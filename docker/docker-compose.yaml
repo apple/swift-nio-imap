@@ -26,7 +26,7 @@ services:
     <<: *common
     command: /bin/bash -xcl "./scripts/sanity.sh"
 
-  unit-tests:
+  test:
     <<: *common
     command: /bin/bash -xcl "swift test -Xswiftc -warnings-as-errors --enable-test-discovery"
 

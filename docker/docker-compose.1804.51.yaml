@@ -9,12 +9,6 @@ services:
         ubuntu_version: "bionic"
         swift_version: "5.1"
 
-  unit-tests:
-    image: swift-nio:18.04-5.1
-
-  integration-tests:
-    image: swift-nio:18.04-5.1
-
   test:
     image: swift-nio:18.04-5.1
 
