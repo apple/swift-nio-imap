@@ -6,13 +6,13 @@ version: "3"
 services:
 
   runtime-setup:
-    image: swift-nio:default
+    image: swift-nio-email:default
     build:
       context: .
       dockerfile: Dockerfile
 
   common: &common
-    image: swift-nio:default
+    image: swift-nio-email:default
     depends_on: [runtime-setup]
     volumes:
       - ~/.ssh:/root/.ssh
