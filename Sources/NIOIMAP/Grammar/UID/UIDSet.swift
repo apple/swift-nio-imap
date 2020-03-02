@@ -1,0 +1,27 @@
+//===----------------------------------------------------------------------===//
+//
+// This source file is part of the SwiftNIO open source project
+//
+// Copyright (c) 2020 Apple Inc. and the SwiftNIO project authors
+// Licensed under Apache License v2.0
+//
+// See LICENSE.txt for license information
+// See CONTRIBUTORS.txt for the list of SwiftNIO project authors
+//
+// SPDX-License-Identifier: Apache-2.0
+//
+//===----------------------------------------------------------------------===//
+
+import NIO
+
+extension NIOIMAP {
+
+    public enum UIDSetType: Equatable {
+        case uniqueID(UniqueID)
+        case range(UIDRange)
+    }
+
+    /// IMAPv4 `uid-set`
+    public typealias UIDSet = [UIDSetType]
+
+}
