@@ -1,0 +1,21 @@
+version: "3"
+
+services:
+
+  runtime-setup:
+    image: swift-nio:18.04-5.2
+    build:
+      args:
+        base_image: "swiftlang/swift:nightly-5.2-xenial"
+
+  unit-tests:
+    image: swift-nio:18.04-5.2
+
+  integration-tests:
+    image: swift-nio:18.04-5.2
+
+  test:
+    image: swift-nio:18.04-5.2
+
+  shell:
+    image: swift-nio:18.04-5.2
