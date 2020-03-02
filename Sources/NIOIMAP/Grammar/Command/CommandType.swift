@@ -1,0 +1,341 @@
+//===----------------------------------------------------------------------===//
+//
+// This source file is part of the SwiftNIO open source project
+//
+// Copyright (c) 2020 Apple Inc. and the SwiftNIO project authors
+// Licensed under Apache License v2.0
+//
+// See LICENSE.txt for license information
+// See CONTRIBUTORS.txt for the list of SwiftNIO project authors
+//
+// SPDX-License-Identifier: Apache-2.0
+//
+//===----------------------------------------------------------------------===//
+
+import NIO
+
+extension NIOIMAP {
+
+    public enum CommandType: Equatable {
+        case capability
+        case logout
+        case noop
+        case xcommand(XCommand)
+        case append(to: Mailbox, firstMessageMetadata: AppendMessage)
+        case create(Mailbox, CreateParameters?)
+        case delete(Mailbox)
+        case examine(Mailbox, SelectParameters?)
+        case list(ListSelectOptions?, Mailbox, MailboxPatterns, ListReturnOptions?)
+        case lsub(Mailbox, NIOIMAP.Mailbox.ListMailbox)
+        case rename(from: Mailbox, to: Mailbox, params: RenameParameters?)
+        case select(Mailbox, SelectParameters?)
+        case status(Mailbox, [StatusAttribute])
+        case subscribe(Mailbox)
+        case unsubscribe(Mailbox)
+        case authenticate(AuthType, InitialResponse?, [NIOIMAP.Base64])
+        case login(UserID, Password)
+        case starttls
+        case check
+        case close
+        case expunge
+        case uid(UIDCommandType)
+        case enable([Capability])
+        case unselect
+        case idleStart
+        case idleFinish
+        case copy(SequenceSet, Mailbox)
+        case fetch(SequenceSet, FetchType, FetchModifiers?)
+        case store(SequenceSet, StoreModifiers?, StoreAttributeFlags)
+        case search(returnOptions: SearchReturnOptions?, program: SearchProgram)
+        case move(SequenceSet, Mailbox)
+        case id(ID)
+        case namespace
+    }
+
+}
+
+// MARK: - IMAP
+extension ByteBuffer {
+    
+    @discardableResult mutating func writeCommandType(_ commandType: NIOIMAP.CommandType) -> Int {
+        switch commandType {
+        case .capability:
+            return self.writeCommandType_capability()
+        case .logout:
+            return self.writeCommandType_logout()
+        case .noop:
+            return self.writeCommandType_noop()
+        case let .xcommand(command):
+            return self.writeCommandType_xCommand(command)
+        case let .append(to, firstMessageMetadata):
+            return self.writeCommandType_append(to: to, firstMessageMetadata: firstMessageMetadata)
+        case let .create(mailbox, params):
+            return self.writeCommandType_create(mailbox: mailbox, parameters: params)
+        case let .delete(mailbox):
+            return self.writeCommandType_delete(mailbox: mailbox)
+        case let .examine(mailbox, params):
+            return self.writeCommandType_examine(mailbox: mailbox, parameters: params)
+        case let .list(selectOptions, mailbox, mailboxPatterns, returnOptions):
+            return self.writeCommandType_list(selectOptions: selectOptions, mailbox: mailbox, mailboxPatterns: mailboxPatterns, returnOptions: returnOptions)
+        case let .lsub(mailbox, listMailbox):
+            return self.writeCommandType_lsub(mailbox: mailbox, listMailbox: listMailbox)
+        case let .rename(from, to, params):
+            return self.writeCommandType_rename(from: from, to: to, parameters: params)
+        case let .select(mailbox, params):
+            return self.writeCommandType_select(mailbox: mailbox, params: params)
+        case let .status(mailbox, attributes):
+            return self.writeCommandType_status(mailbox: mailbox, attributes: attributes)
+        case let .subscribe(mailbox):
+            return self.writeCommandType_subscribe(mailbox: mailbox)
+        case let .unsubscribe(mailbox):
+            return self.writeCommandType_unsubscribe(mailbox: mailbox)
+        case let .authenticate(type, initial, data):
+            return self.writeCommandType_authenticate(type: type, initial: initial, data: data)
+        case let .login(userid, password):
+            return self.writeCommandType_login(userid: userid, password: password)
+        case .starttls:
+            return self.writeCommandType_startTLS()
+        case .check:
+            return self.writeCommandType_check()
+        case .close:
+            return self.writeCommandType_close()
+        case .expunge:
+            return self.writeCommandType_expunge()
+        case .enable(let capabilities):
+            return self.writeCommandType_enable(capabilities: capabilities)
+        case .unselect:
+            return self.writeCommandType_unselect()
+        case .idleStart:
+            return self.writeCommandType_idleStart()
+        case .idleFinish:
+            return self.writeCommandType_idleFinish()
+        case .uid(let command):
+            return self.writeCommandType_uid(command: command)
+        case .copy(let sequence, let mailbox):
+            return self.writeCommandType_copy(sequence: sequence, mailbox: mailbox)
+        case .fetch(let set, let atts, let modifiers):
+            return self.writeCommandType_fetch(set: set, atts: atts, modifiers: modifiers)
+        case .store(let set, let modifiers, let flags):
+            return self.writeCommandType_store(set: set, modifiers: modifiers, flags: flags)
+        case .search(let returnOptions, let program):
+            return self.writeCommandType_search(returnOptions: returnOptions, program: program)
+        case .move(let set, let mailbox):
+            return self.writeCommandType_move(set: set, mailbox: mailbox)
+        case .id(let id):
+            return self.writeID(id)
+        case .namespace:
+            return self.writeCommandType_namespace()
+        }
+    }
+    
+    private mutating func writeCommandType_capability() -> Int {
+        self.writeString("CAPABILITY")
+    }
+    
+    private mutating func writeCommandType_logout() -> Int {
+        self.writeString("LOGOUT")
+    }
+    
+    private mutating func writeCommandType_noop() -> Int {
+        self.writeString("NOOP")
+    }
+    
+    private mutating func writeCommandType_xCommand(_ command: NIOIMAP.XCommand) -> Int {
+        self.writeString("X") +
+        self.writeString(command)
+    }
+    
+    private mutating func writeCommandType_append(to: NIOIMAP.Mailbox, firstMessageMetadata: NIOIMAP.AppendMessage) -> Int {
+        self.writeString("APPEND ") +
+        self.writeMailbox(to) +
+        self.writeSpace() +
+        self.writeAppendMessage(firstMessageMetadata)
+    }
+    
+    private mutating func writeCommandType_create(mailbox: NIOIMAP.Mailbox, parameters: NIOIMAP.CreateParameters?) -> Int {
+        self.writeString("CREATE ") +
+        self.writeMailbox(mailbox) +
+        self.writeIfExists(parameters) { (parameters) -> Int in
+            self.writeCreateParameters(parameters)
+        }
+    }
+    
+    private mutating func writeCommandType_delete(mailbox: NIOIMAP.Mailbox) -> Int {
+        self.writeString("DELETE ") +
+        self.writeMailbox(mailbox)
+    }
+    
+    private mutating func writeCommandType_examine(mailbox: NIOIMAP.Mailbox, parameters: NIOIMAP.SelectParameters?) -> Int {
+        self.writeString("EXAMINE ") +
+        self.writeMailbox(mailbox) +
+        self.writeIfExists(parameters) { (params) -> Int in
+            self.writeSelectParameters(params)
+        }
+    }
+    
+    private mutating func writeCommandType_list(selectOptions: NIOIMAP.ListSelectOptions?, mailbox: NIOIMAP.Mailbox, mailboxPatterns: NIOIMAP.MailboxPatterns, returnOptions: NIOIMAP.ListReturnOptions?) -> Int {
+        self.writeString("LIST") +
+        self.writeIfExists(selectOptions) { (options) -> Int in
+            self.writeSpace() +
+            self.writeListSelectOptions(options)
+        } +
+        self.writeSpace() +
+        self.writeMailbox(mailbox) +
+        self.writeSpace() +
+        self.writeMailboxPatterns(mailboxPatterns) +
+        self.writeIfExists(returnOptions) { (options) -> Int in
+            self.writeSpace() +
+            self.writeListReturnOptions(options)
+        }
+    }
+    
+    private mutating func writeCommandType_lsub(mailbox: NIOIMAP.Mailbox, listMailbox: NIOIMAP.Mailbox.ListMailbox) -> Int {
+        self.writeString("LSUB ") +
+        self.writeMailbox(mailbox) +
+        self.writeSpace() +
+        self.writeIMAPString(listMailbox)
+    }
+    
+    private mutating func writeCommandType_rename(from: NIOIMAP.Mailbox, to: NIOIMAP.Mailbox, parameters: NIOIMAP.RenameParameters?) -> Int {
+        self.writeString("RENAME ") +
+        self.writeMailbox(from) +
+        self.writeSpace() +
+        self.writeMailbox(to) +
+        self.writeIfExists(parameters) { (params) -> Int in
+            self.writeRenameParameters(params)
+        }
+    }
+    
+    private mutating func writeCommandType_select(mailbox: NIOIMAP.Mailbox, params: NIOIMAP.SelectParameters?) -> Int {
+        self.writeString("SELECT ") +
+        self.writeMailbox(mailbox) +
+        self.writeIfExists(params) { (params) -> Int in
+            self.writeSelectParameters(params)
+        }
+    }
+    
+    private mutating func writeCommandType_status(mailbox: NIOIMAP.Mailbox, attributes: [NIOIMAP.StatusAttribute]) -> Int {
+        self.writeString("STATUS ") +
+        self.writeMailbox(mailbox) +
+        self.writeString(" (") +
+        self.writeStatusAttributes(attributes) +
+        self.writeString(")")
+    }
+    
+    private mutating func writeCommandType_subscribe(mailbox: NIOIMAP.Mailbox) -> Int {
+        self.writeString("SUBSCRIBE ") +
+        self.writeMailbox(mailbox)
+    }
+    
+    private mutating func writeCommandType_unsubscribe(mailbox: NIOIMAP.Mailbox) -> Int {
+        self.writeString("UNSUBSCRIBE ") +
+        self.writeMailbox(mailbox)
+    }
+    
+    private mutating func writeCommandType_authenticate(type: NIOIMAP.AuthType, initial: NIOIMAP.InitialResponse?, data: [NIOIMAP.Base64]) -> Int {
+        self.writeString("AUTHENTICATE \(type)") +
+        self.writeIfExists(initial) { (initial) -> Int in
+            self.writeSpace() +
+            self.writeInitialResponse(initial)
+        } +
+        self.writeArray(data, separator: "", parenthesis: false) { (base64, self) -> Int in
+            var base64 = base64
+            return self.writeString("\r\n") + self.writeBuffer(&base64)
+        }
+    }
+    
+    private mutating func writeCommandType_login(userid: NIOIMAP.Literal, password: NIOIMAP.Literal) -> Int {
+        self.writeString("LOGIN ") +
+        self.writeLiteral(userid) +
+        self.writeSpace() +
+        self.writeLiteral(password)
+    }
+    
+    private mutating func writeCommandType_startTLS() -> Int {
+        self.writeString("STARTTLS")
+    }
+    
+    private mutating func writeCommandType_check() -> Int {
+        self.writeString("CHECK")
+    }
+    
+    private mutating func writeCommandType_close() -> Int {
+        self.writeString("CLOSE")
+    }
+    
+    private mutating func writeCommandType_expunge() -> Int {
+        self.writeString("EXPUNGE")
+    }
+    
+    private mutating func writeCommandType_unselect() -> Int {
+        self.writeString("UNSELECT")
+    }
+    
+    private mutating func writeCommandType_idleStart() -> Int {
+        self.writeString("IDLE")
+    }
+    
+    private mutating func writeCommandType_idleFinish() -> Int {
+        self.writeString("DONE")
+    }
+    
+    private mutating func writeCommandType_enable(capabilities: [NIOIMAP.Capability]) -> Int {
+        self.writeString("ENABLE ") +
+        self.writeArray(capabilities, parenthesis: false) { (element, self) in
+            self.writeCapability(element)
+        }
+    }
+    
+    private mutating func writeCommandType_uid(command: NIOIMAP.UIDCommandType) -> Int {
+        self.writeString("UID ") +
+        self.writeUIDCommandType(command)
+    }
+    
+    private mutating func writeCommandType_copy(sequence: NIOIMAP.SequenceSet, mailbox: NIOIMAP.Mailbox) -> Int {
+        self.writeString("COPY ") +
+        self.writeSequenceSet(sequence) +
+        self.writeSpace() +
+        self.writeMailbox(mailbox)
+    }
+    
+    private mutating func writeCommandType_fetch(set: NIOIMAP.SequenceSet, atts: NIOIMAP.FetchType, modifiers: NIOIMAP.FetchModifiers?) -> Int {
+        self.writeString("FETCH ") +
+        self.writeSequenceSet(set) +
+        self.writeSpace() +
+        self.writeFetchType(atts) +
+        self.writeIfExists(modifiers) { (modifiers) -> Int in
+            self.writeFetchModifiers(modifiers)
+        }
+    }
+    
+    private mutating func writeCommandType_store(set: NIOIMAP.SequenceSet, modifiers: NIOIMAP.StoreModifiers?, flags: NIOIMAP.StoreAttributeFlags) -> Int {
+        self.writeString("STORE ") +
+        self.writeSequenceSet(set) +
+        self.writeIfExists(modifiers) { (modifiers) -> Int in
+            self.writeStoreModifiers(modifiers)
+        } +
+        self.writeSpace() +
+        self.writeStoreAttributeFlags(flags)
+    }
+    
+    private mutating func writeCommandType_search(returnOptions: NIOIMAP.SearchReturnOptions?, program: NIOIMAP.SearchProgram) -> Int {
+        self.writeString("SEARCH") +
+        self.writeIfExists(returnOptions) { (options) -> Int in
+            self.writeSearchReturnOptions(options)
+        } +
+        self.writeSpace() +
+        self.writeSearchProgram(program)
+    }
+    
+    private mutating func writeCommandType_move(set: NIOIMAP.SequenceSet, mailbox: NIOIMAP.Mailbox) -> Int {
+        self.writeString("MOVE ") +
+        self.writeSequenceSet(set) +
+        self.writeSpace() +
+        self.writeMailbox(mailbox)
+    }
+    
+    private mutating func writeCommandType_namespace() -> Int {
+        self.writeNamespaceCommand()
+    }
+
+}
