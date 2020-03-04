@@ -18,8 +18,12 @@ extension NIOIMAP {
 
     /// IMAPv4 `uid-range`
     public struct UIDRange: Equatable {
-        var left: UniqueID
-        var right: UniqueID
+        public var left: UniqueID
+        public var right: UniqueID
+        
+        public static func from(_ from: UniqueID, to: UniqueID) -> Self {
+            return Self(left: from, right: to)
+        }
     }
 
 }

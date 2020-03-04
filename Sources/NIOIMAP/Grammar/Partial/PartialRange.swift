@@ -17,9 +17,13 @@ import NIO
 extension NIOIMAP.Partial {
 
     /// IMAPv4 `partial-range`
-    struct Range: Equatable {
-        let num1: NIOIMAP.Number
-        let num2: NIOIMAP.NZNumber?
+    public struct Range: Equatable {
+        public var num1: NIOIMAP.Number
+        public var num2: NIOIMAP.NZNumber?
+        
+        public static func range(from: NIOIMAP.Number, to: NIOIMAP.NZNumber) -> Self {
+            return Self(num1: from, num2: to)
+        }
     }
 
 }

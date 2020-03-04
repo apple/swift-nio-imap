@@ -26,27 +26,27 @@ extension BodyTypeSinglepartTests {
     func testEncode() {
         let inputs: [(NIOIMAP.Body.TypeSinglepart, String, UInt)] = [
             (
-                .type(.basic(.init(media: .type(.application, subtype: "subtype"), fields: .parameter([], id: nil, description: nil, encoding: .base64, octets: 6))), extension: nil),
+                .type(.basic(.media(.type(.application, subtype: "subtype"), fields: .parameter([], id: nil, description: nil, encoding: .base64, octets: 6))), extension: nil),
                 "\"APPLICATION\" \"subtype\" () NIL NIL \"BASE64\" 6",
                 #line
             ),
             (
-                .type(.basic(.init(media: .type(.application, subtype: "subtype"), fields: .parameter([], id: "id", description: "desc", encoding: .base64, octets: 7))), extension: .fieldMD5("md5", dspLanguage: nil)),
+                .type(.basic(.media(.type(.application, subtype: "subtype"), fields: .parameter([], id: "id", description: "desc", encoding: .base64, octets: 7))), extension: .fieldMD5("md5", dspLanguage: nil)),
                 "\"APPLICATION\" \"subtype\" () \"id\" \"desc\" \"BASE64\" 7 \"md5\"",
                 #line
             ),
             (
-                .type(.text(.init(mediaText: "subtype", fields: .parameter([], id: nil, description: nil, encoding: .base64, octets: 6), lines: 5)), extension: nil),
+                .type(.text(.mediaText("subtype", fields: .parameter([], id: nil, description: nil, encoding: .base64, octets: 6), lines: 5)), extension: nil),
                 "\"TEXT\" \"subtype\" () NIL NIL \"BASE64\" 6 5",
                 #line
             ),
             (
-                .type(.message(.init(
-                    message: .rfc822,
+                .type(.message(.message(
+                    .rfc822,
                     fields: .parameter([], id: nil, description: nil, encoding: .base64, octets: 6),
-                    envelope: .init(date: "date", subject: nil, from: nil, sender: nil, reply: nil, to: nil, cc: nil, bcc: nil, inReplyTo: nil, messageID: nil),
-                    body: .singlepart(.type(.text(.init(
-                        mediaText: "subtype",
+                    envelope: .date("date", subject: nil, from: nil, sender: nil, reply: nil, to: nil, cc: nil, bcc: nil, inReplyTo: nil, messageID: nil),
+                    body: .singlepart(.type(.text(.mediaText(
+                        "subtype",
                         fields: .parameter([], id: nil, description: nil, encoding: .base64, octets: 6),
                         lines: 5
                     )), extension: nil)),

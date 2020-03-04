@@ -17,13 +17,13 @@ import NIO
 extension NIOIMAP.Mailbox.List {
     
     /// IMAPv4 `mbx-list-sflag`
-    enum SFlag: String, Equatable {
+    public enum SFlag: String, Equatable {
         case noSelect   = #"\Noselect"#
         case marked     = #"\Marked"#
         case unmarked   = #"\Unmarked"#
         case nonExistent = #"\Nonexistent"#
 
-        init?(rawValue: String) {
+        public init?(rawValue: String) {
             switch rawValue.lowercased() {
             case #"\noselect"#:
                 self = .noSelect

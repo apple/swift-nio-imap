@@ -18,11 +18,11 @@ extension NIOIMAP.Body {
 
     /// IMAPv4 `body-ext-1part`
     public struct ExtensionSinglepart: Equatable {
-        var fieldMD5: FieldMD5
-        var dspLanguage: FieldDSPLanguage?
+        public var fieldMD5: FieldMD5
+        public var dspLanguage: FieldDSPLanguage?
 
         /// Convenience function for a better experience when chaining multiple types.
-        static func fieldMD5(_ fieldMD5: FieldMD5, dspLanguage: FieldDSPLanguage?) -> Self {
+        public static func fieldMD5(_ fieldMD5: FieldMD5, dspLanguage: FieldDSPLanguage?) -> Self {
             return Self(fieldMD5: fieldMD5, dspLanguage: dspLanguage)
         }
     }

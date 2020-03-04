@@ -372,7 +372,7 @@ extension ParserUnitTests {
             (
                 " \"25-jun-1994 01:02:03 +0000\"",
                 "\r",
-                .flagList(nil, dateTime: .init(date: .init(day: 25, month: .jun, year: 1994), time: .init(hour: 01, minute: 02, second: 03), zone: NIOIMAP.Date.TimeZone.init(0)!), extensions: []),
+                .flagList(nil, dateTime: .date(.day(25, month: .jun, year: 1994), time: .hour(01, minute: 02, second: 03), zone: NIOIMAP.Date.TimeZone(0)!), extensions: []),
                 #line
             ),
             (
@@ -1990,7 +1990,7 @@ extension ParserUnitTests {
             (
                 "LIST (\\oflag1 \\oflag2) NIL inbox",
                 "\r\n",
-                .list(.init(flags: .init(oFlags: [.other("oflag1"), .other("oflag2")], sFlag: nil), char: nil, mailbox: .inbox, listExtended: nil)),
+                .list(.flags(.oFlags([.other("oflag1"), .other("oflag2")], sFlag: nil), char: nil, mailbox: .inbox, listExtended: nil)),
                 #line
             ),
             ("ESEARCH MIN 1 MAX 2", "\r\n", .search(.correlator(nil, uid: false, returnData: [.min(1), .max(2)])), #line),
@@ -2001,7 +2001,7 @@ extension ParserUnitTests {
             (
                 "LSUB (\\seen \\draft) NIL inbox",
                 "\r\n",
-                .lsub(.init(flags: .init(oFlags: [.other("seen"), .other("draft")], sFlag: nil), char: nil, mailbox: .inbox, listExtended: nil)),
+                .lsub(.flags(.oFlags([.other("seen"), .other("draft")], sFlag: nil), char: nil, mailbox: .inbox, listExtended: nil)),
                 #line
             ),
         ]
@@ -2454,7 +2454,7 @@ extension ParserUnitTests {
     func testParseMove() {
         let inputs: [(String, String, NIOIMAP.CommandType, UInt)] = [
             ("MOVE * inbox", " ", .move([.wildcard], .inbox), #line),
-            ("MOVE 1:2,4:5 test", " ", .move([1...2, 4...5], .init("test")), #line),
+            ("MOVE 1:2,4:5 test", " ", .move([1...2, 4...5], "test"), #line),
         ]
 
         for (input, terminator, expected, line) in inputs {

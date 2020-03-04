@@ -18,8 +18,8 @@ extension NIOIMAP {
 
     /// IMAPv4 `search-program`
     public struct SearchProgram: Equatable {
-        var charset: Charset?
-        var keys: [SearchKey]
+        public var charset: Charset?
+        public var keys: [SearchKey]
 
         public static func charset(_ charset: Charset?, keys: [SearchKey]) -> Self {
             return Self(charset: charset, keys: keys)

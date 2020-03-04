@@ -19,11 +19,11 @@ enum ParserLibrary {}
 typealias SubParser<T> = (inout ByteBuffer, StackTracker) throws -> T
 
 public struct ParserError: Error {
-    public let hint: String
-    let file: String
-    let line: Int
+    public var hint: String
+    var file: String
+    var line: Int
 
-    init(hint: String = "go figure", file: String = #file, line: Int = #line) {
+    init(hint: String = "Unknown", file: String = #file, line: Int = #line) {
         self.hint = hint
         self.file = file
         self.line = line

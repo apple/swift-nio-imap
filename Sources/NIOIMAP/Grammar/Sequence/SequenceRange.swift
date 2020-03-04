@@ -19,25 +19,25 @@ extension NIOIMAP {
     /// IMAPv4 `seq-range`
     public struct SequenceRange: Equatable {
         
-        static var wildcard: SequenceRange {
+        public static var wildcard: SequenceRange {
             return Self(.last ... .last)
         }
         
-        static func single(_ num: Int) -> SequenceRange {
+        public static func single(_ num: Int) -> SequenceRange {
             return Self(.number(num) ... .number(num))
         }
         
-        var closedRange: ClosedRange<SequenceNumber>
+        public var closedRange: ClosedRange<SequenceNumber>
         
-        var from: SequenceNumber {
+        public var from: SequenceNumber {
             return closedRange.lowerBound
         }
         
-        var to: SequenceNumber {
+        public var to: SequenceNumber {
             return closedRange.upperBound
         }
         
-        init(from: SequenceNumber, to: SequenceNumber) {
+        public init(from: SequenceNumber, to: SequenceNumber) {
             if from < to {
                 self.init(from ... to)
             } else {
@@ -45,7 +45,7 @@ extension NIOIMAP {
             }
         }
         
-        init(_ closedRange: ClosedRange<SequenceNumber>) {
+        public init(_ closedRange: ClosedRange<SequenceNumber>) {
             self.closedRange = closedRange
         }
         

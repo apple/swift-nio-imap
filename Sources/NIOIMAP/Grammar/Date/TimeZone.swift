@@ -17,10 +17,10 @@ import NIO
 extension NIOIMAP.Date {
     
     /// IMAPv4 `zone`
-    struct TimeZone: Equatable {
+    public struct TimeZone: Equatable {
         fileprivate var backing: Int
         
-        init?(_ val: Int) {
+        public init?(_ val: Int) {
             self.backing = val
         }
     }

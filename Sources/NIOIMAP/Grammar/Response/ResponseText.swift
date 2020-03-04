@@ -18,11 +18,11 @@ extension NIOIMAP {
 
     /// IMAPv4 `resp-text`
     public struct ResponseText: Equatable {
-        var code: ResponseTextCode?
-        var text: Text?
+        public var code: ResponseTextCode?
+        public var text: Text?
 
         /// Convenience function for a better experience when chaining multiple types.
-        static func code(_ code: ResponseTextCode?, text: Text?) -> Self {
+        public static func code(_ code: ResponseTextCode?, text: Text?) -> Self {
             return Self(code: code, text: text)
         }
     }

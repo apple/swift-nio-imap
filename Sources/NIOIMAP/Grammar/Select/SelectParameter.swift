@@ -17,10 +17,10 @@ import NIO
 extension NIOIMAP {
     
     public struct SelectParameter: Equatable {
-        var name: SelectParameterName
-        var value: SelectParameterValue?
+        public var name: SelectParameterName
+        public var value: SelectParameterValue?
         
-        static func name(_ name: SelectParameterName, value: SelectParameterValue?) -> Self {
+        public static func name(_ name: SelectParameterName, value: SelectParameterValue?) -> Self {
             return Self(name: name, value: value)
         }
     }
