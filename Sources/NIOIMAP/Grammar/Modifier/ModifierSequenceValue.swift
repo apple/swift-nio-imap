@@ -17,7 +17,7 @@ import NIO
 extension NIOIMAP {
 
     public struct ModifierSequenceValue: Equatable {
-        var value: Int
+        public var value: Int
         
         public static var zero: Self {
             return Self(0)!

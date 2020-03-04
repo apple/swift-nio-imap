@@ -18,8 +18,8 @@ extension NIOIMAP {
 
     /// IMAPv4 `response-code-apnd`
     public struct ResponseCodeAppend: Equatable {
-        let num: NZNumber
-        let uid: AppendUID
+        public let num: NZNumber
+        public let uid: AppendUID
     }
 
 }

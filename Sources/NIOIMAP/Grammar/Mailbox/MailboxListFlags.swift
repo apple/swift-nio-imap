@@ -17,9 +17,9 @@ import NIO
 extension NIOIMAP.Mailbox.List {
     
     /// IMAPv4 `mbx-list-flags`
-    struct Flags: Equatable {
-        var oFlags: [OFlag]
-        var sFlag: SFlag?
+    public struct Flags: Equatable {
+        public var oFlags: [OFlag]
+        public var sFlag: SFlag?
     }
     
 }

@@ -18,9 +18,9 @@ extension NIOIMAP {
 
     /// IMAPv4 `response-code-copy`
     public struct ResponseCodeCopy: Equatable {
-        var num: NZNumber
-        var set1: UIDSet
-        var set2: UIDSet
+        public var num: NZNumber
+        public var set1: UIDSet
+        public var set2: UIDSet
     }
 
 }

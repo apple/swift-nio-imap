@@ -17,7 +17,7 @@ import NIO
 extension NIOIMAP.Body {
 
     /// IMAPv4 `body-fld-enc`
-    enum FieldEncoding: Equatable {
+    public enum FieldEncoding: Equatable {
         case bit7
         case bit8
         case binary

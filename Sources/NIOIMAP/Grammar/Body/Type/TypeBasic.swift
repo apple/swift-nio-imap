@@ -18,8 +18,8 @@ extension NIOIMAP.Body {
 
     /// IMAPv4 `body-type-basic`
     public struct TypeBasic: Equatable {
-        var media: NIOIMAP.Media.Basic
-        var fields: Fields
+        public var media: NIOIMAP.Media.Basic
+        public var fields: Fields
     }
 
 }

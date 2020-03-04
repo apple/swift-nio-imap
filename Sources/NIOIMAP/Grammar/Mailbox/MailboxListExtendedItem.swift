@@ -21,8 +21,8 @@ extension NIOIMAP.Mailbox {
 
     /// IMAPv4 `mbox-list-extended-item`
     public struct ListExtendedItem: Equatable {
-        var tag: ListExtendedItemTag
-        var extensionValue: NIOIMAP.TaggedExtensionValue
+        public var tag: ListExtendedItemTag
+        public var extensionValue: NIOIMAP.TaggedExtensionValue
     }
 
 }

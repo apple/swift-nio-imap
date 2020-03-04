@@ -18,9 +18,9 @@ extension NIOIMAP.Body {
 
     /// IMAPv4 `body-type-text`
     public struct TypeText: Equatable {
-        var mediaText: NIOIMAP.Media.Text
-        var fields: Fields
-        var lines: FieldLines
+        public var mediaText: NIOIMAP.Media.Text
+        public var fields: Fields
+        public var lines: FieldLines
     }
 
 }

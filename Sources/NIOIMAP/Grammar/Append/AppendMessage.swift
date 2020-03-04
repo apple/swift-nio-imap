@@ -17,10 +17,10 @@ import NIO
 extension NIOIMAP {
 
     public struct AppendMessage: Equatable {
-        var options: AppendOptions
-        var data: AppendData
+        public var options: AppendOptions
+        public var data: AppendData
         
-        static func options(_ options: AppendOptions, data: AppendData) -> Self {
+        public static func options(_ options: AppendOptions, data: AppendData) -> Self {
             return Self(options: options, data: data)
         }
     }

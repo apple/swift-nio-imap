@@ -21,8 +21,8 @@ extension NIOIMAP {
 
     /// IMAPv4 `Namespace-Response-Extension`
     public struct NamespaceResponseExtension: Equatable {
-        let str1: NIOIMAP.IMAPString
-        let strs: [NIOIMAP.IMAPString]
+        public let str1: NIOIMAP.IMAPString
+        public let strs: [NIOIMAP.IMAPString]
 
         public static func string(_ string: IMAPString, array: [IMAPString]) -> Self {
             return Self(str1: string, strs: array)

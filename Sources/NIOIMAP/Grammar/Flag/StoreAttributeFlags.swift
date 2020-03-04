@@ -24,21 +24,21 @@ extension NIOIMAP {
     
     public struct StoreAttributeFlags: Equatable {
 
-        static func add(silent: Bool, list: FlagList) -> Self {
+        public static func add(silent: Bool, list: FlagList) -> Self {
             return Self(type: .add, silent: silent, flags: list)
         }
         
-        static func remove(silent: Bool, list: FlagList) -> Self {
+        public static func remove(silent: Bool, list: FlagList) -> Self {
             return Self(type: .remove, silent: silent, flags: list)
         }
         
-        static func other(silent: Bool, list: FlagList) -> Self {
+        public static func other(silent: Bool, list: FlagList) -> Self {
             return Self(type: .other, silent: silent, flags: list)
         }
         
-        var type: StoreAttributeFlagsType
-        var silent: Bool
-        var flags: FlagList
+        public var type: StoreAttributeFlagsType
+        public var silent: Bool
+        public var flags: FlagList
     }
     
 }

@@ -27,10 +27,10 @@ extension NIOIMAP {
     
     // Exracted from `IDParamsList`
     public struct IDParamsListElement: Equatable {
-        var key: IMAPString
-        var value: NString
+        public var key: IMAPString
+        public var value: NString
         
-        static func key(_ key: IMAPString, value: NString) -> Self {
+        public static func key(_ key: IMAPString, value: NString) -> Self {
             return Self(key: key, value: value)
         }
     }

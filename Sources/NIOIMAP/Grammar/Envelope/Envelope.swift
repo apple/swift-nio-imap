@@ -18,16 +18,16 @@ extension NIOIMAP {
     
     /// IMAPv4 `envelope`
     public struct Envelope: Equatable {
-        var date: Date
-        var subject: Subject
-        var from: From
-        var sender: Sender
-        var reply: ReplyTo
-        var to: To
-        var cc: CC
-        var bcc: BCC
-        var inReplyTo: InReplyTo
-        var messageID: MessageID
+        public var date: Date
+        public var subject: Subject
+        public var from: From
+        public var sender: Sender
+        public var reply: ReplyTo
+        public var to: To
+        public var cc: CC
+        public var bcc: BCC
+        public var inReplyTo: InReplyTo
+        public var messageID: MessageID
     }
     
 }

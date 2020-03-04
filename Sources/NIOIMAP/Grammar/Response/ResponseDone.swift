@@ -17,7 +17,7 @@ import NIO
 extension NIOIMAP {
     
     /// IMAPv4 `response-done`
-    enum ResponseDone: Equatable {
+    public enum ResponseDone: Equatable {
         case tagged(ResponseTagged)
         case fatal(ResponseFatal)
     }

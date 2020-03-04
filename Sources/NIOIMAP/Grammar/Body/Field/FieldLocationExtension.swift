@@ -17,9 +17,9 @@ import NIO
 extension NIOIMAP.Body {
 
     /// Extracted from IMAPv4 `body-ext-1part`
-    struct FieldLocationExtension: Equatable {
-        var location: FieldLocation
-        var extensions: [NIOIMAP.BodyExtension]
+    public struct FieldLocationExtension: Equatable {
+        public var location: FieldLocation
+        public var extensions: [NIOIMAP.BodyExtension]
     }
 
 }

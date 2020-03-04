@@ -17,7 +17,7 @@ import NIO
 extension NIOIMAP.Body {
 
     /// IMAPv4 `body-fld-lang`
-    enum FieldLanguage: Equatable {
+    public enum FieldLanguage: Equatable {
         case single(NIOIMAP.NString)
         case multiple([NIOIMAP.IMAPString])
     }

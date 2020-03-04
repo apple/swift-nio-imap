@@ -16,37 +16,37 @@ import NIO
 
 extension NIOIMAP.Envelope {
 
-    typealias Addresses = [NIOIMAP.Address]?
+    public typealias Addresses = [NIOIMAP.Address]?
     
     /// IMAPv4 `env-sender`
-    typealias Sender = Addresses
+    public typealias Sender = Addresses
     
     /// IMAPv4 `env-to`
-    typealias To = Addresses
+    public typealias To = Addresses
     
     /// IMAPv4 `env-reply-to`
-    typealias ReplyTo = Addresses
+    public typealias ReplyTo = Addresses
     
     /// IMAPv4 `env-bcc`
-    typealias BCC = Addresses
+    public typealias BCC = Addresses
     
     /// IMAPv4 `env-cc`
-    typealias CC = Addresses
+    public typealias CC = Addresses
     
     /// IMAPv4 `env-from`
-    typealias From = Addresses
+    public typealias From = Addresses
     
     /// IMAPv4 `env-in-reply-to`
-    typealias InReplyTo = NIOIMAP.NString
+    public typealias InReplyTo = NIOIMAP.NString
     
     /// IMAPv4 `env-date`
-    typealias Date = NIOIMAP.NString
+    public typealias Date = NIOIMAP.NString
     
     /// IMAPv4 `env-message-id`
-    typealias MessageID = NIOIMAP.NString
+    public typealias MessageID = NIOIMAP.NString
     
     /// IMAPv4 `env-subject`
-    typealias Subject = NIOIMAP.NString
+    public typealias Subject = NIOIMAP.NString
     
 }
 

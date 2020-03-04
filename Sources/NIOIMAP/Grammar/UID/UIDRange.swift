@@ -18,8 +18,8 @@ extension NIOIMAP {
 
     /// IMAPv4 `uid-range`
     public struct UIDRange: Equatable {
-        var left: UniqueID
-        var right: UniqueID
+        public var left: UniqueID
+        public var right: UniqueID
     }
 
 }

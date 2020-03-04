@@ -22,11 +22,11 @@ extension NIOIMAP {
         /// IMAPv4 `list-mailbox`
         public typealias ListMailbox = IMAPString
         
-        let name: String
+        public let name: String
         
-        static let inbox = Self("inbox")
+        public static let inbox = Self("inbox")
 
-        init(_ name: String) {
+        public init(_ name: String) {
             if name.lowercased() == "inbox" {
                 self.name = "INBOX"
             } else {

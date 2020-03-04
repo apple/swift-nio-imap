@@ -17,15 +17,15 @@ import NIO
 extension NIOIMAP.Body {
 
     /// IMAPv4 `body-fields`
-    struct Fields: Equatable {
-        var parameter: FieldParameter
-        var id: FieldID
-        var description: FieldDescription
-        var encoding: FieldEncoding
-        var octets: NIOIMAP.Number
+    public struct Fields: Equatable {
+        public var parameter: FieldParameter
+        public var id: FieldID
+        public var description: FieldDescription
+        public var encoding: FieldEncoding
+        public var octets: NIOIMAP.Number
 
         /// Convenience function for a better experience when chaining multiple types.
-        static func parameter(_ parameters: FieldParameter, id: FieldID, description: FieldDescription, encoding: FieldEncoding, octets: NIOIMAP.Number) -> Self {
+        public static func parameter(_ parameters: FieldParameter, id: FieldID, description: FieldDescription, encoding: FieldEncoding, octets: NIOIMAP.Number) -> Self {
             return Self(parameter: parameters, id: id, description: description, encoding: encoding, octets: octets)
         }
     }

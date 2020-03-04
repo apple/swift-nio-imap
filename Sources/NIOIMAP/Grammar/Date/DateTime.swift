@@ -18,9 +18,9 @@ extension NIOIMAP.Date {
     
     /// IMAPv4 `date-time`
     public struct DateTime: Equatable {
-        var date: NIOIMAP.Date
-        var time: Time
-        var zone: TimeZone
+        public var date: NIOIMAP.Date
+        public var time: Time
+        public var zone: TimeZone
     }
     
 }

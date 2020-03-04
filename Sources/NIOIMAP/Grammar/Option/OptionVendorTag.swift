@@ -21,10 +21,10 @@ extension NIOIMAP {
 
     /// IMAPv4 `option-vendor-tag`
     public struct OptionVendorTag: Equatable {
-        var token: VendorToken
-        var atom: Atom
+        public var token: VendorToken
+        public var atom: Atom
 
-        static func token(_ token: VendorToken, atom: Atom) -> Self {
+        public static func token(_ token: VendorToken, atom: Atom) -> Self {
             return Self(token: token, atom: atom)
         }
     }

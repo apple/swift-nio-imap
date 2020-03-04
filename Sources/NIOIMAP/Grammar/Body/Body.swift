@@ -23,22 +23,22 @@ extension NIOIMAP {
         case multipart(TypeMultipart)
         
         /// IMAPv4 `body-fld-lines`
-        typealias FieldLines = Number
+        public typealias FieldLines = Number
         
         /// IMAPv4 `body-fld-octets`
-        typealias FieldOctets = Number
+        public typealias FieldOctets = Number
         
         /// IMAPv4 `body-fld-id`
-        typealias FieldID = NString
+        public typealias FieldID = NString
         
         /// IMAPv4 `body-fld-loc`
-        typealias FieldLocation = NString
+        public typealias FieldLocation = NString
         
         /// IMAPv4 `body-fld-md`5
-        typealias FieldMD5 = NString
+        public typealias FieldMD5 = NString
         
         /// IMAPv4 `body-fld-desc`
-        typealias FieldDescription = NString
+        public typealias FieldDescription = NString
     }
     
 }

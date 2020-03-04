@@ -18,14 +18,14 @@ extension NIOIMAP.Body {
 
     /// IMAPv4 `body-type-message`
     public struct TypeMessage: Equatable {
-        var message: NIOIMAP.Media.Message
-        var fields: Fields
-        var envelope: NIOIMAP.Envelope
-        var body: NIOIMAP.Body
-        var fieldLines: FieldLines
+        public var message: NIOIMAP.Media.Message
+        public var fields: Fields
+        public var envelope: NIOIMAP.Envelope
+        public var body: NIOIMAP.Body
+        public var fieldLines: FieldLines
 
         /// Convenience function for a better experience when chaining multiple types.
-        static func message(_ message: NIOIMAP.Media.Message, fields: Fields, envelope: NIOIMAP.Envelope, body: NIOIMAP.Body, fieldLines: FieldLines) -> Self {
+        public static func message(_ message: NIOIMAP.Media.Message, fields: Fields, envelope: NIOIMAP.Envelope, body: NIOIMAP.Body, fieldLines: FieldLines) -> Self {
             return Self(message: message, fields: fields, envelope: envelope, body: body, fieldLines: fieldLines)
         }
     }

@@ -17,12 +17,12 @@ import NIO
 extension NIOIMAP.Body {
 
     /// IMAPv4 `body-fld-dsp`
-    struct FieldDSPData: Equatable {
-        var string: NIOIMAP.IMAPString
-        var parameter: FieldParameter
+    public struct FieldDSPData: Equatable {
+        public var string: NIOIMAP.IMAPString
+        public var parameter: FieldParameter
     }
 
-    typealias FieldDSP = FieldDSPData?
+    public typealias FieldDSP = FieldDSPData?
 
 }
 

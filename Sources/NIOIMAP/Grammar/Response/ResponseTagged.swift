@@ -17,9 +17,9 @@ import NIO
 extension NIOIMAP {
 
     /// IMAPv4 `response-tagged`
-    struct ResponseTagged: Equatable {
-        var tag: Tag
-        var state: ResponseConditionalState
+    public struct ResponseTagged: Equatable {
+        public var tag: Tag
+        public var state: ResponseConditionalState
     }
     
 }

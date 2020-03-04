@@ -17,27 +17,27 @@ import NIO
 extension NIOIMAP {
 
     /// IMAPv4 `address`
-    struct Address: Equatable {
+    public struct Address: Equatable {
         
         /// IMAPv4 `addr-name`
-        typealias Name = NString
+        public typealias Name = NString
         
         /// IMAPv4 `addr-adl`
-        typealias Adl = NString
+        public typealias Adl = NString
         
         /// IMAPv4 `addr-host`
-        typealias Host = NString
+        public typealias Host = NString
         
         /// IMAPv4 `addr-mailbox`
-        typealias Mailbox = NString
+        public typealias Mailbox = NString
         
-        var name: Name
-        var adl: Adl
-        var mailbox: Mailbox
-        var host: Host
+        public var name: Name
+        public var adl: Adl
+        public var mailbox: Mailbox
+        public var host: Host
 
         /// Convenience function for a better experience when chaining multiple types.
-        static func name(_ name: Name, adl: Adl, mailbox: Mailbox, host: Host) -> Self {
+        public static func name(_ name: Name, adl: Adl, mailbox: Mailbox, host: Host) -> Self {
             return Self(name: name, adl: adl, mailbox: mailbox, host: host)
         }
     }

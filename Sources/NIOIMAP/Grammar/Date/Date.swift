@@ -20,12 +20,12 @@ extension NIOIMAP {
     public struct Date: Equatable {
         
         /// IMAPv4 `date-day` (`date-day-fixed`)
-        typealias Day = Int
+        public typealias Day = Int
         
         /// IMAPv4 `date-year`
-        typealias Year = Int
+        public typealias Year = Int
         
-        enum Month: String {
+        public enum Month: String {
             case jan
             case feb
             case mar
@@ -40,9 +40,9 @@ extension NIOIMAP {
             case dec
         }
         
-        var day: Day
-        var month: Month
-        var year: Year
+        public var day: Day
+        public var month: Month
+        public var year: Year
     }
     
 }
