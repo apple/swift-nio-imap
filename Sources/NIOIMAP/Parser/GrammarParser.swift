@@ -2582,7 +2582,7 @@ extension NIOIMAP.GrammarParser {
     //                       SP Namespace SP Namespace
     static func parseNamespaceResponse(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.NamespaceResponse {
         return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> NIOIMAP.NamespaceResponse in
-            try ParserLibrary.parseFixedString("* NAMESPACE ", buffer: &buffer, tracker: tracker)
+            try ParserLibrary.parseFixedString("NAMESPACE ", buffer: &buffer, tracker: tracker)
             let n1 = try self.parseNamespace(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
             let n2 = try self.parseNamespace(buffer: &buffer, tracker: tracker)
@@ -3098,6 +3098,10 @@ extension NIOIMAP.GrammarParser {
             try ParserLibrary.parseFixedString("UNSEEN ", buffer: &buffer, tracker: tracker)
             return .unseen(try self.parseNZNumber(buffer: &buffer, tracker: tracker))
         }
+        
+        func parseResponseTextCode_namespace(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.ResponseTextCode {
+            return .namespace(try self.parseNamespaceResponse(buffer: &buffer, tracker: tracker))
+        }
 
         func parseResponseTextCode_atom(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.ResponseTextCode {
             let atom = try self.parseAtom(buffer: &buffer, tracker: tracker)
@@ -3122,6 +3126,7 @@ extension NIOIMAP.GrammarParser {
             parseResponseTextCode_uidNext,
             parseResponseTextCode_uidValidity,
             parseResponseTextCode_unseen,
+            parseResponseTextCode_namespace,
             parseResponseTextCode_atom
         ], buffer: &buffer, tracker: tracker)
     }
