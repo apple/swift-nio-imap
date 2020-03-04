@@ -10,8 +10,8 @@ that your contributions are licensed under the Apache 2.0 license (see
 
 Please ensure to specify the following:
 
-* SwiftNIO commit hash
-* Contextual information (e.g. what you were trying to achieve with SwiftNIO)
+* swift-nio-email commit hash
+* Contextual information (e.g. what you were trying to achieve with which module (e.g. IMAP, SMTP))
 * Simplest possible steps to reproduce
   * More complex the steps are, lower the priority will be.
   * A pull request with failing test case is preferred, but it's just fine to paste the test case into the issue description.
@@ -24,11 +24,11 @@ Please ensure to specify the following:
 ### Example
 
 ```
-SwiftNIO commit hash: 22ec043dc9d24bb011b47ece4f9ee97ee5be2757
+swift-nio-email commit hash: 22ec043dc9d24bb011b47ece4f9ee97ee5be2757
 
 Context:
-While load testing my HTTP web server written with SwiftNIO, I noticed
-that one file descriptor is leaked per request.
+While load testing my mail server written with swift-nio-email, I noticed that valid
+data was being rejected as invalid.
 
 Steps to reproduce:
 1. ...
@@ -37,7 +37,7 @@ Steps to reproduce:
 4. ...
 
 $ swift --version
-Swift version 4.0.2 (swift-4.0.2-RELEASE)
+Swift version 5.1.3 (swift-5.1.3-RELEASE)
 Target: x86_64-unknown-linux-gnu
 
 Operating system: Ubuntu Linux 16.04 64-bit
@@ -50,7 +50,7 @@ My system has IPv6 disabled.
 
 ## Writing a Patch
 
-A good SwiftNIO patch is:
+A good swift-nio-email patch is:
 
 1. Concise, and contains as few changes as needed to achieve the end result.
 2. Tested, ensuring that any tests provided failed before the patch and pass after it.
@@ -65,9 +65,9 @@ We require that your commit messages match our template. The easiest way to do t
 
 ### Make sure Tests work on Linux
 
-SwiftNIO uses XCTest to run tests on both macOS and Linux. While the macOS version of XCTest is able to use the Objective-C runtime to discover tests at execution time, the Linux version is not. 
+swift-nio-email uses XCTest to run tests on both macOS and Linux. While the macOS version of XCTest is able to use the Objective-C runtime to discover tests at execution time, the Linux version is not. 
 For this reason, whenever you add new tests **you have to run a script** that generates the hooks needed to run those tests on Linux, or our CI will complain that the tests are not all present on Linux. To do this, merely execute `ruby ./scripts/generate_linux_tests.rb` at the root of the package and check the changes it made.
 
 ## How to contribute your work
 
-Please open a pull request at https://github.com/apple/swift-nio. Make sure the CI passes, and then wait for code review.
+Please open a pull request at https://github.com/apple/swift-nio-email. Make sure the CI passes, and then wait for code review.
