@@ -31,7 +31,7 @@ extension ServerResponseTests {
                 #line
             ),
             (
-                .response(.init(parts: [.responseData(.messageData(.expunge(6)))], done: .tagged(.init(tag: "a1", state: .ok(.code(nil, text: "response")))))),
+                .response(.parts([.responseData(.messageData(.expunge(6)))], done: .tagged(.tag("a1", state: .ok(.code(nil, text: "response")))))),
                 "* 6 EXPUNGE\r\na1 OK response\r\n",
                 #line
             ),

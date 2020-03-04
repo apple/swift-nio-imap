@@ -26,7 +26,7 @@ extension FieldLanguageLocationTests {
     func testEncode() {
         let inputs: [(NIOIMAP.Body.FieldLanguageLocation, String, UInt)] = [
             (.language(.single("language"), location: nil), " \"language\"", #line),
-            (.language(.single("language"), location: .init(location: "location", extensions: [])), " \"language\" \"location\"", #line)
+            (.language(.single("language"), location: .location("location", extensions: [])), " \"language\" \"location\"", #line)
         ]
 
         for (test, expectedString, line) in inputs {

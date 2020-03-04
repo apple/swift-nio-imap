@@ -27,7 +27,7 @@ extension BodyExtensionMultipartTests {
         let inputs: [(NIOIMAP.Body.ExtensionMultipart, String, UInt)] = [
             (.parameter(["param"], dspLanguage: nil), "(\"param\")", #line),
             (
-                .parameter(["param1", "param2"], dspLanguage: .init(fieldDSP: .init(string: "string", parameter: ["param3"]), fieldLanguage: nil)),
+                .parameter(["param1", "param2"], dspLanguage: .fieldDSP(.string("string", parameter: ["param3"]), fieldLanguage: nil)),
                 "(\"param1\" \"param2\") (\"string\" (\"param3\"))",
                 #line
             )
