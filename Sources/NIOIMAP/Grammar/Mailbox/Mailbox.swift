@@ -22,7 +22,7 @@ extension NIOIMAP {
         /// IMAPv4 `list-mailbox`
         public typealias ListMailbox = IMAPString
         
-        public let name: String
+        public var name: String
         
         public static let inbox = Self("inbox")
 

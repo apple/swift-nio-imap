@@ -18,8 +18,8 @@ extension NIOIMAP.Partial {
 
     /// IMAPv4 `partial-range`
     public struct Range: Equatable {
-        public let num1: NIOIMAP.Number
-        public let num2: NIOIMAP.NZNumber?
+        public var num1: NIOIMAP.Number
+        public var num2: NIOIMAP.NZNumber?
     }
 
 }
