@@ -29,10 +29,10 @@ extension ResponseDecoder_Tests {
             (
                 "+ OK\r\n+ OK\r\n1 OK Login\r\n",
                 [
-                    .response(.init(parts: [
+                    .response(.parts([
                         .continueRequest(.responseText(.code(nil, text: "OK"))),
                         .continueRequest(.responseText(.code(nil, text: "OK")))
-                    ], done: .tagged(.init(tag: "1", state: .ok(.code(nil, text: "Login"))))))
+                    ], done: .tagged(.tag("1", state: .ok(.code(nil, text: "Login"))))))
                 ]
             )
         ]

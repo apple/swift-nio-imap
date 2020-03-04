@@ -24,11 +24,11 @@ extension NIOIMAP.Body {
 
     /// IMAPv4 `body-type-1part`
     public struct TypeSinglepart: Equatable {
-        var type: TypeSinglepartType
-        var `extension`: ExtensionSinglepart?
+        public var type: TypeSinglepartType
+        public var `extension`: ExtensionSinglepart?
 
         /// Convenience function for a better experience when chaining multiple types.
-        static func type(_ type: TypeSinglepartType, extension: ExtensionSinglepart?) -> Self {
+        public static func type(_ type: TypeSinglepartType, extension: ExtensionSinglepart?) -> Self {
             return Self(type: type, extension: `extension`)
         }
     }

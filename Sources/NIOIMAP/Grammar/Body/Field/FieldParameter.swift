@@ -17,7 +17,7 @@ import NIO
 extension NIOIMAP.Body {
 
     /// IMAPv4 `body-fld-param`
-    typealias FieldParameter = [NIOIMAP.IMAPString]?
+    public typealias FieldParameter = [NIOIMAP.IMAPString]?
 
 }
 

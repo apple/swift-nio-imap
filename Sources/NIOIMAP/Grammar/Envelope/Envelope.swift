@@ -18,16 +18,20 @@ extension NIOIMAP {
     
     /// IMAPv4 `envelope`
     public struct Envelope: Equatable {
-        var date: Date
-        var subject: Subject
-        var from: From
-        var sender: Sender
-        var reply: ReplyTo
-        var to: To
-        var cc: CC
-        var bcc: BCC
-        var inReplyTo: InReplyTo
-        var messageID: MessageID
+        public var date: Date
+        public var subject: Subject
+        public var from: From
+        public var sender: Sender
+        public var reply: ReplyTo
+        public var to: To
+        public var cc: CC
+        public var bcc: BCC
+        public var inReplyTo: InReplyTo
+        public var messageID: MessageID
+        
+        public static func date(_ date: NIOIMAP.Envelope.Date, subject: NIOIMAP.Envelope.Subject, from: NIOIMAP.Envelope.From, sender: NIOIMAP.Envelope.Sender, reply: NIOIMAP.Envelope.ReplyTo, to: NIOIMAP.Envelope.To, cc: NIOIMAP.Envelope.CC, bcc: NIOIMAP.Envelope.BCC, inReplyTo: NIOIMAP.Envelope.InReplyTo, messageID: NIOIMAP.Envelope.MessageID) -> Self {
+            return Self(date: date, subject: subject, from: from, sender: sender, reply: reply, to: to, cc: cc, bcc: bcc, inReplyTo: inReplyTo, messageID: messageID)
+        }
     }
     
 }

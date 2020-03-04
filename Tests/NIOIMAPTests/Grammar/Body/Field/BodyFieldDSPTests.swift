@@ -26,7 +26,7 @@ extension BodyFieldDSPTests {
     func testEncode() {
         let inputs: [(NIOIMAP.Body.FieldDSP, String, UInt)] = [
             (nil, "NIL", #line),
-            (.init(string: "some", parameter: ["param"]), "(\"some\" (\"param\"))", #line)
+            (.string("some", parameter: ["param"]), "(\"some\" (\"param\"))", #line)
         ]
 
         for (test, expectedString, line) in inputs {

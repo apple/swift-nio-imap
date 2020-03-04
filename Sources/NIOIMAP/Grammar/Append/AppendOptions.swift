@@ -17,11 +17,11 @@ import NIO
 extension NIOIMAP {
 
     public struct AppendOptions: Equatable {
-        var flagList: FlagList?
-        var dateTime: Date.DateTime?
-        var extensions: [AppendExtension]
+        public var flagList: FlagList?
+        public var dateTime: Date.DateTime?
+        public var extensions: [AppendExtension]
         
-        static func flagList(_ flagList: FlagList?, dateTime: Date.DateTime?, extensions: [AppendExtension]) -> Self {
+        public static func flagList(_ flagList: FlagList?, dateTime: Date.DateTime?, extensions: [AppendExtension]) -> Self {
             return Self(flagList: flagList, dateTime: dateTime, extensions: extensions)
         }
     }

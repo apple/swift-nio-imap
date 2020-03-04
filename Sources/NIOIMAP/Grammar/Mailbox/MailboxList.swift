@@ -18,10 +18,14 @@ extension NIOIMAP.Mailbox {
     
     /// IMAPv4 `mailbox-list`
     public struct List: Equatable {
-        var flags: Flags?
-        var char: Character?
-        var mailbox: NIOIMAP.Mailbox
-        var listExtended: ListExtended?
+        public var flags: Flags?
+        public var char: Character?
+        public var mailbox: NIOIMAP.Mailbox
+        public var listExtended: ListExtended?
+        
+        public static func flags(_ flags: Flags?, char: Character?, mailbox: NIOIMAP.Mailbox, listExtended: ListExtended?) -> Self {
+            return Self(flags: flags, char: char, mailbox: mailbox, listExtended: listExtended)
+        }
     }
     
 }

@@ -16,7 +16,7 @@ import NIO
 
 extension NIOIMAP.Media {
 
-    enum BasicType: Equatable {
+    public enum BasicType: Equatable {
         case application
         case audio
         case image
@@ -27,12 +27,12 @@ extension NIOIMAP.Media {
     }
 
     /// IMAPv4 `media-basic`
-    struct Basic: Equatable {
-        var type: BasicType
-        var subtype: Subtype
+    public struct Basic: Equatable {
+        public var type: BasicType
+        public var subtype: Subtype
 
         /// Convenience function for a better experience when chaining multiple types.
-        static func type(_ type: BasicType, subtype: Subtype) -> Self {
+        public static func type(_ type: BasicType, subtype: Subtype) -> Self {
             return Self(type: type, subtype: subtype)
         }
     }

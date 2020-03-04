@@ -18,9 +18,9 @@ extension NIOIMAP {
 
     /// IMAPv4 `Namespace-Response`
     public struct NamespaceResponse: Equatable {
-        let userNamespace: Namespace
-        let otherUserNamespace: Namespace
-        let sharedNamespace: Namespace
+        public var userNamespace: Namespace
+        public var otherUserNamespace: Namespace
+        public var sharedNamespace: Namespace
 
         public static func userNamespace(_ userNamespace: Namespace, otherUserNamespace: Namespace, sharedNamespace: Namespace) -> Self {
             return Self(userNamespace: userNamespace, otherUserNamespace: otherUserNamespace, sharedNamespace: sharedNamespace)

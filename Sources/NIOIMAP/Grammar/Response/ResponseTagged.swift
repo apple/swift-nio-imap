@@ -17,9 +17,13 @@ import NIO
 extension NIOIMAP {
 
     /// IMAPv4 `response-tagged`
-    struct ResponseTagged: Equatable {
-        var tag: Tag
-        var state: ResponseConditionalState
+    public struct ResponseTagged: Equatable {
+        public var tag: Tag
+        public var state: ResponseConditionalState
+        
+        public static func tag(_ tag: Tag, state: ResponseConditionalState) -> Self {
+            return Self(tag: tag, state: state)
+        }
     }
     
 }

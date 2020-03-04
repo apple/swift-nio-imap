@@ -17,9 +17,13 @@ import NIO
 extension NIOIMAP.Body {
 
     /// Extracted from IMAPv4 `body-ext-`1part
-    struct FieldDSPLanguage: Equatable {
-        var fieldDSP: FieldDSP
-        var fieldLanguage: FieldLanguageLocation?
+    public struct FieldDSPLanguage: Equatable {
+        public var fieldDSP: FieldDSP
+        public var fieldLanguage: FieldLanguageLocation?
+        
+        public static func fieldDSP(_ fieldDSP: FieldDSP, fieldLanguage: FieldLanguageLocation?) -> Self {
+            return Self(fieldDSP: fieldDSP, fieldLanguage: fieldLanguage)
+        }
     }
 
 }

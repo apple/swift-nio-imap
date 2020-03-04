@@ -17,12 +17,12 @@ import NIO
 extension NIOIMAP.Body {
 
     /// IMAPv4 `body-ext-multipart`
-    struct ExtensionMultipart: Equatable {
-        var parameter: FieldParameter
-        var dspLanguage: FieldDSPLanguage?
+    public struct ExtensionMultipart: Equatable {
+        public var parameter: FieldParameter
+        public var dspLanguage: FieldDSPLanguage?
 
         /// Convenience function for a better experience when chaining multiple types.
-        static func parameter(_ parameters: FieldParameter, dspLanguage: FieldDSPLanguage?) -> Self {
+        public static func parameter(_ parameters: FieldParameter, dspLanguage: FieldDSPLanguage?) -> Self {
             return Self(parameter: parameters, dspLanguage: dspLanguage)
         }
     }

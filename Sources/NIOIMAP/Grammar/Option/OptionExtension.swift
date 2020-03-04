@@ -23,14 +23,14 @@ extension NIOIMAP {
 
     /// IMAPv4 `option-extension`
     public struct OptionExtension: Equatable {
-        var type: OptionExtensionType
-        var value: OptionValue?
+        public var type: OptionExtensionType
+        public var value: OptionValue?
 
-        static func standard(_ atom: Atom, value: OptionValue?) -> Self {
+        public static func standard(_ atom: Atom, value: OptionValue?) -> Self {
             return Self(type: .standard(atom), value: value)
         }
 
-        static func vendor(_ tag: OptionVendorTag, value: OptionValue?) -> Self {
+        public static func vendor(_ tag: OptionVendorTag, value: OptionValue?) -> Self {
             return Self(type: .vendor(tag), value: value)
         }
     }

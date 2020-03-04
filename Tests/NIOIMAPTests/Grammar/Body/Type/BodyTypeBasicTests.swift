@@ -25,7 +25,7 @@ extension BodyTypeBasicTests {
 
     func testEncode() {
         let inputs: [(NIOIMAP.Body.TypeBasic, String, UInt)] = [
-            (.init(media: .type(.application, subtype: "subtype"), fields: .parameter(nil, id: nil, description: nil, encoding: .base64, octets: 123)), "\"APPLICATION\" \"subtype\" NIL NIL NIL \"BASE64\" 123", #line)
+            (.media(.type(.application, subtype: "subtype"), fields: .parameter(nil, id: nil, description: nil, encoding: .base64, octets: 123)), "\"APPLICATION\" \"subtype\" NIL NIL NIL \"BASE64\" 123", #line)
         ]
 
         for (test, expectedString, line) in inputs {

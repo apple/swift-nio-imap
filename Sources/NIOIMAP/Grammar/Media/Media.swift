@@ -16,10 +16,10 @@ import NIO
 
 extension NIOIMAP {
 
-    enum Media {
+    public enum Media {
         
         /// IMAPv4 `media-subtype`
-        typealias Subtype = IMAPString
+        public typealias Subtype = IMAPString
         
     }
     

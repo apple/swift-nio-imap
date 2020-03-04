@@ -17,10 +17,10 @@ import NIO
 extension NIOIMAP {
     
     public struct TaggedExtension: Equatable {
-        var label: TaggedExtensionLabel
-        var value: TaggedExtensionValue
+        public var label: TaggedExtensionLabel
+        public var value: TaggedExtensionValue
         
-        static func label(_ label: TaggedExtensionLabel, value: TaggedExtensionValue) -> Self {
+        public static func label(_ label: TaggedExtensionLabel, value: TaggedExtensionValue) -> Self {
             return Self(label: label, value: value)
         }
     }

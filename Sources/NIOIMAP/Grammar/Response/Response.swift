@@ -18,8 +18,12 @@ extension NIOIMAP {
     
     /// IMAPv4 `response`
     public struct Response: Equatable {
-        var parts: [ResponseType]
-        var done: ResponseDone
+        public var parts: [ResponseType]
+        public var done: ResponseDone
+        
+        public static func parts(_ parts: [ResponseType], done: ResponseDone) -> Self {
+            return Self(parts: parts, done: done)
+        }
     }
     
     public enum ResponseType: Equatable {

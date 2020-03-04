@@ -17,7 +17,7 @@ import NIO
 extension NIOIMAP {
 
     /// IMAPv4 `Namespace-Command`
-       static let NamespaceCommand = "NAMESPACE"
+    static let NamespaceCommand = "NAMESPACE"
     
 }
 
