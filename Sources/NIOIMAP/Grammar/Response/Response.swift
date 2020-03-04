@@ -20,6 +20,10 @@ extension NIOIMAP {
     public struct Response: Equatable {
         public var parts: [ResponseType]
         public var done: ResponseDone
+        
+        public static func parts(_ parts: [ResponseType], done: ResponseDone) -> Self {
+            return Self(parts: parts, done: done)
+        }
     }
     
     public enum ResponseType: Equatable {

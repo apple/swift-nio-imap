@@ -20,6 +20,10 @@ extension NIOIMAP.Body {
     public struct FieldDSPData: Equatable {
         public var string: NIOIMAP.IMAPString
         public var parameter: FieldParameter
+        
+        public static func string(_ string: NIOIMAP.IMAPString, parameter: FieldParameter) -> Self {
+            return Self(string: string, parameter: parameter)
+        }
     }
 
     public typealias FieldDSP = FieldDSPData?

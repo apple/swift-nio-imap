@@ -20,6 +20,10 @@ extension NIOIMAP {
     public struct ResponseTagged: Equatable {
         public var tag: Tag
         public var state: ResponseConditionalState
+        
+        public static func tag(_ tag: Tag, state: ResponseConditionalState) -> Self {
+            return Self(tag: tag, state: state)
+        }
     }
     
 }

@@ -20,6 +20,10 @@ extension NIOIMAP.Body {
     public struct FieldLocationExtension: Equatable {
         public var location: FieldLocation
         public var extensions: [NIOIMAP.BodyExtension]
+        
+        public static func location(_ location: FieldLocation, extensions: [NIOIMAP.BodyExtension]) -> Self {
+            return Self(location: location, extensions: extensions)
+        }
     }
 
 }

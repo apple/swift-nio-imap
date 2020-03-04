@@ -21,6 +21,10 @@ extension NIOIMAP.Body {
         public var mediaText: NIOIMAP.Media.Text
         public var fields: Fields
         public var lines: FieldLines
+        
+        public static func mediaText(_ mediaText: NIOIMAP.Media.Text, fields: Fields, lines: FieldLines) -> Self {
+            return Self(mediaText: mediaText, fields: fields, lines: lines)
+        }
     }
 
 }

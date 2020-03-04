@@ -25,6 +25,10 @@ extension NIOIMAP {
         public var name: String
         
         public static let inbox = Self("inbox")
+        
+        public static func other(_ name: String) -> Self {
+            return Self(name)
+        }
 
         public init(_ name: String) {
             if name.lowercased() == "inbox" {

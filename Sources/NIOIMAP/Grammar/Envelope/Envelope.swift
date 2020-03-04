@@ -28,6 +28,10 @@ extension NIOIMAP {
         public var bcc: BCC
         public var inReplyTo: InReplyTo
         public var messageID: MessageID
+        
+        public static func date(_ date: NIOIMAP.Envelope.Date, subject: NIOIMAP.Envelope.Subject, from: NIOIMAP.Envelope.From, sender: NIOIMAP.Envelope.Sender, reply: NIOIMAP.Envelope.ReplyTo, to: NIOIMAP.Envelope.To, cc: NIOIMAP.Envelope.CC, bcc: NIOIMAP.Envelope.BCC, inReplyTo: NIOIMAP.Envelope.InReplyTo, messageID: NIOIMAP.Envelope.MessageID) -> Self {
+            return Self(date: date, subject: subject, from: from, sender: sender, reply: reply, to: to, cc: cc, bcc: bcc, inReplyTo: inReplyTo, messageID: messageID)
+        }
     }
     
 }

@@ -20,6 +20,10 @@ extension NIOIMAP.Body {
     public struct TypeBasic: Equatable {
         public var media: NIOIMAP.Media.Basic
         public var fields: Fields
+        
+        public static func media(_ media: NIOIMAP.Media.Basic, fields: Fields) -> Self {
+            return Self(media: media, fields: fields)
+        }
     }
 
 }

@@ -20,6 +20,10 @@ extension NIOIMAP {
     public struct UIDRange: Equatable {
         public var left: UniqueID
         public var right: UniqueID
+        
+        public static func from(_ from: UniqueID, to: UniqueID) -> Self {
+            return Self(left: from, right: to)
+        }
     }
 
 }

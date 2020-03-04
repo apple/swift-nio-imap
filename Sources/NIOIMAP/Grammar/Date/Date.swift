@@ -43,6 +43,10 @@ extension NIOIMAP {
         public var day: Day
         public var month: Month
         public var year: Year
+        
+        public static func day(_ day: Day, month: Month, year: Year) -> Self {
+            return Self(day: day, month: month, year: year)
+        }
     }
     
 }

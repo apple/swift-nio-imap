@@ -20,6 +20,10 @@ extension NIOIMAP.Partial {
     public struct Range: Equatable {
         public var num1: NIOIMAP.Number
         public var num2: NIOIMAP.NZNumber?
+        
+        public static func range(from: NIOIMAP.Number, to: NIOIMAP.NZNumber) -> Self {
+            return Self(num1: from, num2: to)
+        }
     }
 
 }
