@@ -2510,7 +2510,7 @@ extension ParserUnitTests {
     
     func testParseNamespaceResponse() {
         let inputs: [(String, String, NIOIMAP.NamespaceResponse, UInt)] = [
-            ("* NAMESPACE nil nil nil", " ", .userNamespace(nil, otherUserNamespace: nil, sharedNamespace: nil), #line),
+            ("NAMESPACE nil nil nil", " ", .userNamespace(nil, otherUserNamespace: nil, sharedNamespace: nil), #line),
         ]
 
         for (input, terminator, expected, line) in inputs {
@@ -2810,6 +2810,40 @@ extension ParserUnitTests {
         for (input, terminator, expected, line) in inputs {
             TestUtilities.withBuffer(input, terminator: terminator, line: line) { (buffer) in
                 let testValue = try NIOIMAP.GrammarParser.parseResponsePayload(buffer: &buffer, tracker: .testTracker)
+                XCTAssertEqual(testValue, expected, line: line)
+            }
+        }
+    }
+
+}
+
+// MARK: - parseResponseTextCode
+extension ParserUnitTests {
+
+    func testParseResponseTextCode() {
+        let inputs: [(String, String, NIOIMAP.ResponseTextCode, UInt)] = [
+            ("ALERT", "\r", .alert, #line),
+            ("BADCHARSET", "\r", .badCharset(nil), #line),
+            ("BADCHARSET (UTF8)", "\r", .badCharset(["UTF8"]), #line),
+            ("BADCHARSET (UTF8 UTF9 UTF10)", "\r", .badCharset(["UTF8", "UTF9", "UTF10"]), #line),
+            ("CAPABILITY IMAP4 IMAP4rev1", "\r", .capability([]), #line),
+            ("PARSE", "\r", .parse, #line),
+            ("PERMANENTFLAGS ()", "\r", .permanentFlags([]), #line),
+            ("PERMANENTFLAGS (\\Answered)", "\r", .permanentFlags([.flag(.answered)]), #line),
+            ("PERMANENTFLAGS (\\Answered \\Seen \\*)", "\r", .permanentFlags([.flag(.answered), .flag(.seen), .wildcard]), #line),
+            ("READ-ONLY", "\r", .readOnly, #line),
+            ("READ-WRITE", "\r", .readWrite, #line),
+            ("UIDNEXT 12", "\r", .uidNext(12), #line),
+            ("UIDVALIDITY 34", "\r", .uidValidity(34), #line),
+            ("UNSEEN 56", "\r", .unseen(56), #line),
+            ("NAMESPACE NIL NIL NIL", "\r", .namespace(.userNamespace(nil, otherUserNamespace: nil, sharedNamespace: nil)), #line),
+            ("some", "\r", .other("some", nil), #line),
+            ("some thing", "\r", .other("some", "thing"), #line),
+        ]
+
+        for (input, terminator, expected, line) in inputs {
+            TestUtilities.withBuffer(input, terminator: terminator, line: line) { (buffer) in
+                let testValue = try NIOIMAP.GrammarParser.parseResponseTextCode(buffer: &buffer, tracker: .testTracker)
                 XCTAssertEqual(testValue, expected, line: line)
             }
         }

@@ -29,8 +29,7 @@ extension NIOIMAP {
         case uidNext(NZNumber)
         case uidValidity(NZNumber)
         case unseen(NZNumber)
-        case unknownCTE
-        case undefinedFilter(FilterName)
+        case namespace(NamespaceResponse)
         case other(Atom, String?)
     }
 
@@ -67,12 +66,8 @@ extension ByteBuffer {
             return self.writeString("UNSEEN \(number)")
         case .other(let atom, let string):
             return self.writeResponseTextCode_other(atom: atom, string: string)
-        case .unknownCTE:
-            return self.writeString("UNKNOWN-CTE")
-        case .undefinedFilter(let filterName):
-            return
-                self.writeString("UNDEFINED-FILTER ") +
-                self.writeFilterName(filterName)
+        case .namespace(let namesapce):
+            return self.writeNamespaceResponse(namesapce)
         }
     }
 

@@ -27,7 +27,6 @@ extension ResponseTextCodeTests {
         let inputs: [(NIOIMAP.ResponseTextCode, String, UInt)] = [
             (.alert, "ALERT", #line),
             (.parse, "PARSE", #line),
-            (.unknownCTE, "UNKNOWN-CTE", #line),
             (.readOnly, "READ-ONLY", #line),
             (.readWrite, "READ-WRITE", #line),
             (.tryCreate, "TRYCREATE", #line),
@@ -43,7 +42,7 @@ extension ResponseTextCodeTests {
             (.capability([]), "CAPABILITY IMAP4 IMAP4rev1", #line),
             (.capability([.other("some"), .auth("SSL")]), "CAPABILITY IMAP4 IMAP4rev1 some AUTH=SSL", #line),
             (.capability([.other("some1"), .auth("SSL1"), .other("some2"), .auth("SSL2")]), "CAPABILITY IMAP4 IMAP4rev1 some1 AUTH=SSL1 some2 AUTH=SSL2", #line),
-            (.undefinedFilter("some"), "UNDEFINED-FILTER some", #line)
+            (.namespace(.userNamespace(nil, otherUserNamespace: nil, sharedNamespace: nil)), "NAMESPACE NIL NIL NIL", #line)
         ]
 
         for (code, expectedString, line) in inputs {
