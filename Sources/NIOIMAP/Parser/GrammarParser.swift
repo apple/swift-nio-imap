@@ -2582,7 +2582,7 @@ extension NIOIMAP.GrammarParser {
     //                       SP Namespace SP Namespace
     static func parseNamespaceResponse(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.NamespaceResponse {
         return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> NIOIMAP.NamespaceResponse in
-            try ParserLibrary.parseFixedString("* NAMESPACE ", buffer: &buffer, tracker: tracker)
+            try ParserLibrary.parseFixedString("NAMESPACE ", buffer: &buffer, tracker: tracker)
             let n1 = try self.parseNamespace(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
             let n2 = try self.parseNamespace(buffer: &buffer, tracker: tracker)
@@ -3022,22 +3022,28 @@ extension NIOIMAP.GrammarParser {
     //                   [flag-perm *(SP flag-perm)] ")" /
     //                   "READ-ONLY" / "READ-WRITE" / "TRYCREATE" /
     //                   "UIDNEXT" SP nz-number / "UIDVALIDITY" SP nz-number /
-    //                   resp-code-apnd / resp-code-copy / "UIDNOTSTICKY" /
-    //                   "UNAVAILABLE" / "AUTHENTICATIONFAILED" /
-    //                   "AUTHORIZATIONFAILED" / "EXPIRED" /
-    //                   "PRIVACYREQUIRED" / "CONTACTADMIN" / "NOPERM" /
-    //                   "INUSE" / "EXPUNGEISSUED" / "CORRUPTION" /
-    //                   "SERVERBUG" / "CLIENTBUG" / "CANNOT" /
-    //                   "LIMIT" / "OVERQUOTA" / "ALREADYEXISTS" /
-    //                   "NONEXISTENT" / "NOTSAVED" /
-    //                   "CLOSED" /
-    //                   "UNKNOWN-CTE" /
+    //                   "UNSEEN" SP nz-number
     //                   atom [SP 1*<any TEXT-CHAR except "]">]
     static func parseResponseTextCode(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.ResponseTextCode {
 
         func parseResponseTextCode_alert(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.ResponseTextCode {
             try ParserLibrary.parseFixedString("ALERT", buffer: &buffer, tracker: tracker)
             return .alert
+        }
+        
+        func parseResponseTextCode_badCharset(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.ResponseTextCode {
+            try ParserLibrary.parseFixedString("BADCHARSET", buffer: &buffer, tracker: tracker)
+            let charsets = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> [NIOIMAP.Charset] in
+                try ParserLibrary.parseFixedString(" (", buffer: &buffer, tracker: tracker)
+                var array = [try self.parseCharset(buffer: &buffer, tracker: tracker)]
+                try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) -> NIOIMAP.Charset in
+                    try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
+                    return try self.parseCharset(buffer: &buffer, tracker: tracker)
+                }
+                try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)
+                return array
+            }
+            return .badCharset(charsets)
         }
 
         func parseResponseTextCode_capabilityData(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.ResponseTextCode {
@@ -3051,13 +3057,16 @@ extension NIOIMAP.GrammarParser {
 
         func parseResponseTextCode_permanentFlags(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.ResponseTextCode {
             try ParserLibrary.parseFixedString("PERMANENTFLAGS (", buffer: &buffer, tracker: tracker)
-            var array = [try self.parseFlagPerm(buffer: &buffer, tracker: tracker)]
-            try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) in
-                try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
-                return try self.parseFlagPerm(buffer: &buffer, tracker: tracker)
+            let array = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> [NIOIMAP.PermanentFlag] in
+                var array = [try self.parseFlagPerm(buffer: &buffer, tracker: tracker)]
+                try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) in
+                    try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
+                    return try self.parseFlagPerm(buffer: &buffer, tracker: tracker)
+                }
+                return array
             }
             try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)
-            return .alert
+            return .permanentFlags(array ?? [])
         }
 
         func parseResponseTextCode_readOnly(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.ResponseTextCode {
@@ -3076,12 +3085,12 @@ extension NIOIMAP.GrammarParser {
         }
 
         func parseResponseTextCode_uidNext(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.ResponseTextCode {
-            try ParserLibrary.parseFixedString("UINEXT", buffer: &buffer, tracker: tracker)
+            try ParserLibrary.parseFixedString("UIDNEXT ", buffer: &buffer, tracker: tracker)
             return .uidNext(try self.parseNZNumber(buffer: &buffer, tracker: tracker))
         }
 
         func parseResponseTextCode_uidValidity(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.ResponseTextCode {
-            try ParserLibrary.parseFixedString("UIDVALIDITY", buffer: &buffer, tracker: tracker)
+            try ParserLibrary.parseFixedString("UIDVALIDITY ", buffer: &buffer, tracker: tracker)
             return .uidValidity(try self.parseNZNumber(buffer: &buffer, tracker: tracker))
         }
 
@@ -3089,15 +3098,9 @@ extension NIOIMAP.GrammarParser {
             try ParserLibrary.parseFixedString("UNSEEN ", buffer: &buffer, tracker: tracker)
             return .unseen(try self.parseNZNumber(buffer: &buffer, tracker: tracker))
         }
-
-        func parseResponseTextCode_unknownCTE(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.ResponseTextCode {
-            try ParserLibrary.parseFixedString("UNKNOWN-CTE", buffer: &buffer, tracker: tracker)
-            return .unknownCTE
-        }
-
-        func parseResponseTextCode_undefinedFilter(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.ResponseTextCode {
-            try ParserLibrary.parseFixedString("UNDEFINED-FILTER ", buffer: &buffer, tracker: tracker)
-            return .undefinedFilter(try self.parseFilterName(buffer: &buffer, tracker: tracker))
+        
+        func parseResponseTextCode_namespace(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.ResponseTextCode {
+            return .namespace(try self.parseNamespaceResponse(buffer: &buffer, tracker: tracker))
         }
 
         func parseResponseTextCode_atom(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.ResponseTextCode {
@@ -3113,6 +3116,7 @@ extension NIOIMAP.GrammarParser {
 
         return try ParserLibrary.parseOneOf([
             parseResponseTextCode_alert,
+            parseResponseTextCode_badCharset,
             parseResponseTextCode_capabilityData,
             parseResponseTextCode_parse,
             parseResponseTextCode_permanentFlags,
@@ -3122,8 +3126,7 @@ extension NIOIMAP.GrammarParser {
             parseResponseTextCode_uidNext,
             parseResponseTextCode_uidValidity,
             parseResponseTextCode_unseen,
-            parseResponseTextCode_unknownCTE,
-            parseResponseTextCode_undefinedFilter,
+            parseResponseTextCode_namespace,
             parseResponseTextCode_atom
         ], buffer: &buffer, tracker: tracker)
     }
