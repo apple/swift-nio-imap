@@ -23,7 +23,7 @@ public struct ParserError: Error {
     var file: String
     var line: Int
 
-    init(hint: String = "go figure", file: String = #file, line: Int = #line) {
+    init(hint: String = "Unknown", file: String = #file, line: Int = #line) {
         self.hint = hint
         self.file = file
         self.line = line
