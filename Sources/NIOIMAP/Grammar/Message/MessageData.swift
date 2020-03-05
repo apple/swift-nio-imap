@@ -17,9 +17,10 @@ import NIO
 extension NIOIMAP {
     
     /// IMAPv4 `message-data`
+    /// One message attribute is guarunteed
     public enum MessageData: Equatable {
         case expunge(NZNumber)
-        case fetch(NZNumber, MessageAttributes)
+        case fetch(NZNumber, firstAttribute: MessageAttributeType)
     }
     
 }
@@ -31,11 +32,15 @@ extension ByteBuffer {
         switch data {
         case .expunge(let number):
             return self.writeString("\(number) EXPUNGE")
-        case .fetch(let number, let atts):
+        case .fetch(let number, firstAttribute: let first):
             return
-                self.writeString("\(number) FETCH ") +
-                self.writeMessageAttributes(atts)
+                self.writeString("\(number) FETCH (") +
+                self.writeMessageAttributeType(first)
         }
+    }
+    
+    @discardableResult mutating func writeMessageDataEnd(_ data: NIOIMAP.MessageData) -> Int {
+        return self.writeString(")")
     }
 
 }
