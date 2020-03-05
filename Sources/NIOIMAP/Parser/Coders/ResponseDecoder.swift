@@ -18,9 +18,9 @@ extension NIOIMAP {
     
     public struct ResponseDecoder: ByteToMessageDecoder {
 
-        public typealias InboundOut = ServerResponse
+        public typealias InboundOut = ResponseStream
 
-        private var parser = CommandParser()
+        private var parser = ResponseParser()
 
         public init() {
             print("Got connection, created decoder")
@@ -29,7 +29,7 @@ extension NIOIMAP {
         public mutating func decode(context: ChannelHandlerContext, buffer: inout ByteBuffer) throws -> DecodingState {
             let save = buffer
             do {
-                let result = try self.parser.parseServerResponse(buffer: &buffer)
+                let result = try self.parser.parseResponseStream(buffer: &buffer)
                 context.fireChannelRead(self.wrapInboundOut(result))
                 return .continue
             } catch NIOIMAP.ParsingError.incompleteMessage {

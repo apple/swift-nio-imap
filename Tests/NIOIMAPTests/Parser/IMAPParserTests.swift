@@ -1654,6 +1654,7 @@ extension ParserUnitTests {
             ("FETCH 4:6 ENVELOPE", "\r", .fetch([4...6], .attributes([.envelope]), nil), #line),
             ("FETCH 5:7 (ENVELOPE FLAGS)", "\r", .fetch([5...7], .attributes([.envelope, .flags]), nil), #line),
             ("FETCH 3:5 FAST (name)", "\r", .fetch([3...5], .fast, [.name("name", value: nil)]), #line),
+            ("FETCH 1 BODY[TEXT]", "\r", .fetch([1], .attributes([.bodySection(.text(.text), nil)]), nil), #line),
         ]
 
         for (input, terminator, expected, line) in inputs {
@@ -2369,39 +2370,17 @@ extension ParserUnitTests {
 
 // MARK: - parseMessageData
 extension ParserUnitTests {
+    
+    func testParseMessageData() {
+        let inputs: [(String, String, NIOIMAP.MessageData, UInt)] = [
+            ("1 FETCH (BODY[TEXT] {304}\r\n", "", .fetch(1, [.static(.bodySection(.text(.text), nil, "test"))]), #line)
+        ]
 
-    func testParseMessageData_valid_expunge() {
-        TestUtilities.withBuffer("1234 EXPUNGE", terminator: " ") { (buffer) in
-            let result = try NIOIMAP.GrammarParser.parseMessageData(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(result, .expunge(1234))
-        }
-    }
-
-    func testParseMessageData_valid_fetch() {
-        TestUtilities.withBuffer("1234 FETCH (UID 5678 FLAGS (\\Draft))", terminator: " ") { (buffer) in
-            let result = try NIOIMAP.GrammarParser.parseMessageData(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(
-                result,
-                .fetch(1234, [
-                        .static(.uid(5678)),
-                        .dynamic([.draft])
-                    ]
-                )
-            )
-        }
-    }
-
-    func testParseBase64Terminal_invalid_short() {
-        var buffer = "a " as ByteBuffer
-        XCTAssertThrowsError(try NIOIMAP.GrammarParser.parseBase64(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertTrue(e is ParserError)
-        }
-    }
-
-    func testParseBase64Terminal_invalid_rogueSpace() {
-        var buffer = "abcda==4 " as ByteBuffer
-        XCTAssertThrowsError(try NIOIMAP.GrammarParser.parseBase64(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertTrue(e is ParserError)
+        for (input, terminator, expected, line) in inputs {
+            TestUtilities.withBuffer(input, terminator: terminator, line: line) { (buffer) in
+                let testValue = try NIOIMAP.GrammarParser.parseMessageData(buffer: &buffer, tracker: .testTracker)
+                XCTAssertEqual(testValue, expected, line: line)
+            }
         }
     }
 

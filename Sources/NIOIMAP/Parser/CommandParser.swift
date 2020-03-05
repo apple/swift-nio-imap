@@ -107,18 +107,5 @@ extension NIOIMAP {
             }
         }
 
-        public mutating func parseServerResponse(buffer: inout ByteBuffer) throws -> NIOIMAP.ServerResponse {
-            func parseServerResponse_greeting(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.ServerResponse {
-                return .greeting(try GrammarParser.parseGreeting(buffer: &buffer, tracker: tracker))
-            }
-            func parseServerResponse_response(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.ServerResponse {
-                return .response(try GrammarParser.parseResponse(buffer: &buffer, tracker: tracker))
-            }
-            return try ParserLibrary.parseOneOf([
-                parseServerResponse_greeting,
-                parseServerResponse_response
-            ], buffer: &buffer, tracker: .new)
-        }
-
     }
 }

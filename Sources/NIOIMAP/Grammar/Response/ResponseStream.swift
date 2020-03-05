@@ -15,24 +15,31 @@
 import NIO
 
 extension NIOIMAP {
-
-    public enum ServerResponseStream: Equatable {
-        case response(ServerResponse)
+    
+    public enum ResponseStream: Equatable {
+        case greeting(Greeting)
         case bytes(ByteBuffer)
+        case body(ResponseType)
+        case end(ResponseDone)
     }
-
+    
 }
 
+// MARK: - Encoding
 extension ByteBuffer {
-
-    @discardableResult public mutating func writeServerResponseStream(_ stream: NIOIMAP.ServerResponseStream) -> Int {
+    
+    @discardableResult public mutating func writeResponseStream(_ stream: NIOIMAP.ResponseStream) -> Int {
         switch stream {
-        case .response(let response):
-            return self.writeServerResponse(response)
-        case .bytes(let bytes):
-            var copy = bytes
+        case .bytes(let buffer):
+            var copy = buffer
             return self.writeBuffer(&copy)
+        case .greeting(let greeting):
+            return self.writeGreeting(greeting)
+        case .body(let type):
+            return self.writeResponseType(type)
+        case .end(let end):
+            return self.writeResponseDone(end)
         }
     }
-
+    
 }

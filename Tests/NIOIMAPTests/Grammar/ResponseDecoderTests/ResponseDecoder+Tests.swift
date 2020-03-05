@@ -25,16 +25,19 @@ extension ResponseDecoder_Tests {
     
     func testNormalUsage() throws {
         
-        let inoutPairs: [(String, [NIOIMAP.ServerResponse])] = [
+        let inoutPairs: [(String, [NIOIMAP.ResponseStream])] = [
             (
-                "+ OK\r\n+ OK\r\n1 OK Login\r\n",
+                "1 OK Login\r\n",
                 [
-                    .response(.parts([
-                        .continueRequest(.responseText(.code(nil, text: "OK"))),
-                        .continueRequest(.responseText(.code(nil, text: "OK")))
-                    ], done: .tagged(.tag("1", state: .ok(.code(nil, text: "Login"))))))
+                    .end(.tagged(.tag("1", state: .ok(.code(nil, text: "Login")))))
                 ]
-            )
+            ),
+//            (
+//                "* [ALERT]\r\n",
+//                [
+//                    .body(.continueRequest(.responseText(.code(.alert, text: nil))))
+//                ]
+//            )
         ]
         
         do {
