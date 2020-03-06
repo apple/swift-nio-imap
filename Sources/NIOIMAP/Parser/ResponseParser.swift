@@ -20,6 +20,7 @@ extension NIOIMAP {
 
         enum Mode: Equatable {
             case lines
+            case messageAttributes
             case bytes(Int)
         }
 
@@ -36,7 +37,22 @@ extension NIOIMAP {
             case .bytes(let remaining):
                 return self.parseBytes(buffer: &buffer, remaining: remaining)
             case .lines:
-                return try self.parseLine(buffer: &buffer)
+                let line = try self.parseLine(buffer: &buffer)
+                if case .response(.body(.whole(.responseData(.messageData(.fetch(_, firstAttribute: .static(.bodySectionText(_, let size)))))))) = line {
+                    self.mode = .bytes(size)
+                } else if case .response(.body(.whole(.responseData(.messageData(.fetch(_, firstAttribute: _)))))) = line {
+                    self.mode = .messageAttributes
+                }
+                return line
+            case .messageAttributes:
+                guard let att = try GrammarParser.parseMessageAttributeMiddle(buffer: &buffer, tracker: .new) else {
+                    self.mode = .lines
+                    return try self.parseResponseStream(buffer: &buffer)
+                }
+                if case NIOIMAP.MessageAttributeType.static(NIOIMAP.MessageAttributesStatic.bodySectionText(_, let size)) = att {
+                    self.mode = .bytes(size)
+                }
+                return .response(.body(.messageAttribute(att)))
             }
         }
         
@@ -45,10 +61,10 @@ extension NIOIMAP {
         /// `ByteBuffer` will be emptied.
         /// - parameter buffer: The buffer from which bytes should be extracted.
         /// - returns: A new `ByteBuffer` containing extracted bytes.
-        public mutating func parseBytes(buffer: inout ByteBuffer, remaining: Int) -> ResponseStream {
+        mutating func parseBytes(buffer: inout ByteBuffer, remaining: Int) -> ResponseStream {
             if buffer.readableBytes >= remaining {
                 let bytes = buffer.readSlice(length: remaining)!
-                self.mode = .lines
+                self.mode = .messageAttributes
                 return .bytes(bytes)
             }
             
@@ -64,31 +80,52 @@ extension NIOIMAP {
         /// Upon failure a `PublicParserError` will be thrown.
         /// - parameter buffer: The consumable buffer to parse.
         /// - returns: A `ClientCommand` if parsing was successful.
-        public mutating func parseLine(buffer: inout ByteBuffer) throws -> NIOIMAP.ResponseStream {
+        func parseLine(buffer: inout ByteBuffer) throws -> NIOIMAP.ResponseStream {
+            
+            func parseLine_greeting(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.ResponseStream {
+                return .greeting(try GrammarParser.parseGreeting(buffer: &buffer, tracker: tracker))
+            }
+            
+            func parseLine_response(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.ResponseStream {
+                return .response(try self.parseResponseComponent(buffer: &buffer, tracker: tracker))
+            }
+            
             return try ParserLibrary.parseOneOf([
-                self.parseResponse,
-                self.parseGreeting
+                parseLine_greeting,
+                parseLine_response
             ], buffer: &buffer, tracker: .new)
         }
         
-        func parseResponse(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.ResponseStream {
-            func parseLine_body(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.ResponseStream {
-                return .body(try GrammarParser.parseResponseType(buffer: &buffer, tracker: tracker))
+        func parseResponseComponent(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.ResponseComponentStream {
+            
+            func parseResponseComponent_body(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.ResponseComponentStream {
+                return .body(try self.parseResponseBody(buffer: &buffer, tracker: tracker))
             }
             
-            func parseLine_end(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.ResponseStream {
-                return .end(try GrammarParser.parseResponse(buffer: &buffer, tracker: tracker))
+            func parseResponseComponent_end(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.ResponseComponentStream {
+                return .end(try GrammarParser.parseResponseDone(buffer: &buffer, tracker: tracker))
             }
             
             return try ParserLibrary.parseOneOf([
-                parseLine_body,
-                parseLine_end
-            ], buffer: &buffer, tracker: tracker)
+                parseResponseComponent_body,
+                parseResponseComponent_end
+            ], buffer: &buffer, tracker: .new)
         }
         
-        func parseGreeting(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.ResponseStream {
-            return .greeting(try GrammarParser.parseGreeting(buffer: &buffer, tracker: tracker))
+        func parseResponseBody(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.ResponseBodyStream {
+        
+            func parseResponseBody_whole(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.ResponseBodyStream {
+                return .whole(try GrammarParser.parseResponseType(buffer: &buffer, tracker: tracker))
+            }
+            
+            func parseResponseBody_messageAttribute(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.ResponseBodyStream {
+                return .messageAttribute(try GrammarParser.parseMessageAttribute_dynamicOrStatic(buffer: &buffer, tracker: tracker))
+            }
+            
+            return try ParserLibrary.parseOneOf([
+                parseResponseBody_whole,
+                parseResponseBody_messageAttribute
+            ], buffer: &buffer, tracker: tracker)
         }
-
     }
 }

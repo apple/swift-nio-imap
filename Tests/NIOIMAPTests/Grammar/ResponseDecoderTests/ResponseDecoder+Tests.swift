@@ -29,7 +29,7 @@ extension ResponseDecoder_Tests {
             (
                 "1 OK Login\r\n",
                 [
-                    .end(.tagged(.tag("1", state: .ok(.code(nil, text: "Login")))))
+                    .response(.end(.tagged(.tag("1", state: .ok(.code(nil, text: "Login"))))))
                 ]
             ),
 //            (

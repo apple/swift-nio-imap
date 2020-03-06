@@ -153,6 +153,64 @@ extension ParserUnitTests {
         }
     }
     
+    func testResponseMessageDataStreaming() {
+        
+        // command tag FETCH 1:3 BODY[TEXT]
+        
+        // * 1 FETCH (BODY[TEXT] {123}\r\n
+        // abc
+        // * 2 FETCH (BODY[TEXT] {123}\r\n
+        // abc
+        // * 3 FETCH (BODY[TEXT] {123}\r\n
+        // abc
+        // 1 OK Fetch completed.
+        var buffer: ByteBuffer = "* 1 FETCH (BODY[TEXT] {3}\r\nabc FLAGS (\\seen))\r\n* 2 FETCH (FLAGS (\\seen) BODY[TEXT] {3}\r\ndef)\r\n* 3 FETCH (BODY[TEXT] {3}\r\nghi)\r\n1 OK Fetch completed.\r\n"
+        
+        var parser = NIOIMAP.ResponseParser()
+        XCTAssertEqual(
+            try parser.parseResponseStream(buffer: &buffer),
+            .response(.body(.whole(.responseData(.messageData(.fetch(1, firstAttribute: .static(.bodySectionText(nil, 3))))))))
+        )
+        XCTAssertEqual(
+            try parser.parseResponseStream(buffer: &buffer),
+            .bytes("abc")
+        )
+        XCTAssertEqual(
+            try parser.parseResponseStream(buffer: &buffer),
+            .response(.body(.messageAttribute(.dynamic([.seen]))))
+        )
+        XCTAssertEqual(
+            try parser.parseResponseStream(buffer: &buffer),
+            .response(.body(.whole(.responseData(.messageData(.fetch(2, firstAttribute: .dynamic([.seen])))))))
+        )
+        XCTAssertEqual(
+            try parser.parseResponseStream(buffer: &buffer),
+            .response(.body(.messageAttribute(.static(.bodySectionText(nil, 3)))))
+        )
+        XCTAssertEqual(
+            try parser.parseResponseStream(buffer: &buffer),
+            .bytes("def")
+        )
+        XCTAssertEqual(
+            try parser.parseResponseStream(buffer: &buffer),
+            .response(.body(.whole(.responseData(.messageData(.fetch(3, firstAttribute: .static(.bodySectionText(nil, 3))))))))
+        )
+        XCTAssertEqual(
+            try parser.parseResponseStream(buffer: &buffer),
+            .bytes("ghi")
+        )
+        XCTAssertEqual(
+            try parser.parseResponseStream(buffer: &buffer),
+            .response(.end(.tagged(.tag("1", state: .ok(.code(nil, text: "Fetch completed."))))))
+        )
+        XCTAssertEqual(buffer.readableBytes, 0)
+        
+          
+        // * 5 FETCH (FLAGS (seen, draft) BODY[TEXT] {3}\r\n 123 HEADERS ())
+        // 1 OK Fetch completed.
+        
+    }
+    
     func testIdle() {
         // 1 NOOP
         // 2 IDLE\r\nDONE\r\n
