@@ -32,12 +32,12 @@ extension ResponseDecoder_Tests {
                     .response(.end(.tagged(.tag("1", state: .ok(.code(nil, text: "Login"))))))
                 ]
             ),
-//            (
-//                "* [ALERT]\r\n",
-//                [
-//                    .body(.continueRequest(.responseText(.code(.alert, text: nil))))
-//                ]
-//            )
+            (
+                "* NO [ALERT] ohno\r\n",
+                [
+                    .response(.body(.whole(.responseData(.conditionalState(.no(.code(.alert, text: "ohno")))))))
+                ]
+            )
         ]
         
         do {
@@ -48,7 +48,7 @@ extension ResponseDecoder_Tests {
                 }
             )
         } catch {
-            switch error as? ByteToMessageDecoderVerifier.VerificationError<NIOIMAP.CommandStream> {
+            switch error as? ByteToMessageDecoderVerifier.VerificationError<NIOIMAP.ResponseStream> {
             case .some(let error):
                 for input in error.inputs {
                     print(" input: \(String(decoding: input.readableBytesView, as: Unicode.UTF8.self))")
