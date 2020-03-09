@@ -2830,7 +2830,14 @@ extension NIOIMAP.GrammarParser {
     static func parseResponseData(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.ResponseData {
         return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
             try ParserLibrary.parseFixedString("* ", buffer: &buffer, tracker: tracker)
-            return try self.parseResponsePayload(buffer: &buffer, tracker: tracker)
+            let payload = try self.parseResponsePayload(buffer: &buffer, tracker: tracker)
+            
+            if case NIOIMAP.ResponseData.messageData(NIOIMAP.MessageData.fetch(_, firstAttribute: _)) = payload {
+                return payload
+            }
+            
+            try ParserLibrary.parseFixedString("\r\n", buffer: &buffer, tracker: tracker)
+            return payload
         }
     }
 

@@ -2798,6 +2798,24 @@ extension ParserUnitTests {
 
 }
 
+// MARK: - parseResponseDone
+extension ParserUnitTests {
+
+    func testParseResponseDone() {
+        let inputs: [(String, String, NIOIMAP.ResponseDone, UInt)] = [
+            ("1.250 OK ID completed.\r\n", "", .tagged(.tag("1.250", state: .ok(.code(nil, text: "ID completed.")))), #line),
+        ]
+
+        for (input, terminator, expected, line) in inputs {
+            TestUtilities.withBuffer(input, terminator: terminator, line: line) { (buffer) in
+                let testValue = try NIOIMAP.GrammarParser.parseResponseDone(buffer: &buffer, tracker: .testTracker)
+                XCTAssertEqual(testValue, expected, line: line)
+            }
+        }
+    }
+
+}
+
 // MARK: - parseResponsePayload
 extension ParserUnitTests {
 
