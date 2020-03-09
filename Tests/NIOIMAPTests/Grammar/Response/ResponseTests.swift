@@ -26,20 +26,10 @@ extension ResponseTests {
     func testEncode() {
         let inputs: [(NIOIMAP.Response, String, UInt)] = [
             (
-                .parts([], done: .fatal(.code(.alert, text: "text"))),
+                .fatal(.code(.alert, text: "text")),
                 "* BYE [ALERT] text\r\n",
                 #line
             ),
-            (
-                .parts([.responseData(.messageData(.expunge(4)))], done: .fatal(.code(.alert, text: "text"))),
-                "* 4 EXPUNGE\r\n* BYE [ALERT] text\r\n",
-                #line
-            ),
-            (
-                .parts([.responseData(.messageData(.expunge(4))), .continueRequest(.base64("aa=="))], done: .fatal(.code(.alert, text: "text"))),
-                "* 4 EXPUNGE\r\n+ aa==\r\n* BYE [ALERT] text\r\n",
-                #line
-            )
         ]
 
         for (test, expectedString, line) in inputs {
