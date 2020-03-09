@@ -47,14 +47,14 @@ final class ParserUnitTests: XCTestCase {
     func testBasicDecodes() {
         let inoutPairs: [(String, [NIOIMAP.CommandStream])] = [
             // LOGIN
-//            (#"tag LOGIN "f oo" "bar""#      + CRLF, [.command(.init("tag", .login("foo", "bar")))]),
+            (#"tag LOGIN "foo" "bar""#      + CRLF, [.command(.init("tag", .login("foo", "bar")))]),
             ("tag LOGIN \"\" {0}\r\n"       + CRLF, [.command(.init("tag", .login("", "")))]),
-//            (#"tag LOGIN "foo" "bar""#      + CRLF, [.command(.init("tag", .login("foo", "bar")))]),
-//            (#"tag LOGIN foo bar"#          + CRLF, [.command(.init("tag", .login("foo", "bar")))]),
-//            // RENAME
-//            (#"tag RENAME "foo" "bar""#         + CRLF, [.command(NIOIMAP.Command("tag", .rename(from: NIOIMAP.Mailbox("foo"), to: NIOIMAP.Mailbox("bar"), params: nil)))]),
-//            (#"tag RENAME InBoX "inBOX""#       + CRLF, [.command(NIOIMAP.Command("tag", .rename(from: .inbox, to: .inbox, params: nil)))]),
-//            ("tag RENAME {1}\r\n1 {1}\r\n2"     + CRLF, [.command(NIOIMAP.Command("tag", .rename(from: NIOIMAP.Mailbox("1"), to: NIOIMAP.Mailbox("2"), params: nil)))]),
+            (#"tag LOGIN "foo" "bar""#      + CRLF, [.command(.init("tag", .login("foo", "bar")))]),
+            (#"tag LOGIN foo bar"#          + CRLF, [.command(.init("tag", .login("foo", "bar")))]),
+            // RENAME
+            (#"tag RENAME "foo" "bar""#         + CRLF, [.command(NIOIMAP.Command("tag", .rename(from: NIOIMAP.Mailbox("foo"), to: NIOIMAP.Mailbox("bar"), params: nil)))]),
+            (#"tag RENAME InBoX "inBOX""#       + CRLF, [.command(NIOIMAP.Command("tag", .rename(from: .inbox, to: .inbox, params: nil)))]),
+            ("tag RENAME {1}\r\n1 {1}\r\n2"     + CRLF, [.command(NIOIMAP.Command("tag", .rename(from: NIOIMAP.Mailbox("1"), to: NIOIMAP.Mailbox("2"), params: nil)))]),
         ]
         do {
             try ByteToMessageDecoderVerifier.verifyDecoder(
