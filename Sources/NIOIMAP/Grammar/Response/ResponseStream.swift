@@ -39,9 +39,8 @@ extension ByteBuffer {
     
     @discardableResult public mutating func writeResponseStream(_ stream: NIOIMAP.ResponseStream) -> Int {
         switch stream {
-        case .bytes(let buffer):
-            var copy = buffer
-            return self.writeBuffer(&copy)
+        case .bytes(var buffer):
+            return self.writeBuffer(&buffer)
         case .greeting(let greeting):
             return self.writeGreeting(greeting)
         case .response(let component):
