@@ -17,14 +17,7 @@ import NIO
 extension NIOIMAP {
     
     /// IMAPv4 `response`
-    public struct Response: Equatable {
-        public var parts: [ResponseType]
-        public var done: ResponseDone
-        
-        public static func parts(_ parts: [ResponseType], done: ResponseDone) -> Self {
-            return Self(parts: parts, done: done)
-        }
-    }
+    public typealias Response = ResponseDone
     
     public enum ResponseType: Equatable {
         case continueRequest(ContinueRequest)
@@ -46,10 +39,7 @@ extension ByteBuffer {
     }
 
     @discardableResult mutating func writeResponse(_ response: NIOIMAP.Response) -> Int {
-        response.parts.reduce(0) { (result, part) in
-            result + self.writeResponseType(part)
-        } +
-        self.writeResponseDone(response.done)
+        self.writeResponseDone(response)
     }
 
 }

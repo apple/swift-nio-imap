@@ -21,7 +21,7 @@ extension NIOIMAP {
         enum Mode: Equatable {
             case lines
             case idle
-            case bytes(Int)
+            case streamingAppend(Int)
         }
 
         private(set) var mode: Mode = .lines
@@ -38,27 +38,35 @@ extension NIOIMAP {
         /// - returns: A `CommandStream` that can be sent.
         public mutating func parseCommandStream(buffer: inout ByteBuffer) throws -> NIOIMAP.CommandStream {
             switch self.mode {
-            case .bytes(let remaining):
+            case .streamingAppend(let remaining):
                 let bytes = self.parseBytes(buffer: &buffer, remaining: remaining)
-                try ParserLibrary.parseNewline(buffer: &buffer, tracker: .new)
+                try GrammarParser.parseCommandEnd(buffer: &buffer, tracker: .new)
                 return .bytes(bytes)
             case .idle:
                 try GrammarParser.parseIdleDone(buffer: &buffer, tracker: .new)
                 self.mode = .lines
                 return .idleDone
             case .lines:
-                let command = try self.parseCommand(buffer: &buffer)
-                if case .append(to: _, firstMessageMetadata: let firstMetdata) = command.type {
-                    if case .literal(let size) = firstMetdata.data {
-                        self.mode = .bytes(size)
-                    } else if case .literal8(let size) = firstMetdata.data {
-                        self.mode = .bytes(size)
+                let save = buffer
+                do {
+                    let command = try self.parseCommand(buffer: &buffer)
+                    if case .append(to: _, firstMessageMetadata: let firstMetdata) = command.type {
+                        if case .literal(let size) = firstMetdata.data {
+                            self.mode = .streamingAppend(size)
+                        } else if case .literal8(let size) = firstMetdata.data {
+                            self.mode = .streamingAppend(size)
+                        }
+                    } else {
+                        try GrammarParser.parseCommandEnd(buffer: &buffer, tracker: .new)
                     }
+                    if case .idleStart = command.type {
+                        self.mode = .idle
+                    }
+                    return .command(command)
+                } catch {
+                    buffer = save
+                    throw error
                 }
-                if case .idleStart = command.type {
-                    self.mode = .idle
-                }
-                return .command(command)
             }
         }
         
@@ -75,7 +83,7 @@ extension NIOIMAP {
             }
             
             let bytes = buffer.readSlice(length: buffer.readableBytes)!
-            self.mode = .bytes(remaining - bytes.readableBytes)
+            self.mode = .streamingAppend(remaining - bytes.readableBytes)
             return bytes
         }
 
@@ -100,24 +108,10 @@ extension NIOIMAP {
             }
 
             do {
-                let command = try GrammarParser.parseCommand(buffer: &buffer, tracker: .new)
-                return command
+                return try GrammarParser.parseCommand(buffer: &buffer, tracker: .new)
             } catch is ParsingError {
                 throw ParsingError.incompleteMessage
             }
-        }
-
-        public mutating func parseServerResponse(buffer: inout ByteBuffer) throws -> NIOIMAP.ServerResponse {
-            func parseServerResponse_greeting(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.ServerResponse {
-                return .greeting(try GrammarParser.parseGreeting(buffer: &buffer, tracker: tracker))
-            }
-            func parseServerResponse_response(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.ServerResponse {
-                return .response(try GrammarParser.parseResponse(buffer: &buffer, tracker: tracker))
-            }
-            return try ParserLibrary.parseOneOf([
-                parseServerResponse_greeting,
-                parseServerResponse_response
-            ], buffer: &buffer, tracker: .new)
         }
 
     }

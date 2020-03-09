@@ -25,14 +25,17 @@ extension ResponseDecoder_Tests {
     
     func testNormalUsage() throws {
         
-        let inoutPairs: [(String, [NIOIMAP.ServerResponse])] = [
+        let inoutPairs: [(String, [NIOIMAP.ResponseStream])] = [
             (
-                "+ OK\r\n+ OK\r\n1 OK Login\r\n",
+                "1 OK Login\r\n",
                 [
-                    .response(.parts([
-                        .continueRequest(.responseText(.code(nil, text: "OK"))),
-                        .continueRequest(.responseText(.code(nil, text: "OK")))
-                    ], done: .tagged(.tag("1", state: .ok(.code(nil, text: "Login"))))))
+                    .response(.end(.tagged(.tag("1", state: .ok(.code(nil, text: "Login"))))))
+                ]
+            ),
+            (
+                "* NO [ALERT] ohno\r\n",
+                [
+                    .response(.body(.whole(.responseData(.conditionalState(.no(.code(.alert, text: "ohno")))))))
                 ]
             )
         ]
@@ -45,7 +48,7 @@ extension ResponseDecoder_Tests {
                 }
             )
         } catch {
-            switch error as? ByteToMessageDecoderVerifier.VerificationError<NIOIMAP.CommandStream> {
+            switch error as? ByteToMessageDecoderVerifier.VerificationError<NIOIMAP.ResponseStream> {
             case .some(let error):
                 for input in error.inputs {
                     print(" input: \(String(decoding: input.readableBytesView, as: Unicode.UTF8.self))")

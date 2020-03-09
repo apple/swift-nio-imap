@@ -153,6 +153,64 @@ extension ParserUnitTests {
         }
     }
     
+    func testResponseMessageDataStreaming() {
+        
+        // command tag FETCH 1:3 BODY[TEXT]
+        
+        // * 1 FETCH (BODY[TEXT] {123}\r\n
+        // abc
+        // * 2 FETCH (BODY[TEXT] {123}\r\n
+        // abc
+        // * 3 FETCH (BODY[TEXT] {123}\r\n
+        // abc
+        // 1 OK Fetch completed.
+        var buffer: ByteBuffer = "* 1 FETCH (BODY[TEXT] {3}\r\nabc FLAGS (\\seen))\r\n* 2 FETCH (FLAGS (\\seen) BODY[TEXT] {3}\r\ndef)\r\n* 3 FETCH (BODY[TEXT] {3}\r\nghi)\r\n1 OK Fetch completed.\r\n"
+        
+        var parser = NIOIMAP.ResponseParser()
+        XCTAssertEqual(
+            try parser.parseResponseStream(buffer: &buffer),
+            .response(.body(.whole(.responseData(.messageData(.fetch(1, firstAttribute: .static(.bodySectionText(nil, 3))))))))
+        )
+        XCTAssertEqual(
+            try parser.parseResponseStream(buffer: &buffer),
+            .bytes("abc")
+        )
+        XCTAssertEqual(
+            try parser.parseResponseStream(buffer: &buffer),
+            .response(.body(.messageAttribute(.dynamic([.seen]))))
+        )
+        XCTAssertEqual(
+            try parser.parseResponseStream(buffer: &buffer),
+            .response(.body(.whole(.responseData(.messageData(.fetch(2, firstAttribute: .dynamic([.seen])))))))
+        )
+        XCTAssertEqual(
+            try parser.parseResponseStream(buffer: &buffer),
+            .response(.body(.messageAttribute(.static(.bodySectionText(nil, 3)))))
+        )
+        XCTAssertEqual(
+            try parser.parseResponseStream(buffer: &buffer),
+            .bytes("def")
+        )
+        XCTAssertEqual(
+            try parser.parseResponseStream(buffer: &buffer),
+            .response(.body(.whole(.responseData(.messageData(.fetch(3, firstAttribute: .static(.bodySectionText(nil, 3))))))))
+        )
+        XCTAssertEqual(
+            try parser.parseResponseStream(buffer: &buffer),
+            .bytes("ghi")
+        )
+        XCTAssertEqual(
+            try parser.parseResponseStream(buffer: &buffer),
+            .response(.end(.tagged(.tag("1", state: .ok(.code(nil, text: "Fetch completed."))))))
+        )
+        XCTAssertEqual(buffer.readableBytes, 0)
+        
+          
+        // * 5 FETCH (FLAGS (seen, draft) BODY[TEXT] {3}\r\n 123 HEADERS ())
+        // 1 OK Fetch completed.
+        
+    }
+    
     func testIdle() {
         // 1 NOOP
         // 2 IDLE\r\nDONE\r\n
@@ -245,8 +303,8 @@ extension ParserUnitTests {
     func testParseAppendData() {
         let inputs: [(String, String, NIOIMAP.AppendData, UInt)] = [
             ("label 1:9", " ", .dataExtension(.label("label", value: .simple(.sequence([1...9])))), #line),
-            ("{123}", "\r\nhello", .literal(123), #line),
-            ("~{456}", "\r\nhello", .literal8(456), #line),
+            ("{123}\r\n", "hello", .literal(123), #line),
+            ("~{456}\r\n", "hello", .literal8(456), #line),
         ]
 
         for (input, terminator, expected, line) in inputs {
@@ -339,14 +397,14 @@ extension ParserUnitTests {
     func testParseMessage() {
         let inputs: [(String, String, NIOIMAP.AppendMessage, UInt)] = [
             (
-                " (\\Answered) {123}",
-                "\r\ntest",
+                " (\\Answered) {123}\r\n",
+                "test",
                 .options(.flagList([.answered], dateTime: nil, extensions: []), data: .literal(123)),
                 #line
             ),
             (
-                " (\\Answered) ~{456}",
-                "\r\ntest",
+                " (\\Answered) ~{456}\r\n",
+                "test",
                 .options(.flagList([.answered], dateTime: nil, extensions: []), data: .literal8(456)),
                 #line
             ),
@@ -820,7 +878,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
 
     func testParseCommand_valid_any() {
-        TestUtilities.withBuffer("a1 NOOP\r\n") { (buffer) in
+        TestUtilities.withBuffer("a1 NOOP", terminator: "\r\n") { (buffer) in
             let result = try NIOIMAP.GrammarParser.parseCommand(buffer: &buffer, tracker: .testTracker)
             XCTAssertEqual(result.tag, "a1")
             XCTAssertEqual(result.type, .noop)
@@ -828,7 +886,7 @@ extension ParserUnitTests {
     }
 
     func testParseCommand_valid_auth() {
-        TestUtilities.withBuffer("a1 CREATE \"mailbox\"\r\n") { (buffer) in
+        TestUtilities.withBuffer("a1 CREATE \"mailbox\"", terminator: "\r\n") { (buffer) in
             let result = try NIOIMAP.GrammarParser.parseCommand(buffer: &buffer, tracker: .testTracker)
             XCTAssertEqual(result.tag, "a1")
             XCTAssertEqual(result.type, .create(NIOIMAP.Mailbox("mailbox"), nil))
@@ -836,7 +894,7 @@ extension ParserUnitTests {
     }
 
     func testParseCommand_valid_nonauth() {
-        TestUtilities.withBuffer("a1 STARTTLS\r\n") { (buffer) in
+        TestUtilities.withBuffer("a1 STARTTLS", terminator: "\r\n") { (buffer) in
             let result = try NIOIMAP.GrammarParser.parseCommand(buffer: &buffer, tracker: .testTracker)
             XCTAssertEqual(result.tag, "a1")
             XCTAssertEqual(result.type, .starttls)
@@ -844,7 +902,7 @@ extension ParserUnitTests {
     }
 
     func testParseCommand_valid_select() {
-        TestUtilities.withBuffer("a1 CHECK\r\n") { (buffer) in
+        TestUtilities.withBuffer("a1 CHECK", terminator: "\r\n") { (buffer) in
             let result = try NIOIMAP.GrammarParser.parseCommand(buffer: &buffer, tracker: .testTracker)
             XCTAssertEqual(result.tag, "a1")
             XCTAssertEqual(result.type, .check)
@@ -1654,6 +1712,7 @@ extension ParserUnitTests {
             ("FETCH 4:6 ENVELOPE", "\r", .fetch([4...6], .attributes([.envelope]), nil), #line),
             ("FETCH 5:7 (ENVELOPE FLAGS)", "\r", .fetch([5...7], .attributes([.envelope, .flags]), nil), #line),
             ("FETCH 3:5 FAST (name)", "\r", .fetch([3...5], .fast, [.name("name", value: nil)]), #line),
+            ("FETCH 1 BODY[TEXT]", "\r", .fetch([1], .attributes([.bodySection(.text(.text), nil)]), nil), #line),
         ]
 
         for (input, terminator, expected, line) in inputs {
@@ -2245,40 +2304,8 @@ extension ParserUnitTests {
 
 // MARK: - parseMessageAttribute
 extension ParserUnitTests {
-
-    func testParseMessageAttribute_valid_single_static() {
-        TestUtilities.withBuffer("(UID 1234)", terminator: " ") { (buffer) in
-            let result = try NIOIMAP.GrammarParser.parseMessageAttribute(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(result, [.static(.uid(1234))])
-        }
-    }
-
-    func testParseMessageAttribute_valid_single_dynamic() {
-        TestUtilities.withBuffer("(FLAGS (\\Draft test))") { (buffer) in
-            let result = try NIOIMAP.GrammarParser.parseMessageAttribute(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(
-                result,
-                [
-                    .dynamic([.draft, .keyword("test")])
-                ]
-            )
-        }
-    }
-
-    func testParseMessageAttribute_valid_multiple_mixed() {
-        TestUtilities.withBuffer("(FLAGS (\\Draft test2) UID 1234 FLAGS (test3 test4) RFC822.SIZE 5678)", terminator: "") { (buffer) in
-            let result = try NIOIMAP.GrammarParser.parseMessageAttribute(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(
-                result,
-                [
-                    .dynamic([.draft, .keyword("test2")]),
-                    .static(.uid(1234)),
-                    .dynamic([.keyword("test3"), .keyword("test4")]),
-                    .static(.rfc822Size(5678))
-                ]
-            )
-        }
-    }
+    
+    // TODO: Write tests
 
 }
 
@@ -2345,7 +2372,7 @@ extension ParserUnitTests {
     func testParseMessageAttributeStatic() {
         let inputs: [(String, String, NIOIMAP.MessageAttributesStatic, UInt)] = [
             ("UID 1234", " ", .uid(1234), #line),
-            ("BODY[TEXT]<1> {999}", " ", .bodySectionText(1, 999), #line),
+            ("BODY[TEXT]<1> {999}\r\n", " ", .bodySectionText(1, 999), #line),
             (#"BODY[HEADER] "string""#, " ", .bodySection(.text(.header), nil, "string"), #line),
             (#"BODY[HEADER]<12> "string""#, " ", .bodySection(.text(.header), 12, "string"), #line),
             ("RFC822.SIZE 1234", " ", .rfc822Size(1234), #line),
@@ -2354,7 +2381,7 @@ extension ParserUnitTests {
             ("BINARY.SIZE[3] 4", " ", .binarySize(section: [3], number: 4), #line),
             ("BINARY[3] NIL", " ", .binaryString(section: [3], string: nil), #line),
             ("BINARY[3] \"a\"", " ", .binaryString(section: [3], string: "a"), #line),
-            ("BINARY[3] ~{4}", " ", .binaryLiteral(section: [3], size: 4), #line)
+            ("BINARY[3] ~{4}\r\n", " ", .binaryLiteral(section: [3], size: 4), #line)
         ]
 
         for (input, terminator, expected, line) in inputs {
@@ -2369,39 +2396,17 @@ extension ParserUnitTests {
 
 // MARK: - parseMessageData
 extension ParserUnitTests {
+    
+    func testParseMessageData() {
+        let inputs: [(String, String, NIOIMAP.MessageData, UInt)] = [
+            ("1 FETCH (BODY[TEXT] {304}\r\n", "", .fetch(1, firstAttribute: .static(.bodySectionText(nil, 304))), #line)
+        ]
 
-    func testParseMessageData_valid_expunge() {
-        TestUtilities.withBuffer("1234 EXPUNGE", terminator: " ") { (buffer) in
-            let result = try NIOIMAP.GrammarParser.parseMessageData(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(result, .expunge(1234))
-        }
-    }
-
-    func testParseMessageData_valid_fetch() {
-        TestUtilities.withBuffer("1234 FETCH (UID 5678 FLAGS (\\Draft))", terminator: " ") { (buffer) in
-            let result = try NIOIMAP.GrammarParser.parseMessageData(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(
-                result,
-                .fetch(1234, [
-                        .static(.uid(5678)),
-                        .dynamic([.draft])
-                    ]
-                )
-            )
-        }
-    }
-
-    func testParseBase64Terminal_invalid_short() {
-        var buffer = "a " as ByteBuffer
-        XCTAssertThrowsError(try NIOIMAP.GrammarParser.parseBase64(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertTrue(e is ParserError)
-        }
-    }
-
-    func testParseBase64Terminal_invalid_rogueSpace() {
-        var buffer = "abcda==4 " as ByteBuffer
-        XCTAssertThrowsError(try NIOIMAP.GrammarParser.parseBase64(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertTrue(e is ParserError)
+        for (input, terminator, expected, line) in inputs {
+            TestUtilities.withBuffer(input, terminator: terminator, line: line) { (buffer) in
+                let testValue = try NIOIMAP.GrammarParser.parseMessageData(buffer: &buffer, tracker: .testTracker)
+                XCTAssertEqual(testValue, expected, line: line)
+            }
         }
     }
 
@@ -2786,6 +2791,24 @@ extension ParserUnitTests {
         for (input, terminator, expected, line) in inputs {
             TestUtilities.withBuffer(input, terminator: terminator, line: line) { (buffer) in
                 let testValue = try NIOIMAP.GrammarParser.parseResponseData(buffer: &buffer, tracker: .testTracker)
+                XCTAssertEqual(testValue, expected, line: line)
+            }
+        }
+    }
+
+}
+
+// MARK: - parseResponseDone
+extension ParserUnitTests {
+
+    func testParseResponseDone() {
+        let inputs: [(String, String, NIOIMAP.ResponseDone, UInt)] = [
+            ("1.250 OK ID completed.\r\n", "", .tagged(.tag("1.250", state: .ok(.code(nil, text: "ID completed.")))), #line),
+        ]
+
+        for (input, terminator, expected, line) in inputs {
+            TestUtilities.withBuffer(input, terminator: terminator, line: line) { (buffer) in
+                let testValue = try NIOIMAP.GrammarParser.parseResponseDone(buffer: &buffer, tracker: .testTracker)
                 XCTAssertEqual(testValue, expected, line: line)
             }
         }

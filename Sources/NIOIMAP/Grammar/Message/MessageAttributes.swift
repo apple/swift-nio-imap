@@ -31,12 +31,16 @@ extension ByteBuffer {
 
     @discardableResult mutating func writeMessageAttributes(_ atts: NIOIMAP.MessageAttributes) -> Int {
         return self.writeArray(atts) { (element, self) in
-            switch element {
-            case .dynamic(let att):
-                return self.writeMessageAttributeDynamic(att)
-            case .static(let att):
-                return self.writeMessageAttributeStatic(att)
-            }
+            return self.writeMessageAttributeType(element)
+        }
+    }
+    
+    @discardableResult mutating func writeMessageAttributeType(_ type: NIOIMAP.MessageAttributeType) -> Int {
+        switch type {
+        case .dynamic(let att):
+            return self.writeMessageAttributeDynamic(att)
+        case .static(let att):
+            return self.writeMessageAttributeStatic(att)
         }
     }
 
