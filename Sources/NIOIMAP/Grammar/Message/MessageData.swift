@@ -17,7 +17,7 @@ import NIO
 extension NIOIMAP {
     
     /// IMAPv4 `message-data`
-    /// One message attribute is guarunteed
+    /// One message attribute is guaranteed
     public enum MessageData: Equatable {
         case expunge(NZNumber)
         case fetch(NZNumber, firstAttribute: MessageAttributeType)
