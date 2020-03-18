@@ -33,7 +33,7 @@ extension NIOIMAP {
         case subscribe(Mailbox)
         case unsubscribe(Mailbox)
         case authenticate(AuthType, InitialResponse?, [NIOIMAP.Base64])
-        case login(UserID, Password)
+        case login(UserId, Password)
         case starttls
         case check
         case close
@@ -92,7 +92,7 @@ extension ByteBuffer {
         case let .authenticate(type, initial, data):
             return self.writeCommandType_authenticate(type: type, initial: initial, data: data)
         case let .login(userid, password):
-            return self.writeCommandType_login(userid: userid, password: password)
+            return self.writeCommandType_login(userId: userid, password: password)
         case .starttls:
             return self.writeCommandType_startTLS()
         case .check:
@@ -244,9 +244,9 @@ extension ByteBuffer {
         }
     }
     
-    private mutating func writeCommandType_login(userid: NIOIMAP.Literal, password: NIOIMAP.Literal) -> Int {
+    private mutating func writeCommandType_login(userId: NIOIMAP.UserId, password: NIOIMAP.Literal) -> Int {
         self.writeString("LOGIN ") +
-        self.writeLiteral(userid) +
+        self.writeUserId(userId) +
         self.writeSpace() +
         self.writeLiteral(password)
     }

@@ -1939,7 +1939,7 @@ extension NIOIMAP.GrammarParser {
     static func parseLogin(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.CommandType {
         return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> NIOIMAP.CommandType in
             try ParserLibrary.parseFixedString("LOGIN ", buffer: &buffer, tracker: tracker)
-            let userid = try Self.parseUserid(buffer: &buffer, tracker: tracker)
+            let userid = try Self.parseUserId(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseFixedString(" ", buffer: &buffer, tracker: tracker)
             let password = try Self.parsePassword(buffer: &buffer, tracker: tracker)
             return .login(userid, password)
@@ -4326,8 +4326,9 @@ extension NIOIMAP.GrammarParser {
     }
 
     // userid          = astring
-    static func parseUserid(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.UserID {
-        return try Self.parseAString(buffer: &buffer, tracker: tracker)
+    static func parseUserId(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.UserId {
+        var astring = try Self.parseAString(buffer: &buffer, tracker: tracker)
+        return astring.readString(length: astring.readableBytes)! // if this fails, something has gone very, very wrong
     }
 
     // vendor-token     = atom (maybe?!?!?!)

@@ -63,9 +63,7 @@ public extension NIOIMAP {
     
     /// IMAPv4 `password`
     typealias Password = AString
-    
-    /// IMAPv4 `userid`
-    typealias UserID = AString
+
 }
 
 // MARK: - Atom
