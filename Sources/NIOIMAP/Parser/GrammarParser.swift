@@ -4326,7 +4326,7 @@ extension NIOIMAP.GrammarParser {
     }
 
     // userid          = astring
-    static func parseUserId(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.UserId {
+    static func parseUserId(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.UserID {
         var astring = try Self.parseAString(buffer: &buffer, tracker: tracker)
         return astring.readString(length: astring.readableBytes)! // if this fails, something has gone very, very wrong
     }
