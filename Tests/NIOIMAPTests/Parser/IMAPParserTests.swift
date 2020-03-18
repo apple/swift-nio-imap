@@ -4056,6 +4056,26 @@ extension ParserUnitTests {
 
 }
 
+// MARK: - parseUserId
+extension ParserUnitTests {
+    
+    func testParseUserId() {
+        let inputs: [(String, String, NIOIMAP.UserId, UInt)] = [
+            ("test", "\r\n", "test", #line),
+            ("{4}\r\ntest", "\r\n", "test", #line),
+            ("\"test\"", "\r\n", "test", #line),
+        ]
+
+        for (input, terminator, expected, line) in inputs {
+            TestUtilities.withBuffer(input, terminator: terminator) { (buffer) in
+                let testValue = try NIOIMAP.GrammarParser.parseUserId(buffer: &buffer, tracker: .testTracker)
+                XCTAssertEqual(testValue, expected, line: line)
+            }
+        }
+    }
+    
+}
+
 // MARK: - vendor-token
 extension ParserUnitTests {
 
