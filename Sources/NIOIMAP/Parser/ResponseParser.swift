@@ -25,7 +25,7 @@ extension NIOIMAP {
             case bytes(Int)
         }
 
-        private(set) var mode: Mode = .lines
+        private(set) var mode: Mode = .greeting
 
         let bufferLimit = 80_000
 
