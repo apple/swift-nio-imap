@@ -21,12 +21,13 @@ extension NIOIMAP {
         enum Mode: Equatable {
             case lines
             case messageAttributes
+            case greeting
             case bytes(Int)
         }
 
-        private(set) var mode: Mode = .lines
+        private(set) var mode: Mode = .greeting
 
-        let bufferLimit = 80_000
+        let bufferLimit = 1_000
 
         public init() {
 
@@ -44,6 +45,10 @@ extension NIOIMAP {
                     self.mode = .messageAttributes
                 }
                 return line
+            case .greeting:
+                let greeting = try GrammarParser.parseGreeting(buffer: &buffer, tracker: .new)
+                self.mode = .lines
+                return .greeting(greeting)
             case .messageAttributes:
                 guard let att = try GrammarParser.parseMessageAttributeMiddle(buffer: &buffer, tracker: .new) else {
                     self.mode = .lines
@@ -81,19 +86,7 @@ extension NIOIMAP {
         /// - parameter buffer: The consumable buffer to parse.
         /// - returns: A `ClientCommand` if parsing was successful.
         func parseLine(buffer: inout ByteBuffer) throws -> NIOIMAP.ResponseStream {
-            
-            func parseLine_greeting(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.ResponseStream {
-                return .greeting(try GrammarParser.parseGreeting(buffer: &buffer, tracker: tracker))
-            }
-            
-            func parseLine_response(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.ResponseStream {
-                return .response(try self.parseResponseComponent(buffer: &buffer, tracker: tracker))
-            }
-            
-            return try ParserLibrary.parseOneOf([
-                parseLine_greeting,
-                parseLine_response
-            ], buffer: &buffer, tracker: .new)
+            return .response(try self.parseResponseComponent(buffer: &buffer, tracker: .new))
         }
         
         func parseResponseComponent(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.ResponseComponentStream {
@@ -104,6 +97,17 @@ extension NIOIMAP {
             
             func parseResponseComponent_end(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.ResponseComponentStream {
                 return .end(try GrammarParser.parseResponseDone(buffer: &buffer, tracker: tracker))
+            }
+            
+            // try to find LF in the first `self.bufferLimit` bytes
+            guard buffer.readableBytesView.prefix(self.bufferLimit).contains(UInt8(ascii: "\n")) else {
+                // We're in line-parsing mode and there's no newline, let's buffer more. But let's do a quick check
+                // that don't buffer too much.
+                guard buffer.readableBytes <= self.bufferLimit else {
+                    // We're in line parsing mode
+                    throw ParsingError.lineTooLong
+                }
+                throw ParsingError.incompleteMessage
             }
             
             return try ParserLibrary.parseOneOf([
