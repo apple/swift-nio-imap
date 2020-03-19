@@ -4060,7 +4060,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     
     func testParseUserId() {
-        let inputs: [(String, String, NIOIMAP.UserId, UInt)] = [
+        let inputs: [(String, String, NIOIMAP.UserID, UInt)] = [
             ("test", "\r\n", "test", #line),
             ("{4}\r\ntest", "\r\n", "test", #line),
             ("\"test\"", "\r\n", "test", #line),
