@@ -16,7 +16,7 @@ import NIO
 
 extension NIOIMAP {
 
-    public struct CommandParser {
+    public struct CommandParser: Parser {
 
         enum Mode: Equatable {
             case lines
@@ -24,12 +24,11 @@ extension NIOIMAP {
             case streamingAppend(Int)
         }
 
+        let bufferLimit: Int
         private(set) var mode: Mode = .lines
 
-        let bufferLimit = 80_000
-
-        public init() {
-
+        public init(bufferLimit: Int = 1_000) {
+            self.bufferLimit = bufferLimit
         }
         
         /// Parses a given `ByteBuffer` into a `CommandStream` that may then be transmitted.
@@ -95,18 +94,7 @@ extension NIOIMAP {
         /// - parameter buffer: The consumable buffer to parse.
         /// - returns: A `ClientCommand` if parsing was successful.
         public mutating func parseCommand(buffer: inout ByteBuffer) throws -> NIOIMAP.Command {
-
-            // try to find LF in the first `self.bufferLimit` bytes
-            guard buffer.readableBytesView.prefix(self.bufferLimit).contains(UInt8(ascii: "\n")) else {
-                // We're in line-parsing mode and there's no newline, let's buffer more. But let's do a quick check
-                // that don't buffer too much.
-                guard buffer.readableBytes <= self.bufferLimit else {
-                    // We're in line parsing mode
-                    throw ParsingError.lineTooLong
-                }
-                throw ParsingError.incompleteMessage
-            }
-
+            try self.throwIfExceededBufferLimite(&buffer)
             do {
                 return try GrammarParser.parseCommand(buffer: &buffer, tracker: .new)
             } catch is ParsingError {

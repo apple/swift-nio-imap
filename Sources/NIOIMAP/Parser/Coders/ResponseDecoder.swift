@@ -20,10 +20,10 @@ extension NIOIMAP {
 
         public typealias InboundOut = ResponseStream
 
-        private var parser = ResponseParser()
+        internal(set) var parser: ResponseParser
 
-        public init() {
-            print("Got connection, created decoder")
+        public init(bufferLimit: Int = 1_000) {
+            self.parser = ResponseParser(bufferLimit: bufferLimit)
         }
 
         public mutating func decode(context: ChannelHandlerContext, buffer: inout ByteBuffer) throws -> DecodingState {

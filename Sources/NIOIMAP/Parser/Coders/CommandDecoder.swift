@@ -25,10 +25,10 @@ extension NIOIMAP {
         
         public typealias InboundOut = NIOIMAP.CommandStream
 
-        private var parser = CommandParser()
-
-        public init() {
-            
+        private var parser: CommandParser
+        
+        public init(bufferLimit: Int = 1_000) {
+            self.parser = CommandParser(bufferLimit: bufferLimit)
         }
 
         public mutating func decode(context: ChannelHandlerContext, buffer: inout ByteBuffer) throws -> DecodingState {
