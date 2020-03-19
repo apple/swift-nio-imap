@@ -27,7 +27,7 @@ extension NIOIMAP {
 
         private(set) var mode: Mode = .greeting
 
-        let bufferLimit = 80_000
+        let bufferLimit = 1_000
 
         public init() {
 
