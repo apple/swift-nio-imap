@@ -99,6 +99,17 @@ extension NIOIMAP {
                 return .end(try GrammarParser.parseResponseDone(buffer: &buffer, tracker: tracker))
             }
             
+            // try to find LF in the first `self.bufferLimit` bytes
+            guard buffer.readableBytesView.prefix(self.bufferLimit).contains(UInt8(ascii: "\n")) else {
+                // We're in line-parsing mode and there's no newline, let's buffer more. But let's do a quick check
+                // that don't buffer too much.
+                guard buffer.readableBytes <= self.bufferLimit else {
+                    // We're in line parsing mode
+                    throw ParsingError.lineTooLong
+                }
+                throw ParsingError.incompleteMessage
+            }
+            
             return try ParserLibrary.parseOneOf([
                 parseResponseComponent_body,
                 parseResponseComponent_end
