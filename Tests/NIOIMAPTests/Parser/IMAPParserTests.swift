@@ -34,7 +34,7 @@ final class ParserUnitTests: XCTestCase {
 
     override func setUp() {
         XCTAssertNil(self.channel)
-        self.channel = EmbeddedChannel(handler: ByteToMessageHandler(NIOIMAP.CommandDecoder()))
+        self.channel = EmbeddedChannel(handler: ByteToMessageHandler(NIOIMAP.CommandDecoder(bufferLimit: 80_000)))
     }
 
     override func tearDown() {
@@ -88,12 +88,12 @@ final class ParserUnitTests: XCTestCase {
 
     // - MARK: Parser unit tests
     func testPreventInfiniteRecursion() {
-        var longBuffer = self.channel.allocator.buffer(capacity: 20_000)
+        var longBuffer = self.channel.allocator.buffer(capacity: 80_000)
         longBuffer.writeString("tag SEARCH (")
-        for _ in 0 ..< 1_000 {
+        for _ in 0 ..< 3_000 {
             longBuffer.writeString(#"ALL ANSWERED BCC CC ("#)
         }
-        for _ in 0 ..< 1_000 {
+        for _ in 0 ..< 3_000 {
             longBuffer.writeString(")") // close the recursive brackets 
         }
         longBuffer.writeString(")\r\n")
@@ -157,6 +157,7 @@ extension ParserUnitTests {
         
         // command tag FETCH 1:3 BODY[TEXT]
         
+        // (greeting) * OK [CAPABILITY IMAP4rev1] Ready.\r\n
         // * 1 FETCH (BODY[TEXT] {123}\r\n
         // abc
         // * 2 FETCH (BODY[TEXT] {123}\r\n
@@ -164,9 +165,13 @@ extension ParserUnitTests {
         // * 3 FETCH (BODY[TEXT] {123}\r\n
         // abc
         // 1 OK Fetch completed.
-        var buffer: ByteBuffer = "* 1 FETCH (BODY[TEXT] {3}\r\nabc FLAGS (\\seen))\r\n* 2 FETCH (FLAGS (\\seen) BODY[TEXT] {3}\r\ndef)\r\n* 3 FETCH (BODY[TEXT] {3}\r\nghi)\r\n1 OK Fetch completed.\r\n"
+        var buffer: ByteBuffer = "* OK [CAPABILITY IMAP4rev1] Ready.\r\n* 1 FETCH (BODY[TEXT] {3}\r\nabc FLAGS (\\seen))\r\n* 2 FETCH (FLAGS (\\seen) BODY[TEXT] {3}\r\ndef)\r\n* 3 FETCH (BODY[TEXT] {3}\r\nghi)\r\n1 OK Fetch completed.\r\n"
         
         var parser = NIOIMAP.ResponseParser()
+        XCTAssertEqual(
+            try parser.parseResponseStream(buffer: &buffer),
+            .greeting(.auth(.ok(.code(.capability([]), text: "Ready."))))
+        )
         XCTAssertEqual(
             try parser.parseResponseStream(buffer: &buffer),
             .response(.body(.whole(.responseData(.messageData(.fetch(1, firstAttribute: .static(.bodySectionText(nil, 3))))))))

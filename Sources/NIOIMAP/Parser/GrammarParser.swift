@@ -654,12 +654,6 @@ extension NIOIMAP.GrammarParser {
 
         return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> NIOIMAP.CapabilityData in
             try ParserLibrary.parseFixedString("CAPABILITY", buffer: &buffer, tracker: tracker)
-            try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
-                try ParserLibrary.parseFixedString(" IMAP4", buffer: &buffer, tracker: tracker)
-            }
-            try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
-                try ParserLibrary.parseFixedString(" IMAP4rev1", buffer: &buffer, tracker: tracker)
-            }
             return try parseCapabilityData_array(buffer: &buffer, tracker: tracker)
         }
     }
