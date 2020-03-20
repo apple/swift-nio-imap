@@ -43,8 +43,10 @@ extension ResponseDecoder_Tests {
         do {
             try ByteToMessageDecoderVerifier.verifyDecoder(
                 stringInputOutputPairs: inoutPairs,
-                decoderFactory: {
-                    NIOIMAP.ResponseDecoder()
+                decoderFactory: { () -> NIOIMAP.ResponseDecoder in
+                    var decoder = NIOIMAP.ResponseDecoder()
+                    decoder.parser.mode = .lines
+                    return decoder
                 }
             )
         } catch {

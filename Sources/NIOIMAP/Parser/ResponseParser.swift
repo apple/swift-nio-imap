@@ -16,7 +16,7 @@ import NIO
 
 extension NIOIMAP {
 
-    public struct ResponseParser {
+    public struct ResponseParser: Parser {
 
         enum Mode: Equatable {
             case lines
@@ -25,12 +25,11 @@ extension NIOIMAP {
             case bytes(Int)
         }
 
-        private(set) var mode: Mode = .greeting
+        let bufferLimit: Int
+        internal(set) var mode: Mode = .greeting
 
-        let bufferLimit = 1_000
-
-        public init() {
-
+        public init(bufferLimit: Int = 1_000) {
+            self.bufferLimit = bufferLimit
         }
 
         public mutating func parseResponseStream(buffer: inout ByteBuffer) throws -> NIOIMAP.ResponseStream {
@@ -99,17 +98,7 @@ extension NIOIMAP {
                 return .end(try GrammarParser.parseResponseDone(buffer: &buffer, tracker: tracker))
             }
             
-            // try to find LF in the first `self.bufferLimit` bytes
-            guard buffer.readableBytesView.prefix(self.bufferLimit).contains(UInt8(ascii: "\n")) else {
-                // We're in line-parsing mode and there's no newline, let's buffer more. But let's do a quick check
-                // that don't buffer too much.
-                guard buffer.readableBytes <= self.bufferLimit else {
-                    // We're in line parsing mode
-                    throw ParsingError.lineTooLong
-                }
-                throw ParsingError.incompleteMessage
-            }
-            
+            try self.throwIfExceededBufferLimit(&buffer)
             return try ParserLibrary.parseOneOf([
                 parseResponseComponent_body,
                 parseResponseComponent_end
