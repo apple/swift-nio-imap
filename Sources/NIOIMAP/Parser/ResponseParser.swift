@@ -98,7 +98,7 @@ extension NIOIMAP {
                 return .end(try GrammarParser.parseResponseDone(buffer: &buffer, tracker: tracker))
             }
             
-            try self.throwIfExceededBufferLimite(&buffer)
+            try self.throwIfExceededBufferLimit(&buffer)
             return try ParserLibrary.parseOneOf([
                 parseResponseComponent_body,
                 parseResponseComponent_end
