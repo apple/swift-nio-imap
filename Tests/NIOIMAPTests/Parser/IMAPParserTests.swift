@@ -88,12 +88,12 @@ final class ParserUnitTests: XCTestCase {
 
     // - MARK: Parser unit tests
     func testPreventInfiniteRecursion() {
-        var longBuffer = self.channel.allocator.buffer(capacity: 20_000)
+        var longBuffer = self.channel.allocator.buffer(capacity: 80_000)
         longBuffer.writeString("tag SEARCH (")
-        for _ in 0 ..< 500 {
+        for _ in 0 ..< 3_000 {
             longBuffer.writeString(#"ALL ANSWERED BCC CC ("#)
         }
-        for _ in 0 ..< 500 {
+        for _ in 0 ..< 3_000 {
             longBuffer.writeString(")") // close the recursive brackets 
         }
         longBuffer.writeString(")\r\n")
