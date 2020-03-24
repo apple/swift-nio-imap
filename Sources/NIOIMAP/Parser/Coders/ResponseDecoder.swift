@@ -20,7 +20,7 @@ extension NIOIMAP {
 
         public typealias InboundOut = ResponseStream
 
-        internal(set) var parser: ResponseParser
+        internal(set) public var parser: ResponseParser
 
         public init(bufferLimit: Int = 1_000) {
             self.parser = ResponseParser(bufferLimit: bufferLimit)

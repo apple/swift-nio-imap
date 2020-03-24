@@ -41,9 +41,9 @@ extension ByteBuffer {
 
     @discardableResult mutating func writeEnvelope(_ envelope: NIOIMAP.Envelope) -> Int {
         self.writeString("(") +
-        self.writeNString(envelope.date) +
+        self.writeEnvelopeDate(envelope.date) +
         self.writeSpace() +
-        self.writeNString(envelope.subject) +
+        self.writeEnvelopeSubject(envelope.subject) +
         self.writeSpace() +
         self.writeEnvelopeAddresses(envelope.from) +
         self.writeSpace() +
@@ -57,9 +57,9 @@ extension ByteBuffer {
         self.writeSpace() +
         self.writeEnvelopeAddresses(envelope.bcc) +
         self.writeSpace() +
-        self.writeNString(envelope.inReplyTo) +
+        self.writeEnvelopeInReplyTo(envelope.inReplyTo) +
         self.writeSpace() +
-        self.writeNString(envelope.messageID) +
+        self.writeEnvelopeMessageID(envelope.messageID) +
         self.writeString(")")
     }
 

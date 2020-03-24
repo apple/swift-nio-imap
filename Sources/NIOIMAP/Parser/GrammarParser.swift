@@ -1125,7 +1125,10 @@ extension NIOIMAP.GrammarParser {
 
     // env-date        = nstring
     static func parseEnvelopeDate(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Envelope.Date {
-        return try self.parseNString(buffer: &buffer, tracker: tracker)
+        guard var nstring = try self.parseNString(buffer: &buffer, tracker: tracker) else {
+            return nil
+        }
+        return nstring.readString(length: nstring.readableBytes)!
     }
 
     // env-from        = "(" 1*address ")" / nil
@@ -1135,12 +1138,18 @@ extension NIOIMAP.GrammarParser {
 
     // env-in-reply-to = nstring
     static func parseEnvelopeInReplyTo(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Envelope.InReplyTo {
-        return try self.parseNString(buffer: &buffer, tracker: tracker)
+        guard var nstring = try self.parseNString(buffer: &buffer, tracker: tracker) else {
+            return nil
+        }
+        return nstring.readString(length: nstring.readableBytes)!
     }
 
     // env-message-id  = nstring
     static func parseEnvelopeMessageId(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Envelope.MessageID {
-        return try self.parseNString(buffer: &buffer, tracker: tracker)
+        guard var nstring = try self.parseNString(buffer: &buffer, tracker: tracker) else {
+            return nil
+        }
+        return nstring.readString(length: nstring.readableBytes)!
     }
 
     // env-reply-to    = "(" 1*address ")" / nil
@@ -1155,7 +1164,10 @@ extension NIOIMAP.GrammarParser {
 
     // env-subject     = nstring
     static func parseEnvelopeSubject(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Envelope.Subject {
-        return try self.parseNString(buffer: &buffer, tracker: tracker)
+        guard var nstring = try self.parseNString(buffer: &buffer, tracker: tracker) else {
+            return nil
+        }
+        return nstring.readString(length: nstring.readableBytes)!
     }
 
     // env-to          = "(" 1*address ")" / nil

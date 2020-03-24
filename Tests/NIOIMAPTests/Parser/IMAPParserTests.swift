@@ -2347,7 +2347,7 @@ extension ParserUnitTests {
         TestUtilities.withBuffer(#"ENVELOPE ("date" "subject" (("from1" "from2" "from3" "from4")) (("sender1" "sender2" "sender3" "sender4")) (("reply1" "reply2" "reply3" "reply4")) (("to1" "to2" "to3" "to4")) (("cc1" "cc2" "cc3" "cc4")) (("bcc1" "bcc2" "bcc3" "bcc4")) "inreplyto" "messageid")"#) { (buffer) in
             let result = try NIOIMAP.GrammarParser.parseMessageAttributeStatic(buffer: &buffer, tracker: .testTracker)
             let expectedEnvelope = NIOIMAP.Envelope(
-                date: NIOIMAP.Envelope.Date("date"),
+                date: "date",
                 subject: "subject",
                 from: [.name("from1", adl: "from2", mailbox: "from3", host: "from4")],
                 sender: [.name("sender1", adl: "sender2", mailbox: "sender3", host: "sender4")],
