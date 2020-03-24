@@ -1526,13 +1526,13 @@ extension ParserUnitTests {
  
     func testParseEnvelopeDate() {
         let inputs: [(String, String, NIOIMAP.Envelope.Date, UInt)] = [
-            (#""2020-03-26 12:13:14""#, " ", #""2020-03-26 12:13:14""#, #line),
+            (#""2020-03-26 12:13:14""#, " ", #"2020-03-26 12:13:14"#, #line),
             (#"NIL"#, " ", nil, #line),
         ]
 
         for (input, terminator, expected, line) in inputs {
-            TestUtilities.withBuffer(input, terminator: terminator) { (buffer) in
-                 let testValue = try NIOIMAP.GrammarParser.parseEnvelopeDate(buffer: &buffer, tracker: .testTracker)
+            TestUtilities.withBuffer(input, terminator: terminator, line: line) { (buffer) in
+                let testValue = try NIOIMAP.GrammarParser.parseEnvelopeDate(buffer: &buffer, tracker: .testTracker)
                 XCTAssertEqual(testValue, expected, line: line)
             }
         }
