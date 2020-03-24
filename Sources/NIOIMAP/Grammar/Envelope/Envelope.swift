@@ -43,7 +43,7 @@ extension ByteBuffer {
         self.writeString("(") +
         self.writeEnvelopeDate(envelope.date) +
         self.writeSpace() +
-        self.writeEnvelopeSubject(envelope.subject) +
+        self.writeNString(envelope.subject) +
         self.writeSpace() +
         self.writeEnvelopeAddresses(envelope.from) +
         self.writeSpace() +
@@ -57,9 +57,9 @@ extension ByteBuffer {
         self.writeSpace() +
         self.writeEnvelopeAddresses(envelope.bcc) +
         self.writeSpace() +
-        self.writeEnvelopeInReplyTo(envelope.inReplyTo) +
+        self.writeNString(envelope.inReplyTo) +
         self.writeSpace() +
-        self.writeEnvelopeMessageID(envelope.messageID) +
+        self.writeNString(envelope.messageID) +
         self.writeString(")")
     }
 

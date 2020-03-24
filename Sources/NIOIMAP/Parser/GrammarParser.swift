@@ -1138,18 +1138,12 @@ extension NIOIMAP.GrammarParser {
 
     // env-in-reply-to = nstring
     static func parseEnvelopeInReplyTo(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Envelope.InReplyTo {
-        guard var nstring = try self.parseNString(buffer: &buffer, tracker: tracker) else {
-            return nil
-        }
-        return nstring.readString(length: nstring.readableBytes)!
+        try Self.parseNString(buffer: &buffer, tracker: tracker)
     }
 
     // env-message-id  = nstring
     static func parseEnvelopeMessageId(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Envelope.MessageID {
-        guard var nstring = try self.parseNString(buffer: &buffer, tracker: tracker) else {
-            return nil
-        }
-        return nstring.readString(length: nstring.readableBytes)!
+        try Self.parseNString(buffer: &buffer, tracker: tracker)
     }
 
     // env-reply-to    = "(" 1*address ")" / nil
@@ -1164,10 +1158,7 @@ extension NIOIMAP.GrammarParser {
 
     // env-subject     = nstring
     static func parseEnvelopeSubject(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Envelope.Subject {
-        guard var nstring = try self.parseNString(buffer: &buffer, tracker: tracker) else {
-            return nil
-        }
-        return nstring.readString(length: nstring.readableBytes)!
+        try Self.parseNString(buffer: &buffer, tracker: tracker)
     }
 
     // env-to          = "(" 1*address ")" / nil

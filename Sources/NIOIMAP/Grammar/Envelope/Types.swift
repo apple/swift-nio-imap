@@ -37,16 +37,16 @@ extension NIOIMAP.Envelope {
     public typealias From = Addresses
     
     /// IMAPv4 `env-in-reply-to`
-    public typealias InReplyTo = String?
+    public typealias InReplyTo = NIOIMAP.NString
     
     /// IMAPv4 `env-date`
     public typealias Date = String?
     
     /// IMAPv4 `env-message-id`
-    public typealias MessageID = String?
+    public typealias MessageID = NIOIMAP.NString
     
     /// IMAPv4 `env-subject`
-    public typealias Subject = String?
+    public typealias Subject = NIOIMAP.NString
     
 }
 
@@ -68,18 +68,6 @@ extension ByteBuffer {
 
     @discardableResult mutating func writeEnvelopeDate(_ date: NIOIMAP.Envelope.Date) -> Int {
         self.writeOptionalString(date)
-    }
-    
-    @discardableResult mutating func writeEnvelopeInReplyTo(_ data: NIOIMAP.Envelope.InReplyTo) -> Int {
-        self.writeOptionalString(data)
-    }
-    
-    @discardableResult mutating func writeEnvelopeMessageID(_ data: NIOIMAP.Envelope.MessageID) -> Int {
-        self.writeOptionalString(data)
-    }
-    
-    @discardableResult mutating func writeEnvelopeSubject(_ data: NIOIMAP.Envelope.Subject) -> Int {
-        self.writeOptionalString(data)
     }
     
     @discardableResult mutating func writeOptionalString(_ string: String?) -> Int {
