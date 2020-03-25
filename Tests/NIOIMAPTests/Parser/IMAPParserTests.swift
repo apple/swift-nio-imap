@@ -529,6 +529,53 @@ extension ParserUnitTests {
 
 }
 
+
+// MARK: - parseBodyTypeBasic
+extension ParserUnitTests {
+    
+    func testParseBodyTypeBasic() {
+        let inputs: [(String, String, NIOIMAP.Body.TypeBasic, UInt)] = [
+            (
+                #""text" "plain" ("charset" "utf8") NIL NIL "quoted-printable" 7676"#,
+                " ",
+                .media(.type(.other("text"), subtype: "plain"), fields: .parameter(["charset", "utf8"], id: nil, description: nil, encoding: .quotedPrintable, octets: 7676)),
+                #line
+            )
+        ]
+
+        for (input, terminator, expected, line) in inputs {
+            TestUtilities.withBuffer(input, terminator: terminator, line: line) { (buffer) in
+                let testValue = try NIOIMAP.GrammarParser.parseBodyTypeBasic(buffer: &buffer, tracker: .testTracker)
+                XCTAssertEqual(testValue, expected, line: line)
+            }
+        }
+    }
+    
+}
+
+// MARK: - parseBodyTypeText
+extension ParserUnitTests {
+    
+    func testParseBodyTypeText() {
+        let inputs: [(String, String, NIOIMAP.Body.TypeText, UInt)] = [
+            (
+                #""text" "plain" ("charset" "utf8") NIL NIL "quoted-printable" 7676 192"#,
+                " ",
+                .mediaText("plain", fields: .parameter(["charset", "utf8"], id: nil, description: nil, encoding: .quotedPrintable, octets: 7676), lines: 192),
+                #line
+            )
+        ]
+
+        for (input, terminator, expected, line) in inputs {
+            TestUtilities.withBuffer(input, terminator: terminator, line: line) { (buffer) in
+                let testValue = try NIOIMAP.GrammarParser.parseBodyTypeText(buffer: &buffer, tracker: .testTracker)
+                XCTAssertEqual(testValue, expected, line: line)
+            }
+        }
+    }
+    
+}
+
 // MARK: - parseBodyFieldDsp
 extension ParserUnitTests {
 
