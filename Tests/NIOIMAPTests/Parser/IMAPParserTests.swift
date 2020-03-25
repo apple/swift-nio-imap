@@ -594,6 +594,35 @@ extension ParserUnitTests {
     
 }
 
+// MARK: - parseBodyTypeSinglepart
+extension ParserUnitTests {
+    
+    func testParseBodyTypeSinglepart() {
+        let inputs: [(String, String, NIOIMAP.Body.TypeSinglepart, UInt)] = [
+            (
+                #""text" "plain" ("charset" "utf8") NIL NIL "quoted-printable" 7676"#,
+                "\r",
+                .type(.basic(.media(.type(.other("text"), subtype: "plain"), fields: .parameter(["charset", "utf8"], id: nil, description: nil, encoding: .quotedPrintable, octets: 7676))), extension: nil),
+                #line
+            ),
+            (
+                #""text" "plain" ("charset" "utf8") NIL NIL "quoted-printable" 7676 192"#,
+                "\r",
+                .type(.text(.mediaText("plain", fields: .parameter(["charset", "utf8"], id: nil, description: nil, encoding: .quotedPrintable, octets: 7676), lines: 192)), extension: nil),
+                #line
+            )
+        ]
+
+        for (input, terminator, expected, line) in inputs {
+            TestUtilities.withBuffer(input, terminator: terminator, line: line) { (buffer) in
+                let testValue = try NIOIMAP.GrammarParser.parseBodyTypeSinglePart(buffer: &buffer, tracker: .testTracker)
+                XCTAssertEqual(testValue, expected, line: line)
+            }
+        }
+    }
+    
+}
+
 // MARK: - parseBodyTypeText
 extension ParserUnitTests {
     
