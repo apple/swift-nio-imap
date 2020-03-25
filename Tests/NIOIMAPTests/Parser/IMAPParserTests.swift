@@ -529,6 +529,47 @@ extension ParserUnitTests {
 
 }
 
+// MARK: - parseBody
+extension ParserUnitTests {
+    
+    func testParseBody() {
+        let inputs: [(String, String, NIOIMAP.Body, UInt)] = [
+            (
+                #"(("text" "plain" ("charset" "UTF-8") NIL NIL "quoted-printable" 7676 192 NIL NIL NIL NIL)("text" "html" ("charset" "UTF-8") NIL NIL "quoted-printable" 34515 443 NIL NIL NIL NIL) "alternative" ("boundary" "eecea9cf9258647ca5ffe76ae13fad323c719ba2b4ea2f5d6619f90e0a50") NIL NIL NIL)"#,
+                "",
+                .multipart(.bodies([
+                    .singlepart(
+                        .type(
+                            .text(
+                                .mediaText("plain", fields:
+                                    .parameter(["charset", "UTF-8"], id: nil, description: nil, encoding: .quotedPrintable, octets: 7676), lines: 192
+                                )
+                            ), extension: .fieldMD5(nil, dspLanguage: .fieldDSP(nil, fieldLanguage: .language(.single(nil), location: .location(nil, extensions: []))))
+                        )
+                    ),
+                    .singlepart(
+                        .type(
+                            .text(
+                                .mediaText("html", fields:
+                                    .parameter(["charset", "UTF-8"], id: nil, description: nil, encoding: .quotedPrintable, octets: 34515), lines: 443
+                                )
+                            ), extension: .fieldMD5(nil, dspLanguage: .fieldDSP(nil, fieldLanguage: .language(.single(nil), location: .location(nil, extensions: []))))
+                        )
+                    )
+                ], mediaSubtype: "alternative", multipartExtension: .parameter(["boundary", "eecea9cf9258647ca5ffe76ae13fad323c719ba2b4ea2f5d6619f90e0a50"], dspLanguage: .fieldDSP(nil, fieldLanguage: .language(.single(nil), location: .location(nil, extensions: [])))))),
+                #line
+            )
+        ]
+
+        for (input, terminator, expected, line) in inputs {
+            TestUtilities.withBuffer(input, terminator: terminator, line: line) { (buffer) in
+                let testValue = try NIOIMAP.GrammarParser.parseBody(buffer: &buffer, tracker: .testTracker)
+                XCTAssertEqual(testValue, expected, line: line)
+            }
+        }
+    }
+    
+}
 
 // MARK: - parseBodyTypeBasic
 extension ParserUnitTests {

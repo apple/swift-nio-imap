@@ -496,9 +496,9 @@ extension NIOIMAP.GrammarParser {
 
         return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> NIOIMAP.Body.TypeSinglepart in
             let type = try ParserLibrary.parseOneOf([
+                parseBodyTypeSinglePart_text,
                 parseBodyTypeSinglePart_basic,
                 parseBodyTypeSinglePart_message,
-                parseBodyTypeSinglePart_text
             ], buffer: &buffer, tracker: tracker)
             let ext = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> NIOIMAP.Body.ExtensionSinglepart in
                 try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
