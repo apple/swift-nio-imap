@@ -16,19 +16,19 @@ import NIO
 
 extension NIOIMAP.Body {
 
-    public indirect enum TypeSinglepartType: Equatable {
+    public indirect enum SinglepartType: Equatable {
         case basic(TypeBasic)
         case message(TypeMessage)
         case text(TypeText)
     }
 
     /// IMAPv4 `body-type-1part`
-    public struct TypeSinglepart: Equatable {
-        public var type: TypeSinglepartType
+    public struct Singlepart: Equatable {
+        public var type: SinglepartType
         public var `extension`: ExtensionSinglepart?
 
         /// Convenience function for a better experience when chaining multiple types.
-        public static func type(_ type: TypeSinglepartType, extension: ExtensionSinglepart?) -> Self {
+        public static func type(_ type: SinglepartType, extension: ExtensionSinglepart?) -> Self {
             return Self(type: type, extension: `extension`)
         }
     }
@@ -38,7 +38,7 @@ extension NIOIMAP.Body {
 // MARK: - Encoding
 extension ByteBuffer {
 
-    @discardableResult mutating func writeBodyTypeSinglepart(_ part: NIOIMAP.Body.TypeSinglepart) -> Int {
+    @discardableResult mutating func writeBodySinglepart(_ part: NIOIMAP.Body.Singlepart) -> Int {
         var size = 0
         switch part.type {
         case .basic(let basic):

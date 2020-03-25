@@ -19,8 +19,8 @@ extension NIOIMAP {
     /// IMAOv4 body
     public enum Body: Equatable {
         
-        case singlepart(TypeSinglepart)
-        case multipart(TypeMultipart)
+        case singlepart(Singlepart)
+        case multipart(Multipart)
         
         /// IMAPv4 `body-fld-lines`
         public typealias FieldLines = Number
@@ -51,9 +51,9 @@ extension ByteBuffer {
         size += self.writeString("(")
         switch body {
         case .singlepart(let part):
-            size += self.writeBodyTypeSinglepart(part)
+            size += self.writeBodySinglepart(part)
         case .multipart(let part):
-            size += self.writeBodyTypeMultipart(part)
+            size += self.writeBodyMultipart(part)
         }
         size += self.writeString(")")
         return size
