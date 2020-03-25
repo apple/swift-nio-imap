@@ -231,14 +231,14 @@ extension NIOIMAP.GrammarParser {
 
         func parseBody_singlePart(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Body {
             try ParserLibrary.parseFixedString("(", buffer: &buffer, tracker: tracker)
-            let part = try self.parseBodyTypeSinglePart(buffer: &buffer, tracker: tracker)
+            let part = try self.parseBodySinglePart(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)
             return .singlepart(part)
         }
 
         func parseBody_multiPart(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Body {
             try ParserLibrary.parseFixedString("(", buffer: &buffer, tracker: tracker)
-            let part = try self.parseBodyTypeMultipart(buffer: &buffer, tracker: tracker)
+            let part = try self.parseBodyMultipart(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)
             return .multipart(part)
         }
@@ -480,31 +480,31 @@ extension NIOIMAP.GrammarParser {
 
     // body-type-1part = (body-type-basic / body-type-msg / body-type-text)
     //                   [SP body-ext-1part]
-    static func parseBodyTypeSinglePart(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Body.TypeSinglepart {
+    static func parseBodySinglePart(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Body.Singlepart {
 
-        func parseBodyTypeSinglePart_basic(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Body.TypeSinglepartType {
+        func parseBodySinglePart_basic(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Body.SinglepartType {
             return .basic(try self.parseBodyTypeBasic(buffer: &buffer, tracker: tracker))
         }
 
-        func parseBodyTypeSinglePart_message(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Body.TypeSinglepartType {
+        func parseBodySinglePart_message(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Body.SinglepartType {
             return .message(try self.parseBodyTypeMessage(buffer: &buffer, tracker: tracker))
         }
 
-        func parseBodyTypeSinglePart_text(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Body.TypeSinglepartType {
+        func parseBodySinglePart_text(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Body.SinglepartType {
             return .text(try self.parseBodyTypeText(buffer: &buffer, tracker: tracker))
         }
 
-        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> NIOIMAP.Body.TypeSinglepart in
+        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> NIOIMAP.Body.Singlepart in
             let type = try ParserLibrary.parseOneOf([
-                parseBodyTypeSinglePart_text,
-                parseBodyTypeSinglePart_basic,
-                parseBodyTypeSinglePart_message,
+                parseBodySinglePart_text,
+                parseBodySinglePart_basic,
+                parseBodySinglePart_message,
             ], buffer: &buffer, tracker: tracker)
             let ext = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> NIOIMAP.Body.ExtensionSinglepart in
                 try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
                 return try self.parseBodyExtSinglePart(buffer: &buffer, tracker: tracker)
             }
-            return NIOIMAP.Body.TypeSinglepart(type: type, extension: ext)
+            return NIOIMAP.Body.Singlepart(type: type, extension: ext)
         }
     }
 
@@ -520,8 +520,8 @@ extension NIOIMAP.GrammarParser {
 
     // body-type-mpart = 1*body SP media-subtype
     //                   [SP body-ext-mpart]
-    static func parseBodyTypeMultipart(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Body.TypeMultipart {
-        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> NIOIMAP.Body.TypeMultipart in
+    static func parseBodyMultipart(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Body.Multipart {
+        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> NIOIMAP.Body.Multipart in
             let bodies = try ParserLibrary.parseOneOrMore(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
                 try self.parseBody(buffer: &buffer, tracker: tracker)
             }
@@ -531,7 +531,7 @@ extension NIOIMAP.GrammarParser {
                 try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
                 return try self.parseBodyExtMpart(buffer: &buffer, tracker: tracker)
             }
-            return NIOIMAP.Body.TypeMultipart(bodies: bodies, mediaSubtype: media, multipartExtension: ext)
+            return NIOIMAP.Body.Multipart(bodies: bodies, mediaSubtype: media, multipartExtension: ext)
         }
     }
 

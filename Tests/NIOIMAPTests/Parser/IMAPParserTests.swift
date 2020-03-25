@@ -531,11 +531,11 @@ extension ParserUnitTests {
     
 }
 
-// MARK: - parseBodyTypeSinglepart
+// MARK: - parseBodySinglepart
 extension ParserUnitTests {
     
-    func testParseBodyTypeSinglepart() {
-        let inputs: [(String, String, NIOIMAP.Body.TypeSinglepart, UInt)] = [
+    func testParseBodySinglepart() {
+        let inputs: [(String, String, NIOIMAP.Body.Singlepart, UInt)] = [
             (
                 #""text" "plain" ("charset" "utf8") NIL NIL "quoted-printable" 7676"#,
                 "\r",
@@ -552,7 +552,7 @@ extension ParserUnitTests {
 
         for (input, terminator, expected, line) in inputs {
             TestUtilities.withBuffer(input, terminator: terminator, line: line) { (buffer) in
-                let testValue = try NIOIMAP.GrammarParser.parseBodyTypeSinglePart(buffer: &buffer, tracker: .testTracker)
+                let testValue = try NIOIMAP.GrammarParser.parseBodySinglePart(buffer: &buffer, tracker: .testTracker)
                 XCTAssertEqual(testValue, expected, line: line)
             }
         }

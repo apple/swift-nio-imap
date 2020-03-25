@@ -16,15 +16,15 @@ import XCTest
 import NIO
 @testable import NIOIMAP
 
-class BodyTypeSinglepartTests: EncodeTestClass {
+class BodySinglepartTests: EncodeTestClass {
 
 }
 
 // MARK: - Encoding
-extension BodyTypeSinglepartTests {
+extension BodySinglepartTests {
 
     func testEncode() {
-        let inputs: [(NIOIMAP.Body.TypeSinglepart, String, UInt)] = [
+        let inputs: [(NIOIMAP.Body.Singlepart, String, UInt)] = [
             (
                 .type(.basic(.init(media: .type(.application, subtype: "subtype"), fields: .parameter([], id: nil, description: nil, encoding: .base64, octets: 6))), extension: nil),
                 "\"APPLICATION\" \"subtype\" () NIL NIL \"BASE64\" 6",
@@ -59,7 +59,7 @@ extension BodyTypeSinglepartTests {
 
         for (test, expectedString, line) in inputs {
             self.testBuffer.clear()
-            let size = self.testBuffer.writeBodyTypeSinglepart(test)
+            let size = self.testBuffer.writeBodySinglepart(test)
             XCTAssertEqual(size, expectedString.utf8.count, line: line)
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }
