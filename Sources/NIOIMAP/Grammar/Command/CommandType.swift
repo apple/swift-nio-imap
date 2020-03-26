@@ -244,7 +244,7 @@ extension ByteBuffer {
         }
     }
     
-    private mutating func writeCommandType_login(userID: NIOIMAP.UserID, password: NIOIMAP.Literal) -> Int {
+    private mutating func writeCommandType_login(userID: NIOIMAP.UserID, password: ByteBuffer) -> Int {
         self.writeString("LOGIN ") +
         self.writeUserID(userID) +
         self.writeSpace() +

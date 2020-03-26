@@ -46,7 +46,7 @@ extension ByteBuffer {
         return self.writeString(length) + self.writeBuffer(&buffer)
     }
     
-    @discardableResult mutating func writeLiteral8(_ buffer: NIOIMAP.Literal8) -> Int {
+    @discardableResult mutating func writeLiteral8(_ buffer: ByteBuffer) -> Int {
         var buffer = buffer
         let length = "~{\(buffer.readableBytes)}\r\n"
         return

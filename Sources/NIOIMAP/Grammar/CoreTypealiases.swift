@@ -36,11 +36,6 @@ public extension NIOIMAP {
 
 // MARK: - ByteBuffer
 public extension NIOIMAP {
-    
-    /// IMAPv4 `literal`
-    typealias Literal = ByteBuffer
-    typealias Literal8 = ByteBuffer
-    
     /// IMAPv4 `base`64
     typealias Base64 = ByteBuffer
     

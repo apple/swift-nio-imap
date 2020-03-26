@@ -12,6 +12,7 @@ needs to be listed here.
 ### Contributors
 
 - David Evans <d.evans@apple.com>
+- Johannes Weiss <johannesweiss@apple.com>
 
 **Updating this list**
 

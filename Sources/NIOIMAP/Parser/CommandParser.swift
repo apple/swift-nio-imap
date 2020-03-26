@@ -50,11 +50,7 @@ extension NIOIMAP {
                 do {
                     let command = try self.parseCommand(buffer: &buffer)
                     if case .append(to: _, firstMessageMetadata: let firstMetdata) = command.type {
-                        if case .literal(let size) = firstMetdata.data {
-                            self.mode = .streamingAppend(size)
-                        } else if case .literal8(let size) = firstMetdata.data {
-                            self.mode = .streamingAppend(size)
-                        }
+                        self.mode = .streamingAppend(firstMetdata.data.byteCount)
                     } else {
                         try GrammarParser.parseCommandEnd(buffer: &buffer, tracker: .new)
                     }
