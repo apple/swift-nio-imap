@@ -247,30 +247,38 @@ extension NIOIMAP.GrammarParser {
     //                    "(" body-extension *(SP body-extension) ")"
     static func parseBodyExtension(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.BodyExtension {
 
-        func parseBodyExtension_string(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.BodyExtension {
+        func parseBodyExtensionType_string(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.BodyExtensionType {
             return .string(try self.parseNString(buffer: &buffer, tracker: tracker))
         }
 
-        func parseBodyExtension_number(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.BodyExtension {
+        func parseBodyExtensionType_number(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.BodyExtensionType {
             return .number(try self.parseNumber(buffer: &buffer, tracker: tracker))
         }
-
-        func parseBodyExtension_multiple(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.BodyExtension {
-            try ParserLibrary.parseFixedString("(", buffer: &buffer, tracker: tracker)
-            var array = [try self.parseBodyExtension(buffer: &buffer, tracker: tracker)]
-            try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) -> NIOIMAP.BodyExtension in
-                try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
-                return try self.parseBodyExtension(buffer: &buffer, tracker: tracker)
-            }
-            try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)
-            return .array(array)
+        
+        func parseBodyExtensionType(buffer: inout ByteBuffer, tracker: StackTracker, into array: inout NIOIMAP.BodyExtension) throws {
+            let element = try ParserLibrary.parseOneOf([
+                parseBodyExtensionType_string,
+                parseBodyExtensionType_number
+            ], buffer: &buffer, tracker: tracker)
+            array.append(element)
         }
 
-        return try ParserLibrary.parseOneOf([
-            parseBodyExtension_string,
-            parseBodyExtension_number,
-            parseBodyExtension_multiple
-        ], buffer: &buffer, tracker: tracker)
+        func parseBodyExtension_array(buffer: inout ByteBuffer, tracker: StackTracker, into array: inout NIOIMAP.BodyExtension) throws {
+            try ParserLibrary.parseFixedString("(", buffer: &buffer, tracker: tracker)
+            try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) -> NIOIMAP.BodyExtensionType in
+                try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
+                return try ParserLibrary.parseOneOf([
+                    parseBodyExtensionType_string,
+                    parseBodyExtensionType_number
+                ], buffer: &buffer, tracker: tracker)
+            }
+            try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)
+        }
+
+        var array = NIOIMAP.BodyExtension()
+        try parseBodyExtensionType(buffer: &buffer, tracker: tracker, into: &array)
+        
+        return array
     }
 
     // body-ext-1part  = body-fld-md5 [SP body-fld-dsp [SP body-fld-lang [SP body-fld-loc *(SP body-extension)]]]
