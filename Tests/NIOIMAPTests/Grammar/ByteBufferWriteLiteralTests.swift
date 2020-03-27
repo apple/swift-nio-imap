@@ -51,7 +51,7 @@ extension ByteBufferWriteLiteralTests {
     
     func testWriteLiteral() {
         
-        let inputs: [(NIOIMAP.Literal, String, UInt)] = [
+        let inputs: [(ByteBuffer, String, UInt)] = [
             ("", "{0}\r\n", #line),
             ("abc", "{3}\r\nabc", #line),
         ]
@@ -72,7 +72,7 @@ extension ByteBufferWriteLiteralTests {
 
     func testWriteLiteral8() {
         
-        let inputs: [(NIOIMAP.Literal8, String, UInt)] = [
+        let inputs: [(ByteBuffer, String, UInt)] = [
             ("", "~{0}\r\n", #line),
             ("abc", "~{3}\r\nabc", #line)
         ]

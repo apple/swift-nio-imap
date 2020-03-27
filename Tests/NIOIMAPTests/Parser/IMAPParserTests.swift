@@ -143,7 +143,7 @@ extension ParserUnitTests {
                 c2_1,
                 .command(NIOIMAP.Command("2", .append(
                     to: .inbox,
-                    firstMessageMetadata: .options(.flagList(nil, dateTime: nil, extensions: []), data: .literal(10))
+                    firstMessageMetadata: .options(.flagList(nil, dateTime: nil, extensions: []), data: .init(byteCount: 10))
                 )))
             )
             XCTAssertEqual(c2_2, .bytes("0123456789"))
@@ -307,15 +307,37 @@ extension ParserUnitTests {
 
     func testParseAppendData() {
         let inputs: [(String, String, NIOIMAP.AppendData, UInt)] = [
-            ("label 1:9", " ", .dataExtension(.label("label", value: .simple(.sequence([1...9])))), #line),
-            ("{123}\r\n", "hello", .literal(123), #line),
-            ("~{456}\r\n", "hello", .literal8(456), #line),
+            ("{123}\r\n", "hello", .init(byteCount: 123), #line),
+            ("~{456}\r\n", "hello", .init(byteCount: 456, needs8BitCleanTransport: true), #line),
+            ("{0}\r\n", "hello", .init(byteCount: 0), #line),
+            ("~{\(Int.max)}\r\n", "hello", .init(byteCount: .max, needs8BitCleanTransport: true), #line),
+            ("{123+}\r\n", "hello", .init(byteCount: 123, synchronizing: false), #line),
+            ("~{456+}\r\n", "hello", .init(byteCount: 456, needs8BitCleanTransport: true, synchronizing: false), #line),
+            ("{0+}\r\n", "hello", .init(byteCount: 0, synchronizing: false), #line),
+            ("~{\(Int.max)+}\r\n", "hello", .init(byteCount: .max, needs8BitCleanTransport: true, synchronizing: false), #line),
         ]
 
         for (input, terminator, expected, line) in inputs {
             TestUtilities.withBuffer(input, terminator: terminator) { (buffer) in
                 let testValue = try NIOIMAP.GrammarParser.parseAppendData(buffer: &buffer, tracker: .testTracker)
                 XCTAssertEqual(testValue, expected, line: line)
+            }
+        }
+    }
+
+    func testNegativeAppendDataDoesNotParse() {
+        TestUtilities.withBuffer("{-1}\r\n", shouldRemainUnchanged: true) { buffer in
+            XCTAssertThrowsError(try NIOIMAP.GrammarParser.parseAppendData(buffer: &buffer, tracker: .testTracker)) { error in
+                XCTAssertNotNil(error as? ParserError)
+            }
+        }
+    }
+
+    func testHugeAppendDataDoesNotParse() {
+        let oneAfterMaxInt = "\(UInt(Int.max)+1)"
+        TestUtilities.withBuffer("{\(oneAfterMaxInt)}\r\n", shouldRemainUnchanged: true) { buffer in
+            XCTAssertThrowsError(try NIOIMAP.GrammarParser.parseAppendData(buffer: &buffer, tracker: .testTracker)) { error in
+                XCTAssertNotNil(error as? ParserError)
             }
         }
     }
@@ -404,13 +426,13 @@ extension ParserUnitTests {
             (
                 " (\\Answered) {123}\r\n",
                 "test",
-                .options(.flagList([.answered], dateTime: nil, extensions: []), data: .literal(123)),
+                .options(.flagList([.answered], dateTime: nil, extensions: []), data: .init(byteCount: 123)),
                 #line
             ),
             (
                 " (\\Answered) ~{456}\r\n",
                 "test",
-                .options(.flagList([.answered], dateTime: nil, extensions: []), data: .literal8(456)),
+                .options(.flagList([.answered], dateTime: nil, extensions: []), data: .init(byteCount: 456, needs8BitCleanTransport: true)),
                 #line
             ),
         ]
@@ -2384,9 +2406,8 @@ extension ParserUnitTests {
             (#"RFC822 "some string""#, " ", .rfc822(nil, "some string"), #line),
             (#"RFC822.HEADER "some string""#, " ", .rfc822(.header, "some string"), #line),
             ("BINARY.SIZE[3] 4", " ", .binarySize(section: [3], number: 4), #line),
-            ("BINARY[3] NIL", " ", .binaryString(section: [3], string: nil), #line),
-            ("BINARY[3] \"a\"", " ", .binaryString(section: [3], string: "a"), #line),
-            ("BINARY[3] ~{4}\r\n", " ", .binaryLiteral(section: [3], size: 4), #line)
+            ("BINARY[3] ~{4}\r\n", " ", .binaryLiteral(section: [3], size: 4), #line),
+            ("BINARY[3] {4}\r\n", " ", .binaryLiteral(section: [3], size: 4), #line),
         ]
 
         for (input, terminator, expected, line) in inputs {
@@ -2396,7 +2417,6 @@ extension ParserUnitTests {
             }
         }
     }
-
 }
 
 // MARK: - parseMessageData

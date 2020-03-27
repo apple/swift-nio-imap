@@ -25,9 +25,10 @@ extension AppendData_Tests {
     func testEncode() {
         
         let inputs: [(NIOIMAP.AppendData, String, UInt)] = [
-            (.dataExtension(.label("label", value: .simple(.number(1)))), "label 1", #line),
-            (.literal(123), "{123}\r\n", #line),
-            (.literal8(456), "~{456}\r\n", #line),
+            (.init(byteCount: 123, synchronizing: false), "{123+}\r\n", #line),
+            (.init(byteCount: 456, needs8BitCleanTransport: true, synchronizing: false), "~{456+}\r\n", #line),
+            (.init(byteCount: 123, synchronizing: true), "{123}\r\n", #line),
+            (.init(byteCount: 456, needs8BitCleanTransport: true, synchronizing: true), "~{456}\r\n", #line),
         ]
 
         for (test, expectedString, line) in inputs {

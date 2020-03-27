@@ -78,24 +78,18 @@ extension NIOIMAP.GrammarParser {
     
     // append-data = literal / literal8 / append-data-ext
     static func parseAppendData(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.AppendData {
-        
-        func parseAppendData_literal(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.AppendData {
-            return .literal(try self.parseLiteralSize(buffer: &buffer, tracker: tracker))
+        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> NIOIMAP.AppendData in
+            let needs8BitCleanTransport = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
+                try ParserLibrary.parseFixedString("~", buffer: &buffer, tracker: tracker)
+            }.map { () in true } ?? false
+            try ParserLibrary.parseFixedString("{", buffer: &buffer, tracker: tracker)
+            let length = try Self.parseNumber(buffer: &buffer, tracker: tracker)
+            let synchronising = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
+                try ParserLibrary.parseFixedString("+", buffer: &buffer, tracker: tracker)
+            }.map { () in false } ?? true
+            try ParserLibrary.parseFixedString("}\r\n", buffer: &buffer, tracker: tracker)
+            return .init(byteCount: length, needs8BitCleanTransport: needs8BitCleanTransport, synchronizing: synchronising)
         }
-        
-        func parseAppendData_literal8(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.AppendData {
-            return .literal8(try self.parseLiteral8Size(buffer: &buffer, tracker: tracker))
-        }
-        
-        func parseAppendData_dataExtension(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.AppendData {
-            return .dataExtension(try self.parseAppendDataExtension(buffer: &buffer, tracker: tracker))
-        }
-        
-        return try ParserLibrary.parseOneOf([
-            parseAppendData_literal,
-            parseAppendData_literal8,
-            parseAppendData_dataExtension
-        ], buffer: &buffer, tracker: tracker)
     }
     
     // append-data-ext = tagged-ext
@@ -1829,6 +1823,18 @@ extension NIOIMAP.GrammarParser {
         }
     }
 
+    static func parseLiteralSize(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Int {
+        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Int in
+            try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
+                try ParserLibrary.parseFixedString("~", buffer: &buffer, tracker: tracker)
+            }
+            try ParserLibrary.parseFixedString("{", buffer: &buffer, tracker: tracker)
+            let length = try Self.parseNumber(buffer: &buffer, tracker: tracker)
+            try ParserLibrary.parseFixedString("}\r\n", buffer: &buffer, tracker: tracker)
+            return length
+        }
+    }
+
     // mbox-or-pat  = list-mailbox / patterns
     static func parseMailboxPatterns(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.MailboxPatterns {
 
@@ -1891,31 +1897,13 @@ extension NIOIMAP.GrammarParser {
     }
 
     // literal         = "{" number ["+"] "}" CRLF *CHAR8
-    static func parseLiteral(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Literal {
-        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> NIOIMAP.Literal in
+    static func parseLiteral(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ByteBuffer {
+        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> ByteBuffer in
             try ParserLibrary.parseFixedString("{", buffer: &buffer, tracker: tracker)
             let length = try Self.parseNumber(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
                 try ParserLibrary.parseFixedString("+", buffer: &buffer, tracker: tracker)
             }
-            try ParserLibrary.parseFixedString("}", buffer: &buffer, tracker: tracker)
-            try ParserLibrary.parseNewline(buffer: &buffer, tracker: tracker)
-            if let bytes = buffer.readSlice(length: length) {
-                if bytes.readableBytesView.contains(0) {
-                    throw ParserError(hint: "Found NUL byte in literal")
-                }
-                return bytes
-            } else {
-                throw NIOIMAP.ParsingError.incompleteMessage
-            }
-        }
-    }
-
-    // literal8        =  "~{" number "}" CRLF *OCTET
-    static func parseLiteral8(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Literal {
-        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> NIOIMAP.Literal in
-            try ParserLibrary.parseFixedString("~{", buffer: &buffer, tracker: tracker)
-            let length = try Self.parseNumber(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseFixedString("}", buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseNewline(buffer: &buffer, tracker: tracker)
             if let bytes = buffer.readSlice(length: length) {
@@ -2460,19 +2448,11 @@ extension NIOIMAP.GrammarParser {
             return .binarySize(section: section, number: number)
         }
 
-        func parseMessageAttributeStatic_binaryString(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.MessageAttributesStatic {
+        func parseMessageAttributeStatic_binary(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.MessageAttributesStatic {
             try ParserLibrary.parseFixedString("BINARY", buffer: &buffer, tracker: tracker)
             let section = try self.parseSectionBinary(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
-            let nstring = try self.parseNString(buffer: &buffer, tracker: tracker)
-            return .binaryString(section: section, string: nstring)
-        }
-
-        func parseMessageAttributeStatic_binaryLiteral(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.MessageAttributesStatic {
-            try ParserLibrary.parseFixedString("BINARY", buffer: &buffer, tracker: tracker)
-            let section = try self.parseSectionBinary(buffer: &buffer, tracker: tracker)
-            try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
-            let size = try self.parseLiteral8Size(buffer: &buffer, tracker: tracker)
+            let size = try self.parseLiteralSize(buffer: &buffer, tracker: tracker)
             return .binaryLiteral(section: section, size: size)
         }
 
@@ -2485,8 +2465,8 @@ extension NIOIMAP.GrammarParser {
             parseMessageAttributeStatic_bodySection,
             parseMessageAttributeStatic_uid,
             parseMessageAttributeStatic_binarySize,
-            parseMessageAttributeStatic_binaryString,
-            parseMessageAttributeStatic_binaryLiteral
+            // we currently deliberately don't parse BINARY representations in the quoted string form.
+            parseMessageAttributeStatic_binary
         ], buffer: &buffer, tracker: tracker)
     }
 
@@ -4460,30 +4440,6 @@ extension NIOIMAP.GrammarParser {
             parseRFC822_text
         ], buffer: &buffer, tracker: tracker)
 
-    }
-
-    static func parseLiteralSize(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Int {
-        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Int in
-            try ParserLibrary.parseFixedString("{", buffer: &buffer, tracker: tracker)
-            let length = try Self.parseNumber(buffer: &buffer, tracker: tracker)
-            try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
-                try ParserLibrary.parseFixedString("+", buffer: &buffer, tracker: tracker)
-            }
-            try ParserLibrary.parseFixedString("}\r\n", buffer: &buffer, tracker: tracker)
-            return length
-        }
-    }
-
-    static func parseLiteral8Size(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Int {
-        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Int in
-            try ParserLibrary.parseFixedString("~{", buffer: &buffer, tracker: tracker)
-            let length = try Self.parseNumber(buffer: &buffer, tracker: tracker)
-            try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
-                try ParserLibrary.parseFixedString("+", buffer: &buffer, tracker: tracker)
-            }
-            try ParserLibrary.parseFixedString("}\r\n", buffer: &buffer, tracker: tracker)
-            return length
-        }
     }
 
     static func parseRFC822Reduced(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.RFC822Reduced {
