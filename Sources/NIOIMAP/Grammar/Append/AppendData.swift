@@ -22,7 +22,9 @@ extension NIOIMAP {
             self.synchronizing = synchronizing
             self.needs8BitCleanTransport = needs8BitCleanTransport
         }
-
+public static func byteCount(_ byteCount: Int, needs8BitCleanTransport: Bool = false, synchronizing: Bool = true) -> Self{
+   return Self(byteCount: byteCount, needs8BitCleanTransport: needs8BitCleanTransport, synchronizing: synchronizing)
+}
         public var byteCount: Int
 
         /// `true` is the client needs to wait for the server to send a _command continuation request_ before sending
