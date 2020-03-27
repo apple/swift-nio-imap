@@ -26,7 +26,7 @@ extension NIOIMAP {
         }
 
         let bufferLimit: Int
-        internal(set) var mode: Mode = .greeting
+        var mode: Mode = .greeting
 
         public init(bufferLimit: Int = 1_000) {
             self.bufferLimit = bufferLimit
