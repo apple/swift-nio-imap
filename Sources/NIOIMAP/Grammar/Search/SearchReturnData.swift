@@ -18,10 +18,10 @@ extension NIOIMAP {
 
     /// IMAPv4 `search-return-data`
     public enum SearchReturnData: Equatable {
-        case min(NZNumber)
-        case max(NZNumber)
+        case min(Int)
+        case max(Int)
         case all(SequenceSet)
-        case count(Number)
+        case count(Int)
         case dataExtension(SearchReturnDataExtension)
     }
 

@@ -19,7 +19,7 @@ extension NIOIMAP {
     /// IMAPv4 `seq-number`
     public enum SequenceNumber: Equatable {
         case last // i.e. last (according to IMAPv4)
-        case number(NIOIMAP.NZNumber)
+        case number(Int)
     }
     
 }

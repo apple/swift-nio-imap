@@ -17,14 +17,14 @@ import NIO
 extension NIOIMAP {
 
     /// IMAPv4 `option-standard-tag`
-    public typealias OptionStandardTag = Atom
+    public typealias OptionStandardTag = String
 
     /// IMAPv4 `option-vendor-tag`
     public struct OptionVendorTag: Equatable {
         public var token: VendorToken
-        public var atom: Atom
+        public var atom: String
 
-        public static func token(_ token: VendorToken, atom: Atom) -> Self {
+        public static func token(_ token: VendorToken, atom: String) -> Self {
             return Self(token: token, atom: atom)
         }
     }

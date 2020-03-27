@@ -24,12 +24,12 @@ extension NIOIMAP {
 
     /// IMAPv4 `status-att-val`
     public enum StatusAttributeValue: Equatable {
-        case messages(Number)
-        case uidNext(NZNumber)
-        case uidValidity(NZNumber)
-        case unseen(Number)
-        case deleted(Number)
-        case size(Number64)
+        case messages(Int)
+        case uidNext(Int)
+        case uidValidity(Int)
+        case unseen(Int)
+        case deleted(Int)
+        case size(Int)
         case modSequence(ModifierSequenceValue)
     }
 

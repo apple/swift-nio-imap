@@ -147,7 +147,7 @@ extension NIOIMAP.GrammarParser {
     }
 
     // append-uid      = uniqueid
-    static func parseAppendUid(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.AppendUID {
+    static func parseAppendUid(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Int {
         return try self.parseUniqueID(buffer: &buffer, tracker: tracker)
     }
 
@@ -165,7 +165,7 @@ extension NIOIMAP.GrammarParser {
     }
 
     // atom            = 1*ATOM-CHAR
-    static func parseAtom(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Atom {
+    static func parseAtom(buffer: inout ByteBuffer, tracker: StackTracker) throws -> String {
         return try ParserLibrary.parseOneOrMoreCharacters(buffer: &buffer, tracker: tracker) { char -> Bool in
             return char.isAtomChar
         }
@@ -197,7 +197,7 @@ extension NIOIMAP.GrammarParser {
     }
 
     // auth-type       = atom
-    static func parseAuthType(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.AuthType {
+    static func parseAuthType(buffer: inout ByteBuffer, tracker: StackTracker) throws -> String {
         return try self.parseAtom(buffer: &buffer, tracker: tracker)
     }
 
@@ -653,13 +653,13 @@ extension NIOIMAP.GrammarParser {
     }
 
     // charset          = atom / quoted
-    static func parseCharset(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Charset {
+    static func parseCharset(buffer: inout ByteBuffer, tracker: StackTracker) throws -> String {
 
-        func parseCharset_atom(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Charset {
+        func parseCharset_atom(buffer: inout ByteBuffer, tracker: StackTracker) throws -> String {
             return try parseAtom(buffer: &buffer, tracker: tracker)
         }
 
-        func parseCharset_quoted(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Charset {
+        func parseCharset_quoted(buffer: inout ByteBuffer, tracker: StackTracker) throws -> String {
             var buffer = try parseQuoted(buffer: &buffer, tracker: tracker)
             guard let string = buffer.readString(length: buffer.readableBytes) else {
                 throw ParserError(hint: "Couldn't read string from buffer")
@@ -1483,8 +1483,8 @@ extension NIOIMAP.GrammarParser {
     }
 
     // flag-extension  = "\" atom
-    static func parseFlagExtension(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Atom {
-        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> NIOIMAP.Atom in
+    static func parseFlagExtension(buffer: inout ByteBuffer, tracker: StackTracker) throws -> String {
+        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> String in
             try ParserLibrary.parseFixedString("\\", buffer: &buffer, tracker: tracker)
             return try self.parseAtom(buffer: &buffer, tracker: tracker )
         }
@@ -2417,7 +2417,7 @@ extension NIOIMAP.GrammarParser {
         func parseMessageAttributeStatic_bodySection(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.MessageAttributesStatic {
             try ParserLibrary.parseFixedString("BODY", buffer: &buffer, tracker: tracker)
             let section = try self.parseSection(buffer: &buffer, tracker: tracker)
-            let number = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> NIOIMAP.Number in
+            let number = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> Int in
                 try ParserLibrary.parseFixedString("<", buffer: &buffer, tracker: tracker)
                 let num = try self.parseNumber(buffer: &buffer, tracker: tracker)
                 try ParserLibrary.parseFixedString(">", buffer: &buffer, tracker: tracker)
@@ -2596,7 +2596,7 @@ extension NIOIMAP.GrammarParser {
     }
 
     // number          = 1*DIGIT
-    static func parseNumber(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Number {
+    static func parseNumber(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Int {
         let (num, _) = try ParserLibrary.parseUnsignedInteger(buffer: &buffer, tracker: tracker)
         return num
     }
@@ -2696,7 +2696,7 @@ extension NIOIMAP.GrammarParser {
     static func parsePartialRange(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Partial.Range {
         return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> NIOIMAP.Partial.Range in
             let num1 = try self.parseNumber(buffer: &buffer, tracker: tracker)
-            let num2 = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> NIOIMAP.Number in
+            let num2 = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> Int in
                 try ParserLibrary.parseFixedString(".", buffer: &buffer, tracker: tracker)
                 return try self.parseNZNumber(buffer: &buffer, tracker: tracker)
             }
@@ -3016,10 +3016,10 @@ extension NIOIMAP.GrammarParser {
         
         func parseResponseTextCode_badCharset(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.ResponseTextCode {
             try ParserLibrary.parseFixedString("BADCHARSET", buffer: &buffer, tracker: tracker)
-            let charsets = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> [NIOIMAP.Charset] in
+            let charsets = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> [String] in
                 try ParserLibrary.parseFixedString(" (", buffer: &buffer, tracker: tracker)
                 var array = [try self.parseCharset(buffer: &buffer, tracker: tracker)]
-                try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) -> NIOIMAP.Charset in
+                try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) -> String in
                     try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
                     return try self.parseCharset(buffer: &buffer, tracker: tracker)
                 }
@@ -3455,7 +3455,7 @@ extension NIOIMAP.GrammarParser {
     // search-program       = ["CHARSET" SP charset SP] search-key *(SP search-key)
     static func parseSearchProgram(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.SearchProgram {
         return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
-            let charset = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> NIOIMAP.Charset in
+            let charset = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> String in
                 try ParserLibrary.parseFixedString("CHARSET ", buffer: &buffer, tracker: tracker)
                 let charset = try self.parseCharset(buffer: &buffer, tracker: tracker)
                 try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
@@ -3659,8 +3659,8 @@ extension NIOIMAP.GrammarParser {
     static func parseSectionPart(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.SectionPart {
         return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> NIOIMAP.SectionPart in
             var output = [try self.parseNZNumber(buffer: &buffer, tracker: tracker)]
-            try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &output, tracker: tracker) { (buffer, tracker) -> NIOIMAP.NZNumber in
-                return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> NIOIMAP.NZNumber in
+            try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &output, tracker: tracker) { (buffer, tracker) -> Int in
+                return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> Int in
                     try ParserLibrary.parseFixedString(".", buffer: &buffer, tracker: tracker)
                     return try self.parseNZNumber(buffer: &buffer, tracker: tracker)
                 }
@@ -4039,7 +4039,7 @@ extension NIOIMAP.GrammarParser {
     }
 
     // tag             = 1*<any ASTRING-CHAR except "+">
-    static func parseTag(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Tag {
+    static func parseTag(buffer: inout ByteBuffer, tracker: StackTracker) throws -> String {
         return try ParserLibrary.parseOneOrMoreCharacters(buffer: &buffer, tracker: tracker) { char -> Bool in
             return char.isAStringChar && char != UInt8(ascii: "+")
         }
@@ -4286,7 +4286,7 @@ extension NIOIMAP.GrammarParser {
     }
 
     // uniqueid        = nz-number
-    static func parseUniqueID(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.UniqueID {
+    static func parseUniqueID(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Int {
         return try self.parseNZNumber(buffer: &buffer, tracker: tracker)
     }
 
@@ -4306,7 +4306,7 @@ extension NIOIMAP.GrammarParser {
     }
 
     // vendor-token     = atom (maybe?!?!?!)
-    static func parseVendorToken(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.VendorToken {
+    static func parseVendorToken(buffer: inout ByteBuffer, tracker: StackTracker) throws -> String {
         return try ParserLibrary.parseOneOrMoreCharacters(buffer: &buffer, tracker: tracker) { char -> Bool in
             return char.isAlpha
         }

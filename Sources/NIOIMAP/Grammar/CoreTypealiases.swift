@@ -14,30 +14,14 @@
 
 import NIO
 
-// MARK: - String
+// MARK: - ByteBuffer
 public extension NIOIMAP {
+    
+    /// IMAPv4 `base`64
+    typealias Base64 = ByteBuffer
     
     /// IMAPv4 `astring`
     typealias AString = ByteBuffer
-    
-    /// IMAPv4 `atom`
-    typealias Atom = String
-    
-    /// IMAPv4 `tag`
-    typealias Tag = String
-    
-    // Note: This is probably wrong, the spec didn't define it
-    /// IMAPv4 `vendor-token`
-    typealias VendorToken = Atom
-    
-    /// IMAPv4 `charset`
-    typealias Charset = String
-}
-
-// MARK: - ByteBuffer
-public extension NIOIMAP {
-    /// IMAPv4 `base`64
-    typealias Base64 = ByteBuffer
     
     /// IMAPv4 `text`
     typealias Text = ByteBuffer
@@ -59,35 +43,4 @@ public extension NIOIMAP {
     /// IMAPv4 `password`
     typealias Password = AString
 
-}
-
-// MARK: - Atom
-public extension NIOIMAP {
-    
-    /// IMAPv4 `auth-type`
-    typealias AuthType = Atom
-    
-}
-
-// MARK: - Int
-public extension NIOIMAP {
-    
-    /// IMAPv4 `number`
-    typealias Number = Int
-    
-    /// IMAPv4 `number64`
-    typealias Number64 = Int
-    
-    /// IMAPv4 `nz-number`
-    typealias NZNumber = Int
-}
-
-// MARK: - Number
-public extension NIOIMAP {
-    
-    /// IMAPv4 `uniqueid`
-    typealias UniqueID = Number
-    
-    /// IMAPv4 `append-uid`
-    typealias AppendUID = UniqueID
 }

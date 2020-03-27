@@ -814,7 +814,7 @@ extension ParserUnitTests {
 
     func testParseCharset() {
 
-        let inputs: [(String, String, NIOIMAP.Charset, UInt)] = [
+        let inputs: [(String, String, String, UInt)] = [
             ("UTF8", " ", "UTF8", #line),
             ("\"UTF8\"", " ", "UTF8", #line),
         ]
@@ -4105,7 +4105,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
 
     func testParseVendorToken() {
-        let inputs: [(String, String, NIOIMAP.VendorToken, UInt)] = [
+        let inputs: [(String, String, String, UInt)] = [
             ("token", "-atom ", "token", #line),
             ("token", " ", "token", #line),
         ]

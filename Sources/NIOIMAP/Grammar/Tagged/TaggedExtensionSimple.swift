@@ -19,8 +19,8 @@ extension NIOIMAP {
     /// IMAPv4 `tagged-ext-simple`
     public enum TaggedExtensionSimple: Equatable {
         case sequence(SequenceSet)
-        case number(Number)
-        case number64(Number64)
+        case number(Int)
+        case number64(Int)
     }
 
 }

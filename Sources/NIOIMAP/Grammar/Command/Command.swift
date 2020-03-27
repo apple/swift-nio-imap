@@ -19,9 +19,9 @@ extension NIOIMAP {
     /// IMAP4 `command` (`command-any`, `command-auth`, `command-nonauth`, `command-select`)
     public struct Command: Equatable {
         public var type: CommandType
-        public var tag: NIOIMAP.Tag
+        public var tag: String
 
-        public init(_ tag: NIOIMAP.Tag, _ type: CommandType) {
+        public init(_ tag: String, _ type: CommandType) {
             self.type = type
             self.tag = tag
         }

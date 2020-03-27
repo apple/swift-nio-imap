@@ -25,7 +25,7 @@ extension NIOIMAP {
         case literalPlus
         case literalMinus
         case filters
-        case other(Atom)
+        case other(String)
     }
     
 }

@@ -32,7 +32,7 @@ extension NIOIMAP {
         case status(Mailbox, [StatusAttribute])
         case subscribe(Mailbox)
         case unsubscribe(Mailbox)
-        case authenticate(AuthType, InitialResponse?, [NIOIMAP.Base64])
+        case authenticate(String, InitialResponse?, [NIOIMAP.Base64])
         case login(UserID, Password)
         case starttls
         case check
@@ -232,7 +232,7 @@ extension ByteBuffer {
         self.writeMailbox(mailbox)
     }
     
-    private mutating func writeCommandType_authenticate(type: NIOIMAP.AuthType, initial: NIOIMAP.InitialResponse?, data: [NIOIMAP.Base64]) -> Int {
+    private mutating func writeCommandType_authenticate(type: String, initial: NIOIMAP.InitialResponse?, data: [NIOIMAP.Base64]) -> Int {
         self.writeString("AUTHENTICATE \(type)") +
         self.writeIfExists(initial) { (initial) -> Int in
             self.writeSpace() +

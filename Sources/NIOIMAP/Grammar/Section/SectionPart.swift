@@ -17,7 +17,7 @@ import NIO
 extension NIOIMAP {
     
     /// IMAPv4 `section-part`
-    public typealias SectionPart = [NZNumber]
+    public typealias SectionPart = [Int]
     
 }
 
