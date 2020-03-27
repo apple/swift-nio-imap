@@ -8,9 +8,9 @@ let package = Package(
     products: [
         .library(name: "NIOIMAP", targets: ["NIOIMAP"])
     ], dependencies: [
-        .package(url: "https://github.com/apple/swift-nio", from: "2.13.0"),
+        .package(url: "https://github.com/apple/swift-nio", from: "2.15.0"),
         .package(url: "https://github.com/apple/swift-nio-extras", from: "1.4.0"),
-        .package(url: "https://github.com/apple/swift-nio-ssl", from: "2.6.0"),
+        .package(url: "https://github.com/apple/swift-nio-ssl", from: "2.7.0"),
         .package(url: "https://github.com/apple/swift-log", from: "1.2.0")
     ],
     targets: [
