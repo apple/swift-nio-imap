@@ -265,19 +265,32 @@ extension NIOIMAP.GrammarParser {
 
         func parseBodyExtension_array(buffer: inout ByteBuffer, tracker: StackTracker, into array: inout NIOIMAP.BodyExtension) throws {
             try ParserLibrary.parseFixedString("(", buffer: &buffer, tracker: tracker)
-            try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) -> NIOIMAP.BodyExtensionType in
-                try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
-                return try ParserLibrary.parseOneOf([
-                    parseBodyExtensionType_string,
-                    parseBodyExtensionType_number
-                ], buffer: &buffer, tracker: tracker)
+            try parseBodyExtension_arrayOrStatic(buffer: &buffer, tracker: tracker, into: &array)
+            var save = buffer
+            do {
+                while true {
+                    save = buffer
+                    try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
+                    try parseBodyExtension_arrayOrStatic(buffer: &buffer, tracker: tracker, into: &array)
+                }
+            } catch is ParserError {
+                buffer = save
             }
             try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)
         }
+        
+        func parseBodyExtension_arrayOrStatic(buffer: inout ByteBuffer, tracker: StackTracker, into array: inout NIOIMAP.BodyExtension) throws {
+            let save = buffer
+            do {
+                try parseBodyExtensionType(buffer: &buffer, tracker: tracker, into: &array)
+            } catch is ParserError {
+                buffer = save
+                try parseBodyExtension_array(buffer: &buffer, tracker: tracker, into: &array)
+            }
+        }
 
         var array = NIOIMAP.BodyExtension()
-        try parseBodyExtensionType(buffer: &buffer, tracker: tracker, into: &array)
-        
+        try parseBodyExtension_arrayOrStatic(buffer: &buffer, tracker: tracker, into: &array)
         return array
     }
 

@@ -541,8 +541,9 @@ extension ParserUnitTests {
             ("1", "\r", [.number(1)], #line),
             ("\"s\"", "\r", [.string("s")], #line),
             ("(1)", "\r", [.number(1)], #line),
-            ("(1 2 3)", "\r", [.number(1), .number(2), .number(3)], #line),
-            ("(1 2 3 (4 (5 (6)))", "\r", [.number(1), .number(2), .number(3), .number(4), .number(5), .number(6)], #line),
+            ("(1 \"2\" 3)", "\r", [.number(1), .string("2"), .number(3)], #line),
+            ("(1 2 3 (4 (5 (6))))", "\r", [.number(1), .number(2), .number(3), .number(4), .number(5), .number(6)], #line),
+            ("(((((1)))))", "\r", [.number(1)], #line), // yeh, this is valid, don't ask
         ]
 
         for (input, terminator, expected, line) in inputs {
