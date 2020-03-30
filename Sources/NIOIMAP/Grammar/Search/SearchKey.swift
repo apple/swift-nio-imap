@@ -162,7 +162,7 @@ extension ByteBuffer {
         case .header(let field, let value):
             return
                 self.writeString("HEADER ") +
-                self.writeString(field) +
+                self.writeAString(field) +
                 self.writeSpace() +
                 self.writeIMAPString(value)
         

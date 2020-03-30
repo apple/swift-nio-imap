@@ -25,7 +25,7 @@ extension ByteBuffer {
     
     @discardableResult mutating func writeHeaderList(_ headers: [String]) -> Int {
         self.writeArray(headers) { (element, self) in
-            self.writeString(element)
+            self.writeAString(element)
         }
     }
     
