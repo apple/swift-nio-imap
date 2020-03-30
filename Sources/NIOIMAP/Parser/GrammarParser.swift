@@ -459,7 +459,7 @@ extension NIOIMAP.GrammarParser {
     }
 
     // body-fld-octets = number
-    static func parseBodyFieldOctets(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Body.FieldOctets {
+    static func parseBodyFieldOctets(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Int {
         return try self.parseNumber(buffer: &buffer, tracker: tracker)
     }
 
@@ -970,7 +970,7 @@ extension NIOIMAP.GrammarParser {
     }
 
     // date-day        = 1*2DIGIT
-    static func parseDateDay(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Date.Day {
+    static func parseDateDay(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Int {
         let (num, size) = try ParserLibrary.parseUnsignedInteger(buffer: &buffer, tracker: tracker)
         guard size <= 2 else {
             throw ParserError(hint: "Expected 1 or 2 bytes, got \(size)")
@@ -1017,7 +1017,7 @@ extension NIOIMAP.GrammarParser {
     }
 
     // date-year       = 4DIGIT
-    static func parseDateYear(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Date.Year {
+    static func parseDateYear(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Int {
         return try self.parse4Digit(buffer: &buffer, tracker: tracker)
     }
 

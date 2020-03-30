@@ -19,12 +19,6 @@ extension NIOIMAP {
     /// IMAPv4 `date` (`date-text`)
     public struct Date: Equatable {
         
-        /// IMAPv4 `date-day` (`date-day-fixed`)
-        public typealias Day = Int
-        
-        /// IMAPv4 `date-year`
-        public typealias Year = Int
-        
         public enum Month: String {
             case jan
             case feb
@@ -40,11 +34,11 @@ extension NIOIMAP {
             case dec
         }
         
-        public var day: Day
+        public var day: Int
         public var month: Month
-        public var year: Year
+        public var year: Int
         
-        public static func day(_ day: Day, month: Month, year: Year) -> Self {
+        public static func day(_ day: Int, month: Month, year: Int) -> Self {
             return Self(day: day, month: month, year: year)
         }
     }

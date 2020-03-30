@@ -18,15 +18,8 @@ extension NIOIMAP {
 
     /// IMAOv4 body
     public enum Body: Equatable {
-        
         case singlepart(TypeSinglepart)
         case multipart(TypeMultipart)
-        
-        /// IMAPv4 `body-fld-lines`
-        public typealias FieldLines = Int
-        
-        /// IMAPv4 `body-fld-octets`
-        public typealias FieldOctets = Int
     }
     
 }
