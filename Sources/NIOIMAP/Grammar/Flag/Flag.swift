@@ -18,9 +18,6 @@ extension NIOIMAP {
 
     /// IMAP4 `flag-list`
     public typealias FlagList = [Flag]
-
-    /// IMAP4 `flag-extension`
-    public typealias FlagExtenion = String
  
     /// IMAPv4 `flag`
     public enum Flag: Equatable {
@@ -30,7 +27,7 @@ extension NIOIMAP {
         case seen
         case draft
         case keyword(Keyword)
-        case `extension`(FlagExtenion)
+        case `extension`(String)
     }
     
 }

@@ -16,9 +16,6 @@ import NIO
 
 extension NIOIMAP {
 
-    /// IMAPv4 `option-standard-tag`
-    public typealias OptionStandardTag = String
-
     /// IMAPv4 `option-vendor-tag`
     public struct OptionVendorTag: Equatable {
         public var token: String

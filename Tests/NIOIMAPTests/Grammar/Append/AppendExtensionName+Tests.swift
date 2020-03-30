@@ -24,7 +24,7 @@ extension AppendExtensionName_Tests {
     
     func testEncode() {
         
-        let inputs: [(NIOIMAP.AppendExtensionName, String, UInt)] = [
+        let inputs: [(String, String, UInt)] = [
             ("test", "test", #line),
         ]
 

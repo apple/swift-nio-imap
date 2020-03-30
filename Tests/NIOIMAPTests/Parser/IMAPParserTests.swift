@@ -384,7 +384,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
 
     func testParseAppendExtensionName() {
-        let inputs: [(String, String, NIOIMAP.AppendExtensionName, UInt)] = [
+        let inputs: [(String, String, String, UInt)] = [
             ("test", " ", "test", #line),
         ]
 
@@ -1157,7 +1157,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     
     func testParseCreateParameterName() {
-        let inputs: [(String, String, NIOIMAP.CreateParameterName, UInt)] = [
+        let inputs: [(String, String, String, UInt)] = [
             ("test", "\r", "test", #line),
         ]
 
@@ -1402,7 +1402,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
 
     func testParseEItemStandardTag() {
-        let inputs: [(String, String, NIOIMAP.EItemStandardTag, UInt)] = [
+        let inputs: [(String, String, String, UInt)] = [
             ("test", " ", "test", #line),
         ]
 
@@ -1853,7 +1853,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     
     func testParseFetchModifierName() {
-        let inputs: [(String, String, NIOIMAP.FetchModifierName, UInt)] = [
+        let inputs: [(String, String, String, UInt)] = [
             ("test", "\r", "test", #line),
         ]
 
@@ -1890,7 +1890,7 @@ extension ParserUnitTests {
 
     func testParseFilterName() {
 
-        let inputs: [(String, String, NIOIMAP.FilterName, UInt)] = [
+        let inputs: [(String, String, String, UInt)] = [
             ("a", " ", "a", #line),
             ("abcdefg", " ", "abcdefg", #line),
         ]
@@ -3082,7 +3082,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
 
     func testParseSearchModifierName() {
-        let inputs: [(String, String, NIOIMAP.SearchModifierName, UInt)] = [
+        let inputs: [(String, String, String, UInt)] = [
             ("modifier", " ", "modifier", #line),
         ]
 
@@ -3427,7 +3427,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     
     func testParseSelectParameterName() {
-        let inputs: [(String, String, NIOIMAP.SelectParameterName, UInt)] = [
+        let inputs: [(String, String, String, UInt)] = [
             ("test", "\r", "test", #line),
         ]
 
@@ -3778,7 +3778,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     
     func testParseStoreModifierName() {
-        let inputs: [(String, String, NIOIMAP.StoreModifierName, UInt)] = [
+        let inputs: [(String, String, String, UInt)] = [
             ("test", "\r", "test", #line),
         ]
         
@@ -4109,7 +4109,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     
     func testParseUserId() {
-        let inputs: [(String, String, NIOIMAP.UserID, UInt)] = [
+        let inputs: [(String, String, String, UInt)] = [
             ("test", "\r\n", "test", #line),
             ("{4}\r\ntest", "\r\n", "test", #line),
             ("\"test\"", "\r\n", "test", #line),

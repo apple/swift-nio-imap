@@ -15,10 +15,7 @@
 import NIO
 
 extension NIOIMAP {
-
-    /// IMAPv4 `search-modifier-name`
-    public typealias SearchModifierName = TaggedExtensionLabel
-
+    
     /// IMAPv4 `search-mod-params`
     public typealias SearchModifierParams = TaggedExtensionValue
 

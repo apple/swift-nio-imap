@@ -18,10 +18,10 @@ extension NIOIMAP {
 
     /// IMAPv4 `search-ret-data-ext`
     public struct SearchReturnDataExtension: Equatable {
-        public var modifier: SearchModifierName
+        public var modifier: String
         public var returnValue: SearchReturnValue
 
-        public static func modifier(_ modifier: SearchModifierName, returnValue: SearchReturnValue) -> Self {
+        public static func modifier(_ modifier: String, returnValue: SearchReturnValue) -> Self {
             return Self(modifier: modifier, returnValue: returnValue)
         }
     }

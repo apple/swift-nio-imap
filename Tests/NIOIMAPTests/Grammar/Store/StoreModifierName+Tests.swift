@@ -24,7 +24,7 @@ class StoreModifierName_Tests: EncodeTestClass {
 extension StoreModifierName_Tests {
 
     func testEncode() {
-        let inputs: [(NIOIMAP.StoreModifierName, String, UInt)] = [
+        let inputs: [(String, String, UInt)] = [
             ("test", "test", #line),
         ]
 

@@ -22,7 +22,7 @@ extension NIOIMAP.Mailbox.List {
         case subscribed
         case remote
         case child(NIOIMAP.ChildMailboxFlag)
-        case other(NIOIMAP.FlagExtenion)
+        case other(String)
     }
     
 }

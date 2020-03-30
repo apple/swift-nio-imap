@@ -14,16 +14,10 @@
 
 import NIO
 
-extension NIOIMAP {
-    
-    public typealias FetchModifierName = TaggedExtensionLabel
-    
-}
-
 // MARK: - Encoding
 extension ByteBuffer {
     
-    @discardableResult mutating func writeFetchModifierName(_ name: NIOIMAP.FetchModifierName) -> Int {
+    @discardableResult mutating func writeFetchModifierName(_ name: String) -> Int {
         return self.writeTaggedExtensionLabel(name)
     }
     
