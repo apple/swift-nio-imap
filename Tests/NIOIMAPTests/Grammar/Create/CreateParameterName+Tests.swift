@@ -24,7 +24,7 @@ class CreateParameterName_Tests: EncodeTestClass {
 extension CreateParameterName_Tests {
 
     func testEncode() {
-        let inputs: [(NIOIMAP.CreateParameterName, String, UInt)] = [
+        let inputs: [(String, String, UInt)] = [
             ("test", "test", #line),
         ]
 

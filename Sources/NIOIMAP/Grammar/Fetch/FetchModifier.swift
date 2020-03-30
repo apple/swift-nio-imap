@@ -17,10 +17,10 @@ import NIO
 extension NIOIMAP {
     
     public struct FetchModifier: Equatable {
-        public var name: FetchModifierName
+        public var name: String
         public var value: FetchModifierParameter?
         
-        public static func name(_ name: FetchModifierName, value: FetchModifierParameter?) -> Self {
+        public static func name(_ name: String, value: FetchModifierParameter?) -> Self {
             return Self(name: name, value: value)
         }
     }

@@ -19,10 +19,10 @@ extension NIOIMAP {
     public typealias StoreModifiers = [StoreModifier]
     
     public struct StoreModifier: Equatable {
-        public var name: StoreModifierName
+        public var name: String
         public var parameters: StoreModifierParameters?
         
-        public static func name(_ name: StoreModifierName, parameters: StoreModifierParameters?) -> Self {
+        public static func name(_ name: String, parameters: StoreModifierParameters?) -> Self {
             return Self(name: name, parameters: parameters)
         }
     }

@@ -22,10 +22,10 @@ extension NIOIMAP.Body {
         public var fields: Fields
         public var envelope: NIOIMAP.Envelope
         public var body: NIOIMAP.Body
-        public var fieldLines: FieldLines
+        public var fieldLines: Int
 
         /// Convenience function for a better experience when chaining multiple types.
-        public static func message(_ message: NIOIMAP.Media.Message, fields: Fields, envelope: NIOIMAP.Envelope, body: NIOIMAP.Body, fieldLines: FieldLines) -> Self {
+        public static func message(_ message: NIOIMAP.Media.Message, fields: Fields, envelope: NIOIMAP.Envelope, body: NIOIMAP.Body, fieldLines: Int) -> Self {
             return Self(message: message, fields: fields, envelope: envelope, body: body, fieldLines: fieldLines)
         }
     }

@@ -14,16 +14,10 @@
 
 import NIO
 
-extension NIOIMAP {
-    
-    public typealias SelectParameterName = TaggedExtensionLabel
-    
-}
-
 // MARK: - Encoding
 extension ByteBuffer {
     
-    @discardableResult mutating func writeSelectParameterName(_ name: NIOIMAP.SelectParameterName) -> Int {
+    @discardableResult mutating func writeSelectParameterName(_ name: String) -> Int {
         return self.writeTaggedExtensionLabel(name)
     }
     

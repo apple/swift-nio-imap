@@ -24,7 +24,7 @@ class FetchModifierName_Tests: EncodeTestClass {
 extension FetchModifierName_Tests {
 
     func testEncode() {
-        let inputs: [(NIOIMAP.FetchModifierName, String, UInt)] = [
+        let inputs: [(String, String, UInt)] = [
             ("test", "test", #line),
         ]
 

@@ -15,10 +15,6 @@
 import NIO
 
 extension NIOIMAP {
-
-    public typealias AttributeFlagKeyword = String
-    
-    public typealias AttributeFlagExtension = String
     
     public enum AttributeFlag: Equatable {
         case answered
@@ -26,8 +22,8 @@ extension NIOIMAP {
         case deleted
         case seen
         case draft
-        case keyword(AttributeFlagKeyword)
-        case flagExtension(AttributeFlagExtension)
+        case keyword(String)
+        case flagExtension(String)
     }
 
 }

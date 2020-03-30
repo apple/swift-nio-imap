@@ -17,10 +17,10 @@ import NIO
 extension NIOIMAP {
     
     public struct CreateParameter: Equatable {
-        public var name: CreateParameterName
+        public var name: String
         public var value: CreateParameterValue?
         
-        public static func name(_ name: CreateParameterName, value: CreateParameterValue?) -> Self {
+        public static func name(_ name: String, value: CreateParameterValue?) -> Self {
             return Self(name: name, value: value)
         }
     }

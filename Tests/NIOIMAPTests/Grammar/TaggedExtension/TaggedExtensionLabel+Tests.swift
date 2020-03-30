@@ -24,7 +24,7 @@ class TaggedExtensionLabel_Tests: EncodeTestClass {
 extension TaggedExtensionLabel_Tests {
 
     func testEncode() {
-        let inputs: [(NIOIMAP.TaggedExtensionLabel, String, UInt)] = [
+        let inputs: [(String, String, UInt)] = [
             ("label", "label", #line)
         ]
 

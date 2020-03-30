@@ -20,9 +20,9 @@ extension NIOIMAP.Body {
     public struct TypeText: Equatable {
         public var mediaText: NIOIMAP.Media.Text
         public var fields: Fields
-        public var lines: FieldLines
+        public var lines: Int
         
-        public static func mediaText(_ mediaText: NIOIMAP.Media.Text, fields: Fields, lines: FieldLines) -> Self {
+        public static func mediaText(_ mediaText: NIOIMAP.Media.Text, fields: Fields, lines: Int) -> Self {
             return Self(mediaText: mediaText, fields: fields, lines: lines)
         }
     }

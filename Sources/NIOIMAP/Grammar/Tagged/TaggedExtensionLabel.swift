@@ -14,17 +14,10 @@
 
 import NIO
 
-extension NIOIMAP {
-
-    /// IMAPv4 `tagged-ext-label`
-    public typealias TaggedExtensionLabel = String
-
-}
-
 // MARK: - Encoding
 extension ByteBuffer {
 
-    @discardableResult mutating func writeTaggedExtensionLabel(_ label: NIOIMAP.TaggedExtensionLabel) -> Int {
+    @discardableResult mutating func writeTaggedExtensionLabel(_ label: String) -> Int {
         self.writeString(label)
     }
 

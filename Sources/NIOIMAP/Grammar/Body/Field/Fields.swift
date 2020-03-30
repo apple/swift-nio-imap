@@ -19,13 +19,13 @@ extension NIOIMAP.Body {
     /// IMAPv4 `body-fields`
     public struct Fields: Equatable {
         public var parameter: FieldParameter
-        public var id: FieldID
-        public var description: FieldDescription
+        public var id: NIOIMAP.NString
+        public var description: NIOIMAP.NString
         public var encoding: FieldEncoding
         public var octets: Int
 
         /// Convenience function for a better experience when chaining multiple types.
-        public static func parameter(_ parameters: FieldParameter, id: FieldID, description: FieldDescription, encoding: FieldEncoding, octets: Int) -> Self {
+        public static func parameter(_ parameters: FieldParameter, id: NIOIMAP.NString, description: NIOIMAP.NString, encoding: FieldEncoding, octets: Int) -> Self {
             return Self(parameter: parameters, id: id, description: description, encoding: encoding, octets: octets)
         }
     }

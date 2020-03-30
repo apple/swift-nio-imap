@@ -14,17 +14,10 @@
 
 import NIO
 
-extension NIOIMAP {
-    
-    /// IMAPv4 `userid`
-    public typealias UserID = String
-    
-}
-
 // MARK: - Encoding
 extension ByteBuffer {
     
-    @discardableResult mutating func writeUserID(_ id: NIOIMAP.UserID) -> Int {
+    @discardableResult mutating func writeUserID(_ id: String) -> Int {
         self.writeString(id)
     }
     

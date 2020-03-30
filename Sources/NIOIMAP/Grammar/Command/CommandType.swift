@@ -20,7 +20,7 @@ extension NIOIMAP {
         case capability
         case logout
         case noop
-        case xcommand(XCommand)
+        case xcommand(String)
         case append(to: Mailbox, firstMessageMetadata: AppendMessage)
         case create(Mailbox, CreateParameters?)
         case delete(Mailbox)
@@ -33,7 +33,7 @@ extension NIOIMAP {
         case subscribe(Mailbox)
         case unsubscribe(Mailbox)
         case authenticate(String, InitialResponse?, [ByteBuffer])
-        case login(UserID, String)
+        case login(String, String)
         case starttls
         case check
         case close
@@ -140,7 +140,7 @@ extension ByteBuffer {
         self.writeString("NOOP")
     }
     
-    private mutating func writeCommandType_xCommand(_ command: NIOIMAP.XCommand) -> Int {
+    private mutating func writeCommandType_xCommand(_ command: String) -> Int {
         self.writeString("X") +
         self.writeString(command)
     }
@@ -244,7 +244,7 @@ extension ByteBuffer {
         }
     }
     
-    private mutating func writeCommandType_login(userID: NIOIMAP.UserID, password: String) -> Int {
+    private mutating func writeCommandType_login(userID: String, password: String) -> Int {
         self.writeString("LOGIN ") +
         self.writeUserID(userID) +
         self.writeSpace() +

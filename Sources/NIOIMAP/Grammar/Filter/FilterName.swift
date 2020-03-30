@@ -14,16 +14,10 @@
 
 import NIO
 
-extension NIOIMAP {
-
-    public typealias FilterName = String
-
-}
-
 // Mark: - Encoding
 extension ByteBuffer {
     
-    @discardableResult mutating func writeFilterName(_ name: NIOIMAP.FilterName) -> Int {
+    @discardableResult mutating func writeFilterName(_ name: String) -> Int {
         self.writeString(name)
     }
     

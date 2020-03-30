@@ -55,7 +55,7 @@ extension NIOIMAP {
         case array([NIOIMAP.SearchKey])
         case older(Int)
         case younger(Int)
-        case filter(FilterName)
+        case filter(String)
     }
     
 }

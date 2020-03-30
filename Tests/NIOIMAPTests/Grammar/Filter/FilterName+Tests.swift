@@ -24,7 +24,7 @@ class FilterName_Tests: EncodeTestClass {
 extension FilterName_Tests {
 
     func testEncode() {
-        let inputs: [(NIOIMAP.FilterName, String, UInt)] = [
+        let inputs: [(String, String, UInt)] = [
             ("a", "a", #line),
             ("abcde", "abcde", #line),
         ]
