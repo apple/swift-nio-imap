@@ -629,7 +629,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     
     func testParseBodyFieldId() {
-        let inputs: [(String, String, NIOIMAP.Body.FieldID, UInt)] = [
+        let inputs: [(String, String, NIOIMAP.NString, UInt)] = [
             (#""some""#, " ", "some", #line),
             (#"NIL"#, " ", nil, #line),
         ]

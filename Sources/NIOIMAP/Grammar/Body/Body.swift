@@ -27,18 +27,6 @@ extension NIOIMAP {
         
         /// IMAPv4 `body-fld-octets`
         public typealias FieldOctets = Int
-        
-        /// IMAPv4 `body-fld-id`
-        public typealias FieldID = NString
-        
-        /// IMAPv4 `body-fld-loc`
-        public typealias FieldLocation = NString
-        
-        /// IMAPv4 `body-fld-md`5
-        public typealias FieldMD5 = NString
-        
-        /// IMAPv4 `body-fld-desc`
-        public typealias FieldDescription = NString
     }
     
 }

@@ -47,22 +47,22 @@ extension NIOIMAP.GrammarParser {
     }
 
     // addr-adl        = nstring
-    static func parseAddressAdl(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Address.Adl {
+    static func parseAddressAdl(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.NString {
         return try self.parseNString(buffer: &buffer, tracker: tracker)
     }
 
     // addr-host       = nstring
-    static func parseAddressHost(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Address.Host {
+    static func parseAddressHost(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.NString {
         return try self.parseNString(buffer: &buffer, tracker: tracker)
     }
 
     // addr-mailbox    = nstring
-    static func parseAddressMailbox(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Address.Mailbox {
+    static func parseAddressMailbox(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.NString {
         return try self.parseNString(buffer: &buffer, tracker: tracker)
     }
 
     // addr-name       = nstring
-    static func parseAddressName(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Address.Name {
+    static func parseAddressName(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.NString {
         return try self.parseNString(buffer: &buffer, tracker: tracker)
     }
 
@@ -415,7 +415,7 @@ extension NIOIMAP.GrammarParser {
     }
 
     // body-fld-id     = nstring
-    static func parseBodyFieldId(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Body.FieldID {
+    static func parseBodyFieldId(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.NString {
         return try self.parseNString(buffer: &buffer, tracker: tracker)
     }
 
@@ -454,7 +454,7 @@ extension NIOIMAP.GrammarParser {
     }
 
     // body-fld-md5    = nstring
-    static func parseBodyFieldMd5(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Body.FieldMD5 {
+    static func parseBodyFieldMd5(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.NString {
         return try self.parseNString(buffer: &buffer, tracker: tracker)
     }
 
