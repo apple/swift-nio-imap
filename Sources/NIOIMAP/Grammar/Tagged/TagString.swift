@@ -16,7 +16,7 @@ import NIO
 
 extension NIOIMAP {
 
-    public typealias TagString = IMAPString
+    public typealias TagString = ByteBuffer
 
 }
 

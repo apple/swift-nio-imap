@@ -152,8 +152,8 @@ extension NIOIMAP.GrammarParser {
     }
 
     // astring         = 1*ASTRING-CHAR / string
-    static func parseAString(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.AString {
-        func parseOneOrMoreASTRINGCHAR(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.AString {
+    static func parseAString(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ByteBuffer {
+        func parseOneOrMoreASTRINGCHAR(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ByteBuffer {
             return try ParserLibrary.parseOneOrMoreCharactersByteBuffer(buffer: &buffer, tracker: tracker) { char -> Bool in
                 return char.isAStringChar
             }
@@ -202,8 +202,8 @@ extension NIOIMAP.GrammarParser {
     }
 
     // base64          = *(4base64-char) [base64-terminal]
-    static func parseBase64(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Base64 {
-        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> NIOIMAP.Base64 in
+    static func parseBase64(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ByteBuffer {
+        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> ByteBuffer in
             let bytes = try ParserLibrary.parseZeroOrMoreCharactersByteBuffer(buffer: &buffer, tracker: tracker) { $0.isBase64Char || $0 == UInt8(ascii: "=") }
             let readableBytesView = bytes.readableBytesView
             if let firstEq = readableBytesView.firstIndex(of: UInt8(ascii: "=")) {
@@ -429,7 +429,7 @@ extension NIOIMAP.GrammarParser {
         func parseBodyFieldLanguage_multiple(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Body.FieldLanguage {
             try ParserLibrary.parseFixedString("(", buffer: &buffer, tracker: tracker)
             var array = [try self.parseString(buffer: &buffer, tracker: tracker)]
-            try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) -> NIOIMAP.IMAPString in
+            try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) -> ByteBuffer in
                 try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
                 return try self.parseString(buffer: &buffer, tracker: tracker)
             }
@@ -474,7 +474,7 @@ extension NIOIMAP.GrammarParser {
         func parseBodyFieldParam_pairs(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Body.FieldParameter {
             try ParserLibrary.parseFixedString("(", buffer: &buffer, tracker: tracker)
             var array = [try parseString(buffer: &buffer, tracker: tracker)]
-            try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) -> NIOIMAP.IMAPString in
+            try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) -> ByteBuffer in
                 try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
                 return try self.parseString(buffer: &buffer, tracker: tracker)
             }
@@ -1597,16 +1597,17 @@ extension NIOIMAP.GrammarParser {
     }
 
     // header-fld-name = astring
-    static func parseHeaderFieldName(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.HeaderFieldName {
-        return try self.parseAString(buffer: &buffer, tracker: tracker)
+    static func parseHeaderFieldName(buffer: inout ByteBuffer, tracker: StackTracker) throws -> String {
+        var buffer = try self.parseAString(buffer: &buffer, tracker: tracker)
+        return buffer.readString(length: buffer.readableBytes)!
     }
 
     // header-list     = "(" header-fld-name *(SP header-fld-name) ")"
-    static func parseHeaderList(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [NIOIMAP.HeaderFieldName] {
-        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> [NIOIMAP.HeaderFieldName] in
+    static func parseHeaderList(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [String] {
+        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> [String] in
             try ParserLibrary.parseFixedString("(", buffer: &buffer, tracker: tracker)
             var output = [try self.parseHeaderFieldName(buffer: &buffer, tracker: tracker)]
-            try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &output, tracker: tracker) { (buffer, tracker) -> NIOIMAP.HeaderFieldName in
+            try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &output, tracker: tracker) { (buffer, tracker) -> String in
                 try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
                 return try self.parseHeaderFieldName(buffer: &buffer, tracker: tracker)
             }
@@ -2570,7 +2571,7 @@ extension NIOIMAP.GrammarParser {
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseFixedString("(", buffer: &buffer, tracker: tracker)
             var array = [try self.parseString(buffer: &buffer, tracker: tracker)]
-            try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) -> NIOIMAP.IMAPString in
+            try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) -> ByteBuffer in
                 try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
                 return try self.parseString(buffer: &buffer, tracker: tracker)
             }
@@ -2738,8 +2739,9 @@ extension NIOIMAP.GrammarParser {
     }
 
     // password        = astring
-    static func parsePassword(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Password {
-        return try Self.parseAString(buffer: &buffer, tracker: tracker)
+    static func parsePassword(buffer: inout ByteBuffer, tracker: StackTracker) throws -> String {
+        var buffer = try Self.parseAString(buffer: &buffer, tracker: tracker)
+        return buffer.readString(length: buffer.readableBytes)!
     }
 
     // patterns        = "(" list-mailbox *(SP list-mailbox) ")"
@@ -2757,8 +2759,8 @@ extension NIOIMAP.GrammarParser {
     }
 
     // quoted          = DQUOTE *QUOTED-CHAR DQUOTE
-    static func parseQuoted(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Quoted {
-        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> NIOIMAP.Quoted in
+    static func parseQuoted(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ByteBuffer {
+        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> ByteBuffer in
             try ParserLibrary.parseFixedString("\"", buffer: &buffer, tracker: tracker)
             let data = try ParserLibrary.parseZeroOrMoreCharactersByteBuffer(buffer: &buffer, tracker: tracker) { char in
                 return char.isQuotedChar
@@ -4043,7 +4045,7 @@ extension NIOIMAP.GrammarParser {
     }
 
     // string          = quoted / literal
-    static func parseString(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.IMAPString {
+    static func parseString(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ByteBuffer {
         return try ParserLibrary.parseOneOf([
             Self.parseQuoted,
             Self.parseLiteral
@@ -4211,7 +4213,7 @@ extension NIOIMAP.GrammarParser {
     }
 
     // text            = 1*TEXT-CHAR
-    static func parseText(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Text {
+    static func parseText(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ByteBuffer {
         return try ParserLibrary.parseOneOrMoreCharactersByteBuffer(buffer: &buffer, tracker: tracker) { char -> Bool in
             return char.isTextChar
         }

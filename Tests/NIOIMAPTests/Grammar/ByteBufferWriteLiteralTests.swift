@@ -25,7 +25,7 @@ extension ByteBufferWriteLiteralTests {
     
     func testWriteIMAPString() {
         
-        let inputs: [(NIOIMAP.IMAPString, String, UInt)] = [
+        let inputs: [(ByteBuffer, String, UInt)] = [
             ("", "\"\"", #line),
             ("abc", #""abc""#, #line),
             (ByteBuffer(ByteBufferView(repeating: UInt8(ascii: "\""), count: 1)), "{1}\r\n\"", #line),

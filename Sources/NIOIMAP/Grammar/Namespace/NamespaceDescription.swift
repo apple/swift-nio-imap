@@ -18,11 +18,11 @@ extension NIOIMAP {
 
     /// IMAPv4 `Namespace-Description`
     public struct NamespaceDescription: Equatable {
-        public var string: NIOIMAP.IMAPString
+        public var string: ByteBuffer
         public var char: Character?
         public var responseExtensions: NamespaceResponseExtensions
 
-        public static func string(_ string: IMAPString, char: Character?, responseExtensions: NamespaceResponseExtensions) -> Self {
+        public static func string(_ string: ByteBuffer, char: Character?, responseExtensions: NamespaceResponseExtensions) -> Self {
             return Self(string: string, char: char, responseExtensions: responseExtensions)
         }
     }

@@ -21,10 +21,10 @@ extension NIOIMAP {
 
     /// IMAPv4 `Namespace-Response-Extension`
     public struct NamespaceResponseExtension: Equatable {
-        public var str1: NIOIMAP.IMAPString
-        public var strs: [NIOIMAP.IMAPString]
+        public var str1: ByteBuffer
+        public var strs: [ByteBuffer]
 
-        public static func string(_ string: IMAPString, array: [IMAPString]) -> Self {
+        public static func string(_ string: ByteBuffer, array: [ByteBuffer]) -> Self {
             return Self(str1: string, strs: array)
         }
     }

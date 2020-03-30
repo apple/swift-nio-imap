@@ -16,7 +16,7 @@ import NIO
 
 extension ByteBuffer {
 
-    @discardableResult mutating func writeIMAPString(_ str: NIOIMAP.IMAPString) -> Int {
+    @discardableResult mutating func writeIMAPString(_ str: ByteBuffer) -> Int {
         var buffer = str
         
         // allSatisfy vs contains because IMO it's a little clearer
@@ -35,7 +35,7 @@ extension ByteBuffer {
         }
     }
 
-    @discardableResult mutating func writeBase64(_ base64: NIOIMAP.Base64) -> Int {
+    @discardableResult mutating func writeBase64(_ base64: ByteBuffer) -> Int {
         var buffer = base64
         return self.writeBuffer(&buffer)
     }

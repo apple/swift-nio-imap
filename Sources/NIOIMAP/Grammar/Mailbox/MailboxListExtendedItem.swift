@@ -17,7 +17,7 @@ import NIO
 extension NIOIMAP.Mailbox {
 
     /// IMAPv4 `mbx-list-extended-item-tag`
-    public typealias ListExtendedItemTag = NIOIMAP.AString
+    public typealias ListExtendedItemTag = ByteBuffer
 
     /// IMAPv4 `mbox-list-extended-item`
     public struct ListExtendedItem: Equatable {

@@ -19,7 +19,7 @@ extension NIOIMAP {
     /// IMAPv4 `continue-req`
     public enum ContinueRequest: Equatable {
         case responseText(ResponseText)
-        case base64(Base64)
+        case base64(ByteBuffer)
     }
 
 }

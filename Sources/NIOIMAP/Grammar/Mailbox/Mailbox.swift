@@ -20,7 +20,7 @@ extension NIOIMAP {
     public struct Mailbox: Equatable {
         
         /// IMAPv4 `list-mailbox`
-        public typealias ListMailbox = IMAPString
+        public typealias ListMailbox = ByteBuffer
         
         public var name: String
         

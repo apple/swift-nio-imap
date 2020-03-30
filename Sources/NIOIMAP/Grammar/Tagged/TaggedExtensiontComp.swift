@@ -17,7 +17,7 @@ import NIO
 extension NIOIMAP {
 
     /// IMAPv4 `tagged-ext-comp`
-    public typealias TaggedExtensionComplex = [AString]
+    public typealias TaggedExtensionComplex = [ByteBuffer]
 
 }
 
