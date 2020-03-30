@@ -25,11 +25,11 @@ extension BodyExtensionTests {
 
     func testEncode() {
         let inputs: [(NIOIMAP.BodyExtension, String, UInt)] = [
-            (.number(1), "1", #line),
-            (.string("apple"), "\"apple\"", #line),
-            (.string(nil), "NIL", #line),
-            (.array([.number(1), .number(2), .string("three")]), "(1 2 \"three\")", #line),
-            (.array([.number(1), .number(2), .array([.string("three"), .string("four")])]), "(1 2 (\"three\" \"four\"))", #line),
+            ([.number(1)], "(1)", #line),
+            ([.string("apple")], "(\"apple\")", #line),
+            ([.string(nil)], "(NIL)", #line),
+            ([.number(1), .number(2), .string("three")], "(1 2 \"three\")", #line),
+            ([.number(1), .number(2), .string("three"), .string("four")], "(1 2 \"three\" \"four\")", #line),
         ]
 
         for (test, expectedString, line) in inputs {
