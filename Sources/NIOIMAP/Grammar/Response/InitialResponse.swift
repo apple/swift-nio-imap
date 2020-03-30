@@ -19,7 +19,7 @@ extension NIOIMAP {
     /// IMAPv4 `initial-response`
     public enum InitialResponse: Equatable {
         case equals
-        case base64(Base64)
+        case base64(ByteBuffer)
     }
 
 }

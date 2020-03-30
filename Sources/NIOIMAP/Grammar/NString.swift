@@ -18,7 +18,7 @@ import NIO
 extension NIOIMAP {
 
     /// IMAPv4 `nstring`
-    public typealias NString = IMAPString?
+    public typealias NString = ByteBuffer?
     
 }
 

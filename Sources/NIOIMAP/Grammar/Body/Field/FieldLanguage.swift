@@ -19,7 +19,7 @@ extension NIOIMAP.Body {
     /// IMAPv4 `body-fld-lang`
     public enum FieldLanguage: Equatable {
         case single(NIOIMAP.NString)
-        case multiple([NIOIMAP.IMAPString])
+        case multiple([ByteBuffer])
     }
 
 }

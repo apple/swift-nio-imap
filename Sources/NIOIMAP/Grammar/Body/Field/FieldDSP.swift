@@ -18,10 +18,10 @@ extension NIOIMAP.Body {
 
     /// IMAPv4 `body-fld-dsp`
     public struct FieldDSPData: Equatable {
-        public var string: NIOIMAP.IMAPString
+        public var string: ByteBuffer
         public var parameter: FieldParameter
         
-        public static func string(_ string: NIOIMAP.IMAPString, parameter: FieldParameter) -> Self {
+        public static func string(_ string: ByteBuffer, parameter: FieldParameter) -> Self {
             return Self(string: string, parameter: parameter)
         }
     }

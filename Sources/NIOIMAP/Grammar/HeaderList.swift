@@ -17,15 +17,15 @@ import NIO
 extension NIOIMAP {
     
     /// IMAPv4 `header-list`
-    public typealias HeaderList = [HeaderFieldName]
+    public typealias HeaderList = [String]
     
 }
 
 extension ByteBuffer {
     
-    @discardableResult mutating func writeHeaderList(_ headers: [NIOIMAP.HeaderFieldName]) -> Int {
+    @discardableResult mutating func writeHeaderList(_ headers: [String]) -> Int {
         self.writeArray(headers) { (element, self) in
-            self.writeIMAPString(element)
+            self.writeAString(element)
         }
     }
     

@@ -51,7 +51,7 @@ extension SearchKeyTests {
             (.text("some text"), "TEXT \"some text\"", #line),
             (.to("theboss@apple.com"), "TO \"theboss@apple.com\"", #line),
             (.unkeyword("nokeyword"), "UNKEYWORD nokeyword", #line),
-            (.header("header", "value"), "HEADER \"header\" \"value\"", #line),
+            (.header("header", "value"), "HEADER header \"value\"", #line),
             (.larger(333), "LARGER 333", #line),
             (.not(.larger(444)), "NOT LARGER 444", #line),
             (.or(.smaller(444), .larger(666)), "OR SMALLER 444 LARGER 666", #line),

@@ -1966,16 +1966,16 @@ extension ParserUnitTests {
     func testHeaderList_valid_one() {
         TestUtilities.withBuffer(#"("field")"#) { (buffer) in
             let array = try NIOIMAP.GrammarParser.parseHeaderList(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(String(decoding: array[0].readableBytesView, as: Unicode.UTF8.self), "field")
+            XCTAssertEqual(array[0], "field")
         }
     }
 
     func testHeaderList_valid_many() {
         TestUtilities.withBuffer(#"("first" "second" "third")"#) { (buffer) in
             let array = try NIOIMAP.GrammarParser.parseHeaderList(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(String(decoding: array[0].readableBytesView, as: Unicode.UTF8.self), "first")
-            XCTAssertEqual(String(decoding: array[1].readableBytesView, as: Unicode.UTF8.self), "second")
-            XCTAssertEqual(String(decoding: array[2].readableBytesView, as: Unicode.UTF8.self), "third")
+            XCTAssertEqual(array[0], "first")
+            XCTAssertEqual(array[1], "second")
+            XCTAssertEqual(array[2], "third")
         }
     }
 

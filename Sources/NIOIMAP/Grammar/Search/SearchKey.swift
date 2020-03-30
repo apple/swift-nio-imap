@@ -32,19 +32,19 @@ extension NIOIMAP {
         case unseen
         case draft
         case undraft
-        case bcc(AString)
+        case bcc(ByteBuffer)
         case before(Date)
-        case body(AString)
-        case cc(AString)
-        case from(AString)
+        case body(ByteBuffer)
+        case cc(ByteBuffer)
+        case from(ByteBuffer)
         case keyword(Flag.Keyword)
         case on(Date)
         case since(Date)
-        case subject(AString)
-        case text(AString)
-        case to(AString)
+        case subject(ByteBuffer)
+        case text(ByteBuffer)
+        case to(ByteBuffer)
         case unkeyword(Flag.Keyword)
-        case header(HeaderFieldName, AString)
+        case header(String, ByteBuffer)
         case larger(Int)
         case not(SearchKey)
         case or(SearchKey, SearchKey)
@@ -162,7 +162,7 @@ extension ByteBuffer {
         case .header(let field, let value):
             return
                 self.writeString("HEADER ") +
-                self.writeIMAPString(field) +
+                self.writeAString(field) +
                 self.writeSpace() +
                 self.writeIMAPString(value)
         

@@ -18,7 +18,7 @@ extension NIOIMAP {
     
     /// IMAPv4 `capability`
     public enum Capability: Equatable {
-        case auth(AuthType)
+        case auth(String)
         case condStore
         case enable
         case move
