@@ -18,10 +18,10 @@ extension NIOIMAP.Partial {
 
     /// IMAPv4 `partial-range`
     public struct Range: Equatable {
-        public var num1: NIOIMAP.Number
-        public var num2: NIOIMAP.NZNumber?
+        public var num1: Int
+        public var num2: Int?
         
-        public static func range(from: NIOIMAP.Number, to: NIOIMAP.NZNumber) -> Self {
+        public static func range(from: Int, to: Int) -> Self {
             return Self(num1: from, num2: to)
         }
     }

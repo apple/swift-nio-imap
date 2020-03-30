@@ -27,14 +27,14 @@ extension NIOIMAP {
         case envelope(Envelope)
         case internalDate(Date.DateTime)
         case rfc822(RFC822Reduced?, NIOIMAP.NString)
-        case rfc822Size(Number)
+        case rfc822Size(Int)
         case body(Body, structure: Bool)
-        case bodySection(Section, NIOIMAP.Number?, NString)
-        case bodySectionText(NIOIMAP.Number?, Int) // used when streaming the body, send the literal header
-        case uid(UniqueID)
+        case bodySection(Section, Int?, NString)
+        case bodySectionText(Int?, Int) // used when streaming the body, send the literal header
+        case uid(Int)
         case binaryString(section: SectionBinary, string: NString)
         case binaryLiteral(section: SectionBinary, size: Int)
-        case binarySize(section: SectionBinary, number: Number)
+        case binarySize(section: SectionBinary, number: Int)
     }
 
 }
@@ -107,7 +107,7 @@ extension ByteBuffer {
         self.writeBody(body)
     }
     
-    @discardableResult mutating func writeMessageAttributeStatic_bodySection(_ section: NIOIMAP.Section, number: NIOIMAP.Number?, string: NIOIMAP.NString) -> Int {
+    @discardableResult mutating func writeMessageAttributeStatic_bodySection(_ section: NIOIMAP.Section, number: Int?, string: NIOIMAP.NString) -> Int {
         self.writeString("BODY") +
         self.writeSection(section) +
         self.writeIfExists(number) { (number) -> Int in
@@ -117,7 +117,7 @@ extension ByteBuffer {
         self.writeNString(string)
     }
 
-    @discardableResult mutating func writeMessageAttributeStatic_bodySectionText(number: NIOIMAP.Number?, size: Int) -> Int {
+    @discardableResult mutating func writeMessageAttributeStatic_bodySectionText(number: Int?, size: Int) -> Int {
         self.writeString("BODY[TEXT]") +
         self.writeIfExists(number) { (number) -> Int in
             self.writeString("<\(number)>")

@@ -18,10 +18,10 @@ extension NIOIMAP {
 
     /// IMAPv4 `partial`
     public struct Partial: Equatable {
-        public var left: Number
-        public var right: NZNumber
+        public var left: Int
+        public var right: Int
         
-        public init(left: Number, right: NZNumber) {
+        public init(left: Int, right: Int) {
             self.left = left
             self.right = right
         }

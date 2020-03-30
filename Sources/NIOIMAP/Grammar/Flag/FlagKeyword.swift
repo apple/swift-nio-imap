@@ -20,7 +20,7 @@ extension NIOIMAP.Flag {
     public enum Keyword: Equatable {
         case mdnSent
         case forwarded
-        case other(NIOIMAP.Atom)
+        case other(String)
     }
 
 }

@@ -22,10 +22,10 @@ extension NIOIMAP.Body {
         public var id: FieldID
         public var description: FieldDescription
         public var encoding: FieldEncoding
-        public var octets: NIOIMAP.Number
+        public var octets: Int
 
         /// Convenience function for a better experience when chaining multiple types.
-        public static func parameter(_ parameters: FieldParameter, id: FieldID, description: FieldDescription, encoding: FieldEncoding, octets: NIOIMAP.Number) -> Self {
+        public static func parameter(_ parameters: FieldParameter, id: FieldID, description: FieldDescription, encoding: FieldEncoding, octets: Int) -> Self {
             return Self(parameter: parameters, id: id, description: description, encoding: encoding, octets: octets)
         }
     }

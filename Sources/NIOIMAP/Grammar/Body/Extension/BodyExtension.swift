@@ -19,7 +19,7 @@ extension NIOIMAP {
     /// IMAPv4 `body-extension`
     public enum BodyExtensionType: Equatable {
         case string(NString)
-        case number(Number)
+        case number(Int)
     }
     
     public typealias BodyExtension = [BodyExtensionType]

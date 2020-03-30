@@ -23,7 +23,7 @@ extension NIOIMAP.Mailbox {
         case lsub(NIOIMAP.Mailbox.List)
         case search(NIOIMAP.ESearchResponse)
         case status(NIOIMAP.Mailbox, NIOIMAP.StatusAttributeList?)
-        case exists(NIOIMAP.Number)
+        case exists(Int)
         case namespace(NIOIMAP.NamespaceResponse)
     }
     

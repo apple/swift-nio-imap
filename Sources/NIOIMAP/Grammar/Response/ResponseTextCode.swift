@@ -19,18 +19,18 @@ extension NIOIMAP {
     /// IMAPv4 `resp-text-code`
     public enum ResponseTextCode: Equatable {
         case alert
-        case badCharset([Charset]?)
+        case badCharset([String]?)
         case capability(CapabilityData)
         case parse
         case permanentFlags([PermanentFlag])
         case readOnly
         case readWrite
         case tryCreate
-        case uidNext(NZNumber)
-        case uidValidity(NZNumber)
-        case unseen(NZNumber)
+        case uidNext(Int)
+        case uidValidity(Int)
+        case unseen(Int)
         case namespace(NamespaceResponse)
-        case other(Atom, String?)
+        case other(String, String?)
     }
 
 }
@@ -71,7 +71,7 @@ extension ByteBuffer {
         }
     }
 
-    private mutating func writeResponseTextCode_badCharsets(_ charsets: [NIOIMAP.Charset]?) -> Int {
+    private mutating func writeResponseTextCode_badCharsets(_ charsets: [String]?) -> Int {
         self.writeString("BADCHARSET") +
         self.writeIfExists(charsets) { (charsets) -> Int in
             self.writeSpace() +
@@ -81,7 +81,7 @@ extension ByteBuffer {
         }
     }
     
-    private mutating func writeResponseTextCode_other(atom: NIOIMAP.Atom, string: String?) -> Int {
+    private mutating func writeResponseTextCode_other(atom: String, string: String?) -> Int {
         self.writeString(atom) +
         self.writeIfExists(string) { (string) -> Int in
             self.writeString(" \(string)")

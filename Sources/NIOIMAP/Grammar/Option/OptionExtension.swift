@@ -17,7 +17,7 @@ import NIO
 extension NIOIMAP {
 
     public enum OptionExtensionType: Equatable {
-        case standard(Atom)
+        case standard(String)
         case vendor(OptionVendorTag)
     }
 
@@ -26,7 +26,7 @@ extension NIOIMAP {
         public var type: OptionExtensionType
         public var value: OptionValue?
 
-        public static func standard(_ atom: Atom, value: OptionValue?) -> Self {
+        public static func standard(_ atom: String, value: OptionValue?) -> Self {
             return Self(type: .standard(atom), value: value)
         }
 

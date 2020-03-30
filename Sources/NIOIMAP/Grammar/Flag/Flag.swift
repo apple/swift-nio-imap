@@ -20,7 +20,7 @@ extension NIOIMAP {
     public typealias FlagList = [Flag]
 
     /// IMAP4 `flag-extension`
-    public typealias FlagExtenion = Atom
+    public typealias FlagExtenion = String
  
     /// IMAPv4 `flag`
     public enum Flag: Equatable {

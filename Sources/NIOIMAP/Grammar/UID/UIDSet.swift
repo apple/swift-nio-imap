@@ -17,7 +17,7 @@ import NIO
 extension NIOIMAP {
 
     public enum UIDSetType: Equatable {
-        case uniqueID(UniqueID)
+        case uniqueID(Int)
         case range(UIDRange)
     }
 

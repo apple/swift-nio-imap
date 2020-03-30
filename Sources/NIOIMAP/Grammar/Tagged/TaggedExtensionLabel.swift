@@ -17,7 +17,7 @@ import NIO
 extension NIOIMAP {
 
     /// IMAPv4 `tagged-ext-label`
-    public typealias TaggedExtensionLabel = NIOIMAP.Atom
+    public typealias TaggedExtensionLabel = String
 
 }
 

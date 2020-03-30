@@ -16,9 +16,9 @@ import NIO
 
 extension NIOIMAP {
 
-    public typealias AttributeFlagKeyword = Atom
+    public typealias AttributeFlagKeyword = String
     
-    public typealias AttributeFlagExtension = Atom
+    public typealias AttributeFlagExtension = String
     
     public enum AttributeFlag: Equatable {
         case answered
