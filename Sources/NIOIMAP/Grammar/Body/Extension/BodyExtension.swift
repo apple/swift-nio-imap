@@ -17,11 +17,12 @@ import NIO
 extension NIOIMAP {
     
     /// IMAPv4 `body-extension`
-    public enum BodyExtension: Equatable {
+    public enum BodyExtensionType: Equatable {
         case string(NString)
         case number(Int)
-        case array([BodyExtension])
     }
+    
+    public typealias BodyExtension = [BodyExtensionType]
     
 }
 
@@ -29,15 +30,17 @@ extension NIOIMAP {
 extension ByteBuffer {
 
     @discardableResult mutating func writeBodyExtension(_ ext: NIOIMAP.BodyExtension) -> Int {
-        switch ext {
+        return self.writeArray(ext) { (element, self) in
+            self.writeBodyExtensionType(element)
+        }
+    }
+    
+    @discardableResult mutating func writeBodyExtensionType(_ type: NIOIMAP.BodyExtensionType) -> Int {
+        switch type {
         case .string(let string):
             return self.writeNString(string)
         case .number(let number):
             return self.writeString("\(number)")
-        case .array(let array):
-            return self.writeArray(array) { (element, self) in
-                self.writeBodyExtension(element)
-            }
         }
     }
 
