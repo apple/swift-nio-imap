@@ -18,18 +18,18 @@ extension NIOIMAP {
     
     /// IMAPv4 `envelope`
     public struct Envelope: Equatable {
-        public var date: Date
-        public var subject: Subject
-        public var from: From
-        public var sender: Sender
-        public var reply: ReplyTo
-        public var to: To
-        public var cc: CC
-        public var bcc: BCC
-        public var inReplyTo: InReplyTo
-        public var messageID: MessageID
+        public var date: NString
+        public var subject: NString
+        public var from: Addresses
+        public var sender: Addresses
+        public var reply: Addresses
+        public var to: Addresses
+        public var cc: Addresses
+        public var bcc: Addresses
+        public var inReplyTo: NString
+        public var messageID: NString
         
-        public static func date(_ date: NIOIMAP.Envelope.Date, subject: NIOIMAP.Envelope.Subject, from: NIOIMAP.Envelope.From, sender: NIOIMAP.Envelope.Sender, reply: NIOIMAP.Envelope.ReplyTo, to: NIOIMAP.Envelope.To, cc: NIOIMAP.Envelope.CC, bcc: NIOIMAP.Envelope.BCC, inReplyTo: NIOIMAP.Envelope.InReplyTo, messageID: NIOIMAP.Envelope.MessageID) -> Self {
+        public static func date(_ date: NString, subject: NIOIMAP.NString, from: NIOIMAP.Envelope.Addresses, sender: NIOIMAP.Envelope.Addresses, reply: NIOIMAP.Envelope.Addresses, to: NIOIMAP.Envelope.Addresses, cc: NIOIMAP.Envelope.Addresses, bcc: NIOIMAP.Envelope.Addresses, inReplyTo: NIOIMAP.NString, messageID: NIOIMAP.NString) -> Self {
             return Self(date: date, subject: subject, from: from, sender: sender, reply: reply, to: to, cc: cc, bcc: bcc, inReplyTo: inReplyTo, messageID: messageID)
         }
     }

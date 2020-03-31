@@ -556,25 +556,6 @@ extension ParserUnitTests {
     
 }
 
-// MARK: - parseBodyFieldDescription
-extension ParserUnitTests {
-
-    func testParseBodyFieldDescription_some() {
-        TestUtilities.withBuffer(#""some""#, terminator: " ") { (buffer) in
-            let string = try NIOIMAP.GrammarParser.parseBodyFieldDescription(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(string, "some")
-        }
-    }
-
-    func testParseBodyFieldDescription_none() {
-        TestUtilities.withBuffer(#"NIL"#, terminator: " ") { (buffer) in
-            let string = try NIOIMAP.GrammarParser.parseBodyFieldDescription(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(string, nil)
-        }
-    }
-
-}
-
 // MARK: - parseBodyFieldDsp
 extension ParserUnitTests {
 
@@ -625,25 +606,6 @@ extension ParserUnitTests {
 
 }
 
-// MARK: - parseBodyFieldId
-extension ParserUnitTests {
-    
-    func testParseBodyFieldId() {
-        let inputs: [(String, String, NIOIMAP.NString, UInt)] = [
-            (#""some""#, " ", "some", #line),
-            (#"NIL"#, " ", nil, #line),
-        ]
-
-        for (input, terminator, expected, line) in inputs {
-            TestUtilities.withBuffer(input, terminator: terminator) { (buffer) in
-                let testValue = try NIOIMAP.GrammarParser.parseBodyFieldId(buffer: &buffer, tracker: .testTracker)
-                XCTAssertEqual(testValue, expected, line: line)
-            }
-        }
-    }
-
-}
-
 // MARK: - parseBodyFieldLanguage
 extension ParserUnitTests {
 
@@ -671,44 +633,6 @@ extension ParserUnitTests {
         TestUtilities.withBuffer("12", terminator: " ") { (buffer) in
              let num = try NIOIMAP.GrammarParser.parseBodyFieldLines(buffer: &buffer, tracker: .testTracker)
             XCTAssertEqual(num, 12)
-        }
-    }
-
-}
-
-// MARK: - parseBodyFieldLocation
-extension ParserUnitTests {
-
-    func testParseBodyFieldLocation_some() {
-        TestUtilities.withBuffer(#""some""#, terminator: " ") { (buffer) in
-            let result = try NIOIMAP.GrammarParser.parseBodyFieldLocation(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(result, "some")
-        }
-    }
-
-    func testParseBodyFieldLocation_none() {
-        TestUtilities.withBuffer(#"NIL"#, terminator: " ") { (buffer) in
-            let result = try NIOIMAP.GrammarParser.parseBodyFieldLocation(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(result, nil)
-        }
-    }
-
-}
-
-// MARK: - parseBodyFieldMD5
-extension ParserUnitTests {
-
-    func testBodyFieldMD5_nil() {
-        TestUtilities.withBuffer("NIL", terminator: " ") { (buffer) in
-             let num = try NIOIMAP.GrammarParser.parseBodyFieldMd5(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(num, nil)
-        }
-    }
-
-    func testBodyFieldMD5_some() {
-        TestUtilities.withBuffer("\"md5\"", terminator: " ") { (buffer) in
-             let num = try NIOIMAP.GrammarParser.parseBodyFieldMd5(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(num, "md5")
         }
     }
 
@@ -2393,7 +2317,7 @@ extension ParserUnitTests {
         TestUtilities.withBuffer(#"ENVELOPE ("date" "subject" (("from1" "from2" "from3" "from4")) (("sender1" "sender2" "sender3" "sender4")) (("reply1" "reply2" "reply3" "reply4")) (("to1" "to2" "to3" "to4")) (("cc1" "cc2" "cc3" "cc4")) (("bcc1" "bcc2" "bcc3" "bcc4")) "inreplyto" "messageid")"#) { (buffer) in
             let result = try NIOIMAP.GrammarParser.parseMessageAttributeStatic(buffer: &buffer, tracker: .testTracker)
             let expectedEnvelope = NIOIMAP.Envelope(
-                date: NIOIMAP.Envelope.Date("date"),
+                date: "date",
                 subject: "subject",
                 from: [.name("from1", adl: "from2", mailbox: "from3", host: "from4")],
                 sender: [.name("sender1", adl: "sender2", mailbox: "sender3", host: "sender4")],
