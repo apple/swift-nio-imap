@@ -93,7 +93,7 @@ extension NIOIMAP.GrammarParser {
     }
     
     // append-data-ext = tagged-ext
-    static func parseAppendDataExtension(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.AppendDataExtension {
+    static func parseAppendDataExtension(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.TaggedExtension {
         return try self.parseTaggedExtension(buffer: &buffer, tracker: tracker)
     }
     
@@ -113,7 +113,7 @@ extension NIOIMAP.GrammarParser {
     }
     
     // append-ext-value = tagged-ext-value
-    static func parseAppendExtensionValue(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.AppendExtensionValue {
+    static func parseAppendExtensionValue(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.TaggedExtensionValue {
         return try self.parseTaggedExtensionValue(buffer: &buffer, tracker: tracker)
     }
     
@@ -919,7 +919,7 @@ extension NIOIMAP.GrammarParser {
     static func parseCreateParameter(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.CreateParameter {
         return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
             let name = try self.parseCreateParameterName(buffer: &buffer, tracker: tracker)
-            let value = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> NIOIMAP.CreateParameterValue in
+            let value = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> NIOIMAP.TaggedExtensionValue in
                 try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
                 return try self.parseCreateParameterValue(buffer: &buffer, tracker: tracker)
             }
@@ -947,7 +947,7 @@ extension NIOIMAP.GrammarParser {
     }
     
     // create-param-value = tagged-ext-val
-    static func parseCreateParameterValue(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.CreateParameterValue {
+    static func parseCreateParameterValue(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.TaggedExtensionValue {
         return try self.parseTaggedExtensionValue(buffer: &buffer, tracker: tracker)
     }
 
@@ -1414,7 +1414,7 @@ extension NIOIMAP.GrammarParser {
     static func parseFetchModifier(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.FetchModifier {
         return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
             let name = try self.parseFetchModifierName(buffer: &buffer, tracker: tracker)
-            let value = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> NIOIMAP.CreateParameterValue in
+            let value = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> NIOIMAP.TaggedExtensionValue in
                 try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
                 return try self.parseFetchModifierParameter(buffer: &buffer, tracker: tracker)
             }
@@ -1442,7 +1442,7 @@ extension NIOIMAP.GrammarParser {
     }
     
     // fetch-modifier-params = tagged-ext-val
-    static func parseFetchModifierParameter(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.FetchModifierParameter {
+    static func parseFetchModifierParameter(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.TaggedExtensionValue {
         return try self.parseTaggedExtensionValue(buffer: &buffer, tracker: tracker)
     }
 
@@ -2786,7 +2786,7 @@ extension NIOIMAP.GrammarParser {
     static func parseRenameParameter(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.RenameParameter {
         return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
             let name = try self.parseRenameParameterName(buffer: &buffer, tracker: tracker)
-            let value = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> NIOIMAP.RenameParameterValue in
+            let value = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> NIOIMAP.TaggedExtensionValue in
                 try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
                 return try self.parseCreateParameterValue(buffer: &buffer, tracker: tracker)
             }
@@ -2814,7 +2814,7 @@ extension NIOIMAP.GrammarParser {
     }
     
     // rename-param-value = tagged-ext-val
-    static func parseRenameParameterValue(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.RenameParameterValue {
+    static func parseRenameParameterValue(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.TaggedExtensionValue {
         return try self.parseTaggedExtensionValue(buffer: &buffer, tracker: tracker)
     }
 
@@ -3471,7 +3471,7 @@ extension NIOIMAP.GrammarParser {
     }
 
     // search-mod-params = tagged-ext-val
-    static func parseSearchModifierParams(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.SearchModifierParams {
+    static func parseSearchModifierParams(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.TaggedExtensionValue {
         return try self.parseTaggedExtensionValue(buffer: &buffer, tracker: tracker)
     }
 
@@ -3609,7 +3609,7 @@ extension NIOIMAP.GrammarParser {
     static func parseSearchReturnOptionExtension(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.SearchReturnOptionExtension {
         return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> NIOIMAP.SearchReturnOptionExtension in
             let name = try self.parseSearchModifierName(buffer: &buffer, tracker: tracker)
-            let params = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> NIOIMAP.SearchModifierParams in
+            let params = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> NIOIMAP.TaggedExtensionValue in
                 try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
                 return try self.parseSearchModifierParams(buffer: &buffer, tracker: tracker)
             }
@@ -3618,7 +3618,7 @@ extension NIOIMAP.GrammarParser {
     }
 
     // search-return-value = tagged-ext-val
-    static func parseSearchReturnValue(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.SearchReturnValue {
+    static func parseSearchReturnValue(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.TaggedExtensionValue {
         return try self.parseTaggedExtensionValue(buffer: &buffer, tracker: tracker)
     }
 
@@ -3760,7 +3760,7 @@ extension NIOIMAP.GrammarParser {
     static func parseSelectParameter(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.SelectParameter {
         return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> NIOIMAP.SelectParameter in
             let name = try self.parseSelectParameterName(buffer: &buffer, tracker: tracker)
-            let value = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> NIOIMAP.SelectParameterValue in
+            let value = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> NIOIMAP.TaggedExtensionValue in
                 try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
                 return try self.parseSelectParameterValue(buffer: &buffer, tracker: tracker)
             }
@@ -3774,7 +3774,7 @@ extension NIOIMAP.GrammarParser {
     }
 
     // select-param-value = tagged-ext-value
-    static func parseSelectParameterValue(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.SelectParameterValue {
+    static func parseSelectParameterValue(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.TaggedExtensionValue {
         return try self.parseTaggedExtensionValue(buffer: &buffer, tracker: tracker)
     }
 
@@ -4012,7 +4012,7 @@ extension NIOIMAP.GrammarParser {
     static func parseStoreModifier(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.StoreModifier {
         try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
             let name = try self.parseStoreModifierName(buffer: &buffer, tracker: tracker)
-            let params = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> NIOIMAP.StoreModifierParameters in
+            let params = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> NIOIMAP.TaggedExtensionValue in
                 try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
                 return try self.parseStoreModifierParameters(buffer: &buffer, tracker: tracker)
             }
@@ -4040,7 +4040,7 @@ extension NIOIMAP.GrammarParser {
     }
     
     // store-modifier-params = tagged-ext-val
-    static func parseStoreModifierParameters(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.StoreModifierParameters {
+    static func parseStoreModifierParameters(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.TaggedExtensionValue {
         return try self.parseTaggedExtensionValue(buffer: &buffer, tracker: tracker)
     }
 

@@ -18,9 +18,9 @@ extension NIOIMAP {
     
     public struct FetchModifier: Equatable {
         public var name: String
-        public var value: FetchModifierParameter?
+        public var value: TaggedExtensionValue?
         
-        public static func name(_ name: String, value: FetchModifierParameter?) -> Self {
+        public static func name(_ name: String, value: TaggedExtensionValue?) -> Self {
             return Self(name: name, value: value)
         }
     }
@@ -42,7 +42,7 @@ extension ByteBuffer {
         self.writeFetchModifierName(param.name) +
         self.writeIfExists(param.value) { (value) -> Int in
             self.writeSpace() +
-            self.writeFetchModifierParameter(value)
+            self.writeTaggedExtensionValue(value)
         }
     }
     

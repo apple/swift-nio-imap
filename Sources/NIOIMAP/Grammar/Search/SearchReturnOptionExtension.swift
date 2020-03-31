@@ -19,9 +19,9 @@ extension NIOIMAP {
     /// IMAPv4 `search-ret-opt-ext`
     public struct SearchReturnOptionExtension: Equatable {
         public var modifierName: String
-        public var params: SearchModifierParams?
+        public var params: TaggedExtensionValue?
 
-        public static func modifier(_ modifier: String, params: SearchModifierParams?) -> Self {
+        public static func modifier(_ modifier: String, params: TaggedExtensionValue?) -> Self {
             return Self(modifierName: modifier, params: params)
         }
     }

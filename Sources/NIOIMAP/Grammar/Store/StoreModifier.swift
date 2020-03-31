@@ -20,9 +20,9 @@ extension NIOIMAP {
     
     public struct StoreModifier: Equatable {
         public var name: String
-        public var parameters: StoreModifierParameters?
+        public var parameters: NIOIMAP.TaggedExtensionValue?
         
-        public static func name(_ name: String, parameters: StoreModifierParameters?) -> Self {
+        public static func name(_ name: String, parameters: NIOIMAP.TaggedExtensionValue?) -> Self {
             return Self(name: name, parameters: parameters)
         }
     }
@@ -36,7 +36,7 @@ extension ByteBuffer {
         self.writeStoreModifierName(modifier.name) +
         self.writeIfExists(modifier.parameters) { (params) -> Int in
             self.writeSpace() +
-            self.writeStoreModifierParameters(params)
+            self.writeTaggedExtensionValue(params)
         }
     }
     

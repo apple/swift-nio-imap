@@ -348,7 +348,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
 
     func testParseAppendDataExtension() {
-        let inputs: [(String, String, NIOIMAP.AppendDataExtension, UInt)] = [
+        let inputs: [(String, String, NIOIMAP.TaggedExtension, UInt)] = [
             ("label 1:9", " ", .label("label", value: .simple(.sequence([1...9]))), #line),
         ]
 
@@ -402,7 +402,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
 
     func testParseAppendExtensionValue() {
-        let inputs: [(String, String, NIOIMAP.AppendExtensionValue, UInt)] = [
+        let inputs: [(String, String, NIOIMAP.TaggedExtensionValue, UInt)] = [
             ("1:9", " ", .simple(.sequence([1...9])), #line),
         ]
 
@@ -1175,7 +1175,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     
     func testParseCreateParameterValue() {
-        let inputs: [(String, String, NIOIMAP.CreateParameterValue, UInt)] = [
+        let inputs: [(String, String, NIOIMAP.TaggedExtensionValue, UInt)] = [
             ("1", "\r", .simple(.sequence([1])), #line),
         ]
 
@@ -1871,7 +1871,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     
     func testParseFetchModifierParameter() {
-        let inputs: [(String, String, NIOIMAP.FetchModifierParameter, UInt)] = [
+        let inputs: [(String, String, NIOIMAP.TaggedExtensionValue, UInt)] = [
             ("1", "\r", .simple(.sequence([1])), #line),
         ]
 
@@ -3100,7 +3100,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
 
     func testParseSearchModifierParams() {
-        let inputs: [(String, String, NIOIMAP.SearchModifierParams, UInt)] = [
+        let inputs: [(String, String, NIOIMAP.TaggedExtensionValue, UInt)] = [
             ("()", "", .comp(nil), #line),
         ]
 
@@ -3445,7 +3445,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     
     func testParseSelectParameterValue() {
-        let inputs: [(String, String, NIOIMAP.SelectParameterValue, UInt)] = [
+        let inputs: [(String, String, NIOIMAP.TaggedExtensionValue, UInt)] = [
             ("1", "\r", .simple(.sequence([1])), #line),
         ]
 
@@ -3796,7 +3796,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     
     func testParseStoreModifierParameters() {
-        let inputs: [(String, String, NIOIMAP.StoreModifierParameters, UInt)] = [
+        let inputs: [(String, String, NIOIMAP.TaggedExtensionValue, UInt)] = [
             ("1:9", "\r", .simple(.sequence([1...9])), #line),
         ]
         

@@ -18,9 +18,9 @@ extension NIOIMAP {
 
     public struct AppendExtension: Equatable {
         public var name: String
-        public var value: AppendExtensionValue
+        public var value: TaggedExtensionValue
         
-        public static func name(_ name: String, value: AppendExtensionValue) -> Self {
+        public static func name(_ name: String, value: TaggedExtensionValue) -> Self {
             return Self(name: name, value: value)
         }
     }
@@ -33,7 +33,7 @@ extension ByteBuffer {
     @discardableResult mutating func writeAppendExtension(_ data: NIOIMAP.AppendExtension) -> Int {
         self.writeAppendExtensionName(data.name) +
         self.writeSpace() +
-        self.writeAppendExtensionValue(data.value)
+        self.writeTaggedExtensionValue(data.value)
     }
     
 }
