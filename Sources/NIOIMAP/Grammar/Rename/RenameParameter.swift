@@ -18,9 +18,9 @@ extension NIOIMAP {
     
     public struct RenameParameter: Equatable {
         public var name: String
-        public var value: RenameParameterValue?
+        public var value: TaggedExtensionValue?
         
-        public static func name(_ name: String, value: RenameParameterValue?) -> Self {
+        public static func name(_ name: String, value: TaggedExtensionValue?) -> Self {
             return Self(name: name, value: value)
         }
     }
@@ -42,7 +42,7 @@ extension ByteBuffer {
         self.writeRenameParameterName(param.name) +
         self.writeIfExists(param.value) { (value) -> Int in
             self.writeSpace() +
-            self.writeRenameParameterValue(value)
+            self.writeTaggedExtensionValue(value)
         }
     }
     

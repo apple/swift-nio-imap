@@ -18,9 +18,9 @@ extension NIOIMAP {
     
     public struct CreateParameter: Equatable {
         public var name: String
-        public var value: CreateParameterValue?
+        public var value: TaggedExtensionValue?
         
-        public static func name(_ name: String, value: CreateParameterValue?) -> Self {
+        public static func name(_ name: String, value: TaggedExtensionValue?) -> Self {
             return Self(name: name, value: value)
         }
     }
@@ -42,7 +42,7 @@ extension ByteBuffer {
         self.writeCreateParameterName(param.name) +
         self.writeIfExists(param.value) { (value) -> Int in
             self.writeSpace() +
-            self.writeCreateParameterValue(value)
+            self.writeTaggedExtensionValue(value)
         }
     }
     
