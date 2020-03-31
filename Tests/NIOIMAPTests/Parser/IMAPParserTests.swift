@@ -348,7 +348,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
 
     func testParseAppendDataExtension() {
-        let inputs: [(String, String, NIOIMAP.AppendDataExtension, UInt)] = [
+        let inputs: [(String, String, NIOIMAP.TaggedExtension, UInt)] = [
             ("label 1:9", " ", .label("label", value: .simple(.sequence([1...9]))), #line),
         ]
 

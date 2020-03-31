@@ -93,7 +93,7 @@ extension NIOIMAP.GrammarParser {
     }
     
     // append-data-ext = tagged-ext
-    static func parseAppendDataExtension(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.AppendDataExtension {
+    static func parseAppendDataExtension(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.TaggedExtension {
         return try self.parseTaggedExtension(buffer: &buffer, tracker: tracker)
     }
     
