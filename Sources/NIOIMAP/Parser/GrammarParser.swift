@@ -1129,12 +1129,12 @@ extension NIOIMAP.GrammarParser {
     }
 
     // env-bcc         = "(" 1*address ")" / nil
-    static func parseEnvelopeBcc(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Envelope.BCC {
+    static func parseEnvelopeBcc(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Envelope.Addresses {
         return try self.parseOptionalEnvelopeAddresses(buffer: &buffer, tracker: tracker)
     }
 
     // env-cc          = "(" 1*address ")" / nil
-    static func parseEnvelopeCc(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Envelope.CC {
+    static func parseEnvelopeCc(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Envelope.Addresses {
         return try self.parseOptionalEnvelopeAddresses(buffer: &buffer, tracker: tracker)
     }
 
@@ -1144,7 +1144,7 @@ extension NIOIMAP.GrammarParser {
     }
 
     // env-from        = "(" 1*address ")" / nil
-    static func parseEnvelopeFrom(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Envelope.From {
+    static func parseEnvelopeFrom(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Envelope.Addresses {
         return try self.parseOptionalEnvelopeAddresses(buffer: &buffer, tracker: tracker)
     }
 
@@ -1159,12 +1159,12 @@ extension NIOIMAP.GrammarParser {
     }
 
     // env-reply-to    = "(" 1*address ")" / nil
-    static func parseEnvelopeReplyTo(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Envelope.ReplyTo {
+    static func parseEnvelopeReplyTo(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Envelope.Addresses {
         return try self.parseOptionalEnvelopeAddresses(buffer: &buffer, tracker: tracker)
     }
 
     // env-sender      = "(" 1*address ")" / nil
-    static func parseEnvelopeSender(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Envelope.Sender {
+    static func parseEnvelopeSender(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Envelope.Addresses {
         return try self.parseOptionalEnvelopeAddresses(buffer: &buffer, tracker: tracker)
     }
 
@@ -1174,7 +1174,7 @@ extension NIOIMAP.GrammarParser {
     }
 
     // env-to          = "(" 1*address ")" / nil
-    static func parseEnvelopeTo(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Envelope.To {
+    static func parseEnvelopeTo(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Envelope.Addresses {
         return try self.parseOptionalEnvelopeAddresses(buffer: &buffer, tracker: tracker)
     }
 
