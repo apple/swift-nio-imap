@@ -18,18 +18,6 @@ extension NIOIMAP.Envelope {
 
     public typealias Addresses = [NIOIMAP.Address]?
     
-    /// IMAPv4 `env-in-reply-to`
-    public typealias InReplyTo = NIOIMAP.NString
-    
-    /// IMAPv4 `env-date`
-    public typealias Date = NIOIMAP.NString
-    
-    /// IMAPv4 `env-message-id`
-    public typealias MessageID = NIOIMAP.NString
-    
-    /// IMAPv4 `env-subject`
-    public typealias Subject = NIOIMAP.NString
-    
 }
 
 // MARK: - Encoding
