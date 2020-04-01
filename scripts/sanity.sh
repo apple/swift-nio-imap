@@ -31,7 +31,7 @@ for language in swift-or-c bash dtrace python; do
   matching_files=( -name '*' )
   case "$language" in
       swift-or-c)
-        exceptions=( -name process_grammar.sh )
+        exceptions=( -name Package.swift -o -name process_grammar.sh )
         matching_files=( -name '*.swift' -o -name '*.c' -o -name '*.h' )
         cat > "$tmp" <<"EOF"
 //===----------------------------------------------------------------------===//
