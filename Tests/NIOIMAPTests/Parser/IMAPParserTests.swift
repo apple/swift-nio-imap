@@ -3997,26 +3997,18 @@ extension ParserUnitTests {
 
 // MARK: - unsubscribe parseUnsubscribe
 extension ParserUnitTests {
+    
+    func testParseUnsubscribe() {
+        let inputs: [(String, String, NIOIMAP.CommandType, UInt)] = [
+            ("UNSUBSCRIBE inbox", "\r\n", .unsubscribe(.inbox), #line),
+            ("UNSUBScribe INBOX", "\r\n", .unsubscribe(.inbox), #line),
+        ]
 
-    func testUnsubscribe_valid() {
-        TestUtilities.withBuffer("UNSUBSCRIBE inbox", terminator: "\n") { (buffer) in
-            let commandType = try NIOIMAP.GrammarParser.parseUnsubscribe(buffer: &buffer, tracker: .testTracker)
-            guard case NIOIMAP.CommandType.unsubscribe(let mailbox) = commandType else {
-                XCTFail("Didn't parse unsubscribe")
-                return
+        for (input, terminator, expected, line) in inputs {
+            TestUtilities.withBuffer(input, terminator: terminator) { (buffer) in
+                let testValue = try NIOIMAP.GrammarParser.parseUnsubscribe(buffer: &buffer, tracker: .testTracker)
+                XCTAssertEqual(testValue, expected, line: line)
             }
-            XCTAssertEqual(mailbox, NIOIMAP.Mailbox("inbox"))
-        }
-    }
-
-    func testUnsubscribe_valid_mixedCase() {
-        TestUtilities.withBuffer("UNSUBScribe inbox", terminator: "\n") { (buffer) in
-            let commandType = try NIOIMAP.GrammarParser.parseUnsubscribe(buffer: &buffer, tracker: .testTracker)
-            guard case NIOIMAP.CommandType.unsubscribe(let mailbox) = commandType else {
-                XCTFail("Didn't parse unsubscribe")
-                return
-            }
-            XCTAssertEqual(mailbox, NIOIMAP.Mailbox("inbox"))
         }
     }
 
@@ -4071,10 +4063,16 @@ extension ParserUnitTests {
 // MARK: - atom parseXCommand {
 extension ParserUnitTests {
 
-    func testXCommand_valid() {
-        TestUtilities.withBuffer("xhello", terminator: " ") { (buffer) in
-            let atom = try NIOIMAP.GrammarParser.parseXCommand(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(atom, "hello")
+    func testXCommand() {
+        let inputs: [(String, String, String, UInt)] = [
+            ("xhello", " ", "hello", #line),
+        ]
+
+        for (input, terminator, expected, line) in inputs {
+            TestUtilities.withBuffer(input, terminator: terminator, line: line) { (buffer) in
+                let testValue = try NIOIMAP.GrammarParser.parseXCommand(buffer: &buffer, tracker: .testTracker)
+                XCTAssertEqual(testValue, expected, line: line)
+            }
         }
     }
 
@@ -4096,17 +4094,19 @@ extension ParserUnitTests {
 // MARK: - zone (parseZone)
 extension ParserUnitTests {
 
-    func testZone_positive() {
-        TestUtilities.withBuffer("+1234", terminator: "\n") { (buffer) in
-            let zone = try NIOIMAP.GrammarParser.parseZone(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(zone, NIOIMAP.Date.TimeZone(1234))
-        }
-    }
+    func testZone() {
+        let inputs: [(String, String, NIOIMAP.Date.TimeZone?, UInt)] = [
+            ("+1234", " ", NIOIMAP.Date.TimeZone(1234), #line),
+            ("-5678", " ", NIOIMAP.Date.TimeZone(-5678), #line),
+            ("+0000", " ", NIOIMAP.Date.TimeZone(0), #line),
+            ("-0000", " ", NIOIMAP.Date.TimeZone(0), #line),
+        ]
 
-    func testZone_negative() {
-        TestUtilities.withBuffer("-5678", terminator: "\n") { (buffer) in
-            let zone = try NIOIMAP.GrammarParser.parseZone(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(zone, NIOIMAP.Date.TimeZone(-5678))
+        for (input, terminator, expected, line) in inputs {
+            TestUtilities.withBuffer(input, terminator: terminator, line: line) { (buffer) in
+                let testValue = try NIOIMAP.GrammarParser.parseZone(buffer: &buffer, tracker: .testTracker)
+                XCTAssertEqual(testValue, expected, line: line)
+            }
         }
     }
 
@@ -4124,19 +4124,6 @@ extension ParserUnitTests {
         }
     }
 
-    func testZone_zero() {
-        TestUtilities.withBuffer("+0000", terminator: "\n") { (buffer) in
-            let zone = try NIOIMAP.GrammarParser.parseZone(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(zone, NIOIMAP.Date.TimeZone(0))
-        }
-
-        TestUtilities.withBuffer("-0000", terminator: "\n") { (buffer) in
-            let zone = try NIOIMAP.GrammarParser.parseZone(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(zone, NIOIMAP.Date.TimeZone(0))
-        }
-    }
-
-
     func testZone_nonsense() {
         var buffer = TestUtilities.createTestByteBuffer(for: "abc")
         XCTAssertThrowsError(try NIOIMAP.GrammarParser.parseZone(buffer: &buffer, tracker: .testTracker)) { e in
@@ -4149,10 +4136,16 @@ extension ParserUnitTests {
 // MARK: - 2DIGIT
 extension ParserUnitTests {
 
-    func test2digit_valid() {
-        TestUtilities.withBuffer("12", terminator: "\r") { (buffer) in
-             let num = try NIOIMAP.GrammarParser.parse2Digit(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(num, 12)
+    func test2digit() {
+        let inputs: [(String, String, Int, UInt)] = [
+            ("12", " ", 12, #line),
+        ]
+
+        for (input, terminator, expected, line) in inputs {
+            TestUtilities.withBuffer(input, terminator: terminator) { (buffer) in
+                let testValue = try NIOIMAP.GrammarParser.parse2Digit(buffer: &buffer, tracker: .testTracker)
+                XCTAssertEqual(testValue, expected, line: line)
+            }
         }
     }
 
@@ -4181,12 +4174,17 @@ extension ParserUnitTests {
 
 // MARK: - 4DIGIT
 extension ParserUnitTests {
+    
+    func test4digit() {
+        let inputs: [(String, String, Int, UInt)] = [
+            ("1234", " ", 1234, #line),
+        ]
 
-    func test4digit_valid() {
-        TestUtilities.withBuffer("1234", terminator: "\r") { (buffer) in
-            let num = try NIOIMAP.GrammarParser.parse4Digit(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(num, 1234)
-
+        for (input, terminator, expected, line) in inputs {
+            TestUtilities.withBuffer(input, terminator: terminator) { (buffer) in
+                let testValue = try NIOIMAP.GrammarParser.parse4Digit(buffer: &buffer, tracker: .testTracker)
+                XCTAssertEqual(testValue, expected, line: line)
+            }
         }
     }
 
