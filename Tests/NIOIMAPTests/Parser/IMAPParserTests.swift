@@ -42,6 +42,15 @@ final class ParserUnitTests: XCTestCase {
         XCTAssertNoThrow(XCTAssertTrue(try channel.finish().isClean))
         self.channel = nil
     }
+    
+    func iterateTests<T: Equatable>(inputs: [(String, String, T, UInt)], testFunction: (inout ByteBuffer, StackTracker) throws -> T) {
+        for (input, terminator, expected, line) in inputs {
+            TestUtilities.withBuffer(input, terminator: terminator, line: line) { (buffer) in
+                let testValue = try testFunction(&buffer, .testTracker)
+                XCTAssertEqual(testValue, expected, line: line)
+            }
+        }
+    }
 
     // - MARK: ByteToMessageDecoderVerifier tests
     func testBasicDecodes() {
@@ -3609,7 +3618,7 @@ extension ParserUnitTests {
 // MARK: - subscribe parseSubscribe
 extension ParserUnitTests {
     
-    func testParseUnsubscribe() {
+    func testParseSubscribe() {
         let inputs: [(String, String, NIOIMAP.CommandType, UInt)] = [
             ("SUBSCRIBE inbox", "\r\n", .subscribe(.inbox), #line),
             ("SUBScribe INBOX", "\r\n", .subscribe(.inbox), #line),
@@ -4139,12 +4148,7 @@ extension ParserUnitTests {
             ("12", " ", 12, #line),
         ]
 
-        for (input, terminator, expected, line) in inputs {
-            TestUtilities.withBuffer(input, terminator: terminator) { (buffer) in
-                let testValue = try NIOIMAP.GrammarParser.parse2Digit(buffer: &buffer, tracker: .testTracker)
-                XCTAssertEqual(testValue, expected, line: line)
-            }
-        }
+        self.iterateTests(inputs: inputs, testFunction: NIOIMAP.GrammarParser.parse2Digit)
     }
 
     func test2digit_invalid_long() {
@@ -4178,12 +4182,7 @@ extension ParserUnitTests {
             ("1234", " ", 1234, #line),
         ]
 
-        for (input, terminator, expected, line) in inputs {
-            TestUtilities.withBuffer(input, terminator: terminator) { (buffer) in
-                let testValue = try NIOIMAP.GrammarParser.parse4Digit(buffer: &buffer, tracker: .testTracker)
-                XCTAssertEqual(testValue, expected, line: line)
-            }
-        }
+        self.iterateTests(inputs: inputs, testFunction: NIOIMAP.GrammarParser.parse4Digit)
     }
 
     func test4digit_invalid_long() {
