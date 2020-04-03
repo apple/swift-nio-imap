@@ -93,6 +93,7 @@ extension NIOIMAP {
                     returnVal = .attributeBegin(NIOIMAP.MessageAttributesStatic.bodySectionText(optional, size))
                 default:
                     returnVal = .simpleAttribute(att)
+                    self.mode = .attributes(.middle)
                 }
                 if state == .middle {
                     do {

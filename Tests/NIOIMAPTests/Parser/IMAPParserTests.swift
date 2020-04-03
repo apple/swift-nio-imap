@@ -165,19 +165,10 @@ extension ParserUnitTests {
     func testResponseMessageDataStreaming() {
         
         // command tag FETCH 1:3 (BODY[TEXT] FLAGS)
-        
-        // (greeting) * OK [CAPABILITY IMAP4rev1] Ready.\r\n
-        // * 1 FETCH (BODY[TEXT] {123}\r\n
-        // abc
-        // * 2 FETCH (BODY[TEXT] {123}\r\n
-        // def
-        // * 3 FETCH (BODY[TEXT] {123}\r\n
-        // ghi
-        // 1 OK Fetch completed.
         let lines = [
             "* OK [CAPABILITY IMAP4rev1] Ready.\r\n",
-            "* 1 FETCH (BODY[TEXT] {3}\r\nabc)\r\n",
-            "* 2 FETCH (BODY[TEXT] {3}\r\ndef)\r\n",
+            "* 1 FETCH (BODY[TEXT] {3}\r\nabc FLAGS (\\seen \\answered))\r\n",
+            "* 2 FETCH (FLAGS (\\deleted) BODY[TEXT] {3}\r\ndef)\r\n",
             "* 3 FETCH (BODY[TEXT] {3}\r\nghi)\r\n",
         ]
         var buffer = ByteBuffer(stringLiteral: "")
@@ -202,7 +193,15 @@ extension ParserUnitTests {
         )
         XCTAssertEqual(
             try parser.parseResponseStream(buffer: &buffer),
+            .simpleAttribute(.dynamic([.seen, .answered]))
+        )
+        XCTAssertEqual(
+            try parser.parseResponseStream(buffer: &buffer),
             .responseBegin(.messageData(.fetch(2)))
+        )
+        XCTAssertEqual(
+            try parser.parseResponseStream(buffer: &buffer),
+            .simpleAttribute(.dynamic([.deleted]))
         )
         XCTAssertEqual(
             try parser.parseResponseStream(buffer: &buffer),
