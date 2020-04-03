@@ -16,20 +16,19 @@ import NIO
 
 extension NIOIMAP {
     
+    /// You will recieve exactly one `greeting`
+    /// For every `responseBegin`, there will be exactly one corresponding `responseEnd`
+    /// For every `attributeBegin`, there will be exactly one corresponding `responseEnd`
+    /// For every `attributeBegin`, you may recieve 0...n `attributeBytes`
+    /// For every `responseBegin`, you may recieve 0...m `simpleAttribute` and `attributeBegin`
     public enum ResponseStream: Equatable {
-        case bytes(ByteBuffer)
         case greeting(Greeting)
-        case response(ResponseComponentStream)
-    }
-    
-    public enum ResponseComponentStream: Equatable {
-        case body(ResponseBodyStream)
-        case end(ResponseDone)
-    }
-    
-    public enum ResponseBodyStream: Equatable {
-        case whole(ResponseType)
-        case messageAttribute(MessageAttributeType)
+        case responseBegin(ResponseData)
+        case simpleAttribute(MessageAttributeType)
+        case attributeBegin(MessageAttributesStatic)
+        case attributeBytes(ByteBuffer)
+        case attributeEnd
+        case responseEnd(ResponseDone)
     }
     
 }
@@ -37,32 +36,22 @@ extension NIOIMAP {
 // MARK: - Encoding
 extension ByteBuffer {
     
-    @discardableResult public mutating func writeResponseStream(_ stream: NIOIMAP.ResponseStream) -> Int {
-        switch stream {
-        case .bytes(var buffer):
-            return self.writeBuffer(&buffer)
+    @discardableResult public mutating func writeResponseStream(_ response: NIOIMAP.ResponseStream) -> Int {
+        switch response {
         case .greeting(let greeting):
             return self.writeGreeting(greeting)
-        case .response(let component):
-            return self.writeResponseComponentStream(component)
-        }
-    }
-    
-    @discardableResult mutating func writeResponseComponentStream(_ stream: NIOIMAP.ResponseComponentStream) -> Int {
-        switch stream {
-        case .body(let body):
-            return self.writeResponseBodyStream(body)
-        case .end(let done):
-            return self.writeResponseDone(done)
-        }
-    }
-    
-    @discardableResult mutating func writeResponseBodyStream(_ stream: NIOIMAP.ResponseBodyStream) -> Int {
-        switch stream {
-        case .messageAttribute(let att):
+        case .responseBegin(let resp):
+            return self.writeResponseData(resp)
+        case .simpleAttribute(let att):
             return self.writeMessageAttributeType(att)
-        case .whole(let type):
-            return self.writeResponseType(type)
+        case .attributeBegin(let att):
+            return self.writeMessageAttributeStatic(att)
+        case .attributeBytes(var bytes):
+            return self.writeBuffer(&bytes)
+        case .attributeEnd:
+            return 0 // do nothing, this is a "fake" event
+        case .responseEnd(let end):
+            return self.writeResponseDone(end)
         }
     }
     

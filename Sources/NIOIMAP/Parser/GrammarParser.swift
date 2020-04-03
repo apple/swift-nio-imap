@@ -2249,8 +2249,7 @@ extension NIOIMAP.GrammarParser {
         func parseMessageData_fetch(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.MessageData {
             let number = try self.parseNZNumber(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseFixedString(" FETCH ", buffer: &buffer, tracker: tracker)
-            let att = try self.parseMessageAttributeStart(buffer: &buffer, tracker: tracker)
-            return .fetch(number, firstAttribute: att)
+            return .fetch(number)
         }
 
         return try ParserLibrary.parseOneOf([
@@ -2281,9 +2280,16 @@ extension NIOIMAP.GrammarParser {
 
     // msg-att         = "(" (msg-att-dynamic / msg-att-static)
     //                    *(SP (msg-att-dynamic / msg-att-static)) ")"
-    static func parseMessageAttributeStart(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.MessageAttributeType {
+    static func parseMessageAttributeStart(buffer: inout ByteBuffer, tracker: StackTracker) throws {
         try ParserLibrary.parseFixedString("(", buffer: &buffer, tracker: tracker)
-        return try self.parseMessageAttribute_dynamicOrStatic(buffer: &buffer, tracker: tracker)
+    }
+    
+    static func parseMessageAttributeMiddle(buffer: inout ByteBuffer, tracker: StackTracker) throws {
+        try ParserLibrary.parseFixedString(" ", buffer: &buffer, tracker: tracker)
+    }
+    
+    static func parseMessageAttributeEnd(buffer: inout ByteBuffer, tracker: StackTracker) throws {
+        try ParserLibrary.parseFixedString(")\r\n", buffer: &buffer, tracker: tracker)
     }
     
     static func parseMessageAttribute_dynamicOrStatic(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.MessageAttributeType {
@@ -2300,17 +2306,6 @@ extension NIOIMAP.GrammarParser {
             parseMessageAttribute_static,
             parseMessageAttribute_dynamic
         ], buffer: &buffer, tracker: tracker)
-    }
-    
-    static func parseMessageAttributeMiddle(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.MessageAttributeType? {
-        let att = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> NIOIMAP.MessageAttributeType in
-            try ParserLibrary.parseFixedString(" ", buffer: &buffer, tracker: tracker)
-            return try self.parseMessageAttribute_dynamicOrStatic(buffer: &buffer, tracker: tracker)
-        }
-        try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
-            try ParserLibrary.parseFixedString(")\r\n", buffer: &buffer, tracker: tracker)
-        }
-        return att
     }
 
     // msg-att-dynamic = "FLAGS" SP "(" [flag-fetch *(SP flag-fetch)] ")"
@@ -2769,7 +2764,7 @@ extension NIOIMAP.GrammarParser {
             try ParserLibrary.parseFixedString("* ", buffer: &buffer, tracker: tracker)
             let payload = try self.parseResponsePayload(buffer: &buffer, tracker: tracker)
             
-            if case NIOIMAP.ResponseData.messageData(NIOIMAP.MessageData.fetch(_, firstAttribute: _)) = payload {
+            if case NIOIMAP.ResponseData.messageData(NIOIMAP.MessageData.fetch(_)) = payload {
                 return payload
             }
             

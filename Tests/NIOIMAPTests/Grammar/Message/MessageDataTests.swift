@@ -26,7 +26,7 @@ extension MessageDataTests {
     func testEncode() {
         let inputs: [(NIOIMAP.MessageData, String, UInt)] = [
             (.expunge(123), "123 EXPUNGE", #line),
-            (.fetch(456, firstAttribute: .dynamic([.answered])), "456 FETCH (FLAGS (\\Answered)", #line)
+            (.fetch(456), "456 FETCH (", #line)
         ]
 
         for (test, expectedString, line) in inputs {
