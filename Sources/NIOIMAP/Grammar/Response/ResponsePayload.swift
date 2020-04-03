@@ -21,7 +21,7 @@ extension NIOIMAP {
         case conditionalBye(ResponseConditionalBye)
         case mailboxData(Mailbox.Data)
         case messageData(MessageData)
-        case capabilityData(CapabilityData)
+        case capabilityData([Capability])
         case enableData(EnableData)
         case id(IDResponse)
     }

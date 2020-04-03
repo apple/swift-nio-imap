@@ -685,7 +685,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     
     func testParseCapabilityData() {
-        let inputs: [(String, String, NIOIMAP.CapabilityData, UInt)] = [
+        let inputs: [(String, String, [NIOIMAP.Capability], UInt)] = [
             ("CAPABILITY", "\r", [], #line),
             ("CAPABILITY IMAP4 IMAP4rev1", "\r", [], #line),
             ("CAPABILITY IMAP4 IMAP4rev1 IMAP4 IMAP4rev1", "\r", [], #line),

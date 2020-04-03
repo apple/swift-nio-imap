@@ -585,7 +585,7 @@ extension NIOIMAP.GrammarParser {
 
     // capability-data = "CAPABILITY" *(SP capability) SP "IMAP4rev1"
     //                   *(SP capability)
-    static func parseCapabilityData(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.CapabilityData {
+    static func parseCapabilityData(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [NIOIMAP.Capability] {
 
         func parseCapabilityData_constant(buffer: inout ByteBuffer, tracker: StackTracker) throws {
 
@@ -627,7 +627,7 @@ extension NIOIMAP.GrammarParser {
             return array
         }
 
-        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> NIOIMAP.CapabilityData in
+        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> [NIOIMAP.Capability] in
             try ParserLibrary.parseFixedString("CAPABILITY", buffer: &buffer, tracker: tracker)
             return try parseCapabilityData_array(buffer: &buffer, tracker: tracker)
         }
