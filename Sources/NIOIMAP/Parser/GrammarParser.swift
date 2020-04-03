@@ -888,7 +888,7 @@ extension NIOIMAP.GrammarParser {
     }
 
     // create-params = SP "(" create-param *(SP create-param-value) ")"
-    static func parseCreateParameters(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.CreateParameters {
+    static func parseCreateParameters(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [NIOIMAP.CreateParameter] {
         return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
             try ParserLibrary.parseFixedString(" (", buffer: &buffer, tracker: tracker)
             var array = [try self.parseCreateParameter(buffer: &buffer, tracker: tracker)]

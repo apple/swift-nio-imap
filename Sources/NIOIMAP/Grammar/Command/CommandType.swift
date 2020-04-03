@@ -22,7 +22,7 @@ extension NIOIMAP {
         case noop
         case xcommand(String)
         case append(to: Mailbox, firstMessageMetadata: AppendMessage)
-        case create(Mailbox, CreateParameters?)
+        case create(Mailbox, [CreateParameter]?)
         case delete(Mailbox)
         case examine(Mailbox, SelectParameters?)
         case list(ListSelectOptions?, Mailbox, MailboxPatterns, ListReturnOptions?)
@@ -152,7 +152,7 @@ extension ByteBuffer {
         self.writeAppendMessage(firstMessageMetadata)
     }
     
-    private mutating func writeCommandType_create(mailbox: NIOIMAP.Mailbox, parameters: NIOIMAP.CreateParameters?) -> Int {
+    private mutating func writeCommandType_create(mailbox: NIOIMAP.Mailbox, parameters: [NIOIMAP.CreateParameter]?) -> Int {
         self.writeString("CREATE ") +
         self.writeMailbox(mailbox) +
         self.writeIfExists(parameters) { (parameters) -> Int in

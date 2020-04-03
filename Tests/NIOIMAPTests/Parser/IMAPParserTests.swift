@@ -951,7 +951,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     
     func testParseCreateParameters() {
-        let inputs: [(String, String, NIOIMAP.CreateParameters, UInt)] = [
+        let inputs: [(String, String, [NIOIMAP.CreateParameter], UInt)] = [
             (" (test)", "\r", [.name("test", value: nil)], #line),
             (" (test1 test2 test3)", "\r", [.name("test1", value: nil), .name("test2", value: nil), .name("test3", value: nil)], #line),
         ]

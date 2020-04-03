@@ -25,7 +25,6 @@ extension NIOIMAP {
         }
     }
     
-    public typealias CreateParameters = [CreateParameter]
 }
 
 // MARK: - Encoding
