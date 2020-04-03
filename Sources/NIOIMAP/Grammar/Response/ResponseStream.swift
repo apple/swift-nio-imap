@@ -16,6 +16,11 @@ import NIO
 
 extension NIOIMAP {
     
+    /// You will recieve exactly one `greeting`
+    /// For every `responseBegin`, there will be exactly one corresponding `responseEnd`
+    /// For every `attributeBegin`, there will be exactly one corresponding `responseEnd`
+    /// For every `attributeBegin`, you may recieve 0...n `attributeBytes`
+    /// For every `responseBegin`, you may recieve 0...m `simpleAttribute` and `attributeBegin`
     public enum ResponseStream: Equatable {
         case greeting(Greeting)
         case responseBegin(ResponseData)
