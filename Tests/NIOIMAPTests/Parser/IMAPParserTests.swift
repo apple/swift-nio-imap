@@ -164,17 +164,24 @@ extension ParserUnitTests {
     
     func testResponseMessageDataStreaming() {
         
-        // command tag FETCH 1:3 BODY[TEXT]
+        // command tag FETCH 1:3 (BODY[TEXT] FLAGS)
         
         // (greeting) * OK [CAPABILITY IMAP4rev1] Ready.\r\n
         // * 1 FETCH (BODY[TEXT] {123}\r\n
         // abc
         // * 2 FETCH (BODY[TEXT] {123}\r\n
-        // abc
+        // def
         // * 3 FETCH (BODY[TEXT] {123}\r\n
-        // abc
+        // ghi
         // 1 OK Fetch completed.
-        var buffer: ByteBuffer = "* OK [CAPABILITY IMAP4rev1] Ready.\r\n* 1 FETCH (BODY[TEXT] {3}\r\nabc FLAGS (\\seen))\r\n* 2 FETCH (FLAGS (\\seen) BODY[TEXT] {3}\r\ndef)\r\n* 3 FETCH (BODY[TEXT] {3}\r\nghi)\r\n1 OK Fetch completed.\r\n"
+        let lines = [
+            "* OK [CAPABILITY IMAP4rev1] Ready.\r\n",
+            "* 1 FETCH (BODY[TEXT] {3}\r\nabc)\r\n",
+            "* 2 FETCH (BODY[TEXT] {3}\r\ndef)\r\n",
+            "* 3 FETCH (BODY[TEXT] {3}\r\nghi)\r\n",
+        ]
+        var buffer = ByteBuffer(stringLiteral: "")
+        buffer.writeString(lines.joined())
         
         var parser = NIOIMAP.ResponseParser()
         XCTAssertEqual(
@@ -183,46 +190,44 @@ extension ParserUnitTests {
         )
         XCTAssertEqual(
             try parser.parseResponseStream(buffer: &buffer),
-            .response(.body(.whole(.responseData(.messageData(.fetch(1, firstAttribute: .static(.bodySectionText(nil, 3))))))))
+            .responseBegin(.messageData(.fetch(1)))
         )
         XCTAssertEqual(
             try parser.parseResponseStream(buffer: &buffer),
-            .bytes("abc")
+            .attributeBegin(.bodySectionText(nil, 3))
         )
         XCTAssertEqual(
             try parser.parseResponseStream(buffer: &buffer),
-            .response(.body(.messageAttribute(.dynamic([.seen]))))
+            .attributeBytes("abc")
         )
         XCTAssertEqual(
             try parser.parseResponseStream(buffer: &buffer),
-            .response(.body(.whole(.responseData(.messageData(.fetch(2, firstAttribute: .dynamic([.seen])))))))
+            .responseBegin(.messageData(.fetch(2)))
         )
         XCTAssertEqual(
             try parser.parseResponseStream(buffer: &buffer),
-            .response(.body(.messageAttribute(.static(.bodySectionText(nil, 3)))))
+            .attributeBegin(.bodySectionText(nil, 3))
         )
         XCTAssertEqual(
             try parser.parseResponseStream(buffer: &buffer),
-            .bytes("def")
+            .attributeBytes("def")
         )
         XCTAssertEqual(
             try parser.parseResponseStream(buffer: &buffer),
-            .response(.body(.whole(.responseData(.messageData(.fetch(3, firstAttribute: .static(.bodySectionText(nil, 3))))))))
+            .responseBegin(.messageData(.fetch(3)))
         )
         XCTAssertEqual(
             try parser.parseResponseStream(buffer: &buffer),
-            .bytes("ghi")
+            .attributeBegin(.bodySectionText(nil, 3))
         )
         XCTAssertEqual(
             try parser.parseResponseStream(buffer: &buffer),
-            .response(.end(.tagged(.tag("1", state: .ok(.code(nil, text: "Fetch completed."))))))
+            .attributeBytes("ghi")
         )
         XCTAssertEqual(buffer.readableBytes, 0)
         
-          
-        // * 5 FETCH (FLAGS (seen, draft) BODY[TEXT] {3}\r\n 123 HEADERS ())
-        // 1 OK Fetch completed.
-        
+        // this currently fails as there's data left over, the last ")\r\n"
+        // this should be fixed with the framing parser
     }
     
     func testIdle() {
@@ -2118,7 +2123,7 @@ extension ParserUnitTests {
     
     func testParseMessageData() {
         let inputs: [(String, String, NIOIMAP.MessageData, UInt)] = [
-            ("1 FETCH (BODY[TEXT] {304}\r\n", "", .fetch(1, firstAttribute: .static(.bodySectionText(nil, 304))), #line)
+            ("1 FETCH (", "", .fetch(1), #line)
         ]
         self.iterateTestInputs(inputs, testFunction: NIOIMAP.GrammarParser.parseMessageData)
     }

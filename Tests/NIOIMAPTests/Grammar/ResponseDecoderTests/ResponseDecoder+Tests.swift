@@ -29,13 +29,13 @@ extension ResponseDecoder_Tests {
             (
                 "1 OK Login\r\n",
                 [
-                    .response(.end(.tagged(.tag("1", state: .ok(.code(nil, text: "Login"))))))
+                    .responseEnd(.tagged(.tag("1", state: .ok(.code(nil, text: "Login")))))
                 ]
             ),
             (
                 "* NO [ALERT] ohno\r\n",
                 [
-                    .response(.body(.whole(.responseData(.conditionalState(.no(.code(.alert, text: "ohno")))))))
+                    .responseBegin(.conditionalState(.no(.code(.alert, text: "ohno"))))
                 ]
             )
         ]
@@ -45,7 +45,7 @@ extension ResponseDecoder_Tests {
                 stringInputOutputPairs: inoutPairs,
                 decoderFactory: { () -> NIOIMAP.ResponseDecoder in
                     var decoder = NIOIMAP.ResponseDecoder()
-                    decoder.parser.mode = .lines
+                    decoder.parser.mode = .response
                     return decoder
                 }
             )

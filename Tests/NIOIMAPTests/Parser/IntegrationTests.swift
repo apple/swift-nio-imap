@@ -91,4 +91,5 @@ final class ParserIntegrationTests: XCTestCase {
         ]
         XCTAssertNoThrow(XCTAssertEqual(expected, try collectionDonePromise.futureResult.wait()))
     }
+    
 }
