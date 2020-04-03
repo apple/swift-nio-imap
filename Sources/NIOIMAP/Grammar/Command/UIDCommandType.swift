@@ -19,7 +19,7 @@ extension NIOIMAP {
     public enum UIDCommandType: Equatable {
         case copy(SequenceSet, Mailbox)
         case move(SequenceSet, Mailbox)
-        case fetch(SequenceSet, FetchType, FetchModifiers?)
+        case fetch(SequenceSet, FetchType, [FetchModifier]?)
         case search(returnOptions: SearchReturnOptions?, program: SearchProgram)
         case store(SequenceSet, StoreModifiers?, StoreAttributeFlags)
         case uidExpunge(SequenceSet)

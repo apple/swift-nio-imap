@@ -44,7 +44,7 @@ extension NIOIMAP {
         case idleStart
         case idleFinish
         case copy(SequenceSet, Mailbox)
-        case fetch(SequenceSet, FetchType, FetchModifiers?)
+        case fetch(SequenceSet, FetchType, [FetchModifier]?)
         case store(SequenceSet, StoreModifiers?, StoreAttributeFlags)
         case search(returnOptions: SearchReturnOptions?, program: SearchProgram)
         case move(SequenceSet, Mailbox)
@@ -298,7 +298,7 @@ extension ByteBuffer {
         self.writeMailbox(mailbox)
     }
     
-    private mutating func writeCommandType_fetch(set: NIOIMAP.SequenceSet, atts: NIOIMAP.FetchType, modifiers: NIOIMAP.FetchModifiers?) -> Int {
+    private mutating func writeCommandType_fetch(set: NIOIMAP.SequenceSet, atts: NIOIMAP.FetchType, modifiers: [NIOIMAP.FetchModifier]?) -> Int {
         self.writeString("FETCH ") +
         self.writeSequenceSet(set) +
         self.writeSpace() +
