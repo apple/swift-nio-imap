@@ -27,6 +27,14 @@ extension NIOIMAP {
 // MARK: - Encoding
 extension ByteBuffer {
     
+    @discardableResult mutating func writeSection(_ section: NIOIMAP.SectionSpec?) -> Int {
+        self.writeString("[") +
+        self.writeIfExists(section) { (spec) -> Int in
+            self.writeSectionSpec(spec)
+        } +
+        self.writeString("]")
+    }
+    
     @discardableResult mutating func writeSectionSpec(_ spec: NIOIMAP.SectionSpec?) -> Int {
         
         guard let spec = spec else {

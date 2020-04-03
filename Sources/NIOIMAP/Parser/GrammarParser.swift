@@ -3558,8 +3558,8 @@ extension NIOIMAP.GrammarParser {
     }
 
     // section         = "[" [section-spec] "]"
-    static func parseSection(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Section {
-        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> NIOIMAP.Section in
+    static func parseSection(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.SectionSpec? {
+        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> NIOIMAP.SectionSpec? in
             try ParserLibrary.parseFixedString("[", buffer: &buffer, tracker: tracker)
             let spec = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> NIOIMAP.SectionSpec in
                 try self.parseSectionSpec(buffer: &buffer, tracker: tracker)

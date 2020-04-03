@@ -23,8 +23,8 @@ extension NIOIMAP {
         case internaldate
         case rfc822(RFC822?)
         case body(structure: Bool)
-        case bodySection(_ section: Section, Partial?)
-        case bodyPeekSection(_ section: Section, Partial?)
+        case bodySection(_ section: SectionSpec?, Partial?)
+        case bodyPeekSection(_ section: SectionSpec?, Partial?)
         case uid
         case modSequence(ModifierSequenceValue)
         case binary(peek: Bool, section: SectionBinary, partial: Partial?)
@@ -97,7 +97,7 @@ extension ByteBuffer {
         return self.writeString(string)
     }
     
-    @discardableResult mutating func writeFetchAttribute_body(section: NIOIMAP.Section, partial: NIOIMAP.Partial?) -> Int {
+    @discardableResult mutating func writeFetchAttribute_body(section: NIOIMAP.SectionSpec?, partial: NIOIMAP.Partial?) -> Int {
         self.writeString("BODY") +
         self.writeSection(section) +
         self.writeIfExists(partial) { (partial) -> Int in
@@ -105,7 +105,7 @@ extension ByteBuffer {
         }
     }
     
-    @discardableResult mutating func writeFetchAttribute_bodyPeek(section: NIOIMAP.Section, partial: NIOIMAP.Partial?) -> Int {
+    @discardableResult mutating func writeFetchAttribute_bodyPeek(section: NIOIMAP.SectionSpec?, partial: NIOIMAP.Partial?) -> Int {
         self.writeString("BODY.PEEK") +
         self.writeSection(section) +
         self.writeIfExists(partial) { (partial) -> Int in
