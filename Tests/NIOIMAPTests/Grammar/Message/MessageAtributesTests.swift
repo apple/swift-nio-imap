@@ -24,7 +24,7 @@ class MessageAttributesTests: EncodeTestClass {
 extension MessageAttributesTests {
 
     func testEncode() {
-        let inputs: [(NIOIMAP.MessageAttributes, String, UInt)] = [
+        let inputs: [([NIOIMAP.MessageAttributeType], String, UInt)] = [
             ([.dynamic([.draft])], "(FLAGS (\\Draft))", #line),
             ([.dynamic([.flagged]), .static(.rfc822Size(123))], "(FLAGS (\\Flagged) RFC822.SIZE 123)", #line),
         ]
