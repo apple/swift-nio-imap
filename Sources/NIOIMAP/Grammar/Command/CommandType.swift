@@ -24,11 +24,11 @@ extension NIOIMAP {
         case append(to: Mailbox, firstMessageMetadata: AppendMessage)
         case create(Mailbox, [CreateParameter]?)
         case delete(Mailbox)
-        case examine(Mailbox, SelectParameters?)
+        case examine(Mailbox, [SelectParameter]?)
         case list(ListSelectOptions?, Mailbox, MailboxPatterns, ListReturnOptions?)
         case lsub(Mailbox, NIOIMAP.Mailbox.ListMailbox)
         case rename(from: Mailbox, to: Mailbox, params: RenameParameters?)
-        case select(Mailbox, SelectParameters?)
+        case select(Mailbox, [SelectParameter]?)
         case status(Mailbox, [StatusAttribute])
         case subscribe(Mailbox)
         case unsubscribe(Mailbox)
@@ -165,7 +165,7 @@ extension ByteBuffer {
         self.writeMailbox(mailbox)
     }
     
-    private mutating func writeCommandType_examine(mailbox: NIOIMAP.Mailbox, parameters: NIOIMAP.SelectParameters?) -> Int {
+    private mutating func writeCommandType_examine(mailbox: NIOIMAP.Mailbox, parameters: [NIOIMAP.SelectParameter]?) -> Int {
         self.writeString("EXAMINE ") +
         self.writeMailbox(mailbox) +
         self.writeIfExists(parameters) { (params) -> Int in
@@ -206,7 +206,7 @@ extension ByteBuffer {
         }
     }
     
-    private mutating func writeCommandType_select(mailbox: NIOIMAP.Mailbox, params: NIOIMAP.SelectParameters?) -> Int {
+    private mutating func writeCommandType_select(mailbox: NIOIMAP.Mailbox, params: [NIOIMAP.SelectParameter]?) -> Int {
         self.writeString("SELECT ") +
         self.writeMailbox(mailbox) +
         self.writeIfExists(params) { (params) -> Int in

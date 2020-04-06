@@ -3678,8 +3678,8 @@ extension NIOIMAP.GrammarParser {
     }
 
     // select-params = SP "(" select-param *(SP select-param ")"
-    static func parseSelectParameters(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.SelectParameters {
-        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> NIOIMAP.SelectParameters in
+    static func parseSelectParameters(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [NIOIMAP.SelectParameter] {
+        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> [NIOIMAP.SelectParameter] in
             try ParserLibrary.parseFixedString(" (", buffer: &buffer, tracker: tracker)
             var array = [try self.parseSelectParameter(buffer: &buffer, tracker: tracker)]
             try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) -> NIOIMAP.SelectParameter in
