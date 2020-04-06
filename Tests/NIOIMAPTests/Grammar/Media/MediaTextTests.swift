@@ -24,7 +24,7 @@ class MediaTextTests: EncodeTestClass {
 extension MediaTextTests {
 
     func testEncode() {
-        let inputs: [(NIOIMAP.Media.Text, String, UInt)] = [
+        let inputs: [(String, String, UInt)] = [
             ("text/plain", "\"TEXT\" \"text/plain\"", #line)
         ]
 

@@ -2194,13 +2194,14 @@ extension NIOIMAP.GrammarParser {
     }
 
     // media-subtype   = string
-    static func parseMediaSubtype(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Media.Subtype {
-        return try self.parseString(buffer: &buffer, tracker: tracker)
+    static func parseMediaSubtype(buffer: inout ByteBuffer, tracker: StackTracker) throws -> String {
+        var buffer = try self.parseString(buffer: &buffer, tracker: tracker)
+        return buffer.readString(length: buffer.readableBytes)!
     }
 
     // media-text      = DQUOTE "TEXT" DQUOTE SP media-subtype
-    static func parseMediaText(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Media.Text {
-        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> NIOIMAP.Media.Text in
+    static func parseMediaText(buffer: inout ByteBuffer, tracker: StackTracker) throws -> String {
+        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> String in
             try ParserLibrary.parseFixedString("\"TEXT\" ", buffer: &buffer, tracker: tracker)
             let subtype = try self.parseMediaSubtype(buffer: &buffer, tracker: tracker)
             return subtype

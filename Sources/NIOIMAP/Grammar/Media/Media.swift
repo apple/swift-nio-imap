@@ -18,9 +18,6 @@ extension NIOIMAP {
 
     public enum Media {
         
-        /// IMAPv4 `media-subtype`
-        public typealias Subtype = ByteBuffer
-        
     }
     
 }

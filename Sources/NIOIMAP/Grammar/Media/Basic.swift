@@ -29,10 +29,10 @@ extension NIOIMAP.Media {
     /// IMAPv4 `media-basic`
     public struct Basic: Equatable {
         public var type: BasicType
-        public var subtype: Subtype
+        public var subtype: String
 
         /// Convenience function for a better experience when chaining multiple types.
-        public static func type(_ type: BasicType, subtype: Subtype) -> Self {
+        public static func type(_ type: BasicType, subtype: String) -> Self {
             return Self(type: type, subtype: subtype)
         }
     }
