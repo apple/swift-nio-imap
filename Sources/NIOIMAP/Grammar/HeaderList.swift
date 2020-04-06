@@ -16,9 +16,6 @@ import NIO
 
 extension NIOIMAP {
     
-    /// IMAPv4 `header-list`
-    public typealias HeaderList = [String]
-    
 }
 
 extension ByteBuffer {
