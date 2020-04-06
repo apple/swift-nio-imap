@@ -24,7 +24,7 @@ class BodyExtensionTests: EncodeTestClass {
 extension BodyExtensionTests {
 
     func testEncode() {
-        let inputs: [(NIOIMAP.BodyExtension, String, UInt)] = [
+        let inputs: [([NIOIMAP.BodyExtensionType], String, UInt)] = [
             ([.number(1)], "(1)", #line),
             ([.string("apple")], "(\"apple\")", #line),
             ([.string(nil)], "(NIL)", #line),

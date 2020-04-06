@@ -19,9 +19,9 @@ extension NIOIMAP.Body {
     /// Extracted from IMAPv4 `body-ext-1part`
     public struct FieldLocationExtension: Equatable {
         public var location: NIOIMAP.NString
-        public var extensions: [NIOIMAP.BodyExtension]
+        public var extensions: [[NIOIMAP.BodyExtensionType]]
         
-        public static func location(_ location: NIOIMAP.NString, extensions: [NIOIMAP.BodyExtension]) -> Self {
+        public static func location(_ location: NIOIMAP.NString, extensions: [[NIOIMAP.BodyExtensionType]]) -> Self {
             return Self(location: location, extensions: extensions)
         }
     }

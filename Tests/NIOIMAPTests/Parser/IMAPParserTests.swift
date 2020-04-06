@@ -508,7 +508,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
  
     func testParseBodyExtension() {
-        let inputs: [(String, String, NIOIMAP.BodyExtension, UInt)] = [
+        let inputs: [(String, String, [NIOIMAP.BodyExtensionType], UInt)] = [
             ("1", "\r", [.number(1)], #line),
             ("\"s\"", "\r", [.string("s")], #line),
             ("(1)", "\r", [.number(1)], #line),
