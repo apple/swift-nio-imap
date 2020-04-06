@@ -2988,7 +2988,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     
     func testParseStoreModifiers() {
-        let inputs: [(String, String, NIOIMAP.StoreModifiers, UInt)] = [
+        let inputs: [(String, String, [NIOIMAP.StoreModifier], UInt)] = [
             (" (name1)", "\r", [.name("name1", parameters: nil)], #line),
             (" (name1 name2 name3)", "\r", [.name("name1", parameters: nil), .name("name2", parameters: nil), .name("name3", parameters: nil)], #line),
         ]

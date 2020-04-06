@@ -21,7 +21,7 @@ extension NIOIMAP {
         case move(SequenceSet, Mailbox)
         case fetch(SequenceSet, FetchType, [FetchModifier]?)
         case search(returnOptions: SearchReturnOptions?, program: SearchProgram)
-        case store(SequenceSet, StoreModifiers?, StoreAttributeFlags)
+        case store(SequenceSet, [StoreModifier]?, StoreAttributeFlags)
         case uidExpunge(SequenceSet)
         
         init?(commandType: CommandType) {
