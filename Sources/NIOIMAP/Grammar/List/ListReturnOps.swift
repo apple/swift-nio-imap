@@ -14,17 +14,10 @@
 
 import NIO
 
-extension NIOIMAP {
-
-    /// IMAPv4 `list-return-ops`
-    public typealias ListReturnOptions = [ReturnOption]?
-
-}
-
 // MARK: - Encoding
 extension ByteBuffer {
 
-    @discardableResult mutating func writeListReturnOptions(_ options: NIOIMAP.ListReturnOptions) -> Int {
+    @discardableResult mutating func writeListReturnOptions(_ options: [NIOIMAP.ReturnOption]?) -> Int {
         self.writeString("RETURN ") +
         self.writeString("(") +
         self.writeIfExists(options) { (options) -> Int in

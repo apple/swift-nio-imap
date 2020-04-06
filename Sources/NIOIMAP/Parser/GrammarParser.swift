@@ -1614,10 +1614,10 @@ extension NIOIMAP.GrammarParser {
             let mailbox = try self.parseMailbox(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
             let mailboxPatterns = try self.parseMailboxPatterns(buffer: &buffer, tracker: tracker)
-            let returnOptions = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> NIOIMAP.ListReturnOptions in
+            let returnOptions = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> [NIOIMAP.ReturnOption] in
                 try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
                 return try self.parseListReturnOptions(buffer: &buffer, tracker: tracker)
-            }
+            } ?? []
             return .list(selectOptions, mailbox, mailboxPatterns, returnOptions)
         }
     }
@@ -1785,7 +1785,7 @@ extension NIOIMAP.GrammarParser {
     }
 
     // list-return-opt = "RETURN" SP "(" [return-option *(SP return-option)] ")"
-    static func parseListReturnOptions(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.ListReturnOptions {
+    static func parseListReturnOptions(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [NIOIMAP.ReturnOption] {
         return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
             try ParserLibrary.parseFixedString("RETURN (", buffer: &buffer, tracker: tracker)
             var array = [try self.parseReturnOption(buffer: &buffer, tracker: tracker)]

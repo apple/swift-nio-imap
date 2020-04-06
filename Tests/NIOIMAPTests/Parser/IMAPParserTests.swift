@@ -1539,7 +1539,7 @@ extension ParserUnitTests {
     
     func testParseList() {
         let inputs: [(String, String, NIOIMAP.CommandType, UInt)] = [
-            (#"LIST "" """#, "\r", .list(nil, NIOIMAP.Mailbox(""), .mailbox(""), nil), #line),
+            (#"LIST "" """#, "\r", .list(nil, NIOIMAP.Mailbox(""), .mailbox(""), []), #line),
         ]
         self.iterateTestInputs(inputs, testFunction: NIOIMAP.GrammarParser.parseList)
     }
