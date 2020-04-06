@@ -17,7 +17,7 @@ import NIO
 extension NIOIMAP {
 
     /// IMAPv4 `section-binary`
-    public typealias SectionBinary = SectionPart?
+    public typealias SectionBinary = [Int]?
 
 }
 

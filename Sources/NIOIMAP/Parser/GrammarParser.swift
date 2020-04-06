@@ -3585,8 +3585,8 @@ extension NIOIMAP.GrammarParser {
     }
 
     // section-part    = nz-number *("." nz-number)
-    static func parseSectionPart(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.SectionPart {
-        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> NIOIMAP.SectionPart in
+    static func parseSectionPart(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [Int] {
+        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> [Int] in
             var output = [try self.parseNZNumber(buffer: &buffer, tracker: tracker)]
             try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &output, tracker: tracker) { (buffer, tracker) -> Int in
                 return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> Int in
