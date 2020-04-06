@@ -33,6 +33,24 @@ extension NIOIMAP {
     
 }
 
+extension NIOIMAP.ResponseStream {
+    // This needs to list all (but not too many!) `ResponseStream` cases where streamed bytes may follow.
+    internal var isStreamingResponse: Bool {
+        switch self {
+        case .responseBegin:
+            return true
+        case .attributeBegin:
+            return true
+        case .simpleAttribute(.dynamic(_)):
+            return true
+        case .attributeBytes(_):
+            return true
+        default:
+            return false
+        }
+    }
+}
+
 // MARK: - Encoding
 extension ByteBuffer {
     

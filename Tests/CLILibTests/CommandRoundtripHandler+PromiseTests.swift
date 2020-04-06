@@ -32,9 +32,10 @@ class CommandRoundtripHandler_PromiseTests: XCTestCase {
     }
     
     func testPromiseIsNotDropped_shouldThrow() {
-        let buffer = channel.allocator.buffer(capacity: 0)
+        var buffer = channel.allocator.buffer(capacity: 0)
+        buffer.writeString("definitely not IMAP\r\n")
         XCTAssertThrowsError(try self.channel.writeOutbound(buffer)) { e in
-            XCTAssertTrue(e is NIOIMAP.ParsingError, "Error \(e)")
+            XCTAssertTrue(e is ParserError, "Error \(e)")
         }
         XCTAssertNoThrow(XCTAssertNil(try self.channel.readOutbound(as: ByteBuffer.self)))
     }

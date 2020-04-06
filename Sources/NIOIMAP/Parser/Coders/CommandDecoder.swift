@@ -34,11 +34,12 @@ extension NIOIMAP {
         public mutating func decode(context: ChannelHandlerContext, buffer: inout ByteBuffer) throws -> DecodingState {
             let save = buffer
             do {
-                let result = try self.parser.parseCommandStream(buffer: &buffer)
-                context.fireChannelRead(self.wrapInboundOut(result))
-                return .continue
-            } catch NIOIMAP.ParsingError.incompleteMessage {
-                return .needMoreData
+                if let result = try self.parser.parseCommandStream(buffer: &buffer) {
+                    context.fireChannelRead(self.wrapInboundOut(result))
+                    return .continue
+                } else {
+                    return .needMoreData
+                }
             } catch {
                 throw IMAPDecoderError(parserError: error, buffer: save)
             }

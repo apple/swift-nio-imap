@@ -18,7 +18,6 @@ extension NIOIMAP {
     
     public enum ParsingError: Error {
         case lineTooLong
-        case incompleteMessage
     }
 
     public enum GrammarParser {
@@ -1850,7 +1849,7 @@ extension NIOIMAP.GrammarParser {
     // list-wildcards  = "%" / "*"
     static func parseListWildcards(buffer: inout ByteBuffer, tracker: StackTracker) throws -> String {
         guard let char = buffer.readInteger(as: UInt8.self) else {
-            throw NIOIMAP.ParsingError.incompleteMessage
+            throw ParserError()
         }
         guard char.isListWildcard else {
             throw ParserError()
@@ -1874,7 +1873,7 @@ extension NIOIMAP.GrammarParser {
                 }
                 return bytes
             } else {
-                throw NIOIMAP.ParsingError.incompleteMessage
+                throw ParserError(hint: "couldn't parse empty literal")
             }
         }
     }
@@ -1989,7 +1988,7 @@ extension NIOIMAP.GrammarParser {
                 try ParserLibrary.parseFixedString("\"", buffer: &buffer, tracker: tracker)
 
                 guard let character = buffer.readSlice(length: 1)?.readableBytesView.first else {
-                    throw NIOIMAP.ParsingError.incompleteMessage
+                    throw ParserError()
                 }
                 guard character.isQuotedChar else {
                     throw ParserError(hint: "Expected quoted char found \(String(decoding: [character], as: Unicode.UTF8.self))")
@@ -2462,7 +2461,7 @@ extension NIOIMAP.GrammarParser {
         func parseNamespaceDescr_quotedChar(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Character? {
             try ParserLibrary.parseFixedString("\"", buffer: &buffer, tracker: tracker)
             guard let char = buffer.readBytes(length: 1)?.first else {
-                throw NIOIMAP.ParsingError.incompleteMessage
+                throw ParserError()
             }
             guard char.isQuotedChar else {
                 throw ParserError(hint: "Invalid character")
@@ -4023,7 +4022,7 @@ extension NIOIMAP.GrammarParser {
         return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> String in
 
             guard let fchar = buffer.readBytes(length: 1)?.first else {
-                throw NIOIMAP.ParsingError.incompleteMessage
+                throw ParserError()
             }
             guard fchar.isTaggedLabelFchar else {
                 throw ParserError(hint: "\(fchar) is not a valid fchar’")

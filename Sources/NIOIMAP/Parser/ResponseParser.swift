@@ -32,12 +32,42 @@ extension NIOIMAP {
 
         let bufferLimit: Int
         var mode: Mode = .greeting
+        private var framingParser: IMAPFramingParser
 
         public init(bufferLimit: Int = 1_000) {
             self.bufferLimit = bufferLimit
+            self.framingParser = IMAPFramingParser(bufferSizeLimit: bufferLimit)
         }
 
-        public mutating func parseResponseStream(buffer: inout ByteBuffer) throws -> NIOIMAP.ResponseStream {
+        public mutating func parseResponseStream(buffer overallBuffer: inout ByteBuffer) throws -> NIOIMAP.ResponseStream? {
+            let framingResult = try self.framingParser.parse(&overallBuffer)
+            print((framingResult.line?.readableBytesView).map { String(decoding: $0, as: Unicode.UTF8.self) }.debugDescription)
+
+            if var line = framingResult.line {
+                let response = try self.parsePreFramedLine(&line)
+                print("--> \(response)")
+                if line.readableBytes != 0 {
+                    // There are left-overs after parsing a pre-framed line. This can only mean we're streaming, or
+                    // some bug of course.
+                    assert(response.isStreamingResponse,
+                           """
+                           BUG in the SwiftNIO IMAP Parser (please report): We received the IMAP frame \
+                           '\(String(decoding: framingResult.line!.readableBytesView, as: Unicode.UTF8.self))' which \
+                           should parse into exactly IMAP response unless it's a response we stream. The parsed \
+                           response \(response) however isn't marked as a streaming response.
+                           """)
+                    // ok, let's unparse the left-overs
+                    overallBuffer.moveReaderIndex(to: overallBuffer.readerIndex - line.readableBytes)
+                    // let's make sure we unparsed the right stuff.
+                    assert(overallBuffer.readableBytesView.starts(with: line.readableBytesView))
+                }
+                return response
+            } else {
+                return nil
+            }
+        }
+
+        private mutating func parsePreFramedLine(_ buffer: inout ByteBuffer) throws -> NIOIMAP.ResponseStream {
             switch self.mode {
             case .greeting:
                 let greeting = try GrammarParser.parseGreeting(buffer: &buffer, tracker: .new)

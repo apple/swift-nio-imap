@@ -24,6 +24,17 @@ extension NIOIMAP {
 
 }
 
+extension NIOIMAP.CommandStream {
+    internal var isStreamingCommand: Bool {
+        switch self {
+        case .bytes, .idleDone:
+            return false
+        case .command(let command):
+            return command.isStreamingCommand
+        }
+    }
+}
+
 extension ByteBuffer {
 
     @discardableResult public mutating func writeCommandStream(_ stream: NIOIMAP.CommandStream) -> Int {

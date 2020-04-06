@@ -37,7 +37,9 @@ public class CommandRoundtripHandler: ChannelOutboundHandler {
             let commandStream = try parser.parseCommandStream(buffer: &originalBufferCopy)
             
             var roundtripBuffer = context.channel.allocator.buffer(capacity: originalBuffer.readableBytes)
-            roundtripBuffer.writeCommandStream(commandStream)
+            if let commandStream = commandStream {
+                roundtripBuffer.writeCommandStream(commandStream)
+            }
             
             if originalBuffer != roundtripBuffer {
                 logger.warning("Input command vs roundtrip output is different")

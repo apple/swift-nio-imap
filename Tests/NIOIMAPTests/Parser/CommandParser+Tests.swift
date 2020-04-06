@@ -34,18 +34,3 @@ extension CommandParser_Tests {
     }
     
 }
-
-// MARK: - throwIfExceededBufferLimit
-extension CommandParser_Tests {
-    
-    func testThrowIfExceededBufferLimit() {
-        let parser = NIOIMAP.CommandParser(bufferLimit: 2)
-        var b1 = "abc" as ByteBuffer
-        var b2 = "ab" as ByteBuffer
-        var b3 = "a" as ByteBuffer
-        XCTAssertThrowsError(try parser.throwIfExceededBufferLimit(&b1))
-        XCTAssertNoThrow(try parser.throwIfExceededBufferLimit(&b2))
-        XCTAssertNoThrow(try parser.throwIfExceededBufferLimit(&b3))
-    }
-    
-}

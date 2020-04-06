@@ -60,7 +60,7 @@ extension ParserLibrary {
             }
 
             guard let firstBad = maybeFirstBad else {
-                throw NIOIMAP.ParsingError.incompleteMessage
+                throw ParserError()
             }
             return buffer.readString(length: buffer.readableBytesView.startIndex.distance(to: firstBad))!
         }
@@ -73,7 +73,7 @@ extension ParserLibrary {
             }
 
             guard let firstBad = maybeFirstBad else {
-                throw NIOIMAP.ParsingError.incompleteMessage
+                throw ParserError() // TODO: this maybe should support parsing to EOF
             }
             guard firstBad != buffer.readableBytesView.startIndex else {
                 throw ParserError(hint: "couldn't find one or more of the required characters")
@@ -89,7 +89,7 @@ extension ParserLibrary {
             }
 
             guard let firstBad = maybeFirstBad else {
-                throw NIOIMAP.ParsingError.incompleteMessage
+                throw ParserError() // TODO: this maybe should support parsing to EOF
             }
             return buffer.readSlice(length: buffer.readableBytesView.startIndex.distance(to: firstBad))!
         }
@@ -102,7 +102,7 @@ extension ParserLibrary {
             }
 
             guard let firstBad = maybeFirstBad else {
-                throw NIOIMAP.ParsingError.incompleteMessage
+                throw ParserError() // TODO: this maybe should support parsing to EOF
             }
             guard firstBad != buffer.readableBytesView.startIndex else {
                 throw ParserError()
@@ -179,7 +179,7 @@ extension ParserLibrary {
                 guard needle.utf8.starts(with: buffer.readableBytesView, by: { $0 & 0xdf == $1 & 0xdf }) else {
                     throw ParserError(hint: "Tried to parse \(needle) in \(String(decoding: buffer.readableBytesView, as: Unicode.UTF8.self))")
                 }
-                throw NIOIMAP.ParsingError.incompleteMessage
+                throw ParserError(hint: "not enough bytes")
             }
 
             assert(needle.utf8.allSatisfy { $0 & 0b1000_0000 == 0 }, "needle needs to be ASCII but \(needle) isn't")
@@ -202,7 +202,7 @@ extension ParserLibrary {
     static func parseSpace(buffer: inout ByteBuffer, tracker: StackTracker) throws {
         return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             guard let actual = buffer.readString(length: 1) else {
-                throw NIOIMAP.ParsingError.incompleteMessage
+                throw ParserError(hint: "not enough bytes")
             }
             guard actual == " " else {
                 throw ParserError(hint: "Expected space, found \(actual)")
@@ -232,16 +232,14 @@ extension ParserLibrary {
             return
         case .none:
             guard let first = buffer.getInteger(at: buffer.readerIndex, as: UInt8.self) else {
-                throw NIOIMAP.ParsingError.incompleteMessage
+                throw ParserError(hint: "not enough bytes")
             }
             switch first {
             case UInt8(ascii: "\n"):
                 buffer.moveReaderIndex(forwardBy: 1)
                 return
-            case UInt8(ascii: "\r"):
-                throw NIOIMAP.ParsingError.incompleteMessage
             default:
-                // found only one byte which is neither CR nor LF.
+                // found only one byte which is not LF.
                 throw ParserError()
             }
         default:

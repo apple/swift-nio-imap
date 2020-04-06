@@ -56,9 +56,12 @@ extension TestUtilities {
             let expectedString = String(decoding: expected.readableBytesView, as: Unicode.UTF8.self)
             let remainingString = String(decoding: inputBuffer.readableBytesView, as: Unicode.UTF8.self)
             if shouldRemainUnchanged {
-                XCTAssertEqual(beforeRunningBody, inputBuffer, file: file, line: line)
+                XCTAssertEqual(beforeRunningBody, inputBuffer,
+                               "change detected, despite shouldRemainUnchanged=true", file: file, line: line)
             } else {
-                XCTAssertEqual(remainingString, expectedString, file: file, line: line)
+                XCTAssertEqual(remainingString, expectedString,
+                               "remaining bytes '\(remainingString)' but expected '\(expectedString)'",
+                               file: file, line: line)
             }
         }
 

@@ -35,8 +35,8 @@ public class ResponseRoundtripHandler: ChannelInboundHandler {
         do {
             var originalBufferCopy = originalBuffer
             var responses = [NIOIMAP.ResponseStream]()
-            while originalBufferCopy.readableBytes > 0 {
-                responses.append(try parser.parseResponseStream(buffer: &originalBufferCopy))
+            while originalBufferCopy.readableBytes > 0, let response = try parser.parseResponseStream(buffer: &originalBufferCopy) {
+                responses.append(response)
             }
             
             var roundtripBuffer = context.channel.allocator.buffer(capacity: originalBuffer.readableBytes)

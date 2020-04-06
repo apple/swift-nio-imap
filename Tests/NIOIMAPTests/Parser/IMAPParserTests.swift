@@ -92,6 +92,9 @@ final class ParserUnitTests: XCTestCase {
                 ()
             }
             XCTFail("unhandled error: \(error)")
+            if let error = error as? NIOIMAP.IMAPDecoderError {
+                print(String(decoding: error.buffer.readableBytesView, as: Unicode.UTF8.self))
+            }
         }
     }
 
@@ -276,7 +279,7 @@ extension ParserUnitTests {
     func testAddress_invalid_incomplete() {
         var buffer = TestUtilities.createTestByteBuffer(for: #"("a" "b" "c""#)
         XCTAssertThrowsError(try NIOIMAP.GrammarParser.parseAddress(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertEqual(e as? NIOIMAP.ParsingError, .incompleteMessage)
+            XCTAssertTrue(e is ParserError)
         }
     }
 
@@ -472,7 +475,7 @@ extension ParserUnitTests {
     func testAtom_invalid_incomplete() {
         var buffer = TestUtilities.createTestByteBuffer(for: "hello")
         XCTAssertThrowsError(try NIOIMAP.GrammarParser.parseAtom(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertEqual(e as? NIOIMAP.ParsingError, .incompleteMessage)
+            XCTAssertTrue(e is ParserError)
         }
     }
 
@@ -618,7 +621,7 @@ extension ParserUnitTests {
     func testParseBodyFieldParam_invalid_oneObject() {
         var buffer = TestUtilities.createTestByteBuffer(for: #"("p1" "#)
         XCTAssertThrowsError(try NIOIMAP.GrammarParser.parseBodyFieldParam(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertEqual(e as? NIOIMAP.ParsingError, .incompleteMessage)
+            XCTAssertTrue(e is ParserError)
         }
     }
 
@@ -675,7 +678,7 @@ extension ParserUnitTests {
     func testCapability_invalid_empty() {
         var buffer = TestUtilities.createTestByteBuffer(for: "")
         XCTAssertThrowsError(try NIOIMAP.GrammarParser.parseSequenceNumber(buffer: &buffer, tracker: .testTracker)) { error in
-            XCTAssertEqual(error as? NIOIMAP.ParsingError, NIOIMAP.ParsingError.incompleteMessage)
+            XCTAssertTrue(error is ParserError)
         }
     }
 
@@ -756,7 +759,7 @@ extension ParserUnitTests {
     func testCreate_invalid_incomplete() {
         var buffer = TestUtilities.createTestByteBuffer(for: "CREATE ")
         XCTAssertThrowsError(try NIOIMAP.GrammarParser.parseCreate(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertEqual(e as? NIOIMAP.ParsingError, .incompleteMessage, "e has type \(e)")
+            XCTAssertTrue(e is ParserError)
         }
     }
 
@@ -1077,7 +1080,7 @@ extension ParserUnitTests {
     func testDateMonth_invalid_incomplete() {
         var buffer = TestUtilities.createTestByteBuffer(for: "ju")
         XCTAssertThrowsError(try NIOIMAP.GrammarParser.parseDateMonth(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertEqual(e as? NIOIMAP.ParsingError, .incompleteMessage)
+            XCTAssertTrue(e is ParserError)
         }
     }
 
@@ -1103,7 +1106,7 @@ extension ParserUnitTests {
     func testDateText_invalid_missing_year() {
         var buffer = TestUtilities.createTestByteBuffer(for: "25-Jun-")
         XCTAssertThrowsError(try NIOIMAP.GrammarParser.parseDateText(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertEqual(e as? NIOIMAP.ParsingError, .incompleteMessage)
+            XCTAssertTrue(e is ParserError)
         }
     }
 
@@ -1126,7 +1129,7 @@ extension ParserUnitTests {
     func testParseDateTime__invalid_incomplete() {
         var buffer = #""25-Jun-1994 01"# as ByteBuffer
         XCTAssertThrowsError(try NIOIMAP.GrammarParser.parseDateTime(buffer: &buffer, tracker: .testTracker)) { error in
-            XCTAssertEqual(error as? NIOIMAP.ParsingError, NIOIMAP.ParsingError.incompleteMessage)
+            XCTAssertTrue(error is ParserError)
         }
     }
 
@@ -1167,7 +1170,7 @@ extension ParserUnitTests {
     func testDelete_invalid_incomplete() {
         var buffer = TestUtilities.createTestByteBuffer(for: "DELETE ")
         XCTAssertThrowsError(try NIOIMAP.GrammarParser.parseDelete(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertEqual(e as? NIOIMAP.ParsingError, .incompleteMessage, "e has type \(e)")
+            XCTAssertTrue(e is ParserError)
         }
     }
 
@@ -1292,7 +1295,7 @@ extension ParserUnitTests {
     func testParseEnvelopeBCC_invalid_incomplete() {
         var buffer = #"(("1" "2" "3" "4")("5" "6" "7""# as ByteBuffer
         XCTAssertThrowsError(try NIOIMAP.GrammarParser.parseEnvelopeBcc(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertEqual(e as? NIOIMAP.ParsingError, .incompleteMessage)
+            XCTAssertTrue(e is ParserError)
         }
     }
 
@@ -1326,7 +1329,7 @@ extension ParserUnitTests {
     func testParseEnvelopeCC_invalid_incomplete() {
         var buffer = #"(("1" "2" "3" "4")("5" "6" "7""# as ByteBuffer
         XCTAssertThrowsError(try NIOIMAP.GrammarParser.parseEnvelopeCc(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertEqual(e as? NIOIMAP.ParsingError, .incompleteMessage)
+            XCTAssertTrue(e is ParserError)
         }
     }
 
@@ -1360,7 +1363,7 @@ extension ParserUnitTests {
     func testParseEnvelopeFrom_invalid_incomplete() {
         var buffer = #"(("1" "2" "3" "4")("5" "6" "7""# as ByteBuffer
         XCTAssertThrowsError(try NIOIMAP.GrammarParser.parseEnvelopeFrom(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertEqual(e as? NIOIMAP.ParsingError, .incompleteMessage)
+            XCTAssertTrue(e is ParserError)
         }
     }
 
@@ -1394,7 +1397,7 @@ extension ParserUnitTests {
     func testParseEnvelopeReplyTo_invalid_incomplete() {
         var buffer = #"(("1" "2" "3" "4")("5" "6" "7""# as ByteBuffer
         XCTAssertThrowsError(try NIOIMAP.GrammarParser.parseEnvelopeReplyTo(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertEqual(e as? NIOIMAP.ParsingError, .incompleteMessage)
+            XCTAssertTrue(e is ParserError)
         }
     }
 
@@ -1428,7 +1431,7 @@ extension ParserUnitTests {
     func testParseEnvelopeSender_invalid_incomplete() {
         var buffer = #"(("1" "2" "3" "4")("5" "6" "7""# as ByteBuffer
         XCTAssertThrowsError(try NIOIMAP.GrammarParser.parseEnvelopeSender(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertEqual(e as? NIOIMAP.ParsingError, .incompleteMessage)
+            XCTAssertTrue(e is ParserError)
         }
     }
 
@@ -1462,7 +1465,7 @@ extension ParserUnitTests {
     func testParseEnvelopeTo_invalid_incomplete() {
         var buffer = #"(("1" "2" "3" "4")("5" "6" "7""# as ByteBuffer
         XCTAssertThrowsError(try NIOIMAP.GrammarParser.parseEnvelopeTo(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertEqual(e as? NIOIMAP.ParsingError, .incompleteMessage)
+            XCTAssertTrue(e is ParserError)
         }
     }
 
@@ -1499,7 +1502,7 @@ extension ParserUnitTests {
     func testExamine_invalid_incomplete() {
         var buffer = TestUtilities.createTestByteBuffer(for: "EXAMINE ")
         XCTAssertThrowsError(try NIOIMAP.GrammarParser.parseExamine(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertEqual(e as? NIOIMAP.ParsingError, .incompleteMessage, "e has type \(e)")
+            XCTAssertTrue(e is ParserError)
         }
     }
 
@@ -1848,7 +1851,7 @@ extension ParserUnitTests {
     func testParseMailboxList_invalid_character_incomplete() {
         var buffer = "() \"" as ByteBuffer
         XCTAssertThrowsError(try NIOIMAP.GrammarParser.parseMailboxList(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertEqual(e as? NIOIMAP.ParsingError, .incompleteMessage)
+            XCTAssertTrue(e is ParserError)
         }
     }
 
@@ -1994,7 +1997,7 @@ extension ParserUnitTests {
     func testMediaMessage_invalid_partial() {
         var buffer = TestUtilities.createTestByteBuffer(for: "\"messAGE\"")
         XCTAssertThrowsError(try NIOIMAP.GrammarParser.parseMediaMessage(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertEqual(e as? NIOIMAP.ParsingError, .incompleteMessage, "e has type \(e)")
+            XCTAssertTrue(e is ParserError)
         }
     }
 
@@ -2027,7 +2030,7 @@ extension ParserUnitTests {
     func testMediaText_invalid_missingSubtype() {
         var buffer = TestUtilities.createTestByteBuffer(for: #""TEXT""#)
         XCTAssertThrowsError(try NIOIMAP.GrammarParser.parseMediaText(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertEqual(e as? NIOIMAP.ParsingError, .incompleteMessage, "e has type \(e)")
+            XCTAssertTrue(e is ParserError)
         }
     }
 
@@ -2246,7 +2249,7 @@ extension ParserUnitTests {
     func test_parseNewlineFailure() {
         var buffer = TestUtilities.createTestByteBuffer(for: "\r")
         XCTAssertThrowsError(try ParserLibrary.parseNewline(buffer: &buffer, tracker: .testTracker)) { error in
-            XCTAssertEqual(error as? NIOIMAP.ParsingError, NIOIMAP.ParsingError.incompleteMessage)
+            XCTAssertTrue(error is ParserError)
         }
         XCTAssertEqual(UInt8(ascii: "\r"), buffer.readInteger(as: UInt8.self))
 
@@ -2292,7 +2295,7 @@ extension ParserUnitTests {
     func testNil_invalid_incomplete() {
         var buffer = TestUtilities.createTestByteBuffer(for: "N")
         XCTAssertThrowsError(try NIOIMAP.GrammarParser.parseNil(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertEqual(e as? NIOIMAP.ParsingError, .incompleteMessage, "e has type \(e)")
+            XCTAssertTrue(e is ParserError)
         }
     }
 
@@ -2359,7 +2362,7 @@ extension ParserUnitTests {
     func testNumber_invalid_empty() {
         var buffer = TestUtilities.createTestByteBuffer(for: "")
         XCTAssertThrowsError(try ParserLibrary.parseNewline(buffer: &buffer, tracker: .testTracker)) { error in
-            XCTAssertEqual(error as? NIOIMAP.ParsingError, NIOIMAP.ParsingError.incompleteMessage)
+            XCTAssertTrue(error is ParserError)
         }
     }
 
@@ -2406,7 +2409,7 @@ extension ParserUnitTests {
     func testNZNumber_invalid_empty() {
         var buffer = TestUtilities.createTestByteBuffer(for: "")
         XCTAssertThrowsError(try ParserLibrary.parseNewline(buffer: &buffer, tracker: .testTracker)) { error in
-            XCTAssertEqual(error as? NIOIMAP.ParsingError, NIOIMAP.ParsingError.incompleteMessage)
+            XCTAssertTrue(error is ParserError)
         }
     }
 
@@ -2846,7 +2849,7 @@ extension ParserUnitTests {
     func testParseSection_invalid_none() {
         var buffer = "" as ByteBuffer
         XCTAssertThrowsError(try NIOIMAP.GrammarParser.parseSectionPart(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertEqual(e as? NIOIMAP.ParsingError, .incompleteMessage)
+            XCTAssertTrue(e is ParserError)
         }
     }
 
@@ -2880,7 +2883,7 @@ extension ParserUnitTests {
     func testSelect_invalid_incomplete() {
         var buffer = TestUtilities.createTestByteBuffer(for: "SELECT ")
         XCTAssertThrowsError(try NIOIMAP.GrammarParser.parseSelect(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertEqual(e as? NIOIMAP.ParsingError, .incompleteMessage, "e has type \(e)")
+            XCTAssertTrue(e is ParserError)
         }
     }
 
@@ -2989,7 +2992,7 @@ extension ParserUnitTests {
     func testSequenceSet_invalid_none() {
         var buffer = TestUtilities.createTestByteBuffer(for: "")
         XCTAssertThrowsError(try NIOIMAP.GrammarParser.parseSequenceSet(buffer: &buffer, tracker: .testTracker)) { error in
-            XCTAssertEqual(error as? NIOIMAP.ParsingError, NIOIMAP.ParsingError.incompleteMessage)
+            XCTAssertTrue(error is ParserError)
         }
     }
 
@@ -3091,7 +3094,7 @@ extension ParserUnitTests {
     func testStatusAttributeList_invalid_none() {
         var buffer = TestUtilities.createTestByteBuffer(for: "")
         XCTAssertThrowsError(try NIOIMAP.GrammarParser.parseStatusAttributeList(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertEqual(e as? NIOIMAP.ParsingError, .incompleteMessage)
+            XCTAssertTrue(e is ParserError)
         }
     }
 
@@ -3155,7 +3158,7 @@ extension ParserUnitTests {
     func testSubscribe_invalid_incomplete() {
         var buffer = TestUtilities.createTestByteBuffer(for: "SUBSCRIBE ")
         XCTAssertThrowsError(try NIOIMAP.GrammarParser.parseSubscribe(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertEqual(e as? NIOIMAP.ParsingError, .incompleteMessage, "e has type \(e)")
+            XCTAssertTrue(e is ParserError)
         }
     }
 
@@ -3238,7 +3241,7 @@ extension ParserUnitTests {
     func testTag_invalid_short() {
         var buffer = TestUtilities.createTestByteBuffer(for: "")
         XCTAssertThrowsError(try NIOIMAP.GrammarParser.parseTag(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertEqual(e as? NIOIMAP.ParsingError, .incompleteMessage)
+            XCTAssertTrue(e is ParserError)
         }
     }
 
@@ -3297,14 +3300,14 @@ extension ParserUnitTests {
     func testText_empty() {
         var buffer = TestUtilities.createTestByteBuffer(for: "")
         XCTAssertThrowsError(try NIOIMAP.GrammarParser.parseText(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertEqual(e as? NIOIMAP.ParsingError, .incompleteMessage, "e has type \(e)")
+            XCTAssertTrue(e is ParserError)
         }
     }
 
     func testText_incomplete() {
         var buffer = TestUtilities.createTestByteBuffer(for: "hello world!")
         XCTAssertThrowsError(try NIOIMAP.GrammarParser.parseText(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertEqual(e as? NIOIMAP.ParsingError, .incompleteMessage, "e has type \(e)")
+            XCTAssertTrue(e is ParserError)
         }
     }
 
@@ -3351,7 +3354,7 @@ extension ParserUnitTests {
     func testDateTime_invalid_partial() {
         var buffer = TestUtilities.createTestByteBuffer(for: "12:")
         XCTAssertThrowsError(try NIOIMAP.GrammarParser.parseTime(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertEqual(e as? NIOIMAP.ParsingError, .incompleteMessage)
+            XCTAssertTrue(e is ParserError)
         }
     }
 
@@ -3443,7 +3446,7 @@ extension ParserUnitTests {
     func testUniqueID_invalid_incomplete() {
         var buffer = TestUtilities.createTestByteBuffer(for: "123")
         XCTAssertThrowsError(try NIOIMAP.GrammarParser.parseUniqueID(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertEqual(e as? NIOIMAP.ParsingError, .incompleteMessage)
+            XCTAssertTrue(e is ParserError)
         }
     }
 
@@ -3463,7 +3466,7 @@ extension ParserUnitTests {
     func testUnsubscribe_invalid_incomplete() {
         var buffer = TestUtilities.createTestByteBuffer(for: "UNSUBSCRIBE ")
         XCTAssertThrowsError(try NIOIMAP.GrammarParser.parseUnsubscribe(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertEqual(e as? NIOIMAP.ParsingError, .incompleteMessage, "e has type \(e)")
+            XCTAssertTrue(e is ParserError)
         }
     }
 
@@ -3509,7 +3512,7 @@ extension ParserUnitTests {
     func testXCommand_invalid_incomplete() {
         var buffer = TestUtilities.createTestByteBuffer(for: "xhello")
         XCTAssertThrowsError(try NIOIMAP.GrammarParser.parseXCommand(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertEqual(e as? NIOIMAP.ParsingError, .incompleteMessage)
+            XCTAssertTrue(e is ParserError)
         }
     }
 
@@ -3537,7 +3540,7 @@ extension ParserUnitTests {
     func testZone_short() {
         var buffer = TestUtilities.createTestByteBuffer(for: "+12")
         XCTAssertThrowsError(try NIOIMAP.GrammarParser.parseZone(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertEqual(e as? NIOIMAP.ParsingError, .incompleteMessage, "e has type \(e)")
+            XCTAssertTrue(e is ParserError)
         }
     }
 
@@ -3577,7 +3580,7 @@ extension ParserUnitTests {
     func test2digit_invalid_short() {
         var buffer = TestUtilities.createTestByteBuffer(for: [UInt8(ascii: "1")  ])
         XCTAssertThrowsError(try NIOIMAP.GrammarParser.parse2Digit(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertEqual(e as? NIOIMAP.ParsingError, .incompleteMessage)
+            XCTAssertTrue(e is ParserError)
         }
     }
 
@@ -3610,7 +3613,7 @@ extension ParserUnitTests {
     func test4digit_invalid_short() {
         var buffer = TestUtilities.createTestByteBuffer(for: [UInt8(ascii: "1")])
         XCTAssertThrowsError(try NIOIMAP.GrammarParser.parse4Digit(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertEqual(e as? NIOIMAP.ParsingError, .incompleteMessage)
+            XCTAssertTrue(e is ParserError)
         }
     }
 

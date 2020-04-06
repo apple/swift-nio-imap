@@ -23,11 +23,9 @@ final class ParserLibraryTests: XCTestCase {
 extension ParserLibraryTests {
     func test_parseOptionalWorksForNothing() {
         var buffer = TestUtilities.createTestByteBuffer(for: "")
-        XCTAssertThrowsError(try ParserLibrary.parseOptional(buffer: &buffer, tracker: StackTracker.testTracker) { buffer, tracker in
+        XCTAssertNoThrow(XCTAssertNil(try ParserLibrary.parseOptional(buffer: &buffer, tracker: StackTracker.testTracker) { buffer, tracker in
             try ParserLibrary.parseFixedString("x", buffer: &buffer, tracker: tracker)
-        }) { error in
-            XCTAssertEqual(error as? NIOIMAP.ParsingError, NIOIMAP.ParsingError.incompleteMessage)
-        }
+        }))
     }
 
     func test_parseOptionalWorks() {
@@ -47,12 +45,10 @@ extension ParserLibraryTests {
 
     func test_parseOptionalCorrectlyResetsForCompositesIfNotEnough() {
         var buffer = TestUtilities.createTestByteBuffer(for: "x")
-        XCTAssertThrowsError(try ParserLibrary.parseOptional(buffer: &buffer, tracker: StackTracker.testTracker) { buffer, tracker in
+        XCTAssertNoThrow(XCTAssertNil(try ParserLibrary.parseOptional(buffer: &buffer, tracker: StackTracker.testTracker) { buffer, tracker -> Void in
             try ParserLibrary.parseFixedString("x", buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseFixedString("y", buffer: &buffer, tracker: tracker)
-        }) { error in
-            XCTAssertEqual(error as? NIOIMAP.ParsingError, NIOIMAP.ParsingError.incompleteMessage)
-        }
+        }))
         XCTAssertEqual(1, buffer.readableBytes)
     }
 
@@ -91,7 +87,7 @@ extension ParserLibraryTests {
                                                                 caseSensitive: true,
                                                                 buffer: &buffer,
                                                                 tracker: .testTracker)) { error in
-                                                                    XCTAssertEqual(error as? NIOIMAP.ParsingError, NIOIMAP.ParsingError.incompleteMessage)
+                                                                    XCTAssertTrue(error is ParserError)
         }
     }
 
@@ -111,7 +107,7 @@ extension ParserLibraryTests {
         XCTAssertThrowsError(try ParserLibrary.parseFixedString("fooFooFOO",
                                                                 buffer: &buffer,
                                                                 tracker: .testTracker)) { error in
-                                                                    XCTAssertEqual(error as? NIOIMAP.ParsingError, NIOIMAP.ParsingError.incompleteMessage)
+                                                                    XCTAssertTrue(error is ParserError)
         }
     }
 
@@ -144,12 +140,11 @@ extension ParserLibraryTests {
 
     func test_parseZeroOrMoreParsesNothingNoData() {
         TestUtilities.withBuffer("") { buffer in
-            XCTAssertThrowsError(try ParserLibrary.parseZeroOrMore(buffer: &buffer, tracker: .testTracker) { buffer, tracker in
+            XCTAssertNoThrow(XCTAssertEqual(0,
+                                            try ParserLibrary.parseZeroOrMore(buffer: &buffer, tracker: .testTracker) { buffer, tracker in
                 try ParserLibrary.parseFixedString("x", buffer: &buffer, tracker: tracker)
                 try ParserLibrary.parseFixedString("x", buffer: &buffer, tracker: tracker)
-            }) { error in
-                XCTAssertEqual(error as? NIOIMAP.ParsingError, NIOIMAP.ParsingError.incompleteMessage)
-            }
+            }.count))
         }
     }
 
@@ -197,7 +192,7 @@ extension ParserLibraryTests {
                 try ParserLibrary.parseFixedString("x", buffer: &buffer, tracker: tracker)
                 try ParserLibrary.parseFixedString("x", buffer: &buffer, tracker: tracker)
             }) { error in
-                XCTAssertEqual(error as? NIOIMAP.ParsingError, NIOIMAP.ParsingError.incompleteMessage)
+                XCTAssertTrue(error is ParserError)
             }
         }
     }
