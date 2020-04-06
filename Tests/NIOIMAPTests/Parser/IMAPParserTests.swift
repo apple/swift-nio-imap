@@ -2548,8 +2548,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
 
     func testParseSearchReturnOptions() {
-        let inputs: [(String, String, NIOIMAP.SearchReturnOptions, UInt)] = [
-            (" RETURN ()", "\r", nil, #line),
+        let inputs: [(String, String, [NIOIMAP.SearchReturnOption], UInt)] = [
             (" RETURN (ALL)", "\r", [.all], #line),
             (" RETURN (MIN MAX COUNT)", "\r", [.min, .max, .count], #line),
             (" RETURN (m1 m2)","\r",[

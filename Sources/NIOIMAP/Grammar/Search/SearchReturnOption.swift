@@ -16,9 +16,6 @@ import NIO
 
 extension NIOIMAP {
 
-    /// IMAPv4 `search-return-opts`
-    public typealias SearchReturnOptions = [SearchReturnOption]?
-
     /// IMAPv4 `search-return-opt`
     public enum SearchReturnOption: Equatable {
         case min
@@ -51,7 +48,7 @@ extension ByteBuffer {
         }
     }
 
-    @discardableResult mutating func writeSearchReturnOptions(_ options: NIOIMAP.SearchReturnOptions) -> Int {
+    @discardableResult mutating func writeSearchReturnOptions(_ options: [NIOIMAP.SearchReturnOption]?) -> Int {
         self.writeString(" RETURN (") +
         self.writeIfExists(options) { (options) -> Int in
             self.writeArray(options, parenthesis: false) { (option, self) in

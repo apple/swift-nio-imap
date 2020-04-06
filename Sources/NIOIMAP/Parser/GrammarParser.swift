@@ -3450,7 +3450,7 @@ extension NIOIMAP.GrammarParser {
     }
 
     // search-return-opts   = SP "RETURN" SP "(" [search-return-opt *(SP search-return-opt)] ")"
-    static func parseSearchReturnOptions(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.SearchReturnOptions {
+    static func parseSearchReturnOptions(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [NIOIMAP.SearchReturnOption] {
         return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
             try ParserLibrary.parseFixedString(" RETURN (", buffer: &buffer, tracker: tracker)
             let array = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> [NIOIMAP.SearchReturnOption] in
@@ -3460,7 +3460,7 @@ extension NIOIMAP.GrammarParser {
                     return try self.parseSearchReturnOption(buffer: &buffer, tracker: tracker)
                 }
                 return array
-            }
+            } ?? []
             try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)
             return array
         }
