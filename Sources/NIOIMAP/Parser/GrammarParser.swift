@@ -1057,17 +1057,17 @@ extension NIOIMAP.GrammarParser {
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
             let subject = try self.parseNString(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
-            let from = try self.parseEnvelopeFrom(buffer: &buffer, tracker: tracker)
+            let from = try self.parseOptionalEnvelopeAddresses(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
-            let sender = try self.parseEnvelopeSender(buffer: &buffer, tracker: tracker)
+            let sender = try self.parseOptionalEnvelopeAddresses(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
-            let replyTo = try self.parseEnvelopeReplyTo(buffer: &buffer, tracker: tracker)
+            let replyTo = try self.parseOptionalEnvelopeAddresses(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
-            let to = try self.parseEnvelopeTo(buffer: &buffer, tracker: tracker)
+            let to = try self.parseOptionalEnvelopeAddresses(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
-            let cc = try self.parseEnvelopeCc(buffer: &buffer, tracker: tracker)
+            let cc = try self.parseOptionalEnvelopeAddresses(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
-            let bcc = try self.parseEnvelopeBcc(buffer: &buffer, tracker: tracker)
+            let bcc = try self.parseOptionalEnvelopeAddresses(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
             let inReplyTo = try self.parseNString(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
@@ -1086,36 +1086,6 @@ extension NIOIMAP.GrammarParser {
                 messageID: messageID
             )
         }
-    }
-
-    // env-bcc         = "(" 1*address ")" / nil
-    static func parseEnvelopeBcc(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Envelope.Addresses {
-        return try self.parseOptionalEnvelopeAddresses(buffer: &buffer, tracker: tracker)
-    }
-
-    // env-cc          = "(" 1*address ")" / nil
-    static func parseEnvelopeCc(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Envelope.Addresses {
-        return try self.parseOptionalEnvelopeAddresses(buffer: &buffer, tracker: tracker)
-    }
-
-    // env-from        = "(" 1*address ")" / nil
-    static func parseEnvelopeFrom(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Envelope.Addresses {
-        return try self.parseOptionalEnvelopeAddresses(buffer: &buffer, tracker: tracker)
-    }
-
-    // env-reply-to    = "(" 1*address ")" / nil
-    static func parseEnvelopeReplyTo(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Envelope.Addresses {
-        return try self.parseOptionalEnvelopeAddresses(buffer: &buffer, tracker: tracker)
-    }
-
-    // env-sender      = "(" 1*address ")" / nil
-    static func parseEnvelopeSender(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Envelope.Addresses {
-        return try self.parseOptionalEnvelopeAddresses(buffer: &buffer, tracker: tracker)
-    }
-
-    // env-to          = "(" 1*address ")" / nil
-    static func parseEnvelopeTo(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Envelope.Addresses {
-        return try self.parseOptionalEnvelopeAddresses(buffer: &buffer, tracker: tracker)
     }
 
     // entry-type-req = entry-type-resp / all
@@ -4364,8 +4334,8 @@ extension NIOIMAP.GrammarParser {
         return addresses
     }
 
-    static func parseOptionalEnvelopeAddresses(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Envelope.Addresses {
-        func parseOptionalEnvelopeAddresses_nil(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Envelope.Addresses {
+    static func parseOptionalEnvelopeAddresses(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [NIOIMAP.Address]? {
+        func parseOptionalEnvelopeAddresses_nil(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [NIOIMAP.Address]? {
             try self.parseNil(buffer: &buffer, tracker: tracker)
             return nil
         }
