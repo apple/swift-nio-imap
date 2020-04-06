@@ -27,8 +27,8 @@ extension NIOIMAP {
         case bodyPeekSection(_ section: SectionSpec?, Partial?)
         case uid
         case modSequence(ModifierSequenceValue)
-        case binary(peek: Bool, section: SectionBinary, partial: Partial?)
-        case binarySize(section: SectionBinary)
+        case binary(peek: Bool, section: [Int]?, partial: Partial?)
+        case binarySize(section: [Int]?)
     }
     
 }
@@ -113,12 +113,12 @@ extension ByteBuffer {
         }
     }
     
-    @discardableResult mutating func writeFetchAttribute_binarySize(_ section: NIOIMAP.SectionBinary) -> Int {
+    @discardableResult mutating func writeFetchAttribute_binarySize(_ section: [Int]?) -> Int {
         self.writeString("BINARY.SIZE") +
         self.writeSectionBinary(section)
     }
     
-    @discardableResult mutating func writeFetchAttribute_binary(peek: Bool, section: NIOIMAP.SectionBinary, partial: NIOIMAP.Partial?) -> Int {
+    @discardableResult mutating func writeFetchAttribute_binary(peek: Bool, section: [Int]?, partial: NIOIMAP.Partial?) -> Int {
         self.writeString("BINARY") +
         self.writeIfTrue(peek) {
             self.writeString(".PEEK")

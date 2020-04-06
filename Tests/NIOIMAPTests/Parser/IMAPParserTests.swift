@@ -2598,7 +2598,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     
     func testParseSectionBinary() {
-        let inputs: [(String, String, NIOIMAP.SectionBinary, UInt)] = [
+        let inputs: [(String, String, [Int]?, UInt)] = [
             ("[]", "\r", nil, #line),
             ("[1]", "\r", [1], #line),
         ]

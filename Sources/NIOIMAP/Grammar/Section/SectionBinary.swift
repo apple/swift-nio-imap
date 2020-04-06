@@ -14,16 +14,9 @@
 
 import NIO
 
-extension NIOIMAP {
-
-    /// IMAPv4 `section-binary`
-    public typealias SectionBinary = [Int]?
-
-}
-
 extension ByteBuffer {
     
-    @discardableResult mutating func writeSectionBinary(_ binary: NIOIMAP.SectionBinary) -> Int {
+    @discardableResult mutating func writeSectionBinary(_ binary: [Int]?) -> Int {
         self.writeString("[") +
         self.writeIfExists(binary) { (part) -> Int in
             self.writeSectionPart(part)
