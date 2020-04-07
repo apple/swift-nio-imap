@@ -3080,7 +3080,7 @@ extension NIOIMAP.GrammarParser {
     }
 
     // search-correlator    = SP "(" "TAG" SP tag-string ")"
-    static func parseSearchCorrelator(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.SearchCorrelator {
+    static func parseSearchCorrelator(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ByteBuffer {
         return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
             try ParserLibrary.parseFixedString(" (TAG ", buffer: &buffer, tracker: tracker)
             let tag = try self.parseTagString(buffer: &buffer, tracker: tracker)
@@ -3970,7 +3970,7 @@ extension NIOIMAP.GrammarParser {
     }
 
     // tag-string       = string
-    static func parseTagString(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.TagString {
+    static func parseTagString(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ByteBuffer {
         return try self.parseString(buffer: &buffer, tracker: tracker)
     }
 

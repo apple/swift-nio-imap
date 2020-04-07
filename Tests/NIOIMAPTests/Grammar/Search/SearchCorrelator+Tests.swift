@@ -24,7 +24,7 @@ class SearchCorrelator_Tests: EncodeTestClass {
 extension SearchCorrelator_Tests {
 
     func testEncode() {
-        let inputs: [(NIOIMAP.SearchCorrelator, String, UInt)] = [
+        let inputs: [(ByteBuffer, String, UInt)] = [
             ("some", " (TAG \"some\")", #line),
         ]
 

@@ -18,11 +18,11 @@ extension NIOIMAP {
 
     /// IMAPv4 `esearch-response`
     public struct ESearchResponse: Equatable {
-        public var correlator: SearchCorrelator?
+        public var correlator: ByteBuffer?
         public var uid: Bool
         public var returnData: [SearchReturnData]
 
-        public static func correlator(_ correlator: SearchCorrelator?, uid: Bool, returnData: [SearchReturnData]) -> Self {
+        public static func correlator(_ correlator: ByteBuffer?, uid: Bool, returnData: [SearchReturnData]) -> Self {
             return Self(correlator: correlator, uid: uid, returnData: returnData)
         }
     }
