@@ -19,7 +19,7 @@ extension NIOIMAP {
     /// IMAPv4 `tagged-ext-val`
     public enum TaggedExtensionValue: Equatable {
         case simple(TaggedExtensionSimple)
-        case comp(TaggedExtensionComplex?)
+        case comp([ByteBuffer]?)
     }
 
 }

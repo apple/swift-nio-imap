@@ -24,7 +24,7 @@ class TaggedExtensionComp_Tests: EncodeTestClass {
 extension TaggedExtensionComp_Tests {
 
     func testEncode() {
-        let inputs: [(NIOIMAP.TaggedExtensionComplex, String, UInt)] = [
+        let inputs: [([ByteBuffer], String, UInt)] = [
             (["hello"], "(\"hello\")", #line),
             (["hello", "goodbye"], "(\"hello\" \"goodbye\")", #line),
         ]

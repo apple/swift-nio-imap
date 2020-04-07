@@ -4007,7 +4007,7 @@ extension NIOIMAP.GrammarParser {
     // continuation = ( SP tagged-ext-comp )*
     // tagged-ext-comp = astring continuation | '(' tagged-ext-comp ')' continuation
     static func parseTaggedExtensionComplex_continuation(
-        into: inout NIOIMAP.TaggedExtensionComplex,
+        into: inout [ByteBuffer],
         buffer: inout ByteBuffer,
         tracker: StackTracker
     ) throws {
@@ -4022,13 +4022,13 @@ extension NIOIMAP.GrammarParser {
     }
 
     static func parseTaggedExtensionComplex_helper(
-        into: inout NIOIMAP.TaggedExtensionComplex,
+        into: inout [ByteBuffer],
         buffer: inout ByteBuffer,
         tracker: StackTracker
     ) throws {
 
         func parseTaggedExtensionComplex_string(
-            into: inout NIOIMAP.TaggedExtensionComplex,
+            into: inout [ByteBuffer],
             buffer: inout ByteBuffer,
             tracker: StackTracker
         ) throws {
@@ -4037,7 +4037,7 @@ extension NIOIMAP.GrammarParser {
         }
 
         func parseTaggedExtensionComplex_bracketed(
-            into: inout NIOIMAP.TaggedExtensionComplex,
+            into: inout [ByteBuffer],
             buffer: inout ByteBuffer,
             tracker: StackTracker
         ) throws {
@@ -4064,8 +4064,8 @@ extension NIOIMAP.GrammarParser {
     // tagged-ext-comp     = astring /
     //                       tagged-ext-comp *(SP tagged-ext-comp) /
     //                       "(" tagged-ext-comp ")"
-    static func parseTaggedExtensionComplex(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.TaggedExtensionComplex {
-        var result = NIOIMAP.TaggedExtensionComplex()
+    static func parseTaggedExtensionComplex(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [ByteBuffer] {
+        var result = [ByteBuffer]()
         try self.parseTaggedExtensionComplex_helper(into: &result, buffer: &buffer, tracker: tracker)
         return result
     }

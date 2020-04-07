@@ -3052,7 +3052,7 @@ extension ParserUnitTests {
 
     func testParseTaggedExtensionComplex() {
 
-        let inputs: [(String, String, NIOIMAP.TaggedExtensionComplex, UInt)] = [
+        let inputs: [(String, String, [ByteBuffer], UInt)] = [
             ("test", "\r\n", ["test"], #line),
             ("(test)", "\r\n", ["test"], #line),
             ("(test1 test2)", "\r\n", ["test1", "test2"], #line),
