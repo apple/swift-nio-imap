@@ -26,14 +26,12 @@ extension NIOIMAP.Body {
         }
     }
 
-    public typealias FieldDSP = FieldDSPData?
-
 }
 
 // MARK: - Encoding
 extension ByteBuffer {
 
-    @discardableResult mutating func writeBodyFieldDSP(_ dsp: NIOIMAP.Body.FieldDSP) -> Int {
+    @discardableResult mutating func writeBodyFieldDSP(_ dsp: NIOIMAP.Body.FieldDSPData?) -> Int {
         guard let dsp = dsp else {
             return self.writeNil()
         }
