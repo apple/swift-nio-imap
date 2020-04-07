@@ -17,7 +17,7 @@ import NIO
 extension NIOIMAP {
 
     /// IMAPv4 `msg-att-dynamic`
-    public typealias MessageAttributesDynamic = [FlagFetch]
+    public typealias MessageAttributesDynamic = [Flag]
     
 }
 
@@ -27,7 +27,7 @@ extension ByteBuffer {
     @discardableResult mutating func writeMessageAttributeDynamic(_ atts: NIOIMAP.MessageAttributesDynamic) -> Int {
         self.writeString("FLAGS ") +
         self.writeArray(atts) { (element, self) in
-            self.writeFlagFetch(element)
+            self.writeFlag(element)
         }
     }
 
