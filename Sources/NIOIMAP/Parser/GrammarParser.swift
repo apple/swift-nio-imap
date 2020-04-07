@@ -2280,8 +2280,8 @@ extension NIOIMAP.GrammarParser {
     }
 
     // msg-att-dynamic = "FLAGS" SP "(" [flag-fetch *(SP flag-fetch)] ")"
-    static func parseMessageAttributeDynamic(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.MessageAttributesDynamic {
-        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> NIOIMAP.MessageAttributesDynamic in
+    static func parseMessageAttributeDynamic(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [NIOIMAP.Flag] {
+        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> [NIOIMAP.Flag] in
             try ParserLibrary.parseFixedString("FLAGS (", buffer: &buffer, tracker: tracker)
             var array = [try self.parseFlagFetch(buffer: &buffer, tracker: tracker)]
             try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) -> NIOIMAP.Flag in

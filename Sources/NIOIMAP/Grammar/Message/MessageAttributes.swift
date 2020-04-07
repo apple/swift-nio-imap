@@ -17,7 +17,7 @@ import NIO
 extension NIOIMAP {
 
     public enum MessageAttributeType: Equatable {
-        case dynamic(NIOIMAP.MessageAttributesDynamic)
+        case dynamic([NIOIMAP.Flag])
         case `static`(NIOIMAP.MessageAttributesStatic)
     }
 

@@ -24,7 +24,7 @@ class MessageAttributesDynamicTests: EncodeTestClass {
 extension MessageAttributesDynamicTests {
 
     func testEncode() {
-        let inputs: [(NIOIMAP.MessageAttributesDynamic, String, UInt)] = [
+        let inputs: [([NIOIMAP.Flag], String, UInt)] = [
             ([.draft], "FLAGS (\\Draft)", #line),
             ([.flagged, .draft], "FLAGS (\\Flagged \\Draft)", #line),
         ]
