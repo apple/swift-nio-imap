@@ -2754,8 +2754,8 @@ extension NIOIMAP.GrammarParser {
     }
 
     // response-fatal  = "*" SP resp-cond-bye CRLF
-    static func parseResponseFatal(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.ResponseConditionalBye {
-        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> NIOIMAP.ResponseConditionalBye in
+    static func parseResponseFatal(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.ResponseText {
+        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> NIOIMAP.ResponseText in
             try ParserLibrary.parseFixedString("* ", buffer: &buffer, tracker: tracker)
             let bye = try self.parseResponseConditionalBye(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseFixedString("\r\n", buffer: &buffer, tracker: tracker)
@@ -2818,8 +2818,8 @@ extension NIOIMAP.GrammarParser {
     }
 
     // resp-cond-bye   = "BYE" SP resp-text
-    static func parseResponseConditionalBye(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.ResponseConditionalBye {
-        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> NIOIMAP.ResponseConditionalBye in
+    static func parseResponseConditionalBye(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.ResponseText {
+        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> NIOIMAP.ResponseText in
             try ParserLibrary.parseFixedString("BYE ", buffer: &buffer, tracker: tracker)
             return try self.parseResponseText(buffer: &buffer, tracker: tracker)
         }

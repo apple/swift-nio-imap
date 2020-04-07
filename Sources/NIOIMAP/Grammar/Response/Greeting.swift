@@ -19,7 +19,7 @@ extension NIOIMAP {
     /// IMAPv4 `greeting`
     public enum Greeting: Equatable {
         case auth(ResponseConditionalAuth)
-        case bye(ResponseConditionalBye)
+        case bye(ResponseText)
     }
 }
 
