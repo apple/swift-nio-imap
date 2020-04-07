@@ -2022,7 +2022,7 @@ extension NIOIMAP.GrammarParser {
     }
 
     // mbox-list-extended-item-tag =  astring
-    static func parseMailboxListExtendedItemTag(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Mailbox.ListExtendedItemTag {
+    static func parseMailboxListExtendedItemTag(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ByteBuffer {
         return try self.parseAString(buffer: &buffer, tracker: tracker)
     }
 
