@@ -38,7 +38,7 @@ extension ListSelectBaseOption_Tests {
     }
 
     func testEncodeQuoted() {
-        let inputs: [(NIOIMAP.ListSelectBaseOptionQuoted, String, UInt)] = [
+        let inputs: [(NIOIMAP.ListSelectBaseOption, String, UInt)] = [
             (.subscribed, #""SUBSCRIBED""#, #line),
         ]
 
