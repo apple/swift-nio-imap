@@ -48,7 +48,7 @@ extension NIOIMAP {
         case store([NIOIMAP.SequenceRange], [StoreModifier]?, StoreAttributeFlags)
         case search(returnOptions: [SearchReturnOption]?, program: SearchProgram)
         case move([NIOIMAP.SequenceRange], Mailbox)
-        case id(ID)
+        case id([IDParamsListElement]?)
         case namespace
     }
 

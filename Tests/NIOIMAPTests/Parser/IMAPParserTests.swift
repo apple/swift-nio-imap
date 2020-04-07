@@ -1492,30 +1492,8 @@ extension ParserUnitTests {
 // MARK: - id (parseID, parseIDResponse, parseIDParamsList)
 extension ParserUnitTests {
     
-    func testParseID() {
-        let inputs: [(String, String, NIOIMAP.IDResponse, UInt)] = [
-            ("ID NIL", " ", nil, #line),
-            (#"ID ("key1" "value1")"#, "" , [.key("key1", value: "value1")], #line),
-        ]
-
-        for (input, terminator, expected, line) in inputs {
-            TestUtilities.withBuffer(input, terminator: terminator) { (buffer) in
-                let testValue = try NIOIMAP.GrammarParser.parseID(buffer: &buffer, tracker: .testTracker)
-                XCTAssertEqual(testValue, expected, line: line)
-            }
-        }
-    }
-    
-    func testParseIDResponse() {
-        let inputs: [(String, String, NIOIMAP.IDResponse, UInt)] = [
-            ("ID NIL", " ", nil, #line),
-            (#"ID ("key1" "value1")"#, "" , [.key("key1", value: "value1")], #line),
-        ]
-        self.iterateTestInputs(inputs, testFunction: NIOIMAP.GrammarParser.parseIDResponse)
-    }
-    
     func testParseIDParamsList() {
-        let inputs: [(String, String, NIOIMAP.IDParamsList, UInt)] = [
+        let inputs: [(String, String, [NIOIMAP.IDParamsListElement]?, UInt)] = [
             ("NIL", " ", nil, #line),
             (#"("key1" "value1")"#, "" , [.key("key1", value: "value1")], #line),
             (

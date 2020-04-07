@@ -16,15 +16,6 @@ import NIO
 
 extension NIOIMAP {
     
-    /// IMAPv4 `id`
-    public typealias ID = IDResponse
-    
-    /// IMAPv4 `id-response`
-    public typealias IDResponse = IDParamsList
-    
-    /// IMAPv4 `id-params-list`
-    public typealias IDParamsList = [IDParamsListElement]?
-    
     // Exracted from `IDParamsList`
     public struct IDParamsListElement: Equatable {
         public var key: ByteBuffer
@@ -46,7 +37,7 @@ extension ByteBuffer {
         self.writeNString(element.value)
     }
     
-    @discardableResult mutating func writeIDParamsList(_ list: NIOIMAP.IDParamsList) -> Int {
+    @discardableResult mutating func writeIDParamsList(_ list: [NIOIMAP.IDParamsListElement]?) -> Int {
         if let array = list {
             return self.writeArray(array) { (element, self) in
                 self.writeIDParamsListElement(element)
@@ -56,12 +47,12 @@ extension ByteBuffer {
         }
     }
     
-    @discardableResult mutating func writeIDResponse(_ response: NIOIMAP.IDResponse) -> Int {
+    @discardableResult mutating func writeIDResponse(_ response: [NIOIMAP.IDParamsListElement]?) -> Int {
         self.writeString("ID ") +
         self.writeIDParamsList(response)
     }
     
-    @discardableResult mutating func writeID(_ id: NIOIMAP.ID) -> Int {
+    @discardableResult mutating func writeID(_ id: [NIOIMAP.IDParamsListElement]?) -> Int {
         self.writeString("ID ") +
         self.writeIDParamsList(id)
     }

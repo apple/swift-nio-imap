@@ -1527,7 +1527,7 @@ extension NIOIMAP.GrammarParser {
     }
 
     // id = "ID" SP id-params-list
-    static func parseID(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.ID {
+    static func parseID(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [NIOIMAP.IDParamsListElement]? {
         return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
             try ParserLibrary.parseFixedString("ID ", buffer: &buffer, tracker: tracker)
             return try parseIDParamsList(buffer: &buffer, tracker: tracker)
@@ -1535,7 +1535,7 @@ extension NIOIMAP.GrammarParser {
     }
 
     // id-response = "ID" SP id-params-list
-    static func parseIDResponse(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.IDResponse {
+    static func parseIDResponse(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [NIOIMAP.IDParamsListElement]? {
         return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
             try ParserLibrary.parseFixedString("ID ", buffer: &buffer, tracker: tracker)
             return try parseIDParamsList(buffer: &buffer, tracker: tracker)
@@ -1543,9 +1543,9 @@ extension NIOIMAP.GrammarParser {
     }
 
     // id-params-list = "(" *(string SP nstring) ")" / nil
-    static func parseIDParamsList(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.IDParamsList {
+    static func parseIDParamsList(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [NIOIMAP.IDParamsListElement]? {
 
-        func parseIDParamsList_nil(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.IDParamsList {
+        func parseIDParamsList_nil(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [NIOIMAP.IDParamsListElement]? {
             try self.parseNil(buffer: &buffer, tracker: tracker)
             return nil
         }
@@ -1557,7 +1557,7 @@ extension NIOIMAP.GrammarParser {
             return .key(key, value: value)
         }
 
-        func parseIDParamsList_some(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.IDParamsList {
+        func parseIDParamsList_some(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [NIOIMAP.IDParamsListElement]? {
             try ParserLibrary.parseFixedString("(", buffer: &buffer, tracker: tracker)
             var array = [try parseIDParamsList_element(buffer: &buffer, tracker: tracker)]
             try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) -> NIOIMAP.IDParamsListElement in

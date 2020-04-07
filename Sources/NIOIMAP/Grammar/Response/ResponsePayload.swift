@@ -23,7 +23,7 @@ extension NIOIMAP {
         case messageData(MessageData)
         case capabilityData([Capability])
         case enableData([NIOIMAP.Capability])
-        case id(IDResponse)
+        case id([IDParamsListElement]?)
     }
 
 }
