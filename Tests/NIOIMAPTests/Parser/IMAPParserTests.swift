@@ -2357,7 +2357,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     
     func testParseSearchCriteria() {
-        let inputs: [(String, String, NIOIMAP.SearchCriteria, UInt)] = [
+        let inputs: [(String, String, [NIOIMAP.SearchKey], UInt)] = [
             ("ALL", "\r", [.all], #line),
             ("ALL ANSWERED DELETED", "\r", [.all, .answered, .deleted], #line),
         ]

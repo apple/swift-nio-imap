@@ -3095,7 +3095,7 @@ extension NIOIMAP.GrammarParser {
     }
 
     // search-critera = search-key *(search-key)
-    static func parseSearchCriteria(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.SearchCriteria {
+    static func parseSearchCriteria(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [NIOIMAP.SearchKey] {
         return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
             var array = [try self.parseSearchKey(buffer: &buffer, tracker: tracker)]
             try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) in
