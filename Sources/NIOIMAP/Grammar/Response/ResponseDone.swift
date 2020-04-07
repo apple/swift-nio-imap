@@ -19,7 +19,7 @@ extension NIOIMAP {
     /// IMAPv4 `response-done`
     public enum ResponseDone: Equatable {
         case tagged(ResponseTagged)
-        case fatal(ResponseFatal)
+        case fatal(ResponseConditionalBye)
     }
     
 }

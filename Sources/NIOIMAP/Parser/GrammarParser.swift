@@ -2754,8 +2754,8 @@ extension NIOIMAP.GrammarParser {
     }
 
     // response-fatal  = "*" SP resp-cond-bye CRLF
-    static func parseResponseFatal(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.ResponseFatal {
-        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> NIOIMAP.ResponseFatal in
+    static func parseResponseFatal(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.ResponseConditionalBye {
+        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> NIOIMAP.ResponseConditionalBye in
             try ParserLibrary.parseFixedString("* ", buffer: &buffer, tracker: tracker)
             let bye = try self.parseResponseConditionalBye(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseFixedString("\r\n", buffer: &buffer, tracker: tracker)
