@@ -38,7 +38,7 @@ extension NamespaceResponseExtension_Tests {
     }
 
     func testEncode_multiple() {
-        let inputs: [(NIOIMAP.NamespaceResponseExtensions, String, UInt)] = [
+        let inputs: [([NIOIMAP.NamespaceResponseExtension], String, UInt)] = [
             ([], "", #line),
             ([.string("str1", array: ["str2"])], " \"str1\" (\"str2\")", #line),
             (

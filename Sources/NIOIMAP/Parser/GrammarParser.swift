@@ -2462,7 +2462,7 @@ extension NIOIMAP.GrammarParser {
     }
 
     // Namespace-Response-Extensions = *(Namespace-Response-Extension)
-    static func parseNamespaceResponseExtensions(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.NamespaceResponseExtensions {
+    static func parseNamespaceResponseExtensions(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [NIOIMAP.NamespaceResponseExtension] {
         return try ParserLibrary.parseZeroOrMore(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> NIOIMAP.NamespaceResponseExtension in
             return try self.parseNamespaceResponseExtension(buffer: &buffer, tracker: tracker)
         }

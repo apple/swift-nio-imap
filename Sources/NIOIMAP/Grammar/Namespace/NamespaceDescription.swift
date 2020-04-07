@@ -20,9 +20,9 @@ extension NIOIMAP {
     public struct NamespaceDescription: Equatable {
         public var string: ByteBuffer
         public var char: Character?
-        public var responseExtensions: NamespaceResponseExtensions
+        public var responseExtensions: [NamespaceResponseExtension]
 
-        public static func string(_ string: ByteBuffer, char: Character?, responseExtensions: NamespaceResponseExtensions) -> Self {
+        public static func string(_ string: ByteBuffer, char: Character?, responseExtensions: [NamespaceResponseExtension]) -> Self {
             return Self(string: string, char: char, responseExtensions: responseExtensions)
         }
     }

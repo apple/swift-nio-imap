@@ -16,9 +16,6 @@ import NIO
 
 extension NIOIMAP {
 
-    /// IMAPv4 `Namespace-Response-Extensions`
-    public typealias NamespaceResponseExtensions = [NamespaceResponseExtension]
-
     /// IMAPv4 `Namespace-Response-Extension`
     public struct NamespaceResponseExtension: Equatable {
         public var str1: ByteBuffer
@@ -34,7 +31,7 @@ extension NIOIMAP {
 // MARK: - Encoding
 extension ByteBuffer {
 
-    @discardableResult mutating func writeNamespaceResponseExtensions(_ extensions: NIOIMAP.NamespaceResponseExtensions) -> Int {
+    @discardableResult mutating func writeNamespaceResponseExtensions(_ extensions: [NIOIMAP.NamespaceResponseExtension]) -> Int {
         extensions.reduce(into: 0) { (res, ext) in
             res += self.writeNamespaceResponseExtension(ext)
         }
