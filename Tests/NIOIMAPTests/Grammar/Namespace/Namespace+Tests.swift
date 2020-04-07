@@ -24,7 +24,7 @@ class Namespace_Tests: EncodeTestClass {
 extension Namespace_Tests {
 
     func testEncode() {
-        let inputs: [(NIOIMAP.Namespace, String, UInt)] = [
+        let inputs: [([NIOIMAP.NamespaceDescription]?, String, UInt)] = [
             (nil, "NIL", #line),
             ([.string("str1", char: nil, responseExtensions: [])], "((\"str1\" NIL))", #line),
             (
