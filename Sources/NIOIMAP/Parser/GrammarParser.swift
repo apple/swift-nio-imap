@@ -4177,7 +4177,7 @@ extension NIOIMAP.GrammarParser {
     }
 
     // uid-set         = (uniqueid / uid-range) *("," uid-set)
-    static func parseUidSet(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.UIDSet {
+    static func parseUidSet(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [NIOIMAP.UIDSetType] {
 
         func parseUidSetType_id(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.UIDSetType {
             return .uniqueID(try self.parseUniqueID(buffer: &buffer, tracker: tracker))
@@ -4194,7 +4194,7 @@ extension NIOIMAP.GrammarParser {
             ], buffer: &buffer, tracker: tracker)
         }
 
-        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> NIOIMAP.UIDSet in
+        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> [NIOIMAP.UIDSetType] in
             var array = [try parseUidSetType(buffer: &buffer, tracker: tracker)]
             try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) -> NIOIMAP.UIDSetType in
                 try ParserLibrary.parseFixedString(",", buffer: &buffer, tracker: tracker)

@@ -3200,7 +3200,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     
     func testParseUIDSet() {
-        let inputs: [(String, String, NIOIMAP.UIDSet, UInt)] = [
+        let inputs: [(String, String, [NIOIMAP.UIDSetType], UInt)] = [
             ("1234", "\r\n", [.uniqueID(1234)], #line),
             ("12:34", "\r\n", [.range(NIOIMAP.UIDRange(left: 12, right: 34))], #line),
             ("1,2,34:56,78:910,11", "\r\n", [

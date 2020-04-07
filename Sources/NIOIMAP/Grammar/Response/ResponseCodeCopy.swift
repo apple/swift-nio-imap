@@ -19,10 +19,10 @@ extension NIOIMAP {
     /// IMAPv4 `response-code-copy`
     public struct ResponseCodeCopy: Equatable {
         public var num: Int
-        public var set1: UIDSet
-        public var set2: UIDSet
+        public var set1: [UIDSetType]
+        public var set2: [UIDSetType]
         
-        public static func num(_ num: Int, set1: UIDSet, set2: UIDSet) -> Self {
+        public static func num(_ num: Int, set1: [UIDSetType], set2: [UIDSetType]) -> Self {
             return Self(num: num, set1: set1, set2: set2)
         }
     }
