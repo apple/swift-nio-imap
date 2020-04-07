@@ -3818,9 +3818,9 @@ extension NIOIMAP.GrammarParser {
     }
 
     // status-att-list  = status-att-val *(SP status-att-val)
-    static func parseStatusAttributeList(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.StatusAttributeList {
+    static func parseStatusAttributeList(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [NIOIMAP.StatusAttributeValue] {
 
-        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> NIOIMAP.StatusAttributeList in
+        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> [NIOIMAP.StatusAttributeValue] in
             var array = [try parseStatusAttributeValue(buffer: &buffer, tracker: tracker)]
             try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) -> NIOIMAP.StatusAttributeValue in
                 try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)

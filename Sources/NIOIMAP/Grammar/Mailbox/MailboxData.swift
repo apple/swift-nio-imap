@@ -22,7 +22,7 @@ extension NIOIMAP.Mailbox {
         case list(NIOIMAP.Mailbox.List)
         case lsub(NIOIMAP.Mailbox.List)
         case search(NIOIMAP.ESearchResponse)
-        case status(NIOIMAP.Mailbox, NIOIMAP.StatusAttributeList?)
+        case status(NIOIMAP.Mailbox, [NIOIMAP.StatusAttributeValue]?)
         case exists(Int)
         case namespace(NIOIMAP.NamespaceResponse)
     }
@@ -66,7 +66,7 @@ extension ByteBuffer {
         self.writeMailboxList(list)
     }
     
-    private mutating func writeMailboxData_status(mailbox: NIOIMAP.Mailbox, list: NIOIMAP.StatusAttributeList?) -> Int {
+    private mutating func writeMailboxData_status(mailbox: NIOIMAP.Mailbox, list: [NIOIMAP.StatusAttributeValue]?) -> Int {
         self.writeString("STATUS ") +
         self.writeMailbox(mailbox) +
         self.writeString(" (") +
