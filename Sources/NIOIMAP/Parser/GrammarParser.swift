@@ -2725,12 +2725,12 @@ extension NIOIMAP.GrammarParser {
     }
 
     // response-data   = "*" SP response-payload CRLF
-    static func parseResponseData(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.ResponseData {
+    static func parseResponseData(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.ResponsePayload {
         return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
             try ParserLibrary.parseFixedString("* ", buffer: &buffer, tracker: tracker)
             let payload = try self.parseResponsePayload(buffer: &buffer, tracker: tracker)
             
-            if case NIOIMAP.ResponseData.messageData(NIOIMAP.MessageData.fetch(_)) = payload {
+            if case NIOIMAP.ResponsePayload.messageData(NIOIMAP.MessageData.fetch(_)) = payload {
                 return payload
             }
             

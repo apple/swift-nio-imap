@@ -2222,7 +2222,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
 
     func testParseResponseData() {
-        let inputs: [(String, String, NIOIMAP.ResponseData, UInt)] = [
+        let inputs: [(String, String, NIOIMAP.ResponsePayload, UInt)] = [
             ("* CAPABILITY ENABLE\r\n", " ", .capabilityData([.enable]), #line),
         ]
         self.iterateTestInputs(inputs, testFunction: NIOIMAP.GrammarParser.parseResponseData)

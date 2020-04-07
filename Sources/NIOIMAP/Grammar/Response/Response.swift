@@ -18,7 +18,7 @@ extension NIOIMAP {
     
     public enum ResponseType: Equatable {
         case continueRequest(ContinueRequest)
-        case responseData(ResponseData)
+        case responseData(ResponsePayload)
     }
     
 }

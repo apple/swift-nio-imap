@@ -14,17 +14,10 @@
 
 import NIO
 
-extension NIOIMAP {
-    
-    /// IMAPv4 `response-data`
-    public typealias ResponseData = ResponsePayload
-    
-}
-
 // MARK: - Encoding
 extension ByteBuffer {
 
-    @discardableResult mutating func writeResponseData(_ data: NIOIMAP.ResponseData) -> Int {
+    @discardableResult mutating func writeResponseData(_ data: NIOIMAP.ResponsePayload) -> Int {
         self.writeString("* ") +
         self.writeResponsePayload(data) +
         self.writeString("\r\n")

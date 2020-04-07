@@ -24,7 +24,7 @@ class ResponseDataTests: EncodeTestClass {
 extension ResponseDataTests {
 
     func testEncode() {
-        let inputs: [(NIOIMAP.ResponseData, String, UInt)] = [
+        let inputs: [(NIOIMAP.ResponsePayload, String, UInt)] = [
             (.messageData(.expunge(3)), "* 3 EXPUNGE\r\n", #line),
         ]
 

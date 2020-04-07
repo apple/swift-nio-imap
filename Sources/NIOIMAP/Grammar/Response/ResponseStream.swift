@@ -23,7 +23,7 @@ extension NIOIMAP {
     /// For every `responseBegin`, you may recieve 0...m `simpleAttribute` and `attributeBegin`
     public enum ResponseStream: Equatable {
         case greeting(Greeting)
-        case responseBegin(ResponseData)
+        case responseBegin(ResponsePayload)
         case simpleAttribute(MessageAttributeType)
         case attributeBegin(MessageAttributesStatic)
         case attributeBytes(ByteBuffer)
