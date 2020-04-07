@@ -15,23 +15,30 @@
 import NIO
 
 extension ByteBuffer {
-
+    
+    @discardableResult mutating func writeIMAPString(_ str: String) -> Int {
+        self.writeIMAPString(Array(str.utf8)) // this is horrid
+    }
+    
     @discardableResult mutating func writeIMAPString(_ str: ByteBuffer) -> Int {
-        var buffer = str
+        self.writeIMAPString(Array(str.readableBytesView)) // also horrid
+    }
+
+    fileprivate mutating func writeIMAPString(_ bytes: [UInt8]) -> Int {
         
         // allSatisfy vs contains because IMO it's a little clearer
         var foundNull = false
-        let canUseQuoted = buffer.readableBytesView.allSatisfy { c in
+        let canUseQuoted = bytes.allSatisfy { c in
             foundNull = foundNull || (c == 0)
             return c.isQuotedChar && !foundNull
         }
         
         if canUseQuoted {
-            return self.writeString("\"") + self.writeBuffer(&buffer) + self.writeString("\"")
+            return self.writeString("\"") + self.writeBytes(bytes) + self.writeString("\"")
         } else if foundNull {
-            return self.writeLiteral8(str)
+            return self.writeLiteral8(bytes)
         } else {
-            return self.writeLiteral(str)
+            return self.writeLiteral(bytes)
         }
     }
 
@@ -40,18 +47,16 @@ extension ByteBuffer {
         return self.writeBuffer(&buffer)
     }
 
-    @discardableResult mutating func writeLiteral(_ buffer: ByteBuffer) -> Int {
-        var buffer = buffer
-        let length = "{\(buffer.readableBytes)}\r\n"
-        return self.writeString(length) + self.writeBuffer(&buffer)
+    @discardableResult mutating func writeLiteral(_ bytes: [UInt8]) -> Int {
+        let length = "{\(bytes.count)}\r\n"
+        return self.writeString(length) + self.writeBytes(bytes)
     }
     
-    @discardableResult mutating func writeLiteral8(_ buffer: ByteBuffer) -> Int {
-        var buffer = buffer
-        let length = "~{\(buffer.readableBytes)}\r\n"
+    @discardableResult mutating func writeLiteral8(_ bytes: [UInt8]) -> Int {
+        let length = "~{\(bytes.count)}\r\n"
         return
             self.writeString(length) +
-            self.writeBuffer(&buffer)
+            self.writeBytes(bytes)
     }
 
     @discardableResult mutating func writeNil() -> Int {

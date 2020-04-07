@@ -36,21 +36,4 @@ extension ByteBuffer {
         }
     }
     
-    mutating func writeIMAPString(_ str: String) -> Int {
-        
-        // allSatisfy vs contains because IMO it's a little clearer
-        var foundNull = false
-        let canUseQuoted = str.utf8.allSatisfy { c in
-            foundNull = foundNull || (c == 0)
-            return c.isQuotedChar && !foundNull
-        }
-        
-        if canUseQuoted {
-            return self.writeString("\"\(str)\"")
-        } else {
-            return self.writeString("{\(str.utf8.count)}\r\n\(str)")
-        }
-        
-    }
-    
 }

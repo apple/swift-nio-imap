@@ -31,7 +31,7 @@ extension NIOIMAP {
 extension ByteBuffer {
 
     @discardableResult mutating func writeBodyFieldParameter(_ params: [NIOIMAP.FieldParameterPair]) -> Int {
-        guard params.count > 1 else {
+        guard params.count > 0 else {
             return self.writeNil()
         }
         return self.writeArray(params) { (element, buffer) in
@@ -40,7 +40,9 @@ extension ByteBuffer {
     }
     
     @discardableResult mutating func writeFieldParameterPair(_ pair: NIOIMAP.FieldParameterPair) -> Int {
-        self.writeString("\(pair.field) \(pair.value)")
+        self.writeIMAPString(pair.field) +
+        self.writeSpace() +
+        self.writeIMAPString(pair.value)
     }
 
 }
