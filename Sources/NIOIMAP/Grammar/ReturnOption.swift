@@ -20,7 +20,7 @@ extension NIOIMAP {
     public enum ReturnOption: Equatable {
         case subscribed
         case children
-        case statusOption(StatusOption)
+        case statusOption([StatusAttribute])
         case optionExtension(OptionExtension)
     }
 

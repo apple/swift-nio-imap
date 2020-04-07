@@ -3831,8 +3831,8 @@ extension NIOIMAP.GrammarParser {
     }
 
     // status-option = "STATUS" SP "(" status-att *(SP status-att) ")"
-    static func parseStatusOption(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.StatusOption {
-        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> NIOIMAP.StatusOption in
+    static func parseStatusOption(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [NIOIMAP.StatusAttribute] {
+        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> [NIOIMAP.StatusAttribute] in
             try ParserLibrary.parseFixedString("STATUS (", buffer: &buffer, tracker: tracker)
             var array = [try self.parseStatusAttribute(buffer: &buffer, tracker: tracker)]
             try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) -> NIOIMAP.StatusAttribute in
