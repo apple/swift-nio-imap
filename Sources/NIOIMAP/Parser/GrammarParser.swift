@@ -2555,7 +2555,7 @@ extension NIOIMAP.GrammarParser {
                 parseOptionExtensionType_standard,
                 parseOptionExtensionType_vendor
             ], buffer: &buffer, tracker: tracker)
-            let value = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> NIOIMAP.OptionValue in
+            let value = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> NIOIMAP.OptionValueComp in
                 try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
                 return try self.parseOptionValue(buffer: &buffer, tracker: tracker)
             }
@@ -2601,8 +2601,8 @@ extension NIOIMAP.GrammarParser {
     }
 
     // option-value =  "(" option-val-comp ")"
-    static func parseOptionValue(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.OptionValue {
-        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> NIOIMAP.OptionValue in
+    static func parseOptionValue(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.OptionValueComp {
+        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> NIOIMAP.OptionValueComp in
             try ParserLibrary.parseFixedString("(", buffer: &buffer, tracker: tracker)
             let comp = try self.parseOptionValueComp(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)

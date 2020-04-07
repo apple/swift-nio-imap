@@ -16,9 +16,6 @@ import NIO
 
 extension NIOIMAP {
 
-    /// IMAPv4 `option-value`
-    public typealias OptionValue = OptionValueComp
-
     /// IMAPv4 `option-val-comp`
     public enum OptionValueComp: Equatable {
         case string(ByteBuffer)
@@ -42,7 +39,7 @@ extension NIOIMAP.OptionValueComp: ExpressibleByArrayLiteral {
 // MARK: - Encoding
 extension ByteBuffer {
 
-    @discardableResult mutating func writeOptionValue(_ value: NIOIMAP.OptionValue) -> Int {
+    @discardableResult mutating func writeOptionValue(_ value: NIOIMAP.OptionValueComp) -> Int {
         self.writeString("(") +
         self.writeOptionValueComp(value) +
         self.writeString(")")
