@@ -27,17 +27,17 @@ extension BodyTypeSinglepartTests {
         let inputs: [(NIOIMAP.Body.TypeSinglepart, String, UInt)] = [
             (
                 .type(.basic(.media(.type(.application, subtype: "subtype"), fields: .parameter([], id: nil, description: nil, encoding: .base64, octets: 6))), extension: nil),
-                "\"APPLICATION\" \"subtype\" () NIL NIL \"BASE64\" 6",
+                "\"APPLICATION\" \"subtype\" NIL NIL NIL \"BASE64\" 6",
                 #line
             ),
             (
                 .type(.basic(.media(.type(.application, subtype: "subtype"), fields: .parameter([], id: "id", description: "desc", encoding: .base64, octets: 7))), extension: .fieldMD5("md5", dspLanguage: nil)),
-                "\"APPLICATION\" \"subtype\" () \"id\" \"desc\" \"BASE64\" 7 \"md5\"",
+                "\"APPLICATION\" \"subtype\" NIL \"id\" \"desc\" \"BASE64\" 7 \"md5\"",
                 #line
             ),
             (
                 .type(.text(.mediaText("subtype", fields: .parameter([], id: nil, description: nil, encoding: .base64, octets: 6), lines: 5)), extension: nil),
-                "\"TEXT\" \"subtype\" () NIL NIL \"BASE64\" 6 5",
+                "\"TEXT\" \"subtype\" NIL NIL NIL \"BASE64\" 6 5",
                 #line
             ),
             (
@@ -52,7 +52,7 @@ extension BodyTypeSinglepartTests {
                     )), extension: nil)),
                     fieldLines: 8
                 )), extension: nil),
-                "\"MESSAGE\" \"RFC822\" () NIL NIL \"BASE64\" 6 (\"date\" NIL NIL NIL NIL NIL NIL NIL NIL NIL) (\"TEXT\" \"subtype\" () NIL NIL \"BASE64\" 6 5) 8",
+                "\"MESSAGE\" \"RFC822\" NIL NIL NIL \"BASE64\" 6 (\"date\" NIL NIL NIL NIL NIL NIL NIL NIL NIL) (\"TEXT\" \"subtype\" NIL NIL NIL \"BASE64\" 6 5) 8",
                 #line
             )
         ]

@@ -27,7 +27,7 @@ extension BodyExtensionSinglepartTests {
         let inputs: [(NIOIMAP.Body.ExtensionSinglepart, String, UInt)] = [
             (.fieldMD5(nil, dspLanguage: nil), "NIL", #line),
             (.fieldMD5("md5", dspLanguage: nil), "\"md5\"", #line),
-            (.fieldMD5("md5", dspLanguage: .fieldDSP(.string("string", parameter: []), fieldLanguage: nil)), "\"md5\" (\"string\" ())", #line)
+            (.fieldMD5("md5", dspLanguage: .fieldDSP(.string("string", parameter: []), fieldLanguage: nil)), "\"md5\" (\"string\" NIL)", #line)
         ]
 
         for (test, expectedString, line) in inputs {
