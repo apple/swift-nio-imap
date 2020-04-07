@@ -2724,11 +2724,6 @@ extension NIOIMAP.GrammarParser {
         return try self.parseTaggedExtensionValue(buffer: &buffer, tracker: tracker)
     }
 
-    // response        = response-done
-    static func parseResponse(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Response {
-        return try self.parseResponseDone(buffer: &buffer, tracker: tracker)
-    }
-
     // response-data   = "*" SP response-payload CRLF
     static func parseResponseData(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.ResponseData {
         return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
