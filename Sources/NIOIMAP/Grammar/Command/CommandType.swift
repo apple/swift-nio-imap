@@ -26,7 +26,7 @@ extension NIOIMAP {
         case delete(Mailbox)
         case examine(Mailbox, [SelectParameter]?)
         case list(ListSelectOptions?, Mailbox, MailboxPatterns, [NIOIMAP.ReturnOption])
-        case lsub(Mailbox, NIOIMAP.Mailbox.ListMailbox)
+        case lsub(Mailbox, ByteBuffer)
         case rename(from: Mailbox, to: Mailbox, params: [RenameParameter]?)
         case select(Mailbox, [SelectParameter]?)
         case status(Mailbox, [StatusAttribute])
@@ -187,7 +187,7 @@ extension ByteBuffer {
         self.writeListReturnOptions(returnOptions)
     }
     
-    private mutating func writeCommandType_lsub(mailbox: NIOIMAP.Mailbox, listMailbox: NIOIMAP.Mailbox.ListMailbox) -> Int {
+    private mutating func writeCommandType_lsub(mailbox: NIOIMAP.Mailbox, listMailbox: ByteBuffer) -> Int {
         self.writeString("LSUB ") +
         self.writeMailbox(mailbox) +
         self.writeSpace() +

@@ -19,9 +19,6 @@ extension NIOIMAP {
     /// IMAPv4 `mailbox`
     public struct Mailbox: Equatable {
         
-        /// IMAPv4 `list-mailbox`
-        public typealias ListMailbox = ByteBuffer
-        
         public var name: String
         
         public static let inbox = Self("inbox")

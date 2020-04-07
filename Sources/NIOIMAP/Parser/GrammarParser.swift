@@ -1799,13 +1799,13 @@ extension NIOIMAP.GrammarParser {
     }
 
     // list-mailbox    = 1*list-char / string
-    static func parseListMailbox(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Mailbox.ListMailbox {
+    static func parseListMailbox(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ByteBuffer {
 
-        func parseListMailbox_string(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Mailbox.ListMailbox {
+        func parseListMailbox_string(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ByteBuffer {
             try self.parseString(buffer: &buffer, tracker: tracker)
         }
 
-        func parseListMailbox_chars(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Mailbox.ListMailbox {
+        func parseListMailbox_chars(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ByteBuffer {
             try ParserLibrary.parseOneOrMoreCharactersByteBuffer(buffer: &buffer, tracker: tracker) { char -> Bool in
                 char.isListChar
             }
@@ -2651,11 +2651,11 @@ extension NIOIMAP.GrammarParser {
     }
 
     // patterns        = "(" list-mailbox *(SP list-mailbox) ")"
-    static func parsePatterns(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Patterns {
-        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> NIOIMAP.Patterns in
+    static func parsePatterns(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [ByteBuffer] {
+        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> [ByteBuffer] in
             try ParserLibrary.parseFixedString("(", buffer: &buffer, tracker: tracker)
             var array = [try self.parseListMailbox(buffer: &buffer, tracker: tracker)]
-            try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) -> NIOIMAP.Mailbox.ListMailbox in
+            try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) -> ByteBuffer in
                 try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
                 return try self.parseListMailbox(buffer: &buffer, tracker: tracker)
             }

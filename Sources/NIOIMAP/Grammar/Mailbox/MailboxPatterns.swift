@@ -18,8 +18,8 @@ extension NIOIMAP {
 
     /// IMAPv4 `mbox-or-pat`
     public enum MailboxPatterns: Equatable {
-        case mailbox(Mailbox.ListMailbox)
-        case pattern(Patterns)
+        case mailbox(ByteBuffer)
+        case pattern([ByteBuffer])
     }
 
 }
