@@ -1177,7 +1177,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
  
     func testParseEnableData() {
-        let inputs: [(String, String, NIOIMAP.EnableData, UInt)] = [
+        let inputs: [(String, String, [NIOIMAP.Capability], UInt)] = [
             ("ENABLED", "\r", [], #line),
             ("ENABLED ENABLE", "\r", [.enable], #line),
             ("ENABLED ENABLE CONDSTORE", "\r", [.enable, .condStore], #line),

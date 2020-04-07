@@ -22,7 +22,7 @@ extension NIOIMAP {
         case mailboxData(Mailbox.Data)
         case messageData(MessageData)
         case capabilityData([Capability])
-        case enableData(EnableData)
+        case enableData([NIOIMAP.Capability])
         case id(IDResponse)
     }
 

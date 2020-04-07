@@ -1037,8 +1037,8 @@ extension NIOIMAP.GrammarParser {
     }
 
     // enable-data     = "ENABLED" *(SP capability)
-    static func parseEnableData(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.EnableData {
-        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> NIOIMAP.EnableData in
+    static func parseEnableData(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [NIOIMAP.Capability] {
+        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> [NIOIMAP.Capability] in
             try ParserLibrary.parseFixedString("ENABLED", buffer: &buffer, tracker: tracker)
             return try ParserLibrary.parseZeroOrMore(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> NIOIMAP.Capability in
                 try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
