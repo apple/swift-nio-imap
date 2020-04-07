@@ -17,12 +17,12 @@ import NIO
 extension NIOIMAP {
     
     public enum UIDCommandType: Equatable {
-        case copy(SequenceSet, Mailbox)
-        case move(SequenceSet, Mailbox)
-        case fetch(SequenceSet, FetchType, [FetchModifier]?)
+        case copy([NIOIMAP.SequenceRange], Mailbox)
+        case move([NIOIMAP.SequenceRange], Mailbox)
+        case fetch([NIOIMAP.SequenceRange], FetchType, [FetchModifier]?)
         case search(returnOptions: [SearchReturnOption]?, program: SearchProgram)
-        case store(SequenceSet, [StoreModifier]?, StoreAttributeFlags)
-        case uidExpunge(SequenceSet)
+        case store([NIOIMAP.SequenceRange], [StoreModifier]?, StoreAttributeFlags)
+        case uidExpunge([NIOIMAP.SequenceRange])
         
         init?(commandType: CommandType) {
             switch commandType {

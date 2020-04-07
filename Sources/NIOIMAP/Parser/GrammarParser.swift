@@ -3714,7 +3714,7 @@ extension NIOIMAP.GrammarParser {
     }
 
     // sequence-set    = (seq-number / seq-range) ["," sequence-set]
-    static func parseSequenceSet(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.SequenceSet {
+    static func parseSequenceSet(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [NIOIMAP.SequenceRange] {
 
         func parseSequenceSet_number(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.SequenceRange {
             let num = try self.parseSequenceNumber(buffer: &buffer, tracker: tracker)

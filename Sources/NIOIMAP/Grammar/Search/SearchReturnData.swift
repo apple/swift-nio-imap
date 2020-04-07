@@ -20,7 +20,7 @@ extension NIOIMAP {
     public enum SearchReturnData: Equatable {
         case min(Int)
         case max(Int)
-        case all(SequenceSet)
+        case all([NIOIMAP.SequenceRange])
         case count(Int)
         case dataExtension(SearchReturnDataExtension)
     }

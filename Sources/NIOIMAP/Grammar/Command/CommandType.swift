@@ -43,11 +43,11 @@ extension NIOIMAP {
         case unselect
         case idleStart
         case idleFinish
-        case copy(SequenceSet, Mailbox)
-        case fetch(SequenceSet, FetchType, [FetchModifier]?)
-        case store(SequenceSet, [StoreModifier]?, StoreAttributeFlags)
+        case copy([NIOIMAP.SequenceRange], Mailbox)
+        case fetch([NIOIMAP.SequenceRange], FetchType, [FetchModifier]?)
+        case store([NIOIMAP.SequenceRange], [StoreModifier]?, StoreAttributeFlags)
         case search(returnOptions: [SearchReturnOption]?, program: SearchProgram)
-        case move(SequenceSet, Mailbox)
+        case move([NIOIMAP.SequenceRange], Mailbox)
         case id(ID)
         case namespace
     }
@@ -289,14 +289,14 @@ extension ByteBuffer {
         self.writeUIDCommandType(command)
     }
     
-    private mutating func writeCommandType_copy(sequence: NIOIMAP.SequenceSet, mailbox: NIOIMAP.Mailbox) -> Int {
+    private mutating func writeCommandType_copy(sequence: [NIOIMAP.SequenceRange], mailbox: NIOIMAP.Mailbox) -> Int {
         self.writeString("COPY ") +
         self.writeSequenceSet(sequence) +
         self.writeSpace() +
         self.writeMailbox(mailbox)
     }
     
-    private mutating func writeCommandType_fetch(set: NIOIMAP.SequenceSet, atts: NIOIMAP.FetchType, modifiers: [NIOIMAP.FetchModifier]?) -> Int {
+    private mutating func writeCommandType_fetch(set: [NIOIMAP.SequenceRange], atts: NIOIMAP.FetchType, modifiers: [NIOIMAP.FetchModifier]?) -> Int {
         self.writeString("FETCH ") +
         self.writeSequenceSet(set) +
         self.writeSpace() +
@@ -306,7 +306,7 @@ extension ByteBuffer {
         }
     }
     
-    private mutating func writeCommandType_store(set: NIOIMAP.SequenceSet, modifiers: [NIOIMAP.StoreModifier]?, flags: NIOIMAP.StoreAttributeFlags) -> Int {
+    private mutating func writeCommandType_store(set: [NIOIMAP.SequenceRange], modifiers: [NIOIMAP.StoreModifier]?, flags: NIOIMAP.StoreAttributeFlags) -> Int {
         self.writeString("STORE ") +
         self.writeSequenceSet(set) +
         self.writeIfExists(modifiers) { (modifiers) -> Int in
@@ -325,7 +325,7 @@ extension ByteBuffer {
         self.writeSearchProgram(program)
     }
     
-    private mutating func writeCommandType_move(set: NIOIMAP.SequenceSet, mailbox: NIOIMAP.Mailbox) -> Int {
+    private mutating func writeCommandType_move(set: [NIOIMAP.SequenceRange], mailbox: NIOIMAP.Mailbox) -> Int {
         self.writeString("MOVE ") +
         self.writeSequenceSet(set) +
         self.writeSpace() +
