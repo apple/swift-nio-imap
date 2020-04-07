@@ -24,10 +24,10 @@ class BodyFieldParameterTests: EncodeTestClass {
 extension BodyFieldParameterTests {
 
     func testEncode() {
-        let inputs: [([ByteBuffer]?, String, UInt)] = [
-            (nil, "NIL", #line),
-            (["param1"], "(\"param1\")", #line),
-            (["param1", "param2", "param3"], "(\"param1\" \"param2\" \"param3\")", #line)
+        let inputs: [([NIOIMAP.FieldParameterPair], String, UInt)] = [
+            ([], "NIL", #line),
+            ([.field("f1", value: "v1")], "(\"f1\" \"v1\")", #line),
+            ([.field("f1", value: "v2"), .init(field: "f2", value: "v2")], "(\"f1\" \"v1\" \"f2\" \"v2\")", #line)
         ]
 
         for (test, expectedString, line) in inputs {

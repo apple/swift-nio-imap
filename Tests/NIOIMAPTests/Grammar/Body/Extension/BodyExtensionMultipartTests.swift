@@ -25,10 +25,10 @@ extension BodyExtensionMultipartTests {
 
     func testEncode() {
         let inputs: [(NIOIMAP.Body.ExtensionMultipart, String, UInt)] = [
-            (.parameter(["param"], dspLanguage: nil), "(\"param\")", #line),
+            (.parameter([.field("f", value: "v")], dspLanguage: nil), "(\"f\" \"v\")", #line),
             (
-                .parameter(["param1", "param2"], dspLanguage: .fieldDSP(.string("string", parameter: ["param3"]), fieldLanguage: nil)),
-                "(\"param1\" \"param2\") (\"string\" (\"param3\"))",
+                .parameter([.field("f1", value: "v1")], dspLanguage: .fieldDSP(.string("string", parameter: [.field("f2", value: "v2")]), fieldLanguage: nil)),
+                "(\"f1\" \"v1\") (\"string\" (\"f2\" \"v2\"))",
                 #line
             )
         ]
