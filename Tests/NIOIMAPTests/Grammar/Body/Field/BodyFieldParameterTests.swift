@@ -24,7 +24,7 @@ class BodyFieldParameterTests: EncodeTestClass {
 extension BodyFieldParameterTests {
 
     func testEncode() {
-        let inputs: [(NIOIMAP.Body.FieldParameter, String, UInt)] = [
+        let inputs: [([ByteBuffer]?, String, UInt)] = [
             (nil, "NIL", #line),
             (["param1"], "(\"param1\")", #line),
             (["param1", "param2", "param3"], "(\"param1\" \"param2\" \"param3\")", #line)

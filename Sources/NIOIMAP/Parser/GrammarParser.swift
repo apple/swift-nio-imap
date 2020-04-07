@@ -424,14 +424,14 @@ extension NIOIMAP.GrammarParser {
     }
 
     // body-fld-param  = "(" string SP string *(SP string SP string) ")" / nil
-    static func parseBodyFieldParam(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Body.FieldParameter {
+    static func parseBodyFieldParam(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [ByteBuffer]? {
 
-        func parseBodyFieldParam_nil(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Body.FieldParameter {
+        func parseBodyFieldParam_nil(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [ByteBuffer]? {
             try parseNil(buffer: &buffer, tracker: tracker)
             return nil
         }
 
-        func parseBodyFieldParam_pairs(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Body.FieldParameter {
+        func parseBodyFieldParam_pairs(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [ByteBuffer]? {
             try ParserLibrary.parseFixedString("(", buffer: &buffer, tracker: tracker)
             var array = [try parseString(buffer: &buffer, tracker: tracker)]
             try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) -> ByteBuffer in

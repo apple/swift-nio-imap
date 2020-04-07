@@ -14,17 +14,10 @@
 
 import NIO
 
-extension NIOIMAP.Body {
-
-    /// IMAPv4 `body-fld-param`
-    public typealias FieldParameter = [ByteBuffer]?
-
-}
-
 // MARK: - Encoding
 extension ByteBuffer {
 
-    @discardableResult mutating func writeBodyFieldParameter(_ params: NIOIMAP.Body.FieldParameter) -> Int {
+    @discardableResult mutating func writeBodyFieldParameter(_ params: [ByteBuffer]?) -> Int {
         guard let params = params else {
             return self.writeNil()
         }

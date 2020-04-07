@@ -19,9 +19,9 @@ extension NIOIMAP.Body {
     /// IMAPv4 `body-fld-dsp`
     public struct FieldDSPData: Equatable {
         public var string: ByteBuffer
-        public var parameter: FieldParameter
+        public var parameter: [ByteBuffer]?
         
-        public static func string(_ string: ByteBuffer, parameter: FieldParameter) -> Self {
+        public static func string(_ string: ByteBuffer, parameter: [ByteBuffer]?) -> Self {
             return Self(string: string, parameter: parameter)
         }
     }
