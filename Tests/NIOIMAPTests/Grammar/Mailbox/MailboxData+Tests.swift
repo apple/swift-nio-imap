@@ -37,7 +37,7 @@ extension MailboxDataTests {
             (.search(NIOIMAP.ESearchResponse(correlator: nil, uid: false, returnData: [.count(1), .count(2)])), "ESEARCH COUNT 1 COUNT 2", #line),
             (.status(.inbox, [.messages(1)]), "STATUS \"INBOX\" (MESSAGES 1)", #line),
             (.status(.inbox, [.messages(1), .unseen(2)]), "STATUS \"INBOX\" (MESSAGES 1 UNSEEN 2)", #line),
-            (.namespace(.userNamespace(nil, otherUserNamespace: nil, sharedNamespace: nil)), "NAMESPACE NIL NIL NIL", #line),
+            (.namespace(.userNamespace([], otherUserNamespace: [], sharedNamespace: [])), "NAMESPACE NIL NIL NIL", #line),
         ]
 
         for (test, expectedString, line) in inputs {

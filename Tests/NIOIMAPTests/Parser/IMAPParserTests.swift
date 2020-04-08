@@ -1966,7 +1966,7 @@ extension ParserUnitTests {
     
     func testParseNamespaceResponse() {
         let inputs: [(String, String, NIOIMAP.NamespaceResponse, UInt)] = [
-            ("NAMESPACE nil nil nil", " ", .userNamespace(nil, otherUserNamespace: nil, sharedNamespace: nil), #line),
+            ("NAMESPACE nil nil nil", " ", .userNamespace([], otherUserNamespace: [], sharedNamespace: []), #line),
         ]
         self.iterateTestInputs(inputs, testFunction: NIOIMAP.GrammarParser.parseNamespaceResponse)
     }
@@ -2268,7 +2268,7 @@ extension ParserUnitTests {
             ("UIDNEXT 12", "\r", .uidNext(12), #line),
             ("UIDVALIDITY 34", "\r", .uidValidity(34), #line),
             ("UNSEEN 56", "\r", .unseen(56), #line),
-            ("NAMESPACE NIL NIL NIL", "\r", .namespace(.userNamespace(nil, otherUserNamespace: nil, sharedNamespace: nil)), #line),
+            ("NAMESPACE NIL NIL NIL", "\r", .namespace(.userNamespace([], otherUserNamespace: [], sharedNamespace: [])), #line),
             ("some", "\r", .other("some", nil), #line),
             ("some thing", "\r", .other("some", "thing"), #line),
         ]
