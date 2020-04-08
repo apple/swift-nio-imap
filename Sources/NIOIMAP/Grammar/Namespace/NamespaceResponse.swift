@@ -18,11 +18,11 @@ extension NIOIMAP {
 
     /// IMAPv4 `Namespace-Response`
     public struct NamespaceResponse: Equatable {
-        public var userNamespace: [NamespaceDescription]?
-        public var otherUserNamespace: [NamespaceDescription]?
-        public var sharedNamespace: [NamespaceDescription]?
+        public var userNamespace: [NamespaceDescription]
+        public var otherUserNamespace: [NamespaceDescription]
+        public var sharedNamespace: [NamespaceDescription]
 
-        public static func userNamespace(_ userNamespace: [NamespaceDescription]?, otherUserNamespace: [NamespaceDescription]?, sharedNamespace: [NamespaceDescription]?) -> Self {
+        public static func userNamespace(_ userNamespace: [NamespaceDescription], otherUserNamespace: [NamespaceDescription], sharedNamespace: [NamespaceDescription]) -> Self {
             return Self(userNamespace: userNamespace, otherUserNamespace: otherUserNamespace, sharedNamespace: sharedNamespace)
         }
     }

@@ -2401,14 +2401,14 @@ extension NIOIMAP.GrammarParser {
     }
 
     // Namespace         = nil / "(" 1*Namespace-Descr ")"
-    static func parseNamespace(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [NIOIMAP.NamespaceDescription]? {
+    static func parseNamespace(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [NIOIMAP.NamespaceDescription] {
 
-        func parseNamespace_nil(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [NIOIMAP.NamespaceDescription]? {
+        func parseNamespace_nil(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [NIOIMAP.NamespaceDescription] {
             try self.parseNil(buffer: &buffer, tracker: tracker)
-            return nil
+            return []
         }
 
-        func parseNamespace_some(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [NIOIMAP.NamespaceDescription]? {
+        func parseNamespace_some(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [NIOIMAP.NamespaceDescription] {
             try ParserLibrary.parseFixedString("(", buffer: &buffer, tracker: tracker)
             let descriptions = try ParserLibrary.parseOneOrMore(buffer: &buffer, tracker: tracker, parser: self.parseNamespaceDescription)
             try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)

@@ -17,13 +17,14 @@ import NIO
 // MARK: - Encoding
 extension ByteBuffer {
 
-    @discardableResult mutating func writeNamespace(_ namespace: [NIOIMAP.NamespaceDescription]?) -> Int {
-        if let namespace = namespace {
-            return self.writeArray(namespace, separator: "") { (description, self) in
-                self.writeNamespaceDescription(description)
-            }
-        } else {
+    @discardableResult mutating func writeNamespace(_ namespace: [NIOIMAP.NamespaceDescription]) -> Int {
+        
+        guard namespace.count > 0 else {
             return self.writeNil()
+        }
+        
+        return self.writeArray(namespace, separator: "") { (description, self) in
+            self.writeNamespaceDescription(description)
         }
     }
     
