@@ -36,7 +36,7 @@ extension NIOIMAP.Body {
 extension ByteBuffer {
 
     @discardableResult mutating func writeBodyFields(_ fields: NIOIMAP.Body.Fields) -> Int {
-        self.writeBodyFieldParameter(fields.parameter) +
+        self.writeBodyFieldParameters(fields.parameter) +
         self.writeSpace() +
         self.writeNString(fields.id) +
         self.writeSpace() +

@@ -40,7 +40,7 @@ extension ByteBuffer {
             self.writeString("(") +
             self.writeIMAPString(dsp.string) +
             self.writeSpace() +
-            self.writeBodyFieldParameter(dsp.parameter) +
+            self.writeBodyFieldParameters(dsp.parameter) +
             self.writeString(")")
     }
 

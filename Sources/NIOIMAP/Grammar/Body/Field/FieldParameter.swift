@@ -30,7 +30,7 @@ extension NIOIMAP {
 // MARK: - Encoding
 extension ByteBuffer {
 
-    @discardableResult mutating func writeBodyFieldParameter(_ params: [NIOIMAP.FieldParameterPair]) -> Int {
+    @discardableResult mutating func writeBodyFieldParameters(_ params: [NIOIMAP.FieldParameterPair]) -> Int {
         guard params.count > 0 else {
             return self.writeNil()
         }

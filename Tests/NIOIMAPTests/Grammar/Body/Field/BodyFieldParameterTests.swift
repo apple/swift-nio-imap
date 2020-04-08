@@ -32,7 +32,7 @@ extension BodyFieldParameterTests {
 
         for (test, expectedString, line) in inputs {
             self.testBuffer.clear()
-            let size = self.testBuffer.writeBodyFieldParameter(test)
+            let size = self.testBuffer.writeBodyFieldParameters(test)
             XCTAssertEqual(size, expectedString.utf8.count, line: line)
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }
