@@ -38,7 +38,7 @@ extension CreateParameter_Tests {
     }
     
     func testEncode_multiple() {
-        let inputs: [(NIOIMAP.CreateParameters, String, UInt)] = [
+        let inputs: [([NIOIMAP.CreateParameter], String, UInt)] = [
             ([.name("some", value: nil)], " (some)", #line),
             ([.name("some1", value: nil), .name("some2", value: nil), .name("some3", value: nil)], " (some1 some2 some3)", #line),
         ]

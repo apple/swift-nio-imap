@@ -58,7 +58,7 @@ extension ByteBufferWriteLiteralTests {
 
         for (test, expectedString, line) in inputs {
             self.testBuffer.clear()
-            let size = self.testBuffer.writeLiteral(test)
+            let size = self.testBuffer.writeLiteral(Array(test.readableBytesView))
             XCTAssertEqual(size, expectedString.utf8.count, line: line)
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }
@@ -79,7 +79,7 @@ extension ByteBufferWriteLiteralTests {
 
         for (test, expectedString, line) in inputs {
             self.testBuffer.clear()
-            let size = self.testBuffer.writeLiteral8(test)
+            let size = self.testBuffer.writeLiteral8(Array(test.readableBytesView))
             XCTAssertEqual(size, expectedString.utf8.count, line: line)
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }

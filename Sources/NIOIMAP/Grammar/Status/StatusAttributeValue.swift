@@ -16,12 +16,6 @@ import NIO
 
 extension NIOIMAP {
 
-    /// IMAPv4 `status-option`
-    public typealias StatusOption = [StatusAttribute]
-
-    /// IMAPv4 `status-att-list`
-    public typealias StatusAttributeList = [StatusAttributeValue]
-
     /// IMAPv4 `status-att-val`
     public enum StatusAttributeValue: Equatable {
         case messages(Int)
@@ -38,14 +32,14 @@ extension NIOIMAP {
 // MARK: - Encoding
 extension ByteBuffer {
 
-    @discardableResult mutating func writeStatusOption(_ option: NIOIMAP.StatusOption) -> Int {
+    @discardableResult mutating func writeStatusOption(_ option: [NIOIMAP.StatusAttribute]) -> Int {
         self.writeString("STATUS ") +
         self.writeArray(option) { (att, self) in
             self.writeStatusAttribute(att)
         }
     }
 
-    @discardableResult mutating func writeStatusAttributeList(_ list: NIOIMAP.StatusAttributeList) -> Int {
+    @discardableResult mutating func writeStatusAttributeList(_ list: [NIOIMAP.StatusAttributeValue]) -> Int {
         self.writeArray(list, parenthesis: false) { (val, self) in
             self.writeStatusAttributeValue(val)
         }

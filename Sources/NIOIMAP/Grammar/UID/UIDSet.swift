@@ -21,7 +21,4 @@ extension NIOIMAP {
         case range(UIDRange)
     }
 
-    /// IMAPv4 `uid-set`
-    public typealias UIDSet = [UIDSetType]
-
 }

@@ -24,7 +24,7 @@ class SearchCriteria_Tests: EncodeTestClass {
 extension SearchCriteria_Tests {
 
     func testEncode() {
-        let inputs: [(NIOIMAP.SearchCriteria, String, UInt)] = [
+        let inputs: [([NIOIMAP.SearchKey], String, UInt)] = [
             ([.all], "ALL", #line),
             ([.all, .answered, .deleted], "ALL ANSWERED DELETED", #line),
         ]

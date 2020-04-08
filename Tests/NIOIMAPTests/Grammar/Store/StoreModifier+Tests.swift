@@ -38,7 +38,7 @@ extension StoreModifier_Tests {
     }
     
     func testEncode_array() {
-        let inputs: [(NIOIMAP.StoreModifiers, String, UInt)] = [
+        let inputs: [([NIOIMAP.StoreModifier], String, UInt)] = [
             ([.name("name", parameters: nil)], " (name)", #line),
             ([.name("name1", parameters: nil), .name("name2", parameters: nil)], " (name1 name2)", #line),
         ]

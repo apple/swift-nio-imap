@@ -24,7 +24,7 @@ class SectionBinary_Tests: EncodeTestClass {
 extension SectionBinary_Tests {
 
     func testEncode() {
-        let inputs: [(NIOIMAP.SectionBinary, String, UInt)] = [
+        let inputs: [([Int]?, String, UInt)] = [
             (nil, "[]", #line),
             ([1], "[1]", #line)
         ]

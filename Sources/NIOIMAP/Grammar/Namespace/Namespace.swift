@@ -14,17 +14,10 @@
 
 import NIO
 
-extension NIOIMAP {
-
-    /// IMAPv4 `Namespace`
-    public typealias Namespace = [NamespaceDescription]?
-
-}
-
 // MARK: - Encoding
 extension ByteBuffer {
 
-    @discardableResult mutating func writeNamespace(_ namespace: NIOIMAP.Namespace) -> Int {
+    @discardableResult mutating func writeNamespace(_ namespace: [NIOIMAP.NamespaceDescription]?) -> Int {
         if let namespace = namespace {
             return self.writeArray(namespace, separator: "") { (description, self) in
                 self.writeNamespaceDescription(description)

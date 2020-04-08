@@ -38,7 +38,7 @@ extension BodyTypeMessageTests {
                     )),
                     fieldLines: 89
                 ),
-                "\"MESSAGE\" \"RFC822\" () NIL NIL \"BASE64\" 111 (\"date\" NIL NIL NIL NIL NIL NIL NIL NIL NIL) (\"TEXT\" \"subtype\" () NIL NIL \"BINARY\" 22 33) 89",
+                "\"MESSAGE\" \"RFC822\" NIL NIL NIL \"BASE64\" 111 (\"date\" NIL NIL NIL NIL NIL NIL NIL NIL NIL) (\"TEXT\" \"subtype\" NIL NIL NIL \"BINARY\" 22 33) 89",
                 #line
             )
         ]

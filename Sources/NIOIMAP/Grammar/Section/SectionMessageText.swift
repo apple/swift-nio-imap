@@ -19,8 +19,8 @@ extension NIOIMAP {
     /// IMAPv4 `section-msgtext`
     public enum SectionMessageText: Equatable {
         case header
-        case headerFields(_ fields: HeaderList)
-        case notHeaderFields(_ fields: HeaderList)
+        case headerFields(_ fields: [String])
+        case notHeaderFields(_ fields: [String])
         case text
     }
     

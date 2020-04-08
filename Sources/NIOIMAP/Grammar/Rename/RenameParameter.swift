@@ -25,7 +25,6 @@ extension NIOIMAP {
         }
     }
     
-    public typealias RenameParameters = [RenameParameter]
 }
 
 // MARK: - Encoding

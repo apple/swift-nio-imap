@@ -20,7 +20,7 @@ extension NIOIMAP {
     public enum ResponseTextCode: Equatable {
         case alert
         case badCharset([String]?)
-        case capability(CapabilityData)
+        case capability([Capability])
         case parse
         case permanentFlags([PermanentFlag])
         case readOnly

@@ -24,7 +24,7 @@ class ResponseFatalTests: EncodeTestClass {
 extension ResponseFatalTests {
 
     func testEncode() {
-        let inputs: [(NIOIMAP.ResponseFatal, String, UInt)] = [
+        let inputs: [(NIOIMAP.ResponseText, String, UInt)] = [
             (.code(.alert, text: "error"), "* BYE [ALERT] error\r\n", #line)
         ]
 

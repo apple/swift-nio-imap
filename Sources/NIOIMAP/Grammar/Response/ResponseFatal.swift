@@ -14,17 +14,10 @@
 
 import NIO
 
-extension NIOIMAP {
-
-    /// IMAPv4 `response-fatal`
-    public typealias ResponseFatal = ResponseConditionalBye
-
-}
-
 // MARK: - Encoding
 extension ByteBuffer {
 
-    @discardableResult mutating func writeResponseFatal(_ fatal: NIOIMAP.ResponseFatal) -> Int {
+    @discardableResult mutating func writeResponseFatal(_ fatal: NIOIMAP.ResponseText) -> Int {
         self.writeString("* ") +
         self.writeResponseConditionalBye(fatal) +
         self.writeString("\r\n")

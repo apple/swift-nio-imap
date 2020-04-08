@@ -14,16 +14,10 @@
 
 import NIO
 
-extension NIOIMAP.Envelope {
-
-    public typealias Addresses = [NIOIMAP.Address]?
-    
-}
-
 // MARK: - Encoding
 extension ByteBuffer {
 
-    @discardableResult mutating func writeEnvelopeAddresses(_ addresses: NIOIMAP.Envelope.Addresses) -> Int {
+    @discardableResult mutating func writeEnvelopeAddresses(_ addresses: [NIOIMAP.Address]?) -> Int {
         guard let addresses = addresses else {
             return self.writeNil()
         }

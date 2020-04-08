@@ -22,14 +22,12 @@ extension NIOIMAP {
         case number(Int)
     }
     
-    public typealias BodyExtension = [BodyExtensionType]
-    
 }
 
 // MARK: - Encoding
 extension ByteBuffer {
 
-    @discardableResult mutating func writeBodyExtension(_ ext: NIOIMAP.BodyExtension) -> Int {
+    @discardableResult mutating func writeBodyExtension(_ ext: [NIOIMAP.BodyExtensionType]) -> Int {
         return self.writeArray(ext) { (element, self) in
             self.writeBodyExtensionType(element)
         }

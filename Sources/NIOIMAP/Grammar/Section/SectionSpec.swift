@@ -19,13 +19,21 @@ extension NIOIMAP {
     /// IMAPv4 `section-spec`
     public enum SectionSpec: Equatable {
         case text(_ text: SectionMessageText)
-        case part(_ part: SectionPart, text: SectionText?)
+        case part(_ part: [Int], text: SectionText?)
     }
     
 }
 
 // MARK: - Encoding
 extension ByteBuffer {
+    
+    @discardableResult mutating func writeSection(_ section: NIOIMAP.SectionSpec?) -> Int {
+        self.writeString("[") +
+        self.writeIfExists(section) { (spec) -> Int in
+            self.writeSectionSpec(spec)
+        } +
+        self.writeString("]")
+    }
     
     @discardableResult mutating func writeSectionSpec(_ spec: NIOIMAP.SectionSpec?) -> Int {
         

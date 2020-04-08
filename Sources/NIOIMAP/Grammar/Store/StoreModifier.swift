@@ -15,8 +15,6 @@
 import NIO
 
 extension NIOIMAP {
-
-    public typealias StoreModifiers = [StoreModifier]
     
     public struct StoreModifier: Equatable {
         public var name: String
@@ -40,7 +38,7 @@ extension ByteBuffer {
         }
     }
     
-    @discardableResult mutating func writeStoreModifiers(_ modifiers: NIOIMAP.StoreModifiers) -> Int {
+    @discardableResult mutating func writeStoreModifiers(_ modifiers: [NIOIMAP.StoreModifier]) -> Int {
         self.writeSpace() +
         self.writeArray(modifiers) { (modifier, self) -> Int in
             self.writeStoreModifier(modifier)

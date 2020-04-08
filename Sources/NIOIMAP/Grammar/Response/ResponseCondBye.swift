@@ -14,17 +14,10 @@
 
 import NIO
 
-extension NIOIMAP {
-    
-    /// IMAPv4 `resp-cond-bye`
-    public typealias ResponseConditionalBye = ResponseText
-    
-}
-
 // MARK: - Encoding
 extension ByteBuffer {
 
-    @discardableResult mutating func writeResponseConditionalBye(_ cond: NIOIMAP.ResponseConditionalBye) -> Int {
+    @discardableResult mutating func writeResponseConditionalBye(_ cond: NIOIMAP.ResponseText) -> Int {
         self.writeString("BYE ") +
         self.writeResponseText(cond)
     }

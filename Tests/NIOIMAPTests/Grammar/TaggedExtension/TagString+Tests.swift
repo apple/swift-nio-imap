@@ -24,7 +24,7 @@ class TaggedString_Tests: EncodeTestClass {
 extension TaggedString_Tests {
 
     func testEncode() {
-        let inputs: [(NIOIMAP.TagString, String, UInt)] = [
+        let inputs: [(ByteBuffer, String, UInt)] = [
             ("abc", #""abc""#, #line),
         ]
 

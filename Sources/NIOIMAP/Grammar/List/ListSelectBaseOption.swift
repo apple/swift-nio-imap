@@ -16,9 +16,6 @@ import NIO
 
 extension NIOIMAP {
 
-    /// IMAPv4 `list-select-base-opt-quoted`
-    public typealias ListSelectBaseOptionQuoted = ListSelectBaseOption
-
     /// IMAPv4 `list-select-base-opt`
     public enum ListSelectBaseOption: Equatable {
         case subscribed

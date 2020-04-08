@@ -19,7 +19,7 @@ import NIO
 class EnableData_Tests: EncodeTestClass {
 
     func testEncoding() {
-        let inputs: [(NIOIMAP.EnableData, String, UInt)] = [
+        let inputs: [([NIOIMAP.Capability], String, UInt)] = [
             ([], "ENABLED", #line),
             ([.enable], "ENABLED ENABLE", #line),
             ([.enable, .condStore], "ENABLED ENABLE CONDSTORE", #line),

@@ -16,15 +16,12 @@ import NIO
 
 extension NIOIMAP.Mailbox {
 
-    /// IMAPv4 `mbx-list-extended-item-tag`
-    public typealias ListExtendedItemTag = ByteBuffer
-
     /// IMAPv4 `mbox-list-extended-item`
     public struct ListExtendedItem: Equatable {
-        public var tag: ListExtendedItemTag
+        public var tag: ByteBuffer
         public var extensionValue: NIOIMAP.TaggedExtensionValue
         
-        public static func tag(_ tag: ListExtendedItemTag, extensionValue: NIOIMAP.TaggedExtensionValue) -> Self {
+        public static func tag(_ tag: ByteBuffer, extensionValue: NIOIMAP.TaggedExtensionValue) -> Self {
             return Self(tag: tag, extensionValue: extensionValue)
         }
     }

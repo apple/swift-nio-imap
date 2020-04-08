@@ -25,7 +25,7 @@ extension BodyFieldsTests {
 
     func testEncode() {
         let inputs: [(NIOIMAP.Body.Fields, String, UInt)] = [
-            (.parameter(["param"], id: "fieldID", description: "desc", encoding: .base64, octets: 12), "(\"param\") \"fieldID\" \"desc\" \"BASE64\" 12", #line)
+            (.parameter([.field("f1", value: "v1")], id: "fieldID", description: "desc", encoding: .base64, octets: 12), "(\"f1\" \"v1\") \"fieldID\" \"desc\" \"BASE64\" 12", #line)
         ]
 
         for (test, expectedString, line) in inputs {

@@ -14,17 +14,10 @@
 
 import NIO
 
-extension NIOIMAP.Media {
-
-    /// IMAPv4 `media-text`
-    public typealias Text = Subtype
-
-}
-
 // MARK: - Encoding
 extension ByteBuffer {
 
-    @discardableResult mutating func writeMediaText(_ text: NIOIMAP.Media.Text) -> Int {
+    @discardableResult mutating func writeMediaText(_ text: String) -> Int {
         self.writeString(#""TEXT" "#) +
         self.writeIMAPString(text)
     }

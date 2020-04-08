@@ -14,15 +14,9 @@
 
 import NIO
 
-extension NIOIMAP {
-
-    public typealias SearchCriteria = [SearchKey]
-
-}
-
 extension ByteBuffer {
     
-    @discardableResult public mutating func writeSearchCriteria(_ criteria: NIOIMAP.SearchCriteria) -> Int {
+    @discardableResult public mutating func writeSearchCriteria(_ criteria: [NIOIMAP.SearchKey]) -> Int {
         self.writeArray(criteria, parenthesis: false) { (key, self) in
             self.writeSearchKey(key)
         }

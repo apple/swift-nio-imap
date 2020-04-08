@@ -24,14 +24,12 @@ extension NIOIMAP {
             return Self(name: name, value: value)
         }
     }
-    
-    public typealias FetchModifiers = [FetchModifier]
 }
 
 // MARK: - Encoding
 extension ByteBuffer {
     
-    @discardableResult mutating func writeFetchModifiers(_ params: NIOIMAP.FetchModifiers) -> Int {
+    @discardableResult mutating func writeFetchModifiers(_ params: [NIOIMAP.FetchModifier]) -> Int {
         self.writeSpace() +
         self.writeArray(params) { (param, self) -> Int in
             self.writeFetchModifier(param)

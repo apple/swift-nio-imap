@@ -14,17 +14,10 @@
 
 import NIO
 
-extension NIOIMAP {
-
-    /// IMAPv4 `sequence-set`
-    public typealias SequenceSet = [SequenceRange]
-
-}
-
 // MARK: - Encoding
 extension ByteBuffer {
 
-    @discardableResult mutating func writeSequenceSet(_ set: NIOIMAP.SequenceSet) -> Int {
+    @discardableResult mutating func writeSequenceSet(_ set: [NIOIMAP.SequenceRange]) -> Int {
         self.writeArray(set, separator: ",", parenthesis: false) { (element, self) in
              self.writeSequenceRange(element)
         }

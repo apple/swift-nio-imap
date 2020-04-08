@@ -24,8 +24,8 @@ class ListReturnOptions_Tests: EncodeTestClass {
 extension ListReturnOptions_Tests {
 
     func testEncode() {
-        let inputs: [(NIOIMAP.ListReturnOptions, String, UInt)] = [
-            (nil, "RETURN ()", #line),
+        let inputs: [([NIOIMAP.ReturnOption], String, UInt)] = [
+            ([], "RETURN ()", #line),
             ([.subscribed], "RETURN (SUBSCRIBED)", #line),
             ([.subscribed, .children], "RETURN (SUBSCRIBED CHILDREN)", #line),
         ]

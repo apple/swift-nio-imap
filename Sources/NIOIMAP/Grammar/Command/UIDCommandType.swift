@@ -17,12 +17,12 @@ import NIO
 extension NIOIMAP {
     
     public enum UIDCommandType: Equatable {
-        case copy(SequenceSet, Mailbox)
-        case move(SequenceSet, Mailbox)
-        case fetch(SequenceSet, FetchType, FetchModifiers?)
-        case search(returnOptions: SearchReturnOptions?, program: SearchProgram)
-        case store(SequenceSet, StoreModifiers?, StoreAttributeFlags)
-        case uidExpunge(SequenceSet)
+        case copy([NIOIMAP.SequenceRange], Mailbox)
+        case move([NIOIMAP.SequenceRange], Mailbox)
+        case fetch([NIOIMAP.SequenceRange], FetchType, [FetchModifier]?)
+        case search(returnOptions: [SearchReturnOption]?, program: SearchProgram)
+        case store([NIOIMAP.SequenceRange], [StoreModifier]?, StoreAttributeFlags)
+        case uidExpunge([NIOIMAP.SequenceRange])
         
         init?(commandType: CommandType) {
             switch commandType {
@@ -93,7 +93,7 @@ extension ByteBuffer {
         }
     }
     
-    private mutating func writeUIDCommandType_search(returnOptions: NIOIMAP.SearchReturnOptions?, program: NIOIMAP.SearchProgram) -> Int {
+    private mutating func writeUIDCommandType_search(returnOptions: [NIOIMAP.SearchReturnOption]?, program: NIOIMAP.SearchProgram) -> Int {
         self.writeString("SEARCH") +
         self.writeIfExists(returnOptions) { (options) -> Int in
             self.writeSearchReturnOptions(options)

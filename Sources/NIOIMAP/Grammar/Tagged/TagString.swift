@@ -14,16 +14,10 @@
 
 import NIO
 
-extension NIOIMAP {
-
-    public typealias TagString = ByteBuffer
-
-}
-
 // MARK: - Encoding
 extension ByteBuffer {
     
-    @discardableResult mutating func writeTagString(_ string: NIOIMAP.TagString) -> Int {
+    @discardableResult mutating func writeTagString(_ string: ByteBuffer) -> Int {
         self.writeIMAPString(string)
     }
     

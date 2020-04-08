@@ -29,12 +29,12 @@ extension NIOIMAP {
         case rfc822(RFC822Reduced?, NIOIMAP.NString)
         case rfc822Size(Int)
         case body(Body, structure: Bool)
-        case bodySection(Section, Int?, NString)
+        case bodySection(SectionSpec?, Int?, NString)
         case bodySectionText(Int?, Int) // used when streaming the body, send the literal header
         case uid(Int)
-        case binaryString(section: SectionBinary, string: NString)
-        case binaryLiteral(section: SectionBinary, size: Int)
-        case binarySize(section: SectionBinary, number: Int)
+        case binaryString(section: [Int]?, string: NString)
+        case binaryLiteral(section: [Int]?, size: Int)
+        case binarySize(section: [Int]?, number: Int)
     }
 
 }
@@ -107,7 +107,7 @@ extension ByteBuffer {
         self.writeBody(body)
     }
     
-    @discardableResult mutating func writeMessageAttributeStatic_bodySection(_ section: NIOIMAP.Section, number: Int?, string: NIOIMAP.NString) -> Int {
+    @discardableResult mutating func writeMessageAttributeStatic_bodySection(_ section: NIOIMAP.SectionSpec?, number: Int?, string: NIOIMAP.NString) -> Int {
         self.writeString("BODY") +
         self.writeSection(section) +
         self.writeIfExists(number) { (number) -> Int in

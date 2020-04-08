@@ -18,11 +18,11 @@ extension NIOIMAP.Body {
 
     /// IMAPv4 `body-type-text`
     public struct TypeText: Equatable {
-        public var mediaText: NIOIMAP.Media.Text
+        public var mediaText: String
         public var fields: Fields
         public var lines: Int
         
-        public static func mediaText(_ mediaText: NIOIMAP.Media.Text, fields: Fields, lines: Int) -> Self {
+        public static func mediaText(_ mediaText: String, fields: Fields, lines: Int) -> Self {
             return Self(mediaText: mediaText, fields: fields, lines: lines)
         }
     }

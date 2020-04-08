@@ -15,9 +15,6 @@
 import NIO
 
 extension NIOIMAP {
-
-    /// IMAP4 `flag-list`
-    public typealias FlagList = [Flag]
  
     /// IMAPv4 `flag`
     public enum Flag: Equatable {

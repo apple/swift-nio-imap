@@ -24,7 +24,7 @@ class StatusAttributeValue_Tests: EncodeTestClass {
 extension StatusAttributeValue_Tests {
 
     func testEncode_statusOption() {
-        let inputs: [(NIOIMAP.StatusOption, String, UInt)] = [
+        let inputs: [([NIOIMAP.StatusAttribute], String, UInt)] = [
             ([.messages], "STATUS (MESSAGES)", #line),
             ([.messages, .size, .recent], "STATUS (MESSAGES SIZE RECENT)", #line)
         ]
@@ -57,7 +57,7 @@ extension StatusAttributeValue_Tests {
     }
 
     func testEncode_statusAttributeList() {
-        let inputs: [(NIOIMAP.StatusAttributeList, String, UInt)] = [
+        let inputs: [([NIOIMAP.StatusAttributeValue], String, UInt)] = [
             ([.messages(12)], "MESSAGES 12", #line),
             ([.messages(12), .deleted(34)], "MESSAGES 12 DELETED 34", #line),
             ([.messages(12), .deleted(34), .size(56)], "MESSAGES 12 DELETED 34 SIZE 56", #line),

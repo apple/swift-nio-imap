@@ -17,19 +17,16 @@ import NIO
 extension NIOIMAP {
 
     public enum MessageAttributeType: Equatable {
-        case dynamic(NIOIMAP.MessageAttributesDynamic)
+        case dynamic([NIOIMAP.Flag])
         case `static`(NIOIMAP.MessageAttributesStatic)
     }
-
-    /// IMAPv4 `msg-att`
-    public typealias MessageAttributes = [MessageAttributeType]
 
 }
 
 // MARK: - Encoding
 extension ByteBuffer {
 
-    @discardableResult mutating func writeMessageAttributes(_ atts: NIOIMAP.MessageAttributes) -> Int {
+    @discardableResult mutating func writeMessageAttributes(_ atts: [NIOIMAP.MessageAttributeType]) -> Int {
         return self.writeArray(atts) { (element, self) in
             return self.writeMessageAttributeType(element)
         }

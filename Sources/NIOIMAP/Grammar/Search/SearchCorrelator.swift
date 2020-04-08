@@ -14,17 +14,10 @@
 
 import NIO
 
-extension NIOIMAP {
-
-    /// IMAPv4 `search-correlator`
-    public typealias SearchCorrelator = TagString
-
-}
-
 // MARK: - Encoding
 extension ByteBuffer {
 
-    @discardableResult mutating func writeSearchCorrelator(_ correlator: NIOIMAP.SearchCorrelator) -> Int {
+    @discardableResult mutating func writeSearchCorrelator(_ correlator: ByteBuffer) -> Int {
         self.writeString(" (TAG ") +
         self.writeTagString(correlator) +
         self.writeString(")")

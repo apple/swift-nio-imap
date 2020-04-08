@@ -14,23 +14,35 @@
 
 import NIO
 
-extension NIOIMAP.Body {
-
-    /// IMAPv4 `body-fld-param`
-    public typealias FieldParameter = [ByteBuffer]?
-
+extension NIOIMAP {
+    
+    public struct FieldParameterPair: Equatable {
+        public var field: String
+        public var value: String
+        
+        public static func field(_ field: String, value: String) -> Self {
+            return Self(field: field, value: value)
+        }
+    }
+    
 }
 
 // MARK: - Encoding
 extension ByteBuffer {
 
-    @discardableResult mutating func writeBodyFieldParameter(_ params: NIOIMAP.Body.FieldParameter) -> Int {
-        guard let params = params else {
+    @discardableResult mutating func writeBodyFieldParameters(_ params: [NIOIMAP.FieldParameterPair]) -> Int {
+        guard params.count > 0 else {
             return self.writeNil()
         }
         return self.writeArray(params) { (element, buffer) in
-            buffer.writeIMAPString(element)
+            buffer.writeFieldParameterPair(element)
         }
+    }
+    
+    @discardableResult mutating func writeFieldParameterPair(_ pair: NIOIMAP.FieldParameterPair) -> Int {
+        self.writeIMAPString(pair.field) +
+        self.writeSpace() +
+        self.writeIMAPString(pair.value)
     }
 
 }
