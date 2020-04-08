@@ -29,7 +29,7 @@ extension BodyTypeMessageTests {
                 .message(
                     .rfc822,
                     fields: .parameter([], id: nil, description: nil, encoding: .base64, octets: 111),
-                    envelope: NIOIMAP.Envelope(date: "date", subject: nil, from: nil, sender: nil, reply: nil, to: nil, cc: nil, bcc: nil, inReplyTo: nil, messageID: nil),
+                    envelope: NIOIMAP.Envelope(date: "date", subject: nil, from: [], sender: [], reply: [], to: [], cc: [], bcc: [], inReplyTo: nil, messageID: nil),
                     body: .singlepart(.type(.text(.mediaText("subtype",
                             fields: .parameter([], id: nil, description: nil, encoding: .binary, octets: 22),
                             lines: 33

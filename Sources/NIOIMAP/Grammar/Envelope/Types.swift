@@ -17,8 +17,8 @@ import NIO
 // MARK: - Encoding
 extension ByteBuffer {
 
-    @discardableResult mutating func writeEnvelopeAddresses(_ addresses: [NIOIMAP.Address]?) -> Int {
-        guard let addresses = addresses else {
+    @discardableResult mutating func writeEnvelopeAddresses(_ addresses: [NIOIMAP.Address]) -> Int {
+        guard addresses.count > 0 else {
             return self.writeNil()
         }
 

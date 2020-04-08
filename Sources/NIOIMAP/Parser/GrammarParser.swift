@@ -4332,10 +4332,10 @@ extension NIOIMAP.GrammarParser {
         return addresses
     }
 
-    static func parseOptionalEnvelopeAddresses(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [NIOIMAP.Address]? {
-        func parseOptionalEnvelopeAddresses_nil(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [NIOIMAP.Address]? {
+    static func parseOptionalEnvelopeAddresses(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [NIOIMAP.Address] {
+        func parseOptionalEnvelopeAddresses_nil(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [NIOIMAP.Address] {
             try self.parseNil(buffer: &buffer, tracker: tracker)
-            return nil
+            return []
         }
         return try ParserLibrary.parseOneOf([
             parseEnvelopeAddresses,

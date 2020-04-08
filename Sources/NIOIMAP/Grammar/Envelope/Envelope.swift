@@ -20,16 +20,16 @@ extension NIOIMAP {
     public struct Envelope: Equatable {
         public var date: NString
         public var subject: NString
-        public var from: [NIOIMAP.Address]?
-        public var sender: [NIOIMAP.Address]?
-        public var reply: [NIOIMAP.Address]?
-        public var to: [NIOIMAP.Address]?
-        public var cc: [NIOIMAP.Address]?
-        public var bcc: [NIOIMAP.Address]?
+        public var from: [NIOIMAP.Address]
+        public var sender: [NIOIMAP.Address]
+        public var reply: [NIOIMAP.Address]
+        public var to: [NIOIMAP.Address]
+        public var cc: [NIOIMAP.Address]
+        public var bcc: [NIOIMAP.Address]
         public var inReplyTo: NString
         public var messageID: NString
         
-        public static func date(_ date: NString, subject: NIOIMAP.NString, from: [NIOIMAP.Address]?, sender: [NIOIMAP.Address]?, reply: [NIOIMAP.Address]?, to: [NIOIMAP.Address]?, cc: [NIOIMAP.Address]?, bcc: [NIOIMAP.Address]?, inReplyTo: NIOIMAP.NString, messageID: NIOIMAP.NString) -> Self {
+        public static func date(_ date: NString, subject: NIOIMAP.NString, from: [NIOIMAP.Address], sender: [NIOIMAP.Address], reply: [NIOIMAP.Address], to: [NIOIMAP.Address], cc: [NIOIMAP.Address], bcc: [NIOIMAP.Address], inReplyTo: NIOIMAP.NString, messageID: NIOIMAP.NString) -> Self {
             return Self(date: date, subject: subject, from: from, sender: sender, reply: reply, to: to, cc: cc, bcc: bcc, inReplyTo: inReplyTo, messageID: messageID)
         }
     }

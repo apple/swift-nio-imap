@@ -29,12 +29,12 @@ extension EnvelopeTests {
                 NIOIMAP.Envelope(
                     date: "01-02-03",
                     subject: nil,
-                    from: nil,
-                    sender: nil,
-                    reply: nil,
-                    to: nil,
-                    cc: nil,
-                    bcc: nil,
+                    from: [],
+                    sender: [],
+                    reply: [],
+                    to: [],
+                    cc: [],
+                    bcc: [],
                     inReplyTo: nil,
                     messageID: "1"
                 ),
