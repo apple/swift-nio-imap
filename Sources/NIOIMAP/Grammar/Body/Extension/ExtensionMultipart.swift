@@ -18,11 +18,11 @@ extension NIOIMAP.Body {
 
     /// IMAPv4 `body-ext-multipart`
     public struct ExtensionMultipart: Equatable {
-        public var parameter: [ByteBuffer]?
+        public var parameter: [NIOIMAP.FieldParameterPair]
         public var dspLanguage: FieldDSPLanguage?
 
         /// Convenience function for a better experience when chaining multiple types.
-        public static func parameter(_ parameters: [ByteBuffer]?, dspLanguage: FieldDSPLanguage?) -> Self {
+        public static func parameter(_ parameters: [NIOIMAP.FieldParameterPair], dspLanguage: FieldDSPLanguage?) -> Self {
             return Self(parameter: parameters, dspLanguage: dspLanguage)
         }
     }
@@ -33,7 +33,7 @@ extension NIOIMAP.Body {
 extension ByteBuffer {
 
     @discardableResult mutating func writeBodyExtensionMultipart(_ ext: NIOIMAP.Body.ExtensionMultipart) -> Int {
-        self.writeBodyFieldParameter(ext.parameter) +
+        self.writeBodyFieldParameters(ext.parameter) +
         self.writeIfExists(ext.dspLanguage) { (dspLanguage) -> Int in
             self.writeBodyFieldDSPLanguage(dspLanguage)
         }

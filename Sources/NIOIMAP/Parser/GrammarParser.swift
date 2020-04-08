@@ -424,25 +424,27 @@ extension NIOIMAP.GrammarParser {
     }
 
     // body-fld-param  = "(" string SP string *(SP string SP string) ")" / nil
-    static func parseBodyFieldParam(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [ByteBuffer]? {
+    static func parseBodyFieldParam(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [NIOIMAP.FieldParameterPair] {
 
-        func parseBodyFieldParam_nil(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [ByteBuffer]? {
+        func parseBodyFieldParam_nil(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [NIOIMAP.FieldParameterPair] {
             try parseNil(buffer: &buffer, tracker: tracker)
-            return nil
+            return []
+        }
+        
+        func parseBodyFieldParam_singlePair(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.FieldParameterPair {
+            let field = String(buffer: try parseString(buffer: &buffer, tracker: tracker))
+            try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
+            let value = String(buffer: try parseString(buffer: &buffer, tracker: tracker))
+            return .field(field, value: value)
         }
 
-        func parseBodyFieldParam_pairs(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [ByteBuffer]? {
+        func parseBodyFieldParam_pairs(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [NIOIMAP.FieldParameterPair] {
             try ParserLibrary.parseFixedString("(", buffer: &buffer, tracker: tracker)
-            var array = [try parseString(buffer: &buffer, tracker: tracker)]
-            try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) -> ByteBuffer in
+            var array = [try parseBodyFieldParam_singlePair(buffer: &buffer, tracker: tracker)]
+            try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) -> NIOIMAP.FieldParameterPair in
                 try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
-                return try self.parseString(buffer: &buffer, tracker: tracker)
+                return try parseBodyFieldParam_singlePair(buffer: &buffer, tracker: tracker)
             }
-
-            guard array.count % 2 == 0 else {
-                throw ParserError(hint: "Field parameteres expected in pairs")
-            }
-
             try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)
             return array
         }

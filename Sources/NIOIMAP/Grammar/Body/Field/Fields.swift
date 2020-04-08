@@ -18,14 +18,14 @@ extension NIOIMAP.Body {
 
     /// IMAPv4 `body-fields`
     public struct Fields: Equatable {
-        public var parameter: [ByteBuffer]?
+        public var parameter: [NIOIMAP.FieldParameterPair]
         public var id: NIOIMAP.NString
         public var description: NIOIMAP.NString
         public var encoding: FieldEncoding
         public var octets: Int
 
         /// Convenience function for a better experience when chaining multiple types.
-        public static func parameter(_ parameters: [ByteBuffer]?, id: NIOIMAP.NString, description: NIOIMAP.NString, encoding: FieldEncoding, octets: Int) -> Self {
+        public static func parameter(_ parameters: [NIOIMAP.FieldParameterPair], id: NIOIMAP.NString, description: NIOIMAP.NString, encoding: FieldEncoding, octets: Int) -> Self {
             return Self(parameter: parameters, id: id, description: description, encoding: encoding, octets: octets)
         }
     }
@@ -36,7 +36,7 @@ extension NIOIMAP.Body {
 extension ByteBuffer {
 
     @discardableResult mutating func writeBodyFields(_ fields: NIOIMAP.Body.Fields) -> Int {
-        self.writeBodyFieldParameter(fields.parameter) +
+        self.writeBodyFieldParameters(fields.parameter) +
         self.writeSpace() +
         self.writeNString(fields.id) +
         self.writeSpace() +
