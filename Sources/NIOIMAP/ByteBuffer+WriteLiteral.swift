@@ -17,14 +17,14 @@ import NIO
 extension ByteBuffer {
     
     @discardableResult mutating func writeIMAPString(_ str: String) -> Int {
-        self.writeIMAPString(Array(str.utf8)) // this is horrid
+        self.writeIMAPString(str.utf8)
     }
     
     @discardableResult mutating func writeIMAPString(_ str: ByteBuffer) -> Int {
-        self.writeIMAPString(Array(str.readableBytesView)) // also horrid
+        self.writeIMAPString(str.readableBytesView)
     }
 
-    fileprivate mutating func writeIMAPString(_ bytes: [UInt8]) -> Int {
+    fileprivate mutating func writeIMAPString<T: Collection>(_ bytes: T) -> Int where T.Element == UInt8 {
         
         // allSatisfy vs contains because IMO it's a little clearer
         var foundNull = false
@@ -47,12 +47,12 @@ extension ByteBuffer {
         return self.writeBuffer(&buffer)
     }
 
-    @discardableResult mutating func writeLiteral(_ bytes: [UInt8]) -> Int {
+    @discardableResult mutating func writeLiteral<T: Collection>(_ bytes: T) -> Int where T.Element == UInt8 {
         let length = "{\(bytes.count)}\r\n"
         return self.writeString(length) + self.writeBytes(bytes)
     }
     
-    @discardableResult mutating func writeLiteral8(_ bytes: [UInt8]) -> Int {
+    @discardableResult mutating func writeLiteral8<T: Collection>(_ bytes: T) -> Int where T.Element == UInt8 {
         let length = "~{\(bytes.count)}\r\n"
         return
             self.writeString(length) +
