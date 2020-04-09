@@ -98,4 +98,12 @@ extension ByteBuffer {
         }
         return callback()
     }
+    
+    @discardableResult mutating func writeIfArrayHasMinimumSize<T>(array: [T], minimum: Int = 1, callback: ([T], inout ByteBuffer) -> Int) -> Int {
+        guard array.count >= minimum else {
+            return 0
+        }
+        return callback(array, &self)
+    }
+    
 }

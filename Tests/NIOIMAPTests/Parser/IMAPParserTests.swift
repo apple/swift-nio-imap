@@ -152,7 +152,7 @@ extension ParserUnitTests {
                 c2_1,
                 .command(NIOIMAP.Command("2", .append(
                     to: .inbox,
-                    firstMessageMetadata: .options(.flagList(nil, dateTime: nil, extensions: []), data: .init(byteCount: 10))
+                    firstMessageMetadata: .options(.flagList([], dateTime: nil, extensions: []), data: .init(byteCount: 10))
                 )))
             )
             XCTAssertEqual(c2_2, .bytes("0123456789"))
@@ -430,24 +430,24 @@ extension ParserUnitTests {
 
     func testParseAppendOptions() {
         let inputs: [(String, String, NIOIMAP.AppendOptions, UInt)] = [
-            ("", "\r", .flagList(nil, dateTime: nil, extensions: []), #line),
+            ("", "\r", .flagList([], dateTime: nil, extensions: []), #line),
             (" (\\Answered)", "\r", .flagList([.answered], dateTime: nil, extensions: []), #line),
             (
                 " \"25-jun-1994 01:02:03 +0000\"",
                 "\r",
-                .flagList(nil, dateTime: .date(.day(25, month: .jun, year: 1994), time: .hour(01, minute: 02, second: 03), zone: NIOIMAP.Date.TimeZone(0)!), extensions: []),
+                .flagList([], dateTime: .date(.day(25, month: .jun, year: 1994), time: .hour(01, minute: 02, second: 03), zone: NIOIMAP.Date.TimeZone(0)!), extensions: []),
                 #line
             ),
             (
                 " name1 1:2",
                 "\r",
-                .flagList(nil, dateTime: nil, extensions: [.name("name1", value: .simple(.sequence([1...2])))]),
+                .flagList([], dateTime: nil, extensions: [.name("name1", value: .simple(.sequence([1...2])))]),
                 #line
             ),
             (
                 " name1 1:2 name2 2:3 name3 3:4",
                 "\r",
-                .flagList(nil, dateTime: nil, extensions: [
+                .flagList([], dateTime: nil, extensions: [
                     .name("name1", value: .simple(.sequence([1...2]))),
                     .name("name2", value: .simple(.sequence([2...3]))),
                     .name("name3", value: .simple(.sequence([3...4]))),
