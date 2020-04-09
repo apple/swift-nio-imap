@@ -17,11 +17,11 @@ import NIO
 extension NIOIMAP {
     
     // Exracted from `IDParamsList`
-    public struct IDParamsListElement: Equatable {
-        public var key: ByteBuffer
+    public struct IDParameter: Equatable {
+        public var key: String
         public var value: NString
         
-        public static func key(_ key: ByteBuffer, value: NString) -> Self {
+        public static func key(_ key: String, value: NString) -> Self {
             return Self(key: key, value: value)
         }
     }
@@ -31,30 +31,29 @@ extension NIOIMAP {
 // MARK: - Encoding
 extension ByteBuffer {
     
-    @discardableResult mutating func writeIDParamsListElement(_ element: NIOIMAP.IDParamsListElement) -> Int {
-        self.writeIMAPString(element.key) +
+    @discardableResult mutating func writeIDParameter(_ parameter: NIOIMAP.IDParameter) -> Int {
+        self.writeIMAPString(parameter.key) +
         self.writeSpace() +
-        self.writeNString(element.value)
+        self.writeNString(parameter.value)
     }
     
-    @discardableResult mutating func writeIDParamsList(_ list: [NIOIMAP.IDParamsListElement]?) -> Int {
-        if let array = list {
-            return self.writeArray(array) { (element, self) in
-                self.writeIDParamsListElement(element)
-            }
-        } else {
+    @discardableResult mutating func writeIDParameters(_ array: [NIOIMAP.IDParameter]) -> Int {
+        guard array.count > 0 else {
             return self.writeNil()
+        }
+        return self.writeArray(array) { (element, self) in
+            self.writeIDParameter(element)
         }
     }
     
-    @discardableResult mutating func writeIDResponse(_ response: [NIOIMAP.IDParamsListElement]?) -> Int {
+    @discardableResult mutating func writeIDResponse(_ response: [NIOIMAP.IDParameter]) -> Int {
         self.writeString("ID ") +
-        self.writeIDParamsList(response)
+        self.writeIDParameters(response)
     }
     
-    @discardableResult mutating func writeID(_ id: [NIOIMAP.IDParamsListElement]?) -> Int {
+    @discardableResult mutating func writeID(_ id: [NIOIMAP.IDParameter]) -> Int {
         self.writeString("ID ") +
-        self.writeIDParamsList(id)
+        self.writeIDParameters(id)
     }
     
 }
