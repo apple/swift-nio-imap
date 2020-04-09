@@ -3074,7 +3074,7 @@ extension NIOIMAP.GrammarParser {
     static func parseSearch(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.CommandType {
         try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
             try ParserLibrary.parseFixedString("SEARCH", buffer: &buffer, tracker: tracker)
-            let returnOpts = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseSearchReturnOptions)
+            let returnOpts = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseSearchReturnOptions) ?? []
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
             let program = try self.parseSearchProgram(buffer: &buffer, tracker: tracker)
             return .search(returnOptions: returnOpts, program: program)

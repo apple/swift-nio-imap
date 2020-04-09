@@ -2325,7 +2325,16 @@ extension ParserUnitTests {
 // MARK: - search parseSearch
 extension ParserUnitTests {
 
-
+    func testParseSearch() {
+        let inputs: [(String, String, NIOIMAP.CommandType, UInt)] = [
+            ("SEARCH ALL", "\r", .search(returnOptions: [], program: .charset(nil, keys: [.all])), #line),
+            ("SEARCH ALL DELETED FLAGGED", "\r", .search(returnOptions: [], program: .charset(nil, keys: [.all, .deleted, .flagged])), #line),
+            ("SEARCH CHARSET UTF-8 ALL", "\r", .search(returnOptions: [], program: .charset("UTF-8", keys: [.all])), #line),
+            ("SEARCH RETURN () ALL", "\r", .search(returnOptions: [], program: .charset(nil, keys: [.all])), #line),
+            ("SEARCH RETURN (MIN) ALL", "\r", .search(returnOptions: [.min], program: .charset(nil, keys: [.all])), #line)
+        ]
+        self.iterateTestInputs(inputs, testFunction: NIOIMAP.GrammarParser.parseSearch)
+    }
 
 }
 

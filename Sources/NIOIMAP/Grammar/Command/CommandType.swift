@@ -46,7 +46,7 @@ extension NIOIMAP {
         case copy([NIOIMAP.SequenceRange], Mailbox)
         case fetch([NIOIMAP.SequenceRange], FetchType, [FetchModifier])
         case store([NIOIMAP.SequenceRange], [StoreModifier]?, StoreAttributeFlags)
-        case search(returnOptions: [SearchReturnOption]?, program: SearchProgram)
+        case search(returnOptions: [SearchReturnOption], program: SearchProgram)
         case move([NIOIMAP.SequenceRange], Mailbox)
         case id([IDParameter])
         case namespace
@@ -314,7 +314,7 @@ extension ByteBuffer {
         self.writeStoreAttributeFlags(flags)
     }
     
-    private mutating func writeCommandType_search(returnOptions: [NIOIMAP.SearchReturnOption]?, program: NIOIMAP.SearchProgram) -> Int {
+    private mutating func writeCommandType_search(returnOptions: [NIOIMAP.SearchReturnOption], program: NIOIMAP.SearchProgram) -> Int {
         self.writeString("SEARCH") +
         self.writeIfExists(returnOptions) { (options) -> Int in
             self.writeSearchReturnOptions(options)
