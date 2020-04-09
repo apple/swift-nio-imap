@@ -1274,8 +1274,8 @@ extension ParserUnitTests {
 
     func testParseExamine() {
         let inputs: [(String, String, NIOIMAP.CommandType, UInt)] = [
-            ("EXAMINE inbox", "\r", .examine(.inbox, nil), #line),
-            ("examine inbox", "\r", .examine(.inbox, nil), #line),
+            ("EXAMINE inbox", "\r", .examine(.inbox, []), #line),
+            ("examine inbox", "\r", .examine(.inbox, []), #line),
             ("EXAMINE inbox (number)", "\r", .examine(.inbox, [.name("number", value: nil)]), #line),
         ]
         self.iterateTestInputs(inputs, testFunction: NIOIMAP.GrammarParser.parseExamine)
@@ -2633,7 +2633,7 @@ extension ParserUnitTests {
 
     func testParseSelect() {
         let inputs: [(String, String, NIOIMAP.CommandType, UInt)] = [
-            ("SELECT inbox", "\r", .select(.inbox, nil), #line),
+            ("SELECT inbox", "\r", .select(.inbox, []), #line),
             ("SELECT inbox (some1)", "\r", .select(.inbox, [.name("some1", value: nil)]), #line),
         ]
         self.iterateTestInputs(inputs, testFunction: NIOIMAP.GrammarParser.parseSelect)

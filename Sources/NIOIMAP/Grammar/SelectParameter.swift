@@ -31,10 +31,15 @@ extension NIOIMAP {
 extension ByteBuffer {
     
     @discardableResult mutating func writeSelectParameters(_ params: [NIOIMAP.SelectParameter]) -> Int {
-        self.writeSpace() +
-        self.writeArray(params) { (param, self) -> Int in
-            self.writeSelectParameter(param)
+        guard params.count > 0 else {
+            return 0
         }
+        
+        return
+            self.writeSpace() +
+            self.writeArray(params) { (param, self) -> Int in
+                self.writeSelectParameter(param)
+            }
     }
     
     @discardableResult mutating func writeSelectParameter(_ param: NIOIMAP.SelectParameter) -> Int {
@@ -43,6 +48,10 @@ extension ByteBuffer {
             self.writeSpace() +
             self.writeTaggedExtensionValue(value)
         }
+    }
+    
+    @discardableResult mutating func writeSelectParameterName(_ name: String) -> Int {
+        return self.writeTaggedExtensionLabel(name)
     }
     
 }
