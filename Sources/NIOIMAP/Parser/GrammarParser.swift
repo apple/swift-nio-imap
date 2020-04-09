@@ -113,7 +113,7 @@ extension NIOIMAP.GrammarParser {
             let flagList = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> [NIOIMAP.Flag] in
                 try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
                 return try self.parseFlagList(buffer: &buffer, tracker: tracker)
-            }
+            } ?? []
             let dateTime = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> NIOIMAP.Date.DateTime in
                 try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
                 return try self.parseDateTime(buffer: &buffer, tracker: tracker)
@@ -1923,7 +1923,7 @@ extension NIOIMAP.GrammarParser {
             try ParserLibrary.parseFixedString("(", buffer: &buffer, tracker: tracker)
             let list = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
                 try self.parseStatusAttributeList(buffer: &buffer, tracker: tracker)
-            }
+            } ?? []
             try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)
             return .status(mailbox, list)
         }
@@ -1990,7 +1990,11 @@ extension NIOIMAP.GrammarParser {
             ], buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
             let mailbox = try self.parseMailbox(buffer: &buffer, tracker: tracker)
-            return NIOIMAP.Mailbox.List(flags: flags, char: character, mailbox: mailbox)
+            let listExtended = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: { (buffer, tracker) -> [NIOIMAP.Mailbox.ListExtendedItem] in
+                try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
+                return try self.parseMailboxListExtended(buffer: &buffer, tracker: tracker)
+            }) ?? []
+            return NIOIMAP.Mailbox.List(flags: flags, char: character, mailbox: mailbox, listExtended: listExtended)
         }
     }
 
@@ -2685,7 +2689,7 @@ extension NIOIMAP.GrammarParser {
             let from = try self.parseMailbox(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseFixedString(" ", caseSensitive: false, buffer: &buffer, tracker: tracker)
             let to = try self.parseMailbox(buffer: &buffer, tracker: tracker)
-            let params = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseRenameParameters)
+            let params = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseRenameParameters) ?? []
             return .rename(from: from, to: to, params: params)
         }
     }
@@ -2951,7 +2955,7 @@ extension NIOIMAP.GrammarParser {
                 }
                 try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)
                 return array
-            }
+            } ?? []
             return .badCharset(charsets)
         }
 
@@ -3074,7 +3078,7 @@ extension NIOIMAP.GrammarParser {
     static func parseSearch(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.CommandType {
         try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
             try ParserLibrary.parseFixedString("SEARCH", buffer: &buffer, tracker: tracker)
-            let returnOpts = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseSearchReturnOptions)
+            let returnOpts = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseSearchReturnOptions) ?? []
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
             let program = try self.parseSearchProgram(buffer: &buffer, tracker: tracker)
             return .search(returnOptions: returnOpts, program: program)
@@ -3538,12 +3542,12 @@ extension NIOIMAP.GrammarParser {
     }
 
     // section-binary  = "[" [section-part] "]"
-    static func parseSectionBinary(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [Int]? {
-        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> [Int]? in
+    static func parseSectionBinary(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [Int] {
+        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> [Int] in
             try ParserLibrary.parseFixedString("[", buffer: &buffer, tracker: tracker)
             let part = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
                 return try self.parseSectionPart(buffer: &buffer, tracker: tracker)
-            }
+            } ?? []
             try ParserLibrary.parseFixedString("]", buffer: &buffer, tracker: tracker)
             return part
         }
@@ -3851,7 +3855,7 @@ extension NIOIMAP.GrammarParser {
         return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> NIOIMAP.CommandType in
             try ParserLibrary.parseFixedString("STORE ", buffer: &buffer, tracker: tracker)
             let sequence = try self.parseSequenceSet(buffer: &buffer, tracker: tracker)
-            let modifiers = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseStoreModifiers)
+            let modifiers = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseStoreModifiers) ?? []
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
             let flags = try self.parseStoreAttributeFlags(buffer: &buffer, tracker: tracker)
             return .store(sequence, modifiers, flags)
@@ -4009,7 +4013,7 @@ extension NIOIMAP.GrammarParser {
     // continuation = ( SP tagged-ext-comp )*
     // tagged-ext-comp = astring continuation | '(' tagged-ext-comp ')' continuation
     static func parseTaggedExtensionComplex_continuation(
-        into: inout [ByteBuffer],
+        into: inout [String],
         buffer: inout ByteBuffer,
         tracker: StackTracker
     ) throws {
@@ -4024,22 +4028,22 @@ extension NIOIMAP.GrammarParser {
     }
 
     static func parseTaggedExtensionComplex_helper(
-        into: inout [ByteBuffer],
+        into: inout [String],
         buffer: inout ByteBuffer,
         tracker: StackTracker
     ) throws {
 
         func parseTaggedExtensionComplex_string(
-            into: inout [ByteBuffer],
+            into: inout [String],
             buffer: inout ByteBuffer,
             tracker: StackTracker
         ) throws {
-            into.append(try self.parseAString(buffer: &buffer, tracker: tracker))
+            into.append(String(buffer: try self.parseAString(buffer: &buffer, tracker: tracker)))
             try self.parseTaggedExtensionComplex_continuation(into: &into, buffer: &buffer, tracker: tracker)
         }
 
         func parseTaggedExtensionComplex_bracketed(
-            into: inout [ByteBuffer],
+            into: inout [String],
             buffer: inout ByteBuffer,
             tracker: StackTracker
         ) throws {
@@ -4066,8 +4070,8 @@ extension NIOIMAP.GrammarParser {
     // tagged-ext-comp     = astring /
     //                       tagged-ext-comp *(SP tagged-ext-comp) /
     //                       "(" tagged-ext-comp ")"
-    static func parseTaggedExtensionComplex(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [ByteBuffer] {
-        var result = [ByteBuffer]()
+    static func parseTaggedExtensionComplex(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [String] {
+        var result = [String]()
         try self.parseTaggedExtensionComplex_helper(into: &result, buffer: &buffer, tracker: tracker)
         return result
     }
@@ -4104,7 +4108,7 @@ extension NIOIMAP.GrammarParser {
 
         func parseTaggedExtensionVal_comp(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.TaggedExtensionValue {
             try ParserLibrary.parseFixedString("(", buffer: &buffer, tracker: tracker)
-            let comp = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseTaggedExtensionComplex)
+            let comp = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseTaggedExtensionComplex) ?? []
             try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)
             return .comp(comp)
         }

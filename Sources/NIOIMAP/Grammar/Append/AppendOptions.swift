@@ -17,11 +17,11 @@ import NIO
 extension NIOIMAP {
 
     public struct AppendOptions: Equatable {
-        public var flagList: [Flag]?
+        public var flagList: [Flag]
         public var dateTime: Date.DateTime?
         public var extensions: [AppendExtension]
         
-        public static func flagList(_ flagList: [Flag]?, dateTime: Date.DateTime?, extensions: [AppendExtension]) -> Self {
+        public static func flagList(_ flagList: [Flag], dateTime: Date.DateTime?, extensions: [AppendExtension]) -> Self {
             return Self(flagList: flagList, dateTime: dateTime, extensions: extensions)
         }
     }
@@ -32,9 +32,9 @@ extension NIOIMAP {
 extension ByteBuffer {
     
     @discardableResult mutating func writeAppendOptions(_ options: NIOIMAP.AppendOptions) -> Int {
-        self.writeIfExists(options.flagList) { (flagList) -> Int in
+        self.writeIfArrayHasMinimumSize(array: options.flagList) { (array, self) -> Int in
             self.writeSpace() +
-            self.writeFlags(flagList)
+            self.writeFlags(array)
         } +
         self.writeIfExists(options.dateTime) { (dateTime) -> Int in
             self.writeSpace() +

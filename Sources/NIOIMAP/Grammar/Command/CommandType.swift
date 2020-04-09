@@ -27,7 +27,7 @@ extension NIOIMAP {
         case examine(Mailbox, [SelectParameter])
         case list(ListSelectOptions?, Mailbox, MailboxPatterns, [NIOIMAP.ReturnOption])
         case lsub(Mailbox, ByteBuffer)
-        case rename(from: Mailbox, to: Mailbox, params: [RenameParameter]?)
+        case rename(from: Mailbox, to: Mailbox, params: [RenameParameter])
         case select(Mailbox, [SelectParameter])
         case status(Mailbox, [StatusAttribute])
         case subscribe(Mailbox)
@@ -45,8 +45,8 @@ extension NIOIMAP {
         case idleFinish
         case copy([NIOIMAP.SequenceRange], Mailbox)
         case fetch([NIOIMAP.SequenceRange], FetchType, [FetchModifier])
-        case store([NIOIMAP.SequenceRange], [StoreModifier]?, StoreAttributeFlags)
-        case search(returnOptions: [SearchReturnOption]?, program: SearchProgram)
+        case store([NIOIMAP.SequenceRange], [StoreModifier], StoreAttributeFlags)
+        case search(returnOptions: [SearchReturnOption], program: SearchProgram)
         case move([NIOIMAP.SequenceRange], Mailbox)
         case id([IDParameter])
         case namespace
@@ -192,7 +192,7 @@ extension ByteBuffer {
         self.writeIMAPString(listMailbox)
     }
     
-    private mutating func writeCommandType_rename(from: NIOIMAP.Mailbox, to: NIOIMAP.Mailbox, parameters: [NIOIMAP.RenameParameter]?) -> Int {
+    private mutating func writeCommandType_rename(from: NIOIMAP.Mailbox, to: NIOIMAP.Mailbox, parameters: [NIOIMAP.RenameParameter]) -> Int {
         self.writeString("RENAME ") +
         self.writeMailbox(from) +
         self.writeSpace() +
@@ -304,17 +304,17 @@ extension ByteBuffer {
         }
     }
     
-    private mutating func writeCommandType_store(set: [NIOIMAP.SequenceRange], modifiers: [NIOIMAP.StoreModifier]?, flags: NIOIMAP.StoreAttributeFlags) -> Int {
+    private mutating func writeCommandType_store(set: [NIOIMAP.SequenceRange], modifiers: [NIOIMAP.StoreModifier], flags: NIOIMAP.StoreAttributeFlags) -> Int {
         self.writeString("STORE ") +
         self.writeSequenceSet(set) +
-        self.writeIfExists(modifiers) { (modifiers) -> Int in
+            self.writeIfArrayHasMinimumSize(array: modifiers) { (modifiers, self) -> Int in
             self.writeStoreModifiers(modifiers)
         } +
         self.writeSpace() +
         self.writeStoreAttributeFlags(flags)
     }
     
-    private mutating func writeCommandType_search(returnOptions: [NIOIMAP.SearchReturnOption]?, program: NIOIMAP.SearchProgram) -> Int {
+    private mutating func writeCommandType_search(returnOptions: [NIOIMAP.SearchReturnOption], program: NIOIMAP.SearchProgram) -> Int {
         self.writeString("SEARCH") +
         self.writeIfExists(returnOptions) { (options) -> Int in
             self.writeSearchReturnOptions(options)

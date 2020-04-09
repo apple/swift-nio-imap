@@ -15,15 +15,15 @@
 import NIO
 
 extension NIOIMAP {
-    
+
     public enum UIDCommandType: Equatable {
         case copy([NIOIMAP.SequenceRange], Mailbox)
         case move([NIOIMAP.SequenceRange], Mailbox)
         case fetch([NIOIMAP.SequenceRange], FetchType, [FetchModifier])
-        case search(returnOptions: [SearchReturnOption]?, program: SearchProgram)
-        case store([NIOIMAP.SequenceRange], [StoreModifier]?, StoreAttributeFlags)
+        case search(returnOptions: [SearchReturnOption], program: SearchProgram)
+        case store([NIOIMAP.SequenceRange], [StoreModifier], StoreAttributeFlags)
         case uidExpunge([NIOIMAP.SequenceRange])
-        
+
         init?(commandType: CommandType) {
             switch commandType {
             case .copy(let arg1, let arg2):
@@ -41,12 +41,12 @@ extension NIOIMAP {
             }
         }
     }
-    
+
 }
 
 // MARK: - Encoding
 extension ByteBuffer {
-    
+
     @discardableResult mutating func writeUIDCommandType(_ command: NIOIMAP.UIDCommandType) -> Int {
         switch command {
         case let .copy(sequence, mailbox):
@@ -55,7 +55,7 @@ extension ByteBuffer {
                 self.writeSequenceSet(sequence) +
                 self.writeSpace() +
                 self.writeMailbox(mailbox)
-            
+
         case let .fetch(set, atts, modifiers):
             return
                 self.writeString("FETCH ") +
@@ -65,7 +65,7 @@ extension ByteBuffer {
                 self.writeIfExists(modifiers) { (modifiers) -> Int in
                     self.writeFetchModifiers(modifiers)
                 }
-            
+
         case let .store(set, modifiers, flags):
             return
                 self.writeString("STORE ") +
@@ -75,25 +75,25 @@ extension ByteBuffer {
                 } +
                 self.writeSpace() +
                 self.writeStoreAttributeFlags(flags)
-            
+
         case let .uidExpunge(set):
             return
                 self.writeString("EXPUNGE ") +
                 self.writeSequenceSet(set)
-            
+
         case .search(let returnOptions, let program):
             return self.writeUIDCommandType_search(returnOptions: returnOptions, program: program)
-            
+
         case .move(let set, let mailbox):
             return
                 self.writeString("MOVE ") +
                 self.writeSequenceSet(set) +
-                self.writeSpace() + 
+                self.writeSpace() +
                 self.writeMailbox(mailbox)
         }
     }
-    
-    private mutating func writeUIDCommandType_search(returnOptions: [NIOIMAP.SearchReturnOption]?, program: NIOIMAP.SearchProgram) -> Int {
+
+    private mutating func writeUIDCommandType_search(returnOptions: [NIOIMAP.SearchReturnOption], program: NIOIMAP.SearchProgram) -> Int {
         self.writeString("SEARCH") +
         self.writeIfExists(returnOptions) { (options) -> Int in
             self.writeSearchReturnOptions(options)
@@ -101,5 +101,5 @@ extension ByteBuffer {
         self.writeSpace() +
         self.writeSearchProgram(program)
     }
-    
+
 }

@@ -61,9 +61,9 @@ final class ParserUnitTests: XCTestCase {
             (#"tag LOGIN "foo" "bar""#      + CRLF, [.command(.init("tag", .login("foo", "bar")))]),
             (#"tag LOGIN foo bar"#          + CRLF, [.command(.init("tag", .login("foo", "bar")))]),
             // RENAME
-            (#"tag RENAME "foo" "bar""#         + CRLF, [.command(NIOIMAP.Command("tag", .rename(from: NIOIMAP.Mailbox("foo"), to: NIOIMAP.Mailbox("bar"), params: nil)))]),
-            (#"tag RENAME InBoX "inBOX""#       + CRLF, [.command(NIOIMAP.Command("tag", .rename(from: .inbox, to: .inbox, params: nil)))]),
-            ("tag RENAME {1}\r\n1 {1}\r\n2"     + CRLF, [.command(NIOIMAP.Command("tag", .rename(from: NIOIMAP.Mailbox("1"), to: NIOIMAP.Mailbox("2"), params: nil)))]),
+            (#"tag RENAME "foo" "bar""#         + CRLF, [.command(NIOIMAP.Command("tag", .rename(from: NIOIMAP.Mailbox("foo"), to: NIOIMAP.Mailbox("bar"), params: [])))]),
+            (#"tag RENAME InBoX "inBOX""#       + CRLF, [.command(NIOIMAP.Command("tag", .rename(from: .inbox, to: .inbox, params: [])))]),
+            ("tag RENAME {1}\r\n1 {1}\r\n2"     + CRLF, [.command(NIOIMAP.Command("tag", .rename(from: NIOIMAP.Mailbox("1"), to: NIOIMAP.Mailbox("2"), params: [])))]),
         ]
         do {
             try ByteToMessageDecoderVerifier.verifyDecoder(
@@ -152,7 +152,7 @@ extension ParserUnitTests {
                 c2_1,
                 .command(NIOIMAP.Command("2", .append(
                     to: .inbox,
-                    firstMessageMetadata: .options(.flagList(nil, dateTime: nil, extensions: []), data: .init(byteCount: 10))
+                    firstMessageMetadata: .options(.flagList([], dateTime: nil, extensions: []), data: .init(byteCount: 10))
                 )))
             )
             XCTAssertEqual(c2_2, .bytes("0123456789"))
@@ -430,24 +430,24 @@ extension ParserUnitTests {
 
     func testParseAppendOptions() {
         let inputs: [(String, String, NIOIMAP.AppendOptions, UInt)] = [
-            ("", "\r", .flagList(nil, dateTime: nil, extensions: []), #line),
+            ("", "\r", .flagList([], dateTime: nil, extensions: []), #line),
             (" (\\Answered)", "\r", .flagList([.answered], dateTime: nil, extensions: []), #line),
             (
                 " \"25-jun-1994 01:02:03 +0000\"",
                 "\r",
-                .flagList(nil, dateTime: .date(.day(25, month: .jun, year: 1994), time: .hour(01, minute: 02, second: 03), zone: NIOIMAP.Date.TimeZone(0)!), extensions: []),
+                .flagList([], dateTime: .date(.day(25, month: .jun, year: 1994), time: .hour(01, minute: 02, second: 03), zone: NIOIMAP.Date.TimeZone(0)!), extensions: []),
                 #line
             ),
             (
                 " name1 1:2",
                 "\r",
-                .flagList(nil, dateTime: nil, extensions: [.name("name1", value: .simple(.sequence([1...2])))]),
+                .flagList([], dateTime: nil, extensions: [.name("name1", value: .simple(.sequence([1...2])))]),
                 #line
             ),
             (
                 " name1 1:2 name2 2:3 name3 3:4",
                 "\r",
-                .flagList(nil, dateTime: nil, extensions: [
+                .flagList([], dateTime: nil, extensions: [
                     .name("name1", value: .simple(.sequence([1...2]))),
                     .name("name2", value: .simple(.sequence([2...3]))),
                     .name("name3", value: .simple(.sequence([3...4]))),
@@ -1549,18 +1549,18 @@ extension ParserUnitTests {
             (
                 "LIST (\\oflag1 \\oflag2) NIL inbox",
                 "\r\n",
-                .list(.flags(.oFlags([.other("oflag1"), .other("oflag2")], sFlag: nil), char: nil, mailbox: .inbox, listExtended: nil)),
+                .list(.flags(.oFlags([.other("oflag1"), .other("oflag2")], sFlag: nil), char: nil, mailbox: .inbox, listExtended: [])),
                 #line
             ),
             ("ESEARCH MIN 1 MAX 2", "\r\n", .search(.correlator(nil, uid: false, returnData: [.min(1), .max(2)])), #line),
             ("1234 EXISTS", "\r\n", .exists(1234), #line),
             ("5678 RECENT", "\r\n", .exists(5678), #line),
-            ("STATUS INBOX ()", "\r\n", .status(.inbox, nil), #line),
+            ("STATUS INBOX ()", "\r\n", .status(.inbox, []), #line),
             ("STATUS INBOX (MESSAGES 2)", "\r\n", .status(.inbox, [.messages(2)]), #line),
             (
                 "LSUB (\\seen \\draft) NIL inbox",
                 "\r\n",
-                .lsub(.flags(.oFlags([.other("seen"), .other("draft")], sFlag: nil), char: nil, mailbox: .inbox, listExtended: nil)),
+                .lsub(.flags(.oFlags([.other("seen"), .other("draft")], sFlag: nil), char: nil, mailbox: .inbox, listExtended: [])),
                 #line
             ),
         ]
@@ -1571,41 +1571,35 @@ extension ParserUnitTests {
 
 // MARK: - parseMailboxList
 extension ParserUnitTests {
-
-    func testParseMailboxList_valid_noFlags_noCharacter() {
-        TestUtilities.withBuffer("() NIL inbox") { (buffer) in
-            let list = try NIOIMAP.GrammarParser.parseMailboxList(buffer: &buffer, tracker: .testTracker)
-            XCTAssertNil(list.flags)
-            XCTAssertNil(list.char)
-            XCTAssertEqual(list.mailbox, .inbox)
-        }
-    }
-
-    func testParseMailboxList_valid_noFlags_character() {
-        TestUtilities.withBuffer("() \"d\" inbox") { (buffer) in
-            let list = try NIOIMAP.GrammarParser.parseMailboxList(buffer: &buffer, tracker: .testTracker)
-            XCTAssertNil(list.flags)
-            XCTAssertEqual(list.char, "d")
-            XCTAssertEqual(list.mailbox, .inbox)
-        }
-    }
-
-    func testParseMailboxList_valid_flags_noCharacter() {
-        TestUtilities.withBuffer("(\\oflag1 \\oflag2) NIL inbox") { (buffer) in
-            let list = try NIOIMAP.GrammarParser.parseMailboxList(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(list.flags, NIOIMAP.Mailbox.List.Flags(oFlags: [.other("oflag1"), .other("oflag2")], sFlag: nil))
-            XCTAssertNil(list.char)
-            XCTAssertEqual(list.mailbox, .inbox)
-        }
-    }
-
-    func testParseMailboxList_valid_flags_character() {
-        TestUtilities.withBuffer("(\\oflag1 \\oflag2) \"d\" inbox") { (buffer) in
-            let list = try NIOIMAP.GrammarParser.parseMailboxList(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(list.flags, NIOIMAP.Mailbox.List.Flags(oFlags: [.other("oflag1"), .other("oflag2")], sFlag: nil))
-            XCTAssertEqual(list.char, "d")
-            XCTAssertEqual(list.mailbox, .inbox)
-        }
+    
+    func testParseMailboxList() {
+        let inputs: [(String, String, NIOIMAP.Mailbox.List, UInt)] = [
+            (
+                "() NIL inbox",
+                "\r",
+                .flags(nil, char: nil, mailbox: .inbox, listExtended: []),
+                #line
+            ),
+            (
+                "() \"d\" inbox",
+                "\r",
+                .flags(nil, char: "d", mailbox: .inbox, listExtended: []),
+                #line
+            ),
+            (
+                "(\\oflag1 \\oflag2) NIL inbox",
+                "\r",
+                .flags(NIOIMAP.Mailbox.List.Flags(oFlags: [.other("oflag1"), .other("oflag2")], sFlag: nil), char: nil, mailbox: .inbox, listExtended: []),
+                #line
+            ),
+            (
+                "(\\oflag1 \\oflag2) \"d\" inbox",
+                "\r",
+                .flags(NIOIMAP.Mailbox.List.Flags(oFlags: [.other("oflag1"), .other("oflag2")], sFlag: nil), char: "d", mailbox: .inbox, listExtended: []),
+                #line
+            )
+        ]
+        self.iterateTestInputs(inputs, testFunction: NIOIMAP.GrammarParser.parseMailboxList)
     }
 
     func testParseMailboxList_invalid_character_incomplete() {
@@ -2255,7 +2249,7 @@ extension ParserUnitTests {
     func testParseResponseTextCode() {
         let inputs: [(String, String, NIOIMAP.ResponseTextCode, UInt)] = [
             ("ALERT", "\r", .alert, #line),
-            ("BADCHARSET", "\r", .badCharset(nil), #line),
+            ("BADCHARSET", "\r", .badCharset([]), #line),
             ("BADCHARSET (UTF8)", "\r", .badCharset(["UTF8"]), #line),
             ("BADCHARSET (UTF8 UTF9 UTF10)", "\r", .badCharset(["UTF8", "UTF9", "UTF10"]), #line),
             ("CAPABILITY IMAP4 IMAP4rev1", "\r", .capability([]), #line),
@@ -2325,7 +2319,16 @@ extension ParserUnitTests {
 // MARK: - search parseSearch
 extension ParserUnitTests {
 
-
+    func testParseSearch() {
+        let inputs: [(String, String, NIOIMAP.CommandType, UInt)] = [
+            ("SEARCH ALL", "\r", .search(returnOptions: [], program: .charset(nil, keys: [.all])), #line),
+            ("SEARCH ALL DELETED FLAGGED", "\r", .search(returnOptions: [], program: .charset(nil, keys: [.all, .deleted, .flagged])), #line),
+            ("SEARCH CHARSET UTF-8 ALL", "\r", .search(returnOptions: [], program: .charset("UTF-8", keys: [.all])), #line),
+            ("SEARCH RETURN () ALL", "\r", .search(returnOptions: [], program: .charset(nil, keys: [.all])), #line),
+            ("SEARCH RETURN (MIN) ALL", "\r", .search(returnOptions: [.min], program: .charset(nil, keys: [.all])), #line)
+        ]
+        self.iterateTestInputs(inputs, testFunction: NIOIMAP.GrammarParser.parseSearch)
+    }
 
 }
 
@@ -2431,7 +2434,7 @@ extension ParserUnitTests {
 
     func testParseSearchModifierParams() {
         let inputs: [(String, String, NIOIMAP.TaggedExtensionValue, UInt)] = [
-            ("()", "", .comp(nil), #line),
+            ("()", "", .comp([]), #line),
         ]
         self.iterateTestInputs(inputs, testFunction: NIOIMAP.GrammarParser.parseSearchModifierParams)
     }
@@ -2564,9 +2567,10 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     
     func testParseSectionBinary() {
-        let inputs: [(String, String, [Int]?, UInt)] = [
-            ("[]", "\r", nil, #line),
+        let inputs: [(String, String, [Int], UInt)] = [
+            ("[]", "\r", [], #line),
             ("[1]", "\r", [1], #line),
+            ("[1.2.3]", "\r", [1, 2, 3], #line),
         ]
         self.iterateTestInputs(inputs, testFunction: NIOIMAP.GrammarParser.parseSectionBinary)
     }
@@ -2878,7 +2882,7 @@ extension ParserUnitTests {
 
     func testParseStore() {
         let inputs: [(String, String, NIOIMAP.CommandType, UInt)] = [
-            ("STORE 1 +FLAGS \\answered", "\r", .store([1], nil, .add(silent: false, list: [.answered])), #line),
+            ("STORE 1 +FLAGS \\answered", "\r", .store([1], [], .add(silent: false, list: [.answered])), #line),
             ("STORE 1 (label) -FLAGS \\seen", "\r", .store([1], [.name("label", parameters: nil)], .remove(silent: false, list: [.seen])), #line),
         ]
         self.iterateTestInputs(inputs, testFunction: NIOIMAP.GrammarParser.parseStore)
@@ -2928,8 +2932,8 @@ extension ParserUnitTests {
     
     func testParseRename() {
         let inputs: [(String, String, NIOIMAP.CommandType, UInt)] = [
-            ("RENAME box1 box2", "\r", .rename(from: "box1", to: "box2", params: nil), #line),
-            ("rename box3 box4", "\r", .rename(from: "box3", to: "box4", params: nil), #line),
+            ("RENAME box1 box2", "\r", .rename(from: "box1", to: "box2", params: []), #line),
+            ("rename box3 box4", "\r", .rename(from: "box3", to: "box4", params: []), #line),
             ("RENAME box5 box6 (test)", "\r", .rename(from: "box5", to: "box6", params: [.name("test", value: nil)]), #line)
         ]
         self.iterateTestInputs(inputs, testFunction: NIOIMAP.GrammarParser.parseRename)
@@ -3041,7 +3045,7 @@ extension ParserUnitTests {
 
     func testParseTaggedExtensionComplex() {
 
-        let inputs: [(String, String, [ByteBuffer], UInt)] = [
+        let inputs: [(String, String, [String], UInt)] = [
             ("test", "\r\n", ["test"], #line),
             ("(test)", "\r\n", ["test"], #line),
             ("(test1 test2)", "\r\n", ["test1", "test2"], #line),

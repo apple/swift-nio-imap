@@ -48,14 +48,18 @@ extension ByteBuffer {
         }
     }
 
-    @discardableResult mutating func writeSearchReturnOptions(_ options: [NIOIMAP.SearchReturnOption]?) -> Int {
-        self.writeString(" RETURN (") +
-        self.writeIfExists(options) { (options) -> Int in
-            self.writeArray(options, parenthesis: false) { (option, self) in
-                self.writeSearchReturnOption(option)
-            }
-        } +
-        self.writeString(")")
+    @discardableResult mutating func writeSearchReturnOptions(_ options: [NIOIMAP.SearchReturnOption]) -> Int {
+        guard options.count > 0 else {
+            return 0
+        }
+        return
+            self.writeString(" RETURN (") +
+            self.writeIfExists(options) { (options) -> Int in
+                self.writeArray(options, parenthesis: false) { (option, self) in
+                    self.writeSearchReturnOption(option)
+                }
+            } +
+            self.writeString(")")
     }
 
 }

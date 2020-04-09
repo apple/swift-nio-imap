@@ -43,6 +43,7 @@ extension SearchReturnOption_Tests {
 
     func testEncode_multiple() {
         let inputs: [([NIOIMAP.SearchReturnOption], String, UInt)] = [
+            ([], "", #line),
             ([.min], " RETURN (MIN)", #line),
             ([.min, .max, .count], " RETURN (MIN MAX COUNT)", #line),
         ]
