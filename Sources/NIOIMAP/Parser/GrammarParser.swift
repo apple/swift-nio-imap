@@ -3538,12 +3538,12 @@ extension NIOIMAP.GrammarParser {
     }
 
     // section-binary  = "[" [section-part] "]"
-    static func parseSectionBinary(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [Int]? {
-        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> [Int]? in
+    static func parseSectionBinary(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [Int] {
+        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> [Int] in
             try ParserLibrary.parseFixedString("[", buffer: &buffer, tracker: tracker)
             let part = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
                 return try self.parseSectionPart(buffer: &buffer, tracker: tracker)
-            }
+            } ?? []
             try ParserLibrary.parseFixedString("]", buffer: &buffer, tracker: tracker)
             return part
         }

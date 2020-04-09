@@ -32,9 +32,9 @@ extension NIOIMAP {
         case bodySection(SectionSpec?, Int?, NString)
         case bodySectionText(Int?, Int) // used when streaming the body, send the literal header
         case uid(Int)
-        case binaryString(section: [Int]?, string: NString)
-        case binaryLiteral(section: [Int]?, size: Int)
-        case binarySize(section: [Int]?, number: Int)
+        case binaryString(section: [Int], string: NString)
+        case binaryLiteral(section: [Int], size: Int)
+        case binarySize(section: [Int], number: Int)
     }
 
 }

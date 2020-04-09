@@ -24,9 +24,9 @@ class SectionBinary_Tests: EncodeTestClass {
 extension SectionBinary_Tests {
 
     func testEncode() {
-        let inputs: [([Int]?, String, UInt)] = [
-            (nil, "[]", #line),
-            ([1], "[1]", #line)
+        let inputs: [([Int], String, UInt)] = [
+            ([], "[]", #line),
+            ([1, 2, 3], "[1.2.3]", #line)
         ]
 
         for (test, expectedString, line) in inputs {
