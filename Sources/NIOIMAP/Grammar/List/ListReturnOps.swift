@@ -17,10 +17,10 @@ import NIO
 // MARK: - Encoding
 extension ByteBuffer {
 
-    @discardableResult mutating func writeListReturnOptions(_ options: [NIOIMAP.ReturnOption]?) -> Int {
+    @discardableResult mutating func writeListReturnOptions(_ options: [NIOIMAP.ReturnOption]) -> Int {
         self.writeString("RETURN ") +
         self.writeString("(") +
-        self.writeIfExists(options) { (options) -> Int in
+        self.writeIfArrayHasMinimumSize(array: options) { (options, self) -> Int in
             self.writeArray(options, parenthesis: false) { (option, self) in
                 self.writeReturnOption(option)
             }
