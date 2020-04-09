@@ -29,11 +29,16 @@ extension NIOIMAP {
 // MARK: - Encoding
 extension ByteBuffer {
     
-    @discardableResult mutating func writeFetchModifiers(_ params: [NIOIMAP.FetchModifier]) -> Int {
-        self.writeSpace() +
-        self.writeArray(params) { (param, self) -> Int in
-            self.writeFetchModifier(param)
+    @discardableResult mutating func writeFetchModifiers(_ array: [NIOIMAP.FetchModifier]) -> Int {
+        guard array.count > 0 else {
+            return 0
         }
+        
+        return
+            self.writeSpace() +
+            self.writeArray(array) { (param, self) -> Int in
+                self.writeFetchModifier(param)
+            }
     }
     
     @discardableResult mutating func writeFetchModifier(_ param: NIOIMAP.FetchModifier) -> Int {
