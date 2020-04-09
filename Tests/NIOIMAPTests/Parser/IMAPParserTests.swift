@@ -1482,8 +1482,8 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     
     func testParseIDParamsList() {
-        let inputs: [(String, String, [NIOIMAP.IDParamsListElement]?, UInt)] = [
-            ("NIL", " ", nil, #line),
+        let inputs: [(String, String, [NIOIMAP.IDParameter], UInt)] = [
+            ("NIL", " ", [], #line),
             (#"("key1" "value1")"#, "" , [.key("key1", value: "value1")], #line),
             (
                 #"("key1" "value1" "key2" "value2" "key3" "value3")"#,
