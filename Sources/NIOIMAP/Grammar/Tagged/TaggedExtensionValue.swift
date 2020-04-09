@@ -19,7 +19,7 @@ extension NIOIMAP {
     /// IMAPv4 `tagged-ext-val`
     public enum TaggedExtensionValue: Equatable {
         case simple(TaggedExtensionSimple)
-        case comp([ByteBuffer]?)
+        case comp([String])
     }
 
 }
@@ -34,9 +34,7 @@ extension ByteBuffer {
         case .comp(let comp):
             return
                 self.writeString("(") +
-                self.writeIfExists(comp) { (comp) -> Int in
-                    self.writeTaggedExtensionComp(comp)
-                } +
+                self.writeTaggedExtensionComp(comp) +
                 self.writeString(")")
         }
     }

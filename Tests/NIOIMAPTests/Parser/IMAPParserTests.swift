@@ -2434,7 +2434,7 @@ extension ParserUnitTests {
 
     func testParseSearchModifierParams() {
         let inputs: [(String, String, NIOIMAP.TaggedExtensionValue, UInt)] = [
-            ("()", "", .comp(nil), #line),
+            ("()", "", .comp([]), #line),
         ]
         self.iterateTestInputs(inputs, testFunction: NIOIMAP.GrammarParser.parseSearchModifierParams)
     }
@@ -3045,7 +3045,7 @@ extension ParserUnitTests {
 
     func testParseTaggedExtensionComplex() {
 
-        let inputs: [(String, String, [ByteBuffer], UInt)] = [
+        let inputs: [(String, String, [String], UInt)] = [
             ("test", "\r\n", ["test"], #line),
             ("(test)", "\r\n", ["test"], #line),
             ("(test1 test2)", "\r\n", ["test1", "test2"], #line),
