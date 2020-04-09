@@ -3851,7 +3851,7 @@ extension NIOIMAP.GrammarParser {
         return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> NIOIMAP.CommandType in
             try ParserLibrary.parseFixedString("STORE ", buffer: &buffer, tracker: tracker)
             let sequence = try self.parseSequenceSet(buffer: &buffer, tracker: tracker)
-            let modifiers = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseStoreModifiers)
+            let modifiers = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseStoreModifiers) ?? []
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
             let flags = try self.parseStoreAttributeFlags(buffer: &buffer, tracker: tracker)
             return .store(sequence, modifiers, flags)

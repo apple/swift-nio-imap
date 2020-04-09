@@ -45,7 +45,7 @@ extension NIOIMAP {
         case idleFinish
         case copy([NIOIMAP.SequenceRange], Mailbox)
         case fetch([NIOIMAP.SequenceRange], FetchType, [FetchModifier])
-        case store([NIOIMAP.SequenceRange], [StoreModifier]?, StoreAttributeFlags)
+        case store([NIOIMAP.SequenceRange], [StoreModifier], StoreAttributeFlags)
         case search(returnOptions: [SearchReturnOption], program: SearchProgram)
         case move([NIOIMAP.SequenceRange], Mailbox)
         case id([IDParameter])
@@ -304,10 +304,10 @@ extension ByteBuffer {
         }
     }
     
-    private mutating func writeCommandType_store(set: [NIOIMAP.SequenceRange], modifiers: [NIOIMAP.StoreModifier]?, flags: NIOIMAP.StoreAttributeFlags) -> Int {
+    private mutating func writeCommandType_store(set: [NIOIMAP.SequenceRange], modifiers: [NIOIMAP.StoreModifier], flags: NIOIMAP.StoreAttributeFlags) -> Int {
         self.writeString("STORE ") +
         self.writeSequenceSet(set) +
-        self.writeIfExists(modifiers) { (modifiers) -> Int in
+            self.writeIfArrayHasMinimumSize(array: modifiers) { (modifiers, self) -> Int in
             self.writeStoreModifiers(modifiers)
         } +
         self.writeSpace() +

@@ -2888,7 +2888,7 @@ extension ParserUnitTests {
 
     func testParseStore() {
         let inputs: [(String, String, NIOIMAP.CommandType, UInt)] = [
-            ("STORE 1 +FLAGS \\answered", "\r", .store([1], nil, .add(silent: false, list: [.answered])), #line),
+            ("STORE 1 +FLAGS \\answered", "\r", .store([1], [], .add(silent: false, list: [.answered])), #line),
             ("STORE 1 (label) -FLAGS \\seen", "\r", .store([1], [.name("label", parameters: nil)], .remove(silent: false, list: [.seen])), #line),
         ]
         self.iterateTestInputs(inputs, testFunction: NIOIMAP.GrammarParser.parseStore)
