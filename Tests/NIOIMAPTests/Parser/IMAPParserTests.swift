@@ -735,7 +735,7 @@ extension ParserUnitTests {
     
     func testParseCreate() {
         let inputs: [(String, String, NIOIMAP.CommandType, UInt)] = [
-            ("CREATE inbox", "\r", .create(.inbox, nil), #line),
+            ("CREATE inbox", "\r", .create(.inbox, []), #line),
             ("CREATE inbox (some)", "\r", .create(.inbox, [.name("some", value: nil)]), #line),
         ]
         self.iterateTestInputs(inputs, testFunction: NIOIMAP.GrammarParser.parseCreate)
@@ -766,7 +766,7 @@ extension ParserUnitTests {
         TestUtilities.withBuffer("a1 CREATE \"mailbox\"", terminator: "\r\n") { (buffer) in
             let result = try NIOIMAP.GrammarParser.parseCommand(buffer: &buffer, tracker: .testTracker)
             XCTAssertEqual(result.tag, "a1")
-            XCTAssertEqual(result.type, .create(NIOIMAP.Mailbox("mailbox"), nil))
+            XCTAssertEqual(result.type, .create(NIOIMAP.Mailbox("mailbox"), []))
         }
     }
 

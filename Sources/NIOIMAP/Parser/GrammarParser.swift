@@ -872,7 +872,7 @@ extension NIOIMAP.GrammarParser {
         return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> NIOIMAP.CommandType in
             try ParserLibrary.parseFixedString("CREATE ", buffer: &buffer, tracker: tracker)
             let mailbox = try self.parseMailbox(buffer: &buffer, tracker: tracker)
-            let params = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseCreateParameters)
+            let params = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseCreateParameters) ?? []
             return .create(mailbox, params)
         }
     }
