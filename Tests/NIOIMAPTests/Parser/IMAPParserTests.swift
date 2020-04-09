@@ -1295,13 +1295,13 @@ extension ParserUnitTests {
     
     func testParseFetch() {
         let inputs: [(String, String, NIOIMAP.CommandType, UInt)] = [
-            ("FETCH 1:3 ALL", "\r", .fetch([1...3], .all, nil), #line),
-            ("FETCH 2:4 FULL", "\r", .fetch([2...4], .full, nil), #line),
-            ("FETCH 3:5 FAST", "\r", .fetch([3...5], .fast, nil), #line),
-            ("FETCH 4:6 ENVELOPE", "\r", .fetch([4...6], .attributes([.envelope]), nil), #line),
-            ("FETCH 5:7 (ENVELOPE FLAGS)", "\r", .fetch([5...7], .attributes([.envelope, .flags]), nil), #line),
+            ("FETCH 1:3 ALL", "\r", .fetch([1...3], .all, []), #line),
+            ("FETCH 2:4 FULL", "\r", .fetch([2...4], .full, []), #line),
+            ("FETCH 3:5 FAST", "\r", .fetch([3...5], .fast, []), #line),
+            ("FETCH 4:6 ENVELOPE", "\r", .fetch([4...6], .attributes([.envelope]), []), #line),
+            ("FETCH 5:7 (ENVELOPE FLAGS)", "\r", .fetch([5...7], .attributes([.envelope, .flags]), []), #line),
             ("FETCH 3:5 FAST (name)", "\r", .fetch([3...5], .fast, [.name("name", value: nil)]), #line),
-            ("FETCH 1 BODY[TEXT]", "\r", .fetch([1], .attributes([.bodySection(.text(.text), nil)]), nil), #line),
+            ("FETCH 1 BODY[TEXT]", "\r", .fetch([1], .attributes([.bodySection(.text(.text), nil)]), []), #line),
         ]
         self.iterateTestInputs(inputs, testFunction: NIOIMAP.GrammarParser.parseFetch)
     }
