@@ -31,10 +31,15 @@ extension NIOIMAP {
 extension ByteBuffer {
     
     @discardableResult mutating func writeCreateParameters(_ params: [NIOIMAP.CreateParameter]) -> Int {
-        self.writeSpace() +
-        self.writeArray(params) { (param, self) -> Int in
-            self.writeCreateParameter(param)
+        guard params.count > 0 else {
+            return 0 // don't do anything
         }
+        
+        return
+            self.writeSpace() +
+            self.writeArray(params) { (param, self) -> Int in
+                self.writeCreateParameter(param)
+            }
     }
     
     @discardableResult mutating func writeCreateParameter(_ param: NIOIMAP.CreateParameter) -> Int {
