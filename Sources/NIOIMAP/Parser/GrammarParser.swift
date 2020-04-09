@@ -1990,7 +1990,11 @@ extension NIOIMAP.GrammarParser {
             ], buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
             let mailbox = try self.parseMailbox(buffer: &buffer, tracker: tracker)
-            return NIOIMAP.Mailbox.List(flags: flags, char: character, mailbox: mailbox)
+            let listExtended = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: { (buffer, tracker) -> [NIOIMAP.Mailbox.ListExtendedItem] in
+                try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
+                return try self.parseMailboxListExtended(buffer: &buffer, tracker: tracker)
+            }) ?? []
+            return NIOIMAP.Mailbox.List(flags: flags, char: character, mailbox: mailbox, listExtended: listExtended)
         }
     }
 

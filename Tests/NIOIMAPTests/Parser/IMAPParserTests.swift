@@ -1549,7 +1549,7 @@ extension ParserUnitTests {
             (
                 "LIST (\\oflag1 \\oflag2) NIL inbox",
                 "\r\n",
-                .list(.flags(.oFlags([.other("oflag1"), .other("oflag2")], sFlag: nil), char: nil, mailbox: .inbox, listExtended: nil)),
+                .list(.flags(.oFlags([.other("oflag1"), .other("oflag2")], sFlag: nil), char: nil, mailbox: .inbox, listExtended: [])),
                 #line
             ),
             ("ESEARCH MIN 1 MAX 2", "\r\n", .search(.correlator(nil, uid: false, returnData: [.min(1), .max(2)])), #line),
@@ -1560,7 +1560,7 @@ extension ParserUnitTests {
             (
                 "LSUB (\\seen \\draft) NIL inbox",
                 "\r\n",
-                .lsub(.flags(.oFlags([.other("seen"), .other("draft")], sFlag: nil), char: nil, mailbox: .inbox, listExtended: nil)),
+                .lsub(.flags(.oFlags([.other("seen"), .other("draft")], sFlag: nil), char: nil, mailbox: .inbox, listExtended: [])),
                 #line
             ),
         ]
@@ -1571,41 +1571,35 @@ extension ParserUnitTests {
 
 // MARK: - parseMailboxList
 extension ParserUnitTests {
-
-    func testParseMailboxList_valid_noFlags_noCharacter() {
-        TestUtilities.withBuffer("() NIL inbox") { (buffer) in
-            let list = try NIOIMAP.GrammarParser.parseMailboxList(buffer: &buffer, tracker: .testTracker)
-            XCTAssertNil(list.flags)
-            XCTAssertNil(list.char)
-            XCTAssertEqual(list.mailbox, .inbox)
-        }
-    }
-
-    func testParseMailboxList_valid_noFlags_character() {
-        TestUtilities.withBuffer("() \"d\" inbox") { (buffer) in
-            let list = try NIOIMAP.GrammarParser.parseMailboxList(buffer: &buffer, tracker: .testTracker)
-            XCTAssertNil(list.flags)
-            XCTAssertEqual(list.char, "d")
-            XCTAssertEqual(list.mailbox, .inbox)
-        }
-    }
-
-    func testParseMailboxList_valid_flags_noCharacter() {
-        TestUtilities.withBuffer("(\\oflag1 \\oflag2) NIL inbox") { (buffer) in
-            let list = try NIOIMAP.GrammarParser.parseMailboxList(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(list.flags, NIOIMAP.Mailbox.List.Flags(oFlags: [.other("oflag1"), .other("oflag2")], sFlag: nil))
-            XCTAssertNil(list.char)
-            XCTAssertEqual(list.mailbox, .inbox)
-        }
-    }
-
-    func testParseMailboxList_valid_flags_character() {
-        TestUtilities.withBuffer("(\\oflag1 \\oflag2) \"d\" inbox") { (buffer) in
-            let list = try NIOIMAP.GrammarParser.parseMailboxList(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(list.flags, NIOIMAP.Mailbox.List.Flags(oFlags: [.other("oflag1"), .other("oflag2")], sFlag: nil))
-            XCTAssertEqual(list.char, "d")
-            XCTAssertEqual(list.mailbox, .inbox)
-        }
+    
+    func testParseMailboxList() {
+        let inputs: [(String, String, NIOIMAP.Mailbox.List, UInt)] = [
+            (
+                "() NIL inbox",
+                "\r",
+                .flags(nil, char: nil, mailbox: .inbox, listExtended: []),
+                #line
+            ),
+            (
+                "() \"d\" inbox",
+                "\r",
+                .flags(nil, char: "d", mailbox: .inbox, listExtended: []),
+                #line
+            ),
+            (
+                "(\\oflag1 \\oflag2) NIL inbox",
+                "\r",
+                .flags(NIOIMAP.Mailbox.List.Flags(oFlags: [.other("oflag1"), .other("oflag2")], sFlag: nil), char: nil, mailbox: .inbox, listExtended: []),
+                #line
+            ),
+            (
+                "(\\oflag1 \\oflag2) \"d\" inbox",
+                "\r",
+                .flags(NIOIMAP.Mailbox.List.Flags(oFlags: [.other("oflag1"), .other("oflag2")], sFlag: nil), char: "d", mailbox: .inbox, listExtended: []),
+                #line
+            )
+        ]
+        self.iterateTestInputs(inputs, testFunction: NIOIMAP.GrammarParser.parseMailboxList)
     }
 
     func testParseMailboxList_invalid_character_incomplete() {

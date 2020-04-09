@@ -21,9 +21,9 @@ extension NIOIMAP.Mailbox {
         public var flags: Flags?
         public var char: Character?
         public var mailbox: NIOIMAP.Mailbox
-        public var listExtended: [ListExtendedItem]?
+        public var listExtended: [ListExtendedItem]
         
-        public static func flags(_ flags: Flags?, char: Character?, mailbox: NIOIMAP.Mailbox, listExtended: [ListExtendedItem]?) -> Self {
+        public static func flags(_ flags: Flags?, char: Character?, mailbox: NIOIMAP.Mailbox, listExtended: [ListExtendedItem]) -> Self {
             return Self(flags: flags, char: char, mailbox: mailbox, listExtended: listExtended)
         }
     }
