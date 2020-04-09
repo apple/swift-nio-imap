@@ -19,7 +19,7 @@ extension NIOIMAP {
     /// IMAPv4 `resp-text-code`
     public enum ResponseTextCode: Equatable {
         case alert
-        case badCharset([String]?)
+        case badCharset([String])
         case capability([Capability])
         case parse
         case permanentFlags([PermanentFlag])
@@ -71,9 +71,9 @@ extension ByteBuffer {
         }
     }
 
-    private mutating func writeResponseTextCode_badCharsets(_ charsets: [String]?) -> Int {
+    private mutating func writeResponseTextCode_badCharsets(_ charsets: [String]) -> Int {
         self.writeString("BADCHARSET") +
-        self.writeIfExists(charsets) { (charsets) -> Int in
+        self.writeIfArrayHasMinimumSize(array: charsets) { (charsets, self) -> Int in
             self.writeSpace() +
             self.writeArray(charsets) { (charset, self) in
                 self.writeString(charset)

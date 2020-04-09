@@ -2955,7 +2955,7 @@ extension NIOIMAP.GrammarParser {
                 }
                 try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)
                 return array
-            }
+            } ?? []
             return .badCharset(charsets)
         }
 

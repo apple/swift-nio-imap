@@ -2249,7 +2249,7 @@ extension ParserUnitTests {
     func testParseResponseTextCode() {
         let inputs: [(String, String, NIOIMAP.ResponseTextCode, UInt)] = [
             ("ALERT", "\r", .alert, #line),
-            ("BADCHARSET", "\r", .badCharset(nil), #line),
+            ("BADCHARSET", "\r", .badCharset([]), #line),
             ("BADCHARSET (UTF8)", "\r", .badCharset(["UTF8"]), #line),
             ("BADCHARSET (UTF8 UTF9 UTF10)", "\r", .badCharset(["UTF8", "UTF9", "UTF10"]), #line),
             ("CAPABILITY IMAP4 IMAP4rev1", "\r", .capability([]), #line),
