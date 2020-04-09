@@ -1923,7 +1923,7 @@ extension NIOIMAP.GrammarParser {
             try ParserLibrary.parseFixedString("(", buffer: &buffer, tracker: tracker)
             let list = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
                 try self.parseStatusAttributeList(buffer: &buffer, tracker: tracker)
-            }
+            } ?? []
             try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)
             return .status(mailbox, list)
         }
