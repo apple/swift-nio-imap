@@ -2685,7 +2685,7 @@ extension NIOIMAP.GrammarParser {
             let from = try self.parseMailbox(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseFixedString(" ", caseSensitive: false, buffer: &buffer, tracker: tracker)
             let to = try self.parseMailbox(buffer: &buffer, tracker: tracker)
-            let params = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseRenameParameters)
+            let params = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseRenameParameters) ?? []
             return .rename(from: from, to: to, params: params)
         }
     }

@@ -27,7 +27,7 @@ extension NIOIMAP {
         case examine(Mailbox, [SelectParameter])
         case list(ListSelectOptions?, Mailbox, MailboxPatterns, [NIOIMAP.ReturnOption])
         case lsub(Mailbox, ByteBuffer)
-        case rename(from: Mailbox, to: Mailbox, params: [RenameParameter]?)
+        case rename(from: Mailbox, to: Mailbox, params: [RenameParameter])
         case select(Mailbox, [SelectParameter])
         case status(Mailbox, [StatusAttribute])
         case subscribe(Mailbox)
@@ -192,7 +192,7 @@ extension ByteBuffer {
         self.writeIMAPString(listMailbox)
     }
     
-    private mutating func writeCommandType_rename(from: NIOIMAP.Mailbox, to: NIOIMAP.Mailbox, parameters: [NIOIMAP.RenameParameter]?) -> Int {
+    private mutating func writeCommandType_rename(from: NIOIMAP.Mailbox, to: NIOIMAP.Mailbox, parameters: [NIOIMAP.RenameParameter]) -> Int {
         self.writeString("RENAME ") +
         self.writeMailbox(from) +
         self.writeSpace() +

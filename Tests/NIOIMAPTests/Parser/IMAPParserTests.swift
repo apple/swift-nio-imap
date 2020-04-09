@@ -61,9 +61,9 @@ final class ParserUnitTests: XCTestCase {
             (#"tag LOGIN "foo" "bar""#      + CRLF, [.command(.init("tag", .login("foo", "bar")))]),
             (#"tag LOGIN foo bar"#          + CRLF, [.command(.init("tag", .login("foo", "bar")))]),
             // RENAME
-            (#"tag RENAME "foo" "bar""#         + CRLF, [.command(NIOIMAP.Command("tag", .rename(from: NIOIMAP.Mailbox("foo"), to: NIOIMAP.Mailbox("bar"), params: nil)))]),
-            (#"tag RENAME InBoX "inBOX""#       + CRLF, [.command(NIOIMAP.Command("tag", .rename(from: .inbox, to: .inbox, params: nil)))]),
-            ("tag RENAME {1}\r\n1 {1}\r\n2"     + CRLF, [.command(NIOIMAP.Command("tag", .rename(from: NIOIMAP.Mailbox("1"), to: NIOIMAP.Mailbox("2"), params: nil)))]),
+            (#"tag RENAME "foo" "bar""#         + CRLF, [.command(NIOIMAP.Command("tag", .rename(from: NIOIMAP.Mailbox("foo"), to: NIOIMAP.Mailbox("bar"), params: [])))]),
+            (#"tag RENAME InBoX "inBOX""#       + CRLF, [.command(NIOIMAP.Command("tag", .rename(from: .inbox, to: .inbox, params: [])))]),
+            ("tag RENAME {1}\r\n1 {1}\r\n2"     + CRLF, [.command(NIOIMAP.Command("tag", .rename(from: NIOIMAP.Mailbox("1"), to: NIOIMAP.Mailbox("2"), params: [])))]),
         ]
         do {
             try ByteToMessageDecoderVerifier.verifyDecoder(
@@ -2937,8 +2937,8 @@ extension ParserUnitTests {
     
     func testParseRename() {
         let inputs: [(String, String, NIOIMAP.CommandType, UInt)] = [
-            ("RENAME box1 box2", "\r", .rename(from: "box1", to: "box2", params: nil), #line),
-            ("rename box3 box4", "\r", .rename(from: "box3", to: "box4", params: nil), #line),
+            ("RENAME box1 box2", "\r", .rename(from: "box1", to: "box2", params: []), #line),
+            ("rename box3 box4", "\r", .rename(from: "box3", to: "box4", params: []), #line),
             ("RENAME box5 box6 (test)", "\r", .rename(from: "box5", to: "box6", params: [.name("test", value: nil)]), #line)
         ]
         self.iterateTestInputs(inputs, testFunction: NIOIMAP.GrammarParser.parseRename)
