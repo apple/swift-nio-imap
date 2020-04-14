@@ -83,6 +83,7 @@ extension NIOIMAP {
             case .separator:
                 do {
                     try GrammarParser.parseMessageAttributeMiddle(buffer: &buffer, tracker: .new)
+                    self.mode = .attributes(.attribute)
                 } catch is ParserError {
                     try GrammarParser.parseMessageAttributeEnd(buffer: &buffer, tracker: .new)
                     self.mode = .response
@@ -92,23 +93,17 @@ extension NIOIMAP {
                 break // no special case, handle below
             }
             
-            var save = buffer
-            do {
-                let att = try GrammarParser.parseMessageAttribute_dynamicOrStatic(buffer: &buffer, tracker: .new)
-                let returnVal: ResponseStream
-                switch att {
-                case .static(.bodySectionText(let optional, let size)):
-                    self.mode = .attributeBytes(size)
-                    returnVal = .attributeBegin(NIOIMAP.MessageAttributesStatic.bodySectionText(optional, size))
-                default:
-                    returnVal = .simpleAttribute(att)
-                    self.mode = .attributes(.separator)
-                }
-                return returnVal
-            } catch is ParserError {
-                self.mode = .response // if there isn't a next attribute then it's time for the next response
-                return try self.parseResponse(buffer: &save)
+            let att = try GrammarParser.parseMessageAttribute_dynamicOrStatic(buffer: &buffer, tracker: .new)
+            let returnVal: ResponseStream
+            switch att {
+            case .static(.bodySectionText(let optional, let size)):
+                self.mode = .attributeBytes(size)
+                returnVal = .attributeBegin(NIOIMAP.MessageAttributesStatic.bodySectionText(optional, size))
+            default:
+                returnVal = .simpleAttribute(att)
+                self.mode = .attributes(.separator)
             }
+            return returnVal
         }
         
         mutating func parseResponse(buffer: inout ByteBuffer) throws -> NIOIMAP.ResponseStream {
