@@ -45,8 +45,8 @@ extension ResponseDecoder_Tests {
                     .attributesStart,
                     .simpleAttribute(.dynamic([.deleted])),
                     .streamingAttributeBegin(.bodySectionText(nil, 1)),
-                    .attributeBytes("X"),
-                    .attributeEnd,
+                    .streamingAttributeBytes("X"),
+                    .streamingAttributeEnd,
                     .attributesFinish,
                     .responseEnd(.tagged(.tag("2", state: .ok(.code(nil, text: "Fetch completed.")))))
                 ]
