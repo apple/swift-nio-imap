@@ -170,6 +170,7 @@ extension ParserUnitTests {
             "* 1 FETCH (BODY[TEXT] {3}\r\nabc FLAGS (\\seen \\answered))\r\n",
             "* 2 FETCH (FLAGS (\\deleted) BODY[TEXT] {3}\r\ndef)\r\n",
             "* 3 FETCH (BODY[TEXT] {3}\r\nghi)\r\n",
+            "3 OK Fetch completed.\r\n"
         ]
         var buffer = ByteBuffer(stringLiteral: "")
         buffer.writeString(lines.joined())
@@ -213,6 +214,10 @@ extension ParserUnitTests {
         )
         XCTAssertEqual(
             try parser.parseResponseStream(buffer: &buffer),
+            .attributeEnd
+        )
+        XCTAssertEqual(
+            try parser.parseResponseStream(buffer: &buffer),
             .responseBegin(.messageData(.fetch(3)))
         )
         XCTAssertEqual(
@@ -223,11 +228,15 @@ extension ParserUnitTests {
             try parser.parseResponseStream(buffer: &buffer),
             .attributeBytes("ghi")
         )
-//        XCTAssertEqual(buffer.readableBytes, 0)
-        // TODO: enable this final check for readable bytes when the framing parser is ready
-        
-        // this currently fails as there's data left over, the last ")\r\n"
-        // this should be fixed with the framing parser
+        XCTAssertEqual(
+            try parser.parseResponseStream(buffer: &buffer),
+            .attributeEnd
+        )
+        XCTAssertEqual(
+            try parser.parseResponseStream(buffer: &buffer),
+            .responseEnd(.tagged(.tag("3", state: .ok(.code(nil, text: "Fetch completed.")))))
+        )
+        XCTAssertEqual(buffer.readableBytes, 0)
     }
     
     func testIdle() {

@@ -26,16 +26,27 @@ extension ResponseDecoder_Tests {
     func testNormalUsage() throws {
         
         let inoutPairs: [(String, [NIOIMAP.ResponseStream])] = [
+//            (
+//                "1 OK Login\r\n",
+//                [
+//                    .responseEnd(.tagged(.tag("1", state: .ok(.code(nil, text: "Login")))))
+//                ]
+//            ),
+//            (
+//                "* NO [ALERT] ohno\r\n",
+//                [
+//                    .responseBegin(.conditionalState(.no(.code(.alert, text: "ohno"))))
+//                ]
+//            ),
             (
-                "1 OK Login\r\n",
+                "* 2 FETCH (FLAGS (\\deleted) BODY[TEXT] {1}\r\nX)\r\n2 OK Fetch completed.\r\n",
                 [
-                    .responseEnd(.tagged(.tag("1", state: .ok(.code(nil, text: "Login")))))
-                ]
-            ),
-            (
-                "* NO [ALERT] ohno\r\n",
-                [
-                    .responseBegin(.conditionalState(.no(.code(.alert, text: "ohno"))))
+                    .responseBegin(.messageData(.fetch(2))),
+                    .simpleAttribute(.dynamic([.deleted])),
+                    .attributeBegin(.bodySectionText(nil, 1)),
+                    .attributeBytes("X"),
+                    .attributeEnd,
+                    .responseEnd(.tagged(.tag("2", state: .ok(.code(nil, text: "Fetch completed.")))))
                 ]
             )
         ]

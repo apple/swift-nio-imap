@@ -79,7 +79,8 @@ extension NIOIMAP {
                     try GrammarParser.parseMessageAttributeMiddle(buffer: &buffer, tracker: .new)
                 } catch {
                     try GrammarParser.parseMessageAttributeEnd(buffer: &buffer, tracker: .new)
-                    return try self.parseResponse(buffer: &buffer)
+                    self.mode = .response
+                    return .attributeEnd
                 }
             }
             
