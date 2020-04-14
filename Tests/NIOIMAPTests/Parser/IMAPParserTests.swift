@@ -175,67 +175,41 @@ extension ParserUnitTests {
         var buffer = ByteBuffer(stringLiteral: "")
         buffer.writeString(lines.joined())
         
+        let expectedResults: [(NIOIMAP.ResponseStream, UInt)] = [
+            (.greeting(.auth(.ok(.code(.capability([]), text: "Ready.")))), #line),
+            (.responseBegin(.messageData(.fetch(1))), #line),
+            (.attributesStart, #line),
+            (.attributeBegin(.bodySectionText(nil, 3)), #line),
+            (.attributeBytes("abc"), #line),
+            (.attributeEnd, #line),
+            (.simpleAttribute(.dynamic([.seen, .answered])), #line),
+            (.attributesFinish, #line),
+            (.responseBegin(.messageData(.fetch(2))), #line),
+            (.attributesStart, #line),
+            (.simpleAttribute(.dynamic([.deleted])), #line),
+            (.attributeBegin(.bodySectionText(nil, 3)), #line),
+            (.attributeBytes("def"), #line),
+            (.attributeEnd, #line),
+            (.attributesFinish, #line),
+            (.responseBegin(.messageData(.fetch(3))), #line),
+            (.attributesStart, #line),
+            (.attributeBegin(.bodySectionText(nil, 3)), #line),
+            (.attributeBytes("ghi"), #line),
+            (.attributeEnd, #line),
+            (.attributesFinish, #line),
+            (.responseEnd(.tagged(.tag("3", state: .ok(.code(nil, text: "Fetch completed."))))), #line),
+        ]
+        
         var parser = NIOIMAP.ResponseParser()
-        XCTAssertEqual(
-            try parser.parseResponseStream(buffer: &buffer),
-            .greeting(.auth(.ok(.code(.capability([]), text: "Ready."))))
-        )
-        XCTAssertEqual(
-            try parser.parseResponseStream(buffer: &buffer),
-            .responseBegin(.messageData(.fetch(1)))
-        )
-        XCTAssertEqual(
-            try parser.parseResponseStream(buffer: &buffer),
-            .attributeBegin(.bodySectionText(nil, 3))
-        )
-        XCTAssertEqual(
-            try parser.parseResponseStream(buffer: &buffer),
-            .attributeBytes("abc")
-        )
-        XCTAssertEqual(
-            try parser.parseResponseStream(buffer: &buffer),
-            .simpleAttribute(.dynamic([.seen, .answered]))
-        )
-        XCTAssertEqual(
-            try parser.parseResponseStream(buffer: &buffer),
-            .responseBegin(.messageData(.fetch(2)))
-        )
-        XCTAssertEqual(
-            try parser.parseResponseStream(buffer: &buffer),
-            .simpleAttribute(.dynamic([.deleted]))
-        )
-        XCTAssertEqual(
-            try parser.parseResponseStream(buffer: &buffer),
-            .attributeBegin(.bodySectionText(nil, 3))
-        )
-        XCTAssertEqual(
-            try parser.parseResponseStream(buffer: &buffer),
-            .attributeBytes("def")
-        )
-        XCTAssertEqual(
-            try parser.parseResponseStream(buffer: &buffer),
-            .attributeEnd
-        )
-        XCTAssertEqual(
-            try parser.parseResponseStream(buffer: &buffer),
-            .responseBegin(.messageData(.fetch(3)))
-        )
-        XCTAssertEqual(
-            try parser.parseResponseStream(buffer: &buffer),
-            .attributeBegin(.bodySectionText(nil, 3))
-        )
-        XCTAssertEqual(
-            try parser.parseResponseStream(buffer: &buffer),
-            .attributeBytes("ghi")
-        )
-        XCTAssertEqual(
-            try parser.parseResponseStream(buffer: &buffer),
-            .attributeEnd
-        )
-        XCTAssertEqual(
-            try parser.parseResponseStream(buffer: &buffer),
-            .responseEnd(.tagged(.tag("3", state: .ok(.code(nil, text: "Fetch completed.")))))
-        )
+        for (input, line) in expectedResults {
+            do {
+                let actual = try parser.parseResponseStream(buffer: &buffer)
+                XCTAssertEqual(input, actual, line: line)
+            } catch {
+                XCTFail("\(error)", line: line)
+                return
+            }
+        }
         XCTAssertEqual(buffer.readableBytes, 0)
     }
     

@@ -19,8 +19,9 @@ extension NIOIMAP {
     public struct ResponseParser: Parser {
 
         enum AttributeState: Equatable {
-            case first
-            case middle
+            case head
+            case attribute
+            case separator
         }
         
         enum Mode: Equatable {
@@ -58,9 +59,12 @@ extension NIOIMAP {
         /// - parameter buffer: The buffer from which bytes should be extracted.
         /// - returns: A new `ByteBuffer` containing extracted bytes.
         mutating func parseBytes(buffer: inout ByteBuffer, remaining: Int) -> ResponseStream {
-            if buffer.readableBytes >= remaining {
+            if remaining == 0 {
+                self.mode = .attributes(.separator) // we've finished the current stream, let's get the next attribute
+                return .attributeEnd
+            } else if buffer.readableBytes >= remaining {
                 let bytes = buffer.readSlice(length: remaining)!
-                self.mode = .attributes(.middle)
+                self.mode = .attributeBytes(0)
                 return .attributeBytes(bytes)
             }
             let bytes = buffer.readSlice(length: buffer.readableBytes)!
@@ -72,16 +76,20 @@ extension NIOIMAP {
         mutating func parseAtributes(state: AttributeState, buffer: inout ByteBuffer) throws -> ResponseStream {
             
             switch state {
-            case .first:
+            case .head:
                 try GrammarParser.parseMessageAttributeStart(buffer: &buffer, tracker: .new)
-            case .middle:
+                self.mode = .attributes(.attribute)
+                return .attributesStart
+            case .separator:
                 do {
                     try GrammarParser.parseMessageAttributeMiddle(buffer: &buffer, tracker: .new)
-                } catch {
+                } catch is ParserError {
                     try GrammarParser.parseMessageAttributeEnd(buffer: &buffer, tracker: .new)
                     self.mode = .response
-                    return .attributeEnd
+                    return .attributesFinish
                 }
+            case .attribute:
+                break // no special case, handle below
             }
             
             var save = buffer
@@ -94,17 +102,8 @@ extension NIOIMAP {
                     returnVal = .attributeBegin(NIOIMAP.MessageAttributesStatic.bodySectionText(optional, size))
                 default:
                     returnVal = .simpleAttribute(att)
-                    self.mode = .attributes(.middle)
+                    self.mode = .attributes(.separator)
                 }
-                if state == .middle {
-                    do {
-                        try GrammarParser.parseMessageAttributeEnd(buffer: &buffer, tracker: .new)
-                        self.mode = .response
-                    } catch is ParserError {
-                        /// do nothing, we aren't ready to end
-                    }
-                }
-                
                 return returnVal
             } catch is ParserError {
                 self.mode = .response // if there isn't a next attribute then it's time for the next response
@@ -116,7 +115,7 @@ extension NIOIMAP {
             do {
                 let response = try GrammarParser.parseResponseData(buffer: &buffer, tracker: .new)
                 if case .messageData(.fetch(_)) = response {
-                    self.mode = .attributes(.first)
+                    self.mode = .attributes(.head)
                 }
                 return .responseBegin(response)
             } catch is ParserError {
