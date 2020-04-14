@@ -44,7 +44,7 @@ extension ResponseDecoder_Tests {
                     .responseBegin(.messageData(.fetch(2))),
                     .attributesStart,
                     .simpleAttribute(.dynamic([.deleted])),
-                    .attributeBegin(.bodySectionText(nil, 1)),
+                    .streamingAttributeBegin(.bodySectionText(nil, 1)),
                     .attributeBytes("X"),
                     .attributeEnd,
                     .attributesFinish,

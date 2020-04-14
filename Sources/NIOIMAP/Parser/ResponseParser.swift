@@ -61,16 +61,16 @@ extension NIOIMAP {
         mutating func parseBytes(buffer: inout ByteBuffer, remaining: Int) -> ResponseStream {
             if remaining == 0 {
                 self.mode = .attributes(.separator) // we've finished the current stream, let's get the next attribute
-                return .attributeEnd
+                return .streamingAttributeEnd
             } else if buffer.readableBytes >= remaining {
                 let bytes = buffer.readSlice(length: remaining)!
                 self.mode = .attributeBytes(0)
-                return .attributeBytes(bytes)
+                return .streamingAttributeBytes(bytes)
             }
             let bytes = buffer.readSlice(length: buffer.readableBytes)!
             let leftToRead = remaining - bytes.readableBytes
             self.mode = .attributeBytes(leftToRead)
-            return .attributeBytes(bytes)
+            return .streamingAttributeBytes(bytes)
         }
         
         mutating func parseAtributes(state: AttributeState, buffer: inout ByteBuffer) throws -> ResponseStream {
@@ -98,7 +98,7 @@ extension NIOIMAP {
             switch att {
             case .static(.bodySectionText(let optional, let size)):
                 self.mode = .attributeBytes(size)
-                returnVal = .attributeBegin(NIOIMAP.MessageAttributesStatic.bodySectionText(optional, size))
+                returnVal = .streamingAttributeBegin(NIOIMAP.MessageAttributesStatic.bodySectionText(optional, size))
             default:
                 returnVal = .simpleAttribute(att)
                 self.mode = .attributes(.separator)
