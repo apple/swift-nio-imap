@@ -17,7 +17,7 @@ import NIO
 // MARK: - Encoding
 extension ByteBuffer {
 
-    @discardableResult mutating func writeSearchCorrelator(_ correlator: ByteBuffer) -> Int {
+    @discardableResult mutating func writeSearchCorrelator(_ correlator: String) -> Int {
         self.writeString(" (TAG ") +
         self.writeTagString(correlator) +
         self.writeString(")")

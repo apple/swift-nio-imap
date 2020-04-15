@@ -24,7 +24,7 @@ class TaggedString_Tests: EncodeTestClass {
 extension TaggedString_Tests {
 
     func testEncode() {
-        let inputs: [(ByteBuffer, String, UInt)] = [
+        let inputs: [(String, String, UInt)] = [
             ("abc", #""abc""#, #line),
         ]
 

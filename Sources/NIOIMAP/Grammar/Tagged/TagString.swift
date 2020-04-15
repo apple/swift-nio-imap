@@ -17,7 +17,7 @@ import NIO
 // MARK: - Encoding
 extension ByteBuffer {
     
-    @discardableResult mutating func writeTagString(_ string: ByteBuffer) -> Int {
+    @discardableResult mutating func writeTagString(_ string: String) -> Int {
         self.writeIMAPString(string)
     }
     

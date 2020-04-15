@@ -2319,7 +2319,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
 
     func testParseSearchCorrelator() {
-        let inputs: [(String, String, ByteBuffer, UInt)] = [
+        let inputs: [(String, String, String, UInt)] = [
             (" (TAG \"test1\")", "\r", "test1", #line),
             (" (tag \"test2\")", "\r", "test2", #line),
         ]
@@ -3003,7 +3003,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     
     func testParseTagString() {
-        let inputs: [(String, String, ByteBuffer, UInt)] = [
+        let inputs: [(String, String, String, UInt)] = [
             ("\"test\"", "\r", "test", #line),
         ]
         self.iterateTestInputs(inputs, testFunction: NIOIMAP.GrammarParser.parseTagString)

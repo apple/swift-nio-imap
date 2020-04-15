@@ -24,7 +24,7 @@ class SearchCorrelator_Tests: EncodeTestClass {
 extension SearchCorrelator_Tests {
 
     func testEncode() {
-        let inputs: [(ByteBuffer, String, UInt)] = [
+        let inputs: [(String, String, UInt)] = [
             ("some", " (TAG \"some\")", #line),
         ]
 

@@ -331,7 +331,7 @@ extension NIOIMAP.GrammarParser {
 
         func parseBodyFieldDsp_some(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Body.FieldDSPData? {
             try ParserLibrary.parseFixedString("(", buffer: &buffer, tracker: tracker)
-            let string = try self.parseString(buffer: &buffer, tracker: tracker)
+            let string = String(buffer: try self.parseString(buffer: &buffer, tracker: tracker))
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
             let param = try self.parseBodyFieldParam(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)
@@ -2028,8 +2028,8 @@ extension NIOIMAP.GrammarParser {
     }
 
     // mbox-list-extended-item-tag =  astring
-    static func parseMailboxListExtendedItemTag(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ByteBuffer {
-        return try self.parseAString(buffer: &buffer, tracker: tracker)
+    static func parseMailboxListExtendedItemTag(buffer: inout ByteBuffer, tracker: StackTracker) throws -> String {
+        return String(buffer: try self.parseAString(buffer: &buffer, tracker: tracker))
     }
 
     // mbox-or-pat =  list-mailbox / patterns
@@ -2455,7 +2455,7 @@ extension NIOIMAP.GrammarParser {
 
         return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> NIOIMAP.NamespaceDescription in
             try ParserLibrary.parseFixedString("(", buffer: &buffer, tracker: tracker)
-            let string = try self.parseString(buffer: &buffer, tracker: tracker)
+            let string = String(buffer: try self.parseString(buffer: &buffer, tracker: tracker))
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
             let char = try ParserLibrary.parseOneOf([
                 parseNamespaceDescr_quotedChar,
@@ -2479,7 +2479,7 @@ extension NIOIMAP.GrammarParser {
     static func parseNamespaceResponseExtension(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.NamespaceResponseExtension {
         return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> NIOIMAP.NamespaceResponseExtension in
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
-            let s1 = try self.parseString(buffer: &buffer, tracker: tracker)
+            let s1 = String(buffer: try self.parseString(buffer: &buffer, tracker: tracker))
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseFixedString("(", buffer: &buffer, tracker: tracker)
             var array = [try self.parseString(buffer: &buffer, tracker: tracker)]
@@ -2907,7 +2907,7 @@ extension NIOIMAP.GrammarParser {
                 try ParserLibrary.parseFixedString("] ", buffer: &buffer, tracker: tracker)
                 return code
             }
-            let text = try self.parseText(buffer: &buffer, tracker: tracker)
+            let text = String(buffer: try self.parseText(buffer: &buffer, tracker: tracker))
             return NIOIMAP.ResponseText(code: code, text: text)
         }
     }
@@ -3086,7 +3086,7 @@ extension NIOIMAP.GrammarParser {
     }
 
     // search-correlator    = SP "(" "TAG" SP tag-string ")"
-    static func parseSearchCorrelator(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ByteBuffer {
+    static func parseSearchCorrelator(buffer: inout ByteBuffer, tracker: StackTracker) throws -> String {
         return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
             try ParserLibrary.parseFixedString(" (TAG ", buffer: &buffer, tracker: tracker)
             let tag = try self.parseTagString(buffer: &buffer, tracker: tracker)
@@ -3976,8 +3976,8 @@ extension NIOIMAP.GrammarParser {
     }
 
     // tag-string       = string
-    static func parseTagString(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ByteBuffer {
-        return try self.parseString(buffer: &buffer, tracker: tracker)
+    static func parseTagString(buffer: inout ByteBuffer, tracker: StackTracker) throws -> String {
+        return String(buffer: try self.parseString(buffer: &buffer, tracker: tracker))
     }
 
     // tagged-ext = tagged-ext-label SP tagged-ext-val
