@@ -14,31 +14,6 @@
 
 import NIO
 
-extension NIOIMAP {
-
-    /// Extracted from IMAPv4 `msg-att-static`
-    public enum RFC822Reduced: String, Equatable {
-        case header
-        case text
-    }
-
-    /// IMAPv4 `msg-att-static`
-    public enum MessageAttributesStatic: Equatable {
-        case envelope(Envelope)
-        case internalDate(Date.DateTime)
-        case rfc822(RFC822Reduced?, NIOIMAP.NString)
-        case rfc822Size(Int)
-        case body(Body, structure: Bool)
-        case bodySection(SectionSpec?, Int?, NString)
-        case bodySectionText(Int?, Int) // used when streaming the body, send the literal header
-        case uid(Int)
-        case binaryString(section: [Int], string: NString)
-        case binaryLiteral(section: [Int], size: Int)
-        case binarySize(section: [Int], number: Int)
-    }
-
-}
-
 // MARK: - Encoding
 extension ByteBuffer {
 

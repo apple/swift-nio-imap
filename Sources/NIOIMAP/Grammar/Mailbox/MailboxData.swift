@@ -14,21 +14,6 @@
 
 import NIO
 
-extension NIOIMAP.Mailbox {
-    
-    /// IMAPv4 `mailbox-data`
-    public enum Data: Equatable {
-        case flags([NIOIMAP.Flag])
-        case list(NIOIMAP.Mailbox.List)
-        case lsub(NIOIMAP.Mailbox.List)
-        case search(NIOIMAP.ESearchResponse)
-        case status(NIOIMAP.Mailbox, [NIOIMAP.StatusAttributeValue])
-        case exists(Int)
-        case namespace(NIOIMAP.NamespaceResponse)
-    }
-    
-}
-
 // MARK: - Encoding
 extension ByteBuffer {
 

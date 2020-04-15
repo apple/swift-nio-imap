@@ -14,21 +14,6 @@
 
 import NIO
 
-extension NIOIMAP {
-
-    /// IMAPv4 `Namespace-Description`
-    public struct NamespaceDescription: Equatable {
-        public var string: String
-        public var char: Character?
-        public var responseExtensions: [NamespaceResponseExtension]
-
-        public static func string(_ string: String, char: Character?, responseExtensions: [NamespaceResponseExtension]) -> Self {
-            return Self(string: string, char: char, responseExtensions: responseExtensions)
-        }
-    }
-
-}
-
 // MARK: - Encoding
 extension ByteBuffer {
 

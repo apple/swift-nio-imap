@@ -14,16 +14,6 @@
 
 import NIO
 
-extension NIOIMAP {
-
-    /// IMAPv4 `list-select-independent-opt`
-    public enum ListSelectIndependentOption: Equatable {
-        case remote
-        case option(OptionExtension)
-    }
-
-}
-
 // MARK: - Encoding
 extension ByteBuffer {
 

@@ -14,16 +14,6 @@
 
 import NIO
 
-extension NIOIMAP {
-
-    /// IMAPv4 `tagged-ext-val`
-    public enum TaggedExtensionValue: Equatable {
-        case simple(TaggedExtensionSimple)
-        case comp([String])
-    }
-
-}
-
 // MARK: - Encoding
 extension ByteBuffer {
 

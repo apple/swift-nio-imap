@@ -14,25 +14,6 @@
 
 import NIO
 
-extension NIOIMAP {        
-    
-    /// IMAPv4 `fetch-att`
-    public enum FetchAttribute: Equatable {
-        case envelope
-        case flags
-        case internaldate
-        case rfc822(RFC822?)
-        case body(structure: Bool)
-        case bodySection(_ section: SectionSpec?, Partial?)
-        case bodyPeekSection(_ section: SectionSpec?, Partial?)
-        case uid
-        case modSequence(ModifierSequenceValue)
-        case binary(peek: Bool, section: [Int], partial: Partial?)
-        case binarySize(section: [Int])
-    }
-    
-}
-
 // MARK: - Encoding
 extension ByteBuffer {
     

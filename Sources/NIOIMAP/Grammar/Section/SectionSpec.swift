@@ -14,16 +14,6 @@
 
 import NIO
 
-extension NIOIMAP {
-    
-    /// IMAPv4 `section-spec`
-    public enum SectionSpec: Equatable {
-        case text(_ text: SectionMessageText)
-        case part(_ part: [Int], text: SectionText?)
-    }
-    
-}
-
 // MARK: - Encoding
 extension ByteBuffer {
     

@@ -14,18 +14,6 @@
 
 import NIO
 
-extension NIOIMAP {
-
-    // Dervied from `fetch-att`
-    public enum FetchType: Equatable {
-        case all
-        case full
-        case fast
-        case attributes([NIOIMAP.FetchAttribute])
-    }
-    
-}
-
 // MARK: - Encoding
 extension ByteBuffer {
     

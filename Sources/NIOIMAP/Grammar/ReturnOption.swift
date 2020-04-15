@@ -14,18 +14,6 @@
 
 import NIO
 
-extension NIOIMAP {
-
-    /// IMAPv4 `return-option`
-    public enum ReturnOption: Equatable {
-        case subscribed
-        case children
-        case statusOption([StatusAttribute])
-        case optionExtension(OptionExtension)
-    }
-
-}
-
 // MARK: - Encoding
 extension ByteBuffer {
 

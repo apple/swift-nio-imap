@@ -14,15 +14,6 @@
 
 import NIO
 
-extension NIOIMAP {
-    
-    public enum ResponseType: Equatable {
-        case continueRequest(ContinueRequest)
-        case responseData(ResponsePayload)
-    }
-    
-}
-
 // MARK: - Encoding
 extension ByteBuffer {
 

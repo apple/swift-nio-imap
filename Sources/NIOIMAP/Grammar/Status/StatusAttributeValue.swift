@@ -14,21 +14,6 @@
 
 import NIO
 
-extension NIOIMAP {
-
-    /// IMAPv4 `status-att-val`
-    public enum StatusAttributeValue: Equatable {
-        case messages(Int)
-        case uidNext(Int)
-        case uidValidity(Int)
-        case unseen(Int)
-        case deleted(Int)
-        case size(Int)
-        case modSequence(ModifierSequenceValue)
-    }
-
-}
-
 // MARK: - Encoding
 extension ByteBuffer {
 

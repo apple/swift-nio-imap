@@ -14,24 +14,6 @@
 
 import NIO
 
-extension NIOIMAP {
-
-    /// IMAPv4 `address`
-    public struct Address: Equatable {
-        
-        public var name: NString
-        public var adl: NString
-        public var mailbox: NString
-        public var host: NString
-
-        /// Convenience function for a better experience when chaining multiple types.
-        public static func name(_ name: NString, adl: NString, mailbox: NString, host: NString) -> Self {
-            return Self(name: name, adl: adl, mailbox: mailbox, host: host)
-        }
-    }
-    
-}
-
 // MARK: - Encoding
 extension ByteBuffer {
     

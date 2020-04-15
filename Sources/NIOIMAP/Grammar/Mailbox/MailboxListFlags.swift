@@ -14,20 +14,6 @@
 
 import NIO
 
-extension NIOIMAP.Mailbox.List {
-    
-    /// IMAPv4 `mbx-list-flags`
-    public struct Flags: Equatable {
-        public var oFlags: [OFlag]
-        public var sFlag: SFlag?
-        
-        public static func oFlags(_ oFlags: [OFlag], sFlag: SFlag?) -> Self {
-            return Self(oFlags: oFlags, sFlag: sFlag)
-        }
-    }
-    
-}
-
 // MARK: - Encoding
 extension ByteBuffer {
 

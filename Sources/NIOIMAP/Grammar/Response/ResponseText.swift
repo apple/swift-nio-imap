@@ -14,21 +14,6 @@
 
 import NIO
 
-extension NIOIMAP {
-
-    /// IMAPv4 `resp-text`
-    public struct ResponseText: Equatable {
-        public var code: ResponseTextCode?
-        public var text: String
-
-        /// Convenience function for a better experience when chaining multiple types.
-        public static func code(_ code: ResponseTextCode?, text: String) -> Self {
-            return Self(code: code, text: text)
-        }
-    }
-
-}
-
 // MARK: - Encoding
 extension ByteBuffer {
 

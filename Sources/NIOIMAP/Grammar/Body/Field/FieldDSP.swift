@@ -14,20 +14,6 @@
 
 import NIO
 
-extension NIOIMAP.Body {
-
-    /// IMAPv4 `body-fld-dsp`
-    public struct FieldDSPData: Equatable {
-        public var string: String
-        public var parameter: [NIOIMAP.FieldParameterPair]
-        
-        public static func string(_ string: String, parameter: [NIOIMAP.FieldParameterPair]) -> Self {
-            return Self(string: string, parameter: parameter)
-        }
-    }
-
-}
-
 // MARK: - Encoding
 extension ByteBuffer {
 

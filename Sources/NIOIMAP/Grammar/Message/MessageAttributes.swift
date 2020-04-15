@@ -14,15 +14,6 @@
 
 import NIO
 
-extension NIOIMAP {
-
-    public enum MessageAttributeType: Equatable {
-        case dynamic([NIOIMAP.Flag])
-        case `static`(NIOIMAP.MessageAttributesStatic)
-    }
-
-}
-
 // MARK: - Encoding
 extension ByteBuffer {
 

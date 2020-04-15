@@ -14,20 +14,6 @@
 
 import NIO
 
-extension NIOIMAP.Body {
-
-    /// IMAPv4 `body-fld-enc`
-    public enum FieldEncoding: Equatable {
-        case bit7
-        case bit8
-        case binary
-        case base64
-        case quotedPrintable
-        case string(String)
-    }
-
-}
-
 // MARK: - Encoding
 extension ByteBuffer {
 

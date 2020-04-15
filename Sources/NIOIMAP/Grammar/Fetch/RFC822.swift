@@ -14,16 +14,6 @@
 
 import NIO
 
-extension NIOIMAP {
-    
-    public enum RFC822: String {
-        case header
-        case size
-        case text
-    }
-    
-}
-
 // MARK: - Encoding
 extension ByteBuffer {
     

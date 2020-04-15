@@ -14,10 +14,6 @@
 
 import NIO
 
-extension NIOIMAP {
-    
-}
-
 extension ByteBuffer {
     
     @discardableResult mutating func writeHeaderList(_ headers: [String]) -> Int {

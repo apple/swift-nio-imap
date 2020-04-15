@@ -14,29 +14,6 @@
 
 import NIO
 
-extension NIOIMAP {
-
-    public enum OptionExtensionType: Equatable {
-        case standard(String)
-        case vendor(OptionVendorTag)
-    }
-
-    /// IMAPv4 `option-extension`
-    public struct OptionExtension: Equatable {
-        public var type: OptionExtensionType
-        public var value: OptionValueComp?
-
-        public static func standard(_ atom: String, value: OptionValueComp?) -> Self {
-            return Self(type: .standard(atom), value: value)
-        }
-
-        public static func vendor(_ tag: OptionVendorTag, value: OptionValueComp?) -> Self {
-            return Self(type: .vendor(tag), value: value)
-        }
-    }
-
-}
-
 // MARK: - Encoding
 extension ByteBuffer {
 

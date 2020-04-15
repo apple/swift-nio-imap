@@ -14,16 +14,6 @@
 
 import NIO
 
-extension NIOIMAP {
-
-    /// IMAPv4 `list-select-mod-opt`
-    public enum ListSelectModOption: Equatable {
-        case recursiveMatch
-        case option(OptionExtension)
-    }
-
-}
-
 // MARK: - Encoding
 extension ByteBuffer {
 

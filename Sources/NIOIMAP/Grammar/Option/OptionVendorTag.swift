@@ -14,20 +14,6 @@
 
 import NIO
 
-extension NIOIMAP {
-
-    /// IMAPv4 `option-vendor-tag`
-    public struct OptionVendorTag: Equatable {
-        public var token: String
-        public var atom: String
-
-        public static func token(_ token: String, atom: String) -> Self {
-            return Self(token: token, atom: atom)
-        }
-    }
-
-}
-
 // MARK: - Encoding
 extension ByteBuffer {
 

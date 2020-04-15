@@ -14,22 +14,6 @@
 
 import NIO
 
-extension NIOIMAP {
-    
-    /// IMAPv4 `capability`
-    public enum Capability: Equatable {
-        case auth(String)
-        case condStore
-        case enable
-        case move
-        case literalPlus
-        case literalMinus
-        case filters
-        case other(String)
-    }
-    
-}
-
 // MARK: - Encoding
 extension ByteBuffer {
     

@@ -14,20 +14,6 @@
 
 import NIO
 
-extension NIOIMAP {
-
-    /// IMAPv4 `search-ret-data-ext`
-    public struct SearchReturnDataExtension: Equatable {
-        public var modifier: String
-        public var returnValue: TaggedExtensionValue
-
-        public static func modifier(_ modifier: String, returnValue: TaggedExtensionValue) -> Self {
-            return Self(modifier: modifier, returnValue: returnValue)
-        }
-    }
-
-}
-
 // MARK: - Encoding
 extension ByteBuffer {
 

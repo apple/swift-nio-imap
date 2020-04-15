@@ -14,19 +14,6 @@
 
 import NIO
 
-extension NIOIMAP {
-
-    /// IMAPv4 `search-return-data`
-    public enum SearchReturnData: Equatable {
-        case min(Int)
-        case max(Int)
-        case all([NIOIMAP.SequenceRange])
-        case count(Int)
-        case dataExtension(SearchReturnDataExtension)
-    }
-
-}
-
 // MARK: - Encoding
 extension ByteBuffer {
 

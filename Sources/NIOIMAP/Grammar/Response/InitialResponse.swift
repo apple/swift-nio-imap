@@ -14,16 +14,6 @@
 
 import NIO
 
-extension NIOIMAP {
-
-    /// IMAPv4 `initial-response`
-    public enum InitialResponse: Equatable {
-        case equals
-        case base64([UInt8])
-    }
-
-}
-
 // MARK: - Encoding
 extension ByteBuffer {
     

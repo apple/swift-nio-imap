@@ -14,27 +14,6 @@
 
 import NIO
 
-extension NIOIMAP.Flag {
-
-    /// IMAPv4 `flag-keyword`
-    public enum Keyword: Equatable {
-        case mdnSent
-        case forwarded
-        case other(String)
-    }
-
-}
-
-extension NIOIMAP.Flag.Keyword: ExpressibleByStringLiteral {
-
-    public typealias StringLiteralType = String
-
-    public init(stringLiteral value: Self.StringLiteralType) {
-        self = .other(value)
-    }
-
-}
-
 // MARK: - Encoding
 extension ByteBuffer {
 

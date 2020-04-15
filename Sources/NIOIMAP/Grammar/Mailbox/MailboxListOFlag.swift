@@ -14,19 +14,6 @@
 
 import NIO
 
-extension NIOIMAP.Mailbox.List {
-    
-    /// IMAPv4 `mbx-list-oflag`
-    public enum OFlag: Equatable {
-        case noInferiors
-        case subscribed
-        case remote
-        case child(NIOIMAP.ChildMailboxFlag)
-        case other(String)
-    }
-    
-}
-
 // MARK: - Encoding
 extension ByteBuffer {
 

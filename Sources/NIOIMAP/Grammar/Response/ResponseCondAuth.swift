@@ -14,16 +14,6 @@
 
 import NIO
 
-extension NIOIMAP {
-    
-    /// IMAPv4 `resp-cond-auth`
-    public enum ResponseConditionalAuth: Equatable {
-        case ok(ResponseText)
-        case preauth(ResponseText)
-    }
-    
-}
-
 // MARK: - Encoding
 extension ByteBuffer {
 

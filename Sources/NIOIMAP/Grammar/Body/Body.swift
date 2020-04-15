@@ -14,16 +14,6 @@
 
 import NIO
 
-extension NIOIMAP {
-
-    /// IMAOv4 body
-    public enum Body: Equatable {
-        case singlepart(TypeSinglepart)
-        case multipart(TypeMultipart)
-    }
-    
-}
-
 // MARK: - Encoding
 extension ByteBuffer {
 

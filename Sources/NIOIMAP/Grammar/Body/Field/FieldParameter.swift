@@ -14,19 +14,6 @@
 
 import NIO
 
-extension NIOIMAP {
-    
-    public struct FieldParameterPair: Equatable {
-        public var field: String
-        public var value: String
-        
-        public static func field(_ field: String, value: String) -> Self {
-            return Self(field: field, value: value)
-        }
-    }
-    
-}
-
 // MARK: - Encoding
 extension ByteBuffer {
 

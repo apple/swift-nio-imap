@@ -14,15 +14,6 @@
 
 import NIO
 
-extension NIOIMAP {
-
-    /// IMAPv4 `greeting`
-    public enum Greeting: Equatable {
-        case auth(ResponseConditionalAuth)
-        case bye(ResponseText)
-    }
-}
-
 // MARK: - Encoding
 extension ByteBuffer {
 

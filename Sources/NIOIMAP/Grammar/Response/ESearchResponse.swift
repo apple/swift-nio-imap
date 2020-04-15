@@ -14,21 +14,6 @@
 
 import NIO
 
-extension NIOIMAP {
-
-    /// IMAPv4 `esearch-response`
-    public struct ESearchResponse: Equatable {
-        public var correlator: String?
-        public var uid: Bool
-        public var returnData: [SearchReturnData]
-
-        public static func correlator(_ correlator: String?, uid: Bool, returnData: [SearchReturnData]) -> Self {
-            return Self(correlator: correlator, uid: uid, returnData: returnData)
-        }
-    }
-
-}
-
 // MARK: - Encoding
 extension ByteBuffer {
 

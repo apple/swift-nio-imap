@@ -14,21 +14,6 @@
 
 import NIO
 
-extension NIOIMAP.Body {
-
-    /// IMAPv4 `body-ext-1part`
-    public struct ExtensionSinglepart: Equatable {
-        public var fieldMD5: NIOIMAP.NString
-        public var dspLanguage: FieldDSPLanguage?
-
-        /// Convenience function for a better experience when chaining multiple types.
-        public static func fieldMD5(_ fieldMD5: NIOIMAP.NString, dspLanguage: FieldDSPLanguage?) -> Self {
-            return Self(fieldMD5: fieldMD5, dspLanguage: dspLanguage)
-        }
-    }
-
-}
-
 // MARK: - Encoding
 extension ByteBuffer {
 

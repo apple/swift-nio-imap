@@ -14,16 +14,6 @@
 
 import NIO
 
-extension NIOIMAP.Body {
-
-    /// IMAPv4 `body-fld-lang`
-    public enum FieldLanguage: Equatable {
-        case single(NIOIMAP.NString)
-        case multiple([String])
-    }
-
-}
-
 // MARK: - Encoding
 extension ByteBuffer {
 

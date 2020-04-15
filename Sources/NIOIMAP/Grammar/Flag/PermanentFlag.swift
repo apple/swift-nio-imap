@@ -14,16 +14,6 @@
 
 import NIO
 
-extension NIOIMAP {
-
-    /// IMAPv4 `flag-perm`
-    public enum PermanentFlag: Equatable {
-        case flag(Flag)
-        case wildcard
-    }
-
-}
-
 // MARK: - Encoding
 extension ByteBuffer {
 

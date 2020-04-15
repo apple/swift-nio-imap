@@ -14,21 +14,6 @@
 
 import NIO
 
-extension NIOIMAP.Date {
-    
-    /// IMAPv4 `time`
-    public struct Time: Equatable {
-        public var hour: Int
-        public var minute: Int
-        public var second: Int
-        
-        public static func hour(_ hour: Int, minute: Int, second: Int) -> Self {
-            return Self(hour: hour, minute: minute, second: second)
-        }
-    }
-    
-}
-
 // MARK: - Encoding
 extension ByteBuffer {
     

@@ -14,15 +14,6 @@
 
 import NIO
 
-extension NIOIMAP {
-
-    public enum EntryTypeResponse: Equatable {
-        case `private`
-        case shared
-    }
-
-}
-
 // MARK: - Encoding
 extension ByteBuffer {
     

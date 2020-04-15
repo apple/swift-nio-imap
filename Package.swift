@@ -6,7 +6,8 @@ import PackageDescription
 let package = Package(
     name: "swift-nio-imap",
     products: [
-        .library(name: "NIOIMAP", targets: ["NIOIMAP"])
+        .library(name: "NIOIMAP", targets: ["NIOIMAP"]),
+        .library(name: "IMAPCore", targets: ["IMAPCore"])
     ], dependencies: [
         .package(url: "https://github.com/apple/swift-nio", from: "2.16.0"),
         .package(url: "https://github.com/apple/swift-nio-extras", from: "1.4.0"),
@@ -16,7 +17,11 @@ let package = Package(
     targets: [
         .target(
             name: "NIOIMAP",
-            dependencies: ["NIO"]
+            dependencies: ["NIO", "IMAPCore"]
+        ),
+        .target(
+            name: "IMAPCore",
+            dependencies: []
         ),
         .target(
             name: "CLI",

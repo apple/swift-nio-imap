@@ -14,21 +14,6 @@
 
 import NIO
 
-extension NIOIMAP {
-
-    /// IMAP4 `command` (`command-any`, `command-auth`, `command-nonauth`, `command-select`)
-    public struct Command: Equatable {
-        public var type: CommandType
-        public var tag: String
-
-        public init(_ tag: String, _ type: CommandType) {
-            self.type = type
-            self.tag = tag
-        }
-    }
-
-}
-
 extension ByteBuffer {
 
     @discardableResult public mutating func writeCommand(_ command: NIOIMAP.Command) -> Int {

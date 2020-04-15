@@ -14,36 +14,6 @@
 
 import NIO
 
-extension NIOIMAP {
-
-    public enum UIDCommandType: Equatable {
-        case copy([NIOIMAP.SequenceRange], Mailbox)
-        case move([NIOIMAP.SequenceRange], Mailbox)
-        case fetch([NIOIMAP.SequenceRange], FetchType, [FetchModifier])
-        case search(returnOptions: [SearchReturnOption], program: SearchProgram)
-        case store([NIOIMAP.SequenceRange], [StoreModifier], StoreAttributeFlags)
-        case uidExpunge([NIOIMAP.SequenceRange])
-
-        init?(commandType: CommandType) {
-            switch commandType {
-            case .copy(let arg1, let arg2):
-                self = .copy(arg1, arg2)
-            case .fetch(let arg1, let arg2, let arg3):
-                self = .fetch(arg1, arg2, arg3)
-            case .store(let arg1, let arg2, let arg3):
-                self = .store(arg1, arg2, arg3)
-            case .search(returnOptions: let options, program: let program):
-                self = .search(returnOptions: options, program: program)
-            case .move(let arg1, let arg2):
-                self = .move(arg1, arg2)
-            default:
-                return nil
-            }
-        }
-    }
-
-}
-
 // MARK: - Encoding
 extension ByteBuffer {
 

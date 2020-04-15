@@ -14,16 +14,6 @@
 
 import NIO
 
-extension NIOIMAP {
-
-    /// IMAPv4 `continue-req`
-    public enum ContinueRequest: Equatable {
-        case responseText(ResponseText)
-        case base64([UInt8])
-    }
-
-}
-
 // MARK: - Encoding
 extension ByteBuffer {
 

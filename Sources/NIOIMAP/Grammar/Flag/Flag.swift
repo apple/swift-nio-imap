@@ -14,21 +14,6 @@
 
 import NIO
 
-extension NIOIMAP {
- 
-    /// IMAPv4 `flag`
-    public enum Flag: Equatable {
-        case answered
-        case flagged
-        case deleted
-        case seen
-        case draft
-        case keyword(Keyword)
-        case `extension`(String)
-    }
-    
-}
-
 // MARK: - Encoding
 extension ByteBuffer {
     

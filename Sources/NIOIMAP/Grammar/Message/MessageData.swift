@@ -14,17 +14,6 @@
 
 import NIO
 
-extension NIOIMAP {
-    
-    /// IMAPv4 `message-data`
-    /// One message attribute is guaranteed
-    public enum MessageData: Equatable {
-        case expunge(Int)
-        case fetch(Int)
-    }
-    
-}
-
 // MARK: - Encoding
 extension ByteBuffer {
 

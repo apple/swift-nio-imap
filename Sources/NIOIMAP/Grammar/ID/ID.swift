@@ -14,20 +14,6 @@
 
 import NIO
 
-extension NIOIMAP {
-    
-    // Exracted from `IDParamsList`
-    public struct IDParameter: Equatable {
-        public var key: String
-        public var value: NString
-        
-        public static func key(_ key: String, value: NString) -> Self {
-            return Self(key: key, value: value)
-        }
-    }
-
-}
-
 // MARK: - Encoding
 extension ByteBuffer {
     

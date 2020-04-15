@@ -14,20 +14,6 @@
 
 import NIO
 
-extension NIOIMAP {
-
-    /// IMAPv4 `search-return-opt`
-    public enum SearchReturnOption: Equatable {
-        case min
-        case max
-        case all
-        case count
-        case save
-        case optionExtension(SearchReturnOptionExtension)
-    }
-
-}
-
 // MARK: - Encoding
 extension ByteBuffer {
 

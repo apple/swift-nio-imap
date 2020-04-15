@@ -14,27 +14,6 @@
 
 import NIO
 
-extension NIOIMAP {
-
-    /// IMAPv4 `resp-text-code`
-    public enum ResponseTextCode: Equatable {
-        case alert
-        case badCharset([String])
-        case capability([Capability])
-        case parse
-        case permanentFlags([PermanentFlag])
-        case readOnly
-        case readWrite
-        case tryCreate
-        case uidNext(Int)
-        case uidValidity(Int)
-        case unseen(Int)
-        case namespace(NamespaceResponse)
-        case other(String, String?)
-    }
-
-}
-
 // MARK: - Encoding
 extension ByteBuffer {
 

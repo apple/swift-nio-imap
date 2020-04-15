@@ -14,16 +14,6 @@
 
 import NIO
 
-extension NIOIMAP {
-
-    /// IMAPv4 `mbox-or-pat`
-    public enum MailboxPatterns: Equatable {
-        case mailbox(String)
-        case pattern([String])
-    }
-
-}
-
 // MARK: - Encoding
 extension ByteBuffer {
 

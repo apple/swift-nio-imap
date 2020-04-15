@@ -14,14 +14,6 @@
 
 import NIO
 
-// MARK: - NString
-extension NIOIMAP {
-
-    /// IMAPv4 `nstring`
-    public typealias NString = String?
-    
-}
-
 // MARK: - IMAP
 extension ByteBuffer {
     

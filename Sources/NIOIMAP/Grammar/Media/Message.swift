@@ -14,15 +14,6 @@
 
 import NIO
 
-extension NIOIMAP.Media {
-
-    public enum Message: String, Equatable {
-        case rfc822 = "RFC822"
-        case global = "GLOBAL"
-    }
-
-}
-
 // MARK: - Encoding
 extension ByteBuffer {
 

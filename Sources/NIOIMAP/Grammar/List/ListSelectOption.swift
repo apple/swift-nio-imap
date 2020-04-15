@@ -14,24 +14,6 @@
 
 import NIO
 
-extension NIOIMAP {
-
-    /// IMAPv4 `list-select-opt`
-    public enum ListSelectOption: Equatable {
-        case base(ListSelectBaseOption)
-        case independent(ListSelectIndependentOption)
-        case mod(ListSelectModOption)
-    }
-
-    public enum ListSelectionOptionsData: Equatable {
-        case select([ListSelectOption], ListSelectBaseOption)
-        case selectIndependent([ListSelectIndependentOption])
-    }
-
-    /// IMAPv4 `list-select-options`
-    public typealias ListSelectOptions = ListSelectionOptionsData?
-}
-
 // MARK: - Encoding
 extension ByteBuffer {
 

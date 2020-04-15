@@ -14,16 +14,6 @@
 
 import NIO
 
-extension NIOIMAP {
-    
-    /// IMAPv4 `body-extension`
-    public enum BodyExtensionType: Equatable {
-        case string(NString)
-        case number(Int)
-    }
-    
-}
-
 // MARK: - Encoding
 extension ByteBuffer {
 

@@ -14,33 +14,6 @@
 
 import NIO
 
-extension NIOIMAP.Mailbox.List {
-    
-    /// IMAPv4 `mbx-list-sflag`
-    public enum SFlag: String, Equatable {
-        case noSelect   = #"\Noselect"#
-        case marked     = #"\Marked"#
-        case unmarked   = #"\Unmarked"#
-        case nonExistent = #"\Nonexistent"#
-
-        public init?(rawValue: String) {
-            switch rawValue.lowercased() {
-            case #"\noselect"#:
-                self = .noSelect
-            case #"\marked"#:
-                self = .marked
-            case #"\unmarked"#:
-                self = .unmarked
-            case #"\nonexistent"#:
-                self = .nonExistent
-            default:
-                return nil
-            }
-        }
-    }
-    
-}
-
 // MARK: - Encoding
 extension ByteBuffer {
 

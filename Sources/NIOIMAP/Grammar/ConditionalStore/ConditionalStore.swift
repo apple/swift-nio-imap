@@ -14,16 +14,6 @@
 
 import NIO
 
-extension NIOIMAP {
-
-    public enum ConditionalStore {
-        
-        static let param = "CONDSTORE"
-        
-    }
-    
-}
-
 // MARK: - Encoding
 extension ByteBuffer {
     

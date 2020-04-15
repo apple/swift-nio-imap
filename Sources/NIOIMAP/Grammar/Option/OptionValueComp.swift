@@ -14,28 +14,6 @@
 
 import NIO
 
-extension NIOIMAP {
-
-    /// IMAPv4 `option-val-comp`
-    public enum OptionValueComp: Equatable {
-        case string(String)
-        case array([OptionValueComp])
-    }
-
-}
-
-// MARK: - Conveniences
-extension NIOIMAP.OptionValueComp: ExpressibleByArrayLiteral {
-
-    public typealias ArrayLiteralElement = Self
-
-    public init(arrayLiteral elements: NIOIMAP.OptionValueComp...) {
-        let array = Array(elements)
-        self = .array(array)
-    }
-
-}
-
 // MARK: - Encoding
 extension ByteBuffer {
 

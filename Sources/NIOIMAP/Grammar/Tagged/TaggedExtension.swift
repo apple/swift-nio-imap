@@ -14,19 +14,6 @@
 
 import NIO
 
-extension NIOIMAP {
-    
-    public struct TaggedExtension: Equatable {
-        public var label: String
-        public var value: TaggedExtensionValue
-        
-        public static func label(_ label: String, value: TaggedExtensionValue) -> Self {
-            return Self(label: label, value: value)
-        }
-    }
-    
-}
-
 // MARK: - Encoding
 extension ByteBuffer {
     

@@ -14,10 +14,6 @@
 
 import NIO
 
-extension NIOIMAP {
-
-}
-
 // MARK: - Encoding
 extension ByteBuffer {
 

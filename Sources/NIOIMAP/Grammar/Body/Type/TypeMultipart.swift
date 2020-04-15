@@ -14,22 +14,6 @@
 
 import NIO
 
-extension NIOIMAP.Body {
-
-    /// IMAPv4 `body-type-mpart`
-    public struct TypeMultipart: Equatable {
-        public var bodies: [NIOIMAP.Body]
-        public var mediaSubtype: String
-        public var multipartExtension: ExtensionMultipart?
-
-        /// Convenience function for a better experience when chaining multiple types.
-        public static func bodies(_ bodies: [NIOIMAP.Body], mediaSubtype: String, multipartExtension: ExtensionMultipart?) -> Self {
-            return Self(bodies: bodies, mediaSubtype: mediaSubtype, multipartExtension: multipartExtension)
-        }
-    }
-
-}
-
 // MARK: - Encoding
 extension ByteBuffer {
 

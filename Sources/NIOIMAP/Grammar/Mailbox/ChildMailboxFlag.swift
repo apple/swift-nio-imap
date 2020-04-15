@@ -14,16 +14,6 @@
 
 import NIO
 
-extension NIOIMAP {
-
-    /// IMAP4 `child-mbx-flag`
-    public enum ChildMailboxFlag: String, Equatable {
-        case HasChildren = #"\HasChildren"#
-        case HasNoChildren = #"\HasNoChildren"#
-    }
-
-}
-
 // MARK: - Encoding
 extension ByteBuffer {
 

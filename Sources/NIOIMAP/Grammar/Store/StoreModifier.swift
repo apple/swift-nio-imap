@@ -14,19 +14,6 @@
 
 import NIO
 
-extension NIOIMAP {
-    
-    public struct StoreModifier: Equatable {
-        public var name: String
-        public var parameters: NIOIMAP.TaggedExtensionValue?
-        
-        public static func name(_ name: String, parameters: NIOIMAP.TaggedExtensionValue?) -> Self {
-            return Self(name: name, parameters: parameters)
-        }
-    }
-
-}
-
 // MARK: - Encoding
 extension ByteBuffer {
     

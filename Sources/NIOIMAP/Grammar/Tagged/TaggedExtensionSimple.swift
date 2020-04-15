@@ -14,17 +14,6 @@
 
 import NIO
 
-extension NIOIMAP {
-
-    /// IMAPv4 `tagged-ext-simple`
-    public enum TaggedExtensionSimple: Equatable {
-        case sequence([NIOIMAP.SequenceRange])
-        case number(Int)
-        case number64(Int)
-    }
-
-}
-
 // MARK: - Encoding
 extension ByteBuffer {
 

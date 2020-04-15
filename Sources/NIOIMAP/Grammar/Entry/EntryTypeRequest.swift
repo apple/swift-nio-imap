@@ -14,15 +14,6 @@
 
 import NIO
 
-extension NIOIMAP {
-
-    public enum EntryTypeRequest: Equatable {
-        case response(EntryTypeResponse)
-        case all
-    }
-
-}
-
 // MARK: - Encoding
 extension ByteBuffer {
     

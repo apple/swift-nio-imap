@@ -14,20 +14,6 @@
 
 import NIO
 
-extension NIOIMAP.Body {
-
-    /// Extracted from IMAPv4 `body-ext-`1part
-    public struct FieldDSPLanguage: Equatable {
-        public var fieldDSP: FieldDSPData?
-        public var fieldLanguage: FieldLanguageLocation?
-        
-        public static func fieldDSP(_ fieldDSP: FieldDSPData?, fieldLanguage: FieldLanguageLocation?) -> Self {
-            return Self(fieldDSP: fieldDSP, fieldLanguage: fieldLanguage)
-        }
-    }
-
-}
-
 // MARK: - Encoding
 extension ByteBuffer {
 

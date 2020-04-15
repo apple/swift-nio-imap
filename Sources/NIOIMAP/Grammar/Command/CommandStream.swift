@@ -14,16 +14,6 @@
 
 import NIO
 
-extension NIOIMAP {
-
-    public enum CommandStream: Equatable {
-        case idleDone
-        case command(Command)
-        case bytes([UInt8])
-    }
-
-}
-
 extension ByteBuffer {
 
     @discardableResult public mutating func writeCommandStream(_ stream: NIOIMAP.CommandStream) -> Int {

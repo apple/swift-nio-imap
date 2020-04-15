@@ -14,31 +14,6 @@
 
 import NIO
 
-extension NIOIMAP.Media {
-
-    public enum BasicType: Equatable {
-        case application
-        case audio
-        case image
-        case message
-        case video
-        case font
-        case other(String)
-    }
-
-    /// IMAPv4 `media-basic`
-    public struct Basic: Equatable {
-        public var type: BasicType
-        public var subtype: String
-
-        /// Convenience function for a better experience when chaining multiple types.
-        public static func type(_ type: BasicType, subtype: String) -> Self {
-            return Self(type: type, subtype: subtype)
-        }
-    }
-
-}
-
 // MARK: - Encoding
 extension ByteBuffer {
 

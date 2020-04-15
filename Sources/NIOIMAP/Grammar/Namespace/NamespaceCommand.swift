@@ -14,13 +14,6 @@
 
 import NIO
 
-extension NIOIMAP {
-
-    /// IMAPv4 `Namespace-Command`
-    static let NamespaceCommand = "NAMESPACE"
-    
-}
-
 // MARK: - Encoding
 extension ByteBuffer {
     

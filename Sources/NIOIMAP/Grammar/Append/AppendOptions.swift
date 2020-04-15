@@ -14,20 +14,6 @@
 
 import NIO
 
-extension NIOIMAP {
-
-    public struct AppendOptions: Equatable {
-        public var flagList: [Flag]
-        public var dateTime: Date.DateTime?
-        public var extensions: [AppendExtension]
-        
-        public static func flagList(_ flagList: [Flag], dateTime: Date.DateTime?, extensions: [AppendExtension]) -> Self {
-            return Self(flagList: flagList, dateTime: dateTime, extensions: extensions)
-        }
-    }
-
-}
-
 // MARK: - Encoding
 extension ByteBuffer {
     

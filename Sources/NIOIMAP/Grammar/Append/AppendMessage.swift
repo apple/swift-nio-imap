@@ -14,19 +14,6 @@
 
 import NIO
 
-extension NIOIMAP {
-
-    public struct AppendMessage: Equatable {
-        public var options: AppendOptions
-        public var data: AppendData
-        
-        public static func options(_ options: AppendOptions, data: AppendData) -> Self {
-            return Self(options: options, data: data)
-        }
-    }
-
-}
-
 // MARK: - Encoding
 extension ByteBuffer {
     

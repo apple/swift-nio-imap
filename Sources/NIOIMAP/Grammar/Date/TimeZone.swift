@@ -14,19 +14,6 @@
 
 import NIO
 
-extension NIOIMAP.Date {
-    
-    /// IMAPv4 `zone`
-    public struct TimeZone: Equatable {
-        fileprivate var backing: Int
-        
-        public init?(_ val: Int) {
-            self.backing = val
-        }
-    }
-    
-}
-
 // MARK: IMAP
 extension ByteBuffer {
     

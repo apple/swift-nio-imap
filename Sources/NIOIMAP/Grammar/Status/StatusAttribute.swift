@@ -14,21 +14,6 @@
 
 import NIO
 
-extension NIOIMAP {
-
-    /// IMAPv4 `status-att`
-    public enum StatusAttribute: String, CaseIterable {
-        case messages = "MESSAGES"
-        case recent = "RECENT"
-        case uidnext = "UIDNEXT"
-        case uidvalidity = "UIDVALIDITY"
-        case unseen = "UNSEEN"
-        case size = "SIZE"
-        case highestModSeq = "HIGHESTMODSEQ"
-    }
-    
-}
-
 // MARK: - IMAP
 extension ByteBuffer {
     

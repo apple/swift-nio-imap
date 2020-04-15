@@ -14,16 +14,6 @@
 
 import NIO
 
-extension NIOIMAP {
-    
-    /// IMAPv4 `response-done`
-    public enum ResponseDone: Equatable {
-        case tagged(ResponseTagged)
-        case fatal(ResponseText)
-    }
-    
-}
-
 // MARK: - Encoding
 extension ByteBuffer {
 

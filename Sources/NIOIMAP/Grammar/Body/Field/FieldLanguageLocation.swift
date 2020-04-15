@@ -14,21 +14,6 @@
 
 import NIO
 
-extension NIOIMAP.Body {
-
-    /// Extracted from IMAPv4 `body-ext-1part`
-    public struct FieldLanguageLocation: Equatable {
-        public var language: FieldLanguage
-        public var location: FieldLocationExtension?
-
-        /// Convenience function for a better experience when chaining multiple types.
-        public static func language(_ language: NIOIMAP.Body.FieldLanguage, location: FieldLocationExtension?) -> Self {
-            return Self(language: language, location: location)
-        }
-    }
-
-}
-
 // MARK: - Encoding
 extension ByteBuffer {
 

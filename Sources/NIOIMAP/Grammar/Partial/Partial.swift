@@ -14,21 +14,6 @@
 
 import NIO
 
-extension NIOIMAP {
-
-    /// IMAPv4 `partial`
-    public struct Partial: Equatable {
-        public var left: Int
-        public var right: Int
-        
-        public init(left: Int, right: Int) {
-            self.left = left
-            self.right = right
-        }
-    }
-    
-}
-
 extension ByteBuffer {
     
     @discardableResult mutating func writePartial(_ num: NIOIMAP.Partial) -> Int {

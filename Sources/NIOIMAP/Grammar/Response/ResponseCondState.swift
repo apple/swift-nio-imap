@@ -14,17 +14,6 @@
 
 import NIO
 
-extension NIOIMAP {
-    
-    /// IMAPv4 `resp-cond-state`
-    public enum ResponseConditionalState: Equatable {
-        case ok(ResponseText)
-        case no(ResponseText)
-        case bad(ResponseText)
-    }
-    
-}
-
 // MARK: - Encoding
 extension ByteBuffer {
 

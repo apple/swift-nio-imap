@@ -14,20 +14,6 @@
 
 import NIO
 
-extension NIOIMAP {
-
-    /// IMAPv4 `search-program`
-    public struct SearchProgram: Equatable {
-        public var charset: String?
-        public var keys: [SearchKey]
-
-        public static func charset(_ charset: String?, keys: [SearchKey]) -> Self {
-            return Self(charset: charset, keys: keys)
-        }
-    }
-
-}
-
 // MARK: - Encoding
 extension ByteBuffer {
 

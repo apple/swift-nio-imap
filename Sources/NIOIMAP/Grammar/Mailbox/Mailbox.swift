@@ -14,42 +14,6 @@
 
 import NIO
 
-extension NIOIMAP {
- 
-    /// IMAPv4 `mailbox`
-    public struct Mailbox: Equatable {
-        
-        public var name: String
-        
-        public static let inbox = Self("inbox")
-        
-        public static func other(_ name: String) -> Self {
-            return Self(name)
-        }
-
-        public init(_ name: String) {
-            if name.lowercased() == "inbox" {
-                self.name = "INBOX"
-            } else {
-                self.name = name
-            }
-        }
-        
-    }
-    
-}
-
-// MARK: - ExpressibleByStringLiteral
-extension NIOIMAP.Mailbox: ExpressibleByStringLiteral {
-    
-    public typealias StringLiteralType = String
-    
-    public init(stringLiteral value: String) {
-        self.init(value)
-    }
-    
-}
-
 // MARK: - Encoding
 extension ByteBuffer {
     
