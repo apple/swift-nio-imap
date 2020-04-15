@@ -16,7 +16,7 @@ import NIO
 
 enum ParserLibrary {}
 
-typealias SubParser<T> = (inout ByteBuffer, StackTracker) throws -> T
+typealias SubParser<ByteBufferType: ByteBufferProtocol, T> = (inout ByteBufferType, StackTracker) throws -> T
 
 public struct ParserError: Error {
     public var hint: String
@@ -53,7 +53,7 @@ struct StackTracker {
 }
 
 extension ParserLibrary {
-    static func parseZeroOrMoreCharacters(buffer: inout ByteBuffer, tracker: StackTracker, where: ((UInt8) -> Bool)) throws -> String {
+    static func parseZeroOrMoreCharacters<ByteBufferType: ByteBufferProtocol>(buffer: inout ByteBufferType, tracker: StackTracker, where: ((ByteBufferType.ReadableBytesViewType.Element) -> Bool)) throws -> String {
         return try Self.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             let maybeFirstBad = buffer.readableBytesView.firstIndex { char in
                 return !`where`(char)
@@ -66,7 +66,7 @@ extension ParserLibrary {
         }
     }
 
-    static func parseOneOrMoreCharacters(buffer: inout ByteBuffer, tracker: StackTracker, where: ((UInt8) -> Bool)) throws -> String {
+    static func parseOneOrMoreCharacters<ByteBufferType: ByteBufferProtocol>(buffer: inout ByteBufferType, tracker: StackTracker, where: ((ByteBufferType.ReadableBytesViewType.Element) -> Bool)) throws -> String {
         return try Self.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             let maybeFirstBad = buffer.readableBytesView.firstIndex { char in
                 return !`where`(char)
@@ -82,7 +82,7 @@ extension ParserLibrary {
         }
     }
 
-    static func parseZeroOrMoreCharactersByteBuffer(buffer: inout ByteBuffer, tracker: StackTracker, where: ((UInt8) -> Bool)) throws -> ByteBuffer {
+    static func parseZeroOrMoreCharactersByteBuffer<ByteBufferType: ByteBufferProtocol>(buffer: inout ByteBufferType, tracker: StackTracker, where: ((ByteBufferType.ReadableBytesViewType.Element) -> Bool)) throws -> ByteBufferType {
         return try Self.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             let maybeFirstBad = buffer.readableBytesView.firstIndex { char in
                 return !`where`(char)
@@ -95,7 +95,7 @@ extension ParserLibrary {
         }
     }
 
-    static func parseOneOrMoreCharactersByteBuffer(buffer: inout ByteBuffer, tracker: StackTracker, where: ((UInt8) -> Bool)) throws -> ByteBuffer {
+    static func parseOneOrMoreCharactersByteBuffer<ByteBufferType: ByteBufferProtocol>(buffer: inout ByteBufferType, tracker: StackTracker, where: ((ByteBufferType.ReadableBytesViewType.Element) -> Bool)) throws -> ByteBufferType {
         return try Self.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             let maybeFirstBad = buffer.readableBytesView.firstIndex { char in
                 return !`where`(char)
@@ -111,7 +111,7 @@ extension ParserLibrary {
         }
     }
 
-    static func parseComposite<T>(buffer: inout ByteBuffer, tracker: StackTracker, _ body: SubParser<T>) throws -> T {
+    static func parseComposite<ByteBufferType: ByteBufferProtocol, T>(buffer: inout ByteBufferType, tracker: StackTracker, _ body: SubParser<ByteBufferType, T>) throws -> T {
         var tracker = tracker
         try tracker.newStackFrame()
 
@@ -124,7 +124,7 @@ extension ParserLibrary {
         }
     }
 
-    static func parseOptional<T>(buffer: inout ByteBuffer, tracker: StackTracker, parser: SubParser<T>) throws -> T? {
+    static func parseOptional<ByteBufferType: ByteBufferProtocol, T>(buffer: inout ByteBufferType, tracker: StackTracker, parser: SubParser<ByteBufferType, T>) throws -> T? {
         do {
             return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker, parser)
         } catch is ParserError {
@@ -132,13 +132,13 @@ extension ParserLibrary {
         }
     }
 
-    static func parseOneOrMore<T>(buffer: inout ByteBuffer, tracker: StackTracker, parser: SubParser<T>) throws -> [T] {
+    static func parseOneOrMore<ByteBufferType: ByteBufferProtocol, T>(buffer: inout ByteBufferType, tracker: StackTracker, parser: SubParser<ByteBufferType, T>) throws -> [T] {
         var parsed: [T] = []
         try Self.parseOneOrMore(buffer: &buffer, into: &parsed, tracker: tracker, parser: parser)
         return parsed
     }
 
-    static func parseOneOrMore<T>(buffer: inout ByteBuffer, into parsed: inout [T], tracker: StackTracker, parser: SubParser<T>) throws {
+    static func parseOneOrMore<ByteBufferType: ByteBufferProtocol, T>(buffer: inout ByteBufferType, into parsed: inout [T], tracker: StackTracker, parser: SubParser<ByteBufferType, T>) throws {
         try Self.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             parsed.append(try parser(&buffer, tracker))
             while let next = try self.parseOptional(buffer: &buffer, tracker: tracker, parser: parser) {
@@ -147,7 +147,7 @@ extension ParserLibrary {
         }
     }
     
-    static func parseZeroOrMore<T>(buffer: inout ByteBuffer, into parsed: inout [T], tracker: StackTracker, parser: SubParser<T>) throws {
+    static func parseZeroOrMore<ByteBufferType: ByteBufferProtocol, T>(buffer: inout ByteBufferType, into parsed: inout [T], tracker: StackTracker, parser: SubParser<ByteBufferType, T>) throws {
         return try Self.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             while let next = try self.parseOptional(buffer: &buffer, tracker: tracker, parser: parser) {
                 parsed.append(next)
@@ -155,13 +155,13 @@ extension ParserLibrary {
         }
     }
 
-    static func parseZeroOrMore<T>(buffer: inout ByteBuffer, tracker: StackTracker, parser: SubParser<T>) throws -> [T] {
+    static func parseZeroOrMore<ByteBufferType: ByteBufferProtocol, T>(buffer: inout ByteBufferType, tracker: StackTracker, parser: SubParser<ByteBufferType, T>) throws -> [T] {
         var parsed: [T] = []
         try Self.parseZeroOrMore(buffer: &buffer, into: &parsed, tracker: tracker, parser: parser)
         return parsed
     }
     
-    static func parseOneOf<T>(_ subParsers: [SubParser<T>], buffer: inout ByteBuffer, tracker: StackTracker, file: String = #file, line: Int = #line) throws -> T {
+    static func parseOneOf<ByteBufferType: ByteBufferProtocol, T>(_ subParsers: [SubParser<ByteBufferType, T>], buffer: inout ByteBufferType, tracker: StackTracker, file: String = #file, line: Int = #line) throws -> T {
         for parser in subParsers {
             do {
                 return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker, parser)
@@ -172,7 +172,7 @@ extension ParserLibrary {
         throw ParserError(hint: "none of the options match", file: file, line: line)
     }
 
-    static func parseFixedString(_ needle: String, caseSensitive: Bool = false, buffer: inout ByteBuffer, tracker: StackTracker) throws {
+    static func parseFixedString<ByteBufferType: ByteBufferProtocol>(_ needle: String, caseSensitive: Bool = false, buffer: inout ByteBufferType, tracker: StackTracker) throws {
         return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             let needleCount = needle.utf8.count
             guard let actual = buffer.readString(length: needleCount) else {
@@ -199,7 +199,7 @@ extension ParserLibrary {
         }
     }
     
-    static func parseSpace(buffer: inout ByteBuffer, tracker: StackTracker) throws {
+    static func parseSpace<ByteBufferType: ByteBufferProtocol>(buffer: inout ByteBufferType, tracker: StackTracker) throws {
         return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             guard let actual = buffer.readString(length: 1) else {
                 throw NIOIMAP.ParsingError.incompleteMessage
@@ -210,7 +210,7 @@ extension ParserLibrary {
         }
     }
     
-    static func parseUnsignedInteger(buffer: inout ByteBuffer, tracker: StackTracker) throws -> (number: Int, bytesConsumed: Int) {
+    static func parseUnsignedInteger<ByteBufferType: ByteBufferProtocol>(buffer: inout ByteBufferType, tracker: StackTracker) throws -> (number: Int, bytesConsumed: Int) {
         let string = try ParserLibrary.parseOneOrMoreCharacters(buffer: &buffer, tracker: tracker) { char in
             return char >= UInt8(ascii: "0") && char <= UInt8(ascii: "9")
         }
@@ -220,8 +220,8 @@ extension ParserLibrary {
         return (int, string.count)
     }
 
-    static func parseNewline(buffer: inout ByteBuffer, tracker: StackTracker) throws {
-        switch buffer.getInteger(at: buffer.readerIndex, as: UInt16.self) {
+    static func parseNewline<ByteBufferType: ByteBufferProtocol>(buffer: inout ByteBufferType, tracker: StackTracker) throws {
+        switch buffer.getInteger(at: buffer.readerIndex, endianness: .bigEndian(), as: UInt16.self) {
         case .some(UInt16(0x0d0a /* CRLF */)):
             // fast path: we find CRLF
             buffer.moveReaderIndex(forwardBy: 2)
@@ -231,7 +231,7 @@ extension ParserLibrary {
             buffer.moveReaderIndex(forwardBy: 1)
             return
         case .none:
-            guard let first = buffer.getInteger(at: buffer.readerIndex, as: UInt8.self) else {
+            guard let first = buffer.getInteger(at: buffer.readerIndex, endianness: .bigEndian(), as: UInt8.self) else {
                 throw NIOIMAP.ParsingError.incompleteMessage
             }
             switch first {

@@ -14,6 +14,30 @@
 
 import NIO
 
+extension ByteBuffer: ByteBufferProtocol {
+    
+    typealias EndiannessType = NIO.Endianness
+    
+}
+
+extension ByteBufferView: ByteBufferProtocolView {
+    
+    
+    
+}
+
+extension Endianness: EndiannessProtocol {
+    
+    static func bigEndian() -> Endianness {
+        return .big
+    }
+    
+    static func littleEndian() -> Endianness {
+        return .little
+    }
+    
+}
+
 extension ByteBuffer {
     
     @discardableResult mutating func writeIMAPString(_ str: String) -> Int {
