@@ -170,64 +170,47 @@ extension ParserUnitTests {
             "* 1 FETCH (BODY[TEXT] {3}\r\nabc FLAGS (\\seen \\answered))\r\n",
             "* 2 FETCH (FLAGS (\\deleted) BODY[TEXT] {3}\r\ndef)\r\n",
             "* 3 FETCH (BODY[TEXT] {3}\r\nghi)\r\n",
+            "3 OK Fetch completed.\r\n"
         ]
         var buffer = ByteBuffer(stringLiteral: "")
         buffer.writeString(lines.joined())
         
-        var parser = NIOIMAP.ResponseParser()
-        XCTAssertEqual(
-            try parser.parseResponseStream(buffer: &buffer),
-            .greeting(.auth(.ok(.code(.capability([]), text: "Ready."))))
-        )
-        XCTAssertEqual(
-            try parser.parseResponseStream(buffer: &buffer),
-            .responseBegin(.messageData(.fetch(1)))
-        )
-        XCTAssertEqual(
-            try parser.parseResponseStream(buffer: &buffer),
-            .attributeBegin(.bodySectionText(nil, 3))
-        )
-        XCTAssertEqual(
-            try parser.parseResponseStream(buffer: &buffer),
-            .attributeBytes("abc")
-        )
-        XCTAssertEqual(
-            try parser.parseResponseStream(buffer: &buffer),
-            .simpleAttribute(.dynamic([.seen, .answered]))
-        )
-        XCTAssertEqual(
-            try parser.parseResponseStream(buffer: &buffer),
-            .responseBegin(.messageData(.fetch(2)))
-        )
-        XCTAssertEqual(
-            try parser.parseResponseStream(buffer: &buffer),
-            .simpleAttribute(.dynamic([.deleted]))
-        )
-        XCTAssertEqual(
-            try parser.parseResponseStream(buffer: &buffer),
-            .attributeBegin(.bodySectionText(nil, 3))
-        )
-        XCTAssertEqual(
-            try parser.parseResponseStream(buffer: &buffer),
-            .attributeBytes("def")
-        )
-        XCTAssertEqual(
-            try parser.parseResponseStream(buffer: &buffer),
-            .responseBegin(.messageData(.fetch(3)))
-        )
-        XCTAssertEqual(
-            try parser.parseResponseStream(buffer: &buffer),
-            .attributeBegin(.bodySectionText(nil, 3))
-        )
-        XCTAssertEqual(
-            try parser.parseResponseStream(buffer: &buffer),
-            .attributeBytes("ghi")
-        )
-//        XCTAssertEqual(buffer.readableBytes, 0)
-        // TODO: enable this final check for readable bytes when the framing parser is ready
+        let expectedResults: [(NIOIMAP.ResponseStream, UInt)] = [
+            (.greeting(.auth(.ok(.code(.capability([]), text: "Ready.")))), #line),
+            (.responseBegin(.messageData(.fetch(1))), #line),
+            (.attributesStart, #line),
+            (.streamingAttributeBegin(.bodySectionText(nil, 3)), #line),
+            (.streamingAttributeBytes("abc"), #line),
+            (.streamingAttributeEnd, #line),
+            (.simpleAttribute(.dynamic([.seen, .answered])), #line),
+            (.attributesFinish, #line),
+            (.responseBegin(.messageData(.fetch(2))), #line),
+            (.attributesStart, #line),
+            (.simpleAttribute(.dynamic([.deleted])), #line),
+            (.streamingAttributeBegin(.bodySectionText(nil, 3)), #line),
+            (.streamingAttributeBytes("def"), #line),
+            (.streamingAttributeEnd, #line),
+            (.attributesFinish, #line),
+            (.responseBegin(.messageData(.fetch(3))), #line),
+            (.attributesStart, #line),
+            (.streamingAttributeBegin(.bodySectionText(nil, 3)), #line),
+            (.streamingAttributeBytes("ghi"), #line),
+            (.streamingAttributeEnd, #line),
+            (.attributesFinish, #line),
+            (.responseEnd(.tagged(.tag("3", state: .ok(.code(nil, text: "Fetch completed."))))), #line),
+        ]
         
-        // this currently fails as there's data left over, the last ")\r\n"
-        // this should be fixed with the framing parser
+        var parser = NIOIMAP.ResponseParser()
+        for (input, line) in expectedResults {
+            do {
+                let actual = try parser.parseResponseStream(buffer: &buffer)
+                XCTAssertEqual(input, actual, line: line)
+            } catch {
+                XCTFail("\(error)", line: line)
+                return
+            }
+        }
+        XCTAssertEqual(buffer.readableBytes, 0)
     }
     
     func testIdle() {

@@ -19,8 +19,9 @@ extension NIOIMAP {
     public struct ResponseParser: Parser {
 
         enum AttributeState: Equatable {
-            case first
-            case middle
+            case head
+            case attribute
+            case separator
         }
         
         enum Mode: Equatable {
@@ -40,9 +41,7 @@ extension NIOIMAP {
         public mutating func parseResponseStream(buffer: inout ByteBuffer) throws -> NIOIMAP.ResponseStream {
             switch self.mode {
             case .greeting:
-                let greeting = try GrammarParser.parseGreeting(buffer: &buffer, tracker: .new)
-                self.mode = .response
-                return .greeting(greeting)
+                return try self.parseGreeting(buffer: &buffer)
             case .response:
                 return try self.parseResponse(buffer: &buffer)
             case .attributes(let state):
@@ -52,76 +51,129 @@ extension NIOIMAP {
             }
         }
         
-        /// Extracts bytes from a given `ByteBuffer`. If more bytes are present than are required
-        /// only those that are required will be extracted. If not enough bytes are provided then the given
-        /// `ByteBuffer` will be emptied.
-        /// - parameter buffer: The buffer from which bytes should be extracted.
-        /// - returns: A new `ByteBuffer` containing extracted bytes.
-        mutating func parseBytes(buffer: inout ByteBuffer, remaining: Int) -> ResponseStream {
-            if buffer.readableBytes >= remaining {
-                let bytes = buffer.readSlice(length: remaining)!
-                self.mode = .attributes(.middle)
-                return .attributeBytes(bytes)
-            }
-            let bytes = buffer.readSlice(length: buffer.readableBytes)!
-            let leftToRead = remaining - bytes.readableBytes
-            self.mode = .attributeBytes(leftToRead)
-            return .attributeBytes(bytes)
-        }
         
-        mutating func parseAtributes(state: AttributeState, buffer: inout ByteBuffer) throws -> ResponseStream {
-            
-            switch state {
-            case .first:
-                try GrammarParser.parseMessageAttributeStart(buffer: &buffer, tracker: .new)
-            case .middle:
-                do {
-                    try GrammarParser.parseMessageAttributeMiddle(buffer: &buffer, tracker: .new)
-                } catch {
-                    try GrammarParser.parseMessageAttributeEnd(buffer: &buffer, tracker: .new)
-                    return try self.parseResponse(buffer: &buffer)
-                }
-            }
-            
-            var save = buffer
-            do {
-                let att = try GrammarParser.parseMessageAttribute_dynamicOrStatic(buffer: &buffer, tracker: .new)
-                let returnVal: ResponseStream
-                switch att {
-                case .static(.bodySectionText(let optional, let size)):
-                    self.mode = .attributeBytes(size)
-                    returnVal = .attributeBegin(NIOIMAP.MessageAttributesStatic.bodySectionText(optional, size))
-                default:
-                    returnVal = .simpleAttribute(att)
-                    self.mode = .attributes(.middle)
-                }
-                if state == .middle {
-                    do {
-                        try GrammarParser.parseMessageAttributeEnd(buffer: &buffer, tracker: .new)
-                        self.mode = .response
-                    } catch is ParserError {
-                        /// do nothing, we aren't ready to end
-                    }
-                }
-                
-                return returnVal
-            } catch is ParserError {
-                self.mode = .response // if there isn't a next attribute then it's time for the next response
-                return try self.parseResponse(buffer: &save)
+        private mutating func moveStateMachine<Return>(expected: Mode, next: Mode, returnValue: Return) -> Return {
+            if case expected = self.mode {
+                self.mode = next
+                return returnValue
+            } else {
+                fatalError("Unexpected state \(self.mode)")
             }
         }
         
-        mutating func parseResponse(buffer: inout ByteBuffer) throws -> NIOIMAP.ResponseStream {
-            do {
-                let response = try GrammarParser.parseResponseData(buffer: &buffer, tracker: .new)
-                if case .messageData(.fetch(_)) = response {
-                    self.mode = .attributes(.first)
-                }
-                return .responseBegin(response)
-            } catch is ParserError {
-                // no response? we must be at response end
-                return .responseEnd(try GrammarParser.parseResponseDone(buffer: &buffer, tracker: .new))
-            }
+        private mutating func moveStateMachine(expected: Mode, next: Mode) {
+            self.moveStateMachine(expected: expected, next: next, returnValue: ())
         }
     }
+}
+
+// MARK: - Parse greeting
+extension NIOIMAP.ResponseParser {
+    
+    fileprivate mutating func parseGreeting(buffer: inout ByteBuffer) throws -> NIOIMAP.ResponseStream {
+        let greeting = try NIOIMAP.GrammarParser.parseGreeting(buffer: &buffer, tracker: .new)
+        return self.moveStateMachine(expected: .greeting, next: .response, returnValue: .greeting(greeting))
+    }
+    
+}
+
+// MARK: - Parse responses
+extension NIOIMAP.ResponseParser {
+
+    fileprivate mutating func parseResponse(buffer: inout ByteBuffer) throws -> NIOIMAP.ResponseStream {
+        do {
+            let response = try NIOIMAP.GrammarParser.parseResponseData(buffer: &buffer, tracker: .new)
+            if case .messageData(.fetch(_)) = response {
+                self.moveStateMachine(expected: .response, next: .attributes(.head))
+            }
+            return .responseBegin(response)
+        } catch is ParserError {
+            // no response? we must be at response end
+            return .responseEnd(try NIOIMAP.GrammarParser.parseResponseDone(buffer: &buffer, tracker: .new))
+        }
+    }
+    
+}
+
+// MARK: - Parse attributes
+extension NIOIMAP.ResponseParser {
+    
+    fileprivate mutating func parseAtributes(state: AttributeState, buffer: inout ByteBuffer) throws -> NIOIMAP.ResponseStream {
+        
+        switch state {
+        case .head:
+            try NIOIMAP.GrammarParser.parseMessageAttributeStart(buffer: &buffer, tracker: .new)
+            return self.moveStateMachine(
+                expected: .attributes(.head),
+                next: .attributes(.attribute),
+                returnValue: .attributesStart
+            )
+        case .separator:
+            do {
+                try NIOIMAP.GrammarParser.parseMessageAttributeMiddle(buffer: &buffer, tracker: .new)
+                self.moveStateMachine(expected: .attributes(.separator), next: .attributes(.attribute))
+                return try self.parseSingleAttribute(buffer: &buffer)
+            } catch is ParserError {
+                try NIOIMAP.GrammarParser.parseMessageAttributeEnd(buffer: &buffer, tracker: .new)
+                return self.moveStateMachine(expected: .attributes(.separator), next: .response, returnValue: .attributesFinish)
+            }
+        case .attribute:
+            return try self.parseSingleAttribute(buffer: &buffer)
+        }
+        
+    }
+    
+    private mutating func parseSingleAttribute(buffer: inout ByteBuffer) throws -> NIOIMAP.ResponseStream {
+        let att = try NIOIMAP.GrammarParser.parseMessageAttribute_dynamicOrStatic(buffer: &buffer, tracker: .new)
+        switch att {
+        case .static(.bodySectionText(let optional, let size)):
+            return self.moveStateMachine(
+                expected: .attributes(.attribute),
+                next: .attributeBytes(size),
+                returnValue: .streamingAttributeBegin(NIOIMAP.MessageAttributesStatic.bodySectionText(optional, size))
+            )
+        default:
+            return self.moveStateMachine(
+                expected: .attributes(.attribute),
+                next: .attributes(.separator),
+                returnValue: .simpleAttribute(att)
+            )
+        }
+    }
+    
+}
+
+// MARK: - Parse bytes
+extension NIOIMAP.ResponseParser {
+
+    /// Extracts bytes from a given `ByteBuffer`. If more bytes are present than are required
+    /// only those that are required will be extracted. If not enough bytes are provided then the given
+    /// `ByteBuffer` will be emptied.
+    /// - parameter buffer: The buffer from which bytes should be extracted.
+    /// - returns: A new `ByteBuffer` containing extracted bytes.
+    fileprivate mutating func parseBytes(buffer: inout ByteBuffer, remaining: Int) -> NIOIMAP.ResponseStream {
+        if remaining == 0 {
+            return self.moveStateMachine(
+                expected: .attributeBytes(remaining),
+                next: .attributes(.separator),
+                returnValue: .streamingAttributeEnd
+            )
+        } else if buffer.readableBytes >= remaining {
+            let bytes = buffer.readSlice(length: remaining)!
+            return self.moveStateMachine(
+                expected: .attributeBytes(remaining),
+                next: .attributeBytes(0),
+                returnValue: .streamingAttributeBytes(bytes)
+            )
+        } else {
+            let bytes = buffer.readSlice(length: buffer.readableBytes)!
+            let leftToRead = remaining - bytes.readableBytes
+            return self.moveStateMachine(
+                expected: .attributeBytes(remaining),
+                next: .attributeBytes(leftToRead),
+                returnValue: .streamingAttributeBytes(bytes)
+            )
+        }
+    }
+    
 }

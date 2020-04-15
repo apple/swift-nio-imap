@@ -18,16 +18,18 @@ extension NIOIMAP {
     
     /// You will recieve exactly one `greeting`
     /// For every `responseBegin`, there will be exactly one corresponding `responseEnd`
-    /// For every `attributeBegin`, there will be exactly one corresponding `responseEnd`
-    /// For every `attributeBegin`, you may recieve 0...n `attributeBytes`
+    /// For every `attributeBegin`, there will be exactly one corresponding `attributeEnd`
+    /// For every `attributeBytes`, you may recieve 0...n `attributeBytes`
     /// For every `responseBegin`, you may recieve 0...m `simpleAttribute` and `attributeBegin`
     public enum ResponseStream: Equatable {
         case greeting(Greeting)
         case responseBegin(ResponsePayload)
+        case attributesStart
         case simpleAttribute(MessageAttributeType)
-        case attributeBegin(MessageAttributesStatic)
-        case attributeBytes(ByteBuffer)
-        case attributeEnd
+        case streamingAttributeBegin(MessageAttributesStatic)
+        case streamingAttributeBytes(ByteBuffer)
+        case streamingAttributeEnd
+        case attributesFinish
         case responseEnd(ResponseDone)
     }
     
@@ -42,14 +44,18 @@ extension ByteBuffer {
             return self.writeGreeting(greeting)
         case .responseBegin(let resp):
             return self.writeResponseData(resp)
+        case .attributesStart:
+            return self.writeString("(")
         case .simpleAttribute(let att):
             return self.writeMessageAttributeType(att)
-        case .attributeBegin(let att):
+        case .streamingAttributeBegin(let att):
             return self.writeMessageAttributeStatic(att)
-        case .attributeBytes(var bytes):
+        case .streamingAttributeBytes(var bytes):
             return self.writeBuffer(&bytes)
-        case .attributeEnd:
+        case .streamingAttributeEnd:
             return 0 // do nothing, this is a "fake" event
+        case .attributesFinish:
+            return self.writeString(")")
         case .responseEnd(let end):
             return self.writeResponseDone(end)
         }

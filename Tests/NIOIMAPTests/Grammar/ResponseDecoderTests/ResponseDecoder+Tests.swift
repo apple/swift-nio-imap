@@ -37,6 +37,19 @@ extension ResponseDecoder_Tests {
                 [
                     .responseBegin(.conditionalState(.no(.code(.alert, text: "ohno"))))
                 ]
+            ),
+            (
+                "* 2 FETCH (FLAGS (\\deleted) BODY[TEXT] {1}\r\nX)\r\n2 OK Fetch completed.\r\n",
+                [
+                    .responseBegin(.messageData(.fetch(2))),
+                    .attributesStart,
+                    .simpleAttribute(.dynamic([.deleted])),
+                    .streamingAttributeBegin(.bodySectionText(nil, 1)),
+                    .streamingAttributeBytes("X"),
+                    .streamingAttributeEnd,
+                    .attributesFinish,
+                    .responseEnd(.tagged(.tag("2", state: .ok(.code(nil, text: "Fetch completed.")))))
+                ]
             )
         ]
         
