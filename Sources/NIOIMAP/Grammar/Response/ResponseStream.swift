@@ -27,7 +27,7 @@ extension NIOIMAP {
         case attributesStart
         case simpleAttribute(MessageAttributeType)
         case streamingAttributeBegin(MessageAttributesStatic)
-        case streamingAttributeBytes(ByteBuffer)
+        case streamingAttributeBytes([UInt8])
         case streamingAttributeEnd
         case attributesFinish
         case responseEnd(ResponseDone)
@@ -50,8 +50,8 @@ extension ByteBuffer {
             return self.writeMessageAttributeType(att)
         case .streamingAttributeBegin(let att):
             return self.writeMessageAttributeStatic(att)
-        case .streamingAttributeBytes(var bytes):
-            return self.writeBuffer(&bytes)
+        case .streamingAttributeBytes(let bytes):
+            return self.writeBytes(bytes)
         case .streamingAttributeEnd:
             return 0 // do nothing, this is a "fake" event
         case .attributesFinish:

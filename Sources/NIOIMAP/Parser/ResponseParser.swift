@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import NIO
-
 extension NIOIMAP {
 
     public struct ResponseParser: Parser {
@@ -38,7 +36,7 @@ extension NIOIMAP {
             self.bufferLimit = bufferLimit
         }
 
-        public mutating func parseResponseStream(buffer: inout ByteBuffer) throws -> NIOIMAP.ResponseStream {
+        public mutating func parseResponseStream<ByteBufferType: ByteBufferProtocol>(buffer: inout ByteBufferType) throws -> NIOIMAP.ResponseStream {
             switch self.mode {
             case .greeting:
                 return try self.parseGreeting(buffer: &buffer)
@@ -70,7 +68,7 @@ extension NIOIMAP {
 // MARK: - Parse greeting
 extension NIOIMAP.ResponseParser {
     
-    fileprivate mutating func parseGreeting(buffer: inout ByteBuffer) throws -> NIOIMAP.ResponseStream {
+    fileprivate mutating func parseGreeting<ByteBufferType: ByteBufferProtocol>(buffer: inout ByteBufferType) throws -> NIOIMAP.ResponseStream {
         let greeting = try NIOIMAP.GrammarParser.parseGreeting(buffer: &buffer, tracker: .new)
         return self.moveStateMachine(expected: .greeting, next: .response, returnValue: .greeting(greeting))
     }
@@ -80,7 +78,7 @@ extension NIOIMAP.ResponseParser {
 // MARK: - Parse responses
 extension NIOIMAP.ResponseParser {
 
-    fileprivate mutating func parseResponse(buffer: inout ByteBuffer) throws -> NIOIMAP.ResponseStream {
+    fileprivate mutating func parseResponse<ByteBufferType: ByteBufferProtocol>(buffer: inout ByteBufferType) throws -> NIOIMAP.ResponseStream {
         do {
             let response = try NIOIMAP.GrammarParser.parseResponseData(buffer: &buffer, tracker: .new)
             if case .messageData(.fetch(_)) = response {
@@ -98,7 +96,7 @@ extension NIOIMAP.ResponseParser {
 // MARK: - Parse attributes
 extension NIOIMAP.ResponseParser {
     
-    fileprivate mutating func parseAtributes(state: AttributeState, buffer: inout ByteBuffer) throws -> NIOIMAP.ResponseStream {
+    fileprivate mutating func parseAtributes<ByteBufferType: ByteBufferProtocol>(state: AttributeState, buffer: inout ByteBufferType) throws -> NIOIMAP.ResponseStream {
         
         switch state {
         case .head:
@@ -123,7 +121,7 @@ extension NIOIMAP.ResponseParser {
         
     }
     
-    private mutating func parseSingleAttribute(buffer: inout ByteBuffer) throws -> NIOIMAP.ResponseStream {
+    private mutating func parseSingleAttribute<ByteBufferType: ByteBufferProtocol>(buffer: inout ByteBufferType) throws -> NIOIMAP.ResponseStream {
         let att = try NIOIMAP.GrammarParser.parseMessageAttribute_dynamicOrStatic(buffer: &buffer, tracker: .new)
         switch att {
         case .static(.bodySectionText(let optional, let size)):
@@ -151,7 +149,7 @@ extension NIOIMAP.ResponseParser {
     /// `ByteBuffer` will be emptied.
     /// - parameter buffer: The buffer from which bytes should be extracted.
     /// - returns: A new `ByteBuffer` containing extracted bytes.
-    fileprivate mutating func parseBytes(buffer: inout ByteBuffer, remaining: Int) -> NIOIMAP.ResponseStream {
+    fileprivate mutating func parseBytes<ByteBufferType: ByteBufferProtocol>(buffer: inout ByteBufferType, remaining: Int) -> NIOIMAP.ResponseStream {
         if remaining == 0 {
             return self.moveStateMachine(
                 expected: .attributeBytes(remaining),
@@ -159,19 +157,19 @@ extension NIOIMAP.ResponseParser {
                 returnValue: .streamingAttributeEnd
             )
         } else if buffer.readableBytes >= remaining {
-            let bytes = buffer.readSlice(length: remaining)!
+            var bytes = buffer.readSlice(length: remaining)!
             return self.moveStateMachine(
                 expected: .attributeBytes(remaining),
                 next: .attributeBytes(0),
-                returnValue: .streamingAttributeBytes(bytes)
+                returnValue: .streamingAttributeBytes(bytes.readBytes(length: bytes.readableBytes)!)
             )
         } else {
-            let bytes = buffer.readSlice(length: buffer.readableBytes)!
+            var bytes = buffer.readSlice(length: buffer.readableBytes)!
             let leftToRead = remaining - bytes.readableBytes
             return self.moveStateMachine(
                 expected: .attributeBytes(remaining),
                 next: .attributeBytes(leftToRead),
-                returnValue: .streamingAttributeBytes(bytes)
+                returnValue: .streamingAttributeBytes(bytes.readBytes(length: bytes.readableBytes)!)
             )
         }
     }

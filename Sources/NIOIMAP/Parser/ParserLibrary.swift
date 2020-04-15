@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import NIO
-
 enum ParserLibrary {}
 
 typealias SubParser<ByteBufferType: ByteBufferProtocol, T> = (inout ByteBufferType, StackTracker) throws -> T

@@ -12,15 +12,13 @@
 //
 //===----------------------------------------------------------------------===//
 
-import NIO
-
 protocol Parser {
     var bufferLimit: Int { get }
 }
 
 extension Parser {
     
-    func throwIfExceededBufferLimit(_ buffer: inout ByteBuffer) throws {
+    func throwIfExceededBufferLimit<ByteBufferType: ByteBufferProtocol>(_ buffer: inout ByteBufferType) throws {
         // try to find LF in the first `self.bufferLimit` bytes
         guard buffer.readableBytesView.prefix(self.bufferLimit).contains(UInt8(ascii: "\n")) else {
             // We're in line-parsing mode and there's no newline, let's buffer more. But let's do a quick check

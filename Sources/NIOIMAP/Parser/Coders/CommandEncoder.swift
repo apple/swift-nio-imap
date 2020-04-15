@@ -27,7 +27,7 @@ extension NIOIMAP {
         public func encode(data: CommandStream, out: inout ByteBuffer) throws {
             switch data {
             case .bytes(let buffer):
-                out = buffer
+                out = ByteBuffer(ByteBufferView(buffer))
             case .idleDone:
                 out.writeString("DONE\r\n")
             case .command(let command):

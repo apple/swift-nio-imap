@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import NIO
+import Darwin
 
 extension UInt8 {
     
@@ -135,4 +135,12 @@ extension UInt8 {
             return self.isTaggedLabelFchar
         }
     }
+}
+
+func isalnum(_ value: Int32) -> Int32 {
+    return Darwin.isalnum(value)
+}
+
+func isalpha(_ value: Int32) -> Int32 {
+    return Darwin.isalpha(value)
 }

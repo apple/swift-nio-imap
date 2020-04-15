@@ -155,7 +155,7 @@ extension ParserUnitTests {
                     firstMessageMetadata: .options(.flagList([], dateTime: nil, extensions: []), data: .init(byteCount: 10))
                 )))
             )
-            XCTAssertEqual(c2_2, .bytes("0123456789"))
+            XCTAssertEqual(c2_2, .bytes(Array("0123456789".utf8)))
             XCTAssertEqual(c3, .command(NIOIMAP.Command("3", .noop)))
         } catch {
             XCTFail("\(error)")
@@ -180,7 +180,7 @@ extension ParserUnitTests {
             (.responseBegin(.messageData(.fetch(1))), #line),
             (.attributesStart, #line),
             (.streamingAttributeBegin(.bodySectionText(nil, 3)), #line),
-            (.streamingAttributeBytes("abc"), #line),
+            (.streamingAttributeBytes(Array("abc".utf8)), #line),
             (.streamingAttributeEnd, #line),
             (.simpleAttribute(.dynamic([.seen, .answered])), #line),
             (.attributesFinish, #line),
@@ -188,13 +188,13 @@ extension ParserUnitTests {
             (.attributesStart, #line),
             (.simpleAttribute(.dynamic([.deleted])), #line),
             (.streamingAttributeBegin(.bodySectionText(nil, 3)), #line),
-            (.streamingAttributeBytes("def"), #line),
+            (.streamingAttributeBytes(Array("def".utf8)), #line),
             (.streamingAttributeEnd, #line),
             (.attributesFinish, #line),
             (.responseBegin(.messageData(.fetch(3))), #line),
             (.attributesStart, #line),
             (.streamingAttributeBegin(.bodySectionText(nil, 3)), #line),
-            (.streamingAttributeBytes("ghi"), #line),
+            (.streamingAttributeBytes(Array("ghi".utf8)), #line),
             (.streamingAttributeEnd, #line),
             (.attributesFinish, #line),
             (.responseEnd(.tagged(.tag("3", state: .ok(.code(nil, text: "Fetch completed."))))), #line),

@@ -19,7 +19,7 @@ extension NIOIMAP {
     public enum CommandStream: Equatable {
         case idleDone
         case command(Command)
-        case bytes(ByteBuffer)
+        case bytes([UInt8])
     }
 
 }
@@ -33,8 +33,7 @@ extension ByteBuffer {
         case .command(let command):
             return self.writeCommand(command)
         case .bytes(let bytes):
-            var copy = bytes
-            return self.writeBuffer(&copy)
+            return self.writeBytes(bytes)
         }
     }
 

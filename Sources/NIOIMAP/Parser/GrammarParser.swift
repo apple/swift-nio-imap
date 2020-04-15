@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import NIO
-
 extension NIOIMAP {
     
     public enum ParsingError: Error {

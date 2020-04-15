@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import NIO
-
 extension NIOIMAP {
 
     public struct CommandParser: Parser {
@@ -35,12 +33,12 @@ extension NIOIMAP {
         /// Parsing depends on the current mode of the parser.
         /// - parameter buffer: A `ByteBuffer` that will be consumed for parsing.
         /// - returns: A `CommandStream` that can be sent.
-        public mutating func parseCommandStream(buffer: inout ByteBuffer) throws -> NIOIMAP.CommandStream {
+        public mutating func parseCommandStream<ByteBufferType: ByteBufferProtocol>(buffer: inout ByteBufferType) throws -> NIOIMAP.CommandStream {
             switch self.mode {
             case .streamingAppend(let remaining):
-                let bytes = self.parseBytes(buffer: &buffer, remaining: remaining)
+                var bytes = self.parseBytes(buffer: &buffer, remaining: remaining)
                 try GrammarParser.parseCommandEnd(buffer: &buffer, tracker: .new)
-                return .bytes(bytes)
+                return .bytes(bytes.readBytes(length: bytes.readableBytes)!)
             case .idle:
                 try GrammarParser.parseIdleDone(buffer: &buffer, tracker: .new)
                 self.mode = .lines
@@ -70,7 +68,7 @@ extension NIOIMAP {
         /// `ByteBuffer` will be emptied.
         /// - parameter buffer: The buffer from which bytes should be extracted.
         /// - returns: A new `ByteBuffer` containing extracted bytes.
-        public mutating func parseBytes(buffer: inout ByteBuffer, remaining: Int) -> ByteBuffer {
+        public mutating func parseBytes<ByteBufferType: ByteBufferProtocol>(buffer: inout ByteBufferType, remaining: Int) -> ByteBufferType {
             if buffer.readableBytes >= remaining {
                 let bytes = buffer.readSlice(length: remaining)!
                 self.mode = .lines
@@ -89,7 +87,7 @@ extension NIOIMAP {
         /// Upon failure a `PublicParserError` will be thrown.
         /// - parameter buffer: The consumable buffer to parse.
         /// - returns: A `ClientCommand` if parsing was successful.
-        public mutating func parseCommand(buffer: inout ByteBuffer) throws -> NIOIMAP.Command {
+        public mutating func parseCommand<ByteBufferType: ByteBufferProtocol>(buffer: inout ByteBufferType) throws -> NIOIMAP.Command {
             try self.throwIfExceededBufferLimit(&buffer)
             do {
                 return try GrammarParser.parseCommand(buffer: &buffer, tracker: .new)
