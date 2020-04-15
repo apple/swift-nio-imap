@@ -21,7 +21,7 @@ extension NIOIMAP {
 // MARK: - Encoding
 extension ByteBuffer {
 
-    @discardableResult mutating func writePatterns(_ patterns: [ByteBuffer]) -> Int {
+    @discardableResult mutating func writePatterns(_ patterns: [String]) -> Int {
         self.writeArray(patterns) { (pattern, self) in
             self.writeIMAPString(pattern)
         }

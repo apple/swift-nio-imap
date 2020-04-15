@@ -25,9 +25,9 @@ extension ResponseConditionalStateTests {
 
     func testEncode() {
         let inputs: [(NIOIMAP.ResponseConditionalState, String, UInt)] = [
-            (NIOIMAP.ResponseConditionalState.bad(.code(.parse, text: "something")), "BAD [PARSE] something", #line),
-            (NIOIMAP.ResponseConditionalState.ok(.code(.alert, text: "error")), "OK [ALERT] error", #line),
-            (NIOIMAP.ResponseConditionalState.no(.code(.readOnly, text: "everything")), "NO [READ-ONLY] everything", #line)
+            (NIOIMAP.ResponseConditionalState.bad(.code(.parse, text: "something")), "BAD [PARSE] \"something\"", #line),
+            (NIOIMAP.ResponseConditionalState.ok(.code(.alert, text: "error")), "OK [ALERT] \"error\"", #line),
+            (NIOIMAP.ResponseConditionalState.no(.code(.readOnly, text: "everything")), "NO [READ-ONLY] \"everything\"", #line)
         ]
 
         for (test, expectedString, line) in inputs {

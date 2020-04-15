@@ -16,7 +16,11 @@ import NIO
 
 extension ByteBuffer: ByteBufferProtocol {
     
-    typealias EndiannessType = NIO.Endianness
+    public typealias EndiannessType = NIO.Endianness
+    
+    public func asString() -> String {
+        return String(buffer: self)
+    }
     
 }
 
@@ -28,11 +32,11 @@ extension ByteBufferView: ByteBufferProtocolView {
 
 extension Endianness: EndiannessProtocol {
     
-    static func bigEndian() -> Endianness {
+    public static func bigEndian() -> Endianness {
         return .big
     }
     
-    static func littleEndian() -> Endianness {
+    public static func littleEndian() -> Endianness {
         return .little
     }
     
@@ -66,9 +70,8 @@ extension ByteBuffer {
         }
     }
 
-    @discardableResult mutating func writeBase64(_ base64: ByteBuffer) -> Int {
-        var buffer = base64
-        return self.writeBuffer(&buffer)
+    @discardableResult mutating func writeBase64(_ base64: [UInt8]) -> Int {
+        return self.writeBytes(base64)
     }
 
     @discardableResult mutating func writeLiteral<T: Collection>(_ bytes: T) -> Int where T.Element == UInt8 {

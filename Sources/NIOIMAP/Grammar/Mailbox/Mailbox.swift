@@ -54,8 +54,7 @@ extension NIOIMAP.Mailbox: ExpressibleByStringLiteral {
 extension ByteBuffer {
     
     @discardableResult mutating func writeMailbox(_ mailbox: NIOIMAP.Mailbox) -> Int {
-        let buffer = ByteBuffer(ByteBufferView(mailbox.name.utf8))
-        return self.writeIMAPString(buffer)
+        self.writeIMAPString(mailbox.name)
     }
     
 }

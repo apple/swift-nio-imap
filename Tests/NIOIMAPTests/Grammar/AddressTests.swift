@@ -24,10 +24,10 @@ class AddressTests: EncodeTestClass {
 extension AddressTests {
     
     func testInit() {
-        let name: NIOIMAP.NString = TestUtilities.createTestByteBuffer(for: "a")
-        let adl: NIOIMAP.NString = TestUtilities.createTestByteBuffer(for: "b")
-        let mailbox: NIOIMAP.NString = TestUtilities.createTestByteBuffer(for: "c")
-        let host: NIOIMAP.NString = TestUtilities.createTestByteBuffer(for: "d")
+        let name: NIOIMAP.NString = "a"
+        let adl: NIOIMAP.NString = "b"
+        let mailbox: NIOIMAP.NString = "c"
+        let host: NIOIMAP.NString = "d"
         let address = NIOIMAP.Address(name: name, adl: adl, mailbox: mailbox, host: host)
         
         XCTAssertEqual(address.name, name)

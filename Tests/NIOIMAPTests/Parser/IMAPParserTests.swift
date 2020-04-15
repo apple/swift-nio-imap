@@ -475,14 +475,14 @@ extension ParserUnitTests {
     func testParseBase64Terminal_valid_short() {
         TestUtilities.withBuffer("abcd1234", terminator: " ") { (buffer) in
             let result = try NIOIMAP.GrammarParser.parseBase64(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(result, "abcd1234" )
+            XCTAssertEqual(result, Array("abcd1234".utf8))
         }
     }
 
     func testParseBase64Terminal_valid_short_terminal() {
         TestUtilities.withBuffer("abcd1234++==", terminator: " ") { (buffer) in
             let result = try NIOIMAP.GrammarParser.parseBase64(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(result, "abcd1234++==" )
+            XCTAssertEqual(result, Array("abcd1234++==".utf8))
         }
     }
 }
@@ -706,7 +706,7 @@ extension ParserUnitTests {
     func testParseContinueRequest() {
         let inputs: [(String, String, NIOIMAP.ContinueRequest, UInt)] = [
             ("+ OK\r\n", " ", .responseText(.code(nil, text: "OK")), #line),
-            ("+ abc=\r\n", " ", .base64("abc="), #line),
+            ("+ abc=\r\n", " ", .base64(Array("abc=".utf8)), #line),
         ]
         self.iterateTestInputs(inputs, testFunction: NIOIMAP.GrammarParser.parseContinueRequest)
     }

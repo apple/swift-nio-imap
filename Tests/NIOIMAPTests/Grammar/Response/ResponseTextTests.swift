@@ -25,8 +25,8 @@ extension ResponseTextTests {
     
     func testEncode() {
         let inputs: [(NIOIMAP.ResponseText, String, UInt)] = [
-            (.code(nil, text: "buffer"), "buffer", #line),
-            (.code(.alert, text: "buffer"), "[ALERT] buffer", #line)
+            (.code(nil, text: "buffer"), "\"buffer\"", #line),
+            (.code(.alert, text: "buffer"), "[ALERT] \"buffer\"", #line)
         ]
 
         for (code, expectedString, line) in inputs {

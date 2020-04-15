@@ -25,7 +25,7 @@ extension ResponseConditionalByeTests {
 
     func testEncode() {
         let inputs: [(NIOIMAP.ResponseText, String, UInt)] = [
-            (.code(.alert, text: "ERROR"), "BYE [ALERT] ERROR", #line)
+            (.code(.alert, text: "ERROR"), "BYE [ALERT] \"ERROR\"", #line)
         ]
 
         for (test, expectedString, line) in inputs {

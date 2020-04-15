@@ -23,7 +23,7 @@ extension NIOIMAP.Media {
         case message
         case video
         case font
-        case other(ByteBuffer)
+        case other(String)
     }
 
     /// IMAPv4 `media-basic`

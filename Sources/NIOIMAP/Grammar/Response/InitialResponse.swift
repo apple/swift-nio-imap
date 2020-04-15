@@ -19,7 +19,7 @@ extension NIOIMAP {
     /// IMAPv4 `initial-response`
     public enum InitialResponse: Equatable {
         case equals
-        case base64(ByteBuffer)
+        case base64([UInt8])
     }
 
 }
@@ -32,7 +32,7 @@ extension ByteBuffer {
         case .equals:
             return self.writeString("=")
         case .base64(let base64):
-            return self.writeBase64(base64)
+            return self.writeBytes(base64)
         }
     }
     

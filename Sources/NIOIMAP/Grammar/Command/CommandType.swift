@@ -26,13 +26,13 @@ extension NIOIMAP {
         case delete(Mailbox)
         case examine(Mailbox, [SelectParameter])
         case list(ListSelectOptions?, Mailbox, MailboxPatterns, [NIOIMAP.ReturnOption])
-        case lsub(Mailbox, ByteBuffer)
+        case lsub(Mailbox, String)
         case rename(from: Mailbox, to: Mailbox, params: [RenameParameter])
         case select(Mailbox, [SelectParameter])
         case status(Mailbox, [StatusAttribute])
         case subscribe(Mailbox)
         case unsubscribe(Mailbox)
-        case authenticate(String, InitialResponse?, [ByteBuffer])
+        case authenticate(String, InitialResponse?, [String])
         case login(String, String)
         case starttls
         case check
@@ -185,7 +185,7 @@ extension ByteBuffer {
         self.writeListReturnOptions(returnOptions)
     }
     
-    private mutating func writeCommandType_lsub(mailbox: NIOIMAP.Mailbox, listMailbox: ByteBuffer) -> Int {
+    private mutating func writeCommandType_lsub(mailbox: NIOIMAP.Mailbox, listMailbox: String) -> Int {
         self.writeString("LSUB ") +
         self.writeMailbox(mailbox) +
         self.writeSpace() +
@@ -228,15 +228,14 @@ extension ByteBuffer {
         self.writeMailbox(mailbox)
     }
     
-    private mutating func writeCommandType_authenticate(type: String, initial: NIOIMAP.InitialResponse?, data: [ByteBuffer]) -> Int {
+    private mutating func writeCommandType_authenticate(type: String, initial: NIOIMAP.InitialResponse?, data: [String]) -> Int {
         self.writeString("AUTHENTICATE \(type)") +
         self.writeIfExists(initial) { (initial) -> Int in
             self.writeSpace() +
             self.writeInitialResponse(initial)
         } +
         self.writeArray(data, separator: "", parenthesis: false) { (base64, self) -> Int in
-            var base64 = base64
-            return self.writeString("\r\n") + self.writeBuffer(&base64)
+            return self.writeString("\r\n") + self.writeString(base64)
         }
     }
     

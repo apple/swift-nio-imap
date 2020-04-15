@@ -24,7 +24,7 @@ class Patterns_Tests: EncodeTestClass {
 extension Patterns_Tests {
 
     func testEncode() {
-        let inputs: [([ByteBuffer], String, UInt)] = [
+        let inputs: [([String], String, UInt)] = [
             (["Mailbox1", "Mailbox2"], "(\"Mailbox1\" \"Mailbox2\")", #line)
         ]
 

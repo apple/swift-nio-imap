@@ -25,7 +25,7 @@ extension ResponseTaggedTests {
 
     func testEncode() {
         let inputs: [(NIOIMAP.ResponseTagged, String, UInt)] = [
-            (NIOIMAP.ResponseTagged(tag: "tag", state: .bad(.code(.parse, text: "something"))), "tag BAD [PARSE] something\r\n", #line)
+            (NIOIMAP.ResponseTagged(tag: "tag", state: .bad(.code(.parse, text: "something"))), "tag BAD [PARSE] \"something\"\r\n", #line)
         ]
 
         for (test, expectedString, line) in inputs {

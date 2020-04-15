@@ -23,7 +23,7 @@ extension NIOIMAP.Body {
         case binary
         case base64
         case quotedPrintable
-        case string(ByteBuffer)
+        case string(String)
     }
 
 }

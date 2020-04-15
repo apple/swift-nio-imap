@@ -19,7 +19,7 @@ extension NIOIMAP {
     /// IMAPv4 `continue-req`
     public enum ContinueRequest: Equatable {
         case responseText(ResponseText)
-        case base64(ByteBuffer)
+        case base64([UInt8])
     }
 
 }
@@ -34,7 +34,7 @@ extension ByteBuffer {
         case .responseText(let text):
             size += self.writeResponseText(text)
         case .base64(let base64):
-            size += self.writeBase64(base64)
+            size += self.writeBytes(base64)
         }
         size += self.writeString("\r\n")
         return size

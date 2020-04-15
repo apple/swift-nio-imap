@@ -18,7 +18,7 @@ extension NIOIMAP {
 
     /// IMAPv4 `option-val-comp`
     public enum OptionValueComp: Equatable {
-        case string(ByteBuffer)
+        case string(String)
         case array([OptionValueComp])
     }
 

@@ -25,8 +25,8 @@ extension ResponseDoneTests {
 
     func testEncode() {
         let inputs: [(NIOIMAP.ResponseDone, String, UInt)] = [
-            (.tagged(.tag("tag1", state: .bad(.code(.alert, text: "test1")))), "tag1 BAD [ALERT] test1\r\n", #line),
-            (.fatal(.code(.parse, text: "test2")), "* BYE [PARSE] test2\r\n", #line)
+            (.tagged(.tag("tag1", state: .bad(.code(.alert, text: "test1")))), "tag1 BAD [ALERT] \"test1\"\r\n", #line),
+            (.fatal(.code(.parse, text: "test2")), "* BYE [PARSE] \"test2\"\r\n", #line)
         ]
 
         for (test, expectedString, line) in inputs {

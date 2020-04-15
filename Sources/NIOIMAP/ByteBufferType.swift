@@ -12,21 +12,24 @@
 //
 //===----------------------------------------------------------------------===//
 
-protocol EndiannessProtocol {
+public protocol EndiannessProtocol {
     
     static func bigEndian() -> Self
     static func littleEndian() -> Self
     
 }
 
-protocol ByteBufferProtocol {
+public protocol ByteBufferProtocol {
     
     associatedtype EndiannessType: EndiannessProtocol
     associatedtype ReadableBytesViewType: ByteBufferProtocolView
     
+    var readableBytes: Int { get }
     var readerIndex: Int { get }
     var writerIndex: Int { get }
     var readableBytesView: ReadableBytesViewType { get }
+    
+    func asString() -> String
     
     func getInteger<T: FixedWidthInteger>(at index: Int, endianness: EndiannessType, as: T.Type) -> T?
     
@@ -36,9 +39,12 @@ protocol ByteBufferProtocol {
     
     mutating func readSlice(length: Int) -> Self?
     
+    mutating func readBytes(length: Int) -> [UInt8]?
+    
+    mutating func readInteger<T: FixedWidthInteger>(endianness: EndiannessType, as: T.Type) -> T?
 }
 
-protocol ByteBufferProtocolView: RandomAccessCollection where Self.Element == UInt8, Self.Index: FixedWidthInteger {
+public protocol ByteBufferProtocolView: RandomAccessCollection where Self.Element == UInt8, Self.Index: FixedWidthInteger {
     
     
     
