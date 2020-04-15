@@ -14,6 +14,7 @@
 
 import XCTest
 import NIO
+@testable import IMAPCore
 @testable import NIOIMAP
 
 class FlagKeyword_Tests: EncodeTestClass {
@@ -24,7 +25,7 @@ class FlagKeyword_Tests: EncodeTestClass {
 extension FlagKeyword_Tests {
 
     func testEncode() {
-        let inputs: [(NIOIMAP.Flag.Keyword, String, UInt)] = [
+        let inputs: [(IMAPCore.Flag.Keyword, String, UInt)] = [
             (.forwarded, "$Forwarded", #line),
             (.mdnSent, "$MDNSent", #line),
             (.other("keyword"), "keyword", #line),

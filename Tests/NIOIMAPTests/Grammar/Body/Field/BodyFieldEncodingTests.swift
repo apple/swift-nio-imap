@@ -14,6 +14,7 @@
 
 import XCTest
 import NIO
+@testable import IMAPCore
 @testable import NIOIMAP
 
 class BodyFieldEncodingTests: EncodeTestClass {
@@ -24,7 +25,7 @@ class BodyFieldEncodingTests: EncodeTestClass {
 extension BodyFieldEncodingTests {
 
     func testEncode() {
-        let inputs: [(NIOIMAP.Body.FieldEncoding, String, UInt)] = [
+        let inputs: [(IMAPCore.Body.FieldEncoding, String, UInt)] = [
             (.bit7, #""7BIT""#, #line),
             (.bit8, #""8BIT""#, #line),
             (.binary, #""BINARY""#, #line),

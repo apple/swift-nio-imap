@@ -14,6 +14,7 @@
 
 import XCTest
 import NIO
+@testable import IMAPCore
 @testable import NIOIMAP
 
 class TimezoneTests: EncodeTestClass {
@@ -25,9 +26,9 @@ extension TimezoneTests {
     
     // stupid test, but I want the test coverage
     func testTimezoneInit() {
-        let zone = NIOIMAP.Date.TimeZone(1000)
+        let zone = IMAPCore.Date.TimeZone(1000)
         XCTAssertNotNil(zone)
-        XCTAssertEqual(zone, NIOIMAP.Date.TimeZone(1000))
+        XCTAssertEqual(zone, IMAPCore.Date.TimeZone(1000))
     }
     
 }
@@ -37,21 +38,21 @@ extension TimezoneTests {
     
     func testPositive() {
         let expected = "+1000"
-        let size = self.testBuffer.writeTimezone(NIOIMAP.Date.TimeZone(1000)!)
+        let size = self.testBuffer.writeTimezone(IMAPCore.Date.TimeZone(1000)!)
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }
     
     func testNegative() {
         let expected = "-1000"
-        let size = self.testBuffer.writeTimezone(NIOIMAP.Date.TimeZone(-1000)!)
+        let size = self.testBuffer.writeTimezone(IMAPCore.Date.TimeZone(-1000)!)
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }
     
     func testTooShort() {
         let expected = "+0100"
-        let size = self.testBuffer.writeTimezone(NIOIMAP.Date.TimeZone(100)!)
+        let size = self.testBuffer.writeTimezone(IMAPCore.Date.TimeZone(100)!)
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }

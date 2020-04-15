@@ -14,6 +14,7 @@
 
 import XCTest
 import NIO
+@testable import IMAPCore
 @testable import NIOIMAP
 
 class SequenceNumberTests: EncodeTestClass {
@@ -24,7 +25,7 @@ class SequenceNumberTests: EncodeTestClass {
 extension SequenceNumberTests {
     
     func testIntegerLiteral() {
-        let num: NIOIMAP.SequenceNumber = 5
+        let num: IMAPCore.SequenceNumber = 5
         XCTAssertEqual(num, 5)
     }
     
@@ -34,10 +35,10 @@ extension SequenceNumberTests {
 extension SequenceNumberTests {
 
     func testComparable() {
-        XCTAssertFalse(NIOIMAP.SequenceNumber.last < .last)
-        XCTAssertFalse(NIOIMAP.SequenceNumber.last < 999)
-        XCTAssertTrue(999 < NIOIMAP.SequenceNumber.last)
-        XCTAssertTrue(NIOIMAP.SequenceNumber.number(1) < 999) // use .number to force type
+        XCTAssertFalse(IMAPCore.SequenceNumber.last < .last)
+        XCTAssertFalse(IMAPCore.SequenceNumber.last < 999)
+        XCTAssertTrue(999 < IMAPCore.SequenceNumber.last)
+        XCTAssertTrue(IMAPCore.SequenceNumber.number(1) < 999) // use .number to force type
     }
     
 }

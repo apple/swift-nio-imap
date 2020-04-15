@@ -14,6 +14,7 @@
 
 import XCTest
 import NIO
+@testable import IMAPCore
 @testable import NIOIMAP
 
 class OptionVendorTag_Tests: EncodeTestClass {
@@ -24,7 +25,7 @@ class OptionVendorTag_Tests: EncodeTestClass {
 extension OptionVendorTag_Tests {
 
     func testEncode() {
-        let inputs: [(NIOIMAP.OptionVendorTag, String, UInt)] = [
+        let inputs: [(IMAPCore.OptionVendorTag, String, UInt)] = [
             (.token("some", atom: "thing"), "some-thing", #line),
         ]
 

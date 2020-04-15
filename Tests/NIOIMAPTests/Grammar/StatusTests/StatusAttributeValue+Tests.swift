@@ -14,6 +14,7 @@
 
 import XCTest
 import NIO
+@testable import IMAPCore
 @testable import NIOIMAP
 
 class StatusAttributeValue_Tests: EncodeTestClass {
@@ -24,7 +25,7 @@ class StatusAttributeValue_Tests: EncodeTestClass {
 extension StatusAttributeValue_Tests {
 
     func testEncode_statusOption() {
-        let inputs: [([NIOIMAP.StatusAttribute], String, UInt)] = [
+        let inputs: [([IMAPCore.StatusAttribute], String, UInt)] = [
             ([.messages], "STATUS (MESSAGES)", #line),
             ([.messages, .size, .recent], "STATUS (MESSAGES SIZE RECENT)", #line)
         ]
@@ -38,7 +39,7 @@ extension StatusAttributeValue_Tests {
     }
 
     func testEncode_statusAttributeValue() {
-        let inputs: [(NIOIMAP.StatusAttributeValue, String, UInt)] = [
+        let inputs: [(IMAPCore.StatusAttributeValue, String, UInt)] = [
             (.messages(12), "MESSAGES 12", #line),
             (.uidNext(23), "UIDNEXT 23", #line),
             (.uidValidity(34), "UIDVALIDITY 34", #line),
@@ -57,7 +58,7 @@ extension StatusAttributeValue_Tests {
     }
 
     func testEncode_statusAttributeList() {
-        let inputs: [([NIOIMAP.StatusAttributeValue], String, UInt)] = [
+        let inputs: [([IMAPCore.StatusAttributeValue], String, UInt)] = [
             ([.messages(12)], "MESSAGES 12", #line),
             ([.messages(12), .deleted(34)], "MESSAGES 12 DELETED 34", #line),
             ([.messages(12), .deleted(34), .size(56)], "MESSAGES 12 DELETED 34 SIZE 56", #line),

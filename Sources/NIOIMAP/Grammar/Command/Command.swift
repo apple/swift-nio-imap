@@ -13,10 +13,11 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import IMAPCore
 
 extension ByteBuffer {
 
-    @discardableResult public mutating func writeCommand(_ command: NIOIMAP.Command) -> Int {
+    @discardableResult public mutating func writeCommand(_ command: IMAPCore.Command) -> Int {
         var size = 0
         size += self.writeString("\(command.tag) ")
         size += self.writeCommandType(command.type)

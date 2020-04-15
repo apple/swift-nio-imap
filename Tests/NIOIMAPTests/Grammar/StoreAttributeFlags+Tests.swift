@@ -14,6 +14,7 @@
 
 import XCTest
 import NIO
+@testable import IMAPCore
 @testable import NIOIMAP
 
 class StoreAttributeFlags_Tests: EncodeTestClass {
@@ -24,7 +25,7 @@ class StoreAttributeFlags_Tests: EncodeTestClass {
 extension StoreAttributeFlags_Tests {
 
     func testEncode() {
-        let inputs: [(NIOIMAP.StoreAttributeFlags, String, UInt)] = [
+        let inputs: [(IMAPCore.StoreAttributeFlags, String, UInt)] = [
             (.add(silent: true, list: [.answered]), "+FLAGS.SILENT (\\Answered)", #line),
             (.add(silent: false, list: [.draft]), "+FLAGS (\\Draft)", #line),
             (.remove(silent: true, list: [.deleted]), "-FLAGS.SILENT (\\Deleted)", #line),

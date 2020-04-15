@@ -13,11 +13,12 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import IMAPCore
 
 // MARK: - Encoding
 extension ByteBuffer {
 
-    @discardableResult mutating func writeESearchResponse(_ response: NIOIMAP.ESearchResponse) -> Int {
+    @discardableResult mutating func writeESearchResponse(_ response: IMAPCore.ESearchResponse) -> Int {
         self.writeString("ESEARCH") +
         self.writeIfExists(response.correlator) { (correlator) -> Int in
             self.writeSearchCorrelator(correlator)

@@ -13,11 +13,12 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import IMAPCore
 
 // MARK: - Encoding
 extension ByteBuffer {
     
-    @discardableResult mutating func writeModifierSequenceValue(_ value: NIOIMAP.ModifierSequenceValue) -> Int {
+    @discardableResult mutating func writeModifierSequenceValue(_ value: IMAPCore.ModifierSequenceValue) -> Int {
         self.writeString("\(value.value)")
     }
     

@@ -13,17 +13,18 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import IMAPCore
 
 // MARK: - Encoding
 extension ByteBuffer {
     
-    @discardableResult mutating func writeFlags(_ flags: [NIOIMAP.Flag]) -> Int {
+    @discardableResult mutating func writeFlags(_ flags: [IMAPCore.Flag]) -> Int {
         self.writeArray(flags) { (flag, self) -> Int in
             self.writeFlag(flag)
         }
     }
     
-    @discardableResult mutating func writeFlag(_ flag: NIOIMAP.Flag) -> Int {
+    @discardableResult mutating func writeFlag(_ flag: IMAPCore.Flag) -> Int {
         switch flag {
         case .answered:
             return self.writeString("\\Answered")

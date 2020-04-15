@@ -13,11 +13,12 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import IMAPCore
 
 // MARK: - Encoding
 extension ByteBuffer {
 
-    @discardableResult mutating func writeMailboxList(_ list: NIOIMAP.Mailbox.List) -> Int {
+    @discardableResult mutating func writeMailboxList(_ list: IMAPCore.Mailbox.List) -> Int {
         self.writeString("(") +
         self.writeIfExists(list.flags) { (flags) -> Int in
             self.writeMailboxListFlags(flags)

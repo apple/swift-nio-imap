@@ -15,6 +15,7 @@
 import XCTest
 import NIO
 import NIOTestUtils
+@testable import IMAPCore
 @testable import NIOIMAP
 
 class ResponseDecoder_Tests: EncodeTestClass {
@@ -25,7 +26,7 @@ extension ResponseDecoder_Tests {
     
     func testNormalUsage() throws {
         
-        let inoutPairs: [(String, [NIOIMAP.ResponseStream])] = [
+        let inoutPairs: [(String, [IMAPCore.ResponseStream])] = [
             (
                 "1 OK Login\r\n",
                 [
@@ -63,7 +64,7 @@ extension ResponseDecoder_Tests {
                 }
             )
         } catch {
-            switch error as? ByteToMessageDecoderVerifier.VerificationError<NIOIMAP.ResponseStream> {
+            switch error as? ByteToMessageDecoderVerifier.VerificationError<IMAPCore.ResponseStream> {
             case .some(let error):
                 for input in error.inputs {
                     print(" input: \(String(decoding: input.readableBytesView, as: Unicode.UTF8.self))")

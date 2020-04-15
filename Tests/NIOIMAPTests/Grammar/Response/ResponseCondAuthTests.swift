@@ -14,6 +14,7 @@
 
 import XCTest
 import NIO
+@testable import IMAPCore
 @testable import NIOIMAP
 
 class ResponseConditionalAuthTests: EncodeTestClass {
@@ -24,9 +25,9 @@ class ResponseConditionalAuthTests: EncodeTestClass {
 extension ResponseConditionalAuthTests {
 
     func testEncode() {
-        let inputs: [(NIOIMAP.ResponseConditionalAuth, String, UInt)] = [
-            (NIOIMAP.ResponseConditionalAuth.ok(.code(nil, text: "hello")), "OK \"hello\"", #line),
-            (NIOIMAP.ResponseConditionalAuth.preauth(.code(nil, text: "goodbye")), "PREAUTH \"goodbye\"", #line)
+        let inputs: [(IMAPCore.ResponseConditionalAuth, String, UInt)] = [
+            (IMAPCore.ResponseConditionalAuth.ok(.code(nil, text: "hello")), "OK \"hello\"", #line),
+            (IMAPCore.ResponseConditionalAuth.preauth(.code(nil, text: "goodbye")), "PREAUTH \"goodbye\"", #line)
         ]
 
         for (test, expectedString, line) in inputs {

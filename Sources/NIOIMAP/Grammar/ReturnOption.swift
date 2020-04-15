@@ -13,11 +13,12 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import IMAPCore
 
 // MARK: - Encoding
 extension ByteBuffer {
 
-    @discardableResult mutating func writeReturnOption(_ option: NIOIMAP.ReturnOption) -> Int {
+    @discardableResult mutating func writeReturnOption(_ option: IMAPCore.ReturnOption) -> Int {
         switch option {
         case .subscribed:
             return self.writeString("SUBSCRIBED")

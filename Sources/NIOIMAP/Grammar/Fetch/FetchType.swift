@@ -13,11 +13,12 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import IMAPCore
 
 // MARK: - Encoding
 extension ByteBuffer {
     
-    @discardableResult mutating func writeFetchType(_ type: NIOIMAP.FetchType) -> Int {
+    @discardableResult mutating func writeFetchType(_ type: IMAPCore.FetchType) -> Int {
         switch type {
         case .all:
             return self.writeString("ALL")

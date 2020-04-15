@@ -16,6 +16,7 @@ import XCTest
 import NIO
 import Logging
 import NIOIMAP
+import IMAPCore
 @testable import CLILib
 
 class CommandRoundtripHandler_PromiseTests: XCTestCase {
@@ -34,7 +35,7 @@ class CommandRoundtripHandler_PromiseTests: XCTestCase {
     func testPromiseIsNotDropped_shouldThrow() {
         let buffer = channel.allocator.buffer(capacity: 0)
         XCTAssertThrowsError(try self.channel.writeOutbound(buffer)) { e in
-            XCTAssertTrue(e is NIOIMAP.ParsingError, "Error \(e)")
+            XCTAssertTrue(e is IMAPCore.ParsingError, "Error \(e)")
         }
         XCTAssertNoThrow(XCTAssertNil(try self.channel.readOutbound(as: ByteBuffer.self)))
     }

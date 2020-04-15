@@ -13,11 +13,12 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import IMAPCore
 
 // MARK: - Encoding
 extension ByteBuffer {
     
-    @discardableResult mutating func writeRFC822(_ rfc822: NIOIMAP.RFC822) -> Int {
+    @discardableResult mutating func writeRFC822(_ rfc822: IMAPCore.RFC822) -> Int {
         self.writeString(".\(rfc822.rawValue.uppercased())")
     }
     

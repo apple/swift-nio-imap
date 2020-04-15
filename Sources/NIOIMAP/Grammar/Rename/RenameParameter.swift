@@ -13,11 +13,12 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import IMAPCore
 
 // MARK: - Encoding
 extension ByteBuffer {
     
-    @discardableResult mutating func writeRenameParameters(_ params: [NIOIMAP.RenameParameter]) -> Int {
+    @discardableResult mutating func writeRenameParameters(_ params: [IMAPCore.RenameParameter]) -> Int {
         guard params.count > 0 else {
             return 0
         }
@@ -28,7 +29,7 @@ extension ByteBuffer {
             }
     }
     
-    @discardableResult mutating func writeRenameParameter(_ param: NIOIMAP.RenameParameter) -> Int {
+    @discardableResult mutating func writeRenameParameter(_ param: IMAPCore.RenameParameter) -> Int {
         self.writeRenameParameterName(param.name) +
         self.writeIfExists(param.value) { (value) -> Int in
             self.writeSpace() +

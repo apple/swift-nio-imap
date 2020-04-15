@@ -14,6 +14,7 @@
 
 import XCTest
 import NIO
+@testable import IMAPCore
 @testable import NIOIMAP
 
 class EnvelopeTests: EncodeTestClass {
@@ -24,9 +25,9 @@ class EnvelopeTests: EncodeTestClass {
 extension EnvelopeTests {
 
     func testEncode() {
-        let inputs: [(NIOIMAP.Envelope, String, UInt)] = [
+        let inputs: [(IMAPCore.Envelope, String, UInt)] = [
             (
-                NIOIMAP.Envelope(
+                IMAPCore.Envelope(
                     date: "01-02-03",
                     subject: nil,
                     from: [],
@@ -42,7 +43,7 @@ extension EnvelopeTests {
                 #line
             ),
             (
-                NIOIMAP.Envelope(
+                IMAPCore.Envelope(
                     date: "01-02-03",
                     subject: "subject",
                     from: [.name("name1", adl: "adl1", mailbox: "mailbox1", host: "host1")],

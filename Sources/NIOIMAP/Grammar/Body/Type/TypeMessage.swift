@@ -13,11 +13,12 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import IMAPCore
 
 // MARK: - Encoding
 extension ByteBuffer {
 
-    @discardableResult mutating func writeBodyTypeMessage(_ message: NIOIMAP.Body.TypeMessage) -> Int {
+    @discardableResult mutating func writeBodyTypeMessage(_ message: IMAPCore.Body.TypeMessage) -> Int {
         self.writeMediaMessage(message.message) +
         self.writeSpace() +
         self.writeBodyFields(message.fields) +

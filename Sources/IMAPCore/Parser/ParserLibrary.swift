@@ -30,15 +30,15 @@ public struct ParserError: Error {
 
 public struct TooDeep: Error {}
 
-struct StackTracker {
+public struct StackTracker {
     private var stackDepth = 0
     private let maximumStackDepth: Int
     
-    static var new: StackTracker {
+    public static var new: StackTracker {
         return StackTracker(maximumParserStackDepth: 100)
     }
 
-    init(maximumParserStackDepth: Int) {
+    public init(maximumParserStackDepth: Int) {
         self.maximumStackDepth = maximumParserStackDepth
     }
 

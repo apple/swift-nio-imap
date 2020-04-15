@@ -13,11 +13,12 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import IMAPCore
 
 // MARK: - Encoding
 extension ByteBuffer {
     
-    @discardableResult mutating func writeSelectParameters(_ params: [NIOIMAP.SelectParameter]) -> Int {
+    @discardableResult mutating func writeSelectParameters(_ params: [IMAPCore.SelectParameter]) -> Int {
         guard params.count > 0 else {
             return 0
         }
@@ -29,7 +30,7 @@ extension ByteBuffer {
             }
     }
     
-    @discardableResult mutating func writeSelectParameter(_ param: NIOIMAP.SelectParameter) -> Int {
+    @discardableResult mutating func writeSelectParameter(_ param: IMAPCore.SelectParameter) -> Int {
         self.writeSelectParameterName(param.name) +
         self.writeIfExists(param.value) { (value) -> Int in
             self.writeSpace() +

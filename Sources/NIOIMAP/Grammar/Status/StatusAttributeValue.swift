@@ -13,24 +13,25 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import IMAPCore
 
 // MARK: - Encoding
 extension ByteBuffer {
 
-    @discardableResult mutating func writeStatusOption(_ option: [NIOIMAP.StatusAttribute]) -> Int {
+    @discardableResult mutating func writeStatusOption(_ option: [IMAPCore.StatusAttribute]) -> Int {
         self.writeString("STATUS ") +
         self.writeArray(option) { (att, self) in
             self.writeStatusAttribute(att)
         }
     }
 
-    @discardableResult mutating func writeStatusAttributeList(_ list: [NIOIMAP.StatusAttributeValue]) -> Int {
+    @discardableResult mutating func writeStatusAttributeList(_ list: [IMAPCore.StatusAttributeValue]) -> Int {
         self.writeArray(list, parenthesis: false) { (val, self) in
             self.writeStatusAttributeValue(val)
         }
     }
 
-    @discardableResult mutating func writeStatusAttributeValue(_ val: NIOIMAP.StatusAttributeValue) -> Int {
+    @discardableResult mutating func writeStatusAttributeValue(_ val: IMAPCore.StatusAttributeValue) -> Int {
         switch val {
         case .messages(let num):
             return self.writeString("MESSAGES \(num)")

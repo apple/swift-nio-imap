@@ -29,15 +29,15 @@ let package = Package(
         ),
         .target(
             name: "CLILib",
-            dependencies: ["NIO", "NIOSSL", "NIOIMAP", "Logging"]
+            dependencies: ["NIO", "NIOSSL", "NIOIMAP", "IMAPCore", "Logging"]
         ),
         .target(
             name: "Proxy",
-            dependencies: ["NIOIMAP", "NIO", "NIOSSL"]
+            dependencies: ["NIOIMAP", "IMAPCore", "NIO", "NIOSSL"]
         ),
         .testTarget(
             name: "NIOIMAPTests",
-            dependencies: ["NIOIMAP", "NIO", "NIOTestUtils"]
+            dependencies: ["NIOIMAP", "IMAPCore", "NIO", "NIOTestUtils"]
         ),
         .testTarget(
             name: "CLILibTests",

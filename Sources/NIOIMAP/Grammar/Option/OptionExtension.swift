@@ -13,11 +13,12 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import IMAPCore
 
 // MARK: - Encoding
 extension ByteBuffer {
 
-    @discardableResult mutating func writeOptionExtension(_ option: NIOIMAP.OptionExtension) -> Int {
+    @discardableResult mutating func writeOptionExtension(_ option: IMAPCore.OptionExtension) -> Int {
         var size = 0
         switch option.type {
         case .standard(let atom):

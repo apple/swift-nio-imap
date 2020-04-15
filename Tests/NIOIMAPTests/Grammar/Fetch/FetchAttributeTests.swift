@@ -14,6 +14,7 @@
 
 import XCTest
 import NIO
+@testable import IMAPCore
 @testable import NIOIMAP
 
 class FetchAttributeTests: EncodeTestClass {
@@ -25,7 +26,7 @@ extension FetchAttributeTests {
     
     func testEncode() {
         
-        let inputs: [(NIOIMAP.FetchAttribute, String, UInt)] = [
+        let inputs: [(IMAPCore.FetchAttribute, String, UInt)] = [
             (.envelope, "ENVELOPE", #line),
             (.flags, "FLAGS", #line),
             (.uid, "UID", #line),

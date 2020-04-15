@@ -14,6 +14,7 @@
 
 import XCTest
 import NIO
+@testable import IMAPCore
 @testable import NIOIMAP
 
 class ChildMailboxFlag_Tests: EncodeTestClass {
@@ -24,7 +25,7 @@ class ChildMailboxFlag_Tests: EncodeTestClass {
 extension ChildMailboxFlag_Tests {
 
     func testEncode() {
-        let inputs: [(NIOIMAP.ChildMailboxFlag, String, UInt)] = [
+        let inputs: [(IMAPCore.ChildMailboxFlag, String, UInt)] = [
             (.HasChildren, #"\HasChildren"#, #line),
             (.HasNoChildren, #"\HasNoChildren"#, #line)
         ]

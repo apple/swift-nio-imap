@@ -14,6 +14,7 @@
 
 import XCTest
 import NIO
+@testable import IMAPCore
 @testable import NIOIMAP
 
 class StatusAttributeTests: EncodeTestClass {
@@ -32,7 +33,7 @@ extension StatusAttributeTests {
     
     func testStatusAttribute_ImapEncodedFull() {
         let expected = "MESSAGES RECENT UNSEEN"
-        let size = self.testBuffer.writeStatusAttributes([NIOIMAP.StatusAttribute.messages, .recent, .unseen])
+        let size = self.testBuffer.writeStatusAttributes([IMAPCore.StatusAttribute.messages, .recent, .unseen])
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }

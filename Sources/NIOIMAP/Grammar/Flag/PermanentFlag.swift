@@ -13,11 +13,12 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import IMAPCore
 
 // MARK: - Encoding
 extension ByteBuffer {
 
-    @discardableResult mutating func writeFlagPerm(_ flagPerm: NIOIMAP.PermanentFlag) -> Int {
+    @discardableResult mutating func writeFlagPerm(_ flagPerm: IMAPCore.PermanentFlag) -> Int {
         switch flagPerm {
         case .flag(let flag):
             return self.writeFlag(flag)
@@ -26,7 +27,7 @@ extension ByteBuffer {
         }
     }
     
-    @discardableResult mutating func writePermanentFlags(_ flags: [NIOIMAP.PermanentFlag]) -> Int {
+    @discardableResult mutating func writePermanentFlags(_ flags: [IMAPCore.PermanentFlag]) -> Int {
         return self.writeArray(flags) { (element, self) in
             self.writeFlagPerm(element)
         }

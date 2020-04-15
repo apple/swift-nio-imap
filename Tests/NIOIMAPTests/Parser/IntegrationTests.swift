@@ -14,19 +14,19 @@
 
 import NIO
 import NIOTestUtils
-import NIOIMAP
-
 import XCTest
+@testable import NIOIMAP
+@testable import IMAPCore
 
 final class ParserIntegrationTests: XCTestCase {
     func testItWorksWithAnActualConnection() {
         class CollectEverythingHandler: ChannelInboundHandler {
-            typealias InboundIn = NIOIMAP.CommandStream
+            typealias InboundIn = IMAPCore.CommandStream
 
-            var allCommands: [NIOIMAP.CommandStream] = []
-            let collectionDonePromise: EventLoopPromise<[NIOIMAP.CommandStream]>
+            var allCommands: [IMAPCore.CommandStream] = []
+            let collectionDonePromise: EventLoopPromise<[IMAPCore.CommandStream]>
 
-            init(collectionDonePromise: EventLoopPromise<[NIOIMAP.CommandStream]>) {
+            init(collectionDonePromise: EventLoopPromise<[IMAPCore.CommandStream]>) {
                 self.collectionDonePromise = collectionDonePromise
             }
 
@@ -55,7 +55,7 @@ final class ParserIntegrationTests: XCTestCase {
             XCTAssertNoThrow(try group.syncShutdownGracefully())
         }
 
-        let collectionDonePromise = group.next().makePromise(of: [NIOIMAP.CommandStream].self)
+        let collectionDonePromise = group.next().makePromise(of: [IMAPCore.CommandStream].self)
         var server: Channel?
         XCTAssertNoThrow(server = try ServerBootstrap(group: group)
             .serverChannelOption(ChannelOptions.socket(.init(SOL_SOCKET), .init(SO_REUSEADDR)), value: 1)
@@ -85,7 +85,7 @@ final class ParserIntegrationTests: XCTestCase {
         XCTAssertNoThrow(try client?.writeAndFlush("tag NOOP\r\n" as ByteBuffer).wait())
         XCTAssertNoThrow(try client?.close().wait())
 
-        let expected: [NIOIMAP.CommandStream] = [
+        let expected: [IMAPCore.CommandStream] = [
             .command(.init("tag", .login("1", "2"))),
             .command(.init("tag", .noop))
         ]

@@ -14,6 +14,7 @@
 
 import XCTest
 import NIO
+@testable import IMAPCore
 @testable import NIOIMAP
 
 class SearchReturnDataExtension_Tests: EncodeTestClass {
@@ -24,7 +25,7 @@ class SearchReturnDataExtension_Tests: EncodeTestClass {
 extension SearchReturnDataExtension_Tests {
 
     func testEncode() {
-        let inputs: [(NIOIMAP.SearchReturnDataExtension, String, UInt)] = [
+        let inputs: [(IMAPCore.SearchReturnDataExtension, String, UInt)] = [
             (.modifier("modifier", returnValue: .simple(.number(123))), "modifier 123", #line),
         ]
 

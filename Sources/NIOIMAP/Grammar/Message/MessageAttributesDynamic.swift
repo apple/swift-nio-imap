@@ -13,11 +13,12 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import IMAPCore
 
 // MARK: - Encoding
 extension ByteBuffer {
 
-    @discardableResult mutating func writeMessageAttributeDynamic(_ atts: [NIOIMAP.Flag]) -> Int {
+    @discardableResult mutating func writeMessageAttributeDynamic(_ atts: [IMAPCore.Flag]) -> Int {
         self.writeString("FLAGS ") +
         self.writeArray(atts) { (element, self) in
             self.writeFlag(element)

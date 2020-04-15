@@ -14,6 +14,7 @@
 
 import XCTest
 import NIO
+@testable import IMAPCore
 @testable import NIOIMAP
 
 class CommandType_Tests: EncodeTestClass {
@@ -24,7 +25,7 @@ class CommandType_Tests: EncodeTestClass {
 extension CommandType_Tests {
 
     func testEncode() {
-        let inputs: [(NIOIMAP.CommandType, String, UInt)] = [
+        let inputs: [(IMAPCore.CommandType, String, UInt)] = [
             (.list(nil, "", .mailbox(""), []), "LIST \"\" \"\" RETURN ()", #line),
             (.namespace, "NAMESPACE", #line)
         ]

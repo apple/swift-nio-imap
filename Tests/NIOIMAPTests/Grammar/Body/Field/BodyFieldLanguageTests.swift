@@ -14,6 +14,7 @@
 
 import XCTest
 import NIO
+@testable import IMAPCore
 @testable import NIOIMAP
 
 class BodyFieldLanguageTests: EncodeTestClass {
@@ -24,7 +25,7 @@ class BodyFieldLanguageTests: EncodeTestClass {
 extension BodyFieldLanguageTests {
 
     func testEncode() {
-        let inputs: [(NIOIMAP.Body.FieldLanguage, String, UInt)] = [
+        let inputs: [(IMAPCore.Body.FieldLanguage, String, UInt)] = [
             (.single(nil), "NIL", #line),
             (.single("some"), "\"some\"", #line),
             (.multiple(["some1"]), "(\"some1\")", #line),

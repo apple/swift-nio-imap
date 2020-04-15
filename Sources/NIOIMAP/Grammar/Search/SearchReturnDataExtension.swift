@@ -13,11 +13,12 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import IMAPCore
 
 // MARK: - Encoding
 extension ByteBuffer {
 
-    @discardableResult mutating func writeSearchReturnDataExtension(_ data: NIOIMAP.SearchReturnDataExtension) -> Int {
+    @discardableResult mutating func writeSearchReturnDataExtension(_ data: IMAPCore.SearchReturnDataExtension) -> Int {
         self.writeTaggedExtensionLabel(data.modifier) +
         self.writeSpace() +
         self.writeTaggedExtensionValue(data.returnValue)

@@ -18,7 +18,7 @@ extension IMAPCore {
 
     public enum ConditionalStore {
         
-        static let param = "CONDSTORE"
+        public static let param = "CONDSTORE"
         
     }
     

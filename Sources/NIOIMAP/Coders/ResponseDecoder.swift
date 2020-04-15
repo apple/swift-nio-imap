@@ -13,17 +13,18 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import IMAPCore
 
 extension NIOIMAP {
     
     public struct ResponseDecoder: ByteToMessageDecoder {
 
-        public typealias InboundOut = ResponseStream
+        public typealias InboundOut = IMAPCore.ResponseStream
 
-        var parser: ResponseParser
+        var parser: IMAPCore.ResponseParser
 
         public init(bufferLimit: Int = 1_000) {
-            self.parser = ResponseParser(bufferLimit: bufferLimit)
+            self.parser = IMAPCore.ResponseParser(bufferLimit: bufferLimit)
         }
 
         public mutating func decode(context: ChannelHandlerContext, buffer: inout ByteBuffer) throws -> DecodingState {
@@ -32,7 +33,7 @@ extension NIOIMAP {
                 let result = try self.parser.parseResponseStream(buffer: &buffer)
                 context.fireChannelRead(self.wrapInboundOut(result))
                 return .continue
-            } catch NIOIMAP.ParsingError.incompleteMessage {
+            } catch IMAPCore.ParsingError.incompleteMessage {
                 return .needMoreData
             } catch {
                 throw IMAPDecoderError(parserError: error, buffer: save)

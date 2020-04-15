@@ -14,6 +14,7 @@
 
 import XCTest
 import NIO
+@testable import IMAPCore
 @testable import NIOIMAP
 
 class SearchReturnData_Tests: EncodeTestClass {
@@ -24,7 +25,7 @@ class SearchReturnData_Tests: EncodeTestClass {
 extension SearchReturnData_Tests {
 
     func testEncode() {
-        let inputs: [(NIOIMAP.SearchReturnData, String, UInt)] = [
+        let inputs: [(IMAPCore.SearchReturnData, String, UInt)] = [
             (.min(1), "MIN 1", #line),
             (.max(1), "MAX 1", #line),
             (.all([1...3]), "ALL 1:3", #line),

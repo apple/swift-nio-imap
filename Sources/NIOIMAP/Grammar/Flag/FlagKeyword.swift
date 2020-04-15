@@ -13,11 +13,12 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import IMAPCore
 
 // MARK: - Encoding
 extension ByteBuffer {
 
-    @discardableResult mutating func writeFlagKeyword(_ keyword: NIOIMAP.Flag.Keyword) -> Int {
+    @discardableResult mutating func writeFlagKeyword(_ keyword: IMAPCore.Flag.Keyword) -> Int {
         switch keyword {
         case .forwarded:
             return self.writeString("$Forwarded")

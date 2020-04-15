@@ -13,11 +13,12 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import IMAPCore
 
 // MARK: - Encoding
 extension ByteBuffer {
     
-    @discardableResult mutating func writeFetchModifiers(_ array: [NIOIMAP.FetchModifier]) -> Int {
+    @discardableResult mutating func writeFetchModifiers(_ array: [IMAPCore.FetchModifier]) -> Int {
         guard array.count > 0 else {
             return 0
         }
@@ -29,7 +30,7 @@ extension ByteBuffer {
             }
     }
     
-    @discardableResult mutating func writeFetchModifier(_ param: NIOIMAP.FetchModifier) -> Int {
+    @discardableResult mutating func writeFetchModifier(_ param: IMAPCore.FetchModifier) -> Int {
         self.writeFetchModifierName(param.name) +
         self.writeIfExists(param.value) { (value) -> Int in
             self.writeSpace() +

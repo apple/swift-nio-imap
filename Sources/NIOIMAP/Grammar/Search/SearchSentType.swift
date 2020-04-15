@@ -13,11 +13,12 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import IMAPCore
 
 // MARK: - Encoding
 extension ByteBuffer {
     
-    @discardableResult mutating func writeSearchSentType(_ type: NIOIMAP.SearchSentType) -> Int {
+    @discardableResult mutating func writeSearchSentType(_ type: IMAPCore.SearchSentType) -> Int {
         switch type {
         case .before(let date):
             return

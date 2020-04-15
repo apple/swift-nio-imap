@@ -13,12 +13,13 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import IMAPCore
 
 // MARK: - Encoding
 extension ByteBuffer {
     
     @discardableResult mutating func writeNamespaceCommand() -> Int {
-        self.writeString(NIOIMAP.NamespaceCommand)
+        self.writeString(IMAPCore.NamespaceCommand)
     }
 
 }

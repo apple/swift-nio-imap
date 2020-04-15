@@ -13,12 +13,13 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import IMAPCore
 
 // MARK: - Encoding
 extension ByteBuffer {
     
     @discardableResult mutating func writeConditionalStoreParameter() -> Int {
-        self.writeString(NIOIMAP.ConditionalStore.param)
+        self.writeString(IMAPCore.ConditionalStore.param)
     }
     
 }

@@ -14,6 +14,7 @@
 
 import XCTest
 import NIO
+@testable import IMAPCore
 @testable import NIOIMAP
 
 class MailboxListTests: EncodeTestClass {
@@ -24,9 +25,9 @@ class MailboxListTests: EncodeTestClass {
 extension MailboxListTests {
 
     func testEncode() {
-        let inputs: [(NIOIMAP.Mailbox.List, String, UInt)] = [
-            (NIOIMAP.Mailbox.List(flags: nil, char: nil, mailbox: .inbox, listExtended: []), "() \"INBOX\"", #line),
-            (NIOIMAP.Mailbox.List(flags: nil, char: "a", mailbox: .inbox, listExtended: []), "() a \"INBOX\"", #line)
+        let inputs: [(IMAPCore.Mailbox.List, String, UInt)] = [
+            (IMAPCore.Mailbox.List(flags: nil, char: nil, mailbox: .inbox, listExtended: []), "() \"INBOX\"", #line),
+            (IMAPCore.Mailbox.List(flags: nil, char: "a", mailbox: .inbox, listExtended: []), "() a \"INBOX\"", #line)
         ]
 
         for (test, expectedString, line) in inputs {

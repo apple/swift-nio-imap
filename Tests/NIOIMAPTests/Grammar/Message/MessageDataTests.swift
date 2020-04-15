@@ -14,6 +14,7 @@
 
 import XCTest
 import NIO
+@testable import IMAPCore
 @testable import NIOIMAP
 
 class MessageDataTests: EncodeTestClass {
@@ -24,7 +25,7 @@ class MessageDataTests: EncodeTestClass {
 extension MessageDataTests {
 
     func testEncode() {
-        let inputs: [(NIOIMAP.MessageData, String, UInt)] = [
+        let inputs: [(IMAPCore.MessageData, String, UInt)] = [
             (.expunge(123), "123 EXPUNGE", #line),
             (.fetch(456), "456 FETCH (", #line)
         ]

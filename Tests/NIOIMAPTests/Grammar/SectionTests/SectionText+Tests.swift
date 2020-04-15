@@ -14,6 +14,7 @@
 
 import XCTest
 import NIO
+@testable import IMAPCore
 @testable import NIOIMAP
 
 class SectionText_Tests: EncodeTestClass {
@@ -24,7 +25,7 @@ class SectionText_Tests: EncodeTestClass {
 extension SectionText_Tests {
 
     func testEncode() {
-        let inputs: [(NIOIMAP.SectionText, String, UInt)] = [
+        let inputs: [(IMAPCore.SectionText, String, UInt)] = [
             (.mime, "MIME", #line),
             (.message(.header), "HEADER", #line),
         ]

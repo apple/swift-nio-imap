@@ -13,11 +13,12 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import IMAPCore
 
 // MARK: - Encoding
 extension ByteBuffer {
 
-    @discardableResult mutating func writeSearchReturnOption(_ option: NIOIMAP.SearchReturnOption) -> Int {
+    @discardableResult mutating func writeSearchReturnOption(_ option: IMAPCore.SearchReturnOption) -> Int {
         switch option {
         case .min:
             return self.writeString("MIN")
@@ -34,7 +35,7 @@ extension ByteBuffer {
         }
     }
 
-    @discardableResult mutating func writeSearchReturnOptions(_ options: [NIOIMAP.SearchReturnOption]) -> Int {
+    @discardableResult mutating func writeSearchReturnOptions(_ options: [IMAPCore.SearchReturnOption]) -> Int {
         guard options.count > 0 else {
             return 0
         }

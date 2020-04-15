@@ -14,6 +14,7 @@
 
 import XCTest
 import NIO
+@testable import IMAPCore
 @testable import NIOIMAP
 
 class BodyTypeSinglepartTests: EncodeTestClass {
@@ -24,7 +25,7 @@ class BodyTypeSinglepartTests: EncodeTestClass {
 extension BodyTypeSinglepartTests {
 
     func testEncode() {
-        let inputs: [(NIOIMAP.Body.TypeSinglepart, String, UInt)] = [
+        let inputs: [(IMAPCore.Body.TypeSinglepart, String, UInt)] = [
             (
                 .type(.basic(.media(.type(.application, subtype: "subtype"), fields: .parameter([], id: nil, description: nil, encoding: .base64, octets: 6))), extension: nil),
                 "\"APPLICATION\" \"subtype\" NIL NIL NIL \"BASE64\" 6",

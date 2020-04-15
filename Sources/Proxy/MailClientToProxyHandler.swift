@@ -14,13 +14,14 @@
 
 import NIO
 import NIOSSL
-import NIOIMAP
+@testable import NIOIMAP
+@testable import IMAPCore
 
 class MailClientToProxyHandler: ChannelInboundHandler {
     
-    typealias InboundIn = NIOIMAP.CommandStream
+    typealias InboundIn = IMAPCore.CommandStream
     
-    var parser = NIOIMAP.CommandParser()
+    var parser = IMAPCore.CommandParser()
     var clientChannel: Channel?
     
     let serverHost: String

@@ -14,6 +14,7 @@
 
 import XCTest
 import NIO
+@testable import IMAPCore
 @testable import NIOIMAP
 
 class TaggedExtension_Tests: EncodeTestClass {
@@ -24,7 +25,7 @@ class TaggedExtension_Tests: EncodeTestClass {
 extension TaggedExtension_Tests {
 
     func testEncode() {
-        let inputs: [(NIOIMAP.TaggedExtension, String, UInt)] = [
+        let inputs: [(IMAPCore.TaggedExtension, String, UInt)] = [
             (.label("label", value: .simple(.number(1))), "label 1", #line),
         ]
 

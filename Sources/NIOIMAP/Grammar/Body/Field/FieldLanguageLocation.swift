@@ -13,11 +13,12 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import IMAPCore
 
 // MARK: - Encoding
 extension ByteBuffer {
 
-    @discardableResult mutating func writeBodyFieldLanguageLocation(_ langLoc: NIOIMAP.Body.FieldLanguageLocation) -> Int {
+    @discardableResult mutating func writeBodyFieldLanguageLocation(_ langLoc: IMAPCore.Body.FieldLanguageLocation) -> Int {
         self.writeSpace() +
         self.writeBodyFieldLanguage(langLoc.language) +
         self.writeIfExists(langLoc.location) { (location) -> Int in

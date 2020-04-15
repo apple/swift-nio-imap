@@ -13,17 +13,18 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import IMAPCore
 
 // MARK: - Encoding
 extension ByteBuffer {
 
-    @discardableResult mutating func writeMessageAttributes(_ atts: [NIOIMAP.MessageAttributeType]) -> Int {
+    @discardableResult mutating func writeMessageAttributes(_ atts: [IMAPCore.MessageAttributeType]) -> Int {
         return self.writeArray(atts) { (element, self) in
             return self.writeMessageAttributeType(element)
         }
     }
     
-    @discardableResult mutating func writeMessageAttributeType(_ type: NIOIMAP.MessageAttributeType) -> Int {
+    @discardableResult mutating func writeMessageAttributeType(_ type: IMAPCore.MessageAttributeType) -> Int {
         switch type {
         case .dynamic(let att):
             return self.writeMessageAttributeDynamic(att)

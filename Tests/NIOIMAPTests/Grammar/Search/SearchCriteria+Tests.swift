@@ -14,6 +14,7 @@
 
 import XCTest
 import NIO
+@testable import IMAPCore
 @testable import NIOIMAP
 
 class SearchCriteria_Tests: EncodeTestClass {
@@ -24,7 +25,7 @@ class SearchCriteria_Tests: EncodeTestClass {
 extension SearchCriteria_Tests {
 
     func testEncode() {
-        let inputs: [([NIOIMAP.SearchKey], String, UInt)] = [
+        let inputs: [([IMAPCore.SearchKey], String, UInt)] = [
             ([.all], "ALL", #line),
             ([.all, .answered, .deleted], "ALL ANSWERED DELETED", #line),
         ]

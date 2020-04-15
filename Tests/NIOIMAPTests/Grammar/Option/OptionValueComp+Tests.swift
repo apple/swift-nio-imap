@@ -14,6 +14,7 @@
 
 import XCTest
 import NIO
+@testable import IMAPCore
 @testable import NIOIMAP
 
 class OptionValueComp_Tests: EncodeTestClass {
@@ -24,7 +25,7 @@ class OptionValueComp_Tests: EncodeTestClass {
 extension OptionValueComp_Tests {
 
     func testEncode() {
-        let inputs: [(NIOIMAP.OptionValueComp, String, UInt)] = [
+        let inputs: [(IMAPCore.OptionValueComp, String, UInt)] = [
             (.string("test"), "\"test\"", #line),
             ([.string("test1"), .string("test2")], "(\"test1\" \"test2\")", #line)
         ]

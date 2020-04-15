@@ -14,12 +14,13 @@
 
 import XCTest
 import NIO
+@testable import IMAPCore
 @testable import NIOIMAP
 
 class EnableData_Tests: EncodeTestClass {
 
     func testEncoding() {
-        let inputs: [([NIOIMAP.Capability], String, UInt)] = [
+        let inputs: [([IMAPCore.Capability], String, UInt)] = [
             ([], "ENABLED", #line),
             ([.enable], "ENABLED ENABLE", #line),
             ([.enable, .condStore], "ENABLED ENABLE CONDSTORE", #line),

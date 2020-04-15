@@ -13,11 +13,12 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import IMAPCore
 
 // MARK: - Encoding
 extension ByteBuffer {
     
-    @discardableResult mutating func writeCapability(_ capability: NIOIMAP.Capability) -> Int {
+    @discardableResult mutating func writeCapability(_ capability: IMAPCore.Capability) -> Int {
         switch capability {
         case .auth(let type):
             return self.writeString("AUTH=\(type)")
@@ -38,7 +39,7 @@ extension ByteBuffer {
         }
     }
     
-    @discardableResult mutating func writeCapabilityData(_ data: [NIOIMAP.Capability]) -> Int {
+    @discardableResult mutating func writeCapabilityData(_ data: [IMAPCore.Capability]) -> Int {
         self.writeString("CAPABILITY IMAP4 IMAP4rev1") +
         self.writeArray(data, separator: "", parenthesis: false) { (capability, self) -> Int in
             self.writeSpace() +

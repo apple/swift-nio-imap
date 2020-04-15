@@ -13,11 +13,12 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import IMAPCore
 
 // MARK: - Encoding
 extension ByteBuffer {
 
-    @discardableResult mutating func writeSearchProgram(_ program: NIOIMAP.SearchProgram) -> Int {
+    @discardableResult mutating func writeSearchProgram(_ program: IMAPCore.SearchProgram) -> Int {
         self.writeIfExists(program.charset) { (charset) -> Int in
             self.writeString("CHARSET \(charset) ")
         } +

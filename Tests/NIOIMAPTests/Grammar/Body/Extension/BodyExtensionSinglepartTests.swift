@@ -14,6 +14,7 @@
 
 import XCTest
 import NIO
+@testable import IMAPCore
 @testable import NIOIMAP
 
 class BodyExtensionSinglepartTests: EncodeTestClass {
@@ -24,7 +25,7 @@ class BodyExtensionSinglepartTests: EncodeTestClass {
 extension BodyExtensionSinglepartTests {
 
     func testEncode() {
-        let inputs: [(NIOIMAP.Body.ExtensionSinglepart, String, UInt)] = [
+        let inputs: [(IMAPCore.Body.ExtensionSinglepart, String, UInt)] = [
             (.fieldMD5(nil, dspLanguage: nil), "NIL", #line),
             (.fieldMD5("md5", dspLanguage: nil), "\"md5\"", #line),
             (.fieldMD5("md5", dspLanguage: .fieldDSP(.string("string", parameter: []), fieldLanguage: nil)), "\"md5\" (\"string\" NIL)", #line)

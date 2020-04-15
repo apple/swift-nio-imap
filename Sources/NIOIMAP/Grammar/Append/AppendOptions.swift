@@ -13,11 +13,12 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import IMAPCore
 
 // MARK: - Encoding
 extension ByteBuffer {
     
-    @discardableResult mutating func writeAppendOptions(_ options: NIOIMAP.AppendOptions) -> Int {
+    @discardableResult mutating func writeAppendOptions(_ options: IMAPCore.AppendOptions) -> Int {
         self.writeIfArrayHasMinimumSize(array: options.flagList) { (array, self) -> Int in
             self.writeSpace() +
             self.writeFlags(array)

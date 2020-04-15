@@ -13,11 +13,12 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import IMAPCore
 
 // MARK: - Encoding
 extension ByteBuffer {
     
-    @discardableResult mutating func writeAppendData(_ data: NIOIMAP.AppendData) -> Int {
+    @discardableResult mutating func writeAppendData(_ data: IMAPCore.AppendData) -> Int {
         self.writeString("\(data.needs8BitCleanTransport ? "~" : ""){\(data.byteCount)\(data.synchronizing ? "" : "+")}\r\n")
     }
 }

@@ -14,6 +14,7 @@
 
 import XCTest
 import NIO
+@testable import IMAPCore
 @testable import NIOIMAP
 
 class ListSelectOption_Tests: EncodeTestClass {
@@ -24,7 +25,7 @@ class ListSelectOption_Tests: EncodeTestClass {
 extension ListSelectOption_Tests {
 
     func testEncode() {
-        let inputs: [(NIOIMAP.ListSelectOption, String, UInt)] = [
+        let inputs: [(IMAPCore.ListSelectOption, String, UInt)] = [
             (.base(.subscribed), "SUBSCRIBED", #line),
             (.independent(.remote), "REMOTE", #line),
             (.mod(.recursiveMatch), "RECURSIVEMATCH", #line),
@@ -39,7 +40,7 @@ extension ListSelectOption_Tests {
     }
 
     func testEncode_multiple() {
-        let inputs: [(NIOIMAP.ListSelectOptions, String, UInt)] = [
+        let inputs: [(IMAPCore.ListSelectOptions, String, UInt)] = [
             (nil, "()", #line),
             (.select([.base(.subscribed)], .subscribed), "(SUBSCRIBED SUBSCRIBED)", #line),
             (.selectIndependent([.remote, .option(.standard("SOME", value: nil))]), "(REMOTE SOME)", #line),

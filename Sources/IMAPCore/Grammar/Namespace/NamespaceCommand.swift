@@ -17,6 +17,6 @@
 extension IMAPCore {
 
     /// IMAPv4 `Namespace-Command`
-    static let NamespaceCommand = "NAMESPACE"
+    public static let NamespaceCommand = "NAMESPACE"
     
 }

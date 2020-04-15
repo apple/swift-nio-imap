@@ -13,11 +13,12 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import IMAPCore
 
 // MARK: - Encoding
 extension ByteBuffer {
 
-    @discardableResult mutating func writeBodyExtensionMultipart(_ ext: NIOIMAP.Body.ExtensionMultipart) -> Int {
+    @discardableResult mutating func writeBodyExtensionMultipart(_ ext: IMAPCore.Body.ExtensionMultipart) -> Int {
         self.writeBodyFieldParameters(ext.parameter) +
         self.writeIfExists(ext.dspLanguage) { (dspLanguage) -> Int in
             self.writeBodyFieldDSPLanguage(dspLanguage)

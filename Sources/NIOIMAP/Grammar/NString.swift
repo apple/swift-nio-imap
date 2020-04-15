@@ -13,11 +13,12 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import IMAPCore
 
 // MARK: - IMAP
 extension ByteBuffer {
     
-    @discardableResult mutating func writeNString(_ string: NIOIMAP.NString) -> Int {
+    @discardableResult mutating func writeNString(_ string: IMAPCore.NString) -> Int {
         if let string = string {
             return self.writeIMAPString(string)
         } else {

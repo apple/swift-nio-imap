@@ -14,6 +14,7 @@
 
 import XCTest
 import NIO
+@testable import IMAPCore
 @testable import NIOIMAP
 
 class Namespace_Tests: EncodeTestClass {
@@ -24,7 +25,7 @@ class Namespace_Tests: EncodeTestClass {
 extension Namespace_Tests {
 
     func testEncode() {
-        let inputs: [([NIOIMAP.NamespaceDescription], String, UInt)] = [
+        let inputs: [([IMAPCore.NamespaceDescription], String, UInt)] = [
             ([], "NIL", #line),
             ([.string("str1", char: nil, responseExtensions: [])], "((\"str1\" NIL))", #line),
             (

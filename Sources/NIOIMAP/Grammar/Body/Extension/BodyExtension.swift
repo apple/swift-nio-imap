@@ -13,17 +13,18 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import IMAPCore
 
 // MARK: - Encoding
 extension ByteBuffer {
 
-    @discardableResult mutating func writeBodyExtension(_ ext: [NIOIMAP.BodyExtensionType]) -> Int {
+    @discardableResult mutating func writeBodyExtension(_ ext: [IMAPCore.BodyExtensionType]) -> Int {
         return self.writeArray(ext) { (element, self) in
             self.writeBodyExtensionType(element)
         }
     }
     
-    @discardableResult mutating func writeBodyExtensionType(_ type: NIOIMAP.BodyExtensionType) -> Int {
+    @discardableResult mutating func writeBodyExtensionType(_ type: IMAPCore.BodyExtensionType) -> Int {
         switch type {
         case .string(let string):
             return self.writeNString(string)

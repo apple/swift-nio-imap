@@ -15,6 +15,7 @@
 import Foundation
 import NIO
 import NIOIMAP
+import IMAPCore
 import NIOSSL
 
 func log(_ string: String, buffer: ByteBuffer? = nil) {
@@ -53,7 +54,7 @@ try ServerBootstrap(group: eventLoopGroup).childChannelInitializer({ channel -> 
     return channel.pipeline.addHandlers([
         InboundPrintHandler(type: "CLIENT (Original)"),
         OutboundPrintHandler(type: "SERVER (Decoded)"),
-        ByteToMessageHandler(NIOIMAP.CommandDecoder()),
+//        ByteToMessageHandler(NIOIMAP.CommandDecoder()),
         MailClientToProxyHandler(serverHost: serverHost, serverPort: serverPort),
     ])
 })

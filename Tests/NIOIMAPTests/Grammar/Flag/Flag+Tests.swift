@@ -14,6 +14,7 @@
 
 import XCTest
 import NIO
+@testable import IMAPCore
 @testable import NIOIMAP
 
 class Flag_Tests: EncodeTestClass {
@@ -24,7 +25,7 @@ class Flag_Tests: EncodeTestClass {
 extension Flag_Tests {
 
     func testEncode() {
-        let inputs: [(NIOIMAP.Flag, String, UInt)] = [
+        let inputs: [(IMAPCore.Flag, String, UInt)] = [
             (.answered, "\\Answered", #line),
             (.deleted, "\\Deleted", #line),
             (.draft, "\\Draft", #line),

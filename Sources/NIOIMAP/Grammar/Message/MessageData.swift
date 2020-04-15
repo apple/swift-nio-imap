@@ -13,11 +13,12 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import IMAPCore
 
 // MARK: - Encoding
 extension ByteBuffer {
 
-    @discardableResult mutating func writeMessageData(_ data: NIOIMAP.MessageData) -> Int {
+    @discardableResult mutating func writeMessageData(_ data: IMAPCore.MessageData) -> Int {
         switch data {
         case .expunge(let number):
             return self.writeString("\(number) EXPUNGE")
@@ -27,7 +28,7 @@ extension ByteBuffer {
         }
     }
     
-    @discardableResult mutating func writeMessageDataEnd(_ data: NIOIMAP.MessageData) -> Int {
+    @discardableResult mutating func writeMessageDataEnd(_ data: IMAPCore.MessageData) -> Int {
         return self.writeString(")")
     }
 

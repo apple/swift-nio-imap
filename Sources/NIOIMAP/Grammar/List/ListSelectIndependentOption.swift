@@ -13,11 +13,12 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import IMAPCore
 
 // MARK: - Encoding
 extension ByteBuffer {
 
-    @discardableResult mutating func writeListSelectIndependentOption(_ option: NIOIMAP.ListSelectIndependentOption) -> Int {
+    @discardableResult mutating func writeListSelectIndependentOption(_ option: IMAPCore.ListSelectIndependentOption) -> Int {
         switch option {
         case .remote:
             return self.writeString("REMOTE")

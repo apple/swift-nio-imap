@@ -16,6 +16,7 @@ import NIO
 import NIOSSL
 import NIOIMAP
 import Logging
+import IMAPCore
 
 public class CommandRoundtripHandler: ChannelOutboundHandler {
     
@@ -23,7 +24,7 @@ public class CommandRoundtripHandler: ChannelOutboundHandler {
     public typealias OutboundOut = ByteBuffer
     
     let logger: Logger
-    private var parser = NIOIMAP.CommandParser()
+    private var parser = IMAPCore.CommandParser()
     
     public init(logger: Logger) {
         self.logger = logger

@@ -13,10 +13,11 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import IMAPCore
 
 extension ByteBuffer {
     
-    @discardableResult public mutating func writeSearchCriteria(_ criteria: [NIOIMAP.SearchKey]) -> Int {
+    @discardableResult public mutating func writeSearchCriteria(_ criteria: [IMAPCore.SearchKey]) -> Int {
         self.writeArray(criteria, parenthesis: false) { (key, self) in
             self.writeSearchKey(key)
         }

@@ -13,11 +13,12 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import IMAPCore
 
 // MARK: - Encoding
 extension ByteBuffer {
 
-    @discardableResult mutating func writeResponseType(_ type: NIOIMAP.ResponseType) -> Int {
+    @discardableResult mutating func writeResponseType(_ type: IMAPCore.ResponseType) -> Int {
         switch type {
         case .continueRequest(let continueRequest):
             return self.writeContinueRequest(continueRequest)

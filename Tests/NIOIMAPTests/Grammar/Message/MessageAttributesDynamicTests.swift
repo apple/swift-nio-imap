@@ -14,6 +14,7 @@
 
 import XCTest
 import NIO
+@testable import IMAPCore
 @testable import NIOIMAP
 
 class MessageAttributesDynamicTests: EncodeTestClass {
@@ -24,7 +25,7 @@ class MessageAttributesDynamicTests: EncodeTestClass {
 extension MessageAttributesDynamicTests {
 
     func testEncode() {
-        let inputs: [([NIOIMAP.Flag], String, UInt)] = [
+        let inputs: [([IMAPCore.Flag], String, UInt)] = [
             ([.draft], "FLAGS (\\Draft)", #line),
             ([.flagged, .draft], "FLAGS (\\Flagged \\Draft)", #line),
         ]

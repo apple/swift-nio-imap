@@ -14,6 +14,7 @@
 
 import XCTest
 import NIO
+@testable import IMAPCore
 @testable import NIOIMAP
 
 class ListSelectIndependentOption_Tests: EncodeTestClass {
@@ -24,7 +25,7 @@ class ListSelectIndependentOption_Tests: EncodeTestClass {
 extension ListSelectIndependentOption_Tests {
 
     func testEncode() {
-        let inputs: [(NIOIMAP.ListSelectIndependentOption, String, UInt)] = [
+        let inputs: [(IMAPCore.ListSelectIndependentOption, String, UInt)] = [
             (.remote, "REMOTE", #line),
             (.option(.standard("test", value: nil)), "test", #line)
         ]

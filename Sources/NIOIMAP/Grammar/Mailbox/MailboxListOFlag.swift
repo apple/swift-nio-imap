@@ -13,11 +13,12 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import IMAPCore
 
 // MARK: - Encoding
 extension ByteBuffer {
 
-    @discardableResult mutating func writeMailboxListOFlag(_ flag: NIOIMAP.Mailbox.List.OFlag) -> Int {
+    @discardableResult mutating func writeMailboxListOFlag(_ flag: IMAPCore.Mailbox.List.OFlag) -> Int {
         switch flag {
         case .noInferiors:
             return self.writeString(#"\Noinferiors"#)

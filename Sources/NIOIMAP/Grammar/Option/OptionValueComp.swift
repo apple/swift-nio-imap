@@ -13,17 +13,18 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import IMAPCore
 
 // MARK: - Encoding
 extension ByteBuffer {
 
-    @discardableResult mutating func writeOptionValue(_ value: NIOIMAP.OptionValueComp) -> Int {
+    @discardableResult mutating func writeOptionValue(_ value: IMAPCore.OptionValueComp) -> Int {
         self.writeString("(") +
         self.writeOptionValueComp(value) +
         self.writeString(")")
     }
 
-    @discardableResult mutating func writeOptionValueComp(_ option: NIOIMAP.OptionValueComp) -> Int {
+    @discardableResult mutating func writeOptionValueComp(_ option: IMAPCore.OptionValueComp) -> Int {
         switch option {
         case .string(let string):
             return self.writeIMAPString(string)

@@ -14,6 +14,7 @@
 
 import XCTest
 import NIO
+@testable import IMAPCore
 @testable import NIOIMAP
 
 class FetchModifier_Tests: EncodeTestClass {
@@ -24,7 +25,7 @@ class FetchModifier_Tests: EncodeTestClass {
 extension FetchModifier_Tests {
 
     func testEncode() {
-        let inputs: [(NIOIMAP.FetchModifier, String, UInt)] = [
+        let inputs: [(IMAPCore.FetchModifier, String, UInt)] = [
             (.name("some", value: nil), "some", #line),
             (.name("test", value: .simple(.number(1))), "test 1", #line),
         ]
@@ -38,7 +39,7 @@ extension FetchModifier_Tests {
     }
     
     func testEncode_multiple() {
-        let inputs: [([NIOIMAP.FetchModifier], String, UInt)] = [
+        let inputs: [([IMAPCore.FetchModifier], String, UInt)] = [
             ([.name("some", value: nil)], " (some)", #line),
             ([.name("some1", value: nil), .name("some2", value: nil), .name("some3", value: nil)], " (some1 some2 some3)", #line),
         ]

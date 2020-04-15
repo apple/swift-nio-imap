@@ -14,6 +14,7 @@
 
 import XCTest
 import NIO
+@testable import IMAPCore
 @testable import NIOIMAP
 
 class ResponseTextCodeTests: EncodeTestClass {
@@ -24,7 +25,7 @@ class ResponseTextCodeTests: EncodeTestClass {
 extension ResponseTextCodeTests {
 
     func testEncode() {
-        let inputs: [(NIOIMAP.ResponseTextCode, String, UInt)] = [
+        let inputs: [(IMAPCore.ResponseTextCode, String, UInt)] = [
             (.alert, "ALERT", #line),
             (.parse, "PARSE", #line),
             (.readOnly, "READ-ONLY", #line),

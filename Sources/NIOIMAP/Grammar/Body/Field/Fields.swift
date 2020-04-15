@@ -13,11 +13,12 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import IMAPCore
 
 // MARK: - Encoding
 extension ByteBuffer {
 
-    @discardableResult mutating func writeBodyFields(_ fields: NIOIMAP.Body.Fields) -> Int {
+    @discardableResult mutating func writeBodyFields(_ fields: IMAPCore.Body.Fields) -> Int {
         self.writeBodyFieldParameters(fields.parameter) +
         self.writeSpace() +
         self.writeNString(fields.id) +

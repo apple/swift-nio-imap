@@ -14,6 +14,7 @@
 
 import XCTest
 import NIO
+@testable import IMAPCore
 @testable import NIOIMAP
 
 class GreetingTests: EncodeTestClass {
@@ -24,7 +25,7 @@ class GreetingTests: EncodeTestClass {
 extension GreetingTests {
 
     func testEncode() {
-        let inputs: [(NIOIMAP.Greeting, String, UInt)] = [
+        let inputs: [(IMAPCore.Greeting, String, UInt)] = [
             (.auth(.ok(.code(nil, text: "text"))), "* OK \"text\"\r\n", #line),
             (.bye(.code(nil, text: "text")), "* BYE \"text\"\r\n", #line)
         ]

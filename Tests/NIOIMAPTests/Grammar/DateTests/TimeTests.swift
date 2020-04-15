@@ -13,6 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 import XCTest
+@testable import IMAPCore
 @testable import NIOIMAP
 
 class TimeTests: XCTestCase {
@@ -27,7 +28,7 @@ extension TimeTests {
         let hour = 1
         let minute = 2
         let second = 3
-        let time = NIOIMAP.Date.Time(hour: hour, minute: minute, second: second)
+        let time = IMAPCore.Date.Time(hour: hour, minute: minute, second: second)
         
         XCTAssertEqual(time.hour, hour)
         XCTAssertEqual(time.minute, minute)

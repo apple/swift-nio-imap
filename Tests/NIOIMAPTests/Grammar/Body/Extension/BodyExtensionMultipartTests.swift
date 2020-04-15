@@ -14,6 +14,7 @@
 
 import XCTest
 import NIO
+@testable import IMAPCore
 @testable import NIOIMAP
 
 class BodyExtensionMultipartTests: EncodeTestClass {
@@ -24,7 +25,7 @@ class BodyExtensionMultipartTests: EncodeTestClass {
 extension BodyExtensionMultipartTests {
 
     func testEncode() {
-        let inputs: [(NIOIMAP.Body.ExtensionMultipart, String, UInt)] = [
+        let inputs: [(IMAPCore.Body.ExtensionMultipart, String, UInt)] = [
             (.parameter([.field("f", value: "v")], dspLanguage: nil), "(\"f\" \"v\")", #line),
             (
                 .parameter([.field("f1", value: "v1")], dspLanguage: .fieldDSP(.string("string", parameter: [.field("f2", value: "v2")]), fieldLanguage: nil)),

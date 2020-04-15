@@ -13,11 +13,12 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import IMAPCore
 
 // MARK: - Encoding
 extension ByteBuffer {
     
-    @discardableResult mutating func writeSection(_ section: NIOIMAP.SectionSpec?) -> Int {
+    @discardableResult mutating func writeSection(_ section: IMAPCore.SectionSpec?) -> Int {
         self.writeString("[") +
         self.writeIfExists(section) { (spec) -> Int in
             self.writeSectionSpec(spec)
@@ -25,7 +26,7 @@ extension ByteBuffer {
         self.writeString("]")
     }
     
-    @discardableResult mutating func writeSectionSpec(_ spec: NIOIMAP.SectionSpec?) -> Int {
+    @discardableResult mutating func writeSectionSpec(_ spec: IMAPCore.SectionSpec?) -> Int {
         
         guard let spec = spec else {
             return 0 // do nothing

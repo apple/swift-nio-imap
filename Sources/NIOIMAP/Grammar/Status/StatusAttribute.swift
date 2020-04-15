@@ -13,17 +13,18 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import IMAPCore
 
 // MARK: - IMAP
 extension ByteBuffer {
     
-    @discardableResult mutating func writeStatusAttributes(_ atts: [NIOIMAP.StatusAttribute]) -> Int {
+    @discardableResult mutating func writeStatusAttributes(_ atts: [IMAPCore.StatusAttribute]) -> Int {
         self.writeArray(atts, parenthesis: false) { (element, self) in
             self.writeStatusAttribute(element)
         }
     }
     
-    @discardableResult mutating func writeStatusAttribute(_ att: NIOIMAP.StatusAttribute) -> Int {
+    @discardableResult mutating func writeStatusAttribute(_ att: IMAPCore.StatusAttribute) -> Int {
         self.writeString(att.rawValue)
     }
     

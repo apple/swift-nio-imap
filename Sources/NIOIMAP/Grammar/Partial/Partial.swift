@@ -13,10 +13,11 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import IMAPCore
 
 extension ByteBuffer {
     
-    @discardableResult mutating func writePartial(_ num: NIOIMAP.Partial) -> Int {
+    @discardableResult mutating func writePartial(_ num: IMAPCore.Partial) -> Int {
         self.writeString("<\(num.left).\(num.right)>")
     }
     

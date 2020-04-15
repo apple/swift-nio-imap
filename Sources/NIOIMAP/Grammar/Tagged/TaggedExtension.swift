@@ -13,11 +13,12 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import IMAPCore
 
 // MARK: - Encoding
 extension ByteBuffer {
     
-    @discardableResult mutating func writeTaggedExtension(_ ext: NIOIMAP.TaggedExtension) -> Int {
+    @discardableResult mutating func writeTaggedExtension(_ ext: IMAPCore.TaggedExtension) -> Int {
         self.writeTaggedExtensionLabel(ext.label) +
         self.writeSpace() +
         self.writeTaggedExtensionValue(ext.value)

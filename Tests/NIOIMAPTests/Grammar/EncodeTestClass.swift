@@ -14,6 +14,7 @@
 
 import NIO
 import XCTest
+@testable import IMAPCore
 
 class EncodeTestClass: XCTestCase {
 

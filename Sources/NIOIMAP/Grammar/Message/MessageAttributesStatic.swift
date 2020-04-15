@@ -13,11 +13,12 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import IMAPCore
 
 // MARK: - Encoding
 extension ByteBuffer {
 
-    @discardableResult mutating func writeMessageAttributeStatic(_ att: NIOIMAP.MessageAttributesStatic) -> Int {
+    @discardableResult mutating func writeMessageAttributeStatic(_ att: IMAPCore.MessageAttributesStatic) -> Int {
         switch att {
         case .envelope(let env):
             return self.writeMessageAttributeStatic_envelope(env)
@@ -54,17 +55,17 @@ extension ByteBuffer {
         }
     }
     
-    @discardableResult mutating func writeMessageAttributeStatic_envelope(_ env: NIOIMAP.Envelope) -> Int {
+    @discardableResult mutating func writeMessageAttributeStatic_envelope(_ env: IMAPCore.Envelope) -> Int {
         self.writeString("ENVELOPE ") +
         self.writeEnvelope(env)
     }
     
-    @discardableResult mutating func writeMessageAttributeStatic_internalDate(_ date: NIOIMAP.Date.DateTime) -> Int {
+    @discardableResult mutating func writeMessageAttributeStatic_internalDate(_ date: IMAPCore.Date.DateTime) -> Int {
         self.writeString("INTERNALDATE ") +
         self.writeDateTime(date)
     }
     
-    @discardableResult mutating func writeMessageAttributeStatic_rfc(_ type: NIOIMAP.RFC822Reduced?, string: NIOIMAP.NString) -> Int {
+    @discardableResult mutating func writeMessageAttributeStatic_rfc(_ type: IMAPCore.RFC822Reduced?, string: IMAPCore.NString) -> Int {
         self.writeString("RFC822") +
         self.writeIfExists(type) { (type) -> Int in
             self.writeString(".\(type.rawValue.uppercased())")
@@ -73,7 +74,7 @@ extension ByteBuffer {
         self.writeNString(string)
     }
     
-    @discardableResult mutating func writeMessageAttributeStatic_body(_ body: NIOIMAP.Body, structure: Bool) -> Int {
+    @discardableResult mutating func writeMessageAttributeStatic_body(_ body: IMAPCore.Body, structure: Bool) -> Int {
         self.writeString("BODY") +
         self.writeIfTrue(structure) { () -> Int in
              self.writeString("STRUCTURE")
@@ -82,7 +83,7 @@ extension ByteBuffer {
         self.writeBody(body)
     }
     
-    @discardableResult mutating func writeMessageAttributeStatic_bodySection(_ section: NIOIMAP.SectionSpec?, number: Int?, string: NIOIMAP.NString) -> Int {
+    @discardableResult mutating func writeMessageAttributeStatic_bodySection(_ section: IMAPCore.SectionSpec?, number: Int?, string: IMAPCore.NString) -> Int {
         self.writeString("BODY") +
         self.writeSection(section) +
         self.writeIfExists(number) { (number) -> Int in

@@ -14,6 +14,7 @@
 
 import XCTest
 import NIO
+@testable import IMAPCore
 @testable import NIOIMAP
 
 class ResponseConditionalStateTests: EncodeTestClass {
@@ -24,10 +25,10 @@ class ResponseConditionalStateTests: EncodeTestClass {
 extension ResponseConditionalStateTests {
 
     func testEncode() {
-        let inputs: [(NIOIMAP.ResponseConditionalState, String, UInt)] = [
-            (NIOIMAP.ResponseConditionalState.bad(.code(.parse, text: "something")), "BAD [PARSE] \"something\"", #line),
-            (NIOIMAP.ResponseConditionalState.ok(.code(.alert, text: "error")), "OK [ALERT] \"error\"", #line),
-            (NIOIMAP.ResponseConditionalState.no(.code(.readOnly, text: "everything")), "NO [READ-ONLY] \"everything\"", #line)
+        let inputs: [(IMAPCore.ResponseConditionalState, String, UInt)] = [
+            (IMAPCore.ResponseConditionalState.bad(.code(.parse, text: "something")), "BAD [PARSE] \"something\"", #line),
+            (IMAPCore.ResponseConditionalState.ok(.code(.alert, text: "error")), "OK [ALERT] \"error\"", #line),
+            (IMAPCore.ResponseConditionalState.no(.code(.readOnly, text: "everything")), "NO [READ-ONLY] \"everything\"", #line)
         ]
 
         for (test, expectedString, line) in inputs {

@@ -13,11 +13,12 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import IMAPCore
 
 // MARK: - Encoding
 extension ByteBuffer {
 
-    @discardableResult mutating func writeResponsePayload(_ payload: NIOIMAP.ResponsePayload) -> Int {
+    @discardableResult mutating func writeResponsePayload(_ payload: IMAPCore.ResponsePayload) -> Int {
         switch payload {
         case .conditionalState(let data):
             return self.writeResponseConditionalState(data)

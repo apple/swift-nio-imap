@@ -13,18 +13,19 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import IMAPCore
 
 extension NIOIMAP {
 
     public struct CommandEncoder: MessageToByteEncoder {
         
-        public typealias OutboundIn = CommandStream
+        public typealias OutboundIn = IMAPCore.CommandStream
 
         public init() {
             
         }
         
-        public func encode(data: CommandStream, out: inout ByteBuffer) throws {
+        public func encode(data: IMAPCore.CommandStream, out: inout ByteBuffer) throws {
             switch data {
             case .bytes(let buffer):
                 out = ByteBuffer(ByteBufferView(buffer))

@@ -13,11 +13,12 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import IMAPCore
 
 // MARK: IMAP
 extension ByteBuffer {
     
-    @discardableResult mutating func writeTimezone(_ timezone: NIOIMAP.Date.TimeZone) -> Int {
+    @discardableResult mutating func writeTimezone(_ timezone: IMAPCore.Date.TimeZone) -> Int {
         let string = String(abs(timezone.backing))
         
         let zeroedString: String

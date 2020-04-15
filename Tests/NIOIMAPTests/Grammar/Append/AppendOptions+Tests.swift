@@ -14,6 +14,7 @@
 
 import XCTest
 import NIO
+@testable import IMAPCore
 @testable import NIOIMAP
 
 class AppendOptions_Tests: EncodeTestClass {
@@ -24,10 +25,10 @@ extension AppendOptions_Tests {
     
     func testEncode() {
         
-        let inputs: [(NIOIMAP.AppendOptions, String, UInt)] = [
+        let inputs: [(IMAPCore.AppendOptions, String, UInt)] = [
             (.flagList([], dateTime: nil, extensions: []), "", #line),
             (.flagList([.answered], dateTime: nil, extensions: []), " (\\Answered)", #line),
-            (.flagList([.answered], dateTime: .date(.day(25, month: .jun, year: 1994), time: .hour(01, minute: 02, second: 03), zone: NIOIMAP.Date.TimeZone(0)!), extensions: []), " (\\Answered) \"25-jun-1994 01:02:03 +0000\"", #line),
+            (.flagList([.answered], dateTime: .date(.day(25, month: .jun, year: 1994), time: .hour(01, minute: 02, second: 03), zone: IMAPCore.Date.TimeZone(0)!), extensions: []), " (\\Answered) \"25-jun-1994 01:02:03 +0000\"", #line),
         ]
 
         for (test, expectedString, line) in inputs {

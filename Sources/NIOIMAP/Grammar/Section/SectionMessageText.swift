@@ -13,11 +13,12 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import IMAPCore
 
 // MARK: - Encoding
 extension ByteBuffer {
     
-    @discardableResult mutating func writeSectionMessageText(_ text: NIOIMAP.SectionMessageText) -> Int {
+    @discardableResult mutating func writeSectionMessageText(_ text: IMAPCore.SectionMessageText) -> Int {
         switch text {
         case .header:
             return self.writeString("HEADER")

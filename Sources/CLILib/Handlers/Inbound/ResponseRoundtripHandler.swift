@@ -16,6 +16,7 @@ import NIO
 import NIOSSL
 import NIOIMAP
 import Logging
+import IMAPCore
 
 public class ResponseRoundtripHandler: ChannelInboundHandler {
     
@@ -23,7 +24,7 @@ public class ResponseRoundtripHandler: ChannelInboundHandler {
     public typealias InboundOut = ByteBuffer
     
     let logger: Logger
-    private var parser = NIOIMAP.ResponseParser()
+    private var parser = IMAPCore.ResponseParser()
     
     public init(logger: Logger) {
         self.logger = logger
@@ -34,7 +35,7 @@ public class ResponseRoundtripHandler: ChannelInboundHandler {
         var originalBuffer = self.unwrapInboundIn(data)
         do {
             var originalBufferCopy = originalBuffer
-            var responses = [NIOIMAP.ResponseStream]()
+            var responses = [IMAPCore.ResponseStream]()
             while originalBufferCopy.readableBytes > 0 {
                 responses.append(try parser.parseResponseStream(buffer: &originalBufferCopy))
             }

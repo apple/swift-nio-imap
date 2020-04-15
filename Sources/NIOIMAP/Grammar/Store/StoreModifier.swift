@@ -13,11 +13,12 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import IMAPCore
 
 // MARK: - Encoding
 extension ByteBuffer {
     
-    @discardableResult mutating func writeStoreModifier(_ modifier: NIOIMAP.StoreModifier) -> Int {
+    @discardableResult mutating func writeStoreModifier(_ modifier: IMAPCore.StoreModifier) -> Int {
         self.writeStoreModifierName(modifier.name) +
         self.writeIfExists(modifier.parameters) { (params) -> Int in
             self.writeSpace() +
@@ -25,7 +26,7 @@ extension ByteBuffer {
         }
     }
     
-    @discardableResult mutating func writeStoreModifiers(_ modifiers: [NIOIMAP.StoreModifier]) -> Int {
+    @discardableResult mutating func writeStoreModifiers(_ modifiers: [IMAPCore.StoreModifier]) -> Int {
         self.writeSpace() +
         self.writeArray(modifiers) { (modifier, self) -> Int in
             self.writeStoreModifier(modifier)

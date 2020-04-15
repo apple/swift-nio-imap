@@ -14,6 +14,7 @@
 
 import XCTest
 import NIO
+@testable import IMAPCore
 @testable import NIOIMAP
 
 class CapabilityDataTests: EncodeTestClass {
@@ -25,7 +26,7 @@ extension CapabilityDataTests {
 
     func testCapabilityData_encode() {
 
-        let tests: [([NIOIMAP.Capability], String, UInt)] = [
+        let tests: [([IMAPCore.Capability], String, UInt)] = [
             ([], "CAPABILITY IMAP4 IMAP4rev1", #line),
             ([.condStore], "CAPABILITY IMAP4 IMAP4rev1 CONDSTORE", #line),
             ([.condStore, .enable, .filters], "CAPABILITY IMAP4 IMAP4rev1 CONDSTORE ENABLE FILTERS", #line)

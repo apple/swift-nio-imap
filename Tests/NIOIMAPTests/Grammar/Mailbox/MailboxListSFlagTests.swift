@@ -14,6 +14,7 @@
 
 import XCTest
 import NIO
+@testable import IMAPCore
 @testable import NIOIMAP
 
 class MailboxListSFlagTests: EncodeTestClass {
@@ -26,7 +27,7 @@ extension MailboxListSFlagTests {
 
     func testInit() {
 
-        let inputs: [(String, NIOIMAP.Mailbox.List.SFlag?, UInt)] = [
+        let inputs: [(String, IMAPCore.Mailbox.List.SFlag?, UInt)] = [
             (#"\fecd"#, nil, #line),
             (#"\Noselect"#, .noSelect, #line),
             (#"\NOSELECT"#, .noSelect, #line),
@@ -43,7 +44,7 @@ extension MailboxListSFlagTests {
         ]
 
         for (test, expected, line) in inputs {
-            let testValue = NIOIMAP.Mailbox.List.SFlag(rawValue: test)
+            let testValue = IMAPCore.Mailbox.List.SFlag(rawValue: test)
             XCTAssertEqual(testValue, expected, line: line)
         }
 
@@ -55,7 +56,7 @@ extension MailboxListSFlagTests {
 extension MailboxListSFlagTests {
 
     func testEncode() {
-        let inputs: [(NIOIMAP.Mailbox.List.SFlag, String, UInt)] = [
+        let inputs: [(IMAPCore.Mailbox.List.SFlag, String, UInt)] = [
             (.marked, #"\Marked"#, #line),
             (.noSelect, #"\Noselect"#, #line),
             (.unmarked, #"\Unmarked"#, #line),

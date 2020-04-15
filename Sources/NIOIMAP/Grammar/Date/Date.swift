@@ -13,11 +13,12 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import IMAPCore
 
 // MARK: - IMAP
 extension ByteBuffer {
     
-    @discardableResult mutating func writeDate(_ date: NIOIMAP.Date) -> Int {
+    @discardableResult mutating func writeDate(_ date: IMAPCore.Date) -> Int {
         self.writeString("\(date.day)-\(date.month.rawValue)-\(date.year)")
     }
     

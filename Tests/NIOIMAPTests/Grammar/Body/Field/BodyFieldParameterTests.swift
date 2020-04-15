@@ -14,6 +14,7 @@
 
 import XCTest
 import NIO
+@testable import IMAPCore
 @testable import NIOIMAP
 
 class BodyFieldParameterTests: EncodeTestClass {
@@ -24,7 +25,7 @@ class BodyFieldParameterTests: EncodeTestClass {
 extension BodyFieldParameterTests {
 
     func testEncode() {
-        let inputs: [([NIOIMAP.FieldParameterPair], String, UInt)] = [
+        let inputs: [([IMAPCore.FieldParameterPair], String, UInt)] = [
             ([], "NIL", #line),
             ([.field("f1", value: "v1")], "(\"f1\" \"v1\")", #line),
             ([.field("f1", value: "v1"), .init(field: "f2", value: "v2")], "(\"f1\" \"v1\" \"f2\" \"v2\")", #line)

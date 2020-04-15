@@ -14,6 +14,7 @@
 
 import XCTest
 import NIO
+@testable import IMAPCore
 @testable import NIOIMAP
 
 class ContinueRequestTests: EncodeTestClass {
@@ -24,7 +25,7 @@ class ContinueRequestTests: EncodeTestClass {
 extension ContinueRequestTests {
 
     func testEncode() {
-        let inputs: [(NIOIMAP.ContinueRequest, String, UInt)] = [
+        let inputs: [(IMAPCore.ContinueRequest, String, UInt)] = [
             (.base64(Array("bb==".utf8)), "+ bb==\r\n", #line),
             (.responseText(.code(.alert, text: "text")), "+ [ALERT] \"text\"\r\n", #line)
         ]

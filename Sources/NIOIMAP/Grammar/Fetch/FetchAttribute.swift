@@ -13,17 +13,18 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import IMAPCore
 
 // MARK: - Encoding
 extension ByteBuffer {
     
-    @discardableResult mutating func writeFetchAttributeList(_ atts: [NIOIMAP.FetchAttribute]) -> Int {
+    @discardableResult mutating func writeFetchAttributeList(_ atts: [IMAPCore.FetchAttribute]) -> Int {
         return self.writeArray(atts) { (element, self) in
             self.writeFetchAttribute(element)
         }
     }
     
-    @discardableResult mutating func writeFetchAttribute(_ attribute: NIOIMAP.FetchAttribute) -> Int {
+    @discardableResult mutating func writeFetchAttribute(_ attribute: IMAPCore.FetchAttribute) -> Int {
         switch attribute {
         case .envelope:
             return self.writeFetchAttribute_envelope()
@@ -66,7 +67,7 @@ extension ByteBuffer {
         self.writeString("UID")
     }
     
-    @discardableResult mutating func writeFetchAttribute_rfc(_ rfc: NIOIMAP.RFC822?) -> Int {
+    @discardableResult mutating func writeFetchAttribute_rfc(_ rfc: IMAPCore.RFC822?) -> Int {
         self.writeString("RFC822") +
         self.writeIfExists(rfc) { (rfc) -> Int in
             self.writeRFC822(rfc)
@@ -78,7 +79,7 @@ extension ByteBuffer {
         return self.writeString(string)
     }
     
-    @discardableResult mutating func writeFetchAttribute_body(section: NIOIMAP.SectionSpec?, partial: NIOIMAP.Partial?) -> Int {
+    @discardableResult mutating func writeFetchAttribute_body(section: IMAPCore.SectionSpec?, partial: IMAPCore.Partial?) -> Int {
         self.writeString("BODY") +
         self.writeSection(section) +
         self.writeIfExists(partial) { (partial) -> Int in
@@ -86,7 +87,7 @@ extension ByteBuffer {
         }
     }
     
-    @discardableResult mutating func writeFetchAttribute_bodyPeek(section: NIOIMAP.SectionSpec?, partial: NIOIMAP.Partial?) -> Int {
+    @discardableResult mutating func writeFetchAttribute_bodyPeek(section: IMAPCore.SectionSpec?, partial: IMAPCore.Partial?) -> Int {
         self.writeString("BODY.PEEK") +
         self.writeSection(section) +
         self.writeIfExists(partial) { (partial) -> Int in
@@ -99,7 +100,7 @@ extension ByteBuffer {
         self.writeSectionBinary(section)
     }
     
-    @discardableResult mutating func writeFetchAttribute_binary(peek: Bool, section: [Int], partial: NIOIMAP.Partial?) -> Int {
+    @discardableResult mutating func writeFetchAttribute_binary(peek: Bool, section: [Int], partial: IMAPCore.Partial?) -> Int {
         self.writeString("BINARY") +
         self.writeIfTrue(peek) {
             self.writeString(".PEEK")

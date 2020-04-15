@@ -14,6 +14,7 @@
 
 import XCTest
 import NIO
+@testable import IMAPCore
 @testable import NIOIMAP
 
 class FieldLocationExtensionTests: EncodeTestClass {
@@ -24,7 +25,7 @@ class FieldLocationExtensionTests: EncodeTestClass {
 extension FieldLocationExtensionTests {
 
     func testEncode() {
-        let inputs: [(NIOIMAP.Body.FieldLocationExtension, String, UInt)] = [
+        let inputs: [(IMAPCore.Body.FieldLocationExtension, String, UInt)] = [
             (.location("loc", extensions: []), " \"loc\"", #line),
             (.location("loc", extensions: [[.number(1)]]), " \"loc\" (1)", #line),
             (.location("loc", extensions: [[.number(1), .number(2)]]), " \"loc\" (1 2)", #line)

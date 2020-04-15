@@ -14,6 +14,7 @@
 
 import XCTest
 import NIO
+@testable import IMAPCore
 @testable import NIOIMAP
 
 class ListSelectBaseOption_Tests: EncodeTestClass {
@@ -24,7 +25,7 @@ class ListSelectBaseOption_Tests: EncodeTestClass {
 extension ListSelectBaseOption_Tests {
 
     func testEncode() {
-        let inputs: [(NIOIMAP.ListSelectBaseOption, String, UInt)] = [
+        let inputs: [(IMAPCore.ListSelectBaseOption, String, UInt)] = [
             (.subscribed, "SUBSCRIBED", #line),
             (.option(.standard("test", value: nil)), "test", #line)
         ]
@@ -38,7 +39,7 @@ extension ListSelectBaseOption_Tests {
     }
 
     func testEncodeQuoted() {
-        let inputs: [(NIOIMAP.ListSelectBaseOption, String, UInt)] = [
+        let inputs: [(IMAPCore.ListSelectBaseOption, String, UInt)] = [
             (.subscribed, #""SUBSCRIBED""#, #line),
         ]
 

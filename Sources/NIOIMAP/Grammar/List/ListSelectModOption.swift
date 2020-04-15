@@ -13,11 +13,12 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import IMAPCore
 
 // MARK: - Encoding
 extension ByteBuffer {
 
-    @discardableResult mutating func writeListSelectModOption(_ option: NIOIMAP.ListSelectModOption) -> Int {
+    @discardableResult mutating func writeListSelectModOption(_ option: IMAPCore.ListSelectModOption) -> Int {
         switch option {
         case .recursiveMatch:
             return self.writeString("RECURSIVEMATCH")

@@ -13,11 +13,12 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import IMAPCore
 
 // MARK: - Encoding
 extension ByteBuffer {
 
-    @discardableResult mutating func writeMediaBasicType(_ type: NIOIMAP.Media.BasicType) -> Int {
+    @discardableResult mutating func writeMediaBasicType(_ type: IMAPCore.Media.BasicType) -> Int {
         switch type {
         case .application:
             return self.writeString(#""APPLICATION""#)
@@ -36,7 +37,7 @@ extension ByteBuffer {
         }
     }
 
-    @discardableResult mutating func writeMediaBasic(_ media: NIOIMAP.Media.Basic) -> Int {
+    @discardableResult mutating func writeMediaBasic(_ media: IMAPCore.Media.Basic) -> Int {
         self.writeMediaBasicType(media.type) +
         self.writeSpace() +
         self.writeIMAPString(media.subtype)

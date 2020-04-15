@@ -13,11 +13,12 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import IMAPCore
 
 // MARK: - Encoding
 extension ByteBuffer {
 
-    @discardableResult mutating func writeListSelectBaseOption(_ option: NIOIMAP.ListSelectBaseOption) -> Int {
+    @discardableResult mutating func writeListSelectBaseOption(_ option: IMAPCore.ListSelectBaseOption) -> Int {
         switch option {
         case .subscribed:
             return self.writeString("SUBSCRIBED")
@@ -26,7 +27,7 @@ extension ByteBuffer {
         }
     }
 
-    @discardableResult mutating func writeListSelectBaseOptionQuoted(_ option: NIOIMAP.ListSelectBaseOption) -> Int {
+    @discardableResult mutating func writeListSelectBaseOptionQuoted(_ option: IMAPCore.ListSelectBaseOption) -> Int {
         self.writeString("\"") +
         self.writeListSelectBaseOption(option) +
         self.writeString("\"")

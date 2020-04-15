@@ -13,11 +13,12 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import IMAPCore
 
 // MARK: - Encoding
 extension ByteBuffer {
     
-    @discardableResult mutating func writeStoreAttributeFlags(_ flags: NIOIMAP.StoreAttributeFlags) -> Int {
+    @discardableResult mutating func writeStoreAttributeFlags(_ flags: IMAPCore.StoreAttributeFlags) -> Int {
         let silentString = flags.silent ? ".SILENT" : ""
         return
             self.writeString("\(flags.type.rawValue)FLAGS\(silentString) ") +

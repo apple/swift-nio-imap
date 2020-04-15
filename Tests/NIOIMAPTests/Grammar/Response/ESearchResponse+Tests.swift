@@ -14,6 +14,7 @@
 
 import XCTest
 import NIO
+@testable import IMAPCore
 @testable import NIOIMAP
 
 class ESearchResponse_Tests: EncodeTestClass {
@@ -24,7 +25,7 @@ class ESearchResponse_Tests: EncodeTestClass {
 extension ESearchResponse_Tests {
 
     func testEncode() {
-        let inputs: [(NIOIMAP.ESearchResponse, String, UInt)] = [
+        let inputs: [(IMAPCore.ESearchResponse, String, UInt)] = [
             (.correlator(nil, uid: false, returnData: []), "ESEARCH", #line),
             (.correlator(nil, uid: true, returnData: []), "ESEARCH UID", #line),
             (.correlator(nil, uid: false, returnData: [.count(2)]), "ESEARCH COUNT 2", #line),

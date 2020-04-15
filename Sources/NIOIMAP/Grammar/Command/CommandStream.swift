@@ -13,10 +13,11 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import IMAPCore
 
 extension ByteBuffer {
 
-    @discardableResult public mutating func writeCommandStream(_ stream: NIOIMAP.CommandStream) -> Int {
+    @discardableResult public mutating func writeCommandStream(_ stream: IMAPCore.CommandStream) -> Int {
         switch stream {
         case .idleDone:
             return self.writeString("DONE\r\n")

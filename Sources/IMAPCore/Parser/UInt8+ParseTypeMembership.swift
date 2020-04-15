@@ -16,19 +16,19 @@ import Darwin
 
 extension UInt8 {
     
-    var isCR: Bool {
+    public var isCR: Bool {
         return self == UInt8(ascii: "\r")
     }
     
-    var isLF: Bool {
+    public var isLF: Bool {
         return self == UInt8(ascii: "\n")
     }
     
-    var isResponseSpecial: Bool {
+    public var isResponseSpecial: Bool {
         return self == UInt8(ascii: "]")
     }
     
-    var isListWildcard: Bool {
+    public var isListWildcard: Bool {
         switch self {
         case UInt8(ascii: "%"), UInt8(ascii: "*"):
             return true
@@ -37,7 +37,7 @@ extension UInt8 {
         }
     }
     
-    var isQuotedSpecial: Bool {
+    public var isQuotedSpecial: Bool {
         switch self {
         case UInt8(ascii: "\""), UInt8(ascii: "\\"):
             return true
@@ -46,11 +46,11 @@ extension UInt8 {
         }
     }
     
-    var isQuotedChar: Bool {
+    public var isQuotedChar: Bool {
         return self.isTextChar && !self.isQuotedSpecial
     }
     
-    var isAtomSpecial: Bool {
+    public var isAtomSpecial: Bool {
         switch self {
         case UInt8(ascii: "("), UInt8(ascii: ")"), UInt8(ascii: " "), UInt8(ascii: "^"):
             return true
@@ -61,7 +61,7 @@ extension UInt8 {
         }
     }
     
-    var isTextChar: Bool {
+    public var isTextChar: Bool {
         switch self {
         case _ where self.isCR, _ where isLF, 0:
             return false
@@ -70,7 +70,7 @@ extension UInt8 {
         }
     }
     
-    var isAStringChar: Bool {
+    public var isAStringChar: Bool {
         switch self {
         case _ where self.isResponseSpecial, _ where isAtomChar:
             return true
@@ -79,7 +79,7 @@ extension UInt8 {
         }
     }
     
-    var isAtomChar: Bool {
+    public var isAtomChar: Bool {
         switch self {
         case _ where self.isAtomSpecial:
             return false
@@ -88,7 +88,7 @@ extension UInt8 {
         }
     }
     
-    var isListChar: Bool {
+    public var isListChar: Bool {
         switch self {
         case _ where self.isAtomChar, _ where self.isListWildcard, _ where self.isResponseSpecial:
             return true
@@ -97,7 +97,7 @@ extension UInt8 {
         }
     }
     
-    var isBase64Char: Bool {
+    public var isBase64Char: Bool {
         switch self {
         case UInt8(ascii: "+"), UInt8(ascii: "-"):
             return true
@@ -106,12 +106,12 @@ extension UInt8 {
         }
     }
 
-    var isAlpha: Bool {
+    public var isAlpha: Bool {
         return (self >= 65 && self <= 90) || (self >= 97 && self <= 122)
     }
 
     /// tagged-label-fchar  = ALPHA / "-" / "_" / "."
-    var isTaggedLabelFchar: Bool {
+    public var isTaggedLabelFchar: Bool {
         switch self {
         case UInt8(ascii: "-"), UInt8(ascii: "_"), UInt8(ascii: "."):
             return true
@@ -125,7 +125,7 @@ extension UInt8 {
     }
 
     /// tagged-label-char   = tagged-label-fchar / DIGIT / ":"
-    var isTaggedLabelChar: Bool {
+    public var isTaggedLabelChar: Bool {
         switch self {
         case UInt8(ascii: ":"):
             return true

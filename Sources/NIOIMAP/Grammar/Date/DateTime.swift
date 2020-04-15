@@ -13,11 +13,12 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import IMAPCore
 
 // MARK: - Encoding
 extension ByteBuffer {
     
-    @discardableResult mutating func writeDateTime(_ dateTime: NIOIMAP.Date.DateTime) -> Int {
+    @discardableResult mutating func writeDateTime(_ dateTime: IMAPCore.Date.DateTime) -> Int {
         self.writeString("\"\(dateTime.date.day)-\(dateTime.date.month.rawValue)-\(dateTime.date.year) ") +
         self.writeTime(dateTime.time) +
         self.writeSpace() +

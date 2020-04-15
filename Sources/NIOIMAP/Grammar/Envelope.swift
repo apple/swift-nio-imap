@@ -13,11 +13,12 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import IMAPCore
 
 // MARK: - Encoding
 extension ByteBuffer {
     
-    @discardableResult mutating func writeEnvelopeAddresses(_ addresses: [NIOIMAP.Address]) -> Int {
+    @discardableResult mutating func writeEnvelopeAddresses(_ addresses: [IMAPCore.Address]) -> Int {
         guard addresses.count > 0 else {
             return self.writeNil()
         }
@@ -30,7 +31,7 @@ extension ByteBuffer {
             self.writeString(")")
     }
 
-    @discardableResult mutating func writeEnvelope(_ envelope: NIOIMAP.Envelope) -> Int {
+    @discardableResult mutating func writeEnvelope(_ envelope: IMAPCore.Envelope) -> Int {
         self.writeString("(") +
         self.writeNString(envelope.date) +
         self.writeSpace() +

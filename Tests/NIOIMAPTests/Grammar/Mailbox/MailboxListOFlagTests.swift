@@ -14,6 +14,7 @@
 
 import XCTest
 import NIO
+@testable import IMAPCore
 @testable import NIOIMAP
 
 class MailboxListOFlagTests: EncodeTestClass {
@@ -24,7 +25,7 @@ class MailboxListOFlagTests: EncodeTestClass {
 extension MailboxListOFlagTests {
 
     func testEncode() {
-        let inputs: [(NIOIMAP.Mailbox.List.OFlag, String, UInt)] = [
+        let inputs: [(IMAPCore.Mailbox.List.OFlag, String, UInt)] = [
             (.noInferiors, "\\Noinferiors", #line),
             (.subscribed, "\\Subscribed", #line),
             (.remote, "\\Remote", #line),

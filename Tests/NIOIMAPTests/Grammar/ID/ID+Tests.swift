@@ -14,6 +14,7 @@
 
 import XCTest
 import NIO
+@testable import IMAPCore
 @testable import NIOIMAP
 
 class ID_Tests: EncodeTestClass {
@@ -24,7 +25,7 @@ class ID_Tests: EncodeTestClass {
 extension ID_Tests {
 
     func testEncode() {
-        let inputs: [(NIOIMAP.IDParameter, String, UInt)] = [
+        let inputs: [(IMAPCore.IDParameter, String, UInt)] = [
             (.key("key", value: "value"), #""key" "value""#, #line),
             (.key("key", value: nil), #""key" NIL"#, #line),
         ]
@@ -38,7 +39,7 @@ extension ID_Tests {
     }
     
     func testEncode_array() {
-        let inputs: [([NIOIMAP.IDParameter], String, UInt)] = [
+        let inputs: [([IMAPCore.IDParameter], String, UInt)] = [
             ([], "NIL", #line),
             ([.key("key", value: "value")], #"("key" "value")"#, #line),
         ]

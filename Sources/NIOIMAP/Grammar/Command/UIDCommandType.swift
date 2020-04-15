@@ -13,11 +13,12 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import IMAPCore
 
 // MARK: - Encoding
 extension ByteBuffer {
 
-    @discardableResult mutating func writeUIDCommandType(_ command: NIOIMAP.UIDCommandType) -> Int {
+    @discardableResult mutating func writeUIDCommandType(_ command: IMAPCore.UIDCommandType) -> Int {
         switch command {
         case let .copy(sequence, mailbox):
             return
@@ -63,7 +64,7 @@ extension ByteBuffer {
         }
     }
 
-    private mutating func writeUIDCommandType_search(returnOptions: [NIOIMAP.SearchReturnOption], program: NIOIMAP.SearchProgram) -> Int {
+    private mutating func writeUIDCommandType_search(returnOptions: [IMAPCore.SearchReturnOption], program: IMAPCore.SearchProgram) -> Int {
         self.writeString("SEARCH") +
         self.writeIfExists(returnOptions) { (options) -> Int in
             self.writeSearchReturnOptions(options)

@@ -14,12 +14,13 @@
 
 import XCTest
 import NIO
+@testable import IMAPCore
 @testable import NIOIMAP
 
 class EntryTypeResponse_Tests: EncodeTestClass {
 
     func testEncoding() {
-        let inputs: [(NIOIMAP.EntryTypeResponse, String, UInt)] = [
+        let inputs: [(IMAPCore.EntryTypeResponse, String, UInt)] = [
             (.private, "priv", #line),
             (.shared, "shared", #line),
         ]

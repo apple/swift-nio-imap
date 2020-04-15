@@ -14,6 +14,7 @@
 
 import XCTest
 import NIO
+@testable import IMAPCore
 @testable import NIOIMAP
 
 class Partial_Tests: EncodeTestClass {
@@ -24,7 +25,7 @@ class Partial_Tests: EncodeTestClass {
 extension Partial_Tests {
     
     func testEncode() {
-        let inputs: [(NIOIMAP.Partial, String, UInt)] = [
+        let inputs: [(IMAPCore.Partial, String, UInt)] = [
             (.init(left: 1, right: 2), "<1.2>", #line),
         ]
         

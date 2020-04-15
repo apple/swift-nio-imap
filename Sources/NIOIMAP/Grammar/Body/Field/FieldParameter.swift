@@ -13,11 +13,12 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import IMAPCore
 
 // MARK: - Encoding
 extension ByteBuffer {
 
-    @discardableResult mutating func writeBodyFieldParameters(_ params: [NIOIMAP.FieldParameterPair]) -> Int {
+    @discardableResult mutating func writeBodyFieldParameters(_ params: [IMAPCore.FieldParameterPair]) -> Int {
         guard params.count > 0 else {
             return self.writeNil()
         }
@@ -26,7 +27,7 @@ extension ByteBuffer {
         }
     }
     
-    @discardableResult mutating func writeFieldParameterPair(_ pair: NIOIMAP.FieldParameterPair) -> Int {
+    @discardableResult mutating func writeFieldParameterPair(_ pair: IMAPCore.FieldParameterPair) -> Int {
         self.writeIMAPString(pair.field) +
         self.writeSpace() +
         self.writeIMAPString(pair.value)

@@ -14,6 +14,7 @@
 
 import XCTest
 import NIO
+@testable import IMAPCore
 @testable import NIOIMAP
 
 class ListSelectModOption_Tests: EncodeTestClass {
@@ -24,7 +25,7 @@ class ListSelectModOption_Tests: EncodeTestClass {
 extension ListSelectModOption_Tests {
 
     func testEncode() {
-        let inputs: [(NIOIMAP.ListSelectModOption, String, UInt)] = [
+        let inputs: [(IMAPCore.ListSelectModOption, String, UInt)] = [
             (.recursiveMatch, "RECURSIVEMATCH", #line),
             (.option(.standard("extension", value: nil)), "extension", #line),
         ]

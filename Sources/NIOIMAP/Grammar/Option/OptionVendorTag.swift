@@ -13,11 +13,12 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import IMAPCore
 
 // MARK: - Encoding
 extension ByteBuffer {
 
-    @discardableResult mutating func writeOptionVendorTag(_ tag: NIOIMAP.OptionVendorTag) -> Int {
+    @discardableResult mutating func writeOptionVendorTag(_ tag: IMAPCore.OptionVendorTag) -> Int {
         self.writeString(tag.token) +
         self.writeString("-") +
         self.writeString(tag.atom)

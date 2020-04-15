@@ -14,6 +14,7 @@
 
 import XCTest
 import NIO
+@testable import IMAPCore
 @testable import NIOIMAP
 
 class MailboxListFlagsTests: EncodeTestClass {
@@ -24,12 +25,12 @@ class MailboxListFlagsTests: EncodeTestClass {
 extension MailboxListFlagsTests {
 
     func testEncode() {
-        let inputs: [(NIOIMAP.Mailbox.List.Flags, String, UInt)] = [
-            (NIOIMAP.Mailbox.List.Flags(oFlags: [], sFlag: nil), "", #line),
-            (NIOIMAP.Mailbox.List.Flags(oFlags: [], sFlag: .marked), "\\Marked", #line),
-            (NIOIMAP.Mailbox.List.Flags(oFlags: [.noInferiors], sFlag: nil), "\\Noinferiors", #line),
-            (NIOIMAP.Mailbox.List.Flags(oFlags: [.noInferiors, .other("test")], sFlag: nil), "\\Noinferiors \\test", #line),
-            (NIOIMAP.Mailbox.List.Flags(oFlags: [.noInferiors, .other("test")], sFlag: .marked), "\\Marked \\Noinferiors \\test", #line),
+        let inputs: [(IMAPCore.Mailbox.List.Flags, String, UInt)] = [
+            (IMAPCore.Mailbox.List.Flags(oFlags: [], sFlag: nil), "", #line),
+            (IMAPCore.Mailbox.List.Flags(oFlags: [], sFlag: .marked), "\\Marked", #line),
+            (IMAPCore.Mailbox.List.Flags(oFlags: [.noInferiors], sFlag: nil), "\\Noinferiors", #line),
+            (IMAPCore.Mailbox.List.Flags(oFlags: [.noInferiors, .other("test")], sFlag: nil), "\\Noinferiors \\test", #line),
+            (IMAPCore.Mailbox.List.Flags(oFlags: [.noInferiors, .other("test")], sFlag: .marked), "\\Marked \\Noinferiors \\test", #line),
         ]
 
         for (test, expectedString, line) in inputs {

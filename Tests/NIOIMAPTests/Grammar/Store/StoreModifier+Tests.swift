@@ -14,6 +14,7 @@
 
 import XCTest
 import NIO
+@testable import IMAPCore
 @testable import NIOIMAP
 
 class StoreModifier_Tests: EncodeTestClass {
@@ -24,7 +25,7 @@ class StoreModifier_Tests: EncodeTestClass {
 extension StoreModifier_Tests {
 
     func testEncode() {
-        let inputs: [(NIOIMAP.StoreModifier, String, UInt)] = [
+        let inputs: [(IMAPCore.StoreModifier, String, UInt)] = [
             (.name("name", parameters: nil), "name", #line),
             (.name("name", parameters: .simple(.number(1))), "name 1", #line),
         ]
@@ -38,7 +39,7 @@ extension StoreModifier_Tests {
     }
     
     func testEncode_array() {
-        let inputs: [([NIOIMAP.StoreModifier], String, UInt)] = [
+        let inputs: [([IMAPCore.StoreModifier], String, UInt)] = [
             ([.name("name", parameters: nil)], " (name)", #line),
             ([.name("name1", parameters: nil), .name("name2", parameters: nil)], " (name1 name2)", #line),
         ]

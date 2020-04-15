@@ -14,6 +14,7 @@
 
 import XCTest
 import NIO
+@testable import IMAPCore
 @testable import NIOIMAP
 
 class MediaBasicTests: EncodeTestClass {
@@ -24,7 +25,7 @@ class MediaBasicTests: EncodeTestClass {
 extension MediaBasicTests {
 
     func testEncode_basicType() {
-        let inputs: [(NIOIMAP.Media.BasicType, String, UInt)] = [
+        let inputs: [(IMAPCore.Media.BasicType, String, UInt)] = [
             (.application, #""APPLICATION""#, #line),
             (.video, #""VIDEO""#, #line),
             (.image, #""IMAGE""#, #line),
@@ -43,8 +44,8 @@ extension MediaBasicTests {
     }
 
     func testEncode() {
-        let inputs: [(NIOIMAP.Media.Basic, String, UInt)] = [
-            (NIOIMAP.Media.Basic(type: .message, subtype: "subtype"), "\"MESSAGE\" \"subtype\"", #line)
+        let inputs: [(IMAPCore.Media.Basic, String, UInt)] = [
+            (IMAPCore.Media.Basic(type: .message, subtype: "subtype"), "\"MESSAGE\" \"subtype\"", #line)
         ]
 
         for (test, expectedString, line) in inputs {

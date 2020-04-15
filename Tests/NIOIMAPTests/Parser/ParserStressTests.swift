@@ -14,9 +14,9 @@
 
 import NIO
 import NIOTestUtils
-import NIOIMAP
-
 import XCTest
+@testable import NIOIMAP
+@testable import IMAPCore
 
 final class ParserStressTests: XCTestCase {
     
@@ -47,7 +47,7 @@ final class ParserStressTests: XCTestCase {
                 XCTFail("\(_error)")
                 return
             }
-            XCTAssertEqual(error.parserError as? NIOIMAP.ParsingError, .lineTooLong)
+            XCTAssertEqual(error.parserError as? IMAPCore.ParsingError, .lineTooLong)
         }
     }
     
@@ -65,7 +65,7 @@ final class ParserStressTests: XCTestCase {
                 XCTFail("\(_error)")
                 return
             }
-            XCTAssertEqual(error.parserError as? NIOIMAP.ParsingError, .lineTooLong)
+            XCTAssertEqual(error.parserError as? IMAPCore.ParsingError, .lineTooLong)
         }
     }
 

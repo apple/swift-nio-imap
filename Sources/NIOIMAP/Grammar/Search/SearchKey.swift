@@ -13,17 +13,18 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import IMAPCore
 
 // MARK: - IMAP
 extension ByteBuffer {
     
-    @discardableResult mutating func writeSearchKeys(_ keys: [NIOIMAP.SearchKey]) -> Int {
+    @discardableResult mutating func writeSearchKeys(_ keys: [IMAPCore.SearchKey]) -> Int {
         return self.writeArray(keys) { (element, self) in
             self.writeSearchKey(element)
         }
     }
     
-    @discardableResult mutating func writeSearchKey(_ key: NIOIMAP.SearchKey) -> Int {
+    @discardableResult mutating func writeSearchKey(_ key: IMAPCore.SearchKey) -> Int {
         switch key {
         case .all:
             return self.writeString("ALL")

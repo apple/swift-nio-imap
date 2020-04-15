@@ -13,11 +13,12 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import IMAPCore
 
 // MARK: - Encoding
 extension ByteBuffer {
 
-    @discardableResult mutating func writeBodyFieldEncoding(_ encoding: NIOIMAP.Body.FieldEncoding) -> Int {
+    @discardableResult mutating func writeBodyFieldEncoding(_ encoding: IMAPCore.Body.FieldEncoding) -> Int {
         switch encoding {
         case .bit7:
             return self.writeString(#""7BIT""#)

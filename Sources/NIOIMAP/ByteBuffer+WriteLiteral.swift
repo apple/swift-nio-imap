@@ -13,25 +13,23 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import IMAPCore
 
 extension ByteBuffer: ByteBufferProtocol {
     
-    public typealias EndiannessType = NIO.Endianness
+    public typealias EndiannessType = Endianness
+    public typealias ReadableBytesViewType = ByteBufferView
     
     public func asString() -> String {
         return String(buffer: self)
     }
-    
 }
 
 extension ByteBufferView: ByteBufferProtocolView {
     
-    
-    
 }
 
 extension Endianness: EndiannessProtocol {
-    
     public static func bigEndian() -> Endianness {
         return .big
     }
@@ -39,7 +37,6 @@ extension Endianness: EndiannessProtocol {
     public static func littleEndian() -> Endianness {
         return .little
     }
-    
 }
 
 extension ByteBuffer {

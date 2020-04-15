@@ -13,11 +13,12 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import IMAPCore
 
 // MARK: - Encoding
 extension ByteBuffer {
 
-    @discardableResult mutating func writeListReturnOptions(_ options: [NIOIMAP.ReturnOption]) -> Int {
+    @discardableResult mutating func writeListReturnOptions(_ options: [IMAPCore.ReturnOption]) -> Int {
         self.writeString("RETURN ") +
         self.writeString("(") +
         self.writeIfArrayHasMinimumSize(array: options) { (options, self) -> Int in

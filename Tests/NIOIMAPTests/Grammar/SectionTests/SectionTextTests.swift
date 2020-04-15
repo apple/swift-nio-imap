@@ -13,6 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 import XCTest
+@testable import IMAPCore
 @testable import NIOIMAP
 
 class SectionTextTests: XCTestCase {

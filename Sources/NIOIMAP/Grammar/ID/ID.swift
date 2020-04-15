@@ -13,17 +13,18 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import IMAPCore
 
 // MARK: - Encoding
 extension ByteBuffer {
     
-    @discardableResult mutating func writeIDParameter(_ parameter: NIOIMAP.IDParameter) -> Int {
+    @discardableResult mutating func writeIDParameter(_ parameter: IMAPCore.IDParameter) -> Int {
         self.writeIMAPString(parameter.key) +
         self.writeSpace() +
         self.writeNString(parameter.value)
     }
     
-    @discardableResult mutating func writeIDParameters(_ array: [NIOIMAP.IDParameter]) -> Int {
+    @discardableResult mutating func writeIDParameters(_ array: [IMAPCore.IDParameter]) -> Int {
         guard array.count > 0 else {
             return self.writeNil()
         }
@@ -32,12 +33,12 @@ extension ByteBuffer {
         }
     }
     
-    @discardableResult mutating func writeIDResponse(_ response: [NIOIMAP.IDParameter]) -> Int {
+    @discardableResult mutating func writeIDResponse(_ response: [IMAPCore.IDParameter]) -> Int {
         self.writeString("ID ") +
         self.writeIDParameters(response)
     }
     
-    @discardableResult mutating func writeID(_ id: [NIOIMAP.IDParameter]) -> Int {
+    @discardableResult mutating func writeID(_ id: [IMAPCore.IDParameter]) -> Int {
         self.writeString("ID ") +
         self.writeIDParameters(id)
     }

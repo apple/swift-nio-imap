@@ -14,6 +14,7 @@
 
 import XCTest
 import NIO
+@testable import IMAPCore
 @testable import NIOIMAP
 
 class ReturnOption_Tests: EncodeTestClass {
@@ -24,7 +25,7 @@ class ReturnOption_Tests: EncodeTestClass {
 extension ReturnOption_Tests {
 
     func testEncode() {
-        let inputs: [(NIOIMAP.ReturnOption, String, UInt)] = [
+        let inputs: [(IMAPCore.ReturnOption, String, UInt)] = [
             (.subscribed, "SUBSCRIBED", #line),
             (.children, "CHILDREN", #line),
             (.statusOption([.messages]), "STATUS (MESSAGES)", #line),

@@ -13,17 +13,18 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import IMAPCore
 
 // MARK: - Encoding
 extension ByteBuffer {
 
-    @discardableResult mutating func writeNamespaceResponseExtensions(_ extensions: [NIOIMAP.NamespaceResponseExtension]) -> Int {
+    @discardableResult mutating func writeNamespaceResponseExtensions(_ extensions: [IMAPCore.NamespaceResponseExtension]) -> Int {
         extensions.reduce(into: 0) { (res, ext) in
             res += self.writeNamespaceResponseExtension(ext)
         }
     }
 
-    @discardableResult mutating func writeNamespaceResponseExtension(_ response: NIOIMAP.NamespaceResponseExtension) -> Int {
+    @discardableResult mutating func writeNamespaceResponseExtension(_ response: IMAPCore.NamespaceResponseExtension) -> Int {
         self.writeSpace() +
         self.writeIMAPString(response.str1) +
         self.writeSpace() +

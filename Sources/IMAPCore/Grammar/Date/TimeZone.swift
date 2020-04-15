@@ -18,7 +18,7 @@ extension IMAPCore.Date {
     
     /// IMAPv4 `zone`
     public struct TimeZone: Equatable {
-        fileprivate var backing: Int
+        public var backing: Int
         
         public init?(_ val: Int) {
             self.backing = val

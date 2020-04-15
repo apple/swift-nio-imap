@@ -13,6 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 import XCTest
+@testable import IMAPCore
 @testable import NIOIMAP
 
 class DateTimeTests: XCTestCase {
@@ -24,10 +25,10 @@ extension DateTimeTests {
     
     func testDateTimeInit() {
         
-        let date = NIOIMAP.Date(day: 25, month: .jun, year: 1994)
-        let time = NIOIMAP.Date.Time(hour: 01, minute: 02, second: 03)
-        let zone = NIOIMAP.Date.TimeZone(999)!
-        let dateTime = NIOIMAP.Date.DateTime(date: date, time: time, zone: zone)
+        let date = IMAPCore.Date(day: 25, month: .jun, year: 1994)
+        let time = IMAPCore.Date.Time(hour: 01, minute: 02, second: 03)
+        let zone = IMAPCore.Date.TimeZone(999)!
+        let dateTime = IMAPCore.Date.DateTime(date: date, time: time, zone: zone)
         
         XCTAssertEqual(dateTime.date, date)
         XCTAssertEqual(dateTime.time, time)

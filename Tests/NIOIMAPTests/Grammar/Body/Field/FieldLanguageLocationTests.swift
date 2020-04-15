@@ -14,6 +14,7 @@
 
 import XCTest
 import NIO
+@testable import IMAPCore
 @testable import NIOIMAP
 
 class FieldLanguageLocationTests: EncodeTestClass {
@@ -24,7 +25,7 @@ class FieldLanguageLocationTests: EncodeTestClass {
 extension FieldLanguageLocationTests {
 
     func testEncode() {
-        let inputs: [(NIOIMAP.Body.FieldLanguageLocation, String, UInt)] = [
+        let inputs: [(IMAPCore.Body.FieldLanguageLocation, String, UInt)] = [
             (.language(.single("language"), location: nil), " \"language\"", #line),
             (.language(.single("language"), location: .location("location", extensions: [])), " \"language\" \"location\"", #line)
         ]

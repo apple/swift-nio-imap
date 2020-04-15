@@ -14,6 +14,7 @@
 
 import XCTest
 import NIO
+@testable import IMAPCore
 @testable import NIOIMAP
 
 class SequenceRangeTests: EncodeTestClass {
@@ -24,7 +25,7 @@ class SequenceRangeTests: EncodeTestClass {
 extension SequenceRangeTests {
     
     func testWildcard() {
-        let range = NIOIMAP.SequenceRange.wildcard
+        let range = IMAPCore.SequenceRange.wildcard
         XCTAssertEqual(range.from, .last)
         XCTAssertEqual(range.to, .last)
     }
@@ -35,7 +36,7 @@ extension SequenceRangeTests {
 extension SequenceRangeTests {
     
     func testSingle() {
-        let range = NIOIMAP.SequenceRange.single(999)
+        let range = IMAPCore.SequenceRange.single(999)
         XCTAssertEqual(range.from, 999)
         XCTAssertEqual(range.to, 999)
     }
@@ -48,26 +49,26 @@ extension SequenceRangeTests {
     // here we always expect the smaller number on the left
     
     func testInit_range() {
-        let range = NIOIMAP.SequenceRange(1 ... 999)
+        let range = IMAPCore.SequenceRange(1 ... 999)
         XCTAssertEqual(range.from, 1)
         XCTAssertEqual(range.to, 999)
     }
     
     // expected to re-order to right-largest
     func testInit_left_larger() {
-        let range = NIOIMAP.SequenceRange(from: 999, to: 1)
+        let range = IMAPCore.SequenceRange(from: 999, to: 1)
         XCTAssertEqual(range.from, 1)
         XCTAssertEqual(range.to, 999)
     }
     
     func testInit_right_larger() {
-        let range = NIOIMAP.SequenceRange(from: 1, to: 999)
+        let range = IMAPCore.SequenceRange(from: 1, to: 999)
         XCTAssertEqual(range.from, 1)
         XCTAssertEqual(range.to, 999)
     }
  
     func testInit_integer() {
-        let range: NIOIMAP.SequenceRange = 654
+        let range: IMAPCore.SequenceRange = 654
         XCTAssertEqual(range.from, 654)
         XCTAssertEqual(range.to, 654)
     }
@@ -86,7 +87,7 @@ extension SequenceRangeTests {
     
     func testEncode_range() {
         let expected = "12:34"
-        let size = self.testBuffer.writeSequenceRange(NIOIMAP.SequenceRange(from: 12, to: 34))
+        let size = self.testBuffer.writeSequenceRange(IMAPCore.SequenceRange(from: 12, to: 34))
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }

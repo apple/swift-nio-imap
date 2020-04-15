@@ -14,6 +14,7 @@
 
 import XCTest
 import NIO
+@testable import IMAPCore
 @testable import NIOIMAP
 
 class BodyTypeMessageTests: EncodeTestClass {
@@ -24,12 +25,12 @@ class BodyTypeMessageTests: EncodeTestClass {
 extension BodyTypeMessageTests {
 
     func testEncode() {
-        let inputs: [(NIOIMAP.Body.TypeMessage, String, UInt)] = [
+        let inputs: [(IMAPCore.Body.TypeMessage, String, UInt)] = [
             (
                 .message(
                     .rfc822,
                     fields: .parameter([], id: nil, description: nil, encoding: .base64, octets: 111),
-                    envelope: NIOIMAP.Envelope(date: "date", subject: nil, from: [], sender: [], reply: [], to: [], cc: [], bcc: [], inReplyTo: nil, messageID: nil),
+                    envelope: IMAPCore.Envelope(date: "date", subject: nil, from: [], sender: [], reply: [], to: [], cc: [], bcc: [], inReplyTo: nil, messageID: nil),
                     body: .singlepart(.type(.text(.mediaText("subtype",
                             fields: .parameter([], id: nil, description: nil, encoding: .binary, octets: 22),
                             lines: 33

@@ -14,6 +14,7 @@
 
 import XCTest
 import NIO
+@testable import IMAPCore
 @testable import NIOIMAP
 
 class DateTests: EncodeTestClass {
@@ -26,9 +27,9 @@ extension DateTests {
     func testDateInit() {
         
         let day = 25
-        let month = NIOIMAP.Date.Month.jun
+        let month = IMAPCore.Date.Month.jun
         let year = 1994
-        let date = NIOIMAP.Date(day: day, month: month, year: year)
+        let date = IMAPCore.Date(day: day, month: month, year: year)
         
         XCTAssertEqual(date.day, day)
         XCTAssertEqual(date.month, month)
@@ -42,7 +43,7 @@ extension DateTests {
     
     func testDateImapEncoded() {
         let expected = "25-jun-1994"
-        let size = self.testBuffer.writeDate(NIOIMAP.Date(day: 25, month: .jun, year: 1994))
+        let size = self.testBuffer.writeDate(IMAPCore.Date(day: 25, month: .jun, year: 1994))
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }
