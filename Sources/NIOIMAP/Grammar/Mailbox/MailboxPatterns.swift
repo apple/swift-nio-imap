@@ -18,7 +18,7 @@ import IMAPCore
 // MARK: - Encoding
 extension ByteBuffer {
 
-    @discardableResult mutating func writeMailboxPatterns(_ patterns: IMAPCore.MailboxPatterns) -> Int {
+    @discardableResult public mutating func writeMailboxPatterns(_ patterns: IMAPCore.MailboxPatterns) -> Int {
         switch patterns {
         case .mailbox(let list):
             return self.writeIMAPString(list)

@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-
-
 extension IMAPCore {
     
     public struct SelectParameter: Equatable {

@@ -7,3 +7,31 @@
 //
 // See LICENSE.txt for license information
 // See CONTRIBUTORS.txt for the list of SwiftNIO project authors
+//
+// SPDX-License-Identifier: Apache-2.0
+//
+//===----------------------------------------------------------------------===//
+
+extension ByteBufferProtocol {
+    
+    public mutating func writeAtom(_ str: String) -> Int {
+        self.writeString(str)
+    }
+    
+    public mutating func writeAString(_ str: String) -> Int {
+        
+        // allSatisfy vs contains because IMO it's a little clearer
+        var foundNull = false
+        let canUseAtom = str.utf8.allSatisfy { c in
+            foundNull = foundNull || (c == 0)
+            return c.isAtomChar && !foundNull
+        }
+        
+        if canUseAtom {
+            return self.writeString(str)
+        } else {
+            return self.writeIMAPString(str)
+        }
+    }
+    
+}

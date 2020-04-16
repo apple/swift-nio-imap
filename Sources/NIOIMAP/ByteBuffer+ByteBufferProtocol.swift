@@ -13,12 +13,28 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import IMAPCore
 
-// MARK: - Encoding
-extension ByteBuffer {
+extension ByteBuffer: ByteBufferProtocol {
     
-    @discardableResult mutating func writeUserID(_ id: String) -> Int {
-        self.writeString(id)
+    public typealias EndiannessType = Endianness
+    public typealias ReadableBytesViewType = ByteBufferView
+    
+    public func asString() -> String {
+        return String(buffer: self)
+    }
+}
+
+extension ByteBufferView: ByteBufferProtocolView {
+    
+}
+
+extension Endianness: EndiannessProtocol {
+    public static func bigEndian() -> Endianness {
+        return .big
     }
     
+    public static func littleEndian() -> Endianness {
+        return .little
+    }
 }

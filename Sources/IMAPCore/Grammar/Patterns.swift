@@ -5,3 +5,20 @@
 // Copyright (c) 2020 Apple Inc. and the SwiftNIO project authors
 // Licensed under Apache License v2.0
 //
+// See LICENSE.txt for license information
+// See CONTRIBUTORS.txt for the list of SwiftNIO project authors
+//
+// SPDX-License-Identifier: Apache-2.0
+//
+//===----------------------------------------------------------------------===//
+
+// MARK: - Encoding
+extension ByteBufferProtocol {
+
+    @discardableResult public mutating func writePatterns(_ patterns: [String]) -> Int {
+        self.writeArray(patterns) { (pattern, self) in
+            self.writeIMAPString(pattern)
+        }
+    }
+
+}
