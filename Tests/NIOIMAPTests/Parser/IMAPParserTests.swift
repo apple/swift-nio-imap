@@ -69,7 +69,7 @@ final class ParserUnitTests: XCTestCase {
             try ByteToMessageDecoderVerifier.verifyDecoder(
                 stringInputOutputPairs: inoutPairs,
                 decoderFactory: { () -> NIOIMAP.CommandDecoder in
-                    return NIOIMAP.CommandDecoder()
+                    return NIOIMAP.CommandDecoder(autoSendContinuations: false)
             })
         } catch {
             switch error as? ByteToMessageDecoderVerifier.VerificationError<NIOIMAP.CommandStream> {

@@ -30,11 +30,13 @@ public class CommandRoundtripHandler: ChannelOutboundHandler {
     }
     
     public func write(context: ChannelHandlerContext, data: NIOAny, promise: EventLoopPromise<Void>?) {
-        
         var originalBuffer = self.unwrapOutboundIn(data)
         do {
             var originalBufferCopy = originalBuffer
-            let commandStream = try parser.parseCommandStream(buffer: &originalBufferCopy)
+            guard let commandStream = try parser.parseCommandStream(buffer: &originalBufferCopy) else {
+                promise?.fail(NIOIMAP.ParsingError.incompleteMessage) // TODO: this leaks implementation details
+                return
+            }
             
             var roundtripBuffer = context.channel.allocator.buffer(capacity: originalBuffer.readableBytes)
             roundtripBuffer.writeCommandStream(commandStream)
