@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-
-
 extension IMAPCore {
     
     public struct TaggedExtension: Equatable {
@@ -23,6 +21,17 @@ extension IMAPCore {
         public static func label(_ label: String, value: TaggedExtensionValue) -> Self {
             return Self(label: label, value: value)
         }
+    }
+    
+}
+
+// MARK: - Encoding
+extension ByteBufferProtocol {
+    
+    @discardableResult mutating func writeTaggedExtension(_ ext: IMAPCore.TaggedExtension) -> Int {
+        self.writeTaggedExtensionLabel(ext.label) +
+        self.writeSpace() +
+        self.writeTaggedExtensionValue(ext.value)
     }
     
 }

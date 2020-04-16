@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-
-
 extension IMAPCore {
 
     public enum EntryTypeRequest: Equatable {
@@ -21,4 +19,18 @@ extension IMAPCore {
         case all
     }
 
+}
+
+// MARK: - Encoding
+extension ByteBufferProtocol {
+    
+    @discardableResult mutating func writeEntryTypeRequest(_ request: IMAPCore.EntryTypeRequest) -> Int {
+        switch request {
+        case .response(let response):
+            return self.writeEntryTypeResponse(response)
+        case .all:
+            return self.writeString("all")
+        }
+    }
+    
 }

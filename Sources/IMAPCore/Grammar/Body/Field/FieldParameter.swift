@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-
-
 extension IMAPCore {
     
     public struct FieldParameterPair: Equatable {
@@ -25,4 +23,24 @@ extension IMAPCore {
         }
     }
     
+}
+
+// MARK: - Encoding
+extension ByteBufferProtocol {
+
+    @discardableResult mutating func writeBodyFieldParameters(_ params: [IMAPCore.FieldParameterPair]) -> Int {
+        guard params.count > 0 else {
+            return self.writeNil()
+        }
+        return self.writeArray(params) { (element, buffer) in
+            buffer.writeFieldParameterPair(element)
+        }
+    }
+    
+    @discardableResult mutating func writeFieldParameterPair(_ pair: IMAPCore.FieldParameterPair) -> Int {
+        self.writeIMAPString(pair.field) +
+        self.writeSpace() +
+        self.writeIMAPString(pair.value)
+    }
+
 }

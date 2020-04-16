@@ -12,4 +12,11 @@
 //
 //===----------------------------------------------------------------------===//
 
-
+// MARK: - Encoding
+extension ByteBufferProtocol {
+    
+    @discardableResult mutating func writeAppendExtensionName(_ name: String) -> Int {
+        self.writeTaggedExtensionLabel(name)
+    }
+    
+}

@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-
-
 extension IMAPCore.Body {
 
     /// Extracted from IMAPv4 `body-ext-`1part
@@ -24,6 +22,16 @@ extension IMAPCore.Body {
         public static func fieldDSP(_ fieldDSP: FieldDSPData?, fieldLanguage: FieldLanguageLocation?) -> Self {
             return Self(fieldDSP: fieldDSP, fieldLanguage: fieldLanguage)
         }
+    }
+
+}
+
+// MARK: - Encoding
+extension ByteBufferProtocol {
+
+    @discardableResult mutating func writeBodyFieldDSPLanguage(_ desc: IMAPCore.Body.FieldDSPLanguage) -> Int {
+        self.writeSpace() +
+        self.writeBodyFieldDSP(desc.fieldDSP)
     }
 
 }

@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-
-
 extension IMAPCore {
     
     /// You will recieve exactly one `greeting`
@@ -31,6 +29,34 @@ extension IMAPCore {
         case streamingAttributeEnd
         case attributesFinish
         case responseEnd(ResponseDone)
+    }
+    
+}
+
+// MARK: - Encoding
+extension ByteBufferProtocol {
+    
+    @discardableResult public mutating func writeResponseStream(_ response: IMAPCore.ResponseStream) -> Int {
+        switch response {
+        case .greeting(let greeting):
+            return self.writeGreeting(greeting)
+        case .responseBegin(let resp):
+            return self.writeResponseData(resp)
+        case .attributesStart:
+            return self.writeString("(")
+        case .simpleAttribute(let att):
+            return self.writeMessageAttributeType(att)
+        case .streamingAttributeBegin(let att):
+            return self.writeMessageAttributeStatic(att)
+        case .streamingAttributeBytes(let bytes):
+            return self.writeBytes(bytes)
+        case .streamingAttributeEnd:
+            return 0 // do nothing, this is a "fake" event
+        case .attributesFinish:
+            return self.writeString(")")
+        case .responseEnd(let end):
+            return self.writeResponseDone(end)
+        }
     }
     
 }

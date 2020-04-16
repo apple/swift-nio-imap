@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-
-
 extension IMAPCore {
 
     public struct AppendMessage: Equatable {
@@ -25,4 +23,15 @@ extension IMAPCore {
         }
     }
 
+}
+
+// MARK: - Encoding
+extension ByteBufferProtocol {
+    
+    @discardableResult mutating func writeAppendMessage(_ message: IMAPCore.AppendMessage) -> Int {
+        self.writeAppendOptions(message.options) +
+        self.writeSpace() +
+        self.writeAppendData(message.data)
+    }
+    
 }

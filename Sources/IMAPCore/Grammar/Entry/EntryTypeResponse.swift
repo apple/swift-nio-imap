@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-
-
 extension IMAPCore {
 
     public enum EntryTypeResponse: Equatable {
@@ -21,4 +19,18 @@ extension IMAPCore {
         case shared
     }
 
+}
+
+// MARK: - Encoding
+extension ByteBufferProtocol {
+    
+    @discardableResult mutating func writeEntryTypeResponse(_ response: IMAPCore.EntryTypeResponse) -> Int {
+        switch response {
+        case .private:
+            return self.writeString("priv")
+        case .shared:
+            return self.writeString("shared")
+        }
+    }
+    
 }

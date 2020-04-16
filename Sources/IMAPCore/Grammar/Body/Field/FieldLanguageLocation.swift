@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-
-
 extension IMAPCore.Body {
 
     /// Extracted from IMAPv4 `body-ext-1part`
@@ -24,6 +22,19 @@ extension IMAPCore.Body {
         /// Convenience function for a better experience when chaining multiple types.
         public static func language(_ language: IMAPCore.Body.FieldLanguage, location: FieldLocationExtension?) -> Self {
             return Self(language: language, location: location)
+        }
+    }
+
+}
+
+// MARK: - Encoding
+extension ByteBufferProtocol {
+
+    @discardableResult mutating func writeBodyFieldLanguageLocation(_ langLoc: IMAPCore.Body.FieldLanguageLocation) -> Int {
+        self.writeSpace() +
+        self.writeBodyFieldLanguage(langLoc.language) +
+        self.writeIfExists(langLoc.location) { (location) -> Int in
+            self.writeBodyFieldLocationExtension(location)
         }
     }
 

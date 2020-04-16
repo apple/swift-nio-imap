@@ -19,3 +19,16 @@ extension IMAPCore {
     public typealias NString = String?
     
 }
+
+// MARK: - IMAP
+extension ByteBufferProtocol {
+    
+    @discardableResult mutating func writeNString(_ string: IMAPCore.NString) -> Int {
+        if let string = string {
+            return self.writeIMAPString(string)
+        } else {
+            return self.writeNil()
+        }
+    }
+    
+}

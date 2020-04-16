@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-
-
 extension IMAPCore {
 
     /// IMAPv4 `initial-response`
@@ -22,4 +20,18 @@ extension IMAPCore {
         case base64([UInt8])
     }
 
+}
+
+// MARK: - Encoding
+extension ByteBufferProtocol {
+    
+    @discardableResult mutating func writeInitialResponse(_ response: IMAPCore.InitialResponse) -> Int {
+        switch response {
+        case .equals:
+            return self.writeString("=")
+        case .base64(let base64):
+            return self.writeBytes(base64)
+        }
+    }
+    
 }

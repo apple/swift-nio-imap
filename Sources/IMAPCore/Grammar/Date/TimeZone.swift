@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-
-
 extension IMAPCore.Date {
     
     /// IMAPv4 `zone`
@@ -23,6 +21,29 @@ extension IMAPCore.Date {
         public init?(_ val: Int) {
             self.backing = val
         }
+    }
+    
+}
+
+// MARK: IMAP
+extension ByteBufferProtocol {
+    
+    @discardableResult mutating func writeTimezone(_ timezone: IMAPCore.Date.TimeZone) -> Int {
+        let string = String(abs(timezone.backing))
+        
+        let zeroedString: String
+        if string.count < 4 {
+            var output = ""
+            output.reserveCapacity(4)
+            output.append(contentsOf: repeatElement("0", count: 4 - string.count))
+            output.append(string)
+            zeroedString = output
+        } else {
+            zeroedString = string
+        }
+        
+        let modifier = (timezone.backing >= 0) ? "+" : "-"
+        return self.writeString("\(modifier)\(zeroedString)")
     }
     
 }

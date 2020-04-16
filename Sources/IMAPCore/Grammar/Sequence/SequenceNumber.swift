@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-
-
 extension IMAPCore {
  
     /// IMAPv4 `seq-number`
@@ -54,3 +52,18 @@ extension IMAPCore.SequenceNumber: Comparable {
     }
     
 }
+
+// MARK: - Encoding
+extension ByteBufferProtocol {
+    
+    @discardableResult mutating func writeSequenceNumber(_ num: IMAPCore.SequenceNumber) -> Int {
+        switch num {
+        case .last:
+            return self.writeString("*")
+        case .number(let num):
+            return self.writeString("\(num)")
+        }
+    }
+    
+}
+

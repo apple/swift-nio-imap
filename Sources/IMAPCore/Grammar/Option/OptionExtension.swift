@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-
-
 extension IMAPCore {
 
     public enum OptionExtensionType: Equatable {
@@ -33,6 +31,27 @@ extension IMAPCore {
         public static func vendor(_ tag: OptionVendorTag, value: OptionValueComp?) -> Self {
             return Self(type: .vendor(tag), value: value)
         }
+    }
+
+}
+
+// MARK: - Encoding
+extension ByteBufferProtocol {
+
+    @discardableResult mutating func writeOptionExtension(_ option: IMAPCore.OptionExtension) -> Int {
+        var size = 0
+        switch option.type {
+        case .standard(let atom):
+            size += self.writeString(atom)
+        case .vendor(let tag):
+            size += self.writeOptionVendorTag(tag)
+        }
+
+        if let value = option.value {
+            size += self.writeSpace()
+            size += self.writeOptionValue(value)
+        }
+        return size
     }
 
 }

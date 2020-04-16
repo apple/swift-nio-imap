@@ -10,3 +10,13 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 //
+//===----------------------------------------------------------------------===//
+
+// MARK: - Encoding
+extension ByteBufferProtocol {
+    
+    @discardableResult mutating func writeStoreModifierName(_ name: String) -> Int {
+        self.writeTaggedExtensionLabel(name)
+    }
+    
+}

@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-
-
 extension IMAPCore {
     
     /// IMAPv4 `section-text`
@@ -22,4 +20,17 @@ extension IMAPCore {
         case message(SectionMessageText)
     }
     
+}
+
+// MARK: - Encoding
+extension ByteBufferProtocol {
+    
+    @discardableResult mutating func writeSectionText(_ text: IMAPCore.SectionText) -> Int {
+        switch text {
+        case .mime:
+            return self.writeString("MIME")
+        case .message(let message):
+            return self.writeSectionMessageText(message)
+        }
+    }
 }

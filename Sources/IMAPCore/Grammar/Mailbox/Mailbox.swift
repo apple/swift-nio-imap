@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-
-
 extension IMAPCore {
  
     /// IMAPv4 `mailbox`
@@ -46,6 +44,15 @@ extension IMAPCore.Mailbox: ExpressibleByStringLiteral {
     
     public init(stringLiteral value: String) {
         self.init(value)
+    }
+    
+}
+
+// MARK: - Encoding
+extension ByteBufferProtocol {
+    
+    @discardableResult mutating func writeMailbox(_ mailbox: IMAPCore.Mailbox) -> Int {
+        self.writeIMAPString(mailbox.name)
     }
     
 }

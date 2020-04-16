@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-
-
 extension IMAPCore {
 
     /// IMAPv4 `list-select-mod-opt`
@@ -23,3 +21,18 @@ extension IMAPCore {
     }
 
 }
+
+// MARK: - Encoding
+extension ByteBufferProtocol {
+
+    @discardableResult mutating func writeListSelectModOption(_ option: IMAPCore.ListSelectModOption) -> Int {
+        switch option {
+        case .recursiveMatch:
+            return self.writeString("RECURSIVEMATCH")
+        case .option(let option):
+            return self.writeOptionExtension(option)
+        }
+    }
+
+}
+

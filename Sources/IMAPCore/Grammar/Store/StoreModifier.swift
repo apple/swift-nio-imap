@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-
-
 extension IMAPCore {
     
     public struct StoreModifier: Equatable {
@@ -25,4 +23,24 @@ extension IMAPCore {
         }
     }
 
+}
+
+// MARK: - Encoding
+extension ByteBufferProtocol {
+    
+    @discardableResult mutating func writeStoreModifier(_ modifier: IMAPCore.StoreModifier) -> Int {
+        self.writeStoreModifierName(modifier.name) +
+        self.writeIfExists(modifier.parameters) { (params) -> Int in
+            self.writeSpace() +
+            self.writeTaggedExtensionValue(params)
+        }
+    }
+    
+    @discardableResult mutating func writeStoreModifiers(_ modifiers: [IMAPCore.StoreModifier]) -> Int {
+        self.writeSpace() +
+        self.writeArray(modifiers) { (modifier, self) -> Int in
+            self.writeStoreModifier(modifier)
+        }
+    }
+    
 }

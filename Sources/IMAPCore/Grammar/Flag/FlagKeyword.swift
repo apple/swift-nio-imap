@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-
-
 extension IMAPCore.Flag {
 
     /// IMAPv4 `flag-keyword`
@@ -31,6 +29,22 @@ extension IMAPCore.Flag.Keyword: ExpressibleByStringLiteral {
 
     public init(stringLiteral value: Self.StringLiteralType) {
         self = .other(value)
+    }
+
+}
+
+// MARK: - Encoding
+extension ByteBufferProtocol {
+
+    @discardableResult mutating func writeFlagKeyword(_ keyword: IMAPCore.Flag.Keyword) -> Int {
+        switch keyword {
+        case .forwarded:
+            return self.writeString("$Forwarded")
+        case .mdnSent:
+            return self.writeString("$MDNSent")
+        case .other(let atom):
+            return self.writeString(atom)
+        }
     }
 
 }

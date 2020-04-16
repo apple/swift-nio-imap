@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-
-
 extension IMAPCore {
 
     /// IMAPv4 `Namespace-Response-Extension`
@@ -23,6 +21,26 @@ extension IMAPCore {
 
         public static func string(_ string: String, array: [String]) -> Self {
             return Self(str1: string, strs: array)
+        }
+    }
+
+}
+
+// MARK: - Encoding
+extension ByteBufferProtocol {
+
+    @discardableResult mutating func writeNamespaceResponseExtensions(_ extensions: [IMAPCore.NamespaceResponseExtension]) -> Int {
+        extensions.reduce(into: 0) { (res, ext) in
+            res += self.writeNamespaceResponseExtension(ext)
+        }
+    }
+
+    @discardableResult mutating func writeNamespaceResponseExtension(_ response: IMAPCore.NamespaceResponseExtension) -> Int {
+        self.writeSpace() +
+        self.writeIMAPString(response.str1) +
+        self.writeSpace() +
+        self.writeArray(response.strs) { (string, self) in
+            self.writeIMAPString(string)
         }
     }
 

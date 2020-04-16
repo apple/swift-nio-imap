@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-
-
 extension IMAPCore {
 
     /// IMAPv4 `partial`
@@ -25,6 +23,14 @@ extension IMAPCore {
             self.left = left
             self.right = right
         }
+    }
+    
+}
+
+extension ByteBufferProtocol {
+    
+    @discardableResult mutating func writePartial(_ num: IMAPCore.Partial) -> Int {
+        self.writeString("<\(num.left).\(num.right)>")
     }
     
 }

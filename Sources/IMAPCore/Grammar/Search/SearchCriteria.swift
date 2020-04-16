@@ -5,3 +5,19 @@
 // Copyright (c) 2020 Apple Inc. and the SwiftNIO project authors
 // Licensed under Apache License v2.0
 //
+// See LICENSE.txt for license information
+// See CONTRIBUTORS.txt for the list of SwiftNIO project authors
+//
+// SPDX-License-Identifier: Apache-2.0
+//
+//===----------------------------------------------------------------------===//
+
+extension ByteBufferProtocol {
+    
+    @discardableResult public mutating func writeSearchCriteria(_ criteria: [IMAPCore.SearchKey]) -> Int {
+        self.writeArray(criteria, parenthesis: false) { (key, self) in
+            self.writeSearchKey(key)
+        }
+    }
+    
+}

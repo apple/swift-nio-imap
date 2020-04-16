@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-
-
 extension IMAPCore {
 
     /// IMAPv4 `greeting`
@@ -21,4 +19,22 @@ extension IMAPCore {
         case auth(ResponseConditionalAuth)
         case bye(ResponseText)
     }
+}
+
+// MARK: - Encoding
+extension ByteBufferProtocol {
+
+    @discardableResult mutating func writeGreeting(_ greeting: IMAPCore.Greeting) -> Int {
+        var size = 0
+        size += self.writeString("* ")
+        switch greeting {
+        case .auth(let auth):
+            size += self.writeResponseConditionalAuth(auth)
+        case .bye(let bye):
+            size += self.writeResponseConditionalBye(bye)
+        }
+        size += self.writeString("\r\n")
+        return size
+    }
+
 }

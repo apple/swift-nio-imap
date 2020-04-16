@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-
-
 extension IMAPCore {
     
     /// IMAPv4 `section-msgtext`
@@ -22,6 +20,28 @@ extension IMAPCore {
         case headerFields(_ fields: [String])
         case notHeaderFields(_ fields: [String])
         case text
+    }
+    
+}
+
+// MARK: - Encoding
+extension ByteBufferProtocol {
+    
+    @discardableResult public mutating func writeSectionMessageText(_ text: IMAPCore.SectionMessageText) -> Int {
+        switch text {
+        case .header:
+            return self.writeString("HEADER")
+        case .headerFields(let list):
+            return
+                self.writeString("HEADER.FIELDS ") +
+                self.writeHeaderList(list)
+        case .notHeaderFields(let list):
+            return
+                self.writeString("HEADER.FIELDS.NOT ") +
+                self.writeHeaderList(list)
+        case .text:
+            return self.writeString("TEXT")
+        }
     }
     
 }

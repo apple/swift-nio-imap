@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-
-
 extension IMAPCore {
 
     /// IMAP4 `command` (`command-any`, `command-auth`, `command-nonauth`, `command-select`)
@@ -25,6 +23,24 @@ extension IMAPCore {
             self.type = type
             self.tag = tag
         }
+    }
+
+}
+
+extension ByteBufferProtocol {
+
+    @discardableResult public mutating func writeCommand(_ command: IMAPCore.Command) -> Int {
+        var size = 0
+        size += self.writeString("\(command.tag) ")
+        size += self.writeCommandType(command.type)
+        
+        switch command.type {
+        case .append(to: _, firstMessageMetadata: _):
+            break
+        default:
+            size += self.writeString("\r\n")
+        }
+        return size
     }
 
 }

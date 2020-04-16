@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-
-
 extension IMAPCore.Body {
 
     /// Extracted from IMAPv4 `body-ext-1part`
@@ -23,6 +21,21 @@ extension IMAPCore.Body {
         
         public static func location(_ location: IMAPCore.NString, extensions: [[IMAPCore.BodyExtensionType]]) -> Self {
             return Self(location: location, extensions: extensions)
+        }
+    }
+
+}
+
+// MARK: - Encoding
+extension ByteBufferProtocol {
+
+    @discardableResult mutating func writeBodyFieldLocationExtension(_ locationExtension: IMAPCore.Body.FieldLocationExtension) -> Int {
+        self.writeSpace() +
+        self.writeNString(locationExtension.location) +
+        locationExtension.extensions.reduce(0) { (result, ext) in
+            result +
+            self.writeSpace() +
+            self.writeBodyExtension(ext)
         }
     }
 

@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-
-
 extension IMAPCore {
 
     /// IMAPv4 `search-program`
@@ -23,6 +21,20 @@ extension IMAPCore {
 
         public static func charset(_ charset: String?, keys: [SearchKey]) -> Self {
             return Self(charset: charset, keys: keys)
+        }
+    }
+
+}
+
+// MARK: - Encoding
+extension ByteBufferProtocol {
+
+    @discardableResult mutating func writeSearchProgram(_ program: IMAPCore.SearchProgram) -> Int {
+        self.writeIfExists(program.charset) { (charset) -> Int in
+            self.writeString("CHARSET \(charset) ")
+        } +
+        self.writeArray(program.keys, parenthesis: false) { (key, self) in
+            self.writeSearchKey(key)
         }
     }
 

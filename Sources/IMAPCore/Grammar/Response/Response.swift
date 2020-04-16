@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-
-
 extension IMAPCore {
     
     public enum ResponseType: Equatable {
@@ -21,4 +19,18 @@ extension IMAPCore {
         case responseData(ResponsePayload)
     }
     
+}
+
+// MARK: - Encoding
+extension ByteBufferProtocol {
+
+    @discardableResult mutating func writeResponseType(_ type: IMAPCore.ResponseType) -> Int {
+        switch type {
+        case .continueRequest(let continueRequest):
+            return self.writeContinueRequest(continueRequest)
+        case .responseData(let data):
+            return self.writeResponseData(data)
+        }
+    }
+
 }

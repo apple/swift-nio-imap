@@ -12,14 +12,32 @@
 //
 //===----------------------------------------------------------------------===//
 
-
-
 extension IMAPCore {
 
     /// IMAPv4 `flag-perm`
     public enum PermanentFlag: Equatable {
         case flag(Flag)
         case wildcard
+    }
+
+}
+
+// MARK: - Encoding
+extension ByteBufferProtocol {
+
+    @discardableResult mutating func writeFlagPerm(_ flagPerm: IMAPCore.PermanentFlag) -> Int {
+        switch flagPerm {
+        case .flag(let flag):
+            return self.writeFlag(flag)
+        case .wildcard:
+            return self.writeString(#"\*"#)
+        }
+    }
+    
+    @discardableResult mutating func writePermanentFlags(_ flags: [IMAPCore.PermanentFlag]) -> Int {
+        return self.writeArray(flags) { (element, self) in
+            self.writeFlagPerm(element)
+        }
     }
 
 }

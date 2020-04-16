@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-
-
 extension IMAPCore {
     
     /// IMAPv4 `resp-cond-state`
@@ -23,4 +21,26 @@ extension IMAPCore {
         case bad(ResponseText)
     }
     
+}
+
+// MARK: - Encoding
+extension ByteBufferProtocol {
+
+    @discardableResult mutating func writeResponseConditionalState(_ cond: IMAPCore.ResponseConditionalState) -> Int {
+        switch cond {
+        case .ok(let text):
+            return
+                self.writeString("OK ") +
+                self.writeResponseText(text)
+        case .no(let text):
+            return
+                self.writeString("NO ") +
+                self.writeResponseText(text)
+        case .bad(let text):
+            return
+                self.writeString("BAD ") +
+                self.writeResponseText(text)
+        }
+    }
+
 }

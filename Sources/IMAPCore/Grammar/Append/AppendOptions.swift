@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-
-
 extension IMAPCore {
 
     public struct AppendOptions: Equatable {
@@ -26,4 +24,24 @@ extension IMAPCore {
         }
     }
 
+}
+
+// MARK: - Encoding
+extension ByteBufferProtocol {
+    
+    @discardableResult mutating func writeAppendOptions(_ options: IMAPCore.AppendOptions) -> Int {
+        self.writeIfArrayHasMinimumSize(array: options.flagList) { (array, self) -> Int in
+            self.writeSpace() +
+            self.writeFlags(array)
+        } +
+        self.writeIfExists(options.dateTime) { (dateTime) -> Int in
+            self.writeSpace() +
+            self.writeDateTime(dateTime)
+        } +
+        self.writeArray(options.extensions, separator: "", parenthesis: false) { (ext, self) -> Int in
+            self.writeSpace() +
+            self.writeAppendExtension(ext)
+        }
+    }
+    
 }

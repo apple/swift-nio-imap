@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-
-
 extension IMAPCore {
 
     // Dervied from `fetch-att`
@@ -22,6 +20,24 @@ extension IMAPCore {
         case full
         case fast
         case attributes([IMAPCore.FetchAttribute])
+    }
+    
+}
+
+// MARK: - Encoding
+extension ByteBufferProtocol {
+    
+    @discardableResult mutating func writeFetchType(_ type: IMAPCore.FetchType) -> Int {
+        switch type {
+        case .all:
+            return self.writeString("ALL")
+        case .full:
+            return self.writeString("FULL")
+        case .fast:
+            return self.writeString("FAST")
+        case .attributes(let atts):
+            return self.writeFetchAttributeList(atts)
+        }
     }
     
 }

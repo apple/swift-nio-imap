@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-
-
 extension IMAPCore.Body {
 
     /// IMAPv4 `body-type-message`
@@ -28,6 +26,22 @@ extension IMAPCore.Body {
         public static func message(_ message: IMAPCore.Media.Message, fields: Fields, envelope: IMAPCore.Envelope, body: IMAPCore.Body, fieldLines: Int) -> Self {
             return Self(message: message, fields: fields, envelope: envelope, body: body, fieldLines: fieldLines)
         }
+    }
+
+}
+
+// MARK: - Encoding
+extension ByteBufferProtocol {
+
+    @discardableResult mutating func writeBodyTypeMessage(_ message: IMAPCore.Body.TypeMessage) -> Int {
+        self.writeMediaMessage(message.message) +
+        self.writeSpace() +
+        self.writeBodyFields(message.fields) +
+        self.writeSpace() +
+        self.writeEnvelope(message.envelope) +
+        self.writeSpace() +
+        self.writeBody(message.body) +
+        self.writeString(" \(message.fieldLines)")
     }
 
 }

@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-
-
 extension IMAPCore {
  
     /// IMAPv4 `flag`
@@ -25,6 +23,36 @@ extension IMAPCore {
         case draft
         case keyword(Keyword)
         case `extension`(String)
+    }
+    
+}
+
+// MARK: - Encoding
+extension ByteBufferProtocol {
+    
+    @discardableResult mutating func writeFlags(_ flags: [IMAPCore.Flag]) -> Int {
+        self.writeArray(flags) { (flag, self) -> Int in
+            self.writeFlag(flag)
+        }
+    }
+    
+    @discardableResult mutating func writeFlag(_ flag: IMAPCore.Flag) -> Int {
+        switch flag {
+        case .answered:
+            return self.writeString("\\Answered")
+        case .flagged:
+            return self.writeString("\\Flagged")
+        case .deleted:
+            return self.writeString("\\Deleted")
+        case .seen:
+            return self.writeString("\\Seen")
+        case .draft:
+            return self.writeString("\\Draft")
+        case .keyword(let keyword):
+            return self.writeFlagKeyword(keyword)
+        case .extension(let x):
+            return self.writeString("\\\(x)")
+        }
     }
     
 }

@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-
-
 extension IMAPCore {
 
     /// IMAPv4 `tagged-ext-simple`
@@ -21,6 +19,22 @@ extension IMAPCore {
         case sequence([IMAPCore.SequenceRange])
         case number(Int)
         case number64(Int)
+    }
+
+}
+
+// MARK: - Encoding
+extension ByteBufferProtocol {
+
+    @discardableResult mutating func writeTaggedExtensionSimple(_ value: IMAPCore.TaggedExtensionSimple) -> Int {
+        switch value {
+        case .sequence(let set):
+            return self.writeSequenceSet(set)
+        case .number(let num):
+            return self.writeString("\(num)")
+        case .number64(let num):
+            return self.writeString("\(num)")
+        }
     }
 
 }

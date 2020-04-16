@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-
-
 extension IMAPCore.Body {
 
     /// IMAPv4 `body-fld-dsp`
@@ -24,6 +22,24 @@ extension IMAPCore.Body {
         public static func string(_ string: String, parameter: [IMAPCore.FieldParameterPair]) -> Self {
             return Self(string: string, parameter: parameter)
         }
+    }
+
+}
+
+// MARK: - Encoding
+extension ByteBufferProtocol {
+
+    @discardableResult mutating func writeBodyFieldDSP(_ dsp: IMAPCore.Body.FieldDSPData?) -> Int {
+        guard let dsp = dsp else {
+            return self.writeNil()
+        }
+        
+        return
+            self.writeString("(") +
+            self.writeIMAPString(dsp.string) +
+            self.writeSpace() +
+            self.writeBodyFieldParameters(dsp.parameter) +
+            self.writeString(")")
     }
 
 }

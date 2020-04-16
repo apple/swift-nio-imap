@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-
-
 extension IMAPCore {
     
     public struct CreateParameter: Equatable {
@@ -22,6 +20,31 @@ extension IMAPCore {
         
         public static func name(_ name: String, value: TaggedExtensionValue?) -> Self {
             return Self(name: name, value: value)
+        }
+    }
+    
+}
+
+// MARK: - Encoding
+extension ByteBufferProtocol {
+    
+    @discardableResult mutating func writeCreateParameters(_ params: [IMAPCore.CreateParameter]) -> Int {
+        guard params.count > 0 else {
+            return 0 // don't do anything
+        }
+        
+        return
+            self.writeSpace() +
+            self.writeArray(params) { (param, self) -> Int in
+                self.writeCreateParameter(param)
+            }
+    }
+    
+    @discardableResult mutating func writeCreateParameter(_ param: IMAPCore.CreateParameter) -> Int {
+        self.writeCreateParameterName(param.name) +
+        self.writeIfExists(param.value) { (value) -> Int in
+            self.writeSpace() +
+            self.writeTaggedExtensionValue(value)
         }
     }
     

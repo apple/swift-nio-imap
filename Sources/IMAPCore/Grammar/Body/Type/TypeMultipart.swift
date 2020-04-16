@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-
-
 extension IMAPCore.Body {
 
     /// IMAPv4 `body-type-mpart`
@@ -29,3 +27,21 @@ extension IMAPCore.Body {
     }
 
 }
+
+// MARK: - Encoding
+extension ByteBufferProtocol {
+
+    @discardableResult mutating func writeBodyTypeMultipart(_ part: IMAPCore.Body.TypeMultipart) -> Int {
+        part.bodies.reduce(into: 0) { (result, body) in
+            result += self.writeBody(body)
+        } +
+        self.writeSpace() +
+        self.writeIMAPString(part.mediaSubtype) +
+        self.writeIfExists(part.multipartExtension) { (ext) -> Int in
+            self.writeSpace() +
+            self.writeBodyExtensionMultipart(ext)
+        }
+    }
+
+}
+

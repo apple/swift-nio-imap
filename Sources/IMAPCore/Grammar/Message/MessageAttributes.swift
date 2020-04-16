@@ -12,13 +12,31 @@
 //
 //===----------------------------------------------------------------------===//
 
-
-
 extension IMAPCore {
 
     public enum MessageAttributeType: Equatable {
         case dynamic([IMAPCore.Flag])
         case `static`(IMAPCore.MessageAttributesStatic)
+    }
+
+}
+
+// MARK: - Encoding
+extension ByteBufferProtocol {
+
+    @discardableResult mutating func writeMessageAttributes(_ atts: [IMAPCore.MessageAttributeType]) -> Int {
+        return self.writeArray(atts) { (element, self) in
+            return self.writeMessageAttributeType(element)
+        }
+    }
+    
+    @discardableResult mutating func writeMessageAttributeType(_ type: IMAPCore.MessageAttributeType) -> Int {
+        switch type {
+        case .dynamic(let att):
+            return self.writeMessageAttributeDynamic(att)
+        case .static(let att):
+            return self.writeMessageAttributeStatic(att)
+        }
     }
 
 }

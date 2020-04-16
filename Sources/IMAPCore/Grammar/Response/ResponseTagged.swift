@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-
-
 extension IMAPCore {
 
     /// IMAPv4 `response-tagged`
@@ -27,3 +25,15 @@ extension IMAPCore {
     }
     
 }
+
+// MARK: - Encoding
+extension ByteBufferProtocol {
+
+    @discardableResult mutating func writeResponseTagged(_ response: IMAPCore.ResponseTagged) -> Int {
+        self.writeString("\(response.tag) ") +
+        self.writeResponseConditionalState(response.state) +
+        self.writeString("\r\n")
+    }
+
+}
+

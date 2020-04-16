@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-
-
 extension IMAPCore.Body {
 
     public indirect enum TypeSinglepartType: Equatable {
@@ -31,6 +29,29 @@ extension IMAPCore.Body {
         public static func type(_ type: TypeSinglepartType, extension: ExtensionSinglepart?) -> Self {
             return Self(type: type, extension: `extension`)
         }
+    }
+
+}
+
+// MARK: - Encoding
+extension ByteBufferProtocol {
+
+    @discardableResult mutating func writeBodyTypeSinglepart(_ part: IMAPCore.Body.TypeSinglepart) -> Int {
+        var size = 0
+        switch part.type {
+        case .basic(let basic):
+            size += self.writeBodyTypeBasic(basic)
+        case .message(let message):
+            size += self.writeBodyTypeMessage(message)
+        case .text(let text):
+            size += self.writeBodyTypeText(text)
+        }
+
+        if let ext = part.extension {
+            size += self.writeSpace()
+            size += self.writeBodyExtensionSinglePart(ext)
+        }
+        return size
     }
 
 }

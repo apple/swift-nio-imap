@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-
-
 extension IMAPCore {
     
     /// IMAPv4 `message-data`
@@ -24,3 +22,23 @@ extension IMAPCore {
     }
     
 }
+
+// MARK: - Encoding
+extension ByteBufferProtocol {
+
+    @discardableResult mutating func writeMessageData(_ data: IMAPCore.MessageData) -> Int {
+        switch data {
+        case .expunge(let number):
+            return self.writeString("\(number) EXPUNGE")
+        case .fetch(let number):
+            return
+                self.writeString("\(number) FETCH (")
+        }
+    }
+    
+    @discardableResult mutating func writeMessageDataEnd(_ data: IMAPCore.MessageData) -> Int {
+        return self.writeString(")")
+    }
+
+}
+

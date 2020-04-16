@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-
-
 extension IMAPCore {
     
     /// IMAPv4 `resp-cond-auth`
@@ -22,4 +20,22 @@ extension IMAPCore {
         case preauth(ResponseText)
     }
     
+}
+
+// MARK: - Encoding
+extension ByteBufferProtocol {
+
+    @discardableResult mutating func writeResponseConditionalAuth(_ cond: IMAPCore.ResponseConditionalAuth) -> Int {
+        switch cond {
+        case .ok(let text):
+            return
+                self.writeString("OK ") +
+                self.writeResponseText(text)
+        case .preauth(let text):
+            return
+                self.writeString("PREAUTH ") +
+                self.writeResponseText(text)
+        }
+    }
+
 }

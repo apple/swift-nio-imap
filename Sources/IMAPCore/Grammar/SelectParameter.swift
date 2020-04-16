@@ -24,3 +24,32 @@ extension IMAPCore {
     }
     
 }
+
+// MARK: - Encoding
+extension ByteBufferProtocol {
+    
+    @discardableResult mutating func writeSelectParameters(_ params: [IMAPCore.SelectParameter]) -> Int {
+        guard params.count > 0 else {
+            return 0
+        }
+        
+        return
+            self.writeSpace() +
+            self.writeArray(params) { (param, self) -> Int in
+                self.writeSelectParameter(param)
+            }
+    }
+    
+    @discardableResult mutating func writeSelectParameter(_ param: IMAPCore.SelectParameter) -> Int {
+        self.writeSelectParameterName(param.name) +
+        self.writeIfExists(param.value) { (value) -> Int in
+            self.writeSpace() +
+            self.writeTaggedExtensionValue(value)
+        }
+    }
+    
+    @discardableResult mutating func writeSelectParameterName(_ name: String) -> Int {
+        return self.writeTaggedExtensionLabel(name)
+    }
+    
+}

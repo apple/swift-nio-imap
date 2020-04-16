@@ -12,14 +12,26 @@
 //
 //===----------------------------------------------------------------------===//
 
-
-
 extension IMAPCore {
 
     /// IMAPv4 `mbox-or-pat`
     public enum MailboxPatterns: Equatable {
         case mailbox(String)
         case pattern([String])
+    }
+
+}
+
+// MARK: - Encoding
+extension ByteBufferProtocol {
+
+    @discardableResult public mutating func writeMailboxPatterns(_ patterns: IMAPCore.MailboxPatterns) -> Int {
+        switch patterns {
+        case .mailbox(let list):
+            return self.writeIMAPString(list)
+        case .pattern(let patterns):
+            return self.writePatterns(patterns)
+        }
     }
 
 }

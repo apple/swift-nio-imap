@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-
-
 extension IMAPCore {
 
     /// IMAPv4 `search-return-opt`
@@ -24,6 +22,42 @@ extension IMAPCore {
         case count
         case save
         case optionExtension(SearchReturnOptionExtension)
+    }
+
+}
+
+// MARK: - Encoding
+extension ByteBufferProtocol {
+
+    @discardableResult mutating func writeSearchReturnOption(_ option: IMAPCore.SearchReturnOption) -> Int {
+        switch option {
+        case .min:
+            return self.writeString("MIN")
+        case .max:
+            return self.writeString("MAX")
+        case .all:
+            return self.writeString("ALL")
+        case .count:
+            return self.writeString("COUNT")
+        case .save:
+            return self.writeString("SAVE")
+        case .optionExtension(let option):
+            return self.writeSearchReturnOptionExtension(option)
+        }
+    }
+
+    @discardableResult mutating func writeSearchReturnOptions(_ options: [IMAPCore.SearchReturnOption]) -> Int {
+        guard options.count > 0 else {
+            return 0
+        }
+        return
+            self.writeString(" RETURN (") +
+            self.writeIfExists(options) { (options) -> Int in
+                self.writeArray(options, parenthesis: false) { (option, self) in
+                    self.writeSearchReturnOption(option)
+                }
+            } +
+            self.writeString(")")
     }
 
 }

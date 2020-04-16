@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-
-
 extension IMAPCore {
     
     /// IMAPv4 `section-spec`
@@ -22,4 +20,35 @@ extension IMAPCore {
         case part(_ part: [Int], text: SectionText?)
     }
     
+}
+
+// MARK: - Encoding
+extension ByteBufferProtocol {
+    
+    @discardableResult mutating func writeSection(_ section: IMAPCore.SectionSpec?) -> Int {
+        self.writeString("[") +
+        self.writeIfExists(section) { (spec) -> Int in
+            self.writeSectionSpec(spec)
+        } +
+        self.writeString("]")
+    }
+    
+    @discardableResult mutating func writeSectionSpec(_ spec: IMAPCore.SectionSpec?) -> Int {
+        
+        guard let spec = spec else {
+            return 0 // do nothing
+        }
+        
+        switch spec {
+        case .text(let text):
+            return self.writeSectionMessageText(text)
+        case .part(let part, text: let text):
+            return
+                self.writeSectionPart(part) +
+                self.writeIfExists(text) { (text) -> Int in
+                    self.writeString(".") +
+                    self.writeSectionText(text)
+                }
+        }
+    }
 }

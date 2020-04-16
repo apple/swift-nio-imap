@@ -33,3 +33,45 @@ extension IMAPCore {
     }
     
 }
+
+// MARK: - Encoding
+extension ByteBufferProtocol {
+    
+    @discardableResult mutating func writeEnvelopeAddresses(_ addresses: [IMAPCore.Address]) -> Int {
+        guard addresses.count > 0 else {
+            return self.writeNil()
+        }
+
+        return
+            self.writeString("(") +
+            self.writeArray(addresses, separator: "", parenthesis: false) { (address, self) -> Int in
+                self.writeAddress(address)
+            } +
+            self.writeString(")")
+    }
+
+    @discardableResult mutating func writeEnvelope(_ envelope: IMAPCore.Envelope) -> Int {
+        self.writeString("(") +
+        self.writeNString(envelope.date) +
+        self.writeSpace() +
+        self.writeNString(envelope.subject) +
+        self.writeSpace() +
+        self.writeEnvelopeAddresses(envelope.from) +
+        self.writeSpace() +
+        self.writeEnvelopeAddresses(envelope.sender) +
+        self.writeSpace() +
+        self.writeEnvelopeAddresses(envelope.reply) +
+        self.writeSpace() +
+        self.writeEnvelopeAddresses(envelope.to) +
+        self.writeSpace() +
+        self.writeEnvelopeAddresses(envelope.cc) +
+        self.writeSpace() +
+        self.writeEnvelopeAddresses(envelope.bcc) +
+        self.writeSpace() +
+        self.writeNString(envelope.inReplyTo) +
+        self.writeSpace() +
+        self.writeNString(envelope.messageID) +
+        self.writeString(")")
+    }
+
+}

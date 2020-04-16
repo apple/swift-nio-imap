@@ -12,14 +12,21 @@
 //
 //===----------------------------------------------------------------------===//
 
-
-
 extension IMAPCore {
 
     public enum ConditionalStore {
         
         public static let param = "CONDSTORE"
         
+    }
+    
+}
+
+// MARK: - Encoding
+extension ByteBufferProtocol {
+    
+    @discardableResult mutating func writeConditionalStoreParameter() -> Int {
+        self.writeString(IMAPCore.ConditionalStore.param)
     }
     
 }

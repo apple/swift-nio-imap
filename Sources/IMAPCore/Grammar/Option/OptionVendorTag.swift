@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-
-
 extension IMAPCore {
 
     /// IMAPv4 `option-vendor-tag`
@@ -24,6 +22,17 @@ extension IMAPCore {
         public static func token(_ token: String, atom: String) -> Self {
             return Self(token: token, atom: atom)
         }
+    }
+
+}
+
+// MARK: - Encoding
+extension ByteBufferProtocol {
+
+    @discardableResult mutating func writeOptionVendorTag(_ tag: IMAPCore.OptionVendorTag) -> Int {
+        self.writeString(tag.token) +
+        self.writeString("-") +
+        self.writeString(tag.atom)
     }
 
 }

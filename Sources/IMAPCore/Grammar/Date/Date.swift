@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-
-
 extension IMAPCore {
 
     /// IMAPv4 `date` (`date-text`)
@@ -41,6 +39,15 @@ extension IMAPCore {
         public static func day(_ day: Int, month: Month, year: Int) -> Self {
             return Self(day: day, month: month, year: year)
         }
+    }
+    
+}
+
+// MARK: - IMAP
+extension ByteBufferProtocol {
+    
+    @discardableResult mutating func writeDate(_ date: IMAPCore.Date) -> Int {
+        self.writeString("\(date.day)-\(date.month.rawValue)-\(date.year)")
     }
     
 }

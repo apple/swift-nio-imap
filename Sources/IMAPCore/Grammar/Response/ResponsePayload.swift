@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-
-
 extension IMAPCore {
 
     public enum ResponsePayload: Equatable {
@@ -28,3 +26,26 @@ extension IMAPCore {
 
 }
 
+// MARK: - Encoding
+extension ByteBufferProtocol {
+
+    @discardableResult mutating func writeResponsePayload(_ payload: IMAPCore.ResponsePayload) -> Int {
+        switch payload {
+        case .conditionalState(let data):
+            return self.writeResponseConditionalState(data)
+        case .conditionalBye(let data):
+            return self.writeResponseConditionalBye(data)
+        case .mailboxData(let data):
+            return self.writeMailboxData(data)
+        case .messageData(let data):
+            return self.writeMessageData(data)
+        case .capabilityData(let data):
+            return self.writeCapabilityData(data)
+        case .enableData(let data):
+            return self.writeEnableData(data)
+        case .id(let data):
+            return self.writeIDResponse(data)
+        }
+    }
+
+}

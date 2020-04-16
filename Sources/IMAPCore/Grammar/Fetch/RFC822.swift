@@ -12,14 +12,21 @@
 //
 //===----------------------------------------------------------------------===//
 
-
-
 extension IMAPCore {
     
     public enum RFC822: String {
         case header
         case size
         case text
+    }
+    
+}
+
+// MARK: - Encoding
+extension ByteBufferProtocol {
+    
+    @discardableResult mutating func writeRFC822(_ rfc822: IMAPCore.RFC822) -> Int {
+        self.writeString(".\(rfc822.rawValue.uppercased())")
     }
     
 }

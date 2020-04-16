@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-
-
 extension IMAPCore {
 
     /// IMAPv4 `option-val-comp`
@@ -32,6 +30,28 @@ extension IMAPCore.OptionValueComp: ExpressibleByArrayLiteral {
     public init(arrayLiteral elements: IMAPCore.OptionValueComp...) {
         let array = Array(elements)
         self = .array(array)
+    }
+
+}
+
+// MARK: - Encoding
+extension ByteBufferProtocol {
+
+    @discardableResult mutating func writeOptionValue(_ value: IMAPCore.OptionValueComp) -> Int {
+        self.writeString("(") +
+        self.writeOptionValueComp(value) +
+        self.writeString(")")
+    }
+
+    @discardableResult mutating func writeOptionValueComp(_ option: IMAPCore.OptionValueComp) -> Int {
+        switch option {
+        case .string(let string):
+            return self.writeIMAPString(string)
+        case .array(let array):
+            return self.writeArray(array) { (option, self) in
+                self.writeOptionValueComp(option)
+            }
+        }
     }
 
 }

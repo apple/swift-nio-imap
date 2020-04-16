@@ -12,14 +12,30 @@
 //
 //===----------------------------------------------------------------------===//
 
-
-
 extension IMAPCore {
 
     /// IMAPv4 `continue-req`
     public enum ContinueRequest: Equatable {
         case responseText(ResponseText)
         case base64([UInt8])
+    }
+
+}
+
+// MARK: - Encoding
+extension ByteBufferProtocol {
+
+    @discardableResult mutating func writeContinueRequest(_ data: IMAPCore.ContinueRequest) -> Int {
+        var size = 0
+        size += self.writeString("+ ")
+        switch data {
+        case .responseText(let text):
+            size += self.writeResponseText(text)
+        case .base64(let base64):
+            size += self.writeBytes(base64)
+        }
+        size += self.writeString("\r\n")
+        return size
     }
 
 }

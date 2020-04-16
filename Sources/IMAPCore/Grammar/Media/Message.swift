@@ -12,13 +12,20 @@
 //
 //===----------------------------------------------------------------------===//
 
-
-
 extension IMAPCore.Media {
 
     public enum Message: String, Equatable {
         case rfc822 = "RFC822"
         case global = "GLOBAL"
+    }
+
+}
+
+// MARK: - Encoding
+extension ByteBufferProtocol {
+
+    @discardableResult mutating func writeMediaMessage(_ message: IMAPCore.Media.Message) -> Int {
+        self.writeString("\"MESSAGE\" \"\(message.rawValue)\"")
     }
 
 }

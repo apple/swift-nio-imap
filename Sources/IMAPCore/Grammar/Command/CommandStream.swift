@@ -12,14 +12,27 @@
 //
 //===----------------------------------------------------------------------===//
 
-
-
 extension IMAPCore {
 
     public enum CommandStream: Equatable {
         case idleDone
         case command(Command)
         case bytes([UInt8])
+    }
+
+}
+
+extension ByteBufferProtocol {
+
+    @discardableResult public mutating func writeCommandStream(_ stream: IMAPCore.CommandStream) -> Int {
+        switch stream {
+        case .idleDone:
+            return self.writeString("DONE\r\n")
+        case .command(let command):
+            return self.writeCommand(command)
+        case .bytes(let bytes):
+            return self.writeBytes(bytes)
+        }
     }
 
 }

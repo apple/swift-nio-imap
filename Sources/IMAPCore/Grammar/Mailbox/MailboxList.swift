@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-
-
 extension IMAPCore.Mailbox {
     
     /// IMAPv4 `mailbox-list`
@@ -28,4 +26,21 @@ extension IMAPCore.Mailbox {
         }
     }
     
+}
+
+// MARK: - Encoding
+extension ByteBufferProtocol {
+
+    @discardableResult mutating func writeMailboxList(_ list: IMAPCore.Mailbox.List) -> Int {
+        self.writeString("(") +
+        self.writeIfExists(list.flags) { (flags) -> Int in
+            self.writeMailboxListFlags(flags)
+        } +
+        self.writeString(") ") +
+        self.writeIfExists(list.char) { (char) -> Int in
+            self.writeString("\(char) ")
+        } +
+        self.writeMailbox(list.mailbox)
+    }
+
 }

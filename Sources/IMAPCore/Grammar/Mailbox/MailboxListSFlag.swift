@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-
-
 extension IMAPCore.Mailbox.List {
     
     /// IMAPv4 `mbx-list-sflag`
@@ -39,4 +37,13 @@ extension IMAPCore.Mailbox.List {
         }
     }
     
+}
+
+// MARK: - Encoding
+extension ByteBufferProtocol {
+
+    @discardableResult mutating func writeMailboxListSFlag(_ flag: IMAPCore.Mailbox.List.SFlag) -> Int {
+        self.writeString(flag.rawValue)
+    }
+
 }

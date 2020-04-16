@@ -6,4 +6,19 @@
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
-// See CONTR
+// See CONTRIBUTORS.txt for the list of SwiftNIO project authors
+//
+// SPDX-License-Identifier: Apache-2.0
+//
+//===----------------------------------------------------------------------===//
+
+// MARK: - Encoding
+extension ByteBufferProtocol {
+
+    @discardableResult mutating func writeSequenceSet(_ set: [IMAPCore.SequenceRange]) -> Int {
+        self.writeArray(set, separator: ",", parenthesis: false) { (element, self) in
+             self.writeSequenceRange(element)
+        }
+    }
+
+}

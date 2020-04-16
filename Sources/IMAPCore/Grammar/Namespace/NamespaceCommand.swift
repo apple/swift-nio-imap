@@ -12,11 +12,18 @@
 //
 //===----------------------------------------------------------------------===//
 
-
-
 extension IMAPCore {
 
     /// IMAPv4 `Namespace-Command`
     public static let NamespaceCommand = "NAMESPACE"
     
+}
+
+// MARK: - Encoding
+extension ByteBufferProtocol {
+    
+    @discardableResult mutating func writeNamespaceCommand() -> Int {
+        self.writeString(IMAPCore.NamespaceCommand)
+    }
+
 }

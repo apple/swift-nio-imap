@@ -30,3 +30,19 @@ extension IMAPCore {
     
 }
 
+// MARK: - Encoding
+extension ByteBufferProtocol {
+    
+    @discardableResult mutating func writeAddress(_ address: IMAPCore.Address) -> Int {
+        self.writeString("(") +
+        self.writeNString(address.name) +
+        self.writeSpace() +
+        self.writeNString(address.adl) +
+        self.writeSpace() +
+        self.writeNString(address.mailbox) +
+        self.writeSpace() +
+        self.writeNString(address.host) +
+        self.writeString(")")
+    }
+    
+}

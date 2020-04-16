@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-
-
 extension IMAPCore.Body {
 
     /// IMAPv4 `body-fields`
@@ -28,6 +26,22 @@ extension IMAPCore.Body {
         public static func parameter(_ parameters: [IMAPCore.FieldParameterPair], id: IMAPCore.NString, description: IMAPCore.NString, encoding: FieldEncoding, octets: Int) -> Self {
             return Self(parameter: parameters, id: id, description: description, encoding: encoding, octets: octets)
         }
+    }
+
+}
+
+// MARK: - Encoding
+extension ByteBufferProtocol {
+
+    @discardableResult mutating func writeBodyFields(_ fields: IMAPCore.Body.Fields) -> Int {
+        self.writeBodyFieldParameters(fields.parameter) +
+        self.writeSpace() +
+        self.writeNString(fields.id) +
+        self.writeSpace() +
+        self.writeNString(fields.description) +
+        self.writeSpace() +
+        self.writeBodyFieldEncoding(fields.encoding) +
+        self.writeString(" \(fields.octets)")
     }
 
 }

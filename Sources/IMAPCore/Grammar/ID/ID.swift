@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-
-
 extension IMAPCore {
     
     // Exracted from `IDParamsList`
@@ -26,4 +24,34 @@ extension IMAPCore {
         }
     }
 
+}
+
+// MARK: - Encoding
+extension ByteBufferProtocol {
+    
+    @discardableResult mutating func writeIDParameter(_ parameter: IMAPCore.IDParameter) -> Int {
+        self.writeIMAPString(parameter.key) +
+        self.writeSpace() +
+        self.writeNString(parameter.value)
+    }
+    
+    @discardableResult mutating func writeIDParameters(_ array: [IMAPCore.IDParameter]) -> Int {
+        guard array.count > 0 else {
+            return self.writeNil()
+        }
+        return self.writeArray(array) { (element, self) in
+            self.writeIDParameter(element)
+        }
+    }
+    
+    @discardableResult mutating func writeIDResponse(_ response: [IMAPCore.IDParameter]) -> Int {
+        self.writeString("ID ") +
+        self.writeIDParameters(response)
+    }
+    
+    @discardableResult mutating func writeID(_ id: [IMAPCore.IDParameter]) -> Int {
+        self.writeString("ID ") +
+        self.writeIDParameters(id)
+    }
+    
 }

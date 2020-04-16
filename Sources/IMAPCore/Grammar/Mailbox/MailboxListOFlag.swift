@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-
-
 extension IMAPCore.Mailbox.List {
     
     /// IMAPv4 `mbx-list-oflag`
@@ -25,4 +23,24 @@ extension IMAPCore.Mailbox.List {
         case other(String)
     }
     
+}
+
+// MARK: - Encoding
+extension ByteBufferProtocol {
+
+    @discardableResult mutating func writeMailboxListOFlag(_ flag: IMAPCore.Mailbox.List.OFlag) -> Int {
+        switch flag {
+        case .noInferiors:
+            return self.writeString(#"\Noinferiors"#)
+        case .subscribed:
+            return self.writeString(#"\Subscribed"#)
+        case .remote:
+            return self.writeString(#"\Remote"#)
+        case .child(let child):
+            return self.writeChildMailboxFlag(child)
+        case .other(let string):
+            return self.writeString("\\\(string)")
+        }
+    }
+
 }

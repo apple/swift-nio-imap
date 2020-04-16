@@ -12,14 +12,28 @@
 //
 //===----------------------------------------------------------------------===//
 
-
-
 extension IMAPCore.Body {
 
     /// IMAPv4 `body-fld-lang`
     public enum FieldLanguage: Equatable {
         case single(IMAPCore.NString)
         case multiple([String])
+    }
+
+}
+
+// MARK: - Encoding
+extension ByteBufferProtocol {
+
+    @discardableResult mutating func writeBodyFieldLanguage(_ language: IMAPCore.Body.FieldLanguage) -> Int {
+        switch language {
+        case .single(let string):
+            return self.writeNString(string)
+        case .multiple(let strings):
+            return self.writeArray(strings) { (element, self) in
+                self.writeIMAPString(element)
+            }
+        }
     }
 
 }

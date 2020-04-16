@@ -12,4 +12,14 @@
 //
 //===----------------------------------------------------------------------===//
 
-
+// MARK: - Encoding
+extension ByteBufferProtocol {
+    
+    @discardableResult mutating func writeEnableData(_ data: [IMAPCore.Capability]) -> Int {
+        self.writeString("ENABLED") +
+        data.reduce(0) { (result, capability) in
+            result + self.writeSpace() + self.writeCapability(capability)
+        }
+    }
+    
+}

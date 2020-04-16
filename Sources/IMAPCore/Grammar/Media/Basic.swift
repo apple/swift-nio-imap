@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-
-
 extension IMAPCore.Media {
 
     public enum BasicType: Equatable {
@@ -35,6 +33,36 @@ extension IMAPCore.Media {
         public static func type(_ type: BasicType, subtype: String) -> Self {
             return Self(type: type, subtype: subtype)
         }
+    }
+
+}
+
+// MARK: - Encoding
+extension ByteBufferProtocol {
+
+    @discardableResult mutating func writeMediaBasicType(_ type: IMAPCore.Media.BasicType) -> Int {
+        switch type {
+        case .application:
+            return self.writeString(#""APPLICATION""#)
+        case .audio:
+            return self.writeString(#""AUDIO""#)
+        case .image:
+            return self.writeString(#""IMAGE""#)
+        case .message:
+            return self.writeString(#""MESSAGE""#)
+        case .video:
+            return self.writeString(#""VIDEO""#)
+        case .font:
+            return self.writeString(#""FONT""#)
+        case .other(let buffer):
+            return self.writeIMAPString(buffer)
+        }
+    }
+
+    @discardableResult mutating func writeMediaBasic(_ media: IMAPCore.Media.Basic) -> Int {
+        self.writeMediaBasicType(media.type) +
+        self.writeSpace() +
+        self.writeIMAPString(media.subtype)
     }
 
 }

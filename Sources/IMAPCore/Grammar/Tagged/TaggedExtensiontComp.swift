@@ -8,3 +8,19 @@
 // See LICENSE.txt for license information
 // See CONTRIBUTORS.txt for the list of SwiftNIO project authors
 //
+// SPDX-License-Identifier: Apache-2.0
+//
+//===----------------------------------------------------------------------===//
+
+// MARK: - Encoding
+extension ByteBufferProtocol {
+
+    @discardableResult mutating func writeTaggedExtensionComp(_ comp: [String]) -> Int {
+        self.writeIfArrayHasMinimumSize(array: comp) { (comp, self) -> Int in
+            self.writeArray(comp) { (string, self) in
+                self.writeIMAPString(string)
+            }
+        }
+    }
+
+}

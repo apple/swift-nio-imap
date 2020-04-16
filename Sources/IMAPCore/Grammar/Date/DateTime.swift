@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-
-
 extension IMAPCore.Date {
     
     /// IMAPv4 `date-time`
@@ -25,6 +23,19 @@ extension IMAPCore.Date {
         public static func date(_ date: IMAPCore.Date, time: Time, zone: TimeZone) -> Self {
             return Self(date: date, time: time, zone: zone)
         }
+    }
+    
+}
+
+// MARK: - Encoding
+extension ByteBufferProtocol {
+    
+    @discardableResult mutating func writeDateTime(_ dateTime: IMAPCore.Date.DateTime) -> Int {
+        self.writeString("\"\(dateTime.date.day)-\(dateTime.date.month.rawValue)-\(dateTime.date.year) ") +
+        self.writeTime(dateTime.time) +
+        self.writeSpace() +
+        self.writeTimezone(dateTime.zone) +
+        self.writeString("\"")
     }
     
 }

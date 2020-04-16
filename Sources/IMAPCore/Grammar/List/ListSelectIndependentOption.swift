@@ -12,14 +12,26 @@
 //
 //===----------------------------------------------------------------------===//
 
-
-
 extension IMAPCore {
 
     /// IMAPv4 `list-select-independent-opt`
     public enum ListSelectIndependentOption: Equatable {
         case remote
         case option(OptionExtension)
+    }
+
+}
+
+// MARK: - Encoding
+extension ByteBufferProtocol {
+
+    @discardableResult mutating func writeListSelectIndependentOption(_ option: IMAPCore.ListSelectIndependentOption) -> Int {
+        switch option {
+        case .remote:
+            return self.writeString("REMOTE")
+        case .option(let option):
+            return self.writeOptionExtension(option)
+        }
     }
 
 }

@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-
-
 extension IMAPCore {
 
     /// IMAPv4 `search-return-data`
@@ -23,6 +21,28 @@ extension IMAPCore {
         case all([IMAPCore.SequenceRange])
         case count(Int)
         case dataExtension(SearchReturnDataExtension)
+    }
+
+}
+
+// MARK: - Encoding
+extension ByteBufferProtocol {
+
+    @discardableResult mutating func writeSearchReturnData(_ data: IMAPCore.SearchReturnData) -> Int {
+        switch data {
+        case .min(let num):
+            return self.writeString("MIN \(num)")
+        case .max(let num):
+            return self.writeString("MAX \(num)")
+        case .all(let set):
+            return
+                self.writeString("ALL ") +
+                self.writeSequenceSet(set)
+        case .count(let num):
+            return self.writeString("COUNT \(num)")
+        case .dataExtension(let optionExt):
+            return self.writeSearchReturnDataExtension(optionExt)
+        }
     }
 
 }

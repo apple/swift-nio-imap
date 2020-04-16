@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-
-
 extension IMAPCore {
     
     /// IMAPv4 `body-extension`
@@ -22,4 +20,24 @@ extension IMAPCore {
         case number(Int)
     }
     
+}
+
+// MARK: - Encoding
+extension ByteBufferProtocol {
+
+    @discardableResult mutating func writeBodyExtension(_ ext: [IMAPCore.BodyExtensionType]) -> Int {
+        return self.writeArray(ext) { (element, self) in
+            self.writeBodyExtensionType(element)
+        }
+    }
+    
+    @discardableResult mutating func writeBodyExtensionType(_ type: IMAPCore.BodyExtensionType) -> Int {
+        switch type {
+        case .string(let string):
+            return self.writeNString(string)
+        case .number(let number):
+            return self.writeString("\(number)")
+        }
+    }
+
 }

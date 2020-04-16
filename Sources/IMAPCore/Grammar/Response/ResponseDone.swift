@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-
-
 extension IMAPCore {
     
     /// IMAPv4 `response-done`
@@ -22,4 +20,18 @@ extension IMAPCore {
         case fatal(ResponseText)
     }
     
+}
+
+// MARK: - Encoding
+extension ByteBufferProtocol {
+
+    @discardableResult mutating func writeResponseDone(_ response: IMAPCore.ResponseDone) -> Int {
+        switch response {
+        case .tagged(let tagged):
+            return self.writeResponseTagged(tagged)
+        case .fatal(let fatal):
+            return self.writeResponseFatal(fatal)
+        }
+    }
+
 }

@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-
-
 extension IMAPCore {
 
     /// IMAPv4 `resp-text`
@@ -25,6 +23,20 @@ extension IMAPCore {
         public static func code(_ code: ResponseTextCode?, text: String) -> Self {
             return Self(code: code, text: text)
         }
+    }
+
+}
+
+// MARK: - Encoding
+extension ByteBufferProtocol {
+
+    @discardableResult mutating func writeResponseText(_ text: IMAPCore.ResponseText) -> Int {
+        self.writeIfExists(text.code) { (code) -> Int in
+            self.writeString("[") +
+            self.writeResponseTextCode(code) +
+            self.writeString("] ")
+        } +
+        self.writeIMAPString(text.text)
     }
 
 }

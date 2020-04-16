@@ -12,14 +12,21 @@
 //
 //===----------------------------------------------------------------------===//
 
-
-
 extension IMAPCore {
 
     /// IMAP4 `child-mbx-flag`
     public enum ChildMailboxFlag: String, Equatable {
         case HasChildren = #"\HasChildren"#
         case HasNoChildren = #"\HasNoChildren"#
+    }
+
+}
+
+// MARK: - Encoding
+extension ByteBufferProtocol {
+
+    @discardableResult mutating func writeChildMailboxFlag(_ flag: IMAPCore.ChildMailboxFlag) -> Int {
+        self.writeString(flag.rawValue)
     }
 
 }

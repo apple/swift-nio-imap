@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-
-
 extension IMAPCore {
     
     /// IMAPv4 `capability`
@@ -26,6 +24,40 @@ extension IMAPCore {
         case literalMinus
         case filters
         case other(String)
+    }
+    
+}
+
+// MARK: - Encoding
+extension ByteBufferProtocol {
+    
+    @discardableResult mutating func writeCapability(_ capability: IMAPCore.Capability) -> Int {
+        switch capability {
+        case .auth(let type):
+            return self.writeString("AUTH=\(type)")
+        case .condStore:
+            return self.writeString("CONDSTORE")
+        case .enable:
+            return self.writeString("ENABLE")
+        case .move:
+            return self.writeString("MOVE")
+        case .literalPlus:
+            return self.writeString("LITERAL+")
+        case .literalMinus:
+            return self.writeString("LITERAL-")
+        case .filters:
+            return self.writeString("FILTERS")
+        case .other(let atom):
+            return self.writeString(atom)
+        }
+    }
+    
+    @discardableResult mutating func writeCapabilityData(_ data: [IMAPCore.Capability]) -> Int {
+        self.writeString("CAPABILITY IMAP4 IMAP4rev1") +
+        self.writeArray(data, separator: "", parenthesis: false) { (capability, self) -> Int in
+            self.writeSpace() +
+            self.writeCapability(capability)
+        }
     }
     
 }

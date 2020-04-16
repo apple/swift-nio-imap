@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-
-
 extension IMAPCore.Body {
 
     /// IMAPv4 `body-fld-enc`
@@ -24,6 +22,28 @@ extension IMAPCore.Body {
         case base64
         case quotedPrintable
         case string(String)
+    }
+
+}
+
+// MARK: - Encoding
+extension ByteBufferProtocol {
+
+    @discardableResult mutating func writeBodyFieldEncoding(_ encoding: IMAPCore.Body.FieldEncoding) -> Int {
+        switch encoding {
+        case .bit7:
+            return self.writeString(#""7BIT""#)
+        case .bit8:
+            return self.writeString(#""8BIT""#)
+        case .binary:
+            return self.writeString(#""BINARY""#)
+        case .base64:
+            return self.writeString(#""BASE64""#)
+        case .quotedPrintable:
+            return self.writeString(#""QUOTED-PRINTABLE""#)
+        case .string(let string):
+            return self.writeIMAPString(string)
+        }
     }
 
 }

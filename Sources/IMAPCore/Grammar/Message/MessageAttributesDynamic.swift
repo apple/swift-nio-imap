@@ -12,4 +12,14 @@
 //
 //===----------------------------------------------------------------------===//
 
+// MARK: - Encoding
+extension ByteBufferProtocol {
 
+    @discardableResult mutating func writeMessageAttributeDynamic(_ atts: [IMAPCore.Flag]) -> Int {
+        self.writeString("FLAGS ") +
+        self.writeArray(atts) { (element, self) in
+            self.writeFlag(element)
+        }
+    }
+
+}

@@ -23,3 +23,21 @@ extension IMAPCore {
     }
 
 }
+
+// MARK: - Encoding
+extension ByteBufferProtocol {
+
+    @discardableResult mutating func writeReturnOption(_ option: IMAPCore.ReturnOption) -> Int {
+        switch option {
+        case .subscribed:
+            return self.writeString("SUBSCRIBED")
+        case .children:
+            return self.writeString("CHILDREN")
+        case .statusOption(let option):
+            return self.writeStatusOption(option)
+        case .optionExtension(let option):
+            return self.writeOptionExtension(option)
+        }
+    }
+
+}

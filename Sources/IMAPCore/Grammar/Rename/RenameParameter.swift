@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-
-
 extension IMAPCore {
     
     public struct RenameParameter: Equatable {
@@ -22,6 +20,30 @@ extension IMAPCore {
         
         public static func name(_ name: String, value: TaggedExtensionValue?) -> Self {
             return Self(name: name, value: value)
+        }
+    }
+    
+}
+
+// MARK: - Encoding
+extension ByteBufferProtocol {
+    
+    @discardableResult mutating func writeRenameParameters(_ params: [IMAPCore.RenameParameter]) -> Int {
+        guard params.count > 0 else {
+            return 0
+        }
+        return
+            self.writeSpace() +
+            self.writeArray(params) { (param, self) -> Int in
+                self.writeRenameParameter(param)
+            }
+    }
+    
+    @discardableResult mutating func writeRenameParameter(_ param: IMAPCore.RenameParameter) -> Int {
+        self.writeRenameParameterName(param.name) +
+        self.writeIfExists(param.value) { (value) -> Int in
+            self.writeSpace() +
+            self.writeTaggedExtensionValue(value)
         }
     }
     

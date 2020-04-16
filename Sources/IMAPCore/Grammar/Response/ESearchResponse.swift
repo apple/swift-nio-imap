@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-
-
 extension IMAPCore {
 
     /// IMAPv4 `esearch-response`
@@ -26,4 +24,25 @@ extension IMAPCore {
             return Self(correlator: correlator, uid: uid, returnData: returnData)
         }
     }
+}
+
+// MARK: - Encoding
+extension ByteBufferProtocol {
+
+    @discardableResult mutating func writeESearchResponse(_ response: IMAPCore.ESearchResponse) -> Int {
+        self.writeString("ESEARCH") +
+        self.writeIfExists(response.correlator) { (correlator) -> Int in
+            self.writeSearchCorrelator(correlator)
+        } +
+        self.writeIfTrue(response.uid) {
+            self.writeString(" UID")
+        } +
+        self.writeIfTrue(response.returnData.count > 0) {
+            self.writeSpace()
+        } +
+        self.writeArray(response.returnData, parenthesis: false) { (data, self) in
+            self.writeSearchReturnData(data)
+        }
+    }
+
 }

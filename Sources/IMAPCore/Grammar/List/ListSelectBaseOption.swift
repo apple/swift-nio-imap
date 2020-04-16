@@ -12,14 +12,32 @@
 //
 //===----------------------------------------------------------------------===//
 
-
-
 extension IMAPCore {
 
     /// IMAPv4 `list-select-base-opt`
     public enum ListSelectBaseOption: Equatable {
         case subscribed
         case option(OptionExtension)
+    }
+
+}
+
+// MARK: - Encoding
+extension ByteBufferProtocol {
+
+    @discardableResult mutating func writeListSelectBaseOption(_ option: IMAPCore.ListSelectBaseOption) -> Int {
+        switch option {
+        case .subscribed:
+            return self.writeString("SUBSCRIBED")
+        case .option(let option):
+            return self.writeOptionExtension(option)
+        }
+    }
+
+    @discardableResult mutating func writeListSelectBaseOptionQuoted(_ option: IMAPCore.ListSelectBaseOption) -> Int {
+        self.writeString("\"") +
+        self.writeListSelectBaseOption(option) +
+        self.writeString("\"")
     }
 
 }

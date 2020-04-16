@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-
-
 extension IMAPCore {
  
     /// IMAPv4 `seq-range`
@@ -84,4 +82,17 @@ extension IMAPCore.SequenceNumber {
         }
     }
 
+}
+
+// MARK: - Encoding
+extension ByteBufferProtocol {
+
+    @discardableResult mutating func writeSequenceRange(_ range: IMAPCore.SequenceRange) -> Int {
+        self.writeSequenceNumber(range.closedRange.lowerBound) +
+        self.writeIfTrue(range.closedRange.lowerBound < range.closedRange.upperBound) {
+            self.writeString(":") +
+            self.writeSequenceNumber(range.closedRange.upperBound)
+        }
+    }
+    
 }

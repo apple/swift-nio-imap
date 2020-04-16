@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-
-
 extension IMAPCore {
 
     public struct ModifierSequenceValue: Equatable {
@@ -33,6 +31,15 @@ extension IMAPCore {
             }
             self.value = value
         }
+    }
+    
+}
+
+// MARK: - Encoding
+extension ByteBufferProtocol {
+    
+    @discardableResult mutating func writeModifierSequenceValue(_ value: IMAPCore.ModifierSequenceValue) -> Int {
+        self.writeString("\(value.value)")
     }
     
 }

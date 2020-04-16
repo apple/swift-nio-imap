@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-
-
 extension IMAPCore {
 
     /// IMAPv4 `resp-text-code`
@@ -31,6 +29,61 @@ extension IMAPCore {
         case unseen(Int)
         case namespace(NamespaceResponse)
         case other(String, String?)
+    }
+
+}
+
+// MARK: - Encoding
+extension ByteBufferProtocol {
+
+    @discardableResult mutating func writeResponseTextCode(_ code: IMAPCore.ResponseTextCode) -> Int {
+        switch code {
+        case .alert:
+            return self.writeString("ALERT")
+        case .badCharset(let charsets):
+            return self.writeResponseTextCode_badCharsets(charsets)
+        case .capability(let data):
+            return self.writeCapabilityData(data)
+        case .parse:
+            return self.writeString("PARSE")
+        case .permanentFlags(let flags):
+            return
+                self.writeString("PERMANENTFLAGS ") +
+                self.writePermanentFlags(flags)
+        case .readOnly:
+            return self.writeString("READ-ONLY")
+        case .readWrite:
+            return self.writeString("READ-WRITE")
+        case .tryCreate:
+            return self.writeString("TRYCREATE")
+        case .uidNext(let number):
+            return self.writeString("UIDNEXT \(number)")
+        case .uidValidity(let number):
+            return self.writeString("UIDVALIDITY \(number)")
+        case .unseen(let number):
+            return self.writeString("UNSEEN \(number)")
+        case .other(let atom, let string):
+            return self.writeResponseTextCode_other(atom: atom, string: string)
+        case .namespace(let namesapce):
+            return self.writeNamespaceResponse(namesapce)
+        }
+    }
+
+    private mutating func writeResponseTextCode_badCharsets(_ charsets: [String]) -> Int {
+        self.writeString("BADCHARSET") +
+        self.writeIfArrayHasMinimumSize(array: charsets) { (charsets, self) -> Int in
+            self.writeSpace() +
+            self.writeArray(charsets) { (charset, self) in
+                self.writeString(charset)
+            }
+        }
+    }
+    
+    private mutating func writeResponseTextCode_other(atom: String, string: String?) -> Int {
+        self.writeString(atom) +
+        self.writeIfExists(string) { (string) -> Int in
+            self.writeString(" \(string)")
+        }
     }
 
 }

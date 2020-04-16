@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-
-
 extension IMAPCore {
 
     /// IMAPv4 `search-ret-opt-ext`
@@ -23,6 +21,19 @@ extension IMAPCore {
 
         public static func modifier(_ modifier: String, params: TaggedExtensionValue?) -> Self {
             return Self(modifierName: modifier, params: params)
+        }
+    }
+
+}
+
+// MARK: - Encoding
+extension ByteBufferProtocol {
+
+    @discardableResult mutating func writeSearchReturnOptionExtension(_ option: IMAPCore.SearchReturnOptionExtension) -> Int {
+        self.writeTaggedExtensionLabel(option.modifierName) +
+        self.writeIfExists(option.params) { (params) -> Int in
+            self.writeSpace() +
+            self.writeTaggedExtensionValue(params)
         }
     }
 

@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-
-
 extension IMAPCore.Body {
 
     /// IMAPv4 `body-type-basic`
@@ -24,6 +22,17 @@ extension IMAPCore.Body {
         public static func media(_ media: IMAPCore.Media.Basic, fields: Fields) -> Self {
             return Self(media: media, fields: fields)
         }
+    }
+
+}
+
+// MARK: - Encoding
+extension ByteBufferProtocol {
+
+    @discardableResult mutating func writeBodyTypeBasic(_ body: IMAPCore.Body.TypeBasic) -> Int {
+        self.writeMediaBasic(body.media) +
+        self.writeSpace() +
+        self.writeBodyFields(body.fields)
     }
 
 }

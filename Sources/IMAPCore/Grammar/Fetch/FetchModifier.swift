@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-
-
 extension IMAPCore {
     
     public struct FetchModifier: Equatable {
@@ -24,4 +22,29 @@ extension IMAPCore {
             return Self(name: name, value: value)
         }
     }
+}
+
+// MARK: - Encoding
+extension ByteBufferProtocol {
+    
+    @discardableResult mutating func writeFetchModifiers(_ array: [IMAPCore.FetchModifier]) -> Int {
+        guard array.count > 0 else {
+            return 0
+        }
+        
+        return
+            self.writeSpace() +
+            self.writeArray(array) { (param, self) -> Int in
+                self.writeFetchModifier(param)
+            }
+    }
+    
+    @discardableResult mutating func writeFetchModifier(_ param: IMAPCore.FetchModifier) -> Int {
+        self.writeFetchModifierName(param.name) +
+        self.writeIfExists(param.value) { (value) -> Int in
+            self.writeSpace() +
+            self.writeTaggedExtensionValue(value)
+        }
+    }
+    
 }

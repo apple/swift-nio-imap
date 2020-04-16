@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-
-
 extension IMAPCore {
 
     /// IMAPv4 `status-att`
@@ -25,6 +23,21 @@ extension IMAPCore {
         case unseen = "UNSEEN"
         case size = "SIZE"
         case highestModSeq = "HIGHESTMODSEQ"
+    }
+    
+}
+
+// MARK: - IMAP
+extension ByteBufferProtocol {
+    
+    @discardableResult mutating func writeStatusAttributes(_ atts: [IMAPCore.StatusAttribute]) -> Int {
+        self.writeArray(atts, parenthesis: false) { (element, self) in
+            self.writeStatusAttribute(element)
+        }
+    }
+    
+    @discardableResult mutating func writeStatusAttribute(_ att: IMAPCore.StatusAttribute) -> Int {
+        self.writeString(att.rawValue)
     }
     
 }

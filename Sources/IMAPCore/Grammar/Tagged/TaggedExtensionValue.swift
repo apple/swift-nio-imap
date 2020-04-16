@@ -12,14 +12,29 @@
 //
 //===----------------------------------------------------------------------===//
 
-
-
 extension IMAPCore {
 
     /// IMAPv4 `tagged-ext-val`
     public enum TaggedExtensionValue: Equatable {
         case simple(TaggedExtensionSimple)
         case comp([String])
+    }
+
+}
+
+// MARK: - Encoding
+extension ByteBufferProtocol {
+
+    @discardableResult mutating func writeTaggedExtensionValue(_ value: IMAPCore.TaggedExtensionValue) -> Int {
+        switch value {
+        case .simple(let simple):
+            return self.writeTaggedExtensionSimple(simple)
+        case .comp(let comp):
+            return
+                self.writeString("(") +
+                self.writeTaggedExtensionComp(comp) +
+                self.writeString(")")
+        }
     }
 
 }

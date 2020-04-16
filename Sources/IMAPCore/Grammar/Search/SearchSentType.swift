@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-
-
 extension IMAPCore {
     
     // Dervied from `search-key`
@@ -21,6 +19,28 @@ extension IMAPCore {
         case before(Date)
         case on(Date)
         case since(Date)
+    }
+    
+}
+
+// MARK: - Encoding
+extension ByteBufferProtocol {
+    
+    @discardableResult mutating func writeSearchSentType(_ type: IMAPCore.SearchSentType) -> Int {
+        switch type {
+        case .before(let date):
+            return
+                self.writeString("SENTBEFORE ") +
+                self.writeDate(date)
+        case .on(let date):
+            return
+                self.writeString("SENTON ") +
+                self.writeDate(date)
+        case .since(let date):
+            return
+                self.writeString("SENTSINCE ") +
+                self.writeDate(date)
+        }
     }
     
 }

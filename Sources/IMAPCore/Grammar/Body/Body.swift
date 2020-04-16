@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-
-
 extension IMAPCore {
 
     /// IMAOv4 body
@@ -22,4 +20,22 @@ extension IMAPCore {
         case multipart(TypeMultipart)
     }
     
+}
+
+// MARK: - Encoding
+extension ByteBufferProtocol {
+
+    @discardableResult mutating func writeBody(_ body: IMAPCore.Body) -> Int {
+        var size = 0
+        size += self.writeString("(")
+        switch body {
+        case .singlepart(let part):
+            size += self.writeBodyTypeSinglepart(part)
+        case .multipart(let part):
+            size += self.writeBodyTypeMultipart(part)
+        }
+        size += self.writeString(")")
+        return size
+    }
+
 }

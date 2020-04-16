@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-
-
 extension IMAPCore.Body {
 
     /// IMAPv4 `body-ext-1part`
@@ -27,4 +25,15 @@ extension IMAPCore.Body {
         }
     }
 
+}
+
+// MARK: - Encoding
+extension ByteBufferProtocol {
+
+    @discardableResult mutating func writeBodyExtensionSinglePart(_ ext: IMAPCore.Body.ExtensionSinglepart) -> Int {
+        self.writeNString(ext.fieldMD5) +
+        self.writeIfExists(ext.dspLanguage) { (dspLanguage) -> Int in
+            self.writeBodyFieldDSPLanguage(dspLanguage)
+        }
+    }
 }
