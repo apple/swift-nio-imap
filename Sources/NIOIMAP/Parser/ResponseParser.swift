@@ -82,14 +82,14 @@ extension NIOIMAP.ResponseParser {
 
     fileprivate mutating func parseResponse(buffer: inout ByteBuffer) throws -> NIOIMAP.ResponseStream {
         do {
-            let response = try NIOIMAP.GrammarParser.parseResponseData(buffer: &buffer, tracker: .new)
-            if case .messageData(.fetch(_)) = response {
+            let response = try NIOIMAP.GrammarParser.parseResponseType(buffer: &buffer, tracker: .new)
+            if case .responseData(.messageData(.fetch(_))) = response {
                 self.moveStateMachine(expected: .response, next: .attributes(.head))
             }
-            return .responseBegin(response)
+            return .untaggedResponse(response)
         } catch is ParserError {
             // no response? we must be at response end
-            return .responseEnd(try NIOIMAP.GrammarParser.parseResponseDone(buffer: &buffer, tracker: .new))
+            return .taggedResponse(try NIOIMAP.GrammarParser.parseResponseTagged(buffer: &buffer, tracker: .new))
         }
     }
     

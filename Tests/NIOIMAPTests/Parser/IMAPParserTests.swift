@@ -177,27 +177,27 @@ extension ParserUnitTests {
         
         let expectedResults: [(NIOIMAP.ResponseStream, UInt)] = [
             (.greeting(.auth(.ok(.code(.capability([]), text: "Ready.")))), #line),
-            (.responseBegin(.messageData(.fetch(1))), #line),
+            (.untaggedResponse(.responseData(.messageData(.fetch(1)))), #line),
             (.attributesStart, #line),
             (.streamingAttributeBegin(.bodySectionText(nil, 3)), #line),
             (.streamingAttributeBytes("abc"), #line),
             (.streamingAttributeEnd, #line),
             (.simpleAttribute(.dynamic([.seen, .answered])), #line),
             (.attributesFinish, #line),
-            (.responseBegin(.messageData(.fetch(2))), #line),
+            (.untaggedResponse(.responseData(.messageData(.fetch(2)))), #line),
             (.attributesStart, #line),
             (.simpleAttribute(.dynamic([.deleted])), #line),
             (.streamingAttributeBegin(.bodySectionText(nil, 3)), #line),
             (.streamingAttributeBytes("def"), #line),
             (.streamingAttributeEnd, #line),
             (.attributesFinish, #line),
-            (.responseBegin(.messageData(.fetch(3))), #line),
+            (.untaggedResponse(.responseData(.messageData(.fetch(3)))), #line),
             (.attributesStart, #line),
             (.streamingAttributeBegin(.bodySectionText(nil, 3)), #line),
             (.streamingAttributeBytes("ghi"), #line),
             (.streamingAttributeEnd, #line),
             (.attributesFinish, #line),
-            (.responseEnd(.tagged(.tag("3", state: .ok(.code(nil, text: "Fetch completed."))))), #line),
+            (.taggedResponse(.tag("3", state: .ok(.code(nil, text: "Fetch completed.")))), #line),
         ]
         
         var parser = NIOIMAP.ResponseParser()
@@ -2192,18 +2192,6 @@ extension ParserUnitTests {
             ("* CAPABILITY ENABLE\r\n", " ", .capabilityData([.enable]), #line),
         ]
         self.iterateTestInputs(inputs, testFunction: NIOIMAP.GrammarParser.parseResponseData)
-    }
-
-}
-
-// MARK: - parseResponseDone
-extension ParserUnitTests {
-
-    func testParseResponseDone() {
-        let inputs: [(String, String, NIOIMAP.ResponseDone, UInt)] = [
-            ("1.250 OK ID completed.\r\n", "", .tagged(.tag("1.250", state: .ok(.code(nil, text: "ID completed.")))), #line),
-        ]
-        self.iterateTestInputs(inputs, testFunction: NIOIMAP.GrammarParser.parseResponseDone)
     }
 
 }
