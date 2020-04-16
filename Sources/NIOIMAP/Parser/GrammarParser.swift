@@ -2745,20 +2745,6 @@ extension NIOIMAP.GrammarParser {
         }
     }
 
-    // response-done   = response-tagged / response-fatal
-    static func parseResponseDone(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.ResponseDone {
-        func parseResponseDone_tagged(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.ResponseDone {
-            return .tagged(try self.parseResponseTagged(buffer: &buffer, tracker: tracker))
-        }
-        func parseResponseDone_fatal(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.ResponseDone {
-            return .fatal(try self.parseResponseFatal(buffer: &buffer, tracker: tracker))
-        }
-        return try ParserLibrary.parseOneOf([
-            parseResponseDone_tagged,
-            parseResponseDone_fatal
-        ], buffer: &buffer, tracker: tracker)
-    }
-
     // response-fatal  = "*" SP resp-cond-bye CRLF
     static func parseResponseFatal(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.ResponseText {
         return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> NIOIMAP.ResponseText in

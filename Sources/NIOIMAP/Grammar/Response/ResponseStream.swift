@@ -23,14 +23,15 @@ extension NIOIMAP {
     /// For every `responseBegin`, you may recieve 0...m `simpleAttribute` and `attributeBegin`
     public enum ResponseStream: Equatable {
         case greeting(Greeting)
-        case responseBegin(ResponsePayload)
+        case untaggedResponse(ResponseType)
         case attributesStart
         case simpleAttribute(MessageAttributeType)
         case streamingAttributeBegin(MessageAttributesStatic)
         case streamingAttributeBytes(ByteBuffer)
         case streamingAttributeEnd
         case attributesFinish
-        case responseEnd(ResponseDone)
+        case taggedResponse(ResponseTagged)
+        case fatalResponse(ResponseText)
     }
     
 }
@@ -42,8 +43,8 @@ extension ByteBuffer {
         switch response {
         case .greeting(let greeting):
             return self.writeGreeting(greeting)
-        case .responseBegin(let resp):
-            return self.writeResponseData(resp)
+        case .untaggedResponse(let resp):
+            return self.writeResponseType(resp)
         case .attributesStart:
             return self.writeString("(")
         case .simpleAttribute(let att):
@@ -56,8 +57,10 @@ extension ByteBuffer {
             return 0 // do nothing, this is a "fake" event
         case .attributesFinish:
             return self.writeString(")")
-        case .responseEnd(let end):
-            return self.writeResponseDone(end)
+        case .taggedResponse(let end):
+            return self.writeResponseTagged(end)
+        case .fatalResponse(let fatal):
+            return self.writeResponseFatal(fatal)
         }
     }
     

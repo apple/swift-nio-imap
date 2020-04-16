@@ -164,40 +164,48 @@ extension ParserUnitTests {
     
     func testResponseMessageDataStreaming() {
         
+        // first send a greeting
+        // then respond to 2 LOGIN {3}\r\nabc {3}\r\nabc
         // command tag FETCH 1:3 (BODY[TEXT] FLAGS)
         let lines = [
             "* OK [CAPABILITY IMAP4rev1] Ready.\r\n",
+            "+ OK\r\n",
+            "+ OK\r\n",
+            "2 OK Login completed.\r\n",
             "* 1 FETCH (BODY[TEXT] {3}\r\nabc FLAGS (\\seen \\answered))\r\n",
             "* 2 FETCH (FLAGS (\\deleted) BODY[TEXT] {3}\r\ndef)\r\n",
             "* 3 FETCH (BODY[TEXT] {3}\r\nghi)\r\n",
-            "3 OK Fetch completed.\r\n"
+            "3 OK Fetch completed.\r\n",
         ]
         var buffer = ByteBuffer(stringLiteral: "")
         buffer.writeString(lines.joined())
         
         let expectedResults: [(NIOIMAP.ResponseStream, UInt)] = [
             (.greeting(.auth(.ok(.code(.capability([]), text: "Ready.")))), #line),
-            (.responseBegin(.messageData(.fetch(1))), #line),
+            (.untaggedResponse(.continueRequest(.responseText(.code(nil, text: "OK")))), #line),
+            (.untaggedResponse(.continueRequest(.responseText(.code(nil, text: "OK")))), #line),
+            (.taggedResponse(.tag("2", state: .ok(.code(nil, text: "Login completed.")))), #line),
+            (.untaggedResponse(.responseData(.messageData(.fetch(1)))), #line),
             (.attributesStart, #line),
             (.streamingAttributeBegin(.bodySectionText(nil, 3)), #line),
             (.streamingAttributeBytes("abc"), #line),
             (.streamingAttributeEnd, #line),
             (.simpleAttribute(.dynamic([.seen, .answered])), #line),
             (.attributesFinish, #line),
-            (.responseBegin(.messageData(.fetch(2))), #line),
+            (.untaggedResponse(.responseData(.messageData(.fetch(2)))), #line),
             (.attributesStart, #line),
             (.simpleAttribute(.dynamic([.deleted])), #line),
             (.streamingAttributeBegin(.bodySectionText(nil, 3)), #line),
             (.streamingAttributeBytes("def"), #line),
             (.streamingAttributeEnd, #line),
             (.attributesFinish, #line),
-            (.responseBegin(.messageData(.fetch(3))), #line),
+            (.untaggedResponse(.responseData(.messageData(.fetch(3)))), #line),
             (.attributesStart, #line),
             (.streamingAttributeBegin(.bodySectionText(nil, 3)), #line),
             (.streamingAttributeBytes("ghi"), #line),
             (.streamingAttributeEnd, #line),
             (.attributesFinish, #line),
-            (.responseEnd(.tagged(.tag("3", state: .ok(.code(nil, text: "Fetch completed."))))), #line),
+            (.taggedResponse(.tag("3", state: .ok(.code(nil, text: "Fetch completed.")))), #line),
         ]
         
         var parser = NIOIMAP.ResponseParser()
@@ -2192,18 +2200,6 @@ extension ParserUnitTests {
             ("* CAPABILITY ENABLE\r\n", " ", .capabilityData([.enable]), #line),
         ]
         self.iterateTestInputs(inputs, testFunction: NIOIMAP.GrammarParser.parseResponseData)
-    }
-
-}
-
-// MARK: - parseResponseDone
-extension ParserUnitTests {
-
-    func testParseResponseDone() {
-        let inputs: [(String, String, NIOIMAP.ResponseDone, UInt)] = [
-            ("1.250 OK ID completed.\r\n", "", .tagged(.tag("1.250", state: .ok(.code(nil, text: "ID completed.")))), #line),
-        ]
-        self.iterateTestInputs(inputs, testFunction: NIOIMAP.GrammarParser.parseResponseDone)
     }
 
 }

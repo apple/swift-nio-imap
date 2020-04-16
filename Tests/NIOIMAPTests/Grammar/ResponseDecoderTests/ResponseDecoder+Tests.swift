@@ -29,26 +29,26 @@ extension ResponseDecoder_Tests {
             (
                 "1 OK Login\r\n",
                 [
-                    .responseEnd(.tagged(.tag("1", state: .ok(.code(nil, text: "Login")))))
+                    .taggedResponse(.tag("1", state: .ok(.code(nil, text: "Login"))))
                 ]
             ),
             (
                 "* NO [ALERT] ohno\r\n",
                 [
-                    .responseBegin(.conditionalState(.no(.code(.alert, text: "ohno"))))
+                    .untaggedResponse(.responseData(.conditionalState(.no(.code(.alert, text: "ohno")))))
                 ]
             ),
             (
                 "* 2 FETCH (FLAGS (\\deleted) BODY[TEXT] {1}\r\nX)\r\n2 OK Fetch completed.\r\n",
                 [
-                    .responseBegin(.messageData(.fetch(2))),
+                    .untaggedResponse(.responseData(.messageData(.fetch(2)))),
                     .attributesStart,
                     .simpleAttribute(.dynamic([.deleted])),
                     .streamingAttributeBegin(.bodySectionText(nil, 1)),
                     .streamingAttributeBytes("X"),
                     .streamingAttributeEnd,
                     .attributesFinish,
-                    .responseEnd(.tagged(.tag("2", state: .ok(.code(nil, text: "Fetch completed.")))))
+                    .taggedResponse(.tag("2", state: .ok(.code(nil, text: "Fetch completed."))))
                 ]
             )
         ]
