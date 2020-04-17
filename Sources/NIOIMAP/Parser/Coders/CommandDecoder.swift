@@ -45,7 +45,7 @@ extension NIOIMAP {
                             self.ok = context.channel.allocator.buffer(capacity: 2)
                             self.ok!.writeString("OK")
                         }
-                        let continuation = Response.untaggedResponse(.continueRequest(.responseText(.init(code: nil, text: self.ok!))))
+                        let continuation = Response.continuationRequest(.responseText(.init(code: nil, text: self.ok!)))
                         // HACK: We shouldn't just emit those here, we should probably not be a B2MD anymore.
                         context.writeAndFlush(NIOAny(continuation), promise: nil)
                     }

@@ -35,13 +35,13 @@ extension ResponseDecoder_Tests {
             (
                 "* NO [ALERT] ohno\r\n",
                 [
-                    .untaggedResponse(.responseData(.conditionalState(.no(.code(.alert, text: "ohno")))))
+                    .untaggedResponse(.conditionalState(.no(.code(.alert, text: "ohno"))))
                 ]
             ),
             (
                 "* 2 FETCH (FLAGS (\\deleted) BODY[TEXT] {1}\r\nX)\r\n2 OK Fetch completed.\r\n",
                 [
-                    .untaggedResponse(.responseData(.messageData(.fetch(2)))),
+                    .untaggedResponse(.messageData(.fetch(2))),
                     .attributesStart,
                     .simpleAttribute(.dynamic([.deleted])),
                     .streamingAttributeBegin(.bodySectionText(nil, 1)),

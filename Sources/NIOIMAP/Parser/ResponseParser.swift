@@ -82,15 +82,30 @@ extension NIOIMAP.ResponseParser {
 
     fileprivate mutating func parseResponse(buffer: inout ByteBuffer) throws -> NIOIMAP.Response {
         do {
-            let response = try NIOIMAP.GrammarParser.parseResponseType(buffer: &buffer, tracker: .new)
-            if case .responseData(.messageData(.fetch(_))) = response {
+            let response = try NIOIMAP.GrammarParser.parseResponseData(buffer: &buffer, tracker: .new)
+            if case .messageData(.fetch(_)) = response {
                 self.moveStateMachine(expected: .response, next: .attributes(.head))
             }
             return .untaggedResponse(response)
         } catch is ParserError {
-            // no response? we must be at response end
-            return .taggedResponse(try NIOIMAP.GrammarParser.parseTaggedResponse(buffer: &buffer, tracker: .new))
+            return try self._parseResponse(buffer: &buffer)
         }
+    }
+    
+    private mutating func _parseResponse(buffer: inout ByteBuffer) throws -> NIOIMAP.Response {
+        
+        func parseResponse_continuation(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Response {
+            return .continuationRequest(try NIOIMAP.GrammarParser.parseContinueRequest(buffer: &buffer, tracker: tracker))
+        }
+        
+        func parseResponse_tagged(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Response {
+            return .taggedResponse(try NIOIMAP.GrammarParser.parseTaggedResponse(buffer: &buffer, tracker: tracker))
+        }
+        
+        return try ParserLibrary.parseOneOf([
+            parseResponse_continuation,
+            parseResponse_tagged
+        ], buffer: &buffer, tracker: .new)
     }
     
 }
