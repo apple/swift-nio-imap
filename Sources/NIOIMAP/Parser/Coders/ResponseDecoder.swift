@@ -18,7 +18,7 @@ extension NIOIMAP {
     
     public struct ResponseDecoder: ByteToMessageDecoder {
 
-        public typealias InboundOut = ResponseStream
+        public typealias InboundOut = Response
 
         var parser: ResponseParser
 

@@ -16,6 +16,19 @@ import NIO
 
 extension NIOIMAP {
     
+    public enum Response: Equatable {
+        case greeting(Greeting)
+        case untaggedResponse(ResponseType)
+        case attributesStart
+        case simpleAttribute(MessageAttributeType)
+        case streamingAttributeBegin(MessageAttributesStatic)
+        case streamingAttributeBytes(ByteBuffer)
+        case streamingAttributeEnd
+        case attributesFinish
+        case taggedResponse(TaggedResponse)
+        case fatalResponse(ResponseText)
+    }
+    
     public enum ResponseType: Equatable {
         case continueRequest(ContinueRequest)
         case responseData(ResponsePayload)
@@ -25,6 +38,31 @@ extension NIOIMAP {
 
 // MARK: - Encoding
 extension ByteBuffer {
+    
+    @discardableResult public mutating func writeResponse(_ response: NIOIMAP.Response) -> Int {
+        switch response {
+        case .greeting(let greeting):
+            return self.writeGreeting(greeting)
+        case .untaggedResponse(let resp):
+            return self.writeResponseType(resp)
+        case .attributesStart:
+            return self.writeString("(")
+        case .simpleAttribute(let att):
+            return self.writeMessageAttributeType(att)
+        case .streamingAttributeBegin(let att):
+            return self.writeMessageAttributeStatic(att)
+        case .streamingAttributeBytes(var bytes):
+            return self.writeBuffer(&bytes)
+        case .streamingAttributeEnd:
+            return 0 // do nothing, this is a "fake" event
+        case .attributesFinish:
+            return self.writeString(")")
+        case .taggedResponse(let end):
+            return self.writeTaggedResponse(end)
+        case .fatalResponse(let fatal):
+            return self.writeResponseFatal(fatal)
+        }
+    }
 
     @discardableResult mutating func writeResponseType(_ type: NIOIMAP.ResponseType) -> Int {
         switch type {

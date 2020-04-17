@@ -25,7 +25,7 @@ extension ResponseDecoder_Tests {
     
     func testNormalUsage() throws {
         
-        let inoutPairs: [(String, [NIOIMAP.ResponseStream])] = [
+        let inoutPairs: [(String, [NIOIMAP.Response])] = [
             (
                 "1 OK Login\r\n",
                 [
@@ -63,7 +63,7 @@ extension ResponseDecoder_Tests {
                 }
             )
         } catch {
-            switch error as? ByteToMessageDecoderVerifier.VerificationError<NIOIMAP.ResponseStream> {
+            switch error as? ByteToMessageDecoderVerifier.VerificationError<NIOIMAP.Response> {
             case .some(let error):
                 for input in error.inputs {
                     print(" input: \(String(decoding: input.readableBytesView, as: Unicode.UTF8.self))")

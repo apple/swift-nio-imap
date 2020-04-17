@@ -180,7 +180,7 @@ extension ParserUnitTests {
         var buffer = ByteBuffer(stringLiteral: "")
         buffer.writeString(lines.joined())
         
-        let expectedResults: [(NIOIMAP.ResponseStream, UInt)] = [
+        let expectedResults: [(NIOIMAP.Response, UInt)] = [
             (.greeting(.auth(.ok(.code(.capability([]), text: "Ready.")))), #line),
             (.untaggedResponse(.continueRequest(.responseText(.code(nil, text: "OK")))), #line),
             (.untaggedResponse(.continueRequest(.responseText(.code(nil, text: "OK")))), #line),

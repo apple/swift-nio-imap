@@ -17,7 +17,7 @@ import NIOIMAP
 
 class ProxyToMailServerHandler: ChannelInboundHandler {
     
-    typealias InboundIn = NIOIMAP.ResponseStream
+    typealias InboundIn = NIOIMAP.Response
     
     let mailAppToProxyChannel: Channel
     var parser = NIOIMAP.ResponseParser()
@@ -35,7 +35,7 @@ class ProxyToMailServerHandler: ChannelInboundHandler {
     func channelRead(context: ChannelHandlerContext, data: NIOAny) {
         let stream = self.unwrapInboundIn(data)
         var buffer = context.channel.allocator.buffer(capacity: 1024)
-        buffer.writeResponseStream(stream)
+        buffer.writeResponse(stream)
         self.mailAppToProxyChannel.writeAndFlush(buffer, promise: nil)
     }
     
