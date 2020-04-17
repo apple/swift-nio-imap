@@ -2756,13 +2756,13 @@ extension NIOIMAP.GrammarParser {
     }
 
     // response-tagged = tag SP resp-cond-state CRLF
-    static func parseResponseTagged(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.ResponseTagged {
-        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> NIOIMAP.ResponseTagged in
+    static func parseTaggedResponse(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.TaggedResponse {
+        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> NIOIMAP.TaggedResponse in
             let tag = try self.parseTag(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseFixedString(" ", buffer: &buffer, tracker: tracker)
             let state = try self.parseResponseConditionalState(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseFixedString("\r\n", buffer: &buffer, tracker: tracker)
-            return NIOIMAP.ResponseTagged(tag: tag, state: state)
+            return NIOIMAP.TaggedResponse(tag: tag, state: state)
         }
     }
 

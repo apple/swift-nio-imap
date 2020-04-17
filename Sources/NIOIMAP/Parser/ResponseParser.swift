@@ -89,7 +89,7 @@ extension NIOIMAP.ResponseParser {
             return .untaggedResponse(response)
         } catch is ParserError {
             // no response? we must be at response end
-            return .taggedResponse(try NIOIMAP.GrammarParser.parseResponseTagged(buffer: &buffer, tracker: .new))
+            return .taggedResponse(try NIOIMAP.GrammarParser.parseTaggedResponse(buffer: &buffer, tracker: .new))
         }
     }
     

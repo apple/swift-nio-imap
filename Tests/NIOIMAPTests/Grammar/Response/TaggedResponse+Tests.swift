@@ -16,21 +16,21 @@ import XCTest
 import NIO
 @testable import NIOIMAP
 
-class ResponseTaggedTests: EncodeTestClass {
+class TaggedResponse_Tests: EncodeTestClass {
 
 }
 
 // MARK: - Encoding
-extension ResponseTaggedTests {
+extension TaggedResponse_Tests {
 
     func testEncode() {
-        let inputs: [(NIOIMAP.ResponseTagged, String, UInt)] = [
-            (NIOIMAP.ResponseTagged(tag: "tag", state: .bad(.code(.parse, text: "something"))), "tag BAD [PARSE] something\r\n", #line)
+        let inputs: [(NIOIMAP.TaggedResponse, String, UInt)] = [
+            (NIOIMAP.TaggedResponse(tag: "tag", state: .bad(.code(.parse, text: "something"))), "tag BAD [PARSE] something\r\n", #line)
         ]
 
         for (test, expectedString, line) in inputs {
             self.testBuffer.clear()
-            let size = self.testBuffer.writeResponseTagged(test)
+            let size = self.testBuffer.writeTaggedResponse(test)
             XCTAssertEqual(size, expectedString.utf8.count, line: line)
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }

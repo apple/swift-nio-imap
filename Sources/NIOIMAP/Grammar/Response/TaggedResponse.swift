@@ -17,7 +17,7 @@ import NIO
 extension NIOIMAP {
 
     /// IMAPv4 `response-tagged`
-    public struct ResponseTagged: Equatable {
+    public struct TaggedResponse: Equatable {
         public var tag: String
         public var state: ResponseConditionalState
         
@@ -31,7 +31,7 @@ extension NIOIMAP {
 // MARK: - Encoding
 extension ByteBuffer {
 
-    @discardableResult mutating func writeResponseTagged(_ response: NIOIMAP.ResponseTagged) -> Int {
+    @discardableResult mutating func writeTaggedResponse(_ response: NIOIMAP.TaggedResponse) -> Int {
         self.writeString("\(response.tag) ") +
         self.writeResponseConditionalState(response.state) +
         self.writeString("\r\n")
