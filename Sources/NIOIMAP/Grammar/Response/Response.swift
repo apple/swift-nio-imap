@@ -25,7 +25,7 @@ extension NIOIMAP {
         case streamingAttributeBytes(ByteBuffer)
         case streamingAttributeEnd
         case attributesFinish
-        case taggedResponse(ResponseTagged)
+        case taggedResponse(TaggedResponse)
         case fatalResponse(ResponseText)
     }
     
@@ -58,7 +58,7 @@ extension ByteBuffer {
         case .attributesFinish:
             return self.writeString(")")
         case .taggedResponse(let end):
-            return self.writeResponseTagged(end)
+            return self.writeTaggedResponse(end)
         case .fatalResponse(let fatal):
             return self.writeResponseFatal(fatal)
         }
