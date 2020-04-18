@@ -2897,22 +2897,6 @@ extension NIOIMAP.GrammarParser {
             return NIOIMAP.ResponseText(code: code, text: text)
         }
     }
-    
-    static func parseResponseType(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.ResponseType {
-        
-        func parseResponseType_continue(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.ResponseType {
-            return .continueRequest(try self.parseContinueRequest(buffer: &buffer, tracker: tracker))
-        }
-        
-        func parseResponseType_data(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.ResponseType {
-            return .responseData(try self.parseResponseData(buffer: &buffer, tracker: tracker))
-        }
-        
-        return try ParserLibrary.parseOneOf([
-            parseResponseType_continue,
-            parseResponseType_data
-        ], buffer: &buffer, tracker: tracker)
-    }
 
     // resp-text-code  = "ALERT" /
     //                   "BADCHARSET" [SP "(" charset *(SP charset) ")" ] /

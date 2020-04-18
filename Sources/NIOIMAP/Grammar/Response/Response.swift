@@ -18,7 +18,7 @@ extension NIOIMAP {
     
     public enum Response: Equatable {
         case greeting(Greeting)
-        case untaggedResponse(ResponseType)
+        case untaggedResponse(ResponsePayload)
         case attributesStart
         case simpleAttribute(MessageAttributeType)
         case streamingAttributeBegin(MessageAttributesStatic)
@@ -27,6 +27,7 @@ extension NIOIMAP {
         case attributesFinish
         case taggedResponse(TaggedResponse)
         case fatalResponse(ResponseText)
+        case continuationRequest(ContinueRequest)
     }
     
     public enum ResponseType: Equatable {
@@ -44,7 +45,7 @@ extension ByteBuffer {
         case .greeting(let greeting):
             return self.writeGreeting(greeting)
         case .untaggedResponse(let resp):
-            return self.writeResponseType(resp)
+            return self.writeResponseData(resp)
         case .attributesStart:
             return self.writeString("(")
         case .simpleAttribute(let att):
@@ -61,6 +62,8 @@ extension ByteBuffer {
             return self.writeTaggedResponse(end)
         case .fatalResponse(let fatal):
             return self.writeResponseFatal(fatal)
+        case .continuationRequest(let req):
+            return self.writeContinueRequest(req)
         }
     }
 
