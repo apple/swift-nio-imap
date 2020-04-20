@@ -14,6 +14,7 @@
 
 import NIO
 import NIOIMAP
+import NIOIMAPCore
 
 class ProxyToMailServerHandler: ChannelInboundHandler {
     

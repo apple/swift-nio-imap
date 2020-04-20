@@ -16,6 +16,7 @@ import NIO
 import NIOSSL
 import NIOIMAP
 import Logging
+import NIOIMAPCore
 
 public class CommandRoundtripHandler: ChannelOutboundHandler {
     
