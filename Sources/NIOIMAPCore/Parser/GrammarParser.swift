@@ -1438,26 +1438,8 @@ extension NIOIMAP.GrammarParser {
 
     // flag-keyword    = "$MDNSent" / "$Forwarded" / atom
     static func parseFlagKeyword(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Flag.Keyword {
-
-        func parseFlag_keyword_sent(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Flag.Keyword {
-            try ParserLibrary.parseFixedString("$MDNSent", buffer: &buffer, tracker: tracker)
-            return .mdnSent
-        }
-
-        func parseFlag_keyword_forwarded(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Flag.Keyword {
-            try ParserLibrary.parseFixedString("$Forwarded", buffer: &buffer, tracker: tracker)
-            return .forwarded
-        }
-
-        func parseFlag_keyword_other(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Flag.Keyword {
-            return .other(try self.parseAtom(buffer: &buffer, tracker: tracker))
-        }
-
-        return try ParserLibrary.parseOneOf([
-            parseFlag_keyword_sent,
-            parseFlag_keyword_forwarded,
-            parseFlag_keyword_other
-        ], buffer: &buffer, tracker: tracker)
+        let string = try self.parseAtom(buffer: &buffer, tracker: tracker)
+        return NIOIMAP.Flag.Keyword(stringLiteral: string)
     }
 
     // flag-list       = "(" [flag *(SP flag)] ")"

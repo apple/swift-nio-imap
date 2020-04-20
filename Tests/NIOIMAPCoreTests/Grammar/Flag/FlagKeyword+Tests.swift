@@ -27,7 +27,15 @@ extension FlagKeyword_Tests {
         let inputs: [(NIOIMAP.Flag.Keyword, String, UInt)] = [
             (.forwarded, "$Forwarded", #line),
             (.mdnSent, "$MDNSent", #line),
-            (.other("keyword"), "keyword", #line),
+            (.colorBit0, "$MailFlagBit0", #line),
+            (.colorBit1, "$MailFlagBit1", #line),
+            (.colorBit2, "$MailFlagBit2", #line),
+            (.junk, "$Junk", #line),
+            (.notJunk, "$NotJunk", #line),
+            (.unregistered_junk, "Junk", #line),
+            (.unregistered_notJunk, "NotJunk", #line),
+            (.unregistered_forwarded, "Forwarded", #line),
+            (.unregistered_redirected, "Redirected", #line),
         ]
 
         for (test, expectedString, line) in inputs {
