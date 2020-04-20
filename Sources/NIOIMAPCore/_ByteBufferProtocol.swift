@@ -12,9 +12,14 @@
 //
 //===----------------------------------------------------------------------===//
 
+import Dispatch
+
 // proof that this works
 import NIO
 extension ByteBuffer: ByteBufferProtocol {
+    typealias ViewType = ByteBufferView
+}
+extension ByteBufferView: ByteBufferViewProtocol {
     
 }
 
@@ -102,6 +107,8 @@ extension ByteBuffer: ByteBufferProtocol {
 /// All `ByteBuffer` methods that don't contain the word 'unsafe' will only allow you to access the 'readable bytes'.
 ///
 protocol ByteBufferProtocol where Self: Hashable, Self: CustomStringConvertible {
+    
+    associatedtype ViewType: ByteBufferViewProtocol
     
     typealias _Capacity = UInt32
     
@@ -320,4 +327,431 @@ protocol ByteBufferProtocol where Self: Hashable, Self: CustomStringConvertible 
     ///     - body: The modification operation to execute, with this `ByteBuffer` passed `inout` as an argument.
     /// - returns: The return value of `body`.
     mutating func modifyIfUniquelyOwned<T>(_ body: (inout Self) throws -> T) rethrows -> T?
+
+    /// Get `length` bytes starting at `index` and return the result as `[UInt8]`. This will not change the reader index.
+    /// The selected bytes must be readable or else `nil` will be returned.
+    ///
+    /// - parameters:
+    ///     - index: The starting index of the bytes of interest into the `ByteBuffer`.
+    ///     - length: The number of bytes of interest.
+    /// - returns: A `[UInt8]` value containing the bytes of interest or `nil` if the bytes `ByteBuffer` are not readable.
+    func getBytes(at index: Int, length: Int) -> [UInt8]?
+
+    /// Read `length` bytes off this `ByteBuffer`, move the reader index forward by `length` bytes and return the result
+    /// as `[UInt8]`.
+    ///
+    /// - parameters:
+    ///     - length: The number of bytes to be read from this `ByteBuffer`.
+    /// - returns: A `[UInt8]` value containing `length` bytes or `nil` if there aren't at least `length` bytes readable.
+    mutating func readBytes(length: Int) -> [UInt8]?
+
+    /// Write the static `string` into this `ByteBuffer` using UTF-8 encoding, moving the writer index forward appropriately.
+    ///
+    /// - parameters:
+    ///     - string: The string to write.
+    /// - returns: The number of bytes written.
+    mutating func writeStaticString(_ string: StaticString) -> Int
+
+    /// Write the static `string` into this `ByteBuffer` at `index` using UTF-8 encoding, moving the writer index forward appropriately.
+    ///
+    /// - parameters:
+    ///     - string: The string to write.
+    ///     - index: The index for the first serialized byte.
+    /// - returns: The number of bytes written.
+    mutating func setStaticString(_ string: StaticString, at index: Int) -> Int
+
+    /// Write `string` into this `ByteBuffer` using UTF-8 encoding, moving the writer index forward appropriately.
+    ///
+    /// - parameters:
+    ///     - string: The string to write.
+    /// - returns: The number of bytes written.
+    mutating func writeString(_ string: String) -> Int
+
+    /// Write `string` into this `ByteBuffer` at `index` using UTF-8 encoding. Does not move the writer index.
+    ///
+    /// - parameters:
+    ///     - string: The string to write.
+    ///     - index: The index for the first serialized byte.
+    /// - returns: The number of bytes written.
+    mutating func setString(_ string: String, at index: Int) -> Int
+
+    /// Get the string at `index` from this `ByteBuffer` decoding using the UTF-8 encoding. Does not move the reader index.
+    /// The selected bytes must be readable or else `nil` will be returned.
+    ///
+    /// - parameters:
+    ///     - index: The starting index into `ByteBuffer` containing the string of interest.
+    ///     - length: The number of bytes making up the string.
+    /// - returns: A `String` value containing the UTF-8 decoded selected bytes from this `ByteBuffer` or `nil` if
+    ///            the requested bytes are not readable.
+    func getString(at index: Int, length: Int) -> String?
+
+    /// Read `length` bytes off this `ByteBuffer`, decoding it as `String` using the UTF-8 encoding. Move the reader index forward by `length`.
+    ///
+    /// - parameters:
+    ///     - length: The number of bytes making up the string.
+    /// - returns: A `String` value deserialized from this `ByteBuffer` or `nil` if there aren't at least `length` bytes readable.
+    mutating func readString(length: Int) -> String?
+
+    /// Write `substring` into this `ByteBuffer` using UTF-8 encoding, moving the writer index forward appropriately.
+    ///
+    /// - parameters:
+    ///     - substring: The substring to write.
+    /// - returns: The number of bytes written.
+    mutating func writeSubstring(_ substring: Substring) -> Int
+
+    /// Write `substring` into this `ByteBuffer` at `index` using UTF-8 encoding. Does not move the writer index.
+    ///
+    /// - parameters:
+    ///     - substring: The substring to write.
+    ///     - index: The index for the first serilized byte.
+    /// - returns: The number of bytes written
+    mutating func setSubstring(_ substring: Substring, at index: Int) -> Int
+
+    /// Write `dispatchData` into this `ByteBuffer`, moving the writer index forward appropriately.
+    ///
+    /// - parameters:
+    ///     - dispatchData: The `DispatchData` instance to write to the `ByteBuffer`.
+    /// - returns: The number of bytes written.
+    mutating func writeDispatchData(_ dispatchData: DispatchData) -> Int
+
+    /// Write `dispatchData` into this `ByteBuffer` at `index`. Does not move the writer index.
+    ///
+    /// - parameters:
+    ///     - dispatchData: The `DispatchData` to write.
+    ///     - index: The index for the first serialized byte.
+    /// - returns: The number of bytes written.
+    mutating func setDispatchData(_ dispatchData: DispatchData, at index: Int) -> Int
+
+    /// Get the bytes at `index` from this `ByteBuffer` as a `DispatchData`. Does not move the reader index.
+    /// The selected bytes must be readable or else `nil` will be returned.
+    ///
+    /// - parameters:
+    ///     - index: The starting index into `ByteBuffer` containing the string of interest.
+    ///     - length: The number of bytes.
+    /// - returns: A `DispatchData` value deserialized from this `ByteBuffer` or `nil` if the requested bytes
+    ///            are not readable.
+    func getDispatchData(at index: Int, length: Int) -> DispatchData?
+
+    /// Read `length` bytes off this `ByteBuffer` and return them as a `DispatchData`. Move the reader index forward by `length`.
+    ///
+    /// - parameters:
+    ///     - length: The number of bytes.
+    /// - returns: A `DispatchData` value containing the bytes from this `ByteBuffer` or `nil` if there aren't at least `length` bytes readable.
+    mutating func readDispatchData(length: Int) -> DispatchData?
+
+    /// Yields an immutable buffer pointer containing this `ByteBuffer`'s readable bytes. Will move the reader index
+    /// by the number of bytes returned by `body`.
+    ///
+    /// - warning: Do not escape the pointer from the closure for later use.
+    ///
+    /// - parameters:
+    ///     - body: The closure that will accept the yielded bytes and returns the number of bytes it processed.
+    /// - returns: The number of bytes read.
+    mutating func readWithUnsafeReadableBytes(_ body: (UnsafeRawBufferPointer) throws -> Int) rethrows -> Int
+
+    /// Yields an immutable buffer pointer containing this `ByteBuffer`'s readable bytes. Will move the reader index
+    /// by the number of bytes `body` returns in the first tuple component.
+    ///
+    /// - warning: Do not escape the pointer from the closure for later use.
+    ///
+    /// - parameters:
+    ///     - body: The closure that will accept the yielded bytes and returns the number of bytes it processed along with some other value.
+    /// - returns: The value `body` returned in the second tuple component.
+    mutating func readWithUnsafeReadableBytes<T>(_ body: (UnsafeRawBufferPointer) throws -> (Int, T)) rethrows -> T
+
+    /// Yields a mutable buffer pointer containing this `ByteBuffer`'s readable bytes. You may modify the yielded bytes.
+    /// Will move the reader index by the number of bytes returned by `body` but leave writer index as it was.
+    ///
+    /// - warning: Do not escape the pointer from the closure for later use.
+    ///
+    /// - parameters:
+    ///     - body: The closure that will accept the yielded bytes and returns the number of bytes it processed.
+    /// - returns: The number of bytes read.
+    mutating func readWithUnsafeMutableReadableBytes(_ body: (UnsafeMutableRawBufferPointer) throws -> Int) rethrows -> Int
+
+    /// Yields a mutable buffer pointer containing this `ByteBuffer`'s readable bytes. You may modify the yielded bytes.
+    /// Will move the reader index by the number of bytes `body` returns in the first tuple component but leave writer index as it was.
+    ///
+    /// - warning: Do not escape the pointer from the closure for later use.
+    ///
+    /// - parameters:
+    ///     - body: The closure that will accept the yielded bytes and returns the number of bytes it processed along with some other value.
+    /// - returns: The value `body` returned in the second tuple component.
+    mutating func readWithUnsafeMutableReadableBytes<T>(_ body: (UnsafeMutableRawBufferPointer) throws -> (Int, T)) rethrows -> T
+
+    /// Copy `buffer`'s readable bytes into this `ByteBuffer` starting at `index`. Does not move any of the reader or writer indices.
+    ///
+    /// - parameters:
+    ///     - buffer: The `ByteBuffer` to copy.
+    ///     - index: The index for the first byte.
+    /// - returns: The number of bytes written.
+    @available(*, deprecated, renamed: "setBuffer(_:at:)")
+    mutating func set(buffer: ByteBuffer, at index: Int) -> Int
+
+    /// Copy `buffer`'s readable bytes into this `ByteBuffer` starting at `index`. Does not move any of the reader or writer indices.
+    ///
+    /// - parameters:
+    ///     - buffer: The `ByteBuffer` to copy.
+    ///     - index: The index for the first byte.
+    /// - returns: The number of bytes written.
+    mutating func setBuffer(_ buffer: ByteBuffer, at index: Int) -> Int
+
+    /// Write `buffer`'s readable bytes into this `ByteBuffer` starting at `writerIndex`. This will move both this
+    /// `ByteBuffer`'s writer index as well as `buffer`'s reader index by the number of bytes readable in `buffer`.
+    ///
+    /// - parameters:
+    ///     - buffer: The `ByteBuffer` to write.
+    /// - returns: The number of bytes written to this `ByteBuffer` which is equal to the number of bytes read from `buffer`.
+    mutating func writeBuffer(_ buffer: inout ByteBuffer) -> Int
+
+    /// Write `bytes`, a `Sequence` of `UInt8` into this `ByteBuffer`. Moves the writer index forward by the number of bytes written.
+    ///
+    /// - parameters:
+    ///     - bytes: A `Collection` of `UInt8` to be written.
+    /// - returns: The number of bytes written or `bytes.count`.
+    mutating func writeBytes<Bytes>(_ bytes: Bytes) -> Int where Bytes : Sequence, Bytes.Element == UInt8
+
+    /// Write `bytes` into this `ByteBuffer`. Moves the writer index forward by the number of bytes written.
+    ///
+    /// - parameters:
+    ///     - bytes: An `UnsafeRawBufferPointer`
+    /// - returns: The number of bytes written or `bytes.count`.
+    mutating func writeBytes(_ bytes: UnsafeRawBufferPointer) -> Int
+
+    /// Slice the readable bytes off this `ByteBuffer` without modifying the reader index. This method will return a
+    /// `ByteBuffer` sharing the underlying storage with the `ByteBuffer` the method was invoked on. The returned
+    /// `ByteBuffer` will contain the bytes in the range `readerIndex..<writerIndex` of the original `ByteBuffer`.
+    ///
+    /// - note: Because `ByteBuffer` implements copy-on-write a copy of the storage will be automatically triggered when either of the `ByteBuffer`s sharing storage is written to.
+    ///
+    /// - returns: A `ByteBuffer` sharing storage containing the readable bytes only.
+    func slice() -> ByteBuffer
+
+    /// Slice `length` bytes off this `ByteBuffer` and move the reader index forward by `length`.
+    /// If enough bytes are readable the `ByteBuffer` returned by this method will share the underlying storage with
+    /// the `ByteBuffer` the method was invoked on.
+    /// The returned `ByteBuffer` will contain the bytes in the range `readerIndex..<(readerIndex + length)` of the
+    /// original `ByteBuffer`.
+    /// The `readerIndex` of the returned `ByteBuffer` will be `0`, the `writerIndex` will be `length`.
+    ///
+    /// - note: Because `ByteBuffer` implements copy-on-write a copy of the storage will be automatically triggered when either of the `ByteBuffer`s sharing storage is written to.
+    ///
+    /// - parameters:
+    ///     - length: The number of bytes to slice off.
+    /// - returns: A `ByteBuffer` sharing storage containing `length` bytes or `nil` if the not enough bytes were readable.
+    mutating func readSlice(length: Int) -> Self?
+
+    /// Read an integer off this `ByteBuffer`, move the reader index forward by the integer's byte size and return the result.
+    ///
+    /// - parameters:
+    ///     - endianness: The endianness of the integer in this `ByteBuffer` (defaults to big endian).
+    ///     - as: the desired `FixedWidthInteger` type (optional parameter)
+    /// - returns: An integer value deserialized from this `ByteBuffer` or `nil` if there aren't enough bytes readable.
+    mutating func readInteger<T>(endianness: Endianness, as: T.Type) -> T? where T : FixedWidthInteger
+
+    /// Get the integer at `index` from this `ByteBuffer`. Does not move the reader index.
+    /// The selected bytes must be readable or else `nil` will be returned.
+    ///
+    /// - parameters:
+    ///     - index: The starting index of the bytes for the integer into the `ByteBuffer`.
+    ///     - endianness: The endianness of the integer in this `ByteBuffer` (defaults to big endian).
+    ///     - as: the desired `FixedWidthInteger` type (optional parameter)
+    /// - returns: An integer value deserialized from this `ByteBuffer` or `nil` if the bytes of interest are not
+    ///            readable.
+    func getInteger<T>(at index: Int, endianness: Endianness, as: T.Type) -> T? where T : FixedWidthInteger
+
+    /// Write `integer` into this `ByteBuffer`, moving the writer index forward appropriately.
+    ///
+    /// - parameters:
+    ///     - integer: The integer to serialize.
+    ///     - endianness: The endianness to use, defaults to big endian.
+    /// - returns: The number of bytes written.
+    mutating func writeInteger<T>(_ integer: T, endianness: Endianness, as: T.Type) -> Int where T : FixedWidthInteger
+
+    /// Write `integer` into this `ByteBuffer` starting at `index`. This does not alter the writer index.
+    ///
+    /// - parameters:
+    ///     - integer: The integer to serialize.
+    ///     - index: The index of the first byte to write.
+    ///     - endianness: The endianness to use, defaults to big endian.
+    /// - returns: The number of bytes written.
+    mutating func setInteger<T>(_ integer: T, at index: Int, endianness: Endianness, as: T.Type) -> Int where T : FixedWidthInteger
+    
+    /// A view into the readable bytes of the `ByteBuffer`.
+    var readableBytesView: ViewType { get }
+
+    /// Returns a view into some portion of the readable bytes of a `ByteBuffer`.
+    ///
+    /// - parameters:
+    ///   - index: The index the view should start at
+    ///   - length: The length of the view (in bytes)
+    /// - returns: A view into a portion of a `ByteBuffer` or `nil` if the requested bytes were not readable.
+    func viewBytes(at index: Int, length: Int) -> ViewType?
+
+    /// Create a `ByteBuffer` from the given `ByteBufferView`s range.
+    ///
+    /// - parameter view: The `ByteBufferView` which you want to get a `ByteBuffer` from.
+    init(_ view: ViewType)
+}
+
+/// A view into a portion of a `ByteBuffer`.
+///
+/// A `ByteBufferView` is useful whenever a `Collection where Element == UInt8` representing a portion of a
+/// `ByteBuffer` is needed.
+protocol ByteBufferViewProtocol where Self: RandomAccessCollection, Self: MutableCollection, Self: RangeReplaceableCollection {
+
+    /// A type representing the sequence's elements.
+    associatedtype Element = UInt8
+
+    /// A type that represents a position in the collection.
+    ///
+    /// Valid indices consist of the position of every element and a
+    /// "past the end" position that's not valid for use as a subscript
+    /// argument.
+    associatedtype Index = Int
+
+    /// A sequence that represents a contiguous subrange of the collection's
+    /// elements.
+    ///
+    /// This associated type appears as a requirement in the `Sequence`
+    /// protocol, but it is restated here with stricter constraints. In a
+    /// collection, the subsequence should also conform to `Collection`.
+    associatedtype SubSequence = ByteBufferView
+
+    /// Creates a `ByteBufferView` from the readable bytes of the given `buffer`.
+    init(_ buffer: ByteBuffer)
+
+    func withUnsafeBytes<R>(_ body: (UnsafeRawBufferPointer) throws -> R) rethrows -> R
+
+    /// The position of the first element in a nonempty collection.
+    ///
+    /// If the collection is empty, `startIndex` is equal to `endIndex`.
+    var startIndex: Index { get }
+
+    /// The collection's "past the end" position---that is, the position one
+    /// greater than the last valid subscript argument.
+    ///
+    /// When you need a range that includes the last element of a collection, use
+    /// the half-open range operator (`..<`) with `endIndex`. The `..<` operator
+    /// creates a range that doesn't include the upper bound, so it's always
+    /// safe to use with `endIndex`. For example:
+    ///
+    ///     let numbers = [10, 20, 30, 40, 50]
+    ///     if let index = numbers.firstIndex(of: 30) {
+    ///         print(numbers[index ..< numbers.endIndex])
+    ///     }
+    ///     // Prints "[30, 40, 50]"
+    ///
+    /// If the collection is empty, `endIndex` is equal to `startIndex`.
+    var endIndex: Index { get }
+
+    /// Returns the position immediately after the given index.
+    ///
+    /// The successor of an index must be well defined. For an index `i` into a
+    /// collection `c`, calling `c.index(after: i)` returns the same index every
+    /// time.
+    ///
+    /// - Parameter i: A valid index of the collection. `i` must be less than
+    ///   `endIndex`.
+    /// - Returns: The index value immediately after `i`.
+    func index(after i: Index) -> Index
+
+    /// Accesses the element at the specified position.
+    ///
+    /// The following example accesses an element of an array through its
+    /// subscript to print its value:
+    ///
+    ///     var streets = ["Adams", "Bryant", "Channing", "Douglas", "Evarts"]
+    ///     print(streets[1])
+    ///     // Prints "Bryant"
+    ///
+    /// You can subscript a collection with any valid index other than the
+    /// collection's end index. The end index refers to the position one past
+    /// the last element of a collection, so it doesn't correspond with an
+    /// element.
+    ///
+    /// - Parameter position: The position of the element to access. `position`
+    ///   must be a valid index of the collection that is not equal to the
+    ///   `endIndex` property.
+    ///
+    /// - Complexity: O(1)
+    subscript(position: Index) -> UInt8 { get set }
+
+    /// Accesses a contiguous subrange of the collection's elements.
+    ///
+    /// The accessed slice uses the same indices for the same elements as the
+    /// original collection uses. Always use the slice's `startIndex` property
+    /// instead of assuming that its indices start at a particular value.
+    ///
+    /// This example demonstrates getting a slice of an array of strings, finding
+    /// the index of one of the strings in the slice, and then using that index
+    /// in the original array.
+    ///
+    ///     let streets = ["Adams", "Bryant", "Channing", "Douglas", "Evarts"]
+    ///     let streetsSlice = streets[2 ..< streets.endIndex]
+    ///     print(streetsSlice)
+    ///     // Prints "["Channing", "Douglas", "Evarts"]"
+    ///
+    ///     let index = streetsSlice.firstIndex(of: "Evarts")    // 4
+    ///     print(streets[index!])
+    ///     // Prints "Evarts"
+    ///
+    /// - Parameter bounds: A range of the collection's indices. The bounds of
+    ///   the range must be valid indices of the collection.
+    ///
+    /// - Complexity: O(1)
+    subscript(range: Range<Index>) -> Self { get set }
+
+    /// Call `body(p)`, where `p` is a pointer to the collection's
+    /// contiguous storage.  If no such storage exists, it is
+    /// first created.  If the collection does not support an internal
+    /// representation in a form of contiguous storage, `body` is not
+    /// called and `nil` is returned.
+    ///
+    /// A `Collection` that provides its own implementation of this method
+    /// must also guarantee that an equivalent buffer of its `SubSequence`
+    /// can be generated by advancing the pointer by the distance to the
+    /// slice's `startIndex`.
+    func withContiguousStorageIfAvailable<R>(_ body: (UnsafeBufferPointer<UInt8>) throws -> R) rethrows -> R?
+
+    /// Creates a new, empty collection.
+    init()
+
+    /// Replaces the specified subrange of elements with the given collection.
+    ///
+    /// This method has the effect of removing the specified range of elements
+    /// from the collection and inserting the new elements at the same location.
+    /// The number of new elements need not match the number of elements being
+    /// removed.
+    ///
+    /// In this example, three elements in the middle of an array of integers are
+    /// replaced by the five elements of a `Repeated<Int>` instance.
+    ///
+    ///      var nums = [10, 20, 30, 40, 50]
+    ///      nums.replaceSubrange(1...3, with: repeatElement(1, count: 5))
+    ///      print(nums)
+    ///      // Prints "[10, 1, 1, 1, 1, 1, 50]"
+    ///
+    /// If you pass a zero-length range as the `subrange` parameter, this method
+    /// inserts the elements of `newElements` at `subrange.startIndex`. Calling
+    /// the `insert(contentsOf:at:)` method instead is preferred.
+    ///
+    /// Likewise, if you pass a zero-length collection as the `newElements`
+    /// parameter, this method removes the elements in the given subrange
+    /// without replacement. Calling the `removeSubrange(_:)` method instead is
+    /// preferred.
+    ///
+    /// Calling this method may invalidate any existing indices for use with this
+    /// collection.
+    ///
+    /// - Parameters:
+    ///   - subrange: The subrange of the collection to replace. The bounds of
+    ///     the range must be valid indices of the collection.
+    ///   - newElements: The new elements to add to the collection.
+    ///
+    /// - Complexity: O(*n* + *m*), where *n* is length of this collection and
+    ///   *m* is the length of `newElements`. If the call to this method simply
+    ///   appends the contents of `newElements` to the collection, this method is
+    ///   equivalent to `append(contentsOf:)`.
+    mutating func replaceSubrange<C>(_ subrange: Range<Index>, with newElements: C) where C : Collection, C.Element == NIO.ByteBufferView.Element
 }
