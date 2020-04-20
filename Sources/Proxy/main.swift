@@ -16,6 +16,7 @@ import Foundation
 import NIO
 import NIOIMAP
 import NIOSSL
+import NIOIMAPCore
 
 func log(_ string: String, buffer: ByteBuffer? = nil) {
     if let buffer = buffer {

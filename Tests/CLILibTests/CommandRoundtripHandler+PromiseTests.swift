@@ -16,6 +16,7 @@ import XCTest
 import NIO
 import Logging
 import NIOIMAP
+import NIOIMAPCore
 @testable import CLILib
 
 class CommandRoundtripHandler_PromiseTests: XCTestCase {
