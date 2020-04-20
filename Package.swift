@@ -4,9 +4,9 @@
 import PackageDescription
 
 let package = Package(
-    name: "swift-nio-imap",
+    name: "swift-nio-email",
     products: [
-        .library(name: "NIOIMAP", targets: ["NIOIMAP"])
+        .library(name: "NIOIMAP", targets: ["NIOIMAP", "NIOIMAPCore"])
     ], dependencies: [
         .package(url: "https://github.com/apple/swift-nio", from: "2.16.0"),
         .package(url: "https://github.com/apple/swift-nio-extras", from: "1.4.0"),
@@ -16,6 +16,10 @@ let package = Package(
     targets: [
         .target(
             name: "NIOIMAP",
+            dependencies: ["NIOIMAPCore"]
+        ),
+        .target(
+            name: "NIOIMAPCore",
             dependencies: ["NIO"]
         ),
         .target(
@@ -32,7 +36,11 @@ let package = Package(
         ),
         .testTarget(
             name: "NIOIMAPTests",
-            dependencies: ["NIOIMAP", "NIO", "NIOTestUtils"]
+            dependencies: ["NIOIMAP", "NIOIMAPCore", "NIO", "NIOTestUtils"]
+        ),
+        .testTarget(
+            name: "NIOIMAPCoreTests",
+            dependencies: ["NIOIMAPCore", "NIO", "NIOTestUtils"]
         ),
         .testTarget(
             name: "CLILibTests",
