@@ -120,6 +120,10 @@ extension UInt8 {
     var isAlpha: Bool {
         return (self >= 65 && self <= 90) || (self >= 97 && self <= 122)
     }
+    
+    var isAlphaNum: Bool {
+        return isalnum(Int32(self)) != 0
+    }
 
     /// tagged-label-fchar  = ALPHA / "-" / "_" / "."
     var isTaggedLabelFchar: Bool {

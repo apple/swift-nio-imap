@@ -554,11 +554,8 @@ extension ParserUnitTests {
     func testParseCapability() {
         let inputs: [(String, String, NIOIMAP.Capability, UInt)] = [
             ("CONDSTORE", " ", .condStore, #line),
-            ("ENABLE", " ", .enable, #line),
-            ("AUTH=some", " ", .auth("some"), #line),
-            ("other", " ", .other("other"), #line),
-            ("MOVE", " ", .move, #line),
-            ("FILTERS", " ", .filters, #line),
+            ("AUTH=PLAIN", " ", .auth(.plain), #line),
+            ("SPECIAL-USE", " ", .specialUse, #line)
         ]
         self.iterateTestInputs(inputs, testFunction: NIOIMAP.GrammarParser.parseCapability)
     }
