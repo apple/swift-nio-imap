@@ -15,7 +15,6 @@
 import XCTest
 import Foundation
 import NIO
-@testable import NIOIMAP
 
 enum TestUtilities {
     
