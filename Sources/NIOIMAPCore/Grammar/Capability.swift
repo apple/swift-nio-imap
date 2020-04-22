@@ -24,7 +24,7 @@ extension NIOIMAP {
         var rawValue: String
         
         public init(stringLiteral value: StringLiteralType) {
-            self.rawValue = value
+            self.rawValue = value.uppercased()
         }
         
     }

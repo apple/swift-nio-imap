@@ -16,12 +16,23 @@ import XCTest
 import NIO
 @testable import NIOIMAPCore
 
-class CapabilityDataTests: EncodeTestClass {
+class Capability_Tests: EncodeTestClass {
 
 }
 
+// MARK: - Equatable
+extension Capability_Tests {
+    
+    func testEquatable() {
+        let capability1 = NIOIMAP.Capability(stringLiteral: "idle")
+        let capability2 = NIOIMAP.Capability(stringLiteral: "IDLE")
+        XCTAssertEqual(capability1, capability2)
+    }
+    
+}
+
 // MARK: - Encoding
-extension CapabilityDataTests {
+extension Capability_Tests {
 
     func testCapabilityData_encode() {
 
