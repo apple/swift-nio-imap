@@ -36,7 +36,7 @@ extension NIOIMAP.Flag {
         }
         
         fileprivate init(unchecked string: String) {
-            precondition(string.utf8.allSatisfy { (c) -> Bool in
+            assert(string.utf8.allSatisfy { (c) -> Bool in
                 if c.isAlpha {
                     return c >= UInt8(ascii: "A") && c <= UInt8(ascii: "Z")
                 }
