@@ -2138,7 +2138,7 @@ extension ParserUnitTests {
             ("BADCHARSET", "\r", .badCharset([]), #line),
             ("BADCHARSET (UTF8)", "\r", .badCharset(["UTF8"]), #line),
             ("BADCHARSET (UTF8 UTF9 UTF10)", "\r", .badCharset(["UTF8", "UTF9", "UTF10"]), #line),
-            ("CAPABILITY IMAP4 IMAP4rev1", "\r", .capability([]), #line),
+            ("CAPABILITY IMAP4 IMAP4rev1", "\r", .capability([.imap4, .imap4rev1]), #line),
             ("PARSE", "\r", .parse, #line),
             ("PERMANENTFLAGS ()", "\r", .permanentFlags([]), #line),
             ("PERMANENTFLAGS (\\Answered)", "\r", .permanentFlags([.flag(.answered)]), #line),
