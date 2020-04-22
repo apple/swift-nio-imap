@@ -24,7 +24,7 @@ extension NIOIMAP.Flag {
         public var rawValue: StringLiteralType
         
         public init(stringLiteral value: StringLiteralType) {
-            self.rawValue = value
+            self.rawValue = value.uppercased()
         }
         
     }
