@@ -17,7 +17,7 @@ import Dispatch
 // proof that this works
 import NIO
 extension ByteBuffer: _ByteBufferAPITemplate {
-    typealias ViewType = ByteBufferView
+    
 }
 extension ByteBufferView: _ByteBufferViewAPITemplate {
     
@@ -107,8 +107,6 @@ extension ByteBufferView: _ByteBufferViewAPITemplate {
 /// All `ByteBuffer` methods that don't contain the word 'unsafe' will only allow you to access the 'readable bytes'.
 ///
 protocol _ByteBufferAPITemplate where Self: Hashable, Self: CustomStringConvertible {
-    
-    associatedtype ViewType: _ByteBufferViewAPITemplate
     
     /// The number of bytes writable until `ByteBuffer` will need to grow its underlying storage which will likely
     /// trigger a copy of the bytes.
@@ -564,7 +562,7 @@ protocol _ByteBufferAPITemplate where Self: Hashable, Self: CustomStringConverti
     mutating func setInteger<T>(_ integer: T, at index: Int, endianness: Endianness, as: T.Type) -> Int where T : FixedWidthInteger
     
     /// A view into the readable bytes of the `ByteBuffer`.
-    var readableBytesView: ViewType { get }
+    var readableBytesView: ByteBufferView { get }
 
     /// Returns a view into some portion of the readable bytes of a `ByteBuffer`.
     ///
@@ -572,12 +570,12 @@ protocol _ByteBufferAPITemplate where Self: Hashable, Self: CustomStringConverti
     ///   - index: The index the view should start at
     ///   - length: The length of the view (in bytes)
     /// - returns: A view into a portion of a `ByteBuffer` or `nil` if the requested bytes were not readable.
-    func viewBytes(at index: Int, length: Int) -> ViewType?
+    func viewBytes(at index: Int, length: Int) -> ByteBufferView?
 
     /// Create a `ByteBuffer` from the given `ByteBufferView`s range.
     ///
     /// - parameter view: The `ByteBufferView` which you want to get a `ByteBuffer` from.
-    init(_ view: ViewType)
+    init(_ view: ByteBufferView)
 }
 
 /// A view into a portion of a `ByteBuffer`.
