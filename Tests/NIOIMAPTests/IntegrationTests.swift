@@ -14,7 +14,6 @@
 
 import NIO
 import NIOTestUtils
-import NIOIMAP
 import NIOIMAPCore
 
 import XCTest
