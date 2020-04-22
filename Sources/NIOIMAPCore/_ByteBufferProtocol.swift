@@ -110,8 +110,6 @@ protocol _ByteBufferAPITemplate where Self: Hashable, Self: CustomStringConverti
     
     associatedtype ViewType: _ByteBufferViewAPITemplate
     
-    typealias _Capacity = UInt32
-    
     /// The number of bytes writable until `ByteBuffer` will need to grow its underlying storage which will likely
     /// trigger a copy of the bytes.
     var writableBytes: Int { get }
@@ -256,7 +254,7 @@ protocol _ByteBufferAPITemplate where Self: Hashable, Self: CustomStringConverti
     ///
     /// - parameters:
     ///     - minimumCapacity: The minimum capacity that will be (re)allocated for this buffer
-    mutating func clear(minimumCapacity: _Capacity)
+    mutating func clear(minimumCapacity: UInt32)
 
     /// Copy the collection of `bytes` into the `ByteBuffer` at `index`. Does not move the writer index.
     mutating func setBytes<Bytes>(_ bytes: Bytes, at index: Int) -> Int where Bytes : Sequence, Bytes.Element == UInt8
