@@ -22,12 +22,9 @@ extension NIOIMAP.Flag {
         public var rawValue: String
         
         public init?(_ string: String) {
-            let valid = string.utf8.allSatisfy { c -> Bool in
+            precondition(string.utf8.allSatisfy { (c) -> Bool in
                 return c.isAtomChar
-            }
-            guard valid else {
-                return nil
-            }
+            }, "String contains invalid characters")
             self.rawValue = string.uppercased()
         }
         
