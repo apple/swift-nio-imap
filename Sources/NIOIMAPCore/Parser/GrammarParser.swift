@@ -551,59 +551,19 @@ extension NIOIMAP.GrammarParser {
 
     // capability      = ("AUTH=" auth-type) / atom / "MOVE" / "ENABLE" / "FILTERS"
     static func parseCapability(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Capability {
-        let string = try ParserLibrary.parseOneOrMoreCharacters(buffer: &buffer, tracker: tracker) { (char) -> Bool in
-            return char.isAlphaNum || char == UInt8(ascii: "=") || char == UInt8(ascii: "-")
-        }
+        let string = try self.parseAtom(buffer: &buffer, tracker: tracker)
         return NIOIMAP.Capability(string)
     }
 
     // capability-data = "CAPABILITY" *(SP capability) SP "IMAP4rev1"
     //                   *(SP capability)
     static func parseCapabilityData(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [NIOIMAP.Capability] {
-
-        func parseCapabilityData_constant(buffer: inout ByteBuffer, tracker: StackTracker) throws {
-
-            func parseCapabilityData_constant_1(buffer: inout ByteBuffer, tracker: StackTracker) throws {
-                try ParserLibrary.parseFixedString(" IMAP4rev1", buffer: &buffer, tracker: tracker)
-            }
-
-            func parseCapabilityData_constant_2(buffer: inout ByteBuffer, tracker: StackTracker) throws {
-                try ParserLibrary.parseFixedString(" IMAP4", buffer: &buffer, tracker: tracker)
-            }
-
-            try ParserLibrary.parseOneOf([
-                parseCapabilityData_constant_1,
-                parseCapabilityData_constant_2
-            ], buffer: &buffer, tracker: tracker)
-        }
-
-        func parseCapabilityData_single(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Capability {
-            return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
+        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> [NIOIMAP.Capability] in
+            try ParserLibrary.parseFixedString("CAPABILITY", buffer: &buffer, tracker: tracker)
+            return try ParserLibrary.parseOneOrMore(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
                 try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
                 return try self.parseCapability(buffer: &buffer, tracker: tracker)
             }
-        }
-
-        func parseCapabilityData_array(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [NIOIMAP.Capability] {
-            var array = [NIOIMAP.Capability]()
-            var shouldContinue = true
-            while shouldContinue {
-                do {
-                    try parseCapabilityData_constant(buffer: &buffer, tracker: tracker)
-                } catch {
-                    do {
-                        array.append(try parseCapabilityData_single(buffer: &buffer, tracker: tracker))
-                    } catch {
-                        shouldContinue = false
-                    }
-                }
-            }
-            return array
-        }
-
-        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> [NIOIMAP.Capability] in
-            try ParserLibrary.parseFixedString("CAPABILITY", buffer: &buffer, tracker: tracker)
-            return try parseCapabilityData_array(buffer: &buffer, tracker: tracker)
         }
     }
 

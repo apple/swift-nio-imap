@@ -92,7 +92,7 @@ extension ParserUnitTests {
         buffer.writeString(lines.joined())
         
         let expectedResults: [(NIOIMAP.Response, UInt)] = [
-            (.greeting(.auth(.ok(.code(.capability([]), text: "Ready.")))), #line),
+            (.greeting(.auth(.ok(.code(.capability([.imap4rev1]), text: "Ready.")))), #line),
             (.continuationRequest(.responseText(.code(nil, text: "OK"))), #line),
             (.continuationRequest(.responseText(.code(nil, text: "OK"))), #line),
             (.taggedResponse(.tag("2", state: .ok(.code(nil, text: "Login completed.")))), #line),
@@ -574,12 +574,11 @@ extension ParserUnitTests {
     
     func testParseCapabilityData() {
         let inputs: [(String, String, [NIOIMAP.Capability], UInt)] = [
-            ("CAPABILITY", "\r", [], #line),
-            ("CAPABILITY IMAP4 IMAP4rev1", "\r", [], #line),
-            ("CAPABILITY IMAP4 IMAP4rev1 IMAP4 IMAP4rev1", "\r", [], #line),
-            ("CAPABILITY FILTERS IMAP4", "\r", [.filters], #line),
-            ("CAPABILITY FILTERS IMAP4rev1 ENABLE IMAP4", "\r", [.filters, .enable], #line),
-            ("CAPABILITY FILTERS IMAP4rev1 ENABLE IMAP4 IMAP4 IMAP4 IMAP4 IMAP4", "\r", [.filters, .enable], #line),
+            ("CAPABILITY IMAP4rev1", "\r", [.imap4rev1], #line),
+            ("CAPABILITY IMAP4 IMAP4rev1", "\r", [.imap4,.imap4rev1], #line),
+            ("CAPABILITY FILTERS IMAP4", "\r", [.filters, .imap4], #line),
+            ("CAPABILITY FILTERS IMAP4rev1 ENABLE", "\r", [.filters, .imap4rev1, .enable], #line),
+            ("CAPABILITY FILTERS IMAP4rev1 ENABLE IMAP4", "\r", [.filters, .imap4rev1, .enable, .imap4], #line),
         ]
         self.iterateTestInputs(inputs, testFunction: NIOIMAP.GrammarParser.parseCapabilityData)
     }
@@ -2139,7 +2138,7 @@ extension ParserUnitTests {
             ("BADCHARSET", "\r", .badCharset([]), #line),
             ("BADCHARSET (UTF8)", "\r", .badCharset(["UTF8"]), #line),
             ("BADCHARSET (UTF8 UTF9 UTF10)", "\r", .badCharset(["UTF8", "UTF9", "UTF10"]), #line),
-            ("CAPABILITY IMAP4 IMAP4rev1", "\r", .capability([]), #line),
+            ("CAPABILITY IMAP4 IMAP4rev1", "\r", .capability([.imap4, .imap4rev1]), #line),
             ("PARSE", "\r", .parse, #line),
             ("PERMANENTFLAGS ()", "\r", .permanentFlags([]), #line),
             ("PERMANENTFLAGS (\\Answered)", "\r", .permanentFlags([.flag(.answered)]), #line),
