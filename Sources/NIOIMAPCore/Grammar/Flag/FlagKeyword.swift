@@ -17,36 +17,74 @@ import struct NIO.ByteBuffer
 extension NIOIMAP.Flag {
 
     /// IMAPv4 `flag-keyword`
-    public enum Keyword: Equatable {
-        case mdnSent
-        case forwarded
-        case other(String)
+    public struct Keyword: Equatable {
+        
+        public var rawValue: String
+        
+        public init(_ string: String) {
+            precondition(string.utf8.allSatisfy { (c) -> Bool in
+                return c.isAtomChar
+            }, "String contains invalid characters")
+            self.rawValue = string.uppercased()
+        }
+        
+        fileprivate init(unchecked string: String) {
+            assert(string.utf8.allSatisfy { (c) -> Bool in
+                if c.isAlpha {
+                    return c >= UInt8(ascii: "A") && c <= UInt8(ascii: "Z")
+                }
+                return c.isAtomChar
+            })
+            self.rawValue = string
+        }
+        
     }
 
 }
 
-extension NIOIMAP.Flag.Keyword: ExpressibleByStringLiteral {
-
-    public typealias StringLiteralType = String
-
-    public init(stringLiteral value: Self.StringLiteralType) {
-        self = .other(value)
-    }
-
+// MARK: - Convenience
+extension NIOIMAP.Flag.Keyword {
+    
+    /// `$Forwarded`
+    public static let forwarded = Self(unchecked: "$FORWARDED")
+    
+    /// `$Junk`
+    public static let junk = Self(unchecked: "$JUNK")
+    
+    /// `$NotJunk`
+    public static let notJunk = Self(unchecked: "$NOTJUNK")
+    
+    /// `Redirected`
+    public static let unregistered_redirected = Self(unchecked: "REDIRECTED")
+    
+    /// `Forwarded`
+    public static let unregistered_forwarded = Self(unchecked: "FORWARDED")
+    
+    /// `Junk`
+    public static let unregistered_junk = Self(unchecked: "JUNK")
+    
+    /// `NotJunk`
+    public static let unregistered_notJunk = Self(unchecked: "NOTJUNK")
+    
+    /// `$MailFlagBit0`
+    public static let colorBit0 = Self(unchecked: "$MAILFLAGBIT0")
+    
+    /// `$MailFlagBit1`
+    public static let colorBit1 = Self(unchecked: "$MAILFLAGBIT1")
+    
+    /// `$MailFlagBit2`
+    public static let colorBit2 = Self(unchecked: "$MAILFLAGBIT2")
+    
+    /// `$MDNSent`
+    public static let mdnSent = Self(unchecked: "$MDNSENT")
+    
 }
 
 // MARK: - Encoding
 extension ByteBuffer {
 
     @discardableResult mutating func writeFlagKeyword(_ keyword: NIOIMAP.Flag.Keyword) -> Int {
-        switch keyword {
-        case .forwarded:
-            return self.writeString("$Forwarded")
-        case .mdnSent:
-            return self.writeString("$MDNSent")
-        case .other(let atom):
-            return self.writeString(atom)
-        }
+        self.writeString(keyword.rawValue)
     }
 
 }
