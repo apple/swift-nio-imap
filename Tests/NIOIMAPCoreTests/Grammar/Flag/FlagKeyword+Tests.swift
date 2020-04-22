@@ -24,8 +24,8 @@ class FlagKeyword_Tests: EncodeTestClass {
 extension FlagKeyword_Tests {
     
     func testOther() {
-        XCTAssertNotNil(NIOIMAP.Flag.Keyword.other("valid-flag"))
-        XCTAssertNil(NIOIMAP.Flag.Keyword.other("invalid flag"))
+        XCTAssertNotNil(NIOIMAP.Flag.Keyword("valid-flag"))
+        XCTAssertNil(NIOIMAP.Flag.Keyword("invalid flag"))
     }
     
 }

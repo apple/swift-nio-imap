@@ -19,10 +19,6 @@ extension NIOIMAP.Flag {
     /// IMAPv4 `flag-keyword`
     public struct Keyword: Equatable {
         
-        public static func other(_ string: String) -> Self? {
-            return Self(string)
-        }
-        
         public var rawValue: String
         
         public init?(_ string: String) {
