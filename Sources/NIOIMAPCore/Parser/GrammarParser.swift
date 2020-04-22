@@ -1439,7 +1439,7 @@ extension NIOIMAP.GrammarParser {
     // flag-keyword    = "$MDNSent" / "$Forwarded" / atom
     static func parseFlagKeyword(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Flag.Keyword {
         let string = try self.parseAtom(buffer: &buffer, tracker: tracker)
-        return NIOIMAP.Flag.Keyword(stringLiteral: string)
+        return NIOIMAP.Flag.Keyword(string)! // will always be a valid keyword because we parse an atom
     }
 
     // flag-list       = "(" [flag *(SP flag)] ")"

@@ -17,14 +17,32 @@ import struct NIO.ByteBuffer
 extension NIOIMAP.Flag {
 
     /// IMAPv4 `flag-keyword`
-    public struct Keyword: Equatable, ExpressibleByStringLiteral {
-    
-        public typealias StringLiteralType = String
+    public struct Keyword: Equatable {
         
-        public var rawValue: StringLiteralType
+        public static func other(_ string: String) -> Self? {
+            return Self(string)
+        }
         
-        public init(stringLiteral value: StringLiteralType) {
-            self.rawValue = value.uppercased()
+        public var rawValue: String
+        
+        public init?(_ string: String) {
+            let valid = string.utf8.allSatisfy { c -> Bool in
+                return c.isAtomChar
+            }
+            guard valid else {
+                return nil
+            }
+            self.rawValue = string.uppercased()
+        }
+        
+        fileprivate init(alreadyUppercased string: String) {
+            precondition(string.utf8.allSatisfy { (c) -> Bool in
+                if c.isAlpha {
+                    return c >= UInt8(ascii: "A") && c <= UInt8(ascii: "Z")
+                }
+                return c.isAtomChar
+            })
+            self.rawValue = string
         }
         
     }
@@ -35,37 +53,37 @@ extension NIOIMAP.Flag {
 extension NIOIMAP.Flag.Keyword {
     
     /// `$Forwarded`
-    public static let forwarded = Self(stringLiteral: "$Forwarded")
+    public static let forwarded = Self(alreadyUppercased: "$FORWARDED")
     
     /// `$Junk`
-    public static let junk = Self(stringLiteral: "$Junk")
+    public static let junk = Self(alreadyUppercased: "$JUNK")
     
     /// `$NotJunk`
-    public static let notJunk = Self(stringLiteral: "$NotJunk")
+    public static let notJunk = Self(alreadyUppercased: "$NOTJUNK")
     
     /// `Redirected`
-    public static let unregistered_redirected = Self(stringLiteral: "Redirected")
+    public static let unregistered_redirected = Self(alreadyUppercased: "REDIRECTED")
     
     /// `Forwarded`
-    public static let unregistered_forwarded = Self(stringLiteral: "Forwarded")
+    public static let unregistered_forwarded = Self(alreadyUppercased: "FORWARDED")
     
     /// `Junk`
-    public static let unregistered_junk = Self(stringLiteral: "Junk")
+    public static let unregistered_junk = Self(alreadyUppercased: "JUNK")
     
     /// `NotJunk`
-    public static let unregistered_notJunk = Self(stringLiteral: "NotJunk")
+    public static let unregistered_notJunk = Self(alreadyUppercased: "NOTJUNK")
     
     /// `$MailFlagBit0`
-    public static let colorBit0 = Self(stringLiteral: "$MailFlagBit0")
+    public static let colorBit0 = Self(alreadyUppercased: "$MAILFLAGBIT0")
     
     /// `$MailFlagBit1`
-    public static let colorBit1 = Self(stringLiteral: "$MailFlagBit1")
+    public static let colorBit1 = Self(alreadyUppercased: "$MAILFLAGBIT1")
     
     /// `$MailFlagBit2`
-    public static let colorBit2 = Self(stringLiteral: "$MailFlagBit2")
+    public static let colorBit2 = Self(alreadyUppercased: "$MAILFLAGBIT2")
     
     /// `$MDNSent`
-    public static let mdnSent = Self(stringLiteral: "$MDNSent")
+    public static let mdnSent = Self(alreadyUppercased: "$MDNSENT")
     
 }
 

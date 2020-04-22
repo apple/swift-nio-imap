@@ -20,12 +20,22 @@ class FlagKeyword_Tests: EncodeTestClass {
 
 }
 
+// MARK: - other
+extension FlagKeyword_Tests {
+    
+    func testOther() {
+        XCTAssertNotNil(NIOIMAP.Flag.Keyword.other("valid-flag"))
+        XCTAssertNil(NIOIMAP.Flag.Keyword.other("invalid flag"))
+    }
+    
+}
+
 // MARK: - Equatable
 extension FlagKeyword_Tests {
     
     func testEquatable() {
-        let flag1 = NIOIMAP.Flag.Keyword(stringLiteral: "flag")
-        let flag2 = NIOIMAP.Flag.Keyword(stringLiteral: "FLAG")
+        let flag1 = NIOIMAP.Flag.Keyword("flag")
+        let flag2 = NIOIMAP.Flag.Keyword("FLAG")
         XCTAssertEqual(flag1, flag2)
     }
     
