@@ -16,7 +16,7 @@ import Dispatch
 
 // proof that this works
 import NIO
-extension ByteBuffer: ByteBufferProtocol {
+extension ByteBuffer: _ByteBufferAPITemplate {
     typealias ViewType = ByteBufferView
 }
 extension ByteBufferView: ByteBufferViewProtocol {
@@ -106,7 +106,7 @@ extension ByteBufferView: ByteBufferViewProtocol {
 /// ### Notes
 /// All `ByteBuffer` methods that don't contain the word 'unsafe' will only allow you to access the 'readable bytes'.
 ///
-protocol ByteBufferProtocol where Self: Hashable, Self: CustomStringConvertible {
+protocol _ByteBufferAPITemplate where Self: Hashable, Self: CustomStringConvertible {
     
     associatedtype ViewType: ByteBufferViewProtocol
     
@@ -173,9 +173,6 @@ protocol ByteBufferProtocol where Self: Hashable, Self: CustomStringConvertible 
     ///     - body: The closure that will accept the yielded bytes and return the number of bytes written.
     /// - returns: The number of bytes written.
     mutating func writeWithUnsafeMutableBytes(minimumWritableBytes: Int, _ body: (UnsafeMutableRawBufferPointer) throws -> Int) rethrows -> Int
-
-    @available(*, deprecated, message: "please use writeWithUnsafeMutableBytes(minimumWritableBytes:_:) instead to ensure sufficient write capacity.")
-    mutating func writeWithUnsafeMutableBytes(_ body: (UnsafeMutableRawBufferPointer) throws -> Int) rethrows -> Int
 
     /// This vends a pointer to the storage of the `ByteBuffer`. It's marked as _very unsafe_ because it might contain
     /// uninitialised memory and it's undefined behaviour to read it. In most cases you should use `withUnsafeReadableBytes`.
@@ -478,15 +475,6 @@ protocol ByteBufferProtocol where Self: Hashable, Self: CustomStringConvertible 
     ///     - body: The closure that will accept the yielded bytes and returns the number of bytes it processed along with some other value.
     /// - returns: The value `body` returned in the second tuple component.
     mutating func readWithUnsafeMutableReadableBytes<T>(_ body: (UnsafeMutableRawBufferPointer) throws -> (Int, T)) rethrows -> T
-
-    /// Copy `buffer`'s readable bytes into this `ByteBuffer` starting at `index`. Does not move any of the reader or writer indices.
-    ///
-    /// - parameters:
-    ///     - buffer: The `ByteBuffer` to copy.
-    ///     - index: The index for the first byte.
-    /// - returns: The number of bytes written.
-    @available(*, deprecated, renamed: "setBuffer(_:at:)")
-    mutating func set(buffer: ByteBuffer, at index: Int) -> Int
 
     /// Copy `buffer`'s readable bytes into this `ByteBuffer` starting at `index`. Does not move any of the reader or writer indices.
     ///
