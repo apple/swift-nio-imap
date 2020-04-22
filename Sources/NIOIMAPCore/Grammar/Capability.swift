@@ -156,7 +156,7 @@ extension NIOIMAP.Capability {
     }
     
     public static let acl = Self(unchecked: "ACL")
-    public static let annotateExperiment1 = Self(unchecked: "")
+    public static let annotateExperiment1 = Self(unchecked: "ANNOTATE-EXPERIMENT-1")
     public static let binary = Self(unchecked: "BINARY")
     public static let catenate = Self(unchecked: "CATENATE")
     public static let children = Self(unchecked: "CHILDREN")
@@ -175,9 +175,9 @@ extension NIOIMAP.Capability {
     public static let metadata = Self(unchecked: "METADATA")
     public static let move = Self(unchecked: "MOVE")
     public static let multiSearch = Self(unchecked: "MULTISEARCH")
-    public static let namespace = Self(unchecked: "NAMESAPCE")
+    public static let namespace = Self(unchecked: "NAMESPACE")
     public static let qresync = Self(unchecked: "QRESYNC")
-    public static let quote = Self(unchecked: "QUOTA")
+    public static let quota = Self(unchecked: "QUOTA")
     public static let saslIR = Self(unchecked: "SASL-IR")
     public static let searchRes = Self(unchecked: "SEARCHRES")
     public static let specialUse = Self(unchecked: "SPECIAL-USE")
