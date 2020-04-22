@@ -551,46 +551,10 @@ extension NIOIMAP.GrammarParser {
 
     // capability      = ("AUTH=" auth-type) / atom / "MOVE" / "ENABLE" / "FILTERS"
     static func parseCapability(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Capability {
-
-        func parseCapability_auth(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Capability {
-            try ParserLibrary.parseFixedString("AUTH=", buffer: &buffer, tracker: tracker)
-            let authType = try parseAuthType(buffer: &buffer, tracker: tracker)
-            return .auth(authType)
+        let string = try ParserLibrary.parseOneOrMoreCharacters(buffer: &buffer, tracker: tracker) { (char) -> Bool in
+            return char.isAlphaNum || char == UInt8(ascii: "=") || char == UInt8(ascii: "-")
         }
-
-        func parseCapability_atom(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Capability {
-            let atom = try self.parseAtom(buffer: &buffer, tracker: tracker)
-            return .other(atom)
-        }
-
-        func parseCapability_condStore(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Capability {
-            try ParserLibrary.parseFixedString("CONDSTORE", buffer: &buffer, tracker: tracker)
-            return .condStore
-        }
-
-        func parseCapability_enable(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Capability {
-            try ParserLibrary.parseFixedString("ENABLE", buffer: &buffer, tracker: tracker)
-            return .enable
-        }
-
-        func parseCapability_move(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Capability {
-            try ParserLibrary.parseFixedString("MOVE", buffer: &buffer, tracker: tracker)
-            return .move
-        }
-
-        func parseCapability_filters(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Capability {
-            try ParserLibrary.parseFixedString("FILTERS", buffer: &buffer, tracker: tracker)
-            return .filters
-        }
-
-        return try ParserLibrary.parseOneOf([
-            parseCapability_move,
-            parseCapability_enable,
-            parseCapability_condStore,
-            parseCapability_auth,
-            parseCapability_filters,
-            parseCapability_atom,
-        ], buffer: &buffer, tracker: tracker)
+        return NIOIMAP.Capability(string)
     }
 
     // capability-data = "CAPABILITY" *(SP capability) SP "IMAP4rev1"
