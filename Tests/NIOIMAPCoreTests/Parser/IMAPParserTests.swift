@@ -1313,7 +1313,7 @@ extension ParserUnitTests {
             ("\\deleted", " ", .deleted, #line),
             ("\\seen", " ", .seen, #line),
             ("\\draft", " ", .draft, #line),
-            ("keyword", " ", .keyword(NIOIMAP.Flag.Keyword("keyword")!), #line),
+            ("keyword", " ", .keyword(NIOIMAP.Flag.Keyword("keyword")), #line),
             ("\\extension", " ", .extension("extension"), #line),
         ]
         self.iterateTestInputs(inputs, testFunction: NIOIMAP.GrammarParser.parseFlag)
@@ -1346,7 +1346,7 @@ extension ParserUnitTests {
     func testParseFlagKeyword_valid() {
         TestUtilities.withBuffer("keyword", terminator: " ") { (buffer) in
             let flagExtension = try NIOIMAP.GrammarParser.parseFlagKeyword(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(flagExtension, NIOIMAP.Flag.Keyword("keyword")!)
+            XCTAssertEqual(flagExtension, NIOIMAP.Flag.Keyword("keyword"))
         }
     }
 
@@ -1712,7 +1712,7 @@ extension ParserUnitTests {
     func testParseMessageAttributeDynamic_valid_multiple() {
         TestUtilities.withBuffer("FLAGS (flag1 flag2 flag3)", terminator: "") { (buffer) in
             let result = try NIOIMAP.GrammarParser.parseMessageAttributeDynamic(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(result, [.keyword(NIOIMAP.Flag.Keyword("flag1")!), .keyword(NIOIMAP.Flag.Keyword("flag2")!), .keyword(NIOIMAP.Flag.Keyword("flag3")!)])
+            XCTAssertEqual(result, [.keyword(NIOIMAP.Flag.Keyword("flag1")), .keyword(NIOIMAP.Flag.Keyword("flag2")), .keyword(NIOIMAP.Flag.Keyword("flag3"))])
         }
     }
 
@@ -2282,15 +2282,15 @@ extension ParserUnitTests {
             ("SUBJECT data5", "\r", .subject("data5"), #line),
             ("TEXT data6", "\r", .text("data6"), #line),
             ("TO data7", "\r", .to("data7"), #line),
-            ("KEYWORD key1", "\r", .keyword(NIOIMAP.Flag.Keyword("key1")!), #line),
+            ("KEYWORD key1", "\r", .keyword(NIOIMAP.Flag.Keyword("key1")), #line),
             ("HEADER some value", "\r", .header("some", "value"), #line),
-            ("UNKEYWORD key2", "\r", .unkeyword(NIOIMAP.Flag.Keyword("key2")!), #line),
+            ("UNKEYWORD key2", "\r", .unkeyword(NIOIMAP.Flag.Keyword("key2")), #line),
             ("NOT LARGER 1234", "\r", .not(.larger(1234)), #line),
             ("OR LARGER 6 SMALLER 4", "\r", .or(.larger(6), .smaller(4)), #line),
             ("UID 2:4", "\r", .uid([2...4]), #line),
             ("2:4", "\r", .sequenceSet([2...4]), #line),
             ("(LARGER 1)", "\r", .array([.larger(1)]), #line),
-            ("(LARGER 1 SMALLER 5 KEYWORD hello)", "\r", .array([.larger(1), .smaller(5), .keyword(NIOIMAP.Flag.Keyword("hello")!)]), #line),
+            ("(LARGER 1 SMALLER 5 KEYWORD hello)", "\r", .array([.larger(1), .smaller(5), .keyword(NIOIMAP.Flag.Keyword("hello"))]), #line),
             ("YOUNGER 34", "\r", .younger(34), #line),
             ("OLDER 45", "\r", .older(45), #line),
             ("FILTER something", "\r", .filter("something"), #line),

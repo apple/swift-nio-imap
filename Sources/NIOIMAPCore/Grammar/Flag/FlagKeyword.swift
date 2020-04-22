@@ -21,7 +21,7 @@ extension NIOIMAP.Flag {
         
         public var rawValue: String
         
-        public init?(_ string: String) {
+        public init(_ string: String) {
             precondition(string.utf8.allSatisfy { (c) -> Bool in
                 return c.isAtomChar
             }, "String contains invalid characters")
