@@ -19,7 +19,7 @@ import NIO
 extension ByteBuffer: _ByteBufferAPITemplate {
     typealias ViewType = ByteBufferView
 }
-extension ByteBufferView: ByteBufferViewProtocol {
+extension ByteBufferView: _ByteBufferViewAPITemplate {
     
 }
 
@@ -108,7 +108,7 @@ extension ByteBufferView: ByteBufferViewProtocol {
 ///
 protocol _ByteBufferAPITemplate where Self: Hashable, Self: CustomStringConvertible {
     
-    associatedtype ViewType: ByteBufferViewProtocol
+    associatedtype ViewType: _ByteBufferViewAPITemplate
     
     typealias _Capacity = UInt32
     
@@ -586,7 +586,7 @@ protocol _ByteBufferAPITemplate where Self: Hashable, Self: CustomStringConverti
 ///
 /// A `ByteBufferView` is useful whenever a `Collection where Element == UInt8` representing a portion of a
 /// `ByteBuffer` is needed.
-protocol ByteBufferViewProtocol where Self: RandomAccessCollection, Self: MutableCollection, Self: RangeReplaceableCollection {
+protocol _ByteBufferViewAPITemplate where Self: RandomAccessCollection, Self: MutableCollection, Self: RangeReplaceableCollection {
 
     /// A type representing the sequence's elements.
     associatedtype Element = UInt8
