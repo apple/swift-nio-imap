@@ -17,14 +17,16 @@ import struct NIO.ByteBuffer
 extension NIOIMAP {
     
     /// IMAPv4 `capability`
-    public struct Capability: Equatable, ExpressibleByStringLiteral {
+    public struct Capability: Equatable {
         
-        public typealias StringLiteralType = String
+        public var rawValue: String
         
-        var rawValue: String
-        
-        public init(stringLiteral value: StringLiteralType) {
+        public init(_ value: String) {
             self.rawValue = value.uppercased()
+        }
+        
+        fileprivate init(uppercased: String) {
+            self.rawValue = uppercased
         }
         
     }
@@ -34,159 +36,191 @@ extension NIOIMAP {
 // MARK: - Convenience Types
 extension NIOIMAP.Capability {
     
-    struct AuthType: Equatable, ExpressibleByStringLiteral {
-        static let token = Self(stringLiteral: "TOKEN")
-        static let plain = Self(stringLiteral: "PLAIN")
-        static let pToken = Self(stringLiteral: "PTOKEN")
-        static let weToken = Self(stringLiteral: "WETOKEN")
-        static let wsToken = Self(stringLiteral: "WSTOKEN")
+    public struct AuthType: Equatable {
+        public static let token = Self(uppercased: "TOKEN")
+        public static let plain = Self(uppercased: "PLAIN")
+        public static let pToken = Self(uppercased: "PTOKEN")
+        public static let weToken = Self(uppercased: "WETOKEN")
+        public static let wsToken = Self(uppercased: "WSTOKEN")
         
-        var rawValue: String
+        public var rawValue: String
         
-        init(stringLiteral value: StringLiteralType) {
-            self.rawValue = value
+        public init(_ value: String) {
+            self.rawValue = value.uppercased()
+        }
+        
+        fileprivate init(uppercased: String) {
+            self.rawValue = uppercased
         }
     }
     
-    struct ContextType: Equatable, ExpressibleByStringLiteral {
-        static let search = Self(stringLiteral: "SEARCH")
-        static let sort = Self(stringLiteral: "SORT")
+    public struct ContextType: Equatable {
+        public static let search = Self(uppercased: "SEARCH")
+        public static let sort = Self(uppercased: "SORT")
         
-        var rawValue: String
+        public var rawValue: String
         
-        init(stringLiteral value: StringLiteralType) {
-            self.rawValue = value
+        public init(_ value: String) {
+            self.rawValue = value.uppercased()
+        }
+        
+        fileprivate init(uppercased: String) {
+            self.rawValue = uppercased
         }
     }
     
-    struct LiteralType: Equatable, ExpressibleByStringLiteral {
-        static let plus = Self(stringLiteral: "+")
-        static let minus = Self(stringLiteral: "-")
+    public struct LiteralType: Equatable {
+        public static let plus = Self(uppercased: "+")
+        public static let minus = Self(uppercased: "-")
         
-        var rawValue: String
+        public var rawValue: String
         
-        init(stringLiteral value: StringLiteralType) {
-            self.rawValue = value
+        public init(_ value: String) {
+            self.rawValue = value.uppercased()
+        }
+        
+        fileprivate init(uppercased: String) {
+            self.rawValue = uppercased
         }
     }
     
-    struct SortType: Equatable, ExpressibleByStringLiteral {
-        static let display = Self(stringLiteral: "DISPLAY")
+    public struct SortType: Equatable {
+        public static let display = Self(uppercased: "DISPLAY")
         
-        var rawValue: String
+        public var rawValue: String
         
-        init(stringLiteral value: StringLiteralType) {
-            self.rawValue = value
+        public init(_ value: String) {
+            self.rawValue = value.uppercased()
+        }
+        
+        fileprivate init(uppercased: String) {
+            self.rawValue = uppercased
         }
     }
     
-    struct ThreadType: Equatable, ExpressibleByStringLiteral {
-        static let orderedSubject = Self(stringLiteral: "ORDEREDSUBJECT")
-        static let references = Self(stringLiteral: "REFERENCES")
+    public struct ThreadType: Equatable {
+        public static let orderedSubject = Self(uppercased: "ORDEREDSUBJECT")
+        public static let references = Self(uppercased: "REFERENCES")
         
-        var rawValue: String
+        public var rawValue: String
         
-        init(stringLiteral value: StringLiteralType) {
-            self.rawValue = value
+        public init(_ value: String) {
+            self.rawValue = value.uppercased()
+        }
+        
+        fileprivate init(uppercased: String) {
+            self.rawValue = uppercased
         }
     }
     
-    struct StatusType: Equatable, ExpressibleByStringLiteral {
-        static let size = Self(stringLiteral: "SIZE")
+    public struct StatusType: Equatable {
+        public static let size = Self(uppercased: "SIZE")
         
-        var rawValue: String
+        public var rawValue: String
         
-        init(stringLiteral value: StringLiteralType) {
-            self.rawValue = value
+        public init(_ value: String) {
+            self.rawValue = value.uppercased()
+        }
+        
+        fileprivate init(uppercased: String) {
+            self.rawValue = uppercased
         }
     }
     
-    struct UTF8Type: Equatable, ExpressibleByStringLiteral {
-        static let accept = Self(stringLiteral: "ACCEPT")
+    public struct UTF8Type: Equatable {
+        public static let accept = Self(uppercased: "ACCEPT")
         
-        var rawValue: String
+        public var rawValue: String
         
-        init(stringLiteral value: StringLiteralType) {
-            self.rawValue = value
+        public init(_ value: String) {
+            self.rawValue = value.uppercased()
+        }
+        
+        fileprivate init(uppercased: String) {
+            self.rawValue = uppercased
         }
     }
     
-    struct  RightsType: Equatable, ExpressibleByStringLiteral {
-        static let tekx = Self(stringLiteral: "tekx")
+    public struct  RightsType: Equatable {
+        public static let tekx = Self(uppercased: "tekx")
         
-        var rawValue: String
+        public var rawValue: String
         
-        init(stringLiteral value: StringLiteralType) {
-            self.rawValue = value
+        public init(_ value: String) {
+            self.rawValue = value.uppercased()
+        }
+        
+        fileprivate init(uppercased: String) {
+            self.rawValue = uppercased
         }
     }
     
-    static let acl = Self(stringLiteral: "ACL")
-    static let annotateExperiment1 = Self(stringLiteral: "")
-    static let binary = Self(stringLiteral: "BINARY")
-    static let catenate = Self(stringLiteral: "CATENATE")
-    static let children = Self(stringLiteral: "CHILDREN")
-    static let condStore = Self(stringLiteral: "CONDSTORE")
-    static let createSpecialUse = Self(stringLiteral: "CREATE-SPECIAL-USE")
-    static let enable = Self(stringLiteral: "ENABLE")
-    static let esearch = Self(stringLiteral: "ESEARCH")
-    static let esort = Self(stringLiteral: "ESORT")
-    static let filters = Self(stringLiteral: "FILTERS")
-    static let id = Self(stringLiteral: "ID")
-    static let idle = Self(stringLiteral: "IDLE")
-    static let IMAP4rev1 = Self(stringLiteral: "IMAP4rev1")
-    static let language = Self(stringLiteral: "LANGUAGE")
-    static let listStatus = Self(stringLiteral: "LIST-STATUS")
-    static let loginReferrals = Self(stringLiteral: "LOGIN-REFERRALS")
-    static let metadata = Self(stringLiteral: "METADATA")
-    static let move = Self(stringLiteral: "MOVE")
-    static let multiSearch = Self(stringLiteral: "MULTISEARCH")
-    static let namespace = Self(stringLiteral: "NAMESAPCE")
-    static let qresync = Self(stringLiteral: "QRESYNC")
-    static let quote = Self(stringLiteral: "QUOTA")
-    static let saslIR = Self(stringLiteral: "SASL-IR")
-    static let searchRes = Self(stringLiteral: "SEARCHRES")
-    static let specialUse = Self(stringLiteral: "SPECIAL-USE")
-    static let uidPlus = Self(stringLiteral: "UIDPLUS")
-    static let unselect = Self(stringLiteral: "UNSELECT")
-    static let urlPartial = Self(stringLiteral: "URL-PARTIAL")
-    static let urlAuth = Self(stringLiteral: "URLAUTH")
-    static let within = Self(stringLiteral: "WITHIN")
+    public static let acl = Self(uppercased: "ACL")
+    public static let annotateExperiment1 = Self(uppercased: "")
+    public static let binary = Self(uppercased: "BINARY")
+    public static let catenate = Self(uppercased: "CATENATE")
+    public static let children = Self(uppercased: "CHILDREN")
+    public static let condStore = Self(uppercased: "CONDSTORE")
+    public static let createSpecialUse = Self(uppercased: "CREATE-SPECIAL-USE")
+    public static let enable = Self(uppercased: "ENABLE")
+    public static let esearch = Self(uppercased: "ESEARCH")
+    public static let esort = Self(uppercased: "ESORT")
+    public static let filters = Self(uppercased: "FILTERS")
+    public static let id = Self(uppercased: "ID")
+    public static let idle = Self(uppercased: "IDLE")
+    public static let IMAP4rev1 = Self(uppercased: "IMAP4rev1")
+    public static let language = Self(uppercased: "LANGUAGE")
+    public static let listStatus = Self(uppercased: "LIST-STATUS")
+    public static let loginReferrals = Self(uppercased: "LOGIN-REFERRALS")
+    public static let metadata = Self(uppercased: "METADATA")
+    public static let move = Self(uppercased: "MOVE")
+    public static let multiSearch = Self(uppercased: "MULTISEARCH")
+    public static let namespace = Self(uppercased: "NAMESAPCE")
+    public static let qresync = Self(uppercased: "QRESYNC")
+    public static let quote = Self(uppercased: "QUOTA")
+    public static let saslIR = Self(uppercased: "SASL-IR")
+    public static let searchRes = Self(uppercased: "SEARCHRES")
+    public static let specialUse = Self(uppercased: "SPECIAL-USE")
+    public static let uidPlus = Self(uppercased: "UIDPLUS")
+    public static let unselect = Self(uppercased: "UNSELECT")
+    public static let urlPartial = Self(uppercased: "URL-PARTIAL")
+    public static let urlAuth = Self(uppercased: "URLAUTH")
+    public static let within = Self(uppercased: "WITHIN")
     
-    static func auth(_ type: AuthType) -> Self {
-        return Self(stringLiteral: "AUTH=\(type.rawValue)")
+    public static func auth(_ type: AuthType) -> Self {
+        return Self("AUTH=\(type.rawValue)")
     }
     
-    static func context(_ type: ContextType) -> Self {
-        return Self(stringLiteral: "CONTEXT=\(type.rawValue)")
+    public static func context(_ type: ContextType) -> Self {
+        return Self("CONTEXT=\(type.rawValue)")
     }
     
-    static func literal(_ type: LiteralType) -> Self {
-        return Self(stringLiteral: "LITERAL\(type.rawValue)")
+    public static func literal(_ type: LiteralType) -> Self {
+        return Self("LITERAL\(type.rawValue)")
     }
     
-    static func sort(_ type: SortType?) -> Self {
+    public static func sort(_ type: SortType?) -> Self {
         if let type = type {
-            return Self(stringLiteral: "SORT=\(type.rawValue)")
+            return Self("SORT=\(type.rawValue)")
         } else {
-            return Self(stringLiteral: "SORT")
+            return Self("SORT")
         }
     }
     
-    static func utf8(_ type: UTF8Type) -> Self {
-        return Self(stringLiteral: "UTF8=\(type.rawValue)")
+    public static func utf8(_ type: UTF8Type) -> Self {
+        return Self("UTF8=\(type.rawValue)")
     }
     
-    static func thread(_ type: ThreadType) -> Self {
-        return Self(stringLiteral: "THREAD=\(type.rawValue)")
+    public static func thread(_ type: ThreadType) -> Self {
+        return Self("THREAD=\(type.rawValue)")
     }
     
-    static func status(_ type: StatusType) -> Self {
-        return Self(stringLiteral: "STATUS=\(type.rawValue)")
+    public static func status(_ type: StatusType) -> Self {
+        return Self("STATUS=\(type.rawValue)")
     }
     
-    static func rights(_ type: RightsType) -> Self {
-        return Self(stringLiteral: "RIGHTS=\(type.rawValue)")
+    public static func rights(_ type: RightsType) -> Self {
+        return Self("RIGHTS=\(type.rawValue)")
     }
     
 }

@@ -24,8 +24,8 @@ class Capability_Tests: EncodeTestClass {
 extension Capability_Tests {
     
     func testEquatable() {
-        let capability1 = NIOIMAP.Capability(stringLiteral: "idle")
-        let capability2 = NIOIMAP.Capability(stringLiteral: "IDLE")
+        let capability1 = NIOIMAP.Capability("idle")
+        let capability2 = NIOIMAP.Capability("IDLE")
         XCTAssertEqual(capability1, capability2)
     }
     

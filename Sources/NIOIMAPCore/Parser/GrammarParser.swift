@@ -554,7 +554,7 @@ extension NIOIMAP.GrammarParser {
         let string = try ParserLibrary.parseOneOrMoreCharacters(buffer: &buffer, tracker: tracker) { (char) -> Bool in
             return char.isAlphaNum || char == UInt8(ascii: "=") || char == UInt8(ascii: "-")
         }
-        return NIOIMAP.Capability(stringLiteral: string)
+        return NIOIMAP.Capability(string)
     }
 
     // capability-data = "CAPABILITY" *(SP capability) SP "IMAP4rev1"
