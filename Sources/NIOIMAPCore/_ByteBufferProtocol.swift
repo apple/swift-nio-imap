@@ -15,9 +15,12 @@
 import Dispatch
 
 // proof that this works
-import NIO
-extension ByteBuffer: _ByteBufferAPITemplate {}
 
+import struct NIO.ByteBuffer
+import struct NIO.ByteBufferView
+import enum NIO.Endianness
+
+extension ByteBuffer: _ByteBufferAPITemplate {}
 extension ByteBufferView: _ByteBufferViewAPITemplate {}
 
 /// `ByteBuffer` stores contiguously allocated raw bytes. It is a random and sequential accessible sequence of zero or
