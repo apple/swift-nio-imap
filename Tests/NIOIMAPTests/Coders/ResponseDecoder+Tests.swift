@@ -39,13 +39,13 @@ extension ResponseDecoder_Tests {
                 "* 2 FETCH (FLAGS (\\deleted) BODY[TEXT] {1}\r\nX)\r\n2 OK Fetch completed.\r\n",
                 [
                     .untaggedResponse(.messageData(.fetch(2))),
-                    .attributesStart,
-                    .simpleAttribute(.dynamic([.deleted])),
-                    .streamingAttributeBegin(.bodySectionText(nil, 1)),
-                    .streamingAttributeBytes("X"),
-                    .streamingAttributeEnd,
-                    .attributesFinish,
-                    .taggedResponse(.tag("2", state: .ok(.code(nil, text: "Fetch completed.")))),
+                    .fetchResponse(.start),
+                    .fetchResponse(.simpleAttribute(.dynamic([.deleted]))),
+                    .fetchResponse(.streamingBegin(type: .body, size: 1)),
+                    .fetchResponse(.streamingBytes("X")),
+                    .fetchResponse(.streamingEnd),
+                    .fetchResponse(.finish),
+                    .taggedResponse(.tag("2", state: .ok(.code(nil, text: "Fetch completed."))))
                 ]
             ),
         ]
