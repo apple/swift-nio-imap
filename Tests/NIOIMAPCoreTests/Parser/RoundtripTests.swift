@@ -35,7 +35,7 @@ extension RoundtripTests {
 
         // 1 AUTHENTICATE type\r\n1111\r\n2222\r\n
 
-        let tests: [NIOIMAP.CommandType] = [
+        let tests: [NIOIMAP.Command] = [
 
             // any
 //            .noop,
@@ -110,7 +110,7 @@ extension RoundtripTests {
         var buffer = ByteBufferAllocator().buffer(capacity: 1)
         for (i, commandType) in tests.enumerated() {
             let tag = "\(i + 1)"
-            let command = NIOIMAP.Command(tag, commandType)
+            let command = NIOIMAP.TaggedCommand(tag, commandType)
             buffer.writeCommand(command)
             buffer.writeString("\r\n") // required for commands that might terminate with a literal (e.g. append)
             do {
