@@ -28,15 +28,12 @@ extension NIOIMAP {
         case uid(Int)
         
         case rfc822(RFC822Reduced?, NIOIMAP.NString)
-//        case rfc822TextStreaming(size: Int)
         case rfc822Size(Int)
         
         case body(Body, structure: Bool)
         case bodySection(SectionSpec?, Int?, NString)
-//        case bodySectionTextStreaming(Int?, size: Int) // used when streaming the body, send the literal header
         
         case binaryString(section: [Int], string: NString)
-//        case binaryStringStreaming(section: [Int], size: Int)
         case binarySize(section: [Int], number: Int)
     }
 }
