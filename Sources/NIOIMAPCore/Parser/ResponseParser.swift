@@ -114,7 +114,7 @@ extension NIOIMAP.ResponseParser {
             return self.moveStateMachine(
                 expected: .attributes(.head),
                 next: .attributes(.attribute),
-                returnValue: .attributesStart
+                returnValue: .fetchResponse(.start)
             )
         case .separator:
             do {
@@ -123,7 +123,7 @@ extension NIOIMAP.ResponseParser {
                 return try self.parseSingleAttribute(buffer: &buffer)
             } catch is ParserError {
                 try NIOIMAP.GrammarParser.parseMessageAttributeEnd(buffer: &buffer, tracker: .new)
-                return self.moveStateMachine(expected: .attributes(.separator), next: .response, returnValue: .attributesFinish)
+                return self.moveStateMachine(expected: .attributes(.separator), next: .response, returnValue: .fetchResponse(.finish))
             }
         case .attribute:
             return try self.parseSingleAttribute(buffer: &buffer)
@@ -133,17 +133,23 @@ extension NIOIMAP.ResponseParser {
     private mutating func parseSingleAttribute(buffer: inout ByteBuffer) throws -> NIOIMAP.Response {
         let att = try NIOIMAP.GrammarParser.parseMessageAttribute_dynamicOrStatic(buffer: &buffer, tracker: .new)
         switch att {
-        case .static(.bodySectionText(let optional, let size)):
+        case .static(.bodySectionText(let partial, let size)):
             return self.moveStateMachine(
                 expected: .attributes(.attribute),
                 next: .attributeBytes(size),
-                returnValue: .streamingAttributeBegin(NIOIMAP.MessageAttributesStatic.bodySectionText(optional, size))
+                returnValue: .fetchResponse(.streamingBegin(type: .body(partial: partial), size: size))
+            )
+        case .static(.binaryLiteral(section: let section, size: let size)):
+            return self.moveStateMachine(
+                expected: .attributes(.attribute),
+                next: .attributeBytes(size),
+                returnValue: .fetchResponse(.streamingBegin(type: .binary(section: section), size: size))
             )
         default:
             return self.moveStateMachine(
                 expected: .attributes(.attribute),
                 next: .attributes(.separator),
-                returnValue: .simpleAttribute(att)
+                returnValue: .fetchResponse(.simpleAttribute(att))
             )
         }
     }
@@ -162,14 +168,14 @@ extension NIOIMAP.ResponseParser {
             return self.moveStateMachine(
                 expected: .attributeBytes(remaining),
                 next: .attributes(.separator),
-                returnValue: .streamingAttributeEnd
+                returnValue: .fetchResponse(.streamingEnd)
             )
         } else if buffer.readableBytes >= remaining {
             let bytes = buffer.readSlice(length: remaining)!
             return self.moveStateMachine(
                 expected: .attributeBytes(remaining),
                 next: .attributeBytes(0),
-                returnValue: .streamingAttributeBytes(bytes)
+                returnValue: .fetchResponse(.streamingBytes(bytes))
             )
         } else {
             let bytes = buffer.readSlice(length: buffer.readableBytes)!
@@ -177,7 +183,7 @@ extension NIOIMAP.ResponseParser {
             return self.moveStateMachine(
                 expected: .attributeBytes(remaining),
                 next: .attributeBytes(leftToRead),
-                returnValue: .streamingAttributeBytes(bytes)
+                returnValue: .fetchResponse(.streamingBytes(bytes))
             )
         }
     }

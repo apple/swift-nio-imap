@@ -73,27 +73,36 @@ extension ParserUnitTests {
         // first send a greeting
         // then respond to 2 LOGIN {3}\r\nabc {3}\r\nabc
         // command tag FETCH 1:3 (BODY[TEXT] FLAGS)
+        // command tag FETCH 1 BINARY[]
+        
         let lines = [
             "* OK [CAPABILITY IMAP4rev1] Ready.\r\n",
+            
             "+ OK\r\n",
             "+ OK\r\n",
             "2 OK Login completed.\r\n",
-            "* 1 FETCH (BODY[TEXT] {3}\r\nabc FLAGS (\\seen \\answered))\r\n",
+            
+            "* 1 FETCH (BODY[TEXT]<4> {3}\r\nabc FLAGS (\\seen \\answered))\r\n",
             "* 2 FETCH (FLAGS (\\deleted) BODY[TEXT] {3}\r\ndef)\r\n",
             "* 3 FETCH (BODY[TEXT] {3}\r\nghi)\r\n",
             "3 OK Fetch completed.\r\n",
+            
+            "* 1 FETCH (BINARY[] {4}\r\n1234)\r\n",
+            "4 OK Fetch completed.\r\n",
         ]
         var buffer = ByteBuffer(stringLiteral: "")
         buffer.writeString(lines.joined())
 
         let expectedResults: [(NIOIMAP.Response, UInt)] = [
             (.greeting(.auth(.ok(.code(.capability([.imap4rev1]), text: "Ready.")))), #line),
+            
             (.continuationRequest(.responseText(.code(nil, text: "OK"))), #line),
             (.continuationRequest(.responseText(.code(nil, text: "OK"))), #line),
             (.taggedResponse(.tag("2", state: .ok(.code(nil, text: "Login completed.")))), #line),
+            
             (.untaggedResponse(.messageData(.fetch(1))), #line),
             (.fetchResponse(.start), #line),
-            (.fetchResponse(.streamingBegin(type: .body, size: 3)), #line),
+            (.fetchResponse(.streamingBegin(type: .body(partial: 4), size: 3)), #line),
             (.fetchResponse(.streamingBytes("abc")), #line),
             (.fetchResponse(.streamingEnd), #line),
             (.fetchResponse(.simpleAttribute(.dynamic([.seen, .answered]))), #line),
@@ -101,17 +110,25 @@ extension ParserUnitTests {
             (.untaggedResponse(.messageData(.fetch(2))), #line),
             (.fetchResponse(.start), #line),
             (.fetchResponse(.simpleAttribute(.dynamic([.deleted]))), #line),
-            (.fetchResponse(.streamingBegin(type: .body, size: 3)), #line),
+            (.fetchResponse(.streamingBegin(type: .body(partial: nil), size: 3)), #line),
             (.fetchResponse(.streamingBytes("def")), #line),
             (.fetchResponse(.streamingEnd), #line),
             (.fetchResponse(.finish), #line),
             (.untaggedResponse(.messageData(.fetch(3))), #line),
             (.fetchResponse(.start), #line),
-            (.fetchResponse(.streamingBegin(type: .body, size: 3)), #line),
+            (.fetchResponse(.streamingBegin(type: .body(partial: nil), size: 3)), #line),
             (.fetchResponse(.streamingBytes("ghi")), #line),
             (.fetchResponse(.streamingEnd), #line),
             (.fetchResponse(.finish), #line),
             (.taggedResponse(.tag("3", state: .ok(.code(nil, text: "Fetch completed.")))), #line),
+            
+            (.untaggedResponse(.messageData(.fetch(1))), #line),
+            (.fetchResponse(.start), #line),
+            (.fetchResponse(.streamingBegin(type: .binary(section: []), size: 4)), #line),
+            (.fetchResponse(.streamingBytes("1234")), #line),
+            (.fetchResponse(.streamingEnd), #line),
+            (.fetchResponse(.finish), #line),
+            (.taggedResponse(.tag("4", state: .ok(.code(nil, text: "Fetch completed.")))), #line),
         ]
 
         var parser = NIOIMAP.ResponseParser()

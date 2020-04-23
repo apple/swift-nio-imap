@@ -34,8 +34,8 @@ extension NIOIMAP {
     }
 
     public enum StreamingType: Equatable {
-        case binary
-        case body
+        case binary(section: [Int])
+        case body(partial: Int?)
         case rfc822
     }
 

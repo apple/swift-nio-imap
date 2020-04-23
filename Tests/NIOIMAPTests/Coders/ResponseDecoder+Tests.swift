@@ -41,7 +41,7 @@ extension ResponseDecoder_Tests {
                     .untaggedResponse(.messageData(.fetch(2))),
                     .fetchResponse(.start),
                     .fetchResponse(.simpleAttribute(.dynamic([.deleted]))),
-                    .fetchResponse(.streamingBegin(type: .body, size: 1)),
+                    .fetchResponse(.streamingBegin(type: .body(partial: nil), size: 1)),
                     .fetchResponse(.streamingBytes("X")),
                     .fetchResponse(.streamingEnd),
                     .fetchResponse(.finish),
