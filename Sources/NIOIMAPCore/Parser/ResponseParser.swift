@@ -133,7 +133,7 @@ extension NIOIMAP.ResponseParser {
     private mutating func parseSingleAttribute(buffer: inout ByteBuffer) throws -> NIOIMAP.Response {
         let att = try NIOIMAP.GrammarParser.parseMessageAttribute_dynamicOrStatic(buffer: &buffer, tracker: .new)
         switch att {
-        case .static(.bodySectionText(let partial, let size)):
+        case .static(.bodySectionTextStreaming(let partial, let size)):
             return self.moveStateMachine(
                 expected: .attributes(.attribute),
                 next: .attributeBytes(size),

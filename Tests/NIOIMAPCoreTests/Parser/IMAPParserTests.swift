@@ -1681,7 +1681,7 @@ extension ParserUnitTests {
     func testParseMessageAttributeStatic() {
         let inputs: [(String, String, NIOIMAP.MessageAttributesStatic, UInt)] = [
             ("UID 1234", " ", .uid(1234), #line),
-            ("BODY[TEXT]<1> {999}\r\n", " ", .bodySectionText(1, 999), #line),
+            ("BODY[TEXT]<1> {999}\r\n", " ", .bodySectionTextStreaming(1, 999), #line),
             (#"BODY[HEADER] "string""#, " ", .bodySection(.text(.header), nil, "string"), #line),
             (#"BODY[HEADER]<12> "string""#, " ", .bodySection(.text(.header), 12, "string"), #line),
             ("RFC822.SIZE 1234", " ", .rfc822Size(1234), #line),

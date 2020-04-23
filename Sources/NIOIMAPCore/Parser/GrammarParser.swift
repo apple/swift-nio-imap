@@ -2226,7 +2226,7 @@ extension NIOIMAP.GrammarParser {
             // stream if body text
             if section == .text(.text) {
                 let literalSize = try self.parseLiteralSize(buffer: &buffer, tracker: tracker)
-                return .bodySectionText(number, literalSize)
+                return .bodySectionTextStreaming(number, size: literalSize)
             } else {
                 let string = try self.parseNString(buffer: &buffer, tracker: tracker)
                 return .bodySection(section, number, string)

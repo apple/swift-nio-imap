@@ -29,7 +29,7 @@ extension NIOIMAP {
         case rfc822Size(Int)
         case body(Body, structure: Bool)
         case bodySection(SectionSpec?, Int?, NString)
-        case bodySectionText(Int?, Int) // used when streaming the body, send the literal header
+        case bodySectionTextStreaming(Int?, size: Int) // used when streaming the body, send the literal header
         case uid(Int)
         case binaryString(section: [Int], string: NString)
         case binaryLiteral(section: [Int], size: Int)
@@ -54,7 +54,7 @@ extension ByteBuffer {
             return self.writeMessageAttributeStatic_body(body, structure: structure)
         case .bodySection(let section, let number, let string):
             return self.writeMessageAttributeStatic_bodySection(section, number: number, string: string)
-        case .bodySectionText(let number, let size):
+        case .bodySectionTextStreaming(let number, let size):
             return self.writeMessageAttributeStatic_bodySectionText(number: number, size: size)
         case .uid(let uid):
             return self.writeString("UID \(uid)")
