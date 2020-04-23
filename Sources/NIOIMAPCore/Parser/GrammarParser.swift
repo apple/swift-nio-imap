@@ -2116,18 +2116,6 @@ extension NIOIMAP.GrammarParser {
 
     // msg-att         = "(" (msg-att-dynamic / msg-att-static)
     //                    *(SP (msg-att-dynamic / msg-att-static)) ")"
-    static func parseMessageAttributeStart(buffer: inout ByteBuffer, tracker: StackTracker) throws {
-        try ParserLibrary.parseFixedString("(", buffer: &buffer, tracker: tracker)
-    }
-
-    static func parseMessageAttributeMiddle(buffer: inout ByteBuffer, tracker: StackTracker) throws {
-        try ParserLibrary.parseFixedString(" ", buffer: &buffer, tracker: tracker)
-    }
-
-    static func parseMessageAttributeEnd(buffer: inout ByteBuffer, tracker: StackTracker) throws {
-        try ParserLibrary.parseFixedString(")\r\n", buffer: &buffer, tracker: tracker)
-    }
-
     static func parseMessageAttribute_dynamicOrStatic(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.MessageAttributeType {
         func parseMessageAttribute_static(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.MessageAttributeType {
             .static(try self.parseMessageAttributeStatic(buffer: &buffer, tracker: tracker))
