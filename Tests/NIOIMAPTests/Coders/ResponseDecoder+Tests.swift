@@ -38,8 +38,7 @@ extension ResponseDecoder_Tests {
             (
                 "* 2 FETCH (FLAGS (\\deleted) BODY[TEXT] {1}\r\nX)\r\n2 OK Fetch completed.\r\n",
                 [
-                    .untaggedResponse(.messageData(.fetch(2))),
-                    .fetchResponse(.start),
+                    .fetchResponse(.start(2)),
                     .fetchResponse(.simpleAttribute(.dynamic([.deleted]))),
                     .fetchResponse(.streamingBegin(type: .body(partial: nil), size: 1)),
                     .fetchResponse(.streamingBytes("X")),

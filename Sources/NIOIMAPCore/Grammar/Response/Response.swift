@@ -25,7 +25,7 @@ extension NIOIMAP {
     }
 
     public enum FetchResponse: Equatable {
-        case start
+        case start(Int)
         case simpleAttribute(MessageAttributeType)
         case streamingBegin(type: StreamingType, size: Int)
         case streamingBytes(ByteBuffer)

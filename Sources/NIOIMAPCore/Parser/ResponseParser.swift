@@ -25,7 +25,6 @@ extension NIOIMAP {
         enum Mode: Equatable {
             case greeting
             case response
-            case attributes(AttributeState)
             case attributeBytes(Int)
         }
 
@@ -42,8 +41,6 @@ extension NIOIMAP {
                 return try self.parseGreeting(buffer: &buffer)
             case .response:
                 return try self.parseResponse(buffer: &buffer)
-            case .attributes(let state):
-                return try self.parseAtributes(state: state, buffer: &buffer)
             case .attributeBytes(let remaining):
                 return self.parseBytes(buffer: &buffer, remaining: remaining)
             }
@@ -77,12 +74,32 @@ extension NIOIMAP.ResponseParser {
 
 extension NIOIMAP.ResponseParser {
     fileprivate mutating func parseResponse(buffer: inout ByteBuffer) throws -> NIOIMAP.Response {
-        do {
-            let response = try NIOIMAP.GrammarParser.parseResponseData(buffer: &buffer, tracker: .new)
-            if case .messageData(.fetch(_)) = response {
-                self.moveStateMachine(expected: .response, next: .attributes(.head))
-            }
+
+        func parseResponse_fetch(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Response {
+            let response = try NIOIMAP.GrammarParser.parseFetchResponse(buffer: &buffer, tracker: tracker)
+            return .fetchResponse(response)
+        }
+
+        func parseResponse_normal(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Response {
+            let response = try NIOIMAP.GrammarParser.parseResponseData(buffer: &buffer, tracker: tracker)
             return .untaggedResponse(response)
+        }
+
+        try? ParserLibrary.parseSpace(buffer: &buffer, tracker: .new)
+        do {
+            let response = try ParserLibrary.parseOneOf([
+                parseResponse_fetch,
+                parseResponse_normal
+            ], buffer: &buffer, tracker: .new)
+            switch response {
+            case .fetchResponse(.streamingEnd):
+                try? ParserLibrary.parseSpace(buffer: &buffer, tracker: .new)
+            case .fetchResponse(.streamingBegin(type: _, size: let size)):
+                self.moveStateMachine(expected: .response, next: .attributeBytes(size))
+            default:
+                break
+            }
+            return response
         } catch is ParserError {
             return try self._parseResponse(buffer: &buffer)
         }
@@ -104,57 +121,6 @@ extension NIOIMAP.ResponseParser {
     }
 }
 
-// MARK: - Parse attributes
-
-extension NIOIMAP.ResponseParser {
-    fileprivate mutating func parseAtributes(state: AttributeState, buffer: inout ByteBuffer) throws -> NIOIMAP.Response {
-        switch state {
-        case .head:
-            try NIOIMAP.GrammarParser.parseMessageAttributeStart(buffer: &buffer, tracker: .new)
-            return self.moveStateMachine(
-                expected: .attributes(.head),
-                next: .attributes(.attribute),
-                returnValue: .fetchResponse(.start)
-            )
-        case .separator:
-            do {
-                try NIOIMAP.GrammarParser.parseMessageAttributeMiddle(buffer: &buffer, tracker: .new)
-                self.moveStateMachine(expected: .attributes(.separator), next: .attributes(.attribute))
-                return try self.parseSingleAttribute(buffer: &buffer)
-            } catch is ParserError {
-                try NIOIMAP.GrammarParser.parseMessageAttributeEnd(buffer: &buffer, tracker: .new)
-                return self.moveStateMachine(expected: .attributes(.separator), next: .response, returnValue: .fetchResponse(.finish))
-            }
-        case .attribute:
-            return try self.parseSingleAttribute(buffer: &buffer)
-        }
-    }
-
-    private mutating func parseSingleAttribute(buffer: inout ByteBuffer) throws -> NIOIMAP.Response {
-        let att = try NIOIMAP.GrammarParser.parseMessageAttribute_dynamicOrStatic(buffer: &buffer, tracker: .new)
-        switch att {
-        case .static(.bodySectionTextStreaming(let partial, let size)):
-            return self.moveStateMachine(
-                expected: .attributes(.attribute),
-                next: .attributeBytes(size),
-                returnValue: .fetchResponse(.streamingBegin(type: .body(partial: partial), size: size))
-            )
-        case .static(.binaryStringStreaming(section: let section, size: let size)):
-            return self.moveStateMachine(
-                expected: .attributes(.attribute),
-                next: .attributeBytes(size),
-                returnValue: .fetchResponse(.streamingBegin(type: .binary(section: section), size: size))
-            )
-        default:
-            return self.moveStateMachine(
-                expected: .attributes(.attribute),
-                next: .attributes(.separator),
-                returnValue: .fetchResponse(.simpleAttribute(att))
-            )
-        }
-    }
-}
-
 // MARK: - Parse bytes
 
 extension NIOIMAP.ResponseParser {
@@ -167,7 +133,7 @@ extension NIOIMAP.ResponseParser {
         if remaining == 0 {
             return self.moveStateMachine(
                 expected: .attributeBytes(remaining),
-                next: .attributes(.separator),
+                next: .response,
                 returnValue: .fetchResponse(.streamingEnd)
             )
         } else if buffer.readableBytes >= remaining {

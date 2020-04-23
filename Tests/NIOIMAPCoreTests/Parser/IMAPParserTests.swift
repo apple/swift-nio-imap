@@ -74,19 +74,19 @@ extension ParserUnitTests {
         // then respond to 2 LOGIN {3}\r\nabc {3}\r\nabc
         // command tag FETCH 1:3 (BODY[TEXT] FLAGS)
         // command tag FETCH 1 BINARY[]
-        
+
         let lines = [
             "* OK [CAPABILITY IMAP4rev1] Ready.\r\n",
-            
+
             "+ OK\r\n",
             "+ OK\r\n",
             "2 OK Login completed.\r\n",
-            
+
             "* 1 FETCH (BODY[TEXT]<4> {3}\r\nabc FLAGS (\\seen \\answered))\r\n",
             "* 2 FETCH (FLAGS (\\deleted) BODY[TEXT] {3}\r\ndef)\r\n",
             "* 3 FETCH (BODY[TEXT] {3}\r\nghi)\r\n",
             "3 OK Fetch completed.\r\n",
-            
+
             "* 1 FETCH (BINARY[] {4}\r\n1234)\r\n",
             "4 OK Fetch completed.\r\n",
         ]
@@ -95,35 +95,36 @@ extension ParserUnitTests {
 
         let expectedResults: [(NIOIMAP.Response, UInt)] = [
             (.greeting(.auth(.ok(.code(.capability([.imap4rev1]), text: "Ready.")))), #line),
-            
+
             (.continuationRequest(.responseText(.code(nil, text: "OK"))), #line),
             (.continuationRequest(.responseText(.code(nil, text: "OK"))), #line),
             (.taggedResponse(.tag("2", state: .ok(.code(nil, text: "Login completed.")))), #line),
-            
-            (.untaggedResponse(.messageData(.fetch(1))), #line),
-            (.fetchResponse(.start), #line),
+
+//            (.untaggedResponse(.messageData(.fetch(1))), #line),
+            (.fetchResponse(.start(1)), #line),
             (.fetchResponse(.streamingBegin(type: .body(partial: 4), size: 3)), #line),
             (.fetchResponse(.streamingBytes("abc")), #line),
             (.fetchResponse(.streamingEnd), #line),
             (.fetchResponse(.simpleAttribute(.dynamic([.seen, .answered]))), #line),
             (.fetchResponse(.finish), #line),
-            (.untaggedResponse(.messageData(.fetch(2))), #line),
-            (.fetchResponse(.start), #line),
+
+            (.fetchResponse(.start(2)), #line),
             (.fetchResponse(.simpleAttribute(.dynamic([.deleted]))), #line),
             (.fetchResponse(.streamingBegin(type: .body(partial: nil), size: 3)), #line),
             (.fetchResponse(.streamingBytes("def")), #line),
             (.fetchResponse(.streamingEnd), #line),
             (.fetchResponse(.finish), #line),
-            (.untaggedResponse(.messageData(.fetch(3))), #line),
-            (.fetchResponse(.start), #line),
+
+//            (.untaggedResponse(.messageData(.fetch(3))), #line),
+            (.fetchResponse(.start(3)), #line),
             (.fetchResponse(.streamingBegin(type: .body(partial: nil), size: 3)), #line),
             (.fetchResponse(.streamingBytes("ghi")), #line),
             (.fetchResponse(.streamingEnd), #line),
             (.fetchResponse(.finish), #line),
             (.taggedResponse(.tag("3", state: .ok(.code(nil, text: "Fetch completed.")))), #line),
-            
-            (.untaggedResponse(.messageData(.fetch(1))), #line),
-            (.fetchResponse(.start), #line),
+
+//            (.untaggedResponse(.messageData(.fetch(1))), #line),
+            (.fetchResponse(.start(1)), #line),
             (.fetchResponse(.streamingBegin(type: .binary(section: []), size: 4)), #line),
             (.fetchResponse(.streamingBytes("1234")), #line),
             (.fetchResponse(.streamingEnd), #line),
@@ -1681,21 +1682,14 @@ extension ParserUnitTests {
     func testParseMessageAttributeStatic() {
         let inputs: [(String, String, NIOIMAP.MessageAttributesStatic, UInt)] = [
             ("UID 1234", " ", .uid(1234), #line),
-            
-            ("BODY[TEXT]<1> {999}\r\n", " ", .bodySectionTextStreaming(1, size: 999), #line),
             ("BODY[TEXT] \"hello\"", " ", .bodySection(.text(.text), nil, "hello"), #line),
             (#"BODY[HEADER] "string""#, " ", .bodySection(.text(.header), nil, "string"), #line),
             (#"BODY[HEADER]<12> "string""#, " ", .bodySection(.text(.header), 12, "string"), #line),
-            
             ("RFC822.SIZE 1234", " ", .rfc822Size(1234), #line),
             (#"RFC822 "some string""#, " ", .rfc822(nil, "some string"), #line),
             (#"RFC822.HEADER "some string""#, " ", .rfc822(.header, "some string"), #line),
             (#"RFC822.TEXT "string""#, " ", .rfc822(.text, "string"), #line),
-            ("RFC822.TEXT {3}\r\n", " ", .rfc822TextStreaming(size: 3), #line),
-            
             ("BINARY.SIZE[3] 4", " ", .binarySize(section: [3], number: 4), #line),
-            ("BINARY[3] ~{4}\r\n", " ", .binaryStringStreaming(section: [3], size: 4), #line),
-            ("BINARY[3] {4}\r\n", " ", .binaryStringStreaming(section: [3], size: 4), #line),
             ("BINARY[3] \"hello\"", " ", .binaryString(section: [3], string: "hello"), #line),
         ]
         self.iterateTestInputs(inputs, testFunction: NIOIMAP.GrammarParser.parseMessageAttributeStatic)
@@ -1707,7 +1701,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     func testParseMessageData() {
         let inputs: [(String, String, NIOIMAP.MessageData, UInt)] = [
-            ("1 FETCH ", "", .fetch(1), #line),
+        
         ]
         self.iterateTestInputs(inputs, testFunction: NIOIMAP.GrammarParser.parseMessageData)
     }
