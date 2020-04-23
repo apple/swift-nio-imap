@@ -4025,39 +4025,58 @@ extension NIOIMAP.GrammarParser {
     // uid             = "UID" SP
     //                   (copy / move / fetch / search / store / uid-expunge)
     static func parseUid(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.CommandType {
-
-        func parseUid_subcommand_command(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.UIDCommandType {
-            let type = try ParserLibrary.parseOneOf([
-                self.parseCommandAny,
-                self.parseCommandAuth,
-                self.parseCommandNonauth,
-                self.parseCommandSelect
-            ], buffer: &buffer, tracker: tracker)
-            guard let uidCommand = NIOIMAP.UIDCommandType(commandType: type) else {
-                throw ParserError(hint: "Invalid UID command")
+        
+        func parseUid_copy(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.CommandType {
+            guard case .copy(let set, let mailbox) = try self.parseCopy(buffer: &buffer, tracker: tracker) else {
+                fatalError("This should never happen")
             }
-            return uidCommand
+            return .uidCopy(set, mailbox)
         }
-
-        func parseUid_subcommand(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.UIDCommandType {
-            return try ParserLibrary.parseOneOf([
-                parseUidExpunge,
-                parseUid_subcommand_command
-            ], buffer: &buffer, tracker: tracker)
+        
+        func parseUid_move(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.CommandType {
+            guard case .move(let set, let mailbox) = try self.parseMove(buffer: &buffer, tracker: tracker) else {
+                fatalError("This should never happen")
+            }
+            return .uidMove(set, mailbox)
         }
-
-        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> NIOIMAP.CommandType in
-            try ParserLibrary.parseFixedString("UID ", buffer: &buffer, tracker: tracker)
-            return .uid(try parseUid_subcommand(buffer: &buffer, tracker: tracker))
+        
+        func parseUid_fetch(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.CommandType {
+            guard case .fetch(let set, let type, let modifiers) = try self.parseFetch(buffer: &buffer, tracker: tracker) else {
+                fatalError("This should never happen")
+            }
+            return .uidFetch(set, type, modifiers)
         }
-    }
-
-    // uid-expunge    = "EXPUNGE" SP sequence-set
-    static func parseUidExpunge(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.UIDCommandType {
-        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
+        
+        func parseUid_search(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.CommandType {
+            guard case .search(let options, let program) = try self.parseSearch(buffer: &buffer, tracker: tracker) else {
+                fatalError("This should never happen")
+            }
+            return .uidSearch(returnOptions: options, program: program)
+        }
+        
+        func parseUid_store(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.CommandType {
+            guard case .store(let set, let modifiers, let flags) = try self.parseStore(buffer: &buffer, tracker: tracker) else {
+                fatalError("This should never happen")
+            }
+            return .uidStore(set, modifiers, flags)
+        }
+        
+        func parseUid_expunge(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.CommandType {
             try ParserLibrary.parseFixedString("EXPUNGE ", buffer: &buffer, tracker: tracker)
             let set = try self.parseSequenceSet(buffer: &buffer, tracker: tracker)
             return .uidExpunge(set)
+        }
+        
+        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> NIOIMAP.CommandType in
+            try ParserLibrary.parseFixedString("UID ", buffer: &buffer, tracker: tracker)
+            return try ParserLibrary.parseOneOf([
+                parseUid_copy,
+                parseUid_move,
+                parseUid_fetch,
+                parseUid_search,
+                parseUid_store,
+                parseUid_expunge,
+            ], buffer: &buffer, tracker: tracker)
         }
     }
 

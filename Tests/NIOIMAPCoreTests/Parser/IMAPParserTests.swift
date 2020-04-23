@@ -3014,8 +3014,11 @@ extension ParserUnitTests {
     
     func testParseUID() {
         let inputs: [(String, String, NIOIMAP.CommandType, UInt)] = [
-            ("UID EXPUNGE 1", "\r\n", .uid(.uidExpunge([.single(1)])), #line),
-            ("UID COPY 1 inbox", "\r\n", .uid(.copy([.single(1)], .inbox)), #line),
+            ("UID EXPUNGE 1", "\r\n", .uidExpunge([.single(1)]), #line),
+            ("UID COPY 1 Inbox", "\r\n", .uidCopy([.single(1)], .inbox), #line),
+            ("UID FETCH 1 FLAGS", "\r\n", .uidFetch([.single(1)], NIOIMAP.FetchType.attributes([.flags]), []), #line),
+            ("UID SEARCH CHARSET UTF8 ALL", "\r\n", .uidSearch(returnOptions: [], program: .charset("UTF8", keys: [.all])), #line),
+            ("UID STORE 1 +FLAGS (Test)", "\r\n", .uidStore([.single(1)], [], .add(silent: false, list: [.keyword(.init("Test"))])), #line),
         ]
         self.iterateTestInputs(inputs, testFunction: NIOIMAP.GrammarParser.parseUid)
     }
@@ -3025,18 +3028,6 @@ extension ParserUnitTests {
         XCTAssertThrowsError(try NIOIMAP.GrammarParser.parseUid(buffer: &buffer, tracker: .testTracker)) { e in
             XCTAssertTrue(e is ParserError)
         }
-    }
-
-}
-
-// MARK: - parseUIDExpunge
-extension ParserUnitTests {
-    
-    func testParseUIDExpunge() {
-        let inputs: [(String, String, NIOIMAP.UIDCommandType, UInt)] = [
-            ("EXPUNGE 1", "\r\n", .uidExpunge([.single(1)]), #line),
-        ]
-        self.iterateTestInputs(inputs, testFunction: NIOIMAP.GrammarParser.parseUidExpunge)
     }
 
 }
