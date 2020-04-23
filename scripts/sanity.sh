@@ -21,17 +21,18 @@ function replace_acceptable_years() {
     sed -e 's/20[12][78901]-20[12][8901]/YEARS/' -e 's/20[12][8901]/YEARS/'
 }
 
-printf "=> Checking license headers... "
 tmp=$(mktemp /tmp/.swift-nio-email-sanity_XXXXXX)
 
-for language in swift-or-c bash dtrace python; do
+printf "=> Checking license headers\n"
+for language in swift-or-c bash; do
+  printf "   * $language... "
   declare -a matching_files
   declare -a exceptions
   expections=( )
   matching_files=( -name '*' )
   case "$language" in
       swift-or-c)
-        exceptions=( -name Package.swift -o -name process_grammar.sh )
+        exceptions=( -name Package.swift )
         matching_files=( -name '*.swift' -o -name '*.c' -o -name '*.h' )
         cat > "$tmp" <<"EOF"
 //===----------------------------------------------------------------------===//
@@ -66,44 +67,6 @@ EOF
 ## SPDX-License-Identifier: Apache-2.0
 ##
 ##===----------------------------------------------------------------------===##
-EOF
-      ;;
-      python)
-        matching_files=( -name '*.py' )
-        cat > "$tmp" <<"EOF"
-#!/usr/bin/env python
-##===----------------------------------------------------------------------===##
-##
-## This source file is part of the SwiftNIO open source project
-##
-## Copyright (c) YEARS Apple Inc. and the SwiftNIO project authors
-## Licensed under Apache License v2.0
-##
-## See LICENSE.txt for license information
-## See CONTRIBUTORS.txt for the list of SwiftNIO project authors
-##
-## SPDX-License-Identifier: Apache-2.0
-##
-##===----------------------------------------------------------------------===##
-EOF
-      ;;
-      dtrace)
-        matching_files=( -name '*.d' )
-        cat > "$tmp" <<"EOF"
-#!/usr/sbin/dtrace -q -s
-/*===----------------------------------------------------------------------===*
- *
- *  This source file is part of the SwiftNIO open source project
- *
- *  Copyright (c) YEARS Apple Inc. and the SwiftNIO project authors
- *  Licensed under Apache License v2.0
- *
- *  See LICENSE.txt for license information
- *  See CONTRIBUTORS.txt for the list of SwiftNIO project authors
- *
- *  SPDX-License-Identifier: Apache-2.0
- *
- *===----------------------------------------------------------------------===*/
 EOF
       ;;
     *)
