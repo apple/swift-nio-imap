@@ -125,7 +125,7 @@ extension ParserUnitTests {
 
 //            (.untaggedResponse(.messageData(.fetch(1))), #line),
             (.fetchResponse(.start(1)), #line),
-            (.fetchResponse(.streamingBegin(type: .binary(section: []), size: 4)), #line),
+            (.fetchResponse(.streamingBegin(type: .binary(section: []), size: 4)), #line),
             (.fetchResponse(.streamingBytes("1234")), #line),
             (.fetchResponse(.streamingEnd), #line),
             (.fetchResponse(.finish), #line),
