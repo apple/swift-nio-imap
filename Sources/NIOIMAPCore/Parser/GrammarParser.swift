@@ -661,11 +661,6 @@ extension NIOIMAP.GrammarParser {
             return .noop
         }
 
-        func parseCommandAny_xcommand(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Command {
-            let command = try self.parseXCommand(buffer: &buffer, tracker: tracker)
-            return .xcommand(command)
-        }
-
         func parseCommandAny_id(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Command {
             let id = try self.parseID(buffer: &buffer, tracker: tracker)
             return .id(id)
@@ -677,7 +672,6 @@ extension NIOIMAP.GrammarParser {
         }
 
         return try ParserLibrary.parseOneOf([
-            parseCommandAny_xcommand,
             parseCommandAny_noop,
             parseCommandAny_logout,
             parseCommandAny_capability,
@@ -4142,15 +4136,6 @@ extension NIOIMAP.GrammarParser {
     static func parseVendorToken(buffer: inout ByteBuffer, tracker: StackTracker) throws -> String {
         return try ParserLibrary.parseOneOrMoreCharacters(buffer: &buffer, tracker: tracker) { char -> Bool in
             return char.isAlpha
-        }
-    }
-
-    // x-command       = "X" atom <experimental command arguments>
-    static func parseXCommand(buffer: inout ByteBuffer, tracker: StackTracker) throws -> String {
-        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker in
-            try ParserLibrary.parseFixedString("X", buffer: &buffer, tracker: tracker)
-            let atom = try self.parseAtom(buffer: &buffer, tracker: tracker)
-            return atom
         }
     }
 
