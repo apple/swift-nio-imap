@@ -99,7 +99,7 @@ extension NIOIMAP {
         /// Upon failure a `PublicParserError` will be thrown.
         /// - parameter buffer: The consumable buffer to parse.
         /// - returns: A `ClientCommand` if parsing was successful.
-        private mutating func parseCommand(buffer: inout ByteBuffer) throws -> NIOIMAP.Command {
+        private mutating func parseCommand(buffer: inout ByteBuffer) throws -> NIOIMAP.TaggedCommand {
             try self.throwIfExceededBufferLimit(&buffer)
             do {
                 return try GrammarParser.parseCommand(buffer: &buffer, tracker: .new)

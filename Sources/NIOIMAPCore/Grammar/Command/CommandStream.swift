@@ -18,7 +18,7 @@ extension NIOIMAP {
 
     public enum CommandStream: Equatable {
         case idleDone
-        case command(Command)
+        case command(TaggedCommand)
         case bytes(ByteBuffer)
     }
 

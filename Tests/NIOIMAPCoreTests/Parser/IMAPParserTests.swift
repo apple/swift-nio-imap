@@ -58,16 +58,16 @@ extension ParserUnitTests {
             let c2_2 = try parser.parseCommandStream(buffer: &buffer)
             let c3 = try parser.parseCommandStream(buffer: &buffer)
             XCTAssertEqual(buffer.readableBytes, 0)
-            XCTAssertEqual(c1, .command(NIOIMAP.Command("1", .noop)))
+            XCTAssertEqual(c1, .command(NIOIMAP.TaggedCommand("1", .noop)))
             XCTAssertEqual(
                 c2_1,
-                .command(NIOIMAP.Command("2", .append(
+                .command(NIOIMAP.TaggedCommand("2", .append(
                     to: .inbox,
                     firstMessageMetadata: .options(.flagList([], dateTime: nil, extensions: []), data: .init(byteCount: 10))
                 )))
             )
             XCTAssertEqual(c2_2, .bytes("0123456789"))
-            XCTAssertEqual(c3, .command(NIOIMAP.Command("3", .noop)))
+            XCTAssertEqual(c3, .command(NIOIMAP.TaggedCommand("3", .noop)))
         } catch {
             XCTFail("\(error)")
         }
@@ -141,11 +141,11 @@ extension ParserUnitTests {
         var parser = NIOIMAP.CommandParser()
         do {
             let c1 = try parser.parseCommandStream(buffer: &buffer)
-            XCTAssertEqual(c1, .command(NIOIMAP.Command("1", .noop)))
+            XCTAssertEqual(c1, .command(NIOIMAP.TaggedCommand("1", .noop)))
             XCTAssertEqual(parser.mode, .lines)
             
             let c2_1 = try parser.parseCommandStream(buffer: &buffer)
-            XCTAssertEqual(c2_1, .command(NIOIMAP.Command("2", .idleStart)))
+            XCTAssertEqual(c2_1, .command(NIOIMAP.TaggedCommand("2", .idleStart)))
             XCTAssertEqual(parser.mode, .idle)
             
             let c2_2 = try parser.parseCommandStream(buffer: &buffer)
@@ -154,7 +154,7 @@ extension ParserUnitTests {
             
             let c3 = try parser.parseCommandStream(buffer: &buffer)
             XCTAssertEqual(buffer.readableBytes, 0)
-            XCTAssertEqual(c3, .command(NIOIMAP.Command("3", .noop)))
+            XCTAssertEqual(c3, .command(NIOIMAP.TaggedCommand("3", .noop)))
             XCTAssertEqual(parser.mode, .lines)
         } catch {
             XCTFail("\(error)")
@@ -632,7 +632,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     
     func testParseCreate() {
-        let inputs: [(String, String, NIOIMAP.CommandType, UInt)] = [
+        let inputs: [(String, String, NIOIMAP.Command, UInt)] = [
             ("CREATE inbox", "\r", .create(.inbox, []), #line),
             ("CREATE inbox (some)", "\r", .create(.inbox, [.name("some", value: nil)]), #line),
         ]
@@ -690,7 +690,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     
     func testParseCommandAny() {
-        let inputs: [(String, String, NIOIMAP.CommandType, UInt)] = [
+        let inputs: [(String, String, NIOIMAP.Command, UInt)] = [
             ("CAPABILITY", " ", .capability, #line),
             ("LOGOUT", " ", .logout, #line),
             ("NOOP", " ", .noop, #line),
@@ -749,7 +749,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
 
     func testParseCommandAuth() {
-        let inputs: [(String, String, NIOIMAP.CommandType, UInt)] = [
+        let inputs: [(String, String, NIOIMAP.Command, UInt)] = [
             ("LSUB inbox someList", " ", .lsub(.inbox, "someList"), #line),
             ("CREATE inbox (something)", " ", .create(.inbox, [.name("something", value: nil)]), #line),
             ("NAMESPACE", " ", .namespace, #line)
@@ -763,7 +763,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     
     func testParseCommandSelect() {
-        let inputs: [(String, String, NIOIMAP.CommandType, UInt)] = [
+        let inputs: [(String, String, NIOIMAP.Command, UInt)] = [
             ("UNSELECT", " ", .unselect, #line),
             ("unselect", " ", .unselect, #line),
             ("UNSelect", " ", .unselect, #line),
@@ -800,7 +800,7 @@ extension ParserUnitTests {
             let copy = try NIOIMAP.GrammarParser.parseCopy(buffer: &buffer, tracker: .testTracker)
             let expectedSequence: [NIOIMAP.SequenceRange] = [1, 2, 3]
             let expectedMailbox = NIOIMAP.Mailbox.inbox
-            XCTAssertEqual(copy, NIOIMAP.CommandType.copy(expectedSequence, expectedMailbox))
+            XCTAssertEqual(copy, NIOIMAP.Command.copy(expectedSequence, expectedMailbox))
         }
     }
 
@@ -1032,7 +1032,7 @@ extension ParserUnitTests {
     func testDelete_valid() {
         TestUtilities.withBuffer("DELETE inbox", terminator: "\n") { (buffer) in
             let commandType = try NIOIMAP.GrammarParser.parseDelete(buffer: &buffer, tracker: .testTracker)
-            guard case NIOIMAP.CommandType.delete(let mailbox) = commandType else {
+            guard case NIOIMAP.Command.delete(let mailbox) = commandType else {
                 XCTFail("Didn't parse delete")
                 return
             }
@@ -1043,7 +1043,7 @@ extension ParserUnitTests {
     func testDelete_valid_mixedCase() {
         TestUtilities.withBuffer("DELete inbox", terminator: "\n") { (buffer) in
             let commandType = try NIOIMAP.GrammarParser.parseDelete(buffer: &buffer, tracker: .testTracker)
-            guard case NIOIMAP.CommandType.delete(let mailbox) = commandType else {
+            guard case NIOIMAP.Command.delete(let mailbox) = commandType else {
                 XCTFail("Didn't parse delete")
                 return
             }
@@ -1171,7 +1171,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
 
     func testParseExamine() {
-        let inputs: [(String, String, NIOIMAP.CommandType, UInt)] = [
+        let inputs: [(String, String, NIOIMAP.Command, UInt)] = [
             ("EXAMINE inbox", "\r", .examine(.inbox, []), #line),
             ("examine inbox", "\r", .examine(.inbox, []), #line),
             ("EXAMINE inbox (number)", "\r", .examine(.inbox, [.name("number", value: nil)]), #line),
@@ -1192,7 +1192,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     
     func testParseFetch() {
-        let inputs: [(String, String, NIOIMAP.CommandType, UInt)] = [
+        let inputs: [(String, String, NIOIMAP.Command, UInt)] = [
             ("FETCH 1:3 ALL", "\r", .fetch([1...3], .all, []), #line),
             ("FETCH 2:4 FULL", "\r", .fetch([2...4], .full, []), #line),
             ("FETCH 3:5 FAST", "\r", .fetch([3...5], .fast, []), #line),
@@ -1403,7 +1403,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     
     func testParseList() {
-        let inputs: [(String, String, NIOIMAP.CommandType, UInt)] = [
+        let inputs: [(String, String, NIOIMAP.Command, UInt)] = [
             (#"LIST "" """#, "\r", .list(nil, NIOIMAP.Mailbox(""), .mailbox(""), []), #line),
         ]
         self.iterateTestInputs(inputs, testFunction: NIOIMAP.GrammarParser.parseList)
@@ -1817,7 +1817,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
  
     func testParseMove() {
-        let inputs: [(String, String, NIOIMAP.CommandType, UInt)] = [
+        let inputs: [(String, String, NIOIMAP.Command, UInt)] = [
             ("MOVE * inbox", " ", .move([.wildcard], .inbox), #line),
             ("MOVE 1:2,4:5 test", " ", .move([1...2, 4...5], "test"), #line),
         ]
@@ -1830,7 +1830,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     
     func testParseNamespaceCommand() {
-        let inputs: [(String, String, NIOIMAP.CommandType, UInt)] = [
+        let inputs: [(String, String, NIOIMAP.Command, UInt)] = [
             ("NAMESPACE", " ", .namespace, #line),
             ("nameSPACE", " ", .namespace, #line),
             ("namespace", " ", .namespace, #line),
@@ -2206,7 +2206,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
 
     func testParseSearch() {
-        let inputs: [(String, String, NIOIMAP.CommandType, UInt)] = [
+        let inputs: [(String, String, NIOIMAP.Command, UInt)] = [
             ("SEARCH ALL", "\r", .search(returnOptions: [], program: .charset(nil, keys: [.all])), #line),
             ("SEARCH ALL DELETED FLAGGED", "\r", .search(returnOptions: [], program: .charset(nil, keys: [.all, .deleted, .flagged])), #line),
             ("SEARCH CHARSET UTF-8 ALL", "\r", .search(returnOptions: [], program: .charset("UTF-8", keys: [.all])), #line),
@@ -2522,7 +2522,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
 
     func testParseSelect() {
-        let inputs: [(String, String, NIOIMAP.CommandType, UInt)] = [
+        let inputs: [(String, String, NIOIMAP.Command, UInt)] = [
             ("SELECT inbox", "\r", .select(.inbox, []), #line),
             ("SELECT inbox (some1)", "\r", .select(.inbox, [.name("some1", value: nil)]), #line),
         ]
@@ -2676,7 +2676,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
 
     func testParseStatus() {
-        let inputs: [(String, String, NIOIMAP.CommandType, UInt)] = [
+        let inputs: [(String, String, NIOIMAP.Command, UInt)] = [
             ("STATUS inbox (messages unseen)", "\r\n", .status(.inbox, [.messages, .unseen]), #line),
             ("STATUS Deleted (messages unseen HIGHESTMODSEQ)", "\r\n", .status(NIOIMAP.Mailbox("Deleted"), [.messages, .unseen, .highestModSeq]), #line),
         ]
@@ -2767,7 +2767,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
 
     func testParseStore() {
-        let inputs: [(String, String, NIOIMAP.CommandType, UInt)] = [
+        let inputs: [(String, String, NIOIMAP.Command, UInt)] = [
             ("STORE 1 +FLAGS \\answered", "\r", .store([1], [], .add(silent: false, list: [.answered])), #line),
             ("STORE 1 (label) -FLAGS \\seen", "\r", .store([1], [.name("label", parameters: nil)], .remove(silent: false, list: [.seen])), #line),
         ]
@@ -2797,7 +2797,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     
     func testParseSubscribe() {
-        let inputs: [(String, String, NIOIMAP.CommandType, UInt)] = [
+        let inputs: [(String, String, NIOIMAP.Command, UInt)] = [
             ("SUBSCRIBE inbox", "\r\n", .subscribe(.inbox), #line),
             ("SUBScribe INBOX", "\r\n", .subscribe(.inbox), #line),
         ]
@@ -2817,7 +2817,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     
     func testParseRename() {
-        let inputs: [(String, String, NIOIMAP.CommandType, UInt)] = [
+        let inputs: [(String, String, NIOIMAP.Command, UInt)] = [
             ("RENAME box1 box2", "\r", .rename(from: "box1", to: "box2", params: []), #line),
             ("rename box3 box4", "\r", .rename(from: "box3", to: "box4", params: []), #line),
             ("RENAME box5 box6 (test)", "\r", .rename(from: "box5", to: "box6", params: [.name("test", value: nil)]), #line)
@@ -3013,9 +3013,12 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     
     func testParseUID() {
-        let inputs: [(String, String, NIOIMAP.CommandType, UInt)] = [
-            ("UID EXPUNGE 1", "\r\n", .uid(.uidExpunge([.single(1)])), #line),
-            ("UID COPY 1 inbox", "\r\n", .uid(.copy([.single(1)], .inbox)), #line),
+        let inputs: [(String, String, NIOIMAP.Command, UInt)] = [
+            ("UID EXPUNGE 1", "\r\n", .uidExpunge([.single(1)]), #line),
+            ("UID COPY 1 Inbox", "\r\n", .uidCopy([.single(1)], .inbox), #line),
+            ("UID FETCH 1 FLAGS", "\r\n", .uidFetch([.single(1)], NIOIMAP.FetchType.attributes([.flags]), []), #line),
+            ("UID SEARCH CHARSET UTF8 ALL", "\r\n", .uidSearch(returnOptions: [], program: .charset("UTF8", keys: [.all])), #line),
+            ("UID STORE 1 +FLAGS (Test)", "\r\n", .uidStore([.single(1)], [], .add(silent: false, list: [.keyword(.init("Test"))])), #line),
         ]
         self.iterateTestInputs(inputs, testFunction: NIOIMAP.GrammarParser.parseUid)
     }
@@ -3025,18 +3028,6 @@ extension ParserUnitTests {
         XCTAssertThrowsError(try NIOIMAP.GrammarParser.parseUid(buffer: &buffer, tracker: .testTracker)) { e in
             XCTAssertTrue(e is ParserError)
         }
-    }
-
-}
-
-// MARK: - parseUIDExpunge
-extension ParserUnitTests {
-    
-    func testParseUIDExpunge() {
-        let inputs: [(String, String, NIOIMAP.UIDCommandType, UInt)] = [
-            ("EXPUNGE 1", "\r\n", .uidExpunge([.single(1)]), #line),
-        ]
-        self.iterateTestInputs(inputs, testFunction: NIOIMAP.GrammarParser.parseUidExpunge)
     }
 
 }
@@ -3105,7 +3096,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     
     func testParseUnsubscribe() {
-        let inputs: [(String, String, NIOIMAP.CommandType, UInt)] = [
+        let inputs: [(String, String, NIOIMAP.Command, UInt)] = [
             ("UNSUBSCRIBE inbox", "\r\n", .unsubscribe(.inbox), #line),
             ("UNSUBScribe INBOX", "\r\n", .unsubscribe(.inbox), #line),
         ]
