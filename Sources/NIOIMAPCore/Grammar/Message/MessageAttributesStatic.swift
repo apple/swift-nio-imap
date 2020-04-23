@@ -26,13 +26,14 @@ extension NIOIMAP {
         case envelope(Envelope)
         case internalDate(Date.DateTime)
         case rfc822(RFC822Reduced?, NIOIMAP.NString)
+        case rfc822TextStreaming(size: Int)
         case rfc822Size(Int)
         case body(Body, structure: Bool)
         case bodySection(SectionSpec?, Int?, NString)
         case bodySectionTextStreaming(Int?, size: Int) // used when streaming the body, send the literal header
         case uid(Int)
         case binaryString(section: [Int], string: NString)
-        case binaryLiteral(section: [Int], size: Int)
+        case binaryStringStreaming(section: [Int], size: Int)
         case binarySize(section: [Int], number: Int)
     }
 }
@@ -50,6 +51,8 @@ extension ByteBuffer {
             return self.writeMessageAttributeStatic_rfc(type, string: string)
         case .rfc822Size(let size):
             return self.writeString("RFC822.SIZE \(size)")
+        case .rfc822TextStreaming(size: let size):
+            return self.writeString("RFC822.TEXT {\(size)}\r\n")
         case .body(let body, structure: let structure):
             return self.writeMessageAttributeStatic_body(body, structure: structure)
         case .bodySection(let section, let number, let string):
@@ -64,7 +67,7 @@ extension ByteBuffer {
                 self.writeSectionBinary(section) +
                 self.writeSpace() +
                 self.writeNString(string)
-        case .binaryLiteral(section: let section, size: let size):
+        case .binaryStringStreaming(section: let section, size: let size):
             return
                 self.writeString("BINARY") +
                 self.writeSectionBinary(section) +

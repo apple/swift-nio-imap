@@ -139,7 +139,7 @@ extension NIOIMAP.ResponseParser {
                 next: .attributeBytes(size),
                 returnValue: .fetchResponse(.streamingBegin(type: .body(partial: partial), size: size))
             )
-        case .static(.binaryLiteral(section: let section, size: let size)):
+        case .static(.binaryStringStreaming(section: let section, size: let size)):
             return self.moveStateMachine(
                 expected: .attributes(.attribute),
                 next: .attributeBytes(size),

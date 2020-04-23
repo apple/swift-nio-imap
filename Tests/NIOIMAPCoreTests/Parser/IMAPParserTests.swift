@@ -1681,15 +1681,22 @@ extension ParserUnitTests {
     func testParseMessageAttributeStatic() {
         let inputs: [(String, String, NIOIMAP.MessageAttributesStatic, UInt)] = [
             ("UID 1234", " ", .uid(1234), #line),
-            ("BODY[TEXT]<1> {999}\r\n", " ", .bodySectionTextStreaming(1, 999), #line),
+            
+            ("BODY[TEXT]<1> {999}\r\n", " ", .bodySectionTextStreaming(1, size: 999), #line),
+            ("BODY[TEXT] \"hello\"", " ", .bodySection(.text(.text), nil, "hello"), #line),
             (#"BODY[HEADER] "string""#, " ", .bodySection(.text(.header), nil, "string"), #line),
             (#"BODY[HEADER]<12> "string""#, " ", .bodySection(.text(.header), 12, "string"), #line),
+            
             ("RFC822.SIZE 1234", " ", .rfc822Size(1234), #line),
             (#"RFC822 "some string""#, " ", .rfc822(nil, "some string"), #line),
             (#"RFC822.HEADER "some string""#, " ", .rfc822(.header, "some string"), #line),
+            (#"RFC822.TEXT "string""#, " ", .rfc822(.text, "string"), #line),
+            ("RFC822.TEXT {3}\r\n", " ", .rfc822TextStreaming(size: 3), #line),
+            
             ("BINARY.SIZE[3] 4", " ", .binarySize(section: [3], number: 4), #line),
-            ("BINARY[3] ~{4}\r\n", " ", .binaryLiteral(section: [3], size: 4), #line),
-            ("BINARY[3] {4}\r\n", " ", .binaryLiteral(section: [3], size: 4), #line),
+            ("BINARY[3] ~{4}\r\n", " ", .binaryStringStreaming(section: [3], size: 4), #line),
+            ("BINARY[3] {4}\r\n", " ", .binaryStringStreaming(section: [3], size: 4), #line),
+            ("BINARY[3] \"hello\"", " ", .binaryString(section: [3], string: "hello"), #line),
         ]
         self.iterateTestInputs(inputs, testFunction: NIOIMAP.GrammarParser.parseMessageAttributeStatic)
     }

@@ -2188,8 +2188,19 @@ extension NIOIMAP.GrammarParser {
                 try self.parseRFC822Reduced(buffer: &buffer, tracker: tracker)
             }
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
-            let string = try self.parseNString(buffer: &buffer, tracker: tracker)
-            return .rfc822(rfc, string)
+            
+            if rfc == .text {
+                do {
+                    let literalSize = try self.parseLiteralSize(buffer: &buffer, tracker: tracker)
+                    return .rfc822TextStreaming(size: literalSize)
+                } catch {
+                    let string = try self.parseNString(buffer: &buffer, tracker: tracker)
+                    return .rfc822(rfc, string)
+                }
+            } else {
+                let string = try self.parseNString(buffer: &buffer, tracker: tracker)
+                return .rfc822(rfc, string)
+            }
         }
 
         func parseMessageAttributeStatic_rfc822Size(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.MessageAttributesStatic {
@@ -2225,8 +2236,13 @@ extension NIOIMAP.GrammarParser {
 
             // stream if body text
             if section == .text(.text) {
-                let literalSize = try self.parseLiteralSize(buffer: &buffer, tracker: tracker)
-                return .bodySectionTextStreaming(number, size: literalSize)
+                do {
+                    let literalSize = try self.parseLiteralSize(buffer: &buffer, tracker: tracker)
+                    return .bodySectionTextStreaming(number, size: literalSize)
+                } catch {
+                    let string = try self.parseNString(buffer: &buffer, tracker: tracker)
+                    return .bodySection(section, number, string)
+                }
             } else {
                 let string = try self.parseNString(buffer: &buffer, tracker: tracker)
                 return .bodySection(section, number, string)
@@ -2250,8 +2266,14 @@ extension NIOIMAP.GrammarParser {
             try ParserLibrary.parseFixedString("BINARY", buffer: &buffer, tracker: tracker)
             let section = try self.parseSectionBinary(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
-            let size = try self.parseLiteralSize(buffer: &buffer, tracker: tracker)
-            return .binaryLiteral(section: section, size: size)
+            
+            do {
+                let literalSize = try self.parseLiteralSize(buffer: &buffer, tracker: tracker)
+                return .binaryStringStreaming(section: section, size: literalSize)
+            } catch {
+                let string = try self.parseNString(buffer: &buffer, tracker: tracker)
+                return .binaryString(section: section, string: string)
+            }
         }
 
         return try ParserLibrary.parseOneOf([

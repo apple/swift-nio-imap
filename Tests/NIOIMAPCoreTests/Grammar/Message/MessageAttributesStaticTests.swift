@@ -26,8 +26,8 @@ extension MessageAttributesStaticTests {
             (.rfc822(.header, "something"), "RFC822.HEADER \"something\"", #line),
             (.rfc822(nil, nil), "RFC822 NIL", #line),
             (.rfc822Size(123), "RFC822.SIZE 123", #line),
-            (.bodySectionTextStreaming(nil, 123), "BODY[TEXT] {123}\r\n", #line),
-            (.bodySectionTextStreaming(123, 456), "BODY[TEXT]<123> {456}\r\n", #line),
+            (.bodySectionTextStreaming(nil, size: 123), "BODY[TEXT] {123}\r\n", #line),
+            (.bodySectionTextStreaming(123, size: 456), "BODY[TEXT]<123> {456}\r\n", #line),
             (.bodySection(.text(.header), nil, "test"), "BODY[HEADER] \"test\"", #line),
             (.bodySection(.text(.header), 123, "test"), "BODY[HEADER]<123> \"test\"", #line),
             (.uid(123), "UID 123", #line),
@@ -36,7 +36,7 @@ extension MessageAttributesStaticTests {
             (.binarySize(section: [2], number: 3), "BINARY.SIZE[2] 3", #line),
             (.binaryString(section: [3], string: nil), "BINARY[3] NIL", #line),
             (.binaryString(section: [3], string: "test"), "BINARY[3] \"test\"", #line),
-            (.binaryLiteral(section: [4], size: 3), "BINARY[4] {3}\r\n", #line),
+            (.binaryStringStreaming(section: [4], size: 3), "BINARY[4] {3}\r\n", #line),
         ]
 
         for (test, expectedString, line) in inputs {
