@@ -18,7 +18,7 @@ import struct NIO.ByteBufferView
 extension NIOIMAP {
  
     /// IMAPv4 `mailbox`
-    public struct Mailbox: Equatable {
+    public struct MailboxName: Equatable {
         
         public var name: String
         
@@ -41,7 +41,7 @@ extension NIOIMAP {
 }
 
 // MARK: - ExpressibleByStringLiteral
-extension NIOIMAP.Mailbox: ExpressibleByStringLiteral {
+extension NIOIMAP.MailboxName: ExpressibleByStringLiteral {
     
     public typealias StringLiteralType = String
     
@@ -54,7 +54,7 @@ extension NIOIMAP.Mailbox: ExpressibleByStringLiteral {
 // MARK: - Encoding
 extension ByteBuffer {
     
-    @discardableResult mutating func writeMailbox(_ mailbox: NIOIMAP.Mailbox) -> Int {
+    @discardableResult mutating func writeMailbox(_ mailbox: NIOIMAP.MailboxName) -> Int {
         let buffer = ByteBuffer(ByteBufferView(mailbox.name.utf8))
         return self.writeIMAPString(buffer)
     }

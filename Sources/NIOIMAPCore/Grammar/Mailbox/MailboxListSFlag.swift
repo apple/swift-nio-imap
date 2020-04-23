@@ -14,7 +14,7 @@
 
 import struct NIO.ByteBuffer
 
-extension NIOIMAP.Mailbox.List {
+extension NIOIMAP.MailboxName.List {
     
     /// IMAPv4 `mbx-list-sflag`
     public enum SFlag: String, Equatable {
@@ -44,7 +44,7 @@ extension NIOIMAP.Mailbox.List {
 // MARK: - Encoding
 extension ByteBuffer {
 
-    @discardableResult mutating func writeMailboxListSFlag(_ flag: NIOIMAP.Mailbox.List.SFlag) -> Int {
+    @discardableResult mutating func writeMailboxListSFlag(_ flag: NIOIMAP.MailboxName.List.SFlag) -> Int {
         self.writeString(flag.rawValue)
     }
 

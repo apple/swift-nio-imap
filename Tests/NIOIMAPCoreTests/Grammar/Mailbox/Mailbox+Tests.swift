@@ -24,7 +24,7 @@ class Mailbox_Tests: EncodeTestClass {
 extension Mailbox_Tests {
 
     func testEncode() {
-        let inputs: [(NIOIMAP.Mailbox, String, UInt)] = [
+        let inputs: [(NIOIMAP.MailboxName, String, UInt)] = [
             (.inbox, "\"INBOX\"", #line),
             ("", "\"\"", #line),
             ("box", "\"box\"", #line),

@@ -26,7 +26,7 @@ extension MailboxListSFlagTests {
 
     func testInit() {
 
-        let inputs: [(String, NIOIMAP.Mailbox.List.SFlag?, UInt)] = [
+        let inputs: [(String, NIOIMAP.MailboxName.List.SFlag?, UInt)] = [
             (#"\fecd"#, nil, #line),
             (#"\Noselect"#, .noSelect, #line),
             (#"\NOSELECT"#, .noSelect, #line),
@@ -43,7 +43,7 @@ extension MailboxListSFlagTests {
         ]
 
         for (test, expected, line) in inputs {
-            let testValue = NIOIMAP.Mailbox.List.SFlag(rawValue: test)
+            let testValue = NIOIMAP.MailboxName.List.SFlag(rawValue: test)
             XCTAssertEqual(testValue, expected, line: line)
         }
 
@@ -55,7 +55,7 @@ extension MailboxListSFlagTests {
 extension MailboxListSFlagTests {
 
     func testEncode() {
-        let inputs: [(NIOIMAP.Mailbox.List.SFlag, String, UInt)] = [
+        let inputs: [(NIOIMAP.MailboxName.List.SFlag, String, UInt)] = [
             (.marked, #"\Marked"#, #line),
             (.noSelect, #"\Noselect"#, #line),
             (.unmarked, #"\Unmarked"#, #line),

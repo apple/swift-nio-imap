@@ -21,17 +21,17 @@ extension NIOIMAP {
         case logout
         case noop
         case xcommand(String)
-        case append(to: Mailbox, firstMessageMetadata: AppendMessage)
-        case create(Mailbox, [CreateParameter])
-        case delete(Mailbox)
-        case examine(Mailbox, [SelectParameter])
-        case list(ListSelectOptions?, Mailbox, MailboxPatterns, [NIOIMAP.ReturnOption])
-        case lsub(Mailbox, ByteBuffer)
-        case rename(from: Mailbox, to: Mailbox, params: [RenameParameter])
-        case select(Mailbox, [SelectParameter])
-        case status(Mailbox, [StatusAttribute])
-        case subscribe(Mailbox)
-        case unsubscribe(Mailbox)
+        case append(to: MailboxName, firstMessageMetadata: AppendMessage)
+        case create(MailboxName, [CreateParameter])
+        case delete(MailboxName)
+        case examine(MailboxName, [SelectParameter])
+        case list(ListSelectOptions?, MailboxName, MailboxPatterns, [NIOIMAP.ReturnOption])
+        case lsub(MailboxName, ByteBuffer)
+        case rename(from: MailboxName, to: MailboxName, params: [RenameParameter])
+        case select(MailboxName, [SelectParameter])
+        case status(MailboxName, [StatusAttribute])
+        case subscribe(MailboxName)
+        case unsubscribe(MailboxName)
         case authenticate(String, InitialResponse?, [ByteBuffer])
         case login(String, String)
         case starttls
@@ -42,16 +42,16 @@ extension NIOIMAP {
         case unselect
         case idleStart
         case idleFinish
-        case copy([NIOIMAP.SequenceRange], Mailbox)
+        case copy([NIOIMAP.SequenceRange], MailboxName)
         case fetch([NIOIMAP.SequenceRange], FetchType, [FetchModifier])
         case store([NIOIMAP.SequenceRange], [StoreModifier], StoreAttributeFlags)
         case search(returnOptions: [SearchReturnOption], program: SearchProgram)
-        case move([NIOIMAP.SequenceRange], Mailbox)
+        case move([NIOIMAP.SequenceRange], MailboxName)
         case id([IDParameter])
         case namespace
         
-        case uidCopy([NIOIMAP.SequenceRange], Mailbox)
-        case uidMove([NIOIMAP.SequenceRange], Mailbox)
+        case uidCopy([NIOIMAP.SequenceRange], MailboxName)
+        case uidMove([NIOIMAP.SequenceRange], MailboxName)
         case uidFetch([NIOIMAP.SequenceRange], FetchType, [FetchModifier])
         case uidSearch(returnOptions: [SearchReturnOption], program: SearchProgram)
         case uidStore([NIOIMAP.SequenceRange], [StoreModifier], StoreAttributeFlags)
@@ -161,25 +161,25 @@ extension ByteBuffer {
         self.writeString(command)
     }
     
-    private mutating func writeCommandType_append(to: NIOIMAP.Mailbox, firstMessageMetadata: NIOIMAP.AppendMessage) -> Int {
+    private mutating func writeCommandType_append(to: NIOIMAP.MailboxName, firstMessageMetadata: NIOIMAP.AppendMessage) -> Int {
         self.writeString("APPEND ") +
         self.writeMailbox(to) +
         self.writeSpace() +
         self.writeAppendMessage(firstMessageMetadata)
     }
     
-    private mutating func writeCommandType_create(mailbox: NIOIMAP.Mailbox, parameters: [NIOIMAP.CreateParameter]) -> Int {
+    private mutating func writeCommandType_create(mailbox: NIOIMAP.MailboxName, parameters: [NIOIMAP.CreateParameter]) -> Int {
         self.writeString("CREATE ") +
         self.writeMailbox(mailbox) +
         self.writeCreateParameters(parameters)
     }
     
-    private mutating func writeCommandType_delete(mailbox: NIOIMAP.Mailbox) -> Int {
+    private mutating func writeCommandType_delete(mailbox: NIOIMAP.MailboxName) -> Int {
         self.writeString("DELETE ") +
         self.writeMailbox(mailbox)
     }
     
-    private mutating func writeCommandType_examine(mailbox: NIOIMAP.Mailbox, parameters: [NIOIMAP.SelectParameter]) -> Int {
+    private mutating func writeCommandType_examine(mailbox: NIOIMAP.MailboxName, parameters: [NIOIMAP.SelectParameter]) -> Int {
         self.writeString("EXAMINE ") +
         self.writeMailbox(mailbox) +
         self.writeIfExists(parameters) { (params) -> Int in
@@ -187,7 +187,7 @@ extension ByteBuffer {
         }
     }
     
-    private mutating func writeCommandType_list(selectOptions: NIOIMAP.ListSelectOptions?, mailbox: NIOIMAP.Mailbox, mailboxPatterns: NIOIMAP.MailboxPatterns, returnOptions: [NIOIMAP.ReturnOption]) -> Int {
+    private mutating func writeCommandType_list(selectOptions: NIOIMAP.ListSelectOptions?, mailbox: NIOIMAP.MailboxName, mailboxPatterns: NIOIMAP.MailboxPatterns, returnOptions: [NIOIMAP.ReturnOption]) -> Int {
         self.writeString("LIST") +
         self.writeIfExists(selectOptions) { (options) -> Int in
             self.writeSpace() +
@@ -201,14 +201,14 @@ extension ByteBuffer {
         self.writeListReturnOptions(returnOptions)
     }
     
-    private mutating func writeCommandType_lsub(mailbox: NIOIMAP.Mailbox, listMailbox: ByteBuffer) -> Int {
+    private mutating func writeCommandType_lsub(mailbox: NIOIMAP.MailboxName, listMailbox: ByteBuffer) -> Int {
         self.writeString("LSUB ") +
         self.writeMailbox(mailbox) +
         self.writeSpace() +
         self.writeIMAPString(listMailbox)
     }
     
-    private mutating func writeCommandType_rename(from: NIOIMAP.Mailbox, to: NIOIMAP.Mailbox, parameters: [NIOIMAP.RenameParameter]) -> Int {
+    private mutating func writeCommandType_rename(from: NIOIMAP.MailboxName, to: NIOIMAP.MailboxName, parameters: [NIOIMAP.RenameParameter]) -> Int {
         self.writeString("RENAME ") +
         self.writeMailbox(from) +
         self.writeSpace() +
@@ -218,7 +218,7 @@ extension ByteBuffer {
         }
     }
     
-    private mutating func writeCommandType_select(mailbox: NIOIMAP.Mailbox, params: [NIOIMAP.SelectParameter]) -> Int {
+    private mutating func writeCommandType_select(mailbox: NIOIMAP.MailboxName, params: [NIOIMAP.SelectParameter]) -> Int {
         self.writeString("SELECT ") +
         self.writeMailbox(mailbox) +
         self.writeIfExists(params) { (params) -> Int in
@@ -226,7 +226,7 @@ extension ByteBuffer {
         }
     }
     
-    private mutating func writeCommandType_status(mailbox: NIOIMAP.Mailbox, attributes: [NIOIMAP.StatusAttribute]) -> Int {
+    private mutating func writeCommandType_status(mailbox: NIOIMAP.MailboxName, attributes: [NIOIMAP.StatusAttribute]) -> Int {
         self.writeString("STATUS ") +
         self.writeMailbox(mailbox) +
         self.writeString(" (") +
@@ -234,12 +234,12 @@ extension ByteBuffer {
         self.writeString(")")
     }
     
-    private mutating func writeCommandType_subscribe(mailbox: NIOIMAP.Mailbox) -> Int {
+    private mutating func writeCommandType_subscribe(mailbox: NIOIMAP.MailboxName) -> Int {
         self.writeString("SUBSCRIBE ") +
         self.writeMailbox(mailbox)
     }
     
-    private mutating func writeCommandType_unsubscribe(mailbox: NIOIMAP.Mailbox) -> Int {
+    private mutating func writeCommandType_unsubscribe(mailbox: NIOIMAP.MailboxName) -> Int {
         self.writeString("UNSUBSCRIBE ") +
         self.writeMailbox(mailbox)
     }
@@ -303,14 +303,14 @@ extension ByteBuffer {
         }
     }
     
-    private mutating func writeCommandType_copy(sequence: [NIOIMAP.SequenceRange], mailbox: NIOIMAP.Mailbox) -> Int {
+    private mutating func writeCommandType_copy(sequence: [NIOIMAP.SequenceRange], mailbox: NIOIMAP.MailboxName) -> Int {
         self.writeString("COPY ") +
         self.writeSequenceSet(sequence) +
         self.writeSpace() +
         self.writeMailbox(mailbox)
     }
     
-    private mutating func writeCommandType_uidCopy(sequence: [NIOIMAP.SequenceRange], mailbox: NIOIMAP.Mailbox) -> Int {
+    private mutating func writeCommandType_uidCopy(sequence: [NIOIMAP.SequenceRange], mailbox: NIOIMAP.MailboxName) -> Int {
         self.writeString("UID ") +
         self.writeCommandType_copy(sequence: sequence, mailbox: mailbox)
     }
@@ -359,14 +359,14 @@ extension ByteBuffer {
         self.writeCommandType_search(returnOptions: returnOptions, program: program)
     }
     
-    private mutating func writeCommandType_move(set: [NIOIMAP.SequenceRange], mailbox: NIOIMAP.Mailbox) -> Int {
+    private mutating func writeCommandType_move(set: [NIOIMAP.SequenceRange], mailbox: NIOIMAP.MailboxName) -> Int {
         self.writeString("MOVE ") +
         self.writeSequenceSet(set) +
         self.writeSpace() +
         self.writeMailbox(mailbox)
     }
     
-    private mutating func writeCommandType_uidMove(set: [NIOIMAP.SequenceRange], mailbox: NIOIMAP.Mailbox) -> Int {
+    private mutating func writeCommandType_uidMove(set: [NIOIMAP.SequenceRange], mailbox: NIOIMAP.MailboxName) -> Int {
         self.writeString("UID ") +
         self.writeCommandType_move(set: set, mailbox: mailbox)
     }
