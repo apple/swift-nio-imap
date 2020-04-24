@@ -21,6 +21,19 @@ function replace_acceptable_years() {
     sed -e 's/20[12][78901]-20[12][8901]/YEARS/' -e 's/20[12][8901]/YEARS/'
 }
 
+printf "=> Checking format... "
+FIRST_OUT="$(git status --porcelain)"
+swiftformat . > /dev/null 2>&1
+SECOND_OUT="$(git status --porcelain)"
+if [[ "$FIRST_OUT" != "$SECOND_OUT" ]]; then
+  printf "\033[0;31mformatting issues!\033[0m\n"
+  git --no-pager diff
+  exit 1
+else
+  printf "\033[0;32mokay.\033[0m\n"
+fi
+
+
 tmp=$(mktemp /tmp/.swift-nio-email-sanity_XXXXXX)
 
 printf "=> Checking license headers\n"
