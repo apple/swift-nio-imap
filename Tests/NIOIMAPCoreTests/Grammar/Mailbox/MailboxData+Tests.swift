@@ -29,7 +29,7 @@ extension MailboxDataTests {
             (.flags([.answered, .deleted]), "FLAGS (\\Answered \\Deleted)", #line),
             (.list(NIOIMAP.MailboxName.List(flags: nil, char: nil, mailbox: .inbox, listExtended: [])), "LIST () \"INBOX\"", #line),
             (
-                .lsub(.flags(.oFlags([.other("Draft")], sFlag: nil), char: ".", mailbox: "Drafts", listExtended: [])),
+                .lsub(.flags(.oFlags([.other("Draft")], sFlag: nil), char: ".", mailbox: .init("Drafts"), listExtended: [])),
                 "LSUB (\\Draft) . \"Drafts\"",
                 #line
             ),

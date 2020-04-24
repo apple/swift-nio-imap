@@ -1819,7 +1819,7 @@ extension ParserUnitTests {
     func testParseMove() {
         let inputs: [(String, String, NIOIMAP.Command, UInt)] = [
             ("MOVE * inbox", " ", .move([.wildcard], .inbox), #line),
-            ("MOVE 1:2,4:5 test", " ", .move([1...2, 4...5], "test"), #line),
+            ("MOVE 1:2,4:5 test", " ", .move([1...2, 4...5], .init("test")), #line),
         ]
         self.iterateTestInputs(inputs, testFunction: NIOIMAP.GrammarParser.parseMove)
     }
@@ -2818,9 +2818,9 @@ extension ParserUnitTests {
     
     func testParseRename() {
         let inputs: [(String, String, NIOIMAP.Command, UInt)] = [
-            ("RENAME box1 box2", "\r", .rename(from: "box1", to: "box2", params: []), #line),
-            ("rename box3 box4", "\r", .rename(from: "box3", to: "box4", params: []), #line),
-            ("RENAME box5 box6 (test)", "\r", .rename(from: "box5", to: "box6", params: [.name("test", value: nil)]), #line)
+            ("RENAME box1 box2", "\r", .rename(from: .init("box1"), to: .init("box2"), params: []), #line),
+            ("rename box3 box4", "\r", .rename(from: .init("box3"), to: .init("box4"), params: []), #line),
+            ("RENAME box5 box6 (test)", "\r", .rename(from: .init("box5"), to: .init("box6"), params: [.name("test", value: nil)]), #line)
         ]
         self.iterateTestInputs(inputs, testFunction: NIOIMAP.GrammarParser.parseRename)
     }

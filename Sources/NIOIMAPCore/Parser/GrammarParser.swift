@@ -1789,19 +1789,8 @@ extension NIOIMAP.GrammarParser {
 
     // mailbox         = "INBOX" / astring
     static func parseMailbox(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.MailboxName {
-        func parseInbox(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.MailboxName {
-            try ParserLibrary.parseFixedString("INBOX", caseSensitive: false, buffer: &buffer, tracker: tracker)
-            return .inbox
-        }
-        func parseOther(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.MailboxName {
-            let bufferedString = try self.parseAString(buffer: &buffer, tracker: tracker)
-            let string = String(decoding: bufferedString.readableBytesView, as: Unicode.UTF8.self)
-            return NIOIMAP.MailboxName(string)
-        }
-        return try ParserLibrary.parseOneOf([
-            parseInbox,
-            parseOther
-        ], buffer: &buffer, tracker: tracker)
+        let string = try self.parseAString(buffer: &buffer, tracker: tracker)
+        return NIOIMAP.MailboxName(string)
     }
 
     // mailbox-data    =  "FLAGS" SP flag-list / "LIST" SP mailbox-list /

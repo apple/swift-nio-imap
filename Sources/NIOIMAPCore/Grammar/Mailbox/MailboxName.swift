@@ -20,19 +20,37 @@ extension NIOIMAP {
     /// IMAPv4 `mailbox`
     public struct MailboxName: Equatable {
         
-        public var name: String
+        public static var inbox = Self("INBOX")
         
-        public static let inbox = Self("inbox")
+        /// The raw bytes, readable as `[UInt8]`
+        public var storage: ByteBuffer
         
-        public static func other(_ name: String) -> Self {
-            return Self(name)
+        /// The raw bytes decoded into a UTF8 `String`
+        public var stringValue: String {
+            return String(buffer: self.storage)
         }
-
-        public init(_ name: String) {
-            if name.lowercased() == "inbox" {
-                self.name = "INBOX"
+        
+        /// `true` if the internal storage reads "INBOX"
+        /// otherwise `false`
+        public var isInbox: Bool {
+            return self.stringValue == "INBOX"
+        }
+        
+        /// Creates a new `MailboxName`. Note if the given string is some variation of "inbox" then we will uppercase it.
+        /// - parameter string: The mailbox name
+        public init(_ string: String) {
+            if string.uppercased() == "INBOX" {
+                self.storage = ByteBuffer(ByteBufferView("INBOX".utf8))
             } else {
-                self.name = name
+                self.storage = ByteBuffer(ByteBufferView(string.utf8))
+            }
+        }
+        
+        public init(_ bytes: ByteBuffer) {
+            if String(buffer: bytes).uppercased() == "INBOX" {
+                self.storage = ByteBuffer(ByteBufferView("INBOX".utf8))
+            } else {
+                self.storage = bytes
             }
         }
         
@@ -40,13 +58,11 @@ extension NIOIMAP {
     
 }
 
-// MARK: - ExpressibleByStringLiteral
-extension NIOIMAP.MailboxName: ExpressibleByStringLiteral {
+// MARK: - CustomStringConvertible
+extension NIOIMAP.MailboxName: CustomStringConvertible {
     
-    public typealias StringLiteralType = String
-    
-    public init(stringLiteral value: String) {
-        self.init(value)
+    public var description: String {
+        return self.stringValue
     }
     
 }
@@ -55,8 +71,7 @@ extension NIOIMAP.MailboxName: ExpressibleByStringLiteral {
 extension ByteBuffer {
     
     @discardableResult mutating func writeMailbox(_ mailbox: NIOIMAP.MailboxName) -> Int {
-        let buffer = ByteBuffer(ByteBufferView(mailbox.name.utf8))
-        return self.writeIMAPString(buffer)
+        return self.writeIMAPString(mailbox.storage)
     }
     
 }
