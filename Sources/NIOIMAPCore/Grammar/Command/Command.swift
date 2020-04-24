@@ -68,7 +68,7 @@ extension ByteBuffer {
             return self.writeCommandType_logout()
         case .noop:
             return self.writeCommandType_noop()
-        case let .append(to, firstMessageMetadata):
+        case .append(let to, let firstMessageMetadata):
             return self.writeCommandType_append(to: to, firstMessageMetadata: firstMessageMetadata)
         case .create(let mailbox, let params):
             return self.writeCommandType_create(mailbox: mailbox, parameters: params)
@@ -150,7 +150,7 @@ extension ByteBuffer {
     private mutating func writeCommandType_noop() -> Int {
         self.writeString("NOOP")
     }
-  
+
     private mutating func writeCommandType_append(to: NIOIMAP.Mailbox, firstMessageMetadata: NIOIMAP.AppendMessage) -> Int {
         self.writeString("APPEND ") +
             self.writeMailbox(to) +
