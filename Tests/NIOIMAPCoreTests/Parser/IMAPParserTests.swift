@@ -101,7 +101,7 @@ extension ParserUnitTests {
             (.taggedResponse(.tag("2", state: .ok(.code(nil, text: "Login completed.")))), #line),
 
             (.fetchResponse(.start(1)), #line),
-            (.fetchResponse(.streamingBegin(type: .body(partial: 4), size: 3)), #line),
+            (.fetchResponse(.streamingBegin(type: .body(partial: 4), byteCount: 3)), #line),
             (.fetchResponse(.streamingBytes("abc")), #line),
             (.fetchResponse(.streamingEnd), #line),
             (.fetchResponse(.simpleAttribute(.dynamic([.seen, .answered]))), #line),
@@ -109,20 +109,20 @@ extension ParserUnitTests {
 
             (.fetchResponse(.start(2)), #line),
             (.fetchResponse(.simpleAttribute(.dynamic([.deleted]))), #line),
-            (.fetchResponse(.streamingBegin(type: .body(partial: nil), size: 3)), #line),
+            (.fetchResponse(.streamingBegin(type: .body(partial: nil), byteCount: 3)), #line),
             (.fetchResponse(.streamingBytes("def")), #line),
             (.fetchResponse(.streamingEnd), #line),
             (.fetchResponse(.finish), #line),
 
             (.fetchResponse(.start(3)), #line),
-            (.fetchResponse(.streamingBegin(type: .body(partial: nil), size: 3)), #line),
+            (.fetchResponse(.streamingBegin(type: .body(partial: nil), byteCount: 3)), #line),
             (.fetchResponse(.streamingBytes("ghi")), #line),
             (.fetchResponse(.streamingEnd), #line),
             (.fetchResponse(.finish), #line),
             (.taggedResponse(.tag("3", state: .ok(.code(nil, text: "Fetch completed.")))), #line),
 
             (.fetchResponse(.start(1)), #line),
-            (.fetchResponse(.streamingBegin(type: .binary(section: []), size: 4)), #line),
+            (.fetchResponse(.streamingBegin(type: .binary(section: []), byteCount: 4)), #line),
             (.fetchResponse(.streamingBytes("1234")), #line),
             (.fetchResponse(.streamingEnd), #line),
             (.fetchResponse(.finish), #line),
