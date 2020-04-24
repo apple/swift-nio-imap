@@ -13,25 +13,23 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
-import NIOSSL
 import NIOIMAP
+import NIOSSL
 
 class OutboundPrintHandler: ChannelOutboundHandler {
-    
     typealias OutboundIn = ByteBuffer
     typealias OutboundOut = ByteBuffer
-    
+
     let type: String
-    
+
     init(type: String) {
         self.type = type
     }
-    
+
     func write(context: ChannelHandlerContext, data: NIOAny, promise: EventLoopPromise<Void>?) {
         var buffer = self.unwrapOutboundIn(data)
         let string = buffer.readString(length: buffer.readableBytes)!
-        print("\(type):\n\(string)")
+        print("\(self.type):\n\(string)")
         context.write(data, promise: promise)
     }
-    
 }

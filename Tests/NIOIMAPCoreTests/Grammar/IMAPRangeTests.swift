@@ -12,46 +12,42 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
 @testable import NIOIMAPCore
+import XCTest
 
-class IMAPRangeTests: EncodeTestClass {
-    
-}
+class IMAPRangeTests: EncodeTestClass {}
 
 // MARK: - IMAP
+
 extension IMAPRangeTests {
-    
     func testImapEncoded_from() {
-        let expected = "5:*" 
+        let expected = "5:*"
         let size = self.testBuffer.writeSequenceRange(NIOIMAP.SequenceRange(5 ... .last))
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }
-    
+
     func testImapEncoded_range() {
-        let expected = "2:4" 
+        let expected = "2:4"
         let size = self.testBuffer.writeSequenceRange(NIOIMAP.SequenceRange(2 ... 4))
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }
-    
 }
 
 // MARK: - Range operators
+
 extension IMAPRangeTests {
-    
     func testRange_from() {
         let expected = NIOIMAP.SequenceRange(7 ... .last)
         let actual: NIOIMAP.SequenceRange = 7...
         XCTAssertEqual(expected, actual)
     }
-    
+
     func testRange_closed() {
         let expected = NIOIMAP.SequenceRange(3 ... 4)
-        let actual: NIOIMAP.SequenceRange = 3...4
+        let actual: NIOIMAP.SequenceRange = 3 ... 4
         XCTAssertEqual(expected, actual)
     }
-    
 }

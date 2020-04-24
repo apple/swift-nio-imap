@@ -15,7 +15,6 @@
 import struct NIO.ByteBuffer
 
 extension NIOIMAP {
-
     /// IMAPv4 `resp-text-code`
     public enum ResponseTextCode: Equatable {
         case alert
@@ -32,12 +31,11 @@ extension NIOIMAP {
         case namespace(NamespaceResponse)
         case other(String, String?)
     }
-
 }
 
 // MARK: - Encoding
-extension ByteBuffer {
 
+extension ByteBuffer {
     @discardableResult mutating func writeResponseTextCode(_ code: NIOIMAP.ResponseTextCode) -> Int {
         switch code {
         case .alert:
@@ -73,19 +71,18 @@ extension ByteBuffer {
 
     private mutating func writeResponseTextCode_badCharsets(_ charsets: [String]) -> Int {
         self.writeString("BADCHARSET") +
-        self.writeIfArrayHasMinimumSize(array: charsets) { (charsets, self) -> Int in
-            self.writeSpace() +
-            self.writeArray(charsets) { (charset, self) in
-                self.writeString(charset)
+            self.writeIfArrayHasMinimumSize(array: charsets) { (charsets, self) -> Int in
+                self.writeSpace() +
+                    self.writeArray(charsets) { (charset, self) in
+                        self.writeString(charset)
+                    }
             }
-        }
-    }
-    
-    private mutating func writeResponseTextCode_other(atom: String, string: String?) -> Int {
-        self.writeString(atom) +
-        self.writeIfExists(string) { (string) -> Int in
-            self.writeString(" \(string)")
-        }
     }
 
+    private mutating func writeResponseTextCode_other(atom: String, string: String?) -> Int {
+        self.writeString(atom) +
+            self.writeIfExists(string) { (string) -> Int in
+                self.writeString(" \(string)")
+            }
+    }
 }

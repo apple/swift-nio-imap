@@ -15,12 +15,11 @@
 import struct NIO.ByteBuffer
 
 // MARK: - Encoding
-extension ByteBuffer {
 
+extension ByteBuffer {
     @discardableResult mutating func writeSequenceSet(_ set: [NIOIMAP.SequenceRange]) -> Int {
         self.writeArray(set, separator: ",", parenthesis: false) { (element, self) in
-             self.writeSequenceRange(element)
+            self.writeSequenceRange(element)
         }
     }
-
 }

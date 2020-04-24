@@ -16,21 +16,19 @@ import NIO
 import NIOIMAPCore
 
 extension NIOIMAP {
-    
     public struct IMAPDecoderError: Error {
         public var parserError: Error
         public var buffer: ByteBuffer
     }
-    
+
     public struct CommandDecoder: ByteToMessageDecoder {
-        
         public typealias InboundOut = NIOIMAP.CommandStream
 
         private var ok: ByteBuffer?
         private var parser: CommandParser
         private var synchronisingLiteralParser = SynchronizingLiteralParser()
         private let autoSendContinuations: Bool
-        
+
         public init(bufferLimit: Int = 1_000, autoSendContinuations: Bool = true) {
             self.parser = CommandParser(bufferLimit: bufferLimit)
             self.autoSendContinuations = autoSendContinuations
@@ -41,7 +39,7 @@ extension NIOIMAP {
             do {
                 let framingResult = try self.synchronisingLiteralParser.parseContinuationsNecessary(buffer)
                 if self.autoSendContinuations {
-                    for _ in 0..<framingResult.synchronizingLiteralCount {
+                    for _ in 0 ..< framingResult.synchronizingLiteralCount {
                         if self.ok == nil {
                             self.ok = context.channel.allocator.buffer(capacity: 2)
                             self.ok!.writeString("OK")
@@ -62,7 +60,7 @@ extension NIOIMAP {
                     self.synchronisingLiteralParser.consumed(consumedBytes)
                     assert(consumedBytes <= framingResult.maximumValidBytes,
                            "We consumed \(consumedBytes) which is more than the framing parser thought are maximally " +
-                            "valid: \(framingResult), \(self.synchronisingLiteralParser)")
+                               "valid: \(framingResult), \(self.synchronisingLiteralParser)")
                     return .continue
                 } else {
                     return .needMoreData
@@ -77,5 +75,4 @@ extension NIOIMAP {
             return .needMoreData
         }
     }
-    
 }

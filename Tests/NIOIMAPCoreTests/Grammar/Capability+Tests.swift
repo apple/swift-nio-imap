@@ -12,28 +12,25 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
 @testable import NIOIMAPCore
+import XCTest
 
-class Capability_Tests: EncodeTestClass {
-
-}
+class Capability_Tests: EncodeTestClass {}
 
 // MARK: - Equatable
+
 extension Capability_Tests {
-    
     func testEquatable() {
         let capability1 = NIOIMAP.Capability("idle")
         let capability2 = NIOIMAP.Capability("IDLE")
         XCTAssertEqual(capability1, capability2)
     }
-    
 }
 
 // MARK: - Encoding
+
 extension Capability_Tests {
-    
     func testEncode() {
         let tests: [(NIOIMAP.Capability, String, UInt)] = [
             (.acl, "ACL", #line),
@@ -95,7 +92,7 @@ extension Capability_Tests {
         let tests: [([NIOIMAP.Capability], String, UInt)] = [
             ([], "CAPABILITY IMAP4 IMAP4rev1", #line),
             ([.condStore], "CAPABILITY IMAP4 IMAP4rev1 CONDSTORE", #line),
-            ([.condStore, .enable, .filters], "CAPABILITY IMAP4 IMAP4rev1 CONDSTORE ENABLE FILTERS", #line)
+            ([.condStore, .enable, .filters], "CAPABILITY IMAP4 IMAP4rev1 CONDSTORE ENABLE FILTERS", #line),
         ]
 
         for (data, expectedString, line) in tests {
@@ -105,5 +102,4 @@ extension Capability_Tests {
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }
     }
-
 }

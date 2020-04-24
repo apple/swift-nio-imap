@@ -16,15 +16,13 @@ import NIO
 import XCTest
 
 class EncodeTestClass: XCTestCase {
-
     var testBuffer = ByteBufferAllocator().buffer(capacity: 1)
 
     var testBufferString: String {
-        return String(decoding: self.testBuffer.readableBytesView, as: Unicode.UTF8.self)
+        String(decoding: self.testBuffer.readableBytesView, as: Unicode.UTF8.self)
     }
 
     override func setUp() {
-        testBuffer = ByteBufferAllocator().buffer(capacity: 1)
+        self.testBuffer = ByteBufferAllocator().buffer(capacity: 1)
     }
-
 }

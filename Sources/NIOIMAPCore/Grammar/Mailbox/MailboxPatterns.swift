@@ -15,18 +15,16 @@
 import struct NIO.ByteBuffer
 
 extension NIOIMAP {
-
     /// IMAPv4 `mbox-or-pat`
     public enum MailboxPatterns: Equatable {
         case mailbox(ByteBuffer)
         case pattern([ByteBuffer])
     }
-
 }
 
 // MARK: - Encoding
-extension ByteBuffer {
 
+extension ByteBuffer {
     @discardableResult mutating func writeMailboxPatterns(_ patterns: NIOIMAP.MailboxPatterns) -> Int {
         switch patterns {
         case .mailbox(let list):
@@ -35,5 +33,4 @@ extension ByteBuffer {
             return self.writePatterns(patterns)
         }
     }
-
 }

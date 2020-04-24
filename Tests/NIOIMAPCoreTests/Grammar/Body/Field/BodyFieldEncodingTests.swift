@@ -12,17 +12,15 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
 @testable import NIOIMAPCore
+import XCTest
 
-class BodyFieldEncodingTests: EncodeTestClass {
-
-}
+class BodyFieldEncodingTests: EncodeTestClass {}
 
 // MARK: - Encoding
-extension BodyFieldEncodingTests {
 
+extension BodyFieldEncodingTests {
     func testEncode() {
         let inputs: [(NIOIMAP.Body.FieldEncoding, String, UInt)] = [
             (.bit7, #""7BIT""#, #line),

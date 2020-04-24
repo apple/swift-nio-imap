@@ -12,17 +12,15 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
 @testable import NIOIMAPCore
+import XCTest
 
 class ConditionalStore_Tests: EncodeTestClass {
-
     func testConditionalStoreParameter_encode() {
         let expected = "CONDSTORE"
         let size = self.testBuffer.writeConditionalStoreParameter()
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(self.testBufferString, expected)
     }
-    
 }

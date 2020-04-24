@@ -15,7 +15,6 @@
 import struct NIO.ByteBuffer
 
 extension NIOIMAP.Body {
-
     /// IMAPv4 `body-type-mpart`
     public struct TypeMultipart: Equatable {
         public var bodies: [NIOIMAP.Body]
@@ -24,25 +23,23 @@ extension NIOIMAP.Body {
 
         /// Convenience function for a better experience when chaining multiple types.
         public static func bodies(_ bodies: [NIOIMAP.Body], mediaSubtype: String, multipartExtension: ExtensionMultipart?) -> Self {
-            return Self(bodies: bodies, mediaSubtype: mediaSubtype, multipartExtension: multipartExtension)
+            Self(bodies: bodies, mediaSubtype: mediaSubtype, multipartExtension: multipartExtension)
         }
     }
-
 }
 
 // MARK: - Encoding
-extension ByteBuffer {
 
+extension ByteBuffer {
     @discardableResult mutating func writeBodyTypeMultipart(_ part: NIOIMAP.Body.TypeMultipart) -> Int {
         part.bodies.reduce(into: 0) { (result, body) in
             result += self.writeBody(body)
         } +
-        self.writeSpace() +
-        self.writeIMAPString(part.mediaSubtype) +
-        self.writeIfExists(part.multipartExtension) { (ext) -> Int in
             self.writeSpace() +
-            self.writeBodyExtensionMultipart(ext)
-        }
+            self.writeIMAPString(part.mediaSubtype) +
+            self.writeIfExists(part.multipartExtension) { (ext) -> Int in
+                self.writeSpace() +
+                    self.writeBodyExtensionMultipart(ext)
+            }
     }
-
 }

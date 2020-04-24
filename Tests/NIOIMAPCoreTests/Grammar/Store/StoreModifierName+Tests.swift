@@ -12,17 +12,15 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
 @testable import NIOIMAPCore
+import XCTest
 
-class StoreModifierName_Tests: EncodeTestClass {
-    
-}
+class StoreModifierName_Tests: EncodeTestClass {}
 
 // MARK: - Encoding
-extension StoreModifierName_Tests {
 
+extension StoreModifierName_Tests {
     func testEncode() {
         let inputs: [(String, String, UInt)] = [
             ("test", "test", #line),
@@ -35,5 +33,4 @@ extension StoreModifierName_Tests {
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }
     }
-
 }

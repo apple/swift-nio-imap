@@ -15,10 +15,9 @@
 import struct NIO.ByteBuffer
 
 // MARK: - Encoding
+
 extension ByteBuffer {
-    
     @discardableResult mutating func writeRenameParameterName(_ name: String) -> Int {
-        return self.writeTaggedExtensionLabel(name)
+        self.writeTaggedExtensionLabel(name)
     }
-    
 }

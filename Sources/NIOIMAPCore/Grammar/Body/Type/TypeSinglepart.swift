@@ -15,7 +15,6 @@
 import struct NIO.ByteBuffer
 
 extension NIOIMAP.Body {
-
     public indirect enum TypeSinglepartType: Equatable {
         case basic(TypeBasic)
         case message(TypeMessage)
@@ -29,15 +28,14 @@ extension NIOIMAP.Body {
 
         /// Convenience function for a better experience when chaining multiple types.
         public static func type(_ type: TypeSinglepartType, extension: ExtensionSinglepart?) -> Self {
-            return Self(type: type, extension: `extension`)
+            Self(type: type, extension: `extension`)
         }
     }
-
 }
 
 // MARK: - Encoding
-extension ByteBuffer {
 
+extension ByteBuffer {
     @discardableResult mutating func writeBodyTypeSinglepart(_ part: NIOIMAP.Body.TypeSinglepart) -> Int {
         var size = 0
         switch part.type {
@@ -55,5 +53,4 @@ extension ByteBuffer {
         }
         return size
     }
-
 }

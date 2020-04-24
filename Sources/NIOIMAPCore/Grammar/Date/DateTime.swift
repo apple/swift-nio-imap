@@ -15,29 +15,26 @@
 import struct NIO.ByteBuffer
 
 extension NIOIMAP.Date {
-    
     /// IMAPv4 `date-time`
     public struct DateTime: Equatable {
         public var date: NIOIMAP.Date
         public var time: Time
         public var zone: TimeZone
-        
+
         public static func date(_ date: NIOIMAP.Date, time: Time, zone: TimeZone) -> Self {
-            return Self(date: date, time: time, zone: zone)
+            Self(date: date, time: time, zone: zone)
         }
     }
-    
 }
 
 // MARK: - Encoding
+
 extension ByteBuffer {
-    
     @discardableResult mutating func writeDateTime(_ dateTime: NIOIMAP.Date.DateTime) -> Int {
         self.writeString("\"\(dateTime.date.day)-\(dateTime.date.month.rawValue)-\(dateTime.date.year) ") +
-        self.writeTime(dateTime.time) +
-        self.writeSpace() +
-        self.writeTimezone(dateTime.zone) +
-        self.writeString("\"")
+            self.writeTime(dateTime.time) +
+            self.writeSpace() +
+            self.writeTimezone(dateTime.zone) +
+            self.writeString("\"")
     }
-    
 }

@@ -12,23 +12,21 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
 @testable import NIOIMAPCore
+import XCTest
 
-class BodyFieldLanguageTests: EncodeTestClass {
-
-}
+class BodyFieldLanguageTests: EncodeTestClass {}
 
 // MARK: - Encoding
-extension BodyFieldLanguageTests {
 
+extension BodyFieldLanguageTests {
     func testEncode() {
         let inputs: [(NIOIMAP.Body.FieldLanguage, String, UInt)] = [
             (.single(nil), "NIL", #line),
             (.single("some"), "\"some\"", #line),
             (.multiple(["some1"]), "(\"some1\")", #line),
-            (.multiple(["some1", "some2", "some3"]), "(\"some1\" \"some2\" \"some3\")", #line)
+            (.multiple(["some1", "some2", "some3"]), "(\"some1\" \"some2\" \"some3\")", #line),
         ]
 
         for (test, expectedString, line) in inputs {

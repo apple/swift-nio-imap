@@ -12,17 +12,15 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
 @testable import NIOIMAPCore
+import XCTest
 
-class BodyTypeMultipartTests: EncodeTestClass {
-
-}
+class BodyTypeMultipartTests: EncodeTestClass {}
 
 // MARK: - Encoding
-extension BodyTypeMultipartTests {
 
+extension BodyTypeMultipartTests {
     func testEncode() {
         let inputs: [(NIOIMAP.Body.TypeMultipart, String, UInt)] = [
             (
@@ -46,7 +44,7 @@ extension BodyTypeMultipartTests {
                 ], mediaSubtype: "subtype", multipartExtension: nil),
                 "(\"TEXT\" \"subtype\" NIL NIL NIL \"BASE64\" 6 5)(\"TEXT\" \"subtype\" NIL NIL NIL \"BASE64\" 7 6) \"subtype\"",
                 #line
-            )
+            ),
         ]
 
         for (test, expectedString, line) in inputs {

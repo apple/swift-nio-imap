@@ -12,20 +12,18 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
 @testable import NIOIMAPCore
+import XCTest
 
-class BodyTypeBasicTests: EncodeTestClass {
-
-}
+class BodyTypeBasicTests: EncodeTestClass {}
 
 // MARK: - Encoding
-extension BodyTypeBasicTests {
 
+extension BodyTypeBasicTests {
     func testEncode() {
         let inputs: [(NIOIMAP.Body.TypeBasic, String, UInt)] = [
-            (.media(.type(.application, subtype: "subtype"), fields: .parameter([], id: nil, description: nil, encoding: .base64, octets: 123)), "\"APPLICATION\" \"subtype\" NIL NIL NIL \"BASE64\" 123", #line)
+            (.media(.type(.application, subtype: "subtype"), fields: .parameter([], id: nil, description: nil, encoding: .base64, octets: 123)), "\"APPLICATION\" \"subtype\" NIL NIL NIL \"BASE64\" 123", #line),
         ]
 
         for (test, expectedString, line) in inputs {

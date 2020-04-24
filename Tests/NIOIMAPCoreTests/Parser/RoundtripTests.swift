@@ -13,18 +13,16 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
-import NIOTestUtils
 @testable import NIOIMAPCore
+import NIOTestUtils
 
 import XCTest
 
-final class RoundtripTests: XCTestCase {
-
-}
+final class RoundtripTests: XCTestCase {}
 
 // MARK: - Client command
-extension RoundtripTests {
 
+extension RoundtripTests {
     func testClientRountrip() {
         self.measure {
             runClientTests()
@@ -32,11 +30,9 @@ extension RoundtripTests {
     }
 
     private func runClientTests() {
-
         // 1 AUTHENTICATE type\r\n1111\r\n2222\r\n
 
         let tests: [NIOIMAP.Command] = [
-
             // any
 //            .noop,
 //            .capability,
@@ -122,20 +118,16 @@ extension RoundtripTests {
             buffer.clear()
         }
     }
-
 }
 
 // MARK: - Server response
-extension RoundtripTests {
 
+extension RoundtripTests {
     func testServerRountrip() {
         self.measure {
             runServerTests()
         }
     }
 
-    private func runServerTests() {
-
-    }
-
+    private func runServerTests() {}
 }

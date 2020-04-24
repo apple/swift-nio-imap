@@ -12,21 +12,19 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
 @testable import NIOIMAPCore
+import XCTest
 
-class MessageDataTests: EncodeTestClass {
-
-}
+class MessageDataTests: EncodeTestClass {}
 
 // MARK: - Encoding
-extension MessageDataTests {
 
+extension MessageDataTests {
     func testEncode() {
         let inputs: [(NIOIMAP.MessageData, String, UInt)] = [
             (.expunge(123), "123 EXPUNGE", #line),
-            (.fetch(456), "456 FETCH (", #line)
+            (.fetch(456), "456 FETCH (", #line),
         ]
 
         for (test, expectedString, line) in inputs {

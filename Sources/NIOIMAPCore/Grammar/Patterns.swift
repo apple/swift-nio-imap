@@ -14,17 +14,14 @@
 
 import struct NIO.ByteBuffer
 
-extension NIOIMAP {
-
-}
+extension NIOIMAP {}
 
 // MARK: - Encoding
-extension ByteBuffer {
 
+extension ByteBuffer {
     @discardableResult mutating func writePatterns(_ patterns: [ByteBuffer]) -> Int {
         self.writeArray(patterns) { (pattern, self) in
             self.writeIMAPString(pattern)
         }
     }
-
 }

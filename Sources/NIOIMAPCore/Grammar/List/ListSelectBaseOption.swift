@@ -15,18 +15,16 @@
 import struct NIO.ByteBuffer
 
 extension NIOIMAP {
-
     /// IMAPv4 `list-select-base-opt`
     public enum ListSelectBaseOption: Equatable {
         case subscribed
         case option(OptionExtension)
     }
-
 }
 
 // MARK: - Encoding
-extension ByteBuffer {
 
+extension ByteBuffer {
     @discardableResult mutating func writeListSelectBaseOption(_ option: NIOIMAP.ListSelectBaseOption) -> Int {
         switch option {
         case .subscribed:
@@ -38,8 +36,7 @@ extension ByteBuffer {
 
     @discardableResult mutating func writeListSelectBaseOptionQuoted(_ option: NIOIMAP.ListSelectBaseOption) -> Int {
         self.writeString("\"") +
-        self.writeListSelectBaseOption(option) +
-        self.writeString("\"")
+            self.writeListSelectBaseOption(option) +
+            self.writeString("\"")
     }
-
 }

@@ -12,17 +12,15 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
 @testable import NIOIMAPCore
+import XCTest
 
-class NamespaceCommand_Tests: EncodeTestClass {
-
-}
+class NamespaceCommand_Tests: EncodeTestClass {}
 
 // MARK: - Encoding
-extension NamespaceCommand_Tests {
 
+extension NamespaceCommand_Tests {
     func testEncode() {
         let inputs: [(String, UInt)] = [
             ("NAMESPACE", #line),
@@ -35,5 +33,4 @@ extension NamespaceCommand_Tests {
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }
     }
-
 }

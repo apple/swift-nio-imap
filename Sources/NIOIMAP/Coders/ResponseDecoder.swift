@@ -16,9 +16,7 @@ import NIO
 import NIOIMAPCore
 
 extension NIOIMAP {
-    
     public struct ResponseDecoder: ByteToMessageDecoder {
-
         public typealias InboundOut = Response
 
         var parser: ResponseParser
@@ -44,7 +42,5 @@ extension NIOIMAP {
             while try self.decode(context: context, buffer: &buffer) != .needMoreData {}
             return .needMoreData
         }
-        
     }
-    
 }

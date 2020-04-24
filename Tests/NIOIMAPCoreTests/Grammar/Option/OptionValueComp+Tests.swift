@@ -12,21 +12,19 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
 @testable import NIOIMAPCore
+import XCTest
 
-class OptionValueComp_Tests: EncodeTestClass {
-
-}
+class OptionValueComp_Tests: EncodeTestClass {}
 
 // MARK: - Encoding
-extension OptionValueComp_Tests {
 
+extension OptionValueComp_Tests {
     func testEncode() {
         let inputs: [(NIOIMAP.OptionValueComp, String, UInt)] = [
             (.string("test"), "\"test\"", #line),
-            ([.string("test1"), .string("test2")], "(\"test1\" \"test2\")", #line)
+            ([.string("test1"), .string("test2")], "(\"test1\" \"test2\")", #line),
         ]
 
         for (test, expectedString, line) in inputs {

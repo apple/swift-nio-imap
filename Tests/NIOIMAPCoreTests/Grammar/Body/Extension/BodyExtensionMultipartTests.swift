@@ -12,17 +12,15 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
 @testable import NIOIMAPCore
+import XCTest
 
-class BodyExtensionMultipartTests: EncodeTestClass {
-
-}
+class BodyExtensionMultipartTests: EncodeTestClass {}
 
 // MARK: - Encoding
-extension BodyExtensionMultipartTests {
 
+extension BodyExtensionMultipartTests {
     func testEncode() {
         let inputs: [(NIOIMAP.Body.ExtensionMultipart, String, UInt)] = [
             (.parameter([.field("f", value: "v")], dspLanguage: nil), "(\"f\" \"v\")", #line),
@@ -30,7 +28,7 @@ extension BodyExtensionMultipartTests {
                 .parameter([.field("f1", value: "v1")], dspLanguage: .fieldDSP(.string("string", parameter: [.field("f2", value: "v2")]), fieldLanguage: nil)),
                 "(\"f1\" \"v1\") (\"string\" (\"f2\" \"v2\"))",
                 #line
-            )
+            ),
         ]
 
         for (test, expectedString, line) in inputs {

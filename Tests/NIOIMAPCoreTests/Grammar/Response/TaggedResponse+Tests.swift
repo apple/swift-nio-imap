@@ -12,20 +12,18 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
 @testable import NIOIMAPCore
+import XCTest
 
-class TaggedResponse_Tests: EncodeTestClass {
-
-}
+class TaggedResponse_Tests: EncodeTestClass {}
 
 // MARK: - Encoding
-extension TaggedResponse_Tests {
 
+extension TaggedResponse_Tests {
     func testEncode() {
         let inputs: [(NIOIMAP.TaggedResponse, String, UInt)] = [
-            (NIOIMAP.TaggedResponse(tag: "tag", state: .bad(.code(.parse, text: "something"))), "tag BAD [PARSE] something\r\n", #line)
+            (NIOIMAP.TaggedResponse(tag: "tag", state: .bad(.code(.parse, text: "something"))), "tag BAD [PARSE] something\r\n", #line),
         ]
 
         for (test, expectedString, line) in inputs {

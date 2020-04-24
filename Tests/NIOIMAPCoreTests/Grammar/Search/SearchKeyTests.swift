@@ -12,17 +12,15 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
 @testable import NIOIMAPCore
+import XCTest
 
-class SearchKeyTests: EncodeTestClass {
-    
-}
+class SearchKeyTests: EncodeTestClass {}
 
 // MARK: - IMAP
+
 extension SearchKeyTests {
-    
     func testEncode() {
         let inputs: [(NIOIMAP.SearchKey, String, UInt)] = [
             (.all, "ALL", #line),
@@ -57,11 +55,11 @@ extension SearchKeyTests {
             (.or(.smaller(444), .larger(666)), "OR SMALLER 444 LARGER 666", #line),
             (.sent(.on(NIOIMAP.Date(day: 7, month: .dec, year: 2018))), "SENTON 7-dec-2018", #line),
             (.smaller(555), "SMALLER 555", #line),
-            (.uid([333...444]), "UID 333:444", #line),
+            (.uid([333 ... 444]), "UID 333:444", #line),
             (.sequenceSet([...222]), "222:*", #line),
             (.array([]), "()", #line),
             (.array([.smaller(444), .larger(333)]), "(SMALLER 444 LARGER 333)", #line),
-            (.filter("name"), "FILTER name", #line)
+            (.filter("name"), "FILTER name", #line),
         ]
 
         for (test, expectedString, line) in inputs {
@@ -71,5 +69,4 @@ extension SearchKeyTests {
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }
     }
-    
 }

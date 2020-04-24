@@ -15,29 +15,26 @@
 import struct NIO.ByteBuffer
 
 extension NIOIMAP {
- 
     /// IMAPv4 `seq-number`
     public enum SequenceNumber: Equatable {
         case last // i.e. last (according to IMAPv4)
         case number(Int)
     }
-    
 }
 
 // MARK: - Integer literal
+
 extension NIOIMAP.SequenceNumber: ExpressibleByIntegerLiteral {
-    
     public typealias IntegerLiteralType = Int
-    
+
     public init(integerLiteral value: Self.IntegerLiteralType) {
         self = .number(value)
     }
-    
 }
 
 // MARK: - Comparable
+
 extension NIOIMAP.SequenceNumber: Comparable {
-    
     // last is treated as the largest possible element
     // i..e if the greatest mail ID is 5, then last is 5
     public static func < (lhs: NIOIMAP.SequenceNumber, rhs: NIOIMAP.SequenceNumber) -> Bool {
@@ -52,12 +49,11 @@ extension NIOIMAP.SequenceNumber: Comparable {
             return num1 < num2
         }
     }
-    
 }
 
 // MARK: - Encoding
+
 extension ByteBuffer {
-    
     @discardableResult mutating func writeSequenceNumber(_ num: NIOIMAP.SequenceNumber) -> Int {
         switch num {
         case .last:
@@ -66,5 +62,4 @@ extension ByteBuffer {
             return self.writeString("\(num)")
         }
     }
-    
 }
