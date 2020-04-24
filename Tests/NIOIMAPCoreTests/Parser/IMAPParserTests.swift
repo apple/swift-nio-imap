@@ -100,7 +100,6 @@ extension ParserUnitTests {
             (.continuationRequest(.responseText(.code(nil, text: "OK"))), #line),
             (.taggedResponse(.tag("2", state: .ok(.code(nil, text: "Login completed.")))), #line),
 
-//            (.untaggedResponse(.messageData(.fetch(1))), #line),
             (.fetchResponse(.start(1)), #line),
             (.fetchResponse(.streamingBegin(type: .body(partial: 4), size: 3)), #line),
             (.fetchResponse(.streamingBytes("abc")), #line),
@@ -115,7 +114,6 @@ extension ParserUnitTests {
             (.fetchResponse(.streamingEnd), #line),
             (.fetchResponse(.finish), #line),
 
-//            (.untaggedResponse(.messageData(.fetch(3))), #line),
             (.fetchResponse(.start(3)), #line),
             (.fetchResponse(.streamingBegin(type: .body(partial: nil), size: 3)), #line),
             (.fetchResponse(.streamingBytes("ghi")), #line),
@@ -123,7 +121,6 @@ extension ParserUnitTests {
             (.fetchResponse(.finish), #line),
             (.taggedResponse(.tag("3", state: .ok(.code(nil, text: "Fetch completed.")))), #line),
 
-//            (.untaggedResponse(.messageData(.fetch(1))), #line),
             (.fetchResponse(.start(1)), #line),
             (.fetchResponse(.streamingBegin(type: .binary(section: []), size: 4)), #line),
             (.fetchResponse(.streamingBytes("1234")), #line),
