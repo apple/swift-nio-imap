@@ -661,13 +661,6 @@ extension ParserUnitTests {
         ]
         self.iterateTestInputs(inputs, testFunction: NIOIMAP.GrammarParser.parseCommandAny)
     }
-
-    func testParseCommandAny_valid_xcommand() {
-        TestUtilities.withBuffer("XHELLO", terminator: " ") { (buffer) in
-            let commandType = try NIOIMAP.GrammarParser.parseCommandAny(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(commandType, .xcommand("HELLO"))
-        }
-    }
 }
 
 // MARK: - CommandType parseCommandNonAuth
@@ -2981,31 +2974,6 @@ extension ParserUnitTests {
             ("token", " ", "token", #line),
         ]
         self.iterateTestInputs(inputs, testFunction: NIOIMAP.GrammarParser.parseVendorToken)
-    }
-}
-
-// MARK: - atom parseXCommand {
-
-extension ParserUnitTests {
-    func testXCommand() {
-        let inputs: [(String, String, String, UInt)] = [
-            ("xhello", " ", "hello", #line),
-        ]
-        self.iterateTestInputs(inputs, testFunction: NIOIMAP.GrammarParser.parseXCommand)
-    }
-
-    func testXCommand_invalid_incomplete() {
-        var buffer = TestUtilities.createTestByteBuffer(for: "xhello")
-        XCTAssertThrowsError(try NIOIMAP.GrammarParser.parseXCommand(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertEqual(e as? NIOIMAP.ParsingError, .incompleteMessage)
-        }
-    }
-
-    func testXCommand_invalid_noX() {
-        var buffer = TestUtilities.createTestByteBuffer(for: "hello ")
-        XCTAssertThrowsError(try NIOIMAP.GrammarParser.parseXCommand(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertTrue(e is ParserError)
-        }
     }
 }
 
