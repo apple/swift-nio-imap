@@ -71,7 +71,7 @@ extension ByteBuffer {
             return self.writeString("(")
         case .simpleAttribute(let att):
             return self.writeMessageAttributeType(att)
-        case let .streamingBegin(type, size):
+        case .streamingBegin(let type, let size):
             return self.writeStreamingType(type, size: size)
         case .streamingBytes(var bytes):
             return self.writeBuffer(&bytes)

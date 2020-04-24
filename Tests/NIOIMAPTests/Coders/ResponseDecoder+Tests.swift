@@ -44,7 +44,7 @@ extension ResponseDecoder_Tests {
                     .fetchResponse(.streamingBytes("X")),
                     .fetchResponse(.streamingEnd),
                     .fetchResponse(.finish),
-                    .taggedResponse(.tag("2", state: .ok(.code(nil, text: "Fetch completed."))))
+                    .taggedResponse(.tag("2", state: .ok(.code(nil, text: "Fetch completed.")))),
                 ]
             ),
         ]

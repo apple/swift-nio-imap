@@ -74,7 +74,6 @@ extension NIOIMAP.ResponseParser {
 
 extension NIOIMAP.ResponseParser {
     fileprivate mutating func parseResponse(buffer: inout ByteBuffer) throws -> NIOIMAP.Response {
-
         func parseResponse_fetch(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Response {
             let response = try NIOIMAP.GrammarParser.parseFetchResponse(buffer: &buffer, tracker: tracker)
             return .fetchResponse(response)
@@ -89,7 +88,7 @@ extension NIOIMAP.ResponseParser {
         do {
             let response = try ParserLibrary.parseOneOf([
                 parseResponse_fetch,
-                parseResponse_normal
+                parseResponse_normal,
             ], buffer: &buffer, tracker: .new)
             switch response {
             case .fetchResponse(.streamingEnd):

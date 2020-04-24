@@ -2090,7 +2090,7 @@ extension NIOIMAP.GrammarParser {
         }
 
         return try ParserLibrary.parseOneOf([
-            parseMessageData_expunge
+            parseMessageData_expunge,
         ], buffer: &buffer, tracker: tracker)
     }
 
@@ -2132,7 +2132,6 @@ extension NIOIMAP.GrammarParser {
     }
 
     static func parseFetchStreamingResponse(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.StreamingType {
-
         func parseFetchStreamingResponse_rfc822(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.StreamingType {
             try ParserLibrary.parseFixedString("RFC822.TEXT", buffer: &buffer, tracker: tracker)
             return .rfc822
@@ -2163,7 +2162,6 @@ extension NIOIMAP.GrammarParser {
     }
 
     static func parseFetchResponse(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.FetchResponse {
-
         func parseFetchResponse_start(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.FetchResponse {
             try ParserLibrary.parseFixedString("* ", buffer: &buffer, tracker: tracker)
             let number = try self.parseNZNumber(buffer: &buffer, tracker: tracker)
@@ -2192,7 +2190,7 @@ extension NIOIMAP.GrammarParser {
             parseFetchResponse_start,
             parseFetchResponse_streamingBegin,
             parseFetchResponse_simpleAttribute,
-            parseFetchResponse_finish
+            parseFetchResponse_finish,
         ], buffer: &buffer, tracker: tracker)
     }
 
@@ -2302,7 +2300,7 @@ extension NIOIMAP.GrammarParser {
             parseMessageAttributeStatic_bodySection,
             parseMessageAttributeStatic_uid,
             parseMessageAttributeStatic_binarySize,
-            parseMessageAttributeStatic_binary
+            parseMessageAttributeStatic_binary,
         ], buffer: &buffer, tracker: tracker)
     }
 

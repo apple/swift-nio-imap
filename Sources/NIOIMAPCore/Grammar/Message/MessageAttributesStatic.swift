@@ -26,13 +26,13 @@ extension NIOIMAP {
         case envelope(Envelope)
         case internalDate(Date.DateTime)
         case uid(Int)
-        
+
         case rfc822(RFC822Reduced?, NIOIMAP.NString)
         case rfc822Size(Int)
-        
+
         case body(Body, structure: Bool)
         case bodySection(SectionSpec?, Int?, NString)
-        
+
         case binaryString(section: [Int], string: NString)
         case binarySize(section: [Int], number: Int)
     }

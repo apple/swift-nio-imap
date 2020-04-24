@@ -1701,7 +1701,6 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     func testParseMessageData() {
         let inputs: [(String, String, NIOIMAP.MessageData, UInt)] = [
-        
         ]
         self.iterateTestInputs(inputs, testFunction: NIOIMAP.GrammarParser.parseMessageData)
     }
