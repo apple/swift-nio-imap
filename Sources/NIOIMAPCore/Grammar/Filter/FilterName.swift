@@ -14,11 +14,10 @@
 
 import struct NIO.ByteBuffer
 
-// Mark: - Encoding
+// MARK: - Encoding
+
 extension ByteBuffer {
-    
     @discardableResult mutating func writeFilterName(_ name: String) -> Int {
         self.writeString(name)
     }
-    
 }

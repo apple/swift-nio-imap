@@ -12,17 +12,15 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
 @testable import NIOIMAPCore
+import XCTest
 
-class PermanentFlagTests: EncodeTestClass {
-
-}
+class PermanentFlagTests: EncodeTestClass {}
 
 // MARK: - Encoding
-extension PermanentFlagTests {
 
+extension PermanentFlagTests {
     func testEncoding_wildcard() {
         let expected = #"\*"#
         let flag = NIOIMAP.PermanentFlag.wildcard
@@ -38,5 +36,4 @@ extension PermanentFlagTests {
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(self.testBufferString, expected)
     }
-
 }

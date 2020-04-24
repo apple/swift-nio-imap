@@ -12,21 +12,19 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
 @testable import NIOIMAPCore
+import XCTest
 
-class BodyFieldDSPTests: EncodeTestClass {
-
-}
+class BodyFieldDSPTests: EncodeTestClass {}
 
 // MARK: - Encoding
-extension BodyFieldDSPTests {
 
+extension BodyFieldDSPTests {
     func testEncode() {
         let inputs: [(NIOIMAP.Body.FieldDSPData?, String, UInt)] = [
             (nil, "NIL", #line),
-            (.string("some", parameter: [.field("f1", value: "v1")]), "(\"some\" (\"f1\" \"v1\"))", #line)
+            (.string("some", parameter: [.field("f1", value: "v1")]), "(\"some\" (\"f1\" \"v1\"))", #line),
         ]
 
         for (test, expectedString, line) in inputs {

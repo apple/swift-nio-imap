@@ -15,7 +15,6 @@
 import struct NIO.ByteBuffer
 
 extension NIOIMAP {
- 
     /// IMAPv4 `flag`
     public enum Flag: Equatable {
         case answered
@@ -26,18 +25,17 @@ extension NIOIMAP {
         case keyword(Keyword)
         case `extension`(String)
     }
-    
 }
 
 // MARK: - Encoding
+
 extension ByteBuffer {
-    
     @discardableResult mutating func writeFlags(_ flags: [NIOIMAP.Flag]) -> Int {
         self.writeArray(flags) { (flag, self) -> Int in
             self.writeFlag(flag)
         }
     }
-    
+
     @discardableResult mutating func writeFlag(_ flag: NIOIMAP.Flag) -> Int {
         switch flag {
         case .answered:
@@ -56,5 +54,4 @@ extension ByteBuffer {
             return self.writeString("\\\(x)")
         }
     }
-    
 }

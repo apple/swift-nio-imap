@@ -12,17 +12,15 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
 @testable import NIOIMAPCore
+import XCTest
 
-class SearchCorrelator_Tests: EncodeTestClass {
-
-}
+class SearchCorrelator_Tests: EncodeTestClass {}
 
 // MARK: - Encoding
-extension SearchCorrelator_Tests {
 
+extension SearchCorrelator_Tests {
     func testEncode() {
         let inputs: [(ByteBuffer, String, UInt)] = [
             ("some", " (TAG \"some\")", #line),
@@ -35,5 +33,4 @@ extension SearchCorrelator_Tests {
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }
     }
-
 }

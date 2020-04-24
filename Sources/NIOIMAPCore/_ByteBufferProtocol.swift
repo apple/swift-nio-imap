@@ -16,12 +16,9 @@ import Dispatch
 
 // proof that this works
 import NIO
-extension ByteBuffer: _ByteBufferAPITemplate {
-    
-}
-extension ByteBufferView: _ByteBufferViewAPITemplate {
-    
-}
+extension ByteBuffer: _ByteBufferAPITemplate {}
+
+extension ByteBufferView: _ByteBufferViewAPITemplate {}
 
 /// `ByteBuffer` stores contiguously allocated raw bytes. It is a random and sequential accessible sequence of zero or
 /// more bytes (octets).
@@ -107,7 +104,6 @@ extension ByteBufferView: _ByteBufferViewAPITemplate {
 /// All `ByteBuffer` methods that don't contain the word 'unsafe' will only allow you to access the 'readable bytes'.
 ///
 protocol _ByteBufferAPITemplate where Self: Hashable, Self: CustomStringConvertible {
-    
     /// The number of bytes writable until `ByteBuffer` will need to grow its underlying storage which will likely
     /// trigger a copy of the bytes.
     var writableBytes: Int { get }
@@ -255,7 +251,7 @@ protocol _ByteBufferAPITemplate where Self: Hashable, Self: CustomStringConverti
     mutating func clear(minimumCapacity: UInt32)
 
     /// Copy the collection of `bytes` into the `ByteBuffer` at `index`. Does not move the writer index.
-    mutating func setBytes<Bytes>(_ bytes: Bytes, at index: Int) -> Int where Bytes : Sequence, Bytes.Element == UInt8
+    mutating func setBytes<Bytes>(_ bytes: Bytes, at index: Int) -> Int where Bytes: Sequence, Bytes.Element == UInt8
 
     /// Copy `bytes` into the `ByteBuffer` at `index`. Does not move the writer index.
     mutating func setBytes(_ bytes: UnsafeRawBufferPointer, at index: Int) -> Int
@@ -493,7 +489,7 @@ protocol _ByteBufferAPITemplate where Self: Hashable, Self: CustomStringConverti
     /// - parameters:
     ///     - bytes: A `Collection` of `UInt8` to be written.
     /// - returns: The number of bytes written or `bytes.count`.
-    mutating func writeBytes<Bytes>(_ bytes: Bytes) -> Int where Bytes : Sequence, Bytes.Element == UInt8
+    mutating func writeBytes<Bytes>(_ bytes: Bytes) -> Int where Bytes: Sequence, Bytes.Element == UInt8
 
     /// Write `bytes` into this `ByteBuffer`. Moves the writer index forward by the number of bytes written.
     ///
@@ -531,7 +527,7 @@ protocol _ByteBufferAPITemplate where Self: Hashable, Self: CustomStringConverti
     ///     - endianness: The endianness of the integer in this `ByteBuffer` (defaults to big endian).
     ///     - as: the desired `FixedWidthInteger` type (optional parameter)
     /// - returns: An integer value deserialized from this `ByteBuffer` or `nil` if there aren't enough bytes readable.
-    mutating func readInteger<T>(endianness: Endianness, as: T.Type) -> T? where T : FixedWidthInteger
+    mutating func readInteger<T>(endianness: Endianness, as: T.Type) -> T? where T: FixedWidthInteger
 
     /// Get the integer at `index` from this `ByteBuffer`. Does not move the reader index.
     /// The selected bytes must be readable or else `nil` will be returned.
@@ -542,7 +538,7 @@ protocol _ByteBufferAPITemplate where Self: Hashable, Self: CustomStringConverti
     ///     - as: the desired `FixedWidthInteger` type (optional parameter)
     /// - returns: An integer value deserialized from this `ByteBuffer` or `nil` if the bytes of interest are not
     ///            readable.
-    func getInteger<T>(at index: Int, endianness: Endianness, as: T.Type) -> T? where T : FixedWidthInteger
+    func getInteger<T>(at index: Int, endianness: Endianness, as: T.Type) -> T? where T: FixedWidthInteger
 
     /// Write `integer` into this `ByteBuffer`, moving the writer index forward appropriately.
     ///
@@ -550,7 +546,7 @@ protocol _ByteBufferAPITemplate where Self: Hashable, Self: CustomStringConverti
     ///     - integer: The integer to serialize.
     ///     - endianness: The endianness to use, defaults to big endian.
     /// - returns: The number of bytes written.
-    mutating func writeInteger<T>(_ integer: T, endianness: Endianness, as: T.Type) -> Int where T : FixedWidthInteger
+    mutating func writeInteger<T>(_ integer: T, endianness: Endianness, as: T.Type) -> Int where T: FixedWidthInteger
 
     /// Write `integer` into this `ByteBuffer` starting at `index`. This does not alter the writer index.
     ///
@@ -559,8 +555,8 @@ protocol _ByteBufferAPITemplate where Self: Hashable, Self: CustomStringConverti
     ///     - index: The index of the first byte to write.
     ///     - endianness: The endianness to use, defaults to big endian.
     /// - returns: The number of bytes written.
-    mutating func setInteger<T>(_ integer: T, at index: Int, endianness: Endianness, as: T.Type) -> Int where T : FixedWidthInteger
-    
+    mutating func setInteger<T>(_ integer: T, at index: Int, endianness: Endianness, as: T.Type) -> Int where T: FixedWidthInteger
+
     /// A view into the readable bytes of the `ByteBuffer`.
     var readableBytesView: ByteBufferView { get }
 
@@ -583,7 +579,6 @@ protocol _ByteBufferAPITemplate where Self: Hashable, Self: CustomStringConverti
 /// A `ByteBufferView` is useful whenever a `Collection where Element == UInt8` representing a portion of a
 /// `ByteBuffer` is needed.
 protocol _ByteBufferViewAPITemplate where Self: RandomAccessCollection, Self: MutableCollection, Self: RangeReplaceableCollection {
-
     /// A type representing the sequence's elements.
     associatedtype Element = UInt8
 
@@ -737,5 +732,5 @@ protocol _ByteBufferViewAPITemplate where Self: RandomAccessCollection, Self: Mu
     ///   *m* is the length of `newElements`. If the call to this method simply
     ///   appends the contents of `newElements` to the collection, this method is
     ///   equivalent to `append(contentsOf:)`.
-    mutating func replaceSubrange<C>(_ subrange: Range<Index>, with newElements: C) where C : Collection, C.Element == NIO.ByteBufferView.Element
+    mutating func replaceSubrange<C>(_ subrange: Range<Index>, with newElements: C) where C: Collection, C.Element == NIO.ByteBufferView.Element
 }

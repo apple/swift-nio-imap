@@ -15,10 +15,9 @@
 import struct NIO.ByteBuffer
 
 // MARK: - Encoding
+
 extension ByteBuffer {
-    
     @discardableResult mutating func writeTagString(_ string: ByteBuffer) -> Int {
         self.writeIMAPString(string)
     }
-    
 }

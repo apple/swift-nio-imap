@@ -12,22 +12,20 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
 @testable import NIOIMAPCore
+import XCTest
 
-class OptionExtension_Tests: EncodeTestClass {
-
-}
+class OptionExtension_Tests: EncodeTestClass {}
 
 // MARK: - Encoding
-extension OptionExtension_Tests {
 
+extension OptionExtension_Tests {
     func testEncode() {
         let inputs: [(NIOIMAP.OptionExtension, String, UInt)] = [
             (.standard("test", value: .string("string")), "test (\"string\")", #line),
             (.vendor(.token("token", atom: "atom"), value: nil), "token-atom", #line),
-            (.vendor(.token("token", atom: "atom"), value: .string("value")), "token-atom (\"value\")", #line)
+            (.vendor(.token("token", atom: "atom"), value: .string("value")), "token-atom (\"value\")", #line),
         ]
 
         for (test, expectedString, line) in inputs {

@@ -12,21 +12,19 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
 @testable import NIOIMAPCore
+import XCTest
 
-class CommandType_Tests: EncodeTestClass {
-
-}
+class CommandType_Tests: EncodeTestClass {}
 
 // MARK: - Encoding
-extension CommandType_Tests {
 
+extension CommandType_Tests {
     func testEncode() {
         let inputs: [(NIOIMAP.Command, String, UInt)] = [
             (.list(nil, "", .mailbox(""), []), "LIST \"\" \"\" RETURN ()", #line),
-            (.namespace, "NAMESPACE", #line)
+            (.namespace, "NAMESPACE", #line),
         ]
 
         for (input, expectedString, line) in inputs {
@@ -36,5 +34,4 @@ extension CommandType_Tests {
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }
     }
-
 }

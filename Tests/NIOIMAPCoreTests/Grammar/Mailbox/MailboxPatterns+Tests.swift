@@ -12,21 +12,19 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
 @testable import NIOIMAPCore
+import XCTest
 
-class MailboxPatterns_Tests: EncodeTestClass {
-
-}
+class MailboxPatterns_Tests: EncodeTestClass {}
 
 // MARK: - Encoding
-extension MailboxPatterns_Tests {
 
+extension MailboxPatterns_Tests {
     func testEncode() {
         let inputs: [(NIOIMAP.MailboxPatterns, String, UInt)] = [
             (.mailbox("inbox"), "\"inbox\"", #line),
-            (.pattern(["pattern"]), "(\"pattern\")", #line)
+            (.pattern(["pattern"]), "(\"pattern\")", #line),
         ]
 
         for (test, expectedString, line) in inputs {

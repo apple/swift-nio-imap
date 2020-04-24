@@ -12,17 +12,15 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
 @testable import NIOIMAPCore
+import XCTest
 
-class TaggedExtensionComp_Tests: EncodeTestClass {
-
-}
+class TaggedExtensionComp_Tests: EncodeTestClass {}
 
 // MARK: - Encoding
-extension TaggedExtensionComp_Tests {
 
+extension TaggedExtensionComp_Tests {
     func testEncode() {
         let inputs: [([String], String, UInt)] = [
             (["hello"], "(\"hello\")", #line),

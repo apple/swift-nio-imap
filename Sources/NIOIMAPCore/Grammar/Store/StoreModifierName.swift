@@ -15,10 +15,9 @@
 import struct NIO.ByteBuffer
 
 // MARK: - Encoding
+
 extension ByteBuffer {
-    
     @discardableResult mutating func writeStoreModifierName(_ name: String) -> Int {
         self.writeTaggedExtensionLabel(name)
     }
-    
 }

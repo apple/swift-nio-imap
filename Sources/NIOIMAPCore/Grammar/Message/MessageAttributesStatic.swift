@@ -15,7 +15,6 @@
 import struct NIO.ByteBuffer
 
 extension NIOIMAP {
-
     /// Extracted from IMAPv4 `msg-att-static`
     public enum RFC822Reduced: String, Equatable {
         case header
@@ -36,12 +35,11 @@ extension NIOIMAP {
         case binaryLiteral(section: [Int], size: Int)
         case binarySize(section: [Int], number: Int)
     }
-
 }
 
 // MARK: - Encoding
-extension ByteBuffer {
 
+extension ByteBuffer {
     @discardableResult mutating func writeMessageAttributeStatic(_ att: NIOIMAP.MessageAttributesStatic) -> Int {
         switch att {
         case .envelope(let env):
@@ -78,51 +76,50 @@ extension ByteBuffer {
                 self.writeString(" \(number)")
         }
     }
-    
+
     @discardableResult mutating func writeMessageAttributeStatic_envelope(_ env: NIOIMAP.Envelope) -> Int {
         self.writeString("ENVELOPE ") +
-        self.writeEnvelope(env)
+            self.writeEnvelope(env)
     }
-    
+
     @discardableResult mutating func writeMessageAttributeStatic_internalDate(_ date: NIOIMAP.Date.DateTime) -> Int {
         self.writeString("INTERNALDATE ") +
-        self.writeDateTime(date)
+            self.writeDateTime(date)
     }
-    
+
     @discardableResult mutating func writeMessageAttributeStatic_rfc(_ type: NIOIMAP.RFC822Reduced?, string: NIOIMAP.NString) -> Int {
         self.writeString("RFC822") +
-        self.writeIfExists(type) { (type) -> Int in
-            self.writeString(".\(type.rawValue.uppercased())")
-        } +
-        self.writeSpace() +
-        self.writeNString(string)
+            self.writeIfExists(type) { (type) -> Int in
+                self.writeString(".\(type.rawValue.uppercased())")
+            } +
+            self.writeSpace() +
+            self.writeNString(string)
     }
-    
+
     @discardableResult mutating func writeMessageAttributeStatic_body(_ body: NIOIMAP.Body, structure: Bool) -> Int {
         self.writeString("BODY") +
-        self.writeIfTrue(structure) { () -> Int in
-             self.writeString("STRUCTURE")
-        } +
-        self.writeSpace() +
-        self.writeBody(body)
+            self.writeIfTrue(structure) { () -> Int in
+                self.writeString("STRUCTURE")
+            } +
+            self.writeSpace() +
+            self.writeBody(body)
     }
-    
+
     @discardableResult mutating func writeMessageAttributeStatic_bodySection(_ section: NIOIMAP.SectionSpec?, number: Int?, string: NIOIMAP.NString) -> Int {
         self.writeString("BODY") +
-        self.writeSection(section) +
-        self.writeIfExists(number) { (number) -> Int in
-            self.writeString("<\(number)>")
-        } +
-        self.writeSpace() +
-        self.writeNString(string)
+            self.writeSection(section) +
+            self.writeIfExists(number) { (number) -> Int in
+                self.writeString("<\(number)>")
+            } +
+            self.writeSpace() +
+            self.writeNString(string)
     }
 
     @discardableResult mutating func writeMessageAttributeStatic_bodySectionText(number: Int?, size: Int) -> Int {
         self.writeString("BODY[TEXT]") +
-        self.writeIfExists(number) { (number) -> Int in
-            self.writeString("<\(number)>")
-        } +
-        self.writeString(" {\(size)}\r\n")
+            self.writeIfExists(number) { (number) -> Int in
+                self.writeString("<\(number)>")
+            } +
+            self.writeString(" {\(size)}\r\n")
     }
-    
 }

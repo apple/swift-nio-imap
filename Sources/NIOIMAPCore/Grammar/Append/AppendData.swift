@@ -15,16 +15,17 @@
 import struct NIO.ByteBuffer
 
 extension NIOIMAP {
-
     public struct AppendData: Equatable {
         public init(byteCount: Int, needs8BitCleanTransport: Bool = false, synchronizing: Bool = true) {
             self.byteCount = byteCount
             self.synchronizing = synchronizing
             self.needs8BitCleanTransport = needs8BitCleanTransport
         }
-public static func byteCount(_ byteCount: Int, needs8BitCleanTransport: Bool = false, synchronizing: Bool = true) -> Self{
-   return Self(byteCount: byteCount, needs8BitCleanTransport: needs8BitCleanTransport, synchronizing: synchronizing)
-}
+
+        public static func byteCount(_ byteCount: Int, needs8BitCleanTransport: Bool = false, synchronizing: Bool = true) -> Self {
+            Self(byteCount: byteCount, needs8BitCleanTransport: needs8BitCleanTransport, synchronizing: synchronizing)
+        }
+
         public var byteCount: Int
 
         /// `true` is the client needs to wait for the server to send a _command continuation request_ before sending
@@ -43,8 +44,8 @@ public static func byteCount(_ byteCount: Int, needs8BitCleanTransport: Bool = f
 }
 
 // MARK: - Encoding
+
 extension ByteBuffer {
-    
     @discardableResult mutating func writeAppendData(_ data: NIOIMAP.AppendData) -> Int {
         self.writeString("\(data.needs8BitCleanTransport ? "~" : ""){\(data.byteCount)\(data.synchronizing ? "" : "+")}\r\n")
     }

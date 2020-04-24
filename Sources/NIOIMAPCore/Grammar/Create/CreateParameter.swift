@@ -15,39 +15,36 @@
 import struct NIO.ByteBuffer
 
 extension NIOIMAP {
-    
     public struct CreateParameter: Equatable {
         public var name: String
         public var value: TaggedExtensionValue?
-        
+
         public static func name(_ name: String, value: TaggedExtensionValue?) -> Self {
-            return Self(name: name, value: value)
+            Self(name: name, value: value)
         }
     }
-    
 }
 
 // MARK: - Encoding
+
 extension ByteBuffer {
-    
     @discardableResult mutating func writeCreateParameters(_ params: [NIOIMAP.CreateParameter]) -> Int {
         guard params.count > 0 else {
             return 0 // don't do anything
         }
-        
+
         return
             self.writeSpace() +
             self.writeArray(params) { (param, self) -> Int in
                 self.writeCreateParameter(param)
             }
     }
-    
+
     @discardableResult mutating func writeCreateParameter(_ param: NIOIMAP.CreateParameter) -> Int {
         self.writeCreateParameterName(param.name) +
-        self.writeIfExists(param.value) { (value) -> Int in
-            self.writeSpace() +
-            self.writeTaggedExtensionValue(value)
-        }
+            self.writeIfExists(param.value) { (value) -> Int in
+                self.writeSpace() +
+                    self.writeTaggedExtensionValue(value)
+            }
     }
-    
 }

@@ -12,17 +12,15 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
 @testable import NIOIMAPCore
+import XCTest
 
-class RenameParameterName_Tests: EncodeTestClass {
-
-}
+class RenameParameterName_Tests: EncodeTestClass {}
 
 // MARK: - Encoding
-extension RenameParameterName_Tests {
 
+extension RenameParameterName_Tests {
     func testEncode() {
         let inputs: [(String, String, UInt)] = [
             ("test", "test", #line),
@@ -35,5 +33,4 @@ extension RenameParameterName_Tests {
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }
     }
-
 }

@@ -12,25 +12,22 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
 @testable import NIOIMAPCore
+import XCTest
 
-class ResponseParser_Tests: XCTest {
-    
-}
+class ResponseParser_Tests: XCTest {}
 
 // MARK: - init
+
 extension ResponseParser_Tests {
-    
     func testInit_defaultBufferSize() {
         let parser = NIOIMAP.CommandParser()
         XCTAssertEqual(parser.bufferLimit, 1_000)
     }
-    
+
     func testInit_customBufferSize() {
         let parser = NIOIMAP.CommandParser(bufferLimit: 80_000)
         XCTAssertEqual(parser.bufferLimit, 80_000)
     }
-    
 }

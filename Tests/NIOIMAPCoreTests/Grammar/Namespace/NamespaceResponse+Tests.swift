@@ -12,17 +12,15 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
 @testable import NIOIMAPCore
+import XCTest
 
-class NamespaceResponse_Tests: EncodeTestClass {
-
-}
+class NamespaceResponse_Tests: EncodeTestClass {}
 
 // MARK: - Encoding
-extension NamespaceResponse_Tests {
 
+extension NamespaceResponse_Tests {
     func testEncode() {
         let inputs: [(NIOIMAP.NamespaceResponse, String, UInt)] = [
             (.userNamespace([], otherUserNamespace: [], sharedNamespace: []), "NAMESPACE NIL NIL NIL", #line),
@@ -35,5 +33,4 @@ extension NamespaceResponse_Tests {
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }
     }
-
 }

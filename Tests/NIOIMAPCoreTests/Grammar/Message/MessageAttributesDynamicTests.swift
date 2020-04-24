@@ -12,17 +12,15 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
 @testable import NIOIMAPCore
+import XCTest
 
-class MessageAttributesDynamicTests: EncodeTestClass {
-
-}
+class MessageAttributesDynamicTests: EncodeTestClass {}
 
 // MARK: - Encoding
-extension MessageAttributesDynamicTests {
 
+extension MessageAttributesDynamicTests {
     func testEncode() {
         let inputs: [([NIOIMAP.Flag], String, UInt)] = [
             ([.draft], "FLAGS (\\Draft)", #line),

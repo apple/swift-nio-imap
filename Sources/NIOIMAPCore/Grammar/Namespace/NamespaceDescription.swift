@@ -15,7 +15,6 @@
 import struct NIO.ByteBuffer
 
 extension NIOIMAP {
-
     /// IMAPv4 `Namespace-Description`
     public struct NamespaceDescription: Equatable {
         public var string: ByteBuffer
@@ -23,15 +22,14 @@ extension NIOIMAP {
         public var responseExtensions: [NamespaceResponseExtension]
 
         public static func string(_ string: ByteBuffer, char: Character?, responseExtensions: [NamespaceResponseExtension]) -> Self {
-            return Self(string: string, char: char, responseExtensions: responseExtensions)
+            Self(string: string, char: char, responseExtensions: responseExtensions)
         }
     }
-
 }
 
 // MARK: - Encoding
-extension ByteBuffer {
 
+extension ByteBuffer {
     @discardableResult mutating func writeNamespaceDescription(_ description: NIOIMAP.NamespaceDescription) -> Int {
         var size = 0
         size += self.writeString("(")
@@ -48,5 +46,4 @@ extension ByteBuffer {
         size += self.writeString(")")
         return size
     }
-
 }

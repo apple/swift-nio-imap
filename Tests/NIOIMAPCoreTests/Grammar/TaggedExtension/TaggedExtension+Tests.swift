@@ -12,17 +12,15 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
 @testable import NIOIMAPCore
+import XCTest
 
-class TaggedExtension_Tests: EncodeTestClass {
-
-}
+class TaggedExtension_Tests: EncodeTestClass {}
 
 // MARK: - Encoding
-extension TaggedExtension_Tests {
 
+extension TaggedExtension_Tests {
     func testEncode() {
         let inputs: [(NIOIMAP.TaggedExtension, String, UInt)] = [
             (.label("label", value: .simple(.number(1))), "label 1", #line),

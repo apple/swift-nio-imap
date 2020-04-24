@@ -15,7 +15,6 @@
 import struct NIO.ByteBuffer
 
 extension NIOIMAP {
-
     /// IMAPv4 `esearch-response`
     public struct ESearchResponse: Equatable {
         public var correlator: ByteBuffer?
@@ -23,29 +22,27 @@ extension NIOIMAP {
         public var returnData: [SearchReturnData]
 
         public static func correlator(_ correlator: ByteBuffer?, uid: Bool, returnData: [SearchReturnData]) -> Self {
-            return Self(correlator: correlator, uid: uid, returnData: returnData)
+            Self(correlator: correlator, uid: uid, returnData: returnData)
         }
     }
-
 }
 
 // MARK: - Encoding
-extension ByteBuffer {
 
+extension ByteBuffer {
     @discardableResult mutating func writeESearchResponse(_ response: NIOIMAP.ESearchResponse) -> Int {
         self.writeString("ESEARCH") +
-        self.writeIfExists(response.correlator) { (correlator) -> Int in
-            self.writeSearchCorrelator(correlator)
-        } +
-        self.writeIfTrue(response.uid) {
-            self.writeString(" UID")
-        } +
-        self.writeIfTrue(response.returnData.count > 0) {
-            self.writeSpace()
-        } +
-        self.writeArray(response.returnData, parenthesis: false) { (data, self) in
-            self.writeSearchReturnData(data)
-        }
+            self.writeIfExists(response.correlator) { (correlator) -> Int in
+                self.writeSearchCorrelator(correlator)
+            } +
+            self.writeIfTrue(response.uid) {
+                self.writeString(" UID")
+            } +
+            self.writeIfTrue(response.returnData.count > 0) {
+                self.writeSpace()
+            } +
+            self.writeArray(response.returnData, parenthesis: false) { (data, self) in
+                self.writeSearchReturnData(data)
+            }
     }
-
 }

@@ -12,9 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-
 extension NIOIMAP {
-
     static let FetchModifierSequence = "MODSEQ"
-    
 }

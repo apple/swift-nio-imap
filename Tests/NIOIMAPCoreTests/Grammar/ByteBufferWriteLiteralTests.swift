@@ -12,19 +12,16 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
 @testable import NIOIMAPCore
+import XCTest
 
-class ByteBufferWriteLiteralTests: EncodeTestClass {
-
-}
+class ByteBufferWriteLiteralTests: EncodeTestClass {}
 
 // MARK: writeIMAPString
+
 extension ByteBufferWriteLiteralTests {
-    
     func testWriteIMAPString() {
-        
         let inputs: [(ByteBuffer, String, UInt)] = [
             ("", "\"\"", #line),
             ("abc", #""abc""#, #line),
@@ -32,7 +29,7 @@ extension ByteBufferWriteLiteralTests {
             (ByteBuffer(ByteBufferView(repeating: UInt8(ascii: "\\"), count: 1)), "{1}\r\n\\", #line),
             ("\\\"", "{2}\r\n\\\"", #line),
             ("a", "\"a\"", #line),
-            ("\0", "~{1}\r\n\0", #line)
+            ("\0", "~{1}\r\n\0", #line),
         ]
 
         for (test, expectedString, line) in inputs {
@@ -41,16 +38,13 @@ extension ByteBufferWriteLiteralTests {
             XCTAssertEqual(size, expectedString.utf8.count, line: line)
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }
-        
     }
-    
 }
 
 // MARK: writeLiteral
+
 extension ByteBufferWriteLiteralTests {
-    
     func testWriteLiteral() {
-        
         let inputs: [(ByteBuffer, String, UInt)] = [
             ("", "{0}\r\n", #line),
             ("abc", "{3}\r\nabc", #line),
@@ -62,19 +56,16 @@ extension ByteBufferWriteLiteralTests {
             XCTAssertEqual(size, expectedString.utf8.count, line: line)
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }
-        
     }
-    
 }
 
 // MARK: writeLiteral8
-extension ByteBufferWriteLiteralTests {
 
+extension ByteBufferWriteLiteralTests {
     func testWriteLiteral8() {
-        
         let inputs: [(ByteBuffer, String, UInt)] = [
             ("", "~{0}\r\n", #line),
-            ("abc", "~{3}\r\nabc", #line)
+            ("abc", "~{3}\r\nabc", #line),
         ]
 
         for (test, expectedString, line) in inputs {
@@ -83,7 +74,5 @@ extension ByteBufferWriteLiteralTests {
             XCTAssertEqual(size, expectedString.utf8.count, line: line)
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }
-        
     }
-
 }

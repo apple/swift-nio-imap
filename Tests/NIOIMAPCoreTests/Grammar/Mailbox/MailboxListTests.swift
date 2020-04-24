@@ -12,21 +12,19 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
 @testable import NIOIMAPCore
+import XCTest
 
-class MailboxListTests: EncodeTestClass {
-
-}
+class MailboxListTests: EncodeTestClass {}
 
 // MARK: - Encoding
-extension MailboxListTests {
 
+extension MailboxListTests {
     func testEncode() {
         let inputs: [(NIOIMAP.Mailbox.List, String, UInt)] = [
             (NIOIMAP.Mailbox.List(flags: nil, char: nil, mailbox: .inbox, listExtended: []), "() \"INBOX\"", #line),
-            (NIOIMAP.Mailbox.List(flags: nil, char: "a", mailbox: .inbox, listExtended: []), "() a \"INBOX\"", #line)
+            (NIOIMAP.Mailbox.List(flags: nil, char: "a", mailbox: .inbox, listExtended: []), "() a \"INBOX\"", #line),
         ]
 
         for (test, expectedString, line) in inputs {

@@ -12,15 +12,14 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
 @testable import NIOIMAPCore
+import XCTest
 
 class ModifierSequenceValue_Tests: EncodeTestClass {
-
     func testModifierSequenceValue_encode() {
         let inputs: [(NIOIMAP.ModifierSequenceValue, String)] = ClosedRange(uncheckedBounds: (0, 10000)).map { num in
-            return (.value(num), "\(num)")
+            (.value(num), "\(num)")
         }
 
         for (test, expectedString) in inputs {
@@ -29,5 +28,4 @@ class ModifierSequenceValue_Tests: EncodeTestClass {
             XCTAssertEqual(self.testBufferString, expectedString)
         }
     }
-    
 }

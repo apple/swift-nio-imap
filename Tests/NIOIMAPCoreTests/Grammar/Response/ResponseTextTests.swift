@@ -12,21 +12,19 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
 @testable import NIOIMAPCore
+import XCTest
 
-class ResponseTextTests: EncodeTestClass {
-    
-}
+class ResponseTextTests: EncodeTestClass {}
 
 // MARK: - Encoding
+
 extension ResponseTextTests {
-    
     func testEncode() {
         let inputs: [(NIOIMAP.ResponseText, String, UInt)] = [
             (.code(nil, text: "buffer"), "buffer", #line),
-            (.code(.alert, text: "buffer"), "[ALERT] buffer", #line)
+            (.code(.alert, text: "buffer"), "[ALERT] buffer", #line),
         ]
 
         for (code, expectedString, line) in inputs {

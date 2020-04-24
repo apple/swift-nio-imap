@@ -12,21 +12,19 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
 @testable import NIOIMAPCore
+import XCTest
 
-class ResponseConditionalAuthTests: EncodeTestClass {
-    
-}
+class ResponseConditionalAuthTests: EncodeTestClass {}
 
 // MARK: - Encoding
-extension ResponseConditionalAuthTests {
 
+extension ResponseConditionalAuthTests {
     func testEncode() {
         let inputs: [(NIOIMAP.ResponseConditionalAuth, String, UInt)] = [
             (NIOIMAP.ResponseConditionalAuth.ok(.code(nil, text: "hello")), "OK hello", #line),
-            (NIOIMAP.ResponseConditionalAuth.preauth(.code(nil, text: "goodbye")), "PREAUTH goodbye", #line)
+            (NIOIMAP.ResponseConditionalAuth.preauth(.code(nil, text: "goodbye")), "PREAUTH goodbye", #line),
         ]
 
         for (test, expectedString, line) in inputs {

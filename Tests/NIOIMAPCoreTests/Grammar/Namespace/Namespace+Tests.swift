@@ -12,17 +12,15 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
 @testable import NIOIMAPCore
+import XCTest
 
-class Namespace_Tests: EncodeTestClass {
-
-}
+class Namespace_Tests: EncodeTestClass {}
 
 // MARK: - Encoding
-extension Namespace_Tests {
 
+extension Namespace_Tests {
     func testEncode() {
         let inputs: [([NIOIMAP.NamespaceDescription], String, UInt)] = [
             ([], "NIL", #line),
@@ -30,10 +28,10 @@ extension Namespace_Tests {
             (
                 [
                     .string("str1", char: nil, responseExtensions: []),
-                    .string("str2", char: nil, responseExtensions: [])
-                ]
-                , "((\"str1\" NIL)(\"str2\" NIL))", #line
-            )
+                    .string("str2", char: nil, responseExtensions: []),
+                ],
+                "((\"str1\" NIL)(\"str2\" NIL))", #line
+            ),
         ]
 
         for (test, expectedString, line) in inputs {
@@ -43,5 +41,4 @@ extension Namespace_Tests {
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }
     }
-
 }

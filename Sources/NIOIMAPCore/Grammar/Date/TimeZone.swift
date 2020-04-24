@@ -15,24 +15,22 @@
 import struct NIO.ByteBuffer
 
 extension NIOIMAP.Date {
-    
     /// IMAPv4 `zone`
     public struct TimeZone: Equatable {
         fileprivate var backing: Int
-        
+
         public init?(_ val: Int) {
             self.backing = val
         }
     }
-    
 }
 
 // MARK: IMAP
+
 extension ByteBuffer {
-    
     @discardableResult mutating func writeTimezone(_ timezone: NIOIMAP.Date.TimeZone) -> Int {
         let string = String(abs(timezone.backing))
-        
+
         let zeroedString: String
         if string.count < 4 {
             var output = ""
@@ -43,9 +41,8 @@ extension ByteBuffer {
         } else {
             zeroedString = string
         }
-        
+
         let modifier = (timezone.backing >= 0) ? "+" : "-"
         return self.writeString("\(modifier)\(zeroedString)")
     }
-    
 }

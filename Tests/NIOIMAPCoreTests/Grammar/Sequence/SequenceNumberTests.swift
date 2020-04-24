@@ -12,51 +12,46 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
 @testable import NIOIMAPCore
+import XCTest
 
-class SequenceNumberTests: EncodeTestClass {
-
-}
+class SequenceNumberTests: EncodeTestClass {}
 
 // MARK: - Integer literal
+
 extension SequenceNumberTests {
-    
     func testIntegerLiteral() {
         let num: NIOIMAP.SequenceNumber = 5
         XCTAssertEqual(num, 5)
     }
-    
 }
 
 // MARK: - Comparable
-extension SequenceNumberTests {
 
+extension SequenceNumberTests {
     func testComparable() {
         XCTAssertFalse(NIOIMAP.SequenceNumber.last < .last)
         XCTAssertFalse(NIOIMAP.SequenceNumber.last < 999)
-        XCTAssertTrue(999 < NIOIMAP.SequenceNumber.last)
+        XCTAssertTrue(NIOIMAP.SequenceNumber.last > 999)
         XCTAssertTrue(NIOIMAP.SequenceNumber.number(1) < 999) // use .number to force type
     }
-    
 }
 
 // MARK: - Encoding
-extension SequenceNumberTests {
 
+extension SequenceNumberTests {
     func testEncode_wildcard() {
         let expected = "*"
         let size = self.testBuffer.writeSequenceNumber(.last)
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }
-    
+
     func testEncode_number() {
-        let expected = "1234" 
+        let expected = "1234"
         let size = self.testBuffer.writeSequenceNumber(1234)
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }
-    
 }

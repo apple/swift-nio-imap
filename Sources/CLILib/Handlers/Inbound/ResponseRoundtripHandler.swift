@@ -12,54 +12,50 @@
 //
 //===----------------------------------------------------------------------===//
 
-import NIO
-import NIOSSL
-import NIOIMAP
 import Logging
+import NIO
+import NIOIMAP
 import NIOIMAPCore
+import NIOSSL
 
 public class ResponseRoundtripHandler: ChannelInboundHandler {
-    
     public typealias InboundIn = ByteBuffer
     public typealias InboundOut = ByteBuffer
-    
+
     let logger: Logger
     private var parser = NIOIMAP.ResponseParser()
-    
+
     public init(logger: Logger) {
         self.logger = logger
     }
-    
+
     public func channelRead(context: ChannelHandlerContext, data: NIOAny) {
-        
         var originalBuffer = self.unwrapInboundIn(data)
         do {
             var originalBufferCopy = originalBuffer
             var responses = [NIOIMAP.Response]()
             while originalBufferCopy.readableBytes > 0 {
-                responses.append(try parser.parseResponseStream(buffer: &originalBufferCopy))
+                responses.append(try self.parser.parseResponseStream(buffer: &originalBufferCopy))
             }
-            
+
             var roundtripBuffer = context.channel.allocator.buffer(capacity: originalBuffer.readableBytes)
             for response in responses {
                 roundtripBuffer.writeResponse(response)
             }
-            
+
             let originalString = originalBuffer.readString(length: originalBuffer.readableBytes)!
             let roundtripString = roundtripBuffer.readString(length: roundtripBuffer.readableBytes)!
             if originalString != roundtripString {
-                logger.warning("Input response vs roundtrip output is different")
-                logger.warning("Response (original):\n\(originalString)")
-                logger.warning("Response (roundtrip):\n\(roundtripString)")
+                self.logger.warning("Input response vs roundtrip output is different")
+                self.logger.warning("Response (original):\n\(originalString)")
+                self.logger.warning("Response (roundtrip):\n\(roundtripString)")
             } else {
-                logger.info("\(originalString)")
+                self.logger.info("\(originalString)")
             }
-            
+
             context.fireChannelRead(self.wrapInboundOut(roundtripBuffer))
         } catch {
             context.fireErrorCaught(error)
         }
-        
     }
-
 }

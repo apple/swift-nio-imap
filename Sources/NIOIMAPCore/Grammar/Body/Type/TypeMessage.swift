@@ -15,7 +15,6 @@
 import struct NIO.ByteBuffer
 
 extension NIOIMAP.Body {
-
     /// IMAPv4 `body-type-message`
     public struct TypeMessage: Equatable {
         public var message: NIOIMAP.Media.Message
@@ -26,24 +25,22 @@ extension NIOIMAP.Body {
 
         /// Convenience function for a better experience when chaining multiple types.
         public static func message(_ message: NIOIMAP.Media.Message, fields: Fields, envelope: NIOIMAP.Envelope, body: NIOIMAP.Body, fieldLines: Int) -> Self {
-            return Self(message: message, fields: fields, envelope: envelope, body: body, fieldLines: fieldLines)
+            Self(message: message, fields: fields, envelope: envelope, body: body, fieldLines: fieldLines)
         }
     }
-
 }
 
 // MARK: - Encoding
-extension ByteBuffer {
 
+extension ByteBuffer {
     @discardableResult mutating func writeBodyTypeMessage(_ message: NIOIMAP.Body.TypeMessage) -> Int {
         self.writeMediaMessage(message.message) +
-        self.writeSpace() +
-        self.writeBodyFields(message.fields) +
-        self.writeSpace() +
-        self.writeEnvelope(message.envelope) +
-        self.writeSpace() +
-        self.writeBody(message.body) +
-        self.writeString(" \(message.fieldLines)")
+            self.writeSpace() +
+            self.writeBodyFields(message.fields) +
+            self.writeSpace() +
+            self.writeEnvelope(message.envelope) +
+            self.writeSpace() +
+            self.writeBody(message.body) +
+            self.writeString(" \(message.fieldLines)")
     }
-
 }

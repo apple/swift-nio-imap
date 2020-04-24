@@ -12,18 +12,14 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
 @testable import NIOIMAPCore
+import XCTest
 
-class AppendMessage_Tests: EncodeTestClass {
-
-}
+class AppendMessage_Tests: EncodeTestClass {}
 
 extension AppendMessage_Tests {
-    
     func testEncode() {
-        
         let inputs: [(NIOIMAP.AppendMessage, String, UInt)] = [
             (.options(.flagList([], dateTime: nil, extensions: []), data: .init(byteCount: 123)), " {123}\r\n", #line),
             (.options(.flagList([], dateTime: nil, extensions: []), data: .init(byteCount: 456)), " {456}\r\n", #line),
@@ -35,7 +31,5 @@ extension AppendMessage_Tests {
             XCTAssertEqual(size, expectedString.utf8.count, line: line)
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }
-        
     }
-    
 }

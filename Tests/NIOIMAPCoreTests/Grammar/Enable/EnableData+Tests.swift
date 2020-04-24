@@ -12,12 +12,11 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
 @testable import NIOIMAPCore
+import XCTest
 
 class EnableData_Tests: EncodeTestClass {
-
     func testEncoding() {
         let inputs: [([NIOIMAP.Capability], String, UInt)] = [
             ([], "ENABLED", #line),
@@ -33,5 +32,4 @@ class EnableData_Tests: EncodeTestClass {
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }
     }
-    
 }

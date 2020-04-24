@@ -12,17 +12,15 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
 @testable import NIOIMAPCore
+import XCTest
 
-class SectionText_Tests: EncodeTestClass {
-
-}
+class SectionText_Tests: EncodeTestClass {}
 
 // MARK: - Encoding
-extension SectionText_Tests {
 
+extension SectionText_Tests {
     func testEncode() {
         let inputs: [(NIOIMAP.SectionText, String, UInt)] = [
             (.mime, "MIME", #line),
@@ -36,5 +34,4 @@ extension SectionText_Tests {
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }
     }
-
 }
