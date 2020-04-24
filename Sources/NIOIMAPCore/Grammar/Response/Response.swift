@@ -24,6 +24,12 @@ extension NIOIMAP {
         case continuationRequest(ContinueRequest)
     }
 
+    /// The first event will always be `start`
+    /// The last event will always be `finish`
+    /// Every `start` has exactly one corresponding `finish`
+    /// After recieving `start` you may recieve n `simpleAttribute`, `streamingBegin`, and `streamingBytes` events.
+    /// Every `streamingBegin` has exaclty one corresponding `streamingEnd`
+    /// `streamingBegin` has a `type` that specifies the type of data to be streamed
     public enum FetchResponse: Equatable {
         case start(Int)
         case simpleAttribute(MessageAttributeType)
