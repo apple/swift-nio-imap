@@ -93,7 +93,7 @@ extension NIOIMAP.ResponseParser {
             switch response {
             case .fetchResponse(.streamingEnd):
                 try? ParserLibrary.parseSpace(buffer: &buffer, tracker: .new)
-            case .fetchResponse(.streamingBegin(type: _, size: let size)):
+            case .fetchResponse(.streamingBegin(type: _, byteCount: let size)):
                 self.moveStateMachine(expected: .response, next: .attributeBytes(size))
             default:
                 break

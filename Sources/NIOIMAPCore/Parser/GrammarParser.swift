@@ -2178,7 +2178,7 @@ extension NIOIMAP.GrammarParser {
             let type = try self.parseFetchStreamingResponse(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
             let literalSize = try self.parseLiteralSize(buffer: &buffer, tracker: tracker)
-            return .streamingBegin(type: type, size: literalSize)
+            return .streamingBegin(type: type, byteCount: literalSize)
         }
 
         func parseFetchResponse_finish(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.FetchResponse {
