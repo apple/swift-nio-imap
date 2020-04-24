@@ -15,24 +15,22 @@
 import struct NIO.ByteBuffer
 
 extension ByteBuffer {
-    
     @discardableResult mutating func writeIMAPString(_ str: String) -> Int {
         self.writeIMAPString(str.utf8)
     }
-    
+
     @discardableResult mutating func writeIMAPString(_ str: ByteBuffer) -> Int {
         self.writeIMAPString(str.readableBytesView)
     }
 
     fileprivate mutating func writeIMAPString<T: Collection>(_ bytes: T) -> Int where T.Element == UInt8 {
-        
         // allSatisfy vs contains because IMO it's a little clearer
         var foundNull = false
         let canUseQuoted = bytes.allSatisfy { c in
             foundNull = foundNull || (c == 0)
             return c.isQuotedChar && !foundNull
         }
-        
+
         if canUseQuoted {
             return self.writeString("\"") + self.writeBytes(bytes) + self.writeString("\"")
         } else if foundNull {
@@ -51,7 +49,7 @@ extension ByteBuffer {
         let length = "{\(bytes.count)}\r\n"
         return self.writeString(length) + self.writeBytes(bytes)
     }
-    
+
     @discardableResult mutating func writeLiteral8<T: Collection>(_ bytes: T) -> Int where T.Element == UInt8 {
         let length = "~{\(bytes.count)}\r\n"
         return
@@ -60,29 +58,29 @@ extension ByteBuffer {
     }
 
     @discardableResult mutating func writeNil() -> Int {
-        return self.writeString("NIL")
+        self.writeString("NIL")
     }
 
     @discardableResult mutating func writeSpace() -> Int {
-        return self.writeString(" ")
+        self.writeString(" ")
     }
 
     @discardableResult mutating func writeArray<T>(_ array: [T], separator: String = " ", parenthesis: Bool = true, callback: (T, inout ByteBuffer) -> Int) -> Int {
         self.writeIfTrue(parenthesis) { () -> Int in
-            return self.writeString("(")
+            self.writeString("(")
         } +
-        array.enumerated().reduce(0) { (size, row) in
-            let (i, element) = row
-            return
-                size +
-                callback(element, &self) +
-                self.writeIfTrue(i < array.count - 1) { () -> Int in
-                    self.writeString(separator)
-                }
-        } +
-        self.writeIfTrue(parenthesis) { () -> Int in
-            return self.writeString(")")
-        }
+            array.enumerated().reduce(0) { (size, row) in
+                let (i, element) = row
+                return
+                    size +
+                    callback(element, &self) +
+                    self.writeIfTrue(i < array.count - 1) { () -> Int in
+                        self.writeString(separator)
+                    }
+            } +
+            self.writeIfTrue(parenthesis) { () -> Int in
+                self.writeString(")")
+            }
     }
 
     @discardableResult func writeIfExists<T>(_ value: T?, callback: (inout T) -> Int) -> Int {
@@ -91,19 +89,18 @@ extension ByteBuffer {
         }
         return callback(&value)
     }
-    
+
     @discardableResult func writeIfTrue(_ value: Bool, callback: () -> Int) -> Int {
         guard value else {
             return 0
         }
         return callback()
     }
-    
+
     @discardableResult mutating func writeIfArrayHasMinimumSize<T>(array: [T], minimum: Int = 1, callback: ([T], inout ByteBuffer) -> Int) -> Int {
         guard array.count >= minimum else {
             return 0
         }
         return callback(array, &self)
     }
-    
 }

@@ -13,24 +13,22 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
-import NIOSSL
 import NIOIMAP
+import NIOSSL
 
 class InboundPrintHandler: ChannelInboundHandler {
-    
     typealias InboundIn = ByteBuffer
-    
+
     let type: String
-    
+
     init(type: String) {
         self.type = type
     }
-    
+
     func channelRead(context: ChannelHandlerContext, data: NIOAny) {
         var buffer = self.unwrapInboundIn(data)
         let string = buffer.readString(length: buffer.readableBytes)!
-        print("\(type):\n\(string)")
+        print("\(self.type):\n\(string)")
         context.fireChannelRead(data)
     }
-    
 }

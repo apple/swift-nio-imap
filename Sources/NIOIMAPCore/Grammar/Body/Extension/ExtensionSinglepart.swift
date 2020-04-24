@@ -15,7 +15,6 @@
 import struct NIO.ByteBuffer
 
 extension NIOIMAP.Body {
-
     /// IMAPv4 `body-ext-1part`
     public struct ExtensionSinglepart: Equatable {
         public var fieldMD5: NIOIMAP.NString
@@ -23,19 +22,18 @@ extension NIOIMAP.Body {
 
         /// Convenience function for a better experience when chaining multiple types.
         public static func fieldMD5(_ fieldMD5: NIOIMAP.NString, dspLanguage: FieldDSPLanguage?) -> Self {
-            return Self(fieldMD5: fieldMD5, dspLanguage: dspLanguage)
+            Self(fieldMD5: fieldMD5, dspLanguage: dspLanguage)
         }
     }
-
 }
 
 // MARK: - Encoding
-extension ByteBuffer {
 
+extension ByteBuffer {
     @discardableResult mutating func writeBodyExtensionSinglePart(_ ext: NIOIMAP.Body.ExtensionSinglepart) -> Int {
         self.writeNString(ext.fieldMD5) +
-        self.writeIfExists(ext.dspLanguage) { (dspLanguage) -> Int in
-            self.writeBodyFieldDSPLanguage(dspLanguage)
-        }
+            self.writeIfExists(ext.dspLanguage) { (dspLanguage) -> Int in
+                self.writeBodyFieldDSPLanguage(dspLanguage)
+            }
     }
 }

@@ -15,7 +15,6 @@
 import struct NIO.ByteBuffer
 
 extension NIOIMAP.Body {
-
     /// IMAPv4 `body-fld-enc`
     public enum FieldEncoding: Equatable {
         case bit7
@@ -25,12 +24,11 @@ extension NIOIMAP.Body {
         case quotedPrintable
         case string(ByteBuffer)
     }
-
 }
 
 // MARK: - Encoding
-extension ByteBuffer {
 
+extension ByteBuffer {
     @discardableResult mutating func writeBodyFieldEncoding(_ encoding: NIOIMAP.Body.FieldEncoding) -> Int {
         switch encoding {
         case .bit7:
@@ -47,5 +45,4 @@ extension ByteBuffer {
             return self.writeIMAPString(string)
         }
     }
-
 }

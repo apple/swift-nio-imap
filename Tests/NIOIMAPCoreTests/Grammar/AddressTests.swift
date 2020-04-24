@@ -12,35 +12,32 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
 @testable import NIOIMAPCore
+import XCTest
 
-class AddressTests: EncodeTestClass {
-
-}
+class AddressTests: EncodeTestClass {}
 
 // MARK: - Address init
+
 extension AddressTests {
-    
     func testInit() {
         let name: NIOIMAP.NString = TestUtilities.createTestByteBuffer(for: "a")
         let adl: NIOIMAP.NString = TestUtilities.createTestByteBuffer(for: "b")
         let mailbox: NIOIMAP.NString = TestUtilities.createTestByteBuffer(for: "c")
         let host: NIOIMAP.NString = TestUtilities.createTestByteBuffer(for: "d")
         let address = NIOIMAP.Address(name: name, adl: adl, mailbox: mailbox, host: host)
-        
+
         XCTAssertEqual(address.name, name)
         XCTAssertEqual(address.adl, adl)
         XCTAssertEqual(address.mailbox, mailbox)
         XCTAssertEqual(address.host, host)
     }
-    
 }
 
 // MARK: - Address imapEncoded
+
 extension AddressTests {
-    
     func testAllNil() {
         let address = NIOIMAP.Address(name: nil, adl: nil, mailbox: nil, host: nil)
         let expected = "(NIL NIL NIL NIL)"
@@ -48,7 +45,7 @@ extension AddressTests {
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }
-    
+
     func testNoneNil() {
         let address = NIOIMAP.Address(name: "somename", adl: "someadl", mailbox: "somemailbox", host: "someaddress")
         let expected = "(\"somename\" \"someadl\" \"somemailbox\" \"someaddress\")"
@@ -56,7 +53,7 @@ extension AddressTests {
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }
-    
+
     func testMixture() {
         let address = NIOIMAP.Address(name: nil, adl: "some", mailbox: "thing", host: nil)
         let expected = "(NIL \"some\" \"thing\" NIL)"
@@ -64,5 +61,4 @@ extension AddressTests {
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }
-    
 }

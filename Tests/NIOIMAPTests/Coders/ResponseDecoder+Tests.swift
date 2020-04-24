@@ -12,31 +12,27 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
-import NIOTestUtils
-@testable import NIOIMAPCore
 @testable import NIOIMAP
+@testable import NIOIMAPCore
+import NIOTestUtils
+import XCTest
 
-class ResponseDecoder_Tests: XCTest {
-
-}
+class ResponseDecoder_Tests: XCTest {}
 
 extension ResponseDecoder_Tests {
-    
     func testNormalUsage() throws {
-        
         let inoutPairs: [(String, [NIOIMAP.Response])] = [
             (
                 "1 OK Login\r\n",
                 [
-                    .taggedResponse(.tag("1", state: .ok(.code(nil, text: "Login"))))
+                    .taggedResponse(.tag("1", state: .ok(.code(nil, text: "Login")))),
                 ]
             ),
             (
                 "* NO [ALERT] ohno\r\n",
                 [
-                    .untaggedResponse(.conditionalState(.no(.code(.alert, text: "ohno"))))
+                    .untaggedResponse(.conditionalState(.no(.code(.alert, text: "ohno")))),
                 ]
             ),
             (
@@ -49,11 +45,11 @@ extension ResponseDecoder_Tests {
                     .streamingAttributeBytes("X"),
                     .streamingAttributeEnd,
                     .attributesFinish,
-                    .taggedResponse(.tag("2", state: .ok(.code(nil, text: "Fetch completed."))))
+                    .taggedResponse(.tag("2", state: .ok(.code(nil, text: "Fetch completed.")))),
                 ]
-            )
+            ),
         ]
-        
+
         do {
             try ByteToMessageDecoderVerifier.verifyDecoder(
                 stringInputOutputPairs: inoutPairs,

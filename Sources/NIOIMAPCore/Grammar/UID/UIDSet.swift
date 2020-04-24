@@ -12,12 +12,9 @@
 //
 //===----------------------------------------------------------------------===//
 
-
 extension NIOIMAP {
-
     public enum UIDSetType: Equatable {
         case uniqueID(Int)
         case range(UIDRange)
     }
-
 }

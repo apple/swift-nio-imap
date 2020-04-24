@@ -15,18 +15,16 @@
 import struct NIO.ByteBuffer
 
 extension NIOIMAP {
-
     /// IMAPv4 `continue-req`
     public enum ContinueRequest: Equatable {
         case responseText(ResponseText)
         case base64(ByteBuffer)
     }
-
 }
 
 // MARK: - Encoding
-extension ByteBuffer {
 
+extension ByteBuffer {
     @discardableResult mutating func writeContinueRequest(_ data: NIOIMAP.ContinueRequest) -> Int {
         var size = 0
         size += self.writeString("+ ")
@@ -39,5 +37,4 @@ extension ByteBuffer {
         size += self.writeString("\r\n")
         return size
     }
-
 }

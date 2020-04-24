@@ -12,23 +12,21 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
 @testable import NIOIMAPCore
+import XCTest
 
-class ReturnOption_Tests: EncodeTestClass {
-
-}
+class ReturnOption_Tests: EncodeTestClass {}
 
 // MARK: - Encoding
-extension ReturnOption_Tests {
 
+extension ReturnOption_Tests {
     func testEncode() {
         let inputs: [(NIOIMAP.ReturnOption, String, UInt)] = [
             (.subscribed, "SUBSCRIBED", #line),
             (.children, "CHILDREN", #line),
             (.statusOption([.messages]), "STATUS (MESSAGES)", #line),
-            (.optionExtension(.standard("atom", value: nil)), "atom", #line)
+            (.optionExtension(.standard("atom", value: nil)), "atom", #line),
         ]
 
         for (test, expectedString, line) in inputs {

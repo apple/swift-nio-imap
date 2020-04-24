@@ -12,12 +12,11 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
 @testable import NIOIMAPCore
+import XCTest
 
 class EntryTypeResponse_Tests: EncodeTestClass {
-
     func testEncoding() {
         let inputs: [(NIOIMAP.EntryTypeResponse, String, UInt)] = [
             (.private, "priv", #line),
@@ -31,5 +30,4 @@ class EntryTypeResponse_Tests: EncodeTestClass {
             XCTAssertEqual(self.testBufferString, expected, line: line)
         }
     }
-    
 }

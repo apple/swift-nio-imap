@@ -12,20 +12,18 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
 @testable import NIOIMAPCore
+import XCTest
 
-class MediaTextTests: EncodeTestClass {
-
-}
+class MediaTextTests: EncodeTestClass {}
 
 // MARK: - Encoding
-extension MediaTextTests {
 
+extension MediaTextTests {
     func testEncode() {
         let inputs: [(String, String, UInt)] = [
-            ("text/plain", "\"TEXT\" \"text/plain\"", #line)
+            ("text/plain", "\"TEXT\" \"text/plain\"", #line),
         ]
 
         for (test, expectedString, line) in inputs {

@@ -12,26 +12,22 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 @testable import NIOIMAPCore
+import XCTest
 
-class TimeTests: XCTestCase {
-
-}
+class TimeTests: XCTestCase {}
 
 // MARK: - Time init
+
 extension TimeTests {
-    
     func testTimeInit() {
-        
         let hour = 1
         let minute = 2
         let second = 3
         let time = NIOIMAP.Date.Time(hour: hour, minute: minute, second: second)
-        
+
         XCTAssertEqual(time.hour, hour)
         XCTAssertEqual(time.minute, minute)
         XCTAssertEqual(time.second, second)
     }
-    
 }

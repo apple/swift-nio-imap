@@ -15,20 +15,17 @@
 import struct NIO.ByteBuffer
 
 extension NIOIMAP {
-
     /// IMAP4 `child-mbx-flag`
     public enum ChildMailboxFlag: String, Equatable {
         case HasChildren = #"\HasChildren"#
         case HasNoChildren = #"\HasNoChildren"#
     }
-
 }
 
 // MARK: - Encoding
-extension ByteBuffer {
 
+extension ByteBuffer {
     @discardableResult mutating func writeChildMailboxFlag(_ flag: NIOIMAP.ChildMailboxFlag) -> Int {
         self.writeString(flag.rawValue)
     }
-
 }

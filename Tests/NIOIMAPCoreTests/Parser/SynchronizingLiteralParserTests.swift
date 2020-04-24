@@ -12,10 +12,10 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
-import NIOTestUtils
 @testable import NIOIMAPCore
+import NIOTestUtils
+import XCTest
 
 final class SynchronizingLiteralParserTests: XCTestCase {
     var parser: NIOIMAP.SynchronizingLiteralParser!
@@ -206,7 +206,7 @@ final class SynchronizingLiteralParserTests: XCTestCase {
             continuations += parse.synchronizingLiteralCount
 
             let newReader = self.consumptions.filter {
-                    $0.numberOfPriorParses <= expected.offset + 1
+                $0.numberOfPriorParses <= expected.offset + 1
             }.map { $0.consumption }.reduce(0, +) + initialAllByteReader
             allBytes.moveReaderIndex(to: newReader)
         }
@@ -233,7 +233,7 @@ final class SynchronizingLiteralParserTests: XCTestCase {
     }
 
     private func stringBuffer(_ string: String) -> ByteBuffer {
-        let garbageByteCount = (0..<32).randomElement() ?? 0
+        let garbageByteCount = (0 ..< 32).randomElement() ?? 0
         var buffer = ByteBufferAllocator().buffer(capacity: garbageByteCount + string.utf8.count)
         buffer.writeString(String(repeating: "X", count: garbageByteCount))
         buffer.moveReaderIndex(forwardBy: garbageByteCount)

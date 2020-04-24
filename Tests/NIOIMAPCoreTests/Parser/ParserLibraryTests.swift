@@ -16,10 +16,10 @@
 
 import XCTest
 
-final class ParserLibraryTests: XCTestCase {
-}
+final class ParserLibraryTests: XCTestCase {}
 
 // MARK: - parseOptional
+
 extension ParserLibraryTests {
     func test_parseOptionalWorksForNothing() {
         var buffer = TestUtilities.createTestByteBuffer(for: "")
@@ -64,12 +64,11 @@ extension ParserLibraryTests {
         })
         XCTAssertEqual(2, buffer.readableBytes)
     }
-
 }
 
 // MARK: - parseFixedString
-extension ParserLibraryTests {
 
+extension ParserLibraryTests {
     func test_fixedStringCaseSensitively() {
         var buffer = TestUtilities.createTestByteBuffer(for: "fooFooFOO")
 
@@ -83,7 +82,7 @@ extension ParserLibraryTests {
                                                                 caseSensitive: true,
                                                                 buffer: &buffer,
                                                                 tracker: .testTracker)) { error in
-                                                                    XCTAssert(error is ParserError)
+            XCTAssert(error is ParserError)
         }
 
         buffer = TestUtilities.createTestByteBuffer(for: "foo")
@@ -91,7 +90,7 @@ extension ParserLibraryTests {
                                                                 caseSensitive: true,
                                                                 buffer: &buffer,
                                                                 tracker: .testTracker)) { error in
-                                                                    XCTAssertEqual(error as? NIOIMAP.ParsingError, NIOIMAP.ParsingError.incompleteMessage)
+            XCTAssertEqual(error as? NIOIMAP.ParsingError, NIOIMAP.ParsingError.incompleteMessage)
         }
     }
 
@@ -111,7 +110,7 @@ extension ParserLibraryTests {
         XCTAssertThrowsError(try ParserLibrary.parseFixedString("fooFooFOO",
                                                                 buffer: &buffer,
                                                                 tracker: .testTracker)) { error in
-                                                                    XCTAssertEqual(error as? NIOIMAP.ParsingError, NIOIMAP.ParsingError.incompleteMessage)
+            XCTAssertEqual(error as? NIOIMAP.ParsingError, NIOIMAP.ParsingError.incompleteMessage)
         }
     }
 
@@ -123,12 +122,13 @@ extension ParserLibraryTests {
                                                                 caseSensitive: true,
                                                                 buffer: &buffer,
                                                                 tracker: .testTracker)) { error in
-                                                                    XCTAssert(error is ParserError, "\(error)")
+            XCTAssert(error is ParserError, "\(error)")
         }
     }
 }
 
 // MARK: - parseZeroOrMore
+
 extension ParserLibraryTests {
     func test_parseZeroOrMoreParsesNothingButThereIsData() {
         TestUtilities.withBuffer("", terminator: "xy") { buffer in
@@ -137,8 +137,7 @@ extension ParserLibraryTests {
                                                 try ParserLibrary.parseFixedString("x", buffer: &buffer, tracker: tracker)
                                                 try ParserLibrary.parseFixedString("x", buffer: &buffer, tracker: tracker)
                                                 return 1
-                }
-            ))
+                                            }))
         }
     }
 
@@ -160,8 +159,7 @@ extension ParserLibraryTests {
                                                 try ParserLibrary.parseFixedString("x", buffer: &buffer, tracker: tracker)
                                                 try ParserLibrary.parseFixedString("x", buffer: &buffer, tracker: tracker)
                                                 return 1
-                }
-            ))
+                                            }))
         }
     }
 
@@ -172,13 +170,13 @@ extension ParserLibraryTests {
                                                 try ParserLibrary.parseFixedString("x", buffer: &buffer, tracker: tracker)
                                                 try ParserLibrary.parseFixedString("x", buffer: &buffer, tracker: tracker)
                                                 return 1
-                }
-            ))
+                                            }))
         }
     }
 }
 
 // MARK: - parseOneOrMore
+
 extension ParserLibraryTests {
     func test_parseOneOrMoreParsesNothingButThereIsData() {
         TestUtilities.withBuffer("", terminator: "xy") { buffer in
@@ -209,8 +207,7 @@ extension ParserLibraryTests {
                                                 try ParserLibrary.parseFixedString("x", buffer: &buffer, tracker: tracker)
                                                 try ParserLibrary.parseFixedString("x", buffer: &buffer, tracker: tracker)
                                                 return 1
-                }
-            ))
+                                            }))
         }
     }
 
@@ -221,8 +218,7 @@ extension ParserLibraryTests {
                                                 try ParserLibrary.parseFixedString("x", buffer: &buffer, tracker: tracker)
                                                 try ParserLibrary.parseFixedString("x", buffer: &buffer, tracker: tracker)
                                                 return 1
-                }
-            ))
+                                            }))
         }
     }
 }

@@ -15,25 +15,22 @@
 import struct NIO.ByteBuffer
 
 extension NIOIMAP {
-
     public struct AppendMessage: Equatable {
         public var options: AppendOptions
         public var data: AppendData
-        
+
         public static func options(_ options: AppendOptions, data: AppendData) -> Self {
-            return Self(options: options, data: data)
+            Self(options: options, data: data)
         }
     }
-
 }
 
 // MARK: - Encoding
+
 extension ByteBuffer {
-    
     @discardableResult mutating func writeAppendMessage(_ message: NIOIMAP.AppendMessage) -> Int {
         self.writeAppendOptions(message.options) +
-        self.writeSpace() +
-        self.writeAppendData(message.data)
+            self.writeSpace() +
+            self.writeAppendData(message.data)
     }
-    
 }

@@ -19,7 +19,6 @@ protocol Parser {
 }
 
 extension Parser {
-    
     func throwIfExceededBufferLimit(_ buffer: inout ByteBuffer) throws {
         // try to find LF in the first `self.bufferLimit` bytes
         guard buffer.readableBytesView.prefix(self.bufferLimit).contains(UInt8(ascii: "\n")) else {
@@ -32,5 +31,4 @@ extension Parser {
             throw NIOIMAP.ParsingError.incompleteMessage
         }
     }
-    
 }

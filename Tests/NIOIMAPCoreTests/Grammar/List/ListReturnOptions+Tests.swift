@@ -12,17 +12,15 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
 @testable import NIOIMAPCore
+import XCTest
 
-class ListReturnOptions_Tests: EncodeTestClass {
-
-}
+class ListReturnOptions_Tests: EncodeTestClass {}
 
 // MARK: - Encoding
-extension ListReturnOptions_Tests {
 
+extension ListReturnOptions_Tests {
     func testEncode() {
         let inputs: [([NIOIMAP.ReturnOption], String, UInt)] = [
             ([], "RETURN ()", #line),

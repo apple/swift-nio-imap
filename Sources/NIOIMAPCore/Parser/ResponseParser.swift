@@ -15,15 +15,13 @@
 import struct NIO.ByteBuffer
 
 extension NIOIMAP {
-
     public struct ResponseParser: Parser {
-
         enum AttributeState: Equatable {
             case head
             case attribute
             case separator
         }
-        
+
         enum Mode: Equatable {
             case greeting
             case response
@@ -50,8 +48,7 @@ extension NIOIMAP {
                 return self.parseBytes(buffer: &buffer, remaining: remaining)
             }
         }
-        
-        
+
         private mutating func moveStateMachine<Return>(expected: Mode, next: Mode, returnValue: Return) -> Return {
             if case expected = self.mode {
                 self.mode = next
@@ -60,7 +57,7 @@ extension NIOIMAP {
                 fatalError("Unexpected state \(self.mode)")
             }
         }
-        
+
         private mutating func moveStateMachine(expected: Mode, next: Mode) {
             self.moveStateMachine(expected: expected, next: next, returnValue: ())
         }
@@ -68,18 +65,17 @@ extension NIOIMAP {
 }
 
 // MARK: - Parse greeting
+
 extension NIOIMAP.ResponseParser {
-    
     fileprivate mutating func parseGreeting(buffer: inout ByteBuffer) throws -> NIOIMAP.Response {
         let greeting = try NIOIMAP.GrammarParser.parseGreeting(buffer: &buffer, tracker: .new)
         return self.moveStateMachine(expected: .greeting, next: .response, returnValue: .greeting(greeting))
     }
-    
 }
 
 // MARK: - Parse responses
-extension NIOIMAP.ResponseParser {
 
+extension NIOIMAP.ResponseParser {
     fileprivate mutating func parseResponse(buffer: inout ByteBuffer) throws -> NIOIMAP.Response {
         do {
             let response = try NIOIMAP.GrammarParser.parseResponseData(buffer: &buffer, tracker: .new)
@@ -91,30 +87,27 @@ extension NIOIMAP.ResponseParser {
             return try self._parseResponse(buffer: &buffer)
         }
     }
-    
+
     private mutating func _parseResponse(buffer: inout ByteBuffer) throws -> NIOIMAP.Response {
-        
         func parseResponse_continuation(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Response {
-            return .continuationRequest(try NIOIMAP.GrammarParser.parseContinueRequest(buffer: &buffer, tracker: tracker))
+            .continuationRequest(try NIOIMAP.GrammarParser.parseContinueRequest(buffer: &buffer, tracker: tracker))
         }
-        
+
         func parseResponse_tagged(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Response {
-            return .taggedResponse(try NIOIMAP.GrammarParser.parseTaggedResponse(buffer: &buffer, tracker: tracker))
+            .taggedResponse(try NIOIMAP.GrammarParser.parseTaggedResponse(buffer: &buffer, tracker: tracker))
         }
-        
+
         return try ParserLibrary.parseOneOf([
             parseResponse_continuation,
-            parseResponse_tagged
+            parseResponse_tagged,
         ], buffer: &buffer, tracker: .new)
     }
-    
 }
 
 // MARK: - Parse attributes
+
 extension NIOIMAP.ResponseParser {
-    
     fileprivate mutating func parseAtributes(state: AttributeState, buffer: inout ByteBuffer) throws -> NIOIMAP.Response {
-        
         switch state {
         case .head:
             try NIOIMAP.GrammarParser.parseMessageAttributeStart(buffer: &buffer, tracker: .new)
@@ -135,9 +128,8 @@ extension NIOIMAP.ResponseParser {
         case .attribute:
             return try self.parseSingleAttribute(buffer: &buffer)
         }
-        
     }
-    
+
     private mutating func parseSingleAttribute(buffer: inout ByteBuffer) throws -> NIOIMAP.Response {
         let att = try NIOIMAP.GrammarParser.parseMessageAttribute_dynamicOrStatic(buffer: &buffer, tracker: .new)
         switch att {
@@ -155,12 +147,11 @@ extension NIOIMAP.ResponseParser {
             )
         }
     }
-    
 }
 
 // MARK: - Parse bytes
-extension NIOIMAP.ResponseParser {
 
+extension NIOIMAP.ResponseParser {
     /// Extracts bytes from a given `ByteBuffer`. If more bytes are present than are required
     /// only those that are required will be extracted. If not enough bytes are provided then the given
     /// `ByteBuffer` will be emptied.
@@ -190,5 +181,4 @@ extension NIOIMAP.ResponseParser {
             )
         }
     }
-    
 }

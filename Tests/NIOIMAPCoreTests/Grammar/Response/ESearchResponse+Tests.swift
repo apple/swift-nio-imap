@@ -12,17 +12,15 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
 @testable import NIOIMAPCore
+import XCTest
 
-class ESearchResponse_Tests: EncodeTestClass {
-
-}
+class ESearchResponse_Tests: EncodeTestClass {}
 
 // MARK: - Encoding
-extension ESearchResponse_Tests {
 
+extension ESearchResponse_Tests {
     func testEncode() {
         let inputs: [(NIOIMAP.ESearchResponse, String, UInt)] = [
             (.correlator(nil, uid: false, returnData: []), "ESEARCH", #line),
@@ -38,5 +36,4 @@ extension ESearchResponse_Tests {
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }
     }
-
 }

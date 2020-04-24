@@ -13,8 +13,8 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
-import NIOTestUtils
 import NIOIMAPCore
+import NIOTestUtils
 
 import XCTest
 
@@ -62,10 +62,11 @@ final class ParserIntegrationTests: XCTestCase {
             .childChannelInitializer { channel in
                 channel.pipeline.addHandlers(
                     ByteToMessageHandler(NIOIMAP.CommandDecoder()),
-                    CollectEverythingHandler(collectionDonePromise: collectionDonePromise))
-        }
-        .bind(to: .init(ipAddress: "127.0.0.1", port: 0))
-        .wait())
+                    CollectEverythingHandler(collectionDonePromise: collectionDonePromise)
+                )
+            }
+            .bind(to: .init(ipAddress: "127.0.0.1", port: 0))
+            .wait())
         XCTAssertNotNil(server)
         defer {
             XCTAssertNoThrow(try server?.close().wait())
@@ -87,9 +88,8 @@ final class ParserIntegrationTests: XCTestCase {
 
         let expected: [NIOIMAP.CommandStream] = [
             .command(.init("tag", .login("1", "2"))),
-            .command(.init("tag", .noop))
+            .command(.init("tag", .noop)),
         ]
         XCTAssertNoThrow(XCTAssertEqual(expected, try collectionDonePromise.futureResult.wait()))
     }
-    
 }

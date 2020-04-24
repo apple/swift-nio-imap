@@ -12,32 +12,29 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
 @testable import NIOIMAPCore
+import XCTest
 
-class CommandParser_Tests: XCTest {
-    
-}
+class CommandParser_Tests: XCTest {}
 
 // MARK: - init
+
 extension CommandParser_Tests {
-    
     func testInit_defaultBufferSize() {
         let parser = NIOIMAP.CommandParser()
         XCTAssertEqual(parser.bufferLimit, 1_000)
     }
-    
+
     func testInit_customBufferSize() {
         let parser = NIOIMAP.CommandParser(bufferLimit: 80_000)
         XCTAssertEqual(parser.bufferLimit, 80_000)
     }
-    
 }
 
 // MARK: - throwIfExceededBufferLimit
+
 extension CommandParser_Tests {
-    
     func testThrowIfExceededBufferLimit() {
         let parser = NIOIMAP.CommandParser(bufferLimit: 2)
         var b1 = "abc" as ByteBuffer
@@ -47,5 +44,4 @@ extension CommandParser_Tests {
         XCTAssertNoThrow(try parser.throwIfExceededBufferLimit(&b2))
         XCTAssertNoThrow(try parser.throwIfExceededBufferLimit(&b3))
     }
-    
 }

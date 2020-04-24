@@ -12,17 +12,15 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
 @testable import NIOIMAPCore
+import XCTest
 
-class OptionVendorTag_Tests: EncodeTestClass {
-
-}
+class OptionVendorTag_Tests: EncodeTestClass {}
 
 // MARK: - Encoding
-extension OptionVendorTag_Tests {
 
+extension OptionVendorTag_Tests {
     func testEncode() {
         let inputs: [(NIOIMAP.OptionVendorTag, String, UInt)] = [
             (.token("some", atom: "thing"), "some-thing", #line),

@@ -12,29 +12,26 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
 @testable import NIOIMAPCore
+import XCTest
 
-class CoreTypealiasesTests: EncodeTestClass {
-
-}
+class CoreTypealiasesTests: EncodeTestClass {}
 
 // MARK: - nstring imapEncoded
+
 extension CoreTypealiasesTests {
-    
-    func testNil () {
+    func testNil() {
         let expected = "NIL"
         let size = self.testBuffer.writeNString(nil)
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }
-    
+
     func testNotNil() {
         let expected = "\"hello\""
         let size = self.testBuffer.writeNString("hello")
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }
-    
 }

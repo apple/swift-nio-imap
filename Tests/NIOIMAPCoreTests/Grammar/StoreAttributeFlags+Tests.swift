@@ -12,17 +12,15 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
 @testable import NIOIMAPCore
+import XCTest
 
-class StoreAttributeFlags_Tests: EncodeTestClass {
-
-}
+class StoreAttributeFlags_Tests: EncodeTestClass {}
 
 // MARK: - Encoding
-extension StoreAttributeFlags_Tests {
 
+extension StoreAttributeFlags_Tests {
     func testEncode() {
         let inputs: [(NIOIMAP.StoreAttributeFlags, String, UInt)] = [
             (.add(silent: true, list: [.answered]), "+FLAGS.SILENT (\\Answered)", #line),
@@ -30,7 +28,7 @@ extension StoreAttributeFlags_Tests {
             (.remove(silent: true, list: [.deleted]), "-FLAGS.SILENT (\\Deleted)", #line),
             (.remove(silent: false, list: [.flagged]), "-FLAGS (\\Flagged)", #line),
             (.other(silent: true, list: [.seen]), "FLAGS.SILENT (\\Seen)", #line),
-            (.other(silent: false, list: [.deleted]), "FLAGS (\\Deleted)", #line)
+            (.other(silent: false, list: [.deleted]), "FLAGS (\\Deleted)", #line),
         ]
 
         for (test, expectedString, line) in inputs {
@@ -40,5 +38,4 @@ extension StoreAttributeFlags_Tests {
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }
     }
-
 }

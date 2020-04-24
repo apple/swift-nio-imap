@@ -15,7 +15,6 @@
 import struct NIO.ByteBuffer
 
 extension NIOIMAP {
-    
     public enum Response: Equatable {
         case greeting(Greeting)
         case untaggedResponse(ResponsePayload)
@@ -29,17 +28,16 @@ extension NIOIMAP {
         case fatalResponse(ResponseText)
         case continuationRequest(ContinueRequest)
     }
-    
+
     public enum ResponseType: Equatable {
         case continueRequest(ContinueRequest)
         case responseData(ResponsePayload)
     }
-    
 }
 
 // MARK: - Encoding
+
 extension ByteBuffer {
-    
     @discardableResult public mutating func writeResponse(_ response: NIOIMAP.Response) -> Int {
         switch response {
         case .greeting(let greeting):
@@ -75,5 +73,4 @@ extension ByteBuffer {
             return self.writeResponseData(data)
         }
     }
-
 }

@@ -15,23 +15,21 @@
 import struct NIO.ByteBuffer
 
 extension NIOIMAP {
-
     public enum MessageAttributeType: Equatable {
         case dynamic([NIOIMAP.Flag])
         case `static`(NIOIMAP.MessageAttributesStatic)
     }
-
 }
 
 // MARK: - Encoding
-extension ByteBuffer {
 
+extension ByteBuffer {
     @discardableResult mutating func writeMessageAttributes(_ atts: [NIOIMAP.MessageAttributeType]) -> Int {
-        return self.writeArray(atts) { (element, self) in
-            return self.writeMessageAttributeType(element)
+        self.writeArray(atts) { (element, self) in
+            self.writeMessageAttributeType(element)
         }
     }
-    
+
     @discardableResult mutating func writeMessageAttributeType(_ type: NIOIMAP.MessageAttributeType) -> Int {
         switch type {
         case .dynamic(let att):
@@ -40,5 +38,4 @@ extension ByteBuffer {
             return self.writeMessageAttributeStatic(att)
         }
     }
-
 }

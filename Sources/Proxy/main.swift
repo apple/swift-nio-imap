@@ -15,8 +15,8 @@
 import Foundation
 import NIO
 import NIOIMAP
-import NIOSSL
 import NIOIMAPCore
+import NIOSSL
 
 func log(_ string: String, buffer: ByteBuffer? = nil) {
     if let buffer = buffer {
@@ -32,6 +32,7 @@ defer {
 }
 
 // MARK: - Configuration
+
 guard CommandLine.arguments.count == 5 else {
     print("Run the command using <localhost> <localport> <serverhost> <serverport>")
     exit(1)
@@ -50,15 +51,15 @@ guard let serverPort = Int(CommandLine.arguments[4]) else {
 }
 
 // MARK: - Run
-try ServerBootstrap(group: eventLoopGroup).childChannelInitializer({ channel -> EventLoopFuture<Void> in
-    return channel.pipeline.addHandlers([
+
+try ServerBootstrap(group: eventLoopGroup).childChannelInitializer { channel -> EventLoopFuture<Void> in
+    channel.pipeline.addHandlers([
         InboundPrintHandler(type: "CLIENT (Original)"),
         OutboundPrintHandler(type: "SERVER (Decoded)"),
         ByteToMessageHandler(NIOIMAP.CommandDecoder()),
         MailClientToProxyHandler(serverHost: serverHost, serverPort: serverPort),
     ])
-})
-    .serverChannelOption(ChannelOptions.socket(SocketOptionLevel(SOL_SOCKET), SO_REUSEADDR), value: 1)
-    .bind(host: host, port: port).wait()
-    .closeFuture.wait()
-
+}
+ .serverChannelOption(ChannelOptions.socket(SocketOptionLevel(SOL_SOCKET), SO_REUSEADDR), value: 1)
+ .bind(host: host, port: port).wait()
+ .closeFuture.wait()

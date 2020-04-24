@@ -15,28 +15,25 @@
 import struct NIO.ByteBuffer
 
 extension NIOIMAP.Body {
-
     /// IMAPv4 `body-type-text`
     public struct TypeText: Equatable {
         public var mediaText: String
         public var fields: Fields
         public var lines: Int
-        
+
         public static func mediaText(_ mediaText: String, fields: Fields, lines: Int) -> Self {
-            return Self(mediaText: mediaText, fields: fields, lines: lines)
+            Self(mediaText: mediaText, fields: fields, lines: lines)
         }
     }
-
 }
 
 // MARK: - Encoding
-extension ByteBuffer {
 
+extension ByteBuffer {
     @discardableResult mutating func writeBodyTypeText(_ body: NIOIMAP.Body.TypeText) -> Int {
         self.writeMediaText(body.mediaText) +
-        self.writeSpace() +
-        self.writeBodyFields(body.fields) +
-        self.writeString(" \(body.lines)")
+            self.writeSpace() +
+            self.writeBodyFields(body.fields) +
+            self.writeString(" \(body.lines)")
     }
-
 }

@@ -12,22 +12,20 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
 @testable import NIOIMAPCore
+import XCTest
 
-class TaggedExtensionSimple_Tests: EncodeTestClass {
-
-}
+class TaggedExtensionSimple_Tests: EncodeTestClass {}
 
 // MARK: - Encoding
-extension TaggedExtensionSimple_Tests {
 
+extension TaggedExtensionSimple_Tests {
     func testEncode() {
         let inputs: [(NIOIMAP.TaggedExtensionSimple, String, UInt)] = [
             (.sequence([.wildcard]), "*", #line),
             (.number(12), "12", #line),
-            (.number64(34), "34", #line)
+            (.number64(34), "34", #line),
         ]
 
         for (test, expectedString, line) in inputs {

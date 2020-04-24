@@ -12,17 +12,15 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
 @testable import NIOIMAPCore
+import XCTest
 
-class SearchReturnOption_Tests: EncodeTestClass {
-
-}
+class SearchReturnOption_Tests: EncodeTestClass {}
 
 // MARK: - Encoding
-extension SearchReturnOption_Tests {
 
+extension SearchReturnOption_Tests {
     func testEncode() {
         let inputs: [(NIOIMAP.SearchReturnOption, String, UInt)] = [
             (.min, "MIN", #line),

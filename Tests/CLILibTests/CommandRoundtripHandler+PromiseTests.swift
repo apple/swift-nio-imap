@@ -12,40 +12,38 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
-import NIO
+@testable import CLILib
 import Logging
+import NIO
 import NIOIMAP
 import NIOIMAPCore
-@testable import CLILib
+import XCTest
 
 class CommandRoundtripHandler_PromiseTests: XCTestCase {
-    
     var channel: EmbeddedChannel!
-    
+
     override func setUp() {
         let logger = Logger(label: "test")
         channel = EmbeddedChannel(handler: CommandRoundtripHandler(logger: logger))
     }
 
     override func tearDown() {
-        channel = nil
+        self.channel = nil
     }
-    
+
     func testPromiseIsNotDropped_shouldThrow() {
-        let buffer = channel.allocator.buffer(capacity: 0)
+        let buffer = self.channel.allocator.buffer(capacity: 0)
         XCTAssertThrowsError(try self.channel.writeOutbound(buffer)) { e in
             XCTAssertTrue(e is NIOIMAP.ParsingError, "Error \(e)")
         }
         XCTAssertNoThrow(XCTAssertNil(try self.channel.readOutbound(as: ByteBuffer.self)))
     }
-    
+
     func testPromiseIsNotDropped_shouldNotThrow() {
-        var buffer = channel.allocator.buffer(capacity: 0)
+        var buffer = self.channel.allocator.buffer(capacity: 0)
         buffer.writeString("1 NOOP\r\n")
         XCTAssertNoThrow(try self.channel.writeOutbound(buffer))
         XCTAssertEqual(try self.channel.readOutbound(as: ByteBuffer.self), buffer)
         XCTAssertNoThrow(XCTAssertTrue(try self.channel.finish().isClean))
     }
-    
 }

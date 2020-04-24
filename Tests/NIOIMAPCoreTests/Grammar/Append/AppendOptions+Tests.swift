@@ -12,18 +12,14 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
 @testable import NIOIMAPCore
+import XCTest
 
-class AppendOptions_Tests: EncodeTestClass {
-
-}
+class AppendOptions_Tests: EncodeTestClass {}
 
 extension AppendOptions_Tests {
-    
     func testEncode() {
-        
         let inputs: [(NIOIMAP.AppendOptions, String, UInt)] = [
             (.flagList([], dateTime: nil, extensions: []), "", #line),
             (.flagList([.answered], dateTime: nil, extensions: []), " (\\Answered)", #line),
@@ -36,7 +32,5 @@ extension AppendOptions_Tests {
             XCTAssertEqual(size, expectedString.utf8.count, line: line)
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }
-        
     }
-    
 }

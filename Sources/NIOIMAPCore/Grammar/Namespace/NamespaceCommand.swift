@@ -15,17 +15,14 @@
 import struct NIO.ByteBuffer
 
 extension NIOIMAP {
-
     /// IMAPv4 `Namespace-Command`
     static let NamespaceCommand = "NAMESPACE"
-    
 }
 
 // MARK: - Encoding
+
 extension ByteBuffer {
-    
     @discardableResult mutating func writeNamespaceCommand() -> Int {
         self.writeString(NIOIMAP.NamespaceCommand)
     }
-
 }

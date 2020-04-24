@@ -15,19 +15,17 @@
 import struct NIO.ByteBuffer
 
 extension NIOIMAP {
-
     /// IMAPv4 `tagged-ext-simple`
     public enum TaggedExtensionSimple: Equatable {
         case sequence([NIOIMAP.SequenceRange])
         case number(Int)
         case number64(Int)
     }
-
 }
 
 // MARK: - Encoding
-extension ByteBuffer {
 
+extension ByteBuffer {
     @discardableResult mutating func writeTaggedExtensionSimple(_ value: NIOIMAP.TaggedExtensionSimple) -> Int {
         switch value {
         case .sequence(let set):
@@ -38,5 +36,4 @@ extension ByteBuffer {
             return self.writeString("\(num)")
         }
     }
-
 }

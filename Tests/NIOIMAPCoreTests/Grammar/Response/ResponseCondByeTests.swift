@@ -12,20 +12,18 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
 @testable import NIOIMAPCore
+import XCTest
 
-class ResponseConditionalByeTests: EncodeTestClass {
-
-}
+class ResponseConditionalByeTests: EncodeTestClass {}
 
 // MARK: - Encoding
-extension ResponseConditionalByeTests {
 
+extension ResponseConditionalByeTests {
     func testEncode() {
         let inputs: [(NIOIMAP.ResponseText, String, UInt)] = [
-            (.code(.alert, text: "ERROR"), "BYE [ALERT] ERROR", #line)
+            (.code(.alert, text: "ERROR"), "BYE [ALERT] ERROR", #line),
         ]
 
         for (test, expectedString, line) in inputs {

@@ -15,9 +15,7 @@
 import struct NIO.ByteBuffer
 
 extension NIOIMAP {
-
     public struct CommandParser: Parser {
-
         enum Mode: Equatable {
             case lines
             case idle
@@ -30,7 +28,7 @@ extension NIOIMAP {
         public init(bufferLimit: Int = 1_000) {
             self.bufferLimit = bufferLimit
         }
-        
+
         /// Parses a given `ByteBuffer` into a `CommandStream` that may then be transmitted.
         /// Parsing depends on the current mode of the parser.
         /// - parameter buffer: A `ByteBuffer` that will be consumed for parsing.
@@ -74,7 +72,7 @@ extension NIOIMAP {
                 }
             }
         }
-        
+
         /// Extracts bytes from a given `ByteBuffer`. If more bytes are present than are required
         /// only those that are required will be extracted. If not enough bytes are provided then the given
         /// `ByteBuffer` will be emptied.
@@ -86,7 +84,7 @@ extension NIOIMAP {
                 self.mode = .lines
                 return bytes
             }
-            
+
             let bytes = buffer.readSlice(length: buffer.readableBytes)!
             self.mode = .streamingAppend(remaining - bytes.readableBytes)
             return bytes
@@ -99,7 +97,7 @@ extension NIOIMAP {
         /// Upon failure a `PublicParserError` will be thrown.
         /// - parameter buffer: The consumable buffer to parse.
         /// - returns: A `ClientCommand` if parsing was successful.
-        private mutating func parseCommand(buffer: inout ByteBuffer) throws -> NIOIMAP.Command {
+        private mutating func parseCommand(buffer: inout ByteBuffer) throws -> NIOIMAP.TaggedCommand {
             try self.throwIfExceededBufferLimit(&buffer)
             do {
                 return try GrammarParser.parseCommand(buffer: &buffer, tracker: .new)
@@ -107,6 +105,5 @@ extension NIOIMAP {
                 throw ParsingError.incompleteMessage
             }
         }
-
     }
 }

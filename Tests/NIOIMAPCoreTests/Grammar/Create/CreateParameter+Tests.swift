@@ -12,17 +12,15 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
 @testable import NIOIMAPCore
+import XCTest
 
-class CreateParameter_Tests: EncodeTestClass {
-
-}
+class CreateParameter_Tests: EncodeTestClass {}
 
 // MARK: - Encoding
-extension CreateParameter_Tests {
 
+extension CreateParameter_Tests {
     func testEncode() {
         let inputs: [(NIOIMAP.CreateParameter, String, UInt)] = [
             (.name("some", value: nil), "some", #line),
@@ -36,7 +34,7 @@ extension CreateParameter_Tests {
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }
     }
-    
+
     func testEncode_array() {
         let inputs: [([NIOIMAP.CreateParameter], String, UInt)] = [
             ([], "", #line),
@@ -51,5 +49,4 @@ extension CreateParameter_Tests {
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }
     }
-
 }

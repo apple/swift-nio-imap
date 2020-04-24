@@ -16,7 +16,6 @@ import struct NIO.ByteBuffer
 import struct NIO.ByteBufferView
 
 extension NIOIMAP {
- 
     public struct SynchronizingLiteralParser {
         private var offset = 0
         private var synchronisingLiterals = 0
@@ -32,10 +31,8 @@ extension NIOIMAP {
             case synchronisingLiteral(Int)
             case nonSynchronisingLiteral(Int)
         }
-        
-        public init() {
-            
-        }
+
+        public init() {}
 
         private static func reverseParseTrailingNewlines(_ buffer: inout ByteBuffer) throws {
             switch (buffer.readableBytesView.reversed().dropFirst().first, buffer.readableBytesView.last) {
@@ -53,7 +50,7 @@ extension NIOIMAP {
             case .some(char):
                 buffer.moveWriterIndex(to: buffer.writerIndex - 1)
                 return true
-            case .some(_):
+            case .some:
                 return false
             case .none:
                 throw ParserError(hint: "whilst looking for \(char), found no bytes")
@@ -69,7 +66,7 @@ extension NIOIMAP {
                     current += (magnitude * Int(digit - UInt8(ascii: "0")))
                     magnitude *= 10
                     buffer.moveWriterIndex(to: buffer.writerIndex - 1)
-                case .some(_):
+                case .some:
                     if magnitude == 1 {
                         throw ParserError()
                     } else {
@@ -139,7 +136,7 @@ extension NIOIMAP {
                         self.offset += remainingBytes
                     }
                 }
-                guard lastOffset < self.offset && self.offset < buffer.readableBytesView.endIndex else {
+                guard lastOffset < self.offset, self.offset < buffer.readableBytesView.endIndex else {
                     let synchronisingLiterals = self.synchronisingLiterals
                     self.synchronisingLiterals = 0
                     return FramingResult(maximumValidBytes: self.offset,
@@ -154,5 +151,4 @@ extension NIOIMAP {
             self.offset -= numberOfBytes
         }
     }
-    
 }

@@ -12,17 +12,15 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
 @testable import NIOIMAPCore
+import XCTest
 
-class SearchProgram_Tests: EncodeTestClass {
-
-}
+class SearchProgram_Tests: EncodeTestClass {}
 
 // MARK: - Encoding
-extension SearchProgram_Tests {
 
+extension SearchProgram_Tests {
     func testEncode() {
         let inputs: [(NIOIMAP.SearchProgram, String, UInt)] = [
             (.charset(nil, keys: [.all]), "ALL", #line),
