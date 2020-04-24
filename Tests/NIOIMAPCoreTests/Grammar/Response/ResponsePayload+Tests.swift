@@ -12,17 +12,15 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
 @testable import NIOIMAPCore
+import XCTest
 
-class ResponsePayload_Tests: EncodeTestClass {
-
-}
+class ResponsePayload_Tests: EncodeTestClass {}
 
 // MARK: - Encoding
-extension ResponsePayload_Tests {
 
+extension ResponsePayload_Tests {
     func testEncode() {
         let inputs: [(NIOIMAP.ResponsePayload, String, UInt)] = [
             (.capabilityData([.enable]), "CAPABILITY IMAP4 IMAP4rev1 ENABLE", #line),

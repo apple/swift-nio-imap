@@ -13,9 +13,9 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
-import NIOTestUtils
 import NIOIMAP
 import NIOIMAPCore
+import NIOTestUtils
 
 import XCTest
 
@@ -24,23 +24,22 @@ let LF = UInt8(ascii: "\n")
 let CRLF = String(decoding: [CR, LF], as: Unicode.UTF8.self)
 
 final class ParserStressTests: XCTestCase {
-    
     private var channel: EmbeddedChannel!
-    
+
     override func setUp() {
         XCTAssertNil(self.channel)
         self.channel = EmbeddedChannel(handler: ByteToMessageHandler(NIOIMAP.CommandDecoder(bufferLimit: 80_000)))
     }
-    
+
     override func tearDown() {
         XCTAssertNotNil(self.channel)
-        XCTAssertNoThrow(XCTAssertTrue(try channel.finish().isClean))
+        XCTAssertNoThrow(XCTAssertTrue(try self.channel.finish().isClean))
         self.channel = nil
     }
-    
+
     // Test that we eventually stop parsing a single item
     // e.g. mailbox with name xxxxxxxxxxxxxxxxxx...
-    func testArbitraryLongMailboxName () {
+    func testArbitraryLongMailboxName() {
         var longBuffer = self.channel.allocator.buffer(capacity: 90_000)
         longBuffer.writeString("CREATE \"")
         for _ in 0 ..< 20_000 {
@@ -55,10 +54,10 @@ final class ParserStressTests: XCTestCase {
             XCTAssertEqual(error.parserError as? NIOIMAP.ParsingError, .lineTooLong)
         }
     }
-    
+
     // Test that we eventually stop parsing infinite parameters
     // e.g. a sequence of numbers 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, ...
-    func testArbitraryNumberOfFlags () {
+    func testArbitraryNumberOfFlags() {
         var longBuffer = self.channel.allocator.buffer(capacity: 90_000)
         longBuffer.writeString("STORE 1, ")
         for i in 2 ..< 20_000 {
@@ -73,26 +72,27 @@ final class ParserStressTests: XCTestCase {
             XCTAssertEqual(error.parserError as? NIOIMAP.ParsingError, .lineTooLong)
         }
     }
-    
+
     // - MARK: ByteToMessageDecoderVerifier tests
     func testBasicDecodes() {
         let inoutPairs: [(String, [NIOIMAP.CommandStream])] = [
             // LOGIN
-            (#"tag LOGIN "foo" "bar""#      + CRLF, [.command(.init("tag", .login("foo", "bar")))]),
-            ("tag LOGIN \"\" {0}\r\n"       + CRLF, [.command(.init("tag", .login("", "")))]),
-            (#"tag LOGIN "foo" "bar""#      + CRLF, [.command(.init("tag", .login("foo", "bar")))]),
-            (#"tag LOGIN foo bar"#          + CRLF, [.command(.init("tag", .login("foo", "bar")))]),
+            (#"tag LOGIN "foo" "bar""# + CRLF, [.command(.init("tag", .login("foo", "bar")))]),
+            ("tag LOGIN \"\" {0}\r\n" + CRLF, [.command(.init("tag", .login("", "")))]),
+            (#"tag LOGIN "foo" "bar""# + CRLF, [.command(.init("tag", .login("foo", "bar")))]),
+            (#"tag LOGIN foo bar"# + CRLF, [.command(.init("tag", .login("foo", "bar")))]),
             // RENAME
-            (#"tag RENAME "foo" "bar""#         + CRLF, [.command(NIOIMAP.TaggedCommand("tag", .rename(from: NIOIMAP.Mailbox("foo"), to: NIOIMAP.Mailbox("bar"), params: [])))]),
-            (#"tag RENAME InBoX "inBOX""#       + CRLF, [.command(NIOIMAP.TaggedCommand("tag", .rename(from: .inbox, to: .inbox, params: [])))]),
-            ("tag RENAME {1}\r\n1 {1}\r\n2"     + CRLF, [.command(NIOIMAP.TaggedCommand("tag", .rename(from: NIOIMAP.Mailbox("1"), to: NIOIMAP.Mailbox("2"), params: [])))]),
+            (#"tag RENAME "foo" "bar""# + CRLF, [.command(NIOIMAP.TaggedCommand("tag", .rename(from: NIOIMAP.Mailbox("foo"), to: NIOIMAP.Mailbox("bar"), params: [])))]),
+            (#"tag RENAME InBoX "inBOX""# + CRLF, [.command(NIOIMAP.TaggedCommand("tag", .rename(from: .inbox, to: .inbox, params: [])))]),
+            ("tag RENAME {1}\r\n1 {1}\r\n2" + CRLF, [.command(NIOIMAP.TaggedCommand("tag", .rename(from: NIOIMAP.Mailbox("1"), to: NIOIMAP.Mailbox("2"), params: [])))]),
         ]
         do {
             try ByteToMessageDecoderVerifier.verifyDecoder(
                 stringInputOutputPairs: inoutPairs,
                 decoderFactory: { () -> NIOIMAP.CommandDecoder in
-                    return NIOIMAP.CommandDecoder(autoSendContinuations: false)
-            })
+                    NIOIMAP.CommandDecoder(autoSendContinuations: false)
+                }
+            )
         } catch {
             switch error as? ByteToMessageDecoderVerifier.VerificationError<NIOIMAP.CommandStream> {
             case .some(let error):
@@ -150,5 +150,4 @@ final class ParserStressTests: XCTestCase {
             XCTAssertEqual(error.parserError as? NIOIMAP.ParsingError, .lineTooLong, "\(error)")
         }
     }
-
 }

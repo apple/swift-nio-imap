@@ -12,21 +12,19 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
 @testable import NIOIMAPCore
+import XCTest
 
-class ListSelectIndependentOption_Tests: EncodeTestClass {
-
-}
+class ListSelectIndependentOption_Tests: EncodeTestClass {}
 
 // MARK: - Encoding
-extension ListSelectIndependentOption_Tests {
 
+extension ListSelectIndependentOption_Tests {
     func testEncode() {
         let inputs: [(NIOIMAP.ListSelectIndependentOption, String, UInt)] = [
             (.remote, "REMOTE", #line),
-            (.option(.standard("test", value: nil)), "test", #line)
+            (.option(.standard("test", value: nil)), "test", #line),
         ]
 
         for (test, expectedString, line) in inputs {

@@ -12,17 +12,15 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
 @testable import NIOIMAPCore
+import XCTest
 
-class MediaBasicTests: EncodeTestClass {
-
-}
+class MediaBasicTests: EncodeTestClass {}
 
 // MARK: - Encoding
-extension MediaBasicTests {
 
+extension MediaBasicTests {
     func testEncode_basicType() {
         let inputs: [(NIOIMAP.Media.BasicType, String, UInt)] = [
             (.application, #""APPLICATION""#, #line),
@@ -31,7 +29,7 @@ extension MediaBasicTests {
             (.audio, #""AUDIO""#, #line),
             (.message, #""MESSAGE""#, #line),
             (.font, #""FONT""#, #line),
-            (.other("type"), "\"type\"", #line)
+            (.other("type"), "\"type\"", #line),
         ]
 
         for (test, expectedString, line) in inputs {
@@ -44,7 +42,7 @@ extension MediaBasicTests {
 
     func testEncode() {
         let inputs: [(NIOIMAP.Media.Basic, String, UInt)] = [
-            (NIOIMAP.Media.Basic(type: .message, subtype: "subtype"), "\"MESSAGE\" \"subtype\"", #line)
+            (NIOIMAP.Media.Basic(type: .message, subtype: "subtype"), "\"MESSAGE\" \"subtype\"", #line),
         ]
 
         for (test, expectedString, line) in inputs {

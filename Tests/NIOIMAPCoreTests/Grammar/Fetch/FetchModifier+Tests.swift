@@ -12,17 +12,15 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
 @testable import NIOIMAPCore
+import XCTest
 
-class FetchModifier_Tests: EncodeTestClass {
-
-}
+class FetchModifier_Tests: EncodeTestClass {}
 
 // MARK: - Encoding
-extension FetchModifier_Tests {
 
+extension FetchModifier_Tests {
     func testEncode() {
         let inputs: [(NIOIMAP.FetchModifier, String, UInt)] = [
             (.name("some", value: nil), "some", #line),
@@ -36,7 +34,7 @@ extension FetchModifier_Tests {
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }
     }
-    
+
     func testEncode_multiple() {
         let inputs: [([NIOIMAP.FetchModifier], String, UInt)] = [
             ([.name("some", value: nil)], " (some)", #line),
@@ -50,5 +48,4 @@ extension FetchModifier_Tests {
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }
     }
-
 }

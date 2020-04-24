@@ -15,7 +15,6 @@
 import struct NIO.ByteBuffer
 
 extension NIOIMAP {
-
     // Dervied from `fetch-att`
     public enum FetchType: Equatable {
         case all
@@ -23,12 +22,11 @@ extension NIOIMAP {
         case fast
         case attributes([NIOIMAP.FetchAttribute])
     }
-    
 }
 
 // MARK: - Encoding
+
 extension ByteBuffer {
-    
     @discardableResult mutating func writeFetchType(_ type: NIOIMAP.FetchType) -> Int {
         switch type {
         case .all:
@@ -41,5 +39,4 @@ extension ByteBuffer {
             return self.writeFetchAttributeList(atts)
         }
     }
-    
 }

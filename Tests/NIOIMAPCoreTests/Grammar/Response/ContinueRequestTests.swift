@@ -12,21 +12,19 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
 @testable import NIOIMAPCore
+import XCTest
 
-class ContinueRequestTests: EncodeTestClass {
-
-}
+class ContinueRequestTests: EncodeTestClass {}
 
 // MARK: - Encoding
-extension ContinueRequestTests {
 
+extension ContinueRequestTests {
     func testEncode() {
         let inputs: [(NIOIMAP.ContinueRequest, String, UInt)] = [
             (.base64("bb=="), "+ bb==\r\n", #line),
-            (.responseText(.code(.alert, text: "text")), "+ [ALERT] text\r\n", #line)
+            (.responseText(.code(.alert, text: "text")), "+ [ALERT] text\r\n", #line),
         ]
 
         for (test, expectedString, line) in inputs {

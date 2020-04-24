@@ -15,10 +15,9 @@
 import struct NIO.ByteBuffer
 
 // MARK: - Encoding
+
 extension ByteBuffer {
-    
     @discardableResult mutating func writeUserID(_ id: String) -> Int {
         self.writeString(id)
     }
-    
 }

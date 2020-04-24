@@ -12,17 +12,15 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
 @testable import NIOIMAPCore
+import XCTest
 
-class MailboxListOFlagTests: EncodeTestClass {
-
-}
+class MailboxListOFlagTests: EncodeTestClass {}
 
 // MARK: - Encoding
-extension MailboxListOFlagTests {
 
+extension MailboxListOFlagTests {
     func testEncode() {
         let inputs: [(NIOIMAP.Mailbox.List.OFlag, String, UInt)] = [
             (.noInferiors, "\\Noinferiors", #line),

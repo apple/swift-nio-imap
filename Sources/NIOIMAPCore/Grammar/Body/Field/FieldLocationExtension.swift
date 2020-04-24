@@ -15,30 +15,27 @@
 import struct NIO.ByteBuffer
 
 extension NIOIMAP.Body {
-
     /// Extracted from IMAPv4 `body-ext-1part`
     public struct FieldLocationExtension: Equatable {
         public var location: NIOIMAP.NString
         public var extensions: [[NIOIMAP.BodyExtensionType]]
-        
+
         public static func location(_ location: NIOIMAP.NString, extensions: [[NIOIMAP.BodyExtensionType]]) -> Self {
-            return Self(location: location, extensions: extensions)
+            Self(location: location, extensions: extensions)
         }
     }
-
 }
 
 // MARK: - Encoding
-extension ByteBuffer {
 
+extension ByteBuffer {
     @discardableResult mutating func writeBodyFieldLocationExtension(_ locationExtension: NIOIMAP.Body.FieldLocationExtension) -> Int {
         self.writeSpace() +
-        self.writeNString(locationExtension.location) +
-        locationExtension.extensions.reduce(0) { (result, ext) in
-            result +
-            self.writeSpace() +
-            self.writeBodyExtension(ext)
-        }
+            self.writeNString(locationExtension.location) +
+            locationExtension.extensions.reduce(0) { (result, ext) in
+                result +
+                    self.writeSpace() +
+                    self.writeBodyExtension(ext)
+            }
     }
-
 }

@@ -12,17 +12,15 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
 @testable import NIOIMAPCore
+import XCTest
 
-class SearchReturnDataExtension_Tests: EncodeTestClass {
-
-}
+class SearchReturnDataExtension_Tests: EncodeTestClass {}
 
 // MARK: - Encoding
-extension SearchReturnDataExtension_Tests {
 
+extension SearchReturnDataExtension_Tests {
     func testEncode() {
         let inputs: [(NIOIMAP.SearchReturnDataExtension, String, UInt)] = [
             (.modifier("modifier", returnValue: .simple(.number(123))), "modifier 123", #line),
@@ -35,5 +33,4 @@ extension SearchReturnDataExtension_Tests {
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }
     }
-
 }

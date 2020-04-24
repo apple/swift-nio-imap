@@ -16,15 +16,11 @@ import NIO
 import NIOIMAPCore
 
 extension NIOIMAP {
-
     public struct CommandEncoder: MessageToByteEncoder {
-        
         public typealias OutboundIn = CommandStream
 
-        public init() {
-            
-        }
-        
+        public init() {}
+
         public func encode(data: CommandStream, out: inout ByteBuffer) throws {
             switch data {
             case .bytes(let buffer):
@@ -36,5 +32,4 @@ extension NIOIMAP {
             }
         }
     }
-    
 }

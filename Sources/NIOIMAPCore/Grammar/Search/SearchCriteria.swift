@@ -15,11 +15,9 @@
 import struct NIO.ByteBuffer
 
 extension ByteBuffer {
-    
     @discardableResult public mutating func writeSearchCriteria(_ criteria: [NIOIMAP.SearchKey]) -> Int {
         self.writeArray(criteria, parenthesis: false) { (key, self) in
             self.writeSearchKey(key)
         }
     }
-    
 }

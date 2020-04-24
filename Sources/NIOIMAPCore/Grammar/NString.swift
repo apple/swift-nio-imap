@@ -15,16 +15,15 @@
 import struct NIO.ByteBuffer
 
 // MARK: - NString
-extension NIOIMAP {
 
+extension NIOIMAP {
     /// IMAPv4 `nstring`
     public typealias NString = ByteBuffer?
-    
 }
 
 // MARK: - IMAP
+
 extension ByteBuffer {
-    
     @discardableResult mutating func writeNString(_ string: NIOIMAP.NString) -> Int {
         if let string = string {
             return self.writeIMAPString(string)
@@ -32,5 +31,4 @@ extension ByteBuffer {
             return self.writeNil()
         }
     }
-    
 }

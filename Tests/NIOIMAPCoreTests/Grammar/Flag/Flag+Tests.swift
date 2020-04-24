@@ -12,17 +12,15 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
 @testable import NIOIMAPCore
+import XCTest
 
-class Flag_Tests: EncodeTestClass {
-
-}
+class Flag_Tests: EncodeTestClass {}
 
 // MARK: - Encoding
-extension Flag_Tests {
 
+extension Flag_Tests {
     func testEncode() {
         let inputs: [(NIOIMAP.Flag, String, UInt)] = [
             (.answered, "\\Answered", #line),
@@ -41,5 +39,4 @@ extension Flag_Tests {
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }
     }
-
 }

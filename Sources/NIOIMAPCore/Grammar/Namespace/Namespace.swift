@@ -15,17 +15,15 @@
 import struct NIO.ByteBuffer
 
 // MARK: - Encoding
-extension ByteBuffer {
 
+extension ByteBuffer {
     @discardableResult mutating func writeNamespace(_ namespace: [NIOIMAP.NamespaceDescription]) -> Int {
-        
         guard namespace.count > 0 else {
             return self.writeNil()
         }
-        
+
         return self.writeArray(namespace, separator: "") { (description, self) in
             self.writeNamespaceDescription(description)
         }
     }
-    
 }

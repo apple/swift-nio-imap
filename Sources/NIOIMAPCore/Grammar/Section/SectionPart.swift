@@ -16,11 +16,9 @@ import struct NIO.ByteBuffer
 
 // MARK" - Encoding
 extension ByteBuffer {
-    
     @discardableResult mutating func writeSectionPart(_ part: [Int]) -> Int {
         self.writeArray(part, separator: ".", parenthesis: false) { (element, self) in
-             self.writeString("\(UInt32(element))")
+            self.writeString("\(UInt32(element))")
         }
     }
-    
 }

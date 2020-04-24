@@ -15,28 +15,26 @@
 import struct NIO.ByteBuffer
 
 extension NIOIMAP {
- 
     /// IMAPv4 `seq-range`
     public struct SequenceRange: Equatable {
-        
         public static var wildcard: SequenceRange {
-            return Self(.last ... .last)
+            Self(.last ... .last)
         }
-        
+
         public static func single(_ num: Int) -> SequenceRange {
-            return Self(.number(num) ... .number(num))
+            Self(.number(num) ... .number(num))
         }
-        
+
         public var closedRange: ClosedRange<SequenceNumber>
-        
+
         public var from: SequenceNumber {
-            return closedRange.lowerBound
+            closedRange.lowerBound
         }
-        
+
         public var to: SequenceNumber {
-            return closedRange.upperBound
+            closedRange.upperBound
         }
-        
+
         public init(from: SequenceNumber, to: SequenceNumber) {
             if from < to {
                 self.init(from ... to)
@@ -44,51 +42,47 @@ extension NIOIMAP {
                 self.init(to ... from)
             }
         }
-        
+
         public init(_ closedRange: ClosedRange<SequenceNumber>) {
             self.closedRange = closedRange
         }
-        
     }
-    
 }
 
 // MARK: - Integer literal
+
 extension NIOIMAP.SequenceRange: ExpressibleByIntegerLiteral {
-    
     public typealias IntegerLiteralType = Int
-    
+
     public init(integerLiteral value: Self.IntegerLiteralType) {
         self.closedRange = ClosedRange(uncheckedBounds: (.number(value), .number(value)))
     }
-    
 }
 
 // MARK: - Encoding
-extension ByteBuffer {
 
+extension ByteBuffer {
     @discardableResult mutating func writeSequenceRange(_ range: NIOIMAP.SequenceRange) -> Int {
         self.writeSequenceNumber(range.closedRange.lowerBound) +
-        self.writeIfTrue(range.closedRange.lowerBound < range.closedRange.upperBound) {
-            self.writeString(":") +
-            self.writeSequenceNumber(range.closedRange.upperBound)
-        }
+            self.writeIfTrue(range.closedRange.lowerBound < range.closedRange.upperBound) {
+                self.writeString(":") +
+                    self.writeSequenceNumber(range.closedRange.upperBound)
+            }
     }
-    
 }
 
 // MARK: - Swift ranges
+
 extension NIOIMAP.SequenceNumber {
-    
     // always flip for wildcard to be on right
     public static prefix func ... (maximum: Self) -> NIOIMAP.SequenceRange {
-        return NIOIMAP.SequenceRange(maximum ... .last)
+        NIOIMAP.SequenceRange(maximum ... .last)
     }
-    
+
     public static postfix func ... (minimum: Self) -> NIOIMAP.SequenceRange {
-        return NIOIMAP.SequenceRange(minimum ... .last)
+        NIOIMAP.SequenceRange(minimum ... .last)
     }
-    
+
     public static func ... (minimum: Self, maximum: Self) -> NIOIMAP.SequenceRange {
         if minimum < maximum {
             return NIOIMAP.SequenceRange(minimum ... maximum)
@@ -96,5 +90,4 @@ extension NIOIMAP.SequenceNumber {
             return NIOIMAP.SequenceRange(maximum ... minimum)
         }
     }
-
 }

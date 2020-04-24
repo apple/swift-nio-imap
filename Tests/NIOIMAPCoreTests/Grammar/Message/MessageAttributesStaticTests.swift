@@ -12,17 +12,15 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
 @testable import NIOIMAPCore
+import XCTest
 
-class MessageAttributesStaticTests: EncodeTestClass {
-
-}
+class MessageAttributesStaticTests: EncodeTestClass {}
 
 // MARK: - Encoding
-extension MessageAttributesStaticTests {
 
+extension MessageAttributesStaticTests {
     func testEncode() {
         let inputs: [(NIOIMAP.MessageAttributesStatic, String, UInt)] = [
             (.rfc822(.header, "something"), "RFC822.HEADER \"something\"", #line),

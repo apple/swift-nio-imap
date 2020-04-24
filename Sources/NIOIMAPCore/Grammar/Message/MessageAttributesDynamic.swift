@@ -15,13 +15,12 @@
 import struct NIO.ByteBuffer
 
 // MARK: - Encoding
-extension ByteBuffer {
 
+extension ByteBuffer {
     @discardableResult mutating func writeMessageAttributeDynamic(_ atts: [NIOIMAP.Flag]) -> Int {
         self.writeString("FLAGS ") +
-        self.writeArray(atts) { (element, self) in
-            self.writeFlag(element)
-        }
+            self.writeArray(atts) { (element, self) in
+                self.writeFlag(element)
+            }
     }
-
 }

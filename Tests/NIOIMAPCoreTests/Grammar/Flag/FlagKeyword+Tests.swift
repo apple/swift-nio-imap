@@ -12,28 +12,25 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
 @testable import NIOIMAPCore
+import XCTest
 
-class FlagKeyword_Tests: EncodeTestClass {
-
-}
+class FlagKeyword_Tests: EncodeTestClass {}
 
 // MARK: - Equatable
+
 extension FlagKeyword_Tests {
-    
     func testEquatable() {
         let flag1 = NIOIMAP.Flag.Keyword("flag")
         let flag2 = NIOIMAP.Flag.Keyword("FLAG")
         XCTAssertEqual(flag1, flag2)
     }
-    
 }
 
 // MARK: - Encoding
-extension FlagKeyword_Tests {
 
+extension FlagKeyword_Tests {
     func testEncode() {
         let inputs: [(NIOIMAP.Flag.Keyword, String, UInt)] = [
             (.forwarded, "$FORWARDED", #line),
@@ -56,5 +53,4 @@ extension FlagKeyword_Tests {
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }
     }
-
 }

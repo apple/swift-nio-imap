@@ -12,21 +12,19 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
 @testable import NIOIMAPCore
+import XCTest
 
-class SectionBinary_Tests: EncodeTestClass {
-
-}
+class SectionBinary_Tests: EncodeTestClass {}
 
 // MARK: - Encoding
-extension SectionBinary_Tests {
 
+extension SectionBinary_Tests {
     func testEncode() {
         let inputs: [([Int], String, UInt)] = [
             ([], "[]", #line),
-            ([1, 2, 3], "[1.2.3]", #line)
+            ([1, 2, 3], "[1.2.3]", #line),
         ]
 
         for (test, expectedString, line) in inputs {
@@ -36,5 +34,4 @@ extension SectionBinary_Tests {
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }
     }
-
 }

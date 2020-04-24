@@ -12,9 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-
 extension NIOIMAP {
-    
     public enum AttributeFlag: Equatable {
         case answered
         case flagged
@@ -24,5 +22,4 @@ extension NIOIMAP {
         case keyword(String)
         case flagExtension(String)
     }
-
 }

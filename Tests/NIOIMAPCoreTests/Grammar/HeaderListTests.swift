@@ -12,29 +12,26 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
 @testable import NIOIMAPCore
+import XCTest
 
-class HeaderListsTests: EncodeTestClass {
-
-}
+class HeaderListsTests: EncodeTestClass {}
 
 // MARK: - IMAP
+
 extension HeaderListsTests {
-    
     func testArray_empty() {
-        let expected = "()" 
+        let expected = "()"
         let size = self.testBuffer.writeHeaderList([])
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }
-    
+
     func testArray_full() {
-        let expected = "(hello there world)" 
+        let expected = "(hello there world)"
         let size = self.testBuffer.writeHeaderList(["hello", "there", "world"])
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }
-    
 }

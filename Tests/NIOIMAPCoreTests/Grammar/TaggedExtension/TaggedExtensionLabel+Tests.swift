@@ -12,20 +12,18 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
 @testable import NIOIMAPCore
+import XCTest
 
-class TaggedExtensionLabel_Tests: EncodeTestClass {
-
-}
+class TaggedExtensionLabel_Tests: EncodeTestClass {}
 
 // MARK: - Encoding
-extension TaggedExtensionLabel_Tests {
 
+extension TaggedExtensionLabel_Tests {
     func testEncode() {
         let inputs: [(String, String, UInt)] = [
-            ("label", "label", #line)
+            ("label", "label", #line),
         ]
 
         for (test, expectedString, line) in inputs {

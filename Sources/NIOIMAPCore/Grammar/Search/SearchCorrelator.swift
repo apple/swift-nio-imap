@@ -15,12 +15,11 @@
 import struct NIO.ByteBuffer
 
 // MARK: - Encoding
-extension ByteBuffer {
 
+extension ByteBuffer {
     @discardableResult mutating func writeSearchCorrelator(_ correlator: ByteBuffer) -> Int {
         self.writeString(" (TAG ") +
-        self.writeTagString(correlator) +
-        self.writeString(")")
+            self.writeTagString(correlator) +
+            self.writeString(")")
     }
-
 }

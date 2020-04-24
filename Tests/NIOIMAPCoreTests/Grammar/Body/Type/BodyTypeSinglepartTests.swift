@@ -12,17 +12,15 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
 @testable import NIOIMAPCore
+import XCTest
 
-class BodyTypeSinglepartTests: EncodeTestClass {
-
-}
+class BodyTypeSinglepartTests: EncodeTestClass {}
 
 // MARK: - Encoding
-extension BodyTypeSinglepartTests {
 
+extension BodyTypeSinglepartTests {
     func testEncode() {
         let inputs: [(NIOIMAP.Body.TypeSinglepart, String, UInt)] = [
             (
@@ -54,7 +52,7 @@ extension BodyTypeSinglepartTests {
                 )), extension: nil),
                 "\"MESSAGE\" \"RFC822\" NIL NIL NIL \"BASE64\" 6 (\"date\" NIL NIL NIL NIL NIL NIL NIL NIL NIL) (\"TEXT\" \"subtype\" NIL NIL NIL \"BASE64\" 6 5) 8",
                 #line
-            )
+            ),
         ]
 
         for (test, expectedString, line) in inputs {

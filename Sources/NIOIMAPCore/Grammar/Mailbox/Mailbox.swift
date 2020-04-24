@@ -16,16 +16,14 @@ import struct NIO.ByteBuffer
 import struct NIO.ByteBufferView
 
 extension NIOIMAP {
- 
     /// IMAPv4 `mailbox`
     public struct Mailbox: Equatable {
-        
         public var name: String
-        
+
         public static let inbox = Self("inbox")
-        
+
         public static func other(_ name: String) -> Self {
-            return Self(name)
+            Self(name)
         }
 
         public init(_ name: String) {
@@ -35,28 +33,24 @@ extension NIOIMAP {
                 self.name = name
             }
         }
-        
     }
-    
 }
 
 // MARK: - ExpressibleByStringLiteral
+
 extension NIOIMAP.Mailbox: ExpressibleByStringLiteral {
-    
     public typealias StringLiteralType = String
-    
+
     public init(stringLiteral value: String) {
         self.init(value)
     }
-    
 }
 
 // MARK: - Encoding
+
 extension ByteBuffer {
-    
     @discardableResult mutating func writeMailbox(_ mailbox: NIOIMAP.Mailbox) -> Int {
         let buffer = ByteBuffer(ByteBufferView(mailbox.name.utf8))
         return self.writeIMAPString(buffer)
     }
-    
 }

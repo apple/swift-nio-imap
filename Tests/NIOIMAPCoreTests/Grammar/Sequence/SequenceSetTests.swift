@@ -12,17 +12,15 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
 @testable import NIOIMAPCore
+import XCTest
 
-class SequenceSetTests: EncodeTestClass {
-
-}
+class SequenceSetTests: EncodeTestClass {}
 
 // MARK: - SequenceSetTests imapEncoded
-extension SequenceSetTests {
 
+extension SequenceSetTests {
     func testIMAPEncoded_empty() {
         let expected = ""
         let size = self.testBuffer.writeSequenceSet([])
@@ -41,13 +39,12 @@ extension SequenceSetTests {
         let expected = "1,2:3,4,5,6:*"
         let size = self.testBuffer.writeSequenceSet([
             1,
-            2...3,
+            2 ... 3,
             4,
             5,
-            6...
+            6...,
         ])
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }
-
 }

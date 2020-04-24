@@ -15,7 +15,6 @@
 import struct NIO.ByteBuffer
 
 extension NIOIMAP {
-
     /// IMAPv4 `list-select-opt`
     public enum ListSelectOption: Equatable {
         case base(ListSelectBaseOption)
@@ -33,8 +32,8 @@ extension NIOIMAP {
 }
 
 // MARK: - Encoding
-extension ByteBuffer {
 
+extension ByteBuffer {
     @discardableResult mutating func writeListSelectOption(_ option: NIOIMAP.ListSelectOption) -> Int {
         switch option {
         case .base(let option):
@@ -48,22 +47,21 @@ extension ByteBuffer {
 
     @discardableResult mutating func writeListSelectOptions(_ options: NIOIMAP.ListSelectOptions) -> Int {
         self.writeString("(") +
-        self.writeIfExists(options) { (optionsData) -> Int in
-            switch optionsData {
-            case .select(let selectOptions, let baseOption):
-                return
-                    self.writeArray(selectOptions, separator: "", parenthesis: false) { (option, self) -> Int in
-                        self.writeListSelectOption(option) +
-                        self.writeSpace()
-                    } +
-                    self.writeListSelectBaseOption(baseOption)
-            case .selectIndependent(let independentOptions):
-                return self.writeArray(independentOptions, parenthesis: false) { (option, self) in
-                    self.writeListSelectIndependentOption(option)
+            self.writeIfExists(options) { (optionsData) -> Int in
+                switch optionsData {
+                case .select(let selectOptions, let baseOption):
+                    return
+                        self.writeArray(selectOptions, separator: "", parenthesis: false) { (option, self) -> Int in
+                            self.writeListSelectOption(option) +
+                                self.writeSpace()
+                        } +
+                        self.writeListSelectBaseOption(baseOption)
+                case .selectIndependent(let independentOptions):
+                    return self.writeArray(independentOptions, parenthesis: false) { (option, self) in
+                        self.writeListSelectIndependentOption(option)
+                    }
                 }
-            }
-        } +
-        self.writeString(")")
+            } +
+            self.writeString(")")
     }
-
 }

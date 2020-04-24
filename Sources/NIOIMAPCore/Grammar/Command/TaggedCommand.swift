@@ -15,7 +15,6 @@
 import struct NIO.ByteBuffer
 
 extension NIOIMAP {
-
     /// IMAP4 `command` (`command-any`, `command-auth`, `command-nonauth`, `command-select`)
     public struct TaggedCommand: Equatable {
         public var type: Command
@@ -26,16 +25,14 @@ extension NIOIMAP {
             self.tag = tag
         }
     }
-
 }
 
 extension ByteBuffer {
-
     @discardableResult public mutating func writeCommand(_ command: NIOIMAP.TaggedCommand) -> Int {
         var size = 0
         size += self.writeString("\(command.tag) ")
         size += self.writeCommandType(command.type)
-        
+
         switch command.type {
         case .append(to: _, firstMessageMetadata: _):
             break
@@ -44,5 +41,4 @@ extension ByteBuffer {
         }
         return size
     }
-
 }

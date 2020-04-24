@@ -12,17 +12,15 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
 @testable import NIOIMAPCore
+import XCTest
 
-class BodyTypeMessageTests: EncodeTestClass {
-
-}
+class BodyTypeMessageTests: EncodeTestClass {}
 
 // MARK: - Encoding
-extension BodyTypeMessageTests {
 
+extension BodyTypeMessageTests {
     func testEncode() {
         let inputs: [(NIOIMAP.Body.TypeMessage, String, UInt)] = [
             (
@@ -31,16 +29,14 @@ extension BodyTypeMessageTests {
                     fields: .parameter([], id: nil, description: nil, encoding: .base64, octets: 111),
                     envelope: NIOIMAP.Envelope(date: "date", subject: nil, from: [], sender: [], reply: [], to: [], cc: [], bcc: [], inReplyTo: nil, messageID: nil),
                     body: .singlepart(.type(.text(.mediaText("subtype",
-                            fields: .parameter([], id: nil, description: nil, encoding: .binary, octets: 22),
-                            lines: 33
-                        )),
-                        extension: nil
-                    )),
+                                                             fields: .parameter([], id: nil, description: nil, encoding: .binary, octets: 22),
+                                                             lines: 33)),
+                                            extension: nil)),
                     fieldLines: 89
                 ),
                 "\"MESSAGE\" \"RFC822\" NIL NIL NIL \"BASE64\" 111 (\"date\" NIL NIL NIL NIL NIL NIL NIL NIL NIL) (\"TEXT\" \"subtype\" NIL NIL NIL \"BINARY\" 22 33) 89",
                 #line
-            )
+            ),
         ]
 
         for (test, expectedString, line) in inputs {

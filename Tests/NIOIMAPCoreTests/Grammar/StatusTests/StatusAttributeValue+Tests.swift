@@ -12,21 +12,19 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
 @testable import NIOIMAPCore
+import XCTest
 
-class StatusAttributeValue_Tests: EncodeTestClass {
-
-}
+class StatusAttributeValue_Tests: EncodeTestClass {}
 
 // MARK: - Encoding
-extension StatusAttributeValue_Tests {
 
+extension StatusAttributeValue_Tests {
     func testEncode_statusOption() {
         let inputs: [([NIOIMAP.StatusAttribute], String, UInt)] = [
             ([.messages], "STATUS (MESSAGES)", #line),
-            ([.messages, .size, .recent], "STATUS (MESSAGES SIZE RECENT)", #line)
+            ([.messages, .size, .recent], "STATUS (MESSAGES SIZE RECENT)", #line),
         ]
 
         for (test, expectedString, line) in inputs {
@@ -45,7 +43,7 @@ extension StatusAttributeValue_Tests {
             (.unseen(45), "UNSEEN 45", #line),
             (.deleted(56), "DELETED 56", #line),
             (.size(67), "SIZE 67", #line),
-            (.modSequence(.zero), "HIGHESTMODSEQ 0", #line)
+            (.modSequence(.zero), "HIGHESTMODSEQ 0", #line),
         ]
 
         for (test, expectedString, line) in inputs {
@@ -70,5 +68,4 @@ extension StatusAttributeValue_Tests {
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }
     }
-
 }
