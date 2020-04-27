@@ -2201,13 +2201,21 @@ extension NIOIMAP.GrammarParser {
         }
 
         func parseMessageAttribute_rfc822(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.MessageAttribute {
-            try ParserLibrary.parseFixedString("RFC822", buffer: &buffer, tracker: tracker)
-            let rfc = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> NIOIMAP.RFC822Reduced in
-                try self.parseRFC822Reduced(buffer: &buffer, tracker: tracker)
-            }
-            try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
+            try ParserLibrary.parseFixedString("RFC822 ", buffer: &buffer, tracker: tracker)
             let string = try self.parseNString(buffer: &buffer, tracker: tracker)
-            return .rfc822(rfc, string)
+            return .rfc822(string)
+        }
+        
+        func parseMessageAttribute_rfc822Header(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.MessageAttribute {
+            try ParserLibrary.parseFixedString("RFC822.HEADER ", buffer: &buffer, tracker: tracker)
+            let string = try self.parseNString(buffer: &buffer, tracker: tracker)
+            return .rfc822Header(string)
+        }
+        
+        func parseMessageAttribute_rfc822Text(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.MessageAttribute {
+            try ParserLibrary.parseFixedString("RFC822.TEXT ", buffer: &buffer, tracker: tracker)
+            let string = try self.parseNString(buffer: &buffer, tracker: tracker)
+            return .rfc822Text(string)
         }
 
         func parseMessageAttribute_rfc822Size(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.MessageAttribute {
@@ -4188,23 +4196,6 @@ extension NIOIMAP.GrammarParser {
             parseRFC822_header,
             parseRFC822_size,
             parseRFC822_text,
-        ], buffer: &buffer, tracker: tracker)
-    }
-
-    static func parseRFC822Reduced(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.RFC822Reduced {
-        func parseRFC822Reduced_header(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.RFC822Reduced {
-            try ParserLibrary.parseFixedString(".HEADER", buffer: &buffer, tracker: tracker)
-            return .header
-        }
-
-        func parseRFC822Reduced_text(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.RFC822Reduced {
-            try ParserLibrary.parseFixedString(".TEXT", buffer: &buffer, tracker: tracker)
-            return .text
-        }
-
-        return try ParserLibrary.parseOneOf([
-            parseRFC822Reduced_header,
-            parseRFC822Reduced_text,
         ], buffer: &buffer, tracker: tracker)
     }
 }

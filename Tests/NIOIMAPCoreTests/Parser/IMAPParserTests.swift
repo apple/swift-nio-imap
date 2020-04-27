@@ -1621,9 +1621,12 @@ extension ParserUnitTests {
             (#"BODY[HEADER] "string""#, " ", .bodySection(.text(.header), partial: nil, data: "string"), #line),
             (#"BODY[HEADER]<12> "string""#, " ", .bodySection(.text(.header), partial: 12, data: "string"), #line),
             ("RFC822.SIZE 1234", " ", .rfc822Size(1234), #line),
-            (#"RFC822 "some string""#, " ", .rfc822(nil, "some string"), #line),
-            (#"RFC822.HEADER "some string""#, " ", .rfc822(.header, "some string"), #line),
-            (#"RFC822.TEXT "string""#, " ", .rfc822(.text, "string"), #line),
+            (#"RFC822 "some string""#, " ", .rfc822("some string"), #line),
+            (#"RFC822.HEADER "some string""#, " ", .rfc822Header("some string"), #line),
+            (#"RFC822.TEXT "string""#, " ", .rfc822Text("string"), #line),
+            (#"RFC822 NIL"#, " ", .rfc822(nil), #line),
+            (#"RFC822.HEADER NIL"#, " ", .rfc822Header(nil), #line),
+            (#"RFC822.TEXT NIL"#, " ", .rfc822Text(nil), #line),
             ("BINARY.SIZE[3] 4", " ", .binarySize(section: [3], size: 4), #line),
             ("BINARY[3] \"hello\"", " ", .binary(section: [3], data: "hello"), #line),
             (
@@ -2046,24 +2049,6 @@ extension ParserUnitTests {
         TestUtilities.withBuffer(".TEXT") { (buffer) in
             let rfc = try NIOIMAP.GrammarParser.parseRFC822(buffer: &buffer, tracker: .testTracker)
             XCTAssertEqual(rfc, .text)
-        }
-    }
-}
-
-// MARK: - parseRFC822Reduced
-
-extension ParserUnitTests {
-    func testParseRFC822Reduced_header() {
-        TestUtilities.withBuffer(".HEADER") { (buffer) in
-            let result = try NIOIMAP.GrammarParser.parseRFC822Reduced(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(result, .header)
-        }
-    }
-
-    func testParseRFC822Reduced_text() {
-        TestUtilities.withBuffer(".TEXT") { (buffer) in
-            let result = try NIOIMAP.GrammarParser.parseRFC822Reduced(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(result, .text)
         }
     }
 }

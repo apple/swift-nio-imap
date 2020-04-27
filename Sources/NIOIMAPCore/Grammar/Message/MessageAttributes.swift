@@ -16,18 +16,14 @@ import struct NIO.ByteBuffer
 
 extension NIOIMAP {
     
-    /// Extracted from IMAPv4 `msg-att-static`
-    public enum RFC822Reduced: String, Equatable {
-        case header
-        case text
-    }
-    
     public enum MessageAttribute: Equatable {
         case flags([NIOIMAP.Flag])
         case envelope(Envelope)
         case internalDate(Date.DateTime)
         case uid(Int)
-        case rfc822(RFC822Reduced?, NIOIMAP.NString)
+        case rfc822(NIOIMAP.NString)
+        case rfc822Header(NIOIMAP.NString)
+        case rfc822Text(NIOIMAP.NString)
         case rfc822Size(Int)
         case body(Body, structure: Bool)
         case bodySection(SectionSpec?, partial: Int?, data: NString)
@@ -51,8 +47,12 @@ extension ByteBuffer {
             return self.writeMessageAttribute_envelope(env)
         case .internalDate(let date):
             return self.writeMessageAttribute_internalDate(date)
-        case .rfc822(let type, let string):
-            return self.writeMessageAttribute_rfc(type, string: string)
+        case .rfc822(let string):
+            return self.writeMessageAttribute_rfc822(string)
+        case .rfc822Header(let string):
+            return self.writeMessageAttribute_rfc822Header(string)
+        case .rfc822Text(let string):
+            return self.writeMessageAttribute_rfc822Text(string)
         case .rfc822Size(let size):
             return self.writeString("RFC822.SIZE \(size)")
         case .body(let body, structure: let structure):
@@ -102,11 +102,20 @@ extension ByteBuffer {
             self.writeDateTime(date)
     }
 
-    @discardableResult mutating func writeMessageAttribute_rfc(_ type: NIOIMAP.RFC822Reduced?, string: NIOIMAP.NString) -> Int {
+    @discardableResult mutating func writeMessageAttribute_rfc822(_ string: NIOIMAP.NString) -> Int {
         self.writeString("RFC822") +
-            self.writeIfExists(type) { (type) -> Int in
-                self.writeString(".\(type.rawValue.uppercased())")
-            } +
+            self.writeSpace() +
+            self.writeNString(string)
+    }
+    
+    @discardableResult mutating func writeMessageAttribute_rfc822Text(_ string: NIOIMAP.NString) -> Int {
+        self.writeString("RFC822.TEXT") +
+            self.writeSpace() +
+            self.writeNString(string)
+    }
+    
+    @discardableResult mutating func writeMessageAttribute_rfc822Header(_ string: NIOIMAP.NString) -> Int {
+        self.writeString("RFC822.HEADER") +
             self.writeSpace() +
             self.writeNString(string)
     }

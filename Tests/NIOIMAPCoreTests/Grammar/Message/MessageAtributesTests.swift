@@ -24,8 +24,10 @@ extension MessageAttributesTests {
     
     func testEncode() {
         let inputs: [(NIOIMAP.MessageAttribute, String, UInt)] = [
-            (.rfc822(.header, "something"), "RFC822.HEADER \"something\"", #line),
-            (.rfc822(nil, nil), "RFC822 NIL", #line),
+            (.rfc822(nil), "RFC822 NIL", #line),
+            (.rfc822Header(nil), "RFC822.HEADER NIL", #line),
+            (.rfc822Header("header"), "RFC822.HEADER \"header\"", #line),
+            (.rfc822Text("text"), "RFC822.TEXT \"text\"", #line),
             (.rfc822Size(123), "RFC822.SIZE 123", #line),
             (.bodySection(.text(.header), partial: nil, data: "test"), "BODY[HEADER] \"test\"", #line),
             (.bodySection(.text(.header), partial: 123, data: "test"), "BODY[HEADER]<123> \"test\"", #line),
