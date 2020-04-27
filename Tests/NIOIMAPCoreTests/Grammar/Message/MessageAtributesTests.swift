@@ -21,7 +21,6 @@ class MessageAttributesTests: EncodeTestClass {}
 // MARK: - Encoding
 
 extension MessageAttributesTests {
-    
     func testEncode() {
         let inputs: [(NIOIMAP.MessageAttribute, String, UInt)] = [
             (.rfc822(nil), "RFC822 NIL", #line),
@@ -48,7 +47,7 @@ extension MessageAttributesTests {
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }
     }
-    
+
     func testEncode_multiple() {
         let inputs: [([NIOIMAP.MessageAttribute], String, UInt)] = [
             ([.flags([.draft])], "(FLAGS (\\Draft))", #line),

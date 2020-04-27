@@ -1612,8 +1612,8 @@ extension ParserUnitTests {
 }
 
 // MARK: - parseMessageAttribute
+
 extension ParserUnitTests {
-    
     func testParseMessageAttribute() {
         let inputs: [(String, String, NIOIMAP.MessageAttribute, UInt)] = [
             ("UID 1234", " ", .uid(1234), #line),

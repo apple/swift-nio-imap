@@ -2176,7 +2176,6 @@ extension NIOIMAP.GrammarParser {
     // msg-att-dynamic = "FLAGS" SP "(" [flag-fetch *(SP flag-fetch)] ")"
     // ---- This function combines static and dynamic
     static func parseMessageAttribute(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.MessageAttribute {
-        
         func parseMessageAttribute_flags(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.MessageAttribute {
             try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> NIOIMAP.MessageAttribute in
                 try ParserLibrary.parseFixedString("FLAGS (", buffer: &buffer, tracker: tracker)
@@ -2189,7 +2188,7 @@ extension NIOIMAP.GrammarParser {
                 return .flags(array)
             }
         }
-        
+
         func parseMessageAttribute_envelope(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.MessageAttribute {
             try ParserLibrary.parseFixedString("ENVELOPE ", buffer: &buffer, tracker: tracker)
             return .envelope(try self.parseEnvelope(buffer: &buffer, tracker: tracker))
@@ -2205,13 +2204,13 @@ extension NIOIMAP.GrammarParser {
             let string = try self.parseNString(buffer: &buffer, tracker: tracker)
             return .rfc822(string)
         }
-        
+
         func parseMessageAttribute_rfc822Header(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.MessageAttribute {
             try ParserLibrary.parseFixedString("RFC822.HEADER ", buffer: &buffer, tracker: tracker)
             let string = try self.parseNString(buffer: &buffer, tracker: tracker)
             return .rfc822Header(string)
         }
-        
+
         func parseMessageAttribute_rfc822Text(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.MessageAttribute {
             try ParserLibrary.parseFixedString("RFC822.TEXT ", buffer: &buffer, tracker: tracker)
             let string = try self.parseNString(buffer: &buffer, tracker: tracker)
@@ -2283,7 +2282,7 @@ extension NIOIMAP.GrammarParser {
             parseMessageAttribute_uid,
             parseMessageAttribute_binarySize,
             parseMessageAttribute_binary,
-            parseMessageAttribute_flags
+            parseMessageAttribute_flags,
         ], buffer: &buffer, tracker: tracker)
     }
 
