@@ -15,12 +15,12 @@
 import struct NIO.ByteBuffer
 
 extension NIOIMAP.MailboxName.List {
-    
+
     /// IMAPv4 `mbx-list-sflag`
     public enum SFlag: String, Equatable {
-        case noSelect   = #"\Noselect"#
-        case marked     = #"\Marked"#
-        case unmarked   = #"\Unmarked"#
+        case noSelect = #"\Noselect"#
+        case marked = #"\Marked"#
+        case unmarked = #"\Unmarked"#
         case nonExistent = #"\Nonexistent"#
 
         public init?(rawValue: String) {
@@ -38,14 +38,11 @@ extension NIOIMAP.MailboxName.List {
             }
         }
     }
-    
 }
 
 // MARK: - Encoding
-extension ByteBuffer {
 
     @discardableResult mutating func writeMailboxListSFlag(_ flag: NIOIMAP.MailboxName.List.SFlag) -> Int {
         self.writeString(flag.rawValue)
     }
-
 }

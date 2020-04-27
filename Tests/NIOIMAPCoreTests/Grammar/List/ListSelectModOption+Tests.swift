@@ -12,17 +12,15 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
 @testable import NIOIMAPCore
+import XCTest
 
-class ListSelectModOption_Tests: EncodeTestClass {
-
-}
+class ListSelectModOption_Tests: EncodeTestClass {}
 
 // MARK: - Encoding
-extension ListSelectModOption_Tests {
 
+extension ListSelectModOption_Tests {
     func testEncode() {
         let inputs: [(NIOIMAP.ListSelectModOption, String, UInt)] = [
             (.recursiveMatch, "RECURSIVEMATCH", #line),

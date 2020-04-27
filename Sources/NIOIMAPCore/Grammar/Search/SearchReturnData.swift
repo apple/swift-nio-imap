@@ -15,7 +15,6 @@
 import struct NIO.ByteBuffer
 
 extension NIOIMAP {
-
     /// IMAPv4 `search-return-data`
     public enum SearchReturnData: Equatable {
         case min(Int)
@@ -24,12 +23,11 @@ extension NIOIMAP {
         case count(Int)
         case dataExtension(SearchReturnDataExtension)
     }
-
 }
 
 // MARK: - Encoding
-extension ByteBuffer {
 
+extension ByteBuffer {
     @discardableResult mutating func writeSearchReturnData(_ data: NIOIMAP.SearchReturnData) -> Int {
         switch data {
         case .min(let num):
@@ -46,5 +44,4 @@ extension ByteBuffer {
             return self.writeSearchReturnDataExtension(optionExt)
         }
     }
-
 }

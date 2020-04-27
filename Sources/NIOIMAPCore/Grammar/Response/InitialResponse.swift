@@ -15,18 +15,16 @@
 import struct NIO.ByteBuffer
 
 extension NIOIMAP {
-
     /// IMAPv4 `initial-response`
     public enum InitialResponse: Equatable {
         case equals
         case base64(ByteBuffer)
     }
-
 }
 
 // MARK: - Encoding
+
 extension ByteBuffer {
-    
     @discardableResult mutating func writeInitialResponse(_ response: NIOIMAP.InitialResponse) -> Int {
         switch response {
         case .equals:
@@ -35,5 +33,4 @@ extension ByteBuffer {
             return self.writeBase64(base64)
         }
     }
-    
 }

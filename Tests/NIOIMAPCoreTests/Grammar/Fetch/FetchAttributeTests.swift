@@ -12,19 +12,16 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
 @testable import NIOIMAPCore
+import XCTest
 
-class FetchAttributeTests: EncodeTestClass {
-    
-}
+class FetchAttributeTests: EncodeTestClass {}
 
 // MARK: - IMAP
+
 extension FetchAttributeTests {
-    
     func testEncode() {
-        
         let inputs: [(NIOIMAP.FetchAttribute, String, UInt)] = [
             (.envelope, "ENVELOPE", #line),
             (.flags, "FLAGS", #line),
@@ -39,16 +36,14 @@ extension FetchAttributeTests {
             (.binary(peek: true, section: [1, 2, 3], partial: nil), "BINARY.PEEK[1.2.3]", #line),
             (.binary(peek: false, section: [3, 4, 5], partial: nil), "BINARY[3.4.5]", #line),
             (.modSequence(.zero), "0", #line),
-            (.modSequence(.value(3)), "3", #line)
+            (.modSequence(.value(3)), "3", #line),
         ]
-        
+
         for (test, expectedString, line) in inputs {
             self.testBuffer.clear()
             let size = self.testBuffer.writeFetchAttribute(test)
             XCTAssertEqual(size, expectedString.utf8.count, line: line)
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }
-        
     }
-    
 }

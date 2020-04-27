@@ -12,11 +12,11 @@
 //
 //===----------------------------------------------------------------------===//
 
-import NIO
-import NIOSSL
-import NIOIMAP
-import Logging
 import CLILib
+import Logging
+import NIO
+import NIOIMAP
+import NIOSSL
 
 let logger = Logger(label: "swiftnio.nioimap.cli.main")
 logger.info("Welcome to the NIOIMAP CLI demo")
@@ -39,7 +39,7 @@ let channel = try ClientBootstrap(group: group).channelInitializer { (channel) -
     ])
 }.connect(host: hostname, port: 993).wait()
 
-_ = channel.closeFuture.always{ result in
+_ = channel.closeFuture.always { result in
     switch result {
     case .failure(let error):
         logger.error("Channel closed with error \(error)")
@@ -60,7 +60,7 @@ while true {
     }
     var buffer = channel.allocator.buffer(capacity: strCommand.utf8.count)
     buffer.writeString(strCommand + "\r\n")
-    
+
     // handle the error somewhat gracefully
     do {
         try channel.writeAndFlush(buffer).wait()

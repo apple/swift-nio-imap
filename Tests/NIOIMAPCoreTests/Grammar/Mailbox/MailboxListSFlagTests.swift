@@ -12,18 +12,15 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
 @testable import NIOIMAPCore
+import XCTest
 
-class MailboxListSFlagTests: EncodeTestClass {
-
-}
+class MailboxListSFlagTests: EncodeTestClass {}
 
 // MARK: - init
+
 extension MailboxListSFlagTests {
-
-
     func testInit() {
 
         let inputs: [(String, NIOIMAP.MailboxName.List.SFlag?, UInt)] = [
@@ -46,14 +43,12 @@ extension MailboxListSFlagTests {
             let testValue = NIOIMAP.MailboxName.List.SFlag(rawValue: test)
             XCTAssertEqual(testValue, expected, line: line)
         }
-
     }
-
 }
 
 // MARK: - Encoding
-extension MailboxListSFlagTests {
 
+extension MailboxListSFlagTests {
     func testEncode() {
         let inputs: [(NIOIMAP.MailboxName.List.SFlag, String, UInt)] = [
             (.marked, #"\Marked"#, #line),
@@ -69,5 +64,4 @@ extension MailboxListSFlagTests {
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }
     }
-
 }

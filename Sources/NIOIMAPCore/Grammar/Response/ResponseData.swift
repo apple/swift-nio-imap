@@ -15,12 +15,11 @@
 import struct NIO.ByteBuffer
 
 // MARK: - Encoding
-extension ByteBuffer {
 
+extension ByteBuffer {
     @discardableResult mutating func writeResponseData(_ data: NIOIMAP.ResponsePayload) -> Int {
         self.writeString("* ") +
-        self.writeResponsePayload(data) +
-        self.writeString("\r\n")
+            self.writeResponsePayload(data) +
+            self.writeString("\r\n")
     }
-
 }

@@ -12,17 +12,15 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
 @testable import NIOIMAPCore
+import XCTest
 
-class StoreModifier_Tests: EncodeTestClass {
-    
-}
+class StoreModifier_Tests: EncodeTestClass {}
 
 // MARK: - Encoding
-extension StoreModifier_Tests {
 
+extension StoreModifier_Tests {
     func testEncode() {
         let inputs: [(NIOIMAP.StoreModifier, String, UInt)] = [
             (.name("name", parameters: nil), "name", #line),
@@ -36,7 +34,7 @@ extension StoreModifier_Tests {
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }
     }
-    
+
     func testEncode_array() {
         let inputs: [([NIOIMAP.StoreModifier], String, UInt)] = [
             ([.name("name", parameters: nil)], " (name)", #line),
@@ -50,5 +48,4 @@ extension StoreModifier_Tests {
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }
     }
-
 }

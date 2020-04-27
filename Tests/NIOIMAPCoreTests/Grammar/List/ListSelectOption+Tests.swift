@@ -12,17 +12,15 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
 @testable import NIOIMAPCore
+import XCTest
 
-class ListSelectOption_Tests: EncodeTestClass {
-
-}
+class ListSelectOption_Tests: EncodeTestClass {}
 
 // MARK: - Encoding
-extension ListSelectOption_Tests {
 
+extension ListSelectOption_Tests {
     func testEncode() {
         let inputs: [(NIOIMAP.ListSelectOption, String, UInt)] = [
             (.base(.subscribed), "SUBSCRIBED", #line),

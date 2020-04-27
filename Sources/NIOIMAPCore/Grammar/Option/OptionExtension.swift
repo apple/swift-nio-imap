@@ -15,7 +15,6 @@
 import struct NIO.ByteBuffer
 
 extension NIOIMAP {
-
     public enum OptionExtensionType: Equatable {
         case standard(String)
         case vendor(OptionVendorTag)
@@ -27,19 +26,18 @@ extension NIOIMAP {
         public var value: OptionValueComp?
 
         public static func standard(_ atom: String, value: OptionValueComp?) -> Self {
-            return Self(type: .standard(atom), value: value)
+            Self(type: .standard(atom), value: value)
         }
 
         public static func vendor(_ tag: OptionVendorTag, value: OptionValueComp?) -> Self {
-            return Self(type: .vendor(tag), value: value)
+            Self(type: .vendor(tag), value: value)
         }
     }
-
 }
 
 // MARK: - Encoding
-extension ByteBuffer {
 
+extension ByteBuffer {
     @discardableResult mutating func writeOptionExtension(_ option: NIOIMAP.OptionExtension) -> Int {
         var size = 0
         switch option.type {
@@ -55,5 +53,4 @@ extension ByteBuffer {
         }
         return size
     }
-
 }

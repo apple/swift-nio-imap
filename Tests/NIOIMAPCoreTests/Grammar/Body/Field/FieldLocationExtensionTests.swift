@@ -12,22 +12,20 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
 @testable import NIOIMAPCore
+import XCTest
 
-class FieldLocationExtensionTests: EncodeTestClass {
-
-}
+class FieldLocationExtensionTests: EncodeTestClass {}
 
 // MARK: - Encoding
-extension FieldLocationExtensionTests {
 
+extension FieldLocationExtensionTests {
     func testEncode() {
         let inputs: [(NIOIMAP.Body.FieldLocationExtension, String, UInt)] = [
             (.location("loc", extensions: []), " \"loc\"", #line),
             (.location("loc", extensions: [[.number(1)]]), " \"loc\" (1)", #line),
-            (.location("loc", extensions: [[.number(1), .number(2)]]), " \"loc\" (1 2)", #line)
+            (.location("loc", extensions: [[.number(1), .number(2)]]), " \"loc\" (1 2)", #line),
         ]
 
         for (test, expectedString, line) in inputs {

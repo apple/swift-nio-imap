@@ -15,19 +15,16 @@
 import struct NIO.ByteBuffer
 
 extension NIOIMAP.Media {
-
     public enum Message: String, Equatable {
         case rfc822 = "RFC822"
         case global = "GLOBAL"
     }
-
 }
 
 // MARK: - Encoding
-extension ByteBuffer {
 
+extension ByteBuffer {
     @discardableResult mutating func writeMediaMessage(_ message: NIOIMAP.Media.Message) -> Int {
         self.writeString("\"MESSAGE\" \"\(message.rawValue)\"")
     }
-
 }

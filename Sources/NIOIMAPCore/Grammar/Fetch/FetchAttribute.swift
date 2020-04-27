@@ -14,8 +14,7 @@
 
 import struct NIO.ByteBuffer
 
-extension NIOIMAP {        
-    
+extension NIOIMAP {
     /// IMAPv4 `fetch-att`
     public enum FetchAttribute: Equatable {
         case envelope
@@ -30,18 +29,17 @@ extension NIOIMAP {
         case binary(peek: Bool, section: [Int], partial: Partial?)
         case binarySize(section: [Int])
     }
-    
 }
 
 // MARK: - Encoding
+
 extension ByteBuffer {
-    
     @discardableResult mutating func writeFetchAttributeList(_ atts: [NIOIMAP.FetchAttribute]) -> Int {
-        return self.writeArray(atts) { (element, self) in
+        self.writeArray(atts) { (element, self) in
             self.writeFetchAttribute(element)
         }
     }
-    
+
     @discardableResult mutating func writeFetchAttribute(_ attribute: NIOIMAP.FetchAttribute) -> Int {
         switch attribute {
         case .envelope:
@@ -62,71 +60,70 @@ extension ByteBuffer {
             return self.writeFetchAttribute_uid()
         case .modSequence(let value):
             return self.writeModifierSequenceValue(value)
-        case let .binary(peek: peek, section: section, partial: partial):
+        case .binary(let peek, let section, let partial):
             return self.writeFetchAttribute_binary(peek: peek, section: section, partial: partial)
-        case let .binarySize(section: section):
+        case .binarySize(let section):
             return self.writeFetchAttribute_binarySize(section)
         }
     }
-    
+
     @discardableResult mutating func writeFetchAttribute_envelope() -> Int {
         self.writeString("ENVELOPE")
     }
-    
+
     @discardableResult mutating func writeFetchAttribute_flags() -> Int {
         self.writeString("FLAGS")
     }
-    
+
     @discardableResult mutating func writeFetchAttribute_internalDate() -> Int {
         self.writeString("INTERNALDATE")
     }
-    
+
     @discardableResult mutating func writeFetchAttribute_uid() -> Int {
         self.writeString("UID")
     }
-    
+
     @discardableResult mutating func writeFetchAttribute_rfc(_ rfc: NIOIMAP.RFC822?) -> Int {
         self.writeString("RFC822") +
-        self.writeIfExists(rfc) { (rfc) -> Int in
-            self.writeRFC822(rfc)
-        }
+            self.writeIfExists(rfc) { (rfc) -> Int in
+                self.writeRFC822(rfc)
+            }
     }
-    
+
     @discardableResult mutating func writeFetchAttribute_body(structure: Bool) -> Int {
         let string = structure ? "BODYSTRUCTURE" : "BODY"
         return self.writeString(string)
     }
-    
+
     @discardableResult mutating func writeFetchAttribute_body(section: NIOIMAP.SectionSpec?, partial: NIOIMAP.Partial?) -> Int {
         self.writeString("BODY") +
-        self.writeSection(section) +
-        self.writeIfExists(partial) { (partial) -> Int in
-            self.writePartial(partial)
-        }
+            self.writeSection(section) +
+            self.writeIfExists(partial) { (partial) -> Int in
+                self.writePartial(partial)
+            }
     }
-    
+
     @discardableResult mutating func writeFetchAttribute_bodyPeek(section: NIOIMAP.SectionSpec?, partial: NIOIMAP.Partial?) -> Int {
         self.writeString("BODY.PEEK") +
-        self.writeSection(section) +
-        self.writeIfExists(partial) { (partial) -> Int in
-            self.writePartial(partial)
-        }
+            self.writeSection(section) +
+            self.writeIfExists(partial) { (partial) -> Int in
+                self.writePartial(partial)
+            }
     }
-    
+
     @discardableResult mutating func writeFetchAttribute_binarySize(_ section: [Int]) -> Int {
         self.writeString("BINARY.SIZE") +
-        self.writeSectionBinary(section)
+            self.writeSectionBinary(section)
     }
-    
+
     @discardableResult mutating func writeFetchAttribute_binary(peek: Bool, section: [Int], partial: NIOIMAP.Partial?) -> Int {
         self.writeString("BINARY") +
-        self.writeIfTrue(peek) {
-            self.writeString(".PEEK")
-        } +
-        self.writeSectionBinary(section) +
-        self.writeIfExists(partial) { (partial) -> Int in
-            self.writePartial(partial)
-        }
+            self.writeIfTrue(peek) {
+                self.writeString(".PEEK")
+            } +
+            self.writeSectionBinary(section) +
+            self.writeIfExists(partial) { (partial) -> Int in
+                self.writePartial(partial)
+            }
     }
-    
 }

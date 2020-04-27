@@ -15,7 +15,6 @@
 import struct NIO.ByteBuffer
 
 extension NIOIMAP {
-
     public enum ResponsePayload: Equatable {
         case conditionalState(ResponseConditionalState)
         case conditionalBye(ResponseText)
@@ -25,12 +24,11 @@ extension NIOIMAP {
         case enableData([NIOIMAP.Capability])
         case id([IDParameter])
     }
-
 }
 
 // MARK: - Encoding
-extension ByteBuffer {
 
+extension ByteBuffer {
     @discardableResult mutating func writeResponsePayload(_ payload: NIOIMAP.ResponsePayload) -> Int {
         switch payload {
         case .conditionalState(let data):
@@ -49,5 +47,4 @@ extension ByteBuffer {
             return self.writeIDResponse(data)
         }
     }
-
 }

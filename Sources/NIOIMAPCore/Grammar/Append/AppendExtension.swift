@@ -15,25 +15,22 @@
 import struct NIO.ByteBuffer
 
 extension NIOIMAP {
-
     public struct AppendExtension: Equatable {
         public var name: String
         public var value: TaggedExtensionValue
-        
+
         public static func name(_ name: String, value: TaggedExtensionValue) -> Self {
-            return Self(name: name, value: value)
+            Self(name: name, value: value)
         }
     }
-
 }
 
 // MARK: - Encoding
+
 extension ByteBuffer {
-    
     @discardableResult mutating func writeAppendExtension(_ data: NIOIMAP.AppendExtension) -> Int {
         self.writeAppendExtensionName(data.name) +
-        self.writeSpace() +
-        self.writeTaggedExtensionValue(data.value)
+            self.writeSpace() +
+            self.writeTaggedExtensionValue(data.value)
     }
-    
 }

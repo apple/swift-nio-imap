@@ -15,29 +15,26 @@
 import struct NIO.ByteBuffer
 
 extension NIOIMAP {
-
     /// IMAPv4 `search-program`
     public struct SearchProgram: Equatable {
         public var charset: String?
         public var keys: [SearchKey]
 
         public static func charset(_ charset: String?, keys: [SearchKey]) -> Self {
-            return Self(charset: charset, keys: keys)
+            Self(charset: charset, keys: keys)
         }
     }
-
 }
 
 // MARK: - Encoding
-extension ByteBuffer {
 
+extension ByteBuffer {
     @discardableResult mutating func writeSearchProgram(_ program: NIOIMAP.SearchProgram) -> Int {
         self.writeIfExists(program.charset) { (charset) -> Int in
             self.writeString("CHARSET \(charset) ")
         } +
-        self.writeArray(program.keys, parenthesis: false) { (key, self) in
-            self.writeSearchKey(key)
-        }
+            self.writeArray(program.keys, parenthesis: false) { (key, self) in
+                self.writeSearchKey(key)
+            }
     }
-
 }

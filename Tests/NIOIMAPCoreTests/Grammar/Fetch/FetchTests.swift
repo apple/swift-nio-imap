@@ -12,34 +12,30 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
 @testable import NIOIMAPCore
+import XCTest
 
-class FetchTests: EncodeTestClass {
-    
-}
+class FetchTests: EncodeTestClass {}
 
 // MARK: - FetchType
+
 extension FetchTests {
-    
     func testFetchTypeImapEncoding() {
         let expected = "ALL"
         let size = self.testBuffer.writeFetchType(NIOIMAP.FetchType.all)
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }
-    
 }
 
 // MARK: - RFC822
+
 extension FetchTests {
-    
     func testRFC822ImapEncoding() {
         let expected = ".HEADER"
         let size = self.testBuffer.writeRFC822(NIOIMAP.RFC822.header)
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }
-    
 }

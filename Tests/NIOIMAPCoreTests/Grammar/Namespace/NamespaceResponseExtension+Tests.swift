@@ -12,21 +12,19 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
 @testable import NIOIMAPCore
+import XCTest
 
-class NamespaceResponseExtension_Tests: EncodeTestClass {
-
-}
+class NamespaceResponseExtension_Tests: EncodeTestClass {}
 
 // MARK: - Encoding
-extension NamespaceResponseExtension_Tests {
 
+extension NamespaceResponseExtension_Tests {
     func testEncode() {
         let inputs: [(NIOIMAP.NamespaceResponseExtension, String, UInt)] = [
             (.string("string1", array: ["string2"]), " \"string1\" (\"string2\")", #line),
-            (.string("str1", array: ["str2", "str3", "str4", "str5"]), " \"str1\" (\"str2\" \"str3\" \"str4\" \"str5\")", #line)
+            (.string("str1", array: ["str2", "str3", "str4", "str5"]), " \"str1\" (\"str2\" \"str3\" \"str4\" \"str5\")", #line),
         ]
 
         for (test, expectedString, line) in inputs {
@@ -45,9 +43,9 @@ extension NamespaceResponseExtension_Tests {
                 [
                     .string("str1", array: ["str2"]),
                     .string("str3", array: ["str4"]),
-                    .string("str5", array: ["str6"])
-                ]
-                , " \"str1\" (\"str2\") \"str3\" (\"str4\") \"str5\" (\"str6\")", #line
+                    .string("str5", array: ["str6"]),
+                ],
+                " \"str1\" (\"str2\") \"str3\" (\"str4\") \"str5\" (\"str6\")", #line
             ),
         ]
 

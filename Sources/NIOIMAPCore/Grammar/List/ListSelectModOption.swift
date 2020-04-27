@@ -15,18 +15,16 @@
 import struct NIO.ByteBuffer
 
 extension NIOIMAP {
-
     /// IMAPv4 `list-select-mod-opt`
     public enum ListSelectModOption: Equatable {
         case recursiveMatch
         case option(OptionExtension)
     }
-
 }
 
 // MARK: - Encoding
-extension ByteBuffer {
 
+extension ByteBuffer {
     @discardableResult mutating func writeListSelectModOption(_ option: NIOIMAP.ListSelectModOption) -> Int {
         switch option {
         case .recursiveMatch:
@@ -35,5 +33,4 @@ extension ByteBuffer {
             return self.writeOptionExtension(option)
         }
     }
-
 }

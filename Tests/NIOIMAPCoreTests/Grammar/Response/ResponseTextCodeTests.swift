@@ -12,17 +12,15 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
 @testable import NIOIMAPCore
+import XCTest
 
-class ResponseTextCodeTests: EncodeTestClass {
-
-}
+class ResponseTextCodeTests: EncodeTestClass {}
 
 // MARK: - Encoding
-extension ResponseTextCodeTests {
 
+extension ResponseTextCodeTests {
     func testEncode() {
         let inputs: [(NIOIMAP.ResponseTextCode, String, UInt)] = [
             (.alert, "ALERT", #line),
@@ -42,7 +40,7 @@ extension ResponseTextCodeTests {
             (.capability([]), "CAPABILITY IMAP4 IMAP4rev1", #line),
             (.capability([.unselect]), "CAPABILITY IMAP4 IMAP4rev1 UNSELECT", #line),
             (.capability([.unselect, .binary, .children]), "CAPABILITY IMAP4 IMAP4rev1 UNSELECT BINARY CHILDREN", #line),
-            (.namespace(.userNamespace([], otherUserNamespace: [], sharedNamespace: [])), "NAMESPACE NIL NIL NIL", #line)
+            (.namespace(.userNamespace([], otherUserNamespace: [], sharedNamespace: [])), "NAMESPACE NIL NIL NIL", #line),
         ]
 
         for (code, expectedString, line) in inputs {

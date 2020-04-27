@@ -12,16 +12,11 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 @testable import NIOIMAPCore
+import XCTest
 
-class SectionTextTests: XCTestCase {
-
-}
+class SectionTextTests: XCTestCase {}
 
 // MARK: - SectionTextTests imapEncoded
-extension SectionTextTests {
-    
-    
-    
-}
+
+extension SectionTextTests {}

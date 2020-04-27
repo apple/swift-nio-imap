@@ -15,7 +15,7 @@
 import struct NIO.ByteBuffer
 
 extension NIOIMAP.MailboxName {
-    
+
     /// IMAPv4 `mailbox-data`
     public enum Data: Equatable {
         case flags([NIOIMAP.Flag])
@@ -26,11 +26,9 @@ extension NIOIMAP.MailboxName {
         case exists(Int)
         case namespace(NIOIMAP.NamespaceResponse)
     }
-    
 }
 
 // MARK: - Encoding
-extension ByteBuffer {
 
     @discardableResult mutating func writeMailboxData(_ data: NIOIMAP.MailboxName.Data) -> Int {
         switch data {
@@ -50,30 +48,29 @@ extension ByteBuffer {
             return self.writeNamespaceResponse(namespaceResponse)
         }
     }
-    
+
     private mutating func writeMailboxData_flags(_ flags: [NIOIMAP.Flag]) -> Int {
         self.writeString("FLAGS ") +
-        self.writeFlags(flags)
-    }
-    
-    private mutating func writeMailboxData_list(_ list: NIOIMAP.MailboxName.List) -> Int {
-        self.writeString("LIST ") +
-        self.writeMailboxList(list)
-    }
-    
-    private mutating func writeMailboxData_lsub(_ list: NIOIMAP.MailboxName.List) -> Int {
-        self.writeString("LSUB ") +
-        self.writeMailboxList(list)
-    }
-    
-    private mutating func writeMailboxData_status(mailbox: NIOIMAP.MailboxName, list: [NIOIMAP.StatusAttributeValue]) -> Int {
-        self.writeString("STATUS ") +
-        self.writeMailbox(mailbox) +
-        self.writeString(" (") +
-        self.writeIfArrayHasMinimumSize(array: list) { (list, self) -> Int in
-            self.writeStatusAttributeList(list)
-        } +
-        self.writeString(")")
+            self.writeFlags(flags)
     }
 
+    private mutating func writeMailboxData_list(_ list: NIOIMAP.MailboxName.List) -> Int {
+        self.writeString("LIST ") +
+            self.writeMailboxList(list)
+    }
+
+    private mutating func writeMailboxData_lsub(_ list: NIOIMAP.MailboxName.List) -> Int {
+        self.writeString("LSUB ") +
+            self.writeMailboxList(list)
+    }
+
+    private mutating func writeMailboxData_status(mailbox: NIOIMAP.MailboxName, list: [NIOIMAP.StatusAttributeValue]) -> Int {
+        self.writeString("STATUS ") +
+            self.writeMailbox(mailbox) +
+            self.writeString(" (") +
+            self.writeIfArrayHasMinimumSize(array: list) { (list, self) -> Int in
+                self.writeStatusAttributeList(list)
+            } +
+            self.writeString(")")
+    }
 }

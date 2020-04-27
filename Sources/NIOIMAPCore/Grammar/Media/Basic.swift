@@ -15,7 +15,6 @@
 import struct NIO.ByteBuffer
 
 extension NIOIMAP.Media {
-
     public enum BasicType: Equatable {
         case application
         case audio
@@ -33,15 +32,14 @@ extension NIOIMAP.Media {
 
         /// Convenience function for a better experience when chaining multiple types.
         public static func type(_ type: BasicType, subtype: String) -> Self {
-            return Self(type: type, subtype: subtype)
+            Self(type: type, subtype: subtype)
         }
     }
-
 }
 
 // MARK: - Encoding
-extension ByteBuffer {
 
+extension ByteBuffer {
     @discardableResult mutating func writeMediaBasicType(_ type: NIOIMAP.Media.BasicType) -> Int {
         switch type {
         case .application:
@@ -63,8 +61,7 @@ extension ByteBuffer {
 
     @discardableResult mutating func writeMediaBasic(_ media: NIOIMAP.Media.Basic) -> Int {
         self.writeMediaBasicType(media.type) +
-        self.writeSpace() +
-        self.writeIMAPString(media.subtype)
+            self.writeSpace() +
+            self.writeIMAPString(media.subtype)
     }
-
 }

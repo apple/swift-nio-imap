@@ -12,17 +12,15 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
 @testable import NIOIMAPCore
+import XCTest
 
-class TaggedString_Tests: EncodeTestClass {
-
-}
+class TaggedString_Tests: EncodeTestClass {}
 
 // MARK: - Encoding
-extension TaggedString_Tests {
 
+extension TaggedString_Tests {
     func testEncode() {
         let inputs: [(ByteBuffer, String, UInt)] = [
             ("abc", #""abc""#, #line),

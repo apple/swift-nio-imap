@@ -15,28 +15,25 @@
 import struct NIO.ByteBuffer
 
 extension NIOIMAP.Date {
-    
     /// IMAPv4 `time`
     public struct Time: Equatable {
         public var hour: Int
         public var minute: Int
         public var second: Int
-        
+
         public static func hour(_ hour: Int, minute: Int, second: Int) -> Self {
-            return Self(hour: hour, minute: minute, second: second)
+            Self(hour: hour, minute: minute, second: second)
         }
     }
-    
 }
 
 // MARK: - Encoding
+
 extension ByteBuffer {
-    
     @discardableResult mutating func writeTime(_ time: NIOIMAP.Date.Time) -> Int {
         let hour = time.hour < 10 ? "0\(time.hour)" : "\(time.hour)"
         let minute = time.minute < 10 ? "0\(time.minute)" : "\(time.minute)"
         let second = time.second < 10 ? "0\(time.second)" : "\(time.second)"
         return self.writeString("\(hour):\(minute):\(second)")
     }
-    
 }

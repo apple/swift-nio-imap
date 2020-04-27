@@ -15,17 +15,15 @@
 import struct NIO.ByteBuffer
 
 extension NIOIMAP {
-
     public enum EntryTypeRequest: Equatable {
         case response(EntryTypeResponse)
         case all
     }
-
 }
 
 // MARK: - Encoding
+
 extension ByteBuffer {
-    
     @discardableResult mutating func writeEntryTypeRequest(_ request: NIOIMAP.EntryTypeRequest) -> Int {
         switch request {
         case .response(let response):
@@ -34,5 +32,4 @@ extension ByteBuffer {
             return self.writeString("all")
         }
     }
-    
 }

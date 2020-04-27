@@ -15,17 +15,14 @@
 import struct NIO.ByteBuffer
 
 extension NIOIMAP {
-
     public enum CommandStream: Equatable {
         case idleDone
         case command(TaggedCommand)
         case bytes(ByteBuffer)
     }
-
 }
 
 extension ByteBuffer {
-
     @discardableResult public mutating func writeCommandStream(_ stream: NIOIMAP.CommandStream) -> Int {
         switch stream {
         case .idleDone:
@@ -37,5 +34,4 @@ extension ByteBuffer {
             return self.writeBuffer(&copy)
         }
     }
-
 }

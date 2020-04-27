@@ -15,25 +15,22 @@
 import struct NIO.ByteBuffer
 
 extension ByteBuffer {
-    
     mutating func writeAtom(_ str: String) -> Int {
         self.writeString(str)
     }
-    
+
     mutating func writeAString(_ str: String) -> Int {
-        
         // allSatisfy vs contains because IMO it's a little clearer
         var foundNull = false
         let canUseAtom = str.utf8.allSatisfy { c in
             foundNull = foundNull || (c == 0)
             return c.isAtomChar && !foundNull
         }
-        
+
         if canUseAtom {
             return self.writeString(str)
         } else {
             return self.writeIMAPString(str)
         }
     }
-    
 }

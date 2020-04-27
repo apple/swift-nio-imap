@@ -15,28 +15,25 @@
 import struct NIO.ByteBuffer
 
 extension NIOIMAP {
-
     /// IMAPv4 `search-ret-opt-ext`
     public struct SearchReturnOptionExtension: Equatable {
         public var modifierName: String
         public var params: TaggedExtensionValue?
 
         public static func modifier(_ modifier: String, params: TaggedExtensionValue?) -> Self {
-            return Self(modifierName: modifier, params: params)
+            Self(modifierName: modifier, params: params)
         }
     }
-
 }
 
 // MARK: - Encoding
-extension ByteBuffer {
 
+extension ByteBuffer {
     @discardableResult mutating func writeSearchReturnOptionExtension(_ option: NIOIMAP.SearchReturnOptionExtension) -> Int {
         self.writeTaggedExtensionLabel(option.modifierName) +
-        self.writeIfExists(option.params) { (params) -> Int in
-            self.writeSpace() +
-            self.writeTaggedExtensionValue(params)
-        }
+            self.writeIfExists(option.params) { (params) -> Int in
+                self.writeSpace() +
+                    self.writeTaggedExtensionValue(params)
+            }
     }
-
 }

@@ -15,32 +15,29 @@
 import struct NIO.ByteBuffer
 
 extension NIOIMAP {
-    
     /// IMAPv4 `section-spec`
     public enum SectionSpec: Equatable {
         case text(_ text: SectionMessageText)
         case part(_ part: [Int], text: SectionText?)
     }
-    
 }
 
 // MARK: - Encoding
+
 extension ByteBuffer {
-    
     @discardableResult mutating func writeSection(_ section: NIOIMAP.SectionSpec?) -> Int {
         self.writeString("[") +
-        self.writeIfExists(section) { (spec) -> Int in
-            self.writeSectionSpec(spec)
-        } +
-        self.writeString("]")
+            self.writeIfExists(section) { (spec) -> Int in
+                self.writeSectionSpec(spec)
+            } +
+            self.writeString("]")
     }
-    
+
     @discardableResult mutating func writeSectionSpec(_ spec: NIOIMAP.SectionSpec?) -> Int {
-        
         guard let spec = spec else {
             return 0 // do nothing
         }
-        
+
         switch spec {
         case .text(let text):
             return self.writeSectionMessageText(text)
@@ -49,7 +46,7 @@ extension ByteBuffer {
                 self.writeSectionPart(part) +
                 self.writeIfExists(text) { (text) -> Int in
                     self.writeString(".") +
-                    self.writeSectionText(text)
+                        self.writeSectionText(text)
                 }
         }
     }

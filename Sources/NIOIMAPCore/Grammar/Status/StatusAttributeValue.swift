@@ -15,7 +15,6 @@
 import struct NIO.ByteBuffer
 
 extension NIOIMAP {
-
     /// IMAPv4 `status-att-val`
     public enum StatusAttributeValue: Equatable {
         case messages(Int)
@@ -26,17 +25,16 @@ extension NIOIMAP {
         case size(Int)
         case modSequence(ModifierSequenceValue)
     }
-
 }
 
 // MARK: - Encoding
-extension ByteBuffer {
 
+extension ByteBuffer {
     @discardableResult mutating func writeStatusOption(_ option: [NIOIMAP.StatusAttribute]) -> Int {
         self.writeString("STATUS ") +
-        self.writeArray(option) { (att, self) in
-            self.writeStatusAttribute(att)
-        }
+            self.writeArray(option) { (att, self) in
+                self.writeStatusAttribute(att)
+            }
     }
 
     @discardableResult mutating func writeStatusAttributeList(_ list: [NIOIMAP.StatusAttributeValue]) -> Int {
@@ -65,5 +63,4 @@ extension ByteBuffer {
                 self.writeModifierSequenceValue(value)
         }
     }
-
 }

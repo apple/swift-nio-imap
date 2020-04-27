@@ -15,18 +15,16 @@
 import struct NIO.ByteBuffer
 
 extension NIOIMAP {
-
     /// IMAPv4 `list-select-independent-opt`
     public enum ListSelectIndependentOption: Equatable {
         case remote
         case option(OptionExtension)
     }
-
 }
 
 // MARK: - Encoding
-extension ByteBuffer {
 
+extension ByteBuffer {
     @discardableResult mutating func writeListSelectIndependentOption(_ option: NIOIMAP.ListSelectIndependentOption) -> Int {
         switch option {
         case .remote:
@@ -35,5 +33,4 @@ extension ByteBuffer {
             return self.writeOptionExtension(option)
         }
     }
-
 }

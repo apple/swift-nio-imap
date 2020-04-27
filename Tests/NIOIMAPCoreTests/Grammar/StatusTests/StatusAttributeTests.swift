@@ -12,29 +12,26 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
 @testable import NIOIMAPCore
+import XCTest
 
-class StatusAttributeTests: EncodeTestClass {
-    
-}
+class StatusAttributeTests: EncodeTestClass {}
 
 // MARK: - [StatusAttribute] imapEncoded
+
 extension StatusAttributeTests {
-    
     func testStatusAttribute_ImapEncodedEmpty() {
         let expected = ""
         let size = self.testBuffer.writeStatusAttributes([])
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }
-    
+
     func testStatusAttribute_ImapEncodedFull() {
         let expected = "MESSAGES RECENT UNSEEN"
         let size = self.testBuffer.writeStatusAttributes([NIOIMAP.StatusAttribute.messages, .recent, .unseen])
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }
-    
 }

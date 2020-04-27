@@ -12,17 +12,15 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
 @testable import NIOIMAPCore
+import XCTest
 
-class BodyExtensionTests: EncodeTestClass {
-
-}
+class BodyExtensionTests: EncodeTestClass {}
 
 // MARK: - Encoding
-extension BodyExtensionTests {
 
+extension BodyExtensionTests {
     func testEncode() {
         let inputs: [([NIOIMAP.BodyExtensionType], String, UInt)] = [
             ([.number(1)], "(1)", #line),

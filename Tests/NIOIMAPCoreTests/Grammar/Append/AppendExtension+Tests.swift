@@ -12,18 +12,14 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
 @testable import NIOIMAPCore
+import XCTest
 
-class AppendExtension_Tests: EncodeTestClass {
-
-}
+class AppendExtension_Tests: EncodeTestClass {}
 
 extension AppendExtension_Tests {
-    
     func testEncode() {
-        
         let inputs: [(NIOIMAP.AppendExtension, String, UInt)] = [
             (.name("name", value: .simple(.number(1))), "name 1", #line),
         ]
@@ -34,7 +30,5 @@ extension AppendExtension_Tests {
             XCTAssertEqual(size, expectedString.utf8.count, line: line)
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }
-        
     }
-    
 }

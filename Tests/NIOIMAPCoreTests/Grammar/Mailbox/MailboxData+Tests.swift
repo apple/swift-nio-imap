@@ -12,17 +12,15 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
 @testable import NIOIMAPCore
+import XCTest
 
-class MailboxDataTests: EncodeTestClass {
-
-}
+class MailboxDataTests: EncodeTestClass {}
 
 // MARK: - Encoding
-extension MailboxDataTests {
 
+extension MailboxDataTests {
     func testEncode() {
         let inputs: [(NIOIMAP.MailboxName.Data, String, UInt)] = [
             (.exists(1), "1 EXISTS", #line),

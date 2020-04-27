@@ -12,17 +12,15 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import NIO
 @testable import NIOIMAPCore
+import XCTest
 
-class EnvelopeTests: EncodeTestClass {
-
-}
+class EnvelopeTests: EncodeTestClass {}
 
 // MARK: - Encoding
-extension EnvelopeTests {
 
+extension EnvelopeTests {
     func testEncode() {
         let inputs: [(NIOIMAP.Envelope, String, UInt)] = [
             (

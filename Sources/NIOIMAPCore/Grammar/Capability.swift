@@ -15,146 +15,142 @@
 import struct NIO.ByteBuffer
 
 extension NIOIMAP {
-    
     /// IMAPv4 `capability`
     public struct Capability: Equatable {
-        
         public var rawValue: String
-        
+
         public init(_ value: String) {
             self.rawValue = value.uppercased()
         }
-        
+
         fileprivate init(unchecked: String) {
             self.rawValue = unchecked
         }
-        
     }
-    
 }
 
 // MARK: - Convenience Types
+
 extension NIOIMAP.Capability {
-    
     public struct AuthType: Equatable {
         public static let token = Self(unchecked: "TOKEN")
         public static let plain = Self(unchecked: "PLAIN")
         public static let pToken = Self(unchecked: "PTOKEN")
         public static let weToken = Self(unchecked: "WETOKEN")
         public static let wsToken = Self(unchecked: "WSTOKEN")
-        
+
         public var rawValue: String
-        
+
         public init(_ value: String) {
             self.rawValue = value.uppercased()
         }
-        
+
         fileprivate init(unchecked: String) {
             self.rawValue = unchecked
         }
     }
-    
+
     public struct ContextType: Equatable {
         public static let search = Self(unchecked: "SEARCH")
         public static let sort = Self(unchecked: "SORT")
-        
+
         public var rawValue: String
-        
+
         public init(_ value: String) {
             self.rawValue = value.uppercased()
         }
-        
+
         fileprivate init(unchecked: String) {
             self.rawValue = unchecked
         }
     }
-    
+
     public struct LiteralType: Equatable {
         public static let plus = Self(unchecked: "+")
         public static let minus = Self(unchecked: "-")
-        
+
         public var rawValue: String
-        
+
         public init(_ value: String) {
             self.rawValue = value.uppercased()
         }
-        
+
         fileprivate init(unchecked: String) {
             self.rawValue = unchecked
         }
     }
-    
+
     public struct SortType: Equatable {
         public static let display = Self(unchecked: "DISPLAY")
-        
+
         public var rawValue: String
-        
+
         public init(_ value: String) {
             self.rawValue = value.uppercased()
         }
-        
+
         fileprivate init(unchecked: String) {
             self.rawValue = unchecked
         }
     }
-    
+
     public struct ThreadType: Equatable {
         public static let orderedSubject = Self(unchecked: "ORDEREDSUBJECT")
         public static let references = Self(unchecked: "REFERENCES")
-        
+
         public var rawValue: String
-        
+
         public init(_ value: String) {
             self.rawValue = value.uppercased()
         }
-        
+
         fileprivate init(unchecked: String) {
             self.rawValue = unchecked
         }
     }
-    
+
     public struct StatusType: Equatable {
         public static let size = Self(unchecked: "SIZE")
-        
+
         public var rawValue: String
-        
+
         public init(_ value: String) {
             self.rawValue = value.uppercased()
         }
-        
+
         fileprivate init(unchecked: String) {
             self.rawValue = unchecked
         }
     }
-    
+
     public struct UTF8Type: Equatable {
         public static let accept = Self(unchecked: "ACCEPT")
-        
+
         public var rawValue: String
-        
+
         public init(_ value: String) {
             self.rawValue = value.uppercased()
         }
-        
+
         fileprivate init(unchecked: String) {
             self.rawValue = unchecked
         }
     }
-    
-    public struct  RightsType: Equatable {
+
+    public struct RightsType: Equatable {
         public static let tekx = Self(unchecked: "tekx")
-        
+
         public var rawValue: String
-        
+
         public init(_ value: String) {
             self.rawValue = value.uppercased()
         }
-        
+
         fileprivate init(unchecked: String) {
             self.rawValue = unchecked
         }
     }
-    
+
     public static let acl = Self(unchecked: "ACL")
     public static let annotateExperiment1 = Self(unchecked: "ANNOTATE-EXPERIMENT-1")
     public static let binary = Self(unchecked: "BINARY")
@@ -187,19 +183,19 @@ extension NIOIMAP.Capability {
     public static let urlPartial = Self(unchecked: "URL-PARTIAL")
     public static let urlAuth = Self(unchecked: "URLAUTH")
     public static let within = Self(unchecked: "WITHIN")
-    
+
     public static func auth(_ type: AuthType) -> Self {
-        return Self("AUTH=\(type.rawValue)")
+        Self("AUTH=\(type.rawValue)")
     }
-    
+
     public static func context(_ type: ContextType) -> Self {
-        return Self("CONTEXT=\(type.rawValue)")
+        Self("CONTEXT=\(type.rawValue)")
     }
-    
+
     public static func literal(_ type: LiteralType) -> Self {
-        return Self("LITERAL\(type.rawValue)")
+        Self("LITERAL\(type.rawValue)")
     }
-    
+
     public static func sort(_ type: SortType?) -> Self {
         if let type = type {
             return Self("SORT=\(type.rawValue)")
@@ -207,38 +203,36 @@ extension NIOIMAP.Capability {
             return Self("SORT")
         }
     }
-    
+
     public static func utf8(_ type: UTF8Type) -> Self {
-        return Self("UTF8=\(type.rawValue)")
+        Self("UTF8=\(type.rawValue)")
     }
-    
+
     public static func thread(_ type: ThreadType) -> Self {
-        return Self("THREAD=\(type.rawValue)")
+        Self("THREAD=\(type.rawValue)")
     }
-    
+
     public static func status(_ type: StatusType) -> Self {
-        return Self("STATUS=\(type.rawValue)")
+        Self("STATUS=\(type.rawValue)")
     }
-    
+
     public static func rights(_ type: RightsType) -> Self {
-        return Self("RIGHTS=\(type.rawValue)")
+        Self("RIGHTS=\(type.rawValue)")
     }
-    
 }
 
 // MARK: - Encoding
+
 extension ByteBuffer {
-    
     @discardableResult mutating func writeCapability(_ capability: NIOIMAP.Capability) -> Int {
         self.writeString(capability.rawValue)
     }
-    
+
     @discardableResult mutating func writeCapabilityData(_ data: [NIOIMAP.Capability]) -> Int {
         self.writeString("CAPABILITY IMAP4 IMAP4rev1") +
-        self.writeArray(data, separator: "", parenthesis: false) { (capability, self) -> Int in
-            self.writeSpace() +
-            self.writeCapability(capability)
-        }
+            self.writeArray(data, separator: "", parenthesis: false) { (capability, self) -> Int in
+                self.writeSpace() +
+                    self.writeCapability(capability)
+            }
     }
-    
 }

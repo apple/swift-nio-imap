@@ -15,7 +15,7 @@
 import struct NIO.ByteBuffer
 
 extension NIOIMAP.MailboxName {
-    
+
     /// IMAPv4 `mailbox-list`
     public struct List: Equatable {
         public var flags: Flags?
@@ -27,22 +27,19 @@ extension NIOIMAP.MailboxName {
             return Self(flags: flags, char: char, mailbox: mailbox, listExtended: listExtended)
         }
     }
-    
 }
 
 // MARK: - Encoding
-extension ByteBuffer {
 
     @discardableResult mutating func writeMailboxList(_ list: NIOIMAP.MailboxName.List) -> Int {
         self.writeString("(") +
-        self.writeIfExists(list.flags) { (flags) -> Int in
-            self.writeMailboxListFlags(flags)
-        } +
-        self.writeString(") ") +
-        self.writeIfExists(list.char) { (char) -> Int in
-            self.writeString("\(char) ")
-        } +
-        self.writeMailbox(list.mailbox)
+            self.writeIfExists(list.flags) { (flags) -> Int in
+                self.writeMailboxListFlags(flags)
+            } +
+            self.writeString(") ") +
+            self.writeIfExists(list.char) { (char) -> Int in
+                self.writeString("\(char) ")
+            } +
+            self.writeMailbox(list.mailbox)
     }
-
 }
