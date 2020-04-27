@@ -15,8 +15,9 @@
 import struct NIO.ByteBuffer
 
 extension NIOIMAP {
+    
     /// IMAOv4 body
-    public enum Body: Equatable {
+    public enum BodyStructure: Equatable {
         case singlepart(TypeSinglepart)
         case multipart(TypeMultipart)
     }
@@ -25,7 +26,7 @@ extension NIOIMAP {
 // MARK: - Encoding
 
 extension ByteBuffer {
-    @discardableResult mutating func writeBody(_ body: NIOIMAP.Body) -> Int {
+    @discardableResult mutating func writeBody(_ body: NIOIMAP.BodyStructure) -> Int {
         var size = 0
         size += self.writeString("(")
         switch body {

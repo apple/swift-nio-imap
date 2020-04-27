@@ -14,7 +14,7 @@
 
 import struct NIO.ByteBuffer
 
-extension NIOIMAP.Body {
+extension NIOIMAP.BodyStructure {
     public indirect enum TypeSinglepartType: Equatable {
         case basic(TypeBasic)
         case message(TypeMessage)
@@ -36,7 +36,7 @@ extension NIOIMAP.Body {
 // MARK: - Encoding
 
 extension ByteBuffer {
-    @discardableResult mutating func writeBodyTypeSinglepart(_ part: NIOIMAP.Body.TypeSinglepart) -> Int {
+    @discardableResult mutating func writeBodyTypeSinglepart(_ part: NIOIMAP.BodyStructure.TypeSinglepart) -> Int {
         var size = 0
         switch part.type {
         case .basic(let basic):

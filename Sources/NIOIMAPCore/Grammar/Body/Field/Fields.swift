@@ -14,7 +14,7 @@
 
 import struct NIO.ByteBuffer
 
-extension NIOIMAP.Body {
+extension NIOIMAP.BodyStructure {
     /// IMAPv4 `body-fields`
     public struct Fields: Equatable {
         public var parameter: [NIOIMAP.FieldParameterPair]
@@ -33,7 +33,7 @@ extension NIOIMAP.Body {
 // MARK: - Encoding
 
 extension ByteBuffer {
-    @discardableResult mutating func writeBodyFields(_ fields: NIOIMAP.Body.Fields) -> Int {
+    @discardableResult mutating func writeBodyFields(_ fields: NIOIMAP.BodyStructure.Fields) -> Int {
         self.writeBodyFieldParameters(fields.parameter) +
             self.writeSpace() +
             self.writeNString(fields.id) +

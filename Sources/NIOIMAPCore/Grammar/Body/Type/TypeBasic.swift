@@ -14,7 +14,7 @@
 
 import struct NIO.ByteBuffer
 
-extension NIOIMAP.Body {
+extension NIOIMAP.BodyStructure {
     /// IMAPv4 `body-type-basic`
     public struct TypeBasic: Equatable {
         public var media: NIOIMAP.Media.Basic
@@ -29,7 +29,7 @@ extension NIOIMAP.Body {
 // MARK: - Encoding
 
 extension ByteBuffer {
-    @discardableResult mutating func writeBodyTypeBasic(_ body: NIOIMAP.Body.TypeBasic) -> Int {
+    @discardableResult mutating func writeBodyTypeBasic(_ body: NIOIMAP.BodyStructure.TypeBasic) -> Int {
         self.writeMediaBasic(body.media) +
             self.writeSpace() +
             self.writeBodyFields(body.fields)

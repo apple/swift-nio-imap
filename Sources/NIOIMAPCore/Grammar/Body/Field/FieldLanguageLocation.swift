@@ -14,14 +14,14 @@
 
 import struct NIO.ByteBuffer
 
-extension NIOIMAP.Body {
+extension NIOIMAP.BodyStructure {
     /// Extracted from IMAPv4 `body-ext-1part`
     public struct FieldLanguageLocation: Equatable {
         public var language: FieldLanguage
         public var location: FieldLocationExtension?
 
         /// Convenience function for a better experience when chaining multiple types.
-        public static func language(_ language: NIOIMAP.Body.FieldLanguage, location: FieldLocationExtension?) -> Self {
+        public static func language(_ language: NIOIMAP.BodyStructure.FieldLanguage, location: FieldLocationExtension?) -> Self {
             Self(language: language, location: location)
         }
     }
@@ -30,7 +30,7 @@ extension NIOIMAP.Body {
 // MARK: - Encoding
 
 extension ByteBuffer {
-    @discardableResult mutating func writeBodyFieldLanguageLocation(_ langLoc: NIOIMAP.Body.FieldLanguageLocation) -> Int {
+    @discardableResult mutating func writeBodyFieldLanguageLocation(_ langLoc: NIOIMAP.BodyStructure.FieldLanguageLocation) -> Int {
         self.writeSpace() +
             self.writeBodyFieldLanguage(langLoc.language) +
             self.writeIfExists(langLoc.location) { (location) -> Int in

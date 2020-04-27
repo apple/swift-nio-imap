@@ -14,7 +14,7 @@
 
 import struct NIO.ByteBuffer
 
-extension NIOIMAP.Body {
+extension NIOIMAP.BodyStructure {
     /// IMAPv4 `body-fld-enc`
     public enum FieldEncoding: Equatable {
         case bit7
@@ -29,7 +29,7 @@ extension NIOIMAP.Body {
 // MARK: - Encoding
 
 extension ByteBuffer {
-    @discardableResult mutating func writeBodyFieldEncoding(_ encoding: NIOIMAP.Body.FieldEncoding) -> Int {
+    @discardableResult mutating func writeBodyFieldEncoding(_ encoding: NIOIMAP.BodyStructure.FieldEncoding) -> Int {
         switch encoding {
         case .bit7:
             return self.writeString(#""7BIT""#)

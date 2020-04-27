@@ -206,15 +206,15 @@ extension NIOIMAP.GrammarParser {
     }
 
     // body            = "(" (body-type-1part / body-type-mpart) ")"
-    static func parseBody(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Body {
-        func parseBody_singlePart(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Body {
+    static func parseBody(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.BodyStructure {
+        func parseBody_singlePart(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.BodyStructure {
             try ParserLibrary.parseFixedString("(", buffer: &buffer, tracker: tracker)
             let part = try self.parseBodyTypeSinglePart(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)
             return .singlepart(part)
         }
 
-        func parseBody_multiPart(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Body {
+        func parseBody_multiPart(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.BodyStructure {
             try ParserLibrary.parseFixedString("(", buffer: &buffer, tracker: tracker)
             let part = try self.parseBodyTypeMultipart(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)
@@ -278,33 +278,33 @@ extension NIOIMAP.GrammarParser {
     }
 
     // body-ext-1part  = body-fld-md5 [SP body-fld-dsp [SP body-fld-lang [SP body-fld-loc *(SP body-extension)]]]
-    static func parseBodyExtSinglePart(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Body.ExtensionSinglepart {
-        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> NIOIMAP.Body.ExtensionSinglepart in
+    static func parseBodyExtSinglePart(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.BodyStructure.ExtensionSinglepart {
+        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> NIOIMAP.BodyStructure.ExtensionSinglepart in
             let md5 = try self.parseNString(buffer: &buffer, tracker: tracker)
-            let dsp = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> NIOIMAP.Body.FieldDSPLanguage in
+            let dsp = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> NIOIMAP.BodyStructure.FieldDSPLanguage in
                 try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
                 return try parseBodyDescriptionLanguage(buffer: &buffer, tracker: tracker)
             }
-            return NIOIMAP.Body.ExtensionSinglepart(fieldMD5: md5, dspLanguage: dsp)
+            return NIOIMAP.BodyStructure.ExtensionSinglepart(fieldMD5: md5, dspLanguage: dsp)
         }
     }
 
     // body-ext-mpart  = body-fld-param [SP body-fld-dsp [SP body-fld-lang [SP body-fld-loc *(SP body-extension)]]]
-    static func parseBodyExtMpart(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Body.ExtensionMultipart {
-        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> NIOIMAP.Body.ExtensionMultipart in
+    static func parseBodyExtMpart(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.BodyStructure.ExtensionMultipart {
+        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> NIOIMAP.BodyStructure.ExtensionMultipart in
             let param = try self.parseBodyFieldParam(buffer: &buffer, tracker: tracker)
-            let dsp = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> NIOIMAP.Body.FieldDSPLanguage in
+            let dsp = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> NIOIMAP.BodyStructure.FieldDSPLanguage in
                 try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
                 return try parseBodyDescriptionLanguage(buffer: &buffer, tracker: tracker)
             }
-            return NIOIMAP.Body.ExtensionMultipart(parameter: param, dspLanguage: dsp)
+            return NIOIMAP.BodyStructure.ExtensionMultipart(parameter: param, dspLanguage: dsp)
         }
     }
 
     // body-fields     = body-fld-param SP body-fld-id SP body-fld-desc SP
     //                   body-fld-enc SP body-fld-octets
-    static func parseBodyFields(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Body.Fields {
-        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> NIOIMAP.Body.Fields in
+    static func parseBodyFields(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.BodyStructure.Fields {
+        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> NIOIMAP.BodyStructure.Fields in
             let fieldParam = try self.parseBodyFieldParam(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
             let fieldID = try self.parseNString(buffer: &buffer, tracker: tracker)
@@ -314,7 +314,7 @@ extension NIOIMAP.GrammarParser {
             let fieldEncoding = try self.parseBodyFieldEncoding(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
             let fieldOctets = try self.parseBodyFieldOctets(buffer: &buffer, tracker: tracker)
-            return NIOIMAP.Body.Fields(
+            return NIOIMAP.BodyStructure.Fields(
                 parameter: fieldParam,
                 id: fieldID,
                 description: fieldDescription,
@@ -325,19 +325,19 @@ extension NIOIMAP.GrammarParser {
     }
 
     // body-fld-dsp    = "(" string SP body-fld-param ")" / nil
-    static func parseBodyFieldDsp(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Body.FieldDSPData? {
-        func parseBodyFieldDsp_nil(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Body.FieldDSPData? {
+    static func parseBodyFieldDsp(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.BodyStructure.FieldDSPData? {
+        func parseBodyFieldDsp_nil(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.BodyStructure.FieldDSPData? {
             try self.parseNil(buffer: &buffer, tracker: tracker)
             return nil
         }
 
-        func parseBodyFieldDsp_some(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Body.FieldDSPData? {
+        func parseBodyFieldDsp_some(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.BodyStructure.FieldDSPData? {
             try ParserLibrary.parseFixedString("(", buffer: &buffer, tracker: tracker)
             let string = try self.parseString(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
             let param = try self.parseBodyFieldParam(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)
-            return NIOIMAP.Body.FieldDSPData(string: string, parameter: param)
+            return NIOIMAP.BodyStructure.FieldDSPData(string: string, parameter: param)
         }
 
         return try ParserLibrary.parseOneOf([
@@ -348,35 +348,35 @@ extension NIOIMAP.GrammarParser {
 
     // body-fld-enc    = (DQUOTE ("7BIT" / "8BIT" / "BINARY" / "BASE64"/
     //                   "QUOTED-PRINTABLE") DQUOTE) / string
-    static func parseBodyFieldEncoding(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Body.FieldEncoding {
-        func parseBodyFieldEncoding_string(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Body.FieldEncoding {
+    static func parseBodyFieldEncoding(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.BodyStructure.FieldEncoding {
+        func parseBodyFieldEncoding_string(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.BodyStructure.FieldEncoding {
             .string(try self.parseString(buffer: &buffer, tracker: tracker))
         }
 
-        func parseBodyFieldEncoding_option(_ option: String, result: NIOIMAP.Body.FieldEncoding, buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Body.FieldEncoding {
+        func parseBodyFieldEncoding_option(_ option: String, result: NIOIMAP.BodyStructure.FieldEncoding, buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.BodyStructure.FieldEncoding {
             try ParserLibrary.parseFixedString("\"", buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseFixedString(option, buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseFixedString("\"", buffer: &buffer, tracker: tracker)
             return result
         }
 
-        func parseBodyFieldEncoding_7bit(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Body.FieldEncoding {
+        func parseBodyFieldEncoding_7bit(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.BodyStructure.FieldEncoding {
             try parseBodyFieldEncoding_option("7BIT", result: .bit7, buffer: &buffer, tracker: tracker)
         }
 
-        func parseBodyFieldEncoding_8bit(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Body.FieldEncoding {
+        func parseBodyFieldEncoding_8bit(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.BodyStructure.FieldEncoding {
             try parseBodyFieldEncoding_option("8BIT", result: .bit8, buffer: &buffer, tracker: tracker)
         }
 
-        func parseBodyFieldEncoding_binary(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Body.FieldEncoding {
+        func parseBodyFieldEncoding_binary(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.BodyStructure.FieldEncoding {
             try parseBodyFieldEncoding_option("BINARY", result: .binary, buffer: &buffer, tracker: tracker)
         }
 
-        func parseBodyFieldEncoding_base64(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Body.FieldEncoding {
+        func parseBodyFieldEncoding_base64(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.BodyStructure.FieldEncoding {
             try parseBodyFieldEncoding_option("BASE64", result: .base64, buffer: &buffer, tracker: tracker)
         }
 
-        func parseBodyFieldEncoding_quotePrintable(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Body.FieldEncoding {
+        func parseBodyFieldEncoding_quotePrintable(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.BodyStructure.FieldEncoding {
             try parseBodyFieldEncoding_option("QUOTED-PRINTABLE", result: .quotedPrintable, buffer: &buffer, tracker: tracker)
         }
 
@@ -391,12 +391,12 @@ extension NIOIMAP.GrammarParser {
     }
 
     // body-fld-lang   = nstring / "(" string *(SP string) ")"
-    static func parseBodyFieldLanguage(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Body.FieldLanguage {
-        func parseBodyFieldLanguage_single(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Body.FieldLanguage {
+    static func parseBodyFieldLanguage(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.BodyStructure.FieldLanguage {
+        func parseBodyFieldLanguage_single(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.BodyStructure.FieldLanguage {
             .single(try self.parseNString(buffer: &buffer, tracker: tracker))
         }
 
-        func parseBodyFieldLanguage_multiple(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Body.FieldLanguage {
+        func parseBodyFieldLanguage_multiple(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.BodyStructure.FieldLanguage {
             try ParserLibrary.parseFixedString("(", buffer: &buffer, tracker: tracker)
             var array = [try self.parseString(buffer: &buffer, tracker: tracker)]
             try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) -> ByteBuffer in
@@ -456,64 +456,64 @@ extension NIOIMAP.GrammarParser {
 
     // body-type-1part = (body-type-basic / body-type-msg / body-type-text)
     //                   [SP body-ext-1part]
-    static func parseBodyTypeSinglePart(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Body.TypeSinglepart {
-        func parseBodyTypeSinglePart_basic(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Body.TypeSinglepartType {
+    static func parseBodyTypeSinglePart(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.BodyStructure.TypeSinglepart {
+        func parseBodyTypeSinglePart_basic(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.BodyStructure.TypeSinglepartType {
             .basic(try self.parseBodyTypeBasic(buffer: &buffer, tracker: tracker))
         }
 
-        func parseBodyTypeSinglePart_message(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Body.TypeSinglepartType {
+        func parseBodyTypeSinglePart_message(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.BodyStructure.TypeSinglepartType {
             .message(try self.parseBodyTypeMessage(buffer: &buffer, tracker: tracker))
         }
 
-        func parseBodyTypeSinglePart_text(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Body.TypeSinglepartType {
+        func parseBodyTypeSinglePart_text(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.BodyStructure.TypeSinglepartType {
             .text(try self.parseBodyTypeText(buffer: &buffer, tracker: tracker))
         }
 
-        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> NIOIMAP.Body.TypeSinglepart in
+        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> NIOIMAP.BodyStructure.TypeSinglepart in
             let type = try ParserLibrary.parseOneOf([
                 parseBodyTypeSinglePart_basic,
                 parseBodyTypeSinglePart_message,
                 parseBodyTypeSinglePart_text,
             ], buffer: &buffer, tracker: tracker)
-            let ext = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> NIOIMAP.Body.ExtensionSinglepart in
+            let ext = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> NIOIMAP.BodyStructure.ExtensionSinglepart in
                 try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
                 return try self.parseBodyExtSinglePart(buffer: &buffer, tracker: tracker)
             }
-            return NIOIMAP.Body.TypeSinglepart(type: type, extension: ext)
+            return NIOIMAP.BodyStructure.TypeSinglepart(type: type, extension: ext)
         }
     }
 
     // body-type-basic = media-basic SP body-fields
-    static func parseBodyTypeBasic(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Body.TypeBasic {
-        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> NIOIMAP.Body.TypeBasic in
+    static func parseBodyTypeBasic(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.BodyStructure.TypeBasic {
+        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> NIOIMAP.BodyStructure.TypeBasic in
             let media = try self.parseMediaBasic(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
             let fields = try self.parseBodyFields(buffer: &buffer, tracker: tracker)
-            return NIOIMAP.Body.TypeBasic(media: media, fields: fields)
+            return NIOIMAP.BodyStructure.TypeBasic(media: media, fields: fields)
         }
     }
 
     // body-type-mpart = 1*body SP media-subtype
     //                   [SP body-ext-mpart]
-    static func parseBodyTypeMultipart(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Body.TypeMultipart {
-        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> NIOIMAP.Body.TypeMultipart in
+    static func parseBodyTypeMultipart(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.BodyStructure.TypeMultipart {
+        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> NIOIMAP.BodyStructure.TypeMultipart in
             let bodies = try ParserLibrary.parseOneOrMore(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
                 try self.parseBody(buffer: &buffer, tracker: tracker)
             }
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
             let media = try self.parseMediaSubtype(buffer: &buffer, tracker: tracker)
-            let ext = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> NIOIMAP.Body.ExtensionMultipart in
+            let ext = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> NIOIMAP.BodyStructure.ExtensionMultipart in
                 try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
                 return try self.parseBodyExtMpart(buffer: &buffer, tracker: tracker)
             }
-            return NIOIMAP.Body.TypeMultipart(bodies: bodies, mediaSubtype: media, multipartExtension: ext)
+            return NIOIMAP.BodyStructure.TypeMultipart(bodies: bodies, mediaSubtype: media, multipartExtension: ext)
         }
     }
 
     // body-type-msg   = media-message SP body-fields SP envelope
     //                   SP body SP body-fld-lines
-    static func parseBodyTypeMessage(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Body.TypeMessage {
-        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> NIOIMAP.Body.TypeMessage in
+    static func parseBodyTypeMessage(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.BodyStructure.TypeMessage {
+        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> NIOIMAP.BodyStructure.TypeMessage in
             let message = try self.parseMediaMessage(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
             let bodyFields = try self.parseBodyFields(buffer: &buffer, tracker: tracker)
@@ -523,19 +523,19 @@ extension NIOIMAP.GrammarParser {
             let body = try self.parseBody(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
             let fieldLines = try self.parseBodyFieldLines(buffer: &buffer, tracker: tracker)
-            return NIOIMAP.Body.TypeMessage(message: message, fields: bodyFields, envelope: envelope, body: body, fieldLines: fieldLines)
+            return NIOIMAP.BodyStructure.TypeMessage(message: message, fields: bodyFields, envelope: envelope, body: body, fieldLines: fieldLines)
         }
     }
 
     // body-type-text  = media-text SP body-fields SP body-fld-lines
-    static func parseBodyTypeText(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Body.TypeText {
-        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> NIOIMAP.Body.TypeText in
+    static func parseBodyTypeText(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.BodyStructure.TypeText {
+        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> NIOIMAP.BodyStructure.TypeText in
             let media = try self.parseMediaText(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
             let bodyFields = try self.parseBodyFields(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
             let fieldLines = try self.parseBodyFieldLines(buffer: &buffer, tracker: tracker)
-            return NIOIMAP.Body.TypeText(mediaText: media, fields: bodyFields, lines: fieldLines)
+            return NIOIMAP.BodyStructure.TypeText(mediaText: media, fields: bodyFields, lines: fieldLines)
         }
     }
 
@@ -4129,31 +4129,31 @@ extension NIOIMAP.GrammarParser {
 // MARK: - Helper Parsers
 
 extension NIOIMAP.GrammarParser {
-    static func parseBodyLocationExtension(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Body.FieldLocationExtension {
+    static func parseBodyLocationExtension(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.BodyStructure.FieldLocationExtension {
         let fieldLocation = try self.parseNString(buffer: &buffer, tracker: tracker)
         let extensions = try ParserLibrary.parseZeroOrMore(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> [NIOIMAP.BodyExtensionType] in
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
             return try self.parseBodyExtension(buffer: &buffer, tracker: tracker)
         }
-        return NIOIMAP.Body.FieldLocationExtension(location: fieldLocation, extensions: extensions)
+        return NIOIMAP.BodyStructure.FieldLocationExtension(location: fieldLocation, extensions: extensions)
     }
 
-    static func parseBodyLanguageLocation(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Body.FieldLanguageLocation {
+    static func parseBodyLanguageLocation(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.BodyStructure.FieldLanguageLocation {
         let fieldLanguage = try self.parseBodyFieldLanguage(buffer: &buffer, tracker: tracker)
         try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
         let locationExtension = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
             try parseBodyLocationExtension(buffer: &buffer, tracker: tracker)
         }
-        return NIOIMAP.Body.FieldLanguageLocation(language: fieldLanguage, location: locationExtension)
+        return NIOIMAP.BodyStructure.FieldLanguageLocation(language: fieldLanguage, location: locationExtension)
     }
 
-    static func parseBodyDescriptionLanguage(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Body.FieldDSPLanguage {
+    static func parseBodyDescriptionLanguage(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.BodyStructure.FieldDSPLanguage {
         let description = try self.parseBodyFieldDsp(buffer: &buffer, tracker: tracker)
-        let language = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> NIOIMAP.Body.FieldLanguageLocation in
+        let language = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> NIOIMAP.BodyStructure.FieldLanguageLocation in
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
             return try parseBodyLanguageLocation(buffer: &buffer, tracker: tracker)
         }
-        return NIOIMAP.Body.FieldDSPLanguage(fieldDSP: description, fieldLanguage: language)
+        return NIOIMAP.BodyStructure.FieldDSPLanguage(fieldDSP: description, fieldLanguage: language)
     }
 
     static func parse2Digit(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Int {

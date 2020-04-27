@@ -22,7 +22,7 @@ class BodyTypeMessageTests: EncodeTestClass {}
 
 extension BodyTypeMessageTests {
     func testEncode() {
-        let inputs: [(NIOIMAP.Body.TypeMessage, String, UInt)] = [
+        let inputs: [(NIOIMAP.BodyStructure.TypeMessage, String, UInt)] = [
             (
                 .message(
                     .rfc822,
