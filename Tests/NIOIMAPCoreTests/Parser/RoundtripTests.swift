@@ -34,15 +34,15 @@ extension RoundtripTests {
 
         let tests: [NIOIMAP.Command] = [
             // any
-//            .noop,
-//            .capability,
-//            .logout,
-//            .xcommand("HELLO", #line),
-//
-//            // nonauth
-//            .starttls,
-//            .login("user", "password", #line),
-//            .authenticate("some", ["abcd1234"]), // test single base64, spec is unclear about multiple
+            .noop,
+            .capability,
+            .logout,
+
+            // nonauth
+            .starttls,
+            .login("user", "password"),
+            .authenticate("some", nil, ["abcd1234"]), // test single base64, spec is unclear about multiple
+            .authenticate("some", .equals, ["abcd1234"]),
 //
 //            // auth
 //            .create(.inbox),
