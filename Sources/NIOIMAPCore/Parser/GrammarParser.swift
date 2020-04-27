@@ -457,15 +457,15 @@ extension NIOIMAP.GrammarParser {
     // body-type-1part = (body-type-basic / body-type-msg / body-type-text)
     //                   [SP body-ext-1part]
     static func parseBodyTypeSinglePart(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.BodyStructure.Singlepart {
-        func parseBodyTypeSinglePart_basic(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.BodyStructure.TypeSinglepartType {
+        func parseBodyTypeSinglePart_basic(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.BodyStructure.SinglepartType {
             .basic(try self.parseBodyTypeBasic(buffer: &buffer, tracker: tracker))
         }
 
-        func parseBodyTypeSinglePart_message(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.BodyStructure.TypeSinglepartType {
+        func parseBodyTypeSinglePart_message(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.BodyStructure.SinglepartType {
             .message(try self.parseBodyTypeMessage(buffer: &buffer, tracker: tracker))
         }
 
-        func parseBodyTypeSinglePart_text(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.BodyStructure.TypeSinglepartType {
+        func parseBodyTypeSinglePart_text(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.BodyStructure.SinglepartType {
             .text(try self.parseBodyTypeText(buffer: &buffer, tracker: tracker))
         }
 
@@ -484,12 +484,12 @@ extension NIOIMAP.GrammarParser {
     }
 
     // body-type-basic = media-basic SP body-fields
-    static func parseBodyTypeBasic(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.BodyStructure.TypeBasic {
-        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> NIOIMAP.BodyStructure.TypeBasic in
+    static func parseBodyTypeBasic(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.BodyStructure.Singlepart.Basic {
+        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> NIOIMAP.BodyStructure.Singlepart.Basic in
             let media = try self.parseMediaBasic(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
             let fields = try self.parseBodyFields(buffer: &buffer, tracker: tracker)
-            return NIOIMAP.BodyStructure.TypeBasic(media: media, fields: fields)
+            return NIOIMAP.BodyStructure.Singlepart.Basic(media: media, fields: fields)
         }
     }
 
@@ -512,8 +512,8 @@ extension NIOIMAP.GrammarParser {
 
     // body-type-msg   = media-message SP body-fields SP envelope
     //                   SP body SP body-fld-lines
-    static func parseBodyTypeMessage(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.BodyStructure.TypeMessage {
-        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> NIOIMAP.BodyStructure.TypeMessage in
+    static func parseBodyTypeMessage(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.BodyStructure.Singlepart.Message {
+        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> NIOIMAP.BodyStructure.Singlepart.Message in
             let message = try self.parseMediaMessage(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
             let bodyFields = try self.parseBodyFields(buffer: &buffer, tracker: tracker)
@@ -523,19 +523,19 @@ extension NIOIMAP.GrammarParser {
             let body = try self.parseBody(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
             let fieldLines = try self.parseBodyFieldLines(buffer: &buffer, tracker: tracker)
-            return NIOIMAP.BodyStructure.TypeMessage(message: message, fields: bodyFields, envelope: envelope, body: body, fieldLines: fieldLines)
+            return NIOIMAP.BodyStructure.Singlepart.Message(message: message, fields: bodyFields, envelope: envelope, body: body, fieldLines: fieldLines)
         }
     }
 
     // body-type-text  = media-text SP body-fields SP body-fld-lines
-    static func parseBodyTypeText(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.BodyStructure.TypeText {
-        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> NIOIMAP.BodyStructure.TypeText in
+    static func parseBodyTypeText(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.BodyStructure.Singlepart.Text {
+        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> NIOIMAP.BodyStructure.Singlepart.Text in
             let media = try self.parseMediaText(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
             let bodyFields = try self.parseBodyFields(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
             let fieldLines = try self.parseBodyFieldLines(buffer: &buffer, tracker: tracker)
-            return NIOIMAP.BodyStructure.TypeText(mediaText: media, fields: bodyFields, lines: fieldLines)
+            return NIOIMAP.BodyStructure.Singlepart.Text(mediaText: media, fields: bodyFields, lines: fieldLines)
         }
     }
 

@@ -22,7 +22,7 @@ class BodyTypeTextTests: EncodeTestClass {}
 
 extension BodyTypeTextTests {
     func testEncode() {
-        let inputs: [(NIOIMAP.BodyStructure.TypeText, String, UInt)] = [
+        let inputs: [(NIOIMAP.BodyStructure.Singlepart.Text, String, UInt)] = [
             (.mediaText("subtype", fields: .parameter([], id: nil, description: nil, encoding: .base64, octets: 123), lines: 456), "\"TEXT\" \"subtype\" NIL NIL NIL \"BASE64\" 123 456", #line),
         ]
 
