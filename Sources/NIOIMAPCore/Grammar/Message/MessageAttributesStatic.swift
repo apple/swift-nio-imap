@@ -25,14 +25,15 @@ extension NIOIMAP {
     public enum MessageAttributesStatic: Equatable {
         case envelope(Envelope)
         case internalDate(Date.DateTime)
+        case uid(Int)
+
         case rfc822(RFC822Reduced?, NIOIMAP.NString)
         case rfc822Size(Int)
+
         case body(Body, structure: Bool)
         case bodySection(SectionSpec?, Int?, NString)
-        case bodySectionText(Int?, Int) // used when streaming the body, send the literal header
-        case uid(Int)
+
         case binaryString(section: [Int], string: NString)
-        case binaryLiteral(section: [Int], size: Int)
         case binarySize(section: [Int], number: Int)
     }
 }
@@ -54,8 +55,6 @@ extension ByteBuffer {
             return self.writeMessageAttributeStatic_body(body, structure: structure)
         case .bodySection(let section, let number, let string):
             return self.writeMessageAttributeStatic_bodySection(section, number: number, string: string)
-        case .bodySectionText(let number, let size):
-            return self.writeMessageAttributeStatic_bodySectionText(number: number, size: size)
         case .uid(let uid):
             return self.writeString("UID \(uid)")
         case .binaryString(section: let section, string: let string):
@@ -64,11 +63,6 @@ extension ByteBuffer {
                 self.writeSectionBinary(section) +
                 self.writeSpace() +
                 self.writeNString(string)
-        case .binaryLiteral(section: let section, size: let size):
-            return
-                self.writeString("BINARY") +
-                self.writeSectionBinary(section) +
-                self.writeString(" {\(size)}\r\n")
         case .binarySize(section: let section, number: let number):
             return
                 self.writeString("BINARY.SIZE") +

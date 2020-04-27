@@ -19,7 +19,6 @@ extension NIOIMAP {
     /// One message attribute is guaranteed
     public enum MessageData: Equatable {
         case expunge(Int)
-        case fetch(Int)
     }
 }
 
@@ -30,9 +29,6 @@ extension ByteBuffer {
         switch data {
         case .expunge(let number):
             return self.writeString("\(number) EXPUNGE")
-        case .fetch(let number):
-            return
-                self.writeString("\(number) FETCH (")
         }
     }
 

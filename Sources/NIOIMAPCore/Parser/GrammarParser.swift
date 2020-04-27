@@ -2089,15 +2089,8 @@ extension NIOIMAP.GrammarParser {
             return .expunge(number)
         }
 
-        func parseMessageData_fetch(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.MessageData {
-            let number = try self.parseNZNumber(buffer: &buffer, tracker: tracker)
-            try ParserLibrary.parseFixedString(" FETCH ", buffer: &buffer, tracker: tracker)
-            return .fetch(number)
-        }
-
         return try ParserLibrary.parseOneOf([
             parseMessageData_expunge,
-            parseMessageData_fetch,
         ], buffer: &buffer, tracker: tracker)
     }
 
@@ -2123,18 +2116,6 @@ extension NIOIMAP.GrammarParser {
 
     // msg-att         = "(" (msg-att-dynamic / msg-att-static)
     //                    *(SP (msg-att-dynamic / msg-att-static)) ")"
-    static func parseMessageAttributeStart(buffer: inout ByteBuffer, tracker: StackTracker) throws {
-        try ParserLibrary.parseFixedString("(", buffer: &buffer, tracker: tracker)
-    }
-
-    static func parseMessageAttributeMiddle(buffer: inout ByteBuffer, tracker: StackTracker) throws {
-        try ParserLibrary.parseFixedString(" ", buffer: &buffer, tracker: tracker)
-    }
-
-    static func parseMessageAttributeEnd(buffer: inout ByteBuffer, tracker: StackTracker) throws {
-        try ParserLibrary.parseFixedString(")\r\n", buffer: &buffer, tracker: tracker)
-    }
-
     static func parseMessageAttribute_dynamicOrStatic(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.MessageAttributeType {
         func parseMessageAttribute_static(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.MessageAttributeType {
             .static(try self.parseMessageAttributeStatic(buffer: &buffer, tracker: tracker))
@@ -2147,6 +2128,69 @@ extension NIOIMAP.GrammarParser {
         return try ParserLibrary.parseOneOf([
             parseMessageAttribute_static,
             parseMessageAttribute_dynamic,
+        ], buffer: &buffer, tracker: tracker)
+    }
+
+    static func parseFetchStreamingResponse(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.StreamingType {
+        func parseFetchStreamingResponse_rfc822(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.StreamingType {
+            try ParserLibrary.parseFixedString("RFC822.TEXT", buffer: &buffer, tracker: tracker)
+            return .rfc822
+        }
+
+        func parseFetchStreamingResponse_bodySectionText(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.StreamingType {
+            try ParserLibrary.parseFixedString("BODY[TEXT]", buffer: &buffer, tracker: tracker)
+            let number = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> Int in
+                try ParserLibrary.parseFixedString("<", buffer: &buffer, tracker: tracker)
+                let num = try self.parseNumber(buffer: &buffer, tracker: tracker)
+                try ParserLibrary.parseFixedString(">", buffer: &buffer, tracker: tracker)
+                return num
+            }
+            return .body(partial: number)
+        }
+
+        func parseFetchStreamingResponse_binary(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.StreamingType {
+            try ParserLibrary.parseFixedString("BINARY", buffer: &buffer, tracker: tracker)
+            let section = try self.parseSectionBinary(buffer: &buffer, tracker: tracker)
+            return .binary(section: section)
+        }
+
+        return try ParserLibrary.parseOneOf([
+            parseFetchStreamingResponse_rfc822,
+            parseFetchStreamingResponse_bodySectionText,
+            parseFetchStreamingResponse_binary,
+        ], buffer: &buffer, tracker: tracker)
+    }
+
+    static func parseFetchResponse(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.FetchResponse {
+        func parseFetchResponse_start(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.FetchResponse {
+            try ParserLibrary.parseFixedString("* ", buffer: &buffer, tracker: tracker)
+            let number = try self.parseNZNumber(buffer: &buffer, tracker: tracker)
+            try ParserLibrary.parseFixedString(" FETCH (", buffer: &buffer, tracker: tracker)
+            return .start(number)
+        }
+
+        func parseFetchResponse_simpleAttribute(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.FetchResponse {
+            let attribute = try self.parseMessageAttribute_dynamicOrStatic(buffer: &buffer, tracker: tracker)
+            return .simpleAttribute(attribute)
+        }
+
+        func parseFetchResponse_streamingBegin(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.FetchResponse {
+            let type = try self.parseFetchStreamingResponse(buffer: &buffer, tracker: tracker)
+            try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
+            let literalSize = try self.parseLiteralSize(buffer: &buffer, tracker: tracker)
+            return .streamingBegin(type: type, byteCount: literalSize)
+        }
+
+        func parseFetchResponse_finish(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.FetchResponse {
+            try ParserLibrary.parseFixedString(")\r\n", buffer: &buffer, tracker: tracker)
+            return .finish
+        }
+
+        return try ParserLibrary.parseOneOf([
+            parseFetchResponse_start,
+            parseFetchResponse_streamingBegin,
+            parseFetchResponse_simpleAttribute,
+            parseFetchResponse_finish,
         ], buffer: &buffer, tracker: tracker)
     }
 
@@ -2222,15 +2266,8 @@ extension NIOIMAP.GrammarParser {
                 return num
             }
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
-
-            // stream if body text
-            if section == .text(.text) {
-                let literalSize = try self.parseLiteralSize(buffer: &buffer, tracker: tracker)
-                return .bodySectionText(number, literalSize)
-            } else {
-                let string = try self.parseNString(buffer: &buffer, tracker: tracker)
-                return .bodySection(section, number, string)
-            }
+            let string = try self.parseNString(buffer: &buffer, tracker: tracker)
+            return .bodySection(section, number, string)
         }
 
         func parseMessageAttributeStatic_uid(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.MessageAttributesStatic {
@@ -2250,8 +2287,8 @@ extension NIOIMAP.GrammarParser {
             try ParserLibrary.parseFixedString("BINARY", buffer: &buffer, tracker: tracker)
             let section = try self.parseSectionBinary(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
-            let size = try self.parseLiteralSize(buffer: &buffer, tracker: tracker)
-            return .binaryLiteral(section: section, size: size)
+            let string = try self.parseNString(buffer: &buffer, tracker: tracker)
+            return .binaryString(section: section, string: string)
         }
 
         return try ParserLibrary.parseOneOf([
@@ -2263,7 +2300,6 @@ extension NIOIMAP.GrammarParser {
             parseMessageAttributeStatic_bodySection,
             parseMessageAttributeStatic_uid,
             parseMessageAttributeStatic_binarySize,
-            // we currently deliberately don't parse BINARY representations in the quoted string form.
             parseMessageAttributeStatic_binary,
         ], buffer: &buffer, tracker: tracker)
     }
@@ -2594,11 +2630,6 @@ extension NIOIMAP.GrammarParser {
         try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
             try ParserLibrary.parseFixedString("* ", buffer: &buffer, tracker: tracker)
             let payload = try self.parseResponsePayload(buffer: &buffer, tracker: tracker)
-
-            if case NIOIMAP.ResponsePayload.messageData(NIOIMAP.MessageData.fetch(_)) = payload {
-                return payload
-            }
-
             try ParserLibrary.parseFixedString("\r\n", buffer: &buffer, tracker: tracker)
             return payload
         }
