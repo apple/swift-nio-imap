@@ -29,7 +29,7 @@ extension BodyStructure {
 
 // MARK: - Encoding
 
-extension ByteBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeBodyFieldDSPLanguage(_ desc: BodyStructure.FieldDSPLanguage) -> Int {
         self.writeSpace() +
             self.writeBodyFieldDSP(desc.fieldDSP)

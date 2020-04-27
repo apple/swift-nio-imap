@@ -40,7 +40,7 @@ public struct StoreAttributeFlags: Equatable {
 
 // MARK: - Encoding
 
-extension ByteBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeStoreAttributeFlags(_ flags: StoreAttributeFlags) -> Int {
         let silentString = flags.silent ? ".SILENT" : ""
         return

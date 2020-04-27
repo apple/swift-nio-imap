@@ -18,18 +18,8 @@ import NIOTestUtils
 
 import XCTest
 
-final class RoundtripTests: XCTestCase {}
-
-// MARK: - Client command
-
-extension RoundtripTests {
+final class RoundtripTests: XCTestCase {
     func testClientRountrip() {
-        self.measure {
-            runClientTests()
-        }
-    }
-
-    private func runClientTests() {
         // 1 AUTHENTICATE type\r\n1111\r\n2222\r\n
 
         let tests: [(Command, UInt)] = [
@@ -102,14 +92,23 @@ extension RoundtripTests {
             (.search(returnOptions: [.all], program: .init(charset: nil, keys: [.all])), #line),
         ]
 
-        var buffer = ByteBufferAllocator().buffer(capacity: 1)
         for (i, test) in tests.enumerated() {
+            var encodeBuffer = EncodeBuffer(ByteBufferAllocator().buffer(capacity: 128), mode: .client)
             let commandType = test.0
             let line = test.1
             let tag = "\(i + 1)"
             let command = TaggedCommand(type: commandType, tag: tag)
-            buffer.writeCommand(command)
-            buffer.writeString("\r\n") // required for commands that might terminate with a literal (e.g. append)
+            encodeBuffer.writeCommand(command)
+            encodeBuffer.writeString("\r\n") // required for commands that might terminate with a literal (e.g. append)
+            var buffer = ByteBufferAllocator().buffer(capacity: 128)
+            while true {
+                let next = encodeBuffer.nextChunk()
+                var toSend = next.bytes
+                buffer.writeBuffer(&toSend)
+                if !next.waitForContinuation {
+                    break
+                }
+            }
             do {
                 let decoded = try GrammarParser.parseCommand(buffer: &buffer, tracker: .testTracker)
                 XCTAssertEqual(command, decoded, line: line)
@@ -119,16 +118,4 @@ extension RoundtripTests {
             buffer.clear()
         }
     }
-}
-
-// MARK: - Server response
-
-extension RoundtripTests {
-    func testServerRountrip() {
-        self.measure {
-            runServerTests()
-        }
-    }
-
-    private func runServerTests() {}
 }

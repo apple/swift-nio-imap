@@ -27,7 +27,7 @@ public struct SearchProgram: Equatable {
 
 // MARK: - Encoding
 
-extension ByteBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeSearchProgram(_ program: SearchProgram) -> Int {
         self.writeIfExists(program.charset) { (charset) -> Int in
             self.writeString("CHARSET \(charset) ")

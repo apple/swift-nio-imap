@@ -44,7 +44,7 @@ public struct Date: Equatable {
 
 // MARK: - IMAP
 
-extension ByteBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeDate(_ date: Date) -> Int {
         self.writeString("\(date.day)-\(date.month.rawValue)-\(date.year)")
     }

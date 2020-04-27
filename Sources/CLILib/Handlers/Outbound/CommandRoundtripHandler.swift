@@ -38,8 +38,10 @@ public class CommandRoundtripHandler: ChannelOutboundHandler {
                 return
             }
 
-            var roundtripBuffer = context.channel.allocator.buffer(capacity: originalBuffer.readableBytes)
-            roundtripBuffer.writeCommandStream(commandStream)
+            var encodeBuffer = EncodeBuffer(context.channel.allocator.buffer(capacity: originalBuffer.readableBytes),
+                                            mode: .client)
+            encodeBuffer.writeCommandStream(commandStream)
+            var roundtripBuffer = encodeBuffer.nextChunk().bytes
 
             if originalBuffer != roundtripBuffer {
                 self.logger.warning("Input command vs roundtrip output is different")

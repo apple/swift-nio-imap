@@ -22,7 +22,7 @@ public enum ChildMailboxFlag: String, Equatable {
 
 // MARK: - Encoding
 
-extension ByteBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeChildMailboxFlag(_ flag: ChildMailboxFlag) -> Int {
         self.writeString(flag.rawValue)
     }

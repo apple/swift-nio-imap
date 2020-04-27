@@ -41,7 +41,7 @@ extension ModifierSequenceValue: ExpressibleByIntegerLiteral {
 
 // MARK: - Encoding
 
-extension ByteBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeModifierSequenceValue(_ value: ModifierSequenceValue) -> Int {
         self.writeString("\(value.value)")
     }

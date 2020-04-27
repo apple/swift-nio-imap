@@ -26,7 +26,7 @@ public enum SearchReturnOption: Equatable {
 
 // MARK: - Encoding
 
-extension ByteBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeSearchReturnOption(_ option: SearchReturnOption) -> Int {
         switch option {
         case .min:

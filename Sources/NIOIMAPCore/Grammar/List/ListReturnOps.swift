@@ -16,7 +16,7 @@ import struct NIO.ByteBuffer
 
 // MARK: - Encoding
 
-extension ByteBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeListReturnOptions(_ options: [ReturnOption]) -> Int {
         self.writeString("RETURN ") +
             self.writeString("(") +

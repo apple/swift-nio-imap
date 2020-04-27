@@ -14,7 +14,7 @@
 
 import struct NIO.ByteBuffer
 
-extension ByteBuffer {
+extension EncodeBuffer {
     mutating func writeAtom(_ str: String) -> Int {
         self.writeString(str)
     }

@@ -29,7 +29,7 @@ public struct ESearchResponse: Equatable {
 
 // MARK: - Encoding
 
-extension ByteBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeESearchResponse(_ response: ESearchResponse) -> Int {
         self.writeString("ESEARCH") +
             self.writeIfExists(response.correlator) { (correlator) -> Int in

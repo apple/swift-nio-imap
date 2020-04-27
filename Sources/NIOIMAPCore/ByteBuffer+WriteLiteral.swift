@@ -14,7 +14,7 @@
 
 import struct NIO.ByteBuffer
 
-extension ByteBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeIMAPString(_ str: String) -> Int {
         self.writeIMAPString(str.utf8)
     }
@@ -47,13 +47,14 @@ extension ByteBuffer {
 
     @discardableResult mutating func writeLiteral<T: Collection>(_ bytes: T) -> Int where T.Element == UInt8 {
         let length = "{\(bytes.count)}\r\n"
-        return self.writeString(length) + self.writeBytes(bytes)
+        return self.writeString(length) + self.markStopPoint() + self.writeBytes(bytes)
     }
 
     @discardableResult mutating func writeLiteral8<T: Collection>(_ bytes: T) -> Int where T.Element == UInt8 {
         let length = "~{\(bytes.count)}\r\n"
         return
             self.writeString(length) +
+            self.markStopPoint() +
             self.writeBytes(bytes)
     }
 
@@ -65,7 +66,7 @@ extension ByteBuffer {
         self.writeString(" ")
     }
 
-    @discardableResult mutating func writeArray<T>(_ array: [T], separator: String = " ", parenthesis: Bool = true, callback: (T, inout ByteBuffer) -> Int) -> Int {
+    @discardableResult mutating func writeArray<T>(_ array: [T], separator: String = " ", parenthesis: Bool = true, callback: (T, inout EncodeBuffer) -> Int) -> Int {
         self.writeIfTrue(parenthesis) { () -> Int in
             self.writeString("(")
         } +
@@ -97,7 +98,7 @@ extension ByteBuffer {
         return callback()
     }
 
-    @discardableResult mutating func writeIfArrayHasMinimumSize<T>(array: [T], minimum: Int = 1, callback: ([T], inout ByteBuffer) -> Int) -> Int {
+    @discardableResult mutating func writeIfArrayHasMinimumSize<T>(array: [T], minimum: Int = 1, callback: ([T], inout EncodeBuffer) -> Int) -> Int {
         guard array.count >= minimum else {
             return 0
         }

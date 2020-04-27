@@ -23,7 +23,7 @@ public enum SearchSentType: Equatable {
 
 // MARK: - Encoding
 
-extension ByteBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeSearchSentType(_ type: SearchSentType) -> Int {
         switch type {
         case .before(let date):

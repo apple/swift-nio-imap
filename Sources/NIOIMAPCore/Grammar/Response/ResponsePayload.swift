@@ -26,7 +26,7 @@ public enum ResponsePayload: Equatable {
 
 // MARK: - Encoding
 
-extension ByteBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeResponsePayload(_ payload: ResponsePayload) -> Int {
         switch payload {
         case .conditionalState(let data):

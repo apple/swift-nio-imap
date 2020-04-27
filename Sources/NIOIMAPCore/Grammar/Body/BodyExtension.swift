@@ -22,7 +22,7 @@ public enum BodyExtensionType: Equatable {
 
 // MARK: - Encoding
 
-extension ByteBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeBodyExtension(_ ext: [BodyExtensionType]) -> Int {
         self.writeArray(ext) { (element, self) in
             self.writeBodyExtensionType(element)

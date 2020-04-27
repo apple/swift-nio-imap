@@ -23,7 +23,7 @@ public enum ResponseConditionalState: Equatable {
 
 // MARK: - Encoding
 
-extension ByteBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeResponseConditionalState(_ cond: ResponseConditionalState) -> Int {
         switch cond {
         case .ok(let text):

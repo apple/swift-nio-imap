@@ -16,7 +16,7 @@ import struct NIO.ByteBuffer
 
 // MARK: - Encoding
 
-extension ByteBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeResponseConditionalBye(_ cond: ResponseText) -> Int {
         self.writeString("BYE ") +
             self.writeResponseText(cond)

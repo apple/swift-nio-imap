@@ -31,7 +31,7 @@ public struct Address: Equatable {
 
 // MARK: - Encoding
 
-extension ByteBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeAddress(_ address: Address) -> Int {
         self.writeString("(") +
             self.writeNString(address.name) +

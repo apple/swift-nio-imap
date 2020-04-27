@@ -16,7 +16,7 @@ import struct NIO.ByteBuffer
 
 // MARK: - Encoding
 
-extension ByteBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeSequenceSet(_ set: [SequenceRange]) -> Int {
         self.writeArray(set, separator: ",", parenthesis: false) { (element, self) in
             self.writeSequenceRange(element)

@@ -21,7 +21,7 @@ public enum EntryTypeRequest: Equatable {
 
 // MARK: - Encoding
 
-extension ByteBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeEntryTypeRequest(_ request: EntryTypeRequest) -> Int {
         switch request {
         case .response(let response):

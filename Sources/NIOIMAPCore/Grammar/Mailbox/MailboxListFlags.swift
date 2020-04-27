@@ -29,7 +29,7 @@ extension MailboxName.List {
 
 // MARK: - Encoding
 
-extension ByteBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeMailboxListFlags(_ flags: MailboxName.List.Flags) -> Int {
         if let sFlag = flags.sFlag {
             return

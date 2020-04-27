@@ -75,26 +75,35 @@ final class ParserStressTests: XCTestCase {
 
     // - MARK: ByteToMessageDecoderVerifier tests
     func testBasicDecodes() {
-        let inoutPairs: [(String, [CommandStream])] = [
+        let inoutPairs: [(String, [CommandDecoder.PartialCommandStream])] = [
             // LOGIN
-            (#"tag LOGIN "foo" "bar""# + CRLF, [.command(.init(type: .login(username: "foo", password: "bar"), tag: "tag"))]),
-            ("tag LOGIN \"\" {0}\r\n" + CRLF, [.command(.init(type: .login(username: "", password: ""), tag: "tag"))]),
-            (#"tag LOGIN "foo" "bar""# + CRLF, [.command(.init(type: .login(username: "foo", password: "bar"), tag: "tag"))]),
-            (#"tag LOGIN foo bar"# + CRLF, [.command(.init(type: .login(username: "foo", password: "bar"), tag: "tag"))]),
+            (#"tag LOGIN "foo" "bar""# + CRLF,
+             [CommandDecoder.PartialCommandStream(.command(.init(type: .login(username: "foo",
+                                                                              password: "bar"),
+                                                                 tag: "tag")))]),
+            (#"tag LOGIN "foo" "bar""# + CRLF,
+             [CommandDecoder.PartialCommandStream(.command(.init(type: .login(username: "foo",
+                                                                              password: "bar"),
+                                                                 tag: "tag")))]),
+            (#"tag LOGIN foo bar"# + CRLF,
+             [CommandDecoder.PartialCommandStream(.command(.init(type: .login(username: "foo",
+                                                                              password: "bar"),
+                                                                 tag: "tag")))]),
             // RENAME
-            (#"tag RENAME "foo" "bar""# + CRLF, [.command(TaggedCommand(type: .rename(from: MailboxName("foo"), to: MailboxName("bar"), params: []), tag: "tag"))]),
-            (#"tag RENAME InBoX "inBOX""# + CRLF, [.command(TaggedCommand(type: .rename(from: .inbox, to: .inbox, params: []), tag: "tag"))]),
-            ("tag RENAME {1}\r\n1 {1}\r\n2" + CRLF, [.command(TaggedCommand(type: .rename(from: MailboxName("1"), to: MailboxName("2"), params: []), tag: "tag"))]),
+            (#"tag RENAME "foo" "bar""# + CRLF,
+             [CommandDecoder.PartialCommandStream(.command(TaggedCommand(type: .rename(from: MailboxName("foo"), to: MailboxName("bar"), params: []), tag: "tag")))]),
+            (#"tag RENAME InBoX "inBOX""# + CRLF,
+             [CommandDecoder.PartialCommandStream(.command(TaggedCommand(type: .rename(from: .inbox, to: .inbox, params: []), tag: "tag")))]),
         ]
         do {
             try ByteToMessageDecoderVerifier.verifyDecoder(
                 stringInputOutputPairs: inoutPairs,
                 decoderFactory: { () -> CommandDecoder in
-                    CommandDecoder(autoSendContinuations: false)
+                    CommandDecoder()
                 }
             )
         } catch {
-            switch error as? ByteToMessageDecoderVerifier.VerificationError<CommandStream> {
+            switch error as? ByteToMessageDecoderVerifier.VerificationError<CommandDecoder.PartialCommandStream> {
             case .some(let error):
                 for input in error.inputs {
                     print(" input: \(String(decoding: input.readableBytesView, as: Unicode.UTF8.self))")

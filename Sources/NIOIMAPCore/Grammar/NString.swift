@@ -21,7 +21,7 @@ public typealias NString = ByteBuffer?
 
 // MARK: - IMAP
 
-extension ByteBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeNString(_ string: NString) -> Int {
         if let string = string {
             return self.writeIMAPString(string)

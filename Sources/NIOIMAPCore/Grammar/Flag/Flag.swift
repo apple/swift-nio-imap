@@ -77,7 +77,7 @@ public struct Flag: Hashable {
 
 // MARK: - Encoding
 
-extension ByteBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeFlags(_ flags: [Flag]) -> Int {
         self.writeArray(flags) { (flag, self) -> Int in
             self.writeFlag(flag)

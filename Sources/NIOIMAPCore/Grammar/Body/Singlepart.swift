@@ -92,7 +92,7 @@ extension BodyStructure.Singlepart {
 
 // MARK: - Encoding
 
-extension ByteBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeBodyTypeSinglepart(_ part: BodyStructure.Singlepart) -> Int {
         var size = 0
         switch part.type {

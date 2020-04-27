@@ -20,37 +20,43 @@ public struct IMAPDecoderError: Error {
     public var buffer: ByteBuffer
 }
 
-public struct CommandDecoder: ByteToMessageDecoder {
-    public typealias InboundOut = CommandStream
+public struct CommandDecoder: NIOSingleStepByteToMessageDecoder {
+    public typealias InboundOut = PartialCommandStream
 
     private var ok: ByteBuffer?
     private var parser: CommandParser
     private var synchronisingLiteralParser = SynchronizingLiteralParser()
-    private let autoSendContinuations: Bool
 
-    public init(bufferLimit: Int = 1_000, autoSendContinuations: Bool = true) {
-        self.parser = CommandParser(bufferLimit: bufferLimit)
-        self.autoSendContinuations = autoSendContinuations
+    public struct PartialCommandStream: Equatable {
+        public var numberOfSynchronisingLiterals: Int
+        public var command: CommandStream?
+
+        internal init(numberOfSynchronisingLiterals: Int, command: CommandStream?) {
+            self.numberOfSynchronisingLiterals = numberOfSynchronisingLiterals
+            self.command = command
+        }
+
+        public init(_ command: CommandStream, numberOfSynchronisingLiterals: Int = 0) {
+            self = .init(numberOfSynchronisingLiterals: numberOfSynchronisingLiterals, command: command)
+        }
+
+        public init(numberOfSynchronisingLiterals: Int) {
+            self = .init(numberOfSynchronisingLiterals: numberOfSynchronisingLiterals, command: nil)
+        }
     }
 
-    public mutating func decode(context: ChannelHandlerContext, buffer: inout ByteBuffer) throws -> DecodingState {
+    public init(bufferLimit: Int = 1_000) {
+        self.parser = CommandParser(bufferLimit: bufferLimit)
+    }
+
+    public mutating func decode(buffer: inout ByteBuffer) throws -> PartialCommandStream? {
         let save = buffer
         do {
             let framingResult = try self.synchronisingLiteralParser.parseContinuationsNecessary(buffer)
-            if self.autoSendContinuations {
-                for _ in 0 ..< framingResult.synchronizingLiteralCount {
-                    if self.ok == nil {
-                        self.ok = context.channel.allocator.buffer(capacity: 2)
-                        self.ok!.writeString("OK")
-                    }
-                    let continuation = Response.continuationRequest(.responseText(.init(code: nil, text: self.ok!)))
-                    // HACK: We shouldn't just emit those here, we should probably not be a B2MD anymore.
-                    context.writeAndFlush(NIOAny(continuation), promise: nil)
-                }
-            }
+            var result = PartialCommandStream(numberOfSynchronisingLiterals: framingResult.synchronizingLiteralCount,
+                                              command: nil)
 
-            if let result = try self.parser.parseCommandStream(buffer: &buffer) {
-                context.fireChannelRead(self.wrapInboundOut(result))
+            if let command = try self.parser.parseCommandStream(buffer: &buffer) {
                 let consumedBytes = buffer.readerIndex - save.readerIndex
                 assert(buffer.writerIndex == save.writerIndex,
                        "the writer index of the buffer moved whilst parsing which is not supported: \(buffer), \(save)")
@@ -60,17 +66,21 @@ public struct CommandDecoder: ByteToMessageDecoder {
                 assert(consumedBytes <= framingResult.maximumValidBytes,
                        "We consumed \(consumedBytes) which is more than the framing parser thought are maximally " +
                            "valid: \(framingResult), \(self.synchronisingLiteralParser)")
-                return .continue
+                result.command = command
+                return result
             } else {
-                return .needMoreData
+                if result.numberOfSynchronisingLiterals == 0 {
+                    return nil
+                } else {
+                    return result
+                }
             }
         } catch {
             throw IMAPDecoderError(parserError: error, buffer: save)
         }
     }
 
-    public mutating func decodeLast(context: ChannelHandlerContext, buffer: inout ByteBuffer, seenEOF: Bool) throws -> DecodingState {
-        while try self.decode(context: context, buffer: &buffer) != .needMoreData {}
-        return .needMoreData
+    public mutating func decodeLast(buffer: inout ByteBuffer, seenEOF: Bool) throws -> PartialCommandStream? {
+        try self.decode(buffer: &buffer)
     }
 }

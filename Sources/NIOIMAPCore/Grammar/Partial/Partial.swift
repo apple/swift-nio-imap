@@ -25,7 +25,7 @@ public struct Partial: Equatable {
     }
 }
 
-extension ByteBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writePartial(_ num: Partial) -> Int {
         self.writeString("<\(num.left).\(num.right)>")
     }

@@ -2776,7 +2776,7 @@ extension GrammarParser {
                 return code
             }
             let text = try self.parseText(buffer: &buffer, tracker: tracker)
-            return ResponseText(code: code, text: text)
+            return ResponseText(code: code, text: String(buffer: text))
         }
     }
 

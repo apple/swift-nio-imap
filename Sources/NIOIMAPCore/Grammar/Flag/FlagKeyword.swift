@@ -77,7 +77,7 @@ extension Flag.Keyword {
 
 // MARK: - Encoding
 
-extension ByteBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeFlagKeyword(_ keyword: Flag.Keyword) -> Int {
         self.writeString(keyword.rawValue)
     }

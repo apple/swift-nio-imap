@@ -14,7 +14,7 @@
 
 import struct NIO.ByteBuffer
 
-extension ByteBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeSectionBinary(_ binary: [Int]) -> Int {
         self.writeString("[") +
             self.writeSectionPart(binary) +

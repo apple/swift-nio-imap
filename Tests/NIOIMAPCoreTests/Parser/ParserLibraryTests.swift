@@ -137,7 +137,7 @@ extension ParserLibraryTests {
                                                 try ParserLibrary.parseFixedString("x", buffer: &buffer, tracker: tracker)
                                                 try ParserLibrary.parseFixedString("x", buffer: &buffer, tracker: tracker)
                                                 return 1
-                                            }))
+            }))
         }
     }
 
@@ -159,7 +159,7 @@ extension ParserLibraryTests {
                                                 try ParserLibrary.parseFixedString("x", buffer: &buffer, tracker: tracker)
                                                 try ParserLibrary.parseFixedString("x", buffer: &buffer, tracker: tracker)
                                                 return 1
-                                            }))
+            }))
         }
     }
 
@@ -170,7 +170,7 @@ extension ParserLibraryTests {
                                                 try ParserLibrary.parseFixedString("x", buffer: &buffer, tracker: tracker)
                                                 try ParserLibrary.parseFixedString("x", buffer: &buffer, tracker: tracker)
                                                 return 1
-                                            }))
+            }))
         }
     }
 }
@@ -207,7 +207,7 @@ extension ParserLibraryTests {
                                                 try ParserLibrary.parseFixedString("x", buffer: &buffer, tracker: tracker)
                                                 try ParserLibrary.parseFixedString("x", buffer: &buffer, tracker: tracker)
                                                 return 1
-                                            }))
+            }))
         }
     }
 
@@ -218,7 +218,7 @@ extension ParserLibraryTests {
                                                 try ParserLibrary.parseFixedString("x", buffer: &buffer, tracker: tracker)
                                                 try ParserLibrary.parseFixedString("x", buffer: &buffer, tracker: tracker)
                                                 return 1
-                                            }))
+            }))
         }
     }
 }

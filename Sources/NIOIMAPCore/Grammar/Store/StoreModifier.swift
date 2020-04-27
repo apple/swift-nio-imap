@@ -26,7 +26,7 @@ public struct StoreModifier: Equatable {
 
 // MARK: - Encoding
 
-extension ByteBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeStoreModifier(_ modifier: StoreModifier) -> Int {
         self.writeStoreModifierName(modifier.name) +
             self.writeIfExists(modifier.parameters) { (params) -> Int in

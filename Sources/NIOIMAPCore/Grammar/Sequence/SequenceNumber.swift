@@ -51,7 +51,7 @@ extension SequenceNumber: Comparable {
 
 // MARK: - Encoding
 
-extension ByteBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeSequenceNumber(_ num: SequenceNumber) -> Int {
         switch num {
         case .last:

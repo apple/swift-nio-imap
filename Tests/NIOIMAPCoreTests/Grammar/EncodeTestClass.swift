@@ -13,16 +13,19 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import NIOIMAPCore
 import XCTest
 
 class EncodeTestClass: XCTestCase {
-    var testBuffer = ByteBufferAllocator().buffer(capacity: 1)
+    var testBuffer = EncodeBuffer(ByteBufferAllocator().buffer(capacity: 128), mode: .server)
 
     var testBufferString: String {
-        String(decoding: self.testBuffer.readableBytesView, as: Unicode.UTF8.self)
+        var remaining = self.testBuffer
+        let nextBit = remaining.nextChunk().bytes
+        return String(buffer: nextBit)
     }
 
     override func setUp() {
-        self.testBuffer = ByteBufferAllocator().buffer(capacity: 1)
+        self.testBuffer = EncodeBuffer(ByteBufferAllocator().buffer(capacity: 128), mode: .server)
     }
 }

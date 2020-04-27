@@ -22,7 +22,7 @@ public enum ListSelectModOption: Equatable {
 
 // MARK: - Encoding
 
-extension ByteBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeListSelectModOption(_ option: ListSelectModOption) -> Int {
         switch option {
         case .recursiveMatch:

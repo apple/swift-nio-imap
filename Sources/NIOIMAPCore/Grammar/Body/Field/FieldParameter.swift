@@ -26,7 +26,7 @@ public struct FieldParameterPair: Equatable {
 
 // MARK: - Encoding
 
-extension ByteBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeBodyFieldParameters(_ params: [FieldParameterPair]) -> Int {
         guard params.count > 0 else {
             return self.writeNil()

@@ -13,6 +13,12 @@
 //===----------------------------------------------------------------------===//
 
 import struct NIO.ByteBuffer
+import struct NIO.ByteBufferAllocator
+
+public enum ResponseOrContinueRequest: Equatable {
+    case continueRequest(ContinueRequest)
+    case response(Response)
+}
 
 public enum Response: Equatable {
     case greeting(Greeting)
@@ -20,7 +26,6 @@ public enum Response: Equatable {
     case fetchResponse(FetchResponse)
     case taggedResponse(TaggedResponse)
     case fatalResponse(ResponseText)
-    case continuationRequest(ContinueRequest)
 }
 
 /// The first event will always be `start`
@@ -44,15 +49,24 @@ public enum StreamingType: Equatable {
     case rfc822 /// IMAP4rev1 RFC 3501, streams RF822.TEXT when using a `literal`
 }
 
-public enum ResponseType: Equatable {
-    case continueRequest(ContinueRequest)
-    case responseData(ResponsePayload)
-}
-
 // MARK: - Encoding
+
+let emptyBuffer = ByteBufferAllocator().buffer(capacity: 0)
 
 extension ByteBuffer {
     @discardableResult public mutating func writeResponse(_ response: Response) -> Int {
+        var switchBuffer = emptyBuffer
+        swap(&self, &switchBuffer)
+        var encodeBuffer = EncodeBuffer(switchBuffer, mode: .server)
+        let ret = encodeBuffer.writeResponse(response)
+        self = encodeBuffer.nextChunk().bytes
+        return ret
+    }
+}
+
+extension EncodeBuffer {
+    @discardableResult fileprivate mutating func writeResponse(_ response: Response) -> Int {
+        assert(self.mode == .server)
         switch response {
         case .greeting(let greeting):
             return self.writeGreeting(greeting)
@@ -64,8 +78,6 @@ extension ByteBuffer {
             return self.writeTaggedResponse(end)
         case .fatalResponse(let fatal):
             return self.writeResponseFatal(fatal)
-        case .continuationRequest(let req):
-            return self.writeContinueRequest(req)
         }
     }
 
@@ -94,15 +106,6 @@ extension ByteBuffer {
             return self.writeString("BODY[TEXT] {\(size)}\r\n")
         case .rfc822:
             return self.writeString("RFC822.TEXT {\(size)}\r\n")
-        }
-    }
-
-    @discardableResult mutating func writeResponseType(_ type: ResponseType) -> Int {
-        switch type {
-        case .continueRequest(let continueRequest):
-            return self.writeContinueRequest(continueRequest)
-        case .responseData(let data):
-            return self.writeResponseData(data)
         }
     }
 }

@@ -26,7 +26,7 @@ public struct RenameParameter: Equatable {
 
 // MARK: - Encoding
 
-extension ByteBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeRenameParameters(_ params: [RenameParameter]) -> Int {
         guard params.count > 0 else {
             return 0

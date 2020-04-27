@@ -31,7 +31,7 @@ extension MailboxName {
 
 // MARK: - Encoding
 
-extension ByteBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeMailboxData(_ data: MailboxName.Data) -> Int {
         switch data {
         case .flags(let flags):

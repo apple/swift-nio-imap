@@ -58,7 +58,7 @@ public indirect enum SearchKey: Equatable {
 
 // MARK: - IMAP
 
-extension ByteBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeSearchKeys(_ keys: [SearchKey]) -> Int {
         self.writeArray(keys) { (element, self) in
             self.writeSearchKey(element)

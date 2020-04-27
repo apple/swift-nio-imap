@@ -27,7 +27,7 @@ public struct OptionVendorTag: Equatable {
 
 // MARK: - Encoding
 
-extension ByteBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeOptionVendorTag(_ tag: OptionVendorTag) -> Int {
         self.writeString(tag.token) +
             self.writeString("-") +

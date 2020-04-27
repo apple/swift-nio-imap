@@ -26,7 +26,7 @@ public struct AppendExtension: Equatable {
 
 // MARK: - Encoding
 
-extension ByteBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeAppendExtension(_ data: AppendExtension) -> Int {
         self.writeAppendExtensionName(data.name) +
             self.writeSpace() +

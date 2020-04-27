@@ -78,8 +78,6 @@ extension ParserUnitTests {
         let lines = [
             "* OK [CAPABILITY IMAP4rev1] Ready.\r\n",
 
-            "+ OK\r\n",
-            "+ OK\r\n",
             "2 OK Login completed.\r\n",
 
             "* 1 FETCH (BODY[TEXT]<4> {3}\r\nabc FLAGS (\\seen \\answered))\r\n",
@@ -95,9 +93,6 @@ extension ParserUnitTests {
 
         let expectedResults: [(Response, UInt)] = [
             (.greeting(.auth(.ok(.init(code: .capability([.imap4rev1]), text: "Ready.")))), #line),
-
-            (.continuationRequest(.responseText(.init(code: nil, text: "OK"))), #line),
-            (.continuationRequest(.responseText(.init(code: nil, text: "OK"))), #line),
             (.taggedResponse(.init(tag: "2", state: .ok(.init(code: nil, text: "Login completed.")))), #line),
 
             (.fetchResponse(.start(1)), #line),
@@ -133,7 +128,7 @@ extension ParserUnitTests {
         for (input, line) in expectedResults {
             do {
                 let actual = try parser.parseResponseStream(buffer: &buffer)
-                XCTAssertEqual(input, actual, line: line)
+                XCTAssertEqual(.response(input), actual, line: line)
             } catch {
                 XCTFail("\(error)", line: line)
                 return

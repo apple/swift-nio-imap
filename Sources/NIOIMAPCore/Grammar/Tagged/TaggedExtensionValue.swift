@@ -22,7 +22,7 @@ public enum TaggedExtensionValue: Equatable {
 
 // MARK: - Encoding
 
-extension ByteBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeTaggedExtensionValue(_ value: TaggedExtensionValue) -> Int {
         switch value {
         case .simple(let simple):

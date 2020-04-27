@@ -15,30 +15,27 @@
 import NIO
 import NIOIMAPCore
 
-public struct ResponseDecoder: ByteToMessageDecoder {
-    public typealias InboundOut = Response
+public struct ResponseDecoder: NIOSingleStepByteToMessageDecoder {
+    public typealias InboundOut = ResponseOrContinueRequest
 
     var parser: ResponseParser
 
-    public init(bufferLimit: Int = 1_000) {
-        self.parser = ResponseParser(bufferLimit: bufferLimit)
+    public init(bufferLimit: Int = 1_000, expectGreeting: Bool = true) {
+        self.parser = ResponseParser(bufferLimit: bufferLimit, expectGreeting: expectGreeting)
     }
 
-    public mutating func decode(context: ChannelHandlerContext, buffer: inout ByteBuffer) throws -> DecodingState {
+    public mutating func decode(buffer: inout ByteBuffer) throws -> ResponseOrContinueRequest? {
         let save = buffer
         do {
-            let result = try self.parser.parseResponseStream(buffer: &buffer)
-            context.fireChannelRead(self.wrapInboundOut(result))
-            return .continue
+            return try self.parser.parseResponseStream(buffer: &buffer)
         } catch ParsingError.incompleteMessage {
-            return .needMoreData
+            return nil
         } catch {
             throw IMAPDecoderError(parserError: error, buffer: save)
         }
     }
 
-    public mutating func decodeLast(context: ChannelHandlerContext, buffer: inout ByteBuffer, seenEOF: Bool) throws -> DecodingState {
-        while try self.decode(context: context, buffer: &buffer) != .needMoreData {}
-        return .needMoreData
+    public mutating func decodeLast(buffer: inout ByteBuffer, seenEOF: Bool) throws -> ResponseOrContinueRequest? {
+        try self.decode(buffer: &buffer)
     }
 }

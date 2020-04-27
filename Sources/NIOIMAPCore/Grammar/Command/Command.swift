@@ -57,7 +57,7 @@ public enum Command: Equatable {
 
 // MARK: - IMAP
 
-extension ByteBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeCommandType(_ commandType: Command) -> Int {
         switch commandType {
         case .capability:

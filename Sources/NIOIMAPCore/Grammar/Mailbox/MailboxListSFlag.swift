@@ -41,7 +41,7 @@ extension MailboxName.List {
 
 // MARK: - Encoding
 
-extension ByteBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeMailboxListSFlag(_ flag: MailboxName.List.SFlag) -> Int {
         self.writeString(flag.rawValue)
     }

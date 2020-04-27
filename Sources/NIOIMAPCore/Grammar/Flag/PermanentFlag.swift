@@ -22,7 +22,7 @@ public enum PermanentFlag: Equatable {
 
 // MARK: - Encoding
 
-extension ByteBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeFlagPerm(_ flagPerm: PermanentFlag) -> Int {
         switch flagPerm {
         case .flag(let flag):

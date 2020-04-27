@@ -51,11 +51,9 @@ extension ResponseDecoder_Tests {
 
         do {
             try ByteToMessageDecoderVerifier.verifyDecoder(
-                stringInputOutputPairs: inoutPairs,
+                stringInputOutputPairs: inoutPairs.map { ($0, $1.map { .response($0) }) },
                 decoderFactory: { () -> ResponseDecoder in
-                    var decoder = ResponseDecoder()
-                    decoder.parser.mode = .response
-                    return decoder
+                    ResponseDecoder(expectGreeting: false)
                 }
             )
         } catch {

@@ -16,7 +16,7 @@ import struct NIO.ByteBuffer
 
 // MARK: - Encoding
 
-extension ByteBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeTaggedExtensionComp(_ comp: [String]) -> Int {
         self.writeIfArrayHasMinimumSize(array: comp) { (comp, self) -> Int in
             self.writeArray(comp) { (string, self) in

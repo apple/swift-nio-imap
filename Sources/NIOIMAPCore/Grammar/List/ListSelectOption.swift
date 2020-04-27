@@ -31,7 +31,7 @@ public typealias ListSelectOptions = ListSelectionOptionsData?
 
 // MARK: - Encoding
 
-extension ByteBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeListSelectOption(_ option: ListSelectOption) -> Int {
         switch option {
         case .base(let option):

@@ -27,7 +27,9 @@ public struct CommandEncoder: MessageToByteEncoder {
         case .idleDone:
             out.writeString("DONE\r\n")
         case .command(let command):
-            out.writeCommand(command)
+            var encodeBuffer = EncodeBuffer(out, mode: .client)
+            encodeBuffer.writeCommand(command)
+            out = encodeBuffer.nextChunk().bytes
         }
     }
 }

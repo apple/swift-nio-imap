@@ -26,7 +26,7 @@ public struct FetchModifier: Equatable {
 
 // MARK: - Encoding
 
-extension ByteBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeFetchModifiers(_ array: [FetchModifier]) -> Int {
         guard array.count > 0 else {
             return 0

@@ -20,7 +20,7 @@ public enum CommandStream: Equatable {
     case bytes(ByteBuffer)
 }
 
-extension ByteBuffer {
+extension EncodeBuffer {
     @discardableResult public mutating func writeCommandStream(_ stream: CommandStream) -> Int {
         switch stream {
         case .idleDone:

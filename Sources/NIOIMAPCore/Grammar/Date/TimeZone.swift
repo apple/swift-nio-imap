@@ -27,7 +27,7 @@ extension Date {
 
 // MARK: IMAP
 
-extension ByteBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeTimezone(_ timezone: Date.TimeZone) -> Int {
         let string = String(abs(timezone.backing))
 

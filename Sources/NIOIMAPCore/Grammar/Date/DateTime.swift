@@ -31,7 +31,7 @@ extension Date {
 
 // MARK: - Encoding
 
-extension ByteBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeDateTime(_ dateTime: Date.DateTime) -> Int {
         self.writeString("\"\(dateTime.date.day)-\(dateTime.date.month.rawValue)-\(dateTime.date.year) ") +
             self.writeTime(dateTime.time) +
