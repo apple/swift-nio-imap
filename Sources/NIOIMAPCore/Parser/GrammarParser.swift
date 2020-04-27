@@ -173,11 +173,11 @@ extension NIOIMAP.GrammarParser {
             //                return try self.parseBase64(buffer: &buffer, tracker: tracker)
             //            }
 
-//            let data = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> [NIOIMAP.Base64] in
-//                try ParserLibrary.parseFixedString("\r\n", buffer: &buffer, tracker: tracker)
-//                return [try self.parseBase64(buffer: &buffer, tracker: tracker)]
-//            } ?? []
-            return .authenticate(authType, initial, [])
+            let data = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> [ByteBuffer] in
+                try ParserLibrary.parseFixedString("\r\n", buffer: &buffer, tracker: tracker)
+                return [try self.parseBase64(buffer: &buffer, tracker: tracker)]
+            } ?? []
+            return .authenticate(authType, initial, data)
         }
     }
 
