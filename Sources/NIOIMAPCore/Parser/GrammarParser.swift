@@ -2241,7 +2241,7 @@ extension NIOIMAP.GrammarParser {
             }
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
             let string = try self.parseNString(buffer: &buffer, tracker: tracker)
-            return .bodySection(section, number, string)
+            return .bodySection(section, partial: number, data: string)
         }
 
         func parseMessageAttribute_uid(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.MessageAttribute {
@@ -2254,7 +2254,7 @@ extension NIOIMAP.GrammarParser {
             let section = try self.parseSectionBinary(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
             let number = try self.parseNumber(buffer: &buffer, tracker: tracker)
-            return .binarySize(section: section, number: number)
+            return .binarySize(section: section, size: number)
         }
 
         func parseMessageAttribute_binary(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.MessageAttribute {
@@ -2262,7 +2262,7 @@ extension NIOIMAP.GrammarParser {
             let section = try self.parseSectionBinary(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
             let string = try self.parseNString(buffer: &buffer, tracker: tracker)
-            return .binaryString(section: section, string: string)
+            return .binary(section: section, data: string)
         }
 
         return try ParserLibrary.parseOneOf([

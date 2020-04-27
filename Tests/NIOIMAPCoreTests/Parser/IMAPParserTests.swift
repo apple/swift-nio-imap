@@ -1617,15 +1617,15 @@ extension ParserUnitTests {
     func testParseMessageAttribute() {
         let inputs: [(String, String, NIOIMAP.MessageAttribute, UInt)] = [
             ("UID 1234", " ", .uid(1234), #line),
-            ("BODY[TEXT] \"hello\"", " ", .bodySection(.text(.text), nil, "hello"), #line),
-            (#"BODY[HEADER] "string""#, " ", .bodySection(.text(.header), nil, "string"), #line),
-            (#"BODY[HEADER]<12> "string""#, " ", .bodySection(.text(.header), 12, "string"), #line),
+            ("BODY[TEXT] \"hello\"", " ", .bodySection(.text(.text), partial: nil, data: "hello"), #line),
+            (#"BODY[HEADER] "string""#, " ", .bodySection(.text(.header), partial: nil, data: "string"), #line),
+            (#"BODY[HEADER]<12> "string""#, " ", .bodySection(.text(.header), partial: 12, data: "string"), #line),
             ("RFC822.SIZE 1234", " ", .rfc822Size(1234), #line),
             (#"RFC822 "some string""#, " ", .rfc822(nil, "some string"), #line),
             (#"RFC822.HEADER "some string""#, " ", .rfc822(.header, "some string"), #line),
             (#"RFC822.TEXT "string""#, " ", .rfc822(.text, "string"), #line),
-            ("BINARY.SIZE[3] 4", " ", .binarySize(section: [3], number: 4), #line),
-            ("BINARY[3] \"hello\"", " ", .binaryString(section: [3], string: "hello"), #line),
+            ("BINARY.SIZE[3] 4", " ", .binarySize(section: [3], size: 4), #line),
+            ("BINARY[3] \"hello\"", " ", .binary(section: [3], data: "hello"), #line),
             (
                 #"INTERNALDATE "25-jun-1994 01:02:03 +0000""#,
                 " ",

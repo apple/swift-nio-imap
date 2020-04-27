@@ -30,9 +30,9 @@ extension NIOIMAP {
         case rfc822(RFC822Reduced?, NIOIMAP.NString)
         case rfc822Size(Int)
         case body(Body, structure: Bool)
-        case bodySection(SectionSpec?, Int?, NString)
-        case binaryString(section: [Int], string: NString)
-        case binarySize(section: [Int], number: Int)
+        case bodySection(SectionSpec?, partial: Int?, data: NString)
+        case binary(section: [Int], data: NString)
+        case binarySize(section: [Int], size: Int)
     }
 }
 
@@ -61,9 +61,9 @@ extension ByteBuffer {
             return self.writeMessageAttribute_bodySection(section, number: number, string: string)
         case .uid(let uid):
             return self.writeString("UID \(uid)")
-        case .binaryString(section: let section, string: let string):
+        case .binary(section: let section, data: let string):
             return self.writeMessageAttribute_binaryString(section: section, string: string)
-        case .binarySize(section: let section, number: let number):
+        case .binarySize(section: let section, size: let number):
             return self.writeMessageAttribute_binarySize(section: section, number: number)
         case .flags(let flags):
             return self.writeMessageAttributeFlags(flags)
