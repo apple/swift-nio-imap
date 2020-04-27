@@ -15,8 +15,6 @@
 import struct NIO.ByteBuffer
 
 extension NIOIMAP.BodyStructure {
-    
-    
     /// IMAPv4 `body-type-mpart`
     public struct Multipart: Equatable {
         public var bodies: [NIOIMAP.BodyStructure]

@@ -15,16 +15,14 @@
 import struct NIO.ByteBuffer
 
 extension NIOIMAP.BodyStructure {
-
     public indirect enum SinglepartType: Equatable {
         case basic(Singlepart.Basic)
         case message(Singlepart.Message)
         case text(Singlepart.Text)
     }
-    
+
     /// IMAPv4 `body-type-1part`
     public struct Singlepart: Equatable {
-        
         /// IMAPv4 `body-type-basic`
         public struct Basic: Equatable {
             public var media: NIOIMAP.Media.Basic
@@ -34,7 +32,7 @@ extension NIOIMAP.BodyStructure {
                 Self(media: media, fields: fields)
             }
         }
-        
+
         /// IMAPv4 `body-type-message`
         public struct Message: Equatable {
             public var message: NIOIMAP.Media.Message
@@ -48,7 +46,7 @@ extension NIOIMAP.BodyStructure {
                 Self(message: message, fields: fields, envelope: envelope, body: body, fieldLines: fieldLines)
             }
         }
-        
+
         /// IMAPv4 `body-type-text`
         public struct Text: Equatable {
             public var mediaText: String
@@ -59,7 +57,7 @@ extension NIOIMAP.BodyStructure {
                 Self(mediaText: mediaText, fields: fields, lines: lines)
             }
         }
-        
+
         public var type: SinglepartType
         public var `extension`: ExtensionSinglepart?
 
@@ -73,7 +71,6 @@ extension NIOIMAP.BodyStructure {
 // MARK: - Encoding
 
 extension ByteBuffer {
-    
     @discardableResult mutating func writeBodyTypeSinglepart(_ part: NIOIMAP.BodyStructure.Singlepart) -> Int {
         var size = 0
         switch part.type {
@@ -91,14 +88,14 @@ extension ByteBuffer {
         }
         return size
     }
-    
+
     @discardableResult mutating func writeBodyTypeText(_ body: NIOIMAP.BodyStructure.Singlepart.Text) -> Int {
         self.writeMediaText(body.mediaText) +
             self.writeSpace() +
             self.writeBodyFields(body.fields) +
             self.writeString(" \(body.lines)")
     }
-    
+
     @discardableResult mutating func writeBodyTypeMessage(_ message: NIOIMAP.BodyStructure.Singlepart.Message) -> Int {
         self.writeMediaMessage(message.message) +
             self.writeSpace() +
@@ -109,11 +106,10 @@ extension ByteBuffer {
             self.writeBody(message.body) +
             self.writeString(" \(message.fieldLines)")
     }
-    
+
     @discardableResult mutating func writeBodyTypeBasic(_ body: NIOIMAP.BodyStructure.Singlepart.Basic) -> Int {
         self.writeMediaBasic(body.media) +
             self.writeSpace() +
             self.writeBodyFields(body.fields)
     }
-    
 }

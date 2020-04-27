@@ -15,7 +15,6 @@
 import struct NIO.ByteBuffer
 
 extension NIOIMAP {
-    
     /// IMAOv4 body
     public enum BodyStructure: Equatable {
         case singlepart(Singlepart)

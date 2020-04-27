@@ -62,7 +62,7 @@ extension BodySinglepartTests {
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }
     }
-    
+
     func testEncode_basic() {
         let inputs: [(NIOIMAP.BodyStructure.Singlepart.Basic, String, UInt)] = [
             (.media(.type(.application, subtype: "subtype"), fields: .parameter([], id: nil, description: nil, encoding: .base64, octets: 123)), "\"APPLICATION\" \"subtype\" NIL NIL NIL \"BASE64\" 123", #line),
@@ -75,7 +75,7 @@ extension BodySinglepartTests {
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }
     }
-    
+
     func testEncode_message() {
         let inputs: [(NIOIMAP.BodyStructure.Singlepart.Message, String, UInt)] = [
             (
@@ -101,7 +101,7 @@ extension BodySinglepartTests {
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }
     }
-    
+
     func testEncode_text() {
         let inputs: [(NIOIMAP.BodyStructure.Singlepart.Text, String, UInt)] = [
             (.mediaText("subtype", fields: .parameter([], id: nil, description: nil, encoding: .base64, octets: 123), lines: 456), "\"TEXT\" \"subtype\" NIL NIL NIL \"BASE64\" 123 456", #line),
