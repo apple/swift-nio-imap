@@ -22,7 +22,6 @@ class MailboxListSFlagTests: EncodeTestClass {}
 
 extension MailboxListSFlagTests {
     func testInit() {
-
         let inputs: [(String, NIOIMAP.MailboxName.List.SFlag?, UInt)] = [
             (#"\fecd"#, nil, #line),
             (#"\Noselect"#, .noSelect, #line),

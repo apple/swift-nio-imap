@@ -1759,7 +1759,6 @@ extension NIOIMAP.GrammarParser {
     //                    "STATUS" SP mailbox SP "(" [status-att-list] ")" /
     //                    number SP "EXISTS" / Namespace-Response
     static func parseMailboxData(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.MailboxName.Data {
-
         func parseMailboxData_flags(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.MailboxName.Data {
             try ParserLibrary.parseFixedString("FLAGS ", buffer: &buffer, tracker: tracker)
             return .flags(try self.parseFlagList(buffer: &buffer, tracker: tracker))
@@ -1819,7 +1818,6 @@ extension NIOIMAP.GrammarParser {
     //                    (DQUOTE QUOTED-CHAR DQUOTE / nil) SP mailbox
     //                    [SP mbox-list-extended]
     static func parseMailboxList(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.MailboxName.List {
-
         func parseMailboxList_quotedChar_some(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Character? {
             try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> Character? in
                 try ParserLibrary.parseFixedString("\"", buffer: &buffer, tracker: tracker)
@@ -1844,7 +1842,7 @@ extension NIOIMAP.GrammarParser {
         return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> NIOIMAP.MailboxName.List in
             try ParserLibrary.parseFixedString("(", buffer: &buffer, tracker: tracker)
             let flags = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> NIOIMAP.MailboxName.List.Flags in
-                return try self.parseMailboxListFlags(buffer: &buffer, tracker: tracker)
+                try self.parseMailboxListFlags(buffer: &buffer, tracker: tracker)
             }
             try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
@@ -1865,7 +1863,7 @@ extension NIOIMAP.GrammarParser {
     // mbox-list-extended =  "(" [mbox-list-extended-item
     //                       *(SP mbox-list-extended-item)] ")"
     static func parseMailboxListExtended(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [NIOIMAP.MailboxName.ListExtendedItem] {
-        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> [NIOIMAP.MailboxName.ListExtendedItem] in
+        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> [NIOIMAP.MailboxName.ListExtendedItem] in
             try ParserLibrary.parseFixedString("(", buffer: &buffer, tracker: tracker)
             let data = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> [NIOIMAP.MailboxName.ListExtendedItem] in
                 var array = [try self.parseMailboxListExtendedItem(buffer: &buffer, tracker: tracker)]
@@ -1883,7 +1881,7 @@ extension NIOIMAP.GrammarParser {
     // mbox-list-extended-item =  mbox-list-extended-item-tag SP
     //                            tagged-ext-val
     static func parseMailboxListExtendedItem(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.MailboxName.ListExtendedItem {
-        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> NIOIMAP.MailboxName.ListExtendedItem in
+        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> NIOIMAP.MailboxName.ListExtendedItem in
             let tag = try self.parseMailboxListExtendedItemTag(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
             let val = try self.parseTaggedExtensionValue(buffer: &buffer, tracker: tracker)
@@ -1916,7 +1914,6 @@ extension NIOIMAP.GrammarParser {
     //                   *(SP mbx-list-oflag) /
     //                   mbx-list-oflag *(SP mbx-list-oflag)
     static func parseMailboxListFlags(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.MailboxName.List.Flags {
-
         func parseMailboxListFlags_mixedArray(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.MailboxName.List.Flags {
             var oFlags = try ParserLibrary.parseZeroOrMore(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> NIOIMAP.MailboxName.List.OFlag in
                 let flag = try self.parseMailboxListOflag(buffer: &buffer, tracker: tracker)
@@ -1949,7 +1946,6 @@ extension NIOIMAP.GrammarParser {
     // mbx-list-oflag  = "\Noinferiors" / child-mbox-flag /
     //                   "\Subscribed" / "\Remote" / flag-extension
     static func parseMailboxListOflag(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.MailboxName.List.OFlag {
-
         // protect against parsing an sflag
         let saved = buffer
         if let sFlag = try? self.parseMailboxListSflag(buffer: &buffer, tracker: tracker) {
@@ -1963,7 +1959,7 @@ extension NIOIMAP.GrammarParser {
         }
 
         func parseMailboxListOflag_flagExtension(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.MailboxName.List.OFlag {
-            return .other(try self.parseFlagExtension(buffer: &buffer, tracker: tracker))
+            .other(try self.parseFlagExtension(buffer: &buffer, tracker: tracker))
         }
 
         return try ParserLibrary.parseOneOf([
@@ -1974,7 +1970,7 @@ extension NIOIMAP.GrammarParser {
 
     // mbx-list-sflag  = "\NonExistent" / "\Noselect" / "\Marked" / "\Unmarked"
     static func parseMailboxListSflag(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.MailboxName.List.SFlag {
-        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker in
+        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             let string = try ParserLibrary.parseOneOrMoreCharacters(buffer: &buffer, tracker: tracker) { c -> Bool in
                 isalpha(Int32(c)) != 0 || c == UInt8(ascii: "\\")
             }

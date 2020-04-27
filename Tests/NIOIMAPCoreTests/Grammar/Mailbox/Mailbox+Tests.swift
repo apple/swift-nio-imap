@@ -26,7 +26,7 @@ extension Mailbox_Tests {
             (.inbox, "\"INBOX\"", #line),
             (.init(""), "\"\"", #line),
             (.init("box"), "\"box\"", #line),
-            (.init("\""), "{1}\r\n\"", #line)
+            (.init("\""), "{1}\r\n\"", #line),
         ]
 
         for (test, expectedString, line) in inputs {

@@ -15,7 +15,6 @@
 import struct NIO.ByteBuffer
 
 extension NIOIMAP.MailboxName.List {
-
     /// IMAPv4 `mbx-list-flags`
     public struct Flags: Equatable {
         public var oFlags: [OFlag]
@@ -28,8 +27,8 @@ extension NIOIMAP.MailboxName.List {
 }
 
 // MARK: - Encoding
-extension ByteBuffer {
 
+extension ByteBuffer {
     @discardableResult mutating func writeMailboxListFlags(_ flags: NIOIMAP.MailboxName.List.Flags) -> Int {
         if let sFlag = flags.sFlag {
             return

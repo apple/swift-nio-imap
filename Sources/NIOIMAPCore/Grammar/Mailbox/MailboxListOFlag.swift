@@ -15,7 +15,6 @@
 import struct NIO.ByteBuffer
 
 extension NIOIMAP.MailboxName.List {
-
     /// IMAPv4 `mbx-list-oflag`
     public enum OFlag: Equatable {
         case noInferiors
@@ -27,8 +26,8 @@ extension NIOIMAP.MailboxName.List {
 }
 
 // MARK: - Encoding
-extension ByteBuffer {
 
+extension ByteBuffer {
     @discardableResult mutating func writeMailboxListOFlag(_ flag: NIOIMAP.MailboxName.List.OFlag) -> Int {
         switch flag {
         case .noInferiors:

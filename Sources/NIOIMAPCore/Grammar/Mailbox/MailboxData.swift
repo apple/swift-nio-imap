@@ -15,7 +15,6 @@
 import struct NIO.ByteBuffer
 
 extension NIOIMAP.MailboxName {
-
     /// IMAPv4 `mailbox-data`
     public enum Data: Equatable {
         case flags([NIOIMAP.Flag])
@@ -29,8 +28,8 @@ extension NIOIMAP.MailboxName {
 }
 
 // MARK: - Encoding
-extension ByteBuffer {
 
+extension ByteBuffer {
     @discardableResult mutating func writeMailboxData(_ data: NIOIMAP.MailboxName.Data) -> Int {
         switch data {
         case .flags(let flags):
