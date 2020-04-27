@@ -15,9 +15,12 @@
 import Dispatch
 
 // proof that this works
-import NIO
-extension ByteBuffer: _ByteBufferAPITemplate {}
 
+import struct NIO.ByteBuffer
+import struct NIO.ByteBufferView
+import enum NIO.Endianness
+
+extension ByteBuffer: _ByteBufferAPITemplate {}
 extension ByteBufferView: _ByteBufferViewAPITemplate {}
 
 /// `ByteBuffer` stores contiguously allocated raw bytes. It is a random and sequential accessible sequence of zero or
@@ -732,5 +735,5 @@ protocol _ByteBufferViewAPITemplate where Self: RandomAccessCollection, Self: Mu
     ///   *m* is the length of `newElements`. If the call to this method simply
     ///   appends the contents of `newElements` to the collection, this method is
     ///   equivalent to `append(contentsOf:)`.
-    mutating func replaceSubrange<C>(_ subrange: Range<Index>, with newElements: C) where C: Collection, C.Element == NIO.ByteBufferView.Element
+    mutating func replaceSubrange<C>(_ subrange: Range<Index>, with newElements: C) where C: Collection, C.Element == ByteBufferView.Element
 }
