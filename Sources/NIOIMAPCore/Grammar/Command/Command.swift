@@ -179,14 +179,9 @@ extension ByteBuffer {
 
     private mutating func writeCommandType_list(selectOptions: NIOIMAP.ListSelectOptions?, mailbox: NIOIMAP.MailboxName, mailboxPatterns: NIOIMAP.MailboxPatterns, returnOptions: [NIOIMAP.ReturnOption]) -> Int {
         self.writeString("LIST") +
-            self.writeIfExists(selectOptions) { (options) -> Int in
-                self.writeSpace() +
-                    self.writeListSelectOptions(options)
-            } +
+        self.writeIfExists(selectOptions) { (options) -> Int in
             self.writeSpace() +
-            self.writeMailbox(mailbox) +
-            self.writeSpace() +
-            self.writeListSelectOptions(options)
+                self.writeListSelectOptions(options)
         } +
         self.writeSpace() +
         self.writeMailbox(mailbox) +

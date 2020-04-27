@@ -29,6 +29,7 @@ extension NIOIMAP.MailboxName {
 }
 
 // MARK: - Encoding
+extension ByteBuffer {
 
     @discardableResult mutating func writeMailboxData(_ data: NIOIMAP.MailboxName.Data) -> Int {
         switch data {

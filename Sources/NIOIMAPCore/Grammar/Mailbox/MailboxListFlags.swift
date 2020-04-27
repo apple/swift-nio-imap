@@ -28,6 +28,7 @@ extension NIOIMAP.MailboxName.List {
 }
 
 // MARK: - Encoding
+extension ByteBuffer {
 
     @discardableResult mutating func writeMailboxListFlags(_ flags: NIOIMAP.MailboxName.List.Flags) -> Int {
         if let sFlag = flags.sFlag {

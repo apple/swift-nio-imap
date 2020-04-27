@@ -30,7 +30,8 @@ extension NIOIMAP.MailboxName {
 }
 
 // MARK: - Encoding
-
+extension ByteBuffer {
+    
     @discardableResult mutating func writeMailboxList(_ list: NIOIMAP.MailboxName.List) -> Int {
         self.writeString("(") +
             self.writeIfExists(list.flags) { (flags) -> Int in
