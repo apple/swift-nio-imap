@@ -16,11 +16,11 @@ import NIO
 @testable import NIOIMAPCore
 import XCTest
 
-class BodyTypeSinglepartTests: EncodeTestClass {}
+class BodySinglepartTests: EncodeTestClass {}
 
 // MARK: - Encoding
 
-extension BodyTypeSinglepartTests {
+extension BodySinglepartTests {
     func testEncode() {
         let inputs: [(NIOIMAP.BodyStructure.Singlepart, String, UInt)] = [
             (
@@ -58,6 +58,58 @@ extension BodyTypeSinglepartTests {
         for (test, expectedString, line) in inputs {
             self.testBuffer.clear()
             let size = self.testBuffer.writeBodyTypeSinglepart(test)
+            XCTAssertEqual(size, expectedString.utf8.count, line: line)
+            XCTAssertEqual(self.testBufferString, expectedString, line: line)
+        }
+    }
+    
+    func testEncode_basic() {
+        let inputs: [(NIOIMAP.BodyStructure.Singlepart.Basic, String, UInt)] = [
+            (.media(.type(.application, subtype: "subtype"), fields: .parameter([], id: nil, description: nil, encoding: .base64, octets: 123)), "\"APPLICATION\" \"subtype\" NIL NIL NIL \"BASE64\" 123", #line),
+        ]
+
+        for (test, expectedString, line) in inputs {
+            self.testBuffer.clear()
+            let size = self.testBuffer.writeBodyTypeBasic(test)
+            XCTAssertEqual(size, expectedString.utf8.count, line: line)
+            XCTAssertEqual(self.testBufferString, expectedString, line: line)
+        }
+    }
+    
+    func testEncode_message() {
+        let inputs: [(NIOIMAP.BodyStructure.Singlepart.Message, String, UInt)] = [
+            (
+                .message(
+                    .rfc822,
+                    fields: .parameter([], id: nil, description: nil, encoding: .base64, octets: 111),
+                    envelope: NIOIMAP.Envelope(date: "date", subject: nil, from: [], sender: [], reply: [], to: [], cc: [], bcc: [], inReplyTo: nil, messageID: nil),
+                    body: .singlepart(.type(.text(.mediaText("subtype",
+                                                             fields: .parameter([], id: nil, description: nil, encoding: .binary, octets: 22),
+                                                             lines: 33)),
+                                            extension: nil)),
+                    fieldLines: 89
+                ),
+                "\"MESSAGE\" \"RFC822\" NIL NIL NIL \"BASE64\" 111 (\"date\" NIL NIL NIL NIL NIL NIL NIL NIL NIL) (\"TEXT\" \"subtype\" NIL NIL NIL \"BINARY\" 22 33) 89",
+                #line
+            ),
+        ]
+
+        for (test, expectedString, line) in inputs {
+            self.testBuffer.clear()
+            let size = self.testBuffer.writeBodyTypeMessage(test)
+            XCTAssertEqual(size, expectedString.utf8.count, line: line)
+            XCTAssertEqual(self.testBufferString, expectedString, line: line)
+        }
+    }
+    
+    func testEncode_text() {
+        let inputs: [(NIOIMAP.BodyStructure.Singlepart.Text, String, UInt)] = [
+            (.mediaText("subtype", fields: .parameter([], id: nil, description: nil, encoding: .base64, octets: 123), lines: 456), "\"TEXT\" \"subtype\" NIL NIL NIL \"BASE64\" 123 456", #line),
+        ]
+
+        for (test, expectedString, line) in inputs {
+            self.testBuffer.clear()
+            let size = self.testBuffer.writeBodyTypeText(test)
             XCTAssertEqual(size, expectedString.utf8.count, line: line)
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }

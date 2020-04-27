@@ -16,11 +16,11 @@ import NIO
 @testable import NIOIMAPCore
 import XCTest
 
-class BodyTypeMultipartTests: EncodeTestClass {}
+class BodyMultipartTests: EncodeTestClass {}
 
 // MARK: - Encoding
 
-extension BodyTypeMultipartTests {
+extension BodyMultipartTests {
     func testEncode() {
         let inputs: [(NIOIMAP.BodyStructure.Multipart, String, UInt)] = [
             (
