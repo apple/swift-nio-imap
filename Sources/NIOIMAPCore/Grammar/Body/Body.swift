@@ -18,8 +18,8 @@ extension NIOIMAP {
     
     /// IMAOv4 body
     public enum BodyStructure: Equatable {
-        case singlepart(TypeSinglepart)
-        case multipart(TypeMultipart)
+        case singlepart(Singlepart)
+        case multipart(Multipart)
     }
 }
 

@@ -22,7 +22,7 @@ extension NIOIMAP.BodyStructure {
     }
 
     /// IMAPv4 `body-type-1part`
-    public struct TypeSinglepart: Equatable {
+    public struct Singlepart: Equatable {
         public var type: TypeSinglepartType
         public var `extension`: ExtensionSinglepart?
 
@@ -36,7 +36,7 @@ extension NIOIMAP.BodyStructure {
 // MARK: - Encoding
 
 extension ByteBuffer {
-    @discardableResult mutating func writeBodyTypeSinglepart(_ part: NIOIMAP.BodyStructure.TypeSinglepart) -> Int {
+    @discardableResult mutating func writeBodyTypeSinglepart(_ part: NIOIMAP.BodyStructure.Singlepart) -> Int {
         var size = 0
         switch part.type {
         case .basic(let basic):
