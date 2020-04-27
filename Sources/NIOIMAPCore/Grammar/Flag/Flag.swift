@@ -15,16 +15,50 @@
 import struct NIO.ByteBuffer
 
 extension NIOIMAP {
-    /// IMAPv4 `flag`
-    public enum Flag: Equatable {
+    
+    enum _Flag: Hashable {
         case answered
         case flagged
         case deleted
         case seen
         case draft
-        case keyword(Keyword)
+        case keyword(Flag.Keyword)
         case `extension`(String)
     }
+    
+    public struct Flag: Hashable {
+        var _backing: _Flag
+        
+        public static var answered: Self {
+            Self(_backing: .answered)
+        }
+        
+        public static var flagged: Self {
+            Self(_backing: .flagged)
+        }
+        
+        public static var deleted: Self {
+            Self(_backing: .deleted)
+        }
+        
+        public static var seen: Self {
+            Self(_backing: .seen)
+        }
+        
+        public static var draft: Self {
+            Self(_backing: .draft)
+        }
+        
+        public static func keyword(_ keyword: Keyword) -> Self {
+            Self(_backing: .keyword(keyword))
+        }
+        
+        public static func `extension`(_ string: String) -> Self {
+            Self(_backing: .extension(string))
+        }
+        
+    }
+    
 }
 
 // MARK: - Encoding
@@ -37,7 +71,7 @@ extension ByteBuffer {
     }
 
     @discardableResult mutating func writeFlag(_ flag: NIOIMAP.Flag) -> Int {
-        switch flag {
+        switch flag._backing {
         case .answered:
             return self.writeString("\\Answered")
         case .flagged:
