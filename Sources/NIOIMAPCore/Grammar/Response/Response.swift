@@ -32,7 +32,7 @@ extension NIOIMAP {
     /// `streamingBegin` has a `type` that specifies the type of data to be streamed
     public enum FetchResponse: Equatable {
         case start(Int)
-        case simpleAttribute(MessageAttributeType)
+        case simpleAttribute(MessageAttribute)
         case streamingBegin(type: StreamingType, byteCount: Int)
         case streamingBytes(ByteBuffer)
         case streamingEnd
@@ -76,7 +76,7 @@ extension ByteBuffer {
         case .start:
             return self.writeString("(")
         case .simpleAttribute(let att):
-            return self.writeMessageAttributeType(att)
+            return self.writeMessageAttribute(att)
         case .streamingBegin(let type, let size):
             return self.writeStreamingType(type, size: size)
         case .streamingBytes(var bytes):

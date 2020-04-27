@@ -2103,23 +2103,6 @@ extension NIOIMAP.GrammarParser {
         }
     }
 
-    // msg-att         = "(" (msg-att-dynamic / msg-att-static)
-    //                    *(SP (msg-att-dynamic / msg-att-static)) ")"
-    static func parseMessageAttribute_dynamicOrStatic(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.MessageAttributeType {
-        func parseMessageAttribute_static(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.MessageAttributeType {
-            .static(try self.parseMessageAttributeStatic(buffer: &buffer, tracker: tracker))
-        }
-
-        func parseMessageAttribute_dynamic(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.MessageAttributeType {
-            .dynamic(try self.parseMessageAttributeDynamic(buffer: &buffer, tracker: tracker))
-        }
-
-        return try ParserLibrary.parseOneOf([
-            parseMessageAttribute_static,
-            parseMessageAttribute_dynamic,
-        ], buffer: &buffer, tracker: tracker)
-    }
-
     static func parseFetchStreamingResponse(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.StreamingType {
         func parseFetchStreamingResponse_rfc822(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.StreamingType {
             try ParserLibrary.parseFixedString("RFC822.TEXT", buffer: &buffer, tracker: tracker)
@@ -2159,7 +2142,7 @@ extension NIOIMAP.GrammarParser {
         }
 
         func parseFetchResponse_simpleAttribute(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.FetchResponse {
-            let attribute = try self.parseMessageAttribute_dynamicOrStatic(buffer: &buffer, tracker: tracker)
+            let attribute = try self.parseMessageAttribute(buffer: &buffer, tracker: tracker)
             return .simpleAttribute(attribute)
         }
 
@@ -2183,20 +2166,6 @@ extension NIOIMAP.GrammarParser {
         ], buffer: &buffer, tracker: tracker)
     }
 
-    // msg-att-dynamic = "FLAGS" SP "(" [flag-fetch *(SP flag-fetch)] ")"
-    static func parseMessageAttributeDynamic(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [NIOIMAP.Flag] {
-        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> [NIOIMAP.Flag] in
-            try ParserLibrary.parseFixedString("FLAGS (", buffer: &buffer, tracker: tracker)
-            var array = [try self.parseFlagFetch(buffer: &buffer, tracker: tracker)]
-            try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) -> NIOIMAP.Flag in
-                try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
-                return try self.parseFlagFetch(buffer: &buffer, tracker: tracker)
-            }
-            try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)
-            return array
-        }
-    }
-
     // msg-att-static  = "ENVELOPE" SP envelope / "INTERNALDATE" SP date-time /
     //                   "RFC822.SIZE" SP number /
     //                   "BODY" ["STRUCTURE"] SP body /
@@ -2204,18 +2173,34 @@ extension NIOIMAP.GrammarParser {
     //                   "BINARY" section-binary SP (nstring / literal8) /
     //                   "BINARY.SIZE" section-binary SP number /
     //                   "UID" SP uniqueid
-    static func parseMessageAttributeStatic(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.MessageAttributesStatic {
-        func parseMessageAttributeStatic_envelope(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.MessageAttributesStatic {
+    // msg-att-dynamic = "FLAGS" SP "(" [flag-fetch *(SP flag-fetch)] ")"
+    // ---- This function combines static and dynamic
+    static func parseMessageAttribute(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.MessageAttribute {
+        
+        func parseMessageAttribute_flags(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.MessageAttribute {
+            try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> NIOIMAP.MessageAttribute in
+                try ParserLibrary.parseFixedString("FLAGS (", buffer: &buffer, tracker: tracker)
+                var array = [try self.parseFlagFetch(buffer: &buffer, tracker: tracker)]
+                try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) -> NIOIMAP.Flag in
+                    try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
+                    return try self.parseFlagFetch(buffer: &buffer, tracker: tracker)
+                }
+                try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)
+                return .flags(array)
+            }
+        }
+        
+        func parseMessageAttribute_envelope(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.MessageAttribute {
             try ParserLibrary.parseFixedString("ENVELOPE ", buffer: &buffer, tracker: tracker)
             return .envelope(try self.parseEnvelope(buffer: &buffer, tracker: tracker))
         }
 
-        func parseMessageAttributeStatic_internalDate(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.MessageAttributesStatic {
+        func parseMessageAttribute_internalDate(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.MessageAttribute {
             try ParserLibrary.parseFixedString("INTERNALDATE ", buffer: &buffer, tracker: tracker)
             return .internalDate(try self.parseDateTime(buffer: &buffer, tracker: tracker))
         }
 
-        func parseMessageAttributeStatic_rfc822(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.MessageAttributesStatic {
+        func parseMessageAttribute_rfc822(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.MessageAttribute {
             try ParserLibrary.parseFixedString("RFC822", buffer: &buffer, tracker: tracker)
             let rfc = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> NIOIMAP.RFC822Reduced in
                 try self.parseRFC822Reduced(buffer: &buffer, tracker: tracker)
@@ -2225,12 +2210,12 @@ extension NIOIMAP.GrammarParser {
             return .rfc822(rfc, string)
         }
 
-        func parseMessageAttributeStatic_rfc822Size(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.MessageAttributesStatic {
+        func parseMessageAttribute_rfc822Size(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.MessageAttribute {
             try ParserLibrary.parseFixedString("RFC822.SIZE ", buffer: &buffer, tracker: tracker)
             return .rfc822Size(try self.parseNumber(buffer: &buffer, tracker: tracker))
         }
 
-        func parseMessageAttributeStatic_body(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.MessageAttributesStatic {
+        func parseMessageAttribute_body(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.MessageAttribute {
             try ParserLibrary.parseFixedString("BODY", buffer: &buffer, tracker: tracker)
             let structure: Bool = {
                 do {
@@ -2245,7 +2230,7 @@ extension NIOIMAP.GrammarParser {
             return .body(body, structure: structure)
         }
 
-        func parseMessageAttributeStatic_bodySection(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.MessageAttributesStatic {
+        func parseMessageAttribute_bodySection(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.MessageAttribute {
             try ParserLibrary.parseFixedString("BODY", buffer: &buffer, tracker: tracker)
             let section = try self.parseSection(buffer: &buffer, tracker: tracker)
             let number = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> Int in
@@ -2259,12 +2244,12 @@ extension NIOIMAP.GrammarParser {
             return .bodySection(section, number, string)
         }
 
-        func parseMessageAttributeStatic_uid(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.MessageAttributesStatic {
+        func parseMessageAttribute_uid(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.MessageAttribute {
             try ParserLibrary.parseFixedString("UID ", buffer: &buffer, tracker: tracker)
             return .uid(try self.parseUniqueID(buffer: &buffer, tracker: tracker))
         }
 
-        func parseMessageAttributeStatic_binarySize(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.MessageAttributesStatic {
+        func parseMessageAttribute_binarySize(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.MessageAttribute {
             try ParserLibrary.parseFixedString("BINARY.SIZE", buffer: &buffer, tracker: tracker)
             let section = try self.parseSectionBinary(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
@@ -2272,7 +2257,7 @@ extension NIOIMAP.GrammarParser {
             return .binarySize(section: section, number: number)
         }
 
-        func parseMessageAttributeStatic_binary(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.MessageAttributesStatic {
+        func parseMessageAttribute_binary(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.MessageAttribute {
             try ParserLibrary.parseFixedString("BINARY", buffer: &buffer, tracker: tracker)
             let section = try self.parseSectionBinary(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
@@ -2281,15 +2266,16 @@ extension NIOIMAP.GrammarParser {
         }
 
         return try ParserLibrary.parseOneOf([
-            parseMessageAttributeStatic_envelope,
-            parseMessageAttributeStatic_internalDate,
-            parseMessageAttributeStatic_rfc822,
-            parseMessageAttributeStatic_rfc822Size,
-            parseMessageAttributeStatic_body,
-            parseMessageAttributeStatic_bodySection,
-            parseMessageAttributeStatic_uid,
-            parseMessageAttributeStatic_binarySize,
-            parseMessageAttributeStatic_binary,
+            parseMessageAttribute_envelope,
+            parseMessageAttribute_internalDate,
+            parseMessageAttribute_rfc822,
+            parseMessageAttribute_rfc822Size,
+            parseMessageAttribute_body,
+            parseMessageAttribute_bodySection,
+            parseMessageAttribute_uid,
+            parseMessageAttribute_binarySize,
+            parseMessageAttribute_binary,
+            parseMessageAttribute_flags
         ], buffer: &buffer, tracker: tracker)
     }
 

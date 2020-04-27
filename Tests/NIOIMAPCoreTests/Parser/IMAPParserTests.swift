@@ -104,11 +104,11 @@ extension ParserUnitTests {
             (.fetchResponse(.streamingBegin(type: .body(partial: 4), byteCount: 3)), #line),
             (.fetchResponse(.streamingBytes("abc")), #line),
             (.fetchResponse(.streamingEnd), #line),
-            (.fetchResponse(.simpleAttribute(.dynamic([.seen, .answered]))), #line),
+            (.fetchResponse(.simpleAttribute(.flags([.seen, .answered]))), #line),
             (.fetchResponse(.finish), #line),
 
             (.fetchResponse(.start(2)), #line),
-            (.fetchResponse(.simpleAttribute(.dynamic([.deleted]))), #line),
+            (.fetchResponse(.simpleAttribute(.flags([.deleted]))), #line),
             (.fetchResponse(.streamingBegin(type: .body(partial: nil), byteCount: 3)), #line),
             (.fetchResponse(.streamingBytes("def")), #line),
             (.fetchResponse(.streamingEnd), #line),
@@ -1612,72 +1612,10 @@ extension ParserUnitTests {
 }
 
 // MARK: - parseMessageAttribute
-
 extension ParserUnitTests {
-    // TODO: Write tests
-}
-
-// MARK: - parseMessageAttributeDynamic
-
-extension ParserUnitTests {
-    func testParseMessageAttributeDynamic_valid_single() {
-        TestUtilities.withBuffer("FLAGS (\\Draft)", terminator: "") { (buffer) in
-            let result = try NIOIMAP.GrammarParser.parseMessageAttributeDynamic(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(result, [.draft])
-        }
-    }
-
-    func testParseMessageAttributeDynamic_valid_multiple() {
-        TestUtilities.withBuffer("FLAGS (flag1 flag2 flag3)", terminator: "") { (buffer) in
-            let result = try NIOIMAP.GrammarParser.parseMessageAttributeDynamic(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(result, [.keyword(NIOIMAP.Flag.Keyword("flag1")), .keyword(NIOIMAP.Flag.Keyword("flag2")), .keyword(NIOIMAP.Flag.Keyword("flag3"))])
-        }
-    }
-
-    func testParseMessageAttributeDynamic_invalid_empty() {
-        var buffer = "FLAGS ()" as ByteBuffer
-        XCTAssertThrowsError(try NIOIMAP.GrammarParser.parseMessageAttributeDynamic(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertTrue(e is ParserError)
-        }
-    }
-}
-
-// MARK: - parseMessageAttributeStatic
-
-extension ParserUnitTests {
-    func testParseMessageAttributeStatic_envelope() {
-        TestUtilities.withBuffer(#"ENVELOPE ("date" "subject" (("from1" "from2" "from3" "from4")) (("sender1" "sender2" "sender3" "sender4")) (("reply1" "reply2" "reply3" "reply4")) (("to1" "to2" "to3" "to4")) (("cc1" "cc2" "cc3" "cc4")) (("bcc1" "bcc2" "bcc3" "bcc4")) "inreplyto" "messageid")"#) { (buffer) in
-            let result = try NIOIMAP.GrammarParser.parseMessageAttributeStatic(buffer: &buffer, tracker: .testTracker)
-            let expectedEnvelope = NIOIMAP.Envelope(
-                date: "date",
-                subject: "subject",
-                from: [.name("from1", adl: "from2", mailbox: "from3", host: "from4")],
-                sender: [.name("sender1", adl: "sender2", mailbox: "sender3", host: "sender4")],
-                reply: [.name("reply1", adl: "reply2", mailbox: "reply3", host: "reply4")],
-                to: [.name("to1", adl: "to2", mailbox: "to3", host: "to4")],
-                cc: [.name("cc1", adl: "cc2", mailbox: "cc3", host: "cc4")],
-                bcc: [.name("bcc1", adl: "bcc2", mailbox: "bcc3", host: "bcc4")],
-                inReplyTo: "inreplyto",
-                messageID: "messageid"
-            )
-            XCTAssertEqual(result, .envelope(expectedEnvelope))
-        }
-    }
-
-    func testParseMessageAttributeStatic_dateTime() {
-        TestUtilities.withBuffer(#"INTERNALDATE "25-jun-1994 01:02:03 +0000""#) { (buffer) in
-            let result = try NIOIMAP.GrammarParser.parseMessageAttributeStatic(buffer: &buffer, tracker: .testTracker)
-            let expectedDateTime = NIOIMAP.Date.DateTime(
-                date: NIOIMAP.Date(day: 25, month: .jun, year: 1994),
-                time: NIOIMAP.Date.Time(hour: 01, minute: 02, second: 03),
-                zone: NIOIMAP.Date.TimeZone(0)!
-            )
-            XCTAssertEqual(result, .internalDate(expectedDateTime))
-        }
-    }
-
-    func testParseMessageAttributeStatic() {
-        let inputs: [(String, String, NIOIMAP.MessageAttributesStatic, UInt)] = [
+    
+    func testParseMessageAttribute() {
+        let inputs: [(String, String, NIOIMAP.MessageAttribute, UInt)] = [
             ("UID 1234", " ", .uid(1234), #line),
             ("BODY[TEXT] \"hello\"", " ", .bodySection(.text(.text), nil, "hello"), #line),
             (#"BODY[HEADER] "string""#, " ", .bodySection(.text(.header), nil, "string"), #line),
@@ -1688,8 +1626,35 @@ extension ParserUnitTests {
             (#"RFC822.TEXT "string""#, " ", .rfc822(.text, "string"), #line),
             ("BINARY.SIZE[3] 4", " ", .binarySize(section: [3], number: 4), #line),
             ("BINARY[3] \"hello\"", " ", .binaryString(section: [3], string: "hello"), #line),
+            (
+                #"INTERNALDATE "25-jun-1994 01:02:03 +0000""#,
+                " ",
+                .internalDate(NIOIMAP.Date.DateTime(
+                    date: NIOIMAP.Date(day: 25, month: .jun, year: 1994),
+                    time: NIOIMAP.Date.Time(hour: 01, minute: 02, second: 03),
+                    zone: NIOIMAP.Date.TimeZone(0)!
+                )),
+                #line
+            ),
+            (
+                #"ENVELOPE ("date" "subject" (("from1" "from2" "from3" "from4")) (("sender1" "sender2" "sender3" "sender4")) (("reply1" "reply2" "reply3" "reply4")) (("to1" "to2" "to3" "to4")) (("cc1" "cc2" "cc3" "cc4")) (("bcc1" "bcc2" "bcc3" "bcc4")) "inreplyto" "messageid")"#,
+                " ",
+                .envelope(NIOIMAP.Envelope(
+                    date: "date",
+                    subject: "subject",
+                    from: [.name("from1", adl: "from2", mailbox: "from3", host: "from4")],
+                    sender: [.name("sender1", adl: "sender2", mailbox: "sender3", host: "sender4")],
+                    reply: [.name("reply1", adl: "reply2", mailbox: "reply3", host: "reply4")],
+                    to: [.name("to1", adl: "to2", mailbox: "to3", host: "to4")],
+                    cc: [.name("cc1", adl: "cc2", mailbox: "cc3", host: "cc4")],
+                    bcc: [.name("bcc1", adl: "bcc2", mailbox: "bcc3", host: "bcc4")],
+                    inReplyTo: "inreplyto",
+                    messageID: "messageid"
+                )),
+                #line
+            ),
         ]
-        self.iterateTestInputs(inputs, testFunction: NIOIMAP.GrammarParser.parseMessageAttributeStatic)
+        self.iterateTestInputs(inputs, testFunction: NIOIMAP.GrammarParser.parseMessageAttribute)
     }
 }
 
