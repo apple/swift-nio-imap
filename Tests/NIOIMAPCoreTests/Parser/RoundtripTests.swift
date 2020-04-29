@@ -62,7 +62,7 @@ extension RoundtripTests {
             (.unsubscribe(NIOIMAP.Mailbox("mailbox")), #line),
 
             (.select(.inbox, []), #line),
-            (.select(NIOIMAP.Mailbox("mailbox"), []), #line ),
+            (.select(NIOIMAP.Mailbox("mailbox"), []), #line),
 
             (.rename(from: .inbox, to: .inbox, params: []), #line),
             (.rename(from: NIOIMAP.Mailbox("test1"), to: NIOIMAP.Mailbox("test2"), params: []), #line),
@@ -82,7 +82,7 @@ extension RoundtripTests {
 
             (.copy([.single(2), .wildcard], .inbox), #line),
 
-            (.fetch([.wildcard], .all, []),  #line),
+            (.fetch([.wildcard], .all, []), #line),
             (.fetch([.wildcard], .fast, []), #line),
             (.fetch([.wildcard], .full, []), #line),
             (.fetch([.single(5678)], .attributes([.uid, .flags, .internaldate, .envelope]), []), #line),
@@ -99,7 +99,7 @@ extension RoundtripTests {
 
             (.uidStore([.wildcard], [], .add(silent: true, list: [.draft, .deleted, .answered])), #line),
 
-            (.search(returnOptions: [.all], program: .charset(nil, keys: [.all])), #line)
+            (.search(returnOptions: [.all], program: .charset(nil, keys: [.all])), #line),
         ]
 
         var buffer = ByteBufferAllocator().buffer(capacity: 1)
