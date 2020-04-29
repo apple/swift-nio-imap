@@ -23,12 +23,12 @@ class BodyFieldEncodingTests: EncodeTestClass {}
 extension BodyFieldEncodingTests {
     func testEncode() {
         let inputs: [(NIOIMAP.BodyStructure.FieldEncoding, String, UInt)] = [
-            (.bit7, #""7BIT""#, #line),
-            (.bit8, #""8BIT""#, #line),
+            (.sevenBit, #""7BIT""#, #line),
+            (.eightBit, #""8BIT""#, #line),
             (.binary, #""BINARY""#, #line),
             (.base64, #""BASE64""#, #line),
             (.quotedPrintable, #""QUOTED-PRINTABLE""#, #line),
-            (.string("some"), "\"some\"", #line),
+            (.other("some"), "\"some\"", #line),
         ]
 
         for (test, expectedString, line) in inputs {

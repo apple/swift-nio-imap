@@ -350,7 +350,8 @@ extension NIOIMAP.GrammarParser {
     //                   "QUOTED-PRINTABLE") DQUOTE) / string
     static func parseBodyFieldEncoding(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.BodyStructure.FieldEncoding {
         func parseBodyFieldEncoding_string(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.BodyStructure.FieldEncoding {
-            .string(try self.parseString(buffer: &buffer, tracker: tracker))
+            let parsedBuffer = try self.parseString(buffer: &buffer, tracker: tracker)
+            return .other(String(buffer: parsedBuffer))
         }
 
         func parseBodyFieldEncoding_option(_ option: String, result: NIOIMAP.BodyStructure.FieldEncoding, buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.BodyStructure.FieldEncoding {
@@ -361,11 +362,11 @@ extension NIOIMAP.GrammarParser {
         }
 
         func parseBodyFieldEncoding_7bit(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.BodyStructure.FieldEncoding {
-            try parseBodyFieldEncoding_option("7BIT", result: .bit7, buffer: &buffer, tracker: tracker)
+            try parseBodyFieldEncoding_option("7BIT", result: .sevenBit, buffer: &buffer, tracker: tracker)
         }
 
         func parseBodyFieldEncoding_8bit(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.BodyStructure.FieldEncoding {
-            try parseBodyFieldEncoding_option("8BIT", result: .bit8, buffer: &buffer, tracker: tracker)
+            try parseBodyFieldEncoding_option("8BIT", result: .eightBit, buffer: &buffer, tracker: tracker)
         }
 
         func parseBodyFieldEncoding_binary(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.BodyStructure.FieldEncoding {
