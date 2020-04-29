@@ -1251,7 +1251,7 @@ extension ParserUnitTests {
             ("\\seen", " ", .seen, #line),
             ("\\draft", " ", .draft, #line),
             ("keyword", " ", .keyword(NIOIMAP.Flag.Keyword("keyword")), #line),
-            ("\\extension", " ", .extension("extension"), #line),
+            ("\\extension", " ", .extension("\\extension"), #line),
         ]
         self.iterateTestInputs(inputs, testFunction: NIOIMAP.GrammarParser.parseFlag)
     }
@@ -1263,7 +1263,7 @@ extension ParserUnitTests {
     func testParseFlagExtension_valid() {
         TestUtilities.withBuffer("\\Something", terminator: " ") { (buffer) in
             let flagExtension = try NIOIMAP.GrammarParser.parseFlagExtension(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(flagExtension, "Something")
+            XCTAssertEqual(flagExtension, "\\Something")
         }
     }
 
@@ -1381,7 +1381,7 @@ extension ParserUnitTests {
             (
                 "LIST (\\oflag1 \\oflag2) NIL inbox",
                 "\r\n",
-                .list(.flags(.oFlags([.other("oflag1"), .other("oflag2")], sFlag: nil), char: nil, mailbox: .inbox, listExtended: [])),
+                .list(.flags(.oFlags([.other("\\oflag1"), .other("\\oflag2")], sFlag: nil), char: nil, mailbox: .inbox, listExtended: [])),
                 #line
             ),
             ("ESEARCH MIN 1 MAX 2", "\r\n", .search(.correlator(nil, uid: false, returnData: [.min(1), .max(2)])), #line),
@@ -1392,7 +1392,7 @@ extension ParserUnitTests {
             (
                 "LSUB (\\seen \\draft) NIL inbox",
                 "\r\n",
-                .lsub(.flags(.oFlags([.other("seen"), .other("draft")], sFlag: nil), char: nil, mailbox: .inbox, listExtended: [])),
+                .lsub(.flags(.oFlags([.other("\\seen"), .other("\\draft")], sFlag: nil), char: nil, mailbox: .inbox, listExtended: [])),
                 #line
             ),
         ]
@@ -1420,13 +1420,13 @@ extension ParserUnitTests {
             (
                 "(\\oflag1 \\oflag2) NIL inbox",
                 "\r",
-                .flags(NIOIMAP.MailboxName.List.Flags(oFlags: [.other("oflag1"), .other("oflag2")], sFlag: nil), char: nil, mailbox: .inbox, listExtended: []),
+                .flags(NIOIMAP.MailboxName.List.Flags(oFlags: [.other("\\oflag1"), .other("\\oflag2")], sFlag: nil), char: nil, mailbox: .inbox, listExtended: []),
                 #line
             ),
             (
                 "(\\oflag1 \\oflag2) \"d\" inbox",
                 "\r",
-                .flags(NIOIMAP.MailboxName.List.Flags(oFlags: [.other("oflag1"), .other("oflag2")], sFlag: nil), char: "d", mailbox: .inbox, listExtended: []),
+                .flags(NIOIMAP.MailboxName.List.Flags(oFlags: [.other("\\oflag1"), .other("\\oflag2")], sFlag: nil), char: "d", mailbox: .inbox, listExtended: []),
                 #line
             ),
         ]
@@ -1454,7 +1454,7 @@ extension ParserUnitTests {
     func testParseMailboxListFlags_valid_oFlags_one() {
         TestUtilities.withBuffer("\\flag1", terminator: " \r\n") { (buffer) in
             let flags = try NIOIMAP.GrammarParser.parseMailboxListFlags(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(flags.oFlags, [.other("flag1")])
+            XCTAssertEqual(flags.oFlags, [.other("\\flag1")])
             XCTAssertNil(flags.sFlag)
         }
     }
@@ -1462,7 +1462,7 @@ extension ParserUnitTests {
     func testParseMailboxListFlags_valid_oFlags_multiple() {
         TestUtilities.withBuffer("\\flag1 \\flag2", terminator: " \r\n") { (buffer) in
             let flags = try NIOIMAP.GrammarParser.parseMailboxListFlags(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(flags.oFlags, [.other("flag1"), .other("flag2")])
+            XCTAssertEqual(flags.oFlags, [.other("\\flag1"), .other("\\flag2")])
             XCTAssertNil(flags.sFlag)
         }
     }
@@ -1471,7 +1471,7 @@ extension ParserUnitTests {
     func testParseMailboxListFlags_valid_mixedArray1() {
         TestUtilities.withBuffer("\\oflag1 \\marked", terminator: "\r\n") { (buffer) in
             let flags = try NIOIMAP.GrammarParser.parseMailboxListFlags(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(flags.oFlags, [.other("oflag1")])
+            XCTAssertEqual(flags.oFlags, [.other("\\oflag1")])
             XCTAssertEqual(flags.sFlag, NIOIMAP.MailboxName.List.SFlag.marked)
         }
     }
@@ -1480,7 +1480,7 @@ extension ParserUnitTests {
     func testParseMailboxListFlags_valid_mixedArray2() {
         TestUtilities.withBuffer("\\oflag1 \\marked \\oflag2", terminator: " \r\n") { (buffer) in
             let flags = try NIOIMAP.GrammarParser.parseMailboxListFlags(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(flags.oFlags, [.other("oflag1"), .other("oflag2")])
+            XCTAssertEqual(flags.oFlags, [.other("\\oflag1"), .other("\\oflag2")])
             XCTAssertEqual(flags.sFlag, NIOIMAP.MailboxName.List.SFlag.marked)
         }
     }
@@ -1489,7 +1489,7 @@ extension ParserUnitTests {
     func testParseMailboxListFlags_valid_mixedArray3() {
         TestUtilities.withBuffer("\\oflag1 \\oflag2 \\marked \\oflag3 \\oflag4", terminator: " \r\n") { (buffer) in
             let flags = try NIOIMAP.GrammarParser.parseMailboxListFlags(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(flags.oFlags, [.other("oflag1"), .other("oflag2"), .other("oflag3"), .other("oflag4")])
+            XCTAssertEqual(flags.oFlags, [.other("\\oflag1"), .other("\\oflag2"), .other("\\oflag3"), .other("\\oflag4")])
             XCTAssertEqual(flags.sFlag, NIOIMAP.MailboxName.List.SFlag.marked)
         }
     }
@@ -1515,7 +1515,7 @@ extension ParserUnitTests {
     func testParseMailboxListOflag_valid_other() {
         TestUtilities.withBuffer("\\SomeFlag", terminator: " ") { (buffer) in
             let flag = try NIOIMAP.GrammarParser.parseMailboxListOflag(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(flag, .other("SomeFlag"))
+            XCTAssertEqual(flag, .other("\\SomeFlag"))
         }
     }
 }

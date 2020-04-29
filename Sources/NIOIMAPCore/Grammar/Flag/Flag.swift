@@ -15,15 +15,65 @@
 import struct NIO.ByteBuffer
 
 extension NIOIMAP {
-    /// IMAPv4 `flag`
-    public enum Flag: Equatable {
+    enum _Flag: Hashable {
         case answered
         case flagged
         case deleted
         case seen
         case draft
-        case keyword(Keyword)
+        case keyword(Flag.Keyword)
         case `extension`(String)
+    }
+
+    public struct Flag: Hashable {
+        var _backing: _Flag
+
+        public static var answered: Self {
+            Self(_backing: .answered)
+        }
+
+        public static var flagged: Self {
+            Self(_backing: .flagged)
+        }
+
+        public static var deleted: Self {
+            Self(_backing: .deleted)
+        }
+
+        public static var seen: Self {
+            Self(_backing: .seen)
+        }
+
+        public static var draft: Self {
+            Self(_backing: .draft)
+        }
+
+        public static func keyword(_ keyword: Keyword) -> Self {
+            Self(_backing: .keyword(keyword))
+        }
+
+        /// Creates a new `Flag` that complies to RFC 3501 `flag-extension`
+        /// Note: If the provided extension is invalid then we will crash
+        /// - parameter string: The new flag text, *must* begin with a single '\'
+        /// - returns: A newly-create `Flag`
+        public static func `extension`(_ string: String) -> Self {
+            precondition(string.first == "\\", "Flag extensions must begin with \\")
+            let uppercased = string.uppercased()
+            switch string.uppercased() {
+            case "\\ANSWERED":
+                return .answered
+            case "\\FLAGGED":
+                return .flagged
+            case "\\DELETED":
+                return .deleted
+            case "\\SEEN":
+                return .seen
+            case "\\DRAFT":
+                return .draft
+            default:
+                return Self(_backing: .extension(uppercased))
+            }
+        }
     }
 }
 
@@ -37,21 +87,21 @@ extension ByteBuffer {
     }
 
     @discardableResult mutating func writeFlag(_ flag: NIOIMAP.Flag) -> Int {
-        switch flag {
+        switch flag._backing {
         case .answered:
-            return self.writeString("\\Answered")
+            return self.writeString("\\ANSWERED")
         case .flagged:
-            return self.writeString("\\Flagged")
+            return self.writeString("\\FLAGGED")
         case .deleted:
-            return self.writeString("\\Deleted")
+            return self.writeString("\\DELETED")
         case .seen:
-            return self.writeString("\\Seen")
+            return self.writeString("\\SEEN")
         case .draft:
-            return self.writeString("\\Draft")
+            return self.writeString("\\DRAFT")
         case .keyword(let keyword):
             return self.writeFlagKeyword(keyword)
         case .extension(let x):
-            return self.writeString("\\\(x)")
+            return self.writeString(x)
         }
     }
 }

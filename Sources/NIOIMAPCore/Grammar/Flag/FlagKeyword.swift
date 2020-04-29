@@ -16,7 +16,7 @@ import struct NIO.ByteBuffer
 
 extension NIOIMAP.Flag {
     /// IMAPv4 `flag-keyword`
-    public struct Keyword: Equatable {
+    public struct Keyword: Hashable {
         public var rawValue: String
 
         public init(_ string: String) {

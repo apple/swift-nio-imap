@@ -24,7 +24,7 @@ extension MailboxDataTests {
     func testEncode() {
         let inputs: [(NIOIMAP.MailboxName.Data, String, UInt)] = [
             (.exists(1), "1 EXISTS", #line),
-            (.flags([.answered, .deleted]), "FLAGS (\\Answered \\Deleted)", #line),
+            (.flags([.answered, .deleted]), "FLAGS (\\ANSWERED \\DELETED)", #line),
             (.list(NIOIMAP.MailboxName.List(flags: nil, char: nil, mailbox: .inbox, listExtended: [])), "LIST () \"INBOX\"", #line),
             (
                 .lsub(.flags(.oFlags([.other("Draft")], sFlag: nil), char: ".", mailbox: .init("Drafts"), listExtended: [])),

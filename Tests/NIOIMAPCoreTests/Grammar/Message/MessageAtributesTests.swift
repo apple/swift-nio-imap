@@ -36,8 +36,8 @@ extension MessageAttributesTests {
             (.binarySize(section: [2], size: 3), "BINARY.SIZE[2] 3", #line),
             (.binary(section: [3], data: nil), "BINARY[3] NIL", #line),
             (.binary(section: [3], data: "test"), "BINARY[3] \"test\"", #line),
-            (.flags([.draft]), "FLAGS (\\Draft)", #line),
-            (.flags([.flagged, .draft]), "FLAGS (\\Flagged \\Draft)", #line),
+            (.flags([.draft]), "FLAGS (\\DRAFT)", #line),
+            (.flags([.flagged, .draft]), "FLAGS (\\FLAGGED \\DRAFT)", #line),
         ]
 
         for (test, expectedString, line) in inputs {
@@ -50,9 +50,9 @@ extension MessageAttributesTests {
 
     func testEncode_multiple() {
         let inputs: [([NIOIMAP.MessageAttribute], String, UInt)] = [
-            ([.flags([.draft])], "(FLAGS (\\Draft))", #line),
-            ([.flags([.flagged]), .rfc822Size(123)], "(FLAGS (\\Flagged) RFC822.SIZE 123)", #line),
-            ([.flags([.flagged]), .rfc822Size(123), .uid(456)], "(FLAGS (\\Flagged) RFC822.SIZE 123 UID 456)", #line),
+            ([.flags([.draft])], "(FLAGS (\\DRAFT))", #line),
+            ([.flags([.flagged]), .rfc822Size(123)], "(FLAGS (\\FLAGGED) RFC822.SIZE 123)", #line),
+            ([.flags([.flagged]), .rfc822Size(123), .uid(456)], "(FLAGS (\\FLAGGED) RFC822.SIZE 123 UID 456)", #line),
         ]
 
         for (test, expectedString, line) in inputs {

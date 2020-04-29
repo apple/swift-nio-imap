@@ -18,17 +18,38 @@ import XCTest
 
 class Flag_Tests: EncodeTestClass {}
 
+// MARK: - init
+
+extension Flag_Tests {
+    // test a couple of cases to make sure that extensions are converted into non-extensions when appropriate
+    // test that casing doesn't matter
+    func testInit_extension() {
+        let inputs: [(NIOIMAP.Flag, NIOIMAP.Flag, UInt)] = [
+            (.extension("\\ANSWERED"), .answered, #line),
+            (.extension("\\answered"), .answered, #line),
+            (.extension("\\deleted"), .deleted, #line),
+            (.extension("\\seen"), .seen, #line),
+            (.extension("\\draft"), .draft, #line),
+            (.extension("\\flagged"), .flagged, #line),
+        ]
+
+        for (test, expected, line) in inputs {
+            XCTAssertEqual(test, expected, line: line)
+        }
+    }
+}
+
 // MARK: - Encoding
 
 extension Flag_Tests {
     func testEncode() {
         let inputs: [(NIOIMAP.Flag, String, UInt)] = [
-            (.answered, "\\Answered", #line),
-            (.deleted, "\\Deleted", #line),
-            (.draft, "\\Draft", #line),
-            (.flagged, "\\Flagged", #line),
-            (.seen, "\\Seen", #line),
-            (.extension("extension"), "\\extension", #line),
+            (.answered, "\\ANSWERED", #line),
+            (.deleted, "\\DELETED", #line),
+            (.draft, "\\DRAFT", #line),
+            (.flagged, "\\FLAGGED", #line),
+            (.seen, "\\SEEN", #line),
+            (.extension("\\extension"), "\\EXTENSION", #line),
             (.keyword(.forwarded), "$FORWARDED", #line),
         ]
 
