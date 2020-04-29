@@ -47,38 +47,38 @@ extension RoundtripTests {
             (.authenticate("some", .equals, ["abcd1234"]), #line),
 
             (.create(.inbox, []), #line),
-            (.create(NIOIMAP.Mailbox("mailbox"), []), #line),
+            (.create(NIOIMAP.MailboxName("mailbox"), []), #line),
 
             (.delete(.inbox), #line),
-            (.delete(NIOIMAP.Mailbox("mailbox")), #line),
+            (.delete(NIOIMAP.MailboxName("mailbox")), #line),
 
             (.examine(.inbox, []), #line),
-            (.examine(NIOIMAP.Mailbox("mailbox"), []), #line),
+            (.examine(NIOIMAP.MailboxName("mailbox"), []), #line),
 
             (.subscribe(.inbox), #line),
-            (.subscribe(NIOIMAP.Mailbox("mailbox")), #line),
+            (.subscribe(NIOIMAP.MailboxName("mailbox")), #line),
 
             (.unsubscribe(.inbox), #line),
-            (.unsubscribe(NIOIMAP.Mailbox("mailbox")), #line),
+            (.unsubscribe(NIOIMAP.MailboxName("mailbox")), #line),
 
             (.select(.inbox, []), #line),
-            (.select(NIOIMAP.Mailbox("mailbox"), []), #line),
+            (.select(NIOIMAP.MailboxName("mailbox"), []), #line),
 
             (.rename(from: .inbox, to: .inbox, params: []), #line),
-            (.rename(from: NIOIMAP.Mailbox("test1"), to: NIOIMAP.Mailbox("test2"), params: []), #line),
+            (.rename(from: NIOIMAP.MailboxName("test1"), to: NIOIMAP.MailboxName("test2"), params: []), #line),
 
             (.append(to: .inbox, firstMessageMetadata: .options(.flagList([.answered], dateTime: nil, extensions: []), data: .byteCount(5))), #line),
-            (.append(to: NIOIMAP.Mailbox("test1"), firstMessageMetadata: .options(.flagList([.answered, .deleted, .draft], dateTime: nil, extensions: []), data: .byteCount(5))), #line),
+            (.append(to: NIOIMAP.MailboxName("test1"), firstMessageMetadata: .options(.flagList([.answered, .deleted, .draft], dateTime: nil, extensions: []), data: .byteCount(5))), #line),
 
             (.list(nil, .inbox, .pattern(["pattern"]), []), #line),
-            (.list(nil, NIOIMAP.Mailbox("bar"), .pattern(["pattern"]), []), #line),
+            (.list(nil, NIOIMAP.MailboxName("bar"), .pattern(["pattern"]), []), #line),
 
             (.lsub(.inbox, "abcd"), #line),
             (.lsub(.inbox, "\"something\""), #line),
-            (.lsub(NIOIMAP.Mailbox("bar"), "{3}\r\nfoo"), #line),
+            (.lsub(NIOIMAP.MailboxName("bar"), "{3}\r\nfoo"), #line),
 
             (.status(.inbox, [.messages]), #line),
-            (.status(NIOIMAP.Mailbox("foobar"), [.messages, .recent, .uidnext]), #line),
+            (.status(NIOIMAP.MailboxName("foobar"), [.messages, .recent, .uidnext]), #line),
 
             (.copy([.single(2), .wildcard], .inbox), #line),
 
