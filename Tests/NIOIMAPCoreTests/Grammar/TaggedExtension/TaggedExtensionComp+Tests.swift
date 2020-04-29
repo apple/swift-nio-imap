@@ -22,9 +22,9 @@ class TaggedExtensionComp_Tests: EncodeTestClass {}
 
 extension TaggedExtensionComp_Tests {
     func testEncode() {
-        let inputs: [([String], String, UInt)] = [
-            (["hello"], "(\"hello\")", #line),
-            (["hello", "goodbye"], "(\"hello\" \"goodbye\")", #line),
+        let inputs: [([NIOIMAP.Flag], String, UInt)] = [
+            ([.draft], "FLAGS (\\DRAFT)", #line),
+            ([.flagged, .draft], "FLAGS (\\FLAGGED \\DRAFT)", #line),
         ]
 
         for (test, expectedString, line) in inputs {

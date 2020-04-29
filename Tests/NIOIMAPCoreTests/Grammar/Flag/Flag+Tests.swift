@@ -23,12 +23,12 @@ class Flag_Tests: EncodeTestClass {}
 extension Flag_Tests {
     func testEncode() {
         let inputs: [(NIOIMAP.Flag, String, UInt)] = [
-            (.answered, "\\Answered", #line),
-            (.deleted, "\\Deleted", #line),
-            (.draft, "\\Draft", #line),
-            (.flagged, "\\Flagged", #line),
-            (.seen, "\\Seen", #line),
-            (.extension("extension"), "\\extension", #line),
+            (.answered, "\\ANSWERED", #line),
+            (.deleted, "\\DELETED", #line),
+            (.draft, "\\DRAFT", #line),
+            (.flagged, "\\FLAGGED", #line),
+            (.seen, "\\SEEN", #line),
+            (.extension("extension"), "\\EXTENSION", #line),
             (.keyword(.forwarded), "$FORWARDED", #line),
         ]
 

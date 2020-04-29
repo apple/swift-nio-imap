@@ -53,7 +53,21 @@ extension NIOIMAP {
         }
 
         public static func `extension`(_ string: String) -> Self {
-            Self(_backing: .extension(string))
+            let uppercased = string.uppercased()
+            switch string.uppercased() {
+            case "\\ANSWERED":
+                return .answered
+            case "\\FLAGGED":
+                return .flagged
+            case "\\DELETED":
+                return .deleted
+            case "\\SEEN":
+                return .seen
+            case "\\DRAFT":
+                return .draft
+            default:
+                return Self(_backing: .extension(uppercased))
+            }
         }
     }
 }
@@ -70,15 +84,15 @@ extension ByteBuffer {
     @discardableResult mutating func writeFlag(_ flag: NIOIMAP.Flag) -> Int {
         switch flag._backing {
         case .answered:
-            return self.writeString("\\Answered")
+            return self.writeString("\\ANSWERED")
         case .flagged:
-            return self.writeString("\\Flagged")
+            return self.writeString("\\FLAGGED")
         case .deleted:
-            return self.writeString("\\Deleted")
+            return self.writeString("\\DELETED")
         case .seen:
-            return self.writeString("\\Seen")
+            return self.writeString("\\SEEN")
         case .draft:
-            return self.writeString("\\Draft")
+            return self.writeString("\\DRAFT")
         case .keyword(let keyword):
             return self.writeFlagKeyword(keyword)
         case .extension(let x):

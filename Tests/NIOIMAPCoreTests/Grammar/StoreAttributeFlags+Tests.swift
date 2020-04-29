@@ -23,12 +23,12 @@ class StoreAttributeFlags_Tests: EncodeTestClass {}
 extension StoreAttributeFlags_Tests {
     func testEncode() {
         let inputs: [(NIOIMAP.StoreAttributeFlags, String, UInt)] = [
-            (.add(silent: true, list: [.answered]), "+FLAGS.SILENT (\\Answered)", #line),
-            (.add(silent: false, list: [.draft]), "+FLAGS (\\Draft)", #line),
-            (.remove(silent: true, list: [.deleted]), "-FLAGS.SILENT (\\Deleted)", #line),
-            (.remove(silent: false, list: [.flagged]), "-FLAGS (\\Flagged)", #line),
-            (.other(silent: true, list: [.seen]), "FLAGS.SILENT (\\Seen)", #line),
-            (.other(silent: false, list: [.deleted]), "FLAGS (\\Deleted)", #line),
+            (.add(silent: true, list: [.answered]), "+FLAGS.SILENT (\\ANSWERED)", #line),
+            (.add(silent: false, list: [.draft]), "+FLAGS (\\DRAFT)", #line),
+            (.remove(silent: true, list: [.deleted]), "-FLAGS.SILENT (\\DELETED)", #line),
+            (.remove(silent: false, list: [.flagged]), "-FLAGS (\\FLAGGED)", #line),
+            (.other(silent: true, list: [.seen]), "FLAGS.SILENT (\\SEEN)", #line),
+            (.other(silent: false, list: [.deleted]), "FLAGS (\\DELETED)", #line),
         ]
 
         for (test, expectedString, line) in inputs {
