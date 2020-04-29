@@ -2277,6 +2277,8 @@ extension NIOIMAP.GrammarParser {
             parseMessageAttribute_internalDate,
             parseMessageAttribute_rfc822,
             parseMessageAttribute_rfc822Size,
+            parseMessageAttribute_rfc822Header,
+            parseMessageAttribute_rfc822Text,
             parseMessageAttribute_body,
             parseMessageAttribute_bodySection,
             parseMessageAttribute_uid,
