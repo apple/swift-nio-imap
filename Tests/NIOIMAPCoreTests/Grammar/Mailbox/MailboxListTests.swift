@@ -22,9 +22,9 @@ class MailboxListTests: EncodeTestClass {}
 
 extension MailboxListTests {
     func testEncode() {
-        let inputs: [(NIOIMAP.Mailbox.List, String, UInt)] = [
-            (NIOIMAP.Mailbox.List(flags: nil, char: nil, mailbox: .inbox, listExtended: []), "() \"INBOX\"", #line),
-            (NIOIMAP.Mailbox.List(flags: nil, char: "a", mailbox: .inbox, listExtended: []), "() a \"INBOX\"", #line),
+        let inputs: [(NIOIMAP.MailboxName.List, String, UInt)] = [
+            (NIOIMAP.MailboxName.List(flags: nil, char: nil, mailbox: .inbox, listExtended: []), "() \"INBOX\"", #line),
+            (NIOIMAP.MailboxName.List(flags: nil, char: "a", mailbox: .inbox, listExtended: []), "() a \"INBOX\"", #line),
         ]
 
         for (test, expectedString, line) in inputs {

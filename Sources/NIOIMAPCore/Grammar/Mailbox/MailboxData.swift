@@ -14,14 +14,14 @@
 
 import struct NIO.ByteBuffer
 
-extension NIOIMAP.Mailbox {
+extension NIOIMAP.MailboxName {
     /// IMAPv4 `mailbox-data`
     public enum Data: Equatable {
         case flags([NIOIMAP.Flag])
-        case list(NIOIMAP.Mailbox.List)
-        case lsub(NIOIMAP.Mailbox.List)
+        case list(NIOIMAP.MailboxName.List)
+        case lsub(NIOIMAP.MailboxName.List)
         case search(NIOIMAP.ESearchResponse)
-        case status(NIOIMAP.Mailbox, [NIOIMAP.StatusAttributeValue])
+        case status(NIOIMAP.MailboxName, [NIOIMAP.StatusAttributeValue])
         case exists(Int)
         case namespace(NIOIMAP.NamespaceResponse)
     }
@@ -30,7 +30,7 @@ extension NIOIMAP.Mailbox {
 // MARK: - Encoding
 
 extension ByteBuffer {
-    @discardableResult mutating func writeMailboxData(_ data: NIOIMAP.Mailbox.Data) -> Int {
+    @discardableResult mutating func writeMailboxData(_ data: NIOIMAP.MailboxName.Data) -> Int {
         switch data {
         case .flags(let flags):
             return self.writeMailboxData_flags(flags)
@@ -54,17 +54,17 @@ extension ByteBuffer {
             self.writeFlags(flags)
     }
 
-    private mutating func writeMailboxData_list(_ list: NIOIMAP.Mailbox.List) -> Int {
+    private mutating func writeMailboxData_list(_ list: NIOIMAP.MailboxName.List) -> Int {
         self.writeString("LIST ") +
             self.writeMailboxList(list)
     }
 
-    private mutating func writeMailboxData_lsub(_ list: NIOIMAP.Mailbox.List) -> Int {
+    private mutating func writeMailboxData_lsub(_ list: NIOIMAP.MailboxName.List) -> Int {
         self.writeString("LSUB ") +
             self.writeMailboxList(list)
     }
 
-    private mutating func writeMailboxData_status(mailbox: NIOIMAP.Mailbox, list: [NIOIMAP.StatusAttributeValue]) -> Int {
+    private mutating func writeMailboxData_status(mailbox: NIOIMAP.MailboxName, list: [NIOIMAP.StatusAttributeValue]) -> Int {
         self.writeString("STATUS ") +
             self.writeMailbox(mailbox) +
             self.writeString(" (") +

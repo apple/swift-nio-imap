@@ -23,7 +23,7 @@ class CommandType_Tests: EncodeTestClass {}
 extension CommandType_Tests {
     func testEncode() {
         let inputs: [(NIOIMAP.Command, String, UInt)] = [
-            (.list(nil, "", .mailbox(""), []), "LIST \"\" \"\" RETURN ()", #line),
+            (.list(nil, .init(""), .mailbox(""), []), "LIST \"\" \"\" RETURN ()", #line),
             (.namespace, "NAMESPACE", #line),
         ]
 

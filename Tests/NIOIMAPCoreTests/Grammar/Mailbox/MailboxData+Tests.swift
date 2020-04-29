@@ -22,12 +22,12 @@ class MailboxDataTests: EncodeTestClass {}
 
 extension MailboxDataTests {
     func testEncode() {
-        let inputs: [(NIOIMAP.Mailbox.Data, String, UInt)] = [
+        let inputs: [(NIOIMAP.MailboxName.Data, String, UInt)] = [
             (.exists(1), "1 EXISTS", #line),
             (.flags([.answered, .deleted]), "FLAGS (\\Answered \\Deleted)", #line),
-            (.list(NIOIMAP.Mailbox.List(flags: nil, char: nil, mailbox: .inbox, listExtended: [])), "LIST () \"INBOX\"", #line),
+            (.list(NIOIMAP.MailboxName.List(flags: nil, char: nil, mailbox: .inbox, listExtended: [])), "LIST () \"INBOX\"", #line),
             (
-                .lsub(.flags(.oFlags([.other("Draft")], sFlag: nil), char: ".", mailbox: "Drafts", listExtended: [])),
+                .lsub(.flags(.oFlags([.other("Draft")], sFlag: nil), char: ".", mailbox: .init("Drafts"), listExtended: [])),
                 "LSUB (\\Draft) . \"Drafts\"",
                 #line
             ),

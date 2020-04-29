@@ -18,7 +18,7 @@ extension NIOIMAP {
     public enum ResponsePayload: Equatable {
         case conditionalState(ResponseConditionalState)
         case conditionalBye(ResponseText)
-        case mailboxData(Mailbox.Data)
+        case mailboxData(MailboxName.Data)
         case messageData(MessageData)
         case capabilityData([Capability])
         case enableData([NIOIMAP.Capability])

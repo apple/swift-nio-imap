@@ -14,7 +14,7 @@
 
 import struct NIO.ByteBuffer
 
-extension NIOIMAP.Mailbox {
+extension NIOIMAP.MailboxName {
     /// IMAPv4 `mbox-list-extended-item`
     public struct ListExtendedItem: Equatable {
         public var tag: ByteBuffer

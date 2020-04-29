@@ -1749,48 +1749,37 @@ extension NIOIMAP.GrammarParser {
     }
 
     // mailbox         = "INBOX" / astring
-    static func parseMailbox(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Mailbox {
-        func parseInbox(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Mailbox {
-            try ParserLibrary.parseFixedString("INBOX", caseSensitive: false, buffer: &buffer, tracker: tracker)
-            return .inbox
-        }
-        func parseOther(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Mailbox {
-            let bufferedString = try self.parseAString(buffer: &buffer, tracker: tracker)
-            let string = String(decoding: bufferedString.readableBytesView, as: Unicode.UTF8.self)
-            return NIOIMAP.Mailbox(string)
-        }
-        return try ParserLibrary.parseOneOf([
-            parseInbox,
-            parseOther,
-        ], buffer: &buffer, tracker: tracker)
+    static func parseMailbox(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.MailboxName {
+        let string = try self.parseAString(buffer: &buffer, tracker: tracker)
+        return NIOIMAP.MailboxName(string)
     }
 
     // mailbox-data    =  "FLAGS" SP flag-list / "LIST" SP mailbox-list /
     //                    esearch-response /
     //                    "STATUS" SP mailbox SP "(" [status-att-list] ")" /
     //                    number SP "EXISTS" / Namespace-Response
-    static func parseMailboxData(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Mailbox.Data {
-        func parseMailboxData_flags(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Mailbox.Data {
+    static func parseMailboxData(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.MailboxName.Data {
+        func parseMailboxData_flags(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.MailboxName.Data {
             try ParserLibrary.parseFixedString("FLAGS ", buffer: &buffer, tracker: tracker)
             return .flags(try self.parseFlagList(buffer: &buffer, tracker: tracker))
         }
 
-        func parseMailboxData_list(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Mailbox.Data {
+        func parseMailboxData_list(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.MailboxName.Data {
             try ParserLibrary.parseFixedString("LIST ", buffer: &buffer, tracker: tracker)
             return .list(try self.parseMailboxList(buffer: &buffer, tracker: tracker))
         }
 
-        func parseMailboxData_lsub(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Mailbox.Data {
+        func parseMailboxData_lsub(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.MailboxName.Data {
             try ParserLibrary.parseFixedString("LSUB ", buffer: &buffer, tracker: tracker)
             return .lsub(try self.parseMailboxList(buffer: &buffer, tracker: tracker))
         }
 
-        func parseMailboxData_search(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Mailbox.Data {
+        func parseMailboxData_search(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.MailboxName.Data {
             let response = try self.parseEsearchResponse(buffer: &buffer, tracker: tracker)
             return .search(response)
         }
 
-        func parseMailboxData_status(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Mailbox.Data {
+        func parseMailboxData_status(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.MailboxName.Data {
             try ParserLibrary.parseFixedString("STATUS ", buffer: &buffer, tracker: tracker)
             let mailbox = try self.parseMailbox(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
@@ -1802,13 +1791,13 @@ extension NIOIMAP.GrammarParser {
             return .status(mailbox, list)
         }
 
-        func parseMailboxData_exists(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Mailbox.Data {
+        func parseMailboxData_exists(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.MailboxName.Data {
             let number = try self.parseNumber(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseFixedString(" EXISTS", buffer: &buffer, tracker: tracker)
             return .exists(number)
         }
 
-        func parseMailboxData_recent(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Mailbox.Data {
+        func parseMailboxData_recent(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.MailboxName.Data {
             let number = try self.parseNumber(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseFixedString(" RECENT", buffer: &buffer, tracker: tracker)
             return .exists(number)
@@ -1828,7 +1817,7 @@ extension NIOIMAP.GrammarParser {
     // mailbox-list    = "(" [mbx-list-flags] ")" SP
     //                    (DQUOTE QUOTED-CHAR DQUOTE / nil) SP mailbox
     //                    [SP mbox-list-extended]
-    static func parseMailboxList(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Mailbox.List {
+    static func parseMailboxList(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.MailboxName.List {
         func parseMailboxList_quotedChar_some(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Character? {
             try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> Character? in
                 try ParserLibrary.parseFixedString("\"", buffer: &buffer, tracker: tracker)
@@ -1850,9 +1839,9 @@ extension NIOIMAP.GrammarParser {
             return nil
         }
 
-        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> NIOIMAP.Mailbox.List in
+        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> NIOIMAP.MailboxName.List in
             try ParserLibrary.parseFixedString("(", buffer: &buffer, tracker: tracker)
-            let flags = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> NIOIMAP.Mailbox.List.Flags in
+            let flags = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> NIOIMAP.MailboxName.List.Flags in
                 try self.parseMailboxListFlags(buffer: &buffer, tracker: tracker)
             }
             try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)
@@ -1863,22 +1852,22 @@ extension NIOIMAP.GrammarParser {
             ], buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
             let mailbox = try self.parseMailbox(buffer: &buffer, tracker: tracker)
-            let listExtended = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: { (buffer, tracker) -> [NIOIMAP.Mailbox.ListExtendedItem] in
+            let listExtended = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: { (buffer, tracker) -> [NIOIMAP.MailboxName.ListExtendedItem] in
                 try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
                 return try self.parseMailboxListExtended(buffer: &buffer, tracker: tracker)
             }) ?? []
-            return NIOIMAP.Mailbox.List(flags: flags, char: character, mailbox: mailbox, listExtended: listExtended)
+            return NIOIMAP.MailboxName.List(flags: flags, char: character, mailbox: mailbox, listExtended: listExtended)
         }
     }
 
     // mbox-list-extended =  "(" [mbox-list-extended-item
     //                       *(SP mbox-list-extended-item)] ")"
-    static func parseMailboxListExtended(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [NIOIMAP.Mailbox.ListExtendedItem] {
-        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> [NIOIMAP.Mailbox.ListExtendedItem] in
+    static func parseMailboxListExtended(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [NIOIMAP.MailboxName.ListExtendedItem] {
+        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> [NIOIMAP.MailboxName.ListExtendedItem] in
             try ParserLibrary.parseFixedString("(", buffer: &buffer, tracker: tracker)
-            let data = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> [NIOIMAP.Mailbox.ListExtendedItem] in
+            let data = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> [NIOIMAP.MailboxName.ListExtendedItem] in
                 var array = [try self.parseMailboxListExtendedItem(buffer: &buffer, tracker: tracker)]
-                try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) -> NIOIMAP.Mailbox.ListExtendedItem in
+                try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) -> NIOIMAP.MailboxName.ListExtendedItem in
                     try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
                     return try self.parseMailboxListExtendedItem(buffer: &buffer, tracker: tracker)
                 }
@@ -1891,12 +1880,12 @@ extension NIOIMAP.GrammarParser {
 
     // mbox-list-extended-item =  mbox-list-extended-item-tag SP
     //                            tagged-ext-val
-    static func parseMailboxListExtendedItem(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Mailbox.ListExtendedItem {
-        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> NIOIMAP.Mailbox.ListExtendedItem in
+    static func parseMailboxListExtendedItem(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.MailboxName.ListExtendedItem {
+        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> NIOIMAP.MailboxName.ListExtendedItem in
             let tag = try self.parseMailboxListExtendedItemTag(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
             let val = try self.parseTaggedExtensionValue(buffer: &buffer, tracker: tracker)
-            return NIOIMAP.Mailbox.ListExtendedItem(tag: tag, extensionValue: val)
+            return NIOIMAP.MailboxName.ListExtendedItem(tag: tag, extensionValue: val)
         }
     }
 
@@ -1924,28 +1913,28 @@ extension NIOIMAP.GrammarParser {
     // mbx-list-flags  = *(mbx-list-oflag SP) mbx-list-sflag
     //                   *(SP mbx-list-oflag) /
     //                   mbx-list-oflag *(SP mbx-list-oflag)
-    static func parseMailboxListFlags(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Mailbox.List.Flags {
-        func parseMailboxListFlags_mixedArray(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Mailbox.List.Flags {
-            var oFlags = try ParserLibrary.parseZeroOrMore(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> NIOIMAP.Mailbox.List.OFlag in
+    static func parseMailboxListFlags(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.MailboxName.List.Flags {
+        func parseMailboxListFlags_mixedArray(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.MailboxName.List.Flags {
+            var oFlags = try ParserLibrary.parseZeroOrMore(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> NIOIMAP.MailboxName.List.OFlag in
                 let flag = try self.parseMailboxListOflag(buffer: &buffer, tracker: tracker)
                 try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
                 return flag
             }
             let sFlag = try self.parseMailboxListSflag(buffer: &buffer, tracker: tracker)
-            try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &oFlags, tracker: tracker) { (buffer, tracker) -> NIOIMAP.Mailbox.List.OFlag in
+            try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &oFlags, tracker: tracker) { (buffer, tracker) -> NIOIMAP.MailboxName.List.OFlag in
                 try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
                 return try self.parseMailboxListOflag(buffer: &buffer, tracker: tracker)
             }
-            return NIOIMAP.Mailbox.List.Flags(oFlags: oFlags, sFlag: sFlag)
+            return NIOIMAP.MailboxName.List.Flags(oFlags: oFlags, sFlag: sFlag)
         }
 
-        func parseMailboxListFlags_OFlags(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Mailbox.List.Flags {
+        func parseMailboxListFlags_OFlags(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.MailboxName.List.Flags {
             var output = [try self.parseMailboxListOflag(buffer: &buffer, tracker: tracker)]
-            try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &output, tracker: tracker) { (buffer, tracker) -> NIOIMAP.Mailbox.List.OFlag in
+            try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &output, tracker: tracker) { (buffer, tracker) -> NIOIMAP.MailboxName.List.OFlag in
                 try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
                 return try self.parseMailboxListOflag(buffer: &buffer, tracker: tracker)
             }
-            return NIOIMAP.Mailbox.List.Flags(oFlags: output, sFlag: nil)
+            return NIOIMAP.MailboxName.List.Flags(oFlags: output, sFlag: nil)
         }
 
         return try ParserLibrary.parseOneOf([
@@ -1956,7 +1945,7 @@ extension NIOIMAP.GrammarParser {
 
     // mbx-list-oflag  = "\Noinferiors" / child-mbox-flag /
     //                   "\Subscribed" / "\Remote" / flag-extension
-    static func parseMailboxListOflag(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Mailbox.List.OFlag {
+    static func parseMailboxListOflag(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.MailboxName.List.OFlag {
         // protect against parsing an sflag
         let saved = buffer
         if let sFlag = try? self.parseMailboxListSflag(buffer: &buffer, tracker: tracker) {
@@ -1964,12 +1953,12 @@ extension NIOIMAP.GrammarParser {
         }
         buffer = saved
 
-        func parseMailboxListOflag_inferiors(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Mailbox.List.OFlag {
+        func parseMailboxListOflag_inferiors(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.MailboxName.List.OFlag {
             try ParserLibrary.parseFixedString("\\Noinferiors", buffer: &buffer, tracker: tracker)
             return .noInferiors
         }
 
-        func parseMailboxListOflag_flagExtension(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Mailbox.List.OFlag {
+        func parseMailboxListOflag_flagExtension(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.MailboxName.List.OFlag {
             .other(try self.parseFlagExtension(buffer: &buffer, tracker: tracker))
         }
 
@@ -1980,12 +1969,12 @@ extension NIOIMAP.GrammarParser {
     }
 
     // mbx-list-sflag  = "\NonExistent" / "\Noselect" / "\Marked" / "\Unmarked"
-    static func parseMailboxListSflag(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Mailbox.List.SFlag {
+    static func parseMailboxListSflag(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.MailboxName.List.SFlag {
         try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             let string = try ParserLibrary.parseOneOrMoreCharacters(buffer: &buffer, tracker: tracker) { c -> Bool in
                 isalpha(Int32(c)) != 0 || c == UInt8(ascii: "\\")
             }
-            guard let flag = NIOIMAP.Mailbox.List.SFlag(rawValue: string) else {
+            guard let flag = NIOIMAP.MailboxName.List.SFlag(rawValue: string) else {
                 throw ParserError(hint: "Found \(string) which was not an sflag")
             }
             return flag
