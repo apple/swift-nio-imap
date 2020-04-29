@@ -22,7 +22,7 @@ class BodyFieldEncodingTests: EncodeTestClass {}
 
 extension BodyFieldEncodingTests {
     func testEncode() {
-        let inputs: [(NIOIMAP.Body.FieldEncoding, String, UInt)] = [
+        let inputs: [(NIOIMAP.BodyStructure.FieldEncoding, String, UInt)] = [
             (.bit7, #""7BIT""#, #line),
             (.bit8, #""8BIT""#, #line),
             (.binary, #""BINARY""#, #line),

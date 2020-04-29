@@ -424,7 +424,7 @@ extension ParserUnitTests {
         TestUtilities.withBuffer(#"("astring" ("f1" "v1"))"#) { (buffer) in
             let dsp = try NIOIMAP.GrammarParser.parseBodyFieldDsp(buffer: &buffer, tracker: .testTracker)
             XCTAssertNotNil(dsp)
-            XCTAssertEqual(dsp, NIOIMAP.Body.FieldDSPData(string: "astring", parameter: [.field("f1", value: "v1")]))
+            XCTAssertEqual(dsp, NIOIMAP.BodyStructure.FieldDSPData(string: "astring", parameter: [.field("f1", value: "v1")]))
         }
     }
 
@@ -440,7 +440,7 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseBodyFieldEncoding() {
-        let inputs: [(String, String, NIOIMAP.Body.FieldEncoding, UInt)] = [
+        let inputs: [(String, String, NIOIMAP.BodyStructure.FieldEncoding, UInt)] = [
             (#""BASE64""#, " ", .base64, #line),
             (#""BINARY""#, " ", .binary, #line),
             (#""7BIT""#, " ", .bit7, #line),
@@ -463,7 +463,7 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseBodyFieldLanguage() {
-        let inputs: [(String, String, NIOIMAP.Body.FieldLanguage, UInt)] = [
+        let inputs: [(String, String, NIOIMAP.BodyStructure.FieldLanguage, UInt)] = [
             (#""english""#, " ", .single("english"), #line),
             (#"("english")"#, " ", .multiple(["english"]), #line),
             (#"("english" "french")"#, " ", .multiple(["english", "french"]), #line),

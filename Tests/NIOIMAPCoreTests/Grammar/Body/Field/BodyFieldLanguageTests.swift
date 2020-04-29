@@ -22,7 +22,7 @@ class BodyFieldLanguageTests: EncodeTestClass {}
 
 extension BodyFieldLanguageTests {
     func testEncode() {
-        let inputs: [(NIOIMAP.Body.FieldLanguage, String, UInt)] = [
+        let inputs: [(NIOIMAP.BodyStructure.FieldLanguage, String, UInt)] = [
             (.single(nil), "NIL", #line),
             (.single("some"), "\"some\"", #line),
             (.multiple(["some1"]), "(\"some1\")", #line),

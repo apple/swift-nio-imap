@@ -22,7 +22,7 @@ class BodyExtensionSinglepartTests: EncodeTestClass {}
 
 extension BodyExtensionSinglepartTests {
     func testEncode() {
-        let inputs: [(NIOIMAP.Body.ExtensionSinglepart, String, UInt)] = [
+        let inputs: [(NIOIMAP.BodyStructure.ExtensionSinglepart, String, UInt)] = [
             (.fieldMD5(nil, dspLanguage: nil), "NIL", #line),
             (.fieldMD5("md5", dspLanguage: nil), "\"md5\"", #line),
             (.fieldMD5("md5", dspLanguage: .fieldDSP(.string("string", parameter: []), fieldLanguage: nil)), "\"md5\" (\"string\" NIL)", #line),
