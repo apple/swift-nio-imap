@@ -19,8 +19,8 @@ import XCTest
 class Flag_Tests: EncodeTestClass {}
 
 // MARK: - init
-extension Flag_Tests {
 
+extension Flag_Tests {
     // test a couple of cases to make sure that extensions are converted into non-extensions when appropriate
     // test that casing doesn't matter
     func testInit_extension() {
@@ -30,14 +30,13 @@ extension Flag_Tests {
             (.extension("deleted"), .deleted, #line),
             (.extension("seen"), .seen, #line),
             (.extension("draft"), .draft, #line),
-            (.extension("flagged"), .flagged, #line)
+            (.extension("flagged"), .flagged, #line),
         ]
-        
+
         for (test, expected, line) in inputs {
             XCTAssertEqual(test, expected, line: line)
         }
     }
-    
 }
 
 // MARK: - Encoding
