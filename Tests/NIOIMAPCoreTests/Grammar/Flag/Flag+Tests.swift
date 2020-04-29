@@ -25,12 +25,12 @@ extension Flag_Tests {
     // test that casing doesn't matter
     func testInit_extension() {
         let inputs: [(NIOIMAP.Flag, NIOIMAP.Flag, UInt)] = [
-            (.extension("ANSWERED"), .answered, #line),
-            (.extension("answered"), .answered, #line),
-            (.extension("deleted"), .deleted, #line),
-            (.extension("seen"), .seen, #line),
-            (.extension("draft"), .draft, #line),
-            (.extension("flagged"), .flagged, #line),
+            (.extension("\\ANSWERED"), .answered, #line),
+            (.extension("\\answered"), .answered, #line),
+            (.extension("\\deleted"), .deleted, #line),
+            (.extension("\\seen"), .seen, #line),
+            (.extension("\\draft"), .draft, #line),
+            (.extension("\\flagged"), .flagged, #line),
         ]
 
         for (test, expected, line) in inputs {
@@ -49,7 +49,7 @@ extension Flag_Tests {
             (.draft, "\\DRAFT", #line),
             (.flagged, "\\FLAGGED", #line),
             (.seen, "\\SEEN", #line),
-            (.extension("extension"), "\\EXTENSION", #line),
+            (.extension("\\extension"), "\\EXTENSION", #line),
             (.keyword(.forwarded), "$FORWARDED", #line),
         ]
 

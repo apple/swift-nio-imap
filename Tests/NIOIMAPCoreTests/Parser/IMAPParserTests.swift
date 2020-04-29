@@ -1251,7 +1251,7 @@ extension ParserUnitTests {
             ("\\seen", " ", .seen, #line),
             ("\\draft", " ", .draft, #line),
             ("keyword", " ", .keyword(NIOIMAP.Flag.Keyword("keyword")), #line),
-            ("\\extension", " ", .extension("extension"), #line),
+            ("\\extension", " ", .extension("\\extension"), #line),
         ]
         self.iterateTestInputs(inputs, testFunction: NIOIMAP.GrammarParser.parseFlag)
     }

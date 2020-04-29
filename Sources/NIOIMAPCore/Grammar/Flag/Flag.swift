@@ -60,15 +60,15 @@ extension NIOIMAP {
             precondition(string.first == "\\", "Flag extensions must begin with \\")
             let uppercased = string.uppercased()
             switch string.uppercased() {
-            case "ANSWERED":
+            case "\\ANSWERED":
                 return .answered
-            case "FLAGGED":
+            case "\\FLAGGED":
                 return .flagged
-            case "DELETED":
+            case "\\DELETED":
                 return .deleted
-            case "SEEN":
+            case "\\SEEN":
                 return .seen
-            case "DRAFT":
+            case "\\DRAFT":
                 return .draft
             default:
                 return Self(_backing: .extension(uppercased))
