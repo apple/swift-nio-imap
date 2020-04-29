@@ -24,7 +24,7 @@ extension NIOIMAP {
         case rfc822Header(NIOIMAP.NString)
         case rfc822Text(NIOIMAP.NString)
         case rfc822Size(Int)
-        case body(Body, structure: Bool)
+        case body(BodyStructure, structure: Bool)
         case bodySection(SectionSpec?, partial: Int?, data: NString)
         case binary(section: [Int], data: NString)
         case binarySize(section: [Int], size: Int)
@@ -117,7 +117,7 @@ extension ByteBuffer {
             self.writeNString(string)
     }
 
-    @discardableResult mutating func writeMessageAttribute_body(_ body: NIOIMAP.Body, structure: Bool) -> Int {
+    @discardableResult mutating func writeMessageAttribute_body(_ body: NIOIMAP.BodyStructure, structure: Bool) -> Int {
         self.writeString("BODY") +
             self.writeIfTrue(structure) { () -> Int in
                 self.writeString("STRUCTURE")
