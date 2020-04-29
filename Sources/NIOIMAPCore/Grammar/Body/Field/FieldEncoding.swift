@@ -15,24 +15,21 @@
 import struct NIO.ByteBuffer
 
 extension NIOIMAP.BodyStructure {
-    
     /// IMAPv4 `body-fld-enc`
     public struct FieldEncoding: CustomStringConvertible, Equatable {
-        
         public typealias StringLiteralType = String
-        
-        public static var sevenBit: Self { return Self("7BIT") }
-        public static var eightBit: Self { return Self("8BIT") }
-        public static var binary: Self { return Self("BINARY") }
-        public static var base64: Self { return Self("BASE64") }
-        public static var quotedPrintable: Self { return Self("QUOTED-PRINTABLE") }
-        
+
+        public static var sevenBit: Self { Self("7BIT") }
+        public static var eightBit: Self { Self("8BIT") }
+        public static var binary: Self { Self("BINARY") }
+        public static var base64: Self { Self("BASE64") }
+        public static var quotedPrintable: Self { Self("QUOTED-PRINTABLE") }
+
         public var description: String
-        
+
         public init(_ rawValue: String) {
             self.description = rawValue
         }
-        
     }
 }
 
