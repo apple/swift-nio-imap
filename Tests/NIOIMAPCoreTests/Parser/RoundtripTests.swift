@@ -92,7 +92,7 @@ extension RoundtripTests {
             (.fetch([.single(5678)], .attributes([.flags, .bodySection(.part([12, 34], text: .message(.headerFields(["some", "header"]))), NIOIMAP.Partial(left: 3, right: 4))]), []), #line),
 
             (.store([.wildcard], [], .remove(silent: true, list: [.answered, .deleted])), #line),
-            (.store([.wildcard], [], .add(silent: true, list: [.draft, .extension("some")])), #line),
+            (.store([.wildcard], [], .add(silent: true, list: [.draft, .extension("\\some")])), #line),
             (.store([.wildcard], [], .other(silent: true, list: [.keyword(.colorBit0)])), #line),
 
             (.uidCopy([.wildcard], .inbox), #line),

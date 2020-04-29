@@ -1322,7 +1322,8 @@ extension NIOIMAP.GrammarParser {
     static func parseFlagExtension(buffer: inout ByteBuffer, tracker: StackTracker) throws -> String {
         try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> String in
             try ParserLibrary.parseFixedString("\\", buffer: &buffer, tracker: tracker)
-            return try self.parseAtom(buffer: &buffer, tracker: tracker)
+            let string = try self.parseAtom(buffer: &buffer, tracker: tracker)
+            return "\\\(string)"
         }
     }
 
