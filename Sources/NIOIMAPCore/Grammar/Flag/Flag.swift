@@ -52,7 +52,12 @@ extension NIOIMAP {
             Self(_backing: .keyword(keyword))
         }
 
+        /// Creates a new `Flag` that complies to RFC 3501 `flag-extension`
+        /// Note: If the provided extension is invalid then we will crash
+        /// - parameter string: The new flag text, *must* begin with a single '\'
+        /// - returns: A newly-create `Flag`
         public static func `extension`(_ string: String) -> Self {
+            precondition(string.first == "\\", "Flag extensions must begin with \\")
             let uppercased = string.uppercased()
             switch string.uppercased() {
             case "ANSWERED":
@@ -96,7 +101,7 @@ extension ByteBuffer {
         case .keyword(let keyword):
             return self.writeFlagKeyword(keyword)
         case .extension(let x):
-            return self.writeString("\\\(x)")
+            return self.writeString(x)
         }
     }
 }
