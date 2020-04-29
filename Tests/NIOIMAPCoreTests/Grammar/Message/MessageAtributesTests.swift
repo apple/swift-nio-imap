@@ -22,9 +22,37 @@ class MessageAttributesTests: EncodeTestClass {}
 
 extension MessageAttributesTests {
     func testEncode() {
-        let inputs: [([NIOIMAP.MessageAttributeType], String, UInt)] = [
-            ([.dynamic([.draft])], "(FLAGS (\\Draft))", #line),
-            ([.dynamic([.flagged]), .static(.rfc822Size(123))], "(FLAGS (\\Flagged) RFC822.SIZE 123)", #line),
+        let inputs: [(NIOIMAP.MessageAttribute, String, UInt)] = [
+            (.rfc822(nil), "RFC822 NIL", #line),
+            (.rfc822Header(nil), "RFC822.HEADER NIL", #line),
+            (.rfc822Header("header"), "RFC822.HEADER \"header\"", #line),
+            (.rfc822Text("text"), "RFC822.TEXT \"text\"", #line),
+            (.rfc822Size(123), "RFC822.SIZE 123", #line),
+            (.bodySection(.text(.header), partial: nil, data: "test"), "BODY[HEADER] \"test\"", #line),
+            (.bodySection(.text(.header), partial: 123, data: "test"), "BODY[HEADER]<123> \"test\"", #line),
+            (.uid(123), "UID 123", #line),
+            (.envelope(NIOIMAP.Envelope(date: "date", subject: "subject", from: [.name("name", adl: "adl", mailbox: "mailbox", host: "host")], sender: [.name("name", adl: "adl", mailbox: "mailbox", host: "host")], reply: [.name("name", adl: "adl", mailbox: "mailbox", host: "host")], to: [.name("name", adl: "adl", mailbox: "mailbox", host: "host")], cc: [.name("name", adl: "adl", mailbox: "mailbox", host: "host")], bcc: [.name("name", adl: "adl", mailbox: "mailbox", host: "host")], inReplyTo: "replyto", messageID: "abc123")), "ENVELOPE (\"date\" \"subject\" ((\"name\" \"adl\" \"mailbox\" \"host\")) ((\"name\" \"adl\" \"mailbox\" \"host\")) ((\"name\" \"adl\" \"mailbox\" \"host\")) ((\"name\" \"adl\" \"mailbox\" \"host\")) ((\"name\" \"adl\" \"mailbox\" \"host\")) ((\"name\" \"adl\" \"mailbox\" \"host\")) \"replyto\" \"abc123\")", #line),
+            (.internalDate(.date(.day(25, month: .jun, year: 1994), time: NIOIMAP.Date.Time(hour: 01, minute: 02, second: 03), zone: NIOIMAP.Date.TimeZone(0)!)), #"INTERNALDATE "25-jun-1994 01:02:03 +0000""#, #line),
+            (.binarySize(section: [2], size: 3), "BINARY.SIZE[2] 3", #line),
+            (.binary(section: [3], data: nil), "BINARY[3] NIL", #line),
+            (.binary(section: [3], data: "test"), "BINARY[3] \"test\"", #line),
+            (.flags([.draft]), "FLAGS (\\Draft)", #line),
+            (.flags([.flagged, .draft]), "FLAGS (\\Flagged \\Draft)", #line),
+        ]
+
+        for (test, expectedString, line) in inputs {
+            self.testBuffer.clear()
+            let size = self.testBuffer.writeMessageAttribute(test)
+            XCTAssertEqual(size, expectedString.utf8.count, line: line)
+            XCTAssertEqual(self.testBufferString, expectedString, line: line)
+        }
+    }
+
+    func testEncode_multiple() {
+        let inputs: [([NIOIMAP.MessageAttribute], String, UInt)] = [
+            ([.flags([.draft])], "(FLAGS (\\Draft))", #line),
+            ([.flags([.flagged]), .rfc822Size(123)], "(FLAGS (\\Flagged) RFC822.SIZE 123)", #line),
+            ([.flags([.flagged]), .rfc822Size(123), .uid(456)], "(FLAGS (\\Flagged) RFC822.SIZE 123 UID 456)", #line),
         ]
 
         for (test, expectedString, line) in inputs {
