@@ -154,7 +154,6 @@ extension ByteBuffer {
     private mutating func writeCommandType_append(to: NIOIMAP.Mailbox, firstMessageMetadata: NIOIMAP.AppendMessage) -> Int {
         self.writeString("APPEND ") +
             self.writeMailbox(to) +
-            self.writeSpace() +
             self.writeAppendMessage(firstMessageMetadata)
     }
 
