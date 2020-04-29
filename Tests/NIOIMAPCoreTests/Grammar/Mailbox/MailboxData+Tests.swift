@@ -25,7 +25,7 @@ extension MailboxDataTests {
         let inputs: [(NIOIMAP.MailboxName.Data, String, UInt)] = [
             (.exists(1), "1 EXISTS", #line),
             (.flags([.answered, .deleted]), "FLAGS (\\ANSWERED \\DELETED)", #line),
-            (.list(NIOIMAP.Mailbox.List(flags: nil, char: nil, mailbox: .inbox, listExtended: [])), "LIST () \"INBOX\"", #line),
+            (.list(NIOIMAP.MailboxName.List(flags: nil, char: nil, mailbox: .inbox, listExtended: [])), "LIST () \"INBOX\"", #line),
             (
                 .lsub(.flags(.oFlags([.other("Draft")], sFlag: nil), char: ".", mailbox: .init("Drafts"), listExtended: [])),
                 "LSUB (\\Draft) . \"Drafts\"",
