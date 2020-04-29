@@ -446,7 +446,7 @@ extension ParserUnitTests {
             (#""7BIT""#, " ", .sevenBit, #line),
             (#""8BIT""#, " ", .eightBit, #line),
             (#""QUOTED-PRINTABLE""#, " ", .quotedPrintable, #line),
-            (#""other""#, " ", .other("other"), #line),
+            (#""other""#, " ", .init("other"), #line),
         ]
         self.iterateTestInputs(inputs, testFunction: NIOIMAP.GrammarParser.parseBodyFieldEncoding)
     }

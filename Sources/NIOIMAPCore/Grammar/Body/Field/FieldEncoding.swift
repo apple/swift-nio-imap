@@ -15,14 +15,24 @@
 import struct NIO.ByteBuffer
 
 extension NIOIMAP.BodyStructure {
+    
     /// IMAPv4 `body-fld-enc`
-    public enum FieldEncoding: Equatable {
-        case sevenBit
-        case eightBit
-        case binary
-        case base64
-        case quotedPrintable
-        case other(String)
+    public struct FieldEncoding: CustomStringConvertible, Equatable {
+        
+        public typealias StringLiteralType = String
+        
+        public static var sevenBit: Self { return Self("7BIT") }
+        public static var eightBit: Self { return Self("8BIT") }
+        public static var binary: Self { return Self("BINARY") }
+        public static var base64: Self { return Self("BASE64") }
+        public static var quotedPrintable: Self { return Self("QUOTED-PRINTABLE") }
+        
+        public var description: String
+        
+        public init(_ rawValue: String) {
+            self.description = rawValue
+        }
+        
     }
 }
 
@@ -30,19 +40,6 @@ extension NIOIMAP.BodyStructure {
 
 extension ByteBuffer {
     @discardableResult mutating func writeBodyFieldEncoding(_ encoding: NIOIMAP.BodyStructure.FieldEncoding) -> Int {
-        switch encoding {
-        case .sevenBit:
-            return self.writeString(#""7BIT""#)
-        case .eightBit:
-            return self.writeString(#""8BIT""#)
-        case .binary:
-            return self.writeString(#""BINARY""#)
-        case .base64:
-            return self.writeString(#""BASE64""#)
-        case .quotedPrintable:
-            return self.writeString(#""QUOTED-PRINTABLE""#)
-        case .other(let string):
-            return self.writeIMAPString(string)
-        }
+        self.writeString("\"\(encoding.description)\"")
     }
 }

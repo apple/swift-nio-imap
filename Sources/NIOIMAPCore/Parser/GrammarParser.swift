@@ -351,7 +351,7 @@ extension NIOIMAP.GrammarParser {
     static func parseBodyFieldEncoding(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.BodyStructure.FieldEncoding {
         func parseBodyFieldEncoding_string(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.BodyStructure.FieldEncoding {
             let parsedBuffer = try self.parseString(buffer: &buffer, tracker: tracker)
-            return .other(String(buffer: parsedBuffer))
+            return .init(String(buffer: parsedBuffer))
         }
 
         func parseBodyFieldEncoding_option(_ option: String, result: NIOIMAP.BodyStructure.FieldEncoding, buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.BodyStructure.FieldEncoding {

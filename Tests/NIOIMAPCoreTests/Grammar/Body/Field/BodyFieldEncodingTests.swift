@@ -28,7 +28,7 @@ extension BodyFieldEncodingTests {
             (.binary, #""BINARY""#, #line),
             (.base64, #""BASE64""#, #line),
             (.quotedPrintable, #""QUOTED-PRINTABLE""#, #line),
-            (.other("some"), "\"some\"", #line),
+            (.init("some"), "\"some\"", #line),
         ]
 
         for (test, expectedString, line) in inputs {
