@@ -457,15 +457,15 @@ extension NIOIMAP.GrammarParser {
     // body-type-1part = (body-type-basic / body-type-msg / body-type-text)
     //                   [SP body-ext-1part]
     static func parseBodyTypeSinglePart(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.BodyStructure.Singlepart {
-        func parseBodyTypeSinglePart_basic(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.BodyStructure.SinglepartType {
+        func parseBodyTypeSinglePart_basic(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.BodyStructure.Singlepart.Kind {
             .basic(try self.parseBodyTypeBasic(buffer: &buffer, tracker: tracker))
         }
 
-        func parseBodyTypeSinglePart_message(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.BodyStructure.SinglepartType {
+        func parseBodyTypeSinglePart_message(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.BodyStructure.Singlepart.Kind {
             .message(try self.parseBodyTypeMessage(buffer: &buffer, tracker: tracker))
         }
 
-        func parseBodyTypeSinglePart_text(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.BodyStructure.SinglepartType {
+        func parseBodyTypeSinglePart_text(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.BodyStructure.Singlepart.Kind {
             .text(try self.parseBodyTypeText(buffer: &buffer, tracker: tracker))
         }
 
