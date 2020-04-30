@@ -15,10 +15,8 @@
 import struct NIO.ByteBuffer
 
 extension NIOIMAP.BodyStructure {
-
     /// IMAPv4 `body-type-1part`
     public struct Singlepart: Equatable {
-
         public var type: Kind
         public var `extension`: ExtensionSinglepart?
 
@@ -30,14 +28,14 @@ extension NIOIMAP.BodyStructure {
 }
 
 // MARK: - Types
+
 extension NIOIMAP.BodyStructure.Singlepart {
-    
     public indirect enum Kind: Equatable {
         case basic(Basic)
         case message(Message)
         case text(Text)
     }
-    
+
     /// IMAPv4 `body-type-basic`
     public struct Basic: Equatable {
         public var media: NIOIMAP.Media.Basic
@@ -72,7 +70,6 @@ extension NIOIMAP.BodyStructure.Singlepart {
             Self(mediaText: mediaText, fields: fields, lines: lines)
         }
     }
-    
 }
 
 // MARK: - Encoding
