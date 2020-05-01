@@ -17,7 +17,7 @@ let package = Package(
         .target(
             name: "NIOIMAP",
             dependencies: [
-                "NIOIMAPCore"
+                "NIOIMAPCore",
             ]
         ),
         .testTarget(
@@ -26,7 +26,7 @@ let package = Package(
                 "NIOIMAP",
                 "NIOIMAPCore",
                 .product(name: "NIO", package: "swift-nio"),
-                .product(name: "NIOTestUtils", package: "swift-nio")
+                .product(name: "NIOTestUtils", package: "swift-nio"),
             ]
         ),
 
@@ -41,14 +41,14 @@ let package = Package(
             dependencies: [
                 "NIOIMAPCore",
                 .product(name: "NIO", package: "swift-nio"),
-                .product(name: "NIOTestUtils", package: "swift-nio")
+                .product(name: "NIOTestUtils", package: "swift-nio"),
             ]
         ),
 
         .target(
             name: "CLI",
             dependencies: [
-                "CLILib"
+                "CLILib",
             ]
         ),
         .target(
@@ -65,7 +65,7 @@ let package = Package(
             dependencies: [
                 "CLILib",
                 .product(name: "NIO", package: "swift-nio"),
-                .product(name: "NIOTestUtils", package: "swift-nio")
+                .product(name: "NIOTestUtils", package: "swift-nio"),
             ]
         ),
 
