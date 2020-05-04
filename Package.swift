@@ -1,4 +1,4 @@
-// swift-tools-version:5.1
+// swift-tools-version:5.2
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
@@ -14,25 +14,68 @@ let package = Package(
         .package(url: "https://github.com/apple/swift-log", from: "1.2.0"),
     ],
     targets: [
-        .target(name: "NIOIMAP", dependencies: ["NIOIMAPCore"]),
+        .target(
+            name: "NIOIMAP",
+            dependencies: [
+                "NIOIMAPCore",
+            ]
+        ),
         .testTarget(
             name: "NIOIMAPTests",
-            dependencies: ["NIOIMAP", "NIOIMAPCore", "NIO", "NIOTestUtils"]
+            dependencies: [
+                "NIOIMAP",
+                "NIOIMAPCore",
+                .product(name: "NIO", package: "swift-nio"),
+                .product(name: "NIOTestUtils", package: "swift-nio"),
+            ]
         ),
 
-        .target(name: "NIOIMAPCore", dependencies: ["NIO"]),
+        .target(
+            name: "NIOIMAPCore",
+            dependencies: [
+                .product(name: "NIO", package: "swift-nio"),
+            ]
+        ),
         .testTarget(
             name: "NIOIMAPCoreTests",
-            dependencies: ["NIOIMAPCore", "NIO", "NIOTestUtils"]
+            dependencies: [
+                "NIOIMAPCore",
+                .product(name: "NIO", package: "swift-nio"),
+                .product(name: "NIOTestUtils", package: "swift-nio"),
+            ]
         ),
 
-        .target(name: "CLI", dependencies: ["CLILib"]),
-        .target(name: "CLILib", dependencies: ["NIO", "NIOSSL", "NIOIMAP", "Logging"]),
+        .target(
+            name: "CLI",
+            dependencies: [
+                "CLILib",
+            ]
+        ),
+        .target(
+            name: "CLILib",
+            dependencies: [
+                "NIOIMAP",
+                .product(name: "NIO", package: "swift-nio"),
+                .product(name: "NIOSSL", package: "swift-nio-ssl"),
+                .product(name: "Logging", package: "swift-log"),
+            ]
+        ),
         .testTarget(
             name: "CLILibTests",
-            dependencies: ["CLILib", "NIO", "NIOTestUtils"]
+            dependencies: [
+                "CLILib",
+                .product(name: "NIO", package: "swift-nio"),
+                .product(name: "NIOTestUtils", package: "swift-nio"),
+            ]
         ),
 
-        .target(name: "Proxy", dependencies: ["NIOIMAP", "NIO", "NIOSSL"]),
+        .target(
+            name: "Proxy",
+            dependencies: [
+                "NIOIMAP",
+                .product(name: "NIO", package: "swift-nio"),
+                .product(name: "NIOSSL", package: "swift-nio-ssl"),
+            ]
+        ),
     ]
 )
