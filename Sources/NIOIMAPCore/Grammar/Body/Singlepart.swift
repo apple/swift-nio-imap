@@ -15,55 +15,59 @@
 import struct NIO.ByteBuffer
 
 extension NIOIMAP.BodyStructure {
-    public indirect enum SinglepartType: Equatable {
-        case basic(Singlepart.Basic)
-        case message(Singlepart.Message)
-        case text(Singlepart.Text)
-    }
-
     /// IMAPv4 `body-type-1part`
     public struct Singlepart: Equatable {
-        /// IMAPv4 `body-type-basic`
-        public struct Basic: Equatable {
-            public var media: NIOIMAP.Media.Basic
-            public var fields: Fields
-
-            public static func media(_ media: NIOIMAP.Media.Basic, fields: Fields) -> Self {
-                Self(media: media, fields: fields)
-            }
-        }
-
-        /// IMAPv4 `body-type-message`
-        public struct Message: Equatable {
-            public var message: NIOIMAP.Media.Message
-            public var fields: Fields
-            public var envelope: NIOIMAP.Envelope
-            public var body: NIOIMAP.BodyStructure
-            public var fieldLines: Int
-
-            /// Convenience function for a better experience when chaining multiple types.
-            public static func message(_ message: NIOIMAP.Media.Message, fields: Fields, envelope: NIOIMAP.Envelope, body: NIOIMAP.BodyStructure, fieldLines: Int) -> Self {
-                Self(message: message, fields: fields, envelope: envelope, body: body, fieldLines: fieldLines)
-            }
-        }
-
-        /// IMAPv4 `body-type-text`
-        public struct Text: Equatable {
-            public var mediaText: String
-            public var fields: Fields
-            public var lines: Int
-
-            public static func mediaText(_ mediaText: String, fields: Fields, lines: Int) -> Self {
-                Self(mediaText: mediaText, fields: fields, lines: lines)
-            }
-        }
-
-        public var type: SinglepartType
+        public var type: Kind
         public var `extension`: ExtensionSinglepart?
 
         /// Convenience function for a better experience when chaining multiple types.
-        public static func type(_ type: SinglepartType, extension: ExtensionSinglepart?) -> Self {
+        public static func type(_ type: Kind, extension: ExtensionSinglepart?) -> Self {
             Self(type: type, extension: `extension`)
+        }
+    }
+}
+
+// MARK: - Types
+
+extension NIOIMAP.BodyStructure.Singlepart {
+    public indirect enum Kind: Equatable {
+        case basic(Basic)
+        case message(Message)
+        case text(Text)
+    }
+
+    /// IMAPv4 `body-type-basic`
+    public struct Basic: Equatable {
+        public var media: NIOIMAP.Media.Basic
+        public var fields: NIOIMAP.BodyStructure.Fields
+
+        public static func media(_ media: NIOIMAP.Media.Basic, fields: NIOIMAP.BodyStructure.Fields) -> Self {
+            Self(media: media, fields: fields)
+        }
+    }
+
+    /// IMAPv4 `body-type-message`
+    public struct Message: Equatable {
+        public var message: NIOIMAP.Media.Message
+        public var fields: NIOIMAP.BodyStructure.Fields
+        public var envelope: NIOIMAP.Envelope
+        public var body: NIOIMAP.BodyStructure
+        public var fieldLines: Int
+
+        /// Convenience function for a better experience when chaining multiple types.
+        public static func message(_ message: NIOIMAP.Media.Message, fields: NIOIMAP.BodyStructure.Fields, envelope: NIOIMAP.Envelope, body: NIOIMAP.BodyStructure, fieldLines: Int) -> Self {
+            Self(message: message, fields: fields, envelope: envelope, body: body, fieldLines: fieldLines)
+        }
+    }
+
+    /// IMAPv4 `body-type-text`
+    public struct Text: Equatable {
+        public var mediaText: String
+        public var fields: NIOIMAP.BodyStructure.Fields
+        public var lines: Int
+
+        public static func mediaText(_ mediaText: String, fields: NIOIMAP.BodyStructure.Fields, lines: Int) -> Self {
+            Self(mediaText: mediaText, fields: fields, lines: lines)
         }
     }
 }
