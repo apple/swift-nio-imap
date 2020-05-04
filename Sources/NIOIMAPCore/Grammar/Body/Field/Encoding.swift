@@ -15,7 +15,6 @@
 import struct NIO.ByteBuffer
 
 extension NIOIMAP.BodyStructure {
-    
     /// IMAPv4 `body-fld-enc`
     public struct Encoding: CustomStringConvertible, Equatable {
         public typealias StringLiteralType = String
