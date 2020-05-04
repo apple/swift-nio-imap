@@ -436,11 +436,11 @@ extension ParserUnitTests {
     }
 }
 
-// MARK: - parseBodyFieldEncoding
+// MARK: - parseBodyEncoding
 
 extension ParserUnitTests {
-    func testParseBodyFieldEncoding() {
-        let inputs: [(String, String, NIOIMAP.BodyStructure.FieldEncoding, UInt)] = [
+    func testParseBodyEncoding() {
+        let inputs: [(String, String, NIOIMAP.BodyStructure.Encoding, UInt)] = [
             (#""BASE64""#, " ", .base64, #line),
             (#""BINARY""#, " ", .binary, #line),
             (#""7BIT""#, " ", .sevenBit, #line),
@@ -448,12 +448,12 @@ extension ParserUnitTests {
             (#""QUOTED-PRINTABLE""#, " ", .quotedPrintable, #line),
             (#""other""#, " ", .init("other"), #line),
         ]
-        self.iterateTestInputs(inputs, testFunction: NIOIMAP.GrammarParser.parseBodyFieldEncoding)
+        self.iterateTestInputs(inputs, testFunction: NIOIMAP.GrammarParser.parseBodyEncoding)
     }
 
-    func testParseBodyFieldEncoding_invalid_missingQuotes() {
+    func testParseBodyEncoding_invalid_missingQuotes() {
         var buffer = TestUtilities.createTestByteBuffer(for: "other")
-        XCTAssertThrowsError(try NIOIMAP.GrammarParser.parseBodyFieldEncoding(buffer: &buffer, tracker: .testTracker)) { e in
+        XCTAssertThrowsError(try NIOIMAP.GrammarParser.parseBodyEncoding(buffer: &buffer, tracker: .testTracker)) { e in
             XCTAssertTrue(e is ParserError)
         }
     }

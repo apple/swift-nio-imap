@@ -20,11 +20,11 @@ extension NIOIMAP.BodyStructure {
         public var parameter: [NIOIMAP.FieldParameterPair]
         public var id: NIOIMAP.NString
         public var description: NIOIMAP.NString
-        public var encoding: FieldEncoding
+        public var encoding: Encoding
         public var octets: Int
 
         /// Convenience function for a better experience when chaining multiple types.
-        public static func parameter(_ parameters: [NIOIMAP.FieldParameterPair], id: NIOIMAP.NString, description: NIOIMAP.NString, encoding: FieldEncoding, octets: Int) -> Self {
+        public static func parameter(_ parameters: [NIOIMAP.FieldParameterPair], id: NIOIMAP.NString, description: NIOIMAP.NString, encoding: Encoding, octets: Int) -> Self {
             Self(parameter: parameters, id: id, description: description, encoding: encoding, octets: octets)
         }
     }
@@ -40,7 +40,7 @@ extension ByteBuffer {
             self.writeSpace() +
             self.writeNString(fields.description) +
             self.writeSpace() +
-            self.writeBodyFieldEncoding(fields.encoding) +
+            self.writeBodyEncoding(fields.encoding) +
             self.writeString(" \(fields.octets)")
     }
 }
