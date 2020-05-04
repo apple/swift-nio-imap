@@ -16,24 +16,24 @@ import NIO
 @testable import NIOIMAPCore
 import XCTest
 
-class BodyFieldEncodingTests: EncodeTestClass {}
+class BodyEncodingTests: EncodeTestClass {}
 
 // MARK: - Encoding
 
-extension BodyFieldEncodingTests {
+extension BodyEncodingTests {
     func testEncode() {
-        let inputs: [(NIOIMAP.BodyStructure.FieldEncoding, String, UInt)] = [
-            (.bit7, #""7BIT""#, #line),
-            (.bit8, #""8BIT""#, #line),
+        let inputs: [(NIOIMAP.BodyStructure.Encoding, String, UInt)] = [
+            (.sevenBit, #""7BIT""#, #line),
+            (.eightBit, #""8BIT""#, #line),
             (.binary, #""BINARY""#, #line),
             (.base64, #""BASE64""#, #line),
             (.quotedPrintable, #""QUOTED-PRINTABLE""#, #line),
-            (.string("some"), "\"some\"", #line),
+            (.init("some"), "\"some\"", #line),
         ]
 
         for (test, expectedString, line) in inputs {
             self.testBuffer.clear()
-            let size = self.testBuffer.writeBodyFieldEncoding(test)
+            let size = self.testBuffer.writeBodyEncoding(test)
             XCTAssertEqual(size, expectedString.utf8.count, line: line)
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }
