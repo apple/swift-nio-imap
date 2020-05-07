@@ -29,7 +29,6 @@ extension BodyStructure {
 }
 
 extension NIOIMAP.BodyStructure.Multipart {
-
     /// IMAPv4 `body-ext-multipart`
     public struct Extension: Equatable {
         public var parameter: [NIOIMAP.FieldParameterPair]
@@ -40,7 +39,6 @@ extension NIOIMAP.BodyStructure.Multipart {
             Self(parameter: parameters, dspLanguage: dspLanguage)
         }
     }
-
 }
 
 // MARK: - Encoding

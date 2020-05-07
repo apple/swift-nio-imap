@@ -54,7 +54,7 @@ extension BodyMultipartTests {
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }
     }
-    
+
     func testEncode_extension() {
         let inputs: [(NIOIMAP.BodyStructure.Multipart.Extension, String, UInt)] = [
             (.parameter([.field("f", value: "v")], dspLanguage: nil), "(\"f\" \"v\")", #line),

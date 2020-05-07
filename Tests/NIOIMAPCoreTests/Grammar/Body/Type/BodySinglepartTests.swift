@@ -114,7 +114,7 @@ extension BodySinglepartTests {
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }
     }
-    
+
     func testEncode_extension() {
         let inputs: [(NIOIMAP.BodyStructure.Singlepart.Extension, String, UInt)] = [
             (.fieldMD5(nil, dspLanguage: nil), "NIL", #line),
