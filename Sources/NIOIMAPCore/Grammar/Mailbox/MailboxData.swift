@@ -69,7 +69,7 @@ extension ByteBuffer {
             self.writeMailbox(mailbox) +
             self.writeString(" (") +
             self.writeIfArrayHasMinimumSize(array: list) { (list, self) -> Int in
-                self.writeStatusAttributeList(list)
+                self.writeMailboxValues(list)
             } +
             self.writeString(")")
     }

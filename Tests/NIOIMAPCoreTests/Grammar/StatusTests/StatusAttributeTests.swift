@@ -23,14 +23,14 @@ class StatusAttributeTests: EncodeTestClass {}
 extension StatusAttributeTests {
     func testStatusAttribute_ImapEncodedEmpty() {
         let expected = ""
-        let size = self.testBuffer.writeStatusAttributes([])
+        let size = self.testBuffer.writeMailboxAttributes([])
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }
 
     func testStatusAttribute_ImapEncodedFull() {
         let expected = "MESSAGES RECENT UNSEEN"
-        let size = self.testBuffer.writeStatusAttributes([NIOIMAP.MailboxAttribute.messages, .recent, .unseen])
+        let size = self.testBuffer.writeMailboxAttributes([NIOIMAP.MailboxAttribute.messages, .recent, .unseen])
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }

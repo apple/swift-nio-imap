@@ -217,7 +217,7 @@ extension ByteBuffer {
         self.writeString("STATUS ") +
             self.writeMailbox(mailbox) +
             self.writeString(" (") +
-            self.writeStatusAttributes(attributes) +
+            self.writeMailboxAttributes(attributes) +
             self.writeString(")")
     }
 

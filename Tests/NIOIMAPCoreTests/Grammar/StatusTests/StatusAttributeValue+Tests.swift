@@ -29,7 +29,7 @@ extension StatusAttributeValue_Tests {
 
         for (test, expectedString, line) in inputs {
             self.testBuffer.clear()
-            let size = self.testBuffer.writeStatusOption(test)
+            let size = self.testBuffer.writeMailboxOptions(test)
             XCTAssertEqual(size, expectedString.utf8.count, line: line)
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }
@@ -48,7 +48,7 @@ extension StatusAttributeValue_Tests {
 
         for (test, expectedString, line) in inputs {
             self.testBuffer.clear()
-            let size = self.testBuffer.writeStatusAttributeValue(test)
+            let size = self.testBuffer.writeMailboxValue(test)
             XCTAssertEqual(size, expectedString.utf8.count, line: line)
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }
@@ -63,7 +63,7 @@ extension StatusAttributeValue_Tests {
 
         for (test, expectedString, line) in inputs {
             self.testBuffer.clear()
-            let size = self.testBuffer.writeStatusAttributeList(test)
+            let size = self.testBuffer.writeMailboxValues(test)
             XCTAssertEqual(size, expectedString.utf8.count, line: line)
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }

@@ -32,7 +32,7 @@ extension ByteBuffer {
         case .children:
             return self.writeString("CHILDREN")
         case .statusOption(let option):
-            return self.writeStatusOption(option)
+            return self.writeMailboxOptions(option)
         case .optionExtension(let option):
             return self.writeOptionExtension(option)
         }

@@ -39,30 +39,30 @@ public enum MailboxValue: Equatable {
 // MARK: - Encoding
 
 extension ByteBuffer {
-    @discardableResult mutating func writeStatusAttributes(_ atts: [MailboxAttribute]) -> Int {
+    @discardableResult mutating func writeMailboxAttributes(_ atts: [NIOIMAP.MailboxAttribute]) -> Int {
         self.writeArray(atts, parenthesis: false) { (element, self) in
-            self.writeStatusAttribute(element)
+            self.writeMailboxAttribute(element)
         }
     }
 
-    @discardableResult mutating func writeStatusAttribute(_ att: MailboxAttribute) -> Int {
+    @discardableResult mutating func writeMailboxAttribute(_ att: NIOIMAP.MailboxAttribute) -> Int {
         self.writeString(att.rawValue)
     }
 
-    @discardableResult mutating func writeStatusOption(_ option: [MailboxAttribute]) -> Int {
+    @discardableResult mutating func writeMailboxOptions(_ option: [NIOIMAP.MailboxAttribute]) -> Int {
         self.writeString("STATUS ") +
             self.writeArray(option) { (att, self) in
-                self.writeStatusAttribute(att)
+                self.writeMailboxAttribute(att)
             }
     }
 
-    @discardableResult mutating func writeStatusAttributeList(_ list: [MailboxValue]) -> Int {
+    @discardableResult mutating func writeMailboxValues(_ list: [NIOIMAP.MailboxValue]) -> Int {
         self.writeArray(list, parenthesis: false) { (val, self) in
-            self.writeStatusAttributeValue(val)
+            self.writeMailboxValue(val)
         }
     }
 
-    @discardableResult mutating func writeStatusAttributeValue(_ val: MailboxValue) -> Int {
+    @discardableResult mutating func writeMailboxValue(_ val: NIOIMAP.MailboxValue) -> Int {
         switch val {
         case .messages(let num):
             return self.writeString("MESSAGES \(num)")
