@@ -14,26 +14,28 @@
 
 import struct NIO.ByteBuffer
 
-/// IMAPv4 `status-att`
-public enum MailboxAttribute: String, CaseIterable {
-    case messages = "MESSAGES"
-    case recent = "RECENT"
-    case uidnext = "UIDNEXT"
-    case uidvalidity = "UIDVALIDITY"
-    case unseen = "UNSEEN"
-    case size = "SIZE"
-    case highestModSeq = "HIGHESTMODSEQ"
-}
+extension NIOIMAP {
+    /// IMAPv4 `status-att`
+    public enum MailboxAttribute: String, CaseIterable {
+        case messages = "MESSAGES"
+        case recent = "RECENT"
+        case uidnext = "UIDNEXT"
+        case uidvalidity = "UIDVALIDITY"
+        case unseen = "UNSEEN"
+        case size = "SIZE"
+        case highestModSeq = "HIGHESTMODSEQ"
+    }
 
-/// IMAPv4 `status-att-val`
-public enum MailboxValue: Equatable {
-    case messages(Int)
-    case uidNext(Int)
-    case uidValidity(Int)
-    case unseen(Int)
-    case deleted(Int)
-    case size(Int)
-    case modSequence(ModifierSequenceValue)
+    /// IMAPv4 `status-att-val`
+    public enum MailboxValue: Equatable {
+        case messages(Int)
+        case uidNext(Int)
+        case uidValidity(Int)
+        case unseen(Int)
+        case deleted(Int)
+        case size(Int)
+        case modSequence(ModifierSequenceValue)
+    }
 }
 
 // MARK: - Encoding
