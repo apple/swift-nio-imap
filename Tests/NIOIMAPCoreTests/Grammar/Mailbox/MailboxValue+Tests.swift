@@ -16,11 +16,11 @@ import NIO
 @testable import NIOIMAPCore
 import XCTest
 
-class StatusAttributeValue_Tests: EncodeTestClass {}
+class MailboxValue_Tests: EncodeTestClass {}
 
 // MARK: - Encoding
 
-extension StatusAttributeValue_Tests {
+extension MailboxValue_Tests {
     func testEncode_statusOption() {
         let inputs: [([NIOIMAP.MailboxAttribute], String, UInt)] = [
             ([.messages], "STATUS (MESSAGES)", #line),
