@@ -17,11 +17,11 @@ import struct NIO.ByteBuffer
 extension MailboxName {
     /// IMAPv4 `mailbox-data`
     public enum Data: Equatable {
-        case flags([Flag])
-        case list(MailboxName.List)
-        case lsub(MailboxName.List)
-        case search(ESearchResponse)
-        case status(MailboxName, [StatusAttributeValue])
+        case flags([NIOIMAP.Flag])
+        case list(NIOIMAP.MailboxName.List)
+        case lsub(NIOIMAP.MailboxName.List)
+        case search(NIOIMAP.ESearchResponse)
+        case status(NIOIMAP.MailboxName, [NIOIMAP.MailboxValue])
         case exists(Int)
         case namespace(NamespaceResponse)
     }
@@ -64,7 +64,7 @@ extension ByteBuffer {
             self.writeMailboxList(list)
     }
 
-    private mutating func writeMailboxData_status(mailbox: MailboxName, list: [StatusAttributeValue]) -> Int {
+    private mutating func writeMailboxData_status(mailbox: NIOIMAP.MailboxName, list: [NIOIMAP.MailboxValue]) -> Int {
         self.writeString("STATUS ") +
             self.writeMailbox(mailbox) +
             self.writeString(" (") +

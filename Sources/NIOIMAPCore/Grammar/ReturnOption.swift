@@ -18,7 +18,7 @@ import struct NIO.ByteBuffer
 public enum ReturnOption: Equatable {
     case subscribed
     case children
-    case statusOption([StatusAttribute])
+    case statusOption([MailboxAttribute])
     case optionExtension(OptionExtension)
 }
 
