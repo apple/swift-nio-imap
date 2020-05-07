@@ -19,7 +19,7 @@ public struct TaggedCommand: Equatable {
     public var type: Command
     public var tag: String
 
-    public init(_ tag: String, _ type: Command) {
+    public init(type: NIOIMAP.Command, tag: String) {
         self.type = type
         self.tag = tag
     }

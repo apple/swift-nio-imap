@@ -19,8 +19,10 @@ public struct AppendOptions: Equatable {
     public var dateTime: Date.DateTime?
     public var extensions: [AppendExtension]
 
-    public static func flagList(_ flagList: [Flag], dateTime: Date.DateTime?, extensions: [AppendExtension]) -> Self {
-        Self(flagList: flagList, dateTime: dateTime, extensions: extensions)
+    public init(flagList: [NIOIMAP.Flag], dateTime: NIOIMAP.Date.DateTime? = nil, extensions: [NIOIMAP.AppendExtension]) {
+        self.flagList = flagList
+        self.dateTime = dateTime
+        self.extensions = extensions
     }
 }
 

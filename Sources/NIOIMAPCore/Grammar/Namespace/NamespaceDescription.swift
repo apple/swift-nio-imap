@@ -20,8 +20,10 @@ public struct NamespaceDescription: Equatable {
     public var char: Character?
     public var responseExtensions: [NamespaceResponseExtension]
 
-    public static func string(_ string: ByteBuffer, char: Character?, responseExtensions: [NamespaceResponseExtension]) -> Self {
-        Self(string: string, char: char, responseExtensions: responseExtensions)
+    public init(string: ByteBuffer, char: Character? = nil, responseExtensions: [NIOIMAP.NamespaceResponseExtension]) {
+        self.string = string
+        self.char = char
+        self.responseExtensions = responseExtensions
     }
 }
 

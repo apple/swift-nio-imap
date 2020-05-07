@@ -29,10 +29,10 @@ extension Media {
     public struct Basic: Equatable {
         public var type: BasicType
         public var subtype: String
-
-        /// Convenience function for a better experience when chaining multiple types.
-        public static func type(_ type: BasicType, subtype: String) -> Self {
-            Self(type: type, subtype: subtype)
+        
+        public init(type: NIOIMAP.Media.BasicType, subtype: String) {
+            self.type = type
+            self.subtype = subtype
         }
     }
 }

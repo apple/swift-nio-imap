@@ -18,17 +18,26 @@ import struct NIO.ByteBuffer
 public struct Envelope: Equatable {
     public var date: NString
     public var subject: NString
-    public var from: [Address]
-    public var sender: [Address]
-    public var reply: [Address]
-    public var to: [Address]
-    public var cc: [Address]
-    public var bcc: [Address]
+    public var from: [NIOIMAP.Address]
+    public var sender: [NIOIMAP.Address]
+    public var reply: [NIOIMAP.Address]
+    public var to: [NIOIMAP.Address]
+    public var cc: [NIOIMAP.Address]
+    public var bcc: [NIOIMAP.Address]
     public var inReplyTo: NString
     public var messageID: NString
 
-    public static func date(_ date: NString, subject: NString, from: [Address], sender: [Address], reply: [Address], to: [Address], cc: [Address], bcc: [Address], inReplyTo: NString, messageID: NString) -> Self {
-        Self(date: date, subject: subject, from: from, sender: sender, reply: reply, to: to, cc: cc, bcc: bcc, inReplyTo: inReplyTo, messageID: messageID)
+    public init(date: NIOIMAP.NString, subject: NIOIMAP.NString, from: [NIOIMAP.Address], sender: [NIOIMAP.Address], reply: [NIOIMAP.Address], to: [NIOIMAP.Address], cc: [NIOIMAP.Address], bcc: [NIOIMAP.Address], inReplyTo: NIOIMAP.NString, messageID: NIOIMAP.NString) {
+        self.date = date
+        self.subject = subject
+        self.from = from
+        self.sender = sender
+        self.reply = reply
+        self.to = to
+        self.cc = cc
+        self.bcc = bcc
+        self.inReplyTo = inReplyTo
+        self.messageID = messageID
     }
 }
 

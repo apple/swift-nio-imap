@@ -21,9 +21,9 @@ public struct ModifierSequenceValue: Equatable {
         Self(0)!
     }
 
-    public static func value(_ value: Int) -> Self {
-        Self(value)!
-    }
+        public init(value: Int) {
+            self.value = value
+        }
 
     public init?(_ value: Int) {
         guard value >= 0 else {

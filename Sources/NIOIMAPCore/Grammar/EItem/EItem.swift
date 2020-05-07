@@ -17,7 +17,8 @@ public struct EItemVendorTag: Equatable {
     public var token: String
     public var atom: String
 
-    public static func token(_ token: String, atom: String) -> Self {
-        Self(token: token, atom: atom)
+    public init(token: String, atom: String) {
+        self.token = token
+        self.atom = atom
     }
 }

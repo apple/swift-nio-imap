@@ -19,8 +19,9 @@ public struct NamespaceResponseExtension: Equatable {
     public var str1: ByteBuffer
     public var strs: [ByteBuffer]
 
-    public static func string(_ string: ByteBuffer, array: [ByteBuffer]) -> Self {
-        Self(str1: string, strs: array)
+    public init(str1: ByteBuffer, strs: [ByteBuffer]) {
+        self.str1 = str1
+        self.strs = strs
     }
 }
 

@@ -18,10 +18,11 @@ extension MailboxName {
     /// IMAPv4 `mbox-list-extended-item`
     public struct ListExtendedItem: Equatable {
         public var tag: ByteBuffer
-        public var extensionValue: TaggedExtensionValue
+        public var extensionValue: NIOIMAP.TaggedExtensionValue
 
-        public static func tag(_ tag: ByteBuffer, extensionValue: TaggedExtensionValue) -> Self {
-            Self(tag: tag, extensionValue: extensionValue)
+        public init(tag: ByteBuffer, extensionValue: NIOIMAP.TaggedExtensionValue) {
+            self.tag = tag
+            self.extensionValue = extensionValue
         }
     }
 }

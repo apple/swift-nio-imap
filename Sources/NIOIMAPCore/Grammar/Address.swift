@@ -21,9 +21,11 @@ public struct Address: Equatable {
     public var mailbox: NString
     public var host: NString
 
-    /// Convenience function for a better experience when chaining multiple types.
-    public static func name(_ name: NString, adl: NString, mailbox: NString, host: NString) -> Self {
-        Self(name: name, adl: adl, mailbox: mailbox, host: host)
+    public init(name: NIOIMAP.NString, adl: NIOIMAP.NString, mailbox: NIOIMAP.NString, host: NIOIMAP.NString) {
+        self.name = name
+        self.adl = adl
+        self.mailbox = mailbox
+        self.host = host
     }
 }
 

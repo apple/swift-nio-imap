@@ -19,8 +19,9 @@ public struct SearchReturnOptionExtension: Equatable {
     public var modifierName: String
     public var params: TaggedExtensionValue?
 
-    public static func modifier(_ modifier: String, params: TaggedExtensionValue?) -> Self {
-        Self(modifierName: modifier, params: params)
+    public init(modifierName: String, params: NIOIMAP.TaggedExtensionValue? = nil) {
+        self.modifierName = modifierName
+        self.params = params
     }
 }
 

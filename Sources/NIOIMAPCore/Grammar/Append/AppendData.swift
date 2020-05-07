@@ -15,15 +15,6 @@
 import struct NIO.ByteBuffer
 
 public struct AppendData: Equatable {
-    public init(byteCount: Int, needs8BitCleanTransport: Bool = false, synchronizing: Bool = true) {
-        self.byteCount = byteCount
-        self.synchronizing = synchronizing
-        self.needs8BitCleanTransport = needs8BitCleanTransport
-    }
-
-    public static func byteCount(_ byteCount: Int, needs8BitCleanTransport: Bool = false, synchronizing: Bool = true) -> Self {
-        Self(byteCount: byteCount, needs8BitCleanTransport: needs8BitCleanTransport, synchronizing: synchronizing)
-    }
 
     public var byteCount: Int
 
@@ -39,6 +30,12 @@ public struct AppendData: Equatable {
     /// `true` is only valid if the server advertised the [`BINARY`](https://tools.ietf.org/html/rfc3516)
     /// capability.
     public var needs8BitCleanTransport: Bool
+
+    public init(byteCount: Int, needs8BitCleanTransport: Bool = false, synchronizing: Bool = true) {
+        self.byteCount = byteCount
+        self.synchronizing = synchronizing
+        self.needs8BitCleanTransport = needs8BitCleanTransport
+    }
 }
 
 // MARK: - Encoding

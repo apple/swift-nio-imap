@@ -19,9 +19,10 @@ extension MailboxName.List {
     public struct Flags: Equatable {
         public var oFlags: [OFlag]
         public var sFlag: SFlag?
-
-        public static func oFlags(_ oFlags: [OFlag], sFlag: SFlag?) -> Self {
-            Self(oFlags: oFlags, sFlag: sFlag)
+        
+        public init(oFlags: [NIOIMAP.MailboxName.List.OFlag], sFlag: NIOIMAP.MailboxName.List.SFlag? = nil) {
+            self.oFlags = oFlags
+            self.sFlag = sFlag
         }
     }
 }

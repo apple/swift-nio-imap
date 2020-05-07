@@ -20,8 +20,10 @@ public struct ESearchResponse: Equatable {
     public var uid: Bool
     public var returnData: [SearchReturnData]
 
-    public static func correlator(_ correlator: ByteBuffer?, uid: Bool, returnData: [SearchReturnData]) -> Self {
-        Self(correlator: correlator, uid: uid, returnData: returnData)
+    public init(correlator: ByteBuffer? = nil, uid: Bool, returnData: [NIOIMAP.SearchReturnData]) {
+        self.correlator = correlator
+        self.uid = uid
+        self.returnData = returnData
     }
 }
 

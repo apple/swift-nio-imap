@@ -19,9 +19,9 @@ public struct ResponseText: Equatable {
     public var code: ResponseTextCode?
     public var text: ByteBuffer
 
-    /// Convenience function for a better experience when chaining multiple types.
-    public static func code(_ code: ResponseTextCode?, text: ByteBuffer) -> Self {
-        Self(code: code, text: text)
+    public init(code: NIOIMAP.ResponseTextCode? = nil, text: ByteBuffer) {
+        self.code = code
+        self.text = text
     }
 }
 

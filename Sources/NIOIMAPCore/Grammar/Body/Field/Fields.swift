@@ -23,9 +23,12 @@ extension BodyStructure {
         public var encoding: Encoding
         public var octets: Int
 
-        /// Convenience function for a better experience when chaining multiple types.
-        public static func parameter(_ parameters: [FieldParameterPair], id: NString, description: NString, encoding: Encoding, octets: Int) -> Self {
-            Self(parameter: parameters, id: id, description: description, encoding: encoding, octets: octets)
+        public init(parameter: [NIOIMAP.FieldParameterPair], id: NIOIMAP.NString, description: NIOIMAP.NString, encoding: NIOIMAP.BodyStructure.Encoding, octets: Int) {
+            self.parameter = parameter
+            self.id = id
+            self.description = description
+            self.encoding = encoding
+            self.octets = octets
         }
     }
 }

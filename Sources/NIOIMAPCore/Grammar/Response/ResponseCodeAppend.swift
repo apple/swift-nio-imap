@@ -17,7 +17,8 @@ public struct ResponseCodeAppend: Equatable {
     public var num: Int
     public var uid: Int
 
-    public static func num(_ num: Int, uid: Int) -> Self {
-        Self(num: num, uid: uid)
+    public init(num: Int, uid: Int) {
+        self.num = num
+        self.uid = uid
     }
 }

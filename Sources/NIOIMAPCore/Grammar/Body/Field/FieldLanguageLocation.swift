@@ -20,9 +20,9 @@ extension BodyStructure {
         public var language: FieldLanguage
         public var location: FieldLocationExtension?
 
-        /// Convenience function for a better experience when chaining multiple types.
-        public static func language(_ language: BodyStructure.FieldLanguage, location: FieldLocationExtension?) -> Self {
-            Self(language: language, location: location)
+        public init(language: NIOIMAP.BodyStructure.FieldLanguage, location: NIOIMAP.BodyStructure.FieldLocationExtension? = nil) {
+            self.language = language
+            self.location = location
         }
     }
 }

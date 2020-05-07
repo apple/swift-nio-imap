@@ -16,6 +16,7 @@ import struct NIO.ByteBuffer
 
 /// IMAPv4 `date` (`date-text`)
 public struct Date: Equatable {
+
     public enum Month: String {
         case jan
         case feb
@@ -35,8 +36,10 @@ public struct Date: Equatable {
     public var month: Month
     public var year: Int
 
-    public static func day(_ day: Int, month: Month, year: Int) -> Self {
-        Self(day: day, month: month, year: year)
+    public init(day: Int, month: NIOIMAP.Date.Month, year: Int) {
+        self.day = day
+        self.month = month
+        self.year = year
     }
 }
 

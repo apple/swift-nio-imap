@@ -21,9 +21,10 @@ extension BodyStructure {
         public var mediaSubtype: String
         public var multipartExtension: Extension?
 
-        /// Convenience function for a better experience when chaining multiple types.
-        public static func bodies(_ bodies: [BodyStructure], mediaSubtype: String, multipartExtension: Extension?) -> Self {
-            Self(bodies: bodies, mediaSubtype: mediaSubtype, multipartExtension: multipartExtension)
+        public init(bodies: [NIOIMAP.BodyStructure], mediaSubtype: String, multipartExtension: NIOIMAP.BodyStructure.ExtensionMultipart? = nil) {
+            self.bodies = bodies
+            self.mediaSubtype = mediaSubtype
+            self.multipartExtension = multipartExtension
         }
     }
 }

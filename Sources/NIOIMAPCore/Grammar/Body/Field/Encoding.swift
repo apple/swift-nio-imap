@@ -26,9 +26,9 @@ extension BodyStructure {
         public static var quotedPrintable: Self { Self("QUOTED-PRINTABLE") }
 
         public var description: String
-
-        public init(_ rawValue: String) {
-            self.description = rawValue
+        
+        public init(_ description: String) {
+            self.description = description
         }
     }
 }

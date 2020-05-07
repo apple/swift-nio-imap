@@ -20,11 +20,7 @@ public struct SequenceRange: Equatable {
         Self(.last ... .last)
     }
 
-    public static func single(_ num: Int) -> SequenceRange {
-        Self(.number(num) ... .number(num))
-    }
-
-    public var closedRange: ClosedRange<SequenceNumber>
+        public var closedRange: ClosedRange<SequenceNumber>
 
     public var from: SequenceNumber {
         closedRange.lowerBound
