@@ -22,8 +22,8 @@ class OptionVendorTag_Tests: EncodeTestClass {}
 
 extension OptionVendorTag_Tests {
     func testEncode() {
-        let inputs: [(OptionVendorTag, String, UInt)] = [
-            (.token("some", atom: "thing"), "some-thing", #line),
+        let inputs: [(NIOIMAP.OptionVendorTag, String, UInt)] = [
+            (.init(token: "some", atom: "thing"), "some-thing", #line),
         ]
 
         for (test, expectedString, line) in inputs {

@@ -17,12 +17,8 @@ import struct NIO.ByteBuffer
 public struct ModifierSequenceValue: Equatable {
     public var value: Int
 
-    public static var zero: Self {
-        Self(0)!
-    }
-
-        public init(value: Int) {
-            self.value = value
+        public static var zero: Self {
+            Self(0)
         }
 
     public init?(_ value: Int) {
@@ -31,6 +27,17 @@ public struct ModifierSequenceValue: Equatable {
         }
         self.value = value
     }
+}
+
+// MARK: - ExpressibleByIntegerLiteral
+extension NIOIMAP.ModifierSequenceValue: ExpressibleByIntegerLiteral {
+
+    public typealias IntegerLiteralType = Int
+
+    public init(integerLiteral value: Int) {
+        self.value = value
+    }
+
 }
 
 // MARK: - Encoding

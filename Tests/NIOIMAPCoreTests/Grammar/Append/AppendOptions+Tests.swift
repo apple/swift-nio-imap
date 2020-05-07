@@ -20,10 +20,10 @@ class AppendOptions_Tests: EncodeTestClass {}
 
 extension AppendOptions_Tests {
     func testEncode() {
-        let inputs: [(AppendOptions, String, UInt)] = [
-            (.flagList([], dateTime: nil, extensions: []), "", #line),
-            (.flagList([.answered], dateTime: nil, extensions: []), " (\\ANSWERED)", #line),
-            (.flagList([.answered], dateTime: .date(.day(25, month: .jun, year: 1994), time: .hour(01, minute: 02, second: 03), zone: Date.TimeZone(0)!), extensions: []), " (\\ANSWERED) \"25-jun-1994 01:02:03 +0000\"", #line),
+        let inputs: [(NIOIMAP.AppendOptions, String, UInt)] = [
+            (.init(flagList: [], dateTime: nil, extensions: []), "", #line),
+            (.init(flagList: [.answered], dateTime: nil, extensions: []), " (\\ANSWERED)", #line),
+            (.init(flagList: [.answered], dateTime: .init(date: .init(day: 25, month: .jun, year: 1994), time: .init(hour: 01, minute: 02, second: 03), zone: NIOIMAP.Date.TimeZone(0)!), extensions: []), " (\\ANSWERED) \"25-jun-1994 01:02:03 +0000\"", #line),
         ]
 
         for (test, expectedString, line) in inputs {

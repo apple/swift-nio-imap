@@ -22,9 +22,9 @@ class NamespaceResponseExtension_Tests: EncodeTestClass {}
 
 extension NamespaceResponseExtension_Tests {
     func testEncode() {
-        let inputs: [(NamespaceResponseExtension, String, UInt)] = [
-            (.string("string1", array: ["string2"]), " \"string1\" (\"string2\")", #line),
-            (.string("str1", array: ["str2", "str3", "str4", "str5"]), " \"str1\" (\"str2\" \"str3\" \"str4\" \"str5\")", #line),
+        let inputs: [(NIOIMAP.NamespaceResponseExtension, String, UInt)] = [
+            (.init(string: "string1", array: ["string2"]), " \"string1\" (\"string2\")", #line),
+            (.init(string: "str1", array: ["str2", "str3", "str4", "str5"]), " \"str1\" (\"str2\" \"str3\" \"str4\" \"str5\")", #line),
         ]
 
         for (test, expectedString, line) in inputs {
@@ -38,12 +38,12 @@ extension NamespaceResponseExtension_Tests {
     func testEncode_multiple() {
         let inputs: [([NamespaceResponseExtension], String, UInt)] = [
             ([], "", #line),
-            ([.string("str1", array: ["str2"])], " \"str1\" (\"str2\")", #line),
+            ([.init(string: "str1", array: ["str2"])], " \"str1\" (\"str2\")", #line),
             (
                 [
-                    .string("str1", array: ["str2"]),
-                    .string("str3", array: ["str4"]),
-                    .string("str5", array: ["str6"]),
+                    .init(string: "str1", array: ["str2"]),
+                    .init(string: "str3", array: ["str4"]),
+                    .init(string: "str5", array: ["str6"]),
                 ],
                 " \"str1\" (\"str2\") \"str3\" (\"str4\") \"str5\" (\"str6\")", #line
             ),

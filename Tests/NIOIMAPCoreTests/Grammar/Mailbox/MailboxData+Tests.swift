@@ -27,7 +27,7 @@ extension MailboxDataTests {
             (.flags([.answered, .deleted]), "FLAGS (\\ANSWERED \\DELETED)", #line),
             (.list(MailboxName.List(flags: nil, char: nil, mailbox: .inbox, listExtended: [])), "LIST () \"INBOX\"", #line),
             (
-                .lsub(.flags(.oFlags([.other("Draft")], sFlag: nil), char: ".", mailbox: .init("Drafts"), listExtended: [])),
+                .lsub(.init(flags: .init(oFlags: [.other("Draft")], sFlag: nil), char: ".", mailbox: .init("Drafts"), listExtended: [])),
                 "LSUB (\\Draft) . \"Drafts\"",
                 #line
             ),
@@ -35,7 +35,7 @@ extension MailboxDataTests {
             (.search(ESearchResponse(correlator: nil, uid: false, returnData: [.count(1), .count(2)])), "ESEARCH COUNT 1 COUNT 2", #line),
             (.status(.inbox, [.messages(1)]), "STATUS \"INBOX\" (MESSAGES 1)", #line),
             (.status(.inbox, [.messages(1), .unseen(2)]), "STATUS \"INBOX\" (MESSAGES 1 UNSEEN 2)", #line),
-            (.namespace(.userNamespace([], otherUserNamespace: [], sharedNamespace: [])), "NAMESPACE NIL NIL NIL", #line),
+            (.namespace(.init(userNamespace: [], otherUserNamespace: [], sharedNamespace: [])), "NAMESPACE NIL NIL NIL", #line),
         ]
 
         for (test, expectedString, line) in inputs {

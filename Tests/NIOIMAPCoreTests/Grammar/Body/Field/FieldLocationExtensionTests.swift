@@ -22,10 +22,10 @@ class FieldLocationExtensionTests: EncodeTestClass {}
 
 extension FieldLocationExtensionTests {
     func testEncode() {
-        let inputs: [(BodyStructure.FieldLocationExtension, String, UInt)] = [
-            (.location("loc", extensions: []), " \"loc\"", #line),
-            (.location("loc", extensions: [[.number(1)]]), " \"loc\" (1)", #line),
-            (.location("loc", extensions: [[.number(1), .number(2)]]), " \"loc\" (1 2)", #line),
+        let inputs: [(NIOIMAP.BodyStructure.FieldLocationExtension, String, UInt)] = [
+            (.init(location: "loc", extensions: []), " \"loc\"", #line),
+            (.init(location: "loc", extensions: [[.number(1)]]), " \"loc\" (1)", #line),
+            (.init(location: "loc", extensions: [[.number(1), .number(2)]]), " \"loc\" (1 2)", #line),
         ]
 
         for (test, expectedString, line) in inputs {

@@ -24,7 +24,7 @@ extension ContinueRequestTests {
     func testEncode() {
         let inputs: [(ContinueRequest, String, UInt)] = [
             (.base64("bb=="), "+ bb==\r\n", #line),
-            (.responseText(.code(.alert, text: "text")), "+ [ALERT] text\r\n", #line),
+            (.responseText(.init(code: .alert, text: "text")), "+ [ALERT] text\r\n", #line),
         ]
 
         for (test, expectedString, line) in inputs {

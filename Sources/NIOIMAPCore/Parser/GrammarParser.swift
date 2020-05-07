@@ -2370,7 +2370,7 @@ extension GrammarParser {
                 return try self.parseString(buffer: &buffer, tracker: tracker)
             }
             try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)
-            return NamespaceResponseExtension(str1: s1, strs: array)
+            return NIOIMAP.NamespaceResponseExtension(string: s1, array: array)
         }
     }
 

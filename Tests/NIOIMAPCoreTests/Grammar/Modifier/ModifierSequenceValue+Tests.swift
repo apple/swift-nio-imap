@@ -18,8 +18,8 @@ import XCTest
 
 class ModifierSequenceValue_Tests: EncodeTestClass {
     func testModifierSequenceValue_encode() {
-        let inputs: [(ModifierSequenceValue, String)] = ClosedRange(uncheckedBounds: (0, 10000)).map { num in
-            (.value(num), "\(num)")
+        let inputs: [(NIOIMAP.ModifierSequenceValue, String)] = ClosedRange(uncheckedBounds: (0, 10000)).map { num in
+            return (.init(integerLiteral: num), "\(num)")
         }
 
         for (test, expectedString) in inputs {

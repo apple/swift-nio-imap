@@ -24,28 +24,28 @@ extension BodySinglepartTests {
     func testEncode() {
         let inputs: [(BodyStructure.Singlepart, String, UInt)] = [
             (
-                .type(.basic(.media(.type(.application, subtype: "subtype"), fields: .parameter([], id: nil, description: nil, encoding: .base64, octets: 6))), extension: nil),
+                .init(type: .basic(.init(media: .init(type: .application, subtype: "subtype"), fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 6))), extension: nil),
                 "\"APPLICATION\" \"subtype\" NIL NIL NIL \"BASE64\" 6",
                 #line
             ),
             (
-                .type(.basic(.media(.type(.application, subtype: "subtype"), fields: .parameter([], id: "id", description: "desc", encoding: .base64, octets: 7))), extension: .fieldMD5("md5", dspLanguage: nil)),
+                .init(type: .basic(.init(media: .init(type: .application, subtype: "subtype"), fields: .init(parameter: [], id: "id", description: "desc", encoding: .base64, octets: 7))), extension: .init(fieldMD5: "md5", dspLanguage: nil)),
                 "\"APPLICATION\" \"subtype\" NIL \"id\" \"desc\" \"BASE64\" 7 \"md5\"",
                 #line
             ),
             (
-                .type(.text(.mediaText("subtype", fields: .parameter([], id: nil, description: nil, encoding: .base64, octets: 6), lines: 5)), extension: nil),
+                .init(type: .text(.init(mediaText: "subtype", fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 6), lines: 5)), extension: nil),
                 "\"TEXT\" \"subtype\" NIL NIL NIL \"BASE64\" 6 5",
                 #line
             ),
             (
-                .type(.message(.message(
+                .init(type: .message(.init(message:
                     .rfc822,
-                    fields: .parameter([], id: nil, description: nil, encoding: .base64, octets: 6),
-                    envelope: .date("date", subject: nil, from: [], sender: [], reply: [], to: [], cc: [], bcc: [], inReplyTo: nil, messageID: nil),
-                    body: .singlepart(.type(.text(.mediaText(
+                    fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 6),
+                    envelope: .init(date: "date", subject: nil, from: [], sender: [], reply: [], to: [], cc: [], bcc: [], inReplyTo: nil, messageID: nil),
+                    body: .singlepart(.init(type: .text(.init(mediaText:
                         "subtype",
-                        fields: .parameter([], id: nil, description: nil, encoding: .base64, octets: 6),
+                        fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 6),
                         lines: 5
                     )), extension: nil)),
                     fieldLines: 8
@@ -64,8 +64,8 @@ extension BodySinglepartTests {
     }
 
     func testEncode_basic() {
-        let inputs: [(BodyStructure.Singlepart.Basic, String, UInt)] = [
-            (.media(.type(.application, subtype: "subtype"), fields: .parameter([], id: nil, description: nil, encoding: .base64, octets: 123)), "\"APPLICATION\" \"subtype\" NIL NIL NIL \"BASE64\" 123", #line),
+        let inputs: [(NIOIMAP.BodyStructure.Singlepart.Basic, String, UInt)] = [
+            (.init(media: .init(type: .application, subtype: "subtype"), fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 123)), "\"APPLICATION\" \"subtype\" NIL NIL NIL \"BASE64\" 123", #line),
         ]
 
         for (test, expectedString, line) in inputs {
@@ -79,12 +79,12 @@ extension BodySinglepartTests {
     func testEncode_message() {
         let inputs: [(BodyStructure.Singlepart.Message, String, UInt)] = [
             (
-                .message(
+                .init(message:
                     .rfc822,
-                    fields: .parameter([], id: nil, description: nil, encoding: .base64, octets: 111),
-                    envelope: Envelope(date: "date", subject: nil, from: [], sender: [], reply: [], to: [], cc: [], bcc: [], inReplyTo: nil, messageID: nil),
-                    body: .singlepart(.type(.text(.mediaText("subtype",
-                                                             fields: .parameter([], id: nil, description: nil, encoding: .binary, octets: 22),
+                    fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 111),
+                    envelope: NIOIMAP.Envelope(date: "date", subject: nil, from: [], sender: [], reply: [], to: [], cc: [], bcc: [], inReplyTo: nil, messageID: nil),
+                    body: .singlepart(.init(type: .text(.init(mediaText: "subtype",
+                                                             fields: .init(parameter: [], id: nil, description: nil, encoding: .binary, octets: 22),
                                                              lines: 33)),
                                             extension: nil)),
                     fieldLines: 89
@@ -103,8 +103,8 @@ extension BodySinglepartTests {
     }
 
     func testEncode_text() {
-        let inputs: [(BodyStructure.Singlepart.Text, String, UInt)] = [
-            (.mediaText("subtype", fields: .parameter([], id: nil, description: nil, encoding: .base64, octets: 123), lines: 456), "\"TEXT\" \"subtype\" NIL NIL NIL \"BASE64\" 123 456", #line),
+        let inputs: [(NIOIMAP.BodyStructure.Singlepart.Text, String, UInt)] = [
+            (.init(mediaText: "subtype", fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 123), lines: 456), "\"TEXT\" \"subtype\" NIL NIL NIL \"BASE64\" 123 456", #line),
         ]
 
         for (test, expectedString, line) in inputs {

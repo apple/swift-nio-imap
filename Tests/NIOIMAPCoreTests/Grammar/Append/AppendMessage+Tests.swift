@@ -20,9 +20,9 @@ class AppendMessage_Tests: EncodeTestClass {}
 
 extension AppendMessage_Tests {
     func testEncode() {
-        let inputs: [(AppendMessage, String, UInt)] = [
-            (.options(.flagList([], dateTime: nil, extensions: []), data: .init(byteCount: 123)), " {123}\r\n", #line),
-            (.options(.flagList([], dateTime: nil, extensions: []), data: .init(byteCount: 456)), " {456}\r\n", #line),
+        let inputs: [(NIOIMAP.AppendMessage, String, UInt)] = [
+            (.init(options: .init(flagList: [], dateTime: nil, extensions: []), data: .init(byteCount: 123)), " {123}\r\n", #line),
+            (.init(options: .init(flagList: [], dateTime: nil, extensions: []), data: .init(byteCount: 456)), " {456}\r\n", #line),
         ]
 
         for (test, expectedString, line) in inputs {

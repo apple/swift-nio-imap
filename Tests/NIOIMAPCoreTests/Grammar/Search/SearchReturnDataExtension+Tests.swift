@@ -22,8 +22,8 @@ class SearchReturnDataExtension_Tests: EncodeTestClass {}
 
 extension SearchReturnDataExtension_Tests {
     func testEncode() {
-        let inputs: [(SearchReturnDataExtension, String, UInt)] = [
-            (.modifier("modifier", returnValue: .simple(.number(123))), "modifier 123", #line),
+        let inputs: [(NIOIMAP.SearchReturnDataExtension, String, UInt)] = [
+            (.init(modifier: "modifier", returnValue: .simple(.number(123))), "modifier 123", #line),
         ]
 
         for (test, expectedString, line) in inputs {

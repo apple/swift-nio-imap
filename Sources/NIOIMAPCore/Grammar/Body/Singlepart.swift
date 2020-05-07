@@ -22,7 +22,7 @@ extension BodyStructure {
 
         public init(type: NIOIMAP.BodyStructure.Singlepart.Kind, extension: NIOIMAP.BodyStructure.ExtensionSinglepart? = nil) {
             self.type = type
-            self.extension = extension
+            self.extension = `extension`
         }
     }
 }

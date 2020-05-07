@@ -16,12 +16,12 @@ import struct NIO.ByteBuffer
 
 /// IMAPv4 `Namespace-Response-Extension`
 public struct NamespaceResponseExtension: Equatable {
-    public var str1: ByteBuffer
-    public var strs: [ByteBuffer]
+    public var string: ByteBuffer
+    public var array: [ByteBuffer]
 
-    public init(str1: ByteBuffer, strs: [ByteBuffer]) {
-        self.str1 = str1
-        self.strs = strs
+    public init(string: ByteBuffer, array: [ByteBuffer]) {
+        self.string = string
+        self.array = array
     }
 }
 
@@ -36,9 +36,9 @@ extension ByteBuffer {
 
     @discardableResult mutating func writeNamespaceResponseExtension(_ response: NamespaceResponseExtension) -> Int {
         self.writeSpace() +
-            self.writeIMAPString(response.str1) +
+            self.writeIMAPString(response.string) +
             self.writeSpace() +
-            self.writeArray(response.strs) { (string, self) in
+            self.writeArray(response.array) { (string, self) in
                 self.writeIMAPString(string)
             }
     }

@@ -24,8 +24,8 @@ extension BodyFieldParameterTests {
     func testEncode() {
         let inputs: [([FieldParameterPair], String, UInt)] = [
             ([], "NIL", #line),
-            ([.field("f1", value: "v1")], "(\"f1\" \"v1\")", #line),
-            ([.field("f1", value: "v1"), .init(field: "f2", value: "v2")], "(\"f1\" \"v1\" \"f2\" \"v2\")", #line),
+            ([.init(field: "f1", value: "v1")], "(\"f1\" \"v1\")", #line),
+            ([.init(field: "f1", value: "v1"), .init(field: "f2", value: "v2")], "(\"f1\" \"v1\" \"f2\" \"v2\")", #line),
         ]
 
         for (test, expectedString, line) in inputs {

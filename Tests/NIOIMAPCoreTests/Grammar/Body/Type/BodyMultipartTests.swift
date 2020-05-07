@@ -24,23 +24,23 @@ extension BodyMultipartTests {
     func testEncode() {
         let inputs: [(BodyStructure.Multipart, String, UInt)] = [
             (
-                .bodies([
-                    .singlepart(BodyStructure.Singlepart(type: .text(.mediaText("subtype", fields: .parameter([], id: nil, description: nil, encoding: .base64, octets: 6), lines: 5)), extension: nil)),
+                .init(bodies: [
+                    .singlepart(NIOIMAP.BodyStructure.Singlepart(type: .text(.init(mediaText: "subtype", fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 6), lines: 5)), extension: nil)),
                 ], mediaSubtype: "subtype", multipartExtension: nil),
                 "(\"TEXT\" \"subtype\" NIL NIL NIL \"BASE64\" 6 5) \"subtype\"",
                 #line
             ),
             (
-                .bodies([
-                    .singlepart(BodyStructure.Singlepart(type: .text(.mediaText("subtype", fields: .parameter([], id: nil, description: nil, encoding: .base64, octets: 6), lines: 5)), extension: nil)),
-                ], mediaSubtype: "subtype", multipartExtension: .parameter([], dspLanguage: nil)),
+                .init(bodies: [
+                    .singlepart(NIOIMAP.BodyStructure.Singlepart(type: .text(.init(mediaText: "subtype", fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 6), lines: 5)), extension: nil)),
+                ], mediaSubtype: "subtype", multipartExtension: .init(parameter: [], dspLanguage: nil)),
                 "(\"TEXT\" \"subtype\" NIL NIL NIL \"BASE64\" 6 5) \"subtype\" NIL",
                 #line
             ),
             (
-                .bodies([
-                    .singlepart(BodyStructure.Singlepart(type: .text(.mediaText("subtype", fields: .parameter([], id: nil, description: nil, encoding: .base64, octets: 6), lines: 5)), extension: nil)),
-                    .singlepart(BodyStructure.Singlepart(type: .text(.mediaText("subtype", fields: .parameter([], id: nil, description: nil, encoding: .base64, octets: 7), lines: 6)), extension: nil)),
+                .init(bodies: [
+                    .singlepart(NIOIMAP.BodyStructure.Singlepart(type: .text(.init(mediaText: "subtype", fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 6), lines: 5)), extension: nil)),
+                    .singlepart(NIOIMAP.BodyStructure.Singlepart(type: .text(.init(mediaText: "subtype", fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 7), lines: 6)), extension: nil)),
                 ], mediaSubtype: "subtype", multipartExtension: nil),
                 "(\"TEXT\" \"subtype\" NIL NIL NIL \"BASE64\" 6 5)(\"TEXT\" \"subtype\" NIL NIL NIL \"BASE64\" 7 6) \"subtype\"",
                 #line

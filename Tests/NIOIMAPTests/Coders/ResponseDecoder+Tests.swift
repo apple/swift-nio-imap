@@ -26,13 +26,13 @@ extension ResponseDecoder_Tests {
             (
                 "1 OK Login\r\n",
                 [
-                    .taggedResponse(.tag("1", state: .ok(.code(nil, text: "Login")))),
+                    .taggedResponse(.init(tag: "1", state: .ok(.init(code: nil, text: "Login")))),
                 ]
             ),
             (
                 "* NO [ALERT] ohno\r\n",
                 [
-                    .untaggedResponse(.conditionalState(.no(.code(.alert, text: "ohno")))),
+                    .untaggedResponse(.conditionalState(.no(.init(code: .alert, text: "ohno")))),
                 ]
             ),
             (
@@ -44,7 +44,7 @@ extension ResponseDecoder_Tests {
                     .fetchResponse(.streamingBytes("X")),
                     .fetchResponse(.streamingEnd),
                     .fetchResponse(.finish),
-                    .taggedResponse(.tag("2", state: .ok(.code(nil, text: "Fetch completed.")))),
+                    .taggedResponse(.init(tag: "2", state: .ok(.init(code: nil, text: "Fetch completed.")))),
                 ]
             ),
         ]
