@@ -54,4 +54,22 @@ extension BodyMultipartTests {
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }
     }
+    
+    func testEncode_extension() {
+        let inputs: [(NIOIMAP.BodyStructure.Multipart.Extension, String, UInt)] = [
+            (.parameter([.field("f", value: "v")], dspLanguage: nil), "(\"f\" \"v\")", #line),
+            (
+                .parameter([.field("f1", value: "v1")], dspLanguage: .fieldDSP(.string("string", parameter: [.field("f2", value: "v2")]), fieldLanguage: nil)),
+                "(\"f1\" \"v1\") (\"string\" (\"f2\" \"v2\"))",
+                #line
+            ),
+        ]
+
+        for (test, expectedString, line) in inputs {
+            self.testBuffer.clear()
+            let size = self.testBuffer.writeBodyExtensionMultipart(test)
+            XCTAssertEqual(size, expectedString.utf8.count, line: line)
+            XCTAssertEqual(self.testBufferString, expectedString, line: line)
+        }
+    }
 }
