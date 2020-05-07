@@ -73,7 +73,7 @@ extension BodyStructure.Singlepart {
 
     /// IMAPv4 `body-ext-1part`
     public struct Extension: Equatable {
-        public var fieldMD5: NIOIMAP.NString
+        public let fieldMD5: NIOIMAP.NString
         public var dspLanguage: NIOIMAP.BodyStructure.FieldDSPLanguage?
 
         /// Convenience function for a better experience when chaining multiple types.
