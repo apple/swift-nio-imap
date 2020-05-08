@@ -14,22 +14,20 @@
 
 import struct NIO.ByteBuffer
 
-extension NIOIMAP {
-    public enum ResponsePayload: Equatable {
-        case conditionalState(ResponseConditionalState)
-        case conditionalBye(ResponseText)
-        case mailboxData(MailboxName.Data)
-        case messageData(MessageData)
-        case capabilityData([Capability])
-        case enableData([NIOIMAP.Capability])
-        case id([IDParameter])
-    }
+public enum ResponsePayload: Equatable {
+    case conditionalState(ResponseConditionalState)
+    case conditionalBye(ResponseText)
+    case mailboxData(MailboxName.Data)
+    case messageData(MessageData)
+    case capabilityData([Capability])
+    case enableData([Capability])
+    case id([IDParameter])
 }
 
 // MARK: - Encoding
 
 extension ByteBuffer {
-    @discardableResult mutating func writeResponsePayload(_ payload: NIOIMAP.ResponsePayload) -> Int {
+    @discardableResult mutating func writeResponsePayload(_ payload: ResponsePayload) -> Int {
         switch payload {
         case .conditionalState(let data):
             return self.writeResponseConditionalState(data)

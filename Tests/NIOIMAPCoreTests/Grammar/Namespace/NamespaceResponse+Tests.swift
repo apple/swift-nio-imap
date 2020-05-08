@@ -22,7 +22,7 @@ class NamespaceResponse_Tests: EncodeTestClass {}
 
 extension NamespaceResponse_Tests {
     func testEncode() {
-        let inputs: [(NIOIMAP.NamespaceResponse, String, UInt)] = [
+        let inputs: [(NamespaceResponse, String, UInt)] = [
             (.userNamespace([], otherUserNamespace: [], sharedNamespace: []), "NAMESPACE NIL NIL NIL", #line),
         ]
 

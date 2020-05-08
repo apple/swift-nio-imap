@@ -23,7 +23,7 @@ class PermanentFlagTests: EncodeTestClass {}
 extension PermanentFlagTests {
     func testEncoding_wildcard() {
         let expected = #"\*"#
-        let flag = NIOIMAP.PermanentFlag.wildcard
+        let flag = PermanentFlag.wildcard
         let size = self.testBuffer.writeFlagPerm(flag)
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(self.testBufferString, expected)
@@ -31,7 +31,7 @@ extension PermanentFlagTests {
 
     func testEncoding_flag() {
         let expected = "\\ANSWERED"
-        let flag = NIOIMAP.PermanentFlag.flag(.answered)
+        let flag = PermanentFlag.flag(.answered)
         let size = self.testBuffer.writeFlagPerm(flag)
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(self.testBufferString, expected)

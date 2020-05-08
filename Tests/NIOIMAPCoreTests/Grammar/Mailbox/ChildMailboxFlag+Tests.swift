@@ -22,7 +22,7 @@ class ChildMailboxFlag_Tests: EncodeTestClass {}
 
 extension ChildMailboxFlag_Tests {
     func testEncode() {
-        let inputs: [(NIOIMAP.ChildMailboxFlag, String, UInt)] = [
+        let inputs: [(ChildMailboxFlag, String, UInt)] = [
             (.HasChildren, #"\HasChildren"#, #line),
             (.HasNoChildren, #"\HasNoChildren"#, #line),
         ]

@@ -26,9 +26,9 @@ extension Parser {
             // that don't buffer too much.
             guard buffer.readableBytes <= self.bufferLimit else {
                 // We're in line parsing mode
-                throw NIOIMAP.ParsingError.lineTooLong
+                throw ParsingError.lineTooLong
             }
-            throw NIOIMAP.ParsingError.incompleteMessage
+            throw ParsingError.incompleteMessage
         }
     }
 }

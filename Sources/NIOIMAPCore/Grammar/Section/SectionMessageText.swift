@@ -14,20 +14,18 @@
 
 import struct NIO.ByteBuffer
 
-extension NIOIMAP {
-    /// IMAPv4 `section-msgtext`
-    public enum SectionMessageText: Equatable {
-        case header
-        case headerFields(_ fields: [String])
-        case notHeaderFields(_ fields: [String])
-        case text
-    }
+/// IMAPv4 `section-msgtext`
+public enum SectionMessageText: Equatable {
+    case header
+    case headerFields(_ fields: [String])
+    case notHeaderFields(_ fields: [String])
+    case text
 }
 
 // MARK: - Encoding
 
 extension ByteBuffer {
-    @discardableResult mutating func writeSectionMessageText(_ text: NIOIMAP.SectionMessageText) -> Int {
+    @discardableResult mutating func writeSectionMessageText(_ text: SectionMessageText) -> Int {
         switch text {
         case .header:
             return self.writeString("HEADER")

@@ -12,14 +12,12 @@
 //
 //===----------------------------------------------------------------------===//
 
-extension NIOIMAP {
-    /// IMAPv4 `uid-range`
-    public struct UIDRange: Equatable {
-        public var left: Int
-        public var right: Int
+/// IMAPv4 `uid-range`
+public struct UIDRange: Equatable {
+    public var left: Int
+    public var right: Int
 
-        public static func from(_ from: Int, to: Int) -> Self {
-            Self(left: from, right: to)
-        }
+    public static func from(_ from: Int, to: Int) -> Self {
+        Self(left: from, right: to)
     }
 }

@@ -24,7 +24,7 @@ extension Flag_Tests {
     // test a couple of cases to make sure that extensions are converted into non-extensions when appropriate
     // test that casing doesn't matter
     func testInit_extension() {
-        let inputs: [(NIOIMAP.Flag, NIOIMAP.Flag, UInt)] = [
+        let inputs: [(Flag, Flag, UInt)] = [
             (.extension("\\ANSWERED"), .answered, #line),
             (.extension("\\answered"), .answered, #line),
             (.extension("\\deleted"), .deleted, #line),
@@ -43,7 +43,7 @@ extension Flag_Tests {
 
 extension Flag_Tests {
     func testEncode() {
-        let inputs: [(NIOIMAP.Flag, String, UInt)] = [
+        let inputs: [(Flag, String, UInt)] = [
             (.answered, "\\ANSWERED", #line),
             (.deleted, "\\DELETED", #line),
             (.draft, "\\DRAFT", #line),

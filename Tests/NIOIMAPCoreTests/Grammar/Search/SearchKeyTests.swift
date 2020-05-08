@@ -22,7 +22,7 @@ class SearchKeyTests: EncodeTestClass {}
 
 extension SearchKeyTests {
     func testEncode() {
-        let inputs: [(NIOIMAP.SearchKey, String, UInt)] = [
+        let inputs: [(SearchKey, String, UInt)] = [
             (.all, "ALL", #line),
             (.answered, "ANSWERED", #line),
             (.deleted, "DELETED", #line),
@@ -38,22 +38,22 @@ extension SearchKeyTests {
             (.draft, "DRAFT", #line),
             (.undraft, "UNDRAFT", #line),
             (.bcc("hello@hello.co.uk"), "BCC \"hello@hello.co.uk\"", #line),
-            (.before(NIOIMAP.Date(day: 25, month: .jun, year: 1994)), "BEFORE 25-jun-1994", #line),
+            (.before(Date(day: 25, month: .jun, year: 1994)), "BEFORE 25-jun-1994", #line),
             (.body("some body"), "BODY \"some body\"", #line),
             (.cc("tim@apple.com"), "CC \"tim@apple.com\"", #line),
             (.from("tim@apple.com"), "FROM \"tim@apple.com\"", #line),
-            (.keyword(NIOIMAP.Flag.Keyword("somekeyword")), "KEYWORD SOMEKEYWORD", #line),
-            (.on(NIOIMAP.Date(day: 16, month: .sep, year: 1999)), "ON 16-sep-1999", #line),
-            (.since(NIOIMAP.Date(day: 17, month: .jan, year: 1984)), "SINCE 17-jan-1984", #line),
+            (.keyword(Flag.Keyword("somekeyword")), "KEYWORD SOMEKEYWORD", #line),
+            (.on(Date(day: 16, month: .sep, year: 1999)), "ON 16-sep-1999", #line),
+            (.since(Date(day: 17, month: .jan, year: 1984)), "SINCE 17-jan-1984", #line),
             (.subject("some subject"), "SUBJECT \"some subject\"", #line),
             (.text("some text"), "TEXT \"some text\"", #line),
             (.to("theboss@apple.com"), "TO \"theboss@apple.com\"", #line),
-            (.unkeyword(NIOIMAP.Flag.Keyword("nokeyword")), "UNKEYWORD NOKEYWORD", #line),
+            (.unkeyword(Flag.Keyword("nokeyword")), "UNKEYWORD NOKEYWORD", #line),
             (.header("header", "value"), "HEADER header \"value\"", #line),
             (.larger(333), "LARGER 333", #line),
             (.not(.larger(444)), "NOT LARGER 444", #line),
             (.or(.smaller(444), .larger(666)), "OR SMALLER 444 LARGER 666", #line),
-            (.sent(.on(NIOIMAP.Date(day: 7, month: .dec, year: 2018))), "SENTON 7-dec-2018", #line),
+            (.sent(.on(Date(day: 7, month: .dec, year: 2018))), "SENTON 7-dec-2018", #line),
             (.smaller(555), "SMALLER 555", #line),
             (.uid([333 ... 444]), "UID 333:444", #line),
             (.sequenceSet([...222]), "222:*", #line),

@@ -14,18 +14,16 @@
 
 import struct NIO.ByteBuffer
 
-extension NIOIMAP {
-    /// IMAPv4 `tagged-ext-val`
-    public enum TaggedExtensionValue: Equatable {
-        case simple(TaggedExtensionSimple)
-        case comp([String])
-    }
+/// IMAPv4 `tagged-ext-val`
+public enum TaggedExtensionValue: Equatable {
+    case simple(TaggedExtensionSimple)
+    case comp([String])
 }
 
 // MARK: - Encoding
 
 extension ByteBuffer {
-    @discardableResult mutating func writeTaggedExtensionValue(_ value: NIOIMAP.TaggedExtensionValue) -> Int {
+    @discardableResult mutating func writeTaggedExtensionValue(_ value: TaggedExtensionValue) -> Int {
         switch value {
         case .simple(let simple):
             return self.writeTaggedExtensionSimple(simple)

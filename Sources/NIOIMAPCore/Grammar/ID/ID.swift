@@ -14,28 +14,26 @@
 
 import struct NIO.ByteBuffer
 
-extension NIOIMAP {
-    // Exracted from `IDParamsList`
-    public struct IDParameter: Equatable {
-        public var key: String
-        public var value: NString
+// Exracted from `IDParamsList`
+public struct IDParameter: Equatable {
+    public var key: String
+    public var value: NString
 
-        public static func key(_ key: String, value: NString) -> Self {
-            Self(key: key, value: value)
-        }
+    public static func key(_ key: String, value: NString) -> Self {
+        Self(key: key, value: value)
     }
 }
 
 // MARK: - Encoding
 
 extension ByteBuffer {
-    @discardableResult mutating func writeIDParameter(_ parameter: NIOIMAP.IDParameter) -> Int {
+    @discardableResult mutating func writeIDParameter(_ parameter: IDParameter) -> Int {
         self.writeIMAPString(parameter.key) +
             self.writeSpace() +
             self.writeNString(parameter.value)
     }
 
-    @discardableResult mutating func writeIDParameters(_ array: [NIOIMAP.IDParameter]) -> Int {
+    @discardableResult mutating func writeIDParameters(_ array: [IDParameter]) -> Int {
         guard array.count > 0 else {
             return self.writeNil()
         }
@@ -44,12 +42,12 @@ extension ByteBuffer {
         }
     }
 
-    @discardableResult mutating func writeIDResponse(_ response: [NIOIMAP.IDParameter]) -> Int {
+    @discardableResult mutating func writeIDResponse(_ response: [IDParameter]) -> Int {
         self.writeString("ID ") +
             self.writeIDParameters(response)
     }
 
-    @discardableResult mutating func writeID(_ id: [NIOIMAP.IDParameter]) -> Int {
+    @discardableResult mutating func writeID(_ id: [IDParameter]) -> Int {
         self.writeString("ID ") +
             self.writeIDParameters(id)
     }

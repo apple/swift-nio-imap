@@ -22,7 +22,7 @@ class Partial_Tests: EncodeTestClass {}
 
 extension Partial_Tests {
     func testEncode() {
-        let inputs: [(NIOIMAP.Partial, String, UInt)] = [
+        let inputs: [(Partial, String, UInt)] = [
             (.init(left: 1, right: 2), "<1.2>", #line),
         ]
 

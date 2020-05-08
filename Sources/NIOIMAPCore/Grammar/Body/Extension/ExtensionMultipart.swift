@@ -14,14 +14,14 @@
 
 import struct NIO.ByteBuffer
 
-extension NIOIMAP.BodyStructure {
+extension BodyStructure {
     /// IMAPv4 `body-ext-multipart`
     public struct ExtensionMultipart: Equatable {
-        public var parameter: [NIOIMAP.FieldParameterPair]
+        public var parameter: [FieldParameterPair]
         public var dspLanguage: FieldDSPLanguage?
 
         /// Convenience function for a better experience when chaining multiple types.
-        public static func parameter(_ parameters: [NIOIMAP.FieldParameterPair], dspLanguage: FieldDSPLanguage?) -> Self {
+        public static func parameter(_ parameters: [FieldParameterPair], dspLanguage: FieldDSPLanguage?) -> Self {
             Self(parameter: parameters, dspLanguage: dspLanguage)
         }
     }
@@ -30,7 +30,7 @@ extension NIOIMAP.BodyStructure {
 // MARK: - Encoding
 
 extension ByteBuffer {
-    @discardableResult mutating func writeBodyExtensionMultipart(_ ext: NIOIMAP.BodyStructure.ExtensionMultipart) -> Int {
+    @discardableResult mutating func writeBodyExtensionMultipart(_ ext: BodyStructure.ExtensionMultipart) -> Int {
         self.writeBodyFieldParameters(ext.parameter) +
             self.writeIfExists(ext.dspLanguage) { (dspLanguage) -> Int in
                 self.writeBodyFieldDSPLanguage(dspLanguage)

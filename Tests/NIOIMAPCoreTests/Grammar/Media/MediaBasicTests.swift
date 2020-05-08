@@ -22,7 +22,7 @@ class MediaBasicTests: EncodeTestClass {}
 
 extension MediaBasicTests {
     func testEncode_basicType() {
-        let inputs: [(NIOIMAP.Media.BasicType, String, UInt)] = [
+        let inputs: [(Media.BasicType, String, UInt)] = [
             (.application, #""APPLICATION""#, #line),
             (.video, #""VIDEO""#, #line),
             (.image, #""IMAGE""#, #line),
@@ -41,8 +41,8 @@ extension MediaBasicTests {
     }
 
     func testEncode() {
-        let inputs: [(NIOIMAP.Media.Basic, String, UInt)] = [
-            (NIOIMAP.Media.Basic(type: .message, subtype: "subtype"), "\"MESSAGE\" \"subtype\"", #line),
+        let inputs: [(Media.Basic, String, UInt)] = [
+            (Media.Basic(type: .message, subtype: "subtype"), "\"MESSAGE\" \"subtype\"", #line),
         ]
 
         for (test, expectedString, line) in inputs {

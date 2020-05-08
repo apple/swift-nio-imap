@@ -14,39 +14,37 @@
 
 import struct NIO.ByteBuffer
 
-extension NIOIMAP {
-    public struct AppendData: Equatable {
-        public init(byteCount: Int, needs8BitCleanTransport: Bool = false, synchronizing: Bool = true) {
-            self.byteCount = byteCount
-            self.synchronizing = synchronizing
-            self.needs8BitCleanTransport = needs8BitCleanTransport
-        }
-
-        public static func byteCount(_ byteCount: Int, needs8BitCleanTransport: Bool = false, synchronizing: Bool = true) -> Self {
-            Self(byteCount: byteCount, needs8BitCleanTransport: needs8BitCleanTransport, synchronizing: synchronizing)
-        }
-
-        public var byteCount: Int
-
-        /// `true` is the client needs to wait for the server to send a _command continuation request_ before sending
-        /// the actual data.
-        ///
-        /// `false` is only valid if the server advertised the [`LITERAL+`](https://tools.ietf.org/html/rfc2088)
-        /// capability.
-        public var synchronizing: Bool
-
-        /// `true` if the data to follow may contain `\0` bytes.
-        ///
-        /// `true` is only valid if the server advertised the [`BINARY`](https://tools.ietf.org/html/rfc3516)
-        /// capability.
-        public var needs8BitCleanTransport: Bool
+public struct AppendData: Equatable {
+    public init(byteCount: Int, needs8BitCleanTransport: Bool = false, synchronizing: Bool = true) {
+        self.byteCount = byteCount
+        self.synchronizing = synchronizing
+        self.needs8BitCleanTransport = needs8BitCleanTransport
     }
+
+    public static func byteCount(_ byteCount: Int, needs8BitCleanTransport: Bool = false, synchronizing: Bool = true) -> Self {
+        Self(byteCount: byteCount, needs8BitCleanTransport: needs8BitCleanTransport, synchronizing: synchronizing)
+    }
+
+    public var byteCount: Int
+
+    /// `true` is the client needs to wait for the server to send a _command continuation request_ before sending
+    /// the actual data.
+    ///
+    /// `false` is only valid if the server advertised the [`LITERAL+`](https://tools.ietf.org/html/rfc2088)
+    /// capability.
+    public var synchronizing: Bool
+
+    /// `true` if the data to follow may contain `\0` bytes.
+    ///
+    /// `true` is only valid if the server advertised the [`BINARY`](https://tools.ietf.org/html/rfc3516)
+    /// capability.
+    public var needs8BitCleanTransport: Bool
 }
 
 // MARK: - Encoding
 
 extension ByteBuffer {
-    @discardableResult mutating func writeAppendData(_ data: NIOIMAP.AppendData) -> Int {
+    @discardableResult mutating func writeAppendData(_ data: AppendData) -> Int {
         self.writeString("\(data.needs8BitCleanTransport ? "~" : ""){\(data.byteCount)\(data.synchronizing ? "" : "+")}\r\n")
     }
 }

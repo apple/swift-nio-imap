@@ -22,7 +22,7 @@ class SequenceNumberTests: EncodeTestClass {}
 
 extension SequenceNumberTests {
     func testIntegerLiteral() {
-        let num: NIOIMAP.SequenceNumber = 5
+        let num: SequenceNumber = 5
         XCTAssertEqual(num, 5)
     }
 }
@@ -31,10 +31,10 @@ extension SequenceNumberTests {
 
 extension SequenceNumberTests {
     func testComparable() {
-        XCTAssertFalse(NIOIMAP.SequenceNumber.last < .last)
-        XCTAssertFalse(NIOIMAP.SequenceNumber.last < 999)
-        XCTAssertTrue(NIOIMAP.SequenceNumber.last > 999)
-        XCTAssertTrue(NIOIMAP.SequenceNumber.number(1) < 999) // use .number to force type
+        XCTAssertFalse(SequenceNumber.last < .last)
+        XCTAssertFalse(SequenceNumber.last < 999)
+        XCTAssertTrue(SequenceNumber.last > 999)
+        XCTAssertTrue(SequenceNumber.number(1) < 999) // use .number to force type
     }
 }
 

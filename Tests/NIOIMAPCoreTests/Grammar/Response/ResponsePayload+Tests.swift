@@ -22,7 +22,7 @@ class ResponsePayload_Tests: EncodeTestClass {}
 
 extension ResponsePayload_Tests {
     func testEncode() {
-        let inputs: [(NIOIMAP.ResponsePayload, String, UInt)] = [
+        let inputs: [(ResponsePayload, String, UInt)] = [
             (.capabilityData([.enable]), "CAPABILITY IMAP4 IMAP4rev1 ENABLE", #line),
             (.conditionalState(.ok(.code(nil, text: "test"))), "OK test", #line),
             (.conditionalBye(.code(nil, text: "test")), "BYE test", #line),

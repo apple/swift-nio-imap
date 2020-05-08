@@ -18,7 +18,7 @@ import XCTest
 
 class EntryTypeResponse_Tests: EncodeTestClass {
     func testEncoding() {
-        let inputs: [(NIOIMAP.EntryTypeResponse, String, UInt)] = [
+        let inputs: [(EntryTypeResponse, String, UInt)] = [
             (.private, "priv", #line),
             (.shared, "shared", #line),
         ]

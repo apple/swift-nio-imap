@@ -23,7 +23,7 @@ class FetchTests: EncodeTestClass {}
 extension FetchTests {
     func testFetchTypeImapEncoding() {
         let expected = "ALL"
-        let size = self.testBuffer.writeFetchType(NIOIMAP.FetchType.all)
+        let size = self.testBuffer.writeFetchType(FetchType.all)
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }
@@ -34,7 +34,7 @@ extension FetchTests {
 extension FetchTests {
     func testRFC822ImapEncoding() {
         let expected = ".HEADER"
-        let size = self.testBuffer.writeRFC822(NIOIMAP.RFC822.header)
+        let size = self.testBuffer.writeRFC822(RFC822.header)
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }

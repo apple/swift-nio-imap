@@ -14,20 +14,18 @@
 
 import struct NIO.ByteBuffer
 
-extension NIOIMAP {
-    /// IMAPv4 `return-option`
-    public enum ReturnOption: Equatable {
-        case subscribed
-        case children
-        case statusOption([StatusAttribute])
-        case optionExtension(OptionExtension)
-    }
+/// IMAPv4 `return-option`
+public enum ReturnOption: Equatable {
+    case subscribed
+    case children
+    case statusOption([StatusAttribute])
+    case optionExtension(OptionExtension)
 }
 
 // MARK: - Encoding
 
 extension ByteBuffer {
-    @discardableResult mutating func writeReturnOption(_ option: NIOIMAP.ReturnOption) -> Int {
+    @discardableResult mutating func writeReturnOption(_ option: ReturnOption) -> Int {
         switch option {
         case .subscribed:
             return self.writeString("SUBSCRIBED")

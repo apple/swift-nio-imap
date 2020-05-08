@@ -14,33 +14,31 @@
 
 import struct NIO.ByteBuffer
 
-extension NIOIMAP {
-    public enum MessageAttribute: Equatable {
-        case flags([NIOIMAP.Flag])
-        case envelope(Envelope)
-        case internalDate(Date.DateTime)
-        case uid(Int)
-        case rfc822(NIOIMAP.NString)
-        case rfc822Header(NIOIMAP.NString)
-        case rfc822Text(NIOIMAP.NString)
-        case rfc822Size(Int)
-        case body(BodyStructure, structure: Bool)
-        case bodySection(SectionSpec?, partial: Int?, data: NString)
-        case binary(section: [Int], data: NString)
-        case binarySize(section: [Int], size: Int)
-    }
+public enum MessageAttribute: Equatable {
+    case flags([Flag])
+    case envelope(Envelope)
+    case internalDate(Date.DateTime)
+    case uid(Int)
+    case rfc822(NString)
+    case rfc822Header(NString)
+    case rfc822Text(NString)
+    case rfc822Size(Int)
+    case body(BodyStructure, structure: Bool)
+    case bodySection(SectionSpec?, partial: Int?, data: NString)
+    case binary(section: [Int], data: NString)
+    case binarySize(section: [Int], size: Int)
 }
 
 // MARK: - Encoding
 
 extension ByteBuffer {
-    @discardableResult mutating func writeMessageAttributes(_ atts: [NIOIMAP.MessageAttribute]) -> Int {
+    @discardableResult mutating func writeMessageAttributes(_ atts: [MessageAttribute]) -> Int {
         self.writeArray(atts) { (element, self) in
             self.writeMessageAttribute(element)
         }
     }
 
-    @discardableResult mutating func writeMessageAttribute(_ type: NIOIMAP.MessageAttribute) -> Int {
+    @discardableResult mutating func writeMessageAttribute(_ type: MessageAttribute) -> Int {
         switch type {
         case .envelope(let env):
             return self.writeMessageAttribute_envelope(env)
@@ -69,7 +67,7 @@ extension ByteBuffer {
         }
     }
 
-    @discardableResult mutating func writeMessageAttribute_binaryString(section: [Int], string: NIOIMAP.NString) -> Int {
+    @discardableResult mutating func writeMessageAttribute_binaryString(section: [Int], string: NString) -> Int {
         self.writeString("BINARY") +
             self.writeSectionBinary(section) +
             self.writeSpace() +
@@ -82,42 +80,42 @@ extension ByteBuffer {
             self.writeString(" \(number)")
     }
 
-    @discardableResult mutating func writeMessageAttributeFlags(_ atts: [NIOIMAP.Flag]) -> Int {
+    @discardableResult mutating func writeMessageAttributeFlags(_ atts: [Flag]) -> Int {
         self.writeString("FLAGS ") +
             self.writeArray(atts) { (element, self) in
                 self.writeFlag(element)
             }
     }
 
-    @discardableResult mutating func writeMessageAttribute_envelope(_ env: NIOIMAP.Envelope) -> Int {
+    @discardableResult mutating func writeMessageAttribute_envelope(_ env: Envelope) -> Int {
         self.writeString("ENVELOPE ") +
             self.writeEnvelope(env)
     }
 
-    @discardableResult mutating func writeMessageAttribute_internalDate(_ date: NIOIMAP.Date.DateTime) -> Int {
+    @discardableResult mutating func writeMessageAttribute_internalDate(_ date: Date.DateTime) -> Int {
         self.writeString("INTERNALDATE ") +
             self.writeDateTime(date)
     }
 
-    @discardableResult mutating func writeMessageAttribute_rfc822(_ string: NIOIMAP.NString) -> Int {
+    @discardableResult mutating func writeMessageAttribute_rfc822(_ string: NString) -> Int {
         self.writeString("RFC822") +
             self.writeSpace() +
             self.writeNString(string)
     }
 
-    @discardableResult mutating func writeMessageAttribute_rfc822Text(_ string: NIOIMAP.NString) -> Int {
+    @discardableResult mutating func writeMessageAttribute_rfc822Text(_ string: NString) -> Int {
         self.writeString("RFC822.TEXT") +
             self.writeSpace() +
             self.writeNString(string)
     }
 
-    @discardableResult mutating func writeMessageAttribute_rfc822Header(_ string: NIOIMAP.NString) -> Int {
+    @discardableResult mutating func writeMessageAttribute_rfc822Header(_ string: NString) -> Int {
         self.writeString("RFC822.HEADER") +
             self.writeSpace() +
             self.writeNString(string)
     }
 
-    @discardableResult mutating func writeMessageAttribute_body(_ body: NIOIMAP.BodyStructure, structure: Bool) -> Int {
+    @discardableResult mutating func writeMessageAttribute_body(_ body: BodyStructure, structure: Bool) -> Int {
         self.writeString("BODY") +
             self.writeIfTrue(structure) { () -> Int in
                 self.writeString("STRUCTURE")
@@ -126,7 +124,7 @@ extension ByteBuffer {
             self.writeBody(body)
     }
 
-    @discardableResult mutating func writeMessageAttribute_bodySection(_ section: NIOIMAP.SectionSpec?, number: Int?, string: NIOIMAP.NString) -> Int {
+    @discardableResult mutating func writeMessageAttribute_bodySection(_ section: SectionSpec?, number: Int?, string: NString) -> Int {
         self.writeString("BODY") +
             self.writeSection(section) +
             self.writeIfExists(number) { (number) -> Int in

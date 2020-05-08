@@ -14,19 +14,17 @@
 
 import struct NIO.ByteBuffer
 
-extension NIOIMAP {
-    /// IMAPv4 `resp-cond-state`
-    public enum ResponseConditionalState: Equatable {
-        case ok(ResponseText)
-        case no(ResponseText)
-        case bad(ResponseText)
-    }
+/// IMAPv4 `resp-cond-state`
+public enum ResponseConditionalState: Equatable {
+    case ok(ResponseText)
+    case no(ResponseText)
+    case bad(ResponseText)
 }
 
 // MARK: - Encoding
 
 extension ByteBuffer {
-    @discardableResult mutating func writeResponseConditionalState(_ cond: NIOIMAP.ResponseConditionalState) -> Int {
+    @discardableResult mutating func writeResponseConditionalState(_ cond: ResponseConditionalState) -> Int {
         switch cond {
         case .ok(let text):
             return

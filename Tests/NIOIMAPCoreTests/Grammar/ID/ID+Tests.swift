@@ -22,7 +22,7 @@ class ID_Tests: EncodeTestClass {}
 
 extension ID_Tests {
     func testEncode() {
-        let inputs: [(NIOIMAP.IDParameter, String, UInt)] = [
+        let inputs: [(IDParameter, String, UInt)] = [
             (.key("key", value: "value"), #""key" "value""#, #line),
             (.key("key", value: nil), #""key" NIL"#, #line),
         ]
@@ -36,7 +36,7 @@ extension ID_Tests {
     }
 
     func testEncode_array() {
-        let inputs: [([NIOIMAP.IDParameter], String, UInt)] = [
+        let inputs: [([IDParameter], String, UInt)] = [
             ([], "NIL", #line),
             ([.key("key", value: "value")], #"("key" "value")"#, #line),
         ]

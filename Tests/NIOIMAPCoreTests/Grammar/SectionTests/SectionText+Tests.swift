@@ -22,7 +22,7 @@ class SectionText_Tests: EncodeTestClass {}
 
 extension SectionText_Tests {
     func testEncode() {
-        let inputs: [(NIOIMAP.SectionText, String, UInt)] = [
+        let inputs: [(SectionText, String, UInt)] = [
             (.mime, "MIME", #line),
             (.message(.header), "HEADER", #line),
         ]

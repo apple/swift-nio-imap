@@ -22,7 +22,7 @@ class BodyExtensionTests: EncodeTestClass {}
 
 extension BodyExtensionTests {
     func testEncode() {
-        let inputs: [([NIOIMAP.BodyExtensionType], String, UInt)] = [
+        let inputs: [([BodyExtensionType], String, UInt)] = [
             ([.number(1)], "(1)", #line),
             ([.string("apple")], "(\"apple\")", #line),
             ([.string(nil)], "(NIL)", #line),

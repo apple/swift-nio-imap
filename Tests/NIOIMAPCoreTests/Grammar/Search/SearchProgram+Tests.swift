@@ -22,7 +22,7 @@ class SearchProgram_Tests: EncodeTestClass {}
 
 extension SearchProgram_Tests {
     func testEncode() {
-        let inputs: [(NIOIMAP.SearchProgram, String, UInt)] = [
+        let inputs: [(SearchProgram, String, UInt)] = [
             (.charset(nil, keys: [.all]), "ALL", #line),
             (.charset(nil, keys: [.all, .answered, .deleted]), "ALL ANSWERED DELETED", #line),
             (.charset("UTF8", keys: [.all]), "CHARSET UTF8 ALL", #line),

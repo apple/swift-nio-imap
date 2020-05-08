@@ -14,25 +14,23 @@
 
 import struct NIO.ByteBuffer
 
-extension NIOIMAP {
-    /// IMAPv4 `message-data`
-    /// One message attribute is guaranteed
-    public enum MessageData: Equatable {
-        case expunge(Int)
-    }
+/// IMAPv4 `message-data`
+/// One message attribute is guaranteed
+public enum MessageData: Equatable {
+    case expunge(Int)
 }
 
 // MARK: - Encoding
 
 extension ByteBuffer {
-    @discardableResult mutating func writeMessageData(_ data: NIOIMAP.MessageData) -> Int {
+    @discardableResult mutating func writeMessageData(_ data: MessageData) -> Int {
         switch data {
         case .expunge(let number):
             return self.writeString("\(number) EXPUNGE")
         }
     }
 
-    @discardableResult mutating func writeMessageDataEnd(_: NIOIMAP.MessageData) -> Int {
+    @discardableResult mutating func writeMessageDataEnd(_: MessageData) -> Int {
         self.writeString(")")
     }
 }

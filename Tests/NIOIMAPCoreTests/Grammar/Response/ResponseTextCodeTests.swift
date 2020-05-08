@@ -22,7 +22,7 @@ class ResponseTextCodeTests: EncodeTestClass {}
 
 extension ResponseTextCodeTests {
     func testEncode() {
-        let inputs: [(NIOIMAP.ResponseTextCode, String, UInt)] = [
+        let inputs: [(ResponseTextCode, String, UInt)] = [
             (.alert, "ALERT", #line),
             (.parse, "PARSE", #line),
             (.readOnly, "READ-ONLY", #line),

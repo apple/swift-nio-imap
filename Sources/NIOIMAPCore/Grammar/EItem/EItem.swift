@@ -12,14 +12,12 @@
 //
 //===----------------------------------------------------------------------===//
 
-extension NIOIMAP {
-    /// IMAPv4 `eitem-vendor-tag`
-    public struct EItemVendorTag: Equatable {
-        public var token: String
-        public var atom: String
+/// IMAPv4 `eitem-vendor-tag`
+public struct EItemVendorTag: Equatable {
+    public var token: String
+    public var atom: String
 
-        public static func token(_ token: String, atom: String) -> Self {
-            Self(token: token, atom: atom)
-        }
+    public static func token(_ token: String, atom: String) -> Self {
+        Self(token: token, atom: atom)
     }
 }

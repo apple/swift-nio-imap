@@ -22,7 +22,7 @@ class MessageDataTests: EncodeTestClass {}
 
 extension MessageDataTests {
     func testEncode() {
-        let inputs: [(NIOIMAP.MessageData, String, UInt)] = [
+        let inputs: [(MessageData, String, UInt)] = [
             (.expunge(123), "123 EXPUNGE", #line),
         ]
 

@@ -22,8 +22,8 @@ class Capability_Tests: EncodeTestClass {}
 
 extension Capability_Tests {
     func testEquatable() {
-        let capability1 = NIOIMAP.Capability("idle")
-        let capability2 = NIOIMAP.Capability("IDLE")
+        let capability1 = Capability("idle")
+        let capability2 = Capability("IDLE")
         XCTAssertEqual(capability1, capability2)
     }
 }
@@ -32,7 +32,7 @@ extension Capability_Tests {
 
 extension Capability_Tests {
     func testEncode() {
-        let tests: [(NIOIMAP.Capability, String, UInt)] = [
+        let tests: [(Capability, String, UInt)] = [
             (.acl, "ACL", #line),
             (.annotateExperiment1, "ANNOTATE-EXPERIMENT-1", #line),
             (.binary, "BINARY", #line),
@@ -89,7 +89,7 @@ extension Capability_Tests {
     }
 
     func testEncode_multiple() {
-        let tests: [([NIOIMAP.Capability], String, UInt)] = [
+        let tests: [([Capability], String, UInt)] = [
             ([], "CAPABILITY IMAP4 IMAP4rev1", #line),
             ([.condStore], "CAPABILITY IMAP4 IMAP4rev1 CONDSTORE", #line),
             ([.condStore, .enable, .filters], "CAPABILITY IMAP4 IMAP4rev1 CONDSTORE ENABLE FILTERS", #line),

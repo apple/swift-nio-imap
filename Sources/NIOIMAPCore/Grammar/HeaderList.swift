@@ -14,8 +14,6 @@
 
 import struct NIO.ByteBuffer
 
-extension NIOIMAP {}
-
 extension ByteBuffer {
     @discardableResult mutating func writeHeaderList(_ headers: [String]) -> Int {
         self.writeArray(headers) { (element, self) in

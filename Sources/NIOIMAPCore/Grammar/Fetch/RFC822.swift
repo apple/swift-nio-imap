@@ -14,18 +14,16 @@
 
 import struct NIO.ByteBuffer
 
-extension NIOIMAP {
-    public enum RFC822: String {
-        case header
-        case size
-        case text
-    }
+public enum RFC822: String {
+    case header
+    case size
+    case text
 }
 
 // MARK: - Encoding
 
 extension ByteBuffer {
-    @discardableResult mutating func writeRFC822(_ rfc822: NIOIMAP.RFC822) -> Int {
+    @discardableResult mutating func writeRFC822(_ rfc822: RFC822) -> Int {
         self.writeString(".\(rfc822.rawValue.uppercased())")
     }
 }

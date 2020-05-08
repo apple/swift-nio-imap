@@ -22,12 +22,12 @@ class ResponseParser_Tests: XCTest {}
 
 extension ResponseParser_Tests {
     func testInit_defaultBufferSize() {
-        let parser = NIOIMAP.CommandParser()
+        let parser = CommandParser()
         XCTAssertEqual(parser.bufferLimit, 1_000)
     }
 
     func testInit_customBufferSize() {
-        let parser = NIOIMAP.CommandParser(bufferLimit: 80_000)
+        let parser = CommandParser(bufferLimit: 80_000)
         XCTAssertEqual(parser.bufferLimit, 80_000)
     }
 }

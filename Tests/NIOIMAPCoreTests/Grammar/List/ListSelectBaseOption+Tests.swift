@@ -22,7 +22,7 @@ class ListSelectBaseOption_Tests: EncodeTestClass {}
 
 extension ListSelectBaseOption_Tests {
     func testEncode() {
-        let inputs: [(NIOIMAP.ListSelectBaseOption, String, UInt)] = [
+        let inputs: [(ListSelectBaseOption, String, UInt)] = [
             (.subscribed, "SUBSCRIBED", #line),
             (.option(.standard("test", value: nil)), "test", #line),
         ]
@@ -36,7 +36,7 @@ extension ListSelectBaseOption_Tests {
     }
 
     func testEncodeQuoted() {
-        let inputs: [(NIOIMAP.ListSelectBaseOption, String, UInt)] = [
+        let inputs: [(ListSelectBaseOption, String, UInt)] = [
             (.subscribed, #""SUBSCRIBED""#, #line),
         ]
 

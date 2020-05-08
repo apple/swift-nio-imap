@@ -14,18 +14,16 @@
 
 import struct NIO.ByteBuffer
 
-extension NIOIMAP {
-    /// IMAPv4 `greeting`
-    public enum Greeting: Equatable {
-        case auth(ResponseConditionalAuth)
-        case bye(ResponseText)
-    }
+/// IMAPv4 `greeting`
+public enum Greeting: Equatable {
+    case auth(ResponseConditionalAuth)
+    case bye(ResponseText)
 }
 
 // MARK: - Encoding
 
 extension ByteBuffer {
-    @discardableResult mutating func writeGreeting(_ greeting: NIOIMAP.Greeting) -> Int {
+    @discardableResult mutating func writeGreeting(_ greeting: Greeting) -> Int {
         var size = 0
         size += self.writeString("* ")
         switch greeting {

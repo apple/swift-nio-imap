@@ -18,7 +18,7 @@ import XCTest
 
 class EnableData_Tests: EncodeTestClass {
     func testEncoding() {
-        let inputs: [([NIOIMAP.Capability], String, UInt)] = [
+        let inputs: [([Capability], String, UInt)] = [
             ([], "ENABLED", #line),
             ([.enable], "ENABLED ENABLE", #line),
             ([.enable, .condStore], "ENABLED ENABLE CONDSTORE", #line),

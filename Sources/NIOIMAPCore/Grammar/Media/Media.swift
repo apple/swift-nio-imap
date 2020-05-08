@@ -12,6 +12,4 @@
 //
 //===----------------------------------------------------------------------===//
 
-extension NIOIMAP {
-    public enum Media {}
-}
+public enum Media {}

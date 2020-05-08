@@ -22,7 +22,7 @@ class ContinueRequestTests: EncodeTestClass {}
 
 extension ContinueRequestTests {
     func testEncode() {
-        let inputs: [(NIOIMAP.ContinueRequest, String, UInt)] = [
+        let inputs: [(ContinueRequest, String, UInt)] = [
             (.base64("bb=="), "+ bb==\r\n", #line),
             (.responseText(.code(.alert, text: "text")), "+ [ALERT] text\r\n", #line),
         ]

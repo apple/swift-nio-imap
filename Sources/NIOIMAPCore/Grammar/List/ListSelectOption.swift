@@ -14,27 +14,25 @@
 
 import struct NIO.ByteBuffer
 
-extension NIOIMAP {
-    /// IMAPv4 `list-select-opt`
-    public enum ListSelectOption: Equatable {
-        case base(ListSelectBaseOption)
-        case independent(ListSelectIndependentOption)
-        case mod(ListSelectModOption)
-    }
-
-    public enum ListSelectionOptionsData: Equatable {
-        case select([ListSelectOption], ListSelectBaseOption)
-        case selectIndependent([ListSelectIndependentOption])
-    }
-
-    /// IMAPv4 `list-select-options`
-    public typealias ListSelectOptions = ListSelectionOptionsData?
+/// IMAPv4 `list-select-opt`
+public enum ListSelectOption: Equatable {
+    case base(ListSelectBaseOption)
+    case independent(ListSelectIndependentOption)
+    case mod(ListSelectModOption)
 }
+
+public enum ListSelectionOptionsData: Equatable {
+    case select([ListSelectOption], ListSelectBaseOption)
+    case selectIndependent([ListSelectIndependentOption])
+}
+
+/// IMAPv4 `list-select-options`
+public typealias ListSelectOptions = ListSelectionOptionsData?
 
 // MARK: - Encoding
 
 extension ByteBuffer {
-    @discardableResult mutating func writeListSelectOption(_ option: NIOIMAP.ListSelectOption) -> Int {
+    @discardableResult mutating func writeListSelectOption(_ option: ListSelectOption) -> Int {
         switch option {
         case .base(let option):
             return self.writeListSelectBaseOption(option)
@@ -45,7 +43,7 @@ extension ByteBuffer {
         }
     }
 
-    @discardableResult mutating func writeListSelectOptions(_ options: NIOIMAP.ListSelectOptions) -> Int {
+    @discardableResult mutating func writeListSelectOptions(_ options: ListSelectOptions) -> Int {
         self.writeString("(") +
             self.writeIfExists(options) { (optionsData) -> Int in
                 switch optionsData {

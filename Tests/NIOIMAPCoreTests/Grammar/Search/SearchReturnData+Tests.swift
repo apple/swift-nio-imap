@@ -22,7 +22,7 @@ class SearchReturnData_Tests: EncodeTestClass {}
 
 extension SearchReturnData_Tests {
     func testEncode() {
-        let inputs: [(NIOIMAP.SearchReturnData, String, UInt)] = [
+        let inputs: [(SearchReturnData, String, UInt)] = [
             (.min(1), "MIN 1", #line),
             (.max(1), "MAX 1", #line),
             (.all([1 ... 3]), "ALL 1:3", #line),

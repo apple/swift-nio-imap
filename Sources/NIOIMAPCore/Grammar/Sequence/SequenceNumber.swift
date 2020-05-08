@@ -14,17 +14,15 @@
 
 import struct NIO.ByteBuffer
 
-extension NIOIMAP {
-    /// IMAPv4 `seq-number`
-    public enum SequenceNumber: Equatable {
-        case last // i.e. last (according to IMAPv4)
-        case number(Int)
-    }
+/// IMAPv4 `seq-number`
+public enum SequenceNumber: Equatable {
+    case last // i.e. last (according to IMAPv4)
+    case number(Int)
 }
 
 // MARK: - Integer literal
 
-extension NIOIMAP.SequenceNumber: ExpressibleByIntegerLiteral {
+extension SequenceNumber: ExpressibleByIntegerLiteral {
     public typealias IntegerLiteralType = Int
 
     public init(integerLiteral value: Self.IntegerLiteralType) {
@@ -34,10 +32,10 @@ extension NIOIMAP.SequenceNumber: ExpressibleByIntegerLiteral {
 
 // MARK: - Comparable
 
-extension NIOIMAP.SequenceNumber: Comparable {
+extension SequenceNumber: Comparable {
     // last is treated as the largest possible element
     // i..e if the greatest mail ID is 5, then last is 5
-    public static func < (lhs: NIOIMAP.SequenceNumber, rhs: NIOIMAP.SequenceNumber) -> Bool {
+    public static func < (lhs: SequenceNumber, rhs: SequenceNumber) -> Bool {
         switch (lhs, rhs) {
         case (.last, .last):
             return false
@@ -54,7 +52,7 @@ extension NIOIMAP.SequenceNumber: Comparable {
 // MARK: - Encoding
 
 extension ByteBuffer {
-    @discardableResult mutating func writeSequenceNumber(_ num: NIOIMAP.SequenceNumber) -> Int {
+    @discardableResult mutating func writeSequenceNumber(_ num: SequenceNumber) -> Int {
         switch num {
         case .last:
             return self.writeString("*")

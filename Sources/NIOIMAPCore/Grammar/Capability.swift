@@ -14,24 +14,22 @@
 
 import struct NIO.ByteBuffer
 
-extension NIOIMAP {
-    /// IMAPv4 `capability`
-    public struct Capability: Equatable {
-        public var rawValue: String
+/// IMAPv4 `capability`
+public struct Capability: Equatable {
+    public var rawValue: String
 
-        public init(_ value: String) {
-            self.rawValue = value.uppercased()
-        }
+    public init(_ value: String) {
+        self.rawValue = value.uppercased()
+    }
 
-        fileprivate init(unchecked: String) {
-            self.rawValue = unchecked
-        }
+    fileprivate init(unchecked: String) {
+        self.rawValue = unchecked
     }
 }
 
 // MARK: - Convenience Types
 
-extension NIOIMAP.Capability {
+extension Capability {
     public struct AuthType: Equatable {
         public static let token = Self(unchecked: "TOKEN")
         public static let plain = Self(unchecked: "PLAIN")
@@ -224,11 +222,11 @@ extension NIOIMAP.Capability {
 // MARK: - Encoding
 
 extension ByteBuffer {
-    @discardableResult mutating func writeCapability(_ capability: NIOIMAP.Capability) -> Int {
+    @discardableResult mutating func writeCapability(_ capability: Capability) -> Int {
         self.writeString(capability.rawValue)
     }
 
-    @discardableResult mutating func writeCapabilityData(_ data: [NIOIMAP.Capability]) -> Int {
+    @discardableResult mutating func writeCapabilityData(_ data: [Capability]) -> Int {
         self.writeString("CAPABILITY IMAP4 IMAP4rev1") +
             self.writeArray(data, separator: "", parenthesis: false) { (capability, self) -> Int in
                 self.writeSpace() +

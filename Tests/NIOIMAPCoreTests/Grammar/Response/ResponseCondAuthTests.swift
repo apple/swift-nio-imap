@@ -22,9 +22,9 @@ class ResponseConditionalAuthTests: EncodeTestClass {}
 
 extension ResponseConditionalAuthTests {
     func testEncode() {
-        let inputs: [(NIOIMAP.ResponseConditionalAuth, String, UInt)] = [
-            (NIOIMAP.ResponseConditionalAuth.ok(.code(nil, text: "hello")), "OK hello", #line),
-            (NIOIMAP.ResponseConditionalAuth.preauth(.code(nil, text: "goodbye")), "PREAUTH goodbye", #line),
+        let inputs: [(ResponseConditionalAuth, String, UInt)] = [
+            (ResponseConditionalAuth.ok(.code(nil, text: "hello")), "OK hello", #line),
+            (ResponseConditionalAuth.preauth(.code(nil, text: "goodbye")), "PREAUTH goodbye", #line),
         ]
 
         for (test, expectedString, line) in inputs {

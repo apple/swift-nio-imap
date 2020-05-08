@@ -12,14 +12,12 @@
 //
 //===----------------------------------------------------------------------===//
 
-extension NIOIMAP {
-    public enum AttributeFlag: Equatable {
-        case answered
-        case flagged
-        case deleted
-        case seen
-        case draft
-        case keyword(String)
-        case flagExtension(String)
-    }
+public enum AttributeFlag: Equatable {
+    case answered
+    case flagged
+    case deleted
+    case seen
+    case draft
+    case keyword(String)
+    case flagExtension(String)
 }

@@ -14,22 +14,20 @@
 
 import struct NIO.ByteBuffer
 
-extension NIOIMAP {
-    public struct AppendOptions: Equatable {
-        public var flagList: [Flag]
-        public var dateTime: Date.DateTime?
-        public var extensions: [AppendExtension]
+public struct AppendOptions: Equatable {
+    public var flagList: [Flag]
+    public var dateTime: Date.DateTime?
+    public var extensions: [AppendExtension]
 
-        public static func flagList(_ flagList: [Flag], dateTime: Date.DateTime?, extensions: [AppendExtension]) -> Self {
-            Self(flagList: flagList, dateTime: dateTime, extensions: extensions)
-        }
+    public static func flagList(_ flagList: [Flag], dateTime: Date.DateTime?, extensions: [AppendExtension]) -> Self {
+        Self(flagList: flagList, dateTime: dateTime, extensions: extensions)
     }
 }
 
 // MARK: - Encoding
 
 extension ByteBuffer {
-    @discardableResult mutating func writeAppendOptions(_ options: NIOIMAP.AppendOptions) -> Int {
+    @discardableResult mutating func writeAppendOptions(_ options: AppendOptions) -> Int {
         self.writeIfArrayHasMinimumSize(array: options.flagList) { (array, self) -> Int in
             self.writeSpace() +
                 self.writeFlags(array)

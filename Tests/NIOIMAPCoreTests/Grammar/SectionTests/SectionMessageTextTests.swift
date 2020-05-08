@@ -23,28 +23,28 @@ class SectionMessageTextTests: EncodeTestClass {}
 extension SectionMessageTextTests {
     func testInit_header() {
         let expected = "HEADER"
-        let size = self.testBuffer.writeSectionMessageText(NIOIMAP.SectionMessageText.header)
+        let size = self.testBuffer.writeSectionMessageText(SectionMessageText.header)
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }
 
     func testInit_text() {
         let expected = "TEXT"
-        let size = self.testBuffer.writeSectionMessageText(NIOIMAP.SectionMessageText.text)
+        let size = self.testBuffer.writeSectionMessageText(SectionMessageText.text)
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }
 
     func testInit_headerFields() {
         let expected = "HEADER.FIELDS (\"hello world\")"
-        let size = self.testBuffer.writeSectionMessageText(NIOIMAP.SectionMessageText.headerFields(["hello world"]))
+        let size = self.testBuffer.writeSectionMessageText(SectionMessageText.headerFields(["hello world"]))
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }
 
     func testInit_noteHeaderFields() {
         let expected = "HEADER.FIELDS.NOT (\"some text\")"
-        let size = self.testBuffer.writeSectionMessageText(NIOIMAP.SectionMessageText.notHeaderFields(["some text"]))
+        let size = self.testBuffer.writeSectionMessageText(SectionMessageText.notHeaderFields(["some text"]))
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }

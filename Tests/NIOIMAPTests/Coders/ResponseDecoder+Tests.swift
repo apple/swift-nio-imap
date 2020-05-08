@@ -22,7 +22,7 @@ class ResponseDecoder_Tests: XCTest {}
 
 extension ResponseDecoder_Tests {
     func testNormalUsage() throws {
-        let inoutPairs: [(String, [NIOIMAP.Response])] = [
+        let inoutPairs: [(String, [Response])] = [
             (
                 "1 OK Login\r\n",
                 [
@@ -52,14 +52,14 @@ extension ResponseDecoder_Tests {
         do {
             try ByteToMessageDecoderVerifier.verifyDecoder(
                 stringInputOutputPairs: inoutPairs,
-                decoderFactory: { () -> NIOIMAP.ResponseDecoder in
-                    var decoder = NIOIMAP.ResponseDecoder()
+                decoderFactory: { () -> ResponseDecoder in
+                    var decoder = ResponseDecoder()
                     decoder.parser.mode = .response
                     return decoder
                 }
             )
         } catch {
-            switch error as? ByteToMessageDecoderVerifier.VerificationError<NIOIMAP.Response> {
+            switch error as? ByteToMessageDecoderVerifier.VerificationError<Response> {
             case .some(let error):
                 for input in error.inputs {
                     print(" input: \(String(decoding: input.readableBytesView, as: Unicode.UTF8.self))")

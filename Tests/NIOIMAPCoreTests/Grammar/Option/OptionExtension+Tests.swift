@@ -22,7 +22,7 @@ class OptionExtension_Tests: EncodeTestClass {}
 
 extension OptionExtension_Tests {
     func testEncode() {
-        let inputs: [(NIOIMAP.OptionExtension, String, UInt)] = [
+        let inputs: [(OptionExtension, String, UInt)] = [
             (.standard("test", value: .string("string")), "test (\"string\")", #line),
             (.vendor(.token("token", atom: "atom"), value: nil), "token-atom", #line),
             (.vendor(.token("token", atom: "atom"), value: .string("value")), "token-atom (\"value\")", #line),

@@ -14,24 +14,22 @@
 
 import struct NIO.ByteBuffer
 
-extension NIOIMAP {
-    /// IMAPv4 `body-extension`
-    public enum BodyExtensionType: Equatable {
-        case string(NString)
-        case number(Int)
-    }
+/// IMAPv4 `body-extension`
+public enum BodyExtensionType: Equatable {
+    case string(NString)
+    case number(Int)
 }
 
 // MARK: - Encoding
 
 extension ByteBuffer {
-    @discardableResult mutating func writeBodyExtension(_ ext: [NIOIMAP.BodyExtensionType]) -> Int {
+    @discardableResult mutating func writeBodyExtension(_ ext: [BodyExtensionType]) -> Int {
         self.writeArray(ext) { (element, self) in
             self.writeBodyExtensionType(element)
         }
     }
 
-    @discardableResult mutating func writeBodyExtensionType(_ type: NIOIMAP.BodyExtensionType) -> Int {
+    @discardableResult mutating func writeBodyExtensionType(_ type: BodyExtensionType) -> Int {
         switch type {
         case .string(let string):
             return self.writeNString(string)

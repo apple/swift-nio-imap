@@ -22,7 +22,7 @@ class BodyFieldsTests: EncodeTestClass {}
 
 extension BodyFieldsTests {
     func testEncode() {
-        let inputs: [(NIOIMAP.BodyStructure.Fields, String, UInt)] = [
+        let inputs: [(BodyStructure.Fields, String, UInt)] = [
             (.parameter([.field("f1", value: "v1")], id: "fieldID", description: "desc", encoding: .base64, octets: 12), "(\"f1\" \"v1\") \"fieldID\" \"desc\" \"BASE64\" 12", #line),
         ]
 

@@ -14,16 +14,14 @@
 
 import struct NIO.ByteBuffer
 
-extension NIOIMAP {
-    public enum ConditionalStore {
-        static let param = "CONDSTORE"
-    }
+public enum ConditionalStore {
+    static let param = "CONDSTORE"
 }
 
 // MARK: - Encoding
 
 extension ByteBuffer {
     @discardableResult mutating func writeConditionalStoreParameter() -> Int {
-        self.writeString(NIOIMAP.ConditionalStore.param)
+        self.writeString(ConditionalStore.param)
     }
 }

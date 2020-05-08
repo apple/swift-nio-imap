@@ -14,44 +14,42 @@
 
 import struct NIO.ByteBuffer
 
-extension NIOIMAP {
-    /// IMAPv4 `seq-range`
-    public struct SequenceRange: Equatable {
-        public static var wildcard: SequenceRange {
-            Self(.last ... .last)
-        }
+/// IMAPv4 `seq-range`
+public struct SequenceRange: Equatable {
+    public static var wildcard: SequenceRange {
+        Self(.last ... .last)
+    }
 
-        public static func single(_ num: Int) -> SequenceRange {
-            Self(.number(num) ... .number(num))
-        }
+    public static func single(_ num: Int) -> SequenceRange {
+        Self(.number(num) ... .number(num))
+    }
 
-        public var closedRange: ClosedRange<SequenceNumber>
+    public var closedRange: ClosedRange<SequenceNumber>
 
-        public var from: SequenceNumber {
-            closedRange.lowerBound
-        }
+    public var from: SequenceNumber {
+        closedRange.lowerBound
+    }
 
-        public var to: SequenceNumber {
-            closedRange.upperBound
-        }
+    public var to: SequenceNumber {
+        closedRange.upperBound
+    }
 
-        public init(from: SequenceNumber, to: SequenceNumber) {
-            if from < to {
-                self.init(from ... to)
-            } else {
-                self.init(to ... from)
-            }
+    public init(from: SequenceNumber, to: SequenceNumber) {
+        if from < to {
+            self.init(from ... to)
+        } else {
+            self.init(to ... from)
         }
+    }
 
-        public init(_ closedRange: ClosedRange<SequenceNumber>) {
-            self.closedRange = closedRange
-        }
+    public init(_ closedRange: ClosedRange<SequenceNumber>) {
+        self.closedRange = closedRange
     }
 }
 
 // MARK: - Integer literal
 
-extension NIOIMAP.SequenceRange: ExpressibleByIntegerLiteral {
+extension SequenceRange: ExpressibleByIntegerLiteral {
     public typealias IntegerLiteralType = Int
 
     public init(integerLiteral value: Self.IntegerLiteralType) {
@@ -62,7 +60,7 @@ extension NIOIMAP.SequenceRange: ExpressibleByIntegerLiteral {
 // MARK: - Encoding
 
 extension ByteBuffer {
-    @discardableResult mutating func writeSequenceRange(_ range: NIOIMAP.SequenceRange) -> Int {
+    @discardableResult mutating func writeSequenceRange(_ range: SequenceRange) -> Int {
         self.writeSequenceNumber(range.closedRange.lowerBound) +
             self.writeIfTrue(range.closedRange.lowerBound < range.closedRange.upperBound) {
                 self.writeString(":") +
@@ -73,21 +71,21 @@ extension ByteBuffer {
 
 // MARK: - Swift ranges
 
-extension NIOIMAP.SequenceNumber {
+extension SequenceNumber {
     // always flip for wildcard to be on right
-    public static prefix func ... (maximum: Self) -> NIOIMAP.SequenceRange {
-        NIOIMAP.SequenceRange(maximum ... .last)
+    public static prefix func ... (maximum: Self) -> SequenceRange {
+        SequenceRange(maximum ... .last)
     }
 
-    public static postfix func ... (minimum: Self) -> NIOIMAP.SequenceRange {
-        NIOIMAP.SequenceRange(minimum ... .last)
+    public static postfix func ... (minimum: Self) -> SequenceRange {
+        SequenceRange(minimum ... .last)
     }
 
-    public static func ... (minimum: Self, maximum: Self) -> NIOIMAP.SequenceRange {
+    public static func ... (minimum: Self, maximum: Self) -> SequenceRange {
         if minimum < maximum {
-            return NIOIMAP.SequenceRange(minimum ... maximum)
+            return SequenceRange(minimum ... maximum)
         } else {
-            return NIOIMAP.SequenceRange(maximum ... minimum)
+            return SequenceRange(maximum ... minimum)
         }
     }
 }

@@ -14,13 +14,13 @@
 
 import struct NIO.ByteBuffer
 
-extension NIOIMAP.BodyStructure {
+extension BodyStructure {
     /// Extracted from IMAPv4 `body-ext-1part`
     public struct FieldLocationExtension: Equatable {
-        public var location: NIOIMAP.NString
-        public var extensions: [[NIOIMAP.BodyExtensionType]]
+        public var location: NString
+        public var extensions: [[BodyExtensionType]]
 
-        public static func location(_ location: NIOIMAP.NString, extensions: [[NIOIMAP.BodyExtensionType]]) -> Self {
+        public static func location(_ location: NString, extensions: [[BodyExtensionType]]) -> Self {
             Self(location: location, extensions: extensions)
         }
     }
@@ -29,7 +29,7 @@ extension NIOIMAP.BodyStructure {
 // MARK: - Encoding
 
 extension ByteBuffer {
-    @discardableResult mutating func writeBodyFieldLocationExtension(_ locationExtension: NIOIMAP.BodyStructure.FieldLocationExtension) -> Int {
+    @discardableResult mutating func writeBodyFieldLocationExtension(_ locationExtension: BodyStructure.FieldLocationExtension) -> Int {
         self.writeSpace() +
             self.writeNString(locationExtension.location) +
             locationExtension.extensions.reduce(0) { (result, ext) in

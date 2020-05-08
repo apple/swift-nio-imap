@@ -14,60 +14,58 @@
 
 import struct NIO.ByteBuffer
 
-extension NIOIMAP {
-    /// IMAPv4 `search-key`
-    public indirect enum SearchKey: Equatable {
-        case all
-        case answered
-        case deleted
-        case flagged
-        case new
-        case old
-        case recent
-        case seen
-        case unanswered
-        case undeleted
-        case unflagged
-        case unseen
-        case draft
-        case undraft
-        case bcc(ByteBuffer)
-        case before(Date)
-        case body(ByteBuffer)
-        case cc(ByteBuffer)
-        case from(ByteBuffer)
-        case keyword(Flag.Keyword)
-        case on(Date)
-        case since(Date)
-        case subject(ByteBuffer)
-        case text(ByteBuffer)
-        case to(ByteBuffer)
-        case unkeyword(Flag.Keyword)
-        case header(String, ByteBuffer)
-        case larger(Int)
-        case not(SearchKey)
-        case or(SearchKey, SearchKey)
-        case sent(SearchSentType)
-        case smaller(Int)
-        case uid([NIOIMAP.SequenceRange])
-        case sequenceSet([NIOIMAP.SequenceRange])
-        case array([NIOIMAP.SearchKey])
-        case older(Int)
-        case younger(Int)
-        case filter(String)
-    }
+/// IMAPv4 `search-key`
+public indirect enum SearchKey: Equatable {
+    case all
+    case answered
+    case deleted
+    case flagged
+    case new
+    case old
+    case recent
+    case seen
+    case unanswered
+    case undeleted
+    case unflagged
+    case unseen
+    case draft
+    case undraft
+    case bcc(ByteBuffer)
+    case before(Date)
+    case body(ByteBuffer)
+    case cc(ByteBuffer)
+    case from(ByteBuffer)
+    case keyword(Flag.Keyword)
+    case on(Date)
+    case since(Date)
+    case subject(ByteBuffer)
+    case text(ByteBuffer)
+    case to(ByteBuffer)
+    case unkeyword(Flag.Keyword)
+    case header(String, ByteBuffer)
+    case larger(Int)
+    case not(SearchKey)
+    case or(SearchKey, SearchKey)
+    case sent(SearchSentType)
+    case smaller(Int)
+    case uid([SequenceRange])
+    case sequenceSet([SequenceRange])
+    case array([SearchKey])
+    case older(Int)
+    case younger(Int)
+    case filter(String)
 }
 
 // MARK: - IMAP
 
 extension ByteBuffer {
-    @discardableResult mutating func writeSearchKeys(_ keys: [NIOIMAP.SearchKey]) -> Int {
+    @discardableResult mutating func writeSearchKeys(_ keys: [SearchKey]) -> Int {
         self.writeArray(keys) { (element, self) in
             self.writeSearchKey(element)
         }
     }
 
-    @discardableResult mutating func writeSearchKey(_ key: NIOIMAP.SearchKey) -> Int {
+    @discardableResult mutating func writeSearchKey(_ key: SearchKey) -> Int {
         switch key {
         case .all:
             return self.writeString("ALL")

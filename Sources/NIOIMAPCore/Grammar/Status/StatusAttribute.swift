@@ -14,29 +14,27 @@
 
 import struct NIO.ByteBuffer
 
-extension NIOIMAP {
-    /// IMAPv4 `status-att`
-    public enum StatusAttribute: String, CaseIterable {
-        case messages = "MESSAGES"
-        case recent = "RECENT"
-        case uidnext = "UIDNEXT"
-        case uidvalidity = "UIDVALIDITY"
-        case unseen = "UNSEEN"
-        case size = "SIZE"
-        case highestModSeq = "HIGHESTMODSEQ"
-    }
+/// IMAPv4 `status-att`
+public enum StatusAttribute: String, CaseIterable {
+    case messages = "MESSAGES"
+    case recent = "RECENT"
+    case uidnext = "UIDNEXT"
+    case uidvalidity = "UIDVALIDITY"
+    case unseen = "UNSEEN"
+    case size = "SIZE"
+    case highestModSeq = "HIGHESTMODSEQ"
 }
 
 // MARK: - IMAP
 
 extension ByteBuffer {
-    @discardableResult mutating func writeStatusAttributes(_ atts: [NIOIMAP.StatusAttribute]) -> Int {
+    @discardableResult mutating func writeStatusAttributes(_ atts: [StatusAttribute]) -> Int {
         self.writeArray(atts, parenthesis: false) { (element, self) in
             self.writeStatusAttribute(element)
         }
     }
 
-    @discardableResult mutating func writeStatusAttribute(_ att: NIOIMAP.StatusAttribute) -> Int {
+    @discardableResult mutating func writeStatusAttribute(_ att: StatusAttribute) -> Int {
         self.writeString(att.rawValue)
     }
 }
