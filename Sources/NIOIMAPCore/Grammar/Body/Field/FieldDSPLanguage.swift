@@ -14,7 +14,7 @@
 
 import struct NIO.ByteBuffer
 
-extension NIOIMAP.BodyStructure {
+extension BodyStructure {
     /// Extracted from IMAPv4 `body-ext-`1part
     public struct FieldDSPLanguage: Equatable {
         public var fieldDSP: FieldDSPData?
@@ -29,7 +29,7 @@ extension NIOIMAP.BodyStructure {
 // MARK: - Encoding
 
 extension ByteBuffer {
-    @discardableResult mutating func writeBodyFieldDSPLanguage(_ desc: NIOIMAP.BodyStructure.FieldDSPLanguage) -> Int {
+    @discardableResult mutating func writeBodyFieldDSPLanguage(_ desc: BodyStructure.FieldDSPLanguage) -> Int {
         self.writeSpace() +
             self.writeBodyFieldDSP(desc.fieldDSP)
     }

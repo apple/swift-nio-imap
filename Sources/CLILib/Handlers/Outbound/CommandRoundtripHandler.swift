@@ -23,7 +23,7 @@ public class CommandRoundtripHandler: ChannelOutboundHandler {
     public typealias OutboundOut = ByteBuffer
 
     let logger: Logger
-    private var parser = NIOIMAP.CommandParser()
+    private var parser = CommandParser()
 
     public init(logger: Logger) {
         self.logger = logger
@@ -34,7 +34,7 @@ public class CommandRoundtripHandler: ChannelOutboundHandler {
         do {
             var originalBufferCopy = originalBuffer
             guard let commandStream = try parser.parseCommandStream(buffer: &originalBufferCopy) else {
-                promise?.fail(NIOIMAP.ParsingError.incompleteMessage) // TODO: this leaks implementation details
+                promise?.fail(ParsingError.incompleteMessage) // TODO: this leaks implementation details
                 return
             }
 

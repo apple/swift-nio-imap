@@ -15,32 +15,30 @@
 import NIO
 import NIOIMAPCore
 
-extension NIOIMAP {
-    public struct ResponseDecoder: ByteToMessageDecoder {
-        public typealias InboundOut = Response
+public struct ResponseDecoder: ByteToMessageDecoder {
+    public typealias InboundOut = Response
 
-        var parser: ResponseParser
+    var parser: ResponseParser
 
-        public init(bufferLimit: Int = 1_000) {
-            self.parser = ResponseParser(bufferLimit: bufferLimit)
-        }
+    public init(bufferLimit: Int = 1_000) {
+        self.parser = ResponseParser(bufferLimit: bufferLimit)
+    }
 
-        public mutating func decode(context: ChannelHandlerContext, buffer: inout ByteBuffer) throws -> DecodingState {
-            let save = buffer
-            do {
-                let result = try self.parser.parseResponseStream(buffer: &buffer)
-                context.fireChannelRead(self.wrapInboundOut(result))
-                return .continue
-            } catch NIOIMAP.ParsingError.incompleteMessage {
-                return .needMoreData
-            } catch {
-                throw IMAPDecoderError(parserError: error, buffer: save)
-            }
-        }
-
-        public mutating func decodeLast(context: ChannelHandlerContext, buffer: inout ByteBuffer, seenEOF: Bool) throws -> DecodingState {
-            while try self.decode(context: context, buffer: &buffer) != .needMoreData {}
+    public mutating func decode(context: ChannelHandlerContext, buffer: inout ByteBuffer) throws -> DecodingState {
+        let save = buffer
+        do {
+            let result = try self.parser.parseResponseStream(buffer: &buffer)
+            context.fireChannelRead(self.wrapInboundOut(result))
+            return .continue
+        } catch ParsingError.incompleteMessage {
             return .needMoreData
+        } catch {
+            throw IMAPDecoderError(parserError: error, buffer: save)
         }
+    }
+
+    public mutating func decodeLast(context: ChannelHandlerContext, buffer: inout ByteBuffer, seenEOF: Bool) throws -> DecodingState {
+        while try self.decode(context: context, buffer: &buffer) != .needMoreData {}
+        return .needMoreData
     }
 }

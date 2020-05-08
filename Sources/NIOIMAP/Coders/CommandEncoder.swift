@@ -15,21 +15,19 @@
 import NIO
 import NIOIMAPCore
 
-extension NIOIMAP {
-    public struct CommandEncoder: MessageToByteEncoder {
-        public typealias OutboundIn = CommandStream
+public struct CommandEncoder: MessageToByteEncoder {
+    public typealias OutboundIn = CommandStream
 
-        public init() {}
+    public init() {}
 
-        public func encode(data: CommandStream, out: inout ByteBuffer) throws {
-            switch data {
-            case .bytes(let buffer):
-                out = buffer
-            case .idleDone:
-                out.writeString("DONE\r\n")
-            case .command(let command):
-                out.writeCommand(command)
-            }
+    public func encode(data: CommandStream, out: inout ByteBuffer) throws {
+        switch data {
+        case .bytes(let buffer):
+            out = buffer
+        case .idleDone:
+            out.writeString("DONE\r\n")
+        case .command(let command):
+            out.writeCommand(command)
         }
     }
 }

@@ -14,22 +14,20 @@
 
 import struct NIO.ByteBuffer
 
-extension NIOIMAP {
-    /// IMAPv4 `response-tagged`
-    public struct TaggedResponse: Equatable {
-        public var tag: String
-        public var state: ResponseConditionalState
+/// IMAPv4 `response-tagged`
+public struct TaggedResponse: Equatable {
+    public var tag: String
+    public var state: ResponseConditionalState
 
-        public static func tag(_ tag: String, state: ResponseConditionalState) -> Self {
-            Self(tag: tag, state: state)
-        }
+    public static func tag(_ tag: String, state: ResponseConditionalState) -> Self {
+        Self(tag: tag, state: state)
     }
 }
 
 // MARK: - Encoding
 
 extension ByteBuffer {
-    @discardableResult mutating func writeTaggedResponse(_ response: NIOIMAP.TaggedResponse) -> Int {
+    @discardableResult mutating func writeTaggedResponse(_ response: TaggedResponse) -> Int {
         self.writeString("\(response.tag) ") +
             self.writeResponseConditionalState(response.state) +
             self.writeString("\r\n")

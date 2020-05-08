@@ -14,18 +14,16 @@
 
 import struct NIO.ByteBuffer
 
-extension NIOIMAP {
-    /// IMAPv4 `section-text`
-    public enum SectionText: Equatable {
-        case mime
-        case message(SectionMessageText)
-    }
+/// IMAPv4 `section-text`
+public enum SectionText: Equatable {
+    case mime
+    case message(SectionMessageText)
 }
 
 // MARK: - Encoding
 
 extension ByteBuffer {
-    @discardableResult mutating func writeSectionText(_ text: NIOIMAP.SectionText) -> Int {
+    @discardableResult mutating func writeSectionText(_ text: SectionText) -> Int {
         switch text {
         case .mime:
             return self.writeString("MIME")

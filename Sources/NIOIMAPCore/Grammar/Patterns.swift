@@ -14,8 +14,6 @@
 
 import struct NIO.ByteBuffer
 
-extension NIOIMAP {}
-
 // MARK: - Encoding
 
 extension ByteBuffer {

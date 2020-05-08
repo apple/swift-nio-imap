@@ -14,20 +14,18 @@
 
 import struct NIO.ByteBuffer
 
-extension NIOIMAP {
-    /// IMAPv4 `option-val-comp`
-    public enum OptionValueComp: Equatable {
-        case string(ByteBuffer)
-        case array([OptionValueComp])
-    }
+/// IMAPv4 `option-val-comp`
+public enum OptionValueComp: Equatable {
+    case string(ByteBuffer)
+    case array([OptionValueComp])
 }
 
 // MARK: - Conveniences
 
-extension NIOIMAP.OptionValueComp: ExpressibleByArrayLiteral {
+extension OptionValueComp: ExpressibleByArrayLiteral {
     public typealias ArrayLiteralElement = Self
 
-    public init(arrayLiteral elements: NIOIMAP.OptionValueComp...) {
+    public init(arrayLiteral elements: OptionValueComp...) {
         let array = Array(elements)
         self = .array(array)
     }
@@ -36,13 +34,13 @@ extension NIOIMAP.OptionValueComp: ExpressibleByArrayLiteral {
 // MARK: - Encoding
 
 extension ByteBuffer {
-    @discardableResult mutating func writeOptionValue(_ value: NIOIMAP.OptionValueComp) -> Int {
+    @discardableResult mutating func writeOptionValue(_ value: OptionValueComp) -> Int {
         self.writeString("(") +
             self.writeOptionValueComp(value) +
             self.writeString(")")
     }
 
-    @discardableResult mutating func writeOptionValueComp(_ option: NIOIMAP.OptionValueComp) -> Int {
+    @discardableResult mutating func writeOptionValueComp(_ option: OptionValueComp) -> Int {
         switch option {
         case .string(let string):
             return self.writeIMAPString(string)

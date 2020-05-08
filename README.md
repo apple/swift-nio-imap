@@ -7,7 +7,7 @@ A Swift project that provides an IMAP client and server, built upon SwiftNIO.
 
 To use the framework `import NIOIMAP`.
 
-So that code complete doesn't get polluted by the (literally) hundreds of types, we use namespacing quite intensively. Everything you need will be namespaced under `NIOIMAP`, e.g. `NIOIMAP.ClientCommand` and `NIOIMAP.ServerResponse`.
+So that code complete doesn't get polluted by the (literally) hundreds of types, we use namespacing quite intensively. Everything you need will be namespaced under `NIOIMAP`, e.g. `ClientCommand` and `ServerResponse`.
 
 ### Commands
 
@@ -24,7 +24,7 @@ To send a command we recommend using a `MessageToByteHandler` with `CommandEncod
 
 ```
 ClientBootstrap(group: context.eventLoop).channelInitializer { channel in
-  channel.addHandler(MessageToByteHandler(NIOIMAP.CommandEncoder()))
+  channel.addHandler(MessageToByteHandler(CommandEncoder()))
 }
 ```
 

@@ -23,7 +23,7 @@ class ChevronNumberTests: EncodeTestClass {}
 extension ChevronNumberTests {
     // pointless test, but I want the code coverage
     func testInit() {
-        let num = NIOIMAP.Partial(left: 123, right: 456)
+        let num = Partial(left: 123, right: 456)
         XCTAssertEqual(num.left, 123)
         XCTAssertEqual(num.right, 456)
     }
@@ -34,7 +34,7 @@ extension ChevronNumberTests {
 extension ChevronNumberTests {
     func testImapEncode_basic() {
         let expected = "<123.456>"
-        let size = self.testBuffer.writePartial(NIOIMAP.Partial(left: 123, right: 456))
+        let size = self.testBuffer.writePartial(Partial(left: 123, right: 456))
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }

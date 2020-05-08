@@ -22,7 +22,7 @@ class FetchAttributeTests: EncodeTestClass {}
 
 extension FetchAttributeTests {
     func testEncode() {
-        let inputs: [(NIOIMAP.FetchAttribute, String, UInt)] = [
+        let inputs: [(FetchAttribute, String, UInt)] = [
             (.envelope, "ENVELOPE", #line),
             (.flags, "FLAGS", #line),
             (.uid, "UID", #line),

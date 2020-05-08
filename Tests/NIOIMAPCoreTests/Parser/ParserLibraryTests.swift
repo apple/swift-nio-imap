@@ -26,7 +26,7 @@ extension ParserLibraryTests {
         XCTAssertThrowsError(try ParserLibrary.parseOptional(buffer: &buffer, tracker: StackTracker.testTracker) { buffer, tracker in
             try ParserLibrary.parseFixedString("x", buffer: &buffer, tracker: tracker)
         }) { error in
-            XCTAssertEqual(error as? NIOIMAP.ParsingError, NIOIMAP.ParsingError.incompleteMessage)
+            XCTAssertEqual(error as? ParsingError, ParsingError.incompleteMessage)
         }
     }
 
@@ -51,7 +51,7 @@ extension ParserLibraryTests {
             try ParserLibrary.parseFixedString("x", buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseFixedString("y", buffer: &buffer, tracker: tracker)
         }) { error in
-            XCTAssertEqual(error as? NIOIMAP.ParsingError, NIOIMAP.ParsingError.incompleteMessage)
+            XCTAssertEqual(error as? ParsingError, ParsingError.incompleteMessage)
         }
         XCTAssertEqual(1, buffer.readableBytes)
     }
@@ -90,7 +90,7 @@ extension ParserLibraryTests {
                                                                 caseSensitive: true,
                                                                 buffer: &buffer,
                                                                 tracker: .testTracker)) { error in
-            XCTAssertEqual(error as? NIOIMAP.ParsingError, NIOIMAP.ParsingError.incompleteMessage)
+            XCTAssertEqual(error as? ParsingError, ParsingError.incompleteMessage)
         }
     }
 
@@ -110,7 +110,7 @@ extension ParserLibraryTests {
         XCTAssertThrowsError(try ParserLibrary.parseFixedString("fooFooFOO",
                                                                 buffer: &buffer,
                                                                 tracker: .testTracker)) { error in
-            XCTAssertEqual(error as? NIOIMAP.ParsingError, NIOIMAP.ParsingError.incompleteMessage)
+            XCTAssertEqual(error as? ParsingError, ParsingError.incompleteMessage)
         }
     }
 
@@ -147,7 +147,7 @@ extension ParserLibraryTests {
                 try ParserLibrary.parseFixedString("x", buffer: &buffer, tracker: tracker)
                 try ParserLibrary.parseFixedString("x", buffer: &buffer, tracker: tracker)
             }) { error in
-                XCTAssertEqual(error as? NIOIMAP.ParsingError, NIOIMAP.ParsingError.incompleteMessage)
+                XCTAssertEqual(error as? ParsingError, ParsingError.incompleteMessage)
             }
         }
     }
@@ -195,7 +195,7 @@ extension ParserLibraryTests {
                 try ParserLibrary.parseFixedString("x", buffer: &buffer, tracker: tracker)
                 try ParserLibrary.parseFixedString("x", buffer: &buffer, tracker: tracker)
             }) { error in
-                XCTAssertEqual(error as? NIOIMAP.ParsingError, NIOIMAP.ParsingError.incompleteMessage)
+                XCTAssertEqual(error as? ParsingError, ParsingError.incompleteMessage)
             }
         }
     }

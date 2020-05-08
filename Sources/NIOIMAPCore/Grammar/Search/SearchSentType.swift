@@ -14,19 +14,17 @@
 
 import struct NIO.ByteBuffer
 
-extension NIOIMAP {
-    // Dervied from `search-key`
-    public enum SearchSentType: Equatable {
-        case before(Date)
-        case on(Date)
-        case since(Date)
-    }
+// Dervied from `search-key`
+public enum SearchSentType: Equatable {
+    case before(Date)
+    case on(Date)
+    case since(Date)
 }
 
 // MARK: - Encoding
 
 extension ByteBuffer {
-    @discardableResult mutating func writeSearchSentType(_ type: NIOIMAP.SearchSentType) -> Int {
+    @discardableResult mutating func writeSearchSentType(_ type: SearchSentType) -> Int {
         switch type {
         case .before(let date):
             return

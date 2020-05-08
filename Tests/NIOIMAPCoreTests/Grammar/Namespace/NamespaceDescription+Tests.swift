@@ -22,7 +22,7 @@ class NamespaceDescription_Tests: EncodeTestClass {}
 
 extension NamespaceDescription_Tests {
     func testEncode() {
-        let inputs: [(NIOIMAP.NamespaceDescription, String, UInt)] = [
+        let inputs: [(NamespaceDescription, String, UInt)] = [
             (.string("string", char: nil, responseExtensions: []), "(\"string\" NIL)", #line),
             (.string("string", char: "a", responseExtensions: []), "(\"string\" \"a\")", #line),
             (.string("string", char: nil, responseExtensions: [.string("str2", array: ["str3"])]), "(\"string\" NIL \"str2\" (\"str3\"))", #line),

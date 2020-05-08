@@ -22,7 +22,7 @@ class ListSelectOption_Tests: EncodeTestClass {}
 
 extension ListSelectOption_Tests {
     func testEncode() {
-        let inputs: [(NIOIMAP.ListSelectOption, String, UInt)] = [
+        let inputs: [(ListSelectOption, String, UInt)] = [
             (.base(.subscribed), "SUBSCRIBED", #line),
             (.independent(.remote), "REMOTE", #line),
             (.mod(.recursiveMatch), "RECURSIVEMATCH", #line),
@@ -37,7 +37,7 @@ extension ListSelectOption_Tests {
     }
 
     func testEncode_multiple() {
-        let inputs: [(NIOIMAP.ListSelectOptions, String, UInt)] = [
+        let inputs: [(ListSelectOptions, String, UInt)] = [
             (nil, "()", #line),
             (.select([.base(.subscribed)], .subscribed), "(SUBSCRIBED SUBSCRIBED)", #line),
             (.selectIndependent([.remote, .option(.standard("SOME", value: nil))]), "(REMOTE SOME)", #line),

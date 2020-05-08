@@ -22,7 +22,7 @@ class ListSelectIndependentOption_Tests: EncodeTestClass {}
 
 extension ListSelectIndependentOption_Tests {
     func testEncode() {
-        let inputs: [(NIOIMAP.ListSelectIndependentOption, String, UInt)] = [
+        let inputs: [(ListSelectIndependentOption, String, UInt)] = [
             (.remote, "REMOTE", #line),
             (.option(.standard("test", value: nil)), "test", #line),
         ]

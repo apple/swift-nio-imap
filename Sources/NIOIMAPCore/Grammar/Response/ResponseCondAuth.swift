@@ -14,18 +14,16 @@
 
 import struct NIO.ByteBuffer
 
-extension NIOIMAP {
-    /// IMAPv4 `resp-cond-auth`
-    public enum ResponseConditionalAuth: Equatable {
-        case ok(ResponseText)
-        case preauth(ResponseText)
-    }
+/// IMAPv4 `resp-cond-auth`
+public enum ResponseConditionalAuth: Equatable {
+    case ok(ResponseText)
+    case preauth(ResponseText)
 }
 
 // MARK: - Encoding
 
 extension ByteBuffer {
-    @discardableResult mutating func writeResponseConditionalAuth(_ cond: NIOIMAP.ResponseConditionalAuth) -> Int {
+    @discardableResult mutating func writeResponseConditionalAuth(_ cond: ResponseConditionalAuth) -> Int {
         switch cond {
         case .ok(let text):
             return

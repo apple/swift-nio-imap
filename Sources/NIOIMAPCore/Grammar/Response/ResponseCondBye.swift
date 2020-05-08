@@ -17,7 +17,7 @@ import struct NIO.ByteBuffer
 // MARK: - Encoding
 
 extension ByteBuffer {
-    @discardableResult mutating func writeResponseConditionalBye(_ cond: NIOIMAP.ResponseText) -> Int {
+    @discardableResult mutating func writeResponseConditionalBye(_ cond: ResponseText) -> Int {
         self.writeString("BYE ") +
             self.writeResponseText(cond)
     }

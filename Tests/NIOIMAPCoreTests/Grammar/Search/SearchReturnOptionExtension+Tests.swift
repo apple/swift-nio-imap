@@ -22,7 +22,7 @@ class SearchReturnOptionExtension_Tests: EncodeTestClass {}
 
 extension SearchReturnOptionExtension_Tests {
     func testEncode() {
-        let inputs: [(NIOIMAP.SearchReturnOptionExtension, String, UInt)] = [
+        let inputs: [(SearchReturnOptionExtension, String, UInt)] = [
             (.modifier("modifier", params: nil), "modifier", #line),
             (.modifier("modifier", params: .simple(.number(4))), "modifier 4", #line),
         ]

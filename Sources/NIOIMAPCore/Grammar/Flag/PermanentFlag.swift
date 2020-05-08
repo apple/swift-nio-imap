@@ -14,18 +14,16 @@
 
 import struct NIO.ByteBuffer
 
-extension NIOIMAP {
-    /// IMAPv4 `flag-perm`
-    public enum PermanentFlag: Equatable {
-        case flag(Flag)
-        case wildcard
-    }
+/// IMAPv4 `flag-perm`
+public enum PermanentFlag: Equatable {
+    case flag(Flag)
+    case wildcard
 }
 
 // MARK: - Encoding
 
 extension ByteBuffer {
-    @discardableResult mutating func writeFlagPerm(_ flagPerm: NIOIMAP.PermanentFlag) -> Int {
+    @discardableResult mutating func writeFlagPerm(_ flagPerm: PermanentFlag) -> Int {
         switch flagPerm {
         case .flag(let flag):
             return self.writeFlag(flag)
@@ -34,7 +32,7 @@ extension ByteBuffer {
         }
     }
 
-    @discardableResult mutating func writePermanentFlags(_ flags: [NIOIMAP.PermanentFlag]) -> Int {
+    @discardableResult mutating func writePermanentFlags(_ flags: [PermanentFlag]) -> Int {
         self.writeArray(flags) { (element, self) in
             self.writeFlagPerm(element)
         }

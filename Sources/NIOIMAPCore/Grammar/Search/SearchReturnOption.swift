@@ -14,22 +14,20 @@
 
 import struct NIO.ByteBuffer
 
-extension NIOIMAP {
-    /// IMAPv4 `search-return-opt`
-    public enum SearchReturnOption: Equatable {
-        case min
-        case max
-        case all
-        case count
-        case save
-        case optionExtension(SearchReturnOptionExtension)
-    }
+/// IMAPv4 `search-return-opt`
+public enum SearchReturnOption: Equatable {
+    case min
+    case max
+    case all
+    case count
+    case save
+    case optionExtension(SearchReturnOptionExtension)
 }
 
 // MARK: - Encoding
 
 extension ByteBuffer {
-    @discardableResult mutating func writeSearchReturnOption(_ option: NIOIMAP.SearchReturnOption) -> Int {
+    @discardableResult mutating func writeSearchReturnOption(_ option: SearchReturnOption) -> Int {
         switch option {
         case .min:
             return self.writeString("MIN")
@@ -46,7 +44,7 @@ extension ByteBuffer {
         }
     }
 
-    @discardableResult mutating func writeSearchReturnOptions(_ options: [NIOIMAP.SearchReturnOption]) -> Int {
+    @discardableResult mutating func writeSearchReturnOptions(_ options: [SearchReturnOption]) -> Int {
         guard options.count > 0 else {
             return 0
         }

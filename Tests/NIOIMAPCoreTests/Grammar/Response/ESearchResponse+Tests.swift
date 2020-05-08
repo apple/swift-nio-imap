@@ -22,7 +22,7 @@ class ESearchResponse_Tests: EncodeTestClass {}
 
 extension ESearchResponse_Tests {
     func testEncode() {
-        let inputs: [(NIOIMAP.ESearchResponse, String, UInt)] = [
+        let inputs: [(ESearchResponse, String, UInt)] = [
             (.correlator(nil, uid: false, returnData: []), "ESEARCH", #line),
             (.correlator(nil, uid: true, returnData: []), "ESEARCH UID", #line),
             (.correlator(nil, uid: false, returnData: [.count(2)]), "ESEARCH COUNT 2", #line),

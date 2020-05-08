@@ -14,17 +14,15 @@
 
 import struct NIO.ByteBuffer
 
-extension NIOIMAP {
-    public enum EntryTypeResponse: Equatable {
-        case `private`
-        case shared
-    }
+public enum EntryTypeResponse: Equatable {
+    case `private`
+    case shared
 }
 
 // MARK: - Encoding
 
 extension ByteBuffer {
-    @discardableResult mutating func writeEntryTypeResponse(_ response: NIOIMAP.EntryTypeResponse) -> Int {
+    @discardableResult mutating func writeEntryTypeResponse(_ response: EntryTypeResponse) -> Int {
         switch response {
         case .private:
             return self.writeString("priv")

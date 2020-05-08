@@ -23,7 +23,7 @@ public class ResponseRoundtripHandler: ChannelInboundHandler {
     public typealias InboundOut = ByteBuffer
 
     let logger: Logger
-    private var parser = NIOIMAP.ResponseParser()
+    private var parser = ResponseParser()
 
     public init(logger: Logger) {
         self.logger = logger
@@ -33,7 +33,7 @@ public class ResponseRoundtripHandler: ChannelInboundHandler {
         var originalBuffer = self.unwrapInboundIn(data)
         do {
             var originalBufferCopy = originalBuffer
-            var responses = [NIOIMAP.Response]()
+            var responses = [Response]()
             while originalBufferCopy.readableBytes > 0 {
                 responses.append(try self.parser.parseResponseStream(buffer: &originalBufferCopy))
             }

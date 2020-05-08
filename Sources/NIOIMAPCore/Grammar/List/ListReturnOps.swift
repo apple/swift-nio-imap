@@ -17,7 +17,7 @@ import struct NIO.ByteBuffer
 // MARK: - Encoding
 
 extension ByteBuffer {
-    @discardableResult mutating func writeListReturnOptions(_ options: [NIOIMAP.ReturnOption]) -> Int {
+    @discardableResult mutating func writeListReturnOptions(_ options: [ReturnOption]) -> Int {
         self.writeString("RETURN ") +
             self.writeString("(") +
             self.writeIfArrayHasMinimumSize(array: options) { (options, self) -> Int in

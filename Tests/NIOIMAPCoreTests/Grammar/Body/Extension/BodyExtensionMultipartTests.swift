@@ -22,7 +22,7 @@ class BodyExtensionMultipartTests: EncodeTestClass {}
 
 extension BodyExtensionMultipartTests {
     func testEncode() {
-        let inputs: [(NIOIMAP.BodyStructure.ExtensionMultipart, String, UInt)] = [
+        let inputs: [(BodyStructure.ExtensionMultipart, String, UInt)] = [
             (.parameter([.field("f", value: "v")], dspLanguage: nil), "(\"f\" \"v\")", #line),
             (
                 .parameter([.field("f1", value: "v1")], dspLanguage: .fieldDSP(.string("string", parameter: [.field("f2", value: "v2")]), fieldLanguage: nil)),

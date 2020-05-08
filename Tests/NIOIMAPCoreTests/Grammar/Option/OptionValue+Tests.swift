@@ -22,7 +22,7 @@ class OptionValue_Tests: EncodeTestClass {}
 
 extension OptionValue_Tests {
     func testEncode() {
-        let inputs: [(NIOIMAP.OptionValueComp, String, UInt)] = [
+        let inputs: [(OptionValueComp, String, UInt)] = [
             (.string("test"), "(\"test\")", #line),
         ]
 

@@ -22,7 +22,7 @@ class BodySinglepartTests: EncodeTestClass {}
 
 extension BodySinglepartTests {
     func testEncode() {
-        let inputs: [(NIOIMAP.BodyStructure.Singlepart, String, UInt)] = [
+        let inputs: [(BodyStructure.Singlepart, String, UInt)] = [
             (
                 .type(.basic(.media(.type(.application, subtype: "subtype"), fields: .parameter([], id: nil, description: nil, encoding: .base64, octets: 6))), extension: nil),
                 "\"APPLICATION\" \"subtype\" NIL NIL NIL \"BASE64\" 6",
@@ -64,7 +64,7 @@ extension BodySinglepartTests {
     }
 
     func testEncode_basic() {
-        let inputs: [(NIOIMAP.BodyStructure.Singlepart.Basic, String, UInt)] = [
+        let inputs: [(BodyStructure.Singlepart.Basic, String, UInt)] = [
             (.media(.type(.application, subtype: "subtype"), fields: .parameter([], id: nil, description: nil, encoding: .base64, octets: 123)), "\"APPLICATION\" \"subtype\" NIL NIL NIL \"BASE64\" 123", #line),
         ]
 
@@ -77,12 +77,12 @@ extension BodySinglepartTests {
     }
 
     func testEncode_message() {
-        let inputs: [(NIOIMAP.BodyStructure.Singlepart.Message, String, UInt)] = [
+        let inputs: [(BodyStructure.Singlepart.Message, String, UInt)] = [
             (
                 .message(
                     .rfc822,
                     fields: .parameter([], id: nil, description: nil, encoding: .base64, octets: 111),
-                    envelope: NIOIMAP.Envelope(date: "date", subject: nil, from: [], sender: [], reply: [], to: [], cc: [], bcc: [], inReplyTo: nil, messageID: nil),
+                    envelope: Envelope(date: "date", subject: nil, from: [], sender: [], reply: [], to: [], cc: [], bcc: [], inReplyTo: nil, messageID: nil),
                     body: .singlepart(.type(.text(.mediaText("subtype",
                                                              fields: .parameter([], id: nil, description: nil, encoding: .binary, octets: 22),
                                                              lines: 33)),
@@ -103,7 +103,7 @@ extension BodySinglepartTests {
     }
 
     func testEncode_text() {
-        let inputs: [(NIOIMAP.BodyStructure.Singlepart.Text, String, UInt)] = [
+        let inputs: [(BodyStructure.Singlepart.Text, String, UInt)] = [
             (.mediaText("subtype", fields: .parameter([], id: nil, description: nil, encoding: .base64, octets: 123), lines: 456), "\"TEXT\" \"subtype\" NIL NIL NIL \"BASE64\" 123 456", #line),
         ]
 

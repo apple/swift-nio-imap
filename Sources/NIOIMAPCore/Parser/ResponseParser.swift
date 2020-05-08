@@ -14,73 +14,71 @@
 
 import struct NIO.ByteBuffer
 
-extension NIOIMAP {
-    public struct ResponseParser: Parser {
-        enum AttributeState: Equatable {
-            case head
-            case attribute
-            case separator
-        }
+public struct ResponseParser: Parser {
+    enum AttributeState: Equatable {
+        case head
+        case attribute
+        case separator
+    }
 
-        enum Mode: Equatable {
-            case greeting
-            case response
-            case attributeBytes(Int)
-        }
+    enum Mode: Equatable {
+        case greeting
+        case response
+        case attributeBytes(Int)
+    }
 
-        let bufferLimit: Int
-        var mode: Mode = .greeting
+    let bufferLimit: Int
+    var mode: Mode = .greeting
 
-        public init(bufferLimit: Int = 1_000) {
-            self.bufferLimit = bufferLimit
-        }
+    public init(bufferLimit: Int = 1_000) {
+        self.bufferLimit = bufferLimit
+    }
 
-        public mutating func parseResponseStream(buffer: inout ByteBuffer) throws -> NIOIMAP.Response {
-            switch self.mode {
-            case .greeting:
-                return try self.parseGreeting(buffer: &buffer)
-            case .response:
-                return try self.parseResponse(buffer: &buffer)
-            case .attributeBytes(let remaining):
-                return self.parseBytes(buffer: &buffer, remaining: remaining)
-            }
+    public mutating func parseResponseStream(buffer: inout ByteBuffer) throws -> Response {
+        switch self.mode {
+        case .greeting:
+            return try self.parseGreeting(buffer: &buffer)
+        case .response:
+            return try self.parseResponse(buffer: &buffer)
+        case .attributeBytes(let remaining):
+            return self.parseBytes(buffer: &buffer, remaining: remaining)
         }
+    }
 
-        private mutating func moveStateMachine<Return>(expected: Mode, next: Mode, returnValue: Return) -> Return {
-            if case expected = self.mode {
-                self.mode = next
-                return returnValue
-            } else {
-                fatalError("Unexpected state \(self.mode)")
-            }
+    private mutating func moveStateMachine<Return>(expected: Mode, next: Mode, returnValue: Return) -> Return {
+        if case expected = self.mode {
+            self.mode = next
+            return returnValue
+        } else {
+            fatalError("Unexpected state \(self.mode)")
         }
+    }
 
-        private mutating func moveStateMachine(expected: Mode, next: Mode) {
-            self.moveStateMachine(expected: expected, next: next, returnValue: ())
-        }
+    private mutating func moveStateMachine(expected: Mode, next: Mode) {
+        self.moveStateMachine(expected: expected, next: next, returnValue: ())
     }
 }
 
 // MARK: - Parse greeting
 
-extension NIOIMAP.ResponseParser {
-    fileprivate mutating func parseGreeting(buffer: inout ByteBuffer) throws -> NIOIMAP.Response {
-        let greeting = try NIOIMAP.GrammarParser.parseGreeting(buffer: &buffer, tracker: .new)
+extension ResponseParser {
+    fileprivate mutating func parseGreeting(buffer: inout ByteBuffer) throws -> Response {
+        let greeting = try GrammarParser.parseGreeting(buffer: &buffer, tracker: .new)
         return self.moveStateMachine(expected: .greeting, next: .response, returnValue: .greeting(greeting))
     }
 }
 
 // MARK: - Parse responses
 
-extension NIOIMAP.ResponseParser {
-    fileprivate mutating func parseResponse(buffer: inout ByteBuffer) throws -> NIOIMAP.Response {
-        func parseResponse_fetch(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Response {
-            let response = try NIOIMAP.GrammarParser.parseFetchResponse(buffer: &buffer, tracker: tracker)
+extension ResponseParser {
+    fileprivate mutating func parseResponse(buffer: inout ByteBuffer) throws -> Response {
+        func parseResponse_fetch(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Response {
+            let response = try GrammarParser.parseFetchResponse(buffer: &buffer, tracker: tracker)
             return .fetchResponse(response)
         }
 
-        func parseResponse_normal(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Response {
-            let response = try NIOIMAP.GrammarParser.parseResponseData(buffer: &buffer, tracker: tracker)
+        func parseResponse_normal(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Response {
+            let response = try GrammarParser.parseResponseData(buffer: &buffer, tracker: tracker)
             return .untaggedResponse(response)
         }
 
@@ -104,13 +102,13 @@ extension NIOIMAP.ResponseParser {
         }
     }
 
-    private mutating func _parseResponse(buffer: inout ByteBuffer) throws -> NIOIMAP.Response {
-        func parseResponse_continuation(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Response {
-            .continuationRequest(try NIOIMAP.GrammarParser.parseContinueRequest(buffer: &buffer, tracker: tracker))
+    private mutating func _parseResponse(buffer: inout ByteBuffer) throws -> Response {
+        func parseResponse_continuation(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Response {
+            .continuationRequest(try GrammarParser.parseContinueRequest(buffer: &buffer, tracker: tracker))
         }
 
-        func parseResponse_tagged(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.Response {
-            .taggedResponse(try NIOIMAP.GrammarParser.parseTaggedResponse(buffer: &buffer, tracker: tracker))
+        func parseResponse_tagged(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Response {
+            .taggedResponse(try GrammarParser.parseTaggedResponse(buffer: &buffer, tracker: tracker))
         }
 
         return try ParserLibrary.parseOneOf([
@@ -122,13 +120,13 @@ extension NIOIMAP.ResponseParser {
 
 // MARK: - Parse bytes
 
-extension NIOIMAP.ResponseParser {
+extension ResponseParser {
     /// Extracts bytes from a given `ByteBuffer`. If more bytes are present than are required
     /// only those that are required will be extracted. If not enough bytes are provided then the given
     /// `ByteBuffer` will be emptied.
     /// - parameter buffer: The buffer from which bytes should be extracted.
     /// - returns: A new `ByteBuffer` containing extracted bytes.
-    fileprivate mutating func parseBytes(buffer: inout ByteBuffer, remaining: Int) -> NIOIMAP.Response {
+    fileprivate mutating func parseBytes(buffer: inout ByteBuffer, remaining: Int) -> Response {
         if remaining == 0 {
             return self.moveStateMachine(
                 expected: .attributeBytes(remaining),

@@ -22,7 +22,7 @@ class GreetingTests: EncodeTestClass {}
 
 extension GreetingTests {
     func testEncode() {
-        let inputs: [(NIOIMAP.Greeting, String, UInt)] = [
+        let inputs: [(Greeting, String, UInt)] = [
             (.auth(.ok(.code(nil, text: "text"))), "* OK text\r\n", #line),
             (.bye(.code(nil, text: "text")), "* BYE text\r\n", #line),
         ]

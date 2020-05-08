@@ -18,8 +18,8 @@ import NIOTestUtils
 import XCTest
 
 final class SynchronizingLiteralParserTests: XCTestCase {
-    var parser: NIOIMAP.SynchronizingLiteralParser!
-    var parses: [NIOIMAP.SynchronizingLiteralParser.FramingResult] = []
+    var parser: SynchronizingLiteralParser!
+    var parses: [SynchronizingLiteralParser.FramingResult] = []
     var accumulator: ByteBuffer!
     var consumptions: [(numberOfPriorParses: Int, consumption: Int)] = []
 
@@ -158,7 +158,7 @@ final class SynchronizingLiteralParserTests: XCTestCase {
         XCTAssertNil(self.parser)
         XCTAssertEqual(0, self.parses.count)
         XCTAssertEqual(0, self.consumptions.count)
-        self.parser = NIOIMAP.SynchronizingLiteralParser()
+        self.parser = SynchronizingLiteralParser()
         self.accumulator = self.stringBuffer("")
     }
 

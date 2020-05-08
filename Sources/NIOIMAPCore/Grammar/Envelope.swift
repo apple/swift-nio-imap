@@ -14,30 +14,28 @@
 
 import struct NIO.ByteBuffer
 
-extension NIOIMAP {
-    /// IMAPv4 `envelope`
-    public struct Envelope: Equatable {
-        public var date: NString
-        public var subject: NString
-        public var from: [NIOIMAP.Address]
-        public var sender: [NIOIMAP.Address]
-        public var reply: [NIOIMAP.Address]
-        public var to: [NIOIMAP.Address]
-        public var cc: [NIOIMAP.Address]
-        public var bcc: [NIOIMAP.Address]
-        public var inReplyTo: NString
-        public var messageID: NString
+/// IMAPv4 `envelope`
+public struct Envelope: Equatable {
+    public var date: NString
+    public var subject: NString
+    public var from: [Address]
+    public var sender: [Address]
+    public var reply: [Address]
+    public var to: [Address]
+    public var cc: [Address]
+    public var bcc: [Address]
+    public var inReplyTo: NString
+    public var messageID: NString
 
-        public static func date(_ date: NString, subject: NIOIMAP.NString, from: [NIOIMAP.Address], sender: [NIOIMAP.Address], reply: [NIOIMAP.Address], to: [NIOIMAP.Address], cc: [NIOIMAP.Address], bcc: [NIOIMAP.Address], inReplyTo: NIOIMAP.NString, messageID: NIOIMAP.NString) -> Self {
-            Self(date: date, subject: subject, from: from, sender: sender, reply: reply, to: to, cc: cc, bcc: bcc, inReplyTo: inReplyTo, messageID: messageID)
-        }
+    public static func date(_ date: NString, subject: NString, from: [Address], sender: [Address], reply: [Address], to: [Address], cc: [Address], bcc: [Address], inReplyTo: NString, messageID: NString) -> Self {
+        Self(date: date, subject: subject, from: from, sender: sender, reply: reply, to: to, cc: cc, bcc: bcc, inReplyTo: inReplyTo, messageID: messageID)
     }
 }
 
 // MARK: - Encoding
 
 extension ByteBuffer {
-    @discardableResult mutating func writeEnvelopeAddresses(_ addresses: [NIOIMAP.Address]) -> Int {
+    @discardableResult mutating func writeEnvelopeAddresses(_ addresses: [Address]) -> Int {
         guard addresses.count > 0 else {
             return self.writeNil()
         }
@@ -50,7 +48,7 @@ extension ByteBuffer {
             self.writeString(")")
     }
 
-    @discardableResult mutating func writeEnvelope(_ envelope: NIOIMAP.Envelope) -> Int {
+    @discardableResult mutating func writeEnvelope(_ envelope: Envelope) -> Int {
         self.writeString("(") +
             self.writeNString(envelope.date) +
             self.writeSpace() +

@@ -14,47 +14,45 @@
 
 import struct NIO.ByteBuffer
 
-extension NIOIMAP {
-    public enum Response: Equatable {
-        case greeting(Greeting)
-        case untaggedResponse(ResponsePayload)
-        case fetchResponse(FetchResponse)
-        case taggedResponse(TaggedResponse)
-        case fatalResponse(ResponseText)
-        case continuationRequest(ContinueRequest)
-    }
+public enum Response: Equatable {
+    case greeting(Greeting)
+    case untaggedResponse(ResponsePayload)
+    case fetchResponse(FetchResponse)
+    case taggedResponse(TaggedResponse)
+    case fatalResponse(ResponseText)
+    case continuationRequest(ContinueRequest)
+}
 
-    /// The first event will always be `start`
-    /// The last event will always be `finish`
-    /// Every `start` has exactly one corresponding `finish`
-    /// After recieving `start` you may recieve n `simpleAttribute`, `streamingBegin`, and `streamingBytes` events.
-    /// Every `streamingBegin` has exaclty one corresponding `streamingEnd`
-    /// `streamingBegin` has a `type` that specifies the type of data to be streamed
-    public enum FetchResponse: Equatable {
-        case start(Int)
-        case simpleAttribute(MessageAttribute)
-        case streamingBegin(type: StreamingType, byteCount: Int)
-        case streamingBytes(ByteBuffer)
-        case streamingEnd
-        case finish
-    }
+/// The first event will always be `start`
+/// The last event will always be `finish`
+/// Every `start` has exactly one corresponding `finish`
+/// After recieving `start` you may recieve n `simpleAttribute`, `streamingBegin`, and `streamingBytes` events.
+/// Every `streamingBegin` has exaclty one corresponding `streamingEnd`
+/// `streamingBegin` has a `type` that specifies the type of data to be streamed
+public enum FetchResponse: Equatable {
+    case start(Int)
+    case simpleAttribute(MessageAttribute)
+    case streamingBegin(type: StreamingType, byteCount: Int)
+    case streamingBytes(ByteBuffer)
+    case streamingEnd
+    case finish
+}
 
-    public enum StreamingType: Equatable {
-        case binary(section: [Int]) /// BINARY RFC 3516, streams BINARY when using a `literal`
-        case body(partial: Int?) /// IMAP4rev1 RFC 3501, streams BODY[TEXT] when using a `literal`
-        case rfc822 /// IMAP4rev1 RFC 3501, streams RF822.TEXT when using a `literal`
-    }
+public enum StreamingType: Equatable {
+    case binary(section: [Int]) /// BINARY RFC 3516, streams BINARY when using a `literal`
+    case body(partial: Int?) /// IMAP4rev1 RFC 3501, streams BODY[TEXT] when using a `literal`
+    case rfc822 /// IMAP4rev1 RFC 3501, streams RF822.TEXT when using a `literal`
+}
 
-    public enum ResponseType: Equatable {
-        case continueRequest(ContinueRequest)
-        case responseData(ResponsePayload)
-    }
+public enum ResponseType: Equatable {
+    case continueRequest(ContinueRequest)
+    case responseData(ResponsePayload)
 }
 
 // MARK: - Encoding
 
 extension ByteBuffer {
-    @discardableResult public mutating func writeResponse(_ response: NIOIMAP.Response) -> Int {
+    @discardableResult public mutating func writeResponse(_ response: Response) -> Int {
         switch response {
         case .greeting(let greeting):
             return self.writeGreeting(greeting)
@@ -71,7 +69,7 @@ extension ByteBuffer {
         }
     }
 
-    @discardableResult mutating func writeFetchResponse(_ response: NIOIMAP.FetchResponse) -> Int {
+    @discardableResult mutating func writeFetchResponse(_ response: FetchResponse) -> Int {
         switch response {
         case .start:
             return self.writeString("(")
@@ -88,7 +86,7 @@ extension ByteBuffer {
         }
     }
 
-    @discardableResult mutating func writeStreamingType(_ type: NIOIMAP.StreamingType, size: Int) -> Int {
+    @discardableResult mutating func writeStreamingType(_ type: StreamingType, size: Int) -> Int {
         switch type {
         case .binary:
             return self.writeString("BINARY {\(size)}\r\n")
@@ -99,7 +97,7 @@ extension ByteBuffer {
         }
     }
 
-    @discardableResult mutating func writeResponseType(_ type: NIOIMAP.ResponseType) -> Int {
+    @discardableResult mutating func writeResponseType(_ type: ResponseType) -> Int {
         switch type {
         case .continueRequest(let continueRequest):
             return self.writeContinueRequest(continueRequest)

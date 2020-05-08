@@ -22,7 +22,7 @@ class TaggedExtensionValue_Tests: EncodeTestClass {}
 
 extension TaggedExtensionValue_Tests {
     func testEncode() {
-        let inputs: [(NIOIMAP.TaggedExtensionValue, String, UInt)] = [
+        let inputs: [(TaggedExtensionValue, String, UInt)] = [
             (.simple(.number(123)), "123", #line),
             (.comp(["testComp"]), "((\"testComp\"))", #line),
         ]

@@ -28,7 +28,7 @@ final class ParserStressTests: XCTestCase {
 
     override func setUp() {
         XCTAssertNil(self.channel)
-        self.channel = EmbeddedChannel(handler: ByteToMessageHandler(NIOIMAP.CommandDecoder(bufferLimit: 80_000)))
+        self.channel = EmbeddedChannel(handler: ByteToMessageHandler(CommandDecoder(bufferLimit: 80_000)))
     }
 
     override func tearDown() {
@@ -47,11 +47,11 @@ final class ParserStressTests: XCTestCase {
         }
 
         XCTAssertThrowsError(try self.channel.writeInbound(longBuffer)) { _error in
-            guard let error = _error as? NIOIMAP.IMAPDecoderError else {
+            guard let error = _error as? IMAPDecoderError else {
                 XCTFail("\(_error)")
                 return
             }
-            XCTAssertEqual(error.parserError as? NIOIMAP.ParsingError, .lineTooLong)
+            XCTAssertEqual(error.parserError as? ParsingError, .lineTooLong)
         }
     }
 
@@ -65,36 +65,36 @@ final class ParserStressTests: XCTestCase {
         }
 
         XCTAssertThrowsError(try self.channel.writeInbound(longBuffer)) { _error in
-            guard let error = _error as? NIOIMAP.IMAPDecoderError else {
+            guard let error = _error as? IMAPDecoderError else {
                 XCTFail("\(_error)")
                 return
             }
-            XCTAssertEqual(error.parserError as? NIOIMAP.ParsingError, .lineTooLong)
+            XCTAssertEqual(error.parserError as? ParsingError, .lineTooLong)
         }
     }
 
     // - MARK: ByteToMessageDecoderVerifier tests
     func testBasicDecodes() {
-        let inoutPairs: [(String, [NIOIMAP.CommandStream])] = [
+        let inoutPairs: [(String, [CommandStream])] = [
             // LOGIN
             (#"tag LOGIN "foo" "bar""# + CRLF, [.command(.init("tag", .login("foo", "bar")))]),
             ("tag LOGIN \"\" {0}\r\n" + CRLF, [.command(.init("tag", .login("", "")))]),
             (#"tag LOGIN "foo" "bar""# + CRLF, [.command(.init("tag", .login("foo", "bar")))]),
             (#"tag LOGIN foo bar"# + CRLF, [.command(.init("tag", .login("foo", "bar")))]),
             // RENAME
-            (#"tag RENAME "foo" "bar""# + CRLF, [.command(NIOIMAP.TaggedCommand("tag", .rename(from: NIOIMAP.MailboxName("foo"), to: NIOIMAP.MailboxName("bar"), params: [])))]),
-            (#"tag RENAME InBoX "inBOX""# + CRLF, [.command(NIOIMAP.TaggedCommand("tag", .rename(from: .inbox, to: .inbox, params: [])))]),
-            ("tag RENAME {1}\r\n1 {1}\r\n2" + CRLF, [.command(NIOIMAP.TaggedCommand("tag", .rename(from: NIOIMAP.MailboxName("1"), to: NIOIMAP.MailboxName("2"), params: [])))]),
+            (#"tag RENAME "foo" "bar""# + CRLF, [.command(TaggedCommand("tag", .rename(from: MailboxName("foo"), to: MailboxName("bar"), params: [])))]),
+            (#"tag RENAME InBoX "inBOX""# + CRLF, [.command(TaggedCommand("tag", .rename(from: .inbox, to: .inbox, params: [])))]),
+            ("tag RENAME {1}\r\n1 {1}\r\n2" + CRLF, [.command(TaggedCommand("tag", .rename(from: MailboxName("1"), to: MailboxName("2"), params: [])))]),
         ]
         do {
             try ByteToMessageDecoderVerifier.verifyDecoder(
                 stringInputOutputPairs: inoutPairs,
-                decoderFactory: { () -> NIOIMAP.CommandDecoder in
-                    NIOIMAP.CommandDecoder(autoSendContinuations: false)
+                decoderFactory: { () -> CommandDecoder in
+                    CommandDecoder(autoSendContinuations: false)
                 }
             )
         } catch {
-            switch error as? ByteToMessageDecoderVerifier.VerificationError<NIOIMAP.CommandStream> {
+            switch error as? ByteToMessageDecoderVerifier.VerificationError<CommandStream> {
             case .some(let error):
                 for input in error.inputs {
                     print(" input: \(String(decoding: input.readableBytesView, as: Unicode.UTF8.self))")
@@ -130,7 +130,7 @@ final class ParserStressTests: XCTestCase {
         longBuffer.writeString(")\r\n")
 
         XCTAssertThrowsError(try self.channel.writeInbound(longBuffer)) { _error in
-            guard let error = _error as? NIOIMAP.IMAPDecoderError else {
+            guard let error = _error as? IMAPDecoderError else {
                 XCTFail("\(_error)")
                 return
             }
@@ -143,11 +143,11 @@ final class ParserStressTests: XCTestCase {
         longBuffer.writeString(String(repeating: "X", count: 80_001))
 
         XCTAssertThrowsError(try self.channel.writeInbound(longBuffer)) { _error in
-            guard let error = _error as? NIOIMAP.IMAPDecoderError else {
+            guard let error = _error as? IMAPDecoderError else {
                 XCTFail("\(_error)")
                 return
             }
-            XCTAssertEqual(error.parserError as? NIOIMAP.ParsingError, .lineTooLong, "\(error)")
+            XCTAssertEqual(error.parserError as? ParsingError, .lineTooLong, "\(error)")
         }
     }
 }

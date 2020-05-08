@@ -14,7 +14,7 @@
 
 import struct NIO.ByteBuffer
 
-extension NIOIMAP.Date {
+extension Date {
     /// IMAPv4 `zone`
     public struct TimeZone: Equatable {
         fileprivate var backing: Int
@@ -28,7 +28,7 @@ extension NIOIMAP.Date {
 // MARK: IMAP
 
 extension ByteBuffer {
-    @discardableResult mutating func writeTimezone(_ timezone: NIOIMAP.Date.TimeZone) -> Int {
+    @discardableResult mutating func writeTimezone(_ timezone: Date.TimeZone) -> Int {
         let string = String(abs(timezone.backing))
 
         let zeroedString: String

@@ -22,7 +22,7 @@ class MailboxPatterns_Tests: EncodeTestClass {}
 
 extension MailboxPatterns_Tests {
     func testEncode() {
-        let inputs: [(NIOIMAP.MailboxPatterns, String, UInt)] = [
+        let inputs: [(MailboxPatterns, String, UInt)] = [
             (.mailbox("inbox"), "\"inbox\"", #line),
             (.pattern(["pattern"]), "(\"pattern\")", #line),
         ]

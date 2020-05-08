@@ -20,7 +20,7 @@ class AppendData_Tests: EncodeTestClass {}
 
 extension AppendData_Tests {
     func testEncode() {
-        let inputs: [(NIOIMAP.AppendData, String, UInt)] = [
+        let inputs: [(AppendData, String, UInt)] = [
             (.init(byteCount: 123, synchronizing: false), "{123+}\r\n", #line),
             (.init(byteCount: 456, needs8BitCleanTransport: true, synchronizing: false), "~{456+}\r\n", #line),
             (.init(byteCount: 123, synchronizing: true), "{123}\r\n", #line),

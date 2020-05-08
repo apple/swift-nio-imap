@@ -14,13 +14,13 @@
 
 import struct NIO.ByteBuffer
 
-extension NIOIMAP.MailboxName {
+extension MailboxName {
     /// IMAPv4 `mbox-list-extended-item`
     public struct ListExtendedItem: Equatable {
         public var tag: ByteBuffer
-        public var extensionValue: NIOIMAP.TaggedExtensionValue
+        public var extensionValue: TaggedExtensionValue
 
-        public static func tag(_ tag: ByteBuffer, extensionValue: NIOIMAP.TaggedExtensionValue) -> Self {
+        public static func tag(_ tag: ByteBuffer, extensionValue: TaggedExtensionValue) -> Self {
             Self(tag: tag, extensionValue: extensionValue)
         }
     }

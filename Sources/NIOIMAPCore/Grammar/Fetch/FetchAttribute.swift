@@ -14,33 +14,31 @@
 
 import struct NIO.ByteBuffer
 
-extension NIOIMAP {
-    /// IMAPv4 `fetch-att`
-    public enum FetchAttribute: Equatable {
-        case envelope
-        case flags
-        case internaldate
-        case rfc822(RFC822?)
-        case body(structure: Bool)
-        case bodySection(_ section: SectionSpec?, Partial?)
-        case bodyPeekSection(_ section: SectionSpec?, Partial?)
-        case uid
-        case modSequence(ModifierSequenceValue)
-        case binary(peek: Bool, section: [Int], partial: Partial?)
-        case binarySize(section: [Int])
-    }
+/// IMAPv4 `fetch-att`
+public enum FetchAttribute: Equatable {
+    case envelope
+    case flags
+    case internaldate
+    case rfc822(RFC822?)
+    case body(structure: Bool)
+    case bodySection(_ section: SectionSpec?, Partial?)
+    case bodyPeekSection(_ section: SectionSpec?, Partial?)
+    case uid
+    case modSequence(ModifierSequenceValue)
+    case binary(peek: Bool, section: [Int], partial: Partial?)
+    case binarySize(section: [Int])
 }
 
 // MARK: - Encoding
 
 extension ByteBuffer {
-    @discardableResult mutating func writeFetchAttributeList(_ atts: [NIOIMAP.FetchAttribute]) -> Int {
+    @discardableResult mutating func writeFetchAttributeList(_ atts: [FetchAttribute]) -> Int {
         self.writeArray(atts) { (element, self) in
             self.writeFetchAttribute(element)
         }
     }
 
-    @discardableResult mutating func writeFetchAttribute(_ attribute: NIOIMAP.FetchAttribute) -> Int {
+    @discardableResult mutating func writeFetchAttribute(_ attribute: FetchAttribute) -> Int {
         switch attribute {
         case .envelope:
             return self.writeFetchAttribute_envelope()
@@ -83,7 +81,7 @@ extension ByteBuffer {
         self.writeString("UID")
     }
 
-    @discardableResult mutating func writeFetchAttribute_rfc(_ rfc: NIOIMAP.RFC822?) -> Int {
+    @discardableResult mutating func writeFetchAttribute_rfc(_ rfc: RFC822?) -> Int {
         self.writeString("RFC822") +
             self.writeIfExists(rfc) { (rfc) -> Int in
                 self.writeRFC822(rfc)
@@ -95,7 +93,7 @@ extension ByteBuffer {
         return self.writeString(string)
     }
 
-    @discardableResult mutating func writeFetchAttribute_body(section: NIOIMAP.SectionSpec?, partial: NIOIMAP.Partial?) -> Int {
+    @discardableResult mutating func writeFetchAttribute_body(section: SectionSpec?, partial: Partial?) -> Int {
         self.writeString("BODY") +
             self.writeSection(section) +
             self.writeIfExists(partial) { (partial) -> Int in
@@ -103,7 +101,7 @@ extension ByteBuffer {
             }
     }
 
-    @discardableResult mutating func writeFetchAttribute_bodyPeek(section: NIOIMAP.SectionSpec?, partial: NIOIMAP.Partial?) -> Int {
+    @discardableResult mutating func writeFetchAttribute_bodyPeek(section: SectionSpec?, partial: Partial?) -> Int {
         self.writeString("BODY.PEEK") +
             self.writeSection(section) +
             self.writeIfExists(partial) { (partial) -> Int in
@@ -116,7 +114,7 @@ extension ByteBuffer {
             self.writeSectionBinary(section)
     }
 
-    @discardableResult mutating func writeFetchAttribute_binary(peek: Bool, section: [Int], partial: NIOIMAP.Partial?) -> Int {
+    @discardableResult mutating func writeFetchAttribute_binary(peek: Bool, section: [Int], partial: Partial?) -> Int {
         self.writeString("BINARY") +
             self.writeIfTrue(peek) {
                 self.writeString(".PEEK")

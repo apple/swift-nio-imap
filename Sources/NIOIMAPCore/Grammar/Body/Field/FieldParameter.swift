@@ -14,21 +14,19 @@
 
 import struct NIO.ByteBuffer
 
-extension NIOIMAP {
-    public struct FieldParameterPair: Equatable {
-        public var field: String
-        public var value: String
+public struct FieldParameterPair: Equatable {
+    public var field: String
+    public var value: String
 
-        public static func field(_ field: String, value: String) -> Self {
-            Self(field: field, value: value)
-        }
+    public static func field(_ field: String, value: String) -> Self {
+        Self(field: field, value: value)
     }
 }
 
 // MARK: - Encoding
 
 extension ByteBuffer {
-    @discardableResult mutating func writeBodyFieldParameters(_ params: [NIOIMAP.FieldParameterPair]) -> Int {
+    @discardableResult mutating func writeBodyFieldParameters(_ params: [FieldParameterPair]) -> Int {
         guard params.count > 0 else {
             return self.writeNil()
         }
@@ -37,7 +35,7 @@ extension ByteBuffer {
         }
     }
 
-    @discardableResult mutating func writeFieldParameterPair(_ pair: NIOIMAP.FieldParameterPair) -> Int {
+    @discardableResult mutating func writeFieldParameterPair(_ pair: FieldParameterPair) -> Int {
         self.writeIMAPString(pair.field) +
             self.writeSpace() +
             self.writeIMAPString(pair.value)

@@ -14,21 +14,19 @@
 
 import struct NIO.ByteBuffer
 
-extension NIOIMAP {
-    public struct FetchModifier: Equatable {
-        public var name: String
-        public var value: TaggedExtensionValue?
+public struct FetchModifier: Equatable {
+    public var name: String
+    public var value: TaggedExtensionValue?
 
-        public static func name(_ name: String, value: TaggedExtensionValue?) -> Self {
-            Self(name: name, value: value)
-        }
+    public static func name(_ name: String, value: TaggedExtensionValue?) -> Self {
+        Self(name: name, value: value)
     }
 }
 
 // MARK: - Encoding
 
 extension ByteBuffer {
-    @discardableResult mutating func writeFetchModifiers(_ array: [NIOIMAP.FetchModifier]) -> Int {
+    @discardableResult mutating func writeFetchModifiers(_ array: [FetchModifier]) -> Int {
         guard array.count > 0 else {
             return 0
         }
@@ -40,7 +38,7 @@ extension ByteBuffer {
             }
     }
 
-    @discardableResult mutating func writeFetchModifier(_ param: NIOIMAP.FetchModifier) -> Int {
+    @discardableResult mutating func writeFetchModifier(_ param: FetchModifier) -> Int {
         self.writeFetchModifierName(param.name) +
             self.writeIfExists(param.value) { (value) -> Int in
                 self.writeSpace() +

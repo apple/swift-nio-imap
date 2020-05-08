@@ -22,8 +22,8 @@ class FlagKeyword_Tests: EncodeTestClass {}
 
 extension FlagKeyword_Tests {
     func testEquatable() {
-        let flag1 = NIOIMAP.Flag.Keyword("flag")
-        let flag2 = NIOIMAP.Flag.Keyword("FLAG")
+        let flag1 = Flag.Keyword("flag")
+        let flag2 = Flag.Keyword("FLAG")
         XCTAssertEqual(flag1, flag2)
     }
 }
@@ -32,7 +32,7 @@ extension FlagKeyword_Tests {
 
 extension FlagKeyword_Tests {
     func testEncode() {
-        let inputs: [(NIOIMAP.Flag.Keyword, String, UInt)] = [
+        let inputs: [(Flag.Keyword, String, UInt)] = [
             (.forwarded, "$FORWARDED", #line),
             (.mdnSent, "$MDNSENT", #line),
             (.colorBit0, "$MAILFLAGBIT0", #line),

@@ -14,13 +14,13 @@
 
 import struct NIO.ByteBuffer
 
-extension NIOIMAP.BodyStructure {
+extension BodyStructure {
     /// IMAPv4 `body-fld-dsp`
     public struct FieldDSPData: Equatable {
         public var string: ByteBuffer
-        public var parameter: [NIOIMAP.FieldParameterPair]
+        public var parameter: [FieldParameterPair]
 
-        public static func string(_ string: ByteBuffer, parameter: [NIOIMAP.FieldParameterPair]) -> Self {
+        public static func string(_ string: ByteBuffer, parameter: [FieldParameterPair]) -> Self {
             Self(string: string, parameter: parameter)
         }
     }
@@ -29,7 +29,7 @@ extension NIOIMAP.BodyStructure {
 // MARK: - Encoding
 
 extension ByteBuffer {
-    @discardableResult mutating func writeBodyFieldDSP(_ dsp: NIOIMAP.BodyStructure.FieldDSPData?) -> Int {
+    @discardableResult mutating func writeBodyFieldDSP(_ dsp: BodyStructure.FieldDSPData?) -> Int {
         guard let dsp = dsp else {
             return self.writeNil()
         }

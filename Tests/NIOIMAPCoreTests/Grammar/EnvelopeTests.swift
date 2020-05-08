@@ -22,9 +22,9 @@ class EnvelopeTests: EncodeTestClass {}
 
 extension EnvelopeTests {
     func testEncode() {
-        let inputs: [(NIOIMAP.Envelope, String, UInt)] = [
+        let inputs: [(Envelope, String, UInt)] = [
             (
-                NIOIMAP.Envelope(
+                Envelope(
                     date: "01-02-03",
                     subject: nil,
                     from: [],
@@ -40,7 +40,7 @@ extension EnvelopeTests {
                 #line
             ),
             (
-                NIOIMAP.Envelope(
+                Envelope(
                     date: "01-02-03",
                     subject: "subject",
                     from: [.name("name1", adl: "adl1", mailbox: "mailbox1", host: "host1")],

@@ -14,7 +14,7 @@
 
 import struct NIO.ByteBuffer
 
-extension NIOIMAP.Flag {
+extension Flag {
     /// IMAPv4 `flag-keyword`
     public struct Keyword: Hashable {
         public var rawValue: String
@@ -40,7 +40,7 @@ extension NIOIMAP.Flag {
 
 // MARK: - Convenience
 
-extension NIOIMAP.Flag.Keyword {
+extension Flag.Keyword {
     /// `$Forwarded`
     public static let forwarded = Self(unchecked: "$FORWARDED")
 
@@ -78,7 +78,7 @@ extension NIOIMAP.Flag.Keyword {
 // MARK: - Encoding
 
 extension ByteBuffer {
-    @discardableResult mutating func writeFlagKeyword(_ keyword: NIOIMAP.Flag.Keyword) -> Int {
+    @discardableResult mutating func writeFlagKeyword(_ keyword: Flag.Keyword) -> Int {
         self.writeString(keyword.rawValue)
     }
 }

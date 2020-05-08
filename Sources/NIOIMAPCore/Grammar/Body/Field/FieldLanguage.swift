@@ -14,10 +14,10 @@
 
 import struct NIO.ByteBuffer
 
-extension NIOIMAP.BodyStructure {
+extension BodyStructure {
     /// IMAPv4 `body-fld-lang`
     public enum FieldLanguage: Equatable {
-        case single(NIOIMAP.NString)
+        case single(NString)
         case multiple([ByteBuffer])
     }
 }
@@ -25,7 +25,7 @@ extension NIOIMAP.BodyStructure {
 // MARK: - Encoding
 
 extension ByteBuffer {
-    @discardableResult mutating func writeBodyFieldLanguage(_ language: NIOIMAP.BodyStructure.FieldLanguage) -> Int {
+    @discardableResult mutating func writeBodyFieldLanguage(_ language: BodyStructure.FieldLanguage) -> Int {
         switch language {
         case .single(let string):
             return self.writeNString(string)

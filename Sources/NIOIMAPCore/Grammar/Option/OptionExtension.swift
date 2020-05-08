@@ -14,31 +14,29 @@
 
 import struct NIO.ByteBuffer
 
-extension NIOIMAP {
-    public enum OptionExtensionType: Equatable {
-        case standard(String)
-        case vendor(OptionVendorTag)
+public enum OptionExtensionType: Equatable {
+    case standard(String)
+    case vendor(OptionVendorTag)
+}
+
+/// IMAPv4 `option-extension`
+public struct OptionExtension: Equatable {
+    public var type: OptionExtensionType
+    public var value: OptionValueComp?
+
+    public static func standard(_ atom: String, value: OptionValueComp?) -> Self {
+        Self(type: .standard(atom), value: value)
     }
 
-    /// IMAPv4 `option-extension`
-    public struct OptionExtension: Equatable {
-        public var type: OptionExtensionType
-        public var value: OptionValueComp?
-
-        public static func standard(_ atom: String, value: OptionValueComp?) -> Self {
-            Self(type: .standard(atom), value: value)
-        }
-
-        public static func vendor(_ tag: OptionVendorTag, value: OptionValueComp?) -> Self {
-            Self(type: .vendor(tag), value: value)
-        }
+    public static func vendor(_ tag: OptionVendorTag, value: OptionValueComp?) -> Self {
+        Self(type: .vendor(tag), value: value)
     }
 }
 
 // MARK: - Encoding
 
 extension ByteBuffer {
-    @discardableResult mutating func writeOptionExtension(_ option: NIOIMAP.OptionExtension) -> Int {
+    @discardableResult mutating func writeOptionExtension(_ option: OptionExtension) -> Int {
         var size = 0
         switch option.type {
         case .standard(let atom):

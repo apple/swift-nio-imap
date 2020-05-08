@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-extension NIOIMAP.Partial {
+extension Partial {
     /// IMAPv4 `partial-range`
     public struct Range: Equatable {
         public var num1: Int

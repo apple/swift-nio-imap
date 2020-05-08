@@ -14,7 +14,7 @@
 
 import struct NIO.ByteBuffer
 
-extension NIOIMAP.BodyStructure {
+extension BodyStructure {
     /// IMAPv4 `body-fld-enc`
     public struct Encoding: CustomStringConvertible, Equatable {
         public typealias StringLiteralType = String
@@ -36,7 +36,7 @@ extension NIOIMAP.BodyStructure {
 // MARK: - Encoding
 
 extension ByteBuffer {
-    @discardableResult mutating func writeBodyEncoding(_ encoding: NIOIMAP.BodyStructure.Encoding) -> Int {
+    @discardableResult mutating func writeBodyEncoding(_ encoding: BodyStructure.Encoding) -> Int {
         self.writeString("\"\(encoding.description)\"")
     }
 }

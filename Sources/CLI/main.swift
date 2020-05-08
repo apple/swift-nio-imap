@@ -18,7 +18,7 @@ import NIO
 import NIOIMAP
 import NIOSSL
 
-let logger = Logger(label: "swiftnio.nioimap.cli.main")
+let logger = Logger(label: "swiftnio.cli.main")
 logger.info("Welcome to the NIOIMAP CLI demo")
 logger.info("Enter an IMAP server hostname (SSL required): ")
 

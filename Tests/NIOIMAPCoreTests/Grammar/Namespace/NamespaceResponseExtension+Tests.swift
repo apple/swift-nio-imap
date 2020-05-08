@@ -22,7 +22,7 @@ class NamespaceResponseExtension_Tests: EncodeTestClass {}
 
 extension NamespaceResponseExtension_Tests {
     func testEncode() {
-        let inputs: [(NIOIMAP.NamespaceResponseExtension, String, UInt)] = [
+        let inputs: [(NamespaceResponseExtension, String, UInt)] = [
             (.string("string1", array: ["string2"]), " \"string1\" (\"string2\")", #line),
             (.string("str1", array: ["str2", "str3", "str4", "str5"]), " \"str1\" (\"str2\" \"str3\" \"str4\" \"str5\")", #line),
         ]
@@ -36,7 +36,7 @@ extension NamespaceResponseExtension_Tests {
     }
 
     func testEncode_multiple() {
-        let inputs: [([NIOIMAP.NamespaceResponseExtension], String, UInt)] = [
+        let inputs: [([NamespaceResponseExtension], String, UInt)] = [
             ([], "", #line),
             ([.string("str1", array: ["str2"])], " \"str1\" (\"str2\")", #line),
             (

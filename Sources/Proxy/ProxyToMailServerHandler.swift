@@ -17,10 +17,10 @@ import NIOIMAP
 import NIOIMAPCore
 
 class ProxyToMailServerHandler: ChannelInboundHandler {
-    typealias InboundIn = NIOIMAP.Response
+    typealias InboundIn = Response
 
     let mailAppToProxyChannel: Channel
-    var parser = NIOIMAP.ResponseParser()
+    var parser = ResponseParser()
 
     init(mailAppToProxyChannel: Channel) {
         self.mailAppToProxyChannel = mailAppToProxyChannel

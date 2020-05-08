@@ -14,23 +14,23 @@
 
 import struct NIO.ByteBuffer
 
-extension NIOIMAP.MailboxName {
+extension MailboxName {
     /// IMAPv4 `mailbox-data`
     public enum Data: Equatable {
-        case flags([NIOIMAP.Flag])
-        case list(NIOIMAP.MailboxName.List)
-        case lsub(NIOIMAP.MailboxName.List)
-        case search(NIOIMAP.ESearchResponse)
-        case status(NIOIMAP.MailboxName, [NIOIMAP.StatusAttributeValue])
+        case flags([Flag])
+        case list(MailboxName.List)
+        case lsub(MailboxName.List)
+        case search(ESearchResponse)
+        case status(MailboxName, [StatusAttributeValue])
         case exists(Int)
-        case namespace(NIOIMAP.NamespaceResponse)
+        case namespace(NamespaceResponse)
     }
 }
 
 // MARK: - Encoding
 
 extension ByteBuffer {
-    @discardableResult mutating func writeMailboxData(_ data: NIOIMAP.MailboxName.Data) -> Int {
+    @discardableResult mutating func writeMailboxData(_ data: MailboxName.Data) -> Int {
         switch data {
         case .flags(let flags):
             return self.writeMailboxData_flags(flags)
@@ -49,22 +49,22 @@ extension ByteBuffer {
         }
     }
 
-    private mutating func writeMailboxData_flags(_ flags: [NIOIMAP.Flag]) -> Int {
+    private mutating func writeMailboxData_flags(_ flags: [Flag]) -> Int {
         self.writeString("FLAGS ") +
             self.writeFlags(flags)
     }
 
-    private mutating func writeMailboxData_list(_ list: NIOIMAP.MailboxName.List) -> Int {
+    private mutating func writeMailboxData_list(_ list: MailboxName.List) -> Int {
         self.writeString("LIST ") +
             self.writeMailboxList(list)
     }
 
-    private mutating func writeMailboxData_lsub(_ list: NIOIMAP.MailboxName.List) -> Int {
+    private mutating func writeMailboxData_lsub(_ list: MailboxName.List) -> Int {
         self.writeString("LSUB ") +
             self.writeMailboxList(list)
     }
 
-    private mutating func writeMailboxData_status(mailbox: NIOIMAP.MailboxName, list: [NIOIMAP.StatusAttributeValue]) -> Int {
+    private mutating func writeMailboxData_status(mailbox: MailboxName, list: [StatusAttributeValue]) -> Int {
         self.writeString("STATUS ") +
             self.writeMailbox(mailbox) +
             self.writeString(" (") +

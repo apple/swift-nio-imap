@@ -22,7 +22,7 @@ class ListSelectModOption_Tests: EncodeTestClass {}
 
 extension ListSelectModOption_Tests {
     func testEncode() {
-        let inputs: [(NIOIMAP.ListSelectModOption, String, UInt)] = [
+        let inputs: [(ListSelectModOption, String, UInt)] = [
             (.recursiveMatch, "RECURSIVEMATCH", #line),
             (.option(.standard("extension", value: nil)), "extension", #line),
         ]

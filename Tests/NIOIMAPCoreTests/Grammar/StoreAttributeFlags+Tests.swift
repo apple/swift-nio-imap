@@ -22,7 +22,7 @@ class StoreAttributeFlags_Tests: EncodeTestClass {}
 
 extension StoreAttributeFlags_Tests {
     func testEncode() {
-        let inputs: [(NIOIMAP.StoreAttributeFlags, String, UInt)] = [
+        let inputs: [(StoreAttributeFlags, String, UInt)] = [
             (.add(silent: true, list: [.answered]), "+FLAGS.SILENT (\\ANSWERED)", #line),
             (.add(silent: false, list: [.draft]), "+FLAGS (\\DRAFT)", #line),
             (.remove(silent: true, list: [.deleted]), "-FLAGS.SILENT (\\DELETED)", #line),
