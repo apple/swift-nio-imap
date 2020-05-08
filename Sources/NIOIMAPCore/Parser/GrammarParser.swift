@@ -3990,7 +3990,7 @@ extension GrammarParser {
             guard case .search(let options, let program) = try self.parseSearch(buffer: &buffer, tracker: tracker) else {
                 fatalError("This should never happen")
             }
-            return .search(returnOptions: options, program: program)
+            return .uidSearch(returnOptions: options, program: program)
         }
 
         func parseUid_store(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Command {
