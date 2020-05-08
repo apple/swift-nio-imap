@@ -41,15 +41,13 @@ extension BodySinglepartTests {
             (
                 .init(type: .message(.init(message:
                     .rfc822,
-                    fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 6),
-                    envelope: .init(date: "date", subject: nil, from: [], sender: [], reply: [], to: [], cc: [], bcc: [], inReplyTo: nil, messageID: nil),
-                    body: .singlepart(.init(type: .text(.init(mediaText:
+                                           fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 6),
+                                           envelope: .init(date: "date", subject: nil, from: [], sender: [], reply: [], to: [], cc: [], bcc: [], inReplyTo: nil, messageID: nil),
+                                           body: .singlepart(.init(type: .text(.init(mediaText:
                         "subtype",
-                        fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 6),
-                        lines: 5
-                    )), extension: nil)),
-                    fieldLines: 8
-                )), extension: nil),
+                                                                                     fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 6),
+                                                                                     lines: 5)), extension: nil)),
+                                           fieldLines: 8)), extension: nil),
                 "\"MESSAGE\" \"RFC822\" NIL NIL NIL \"BASE64\" 6 (\"date\" NIL NIL NIL NIL NIL NIL NIL NIL NIL) (\"TEXT\" \"subtype\" NIL NIL NIL \"BASE64\" 6 5) 8",
                 #line
             ),
@@ -81,14 +79,13 @@ extension BodySinglepartTests {
             (
                 .init(message:
                     .rfc822,
-                    fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 111),
-                    envelope: NIOIMAP.Envelope(date: "date", subject: nil, from: [], sender: [], reply: [], to: [], cc: [], bcc: [], inReplyTo: nil, messageID: nil),
-                    body: .singlepart(.init(type: .text(.init(mediaText: "subtype",
-                                                             fields: .init(parameter: [], id: nil, description: nil, encoding: .binary, octets: 22),
-                                                             lines: 33)),
-                                            extension: nil)),
-                    fieldLines: 89
-                ),
+                      fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 111),
+                      envelope: NIOIMAP.Envelope(date: "date", subject: nil, from: [], sender: [], reply: [], to: [], cc: [], bcc: [], inReplyTo: nil, messageID: nil),
+                      body: .singlepart(.init(type: .text(.init(mediaText: "subtype",
+                                                                fields: .init(parameter: [], id: nil, description: nil, encoding: .binary, octets: 22),
+                                                                lines: 33)),
+                                              extension: nil)),
+                      fieldLines: 89),
                 "\"MESSAGE\" \"RFC822\" NIL NIL NIL \"BASE64\" 111 (\"date\" NIL NIL NIL NIL NIL NIL NIL NIL NIL) (\"TEXT\" \"subtype\" NIL NIL NIL \"BINARY\" 22 33) 89",
                 #line
             ),

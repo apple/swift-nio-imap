@@ -15,7 +15,6 @@
 import struct NIO.ByteBuffer
 
 public struct AppendData: Equatable {
-
     public var byteCount: Int
 
     /// `true` is the client needs to wait for the server to send a _command continuation request_ before sending

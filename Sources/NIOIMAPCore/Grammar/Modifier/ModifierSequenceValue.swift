@@ -30,14 +30,13 @@ public struct ModifierSequenceValue: Equatable {
 }
 
 // MARK: - ExpressibleByIntegerLiteral
-extension NIOIMAP.ModifierSequenceValue: ExpressibleByIntegerLiteral {
 
+extension NIOIMAP.ModifierSequenceValue: ExpressibleByIntegerLiteral {
     public typealias IntegerLiteralType = Int
 
     public init(integerLiteral value: Int) {
         self.value = value
     }
-
 }
 
 // MARK: - Encoding

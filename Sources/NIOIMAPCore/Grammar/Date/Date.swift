@@ -16,7 +16,6 @@ import struct NIO.ByteBuffer
 
 /// IMAPv4 `date` (`date-text`)
 public struct Date: Equatable {
-
     public enum Month: String {
         case jan
         case feb

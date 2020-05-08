@@ -24,8 +24,7 @@ public struct NamespaceResponse: Equatable {
         self.userNamespace = userNamespace
         self.otherUserNamespace = otherUserNamespace
         self.sharedNamespace = sharedNamespace
-    }
-}
+  
 
 // MARK: - Encoding
 

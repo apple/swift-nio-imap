@@ -20,7 +20,7 @@ extension Date {
         public var hour: Int
         public var minute: Int
         public var second: Int
-        
+
         init(hour: Int, minute: Int, second: Int) {
             self.hour = hour
             self.minute = minute
