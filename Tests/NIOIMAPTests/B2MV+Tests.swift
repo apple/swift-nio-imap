@@ -69,6 +69,11 @@ extension B2MV_Tests {
             ("tag CREATE {7}\r\nnewBox3" + CRLF, [.command(.init("tag", .create(.init("newBox3"), [])))]),
             ("tag CREATE newBox4 (k5 5 k6 6)" + CRLF, [.command(.init("tag", .create(.init("newBox4"), [.name("k5", value: .simple(.sequence([5]))), .name("k6", value: .simple(.sequence([6])))])))]),
 
+            // MARK: Delete
+            ("tag DELETE box1" + CRLF, [.command(.init("tag", .delete(.init("box1"))))]),
+            ("tag DELETE \"box1\"" + CRLF, [.command(.init("tag", .delete(.init("box1"))))]),
+            ("tag DELETE {4}\r\nbox1" + CRLF, [.command(.init("tag", .delete(.init("box1"))))]),
+            
             // MARK: Rename
 
             (#"tag RENAME "foo" "bar""# + CRLF, [.command(NIOIMAP.TaggedCommand("tag", .rename(from: NIOIMAP.MailboxName("foo"), to: NIOIMAP.MailboxName("bar"), params: [])))]),
