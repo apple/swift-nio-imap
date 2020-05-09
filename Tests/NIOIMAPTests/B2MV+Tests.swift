@@ -38,12 +38,22 @@ extension B2MV_Tests {
             // MARK: StartTLS
             ("tag STARTTLS" + CRLF, [.command(.init("tag", .starttls))]),
             
+            // MARK: Authenticate
+            // this tests causes nothing but trouble
+            // ("tag AUTHENTICATE PLAIN" + CRLF, [.command(.init("tag", .authenticate("PLAIN", nil, [])))]),
+            
             // MARK: Login
             (#"tag LOGIN "foo" "bar""# + CRLF, [.command(.init("tag", .login("foo", "bar")))]),
             ("tag LOGIN \"\" {0}\r\n" + CRLF, [.command(.init("tag", .login("", "")))]),
             (#"tag LOGIN "foo" "bar""# + CRLF, [.command(.init("tag", .login("foo", "bar")))]),
             (#"tag LOGIN foo bar"# + CRLF, [.command(.init("tag", .login("foo", "bar")))]),
             
+            // MARK: Select
+            ("tag SELECT box1" + CRLF, [.command(.init("tag", .select(.init("box1"), [])))]),
+            ("tag SELECT \"box2\"" + CRLF, [.command(.init("tag", .select(.init("box2"), [])))]),
+            ("tag SELECT {4}\r\nbox3" + CRLF, [.command(.init("tag", .select(.init("box3"), [])))]),
+            ("tag SELECT box4 (k1 1 k2 2)" + CRLF, [.command(.init("tag", .select(.init("box4"), [.name("k1", value: .simple(.sequence([1]))), .name("k2", value: .simple(.sequence([1])))])))]),
+
             // MARK: Rename
             (#"tag RENAME "foo" "bar""# + CRLF, [.command(NIOIMAP.TaggedCommand("tag", .rename(from: NIOIMAP.MailboxName("foo"), to: NIOIMAP.MailboxName("bar"), params: [])))]),
             (#"tag RENAME InBoX "inBOX""# + CRLF, [.command(NIOIMAP.TaggedCommand("tag", .rename(from: .inbox, to: .inbox, params: [])))]),
