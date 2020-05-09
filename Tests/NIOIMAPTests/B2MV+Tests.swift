@@ -53,14 +53,21 @@ extension B2MV_Tests {
             ("tag SELECT box1" + CRLF, [.command(.init("tag", .select(.init("box1"), [])))]),
             ("tag SELECT \"box2\"" + CRLF, [.command(.init("tag", .select(.init("box2"), [])))]),
             ("tag SELECT {4}\r\nbox3" + CRLF, [.command(.init("tag", .select(.init("box3"), [])))]),
-            ("tag SELECT box4 (k1 1 k2 2)" + CRLF, [.command(.init("tag", .select(.init("box4"), [.name("k1", value: .simple(.sequence([1]))), .name("k2", value: .simple(.sequence([1])))])))]),
+            ("tag SELECT box4 (k1 1 k2 2)" + CRLF, [.command(.init("tag", .select(.init("box4"), [.name("k1", value: .simple(.sequence([1]))), .name("k2", value: .simple(.sequence([2])))])))]),
 
             // MARK: Examine
 
             ("tag EXAMINE box1" + CRLF, [.command(.init("tag", .examine(.init("box1"), [])))]),
             ("tag EXAMINE \"box2\"" + CRLF, [.command(.init("tag", .examine(.init("box2"), [])))]),
             ("tag EXAMINE {4}\r\nbox3" + CRLF, [.command(.init("tag", .examine(.init("box3"), [])))]),
-            ("tag EXAMINE box4 (k3 1 k4 2)" + CRLF, [.command(.init("tag", .examine(.init("box1"), [.name("k3", value: .simple(.sequence([1]))), .name("k4", value: .simple(.sequence([1])))])))]),
+            ("tag EXAMINE box4 (k3 1 k4 2)" + CRLF, [.command(.init("tag", .examine(.init("box4"), [.name("k3", value: .simple(.sequence([1]))), .name("k4", value: .simple(.sequence([2])))])))]),
+
+            // MARK: Create
+
+            ("tag CREATE newBox1" + CRLF, [.command(.init("tag", .create(.init("newBox1"), [])))]),
+            ("tag CREATE \"newBox2\"" + CRLF, [.command(.init("tag", .create(.init("newBox2"), [])))]),
+            ("tag CREATE {7}\r\nnewBox3" + CRLF, [.command(.init("tag", .create(.init("newBox3"), [])))]),
+            ("tag CREATE newBox4 (k5 5 k6 6)" + CRLF, [.command(.init("tag", .create(.init("newBox4"), [.name("k5", value: .simple(.sequence([5]))), .name("k6", value: .simple(.sequence([6])))])))]),
 
             // MARK: Rename
 
