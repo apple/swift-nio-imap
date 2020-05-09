@@ -73,58 +73,6 @@ final class ParserStressTests: XCTestCase {
         }
     }
 
-    // - MARK: ByteToMessageDecoderVerifier tests
-    func testBasicDecodes() {
-        let inoutPairs: [(String, [CommandDecoder.PartialCommandStream])] = [
-            // LOGIN
-            (#"tag LOGIN "foo" "bar""# + CRLF,
-             [CommandDecoder.PartialCommandStream(.command(.init(tag: "tag",
-                                                                 command: .login(username: "foo", password: "bar"))))]),
-            (#"tag LOGIN "foo" "bar""# + CRLF,
-             [CommandDecoder.PartialCommandStream(.command(.init(tag: "tag",
-                                                                 command: .login(username: "foo", password: "bar"))))]),
-            (#"tag LOGIN foo bar"# + CRLF,
-             [CommandDecoder.PartialCommandStream(.command(.init(tag: "tag",
-                                                                 command: .login(username: "foo", password: "bar"))))]),
-            // RENAME
-            (#"tag RENAME "foo" "bar""# + CRLF,
-             [CommandDecoder.PartialCommandStream(.command(TaggedCommand(tag: "tag",
-                                                                         command: .rename(from: MailboxName("foo"), to: MailboxName("bar"), params: []))))]),
-            (#"tag RENAME InBoX "inBOX""# + CRLF,
-             [CommandDecoder.PartialCommandStream(.command(TaggedCommand(tag: "tag",
-                                                                         command: .rename(from: .inbox, to: .inbox, params: []))))]),
-        ]
-        do {
-            try ByteToMessageDecoderVerifier.verifyDecoder(
-                stringInputOutputPairs: inoutPairs,
-                decoderFactory: { () -> CommandDecoder in
-                    CommandDecoder()
-                }
-            )
-        } catch {
-            switch error as? ByteToMessageDecoderVerifier.VerificationError<CommandDecoder.PartialCommandStream> {
-            case .some(let error):
-                for input in error.inputs {
-                    print(" input: \(String(decoding: input.readableBytesView, as: Unicode.UTF8.self))")
-                }
-                switch error.errorCode {
-                case .underProduction(let command):
-                    print("UNDER PRODUCTION")
-                    print(command)
-                case .wrongProduction(actual: let actualCommand, expected: let expectedCommand):
-                    print("WRONG PRODUCTION")
-                    print(actualCommand)
-                    print(expectedCommand)
-                default:
-                    print(error)
-                }
-            case .none:
-                ()
-            }
-            XCTFail("unhandled error: \(error)")
-        }
-    }
-
     // - MARK: Parser unit tests
     func testPreventInfiniteRecursion() {
         var longBuffer = self.channel.allocator.buffer(capacity: 80_000)
