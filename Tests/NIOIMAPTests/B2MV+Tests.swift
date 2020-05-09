@@ -26,6 +26,9 @@ extension B2MV_Tests {
     func testCommand() {
         let inoutPairs: [(String, [NIOIMAP.CommandStream])] = [
             
+            // MARK: Capability
+            ("tag CAPABILITY" + CRLF, [.command(.init("tag", .capability))]),
+            
             // MARK: Noop
             ("tag NOOP" + CRLF, [.command(.init("tag", .noop))]),
             
