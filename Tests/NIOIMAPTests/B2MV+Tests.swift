@@ -32,6 +32,9 @@ extension B2MV_Tests {
             // MARK: Noop
             ("tag NOOP" + CRLF, [.command(.init("tag", .noop))]),
             
+            // MARK: Logout
+            ("tag LOGOUT" + CRLF, [.command(.init("tag", .logout))]),
+            
             // MARK: Login
             (#"tag LOGIN "foo" "bar""# + CRLF, [.command(.init("tag", .login("foo", "bar")))]),
             ("tag LOGIN \"\" {0}\r\n" + CRLF, [.command(.init("tag", .login("", "")))]),
