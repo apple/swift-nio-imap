@@ -103,10 +103,10 @@ extension B2MV_Tests {
             ("tag UNSUBSCRIBE iNbOx" + CRLF, [.command(.init("tag", .unsubscribe(.inbox)))]),
             ("tag UNSUBSCRIBE \"INBOX\"" + CRLF, [.command(.init("tag", .unsubscribe(.inbox)))]),
             ("tag UNSUBSCRIBE {5}\r\nINBOX" + CRLF, [.command(.init("tag", .unsubscribe(.inbox)))]),
-            
+
             // MARK: Check
-            
-            ("tag CHECK" + CRLF, [.command(.init("tag", .check))])
+
+            ("tag CHECK" + CRLF, [.command(.init("tag", .check))]),
         ]
         do {
             try ByteToMessageDecoderVerifier.verifyDecoder(
