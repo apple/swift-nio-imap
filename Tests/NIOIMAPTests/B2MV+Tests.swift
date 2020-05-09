@@ -81,6 +81,14 @@ extension B2MV_Tests {
             (#"tag RENAME InBoX "inBOX""# + CRLF, [.command(NIOIMAP.TaggedCommand("tag", .rename(from: .inbox, to: .inbox, params: [])))]),
             ("tag RENAME {1}\r\n1 {1}\r\n2" + CRLF, [.command(NIOIMAP.TaggedCommand("tag", .rename(from: NIOIMAP.MailboxName("1"), to: NIOIMAP.MailboxName("2"), params: [])))]),
 
+            // MARK: Subscribe
+
+            ("tag SUBSCRIBE inbox" + CRLF, [.command(.init("tag", .subscribe(.inbox)))]),
+            ("tag SUBSCRIBE INBOX" + CRLF, [.command(.init("tag", .subscribe(.inbox)))]),
+            ("tag SUBSCRIBE iNbOx" + CRLF, [.command(.init("tag", .subscribe(.inbox)))]),
+            ("tag SUBSCRIBE \"INBOX\"" + CRLF, [.command(.init("tag", .subscribe(.inbox)))]),
+            ("tag SUBSCRIBE {5}\r\nINBOX" + CRLF, [.command(.init("tag", .subscribe(.inbox)))]),
+
             // MARK: Unsubscribe
 
             ("tag UNSUBSCRIBE inbox" + CRLF, [.command(.init("tag", .unsubscribe(.inbox)))]),
