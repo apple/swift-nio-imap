@@ -80,6 +80,14 @@ extension B2MV_Tests {
             (#"tag RENAME "foo" "bar""# + CRLF, [.command(NIOIMAP.TaggedCommand("tag", .rename(from: NIOIMAP.MailboxName("foo"), to: NIOIMAP.MailboxName("bar"), params: [])))]),
             (#"tag RENAME InBoX "inBOX""# + CRLF, [.command(NIOIMAP.TaggedCommand("tag", .rename(from: .inbox, to: .inbox, params: [])))]),
             ("tag RENAME {1}\r\n1 {1}\r\n2" + CRLF, [.command(NIOIMAP.TaggedCommand("tag", .rename(from: NIOIMAP.MailboxName("1"), to: NIOIMAP.MailboxName("2"), params: [])))]),
+
+            // MARK: Unsubscribe
+
+            ("tag UNSUBSCRIBE inbox" + CRLF, [.command(.init("tag", .unsubscribe(.inbox)))]),
+            ("tag UNSUBSCRIBE INBOX" + CRLF, [.command(.init("tag", .unsubscribe(.inbox)))]),
+            ("tag UNSUBSCRIBE iNbOx" + CRLF, [.command(.init("tag", .unsubscribe(.inbox)))]),
+            ("tag UNSUBSCRIBE \"INBOX\"" + CRLF, [.command(.init("tag", .unsubscribe(.inbox)))]),
+            ("tag UNSUBSCRIBE {5}\r\nINBOX" + CRLF, [.command(.init("tag", .unsubscribe(.inbox)))]),
         ]
         do {
             try ByteToMessageDecoderVerifier.verifyDecoder(
