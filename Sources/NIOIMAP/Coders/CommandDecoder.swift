@@ -47,7 +47,6 @@ public struct CommandDecoder: ByteToMessageDecoder {
                     // HACK: We shouldn't just emit those here, we should probably not be a B2MD anymore.
                     context.writeAndFlush(NIOAny(continuation), promise: nil)
                 }
-                let continuation = Response.continuationRequest(.responseText(.init(code: nil, text: self.ok!)))
                 // HACK: We shouldn't just emit those here, we should probably not be a B2MD anymore.
                 context.writeAndFlush(NIOAny(continuation), promise: nil)
             }
