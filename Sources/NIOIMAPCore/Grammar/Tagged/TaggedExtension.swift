@@ -18,7 +18,7 @@ public struct TaggedExtension: Equatable {
     public var label: String
     public var value: TaggedExtensionValue
 
-    public init(label: String, value: NIOIMAP.TaggedExtensionValue) {
+    public init(label: String, value: TaggedExtensionValue) {
         self.label = label
         self.value = value
     }

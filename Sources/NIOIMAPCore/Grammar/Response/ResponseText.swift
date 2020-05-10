@@ -19,7 +19,7 @@ public struct ResponseText: Equatable {
     public var code: ResponseTextCode?
     public var text: ByteBuffer
 
-    public init(code: NIOIMAP.ResponseTextCode? = nil, text: ByteBuffer) {
+    public init(code: ResponseTextCode? = nil, text: ByteBuffer) {
         self.code = code
         self.text = text
     }

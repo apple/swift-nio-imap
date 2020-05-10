@@ -19,15 +19,14 @@ public enum OptionExtensionType: Equatable {
     case vendor(OptionVendorTag)
 }
 
-    /// IMAPv4 `option-extension`
-    public struct OptionExtension: Equatable {
-        public var type: OptionExtensionType
-        public var value: OptionValueComp?
+/// IMAPv4 `option-extension`
+public struct OptionExtension: Equatable {
+    public var type: OptionExtensionType
+    public var value: OptionValueComp?
 
-        public init(type: NIOIMAP.OptionExtensionType, value: NIOIMAP.OptionValueComp? = nil) {
-            self.type = type
-            self.value = value
-        }
+    public init(type: OptionExtensionType, value: OptionValueComp? = nil) {
+        self.type = type
+        self.value = value
     }
 }
 

@@ -19,7 +19,7 @@ public struct SearchProgram: Equatable {
     public var charset: String?
     public var keys: [SearchKey]
 
-    public init(charset: String? = nil, keys: [NIOIMAP.SearchKey]) {
+    public init(charset: String? = nil, keys: [SearchKey]) {
         self.charset = charset
         self.keys = keys
     }

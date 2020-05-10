@@ -18,7 +18,7 @@ public struct RenameParameter: Equatable {
     public var name: String
     public var value: TaggedExtensionValue?
 
-    public init(name: String, value: NIOIMAP.TaggedExtensionValue? = nil) {
+    public init(name: String, value: TaggedExtensionValue? = nil) {
         self.name = name
         self.value = value
     }

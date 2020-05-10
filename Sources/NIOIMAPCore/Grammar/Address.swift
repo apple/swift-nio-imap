@@ -21,7 +21,7 @@ public struct Address: Equatable {
     public var mailbox: NString
     public var host: NString
 
-    public init(name: NIOIMAP.NString, adl: NIOIMAP.NString, mailbox: NIOIMAP.NString, host: NIOIMAP.NString) {
+    public init(name: NString, adl: NString, mailbox: NString, host: NString) {
         self.name = name
         self.adl = adl
         self.mailbox = mailbox

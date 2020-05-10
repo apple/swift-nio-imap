@@ -22,10 +22,10 @@ class ResponseConditionalStateTests: EncodeTestClass {}
 
 extension ResponseConditionalStateTests {
     func testEncode() {
-        let inputs: [(NIOIMAP.ResponseConditionalState, String, UInt)] = [
-            (NIOIMAP.ResponseConditionalState.bad(.init(code: .parse, text: "something")), "BAD [PARSE] something", #line),
-            (NIOIMAP.ResponseConditionalState.ok(.init(code: .alert, text: "error")), "OK [ALERT] error", #line),
-            (NIOIMAP.ResponseConditionalState.no(.init(code: .readOnly, text: "everything")), "NO [READ-ONLY] everything", #line),
+        let inputs: [(ResponseConditionalState, String, UInt)] = [
+            (ResponseConditionalState.bad(.init(code: .parse, text: "something")), "BAD [PARSE] something", #line),
+            (ResponseConditionalState.ok(.init(code: .alert, text: "error")), "OK [ALERT] error", #line),
+            (ResponseConditionalState.no(.init(code: .readOnly, text: "everything")), "NO [READ-ONLY] everything", #line),
         ]
 
         for (test, expectedString, line) in inputs {

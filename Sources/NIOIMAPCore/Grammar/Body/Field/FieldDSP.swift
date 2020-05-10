@@ -18,9 +18,9 @@ extension BodyStructure {
     /// IMAPv4 `body-fld-dsp`
     public struct FieldDSPData: Equatable {
         public var string: ByteBuffer
-        public var parameter: [NIOIMAP.FieldParameterPair]
+        public var parameter: [FieldParameterPair]
 
-        public init(string: ByteBuffer, parameter: [NIOIMAP.FieldParameterPair]) {
+        public init(string: ByteBuffer, parameter: [FieldParameterPair]) {
             self.string = string
             self.parameter = parameter
         }

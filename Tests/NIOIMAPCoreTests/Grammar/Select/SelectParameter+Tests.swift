@@ -22,7 +22,7 @@ class SelectParameter_Tests: EncodeTestClass {}
 
 extension SelectParameter_Tests {
     func testEncode() {
-        let inputs: [(NIOIMAP.SelectParameter, String, UInt)] = [
+        let inputs: [(SelectParameter, String, UInt)] = [
             (.init(name: "some", value: nil), "some", #line),
             (.init(name: "test", value: .simple(.number(1))), "test 1", #line),
         ]

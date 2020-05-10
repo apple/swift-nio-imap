@@ -19,7 +19,7 @@ public struct SearchReturnDataExtension: Equatable {
     public var modifier: String
     public var returnValue: TaggedExtensionValue
 
-    public init(modifier: String, returnValue: NIOIMAP.TaggedExtensionValue) {
+    public init(modifier: String, returnValue: TaggedExtensionValue) {
         self.modifier = modifier
         self.returnValue = returnValue
     }

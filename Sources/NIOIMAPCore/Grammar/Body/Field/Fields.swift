@@ -23,7 +23,7 @@ extension BodyStructure {
         public var encoding: Encoding
         public var octets: Int
 
-        public init(parameter: [NIOIMAP.FieldParameterPair], id: NIOIMAP.NString, description: NIOIMAP.NString, encoding: NIOIMAP.BodyStructure.Encoding, octets: Int) {
+        public init(parameter: [FieldParameterPair], id: NString, description: NString, encoding: BodyStructure.Encoding, octets: Int) {
             self.parameter = parameter
             self.id = id
             self.description = description

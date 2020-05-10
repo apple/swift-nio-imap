@@ -32,7 +32,7 @@ extension SequenceRangeTests {
 
 extension SequenceRangeTests {
     func testSingle() {
-        let range = NIOIMAP.SequenceRange(999)
+        let range = SequenceRange(999)
         XCTAssertEqual(range.from, 999)
         XCTAssertEqual(range.to, 999)
     }

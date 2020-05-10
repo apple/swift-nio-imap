@@ -87,7 +87,7 @@ final class ParserIntegrationTests: XCTestCase {
         XCTAssertNoThrow(try client?.writeAndFlush("tag NOOP\r\n" as ByteBuffer).wait())
         XCTAssertNoThrow(try client?.close().wait())
 
-        let expected: [NIOIMAP.CommandStream] = [
+        let expected: [CommandStream] = [
             .command(.init(type: .login("1", "2"), tag: "tag")),
             .command(.init(type: .noop, tag: "tag")),
         ]

@@ -20,7 +20,7 @@ extension BodyStructure {
         public var fieldDSP: FieldDSPData?
         public var fieldLanguage: FieldLanguageLocation?
 
-        public init(fieldDSP: NIOIMAP.BodyStructure.FieldDSPData? = nil, fieldLanguage: NIOIMAP.BodyStructure.FieldLanguageLocation? = nil) {
+        public init(fieldDSP: BodyStructure.FieldDSPData? = nil, fieldLanguage: BodyStructure.FieldLanguageLocation? = nil) {
             self.fieldDSP = fieldDSP
             self.fieldLanguage = fieldLanguage
         }

@@ -21,7 +21,7 @@ extension BodyStructure {
         public var mediaSubtype: String
         public var multipartExtension: Extension?
 
-        public init(bodies: [NIOIMAP.BodyStructure], mediaSubtype: String, multipartExtension: NIOIMAP.BodyStructure.ExtensionMultipart? = nil) {
+        public init(bodies: [BodyStructure], mediaSubtype: String, multipartExtension: BodyStructure.ExtensionMultipart? = nil) {
             self.bodies = bodies
             self.mediaSubtype = mediaSubtype
             self.multipartExtension = multipartExtension

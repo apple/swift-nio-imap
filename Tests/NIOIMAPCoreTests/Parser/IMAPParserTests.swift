@@ -54,16 +54,16 @@ extension ParserUnitTests {
             let c2_2 = try parser.parseCommandStream(buffer: &buffer)
             let c3 = try parser.parseCommandStream(buffer: &buffer)
             XCTAssertEqual(buffer.readableBytes, 0)
-            XCTAssertEqual(c1, .command(NIOIMAP.TaggedCommand(type: .noop, tag: "1")))
+            XCTAssertEqual(c1, .command(TaggedCommand(type: .noop, tag: "1")))
             XCTAssertEqual(
                 c2_1,
-                .command(NIOIMAP.TaggedCommand(type: .append(
+                .command(TaggedCommand(type: .append(
                     to: .inbox,
                     firstMessageMetadata: .init(options: .init(flagList: [], dateTime: nil, extensions: []), data: .init(byteCount: 10))
                 ), tag: "2"))
             )
             XCTAssertEqual(c2_2, .bytes("0123456789"))
-            XCTAssertEqual(c3, .command(NIOIMAP.TaggedCommand(type: .noop, tag: "3")))
+            XCTAssertEqual(c3, .command(TaggedCommand(type: .noop, tag: "3")))
         } catch {
             XCTFail("\(error)")
         }
@@ -93,7 +93,7 @@ extension ParserUnitTests {
         var buffer = ByteBuffer(stringLiteral: "")
         buffer.writeString(lines.joined())
 
-        let expectedResults: [(NIOIMAP.Response, UInt)] = [
+        let expectedResults: [(Response, UInt)] = [
             (.greeting(.auth(.ok(.init(code: .capability([.imap4rev1]), text: "Ready.")))), #line),
 
             (.continuationRequest(.responseText(.init(code: nil, text: "OK"))), #line),
@@ -151,11 +151,11 @@ extension ParserUnitTests {
         var parser = CommandParser()
         do {
             let c1 = try parser.parseCommandStream(buffer: &buffer)
-            XCTAssertEqual(c1, .command(NIOIMAP.TaggedCommand(type: .noop, tag: "1")))
+            XCTAssertEqual(c1, .command(TaggedCommand(type: .noop, tag: "1")))
             XCTAssertEqual(parser.mode, .lines)
 
             let c2_1 = try parser.parseCommandStream(buffer: &buffer)
-            XCTAssertEqual(c2_1, .command(NIOIMAP.TaggedCommand(type: .idleStart, tag: "2")))
+            XCTAssertEqual(c2_1, .command(TaggedCommand(type: .idleStart, tag: "2")))
             XCTAssertEqual(parser.mode, .idle)
 
             let c2_2 = try parser.parseCommandStream(buffer: &buffer)
@@ -164,7 +164,7 @@ extension ParserUnitTests {
 
             let c3 = try parser.parseCommandStream(buffer: &buffer)
             XCTAssertEqual(buffer.readableBytes, 0)
-            XCTAssertEqual(c3, .command(NIOIMAP.TaggedCommand(type: .noop, tag: "3")))
+            XCTAssertEqual(c3, .command(TaggedCommand(type: .noop, tag: "3")))
             XCTAssertEqual(parser.mode, .lines)
         } catch {
             XCTFail("\(error)")
@@ -261,7 +261,7 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseAppendDataExtension() {
-        let inputs: [(String, String, NIOIMAP.TaggedExtension, UInt)] = [
+        let inputs: [(String, String, TaggedExtension, UInt)] = [
             ("label 1:9", " ", .init(label: "label", value: .simple(.sequence([1 ... 9]))), #line),
         ]
         self.iterateTestInputs(inputs, testFunction: GrammarParser.parseAppendDataExtension)
@@ -272,7 +272,7 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseAppendExtension() {
-        let inputs: [(String, String, NIOIMAP.AppendExtension, UInt)] = [
+        let inputs: [(String, String, AppendExtension, UInt)] = [
             ("name 1:9", " ", .init(name: "name", value: .simple(.sequence([1 ... 9]))), #line),
         ]
         self.iterateTestInputs(inputs, testFunction: GrammarParser.parseAppendExtension)
@@ -328,13 +328,13 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseAppendOptions() {
-        let inputs: [(String, String, NIOIMAP.AppendOptions, UInt)] = [
+        let inputs: [(String, String, AppendOptions, UInt)] = [
             ("", "\r", .init(flagList: [], dateTime: nil, extensions: []), #line),
             (" (\\Answered)", "\r", .init(flagList: [.answered], dateTime: nil, extensions: []), #line),
             (
                 " \"25-jun-1994 01:02:03 +0000\"",
                 "\r",
-                .init(flagList: [], dateTime: .init(date: .init(day: 25, month: .jun, year: 1994), time: .init(hour: 01, minute: 02, second: 03), zone: NIOIMAP.Date.TimeZone(0)!), extensions: []),
+                .init(flagList: [], dateTime: .init(date: .init(day: 25, month: .jun, year: 1994), time: .init(hour: 01, minute: 02, second: 03), zone: Date.TimeZone(0)!), extensions: []),
                 #line
             ),
             (
@@ -424,7 +424,7 @@ extension ParserUnitTests {
         TestUtilities.withBuffer(#"("astring" ("f1" "v1"))"#) { (buffer) in
             let dsp = try GrammarParser.parseBodyFieldDsp(buffer: &buffer, tracker: .testTracker)
             XCTAssertNotNil(dsp)
-            XCTAssertEqual(dsp, NIOIMAP.BodyStructure.FieldDSPData(string: "astring", parameter: [.init(field: "f1", value: "v1")]))
+            XCTAssertEqual(dsp, BodyStructure.FieldDSPData(string: "astring", parameter: [.init(field: "f1", value: "v1")]))
         }
     }
 
@@ -508,7 +508,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     func testParseBodyFields_valid() {
         TestUtilities.withBuffer(#"("f1" "v1") "id" "desc" "8BIT" 1234"#, terminator: " ") { (buffer) in
-            let result = try NIOIMAP.GrammarParser.parseBodyFields(buffer: &buffer, tracker: .testTracker)
+            let result = try GrammarParser.parseBodyFields(buffer: &buffer, tracker: .testTracker)
             XCTAssertEqual(result.parameter, [.init(field: "f1", value: "v1")])
             XCTAssertEqual(result.id, "id")
             XCTAssertEqual(result.description, "desc")
@@ -602,7 +602,7 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseContinueRequest() {
-        let inputs: [(String, String, NIOIMAP.ContinueRequest, UInt)] = [
+        let inputs: [(String, String, ContinueRequest, UInt)] = [
             ("+ OK\r\n", " ", .responseText(.init(code: nil, text: "OK")), #line),
             ("+ abc=\r\n", " ", .base64("abc="), #line),
         ]
@@ -792,7 +792,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     // NOTE: I'm not a huge fan of how a single number gets parsed as a set, we should revisit
     func testParseCreateParameter() {
-        let inputs: [(String, String, NIOIMAP.CreateParameter, UInt)] = [
+        let inputs: [(String, String, CreateParameter, UInt)] = [
             ("test", "\r", .init(name: "test", value: nil), #line),
             ("some 1", "\r", .init(name: "some", value: .simple(.sequence([1]))), #line),
         ]
@@ -804,7 +804,7 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseCreateParameters() {
-        let inputs: [(String, String, [NIOIMAP.CreateParameter], UInt)] = [
+        let inputs: [(String, String, [CreateParameter], UInt)] = [
             (" (test)", "\r", [.init(name: "test", value: nil)], #line),
             (" (test1 test2 test3)", "\r", [.init(name: "test1", value: nil), .init(name: "test2", value: nil), .init(name: "test3", value: nil)], #line),
         ]
@@ -1106,7 +1106,7 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseEsearchResponse() {
-        let inputs: [(String, String, NIOIMAP.ESearchResponse, UInt)] = [
+        let inputs: [(String, String, ESearchResponse, UInt)] = [
             ("ESEARCH", "\r", .init(correlator: nil, uid: false, returnData: []), #line),
             ("ESEARCH UID", "\r", .init(correlator: nil, uid: true, returnData: []), #line),
             ("ESEARCH (TAG \"col\") UID", "\r", .init(correlator: "col", uid: true, returnData: []), #line),
@@ -1186,7 +1186,7 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseFetchModifier() {
-        let inputs: [(String, String, NIOIMAP.FetchModifier, UInt)] = [
+        let inputs: [(String, String, FetchModifier, UInt)] = [
             ("test", "\r", .init(name: "test", value: nil), #line),
             ("some 1", "\r", .init(name: "some", value: .simple(.sequence([1]))), #line),
         ]
@@ -1198,7 +1198,7 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseFetchModifiers() {
-        let inputs: [(String, String, [NIOIMAP.FetchModifier], UInt)] = [
+        let inputs: [(String, String, [FetchModifier], UInt)] = [
             (" (test)", "\r", [.init(name: "test", value: nil)], #line),
             (" (test1 test2 test3)", "\r", [.init(name: "test1", value: nil), .init(name: "test2", value: nil), .init(name: "test3", value: nil)], #line),
         ]
@@ -1675,7 +1675,7 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseModifierSequenceValue() {
-        let inputs: [(String, String, NIOIMAP.ModifierSequenceValue, UInt)] = [
+        let inputs: [(String, String, ModifierSequenceValue, UInt)] = [
             ("1", " ", 1, #line),
             ("123", " ", 123, #line),
             ("12345", " ", 12345, #line),
@@ -1727,7 +1727,7 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseNamespaceDescription() {
-        let inputs: [(String, String, NIOIMAP.NamespaceDescription, UInt)] = [
+        let inputs: [(String, String, NamespaceDescription, UInt)] = [
             ("(\"str1\" NIL)", " ", .init(string: "str1", char: nil, responseExtensions: []), #line),
             ("(\"str\" \"a\")", " ", .init(string: "str", char: "a", responseExtensions: []), #line),
         ]
@@ -1739,7 +1739,7 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseNamespaceResponse() {
-        let inputs: [(String, String, NIOIMAP.NamespaceResponse, UInt)] = [
+        let inputs: [(String, String, NamespaceResponse, UInt)] = [
             ("NAMESPACE nil nil nil", " ", .init(userNamespace: [], otherUserNamespace: [], sharedNamespace: []), #line),
         ]
         self.iterateTestInputs(inputs, testFunction: GrammarParser.parseNamespaceResponse)
@@ -1750,7 +1750,7 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseNamespaceResponseExtension() {
-        let inputs: [(String, String, NIOIMAP.NamespaceResponseExtension, UInt)] = [
+        let inputs: [(String, String, NamespaceResponseExtension, UInt)] = [
             (" \"str1\" (\"str2\")", " ", .init(string: "str1", array: ["str2"]), #line),
             (" \"str1\" (\"str2\" \"str3\" \"str4\")", " ", .init(string: "str1", array: ["str2", "str3", "str4"]), #line),
         ]
@@ -2057,7 +2057,7 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseSearch() {
-        let inputs: [(String, String, NIOIMAP.Command, UInt)] = [
+        let inputs: [(String, String, Command, UInt)] = [
             ("SEARCH ALL", "\r", .search(returnOptions: [], program: .init(charset: nil, keys: [.all])), #line),
             ("SEARCH ALL DELETED FLAGGED", "\r", .search(returnOptions: [], program: .init(charset: nil, keys: [.all, .deleted, .flagged])), #line),
             ("SEARCH CHARSET UTF-8 ALL", "\r", .search(returnOptions: [], program: .init(charset: "UTF-8", keys: [.all])), #line),
@@ -2176,7 +2176,7 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseSearchProgram() {
-        let inputs: [(String, String, NIOIMAP.SearchProgram, UInt)] = [
+        let inputs: [(String, String, SearchProgram, UInt)] = [
             ("ALL", "\r", .init(charset: nil, keys: [.all]), #line),
             ("ALL ANSWERED DELETED", "\r", .init(charset: nil, keys: [.all, .answered, .deleted]), #line),
             ("CHARSET UTF8 ALL", "\r", .init(charset: "UTF8", keys: [.all]), #line),
@@ -2192,7 +2192,7 @@ extension ParserUnitTests {
     // the spec is ambiguous when parsing `tagged-ext-simple`, in that a "number" is also a "sequence-set"
     // our parser gives priority to "sequence-set"
     func testParseSearchReturnDataExtension() {
-        let inputs: [(String, String, NIOIMAP.SearchReturnDataExtension, UInt)] = [
+        let inputs: [(String, String, SearchReturnDataExtension, UInt)] = [
             ("modifier 64", "\r", .init(modifier: "modifier", returnValue: .simple(.sequence([64]))), #line),
         ]
         self.iterateTestInputs(inputs, testFunction: GrammarParser.parseSearchReturnDataExtension)
@@ -2261,7 +2261,7 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseSearchReturnOptionExtension() {
-        let inputs: [(String, String, NIOIMAP.SearchReturnOptionExtension, UInt)] = [
+        let inputs: [(String, String, SearchReturnOptionExtension, UInt)] = [
             ("modifier", "\r", .init(modifierName: "modifier", params: nil), #line),
             ("modifier 4", "\r", .init(modifierName: "modifier", params: .simple(.sequence([4]))), #line),
         ]
@@ -2375,7 +2375,7 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseSelectParameter() {
-        let inputs: [(String, String, NIOIMAP.SelectParameter, UInt)] = [
+        let inputs: [(String, String, SelectParameter, UInt)] = [
             ("test", "\r", .init(name: "test", value: nil), #line),
             ("some 1", "\r", .init(name: "some", value: .simple(.sequence([1]))), #line),
         ]
@@ -2387,7 +2387,7 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseSelectParameters() {
-        let inputs: [(String, String, [NIOIMAP.SelectParameter], UInt)] = [
+        let inputs: [(String, String, [SelectParameter], UInt)] = [
             (" (test)", "\r", [.init(name: "test", value: nil)], #line),
             (" (test1 test2 test3)", "\r", [.init(name: "test1", value: nil), .init(name: "test2", value: nil), .init(name: "test3", value: nil)], #line),
         ]
@@ -2650,7 +2650,7 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseStoreModifier() {
-        let inputs: [(String, String, NIOIMAP.StoreModifier, UInt)] = [
+        let inputs: [(String, String, StoreModifier, UInt)] = [
             ("name", "\r", .init(name: "name", parameters: nil), #line),
             ("name 1:9", "\r", .init(name: "name", parameters: .simple(.sequence([1 ... 9]))), #line),
         ]
@@ -2662,7 +2662,7 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseStoreModifiers() {
-        let inputs: [(String, String, [NIOIMAP.StoreModifier], UInt)] = [
+        let inputs: [(String, String, [StoreModifier], UInt)] = [
             (" (name1)", "\r", [.init(name: "name1", parameters: nil)], #line),
             (" (name1 name2 name3)", "\r", [.init(name: "name1", parameters: nil), .init(name: "name2", parameters: nil), .init(name: "name3", parameters: nil)], #line),
         ]
@@ -2732,7 +2732,7 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseTaggedExtension() {
-        let inputs: [(String, String, NIOIMAP.TaggedExtension, UInt)] = [
+        let inputs: [(String, String, TaggedExtension, UInt)] = [
             ("label 1", "\r\n", .init(label: "label", value: .simple(.sequence([1]))), #line),
         ]
         self.iterateTestInputs(inputs, testFunction: GrammarParser.parseTaggedExtension)
@@ -2822,10 +2822,10 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseUID() {
-        let inputs: [(String, String, NIOIMAP.Command, UInt)] = [
+        let inputs: [(String, String, Command, UInt)] = [
             ("UID EXPUNGE 1", "\r\n", .uidExpunge([1]), #line),
             ("UID COPY 1 Inbox", "\r\n", .uidCopy([1], .inbox), #line),
-            ("UID FETCH 1 FLAGS", "\r\n", .uidFetch([1], NIOIMAP.FetchType.attributes([.flags]), []), #line),
+            ("UID FETCH 1 FLAGS", "\r\n", .uidFetch([1], FetchType.attributes([.flags]), []), #line),
             ("UID SEARCH CHARSET UTF8 ALL", "\r\n", .uidSearch(returnOptions: [], program: .init(charset: "UTF8", keys: [.all])), #line),
             ("UID STORE 1 +FLAGS (Test)", "\r\n", .uidStore([1], [], .add(silent: false, list: [.keyword(.init("Test"))])), #line),
         ]
@@ -2844,7 +2844,7 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testUIDRange() {
-        let inputs: [(String, String, NIOIMAP.UIDRange, UInt)] = [
+        let inputs: [(String, String, UIDRange, UInt)] = [
             ("12:34", "\r\n", .init(left: 12, right: 34), #line),
         ]
         self.iterateTestInputs(inputs, testFunction: GrammarParser.parseUidRange)

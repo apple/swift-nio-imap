@@ -82,9 +82,9 @@ final class ParserStressTests: XCTestCase {
             (#"tag LOGIN "foo" "bar""# + CRLF, [.command(.init(type: .login("foo", "bar"), tag: "tag"))]),
             (#"tag LOGIN foo bar"# + CRLF, [.command(.init(type: .login("foo", "bar"), tag: "tag"))]),
             // RENAME
-            (#"tag RENAME "foo" "bar""# + CRLF, [.command(NIOIMAP.TaggedCommand(type: .rename(from: NIOIMAP.MailboxName("foo"), to: NIOIMAP.MailboxName("bar"), params: []), tag: "tag"))]),
-            (#"tag RENAME InBoX "inBOX""# + CRLF, [.command(NIOIMAP.TaggedCommand(type: .rename(from: .inbox, to: .inbox, params: []), tag: "tag"))]),
-            ("tag RENAME {1}\r\n1 {1}\r\n2" + CRLF, [.command(NIOIMAP.TaggedCommand(type: .rename(from: NIOIMAP.MailboxName("1"), to: NIOIMAP.MailboxName("2"), params: []), tag: "tag"))]),
+            (#"tag RENAME "foo" "bar""# + CRLF, [.command(TaggedCommand(type: .rename(from: MailboxName("foo"), to: MailboxName("bar"), params: []), tag: "tag"))]),
+            (#"tag RENAME InBoX "inBOX""# + CRLF, [.command(TaggedCommand(type: .rename(from: .inbox, to: .inbox, params: []), tag: "tag"))]),
+            ("tag RENAME {1}\r\n1 {1}\r\n2" + CRLF, [.command(TaggedCommand(type: .rename(from: MailboxName("1"), to: MailboxName("2"), params: []), tag: "tag"))]),
         ]
         do {
             try ByteToMessageDecoderVerifier.verifyDecoder(

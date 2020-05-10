@@ -20,11 +20,12 @@ public struct NamespaceResponse: Equatable {
     public var otherUserNamespace: [NamespaceDescription]
     public var sharedNamespace: [NamespaceDescription]
 
-    public init(userNamespace: [NIOIMAP.NamespaceDescription], otherUserNamespace: [NIOIMAP.NamespaceDescription], sharedNamespace: [NIOIMAP.NamespaceDescription]) {
+    public init(userNamespace: [NamespaceDescription], otherUserNamespace: [NamespaceDescription], sharedNamespace: [NamespaceDescription]) {
         self.userNamespace = userNamespace
         self.otherUserNamespace = otherUserNamespace
         self.sharedNamespace = sharedNamespace
-  
+    }
+}
 
 // MARK: - Encoding
 

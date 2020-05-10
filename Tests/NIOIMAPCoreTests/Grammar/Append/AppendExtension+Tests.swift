@@ -20,7 +20,7 @@ class AppendExtension_Tests: EncodeTestClass {}
 
 extension AppendExtension_Tests {
     func testEncode() {
-        let inputs: [(NIOIMAP.AppendExtension, String, UInt)] = [
+        let inputs: [(AppendExtension, String, UInt)] = [
             (.init(name: "name", value: .simple(.number(1))), "name 1", #line),
         ]
 

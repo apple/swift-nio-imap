@@ -22,7 +22,7 @@ class FetchModifier_Tests: EncodeTestClass {}
 
 extension FetchModifier_Tests {
     func testEncode() {
-        let inputs: [(NIOIMAP.FetchModifier, String, UInt)] = [
+        let inputs: [(FetchModifier, String, UInt)] = [
             (.init(name: "some", value: nil), "some", #line),
             (.init(name: "test", value: .simple(.number(1))), "test 1", #line),
         ]
@@ -36,7 +36,7 @@ extension FetchModifier_Tests {
     }
 
     func testEncode_multiple() {
-        let inputs: [([NIOIMAP.FetchModifier], String, UInt)] = [
+        let inputs: [([FetchModifier], String, UInt)] = [
             ([.init(name: "some", value: nil)], " (some)", #line),
             ([.init(name: "some1", value: nil), .init(name: "some2", value: nil), .init(name: "some3", value: nil)], " (some1 some2 some3)", #line),
         ]

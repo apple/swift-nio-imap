@@ -22,7 +22,7 @@ class FieldLanguageLocationTests: EncodeTestClass {}
 
 extension FieldLanguageLocationTests {
     func testEncode() {
-        let inputs: [(NIOIMAP.BodyStructure.FieldLanguageLocation, String, UInt)] = [
+        let inputs: [(BodyStructure.FieldLanguageLocation, String, UInt)] = [
             (.init(language: .single("language"), location: nil), " \"language\"", #line),
             (.init(language: .single("language"), location: .init(location: "location", extensions: [])), " \"language\" \"location\"", #line),
         ]

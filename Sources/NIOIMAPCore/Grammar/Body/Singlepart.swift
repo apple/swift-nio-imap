@@ -20,7 +20,7 @@ extension BodyStructure {
         public var type: Kind
         public var `extension`: Extension?
 
-        public init(type: NIOIMAP.BodyStructure.Singlepart.Kind, extension: NIOIMAP.BodyStructure.ExtensionSinglepart? = nil) {
+        public init(type: BodyStructure.Singlepart.Kind, extension: BodyStructure.ExtensionSinglepart? = nil) {
             self.type = type
             self.extension = `extension`
         }
@@ -38,10 +38,10 @@ extension BodyStructure.Singlepart {
 
     /// IMAPv4 `body-type-basic`
     public struct Basic: Equatable {
-        public var media: NIOIMAP.Media.Basic
-        public var fields: NIOIMAP.BodyStructure.Fields
+        public var media: Media.Basic
+        public var fields: BodyStructure.Fields
 
-        public init(media: NIOIMAP.Media.Basic, fields: NIOIMAP.BodyStructure.Fields) {
+        public init(media: Media.Basic, fields: BodyStructure.Fields) {
             self.media = media
             self.fields = fields
         }
@@ -55,7 +55,7 @@ extension BodyStructure.Singlepart {
         public var body: BodyStructure
         public var fieldLines: Int
 
-        public init(message: NIOIMAP.Media.Message, fields: NIOIMAP.BodyStructure.Fields, envelope: NIOIMAP.Envelope, body: NIOIMAP.BodyStructure, fieldLines: Int) {
+        public init(message: Media.Message, fields: BodyStructure.Fields, envelope: Envelope, body: BodyStructure, fieldLines: Int) {
             self.message = message
             self.fields = fields
             self.envelope = envelope
@@ -70,7 +70,7 @@ extension BodyStructure.Singlepart {
         public var fields: BodyStructure.Fields
         public var lines: Int
 
-        public init(mediaText: String, fields: NIOIMAP.BodyStructure.Fields, lines: Int) {
+        public init(mediaText: String, fields: BodyStructure.Fields, lines: Int) {
             self.mediaText = mediaText
             self.fields = fields
             self.lines = lines

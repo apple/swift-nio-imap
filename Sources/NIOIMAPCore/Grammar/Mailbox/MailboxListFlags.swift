@@ -20,7 +20,7 @@ extension MailboxName.List {
         public var oFlags: [OFlag]
         public var sFlag: SFlag?
 
-        public init(oFlags: [NIOIMAP.MailboxName.List.OFlag], sFlag: NIOIMAP.MailboxName.List.SFlag? = nil) {
+        public init(oFlags: [MailboxName.List.OFlag], sFlag: MailboxName.List.SFlag? = nil) {
             self.oFlags = oFlags
             self.sFlag = sFlag
         }

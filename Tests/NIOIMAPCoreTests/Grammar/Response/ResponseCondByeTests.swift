@@ -22,7 +22,7 @@ class ResponseConditionalByeTests: EncodeTestClass {}
 
 extension ResponseConditionalByeTests {
     func testEncode() {
-        let inputs: [(NIOIMAP.ResponseText, String, UInt)] = [
+        let inputs: [(ResponseText, String, UInt)] = [
             (.init(code: .alert, text: "ERROR"), "BYE [ALERT] ERROR", #line),
         ]
 

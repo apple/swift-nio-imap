@@ -33,24 +33,23 @@ public struct CommandDecoder: ByteToMessageDecoder {
         self.autoSendContinuations = autoSendContinuations
     }
 
-        public mutating func decode(context: ChannelHandlerContext, buffer: inout ByteBuffer) throws -> DecodingState {
-            let save = buffer
-            do {
-                let framingResult = try self.synchronisingLiteralParser.parseContinuationsNecessary(buffer)
-                if self.autoSendContinuations {
-                    for _ in 0 ..< framingResult.synchronizingLiteralCount {
-                        if self.ok == nil {
-                            self.ok = context.channel.allocator.buffer(capacity: 2)
-                            self.ok!.writeString("OK")
-                        }
-                        let continuation = Response.continuationRequest(.responseText(.init(code: nil, text: self.ok!)))
-                        // HACK: We shouldn't just emit those here, we should probably not be a B2MD anymore.
-                        context.writeAndFlush(NIOAny(continuation), promise: nil)
+    public mutating func decode(context: ChannelHandlerContext, buffer: inout ByteBuffer) throws -> DecodingState {
+        let save = buffer
+        do {
+            let framingResult = try self.synchronisingLiteralParser.parseContinuationsNecessary(buffer)
+            if self.autoSendContinuations {
+                for _ in 0 ..< framingResult.synchronizingLiteralCount {
+                    if self.ok == nil {
+                        self.ok = context.channel.allocator.buffer(capacity: 2)
+                        self.ok!.writeString("OK")
                     }
-                    let continuation = Response.continuationRequest(.responseText(.code(nil, text: self.ok!)))
+                    let continuation = Response.continuationRequest(.responseText(.init(code: nil, text: self.ok!)))
                     // HACK: We shouldn't just emit those here, we should probably not be a B2MD anymore.
                     context.writeAndFlush(NIOAny(continuation), promise: nil)
                 }
+                let continuation = Response.continuationRequest(.responseText(.init(code: nil, text: self.ok!)))
+                // HACK: We shouldn't just emit those here, we should probably not be a B2MD anymore.
+                context.writeAndFlush(NIOAny(continuation), promise: nil)
             }
 
             if let result = try self.parser.parseCommandStream(buffer: &buffer) {

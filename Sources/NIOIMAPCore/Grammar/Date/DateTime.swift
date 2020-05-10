@@ -21,7 +21,7 @@ extension Date {
         public var time: Time
         public var zone: TimeZone
 
-        public init(date: NIOIMAP.Date, time: NIOIMAP.Date.Time, zone: NIOIMAP.Date.TimeZone) {
+        public init(date: Date, time: Date.Time, zone: Date.TimeZone) {
             self.date = date
             self.time = time
             self.zone = zone

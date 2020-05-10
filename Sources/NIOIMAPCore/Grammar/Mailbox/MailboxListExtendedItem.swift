@@ -18,9 +18,9 @@ extension MailboxName {
     /// IMAPv4 `mbox-list-extended-item`
     public struct ListExtendedItem: Equatable {
         public var tag: ByteBuffer
-        public var extensionValue: NIOIMAP.TaggedExtensionValue
+        public var extensionValue: TaggedExtensionValue
 
-        public init(tag: ByteBuffer, extensionValue: NIOIMAP.TaggedExtensionValue) {
+        public init(tag: ByteBuffer, extensionValue: TaggedExtensionValue) {
             self.tag = tag
             self.extensionValue = extensionValue
         }

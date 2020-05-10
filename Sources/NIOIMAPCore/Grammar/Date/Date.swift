@@ -35,7 +35,7 @@ public struct Date: Equatable {
     public var month: Month
     public var year: Int
 
-    public init(day: Int, month: NIOIMAP.Date.Month, year: Int) {
+    public init(day: Int, month: Date.Month, year: Int) {
         self.day = day
         self.month = month
         self.year = year

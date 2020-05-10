@@ -19,7 +19,7 @@ public struct TaggedResponse: Equatable {
     public var tag: String
     public var state: ResponseConditionalState
 
-    public init(tag: String, state: NIOIMAP.ResponseConditionalState) {
+    public init(tag: String, state: ResponseConditionalState) {
         self.tag = tag
         self.state = state
     }

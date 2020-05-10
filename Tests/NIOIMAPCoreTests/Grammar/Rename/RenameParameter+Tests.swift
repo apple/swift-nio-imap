@@ -22,7 +22,7 @@ class RenameParameter_Tests: EncodeTestClass {}
 
 extension RenameParameter_Tests {
     func testEncode() {
-        let inputs: [(NIOIMAP.RenameParameter, String, UInt)] = [
+        let inputs: [(RenameParameter, String, UInt)] = [
             (.init(name: "some", value: nil), "some", #line),
             (.init(name: "test", value: .simple(.number(1))), "test 1", #line),
         ]

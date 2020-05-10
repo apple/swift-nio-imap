@@ -18,7 +18,7 @@ public struct AppendMessage: Equatable {
     public var options: AppendOptions
     public var data: AppendData
 
-    public init(options: NIOIMAP.AppendOptions, data: NIOIMAP.AppendData) {
+    public init(options: AppendOptions, data: AppendData) {
         self.options = options
         self.data = data
     }

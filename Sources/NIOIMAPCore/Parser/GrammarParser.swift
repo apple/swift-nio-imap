@@ -612,7 +612,7 @@ extension GrammarParser {
 
     // command         = tag SP (command-any / command-auth / command-nonauth /
     //                   command-select) CRLF
-    static func parseCommand(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAP.TaggedCommand {
+    static func parseCommand(buffer: inout ByteBuffer, tracker: StackTracker) throws -> TaggedCommand {
         try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             let tag = try self.parseTag(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
@@ -622,7 +622,7 @@ extension GrammarParser {
                 self.parseCommandNonauth,
                 self.parseCommandSelect,
             ], buffer: &buffer, tracker: tracker)
-            return NIOIMAP.TaggedCommand(type: type, tag: tag)
+            return TaggedCommand(type: type, tag: tag)
         }
     }
 
@@ -2370,7 +2370,7 @@ extension GrammarParser {
                 return try self.parseString(buffer: &buffer, tracker: tracker)
             }
             try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)
-            return NIOIMAP.NamespaceResponseExtension(string: s1, array: array)
+            return NamespaceResponseExtension(string: s1, array: array)
         }
     }
 

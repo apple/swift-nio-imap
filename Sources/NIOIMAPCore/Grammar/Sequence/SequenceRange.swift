@@ -20,7 +20,7 @@ public struct SequenceRange: Equatable {
         Self(.last ... .last)
     }
 
-        public var closedRange: ClosedRange<SequenceNumber>
+    public var closedRange: ClosedRange<SequenceNumber>
 
     public var from: SequenceNumber {
         closedRange.lowerBound

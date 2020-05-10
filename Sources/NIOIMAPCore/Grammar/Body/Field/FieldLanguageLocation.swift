@@ -20,7 +20,7 @@ extension BodyStructure {
         public var language: FieldLanguage
         public var location: FieldLocationExtension?
 
-        public init(language: NIOIMAP.BodyStructure.FieldLanguage, location: NIOIMAP.BodyStructure.FieldLocationExtension? = nil) {
+        public init(language: BodyStructure.FieldLanguage, location: BodyStructure.FieldLocationExtension? = nil) {
             self.language = language
             self.location = location
         }

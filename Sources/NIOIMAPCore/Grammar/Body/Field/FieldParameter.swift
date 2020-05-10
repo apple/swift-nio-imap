@@ -14,15 +14,13 @@
 
 import struct NIO.ByteBuffer
 
-extension NIOIMAP {
-    public struct FieldParameterPair: Equatable {
-        public var field: String
-        public var value: String
+public struct FieldParameterPair: Equatable {
+    public var field: String
+    public var value: String
 
-        public init(field: String, value: String) {
-            self.field = field
-            self.value = value
-        }
+    public init(field: String, value: String) {
+        self.field = field
+        self.value = value
     }
 }
 

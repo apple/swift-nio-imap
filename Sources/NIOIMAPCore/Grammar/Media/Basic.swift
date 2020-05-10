@@ -30,7 +30,7 @@ extension Media {
         public var type: BasicType
         public var subtype: String
 
-        public init(type: NIOIMAP.Media.BasicType, subtype: String) {
+        public init(type: Media.BasicType, subtype: String) {
             self.type = type
             self.subtype = subtype
         }

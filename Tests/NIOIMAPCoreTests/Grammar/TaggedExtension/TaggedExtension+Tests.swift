@@ -22,7 +22,7 @@ class TaggedExtension_Tests: EncodeTestClass {}
 
 extension TaggedExtension_Tests {
     func testEncode() {
-        let inputs: [(NIOIMAP.TaggedExtension, String, UInt)] = [
+        let inputs: [(TaggedExtension, String, UInt)] = [
             (.init(label: "label", value: .simple(.number(1))), "label 1", #line),
         ]
 

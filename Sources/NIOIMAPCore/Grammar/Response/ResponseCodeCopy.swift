@@ -18,7 +18,7 @@ public struct ResponseCodeCopy: Equatable {
     public var set1: [UIDSetType]
     public var set2: [UIDSetType]
 
-    public init(num: Int, set1: [NIOIMAP.UIDSetType], set2: [NIOIMAP.UIDSetType]) {
+    public init(num: Int, set1: [UIDSetType], set2: [UIDSetType]) {
         self.num = num
         self.set1 = set1
         self.set2 = set2

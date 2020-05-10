@@ -19,7 +19,7 @@ public struct AppendOptions: Equatable {
     public var dateTime: Date.DateTime?
     public var extensions: [AppendExtension]
 
-    public init(flagList: [NIOIMAP.Flag], dateTime: NIOIMAP.Date.DateTime? = nil, extensions: [NIOIMAP.AppendExtension]) {
+    public init(flagList: [Flag], dateTime: Date.DateTime? = nil, extensions: [AppendExtension]) {
         self.flagList = flagList
         self.dateTime = dateTime
         self.extensions = extensions

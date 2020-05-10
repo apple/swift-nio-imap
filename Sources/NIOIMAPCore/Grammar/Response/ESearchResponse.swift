@@ -20,7 +20,7 @@ public struct ESearchResponse: Equatable {
     public var uid: Bool
     public var returnData: [SearchReturnData]
 
-    public init(correlator: ByteBuffer? = nil, uid: Bool, returnData: [NIOIMAP.SearchReturnData]) {
+    public init(correlator: ByteBuffer? = nil, uid: Bool, returnData: [SearchReturnData]) {
         self.correlator = correlator
         self.uid = uid
         self.returnData = returnData

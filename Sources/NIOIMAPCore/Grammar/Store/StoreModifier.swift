@@ -16,9 +16,9 @@ import struct NIO.ByteBuffer
 
 public struct StoreModifier: Equatable {
     public var name: String
-    public var parameters: NIOIMAP.TaggedExtensionValue?
+    public var parameters: TaggedExtensionValue?
 
-    public init(name: String, parameters: NIOIMAP.TaggedExtensionValue? = nil) {
+    public init(name: String, parameters: TaggedExtensionValue? = nil) {
         self.name = name
         self.parameters = parameters
     }

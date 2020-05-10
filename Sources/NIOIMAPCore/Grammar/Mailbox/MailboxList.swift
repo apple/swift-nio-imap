@@ -22,7 +22,7 @@ extension MailboxName {
         public var mailbox: MailboxName
         public var listExtended: [ListExtendedItem]
 
-        public init(flags: NIOIMAP.MailboxName.List.Flags? = nil, char: Character? = nil, mailbox: NIOIMAP.MailboxName, listExtended: [NIOIMAP.MailboxName.ListExtendedItem]) {
+        public init(flags: MailboxName.List.Flags? = nil, char: Character? = nil, mailbox: MailboxName, listExtended: [MailboxName.ListExtendedItem]) {
             self.flags = flags
             self.char = char
             self.mailbox = mailbox
