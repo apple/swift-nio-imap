@@ -56,7 +56,7 @@ extension BodyMultipartTests {
     }
 
     func testEncode_extension() {
-        let inputs: [(NIOIMAP.BodyStructure.Multipart.Extension, String, UInt)] = [
+        let inputs: [(BodyStructure.Multipart.Extension, String, UInt)] = [
             (.parameter([.field("f", value: "v")], dspLanguage: nil), "(\"f\" \"v\")", #line),
             (
                 .parameter([.field("f1", value: "v1")], dspLanguage: .fieldDSP(.string("string", parameter: [.field("f2", value: "v2")]), fieldLanguage: nil)),

@@ -73,11 +73,11 @@ extension BodyStructure.Singlepart {
 
     /// IMAPv4 `body-ext-1part`
     public struct Extension: Equatable {
-        public let fieldMD5: NIOIMAP.NString
-        public var dspLanguage: NIOIMAP.BodyStructure.FieldDSPLanguage?
+        public let fieldMD5: NString
+        public var dspLanguage: BodyStructure.FieldDSPLanguage?
 
         /// Convenience function for a better experience when chaining multiple types.
-        public static func fieldMD5(_ fieldMD5: NIOIMAP.NString, dspLanguage: NIOIMAP.BodyStructure.FieldDSPLanguage?) -> Self {
+        public static func fieldMD5(_ fieldMD5: NString, dspLanguage: BodyStructure.FieldDSPLanguage?) -> Self {
             Self(fieldMD5: fieldMD5, dspLanguage: dspLanguage)
         }
     }
@@ -128,7 +128,7 @@ extension ByteBuffer {
             self.writeBodyFields(body.fields)
     }
 
-    @discardableResult mutating func writeBodyExtensionSinglePart(_ ext: NIOIMAP.BodyStructure.Singlepart.Extension) -> Int {
+    @discardableResult mutating func writeBodyExtensionSinglePart(_ ext: BodyStructure.Singlepart.Extension) -> Int {
         self.writeNString(ext.fieldMD5) +
             self.writeIfExists(ext.dspLanguage) { (dspLanguage) -> Int in
                 self.writeBodyFieldDSPLanguage(dspLanguage)
