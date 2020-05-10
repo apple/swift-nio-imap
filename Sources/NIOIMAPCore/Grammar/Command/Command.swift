@@ -22,7 +22,7 @@ public enum Command: Equatable {
     case create(MailboxName, [CreateParameter])
     case delete(MailboxName)
     case examine(MailboxName, [SelectParameter])
-    case list(ListSelectOptions?, MailboxName, MailboxPatterns, [NIOIMAP.ReturnOption])
+    case list(ListSelectOptions?, MailboxName, MailboxPatterns, [ReturnOption])
     case lsub(MailboxName, ByteBuffer)
     case rename(from: MailboxName, to: MailboxName, params: [RenameParameter])
     case select(MailboxName, [SelectParameter])
@@ -39,20 +39,20 @@ public enum Command: Equatable {
     case unselect
     case idleStart
     case idleFinish
-    case copy([NIOIMAP.SequenceRange], MailboxName)
-    case fetch([NIOIMAP.SequenceRange], FetchType, [FetchModifier])
-    case store([NIOIMAP.SequenceRange], [StoreModifier], StoreAttributeFlags)
+    case copy([SequenceRange], MailboxName)
+    case fetch([SequenceRange], FetchType, [FetchModifier])
+    case store([SequenceRange], [StoreModifier], StoreAttributeFlags)
     case search(returnOptions: [SearchReturnOption], program: SearchProgram)
-    case move([NIOIMAP.SequenceRange], MailboxName)
+    case move([SequenceRange], MailboxName)
     case id([IDParameter])
     case namespace
 
-    case uidCopy([NIOIMAP.SequenceRange], MailboxName)
-    case uidMove([NIOIMAP.SequenceRange], MailboxName)
-    case uidFetch([NIOIMAP.SequenceRange], FetchType, [FetchModifier])
+    case uidCopy([SequenceRange], MailboxName)
+    case uidMove([SequenceRange], MailboxName)
+    case uidFetch([SequenceRange], FetchType, [FetchModifier])
     case uidSearch(returnOptions: [SearchReturnOption], program: SearchProgram)
-    case uidStore([NIOIMAP.SequenceRange], [StoreModifier], StoreAttributeFlags)
-    case uidExpunge([NIOIMAP.SequenceRange])
+    case uidStore([SequenceRange], [StoreModifier], StoreAttributeFlags)
+    case uidExpunge([SequenceRange])
 }
 
 // MARK: - IMAP

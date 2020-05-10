@@ -22,7 +22,7 @@ class MailboxValue_Tests: EncodeTestClass {}
 
 extension MailboxValue_Tests {
     func testEncode_statusOption() {
-        let inputs: [([NIOIMAP.MailboxAttribute], String, UInt)] = [
+        let inputs: [([MailboxAttribute], String, UInt)] = [
             ([.messages], "STATUS (MESSAGES)", #line),
             ([.messages, .size, .recent], "STATUS (MESSAGES SIZE RECENT)", #line),
         ]
@@ -36,7 +36,7 @@ extension MailboxValue_Tests {
     }
 
     func testEncode_statusAttributeValue() {
-        let inputs: [(NIOIMAP.MailboxValue, String, UInt)] = [
+        let inputs: [(MailboxValue, String, UInt)] = [
             (.messages(12), "MESSAGES 12", #line),
             (.uidNext(23), "UIDNEXT 23", #line),
             (.uidValidity(34), "UIDVALIDITY 34", #line),
@@ -55,7 +55,7 @@ extension MailboxValue_Tests {
     }
 
     func testEncode_statusAttributeList() {
-        let inputs: [([NIOIMAP.MailboxValue], String, UInt)] = [
+        let inputs: [([MailboxValue], String, UInt)] = [
             ([.messages(12)], "MESSAGES 12", #line),
             ([.messages(12), .deleted(34)], "MESSAGES 12 DELETED 34", #line),
             ([.messages(12), .deleted(34), .size(56)], "MESSAGES 12 DELETED 34 SIZE 56", #line),

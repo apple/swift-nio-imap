@@ -22,9 +22,9 @@ class MailboxAttribute_Tests: EncodeTestClass {}
 
 extension MailboxAttribute_Tests {
     func testEncode() {
-        let inputs: [([NIOIMAP.MailboxAttribute], String, UInt)] = [
+        let inputs: [([MailboxAttribute], String, UInt)] = [
             ([], "", #line),
-            ([NIOIMAP.MailboxAttribute.messages, .recent, .unseen], "MESSAGES RECENT UNSEEN", #line),
+            ([MailboxAttribute.messages, .recent, .unseen], "MESSAGES RECENT UNSEEN", #line),
         ]
 
         for (test, expectedString, line) in inputs {

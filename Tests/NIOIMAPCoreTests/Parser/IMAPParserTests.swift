@@ -2515,7 +2515,7 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testStatusAttribute_valid_all() {
-        for att in NIOIMAP.MailboxAttribute.AllCases() {
+        for att in MailboxAttribute.AllCases() {
             do {
                 var buffer = TestUtilities.createTestByteBuffer(for: att.rawValue)
                 let parsedAtt = try GrammarParser.parseStatusAttribute(buffer: &buffer, tracker: .testTracker)
@@ -2546,8 +2546,8 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     func testStatusAttributeList_valid_single() {
         TestUtilities.withBuffer("MESSAGES 2", terminator: "\n") { (buffer) in
-            let expected = [NIOIMAP.MailboxValue.messages(2)]
-            let parsed = try NIOIMAP.GrammarParser.parseStatusAttributeList(buffer: &buffer, tracker: .testTracker)
+            let expected = [MailboxValue.messages(2)]
+            let parsed = try GrammarParser.parseStatusAttributeList(buffer: &buffer, tracker: .testTracker)
             XCTAssertEqual(parsed, expected)
         }
     }
@@ -2555,9 +2555,9 @@ extension ParserUnitTests {
     func testStatusAttributeList_valid_many() {
         TestUtilities.withBuffer("MESSAGES 2 UNSEEN 3 DELETED 4", terminator: "\n") { (buffer) in
             let expected = [
-                NIOIMAP.MailboxValue.messages(2),
-                NIOIMAP.MailboxValue.unseen(3),
-                NIOIMAP.MailboxValue.deleted(4),
+                MailboxValue.messages(2),
+                MailboxValue.unseen(3),
+                MailboxValue.deleted(4),
             ]
             let parsed = try GrammarParser.parseStatusAttributeList(buffer: &buffer, tracker: .testTracker)
             XCTAssertEqual(parsed, expected)
