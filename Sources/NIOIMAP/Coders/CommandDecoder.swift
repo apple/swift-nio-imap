@@ -47,8 +47,6 @@ public struct CommandDecoder: ByteToMessageDecoder {
                     // HACK: We shouldn't just emit those here, we should probably not be a B2MD anymore.
                     context.writeAndFlush(NIOAny(continuation), promise: nil)
                 }
-                // HACK: We shouldn't just emit those here, we should probably not be a B2MD anymore.
-                context.writeAndFlush(NIOAny(continuation), promise: nil)
             }
 
             if let result = try self.parser.parseCommandStream(buffer: &buffer) {
