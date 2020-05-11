@@ -23,7 +23,7 @@ class ResponseConditionalByeTests: EncodeTestClass {}
 extension ResponseConditionalByeTests {
     func testEncode() {
         let inputs: [(ResponseText, String, UInt)] = [
-            (.code(.alert, text: "ERROR"), "BYE [ALERT] ERROR", #line),
+            (.init(code: .alert, text: "ERROR"), "BYE [ALERT] ERROR", #line),
         ]
 
         for (test, expectedString, line) in inputs {

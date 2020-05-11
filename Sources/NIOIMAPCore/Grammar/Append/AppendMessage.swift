@@ -18,8 +18,9 @@ public struct AppendMessage: Equatable {
     public var options: AppendOptions
     public var data: AppendData
 
-    public static func options(_ options: AppendOptions, data: AppendData) -> Self {
-        Self(options: options, data: data)
+    public init(options: AppendOptions, data: AppendData) {
+        self.options = options
+        self.data = data
     }
 }
 

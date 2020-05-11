@@ -23,8 +23,8 @@ class StoreModifier_Tests: EncodeTestClass {}
 extension StoreModifier_Tests {
     func testEncode() {
         let inputs: [(StoreModifier, String, UInt)] = [
-            (.name("name", parameters: nil), "name", #line),
-            (.name("name", parameters: .simple(.number(1))), "name 1", #line),
+            (.init(name: "name", parameters: nil), "name", #line),
+            (.init(name: "name", parameters: .simple(.number(1))), "name 1", #line),
         ]
 
         for (test, expectedString, line) in inputs {
@@ -37,8 +37,8 @@ extension StoreModifier_Tests {
 
     func testEncode_array() {
         let inputs: [([StoreModifier], String, UInt)] = [
-            ([.name("name", parameters: nil)], " (name)", #line),
-            ([.name("name1", parameters: nil), .name("name2", parameters: nil)], " (name1 name2)", #line),
+            ([.init(name: "name", parameters: nil)], " (name)", #line),
+            ([.init(name: "name1", parameters: nil), .init(name: "name2", parameters: nil)], " (name1 name2)", #line),
         ]
 
         for (test, expectedString, line) in inputs {

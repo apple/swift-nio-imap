@@ -20,8 +20,9 @@ extension BodyStructure {
         public var location: NString
         public var extensions: [[BodyExtensionType]]
 
-        public static func location(_ location: NString, extensions: [[BodyExtensionType]]) -> Self {
-            Self(location: location, extensions: extensions)
+        public init(location: NString, extensions: [[BodyExtensionType]]) {
+            self.location = location
+            self.extensions = extensions
         }
     }
 }

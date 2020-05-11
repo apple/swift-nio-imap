@@ -23,9 +23,9 @@ class SearchProgram_Tests: EncodeTestClass {}
 extension SearchProgram_Tests {
     func testEncode() {
         let inputs: [(SearchProgram, String, UInt)] = [
-            (.charset(nil, keys: [.all]), "ALL", #line),
-            (.charset(nil, keys: [.all, .answered, .deleted]), "ALL ANSWERED DELETED", #line),
-            (.charset("UTF8", keys: [.all]), "CHARSET UTF8 ALL", #line),
+            (.init(charset: nil, keys: [.all]), "ALL", #line),
+            (.init(charset: nil, keys: [.all, .answered, .deleted]), "ALL ANSWERED DELETED", #line),
+            (.init(charset: "UTF8", keys: [.all]), "CHARSET UTF8 ALL", #line),
         ]
 
         for (test, expectedString, line) in inputs {

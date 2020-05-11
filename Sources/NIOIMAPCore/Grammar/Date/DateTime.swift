@@ -21,8 +21,10 @@ extension Date {
         public var time: Time
         public var zone: TimeZone
 
-        public static func date(_ date: Date, time: Time, zone: TimeZone) -> Self {
-            Self(date: date, time: time, zone: zone)
+        public init(date: Date, time: Date.Time, zone: Date.TimeZone) {
+            self.date = date
+            self.time = time
+            self.zone = zone
         }
     }
 }

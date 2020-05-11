@@ -86,7 +86,7 @@ extension GrammarParser {
             let name = try self.parseAppendExtensionName(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
             let value = try self.parseAppendExtensionValue(buffer: &buffer, tracker: tracker)
-            return .name(name, value: value)
+            return .init(name: name, value: value)
         }
     }
 
@@ -106,7 +106,7 @@ extension GrammarParser {
             let options = try self.parseAppendOptions(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
             let data = try self.parseAppendData(buffer: &buffer, tracker: tracker)
-            return .options(options, data: data)
+            return .init(options: options, data: data)
         }
     }
 
@@ -125,7 +125,7 @@ extension GrammarParser {
                 try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
                 return try self.parseAppendExtension(buffer: &buffer, tracker: tracker)
             }
-            return .flagList(flagList, dateTime: dateTime, extensions: array)
+            return .init(flagList: flagList, dateTime: dateTime, extensions: array)
         }
     }
 
@@ -295,7 +295,7 @@ extension GrammarParser {
                 try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
                 return try parseBodyDescriptionLanguage(buffer: &buffer, tracker: tracker)
             }
-            return BodyStructure.Multipart.Extension(parameter: param, dspLanguage: dsp)
+            return BodyStructure.Multipart.Extension(parameters: param, dspLanguage: dsp)
         }
     }
 
@@ -433,7 +433,7 @@ extension GrammarParser {
             let field = String(buffer: try parseString(buffer: &buffer, tracker: tracker))
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
             let value = String(buffer: try parseString(buffer: &buffer, tracker: tracker))
-            return .field(field, value: value)
+            return .init(field: field, value: value)
         }
 
         func parseBodyFieldParam_pairs(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [FieldParameterPair] {
@@ -613,7 +613,7 @@ extension GrammarParser {
     // command         = tag SP (command-any / command-auth / command-nonauth /
     //                   command-select) CRLF
     static func parseCommand(buffer: inout ByteBuffer, tracker: StackTracker) throws -> TaggedCommand {
-        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> TaggedCommand in
+        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             let tag = try self.parseTag(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
             let type = try ParserLibrary.parseOneOf([
@@ -622,7 +622,7 @@ extension GrammarParser {
                 self.parseCommandNonauth,
                 self.parseCommandSelect,
             ], buffer: &buffer, tracker: tracker)
-            return TaggedCommand(tag, type)
+            return TaggedCommand(type: type, tag: tag)
         }
     }
 
@@ -794,7 +794,7 @@ extension GrammarParser {
                 try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
                 return try self.parseCreateParameterValue(buffer: &buffer, tracker: tracker)
             }
-            return .name(name, value: value)
+            return .init(name: name, value: value)
         }
     }
 
@@ -1233,7 +1233,7 @@ extension GrammarParser {
                 try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
                 return try self.parseFetchModifierParameter(buffer: &buffer, tracker: tracker)
             }
-            return .name(name, value: value)
+            return .init(name: name, value: value)
         }
     }
 
@@ -1439,7 +1439,7 @@ extension GrammarParser {
             let key = String(buffer: try self.parseString(buffer: &buffer, tracker: tracker))
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
             let value = try self.parseNString(buffer: &buffer, tracker: tracker)
-            return .key(key, value: value)
+            return .init(key: key, value: value)
         }
 
         func parseIDParamsList_some(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [IDParameter] {
@@ -2345,7 +2345,7 @@ extension GrammarParser {
             ], buffer: &buffer, tracker: tracker)
             let extensions = try self.parseNamespaceResponseExtensions(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)
-            return .string(string, char: char, responseExtensions: extensions)
+            return .init(string: string, char: char, responseExtensions: extensions)
         }
     }
 
@@ -2370,7 +2370,7 @@ extension GrammarParser {
                 return try self.parseString(buffer: &buffer, tracker: tracker)
             }
             try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)
-            return NamespaceResponseExtension(str1: s1, strs: array)
+            return NamespaceResponseExtension(string: s1, array: array)
         }
     }
 
@@ -2513,7 +2513,7 @@ extension GrammarParser {
                 try ParserLibrary.parseFixedString(".", buffer: &buffer, tracker: tracker)
                 return try self.parseNZNumber(buffer: &buffer, tracker: tracker)
             }
-            return Partial.Range(num1: num1, num2: num2)
+            return Partial.Range(from: num1, to: num2)
         }
     }
 
@@ -2581,7 +2581,7 @@ extension GrammarParser {
                 try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
                 return try self.parseCreateParameterValue(buffer: &buffer, tracker: tracker)
             }
-            return .name(name, value: value)
+            return .init(name: name, value: value)
         }
     }
 
@@ -3503,7 +3503,7 @@ extension GrammarParser {
                 try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
                 return try self.parseSelectParameterValue(buffer: &buffer, tracker: tracker)
             }
-            return .name(name, value: value)
+            return .init(name: name, value: value)
         }
     }
 
@@ -3750,7 +3750,7 @@ extension GrammarParser {
                 try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
                 return try self.parseStoreModifierParameters(buffer: &buffer, tracker: tracker)
             }
-            return .name(name, parameters: params)
+            return .init(name: name, parameters: params)
         }
     }
 
@@ -3813,7 +3813,7 @@ extension GrammarParser {
             let label = try self.parseTaggedExtensionLabel(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
             let value = try self.parseTaggedExtensionValue(buffer: &buffer, tracker: tracker)
-            return .label(label, value: value)
+            return .init(label: label, value: value)
         }
     }
 

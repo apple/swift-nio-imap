@@ -21,7 +21,7 @@ class AppendExtension_Tests: EncodeTestClass {}
 extension AppendExtension_Tests {
     func testEncode() {
         let inputs: [(AppendExtension, String, UInt)] = [
-            (.name("name", value: .simple(.number(1))), "name 1", #line),
+            (.init(name: "name", value: .simple(.number(1))), "name 1", #line),
         ]
 
         for (test, expectedString, line) in inputs {

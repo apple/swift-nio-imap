@@ -36,7 +36,7 @@ extension FetchAttributeTests {
             (.binary(peek: true, section: [1, 2, 3], partial: nil), "BINARY.PEEK[1.2.3]", #line),
             (.binary(peek: false, section: [3, 4, 5], partial: nil), "BINARY[3.4.5]", #line),
             (.modSequence(.zero), "0", #line),
-            (.modSequence(.value(3)), "3", #line),
+            (.modSequence(3), "3", #line),
         ]
 
         for (test, expectedString, line) in inputs {

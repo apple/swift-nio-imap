@@ -27,8 +27,17 @@ public struct Envelope: Equatable {
     public var inReplyTo: NString
     public var messageID: NString
 
-    public static func date(_ date: NString, subject: NString, from: [Address], sender: [Address], reply: [Address], to: [Address], cc: [Address], bcc: [Address], inReplyTo: NString, messageID: NString) -> Self {
-        Self(date: date, subject: subject, from: from, sender: sender, reply: reply, to: to, cc: cc, bcc: bcc, inReplyTo: inReplyTo, messageID: messageID)
+    public init(date: NString, subject: NString, from: [Address], sender: [Address], reply: [Address], to: [Address], cc: [Address], bcc: [Address], inReplyTo: NString, messageID: NString) {
+        self.date = date
+        self.subject = subject
+        self.from = from
+        self.sender = sender
+        self.reply = reply
+        self.to = to
+        self.cc = cc
+        self.bcc = bcc
+        self.inReplyTo = inReplyTo
+        self.messageID = messageID
     }
 }
 

@@ -18,17 +18,23 @@ public struct ModifierSequenceValue: Equatable {
     public var value: Int
 
     public static var zero: Self {
-        Self(0)!
-    }
-
-    public static func value(_ value: Int) -> Self {
-        Self(value)!
+        Self(0)
     }
 
     public init?(_ value: Int) {
         guard value >= 0 else {
             return nil
         }
+        self.value = value
+    }
+}
+
+// MARK: - ExpressibleByIntegerLiteral
+
+extension ModifierSequenceValue: ExpressibleByIntegerLiteral {
+    public typealias IntegerLiteralType = Int
+
+    public init(integerLiteral value: Int) {
         self.value = value
     }
 }

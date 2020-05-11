@@ -19,8 +19,9 @@ public struct TaggedResponse: Equatable {
     public var tag: String
     public var state: ResponseConditionalState
 
-    public static func tag(_ tag: String, state: ResponseConditionalState) -> Self {
-        Self(tag: tag, state: state)
+    public init(tag: String, state: ResponseConditionalState) {
+        self.tag = tag
+        self.state = state
     }
 }
 

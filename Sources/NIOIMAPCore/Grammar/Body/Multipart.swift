@@ -21,9 +21,10 @@ extension BodyStructure {
         public var mediaSubtype: String
         public var multipartExtension: Extension?
 
-        /// Convenience function for a better experience when chaining multiple types.
-        public static func bodies(_ bodies: [BodyStructure], mediaSubtype: String, multipartExtension: Extension?) -> Self {
-            Self(bodies: bodies, mediaSubtype: mediaSubtype, multipartExtension: multipartExtension)
+        public init(bodies: [BodyStructure], mediaSubtype: String, multipartExtension: Extension? = nil) {
+            self.bodies = bodies
+            self.mediaSubtype = mediaSubtype
+            self.multipartExtension = multipartExtension
         }
     }
 }
@@ -35,8 +36,9 @@ extension BodyStructure.Multipart {
         public var dspLanguage: BodyStructure.FieldDSPLanguage?
 
         /// Convenience function for a better experience when chaining multiple types.
-        public static func parameter(_ parameters: [FieldParameterPair], dspLanguage: BodyStructure.FieldDSPLanguage?) -> Self {
-            Self(parameter: parameters, dspLanguage: dspLanguage)
+        public init(parameters: [FieldParameterPair], dspLanguage: BodyStructure.FieldDSPLanguage?) {
+            self.parameter = parameters
+            self.dspLanguage = dspLanguage
         }
     }
 }

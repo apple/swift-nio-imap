@@ -24,7 +24,7 @@ extension ListSelectBaseOption_Tests {
     func testEncode() {
         let inputs: [(ListSelectBaseOption, String, UInt)] = [
             (.subscribed, "SUBSCRIBED", #line),
-            (.option(.standard("test", value: nil)), "test", #line),
+            (.option(.init(type: .standard("test"), value: nil)), "test", #line),
         ]
 
         for (test, expectedString, line) in inputs {

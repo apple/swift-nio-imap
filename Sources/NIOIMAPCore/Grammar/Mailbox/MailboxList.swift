@@ -22,8 +22,11 @@ extension MailboxName {
         public var mailbox: MailboxName
         public var listExtended: [ListExtendedItem]
 
-        public static func flags(_ flags: Flags?, char: Character?, mailbox: MailboxName, listExtended: [ListExtendedItem]) -> Self {
-            Self(flags: flags, char: char, mailbox: mailbox, listExtended: listExtended)
+        public init(flags: MailboxName.List.Flags? = nil, char: Character? = nil, mailbox: MailboxName, listExtended: [MailboxName.ListExtendedItem]) {
+            self.flags = flags
+            self.char = char
+            self.mailbox = mailbox
+            self.listExtended = listExtended
         }
     }
 }

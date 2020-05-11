@@ -40,7 +40,7 @@ extension ListSelectOption_Tests {
         let inputs: [(ListSelectOptions, String, UInt)] = [
             (nil, "()", #line),
             (.select([.base(.subscribed)], .subscribed), "(SUBSCRIBED SUBSCRIBED)", #line),
-            (.selectIndependent([.remote, .option(.standard("SOME", value: nil))]), "(REMOTE SOME)", #line),
+            (.selectIndependent([.remote, .option(.init(type: .standard("SOME"), value: nil))]), "(REMOTE SOME)", #line),
         ]
 
         for (test, expectedString, line) in inputs {

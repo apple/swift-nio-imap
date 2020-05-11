@@ -18,8 +18,9 @@ public struct StoreModifier: Equatable {
     public var name: String
     public var parameters: TaggedExtensionValue?
 
-    public static func name(_ name: String, parameters: TaggedExtensionValue?) -> Self {
-        Self(name: name, parameters: parameters)
+    public init(name: String, parameters: TaggedExtensionValue? = nil) {
+        self.name = name
+        self.parameters = parameters
     }
 }
 

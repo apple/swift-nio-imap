@@ -23,9 +23,9 @@ class ResponseConditionalStateTests: EncodeTestClass {}
 extension ResponseConditionalStateTests {
     func testEncode() {
         let inputs: [(ResponseConditionalState, String, UInt)] = [
-            (ResponseConditionalState.bad(.code(.parse, text: "something")), "BAD [PARSE] something", #line),
-            (ResponseConditionalState.ok(.code(.alert, text: "error")), "OK [ALERT] error", #line),
-            (ResponseConditionalState.no(.code(.readOnly, text: "everything")), "NO [READ-ONLY] everything", #line),
+            (ResponseConditionalState.bad(.init(code: .parse, text: "something")), "BAD [PARSE] something", #line),
+            (ResponseConditionalState.ok(.init(code: .alert, text: "error")), "OK [ALERT] error", #line),
+            (ResponseConditionalState.no(.init(code: .readOnly, text: "everything")), "NO [READ-ONLY] everything", #line),
         ]
 
         for (test, expectedString, line) in inputs {

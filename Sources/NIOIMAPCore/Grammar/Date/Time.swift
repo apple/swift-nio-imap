@@ -21,8 +21,10 @@ extension Date {
         public var minute: Int
         public var second: Int
 
-        public static func hour(_ hour: Int, minute: Int, second: Int) -> Self {
-            Self(hour: hour, minute: minute, second: second)
+        init(hour: Int, minute: Int, second: Int) {
+            self.hour = hour
+            self.minute = minute
+            self.second = second
         }
     }
 }

@@ -23,8 +23,8 @@ class ResponseTextTests: EncodeTestClass {}
 extension ResponseTextTests {
     func testEncode() {
         let inputs: [(ResponseText, String, UInt)] = [
-            (.code(nil, text: "buffer"), "buffer", #line),
-            (.code(.alert, text: "buffer"), "[ALERT] buffer", #line),
+            (.init(code: nil, text: "buffer"), "buffer", #line),
+            (.init(code: .alert, text: "buffer"), "[ALERT] buffer", #line),
         ]
 
         for (code, expectedString, line) in inputs {

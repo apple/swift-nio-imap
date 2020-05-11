@@ -18,8 +18,9 @@ public struct TaggedExtension: Equatable {
     public var label: String
     public var value: TaggedExtensionValue
 
-    public static func label(_ label: String, value: TaggedExtensionValue) -> Self {
-        Self(label: label, value: value)
+    public init(label: String, value: TaggedExtensionValue) {
+        self.label = label
+        self.value = value
     }
 }
 

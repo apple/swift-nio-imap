@@ -24,11 +24,11 @@ extension Namespace_Tests {
     func testEncode() {
         let inputs: [([NamespaceDescription], String, UInt)] = [
             ([], "NIL", #line),
-            ([.string("str1", char: nil, responseExtensions: [])], "((\"str1\" NIL))", #line),
+            ([.init(string: "str1", char: nil, responseExtensions: [])], "((\"str1\" NIL))", #line),
             (
                 [
-                    .string("str1", char: nil, responseExtensions: []),
-                    .string("str2", char: nil, responseExtensions: []),
+                    .init(string: "str1", char: nil, responseExtensions: []),
+                    .init(string: "str2", char: nil, responseExtensions: []),
                 ],
                 "((\"str1\" NIL)(\"str2\" NIL))", #line
             ),

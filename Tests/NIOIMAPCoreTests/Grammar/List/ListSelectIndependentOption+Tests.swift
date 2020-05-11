@@ -24,7 +24,7 @@ extension ListSelectIndependentOption_Tests {
     func testEncode() {
         let inputs: [(ListSelectIndependentOption, String, UInt)] = [
             (.remote, "REMOTE", #line),
-            (.option(.standard("test", value: nil)), "test", #line),
+            (.option(.init(type: .standard("test"), value: nil)), "test", #line),
         ]
 
         for (test, expectedString, line) in inputs {

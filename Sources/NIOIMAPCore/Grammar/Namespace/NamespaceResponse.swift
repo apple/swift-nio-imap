@@ -20,8 +20,10 @@ public struct NamespaceResponse: Equatable {
     public var otherUserNamespace: [NamespaceDescription]
     public var sharedNamespace: [NamespaceDescription]
 
-    public static func userNamespace(_ userNamespace: [NamespaceDescription], otherUserNamespace: [NamespaceDescription], sharedNamespace: [NamespaceDescription]) -> Self {
-        Self(userNamespace: userNamespace, otherUserNamespace: otherUserNamespace, sharedNamespace: sharedNamespace)
+    public init(userNamespace: [NamespaceDescription], otherUserNamespace: [NamespaceDescription], sharedNamespace: [NamespaceDescription]) {
+        self.userNamespace = userNamespace
+        self.otherUserNamespace = otherUserNamespace
+        self.sharedNamespace = sharedNamespace
     }
 }
 

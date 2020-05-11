@@ -24,12 +24,9 @@ public struct OptionExtension: Equatable {
     public var type: OptionExtensionType
     public var value: OptionValueComp?
 
-    public static func standard(_ atom: String, value: OptionValueComp?) -> Self {
-        Self(type: .standard(atom), value: value)
-    }
-
-    public static func vendor(_ tag: OptionVendorTag, value: OptionValueComp?) -> Self {
-        Self(type: .vendor(tag), value: value)
+    public init(type: OptionExtensionType, value: OptionValueComp? = nil) {
+        self.type = type
+        self.value = value
     }
 }
 

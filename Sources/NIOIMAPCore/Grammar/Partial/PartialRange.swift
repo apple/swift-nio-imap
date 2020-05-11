@@ -15,11 +15,12 @@
 extension Partial {
     /// IMAPv4 `partial-range`
     public struct Range: Equatable {
-        public var num1: Int
-        public var num2: Int?
+        public var from: Int
+        public var to: Int?
 
-        public static func range(from: Int, to: Int) -> Self {
-            Self(num1: from, num2: to)
+        public init(from: Int, to: Int?) {
+            self.from = from
+            self.to = to
         }
     }
 }

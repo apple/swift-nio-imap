@@ -23,7 +23,7 @@ class TaggedResponse_Tests: EncodeTestClass {}
 extension TaggedResponse_Tests {
     func testEncode() {
         let inputs: [(TaggedResponse, String, UInt)] = [
-            (TaggedResponse(tag: "tag", state: .bad(.code(.parse, text: "something"))), "tag BAD [PARSE] something\r\n", #line),
+            (TaggedResponse(tag: "tag", state: .bad(.init(code: .parse, text: "something"))), "tag BAD [PARSE] something\r\n", #line),
         ]
 
         for (test, expectedString, line) in inputs {

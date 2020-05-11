@@ -67,8 +67,8 @@ extension RoundtripTests {
             (.rename(from: .inbox, to: .inbox, params: []), #line),
             (.rename(from: MailboxName("test1"), to: MailboxName("test2"), params: []), #line),
 
-            (.append(to: .inbox, firstMessageMetadata: .options(.flagList([.answered], dateTime: nil, extensions: []), data: .byteCount(5))), #line),
-            (.append(to: MailboxName("test1"), firstMessageMetadata: .options(.flagList([.answered, .deleted, .draft], dateTime: nil, extensions: []), data: .byteCount(5))), #line),
+            (.append(to: .inbox, firstMessageMetadata: .init(options: .init(flagList: [.answered], dateTime: nil, extensions: []), data: .init(byteCount: 5))), #line),
+            (.append(to: MailboxName("test1"), firstMessageMetadata: .init(options: .init(flagList: [.answered, .deleted, .draft], dateTime: nil, extensions: []), data: .init(byteCount: 5))), #line),
 
             (.list(nil, .inbox, .pattern(["pattern"]), []), #line),
             (.list(nil, MailboxName("bar"), .pattern(["pattern"]), []), #line),
@@ -80,16 +80,16 @@ extension RoundtripTests {
             (.status(.inbox, [.messages]), #line),
             (.status(MailboxName("foobar"), [.messages, .recent, .uidnext]), #line),
 
-            (.copy([.single(2), .wildcard], .inbox), #line),
+            (.copy([2, .wildcard], .inbox), #line),
 
             (.fetch([.wildcard], .all, []), #line),
             (.fetch([.wildcard], .fast, []), #line),
             (.fetch([.wildcard], .full, []), #line),
-            (.fetch([.single(5678)], .attributes([.uid, .flags, .internaldate, .envelope]), []), #line),
-            (.fetch([.single(5678)], .attributes([.flags, .body(structure: true)]), []), #line),
-            (.fetch([.single(5678)], .attributes([.flags, .bodySection(nil, Partial(left: 3, right: 4))]), []), #line),
-            (.fetch([.single(5678)], .attributes([.flags, .bodySection(.text(.header), Partial(left: 3, right: 4))]), []), #line),
-            (.fetch([.single(5678)], .attributes([.flags, .bodySection(.part([12, 34], text: .message(.headerFields(["some", "header"]))), Partial(left: 3, right: 4))]), []), #line),
+            (.fetch([5678], .attributes([.uid, .flags, .internaldate, .envelope]), []), #line),
+            (.fetch([5678], .attributes([.flags, .body(structure: true)]), []), #line),
+            (.fetch([5678], .attributes([.flags, .bodySection(nil, Partial(left: 3, right: 4))]), []), #line),
+            (.fetch([5678], .attributes([.flags, .bodySection(.text(.header), Partial(left: 3, right: 4))]), []), #line),
+            (.fetch([5678], .attributes([.bodySection(.part([12, 34], text: .message(.headerFields(["some", "header"]))), .init(left: 3, right: 4))]), []), #line),
 
             (.store([.wildcard], [], .remove(silent: true, list: [.answered, .deleted])), #line),
             (.store([.wildcard], [], .add(silent: true, list: [.draft, .extension("\\some")])), #line),
@@ -99,7 +99,7 @@ extension RoundtripTests {
 
             (.uidStore([.wildcard], [], .add(silent: true, list: [.draft, .deleted, .answered])), #line),
 
-            (.search(returnOptions: [.all], program: .charset(nil, keys: [.all])), #line),
+            (.search(returnOptions: [.all], program: .init(charset: nil, keys: [.all])), #line),
         ]
 
         var buffer = ByteBufferAllocator().buffer(capacity: 1)
@@ -107,7 +107,7 @@ extension RoundtripTests {
             let commandType = test.0
             let line = test.1
             let tag = "\(i + 1)"
-            let command = TaggedCommand(tag, commandType)
+            let command = TaggedCommand(type: commandType, tag: tag)
             buffer.writeCommand(command)
             buffer.writeString("\r\n") // required for commands that might terminate with a literal (e.g. append)
             do {

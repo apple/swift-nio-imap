@@ -43,12 +43,12 @@ extension EnvelopeTests {
                 Envelope(
                     date: "01-02-03",
                     subject: "subject",
-                    from: [.name("name1", adl: "adl1", mailbox: "mailbox1", host: "host1")],
-                    sender: [.name("name2", adl: "adl2", mailbox: "mailbox2", host: "host2")],
-                    reply: [.name("name3", adl: "adl3", mailbox: "mailbox3", host: "host3")],
-                    to: [.name("name4", adl: "adl4", mailbox: "mailbox4", host: "host4")],
-                    cc: [.name("name5", adl: "adl5", mailbox: "mailbox5", host: "host5")],
-                    bcc: [.name("name6", adl: "adl6", mailbox: "mailbox6", host: "host6")],
+                    from: [.init(name: "name1", adl: "adl1", mailbox: "mailbox1", host: "host1")],
+                    sender: [.init(name: "name2", adl: "adl2", mailbox: "mailbox2", host: "host2")],
+                    reply: [.init(name: "name3", adl: "adl3", mailbox: "mailbox3", host: "host3")],
+                    to: [.init(name: "name4", adl: "adl4", mailbox: "mailbox4", host: "host4")],
+                    cc: [.init(name: "name5", adl: "adl5", mailbox: "mailbox5", host: "host5")],
+                    bcc: [.init(name: "name6", adl: "adl6", mailbox: "mailbox6", host: "host6")],
                     inReplyTo: nil, messageID: "1"
                 ),
                 "(\"01-02-03\" \"subject\" ((\"name1\" \"adl1\" \"mailbox1\" \"host1\")) ((\"name2\" \"adl2\" \"mailbox2\" \"host2\")) ((\"name3\" \"adl3\" \"mailbox3\" \"host3\")) ((\"name4\" \"adl4\" \"mailbox4\" \"host4\")) ((\"name5\" \"adl5\" \"mailbox5\" \"host5\")) ((\"name6\" \"adl6\" \"mailbox6\" \"host6\")) NIL \"1\")",

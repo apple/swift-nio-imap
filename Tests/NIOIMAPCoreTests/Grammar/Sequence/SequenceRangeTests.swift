@@ -32,7 +32,7 @@ extension SequenceRangeTests {
 
 extension SequenceRangeTests {
     func testSingle() {
-        let range = SequenceRange.single(999)
+        let range = SequenceRange(999)
         XCTAssertEqual(range.from, 999)
         XCTAssertEqual(range.to, 999)
     }
@@ -74,7 +74,7 @@ extension SequenceRangeTests {
 extension SequenceRangeTests {
     func testEncode_single() {
         let expected = "5"
-        let size = self.testBuffer.writeSequenceRange(.single(5))
+        let size = self.testBuffer.writeSequenceRange(5)
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }

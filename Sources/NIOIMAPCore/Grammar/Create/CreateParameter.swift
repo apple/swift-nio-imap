@@ -18,8 +18,9 @@ public struct CreateParameter: Equatable {
     public var name: String
     public var value: TaggedExtensionValue?
 
-    public static func name(_ name: String, value: TaggedExtensionValue?) -> Self {
-        Self(name: name, value: value)
+    public init(name: String, value: TaggedExtensionValue? = nil) {
+        self.name = name
+        self.value = value
     }
 }
 

@@ -40,7 +40,7 @@ extension ResponseTextCodeTests {
             (.capability([]), "CAPABILITY IMAP4 IMAP4rev1", #line),
             (.capability([.unselect]), "CAPABILITY IMAP4 IMAP4rev1 UNSELECT", #line),
             (.capability([.unselect, .binary, .children]), "CAPABILITY IMAP4 IMAP4rev1 UNSELECT BINARY CHILDREN", #line),
-            (.namespace(.userNamespace([], otherUserNamespace: [], sharedNamespace: [])), "NAMESPACE NIL NIL NIL", #line),
+            (.namespace(.init(userNamespace: [], otherUserNamespace: [], sharedNamespace: [])), "NAMESPACE NIL NIL NIL", #line),
         ]
 
         for (code, expectedString, line) in inputs {

@@ -18,8 +18,9 @@ public struct FieldParameterPair: Equatable {
     public var field: String
     public var value: String
 
-    public static func field(_ field: String, value: String) -> Self {
-        Self(field: field, value: value)
+    public init(field: String, value: String) {
+        self.field = field
+        self.value = value
     }
 }
 

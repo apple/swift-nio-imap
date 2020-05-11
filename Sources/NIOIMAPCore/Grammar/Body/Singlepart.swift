@@ -20,9 +20,9 @@ extension BodyStructure {
         public var type: Kind
         public var `extension`: Extension?
 
-        /// Convenience function for a better experience when chaining multiple types.
-        public static func type(_ type: Kind, extension: Extension?) -> Self {
-            Self(type: type, extension: `extension`)
+        public init(type: BodyStructure.Singlepart.Kind, extension: Extension? = nil) {
+            self.type = type
+            self.extension = `extension`
         }
     }
 }
@@ -41,8 +41,9 @@ extension BodyStructure.Singlepart {
         public var media: Media.Basic
         public var fields: BodyStructure.Fields
 
-        public static func media(_ media: Media.Basic, fields: BodyStructure.Fields) -> Self {
-            Self(media: media, fields: fields)
+        public init(media: Media.Basic, fields: BodyStructure.Fields) {
+            self.media = media
+            self.fields = fields
         }
     }
 
@@ -54,9 +55,12 @@ extension BodyStructure.Singlepart {
         public var body: BodyStructure
         public var fieldLines: Int
 
-        /// Convenience function for a better experience when chaining multiple types.
-        public static func message(_ message: Media.Message, fields: BodyStructure.Fields, envelope: Envelope, body: BodyStructure, fieldLines: Int) -> Self {
-            Self(message: message, fields: fields, envelope: envelope, body: body, fieldLines: fieldLines)
+        public init(message: Media.Message, fields: BodyStructure.Fields, envelope: Envelope, body: BodyStructure, fieldLines: Int) {
+            self.message = message
+            self.fields = fields
+            self.envelope = envelope
+            self.body = body
+            self.fieldLines = fieldLines
         }
     }
 
@@ -66,8 +70,10 @@ extension BodyStructure.Singlepart {
         public var fields: BodyStructure.Fields
         public var lines: Int
 
-        public static func mediaText(_ mediaText: String, fields: BodyStructure.Fields, lines: Int) -> Self {
-            Self(mediaText: mediaText, fields: fields, lines: lines)
+        public init(mediaText: String, fields: BodyStructure.Fields, lines: Int) {
+            self.mediaText = mediaText
+            self.fields = fields
+            self.lines = lines
         }
     }
 
@@ -77,8 +83,9 @@ extension BodyStructure.Singlepart {
         public var dspLanguage: BodyStructure.FieldDSPLanguage?
 
         /// Convenience function for a better experience when chaining multiple types.
-        public static func fieldMD5(_ fieldMD5: NString, dspLanguage: BodyStructure.FieldDSPLanguage?) -> Self {
-            Self(fieldMD5: fieldMD5, dspLanguage: dspLanguage)
+        init(fieldMD5: NString, dspLanguage: BodyStructure.FieldDSPLanguage?) {
+            self.fieldMD5 = fieldMD5
+            self.dspLanguage = dspLanguage
         }
     }
 }

@@ -24,7 +24,7 @@ extension ListSelectModOption_Tests {
     func testEncode() {
         let inputs: [(ListSelectModOption, String, UInt)] = [
             (.recursiveMatch, "RECURSIVEMATCH", #line),
-            (.option(.standard("extension", value: nil)), "extension", #line),
+            (.option(.init(type: .standard("extension"), value: nil)), "extension", #line),
         ]
 
         for (test, expectedString, line) in inputs {

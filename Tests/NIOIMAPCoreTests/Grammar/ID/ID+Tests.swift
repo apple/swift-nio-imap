@@ -23,8 +23,8 @@ class ID_Tests: EncodeTestClass {}
 extension ID_Tests {
     func testEncode() {
         let inputs: [(IDParameter, String, UInt)] = [
-            (.key("key", value: "value"), #""key" "value""#, #line),
-            (.key("key", value: nil), #""key" NIL"#, #line),
+            (.init(key: "key", value: "value"), #""key" "value""#, #line),
+            (.init(key: "key", value: nil), #""key" NIL"#, #line),
         ]
 
         for (test, expectedString, line) in inputs {
@@ -38,7 +38,7 @@ extension ID_Tests {
     func testEncode_array() {
         let inputs: [([IDParameter], String, UInt)] = [
             ([], "NIL", #line),
-            ([.key("key", value: "value")], #"("key" "value")"#, #line),
+            ([.init(key: "key", value: "value")], #"("key" "value")"#, #line),
         ]
 
         for (test, expectedString, line) in inputs {

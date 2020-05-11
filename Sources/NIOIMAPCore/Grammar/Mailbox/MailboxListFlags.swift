@@ -20,8 +20,9 @@ extension MailboxName.List {
         public var oFlags: [OFlag]
         public var sFlag: SFlag?
 
-        public static func oFlags(_ oFlags: [OFlag], sFlag: SFlag?) -> Self {
-            Self(oFlags: oFlags, sFlag: sFlag)
+        public init(oFlags: [MailboxName.List.OFlag], sFlag: MailboxName.List.SFlag? = nil) {
+            self.oFlags = oFlags
+            self.sFlag = sFlag
         }
     }
 }

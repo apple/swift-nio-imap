@@ -88,8 +88,8 @@ final class ParserIntegrationTests: XCTestCase {
         XCTAssertNoThrow(try client?.close().wait())
 
         let expected: [CommandStream] = [
-            .command(.init("tag", .login("1", "2"))),
-            .command(.init("tag", .noop)),
+            .command(.init(type: .login("1", "2"), tag: "tag")),
+            .command(.init(type: .noop, tag: "tag")),
         ]
         XCTAssertNoThrow(XCTAssertEqual(expected, try collectionDonePromise.futureResult.wait()))
     }

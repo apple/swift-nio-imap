@@ -20,8 +20,9 @@ extension BodyStructure {
         public var fieldDSP: FieldDSPData?
         public var fieldLanguage: FieldLanguageLocation?
 
-        public static func fieldDSP(_ fieldDSP: FieldDSPData?, fieldLanguage: FieldLanguageLocation?) -> Self {
-            Self(fieldDSP: fieldDSP, fieldLanguage: fieldLanguage)
+        public init(fieldDSP: BodyStructure.FieldDSPData? = nil, fieldLanguage: BodyStructure.FieldLanguageLocation? = nil) {
+            self.fieldDSP = fieldDSP
+            self.fieldLanguage = fieldLanguage
         }
     }
 }

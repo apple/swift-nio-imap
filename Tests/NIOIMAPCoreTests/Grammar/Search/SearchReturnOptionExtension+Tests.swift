@@ -23,8 +23,8 @@ class SearchReturnOptionExtension_Tests: EncodeTestClass {}
 extension SearchReturnOptionExtension_Tests {
     func testEncode() {
         let inputs: [(SearchReturnOptionExtension, String, UInt)] = [
-            (.modifier("modifier", params: nil), "modifier", #line),
-            (.modifier("modifier", params: .simple(.number(4))), "modifier 4", #line),
+            (.init(modifierName: "modifier", params: nil), "modifier", #line),
+            (.init(modifierName: "modifier", params: .simple(.number(4))), "modifier 4", #line),
         ]
 
         for (test, expectedString, line) in inputs {

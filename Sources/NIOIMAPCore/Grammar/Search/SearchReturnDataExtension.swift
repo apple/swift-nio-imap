@@ -19,8 +19,9 @@ public struct SearchReturnDataExtension: Equatable {
     public var modifier: String
     public var returnValue: TaggedExtensionValue
 
-    public static func modifier(_ modifier: String, returnValue: TaggedExtensionValue) -> Self {
-        Self(modifier: modifier, returnValue: returnValue)
+    public init(modifier: String, returnValue: TaggedExtensionValue) {
+        self.modifier = modifier
+        self.returnValue = returnValue
     }
 }
 

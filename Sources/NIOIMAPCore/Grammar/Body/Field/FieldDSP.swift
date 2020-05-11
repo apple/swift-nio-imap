@@ -20,8 +20,9 @@ extension BodyStructure {
         public var string: ByteBuffer
         public var parameter: [FieldParameterPair]
 
-        public static func string(_ string: ByteBuffer, parameter: [FieldParameterPair]) -> Self {
-            Self(string: string, parameter: parameter)
+        public init(string: ByteBuffer, parameter: [FieldParameterPair]) {
+            self.string = string
+            self.parameter = parameter
         }
     }
 }
