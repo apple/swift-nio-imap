@@ -18,7 +18,7 @@ import struct NIO.ByteBuffer
 public enum ReturnOption: Equatable {
     case subscribed
     case children
-    case statusOption([StatusAttribute])
+    case statusOption([MailboxAttribute])
     case optionExtension(OptionExtension)
 }
 
@@ -32,7 +32,7 @@ extension ByteBuffer {
         case .children:
             return self.writeString("CHILDREN")
         case .statusOption(let option):
-            return self.writeStatusOption(option)
+            return self.writeMailboxOptions(option)
         case .optionExtension(let option):
             return self.writeOptionExtension(option)
         }

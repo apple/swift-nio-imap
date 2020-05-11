@@ -26,7 +26,7 @@ public enum Command: Equatable {
     case lsub(MailboxName, ByteBuffer)
     case rename(from: MailboxName, to: MailboxName, params: [RenameParameter])
     case select(MailboxName, [SelectParameter])
-    case status(MailboxName, [StatusAttribute])
+    case status(MailboxName, [MailboxAttribute])
     case subscribe(MailboxName)
     case unsubscribe(MailboxName)
     case authenticate(String, InitialResponse?, [ByteBuffer])
@@ -213,11 +213,11 @@ extension ByteBuffer {
             }
     }
 
-    private mutating func writeCommandType_status(mailbox: MailboxName, attributes: [StatusAttribute]) -> Int {
+    private mutating func writeCommandType_status(mailbox: MailboxName, attributes: [MailboxAttribute]) -> Int {
         self.writeString("STATUS ") +
             self.writeMailbox(mailbox) +
             self.writeString(" (") +
-            self.writeStatusAttributes(attributes) +
+            self.writeMailboxAttributes(attributes) +
             self.writeString(")")
     }
 

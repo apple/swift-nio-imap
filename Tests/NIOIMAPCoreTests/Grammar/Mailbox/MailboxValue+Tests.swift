@@ -16,27 +16,27 @@ import NIO
 @testable import NIOIMAPCore
 import XCTest
 
-class StatusAttributeValue_Tests: EncodeTestClass {}
+class MailboxValue_Tests: EncodeTestClass {}
 
 // MARK: - Encoding
 
-extension StatusAttributeValue_Tests {
+extension MailboxValue_Tests {
     func testEncode_statusOption() {
-        let inputs: [([StatusAttribute], String, UInt)] = [
+        let inputs: [([MailboxAttribute], String, UInt)] = [
             ([.messages], "STATUS (MESSAGES)", #line),
             ([.messages, .size, .recent], "STATUS (MESSAGES SIZE RECENT)", #line),
         ]
 
         for (test, expectedString, line) in inputs {
             self.testBuffer.clear()
-            let size = self.testBuffer.writeStatusOption(test)
+            let size = self.testBuffer.writeMailboxOptions(test)
             XCTAssertEqual(size, expectedString.utf8.count, line: line)
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }
     }
 
     func testEncode_statusAttributeValue() {
-        let inputs: [(StatusAttributeValue, String, UInt)] = [
+        let inputs: [(MailboxValue, String, UInt)] = [
             (.messages(12), "MESSAGES 12", #line),
             (.uidNext(23), "UIDNEXT 23", #line),
             (.uidValidity(34), "UIDVALIDITY 34", #line),
@@ -48,14 +48,14 @@ extension StatusAttributeValue_Tests {
 
         for (test, expectedString, line) in inputs {
             self.testBuffer.clear()
-            let size = self.testBuffer.writeStatusAttributeValue(test)
+            let size = self.testBuffer.writeMailboxValue(test)
             XCTAssertEqual(size, expectedString.utf8.count, line: line)
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }
     }
 
     func testEncode_statusAttributeList() {
-        let inputs: [([StatusAttributeValue], String, UInt)] = [
+        let inputs: [([MailboxValue], String, UInt)] = [
             ([.messages(12)], "MESSAGES 12", #line),
             ([.messages(12), .deleted(34)], "MESSAGES 12 DELETED 34", #line),
             ([.messages(12), .deleted(34), .size(56)], "MESSAGES 12 DELETED 34 SIZE 56", #line),
@@ -63,7 +63,7 @@ extension StatusAttributeValue_Tests {
 
         for (test, expectedString, line) in inputs {
             self.testBuffer.clear()
-            let size = self.testBuffer.writeStatusAttributeList(test)
+            let size = self.testBuffer.writeMailboxValues(test)
             XCTAssertEqual(size, expectedString.utf8.count, line: line)
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }

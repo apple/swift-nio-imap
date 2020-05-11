@@ -14,8 +14,19 @@
 
 import struct NIO.ByteBuffer
 
+/// IMAPv4 `status-att`
+public enum MailboxAttribute: String, CaseIterable {
+    case messages = "MESSAGES"
+    case recent = "RECENT"
+    case uidnext = "UIDNEXT"
+    case uidvalidity = "UIDVALIDITY"
+    case unseen = "UNSEEN"
+    case size = "SIZE"
+    case highestModSeq = "HIGHESTMODSEQ"
+}
+
 /// IMAPv4 `status-att-val`
-public enum StatusAttributeValue: Equatable {
+public enum MailboxValue: Equatable {
     case messages(Int)
     case uidNext(Int)
     case uidValidity(Int)
@@ -28,20 +39,30 @@ public enum StatusAttributeValue: Equatable {
 // MARK: - Encoding
 
 extension ByteBuffer {
-    @discardableResult mutating func writeStatusOption(_ option: [StatusAttribute]) -> Int {
-        self.writeString("STATUS ") +
-            self.writeArray(option) { (att, self) in
-                self.writeStatusAttribute(att)
-            }
-    }
-
-    @discardableResult mutating func writeStatusAttributeList(_ list: [StatusAttributeValue]) -> Int {
-        self.writeArray(list, parenthesis: false) { (val, self) in
-            self.writeStatusAttributeValue(val)
+    @discardableResult mutating func writeMailboxAttributes(_ atts: [MailboxAttribute]) -> Int {
+        self.writeArray(atts, parenthesis: false) { (element, self) in
+            self.writeMailboxAttribute(element)
         }
     }
 
-    @discardableResult mutating func writeStatusAttributeValue(_ val: StatusAttributeValue) -> Int {
+    @discardableResult mutating func writeMailboxAttribute(_ att: MailboxAttribute) -> Int {
+        self.writeString(att.rawValue)
+    }
+
+    @discardableResult mutating func writeMailboxOptions(_ option: [MailboxAttribute]) -> Int {
+        self.writeString("STATUS ") +
+            self.writeArray(option) { (att, self) in
+                self.writeMailboxAttribute(att)
+            }
+    }
+
+    @discardableResult mutating func writeMailboxValues(_ list: [MailboxValue]) -> Int {
+        self.writeArray(list, parenthesis: false) { (val, self) in
+            self.writeMailboxValue(val)
+        }
+    }
+
+    @discardableResult mutating func writeMailboxValue(_ val: MailboxValue) -> Int {
         switch val {
         case .messages(let num):
             return self.writeString("MESSAGES \(num)")

@@ -21,7 +21,7 @@ extension MailboxName {
         case list(MailboxName.List)
         case lsub(MailboxName.List)
         case search(ESearchResponse)
-        case status(MailboxName, [StatusAttributeValue])
+        case status(MailboxName, [MailboxValue])
         case exists(Int)
         case namespace(NamespaceResponse)
     }
@@ -64,12 +64,12 @@ extension ByteBuffer {
             self.writeMailboxList(list)
     }
 
-    private mutating func writeMailboxData_status(mailbox: MailboxName, list: [StatusAttributeValue]) -> Int {
+    private mutating func writeMailboxData_status(mailbox: MailboxName, list: [MailboxValue]) -> Int {
         self.writeString("STATUS ") +
             self.writeMailbox(mailbox) +
             self.writeString(" (") +
             self.writeIfArrayHasMinimumSize(array: list) { (list, self) -> Int in
-                self.writeStatusAttributeList(list)
+                self.writeMailboxValues(list)
             } +
             self.writeString(")")
     }
