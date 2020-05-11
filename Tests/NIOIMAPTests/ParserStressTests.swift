@@ -77,10 +77,10 @@ final class ParserStressTests: XCTestCase {
     func testBasicDecodes() {
         let inoutPairs: [(String, [CommandStream])] = [
             // LOGIN
-            (#"tag LOGIN "foo" "bar""# + CRLF, [.command(.init(type: .login("foo", "bar"), tag: "tag"))]),
-            ("tag LOGIN \"\" {0}\r\n" + CRLF, [.command(.init(type: .login("", ""), tag: "tag"))]),
-            (#"tag LOGIN "foo" "bar""# + CRLF, [.command(.init(type: .login("foo", "bar"), tag: "tag"))]),
-            (#"tag LOGIN foo bar"# + CRLF, [.command(.init(type: .login("foo", "bar"), tag: "tag"))]),
+            (#"tag LOGIN "foo" "bar""# + CRLF, [.command(.init(type: .login(username: "foo", password: "bar"), tag: "tag"))]),
+            ("tag LOGIN \"\" {0}\r\n" + CRLF, [.command(.init(type: .login(username: "", password: ""), tag: "tag"))]),
+            (#"tag LOGIN "foo" "bar""# + CRLF, [.command(.init(type: .login(username: "foo", password: "bar"), tag: "tag"))]),
+            (#"tag LOGIN foo bar"# + CRLF, [.command(.init(type: .login(username: "foo", password: "bar"), tag: "tag"))]),
             // RENAME
             (#"tag RENAME "foo" "bar""# + CRLF, [.command(TaggedCommand(type: .rename(from: MailboxName("foo"), to: MailboxName("bar"), params: []), tag: "tag"))]),
             (#"tag RENAME InBoX "inBOX""# + CRLF, [.command(TaggedCommand(type: .rename(from: .inbox, to: .inbox, params: []), tag: "tag"))]),

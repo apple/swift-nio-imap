@@ -41,7 +41,7 @@ extension RoundtripTests {
             (.close, #line),
             (.expunge, #line),
 
-            (.login("user", "password"), #line),
+            (.login(username: "user", password: "password"), #line),
 
             (.authenticate("some", nil, ["abcd1234"]), #line),
             (.authenticate("some", .equals, ["abcd1234"]), #line),
