@@ -26,7 +26,7 @@ final class B2MV_Tests: XCTestCase {}
 
 extension B2MV_Tests {
     func testCommand() {
-        let inoutPairs: [(String, [NIOIMAP.CommandStream])] = [
+        let inoutPairs: [(String, [CommandStream])] = [
             // MARK: Capability
 
             ("tag CAPABILITY" + CRLF, [.command(.init("tag", .capability))]),
@@ -84,9 +84,9 @@ extension B2MV_Tests {
 
             // MARK: Rename
 
-            (#"tag RENAME "foo" "bar""# + CRLF, [.command(NIOIMAP.TaggedCommand("tag", .rename(from: NIOIMAP.MailboxName("foo"), to: NIOIMAP.MailboxName("bar"), params: [])))]),
-            (#"tag RENAME InBoX "inBOX""# + CRLF, [.command(NIOIMAP.TaggedCommand("tag", .rename(from: .inbox, to: .inbox, params: [])))]),
-            ("tag RENAME {1}\r\n1 {1}\r\n2" + CRLF, [.command(NIOIMAP.TaggedCommand("tag", .rename(from: NIOIMAP.MailboxName("1"), to: NIOIMAP.MailboxName("2"), params: [])))]),
+            (#"tag RENAME "foo" "bar""# + CRLF, [.command(TaggedCommand("tag", .rename(from: MailboxName("foo"), to: MailboxName("bar"), params: [])))]),
+            (#"tag RENAME InBoX "inBOX""# + CRLF, [.command(TaggedCommand("tag", .rename(from: .inbox, to: .inbox, params: [])))]),
+            ("tag RENAME {1}\r\n1 {1}\r\n2" + CRLF, [.command(TaggedCommand("tag", .rename(from: MailboxName("1"), to: MailboxName("2"), params: [])))]),
 
             // MARK: Subscribe
 
@@ -111,12 +111,12 @@ extension B2MV_Tests {
         do {
             try ByteToMessageDecoderVerifier.verifyDecoder(
                 stringInputOutputPairs: inoutPairs,
-                decoderFactory: { () -> NIOIMAP.CommandDecoder in
-                    NIOIMAP.CommandDecoder(autoSendContinuations: false)
+                decoderFactory: { () -> CommandDecoder in
+                    CommandDecoder(autoSendContinuations: false)
                 }
             )
         } catch {
-            switch error as? ByteToMessageDecoderVerifier.VerificationError<NIOIMAP.CommandStream> {
+            switch error as? ByteToMessageDecoderVerifier.VerificationError<CommandStream> {
             case .some(let error):
                 for input in error.inputs {
                     print(" input: \(String(decoding: input.readableBytesView, as: Unicode.UTF8.self))")
