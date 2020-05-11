@@ -18,10 +18,10 @@ extension BodyStructure {
     /// IMAPv4 `body-type-1part`
     public struct Singlepart: Equatable {
         public var type: Kind
-        public var `extension`: ExtensionSinglepart?
+        public var `extension`: Extension?
 
         /// Convenience function for a better experience when chaining multiple types.
-        public static func type(_ type: Kind, extension: ExtensionSinglepart?) -> Self {
+        public static func type(_ type: Kind, extension: Extension?) -> Self {
             Self(type: type, extension: `extension`)
         }
     }
@@ -70,6 +70,17 @@ extension BodyStructure.Singlepart {
             Self(mediaText: mediaText, fields: fields, lines: lines)
         }
     }
+
+    /// IMAPv4 `body-ext-1part`
+    public struct Extension: Equatable {
+        public let fieldMD5: NString
+        public var dspLanguage: BodyStructure.FieldDSPLanguage?
+
+        /// Convenience function for a better experience when chaining multiple types.
+        public static func fieldMD5(_ fieldMD5: NString, dspLanguage: BodyStructure.FieldDSPLanguage?) -> Self {
+            Self(fieldMD5: fieldMD5, dspLanguage: dspLanguage)
+        }
+    }
 }
 
 // MARK: - Encoding
@@ -115,5 +126,12 @@ extension ByteBuffer {
         self.writeMediaBasic(body.media) +
             self.writeSpace() +
             self.writeBodyFields(body.fields)
+    }
+
+    @discardableResult mutating func writeBodyExtensionSinglePart(_ ext: BodyStructure.Singlepart.Extension) -> Int {
+        self.writeNString(ext.fieldMD5) +
+            self.writeIfExists(ext.dspLanguage) { (dspLanguage) -> Int in
+                self.writeBodyFieldDSPLanguage(dspLanguage)
+            }
     }
 }

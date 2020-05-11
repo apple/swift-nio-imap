@@ -114,4 +114,19 @@ extension BodySinglepartTests {
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }
     }
+
+    func testEncode_extension() {
+        let inputs: [(BodyStructure.Singlepart.Extension, String, UInt)] = [
+            (.fieldMD5(nil, dspLanguage: nil), "NIL", #line),
+            (.fieldMD5("md5", dspLanguage: nil), "\"md5\"", #line),
+            (.fieldMD5("md5", dspLanguage: .fieldDSP(.string("string", parameter: []), fieldLanguage: nil)), "\"md5\" (\"string\" NIL)", #line),
+        ]
+
+        for (test, expectedString, line) in inputs {
+            self.testBuffer.clear()
+            let size = self.testBuffer.writeBodyExtensionSinglePart(test)
+            XCTAssertEqual(size, expectedString.utf8.count, line: line)
+            XCTAssertEqual(self.testBufferString, expectedString, line: line)
+        }
+    }
 }

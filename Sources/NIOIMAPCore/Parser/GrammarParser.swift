@@ -276,26 +276,26 @@ extension GrammarParser {
     }
 
     // body-ext-1part  = body-fld-md5 [SP body-fld-dsp [SP body-fld-lang [SP body-fld-loc *(SP body-extension)]]]
-    static func parseBodyExtSinglePart(buffer: inout ByteBuffer, tracker: StackTracker) throws -> BodyStructure.ExtensionSinglepart {
-        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> BodyStructure.ExtensionSinglepart in
+    static func parseBodyExtSinglePart(buffer: inout ByteBuffer, tracker: StackTracker) throws -> BodyStructure.Singlepart.Extension {
+        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> BodyStructure.Singlepart.Extension in
             let md5 = try self.parseNString(buffer: &buffer, tracker: tracker)
             let dsp = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> BodyStructure.FieldDSPLanguage in
                 try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
                 return try parseBodyDescriptionLanguage(buffer: &buffer, tracker: tracker)
             }
-            return BodyStructure.ExtensionSinglepart(fieldMD5: md5, dspLanguage: dsp)
+            return BodyStructure.Singlepart.Extension(fieldMD5: md5, dspLanguage: dsp)
         }
     }
 
     // body-ext-mpart  = body-fld-param [SP body-fld-dsp [SP body-fld-lang [SP body-fld-loc *(SP body-extension)]]]
-    static func parseBodyExtMpart(buffer: inout ByteBuffer, tracker: StackTracker) throws -> BodyStructure.ExtensionMultipart {
-        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> BodyStructure.ExtensionMultipart in
+    static func parseBodyExtMpart(buffer: inout ByteBuffer, tracker: StackTracker) throws -> BodyStructure.Multipart.Extension {
+        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> BodyStructure.Multipart.Extension in
             let param = try self.parseBodyFieldParam(buffer: &buffer, tracker: tracker)
             let dsp = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> BodyStructure.FieldDSPLanguage in
                 try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
                 return try parseBodyDescriptionLanguage(buffer: &buffer, tracker: tracker)
             }
-            return BodyStructure.ExtensionMultipart(parameter: param, dspLanguage: dsp)
+            return BodyStructure.Multipart.Extension(parameter: param, dspLanguage: dsp)
         }
     }
 
@@ -474,7 +474,7 @@ extension GrammarParser {
                 parseBodyTypeSinglePart_message,
                 parseBodyTypeSinglePart_text,
             ], buffer: &buffer, tracker: tracker)
-            let ext = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> BodyStructure.ExtensionSinglepart in
+            let ext = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> BodyStructure.Singlepart.Extension in
                 try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
                 return try self.parseBodyExtSinglePart(buffer: &buffer, tracker: tracker)
             }
@@ -501,7 +501,7 @@ extension GrammarParser {
             }
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
             let media = try self.parseMediaSubtype(buffer: &buffer, tracker: tracker)
-            let ext = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> BodyStructure.ExtensionMultipart in
+            let ext = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> BodyStructure.Multipart.Extension in
                 try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
                 return try self.parseBodyExtMpart(buffer: &buffer, tracker: tracker)
             }
