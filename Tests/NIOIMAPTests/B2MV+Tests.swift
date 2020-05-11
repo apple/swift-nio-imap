@@ -107,6 +107,11 @@ extension B2MV_Tests {
             // MARK: Check
 
             ("tag CHECK" + CRLF, [.command(.init("tag", .check))]),
+            
+            // MARK: List
+            
+            ("tag LIST INBOX \"\"" + CRLF, [.command(.init("tag", .list(nil, .inbox, .mailbox(""), [])))]),
+            ("tag LIST /Mail/ %" + CRLF, [.command(.init("tag", .list(nil, .init("/Mail/"), .mailbox("%"), [])))]),
         ]
         do {
             try ByteToMessageDecoderVerifier.verifyDecoder(
