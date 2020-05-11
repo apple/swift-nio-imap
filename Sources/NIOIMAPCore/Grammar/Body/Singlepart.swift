@@ -20,7 +20,7 @@ extension BodyStructure {
         public var type: Kind
         public var `extension`: Extension?
 
-        public init(type: BodyStructure.Singlepart.Kind, extension: BodyStructure.ExtensionSinglepart? = nil) {
+        public init(type: BodyStructure.Singlepart.Kind, extension: Extension? = nil) {
             self.type = type
             self.extension = `extension`
         }
@@ -83,8 +83,9 @@ extension BodyStructure.Singlepart {
         public var dspLanguage: BodyStructure.FieldDSPLanguage?
 
         /// Convenience function for a better experience when chaining multiple types.
-        public static func fieldMD5(_ fieldMD5: NString, dspLanguage: BodyStructure.FieldDSPLanguage?) -> Self {
-            Self(fieldMD5: fieldMD5, dspLanguage: dspLanguage)
+        init(fieldMD5: NString, dspLanguage: BodyStructure.FieldDSPLanguage?) {
+            self.fieldMD5 = fieldMD5
+            self.dspLanguage = dspLanguage
         }
     }
 }

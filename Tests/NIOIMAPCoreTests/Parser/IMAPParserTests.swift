@@ -1955,8 +1955,8 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     func testParsePartialRange() {
         let inputs: [(String, String, Partial.Range, UInt)] = [
-            ("1", " ", Partial.Range(num1: 1, num2: nil), #line),
-            ("1.2", " ", Partial.Range(num1: 1, num2: 2), #line),
+            ("1", " ", Partial.Range(from: 1, to: nil), #line),
+            ("1.2", " ", Partial.Range(from: 1, to: 2), #line),
         ]
         self.iterateTestInputs(inputs, testFunction: GrammarParser.parsePartialRange)
     }

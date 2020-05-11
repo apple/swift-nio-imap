@@ -295,7 +295,7 @@ extension GrammarParser {
                 try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
                 return try parseBodyDescriptionLanguage(buffer: &buffer, tracker: tracker)
             }
-            return BodyStructure.Multipart.Extension(parameter: param, dspLanguage: dsp)
+            return BodyStructure.Multipart.Extension(parameters: param, dspLanguage: dsp)
         }
     }
 
@@ -2513,7 +2513,7 @@ extension GrammarParser {
                 try ParserLibrary.parseFixedString(".", buffer: &buffer, tracker: tracker)
                 return try self.parseNZNumber(buffer: &buffer, tracker: tracker)
             }
-            return Partial.Range(num1: num1, num2: num2)
+            return Partial.Range(from: num1, to: num2)
         }
     }
 

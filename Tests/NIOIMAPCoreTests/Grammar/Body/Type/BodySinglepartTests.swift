@@ -114,9 +114,9 @@ extension BodySinglepartTests {
 
     func testEncode_extension() {
         let inputs: [(BodyStructure.Singlepart.Extension, String, UInt)] = [
-            (.fieldMD5(nil, dspLanguage: nil), "NIL", #line),
-            (.fieldMD5("md5", dspLanguage: nil), "\"md5\"", #line),
-            (.fieldMD5("md5", dspLanguage: .fieldDSP(.string("string", parameter: []), fieldLanguage: nil)), "\"md5\" (\"string\" NIL)", #line),
+            (.init(fieldMD5: nil, dspLanguage: nil), "NIL", #line),
+            (.init(fieldMD5: "md5", dspLanguage: nil), "\"md5\"", #line),
+            (.init(fieldMD5: "md5", dspLanguage: .init(fieldDSP: .init(string: "string", parameter: []), fieldLanguage: nil)), "\"md5\" (\"string\" NIL)", #line),
         ]
 
         for (test, expectedString, line) in inputs {
