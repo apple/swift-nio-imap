@@ -116,6 +116,11 @@ extension B2MV_Tests {
             // MARK: LSUB
             
             ("tag LSUB INBOX \"\"" + CRLF, [.command(.init("tag", .lsub(.inbox, "")))]),
+            
+            // MARK: Status
+            
+            ("tag STATUS INBOX (MESSAGES)" + CRLF, [.command(.init("tag", .status(.inbox, [.messages])))]),
+            ("tag STATUS INBOX (MESSAGES RECENT UIDNEXT)" + CRLF, [.command(.init("tag", .status(.inbox, [.messages, .recent, .uidnext])))]),
         ]
         do {
             try ByteToMessageDecoderVerifier.verifyDecoder(
