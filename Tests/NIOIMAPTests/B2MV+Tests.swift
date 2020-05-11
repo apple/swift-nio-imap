@@ -112,6 +112,10 @@ extension B2MV_Tests {
             
             ("tag LIST INBOX \"\"" + CRLF, [.command(.init("tag", .list(nil, .inbox, .mailbox(""), [])))]),
             ("tag LIST /Mail/ %" + CRLF, [.command(.init("tag", .list(nil, .init("/Mail/"), .mailbox("%"), [])))]),
+            
+            // MARK: LSUB
+            
+            ("tag LSUB INBOX \"\"" + CRLF, [.command(.init("tag", .lsub(.inbox, "")))]),
         ]
         do {
             try ByteToMessageDecoderVerifier.verifyDecoder(
