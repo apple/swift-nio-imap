@@ -17,12 +17,12 @@ import struct NIO.ByteBuffer
 extension BodyStructure {
     /// IMAPv4 `body-type-mpart`
     public struct Multipart: Equatable {
-        public var bodies: [BodyStructure]
-        public var mediaSubtype: String
+        public var parts: [BodyStructure]
+        public var mediaSubtype: MediaSubtype
         public var multipartExtension: Extension?
 
-        public init(bodies: [BodyStructure], mediaSubtype: String, multipartExtension: Extension? = nil) {
-            self.bodies = bodies
+        public init(parts: [BodyStructure], mediaSubtype: MediaSubtype, multipartExtension: Extension? = nil) {
+            self.parts = parts
             self.mediaSubtype = mediaSubtype
             self.multipartExtension = multipartExtension
         }
@@ -41,17 +41,38 @@ extension BodyStructure.Multipart {
             self.dspLanguage = dspLanguage
         }
     }
+    
+    public struct MediaSubtype: Equatable {
+        
+        var _backing: String
+        
+        public static var alternative: Self {
+            return .init(_backing: "multipart/alternative")
+        }
+        
+        public static var related: Self {
+            return .init(_backing: "multipart/related")
+        }
+        
+        public static var mixed: Self {
+            return .init(_backing: "multipart/mixed")
+        }
+        
+        public static func other(_ string: String) -> Self {
+            return .init(_backing: string)
+        }
+    }
 }
 
 // MARK: - Encoding
 
 extension EncodeBuffer {
     @discardableResult mutating func writeBodyTypeMultipart(_ part: BodyStructure.Multipart) -> Int {
-        part.bodies.reduce(into: 0) { (result, body) in
+        part.parts.reduce(into: 0) { (result, body) in
             result += self.writeBody(body)
         } +
             self.writeSpace() +
-            self.writeIMAPString(part.mediaSubtype) +
+            self.writeMediaSubtype(part.mediaSubtype) +
             self.writeIfExists(part.multipartExtension) { (ext) -> Int in
                 self.writeSpace() +
                     self.writeBodyExtensionMultipart(ext)
@@ -63,5 +84,9 @@ extension EncodeBuffer {
             self.writeIfExists(ext.dspLanguage) { (dspLanguage) -> Int in
                 self.writeBodyFieldDSPLanguage(dspLanguage)
             }
+    }
+    
+    @discardableResult mutating func writeMediaSubtype(_ type: BodyStructure.Multipart.MediaSubtype) -> Int {
+        self.writeString(type._backing)
     }
 }

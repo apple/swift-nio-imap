@@ -47,9 +47,9 @@ extension Media {
     /// IMAPv4 `media-basic`
     public struct Basic: Equatable {
         public var type: BasicType
-        public var subtype: String
+        public var subtype: BodyStructure.Multipart.MediaSubtype
 
-        public init(type: Media.BasicType, subtype: String) {
+        public init(type: Media.BasicType, subtype: BodyStructure.Multipart.MediaSubtype) {
             self.type = type
             self.subtype = subtype
         }
@@ -71,6 +71,6 @@ extension EncodeBuffer {
     @discardableResult mutating func writeMediaBasic(_ media: Media.Basic) -> Int {
         self.writeMediaBasicType(media.type) +
             self.writeSpace() +
-            self.writeIMAPString(media.subtype)
+            self.writeMediaSubtype(media.subtype)
     }
 }

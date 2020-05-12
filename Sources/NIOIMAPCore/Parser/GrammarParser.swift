@@ -504,7 +504,7 @@ extension GrammarParser {
     //                   [SP body-ext-mpart]
     static func parseBodyTypeMultipart(buffer: inout ByteBuffer, tracker: StackTracker) throws -> BodyStructure.Multipart {
         try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> BodyStructure.Multipart in
-            let bodies = try ParserLibrary.parseOneOrMore(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
+            let parts = try ParserLibrary.parseOneOrMore(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
                 try self.parseBody(buffer: &buffer, tracker: tracker)
             }
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
@@ -513,7 +513,7 @@ extension GrammarParser {
                 try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
                 return try self.parseBodyExtMpart(buffer: &buffer, tracker: tracker)
             }
-            return BodyStructure.Multipart(bodies: bodies, mediaSubtype: media, multipartExtension: ext)
+            return BodyStructure.Multipart(parts: parts, mediaSubtype: media, multipartExtension: ext)
         }
     }
 
@@ -2051,17 +2051,18 @@ extension GrammarParser {
     }
 
     // media-subtype   = string
-    static func parseMediaSubtype(buffer: inout ByteBuffer, tracker: StackTracker) throws -> String {
-        var buffer = try self.parseString(buffer: &buffer, tracker: tracker)
-        return buffer.readString(length: buffer.readableBytes)!
+    static func parseMediaSubtype(buffer: inout ByteBuffer, tracker: StackTracker) throws -> BodyStructure.Multipart.MediaSubtype {
+        let buffer = try self.parseString(buffer: &buffer, tracker: tracker)
+        let string = String(buffer: buffer)
+        return .init(_backing: string)
     }
 
     // media-text      = DQUOTE "TEXT" DQUOTE SP media-subtype
     static func parseMediaText(buffer: inout ByteBuffer, tracker: StackTracker) throws -> String {
         try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> String in
             try ParserLibrary.parseFixedString("\"TEXT\" ", buffer: &buffer, tracker: tracker)
-            let subtype = try self.parseMediaSubtype(buffer: &buffer, tracker: tracker)
-            return subtype
+            let subtype = try self.parseString(buffer: &buffer, tracker: tracker)
+            return String(buffer: subtype)
         }
     }
 
