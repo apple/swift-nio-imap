@@ -195,6 +195,10 @@ extension B2MV_Tests {
             
             // MARK: Exists
             ("* 23 EXISTS" + CRLF, [.untaggedResponse(.mailboxData(.exists(23)))]),
+            
+            // MARK: Recent
+            ("* 5 RECENT" + CRLF, [.untaggedResponse(.mailboxData(.recent(5)))]),
+            
         ]
         do {
             try ByteToMessageDecoderVerifier.verifyDecoder(
