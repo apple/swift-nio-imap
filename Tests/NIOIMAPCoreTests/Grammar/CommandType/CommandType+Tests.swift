@@ -25,7 +25,7 @@ extension CommandType_Tests {
         let inputs: [(Command, String, UInt)] = [
             (.list(nil, .init(""), .mailbox(""), []), "LIST \"\" \"\" RETURN ()", #line),
             (.namespace, "NAMESPACE", #line),
-            (.login(username: " ", password: " "), "LOGIN \" \" \" \"", #line)
+            (.login(username: " ", password: " "), "LOGIN \" \" \" \"", #line),
         ]
 
         for (input, expectedString, line) in inputs {
