@@ -190,6 +190,8 @@ extension B2MV_Tests {
             // MARK: Capability
             ("* CAPABILITY IMAP4rev1 CHILDREN CONDSTORE" + CRLF, [.untaggedResponse(.capabilityData([.imap4rev1, .children, .condStore]))]),
             
+            // MARK: Flags
+            ("* FLAGS (\\Answered \\Seen)" + CRLF, [.untaggedResponse(.mailboxData(.flags([.answered, .seen])))]),
         ]
         do {
             try ByteToMessageDecoderVerifier.verifyDecoder(
