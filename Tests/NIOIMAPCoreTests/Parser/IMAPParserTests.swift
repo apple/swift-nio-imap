@@ -518,23 +518,6 @@ extension ParserUnitTests {
     }
 }
 
-// MARK: - parseBodyTypeBasic
-
-extension ParserUnitTests {
-    func testParseBodyBasic_valid() {
-        TestUtilities.withBuffer(#""APPLICATION" "something" ("f1" "v1") "id" "desc" "8BIT" 1234"#, terminator: " ") { (buffer) in
-            let result = try GrammarParser.parseBodyTypeBasic(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(result.media.type, .application)
-            XCTAssertEqual(result.media.subtype, "something")
-            XCTAssertEqual(result.fields.parameter, [.init(field: "f1", value: "v1")])
-            XCTAssertEqual(result.fields.id, "id")
-            XCTAssertEqual(result.fields.description, "desc")
-            XCTAssertEqual(result.fields.encoding, .eightBit)
-            XCTAssertEqual(result.fields.octets, 1234)
-        }
-    }
-}
-
 // MARK: - capability parseCapability
 
 extension ParserUnitTests {

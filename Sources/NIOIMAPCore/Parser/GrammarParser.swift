@@ -456,40 +456,52 @@ extension GrammarParser {
     // body-type-1part = (body-type-basic / body-type-msg / body-type-text)
     //                   [SP body-ext-1part]
     static func parseBodyTypeSinglePart(buffer: inout ByteBuffer, tracker: StackTracker) throws -> BodyStructure.Singlepart {
-        func parseBodyTypeSinglePart_basic(buffer: inout ByteBuffer, tracker: StackTracker) throws -> BodyStructure.Singlepart.Kind {
-            .basic(try self.parseBodyTypeBasic(buffer: &buffer, tracker: tracker))
+        
+        func parseBodyTypeSinglePart_extension(buffer: inout ByteBuffer, tracker: StackTracker) throws -> BodyStructure.Singlepart.Extension {
+            try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
+            return try self.parseBodyExtSinglePart(buffer: &buffer, tracker: tracker)
         }
-
-        func parseBodyTypeSinglePart_message(buffer: inout ByteBuffer, tracker: StackTracker) throws -> BodyStructure.Singlepart.Kind {
-            .message(try self.parseBodyTypeMessage(buffer: &buffer, tracker: tracker))
-        }
-
-        func parseBodyTypeSinglePart_text(buffer: inout ByteBuffer, tracker: StackTracker) throws -> BodyStructure.Singlepart.Kind {
-            .text(try self.parseBodyTypeText(buffer: &buffer, tracker: tracker))
-        }
-
-        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> BodyStructure.Singlepart in
-            let type = try ParserLibrary.parseOneOf([
-                parseBodyTypeSinglePart_basic,
-                parseBodyTypeSinglePart_message,
-                parseBodyTypeSinglePart_text,
-            ], buffer: &buffer, tracker: tracker)
-            let ext = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> BodyStructure.Singlepart.Extension in
-                try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
-                return try self.parseBodyExtSinglePart(buffer: &buffer, tracker: tracker)
-            }
-            return BodyStructure.Singlepart(type: type, extension: ext)
-        }
-    }
-
-    // body-type-basic = media-basic SP body-fields
-    static func parseBodyTypeBasic(buffer: inout ByteBuffer, tracker: StackTracker) throws -> BodyStructure.Singlepart.Basic {
-        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> BodyStructure.Singlepart.Basic in
+        
+        func parseBodyTypeSinglePart_basic(buffer: inout ByteBuffer, tracker: StackTracker) throws -> BodyStructure.Singlepart {
             let media = try self.parseMediaBasic(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
             let fields = try self.parseBodyFields(buffer: &buffer, tracker: tracker)
-            return BodyStructure.Singlepart.Basic(media: media, fields: fields)
+            let basic = BodyStructure.Singlepart.Basic(media: media)
+            let ext = try parseBodyTypeSinglePart_extension(buffer: &buffer, tracker: tracker)
+            return BodyStructure.Singlepart(type: .basic(basic), fields: fields, extension: ext)
         }
+
+        func parseBodyTypeSinglePart_message(buffer: inout ByteBuffer, tracker: StackTracker) throws -> BodyStructure.Singlepart {
+            let mediaMessage = try self.parseMediaMessage(buffer: &buffer, tracker: tracker)
+            try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
+            let fields = try self.parseBodyFields(buffer: &buffer, tracker: tracker)
+            try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
+            let envelope = try self.parseEnvelope(buffer: &buffer, tracker: tracker)
+            try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
+            let body = try self.parseBody(buffer: &buffer, tracker: tracker)
+            try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
+            let fieldLines = try self.parseBodyFieldLines(buffer: &buffer, tracker: tracker)
+            let message = BodyStructure.Singlepart.Message(message: mediaMessage, envelope: envelope, body: body, fieldLines: fieldLines)
+            let ext = try parseBodyTypeSinglePart_extension(buffer: &buffer, tracker: tracker)
+            return BodyStructure.Singlepart(type: .message(message), fields: fields, extension: ext)
+        }
+
+        func parseBodyTypeSinglePart_text(buffer: inout ByteBuffer, tracker: StackTracker) throws -> BodyStructure.Singlepart {
+            let media = try self.parseMediaText(buffer: &buffer, tracker: tracker)
+            try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
+            let fields = try self.parseBodyFields(buffer: &buffer, tracker: tracker)
+            try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
+            let fieldLines = try self.parseBodyFieldLines(buffer: &buffer, tracker: tracker)
+            let text = BodyStructure.Singlepart.Text(mediaText: media, lines: fieldLines)
+            let ext = try parseBodyTypeSinglePart_extension(buffer: &buffer, tracker: tracker)
+            return BodyStructure.Singlepart(type: .text(text), fields: fields, extension: ext)
+        }
+
+        return try ParserLibrary.parseOneOf([
+            parseBodyTypeSinglePart_basic,
+            parseBodyTypeSinglePart_message,
+            parseBodyTypeSinglePart_text
+        ], buffer: &buffer, tracker: tracker)
     }
 
     // body-type-mpart = 1*body SP media-subtype
@@ -506,35 +518,6 @@ extension GrammarParser {
                 return try self.parseBodyExtMpart(buffer: &buffer, tracker: tracker)
             }
             return BodyStructure.Multipart(bodies: bodies, mediaSubtype: media, multipartExtension: ext)
-        }
-    }
-
-    // body-type-msg   = media-message SP body-fields SP envelope
-    //                   SP body SP body-fld-lines
-    static func parseBodyTypeMessage(buffer: inout ByteBuffer, tracker: StackTracker) throws -> BodyStructure.Singlepart.Message {
-        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> BodyStructure.Singlepart.Message in
-            let message = try self.parseMediaMessage(buffer: &buffer, tracker: tracker)
-            try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
-            let bodyFields = try self.parseBodyFields(buffer: &buffer, tracker: tracker)
-            try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
-            let envelope = try self.parseEnvelope(buffer: &buffer, tracker: tracker)
-            try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
-            let body = try self.parseBody(buffer: &buffer, tracker: tracker)
-            try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
-            let fieldLines = try self.parseBodyFieldLines(buffer: &buffer, tracker: tracker)
-            return BodyStructure.Singlepart.Message(message: message, fields: bodyFields, envelope: envelope, body: body, fieldLines: fieldLines)
-        }
-    }
-
-    // body-type-text  = media-text SP body-fields SP body-fld-lines
-    static func parseBodyTypeText(buffer: inout ByteBuffer, tracker: StackTracker) throws -> BodyStructure.Singlepart.Text {
-        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> BodyStructure.Singlepart.Text in
-            let media = try self.parseMediaText(buffer: &buffer, tracker: tracker)
-            try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
-            let bodyFields = try self.parseBodyFields(buffer: &buffer, tracker: tracker)
-            try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
-            let fieldLines = try self.parseBodyFieldLines(buffer: &buffer, tracker: tracker)
-            return BodyStructure.Singlepart.Text(mediaText: media, fields: bodyFields, lines: fieldLines)
         }
     }
 

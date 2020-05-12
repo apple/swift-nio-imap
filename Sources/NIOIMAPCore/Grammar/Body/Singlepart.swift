@@ -107,14 +107,14 @@ extension ByteBuffer {
         return size
     }
 
-    @discardableResult mutating func writeBodyTypeText(_ body: BodyStructure.Singlepart.Text, fields: BodyStructure.Fields) -> Int {
+    @discardableResult private mutating func writeBodyTypeText(_ body: BodyStructure.Singlepart.Text, fields: BodyStructure.Fields) -> Int {
         self.writeMediaText(body.mediaText) +
             self.writeSpace() +
             self.writeBodyFields(fields) +
             self.writeString(" \(body.lines)")
     }
 
-    @discardableResult mutating func writeBodyTypeMessage(_ message: BodyStructure.Singlepart.Message, fields: BodyStructure.Fields) -> Int {
+    @discardableResult private mutating func writeBodyTypeMessage(_ message: BodyStructure.Singlepart.Message, fields: BodyStructure.Fields) -> Int {
         self.writeMediaMessage(message.message) +
             self.writeSpace() +
             self.writeBodyFields(fields) +
@@ -125,7 +125,7 @@ extension ByteBuffer {
             self.writeString(" \(message.fieldLines)")
     }
 
-    @discardableResult mutating func writeBodyTypeBasic(_ body: BodyStructure.Singlepart.Basic, fields: BodyStructure.Fields) -> Int {
+    @discardableResult private mutating func writeBodyTypeBasic(_ body: BodyStructure.Singlepart.Basic, fields: BodyStructure.Fields) -> Int {
         self.writeMediaBasic(body.media) +
             self.writeSpace() +
             self.writeBodyFields(fields)
