@@ -124,12 +124,10 @@ extension B2MV_Tests {
             
             // MARK: Append
             
-            ("tag APPEND box (\\Seen) {3}\r\nabc" + CRLF, [
-                .command(.init("tag", .append(to: .init("box"), firstMessageMetadata: .options(.flagList([.seen], dateTime: nil, extensions: []), data: .init(byteCount: 3))))),
-                .bytes("a"),
-                .bytes("b"),
-                .bytes("c")
-            ])
+//            ("tag APPEND box (\\Seen) {1}\r\na" + CRLF, [
+//                .command(.init("tag", .append(to: .init("box"), firstMessageMetadata: .options(.flagList([.seen], dateTime: nil, extensions: []), data: .init(byteCount: 1))))),
+//                .bytes("a"),
+//            ])
         ]
         do {
             try ByteToMessageDecoderVerifier.verifyDecoder(
