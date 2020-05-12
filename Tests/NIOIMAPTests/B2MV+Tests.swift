@@ -202,12 +202,17 @@ extension B2MV_Tests {
             // MARK: Expunge
             ("* 20 EXPUNGE" + CRLF, [.untaggedResponse(.messageData(.expunge(20)))]),
             
+            // Tagged
+            ("tag OK Complete" + CRLF, [.taggedResponse(.tag("tag", state: .ok(.code(nil, text: "Complete"))))]),
+            ("tag NO [ALERT] Complete" + CRLF, [.taggedResponse(.tag("tag", state: .no(.code(.alert, text: "Complete"))))]),
+            ("tag BAD [PARSE] Complete" + CRLF, [.taggedResponse(.tag("tag", state: .bad(.code(.parse, text: "Complete"))))]),
+            
         ]
         do {
             try ByteToMessageDecoderVerifier.verifyDecoder(
                 stringInputOutputPairs: inoutPairs,
                 decoderFactory: { () -> ResponseDecoder in
-                    ResponseDecoder()
+                    ResponseDecoder(mode: .response)
                 }
             )
         } catch {
