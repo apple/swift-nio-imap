@@ -1778,7 +1778,7 @@ extension GrammarParser {
             let response = try self.parseEsearchResponse(buffer: &buffer, tracker: tracker)
             return .esearch(response)
         }
-        
+
         func parseMailboxData_search(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxName.Data {
             try ParserLibrary.parseFixedString("SEARCH", buffer: &buffer, tracker: tracker)
             let nums = try ParserLibrary.parseZeroOrMore(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> Int in

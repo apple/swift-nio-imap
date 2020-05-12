@@ -51,12 +51,12 @@ extension ByteBuffer {
             return self.writeNamespaceResponse(namespaceResponse)
         }
     }
-    
+
     private mutating func writeMailboxData_search(_ list: [Int]) -> Int {
         self.writeString("SEARCH") +
-        self.writeArray(list, separator: "", parenthesis: false) { (num, buffer) -> Int in
-            buffer.writeString(" \(num)")
-        }
+            self.writeArray(list, separator: "", parenthesis: false) { (num, buffer) -> Int in
+                buffer.writeString(" \(num)")
+            }
     }
 
     private mutating func writeMailboxData_flags(_ flags: [Flag]) -> Int {
