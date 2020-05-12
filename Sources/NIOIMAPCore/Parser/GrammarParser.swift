@@ -456,12 +456,11 @@ extension GrammarParser {
     // body-type-1part = (body-type-basic / body-type-msg / body-type-text)
     //                   [SP body-ext-1part]
     static func parseBodyTypeSinglePart(buffer: inout ByteBuffer, tracker: StackTracker) throws -> BodyStructure.Singlepart {
-        
         func parseBodyTypeSinglePart_extension(buffer: inout ByteBuffer, tracker: StackTracker) throws -> BodyStructure.Singlepart.Extension {
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
             return try self.parseBodyExtSinglePart(buffer: &buffer, tracker: tracker)
         }
-        
+
         func parseBodyTypeSinglePart_basic(buffer: inout ByteBuffer, tracker: StackTracker) throws -> BodyStructure.Singlepart {
             let media = try self.parseMediaBasic(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
@@ -500,7 +499,7 @@ extension GrammarParser {
         return try ParserLibrary.parseOneOf([
             parseBodyTypeSinglePart_basic,
             parseBodyTypeSinglePart_message,
-            parseBodyTypeSinglePart_text
+            parseBodyTypeSinglePart_text,
         ], buffer: &buffer, tracker: tracker)
     }
 
