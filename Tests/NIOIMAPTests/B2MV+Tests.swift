@@ -192,6 +192,9 @@ extension B2MV_Tests {
             
             // MARK: Flags
             ("* FLAGS (\\Answered \\Seen)" + CRLF, [.untaggedResponse(.mailboxData(.flags([.answered, .seen])))]),
+            
+            // MARK: Exists
+            ("* 23 EXISTS" + CRLF, [.untaggedResponse(.mailboxData(.exists(23)))]),
         ]
         do {
             try ByteToMessageDecoderVerifier.verifyDecoder(
