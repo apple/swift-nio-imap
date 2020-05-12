@@ -175,7 +175,7 @@ extension B2MV_Tests {
         
         let inoutPairs: [(String, [Response])] = [
             
-            // MARK: OK
+            // MARK: State responses
             ("* OK Server ready" + CRLF, [.untaggedResponse(.conditionalState(.ok(.code(nil, text: "Server ready"))))]),
             ("* OK [ALERT] Server ready" + CRLF, [.untaggedResponse(.conditionalState(.ok(.code(.alert, text: "Server ready"))))]),
             ("* NO Disk full" + CRLF, [.untaggedResponse(.conditionalState(.no(.code(nil, text: "Disk full"))))]),
@@ -190,6 +190,16 @@ extension B2MV_Tests {
             // MARK: Capability
             ("* CAPABILITY IMAP4rev1 CHILDREN CONDSTORE" + CRLF, [.untaggedResponse(.capabilityData([.imap4rev1, .children, .condStore]))]),
             
+            // MARK: LIST
+            
+            ("* LIST (\\NoSelect) \"/\" ~/Mail/foo" + CRLF, [.untaggedResponse(.mailboxData(.list(.flags(.oFlags([], sFlag: .noSelect), char: "/", mailbox: .init("~/Mail/foo"), listExtended: []))))]),
+            
+            // MARK: LSUB
+            
+            ("* LSUB (\\NoSelect) \"/\" ~/Mail/foo" + CRLF, [.untaggedResponse(.mailboxData(.lsub(.flags(.oFlags([], sFlag: .noSelect), char: "/", mailbox: .init("~/Mail/foo"), listExtended: []))))]),
+            
+            // MARK: Status
+            ("* STATUS INBOX (MESSAGES 231 UIDNEXT 44292)" + CRLF, [.untaggedResponse(.mailboxData(.status(.inbox, [.messages(231), .uidNext(44292)])))]),
             // MARK: Flags
             ("* FLAGS (\\Answered \\Seen)" + CRLF, [.untaggedResponse(.mailboxData(.flags([.answered, .seen])))]),
             
