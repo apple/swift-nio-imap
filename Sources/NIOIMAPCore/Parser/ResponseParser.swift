@@ -21,7 +21,7 @@ public struct ResponseParser: Parser {
         case separator
     }
 
-    enum Mode: Equatable {
+    public enum Mode: Equatable {
         case greeting
         case response
         case attributeBytes(Int)
