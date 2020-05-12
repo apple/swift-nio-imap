@@ -121,6 +121,13 @@ extension B2MV_Tests {
             
             ("tag STATUS INBOX (MESSAGES)" + CRLF, [.command(.init("tag", .status(.inbox, [.messages])))]),
             ("tag STATUS INBOX (MESSAGES RECENT UIDNEXT)" + CRLF, [.command(.init("tag", .status(.inbox, [.messages, .recent, .uidnext])))]),
+            
+            // MARK: Append
+            
+            ("tag APPEND box (\\Seen) {3}\r\nabc" + CRLF, [
+                .command(.init("tag", .append(to: .init("box"), firstMessageMetadata: .options(.flagList([.seen], dateTime: nil, extensions: []), data: .init(byteCount: 3))))),
+                .bytes("abc")
+            ])
         ]
         do {
             try ByteToMessageDecoderVerifier.verifyDecoder(
@@ -137,14 +144,21 @@ extension B2MV_Tests {
                 }
                 switch error.errorCode {
                 case .underProduction(let command):
-                    print("UNDER PRODUCTION")
+                    XCTFail("UNDER PRODUCTION")
                     print(command)
+                    return
                 case .wrongProduction(actual: let actualCommand, expected: let expectedCommand):
-                    print("WRONG PRODUCTION")
+                    XCTFail("WRONG PRODUCTION")
                     print(actualCommand)
                     print(expectedCommand)
+                    return
+                case .overProduction(let command):
+                    XCTFail("OVER PRODUCTION")
+                    print(command)
+                    return
                 default:
-                    print(error)
+                    XCTFail("\(error)")
+                    return
                 }
             case .none:
                 ()

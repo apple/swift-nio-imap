@@ -19,6 +19,7 @@ public struct CommandParser: Parser {
         case lines
         case idle
         case streamingAppend(Int)
+        case streamingEnd
     }
 
     let bufferLimit: Int
@@ -46,8 +47,11 @@ public struct CommandParser: Parser {
         switch self.mode {
         case .streamingAppend(let remaining):
             let bytes = self.parseBytes(buffer: &buffer, remaining: remaining)
-            try GrammarParser.parseCommandEnd(buffer: &buffer, tracker: .new)
             return .bytes(bytes)
+        case .streamingEnd:
+            try GrammarParser.parseCommandEnd(buffer: &buffer, tracker: .new)
+            self.mode = .lines
+            return try self.parseCommandStream0(buffer: &buffer)
         case .idle:
             try GrammarParser.parseIdleDone(buffer: &buffer, tracker: .new)
             self.mode = .lines
@@ -79,9 +83,8 @@ public struct CommandParser: Parser {
     /// - returns: A new `ByteBuffer` containing extracted bytes.
     private mutating func parseBytes(buffer: inout ByteBuffer, remaining: Int) -> ByteBuffer {
         if buffer.readableBytes >= remaining {
-            let bytes = buffer.readSlice(length: remaining)!
-            self.mode = .lines
-            return bytes
+            self.mode = .streamingEnd
+            return buffer.readSlice(length: remaining)!
         }
 
         let bytes = buffer.readSlice(length: buffer.readableBytes)!
