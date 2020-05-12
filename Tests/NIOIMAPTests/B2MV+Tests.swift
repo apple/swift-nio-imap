@@ -187,6 +187,9 @@ extension B2MV_Tests {
             ("* BYE logging off" + CRLF, [.untaggedResponse(.conditionalBye(.code(nil, text: "logging off")))]),
             ("* BYE [ALERT] logging off" + CRLF, [.untaggedResponse(.conditionalBye(.code(.alert, text: "logging off")))]),
             
+            // MARK: Capability
+            ("* CAPABILITY IMAP4rev1 CHILDREN CONDSTORE" + CRLF, [.untaggedResponse(.capabilityData([.imap4rev1, .children, .condStore]))]),
+            
         ]
         do {
             try ByteToMessageDecoderVerifier.verifyDecoder(
