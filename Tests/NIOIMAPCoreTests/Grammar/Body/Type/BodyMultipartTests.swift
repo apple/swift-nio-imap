@@ -40,7 +40,7 @@ extension BodyMultipartTests {
             (
                 .init(bodies: [
                     .singlepart(BodyStructure.Singlepart(type: .text(.init(mediaText: "subtype", lines: 5)), fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 6), extension: nil)),
-                    .singlepart(BodyStructure.Singlepart(type: .text(.init(mediaText: "subtype", lines: 6)), fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 6), extension: nil)),
+                    .singlepart(BodyStructure.Singlepart(type: .text(.init(mediaText: "subtype", lines: 6)), fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 7), extension: nil)),
                 ], mediaSubtype: "subtype", multipartExtension: nil),
                 "(\"TEXT\" \"subtype\" NIL NIL NIL \"BASE64\" 6 5)(\"TEXT\" \"subtype\" NIL NIL NIL \"BASE64\" 7 6) \"subtype\"",
                 #line

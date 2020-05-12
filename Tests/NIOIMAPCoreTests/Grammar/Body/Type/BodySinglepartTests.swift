@@ -29,8 +29,8 @@ extension BodySinglepartTests {
                 #line
             ),
             (
-                .init(type: .basic(.init(media: .init(type: .application, subtype: "subtype"))), fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 6), extension: .init(fieldMD5: "md5", dspLanguage: nil)),
-                "\"APPLICATION\" \"subtype\" NIL \"id\" \"desc\" \"BASE64\" 7 \"md5\"",
+                .init(type: .basic(.init(media: .init(type: .application, subtype: "subtype"))), fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 7), extension: .init(fieldMD5: "md5", dspLanguage: nil)),
+                "\"APPLICATION\" \"subtype\" NIL NIL NIL \"BASE64\" 7 \"md5\"",
                 #line
             ),
             (
