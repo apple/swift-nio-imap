@@ -20,7 +20,8 @@ extension MailboxName {
         case flags([Flag])
         case list(MailboxName.List)
         case lsub(MailboxName.List)
-        case search(ESearchResponse)
+        case search([Int])
+        case esearch(ESearchResponse)
         case status(MailboxName, [MailboxValue])
         case exists(Int)
         case namespace(NamespaceResponse)
@@ -38,7 +39,9 @@ extension ByteBuffer {
             return self.writeMailboxData_list(list)
         case .lsub(let list):
             return self.writeMailboxData_lsub(list)
-        case .search(let response):
+        case .search(let list):
+            return self.writeMailboxData_search(list)
+        case .esearch(let response):
             return self.writeESearchResponse(response)
         case .status(let mailbox, let list):
             return self.writeMailboxData_status(mailbox: mailbox, list: list)
@@ -46,6 +49,13 @@ extension ByteBuffer {
             return self.writeString("\(num) EXISTS")
         case .namespace(let namespaceResponse):
             return self.writeNamespaceResponse(namespaceResponse)
+        }
+    }
+    
+    private mutating func writeMailboxData_search(_ list: [Int]) -> Int {
+        self.writeString("SEARCH") +
+        self.writeArray(list, separator: "", parenthesis: false) { (num, buffer) -> Int in
+            buffer.writeString(" \(num)")
         }
     }
 

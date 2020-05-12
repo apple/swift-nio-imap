@@ -31,11 +31,14 @@ extension MailboxDataTests {
                 "LSUB (\\Draft) . \"Drafts\"",
                 #line
             ),
-            (.search(ESearchResponse(correlator: nil, uid: false, returnData: [.count(1)])), "ESEARCH COUNT 1", #line),
-            (.search(ESearchResponse(correlator: nil, uid: false, returnData: [.count(1), .count(2)])), "ESEARCH COUNT 1 COUNT 2", #line),
+            (.esearch(ESearchResponse(correlator: nil, uid: false, returnData: [.count(1)])), "ESEARCH COUNT 1", #line),
+            (.esearch(ESearchResponse(correlator: nil, uid: false, returnData: [.count(1), .count(2)])), "ESEARCH COUNT 1 COUNT 2", #line),
             (.status(.inbox, [.messages(1)]), "STATUS \"INBOX\" (MESSAGES 1)", #line),
             (.status(.inbox, [.messages(1), .unseen(2)]), "STATUS \"INBOX\" (MESSAGES 1 UNSEEN 2)", #line),
             (.namespace(.init(userNamespace: [], otherUserNamespace: [], sharedNamespace: [])), "NAMESPACE NIL NIL NIL", #line),
+            (.search([]), "SEARCH", #line),
+            (.search([1]), "SEARCH 1", #line),
+            (.search([1, 2, 3, 4, 5]), "SEARCH 1 2 3 4 5", #line),
         ]
 
         for (test, expectedString, line) in inputs {
