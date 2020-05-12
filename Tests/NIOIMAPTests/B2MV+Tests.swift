@@ -183,6 +183,10 @@ extension B2MV_Tests {
             ("* BAD horrible" + CRLF, [.untaggedResponse(.conditionalState(.bad(.code(nil, text: "horrible"))))]),
             ("* BAD [BADCHARSET (utf123)] horrible" + CRLF, [.untaggedResponse(.conditionalState(.bad(.code(.badCharset(["utf123"]), text: "horrible"))))]),
             
+            // MARK: Bye
+            ("* BYE logging off" + CRLF, [.untaggedResponse(.conditionalBye(.code(nil, text: "logging off")))]),
+            ("* BYE [ALERT] logging off" + CRLF, [.untaggedResponse(.conditionalBye(.code(.alert, text: "logging off")))]),
+            
         ]
         do {
             try ByteToMessageDecoderVerifier.verifyDecoder(
