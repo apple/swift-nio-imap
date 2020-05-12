@@ -26,9 +26,7 @@ public enum ParsingError: Error {
     case lineTooLong
 }
 
-struct IncompleteMessage: Error {
-    
-}
+struct IncompleteMessage: Error {}
 
 public enum GrammarParser {}
 
