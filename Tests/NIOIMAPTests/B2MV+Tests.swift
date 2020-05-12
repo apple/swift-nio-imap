@@ -199,6 +199,9 @@ extension B2MV_Tests {
             // MARK: Recent
             ("* 5 RECENT" + CRLF, [.untaggedResponse(.mailboxData(.recent(5)))]),
             
+            // MARK: Expunge
+            ("* 20 EXPUNGE" + CRLF, [.untaggedResponse(.messageData(.expunge(20)))]),
+            
         ]
         do {
             try ByteToMessageDecoderVerifier.verifyDecoder(
