@@ -175,6 +175,14 @@ extension B2MV_Tests {
         
         let inoutPairs: [(String, [Response])] = [
             
+            // MARK: OK
+            ("* OK Server ready" + CRLF, [.untaggedResponse(.conditionalState(.ok(.code(nil, text: "Server ready"))))]),
+            ("* OK [ALERT] Server ready" + CRLF, [.untaggedResponse(.conditionalState(.ok(.code(.alert, text: "Server ready"))))]),
+            ("* NO Disk full" + CRLF, [.untaggedResponse(.conditionalState(.no(.code(nil, text: "Disk full"))))]),
+            ("* NO [READ-ONLY] Disk full" + CRLF, [.untaggedResponse(.conditionalState(.no(.code(.readOnly, text: "Disk full"))))]),
+            ("* BAD horrible" + CRLF, [.untaggedResponse(.conditionalState(.bad(.code(nil, text: "horrible"))))]),
+            ("* BAD [BADCHARSET (utf123)] horrible" + CRLF, [.untaggedResponse(.conditionalState(.bad(.code(.badCharset(["utf123"]), text: "horrible"))))]),
+            
         ]
         do {
             try ByteToMessageDecoderVerifier.verifyDecoder(
