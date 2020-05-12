@@ -34,7 +34,7 @@ class CommandRoundtripHandler_PromiseTests: XCTestCase {
     func testPromiseIsNotDropped_shouldThrow() {
         let buffer = self.channel.allocator.buffer(capacity: 0)
         XCTAssertThrowsError(try self.channel.writeOutbound(buffer)) { e in
-            XCTAssertTrue(e is ParsingError, "Error \(e)")
+            XCTAssertTrue(e is ImapError, "Error \(e)")
         }
         XCTAssertNoThrow(XCTAssertNil(try self.channel.readOutbound(as: ByteBuffer.self)))
     }

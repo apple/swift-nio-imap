@@ -18,6 +18,10 @@ import NIOIMAP
 import NIOIMAPCore
 import NIOSSL
 
+struct ImapError: Error {
+    var message: String
+}
+
 public class CommandRoundtripHandler: ChannelOutboundHandler {
     public typealias OutboundIn = ByteBuffer
     public typealias OutboundOut = ByteBuffer
@@ -34,7 +38,7 @@ public class CommandRoundtripHandler: ChannelOutboundHandler {
         do {
             var originalBufferCopy = originalBuffer
             guard let commandStream = try parser.parseCommandStream(buffer: &originalBufferCopy) else {
-                promise?.fail(ParsingError.incompleteMessage) // TODO: this leaks implementation details
+                promise?.fail(ImapError(message: "Need more data to parse a command"))
                 return
             }
 

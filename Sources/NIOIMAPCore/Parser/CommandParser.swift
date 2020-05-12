@@ -120,7 +120,7 @@ public struct CommandParser: Parser {
         do {
             return try GrammarParser.parseCommand(buffer: &buffer, tracker: tracker)
         } catch is ParsingError {
-            throw ParsingError.incompleteMessage
+            throw IncompleteMessage()
         }
     }
 }

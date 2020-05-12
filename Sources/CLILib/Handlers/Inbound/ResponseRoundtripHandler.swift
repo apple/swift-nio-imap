@@ -35,7 +35,10 @@ public class ResponseRoundtripHandler: ChannelInboundHandler {
             var originalBufferCopy = originalBuffer
             var responses = [ResponseOrContinueRequest]()
             while originalBufferCopy.readableBytes > 0 {
-                responses.append(try self.parser.parseResponseStream(buffer: &originalBufferCopy))
+                guard let response = try self.parser.parseResponseStream(buffer: &originalBufferCopy) else {
+                    throw ImapError(message: "Need more data to parse a response")
+                }
+                responses.append(response)
             }
 
             var roundtripBuffer = context.channel.allocator.buffer(capacity: originalBuffer.readableBytes)
