@@ -1384,7 +1384,7 @@ extension ParserUnitTests {
                 .list(.init(flags: .init(oFlags: [.other("\\oflag1"), .other("\\oflag2")], sFlag: nil), char: nil, mailbox: .inbox, listExtended: [])),
                 #line
             ),
-            ("ESEARCH MIN 1 MAX 2", "\r\n", .search(.init(correlator: nil, uid: false, returnData: [.min(1), .max(2)])), #line),
+            ("ESEARCH MIN 1 MAX 2", "\r\n", .esearch(.init(correlator: nil, uid: false, returnData: [.min(1), .max(2)])), #line),
             ("1234 EXISTS", "\r\n", .exists(1234), #line),
             ("5678 RECENT", "\r\n", .exists(5678), #line),
             ("STATUS INBOX ()", "\r\n", .status(.inbox, []), #line),
@@ -1395,6 +1395,9 @@ extension ParserUnitTests {
                 .lsub(.init(flags: .init(oFlags: [.other("\\seen"), .other("\\draft")], sFlag: nil), char: nil, mailbox: .inbox, listExtended: [])),
                 #line
             ),
+            ("SEARCH", "\r\n", .search([]), #line),
+            ("SEARCH 1", "\r\n", .search([1]), #line),
+            ("SEARCH 1 2 3 4 5", "\r\n", .search([1, 2, 3, 4, 5]), #line),
         ]
         self.iterateTestInputs(inputs, testFunction: GrammarParser.parseMailboxData)
     }
