@@ -30,7 +30,7 @@ public enum Command: Equatable {
     case subscribe(MailboxName)
     case unsubscribe(MailboxName)
     case authenticate(String, InitialResponse?, [ByteBuffer])
-    case login(String, String)
+    case login(username: String, password: String)
     case starttls
     case check
     case close
@@ -245,9 +245,9 @@ extension ByteBuffer {
 
     private mutating func writeCommandType_login(userID: String, password: String) -> Int {
         self.writeString("LOGIN ") +
-            self.writeUserID(userID) +
+            self.writeIMAPString(userID) +
             self.writeSpace() +
-            self.writeString(password)
+            self.writeIMAPString(password)
     }
 
     private mutating func writeCommandType_startTLS() -> Int {

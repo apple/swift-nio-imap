@@ -1733,7 +1733,7 @@ extension GrammarParser {
             let userid = try Self.parseUserId(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseFixedString(" ", buffer: &buffer, tracker: tracker)
             let password = try Self.parsePassword(buffer: &buffer, tracker: tracker)
-            return .login(userid, password)
+            return .login(username: userid, password: password)
         }
     }
 
