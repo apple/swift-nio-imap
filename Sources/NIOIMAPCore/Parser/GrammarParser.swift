@@ -499,8 +499,8 @@ extension GrammarParser {
         }
 
         return try ParserLibrary.parseOneOf([
-            parseBodyTypeSinglePart_basic,
             parseBodyTypeSinglePart_message,
+            parseBodyTypeSinglePart_basic,
             parseBodyTypeSinglePart_text,
         ], buffer: &buffer, tracker: tracker)
     }

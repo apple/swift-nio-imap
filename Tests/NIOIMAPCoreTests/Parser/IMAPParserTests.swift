@@ -558,11 +558,18 @@ extension ParserUnitTests {
         
         let messageInputs: [(String, String, BodyStructure.Singlepart, UInt)] = [
             (
-                "\"AUDIO\" \"some\" NIL NIL NIL \"BASE64\" 5",
+                "\"MESSAGE\" \"RFC822\" NIL NIL NIL \"BASE64\" 4 (NIL NIL NIL NIL NIL NIL NIL NIL NIL NIL) (\"FONT\" \"SF\" NIL NIL NIL \"BINARY\" 5) 8",
                 "\r\n",
                 .init(
-                    type: .basic(.init(media: .init(type: .audio, subtype: "some"))),
-                    fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 5),
+                    type: .message(
+                        .init(
+                            message: .rfc822,
+                            envelope: Envelope.init(date: nil, subject: nil, from: [], sender: [], reply: [], to: [], cc: [], bcc: [], inReplyTo: nil, messageID: nil),
+                            body: .singlepart(.init(type: .basic(.init(media: .init(type: .font, subtype: "SF"))), fields: .init(parameter: [], id: nil, description: nil, encoding: .binary, octets: 5))),
+                            fieldLines: 8
+                        )
+                    ),
+                    fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 4),
                     extension: nil
                 ),
                 #line
