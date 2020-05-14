@@ -24,28 +24,50 @@ extension BodySinglepartTests {
     func testEncode() {
         let inputs: [(BodyStructure.Singlepart, String, UInt)] = [
             (
-                .init(type: .basic(.init(media: .init(type: .application, subtype: "subtype"))), fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 6), extension: nil),
+                .init(
+                    type: .basic(.init(media: .init(type: .application, subtype: "subtype"))),
+                    fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 6),
+                    extension: nil
+                ),
                 "\"APPLICATION\" \"subtype\" NIL NIL NIL \"BASE64\" 6",
                 #line
             ),
             (
-                .init(type: .basic(.init(media: .init(type: .application, subtype: "subtype"))), fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 7), extension: .init(fieldMD5: "md5", dspLanguage: nil)),
+                .init(
+                    type: .basic(.init(media: .init(type: .application, subtype: "subtype"))),
+                    fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 7),
+                    extension: .init(fieldMD5: "md5", dspLanguage: nil)
+                ),
                 "\"APPLICATION\" \"subtype\" NIL NIL NIL \"BASE64\" 7 \"md5\"",
                 #line
             ),
             (
-                .init(type: .text(.init(mediaText: "subtype", lines: 5)), fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 6), extension: nil),
+                .init(
+                    type: .text(.init(mediaText: "subtype", lines: 5)),
+                    fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 6),
+                    extension: nil
+                ),
                 "\"TEXT\" \"subtype\" NIL NIL NIL \"BASE64\" 6 5",
                 #line
             ),
             (
-                .init(type: .message(.init(message:
-                    .rfc822,
-                                           envelope: .init(date: "date", subject: nil, from: [], sender: [], reply: [], to: [], cc: [], bcc: [], inReplyTo: nil, messageID: nil),
-                                           body: .singlepart(.init(type: .text(.init(mediaText:
-                        "subtype",
-                                                                                     lines: 5)), fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 6), extension: nil)),
-                                           fieldLines: 8)), fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 6), extension: nil),
+                .init(
+                    type: .message(
+                        .init(
+                            message:.rfc822,
+                            envelope: .init(date: "date", subject: nil, from: [], sender: [], reply: [], to: [], cc: [], bcc: [], inReplyTo: nil, messageID: nil),
+                            body: .singlepart(
+                                .init(
+                                    type: .text(.init(mediaText:"subtype", lines: 5)),
+                                    fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 6),
+                                    extension: nil
+                                )
+                            ),
+                            fieldLines: 8
+                        )
+                    ),
+                    fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 6),
+                    extension: nil),
                 "\"MESSAGE\" \"RFC822\" NIL NIL NIL \"BASE64\" 6 (\"date\" NIL NIL NIL NIL NIL NIL NIL NIL NIL) (\"TEXT\" \"subtype\" NIL NIL NIL \"BASE64\" 6 5) 8",
                 #line
             ),

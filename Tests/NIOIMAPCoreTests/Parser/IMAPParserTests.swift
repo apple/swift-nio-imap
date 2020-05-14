@@ -518,6 +518,76 @@ extension ParserUnitTests {
     }
 }
 
+// MARK: - parseBodyTypeSinglepart
+
+extension ParserUnitTests {
+    
+    func testParseBodyTypeSinglepart() {
+        let basicInputs: [(String, String, BodyStructure.Singlepart, UInt)] = [
+            (
+                "\"AUDIO\" \"sub\" NIL NIL NIL \"BASE64\" 1",
+                "\r\n",
+                .init(
+                    type: .basic(.init(media: .init(type: .audio, subtype: "sub"))),
+                    fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 1),
+                    extension: nil
+                ),
+                #line
+            ),
+            (
+                "\"APPLICATION\" \"type\" NIL \"id\" \"description\" \"7BIT\" 2",
+                "\r\n",
+                .init(
+                    type: .basic(.init(media: .init(type: .application, subtype: "type"))),
+                    fields: .init(parameter: [], id: "id", description: "description", encoding: .sevenBit, octets: 2),
+                    extension: nil
+                ),
+                #line
+            ),
+            (
+                "\"VIDEO\" \"type\" (\"f1\" \"v1\") NIL NIL \"8BIT\" 3",
+                "\r\n",
+                .init(
+                    type: .basic(.init(media: .init(type: .video, subtype: "type"))),
+                    fields: .init(parameter: [.init(field: "f1", value: "v1")], id: nil, description: nil, encoding: .eightBit, octets: 3),
+                    extension: nil
+                ),
+                #line
+            ),
+        ]
+        
+        let messageInputs: [(String, String, BodyStructure.Singlepart, UInt)] = [
+            (
+                "\"AUDIO\" \"some\" NIL NIL NIL \"BASE64\" 5",
+                "\r\n",
+                .init(
+                    type: .basic(.init(media: .init(type: .audio, subtype: "some"))),
+                    fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 5),
+                    extension: nil
+                ),
+                #line
+            ),
+        ]
+        
+        let textInputs: [(String, String, BodyStructure.Singlepart, UInt)] = [
+            (
+                "\"AUDIO\" \"some\" NIL NIL NIL \"BASE64\" 5",
+                "\r\n",
+                .init(
+                    type: .basic(.init(media: .init(type: .audio, subtype: "some"))),
+                    fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 5),
+                    extension: nil
+                ),
+                #line
+            ),
+        ]
+        
+        let inputs = basicInputs + messageInputs + textInputs
+        self.iterateTestInputs(inputs, testFunction: GrammarParser.parseBodyTypeSinglePart)
+    }
+    
+}
+
 // MARK: - capability parseCapability
 
 extension ParserUnitTests {
