@@ -60,7 +60,12 @@ extension Media {
 
 extension ByteBuffer {
     @discardableResult mutating func writeMediaBasicType(_ type: Media.BasicType) -> Int {
-        self.writeString("\"\(type._backing)\"")
+        switch type {
+        case .application, .audio, .image, .message, .video:
+            return self.writeString("\"\(type._backing)\"")
+        default:
+            return self.writeString(type._backing)
+        }
     }
 
     @discardableResult mutating func writeMediaBasic(_ media: Media.Basic) -> Int {
