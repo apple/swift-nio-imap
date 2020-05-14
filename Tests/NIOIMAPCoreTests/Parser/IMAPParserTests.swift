@@ -704,8 +704,6 @@ extension ParserUnitTests {
             XCTAssertEqual(type, "some")
 
             XCTAssertEqual(dataArray, [])
-            // temporarily disable this check as the spec is unclear
-//            XCTAssertEqual(dataArray, ["111="])
         }
     }
 
