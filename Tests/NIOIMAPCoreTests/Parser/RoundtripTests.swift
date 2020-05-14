@@ -43,8 +43,8 @@ extension RoundtripTests {
 
             (.login(username: "user", password: "password"), #line),
 
-            (.authenticate("some", nil, ["abcd1234"]), #line),
-            (.authenticate("some", .equals, ["abcd1234"]), #line),
+            (.authenticate("some", nil, []), #line),
+            (.authenticate("some", .equals, []), #line),
 
             (.create(.inbox, []), #line),
             (.create(MailboxName("mailbox"), []), #line),
