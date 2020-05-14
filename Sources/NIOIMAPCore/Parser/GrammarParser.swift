@@ -1811,6 +1811,10 @@ extension GrammarParser {
             try ParserLibrary.parseFixedString(" RECENT", buffer: &buffer, tracker: tracker)
             return .exists(number)
         }
+        
+        func parseMailboxData_namespace(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxName.Data {
+            .namespace(try self.parseNamespaceResponse(buffer: &buffer, tracker: tracker))
+        }
 
         return try ParserLibrary.parseOneOf([
             parseMailboxData_flags,
@@ -1821,6 +1825,7 @@ extension GrammarParser {
             parseMailboxData_exists,
             parseMailboxData_recent,
             parseMailboxData_search,
+            parseMailboxData_namespace
         ], buffer: &buffer, tracker: tracker)
     }
 

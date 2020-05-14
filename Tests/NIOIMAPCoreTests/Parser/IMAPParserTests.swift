@@ -1398,6 +1398,7 @@ extension ParserUnitTests {
             ("SEARCH", "\r\n", .search([]), #line),
             ("SEARCH 1", "\r\n", .search([1]), #line),
             ("SEARCH 1 2 3 4 5", "\r\n", .search([1, 2, 3, 4, 5]), #line),
+            ("NAMESPACE NIL NIL NIL", "\r\n", .namespace(.init(userNamespace: [], otherUserNamespace: [], sharedNamespace: [])), #line)
         ]
         self.iterateTestInputs(inputs, testFunction: GrammarParser.parseMailboxData)
     }
