@@ -2630,7 +2630,7 @@ extension GrammarParser {
             let tag = try self.parseTag(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseFixedString(" ", buffer: &buffer, tracker: tracker)
             let state = try self.parseResponseConditionalState(buffer: &buffer, tracker: tracker)
-            try ParserLibrary.parseFixedString("\r\n", buffer: &buffer, tracker: tracker)
+            try ParserLibrary.parseNewline(buffer: &buffer, tracker: tracker)
             return TaggedResponse(tag: tag, state: state)
         }
     }
@@ -2757,6 +2757,7 @@ extension GrammarParser {
                 try ParserLibrary.parseFixedString("[", buffer: &buffer, tracker: tracker)
                 let code = try self.parseResponseTextCode(buffer: &buffer, tracker: tracker)
                 try ParserLibrary.parseFixedString("] ", buffer: &buffer, tracker: tracker)
+                try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
                 return code
             }
             let text = try self.parseText(buffer: &buffer, tracker: tracker)

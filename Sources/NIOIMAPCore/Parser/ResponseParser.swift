@@ -83,11 +83,18 @@ extension ResponseParser {
             return .untaggedResponse(response)
         }
 
+        func parseResponse_fetch_end(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Response {
+            try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)
+            try ParserLibrary.parseNewline(buffer: &buffer, tracker: tracker)
+            return .fetchResponse(.finish)
+        }
+
         try? ParserLibrary.parseSpace(buffer: &buffer, tracker: .new)
         do {
             let response = try ParserLibrary.parseOneOf([
                 parseResponse_fetch,
                 parseResponse_normal,
+                parseResponse_fetch_end,
             ], buffer: &buffer, tracker: .new)
             switch response {
             case .fetchResponse(.streamingEnd):
