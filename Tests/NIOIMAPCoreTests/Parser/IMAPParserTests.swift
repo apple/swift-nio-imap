@@ -521,7 +521,6 @@ extension ParserUnitTests {
 // MARK: - parseBodyTypeSinglepart
 
 extension ParserUnitTests {
-    
     func testParseBodyTypeSinglepart() {
         let basicInputs: [(String, String, BodyStructure.Singlepart, UInt)] = [
             (
@@ -555,7 +554,7 @@ extension ParserUnitTests {
                 #line
             ),
         ]
-        
+
         let messageInputs: [(String, String, BodyStructure.Singlepart, UInt)] = [
             (
                 "\"MESSAGE\" \"RFC822\" NIL NIL NIL \"BASE64\" 4 (NIL NIL NIL NIL NIL NIL NIL NIL NIL NIL) (\"IMAGE\" \"SF\" NIL NIL NIL \"BINARY\" 5) 8",
@@ -564,7 +563,7 @@ extension ParserUnitTests {
                     type: .message(
                         .init(
                             message: .rfc822,
-                            envelope: Envelope.init(date: nil, subject: nil, from: [], sender: [], reply: [], to: [], cc: [], bcc: [], inReplyTo: nil, messageID: nil),
+                            envelope: Envelope(date: nil, subject: nil, from: [], sender: [], reply: [], to: [], cc: [], bcc: [], inReplyTo: nil, messageID: nil),
                             body: .singlepart(.init(type: .basic(.init(media: .init(type: .image, subtype: "SF"))), fields: .init(parameter: [], id: nil, description: nil, encoding: .binary, octets: 5))),
                             fieldLines: 8
                         )
@@ -575,7 +574,7 @@ extension ParserUnitTests {
                 #line
             ),
         ]
-        
+
         let textInputs: [(String, String, BodyStructure.Singlepart, UInt)] = [
             (
                 "\"TEXT\" \"media\" NIL NIL NIL \"QUOTED-PRINTABLE\" 1 2",
@@ -588,11 +587,10 @@ extension ParserUnitTests {
                 #line
             ),
         ]
-        
+
         let inputs = basicInputs + messageInputs + textInputs
         self.iterateTestInputs(inputs, testFunction: GrammarParser.parseBodyTypeSinglePart)
     }
-    
 }
 
 // MARK: - capability parseCapability

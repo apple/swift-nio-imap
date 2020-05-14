@@ -54,11 +54,11 @@ extension BodySinglepartTests {
                 .init(
                     type: .message(
                         .init(
-                            message:.rfc822,
+                            message: .rfc822,
                             envelope: .init(date: "date", subject: nil, from: [], sender: [], reply: [], to: [], cc: [], bcc: [], inReplyTo: nil, messageID: nil),
                             body: .singlepart(
                                 .init(
-                                    type: .text(.init(mediaText:"subtype", lines: 5)),
+                                    type: .text(.init(mediaText: "subtype", lines: 5)),
                                     fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 6),
                                     extension: nil
                                 )
@@ -67,7 +67,8 @@ extension BodySinglepartTests {
                         )
                     ),
                     fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 6),
-                    extension: nil),
+                    extension: nil
+                ),
                 "\"MESSAGE\" \"RFC822\" NIL NIL NIL \"BASE64\" 6 (\"date\" NIL NIL NIL NIL NIL NIL NIL NIL NIL) (\"TEXT\" \"subtype\" NIL NIL NIL \"BASE64\" 6 5) 8",
                 #line
             ),
