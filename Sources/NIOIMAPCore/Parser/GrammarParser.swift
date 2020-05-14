@@ -500,8 +500,8 @@ extension GrammarParser {
 
         return try ParserLibrary.parseOneOf([
             parseBodyTypeSinglePart_message,
-            parseBodyTypeSinglePart_basic,
             parseBodyTypeSinglePart_text,
+            parseBodyTypeSinglePart_basic,
         ], buffer: &buffer, tracker: tracker)
     }
 
