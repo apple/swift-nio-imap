@@ -1385,7 +1385,7 @@ extension ParserUnitTests {
             ),
             ("ESEARCH MIN 1 MAX 2", "\r\n", .esearch(.init(correlator: nil, uid: false, returnData: [.min(1), .max(2)])), #line),
             ("1234 EXISTS", "\r\n", .exists(1234), #line),
-            ("5678 RECENT", "\r\n", .exists(5678), #line),
+            ("5678 RECENT", "\r\n", .recent(5678), #line),
             ("STATUS INBOX ()", "\r\n", .status(.inbox, []), #line),
             ("STATUS INBOX (MESSAGES 2)", "\r\n", .status(.inbox, [.messages(2)]), #line),
             (

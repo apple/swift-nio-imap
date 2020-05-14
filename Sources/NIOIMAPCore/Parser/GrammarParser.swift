@@ -1804,7 +1804,7 @@ extension GrammarParser {
         func parseMailboxData_recent(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxName.Data {
             let number = try self.parseNumber(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseFixedString(" RECENT", buffer: &buffer, tracker: tracker)
-            return .exists(number)
+            return .recent(number)
         }
 
         func parseMailboxData_namespace(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxName.Data {

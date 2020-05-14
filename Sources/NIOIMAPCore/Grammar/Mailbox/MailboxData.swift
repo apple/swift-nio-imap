@@ -24,6 +24,7 @@ extension MailboxName {
         case esearch(ESearchResponse)
         case status(MailboxName, [MailboxValue])
         case exists(Int)
+        case recent(Int)
         case namespace(NamespaceResponse)
     }
 }
@@ -47,6 +48,8 @@ extension ByteBuffer {
             return self.writeMailboxData_status(mailbox: mailbox, list: list)
         case .exists(let num):
             return self.writeString("\(num) EXISTS")
+        case .recent(let num):
+            return self.writeString("\(num) RECENT")
         case .namespace(let namespaceResponse):
             return self.writeNamespaceResponse(namespaceResponse)
         }
