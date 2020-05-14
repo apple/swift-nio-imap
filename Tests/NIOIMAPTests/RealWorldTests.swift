@@ -49,7 +49,7 @@ extension RealWorldTests {
                     .fetchResponse(.simpleAttribute(.uid(56))),
                     .fetchResponse(.simpleAttribute(.rfc822Size(34007))),
                     .fetchResponse(.finish),
-                    .taggedResponse(.tag("15.16", state: .ok(.code(nil, text: "Fetch completed (0.001 + 0.000 secs).")))),
+                    .taggedResponse(.init(tag: "15.16", state: .ok(.init(code: nil, text: "Fetch completed (0.001 + 0.000 secs).")))),
                 ]
             ),
         ]

@@ -2757,7 +2757,6 @@ extension GrammarParser {
                 try ParserLibrary.parseFixedString("[", buffer: &buffer, tracker: tracker)
                 let code = try self.parseResponseTextCode(buffer: &buffer, tracker: tracker)
                 try ParserLibrary.parseFixedString("] ", buffer: &buffer, tracker: tracker)
-                try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
                 return code
             }
             let text = try self.parseText(buffer: &buffer, tracker: tracker)
