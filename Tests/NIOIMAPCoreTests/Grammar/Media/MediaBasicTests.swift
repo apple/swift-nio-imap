@@ -28,8 +28,8 @@ extension MediaBasicTests {
             (.image, #""IMAGE""#, #line),
             (.audio, #""AUDIO""#, #line),
             (.message, #""MESSAGE""#, #line),
-            (.font, #""FONT""#, #line),
-            (.other("type"), "\"type\"", #line),
+            (.font, #"FONT"#, #line),
+            (.other("type"), "TYPE", #line),
         ]
 
         for (test, expectedString, line) in inputs {
