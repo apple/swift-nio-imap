@@ -694,7 +694,7 @@ extension ParserUnitTests {
     }
 
     func testParseCommandNonAuth_valid_authenticate() {
-        TestUtilities.withBuffer("AUTHENTICATE some\r\n111=", terminator: " ") { (buffer) in
+        TestUtilities.withBuffer("AUTHENTICATE some", terminator: "\r\n") { (buffer) in
             let result = try GrammarParser.parseCommandNonauth(buffer: &buffer, tracker: .testTracker)
             guard case .authenticate(let type, let initial, let dataArray) = result else {
                 XCTFail("Case mixup \(result)")
@@ -703,8 +703,9 @@ extension ParserUnitTests {
             XCTAssertNil(initial)
             XCTAssertEqual(type, "some")
 
+            XCTAssertEqual(dataArray, [])
             // temporarily disable this check as the spec is unclear
-            XCTAssertEqual(dataArray, ["111="])
+//            XCTAssertEqual(dataArray, ["111="])
         }
     }
 
