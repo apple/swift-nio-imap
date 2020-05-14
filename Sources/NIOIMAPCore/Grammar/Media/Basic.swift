@@ -15,14 +15,33 @@
 import struct NIO.ByteBuffer
 
 extension Media {
-    public enum BasicType: Equatable {
-        case application
-        case audio
-        case image
-        case message
-        case video
-        case font
-        case other(ByteBuffer)
+    public struct BasicType: Equatable {
+        var _backing: String
+
+        /// IMAP4rev1 APPLICATION
+        public static var application: Self { .init(_backing: "APPLICATION") }
+
+        /// IMAP4rev1 AUDIO
+        public static var audio: Self { .init(_backing: "AUDIO") }
+
+        /// IMAP4rev1 IMAGE
+        public static var image: Self { .init(_backing: "IMAGE") }
+
+        /// IMAP4rev1 MESSAGE
+        public static var message: Self { .init(_backing: "MESSAGE") }
+
+        /// IMAP4rev1 VIDEO
+        public static var video: Self { .init(_backing: "VIDEO") }
+
+        /// IMAP4rev1 FONT
+        public static var font: Self { .init(_backing: "FONT") }
+
+        /// Creates a new type with the given `String`.
+        /// - parameter string: The type to create. Note that the `String` will be uppercased.
+        /// - returns: A new type from the given `String`.
+        public static func other(_ string: String) -> Self {
+            self.init(_backing: string.uppercased())
+        }
     }
 
     /// IMAPv4 `media-basic`
@@ -41,22 +60,7 @@ extension Media {
 
 extension ByteBuffer {
     @discardableResult mutating func writeMediaBasicType(_ type: Media.BasicType) -> Int {
-        switch type {
-        case .application:
-            return self.writeString(#""APPLICATION""#)
-        case .audio:
-            return self.writeString(#""AUDIO""#)
-        case .image:
-            return self.writeString(#""IMAGE""#)
-        case .message:
-            return self.writeString(#""MESSAGE""#)
-        case .video:
-            return self.writeString(#""VIDEO""#)
-        case .font:
-            return self.writeString(#""FONT""#)
-        case .other(let buffer):
-            return self.writeIMAPString(buffer)
-        }
+        self.writeString(type._backing)
     }
 
     @discardableResult mutating func writeMediaBasic(_ media: Media.Basic) -> Int {

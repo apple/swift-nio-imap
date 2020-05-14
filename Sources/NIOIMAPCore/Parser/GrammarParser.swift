@@ -2023,7 +2023,8 @@ extension GrammarParser {
         }
 
         func parseMediaBasic_Type_other(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Media.BasicType {
-            .other(try self.parseString(buffer: &buffer, tracker: tracker))
+            let buffer = try self.parseString(buffer: &buffer, tracker: tracker)
+            return .other(String(buffer: buffer))
         }
 
         return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Media.Basic in

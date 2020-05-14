@@ -29,7 +29,7 @@ extension MediaBasicTests {
             (.audio, #""AUDIO""#, #line),
             (.message, #""MESSAGE""#, #line),
             (.font, #""FONT""#, #line),
-            (.other("type"), "\"type\"", #line),
+            (.other("type"), "\"TYPE\"", #line),
         ]
 
         for (test, expectedString, line) in inputs {
