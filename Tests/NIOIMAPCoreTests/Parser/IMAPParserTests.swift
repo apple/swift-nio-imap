@@ -558,14 +558,14 @@ extension ParserUnitTests {
         
         let messageInputs: [(String, String, BodyStructure.Singlepart, UInt)] = [
             (
-                "\"MESSAGE\" \"RFC822\" NIL NIL NIL \"BASE64\" 4 (NIL NIL NIL NIL NIL NIL NIL NIL NIL NIL) (\"FONT\" \"SF\" NIL NIL NIL \"BINARY\" 5) 8",
+                "\"MESSAGE\" \"RFC822\" NIL NIL NIL \"BASE64\" 4 (NIL NIL NIL NIL NIL NIL NIL NIL NIL NIL) (\"IMAGE\" \"SF\" NIL NIL NIL \"BINARY\" 5) 8",
                 "\r\n",
                 .init(
                     type: .message(
                         .init(
                             message: .rfc822,
                             envelope: Envelope.init(date: nil, subject: nil, from: [], sender: [], reply: [], to: [], cc: [], bcc: [], inReplyTo: nil, messageID: nil),
-                            body: .singlepart(.init(type: .basic(.init(media: .init(type: .font, subtype: "SF"))), fields: .init(parameter: [], id: nil, description: nil, encoding: .binary, octets: 5))),
+                            body: .singlepart(.init(type: .basic(.init(media: .init(type: .image, subtype: "SF"))), fields: .init(parameter: [], id: nil, description: nil, encoding: .binary, octets: 5))),
                             fieldLines: 8
                         )
                     ),
@@ -578,11 +578,11 @@ extension ParserUnitTests {
         
         let textInputs: [(String, String, BodyStructure.Singlepart, UInt)] = [
             (
-                "\"AUDIO\" \"some\" NIL NIL NIL \"BASE64\" 5",
+                "\"TEXT\" \"media\" NIL NIL NIL \"QUOTED-PRINTABLE\" 1 2",
                 "\r\n",
                 .init(
-                    type: .basic(.init(media: .init(type: .audio, subtype: "some"))),
-                    fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 5),
+                    type: .text(.init(mediaText: "media", lines: 2)),
+                    fields: .init(parameter: [], id: nil, description: nil, encoding: .quotedPrintable, octets: 1),
                     extension: nil
                 ),
                 #line
