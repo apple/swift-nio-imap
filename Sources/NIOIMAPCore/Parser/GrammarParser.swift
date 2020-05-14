@@ -166,16 +166,11 @@ extension GrammarParser {
             }
 
             // NOTE: Spec is super unclear, so we're ignoring the possibility of multiple base 64 chunks right now
-            //            let data = try ParserLibrary.parseZeroOrMore(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> Base64 in
-            //                try ParserLibrary.parseFixedString("\r\n", buffer: &buffer, tracker: tracker)
-            //                return try self.parseBase64(buffer: &buffer, tracker: tracker)
-            //            }
-
-            let data = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> [ByteBuffer] in
-                try ParserLibrary.parseFixedString("\r\n", buffer: &buffer, tracker: tracker)
-                return [try self.parseBase64(buffer: &buffer, tracker: tracker)]
-            } ?? []
-            return .authenticate(authType, initial, data)
+//            let data = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> [ByteBuffer] in
+//                try ParserLibrary.parseFixedString("\r\n", buffer: &buffer, tracker: tracker)
+//                return [try self.parseBase64(buffer: &buffer, tracker: tracker)]
+//            } ?? []
+            return .authenticate(authType, initial, [])
         }
     }
 
