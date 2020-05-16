@@ -82,7 +82,7 @@ extension ByteBuffer {
         case .streamingEnd:
             return 0 // do nothing, this is a "fake" event
         case .finish:
-            return self.writeString(")")
+            return self.writeString(")\r\n")
         }
     }
 
