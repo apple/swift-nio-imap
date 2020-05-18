@@ -17,7 +17,6 @@ import struct NIO.ByteBufferView
 import struct NIO.CircularBuffer
 
 public struct EncodeBuffer {
-    
     public enum Mode: Equatable {
         case client
         case server(streamingAttributes: Bool = false)
