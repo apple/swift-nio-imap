@@ -47,19 +47,19 @@ extension BodyStructure.Multipart {
         var _backing: String
         
         public static var alternative: Self {
-            return .init(_backing: "multipart/alternative")
+            return .init("multipart/alternative")
         }
         
         public static var related: Self {
-            return .init(_backing: "multipart/related")
+            return .init("multipart/related")
         }
         
         public static var mixed: Self {
-            return .init(_backing: "multipart/mixed")
+            return .init("multipart/mixed")
         }
         
-        public static func other(_ string: String) -> Self {
-            return .init(_backing: string)
+        public init(_ string: String) {
+            self._backing = string
         }
     }
 }
@@ -87,6 +87,6 @@ extension EncodeBuffer {
     }
     
     @discardableResult mutating func writeMediaSubtype(_ type: BodyStructure.Multipart.MediaSubtype) -> Int {
-        self.writeString(type._backing)
+        self.writeString("\"\(type._backing)\"")
     }
 }

@@ -42,7 +42,7 @@ extension MediaBasicTests {
 
     func testEncode() {
         let inputs: [(Media.Basic, String, UInt)] = [
-            (Media.Basic(type: .message, subtype: "subtype"), "\"MESSAGE\" \"subtype\"", #line),
+            (Media.Basic(type: .message, subtype: .mixed), "\"MESSAGE\" \"multipart/mixed\"", #line),
         ]
 
         for (test, expectedString, line) in inputs {
