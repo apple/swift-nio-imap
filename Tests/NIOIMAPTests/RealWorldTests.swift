@@ -32,35 +32,33 @@ extension RealWorldTests {
         15.16 OK Fetch completed (0.001 + 0.000 secs).
 
         """
-
-        let inoutPairs: [(String, [NIOIMAPCore.Response])] = [
+        
+        let inoutPairs: [(String, [NIOIMAPCore.ResponseOrContinueRequest])] = [
             (
                 input,
                 [
-                    .fetchResponse(.start(1)),
-                    .fetchResponse(.simpleAttribute(.uid(54))),
-                    .fetchResponse(.simpleAttribute(.rfc822Size(40639))),
-                    .fetchResponse(.finish),
-                    .fetchResponse(.start(2)),
-                    .fetchResponse(.simpleAttribute(.uid(55))),
-                    .fetchResponse(.simpleAttribute(.rfc822Size(27984))),
-                    .fetchResponse(.finish),
-                    .fetchResponse(.start(3)),
-                    .fetchResponse(.simpleAttribute(.uid(56))),
-                    .fetchResponse(.simpleAttribute(.rfc822Size(34007))),
-                    .fetchResponse(.finish),
-                    .taggedResponse(.init(tag: "15.16", state: .ok(.init(code: nil, text: "Fetch completed (0.001 + 0.000 secs).")))),
+                    .response(.fetchResponse(.start(1))),
+                    .response(.fetchResponse(.simpleAttribute(.uid(54)))),
+                    .response(.fetchResponse(.simpleAttribute(.rfc822Size(40639)))),
+                    .response(.fetchResponse(.finish)),
+                    .response(.fetchResponse(.start(2))),
+                    .response(.fetchResponse(.simpleAttribute(.uid(55)))),
+                    .response(.fetchResponse(.simpleAttribute(.rfc822Size(27984)))),
+                    .response(.fetchResponse(.finish)),
+                    .response(.fetchResponse(.start(3))),
+                    .response(.fetchResponse(.simpleAttribute(.uid(56)))),
+                    .response(.fetchResponse(.simpleAttribute(.rfc822Size(34007)))),
+                    .response(.fetchResponse(.finish)),
+                    .response(.taggedResponse(.init(tag: "15.16", state: .ok(.init(code: nil, text: "Fetch completed (0.001 + 0.000 secs)."))))),
                 ]
             ),
         ]
-
+        
         do {
             try ByteToMessageDecoderVerifier.verifyDecoder(
                 stringInputOutputPairs: inoutPairs,
                 decoderFactory: { () -> ResponseDecoder in
-                    var decoder = ResponseDecoder()
-                    decoder.parser.mode = .response
-                    return decoder
+                    ResponseDecoder(expectGreeting: false)
                 }
             )
         } catch {
