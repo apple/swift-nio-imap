@@ -419,7 +419,7 @@ extension ParserUnitTests {
         TestUtilities.withBuffer(#"("astring" ("f1" "v1"))"#) { (buffer) in
             let dsp = try GrammarParser.parseBodyFieldDsp(buffer: &buffer, tracker: .testTracker)
             XCTAssertNotNil(dsp)
-            XCTAssertEqual(dsp, BodyStructure.FieldDSPData(string: "astring", parameter: [.init(field: "f1", value: "v1")]))
+            XCTAssertEqual(dsp, BodyStructure.FieldDispositionData(string: "astring", parameter: [.init(field: "f1", value: "v1")]))
         }
     }
 

@@ -16,7 +16,7 @@ import struct NIO.ByteBuffer
 
 extension BodyStructure {
     /// IMAPv4 `body-fld-dsp`
-    public struct FieldDSPData: Equatable {
+    public struct FieldDispositionData: Equatable {
         public var string: ByteBuffer
         public var parameter: [FieldParameterPair]
 
@@ -30,7 +30,7 @@ extension BodyStructure {
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeBodyFieldDSP(_ dsp: BodyStructure.FieldDSPData?) -> Int {
+    @discardableResult mutating func writeBodyFieldDSP(_ dsp: BodyStructure.FieldDispositionData?) -> Int {
         guard let dsp = dsp else {
             return self.writeNil()
         }

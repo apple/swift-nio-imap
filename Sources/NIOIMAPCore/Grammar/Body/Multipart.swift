@@ -33,10 +33,10 @@ extension BodyStructure.Multipart {
     /// IMAPv4 `body-ext-multipart`
     public struct Extension: Equatable {
         public var parameter: [FieldParameterPair]
-        public var dspLanguage: BodyStructure.FieldDSPLanguage?
+        public var dspLanguage: BodyStructure.FieldDispositionLanguage?
 
         /// Convenience function for a better experience when chaining multiple types.
-        public init(parameters: [FieldParameterPair], dspLanguage: BodyStructure.FieldDSPLanguage?) {
+        public init(parameters: [FieldParameterPair], dspLanguage: BodyStructure.FieldDispositionLanguage?) {
             self.parameter = parameters
             self.dspLanguage = dspLanguage
         }
@@ -61,7 +61,7 @@ extension EncodeBuffer {
     @discardableResult mutating func writeBodyExtensionMultipart(_ ext: BodyStructure.Multipart.Extension) -> Int {
         self.writeBodyFieldParameters(ext.parameter) +
             self.writeIfExists(ext.dspLanguage) { (dspLanguage) -> Int in
-                self.writeBodyFieldDSPLanguage(dspLanguage)
+                self.writeBodyFieldDispositionLanguage(dspLanguage)
             }
     }
 

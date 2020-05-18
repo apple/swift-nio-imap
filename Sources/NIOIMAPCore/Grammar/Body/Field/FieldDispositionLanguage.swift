@@ -16,12 +16,12 @@ import struct NIO.ByteBuffer
 
 extension BodyStructure {
     /// Extracted from IMAPv4 `body-ext-`1part
-    public struct FieldDSPLanguage: Equatable {
-        public var fieldDSP: FieldDSPData?
+    public struct FieldDispositionLanguage: Equatable {
+        public var fieldDisposition: FieldDispositionData?
         public var fieldLanguage: FieldLanguageLocation?
 
-        public init(fieldDSP: BodyStructure.FieldDSPData? = nil, fieldLanguage: BodyStructure.FieldLanguageLocation? = nil) {
-            self.fieldDSP = fieldDSP
+        public init(fieldDisposition: FieldDispositionData? = nil, fieldLanguage: FieldLanguageLocation? = nil) {
+            self.fieldDisposition = fieldDisposition
             self.fieldLanguage = fieldLanguage
         }
     }
@@ -30,8 +30,8 @@ extension BodyStructure {
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeBodyFieldDSPLanguage(_ desc: BodyStructure.FieldDSPLanguage) -> Int {
+    @discardableResult mutating func writeBodyFieldDispositionLanguage(_ desc: BodyStructure.FieldDispositionLanguage) -> Int {
         self.writeSpace() +
-            self.writeBodyFieldDSP(desc.fieldDSP)
+            self.writeBodyFieldDSP(desc.fieldDisposition)
     }
 }
