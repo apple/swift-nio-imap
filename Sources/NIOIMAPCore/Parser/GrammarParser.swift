@@ -326,7 +326,7 @@ extension GrammarParser {
 
         func parseBodyFieldDsp_some(buffer: inout ByteBuffer, tracker: StackTracker) throws -> BodyStructure.FieldDispositionData? {
             try ParserLibrary.parseFixedString("(", buffer: &buffer, tracker: tracker)
-            let string = try self.parseString(buffer: &buffer, tracker: tracker)
+            let string = String(buffer: try self.parseString(buffer: &buffer, tracker: tracker))
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
             let param = try self.parseBodyFieldParam(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)
@@ -392,10 +392,10 @@ extension GrammarParser {
 
         func parseBodyFieldLanguage_multiple(buffer: inout ByteBuffer, tracker: StackTracker) throws -> BodyStructure.FieldLanguage {
             try ParserLibrary.parseFixedString("(", buffer: &buffer, tracker: tracker)
-            var array = [try self.parseString(buffer: &buffer, tracker: tracker)]
-            try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) -> ByteBuffer in
+            var array = [String(buffer: try self.parseString(buffer: &buffer, tracker: tracker))]
+            try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) -> String in
                 try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
-                return try self.parseString(buffer: &buffer, tracker: tracker)
+                return String(buffer: try self.parseString(buffer: &buffer, tracker: tracker))
             }
             try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)
             return .multiple(array)

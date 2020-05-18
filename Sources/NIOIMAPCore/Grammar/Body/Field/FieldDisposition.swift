@@ -17,10 +17,10 @@ import struct NIO.ByteBuffer
 extension BodyStructure {
     /// IMAPv4 `body-fld-dsp`
     public struct FieldDispositionData: Equatable {
-        public var string: ByteBuffer
+        public var string: String
         public var parameter: [FieldParameterPair]
 
-        public init(string: ByteBuffer, parameter: [FieldParameterPair]) {
+        public init(string: String, parameter: [FieldParameterPair]) {
             self.string = string
             self.parameter = parameter
         }

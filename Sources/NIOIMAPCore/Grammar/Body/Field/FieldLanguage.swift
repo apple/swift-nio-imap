@@ -18,7 +18,7 @@ extension BodyStructure {
     /// IMAPv4 `body-fld-lang`
     public enum FieldLanguage: Equatable {
         case single(NString)
-        case multiple([ByteBuffer])
+        case multiple([String])
     }
 }
 
