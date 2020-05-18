@@ -19,15 +19,14 @@ import XCTest
 class Response_Tests: EncodeTestClass {}
 
 // MARK: - Encoding
+
 extension Response_Tests {
-    
     func testEncode_fetchResponse_multiple() {
-        
         let inputs: [([NIOIMAPCore.FetchResponse], String, UInt)] = [
-            ([.start(1), .simpleAttribute(.rfc822Size(123)), .finish], "(RFC822.SIZE 123)", #line),
-            ([.start(1), .simpleAttribute(.uid(123)), .simpleAttribute(.rfc822Size(456)), .finish], "(UID 123 RFC822.SIZE 456)", #line),
+            ([.start(1), .simpleAttribute(.rfc822Size(123)), .finish], "(RFC822.SIZE 123)\r\n", #line),
+            ([.start(1), .simpleAttribute(.uid(123)), .simpleAttribute(.rfc822Size(456)), .finish], "(UID 123 RFC822.SIZE 456)\r\n", #line),
         ]
-        
+
         for (test, expectedString, line) in inputs {
             self.testBuffer.clear()
             let size = test.reduce(into: 0) { (size, response) in
@@ -37,6 +36,4 @@ extension Response_Tests {
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }
     }
-    
-    
 }
