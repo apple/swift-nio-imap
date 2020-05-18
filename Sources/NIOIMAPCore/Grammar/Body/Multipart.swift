@@ -64,7 +64,7 @@ extension EncodeBuffer {
                 self.writeBodyFieldDSPLanguage(dspLanguage)
             }
     }
-    
+
     @discardableResult mutating func writeMediaSubtype(_ type: BodyStructure.MediaSubtype) -> Int {
         self.writeString("\"\(type._backing)\"")
     }

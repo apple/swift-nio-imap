@@ -19,18 +19,17 @@ import XCTest
 class BodyStructure_Tests: EncodeTestClass {}
 
 // MARK: - init
+
 extension BodyStructure_Tests {
-    
     func testInit_mediaSubtype() {
         let type = BodyStructure.MediaSubtype("TYPE")
         XCTAssertEqual(type._backing, "type")
     }
-    
 }
 
 // MARK: - Encoding
+
 extension BodyStructure_Tests {
-    
     func testEncode_mediaSubtype() {
         let inputs: [(BodyStructure.MediaSubtype, String, UInt)] = [
             (.related, #""multipart/related""#, #line),
@@ -40,5 +39,4 @@ extension BodyStructure_Tests {
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeMediaSubtype($0) })
     }
-    
 }

@@ -60,7 +60,7 @@ extension BodyMultipartTests {
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeBodyExtensionMultipart($0) })
     }
-    
+
     func testEncode_mediaSubtype() {
         let inputs: [(BodyStructure.MediaSubtype, String, UInt)] = [
             (.alternative, "\"multipart/alternative\"", #line),
