@@ -26,7 +26,6 @@ extension MailboxName {
         case exists(Int)
         case recent(Int)
         case namespace(NamespaceResponse)
-        case recent(Int)
     }
 }
 
@@ -53,8 +52,6 @@ extension EncodeBuffer {
             return self.writeString("\(num) RECENT")
         case .namespace(let namespaceResponse):
             return self.writeNamespaceResponse(namespaceResponse)
-        case .recent(let num):
-            return self.writeString("\(num) RECENT")
         }
     }
 
