@@ -8,10 +8,11 @@ let package = Package(
     products: [
         .library(name: "NIOIMAP", targets: ["NIOIMAPCore"]),
     ], dependencies: [
-        .package(url: "https://github.com/apple/swift-nio", from: "2.16.0"),
+        .package(url: "https://github.com/apple/swift-nio", from: "2.17.0"),
         .package(url: "https://github.com/apple/swift-nio-extras", from: "1.4.0"),
         .package(url: "https://github.com/apple/swift-nio-ssl", from: "2.7.0"),
         .package(url: "https://github.com/apple/swift-log", from: "1.2.0"),
+        .package(url: "https://github.com/nicklockwood/SwiftFormat.git", .exact("0.44.10")),
     ],
     targets: [
         .target(
@@ -75,6 +76,13 @@ let package = Package(
                 "NIOIMAP",
                 .product(name: "NIO", package: "swift-nio"),
                 .product(name: "NIOSSL", package: "swift-nio-ssl"),
+            ]
+        ),
+
+        .target(
+            name: "NIOIMAPFormatter",
+            dependencies: [
+                .product(name: "swiftformat", package: "SwiftFormat"),
             ]
         ),
     ]

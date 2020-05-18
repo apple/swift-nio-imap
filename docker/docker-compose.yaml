@@ -28,7 +28,8 @@ services:
 
   test:
     <<: *common
-    command: /bin/bash -xcl "swift test -Xswiftc -warnings-as-errors --enable-test-discovery $${SANITIZER_ARG-}"
+    # no -warnings-as-errors until https://github.com/nicklockwood/SwiftFormat/issues/628 is fixed
+    command: /bin/bash -xcl "swift test --enable-test-discovery $${SANITIZER_ARG-}"
 
   # util
 
