@@ -32,7 +32,7 @@ extension RealWorldTests {
         15.16 OK Fetch completed (0.001 + 0.000 secs).
 
         """
-        
+
         let inoutPairs: [(String, [NIOIMAPCore.ResponseOrContinueRequest])] = [
             (
                 input,
@@ -53,7 +53,7 @@ extension RealWorldTests {
                 ]
             ),
         ]
-        
+
         do {
             try ByteToMessageDecoderVerifier.verifyDecoder(
                 stringInputOutputPairs: inoutPairs,
