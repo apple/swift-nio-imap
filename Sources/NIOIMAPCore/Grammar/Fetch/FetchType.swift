@@ -24,7 +24,7 @@ public enum FetchType: Equatable {
 
 // MARK: - Encoding
 
-extension ByteBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeFetchType(_ type: FetchType) -> Int {
         switch type {
         case .all:

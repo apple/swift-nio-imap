@@ -62,7 +62,7 @@ final class ParserIntegrationTests: XCTestCase {
             .serverChannelOption(ChannelOptions.socket(.init(SOL_SOCKET), .init(SO_REUSEADDR)), value: 1)
             .childChannelInitializer { channel in
                 channel.pipeline.addHandlers(
-                    ByteToMessageHandler(CommandDecoder()),
+                    IMAPServerHandler(),
                     CollectEverythingHandler(collectionDonePromise: collectionDonePromise)
                 )
             }
@@ -73,19 +73,19 @@ final class ParserIntegrationTests: XCTestCase {
             XCTAssertNoThrow(try server?.close().wait())
         }
 
-        var client: Channel?
-        XCTAssertNoThrow(client = try ClientBootstrap(group: group)
+        var maybeClient: Channel?
+        XCTAssertNoThrow(maybeClient = try ClientBootstrap(group: group)
             .connect(to: server?.localAddress ?? SocketAddress(unixDomainSocketPath: "should fail"))
             .wait())
-        XCTAssertNotNil(client)
-        guard client != nil else {
+        guard let client = maybeClient else {
+            XCTFail("couldn't connect client")
             return
         }
 
         // try a couple of examples
-        XCTAssertNoThrow(try client?.writeAndFlush("tag LOGIN \"1\" \"2\"\r\n" as ByteBuffer).wait())
-        XCTAssertNoThrow(try client?.writeAndFlush("tag NOOP\r\n" as ByteBuffer).wait())
-        XCTAssertNoThrow(try client?.close().wait())
+        XCTAssertNoThrow(try client.writeAndFlush("tag LOGIN \"1\" \"2\"\r\n" as ByteBuffer).wait())
+        XCTAssertNoThrow(try client.writeAndFlush("tag NOOP\r\n" as ByteBuffer).wait())
+        XCTAssertNoThrow(try client.close().wait())
 
         let expected: [CommandStream] = [
             .command(.init(type: .login(username: "1", password: "2"), tag: "tag")),

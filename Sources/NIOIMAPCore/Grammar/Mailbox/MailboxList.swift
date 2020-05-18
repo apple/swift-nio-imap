@@ -33,7 +33,7 @@ extension MailboxName {
 
 // MARK: - Encoding
 
-extension ByteBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeMailboxList(_ list: MailboxName.List) -> Int {
         self.writeString("(") +
             self.writeIfExists(list.flags) { (flags) -> Int in

@@ -26,7 +26,7 @@ public struct CreateParameter: Equatable {
 
 // MARK: - Encoding
 
-extension ByteBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeCreateParameters(_ params: [CreateParameter]) -> Int {
         guard params.count > 0 else {
             return 0 // don't do anything

@@ -22,7 +22,7 @@ public enum ListSelectBaseOption: Equatable {
 
 // MARK: - Encoding
 
-extension ByteBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeListSelectBaseOption(_ option: ListSelectBaseOption) -> Int {
         switch option {
         case .subscribed:

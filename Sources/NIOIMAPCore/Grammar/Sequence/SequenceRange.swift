@@ -55,7 +55,7 @@ extension SequenceRange: ExpressibleByIntegerLiteral {
 
 // MARK: - Encoding
 
-extension ByteBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeSequenceRange(_ range: SequenceRange) -> Int {
         self.writeSequenceNumber(range.closedRange.lowerBound) +
             self.writeIfTrue(range.closedRange.lowerBound < range.closedRange.upperBound) {

@@ -24,7 +24,7 @@ extension BodyStructure {
 
 // MARK: - Encoding
 
-extension ByteBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeBodyFieldLanguage(_ language: BodyStructure.FieldLanguage) -> Int {
         switch language {
         case .single(let string):

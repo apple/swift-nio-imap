@@ -22,7 +22,7 @@ public enum SectionSpec: Equatable {
 
 // MARK: - Encoding
 
-extension ByteBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeSection(_ section: SectionSpec?) -> Int {
         self.writeString("[") +
             self.writeIfExists(section) { (spec) -> Int in

@@ -31,7 +31,7 @@ public enum FetchAttribute: Equatable {
 
 // MARK: - Encoding
 
-extension ByteBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeFetchAttributeList(_ atts: [FetchAttribute]) -> Int {
         self.writeArray(atts) { (element, self) in
             self.writeFetchAttribute(element)

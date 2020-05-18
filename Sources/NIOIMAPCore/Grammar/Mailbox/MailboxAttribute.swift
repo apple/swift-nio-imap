@@ -38,7 +38,7 @@ public enum MailboxValue: Equatable {
 
 // MARK: - Encoding
 
-extension ByteBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeMailboxAttributes(_ atts: [MailboxAttribute]) -> Int {
         self.writeArray(atts, parenthesis: false) { (element, self) in
             self.writeMailboxAttribute(element)

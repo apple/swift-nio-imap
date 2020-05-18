@@ -25,7 +25,7 @@ public enum SearchReturnData: Equatable {
 
 // MARK: - Encoding
 
-extension ByteBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeSearchReturnData(_ data: SearchReturnData) -> Int {
         switch data {
         case .min(let num):

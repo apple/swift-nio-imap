@@ -22,7 +22,7 @@ public enum Greeting: Equatable {
 
 // MARK: - Encoding
 
-extension ByteBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeGreeting(_ greeting: Greeting) -> Int {
         var size = 0
         size += self.writeString("* ")

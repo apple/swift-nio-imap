@@ -32,7 +32,7 @@ public struct OptionExtension: Equatable {
 
 // MARK: - Encoding
 
-extension ByteBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeOptionExtension(_ option: OptionExtension) -> Int {
         var size = 0
         switch option.type {

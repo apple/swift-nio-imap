@@ -21,7 +21,7 @@ public enum EntryTypeResponse: Equatable {
 
 // MARK: - Encoding
 
-extension ByteBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeEntryTypeResponse(_ response: EntryTypeResponse) -> Int {
         switch response {
         case .private:

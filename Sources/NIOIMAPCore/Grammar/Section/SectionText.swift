@@ -22,7 +22,7 @@ public enum SectionText: Equatable {
 
 // MARK: - Encoding
 
-extension ByteBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeSectionText(_ text: SectionText) -> Int {
         switch text {
         case .mime:

@@ -27,7 +27,7 @@ public struct SearchReturnOptionExtension: Equatable {
 
 // MARK: - Encoding
 
-extension ByteBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeSearchReturnOptionExtension(_ option: SearchReturnOptionExtension) -> Int {
         self.writeTaggedExtensionLabel(option.modifierName) +
             self.writeIfExists(option.params) { (params) -> Int in

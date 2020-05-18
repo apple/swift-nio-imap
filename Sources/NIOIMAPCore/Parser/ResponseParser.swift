@@ -28,20 +28,21 @@ public struct ResponseParser: Parser {
     }
 
     let bufferLimit: Int
-    var mode: Mode = .greeting
+    private var mode: Mode
 
-    public init(bufferLimit: Int = 1_000) {
+    public init(bufferLimit: Int = 1_000, expectGreeting: Bool = true) {
         self.bufferLimit = bufferLimit
+        self.mode = expectGreeting ? .greeting : .response
     }
 
-    public mutating func parseResponseStream(buffer: inout ByteBuffer) throws -> Response {
+    public mutating func parseResponseStream(buffer: inout ByteBuffer) throws -> ResponseOrContinueRequest {
         switch self.mode {
         case .greeting:
-            return try self.parseGreeting(buffer: &buffer)
+            return try .response(self.parseGreeting(buffer: &buffer))
         case .response:
             return try self.parseResponse(buffer: &buffer)
         case .attributeBytes(let remaining):
-            return self.parseBytes(buffer: &buffer, remaining: remaining)
+            return .response(self.parseBytes(buffer: &buffer, remaining: remaining))
         }
     }
 
@@ -71,7 +72,7 @@ extension ResponseParser {
 // MARK: - Parse responses
 
 extension ResponseParser {
-    fileprivate mutating func parseResponse(buffer: inout ByteBuffer) throws -> Response {
+    fileprivate mutating func parseResponse(buffer: inout ByteBuffer) throws -> ResponseOrContinueRequest {
         func parseResponse_fetch(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Response {
             let response = try GrammarParser.parseFetchResponse(buffer: &buffer, tracker: tracker)
             return .fetchResponse(response)
@@ -96,19 +97,19 @@ extension ResponseParser {
             default:
                 break
             }
-            return response
+            return .response(response)
         } catch is ParserError {
             return try self._parseResponse(buffer: &buffer)
         }
     }
 
-    private mutating func _parseResponse(buffer: inout ByteBuffer) throws -> Response {
-        func parseResponse_continuation(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Response {
-            .continuationRequest(try GrammarParser.parseContinueRequest(buffer: &buffer, tracker: tracker))
+    private mutating func _parseResponse(buffer: inout ByteBuffer) throws -> ResponseOrContinueRequest {
+        func parseResponse_continuation(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ResponseOrContinueRequest {
+            .continueRequest(try GrammarParser.parseContinueRequest(buffer: &buffer, tracker: tracker))
         }
 
-        func parseResponse_tagged(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Response {
-            .taggedResponse(try GrammarParser.parseTaggedResponse(buffer: &buffer, tracker: tracker))
+        func parseResponse_tagged(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ResponseOrContinueRequest {
+            .response(.taggedResponse(try GrammarParser.parseTaggedResponse(buffer: &buffer, tracker: tracker)))
         }
 
         return try ParserLibrary.parseOneOf([

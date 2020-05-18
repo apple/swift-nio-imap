@@ -27,7 +27,7 @@ public struct TaggedResponse: Equatable {
 
 // MARK: - Encoding
 
-extension ByteBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeTaggedResponse(_ response: TaggedResponse) -> Int {
         self.writeString("\(response.tag) ") +
             self.writeResponseConditionalState(response.state) +

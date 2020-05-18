@@ -31,7 +31,7 @@ extension Date {
 
 // MARK: - Encoding
 
-extension ByteBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeTime(_ time: Date.Time) -> Int {
         let hour = time.hour < 10 ? "0\(time.hour)" : "\(time.hour)"
         let minute = time.minute < 10 ? "0\(time.minute)" : "\(time.minute)"

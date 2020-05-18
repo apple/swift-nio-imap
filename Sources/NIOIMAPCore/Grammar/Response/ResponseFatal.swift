@@ -16,7 +16,7 @@ import struct NIO.ByteBuffer
 
 // MARK: - Encoding
 
-extension ByteBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeResponseFatal(_ fatal: ResponseText) -> Int {
         self.writeString("* ") +
             self.writeResponseConditionalBye(fatal) +

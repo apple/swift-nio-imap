@@ -26,7 +26,7 @@ public struct TaggedExtension: Equatable {
 
 // MARK: - Encoding
 
-extension ByteBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeTaggedExtension(_ ext: TaggedExtension) -> Int {
         self.writeTaggedExtensionLabel(ext.label) +
             self.writeSpace() +

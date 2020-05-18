@@ -17,9 +17,9 @@ import struct NIO.ByteBuffer
 /// IMAPv4 `resp-text`
 public struct ResponseText: Equatable {
     public var code: ResponseTextCode?
-    public var text: ByteBuffer
+    public var text: String
 
-    public init(code: ResponseTextCode? = nil, text: ByteBuffer) {
+    public init(code: ResponseTextCode? = nil, text: String) {
         self.code = code
         self.text = text
     }
@@ -27,7 +27,7 @@ public struct ResponseText: Equatable {
 
 // MARK: - Encoding
 
-extension ByteBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeResponseText(_ text: ResponseText) -> Int {
         self.writeIfExists(text.code) { (code) -> Int in
             self.writeString("[") +
@@ -37,8 +37,7 @@ extension ByteBuffer {
             self.writeText(text.text)
     }
 
-    @discardableResult mutating func writeText(_ text: ByteBuffer) -> Int {
-        var copy = text
-        return self.writeBuffer(&copy)
+    @discardableResult mutating func writeText(_ text: String) -> Int {
+        self.writeString(text)
     }
 }

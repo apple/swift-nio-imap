@@ -27,7 +27,7 @@ public struct IDParameter: Equatable {
 
 // MARK: - Encoding
 
-extension ByteBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeIDParameter(_ parameter: IDParameter) -> Int {
         self.writeIMAPString(parameter.key) +
             self.writeSpace() +

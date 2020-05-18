@@ -33,14 +33,19 @@ public class ResponseRoundtripHandler: ChannelInboundHandler {
         var originalBuffer = self.unwrapInboundIn(data)
         do {
             var originalBufferCopy = originalBuffer
-            var responses = [Response]()
+            var responses = [ResponseOrContinueRequest]()
             while originalBufferCopy.readableBytes > 0 {
                 responses.append(try self.parser.parseResponseStream(buffer: &originalBufferCopy))
             }
 
             var roundtripBuffer = context.channel.allocator.buffer(capacity: originalBuffer.readableBytes)
             for response in responses {
-                roundtripBuffer.writeResponse(response)
+                switch response {
+                case .response(let response):
+                    roundtripBuffer.writeResponse(response)
+                case .continueRequest(let cReq):
+                    roundtripBuffer.writeContinueRequest(cReq)
+                }
             }
 
             let originalString = originalBuffer.readString(length: originalBuffer.readableBytes)!

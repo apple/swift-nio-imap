@@ -58,7 +58,7 @@ extension Media {
 
 // MARK: - Encoding
 
-extension ByteBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeMediaBasicType(_ type: Media.BasicType) -> Int {
         switch type {
         case .application, .audio, .image, .message, .video:

@@ -35,7 +35,7 @@ extension BodyStructure {
 
 // MARK: - Encoding
 
-extension ByteBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeBodyFields(_ fields: BodyStructure.Fields) -> Int {
         self.writeBodyFieldParameters(fields.parameter) +
             self.writeSpace() +

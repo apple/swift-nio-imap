@@ -22,7 +22,7 @@ public enum InitialResponse: Equatable {
 
 // MARK: - Encoding
 
-extension ByteBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeInitialResponse(_ response: InitialResponse) -> Int {
         switch response {
         case .equals:

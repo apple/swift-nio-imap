@@ -29,7 +29,7 @@ extension BodyStructure {
 
 // MARK: - Encoding
 
-extension ByteBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeBodyFieldLocationExtension(_ locationExtension: BodyStructure.FieldLocationExtension) -> Int {
         self.writeSpace() +
             self.writeNString(locationExtension.location) +

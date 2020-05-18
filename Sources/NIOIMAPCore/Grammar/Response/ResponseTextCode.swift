@@ -33,7 +33,7 @@ public enum ResponseTextCode: Equatable {
 
 // MARK: - Encoding
 
-extension ByteBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeResponseTextCode(_ code: ResponseTextCode) -> Int {
         switch code {
         case .alert:

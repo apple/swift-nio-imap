@@ -22,7 +22,7 @@ public enum RFC822: String {
 
 // MARK: - Encoding
 
-extension ByteBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeRFC822(_ rfc822: RFC822) -> Int {
         self.writeString(".\(rfc822.rawValue.uppercased())")
     }

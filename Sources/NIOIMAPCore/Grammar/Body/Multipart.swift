@@ -45,7 +45,7 @@ extension BodyStructure.Multipart {
 
 // MARK: - Encoding
 
-extension ByteBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeBodyTypeMultipart(_ part: BodyStructure.Multipart) -> Int {
         part.bodies.reduce(into: 0) { (result, body) in
             result += self.writeBody(body)

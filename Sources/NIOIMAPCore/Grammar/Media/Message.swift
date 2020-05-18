@@ -23,7 +23,7 @@ extension Media {
 
 // MARK: - Encoding
 
-extension ByteBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeMediaMessage(_ message: Media.Message) -> Int {
         self.writeString("\"MESSAGE\" \"\(message.rawValue)\"")
     }

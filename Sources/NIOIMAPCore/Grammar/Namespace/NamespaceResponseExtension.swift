@@ -27,7 +27,7 @@ public struct NamespaceResponseExtension: Equatable {
 
 // MARK: - Encoding
 
-extension ByteBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeNamespaceResponseExtensions(_ extensions: [NamespaceResponseExtension]) -> Int {
         extensions.reduce(into: 0) { (res, ext) in
             res += self.writeNamespaceResponseExtension(ext)

@@ -27,7 +27,7 @@ extension MailboxName.List {
 
 // MARK: - Encoding
 
-extension ByteBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeMailboxListOFlag(_ flag: MailboxName.List.OFlag) -> Int {
         switch flag {
         case .noInferiors:

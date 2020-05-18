@@ -22,7 +22,7 @@ public enum ResponseConditionalAuth: Equatable {
 
 // MARK: - Encoding
 
-extension ByteBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeResponseConditionalAuth(_ cond: ResponseConditionalAuth) -> Int {
         switch cond {
         case .ok(let text):
