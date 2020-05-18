@@ -1580,7 +1580,7 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseMediaBasic_valid_match() {
-        var buffer = #""APPLICATION" "something""# as ByteBuffer
+        var buffer = #""APPLICATION" "multipart/mixed""# as ByteBuffer
         do {
             let mediaBasic = try GrammarParser.parseMediaBasic(buffer: &buffer, tracker: .testTracker)
             XCTAssertEqual(mediaBasic, Media.Basic(type: .application, subtype: .mixed))
@@ -1590,10 +1590,10 @@ extension ParserUnitTests {
     }
 
     func testParseMediaBasic_valid_string() {
-        var buffer = #""STRING" "something""# as ByteBuffer
+        var buffer = #""STRING" "multipart/related""# as ByteBuffer
         do {
             let mediaBasic = try GrammarParser.parseMediaBasic(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(mediaBasic, Media.Basic(type: .other("STRING"), subtype: .mixed))
+            XCTAssertEqual(mediaBasic, Media.Basic(type: .other("STRING"), subtype: .related))
         } catch {
             XCTFail("\(error)")
         }
