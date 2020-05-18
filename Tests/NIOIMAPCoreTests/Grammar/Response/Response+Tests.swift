@@ -25,6 +25,11 @@ extension Response_Tests {
         let inputs: [([NIOIMAPCore.FetchResponse], String, UInt)] = [
             ([.start(1), .simpleAttribute(.rfc822Size(123)), .finish], "(RFC822.SIZE 123)\r\n", #line),
             ([.start(1), .simpleAttribute(.uid(123)), .simpleAttribute(.rfc822Size(456)), .finish], "(UID 123 RFC822.SIZE 456)\r\n", #line),
+            (
+                [.start(1), .simpleAttribute(.uid(123)), .streamingBegin(type: .rfc822, byteCount: 0), .streamingEnd, .simpleAttribute(.uid(456)), .finish],
+                "(UID 123 RFC822.TEXT {0}\r\n UID 456)\r\n",
+                #line
+            ),
         ]
 
         for (test, expectedString, line) in inputs {

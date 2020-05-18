@@ -21,6 +21,8 @@ public struct EncodeBuffer {
         case client
         case server
     }
+    
+    var streamingAttributes = false
 
     let mode: Mode
     @usableFromInline internal var _buffer: ByteBuffer

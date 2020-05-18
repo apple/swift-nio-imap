@@ -86,14 +86,25 @@ extension EncodeBuffer {
         case .start:
             return self.writeString("(")
         case .simpleAttribute(let att):
-            return self.writeMessageAttribute(att)
+            if self.streamingAttributes {
+                return self.writeSpace() + self.writeMessageAttribute(att)
+            } else {
+                self.streamingAttributes = true
+                return self.writeMessageAttribute(att)
+            }
         case .streamingBegin(let type, let size):
-            return self.writeStreamingType(type, size: size)
+            if self.streamingAttributes {
+                return self.writeSpace() + self.writeStreamingType(type, size: size)
+            } else {
+                self.streamingAttributes = true
+                return self.writeStreamingType(type, size: size)
+            }
         case .streamingBytes(var bytes):
             return self.writeBuffer(&bytes)
         case .streamingEnd:
             return 0 // do nothing, this is a "fake" event
         case .finish:
+            self.streamingAttributes = false
             return self.writeString(")\r\n")
         }
     }
