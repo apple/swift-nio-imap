@@ -47,9 +47,9 @@ extension Media {
     /// IMAPv4 `media-basic`
     public struct Basic: Equatable {
         public var type: BasicType
-        public var subtype: BodyStructure.Multipart.MediaSubtype
+        public var subtype: BodyStructure.MediaSubtype
 
-        public init(type: Media.BasicType, subtype: BodyStructure.Multipart.MediaSubtype) {
+        public init(type: Media.BasicType, subtype: BodyStructure.MediaSubtype) {
             self.type = type
             self.subtype = subtype
         }

@@ -62,7 +62,7 @@ extension BodyMultipartTests {
     }
     
     func testEncode_mediaSubtype() {
-        let inputs: [(BodyStructure.Multipart.MediaSubtype, String, UInt)] = [
+        let inputs: [(BodyStructure.MediaSubtype, String, UInt)] = [
             (.alternative, "\"multipart/alternative\"", #line),
             (.mixed, "\"multipart/mixed\"", #line),
             (.related, "\"multipart/related\"", #line),

@@ -2051,7 +2051,7 @@ extension GrammarParser {
     }
 
     // media-subtype   = string
-    static func parseMediaSubtype(buffer: inout ByteBuffer, tracker: StackTracker) throws -> BodyStructure.Multipart.MediaSubtype {
+    static func parseMediaSubtype(buffer: inout ByteBuffer, tracker: StackTracker) throws -> BodyStructure.MediaSubtype {
         let buffer = try self.parseString(buffer: &buffer, tracker: tracker)
         let string = String(buffer: buffer)
         return .init(string)

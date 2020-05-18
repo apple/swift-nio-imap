@@ -41,27 +41,6 @@ extension BodyStructure.Multipart {
             self.dspLanguage = dspLanguage
         }
     }
-    
-    public struct MediaSubtype: Equatable {
-        
-        var _backing: String
-        
-        public static var alternative: Self {
-            return .init("multipart/alternative")
-        }
-        
-        public static var related: Self {
-            return .init("multipart/related")
-        }
-        
-        public static var mixed: Self {
-            return .init("multipart/mixed")
-        }
-        
-        public init(_ string: String) {
-            self._backing = string
-        }
-    }
 }
 
 // MARK: - Encoding
@@ -86,7 +65,7 @@ extension EncodeBuffer {
             }
     }
     
-    @discardableResult mutating func writeMediaSubtype(_ type: BodyStructure.Multipart.MediaSubtype) -> Int {
+    @discardableResult mutating func writeMediaSubtype(_ type: BodyStructure.MediaSubtype) -> Int {
         self.writeString("\"\(type._backing)\"")
     }
 }

@@ -20,6 +20,33 @@ public enum BodyStructure: Equatable {
     case multipart(Multipart)
 }
 
+// MARK: - Types
+extension BodyStructure {
+    
+    /// IMAPv4rev1 media-subtype
+    public struct MediaSubtype: Equatable {
+        
+        var _backing: String
+        
+        public static var alternative: Self {
+            return .init("multipart/alternative")
+        }
+        
+        public static var related: Self {
+            return .init("multipart/related")
+        }
+        
+        public static var mixed: Self {
+            return .init("multipart/mixed")
+        }
+        
+        public init(_ string: String) {
+            self._backing = string.lowercased()
+        }
+    }
+    
+}
+
 // MARK: - Encoding
 
 extension EncodeBuffer {
