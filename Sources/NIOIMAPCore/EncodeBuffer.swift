@@ -17,14 +17,13 @@ import struct NIO.ByteBufferView
 import struct NIO.CircularBuffer
 
 public struct EncodeBuffer {
-    public enum Mode {
+    
+    public enum Mode: Equatable {
         case client
-        case server
+        case server(streamingAttributes: Bool = false)
     }
 
-    var streamingAttributes = false
-
-    let mode: Mode
+    var mode: Mode
     @usableFromInline internal var _buffer: ByteBuffer
     @usableFromInline internal var _stopPoints: CircularBuffer<Int> = []
 

@@ -57,7 +57,7 @@ extension ByteBuffer {
     @discardableResult public mutating func writeResponse(_ response: Response) -> Int {
         var switchBuffer = emptyBuffer
         swap(&self, &switchBuffer)
-        var encodeBuffer = EncodeBuffer(switchBuffer, mode: .server)
+        var encodeBuffer = EncodeBuffer(switchBuffer, mode: .server())
         let ret = encodeBuffer.writeResponse(response)
         self = encodeBuffer.nextChunk().bytes
         return ret
@@ -66,7 +66,7 @@ extension ByteBuffer {
 
 extension EncodeBuffer {
     @discardableResult fileprivate mutating func writeResponse(_ response: Response) -> Int {
-        assert(self.mode == .server)
+        assert(self.mode == .server())
         switch response {
         case .greeting(let greeting):
             return self.writeGreeting(greeting)
@@ -86,17 +86,17 @@ extension EncodeBuffer {
         case .start:
             return self.writeString("(")
         case .simpleAttribute(let att):
-            if self.streamingAttributes {
+            if case .server(streamingAttributes: true) = self.mode {
                 return self.writeSpace() + self.writeMessageAttribute(att)
             } else {
-                self.streamingAttributes = true
+                self.mode = .server(streamingAttributes: true)
                 return self.writeMessageAttribute(att)
             }
         case .streamingBegin(let type, let size):
-            if self.streamingAttributes {
+            if case .server(streamingAttributes: true) = self.mode {
                 return self.writeSpace() + self.writeStreamingType(type, size: size)
             } else {
-                self.streamingAttributes = true
+                self.mode = .server(streamingAttributes: true)
                 return self.writeStreamingType(type, size: size)
             }
         case .streamingBytes(var bytes):
@@ -104,7 +104,7 @@ extension EncodeBuffer {
         case .streamingEnd:
             return 0 // do nothing, this is a "fake" event
         case .finish:
-            self.streamingAttributes = false
+            self.mode = .server(streamingAttributes: false)
             return self.writeString(")\r\n")
         }
     }
