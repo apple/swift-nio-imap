@@ -18,10 +18,12 @@ extension BodyStructure {
     /// IMAPv4 `body-type-1part`
     public struct Singlepart: Equatable {
         public var type: Kind
+        public var fields: Fields
         public var `extension`: Extension?
 
-        public init(type: BodyStructure.Singlepart.Kind, extension: Extension? = nil) {
+        public init(type: BodyStructure.Singlepart.Kind, fields: Fields, extension: Extension? = nil) {
             self.type = type
+            self.fields = fields
             self.extension = `extension`
         }
     }
@@ -39,25 +41,21 @@ extension BodyStructure.Singlepart {
     /// IMAPv4 `body-type-basic`
     public struct Basic: Equatable {
         public var media: Media.Basic
-        public var fields: BodyStructure.Fields
 
-        public init(media: Media.Basic, fields: BodyStructure.Fields) {
+        public init(media: Media.Basic) {
             self.media = media
-            self.fields = fields
         }
     }
 
     /// IMAPv4 `body-type-message`
     public struct Message: Equatable {
         public var message: Media.Message
-        public var fields: BodyStructure.Fields
         public var envelope: Envelope
         public var body: BodyStructure
         public var fieldLines: Int
 
-        public init(message: Media.Message, fields: BodyStructure.Fields, envelope: Envelope, body: BodyStructure, fieldLines: Int) {
+        public init(message: Media.Message, envelope: Envelope, body: BodyStructure, fieldLines: Int) {
             self.message = message
-            self.fields = fields
             self.envelope = envelope
             self.body = body
             self.fieldLines = fieldLines
@@ -67,12 +65,10 @@ extension BodyStructure.Singlepart {
     /// IMAPv4 `body-type-text`
     public struct Text: Equatable {
         public var mediaText: String
-        public var fields: BodyStructure.Fields
         public var lines: Int
 
-        public init(mediaText: String, fields: BodyStructure.Fields, lines: Int) {
+        public init(mediaText: String, lines: Int) {
             self.mediaText = mediaText
-            self.fields = fields
             self.lines = lines
         }
     }
@@ -97,11 +93,11 @@ extension EncodeBuffer {
         var size = 0
         switch part.type {
         case .basic(let basic):
-            size += self.writeBodyTypeBasic(basic)
+            size += self.writeBodyTypeBasic(basic, fields: part.fields)
         case .message(let message):
-            size += self.writeBodyTypeMessage(message)
+            size += self.writeBodyTypeMessage(message, fields: part.fields)
         case .text(let text):
-            size += self.writeBodyTypeText(text)
+            size += self.writeBodyTypeText(text, fields: part.fields)
         }
 
         if let ext = part.extension {
@@ -111,17 +107,17 @@ extension EncodeBuffer {
         return size
     }
 
-    @discardableResult mutating func writeBodyTypeText(_ body: BodyStructure.Singlepart.Text) -> Int {
+    @discardableResult private mutating func writeBodyTypeText(_ body: BodyStructure.Singlepart.Text, fields: BodyStructure.Fields) -> Int {
         self.writeMediaText(body.mediaText) +
             self.writeSpace() +
-            self.writeBodyFields(body.fields) +
+            self.writeBodyFields(fields) +
             self.writeString(" \(body.lines)")
     }
 
-    @discardableResult mutating func writeBodyTypeMessage(_ message: BodyStructure.Singlepart.Message) -> Int {
+    @discardableResult private mutating func writeBodyTypeMessage(_ message: BodyStructure.Singlepart.Message, fields: BodyStructure.Fields) -> Int {
         self.writeMediaMessage(message.message) +
             self.writeSpace() +
-            self.writeBodyFields(message.fields) +
+            self.writeBodyFields(fields) +
             self.writeSpace() +
             self.writeEnvelope(message.envelope) +
             self.writeSpace() +
@@ -129,10 +125,10 @@ extension EncodeBuffer {
             self.writeString(" \(message.fieldLines)")
     }
 
-    @discardableResult mutating func writeBodyTypeBasic(_ body: BodyStructure.Singlepart.Basic) -> Int {
+    @discardableResult private mutating func writeBodyTypeBasic(_ body: BodyStructure.Singlepart.Basic, fields: BodyStructure.Fields) -> Int {
         self.writeMediaBasic(body.media) +
             self.writeSpace() +
-            self.writeBodyFields(body.fields)
+            self.writeBodyFields(fields)
     }
 
     @discardableResult mutating func writeBodyExtensionSinglePart(_ ext: BodyStructure.Singlepart.Extension) -> Int {
