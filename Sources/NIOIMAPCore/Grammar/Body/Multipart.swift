@@ -17,12 +17,12 @@ import struct NIO.ByteBuffer
 extension BodyStructure {
     /// IMAPv4 `body-type-mpart`
     public struct Multipart: Equatable {
-        public var bodies: [BodyStructure]
-        public var mediaSubtype: String
+        public var parts: [BodyStructure]
+        public var mediaSubtype: MediaSubtype
         public var multipartExtension: Extension?
 
-        public init(bodies: [BodyStructure], mediaSubtype: String, multipartExtension: Extension? = nil) {
-            self.bodies = bodies
+        public init(parts: [BodyStructure], mediaSubtype: MediaSubtype, multipartExtension: Extension? = nil) {
+            self.parts = parts
             self.mediaSubtype = mediaSubtype
             self.multipartExtension = multipartExtension
         }
@@ -33,10 +33,10 @@ extension BodyStructure.Multipart {
     /// IMAPv4 `body-ext-multipart`
     public struct Extension: Equatable {
         public var parameter: [FieldParameterPair]
-        public var dspLanguage: BodyStructure.FieldDSPLanguage?
+        public var dspLanguage: BodyStructure.FieldDispositionLanguage?
 
         /// Convenience function for a better experience when chaining multiple types.
-        public init(parameters: [FieldParameterPair], dspLanguage: BodyStructure.FieldDSPLanguage?) {
+        public init(parameters: [FieldParameterPair], dspLanguage: BodyStructure.FieldDispositionLanguage?) {
             self.parameter = parameters
             self.dspLanguage = dspLanguage
         }
@@ -47,11 +47,11 @@ extension BodyStructure.Multipart {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeBodyTypeMultipart(_ part: BodyStructure.Multipart) -> Int {
-        part.bodies.reduce(into: 0) { (result, body) in
+        part.parts.reduce(into: 0) { (result, body) in
             result += self.writeBody(body)
         } +
             self.writeSpace() +
-            self.writeIMAPString(part.mediaSubtype) +
+            self.writeMediaSubtype(part.mediaSubtype) +
             self.writeIfExists(part.multipartExtension) { (ext) -> Int in
                 self.writeSpace() +
                     self.writeBodyExtensionMultipart(ext)
@@ -61,7 +61,11 @@ extension EncodeBuffer {
     @discardableResult mutating func writeBodyExtensionMultipart(_ ext: BodyStructure.Multipart.Extension) -> Int {
         self.writeBodyFieldParameters(ext.parameter) +
             self.writeIfExists(ext.dspLanguage) { (dspLanguage) -> Int in
-                self.writeBodyFieldDSPLanguage(dspLanguage)
+                self.writeBodyFieldDispositionLanguage(dspLanguage)
             }
+    }
+
+    @discardableResult mutating func writeMediaSubtype(_ type: BodyStructure.MediaSubtype) -> Int {
+        self.writeString("\"\(type._backing)\"")
     }
 }

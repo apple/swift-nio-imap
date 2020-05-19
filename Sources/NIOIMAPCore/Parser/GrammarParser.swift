@@ -274,7 +274,7 @@ extension GrammarParser {
     static func parseBodyExtSinglePart(buffer: inout ByteBuffer, tracker: StackTracker) throws -> BodyStructure.Singlepart.Extension {
         try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> BodyStructure.Singlepart.Extension in
             let md5 = try self.parseNString(buffer: &buffer, tracker: tracker)
-            let dsp = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> BodyStructure.FieldDSPLanguage in
+            let dsp = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> BodyStructure.FieldDispositionLanguage in
                 try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
                 return try parseBodyDescriptionLanguage(buffer: &buffer, tracker: tracker)
             }
@@ -286,7 +286,7 @@ extension GrammarParser {
     static func parseBodyExtMpart(buffer: inout ByteBuffer, tracker: StackTracker) throws -> BodyStructure.Multipart.Extension {
         try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> BodyStructure.Multipart.Extension in
             let param = try self.parseBodyFieldParam(buffer: &buffer, tracker: tracker)
-            let dsp = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> BodyStructure.FieldDSPLanguage in
+            let dsp = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> BodyStructure.FieldDispositionLanguage in
                 try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
                 return try parseBodyDescriptionLanguage(buffer: &buffer, tracker: tracker)
             }
@@ -318,19 +318,19 @@ extension GrammarParser {
     }
 
     // body-fld-dsp    = "(" string SP body-fld-param ")" / nil
-    static func parseBodyFieldDsp(buffer: inout ByteBuffer, tracker: StackTracker) throws -> BodyStructure.FieldDSPData? {
-        func parseBodyFieldDsp_nil(buffer: inout ByteBuffer, tracker: StackTracker) throws -> BodyStructure.FieldDSPData? {
+    static func parseBodyFieldDsp(buffer: inout ByteBuffer, tracker: StackTracker) throws -> BodyStructure.FieldDispositionData? {
+        func parseBodyFieldDsp_nil(buffer: inout ByteBuffer, tracker: StackTracker) throws -> BodyStructure.FieldDispositionData? {
             try self.parseNil(buffer: &buffer, tracker: tracker)
             return nil
         }
 
-        func parseBodyFieldDsp_some(buffer: inout ByteBuffer, tracker: StackTracker) throws -> BodyStructure.FieldDSPData? {
+        func parseBodyFieldDsp_some(buffer: inout ByteBuffer, tracker: StackTracker) throws -> BodyStructure.FieldDispositionData? {
             try ParserLibrary.parseFixedString("(", buffer: &buffer, tracker: tracker)
-            let string = try self.parseString(buffer: &buffer, tracker: tracker)
+            let string = String(buffer: try self.parseString(buffer: &buffer, tracker: tracker))
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
             let param = try self.parseBodyFieldParam(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)
-            return BodyStructure.FieldDSPData(string: string, parameter: param)
+            return BodyStructure.FieldDispositionData(string: string, parameter: param)
         }
 
         return try ParserLibrary.parseOneOf([
@@ -392,10 +392,10 @@ extension GrammarParser {
 
         func parseBodyFieldLanguage_multiple(buffer: inout ByteBuffer, tracker: StackTracker) throws -> BodyStructure.FieldLanguage {
             try ParserLibrary.parseFixedString("(", buffer: &buffer, tracker: tracker)
-            var array = [try self.parseString(buffer: &buffer, tracker: tracker)]
-            try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) -> ByteBuffer in
+            var array = [String(buffer: try self.parseString(buffer: &buffer, tracker: tracker))]
+            try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) -> String in
                 try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
-                return try self.parseString(buffer: &buffer, tracker: tracker)
+                return String(buffer: try self.parseString(buffer: &buffer, tracker: tracker))
             }
             try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)
             return .multiple(array)
@@ -504,7 +504,7 @@ extension GrammarParser {
     //                   [SP body-ext-mpart]
     static func parseBodyTypeMultipart(buffer: inout ByteBuffer, tracker: StackTracker) throws -> BodyStructure.Multipart {
         try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> BodyStructure.Multipart in
-            let bodies = try ParserLibrary.parseOneOrMore(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
+            let parts = try ParserLibrary.parseOneOrMore(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
                 try self.parseBody(buffer: &buffer, tracker: tracker)
             }
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
@@ -513,7 +513,7 @@ extension GrammarParser {
                 try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
                 return try self.parseBodyExtMpart(buffer: &buffer, tracker: tracker)
             }
-            return BodyStructure.Multipart(bodies: bodies, mediaSubtype: media, multipartExtension: ext)
+            return BodyStructure.Multipart(parts: parts, mediaSubtype: media, multipartExtension: ext)
         }
     }
 
@@ -2051,17 +2051,18 @@ extension GrammarParser {
     }
 
     // media-subtype   = string
-    static func parseMediaSubtype(buffer: inout ByteBuffer, tracker: StackTracker) throws -> String {
-        var buffer = try self.parseString(buffer: &buffer, tracker: tracker)
-        return buffer.readString(length: buffer.readableBytes)!
+    static func parseMediaSubtype(buffer: inout ByteBuffer, tracker: StackTracker) throws -> BodyStructure.MediaSubtype {
+        let buffer = try self.parseString(buffer: &buffer, tracker: tracker)
+        let string = String(buffer: buffer)
+        return .init(string)
     }
 
     // media-text      = DQUOTE "TEXT" DQUOTE SP media-subtype
     static func parseMediaText(buffer: inout ByteBuffer, tracker: StackTracker) throws -> String {
         try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> String in
             try ParserLibrary.parseFixedString("\"TEXT\" ", buffer: &buffer, tracker: tracker)
-            let subtype = try self.parseMediaSubtype(buffer: &buffer, tracker: tracker)
-            return subtype
+            let subtype = try self.parseString(buffer: &buffer, tracker: tracker)
+            return String(buffer: subtype)
         }
     }
 
@@ -4126,13 +4127,13 @@ extension GrammarParser {
         return BodyStructure.FieldLanguageLocation(language: fieldLanguage, location: locationExtension)
     }
 
-    static func parseBodyDescriptionLanguage(buffer: inout ByteBuffer, tracker: StackTracker) throws -> BodyStructure.FieldDSPLanguage {
+    static func parseBodyDescriptionLanguage(buffer: inout ByteBuffer, tracker: StackTracker) throws -> BodyStructure.FieldDispositionLanguage {
         let description = try self.parseBodyFieldDsp(buffer: &buffer, tracker: tracker)
         let language = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> BodyStructure.FieldLanguageLocation in
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
             return try parseBodyLanguageLocation(buffer: &buffer, tracker: tracker)
         }
-        return BodyStructure.FieldDSPLanguage(fieldDSP: description, fieldLanguage: language)
+        return BodyStructure.FieldDispositionLanguage(fieldDisposition: description, fieldLanguage: language)
     }
 
     static func parse2Digit(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Int {

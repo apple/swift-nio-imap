@@ -24,52 +24,50 @@ extension BodyMultipartTests {
     func testEncode() {
         let inputs: [(BodyStructure.Multipart, String, UInt)] = [
             (
-                .init(bodies: [
+                .init(parts: [
                     .singlepart(BodyStructure.Singlepart(type: .text(.init(mediaText: "subtype", lines: 5)), fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 6), extension: nil)),
-                ], mediaSubtype: "subtype", multipartExtension: nil),
-                "(\"TEXT\" \"subtype\" NIL NIL NIL \"BASE64\" 6 5) \"subtype\"",
+                ], mediaSubtype: .mixed, multipartExtension: nil),
+                "(\"TEXT\" \"subtype\" NIL NIL NIL \"BASE64\" 6 5) \"multipart/mixed\"",
                 #line
             ),
             (
-                .init(bodies: [
+                .init(parts: [
                     .singlepart(BodyStructure.Singlepart(type: .text(.init(mediaText: "subtype", lines: 5)), fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 6), extension: nil)),
-                ], mediaSubtype: "subtype", multipartExtension: .init(parameters: [], dspLanguage: nil)),
-                "(\"TEXT\" \"subtype\" NIL NIL NIL \"BASE64\" 6 5) \"subtype\" NIL",
+                ], mediaSubtype: .alternative, multipartExtension: .init(parameters: [], dspLanguage: nil)),
+                "(\"TEXT\" \"subtype\" NIL NIL NIL \"BASE64\" 6 5) \"multipart/alternative\" NIL",
                 #line
             ),
             (
-                .init(bodies: [
+                .init(parts: [
                     .singlepart(BodyStructure.Singlepart(type: .text(.init(mediaText: "subtype", lines: 5)), fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 6), extension: nil)),
                     .singlepart(BodyStructure.Singlepart(type: .text(.init(mediaText: "subtype", lines: 6)), fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 7), extension: nil)),
-                ], mediaSubtype: "subtype", multipartExtension: nil),
-                "(\"TEXT\" \"subtype\" NIL NIL NIL \"BASE64\" 6 5)(\"TEXT\" \"subtype\" NIL NIL NIL \"BASE64\" 7 6) \"subtype\"",
+                ], mediaSubtype: .related, multipartExtension: nil),
+                "(\"TEXT\" \"subtype\" NIL NIL NIL \"BASE64\" 6 5)(\"TEXT\" \"subtype\" NIL NIL NIL \"BASE64\" 7 6) \"multipart/related\"",
                 #line
             ),
         ]
-
-        for (test, expectedString, line) in inputs {
-            self.testBuffer.clear()
-            let size = self.testBuffer.writeBodyTypeMultipart(test)
-            XCTAssertEqual(size, expectedString.utf8.count, line: line)
-            XCTAssertEqual(self.testBufferString, expectedString, line: line)
-        }
+        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeBodyTypeMultipart($0) })
     }
 
     func testEncode_extension() {
         let inputs: [(BodyStructure.Multipart.Extension, String, UInt)] = [
             (.init(parameters: [.init(field: "f", value: "v")], dspLanguage: nil), "(\"f\" \"v\")", #line),
             (
-                .init(parameters: [.init(field: "f1", value: "v1")], dspLanguage: .init(fieldDSP: .init(string: "string", parameter: [.init(field: "f2", value: "v2")]), fieldLanguage: nil)),
+                .init(parameters: [.init(field: "f1", value: "v1")], dspLanguage: .init(fieldDisposition: .init(string: "string", parameter: [.init(field: "f2", value: "v2")]), fieldLanguage: nil)),
                 "(\"f1\" \"v1\") (\"string\" (\"f2\" \"v2\"))",
                 #line
             ),
         ]
+        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeBodyExtensionMultipart($0) })
+    }
 
-        for (test, expectedString, line) in inputs {
-            self.testBuffer.clear()
-            let size = self.testBuffer.writeBodyExtensionMultipart(test)
-            XCTAssertEqual(size, expectedString.utf8.count, line: line)
-            XCTAssertEqual(self.testBufferString, expectedString, line: line)
-        }
+    func testEncode_mediaSubtype() {
+        let inputs: [(BodyStructure.MediaSubtype, String, UInt)] = [
+            (.alternative, "\"multipart/alternative\"", #line),
+            (.mixed, "\"multipart/mixed\"", #line),
+            (.related, "\"multipart/related\"", #line),
+            (.init("other"), "\"other\"", #line),
+        ]
+        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeMediaSubtype($0) })
     }
 }

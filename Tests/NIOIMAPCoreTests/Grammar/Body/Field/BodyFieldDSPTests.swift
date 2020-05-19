@@ -22,7 +22,7 @@ class BodyFieldDSPTests: EncodeTestClass {}
 
 extension BodyFieldDSPTests {
     func testEncode() {
-        let inputs: [(BodyStructure.FieldDSPData?, String, UInt)] = [
+        let inputs: [(BodyStructure.FieldDispositionData?, String, UInt)] = [
             (nil, "NIL", #line),
             (.init(string: "some", parameter: [.init(field: "f1", value: "v1")]), "(\"some\" (\"f1\" \"v1\"))", #line),
         ]

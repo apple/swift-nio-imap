@@ -76,10 +76,10 @@ extension BodyStructure.Singlepart {
     /// IMAPv4 `body-ext-1part`
     public struct Extension: Equatable {
         public let fieldMD5: NString
-        public var dspLanguage: BodyStructure.FieldDSPLanguage?
+        public var dspLanguage: BodyStructure.FieldDispositionLanguage?
 
         /// Convenience function for a better experience when chaining multiple types.
-        init(fieldMD5: NString, dspLanguage: BodyStructure.FieldDSPLanguage?) {
+        init(fieldMD5: NString, dspLanguage: BodyStructure.FieldDispositionLanguage?) {
             self.fieldMD5 = fieldMD5
             self.dspLanguage = dspLanguage
         }
@@ -134,7 +134,7 @@ extension EncodeBuffer {
     @discardableResult mutating func writeBodyExtensionSinglePart(_ ext: BodyStructure.Singlepart.Extension) -> Int {
         self.writeNString(ext.fieldMD5) +
             self.writeIfExists(ext.dspLanguage) { (dspLanguage) -> Int in
-                self.writeBodyFieldDSPLanguage(dspLanguage)
+                self.writeBodyFieldDispositionLanguage(dspLanguage)
             }
     }
 }

@@ -419,7 +419,7 @@ extension ParserUnitTests {
         TestUtilities.withBuffer(#"("astring" ("f1" "v1"))"#) { (buffer) in
             let dsp = try GrammarParser.parseBodyFieldDsp(buffer: &buffer, tracker: .testTracker)
             XCTAssertNotNil(dsp)
-            XCTAssertEqual(dsp, BodyStructure.FieldDSPData(string: "astring", parameter: [.init(field: "f1", value: "v1")]))
+            XCTAssertEqual(dsp, BodyStructure.FieldDispositionData(string: "astring", parameter: [.init(field: "f1", value: "v1")]))
         }
     }
 
@@ -519,30 +519,30 @@ extension ParserUnitTests {
     func testParseBodyTypeSinglepart() {
         let basicInputs: [(String, String, BodyStructure.Singlepart, UInt)] = [
             (
-                "\"AUDIO\" \"sub\" NIL NIL NIL \"BASE64\" 1",
+                "\"AUDIO\" \"multipart/alternative\" NIL NIL NIL \"BASE64\" 1",
                 "\r\n",
                 .init(
-                    type: .basic(.init(media: .init(type: .audio, subtype: "sub"))),
+                    type: .basic(.init(media: .init(type: .audio, subtype: .alternative))),
                     fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 1),
                     extension: nil
                 ),
                 #line
             ),
             (
-                "\"APPLICATION\" \"type\" NIL \"id\" \"description\" \"7BIT\" 2",
+                "\"APPLICATION\" \"multipart/mixed\" NIL \"id\" \"description\" \"7BIT\" 2",
                 "\r\n",
                 .init(
-                    type: .basic(.init(media: .init(type: .application, subtype: "type"))),
+                    type: .basic(.init(media: .init(type: .application, subtype: .mixed))),
                     fields: .init(parameter: [], id: "id", description: "description", encoding: .sevenBit, octets: 2),
                     extension: nil
                 ),
                 #line
             ),
             (
-                "\"VIDEO\" \"type\" (\"f1\" \"v1\") NIL NIL \"8BIT\" 3",
+                "\"VIDEO\" \"multipart/related\" (\"f1\" \"v1\") NIL NIL \"8BIT\" 3",
                 "\r\n",
                 .init(
-                    type: .basic(.init(media: .init(type: .video, subtype: "type"))),
+                    type: .basic(.init(media: .init(type: .video, subtype: .related))),
                     fields: .init(parameter: [.init(field: "f1", value: "v1")], id: nil, description: nil, encoding: .eightBit, octets: 3),
                     extension: nil
                 ),
@@ -552,14 +552,14 @@ extension ParserUnitTests {
 
         let messageInputs: [(String, String, BodyStructure.Singlepart, UInt)] = [
             (
-                "\"MESSAGE\" \"RFC822\" NIL NIL NIL \"BASE64\" 4 (NIL NIL NIL NIL NIL NIL NIL NIL NIL NIL) (\"IMAGE\" \"SF\" NIL NIL NIL \"BINARY\" 5) 8",
+                "\"MESSAGE\" \"RFC822\" NIL NIL NIL \"BASE64\" 4 (NIL NIL NIL NIL NIL NIL NIL NIL NIL NIL) (\"IMAGE\" \"multipart/related\" NIL NIL NIL \"BINARY\" 5) 8",
                 "\r\n",
                 .init(
                     type: .message(
                         .init(
                             message: .rfc822,
                             envelope: Envelope(date: nil, subject: nil, from: [], sender: [], reply: [], to: [], cc: [], bcc: [], inReplyTo: nil, messageID: nil),
-                            body: .singlepart(.init(type: .basic(.init(media: .init(type: .image, subtype: "SF"))), fields: .init(parameter: [], id: nil, description: nil, encoding: .binary, octets: 5))),
+                            body: .singlepart(.init(type: .basic(.init(media: .init(type: .image, subtype: .related))), fields: .init(parameter: [], id: nil, description: nil, encoding: .binary, octets: 5))),
                             fieldLines: 8
                         )
                     ),
@@ -1580,20 +1580,20 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseMediaBasic_valid_match() {
-        var buffer = #""APPLICATION" "something""# as ByteBuffer
+        var buffer = #""APPLICATION" "multipart/mixed""# as ByteBuffer
         do {
             let mediaBasic = try GrammarParser.parseMediaBasic(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(mediaBasic, Media.Basic(type: .application, subtype: "something"))
+            XCTAssertEqual(mediaBasic, Media.Basic(type: .application, subtype: .mixed))
         } catch {
             XCTFail("\(error)")
         }
     }
 
     func testParseMediaBasic_valid_string() {
-        var buffer = #""STRING" "something""# as ByteBuffer
+        var buffer = #""STRING" "multipart/related""# as ByteBuffer
         do {
             let mediaBasic = try GrammarParser.parseMediaBasic(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(mediaBasic, Media.Basic(type: .other("STRING"), subtype: "something"))
+            XCTAssertEqual(mediaBasic, Media.Basic(type: .other("STRING"), subtype: .related))
         } catch {
             XCTFail("\(error)")
         }

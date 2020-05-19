@@ -28,4 +28,13 @@ class EncodeTestClass: XCTestCase {
     override func setUp() {
         self.testBuffer = EncodeBuffer(ByteBufferAllocator().buffer(capacity: 128), mode: .server())
     }
+
+    func iterateInputs<T>(inputs: [(T, String, UInt)], encoder: (T) -> Int, file: StaticString = #file) {
+        for (test, expectedString, line) in inputs {
+            self.testBuffer.clear()
+            let size = encoder(test)
+            XCTAssertEqual(size, expectedString.utf8.count, file: file, line: line)
+            XCTAssertEqual(self.testBufferString, expectedString, file: file, line: line)
+        }
+    }
 }
