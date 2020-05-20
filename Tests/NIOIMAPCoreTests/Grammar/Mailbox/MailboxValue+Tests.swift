@@ -23,8 +23,8 @@ class MailboxValue_Tests: EncodeTestClass {}
 extension MailboxValue_Tests {
     func testEncode_statusOption() {
         let inputs: [([MailboxAttribute], String, UInt)] = [
-            ([.messages], "STATUS (MESSAGES)", #line),
-            ([.messages, .size, .recent], "STATUS (MESSAGES SIZE RECENT)", #line),
+            ([.messageCount], "STATUS (MESSAGES)", #line),
+            ([.messageCount, .size, .recentCount], "STATUS (MESSAGES SIZE RECENT)", #line),
         ]
 
         for (test, expectedString, line) in inputs {

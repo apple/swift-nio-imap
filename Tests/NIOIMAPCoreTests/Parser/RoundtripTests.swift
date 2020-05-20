@@ -67,8 +67,8 @@ final class RoundtripTests: XCTestCase {
             (.lsub(.inbox, "\"something\""), #line),
             (.lsub(MailboxName("bar"), "{3}\r\nfoo"), #line),
 
-            (.status(.inbox, [.messages]), #line),
-            (.status(MailboxName("foobar"), [.messages, .recent, .uidnext]), #line),
+            (.status(.inbox, [.messageCount]), #line),
+            (.status(MailboxName("foobar"), [.messageCount, .recentCount, .uidNext]), #line),
 
             (.copy([2, .wildcard], .inbox), #line),
 
