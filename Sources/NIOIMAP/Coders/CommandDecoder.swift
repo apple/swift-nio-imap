@@ -56,6 +56,7 @@ public struct CommandDecoder: NIOSingleStepByteToMessageDecoder {
             var result = PartialCommandStream(numberOfSynchronisingLiterals: framingResult.synchronizingLiteralCount,
                                               command: nil)
 
+            let readables = buffer.readableBytes
             if let command = try self.parser.parseCommandStream(buffer: &buffer) {
                 let consumedBytes = buffer.readerIndex - save.readerIndex
                 assert(buffer.writerIndex == save.writerIndex,
@@ -69,6 +70,8 @@ public struct CommandDecoder: NIOSingleStepByteToMessageDecoder {
                 result.command = command
                 return result
             } else {
+                assert(readables == buffer.readableBytes,
+                       "parser consumed bytes on nil: readableBytes before parse: \(readables), buffer: \(buffer)")
                 if result.numberOfSynchronisingLiterals == 0 {
                     return nil
                 } else {

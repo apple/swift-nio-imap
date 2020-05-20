@@ -36,7 +36,7 @@ struct StackTracker {
     private var stackDepth = 0
     private let maximumStackDepth: Int
 
-    static var new: StackTracker {
+    static var makeNewDefaultLimitStackTracker: StackTracker {
         StackTracker(maximumParserStackDepth: 100)
     }
 
