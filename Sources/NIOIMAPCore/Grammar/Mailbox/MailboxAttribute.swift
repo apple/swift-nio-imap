@@ -16,13 +16,13 @@ import struct NIO.ByteBuffer
 
 /// IMAPv4 `status-att`
 public enum MailboxAttribute: String, CaseIterable {
-    case messages = "MESSAGES"
-    case recent = "RECENT"
-    case uidnext = "UIDNEXT"
-    case uidvalidity = "UIDVALIDITY"
-    case unseen = "UNSEEN"
+    case messageCount = "MESSAGES"
+    case recentCount = "RECENT"
+    case uidNext = "UIDNEXT"
+    case uidValidity = "UIDVALIDITY"
+    case unseenCount = "UNSEEN"
     case size = "SIZE"
-    case highestModSeq = "HIGHESTMODSEQ"
+    case highestModificationSequence = "HIGHESTMODSEQ"
 }
 
 /// IMAPv4 `status-att-val`

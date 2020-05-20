@@ -25,7 +25,7 @@ extension ReturnOption_Tests {
         let inputs: [(ReturnOption, String, UInt)] = [
             (.subscribed, "SUBSCRIBED", #line),
             (.children, "CHILDREN", #line),
-            (.statusOption([.messages]), "STATUS (MESSAGES)", #line),
+            (.statusOption([.messageCount]), "STATUS (MESSAGES)", #line),
             (.optionExtension(.init(type: .standard("atom"), value: nil)), "atom", #line),
         ]
 

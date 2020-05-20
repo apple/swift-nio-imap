@@ -24,7 +24,7 @@ extension MailboxAttribute_Tests {
     func testEncode() {
         let inputs: [([MailboxAttribute], String, UInt)] = [
             ([], "", #line),
-            ([MailboxAttribute.messages, .recent, .unseen], "MESSAGES RECENT UNSEEN", #line),
+            ([MailboxAttribute.messageCount, .recentCount, .unseenCount], "MESSAGES RECENT UNSEEN", #line),
         ]
 
         for (test, expectedString, line) in inputs {

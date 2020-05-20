@@ -2560,8 +2560,8 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     func testParseStatus() {
         let inputs: [(String, String, Command, UInt)] = [
-            ("STATUS inbox (messages unseen)", "\r\n", .status(.inbox, [.messages, .unseen]), #line),
-            ("STATUS Deleted (messages unseen HIGHESTMODSEQ)", "\r\n", .status(MailboxName("Deleted"), [.messages, .unseen, .highestModSeq]), #line),
+            ("STATUS inbox (messages unseen)", "\r\n", .status(.inbox, [.messageCount, .unseenCount]), #line),
+            ("STATUS Deleted (messages unseen HIGHESTMODSEQ)", "\r\n", .status(MailboxName("Deleted"), [.messageCount, .unseenCount, .highestModificationSequence]), #line),
         ]
         self.iterateTestInputs(inputs, testFunction: GrammarParser.parseStatus)
     }
