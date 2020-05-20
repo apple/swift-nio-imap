@@ -29,108 +29,108 @@ extension B2MV_Tests {
         let inoutPairs: [(String, [CommandStream])] = [
             // MARK: Capability
 
-            ("tag CAPABILITY" + CRLF, [.command(.init("tag", .capability))]),
+            ("tag CAPABILITY", [.command(.init("tag", .capability))]),
 
             // MARK: Noop
 
-            ("tag NOOP" + CRLF, [.command(.init("tag", .noop))]),
+            ("tag NOOP", [.command(.init("tag", .noop))]),
 
             // MARK: Logout
 
-            ("tag LOGOUT" + CRLF, [.command(.init("tag", .logout))]),
+            ("tag LOGOUT", [.command(.init("tag", .logout))]),
 
             // MARK: StartTLS
 
-            ("tag STARTTLS" + CRLF, [.command(.init("tag", .starttls))]),
+            ("tag STARTTLS", [.command(.init("tag", .starttls))]),
 
             // MARK: Authenticate
 
             // this tests causes nothing but trouble
-            // ("tag AUTHENTICATE PLAIN" + CRLF, [.command(.init("tag", .authenticate("PLAIN", nil, [])))]),
+            // ("tag AUTHENTICATE PLAIN", [.command(.init("tag", .authenticate("PLAIN", nil, [])))]),
 
             // MARK: Login
 
-            (#"tag LOGIN "foo" "bar""# + CRLF, [.command(.init("tag", .login(username: "foo", password: "bar")))]),
-            ("tag LOGIN \"\" {0+}\r\n" + CRLF, [.command(.init("tag", .login(username: "", password: "")))]),
-            (#"tag LOGIN "foo" "bar""# + CRLF, [.command(.init("tag", .login(username: "foo", password: "bar")))]),
-            (#"tag LOGIN foo bar"# + CRLF, [.command(.init("tag", .login(username: "foo", password: "bar")))]),
+            (#"tag LOGIN "foo" "bar""#, [.command(.init("tag", .login(username: "foo", password: "bar")))]),
+            ("tag LOGIN \"\" {0+}\r\n", [.command(.init("tag", .login(username: "", password: "")))]),
+            (#"tag LOGIN "foo" "bar""#, [.command(.init("tag", .login(username: "foo", password: "bar")))]),
+            (#"tag LOGIN foo bar"#, [.command(.init("tag", .login(username: "foo", password: "bar")))]),
 
             // MARK: Select
 
-            ("tag SELECT box1" + CRLF, [.command(.init("tag", .select(.init("box1"), [])))]),
-            ("tag SELECT \"box2\"" + CRLF, [.command(.init("tag", .select(.init("box2"), [])))]),
-            ("tag SELECT {4+}\r\nbox3" + CRLF, [.command(.init("tag", .select(.init("box3"), [])))]),
-            ("tag SELECT box4 (k1 1 k2 2)" + CRLF, [.command(.init("tag", .select(.init("box4"), [.init(name: "k1", value: .simple(.sequence([1]))), .init(name: "k2", value: .simple(.sequence([2])))])))]),
+            ("tag SELECT box1", [.command(.init("tag", .select(.init("box1"), [])))]),
+            ("tag SELECT \"box2\"", [.command(.init("tag", .select(.init("box2"), [])))]),
+            ("tag SELECT {4+}\r\nbox3", [.command(.init("tag", .select(.init("box3"), [])))]),
+            ("tag SELECT box4 (k1 1 k2 2)", [.command(.init("tag", .select(.init("box4"), [.init(name: "k1", value: .simple(.sequence([1]))), .init(name: "k2", value: .simple(.sequence([2])))])))]),
 
             // MARK: Examine
 
-            ("tag EXAMINE box1" + CRLF, [.command(.init("tag", .examine(.init("box1"), [])))]),
-            ("tag EXAMINE \"box2\"" + CRLF, [.command(.init("tag", .examine(.init("box2"), [])))]),
-            ("tag EXAMINE {4+}\r\nbox3" + CRLF, [.command(.init("tag", .examine(.init("box3"), [])))]),
-            ("tag EXAMINE box4 (k3 1 k4 2)" + CRLF, [.command(.init("tag", .examine(.init("box4"), [.init(name: "k3", value: .simple(.sequence([1]))), .init(name: "k4", value: .simple(.sequence([2])))])))]),
+            ("tag EXAMINE box1", [.command(.init("tag", .examine(.init("box1"), [])))]),
+            ("tag EXAMINE \"box2\"", [.command(.init("tag", .examine(.init("box2"), [])))]),
+            ("tag EXAMINE {4+}\r\nbox3", [.command(.init("tag", .examine(.init("box3"), [])))]),
+            ("tag EXAMINE box4 (k3 1 k4 2)", [.command(.init("tag", .examine(.init("box4"), [.init(name: "k3", value: .simple(.sequence([1]))), .init(name: "k4", value: .simple(.sequence([2])))])))]),
 
             // MARK: Create
 
-            ("tag CREATE newBox1" + CRLF, [.command(.init("tag", .create(.init("newBox1"), [])))]),
-            ("tag CREATE \"newBox2\"" + CRLF, [.command(.init("tag", .create(.init("newBox2"), [])))]),
-            ("tag CREATE {7+}\r\nnewBox3" + CRLF, [.command(.init("tag", .create(.init("newBox3"), [])))]),
-            ("tag CREATE newBox4 (k5 5 k6 6)" + CRLF, [.command(.init("tag", .create(.init("newBox4"), [.init(name: "k5", value: .simple(.sequence([5]))), .init(name: "k6", value: .simple(.sequence([6])))])))]),
+            ("tag CREATE newBox1", [.command(.init("tag", .create(.init("newBox1"), [])))]),
+            ("tag CREATE \"newBox2\"", [.command(.init("tag", .create(.init("newBox2"), [])))]),
+            ("tag CREATE {7+}\r\nnewBox3", [.command(.init("tag", .create(.init("newBox3"), [])))]),
+            ("tag CREATE newBox4 (k5 5 k6 6)", [.command(.init("tag", .create(.init("newBox4"), [.init(name: "k5", value: .simple(.sequence([5]))), .init(name: "k6", value: .simple(.sequence([6])))])))]),
 
             // MARK: Delete
 
-            ("tag DELETE box1" + CRLF, [.command(.init("tag", .delete(.init("box1"))))]),
-            ("tag DELETE \"box1\"" + CRLF, [.command(.init("tag", .delete(.init("box1"))))]),
-            ("tag DELETE {4+}\r\nbox1" + CRLF, [.command(.init("tag", .delete(.init("box1"))))]),
+            ("tag DELETE box1", [.command(.init("tag", .delete(.init("box1"))))]),
+            ("tag DELETE \"box1\"", [.command(.init("tag", .delete(.init("box1"))))]),
+            ("tag DELETE {4+}\r\nbox1", [.command(.init("tag", .delete(.init("box1"))))]),
 
             // MARK: Rename
 
-            (#"tag RENAME "foo" "bar""# + CRLF, [.command(TaggedCommand("tag", .rename(from: MailboxName("foo"), to: MailboxName("bar"), params: [])))]),
-            (#"tag RENAME InBoX "inBOX""# + CRLF, [.command(TaggedCommand("tag", .rename(from: .inbox, to: .inbox, params: [])))]),
-            ("tag RENAME {1+}\r\n1 {1+}\r\n2" + CRLF, [.command(TaggedCommand("tag", .rename(from: MailboxName("1"), to: MailboxName("2"), params: [])))]),
+            (#"tag RENAME "foo" "bar""#, [.command(TaggedCommand("tag", .rename(from: MailboxName("foo"), to: MailboxName("bar"), params: [])))]),
+            (#"tag RENAME InBoX "inBOX""#, [.command(TaggedCommand("tag", .rename(from: .inbox, to: .inbox, params: [])))]),
+            ("tag RENAME {1+}\r\n1 {1+}\r\n2", [.command(TaggedCommand("tag", .rename(from: MailboxName("1"), to: MailboxName("2"), params: [])))]),
 
             // MARK: Subscribe
 
-            ("tag SUBSCRIBE inbox" + CRLF, [.command(.init("tag", .subscribe(.inbox)))]),
-            ("tag SUBSCRIBE INBOX" + CRLF, [.command(.init("tag", .subscribe(.inbox)))]),
-            ("tag SUBSCRIBE iNbOx" + CRLF, [.command(.init("tag", .subscribe(.inbox)))]),
-            ("tag SUBSCRIBE \"INBOX\"" + CRLF, [.command(.init("tag", .subscribe(.inbox)))]),
-            ("tag SUBSCRIBE {5+}\r\nINBOX" + CRLF, [.command(.init("tag", .subscribe(.inbox)))]),
+            ("tag SUBSCRIBE inbox", [.command(.init("tag", .subscribe(.inbox)))]),
+            ("tag SUBSCRIBE INBOX", [.command(.init("tag", .subscribe(.inbox)))]),
+            ("tag SUBSCRIBE iNbOx", [.command(.init("tag", .subscribe(.inbox)))]),
+            ("tag SUBSCRIBE \"INBOX\"", [.command(.init("tag", .subscribe(.inbox)))]),
+            ("tag SUBSCRIBE {5+}\r\nINBOX", [.command(.init("tag", .subscribe(.inbox)))]),
 
             // MARK: Unsubscribe
 
-            ("tag UNSUBSCRIBE inbox" + CRLF, [.command(.init("tag", .unsubscribe(.inbox)))]),
-            ("tag UNSUBSCRIBE INBOX" + CRLF, [.command(.init("tag", .unsubscribe(.inbox)))]),
-            ("tag UNSUBSCRIBE iNbOx" + CRLF, [.command(.init("tag", .unsubscribe(.inbox)))]),
-            ("tag UNSUBSCRIBE \"INBOX\"" + CRLF, [.command(.init("tag", .unsubscribe(.inbox)))]),
-            ("tag UNSUBSCRIBE {5+}\r\nINBOX" + CRLF, [.command(.init("tag", .unsubscribe(.inbox)))]),
+            ("tag UNSUBSCRIBE inbox", [.command(.init("tag", .unsubscribe(.inbox)))]),
+            ("tag UNSUBSCRIBE INBOX", [.command(.init("tag", .unsubscribe(.inbox)))]),
+            ("tag UNSUBSCRIBE iNbOx", [.command(.init("tag", .unsubscribe(.inbox)))]),
+            ("tag UNSUBSCRIBE \"INBOX\"", [.command(.init("tag", .unsubscribe(.inbox)))]),
+            ("tag UNSUBSCRIBE {5+}\r\nINBOX", [.command(.init("tag", .unsubscribe(.inbox)))]),
 
             // MARK: Check
 
-            ("tag CHECK" + CRLF, [.command(.init("tag", .check))]),
+            ("tag CHECK", [.command(.init("tag", .check))]),
 
             // MARK: List
 
-            ("tag LIST INBOX \"\"" + CRLF, [.command(.init("tag", .list(nil, .inbox, .mailbox(""), [])))]),
-            ("tag LIST /Mail/ %" + CRLF, [.command(.init("tag", .list(nil, .init("/Mail/"), .mailbox("%"), [])))]),
+            ("tag LIST INBOX \"\"", [.command(.init("tag", .list(nil, .inbox, .mailbox(""), [])))]),
+            ("tag LIST /Mail/ %", [.command(.init("tag", .list(nil, .init("/Mail/"), .mailbox("%"), [])))]),
 
             // MARK: LSUB
 
-            ("tag LSUB INBOX \"\"" + CRLF, [.command(.init("tag", .lsub(.inbox, "")))]),
+            ("tag LSUB INBOX \"\"", [.command(.init("tag", .lsub(.inbox, "")))]),
 
             // MARK: Status
 
-            ("tag STATUS INBOX (MESSAGES)" + CRLF, [.command(.init("tag", .status(.inbox, [.messages])))]),
-            ("tag STATUS INBOX (MESSAGES RECENT UIDNEXT)" + CRLF, [.command(.init("tag", .status(.inbox, [.messages, .recent, .uidnext])))]),
+            ("tag STATUS INBOX (MESSAGES)", [.command(.init("tag", .status(.inbox, [.messages])))]),
+            ("tag STATUS INBOX (MESSAGES RECENT UIDNEXT)", [.command(.init("tag", .status(.inbox, [.messages, .recent, .uidnext])))]),
 
             // MARK: Append
 
-//            ("tag APPEND box (\\Seen) {1}\r\na" + CRLF, [
+//            ("tag APPEND box (\\Seen) {1}\r\na", [
 //                .command(.init("tag", .append(to: .init("box"), firstMessageMetadata: .options(.flagList([.seen], dateTime: nil, extensions: []), data: .init(byteCount: 1))))),
 //                .bytes("a"),
 //            ])
         ]
 
-        let input = inoutPairs.map { ($0.0, $0.1.map { CommandDecoder.PartialCommandStream($0) }) }
+        let input = inoutPairs.map { ($0.0 + CRLF, $0.1.map { CommandDecoder.PartialCommandStream($0) }) }
         do {
             try ByteToMessageDecoderVerifier.verifyDecoder(
                 stringInputOutputPairs: input,
@@ -177,57 +177,61 @@ extension B2MV_Tests {
         let inoutPairs: [(String, [Response])] = [
             // MARK: State responses
 
-            ("* OK Server ready" + CRLF, [.untaggedResponse(.conditionalState(.ok(.init(code: nil, text: "Server ready"))))]),
-            ("* OK [ALERT] Server ready" + CRLF, [.untaggedResponse(.conditionalState(.ok(.init(code: .alert, text: "Server ready"))))]),
-            ("* NO Disk full" + CRLF, [.untaggedResponse(.conditionalState(.no(.init(code: nil, text: "Disk full"))))]),
-            ("* NO [READ-ONLY] Disk full" + CRLF, [.untaggedResponse(.conditionalState(.no(.init(code: .readOnly, text: "Disk full"))))]),
-            ("* BAD horrible" + CRLF, [.untaggedResponse(.conditionalState(.bad(.init(code: nil, text: "horrible"))))]),
-            ("* BAD [BADCHARSET (utf123)] horrible" + CRLF, [.untaggedResponse(.conditionalState(.bad(.init(code: .badCharset(["utf123"]), text: "horrible"))))]),
+            ("* OK Server ready", [.untaggedResponse(.conditionalState(.ok(.init(code: nil, text: "Server ready"))))]),
+            ("* OK [ALERT] Server ready", [.untaggedResponse(.conditionalState(.ok(.init(code: .alert, text: "Server ready"))))]),
+            ("* NO Disk full", [.untaggedResponse(.conditionalState(.no(.init(code: nil, text: "Disk full"))))]),
+            ("* NO [READ-ONLY] Disk full", [.untaggedResponse(.conditionalState(.no(.init(code: .readOnly, text: "Disk full"))))]),
+            ("* BAD horrible", [.untaggedResponse(.conditionalState(.bad(.init(code: nil, text: "horrible"))))]),
+            ("* BAD [BADCHARSET (utf123)] horrible", [.untaggedResponse(.conditionalState(.bad(.init(code: .badCharset(["utf123"]), text: "horrible"))))]),
 
             // MARK: Bye
 
-            ("* BYE logging off" + CRLF, [.untaggedResponse(.conditionalBye(.init(code: nil, text: "logging off")))]),
-            ("* BYE [ALERT] logging off" + CRLF, [.untaggedResponse(.conditionalBye(.init(code: .alert, text: "logging off")))]),
+            ("* BYE logging off", [.untaggedResponse(.conditionalBye(.init(code: nil, text: "logging off")))]),
+            ("* BYE [ALERT] logging off", [.untaggedResponse(.conditionalBye(.init(code: .alert, text: "logging off")))]),
 
             // MARK: Capability
 
-            ("* CAPABILITY IMAP4rev1 CHILDREN CONDSTORE" + CRLF, [.untaggedResponse(.capabilityData([.imap4rev1, .children, .condStore]))]),
+            ("* CAPABILITY IMAP4rev1 CHILDREN CONDSTORE", [.untaggedResponse(.capabilityData([.imap4rev1, .children, .condStore]))]),
 
             // MARK: LIST
 
-            ("* LIST (\\NoSelect) \"/\" ~/Mail/foo" + CRLF, [.untaggedResponse(.mailboxData(.list(.init(flags: .init(oFlags: [], sFlag: .noSelect), char: "/", mailbox: .init("~/Mail/foo"), listExtended: []))))]),
+            ("* LIST (\\NoSelect) \"/\" ~/Mail/foo", [.untaggedResponse(.mailboxData(.list(.init(flags: .init(oFlags: [], sFlag: .noSelect), char: "/", mailbox: .init("~/Mail/foo"), listExtended: []))))]),
 
             // MARK: LSUB
 
-            ("* LSUB (\\NoSelect) \"/\" ~/Mail/foo" + CRLF, [.untaggedResponse(.mailboxData(.lsub(.init(flags: .init(oFlags: [], sFlag: .noSelect), char: "/", mailbox: .init("~/Mail/foo"), listExtended: []))))]),
+            ("* LSUB (\\NoSelect) \"/\" ~/Mail/foo", [.untaggedResponse(.mailboxData(.lsub(.init(flags: .init(oFlags: [], sFlag: .noSelect), char: "/", mailbox: .init("~/Mail/foo"), listExtended: []))))]),
 
             // MARK: Status
 
-            ("* STATUS INBOX (MESSAGES 231 UIDNEXT 44292)" + CRLF, [.untaggedResponse(.mailboxData(.status(.inbox, [.messages(231), .uidNext(44292)])))]),
+            ("* STATUS INBOX (MESSAGES 231 UIDNEXT 44292)", [.untaggedResponse(.mailboxData(.status(.inbox, [.messages(231), .uidNext(44292)])))]),
 
             // MARK: Flags
 
-            ("* FLAGS (\\Answered \\Seen)" + CRLF, [.untaggedResponse(.mailboxData(.flags([.answered, .seen])))]),
+            ("* FLAGS (\\Answered \\Seen)", [.untaggedResponse(.mailboxData(.flags([.answered, .seen])))]),
 
             // MARK: Exists
 
-            ("* 23 EXISTS" + CRLF, [.untaggedResponse(.mailboxData(.exists(23)))]),
+            ("* 23 EXISTS", [.untaggedResponse(.mailboxData(.exists(23)))]),
 
             // MARK: Recent
 
-            ("* 5 RECENT" + CRLF, [.untaggedResponse(.mailboxData(.recent(5)))]),
+            ("* 5 RECENT", [.untaggedResponse(.mailboxData(.recent(5)))]),
 
             // MARK: Expunge
 
-            ("* 20 EXPUNGE" + CRLF, [.untaggedResponse(.messageData(.expunge(20)))]),
+            ("* 20 EXPUNGE", [.untaggedResponse(.messageData(.expunge(20)))]),
+            
+            // MARK: Fetch
+            
+//            ("", []),
 
             // Tagged
-            ("tag OK Complete" + CRLF, [.taggedResponse(.init(tag: "tag", state: .ok(.init(code: nil, text: "Complete"))))]),
-            ("tag NO [ALERT] Complete" + CRLF, [.taggedResponse(.init(tag: "tag", state: .no(.init(code: .alert, text: "Complete"))))]),
-            ("tag BAD [PARSE] Complete" + CRLF, [.taggedResponse(.init(tag: "tag", state: .bad(.init(code: .parse, text: "Complete"))))]),
+            ("tag OK Complete", [.taggedResponse(.init(tag: "tag", state: .ok(.init(code: nil, text: "Complete"))))]),
+            ("tag NO [ALERT] Complete", [.taggedResponse(.init(tag: "tag", state: .no(.init(code: .alert, text: "Complete"))))]),
+            ("tag BAD [PARSE] Complete", [.taggedResponse(.init(tag: "tag", state: .bad(.init(code: .parse, text: "Complete"))))]),
         ]
 
-        let inputs = inoutPairs.map { ($0.0, $0.1.map { ResponseOrContinueRequest.response($0) }) }
+        let inputs = inoutPairs.map { ($0.0 + CRLF, $0.1.map { ResponseOrContinueRequest.response($0) }) }
         do {
             try ByteToMessageDecoderVerifier.verifyDecoder(
                 stringInputOutputPairs: inputs,
