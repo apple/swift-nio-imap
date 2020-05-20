@@ -106,6 +106,4 @@ final class ParserStressTests: XCTestCase {
             XCTAssertEqual(error.parserError as? ParsingError, .lineTooLong, "\(error)")
         }
     }
-    
-    
 }

@@ -22,7 +22,6 @@ import XCTest
 final class CommandDecoder_Tests: XCTestCase {}
 
 extension CommandDecoder_Tests {
-    
     func testConsumeWhenReturningNotEnoughDataRegression() {
         let channel = EmbeddedChannel(handler: ByteToMessageHandler(CommandDecoder()), loop: .init())
 
@@ -30,21 +29,19 @@ extension CommandDecoder_Tests {
             XCTAssertNoThrow(try channel.writeInbound(self.buffer(feed)), feed)
         }
 
-
-        XCTAssertNoThrow(XCTAssertEqual(CommandDecoder.PartialCommandStream.init(.command(.init(type: .append(to: .init(self.buffer("box")),
-                                                                                                              firstMessageMetadata: .init(options: .init(flagList: [.seen],
-                                                                                                                                                         extensions: []),
-                                                                                                                                          data: .init(byteCount: 1,
-                                                                                                                                                      needs8BitCleanTransport: false,
-                                                                                                                                                      synchronizing: false))),
-                                                                                                tag: "tag"))),
+        XCTAssertNoThrow(XCTAssertEqual(CommandDecoder.PartialCommandStream(.command(.init(type: .append(to: .init(self.buffer("box")),
+                                                                                                         firstMessageMetadata: .init(options: .init(flagList: [.seen],
+                                                                                                                                                    extensions: []),
+                                                                                                                                     data: .init(byteCount: 1,
+                                                                                                                                                 needs8BitCleanTransport: false,
+                                                                                                                                                 synchronizing: false))),
+                                                                                           tag: "tag"))),
                                         try channel.readInbound(as: CommandDecoder.PartialCommandStream.self)))
-        XCTAssertNoThrow(XCTAssertEqual(CommandDecoder.PartialCommandStream.init(.bytes(self.buffer("a"))),
+        XCTAssertNoThrow(XCTAssertEqual(CommandDecoder.PartialCommandStream(.bytes(self.buffer("a"))),
                                         try channel.readInbound(as: CommandDecoder.PartialCommandStream.self)))
         XCTAssertNoThrow(XCTAssertNil(try channel.readInbound(as: CommandDecoder.PartialCommandStream.self)))
         XCTAssertNoThrow(XCTAssertTrue(try channel.finish().isClean))
     }
-    
 }
 
 extension CommandDecoder_Tests {

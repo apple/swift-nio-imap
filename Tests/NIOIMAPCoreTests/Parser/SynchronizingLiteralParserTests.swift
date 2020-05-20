@@ -164,8 +164,7 @@ final class SynchronizingLiteralParserTests: XCTestCase {
         self.assertMultipleParses(["tag APPEND box (\\Seen) {1+}\r\na\r\n",
                                    "a\r\n",
                                    "\r\n",
-                                   "\r\n"
-        ])
+                                   "\r\n"])
     }
 
     override func setUp() {

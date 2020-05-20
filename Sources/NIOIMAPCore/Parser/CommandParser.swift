@@ -52,7 +52,7 @@ public struct CommandParser: Parser {
     }
 
     private mutating func parseCommandStream0(buffer: inout ByteBuffer, tracker: StackTracker) throws -> CommandStream? {
-        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker in
+        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             switch self.mode {
             case .streamingAppend(let remaining):
                 let bytes = self.parseBytes(buffer: &buffer, remaining: remaining)
