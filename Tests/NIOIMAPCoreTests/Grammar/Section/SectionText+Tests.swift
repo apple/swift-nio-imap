@@ -25,13 +25,11 @@ extension SectionText_Tests {
         let inputs: [(SectionText, String, UInt)] = [
             (.mime, "MIME", #line),
             (.header, "HEADER", #line),
+            (.text, "TEXT", #line),
+            (.headerFields(["f1"]), "HEADER.FIELDS (f1)", #line),
+            (.headerFields(["f1", "f2", "f3"]), "HEADER.FIELDS (f1 f2 f3)", #line),
+            (.notHeaderFields(["n1", "n2"]), "HEADER.FIELDS.NOT (n1 n2)", #line),
         ]
-
-        for (test, expectedString, line) in inputs {
-            self.testBuffer.clear()
-            let size = self.testBuffer.writeSectionText(test)
-            XCTAssertEqual(size, expectedString.utf8.count, line: line)
-            XCTAssertEqual(self.testBufferString, expectedString, line: line)
-        }
+        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeSectionText($0) })
     }
 }
