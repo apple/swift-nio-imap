@@ -24,7 +24,7 @@ extension SectionText_Tests {
     func testEncode() {
         let inputs: [(SectionText, String, UInt)] = [
             (.mime, "MIME", #line),
-            (.message(.header), "HEADER", #line),
+            (.header, "HEADER", #line),
         ]
 
         for (test, expectedString, line) in inputs {

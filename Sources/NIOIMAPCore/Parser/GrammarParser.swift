@@ -3439,7 +3439,7 @@ extension GrammarParser {
             let part = try self.parseSectionPart(buffer: &buffer, tracker: tracker)
             let text = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> SectionText in
                 try ParserLibrary.parseFixedString(".", buffer: &buffer, tracker: tracker)
-                return .message(try self.parseSectionMessageText(buffer: &buffer, tracker: tracker))
+                return try self.parseSectionText(buffer: &buffer, tracker: tracker)
             }
             return .part(part, text: text)
         }
@@ -3457,13 +3457,32 @@ extension GrammarParser {
             return .mime
         }
 
-        func parseSectionText_messageText(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SectionText {
-            .message(try self.parseSectionMessageText(buffer: &buffer, tracker: tracker))
+        func parseSectionText_header(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SectionText {
+            try ParserLibrary.parseFixedString("HEADER", buffer: &buffer, tracker: tracker)
+            return .header
+        }
+
+        func parseSectionText_headerFields(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SectionText {
+            try ParserLibrary.parseFixedString("HEADER.FIELDS ", buffer: &buffer, tracker: tracker)
+            return .headerFields(try self.parseHeaderList(buffer: &buffer, tracker: tracker))
+        }
+
+        func parseSectionText_notHeaderFields(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SectionText {
+            try ParserLibrary.parseFixedString("HEADER.FIELDS.NOT ", buffer: &buffer, tracker: tracker)
+            return .notHeaderFields(try self.parseHeaderList(buffer: &buffer, tracker: tracker))
+        }
+
+        func parseSectionText_text(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SectionText {
+            try ParserLibrary.parseFixedString("TEXT", buffer: &buffer, tracker: tracker)
+            return .text
         }
 
         return try ParserLibrary.parseOneOf([
             parseSectionText_mime,
-            parseSectionText_messageText,
+            parseSectionText_header,
+            parseSectionText_headerFields,
+            parseSectionText_notHeaderFields,
+            parseSectionText_text,
         ], buffer: &buffer, tracker: tracker)
     }
 
