@@ -2408,6 +2408,23 @@ extension ParserUnitTests {
     }
 }
 
+// MARK: - parseSectionText
+
+extension ParserUnitTests {
+    func testParseSectionText() {
+        let inputs: [(String, String, SectionText, UInt)] = [
+            ("MIME", " ", .mime, #line),
+            ("HEADER", " ", .header, #line),
+            ("TEXT", " ", .text, #line),
+            ("HEADER.FIELDS (f1)", " ", .headerFields(["f1"]), #line),
+            ("HEADER.FIELDS (f1 f2 f3)", " ", .headerFields(["f1", "f2", "f3"]), #line),
+            ("HEADER.FIELDS.NOT (f1)", " ", .notHeaderFields(["f1"]), #line),
+            ("HEADER.FIELDS.NOT (f1 f2 f3)", " ", .notHeaderFields(["f1", "f2", "f3"]), #line),
+        ]
+        self.iterateTestInputs(inputs, testFunction: GrammarParser.parseSectionText)
+    }
+}
+
 // MARK: - select parseSelect
 
 extension ParserUnitTests {
