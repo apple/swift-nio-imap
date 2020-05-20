@@ -124,10 +124,10 @@ extension B2MV_Tests {
 
             // MARK: Append
 
-//            ("tag APPEND box (\\Seen) {1}\r\na", [
-//                .command(.init("tag", .append(to: .init("box"), firstMessageMetadata: .options(.flagList([.seen], dateTime: nil, extensions: []), data: .init(byteCount: 1))))),
-//                .bytes("a"),
-//            ])
+            ("tag APPEND box (\\Seen) {1+}\r\na", [
+                .command(.init("tag", .append(to: .init("box"), firstMessageMetadata: .init(options: .init(flagList: [.seen], extensions: []), data: .init(byteCount: 1, synchronizing: false))))),
+                .bytes("a")
+            ])
         ]
 
         let input = inoutPairs.map { ($0.0 + CRLF, $0.1.map { CommandDecoder.PartialCommandStream($0) }) }
