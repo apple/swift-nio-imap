@@ -54,16 +54,16 @@ extension ParserUnitTests {
             let c2_2 = try parser.parseCommandStream(buffer: &buffer)
             let c3 = try parser.parseCommandStream(buffer: &buffer)
             XCTAssertEqual(buffer.readableBytes, 0)
-            XCTAssertEqual(c1, .command(TaggedCommand(type: .noop, tag: "1")))
+            XCTAssertEqual(c1, .command(TaggedCommand(tag: "1", command: .noop)))
             XCTAssertEqual(
                 c2_1,
-                .command(TaggedCommand(type: .append(
+                .command(TaggedCommand(tag: "2", command: .append(
                     to: .inbox,
                     firstMessageMetadata: .init(options: .init(flagList: [], dateTime: nil, extensions: []), data: .init(byteCount: 10))
-                ), tag: "2"))
+                )))
             )
             XCTAssertEqual(c2_2, .bytes("0123456789"))
-            XCTAssertEqual(c3, .command(TaggedCommand(type: .noop, tag: "3")))
+            XCTAssertEqual(c3, .command(TaggedCommand(tag: "3", command: .noop)))
         } catch {
             XCTFail("\(error)")
         }
@@ -146,11 +146,11 @@ extension ParserUnitTests {
         var parser = CommandParser()
         do {
             let c1 = try parser.parseCommandStream(buffer: &buffer)
-            XCTAssertEqual(c1, .command(TaggedCommand(type: .noop, tag: "1")))
+            XCTAssertEqual(c1, .command(TaggedCommand(tag: "1", command: .noop)))
             XCTAssertEqual(parser.mode, .lines)
 
             let c2_1 = try parser.parseCommandStream(buffer: &buffer)
-            XCTAssertEqual(c2_1, .command(TaggedCommand(type: .idleStart, tag: "2")))
+            XCTAssertEqual(c2_1, .command(TaggedCommand(tag: "2", command: .idleStart)))
             XCTAssertEqual(parser.mode, .idle)
 
             let c2_2 = try parser.parseCommandStream(buffer: &buffer)
@@ -159,7 +159,7 @@ extension ParserUnitTests {
 
             let c3 = try parser.parseCommandStream(buffer: &buffer)
             XCTAssertEqual(buffer.readableBytes, 0)
-            XCTAssertEqual(c3, .command(TaggedCommand(type: .noop, tag: "3")))
+            XCTAssertEqual(c3, .command(TaggedCommand(tag: "3", command: .noop)))
             XCTAssertEqual(parser.mode, .lines)
         } catch {
             XCTFail("\(error)")
@@ -689,7 +689,7 @@ extension ParserUnitTests {
         TestUtilities.withBuffer("a1 NOOP", terminator: "\r\n") { (buffer) in
             let result = try GrammarParser.parseCommand(buffer: &buffer, tracker: .testTracker)
             XCTAssertEqual(result.tag, "a1")
-            XCTAssertEqual(result.type, .noop)
+            XCTAssertEqual(result.command, .noop)
         }
     }
 
@@ -697,7 +697,7 @@ extension ParserUnitTests {
         TestUtilities.withBuffer("a1 CREATE \"mailbox\"", terminator: "\r\n") { (buffer) in
             let result = try GrammarParser.parseCommand(buffer: &buffer, tracker: .testTracker)
             XCTAssertEqual(result.tag, "a1")
-            XCTAssertEqual(result.type, .create(MailboxName("mailbox"), []))
+            XCTAssertEqual(result.command, .create(MailboxName("mailbox"), []))
         }
     }
 
@@ -705,7 +705,7 @@ extension ParserUnitTests {
         TestUtilities.withBuffer("a1 STARTTLS", terminator: "\r\n") { (buffer) in
             let result = try GrammarParser.parseCommand(buffer: &buffer, tracker: .testTracker)
             XCTAssertEqual(result.tag, "a1")
-            XCTAssertEqual(result.type, .starttls)
+            XCTAssertEqual(result.command, .starttls)
         }
     }
 
@@ -713,7 +713,7 @@ extension ParserUnitTests {
         TestUtilities.withBuffer("a1 CHECK", terminator: "\r\n") { (buffer) in
             let result = try GrammarParser.parseCommand(buffer: &buffer, tracker: .testTracker)
             XCTAssertEqual(result.tag, "a1")
-            XCTAssertEqual(result.type, .check)
+            XCTAssertEqual(result.command, .check)
         }
     }
 }

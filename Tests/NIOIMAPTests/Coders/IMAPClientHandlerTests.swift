@@ -22,7 +22,7 @@ class IMAPClientHandlerTests: XCTestCase {
     // MARK: - Tests
 
     func testBasicCommandAndResponse() {
-        self.writeOutbound(.command(.init(type: .login(username: "foo", password: "bar"), tag: "a")))
+        self.writeOutbound(.command(.init(tag: "a", command: .login(username: "foo", password: "bar"))))
         self.assertOutboundString("a LOGIN \"foo\" \"bar\"\r\n")
         self.writeInbound("a OK ok\r\n")
         self.assertInbound(.taggedResponse(.init(tag: "a",
@@ -30,10 +30,10 @@ class IMAPClientHandlerTests: XCTestCase {
     }
 
     func testCommandThatNeedsToWaitForContinuationRequest() {
-        let f = self.writeOutbound(CommandStream.command(TaggedCommand(type: .rename(from: .init("\n"),
-                                                                                     to: .init("to"),
-                                                                                     params: []),
-                                                                       tag: "x")),
+        let f = self.writeOutbound(CommandStream.command(TaggedCommand(tag: "x",
+                                                                       command: .rename(from: .init("\n"),
+                                                                                        to: .init("to"),
+                                                                                        params: []))),
                                    wait: false)
         self.assertOutboundString("x RENAME {1}\r\n")
         self.writeInbound("+ OK\r\n")
@@ -45,10 +45,10 @@ class IMAPClientHandlerTests: XCTestCase {
     }
 
     func testCommandThatNeedsToWaitForTwoContinuationRequest() {
-        let f = self.writeOutbound(CommandStream.command(TaggedCommand(type: .rename(from: .init("\n"),
-                                                                                     to: .init("\r"),
-                                                                                     params: []),
-                                                                       tag: "x")),
+        let f = self.writeOutbound(CommandStream.command(TaggedCommand(tag: "x",
+                                                                       command: .rename(from: .init("\n"),
+                                                                                        to: .init("\r"),
+                                                                                        params: []))),
                                    wait: false)
         self.assertOutboundString("x RENAME {1}\r\n")
         self.writeInbound("+ OK\r\n")
@@ -62,15 +62,15 @@ class IMAPClientHandlerTests: XCTestCase {
     }
 
     func testTwoContReqCommandsEnqueued() {
-        let f1 = self.writeOutbound(CommandStream.command(TaggedCommand(type: .rename(from: .init("\n"),
-                                                                                      to: .init("to"),
-                                                                                      params: []),
-                                                                        tag: "x")),
+        let f1 = self.writeOutbound(CommandStream.command(TaggedCommand(tag: "x",
+                                                                        command: .rename(from: .init("\n"),
+                                                                                         to: .init("to"),
+                                                                                         params: []))),
                                     wait: false)
-        let f2 = self.writeOutbound(CommandStream.command(TaggedCommand(type: .rename(from: .init("from"),
-                                                                                      to: .init("\n"),
-                                                                                      params: []),
-                                                                        tag: "y")),
+        let f2 = self.writeOutbound(CommandStream.command(TaggedCommand(tag: "y",
+                                                                        command: .rename(from: .init("from"),
+                                                                                         to: .init("\n"),
+                                                                                         params: []))),
                                     wait: false)
         self.assertOutboundString("x RENAME {1}\r\n")
         self.writeInbound("+ OK\r\n")
@@ -89,10 +89,10 @@ class IMAPClientHandlerTests: XCTestCase {
     }
 
     func testUnexpectedContinuationRequest() {
-        let f = self.writeOutbound(CommandStream.command(TaggedCommand(type: .rename(from: .init("\n"),
-                                                                                     to: .init("to"),
-                                                                                     params: []),
-                                                                       tag: "x")),
+        let f = self.writeOutbound(CommandStream.command(TaggedCommand(tag: "x",
+                                                                       command: .rename(from: .init("\n"),
+                                                                                        to: .init("to"),
+                                                                                        params: []))),
                                    wait: false)
         self.assertOutboundString("x RENAME {1}\r\n")
         XCTAssertThrowsError(try self.channel.writeInbound(self.buffer(string: "+ OK\r\n+ OK\r\n"))) { error in
