@@ -3479,9 +3479,9 @@ extension GrammarParser {
 
         return try ParserLibrary.parseOneOf([
             parseSectionText_mime,
-            parseSectionText_header,
             parseSectionText_headerFields,
             parseSectionText_notHeaderFields,
+            parseSectionText_header,
             parseSectionText_text,
         ], buffer: &buffer, tracker: tracker)
     }
