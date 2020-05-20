@@ -223,9 +223,22 @@ extension B2MV_Tests {
             
             // MARK: Fetch
             
-//            ("", []),
+            (
+                "* 1 FETCH (UID 999)",
+                [.fetchResponse(.start(1)), .fetchResponse(.simpleAttribute(.uid(999))), .fetchResponse(.finish)]
+            ),
+            (
+                "* 2 FETCH (UID 111 FLAGS (\\Seen \\Deleted \\Answered))",
+                [
+                    .fetchResponse(.start(2)),
+                    .fetchResponse(.simpleAttribute(.uid(111))),
+                    .fetchResponse(.simpleAttribute(.flags([.seen, .deleted,.answered]))),
+                    .fetchResponse(.finish)
+                ]
+            ),
 
-            // Tagged
+            // MARK: Tagged
+            
             ("tag OK Complete", [.taggedResponse(.init(tag: "tag", state: .ok(.init(code: nil, text: "Complete"))))]),
             ("tag NO [ALERT] Complete", [.taggedResponse(.init(tag: "tag", state: .no(.init(code: .alert, text: "Complete"))))]),
             ("tag BAD [PARSE] Complete", [.taggedResponse(.init(tag: "tag", state: .bad(.init(code: .parse, text: "Complete"))))]),
