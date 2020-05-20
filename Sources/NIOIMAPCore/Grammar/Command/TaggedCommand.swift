@@ -23,11 +23,6 @@ public struct TaggedCommand: Equatable {
         self.tag = tag
         self.command = command
     }
-
-    public init(_ tag: String, _ type: Command) {
-        self.tag = tag
-        self.type = type
-    }
 }
 
 extension EncodeBuffer {

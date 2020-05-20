@@ -74,12 +74,12 @@ public struct CommandParser: Parser {
                 let save = buffer
                 do {
                     let command = try self.parseCommand(buffer: &buffer, tracker: tracker)
-                    if case .append(to: _, firstMessageMetadata: let firstMetdata) = command.type {
+                    if case .append(to: _, firstMessageMetadata: let firstMetdata) = command.command {
                         self.mode = .streamingAppend(firstMetdata.data.byteCount)
                     } else {
                         try GrammarParser.parseCommandEnd(buffer: &buffer, tracker: tracker)
                     }
-                    if case .idleStart = command.type {
+                    if case .idleStart = command.command {
                         self.mode = .idle
                     }
                     return .command(command)
