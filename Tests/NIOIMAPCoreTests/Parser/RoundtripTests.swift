@@ -97,7 +97,7 @@ final class RoundtripTests: XCTestCase {
             let commandType = test.0
             let line = test.1
             let tag = "\(i + 1)"
-            let command = TaggedCommand(type: commandType, tag: tag)
+            let command = TaggedCommand(tag: tag, command: commandType)
             encodeBuffer.writeCommand(command)
             encodeBuffer.writeString("\r\n") // required for commands that might terminate with a literal (e.g. append)
             var buffer = ByteBufferAllocator().buffer(capacity: 128)

@@ -16,12 +16,12 @@ import struct NIO.ByteBuffer
 
 /// IMAP4 `command` (`command-any`, `command-auth`, `command-nonauth`, `command-select`)
 public struct TaggedCommand: Equatable {
-    public var type: Command
     public var tag: String
+    public var command: Command
 
-    public init(type: Command, tag: String) {
-        self.type = type
+    public init(tag: String, command: Command) {
         self.tag = tag
+        self.command = command
     }
 }
 
@@ -30,9 +30,9 @@ extension EncodeBuffer {
         assert(self.mode == .client, "only clients can send commands")
         var size = 0
         size += self.writeString("\(command.tag) ")
-        size += self.writeCommandType(command.type)
+        size += self.writeCommandType(command.command)
 
-        switch command.type {
+        switch command.command {
         case .append(to: _, firstMessageMetadata: _):
             break
         default:

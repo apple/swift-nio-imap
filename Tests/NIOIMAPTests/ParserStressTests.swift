@@ -78,22 +78,21 @@ final class ParserStressTests: XCTestCase {
         let inoutPairs: [(String, [CommandDecoder.PartialCommandStream])] = [
             // LOGIN
             (#"tag LOGIN "foo" "bar""# + CRLF,
-             [CommandDecoder.PartialCommandStream(.command(.init(type: .login(username: "foo",
-                                                                              password: "bar"),
-                                                                 tag: "tag")))]),
+             [CommandDecoder.PartialCommandStream(.command(.init(tag: "tag",
+                                                                 command: .login(username: "foo", password: "bar"))))]),
             (#"tag LOGIN "foo" "bar""# + CRLF,
-             [CommandDecoder.PartialCommandStream(.command(.init(type: .login(username: "foo",
-                                                                              password: "bar"),
-                                                                 tag: "tag")))]),
+             [CommandDecoder.PartialCommandStream(.command(.init(tag: "tag",
+                                                                 command: .login(username: "foo", password: "bar"))))]),
             (#"tag LOGIN foo bar"# + CRLF,
-             [CommandDecoder.PartialCommandStream(.command(.init(type: .login(username: "foo",
-                                                                              password: "bar"),
-                                                                 tag: "tag")))]),
+             [CommandDecoder.PartialCommandStream(.command(.init(tag: "tag",
+                                                                 command: .login(username: "foo", password: "bar"))))]),
             // RENAME
             (#"tag RENAME "foo" "bar""# + CRLF,
-             [CommandDecoder.PartialCommandStream(.command(TaggedCommand(type: .rename(from: MailboxName("foo"), to: MailboxName("bar"), params: []), tag: "tag")))]),
+             [CommandDecoder.PartialCommandStream(.command(TaggedCommand(tag: "tag",
+                                                                         command: .rename(from: MailboxName("foo"), to: MailboxName("bar"), params: []))))]),
             (#"tag RENAME InBoX "inBOX""# + CRLF,
-             [CommandDecoder.PartialCommandStream(.command(TaggedCommand(type: .rename(from: .inbox, to: .inbox, params: []), tag: "tag")))]),
+             [CommandDecoder.PartialCommandStream(.command(TaggedCommand(tag: "tag",
+                                                                         command: .rename(from: .inbox, to: .inbox, params: []))))]),
         ]
         do {
             try ByteToMessageDecoderVerifier.verifyDecoder(

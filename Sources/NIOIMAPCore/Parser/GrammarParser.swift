@@ -601,7 +601,7 @@ extension GrammarParser {
                 self.parseCommandNonauth,
                 self.parseCommandSelect,
             ], buffer: &buffer, tracker: tracker)
-            return TaggedCommand(type: type, tag: tag)
+            return TaggedCommand(tag: tag, command: type)
         }
     }
 
