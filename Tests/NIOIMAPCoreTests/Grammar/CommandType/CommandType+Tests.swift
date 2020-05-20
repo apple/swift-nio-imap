@@ -23,7 +23,7 @@ class CommandType_Tests: EncodeTestClass {}
 extension CommandType_Tests {
     func testEncode() {
         let inputs: [(Command, String, UInt)] = [
-            (.list(nil, .init(""), .mailbox(""), []), "LIST \"\" \"\" RETURN ()", #line),
+            (.list(nil, reference: .init(""), .mailbox(""), []), "LIST \"\" \"\" RETURN ()", #line),
             (.namespace, "NAMESPACE", #line),
 
             // MARK: Login

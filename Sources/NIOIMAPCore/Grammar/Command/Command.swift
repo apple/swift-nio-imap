@@ -22,14 +22,14 @@ public enum Command: Equatable {
     case create(MailboxName, [CreateParameter])
     case delete(MailboxName)
     case examine(MailboxName, [SelectParameter])
-    case list(ListSelectOptions?, MailboxName, MailboxPatterns, [ReturnOption])
-    case lsub(MailboxName, ByteBuffer)
+    case list(ListSelectOptions?, reference: MailboxName, MailboxPatterns, [ReturnOption])
+    case lsub(reference: MailboxName, pattern: ByteBuffer)
     case rename(from: MailboxName, to: MailboxName, params: [RenameParameter])
     case select(MailboxName, [SelectParameter])
     case status(MailboxName, [MailboxAttribute])
     case subscribe(MailboxName)
     case unsubscribe(MailboxName)
-    case authenticate(String, InitialResponse?, [ByteBuffer])
+    case authenticate(method: String, InitialResponse?, [ByteBuffer])
     case login(username: String, password: String)
     case starttls
     case check
@@ -53,6 +53,20 @@ public enum Command: Equatable {
     case uidSearch(returnOptions: [SearchReturnOption], program: SearchProgram)
     case uidStore([SequenceRange], [StoreModifier], StoreAttributeFlags)
     case uidExpunge([SequenceRange])
+}
+
+extension Command {
+    public static func list(reference: MailboxName, pattern: ByteBuffer) -> Command {
+        return .list(nil, reference: reference, .mailbox(pattern), [])
+    }
+
+    public static func select(_ name: MailboxName) -> Command {
+        return .select(name, [])
+    }
+
+    public static func examine(_ name: MailboxName) -> Command {
+        return .examine(name, [])
+    }
 }
 
 // MARK: - IMAP
@@ -88,8 +102,8 @@ extension EncodeBuffer {
             return self.writeCommandType_subscribe(mailbox: mailbox)
         case .unsubscribe(let mailbox):
             return self.writeCommandType_unsubscribe(mailbox: mailbox)
-        case .authenticate(let type, let initial, let data):
-            return self.writeCommandType_authenticate(type: type, initial: initial, data: data)
+        case .authenticate(let method, let initial, let data):
+            return self.writeCommandType_authenticate(method: method, initial: initial, data: data)
         case .login(let userid, let password):
             return self.writeCommandType_login(userID: userid, password: password)
         case .starttls:
@@ -231,8 +245,8 @@ extension EncodeBuffer {
             self.writeMailbox(mailbox)
     }
 
-    private mutating func writeCommandType_authenticate(type: String, initial: InitialResponse?, data: [ByteBuffer]) -> Int {
-        self.writeString("AUTHENTICATE \(type)") +
+    private mutating func writeCommandType_authenticate(method: String, initial: InitialResponse?, data: [ByteBuffer]) -> Int {
+        self.writeString("AUTHENTICATE \(method)") +
             self.writeIfExists(initial) { (initial) -> Int in
                 self.writeSpace() +
                     self.writeInitialResponse(initial)

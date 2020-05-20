@@ -33,8 +33,8 @@ final class RoundtripTests: XCTestCase {
 
             (.login(username: "user", password: "password"), #line),
 
-            (.authenticate("some", nil, []), #line),
-            (.authenticate("some", .equals, []), #line),
+            (.authenticate(method: "some", nil, []), #line),
+            (.authenticate(method: "some", .equals, []), #line),
 
             (.create(.inbox, []), #line),
             (.create(MailboxName("mailbox"), []), #line),
@@ -44,6 +44,7 @@ final class RoundtripTests: XCTestCase {
 
             (.examine(.inbox, []), #line),
             (.examine(MailboxName("mailbox"), []), #line),
+            (.examine(MailboxName("mailbox")), #line),
 
             (.subscribe(.inbox), #line),
             (.subscribe(MailboxName("mailbox")), #line),
@@ -53,6 +54,7 @@ final class RoundtripTests: XCTestCase {
 
             (.select(.inbox, []), #line),
             (.select(MailboxName("mailbox"), []), #line),
+            (.select(MailboxName("mailbox")), #line),
 
             (.rename(from: .inbox, to: .inbox, params: []), #line),
             (.rename(from: MailboxName("test1"), to: MailboxName("test2"), params: []), #line),
@@ -60,12 +62,13 @@ final class RoundtripTests: XCTestCase {
             (.append(to: .inbox, firstMessageMetadata: .init(options: .init(flagList: [.answered], dateTime: nil, extensions: []), data: .init(byteCount: 5))), #line),
             (.append(to: MailboxName("test1"), firstMessageMetadata: .init(options: .init(flagList: [.answered, .deleted, .draft], dateTime: nil, extensions: []), data: .init(byteCount: 5))), #line),
 
-            (.list(nil, .inbox, .pattern(["pattern"]), []), #line),
-            (.list(nil, MailboxName("bar"), .pattern(["pattern"]), []), #line),
+            (.list(nil, reference: .inbox, .pattern(["pattern"]), []), #line),
+            (.list(nil, reference: MailboxName("bar"), .pattern(["pattern"]), []), #line),
+            (.list(reference: .inbox, pattern: "pattern"), #line),
 
-            (.lsub(.inbox, "abcd"), #line),
-            (.lsub(.inbox, "\"something\""), #line),
-            (.lsub(MailboxName("bar"), "{3}\r\nfoo"), #line),
+            (.lsub(reference: .inbox, pattern: "abcd"), #line),
+            (.lsub(reference: .inbox, pattern: "\"something\""), #line),
+            (.lsub(reference: MailboxName("bar"), pattern: "{3}\r\nfoo"), #line),
 
             (.status(.inbox, [.messageCount]), #line),
             (.status(MailboxName("foobar"), [.messageCount, .recentCount, .uidNext]), #line),

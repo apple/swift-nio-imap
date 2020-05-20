@@ -158,7 +158,7 @@ extension GrammarParser {
     static func parseAuthenticate(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Command {
         try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Command in
             try ParserLibrary.parseFixedString("AUTHENTICATE ", buffer: &buffer, tracker: tracker)
-            let authType = try self.parseAuthType(buffer: &buffer, tracker: tracker)
+            let authMethod = try self.parseAuthType(buffer: &buffer, tracker: tracker)
 
             let initial = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> InitialResponse in
                 try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
@@ -170,7 +170,7 @@ extension GrammarParser {
 //                try ParserLibrary.parseFixedString("\r\n", buffer: &buffer, tracker: tracker)
 //                return [try self.parseBase64(buffer: &buffer, tracker: tracker)]
 //            } ?? []
-            return .authenticate(authType, initial, [])
+            return .authenticate(method: authMethod, initial, [])
         }
     }
 
@@ -1480,7 +1480,7 @@ extension GrammarParser {
                 try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
                 return try self.parseListReturnOptions(buffer: &buffer, tracker: tracker)
             } ?? []
-            return .list(selectOptions, mailbox, mailboxPatterns, returnOptions)
+            return .list(selectOptions, reference: mailbox, mailboxPatterns, returnOptions)
         }
     }
 
@@ -1722,7 +1722,7 @@ extension GrammarParser {
             let mailbox = try self.parseMailbox(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
             let listMailbox = try self.parseListMailbox(buffer: &buffer, tracker: tracker)
-            return .lsub(mailbox, listMailbox)
+            return .lsub(reference: mailbox, pattern: listMailbox)
         }
     }
 
