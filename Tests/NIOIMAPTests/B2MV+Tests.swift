@@ -138,33 +138,29 @@ extension B2MV_Tests {
                     CommandDecoder()
                 }
             )
-        } catch {
-            switch error as? ByteToMessageDecoderVerifier.VerificationError<CommandStream> {
-            case .some(let error):
-                for input in error.inputs {
-                    print(" input: \(String(decoding: input.readableBytesView, as: Unicode.UTF8.self))")
-                }
-                switch error.errorCode {
-                case .underProduction(let command):
-                    XCTFail("UNDER PRODUCTION")
-                    print(command)
-                    return
-                case .wrongProduction(actual: let actualCommand, expected: let expectedCommand):
-                    XCTFail("WRONG PRODUCTION")
-                    print(actualCommand)
-                    print(expectedCommand)
-                    return
-                case .overProduction(let command):
-                    XCTFail("OVER PRODUCTION")
-                    print(command)
-                    return
-                default:
-                    XCTFail("\(error)")
-                    return
-                }
-            case .none:
-                ()
+        } catch let error as ByteToMessageDecoderVerifier.VerificationError<CommandStream> {
+            for input in error.inputs {
+                print(" input: \(String(decoding: input.readableBytesView, as: Unicode.UTF8.self))")
             }
+            switch error.errorCode {
+            case .underProduction(let command):
+                XCTFail("UNDER PRODUCTION")
+                print(command)
+                return
+            case .wrongProduction(actual: let actualCommand, expected: let expectedCommand):
+                XCTFail("WRONG PRODUCTION")
+                print(actualCommand)
+                print(expectedCommand)
+                return
+            case .overProduction(let command):
+                XCTFail("OVER PRODUCTION")
+                print(command)
+                return
+            default:
+                XCTFail("\(error)")
+                return
+            }
+        } catch {
             XCTFail("unhandled error: \(error)")
         }
     }
@@ -252,33 +248,29 @@ extension B2MV_Tests {
                     ResponseDecoder(expectGreeting: false)
                 }
             )
-        } catch {
-            switch error as? ByteToMessageDecoderVerifier.VerificationError<Response> {
-            case .some(let error):
-                for input in error.inputs {
-                    print(" input: \(String(decoding: input.readableBytesView, as: Unicode.UTF8.self))")
-                }
-                switch error.errorCode {
-                case .underProduction(let command):
-                    XCTFail("UNDER PRODUCTION")
-                    print(command)
-                    return
-                case .wrongProduction(actual: let actualCommand, expected: let expectedCommand):
-                    XCTFail("WRONG PRODUCTION")
-                    print(actualCommand)
-                    print(expectedCommand)
-                    return
-                case .overProduction(let command):
-                    XCTFail("OVER PRODUCTION")
-                    print(command)
-                    return
-                default:
-                    XCTFail("\(error)")
-                    return
-                }
-            case .none:
-                ()
+        } catch let error as ByteToMessageDecoderVerifier.VerificationError<CommandStream> {
+            for input in error.inputs {
+                print(" input: \(String(decoding: input.readableBytesView, as: Unicode.UTF8.self))")
             }
+            switch error.errorCode {
+            case .underProduction(let command):
+                XCTFail("UNDER PRODUCTION")
+                print(command)
+                return
+            case .wrongProduction(actual: let actualCommand, expected: let expectedCommand):
+                XCTFail("WRONG PRODUCTION")
+                print(actualCommand)
+                print(expectedCommand)
+                return
+            case .overProduction(let command):
+                XCTFail("OVER PRODUCTION")
+                print(command)
+                return
+            default:
+                XCTFail("\(error)")
+                return
+            }
+        } catch {
             XCTFail("unhandled error: \(error)")
         }
     }
