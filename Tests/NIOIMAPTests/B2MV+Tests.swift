@@ -138,7 +138,7 @@ extension B2MV_Tests {
                     CommandDecoder()
                 }
             )
-        } catch let error as ByteToMessageDecoderVerifier.VerificationError<CommandStream> {
+        } catch let error as ByteToMessageDecoderVerifier.VerificationError<CommandDecoder.PartialCommandStream> {
             for input in error.inputs {
                 print(" input: \(String(decoding: input.readableBytesView, as: Unicode.UTF8.self))")
             }

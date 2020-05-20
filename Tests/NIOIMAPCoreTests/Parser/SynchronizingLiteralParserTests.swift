@@ -153,6 +153,21 @@ final class SynchronizingLiteralParserTests: XCTestCase {
         ], continuationsNecessary: 4)
     }
 
+    func testAppendFollowedByHalfCommand() {
+        self.feed("tag APPEND box (\\Seen) {1+}\r\na\r\n")
+        self.indicateConsume("tag APPEND box (\\Seen) {1+}\r\n")
+        self.feed("")
+        self.indicateConsume("a")
+        self.feed("")
+        self.feed("t")
+
+        self.assertMultipleParses(["tag APPEND box (\\Seen) {1+}\r\na\r\n",
+                                   "a\r\n",
+                                   "\r\n",
+                                   "\r\n"
+        ])
+    }
+
     override func setUp() {
         XCTAssertNil(self.accumulator)
         XCTAssertNil(self.parser)
@@ -174,7 +189,7 @@ final class SynchronizingLiteralParserTests: XCTestCase {
     private func feed(_ string: String) {
         let buffer = self.stringBuffer(string)
         self.accumulator.writeBytes(buffer.readableBytesView)
-        XCTAssertNoThrow(self.parses.append(try self.parser.parseContinuationsNecessary(self.accumulator)))
+        XCTAssertNoThrow(self.parses.append(try self.parser.parseContinuationsNecessary(self.bufferWithGarbage(self.accumulator))))
     }
 
     private func indicateConsume(_ string: String) {
@@ -200,7 +215,7 @@ final class SynchronizingLiteralParserTests: XCTestCase {
             let expectedUTF8 = Array(expected.element.utf8)
             let actual = Array(allBytes.readableBytesView.prefix(parse.maximumValidBytes))
             XCTAssertEqual(expectedUTF8, actual,
-                           "\(String(decoding: expectedUTF8, as: UTF8.self)) != \(String(decoding: actual, as: UTF8.self))",
+                           "parse \(expected.0): \(String(decoding: expectedUTF8, as: UTF8.self)) != \(String(decoding: actual, as: UTF8.self))",
                            file: file, line: line)
             XCTAssertGreaterThanOrEqual(parse.synchronizingLiteralCount, 0)
             continuations += parse.synchronizingLiteralCount
@@ -233,11 +248,18 @@ final class SynchronizingLiteralParserTests: XCTestCase {
     }
 
     private func stringBuffer(_ string: String) -> ByteBuffer {
-        let garbageByteCount = (0 ..< 32).randomElement() ?? 0
-        var buffer = ByteBufferAllocator().buffer(capacity: garbageByteCount + string.utf8.count)
-        buffer.writeString(String(repeating: "X", count: garbageByteCount))
-        buffer.moveReaderIndex(forwardBy: garbageByteCount)
+        var buffer = ByteBufferAllocator().buffer(capacity: string.utf8.count)
         buffer.writeString(string)
-        return buffer
+        return self.bufferWithGarbage(buffer)
+    }
+
+    private func bufferWithGarbage(_ buffer: ByteBuffer) -> ByteBuffer {
+        var buffer = buffer
+        let garbageByteCount = (0 ..< 32).randomElement() ?? 0
+        var newBuffer = ByteBufferAllocator().buffer(capacity: garbageByteCount + buffer.readableBytes)
+        newBuffer.writeString(String(repeating: "X", count: garbageByteCount))
+        newBuffer.moveReaderIndex(forwardBy: garbageByteCount)
+        newBuffer.writeBuffer(&buffer)
+        return newBuffer
     }
 }

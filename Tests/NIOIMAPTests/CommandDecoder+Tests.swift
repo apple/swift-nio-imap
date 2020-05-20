@@ -23,22 +23,34 @@ final class CommandDecoder_Tests: XCTestCase {}
 
 extension CommandDecoder_Tests {
     
-    func testDripfeed() {
-        
-        // full command = tag APPEND box (\\Seen) {1+}\r\na
-        var drip = ByteBufferAllocator().buffer(capacity: 1)
-        drip.writeString("tag LOGIN \"\" {0+}\r\nt")
-        
+    func testConsumeWhenReturningNotEnoughDataRegression() {
         let channel = EmbeddedChannel(handler: ByteToMessageHandler(CommandDecoder()), loop: .init())
-        do {
-            try channel.writeInbound(drip)
-        } catch {
-            XCTFail("\(error)")
-            return
+
+        for feed in ["tag APPEND box (\\Seen) {1+}\r\na\r\n", "t"] {
+            XCTAssertNoThrow(try channel.writeInbound(self.buffer(feed)), feed)
         }
-        
-        XCTAssertNoThrow(try channel.readInbound(as: CommandDecoder.PartialCommandStream.self))
-        XCTAssertNoThrow(try channel.readInbound(as: CommandDecoder.PartialCommandStream.self))
+
+
+        XCTAssertNoThrow(XCTAssertEqual(CommandDecoder.PartialCommandStream.init(.command(.init(type: .append(to: .init(self.buffer("box")),
+                                                                                                              firstMessageMetadata: .init(options: .init(flagList: [.seen],
+                                                                                                                                                         extensions: []),
+                                                                                                                                          data: .init(byteCount: 1,
+                                                                                                                                                      needs8BitCleanTransport: false,
+                                                                                                                                                      synchronizing: false))),
+                                                                                                tag: "tag"))),
+                                        try channel.readInbound(as: CommandDecoder.PartialCommandStream.self)))
+        XCTAssertNoThrow(XCTAssertEqual(CommandDecoder.PartialCommandStream.init(.bytes(self.buffer("a"))),
+                                        try channel.readInbound(as: CommandDecoder.PartialCommandStream.self)))
+        XCTAssertNoThrow(XCTAssertNil(try channel.readInbound(as: CommandDecoder.PartialCommandStream.self)))
+        XCTAssertNoThrow(XCTAssertTrue(try channel.finish().isClean))
     }
     
+}
+
+extension CommandDecoder_Tests {
+    func buffer(_ string: String) -> ByteBuffer {
+        var buffer = ByteBufferAllocator().buffer(capacity: string.utf8.count)
+        buffer.writeString(string)
+        return buffer
+    }
 }

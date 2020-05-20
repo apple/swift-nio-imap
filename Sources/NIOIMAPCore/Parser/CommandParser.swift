@@ -20,7 +20,7 @@ public struct CommandParser: Parser {
         case idle
         case streamingAppend(Int)
         case streamingEnd
-        
+
         var isStreamingAppend: Bool {
             if case .streamingAppend = self {
                 return true
@@ -45,41 +45,48 @@ public struct CommandParser: Parser {
         // TODO: SynchronisingLiteralParser should be added here but currently we don't have a place to return
         // the necessary continuations.
         do {
-            return try self.parseCommandStream0(buffer: &buffer)
+            return try self.parseCommandStream0(buffer: &buffer, tracker: .makeNewDefaultLimitStackTracker)
         } catch ParsingError.incompleteMessage {
             return nil
         }
     }
 
-    private mutating func parseCommandStream0(buffer: inout ByteBuffer) throws -> CommandStream? {
-        switch self.mode {
-        case .streamingAppend(let remaining):
-            let bytes = self.parseBytes(buffer: &buffer, remaining: remaining)
-            return .bytes(bytes)
-        case .streamingEnd:
-            try GrammarParser.parseCommandEnd(buffer: &buffer, tracker: .new)
-            self.mode = .lines
-            return try self.parseCommandStream0(buffer: &buffer)
-        case .idle:
-            try GrammarParser.parseIdleDone(buffer: &buffer, tracker: .new)
-            self.mode = .lines
-            return .idleDone
-        case .lines:
-            let save = buffer
-            do {
-                let command = try self.parseCommand(buffer: &buffer)
-                if case .append(to: _, firstMessageMetadata: let firstMetdata) = command.command {
-                    self.mode = .streamingAppend(firstMetdata.data.byteCount)
-                } else {
-                    try GrammarParser.parseCommandEnd(buffer: &buffer, tracker: .new)
+    private mutating func parseCommandStream0(buffer: inout ByteBuffer, tracker: StackTracker) throws -> CommandStream? {
+        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker in
+            switch self.mode {
+            case .streamingAppend(let remaining):
+                let bytes = self.parseBytes(buffer: &buffer, remaining: remaining)
+                return .bytes(bytes)
+            case .streamingEnd:
+                try GrammarParser.parseCommandEnd(buffer: &buffer, tracker: tracker)
+                do {
+                    self.mode = .lines
+                    return try self.parseCommandStream0(buffer: &buffer, tracker: tracker)
+                } catch {
+                    self.mode = .streamingEnd
+                    throw error
                 }
-                if case .idleStart = command.command {
-                    self.mode = .idle
+            case .idle:
+                try GrammarParser.parseIdleDone(buffer: &buffer, tracker: tracker)
+                self.mode = .lines
+                return .idleDone
+            case .lines:
+                let save = buffer
+                do {
+                    let command = try self.parseCommand(buffer: &buffer, tracker: tracker)
+                    if case .append(to: _, firstMessageMetadata: let firstMetdata) = command.type {
+                        self.mode = .streamingAppend(firstMetdata.data.byteCount)
+                    } else {
+                        try GrammarParser.parseCommandEnd(buffer: &buffer, tracker: tracker)
+                    }
+                    if case .idleStart = command.type {
+                        self.mode = .idle
+                    }
+                    return .command(command)
+                } catch {
+                    buffer = save
+                    throw error
                 }
-                return .command(command)
-            } catch {
-                buffer = save
-                throw error
             }
         }
     }
@@ -108,10 +115,10 @@ public struct CommandParser: Parser {
     /// Upon failure a `PublicParserError` will be thrown.
     /// - parameter buffer: The consumable buffer to parse.
     /// - returns: A `ClientCommand` if parsing was successful.
-    private mutating func parseCommand(buffer: inout ByteBuffer) throws -> TaggedCommand {
+    private mutating func parseCommand(buffer: inout ByteBuffer, tracker: StackTracker) throws -> TaggedCommand {
         try self.throwIfExceededBufferLimit(&buffer)
         do {
-            return try GrammarParser.parseCommand(buffer: &buffer, tracker: .new)
+            return try GrammarParser.parseCommand(buffer: &buffer, tracker: tracker)
         } catch is ParsingError {
             throw ParsingError.incompleteMessage
         }

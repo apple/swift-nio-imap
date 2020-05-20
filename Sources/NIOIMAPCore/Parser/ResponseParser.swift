@@ -36,11 +36,12 @@ public struct ResponseParser: Parser {
     }
 
     public mutating func parseResponseStream(buffer: inout ByteBuffer) throws -> ResponseOrContinueRequest {
+        let tracker = StackTracker.makeNewDefaultLimitStackTracker
         switch self.mode {
         case .greeting:
-            return try .response(self.parseGreeting(buffer: &buffer))
+            return try .response(self.parseGreeting(buffer: &buffer, tracker: tracker))
         case .response:
-            return try self.parseResponse(buffer: &buffer)
+            return try self.parseResponse(buffer: &buffer, tracker: tracker)
         case .attributeBytes(let remaining):
             return .response(self.parseBytes(buffer: &buffer, remaining: remaining))
         }
@@ -63,8 +64,8 @@ public struct ResponseParser: Parser {
 // MARK: - Parse greeting
 
 extension ResponseParser {
-    fileprivate mutating func parseGreeting(buffer: inout ByteBuffer) throws -> Response {
-        let greeting = try GrammarParser.parseGreeting(buffer: &buffer, tracker: .new)
+    fileprivate mutating func parseGreeting(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Response {
+        let greeting = try GrammarParser.parseGreeting(buffer: &buffer, tracker: tracker)
         return self.moveStateMachine(expected: .greeting, next: .response, returnValue: .greeting(greeting))
     }
 }
@@ -72,7 +73,7 @@ extension ResponseParser {
 // MARK: - Parse responses
 
 extension ResponseParser {
-    fileprivate mutating func parseResponse(buffer: inout ByteBuffer) throws -> ResponseOrContinueRequest {
+    fileprivate mutating func parseResponse(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ResponseOrContinueRequest {
         func parseResponse_fetch(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Response {
             let response = try GrammarParser.parseFetchResponse(buffer: &buffer, tracker: tracker)
             return .fetchResponse(response)
@@ -89,28 +90,30 @@ extension ResponseParser {
             return .fetchResponse(.finish)
         }
 
-        try? ParserLibrary.parseSpace(buffer: &buffer, tracker: .new)
-        do {
-            let response = try ParserLibrary.parseOneOf([
-                parseResponse_fetch,
-                parseResponse_normal,
-                parseResponse_fetch_end,
-            ], buffer: &buffer, tracker: .new)
-            switch response {
-            case .fetchResponse(.streamingEnd):
-                try? ParserLibrary.parseSpace(buffer: &buffer, tracker: .new)
-            case .fetchResponse(.streamingBegin(type: _, byteCount: let size)):
-                self.moveStateMachine(expected: .response, next: .attributeBytes(size))
-            default:
-                break
+        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker in
+            try? ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
+            do {
+                let response = try ParserLibrary.parseOneOf([
+                    parseResponse_fetch,
+                    parseResponse_normal,
+                    parseResponse_fetch_end,
+                ], buffer: &buffer, tracker: tracker)
+                switch response {
+                case .fetchResponse(.streamingEnd):
+                    try? ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
+                case .fetchResponse(.streamingBegin(type: _, byteCount: let size)):
+                    self.moveStateMachine(expected: .response, next: .attributeBytes(size))
+                default:
+                    break
+                }
+                return .response(response)
+            } catch is ParserError {
+                return try self._parseResponse(buffer: &buffer, tracker: tracker)
             }
-            return .response(response)
-        } catch is ParserError {
-            return try self._parseResponse(buffer: &buffer)
         }
     }
 
-    private mutating func _parseResponse(buffer: inout ByteBuffer) throws -> ResponseOrContinueRequest {
+    private mutating func _parseResponse(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ResponseOrContinueRequest {
         func parseResponse_continuation(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ResponseOrContinueRequest {
             .continueRequest(try GrammarParser.parseContinueRequest(buffer: &buffer, tracker: tracker))
         }
@@ -122,7 +125,7 @@ extension ResponseParser {
         return try ParserLibrary.parseOneOf([
             parseResponse_continuation,
             parseResponse_tagged,
-        ], buffer: &buffer, tracker: .new)
+        ], buffer: &buffer, tracker: tracker)
     }
 }
 
