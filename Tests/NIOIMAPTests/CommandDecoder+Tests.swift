@@ -36,8 +36,8 @@ extension CommandDecoder_Tests {
                         .init(
                             tag: "tag",
                             command: .append(to: .init("box"), firstMessageMetadata: .init(
-                                options: .init(flagList: [.seen],extensions: []),
-                                data: .init(byteCount: 1, needs8BitCleanTransport: false,synchronizing: false)
+                                options: .init(flagList: [.seen], extensions: []),
+                                data: .init(byteCount: 1, needs8BitCleanTransport: false, synchronizing: false)
                             ))
                         )
                     )
