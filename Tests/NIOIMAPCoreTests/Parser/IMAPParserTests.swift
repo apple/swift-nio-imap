@@ -1220,8 +1220,8 @@ extension ParserUnitTests {
             ("BODYSTRUCTURE", " ", .body(structure: true), #line),
             ("UID", " ", .uid, #line),
             ("BODY[1]<1.2>", " ", .bodySection(.part([1], text: nil), Partial(left: 1, right: 2)), #line),
-            ("BODY[1.TEXT]", " ", .bodySection(.part([1], text: .message(.text)), nil), #line),
-            ("BODY[4.2.TEXT]", " ", .bodySection(.part([4, 2], text: .message(.text)), nil), #line),
+            ("BODY[1.TEXT]", " ", .bodySection(.part([1], text: .text), nil), #line),
+            ("BODY[4.2.TEXT]", " ", .bodySection(.part([4, 2], text: .text), nil), #line),
             ("BODY[HEADER]", " ", .bodySection(.text(.header), nil), #line),
             ("BODY.PEEK[HEADER]<3.4>", " ", .bodyPeekSection(.text(.header), Partial(left: 3, right: 4)), #line),
             ("BODY.PEEK[HEADER]", " ", .bodyPeekSection(.text(.header), nil), #line),
@@ -2402,9 +2402,26 @@ extension ParserUnitTests {
         let inputs: [(String, String, SectionSpec, UInt)] = [
             ("HEADER", "\r", .text(.header), #line),
             ("1.2.3", "\r", .part([1, 2, 3], text: nil), #line),
-            ("1.2.3.HEADER", "\r", .part([1, 2, 3], text: .message(.header)), #line),
+            ("1.2.3.HEADER", "\r", .part([1, 2, 3], text: .header), #line),
         ]
         self.iterateTestInputs(inputs, testFunction: GrammarParser.parseSectionSpec)
+    }
+}
+
+// MARK: - parseSectionText
+
+extension ParserUnitTests {
+    func testParseSectionText() {
+        let inputs: [(String, String, SectionText, UInt)] = [
+            ("MIME", " ", .mime, #line),
+            ("HEADER", " ", .header, #line),
+            ("TEXT", " ", .text, #line),
+            ("HEADER.FIELDS (f1)", " ", .headerFields(["f1"]), #line),
+            ("HEADER.FIELDS (f1 f2 f3)", " ", .headerFields(["f1", "f2", "f3"]), #line),
+            ("HEADER.FIELDS.NOT (f1)", " ", .notHeaderFields(["f1"]), #line),
+            ("HEADER.FIELDS.NOT (f1 f2 f3)", " ", .notHeaderFields(["f1", "f2", "f3"]), #line),
+        ]
+        self.iterateTestInputs(inputs, testFunction: GrammarParser.parseSectionText)
     }
 }
 

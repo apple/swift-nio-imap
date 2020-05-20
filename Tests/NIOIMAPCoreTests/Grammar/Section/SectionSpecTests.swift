@@ -44,7 +44,7 @@ extension SectionSpecTests {
 
     func testImapEncoded_part_sometext() {
         let expected = "1.2.3.4.HEADER"
-        let size = self.testBuffer.writeSectionSpec(.part([1, 2, 3, 4], text: .message(.header)))
+        let size = self.testBuffer.writeSectionSpec(.part([1, 2, 3, 4], text: .header))
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }
