@@ -220,9 +220,9 @@ extension B2MV_Tests {
             // MARK: Expunge
 
             ("* 20 EXPUNGE", [.untaggedResponse(.messageData(.expunge(20)))]),
-            
+
             // MARK: Fetch
-            
+
             (
                 "* 1 FETCH (UID 999)",
                 [.fetchResponse(.start(1)), .fetchResponse(.simpleAttribute(.uid(999))), .fetchResponse(.finish)]
@@ -232,13 +232,13 @@ extension B2MV_Tests {
                 [
                     .fetchResponse(.start(2)),
                     .fetchResponse(.simpleAttribute(.uid(111))),
-                    .fetchResponse(.simpleAttribute(.flags([.seen, .deleted,.answered]))),
-                    .fetchResponse(.finish)
+                    .fetchResponse(.simpleAttribute(.flags([.seen, .deleted, .answered]))),
+                    .fetchResponse(.finish),
                 ]
             ),
 
             // MARK: Tagged
-            
+
             ("tag OK Complete", [.taggedResponse(.init(tag: "tag", state: .ok(.init(code: nil, text: "Complete"))))]),
             ("tag NO [ALERT] Complete", [.taggedResponse(.init(tag: "tag", state: .no(.init(code: .alert, text: "Complete"))))]),
             ("tag BAD [PARSE] Complete", [.taggedResponse(.init(tag: "tag", state: .bad(.init(code: .parse, text: "Complete"))))]),
