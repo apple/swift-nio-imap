@@ -25,7 +25,7 @@ extension BodySinglepartTests {
         let inputs: [(BodyStructure.Singlepart, String, UInt)] = [
             (
                 .init(
-                    type: .basic(.init(media: .init(type: .application, subtype: .alternative))),
+                    type: .basic(.init(type: .application, subtype: .alternative)),
                     fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 6),
                     extension: nil
                 ),
@@ -34,7 +34,7 @@ extension BodySinglepartTests {
             ),
             (
                 .init(
-                    type: .basic(.init(media: .init(type: .application, subtype: .related))),
+                    type: .basic(.init(type: .application, subtype: .related)),
                     fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 7),
                     extension: .init(fieldMD5: "md5", dspLanguage: nil)
                 ),

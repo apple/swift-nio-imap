@@ -522,7 +522,7 @@ extension ParserUnitTests {
                 "\"AUDIO\" \"multipart/alternative\" NIL NIL NIL \"BASE64\" 1",
                 "\r\n",
                 .init(
-                    type: .basic(.init(media: .init(type: .audio, subtype: .alternative))),
+                    type: .basic(.init(type: .audio, subtype: .alternative)),
                     fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 1),
                     extension: nil
                 ),
@@ -532,7 +532,7 @@ extension ParserUnitTests {
                 "\"APPLICATION\" \"multipart/mixed\" NIL \"id\" \"description\" \"7BIT\" 2",
                 "\r\n",
                 .init(
-                    type: .basic(.init(media: .init(type: .application, subtype: .mixed))),
+                    type: .basic(.init(type: .application, subtype: .mixed)),
                     fields: .init(parameter: [], id: "id", description: "description", encoding: .sevenBit, octets: 2),
                     extension: nil
                 ),
@@ -542,7 +542,7 @@ extension ParserUnitTests {
                 "\"VIDEO\" \"multipart/related\" (\"f1\" \"v1\") NIL NIL \"8BIT\" 3",
                 "\r\n",
                 .init(
-                    type: .basic(.init(media: .init(type: .video, subtype: .related))),
+                    type: .basic(.init(type: .video, subtype: .related)),
                     fields: .init(parameter: [.init(field: "f1", value: "v1")], id: nil, description: nil, encoding: .eightBit, octets: 3),
                     extension: nil
                 ),
@@ -559,7 +559,7 @@ extension ParserUnitTests {
                         .init(
                             message: .rfc822,
                             envelope: Envelope(date: nil, subject: nil, from: [], sender: [], reply: [], to: [], cc: [], bcc: [], inReplyTo: nil, messageID: nil),
-                            body: .singlepart(.init(type: .basic(.init(media: .init(type: .image, subtype: .related))), fields: .init(parameter: [], id: nil, description: nil, encoding: .binary, octets: 5))),
+                            body: .singlepart(.init(type: .basic(.init(type: .image, subtype: .related)), fields: .init(parameter: [], id: nil, description: nil, encoding: .binary, octets: 5))),
                             fieldLines: 8
                         )
                     ),
