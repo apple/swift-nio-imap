@@ -20,6 +20,14 @@ public struct CommandParser: Parser {
         case idle
         case streamingAppend(Int)
         case streamingEnd
+        
+        var isStreamingAppend: Bool {
+            if case .streamingAppend = self {
+                return true
+            } else {
+                return false
+            }
+        }
     }
 
     let bufferLimit: Int
@@ -82,6 +90,7 @@ public struct CommandParser: Parser {
     /// - parameter buffer: The buffer from which bytes should be extracted.
     /// - returns: A new `ByteBuffer` containing extracted bytes.
     private mutating func parseBytes(buffer: inout ByteBuffer, remaining: Int) -> ByteBuffer {
+        assert(self.mode.isStreamingAppend)
         if buffer.readableBytes >= remaining {
             self.mode = .streamingEnd
             return buffer.readSlice(length: remaining)!
