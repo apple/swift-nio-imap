@@ -33,18 +33,9 @@ extension BodyStructure {
 
 extension BodyStructure.Singlepart {
     public indirect enum Kind: Equatable {
-        case basic(Basic)
+        case basic(Media.Basic)
         case message(Message)
         case text(Text)
-    }
-
-    /// IMAPv4 `body-type-basic`
-    public struct Basic: Equatable {
-        public var media: Media.Basic
-
-        public init(media: Media.Basic) {
-            self.media = media
-        }
     }
 
     /// IMAPv4 `body-type-message`
@@ -93,7 +84,7 @@ extension EncodeBuffer {
         var size = 0
         switch part.type {
         case .basic(let basic):
-            size += self.writeBodyTypeBasic(basic, fields: part.fields)
+            size += self.writeBodyTypeBasic(mediaType: basic, fields: part.fields)
         case .message(let message):
             size += self.writeBodyTypeMessage(message, fields: part.fields)
         case .text(let text):
@@ -125,8 +116,8 @@ extension EncodeBuffer {
             self.writeString(" \(message.fieldLines)")
     }
 
-    @discardableResult private mutating func writeBodyTypeBasic(_ body: BodyStructure.Singlepart.Basic, fields: BodyStructure.Fields) -> Int {
-        self.writeMediaBasic(body.media) +
+    @discardableResult private mutating func writeBodyTypeBasic(mediaType: Media.Basic, fields: BodyStructure.Fields) -> Int {
+        self.writeMediaBasic(mediaType) +
             self.writeSpace() +
             self.writeBodyFields(fields)
     }
