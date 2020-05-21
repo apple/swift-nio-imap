@@ -83,8 +83,8 @@ extension EncodeBuffer {
 
     @discardableResult mutating func writeFetchResponse(_ response: FetchResponse) -> Int {
         switch response {
-        case .start:
-            return self.writeString("(")
+        case .start(let num):
+            return self.writeString("* \(num) FETCH (")
         case .simpleAttribute(let att):
             if case .server(streamingAttributes: true) = self.mode {
                 return self.writeSpace() + self.writeMessageAttribute(att)
