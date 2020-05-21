@@ -14,7 +14,8 @@
 
 import struct NIO.ByteBuffer
 
-extension MailboxName.MailboxInfo {
+extension MailboxInfo {
+    
     /// IMAPv4 `mbx-list-sflag`
     public enum SFlag: String, Equatable {
         case noSelect = #"\Noselect"#
@@ -42,7 +43,7 @@ extension MailboxName.MailboxInfo {
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeMailboxListSFlag(_ flag: MailboxName.MailboxInfo.SFlag) -> Int {
+    @discardableResult mutating func writeMailboxListSFlag(_ flag: MailboxInfo.SFlag) -> Int {
         self.writeString(flag.rawValue)
     }
 }

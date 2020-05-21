@@ -22,12 +22,12 @@ class MailboxListFlagsTests: EncodeTestClass {}
 
 extension MailboxListFlagsTests {
     func testEncode() {
-        let inputs: [(MailboxName.MailboxInfo.Flags, String, UInt)] = [
-            (MailboxName.MailboxInfo.Flags(oFlags: [], sFlag: nil), "", #line),
-            (MailboxName.MailboxInfo.Flags(oFlags: [], sFlag: .marked), "\\Marked", #line),
-            (MailboxName.MailboxInfo.Flags(oFlags: [.noInferiors], sFlag: nil), "\\Noinferiors", #line),
-            (MailboxName.MailboxInfo.Flags(oFlags: [.noInferiors, .other("test")], sFlag: nil), "\\Noinferiors \\test", #line),
-            (MailboxName.MailboxInfo.Flags(oFlags: [.noInferiors, .other("test")], sFlag: .marked), "\\Marked \\Noinferiors \\test", #line),
+        let inputs: [(MailboxInfo.Flags, String, UInt)] = [
+            (MailboxInfo.Flags(oFlags: [], sFlag: nil), "", #line),
+            (MailboxInfo.Flags(oFlags: [], sFlag: .marked), "\\Marked", #line),
+            (MailboxInfo.Flags(oFlags: [.noInferiors], sFlag: nil), "\\Noinferiors", #line),
+            (MailboxInfo.Flags(oFlags: [.noInferiors, .other("test")], sFlag: nil), "\\Noinferiors \\test", #line),
+            (MailboxInfo.Flags(oFlags: [.noInferiors, .other("test")], sFlag: .marked), "\\Marked \\Noinferiors \\test", #line),
         ]
 
         for (test, expectedString, line) in inputs {

@@ -22,9 +22,9 @@ class MailboxInfo_Tests: EncodeTestClass {}
 
 extension MailboxInfo_Tests {
     func testEncode() {
-        let inputs: [(MailboxName.MailboxInfo, String, UInt)] = [
-            (MailboxName.MailboxInfo(flags: nil, char: nil, mailbox: .inbox, listExtended: []), "() \"INBOX\"", #line),
-            (MailboxName.MailboxInfo(flags: nil, char: "a", mailbox: .inbox, listExtended: []), "() a \"INBOX\"", #line),
+        let inputs: [(MailboxInfo, String, UInt)] = [
+            (MailboxInfo(flags: nil, char: nil, mailbox: .inbox, listExtended: []), "() \"INBOX\"", #line),
+            (MailboxInfo(flags: nil, char: "a", mailbox: .inbox, listExtended: []), "() a \"INBOX\"", #line),
         ]
 
         for (test, expectedString, line) in inputs {

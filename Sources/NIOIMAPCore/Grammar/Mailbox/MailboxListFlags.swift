@@ -14,13 +14,13 @@
 
 import struct NIO.ByteBuffer
 
-extension MailboxName.MailboxInfo {
+extension MailboxInfo {
     /// IMAPv4 `mbx-list-flags`
     public struct Flags: Equatable {
         public var oFlags: [OFlag]
         public var sFlag: SFlag?
 
-        public init(oFlags: [MailboxName.MailboxInfo.OFlag], sFlag: MailboxName.MailboxInfo.SFlag? = nil) {
+        public init(oFlags: [MailboxInfo.OFlag], sFlag: MailboxInfo.SFlag? = nil) {
             self.oFlags = oFlags
             self.sFlag = sFlag
         }
@@ -30,7 +30,7 @@ extension MailboxName.MailboxInfo {
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeMailboxListFlags(_ flags: MailboxName.MailboxInfo.Flags) -> Int {
+    @discardableResult mutating func writeMailboxListFlags(_ flags: MailboxInfo.Flags) -> Int {
         if let sFlag = flags.sFlag {
             return
                 self.writeMailboxListSFlag(sFlag) +
