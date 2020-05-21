@@ -1835,7 +1835,7 @@ extension GrammarParser {
 
         return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> MailboxInfo in
             try ParserLibrary.parseFixedString("(", buffer: &buffer, tracker: tracker)
-            let flags = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> MailboxInfo.Flags in
+            let flags = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> MailboxInfo.Attributes in
                 try self.parseMailboxListFlags(buffer: &buffer, tracker: tracker)
             }
             try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)
@@ -1850,7 +1850,7 @@ extension GrammarParser {
                 try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
                 return try self.parseMailboxListExtended(buffer: &buffer, tracker: tracker)
             }) ?? []
-            return MailboxInfo(flags: flags, char: character, mailbox: mailbox, listExtended: listExtended)
+            return MailboxInfo(attributes: flags, pathSeparator: character, mailbox: mailbox, extensions: listExtended)
         }
     }
 
@@ -1907,8 +1907,8 @@ extension GrammarParser {
     // mbx-list-flags  = *(mbx-list-oflag SP) mbx-list-sflag
     //                   *(SP mbx-list-oflag) /
     //                   mbx-list-oflag *(SP mbx-list-oflag)
-    static func parseMailboxListFlags(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxInfo.Flags {
-        func parseMailboxListFlags_mixedArray(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxInfo.Flags {
+    static func parseMailboxListFlags(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxInfo.Attributes {
+        func parseMailboxListFlags_mixedArray(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxInfo.Attributes {
             var oFlags = try ParserLibrary.parseZeroOrMore(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> MailboxInfo.OFlag in
                 let flag = try self.parseMailboxListOflag(buffer: &buffer, tracker: tracker)
                 try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
@@ -1919,16 +1919,16 @@ extension GrammarParser {
                 try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
                 return try self.parseMailboxListOflag(buffer: &buffer, tracker: tracker)
             }
-            return MailboxInfo.Flags(oFlags: oFlags, sFlag: sFlag)
+            return MailboxInfo.Attributes(oFlags: oFlags, sFlag: sFlag)
         }
 
-        func parseMailboxListFlags_OFlags(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxInfo.Flags {
+        func parseMailboxListFlags_OFlags(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxInfo.Attributes {
             var output = [try self.parseMailboxListOflag(buffer: &buffer, tracker: tracker)]
             try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &output, tracker: tracker) { (buffer, tracker) -> MailboxInfo.OFlag in
                 try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
                 return try self.parseMailboxListOflag(buffer: &buffer, tracker: tracker)
             }
-            return MailboxInfo.Flags(oFlags: output, sFlag: nil)
+            return MailboxInfo.Attributes(oFlags: output, sFlag: nil)
         }
 
         return try ParserLibrary.parseOneOf([

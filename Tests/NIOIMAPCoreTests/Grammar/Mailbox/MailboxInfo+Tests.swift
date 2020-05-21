@@ -20,7 +20,7 @@ class MailboxInfo_Tests: EncodeTestClass {}
 
 // MARK: - init
 
-extension MailboxListSFlagTests {
+extension MailboxInfo_Tests {
     func testInit() {
         let inputs: [(String, MailboxInfo.SFlag?, UInt)] = [
             (#"\fecd"#, nil, #line),
@@ -50,8 +50,8 @@ extension MailboxListSFlagTests {
 extension MailboxInfo_Tests {
     func testEncode() {
         let inputs: [(MailboxInfo, String, UInt)] = [
-            (MailboxInfo(flags: nil, char: nil, mailbox: .inbox, listExtended: []), "() \"INBOX\"", #line),
-            (MailboxInfo(flags: nil, char: "a", mailbox: .inbox, listExtended: []), "() a \"INBOX\"", #line),
+            (MailboxInfo(attributes: nil, pathSeparator: nil, mailbox: .inbox, extensions: []), "() \"INBOX\"", #line),
+            (MailboxInfo(attributes: nil, pathSeparator: "a", mailbox: .inbox, extensions: []), "() a \"INBOX\"", #line),
         ]
 
         for (test, expectedString, line) in inputs {
@@ -61,14 +61,14 @@ extension MailboxInfo_Tests {
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }
     }
-    
+
     func testEncode_flags() {
-        let inputs: [(MailboxInfo.Flags, String, UInt)] = [
-            (MailboxInfo.Flags(oFlags: [], sFlag: nil), "", #line),
-            (MailboxInfo.Flags(oFlags: [], sFlag: .marked), "\\Marked", #line),
-            (MailboxInfo.Flags(oFlags: [.noInferiors], sFlag: nil), "\\Noinferiors", #line),
-            (MailboxInfo.Flags(oFlags: [.noInferiors, .other("test")], sFlag: nil), "\\Noinferiors \\test", #line),
-            (MailboxInfo.Flags(oFlags: [.noInferiors, .other("test")], sFlag: .marked), "\\Marked \\Noinferiors \\test", #line),
+        let inputs: [(MailboxInfo.Attributes, String, UInt)] = [
+            (MailboxInfo.Attributes(oFlags: [], sFlag: nil), "", #line),
+            (MailboxInfo.Attributes(oFlags: [], sFlag: .marked), "\\Marked", #line),
+            (MailboxInfo.Attributes(oFlags: [.noInferiors], sFlag: nil), "\\Noinferiors", #line),
+            (MailboxInfo.Attributes(oFlags: [.noInferiors, .other("test")], sFlag: nil), "\\Noinferiors \\test", #line),
+            (MailboxInfo.Attributes(oFlags: [.noInferiors, .other("test")], sFlag: .marked), "\\Marked \\Noinferiors \\test", #line),
         ]
 
         for (test, expectedString, line) in inputs {
@@ -78,14 +78,14 @@ extension MailboxInfo_Tests {
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }
     }
-    
+
     func testEncode_oFlags() {
-        let inputs: [(MailboxInfo.Flags, String, UInt)] = [
-            (MailboxInfo.Flags(oFlags: [], sFlag: nil), "", #line),
-            (MailboxInfo.Flags(oFlags: [], sFlag: .marked), "\\Marked", #line),
-            (MailboxInfo.Flags(oFlags: [.noInferiors], sFlag: nil), "\\Noinferiors", #line),
-            (MailboxInfo.Flags(oFlags: [.noInferiors, .other("test")], sFlag: nil), "\\Noinferiors \\test", #line),
-            (MailboxInfo.Flags(oFlags: [.noInferiors, .other("test")], sFlag: .marked), "\\Marked \\Noinferiors \\test", #line),
+        let inputs: [(MailboxInfo.Attributes, String, UInt)] = [
+            (MailboxInfo.Attributes(oFlags: [], sFlag: nil), "", #line),
+            (MailboxInfo.Attributes(oFlags: [], sFlag: .marked), "\\Marked", #line),
+            (MailboxInfo.Attributes(oFlags: [.noInferiors], sFlag: nil), "\\Noinferiors", #line),
+            (MailboxInfo.Attributes(oFlags: [.noInferiors, .other("test")], sFlag: nil), "\\Noinferiors \\test", #line),
+            (MailboxInfo.Attributes(oFlags: [.noInferiors, .other("test")], sFlag: .marked), "\\Marked \\Noinferiors \\test", #line),
         ]
 
         for (test, expectedString, line) in inputs {
@@ -95,7 +95,7 @@ extension MailboxInfo_Tests {
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }
     }
-    
+
     func testEncode_sFlag() {
         let inputs: [(MailboxInfo.SFlag, String, UInt)] = [
             (.marked, #"\Marked"#, #line),

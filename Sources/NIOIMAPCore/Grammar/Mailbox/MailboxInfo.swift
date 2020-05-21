@@ -16,23 +16,22 @@ import struct NIO.ByteBuffer
 
 /// IMAPv4 `mailbox-list`
 public struct MailboxInfo: Equatable {
-    public var flags: Flags?
-    public var char: Character?
+    public var attributes: Attributes?
+    public var pathSeparator: Character?
     public var mailbox: MailboxName
-    public var listExtended: [ListExtendedItem]
+    public var extensions: [ListExtendedItem]
 
-    public init(flags: Flags? = nil, char: Character? = nil, mailbox: MailboxName, listExtended: [ListExtendedItem]) {
-        self.flags = flags
-        self.char = char
+    public init(attributes: Attributes? = nil, pathSeparator: Character? = nil, mailbox: MailboxName, extensions: [ListExtendedItem]) {
+        self.attributes = attributes
+        self.pathSeparator = pathSeparator
         self.mailbox = mailbox
-        self.listExtended = listExtended
+        self.extensions = extensions
     }
 }
 
 // MARK: - Types
 
 extension MailboxInfo {
-    
     /// IMAPv4 `mbx-list-sflag`
     public enum SFlag: String, Equatable {
         case noSelect = #"\Noselect"#
@@ -55,7 +54,7 @@ extension MailboxInfo {
             }
         }
     }
-    
+
     /// IMAPv4 `mbx-list-oflag`
     public enum OFlag: Equatable {
         case noInferiors
@@ -64,9 +63,9 @@ extension MailboxInfo {
         case child(ChildMailboxFlag)
         case other(String)
     }
-    
+
     /// IMAPv4 `mbx-list-flags`
-    public struct Flags: Equatable {
+    public struct Attributes: Equatable {
         public var oFlags: [OFlag]
         public var sFlag: SFlag?
 
@@ -75,7 +74,6 @@ extension MailboxInfo {
             self.sFlag = sFlag
         }
     }
-    
 }
 
 // MARK: - Encoding
@@ -83,20 +81,20 @@ extension MailboxInfo {
 extension EncodeBuffer {
     @discardableResult mutating func writeMailboxInfo(_ list: MailboxInfo) -> Int {
         self.writeString("(") +
-            self.writeIfExists(list.flags) { (flags) -> Int in
+            self.writeIfExists(list.attributes) { (flags) -> Int in
                 self.writeMailboxListFlags(flags)
             } +
             self.writeString(") ") +
-            self.writeIfExists(list.char) { (char) -> Int in
+            self.writeIfExists(list.pathSeparator) { (char) -> Int in
                 self.writeString("\(char) ")
             } +
             self.writeMailbox(list.mailbox)
     }
-    
+
     @discardableResult mutating func writeMailboxListSFlag(_ flag: MailboxInfo.SFlag) -> Int {
         self.writeString(flag.rawValue)
     }
-    
+
     @discardableResult mutating func writeMailboxListOFlag(_ flag: MailboxInfo.OFlag) -> Int {
         switch flag {
         case .noInferiors:
@@ -111,8 +109,8 @@ extension EncodeBuffer {
             return self.writeString("\\\(string)")
         }
     }
-    
-    @discardableResult mutating func writeMailboxListFlags(_ flags: MailboxInfo.Flags) -> Int {
+
+    @discardableResult mutating func writeMailboxListFlags(_ flags: MailboxInfo.Attributes) -> Int {
         if let sFlag = flags.sFlag {
             return
                 self.writeMailboxListSFlag(sFlag) +
