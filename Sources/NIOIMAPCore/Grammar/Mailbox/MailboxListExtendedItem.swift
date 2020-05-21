@@ -14,15 +14,13 @@
 
 import struct NIO.ByteBuffer
 
-extension MailboxName {
-    /// IMAPv4 `mbox-list-extended-item`
-    public struct ListExtendedItem: Equatable {
-        public var tag: ByteBuffer
-        public var extensionValue: TaggedExtensionValue
+/// IMAPv4 `mbox-list-extended-item`
+public struct ListExtendedItem: Equatable {
+    public var tag: ByteBuffer
+    public var extensionValue: TaggedExtensionValue
 
-        public init(tag: ByteBuffer, extensionValue: TaggedExtensionValue) {
-            self.tag = tag
-            self.extensionValue = extensionValue
-        }
+    public init(tag: ByteBuffer, extensionValue: TaggedExtensionValue) {
+        self.tag = tag
+        self.extensionValue = extensionValue
     }
 }

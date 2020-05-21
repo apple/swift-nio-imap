@@ -19,9 +19,9 @@ public struct MailboxInfo: Equatable {
     public var flags: Flags?
     public var char: Character?
     public var mailbox: MailboxName
-    public var listExtended: [MailboxName.ListExtendedItem]
+    public var listExtended: [ListExtendedItem]
 
-    public init(flags: Flags? = nil, char: Character? = nil, mailbox: MailboxName, listExtended: [MailboxName.ListExtendedItem]) {
+    public init(flags: Flags? = nil, char: Character? = nil, mailbox: MailboxName, listExtended: [ListExtendedItem]) {
         self.flags = flags
         self.char = char
         self.mailbox = mailbox
