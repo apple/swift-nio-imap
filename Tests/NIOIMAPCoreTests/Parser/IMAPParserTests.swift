@@ -1433,7 +1433,7 @@ extension ParserUnitTests {
             (
                 "LIST (\\oflag1 \\oflag2) NIL inbox",
                 "\r\n",
-                .list(.init(flags: .init(oFlags: [.other("\\oflag1"), .other("\\oflag2")], sFlag: nil), char: nil, mailbox: .inbox, listExtended: [])),
+                .list(.init(attributes: .init(oFlags: [.other("\\oflag1"), .other("\\oflag2")], sFlag: nil), pathSeparator: nil, mailbox: .inbox, extensions: [])),
                 #line
             ),
             ("ESEARCH MIN 1 MAX 2", "\r\n", .esearch(.init(correlator: nil, uid: false, returnData: [.min(1), .max(2)])), #line),
@@ -1444,7 +1444,7 @@ extension ParserUnitTests {
             (
                 "LSUB (\\seen \\draft) NIL inbox",
                 "\r\n",
-                .lsub(.init(flags: .init(oFlags: [.other("\\seen"), .other("\\draft")], sFlag: nil), char: nil, mailbox: .inbox, listExtended: [])),
+                .lsub(.init(attributes: .init(oFlags: [.other("\\seen"), .other("\\draft")], sFlag: nil), pathSeparator: nil, mailbox: .inbox, extensions: [])),
                 #line
             ),
             ("SEARCH", "\r\n", .search([]), #line),
@@ -1460,29 +1460,29 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseMailboxList() {
-        let inputs: [(String, String, MailboxName.List, UInt)] = [
+        let inputs: [(String, String, MailboxInfo, UInt)] = [
             (
                 "() NIL inbox",
                 "\r",
-                .init(flags: nil, char: nil, mailbox: .inbox, listExtended: []),
+                .init(attributes: nil, pathSeparator: nil, mailbox: .inbox, extensions: []),
                 #line
             ),
             (
                 "() \"d\" inbox",
                 "\r",
-                .init(flags: nil, char: "d", mailbox: .inbox, listExtended: []),
+                .init(attributes: nil, pathSeparator: "d", mailbox: .inbox, extensions: []),
                 #line
             ),
             (
                 "(\\oflag1 \\oflag2) NIL inbox",
                 "\r",
-                .init(flags: .init(oFlags: [.other("\\oflag1"), .other("\\oflag2")], sFlag: nil), char: nil, mailbox: .inbox, listExtended: []),
+                .init(attributes: .init(oFlags: [.other("\\oflag1"), .other("\\oflag2")], sFlag: nil), pathSeparator: nil, mailbox: .inbox, extensions: []),
                 #line
             ),
             (
                 "(\\oflag1 \\oflag2) \"d\" inbox",
                 "\r",
-                .init(flags: .init(oFlags: [.other("\\oflag1"), .other("\\oflag2")], sFlag: nil), char: "d", mailbox: .inbox, listExtended: []),
+                .init(attributes: .init(oFlags: [.other("\\oflag1"), .other("\\oflag2")], sFlag: nil), pathSeparator: "d", mailbox: .inbox, extensions: []),
                 #line
             ),
         ]
@@ -1528,7 +1528,7 @@ extension ParserUnitTests {
         TestUtilities.withBuffer("\\oflag1 \\marked", terminator: "\r\n") { (buffer) in
             let flags = try GrammarParser.parseMailboxListFlags(buffer: &buffer, tracker: .testTracker)
             XCTAssertEqual(flags.oFlags, [.other("\\oflag1")])
-            XCTAssertEqual(flags.sFlag, MailboxName.List.SFlag.marked)
+            XCTAssertEqual(flags.sFlag, MailboxInfo.SFlag.marked)
         }
     }
 
@@ -1537,7 +1537,7 @@ extension ParserUnitTests {
         TestUtilities.withBuffer("\\oflag1 \\marked \\oflag2", terminator: " \r\n") { (buffer) in
             let flags = try GrammarParser.parseMailboxListFlags(buffer: &buffer, tracker: .testTracker)
             XCTAssertEqual(flags.oFlags, [.other("\\oflag1"), .other("\\oflag2")])
-            XCTAssertEqual(flags.sFlag, MailboxName.List.SFlag.marked)
+            XCTAssertEqual(flags.sFlag, MailboxInfo.SFlag.marked)
         }
     }
 
@@ -1546,7 +1546,7 @@ extension ParserUnitTests {
         TestUtilities.withBuffer("\\oflag1 \\oflag2 \\marked \\oflag3 \\oflag4", terminator: " \r\n") { (buffer) in
             let flags = try GrammarParser.parseMailboxListFlags(buffer: &buffer, tracker: .testTracker)
             XCTAssertEqual(flags.oFlags, [.other("\\oflag1"), .other("\\oflag2"), .other("\\oflag3"), .other("\\oflag4")])
-            XCTAssertEqual(flags.sFlag, MailboxName.List.SFlag.marked)
+            XCTAssertEqual(flags.sFlag, MailboxInfo.SFlag.marked)
         }
     }
 }

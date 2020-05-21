@@ -1810,7 +1810,7 @@ extension GrammarParser {
     // mailbox-list    = "(" [mbx-list-flags] ")" SP
     //                    (DQUOTE QUOTED-CHAR DQUOTE / nil) SP mailbox
     //                    [SP mbox-list-extended]
-    static func parseMailboxList(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxName.List {
+    static func parseMailboxList(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxInfo {
         func parseMailboxList_quotedChar_some(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Character? {
             try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> Character? in
                 try ParserLibrary.parseFixedString("\"", buffer: &buffer, tracker: tracker)
@@ -1832,9 +1832,9 @@ extension GrammarParser {
             return nil
         }
 
-        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> MailboxName.List in
+        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> MailboxInfo in
             try ParserLibrary.parseFixedString("(", buffer: &buffer, tracker: tracker)
-            let flags = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> MailboxName.List.Flags in
+            let flags = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> MailboxInfo.Attributes in
                 try self.parseMailboxListFlags(buffer: &buffer, tracker: tracker)
             }
             try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)
@@ -1845,22 +1845,22 @@ extension GrammarParser {
             ], buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
             let mailbox = try self.parseMailbox(buffer: &buffer, tracker: tracker)
-            let listExtended = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: { (buffer, tracker) -> [MailboxName.ListExtendedItem] in
+            let listExtended = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: { (buffer, tracker) -> [ListExtendedItem] in
                 try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
                 return try self.parseMailboxListExtended(buffer: &buffer, tracker: tracker)
             }) ?? []
-            return MailboxName.List(flags: flags, char: character, mailbox: mailbox, listExtended: listExtended)
+            return MailboxInfo(attributes: flags, pathSeparator: character, mailbox: mailbox, extensions: listExtended)
         }
     }
 
     // mbox-list-extended =  "(" [mbox-list-extended-item
     //                       *(SP mbox-list-extended-item)] ")"
-    static func parseMailboxListExtended(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [MailboxName.ListExtendedItem] {
-        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> [MailboxName.ListExtendedItem] in
+    static func parseMailboxListExtended(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [ListExtendedItem] {
+        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> [ListExtendedItem] in
             try ParserLibrary.parseFixedString("(", buffer: &buffer, tracker: tracker)
-            let data = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> [MailboxName.ListExtendedItem] in
+            let data = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> [ListExtendedItem] in
                 var array = [try self.parseMailboxListExtendedItem(buffer: &buffer, tracker: tracker)]
-                try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) -> MailboxName.ListExtendedItem in
+                try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) -> ListExtendedItem in
                     try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
                     return try self.parseMailboxListExtendedItem(buffer: &buffer, tracker: tracker)
                 }
@@ -1873,12 +1873,12 @@ extension GrammarParser {
 
     // mbox-list-extended-item =  mbox-list-extended-item-tag SP
     //                            tagged-ext-val
-    static func parseMailboxListExtendedItem(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxName.ListExtendedItem {
-        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> MailboxName.ListExtendedItem in
+    static func parseMailboxListExtendedItem(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ListExtendedItem {
+        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> ListExtendedItem in
             let tag = try self.parseMailboxListExtendedItemTag(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
             let val = try self.parseTaggedExtensionValue(buffer: &buffer, tracker: tracker)
-            return MailboxName.ListExtendedItem(tag: tag, extensionValue: val)
+            return ListExtendedItem(tag: tag, extensionValue: val)
         }
     }
 
@@ -1906,28 +1906,28 @@ extension GrammarParser {
     // mbx-list-flags  = *(mbx-list-oflag SP) mbx-list-sflag
     //                   *(SP mbx-list-oflag) /
     //                   mbx-list-oflag *(SP mbx-list-oflag)
-    static func parseMailboxListFlags(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxName.List.Flags {
-        func parseMailboxListFlags_mixedArray(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxName.List.Flags {
-            var oFlags = try ParserLibrary.parseZeroOrMore(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> MailboxName.List.OFlag in
+    static func parseMailboxListFlags(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxInfo.Attributes {
+        func parseMailboxListFlags_mixedArray(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxInfo.Attributes {
+            var oFlags = try ParserLibrary.parseZeroOrMore(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> MailboxInfo.OFlag in
                 let flag = try self.parseMailboxListOflag(buffer: &buffer, tracker: tracker)
                 try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
                 return flag
             }
             let sFlag = try self.parseMailboxListSflag(buffer: &buffer, tracker: tracker)
-            try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &oFlags, tracker: tracker) { (buffer, tracker) -> MailboxName.List.OFlag in
+            try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &oFlags, tracker: tracker) { (buffer, tracker) -> MailboxInfo.OFlag in
                 try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
                 return try self.parseMailboxListOflag(buffer: &buffer, tracker: tracker)
             }
-            return MailboxName.List.Flags(oFlags: oFlags, sFlag: sFlag)
+            return MailboxInfo.Attributes(oFlags: oFlags, sFlag: sFlag)
         }
 
-        func parseMailboxListFlags_OFlags(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxName.List.Flags {
+        func parseMailboxListFlags_OFlags(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxInfo.Attributes {
             var output = [try self.parseMailboxListOflag(buffer: &buffer, tracker: tracker)]
-            try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &output, tracker: tracker) { (buffer, tracker) -> MailboxName.List.OFlag in
+            try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &output, tracker: tracker) { (buffer, tracker) -> MailboxInfo.OFlag in
                 try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
                 return try self.parseMailboxListOflag(buffer: &buffer, tracker: tracker)
             }
-            return MailboxName.List.Flags(oFlags: output, sFlag: nil)
+            return MailboxInfo.Attributes(oFlags: output, sFlag: nil)
         }
 
         return try ParserLibrary.parseOneOf([
@@ -1938,7 +1938,7 @@ extension GrammarParser {
 
     // mbx-list-oflag  = "\Noinferiors" / child-mbox-flag /
     //                   "\Subscribed" / "\Remote" / flag-extension
-    static func parseMailboxListOflag(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxName.List.OFlag {
+    static func parseMailboxListOflag(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxInfo.OFlag {
         // protect against parsing an sflag
         let saved = buffer
         if let sFlag = try? self.parseMailboxListSflag(buffer: &buffer, tracker: tracker) {
@@ -1946,12 +1946,12 @@ extension GrammarParser {
         }
         buffer = saved
 
-        func parseMailboxListOflag_inferiors(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxName.List.OFlag {
+        func parseMailboxListOflag_inferiors(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxInfo.OFlag {
             try ParserLibrary.parseFixedString("\\Noinferiors", buffer: &buffer, tracker: tracker)
             return .noInferiors
         }
 
-        func parseMailboxListOflag_flagExtension(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxName.List.OFlag {
+        func parseMailboxListOflag_flagExtension(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxInfo.OFlag {
             .other(try self.parseFlagExtension(buffer: &buffer, tracker: tracker))
         }
 
@@ -1962,12 +1962,12 @@ extension GrammarParser {
     }
 
     // mbx-list-sflag  = "\NonExistent" / "\Noselect" / "\Marked" / "\Unmarked"
-    static func parseMailboxListSflag(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxName.List.SFlag {
+    static func parseMailboxListSflag(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxInfo.SFlag {
         try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             let string = try ParserLibrary.parseOneOrMoreCharacters(buffer: &buffer, tracker: tracker) { c -> Bool in
                 isalpha(Int32(c)) != 0 || c == UInt8(ascii: "\\")
             }
-            guard let flag = MailboxName.List.SFlag(rawValue: string) else {
+            guard let flag = MailboxInfo.SFlag(rawValue: string) else {
                 throw ParserError(hint: "Found \(string) which was not an sflag")
             }
             return flag
