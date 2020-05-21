@@ -16,20 +16,20 @@ import NIO
 @testable import NIOIMAPCore
 import XCTest
 
-class MailboxListTests: EncodeTestClass {}
+class MailboxInfo_Tests: EncodeTestClass {}
 
 // MARK: - Encoding
 
-extension MailboxListTests {
+extension MailboxInfo_Tests {
     func testEncode() {
-        let inputs: [(MailboxName.List, String, UInt)] = [
-            (MailboxName.List(flags: nil, char: nil, mailbox: .inbox, listExtended: []), "() \"INBOX\"", #line),
-            (MailboxName.List(flags: nil, char: "a", mailbox: .inbox, listExtended: []), "() a \"INBOX\"", #line),
+        let inputs: [(MailboxName.MailboxInfo, String, UInt)] = [
+            (MailboxName.MailboxInfo(flags: nil, char: nil, mailbox: .inbox, listExtended: []), "() \"INBOX\"", #line),
+            (MailboxName.MailboxInfo(flags: nil, char: "a", mailbox: .inbox, listExtended: []), "() a \"INBOX\"", #line),
         ]
 
         for (test, expectedString, line) in inputs {
             self.testBuffer.clear()
-            let size = self.testBuffer.writeMailboxList(test)
+            let size = self.testBuffer.writeMailboxInfo(test)
             XCTAssertEqual(size, expectedString.utf8.count, line: line)
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }

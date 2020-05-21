@@ -18,8 +18,8 @@ extension MailboxName {
     /// IMAPv4 `mailbox-data`
     public enum Data: Equatable {
         case flags([Flag])
-        case list(MailboxName.List)
-        case lsub(MailboxName.List)
+        case list(MailboxName.MailboxInfo)
+        case lsub(MailboxName.MailboxInfo)
         case search([Int])
         case esearch(ESearchResponse)
         case status(MailboxName, [MailboxValue])
@@ -67,14 +67,14 @@ extension EncodeBuffer {
             self.writeFlags(flags)
     }
 
-    private mutating func writeMailboxData_list(_ list: MailboxName.List) -> Int {
+    private mutating func writeMailboxData_list(_ list: MailboxName.MailboxInfo) -> Int {
         self.writeString("LIST ") +
-            self.writeMailboxList(list)
+            self.writeMailboxInfo(list)
     }
 
-    private mutating func writeMailboxData_lsub(_ list: MailboxName.List) -> Int {
+    private mutating func writeMailboxData_lsub(_ list: MailboxName.MailboxInfo) -> Int {
         self.writeString("LSUB ") +
-            self.writeMailboxList(list)
+            self.writeMailboxInfo(list)
     }
 
     private mutating func writeMailboxData_status(mailbox: MailboxName, list: [MailboxValue]) -> Int {

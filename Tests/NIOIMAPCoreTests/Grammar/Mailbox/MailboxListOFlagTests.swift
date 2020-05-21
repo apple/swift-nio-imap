@@ -22,7 +22,7 @@ class MailboxListOFlagTests: EncodeTestClass {}
 
 extension MailboxListOFlagTests {
     func testEncode() {
-        let inputs: [(MailboxName.List.OFlag, String, UInt)] = [
+        let inputs: [(MailboxName.MailboxInfo.OFlag, String, UInt)] = [
             (.noInferiors, "\\Noinferiors", #line),
             (.subscribed, "\\Subscribed", #line),
             (.remote, "\\Remote", #line),

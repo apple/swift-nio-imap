@@ -22,7 +22,7 @@ class MailboxListSFlagTests: EncodeTestClass {}
 
 extension MailboxListSFlagTests {
     func testInit() {
-        let inputs: [(String, MailboxName.List.SFlag?, UInt)] = [
+        let inputs: [(String, MailboxName.MailboxInfo.SFlag?, UInt)] = [
             (#"\fecd"#, nil, #line),
             (#"\Noselect"#, .noSelect, #line),
             (#"\NOSELECT"#, .noSelect, #line),
@@ -39,7 +39,7 @@ extension MailboxListSFlagTests {
         ]
 
         for (test, expected, line) in inputs {
-            let testValue = MailboxName.List.SFlag(rawValue: test)
+            let testValue = MailboxName.MailboxInfo.SFlag(rawValue: test)
             XCTAssertEqual(testValue, expected, line: line)
         }
     }
@@ -49,7 +49,7 @@ extension MailboxListSFlagTests {
 
 extension MailboxListSFlagTests {
     func testEncode() {
-        let inputs: [(MailboxName.List.SFlag, String, UInt)] = [
+        let inputs: [(MailboxName.MailboxInfo.SFlag, String, UInt)] = [
             (.marked, #"\Marked"#, #line),
             (.noSelect, #"\Noselect"#, #line),
             (.unmarked, #"\Unmarked"#, #line),

@@ -16,13 +16,13 @@ import struct NIO.ByteBuffer
 
 extension MailboxName {
     /// IMAPv4 `mailbox-list`
-    public struct List: Equatable {
+    public struct MailboxInfo: Equatable {
         public var flags: Flags?
         public var char: Character?
         public var mailbox: MailboxName
         public var listExtended: [ListExtendedItem]
 
-        public init(flags: MailboxName.List.Flags? = nil, char: Character? = nil, mailbox: MailboxName, listExtended: [MailboxName.ListExtendedItem]) {
+        public init(flags: MailboxName.MailboxInfo.Flags? = nil, char: Character? = nil, mailbox: MailboxName, listExtended: [MailboxName.ListExtendedItem]) {
             self.flags = flags
             self.char = char
             self.mailbox = mailbox
@@ -34,7 +34,7 @@ extension MailboxName {
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeMailboxList(_ list: MailboxName.List) -> Int {
+    @discardableResult mutating func writeMailboxInfo(_ list: MailboxName.MailboxInfo) -> Int {
         self.writeString("(") +
             self.writeIfExists(list.flags) { (flags) -> Int in
                 self.writeMailboxListFlags(flags)
