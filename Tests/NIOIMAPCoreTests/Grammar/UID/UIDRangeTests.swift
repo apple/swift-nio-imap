@@ -16,23 +16,23 @@ import NIO
 @testable import NIOIMAPCore
 import XCTest
 
-class SequenceRangeTests: EncodeTestClass {}
+class UIDRangeTests: EncodeTestClass {}
 
 // MARK: - last
 
-extension SequenceRangeTests {
+extension UIDRangeTests {
     func testWildcard() {
-        let range = SequenceRange.all.range
-        XCTAssertEqual(range.lowerBound, SequenceNumber.min)
-        XCTAssertEqual(range.upperBound, SequenceNumber.max)
+        let range = UIDRange.all.range
+        XCTAssertEqual(range.lowerBound, UID.min)
+        XCTAssertEqual(range.upperBound, UID.max)
     }
 }
 
 // MARK: - single
 
-extension SequenceRangeTests {
+extension UIDRangeTests {
     func testSingle() {
-        let range = SequenceRange(999).range
+        let range = UIDRange(999).range
         XCTAssertEqual(range.lowerBound, 999)
         XCTAssertEqual(range.upperBound, 999)
     }
@@ -40,17 +40,17 @@ extension SequenceRangeTests {
 
 // MARK: - init
 
-extension SequenceRangeTests {
+extension UIDRangeTests {
     // here we always expect the smaller number on the left
 
     func testInit_range() {
-        let range = SequenceRange(1 ... 999).range
+        let range = UIDRange(1 ... 999).range
         XCTAssertEqual(range.lowerBound, 1)
         XCTAssertEqual(range.upperBound, 999)
     }
 
     func testInit_integer() {
-        let range: SequenceRange = 654
+        let range: UIDRange = 654
         XCTAssertEqual(range.range.lowerBound, 654)
         XCTAssertEqual(range.range.upperBound, 654)
     }
@@ -58,9 +58,9 @@ extension SequenceRangeTests {
 
 // MARK: - Encoding
 
-extension SequenceRangeTests {
+extension UIDRangeTests {
     func testEncode() {
-        let inputs: [(SequenceRange, String, UInt)] = [
+        let inputs: [(UIDRange, String, UInt)] = [
             (33...44, "33:44", #line),
             (5, "5", #line),
             (.all, "*", #line),
@@ -70,7 +70,7 @@ extension SequenceRangeTests {
 
         for (test, expectedString, line) in inputs {
             self.testBuffer.clear()
-            let size = self.testBuffer.writeSequenceRange(test)
+            let size = self.testBuffer.writeUIDRange(test)
             XCTAssertEqual(size, expectedString.utf8.count, line: line)
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }
@@ -79,31 +79,31 @@ extension SequenceRangeTests {
 
 // MARK: - Range operators
 
-extension SequenceRangeTests {
+extension UIDRangeTests {
     func testRangeOperator_prefix() {
-        let expected = "1:5"
-        let size = self.testBuffer.writeSequenceRange(...5)
+        let expected = "5:*"
+        let size = self.testBuffer.writeUIDRange(UIDRange(left: .max, right: 5))
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }
 
     func testRangeOperator_postfix() {
         let expected = "5:*"
-        let size = self.testBuffer.writeSequenceRange(5...)
+        let size = self.testBuffer.writeUIDRange(UIDRange(left: 5, right: .max))
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }
 
     func testRangeOperator_postfix_complete_right_larger() {
         let expected = "44:55"
-        let size = self.testBuffer.writeSequenceRange(SequenceRange(left: 44, right: 55))
+        let size = self.testBuffer.writeUIDRange(UIDRange(left: 44, right: 55))
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }
 
     func testRangeOperator_postfix_complete_left_larger() {
         let expected = "44:55"
-        let size = self.testBuffer.writeSequenceRange(SequenceRange(left: 55, right: 44))
+        let size = self.testBuffer.writeUIDRange(UIDRange(left: 55, right: 44))
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }

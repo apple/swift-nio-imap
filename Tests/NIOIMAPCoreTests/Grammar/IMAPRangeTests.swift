@@ -23,7 +23,7 @@ class IMAPRangeTests: EncodeTestClass {}
 extension IMAPRangeTests {
     func testImapEncoded_from() {
         let expected = "5:*"
-        let size = self.testBuffer.writeSequenceRange(SequenceRange(5 ... .last))
+        let size = self.testBuffer.writeSequenceRange(SequenceRange(5...))
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }
@@ -40,14 +40,20 @@ extension IMAPRangeTests {
 
 extension IMAPRangeTests {
     func testRange_from() {
-        let expected = SequenceRange(7 ... .last)
-        let actual: SequenceRange = 7...
-        XCTAssertEqual(expected, actual)
+        let sut = SequenceRange(7...)
+        XCTAssertEqual(sut.range.lowerBound, 7)
+        XCTAssertEqual(sut.range.upperBound, SequenceNumber(UInt32.max))
+    }
+
+    func testRange_to() {
+        let sut = SequenceRange(...7)
+        XCTAssertEqual(sut.range.lowerBound, 1)
+        XCTAssertEqual(sut.range.upperBound, 7)
     }
 
     func testRange_closed() {
-        let expected = SequenceRange(3 ... 4)
-        let actual: SequenceRange = 3 ... 4
-        XCTAssertEqual(expected, actual)
+        let sut = SequenceRange(3...4)
+        XCTAssertEqual(sut.range.lowerBound, 3)
+        XCTAssertEqual(sut.range.upperBound, 4)
     }
 }

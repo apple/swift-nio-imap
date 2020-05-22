@@ -39,20 +39,20 @@ public enum Command: Equatable {
     case unselect
     case idleStart
     case idleFinish
-    case copy([SequenceRange], MailboxName)
-    case fetch([SequenceRange], FetchType, [FetchModifier])
-    case store([SequenceRange], [StoreModifier], StoreFlags)
+    case copy(SequenceSet, MailboxName)
+    case fetch(SequenceSet, FetchType, [FetchModifier])
+    case store(SequenceSet, [StoreModifier], StoreFlags)
     case search(returnOptions: [SearchReturnOption], program: SearchProgram)
-    case move([SequenceRange], MailboxName)
+    case move(SequenceSet, MailboxName)
     case id([IDParameter])
     case namespace
 
-    case uidCopy([SequenceRange], MailboxName)
-    case uidMove([SequenceRange], MailboxName)
-    case uidFetch([SequenceRange], FetchType, [FetchModifier])
+    case uidCopy(UIDSet, MailboxName)
+    case uidMove(UIDSet, MailboxName)
+    case uidFetch(UIDSet, FetchType, [FetchModifier])
     case uidSearch(returnOptions: [SearchReturnOption], program: SearchProgram)
-    case uidStore([SequenceRange], [StoreModifier], StoreFlags)
-    case uidExpunge([SequenceRange])
+    case uidStore(UIDSet, [StoreModifier], StoreFlags)
+    case uidExpunge(UIDSet)
 }
 
 // MARK: - IMAP
@@ -110,10 +110,10 @@ extension EncodeBuffer {
             return self.writeCommandType_idleStart()
         case .idleFinish:
             return self.writeCommandType_idleFinish()
-        case .copy(let sequence, let mailbox):
-            return self.writeCommandType_copy(sequence: sequence, mailbox: mailbox)
-        case .uidCopy(let sequence, let mailbox):
-            return self.writeCommandType_uidCopy(sequence: sequence, mailbox: mailbox)
+        case .copy(let set, let mailbox):
+            return self.writeCommandType_copy(set: set, mailbox: mailbox)
+        case .uidCopy(let set, let mailbox):
+            return self.writeCommandType_uidCopy(set: set, mailbox: mailbox)
         case .fetch(let set, let atts, let modifiers):
             return self.writeCommandType_fetch(set: set, atts: atts, modifiers: modifiers)
         case .uidFetch(let set, let atts, let modifiers):
@@ -266,9 +266,9 @@ extension EncodeBuffer {
         self.writeString("EXPUNGE")
     }
 
-    private mutating func writeCommandType_uidExpunge(_ set: [SequenceRange]) -> Int {
+    private mutating func writeCommandType_uidExpunge(_ set: UIDSet) -> Int {
         self.writeString("EXPUNGE ") +
-            self.writeSequenceSet(set)
+            self.writeUIDSet(set)
     }
 
     private mutating func writeCommandType_unselect() -> Int {
@@ -290,19 +290,21 @@ extension EncodeBuffer {
             }
     }
 
-    private mutating func writeCommandType_copy(sequence: [SequenceRange], mailbox: MailboxName) -> Int {
+    private mutating func writeCommandType_copy(set: SequenceSet, mailbox: MailboxName) -> Int {
         self.writeString("COPY ") +
-            self.writeSequenceSet(sequence) +
+            self.writeSequenceSet(set) +
             self.writeSpace() +
             self.writeMailbox(mailbox)
     }
 
-    private mutating func writeCommandType_uidCopy(sequence: [SequenceRange], mailbox: MailboxName) -> Int {
-        self.writeString("UID ") +
-            self.writeCommandType_copy(sequence: sequence, mailbox: mailbox)
+    private mutating func writeCommandType_uidCopy(set: UIDSet, mailbox: MailboxName) -> Int {
+        self.writeString("UID COPY ") +
+            self.writeUIDSet(set) +
+            self.writeSpace() +
+            self.writeMailbox(mailbox)
     }
 
-    private mutating func writeCommandType_fetch(set: [SequenceRange], atts: FetchType, modifiers: [FetchModifier]) -> Int {
+    private mutating func writeCommandType_fetch(set: SequenceSet, atts: FetchType, modifiers: [FetchModifier]) -> Int {
         self.writeString("FETCH ") +
             self.writeSequenceSet(set) +
             self.writeSpace() +
@@ -312,12 +314,17 @@ extension EncodeBuffer {
             }
     }
 
-    private mutating func writeCommandType_uidFetch(set: [SequenceRange], atts: FetchType, modifiers: [FetchModifier]) -> Int {
-        self.writeString("UID ") +
-            self.writeCommandType_fetch(set: set, atts: atts, modifiers: modifiers)
+    private mutating func writeCommandType_uidFetch(set: UIDSet, atts: FetchType, modifiers: [FetchModifier]) -> Int {
+        self.writeString("UID FETCH ") +
+            self.writeUIDSet(set) +
+            self.writeSpace() +
+            self.writeFetchType(atts) +
+            self.writeIfExists(modifiers) { (modifiers) -> Int in
+                self.writeFetchModifiers(modifiers)
+            }
     }
 
-    private mutating func writeCommandType_store(set: [SequenceRange], modifiers: [StoreModifier], flags: StoreFlags) -> Int {
+    private mutating func writeCommandType_store(set: SequenceSet, modifiers: [StoreModifier], flags: StoreFlags) -> Int {
         self.writeString("STORE ") +
             self.writeSequenceSet(set) +
             self.writeIfArrayHasMinimumSize(array: modifiers) { (modifiers, self) -> Int in
@@ -327,9 +334,14 @@ extension EncodeBuffer {
             self.writeStoreAttributeFlags(flags)
     }
 
-    private mutating func writeCommandType_uidStore(set: [SequenceRange], modifiers: [StoreModifier], flags: StoreFlags) -> Int {
-        self.writeString("UID ") +
-            self.writeCommandType_store(set: set, modifiers: modifiers, flags: flags)
+    private mutating func writeCommandType_uidStore(set: UIDSet, modifiers: [StoreModifier], flags: StoreFlags) -> Int {
+        self.writeString("UID STORE ") +
+            self.writeUIDSet(set) +
+            self.writeIfArrayHasMinimumSize(array: modifiers) { (modifiers, self) -> Int in
+                self.writeStoreModifiers(modifiers)
+            } +
+            self.writeSpace() +
+            self.writeStoreAttributeFlags(flags)
     }
 
     private mutating func writeCommandType_search(returnOptions: [SearchReturnOption], program: SearchProgram) -> Int {
@@ -346,16 +358,18 @@ extension EncodeBuffer {
             self.writeCommandType_search(returnOptions: returnOptions, program: program)
     }
 
-    private mutating func writeCommandType_move(set: [SequenceRange], mailbox: MailboxName) -> Int {
+    private mutating func writeCommandType_move(set: SequenceSet, mailbox: MailboxName) -> Int {
         self.writeString("MOVE ") +
             self.writeSequenceSet(set) +
             self.writeSpace() +
             self.writeMailbox(mailbox)
     }
 
-    private mutating func writeCommandType_uidMove(set: [SequenceRange], mailbox: MailboxName) -> Int {
-        self.writeString("UID ") +
-            self.writeCommandType_move(set: set, mailbox: mailbox)
+    private mutating func writeCommandType_uidMove(set: UIDSet, mailbox: MailboxName) -> Int {
+        self.writeString("UID MOVE ") +
+            self.writeUIDSet(set) +
+            self.writeSpace() +
+            self.writeMailbox(mailbox)
     }
 
     private mutating func writeCommandType_namespace() -> Int {

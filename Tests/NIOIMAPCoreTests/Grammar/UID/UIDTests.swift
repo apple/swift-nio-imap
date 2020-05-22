@@ -16,41 +16,41 @@ import NIO
 @testable import NIOIMAPCore
 import XCTest
 
-class SequenceNumberTests: EncodeTestClass {}
+class UIDTests: EncodeTestClass {}
 
 // MARK: - Integer literal
 
-extension SequenceNumberTests {
+extension UIDTests {
     func testIntegerLiteral() {
-        let num: SequenceNumber = 5
+        let num: UID = 5
         XCTAssertEqual(num, 5)
     }
 }
 
 // MARK: - Comparable
 
-extension SequenceNumberTests {
+extension UIDTests {
     func testComparable() {
-        XCTAssertFalse(SequenceNumber.max < .max)
-        XCTAssertFalse(SequenceNumber.max < 999)
-        XCTAssertTrue(SequenceNumber.max > 999)
-        XCTAssertTrue(SequenceNumber(1) < 999) // use .number to force type
+        XCTAssertFalse(UID.max < .max)
+        XCTAssertFalse(UID.max < 999)
+        XCTAssertTrue(UID.max > 999)
+        XCTAssertTrue(UID(1) < 999) // use .number to force type
     }
 }
 
 // MARK: - Encoding
 
-extension SequenceNumberTests {
+extension UIDTests {
     func testEncode_max() {
         let expected = "4294967295"
-        let size = self.testBuffer.writeSequenceNumber(.max)
+        let size = self.testBuffer.writeUID(.max)
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }
 
     func testEncode_number() {
         let expected = "1234"
-        let size = self.testBuffer.writeSequenceNumber(1234)
+        let size = self.testBuffer.writeUID(1234)
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }

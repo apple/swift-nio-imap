@@ -12,24 +12,22 @@
 //
 //===----------------------------------------------------------------------===//
 
-/// Message Sequence Number
+/// Unique Message Identifier
 ///
-/// See RFC 3501 section 2.3.1.2.
-///
-/// IMAPv4 `seq-number`
-public struct SequenceNumber: RawRepresentable, Equatable {
+/// See RFC 3501 section 2.3.1.1.
+public struct UID: RawRepresentable, Equatable {
     public var rawValue: Int
     public init?(rawValue: Int) {
         guard 1 <= rawValue, rawValue <= UInt32.max else { return nil }
         self.rawValue = rawValue
     }
-    public static let min = SequenceNumber(1)
-    public static let max = SequenceNumber(UInt32.max)
+    public static let min = UID(1)
+    public static let max = UID(UInt32.max)
 }
 
 // MARK: - Integer literal
 
-extension SequenceNumber: ExpressibleByIntegerLiteral {
+extension UID: ExpressibleByIntegerLiteral {
     public init(integerLiteral value: Int) {
         self.init(rawValue: value)!
     }
@@ -45,33 +43,33 @@ extension SequenceNumber: ExpressibleByIntegerLiteral {
 
 // MARK: - Comparable
 
-extension SequenceNumber: Strideable {
-    public static func < (lhs: SequenceNumber, rhs: SequenceNumber) -> Bool {
+extension UID: Strideable {
+    public static func < (lhs: UID, rhs: UID) -> Bool {
         return lhs.rawValue < rhs.rawValue
     }
 
-    public static func <= (lhs: SequenceNumber, rhs: SequenceNumber) -> Bool {
+    public static func <= (lhs: UID, rhs: UID) -> Bool {
         return lhs.rawValue <= rhs.rawValue
     }
 
-    public func distance(to other: SequenceNumber) -> Int {
+    public func distance(to other: UID) -> Int {
         return other.rawValue - rawValue
     }
 
-    public func advanced(by n: Int) -> SequenceNumber {
-        return SequenceNumber(rawValue: rawValue + n)!
+    public func advanced(by n: Int) -> UID {
+        return UID(rawValue: rawValue + n)!
     }
 }
 
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeSequenceNumber(_ num: SequenceNumber) -> Int {
+    @discardableResult mutating func writeUID(_ num: UID) -> Int {
         return self.writeString("\(num.rawValue)")
     }
 
-    @discardableResult mutating func writeSequenceNumberOrWildcard(_ num: SequenceNumber) -> Int {
-        if num.rawValue == UInt32.max {
+    @discardableResult mutating func writeUIDOrWildcard(_ num: UID) -> Int {
+        if num == .max {
             return self.writeString("*")
         } else {
             return self.writeString("\(num.rawValue)")
@@ -81,16 +79,16 @@ extension EncodeBuffer {
 
 // MARK: - Swift Ranges
 
-extension SequenceNumber {
-    public static prefix func ... (value: Self) -> SequenceRange {
-        SequenceRange(left: .min, right: value)
+extension UID {
+    public static prefix func ... (value: Self) -> UIDRange {
+        UIDRange(left: .min, right: value)
     }
 
-    public static postfix func ... (value: Self) -> SequenceRange {
-        SequenceRange(left: value, right: .max)
+    public static postfix func ... (value: Self) -> UIDRange {
+        UIDRange(left: value, right: .max)
     }
 
-    public static func ... (lower: Self, upper: Self) -> SequenceRange {
-        SequenceRange(left: lower, right: upper)
+    public static func ... (lower: Self, upper: Self) -> UIDRange {
+        UIDRange(left: lower, right: upper)
     }
 }

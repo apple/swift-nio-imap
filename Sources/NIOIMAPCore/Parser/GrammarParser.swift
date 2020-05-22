@@ -130,8 +130,8 @@ extension GrammarParser {
     }
 
     // append-uid      = uniqueid
-    static func parseAppendUid(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Int {
-        try self.parseUniqueID(buffer: &buffer, tracker: tracker)
+    static func parseAppendUid(buffer: inout ByteBuffer, tracker: StackTracker) throws -> UID {
+        try self.parseUID(buffer: &buffer, tracker: tracker)
     }
 
     // astring         = 1*ASTRING-CHAR / string
@@ -1041,46 +1041,6 @@ extension GrammarParser {
     // fetch           = "FETCH" SP sequence-set SP ("ALL" / "FULL" / "FAST" /
     //                   fetch-att / "(" fetch-att *(SP fetch-att) ")") [fetch-modifiers]
     static func parseFetch(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Command {
-        func parseFetch_type_all(buffer: inout ByteBuffer, tracker: StackTracker) throws -> FetchType {
-            try ParserLibrary.parseFixedString("ALL", buffer: &buffer, tracker: tracker)
-            return .all
-        }
-
-        func parseFetch_type_full(buffer: inout ByteBuffer, tracker: StackTracker) throws -> FetchType {
-            try ParserLibrary.parseFixedString("FULL", buffer: &buffer, tracker: tracker)
-            return .full
-        }
-
-        func parseFetch_type_fast(buffer: inout ByteBuffer, tracker: StackTracker) throws -> FetchType {
-            try ParserLibrary.parseFixedString("FAST", buffer: &buffer, tracker: tracker)
-            return .fast
-        }
-
-        func parseFetch_type_singleAtt(buffer: inout ByteBuffer, tracker: StackTracker) throws -> FetchType {
-            .attributes([try self.parseFetchAttribute(buffer: &buffer, tracker: tracker)])
-        }
-
-        func parseFetch_type_multiAtt(buffer: inout ByteBuffer, tracker: StackTracker) throws -> FetchType {
-            try ParserLibrary.parseFixedString("(", buffer: &buffer, tracker: tracker)
-            var array = [try self.parseFetchAttribute(buffer: &buffer, tracker: tracker)]
-            try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) -> FetchAttribute in
-                try ParserLibrary.parseFixedString(" ", buffer: &buffer, tracker: tracker)
-                return try self.parseFetchAttribute(buffer: &buffer, tracker: tracker)
-            }
-            try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)
-            return .attributes(array)
-        }
-
-        func parseFetch_type(buffer: inout ByteBuffer, tracker: StackTracker) throws -> FetchType {
-            try ParserLibrary.parseOneOf([
-                parseFetch_type_all,
-                parseFetch_type_full,
-                parseFetch_type_fast,
-                parseFetch_type_singleAtt,
-                parseFetch_type_multiAtt,
-            ], buffer: &buffer, tracker: tracker)
-        }
-
         return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Command in
             try ParserLibrary.parseFixedString("FETCH ", buffer: &buffer, tracker: tracker)
             let sequence = try self.parseSequenceSet(buffer: &buffer, tracker: tracker)
@@ -1089,6 +1049,46 @@ extension GrammarParser {
             let modifiers = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseFetchModifiers) ?? []
             return .fetch(sequence, att, modifiers)
         }
+    }
+
+    static fileprivate func parseFetch_type_all(buffer: inout ByteBuffer, tracker: StackTracker) throws -> FetchType {
+        try ParserLibrary.parseFixedString("ALL", buffer: &buffer, tracker: tracker)
+        return .all
+    }
+
+    static fileprivate func parseFetch_type_full(buffer: inout ByteBuffer, tracker: StackTracker) throws -> FetchType {
+        try ParserLibrary.parseFixedString("FULL", buffer: &buffer, tracker: tracker)
+        return .full
+    }
+
+    static fileprivate func parseFetch_type_fast(buffer: inout ByteBuffer, tracker: StackTracker) throws -> FetchType {
+        try ParserLibrary.parseFixedString("FAST", buffer: &buffer, tracker: tracker)
+        return .fast
+    }
+
+    static fileprivate func parseFetch_type_singleAtt(buffer: inout ByteBuffer, tracker: StackTracker) throws -> FetchType {
+        .attributes([try self.parseFetchAttribute(buffer: &buffer, tracker: tracker)])
+    }
+
+    static fileprivate func parseFetch_type_multiAtt(buffer: inout ByteBuffer, tracker: StackTracker) throws -> FetchType {
+        try ParserLibrary.parseFixedString("(", buffer: &buffer, tracker: tracker)
+        var array = [try self.parseFetchAttribute(buffer: &buffer, tracker: tracker)]
+        try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) -> FetchAttribute in
+            try ParserLibrary.parseFixedString(" ", buffer: &buffer, tracker: tracker)
+            return try self.parseFetchAttribute(buffer: &buffer, tracker: tracker)
+        }
+        try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)
+        return .attributes(array)
+    }
+
+    static fileprivate func parseFetch_type(buffer: inout ByteBuffer, tracker: StackTracker) throws -> FetchType {
+        try ParserLibrary.parseOneOf([
+            parseFetch_type_all,
+            parseFetch_type_full,
+            parseFetch_type_fast,
+            parseFetch_type_singleAtt,
+            parseFetch_type_multiAtt,
+        ], buffer: &buffer, tracker: tracker)
     }
 
     // fetch-att       = "ENVELOPE" / "FLAGS" / "INTERNALDATE" /
@@ -2248,7 +2248,7 @@ extension GrammarParser {
 
         func parseMessageAttribute_uid(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MessageAttribute {
             try ParserLibrary.parseFixedString("UID ", buffer: &buffer, tracker: tracker)
-            return .uid(try self.parseUniqueID(buffer: &buffer, tracker: tracker))
+            return .uid(try self.parseUID(buffer: &buffer, tracker: tracker))
         }
 
         func parseMessageAttribute_binarySize(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MessageAttribute {
@@ -3132,7 +3132,7 @@ extension GrammarParser {
 
         func parseSearchKey_uid(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SearchKey {
             try ParserLibrary.parseFixedString("UID ", buffer: &buffer, tracker: tracker)
-            return .uid(try self.parseSequenceSet(buffer: &buffer, tracker: tracker))
+            return .uid(try self.parseUIDSet(buffer: &buffer, tracker: tracker))
         }
 
         func parseSearchKey_sequenceSet(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SearchKey {
@@ -3531,39 +3531,53 @@ extension GrammarParser {
         try self.parseTaggedExtensionValue(buffer: &buffer, tracker: tracker)
     }
 
-    // seq-number      = nz-number / "*"
-    static func parseSequenceNumber(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SequenceNumber {
-        func parseSequenceNumber_wildcard(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SequenceNumber {
+    // Sequence Range
+    static func parseSequenceRange(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SequenceRange {
+        func parse_wildcard(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SequenceNumber {
             try ParserLibrary.parseFixedString("*", buffer: &buffer, tracker: tracker)
-            return .last
+            return .max
         }
 
-        func parseSequenceNumber_number(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SequenceNumber {
-            let num = try self.parseNZNumber(buffer: &buffer, tracker: tracker)
-            return .number(num)
+        func parse_SequenceOrWildcard(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SequenceNumber {
+            return try ParserLibrary.parseOneOf([
+                parse_wildcard,
+                GrammarParser.parseSequenceNumber,
+            ], buffer: &buffer, tracker: tracker)
         }
 
-        return try ParserLibrary.parseOneOf([
-            parseSequenceNumber_wildcard,
-            parseSequenceNumber_number,
-        ], buffer: &buffer, tracker: tracker)
+        func parse_colonAndSequenceOrWildcard(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SequenceNumber {
+            try ParserLibrary.parseFixedString(":", buffer: &buffer, tracker: tracker)
+            return try parse_SequenceOrWildcard(buffer: &buffer, tracker: tracker)
+        }
+
+        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> SequenceRange in
+            let id1 = try parse_SequenceOrWildcard(buffer: &buffer, tracker: tracker)
+            let id2 = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: parse_colonAndSequenceOrWildcard)
+            if let id = id2 {
+                return SequenceRange(left: id1, right: id)
+            } else if id1 == .max {
+                return .all
+            } else {
+                return SequenceRange(id1)
+            }
+        }
     }
 
-    // seq-range       = seq-number ":" seq-number
-    static func parseSequenceRange(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SequenceRange {
-        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> SequenceRange in
-            let num1 = try self.parseSequenceNumber(buffer: &buffer, tracker: tracker)
-            try ParserLibrary.parseFixedString(":", buffer: &buffer, tracker: tracker)
-            let num2 = try self.parseSequenceNumber(buffer: &buffer, tracker: tracker)
-            return SequenceRange(num1 ... num2)
+    // SequenceNumber
+    // Note: the formal syntax is bogus here.
+    // "*" is a sequence range, but not a sequence number.
+    static func parseSequenceNumber(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SequenceNumber {
+        guard let seq = SequenceNumber(rawValue: try self.parseNZNumber(buffer: &buffer, tracker: tracker)) else {
+            throw ParserError.init(hint: "Sequence number out of range.")
         }
+        return seq
     }
 
     // sequence-set    = (seq-number / seq-range) ["," sequence-set]
-    static func parseSequenceSet(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [SequenceRange] {
+    static func parseSequenceSet(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SequenceSet {
         func parseSequenceSet_number(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SequenceRange {
             let num = try self.parseSequenceNumber(buffer: &buffer, tracker: tracker)
-            return SequenceRange(from: num, to: num)
+            return SequenceRange(num)
         }
 
         func parseSequenceSet_element(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SequenceRange {
@@ -3579,7 +3593,37 @@ extension GrammarParser {
                 try ParserLibrary.parseFixedString(",", buffer: &buffer, tracker: tracker)
                 return try parseSequenceSet_element(buffer: &buffer, tracker: tracker)
             }
-            return output
+            guard let s = SequenceSet(output) else {
+                throw ParserError(hint: "Sequence set is empty.")
+            }
+            return s
+        }
+    }
+
+    // uid-set
+    static func parseUIDSet(buffer: inout ByteBuffer, tracker: StackTracker) throws -> UIDSet {
+        func parseUIDSet_number(buffer: inout ByteBuffer, tracker: StackTracker) throws -> UIDRange {
+            let num = try self.parseUID(buffer: &buffer, tracker: tracker)
+            return UIDRange(num)
+        }
+
+        func parseUIDSet_element(buffer: inout ByteBuffer, tracker: StackTracker) throws -> UIDRange {
+            try ParserLibrary.parseOneOf([
+                self.parseUIDRange,
+                parseUIDSet_number,
+            ], buffer: &buffer, tracker: tracker)
+        }
+
+        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker in
+            var output = [try parseUIDSet_element(buffer: &buffer, tracker: tracker)]
+            try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &output, tracker: tracker) { buffer, tracker in
+                try ParserLibrary.parseFixedString(",", buffer: &buffer, tracker: tracker)
+                return try parseUIDSet_element(buffer: &buffer, tracker: tracker)
+            }
+            guard let s = UIDSet(output) else {
+                throw ParserError(hint: "UID set is empty.")
+            }
+            return s
         }
     }
 
@@ -3980,24 +4024,34 @@ extension GrammarParser {
     //                   (copy / move / fetch / search / store / uid-expunge)
     static func parseUid(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Command {
         func parseUid_copy(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Command {
-            guard case .copy(let set, let mailbox) = try self.parseCopy(buffer: &buffer, tracker: tracker) else {
-                fatalError("This should never happen")
+            try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Command in
+                try ParserLibrary.parseFixedString("COPY ", buffer: &buffer, tracker: tracker)
+                let set = try self.parseUIDSet(buffer: &buffer, tracker: tracker)
+                try ParserLibrary.parseFixedString(" ", buffer: &buffer, tracker: tracker)
+                let mailbox = try self.parseMailbox(buffer: &buffer, tracker: tracker)
+                return .uidCopy(set, mailbox)
             }
-            return .uidCopy(set, mailbox)
         }
 
         func parseUid_move(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Command {
-            guard case .move(let set, let mailbox) = try self.parseMove(buffer: &buffer, tracker: tracker) else {
-                fatalError("This should never happen")
+            try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Command in
+                try ParserLibrary.parseFixedString("MOVE ", buffer: &buffer, tracker: tracker)
+                let set = try self.parseUIDSet(buffer: &buffer, tracker: tracker)
+                try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
+                let mailbox = try self.parseMailbox(buffer: &buffer, tracker: tracker)
+                return .uidMove(set, mailbox)
             }
-            return .uidMove(set, mailbox)
         }
 
         func parseUid_fetch(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Command {
-            guard case .fetch(let set, let type, let modifiers) = try self.parseFetch(buffer: &buffer, tracker: tracker) else {
-                fatalError("This should never happen")
+            return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Command in
+                try ParserLibrary.parseFixedString("FETCH ", buffer: &buffer, tracker: tracker)
+                let set = try self.parseUIDSet(buffer: &buffer, tracker: tracker)
+                try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
+                let att = try parseFetch_type(buffer: &buffer, tracker: tracker)
+                let modifiers = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseFetchModifiers) ?? []
+                return .uidFetch(set, att, modifiers)
             }
-            return .uidFetch(set, type, modifiers)
         }
 
         func parseUid_search(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Command {
@@ -4008,15 +4062,19 @@ extension GrammarParser {
         }
 
         func parseUid_store(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Command {
-            guard case .store(let set, let modifiers, let flags) = try self.parseStore(buffer: &buffer, tracker: tracker) else {
-                fatalError("This should never happen")
+            try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Command in
+                try ParserLibrary.parseFixedString("STORE ", buffer: &buffer, tracker: tracker)
+                let set = try self.parseUIDSet(buffer: &buffer, tracker: tracker)
+                let modifiers = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseStoreModifiers) ?? []
+                try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
+                let flags = try self.parseStoreAttributeFlags(buffer: &buffer, tracker: tracker)
+                return .uidStore(set, modifiers, flags)
             }
-            return .uidStore(set, modifiers, flags)
         }
 
         func parseUid_expunge(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Command {
             try ParserLibrary.parseFixedString("EXPUNGE ", buffer: &buffer, tracker: tracker)
-            let set = try self.parseSequenceSet(buffer: &buffer, tracker: tracker)
+            let set = try self.parseUIDSet(buffer: &buffer, tracker: tracker)
             return .uidExpunge(set)
         }
 
@@ -4034,45 +4092,71 @@ extension GrammarParser {
     }
 
     // uid-set         = (uniqueid / uid-range) *("," uid-set)
-    static func parseUidSet(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [UIDSetType] {
-        func parseUidSetType_id(buffer: inout ByteBuffer, tracker: StackTracker) throws -> UIDSetType {
-            .uniqueID(try self.parseUniqueID(buffer: &buffer, tracker: tracker))
+    static func parseUidSet(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [UIDSet] {
+        func parseUIDSet_id(buffer: inout ByteBuffer, tracker: StackTracker) throws -> UIDSet {
+            let uid = try self.parseUID(buffer: &buffer, tracker: tracker)
+            return UIDSet(UIDRange(uid))
         }
 
-        func parseUidSetType_range(buffer: inout ByteBuffer, tracker: StackTracker) throws -> UIDSetType {
-            .range(try self.parseUidRange(buffer: &buffer, tracker: tracker))
+        func parseUIDSet_range(buffer: inout ByteBuffer, tracker: StackTracker) throws -> UIDSet {
+            UIDSet(try self.parseUIDRange(buffer: &buffer, tracker: tracker))
         }
 
-        func parseUidSetType(buffer: inout ByteBuffer, tracker: StackTracker) throws -> UIDSetType {
+        func parseUIDSet(buffer: inout ByteBuffer, tracker: StackTracker) throws -> UIDSet {
             try ParserLibrary.parseOneOf([
-                parseUidSetType_range,
-                parseUidSetType_id,
+                parseUIDSet_range,
+                parseUIDSet_id,
             ], buffer: &buffer, tracker: tracker)
         }
 
-        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> [UIDSetType] in
-            var array = [try parseUidSetType(buffer: &buffer, tracker: tracker)]
-            try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) -> UIDSetType in
+        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> [UIDSet] in
+            var array = [try parseUIDSet(buffer: &buffer, tracker: tracker)]
+            try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) -> UIDSet in
                 try ParserLibrary.parseFixedString(",", buffer: &buffer, tracker: tracker)
-                return try parseUidSetType(buffer: &buffer, tracker: tracker)
+                return try parseUIDSet(buffer: &buffer, tracker: tracker)
             }
             return array
         }
     }
 
     // uid-range       = (uniqueid ":" uniqueid)
-    static func parseUidRange(buffer: inout ByteBuffer, tracker: StackTracker) throws -> UIDRange {
-        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> UIDRange in
-            let id1 = try self.parseUniqueID(buffer: &buffer, tracker: tracker)
+    static func parseUIDRange(buffer: inout ByteBuffer, tracker: StackTracker) throws -> UIDRange {
+        func parse_wildcard(buffer: inout ByteBuffer, tracker: StackTracker) throws -> UID {
+            try ParserLibrary.parseFixedString("*", buffer: &buffer, tracker: tracker)
+            return .max
+        }
+
+        func parse_UIDOrWildcard(buffer: inout ByteBuffer, tracker: StackTracker) throws -> UID {
+            return try ParserLibrary.parseOneOf([
+                parse_wildcard,
+                GrammarParser.parseUID,
+            ], buffer: &buffer, tracker: tracker)
+        }
+
+        func parse_colonAndUIDOrWildcard(buffer: inout ByteBuffer, tracker: StackTracker) throws -> UID {
             try ParserLibrary.parseFixedString(":", buffer: &buffer, tracker: tracker)
-            let id2 = try self.parseUniqueID(buffer: &buffer, tracker: tracker)
-            return UIDRange(left: id1, right: id2)
+            return try parse_UIDOrWildcard(buffer: &buffer, tracker: tracker)
+        }
+
+        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> UIDRange in
+            let id1 = try parse_UIDOrWildcard(buffer: &buffer, tracker: tracker)
+            let id2 = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: parse_colonAndUIDOrWildcard)
+            if let id = id2 {
+                return UIDRange(left: id1, right: id)
+            } else if id1 == .max {
+                return .all
+            } else {
+                return UIDRange(id1)
+            }
         }
     }
 
     // uniqueid        = nz-number
-    static func parseUniqueID(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Int {
-        try self.parseNZNumber(buffer: &buffer, tracker: tracker)
+    static func parseUID(buffer: inout ByteBuffer, tracker: StackTracker) throws -> UID {
+        guard let uid = UID(rawValue: try self.parseNZNumber(buffer: &buffer, tracker: tracker)) else {
+            throw ParserError.init(hint: "UID out of range.")
+        }
+        return uid
     }
 
     // unsubscribe     = "UNSUBSCRIBE" SP mailbox

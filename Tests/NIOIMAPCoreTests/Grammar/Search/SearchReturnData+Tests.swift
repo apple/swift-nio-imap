@@ -25,7 +25,7 @@ extension SearchReturnData_Tests {
         let inputs: [(SearchReturnData, String, UInt)] = [
             (.min(1), "MIN 1", #line),
             (.max(1), "MAX 1", #line),
-            (.all([1 ... 3]), "ALL 1:3", #line),
+            (.all(SequenceSet(1...3)), "ALL 1:3", #line),
             (.count(1), "COUNT 1", #line),
             (.dataExtension(.init(modifier: "modifier", returnValue: .simple(.number(3)))), "modifier 3", #line),
         ]

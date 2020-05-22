@@ -48,13 +48,19 @@ public indirect enum SearchKey: Equatable {
     case or(SearchKey, SearchKey)
     case sent(SearchSentType)
     case smaller(Int)
-    case uid([SequenceRange])
-    case sequenceSet([SequenceRange])
+    case uid(UIDSet)
+    case sequenceSet(SequenceSet)
     case array([SearchKey])
     case older(Int)
     case younger(Int)
     case filter(String)
 }
+
+//extension SearchKey {
+//    static func sequenceSet(_ range: SequenceRange) -> SearchKey {
+//        return .sequenceSet(SequenceSet(range))
+//    }
+//}
 
 // MARK: - IMAP
 
@@ -186,7 +192,7 @@ extension EncodeBuffer {
         case .uid(let set):
             return
                 self.writeString("UID ") +
-                self.writeSequenceSet(set)
+                self.writeUIDSet(set)
 
         case .sequenceSet(let set):
             return self.writeSequenceSet(set)

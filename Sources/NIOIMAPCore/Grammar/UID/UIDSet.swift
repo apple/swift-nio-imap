@@ -12,7 +12,51 @@
 //
 //===----------------------------------------------------------------------===//
 
-public enum UIDSetType: Equatable {
-    case uniqueID(Int)
-    case range(UIDRange)
+import struct NIO.ByteBuffer
+
+public struct UIDSet: Equatable {
+    public var ranges: [UIDRange]
+
+    public init?(_ ranges: [UIDRange]) {
+        guard !ranges.isEmpty else { return nil }
+        self.ranges = ranges
+    }
+}
+
+extension UIDSet {
+    public init(_ range: ClosedRange<UID>) {
+        self.init(UIDRange(range))
+    }
+
+    public init(_ range: PartialRangeThrough<UID>) {
+        self.init(UIDRange(range))
+    }
+
+    public init(_ range: PartialRangeFrom<UID>) {
+        self.init(UIDRange(range))
+    }
+
+    public init(_ range: UIDRange) {
+        self.ranges = [range]
+    }
+}
+
+extension UIDSet: ExpressibleByArrayLiteral {
+    public init(arrayLiteral elements: UIDRange...) {
+        self.init(elements)!
+    }
+}
+
+extension UIDSet {
+    public static let all = UIDSet(UIDRange.all)
+}
+
+// MARK: - Encoding
+
+extension EncodeBuffer {
+    @discardableResult mutating func writeUIDSet(_ set: UIDSet) -> Int {
+        self.writeArray(set.ranges, separator: ",", parenthesis: false) { (element, self) in
+            self.writeUIDRange(element)
+        }
+    }
 }
