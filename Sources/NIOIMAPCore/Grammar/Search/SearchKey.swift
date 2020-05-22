@@ -56,12 +56,6 @@ public indirect enum SearchKey: Equatable {
     case filter(String)
 }
 
-//extension SearchKey {
-//    static func sequenceSet(_ range: SequenceRange) -> SearchKey {
-//        return .sequenceSet(SequenceSet(range))
-//    }
-//}
-
 // MARK: - IMAP
 
 extension EncodeBuffer {
