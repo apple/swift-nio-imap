@@ -14,26 +14,30 @@
 
 import struct NIO.ByteBuffer
 
-public enum StoreAttributeFlagsType: String, Equatable {
-    case add = "+"
-    case remove = "-"
-    case other = ""
-}
+public struct StoreFlags: Equatable {
+    /// What operation to perform on the flags.
+    public enum Operation: String, Equatable {
+        /// Add to the flags for the message.
+        case add = "+"
+        /// Remove from the flags for the message.
+        case remove = "-"
+        /// Replace the flags for the message (other than \Recent).
+        case replace = ""
+    }
 
-public struct StoreAttributeFlags: Equatable {
     public static func add(silent: Bool, list: [Flag]) -> Self {
-        Self(type: .add, silent: silent, flags: list)
+        Self(operation: .add, silent: silent, flags: list)
     }
 
     public static func remove(silent: Bool, list: [Flag]) -> Self {
-        Self(type: .remove, silent: silent, flags: list)
+        Self(operation: .remove, silent: silent, flags: list)
     }
 
-    public static func other(silent: Bool, list: [Flag]) -> Self {
-        Self(type: .other, silent: silent, flags: list)
+    public static func replace(silent: Bool, list: [Flag]) -> Self {
+        Self(operation: .replace, silent: silent, flags: list)
     }
 
-    public var type: StoreAttributeFlagsType
+    public var operation: Operation
     public var silent: Bool
     public var flags: [Flag]
 }
@@ -41,10 +45,10 @@ public struct StoreAttributeFlags: Equatable {
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeStoreAttributeFlags(_ flags: StoreAttributeFlags) -> Int {
+    @discardableResult mutating func writeStoreAttributeFlags(_ flags: StoreFlags) -> Int {
         let silentString = flags.silent ? ".SILENT" : ""
         return
-            self.writeString("\(flags.type.rawValue)FLAGS\(silentString) ") +
+            self.writeString("\(flags.operation.rawValue)FLAGS\(silentString) ") +
             self.writeFlags(flags.flags)
     }
 }
