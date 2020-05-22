@@ -773,7 +773,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     func testParseCommandAuth() {
         let inputs: [(String, String, Command, UInt)] = [
-            ("LSUB inbox someList", " ", .lsub(.inbox, "someList"), #line),
+            ("LSUB inbox someList", " ", .lsub(reference: .inbox, pattern: "someList"), #line),
             ("CREATE inbox (something)", " ", .create(.inbox, [.init(name: "something", value: nil)]), #line),
             ("NAMESPACE", " ", .namespace, #line),
         ]
@@ -1392,7 +1392,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     func testParseList() {
         let inputs: [(String, String, Command, UInt)] = [
-            (#"LIST "" """#, "\r", .list(nil, MailboxName(""), .mailbox(""), []), #line),
+            (#"LIST "" """#, "\r", .list(nil, reference: MailboxName(""), .mailbox(""), []), #line),
         ]
         self.iterateTestInputs(inputs, testFunction: GrammarParser.parseList)
     }
