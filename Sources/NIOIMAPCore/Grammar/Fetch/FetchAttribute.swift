@@ -18,13 +18,16 @@ import struct NIO.ByteBuffer
 public enum FetchAttribute: Equatable {
     case envelope
     case flags
-    case internaldate
+    case internalDate
     case rfc822(RFC822?)
-    case body(structure: Bool)
-    case bodySection(_ section: SectionSpec?, Partial?)
-    case bodyPeekSection(_ section: SectionSpec?, Partial?)
+    /// `BODY` and `BODYSTRUCTURE` -- the latter will result in the extension parts
+    /// of the body structure to be returned as part of the response, whereas the former
+    /// will not.
+    case bodyStructure(extensions: Bool)
+    /// `BODY[<section>]<<partial>>` and `BODY.PEEK[<section>]<<partial>>`
+    case bodySection(peek: Bool, _ section: SectionSpec?, Partial?)
     case uid
-    case modSequence(ModifierSequenceValue)
+    case modifierSequenceValue(ModifierSequenceValue)
     case binary(peek: Bool, section: [Int], partial: Partial?)
     case binarySize(section: [Int])
 }
@@ -44,19 +47,17 @@ extension EncodeBuffer {
             return self.writeFetchAttribute_envelope()
         case .flags:
             return self.writeFetchAttribute_flags()
-        case .internaldate:
+        case .internalDate:
             return self.writeFetchAttribute_internalDate()
         case .rfc822(let rfc):
             return self.writeFetchAttribute_rfc(rfc)
-        case .body(structure: let structure):
-            return self.writeFetchAttribute_body(structure: structure)
-        case .bodySection(let section, let partial):
-            return self.writeFetchAttribute_body(section: section, partial: partial)
-        case .bodyPeekSection(let section, let partial):
-            return self.writeFetchAttribute_bodyPeek(section: section, partial: partial)
+        case .bodyStructure(extensions: let extensions):
+            return self.writeFetchAttribute_bodyStructure(extensions: extensions)
+        case .bodySection(peek: let peek, let section, let partial):
+            return self.writeFetchAttribute_body(peek: peek, section: section, partial: partial)
         case .uid:
             return self.writeFetchAttribute_uid()
-        case .modSequence(let value):
+        case .modifierSequenceValue(let value):
             return self.writeModifierSequenceValue(value)
         case .binary(let peek, let section, let partial):
             return self.writeFetchAttribute_binary(peek: peek, section: section, partial: partial)
@@ -88,21 +89,12 @@ extension EncodeBuffer {
             }
     }
 
-    @discardableResult mutating func writeFetchAttribute_body(structure: Bool) -> Int {
-        let string = structure ? "BODYSTRUCTURE" : "BODY"
-        return self.writeString(string)
+    @discardableResult mutating func writeFetchAttribute_bodyStructure(extensions: Bool) -> Int {
+        self.writeString(extensions ? "BODYSTRUCTURE" : "BODY")
     }
 
-    @discardableResult mutating func writeFetchAttribute_body(section: SectionSpec?, partial: Partial?) -> Int {
-        self.writeString("BODY") +
-            self.writeSection(section) +
-            self.writeIfExists(partial) { (partial) -> Int in
-                self.writePartial(partial)
-            }
-    }
-
-    @discardableResult mutating func writeFetchAttribute_bodyPeek(section: SectionSpec?, partial: Partial?) -> Int {
-        self.writeString("BODY.PEEK") +
+    @discardableResult mutating func writeFetchAttribute_body(peek: Bool, section: SectionSpec?, partial: Partial?) -> Int {
+        self.writeString(peek ? "BODY.PEEK" : "BODY") +
             self.writeSection(section) +
             self.writeIfExists(partial) { (partial) -> Int in
                 self.writePartial(partial)
