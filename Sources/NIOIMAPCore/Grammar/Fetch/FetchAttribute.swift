@@ -20,7 +20,8 @@ public enum FetchAttribute: Equatable {
     case flags
     case internaldate
     case rfc822(RFC822?)
-    case body(structure: Bool)
+    case body
+    case bodyStructure
     case bodySection(_ section: SectionSpec?, Partial?)
     case bodyPeekSection(_ section: SectionSpec?, Partial?)
     case uid
@@ -48,8 +49,10 @@ extension EncodeBuffer {
             return self.writeFetchAttribute_internalDate()
         case .rfc822(let rfc):
             return self.writeFetchAttribute_rfc(rfc)
-        case .body(structure: let structure):
-            return self.writeFetchAttribute_body(structure: structure)
+        case .body:
+            return self.writeFetchAttribute_body()
+        case .bodyStructure:
+            return self.writeFetchAttribute_bodyStructure()
         case .bodySection(let section, let partial):
             return self.writeFetchAttribute_body(section: section, partial: partial)
         case .bodyPeekSection(let section, let partial):
@@ -88,9 +91,12 @@ extension EncodeBuffer {
             }
     }
 
-    @discardableResult mutating func writeFetchAttribute_body(structure: Bool) -> Int {
-        let string = structure ? "BODYSTRUCTURE" : "BODY"
-        return self.writeString(string)
+    @discardableResult mutating func writeFetchAttribute_body() -> Int {
+        return self.writeString("BODY")
+    }
+    
+    @discardableResult mutating func writeFetchAttribute_bodyStructure() -> Int {
+        return self.writeString("BODYSTRUCTURE")
     }
 
     @discardableResult mutating func writeFetchAttribute_body(section: SectionSpec?, partial: Partial?) -> Int {

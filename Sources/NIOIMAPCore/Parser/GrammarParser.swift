@@ -1130,15 +1130,12 @@ extension GrammarParser {
 
         func parseFetchAttribute_body(buffer: inout ByteBuffer, tracker: StackTracker) throws -> FetchAttribute {
             try ParserLibrary.parseFixedString("BODY", buffer: &buffer, tracker: tracker)
-            let structure: Bool = {
-                do {
-                    try ParserLibrary.parseFixedString("STRUCTURE", buffer: &buffer, tracker: tracker)
-                    return true
-                } catch {
-                    return false
-                }
-            }()
-            return .body(structure: structure)
+            return .body
+        }
+        
+        func parseFetchAttribute_bodyStructure(buffer: inout ByteBuffer, tracker: StackTracker) throws -> FetchAttribute {
+            try ParserLibrary.parseFixedString("BODYSTRUCTURE", buffer: &buffer, tracker: tracker)
+            return .bodyStructure
         }
 
         func parseFetchAttribute_bodySection(buffer: inout ByteBuffer, tracker: StackTracker) throws -> FetchAttribute {
@@ -1197,6 +1194,7 @@ extension GrammarParser {
             parseFetchAttribute_bodySection,
             parseFetchAttribute_bodyPeekSection,
             parseFetchAttribute_body,
+            parseFetchAttribute_bodyStructure,
             parseFetchAttribute_modSequence,
             parseFetchAttribute_binary,
             parseFetchAttribute_binarySize,
