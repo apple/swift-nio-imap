@@ -21,11 +21,11 @@ public enum Command: Equatable {
     case append(to: MailboxName, firstMessageMetadata: AppendMessage)
     case create(MailboxName, [CreateParameter])
     case delete(MailboxName)
-    case examine(MailboxName, [SelectParameter])
-    case list(ListSelectOptions?, reference: MailboxName, MailboxPatterns, [ReturnOption])
+    case examine(MailboxName, [SelectParameter] = [])
+    case list(ListSelectOptions? = nil, reference: MailboxName, MailboxPatterns, [ReturnOption] = [])
     case lsub(reference: MailboxName, pattern: ByteBuffer)
     case rename(from: MailboxName, to: MailboxName, params: [RenameParameter])
-    case select(MailboxName, [SelectParameter])
+    case select(MailboxName, [SelectParameter] = [])
     case status(MailboxName, [MailboxAttribute])
     case subscribe(MailboxName)
     case unsubscribe(MailboxName)
@@ -53,20 +53,6 @@ public enum Command: Equatable {
     case uidSearch(returnOptions: [SearchReturnOption], program: SearchProgram)
     case uidStore([SequenceRange], [StoreModifier], StoreAttributeFlags)
     case uidExpunge([SequenceRange])
-}
-
-extension Command {
-    public static func list(reference: MailboxName, pattern: ByteBuffer) -> Command {
-        return .list(nil, reference: reference, .mailbox(pattern), [])
-    }
-
-    public static func select(_ name: MailboxName) -> Command {
-        return .select(name, [])
-    }
-
-    public static func examine(_ name: MailboxName) -> Command {
-        return .examine(name, [])
-    }
 }
 
 // MARK: - IMAP
