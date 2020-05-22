@@ -1112,7 +1112,7 @@ extension GrammarParser {
 
         func parseFetchAttribute_internalDate(buffer: inout ByteBuffer, tracker: StackTracker) throws -> FetchAttribute {
             try ParserLibrary.parseFixedString("INTERNALDATE", buffer: &buffer, tracker: tracker)
-            return .internaldate
+            return .internalDate
         }
 
         func parseFetchAttribute_UID(buffer: inout ByteBuffer, tracker: StackTracker) throws -> FetchAttribute {
@@ -1130,7 +1130,7 @@ extension GrammarParser {
 
         func parseFetchAttribute_body(buffer: inout ByteBuffer, tracker: StackTracker) throws -> FetchAttribute {
             try ParserLibrary.parseFixedString("BODY", buffer: &buffer, tracker: tracker)
-            let structure: Bool = {
+            let extensions: Bool = {
                 do {
                     try ParserLibrary.parseFixedString("STRUCTURE", buffer: &buffer, tracker: tracker)
                     return true
@@ -1138,7 +1138,7 @@ extension GrammarParser {
                     return false
                 }
             }()
-            return .body(structure: structure)
+            return .bodyStructure(extensions: extensions)
         }
 
         func parseFetchAttribute_bodySection(buffer: inout ByteBuffer, tracker: StackTracker) throws -> FetchAttribute {
@@ -1147,7 +1147,7 @@ extension GrammarParser {
             let chevronNumber = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> Partial in
                 try self.parsePartial(buffer: &buffer, tracker: tracker)
             }
-            return .bodySection(section, chevronNumber)
+            return .bodySection(peek: false, section, chevronNumber)
         }
 
         func parseFetchAttribute_bodyPeekSection(buffer: inout ByteBuffer, tracker: StackTracker) throws -> FetchAttribute {
@@ -1156,11 +1156,11 @@ extension GrammarParser {
             let chevronNumber = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> Partial in
                 try self.parsePartial(buffer: &buffer, tracker: tracker)
             }
-            return .bodyPeekSection(section, chevronNumber)
+            return .bodySection(peek: true, section, chevronNumber)
         }
 
         func parseFetchAttribute_modSequence(buffer: inout ByteBuffer, tracker: StackTracker) throws -> FetchAttribute {
-            .modSequence(try self.parseModifierSequenceValue(buffer: &buffer, tracker: tracker))
+            .modifierSequenceValue(try self.parseModifierSequenceValue(buffer: &buffer, tracker: tracker))
         }
 
         func parseFetchAttribute_binary(buffer: inout ByteBuffer, tracker: StackTracker) throws -> FetchAttribute {
