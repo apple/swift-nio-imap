@@ -3706,7 +3706,7 @@ extension GrammarParser {
 
     // store-att-flags = (["+" / "-"] "FLAGS" [".SILENT"]) SP
     //                   (flag-list / (flag *(SP flag)))
-    static func parseStoreAttributeFlags(buffer: inout ByteBuffer, tracker: StackTracker) throws -> StoreAttributeFlags {
+    static func parseStoreAttributeFlags(buffer: inout ByteBuffer, tracker: StackTracker) throws -> StoreFlags {
         func parseStoreAttributeFlags_silent(buffer: inout ByteBuffer, tracker: StackTracker) -> Bool {
             do {
                 try ParserLibrary.parseFixedString(".SILENT", buffer: &buffer, tracker: tracker)
@@ -3727,32 +3727,32 @@ extension GrammarParser {
             }
         }
 
-        func parseStoreAttributeFlags_type(buffer: inout ByteBuffer, tracker: StackTracker) throws -> StoreAttributeFlagsType {
+        func parseStoreAttributeFlags_operation(buffer: inout ByteBuffer, tracker: StackTracker) throws -> StoreFlags.Operation {
             try ParserLibrary.parseOneOf([
-                { (buffer: inout ByteBuffer, tracker: StackTracker) -> StoreAttributeFlagsType in
+                { (buffer: inout ByteBuffer, tracker: StackTracker) -> StoreFlags.Operation in
                     try ParserLibrary.parseFixedString("+FLAGS", buffer: &buffer, tracker: tracker)
                     return .add
                 },
-                { (buffer: inout ByteBuffer, tracker: StackTracker) -> StoreAttributeFlagsType in
+                { (buffer: inout ByteBuffer, tracker: StackTracker) -> StoreFlags.Operation in
                     try ParserLibrary.parseFixedString("-FLAGS", buffer: &buffer, tracker: tracker)
                     return .remove
                 },
-                { (buffer: inout ByteBuffer, tracker: StackTracker) -> StoreAttributeFlagsType in
+                { (buffer: inout ByteBuffer, tracker: StackTracker) -> StoreFlags.Operation in
                     try ParserLibrary.parseFixedString("FLAGS", buffer: &buffer, tracker: tracker)
-                    return .other
+                    return .replace
                 },
             ], buffer: &buffer, tracker: tracker)
         }
 
-        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> StoreAttributeFlags in
-            let type = try parseStoreAttributeFlags_type(buffer: &buffer, tracker: tracker)
+        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> StoreFlags in
+            let operation = try parseStoreAttributeFlags_operation(buffer: &buffer, tracker: tracker)
             let silent = parseStoreAttributeFlags_silent(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
             let flags = try ParserLibrary.parseOneOf([
                 parseStoreAttributeFlags_array,
                 parseFlagList,
             ], buffer: &buffer, tracker: tracker)
-            return StoreAttributeFlags(type: type, silent: silent, flags: flags)
+            return StoreFlags(operation: operation, silent: silent, flags: flags)
         }
     }
 

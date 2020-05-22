@@ -86,7 +86,7 @@ final class RoundtripTests: XCTestCase {
 
             (.store([.wildcard], [], .remove(silent: true, list: [.answered, .deleted])), #line),
             (.store([.wildcard], [], .add(silent: true, list: [.draft, .extension("\\some")])), #line),
-            (.store([.wildcard], [], .other(silent: true, list: [.keyword(.colorBit0)])), #line),
+            (.store([.wildcard], [], .replace(silent: true, list: [.keyword(.colorBit0)])), #line),
 
             (.uidCopy([.wildcard], .inbox), #line),
 

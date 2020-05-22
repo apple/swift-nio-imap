@@ -41,7 +41,7 @@ public enum Command: Equatable {
     case idleFinish
     case copy([SequenceRange], MailboxName)
     case fetch([SequenceRange], FetchType, [FetchModifier])
-    case store([SequenceRange], [StoreModifier], StoreAttributeFlags)
+    case store([SequenceRange], [StoreModifier], StoreFlags)
     case search(returnOptions: [SearchReturnOption], program: SearchProgram)
     case move([SequenceRange], MailboxName)
     case id([IDParameter])
@@ -51,7 +51,7 @@ public enum Command: Equatable {
     case uidMove([SequenceRange], MailboxName)
     case uidFetch([SequenceRange], FetchType, [FetchModifier])
     case uidSearch(returnOptions: [SearchReturnOption], program: SearchProgram)
-    case uidStore([SequenceRange], [StoreModifier], StoreAttributeFlags)
+    case uidStore([SequenceRange], [StoreModifier], StoreFlags)
     case uidExpunge([SequenceRange])
 }
 
@@ -317,7 +317,7 @@ extension EncodeBuffer {
             self.writeCommandType_fetch(set: set, atts: atts, modifiers: modifiers)
     }
 
-    private mutating func writeCommandType_store(set: [SequenceRange], modifiers: [StoreModifier], flags: StoreAttributeFlags) -> Int {
+    private mutating func writeCommandType_store(set: [SequenceRange], modifiers: [StoreModifier], flags: StoreFlags) -> Int {
         self.writeString("STORE ") +
             self.writeSequenceSet(set) +
             self.writeIfArrayHasMinimumSize(array: modifiers) { (modifiers, self) -> Int in
@@ -327,7 +327,7 @@ extension EncodeBuffer {
             self.writeStoreAttributeFlags(flags)
     }
 
-    private mutating func writeCommandType_uidStore(set: [SequenceRange], modifiers: [StoreModifier], flags: StoreAttributeFlags) -> Int {
+    private mutating func writeCommandType_uidStore(set: [SequenceRange], modifiers: [StoreModifier], flags: StoreFlags) -> Int {
         self.writeString("UID ") +
             self.writeCommandType_store(set: set, modifiers: modifiers, flags: flags)
     }

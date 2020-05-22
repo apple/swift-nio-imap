@@ -22,13 +22,13 @@ class StoreAttributeFlags_Tests: EncodeTestClass {}
 
 extension StoreAttributeFlags_Tests {
     func testEncode() {
-        let inputs: [(StoreAttributeFlags, String, UInt)] = [
+        let inputs: [(StoreFlags, String, UInt)] = [
             (.add(silent: true, list: [.answered]), "+FLAGS.SILENT (\\ANSWERED)", #line),
             (.add(silent: false, list: [.draft]), "+FLAGS (\\DRAFT)", #line),
             (.remove(silent: true, list: [.deleted]), "-FLAGS.SILENT (\\DELETED)", #line),
             (.remove(silent: false, list: [.flagged]), "-FLAGS (\\FLAGGED)", #line),
-            (.other(silent: true, list: [.seen]), "FLAGS.SILENT (\\SEEN)", #line),
-            (.other(silent: false, list: [.deleted]), "FLAGS (\\DELETED)", #line),
+            (.replace(silent: true, list: [.seen]), "FLAGS.SILENT (\\SEEN)", #line),
+            (.replace(silent: false, list: [.deleted]), "FLAGS (\\DELETED)", #line),
         ]
 
         for (test, expectedString, line) in inputs {
