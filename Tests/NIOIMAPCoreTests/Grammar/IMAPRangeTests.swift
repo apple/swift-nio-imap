@@ -52,7 +52,7 @@ extension IMAPRangeTests {
     }
 
     func testRange_closed() {
-        let sut = SequenceRange(3...4)
+        let sut = SequenceRange(3 ... 4)
         XCTAssertEqual(sut.range.lowerBound, 3)
         XCTAssertEqual(sut.range.upperBound, 4)
     }

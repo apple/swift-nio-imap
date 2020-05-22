@@ -20,9 +20,10 @@
 public struct SequenceNumber: RawRepresentable, Equatable {
     public var rawValue: Int
     public init?(rawValue: Int) {
-        guard 1 <= rawValue, rawValue <= UInt32.max else { return nil }
+        guard rawValue >= 1, rawValue <= UInt32.max else { return nil }
         self.rawValue = rawValue
     }
+
     public static let min = SequenceNumber(1)
     public static let max = SequenceNumber(UInt32.max)
 }
@@ -47,19 +48,19 @@ extension SequenceNumber: ExpressibleByIntegerLiteral {
 
 extension SequenceNumber: Strideable {
     public static func < (lhs: SequenceNumber, rhs: SequenceNumber) -> Bool {
-        return lhs.rawValue < rhs.rawValue
+        lhs.rawValue < rhs.rawValue
     }
 
     public static func <= (lhs: SequenceNumber, rhs: SequenceNumber) -> Bool {
-        return lhs.rawValue <= rhs.rawValue
+        lhs.rawValue <= rhs.rawValue
     }
 
     public func distance(to other: SequenceNumber) -> Int {
-        return other.rawValue - rawValue
+        other.rawValue - self.rawValue
     }
 
     public func advanced(by n: Int) -> SequenceNumber {
-        return SequenceNumber(rawValue: rawValue + n)!
+        SequenceNumber(rawValue: self.rawValue + n)!
     }
 }
 
@@ -67,7 +68,7 @@ extension SequenceNumber: Strideable {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeSequenceNumber(_ num: SequenceNumber) -> Int {
-        return self.writeString("\(num.rawValue)")
+        self.writeString("\(num.rawValue)")
     }
 
     @discardableResult mutating func writeSequenceNumberOrWildcard(_ num: SequenceNumber) -> Int {

@@ -61,7 +61,7 @@ extension UIDRangeTests {
 extension UIDRangeTests {
     func testEncode() {
         let inputs: [(UIDRange, String, UInt)] = [
-            (33...44, "33:44", #line),
+            (33 ... 44, "33:44", #line),
             (5, "5", #line),
             (.all, "*", #line),
             (...55, "1:55", #line),

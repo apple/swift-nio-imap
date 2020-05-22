@@ -23,7 +23,7 @@ class UIDSetTests: EncodeTestClass {}
 extension UIDSetTests {
     func testIMAPEncoded_one() {
         let expected = "5:22"
-        let size = self.testBuffer.writeUIDSet(UIDSet(5...22))
+        let size = self.testBuffer.writeUIDSet(UIDSet(5 ... 22))
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }
@@ -39,7 +39,7 @@ extension UIDSetTests {
         let expected = "1,2:3,4,5,6:*"
         let size = self.testBuffer.writeUIDSet(UIDSet([
             UIDRange(1),
-            UIDRange(2...3),
+            UIDRange(2 ... 3),
             UIDRange(4),
             UIDRange(5),
             UIDRange(6...),

@@ -23,7 +23,7 @@ class SequenceSetTests: EncodeTestClass {}
 extension SequenceSetTests {
     func testIMAPEncoded_one() {
         let expected = "5:22"
-        let size = self.testBuffer.writeSequenceSet(SequenceSet(5...22))
+        let size = self.testBuffer.writeSequenceSet(SequenceSet(5 ... 22))
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }
@@ -39,7 +39,7 @@ extension SequenceSetTests {
         let expected = "1,2:3,4,5,6:*"
         let size = self.testBuffer.writeSequenceSet(SequenceSet([
             SequenceRange(1),
-            2...3,
+            2 ... 3,
             SequenceRange(4),
             SequenceRange(5),
             6...,

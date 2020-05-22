@@ -31,18 +31,18 @@ extension UIDRange {
     }
 
     public init(_ range: PartialRangeThrough<UID>) {
-        self.init(UID.min...range.upperBound)
+        self.init(UID.min ... range.upperBound)
     }
 
     public init(_ range: PartialRangeFrom<UID>) {
-        self.init(range.lowerBound...UID.max)
+        self.init(range.lowerBound ... UID.max)
     }
 
     internal init(left: UID, right: UID) {
         if left <= right {
-            self.init(rawValue: left...right)
+            self.init(rawValue: left ... right)
         } else {
-            self.init(rawValue: right...left)
+            self.init(rawValue: right ... left)
         }
     }
 }
@@ -53,12 +53,12 @@ extension UIDRange: ExpressibleByIntegerLiteral {
     }
 
     public init(_ value: UID) {
-        self.init(rawValue: value...value)
+        self.init(rawValue: value ... value)
     }
 }
 
 extension UIDRange {
-    public static let all = UIDRange((.min)...(.max))
+    public static let all = UIDRange((.min) ... (.max))
 }
 
 // MARK: - Encoding

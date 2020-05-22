@@ -257,7 +257,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     func testParseAppendDataExtension() {
         let inputs: [(String, String, TaggedExtension, UInt)] = [
-            ("label 1:9", " ", .init(label: "label", value: .simple(.sequence(SequenceSet(1...9)))), #line),
+            ("label 1:9", " ", .init(label: "label", value: .simple(.sequence(SequenceSet(1 ... 9)))), #line),
         ]
         self.iterateTestInputs(inputs, testFunction: GrammarParser.parseAppendDataExtension)
     }
@@ -268,7 +268,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     func testParseAppendExtension() {
         let inputs: [(String, String, AppendExtension, UInt)] = [
-            ("name 1:9", " ", .init(name: "name", value: .simple(.sequence(SequenceSet(1...9)))), #line),
+            ("name 1:9", " ", .init(name: "name", value: .simple(.sequence(SequenceSet(1 ... 9)))), #line),
         ]
         self.iterateTestInputs(inputs, testFunction: GrammarParser.parseAppendExtension)
     }
@@ -290,7 +290,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     func testParseAppendExtensionValue() {
         let inputs: [(String, String, TaggedExtensionValue, UInt)] = [
-            ("1:9", " ", .simple(.sequence(SequenceSet(1...9))), #line),
+            ("1:9", " ", .simple(.sequence(SequenceSet(1 ... 9))), #line),
         ]
         self.iterateTestInputs(inputs, testFunction: GrammarParser.parseAppendExtensionValue)
     }
@@ -335,16 +335,16 @@ extension ParserUnitTests {
             (
                 " name1 1:2",
                 "\r",
-                .init(flagList: [], dateTime: nil, extensions: [.init(name: "name1", value: .simple(.sequence(SequenceSet(1...2))))]),
+                .init(flagList: [], dateTime: nil, extensions: [.init(name: "name1", value: .simple(.sequence(SequenceSet(1 ... 2))))]),
                 #line
             ),
             (
                 " name1 1:2 name2 2:3 name3 3:4",
                 "\r",
                 .init(flagList: [], dateTime: nil, extensions: [
-                    .init(name: "name1", value: .simple(.sequence(SequenceSet(1...2)))),
-                    .init(name: "name2", value: .simple(.sequence(SequenceSet(2...3)))),
-                    .init(name: "name3", value: .simple(.sequence(SequenceSet(3...4)))),
+                    .init(name: "name1", value: .simple(.sequence(SequenceSet(1 ... 2)))),
+                    .init(name: "name2", value: .simple(.sequence(SequenceSet(2 ... 3)))),
+                    .init(name: "name3", value: .simple(.sequence(SequenceSet(3 ... 4)))),
                 ]),
                 #line
             ),
@@ -1760,7 +1760,7 @@ extension ParserUnitTests {
     func testParseMove() {
         let inputs: [(String, String, Command, UInt)] = [
             ("MOVE * inbox", " ", .move(.all, .inbox), #line),
-            ("MOVE 1:2,4:5 test", " ", .move(SequenceSet([SequenceRange(1...2), SequenceRange(4...5)])!, .init("test")), #line),
+            ("MOVE 1:2,4:5 test", " ", .move(SequenceSet([SequenceRange(1 ... 2), SequenceRange(4 ... 5)])!, .init("test")), #line),
         ]
         self.iterateTestInputs(inputs, testFunction: GrammarParser.parseMove)
     }
@@ -2187,8 +2187,8 @@ extension ParserUnitTests {
             ("UNKEYWORD key2", "\r", .unkeyword(Flag.Keyword("key2")), #line),
             ("NOT LARGER 1234", "\r", .not(.larger(1234)), #line),
             ("OR LARGER 6 SMALLER 4", "\r", .or(.larger(6), .smaller(4)), #line),
-            ("UID 2:4", "\r", .uid(UIDSet(2...4)), #line),
-            ("2:4", "\r", .sequenceSet(SequenceSet(2...4)), #line),
+            ("UID 2:4", "\r", .uid(UIDSet(2 ... 4)), #line),
+            ("2:4", "\r", .sequenceSet(SequenceSet(2 ... 4)), #line),
             ("(LARGER 1)", "\r", .array([.larger(1)]), #line),
             ("(LARGER 1 SMALLER 5 KEYWORD hello)", "\r", .array([.larger(1), .smaller(5), .keyword(Flag.Keyword("hello"))]), #line),
             ("YOUNGER 34", "\r", .younger(34), #line),
@@ -2549,7 +2549,7 @@ extension ParserUnitTests {
     func testSequenceSet_valid_many() {
         TestUtilities.withBuffer("1,2:5,7,9:*", terminator: " ") { (buffer) in
             let set = try GrammarParser.parseSequenceSet(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(set, SequenceSet([SequenceRange(1), SequenceRange(2...5), SequenceRange(7), SequenceRange(9...)]))
+            XCTAssertEqual(set, SequenceSet([SequenceRange(1), SequenceRange(2 ... 5), SequenceRange(7), SequenceRange(9...)]))
         }
     }
 
@@ -2739,7 +2739,7 @@ extension ParserUnitTests {
     func testParseStoreModifier() {
         let inputs: [(String, String, StoreModifier, UInt)] = [
             ("name", "\r", .init(name: "name", parameters: nil), #line),
-            ("name 1:9", "\r", .init(name: "name", parameters: .simple(.sequence([1...9]))), #line),
+            ("name 1:9", "\r", .init(name: "name", parameters: .simple(.sequence([1 ... 9]))), #line),
         ]
         self.iterateTestInputs(inputs, testFunction: GrammarParser.parseStoreModifier)
     }
@@ -2773,7 +2773,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     func testParseStoreModifierParameters() {
         let inputs: [(String, String, TaggedExtensionValue, UInt)] = [
-            ("1:9", "\r", .simple(.sequence(SequenceSet(1...9))), #line),
+            ("1:9", "\r", .simple(.sequence(SequenceSet(1 ... 9))), #line),
         ]
         self.iterateTestInputs(inputs, testFunction: GrammarParser.parseStoreModifierParameters)
     }
@@ -2948,12 +2948,12 @@ extension ParserUnitTests {
     func testParseUIDSet() {
         let inputs: [(String, String, UIDSet, UInt)] = [
             ("1234", "\r\n", UIDSet(1234), #line),
-            ("12:34", "\r\n", UIDSet(UIDRange(12...34)), #line),
+            ("12:34", "\r\n", UIDSet(UIDRange(12 ... 34)), #line),
             ("1,2,34:56,78:910,11", "\r\n", UIDSet([
                 UIDRange(1),
                 UIDRange(2),
-                UIDRange(34...56),
-                UIDRange(78...910),
+                UIDRange(34 ... 56),
+                UIDRange(78 ... 910),
                 UIDRange(11),
             ])!, #line),
         ]

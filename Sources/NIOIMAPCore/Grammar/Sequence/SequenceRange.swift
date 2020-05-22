@@ -31,18 +31,18 @@ extension SequenceRange {
     }
 
     public init(_ range: PartialRangeThrough<SequenceNumber>) {
-        self.init(SequenceNumber.min...range.upperBound)
+        self.init(SequenceNumber.min ... range.upperBound)
     }
 
     public init(_ range: PartialRangeFrom<SequenceNumber>) {
-        self.init(range.lowerBound...SequenceNumber.max)
+        self.init(range.lowerBound ... SequenceNumber.max)
     }
 
     internal init(left: SequenceNumber, right: SequenceNumber) {
         if left <= right {
-            self.init(rawValue: left...right)
+            self.init(rawValue: left ... right)
         } else {
-            self.init(rawValue: right...left)
+            self.init(rawValue: right ... left)
         }
     }
 }
@@ -53,12 +53,12 @@ extension SequenceRange: ExpressibleByIntegerLiteral {
     }
 
     public init(_ value: SequenceNumber) {
-        self.init(rawValue: value...value)
+        self.init(rawValue: value ... value)
     }
 }
 
 extension SequenceRange {
-    public static let all = SequenceRange((.min)...(.max))
+    public static let all = SequenceRange((.min) ... (.max))
 }
 
 // MARK: - Encoding

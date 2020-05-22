@@ -18,9 +18,10 @@
 public struct UID: RawRepresentable, Equatable {
     public var rawValue: Int
     public init?(rawValue: Int) {
-        guard 1 <= rawValue, rawValue <= UInt32.max else { return nil }
+        guard rawValue >= 1, rawValue <= UInt32.max else { return nil }
         self.rawValue = rawValue
     }
+
     public static let min = UID(1)
     public static let max = UID(UInt32.max)
 }
@@ -45,19 +46,19 @@ extension UID: ExpressibleByIntegerLiteral {
 
 extension UID: Strideable {
     public static func < (lhs: UID, rhs: UID) -> Bool {
-        return lhs.rawValue < rhs.rawValue
+        lhs.rawValue < rhs.rawValue
     }
 
     public static func <= (lhs: UID, rhs: UID) -> Bool {
-        return lhs.rawValue <= rhs.rawValue
+        lhs.rawValue <= rhs.rawValue
     }
 
     public func distance(to other: UID) -> Int {
-        return other.rawValue - rawValue
+        other.rawValue - self.rawValue
     }
 
     public func advanced(by n: Int) -> UID {
-        return UID(rawValue: rawValue + n)!
+        UID(rawValue: self.rawValue + n)!
     }
 }
 
@@ -65,7 +66,7 @@ extension UID: Strideable {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeUID(_ num: UID) -> Int {
-        return self.writeString("\(num.rawValue)")
+        self.writeString("\(num.rawValue)")
     }
 
     @discardableResult mutating func writeUIDOrWildcard(_ num: UID) -> Int {
