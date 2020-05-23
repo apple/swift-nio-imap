@@ -1722,7 +1722,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     func testParseMessageData() {
         let inputs: [(String, String, MessageData, UInt)] = [
-        ]
+            ]
         self.iterateTestInputs(inputs, testFunction: GrammarParser.parseMessageData)
     }
 }
