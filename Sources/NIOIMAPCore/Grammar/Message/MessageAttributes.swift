@@ -18,7 +18,7 @@ public enum MessageAttribute: Equatable {
     case flags([Flag])
     case envelope(Envelope)
     case internalDate(Date.DateTime)
-    case uid(Int)
+    case uid(UID)
     case rfc822(NString)
     case rfc822Header(NString)
     case rfc822Text(NString)
@@ -57,7 +57,7 @@ extension EncodeBuffer {
         case .bodySection(let section, let number, let string):
             return self.writeMessageAttribute_bodySection(section, number: number, string: string)
         case .uid(let uid):
-            return self.writeString("UID \(uid)")
+            return self.writeString("UID \(uid.rawValue)")
         case .binary(section: let section, data: let string):
             return self.writeMessageAttribute_binaryString(section: section, string: string)
         case .binarySize(section: let section, size: let number):

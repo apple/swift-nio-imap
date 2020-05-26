@@ -23,7 +23,7 @@ class TaggedExtensionSimple_Tests: EncodeTestClass {}
 extension TaggedExtensionSimple_Tests {
     func testEncode() {
         let inputs: [(TaggedExtensionSimple, String, UInt)] = [
-            (.sequence([.wildcard]), "*", #line),
+            (.sequence(.all), "*", #line),
             (.number(12), "12", #line),
             (.number64(34), "34", #line),
         ]

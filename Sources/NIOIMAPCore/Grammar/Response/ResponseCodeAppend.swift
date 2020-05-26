@@ -15,9 +15,9 @@
 /// IMAPv4 `response-code-apnd`
 public struct ResponseCodeAppend: Equatable {
     public var num: Int
-    public var uid: Int
+    public var uid: UID
 
-    public init(num: Int, uid: Int) {
+    public init(num: Int, uid: UID) {
         self.num = num
         self.uid = uid
     }

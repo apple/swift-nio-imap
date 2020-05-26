@@ -15,73 +15,64 @@
 import struct NIO.ByteBuffer
 
 /// IMAPv4 `seq-range`
-public struct SequenceRange: Equatable {
-    public static var wildcard: SequenceRange {
-        Self(.last ... .last)
-    }
+public struct SequenceRange: Equatable, RawRepresentable {
+    public var rawValue: ClosedRange<SequenceNumber>
 
-    public var closedRange: ClosedRange<SequenceNumber>
+    public var range: ClosedRange<SequenceNumber> { rawValue }
 
-    public var from: SequenceNumber {
-        closedRange.lowerBound
-    }
-
-    public var to: SequenceNumber {
-        closedRange.upperBound
-    }
-
-    public init(from: SequenceNumber, to: SequenceNumber) {
-        if from < to {
-            self.init(from ... to)
-        } else {
-            self.init(to ... from)
-        }
-    }
-
-    public init(_ closedRange: ClosedRange<SequenceNumber>) {
-        self.closedRange = closedRange
+    public init(rawValue: ClosedRange<SequenceNumber>) {
+        self.rawValue = rawValue
     }
 }
 
-// MARK: - Integer literal
+extension SequenceRange {
+    public init(_ range: ClosedRange<SequenceNumber>) {
+        self.init(rawValue: range)
+    }
+
+    public init(_ range: PartialRangeThrough<SequenceNumber>) {
+        self.init(SequenceNumber.min ... range.upperBound)
+    }
+
+    public init(_ range: PartialRangeFrom<SequenceNumber>) {
+        self.init(range.lowerBound ... SequenceNumber.max)
+    }
+
+    internal init(left: SequenceNumber, right: SequenceNumber) {
+        if left <= right {
+            self.init(rawValue: left ... right)
+        } else {
+            self.init(rawValue: right ... left)
+        }
+    }
+}
 
 extension SequenceRange: ExpressibleByIntegerLiteral {
-    public typealias IntegerLiteralType = Int
-
-    public init(integerLiteral value: Self.IntegerLiteralType) {
-        self.closedRange = ClosedRange(uncheckedBounds: (.number(value), .number(value)))
+    public init(integerLiteral value: Int) {
+        self.init(SequenceNumber(integerLiteral: value))
     }
+
+    public init(_ value: SequenceNumber) {
+        self.init(rawValue: value ... value)
+    }
+}
+
+extension SequenceRange {
+    public static let all = SequenceRange((.min) ... (.max))
 }
 
 // MARK: - Encoding
 
 extension EncodeBuffer {
     @discardableResult mutating func writeSequenceRange(_ range: SequenceRange) -> Int {
-        self.writeSequenceNumber(range.closedRange.lowerBound) +
-            self.writeIfTrue(range.closedRange.lowerBound < range.closedRange.upperBound) {
-                self.writeString(":") +
-                    self.writeSequenceNumber(range.closedRange.upperBound)
-            }
-    }
-}
-
-// MARK: - Swift ranges
-
-extension SequenceNumber {
-    // always flip for wildcard to be on right
-    public static prefix func ... (maximum: Self) -> SequenceRange {
-        SequenceRange(maximum ... .last)
-    }
-
-    public static postfix func ... (minimum: Self) -> SequenceRange {
-        SequenceRange(minimum ... .last)
-    }
-
-    public static func ... (minimum: Self, maximum: Self) -> SequenceRange {
-        if minimum < maximum {
-            return SequenceRange(minimum ... maximum)
+        if range == .all {
+            return self.writeSequenceNumberOrWildcard(range.range.upperBound)
         } else {
-            return SequenceRange(maximum ... minimum)
+            return self.writeSequenceNumberOrWildcard(range.range.lowerBound) +
+                self.writeIfTrue(range.range.lowerBound < range.range.upperBound) {
+                    self.writeString(":") +
+                        self.writeSequenceNumberOrWildcard(range.range.upperBound)
+                }
         }
     }
 }

@@ -31,19 +31,19 @@ extension SequenceNumberTests {
 
 extension SequenceNumberTests {
     func testComparable() {
-        XCTAssertFalse(SequenceNumber.last < .last)
-        XCTAssertFalse(SequenceNumber.last < 999)
-        XCTAssertTrue(SequenceNumber.last > 999)
-        XCTAssertTrue(SequenceNumber.number(1) < 999) // use .number to force type
+        XCTAssertFalse(SequenceNumber.max < .max)
+        XCTAssertFalse(SequenceNumber.max < 999)
+        XCTAssertTrue(SequenceNumber.max > 999)
+        XCTAssertTrue(SequenceNumber(1) < 999) // use .number to force type
     }
 }
 
 // MARK: - Encoding
 
 extension SequenceNumberTests {
-    func testEncode_wildcard() {
-        let expected = "*"
-        let size = self.testBuffer.writeSequenceNumber(.last)
+    func testEncode_max() {
+        let expected = "4294967295"
+        let size = self.testBuffer.writeSequenceNumber(.max)
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }

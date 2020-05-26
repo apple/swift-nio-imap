@@ -18,7 +18,7 @@ import struct NIO.ByteBuffer
 public enum SearchReturnData: Equatable {
     case min(Int)
     case max(Int)
-    case all([SequenceRange])
+    case all(SequenceSet)
     case count(Int)
     case dataExtension(SearchReturnDataExtension)
 }

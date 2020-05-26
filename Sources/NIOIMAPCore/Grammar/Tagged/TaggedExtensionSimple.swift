@@ -16,7 +16,7 @@ import struct NIO.ByteBuffer
 
 /// IMAPv4 `tagged-ext-simple`
 public enum TaggedExtensionSimple: Equatable {
-    case sequence([SequenceRange])
+    case sequence(SequenceSet)
     case number(Int)
     case number64(Int)
 }

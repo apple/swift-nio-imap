@@ -16,33 +16,33 @@ import NIO
 @testable import NIOIMAPCore
 import XCTest
 
-class SequenceSetTests: EncodeTestClass {}
+class UIDSetTests: EncodeTestClass {}
 
-// MARK: - SequenceSetTests imapEncoded
+// MARK: - UIDSetTests imapEncoded
 
-extension SequenceSetTests {
+extension UIDSetTests {
     func testIMAPEncoded_one() {
         let expected = "5:22"
-        let size = self.testBuffer.writeSequenceSet(SequenceSet(5 ... 22))
+        let size = self.testBuffer.writeUIDSet(UIDSet(5 ... 22))
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }
 
     func testIMAPEncoded_all() {
         let expected = "*"
-        let size = self.testBuffer.writeSequenceSet(.all)
+        let size = self.testBuffer.writeUIDSet(.all)
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }
 
     func testIMAPEncoded_full() {
         let expected = "1,2:3,4,5,6:*"
-        let size = self.testBuffer.writeSequenceSet(SequenceSet([
-            SequenceRange(1),
-            2 ... 3,
-            SequenceRange(4),
-            SequenceRange(5),
-            6...,
+        let size = self.testBuffer.writeUIDSet(UIDSet([
+            UIDRange(1),
+            UIDRange(2 ... 3),
+            UIDRange(4),
+            UIDRange(5),
+            UIDRange(6...),
         ])!)
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
