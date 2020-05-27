@@ -18,7 +18,7 @@ import NIOIMAPCore
 import NIOSSL
 
 class MailClientToProxyHandler: ChannelInboundHandler {
-    typealias InboundIn = CommandStream
+    typealias InboundIn = CommandDecoder.PartialCommandStream
 
     var parser = CommandParser()
     var clientChannel: Channel?
@@ -39,8 +39,7 @@ class MailClientToProxyHandler: ChannelInboundHandler {
                 sslHandler,
                 OutboundPrintHandler(type: "CLIENT (Encoded)"),
                 InboundPrintHandler(type: "SERVER (Original)"),
-                ByteToMessageHandler(ResponseDecoder()),
-                MessageToByteHandler(CommandEncoder()),
+                IMAPClientHandler(expectGreeting: true),
                 ProxyToMailServerHandler(mailAppToProxyChannel: mailClientToProxyChannel),
             ])
         }.connect(host: self.serverHost, port: self.serverPort).map { channel in
@@ -57,7 +56,11 @@ class MailClientToProxyHandler: ChannelInboundHandler {
     }
 
     func channelRead(context: ChannelHandlerContext, data: NIOAny) {
-        self.clientChannel?.writeAndFlush(data, promise: nil)
+        let data = self.unwrapInboundIn(data)
+        guard let command = data.command else {
+            return
+        }
+        self.clientChannel?.writeAndFlush(command, promise: nil)
     }
 
     func errorCaught(context: ChannelHandlerContext, error: Error) {
