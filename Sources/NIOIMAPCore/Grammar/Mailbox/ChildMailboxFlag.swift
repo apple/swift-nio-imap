@@ -16,17 +16,15 @@ import struct NIO.ByteBuffer
 
 /// IMAP4 `child-mbx-flag`
 public struct ChildMailboxFlag: Equatable {
-    
     enum _Backing: String, Equatable {
         case hasChildren = #"\hasChildren"#
         case hasNoChildren = #"\hasNoChildren"#
     }
-    
+
     var _backing: _Backing
-    
+
     public static var hasChildren: Self { Self(_backing: .hasChildren) }
     public static var hasNoChildren: Self { Self(_backing: .hasNoChildren) }
-    
 }
 
 // MARK: - Encoding

@@ -1508,7 +1508,6 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseMailboxListFlags() {
-        
         let inputs: [(String, String, [MailboxInfo.Attribute], UInt)] = [
             ("\\marked", "\r", [.marked], #line),
             ("\\marked \\remote", "\r", [.marked, .remote], #line),

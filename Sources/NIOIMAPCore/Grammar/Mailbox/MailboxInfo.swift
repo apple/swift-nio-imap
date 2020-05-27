@@ -32,11 +32,9 @@ public struct MailboxInfo: Equatable {
 // MARK: - Types
 
 extension MailboxInfo {
-    
     public struct Attribute: Hashable {
-        
         var _backing: String
-        
+
         public static var noSelect: Self { Self(_backing: #"\noselect"#) }
         public static var marked: Self { Self(_backing: #"\marked"#) }
         public static var unmarked: Self { Self(_backing: #"\unmarked"#) }
@@ -44,26 +42,24 @@ extension MailboxInfo {
         public static var noInferiors: Self { Self(_backing: #"\noinferiors"#) }
         public static var subscribed: Self { Self(_backing: #"\subscribed"#) }
         public static var remote: Self { Self(_backing: #"\remote"#) }
-        
+
         public static func child(_ child: ChildMailboxFlag) -> Self {
             Self(_backing: child._backing.rawValue)
         }
-        
+
         init(_backing: String) {
             self._backing = _backing
         }
-        
+
         public init(_ str: String) {
             self._backing = str.lowercased()
         }
-        
     }
 }
 
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    
     @discardableResult mutating func writeMailboxInfo(_ list: MailboxInfo) -> Int {
         self.writeString("(") +
             self.writeIfExists(list.attributes) { (flags) -> Int in
