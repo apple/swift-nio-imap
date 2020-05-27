@@ -11,16 +11,3 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 //===----------------------------------------------------------------------===//
-
-extension Partial {
-    /// IMAPv4 `partial-range`
-    public struct Range: Equatable {
-        public var from: Int
-        public var to: Int?
-
-        public init(from: Int, to: Int?) {
-            self.from = from
-            self.to = to
-        }
-    }
-}
