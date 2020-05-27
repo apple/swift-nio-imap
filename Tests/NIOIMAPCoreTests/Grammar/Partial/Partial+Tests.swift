@@ -23,7 +23,7 @@ class Partial_Tests: EncodeTestClass {}
 extension Partial_Tests {
     func testEncode() {
         let inputs: [(ClosedRange<Int>, String, UInt)] = [
-            (1...2, "<1.2>", #line),
+            (1 ... 2, "<1.2>", #line),
         ]
 
         for (test, expectedString, line) in inputs {

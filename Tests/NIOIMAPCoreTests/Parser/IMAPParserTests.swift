@@ -1219,15 +1219,15 @@ extension ParserUnitTests {
             ("BODY", " ", .bodyStructure(extensions: false), #line),
             ("BODYSTRUCTURE", " ", .bodyStructure(extensions: true), #line),
             ("UID", " ", .uid, #line),
-            ("BODY[1]<1.2>", " ", .bodySection(peek: false, .part([1], text: nil), 1...2), #line),
+            ("BODY[1]<1.2>", " ", .bodySection(peek: false, .part([1], text: nil), 1 ... 2), #line),
             ("BODY[1.TEXT]", " ", .bodySection(peek: false, .part([1], text: .text), nil), #line),
             ("BODY[4.2.TEXT]", " ", .bodySection(peek: false, .part([4, 2], text: .text), nil), #line),
             ("BODY[HEADER]", " ", .bodySection(peek: false, .text(.header), nil), #line),
-            ("BODY.PEEK[HEADER]<3.4>", " ", .bodySection(peek: true, .text(.header), 3...4), #line),
+            ("BODY.PEEK[HEADER]<3.4>", " ", .bodySection(peek: true, .text(.header), 3 ... 4), #line),
             ("BODY.PEEK[HEADER]", " ", .bodySection(peek: true, .text(.header), nil), #line),
             ("BINARY.PEEK[1]", " ", .binary(peek: true, section: [1], partial: nil), #line),
-            ("BINARY.PEEK[1]<3.4>", " ", .binary(peek: true, section: [1], partial: 3...4), #line),
-            ("BINARY[2]<4.5>", " ", .binary(peek: false, section: [2], partial: 4...5), #line),
+            ("BINARY.PEEK[1]<3.4>", " ", .binary(peek: true, section: [1], partial: 3 ... 4), #line),
+            ("BINARY[2]<4.5>", " ", .binary(peek: false, section: [2], partial: 4 ... 5), #line),
             ("BINARY.SIZE[5]", " ", .binarySize(section: [5]), #line),
         ]
         self.iterateTestInputs(inputs, testFunction: GrammarParser.parseFetchAttribute)
@@ -2011,7 +2011,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     func testParsePartial() {
         let inputs: [(String, String, ClosedRange<Int>, UInt)] = [
-            ("<1.2>", " ", 1...2, #line),
+            ("<1.2>", " ", 1 ... 2, #line),
         ]
         self.iterateTestInputs(inputs, testFunction: GrammarParser.parsePartial)
     }

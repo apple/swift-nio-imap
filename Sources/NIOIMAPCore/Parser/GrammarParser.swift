@@ -2508,7 +2508,7 @@ extension GrammarParser {
             try ParserLibrary.parseFixedString(".", buffer: &buffer, tracker: tracker)
             let num2 = try self.parseNZNumber(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseFixedString(">", buffer: &buffer, tracker: tracker)
-            return num1...num2
+            return num1 ... num2
         }
     }
 
