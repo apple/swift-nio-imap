@@ -1052,7 +1052,6 @@ extension GrammarParser {
     }
 
     fileprivate static func parseFetch_type(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [FetchAttribute] {
-        
         func parseFetch_type_all(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [FetchAttribute] {
             try ParserLibrary.parseFixedString("ALL", buffer: &buffer, tracker: tracker)
             return [.flags, .internalDate, .rfc822(.size), .envelope]
@@ -1082,7 +1081,7 @@ extension GrammarParser {
             try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)
             return array
         }
-        
+
         return try ParserLibrary.parseOneOf([
             parseFetch_type_all,
             parseFetch_type_full,

@@ -33,19 +33,16 @@ public enum FetchAttribute: Equatable {
 }
 
 extension Array where Element == FetchAttribute {
-    
     static let all: [Element] = [.flags, .internalDate, .rfc822(.size), .envelope]
-    
+
     static let fast: [Element] = [.flags, .internalDate, .rfc822(.size)]
-    
+
     static let full: [Element] = [.flags, .internalDate, .rfc822(.size), .envelope, .bodyStructure(extensions: false)]
-    
 }
 
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    
     @discardableResult mutating func writeFetchAttributeList(_ atts: [FetchAttribute]) -> Int {
         self.writeArray(atts) { (element, self) in
             self.writeFetchAttribute(element)
