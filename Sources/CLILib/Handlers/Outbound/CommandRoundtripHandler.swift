@@ -38,7 +38,8 @@ public class CommandRoundtripHandler: ChannelOutboundHandler {
         do {
             var originalBufferCopy = originalBuffer
             guard let commandStream = try parser.parseCommandStream(buffer: &originalBufferCopy) else {
-                throw ImapError(message: "Need more data to parse a command")
+                self.logger.error("Need more data to parse a command")
+                return
             }
 
             var encodeBuffer = EncodeBuffer(context.channel.allocator.buffer(capacity: originalBuffer.readableBytes),

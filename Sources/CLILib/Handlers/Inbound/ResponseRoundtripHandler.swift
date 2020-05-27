@@ -36,7 +36,8 @@ public class ResponseRoundtripHandler: ChannelInboundHandler {
             var responses = [ResponseOrContinueRequest]()
             while originalBufferCopy.readableBytes > 0 {
                 guard let response = try self.parser.parseResponseStream(buffer: &originalBufferCopy) else {
-                    throw ImapError(message: "Need more data to parse a response")
+                    self.logger.error("Need more data to parse a response")
+                    break
                 }
                 responses.append(response)
             }
