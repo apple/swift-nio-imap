@@ -16,12 +16,12 @@ import struct NIO.ByteBuffer
 
 /// IMAPv4 `mailbox-list`
 public struct MailboxInfo: Equatable {
-    public var attributes: Attributes?
+    public var attributes: [Attribute]
     public var pathSeparator: Character?
     public var mailbox: MailboxName
     public var extensions: [ListExtendedItem]
 
-    public init(attributes: Attributes? = nil, pathSeparator: Character? = nil, mailbox: MailboxName, extensions: [ListExtendedItem]) {
+    public init(attributes: [Attribute] = [], pathSeparator: Character? = nil, mailbox: MailboxName, extensions: [ListExtendedItem]) {
         self.attributes = attributes
         self.pathSeparator = pathSeparator
         self.mailbox = mailbox
@@ -32,53 +32,38 @@ public struct MailboxInfo: Equatable {
 // MARK: - Types
 
 extension MailboxInfo {
-    /// IMAPv4 `mbx-list-sflag`
-    public enum SFlag: String, Equatable {
-        case noSelect = #"\Noselect"#
-        case marked = #"\Marked"#
-        case unmarked = #"\Unmarked"#
-        case nonExistent = #"\Nonexistent"#
-
-        public init?(rawValue: String) {
-            switch rawValue.lowercased() {
-            case #"\noselect"#:
-                self = .noSelect
-            case #"\marked"#:
-                self = .marked
-            case #"\unmarked"#:
-                self = .unmarked
-            case #"\nonexistent"#:
-                self = .nonExistent
-            default:
-                return nil
-            }
+    
+    public struct Attribute: Hashable {
+        
+        var _backing: String
+        
+        public static var noSelect: Self { Self(_backing: #"\noselect"#) }
+        public static var marked: Self { Self(_backing: #"\marked"#) }
+        public static var unmarked: Self { Self(_backing: #"\unmarked"#) }
+        public static var nonExistent: Self { Self(_backing: #"\nonexistent"#) }
+        public static var noInferiors: Self { Self(_backing: #"\noinferiors"#) }
+        public static var subscribed: Self { Self(_backing: #"\subscribed"#) }
+        public static var remote: Self { Self(_backing: #"\remote"#) }
+        
+        public static func child(_ child: ChildMailboxFlag) -> Self {
+            Self(_backing: child._backing.rawValue)
         }
-    }
-
-    /// IMAPv4 `mbx-list-oflag`
-    public enum OFlag: Equatable {
-        case noInferiors
-        case subscribed
-        case remote
-        case child(ChildMailboxFlag)
-        case other(String)
-    }
-
-    /// IMAPv4 `mbx-list-flags`
-    public struct Attributes: Equatable {
-        public var oFlags: [OFlag]
-        public var sFlag: SFlag?
-
-        public init(oFlags: [MailboxInfo.OFlag], sFlag: MailboxInfo.SFlag? = nil) {
-            self.oFlags = oFlags
-            self.sFlag = sFlag
+        
+        init(_backing: String) {
+            self._backing = _backing
         }
+        
+        public init(_ str: String) {
+            self._backing = str.lowercased()
+        }
+        
     }
 }
 
 // MARK: - Encoding
 
 extension EncodeBuffer {
+    
     @discardableResult mutating func writeMailboxInfo(_ list: MailboxInfo) -> Int {
         self.writeString("(") +
             self.writeIfExists(list.attributes) { (flags) -> Int in
@@ -91,37 +76,9 @@ extension EncodeBuffer {
             self.writeMailbox(list.mailbox)
     }
 
-    @discardableResult mutating func writeMailboxListSFlag(_ flag: MailboxInfo.SFlag) -> Int {
-        self.writeString(flag.rawValue)
-    }
-
-    @discardableResult mutating func writeMailboxListOFlag(_ flag: MailboxInfo.OFlag) -> Int {
-        switch flag {
-        case .noInferiors:
-            return self.writeString(#"\Noinferiors"#)
-        case .subscribed:
-            return self.writeString(#"\Subscribed"#)
-        case .remote:
-            return self.writeString(#"\Remote"#)
-        case .child(let child):
-            return self.writeChildMailboxFlag(child)
-        case .other(let string):
-            return self.writeString("\\\(string)")
-        }
-    }
-
-    @discardableResult mutating func writeMailboxListFlags(_ flags: MailboxInfo.Attributes) -> Int {
-        if let sFlag = flags.sFlag {
-            return
-                self.writeMailboxListSFlag(sFlag) +
-                self.writeArray(flags.oFlags, separator: "", parenthesis: false) { (flag, self) in
-                    self.writeSpace() +
-                        self.writeMailboxListOFlag(flag)
-                }
-        } else {
-            return self.writeArray(flags.oFlags, parenthesis: false) { (element, self) in
-                self.writeMailboxListOFlag(element)
-            }
+    @discardableResult mutating func writeMailboxListFlags(_ flags: [MailboxInfo.Attribute]) -> Int {
+        self.writeArray(flags, parenthesis: false) { (element, self) in
+            self.writeString(element._backing)
         }
     }
 }

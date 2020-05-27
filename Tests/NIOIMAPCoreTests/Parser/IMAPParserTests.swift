@@ -640,12 +640,12 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     func testParseChildMailboxFlag() {
         let inputs: [(String, String, ChildMailboxFlag, UInt)] = [
-            ("\\HasChildren", " ", .HasChildren, #line),
-            ("\\haschildren", " ", .HasChildren, #line),
-            ("\\HASCHILDREN", " ", .HasChildren, #line),
-            ("\\HasNoChildren", " ", .HasNoChildren, #line),
-            ("\\hasnochildren", " ", .HasNoChildren, #line),
-            ("\\HASNOCHILDREN", " ", .HasNoChildren, #line),
+            ("\\hasChildren", " ", .hasChildren, #line),
+            ("\\haschildren", " ", .hasChildren, #line),
+            ("\\HASCHILDREN", " ", .hasChildren, #line),
+            ("\\hasNoChildren", " ", .hasNoChildren, #line),
+            ("\\hasnochildren", " ", .hasNoChildren, #line),
+            ("\\HASNOCHILDREN", " ", .hasNoChildren, #line),
         ]
         self.iterateTestInputs(inputs, testFunction: GrammarParser.parseChildMailboxFlag)
     }
@@ -1433,7 +1433,7 @@ extension ParserUnitTests {
             (
                 "LIST (\\oflag1 \\oflag2) NIL inbox",
                 "\r\n",
-                .list(.init(attributes: .init(oFlags: [.other("\\oflag1"), .other("\\oflag2")], sFlag: nil), pathSeparator: nil, mailbox: .inbox, extensions: [])),
+                .list(.init(attributes: [.init("\\oflag1"), .init("\\oflag2")], pathSeparator: nil, mailbox: .inbox, extensions: [])),
                 #line
             ),
             ("ESEARCH MIN 1 MAX 2", "\r\n", .esearch(.init(correlator: nil, uid: false, returnData: [.min(1), .max(2)])), #line),
@@ -1444,7 +1444,7 @@ extension ParserUnitTests {
             (
                 "LSUB (\\seen \\draft) NIL inbox",
                 "\r\n",
-                .lsub(.init(attributes: .init(oFlags: [.other("\\seen"), .other("\\draft")], sFlag: nil), pathSeparator: nil, mailbox: .inbox, extensions: [])),
+                .lsub(.init(attributes: [.init("\\seen"), .init("\\draft")], pathSeparator: nil, mailbox: .inbox, extensions: [])),
                 #line
             ),
             ("SEARCH", "\r\n", .search([]), #line),
@@ -1464,25 +1464,25 @@ extension ParserUnitTests {
             (
                 "() NIL inbox",
                 "\r",
-                .init(attributes: nil, pathSeparator: nil, mailbox: .inbox, extensions: []),
+                .init(attributes: [], pathSeparator: nil, mailbox: .inbox, extensions: []),
                 #line
             ),
             (
                 "() \"d\" inbox",
                 "\r",
-                .init(attributes: nil, pathSeparator: "d", mailbox: .inbox, extensions: []),
+                .init(attributes: [], pathSeparator: "d", mailbox: .inbox, extensions: []),
                 #line
             ),
             (
                 "(\\oflag1 \\oflag2) NIL inbox",
                 "\r",
-                .init(attributes: .init(oFlags: [.other("\\oflag1"), .other("\\oflag2")], sFlag: nil), pathSeparator: nil, mailbox: .inbox, extensions: []),
+                .init(attributes: [.init("\\oflag1"), .init("\\oflag2")], pathSeparator: nil, mailbox: .inbox, extensions: []),
                 #line
             ),
             (
                 "(\\oflag1 \\oflag2) \"d\" inbox",
                 "\r",
-                .init(attributes: .init(oFlags: [.other("\\oflag1"), .other("\\oflag2")], sFlag: nil), pathSeparator: "d", mailbox: .inbox, extensions: []),
+                .init(attributes: [.init("\\oflag1"), .init("\\oflag2")], pathSeparator: "d", mailbox: .inbox, extensions: []),
                 #line
             ),
         ]
@@ -1507,72 +1507,14 @@ extension ParserUnitTests {
 // MARK: - parseMailboxListFlags
 
 extension ParserUnitTests {
-    func testParseMailboxListFlags_valid_oFlags_one() {
-        TestUtilities.withBuffer("\\flag1", terminator: " \r\n") { (buffer) in
-            let flags = try GrammarParser.parseMailboxListFlags(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(flags.oFlags, [.other("\\flag1")])
-            XCTAssertNil(flags.sFlag)
-        }
-    }
-
-    func testParseMailboxListFlags_valid_oFlags_multiple() {
-        TestUtilities.withBuffer("\\flag1 \\flag2", terminator: " \r\n") { (buffer) in
-            let flags = try GrammarParser.parseMailboxListFlags(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(flags.oFlags, [.other("\\flag1"), .other("\\flag2")])
-            XCTAssertNil(flags.sFlag)
-        }
-    }
-
-    // 1*OFlag sFlag 0*OFlag
-    func testParseMailboxListFlags_valid_mixedArray1() {
-        TestUtilities.withBuffer("\\oflag1 \\marked", terminator: "\r\n") { (buffer) in
-            let flags = try GrammarParser.parseMailboxListFlags(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(flags.oFlags, [.other("\\oflag1")])
-            XCTAssertEqual(flags.sFlag, MailboxInfo.SFlag.marked)
-        }
-    }
-
-    // 1*OFlag sFlag 1*OFlag
-    func testParseMailboxListFlags_valid_mixedArray2() {
-        TestUtilities.withBuffer("\\oflag1 \\marked \\oflag2", terminator: " \r\n") { (buffer) in
-            let flags = try GrammarParser.parseMailboxListFlags(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(flags.oFlags, [.other("\\oflag1"), .other("\\oflag2")])
-            XCTAssertEqual(flags.sFlag, MailboxInfo.SFlag.marked)
-        }
-    }
-
-    // 2*OFlag sFlag 2*OFlag
-    func testParseMailboxListFlags_valid_mixedArray3() {
-        TestUtilities.withBuffer("\\oflag1 \\oflag2 \\marked \\oflag3 \\oflag4", terminator: " \r\n") { (buffer) in
-            let flags = try GrammarParser.parseMailboxListFlags(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(flags.oFlags, [.other("\\oflag1"), .other("\\oflag2"), .other("\\oflag3"), .other("\\oflag4")])
-            XCTAssertEqual(flags.sFlag, MailboxInfo.SFlag.marked)
-        }
-    }
-}
-
-// MARK: - parseMailboxListOflag
-
-extension ParserUnitTests {
-    func testParseMailboxListOflag_valid_inferior() {
-        TestUtilities.withBuffer("\\Noinferiors") { (buffer) in
-            let flag = try GrammarParser.parseMailboxListOflag(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(flag, .noInferiors)
-        }
-    }
-
-    func testParseMailboxListOflag_valid_inferior_mixedCase() {
-        TestUtilities.withBuffer("\\NOINferiors") { (buffer) in
-            let flag = try GrammarParser.parseMailboxListOflag(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(flag, .noInferiors)
-        }
-    }
-
-    func testParseMailboxListOflag_valid_other() {
-        TestUtilities.withBuffer("\\SomeFlag", terminator: " ") { (buffer) in
-            let flag = try GrammarParser.parseMailboxListOflag(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(flag, .other("\\SomeFlag"))
-        }
+    func testParseMailboxListFlags() {
+        
+        let inputs: [(String, String, [MailboxInfo.Attribute], UInt)] = [
+            ("\\marked", "\r", [.marked], #line),
+            ("\\marked \\remote", "\r", [.marked, .remote], #line),
+            ("\\marked \\o1 \\o2", "\r", [.marked, .init("\\o1"), .init("\\o2")], #line),
+        ]
+        self.iterateTestInputs(inputs, testFunction: GrammarParser.parseMailboxListFlags)
     }
 }
 
@@ -2557,31 +2499,6 @@ extension ParserUnitTests {
         var buffer = TestUtilities.createTestByteBuffer(for: "")
         XCTAssertThrowsError(try GrammarParser.parseSequenceSet(buffer: &buffer, tracker: .testTracker)) { error in
             XCTAssertEqual(error as? ParsingError, ParsingError.incompleteMessage)
-        }
-    }
-}
-
-// MARK: - s-flag parseSFlag
-
-extension ParserUnitTests {
-    func testSFlag_valid() {
-        TestUtilities.withBuffer("\\unmarked", terminator: " ") { (buffer) in
-            let flag = try GrammarParser.parseMailboxListSflag(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(flag, .unmarked)
-        }
-    }
-
-    func testSFlag_valid_mixedCase() {
-        TestUtilities.withBuffer("\\UNMArked", terminator: " ") { (buffer) in
-            let flag = try GrammarParser.parseMailboxListSflag(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(flag, .unmarked)
-        }
-    }
-
-    func testSFlage_invalid_noSlash() {
-        var buffer = TestUtilities.createTestByteBuffer(for: "unmarked ")
-        XCTAssertThrowsError(try GrammarParser.parseMailboxListSflag(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertTrue(e is ParserError)
         }
     }
 }

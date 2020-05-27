@@ -15,15 +15,24 @@
 import struct NIO.ByteBuffer
 
 /// IMAP4 `child-mbx-flag`
-public enum ChildMailboxFlag: String, Equatable {
-    case HasChildren = #"\HasChildren"#
-    case HasNoChildren = #"\HasNoChildren"#
+public struct ChildMailboxFlag: Equatable {
+    
+    enum _Backing: String, Equatable {
+        case hasChildren = #"\hasChildren"#
+        case hasNoChildren = #"\hasNoChildren"#
+    }
+    
+    var _backing: _Backing
+    
+    public static var hasChildren: Self { Self(_backing: .hasChildren) }
+    public static var hasNoChildren: Self { Self(_backing: .hasNoChildren) }
+    
 }
 
 // MARK: - Encoding
 
 extension EncodeBuffer {
     @discardableResult mutating func writeChildMailboxFlag(_ flag: ChildMailboxFlag) -> Int {
-        self.writeString(flag.rawValue)
+        self.writeString(flag._backing.rawValue)
     }
 }
