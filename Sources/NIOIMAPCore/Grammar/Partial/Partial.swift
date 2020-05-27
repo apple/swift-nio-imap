@@ -14,19 +14,8 @@
 
 import struct NIO.ByteBuffer
 
-/// IMAPv4 `partial`
-public struct Partial: Equatable {
-    public var left: Int
-    public var right: Int
-
-    public init(left: Int, right: Int) {
-        self.left = left
-        self.right = right
-    }
-}
-
 extension EncodeBuffer {
-    @discardableResult mutating func writePartial(_ num: Partial) -> Int {
-        self.writeString("<\(num.left).\(num.right)>")
+    @discardableResult mutating func writePartial(_ num: ClosedRange<Int>) -> Int {
+        self.writeString("<\(num.lowerBound).\(num.upperBound)>")
     }
 }

@@ -25,10 +25,10 @@ public enum FetchAttribute: Equatable {
     /// will not.
     case bodyStructure(extensions: Bool)
     /// `BODY[<section>]<<partial>>` and `BODY.PEEK[<section>]<<partial>>`
-    case bodySection(peek: Bool, _ section: SectionSpec?, Partial?)
+    case bodySection(peek: Bool, _ section: SectionSpec?, ClosedRange<Int>?)
     case uid
     case modifierSequenceValue(ModifierSequenceValue)
-    case binary(peek: Bool, section: [Int], partial: Partial?)
+    case binary(peek: Bool, section: [Int], partial: ClosedRange<Int>?)
     case binarySize(section: [Int])
 }
 
@@ -101,7 +101,7 @@ extension EncodeBuffer {
         self.writeString(extensions ? "BODYSTRUCTURE" : "BODY")
     }
 
-    @discardableResult mutating func writeFetchAttribute_body(peek: Bool, section: SectionSpec?, partial: Partial?) -> Int {
+    @discardableResult mutating func writeFetchAttribute_body(peek: Bool, section: SectionSpec?, partial: ClosedRange<Int>?) -> Int {
         self.writeString(peek ? "BODY.PEEK" : "BODY") +
             self.writeSection(section) +
             self.writeIfExists(partial) { (partial) -> Int in
@@ -114,7 +114,7 @@ extension EncodeBuffer {
             self.writeSectionBinary(section)
     }
 
-    @discardableResult mutating func writeFetchAttribute_binary(peek: Bool, section: [Int], partial: Partial?) -> Int {
+    @discardableResult mutating func writeFetchAttribute_binary(peek: Bool, section: [Int], partial: ClosedRange<Int>?) -> Int {
         self.writeString("BINARY") +
             self.writeIfTrue(peek) {
                 self.writeString(".PEEK")

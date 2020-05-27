@@ -80,9 +80,9 @@ final class RoundtripTests: XCTestCase {
             (.fetch([.all], .full, []), #line),
             (.fetch([5678], [.uid, .flags, .internalDate, .envelope], []), #line),
             (.fetch([5678], [.flags, .bodyStructure(extensions: true)], []), #line),
-            (.fetch([5678], [.flags, .bodySection(peek: false, nil, Partial(left: 3, right: 4))], []), #line),
-            (.fetch([5678], [.flags, .bodySection(peek: false, .text(.header), Partial(left: 3, right: 4))], []), #line),
-            (.fetch([5678], [.bodySection(peek: false, .part([12, 34], text: .headerFields(["some", "header"])), .init(left: 3, right: 4))], []), #line),
+            (.fetch([5678], [.flags, .bodySection(peek: false, nil, 3...4)], []), #line),
+            (.fetch([5678], [.flags, .bodySection(peek: false, .text(.header), 3...4)], []), #line),
+            (.fetch([5678], [.bodySection(peek: false, .part([12, 34], text: .headerFields(["some", "header"])), 3...4)], []), #line),
 
             (.store(.all, [], .remove(silent: true, list: [.answered, .deleted])), #line),
             (.store(.all, [], .add(silent: true, list: [.draft, .extension("\\some")])), #line),

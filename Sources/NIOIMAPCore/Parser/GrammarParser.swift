@@ -1144,7 +1144,7 @@ extension GrammarParser {
         func parseFetchAttribute_bodySection(buffer: inout ByteBuffer, tracker: StackTracker) throws -> FetchAttribute {
             try ParserLibrary.parseFixedString("BODY", buffer: &buffer, tracker: tracker)
             let section = try self.parseSection(buffer: &buffer, tracker: tracker)
-            let chevronNumber = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> Partial in
+            let chevronNumber = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> ClosedRange<Int> in
                 try self.parsePartial(buffer: &buffer, tracker: tracker)
             }
             return .bodySection(peek: false, section, chevronNumber)
@@ -1153,7 +1153,7 @@ extension GrammarParser {
         func parseFetchAttribute_bodyPeekSection(buffer: inout ByteBuffer, tracker: StackTracker) throws -> FetchAttribute {
             try ParserLibrary.parseFixedString("BODY.PEEK", buffer: &buffer, tracker: tracker)
             let section = try self.parseSection(buffer: &buffer, tracker: tracker)
-            let chevronNumber = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> Partial in
+            let chevronNumber = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> ClosedRange<Int> in
                 try self.parsePartial(buffer: &buffer, tracker: tracker)
             }
             return .bodySection(peek: true, section, chevronNumber)
@@ -2500,27 +2500,15 @@ extension GrammarParser {
         }
     }
 
-    // partial-range    = number ["." nz-number]
-    static func parsePartialRange(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Partial.Range {
-        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Partial.Range in
-            let num1 = try self.parseNumber(buffer: &buffer, tracker: tracker)
-            let num2 = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> Int in
-                try ParserLibrary.parseFixedString(".", buffer: &buffer, tracker: tracker)
-                return try self.parseNZNumber(buffer: &buffer, tracker: tracker)
-            }
-            return Partial.Range(from: num1, to: num2)
-        }
-    }
-
     // partial         = "<" number "." nz-number ">"
-    static func parsePartial(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Partial {
-        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> Partial in
+    static func parsePartial(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ClosedRange<Int> {
+        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> ClosedRange<Int> in
             try ParserLibrary.parseFixedString("<", buffer: &buffer, tracker: tracker)
             let num1 = try self.parseNumber(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseFixedString(".", buffer: &buffer, tracker: tracker)
             let num2 = try self.parseNZNumber(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseFixedString(">", buffer: &buffer, tracker: tracker)
-            return Partial(left: num1, right: num2)
+            return num1...num2
         }
     }
 
