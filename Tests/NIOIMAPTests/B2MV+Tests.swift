@@ -191,11 +191,11 @@ extension B2MV_Tests {
 
             // MARK: LIST
 
-            ("* LIST (\\NoSelect) \"/\" ~/Mail/foo", [.untaggedResponse(.mailboxData(.list(.init(attributes: .init(oFlags: [], sFlag: .noSelect), pathSeparator: "/", mailbox: .init("~/Mail/foo"), extensions: []))))]),
+            ("* LIST (\\noselect) \"/\" ~/Mail/foo", [.untaggedResponse(.mailboxData(.list(.init(attributes: [.noSelect], pathSeparator: "/", mailbox: .init("~/Mail/foo"), extensions: []))))]),
 
             // MARK: LSUB
 
-            ("* LSUB (\\NoSelect) \"/\" ~/Mail/foo", [.untaggedResponse(.mailboxData(.lsub(.init(attributes: .init(oFlags: [], sFlag: .noSelect), pathSeparator: "/", mailbox: .init("~/Mail/foo"), extensions: []))))]),
+            ("* LSUB (\\noselect) \"/\" ~/Mail/foo", [.untaggedResponse(.mailboxData(.lsub(.init(attributes: [.noSelect], pathSeparator: "/", mailbox: .init("~/Mail/foo"), extensions: []))))]),
 
             // MARK: Status
 

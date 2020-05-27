@@ -23,8 +23,8 @@ class ChildMailboxFlag_Tests: EncodeTestClass {}
 extension ChildMailboxFlag_Tests {
     func testEncode() {
         let inputs: [(ChildMailboxFlag, String, UInt)] = [
-            (.HasChildren, #"\HasChildren"#, #line),
-            (.HasNoChildren, #"\HasNoChildren"#, #line),
+            (.hasChildren, #"\hasChildren"#, #line),
+            (.hasNoChildren, #"\hasNoChildren"#, #line),
         ]
 
         for (test, expectedString, line) in inputs {
