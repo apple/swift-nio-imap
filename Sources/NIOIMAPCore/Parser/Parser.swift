@@ -28,7 +28,7 @@ extension Parser {
                 // We're in line parsing mode
                 throw ParsingError.lineTooLong
             }
-            throw IncompleteMessage()
+            throw _IncompleteMessage()
         }
     }
 }

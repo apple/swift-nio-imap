@@ -26,7 +26,7 @@ public enum ParsingError: Error {
     case lineTooLong
 }
 
-struct IncompleteMessage: Error {}
+public struct _IncompleteMessage: Error {}
 
 public enum GrammarParser {}
 
@@ -1676,7 +1676,7 @@ extension GrammarParser {
     // list-wildcards  = "%" / "*"
     static func parseListWildcards(buffer: inout ByteBuffer, tracker: StackTracker) throws -> String {
         guard let char = buffer.readInteger(as: UInt8.self) else {
-            throw IncompleteMessage()
+            throw _IncompleteMessage()
         }
         guard char.isListWildcard else {
             throw ParserError()
@@ -1700,7 +1700,7 @@ extension GrammarParser {
                 }
                 return bytes
             } else {
-                throw IncompleteMessage()
+                throw _IncompleteMessage()
             }
         }
     }
@@ -1817,7 +1817,7 @@ extension GrammarParser {
                 try ParserLibrary.parseFixedString("\"", buffer: &buffer, tracker: tracker)
 
                 guard let character = buffer.readSlice(length: 1)?.readableBytesView.first else {
-                    throw IncompleteMessage()
+                    throw _IncompleteMessage()
                 }
                 guard character.isQuotedChar else {
                     throw ParserError(hint: "Expected quoted char found \(String(decoding: [character], as: Unicode.UTF8.self))")
@@ -2317,7 +2317,7 @@ extension GrammarParser {
         func parseNamespaceDescr_quotedChar(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Character? {
             try ParserLibrary.parseFixedString("\"", buffer: &buffer, tracker: tracker)
             guard let char = buffer.readBytes(length: 1)?.first else {
-                throw IncompleteMessage()
+                throw _IncompleteMessage()
             }
             guard char.isQuotedChar else {
                 throw ParserError(hint: "Invalid character")
@@ -3881,7 +3881,7 @@ extension GrammarParser {
         try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> String in
 
             guard let fchar = buffer.readBytes(length: 1)?.first else {
-                throw IncompleteMessage()
+                throw _IncompleteMessage()
             }
             guard fchar.isTaggedLabelFchar else {
                 throw ParserError(hint: "\(fchar) is not a valid fchar’")
