@@ -66,7 +66,7 @@ public struct ResponseParser: Parser {
 extension ResponseParser {
     fileprivate mutating func parseGreeting(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Response {
         let greeting = try GrammarParser.parseGreeting(buffer: &buffer, tracker: tracker)
-        return self.moveStateMachine(expected: .greeting, next: .response, returnValue: .greeting(greeting))
+        return self.moveStateMachine(expected: .greeting, next: .response, returnValue: .untaggedResponse(.greeting(greeting)))
     }
 }
 

@@ -21,7 +21,6 @@ public enum ResponseOrContinueRequest: Equatable {
 }
 
 public enum Response: Equatable {
-    case greeting(Greeting)
     case untaggedResponse(ResponsePayload)
     case fetchResponse(FetchResponse)
     case taggedResponse(TaggedResponse)
@@ -68,8 +67,6 @@ extension EncodeBuffer {
     @discardableResult fileprivate mutating func writeResponse(_ response: Response) -> Int {
         assert(self.mode == .server())
         switch response {
-        case .greeting(let greeting):
-            return self.writeGreeting(greeting)
         case .untaggedResponse(let resp):
             return self.writeResponseData(resp)
         case .fetchResponse(let response):
