@@ -35,15 +35,19 @@ public struct ResponseParser: Parser {
         self.mode = expectGreeting ? .greeting : .response
     }
 
-    public mutating func parseResponseStream(buffer: inout ByteBuffer) throws -> ResponseOrContinueRequest {
+    public mutating func parseResponseStream(buffer: inout ByteBuffer) throws -> ResponseOrContinueRequest? {
         let tracker = StackTracker.makeNewDefaultLimitStackTracker
-        switch self.mode {
-        case .greeting:
-            return try .response(self.parseGreeting(buffer: &buffer, tracker: tracker))
-        case .response:
-            return try self.parseResponse(buffer: &buffer, tracker: tracker)
-        case .attributeBytes(let remaining):
-            return .response(self.parseBytes(buffer: &buffer, remaining: remaining))
+        do {
+            switch self.mode {
+            case .greeting:
+                return try .response(self.parseGreeting(buffer: &buffer, tracker: tracker))
+            case .response:
+                return try self.parseResponse(buffer: &buffer, tracker: tracker)
+            case .attributeBytes(let remaining):
+                return .response(self.parseBytes(buffer: &buffer, remaining: remaining))
+            }
+        } catch is _IncompleteMessage {
+            return nil
         }
     }
 
