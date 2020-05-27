@@ -18,17 +18,6 @@ import XCTest
 
 class FetchTests: EncodeTestClass {}
 
-// MARK: - FetchType
-
-extension FetchTests {
-    func testFetchTypeImapEncoding() {
-        let expected = "ALL"
-        let size = self.testBuffer.writeFetchType(FetchType.all)
-        XCTAssertEqual(size, expected.utf8.count)
-        XCTAssertEqual(expected, self.testBufferString)
-    }
-}
-
 // MARK: - RFC822
 
 extension FetchTests {

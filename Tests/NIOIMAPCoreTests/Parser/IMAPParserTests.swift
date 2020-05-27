@@ -1197,10 +1197,10 @@ extension ParserUnitTests {
             ("FETCH 1:3 ALL", "\r", .fetch([1 ... 3], .all, []), #line),
             ("FETCH 2:4 FULL", "\r", .fetch([2 ... 4], .full, []), #line),
             ("FETCH 3:5 FAST", "\r", .fetch([3 ... 5], .fast, []), #line),
-            ("FETCH 4:6 ENVELOPE", "\r", .fetch([4 ... 6], .attributes([.envelope]), []), #line),
-            ("FETCH 5:7 (ENVELOPE FLAGS)", "\r", .fetch([5 ... 7], .attributes([.envelope, .flags]), []), #line),
+            ("FETCH 4:6 ENVELOPE", "\r", .fetch([4 ... 6], [.envelope], []), #line),
+            ("FETCH 5:7 (ENVELOPE FLAGS)", "\r", .fetch([5 ... 7], [.envelope, .flags], []), #line),
             ("FETCH 3:5 FAST (name)", "\r", .fetch([3 ... 5], .fast, [.init(name: "name", value: nil)]), #line),
-            ("FETCH 1 BODY[TEXT]", "\r", .fetch([1], .attributes([.bodySection(peek: false, .text(.text), nil)]), []), #line),
+            ("FETCH 1 BODY[TEXT]", "\r", .fetch([1], [.bodySection(peek: false, .text(.text), nil)], []), #line),
         ]
         self.iterateTestInputs(inputs, testFunction: GrammarParser.parseFetch)
     }
@@ -2912,7 +2912,7 @@ extension ParserUnitTests {
         let inputs: [(String, String, Command, UInt)] = [
             ("UID EXPUNGE 1", "\r\n", .uidExpunge([1]), #line),
             ("UID COPY 1 Inbox", "\r\n", .uidCopy([1], .inbox), #line),
-            ("UID FETCH 1 FLAGS", "\r\n", .uidFetch([1], FetchType.attributes([.flags]), []), #line),
+            ("UID FETCH 1 FLAGS", "\r\n", .uidFetch([1], [.flags], []), #line),
             ("UID SEARCH CHARSET UTF8 ALL", "\r\n", .uidSearch(returnOptions: [], program: .init(charset: "UTF8", keys: [.all])), #line),
             ("UID STORE 1 +FLAGS (Test)", "\r\n", .uidStore([1], [], .add(silent: false, list: [.keyword(.init("Test"))])), #line),
         ]

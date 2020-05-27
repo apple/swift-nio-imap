@@ -1051,38 +1051,38 @@ extension GrammarParser {
         }
     }
 
-    fileprivate static func parseFetch_type_all(buffer: inout ByteBuffer, tracker: StackTracker) throws -> FetchType {
-        try ParserLibrary.parseFixedString("ALL", buffer: &buffer, tracker: tracker)
-        return .all
-    }
-
-    fileprivate static func parseFetch_type_full(buffer: inout ByteBuffer, tracker: StackTracker) throws -> FetchType {
-        try ParserLibrary.parseFixedString("FULL", buffer: &buffer, tracker: tracker)
-        return .full
-    }
-
-    fileprivate static func parseFetch_type_fast(buffer: inout ByteBuffer, tracker: StackTracker) throws -> FetchType {
-        try ParserLibrary.parseFixedString("FAST", buffer: &buffer, tracker: tracker)
-        return .fast
-    }
-
-    fileprivate static func parseFetch_type_singleAtt(buffer: inout ByteBuffer, tracker: StackTracker) throws -> FetchType {
-        .attributes([try self.parseFetchAttribute(buffer: &buffer, tracker: tracker)])
-    }
-
-    fileprivate static func parseFetch_type_multiAtt(buffer: inout ByteBuffer, tracker: StackTracker) throws -> FetchType {
-        try ParserLibrary.parseFixedString("(", buffer: &buffer, tracker: tracker)
-        var array = [try self.parseFetchAttribute(buffer: &buffer, tracker: tracker)]
-        try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) -> FetchAttribute in
-            try ParserLibrary.parseFixedString(" ", buffer: &buffer, tracker: tracker)
-            return try self.parseFetchAttribute(buffer: &buffer, tracker: tracker)
+    fileprivate static func parseFetch_type(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [FetchAttribute] {
+        func parseFetch_type_all(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [FetchAttribute] {
+            try ParserLibrary.parseFixedString("ALL", buffer: &buffer, tracker: tracker)
+            return [.flags, .internalDate, .rfc822(.size), .envelope]
         }
-        try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)
-        return .attributes(array)
-    }
 
-    fileprivate static func parseFetch_type(buffer: inout ByteBuffer, tracker: StackTracker) throws -> FetchType {
-        try ParserLibrary.parseOneOf([
+        func parseFetch_type_fast(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [FetchAttribute] {
+            try ParserLibrary.parseFixedString("FAST", buffer: &buffer, tracker: tracker)
+            return [.flags, .internalDate, .rfc822(.size)]
+        }
+
+        func parseFetch_type_full(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [FetchAttribute] {
+            try ParserLibrary.parseFixedString("FULL", buffer: &buffer, tracker: tracker)
+            return [.flags, .internalDate, .rfc822(.size), .envelope, .bodyStructure(extensions: false)]
+        }
+
+        func parseFetch_type_singleAtt(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [FetchAttribute] {
+            [try self.parseFetchAttribute(buffer: &buffer, tracker: tracker)]
+        }
+
+        func parseFetch_type_multiAtt(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [FetchAttribute] {
+            try ParserLibrary.parseFixedString("(", buffer: &buffer, tracker: tracker)
+            var array = [try self.parseFetchAttribute(buffer: &buffer, tracker: tracker)]
+            try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) -> FetchAttribute in
+                try ParserLibrary.parseFixedString(" ", buffer: &buffer, tracker: tracker)
+                return try self.parseFetchAttribute(buffer: &buffer, tracker: tracker)
+            }
+            try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)
+            return array
+        }
+
+        return try ParserLibrary.parseOneOf([
             parseFetch_type_all,
             parseFetch_type_full,
             parseFetch_type_fast,

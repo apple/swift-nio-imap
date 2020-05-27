@@ -32,6 +32,14 @@ public enum FetchAttribute: Equatable {
     case binarySize(section: [Int])
 }
 
+extension Array where Element == FetchAttribute {
+    static let all: [Element] = [.flags, .internalDate, .rfc822(.size), .envelope]
+
+    static let fast: [Element] = [.flags, .internalDate, .rfc822(.size)]
+
+    static let full: [Element] = [.flags, .internalDate, .rfc822(.size), .envelope, .bodyStructure(extensions: false)]
+}
+
 // MARK: - Encoding
 
 extension EncodeBuffer {
