@@ -16,35 +16,35 @@ import NIO
 @testable import NIOIMAPCore
 import XCTest
 
-class SectionSpecTests: EncodeTestClass {}
+class SectionSpecifierTests: EncodeTestClass {}
 
-// MARK: - SectionSpecTests imapEncoded
+// MARK: - SectionSpecifierTests imapEncoded
 
-extension SectionSpecTests {
+extension SectionSpecifierTests {
     func testImapEncoded_optional_none() {
         let expected = ""
-        let size = self.testBuffer.writeSectionSpec(nil)
+        let size = self.testBuffer.writeSectionSpecifier(nil)
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }
 
     func testImapEncoded_text() {
         let expected = "HEADER"
-        let size = self.testBuffer.writeSectionSpec(.text(.header))
+        let size = self.testBuffer.writeSectionSpecifier(.text(.header))
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }
 
     func testImapEncoded_part_notext() {
         let expected = "1.2.3.4"
-        let size = self.testBuffer.writeSectionSpec(.part([1, 2, 3, 4], text: nil))
+        let size = self.testBuffer.writeSectionSpecifier(.part([1, 2, 3, 4], text: nil))
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }
 
     func testImapEncoded_part_sometext() {
         let expected = "1.2.3.4.HEADER"
-        let size = self.testBuffer.writeSectionSpec(.part([1, 2, 3, 4], text: .header))
+        let size = self.testBuffer.writeSectionSpecifier(.part([1, 2, 3, 4], text: .header))
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }

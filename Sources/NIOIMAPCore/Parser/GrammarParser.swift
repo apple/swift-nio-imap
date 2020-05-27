@@ -3293,11 +3293,11 @@ extension GrammarParser {
     }
 
     // section         = "[" [section-spec] "]"
-    static func parseSection(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SectionSpec? {
-        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> SectionSpec? in
+    static func parseSection(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SectionSpecifier? {
+        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> SectionSpecifier? in
             try ParserLibrary.parseFixedString("[", buffer: &buffer, tracker: tracker)
-            let spec = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> SectionSpec in
-                try self.parseSectionSpec(buffer: &buffer, tracker: tracker)
+            let spec = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> SectionSpecifier in
+                try self.parseSectionSpecifier(buffer: &buffer, tracker: tracker)
             }
             try ParserLibrary.parseFixedString("]", buffer: &buffer, tracker: tracker)
             return spec
@@ -3362,12 +3362,12 @@ extension GrammarParser {
     }
 
     // section-spec    = section-msgtext / (section-part ["." section-text])
-    static func parseSectionSpec(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SectionSpec {
-        func parseSectionSpec_messageText(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SectionSpec {
+    static func parseSectionSpecifier(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SectionSpecifier {
+        func parseSectionSpecifier_messageText(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SectionSpecifier {
             .text(try self.parseSectionMessageText(buffer: &buffer, tracker: tracker))
         }
 
-        func parseSectionSpec_part(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SectionSpec {
+        func parseSectionSpecifier_part(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SectionSpecifier {
             let part = try self.parseSectionPart(buffer: &buffer, tracker: tracker)
             let text = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> SectionText in
                 try ParserLibrary.parseFixedString(".", buffer: &buffer, tracker: tracker)
@@ -3377,8 +3377,8 @@ extension GrammarParser {
         }
 
         return try ParserLibrary.parseOneOf([
-            parseSectionSpec_messageText,
-            parseSectionSpec_part,
+            parseSectionSpecifier_messageText,
+            parseSectionSpecifier_part,
         ], buffer: &buffer, tracker: tracker)
     }
 

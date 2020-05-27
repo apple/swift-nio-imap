@@ -15,7 +15,7 @@
 import struct NIO.ByteBuffer
 
 /// IMAPv4 `section-spec`
-public enum SectionSpec: Equatable {
+public enum SectionSpecifier: Equatable {
     case text(_ text: SectionMessageText)
     case part(_ part: [Int], text: SectionText?)
 }
@@ -23,15 +23,15 @@ public enum SectionSpec: Equatable {
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeSection(_ section: SectionSpec?) -> Int {
+    @discardableResult mutating func writeSection(_ section: SectionSpecifier?) -> Int {
         self.writeString("[") +
             self.writeIfExists(section) { (spec) -> Int in
-                self.writeSectionSpec(spec)
+                self.writeSectionSpecifier(spec)
             } +
             self.writeString("]")
     }
 
-    @discardableResult mutating func writeSectionSpec(_ spec: SectionSpec?) -> Int {
+    @discardableResult mutating func writeSectionSpecifier(_ spec: SectionSpecifier?) -> Int {
         guard let spec = spec else {
             return 0 // do nothing
         }

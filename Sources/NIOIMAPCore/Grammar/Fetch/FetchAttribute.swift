@@ -25,7 +25,7 @@ public enum FetchAttribute: Equatable {
     /// will not.
     case bodyStructure(extensions: Bool)
     /// `BODY[<section>]<<partial>>` and `BODY.PEEK[<section>]<<partial>>`
-    case bodySection(peek: Bool, _ section: SectionSpec?, ClosedRange<Int>?)
+    case bodySection(peek: Bool, _ section: SectionSpecifier?, ClosedRange<Int>?)
     case uid
     case modifierSequenceValue(ModifierSequenceValue)
     case binary(peek: Bool, section: [Int], partial: ClosedRange<Int>?)
@@ -101,7 +101,7 @@ extension EncodeBuffer {
         self.writeString(extensions ? "BODYSTRUCTURE" : "BODY")
     }
 
-    @discardableResult mutating func writeFetchAttribute_body(peek: Bool, section: SectionSpec?, partial: ClosedRange<Int>?) -> Int {
+    @discardableResult mutating func writeFetchAttribute_body(peek: Bool, section: SectionSpecifier?, partial: ClosedRange<Int>?) -> Int {
         self.writeString(peek ? "BODY.PEEK" : "BODY") +
             self.writeSection(section) +
             self.writeIfExists(partial) { (partial) -> Int in

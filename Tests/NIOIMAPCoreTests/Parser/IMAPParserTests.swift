@@ -2267,7 +2267,7 @@ extension ParserUnitTests {
     func testParseSection_valid_some() {
         TestUtilities.withBuffer("[HEADER]") { (buffer) in
             let section = try GrammarParser.parseSection(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(section, SectionSpec.text(.header))
+            XCTAssertEqual(section, SectionSpecifier.text(.header))
         }
     }
 }
@@ -2324,16 +2324,16 @@ extension ParserUnitTests {
     }
 }
 
-// MARK: - parseSectionSpec
+// MARK: - parseSectionSpecifier
 
 extension ParserUnitTests {
-    func testParseSectionSpec() {
-        let inputs: [(String, String, SectionSpec, UInt)] = [
+    func testParseSectionSpecifier() {
+        let inputs: [(String, String, SectionSpecifier, UInt)] = [
             ("HEADER", "\r", .text(.header), #line),
             ("1.2.3", "\r", .part([1, 2, 3], text: nil), #line),
             ("1.2.3.HEADER", "\r", .part([1, 2, 3], text: .header), #line),
         ]
-        self.iterateTestInputs(inputs, testFunction: GrammarParser.parseSectionSpec)
+        self.iterateTestInputs(inputs, testFunction: GrammarParser.parseSectionSpecifier)
     }
 }
 

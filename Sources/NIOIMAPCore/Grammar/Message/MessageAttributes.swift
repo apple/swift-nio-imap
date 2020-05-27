@@ -24,7 +24,7 @@ public enum MessageAttribute: Equatable {
     case rfc822Text(NString)
     case rfc822Size(Int)
     case body(BodyStructure, structure: Bool)
-    case bodySection(SectionSpec?, partial: Int?, data: NString)
+    case bodySection(SectionSpecifier?, partial: Int?, data: NString)
     case binary(section: [Int], data: NString)
     case binarySize(section: [Int], size: Int)
 }
@@ -124,7 +124,7 @@ extension EncodeBuffer {
             self.writeBody(body)
     }
 
-    @discardableResult mutating func writeMessageAttribute_bodySection(_ section: SectionSpec?, number: Int?, string: NString) -> Int {
+    @discardableResult mutating func writeMessageAttribute_bodySection(_ section: SectionSpecifier?, number: Int?, string: NString) -> Int {
         self.writeString("BODY") +
             self.writeSection(section) +
             self.writeIfExists(number) { (number) -> Int in
