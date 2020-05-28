@@ -31,31 +31,32 @@ public class ResponseRoundtripHandler: ChannelInboundHandler {
     }
 
     public func channelRead(context: ChannelHandlerContext, data: NIOAny) {
-        var originalBuffer = self.unwrapInboundIn(data)
+        var buffer = self.unwrapInboundIn(data)
+        let originalString = String(buffer: buffer)
+        
         var responses = [ResponseOrContinueRequest]()
         do {
-            try self.processor.process(buffer: originalBuffer) { (response) in
+            try self.processor.process(buffer: buffer) { (response) in
                 responses.append(response)
             }
         } catch {
             self.logger.error("Response parsing error: \(error)")
-            self.logger.error("Response: \(String(buffer: originalBuffer))")
+            self.logger.error("Response: \(originalString)")
             context.fireErrorCaught(error)
             return
         }
 
-        var roundtripBuffer = context.channel.allocator.buffer(capacity: originalBuffer.readableBytes)
+        buffer.clear()
         for response in responses {
             switch response {
             case .response(let response):
-                roundtripBuffer.writeResponse(response)
+                buffer.writeResponse(response)
             case .continueRequest(let cReq):
-                roundtripBuffer.writeContinueRequest(cReq)
+                buffer.writeContinueRequest(cReq)
             }
         }
 
-        let originalString = originalBuffer.readString(length: originalBuffer.readableBytes)!
-        let roundtripString = roundtripBuffer.readString(length: roundtripBuffer.readableBytes)!
+        let roundtripString = String(buffer: buffer)
         if originalString != roundtripString {
             self.logger.warning("Input response vs roundtrip output is different")
             self.logger.warning("Response (original):\n\(originalString)")
@@ -64,6 +65,6 @@ public class ResponseRoundtripHandler: ChannelInboundHandler {
             self.logger.info("\(originalString)")
         }
 
-        context.fireChannelRead(self.wrapInboundOut(roundtripBuffer))
+        context.fireChannelRead(self.wrapInboundOut(buffer))
     }
 }
