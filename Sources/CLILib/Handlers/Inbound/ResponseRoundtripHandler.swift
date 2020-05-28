@@ -45,8 +45,6 @@ public class ResponseRoundtripHandler: ChannelInboundHandler {
                 }
                 responses.append(response)
             }
-        } catch is _IncompleteMessage {
-            // we only want to hold incomplete messges, let every else propogate
         } catch {
             context.fireErrorCaught(error)
             return
