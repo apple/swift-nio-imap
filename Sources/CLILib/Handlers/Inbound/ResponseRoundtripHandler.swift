@@ -22,6 +22,7 @@ public class ResponseRoundtripHandler: ChannelInboundHandler {
     public typealias InboundIn = ByteBuffer
     public typealias InboundOut = ByteBuffer
 
+    let processor = NIOSingleStepByteToMessageProcessor(ResponseDecoder())
     let logger: Logger
     private var parser = ResponseParser()
 
@@ -29,17 +30,13 @@ public class ResponseRoundtripHandler: ChannelInboundHandler {
         self.logger = logger
     }
 
-    var cached = ByteBufferAllocator().buffer(capacity: 0)
-
     public func channelRead(context: ChannelHandlerContext, data: NIOAny) {
         var originalBuffer = self.unwrapInboundIn(data)
-        var originalBufferCopy = originalBuffer
-        self.cached.writeBuffer(&originalBufferCopy)
         var responses = [ResponseOrContinueRequest]()
         do {
-            while let response = try self.parser.parseResponseStream(...) {
+            try processor.process(buffer: originalBuffer, { (response) in
                 responses.append(response)
-            }
+            })
         } catch {
             self.logger.error("Response parsing error: \(error)")
             self.logger.error("Response: \(String(buffer: originalBuffer))")
