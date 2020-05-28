@@ -28,7 +28,7 @@ public class ResponseRoundtripHandler: ChannelInboundHandler {
     public init(logger: Logger) {
         self.logger = logger
     }
-    
+
     var cached = ByteBufferAllocator().buffer(capacity: 0)
 
     public func channelRead(context: ChannelHandlerContext, data: NIOAny) {
@@ -50,7 +50,7 @@ public class ResponseRoundtripHandler: ChannelInboundHandler {
             context.fireErrorCaught(error)
             return
         }
-        
+
         var roundtripBuffer = context.channel.allocator.buffer(capacity: originalBuffer.readableBytes)
         for response in responses {
             switch response {
@@ -70,7 +70,7 @@ public class ResponseRoundtripHandler: ChannelInboundHandler {
         } else {
             self.logger.info("\(originalString)")
         }
-        
+
         context.fireChannelRead(self.wrapInboundOut(roundtripBuffer))
     }
 }
