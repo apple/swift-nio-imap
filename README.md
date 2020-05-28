@@ -3,22 +3,20 @@
 A Swift project that provides an IMAP client and server, built upon SwiftNIO.
 
 ### Introduction and Usage
-`swift-nio-imap` is a Swift implementation of the IMAP4rev1 protocol (RFC3501) that can be used to write both mail clients and servers. It is built upon SwiftNIO v2.x.
+`swift-nio-email` is a Swift implementation of the IMAP4rev1 protocol (RFC3501) that can be used to write both mail clients and servers. It is built upon SwiftNIO v2.x. We'll be soon adding an SMTP implementation.
 
 To use the framework `import NIOIMAP`.
-
-So that code complete doesn't get polluted by the (literally) hundreds of types, we use namespacing quite intensively. Everything you need will be namespaced under `NIOIMAP`, e.g. `ClientCommand` and `ServerResponse`.
 
 ### Commands
 
 Commands are what an IMAP client sends to a server.
 
-A command consists of a `Tag` and a `CommandType`.
+A command consists of a `Tag` and a `Command`.
 
 #### Examples
-`ClientCommand("tag1", .noop)` => `tag1 NOOP`
-`ClientCommand("tag2", .capability)` => `tag1 CAPABILITY`
-`ClientCommand("tag3", .login("email@apple.com", "password"))` => `tag3 LOGIN "email@apple.com" "password"`
+`Command("tag1", .noop)` => `tag1 NOOP`
+`Command("tag2", .capability)` => `tag1 CAPABILITY`
+`Command("tag3", .login("email@apple.com", "password"))` => `tag3 LOGIN "email@apple.com" "password"`
 
 To send a command we recommend using a `MessageToByteHandler` with `CommandEncoder` as the encoder:
 
@@ -28,12 +26,23 @@ ClientBootstrap(group: context.eventLoop).channelInitializer { channel in
 }
 ```
 
-Alternatively, you can write a command to a `ByteBuffer` manually like this:
+Alternatively, you can write a command manually to a `ByteBuffer` manually like this:
 ```
 let command = ...
 var buffer = ...
 let writtenSize = buffer.writeCommand(command)
 ```
+
+### Sample applications
+#### Proxy
+We provide a simple proxy that can be placed between some mail client and server. The mail server *must* support TLS.
+
+`swift run Proxy <local_address> <local_port> <server_address> <server_port>`
+
+#### CLI
+The CLI allows you (the user) to connect to a mail server and enter commands. The mail server *must* support TLS. The CLI will always attempt to connect to the server on port 993.
+
+`swift run CLI`
 
 ### IMAP Extensions
 | Capability | RFC | Status |
