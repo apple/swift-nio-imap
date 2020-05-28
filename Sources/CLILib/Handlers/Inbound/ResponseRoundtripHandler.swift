@@ -46,6 +46,8 @@ public class ResponseRoundtripHandler: ChannelInboundHandler {
                 responses.append(response)
             }
         } catch {
+            self.logger.error("Response parsing error: \(error)")
+            self.logger.error("Response: \(String(buffer: originalBuffer))")
             context.fireErrorCaught(error)
             return
         }
