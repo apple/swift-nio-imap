@@ -33,7 +33,7 @@ public class ResponseRoundtripHandler: ChannelInboundHandler {
     public func channelRead(context: ChannelHandlerContext, data: NIOAny) {
         var buffer = self.unwrapInboundIn(data)
         let originalString = String(buffer: buffer)
-        
+
         var responses = [ResponseOrContinueRequest]()
         do {
             try self.processor.process(buffer: buffer) { (response) in
