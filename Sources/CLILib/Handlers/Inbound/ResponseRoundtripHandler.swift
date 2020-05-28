@@ -34,9 +34,9 @@ public class ResponseRoundtripHandler: ChannelInboundHandler {
         var originalBuffer = self.unwrapInboundIn(data)
         var responses = [ResponseOrContinueRequest]()
         do {
-            try processor.process(buffer: originalBuffer, { (response) in
+            try self.processor.process(buffer: originalBuffer) { (response) in
                 responses.append(response)
-            })
+            }
         } catch {
             self.logger.error("Response parsing error: \(error)")
             self.logger.error("Response: \(String(buffer: originalBuffer))")
