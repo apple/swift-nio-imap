@@ -15,6 +15,7 @@
 import struct NIO.ByteBuffer
 
 public enum ResponsePayload: Equatable {
+    case greeting(Greeting)
     case conditionalState(ResponseConditionalState)
     case conditionalBye(ResponseText)
     case mailboxData(MailboxName.Data)
@@ -43,6 +44,8 @@ extension EncodeBuffer {
             return self.writeEnableData(data)
         case .id(let data):
             return self.writeIDResponse(data)
+        case .greeting(let greeting):
+            return self.writeGreeting(greeting)
         }
     }
 }

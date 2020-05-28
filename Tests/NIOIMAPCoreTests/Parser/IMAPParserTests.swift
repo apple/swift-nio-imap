@@ -92,7 +92,7 @@ extension ParserUnitTests {
         buffer.writeString(lines.joined())
 
         let expectedResults: [(Response, UInt)] = [
-            (.greeting(.auth(.ok(.init(code: .capability([.imap4rev1]), text: "Ready.")))), #line),
+            (.untaggedResponse(.greeting(.auth(.ok(.init(code: .capability([.imap4rev1]), text: "Ready."))))), #line),
             (.taggedResponse(.init(tag: "2", state: .ok(.init(code: nil, text: "Login completed.")))), #line),
 
             (.fetchResponse(.start(1)), #line),
