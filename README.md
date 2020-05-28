@@ -33,6 +33,17 @@ var buffer = ...
 let writtenSize = buffer.writeCommand(command)
 ```
 
+### Sample applications
+#### Proxy
+We provide a simple proxy that can be placed between some mail client and server. The mail server *must* support TLS.
+
+`swift run Proxy <local_address> <local_port> <server_address> <server_port>`
+
+#### CLI
+The CLI allows you (the user) to connect to a mail server and enter commands. The mail server *must* support TLS. The CLI will always attempt to connect to the server on port 993.
+
+`swift run CLI`
+
 ### IMAP Extensions
 | Capability | RFC | Status |
 ---|---|---
