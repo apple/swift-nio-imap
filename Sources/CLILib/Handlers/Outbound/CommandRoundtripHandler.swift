@@ -18,6 +18,10 @@ import NIOIMAP
 import NIOIMAPCore
 import NIOSSL
 
+enum CommandRoundtripError: Error {
+    case incompleteCommand
+}
+
 public class CommandRoundtripHandler: ChannelOutboundHandler {
     public typealias OutboundIn = ByteBuffer
     public typealias OutboundOut = ByteBuffer
@@ -34,8 +38,8 @@ public class CommandRoundtripHandler: ChannelOutboundHandler {
         do {
             var originalBufferCopy = originalBuffer
             guard let commandStream = try parser.parseCommandStream(buffer: &originalBufferCopy) else {
-                promise?.fail(ParsingError.incompleteMessage) // TODO: this leaks implementation details
-                return
+                // this is fine because the command is input by the user, so *should* be valid
+                throw CommandRoundtripError.incompleteCommand
             }
 
             var encodeBuffer = EncodeBuffer(context.channel.allocator.buffer(capacity: originalBuffer.readableBytes),

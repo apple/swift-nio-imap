@@ -46,7 +46,7 @@ public struct CommandParser: Parser {
         // the necessary continuations.
         do {
             return try self.parseCommandStream0(buffer: &buffer, tracker: .makeNewDefaultLimitStackTracker)
-        } catch ParsingError.incompleteMessage {
+        } catch is _IncompleteMessage {
             return nil
         }
     }
@@ -120,7 +120,7 @@ public struct CommandParser: Parser {
         do {
             return try GrammarParser.parseCommand(buffer: &buffer, tracker: tracker)
         } catch is ParsingError {
-            throw ParsingError.incompleteMessage
+            throw _IncompleteMessage()
         }
     }
 }

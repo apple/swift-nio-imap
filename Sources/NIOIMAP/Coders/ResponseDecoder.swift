@@ -28,8 +28,6 @@ public struct ResponseDecoder: NIOSingleStepByteToMessageDecoder {
         let save = buffer
         do {
             return try self.parser.parseResponseStream(buffer: &buffer)
-        } catch ParsingError.incompleteMessage {
-            return nil
         } catch {
             throw IMAPDecoderError(parserError: error, buffer: save)
         }
