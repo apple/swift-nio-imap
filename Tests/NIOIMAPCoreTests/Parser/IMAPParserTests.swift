@@ -2637,6 +2637,30 @@ extension ParserUnitTests {
     }
 }
 
+// MARK: - parseSequenceNumber
+
+extension ParserUnitTests {
+    func testParseSequenceNumber() {
+        let inputs: [(String, String, SequenceNumber, UInt)] = [
+            ("1", "\r", .init(1), #line),
+        ]
+        self.iterateTestInputs(inputs, testFunction: GrammarParser.parseSequenceNumber)
+    }
+}
+
+// MARK: - parseSequenceSet
+
+extension ParserUnitTests {
+    func testParseSequenceSet() {
+        let inputs: [(String, String, SequenceSet, UInt)] = [
+            ("*", "\r", [.all], #line),
+            ("1:2", "\r", [1 ... 2], #line),
+            ("1:2,2:3,3:4", "\r", [1 ... 2, 2 ... 3, 3 ... 4], #line),
+        ]
+        self.iterateTestInputs(inputs, testFunction: GrammarParser.parseSequenceSet)
+    }
+}
+
 // MARK: - parseStoreModifier
 
 extension ParserUnitTests {
