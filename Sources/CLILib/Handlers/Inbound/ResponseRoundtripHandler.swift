@@ -28,43 +28,49 @@ public class ResponseRoundtripHandler: ChannelInboundHandler {
     public init(logger: Logger) {
         self.logger = logger
     }
+    
+    var cached = ByteBufferAllocator().buffer(capacity: 0)
 
     public func channelRead(context: ChannelHandlerContext, data: NIOAny) {
         var originalBuffer = self.unwrapInboundIn(data)
+        var originalBufferCopy = originalBuffer
+        self.cached.writeBuffer(&originalBufferCopy)
+        var responses = [ResponseOrContinueRequest]()
         do {
-            var originalBufferCopy = originalBuffer
-            var responses = [ResponseOrContinueRequest]()
-            while originalBufferCopy.readableBytes > 0 {
-                guard let response = try self.parser.parseResponseStream(buffer: &originalBufferCopy) else {
-                    self.logger.error("Need more data to parse a response")
+            while true {
+                guard let response = try self.parser.parseResponseStream(buffer: &self.cached) else {
+                    // missing data, so stop and wait for more
                     break
                 }
                 responses.append(response)
             }
-
-            var roundtripBuffer = context.channel.allocator.buffer(capacity: originalBuffer.readableBytes)
-            for response in responses {
-                switch response {
-                case .response(let response):
-                    roundtripBuffer.writeResponse(response)
-                case .continueRequest(let cReq):
-                    roundtripBuffer.writeContinueRequest(cReq)
-                }
-            }
-
-            let originalString = originalBuffer.readString(length: originalBuffer.readableBytes)!
-            let roundtripString = roundtripBuffer.readString(length: roundtripBuffer.readableBytes)!
-            if originalString != roundtripString {
-                self.logger.warning("Input response vs roundtrip output is different")
-                self.logger.warning("Response (original):\n\(originalString)")
-                self.logger.warning("Response (roundtrip):\n\(roundtripString)")
-            } else {
-                self.logger.info("\(originalString)")
-            }
-
-            context.fireChannelRead(self.wrapInboundOut(roundtripBuffer))
+        } catch is _IncompleteMessage {
+            // we only want to hold incomplete messges, let every else propogate
         } catch {
             context.fireErrorCaught(error)
+            return
         }
+        
+        var roundtripBuffer = context.channel.allocator.buffer(capacity: originalBuffer.readableBytes)
+        for response in responses {
+            switch response {
+            case .response(let response):
+                roundtripBuffer.writeResponse(response)
+            case .continueRequest(let cReq):
+                roundtripBuffer.writeContinueRequest(cReq)
+            }
+        }
+
+        let originalString = originalBuffer.readString(length: originalBuffer.readableBytes)!
+        let roundtripString = roundtripBuffer.readString(length: roundtripBuffer.readableBytes)!
+        if originalString != roundtripString {
+            self.logger.warning("Input response vs roundtrip output is different")
+            self.logger.warning("Response (original):\n\(originalString)")
+            self.logger.warning("Response (roundtrip):\n\(roundtripString)")
+        } else {
+            self.logger.info("\(originalString)")
+        }
+        
+        context.fireChannelRead(self.wrapInboundOut(roundtripBuffer))
     }
 }

@@ -18,8 +18,8 @@ import NIOIMAP
 import NIOIMAPCore
 import NIOSSL
 
-struct ImapError: Error {
-    var message: String
+enum CommandRoundtripError: Error {
+    case incompleteCommand
 }
 
 public class CommandRoundtripHandler: ChannelOutboundHandler {
@@ -38,8 +38,8 @@ public class CommandRoundtripHandler: ChannelOutboundHandler {
         do {
             var originalBufferCopy = originalBuffer
             guard let commandStream = try parser.parseCommandStream(buffer: &originalBufferCopy) else {
-                self.logger.error("Need more data to parse a command")
-                return
+                // this is fine because the command is input by the user, so *should* be valid
+                throw CommandRoundtripError.incompleteCommand
             }
 
             var encodeBuffer = EncodeBuffer(context.channel.allocator.buffer(capacity: originalBuffer.readableBytes),
