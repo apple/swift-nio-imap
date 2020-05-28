@@ -39,7 +39,8 @@ public class ResponseRoundtripHandler: ChannelInboundHandler {
         do {
             while true {
                 guard let response = try self.parser.parseResponseStream(buffer: &self.cached) else {
-                    // missing data, so stop and wait for more
+                    // missing data, so stop parsing
+                    // the remaining data will be saved for the next read
                     break
                 }
                 responses.append(response)
