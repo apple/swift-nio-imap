@@ -20,6 +20,12 @@ enum TestUtilities {}
 
 // MARK: - ByteBuffer
 
+#if swift(>=5.3)
+func magicFile(file: StaticString = #filePath) -> StaticString { file }
+#else
+func magicFile(file: StaticString = #file) -> StaticString { file }
+#endif
+
 extension TestUtilities {
     static func createTestByteBuffer(for bytes: [UInt8]) -> ByteBuffer {
         var buffer = ByteBufferAllocator().buffer(capacity: bytes.count)
@@ -36,7 +42,7 @@ extension TestUtilities {
     static func withBuffer(_ string: String,
                            terminator: String = "",
                            shouldRemainUnchanged: Bool = false,
-                           file: StaticString = #file, line: UInt = #line, _ body: (inout ByteBuffer) throws -> Void) {
+                           file: StaticString = magicFile(), line: UInt = #line, _ body: (inout ByteBuffer) throws -> Void) {
         var inputBuffer = ByteBufferAllocator().buffer(capacity: string.utf8.count + terminator.utf8.count + 10)
         inputBuffer.writeString("hello")
         inputBuffer.moveReaderIndex(forwardBy: 5)
