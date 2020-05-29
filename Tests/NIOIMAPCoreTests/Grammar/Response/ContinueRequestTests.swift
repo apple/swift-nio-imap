@@ -29,7 +29,7 @@ extension ContinueRequestTests {
 
         for (test, expectedString, line) in inputs {
             var buffer = ByteBufferAllocator().buffer(capacity: 128)
-            let size = buffer.writeContinueRequest(test)
+            let size = buffer.writeContinueRequest(test, capabilities: [])
             XCTAssertEqual(size, expectedString.utf8.count, line: line)
             XCTAssertEqual(String(buffer: buffer), expectedString, line: line)
         }

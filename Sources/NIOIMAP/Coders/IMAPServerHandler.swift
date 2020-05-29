@@ -29,7 +29,7 @@ public final class IMAPServerHandler: ChannelDuplexHandler {
         set {
             self._continueRequest = newValue
             var buffer = ByteBufferAllocator().buffer(capacity: 16)
-            buffer.writeContinueRequest(newValue)
+            buffer.writeContinueRequest(newValue, capabilities: self.capabilities)
             self.continueRequestBytes = buffer
         }
     }
@@ -38,11 +38,13 @@ public final class IMAPServerHandler: ChannelDuplexHandler {
     private var numberOfOutstandingContinueRequests = 0
     private var continueRequestBytes: ByteBuffer
 
+    public var capabilities: [Capability] = []
+    
     public init(continueRequest: ContinueRequest = .responseText(ResponseText(text: "OK"))) {
         self.decoder = NIOSingleStepByteToMessageProcessor(CommandDecoder())
         self._continueRequest = continueRequest
         var buffer = ByteBufferAllocator().buffer(capacity: 16)
-        buffer.writeContinueRequest(continueRequest)
+        buffer.writeContinueRequest(continueRequest, capabilities: self.capabilities)
         self.continueRequestBytes = buffer
     }
 
@@ -77,7 +79,7 @@ public final class IMAPServerHandler: ChannelDuplexHandler {
     public func write(context: ChannelHandlerContext, data: NIOAny, promise: EventLoopPromise<Void>?) {
         let response = self.unwrapOutboundIn(data)
         var buffer = context.channel.allocator.buffer(capacity: 1024)
-        buffer.writeResponse(response)
+        buffer.writeResponse(response, capabilities: self.capabilities)
         context.write(self.wrapOutboundOut(buffer), promise: promise)
     }
 }

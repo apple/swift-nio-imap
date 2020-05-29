@@ -18,6 +18,8 @@ import NIOIMAPCore
 public struct CommandEncoder: MessageToByteEncoder {
     public typealias OutboundIn = CommandStream
 
+    var capabilities: [Capability] = []
+    
     public init() {}
 
     public func encode(data: CommandStream, out: inout ByteBuffer) throws {
@@ -27,7 +29,7 @@ public struct CommandEncoder: MessageToByteEncoder {
         case .idleDone:
             out.writeString("DONE\r\n")
         case .command(let command):
-            var encodeBuffer = EncodeBuffer(out, mode: .client)
+            var encodeBuffer = EncodeBuffer(out, mode: .client, capabilities: self.capabilities)
             encodeBuffer.writeCommand(command)
             out = encodeBuffer.nextChunk().bytes
         }

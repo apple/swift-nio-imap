@@ -28,6 +28,7 @@ public class CommandRoundtripHandler: ChannelOutboundHandler {
 
     let logger: Logger
     private var parser = CommandParser()
+    public var capabilities: [Capability] = []
 
     public init(logger: Logger) {
         self.logger = logger
@@ -43,7 +44,7 @@ public class CommandRoundtripHandler: ChannelOutboundHandler {
             }
 
             var encodeBuffer = EncodeBuffer(context.channel.allocator.buffer(capacity: originalBuffer.readableBytes),
-                                            mode: .client)
+                                            mode: .client, capabilities: self.capabilities)
             encodeBuffer.writeCommandStream(commandStream)
             var roundtripBuffer = encodeBuffer.nextChunk().bytes
 

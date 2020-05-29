@@ -17,7 +17,7 @@ import NIOIMAPCore
 import XCTest
 
 class EncodeTestClass: XCTestCase {
-    var testBuffer = EncodeBuffer(ByteBufferAllocator().buffer(capacity: 128), mode: .server())
+    var testBuffer = EncodeBuffer(ByteBufferAllocator().buffer(capacity: 128), mode: .server(), capabilities: [])
 
     var testBufferString: String {
         var remaining = self.testBuffer
@@ -26,7 +26,7 @@ class EncodeTestClass: XCTestCase {
     }
 
     override func setUp() {
-        self.testBuffer = EncodeBuffer(ByteBufferAllocator().buffer(capacity: 128), mode: .server())
+        self.testBuffer = EncodeBuffer(ByteBufferAllocator().buffer(capacity: 128), mode: .server(), capabilities: [])
     }
 
     func iterateInputs<T>(inputs: [(T, String, UInt)], encoder: (T) -> Int, file: StaticString = magicFile()) {

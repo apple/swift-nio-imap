@@ -23,8 +23,8 @@ public enum ContinueRequest: Equatable {
 // MARK: - Encoding
 
 extension ByteBuffer {
-    @discardableResult public mutating func writeContinueRequest(_ data: ContinueRequest) -> Int {
-        var buffer = EncodeBuffer(self, mode: .client)
+    @discardableResult public mutating func writeContinueRequest(_ data: ContinueRequest, capabilities: [Capability]) -> Int {
+        var buffer = EncodeBuffer(self, mode: .client, capabilities: capabilities)
         defer {
             self = buffer.nextChunk().bytes
         }

@@ -27,12 +27,14 @@ public struct EncodeBuffer {
     }
 
     var mode: Mode
+    var capabilities: [Capability]
     @usableFromInline internal var _buffer: ByteBuffer
     @usableFromInline internal var _stopPoints: CircularBuffer<Int> = []
 
-    public init(_ buffer: ByteBuffer, mode: Mode) {
+    public init(_ buffer: ByteBuffer, mode: Mode, capabilities: [Capability]) {
         self._buffer = buffer
         self.mode = mode
+        self.capabilities = capabilities
     }
 }
 

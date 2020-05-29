@@ -13,6 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import NIOIMAP
 
 public final class IMAPClientHandler: ChannelDuplexHandler {
     public typealias InboundIn = ByteBuffer
@@ -25,6 +26,8 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
         MarkedCircularBuffer(initialCapacity: 4)
 
     public struct UnexpectedContinuationRequest: Error {}
+    
+    var capabilities: [Capability] = []
 
     public init(expectGreeting: Bool) {
         self.decoder = NIOSingleStepByteToMessageProcessor(ResponseDecoder(expectGreeting: expectGreeting))
@@ -71,7 +74,7 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
 
     public func write(context: ChannelHandlerContext, data: NIOAny, promise: EventLoopPromise<Void>?) {
         let command = self.unwrapOutboundIn(data)
-        var encoder = EncodeBuffer(context.channel.allocator.buffer(capacity: 1024), mode: .client)
+        var encoder = EncodeBuffer(context.channel.allocator.buffer(capacity: 1024), mode: .client, capabilities: self.capabilities)
         encoder.writeCommandStream(command)
         if self.bufferedWrites.isEmpty {
             let next = encoder.nextChunk()

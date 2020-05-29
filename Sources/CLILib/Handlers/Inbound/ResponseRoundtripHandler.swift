@@ -25,6 +25,8 @@ public class ResponseRoundtripHandler: ChannelInboundHandler {
     let processor = NIOSingleStepByteToMessageProcessor(ResponseDecoder())
     let logger: Logger
     private var parser = ResponseParser()
+    
+    public var capabilities: [Capability] = []
 
     public init(logger: Logger) {
         self.logger = logger
@@ -50,9 +52,9 @@ public class ResponseRoundtripHandler: ChannelInboundHandler {
         for response in responses {
             switch response {
             case .response(let response):
-                buffer.writeResponse(response)
+                buffer.writeResponse(response, capabilities: self.capabilities)
             case .continueRequest(let cReq):
-                buffer.writeContinueRequest(cReq)
+                buffer.writeContinueRequest(cReq, capabilities: self.capabilities)
             }
         }
 
