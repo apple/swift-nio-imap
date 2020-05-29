@@ -22,7 +22,7 @@ import Glibc
 #if os(Linux) || os(macOS)
 let filePath: String
 #if compiler(>=5.3)
-filePath = magicFile()Path
+filePath = magicFile()
 #else
 filePath = magicFile()
 #endif
