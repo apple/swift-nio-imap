@@ -36,6 +36,10 @@ public struct EncodeBuffer {
         self.mode = mode
         self.capabilities = capabilities
     }
+    
+    func preconditionCapability(_ capability: Capability) {
+        precondition(self.capabilities.contains(capability), "Missing capability: \(capability.rawValue)")
+    }
 }
 
 extension EncodeBuffer {

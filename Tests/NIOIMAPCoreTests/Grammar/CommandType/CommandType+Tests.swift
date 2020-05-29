@@ -22,26 +22,22 @@ class CommandType_Tests: EncodeTestClass {}
 
 extension CommandType_Tests {
     func testEncode() {
-        let inputs: [(Command, String, UInt)] = [
-            (.list(nil, reference: .init(""), .mailbox(""), []), "LIST \"\" \"\" RETURN ()", #line),
-            (.list(reference: .init(""), .mailbox("")), "LIST \"\" \"\" RETURN ()", #line),
-            (.namespace, "NAMESPACE", #line),
+        let inputs: [(Command, [Capability], String, UInt)] = [
+            (.list(nil, reference: .init(""), .mailbox(""), []), [], "LIST \"\" \"\" RETURN ()", #line),
+            (.list(reference: .init(""), .mailbox("")), [], "LIST \"\" \"\" RETURN ()", #line),
+            (.namespace, [], "NAMESPACE", #line),
 
             // MARK: Login
 
-            (.login(username: "username", password: "password"), #"LOGIN "username" "password""#, #line),
-            (.login(username: "david evans", password: "great password"), #"LOGIN "david evans" "great password""#, #line),
-            (.login(username: "\r\n", password: "\\\""), "LOGIN {2}\r\n\r\n {2}\r\n\\\"", #line),
+            (.login(username: "username", password: "password"), [], #"LOGIN "username" "password""#, #line),
+            (.login(username: "david evans", password: "great password"), [], #"LOGIN "david evans" "great password""#, #line),
+            (.login(username: "\r\n", password: "\\\""), [], "LOGIN {2}\r\n\r\n {2}\r\n\\\"", #line),
 
-            (.select(MailboxName("Events")), #"SELECT "Events""#, #line),
-            (.examine(MailboxName("Events")), #"EXAMINE "Events""#, #line),
+            (.select(MailboxName("Events")), [], #"SELECT "Events""#, #line),
+            (.examine(MailboxName("Events")), [], #"EXAMINE "Events""#, #line),
+            (.move([1], .inbox), [.move], "MOVE 1 \"INBOX\"", #line)
         ]
 
-        for (input, expectedString, line) in inputs {
-            self.testBuffer.clear()
-            let size = self.testBuffer.writeCommandType(input)
-            XCTAssertEqual(size, expectedString.utf8.count, line: line)
-            XCTAssertEqual(self.testBufferString, expectedString, line: line)
-        }
+        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeCommandType($0) })
     }
 }
