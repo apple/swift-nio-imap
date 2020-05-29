@@ -3305,14 +3305,12 @@ extension GrammarParser {
     }
 
     // section-binary  = "[" [section-part] "]"
-    static func parseSectionBinary(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [Int] {
-        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> [Int] in
+    static func parseSectionBinary(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SectionSpecifier.Part {
+        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> SectionSpecifier.Part in
             try ParserLibrary.parseFixedString("[", buffer: &buffer, tracker: tracker)
-            let part = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
-                try self.parseSectionPart(buffer: &buffer, tracker: tracker)
-            } ?? []
+            let part = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseSectionPart)
             try ParserLibrary.parseFixedString("]", buffer: &buffer, tracker: tracker)
-            return part
+            return part ?? .init(rawValue: [])
         }
     }
 
@@ -3348,8 +3346,8 @@ extension GrammarParser {
     }
 
     // section-part    = nz-number *("." nz-number)
-    static func parseSectionPart(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [Int] {
-        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> [Int] in
+    static func parseSectionPart(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SectionSpecifier.Part {
+        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> SectionSpecifier.Part in
             var output = [try self.parseNZNumber(buffer: &buffer, tracker: tracker)]
             try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &output, tracker: tracker) { (buffer, tracker) -> Int in
                 try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> Int in
@@ -3357,7 +3355,7 @@ extension GrammarParser {
                     return try self.parseNZNumber(buffer: &buffer, tracker: tracker)
                 }
             }
-            return output
+            return .init(rawValue: output)
         }
     }
 

@@ -2276,7 +2276,7 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseSectionBinary() {
-        let inputs: [(String, String, [Int], UInt)] = [
+        let inputs: [(String, String, SectionSpecifier.Part, UInt)] = [
             ("[]", "\r", [], #line),
             ("[1]", "\r", [1], #line),
             ("[1.2.3]", "\r", [1, 2, 3], #line),
@@ -2302,25 +2302,14 @@ extension ParserUnitTests {
 // MARK: - parseSectionPart
 
 extension ParserUnitTests {
-    func testParseSection_valid_one() {
-        TestUtilities.withBuffer("1", terminator: " ") { (buffer) in
-            let part = try GrammarParser.parseSectionPart(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(part[0], 1)
-        }
-    }
-
-    func testParseSection_valid_many() {
-        TestUtilities.withBuffer("1.3.5", terminator: " ") { (buffer) in
-            let part = try GrammarParser.parseSectionPart(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(part, [1, 3, 5])
-        }
-    }
-
-    func testParseSection_invalid_none() {
-        var buffer = "" as ByteBuffer
-        XCTAssertThrowsError(try GrammarParser.parseSectionPart(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertTrue(e is _IncompleteMessage)
-        }
+    
+    func testParseSectionPart() {
+        let inputs: [(String, String, SectionSpecifier.Part, UInt)] = [
+            ("1", "\r", [1], #line),
+            ("1.2", "\r", [1, 2], #line),
+            ("1.2.3.4.5", "\r", [1, 2, 3, 4, 5], #line),
+        ]
+        self.iterateTestInputs(inputs, testFunction: GrammarParser.parseSectionPart)
     }
 }
 

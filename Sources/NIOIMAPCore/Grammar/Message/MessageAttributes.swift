@@ -25,8 +25,8 @@ public enum MessageAttribute: Equatable {
     case rfc822Size(Int)
     case body(BodyStructure, structure: Bool)
     case bodySection(SectionSpecifier?, partial: Int?, data: NString)
-    case binary(section: [Int], data: NString)
-    case binarySize(section: [Int], size: Int)
+    case binary(section: SectionSpecifier.Part, data: NString)
+    case binarySize(section: SectionSpecifier.Part, size: Int)
 }
 
 // MARK: - Encoding
@@ -67,14 +67,14 @@ extension EncodeBuffer {
         }
     }
 
-    @discardableResult mutating func writeMessageAttribute_binaryString(section: [Int], string: NString) -> Int {
+    @discardableResult mutating func writeMessageAttribute_binaryString(section: SectionSpecifier.Part, string: NString) -> Int {
         self.writeString("BINARY") +
             self.writeSectionBinary(section) +
             self.writeSpace() +
             self.writeNString(string)
     }
 
-    @discardableResult mutating func writeMessageAttribute_binarySize(section: [Int], number: Int) -> Int {
+    @discardableResult mutating func writeMessageAttribute_binarySize(section: SectionSpecifier.Part, number: Int) -> Int {
         self.writeString("BINARY.SIZE") +
             self.writeSectionBinary(section) +
             self.writeString(" \(number)")

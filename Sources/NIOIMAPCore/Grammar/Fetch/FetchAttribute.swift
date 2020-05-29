@@ -28,8 +28,8 @@ public enum FetchAttribute: Equatable {
     case bodySection(peek: Bool, _ section: SectionSpecifier?, ClosedRange<Int>?)
     case uid
     case modifierSequenceValue(ModifierSequenceValue)
-    case binary(peek: Bool, section: [Int], partial: ClosedRange<Int>?)
-    case binarySize(section: [Int])
+    case binary(peek: Bool, section: SectionSpecifier.Part, partial: ClosedRange<Int>?)
+    case binarySize(section: SectionSpecifier.Part)
 }
 
 extension Array where Element == FetchAttribute {
@@ -109,12 +109,12 @@ extension EncodeBuffer {
             }
     }
 
-    @discardableResult mutating func writeFetchAttribute_binarySize(_ section: [Int]) -> Int {
+    @discardableResult mutating func writeFetchAttribute_binarySize(_ section: SectionSpecifier.Part) -> Int {
         self.writeString("BINARY.SIZE") +
             self.writeSectionBinary(section)
     }
 
-    @discardableResult mutating func writeFetchAttribute_binary(peek: Bool, section: [Int], partial: ClosedRange<Int>?) -> Int {
+    @discardableResult mutating func writeFetchAttribute_binary(peek: Bool, section: SectionSpecifier.Part, partial: ClosedRange<Int>?) -> Int {
         self.writeString("BINARY") +
             self.writeIfTrue(peek) {
                 self.writeString(".PEEK")
