@@ -39,7 +39,7 @@ public final class IMAPServerHandler: ChannelDuplexHandler {
     private var continueRequestBytes: ByteBuffer
 
     public var capabilities: [Capability] = []
-    
+
     public init(continueRequest: ContinueRequest = .responseText(ResponseText(text: "OK"))) {
         self.decoder = NIOSingleStepByteToMessageProcessor(CommandDecoder())
         self._continueRequest = continueRequest

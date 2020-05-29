@@ -26,7 +26,7 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
         MarkedCircularBuffer(initialCapacity: 4)
 
     public struct UnexpectedContinuationRequest: Error {}
-    
+
     var capabilities: [Capability] = []
 
     public init(expectGreeting: Bool) {

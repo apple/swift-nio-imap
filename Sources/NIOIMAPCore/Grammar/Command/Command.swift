@@ -378,7 +378,7 @@ extension EncodeBuffer {
         self.preconditionCapability(.namespace)
         return self.writeNamespaceCommand()
     }
-    
+
     @discardableResult mutating func writeCommandType_id(_ id: [IDParameter]) -> Int {
         self.preconditionCapability(.id)
         return self.writeString("ID ") +

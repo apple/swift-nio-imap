@@ -25,7 +25,7 @@ public class ResponseRoundtripHandler: ChannelInboundHandler {
     let processor = NIOSingleStepByteToMessageProcessor(ResponseDecoder())
     let logger: Logger
     private var parser = ResponseParser()
-    
+
     public var capabilities: [Capability] = []
 
     public init(logger: Logger) {

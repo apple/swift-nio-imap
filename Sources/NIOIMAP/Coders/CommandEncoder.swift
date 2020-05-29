@@ -19,7 +19,7 @@ public struct CommandEncoder: MessageToByteEncoder {
     public typealias OutboundIn = CommandStream
 
     var capabilities: [Capability] = []
-    
+
     public init() {}
 
     public func encode(data: CommandStream, out: inout ByteBuffer) throws {

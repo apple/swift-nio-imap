@@ -36,7 +36,7 @@ public struct EncodeBuffer {
         self.mode = mode
         self.capabilities = capabilities
     }
-    
+
     func preconditionCapability(_ capability: Capability, file: StaticString = #file, line: UInt = #line) {
         precondition(self.capabilities.contains(capability), "Missing capability: \(capability.rawValue)", file: file, line: line)
     }
