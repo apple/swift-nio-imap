@@ -25,7 +25,7 @@ extension CommandType_Tests {
         let inputs: [(Command, [Capability], String, UInt)] = [
             (.list(nil, reference: .init(""), .mailbox(""), []), [], "LIST \"\" \"\" RETURN ()", #line),
             (.list(reference: .init(""), .mailbox("")), [], "LIST \"\" \"\" RETURN ()", #line),
-            (.namespace, [], "NAMESPACE", #line),
+            (.namespace, [.namespace], "NAMESPACE", #line),
 
             // MARK: Login
 
@@ -35,7 +35,8 @@ extension CommandType_Tests {
 
             (.select(MailboxName("Events")), [], #"SELECT "Events""#, #line),
             (.examine(MailboxName("Events")), [], #"EXAMINE "Events""#, #line),
-            (.move([1], .inbox), [.move], "MOVE 1 \"INBOX\"", #line)
+            (.move([1], .inbox), [.move], "MOVE 1 \"INBOX\"", #line),
+            (.id([]), [.id], "ID NIL", #line),
         ]
 
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeCommandType($0) })

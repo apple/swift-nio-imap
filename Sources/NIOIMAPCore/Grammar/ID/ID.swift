@@ -47,9 +47,4 @@ extension EncodeBuffer {
         self.writeString("ID ") +
             self.writeIDParameters(response)
     }
-
-    @discardableResult mutating func writeID(_ id: [IDParameter]) -> Int {
-        self.writeString("ID ") +
-            self.writeIDParameters(id)
-    }
 }
