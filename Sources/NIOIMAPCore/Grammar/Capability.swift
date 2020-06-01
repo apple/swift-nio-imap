@@ -15,7 +15,6 @@
 import struct NIO.ByteBuffer
 
 struct EncodingCapabilities: OptionSet {
-    
     static let imap4 = EncodingCapabilities(rawValue: 1 << 0)
     static let imap4rev1 = EncodingCapabilities(rawValue: 1 << 1)
     static let move = EncodingCapabilities(rawValue: 1 << 2)
