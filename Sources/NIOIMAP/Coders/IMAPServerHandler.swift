@@ -28,9 +28,10 @@ public final class IMAPServerHandler: ChannelDuplexHandler {
         }
         set {
             self._continueRequest = newValue
-            var buffer = ByteBufferAllocator().buffer(capacity: 16)
-            buffer.writeContinueRequest(newValue, capabilities: self.capabilities)
-            self.continueRequestBytes = buffer
+            let buffer = ByteBufferAllocator().buffer(capacity: 16)
+            var encodeBuffer = EncodeBuffer(buffer, mode: .server(), capabilities: self.capabilities)
+            encodeBuffer.writeContinueRequest(newValue)
+            self.continueRequestBytes = encodeBuffer.nextChunk().bytes
         }
     }
 
@@ -43,9 +44,10 @@ public final class IMAPServerHandler: ChannelDuplexHandler {
     public init(continueRequest: ContinueRequest = .responseText(ResponseText(text: "OK"))) {
         self.decoder = NIOSingleStepByteToMessageProcessor(CommandDecoder())
         self._continueRequest = continueRequest
-        var buffer = ByteBufferAllocator().buffer(capacity: 16)
-        buffer.writeContinueRequest(continueRequest, capabilities: self.capabilities)
-        self.continueRequestBytes = buffer
+        let buffer = ByteBufferAllocator().buffer(capacity: 16)
+        var encodeBuffer = EncodeBuffer(buffer, mode: .server(), capabilities: self.capabilities)
+        encodeBuffer.writeContinueRequest(continueRequest)
+        self.continueRequestBytes = encodeBuffer.nextChunk().bytes
     }
 
     public func read(context: ChannelHandlerContext) {

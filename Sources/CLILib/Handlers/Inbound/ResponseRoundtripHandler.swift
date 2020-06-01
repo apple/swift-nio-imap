@@ -54,8 +54,8 @@ public class ResponseRoundtripHandler: ChannelInboundHandler {
             switch response {
             case .response(let response):
                 encodeBuffer.writeResponse(response)
-            case .continueRequest:
-                break
+            case .continueRequest(let req):
+                encodeBuffer.writeContinueRequest(req)
             }
         }
 

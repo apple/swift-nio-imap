@@ -26,12 +26,6 @@ extension ContinueRequestTests {
             (.base64("bb=="), "+ bb==\r\n", #line),
             (.responseText(.init(code: .alert, text: "text")), "+ [ALERT] text\r\n", #line),
         ]
-
-        for (test, expectedString, line) in inputs {
-            var buffer = ByteBufferAllocator().buffer(capacity: 128)
-            let size = buffer.writeContinueRequest(test, capabilities: [])
-            XCTAssertEqual(size, expectedString.utf8.count, line: line)
-            XCTAssertEqual(String(buffer: buffer), expectedString, line: line)
-        }
+        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeContinueRequest($0) })
     }
 }
