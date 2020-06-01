@@ -23,9 +23,9 @@ public struct EncodeBuffer {
     }
 
     var hasMoreChunks: Bool {
-        return self._buffer.readableBytes > 0
+        self._buffer.readableBytes > 0
     }
-    
+
     var mode: Mode
     @usableFromInline internal var _buffer: ByteBuffer
     @usableFromInline internal var _stopPoints: CircularBuffer<Int> = []
@@ -43,7 +43,6 @@ extension EncodeBuffer {
     }
 
     public mutating func nextChunk() -> Chunk {
-        
         switch self.mode {
         case .client:
             if let stopPoint = self._stopPoints.popFirst() {

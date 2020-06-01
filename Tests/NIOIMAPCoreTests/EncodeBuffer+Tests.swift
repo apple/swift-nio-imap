@@ -12,19 +12,16 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
 import Foundation
 import NIO
 @testable import NIOIMAPCore
+import XCTest
 
-class EncodeBuffer_Tests: XCTestCase {
-    
-}
+class EncodeBuffer_Tests: XCTestCase {}
 
 // MARK: - hasMoreChunks
 
 extension EncodeBuffer_Tests {
-    
     func testHasMoreChunks() {
         let raw = ByteBufferAllocator().buffer(capacity: 20)
         var encodeBuffer = EncodeBuffer(raw, mode: .client)
@@ -34,5 +31,4 @@ extension EncodeBuffer_Tests {
         _ = encodeBuffer.nextChunk()
         XCTAssertFalse(encodeBuffer.hasMoreChunks)
     }
-    
 }
