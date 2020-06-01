@@ -13,7 +13,6 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
-import NIOIMAP
 
 public final class IMAPClientHandler: ChannelDuplexHandler {
     public typealias InboundIn = ByteBuffer
