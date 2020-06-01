@@ -24,7 +24,7 @@ class EncodeBuffer_Tests: XCTestCase {}
 extension EncodeBuffer_Tests {
     func testHasMoreChunks() {
         let raw = ByteBufferAllocator().buffer(capacity: 20)
-        var encodeBuffer = EncodeBuffer(raw, mode: .client)
+        var encodeBuffer = EncodeBuffer(raw, mode: .client, capabilities: [])
         XCTAssertFalse(encodeBuffer.hasMoreChunks)
         encodeBuffer.writeCommand(.init(tag: "tag", command: .noop))
         XCTAssertTrue(encodeBuffer.hasMoreChunks)
