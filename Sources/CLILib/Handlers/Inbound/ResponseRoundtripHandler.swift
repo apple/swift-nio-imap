@@ -54,11 +54,11 @@ public class ResponseRoundtripHandler: ChannelInboundHandler {
             switch response {
             case .response(let response):
                 encodeBuffer.writeResponse(response)
-            case .continueRequest(_):
+            case .continueRequest:
                 break
             }
         }
-        
+
         while encodeBuffer.hasMoreChunks {
             var chunk = encodeBuffer.nextChunk()
             buffer.writeBuffer(&chunk.bytes)

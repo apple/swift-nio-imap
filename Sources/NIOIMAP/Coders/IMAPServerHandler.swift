@@ -81,7 +81,7 @@ public final class IMAPServerHandler: ChannelDuplexHandler {
         var buffer = context.channel.allocator.buffer(capacity: 1024)
         var encodeBuffer = EncodeBuffer(buffer, mode: .server(), capabilities: self.capabilities)
         encodeBuffer.writeResponse(response)
-        
+
         buffer.clear()
         while encodeBuffer.hasMoreChunks {
             var chunk = encodeBuffer.nextChunk()
