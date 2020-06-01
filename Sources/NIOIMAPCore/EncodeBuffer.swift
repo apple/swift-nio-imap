@@ -49,6 +49,7 @@ extension EncodeBuffer {
                 return .init(bytes: self._buffer.readSlice(length: stopPoint - self._buffer.readerIndex)!,
                              waitForContinuation: stopPoint != self._buffer.writerIndex)
             } else {
+                precondition(self._buffer.readableBytes > 0, "No next chunk to send.")
                 return .init(bytes: self._buffer.readSlice(length: self._buffer.readableBytes)!, waitForContinuation: false)
             }
         case .server:
