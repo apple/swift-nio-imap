@@ -22,6 +22,10 @@ public struct EncodeBuffer {
         case server(streamingAttributes: Bool = false)
     }
 
+    var hasMoreChunks: Bool {
+        self._buffer.readableBytes > 0
+    }
+
     var mode: Mode
     @usableFromInline internal var _buffer: ByteBuffer
     @usableFromInline internal var _stopPoints: CircularBuffer<Int> = []
@@ -46,10 +50,10 @@ extension EncodeBuffer {
                              waitForContinuation: stopPoint != self._buffer.writerIndex)
             } else {
                 precondition(self._buffer.readableBytes > 0, "No next chunk to send.")
-                return .init(bytes: self._buffer, waitForContinuation: false)
+                return .init(bytes: self._buffer.readSlice(length: self._buffer.readableBytes)!, waitForContinuation: false)
             }
         case .server:
-            return .init(bytes: self._buffer, waitForContinuation: false)
+            return .init(bytes: self._buffer.readSlice(length: self._buffer.readableBytes)!, waitForContinuation: false)
         }
     }
 
