@@ -25,7 +25,6 @@ public enum Greeting: Equatable {
 extension EncodeBuffer {
     @discardableResult mutating func writeGreeting(_ greeting: Greeting) -> Int {
         var size = 0
-        size += self.writeString("* ")
         switch greeting {
         case .auth(let auth):
             size += self.writeResponseConditionalAuth(auth)

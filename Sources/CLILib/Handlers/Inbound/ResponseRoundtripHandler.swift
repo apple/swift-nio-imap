@@ -50,14 +50,14 @@ public class ResponseRoundtripHandler: ChannelInboundHandler {
 
         buffer.clear()
         var encodeBuffer = EncodeBuffer(buffer, mode: .server(), capabilities: self.capabilities)
-//        for response in responses {
-//            switch response {
-//            case .response(let response):
-//                encodeBuffer.writeResponse(response)
-//            case .continueRequest(let cReq):
-//                encodeBuffer.writeContinueRequest(cReq)
-//            }
-//        }
+        for response in responses {
+            switch response {
+            case .response(let response):
+                encodeBuffer.writeResponse(response)
+            case .continueRequest(_):
+                break
+            }
+        }
         
         while encodeBuffer.hasMoreChunks {
             var chunk = encodeBuffer.nextChunk()
