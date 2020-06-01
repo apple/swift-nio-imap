@@ -29,7 +29,7 @@ class EncodeTestClass: XCTestCase {
         self.testBuffer = EncodeBuffer(ByteBufferAllocator().buffer(capacity: 128), mode: .server())
     }
 
-    func iterateInputs<T>(inputs: [(T, String, UInt)], encoder: (T) -> Int, file: StaticString = #file) {
+    func iterateInputs<T>(inputs: [(T, String, UInt)], encoder: (T) -> Int, file: StaticString = magicFile()) {
         for (test, expectedString, line) in inputs {
             self.testBuffer.clear()
             let size = encoder(test)
