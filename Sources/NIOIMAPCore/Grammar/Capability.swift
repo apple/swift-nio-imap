@@ -15,32 +15,30 @@
 import struct NIO.ByteBuffer
 
 struct EncodingOptions: OptionSet {
+    static let move = EncodingOptions(rawValue: 1 << 0)
+    static let namespace = EncodingOptions(rawValue: 1 << 1)
+    static let id = EncodingOptions(rawValue: 1 << 2)
+    static let binary = EncodingOptions(rawValue: 1 << 3)
 
-    static let move         = EncodingOptions(rawValue: 1 << 0)
-    static let namespace    = EncodingOptions(rawValue: 1 << 1)
-    static let id           = EncodingOptions(rawValue: 1 << 2)
-    static let binary       = EncodingOptions(rawValue: 1 << 3)
-    
     var rawValue: Int
 
     init(rawValue: Int) {
         self.rawValue = rawValue
     }
-    
+
     init(capabilities: [Capability]) {
         self = .init(rawValue: 0)
-        
+
         let inputs: [(Capability, EncodingOptions)] = [
             (.move, .move),
             (.id, .id),
             (.namespace, .namespace),
-            (.binary, .binary)
+            (.binary, .binary),
         ]
         for (strCap, cap) in inputs where capabilities.contains(strCap) {
             self.insert(cap)
         }
     }
-    
 }
 
 /// IMAPv4 `capability`
