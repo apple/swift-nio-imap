@@ -39,7 +39,7 @@ class EncodeTestClass: XCTestCase {
 
     func iterateInputs<T>(inputs: [(T, [Capability], String, UInt)], encoder: (T) -> Int, file: StaticString = #file) {
         for (test, capabilities, expectedString, line) in inputs {
-            self.testBuffer.capabilities = EncodingOptions(capabilities: capabilities)
+            self.testBuffer.capabilities = EncodingCapabilities(capabilities: capabilities)
             self.testBuffer.clear()
             let size = encoder(test)
             XCTAssertEqual(size, expectedString.utf8.count, file: file, line: line)

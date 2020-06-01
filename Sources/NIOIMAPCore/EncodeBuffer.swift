@@ -27,17 +27,17 @@ public struct EncodeBuffer {
     }
 
     var mode: Mode
-    var capabilities: EncodingOptions
+    var capabilities: EncodingCapabilities
     @usableFromInline internal var _buffer: ByteBuffer
     @usableFromInline internal var _stopPoints: CircularBuffer<Int> = []
 
     public init(_ buffer: ByteBuffer, mode: Mode, capabilities: [Capability]) {
         self._buffer = buffer
         self.mode = mode
-        self.capabilities = EncodingOptions(capabilities: capabilities)
+        self.capabilities = EncodingCapabilities(capabilities: capabilities)
     }
 
-    func preconditionCapability(_ capability: EncodingOptions, file: StaticString = #file, line: UInt = #line) {
+    func preconditionCapability(_ capability: EncodingCapabilities, file: StaticString = #file, line: UInt = #line) {
         precondition(self.capabilities.contains(capability), "Missing capability: \(capability.rawValue)", file: file, line: line)
     }
 }
