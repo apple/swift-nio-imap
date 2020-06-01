@@ -22,7 +22,7 @@ public struct EncodeBuffer {
         case server(streamingAttributes: Bool = false)
     }
 
-    var hasMoreChunks: Bool {
+    public var hasMoreChunks: Bool {
         self._buffer.readableBytes > 0
     }
 

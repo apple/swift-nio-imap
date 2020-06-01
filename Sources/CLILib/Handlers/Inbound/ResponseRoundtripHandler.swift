@@ -49,13 +49,19 @@ public class ResponseRoundtripHandler: ChannelInboundHandler {
         }
 
         buffer.clear()
-        for response in responses {
-            switch response {
-            case .response(let response):
-                buffer.writeResponse(response, capabilities: self.capabilities)
-            case .continueRequest(let cReq):
-                buffer.writeContinueRequest(cReq, capabilities: self.capabilities)
-            }
+        var encodeBuffer = EncodeBuffer(buffer, mode: .server(), capabilities: self.capabilities)
+//        for response in responses {
+//            switch response {
+//            case .response(let response):
+//                encodeBuffer.writeResponse(response)
+//            case .continueRequest(let cReq):
+//                encodeBuffer.writeContinueRequest(cReq)
+//            }
+//        }
+        
+        while encodeBuffer.hasMoreChunks {
+            var chunk = encodeBuffer.nextChunk()
+            buffer.writeBuffer(&chunk.bytes)
         }
 
         let roundtripString = String(buffer: buffer)

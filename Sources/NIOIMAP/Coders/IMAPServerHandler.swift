@@ -79,7 +79,14 @@ public final class IMAPServerHandler: ChannelDuplexHandler {
     public func write(context: ChannelHandlerContext, data: NIOAny, promise: EventLoopPromise<Void>?) {
         let response = self.unwrapOutboundIn(data)
         var buffer = context.channel.allocator.buffer(capacity: 1024)
-        buffer.writeResponse(response, capabilities: self.capabilities)
+        var encodeBuffer = EncodeBuffer(buffer, mode: .server(), capabilities: self.capabilities)
+        encodeBuffer.writeResponse(response)
+        
+        buffer.clear()
+        while encodeBuffer.hasMoreChunks {
+            var chunk = encodeBuffer.nextChunk()
+            buffer.writeBuffer(&chunk.bytes)
+        }
         context.write(self.wrapOutboundOut(buffer), promise: promise)
     }
 }

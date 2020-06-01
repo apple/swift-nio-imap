@@ -50,21 +50,8 @@ public enum StreamingType: Equatable {
 
 // MARK: - Encoding
 
-let emptyBuffer = ByteBufferAllocator().buffer(capacity: 0)
-
-extension ByteBuffer {
-    @discardableResult public mutating func writeResponse(_ response: Response, capabilities: [Capability]) -> Int {
-        var switchBuffer = emptyBuffer
-        swap(&self, &switchBuffer)
-        var encodeBuffer = EncodeBuffer(switchBuffer, mode: .server(), capabilities: capabilities)
-        let ret = encodeBuffer.writeResponse(response)
-        self = encodeBuffer.nextChunk().bytes
-        return ret
-    }
-}
-
 extension EncodeBuffer {
-    @discardableResult fileprivate mutating func writeResponse(_ response: Response) -> Int {
+    @discardableResult public mutating func writeResponse(_ response: Response) -> Int {
         assert(self.mode == .server())
         switch response {
         case .untaggedResponse(let resp):
