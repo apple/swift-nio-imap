@@ -52,7 +52,7 @@ public enum StreamingType: Equatable {
 
 extension EncodeBuffer {
     @discardableResult public mutating func writeResponse(_ response: Response) -> Int {
-        assert(self.mode == .server())
+        assert(self.mode == .server(streamingAttributes: true) || self.mode == .server(streamingAttributes: false))
         switch response {
         case .untaggedResponse(let resp):
             return self.writeResponseData(resp)
