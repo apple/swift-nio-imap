@@ -30,21 +30,21 @@ extension SectionSpecifierTests {
 
     func testImapEncoded_text() {
         let expected = "HEADER"
-        let size = self.testBuffer.writeSectionSpecifier(.text(.header))
+        let size = self.testBuffer.writeSectionSpecifier(.init(kind: .header))
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }
 
     func testImapEncoded_part_notext() {
         let expected = "1.2.3.4"
-        let size = self.testBuffer.writeSectionSpecifier(.part([1, 2, 3, 4], text: nil))
+        let size = self.testBuffer.writeSectionSpecifier(.init(part: [1, 2, 3, 4], kind: .complete))
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }
 
     func testImapEncoded_part_sometext() {
         let expected = "1.2.3.4.HEADER"
-        let size = self.testBuffer.writeSectionSpecifier(.part([1, 2, 3, 4], text: .header))
+        let size = self.testBuffer.writeSectionSpecifier(.init(part: [1, 2, 3, 4], kind: .header))
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }

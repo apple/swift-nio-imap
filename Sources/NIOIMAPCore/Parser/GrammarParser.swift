@@ -3294,14 +3294,25 @@ extension GrammarParser {
 
     // section         = "[" [section-spec] "]"
     static func parseSection(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SectionSpecifier? {
-        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> SectionSpecifier? in
-            try ParserLibrary.parseFixedString("[", buffer: &buffer, tracker: tracker)
-            let spec = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> SectionSpecifier in
-                try self.parseSectionSpecifier(buffer: &buffer, tracker: tracker)
+        
+        func parseSection_none(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SectionSpecifier? {
+            try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> SectionSpecifier? in
+                try ParserLibrary.parseFixedString("[]", buffer: &buffer, tracker: tracker)
+                return nil
             }
+        }
+        
+        func parseSection_some(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SectionSpecifier? {
+            try ParserLibrary.parseFixedString("[", buffer: &buffer, tracker: tracker)
+            let spec = try self.parseSectionSpecifier(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseFixedString("]", buffer: &buffer, tracker: tracker)
             return spec
         }
+        
+        return try ParserLibrary.parseOneOf([
+            parseSection_none,
+            parseSection_some
+        ], buffer: &buffer, tracker: tracker)
     }
 
     // section-binary  = "[" [section-part] "]"
@@ -3312,37 +3323,6 @@ extension GrammarParser {
             try ParserLibrary.parseFixedString("]", buffer: &buffer, tracker: tracker)
             return part ?? .init(rawValue: [])
         }
-    }
-
-    // section-msgtext = "HEADER" / "HEADER.FIELDS" [".NOT"] SP header-list /
-    //                   "TEXT"
-    static func parseSectionMessageText(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SectionMessageText {
-        func parseSectionMessageText_header(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SectionMessageText {
-            try ParserLibrary.parseFixedString("HEADER", buffer: &buffer, tracker: tracker)
-            return .header
-        }
-
-        func parseSectionMessageText_headerFields(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SectionMessageText {
-            try ParserLibrary.parseFixedString("HEADER.FIELDS ", buffer: &buffer, tracker: tracker)
-            return .headerFields(try self.parseHeaderList(buffer: &buffer, tracker: tracker))
-        }
-
-        func parseSectionMessageText_notHeaderFields(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SectionMessageText {
-            try ParserLibrary.parseFixedString("HEADER.FIELDS.NOT ", buffer: &buffer, tracker: tracker)
-            return .notHeaderFields(try self.parseHeaderList(buffer: &buffer, tracker: tracker))
-        }
-
-        func parseSectionMessageText_text(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SectionMessageText {
-            try ParserLibrary.parseFixedString("TEXT", buffer: &buffer, tracker: tracker)
-            return .text
-        }
-
-        return try ParserLibrary.parseOneOf([
-            parseSectionMessageText_headerFields,
-            parseSectionMessageText_notHeaderFields,
-            parseSectionMessageText_header,
-            parseSectionMessageText_text,
-        ], buffer: &buffer, tracker: tracker)
     }
 
     // section-part    = nz-number *("." nz-number)
@@ -3361,58 +3341,64 @@ extension GrammarParser {
 
     // section-spec    = section-msgtext / (section-part ["." section-text])
     static func parseSectionSpecifier(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SectionSpecifier {
-        func parseSectionSpecifier_messageText(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SectionSpecifier {
-            .text(try self.parseSectionMessageText(buffer: &buffer, tracker: tracker))
+        func parseSectionSpecifier_noPart(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SectionSpecifier {
+            let kind = try self.parseSectionSpecifierKind(buffer: &buffer, tracker: tracker)
+            return .init(kind: kind)
         }
 
-        func parseSectionSpecifier_part(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SectionSpecifier {
+        func parseSectionSpecifier_withPart(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SectionSpecifier {
             let part = try self.parseSectionPart(buffer: &buffer, tracker: tracker)
-            let text = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> SectionText in
+            let kind = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> SectionSpecifier.Kind in
                 try ParserLibrary.parseFixedString(".", buffer: &buffer, tracker: tracker)
-                return try self.parseSectionText(buffer: &buffer, tracker: tracker)
-            }
-            return .part(part, text: text)
+                return try self.parseSectionSpecifierKind(buffer: &buffer, tracker: tracker)
+            } ?? .complete
+            return .init(part: part, kind: kind)
         }
 
         return try ParserLibrary.parseOneOf([
-            parseSectionSpecifier_messageText,
-            parseSectionSpecifier_part,
+            parseSectionSpecifier_withPart,
+            parseSectionSpecifier_noPart,
         ], buffer: &buffer, tracker: tracker)
     }
 
     // section-text    = section-msgtext / "MIME"
-    static func parseSectionText(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SectionText {
-        func parseSectionText_mime(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SectionText {
+    static func parseSectionSpecifierKind(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SectionSpecifier.Kind {
+        func parseSectionSpecifierKind_mime(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SectionSpecifier.Kind {
             try ParserLibrary.parseFixedString("MIME", buffer: &buffer, tracker: tracker)
-            return .mime
+            return .MIMEHeader
         }
 
-        func parseSectionText_header(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SectionText {
+        func parseSectionSpecifierKind_header(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SectionSpecifier.Kind {
             try ParserLibrary.parseFixedString("HEADER", buffer: &buffer, tracker: tracker)
             return .header
         }
 
-        func parseSectionText_headerFields(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SectionText {
+        func parseSectionSpecifierKind_headerFields(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SectionSpecifier.Kind {
             try ParserLibrary.parseFixedString("HEADER.FIELDS ", buffer: &buffer, tracker: tracker)
             return .headerFields(try self.parseHeaderList(buffer: &buffer, tracker: tracker))
         }
 
-        func parseSectionText_notHeaderFields(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SectionText {
+        func parseSectionSpecifierKind_notHeaderFields(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SectionSpecifier.Kind {
             try ParserLibrary.parseFixedString("HEADER.FIELDS.NOT ", buffer: &buffer, tracker: tracker)
-            return .notHeaderFields(try self.parseHeaderList(buffer: &buffer, tracker: tracker))
+            return .headerFieldsNot(try self.parseHeaderList(buffer: &buffer, tracker: tracker))
         }
 
-        func parseSectionText_text(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SectionText {
+        func parseSectionSpecifierKind_text(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SectionSpecifier.Kind {
             try ParserLibrary.parseFixedString("TEXT", buffer: &buffer, tracker: tracker)
             return .text
         }
+        
+        func parseSectionSpecifierKind_complete(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SectionSpecifier.Kind {
+            return .complete
+        }
 
         return try ParserLibrary.parseOneOf([
-            parseSectionText_mime,
-            parseSectionText_headerFields,
-            parseSectionText_notHeaderFields,
-            parseSectionText_header,
-            parseSectionText_text,
+            parseSectionSpecifierKind_mime,
+            parseSectionSpecifierKind_headerFields,
+            parseSectionSpecifierKind_notHeaderFields,
+            parseSectionSpecifierKind_header,
+            parseSectionSpecifierKind_text,
+            parseSectionSpecifierKind_complete,
         ], buffer: &buffer, tracker: tracker)
     }
 
