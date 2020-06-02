@@ -18,7 +18,7 @@ import NIOIMAPCore
 public struct CommandEncoder: MessageToByteEncoder {
     public typealias OutboundIn = CommandStream
 
-    var capabilities: [Capability] = []
+    var capabilities: EncodingCapabilities = []
 
     public init() {}
 

@@ -31,10 +31,10 @@ public struct EncodeBuffer {
     @usableFromInline internal var _buffer: ByteBuffer
     @usableFromInline internal var _stopPoints: CircularBuffer<Int> = []
 
-    public init(_ buffer: ByteBuffer, mode: Mode, capabilities: [Capability]) {
+    public init(_ buffer: ByteBuffer, mode: Mode, capabilities: EncodingCapabilities) {
         self._buffer = buffer
         self.mode = mode
-        self.capabilities = EncodingCapabilities(capabilities: capabilities)
+        self.capabilities = capabilities
     }
 
     func preconditionCapability(_ capability: EncodingCapabilities, file: StaticString = #file, line: UInt = #line) {

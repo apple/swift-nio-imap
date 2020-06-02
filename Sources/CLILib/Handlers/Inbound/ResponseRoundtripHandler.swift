@@ -26,7 +26,7 @@ public class ResponseRoundtripHandler: ChannelInboundHandler {
     let logger: Logger
     private var parser = ResponseParser()
 
-    public var capabilities: [Capability] = []
+    public var capabilities: EncodingCapabilities = []
 
     public init(logger: Logger) {
         self.logger = logger

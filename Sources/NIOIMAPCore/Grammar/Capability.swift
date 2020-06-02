@@ -14,21 +14,21 @@
 
 import struct NIO.ByteBuffer
 
-struct EncodingCapabilities: OptionSet {
-    static let imap4 = EncodingCapabilities(rawValue: 1 << 0)
-    static let imap4rev1 = EncodingCapabilities(rawValue: 1 << 1)
-    static let move = EncodingCapabilities(rawValue: 1 << 2)
-    static let namespace = EncodingCapabilities(rawValue: 1 << 3)
-    static let id = EncodingCapabilities(rawValue: 1 << 4)
-    static let binary = EncodingCapabilities(rawValue: 1 << 5)
+public struct EncodingCapabilities: OptionSet {
+    public static let imap4 = EncodingCapabilities(rawValue: 1 << 0)
+    public static let imap4rev1 = EncodingCapabilities(rawValue: 1 << 1)
+    public static let move = EncodingCapabilities(rawValue: 1 << 2)
+    public static let namespace = EncodingCapabilities(rawValue: 1 << 3)
+    public static let id = EncodingCapabilities(rawValue: 1 << 4)
+    public static let binary = EncodingCapabilities(rawValue: 1 << 5)
 
-    var rawValue: Int
+    public var rawValue: Int
 
-    init(rawValue: Int) {
+    public init(rawValue: Int) {
         self.rawValue = rawValue
     }
 
-    init(capabilities: [Capability]) {
+    public init(capabilities: [Capability]) {
         self = .init(rawValue: 0)
 
         let inputs: [(Capability, EncodingCapabilities)] = [

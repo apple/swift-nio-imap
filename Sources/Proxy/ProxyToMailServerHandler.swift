@@ -21,7 +21,7 @@ class ProxyToMailServerHandler: ChannelInboundHandler {
 
     let mailAppToProxyChannel: Channel
     var parser = ResponseParser()
-    var capabilities: [Capability] = []
+    var capabilities: EncodingCapabilities = []
 
     init(mailAppToProxyChannel: Channel) {
         self.mailAppToProxyChannel = mailAppToProxyChannel

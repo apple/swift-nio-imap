@@ -28,7 +28,7 @@ public class CommandRoundtripHandler: ChannelOutboundHandler {
 
     let logger: Logger
     private var parser = CommandParser()
-    public var capabilities: [Capability] = []
+    public var capabilities: EncodingCapabilities = []
 
     public init(logger: Logger) {
         self.logger = logger
