@@ -15,12 +15,10 @@
 import struct NIO.ByteBuffer
 
 public struct EncodingCapabilities: OptionSet {
-    public static let imap4 = EncodingCapabilities(rawValue: 1 << 0)
-    public static let imap4rev1 = EncodingCapabilities(rawValue: 1 << 1)
-    public static let move = EncodingCapabilities(rawValue: 1 << 2)
-    public static let namespace = EncodingCapabilities(rawValue: 1 << 3)
-    public static let id = EncodingCapabilities(rawValue: 1 << 4)
-    public static let binary = EncodingCapabilities(rawValue: 1 << 5)
+    public static let move = EncodingCapabilities(rawValue: 1 << 0)
+    public static let namespace = EncodingCapabilities(rawValue: 1 << 1)
+    public static let id = EncodingCapabilities(rawValue: 1 << 2)
+    public static let binary = EncodingCapabilities(rawValue: 1 << 3)
 
     public var rawValue: Int
 
