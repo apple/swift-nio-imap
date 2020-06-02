@@ -3294,24 +3294,23 @@ extension GrammarParser {
 
     // section         = "[" [section-spec] "]"
     static func parseSection(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SectionSpecifier? {
-        
         func parseSection_none(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SectionSpecifier? {
             try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> SectionSpecifier? in
                 try ParserLibrary.parseFixedString("[]", buffer: &buffer, tracker: tracker)
                 return nil
             }
         }
-        
+
         func parseSection_some(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SectionSpecifier? {
             try ParserLibrary.parseFixedString("[", buffer: &buffer, tracker: tracker)
             let spec = try self.parseSectionSpecifier(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseFixedString("]", buffer: &buffer, tracker: tracker)
             return spec
         }
-        
+
         return try ParserLibrary.parseOneOf([
             parseSection_none,
-            parseSection_some
+            parseSection_some,
         ], buffer: &buffer, tracker: tracker)
     }
 
@@ -3387,9 +3386,9 @@ extension GrammarParser {
             try ParserLibrary.parseFixedString("TEXT", buffer: &buffer, tracker: tracker)
             return .text
         }
-        
+
         func parseSectionSpecifierKind_complete(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SectionSpecifier.Kind {
-            return .complete
+            .complete
         }
 
         return try ParserLibrary.parseOneOf([
