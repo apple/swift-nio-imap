@@ -81,8 +81,8 @@ final class RoundtripTests: XCTestCase {
             (.fetch([5678], [.uid, .flags, .internalDate, .envelope], []), #line),
             (.fetch([5678], [.flags, .bodyStructure(extensions: true)], []), #line),
             (.fetch([5678], [.flags, .bodySection(peek: false, nil, 3 ... 4)], []), #line),
-            (.fetch([5678], [.flags, .bodySection(peek: false, .text(.header), 3 ... 4)], []), #line),
-            (.fetch([5678], [.bodySection(peek: false, .part([12, 34], text: .headerFields(["some", "header"])), 3 ... 4)], []), #line),
+            (.fetch([5678], [.flags, .bodySection(peek: false, .init(kind: .header), 3 ... 4)], []), #line),
+            (.fetch([5678], [.bodySection(peek: false, .init(part: [12, 34], kind: .headerFields(["some", "header"])), 3 ... 4)], []), #line),
 
             (.store(.all, [], .remove(silent: true, list: [.answered, .deleted])), #line),
             (.store(.all, [], .add(silent: true, list: [.draft, .extension("\\some")])), #line),

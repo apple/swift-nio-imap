@@ -22,7 +22,7 @@ class SectionBinary_Tests: EncodeTestClass {}
 
 extension SectionBinary_Tests {
     func testEncode() {
-        let inputs: [([Int], String, UInt)] = [
+        let inputs: [(SectionSpecifier.Part, String, UInt)] = [
             ([], "[]", #line),
             ([1, 2, 3], "[1.2.3]", #line),
         ]

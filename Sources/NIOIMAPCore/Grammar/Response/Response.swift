@@ -43,7 +43,7 @@ public enum FetchResponse: Equatable {
 }
 
 public enum StreamingType: Equatable {
-    case binary(section: [Int]) /// BINARY RFC 3516, streams BINARY when using a `literal`
+    case binary(section: SectionSpecifier.Part) /// BINARY RFC 3516, streams BINARY when using a `literal`
     case body(partial: Int?) /// IMAP4rev1 RFC 3501, streams BODY[TEXT] when using a `literal`
     case rfc822 /// IMAP4rev1 RFC 3501, streams RF822.TEXT when using a `literal`
 }
