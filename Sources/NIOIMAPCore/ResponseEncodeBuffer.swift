@@ -14,11 +14,15 @@
 
 import struct NIO.ByteBuffer
 
-public struct CommandEncodeBuffer {
-    public var buffer: EncodeBuffer
+public struct ResponseEncodeBuffer {
+    var _buffer: EncodeBuffer
     
     public init(buffer: ByteBuffer, capabilities: EncodingCapabilities) {
-        self.buffer = EncodeBuffer(buffer, mode: .client, capabilities: capabilities)
+        self._buffer = EncodeBuffer(buffer, mode: .client, capabilities: capabilities)
+    }
+    
+    mutating public func read() -> ByteBuffer {
+        self._buffer.nextChunk().bytes
     }
     
 }

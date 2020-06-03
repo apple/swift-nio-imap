@@ -50,57 +50,56 @@ public enum StreamingType: Equatable {
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
+extension ResponseEncodeBuffer {
     @discardableResult public mutating func writeResponse(_ response: Response) -> Int {
-        assert(self.mode == .server(streamingAttributes: true) || self.mode == .server(streamingAttributes: false))
         switch response {
         case .untaggedResponse(let resp):
-            return self.writeResponseData(resp)
+            return self._buffer.writeResponseData(resp)
         case .fetchResponse(let response):
             return self.writeFetchResponse(response)
         case .taggedResponse(let end):
-            return self.writeTaggedResponse(end)
+            return self._buffer.writeTaggedResponse(end)
         case .fatalResponse(let fatal):
-            return self.writeResponseFatal(fatal)
+            return self._buffer.writeResponseFatal(fatal)
         }
     }
 
     @discardableResult mutating func writeFetchResponse(_ response: FetchResponse) -> Int {
         switch response {
         case .start(let num):
-            return self.writeString("* \(num) FETCH (")
+            return self._buffer.writeString("* \(num) FETCH (")
         case .simpleAttribute(let att):
-            if case .server(streamingAttributes: true) = self.mode {
-                return self.writeSpace() + self.writeMessageAttribute(att)
+            if case .server(streamingAttributes: true) = self._buffer.mode {
+                return self._buffer.writeSpace() + self._buffer.writeMessageAttribute(att)
             } else {
-                self.mode = .server(streamingAttributes: true)
-                return self.writeMessageAttribute(att)
+                self._buffer.mode = .server(streamingAttributes: true)
+                return self._buffer.writeMessageAttribute(att)
             }
         case .streamingBegin(let type, let size):
-            if case .server(streamingAttributes: true) = self.mode {
-                return self.writeSpace() + self.writeStreamingType(type, size: size)
+            if case .server(streamingAttributes: true) = self._buffer.mode {
+                return self._buffer.writeSpace() + self.writeStreamingType(type, size: size)
             } else {
-                self.mode = .server(streamingAttributes: true)
+                self._buffer.mode = .server(streamingAttributes: true)
                 return self.writeStreamingType(type, size: size)
             }
         case .streamingBytes(var bytes):
-            return self.writeBuffer(&bytes)
+            return self._buffer.writeBuffer(&bytes)
         case .streamingEnd:
             return 0 // do nothing, this is a "fake" event
         case .finish:
-            self.mode = .server(streamingAttributes: false)
-            return self.writeString(")\r\n")
+            self._buffer.mode = .server(streamingAttributes: false)
+            return self._buffer.writeString(")\r\n")
         }
     }
 
     @discardableResult mutating func writeStreamingType(_ type: StreamingType, size: Int) -> Int {
         switch type {
         case .binary:
-            return self.writeString("BINARY {\(size)}\r\n")
+            return self._buffer.writeString("BINARY {\(size)}\r\n")
         case .body:
-            return self.writeString("BODY[TEXT] {\(size)}\r\n")
+            return self._buffer.writeString("BODY[TEXT] {\(size)}\r\n")
         case .rfc822:
-            return self.writeString("RFC822.TEXT {\(size)}\r\n")
+            return self._buffer.writeString("RFC822.TEXT {\(size)}\r\n")
         }
     }
 }

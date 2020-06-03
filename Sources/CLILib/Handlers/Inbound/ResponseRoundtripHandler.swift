@@ -49,7 +49,7 @@ public class ResponseRoundtripHandler: ChannelInboundHandler {
         }
 
         buffer.clear()
-        var encodeBuffer = EncodeBuffer(buffer, mode: .server(), capabilities: self.capabilities)
+        var encodeBuffer = ResponseEncodeBuffer(buffer: buffer, capabilities: self.capabilities)
         for response in responses {
             switch response {
             case .response(let response):
@@ -59,12 +59,7 @@ public class ResponseRoundtripHandler: ChannelInboundHandler {
             }
         }
 
-        while encodeBuffer.hasMoreChunks {
-            var chunk = encodeBuffer.nextChunk()
-            buffer.writeBuffer(&chunk.bytes)
-        }
-
-        let roundtripString = String(buffer: buffer)
+        let roundtripString = String(buffer: encodeBuffer.read())
         if originalString != roundtripString {
             self.logger.warning("Input response vs roundtrip output is different")
             self.logger.warning("Response (original):\n\(originalString)")

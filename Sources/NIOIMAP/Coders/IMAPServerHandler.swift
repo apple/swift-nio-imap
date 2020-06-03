@@ -29,9 +29,9 @@ public final class IMAPServerHandler: ChannelDuplexHandler {
         set {
             self._continueRequest = newValue
             let buffer = ByteBufferAllocator().buffer(capacity: 16)
-            var encodeBuffer = EncodeBuffer(buffer, mode: .server(), capabilities: self.capabilities)
+            var encodeBuffer = ResponseEncodeBuffer(buffer: buffer, capabilities: self.capabilities)
             encodeBuffer.writeContinueRequest(newValue)
-            self.continueRequestBytes = encodeBuffer.nextChunk().bytes
+            self.continueRequestBytes = encodeBuffer.read()
         }
     }
 
@@ -45,9 +45,9 @@ public final class IMAPServerHandler: ChannelDuplexHandler {
         self.decoder = NIOSingleStepByteToMessageProcessor(CommandDecoder())
         self._continueRequest = continueRequest
         let buffer = ByteBufferAllocator().buffer(capacity: 16)
-        var encodeBuffer = EncodeBuffer(buffer, mode: .server(), capabilities: self.capabilities)
+        var encodeBuffer = ResponseEncodeBuffer(buffer: buffer, capabilities: self.capabilities)
         encodeBuffer.writeContinueRequest(continueRequest)
-        self.continueRequestBytes = encodeBuffer.nextChunk().bytes
+        self.continueRequestBytes = encodeBuffer.read()
     }
 
     public func read(context: ChannelHandlerContext) {
@@ -80,15 +80,9 @@ public final class IMAPServerHandler: ChannelDuplexHandler {
 
     public func write(context: ChannelHandlerContext, data: NIOAny, promise: EventLoopPromise<Void>?) {
         let response = self.unwrapOutboundIn(data)
-        var buffer = context.channel.allocator.buffer(capacity: 1024)
-        var encodeBuffer = EncodeBuffer(buffer, mode: .server(), capabilities: self.capabilities)
+        let buffer = context.channel.allocator.buffer(capacity: 1024)
+        var encodeBuffer = ResponseEncodeBuffer(buffer: buffer, capabilities: self.capabilities)
         encodeBuffer.writeResponse(response)
-
-        buffer.clear()
-        while encodeBuffer.hasMoreChunks {
-            var chunk = encodeBuffer.nextChunk()
-            buffer.writeBuffer(&chunk.bytes)
-        }
-        context.write(self.wrapOutboundOut(buffer), promise: promise)
+        context.write(self.wrapOutboundOut(encodeBuffer.read()), promise: promise)
     }
 }

@@ -22,17 +22,17 @@ public enum ContinueRequest: Equatable {
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
+extension ResponseEncodeBuffer {
     @discardableResult public mutating func writeContinueRequest(_ data: ContinueRequest) -> Int {
         var size = 0
-        size += self.writeString("+ ")
+        size += self._buffer.writeString("+ ")
         switch data {
         case .responseText(let text):
-            size += self.writeResponseText(text)
+            size += self._buffer.writeResponseText(text)
         case .base64(let base64):
-            size += self.writeBase64(base64)
+            size += self._buffer.writeBase64(base64)
         }
-        size += self.writeString("\r\n")
+        size += self._buffer.writeString("\r\n")
         return size
     }
 }

@@ -36,9 +36,9 @@ class ProxyToMailServerHandler: ChannelInboundHandler {
     func channelRead(context: ChannelHandlerContext, data: NIOAny) {
         let stream = self.unwrapInboundIn(data)
         let buffer = context.channel.allocator.buffer(capacity: 1024)
-        var encodeBuffer = EncodeBuffer(buffer, mode: .client, capabilities: self.capabilities)
+        var encodeBuffer = ResponseEncodeBuffer(buffer: buffer, capabilities: self.capabilities)
         encodeBuffer.writeResponse(stream)
-        self.mailAppToProxyChannel.writeAndFlush(encodeBuffer.nextChunk().bytes, promise: nil)
+        self.mailAppToProxyChannel.writeAndFlush(encodeBuffer.read(), promise: nil)
     }
 
     func errorCaught(context: ChannelHandlerContext, error: Error) {

@@ -26,6 +26,12 @@ extension ContinueRequestTests {
             (.base64("bb=="), "+ bb==\r\n", #line),
             (.responseText(.init(code: .alert, text: "text")), "+ [ALERT] text\r\n", #line),
         ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeContinueRequest($0) })
+        self.iterateInputs(inputs: inputs, encoder: { req in
+            var encoder = ResponseEncodeBuffer(buffer: self.testBuffer._buffer, capabilities: self.testBuffer.capabilities)
+            defer {
+                self.testBuffer = encoder._buffer
+            }
+            return encoder.writeContinueRequest(req)
+        })
     }
 }
