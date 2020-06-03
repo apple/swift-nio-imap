@@ -73,10 +73,10 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
 
     public func write(context: ChannelHandlerContext, data: NIOAny, promise: EventLoopPromise<Void>?) {
         let command = self.unwrapOutboundIn(data)
-        var encoder = EncodeBuffer(context.channel.allocator.buffer(capacity: 1024), mode: .client, capabilities: self.capabilities)
+        var encoder = CommandEncodeBuffer(buffer: context.channel.allocator.buffer(capacity: 1024), capabilities: self.capabilities)
         encoder.writeCommandStream(command)
         if self.bufferedWrites.isEmpty {
-            let next = encoder.nextChunk()
+            let next = encoder.buffer.nextChunk()
 
             if next.waitForContinuation {
                 context.write(self.wrapOutboundOut(next.bytes), promise: nil)
@@ -86,7 +86,7 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
                 return
             }
         }
-        self.bufferedWrites.append((encoder, promise))
+        self.bufferedWrites.append((encoder.buffer, promise))
     }
 
     public func flush(context: ChannelHandlerContext) {
