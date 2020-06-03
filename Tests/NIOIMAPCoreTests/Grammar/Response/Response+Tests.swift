@@ -33,6 +33,7 @@ extension Response_Tests {
         ]
 
         for (test, expectedString, line) in inputs {
+            self.testBuffer.clear()
             var encoder = ResponseEncodeBuffer(buffer: self.testBuffer._buffer, capabilities: self.testBuffer.capabilities)
             let size = test.reduce(into: 0) { (size, response) in
                 size += encoder.writeFetchResponse(response)
