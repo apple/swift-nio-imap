@@ -29,7 +29,7 @@ extension ContinueRequestTests {
         self.iterateInputs(inputs: inputs, encoder: { req in
             var encoder = ResponseEncodeBuffer(buffer: self.testBuffer._buffer, capabilities: self.testBuffer.capabilities)
             defer {
-                self.testBuffer = encoder._buffer
+                self.testBuffer = EncodeBuffer(encoder.bytes, mode: .server(), capabilities: self.testBuffer.capabilities)
             }
             return encoder.writeContinueRequest(req)
         })

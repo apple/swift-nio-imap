@@ -31,7 +31,7 @@ public final class IMAPServerHandler: ChannelDuplexHandler {
             let buffer = ByteBufferAllocator().buffer(capacity: 16)
             var encodeBuffer = ResponseEncodeBuffer(buffer: buffer, capabilities: self.capabilities)
             encodeBuffer.writeContinueRequest(newValue)
-            self.continueRequestBytes = encodeBuffer.read()
+            self.continueRequestBytes = encodeBuffer.bytes
         }
     }
 
@@ -47,7 +47,7 @@ public final class IMAPServerHandler: ChannelDuplexHandler {
         let buffer = ByteBufferAllocator().buffer(capacity: 16)
         var encodeBuffer = ResponseEncodeBuffer(buffer: buffer, capabilities: self.capabilities)
         encodeBuffer.writeContinueRequest(continueRequest)
-        self.continueRequestBytes = encodeBuffer.read()
+        self.continueRequestBytes = encodeBuffer.bytes
     }
 
     public func read(context: ChannelHandlerContext) {
@@ -83,6 +83,6 @@ public final class IMAPServerHandler: ChannelDuplexHandler {
         let buffer = context.channel.allocator.buffer(capacity: 1024)
         var encodeBuffer = ResponseEncodeBuffer(buffer: buffer, capabilities: self.capabilities)
         encodeBuffer.writeResponse(response)
-        context.write(self.wrapOutboundOut(encodeBuffer.read()), promise: promise)
+        context.write(self.wrapOutboundOut(encodeBuffer.bytes), promise: promise)
     }
 }

@@ -59,7 +59,7 @@ public class ResponseRoundtripHandler: ChannelInboundHandler {
             }
         }
 
-        let roundtripString = String(buffer: encodeBuffer.read())
+        let roundtripString = String(buffer: encodeBuffer.bytes)
         if originalString != roundtripString {
             self.logger.warning("Input response vs roundtrip output is different")
             self.logger.warning("Response (original):\n\(originalString)")
