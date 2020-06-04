@@ -15,14 +15,13 @@
 import struct NIO.ByteBuffer
 
 public struct ResponseEncodeBuffer {
-    
     private var buffer: EncodeBuffer
 
     public var bytes: ByteBuffer {
         var encodeBuffer = self.buffer
         return encodeBuffer.nextChunk().bytes
     }
-    
+
     public init(buffer: ByteBuffer, capabilities: EncodingCapabilities) {
         self.buffer = EncodeBuffer(buffer, mode: .client, capabilities: capabilities)
     }
