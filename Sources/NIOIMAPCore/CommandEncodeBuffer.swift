@@ -14,8 +14,10 @@
 
 import struct NIO.ByteBuffer
 
-/// IMAPv4 `continue-req`
-public enum ContinueRequest: Equatable {
-    case responseText(ResponseText)
-    case base64(ByteBuffer)
+public struct CommandEncodeBuffer {
+    public var buffer: EncodeBuffer
+
+    public init(buffer: ByteBuffer, capabilities: EncodingCapabilities) {
+        self.buffer = EncodeBuffer(buffer, mode: .client, capabilities: capabilities)
+    }
 }

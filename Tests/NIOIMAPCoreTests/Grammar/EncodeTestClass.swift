@@ -13,11 +13,11 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
-import NIOIMAPCore
+@testable import NIOIMAPCore
 import XCTest
 
 class EncodeTestClass: XCTestCase {
-    var testBuffer = EncodeBuffer(ByteBufferAllocator().buffer(capacity: 128), mode: .server())
+    var testBuffer = EncodeBuffer(ByteBufferAllocator().buffer(capacity: 128), mode: .server(), capabilities: [])
 
     var testBufferString: String {
         var remaining = self.testBuffer
@@ -26,11 +26,20 @@ class EncodeTestClass: XCTestCase {
     }
 
     override func setUp() {
-        self.testBuffer = EncodeBuffer(ByteBufferAllocator().buffer(capacity: 128), mode: .server())
+        self.testBuffer = EncodeBuffer(ByteBufferAllocator().buffer(capacity: 128), mode: .server(), capabilities: [])
+    }
+
+    override func tearDown() {
+        self.testBuffer.capabilities = []
     }
 
     func iterateInputs<T>(inputs: [(T, String, UInt)], encoder: (T) -> Int, file: StaticString = magicFile()) {
-        for (test, expectedString, line) in inputs {
+        self.iterateInputs(inputs: inputs.map { ($0.0, [], $0.1, $0.2) }, encoder: encoder, file: file)
+    }
+
+    func iterateInputs<T>(inputs: [(T, EncodingCapabilities, String, UInt)], encoder: (T) -> Int, file: StaticString = magicFile()) {
+        for (test, capabilities, expectedString, line) in inputs {
+            self.testBuffer.capabilities = capabilities
             self.testBuffer.clear()
             let size = encoder(test)
             XCTAssertEqual(size, expectedString.utf8.count, file: file, line: line)

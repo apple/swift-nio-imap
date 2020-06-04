@@ -28,9 +28,10 @@ public final class IMAPServerHandler: ChannelDuplexHandler {
         }
         set {
             self._continueRequest = newValue
-            var buffer = ByteBufferAllocator().buffer(capacity: 16)
-            buffer.writeContinueRequest(newValue)
-            self.continueRequestBytes = buffer
+            let buffer = ByteBufferAllocator().buffer(capacity: 16)
+            var encodeBuffer = ResponseEncodeBuffer(buffer: buffer, capabilities: self.capabilities)
+            encodeBuffer.writeContinueRequest(newValue)
+            self.continueRequestBytes = encodeBuffer.bytes
         }
     }
 
@@ -38,12 +39,15 @@ public final class IMAPServerHandler: ChannelDuplexHandler {
     private var numberOfOutstandingContinueRequests = 0
     private var continueRequestBytes: ByteBuffer
 
+    public var capabilities: EncodingCapabilities = []
+
     public init(continueRequest: ContinueRequest = .responseText(ResponseText(text: "OK"))) {
         self.decoder = NIOSingleStepByteToMessageProcessor(CommandDecoder())
         self._continueRequest = continueRequest
-        var buffer = ByteBufferAllocator().buffer(capacity: 16)
-        buffer.writeContinueRequest(continueRequest)
-        self.continueRequestBytes = buffer
+        let buffer = ByteBufferAllocator().buffer(capacity: 16)
+        var encodeBuffer = ResponseEncodeBuffer(buffer: buffer, capabilities: self.capabilities)
+        encodeBuffer.writeContinueRequest(continueRequest)
+        self.continueRequestBytes = encodeBuffer.bytes
     }
 
     public func read(context: ChannelHandlerContext) {
@@ -76,8 +80,9 @@ public final class IMAPServerHandler: ChannelDuplexHandler {
 
     public func write(context: ChannelHandlerContext, data: NIOAny, promise: EventLoopPromise<Void>?) {
         let response = self.unwrapOutboundIn(data)
-        var buffer = context.channel.allocator.buffer(capacity: 1024)
-        buffer.writeResponse(response)
-        context.write(self.wrapOutboundOut(buffer), promise: promise)
+        let buffer = context.channel.allocator.buffer(capacity: 1024)
+        var encodeBuffer = ResponseEncodeBuffer(buffer: buffer, capabilities: self.capabilities)
+        encodeBuffer.writeResponse(response)
+        context.write(self.wrapOutboundOut(encodeBuffer.bytes), promise: promise)
     }
 }

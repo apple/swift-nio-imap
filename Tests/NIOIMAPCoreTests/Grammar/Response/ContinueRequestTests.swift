@@ -26,12 +26,12 @@ extension ContinueRequestTests {
             (.base64("bb=="), "+ bb==\r\n", #line),
             (.responseText(.init(code: .alert, text: "text")), "+ [ALERT] text\r\n", #line),
         ]
-
-        for (test, expectedString, line) in inputs {
-            var buffer = ByteBufferAllocator().buffer(capacity: 128)
-            let size = buffer.writeContinueRequest(test)
-            XCTAssertEqual(size, expectedString.utf8.count, line: line)
-            XCTAssertEqual(String(buffer: buffer), expectedString, line: line)
-        }
+        self.iterateInputs(inputs: inputs, encoder: { req in
+            var encoder = ResponseEncodeBuffer(buffer: self.testBuffer._buffer, capabilities: self.testBuffer.capabilities)
+            defer {
+                self.testBuffer = EncodeBuffer(encoder.bytes, mode: .server(), capabilities: self.testBuffer.capabilities)
+            }
+            return encoder.writeContinueRequest(req)
+        })
     }
 }

@@ -26,6 +26,8 @@ public class ResponseRoundtripHandler: ChannelInboundHandler {
     let logger: Logger
     private var parser = ResponseParser()
 
+    public var capabilities: EncodingCapabilities = []
+
     public init(logger: Logger) {
         self.logger = logger
     }
@@ -47,16 +49,17 @@ public class ResponseRoundtripHandler: ChannelInboundHandler {
         }
 
         buffer.clear()
+        var encodeBuffer = ResponseEncodeBuffer(buffer: buffer, capabilities: self.capabilities)
         for response in responses {
             switch response {
             case .response(let response):
-                buffer.writeResponse(response)
-            case .continueRequest(let cReq):
-                buffer.writeContinueRequest(cReq)
+                encodeBuffer.writeResponse(response)
+            case .continueRequest(let req):
+                encodeBuffer.writeContinueRequest(req)
             }
         }
 
-        let roundtripString = String(buffer: buffer)
+        let roundtripString = String(buffer: encodeBuffer.bytes)
         if originalString != roundtripString {
             self.logger.warning("Input response vs roundtrip output is different")
             self.logger.warning("Response (original):\n\(originalString)")

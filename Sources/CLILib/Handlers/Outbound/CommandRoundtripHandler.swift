@@ -28,6 +28,7 @@ public class CommandRoundtripHandler: ChannelOutboundHandler {
 
     let logger: Logger
     private var parser = CommandParser()
+    public var capabilities: EncodingCapabilities = []
 
     public init(logger: Logger) {
         self.logger = logger
@@ -42,10 +43,12 @@ public class CommandRoundtripHandler: ChannelOutboundHandler {
                 throw CommandRoundtripError.incompleteCommand
             }
 
-            var encodeBuffer = EncodeBuffer(context.channel.allocator.buffer(capacity: originalBuffer.readableBytes),
-                                            mode: .client)
+            var encodeBuffer = CommandEncodeBuffer(
+                buffer: context.channel.allocator.buffer(capacity: originalBuffer.readableBytes),
+                capabilities: self.capabilities
+            )
             encodeBuffer.writeCommandStream(commandStream)
-            var roundtripBuffer = encodeBuffer.nextChunk().bytes
+            var roundtripBuffer = encodeBuffer.buffer.nextChunk().bytes
 
             if originalBuffer != roundtripBuffer {
                 self.logger.warning("Input command vs roundtrip output is different")

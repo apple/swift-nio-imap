@@ -131,7 +131,7 @@ extension EncodeBuffer {
         case .uidMove(let set, let mailbox):
             return self.writeCommandType_uidMove(set: set, mailbox: mailbox)
         case .id(let id):
-            return self.writeID(id)
+            return self.writeCommandType_id(id)
         case .namespace:
             return self.writeCommandType_namespace()
         }
@@ -359,20 +359,29 @@ extension EncodeBuffer {
     }
 
     private mutating func writeCommandType_move(set: SequenceSet, mailbox: MailboxName) -> Int {
-        self.writeString("MOVE ") +
+        self.preconditionCapability(.move)
+        return self.writeString("MOVE ") +
             self.writeSequenceSet(set) +
             self.writeSpace() +
             self.writeMailbox(mailbox)
     }
 
     private mutating func writeCommandType_uidMove(set: UIDSet, mailbox: MailboxName) -> Int {
-        self.writeString("UID MOVE ") +
+        self.preconditionCapability(.move)
+        return self.writeString("UID MOVE ") +
             self.writeUIDSet(set) +
             self.writeSpace() +
             self.writeMailbox(mailbox)
     }
 
     private mutating func writeCommandType_namespace() -> Int {
-        self.writeNamespaceCommand()
+        self.preconditionCapability(.namespace)
+        return self.writeNamespaceCommand()
+    }
+
+    @discardableResult mutating func writeCommandType_id(_ id: [IDParameter]) -> Int {
+        self.preconditionCapability(.id)
+        return self.writeString("ID ") +
+            self.writeIDParameters(id)
     }
 }

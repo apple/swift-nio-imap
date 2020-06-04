@@ -51,6 +51,7 @@ extension EncodeBuffer {
     }
 
     @discardableResult mutating func writeLiteral8<T: Collection>(_ bytes: T) -> Int where T.Element == UInt8 {
+        self.preconditionCapability(.binary)
         let length = "~{\(bytes.count)}\r\n"
         return
             self.writeString(length) +

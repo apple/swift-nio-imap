@@ -96,7 +96,7 @@ final class RoundtripTests: XCTestCase {
         ]
 
         for (i, test) in tests.enumerated() {
-            var encodeBuffer = EncodeBuffer(ByteBufferAllocator().buffer(capacity: 128), mode: .client)
+            var encodeBuffer = EncodeBuffer(ByteBufferAllocator().buffer(capacity: 128), mode: .client, capabilities: [])
             let commandType = test.0
             let line = test.1
             let tag = "\(i + 1)"

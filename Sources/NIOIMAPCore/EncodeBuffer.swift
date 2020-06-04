@@ -22,17 +22,19 @@ public struct EncodeBuffer {
         case server(streamingAttributes: Bool = false)
     }
 
-    var hasMoreChunks: Bool {
-        self._buffer.readableBytes > 0
-    }
-
     var mode: Mode
+    var capabilities: EncodingCapabilities
     @usableFromInline internal var _buffer: ByteBuffer
     @usableFromInline internal var _stopPoints: CircularBuffer<Int> = []
 
-    public init(_ buffer: ByteBuffer, mode: Mode) {
+    public init(_ buffer: ByteBuffer, mode: Mode, capabilities: EncodingCapabilities) {
         self._buffer = buffer
         self.mode = mode
+        self.capabilities = capabilities
+    }
+
+    func preconditionCapability(_ capability: EncodingCapabilities, file: StaticString = #file, line: UInt = #line) {
+        precondition(self.capabilities.contains(capability), "Missing capability: \(capability.rawValue)", file: file, line: line)
     }
 }
 
