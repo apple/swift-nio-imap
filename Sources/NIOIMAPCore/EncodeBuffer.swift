@@ -22,10 +22,6 @@ public struct EncodeBuffer {
         case server(streamingAttributes: Bool = false)
     }
 
-    public var hasMoreChunks: Bool {
-        self._buffer.readableBytes > 0
-    }
-
     var mode: Mode
     var capabilities: EncodingCapabilities
     @usableFromInline internal var _buffer: ByteBuffer
