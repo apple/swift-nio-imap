@@ -22,7 +22,7 @@ class ByteBufferWriteLiteralTests: EncodeTestClass {}
 
 extension ByteBufferWriteLiteralTests {
     func testWriteIMAPString() {
-        let inputs: [(ByteBuffer, [Capability], String, UInt)] = [
+        let inputs: [(ByteBuffer, EncodingCapabilities, String, UInt)] = [
             ("", [], "\"\"", #line),
             ("abc", [], #""abc""#, #line),
             (ByteBuffer(ByteBufferView(repeating: UInt8(ascii: "\""), count: 1)), [], "{1}\r\n\"", #line),
@@ -57,7 +57,7 @@ extension ByteBufferWriteLiteralTests {
 
 extension ByteBufferWriteLiteralTests {
     func testWriteLiteral8() {
-        let inputs: [(ByteBuffer, [Capability], String, UInt)] = [
+        let inputs: [(ByteBuffer, EncodingCapabilities, String, UInt)] = [
             ("", [.binary], "~{0}\r\n", #line),
             ("abc", [.binary], "~{3}\r\nabc", #line),
         ]

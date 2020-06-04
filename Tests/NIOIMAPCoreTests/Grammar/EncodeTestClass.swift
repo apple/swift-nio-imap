@@ -37,9 +37,9 @@ class EncodeTestClass: XCTestCase {
         self.iterateInputs(inputs: inputs.map { ($0.0, [], $0.1, $0.2) }, encoder: encoder, file: file)
     }
 
-    func iterateInputs<T>(inputs: [(T, [Capability], String, UInt)], encoder: (T) -> Int, file: StaticString = magicFile()) {
+    func iterateInputs<T>(inputs: [(T, EncodingCapabilities, String, UInt)], encoder: (T) -> Int, file: StaticString = magicFile()) {
         for (test, capabilities, expectedString, line) in inputs {
-            self.testBuffer.capabilities = EncodingCapabilities(capabilities: capabilities)
+            self.testBuffer.capabilities = capabilities
             self.testBuffer.clear()
             let size = encoder(test)
             XCTAssertEqual(size, expectedString.utf8.count, file: file, line: line)
