@@ -27,7 +27,7 @@ public struct AppendMessage: Equatable {
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeAppendMessage(_ message: AppendMessage) -> Int {
+    @discardableResult public mutating func writeAppendMessage(_ message: AppendMessage) -> Int {
         self.writeAppendOptions(message.options) +
             self.writeSpace() +
             self.writeAppendData(message.data)
