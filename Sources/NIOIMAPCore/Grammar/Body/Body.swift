@@ -21,29 +21,28 @@ public enum BodyStructure: Equatable {
 }
 
 extension BodyStructure: RandomAccessCollection {
-    
     public typealias Element = BodyStructure
-    
+
     public typealias Index = SectionSpecifier.Part
-    
+
     public typealias SubSequence = Slice<BodyStructure>
-    
+
     public subscript(position: SectionSpecifier.Part) -> BodyStructure {
         precondition(position.rawValue.count > 0, "Part must contain at least one number")
         let first = position.rawValue.first!
         precondition(first > 0, "Part cannot be < 1")
-        
+
         switch self {
         case .singlepart(let part):
             switch part.type {
-            case .basic(_):
+            case .basic:
                 return self
             case .message(let message):
                 return message.body
-            case .text(_):
+            case .text:
                 return self
             }
-            
+
         case .multipart(let part):
             guard first <= part.parts.count else {
                 fatalError("\(first) is out of range")
@@ -56,34 +55,33 @@ extension BodyStructure: RandomAccessCollection {
             }
         }
     }
-    
+
     public var startIndex: SectionSpecifier.Part {
         [1] // both singleparts and multiparts always have at least one part
     }
-    
+
     public var endIndex: SectionSpecifier.Part {
         switch self {
-        case .singlepart(_):
+        case .singlepart:
             return [2]
         case .multipart(let part):
             return [part.parts.count + 1]
         }
     }
-    
+
     public func index(before i: SectionSpecifier.Part) -> SectionSpecifier.Part {
         guard let first = i.rawValue.first else {
             fatalError("Must contain at least one number")
         }
         return [first - 1]
     }
-    
+
     public func index(after i: SectionSpecifier.Part) -> SectionSpecifier.Part {
         guard let first = i.rawValue.first else {
             fatalError("Must contain at least one number")
         }
         return [first + 1]
     }
-    
 }
 
 // MARK: - Types

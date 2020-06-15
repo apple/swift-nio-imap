@@ -44,7 +44,6 @@ extension BodyStructure_Tests {
 // MARK: - RandomAccessCollection
 
 extension BodyStructure_Tests {
-    
     func testRandomeAccessCollection_startIndex() {
         let inputs: [(BodyStructure, SectionSpecifier.Part, UInt)] = [
             (
@@ -54,17 +53,17 @@ extension BodyStructure_Tests {
             ),
             (
                 .multipart(.init(parts: [
-                    .singlepart(.init(type: .basic(.init(type: .application, subtype: .mixed)), fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 1)))
+                    .singlepart(.init(type: .basic(.init(type: .application, subtype: .mixed)), fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 1))),
                 ], mediaSubtype: .mixed)),
                 [1],
                 #line
-            )
+            ),
         ]
         inputs.forEach { (input, expected, line) in
             XCTAssertEqual(input.startIndex, expected, line: line)
         }
     }
-    
+
     func testRandomeAccessCollection_endIndex() {
         let inputs: [(BodyStructure, SectionSpecifier.Part, UInt)] = [
             (
@@ -78,7 +77,8 @@ extension BodyStructure_Tests {
                     envelope: .init(date: nil, subject: nil, from: [], sender: [], reply: [], to: [], cc: [], bcc: [], inReplyTo: nil, messageID: nil),
                     body: .singlepart(.init(
                         type: .basic(.init(type: .application, subtype: .mixed)),
-                        fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 0))
+                        fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 0)
+                    )
                     ),
                     fieldLines: 3
                 )), fields: .init(parameter: [], id: nil, description: nil, encoding: .binary, octets: 0))),
@@ -86,17 +86,17 @@ extension BodyStructure_Tests {
                 #line
             ),
             (
-                .multipart(BodyStructure.Multipart.init(parts: [
-                    .singlepart(.init(type: .basic(.init(type: .audio, subtype: .mixed)), fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 0)))
+                .multipart(BodyStructure.Multipart(parts: [
+                    .singlepart(.init(type: .basic(.init(type: .audio, subtype: .mixed)), fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 0))),
                 ], mediaSubtype: .mixed)),
                 [2],
                 #line
             ),
             (
-                .multipart(BodyStructure.Multipart.init(parts: [
+                .multipart(BodyStructure.Multipart(parts: [
                     .singlepart(.init(type: .basic(.init(type: .audio, subtype: .mixed)), fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 0))),
                     .singlepart(.init(type: .basic(.init(type: .audio, subtype: .mixed)), fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 0))),
-                    .singlepart(.init(type: .basic(.init(type: .audio, subtype: .mixed)), fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 0)))
+                    .singlepart(.init(type: .basic(.init(type: .audio, subtype: .mixed)), fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 0))),
                 ], mediaSubtype: .mixed)),
                 [4],
                 #line
@@ -106,7 +106,7 @@ extension BodyStructure_Tests {
             XCTAssertEqual(input.endIndex, expected, line: line)
         }
     }
-    
+
     func testRandomeAccessCollection_indexBefore() {
         let inputs: [(BodyStructure, SectionSpecifier.Part, SectionSpecifier.Part, UInt)] = [
             (
@@ -116,10 +116,10 @@ extension BodyStructure_Tests {
                 #line
             ),
             (
-                .multipart(BodyStructure.Multipart.init(parts: [
+                .multipart(BodyStructure.Multipart(parts: [
                     .singlepart(.init(type: .basic(.init(type: .audio, subtype: .mixed)), fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 0))),
                     .singlepart(.init(type: .basic(.init(type: .audio, subtype: .mixed)), fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 0))),
-                    .singlepart(.init(type: .basic(.init(type: .audio, subtype: .mixed)), fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 0)))
+                    .singlepart(.init(type: .basic(.init(type: .audio, subtype: .mixed)), fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 0))),
                 ], mediaSubtype: .mixed)),
                 [3],
                 [2],
@@ -130,7 +130,7 @@ extension BodyStructure_Tests {
             XCTAssertEqual(body.index(before: before), expected, line: line)
         }
     }
-    
+
     func testRandomeAccessCollection_indexAfter() {
         let inputs: [(BodyStructure, SectionSpecifier.Part, SectionSpecifier.Part, UInt)] = [
             (
@@ -140,10 +140,10 @@ extension BodyStructure_Tests {
                 #line
             ),
             (
-                .multipart(BodyStructure.Multipart.init(parts: [
+                .multipart(BodyStructure.Multipart(parts: [
                     .singlepart(.init(type: .basic(.init(type: .audio, subtype: .mixed)), fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 0))),
                     .singlepart(.init(type: .basic(.init(type: .audio, subtype: .mixed)), fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 0))),
-                    .singlepart(.init(type: .basic(.init(type: .audio, subtype: .mixed)), fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 0)))
+                    .singlepart(.init(type: .basic(.init(type: .audio, subtype: .mixed)), fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 0))),
                 ], mediaSubtype: .mixed)),
                 [2],
                 [3],
@@ -164,9 +164,9 @@ extension BodyStructure_Tests {
                 #line
             ),
             (
-                .singlepart(.init(type: .text(.init(mediaText: "media", lines: 3)), fields: BodyStructure.Fields.init(parameter: [], id: nil, description: nil, encoding: .binary, octets: 123))),
+                .singlepart(.init(type: .text(.init(mediaText: "media", lines: 3)), fields: BodyStructure.Fields(parameter: [], id: nil, description: nil, encoding: .binary, octets: 123))),
                 [1],
-                .singlepart(.init(type: .text(.init(mediaText: "media", lines: 3)), fields: BodyStructure.Fields.init(parameter: [], id: nil, description: nil, encoding: .binary, octets: 123))),
+                .singlepart(.init(type: .text(.init(mediaText: "media", lines: 3)), fields: BodyStructure.Fields(parameter: [], id: nil, description: nil, encoding: .binary, octets: 123))),
                 #line
             ),
             (
@@ -175,13 +175,13 @@ extension BodyStructure_Tests {
                         type: .message(
                             .init(
                                 message: .rfc822,
-                                envelope: Envelope.init(date: nil, subject: nil, from: [], sender: [], reply: [], to: [], cc: [], bcc: [], inReplyTo: nil, messageID: nil),
+                                envelope: Envelope(date: nil, subject: nil, from: [], sender: [], reply: [], to: [], cc: [], bcc: [], inReplyTo: nil, messageID: nil),
                                 body: .singlepart(.init(type: .basic(.init(type: .audio, subtype: .alternative)), fields: .init(parameter: [], id: nil, description: nil, encoding: .binary, octets: 0))
                                 ),
                                 fieldLines: 1
                             )
                         ),
-                        fields: BodyStructure.Fields.init(parameter: [], id: nil, description: nil, encoding: .binary, octets: 99)
+                        fields: BodyStructure.Fields(parameter: [], id: nil, description: nil, encoding: .binary, octets: 99)
                     )
                 ),
                 [1],
@@ -213,11 +213,10 @@ extension BodyStructure_Tests {
                 [2, 2, 1],
                 .singlepart(.init(type: .basic(.init(type: .audio, subtype: .alternative)), fields: .init(parameter: [], id: nil, description: nil, encoding: .binary, octets: 3))),
                 #line
-            )
+            ),
         ]
         inputs.forEach { (input, index, expected, line) in
             XCTAssertEqual(input[index], expected, line: line)
         }
     }
-    
 }

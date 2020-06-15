@@ -53,7 +53,6 @@ extension SectionSpecifierTests {
 // MARK: - Comparable
 
 extension SectionSpecifierTests {
-    
     func testComparable() {
         let inputs: [(SectionSpecifier, SectionSpecifier, Bool, UInt)] = [
             (.init(kind: .header), .init(kind: .text), true, #line),
@@ -62,15 +61,14 @@ extension SectionSpecifierTests {
             (.init(part: [1, 2], kind: .complete), .init(part: [1], kind: .complete), false, #line),
             (.init(part: [1, 2], kind: .complete), .init(part: [1, 2, 3], kind: .complete), true, #line),
             (.init(part: [1, 2, 3], kind: .complete), .init(part: [1, 2, 3], kind: .text), true, #line),
-            (.init(part: [1, 2], kind: .text), .init(part: [1, 2, 3], kind: .header), true, #line)
+            (.init(part: [1, 2], kind: .text), .init(part: [1, 2, 3], kind: .header), true, #line),
         ]
         inputs.forEach { (lhs, rhs, expected, line) in
             XCTAssertEqual(lhs < rhs, expected, line: line)
         }
     }
-    
+
     func testComparable_kind() {
-        
         let inputs: [(SectionSpecifier.Kind, SectionSpecifier.Kind, Bool, UInt)] = [
             (.complete, .complete, false, #line),
             (.complete, .header, true, #line),
@@ -113,9 +111,8 @@ extension SectionSpecifierTests {
             XCTAssertEqual(lhs < rhs, expected, line: line)
         }
     }
-    
+
     func testComparable_part() {
-        
         let inputs: [(SectionSpecifier.Part, SectionSpecifier.Part, Bool, UInt)] = [
             ([1], [1], false, #line),
             ([1], [1, 2], true, #line),
@@ -128,5 +125,4 @@ extension SectionSpecifierTests {
             XCTAssertEqual(lhs < rhs, expected, line: line)
         }
     }
-    
 }

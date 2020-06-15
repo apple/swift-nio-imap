@@ -30,7 +30,6 @@ public struct SectionSpecifier: Equatable {
 }
 
 extension SectionSpecifier: Comparable {
-    
     public static func < (lhs: SectionSpecifier, rhs: SectionSpecifier) -> Bool {
         if lhs.part == rhs.part {
             return lhs.kind < rhs.kind
@@ -40,7 +39,6 @@ extension SectionSpecifier: Comparable {
             return false
         }
     }
-    
 }
 
 // MARK: - Types
@@ -83,11 +81,9 @@ extension SectionSpecifier {
 }
 
 extension SectionSpecifier.Part: Comparable {
-    
     public static func < (lhs: SectionSpecifier.Part, rhs: SectionSpecifier.Part) -> Bool {
-        
         let minSize = min(lhs.rawValue.count, rhs.rawValue.count)
-        for i in 0..<minSize {
+        for i in 0 ..< minSize {
             if lhs.rawValue[i] == rhs.rawValue[i] {
                 continue
             } else if lhs.rawValue[i] < rhs.rawValue[i] {
@@ -96,20 +92,17 @@ extension SectionSpecifier.Part: Comparable {
                 return false
             }
         }
-        
+
         // [1.2.3.4] < [1.2.3.4.5]
         if lhs.rawValue.count < rhs.rawValue.count {
             return true
         } else {
             return false
         }
-        
     }
-    
 }
 
 extension SectionSpecifier.Kind: Comparable {
-    
     public static func < (lhs: SectionSpecifier.Kind, rhs: SectionSpecifier.Kind) -> Bool {
         switch (lhs, rhs) {
         case (complete, complete):
@@ -186,7 +179,6 @@ extension SectionSpecifier.Kind: Comparable {
             return false
         }
     }
-    
 }
 
 // MARK: - Encoding
