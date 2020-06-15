@@ -1009,39 +1009,13 @@ extension ParserUnitTests {
     }
 
 
-    /*
-     func testCreatingMax() throws {
-         let sut = try XCTUnwrap(DateTime(day: 31, month: 12, year: 2567, hour: 24, minute: 60, seconds: 60, zone: 13*60))
-         let components = DateComponents(
-             timeZone: TimeZone(secondsFromGMT: 13*60*60),
-             year: 2567,
-             month: 12,
-             day: 31,
-             hour: 24,
-             minute: 60,
-             second: 60
-         )
-         let date = Calendar(identifier: .gregorian).date(from: components)!
-         XCTAssertEqual(sut.date, date)
-     }
+    func testCreatingMax() throws {
+        XCTAssertNotNil(InternalDate(year: 2567, month: 12, day: 31, hour: 24, minute: 60, second: 60, zoneMinutes: 13*60))
+    }
 
-     func testCreatingMin() throws {
-         let sut = try XCTUnwrap(DateTime(day: 1, month: 1, year: 1900, hour: 0, minute: 0, seconds: 0, zone: -13*60))
-         let components = DateComponents(
-             timeZone: TimeZone(secondsFromGMT: -13*60*60),
-             year: 1900,
-             month: 1,
-             day: 1,
-             hour: 0,
-             minute: 0,
-             second: 0
-         )
-         let date = Calendar(identifier: .gregorian).date(from: components)!
-         XCTAssertEqual(sut.date, date)
-     }
-
-
- */
+    func testCreatingMin() throws {
+        XCTAssertNotNil(InternalDate(year: 1900, month: 1, day: 1, hour: 0, minute: 0, second: 0, zoneMinutes: -13*60))
+    }
 }
 
 // MARK: - parseInternalDate

@@ -119,15 +119,9 @@ extension InternalDate {
     }
 
     fileprivate struct Date {
-        var day: Int
-        var month: Int
         var year: Int
-
-        init(year: Int, month: Int, day: Int) {
-            self.day = day
-            self.month = month
-            self.year = year
-        }
+        var month: Int
+        var day: Int
     }
 
     fileprivate struct Time: Equatable {
@@ -203,7 +197,7 @@ extension EncodeBuffer {
         if string.count < 4 {
             var output = ""
             output.reserveCapacity(4)
-            output.append(contentsOf: repeatElement("0", count: 4 - string.count))
+            output.append(contentsOf: String(repeating: "0", count: 4 - string.count))
             output.append(string)
             zeroedString = output
         } else {
