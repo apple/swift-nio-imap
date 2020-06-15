@@ -891,7 +891,7 @@ extension GrammarParser {
             try ParserLibrary.parseFixedString(" ", buffer: &buffer, tracker: tracker)
 
             func splitZoneMinutes(_ raw: Int) -> Int? {
-                guard 0 <= raw else { return nil }
+                guard raw >= 0 else { return nil }
                 let minutes = raw % 100
                 let hours = (raw - minutes) / 100
                 guard minutes <= 60, hour <= 24 else { return nil }

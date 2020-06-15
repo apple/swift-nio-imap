@@ -12,7 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-
 /// The internal date and time of the message on the server.
 ///
 /// This is not the date and time in the [RFC-2822] header, but rather a date and time
@@ -26,15 +25,15 @@ public struct InternalDate: Equatable {
 
     public init?(year: Int, month: Int, day: Int, hour: Int, minute: Int, second: Int, zoneMinutes: Int) {
         guard
-            (1...31).contains(day),
-            (1...12).contains(month),
-            (0...24).contains(hour),
-            (0...60).contains(minute),
-            (0...60).contains(second),
-            ((-24 * 60)...(24 * 60)).contains(zoneMinutes),
-            (1...Int(UInt16.max)).contains(year),
+            (1 ... 31).contains(day),
+            (1 ... 12).contains(month),
+            (0 ... 24).contains(hour),
+            (0 ... 60).contains(minute),
+            (0 ... 60).contains(second),
+            ((-24 * 60) ... (24 * 60)).contains(zoneMinutes),
+            (1 ... Int(UInt16.max)).contains(year),
             let zoneValue = UInt16(exactly: abs(zoneMinutes))
-            else { return nil }
+        else { return nil }
         let zoneIsNegative = (zoneMinutes < 0) ? 1 as UInt8 : 0
 
         var rawValue = 0 as UInt64
@@ -84,7 +83,7 @@ extension InternalDate {
     }
 
     public var components: Components {
-        var remainder = rawValue
+        var remainder = self.rawValue
 
         func take(_ a: UInt64) -> Int {
             let r = remainder % (a + 1)
@@ -110,7 +109,7 @@ extension InternalDate {
 
 extension InternalDate {
     fileprivate func makeParts() -> (Date, Time, TimeZone) {
-        let c = components
+        let c = self.components
         return (
             Date(year: c.year, month: c.month, day: c.day),
             Time(hour: c.hour, minute: c.minute, second: c.second),
