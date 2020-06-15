@@ -28,9 +28,9 @@ extension BodyStructure: RandomAccessCollection {
     public typealias SubSequence = Slice<BodyStructure>
 
     public subscript(position: SectionSpecifier.Part) -> BodyStructure {
-        precondition(position.rawValue.count > 0, "Part must contain at least one number")
-        let first = position.rawValue.first!
-        precondition(first > 0, "Part cannot be < 1")
+        guard let first = position.rawValue.first, first > 0  else {
+            preconditionFailure("Part must contain a first number > 0")
+        }
 
         switch self {
         case .singlepart(let part):
