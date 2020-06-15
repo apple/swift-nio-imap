@@ -155,18 +155,69 @@ extension BodyStructure_Tests {
         }
     }
 
-//    func testRandomeAccessCollection_indexAfter() {
-//        let inputs: [(BodyStructure, SectionSpecifier.Part, SectionSpecifier.Part, UInt)] = [
-////            (
-////                .singlepart(BodyStructure.Singlepart.init(type: .basic(<#T##Media.Basic#>), fields: <#T##BodyStructure.Fields#>)),
-////                ,
-////                ,
-////                #line,
-////            )
-//        ]
-//        inputs.forEach { (input, index, expected, line) in
-//            XCTAssertEqual(input.index(after: index), expected, line: line)
-//        }
-//    }
+    func testRandomeAccessCollection_position() {
+        let inputs: [(BodyStructure, SectionSpecifier.Part, BodyStructure, UInt)] = [
+            (
+                .singlepart(.init(type: .basic(.init(type: .audio, subtype: .alternative)), fields: .init(parameter: [], id: nil, description: nil, encoding: .binary, octets: 0))),
+                [1],
+                .singlepart(.init(type: .basic(.init(type: .audio, subtype: .alternative)), fields: .init(parameter: [], id: nil, description: nil, encoding: .binary, octets: 0))),
+                #line
+            ),
+            (
+                .singlepart(.init(type: .text(.init(mediaText: "media", lines: 3)), fields: BodyStructure.Fields.init(parameter: [], id: nil, description: nil, encoding: .binary, octets: 123))),
+                [1],
+                .singlepart(.init(type: .text(.init(mediaText: "media", lines: 3)), fields: BodyStructure.Fields.init(parameter: [], id: nil, description: nil, encoding: .binary, octets: 123))),
+                #line
+            ),
+            (
+                .singlepart(
+                    .init(
+                        type: .message(
+                            .init(
+                                message: .rfc822,
+                                envelope: Envelope.init(date: nil, subject: nil, from: [], sender: [], reply: [], to: [], cc: [], bcc: [], inReplyTo: nil, messageID: nil),
+                                body: .singlepart(.init(type: .basic(.init(type: .audio, subtype: .alternative)), fields: .init(parameter: [], id: nil, description: nil, encoding: .binary, octets: 0))
+                                ),
+                                fieldLines: 1
+                            )
+                        ),
+                        fields: BodyStructure.Fields.init(parameter: [], id: nil, description: nil, encoding: .binary, octets: 99)
+                    )
+                ),
+                [1],
+                .singlepart(.init(type: .basic(.init(type: .audio, subtype: .alternative)), fields: .init(parameter: [], id: nil, description: nil, encoding: .binary, octets: 0))),
+                #line
+            ),
+            (
+                .multipart(.init(parts: [
+                    .singlepart(.init(type: .basic(.init(type: .audio, subtype: .alternative)), fields: .init(parameter: [], id: nil, description: nil, encoding: .binary, octets: 0))),
+                    .singlepart(.init(type: .basic(.init(type: .audio, subtype: .alternative)), fields: .init(parameter: [], id: nil, description: nil, encoding: .binary, octets: 1))),
+                    .singlepart(.init(type: .basic(.init(type: .audio, subtype: .alternative)), fields: .init(parameter: [], id: nil, description: nil, encoding: .binary, octets: 2))),
+                ], mediaSubtype: .init("subtype"))),
+                [3],
+                .singlepart(.init(type: .basic(.init(type: .audio, subtype: .alternative)), fields: .init(parameter: [], id: nil, description: nil, encoding: .binary, octets: 2))),
+                #line
+            ),
+            (
+                .multipart(.init(parts: [
+                    .singlepart(.init(type: .basic(.init(type: .audio, subtype: .alternative)), fields: .init(parameter: [], id: nil, description: nil, encoding: .binary, octets: 0))),
+                    .multipart(.init(parts: [
+                        .singlepart(.init(type: .basic(.init(type: .audio, subtype: .alternative)), fields: .init(parameter: [], id: nil, description: nil, encoding: .binary, octets: 0))),
+                        .multipart(.init(parts: [
+                            .singlepart(.init(type: .basic(.init(type: .audio, subtype: .alternative)), fields: .init(parameter: [], id: nil, description: nil, encoding: .binary, octets: 3))),
+                            .singlepart(.init(type: .basic(.init(type: .audio, subtype: .alternative)), fields: .init(parameter: [], id: nil, description: nil, encoding: .binary, octets: 4))),
+                            .singlepart(.init(type: .basic(.init(type: .audio, subtype: .alternative)), fields: .init(parameter: [], id: nil, description: nil, encoding: .binary, octets: 5))),
+                        ], mediaSubtype: .init("subtype"))),
+                    ], mediaSubtype: .init("subtype"))),
+                ], mediaSubtype: .init("subtype"))),
+                [2, 2, 1],
+                .singlepart(.init(type: .basic(.init(type: .audio, subtype: .alternative)), fields: .init(parameter: [], id: nil, description: nil, encoding: .binary, octets: 3))),
+                #line
+            )
+        ]
+        inputs.forEach { (input, index, expected, line) in
+            XCTAssertEqual(input[index], expected, line: line)
+        }
+    }
     
 }

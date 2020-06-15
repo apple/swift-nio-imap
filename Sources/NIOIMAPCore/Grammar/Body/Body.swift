@@ -29,20 +29,30 @@ extension BodyStructure: RandomAccessCollection {
     public typealias SubSequence = Slice<BodyStructure>
     
     public subscript(position: SectionSpecifier.Part) -> BodyStructure {
-        _read {
-            switch self {
-            case .singlepart(let part):
-                switch part.type {
-                case .basic(let basic):
-                    fatalError("Test")
-                case .message(let message):
-                    fatalError("Test")
-                case .text(let text):
-                    fatalError("Test")
-                }
-                
-            case .multipart(let part):
-                fatalError("Error")
+        precondition(position.rawValue.count > 0, "Part must contain at least one number")
+        let first = position.rawValue.first!
+        precondition(first > 0, "Part cannot be < 1")
+        
+        switch self {
+        case .singlepart(let part):
+            switch part.type {
+            case .basic(_):
+                return self
+            case .message(let message):
+                return message.body
+            case .text(_):
+                return self
+            }
+            
+        case .multipart(let part):
+            guard first <= part.parts.count else {
+                fatalError("\(first) is out of range")
+            }
+            if position.rawValue.count == 1 {
+                return part.parts[first - 1]
+            } else {
+                let subPosition = SectionSpecifier.Part(rawValue: Array(position.rawValue.dropFirst()))
+                return part.parts[first - 1][subPosition]
             }
         }
     }
