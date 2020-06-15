@@ -28,7 +28,7 @@ extension BodyStructure: RandomAccessCollection {
     public typealias SubSequence = Slice<BodyStructure>
 
     public subscript(position: SectionSpecifier.Part) -> BodyStructure {
-        guard let first = position.rawValue.first, first > 0  else {
+        guard let first = position.rawValue.first, first > 0 else {
             preconditionFailure("Part must contain a first number > 0")
         }
 
