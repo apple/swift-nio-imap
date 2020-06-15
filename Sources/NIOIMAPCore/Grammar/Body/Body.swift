@@ -20,6 +20,51 @@ public enum BodyStructure: Equatable {
     case multipart(Multipart)
 }
 
+extension BodyStructure: RandomAccessCollection {
+    
+    public typealias Element = BodyStructure
+    
+    public typealias Index = SectionSpecifier.Part
+    
+    public typealias SubSequence = Slice<BodyStructure>
+    
+    public subscript(position: SectionSpecifier.Part) -> BodyStructure {
+        _read {
+            switch self {
+            case .singlepart(let part):
+                switch part.type {
+                case .basic(let basic):
+                    fatalError("Test")
+                case .message(let message):
+                    fatalError("Test")
+                case .text(let text):
+                    fatalError("Test")
+                }
+                
+            case .multipart(let part):
+                fatalError("Error")
+            }
+        }
+    }
+    
+    public var startIndex: SectionSpecifier.Part {
+        [1] // both singleparts and multiparts always have at least one part
+    }
+    
+    public var endIndex: SectionSpecifier.Part {
+        fatalError("Test")
+    }
+    
+    public func index(before i: SectionSpecifier.Part) -> SectionSpecifier.Part {
+        fatalError("Test")
+    }
+    
+    public func index(after i: SectionSpecifier.Part) -> SectionSpecifier.Part {
+        fatalError("Test")
+    }
+    
+}
+
 // MARK: - Types
 
 extension BodyStructure {

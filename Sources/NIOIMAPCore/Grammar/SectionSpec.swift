@@ -29,6 +29,20 @@ public struct SectionSpecifier: Equatable {
     }
 }
 
+extension SectionSpecifier: Comparable {
+    
+    public static func < (lhs: SectionSpecifier, rhs: SectionSpecifier) -> Bool {
+        if lhs.part == rhs.part {
+            return lhs.kind < rhs.kind
+        } else if lhs.part < rhs.part {
+            return true
+        } else {
+            return false
+        }
+    }
+    
+}
+
 // MARK: - Types
 
 extension SectionSpecifier {
@@ -66,6 +80,113 @@ extension SectionSpecifier {
         /// Text body without header, corresponding to e.g. `4.2.TEXT`.
         case text
     }
+}
+
+extension SectionSpecifier.Part: Comparable {
+    
+    public static func < (lhs: SectionSpecifier.Part, rhs: SectionSpecifier.Part) -> Bool {
+        
+        let minSize = min(lhs.rawValue.count, rhs.rawValue.count)
+        for i in 0..<minSize {
+            if lhs.rawValue[i] == rhs.rawValue[i] {
+                continue
+            } else if lhs.rawValue[i] < rhs.rawValue[i] {
+                return true
+            } else {
+                return false
+            }
+        }
+        
+        // [1.2.3.4] < [1.2.3.4.5]
+        if lhs.rawValue.count < rhs.rawValue.count {
+            return true
+        } else {
+            return false
+        }
+        
+    }
+    
+}
+
+extension SectionSpecifier.Kind: Comparable {
+    
+    public static func < (lhs: SectionSpecifier.Kind, rhs: SectionSpecifier.Kind) -> Bool {
+        switch (lhs, rhs) {
+        case (complete, complete):
+            return false
+        case (complete, header):
+            return true
+        case (complete, headerFields):
+            return true
+        case (complete, headerFieldsNot):
+            return true
+        case (complete, MIMEHeader):
+            return true
+        case (complete, text):
+            return true
+        case (header, complete):
+            return true
+        case (header, header):
+            return true
+        case (header, headerFields):
+            return true
+        case (header, headerFieldsNot):
+            return true
+        case (header, MIMEHeader):
+            return true
+        case (header, text):
+            return true
+        case (headerFields, complete):
+            return false
+        case (headerFields, header):
+            return false
+        case (headerFields, headerFields):
+            return false
+        case (headerFields, headerFieldsNot):
+            return false
+        case (headerFields, MIMEHeader):
+            return false
+        case (headerFields, text):
+            return true
+        case (headerFieldsNot, complete):
+            return false
+        case (headerFieldsNot, header):
+            return false
+        case (headerFieldsNot, headerFields):
+            return false
+        case (headerFieldsNot, headerFieldsNot):
+            return false
+        case (headerFieldsNot, MIMEHeader):
+            return false
+        case (headerFieldsNot, text):
+            return true
+        case (MIMEHeader, complete):
+            return false
+        case (MIMEHeader, header):
+            return true
+        case (MIMEHeader, headerFields):
+            return true
+        case (MIMEHeader, headerFieldsNot):
+            return true
+        case (MIMEHeader, MIMEHeader):
+            return false
+        case (MIMEHeader, text):
+            return true
+        case (text, complete):
+            return false
+        case (text, header):
+            return false
+        case (text, headerFields):
+            return false
+        case (text, headerFieldsNot):
+            return false
+        case (text, MIMEHeader):
+            return false
+        case (text, text):
+            return false
+        }
+    }
+    
 }
 
 // MARK: - Encoding
