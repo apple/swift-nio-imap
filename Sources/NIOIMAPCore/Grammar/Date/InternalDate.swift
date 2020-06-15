@@ -113,7 +113,7 @@ extension InternalDate {
         return (
             Date(year: c.year, month: c.month, day: c.day),
             Time(hour: c.hour, minute: c.minute, second: c.second),
-            TimeZone(c.zoneMinutes)
+            TimeZone(minutes: c.zoneMinutes)
         )
     }
 
@@ -127,20 +127,10 @@ extension InternalDate {
         var hour: Int
         var minute: Int
         var second: Int
-
-        init(hour: Int, minute: Int, second: Int) {
-            self.hour = hour
-            self.minute = minute
-            self.second = second
-        }
     }
 
     fileprivate struct TimeZone: Equatable {
         var minutes: Int
-
-        init(_ minutes: Int) {
-            self.minutes = minutes
-        }
     }
 }
 
