@@ -130,6 +130,30 @@ extension BodyStructure_Tests {
             XCTAssertEqual(body.index(before: before), expected, line: line)
         }
     }
+    
+    func testRandomeAccessCollection_indexAfter() {
+        let inputs: [(BodyStructure, SectionSpecifier.Part, SectionSpecifier.Part, UInt)] = [
+            (
+                .singlepart(.init(type: .basic(.init(type: .audio, subtype: .alternative)), fields: .init(parameter: [], id: nil, description: nil, encoding: .binary, octets: 0))),
+                [1],
+                [2],
+                #line
+            ),
+            (
+                .multipart(BodyStructure.Multipart.init(parts: [
+                    .singlepart(.init(type: .basic(.init(type: .audio, subtype: .mixed)), fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 0))),
+                    .singlepart(.init(type: .basic(.init(type: .audio, subtype: .mixed)), fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 0))),
+                    .singlepart(.init(type: .basic(.init(type: .audio, subtype: .mixed)), fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 0)))
+                ], mediaSubtype: .mixed)),
+                [2],
+                [3],
+                #line
+            ),
+        ]
+        inputs.forEach { (body, after, expected, line) in
+            XCTAssertEqual(body.index(after: after), expected, line: line)
+        }
+    }
 
 //    func testRandomeAccessCollection_indexAfter() {
 //        let inputs: [(BodyStructure, SectionSpecifier.Part, SectionSpecifier.Part, UInt)] = [
