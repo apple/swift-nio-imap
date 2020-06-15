@@ -118,15 +118,15 @@ extension GrammarParser {
                 try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
                 return try self.parseFlagList(buffer: &buffer, tracker: tracker)
             } ?? []
-            let dateTime = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> Date.DateTime in
+            let internalDate = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> InternalDate in
                 try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
-                return try self.parseDateTime(buffer: &buffer, tracker: tracker)
+                return try self.parseInternalDate(buffer: &buffer, tracker: tracker)
             }
             let array = try ParserLibrary.parseZeroOrMore(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> AppendExtension in
                 try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
                 return try self.parseAppendExtension(buffer: &buffer, tracker: tracker)
             }
-            return .init(flagList: flagList, dateTime: dateTime, extensions: array)
+            return .init(flagList: flagList, internalDate: internalDate, extensions: array)
         }
     }
 
@@ -871,20 +871,62 @@ extension GrammarParser {
 
     // date-time       = DQUOTE date-day-fixed "-" date-month "-" date-year
     //                   SP time SP zone DQUOTE
-    static func parseDateTime(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Date.DateTime {
+    static func parseInternalDate(buffer: inout ByteBuffer, tracker: StackTracker) throws -> InternalDate {
         try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             try ParserLibrary.parseFixedString("\"", buffer: &buffer, tracker: tracker)
             let day = try self.parseDateDayFixed(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseFixedString("-", buffer: &buffer, tracker: tracker)
-            let month = try self.parseDateMonth(buffer: &buffer, tracker: tracker)
+            let month = try self.parseDateMonth(buffer: &buffer, tracker: tracker).numericValue
             try ParserLibrary.parseFixedString("-", buffer: &buffer, tracker: tracker)
             let year = try self.parseDateYear(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseFixedString(" ", buffer: &buffer, tracker: tracker)
-            let time = try self.parseTime(buffer: &buffer, tracker: tracker)
+
+            // time            = 2DIGIT ":" 2DIGIT ":" 2DIGIT
+            let hour = try self.parse2Digit(buffer: &buffer, tracker: tracker)
+            try ParserLibrary.parseFixedString(":", buffer: &buffer, tracker: tracker)
+            let minute = try self.parse2Digit(buffer: &buffer, tracker: tracker)
+            try ParserLibrary.parseFixedString(":", buffer: &buffer, tracker: tracker)
+            let second = try self.parse2Digit(buffer: &buffer, tracker: tracker)
+
             try ParserLibrary.parseFixedString(" ", buffer: &buffer, tracker: tracker)
-            let zone = try self.parseZone(buffer: &buffer, tracker: tracker)
+
+            func splitZoneMinutes(_ raw: Int) -> Int? {
+                guard raw >= 0 else { return nil }
+                let minutes = raw % 100
+                let hours = (raw - minutes) / 100
+                guard minutes <= 60, hour <= 24 else { return nil }
+                return hours * 60 + minutes
+            }
+
+            // zone            = ("+" / "-") 4DIGIT
+            func parseZonePositive(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Int {
+                try ParserLibrary.parseFixedString("+", buffer: &buffer, tracker: tracker)
+                let num = try self.parse4Digit(buffer: &buffer, tracker: tracker)
+                guard let zone = splitZoneMinutes(num) else {
+                    throw ParserError(hint: "Building TimeZone from \(num) failed")
+                }
+                return zone
+            }
+
+            func parseZoneNegative(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Int {
+                try ParserLibrary.parseFixedString("-", buffer: &buffer, tracker: tracker)
+                let num = try self.parse4Digit(buffer: &buffer, tracker: tracker)
+                guard let zone = splitZoneMinutes(num) else {
+                    throw ParserError(hint: "Building TimeZone from \(num) failed")
+                }
+                return -zone
+            }
+
+            let zone = try ParserLibrary.parseOneOf([
+                parseZonePositive,
+                parseZoneNegative,
+            ], buffer: &buffer, tracker: tracker)
+
             try ParserLibrary.parseFixedString("\"", buffer: &buffer, tracker: tracker)
-            return Date.DateTime(date: Date(day: day, month: month, year: year), time: time, zone: zone)
+            guard let d = InternalDate(year: year, month: month, day: day, hour: hour, minute: minute, second: second, zoneMinutes: zone) else {
+                throw ParserError(hint: "Invalid internal date.")
+            }
+            return d
         }
     }
 
@@ -2136,7 +2178,7 @@ extension GrammarParser {
 
         func parseMessageAttribute_internalDate(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MessageAttribute {
             try ParserLibrary.parseFixedString("INTERNALDATE ", buffer: &buffer, tracker: tracker)
-            return .internalDate(try self.parseDateTime(buffer: &buffer, tracker: tracker))
+            return .internalDate(try self.parseInternalDate(buffer: &buffer, tracker: tracker))
         }
 
         func parseMessageAttribute_rfc822(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MessageAttribute {
@@ -3924,18 +3966,6 @@ extension GrammarParser {
         }
     }
 
-    // time            = 2DIGIT ":" 2DIGIT ":" 2DIGIT
-    static func parseTime(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Date.Time {
-        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Date.Time in
-            let hour = try self.parse2Digit(buffer: &buffer, tracker: tracker)
-            try ParserLibrary.parseFixedString(":", buffer: &buffer, tracker: tracker)
-            let minute = try self.parse2Digit(buffer: &buffer, tracker: tracker)
-            try ParserLibrary.parseFixedString(":", buffer: &buffer, tracker: tracker)
-            let second = try self.parse2Digit(buffer: &buffer, tracker: tracker)
-            return Date.Time(hour: hour, minute: minute, second: second)
-        }
-    }
-
     // uid             = "UID" SP
     //                   (copy / move / fetch / search / store / uid-expunge)
     static func parseUid(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Command {
@@ -4095,32 +4125,6 @@ extension GrammarParser {
         try ParserLibrary.parseOneOrMoreCharacters(buffer: &buffer, tracker: tracker) { char -> Bool in
             char.isAlpha
         }
-    }
-
-    // zone            = ("+" / "-") 4DIGIT
-    static func parseZone(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Date.TimeZone {
-        func parseZonePositive(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Date.TimeZone {
-            try ParserLibrary.parseFixedString("+", buffer: &buffer, tracker: tracker)
-            let num = try self.parse4Digit(buffer: &buffer, tracker: tracker)
-            guard let zone = Date.TimeZone(num) else {
-                throw ParserError(hint: "Building TimeZone from \(num) failed")
-            }
-            return zone
-        }
-
-        func parseZoneNegative(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Date.TimeZone {
-            try ParserLibrary.parseFixedString("-", buffer: &buffer, tracker: tracker)
-            let num = try self.parse4Digit(buffer: &buffer, tracker: tracker)
-            guard let zone = Date.TimeZone(-num) else {
-                throw ParserError(hint: "Building TimeZone from \(num) failed")
-            }
-            return zone
-        }
-
-        return try ParserLibrary.parseOneOf([
-            parseZonePositive,
-            parseZoneNegative,
-        ], buffer: &buffer, tracker: tracker)
     }
 }
 

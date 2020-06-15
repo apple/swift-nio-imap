@@ -19,11 +19,13 @@ import XCTest
 class AppendOptions_Tests: EncodeTestClass {}
 
 extension AppendOptions_Tests {
-    func testEncode() {
+    func testEncode() throws {
+        let date = try XCTUnwrap(InternalDate(year: 1994, month: 6, day: 25, hour: 1, minute: 2, second: 3, zoneMinutes: 0))
+
         let inputs: [(AppendOptions, String, UInt)] = [
-            (.init(flagList: [], dateTime: nil, extensions: []), "", #line),
-            (.init(flagList: [.answered], dateTime: nil, extensions: []), " (\\ANSWERED)", #line),
-            (.init(flagList: [.answered], dateTime: .init(date: .init(day: 25, month: .jun, year: 1994), time: .init(hour: 01, minute: 02, second: 03), zone: Date.TimeZone(0)!), extensions: []), " (\\ANSWERED) \"25-jun-1994 01:02:03 +0000\"", #line),
+            (.init(flagList: [], internalDate: nil, extensions: []), "", #line),
+            (.init(flagList: [.answered], internalDate: nil, extensions: []), " (\\ANSWERED)", #line),
+            (.init(flagList: [.answered], internalDate: date, extensions: []), " (\\ANSWERED) \"25-jun-1994 01:02:03 +0000\"", #line),
         ]
 
         for (test, expectedString, line) in inputs {

@@ -21,7 +21,9 @@ class MessageAttributesTests: EncodeTestClass {}
 // MARK: - Encoding
 
 extension MessageAttributesTests {
-    func testEncode() {
+    func testEncode() throws {
+        let date = try XCTUnwrap(InternalDate(year: 1994, month: 6, day: 25, hour: 1, minute: 2, second: 3, zoneMinutes: 0))
+
         let inputs: [(MessageAttribute, String, UInt)] = [
             (.rfc822(nil), "RFC822 NIL", #line),
             (.rfc822Header(nil), "RFC822.HEADER NIL", #line),
@@ -32,7 +34,7 @@ extension MessageAttributesTests {
             (.bodySection(.init(kind: .header), partial: 123, data: "test"), "BODY[HEADER]<123> \"test\"", #line),
             (.uid(123), "UID 123", #line),
             (.envelope(Envelope(date: "date", subject: "subject", from: [.init(name: "name", adl: "adl", mailbox: "mailbox", host: "host")], sender: [.init(name: "name", adl: "adl", mailbox: "mailbox", host: "host")], reply: [.init(name: "name", adl: "adl", mailbox: "mailbox", host: "host")], to: [.init(name: "name", adl: "adl", mailbox: "mailbox", host: "host")], cc: [.init(name: "name", adl: "adl", mailbox: "mailbox", host: "host")], bcc: [.init(name: "name", adl: "adl", mailbox: "mailbox", host: "host")], inReplyTo: "replyto", messageID: "abc123")), "ENVELOPE (\"date\" \"subject\" ((\"name\" \"adl\" \"mailbox\" \"host\")) ((\"name\" \"adl\" \"mailbox\" \"host\")) ((\"name\" \"adl\" \"mailbox\" \"host\")) ((\"name\" \"adl\" \"mailbox\" \"host\")) ((\"name\" \"adl\" \"mailbox\" \"host\")) ((\"name\" \"adl\" \"mailbox\" \"host\")) \"replyto\" \"abc123\")", #line),
-            (.internalDate(.init(date: .init(day: 25, month: .jun, year: 1994), time: Date.Time(hour: 01, minute: 02, second: 03), zone: Date.TimeZone(0)!)), #"INTERNALDATE "25-jun-1994 01:02:03 +0000""#, #line),
+            (.internalDate(date), #"INTERNALDATE "25-jun-1994 01:02:03 +0000""#, #line),
             (.binarySize(section: [2], size: 3), "BINARY.SIZE[2] 3", #line),
             (.binary(section: [3], data: nil), "BINARY[3] NIL", #line),
             (.binary(section: [3], data: "test"), "BINARY[3] \"test\"", #line),

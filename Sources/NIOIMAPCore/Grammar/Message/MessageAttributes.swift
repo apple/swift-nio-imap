@@ -17,7 +17,7 @@ import struct NIO.ByteBuffer
 public enum MessageAttribute: Equatable {
     case flags([Flag])
     case envelope(Envelope)
-    case internalDate(Date.DateTime)
+    case internalDate(InternalDate)
     case uid(UID)
     case rfc822(NString)
     case rfc822Header(NString)
@@ -92,9 +92,9 @@ extension EncodeBuffer {
             self.writeEnvelope(env)
     }
 
-    @discardableResult mutating func writeMessageAttribute_internalDate(_ date: Date.DateTime) -> Int {
+    @discardableResult mutating func writeMessageAttribute_internalDate(_ date: InternalDate) -> Int {
         self.writeString("INTERNALDATE ") +
-            self.writeDateTime(date)
+            self.writeInternalDate(date)
     }
 
     @discardableResult mutating func writeMessageAttribute_rfc822(_ string: NString) -> Int {

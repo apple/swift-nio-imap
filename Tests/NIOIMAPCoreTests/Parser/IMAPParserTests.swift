@@ -59,7 +59,7 @@ extension ParserUnitTests {
                 c2_1,
                 .command(TaggedCommand(tag: "2", command: .append(
                     to: .inbox,
-                    firstMessageMetadata: .init(options: .init(flagList: [], dateTime: nil, extensions: []), data: .init(byteCount: 10))
+                    firstMessageMetadata: .init(options: .init(flagList: [], internalDate: nil, extensions: []), data: .init(byteCount: 10))
                 )))
             )
             XCTAssertEqual(c2_2, .bytes("0123456789"))
@@ -305,13 +305,13 @@ extension ParserUnitTests {
             (
                 " (\\Answered) {123}\r\n",
                 "test",
-                .init(options: .init(flagList: [.answered], dateTime: nil, extensions: []), data: .init(byteCount: 123)),
+                .init(options: .init(flagList: [.answered], internalDate: nil, extensions: []), data: .init(byteCount: 123)),
                 #line
             ),
             (
                 " (\\Answered) ~{456}\r\n",
                 "test",
-                .init(options: .init(flagList: [.answered], dateTime: nil, extensions: []), data: .init(byteCount: 456, needs8BitCleanTransport: true)),
+                .init(options: .init(flagList: [.answered], internalDate: nil, extensions: []), data: .init(byteCount: 456, needs8BitCleanTransport: true)),
                 #line
             ),
         ]
@@ -322,26 +322,28 @@ extension ParserUnitTests {
 // MARK: - parseAppendOptions
 
 extension ParserUnitTests {
-    func testParseAppendOptions() {
+    func testParseAppendOptions() throws {
+        let date = try XCTUnwrap(InternalDate(year: 1994, month: 6, day: 25, hour: 1, minute: 2, second: 3, zoneMinutes: 0))
+
         let inputs: [(String, String, AppendOptions, UInt)] = [
-            ("", "\r", .init(flagList: [], dateTime: nil, extensions: []), #line),
-            (" (\\Answered)", "\r", .init(flagList: [.answered], dateTime: nil, extensions: []), #line),
+            ("", "\r", .init(flagList: [], internalDate: nil, extensions: []), #line),
+            (" (\\Answered)", "\r", .init(flagList: [.answered], internalDate: nil, extensions: []), #line),
             (
                 " \"25-jun-1994 01:02:03 +0000\"",
                 "\r",
-                .init(flagList: [], dateTime: .init(date: .init(day: 25, month: .jun, year: 1994), time: .init(hour: 01, minute: 02, second: 03), zone: Date.TimeZone(0)!), extensions: []),
+                .init(flagList: [], internalDate: date, extensions: []),
                 #line
             ),
             (
                 " name1 1:2",
                 "\r",
-                .init(flagList: [], dateTime: nil, extensions: [.init(name: "name1", value: .simple(.sequence(SequenceSet(1 ... 2))))]),
+                .init(flagList: [], internalDate: nil, extensions: [.init(name: "name1", value: .simple(.sequence(SequenceSet(1 ... 2))))]),
                 #line
             ),
             (
                 " name1 1:2 name2 2:3 name3 3:4",
                 "\r",
-                .init(flagList: [], dateTime: nil, extensions: [
+                .init(flagList: [], internalDate: nil, extensions: [
                     .init(name: "name1", value: .simple(.sequence(SequenceSet(1 ... 2)))),
                     .init(name: "name2", value: .simple(.sequence(SequenceSet(2 ... 3)))),
                     .init(name: "name3", value: .simple(.sequence(SequenceSet(3 ... 4)))),
@@ -1005,33 +1007,83 @@ extension ParserUnitTests {
             XCTAssertTrue(e is _IncompleteMessage)
         }
     }
+
+    func testCreatingMax() throws {
+        XCTAssertNotNil(InternalDate(year: 2567, month: 12, day: 31, hour: 24, minute: 60, second: 60, zoneMinutes: 13 * 60))
+    }
+
+    func testCreatingMin() throws {
+        XCTAssertNotNil(InternalDate(year: 1900, month: 1, day: 1, hour: 0, minute: 0, second: 0, zoneMinutes: -13 * 60))
+    }
 }
 
-// MARK: - date-time parseDateTime
+// MARK: - parseInternalDate
 
 extension ParserUnitTests {
     // NOTE: Only a few sample failure cases tested, more will be handled by the `ByteToMessageDecoder`
 
-    func testParseDateTime_valid() {
+    func testparseInternalDate_valid() {
         TestUtilities.withBuffer(#""25-Jun-1994 01:02:03 +1020""#) { (buffer) in
-            let dateTime = try GrammarParser.parseDateTime(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(dateTime.date, Date(day: 25, month: .jun, year: 1994))
-            XCTAssertEqual(dateTime.time, Date.Time(hour: 01, minute: 02, second: 03))
-            XCTAssertEqual(dateTime.zone, Date.TimeZone(1020)!)
+            let internalDate = try GrammarParser.parseInternalDate(buffer: &buffer, tracker: .testTracker)
+            let c = internalDate.components
+            XCTAssertEqual(c.year, 1994)
+            XCTAssertEqual(c.month, 6)
+            XCTAssertEqual(c.day, 25)
+            XCTAssertEqual(c.hour, 1)
+            XCTAssertEqual(c.minute, 2)
+            XCTAssertEqual(c.second, 3)
+            XCTAssertEqual(c.zoneMinutes, 620)
+        }
+        TestUtilities.withBuffer(#""01-Jan-1900 00:00:00 -1559""#) { (buffer) in
+            let internalDate = try GrammarParser.parseInternalDate(buffer: &buffer, tracker: .testTracker)
+            let c = internalDate.components
+            XCTAssertEqual(c.year, 1900)
+            XCTAssertEqual(c.month, 1)
+            XCTAssertEqual(c.day, 1)
+            XCTAssertEqual(c.hour, 0)
+            XCTAssertEqual(c.minute, 0)
+            XCTAssertEqual(c.second, 0)
+            XCTAssertEqual(c.zoneMinutes, -959)
+        }
+        TestUtilities.withBuffer(#""31-Dec-2579 23:59:59 +1559""#) { (buffer) in
+            let internalDate = try GrammarParser.parseInternalDate(buffer: &buffer, tracker: .testTracker)
+            let c = internalDate.components
+            XCTAssertEqual(c.year, 2579)
+            XCTAssertEqual(c.month, 12)
+            XCTAssertEqual(c.day, 31)
+            XCTAssertEqual(c.hour, 23)
+            XCTAssertEqual(c.minute, 59)
+            XCTAssertEqual(c.second, 59)
+            XCTAssertEqual(c.zoneMinutes, 959)
         }
     }
 
-    func testParseDateTime__invalid_incomplete() {
+    func testparseInternalDate__invalid_incomplete() {
         var buffer = #""25-Jun-1994 01"# as ByteBuffer
-        XCTAssertThrowsError(try GrammarParser.parseDateTime(buffer: &buffer, tracker: .testTracker)) { error in
+        XCTAssertThrowsError(try GrammarParser.parseInternalDate(buffer: &buffer, tracker: .testTracker)) { error in
             XCTAssertTrue(error is _IncompleteMessage)
         }
     }
 
-    func testParseDateTime__invalid_missing_space() {
+    func testparseInternalDate__invalid_missing_space() {
         var buffer = #""25-Jun-199401:02:03+1020""# as ByteBuffer
-        XCTAssertThrowsError(try GrammarParser.parseDateTime(buffer: &buffer, tracker: .testTracker)) { error in
+        XCTAssertThrowsError(try GrammarParser.parseInternalDate(buffer: &buffer, tracker: .testTracker)) { error in
             XCTAssert(error is ParserError)
+        }
+    }
+
+    func testparseInternalDate__invalid_timeZone() {
+        var buffer = TestUtilities.createTestByteBuffer(for: #""25-Jun-1994 01:02:03 +12345678\n""#)
+        XCTAssertThrowsError(try GrammarParser.parseInternalDate(buffer: &buffer, tracker: .testTracker)) { e in
+            XCTAssertTrue(e is ParserError, "e has type \(e)")
+        }
+        buffer = TestUtilities.createTestByteBuffer(for: #""25-Jun-1994 01:02:03 +12""#)
+        XCTAssertThrowsError(try GrammarParser.parseInternalDate(buffer: &buffer, tracker: .testTracker)) { e in
+            XCTAssertTrue(e is ParserError, "e has type \(e)")
+        }
+        buffer = TestUtilities.createTestByteBuffer(for: #""25-Jun-1994 01:02:03 abc""#)
+        XCTAssertThrowsError(try GrammarParser.parseInternalDate(buffer: &buffer, tracker: .testTracker)) { e in
+            XCTAssertTrue(e is ParserError, "e has type \(e)")
         }
     }
 }
@@ -1611,7 +1663,9 @@ extension ParserUnitTests {
 // MARK: - parseMessageAttribute
 
 extension ParserUnitTests {
-    func testParseMessageAttribute() {
+    func testParseMessageAttribute() throws {
+        let date = try XCTUnwrap(InternalDate(year: 1994, month: 6, day: 25, hour: 1, minute: 2, second: 3, zoneMinutes: 0))
+
         let inputs: [(String, String, MessageAttribute, UInt)] = [
             ("UID 1234", " ", .uid(1234), #line),
             ("BODY[TEXT] \"hello\"", " ", .bodySection(.init(kind: .text), partial: nil, data: "hello"), #line),
@@ -1626,16 +1680,7 @@ extension ParserUnitTests {
             (#"RFC822.TEXT NIL"#, " ", .rfc822Text(nil), #line),
             ("BINARY.SIZE[3] 4", " ", .binarySize(section: [3], size: 4), #line),
             ("BINARY[3] \"hello\"", " ", .binary(section: [3], data: "hello"), #line),
-            (
-                #"INTERNALDATE "25-jun-1994 01:02:03 +0000""#,
-                " ",
-                .internalDate(Date.DateTime(
-                    date: Date(day: 25, month: .jun, year: 1994),
-                    time: Date.Time(hour: 01, minute: 02, second: 03),
-                    zone: Date.TimeZone(0)!
-                )),
-                #line
-            ),
+            (#"INTERNALDATE "25-jun-1994 01:02:03 +0000""#, " ", .internalDate(date), #line),
             (
                 #"ENVELOPE ("date" "subject" (("from1" "from2" "from3" "from4")) (("sender1" "sender2" "sender3" "sender4")) (("reply1" "reply2" "reply3" "reply4")) (("to1" "to2" "to3" "to4")) (("cc1" "cc2" "cc3" "cc4")) (("bcc1" "bcc2" "bcc3" "bcc4")) "inreplyto" "messageid")"#,
                 " ",
@@ -2782,31 +2827,6 @@ extension ParserUnitTests {
     }
 }
 
-// MARK: - time
-
-extension ParserUnitTests {
-    func testDateTime_valid() {
-        TestUtilities.withBuffer("12:34:56", terminator: "\r") { (buffer) in
-            let time = try GrammarParser.parseTime(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(time, Date.Time(hour: 12, minute: 34, second: 56))
-        }
-    }
-
-    func testDateTime_invalid_missingSeparator() {
-        var buffer = TestUtilities.createTestByteBuffer(for: "123456\r")
-        XCTAssertThrowsError(try GrammarParser.parseTime(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertTrue(e is ParserError)
-        }
-    }
-
-    func testDateTime_invalid_partial() {
-        var buffer = TestUtilities.createTestByteBuffer(for: "12:")
-        XCTAssertThrowsError(try GrammarParser.parseTime(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertTrue(e is _IncompleteMessage)
-        }
-    }
-}
-
 // MARK: - parseUID
 
 extension ParserUnitTests {
@@ -2931,41 +2951,6 @@ extension ParserUnitTests {
             ("token", " ", "token", #line),
         ]
         self.iterateTestInputs(inputs, testFunction: GrammarParser.parseVendorToken)
-    }
-}
-
-// MARK: - zone (parseZone)
-
-extension ParserUnitTests {
-    func testZone() {
-        let inputs: [(String, String, NIOIMAPCore.Date.TimeZone?, UInt)] = [
-            ("+1234", " ", Date.TimeZone(1234), #line),
-            ("-5678", " ", Date.TimeZone(-5678), #line),
-            ("+0000", " ", Date.TimeZone(0), #line),
-            ("-0000", " ", Date.TimeZone(0), #line),
-        ]
-        self.iterateTestInputs(inputs, testFunction: GrammarParser.parseZone)
-    }
-
-    func testZone_short() {
-        var buffer = TestUtilities.createTestByteBuffer(for: "+12")
-        XCTAssertThrowsError(try GrammarParser.parseZone(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertTrue(e is _IncompleteMessage, "e has type \(e)")
-        }
-    }
-
-    func testZone_long() {
-        var buffer = TestUtilities.createTestByteBuffer(for: "+12345678\n")
-        XCTAssertThrowsError(try GrammarParser.parseZone(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertTrue(e is ParserError, "e has type \(e)")
-        }
-    }
-
-    func testZone_nonsense() {
-        var buffer = TestUtilities.createTestByteBuffer(for: "abc")
-        XCTAssertThrowsError(try GrammarParser.parseZone(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertTrue(e is ParserError, "e has type \(e)")
-        }
     }
 }
 

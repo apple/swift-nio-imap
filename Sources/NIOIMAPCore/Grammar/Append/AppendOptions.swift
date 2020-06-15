@@ -16,12 +16,12 @@ import struct NIO.ByteBuffer
 
 public struct AppendOptions: Equatable {
     public var flagList: [Flag]
-    public var dateTime: Date.DateTime?
+    public var internalDate: InternalDate?
     public var extensions: [AppendExtension]
 
-    public init(flagList: [Flag], dateTime: Date.DateTime? = nil, extensions: [AppendExtension]) {
+    public init(flagList: [Flag], internalDate: InternalDate? = nil, extensions: [AppendExtension]) {
         self.flagList = flagList
-        self.dateTime = dateTime
+        self.internalDate = internalDate
         self.extensions = extensions
     }
 }
@@ -34,9 +34,9 @@ extension EncodeBuffer {
             self.writeSpace() +
                 self.writeFlags(array)
         } +
-            self.writeIfExists(options.dateTime) { (dateTime) -> Int in
+            self.writeIfExists(options.internalDate) { (internalDate) -> Int in
                 self.writeSpace() +
-                    self.writeDateTime(dateTime)
+                    self.writeInternalDate(internalDate)
             } +
             self.writeArray(options.extensions, separator: "", parenthesis: false) { (ext, self) -> Int in
                 self.writeSpace() +
