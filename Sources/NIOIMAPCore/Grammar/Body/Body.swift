@@ -20,6 +20,70 @@ public enum BodyStructure: Equatable {
     case multipart(Multipart)
 }
 
+extension BodyStructure: RandomAccessCollection {
+    public typealias Element = BodyStructure
+
+    public typealias Index = SectionSpecifier.Part
+
+    public typealias SubSequence = Slice<BodyStructure>
+
+    public subscript(position: SectionSpecifier.Part) -> BodyStructure {
+        guard let first = position.rawValue.first, first > 0 else {
+            preconditionFailure("Part must contain a first number > 0")
+        }
+
+        switch self {
+        case .singlepart(let part):
+            switch part.type {
+            case .basic:
+                return self
+            case .message(let message):
+                return message.body
+            case .text:
+                return self
+            }
+
+        case .multipart(let part):
+            guard first <= part.parts.count else {
+                fatalError("\(first) is out of range")
+            }
+            if position.rawValue.count == 1 {
+                return part.parts[first - 1]
+            } else {
+                let subPosition = SectionSpecifier.Part(rawValue: Array(position.rawValue.dropFirst()))
+                return part.parts[first - 1][subPosition]
+            }
+        }
+    }
+
+    public var startIndex: SectionSpecifier.Part {
+        [1] // both singleparts and multiparts always have at least one part
+    }
+
+    public var endIndex: SectionSpecifier.Part {
+        switch self {
+        case .singlepart:
+            return [2]
+        case .multipart(let part):
+            return [part.parts.count + 1]
+        }
+    }
+
+    public func index(before i: SectionSpecifier.Part) -> SectionSpecifier.Part {
+        guard let first = i.rawValue.first else {
+            fatalError("Must contain at least one number")
+        }
+        return [first - 1]
+    }
+
+    public func index(after i: SectionSpecifier.Part) -> SectionSpecifier.Part {
+        guard let first = i.rawValue.first else {
+            fatalError("Must contain at least one number")
+        }
+        return [first + 1]
+    }
+}
+
 // MARK: - Types
 
 extension BodyStructure {
