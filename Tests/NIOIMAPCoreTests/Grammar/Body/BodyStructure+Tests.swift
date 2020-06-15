@@ -65,48 +65,72 @@ extension BodyStructure_Tests {
         }
     }
     
-//    func testRandomeAccessCollection_endIndex() {
-//        let inputs: [(BodyStructure, SectionSpecifier.Part, UInt)] = [
-//            (
-//                .singlepart(.init(type: .basic(.init(type: .audio, subtype: .alternative)), fields: .init(parameter: [], id: nil, description: nil, encoding: .binary, octets: 0))),
-//                [2],
-//                #line
-//            ),
-//            (
-//                .singlepart(.init(type: .message(.init(
-//                    message: .rfc822,
-//                    envelope: .init(date: nil, subject: nil, from: [], sender: [], reply: [], to: [], cc: [], bcc: [], inReplyTo: nil, messageID: nil),
-//                    body: .singlepart(.init(
-//                        type: .basic(.init(type: .application, subtype: .mixed)),
-//                        fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 0))
-//                    ),
-//                    fieldLines: 3
-//                )), fields: .init(parameter: [], id: nil, description: nil, encoding: .binary, octets: 0))),
-//                [2],
-//                #line
-//            ),
-//            (
-//                .multipart(BodyStructure.Multipart.init(parts: [
-//                    .singlepart(.init(type: .basic(.init(type: .audio, subtype: .mixed)), fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 0)))
-//                ], mediaSubtype: .mixed)),
-//                [2],
-//                #line
-//            ),
-//            (
-//                .multipart(BodyStructure.Multipart.init(parts: [
-//                    .singlepart(.init(type: .basic(.init(type: .audio, subtype: .mixed)), fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 0))),
-//                    .singlepart(.init(type: .basic(.init(type: .audio, subtype: .mixed)), fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 0))),
-//                    .singlepart(.init(type: .basic(.init(type: .audio, subtype: .mixed)), fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 0)))
-//                ], mediaSubtype: .mixed)),
-//                [3],
-//                #line
-//            ),
-//        ]
-//        inputs.forEach { (input, expected, line) in
-//            XCTAssertEqual(input.endIndex, expected, line: line)
-//        }
-//    }
-//
+    func testRandomeAccessCollection_endIndex() {
+        let inputs: [(BodyStructure, SectionSpecifier.Part, UInt)] = [
+            (
+                .singlepart(.init(type: .basic(.init(type: .audio, subtype: .alternative)), fields: .init(parameter: [], id: nil, description: nil, encoding: .binary, octets: 0))),
+                [2],
+                #line
+            ),
+            (
+                .singlepart(.init(type: .message(.init(
+                    message: .rfc822,
+                    envelope: .init(date: nil, subject: nil, from: [], sender: [], reply: [], to: [], cc: [], bcc: [], inReplyTo: nil, messageID: nil),
+                    body: .singlepart(.init(
+                        type: .basic(.init(type: .application, subtype: .mixed)),
+                        fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 0))
+                    ),
+                    fieldLines: 3
+                )), fields: .init(parameter: [], id: nil, description: nil, encoding: .binary, octets: 0))),
+                [2],
+                #line
+            ),
+            (
+                .multipart(BodyStructure.Multipart.init(parts: [
+                    .singlepart(.init(type: .basic(.init(type: .audio, subtype: .mixed)), fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 0)))
+                ], mediaSubtype: .mixed)),
+                [2],
+                #line
+            ),
+            (
+                .multipart(BodyStructure.Multipart.init(parts: [
+                    .singlepart(.init(type: .basic(.init(type: .audio, subtype: .mixed)), fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 0))),
+                    .singlepart(.init(type: .basic(.init(type: .audio, subtype: .mixed)), fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 0))),
+                    .singlepart(.init(type: .basic(.init(type: .audio, subtype: .mixed)), fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 0)))
+                ], mediaSubtype: .mixed)),
+                [4],
+                #line
+            ),
+        ]
+        inputs.forEach { (input, expected, line) in
+            XCTAssertEqual(input.endIndex, expected, line: line)
+        }
+    }
+    
+    func testRandomeAccessCollection_indexBefore() {
+        let inputs: [(BodyStructure, SectionSpecifier.Part, SectionSpecifier.Part, UInt)] = [
+            (
+                .singlepart(.init(type: .basic(.init(type: .audio, subtype: .alternative)), fields: .init(parameter: [], id: nil, description: nil, encoding: .binary, octets: 0))),
+                [2],
+                [1],
+                #line
+            ),
+            (
+                .multipart(BodyStructure.Multipart.init(parts: [
+                    .singlepart(.init(type: .basic(.init(type: .audio, subtype: .mixed)), fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 0))),
+                    .singlepart(.init(type: .basic(.init(type: .audio, subtype: .mixed)), fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 0))),
+                    .singlepart(.init(type: .basic(.init(type: .audio, subtype: .mixed)), fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 0)))
+                ], mediaSubtype: .mixed)),
+                [3],
+                [2],
+                #line
+            ),
+        ]
+        inputs.forEach { (body, before, expected, line) in
+            XCTAssertEqual(body.index(before: before), expected, line: line)
+        }
+    }
+
 //    func testRandomeAccessCollection_indexAfter() {
 //        let inputs: [(BodyStructure, SectionSpecifier.Part, SectionSpecifier.Part, UInt)] = [
 ////            (

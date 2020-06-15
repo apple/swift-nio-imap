@@ -52,11 +52,22 @@ extension BodyStructure: RandomAccessCollection {
     }
     
     public var endIndex: SectionSpecifier.Part {
-        fatalError("Test")
+        switch self {
+        case .singlepart(_):
+            return [2]
+        case .multipart(let part):
+            return [part.parts.count + 1]
+        }
     }
     
     public func index(before i: SectionSpecifier.Part) -> SectionSpecifier.Part {
-        fatalError("Test")
+        guard let first = i.rawValue.first else {
+            fatalError("Must contain at least one number")
+        }
+        precondition(first > 1, "First part component cannot be < 1")
+        
+        // NOTE: For multiparts, do we need to check if `startIndex` <= `i` <= `endIndex`?
+        return [first - 1]
     }
     
     public func index(after i: SectionSpecifier.Part) -> SectionSpecifier.Part {
