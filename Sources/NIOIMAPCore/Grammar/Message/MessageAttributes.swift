@@ -14,18 +14,36 @@
 
 import struct NIO.ByteBuffer
 
+/// These are the individual parts of a `FETCH` response.
+///
+/// - SeeAlso: RFC 3501 section 7.4.2
 public enum MessageAttribute: Equatable {
+    /// `FLAGS` -- A list of flags that are set for this message.
     case flags([Flag])
+    /// `ENVELOPE` -- A list that describes the envelope structure of a message.
     case envelope(Envelope)
+    /// The internal date of the message.
     case internalDate(InternalDate)
+    /// The unique identifier of the message.
     case uid(UID)
+    /// `RFC822` -- Equivalent to `BODY[]`.
     case rfc822(NString)
+    /// `RFC822.HEADER` -- Equivalent to `BODY[HEADER]`.
     case rfc822Header(NString)
     case rfc822Text(NString)
+    /// `RFC822.SIZE` -- A number expressing the RFC 2822 size of the message.
     case rfc822Size(Int)
+    /// `BODY[<section>]<<origin octet>>` -- The body contents of the specified section.
     case body(BodyStructure, structure: Bool)
+    /// `BODYSTRUCTURE` -- A list that describes the MIME body structure of a message.
     case bodySection(SectionSpecifier?, partial: Int?, data: NString)
+    /// `BINARY<section-binary>[<<number>>]` -- The content of the
+    /// specified section after removing any content-transfer-encoding related encoding.
+    /// - SeeAlso: RFC 3516 “IMAP4 Binary Content Extension”
     case binary(section: SectionSpecifier.Part, data: NString)
+    /// `BINARY.SIZE<section-binary>` -- The size of the section after
+    /// removing any content-transfer-encoding related encoding.
+    /// - SeeAlso: RFC 3516 “IMAP4 Binary Content Extension”
     case binarySize(section: SectionSpecifier.Part, size: Int)
 }
 
