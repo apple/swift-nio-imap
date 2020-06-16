@@ -24,7 +24,7 @@ public enum MessageAttribute: Equatable {
     case rfc822Text(NString)
     case rfc822Size(Int)
     case body(BodyStructure, structure: Bool)
-    case bodySection(SectionSpecifier?, partial: Int?, data: NString)
+    case bodySection(SectionSpecifier, offset: Int?, data: NString)
     case binary(section: SectionSpecifier.Part, data: NString)
     case binarySize(section: SectionSpecifier.Part, size: Int)
 }

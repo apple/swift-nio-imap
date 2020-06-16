@@ -2222,7 +2222,7 @@ extension GrammarParser {
         func parseMessageAttribute_bodySection(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MessageAttribute {
             try ParserLibrary.parseFixedString("BODY", buffer: &buffer, tracker: tracker)
             let section = try self.parseSection(buffer: &buffer, tracker: tracker)
-            let number = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> Int in
+            let offset = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> Int in
                 try ParserLibrary.parseFixedString("<", buffer: &buffer, tracker: tracker)
                 let num = try self.parseNumber(buffer: &buffer, tracker: tracker)
                 try ParserLibrary.parseFixedString(">", buffer: &buffer, tracker: tracker)
@@ -2230,7 +2230,7 @@ extension GrammarParser {
             }
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
             let string = try self.parseNString(buffer: &buffer, tracker: tracker)
-            return .bodySection(section, partial: number, data: string)
+            return .bodySection(section ?? SectionSpecifier(kind: .complete), offset: offset, data: string)
         }
 
         func parseMessageAttribute_uid(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MessageAttribute {
