@@ -23,21 +23,21 @@ class SearchSentTypeTests: EncodeTestClass {}
 extension SearchSentTypeTests {
     func testImapEncoded_before() {
         let expected = "SENTBEFORE 25-jun-1994"
-        let size = self.testBuffer.writeSearchSentType(SearchSentType.before(Date(day: 25, month: .jun, year: 1994)))
+        let size = self.testBuffer.writeSearchSentType(SearchSentType.before(Date(day: 25, month: 6, year: 1994)!))
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }
 
     func testImapEncoded_on() {
         let expected = "SENTON 7-dec-2018"
-        let size = self.testBuffer.writeSearchSentType(SearchSentType.on(Date(day: 07, month: .dec, year: 2018)))
+        let size = self.testBuffer.writeSearchSentType(SearchSentType.on(Date(day: 07, month: 12, year: 2018)!))
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }
 
     func testImapEncoded_since() {
         let expected = "SENTSINCE 16-sep-1999"
-        let size = self.testBuffer.writeSearchSentType(SearchSentType.since(Date(day: 16, month: .sep, year: 1999)))
+        let size = self.testBuffer.writeSearchSentType(SearchSentType.since(Date(day: 16, month: 9, year: 1999)!))
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }

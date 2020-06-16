@@ -894,14 +894,14 @@ extension ParserUnitTests {
     func testDate_valid_plain() {
         TestUtilities.withBuffer("25-Jun-1994", terminator: " ") { (buffer) in
             let day = try GrammarParser.parseDate(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(day, Date(day: 25, month: .jun, year: 1994))
+            XCTAssertEqual(day, Date(day: 25, month: 6, year: 1994))
         }
     }
 
     func testDate_valid_quoted() {
         TestUtilities.withBuffer("\"25-Jun-1994\"") { (buffer) in
             let day = try GrammarParser.parseDate(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(day, Date(day: 25, month: .jun, year: 1994))
+            XCTAssertEqual(day, Date(day: 25, month: 6, year: 1994))
         }
     }
 
@@ -964,15 +964,15 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     func testDateMonth_valid() {
         TestUtilities.withBuffer("jun", terminator: " ") { (buffer) in
-            let day = try GrammarParser.parseDateMonth(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(day, .jun)
+            let month = try GrammarParser.parseDateMonth(buffer: &buffer, tracker: .testTracker)
+            XCTAssertEqual(month, 6)
         }
     }
 
     func testDateMonth_valid_mixedCase() {
         TestUtilities.withBuffer("JUn", terminator: " ") { (buffer) in
-            let day = try GrammarParser.parseDateMonth(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(day, .jun)
+            let month = try GrammarParser.parseDateMonth(buffer: &buffer, tracker: .testTracker)
+            XCTAssertEqual(month, 6)
         }
     }
 
@@ -997,7 +997,7 @@ extension ParserUnitTests {
     func testDateText_valid() {
         TestUtilities.withBuffer("25-Jun-1994", terminator: " ") { (buffer) in
             let day = try GrammarParser.parseDateText(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(day, Date(day: 25, month: .jun, year: 1994))
+            XCTAssertEqual(day, Date(day: 25, month: 6, year: 1994))
         }
     }
 
@@ -2141,12 +2141,12 @@ extension ParserUnitTests {
             ("UNSEEN", "\r", .unseen, #line),
             ("UNDRAFT", "\r", .undraft, #line),
             ("DRAFT", "\r", .draft, #line),
-            ("ON 25-jun-1994", "\r", .on(Date(day: 25, month: .jun, year: 1994)), #line),
-            ("SINCE 01-jan-2001", "\r", .since(Date(day: 1, month: .jan, year: 2001)), #line),
-            ("SENTON 02-jan-2002", "\r", .sent(.on(Date(day: 2, month: .jan, year: 2002))), #line),
-            ("SENTBEFORE 03-jan-2003", "\r", .sent(.before(Date(day: 3, month: .jan, year: 2003))), #line),
-            ("SENTSINCE 04-jan-2004", "\r", .sent(.since(Date(day: 4, month: .jan, year: 2004))), #line),
-            ("BEFORE 05-jan-2005", "\r", .before(Date(day: 5, month: .jan, year: 2005)), #line),
+            ("ON 25-jun-1994", "\r", .on(Date(day: 25, month: 6, year: 1994)!), #line),
+            ("SINCE 01-jan-2001", "\r", .since(Date(day: 1, month: 1, year: 2001)!), #line),
+            ("SENTON 02-jan-2002", "\r", .sent(.on(Date(day: 2, month: 1, year: 2002)!)), #line),
+            ("SENTBEFORE 03-jan-2003", "\r", .sent(.before(Date(day: 3, month: 1, year: 2003)!)), #line),
+            ("SENTSINCE 04-jan-2004", "\r", .sent(.since(Date(day: 4, month: 1, year: 2004)!)), #line),
+            ("BEFORE 05-jan-2005", "\r", .before(Date(day: 5, month: 1, year: 2005)!), #line),
             ("LARGER 1234", "\r", .larger(1234), #line),
             ("SMALLER 5678", "\r", .smaller(5678), #line),
             ("BCC data1", "\r", .bcc("data1"), #line),

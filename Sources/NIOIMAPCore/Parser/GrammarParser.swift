@@ -842,12 +842,12 @@ extension GrammarParser {
 
     // date-month      = "Jan" / "Feb" / "Mar" / "Apr" / "May" / "Jun" /
     //                   "Jul" / "Aug" / "Sep" / "Oct" / "Nov" / "Dec"
-    static func parseDateMonth(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Date.Month {
+    static func parseDateMonth(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Int {
         let string = try ParserLibrary.parseOneOrMoreCharacters(buffer: &buffer, tracker: tracker) { char -> Bool in
             isalnum(Int32(char)) != 0
         }
-        guard let month = Date.Month(rawValue: string.lowercased()) else {
-            throw ParserError(hint: "No date-month match for \(string)")
+        guard let month = Date.month(text: string.lowercased()) else {
+            throw ParserError(hint: "No month match for \(string)")
         }
         return month
     }
@@ -860,7 +860,10 @@ extension GrammarParser {
             let month = try self.parseDateMonth(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseFixedString("-", buffer: &buffer, tracker: tracker)
             let year = try self.parseDateYear(buffer: &buffer, tracker: tracker)
-            return Date(day: day, month: month, year: year)
+            guard let date = Date(day: day, month: month, year: year) else {
+                throw ParserError(hint: "Invalid date components \(year) \(month) \(day)")
+            }
+            return date
         }
     }
 
@@ -876,7 +879,7 @@ extension GrammarParser {
             try ParserLibrary.parseFixedString("\"", buffer: &buffer, tracker: tracker)
             let day = try self.parseDateDayFixed(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseFixedString("-", buffer: &buffer, tracker: tracker)
-            let month = try self.parseDateMonth(buffer: &buffer, tracker: tracker).numericValue
+            let month = try self.parseDateMonth(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseFixedString("-", buffer: &buffer, tracker: tracker)
             let year = try self.parseDateYear(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseFixedString(" ", buffer: &buffer, tracker: tracker)

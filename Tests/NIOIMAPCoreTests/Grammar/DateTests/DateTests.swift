@@ -21,11 +21,11 @@ class DateTests: EncodeTestClass {}
 // MARK: - Date init
 
 extension DateTests {
-    func testDateInit() {
+    func testDateInit() throws {
         let day = 25
-        let month = Date.Month.jun
+        let month = 6
         let year = 1994
-        let date = Date(day: day, month: month, year: year)
+        let date = try XCTUnwrap(Date(day: day, month: month, year: year))
 
         XCTAssertEqual(date.day, day)
         XCTAssertEqual(date.month, month)
@@ -36,9 +36,9 @@ extension DateTests {
 // MARK: - Date imapEncoded
 
 extension DateTests {
-    func testDateImapEncoded() {
+    func testDateImapEncoded() throws {
         let expected = "25-jun-1994"
-        let size = self.testBuffer.writeDate(Date(day: 25, month: .jun, year: 1994))
+        let size = self.testBuffer.writeDate(try XCTUnwrap(Date(day: 25, month: 6, year: 1994)))
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }
