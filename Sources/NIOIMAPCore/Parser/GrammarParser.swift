@@ -860,7 +860,7 @@ extension GrammarParser {
             let month = try self.parseDateMonth(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseFixedString("-", buffer: &buffer, tracker: tracker)
             let year = try self.parseDateYear(buffer: &buffer, tracker: tracker)
-            guard let date = Date(day: day, month: month, year: year) else {
+            guard let date = Date(year: year, month: month, day: day) else {
                 throw ParserError(hint: "Invalid date components \(year) \(month) \(day)")
             }
             return date

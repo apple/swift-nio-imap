@@ -16,11 +16,11 @@ import struct NIO.ByteBuffer
 
 /// IMAPv4 `date` (`date-text`)
 public struct Date: Equatable {
-    public var day: Int
-    public var month: Int
     public var year: Int
+    public var month: Int
+    public var day: Int
 
-    public init?(day: Int, month: Int, year: Int) {
+    public init?(year: Int, month: Int, day: Int) {
         guard
             1 <= day,
             day <= 31,
@@ -29,9 +29,9 @@ public struct Date: Equatable {
             1900 <= year,
             year <= 2500
             else { return nil }
-        self.day = day
-        self.month = month
         self.year = year
+        self.month = month
+        self.day = day
     }
 }
 
