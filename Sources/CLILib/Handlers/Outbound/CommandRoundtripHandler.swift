@@ -34,7 +34,7 @@ public class CommandRoundtripHandler: ChannelOutboundHandler {
         self.logger = logger
     }
 
-    public func write(context: ChannelHandlerContext, data: NIOAny, promise: EventLoopPromise<Void>?) {
+    public func write(context: ChannelHandlerContext, data: NIOAny, promise: EventLoopPromise<Void>?) throws {
         var originalBuffer = self.unwrapOutboundIn(data)
         do {
             var originalBufferCopy = originalBuffer
@@ -47,7 +47,7 @@ public class CommandRoundtripHandler: ChannelOutboundHandler {
                 buffer: context.channel.allocator.buffer(capacity: originalBuffer.readableBytes),
                 capabilities: self.capabilities
             )
-            encodeBuffer.writeCommandStream(commandStream)
+            try encodeBuffer.writeCommandStream(commandStream)
             var roundtripBuffer = encodeBuffer.buffer.nextChunk().bytes
 
             if originalBuffer != roundtripBuffer {

@@ -30,7 +30,7 @@ public struct CommandEncoder: MessageToByteEncoder {
             out.writeString("DONE\r\n")
         case .command(let command):
             var encodeBuffer = EncodeBuffer(out, mode: .client, capabilities: self.capabilities)
-            encodeBuffer.writeCommand(command)
+            try encodeBuffer.writeCommand(command)
             out = encodeBuffer.nextChunk().bytes
         }
     }

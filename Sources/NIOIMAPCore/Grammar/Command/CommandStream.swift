@@ -21,12 +21,12 @@ public enum CommandStream: Equatable {
 }
 
 extension CommandEncodeBuffer {
-    @discardableResult public mutating func writeCommandStream(_ stream: CommandStream) -> Int {
+    @discardableResult public mutating func writeCommandStream(_ stream: CommandStream) throws -> Int {
         switch stream {
         case .idleDone:
             return self.buffer.writeString("DONE\r\n")
         case .command(let command):
-            return self.buffer.writeCommand(command)
+            return try self.buffer.writeCommand(command)
         case .bytes(let bytes):
             var copy = bytes
             return self.buffer.writeBuffer(&copy)

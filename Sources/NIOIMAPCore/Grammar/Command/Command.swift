@@ -58,7 +58,7 @@ public enum Command: Equatable {
 // MARK: - IMAP
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeCommandType(_ commandType: Command) -> Int {
+    @discardableResult mutating func writeCommandType(_ commandType: Command) throws -> Int {
         switch commandType {
         case .capability:
             return self.writeCommandType_capability()
@@ -75,7 +75,7 @@ extension EncodeBuffer {
         case .examine(let mailbox, let params):
             return self.writeCommandType_examine(mailbox: mailbox, parameters: params)
         case .list(let selectOptions, let mailbox, let mailboxPatterns, let returnOptions):
-            return self.writeCommandType_list(selectOptions: selectOptions, mailbox: mailbox, mailboxPatterns: mailboxPatterns, returnOptions: returnOptions)
+            return try self.writeCommandType_list(selectOptions: selectOptions, mailbox: mailbox, mailboxPatterns: mailboxPatterns, returnOptions: returnOptions)
         case .lsub(let mailbox, let listMailbox):
             return self.writeCommandType_lsub(mailbox: mailbox, listMailbox: listMailbox)
         case .rename(let from, let to, let params):
@@ -174,8 +174,8 @@ extension EncodeBuffer {
             }
     }
 
-    private mutating func writeCommandType_list(selectOptions: ListSelectOptions?, mailbox: MailboxName, mailboxPatterns: MailboxPatterns, returnOptions: [ReturnOption]) -> Int {
-        self.writeString("LIST") +
+    private mutating func writeCommandType_list(selectOptions: ListSelectOptions?, mailbox: MailboxName, mailboxPatterns: MailboxPatterns, returnOptions: [ReturnOption]) throws -> Int {
+        try self.writeString("LIST") +
             self.writeIfExists(selectOptions) { (options) -> Int in
                 self.writeSpace() +
                     self.writeListSelectOptions(options)
@@ -184,7 +184,7 @@ extension EncodeBuffer {
             self.writeMailbox(mailbox) +
             self.writeSpace() +
             self.writeMailboxPatterns(mailboxPatterns) +
-            self.writeIfHasCapabilities(.listExtended) {
+            self.throwIfMissingCapabilites(.listExtended) {
                 self.writeIfArrayHasMinimumSize(array: returnOptions, minimum: 1) { (_, self) in
                     self.writeSpace() +
                         self.writeListReturnOptions(returnOptions)

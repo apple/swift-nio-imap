@@ -26,11 +26,11 @@ public struct TaggedCommand: Equatable {
 }
 
 extension EncodeBuffer {
-    @discardableResult public mutating func writeCommand(_ command: TaggedCommand) -> Int {
+    @discardableResult public mutating func writeCommand(_ command: TaggedCommand)throws  -> Int {
         assert(self.mode == .client, "only clients can send commands")
         var size = 0
         size += self.writeString("\(command.tag) ")
-        size += self.writeCommandType(command.command)
+        size += try self.writeCommandType(command.command)
 
         switch command.command {
         case .append(to: _, firstMessageMetadata: _):
