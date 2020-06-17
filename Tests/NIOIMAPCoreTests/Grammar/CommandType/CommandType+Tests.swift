@@ -26,7 +26,6 @@ extension CommandType_Tests {
             (.list(nil, reference: .init(""), .mailbox(""), []), [], "LIST \"\" \"\"", #line),
             (.list(reference: .init(""), .mailbox("")), [], "LIST \"\" \"\"", #line),
             (.list(reference: .init(""), .mailbox("")), [.listExtended], "LIST \"\" \"\"", #line), // no ret-opts but has capability
-            (.list(nil, reference: .inbox, .mailbox(""), [.children]), [], "LIST \"INBOX\" \"\"", #line), // ret-opts but no capability
             (.list(nil, reference: .inbox, .mailbox(""), [.children]), [.listExtended], "LIST \"INBOX\" \"\" RETURN (CHILDREN)", #line), // ret-opts with capability
 
             (.namespace, [.namespace], "NAMESPACE", #line),

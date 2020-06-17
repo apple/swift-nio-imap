@@ -15,8 +15,8 @@
 import struct NIO.ByteBuffer
 
 public struct CapabilityError: Error {
-    var expected: EncodingCapabilities
-    var provided: EncodingCapabilities
+    public var expected: EncodingCapabilities
+    public var provided: EncodingCapabilities
 }
 
 extension EncodeBuffer {
@@ -104,11 +104,11 @@ extension EncodeBuffer {
         return callback()
     }
 
-    @discardableResult mutating func writeIfArrayHasMinimumSize<T>(array: [T], minimum: Int = 1, callback: ([T], inout EncodeBuffer) -> Int) -> Int {
+    @discardableResult mutating func writeIfArrayHasMinimumSize<T>(array: [T], minimum: Int = 1, callback: ([T], inout EncodeBuffer) throws -> Int) rethrows -> Int {
         guard array.count >= minimum else {
             return 0
         }
-        return callback(array, &self)
+        return try callback(array, &self)
     }
 
     @discardableResult func writeIfHasCapabilities(_ capabilities: EncodingCapabilities, _ closure: () -> Int) -> Int {
