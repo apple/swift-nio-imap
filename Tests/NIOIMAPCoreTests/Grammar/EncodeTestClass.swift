@@ -37,11 +37,19 @@ class EncodeTestClass: XCTestCase {
     }
 
     override func setUp() {
-        self.testBuffer = .serverEncodeBuffer(buffer: ByteBufferAllocator().buffer(capacity: 128), capabilities: [])
+        self.resetTestBuffer(ResponseEncodingOptions())
     }
 
     override func tearDown() {
         self.testBuffer = nil
+    }
+
+    func resetTestBuffer(_ options: CommandEncodingOptions) {
+        self.testBuffer = EncodeBuffer.clientEncodeBuffer(buffer: ByteBufferAllocator().buffer(capacity: 200), options: options)
+    }
+
+    func resetTestBuffer(_ options: ResponseEncodingOptions) {
+        self.testBuffer = EncodeBuffer.serverEncodeBuffer(buffer: ByteBufferAllocator().buffer(capacity: 200), options: options)
     }
 
     func iterateInputs<T>(inputs: [(T, String, UInt)], encoder: (T) throws -> Int, file: StaticString = magicFile()) {
@@ -50,7 +58,7 @@ class EncodeTestClass: XCTestCase {
 
     func iterateInputs<T>(inputs: [(T, CommandEncodingOptions, [String], UInt)], encoder: (T) throws -> Int, file: StaticString = magicFile()) {
         for (test, options, expectedStrings, line) in inputs {
-            self.testBuffer = EncodeBuffer.clientEncodeBuffer(buffer: ByteBufferAllocator().buffer(capacity: 128), options: options)
+            self.resetTestBuffer(options)
             do {
                 let size = try encoder(test)
                 XCTAssertEqual(size, expectedStrings.reduce(0) { $0 + $1.utf8.count }, file: file, line: line)
@@ -63,7 +71,7 @@ class EncodeTestClass: XCTestCase {
 
     func iterateInputs<T>(inputs: [(T, ResponseEncodingOptions, String, UInt)], encoder: (T) throws -> Int, file: StaticString = magicFile()) {
         for (test, options, expectedString, line) in inputs {
-            self.testBuffer = EncodeBuffer.serverEncodeBuffer(buffer: ByteBufferAllocator().buffer(capacity: 128), options: options)
+            self.resetTestBuffer(options)
             do {
                 let size = try encoder(test)
                 XCTAssertEqual(size, expectedString.utf8.count, file: file, line: line)
@@ -92,4 +100,48 @@ extension CommandEncodingOptions {
 
 extension ResponseEncodingOptions {
     static var rfc3501: ResponseEncodingOptions { ResponseEncodingOptions() }
+}
+
+extension EncodeTestClass {
+    func roundTrip<T>(value: T, suffix: String? = nil, encode: (inout EncodeBuffer, T) -> Void, decode: (inout ByteBuffer) throws -> T) throws -> T {
+        var encodeBuffer = EncodeBuffer.clientEncodeBuffer(buffer: ByteBufferAllocator().buffer(capacity: 200), options: CommandEncodingOptions())
+        encode(&encodeBuffer, value)
+        if let s = suffix {
+            encodeBuffer.writeString(s)
+        }
+        var buffer = ByteBufferAllocator().buffer(capacity: 128)
+        while true {
+            let next = encodeBuffer.nextChunk()
+            var toSend = next.bytes
+            buffer.writeBuffer(&toSend)
+            if !next.waitForContinuation {
+                break
+            }
+        }
+        defer {
+            buffer.clear()
+        }
+        let result = try decode(&buffer)
+        if let s = suffix {
+            guard buffer.readableBytes == s.count else {
+                throw RoundTripError.readableBytesWrong(buffer.readableBytes, s.count)
+            }
+            guard let decodedSuffix = buffer.readString(length: s.count) else {
+                throw RoundTripError.suffixDoesNotMatch(nil, s)
+            }
+            guard decodedSuffix == suffix else {
+                throw RoundTripError.suffixDoesNotMatch(decodedSuffix, s)
+            }
+        } else {
+            guard buffer.readableBytes == 0 else {
+                throw RoundTripError.readableBytesWrong(buffer.readableBytes, 0)
+            }
+        }
+        return result
+    }
+
+    enum RoundTripError: Swift.Error {
+        case suffixDoesNotMatch(String?, String)
+        case readableBytesWrong(Int, Int)
+    }
 }

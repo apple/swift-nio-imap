@@ -13,6 +13,7 @@ let package = Package(
         .package(url: "https://github.com/apple/swift-nio-ssl", from: "2.7.0"),
         .package(url: "https://github.com/apple/swift-log", from: "1.2.0"),
         .package(url: "https://github.com/nicklockwood/SwiftFormat.git", .exact("0.44.11")),
+        .package(url: "https://github.com/typelift/SwiftCheck.git", from: "0.12.0"),
     ],
     targets: [
         .target(
@@ -43,6 +44,7 @@ let package = Package(
                 "NIOIMAPCore",
                 .product(name: "NIO", package: "swift-nio"),
                 .product(name: "NIOTestUtils", package: "swift-nio"),
+                .product(name: "SwiftCheck", package: "SwiftCheck"),
             ]
         ),
 
