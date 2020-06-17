@@ -22,13 +22,13 @@ public struct Date: Equatable {
 
     public init?(year: Int, month: Int, day: Int) {
         guard
-            1 <= day,
+            day >= 1,
             day <= 31,
-            1 <= month,
+            month >= 1,
             month <= 12,
-            1900 <= year,
+            year >= 1900,
             year <= 2500
-            else { return nil }
+        else { return nil }
         self.year = year
         self.month = month
         self.day = day
