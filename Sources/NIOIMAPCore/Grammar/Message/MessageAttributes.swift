@@ -36,7 +36,7 @@ public enum MessageAttribute: Equatable {
     /// `BODY[<section>]<<origin octet>>` -- The body contents of the specified section.
     case body(BodyStructure, structure: Bool)
     /// `BODYSTRUCTURE` -- A list that describes the MIME body structure of a message.
-    case bodySection(SectionSpecifier?, partial: Int?, data: NString)
+    case bodySection(SectionSpecifier, offset: Int?, data: NString)
     /// `BINARY<section-binary>[<<number>>]` -- The content of the
     /// specified section after removing any content-transfer-encoding related encoding.
     /// - SeeAlso: RFC 3516 “IMAP4 Binary Content Extension”

@@ -14,18 +14,39 @@
 
 import struct NIO.ByteBuffer
 
-/// IMAPv4 `section-spec`
+/// Specifies a section.
+///
+/// Is used in a `FETCH` command’s `BODY[<section>]<<partial>>` for the `<section>` part.
+///
+/// Use `SectionSpecifier.complete` for an empty section specifier (i.e. the complete message).
 public struct SectionSpecifier: Equatable {
-    var part: Part
-    var kind: Kind
+    public internal(set) var part: Part
+    public internal(set) var kind: Kind
 
     public init(part: Part = .init(rawValue: []), kind: Kind) {
         if part.rawValue.count == 0 {
             precondition(kind != .MIMEHeader, "Cannot use MIME with an empty section part")
-            precondition(kind != .complete, "Must specify a part when using complete")
         }
         self.part = part
         self.kind = kind
+    }
+}
+
+extension SectionSpecifier {
+    /// Corresponds to no specifier, i.e. the complete message (including its headers).
+    public static let complete = SectionSpecifier(kind: .complete)
+    /// `Header` -- RFC 2822 header of the message
+    public static let header = SectionSpecifier(kind: .header)
+    /// `TEXT` -- text body of the message, omitting the RFC 2822 header.
+    public static let text = SectionSpecifier(kind: .text)
+    /// `HEADER.FIELDS` -- a subset of the RFC 2822 header of the message
+    public func headerFields(_ fields: [String]) -> SectionSpecifier {
+        SectionSpecifier(kind: .headerFields(fields))
+    }
+
+    /// `HEADER.FIELDS.NOT` -- a subset of the RFC 2822 header of the message
+    public func headerFieldsNot(_ fields: [String]) -> SectionSpecifier {
+        SectionSpecifier(kind: .headerFieldsNot(fields))
     }
 }
 

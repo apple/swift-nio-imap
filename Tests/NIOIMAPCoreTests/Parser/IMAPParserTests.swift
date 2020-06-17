@@ -1668,9 +1668,10 @@ extension ParserUnitTests {
 
         let inputs: [(String, String, MessageAttribute, UInt)] = [
             ("UID 1234", " ", .uid(1234), #line),
-            ("BODY[TEXT] \"hello\"", " ", .bodySection(.init(kind: .text), partial: nil, data: "hello"), #line),
-            (#"BODY[HEADER] "string""#, " ", .bodySection(.init(kind: .header), partial: nil, data: "string"), #line),
-            (#"BODY[HEADER]<12> "string""#, " ", .bodySection(.init(kind: .header), partial: 12, data: "string"), #line),
+            (#"BODY[] "hello""#, " ", .bodySection(.init(kind: .complete), offset: nil, data: "hello"), #line),
+            (#"BODY[TEXT] "hello""#, " ", .bodySection(.init(kind: .text), offset: nil, data: "hello"), #line),
+            (#"BODY[HEADER] "string""#, " ", .bodySection(.init(kind: .header), offset: nil, data: "string"), #line),
+            (#"BODY[HEADER]<12> "string""#, " ", .bodySection(.init(kind: .header), offset: 12, data: "string"), #line),
             ("RFC822.SIZE 1234", " ", .rfc822Size(1234), #line),
             (#"RFC822 "some string""#, " ", .rfc822("some string"), #line),
             (#"RFC822.HEADER "some string""#, " ", .rfc822Header("some string"), #line),
