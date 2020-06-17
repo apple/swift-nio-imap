@@ -58,7 +58,7 @@ extension Date {
         case 10: return "Oct"
         case 11: return "Nov"
         case 12: return "Dec"
-        default: fatalError()
+        default: preconditionFailure("Expected 1 <= month <= 12")
         }
     }
 
