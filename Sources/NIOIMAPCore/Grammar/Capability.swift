@@ -63,6 +63,7 @@ extension Capability {
         public static let pToken = Self(unchecked: "PTOKEN")
         public static let weToken = Self(unchecked: "WETOKEN")
         public static let wsToken = Self(unchecked: "WSTOKEN")
+        public static let gsAPI = Self(unchecked: "GSAPI")
 
         public var rawValue: String
 
@@ -193,6 +194,7 @@ extension Capability {
     public static let imap4 = Self(unchecked: "IMAP4")
     public static let language = Self(unchecked: "LANGUAGE")
     public static let listStatus = Self(unchecked: "LIST-STATUS")
+    public static let loginDisabled = Self(unchecked: "LOGINDISABLED")
     public static let loginReferrals = Self(unchecked: "LOGIN-REFERRALS")
     public static let metadata = Self(unchecked: "METADATA")
     public static let move = Self(unchecked: "MOVE")
@@ -203,6 +205,7 @@ extension Capability {
     public static let saslIR = Self(unchecked: "SASL-IR")
     public static let searchRes = Self(unchecked: "SEARCHRES")
     public static let specialUse = Self(unchecked: "SPECIAL-USE")
+    public static let startTLS = Self(unchecked: "STARTTLS")
     public static let uidPlus = Self(unchecked: "UIDPLUS")
     public static let unselect = Self(unchecked: "UNSELECT")
     public static let urlPartial = Self(unchecked: "URL-PARTIAL")
