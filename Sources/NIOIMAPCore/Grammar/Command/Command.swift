@@ -185,9 +185,9 @@ extension EncodeBuffer {
             self.writeSpace() +
             self.writeMailboxPatterns(mailboxPatterns) +
             self.writeIfHasCapabilities(.listExtended) {
-                self.writeIfArrayHasMinimumSize(array: returnOptions, minimum: 1) { (array, self) in
+                self.writeIfArrayHasMinimumSize(array: returnOptions, minimum: 1) { (_, self) in
                     self.writeSpace() +
-                    self.writeListReturnOptions(returnOptions)
+                        self.writeListReturnOptions(returnOptions)
                 }
             }
     }

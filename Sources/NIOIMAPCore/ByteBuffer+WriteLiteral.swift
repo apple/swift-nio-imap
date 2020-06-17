@@ -105,7 +105,7 @@ extension EncodeBuffer {
         }
         return callback(array, &self)
     }
-    
+
     @discardableResult func writeIfHasCapabilities(_ capabilities: EncodingCapabilities, _ closure: () -> Int) -> Int {
         guard self.capabilities.contains(capabilities) else {
             return 0
