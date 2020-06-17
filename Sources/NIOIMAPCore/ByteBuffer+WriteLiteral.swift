@@ -25,16 +25,10 @@ extension EncodeBuffer {
 
     fileprivate mutating func writeIMAPString<T: Collection>(_ bytes: T) -> Int where T.Element == UInt8 {
         // allSatisfy vs contains because IMO it's a little clearer
-        var foundNull = false
-        let canUseQuoted = bytes.allSatisfy { c in
-            foundNull = foundNull || (c == 0)
-            return c.isQuotedChar && !foundNull
-        }
+        let canUseQuoted = bytes.allSatisfy { $0.isQuotedChar }
 
         if canUseQuoted {
             return self.writeString("\"") + self.writeBytes(bytes) + self.writeString("\"")
-        } else if foundNull {
-            return self.writeLiteral8(bytes)
         } else {
             return self.writeLiteral(bytes)
         }

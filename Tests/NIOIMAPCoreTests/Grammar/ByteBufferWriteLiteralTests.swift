@@ -29,7 +29,6 @@ extension ByteBufferWriteLiteralTests {
             (ByteBuffer(ByteBufferView(repeating: UInt8(ascii: "\\"), count: 1)), [], "{1}\r\n\\", #line),
             ("\\\"", [], "{2}\r\n\\\"", #line),
             ("a", [], "\"a\"", #line),
-            ("\0", [.binary], "~{1}\r\n\0", #line),
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeIMAPString($0) })
     }
