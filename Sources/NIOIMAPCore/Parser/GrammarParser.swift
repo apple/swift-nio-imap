@@ -2494,8 +2494,9 @@ extension GrammarParser {
             let num1 = try self.parseNumber(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseFixedString(".", buffer: &buffer, tracker: tracker)
             let num2 = try self.parseNZNumber(buffer: &buffer, tracker: tracker)
+            guard num2 > 0 else { throw ParserError(hint: "Partial range is invalid: <\(num1).\(num2)>.") }
             try ParserLibrary.parseFixedString(">", buffer: &buffer, tracker: tracker)
-            return num1 ... num2
+            return num1 ... (num1 + num2 - 1)
         }
     }
 

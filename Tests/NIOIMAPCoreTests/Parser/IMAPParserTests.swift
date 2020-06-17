@@ -1275,11 +1275,11 @@ extension ParserUnitTests {
             ("BODY[1.TEXT]", " ", .bodySection(peek: false, .init(part: [1], kind: .text), nil), #line),
             ("BODY[4.2.TEXT]", " ", .bodySection(peek: false, .init(part: [4, 2], kind: .text), nil), #line),
             ("BODY[HEADER]", " ", .bodySection(peek: false, .init(kind: .header), nil), #line),
-            ("BODY.PEEK[HEADER]<3.4>", " ", .bodySection(peek: true, .init(kind: .header), 3 ... 4), #line),
+            ("BODY.PEEK[HEADER]<3.4>", " ", .bodySection(peek: true, .init(kind: .header), 3 ... 6), #line),
             ("BODY.PEEK[HEADER]", " ", .bodySection(peek: true, .init(kind: .header), nil), #line),
             ("BINARY.PEEK[1]", " ", .binary(peek: true, section: [1], partial: nil), #line),
-            ("BINARY.PEEK[1]<3.4>", " ", .binary(peek: true, section: [1], partial: 3 ... 4), #line),
-            ("BINARY[2]<4.5>", " ", .binary(peek: false, section: [2], partial: 4 ... 5), #line),
+            ("BINARY.PEEK[1]<3.4>", " ", .binary(peek: true, section: [1], partial: 3 ... 6), #line),
+            ("BINARY[2]<4.5>", " ", .binary(peek: false, section: [2], partial: 4 ... 8), #line),
             ("BINARY.SIZE[5]", " ", .binarySize(section: [5]), #line),
         ]
         self.iterateTestInputs(inputs, testFunction: GrammarParser.parseFetchAttribute)
