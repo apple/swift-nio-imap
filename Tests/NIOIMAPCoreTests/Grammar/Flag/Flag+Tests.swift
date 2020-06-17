@@ -44,11 +44,11 @@ extension Flag_Tests {
 extension Flag_Tests {
     func testEncode() {
         let inputs: [(Flag, String, UInt)] = [
-            (.answered, "\\ANSWERED", #line),
-            (.deleted, "\\DELETED", #line),
-            (.draft, "\\DRAFT", #line),
-            (.flagged, "\\FLAGGED", #line),
-            (.seen, "\\SEEN", #line),
+            (.answered, "\\Answered", #line),
+            (.deleted, "\\Deleted", #line),
+            (.draft, "\\Draft", #line),
+            (.flagged, "\\Flagged", #line),
+            (.seen, "\\Seen", #line),
             (.extension("\\extension"), "\\EXTENSION", #line),
             (.keyword(.forwarded), "$FORWARDED", #line),
         ]

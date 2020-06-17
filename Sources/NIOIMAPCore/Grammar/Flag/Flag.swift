@@ -87,15 +87,15 @@ extension EncodeBuffer {
     @discardableResult mutating func writeFlag(_ flag: Flag) -> Int {
         switch flag._backing {
         case .answered:
-            return self.writeString("\\ANSWERED")
+            return self.writeString("\\Answered")
         case .flagged:
-            return self.writeString("\\FLAGGED")
+            return self.writeString("\\Flagged")
         case .deleted:
-            return self.writeString("\\DELETED")
+            return self.writeString("\\Deleted")
         case .seen:
-            return self.writeString("\\SEEN")
+            return self.writeString("\\Seen")
         case .draft:
-            return self.writeString("\\DRAFT")
+            return self.writeString("\\Draft")
         case .keyword(let keyword):
             return self.writeFlagKeyword(keyword)
         case .extension(let x):
