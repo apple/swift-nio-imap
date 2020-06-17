@@ -44,7 +44,22 @@ extension Array where Element == FetchAttribute {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeFetchAttributeList(_ atts: [FetchAttribute]) -> Int {
-        self.writeArray(atts) { (element, self) in
+        // FAST -> (FLAGS INTERNALDATE RFC822.SIZE)
+        // ALL -> (FLAGS INTERNALDATE RFC822.SIZE ENVELOPE)
+        // FULL -> (FLAGS INTERNALDATE RFC822.SIZE ENVELOPE BODY)
+        if atts.contains(.flags), atts.contains(.internalDate) {
+            if atts.count == 3, atts.contains(.rfc822(.size)) {
+                return self.writeString("FAST")
+            }
+            if atts.count == 4, atts.contains(.rfc822(.size)), atts.contains(.envelope) {
+                return self.writeString("ALL")
+            }
+            if atts.count == 5, atts.contains(.rfc822(.size)), atts.contains(.envelope), atts.contains(.bodyStructure(extensions: false)) {
+                return self.writeString("FULL")
+            }
+        }
+
+        return self.writeArray(atts) { (element, self) in
             self.writeFetchAttribute(element)
         }
     }
