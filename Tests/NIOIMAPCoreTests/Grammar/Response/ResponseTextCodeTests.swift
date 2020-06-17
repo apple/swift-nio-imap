@@ -34,7 +34,7 @@ extension ResponseTextCodeTests {
             (.badCharset(["some", "string"]), "BADCHARSET (some string)", #line),
             (.permanentFlags([.wildcard]), #"PERMANENTFLAGS (\*)"#, #line),
             (.permanentFlags([.wildcard, .wildcard]), #"PERMANENTFLAGS (\* \*)"#, #line),
-            (.permanentFlags([.flag(.deleted), .flag(.draft)]), #"PERMANENTFLAGS (\DELETED \DRAFT)"#, #line),
+            (.permanentFlags([.flag(.deleted), .flag(.draft)]), #"PERMANENTFLAGS (\Deleted \Draft)"#, #line),
             (.other("some", nil), "some", #line),
             (.other("some", "thing"), "some thing", #line),
             (.capability([]), "CAPABILITY IMAP4 IMAP4rev1", #line),

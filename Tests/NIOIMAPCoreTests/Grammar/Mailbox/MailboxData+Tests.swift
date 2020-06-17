@@ -24,7 +24,7 @@ extension MailboxDataTests {
     func testEncode() {
         let inputs: [(MailboxName.Data, String, UInt)] = [
             (.exists(1), "1 EXISTS", #line),
-            (.flags([.answered, .deleted]), "FLAGS (\\ANSWERED \\DELETED)", #line),
+            (.flags([.answered, .deleted]), "FLAGS (\\Answered \\Deleted)", #line),
             (.list(MailboxInfo(attributes: [], pathSeparator: nil, mailbox: .inbox, extensions: [])), "LIST () \"INBOX\"", #line),
             (
                 .lsub(.init(attributes: [.init("\\draft")], pathSeparator: ".", mailbox: .init("Drafts"), extensions: [])),

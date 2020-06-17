@@ -30,7 +30,7 @@ extension PermanentFlagTests {
     }
 
     func testEncoding_flag() {
-        let expected = "\\ANSWERED"
+        let expected = "\\Answered"
         let flag = PermanentFlag.flag(.answered)
         let size = self.testBuffer.writeFlagPerm(flag)
         XCTAssertEqual(size, expected.utf8.count)
