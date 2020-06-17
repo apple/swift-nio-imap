@@ -1100,17 +1100,17 @@ extension GrammarParser {
     fileprivate static func parseFetch_type(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [FetchAttribute] {
         func parseFetch_type_all(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [FetchAttribute] {
             try ParserLibrary.parseFixedString("ALL", buffer: &buffer, tracker: tracker)
-            return [.flags, .internalDate, .rfc822(.size), .envelope]
+            return [.flags, .internalDate, .rfc822Size, .envelope]
         }
 
         func parseFetch_type_fast(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [FetchAttribute] {
             try ParserLibrary.parseFixedString("FAST", buffer: &buffer, tracker: tracker)
-            return [.flags, .internalDate, .rfc822(.size)]
+            return [.flags, .internalDate, .rfc822Size]
         }
 
         func parseFetch_type_full(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [FetchAttribute] {
             try ParserLibrary.parseFixedString("FULL", buffer: &buffer, tracker: tracker)
-            return [.flags, .internalDate, .rfc822(.size), .envelope, .bodyStructure(extensions: false)]
+            return [.flags, .internalDate, .rfc822Size, .envelope, .bodyStructure(extensions: false)]
         }
 
         func parseFetch_type_singleAtt(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [FetchAttribute] {
@@ -1167,11 +1167,33 @@ extension GrammarParser {
         }
 
         func parseFetchAttribute_rfc822(buffer: inout ByteBuffer, tracker: StackTracker) throws -> FetchAttribute {
-            try ParserLibrary.parseFixedString("RFC822", buffer: &buffer, tracker: tracker)
-            let rfc = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> RFC822 in
-                try self.parseRFC822(buffer: &buffer, tracker: tracker)
+            
+            func parseFetchAttribute_rfc822Size(buffer: inout ByteBuffer, tracker: StackTracker) throws -> FetchAttribute {
+                try ParserLibrary.parseFixedString("RFC822.SIZE", buffer: &buffer, tracker: tracker)
+                return .rfc822Size
             }
-            return .rfc822(rfc)
+            
+            func parseFetchAttribute_rfc822Header(buffer: inout ByteBuffer, tracker: StackTracker) throws -> FetchAttribute {
+                try ParserLibrary.parseFixedString("RFC822.HEADER", buffer: &buffer, tracker: tracker)
+                return .rfc822Size
+            }
+            
+            func parseFetchAttribute_rfc822Text(buffer: inout ByteBuffer, tracker: StackTracker) throws -> FetchAttribute {
+                try ParserLibrary.parseFixedString("RFC822.TEXT", buffer: &buffer, tracker: tracker)
+                return .rfc822Size
+            }
+            
+            func parseFetchAttribute_rfc822(buffer: inout ByteBuffer, tracker: StackTracker) throws -> FetchAttribute {
+                try ParserLibrary.parseFixedString("RFC822", buffer: &buffer, tracker: tracker)
+                return .rfc822Size
+            }
+            
+            return try ParserLibrary.parseOneOf([
+                parseFetchAttribute_rfc822Size,
+                parseFetchAttribute_rfc822Header,
+                parseFetchAttribute_rfc822Text,
+                parseFetchAttribute_rfc822,
+            ], buffer: &buffer, tracker: tracker)
         }
 
         func parseFetchAttribute_body(buffer: inout ByteBuffer, tracker: StackTracker) throws -> FetchAttribute {
@@ -4195,29 +4217,6 @@ extension GrammarParser {
         return try ParserLibrary.parseOneOf([
             parseEnvelopeAddresses,
             parseOptionalEnvelopeAddresses_nil,
-        ], buffer: &buffer, tracker: tracker)
-    }
-
-    static func parseRFC822(buffer: inout ByteBuffer, tracker: StackTracker) throws -> RFC822 {
-        func parseRFC822_header(buffer: inout ByteBuffer, tracker: StackTracker) throws -> RFC822 {
-            try ParserLibrary.parseFixedString(".HEADER", buffer: &buffer, tracker: tracker)
-            return .header
-        }
-
-        func parseRFC822_size(buffer: inout ByteBuffer, tracker: StackTracker) throws -> RFC822 {
-            try ParserLibrary.parseFixedString(".SIZE", buffer: &buffer, tracker: tracker)
-            return .size
-        }
-
-        func parseRFC822_text(buffer: inout ByteBuffer, tracker: StackTracker) throws -> RFC822 {
-            try ParserLibrary.parseFixedString(".TEXT", buffer: &buffer, tracker: tracker)
-            return .text
-        }
-
-        return try ParserLibrary.parseOneOf([
-            parseRFC822_header,
-            parseRFC822_size,
-            parseRFC822_text,
         ], buffer: &buffer, tracker: tracker)
     }
 }

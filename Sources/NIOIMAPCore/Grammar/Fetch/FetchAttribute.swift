@@ -19,7 +19,10 @@ public enum FetchAttribute: Equatable {
     case envelope
     case flags
     case internalDate
-    case rfc822(RFC822?)
+    case rfc822
+    case rfc822Header
+    case rfc822Size
+    case rfc822Text
     /// `BODY` and `BODYSTRUCTURE` -- the latter will result in the extension parts
     /// of the body structure to be returned as part of the response, whereas the former
     /// will not.
@@ -33,11 +36,11 @@ public enum FetchAttribute: Equatable {
 }
 
 extension Array where Element == FetchAttribute {
-    static let all: [Element] = [.flags, .internalDate, .rfc822(.size), .envelope]
+    static let all: [Element] = [.flags, .internalDate, .rfc822Size, .envelope]
 
-    static let fast: [Element] = [.flags, .internalDate, .rfc822(.size)]
+    static let fast: [Element] = [.flags, .internalDate, .rfc822Size]
 
-    static let full: [Element] = [.flags, .internalDate, .rfc822(.size), .envelope, .bodyStructure(extensions: false)]
+    static let full: [Element] = [.flags, .internalDate, .rfc822Size, .envelope, .bodyStructure(extensions: false)]
 }
 
 // MARK: - Encoding
@@ -48,13 +51,13 @@ extension EncodeBuffer {
         // ALL -> (FLAGS INTERNALDATE RFC822.SIZE ENVELOPE)
         // FULL -> (FLAGS INTERNALDATE RFC822.SIZE ENVELOPE BODY)
         if atts.contains(.flags), atts.contains(.internalDate) {
-            if atts.count == 3, atts.contains(.rfc822(.size)) {
+            if atts.count == 3, atts.contains(.rfc822Size) {
                 return self.writeString("FAST")
             }
-            if atts.count == 4, atts.contains(.rfc822(.size)), atts.contains(.envelope) {
+            if atts.count == 4, atts.contains(.rfc822Size), atts.contains(.envelope) {
                 return self.writeString("ALL")
             }
-            if atts.count == 5, atts.contains(.rfc822(.size)), atts.contains(.envelope), atts.contains(.bodyStructure(extensions: false)) {
+            if atts.count == 5, atts.contains(.rfc822Size), atts.contains(.envelope), atts.contains(.bodyStructure(extensions: false)) {
                 return self.writeString("FULL")
             }
         }
@@ -72,8 +75,14 @@ extension EncodeBuffer {
             return self.writeFetchAttribute_flags()
         case .internalDate:
             return self.writeFetchAttribute_internalDate()
-        case .rfc822(let rfc):
-            return self.writeFetchAttribute_rfc(rfc)
+        case .rfc822:
+            return self.writeFetchAttribute_rfc822()
+        case .rfc822Size:
+            return self.writeFetchAttribute_rfc822Size()
+        case .rfc822Header:
+            return self.writeFetchAttribute_rfc822Header()
+        case .rfc822Text:
+            return self.writeFetchAttribute_rfc822Text()
         case .bodyStructure(extensions: let extensions):
             return self.writeFetchAttribute_bodyStructure(extensions: extensions)
         case .bodySection(peek: let peek, let section, let partial):
@@ -105,11 +114,20 @@ extension EncodeBuffer {
         self.writeString("UID")
     }
 
-    @discardableResult mutating func writeFetchAttribute_rfc(_ rfc: RFC822?) -> Int {
-        self.writeString("RFC822") +
-            self.writeIfExists(rfc) { (rfc) -> Int in
-                self.writeRFC822(rfc)
-            }
+    @discardableResult mutating func writeFetchAttribute_rfc822() -> Int {
+        self.writeString("RFC822")
+    }
+    
+    @discardableResult mutating func writeFetchAttribute_rfc822Size() -> Int {
+        self.writeString("RFC822.SIZE")
+    }
+    
+    @discardableResult mutating func writeFetchAttribute_rfc822Header() -> Int {
+        self.writeString("RFC822.HEADER")
+    }
+    
+    @discardableResult mutating func writeFetchAttribute_rfc822Text() -> Int {
+        self.writeString("RFC822.TEXT")
     }
 
     @discardableResult mutating func writeFetchAttribute_bodyStructure(extensions: Bool) -> Int {
