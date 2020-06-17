@@ -117,15 +117,15 @@ extension EncodeBuffer {
     @discardableResult mutating func writeFetchAttribute_rfc822() -> Int {
         self.writeString("RFC822")
     }
-    
+
     @discardableResult mutating func writeFetchAttribute_rfc822Size() -> Int {
         self.writeString("RFC822.SIZE")
     }
-    
+
     @discardableResult mutating func writeFetchAttribute_rfc822Header() -> Int {
         self.writeString("RFC822.HEADER")
     }
-    
+
     @discardableResult mutating func writeFetchAttribute_rfc822Text() -> Int {
         self.writeString("RFC822.TEXT")
     }
