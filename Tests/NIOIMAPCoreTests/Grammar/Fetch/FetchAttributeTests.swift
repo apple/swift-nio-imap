@@ -40,4 +40,19 @@ extension FetchAttributeTests {
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeFetchAttribute($0) })
     }
+
+    func testEncodeList() {
+        let inputs: [([FetchAttribute], EncodingCapabilities, String, UInt)] = [
+            ([.envelope], [], "(ENVELOPE)", #line),
+            ([.flags, .internalDate, .rfc822(.size)], [], "FAST", #line),
+            ([.internalDate, .rfc822(.size), .flags], [], "FAST", #line),
+            ([.flags, .internalDate, .rfc822(.size), .envelope], [], "ALL", #line),
+            ([.rfc822(.size), .flags, .envelope, .internalDate], [], "ALL", #line),
+            ([.flags, .internalDate, .rfc822(.size), .envelope, .bodyStructure(extensions: false)], [], "FULL", #line),
+            ([.flags, .bodyStructure(extensions: false), .rfc822(.size), .internalDate, .envelope], [], "FULL", #line),
+            ([.flags, .bodyStructure(extensions: true), .rfc822(.size), .internalDate, .envelope], [], "(FLAGS BODYSTRUCTURE RFC822.SIZE INTERNALDATE ENVELOPE)", #line),
+            ([.flags, .bodyStructure(extensions: false), .rfc822(.size), .internalDate, .envelope, .uid], [], "(FLAGS BODY RFC822.SIZE INTERNALDATE ENVELOPE UID)", #line),
+        ]
+        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeFetchAttributeList($0) })
+    }
 }
