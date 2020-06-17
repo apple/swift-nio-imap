@@ -1174,17 +1174,17 @@ extension GrammarParser {
 
             func parseFetchAttribute_rfc822Header(buffer: inout ByteBuffer, tracker: StackTracker) throws -> FetchAttribute {
                 try ParserLibrary.parseFixedString("RFC822.HEADER", buffer: &buffer, tracker: tracker)
-                return .rfc822Size
+                return .rfc822Header
             }
 
             func parseFetchAttribute_rfc822Text(buffer: inout ByteBuffer, tracker: StackTracker) throws -> FetchAttribute {
                 try ParserLibrary.parseFixedString("RFC822.TEXT", buffer: &buffer, tracker: tracker)
-                return .rfc822Size
+                return .rfc822Text
             }
 
             func parseFetchAttribute_rfc822(buffer: inout ByteBuffer, tracker: StackTracker) throws -> FetchAttribute {
                 try ParserLibrary.parseFixedString("RFC822", buffer: &buffer, tracker: tracker)
-                return .rfc822Size
+                return .rfc822
             }
 
             return try ParserLibrary.parseOneOf([
