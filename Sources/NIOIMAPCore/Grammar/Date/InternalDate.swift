@@ -154,7 +154,7 @@ extension EncodeBuffer {
         case 10: monthName = "oct"
         case 11: monthName = "nov"
         case 12: monthName = "dec"
-        default: fatalError()
+        default: preconditionFailure("Expected 1 <= month <= 12")
         }
 
         return
