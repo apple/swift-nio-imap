@@ -184,8 +184,12 @@ extension EncodeBuffer {
             self.writeMailbox(mailbox) +
             self.writeSpace() +
             self.writeMailboxPatterns(mailboxPatterns) +
-            self.writeSpace() +
-            self.writeListReturnOptions(returnOptions)
+            self.writeIfHasCapabilities(.listExtended) {
+                self.writeIfArrayHasMinimumSize(array: returnOptions, minimum: 1) { (array, self) in
+                    self.writeSpace() +
+                    self.writeListReturnOptions(returnOptions)
+                }
+            }
     }
 
     private mutating func writeCommandType_lsub(mailbox: MailboxName, listMailbox: ByteBuffer) -> Int {
