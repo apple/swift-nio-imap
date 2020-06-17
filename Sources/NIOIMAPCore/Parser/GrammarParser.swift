@@ -2496,7 +2496,11 @@ extension GrammarParser {
             let num2 = try self.parseNZNumber(buffer: &buffer, tracker: tracker)
             guard num2 > 0 else { throw ParserError(hint: "Partial range is invalid: <\(num1).\(num2)>.") }
             try ParserLibrary.parseFixedString(">", buffer: &buffer, tracker: tracker)
-            return num1 ... (num1 + num2 - 1)
+            let upper1 = num1.addingReportingOverflow(num2)
+            guard !upper1.overflow else { throw ParserError(hint: "Range is invalid: <\(num1).\(num2)>.") }
+            let upper2 = upper1.partialValue.subtractingReportingOverflow(1)
+            guard !upper2.overflow else { throw ParserError(hint: "Range is invalid: <\(num1).\(num2)>.") }
+            return num1 ... upper2.partialValue
         }
     }
 
