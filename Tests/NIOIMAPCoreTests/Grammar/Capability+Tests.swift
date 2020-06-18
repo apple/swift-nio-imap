@@ -28,6 +28,21 @@ extension Capability_Tests {
     }
 }
 
+// MARK: - Name/Values
+
+extension Capability_Tests {
+    func testNameValues() {
+        let inputs: [(Capability, String, String?, UInt)] = [
+            (.acl, "ACL", nil, #line),
+            (.status(.size), "STATUS", "SIZE", #line),
+        ]
+        for (capability, name, value, line) in inputs {
+            XCTAssertEqual(capability.name, name, line: line)
+            XCTAssertEqual(capability.value, value, line: line)
+        }
+    }
+}
+
 // MARK: - Encoding
 
 extension Capability_Tests {
