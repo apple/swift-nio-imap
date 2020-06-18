@@ -29,8 +29,8 @@ extension Capability_Tests {
 }
 
 // MARK: - Name/Values
+
 extension Capability_Tests {
-    
     func testNameValues() {
         let inputs: [(Capability, String, String?, UInt)] = [
             (.acl, "ACL", nil, #line),
@@ -41,7 +41,6 @@ extension Capability_Tests {
             XCTAssertEqual(capability.value, value, line: line)
         }
     }
-    
 }
 
 // MARK: - Encoding
