@@ -43,14 +43,32 @@ public struct EncodingCapabilities: OptionSet {
 
 /// IMAPv4 `capability`
 public struct Capability: Equatable {
+    
     public var rawValue: String
+    private var splitIndex: String.Index?
+    
+    public var name: String {
+        guard let index = self.splitIndex else {
+            return self.rawValue
+        }
+        return String(self.rawValue[..<index])
+    }
+    
+    public var value: String? {
+        guard var index = self.splitIndex else {
+            return nil
+        }
+        index = self.rawValue.index(after: index)
+        return String(self.rawValue[index...])
+    }
 
     public init(_ value: String) {
-        self.rawValue = value.uppercased()
+        self.init(unchecked: value.uppercased())
     }
 
     fileprivate init(unchecked: String) {
         self.rawValue = unchecked
+        self.splitIndex = self.rawValue.firstIndex(of: "=")
     }
 }
 
