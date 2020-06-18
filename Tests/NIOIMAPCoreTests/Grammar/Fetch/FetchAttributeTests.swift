@@ -27,7 +27,10 @@ extension FetchAttributeTests {
             (.flags, [], "FLAGS", #line),
             (.uid, [], "UID", #line),
             (.internalDate, [], "INTERNALDATE", #line),
-            (.rfc822(.header), [], "RFC822.HEADER", #line),
+            (.rfc822Header, [], "RFC822.HEADER", #line),
+            (.rfc822Size, [], "RFC822.SIZE", #line),
+            (.rfc822Text, [], "RFC822.TEXT", #line),
+            (.rfc822, [], "RFC822", #line),
             (.bodyStructure(extensions: false), [], "BODY", #line),
             (.bodyStructure(extensions: true), [], "BODYSTRUCTURE", #line),
             (.bodySection(peek: false, .init(kind: .header), nil), [], "BODY[HEADER]", #line),
@@ -39,5 +42,20 @@ extension FetchAttributeTests {
             (.modifierSequenceValue(3), [], "3", #line),
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeFetchAttribute($0) })
+    }
+
+    func testEncodeList() {
+        let inputs: [([FetchAttribute], EncodingCapabilities, String, UInt)] = [
+            ([.envelope], [], "(ENVELOPE)", #line),
+            ([.flags, .internalDate, .rfc822Size], [], "FAST", #line),
+            ([.internalDate, .rfc822Size, .flags], [], "FAST", #line),
+            ([.flags, .internalDate, .rfc822Size, .envelope], [], "ALL", #line),
+            ([.rfc822Size, .flags, .envelope, .internalDate], [], "ALL", #line),
+            ([.flags, .internalDate, .rfc822Size, .envelope, .bodyStructure(extensions: false)], [], "FULL", #line),
+            ([.flags, .bodyStructure(extensions: false), .rfc822Size, .internalDate, .envelope], [], "FULL", #line),
+            ([.flags, .bodyStructure(extensions: true), .rfc822Size, .internalDate, .envelope], [], "(FLAGS BODYSTRUCTURE RFC822.SIZE INTERNALDATE ENVELOPE)", #line),
+            ([.flags, .bodyStructure(extensions: false), .rfc822Size, .internalDate, .envelope, .uid], [], "(FLAGS BODY RFC822.SIZE INTERNALDATE ENVELOPE UID)", #line),
+        ]
+        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeFetchAttributeList($0) })
     }
 }
