@@ -106,13 +106,6 @@ extension EncodeBuffer {
         return try callback(array, &self)
     }
 
-    @discardableResult func writeIfHasCapabilities(_ capabilities: EncodingCapabilities, _ closure: () -> Int) -> Int {
-        guard self.capabilities.contains(capabilities) else {
-            return 0
-        }
-        return closure()
-    }
-
     @discardableResult func throwIfMissingCapabilites(_ capabilities: EncodingCapabilities, _ closure: () -> Int) throws -> Int {
         guard self.capabilities.contains(capabilities) else {
             throw CapabilityError(expected: capabilities, provided: self.capabilities)
