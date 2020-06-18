@@ -1266,8 +1266,10 @@ extension ParserUnitTests {
             ("ENVELOPE", " ", .envelope, #line),
             ("FLAGS", " ", .flags, #line),
             ("INTERNALDATE", " ", .internalDate, #line),
-            ("RFC822.HEADER", " ", .rfc822(.header), #line),
-            ("RFC822", " ", .rfc822(nil), #line),
+            ("RFC822.HEADER", " ", .rfc822Header, #line),
+            ("RFC822.SIZE", " ", .rfc822Size, #line),
+            ("RFC822.TEXT", " ", .rfc822Text, #line),
+            ("RFC822", " ", .rfc822, #line),
             ("BODY", " ", .bodyStructure(extensions: false), #line),
             ("BODYSTRUCTURE", " ", .bodyStructure(extensions: true), #line),
             ("UID", " ", .uid, #line),
@@ -2056,31 +2058,6 @@ extension ParserUnitTests {
             ("some thing", "\r", .other("some", "thing"), #line),
         ]
         self.iterateTestInputs(inputs, testFunction: GrammarParser.parseResponseTextCode)
-    }
-}
-
-// MARK: - parseRFC822
-
-extension ParserUnitTests {
-    func testParseRFC822_valid_header() {
-        TestUtilities.withBuffer(".HEADER") { (buffer) in
-            let rfc = try GrammarParser.parseRFC822(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(rfc, .header)
-        }
-    }
-
-    func testParseRFC822_valid_size() {
-        TestUtilities.withBuffer(".SIZE") { (buffer) in
-            let rfc = try GrammarParser.parseRFC822(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(rfc, .size)
-        }
-    }
-
-    func testParseRFC822_valid_text() {
-        TestUtilities.withBuffer(".TEXT") { (buffer) in
-            let rfc = try GrammarParser.parseRFC822(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(rfc, .text)
-        }
     }
 }
 
