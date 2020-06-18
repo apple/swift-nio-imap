@@ -78,6 +78,7 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
             try encoder.writeCommandStream(command)
         } catch {
             promise?.fail(error)
+            context.fireErrorCaught(error)
             return
         }
         if self.bufferedWrites.isEmpty {
