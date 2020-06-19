@@ -734,11 +734,17 @@ extension GrammarParser {
         }
 
         return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> ContinueRequest in
-            try ParserLibrary.parseFixedString("+ ", buffer: &buffer, tracker: tracker)
-            let continueReq = try ParserLibrary.parseOneOf([
-                parseContinueReq_base64,
-                parseContinueReq_responseText,
-            ], buffer: &buffer, tracker: tracker)
+            try ParserLibrary.parseFixedString("+", buffer: &buffer, tracker: tracker)
+            // Allow no space and no additional text after "+":
+            let continueReq: ContinueRequest
+            if try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: ParserLibrary.parseSpace(buffer:tracker:)) != nil {
+                continueReq = try ParserLibrary.parseOneOf([
+                    parseContinueReq_base64,
+                    parseContinueReq_responseText,
+                ], buffer: &buffer, tracker: tracker)
+            } else {
+                continueReq = .responseText(ResponseText(code: nil, text: ""))
+            }
             try ParserLibrary.parseFixedString("\r\n", buffer: &buffer, tracker: tracker)
             return continueReq
         }
