@@ -28,7 +28,7 @@ extension Flag {
 
         fileprivate init(unchecked string: String) {
             assert(string.utf8.allSatisfy { (c) -> Bool in
-                return c.isAtomChar
+                c.isAtomChar
             })
             self.rawValue = string
         }
