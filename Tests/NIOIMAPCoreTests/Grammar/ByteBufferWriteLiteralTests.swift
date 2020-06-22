@@ -39,7 +39,6 @@ extension ByteBufferWriteLiteralTests {
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeIMAPString($0) })
     }
-    
 }
 
 // MARK: writeLiteral

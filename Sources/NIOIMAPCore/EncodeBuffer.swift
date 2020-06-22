@@ -17,9 +17,8 @@ import struct NIO.ByteBufferView
 import struct NIO.CircularBuffer
 
 public struct EncodingOptions: Equatable {
-    
     public static let `default` = EncodingOptions()
-    
+
     public var useLiteralPlusIfAvailable: Bool = true
 }
 
