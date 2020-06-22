@@ -60,8 +60,8 @@ extension SearchKeyTests {
             (.uid(UIDSet(333 ... 444)), "UID 333:444", #line),
             (.sequenceNumbers(SequenceSet(...222)), "1:222", #line),
             (.sequenceNumbers(SequenceSet(222...)), "222:*", #line),
-            (.array([]), "()", #line),
-            (.array([.messageSizeSmaller(444), .messageSizeLarger(333)]), "(SMALLER 444 LARGER 333)", #line),
+            (.and([]), "()", #line),
+            (.and([.messageSizeSmaller(444), .messageSizeLarger(333)]), "(SMALLER 444 LARGER 333)", #line),
             (.filter("name"), "FILTER name", #line),
         ]
 
