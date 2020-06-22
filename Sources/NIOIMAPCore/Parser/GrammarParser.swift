@@ -3146,7 +3146,7 @@ extension GrammarParser {
                 return try self.parseSearchKey(buffer: &buffer, tracker: tracker)
             }
             try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)
-            return .array(array)
+            return .and(array)
         }
 
         func parseSearchKey_older(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SearchKey {

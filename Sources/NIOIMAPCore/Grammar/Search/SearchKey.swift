@@ -124,8 +124,8 @@ public indirect enum SearchKey: Equatable {
     /// RFC 3501: Messages that match a given sequence set.
     case sequenceNumbers(SequenceSet)
 
-    /// An array of search keys.
-    case array([SearchKey])
+    /// RFC 3501: Messages that match all of the given keys.
+    case and([SearchKey])
 
     /// RFC 5032: Messages that are older than the given number of seconds.
     case older(Int)
@@ -269,7 +269,7 @@ extension EncodeBuffer {
         case .sequenceNumbers(let set):
             return self.writeSequenceSet(set)
 
-        case .array(let array):
+        case .and(let array):
             return self.writeSearchKeys(array)
         case .younger(let seconds):
             return self.writeString("YOUNGER \(seconds)")

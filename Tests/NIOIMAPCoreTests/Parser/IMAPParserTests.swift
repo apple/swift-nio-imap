@@ -2074,37 +2074,37 @@ extension ParserUnitTests {
             (
                 #"SEARCH CHARSET UTF-8 (OR FROM "me" FROM "you") (OR NEW UNSEEN)"#,
                 "\r",
-                .search(returnOptions: [], program: .init(charset: "UTF-8", keys: [.array([.or(.from("me"), .from("you"))]), .array([.or(.new, .unseen)])])),
+                .search(returnOptions: [], program: .init(charset: "UTF-8", keys: [.and([.or(.from("me"), .from("you"))]), .and([.or(.new, .unseen)])])),
                 #line
             ),
             (
                 #"SEARCH CHARSET UTF-8 OR (FROM "me" FROM "you") (NEW UNSEEN)"#,
                 "\r",
-                .search(returnOptions: [], program: .init(charset: "UTF-8", keys: [.or(.array([.from("me"), .from("you")]), .array([.new, .unseen]))])),
+                .search(returnOptions: [], program: .init(charset: "UTF-8", keys: [.or(.and([.from("me"), .from("you")]), .and([.new, .unseen]))])),
                 #line
             ),
             (
                 #"SEARCH CHARSET UTF-8 OR (FROM "me" NEW) (UNSEEN FROM "you")"#,
                 "\r",
-                .search(returnOptions: [], program: .init(charset: "UTF-8", keys: [.or(.array([.from("me"), .new]), .array([.unseen, .from("you")]))])),
+                .search(returnOptions: [], program: .init(charset: "UTF-8", keys: [.or(.and([.from("me"), .new]), .and([.unseen, .from("you")]))])),
                 #line
             ),
             (
                 #"SEARCH CHARSET UTF-8 OR (FROM "me" NOT FROM "you") (NOT NEW UNSEEN)"#,
                 "\r",
-                .search(returnOptions: [], program: .init(charset: "UTF-8", keys: [.or(.array([.from("me"), .not(.from("you"))]), .array([.not(.new), .unseen]))])),
+                .search(returnOptions: [], program: .init(charset: "UTF-8", keys: [.or(.and([.from("me"), .not(.from("you"))]), .and([.not(.new), .unseen]))])),
                 #line
             ),
             (
                 "SEARCH CHARSET UTF-8 NOT (NEW UNSEEN)",
                 "\r",
-                .search(returnOptions: [], program: .init(charset: "UTF-8", keys: [.not(.array([.new, .unseen]))])),
+                .search(returnOptions: [], program: .init(charset: "UTF-8", keys: [.not(.and([.new, .unseen]))])),
                 #line
             ),
             (
                 "SEARCH CHARSET UTF-8 NOT (OR NEW UNSEEN)",
                 "\r",
-                .search(returnOptions: [], program: .init(charset: "UTF-8", keys: [.not(.array([.or(.new, .unseen)]))])),
+                .search(returnOptions: [], program: .init(charset: "UTF-8", keys: [.not(.and([.or(.new, .unseen)]))])),
                 #line
             ),
         ]
