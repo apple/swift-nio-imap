@@ -46,7 +46,9 @@ public indirect enum SearchKey: Equatable {
     case larger(Int)
     case not(SearchKey)
     case or(SearchKey, SearchKey)
-    case sent(SearchSentType)
+    case sentBefore(Date)
+    case sentOn(Date)
+    case sentSince(Date)
     case smaller(Int)
     case uid(UIDSet)
     case sequenceSet(SequenceSet)
@@ -177,9 +179,6 @@ extension EncodeBuffer {
                 self.writeSpace() +
                 self.writeSearchKey(k2)
 
-        case .sent(let type):
-            return self.writeSearchSentType(type)
-
         case .smaller(let n):
             return self.writeString("SMALLER \(n)")
 
@@ -201,6 +200,18 @@ extension EncodeBuffer {
             return
                 self.writeString("FILTER ") +
                 self.writeFilterName(filterName)
+        case .sentBefore(let date):
+            return
+                self.writeString("SENTBEFORE ") +
+                self.writeDate(date)
+        case .sentOn(let date):
+            return
+                self.writeString("SENTON ") +
+                self.writeDate(date)
+        case .sentSince(let date):
+            return
+                self.writeString("SENTSINCE ") +
+                self.writeDate(date)
         }
     }
 }

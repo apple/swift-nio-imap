@@ -3116,17 +3116,17 @@ extension GrammarParser {
 
         func parseSearchKey_sentBefore(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SearchKey {
             try ParserLibrary.parseFixedString("SENTBEFORE ", buffer: &buffer, tracker: tracker)
-            return .sent(.before(try self.parseDate(buffer: &buffer, tracker: tracker)))
+            return .sentBefore(try self.parseDate(buffer: &buffer, tracker: tracker))
         }
 
         func parseSearchKey_sentOn(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SearchKey {
             try ParserLibrary.parseFixedString("SENTON ", buffer: &buffer, tracker: tracker)
-            return .sent(.on(try self.parseDate(buffer: &buffer, tracker: tracker)))
+            return .sentOn(try self.parseDate(buffer: &buffer, tracker: tracker))
         }
 
         func parseSearchKey_sentSince(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SearchKey {
             try ParserLibrary.parseFixedString("SENTSINCE ", buffer: &buffer, tracker: tracker)
-            return .sent(.since(try self.parseDate(buffer: &buffer, tracker: tracker)))
+            return .sentSince(try self.parseDate(buffer: &buffer, tracker: tracker))
         }
 
         func parseSearchKey_uid(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SearchKey {
