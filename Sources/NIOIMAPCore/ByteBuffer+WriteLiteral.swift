@@ -36,7 +36,7 @@ extension EncodeBuffer {
         if canUseQuoted {
             return self.writeString("\"") + self.writeBytes(bytes) + self.writeString("\"")
         } else {
-            let nonSynchronising = self.capabilities.contains(.nonSyncrhonizingLiterals) && self.options.useLiteralPlusIfAvailable
+            let nonSynchronising = self.capabilities.contains(.nonSyncrhonizingLiterals) && self.options.forceNonSychronisingLiterals
             return self.writeLiteral(bytes, nonSynchronising: nonSynchronising)
         }
     }
