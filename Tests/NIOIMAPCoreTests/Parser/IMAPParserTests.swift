@@ -2071,6 +2071,42 @@ extension ParserUnitTests {
             ("SEARCH CHARSET UTF-8 ALL", "\r", .search(returnOptions: [], program: .init(charset: "UTF-8", keys: [.all])), #line),
             ("SEARCH RETURN () ALL", "\r", .search(returnOptions: [], program: .init(charset: nil, keys: [.all])), #line),
             ("SEARCH RETURN (MIN) ALL", "\r", .search(returnOptions: [.min], program: .init(charset: nil, keys: [.all])), #line),
+            (
+                #"SEARCH CHARSET UTF-8 (OR FROM "me" FROM "you") (OR NEW UNSEEN)"#,
+                "\r",
+                .search(returnOptions: [], program: .init(charset: "UTF-8", keys: [.array([.or(.from("me"), .from("you"))]), .array([.or(.new, .unseen)])])),
+                #line
+            ),
+            (
+                #"SEARCH CHARSET UTF-8 OR (FROM "me" FROM "you") (NEW UNSEEN)"#,
+                "\r",
+                .search(returnOptions: [], program: .init(charset: "UTF-8", keys: [.or(.array([.from("me"), .from("you")]), .array([.new, .unseen]))])),
+                #line
+            ),
+            (
+                #"SEARCH CHARSET UTF-8 OR (FROM "me" NEW) (UNSEEN FROM "you")"#,
+                "\r",
+                .search(returnOptions: [], program: .init(charset: "UTF-8", keys: [.or(.array([.from("me"), .new]), .array([.unseen, .from("you")]))])),
+                #line
+            ),
+            (
+                #"SEARCH CHARSET UTF-8 OR (FROM "me" NOT FROM "you") (NOT NEW UNSEEN)"#,
+                "\r",
+                .search(returnOptions: [], program: .init(charset: "UTF-8", keys: [.or(.array([.from("me"), .not(.from("you"))]), .array([.not(.new), .unseen]))])),
+                #line
+            ),
+            (
+                "SEARCH CHARSET UTF-8 NOT (NEW UNSEEN)",
+                "\r",
+                .search(returnOptions: [], program: .init(charset: "UTF-8", keys: [.not(.array([.new, .unseen]))])),
+                #line
+            ),
+            (
+                "SEARCH CHARSET UTF-8 NOT (OR NEW UNSEEN)",
+                "\r",
+                .search(returnOptions: [], program: .init(charset: "UTF-8", keys: [.not(.array([.or(.new, .unseen)]))])),
+                #line
+            ),
         ]
         self.iterateTestInputs(inputs, testFunction: GrammarParser.parseSearch)
     }
