@@ -2071,6 +2071,42 @@ extension ParserUnitTests {
             ("SEARCH CHARSET UTF-8 ALL", "\r", .search(returnOptions: [], program: .init(charset: "UTF-8", keys: [.all])), #line),
             ("SEARCH RETURN () ALL", "\r", .search(returnOptions: [], program: .init(charset: nil, keys: [.all])), #line),
             ("SEARCH RETURN (MIN) ALL", "\r", .search(returnOptions: [.min], program: .init(charset: nil, keys: [.all])), #line),
+            (
+                #"SEARCH CHARSET UTF-8 (OR FROM "me" FROM "you") (OR NEW UNSEEN)"#,
+                "\r",
+                .search(returnOptions: [], program: .init(charset: "UTF-8", keys: [.and([.or(.from("me"), .from("you"))]), .and([.or(.new, .unseen)])])),
+                #line
+            ),
+            (
+                #"SEARCH CHARSET UTF-8 OR (FROM "me" FROM "you") (NEW UNSEEN)"#,
+                "\r",
+                .search(returnOptions: [], program: .init(charset: "UTF-8", keys: [.or(.and([.from("me"), .from("you")]), .and([.new, .unseen]))])),
+                #line
+            ),
+            (
+                #"SEARCH CHARSET UTF-8 OR (FROM "me" NEW) (UNSEEN FROM "you")"#,
+                "\r",
+                .search(returnOptions: [], program: .init(charset: "UTF-8", keys: [.or(.and([.from("me"), .new]), .and([.unseen, .from("you")]))])),
+                #line
+            ),
+            (
+                #"SEARCH CHARSET UTF-8 OR (FROM "me" NOT FROM "you") (NOT NEW UNSEEN)"#,
+                "\r",
+                .search(returnOptions: [], program: .init(charset: "UTF-8", keys: [.or(.and([.from("me"), .not(.from("you"))]), .and([.not(.new), .unseen]))])),
+                #line
+            ),
+            (
+                "SEARCH CHARSET UTF-8 NOT (NEW UNSEEN)",
+                "\r",
+                .search(returnOptions: [], program: .init(charset: "UTF-8", keys: [.not(.and([.new, .unseen]))])),
+                #line
+            ),
+            (
+                "SEARCH CHARSET UTF-8 NOT (OR NEW UNSEEN)",
+                "\r",
+                .search(returnOptions: [], program: .init(charset: "UTF-8", keys: [.not(.and([.or(.new, .unseen)]))])),
+                #line
+            ),
         ]
         self.iterateTestInputs(inputs, testFunction: GrammarParser.parseSearch)
     }
@@ -2121,12 +2157,12 @@ extension ParserUnitTests {
             ("DRAFT", "\r", .draft, #line),
             ("ON 25-jun-1994", "\r", .on(Date(year: 1994, month: 6, day: 25)!), #line),
             ("SINCE 01-jan-2001", "\r", .since(Date(year: 2001, month: 1, day: 1)!), #line),
-            ("SENTON 02-jan-2002", "\r", .sent(.on(Date(year: 2002, month: 1, day: 2)!)), #line),
-            ("SENTBEFORE 03-jan-2003", "\r", .sent(.before(Date(year: 2003, month: 1, day: 3)!)), #line),
-            ("SENTSINCE 04-jan-2004", "\r", .sent(.since(Date(year: 2004, month: 1, day: 4)!)), #line),
+            ("SENTON 02-jan-2002", "\r", .sentOn(Date(year: 2002, month: 1, day: 2)!), #line),
+            ("SENTBEFORE 03-jan-2003", "\r", .sentBefore(Date(year: 2003, month: 1, day: 3)!), #line),
+            ("SENTSINCE 04-jan-2004", "\r", .sentSince(Date(year: 2004, month: 1, day: 4)!), #line),
             ("BEFORE 05-jan-2005", "\r", .before(Date(year: 2005, month: 1, day: 5)!), #line),
-            ("LARGER 1234", "\r", .larger(1234), #line),
-            ("SMALLER 5678", "\r", .smaller(5678), #line),
+            ("LARGER 1234", "\r", .messageSizeLarger(1234), #line),
+            ("SMALLER 5678", "\r", .messageSizeSmaller(5678), #line),
             ("BCC data1", "\r", .bcc("data1"), #line),
             ("BODY data2", "\r", .body("data2"), #line),
             ("CC data3", "\r", .cc("data3"), #line),
@@ -2137,12 +2173,12 @@ extension ParserUnitTests {
             ("KEYWORD key1", "\r", .keyword(Flag.Keyword("key1")), #line),
             ("HEADER some value", "\r", .header("some", "value"), #line),
             ("UNKEYWORD key2", "\r", .unkeyword(Flag.Keyword("key2")), #line),
-            ("NOT LARGER 1234", "\r", .not(.larger(1234)), #line),
-            ("OR LARGER 6 SMALLER 4", "\r", .or(.larger(6), .smaller(4)), #line),
+            ("NOT LARGER 1234", "\r", .not(.messageSizeLarger(1234)), #line),
+            ("OR LARGER 6 SMALLER 4", "\r", .or(.messageSizeLarger(6), .messageSizeSmaller(4)), #line),
             ("UID 2:4", "\r", .uid(UIDSet(2 ... 4)), #line),
-            ("2:4", "\r", .sequenceSet(SequenceSet(2 ... 4)), #line),
-            ("(LARGER 1)", "\r", .array([.larger(1)]), #line),
-            ("(LARGER 1 SMALLER 5 KEYWORD hello)", "\r", .array([.larger(1), .smaller(5), .keyword(Flag.Keyword("hello"))]), #line),
+            ("2:4", "\r", .sequenceNumbers(SequenceSet(2 ... 4)), #line),
+            ("(LARGER 1)", "\r", .and([.messageSizeLarger(1)]), #line),
+            ("(LARGER 1 SMALLER 5 KEYWORD hello)", "\r", .and([.messageSizeLarger(1), .messageSizeSmaller(5), .keyword(Flag.Keyword("hello"))]), #line),
             ("YOUNGER 34", "\r", .younger(34), #line),
             ("OLDER 45", "\r", .older(45), #line),
             ("FILTER something", "\r", .filter("something"), #line),

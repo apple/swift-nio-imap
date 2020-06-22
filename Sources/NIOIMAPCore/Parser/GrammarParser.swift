@@ -3096,12 +3096,12 @@ extension GrammarParser {
 
         func parseSearchKey_larger(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SearchKey {
             try ParserLibrary.parseFixedString("LARGER ", buffer: &buffer, tracker: tracker)
-            return .larger(try self.parseNumber(buffer: &buffer, tracker: tracker))
+            return .messageSizeLarger(try self.parseNumber(buffer: &buffer, tracker: tracker))
         }
 
         func parseSearchKey_smaller(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SearchKey {
             try ParserLibrary.parseFixedString("SMALLER ", buffer: &buffer, tracker: tracker)
-            return .smaller(try self.parseNumber(buffer: &buffer, tracker: tracker))
+            return .messageSizeSmaller(try self.parseNumber(buffer: &buffer, tracker: tracker))
         }
 
         func parseSearchKey_not(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SearchKey {
@@ -3119,17 +3119,17 @@ extension GrammarParser {
 
         func parseSearchKey_sentBefore(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SearchKey {
             try ParserLibrary.parseFixedString("SENTBEFORE ", buffer: &buffer, tracker: tracker)
-            return .sent(.before(try self.parseDate(buffer: &buffer, tracker: tracker)))
+            return .sentBefore(try self.parseDate(buffer: &buffer, tracker: tracker))
         }
 
         func parseSearchKey_sentOn(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SearchKey {
             try ParserLibrary.parseFixedString("SENTON ", buffer: &buffer, tracker: tracker)
-            return .sent(.on(try self.parseDate(buffer: &buffer, tracker: tracker)))
+            return .sentOn(try self.parseDate(buffer: &buffer, tracker: tracker))
         }
 
         func parseSearchKey_sentSince(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SearchKey {
             try ParserLibrary.parseFixedString("SENTSINCE ", buffer: &buffer, tracker: tracker)
-            return .sent(.since(try self.parseDate(buffer: &buffer, tracker: tracker)))
+            return .sentSince(try self.parseDate(buffer: &buffer, tracker: tracker))
         }
 
         func parseSearchKey_uid(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SearchKey {
@@ -3138,7 +3138,7 @@ extension GrammarParser {
         }
 
         func parseSearchKey_sequenceSet(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SearchKey {
-            .sequenceSet(try self.parseSequenceSet(buffer: &buffer, tracker: tracker))
+            .sequenceNumbers(try self.parseSequenceSet(buffer: &buffer, tracker: tracker))
         }
 
         func parseSearchKey_array(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SearchKey {
@@ -3149,7 +3149,7 @@ extension GrammarParser {
                 return try self.parseSearchKey(buffer: &buffer, tracker: tracker)
             }
             try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)
-            return .array(array)
+            return .and(array)
         }
 
         func parseSearchKey_older(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SearchKey {
