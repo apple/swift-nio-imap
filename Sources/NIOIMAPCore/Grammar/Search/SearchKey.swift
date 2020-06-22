@@ -16,45 +16,125 @@ import struct NIO.ByteBuffer
 
 /// IMAPv4 `search-key`
 public indirect enum SearchKey: Equatable {
+    
+    /// RFC 3501: All messages in the mailbox; the default initial key for ANDing.
     case all
+    
+    /// RFC 3501: Messages with the \Answered flag set.
     case answered
+    
+    /// RFC 3501: Messages with the \Deleted flag set.
     case deleted
+    
+    /// RFC 3501: Messages with the \Flagged flag set.
     case flagged
+    
+    /// RFC 3501: Messages that have the \Recent flag set but not the \Seen flag. This is functionally equivalent to "(RECENT UNSEEN)".
     case new
+    
+    /// RFC 3501: Messages that functionally equivalent to "NOT RECENT" (as opposed to "NOT NEW").
     case old
+    
+    /// RFC 3501: Messages that have the \Recent flag set.
     case recent
+    
+    /// RFC 3501: Messages that have the \Seen flag set.
     case seen
+    
+    /// RFC 3501: Messages that do not have the \Answered flag set.
     case unanswered
+    
+    /// RFC 3501: Messages that do not have the \Delete flag set.
     case undeleted
+    
+    /// RFC 3501: Messages that do not have the \Flagged flag set.
     case unflagged
+    
+    /// RFC 3501: Messages that do not have the \Seen flag set.
     case unseen
+    
+    /// RFC 3501: Messages with the \Draft flag set.
     case draft
+    
+    /// RFC 3501: Messages that do not have the \Draft flag set.
     case undraft
+    
+    /// RFC 3501: Messages that contain the specified string in the envelope structure’s BCC field.
     case bcc(ByteBuffer)
+    
+    /// RFC 3501: Messages whose internal date (disregarding time and timezone) is earlier than the specified date.
     case before(Date)
+    
+    /// RFC 3501: Messages that contain the specified string in the body of the message.
     case body(ByteBuffer)
+    
+    /// RFC 3501: Messages that contain the specified string in the envelope structure’s CC field.
     case cc(ByteBuffer)
+    
+    /// RFC 3501: Messages that contain the specified string in the envelope structure’s FROM field.
     case from(ByteBuffer)
+    
+    /// RFC 3501: Messages with the specified keyword flag set.
     case keyword(Flag.Keyword)
+    
+    /// RFC 3501: Messages whose internal date (disregarding time and timezone) is within the specified date.
     case on(Date)
+    
+    /// RFC 3501: Messages whose internal date (disregarding time and timezone) is within or later than the specified date.
     case since(Date)
+    
+    /// RFC 3501: Messages that contain the specified string in the envelope structure’s SUBJECT field.
     case subject(ByteBuffer)
+    
+    /// RFC 3501: Messages that contain the specified string in the header or body of the message.
     case text(ByteBuffer)
+    
+    /// RFC 3501: Messages that contain the specified string in the envelope structure’s TO field.
     case to(ByteBuffer)
+    
+    /// RFC 3501: Messages that do not have the specified keyword flag set.
     case unkeyword(Flag.Keyword)
+    
+    /// RFC 3501: Messages that have a header with the specified field-name (as defined in [RFC-2822]) and that contains the specified string in the text of the header (what comes after the colon). If the string to search is zero-length, this matches all messages that have a header the contents.
     case header(String, ByteBuffer)
+    
+    /// RFC 3501: Messages with an [RFC-2822] size larger than the specified number of octets.
     case messageSizeLarger(Int)
+    
+    /// RFC 3501: Messages that do not match the specified search key.
     case not(SearchKey)
+    
+    /// RFC 3501: Messages that match either search key.
     case or(SearchKey, SearchKey)
+    
+    /// RFC 3501: Messages whose [RFC-2822] Date: header (disregarding time and timezone) is earlier than the specified date.
     case sentBefore(Date)
+    
+    /// RFC 3501: Messages whose [RFC-2822] Date: header (disregarding time and timezone) is within the specified date.
     case sentOn(Date)
+    
+    /// RFC 3501: Messages whose [RFC-2822] Date: header (disregarding time and timezone) is within or later than the specified date.
     case sentSince(Date)
+    
+    /// RFC 3501: Messages with an [RFC-2822] size smaller than the specified number of octets.
     case messageSizeSmaller(Int)
+    
+    /// RFC 3501: Messages with unique identifiers corresponding to the specified unique identifier set. Sequence set ranges are permitted.
     case uid(UIDSet)
+    
+    /// RFC 3501: Messages that match a given sequence set.
     case sequenceNumbers(SequenceSet)
+    
+    /// An array of search keys.
     case array([SearchKey])
+    
+    /// RFC 5032: Messages that are older than the given number of seconds.
     case older(Int)
+    
+    /// RFC 5032: Messages that are younger than the given number of seconds.
     case younger(Int)
+    
+    /// RFC 3501:
     case filter(String)
 }
 
