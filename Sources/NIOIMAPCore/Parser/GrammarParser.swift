@@ -3135,7 +3135,7 @@ extension GrammarParser {
         }
 
         func parseSearchKey_sequenceSet(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SearchKey {
-            .sequenceSet(try self.parseSequenceSet(buffer: &buffer, tracker: tracker))
+            .sequenceNumbers(try self.parseSequenceSet(buffer: &buffer, tracker: tracker))
         }
 
         func parseSearchKey_array(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SearchKey {

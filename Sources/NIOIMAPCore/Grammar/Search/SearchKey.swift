@@ -51,7 +51,7 @@ public indirect enum SearchKey: Equatable {
     case sentSince(Date)
     case messageSizeSmaller(Int)
     case uid(UIDSet)
-    case sequenceSet(SequenceSet)
+    case sequenceNumbers(SequenceSet)
     case array([SearchKey])
     case older(Int)
     case younger(Int)
@@ -187,7 +187,7 @@ extension EncodeBuffer {
                 self.writeString("UID ") +
                 self.writeUIDSet(set)
 
-        case .sequenceSet(let set):
+        case .sequenceNumbers(let set):
             return self.writeSequenceSet(set)
 
         case .array(let array):

@@ -2176,7 +2176,7 @@ extension ParserUnitTests {
             ("NOT LARGER 1234", "\r", .not(.messageSizeLarger(1234)), #line),
             ("OR LARGER 6 SMALLER 4", "\r", .or(.messageSizeLarger(6), .messageSizeSmaller(4)), #line),
             ("UID 2:4", "\r", .uid(UIDSet(2 ... 4)), #line),
-            ("2:4", "\r", .sequenceSet(SequenceSet(2 ... 4)), #line),
+            ("2:4", "\r", .sequenceNumbers(SequenceSet(2 ... 4)), #line),
             ("(LARGER 1)", "\r", .array([.messageSizeLarger(1)]), #line),
             ("(LARGER 1 SMALLER 5 KEYWORD hello)", "\r", .array([.messageSizeLarger(1), .messageSizeSmaller(5), .keyword(Flag.Keyword("hello"))]), #line),
             ("YOUNGER 34", "\r", .younger(34), #line),
