@@ -3093,12 +3093,12 @@ extension GrammarParser {
 
         func parseSearchKey_larger(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SearchKey {
             try ParserLibrary.parseFixedString("LARGER ", buffer: &buffer, tracker: tracker)
-            return .larger(try self.parseNumber(buffer: &buffer, tracker: tracker))
+            return .messageSizeLarger(try self.parseNumber(buffer: &buffer, tracker: tracker))
         }
 
         func parseSearchKey_smaller(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SearchKey {
             try ParserLibrary.parseFixedString("SMALLER ", buffer: &buffer, tracker: tracker)
-            return .smaller(try self.parseNumber(buffer: &buffer, tracker: tracker))
+            return .messageSizeSmaller(try self.parseNumber(buffer: &buffer, tracker: tracker))
         }
 
         func parseSearchKey_not(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SearchKey {

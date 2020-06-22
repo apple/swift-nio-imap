@@ -43,13 +43,13 @@ public indirect enum SearchKey: Equatable {
     case to(ByteBuffer)
     case unkeyword(Flag.Keyword)
     case header(String, ByteBuffer)
-    case larger(Int)
+    case messageSizeLarger(Int)
     case not(SearchKey)
     case or(SearchKey, SearchKey)
     case sentBefore(Date)
     case sentOn(Date)
     case sentSince(Date)
-    case smaller(Int)
+    case messageSizeSmaller(Int)
     case uid(UIDSet)
     case sequenceSet(SequenceSet)
     case array([SearchKey])
@@ -164,7 +164,7 @@ extension EncodeBuffer {
                 self.writeSpace() +
                 self.writeIMAPString(value)
 
-        case .larger(let n):
+        case .messageSizeLarger(let n):
             return self.writeString("LARGER \(n)")
 
         case .not(let key):
@@ -179,7 +179,7 @@ extension EncodeBuffer {
                 self.writeSpace() +
                 self.writeSearchKey(k2)
 
-        case .smaller(let n):
+        case .messageSizeSmaller(let n):
             return self.writeString("SMALLER \(n)")
 
         case .uid(let set):
