@@ -58,6 +58,7 @@ public struct Capability: Equatable {
             return nil
         }
         index = self.rawValue.index(after: index)
+
         return String(self.rawValue[index...])
     }
 

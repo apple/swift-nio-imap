@@ -19,43 +19,43 @@ public indirect enum SearchKey: Equatable {
     /// RFC 3501: All messages in the mailbox; the default initial key for ANDing.
     case all
 
-    /// RFC 3501: Messages with the \Answered flag set.
+    /// RFC 3501: Messages with the `\Answered` flag set.
     case answered
 
-    /// RFC 3501: Messages with the \Deleted flag set.
+    /// RFC 3501: Messages with the `\Deleted` flag set.
     case deleted
 
-    /// RFC 3501: Messages with the \Flagged flag set.
+    /// RFC 3501: Messages with the `\Flagged` flag set.
     case flagged
 
-    /// RFC 3501: Messages that have the \Recent flag set but not the \Seen flag. This is functionally equivalent to "(RECENT UNSEEN)".
+    /// RFC 3501: Messages that have the `\Recent` flag set but not the `\Seen` flag. This is functionally equivalent to "(RECENT UNSEEN)".
     case new
 
     /// RFC 3501: Messages that functionally equivalent to "NOT RECENT" (as opposed to "NOT NEW").
     case old
 
-    /// RFC 3501: Messages that have the \Recent flag set.
+    /// RFC 3501: Messages that have the `\Recent` flag set.
     case recent
 
-    /// RFC 3501: Messages that have the \Seen flag set.
+    /// RFC 3501: Messages that have the `\Seen` flag set.
     case seen
 
-    /// RFC 3501: Messages that do not have the \Answered flag set.
+    /// RFC 3501: Messages that do not have the `\Answered` flag set.
     case unanswered
 
-    /// RFC 3501: Messages that do not have the \Delete flag set.
+    /// RFC 3501: Messages that do not have the `\Delete` flag set.
     case undeleted
 
-    /// RFC 3501: Messages that do not have the \Flagged flag set.
+    /// RFC 3501: Messages that do not have the `\Flagged` flag set.
     case unflagged
 
-    /// RFC 3501: Messages that do not have the \Seen flag set.
+    /// RFC 3501: Messages that do not have the `\Seen` flag set.
     case unseen
 
-    /// RFC 3501: Messages with the \Draft flag set.
+    /// RFC 3501: Messages with the `\Draft` flag set.
     case draft
 
-    /// RFC 3501: Messages that do not have the \Draft flag set.
+    /// RFC 3501: Messages that do not have the `\Draft` flag set.
     case undraft
 
     /// RFC 3501: Messages that contain the specified string in the envelope structure’s BCC field.
