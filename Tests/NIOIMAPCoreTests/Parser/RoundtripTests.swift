@@ -101,7 +101,11 @@ final class RoundtripTests: XCTestCase {
             let line = test.1
             let tag = "\(i + 1)"
             let command = TaggedCommand(tag: tag, command: commandType)
-            encodeBuffer.writeCommand(command)
+            do {
+                try encodeBuffer.writeCommand(command)
+            } catch {
+                XCTFail("\(error)")
+            }
             encodeBuffer.writeString("\r\n") // required for commands that might terminate with a literal (e.g. append)
             var buffer = ByteBufferAllocator().buffer(capacity: 128)
             while true {

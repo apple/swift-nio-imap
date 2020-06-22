@@ -14,6 +14,11 @@
 
 import struct NIO.ByteBuffer
 
+public struct CapabilityError: Error {
+    public var expected: EncodingCapabilities
+    public var provided: EncodingCapabilities
+}
+
 extension EncodeBuffer {
     @discardableResult mutating func writeIMAPString(_ str: String) -> Int {
         self.writeIMAPString(str.utf8)
@@ -94,10 +99,17 @@ extension EncodeBuffer {
         return callback()
     }
 
-    @discardableResult mutating func writeIfArrayHasMinimumSize<T>(array: [T], minimum: Int = 1, callback: ([T], inout EncodeBuffer) -> Int) -> Int {
+    @discardableResult mutating func writeIfArrayHasMinimumSize<T>(array: [T], minimum: Int = 1, callback: ([T], inout EncodeBuffer) throws -> Int) rethrows -> Int {
         guard array.count >= minimum else {
             return 0
         }
-        return callback(array, &self)
+        return try callback(array, &self)
+    }
+
+    @discardableResult func throwIfMissingCapabilites(_ capabilities: EncodingCapabilities, _ closure: () -> Int) throws -> Int {
+        guard self.capabilities.contains(capabilities) else {
+            throw CapabilityError(expected: capabilities, provided: self.capabilities)
+        }
+        return closure()
     }
 }

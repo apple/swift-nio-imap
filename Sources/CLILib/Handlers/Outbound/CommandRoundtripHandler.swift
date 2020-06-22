@@ -47,7 +47,7 @@ public class CommandRoundtripHandler: ChannelOutboundHandler {
                 buffer: context.channel.allocator.buffer(capacity: originalBuffer.readableBytes),
                 capabilities: self.capabilities
             )
-            encodeBuffer.writeCommandStream(commandStream)
+            try encodeBuffer.writeCommandStream(commandStream)
             var roundtripBuffer = encodeBuffer.buffer.nextChunk().bytes
 
             if originalBuffer != roundtripBuffer {

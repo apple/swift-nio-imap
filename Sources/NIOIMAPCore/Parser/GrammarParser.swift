@@ -1711,13 +1711,16 @@ extension GrammarParser {
     static func parseListReturnOptions(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [ReturnOption] {
         try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
             try ParserLibrary.parseFixedString("RETURN (", buffer: &buffer, tracker: tracker)
-            var array = [try self.parseReturnOption(buffer: &buffer, tracker: tracker)]
-            try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) -> ReturnOption in
-                try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
-                return try self.parseReturnOption(buffer: &buffer, tracker: tracker)
+            let options = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> [ReturnOption] in
+                var array = [try self.parseReturnOption(buffer: &buffer, tracker: tracker)]
+                try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) -> ReturnOption in
+                    try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
+                    return try self.parseReturnOption(buffer: &buffer, tracker: tracker)
+                }
+                return array
             }
             try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)
-            return array
+            return options ?? []
         }
     }
 

@@ -19,6 +19,7 @@ public struct EncodingCapabilities: OptionSet {
     public static let namespace = EncodingCapabilities(rawValue: 1 << 1)
     public static let id = EncodingCapabilities(rawValue: 1 << 2)
     public static let binary = EncodingCapabilities(rawValue: 1 << 3)
+    public static let listExtended = EncodingCapabilities(rawValue: 1 << 4)
 
     public var rawValue: Int
 
@@ -34,6 +35,7 @@ public struct EncodingCapabilities: OptionSet {
             (.id, .id),
             (.namespace, .namespace),
             (.binary, .binary),
+            (.listExtended, .listExtended),
         ]
         for (strCap, cap) in inputs where capabilities.contains(strCap) {
             self.insert(cap)
@@ -211,6 +213,8 @@ extension Capability {
     public static let imap4 = Self(unchecked: "IMAP4")
     public static let language = Self(unchecked: "LANGUAGE")
     public static let listStatus = Self(unchecked: "LIST-STATUS")
+
+    public static let listExtended = Self(unchecked: "LIST-EXTENDED")
     public static let loginDisabled = Self(unchecked: "LOGINDISABLED")
     public static let loginReferrals = Self(unchecked: "LOGIN-REFERRALS")
     public static let metadata = Self(unchecked: "METADATA")

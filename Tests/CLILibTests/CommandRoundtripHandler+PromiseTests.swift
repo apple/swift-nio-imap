@@ -39,6 +39,16 @@ class CommandRoundtripHandler_PromiseTests: XCTestCase {
         XCTAssertNoThrow(XCTAssertNil(try self.channel.readOutbound(as: ByteBuffer.self)))
     }
 
+    // fails to encode because we don't have the LIST-EXTENDED capability
+    func testPromiseIsNotDropped_shouldThrow_failedEncode() {
+        var buffer = self.channel.allocator.buffer(capacity: 0)
+        buffer.writeString("tag LIST INBOX \"\" RETURN (CHILDREN)\r\n")
+        XCTAssertThrowsError(try self.channel.writeOutbound(buffer)) { e in
+            XCTAssertTrue(e is CapabilityError)
+        }
+        XCTAssertNoThrow(XCTAssertNil(try self.channel.readOutbound(as: ByteBuffer.self)))
+    }
+
     func testPromiseIsNotDropped_shouldNotThrow() {
         var buffer = self.channel.allocator.buffer(capacity: 0)
         buffer.writeString("1 NOOP\r\n")

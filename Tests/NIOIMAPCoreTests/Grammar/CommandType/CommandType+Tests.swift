@@ -23,8 +23,11 @@ class CommandType_Tests: EncodeTestClass {}
 extension CommandType_Tests {
     func testEncode() {
         let inputs: [(Command, EncodingCapabilities, String, UInt)] = [
-            (.list(nil, reference: .init(""), .mailbox(""), []), [], "LIST \"\" \"\" RETURN ()", #line),
-            (.list(reference: .init(""), .mailbox("")), [], "LIST \"\" \"\" RETURN ()", #line),
+            (.list(nil, reference: .init(""), .mailbox(""), []), [], "LIST \"\" \"\"", #line),
+            (.list(reference: .init(""), .mailbox("")), [], "LIST \"\" \"\"", #line),
+            (.list(reference: .init(""), .mailbox("")), [.listExtended], "LIST \"\" \"\"", #line), // no ret-opts but has capability
+            (.list(nil, reference: .inbox, .mailbox(""), [.children]), [.listExtended], "LIST \"INBOX\" \"\" RETURN (CHILDREN)", #line), // ret-opts with capability
+
             (.namespace, [.namespace], "NAMESPACE", #line),
 
             // MARK: Login
@@ -39,6 +42,6 @@ extension CommandType_Tests {
             (.id([]), [.id], "ID NIL", #line),
         ]
 
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeCommandType($0) })
+        self.iterateInputs(inputs: inputs, encoder: { try self.testBuffer.writeCommandType($0) })
     }
 }

@@ -74,7 +74,13 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
     public func write(context: ChannelHandlerContext, data: NIOAny, promise: EventLoopPromise<Void>?) {
         let command = self.unwrapOutboundIn(data)
         var encoder = CommandEncodeBuffer(buffer: context.channel.allocator.buffer(capacity: 1024), capabilities: self.capabilities)
-        encoder.writeCommandStream(command)
+        do {
+            try encoder.writeCommandStream(command)
+        } catch {
+            promise?.fail(error)
+            context.fireErrorCaught(error)
+            return
+        }
         if self.bufferedWrites.isEmpty {
             let next = encoder.buffer.nextChunk()
 
