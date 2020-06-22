@@ -16,6 +16,13 @@ import struct NIO.ByteBuffer
 import struct NIO.ByteBufferView
 import struct NIO.CircularBuffer
 
+public struct EncodingOptions: Equatable {
+    
+    public static let `default` = EncodingOptions()
+    
+    public var useLiteralPlusIfAvailable: Bool = true
+}
+
 public struct EncodeBuffer {
     public enum Mode: Equatable {
         case client
@@ -24,13 +31,15 @@ public struct EncodeBuffer {
 
     var mode: Mode
     var capabilities: EncodingCapabilities
+    var options: EncodingOptions
     @usableFromInline internal var _buffer: ByteBuffer
     @usableFromInline internal var _stopPoints: CircularBuffer<Int> = []
 
-    public init(_ buffer: ByteBuffer, mode: Mode, capabilities: EncodingCapabilities) {
+    public init(_ buffer: ByteBuffer, mode: Mode, capabilities: EncodingCapabilities, options: EncodingOptions = .default) {
         self._buffer = buffer
         self.mode = mode
         self.capabilities = capabilities
+        self.options = options
     }
 }
 

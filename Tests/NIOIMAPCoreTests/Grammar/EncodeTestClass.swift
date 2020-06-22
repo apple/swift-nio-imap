@@ -34,12 +34,13 @@ class EncodeTestClass: XCTestCase {
     }
 
     func iterateInputs<T>(inputs: [(T, String, UInt)], encoder: (T) throws -> Int, file: StaticString = magicFile()) {
-        self.iterateInputs(inputs: inputs.map { ($0.0, [], $0.1, $0.2) }, encoder: encoder, file: file)
+        self.iterateInputs(inputs: inputs.map { ($0.0, [], .default, $0.1, $0.2) }, encoder: encoder, file: file)
     }
 
-    func iterateInputs<T>(inputs: [(T, EncodingCapabilities, String, UInt)], encoder: (T) throws -> Int, file: StaticString = magicFile()) {
-        for (test, capabilities, expectedString, line) in inputs {
+    func iterateInputs<T>(inputs: [(T, EncodingCapabilities, EncodingOptions, String, UInt)], encoder: (T) throws -> Int, file: StaticString = magicFile()) {
+        for (test, capabilities, options, expectedString, line) in inputs {
             self.testBuffer.capabilities = capabilities
+            self.testBuffer.options = options
             self.testBuffer.clear()
             do {
                 let size = try encoder(test)

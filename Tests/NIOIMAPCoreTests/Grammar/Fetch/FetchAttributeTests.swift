@@ -22,39 +22,39 @@ class FetchAttributeTests: EncodeTestClass {}
 
 extension FetchAttributeTests {
     func testEncode() {
-        let inputs: [(FetchAttribute, EncodingCapabilities, String, UInt)] = [
-            (.envelope, [], "ENVELOPE", #line),
-            (.flags, [], "FLAGS", #line),
-            (.uid, [], "UID", #line),
-            (.internalDate, [], "INTERNALDATE", #line),
-            (.rfc822Header, [], "RFC822.HEADER", #line),
-            (.rfc822Size, [], "RFC822.SIZE", #line),
-            (.rfc822Text, [], "RFC822.TEXT", #line),
-            (.rfc822, [], "RFC822", #line),
-            (.bodyStructure(extensions: false), [], "BODY", #line),
-            (.bodyStructure(extensions: true), [], "BODYSTRUCTURE", #line),
-            (.bodySection(peek: false, .init(kind: .header), nil), [], "BODY[HEADER]", #line),
-            (.bodySection(peek: true, .init(kind: .header), nil), [], "BODY.PEEK[HEADER]", #line),
-            (.binarySize(section: [1]), [.binary], "BINARY.SIZE[1]", #line),
-            (.binary(peek: true, section: [1, 2, 3], partial: nil), [.binary], "BINARY.PEEK[1.2.3]", #line),
-            (.binary(peek: false, section: [3, 4, 5], partial: nil), [.binary], "BINARY[3.4.5]", #line),
-            (.modifierSequenceValue(.zero), [], "0", #line),
-            (.modifierSequenceValue(3), [], "3", #line),
+        let inputs: [(FetchAttribute, EncodingCapabilities, EncodingOptions, String, UInt)] = [
+            (.envelope, [], .default, "ENVELOPE", #line),
+            (.flags, [], .default, "FLAGS", #line),
+            (.uid, [], .default, "UID", #line),
+            (.internalDate, [], .default, "INTERNALDATE", #line),
+            (.rfc822Header, [], .default, "RFC822.HEADER", #line),
+            (.rfc822Size, [], .default, "RFC822.SIZE", #line),
+            (.rfc822Text, [], .default, "RFC822.TEXT", #line),
+            (.rfc822, [], .default, "RFC822", #line),
+            (.bodyStructure(extensions: false), [], .default, "BODY", #line),
+            (.bodyStructure(extensions: true), [], .default, "BODYSTRUCTURE", #line),
+            (.bodySection(peek: false, .init(kind: .header), nil), [], .default, "BODY[HEADER]", #line),
+            (.bodySection(peek: true, .init(kind: .header), nil), [], .default, "BODY.PEEK[HEADER]", #line),
+            (.binarySize(section: [1]), [.binary], .default, "BINARY.SIZE[1]", #line),
+            (.binary(peek: true, section: [1, 2, 3], partial: nil), [.binary], .default, "BINARY.PEEK[1.2.3]", #line),
+            (.binary(peek: false, section: [3, 4, 5], partial: nil), [.binary], .default, "BINARY[3.4.5]", #line),
+            (.modifierSequenceValue(.zero), [], .default, "0", #line),
+            (.modifierSequenceValue(3), [], .default, "3", #line),
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeFetchAttribute($0) })
     }
 
     func testEncodeList() {
-        let inputs: [([FetchAttribute], EncodingCapabilities, String, UInt)] = [
-            ([.envelope], [], "(ENVELOPE)", #line),
-            ([.flags, .internalDate, .rfc822Size], [], "FAST", #line),
-            ([.internalDate, .rfc822Size, .flags], [], "FAST", #line),
-            ([.flags, .internalDate, .rfc822Size, .envelope], [], "ALL", #line),
-            ([.rfc822Size, .flags, .envelope, .internalDate], [], "ALL", #line),
-            ([.flags, .internalDate, .rfc822Size, .envelope, .bodyStructure(extensions: false)], [], "FULL", #line),
-            ([.flags, .bodyStructure(extensions: false), .rfc822Size, .internalDate, .envelope], [], "FULL", #line),
-            ([.flags, .bodyStructure(extensions: true), .rfc822Size, .internalDate, .envelope], [], "(FLAGS BODYSTRUCTURE RFC822.SIZE INTERNALDATE ENVELOPE)", #line),
-            ([.flags, .bodyStructure(extensions: false), .rfc822Size, .internalDate, .envelope, .uid], [], "(FLAGS BODY RFC822.SIZE INTERNALDATE ENVELOPE UID)", #line),
+        let inputs: [([FetchAttribute], EncodingCapabilities, EncodingOptions, String, UInt)] = [
+            ([.envelope], [], .default, "(ENVELOPE)", #line),
+            ([.flags, .internalDate, .rfc822Size], [], .default, "FAST", #line),
+            ([.internalDate, .rfc822Size, .flags], [], .default, "FAST", #line),
+            ([.flags, .internalDate, .rfc822Size, .envelope], [], .default, "ALL", #line),
+            ([.rfc822Size, .flags, .envelope, .internalDate], [], .default, "ALL", #line),
+            ([.flags, .internalDate, .rfc822Size, .envelope, .bodyStructure(extensions: false)], [], .default, "FULL", #line),
+            ([.flags, .bodyStructure(extensions: false), .rfc822Size, .internalDate, .envelope], [], .default, "FULL", #line),
+            ([.flags, .bodyStructure(extensions: true), .rfc822Size, .internalDate, .envelope], [], .default, "(FLAGS BODYSTRUCTURE RFC822.SIZE INTERNALDATE ENVELOPE)", #line),
+            ([.flags, .bodyStructure(extensions: false), .rfc822Size, .internalDate, .envelope, .uid], [], .default, "(FLAGS BODY RFC822.SIZE INTERNALDATE ENVELOPE UID)", #line),
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeFetchAttributeList($0) })
     }
