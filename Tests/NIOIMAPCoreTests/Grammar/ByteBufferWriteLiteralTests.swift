@@ -46,13 +46,13 @@ extension ByteBufferWriteLiteralTests {
 extension ByteBufferWriteLiteralTests {
     func testWriteLiteral() {
         let inputs: [(ByteBuffer, Bool, String, UInt)] = [
-            ("", false, "{0}\r\n", #line),
-            ("abc", true, "{3+}\r\nabc", #line),
+            ("", true, "{0}\r\n", #line),
+            ("abc", false, "{3+}\r\nabc", #line),
         ]
 
-        for (test, nonSyncrhonising, expectedString, line) in inputs {
+        for (test, forceSynchronising, expectedString, line) in inputs {
             self.testBuffer.clear()
-            let size = self.testBuffer.writeLiteral(Array(test.readableBytesView), nonSynchronising: nonSyncrhonising)
+            let size = self.testBuffer.writeLiteral(Array(test.readableBytesView), synchronising: forceSynchronising)
             XCTAssertEqual(size, expectedString.utf8.count, line: line)
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }

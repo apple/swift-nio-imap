@@ -19,8 +19,8 @@ import struct NIO.CircularBuffer
 public struct EncodingOptions: Equatable {
     public static let `default` = EncodingOptions()
 
-    /// Ensures that non-synchronising literals are used at every oppurtunity, as long as the required capabilities are set.
-    public var forceNonSychronisingLiterals: Bool = true
+    /// Ensures that synchronising literals are used at every oppurtunity, even if `LITERAL+` is supported.
+    public var forceSychronisingLiterals: Bool = true
 }
 
 public struct EncodeBuffer {

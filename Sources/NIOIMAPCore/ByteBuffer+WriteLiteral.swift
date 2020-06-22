@@ -36,8 +36,8 @@ extension EncodeBuffer {
         if canUseQuoted {
             return self.writeString("\"") + self.writeBytes(bytes) + self.writeString("\"")
         } else {
-            let nonSynchronising = self.capabilities.contains(.nonSyncrhonizingLiterals) && self.options.forceNonSychronisingLiterals
-            return self.writeLiteral(bytes, nonSynchronising: nonSynchronising)
+            let forceSynchronising = self.options.forceSychronisingLiterals || !self.capabilities.contains(.nonSyncrhonizingLiterals)
+            return self.writeLiteral(bytes, synchronising: forceSynchronising)
         }
     }
 
@@ -46,8 +46,8 @@ extension EncodeBuffer {
         return self.writeBuffer(&buffer)
     }
 
-    @discardableResult mutating func writeLiteral<T: Collection>(_ bytes: T, nonSynchronising: Bool) -> Int where T.Element == UInt8 {
-        let length = nonSynchronising ? "{\(bytes.count)+}\r\n" : "{\(bytes.count)}\r\n"
+    @discardableResult mutating func writeLiteral<T: Collection>(_ bytes: T, synchronising: Bool) -> Int where T.Element == UInt8 {
+        let length = synchronising ? "{\(bytes.count)}\r\n" : "{\(bytes.count)+}\r\n"
         return self.writeString(length) + self.markStopPoint() + self.writeBytes(bytes)
     }
 
