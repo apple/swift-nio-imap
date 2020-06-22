@@ -23,15 +23,12 @@ extension Flag {
             precondition(string.utf8.allSatisfy { (c) -> Bool in
                 c.isAtomChar
             }, "String contains invalid characters")
-            self.rawValue = string.uppercased()
+            self.rawValue = string
         }
 
         fileprivate init(unchecked string: String) {
             assert(string.utf8.allSatisfy { (c) -> Bool in
-                if c.isAlpha {
-                    return c >= UInt8(ascii: "A") && c <= UInt8(ascii: "Z")
-                }
-                return c.isAtomChar
+                c.isAtomChar
             })
             self.rawValue = string
         }

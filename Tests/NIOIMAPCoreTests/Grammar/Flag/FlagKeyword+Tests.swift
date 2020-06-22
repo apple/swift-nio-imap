@@ -23,7 +23,7 @@ class FlagKeyword_Tests: EncodeTestClass {}
 extension FlagKeyword_Tests {
     func testEquatable() {
         let flag1 = Flag.Keyword("flag")
-        let flag2 = Flag.Keyword("FLAG")
+        let flag2 = Flag.Keyword("flag")
         XCTAssertEqual(flag1, flag2)
     }
 }
