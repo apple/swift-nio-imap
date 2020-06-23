@@ -14,9 +14,18 @@
 
 import struct NIO.ByteBuffer
 
+public enum AppendCommand: Equatable {
+    case start(tag: String, appendingTo: MailboxName)
+    case beginMessage(messsage: AppendMessage)
+    case messageBytes(ByteBuffer)
+    case endMessage
+    case finish
+}
+
 public enum CommandStream: Equatable {
     case idleDone
     case command(TaggedCommand)
+    case append(AppendCommand)
     case bytes(ByteBuffer)
 }
 
@@ -30,6 +39,25 @@ extension CommandEncodeBuffer {
         case .bytes(let bytes):
             var copy = bytes
             return self.buffer.writeBuffer(&copy)
+        case .append(let command):
+            return try self.writeAppendCommand(command)
+        }
+    }
+    
+    @discardableResult mutating func writeAppendCommand(_ command: AppendCommand) throws -> Int {
+        switch command {
+        case .start(tag: let tag, appendingTo: let mailbox):
+            return
+                self.buffer.writeString("\(tag) APPEND ") +
+                self.buffer.writeMailbox(mailbox)
+        case .beginMessage(messsage: let messsage):
+            return self.buffer.writeAppendMessage(messsage)
+        case .messageBytes(var bytes):
+            return self.buffer.writeBuffer(&bytes)
+        case .endMessage:
+            return 0
+        case .finish:
+            return self.buffer.writeString("\r\n")
         }
     }
 }

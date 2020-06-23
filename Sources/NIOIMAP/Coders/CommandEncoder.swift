@@ -32,6 +32,8 @@ public struct CommandEncoder: MessageToByteEncoder {
             var encodeBuffer = EncodeBuffer(out, mode: .client, capabilities: self.capabilities)
             try encodeBuffer.writeCommand(command)
             out = encodeBuffer.nextChunk().bytes
+        case .append(let command):
+            fatalError()
         }
     }
 }
