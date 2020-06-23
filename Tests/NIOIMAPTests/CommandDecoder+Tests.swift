@@ -22,34 +22,32 @@ import XCTest
 final class CommandDecoder_Tests: XCTestCase {}
 
 extension CommandDecoder_Tests {
-//    func testConsumeWhenReturningNotEnoughDataRegression() {
-//        let channel = EmbeddedChannel(handler: ByteToMessageHandler(CommandDecoder()), loop: .init())
-//
-//        for feed in ["tag APPEND box (\\Seen) {1+}\r\na\r\n", "t"] {
-//            XCTAssertNoThrow(try channel.writeInbound(self.buffer(feed)), feed)
-//        }
-//
-//        XCTAssertNoThrow(
-//            XCTAssertEqual(
-//                CommandDecoder.PartialCommandStream(
-//                    .command(
-//                        .init(
-//                            tag: "tag",
-//                            command: .append(to: .init("box"), firstMessageMetadata: .init(
-//                                options: .init(flagList: [.seen], extensions: []),
-//                                data: .init(byteCount: 1, needs8BitCleanTransport: false, synchronizing: false)
-//                            ))
-//                        )
-//                    )
-//                ),
-//                try channel.readInbound(as: CommandDecoder.PartialCommandStream.self)
-//            )
-//        )
-//        XCTAssertNoThrow(XCTAssertEqual(CommandDecoder.PartialCommandStream(.bytes(self.buffer("a"))),
-//                                        try channel.readInbound(as: CommandDecoder.PartialCommandStream.self)))
-//        XCTAssertNoThrow(XCTAssertNil(try channel.readInbound(as: CommandDecoder.PartialCommandStream.self)))
-//        XCTAssertNoThrow(XCTAssertTrue(try channel.finish().isClean))
-//    }
+    func testConsumeWhenReturningNotEnoughDataRegression() {
+        let channel = EmbeddedChannel(handler: ByteToMessageHandler(CommandDecoder()), loop: .init())
+
+        for feed in ["tag APPEND box (\\Seen) {1+}\r\na\r\n", "t"] {
+            XCTAssertNoThrow(try channel.writeInbound(self.buffer(feed)), feed)
+        }
+
+        let output: [(CommandStream, UInt)] = [
+            (.append(.start(tag: "tag", appendingTo: .init("box"))), #line),
+            (.append(.beginMessage(messsage: .init(options: .init(flagList: [], extensions: []), data: .init(byteCount: 1, synchronizing: true)))), #line),
+            (.append(.messageBytes("a")), #line),
+            (.append(.endMessage), #line),
+            (.append(.finish), #line),
+        ]
+        
+        for (expected, line) in output {
+            XCTAssertNoThrow(
+                XCTAssertEqual(
+                    try channel.readInbound(as: CommandDecoder.PartialCommandStream.self),
+                    CommandDecoder.PartialCommandStream(expected), line: line
+                ),
+                line: line
+            )
+        }
+        XCTAssertNoThrow(XCTAssertTrue(try channel.finish().isClean))
+    }
 }
 
 extension CommandDecoder_Tests {
