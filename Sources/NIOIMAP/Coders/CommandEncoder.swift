@@ -34,7 +34,7 @@ public struct CommandEncoder: MessageToByteEncoder {
             self.encodeAppendCommand(command, into: &out)
         }
     }
-    
+
     func encodeAppendCommand(_ command: AppendCommand, into buffer: inout ByteBuffer) {
         var encodeBuffer = EncodeBuffer(buffer, mode: .client, capabilities: self.capabilities)
         switch command {

@@ -131,7 +131,7 @@ public struct CommandParser: Parser {
             throw _IncompleteMessage()
         }
     }
-    
+
     private mutating func parseAppendCommand(buffer: inout ByteBuffer, tracker: StackTracker) throws -> AppendCommand {
         fatalError("test")
     }

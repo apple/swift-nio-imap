@@ -36,7 +36,7 @@ extension CommandDecoder_Tests {
             (.append(.endMessage), #line),
             (.append(.finish), #line),
         ]
-        
+
         for (expected, line) in output {
             XCTAssertNoThrow(
                 XCTAssertEqual(

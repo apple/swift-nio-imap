@@ -53,7 +53,7 @@ public struct CommandDecoder: NIOSingleStepByteToMessageDecoder {
         let save = buffer
         do {
             let framingResult = try self.synchronisingLiteralParser.parseContinuationsNecessary(buffer)
-            
+
             var result = PartialCommandStream(numberOfSynchronisingLiterals: framingResult.synchronizingLiteralCount,
                                               command: nil)
             var actuallyVisible = buffer.getSlice(at: buffer.readerIndex, length: framingResult.maximumValidBytes)!
@@ -61,7 +61,7 @@ public struct CommandDecoder: NIOSingleStepByteToMessageDecoder {
                 // We need to discard the bytes we consumed from the real buffer.
                 let consumedBytes = framingResult.maximumValidBytes - actuallyVisible.readableBytes
                 buffer.moveReaderIndex(forwardBy: consumedBytes)
-                
+
                 assert(buffer.writerIndex == save.writerIndex,
                        "the writer index of the buffer moved whilst parsing which is not supported: \(buffer), \(save)")
                 assert(consumedBytes >= 0,

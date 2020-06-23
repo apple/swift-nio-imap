@@ -39,7 +39,7 @@ extension CommandEncodeBuffer {
             return try self.writeAppendCommand(command)
         }
     }
-    
+
     @discardableResult mutating func writeAppendCommand(_ command: AppendCommand) throws -> Int {
         switch command {
         case .start(tag: let tag, appendingTo: let mailbox):
