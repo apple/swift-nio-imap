@@ -24,8 +24,8 @@ public struct CommandEncoder: MessageToByteEncoder {
 
     public func encode(data: CommandStream, out: inout ByteBuffer) throws {
         switch data {
-        case .bytes(let buffer):
-            out = buffer
+//        case .bytes(let buffer):
+//            out = buffer
         case .idleDone:
             out.writeString("DONE\r\n")
         case .command(let command):
@@ -33,7 +33,11 @@ public struct CommandEncoder: MessageToByteEncoder {
             try encodeBuffer.writeCommand(command)
             out = encodeBuffer.nextChunk().bytes
         case .append(let command):
-            fatalError()
+            self.encodeAppendCommand(command, into: &out)
         }
+    }
+    
+    func encodeAppendCommand(_ command: AppendCommand, into buffer: inout ByteBuffer) {
+        
     }
 }

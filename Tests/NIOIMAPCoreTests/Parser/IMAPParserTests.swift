@@ -41,33 +41,33 @@ final class ParserUnitTests: XCTestCase {
 // MARK: - General usage tests
 
 extension ParserUnitTests {
-    func testCommandToStreamToCommand() {
-        // 1 NOOP
-        // 2 APPEND INBOX {10}\r\n01234567890
-        // 3 NOOP
-        var buffer: ByteBuffer = "1 NOOP\r\n2 APPEND INBOX {10}\r\n0123456789\r\n3 NOOP\r\n"
-
-        var parser = CommandParser()
-        do {
-            let c1 = try parser.parseCommandStream(buffer: &buffer)
-            let c2_1 = try parser.parseCommandStream(buffer: &buffer)
-            let c2_2 = try parser.parseCommandStream(buffer: &buffer)
-            let c3 = try parser.parseCommandStream(buffer: &buffer)
-            XCTAssertEqual(buffer.readableBytes, 0)
-            XCTAssertEqual(c1, .command(TaggedCommand(tag: "1", command: .noop)))
-            XCTAssertEqual(
-                c2_1,
-                .command(TaggedCommand(tag: "2", command: .append(
-                    to: .inbox,
-                    firstMessageMetadata: .init(options: .init(flagList: [], internalDate: nil, extensions: []), data: .init(byteCount: 10))
-                )))
-            )
-            XCTAssertEqual(c2_2, .bytes("0123456789"))
-            XCTAssertEqual(c3, .command(TaggedCommand(tag: "3", command: .noop)))
-        } catch {
-            XCTFail("\(error)")
-        }
-    }
+//    func testCommandToStreamToCommand() {
+//        // 1 NOOP
+//        // 2 APPEND INBOX {10}\r\n01234567890
+//        // 3 NOOP
+//        var buffer: ByteBuffer = "1 NOOP\r\n2 APPEND INBOX {10}\r\n0123456789\r\n3 NOOP\r\n"
+//
+//        var parser = CommandParser()
+//        do {
+//            let c1 = try parser.parseCommandStream(buffer: &buffer)
+//            let c2_1 = try parser.parseCommandStream(buffer: &buffer)
+//            let c2_2 = try parser.parseCommandStream(buffer: &buffer)
+//            let c3 = try parser.parseCommandStream(buffer: &buffer)
+//            XCTAssertEqual(buffer.readableBytes, 0)
+//            XCTAssertEqual(c1, .command(TaggedCommand(tag: "1", command: .noop)))
+//            XCTAssertEqual(
+//                c2_1,
+//                .command(TaggedCommand(tag: "2", command: .append(
+//                    to: .inbox,
+//                    firstMessageMetadata: .init(options: .init(flagList: [], internalDate: nil, extensions: []), data: .init(byteCount: 10))
+//                )))
+//            )
+//            XCTAssertEqual(c2_2, .bytes("0123456789"))
+//            XCTAssertEqual(c3, .command(TaggedCommand(tag: "3", command: .noop)))
+//        } catch {
+//            XCTFail("\(error)")
+//        }
+//    }
 
     func testResponseMessageDataStreaming() {
         // first send a greeting

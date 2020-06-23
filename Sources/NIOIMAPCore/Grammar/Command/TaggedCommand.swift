@@ -31,13 +31,7 @@ extension EncodeBuffer {
         var size = 0
         size += self.writeString("\(command.tag) ")
         size += try self.writeCommandType(command.command)
-
-        switch command.command {
-        case .append(to: _, firstMessageMetadata: _):
-            break
-        default:
-            size += self.writeString("\r\n")
-        }
+        size += self.writeString("\r\n")
         return size
     }
 }

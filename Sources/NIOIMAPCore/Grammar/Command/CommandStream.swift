@@ -26,7 +26,7 @@ public enum CommandStream: Equatable {
     case idleDone
     case command(TaggedCommand)
     case append(AppendCommand)
-    case bytes(ByteBuffer)
+//    case bytes(ByteBuffer)
 }
 
 extension CommandEncodeBuffer {
@@ -36,9 +36,9 @@ extension CommandEncodeBuffer {
             return self.buffer.writeString("DONE\r\n")
         case .command(let command):
             return try self.buffer.writeCommand(command)
-        case .bytes(let bytes):
-            var copy = bytes
-            return self.buffer.writeBuffer(&copy)
+//        case .bytes(let bytes):
+//            var copy = bytes
+//            return self.buffer.writeBuffer(&copy)
         case .append(let command):
             return try self.writeAppendCommand(command)
         }

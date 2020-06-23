@@ -18,7 +18,6 @@ public enum Command: Equatable {
     case capability
     case logout
     case noop
-    case append(to: MailboxName, firstMessageMetadata: AppendMessage)
     case create(MailboxName, [CreateParameter])
     case delete(MailboxName)
     case examine(MailboxName, [SelectParameter] = [])
@@ -66,8 +65,6 @@ extension EncodeBuffer {
             return self.writeCommandType_logout()
         case .noop:
             return self.writeCommandType_noop()
-        case .append(let to, let firstMessageMetadata):
-            return self.writeCommandType_append(to: to, firstMessageMetadata: firstMessageMetadata)
         case .create(let mailbox, let params):
             return self.writeCommandType_create(mailbox: mailbox, parameters: params)
         case .delete(let mailbox):

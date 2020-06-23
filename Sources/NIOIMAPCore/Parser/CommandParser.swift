@@ -18,11 +18,12 @@ public struct CommandParser: Parser {
     enum Mode: Equatable {
         case lines
         case idle
-        case streamingAppend(Int)
+        case waitingForMessage
+        case streamingBytes(Int)
         case streamingEnd
 
         var isStreamingAppend: Bool {
-            if case .streamingAppend = self {
+            if case .streamingBytes = self {
                 return true
             } else {
                 return false
@@ -42,8 +43,7 @@ public struct CommandParser: Parser {
     /// - parameter buffer: A `ByteBuffer` that will be consumed for parsing.
     /// - returns: A `CommandStream` that can be sent.
     public mutating func parseCommandStream(buffer: inout ByteBuffer) throws -> CommandStream? {
-        // TODO: SynchronisingLiteralParser should be added here but currently we don't have a place to return
-        // the necessary continuations.
+        // TODO: SynchronisingLiteralParser should be added here, push in from CommandDecoder.
         do {
             return try self.parseCommandStream0(buffer: &buffer, tracker: .makeNewDefaultLimitStackTracker)
         } catch is _IncompleteMessage {
@@ -54,18 +54,6 @@ public struct CommandParser: Parser {
     private mutating func parseCommandStream0(buffer: inout ByteBuffer, tracker: StackTracker) throws -> CommandStream? {
         try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             switch self.mode {
-            case .streamingAppend(let remaining):
-                let bytes = self.parseBytes(buffer: &buffer, remaining: remaining)
-                return .bytes(bytes)
-            case .streamingEnd:
-                try GrammarParser.parseCommandEnd(buffer: &buffer, tracker: tracker)
-                do {
-                    self.mode = .lines
-                    return try self.parseCommandStream0(buffer: &buffer, tracker: tracker)
-                } catch {
-                    self.mode = .streamingEnd
-                    throw error
-                }
             case .idle:
                 try GrammarParser.parseIdleDone(buffer: &buffer, tracker: tracker)
                 self.mode = .lines
@@ -74,19 +62,39 @@ public struct CommandParser: Parser {
                 let save = buffer
                 do {
                     let command = try self.parseCommand(buffer: &buffer, tracker: tracker)
-                    if case .append(to: _, firstMessageMetadata: let firstMetdata) = command.command {
-                        self.mode = .streamingAppend(firstMetdata.data.byteCount)
-                    } else {
-                        try GrammarParser.parseCommandEnd(buffer: &buffer, tracker: tracker)
-                    }
+                    try GrammarParser.parseCommandEnd(buffer: &buffer, tracker: tracker)
                     if case .idleStart = command.command {
                         self.mode = .idle
                     }
                     return .command(command)
                 } catch {
                     buffer = save
-                    throw error
+                    let appendCommand = try GrammarParser.parseAppend(buffer: &buffer, tracker: tracker)
+                    self.mode = .waitingForMessage
+                    return appendCommand
                 }
+            case .waitingForMessage:
+                do {
+                    let message = try GrammarParser.parseAppendMessage(buffer: &buffer, tracker: tracker)
+                    self.mode = .streamingBytes(message.data.byteCount)
+                    return .append(.beginMessage(messsage: message))
+                } catch is ParserError {
+                    var save = buffer
+                    do {
+                        try GrammarParser.parseCommandEnd(buffer: &buffer, tracker: tracker)
+                        self.mode = .lines
+                        return .append(.finish)
+                    } catch {
+                        buffer = save
+                        throw error
+                    }
+                }
+            case .streamingBytes(let remaining):
+                let bytes = self.parseBytes(buffer: &buffer, remaining: remaining)
+                return .append(.messageBytes(bytes))
+            case .streamingEnd:
+                self.mode = .waitingForMessage
+                return .append(.endMessage)
             }
         }
     }
@@ -104,7 +112,7 @@ public struct CommandParser: Parser {
         }
 
         let bytes = buffer.readSlice(length: buffer.readableBytes)!
-        self.mode = .streamingAppend(remaining - bytes.readableBytes)
+        self.mode = .streamingBytes(remaining - bytes.readableBytes)
         return bytes
     }
 
@@ -122,5 +130,9 @@ public struct CommandParser: Parser {
         } catch is ParsingError {
             throw _IncompleteMessage()
         }
+    }
+    
+    private mutating func parseAppendCommand(buffer: inout ByteBuffer, tracker: StackTracker) throws -> AppendCommand {
+        fatalError("test")
     }
 }
