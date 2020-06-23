@@ -62,23 +62,6 @@ public struct CommandDecoder: NIOSingleStepByteToMessageDecoder {
                 let consumedBytes = framingResult.maximumValidBytes - actuallyVisible.readableBytes
                 buffer.moveReaderIndex(forwardBy: consumedBytes)
                 
-                // [X Y Z]  -> .begin("X")
-                // X [Y Z]  -> .end("X")
-                // X Y [Z] -> .begin("Y")
-                // X Y [Z] -> .end("Y")
-                // X Y Z [] -> .realEnd
-                
-                // tag APPEND INBOX {1}\r\n1{1}\r\n2\r\n
-//                CommandStream.append(.start(tag: "tag", appendingTo: .inbox))
-//                CommandStream.append(.beginMessage(messsage: .init(options: .init(flagList: [], extensions: []), data: .init(byteCount: 1))))
-//                CommandStream.append(.messageBytes("1"))
-//                CommandStream.append(.endMessage)
-//                CommandStream.append(.beginMessage(messsage: .init(options: .init(flagList: [], extensions: []), data: .init(byteCount: 1))))
-//                CommandStream.append(.messageBytes("1"))
-//                CommandStream.append(.endMessage)
-//                CommandStream.append(.finish)
-                
-                
                 assert(buffer.writerIndex == save.writerIndex,
                        "the writer index of the buffer moved whilst parsing which is not supported: \(buffer), \(save)")
                 assert(consumedBytes >= 0,
