@@ -45,6 +45,7 @@ final class ParserStressTests: XCTestCase {
         for _ in 0 ..< 20_000 {
             longBuffer.writeString("xxxx")
         }
+        longBuffer.writeString("\r\n") // needed to make it past the sync literal parser
 
         XCTAssertThrowsError(try self.channel.writeInbound(longBuffer)) { _error in
             guard let error = _error as? IMAPDecoderError else {
@@ -63,6 +64,7 @@ final class ParserStressTests: XCTestCase {
         for i in 2 ..< 20_000 {
             longBuffer.writeString("\(i), ")
         }
+        longBuffer.writeString("\r\n") // needed to make it past the sync literal parser
 
         XCTAssertThrowsError(try self.channel.writeInbound(longBuffer)) { _error in
             guard let error = _error as? IMAPDecoderError else {

@@ -69,6 +69,7 @@ public struct CommandParser: Parser {
                     return .command(command)
                 } catch is ParserError {
                     buffer = save
+                    try self.throwIfExceededBufferLimit(&buffer)
                     let appendCommand = try GrammarParser.parseAppend(buffer: &buffer, tracker: tracker)
                     self.mode = .waitingForMessage
                     return appendCommand
@@ -77,12 +78,13 @@ public struct CommandParser: Parser {
                     throw error
                 }
             case .waitingForMessage:
+                try self.throwIfExceededBufferLimit(&buffer)
                 do {
                     let message = try GrammarParser.parseAppendMessage(buffer: &buffer, tracker: tracker)
                     self.mode = .streamingBytes(message.data.byteCount)
                     return .append(.beginMessage(messsage: message))
                 } catch is ParserError {
-                    var save = buffer
+                    let save = buffer
                     do {
                         try GrammarParser.parseCommandEnd(buffer: &buffer, tracker: tracker)
                         self.mode = .lines
