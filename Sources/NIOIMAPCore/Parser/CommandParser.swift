@@ -67,11 +67,14 @@ public struct CommandParser: Parser {
                         self.mode = .idle
                     }
                     return .command(command)
-                } catch {
+                } catch is ParserError {
                     buffer = save
                     let appendCommand = try GrammarParser.parseAppend(buffer: &buffer, tracker: tracker)
                     self.mode = .waitingForMessage
                     return appendCommand
+                } catch {
+                    buffer = save
+                    throw error
                 }
             case .waitingForMessage:
                 do {
