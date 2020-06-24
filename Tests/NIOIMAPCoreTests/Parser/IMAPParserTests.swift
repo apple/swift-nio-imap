@@ -30,9 +30,17 @@ let CRLF = String(decoding: [CR, LF], as: Unicode.UTF8.self)
 final class ParserUnitTests: XCTestCase {
     func iterateTestInputs<T: Equatable>(_ inputs: [(String, String, T, UInt)], testFunction: (inout ByteBuffer, StackTracker) throws -> T) {
         for (input, terminator, expected, line) in inputs {
-            TestUtilities.withBuffer(input, terminator: terminator, line: line) { (buffer) in
+            TestUtilities.withBuffer(input, terminator: terminator, file: magicFile(), line: line) { (buffer) in
                 let testValue = try testFunction(&buffer, .testTracker)
                 XCTAssertEqual(testValue, expected, line: line)
+            }
+        }
+    }
+
+    func iterateInvalidTestInputs<T: Equatable>(_ inputs: [(String, String, UInt)], testFunction: (inout ByteBuffer, StackTracker) throws -> T) {
+        for (input, terminator, line) in inputs {
+            TestUtilities.withBuffer(input, terminator: terminator, shouldRemainUnchanged: true, file: magicFile(), line: line) { (buffer) in
+                XCTAssertThrowsError(try testFunction(&buffer, .testTracker), line: line)
             }
         }
     }
@@ -1997,9 +2005,25 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     func testParsePartial() {
         let inputs: [(String, String, ClosedRange<Int>, UInt)] = [
+            ("<0.1000000000>", " ", 0 ... 999_999_999, #line),
+            ("<0.4294967290>", " ", 0 ... 4_294_967_289, #line),
             ("<1.2>", " ", 1 ... 2, #line),
+            ("<4294967290.2>", " ", 4294967290 ... 4294967291, #line),
         ]
         self.iterateTestInputs(inputs, testFunction: GrammarParser.parsePartial)
+    }
+
+    func testParsePartial_invalid() {
+        let inputs: [(String, String, UInt)] = [
+            ("<0.0>", " ", #line),
+            ("<654.0>", " ", #line),
+            ("<4294967296.2>", " ", #line),
+            ("<4294967294.2>", " ", #line),
+            ("<2.4294967294>", " ", #line),
+            ("<4294967000.4294967000>", " ", #line),
+            ("<2200000000.2200000000>", " ", #line),
+        ]
+        self.iterateInvalidTestInputs(inputs, testFunction: GrammarParser.parsePartial)
     }
 }
 
