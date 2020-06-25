@@ -57,13 +57,13 @@ extension ParserUnitTests {
             let c2_5 = try parser.parseCommandStream(buffer: &buffer)
             let c3 = try parser.parseCommandStream(buffer: &buffer)
             XCTAssertEqual(buffer.readableBytes, 0)
-            XCTAssertEqual(c1, .command(TaggedCommand(tag: "1", command: .noop)))
-            XCTAssertEqual(c2_1, .append(.start(tag: "2", appendingTo: .inbox)))
-            XCTAssertEqual(c2_2, .append(.beginMessage(messsage: .init(options: .init(flagList: [], extensions: []), data: .init(byteCount: 10)))))
-            XCTAssertEqual(c2_3, .append(.messageBytes("0123456789")))
-            XCTAssertEqual(c2_4, .append(.endMessage))
-            XCTAssertEqual(c2_5, .append(.finish))
-            XCTAssertEqual(c3, .command(TaggedCommand(tag: "3", command: .noop)))
+            XCTAssertEqual(c1, PartialCommandStream(.command(TaggedCommand(tag: "1", command: .noop)), numberOfSynchronisingLiterals: 1))
+            XCTAssertEqual(c2_1, PartialCommandStream(.append(.start(tag: "2", appendingTo: .inbox))))
+            XCTAssertEqual(c2_2, PartialCommandStream(.append(.beginMessage(messsage: .init(options: .init(flagList: [], extensions: []), data: .init(byteCount: 10))))))
+            XCTAssertEqual(c2_3, PartialCommandStream(.append(.messageBytes("0123456789"))))
+            XCTAssertEqual(c2_4, PartialCommandStream(.append(.endMessage)))
+            XCTAssertEqual(c2_5, PartialCommandStream(.append(.finish)))
+            XCTAssertEqual(c3, PartialCommandStream(.command(TaggedCommand(tag: "3", command: .noop))))
         } catch {
             XCTFail("\(error)")
         }
@@ -146,20 +146,20 @@ extension ParserUnitTests {
         var parser = CommandParser()
         do {
             let c1 = try parser.parseCommandStream(buffer: &buffer)
-            XCTAssertEqual(c1, .command(TaggedCommand(tag: "1", command: .noop)))
+            XCTAssertEqual(c1, PartialCommandStream(.command(TaggedCommand(tag: "1", command: .noop))))
             XCTAssertEqual(parser.mode, .lines)
 
             let c2_1 = try parser.parseCommandStream(buffer: &buffer)
-            XCTAssertEqual(c2_1, .command(TaggedCommand(tag: "2", command: .idleStart)))
+            XCTAssertEqual(c2_1, PartialCommandStream(.command(TaggedCommand(tag: "2", command: .idleStart))))
             XCTAssertEqual(parser.mode, .idle)
 
             let c2_2 = try parser.parseCommandStream(buffer: &buffer)
-            XCTAssertEqual(c2_2, CommandStream.idleDone)
+            XCTAssertEqual(c2_2, PartialCommandStream(CommandStream.idleDone))
             XCTAssertEqual(parser.mode, .lines)
 
             let c3 = try parser.parseCommandStream(buffer: &buffer)
             XCTAssertEqual(buffer.readableBytes, 0)
-            XCTAssertEqual(c3, .command(TaggedCommand(tag: "3", command: .noop)))
+            XCTAssertEqual(c3, PartialCommandStream(.command(TaggedCommand(tag: "3", command: .noop))))
             XCTAssertEqual(parser.mode, .lines)
         } catch {
             XCTFail("\(error)")

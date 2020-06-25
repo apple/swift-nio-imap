@@ -15,16 +15,16 @@
 import NIO
 import NIOIMAPCore
 
-public struct ResponseDecoder: NIOSingleStepByteToMessageDecoder {
-    public typealias InboundOut = ResponseOrContinueRequest
+struct ResponseDecoder: NIOSingleStepByteToMessageDecoder {
+    typealias InboundOut = ResponseOrContinueRequest
 
     var parser: ResponseParser
 
-    public init(bufferLimit: Int = 1_000, expectGreeting: Bool = true) {
-        self.parser = ResponseParser(bufferLimit: bufferLimit, expectGreeting: expectGreeting)
+    init(expectGreeting: Bool = true) {
+        self.parser = ResponseParser(expectGreeting: expectGreeting)
     }
 
-    public mutating func decode(buffer: inout ByteBuffer) throws -> ResponseOrContinueRequest? {
+    mutating func decode(buffer: inout ByteBuffer) throws -> ResponseOrContinueRequest? {
         let save = buffer
         do {
             return try self.parser.parseResponseStream(buffer: &buffer)
@@ -33,7 +33,7 @@ public struct ResponseDecoder: NIOSingleStepByteToMessageDecoder {
         }
     }
 
-    public mutating func decodeLast(buffer: inout ByteBuffer, seenEOF: Bool) throws -> ResponseOrContinueRequest? {
+    mutating func decodeLast(buffer: inout ByteBuffer, seenEOF: Bool) throws -> ResponseOrContinueRequest? {
         try self.decode(buffer: &buffer)
     }
 }

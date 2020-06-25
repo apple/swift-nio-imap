@@ -16,7 +16,7 @@ import Foundation
 import XCTest
 
 import NIO
-import NIOIMAP
+@testable import NIOIMAP
 import NIOIMAPCore
 import NIOTestUtils
 
@@ -133,7 +133,7 @@ extension B2MV_Tests {
             ]),
         ]
 
-        let input = inoutPairs.map { ($0.0 + CRLF, $0.1.map { CommandDecoder.PartialCommandStream($0) }) }
+        let input = inoutPairs.map { ($0.0 + CRLF, $0.1.map { PartialCommandStream($0) }) }
         do {
             try ByteToMessageDecoderVerifier.verifyDecoder(
                 stringInputOutputPairs: input,
@@ -141,7 +141,7 @@ extension B2MV_Tests {
                     CommandDecoder()
                 }
             )
-        } catch let error as ByteToMessageDecoderVerifier.VerificationError<CommandDecoder.PartialCommandStream> {
+        } catch let error as ByteToMessageDecoderVerifier.VerificationError<PartialCommandStream> {
             for input in error.inputs {
                 print(" input: \(String(decoding: input.readableBytesView, as: Unicode.UTF8.self))")
             }

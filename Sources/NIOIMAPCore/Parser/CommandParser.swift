@@ -14,6 +14,24 @@
 
 import struct NIO.ByteBuffer
 
+public struct PartialCommandStream: Equatable {
+    public var numberOfSynchronisingLiterals: Int
+    public var command: CommandStream?
+
+    internal init(numberOfSynchronisingLiterals: Int, command: CommandStream?) {
+        self.numberOfSynchronisingLiterals = numberOfSynchronisingLiterals
+        self.command = command
+    }
+
+    public init(_ command: CommandStream, numberOfSynchronisingLiterals: Int = 0) {
+        self = .init(numberOfSynchronisingLiterals: numberOfSynchronisingLiterals, command: command)
+    }
+
+    public init(numberOfSynchronisingLiterals: Int) {
+        self = .init(numberOfSynchronisingLiterals: numberOfSynchronisingLiterals, command: nil)
+    }
+}
+
 public struct CommandParser: Parser {
     enum Mode: Equatable {
         case lines
@@ -33,6 +51,7 @@ public struct CommandParser: Parser {
 
     let bufferLimit: Int
     private(set) var mode: Mode = .lines
+    private var synchronisingLiteralParser = SynchronizingLiteralParser()
 
     public init(bufferLimit: Int = 1_000) {
         self.bufferLimit = bufferLimit
@@ -42,11 +61,42 @@ public struct CommandParser: Parser {
     /// Parsing depends on the current mode of the parser.
     /// - parameter buffer: A `ByteBuffer` that will be consumed for parsing.
     /// - returns: A `CommandStream` that can be sent.
-    public mutating func parseCommandStream(buffer: inout ByteBuffer) throws -> CommandStream? {
-        // TODO: SynchronisingLiteralParser should be added here, push in from CommandDecoder.
-        do {
-            return try self.parseCommandStream0(buffer: &buffer, tracker: .makeNewDefaultLimitStackTracker)
-        } catch is _IncompleteMessage {
+    public mutating func parseCommandStream(buffer: inout ByteBuffer) throws -> PartialCommandStream? {
+        let save = buffer
+        let framingResult = try self.synchronisingLiteralParser.parseContinuationsNecessary(buffer)
+        var actuallyVisible = buffer.getSlice(at: buffer.readerIndex, length: framingResult.maximumValidBytes)!
+        
+        func parseCommand() throws -> CommandStream? {
+            do {
+                if let command = try self.parseCommandStream0(buffer: &actuallyVisible, tracker: .makeNewDefaultLimitStackTracker) {
+                    // We need to discard the bytes we consumed from the real buffer.
+                    let consumedBytes = framingResult.maximumValidBytes - actuallyVisible.readableBytes
+                    buffer.moveReaderIndex(forwardBy: consumedBytes)
+
+                    assert(buffer.writerIndex == save.writerIndex,
+                           "the writer index of the buffer moved whilst parsing which is not supported: \(buffer), \(save)")
+                    assert(consumedBytes >= 0,
+                           "allegedly, we consumed a negative amount of bytes: \(consumedBytes)")
+                    self.synchronisingLiteralParser.consumed(consumedBytes)
+                    assert(consumedBytes <= framingResult.maximumValidBytes,
+                           "We consumed \(consumedBytes) which is more than the framing parser thought are maximally " +
+                               "valid: \(framingResult), \(self.synchronisingLiteralParser)")
+                    return command
+                } else {
+                    assert(framingResult.maximumValidBytes == actuallyVisible.readableBytes,
+                           "parser consumed bytes on nil: readableBytes before parse: \(framingResult.maximumValidBytes), buffer: \(actuallyVisible)")
+                    return nil
+                }
+            } catch is _IncompleteMessage {
+                return nil
+            }
+        }
+        
+        if let command = try parseCommand() {
+            return PartialCommandStream(command, numberOfSynchronisingLiterals: framingResult.synchronizingLiteralCount)
+        } else if framingResult.synchronizingLiteralCount > 0 {
+            return PartialCommandStream(numberOfSynchronisingLiterals: framingResult.synchronizingLiteralCount)
+        } else {
             return nil
         }
     }
@@ -69,7 +119,6 @@ public struct CommandParser: Parser {
                     return .command(command)
                 } catch is ParserError {
                     buffer = save
-                    try self.throwIfExceededBufferLimit(&buffer)
                     let appendCommand = try GrammarParser.parseAppend(buffer: &buffer, tracker: tracker)
                     self.mode = .waitingForMessage
                     return appendCommand
@@ -78,7 +127,6 @@ public struct CommandParser: Parser {
                     throw error
                 }
             case .waitingForMessage:
-                try self.throwIfExceededBufferLimit(&buffer)
                 do {
                     let message = try GrammarParser.parseAppendMessage(buffer: &buffer, tracker: tracker)
                     self.mode = .streamingBytes(message.data.byteCount)
@@ -129,7 +177,6 @@ public struct CommandParser: Parser {
     /// - parameter buffer: The consumable buffer to parse.
     /// - returns: A `ClientCommand` if parsing was successful.
     private mutating func parseCommand(buffer: inout ByteBuffer, tracker: StackTracker) throws -> TaggedCommand {
-        try self.throwIfExceededBufferLimit(&buffer)
         do {
             return try GrammarParser.parseCommand(buffer: &buffer, tracker: tracker)
         } catch is ParsingError {

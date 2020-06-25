@@ -38,7 +38,7 @@ public class CommandRoundtripHandler: ChannelOutboundHandler {
         var originalBuffer = self.unwrapOutboundIn(data)
         do {
             var originalBufferCopy = originalBuffer
-            guard let commandStream = try parser.parseCommandStream(buffer: &originalBufferCopy) else {
+            guard let commandStream = try parser.parseCommandStream(buffer: &originalBufferCopy), let command = commandStream.command else {
                 // this is fine because the command is input by the user, so *should* be valid
                 throw CommandRoundtripError.incompleteCommand
             }
@@ -47,7 +47,7 @@ public class CommandRoundtripHandler: ChannelOutboundHandler {
                 buffer: context.channel.allocator.buffer(capacity: originalBuffer.readableBytes),
                 capabilities: self.capabilities
             )
-            try encodeBuffer.writeCommandStream(commandStream)
+            try encodeBuffer.writeCommandStream(command)
             var roundtripBuffer = encodeBuffer.buffer.nextChunk().bytes
 
             if originalBuffer != roundtripBuffer {

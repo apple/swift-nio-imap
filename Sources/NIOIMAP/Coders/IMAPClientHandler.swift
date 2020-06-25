@@ -29,7 +29,7 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
     var capabilities: EncodingCapabilities = []
 
     public init(expectGreeting: Bool) {
-        self.decoder = NIOSingleStepByteToMessageProcessor(ResponseDecoder(expectGreeting: expectGreeting))
+        self.decoder = NIOSingleStepByteToMessageProcessor(ResponseDecoder(expectGreeting: expectGreeting), maximumBufferSize: 1_000)
     }
 
     public func channelRead(context: ChannelHandlerContext, data: NIOAny) {

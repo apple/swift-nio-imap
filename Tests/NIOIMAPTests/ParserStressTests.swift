@@ -28,7 +28,7 @@ final class ParserStressTests: XCTestCase {
 
     override func setUp() {
         XCTAssertNil(self.channel)
-        self.channel = EmbeddedChannel(handler: ByteToMessageHandler(CommandDecoder(bufferLimit: 80_000)))
+        self.channel = EmbeddedChannel(handler: IMAPServerHandler())
     }
 
     override func tearDown() {
@@ -40,19 +40,17 @@ final class ParserStressTests: XCTestCase {
     // Test that we eventually stop parsing a single item
     // e.g. mailbox with name xxxxxxxxxxxxxxxxxx...
     func testArbitraryLongMailboxName() {
-        var longBuffer = self.channel.allocator.buffer(capacity: 90_000)
-        longBuffer.writeString("CREATE \"")
-        for _ in 0 ..< 20_000 {
-            longBuffer.writeString("xxxx")
-        }
-        longBuffer.writeString("\r\n") // needed to make it past the sync literal parser
-
-        XCTAssertThrowsError(try self.channel.writeInbound(longBuffer)) { _error in
-            guard let error = _error as? IMAPDecoderError else {
-                XCTFail("\(_error)")
-                return
-            }
-            XCTAssertEqual(error.parserError as? ParsingError, .lineTooLong)
+        let longBuffer = self.channel.allocator.buffer(repeating: UInt8(ascii: "x"), count: 60 * 1024)
+        XCTAssertNoThrow(try self.channel.writeInbound(self.channel.allocator.buffer(string: "CREATE \"")))
+        
+        XCTAssertThrowsError(
+            try {
+                while true {
+                    try self.channel.writeInbound(longBuffer)
+                }
+            }()
+        ) { error in
+            XCTAssertTrue(error is ByteToMessageDecoderError.PayloadTooLargeError)
         }
     }
 
@@ -64,14 +62,9 @@ final class ParserStressTests: XCTestCase {
         for i in 2 ..< 20_000 {
             longBuffer.writeString("\(i), ")
         }
-        longBuffer.writeString("\r\n") // needed to make it past the sync literal parser
 
-        XCTAssertThrowsError(try self.channel.writeInbound(longBuffer)) { _error in
-            guard let error = _error as? IMAPDecoderError else {
-                XCTFail("\(_error)")
-                return
-            }
-            XCTAssertEqual(error.parserError as? ParsingError, .lineTooLong)
+        XCTAssertThrowsError(try self.channel.writeInbound(longBuffer)) { error in
+            XCTAssertTrue(error is ByteToMessageDecoderError.PayloadTooLargeError)
         }
     }
 
@@ -100,12 +93,22 @@ final class ParserStressTests: XCTestCase {
         var longBuffer = self.channel.allocator.buffer(capacity: 90_000)
         longBuffer.writeString(String(repeating: "X", count: 80_001))
 
-        XCTAssertThrowsError(try self.channel.writeInbound(longBuffer)) { _error in
-            guard let error = _error as? IMAPDecoderError else {
-                XCTFail("\(_error)")
-                return
-            }
-            XCTAssertEqual(error.parserError as? ParsingError, .lineTooLong, "\(error)")
+        XCTAssertThrowsError(try self.channel.writeInbound(longBuffer)) { error in
+            XCTAssertTrue(error is ByteToMessageDecoderError.PayloadTooLargeError)
+        }
+    }
+    
+    func testManyShortCommands() {
+        var longBuffer = self.channel.allocator.buffer(capacity: 80_000)
+        for _ in 1...1_000 {
+            longBuffer.writeString("1 NOOP\r\n")
+        }
+        XCTAssertNoThrow(try self.channel.writeInbound(longBuffer))
+        for _ in 1...1_000 {
+            XCTAssertNoThrow(XCTAssertEqual(
+                                CommandStream.command(.init(tag: "1", command: .noop)),
+                                try self.channel.readInbound(as: CommandStream.self)
+            ))
         }
     }
 }

@@ -40,8 +40,8 @@ extension CommandDecoder_Tests {
         for (expected, line) in output {
             XCTAssertNoThrow(
                 XCTAssertEqual(
-                    try channel.readInbound(as: CommandDecoder.PartialCommandStream.self),
-                    CommandDecoder.PartialCommandStream(expected), line: line
+                    try channel.readInbound(as: PartialCommandStream.self),
+                    PartialCommandStream(expected), line: line
                 ),
                 line: line
             )
