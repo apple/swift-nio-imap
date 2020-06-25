@@ -814,6 +814,24 @@ extension ParserUnitTests {
     }
 }
 
+// MARK: - Parse Continue Request
+
+extension ParserUnitTests {
+    func testContinueRequest_valid() {
+        let inputs: [(String, UInt)] = [
+            ("+ Ready for additional command text\r\n", #line),
+            ("+ \r\n", #line),
+            ("+\r\n", #line), // This is not standard conformant, but we’re allowing this.
+        ]
+
+        for (input, line) in inputs {
+            TestUtilities.withBuffer(input, terminator: " ") { (buffer) in
+                XCTAssertNoThrow(try GrammarParser.parseContinueRequest(buffer: &buffer, tracker: .testTracker), line: line)
+            }
+        }
+    }
+}
+
 // MARK: - copy parseCopy
 
 extension ParserUnitTests {
