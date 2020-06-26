@@ -42,7 +42,7 @@ public final class IMAPServerHandler: ChannelDuplexHandler {
     public var capabilities: EncodingCapabilities = []
 
     public init(continueRequest: ContinueRequest = .responseText(ResponseText(text: "OK"))) {
-        self.decoder = NIOSingleStepByteToMessageProcessor(CommandDecoder())
+        self.decoder = NIOSingleStepByteToMessageProcessor(CommandDecoder(), maximumBufferSize: 1_000)
         self._continueRequest = continueRequest
         let buffer = ByteBufferAllocator().buffer(capacity: 16)
         var encodeBuffer = ResponseEncodeBuffer(buffer: buffer, capabilities: self.capabilities)

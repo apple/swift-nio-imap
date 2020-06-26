@@ -51,12 +51,12 @@ extension GrammarParser {
     }
 
     // append          = "APPEND" SP mailbox 1*append-message
-    static func parseAppend(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Command {
-        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Command in
-            try ParserLibrary.parseFixedString("APPEND ", buffer: &buffer, tracker: tracker)
+    static func parseAppend(buffer: inout ByteBuffer, tracker: StackTracker) throws -> CommandStream {
+        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> CommandStream in
+            let tag = try self.parseTag(buffer: &buffer, tracker: tracker)
+            try ParserLibrary.parseFixedString(" APPEND ", buffer: &buffer, tracker: tracker)
             let mailbox = try self.parseMailbox(buffer: &buffer, tracker: tracker)
-            let firstMessage = try self.parseAppendMessage(buffer: &buffer, tracker: tracker)
-            return .append(to: mailbox, firstMessageMetadata: firstMessage)
+            return .append(.start(tag: tag, appendingTo: mailbox))
         }
     }
 
@@ -651,7 +651,6 @@ extension GrammarParser {
     //                   idle
     static func parseCommandAuth(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Command {
         try ParserLibrary.parseOneOf([
-            self.parseAppend,
             self.parseCreate,
             self.parseDelete,
             self.parseExamine,

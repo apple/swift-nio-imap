@@ -16,7 +16,7 @@ import Foundation
 import XCTest
 
 import NIO
-import NIOIMAP
+@testable import NIOIMAP
 import NIOIMAPCore
 import NIOTestUtils
 
@@ -125,12 +125,15 @@ extension B2MV_Tests {
             // MARK: Append
 
             ("tag APPEND box (\\Seen) {1+}\r\na", [
-                .command(.init(tag: "tag", command: .append(to: .init("box"), firstMessageMetadata: .init(options: .init(flagList: [.seen], extensions: []), data: .init(byteCount: 1, synchronizing: false))))),
-                .bytes("a"),
+                .append(.start(tag: "tag", appendingTo: .init("box"))),
+                .append(.beginMessage(messsage: .init(options: .init(flagList: [.seen], extensions: []), data: .init(byteCount: 1, synchronizing: false)))),
+                .append(.messageBytes("a")),
+                .append(.endMessage),
+                .append(.finish),
             ]),
         ]
 
-        let input = inoutPairs.map { ($0.0 + CRLF, $0.1.map { CommandDecoder.PartialCommandStream($0) }) }
+        let input = inoutPairs.map { ($0.0 + CRLF, $0.1.map { PartialCommandStream($0) }) }
         do {
             try ByteToMessageDecoderVerifier.verifyDecoder(
                 stringInputOutputPairs: input,
@@ -138,7 +141,7 @@ extension B2MV_Tests {
                     CommandDecoder()
                 }
             )
-        } catch let error as ByteToMessageDecoderVerifier.VerificationError<CommandDecoder.PartialCommandStream> {
+        } catch let error as ByteToMessageDecoderVerifier.VerificationError<PartialCommandStream> {
             for input in error.inputs {
                 print(" input: \(String(decoding: input.readableBytesView, as: Unicode.UTF8.self))")
             }

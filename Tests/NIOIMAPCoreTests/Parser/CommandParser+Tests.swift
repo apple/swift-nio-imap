@@ -31,17 +31,3 @@ extension CommandParser_Tests {
         XCTAssertEqual(parser.bufferLimit, 80_000)
     }
 }
-
-// MARK: - throwIfExceededBufferLimit
-
-extension CommandParser_Tests {
-    func testThrowIfExceededBufferLimit() {
-        let parser = CommandParser(bufferLimit: 2)
-        var b1 = "abc" as ByteBuffer
-        var b2 = "ab" as ByteBuffer
-        var b3 = "a" as ByteBuffer
-        XCTAssertThrowsError(try parser.throwIfExceededBufferLimit(&b1))
-        XCTAssertNoThrow(try parser.throwIfExceededBufferLimit(&b2))
-        XCTAssertNoThrow(try parser.throwIfExceededBufferLimit(&b3))
-    }
-}

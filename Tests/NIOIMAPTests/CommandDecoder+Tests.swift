@@ -29,25 +29,23 @@ extension CommandDecoder_Tests {
             XCTAssertNoThrow(try channel.writeInbound(self.buffer(feed)), feed)
         }
 
-        XCTAssertNoThrow(
-            XCTAssertEqual(
-                CommandDecoder.PartialCommandStream(
-                    .command(
-                        .init(
-                            tag: "tag",
-                            command: .append(to: .init("box"), firstMessageMetadata: .init(
-                                options: .init(flagList: [.seen], extensions: []),
-                                data: .init(byteCount: 1, needs8BitCleanTransport: false, synchronizing: false)
-                            ))
-                        )
-                    )
+        let output: [(CommandStream, UInt)] = [
+            (.append(.start(tag: "tag", appendingTo: .init("box"))), #line),
+            (.append(.beginMessage(messsage: .init(options: .init(flagList: [.seen], extensions: []), data: .init(byteCount: 1, synchronizing: false)))), #line),
+            (.append(.messageBytes("a")), #line),
+            (.append(.endMessage), #line),
+            (.append(.finish), #line),
+        ]
+
+        for (expected, line) in output {
+            XCTAssertNoThrow(
+                XCTAssertEqual(
+                    try channel.readInbound(as: PartialCommandStream.self),
+                    PartialCommandStream(expected), line: line
                 ),
-                try channel.readInbound(as: CommandDecoder.PartialCommandStream.self)
+                line: line
             )
-        )
-        XCTAssertNoThrow(XCTAssertEqual(CommandDecoder.PartialCommandStream(.bytes(self.buffer("a"))),
-                                        try channel.readInbound(as: CommandDecoder.PartialCommandStream.self)))
-        XCTAssertNoThrow(XCTAssertNil(try channel.readInbound(as: CommandDecoder.PartialCommandStream.self)))
+        }
         XCTAssertNoThrow(XCTAssertTrue(try channel.finish().isClean))
     }
 }

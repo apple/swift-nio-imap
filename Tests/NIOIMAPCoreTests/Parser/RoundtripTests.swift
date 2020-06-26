@@ -59,9 +59,6 @@ final class RoundtripTests: XCTestCase {
             (.rename(from: .inbox, to: .inbox, params: []), #line),
             (.rename(from: MailboxName("test1"), to: MailboxName("test2"), params: []), #line),
 
-            (.append(to: .inbox, firstMessageMetadata: .init(options: .init(flagList: [.answered], internalDate: nil, extensions: []), data: .init(byteCount: 5))), #line),
-            (.append(to: MailboxName("test1"), firstMessageMetadata: .init(options: .init(flagList: [.answered, .deleted, .draft], internalDate: nil, extensions: []), data: .init(byteCount: 5))), #line),
-
             (.list(nil, reference: .inbox, .pattern(["pattern"]), []), #line),
             (.list(nil, reference: MailboxName("bar"), .pattern(["pattern"]), []), #line),
             (.list(reference: .inbox, .mailbox("pattern")), #line),

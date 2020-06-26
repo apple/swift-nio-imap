@@ -56,7 +56,7 @@ try ServerBootstrap(group: eventLoopGroup).childChannelInitializer { channel -> 
     channel.pipeline.addHandlers([
         InboundPrintHandler(type: "CLIENT (Original)"),
         OutboundPrintHandler(type: "SERVER (Decoded)"),
-        ByteToMessageHandler(CommandDecoder()),
+        IMAPServerHandler(),
         MailClientToProxyHandler(serverHost: serverHost, serverPort: serverPort),
     ])
 }
