@@ -42,7 +42,7 @@ final class ParserStressTests: XCTestCase {
     func testArbitraryLongMailboxName() {
         let longBuffer = self.channel.allocator.buffer(repeating: UInt8(ascii: "x"), count: 60 * 1024)
         XCTAssertNoThrow(try self.channel.writeInbound(self.channel.allocator.buffer(string: "CREATE \"")))
-        
+
         XCTAssertThrowsError(
             try {
                 while true {
@@ -97,17 +97,17 @@ final class ParserStressTests: XCTestCase {
             XCTAssertTrue(error is ByteToMessageDecoderError.PayloadTooLargeError)
         }
     }
-    
+
     func testManyShortCommands() {
         var longBuffer = self.channel.allocator.buffer(capacity: 80_000)
-        for _ in 1...1_000 {
+        for _ in 1 ... 1_000 {
             longBuffer.writeString("1 NOOP\r\n")
         }
         XCTAssertNoThrow(try self.channel.writeInbound(longBuffer))
-        for _ in 1...1_000 {
+        for _ in 1 ... 1_000 {
             XCTAssertNoThrow(XCTAssertEqual(
-                                CommandStream.command(.init(tag: "1", command: .noop)),
-                                try self.channel.readInbound(as: CommandStream.self)
+                CommandStream.command(.init(tag: "1", command: .noop)),
+                try self.channel.readInbound(as: CommandStream.self)
             ))
         }
     }
