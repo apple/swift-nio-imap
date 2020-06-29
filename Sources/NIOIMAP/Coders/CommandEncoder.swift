@@ -20,14 +20,13 @@ enum CommandEncodingError: Error, Equatable {
 }
 
 public class CommandEncoder: MessageToByteEncoder {
-    
     public typealias OutboundIn = CommandStream
 
     enum Mode: Equatable {
         case normal
         case bytes(remaining: Int)
     }
-    
+
     var capabilities: EncodingCapabilities = []
     private var mode = Mode.normal
 
@@ -60,7 +59,7 @@ public class CommandEncoder: MessageToByteEncoder {
             self.handleAppendMessageFinish(into: &buffer)
         }
     }
-    
+
     private func handleAppendStart(into buffer: inout ByteBuffer, tag: String, mailbox: MailboxName) {
         precondition(self.mode == .normal)
         var encodeBuffer = EncodeBuffer(buffer, mode: .client, capabilities: self.capabilities)
@@ -68,7 +67,7 @@ public class CommandEncoder: MessageToByteEncoder {
         encodeBuffer.writeMailbox(mailbox)
         buffer = encodeBuffer.nextChunk().bytes
     }
-    
+
     private func handleAppendBeginMessage(into buffer: inout ByteBuffer, message: AppendMessage) {
         precondition(self.mode == .normal)
         var encodeBuffer = EncodeBuffer(buffer, mode: .client, capabilities: self.capabilities)
@@ -76,17 +75,17 @@ public class CommandEncoder: MessageToByteEncoder {
         self.mode = .bytes(remaining: message.data.byteCount)
         buffer = encodeBuffer.nextChunk().bytes
     }
-    
+
     private func handleAppendBytes(into buffer: inout ByteBuffer, bytes: ByteBuffer) {
         var encodeBuffer = EncodeBuffer(buffer, mode: .client, capabilities: self.capabilities)
-        guard case .bytes(_) = self.mode else {
+        guard case .bytes = self.mode else {
             preconditionFailure("Incorrect mode")
         }
         var bytes = bytes
         encodeBuffer.writeBuffer(&bytes)
         buffer = encodeBuffer.nextChunk().bytes
     }
-    
+
     private func handleAppendEndMessage() throws {
         guard case .bytes(let remaining) = self.mode else {
             preconditionFailure("Incorrect mode")
@@ -96,7 +95,7 @@ public class CommandEncoder: MessageToByteEncoder {
         }
         self.mode = .normal
     }
-    
+
     private func handleAppendMessageFinish(into buffer: inout ByteBuffer) {
         var encodeBuffer = EncodeBuffer(buffer, mode: .client, capabilities: self.capabilities)
         encodeBuffer.writeString("\r\n")
