@@ -191,6 +191,8 @@ extension B2MV_Tests {
             // MARK: Capability
 
             ("* CAPABILITY IMAP4rev1 CHILDREN CONDSTORE", [.untaggedResponse(.capabilityData([.imap4rev1, .children, .condStore]))]),
+            // With trailing space:
+            ("* CAPABILITY IMAP4rev1 CHILDREN CONDSTORE ", [.untaggedResponse(.capabilityData([.imap4rev1, .children, .condStore]))]),
 
             // MARK: LIST
 
