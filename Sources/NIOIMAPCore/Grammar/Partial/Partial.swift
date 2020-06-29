@@ -16,6 +16,6 @@ import struct NIO.ByteBuffer
 
 extension EncodeBuffer {
     @discardableResult mutating func writePartial(_ num: ClosedRange<Int>) -> Int {
-        self.writeString("<\(num.lowerBound).\(num.upperBound)>")
+        self.writeString("<\(num.lowerBound).\(num.count)>")
     }
 }

@@ -733,11 +733,17 @@ extension GrammarParser {
         }
 
         return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> ContinueRequest in
-            try ParserLibrary.parseFixedString("+ ", buffer: &buffer, tracker: tracker)
-            let continueReq = try ParserLibrary.parseOneOf([
-                parseContinueReq_base64,
-                parseContinueReq_responseText,
-            ], buffer: &buffer, tracker: tracker)
+            try ParserLibrary.parseFixedString("+", buffer: &buffer, tracker: tracker)
+            // Allow no space and no additional text after "+":
+            let continueReq: ContinueRequest
+            if try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: ParserLibrary.parseSpace(buffer:tracker:)) != nil {
+                continueReq = try ParserLibrary.parseOneOf([
+                    parseContinueReq_base64,
+                    parseContinueReq_responseText,
+                ], buffer: &buffer, tracker: tracker)
+            } else {
+                continueReq = .responseText(ResponseText(code: nil, text: ""))
+            }
             try ParserLibrary.parseFixedString("\r\n", buffer: &buffer, tracker: tracker)
             return continueReq
         }
@@ -2517,11 +2523,20 @@ extension GrammarParser {
     static func parsePartial(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ClosedRange<Int> {
         try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> ClosedRange<Int> in
             try ParserLibrary.parseFixedString("<", buffer: &buffer, tracker: tracker)
-            let num1 = try self.parseNumber(buffer: &buffer, tracker: tracker)
+            guard let num1 = UInt32(exactly: try self.parseNumber(buffer: &buffer, tracker: tracker)) else {
+                throw ParserError(hint: "Partial range start is invalid.")
+            }
             try ParserLibrary.parseFixedString(".", buffer: &buffer, tracker: tracker)
-            let num2 = try self.parseNZNumber(buffer: &buffer, tracker: tracker)
+            guard let num2 = UInt32(exactly: try self.parseNZNumber(buffer: &buffer, tracker: tracker)) else {
+                throw ParserError(hint: "Partial range count is invalid.")
+            }
+            guard num2 > 0 else { throw ParserError(hint: "Partial range is invalid: <\(num1).\(num2)>.") }
             try ParserLibrary.parseFixedString(">", buffer: &buffer, tracker: tracker)
-            return num1 ... num2
+            let upper1 = num1.addingReportingOverflow(num2)
+            guard !upper1.overflow else { throw ParserError(hint: "Range is invalid: <\(num1).\(num2)>.") }
+            let upper2 = upper1.partialValue.subtractingReportingOverflow(1)
+            guard !upper2.overflow else { throw ParserError(hint: "Range is invalid: <\(num1).\(num2)>.") }
+            return Int(num1) ... Int(upper2.partialValue)
         }
     }
 
