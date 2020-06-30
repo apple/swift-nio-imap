@@ -47,6 +47,7 @@ extension CommandEncodeBuffer {
                 self.buffer.writeString("\(tag) APPEND ") +
                 self.buffer.writeMailbox(mailbox)
         case .beginMessage(messsage: let messsage):
+            defer { self.buffer.markStopPoint() }
             return self.buffer.writeAppendMessage(messsage)
         case .messageBytes(var bytes):
             return self.buffer.writeBuffer(&bytes)
