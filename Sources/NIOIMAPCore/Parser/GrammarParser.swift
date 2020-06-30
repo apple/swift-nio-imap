@@ -71,7 +71,8 @@ extension GrammarParser {
             let synchronising = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
                 try ParserLibrary.parseFixedString("+", buffer: &buffer, tracker: tracker)
             }.map { () in false } ?? true
-            try ParserLibrary.parseFixedString("}\r\n", buffer: &buffer, tracker: tracker)
+            try ParserLibrary.parseFixedString("}", buffer: &buffer, tracker: tracker)
+            try ParserLibrary.parseNewline(buffer: &buffer, tracker: tracker)
             return .init(byteCount: length, needs8BitCleanTransport: needs8BitCleanTransport, synchronizing: synchronising)
         }
     }
@@ -606,7 +607,7 @@ extension GrammarParser {
     }
 
     static func parseCommandEnd(buffer: inout ByteBuffer, tracker: StackTracker) throws {
-        try ParserLibrary.parseFixedString("\r\n", buffer: &buffer, tracker: tracker)
+        try ParserLibrary.parseNewline(buffer: &buffer, tracker: tracker)
     }
 
     // command-any     = "CAPABILITY" / "LOGOUT" / "NOOP" / enable / x-command / id
@@ -744,7 +745,7 @@ extension GrammarParser {
             } else {
                 continueReq = .responseText(ResponseText(code: nil, text: ""))
             }
-            try ParserLibrary.parseFixedString("\r\n", buffer: &buffer, tracker: tracker)
+            try ParserLibrary.parseNewline(buffer: &buffer, tracker: tracker)
             return continueReq
         }
     }
@@ -1437,7 +1438,7 @@ extension GrammarParser {
                 parseGreeting_auth,
                 parseGreeting_bye,
             ], buffer: &buffer, tracker: tracker)
-            try ParserLibrary.parseFixedString("\r\n", buffer: &buffer, tracker: tracker)
+            try ParserLibrary.parseNewline(buffer: &buffer, tracker: tracker)
             return greeting
         }
     }
@@ -1516,7 +1517,8 @@ extension GrammarParser {
     }
 
     static func parseIdleDone(buffer: inout ByteBuffer, tracker: StackTracker) throws {
-        try ParserLibrary.parseFixedString("DONE\r\n", buffer: &buffer, tracker: tracker)
+        try ParserLibrary.parseFixedString("DONE", buffer: &buffer, tracker: tracker)
+        try ParserLibrary.parseNewline(buffer: &buffer, tracker: tracker)
     }
 
     // initial-resp    =  (base64 / "=")
@@ -1691,7 +1693,8 @@ extension GrammarParser {
             }
             try ParserLibrary.parseFixedString("{", buffer: &buffer, tracker: tracker)
             let length = try Self.parseNumber(buffer: &buffer, tracker: tracker)
-            try ParserLibrary.parseFixedString("}\r\n", buffer: &buffer, tracker: tracker)
+            try ParserLibrary.parseFixedString("}", buffer: &buffer, tracker: tracker)
+            try ParserLibrary.parseNewline(buffer: &buffer, tracker: tracker)
             return length
         }
     }
@@ -2168,7 +2171,8 @@ extension GrammarParser {
         }
 
         func parseFetchResponse_finish(buffer: inout ByteBuffer, tracker: StackTracker) throws -> FetchResponse {
-            try ParserLibrary.parseFixedString(")\r\n", buffer: &buffer, tracker: tracker)
+            try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)
+            try ParserLibrary.parseNewline(buffer: &buffer, tracker: tracker)
             return .finish
         }
 
@@ -2635,7 +2639,7 @@ extension GrammarParser {
         try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> ResponseText in
             try ParserLibrary.parseFixedString("* ", buffer: &buffer, tracker: tracker)
             let bye = try self.parseResponseConditionalBye(buffer: &buffer, tracker: tracker)
-            try ParserLibrary.parseFixedString("\r\n", buffer: &buffer, tracker: tracker)
+            try ParserLibrary.parseNewline(buffer: &buffer, tracker: tracker)
             return bye
         }
     }
