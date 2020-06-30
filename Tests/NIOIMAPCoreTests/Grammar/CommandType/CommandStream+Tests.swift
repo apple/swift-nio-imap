@@ -21,7 +21,6 @@ class CommandStream_Tests: EncodeTestClass {}
 // MARK: - Encoding
 
 extension CommandStream_Tests {
-    
     func testEncode() {
         let inputs: [(AppendCommand, String, UInt)] = [
             (.start(tag: "1", appendingTo: .inbox), "1 APPEND \"INBOX\"", #line),
@@ -46,5 +45,4 @@ extension CommandStream_Tests {
             XCTAssertEqual(String(buffer: commandEncodeBuffer.buffer._buffer), expected, line: line)
         }
     }
-    
 }
