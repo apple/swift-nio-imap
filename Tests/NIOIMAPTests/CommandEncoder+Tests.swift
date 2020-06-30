@@ -19,9 +19,9 @@ import NIOTestUtils
 
 import XCTest
 
-final class CommandParser_Tests: XCTestCase {}
+final class CommandEncoder_Tests: XCTestCase {}
 
-extension CommandParser_Tests {
+extension CommandEncoder_Tests {
     func testThrowsIfMissingBytes() {
         let encoder = CommandEncoder()
 
