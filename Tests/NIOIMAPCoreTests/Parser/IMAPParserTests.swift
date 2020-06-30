@@ -1848,6 +1848,10 @@ extension ParserUnitTests {
         buffer = TestUtilities.createTestByteBuffer(for: "\r\n")
         XCTAssertNoThrow(try ParserLibrary.parseNewline(buffer: &buffer, tracker: .testTracker))
         XCTAssertNil(buffer.readInteger(as: UInt8.self))
+
+        buffer = TestUtilities.createTestByteBuffer(for: " \r\nx")
+        XCTAssertNoThrow(try ParserLibrary.parseNewline(buffer: &buffer, tracker: .testTracker))
+        XCTAssertEqual(UInt8(ascii: "x"), buffer.readInteger(as: UInt8.self))
     }
 
     func test_parseNewlineFailure() {
@@ -1868,6 +1872,12 @@ extension ParserUnitTests {
             XCTAssert(error is ParserError)
         }
         XCTAssertEqual(UInt8(ascii: "x"), buffer.readInteger(as: UInt8.self))
+
+        buffer = TestUtilities.createTestByteBuffer(for: " x")
+        XCTAssertThrowsError(try ParserLibrary.parseNewline(buffer: &buffer, tracker: .testTracker)) { error in
+            XCTAssert(error is ParserError)
+        }
+        XCTAssertEqual(UInt8(ascii: " "), buffer.readInteger(as: UInt8.self))
 
         buffer = TestUtilities.createTestByteBuffer(for: "xy")
         XCTAssertThrowsError(try ParserLibrary.parseNewline(buffer: &buffer, tracker: .testTracker)) { error in

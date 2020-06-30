@@ -230,6 +230,12 @@ extension ParserLibrary {
             // other fast path: we find LF + some other byte
             buffer.moveReaderIndex(forwardBy: 1)
             return
+        case .some(let x) where UInt8(x >> 8) == UInt8(ascii: " "):
+            // found a space that we’ll skip. Some servers insert an extra space at the end.
+            try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, _ in
+                buffer.moveReaderIndex(forwardBy: 1)
+                try parseNewline(buffer: &buffer, tracker: tracker)
+            }
         case .none:
             guard let first = buffer.getInteger(at: buffer.readerIndex, as: UInt8.self) else {
                 throw _IncompleteMessage()

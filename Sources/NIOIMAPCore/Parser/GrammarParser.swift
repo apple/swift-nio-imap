@@ -2625,7 +2625,7 @@ extension GrammarParser {
         try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
             try ParserLibrary.parseFixedString("* ", buffer: &buffer, tracker: tracker)
             let payload = try self.parseResponsePayload(buffer: &buffer, tracker: tracker)
-            try ParserLibrary.parseFixedString("\r\n", buffer: &buffer, tracker: tracker)
+            try ParserLibrary.parseNewline(buffer: &buffer, tracker: tracker)
             return payload
         }
     }
