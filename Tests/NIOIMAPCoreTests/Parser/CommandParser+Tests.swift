@@ -31,3 +31,36 @@ extension CommandParser_Tests {
         XCTAssertEqual(parser.bufferLimit, 80_000)
     }
 }
+
+// MARK: - Test normal usage
+
+extension CommandParser_Tests {
+    func testNormalUsage() {
+        var input = ByteBuffer("")
+        var parser = CommandParser()
+
+        XCTAssertNoThrow(XCTAssertNil(try parser.parseCommandStream(buffer: &input)))
+
+        input = "1 NOOP\r\n"
+        XCTAssertNoThrow(
+            XCTAssertEqual(
+                try parser.parseCommandStream(buffer: &input),
+                .init(numberOfSynchronisingLiterals: 0, command: .command(.init(tag: "1", command: .noop)))
+            )
+        )
+        XCTAssertEqual(input, "")
+
+        input = "2 LOGIN {0}\r\n {0}\r\n\r\n"
+        XCTAssertNoThrow(
+            XCTAssertEqual(
+                try parser.parseCommandStream(buffer: &input),
+                .init(numberOfSynchronisingLiterals: 2, command: .command(.init(tag: "2", command: .noop)))
+            )
+        )
+        XCTAssertEqual(input, "")
+
+        input = "3 APPEND INBOX {3+}\r\n123 {3+}\r\n456 {3+}\r\n789\r\n"
+        XCTAssertEqual(try! parser.parseCommandStream(buffer: &input), .init(numberOfSynchronisingLiterals: 0, command: .append(.start(tag: "3", appendingTo: .inbox))))
+        XCTAssertEqual(input, "")
+    }
+}
