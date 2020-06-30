@@ -137,16 +137,76 @@ public indirect enum SearchKey: Equatable {
     case filter(String)
 }
 
+extension SearchKey {
+    fileprivate var count: Int {
+        switch self {
+        case .all,
+             .answered,
+             .bcc,
+             .before,
+             .body,
+             .cc,
+             .deleted,
+             .flagged,
+             .from,
+             .keyword,
+             .new,
+             .old,
+             .on,
+             .recent,
+             .seen,
+             .since,
+             .subject,
+             .text,
+             .to,
+             .unanswered,
+             .undeleted,
+             .unflagged,
+             .unkeyword,
+             .unseen,
+             .draft,
+             .header,
+             .messageSizeLarger,
+             .sentBefore,
+             .sentOn,
+             .sentSince,
+             .messageSizeSmaller,
+             .uid,
+             .undraft,
+             .sequenceNumbers,
+             .older,
+             .younger,
+             .filter:
+            return 1
+        case .not(let inner):
+            return 1 + inner.count
+        case .or(let lhs, let rhs):
+            return lhs.count + rhs.count
+        case .and(let keys):
+            return keys.reduce(into: 0) { $0 += $1.count }
+        }
+    }
+}
+
 // MARK: - IMAP
 
 extension EncodeBuffer {
     @discardableResult mutating func writeSearchKeys(_ keys: [SearchKey]) -> Int {
-        self.writeArray(keys) { (element, self) in
-            self.writeSearchKey(element)
+        writeSearchKey(.and(keys))
+    }
+
+    @discardableResult mutating func writeSearchKey(_ key: SearchKey, encloseInParenthesisIfNeeded: Bool = false) -> Int {
+        let encloseInParenthesis = encloseInParenthesisIfNeeded && key.count > 1
+        if encloseInParenthesis {
+            return writeString("(") +
+                _writeSearchKey(key) +
+                writeString(")")
+        } else {
+            return _writeSearchKey(key)
         }
     }
 
-    @discardableResult mutating func writeSearchKey(_ key: SearchKey) -> Int {
+    fileprivate mutating func _writeSearchKey(_ key: SearchKey) -> Int {
         switch key {
         case .all:
             return self.writeString("ALL")
@@ -249,14 +309,14 @@ extension EncodeBuffer {
         case .not(let key):
             return
                 self.writeString("NOT ") +
-                self.writeSearchKey(key)
+                self.writeSearchKey(key, encloseInParenthesisIfNeeded: true)
 
         case .or(let k1, let k2):
             return
                 self.writeString("OR ") +
-                self.writeSearchKey(k1) +
+                self.writeSearchKey(k1, encloseInParenthesisIfNeeded: true) +
                 self.writeSpace() +
-                self.writeSearchKey(k2)
+                self.writeSearchKey(k2, encloseInParenthesisIfNeeded: true)
 
         case .messageSizeSmaller(let n):
             return self.writeString("SMALLER \(n)")
@@ -269,8 +329,22 @@ extension EncodeBuffer {
         case .sequenceNumbers(let set):
             return self.writeSequenceSet(set)
 
-        case .and(let array):
-            return self.writeSearchKeys(array)
+        case .and(let keys):
+            if keys.count == 0 {
+                return self.writeString("()")
+            } else if keys.count == 1, let key = keys.first {
+                return self.writeSearchKey(key, encloseInParenthesisIfNeeded: true)
+            } else {
+                return keys.enumerated().reduce(0) { (size, row) in
+                    let (i, key) = row
+                    return
+                        size +
+                        self.writeSearchKey(key, encloseInParenthesisIfNeeded: true) +
+                        self.writeIfTrue(i < keys.count - 1) { () -> Int in
+                            self.writeString(" ")
+                        }
+                }
+            }
         case .younger(let seconds):
             return self.writeString("YOUNGER \(seconds)")
         case .older(let seconds):

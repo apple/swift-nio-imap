@@ -61,8 +61,15 @@ extension SearchKeyTests {
             (.sequenceNumbers(SequenceSet(...222)), "1:222", #line),
             (.sequenceNumbers(SequenceSet(222...)), "222:*", #line),
             (.and([]), "()", #line),
-            (.and([.messageSizeSmaller(444), .messageSizeLarger(333)]), "(SMALLER 444 LARGER 333)", #line),
+            (.and([.messageSizeSmaller(444), .messageSizeLarger(333)]), "SMALLER 444 LARGER 333", #line),
             (.filter("name"), "FILTER name", #line),
+
+            (.and([.messageSizeSmaller(444)]), "SMALLER 444", #line),
+            (.not(.and([.messageSizeSmaller(444)])), "NOT SMALLER 444", #line),
+            (.not(.and([.messageSizeSmaller(444), .messageSizeLarger(333)])), "NOT (SMALLER 444 LARGER 333)", #line),
+            (.or(.not(.messageSizeSmaller(444)), .messageSizeLarger(333)), "OR (NOT SMALLER 444) LARGER 333", #line),
+            (.or(.not(.and([.messageSizeSmaller(444), .messageSizeLarger(333)])), .undeleted), "OR (NOT (SMALLER 444 LARGER 333)) UNDELETED", #line),
+            (.and([.or(.messageSizeSmaller(444), .messageSizeLarger(333)), .undeleted]), "(OR SMALLER 444 LARGER 333) UNDELETED", #line),
         ]
 
         for (test, expectedString, line) in inputs {
