@@ -17,10 +17,9 @@ import struct NIO.ByteBufferView
 import struct NIO.CircularBuffer
 
 public struct EncodingOptions: Equatable {
-    
     public struct Options: OptionSet {
         public static let forceSynchronisingLiterals = Options(rawValue: 1 << 0)
-        
+
         public static let `default`: Options = [.forceSynchronisingLiterals]
 
         public var rawValue: Int
@@ -29,11 +28,10 @@ public struct EncodingOptions: Equatable {
             self.rawValue = rawValue
         }
     }
-    
+
     public static let `default` = Self(options: .default)
-    
+
     public var options: Options
-    
 }
 
 public struct EncodeBuffer {

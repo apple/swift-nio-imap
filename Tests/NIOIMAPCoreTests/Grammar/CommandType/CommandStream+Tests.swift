@@ -45,7 +45,7 @@ extension CommandStream_Tests {
             XCTAssertEqual(String(buffer: commandEncodeBuffer.buffer._buffer), expected, line: line)
         }
     }
-    
+
     func testContinuation_synchronizing() throws {
         let parts: [AppendCommand] = [
             .start(tag: "1", appendingTo: .inbox),
@@ -54,12 +54,12 @@ extension CommandStream_Tests {
             .endMessage,
             .finish,
         ]
-        
+
         var buffer = CommandEncodeBuffer(buffer: "", capabilities: [])
         try parts.forEach {
             try buffer.writeAppendCommand($0)
         }
-        
+
         let encodedCommand = buffer.buffer.nextChunk()
         XCTAssertEqual(String(buffer: encodedCommand.bytes), #"1 APPEND "INBOX" {7}\#r\#n"#)
         guard encodedCommand.waitForContinuation else {
@@ -70,7 +70,7 @@ extension CommandStream_Tests {
         XCTAssertEqual(String(buffer: continuation.bytes), "Foo Bar\r\n")
         XCTAssertFalse(continuation.waitForContinuation, "Should not have additional continuations.")
     }
-    
+
     func testContinuation_nonSynchronizing() throws {
         let parts: [AppendCommand] = [
             .start(tag: "1", appendingTo: .inbox),
@@ -79,12 +79,12 @@ extension CommandStream_Tests {
             .endMessage,
             .finish,
         ]
-        
+
         var buffer = CommandEncodeBuffer(buffer: "", capabilities: [.nonSynchronizingLiterals])
         try parts.forEach {
             try buffer.writeAppendCommand($0)
         }
-        
+
         let encodedCommand = buffer.buffer.nextChunk()
         XCTAssertEqual(String(buffer: encodedCommand.bytes), #"1 APPEND "INBOX" {3+}\#r\#nabc\#r\#n"#)
         guard !encodedCommand.waitForContinuation else {
