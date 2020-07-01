@@ -201,12 +201,21 @@ extension ParserLibrary {
 
     static func parseSpace(buffer: inout ByteBuffer, tracker: StackTracker) throws {
         try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, _ in
-            guard let actual = buffer.readString(length: 1) else {
+            
+            // need at least one readable byte
+≈            guard buffer.readableBytes > 0 else { throw _IncompleteMessage() }
+            
+            // we only found spaces, message must therefore be incomplete
+            guard let index = buffer.readableBytesView.firstIndex(where: { $0 != UInt8(ascii: " ") }) else {
                 throw _IncompleteMessage()
             }
-            guard actual == " " else {
-                throw ParserError(hint: "Expected space, found \(actual)")
+            
+            // first character wasn't a space
+            guard index > buffer.readableBytesView.startIndex else {
+                throw ParserError(hint: "Expected space, found \(buffer.readableBytesView[index])")
             }
+            
+            buffer.moveReaderIndex(to: index)
         }
     }
 
