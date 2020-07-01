@@ -16,11 +16,16 @@ import struct NIO.ByteBuffer
 import struct NIO.ByteBufferView
 import struct NIO.CircularBuffer
 
-public struct EncodingOptions: Equatable {
-    public static let `default` = EncodingOptions()
+public struct EncodingOptions: OptionSet {
+    public static let forceSynchronisingLiterals = EncodingOptions(rawValue: 1 << 0)
+    
+    public static let `default`: EncodingOptions = [.forceSynchronisingLiterals]
 
-    /// Ensures that synchronising literals are used at every oppurtunity, even if `LITERAL+` is supported.
-    public var forceSychronisingLiterals: Bool = true
+    public var rawValue: Int
+
+    public init(rawValue: Int) {
+        self.rawValue = rawValue
+    }
 }
 
 public struct EncodeBuffer {
