@@ -91,7 +91,7 @@ extension UInt8 {
 
     var isAtomChar: Bool {
         switch self {
-        case _ where self.isAtomSpecial:
+        case _ where self.isAtomSpecial, _ where self > 0x7f:
             return false
         default:
             return self >= 32
