@@ -73,7 +73,7 @@ extension UInt8 {
 
     var isTextChar: Bool {
         switch self {
-        case _ where self.isCR, _ where isLF, 0:
+        case _ where self.isCR, _ where isLF, _ where self > 0x7f, 0:
             return false
         default:
             return true
