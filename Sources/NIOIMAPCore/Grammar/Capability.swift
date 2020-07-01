@@ -20,6 +20,7 @@ public struct EncodingCapabilities: OptionSet {
     public static let id = EncodingCapabilities(rawValue: 1 << 2)
     public static let binary = EncodingCapabilities(rawValue: 1 << 3)
     public static let listExtended = EncodingCapabilities(rawValue: 1 << 4)
+    public static let nonSynchronizingLiterals = EncodingCapabilities(rawValue: 1 << 5)
 
     public var rawValue: Int
 
@@ -36,6 +37,7 @@ public struct EncodingCapabilities: OptionSet {
             (.namespace, .namespace),
             (.binary, .binary),
             (.listExtended, .listExtended),
+            (.literal(.plus), .nonSynchronizingLiterals),
         ]
         for (strCap, cap) in inputs where capabilities.contains(strCap) {
             self.insert(cap)

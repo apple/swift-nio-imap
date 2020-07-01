@@ -96,7 +96,7 @@ extension UInt8ParseTypeMembershipTests {
     // thanks Johannes
     func testTextChar() {
         let invalid: Set<UInt8> = [UInt8(ascii: "\r"), .init(ascii: "\n"), 0]
-        let valid = self.allChars.subtracting(invalid)
+        let valid = self.allChars.subtracting(invalid).subtracting(128 ... UInt8.max)
         XCTAssertTrue(valid.allSatisfy { $0.isTextChar })
         XCTAssertTrue(invalid.allSatisfy { !$0.isTextChar })
     }

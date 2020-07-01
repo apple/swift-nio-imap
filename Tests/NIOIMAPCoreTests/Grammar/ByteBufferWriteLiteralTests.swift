@@ -22,16 +22,17 @@ class ByteBufferWriteLiteralTests: EncodeTestClass {}
 
 extension ByteBufferWriteLiteralTests {
     func testWriteIMAPString() {
-        let inputs: [(ByteBuffer, EncodingCapabilities, String, UInt)] = [
-            ("", [], "\"\"", #line),
-            ("abc", [], #""abc""#, #line),
-            (ByteBuffer(ByteBufferView(repeating: UInt8(ascii: "\""), count: 1)), [], "{1}\r\n\"", #line),
-            (ByteBuffer(ByteBufferView(repeating: UInt8(ascii: "\\"), count: 1)), [], "{1}\r\n\\", #line),
-            ("\\\"", [], "{2}\r\n\\\"", #line),
-            ("a", [], "\"a\"", #line),
+        let inputs: [(ByteBuffer, EncodingCapabilities, EncodingOptions, String, UInt)] = [
+            ("", [], .default, "\"\"", #line),
+            ("abc", [], .default, #""abc""#, #line),
+            (ByteBuffer(ByteBufferView(repeating: UInt8(ascii: "\""), count: 1)), [], .default, "{1}\r\n\"", #line),
+            (ByteBuffer(ByteBufferView(repeating: UInt8(ascii: "\\"), count: 1)), [], .default, "{1}\r\n\\", #line),
+            ("\\\"", [], .default, "{2}\r\n\\\"", #line),
+            ("a", [], .default, "\"a\"", #line),
             (
                 "01234567890123456789012345678901234567890123456789012345678901234567890",
                 [],
+                .default,
                 "{71}\r\n01234567890123456789012345678901234567890123456789012345678901234567890",
                 #line
             ),
@@ -44,14 +45,14 @@ extension ByteBufferWriteLiteralTests {
 
 extension ByteBufferWriteLiteralTests {
     func testWriteLiteral() {
-        let inputs: [(ByteBuffer, String, UInt)] = [
-            ("", "{0}\r\n", #line),
-            ("abc", "{3}\r\nabc", #line),
+        let inputs: [(ByteBuffer, Bool, String, UInt)] = [
+            ("", true, "{0}\r\n", #line),
+            ("abc", false, "{3+}\r\nabc", #line),
         ]
 
-        for (test, expectedString, line) in inputs {
+        for (test, forceSynchronising, expectedString, line) in inputs {
             self.testBuffer.clear()
-            let size = self.testBuffer.writeLiteral(Array(test.readableBytesView))
+            let size = self.testBuffer.writeLiteral(Array(test.readableBytesView), synchronising: forceSynchronising)
             XCTAssertEqual(size, expectedString.utf8.count, line: line)
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }
@@ -62,9 +63,9 @@ extension ByteBufferWriteLiteralTests {
 
 extension ByteBufferWriteLiteralTests {
     func testWriteLiteral8() {
-        let inputs: [(ByteBuffer, EncodingCapabilities, String, UInt)] = [
-            ("", [.binary], "~{0}\r\n", #line),
-            ("abc", [.binary], "~{3}\r\nabc", #line),
+        let inputs: [(ByteBuffer, EncodingCapabilities, EncodingOptions, String, UInt)] = [
+            ("", [.binary], .default, "~{0}\r\n", #line),
+            ("abc", [.binary], .default, "~{3}\r\nabc", #line),
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeLiteral8($0.readableBytesView) })
     }

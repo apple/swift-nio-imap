@@ -27,6 +27,7 @@ extension Mailbox_Tests {
             (.init(""), "\"\"", #line),
             (.init("box"), "\"box\"", #line),
             (.init("\""), "{1}\r\n\"", #line),
+            (.init(String(bytes: [0x42, 0xC3, 0xA5, 0x64], encoding: .utf8)!), "{4}\r\nBåd", #line),
         ]
 
         for (test, expectedString, line) in inputs {

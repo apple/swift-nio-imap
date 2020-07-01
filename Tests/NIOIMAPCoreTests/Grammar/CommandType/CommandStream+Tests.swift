@@ -45,4 +45,51 @@ extension CommandStream_Tests {
             XCTAssertEqual(String(buffer: commandEncodeBuffer.buffer._buffer), expected, line: line)
         }
     }
+
+    func testContinuation_synchronizing() throws {
+        let parts: [AppendCommand] = [
+            .start(tag: "1", appendingTo: .inbox),
+            .beginMessage(messsage: .init(options: .init(flagList: [], extensions: []), data: .init(byteCount: 7))),
+            .messageBytes("Foo Bar"),
+            .endMessage,
+            .finish,
+        ]
+
+        var buffer = CommandEncodeBuffer(buffer: "", capabilities: [])
+        try parts.forEach {
+            try buffer.writeAppendCommand($0)
+        }
+
+        let encodedCommand = buffer.buffer.nextChunk()
+        XCTAssertEqual(String(buffer: encodedCommand.bytes), #"1 APPEND "INBOX" {7}\#r\#n"#)
+        guard encodedCommand.waitForContinuation else {
+            XCTFail("Should have had a continuation.")
+            return
+        }
+        let continuation = buffer.buffer.nextChunk()
+        XCTAssertEqual(String(buffer: continuation.bytes), "Foo Bar\r\n")
+        XCTAssertFalse(continuation.waitForContinuation, "Should not have additional continuations.")
+    }
+
+    func testContinuation_nonSynchronizing() throws {
+        let parts: [AppendCommand] = [
+            .start(tag: "1", appendingTo: .inbox),
+            .beginMessage(messsage: .init(options: .init(flagList: [], extensions: []), data: .init(byteCount: 3, synchronizing: false))),
+            .messageBytes("abc"),
+            .endMessage,
+            .finish,
+        ]
+
+        var buffer = CommandEncodeBuffer(buffer: "", capabilities: [.nonSynchronizingLiterals])
+        try parts.forEach {
+            try buffer.writeAppendCommand($0)
+        }
+
+        let encodedCommand = buffer.buffer.nextChunk()
+        XCTAssertEqual(String(buffer: encodedCommand.bytes), #"1 APPEND "INBOX" {3+}\#r\#nabc\#r\#n"#)
+        guard !encodedCommand.waitForContinuation else {
+            XCTFail("Should not have had a continuation.")
+            return
+        }
+    }
 }

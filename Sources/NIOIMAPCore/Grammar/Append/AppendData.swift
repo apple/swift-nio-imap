@@ -41,6 +41,10 @@ public struct AppendData: Equatable {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeAppendData(_ data: AppendData) -> Int {
-        self.writeString("\(data.needs8BitCleanTransport ? "~" : ""){\(data.byteCount)\(data.synchronizing ? "" : "+")}\r\n")
+        let size = self.writeString("\(data.needs8BitCleanTransport ? "~" : ""){\(data.byteCount)\(data.synchronizing ? "" : "+")}\r\n")
+        if data.synchronizing {
+            self.markStopPoint()
+        }
+        return size
     }
 }
