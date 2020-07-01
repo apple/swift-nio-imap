@@ -17,21 +17,24 @@ import struct NIO.ByteBufferView
 import struct NIO.CircularBuffer
 
 public struct EncodingOptions: Equatable {
-    public struct Options: OptionSet {
-        public static let forceSynchronisingLiterals = Options(rawValue: 1 << 0)
 
-        public static let `default`: Options = [.forceSynchronisingLiterals]
+    public static let `default` = Self(capabilities: [])
 
-        public var rawValue: Int
-
-        public init(rawValue: Int) {
-            self.rawValue = rawValue
+    private var capabilities: EncodingCapabilities = []
+    
+    public var forceSynchronisingLiterals: Bool {
+        get {
+            !self.capabilities.contains(.nonSynchronizingLiterals)
+        }
+        set {
+            if newValue {
+                self.capabilities.remove(.nonSynchronizingLiterals)
+            } else {
+                self.capabilities.insert(.nonSynchronizingLiterals)
+            }
         }
     }
 
-    public static let `default` = Self(options: .default)
-
-    public var options: Options
 }
 
 public struct EncodeBuffer {
