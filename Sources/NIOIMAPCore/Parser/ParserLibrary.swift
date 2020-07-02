@@ -203,7 +203,7 @@ extension ParserLibrary {
         try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, _ in
             
             // need at least one readable byte
-≈            guard buffer.readableBytes > 0 else { throw _IncompleteMessage() }
+            guard buffer.readableBytes > 0 else { throw _IncompleteMessage() }
             
             // we only found spaces, message must therefore be incomplete
             guard let index = buffer.readableBytesView.firstIndex(where: { $0 != UInt8(ascii: " ") }) else {
