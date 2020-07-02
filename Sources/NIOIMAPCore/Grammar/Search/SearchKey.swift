@@ -299,7 +299,7 @@ extension EncodeBuffer {
         case .header(let field, let value):
             return
                 self.writeString("HEADER ") +
-                self.writeAString(field) +
+                self.writeIMAPString(field) +
                 self.writeSpace() +
                 self.writeIMAPString(value)
 

@@ -29,7 +29,7 @@ extension HeaderListsTests {
     }
 
     func testArray_full() {
-        let expected = "(hello there world)"
+        let expected = "(\"hello\" \"there\" \"world\")"
         let size = self.testBuffer.writeHeaderList(["hello", "there", "world"])
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
