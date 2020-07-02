@@ -1419,6 +1419,7 @@ extension ParserUnitTests {
 }
 
 // MARK: - parseFetchResponse
+
 extension ParserUnitTests {
     func testParseFetchResponse() {
         let inputs: [(String, String, FetchResponse, UInt)] = [
@@ -2831,6 +2832,7 @@ extension ParserUnitTests {
 }
 
 // MARK: - parseTaggedResponse
+
 extension ParserUnitTests {
     func testParseResponse() {
         let inputs: [(String, String, TaggedResponse, UInt)] = [
