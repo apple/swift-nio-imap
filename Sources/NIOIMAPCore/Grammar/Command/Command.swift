@@ -41,7 +41,7 @@ public enum Command: Equatable {
     case copy(SequenceSet, MailboxName)
     case fetch(SequenceSet, [FetchAttribute], [FetchModifier])
     case store(SequenceSet, [StoreModifier], StoreFlags)
-    case search(returnOptions: [SearchReturnOption], program: SearchProgram)
+    case search(key: SearchKey, charset: String? = nil, returnOptions: [SearchReturnOption] = [])
     case move(SequenceSet, MailboxName)
     case id([IDParameter])
     case namespace
@@ -49,7 +49,7 @@ public enum Command: Equatable {
     case uidCopy(UIDSet, MailboxName)
     case uidMove(UIDSet, MailboxName)
     case uidFetch(UIDSet, [FetchAttribute], [FetchModifier])
-    case uidSearch(returnOptions: [SearchReturnOption], program: SearchProgram)
+    case uidSearch(key: SearchKey, charset: String? = nil, returnOptions: [SearchReturnOption] = [])
     case uidStore(UIDSet, [StoreModifier], StoreFlags)
     case uidExpunge(UIDSet)
 }
@@ -119,10 +119,10 @@ extension EncodeBuffer {
             return self.writeCommandType_store(set: set, modifiers: modifiers, flags: flags)
         case .uidStore(let set, let modifiers, let flags):
             return self.writeCommandType_uidStore(set: set, modifiers: modifiers, flags: flags)
-        case .search(let returnOptions, let program):
-            return self.writeCommandType_search(returnOptions: returnOptions, program: program)
-        case .uidSearch(returnOptions: let returnOptions, program: let program):
-            return self.writeCommandType_uidSearch(returnOptions: returnOptions, program: program)
+        case .search(let key, let charset, let returnOptions):
+            return self.writeCommandType_search(key: key, charset: charset, returnOptions: returnOptions)
+        case .uidSearch(let key, let charset, let returnOptions):
+            return self.writeCommandType_uidSearch(key: key, charset: charset, returnOptions: returnOptions)
         case .move(let set, let mailbox):
             return self.writeCommandType_move(set: set, mailbox: mailbox)
         case .uidMove(let set, let mailbox):
@@ -345,18 +345,21 @@ extension EncodeBuffer {
             self.writeStoreAttributeFlags(flags)
     }
 
-    private mutating func writeCommandType_search(returnOptions: [SearchReturnOption], program: SearchProgram) -> Int {
+    private mutating func writeCommandType_search(key: SearchKey, charset: String? = nil, returnOptions: [SearchReturnOption] = []) -> Int {
         self.writeString("SEARCH") +
             self.writeIfExists(returnOptions) { (options) -> Int in
                 self.writeSearchReturnOptions(options)
             } +
             self.writeSpace() +
-            self.writeSearchProgram(program)
+            self.writeIfExists(charset) { (charset) -> Int in
+                self.writeString("CHARSET \(charset) ")
+            } +
+            self.writeSearchKey(key)
     }
 
-    private mutating func writeCommandType_uidSearch(returnOptions: [SearchReturnOption], program: SearchProgram) -> Int {
+    private mutating func writeCommandType_uidSearch(key: SearchKey, charset: String? = nil, returnOptions: [SearchReturnOption] = []) -> Int {
         self.writeString("UID ") +
-            self.writeCommandType_search(returnOptions: returnOptions, program: program)
+        self.writeCommandType_search(key: key, charset: charset, returnOptions: returnOptions)
     }
 
     private mutating func writeCommandType_move(set: SequenceSet, mailbox: MailboxName) -> Int {

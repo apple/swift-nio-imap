@@ -2118,47 +2118,23 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     func testParseSearch() {
         let inputs: [(String, String, Command, UInt)] = [
-            ("SEARCH ALL", "\r", .search(returnOptions: [], program: .init(charset: nil, keys: [.all])), #line),
-            ("SEARCH ALL DELETED FLAGGED", "\r", .search(returnOptions: [], program: .init(charset: nil, keys: [.all, .deleted, .flagged])), #line),
-            ("SEARCH CHARSET UTF-8 ALL", "\r", .search(returnOptions: [], program: .init(charset: "UTF-8", keys: [.all])), #line),
-            ("SEARCH RETURN () ALL", "\r", .search(returnOptions: [], program: .init(charset: nil, keys: [.all])), #line),
-            ("SEARCH RETURN (MIN) ALL", "\r", .search(returnOptions: [.min], program: .init(charset: nil, keys: [.all])), #line),
+//            ("SEARCH ALL", "\r", .search(key: .all), #line),
+//            ("SEARCH ALL DELETED FLAGGED", "\r", .search(key: .and([.all, .deleted, .flagged])), #line),
+//            ("SEARCH CHARSET UTF-8 ALL", "\r", .search(key: .all, charset: "UTF-8"), #line),
+//            ("SEARCH RETURN () ALL", "\r", .search(key: .all), #line),
+//            ("SEARCH RETURN (MIN) ALL", "\r", .search(key: .all, returnOptions: [.min]), #line),
             (
                 #"SEARCH CHARSET UTF-8 (OR FROM "me" FROM "you") (OR NEW UNSEEN)"#,
                 "\r",
-                .search(returnOptions: [], program: .init(charset: "UTF-8", keys: [.and([.or(.from("me"), .from("you"))]), .and([.or(.new, .unseen)])])),
+                .search(key: .and([.or(.from("me"), .from("you")), .or(.new, .unseen)]), charset: "UTF-8"),
                 #line
             ),
-            (
-                #"SEARCH CHARSET UTF-8 OR (FROM "me" FROM "you") (NEW UNSEEN)"#,
-                "\r",
-                .search(returnOptions: [], program: .init(charset: "UTF-8", keys: [.or(.and([.from("me"), .from("you")]), .and([.new, .unseen]))])),
-                #line
-            ),
-            (
-                #"SEARCH CHARSET UTF-8 OR (FROM "me" NEW) (UNSEEN FROM "you")"#,
-                "\r",
-                .search(returnOptions: [], program: .init(charset: "UTF-8", keys: [.or(.and([.from("me"), .new]), .and([.unseen, .from("you")]))])),
-                #line
-            ),
-            (
-                #"SEARCH CHARSET UTF-8 OR (FROM "me" NOT FROM "you") (NOT NEW UNSEEN)"#,
-                "\r",
-                .search(returnOptions: [], program: .init(charset: "UTF-8", keys: [.or(.and([.from("me"), .not(.from("you"))]), .and([.not(.new), .unseen]))])),
-                #line
-            ),
-            (
-                "SEARCH CHARSET UTF-8 NOT (NEW UNSEEN)",
-                "\r",
-                .search(returnOptions: [], program: .init(charset: "UTF-8", keys: [.not(.and([.new, .unseen]))])),
-                #line
-            ),
-            (
-                "SEARCH CHARSET UTF-8 NOT (OR NEW UNSEEN)",
-                "\r",
-                .search(returnOptions: [], program: .init(charset: "UTF-8", keys: [.not(.and([.or(.new, .unseen)]))])),
-                #line
-            ),
+//            (
+//                #"SEARCH RETURN (MIN MAX) CHARSET UTF-8 OR (FROM "me" FROM "you") (NEW UNSEEN)"#,
+//                "\r",
+//                .search(key: .or(.and([.from("me"), .from("you")]), .and([.new, .unseen])), charset: "UTF-8", returnOptions: [.min, .max]),
+//                #line
+//            )
         ]
         self.iterateTestInputs(inputs, testFunction: GrammarParser.parseSearch)
     }
@@ -2229,7 +2205,7 @@ extension ParserUnitTests {
             ("OR LARGER 6 SMALLER 4", "\r", .or(.messageSizeLarger(6), .messageSizeSmaller(4)), #line),
             ("UID 2:4", "\r", .uid(UIDSet(2 ... 4)), #line),
             ("2:4", "\r", .sequenceNumbers(SequenceSet(2 ... 4)), #line),
-            ("(LARGER 1)", "\r", .and([.messageSizeLarger(1)]), #line),
+            ("(LARGER 1)", "\r", .messageSizeLarger(1), #line),
             ("(LARGER 1 SMALLER 5 KEYWORD hello)", "\r", .and([.messageSizeLarger(1), .messageSizeSmaller(5), .keyword(Flag.Keyword("hello"))]), #line),
             ("YOUNGER 34", "\r", .younger(34), #line),
             ("OLDER 45", "\r", .older(45), #line),
@@ -2265,20 +2241,6 @@ extension ParserUnitTests {
             ("()", "", .comp([]), #line),
         ]
         self.iterateTestInputs(inputs, testFunction: GrammarParser.parseSearchModifierParams)
-    }
-}
-
-// MARK: - `search-program` parseSearchProgram
-
-extension ParserUnitTests {
-    func testParseSearchProgram() {
-        let inputs: [(String, String, SearchProgram, UInt)] = [
-            ("ALL", "\r", .init(charset: nil, keys: [.all]), #line),
-            ("ALL ANSWERED DELETED", "\r", .init(charset: nil, keys: [.all, .answered, .deleted]), #line),
-            ("CHARSET UTF8 ALL", "\r", .init(charset: "UTF8", keys: [.all]), #line),
-            ("CHARSET UTF16 ALL ANSWERED DELETED", "\r", .init(charset: "UTF16", keys: [.all, .answered, .deleted]), #line),
-        ]
-        self.iterateTestInputs(inputs, testFunction: GrammarParser.parseSearchProgram)
     }
 }
 
@@ -2901,7 +2863,7 @@ extension ParserUnitTests {
             ("UID EXPUNGE 1", "\r\n", .uidExpunge([1]), #line),
             ("UID COPY 1 Inbox", "\r\n", .uidCopy([1], .inbox), #line),
             ("UID FETCH 1 FLAGS", "\r\n", .uidFetch([1], [.flags], []), #line),
-            ("UID SEARCH CHARSET UTF8 ALL", "\r\n", .uidSearch(returnOptions: [], program: .init(charset: "UTF8", keys: [.all])), #line),
+            ("UID SEARCH CHARSET UTF8 ALL", "\r\n", .uidSearch(key: .all, charset: "UTF8"), #line),
             ("UID STORE 1 +FLAGS (Test)", "\r\n", .uidStore([1], [], .add(silent: false, list: [.keyword(.init("Test"))])), #line),
         ]
         self.iterateTestInputs(inputs, testFunction: GrammarParser.parseUid)

@@ -89,7 +89,10 @@ final class RoundtripTests: XCTestCase {
 
             (.uidStore(.all, [], .add(silent: true, list: [.draft, .deleted, .answered])), #line),
 
-            (.search(returnOptions: [.all], program: .init(charset: nil, keys: [.all])), #line),
+            (.search(key: .all), #line),
+            (.search(key: .or(.deleted, .unseen), charset: "UTF-7"), #line),
+            (.search(key: .or(.deleted, .unseen), charset: "UTF-7", returnOptions: [.min, .max]), #line),
+            (.search(key: .and([.new, .deleted, .unseen]), charset: "UTF-7", returnOptions: [.min, .max]), #line),
         ]
 
         for (i, test) in tests.enumerated() {
