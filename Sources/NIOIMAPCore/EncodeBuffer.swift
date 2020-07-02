@@ -16,42 +16,37 @@ import struct NIO.ByteBuffer
 import struct NIO.ByteBufferView
 import struct NIO.CircularBuffer
 
-public struct EncodingOptions: Equatable {
-    public static let `default` = Self(capabilities: [])
-
-    private var capabilities: EncodingCapabilities = []
-
-    public var forceSynchronisingLiterals: Bool {
-        get {
-            !self.capabilities.contains(.nonSynchronizingLiterals)
-        }
-        set {
-            if newValue {
-                self.capabilities.remove(.nonSynchronizingLiterals)
-            } else {
-                self.capabilities.insert(.nonSynchronizingLiterals)
-            }
-        }
-    }
-}
-
 public struct EncodeBuffer {
     public enum Mode: Equatable {
-        case client
-        case server(streamingAttributes: Bool = false)
+        case client(options: CommandEncodingOptions)
+        case server(streamingAttributes: Bool, options: ResponseEncodingOptions)
     }
 
-    var mode: Mode
-    var capabilities: EncodingCapabilities
-    var options: EncodingOptions
+    internal var mode: Mode
     @usableFromInline internal var _buffer: ByteBuffer
     @usableFromInline internal var _stopPoints: CircularBuffer<Int> = []
 
-    public init(_ buffer: ByteBuffer, mode: Mode, capabilities: EncodingCapabilities, options: EncodingOptions = .default) {
+    public init(_ buffer: ByteBuffer, mode: Mode) {
         self._buffer = buffer
         self.mode = mode
-        self.capabilities = capabilities
-        self.options = options
+    }
+}
+
+extension EncodeBuffer {
+    public static func clientEncodeBuffer(buffer: ByteBuffer, options: CommandEncodingOptions) -> EncodeBuffer {
+        EncodeBuffer(buffer, mode: .client(options: options))
+    }
+
+    public static func clientEncodeBuffer(buffer: ByteBuffer, capabilities: [Capability]) -> EncodeBuffer {
+        clientEncodeBuffer(buffer: buffer, options: CommandEncodingOptions(capabilities: capabilities))
+    }
+
+    public static func serverEncodeBuffer(buffer: ByteBuffer, options: ResponseEncodingOptions) -> EncodeBuffer {
+        EncodeBuffer(buffer, mode: .server(streamingAttributes: false, options: options))
+    }
+
+    public static func serverEncodeBuffer(buffer: ByteBuffer, capabilities: [Capability]) -> EncodeBuffer {
+        serverEncodeBuffer(buffer: buffer, options: ResponseEncodingOptions(capabilities: capabilities))
     }
 }
 
@@ -78,8 +73,8 @@ extension EncodeBuffer {
 
     @discardableResult
     public mutating func markStopPoint() -> Int {
-        if self.mode == .client {
-            self._stopPoints.append(self._buffer.writerIndex)
+        if case .client = mode {
+            _stopPoints.append(_buffer.writerIndex)
         }
         return 0
     }

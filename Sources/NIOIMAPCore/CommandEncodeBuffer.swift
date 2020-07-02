@@ -17,7 +17,23 @@ import struct NIO.ByteBuffer
 public struct CommandEncodeBuffer {
     public var buffer: EncodeBuffer
 
-    public init(buffer: ByteBuffer, capabilities: EncodingCapabilities) {
-        self.buffer = EncodeBuffer(buffer, mode: .client, capabilities: capabilities)
+    public init(buffer: ByteBuffer, options: CommandEncodingOptions) {
+        self.buffer = .clientEncodeBuffer(buffer: buffer, options: options)
+    }
+}
+
+extension CommandEncodeBuffer {
+    public var options: CommandEncodingOptions {
+        get {
+            guard case .client(let options) = buffer.mode else { fatalError() }
+            return options
+        }
+        set {
+            buffer.mode = .client(options: newValue)
+        }
+    }
+
+    public init(buffer: ByteBuffer, capabilities: [Capability]) {
+        self.buffer = .clientEncodeBuffer(buffer: buffer, capabilities: capabilities)
     }
 }

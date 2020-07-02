@@ -17,31 +17,53 @@ import NIO
 import XCTest
 
 class EncodeTestClass: XCTestCase {
-    var testBuffer = EncodeBuffer(ByteBufferAllocator().buffer(capacity: 128), mode: .server(), capabilities: [])
+    var testBuffer: EncodeBuffer!
 
     var testBufferString: String {
-        var remaining = self.testBuffer
+        var remaining: EncodeBuffer = self.testBuffer
         let nextBit = remaining.nextChunk().bytes
         return String(buffer: nextBit)
     }
 
+    var testBufferStrings: [String] {
+        var remaining: EncodeBuffer = self.testBuffer
+        var chunk = remaining.nextChunk()
+        var result: [String] = [String(buffer: chunk.bytes)]
+        while chunk.waitForContinuation {
+            chunk = remaining.nextChunk()
+            result.append(String(buffer: chunk.bytes))
+        }
+        return result
+    }
+
     override func setUp() {
-        self.testBuffer = EncodeBuffer(ByteBufferAllocator().buffer(capacity: 128), mode: .server(), capabilities: [])
+        self.testBuffer = .serverEncodeBuffer(buffer: ByteBufferAllocator().buffer(capacity: 128), capabilities: [])
     }
 
     override func tearDown() {
-        self.testBuffer.capabilities = []
+        self.testBuffer = nil
     }
 
     func iterateInputs<T>(inputs: [(T, String, UInt)], encoder: (T) throws -> Int, file: StaticString = magicFile()) {
-        self.iterateInputs(inputs: inputs.map { ($0.0, [], .default, $0.1, $0.2) }, encoder: encoder, file: file)
+        self.iterateInputs(inputs: inputs.map { ($0.0, ResponseEncodingOptions(), $0.1, $0.2) }, encoder: encoder, file: file)
     }
 
-    func iterateInputs<T>(inputs: [(T, EncodingCapabilities, EncodingOptions, String, UInt)], encoder: (T) throws -> Int, file: StaticString = magicFile()) {
-        for (test, capabilities, options, expectedString, line) in inputs {
-            self.testBuffer.capabilities = capabilities
-            self.testBuffer.options = options
-            self.testBuffer.clear()
+    func iterateInputs<T>(inputs: [(T, CommandEncodingOptions, [String], UInt)], encoder: (T) throws -> Int, file: StaticString = magicFile()) {
+        for (test, options, expectedStrings, line) in inputs {
+            self.testBuffer = EncodeBuffer.clientEncodeBuffer(buffer: ByteBufferAllocator().buffer(capacity: 128), options: options)
+            do {
+                let size = try encoder(test)
+                XCTAssertEqual(size, expectedStrings.reduce(0) { $0 + $1.utf8.count }, file: file, line: line)
+                XCTAssertEqual(self.testBufferStrings, expectedStrings, file: file, line: line)
+            } catch {
+                XCTFail("\(error)", file: file, line: line)
+            }
+        }
+    }
+
+    func iterateInputs<T>(inputs: [(T, ResponseEncodingOptions, String, UInt)], encoder: (T) throws -> Int, file: StaticString = magicFile()) {
+        for (test, options, expectedString, line) in inputs {
+            self.testBuffer = EncodeBuffer.serverEncodeBuffer(buffer: ByteBufferAllocator().buffer(capacity: 128), options: options)
             do {
                 let size = try encoder(test)
                 XCTAssertEqual(size, expectedString.utf8.count, file: file, line: line)
@@ -51,4 +73,23 @@ class EncodeTestClass: XCTestCase {
             }
         }
     }
+}
+
+extension CommandEncodingOptions {
+    static var rfc3501: CommandEncodingOptions { CommandEncodingOptions() }
+    static var literalPlus: CommandEncodingOptions {
+        var o = CommandEncodingOptions()
+        o.useNonSynchronizingLiteral = true
+        return o
+    }
+
+    static var noQuoted: CommandEncodingOptions {
+        var o = CommandEncodingOptions()
+        o.useQuotedString = false
+        return o
+    }
+}
+
+extension ResponseEncodingOptions {
+    static var rfc3501: ResponseEncodingOptions { ResponseEncodingOptions() }
 }

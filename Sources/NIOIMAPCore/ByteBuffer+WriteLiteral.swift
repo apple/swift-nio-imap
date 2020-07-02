@@ -14,11 +14,6 @@
 
 import struct NIO.ByteBuffer
 
-public struct CapabilityError: Error {
-    public var expected: EncodingCapabilities
-    public var provided: EncodingCapabilities
-}
-
 extension EncodeBuffer {
     @discardableResult mutating func writeIMAPString(_ str: String) -> Int {
         self.writeIMAPString(str.utf8)
@@ -29,26 +24,57 @@ extension EncodeBuffer {
     }
 
     fileprivate mutating func writeIMAPString<T: Collection>(_ bytes: T) -> Int where T.Element == UInt8 {
+        switch stringEncoding(for: bytes) {
+        case .quotedString:
+            return writeString("\"") + writeBytes(bytes) + writeString("\"")
+        case .serverLiteral:
+            return writeString("{\(bytes.count)}\r\n") + writeBytes(bytes)
+        case .clientSynchronizingLiteral:
+            return writeString("{\(bytes.count)}\r\n") + markStopPoint() + writeBytes(bytes)
+        case .clientNonSynchronizingLiteral:
+            return writeString("{\(bytes.count)+}\r\n") + writeBytes(bytes)
+        }
+    }
+
+    enum StringEncoding {
+        /// `"foo bar"`
+        case quotedString
+        /// `{7}CRLFfoo bar` (from server to client)
+        case serverLiteral
+        /// `{7}CRLF` + `foo bar`
+        case clientSynchronizingLiteral
+        /// `{7+}CRLFfoo bar`
+        case clientNonSynchronizingLiteral
+    }
+
+    func stringEncoding<T: Collection>(for bytes: T) -> StringEncoding where T.Element == UInt8 {
+        switch mode {
+        case .client(options: let options):
+            if options.useQuotedString, canUseQuotedString(for: bytes) {
+                return .quotedString
+            } else if options.useNonSynchronizingLiteral {
+                return .clientNonSynchronizingLiteral
+            } else {
+                return .clientSynchronizingLiteral
+            }
+        case .server(_, options: let options):
+            if options.useQuotedString, canUseQuotedString(for: bytes) {
+                return .quotedString
+            } else {
+                return .serverLiteral
+            }
+        }
+    }
+
+    func canUseQuotedString<T: Collection>(for bytes: T) -> Bool where T.Element == UInt8 {
         // allSatisfy vs contains because IMO it's a little clearer
         // if more than 70 bytes, always use a literal
-        let canUseQuoted = bytes.count <= 70 && bytes.allSatisfy { $0.isQuotedChar }
-
-        if canUseQuoted {
-            return self.writeString("\"") + self.writeBytes(bytes) + self.writeString("\"")
-        } else {
-            let forceSynchronising = self.options.forceSynchronisingLiterals || !self.capabilities.contains(.nonSynchronizingLiterals)
-            return self.writeLiteral(bytes, synchronising: forceSynchronising)
-        }
+        return bytes.count <= 70 && bytes.allSatisfy { $0.isQuotedChar }
     }
 
     @discardableResult mutating func writeBase64(_ base64: ByteBuffer) -> Int {
         var buffer = base64
         return self.writeBuffer(&buffer)
-    }
-
-    @discardableResult mutating func writeLiteral<T: Collection>(_ bytes: T, synchronising: Bool) -> Int where T.Element == UInt8 {
-        let length = synchronising ? "{\(bytes.count)}\r\n" : "{\(bytes.count)+}\r\n"
-        return self.writeString(length) + self.markStopPoint() + self.writeBytes(bytes)
     }
 
     @discardableResult mutating func writeLiteral8<T: Collection>(_ bytes: T) -> Int where T.Element == UInt8 {
@@ -104,12 +130,5 @@ extension EncodeBuffer {
             return 0
         }
         return try callback(array, &self)
-    }
-
-    @discardableResult func throwIfMissingCapabilites(_ capabilities: EncodingCapabilities, _ closure: () -> Int) throws -> Int {
-        guard self.capabilities.contains(capabilities) else {
-            throw CapabilityError(expected: capabilities, provided: self.capabilities)
-        }
-        return closure()
     }
 }
