@@ -49,7 +49,7 @@ extension SearchKeyTests {
             (.text("some text"), "TEXT \"some text\"", #line),
             (.to("theboss@apple.com"), "TO \"theboss@apple.com\"", #line),
             (.unkeyword(Flag.Keyword("nokeyword")), "UNKEYWORD nokeyword", #line),
-            (.header("header", "value"), "HEADER header \"value\"", #line),
+            (.header("header", "value"), "HEADER \"header\" \"value\"", #line),
             (.messageSizeLarger(333), "LARGER 333", #line),
             (.not(.messageSizeLarger(444)), "NOT LARGER 444", #line),
             (.or(.messageSizeSmaller(444), .messageSizeLarger(666)), "OR SMALLER 444 LARGER 666", #line),
