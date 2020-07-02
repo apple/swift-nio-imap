@@ -1418,6 +1418,19 @@ extension ParserUnitTests {
     }
 }
 
+// MARK: - parseFetchResponse
+extension ParserUnitTests {
+    func testParseFetchResponse() {
+        let inputs: [(String, String, FetchResponse, UInt)] = [
+            ("* 1 FETCH (", " ", .start(1), #line),
+            ("UID 54", " ", .simpleAttribute(.uid(54)), #line),
+            ("RFC822.SIZE 40639", " ", .simpleAttribute(.rfc822Size(40639)), #line),
+            (")\r\n", " ", .finish, #line),
+        ]
+        self.iterateTestInputs(inputs, testFunction: GrammarParser.parseFetchResponse)
+    }
+}
+
 // MARK: - parseHeaderList
 
 extension ParserUnitTests {
@@ -2814,6 +2827,21 @@ extension ParserUnitTests {
         XCTAssertThrowsError(try GrammarParser.parseTag(buffer: &buffer, tracker: .testTracker)) { e in
             XCTAssertTrue(e is ParserError)
         }
+    }
+}
+
+// MARK: - parseTaggedResponse
+extension ParserUnitTests {
+    func testParseResponse() {
+        let inputs: [(String, String, TaggedResponse, UInt)] = [
+            (
+                "15.16 OK Fetch completed (0.001 + 0.000 secs).\r\n",
+                "",
+                .init(tag: "15.16", state: .ok(.init(text: "Fetch completed (0.001 + 0.000 secs)."))),
+                #line
+            ),
+        ]
+        self.iterateTestInputs(inputs, testFunction: GrammarParser.parseTaggedResponse)
     }
 }
 
