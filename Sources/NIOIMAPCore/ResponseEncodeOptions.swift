@@ -14,7 +14,7 @@
 
 public struct ResponseEncodingOptions: Equatable {
     /// Use RFC 3501 _quoted strings_ when possible (and the string is relatively short).
-    var useQuotedString: Bool
+    public var useQuotedString: Bool
 
     /// Create RFC 3501 compliant encoding options, i.e. without any IMAP extensions.
     public init() {

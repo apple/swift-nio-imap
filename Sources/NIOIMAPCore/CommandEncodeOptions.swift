@@ -14,16 +14,16 @@
 
 public struct CommandEncodingOptions: Equatable {
     /// Use RFC 3501 _quoted strings_ when possible (and the string is relatively short).
-    var useQuotedString: Bool
+    public var useQuotedString: Bool
     /// Use the RFC 3501 `{20}` style literals.
-    var useSynchronizingLiteral: Bool
+    public var useSynchronizingLiteral: Bool
     /// Use the `{20+}` style non-synchronizing literals
     /// - SeeAlso: https://tools.ietf.org/html/rfc2088
-    var useNonSynchronizingLiteral: Bool
+    public var useNonSynchronizingLiteral: Bool
     /// Use binary content literals, i.e. `~{20}` style literals as defined in RFC 3516.
     /// - Note: These can only be used in some places, namely `APPEND`.
     /// - SeeAlso: https://tools.ietf.org/html/rfc3516
-    var useBinaryLiteral: Bool
+    public var useBinaryLiteral: Bool
 
     /// Create RFC 3501 compliant encoding options, i.e. without any IMAP extensions.
     public init() {
@@ -35,7 +35,7 @@ public struct CommandEncodingOptions: Equatable {
 }
 
 extension CommandEncodingOptions {
-    init(capabilities: [Capability]) {
+    public init(capabilities: [Capability]) {
         self.init()
         if capabilities.contains(.literal(.plus)) {
             self.useNonSynchronizingLiteral = true
