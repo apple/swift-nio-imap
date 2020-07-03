@@ -3,7 +3,7 @@
 A Swift project that provides an IMAP client and server, built upon SwiftNIO.
 
 ### Introduction and Usage
-`swift-nio-email` is a Swift implementation of the IMAP4rev1 protocol (RFC3501) that can be used to write both mail clients and servers. It is built upon SwiftNIO v2.x. We'll be soon adding an SMTP implementation.
+`swift-nio-imap` is a Swift implementation of the IMAP4rev1 protocol (RFC3501) that can be used to write both mail clients and servers. It is built upon SwiftNIO v2.x. We'll be soon adding an SMTP implementation.
 
 To use the framework `import NIOIMAP`.
 
