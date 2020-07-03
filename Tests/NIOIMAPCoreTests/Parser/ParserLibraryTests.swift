@@ -15,6 +15,7 @@
 @testable import NIOIMAPCore
 
 import XCTest
+import NIO
 
 final class ParserLibraryTests: XCTestCase {}
 
@@ -221,4 +222,22 @@ extension ParserLibraryTests {
             }))
         }
     }
+}
+
+// MARK: - parseSpace
+extension ParserLibraryTests {
+    
+    func testParseSpace() {
+        let inputs: [(ByteBuffer, ByteBuffer, UInt)] = [
+            (" a", "a", #line),
+            ("       a", "a", #line),
+            ("  a  ", "a  ", #line)
+        ]
+        for (string, remaining, line) in inputs {
+            var string = string
+            XCTAssertNoThrow(try ParserLibrary.parseSpace(buffer: &string, tracker: .makeNewDefaultLimitStackTracker), line: line)
+            XCTAssertEqual(string, remaining, line: line)
+        }
+    }
+    
 }
