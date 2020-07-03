@@ -231,13 +231,13 @@ extension ParserUnitTests {
     func testParseAppendData() {
         let inputs: [(String, String, AppendData, UInt)] = [
             ("{123}\r\n", "hello", .init(byteCount: 123), #line),
-            ("~{456}\r\n", "hello", .init(byteCount: 456, needs8BitCleanTransport: true), #line),
+            ("~{456}\r\n", "hello", .init(byteCount: 456, withoutContentTransferEncoding: true), #line),
             ("{0}\r\n", "hello", .init(byteCount: 0), #line),
-            ("~{\(Int.max)}\r\n", "hello", .init(byteCount: .max, needs8BitCleanTransport: true), #line),
-            ("{123+}\r\n", "hello", .init(byteCount: 123, synchronizing: false), #line),
-            ("~{456+}\r\n", "hello", .init(byteCount: 456, needs8BitCleanTransport: true, synchronizing: false), #line),
-            ("{0+}\r\n", "hello", .init(byteCount: 0, synchronizing: false), #line),
-            ("~{\(Int.max)+}\r\n", "hello", .init(byteCount: .max, needs8BitCleanTransport: true, synchronizing: false), #line),
+            ("~{\(Int.max)}\r\n", "hello", .init(byteCount: .max, withoutContentTransferEncoding: true), #line),
+            ("{123+}\r\n", "hello", .init(byteCount: 123), #line),
+            ("~{456+}\r\n", "hello", .init(byteCount: 456, withoutContentTransferEncoding: true), #line),
+            ("{0+}\r\n", "hello", .init(byteCount: 0), #line),
+            ("~{\(Int.max)+}\r\n", "hello", .init(byteCount: .max, withoutContentTransferEncoding: true), #line),
         ]
         self.iterateTestInputs(inputs, testFunction: GrammarParser.parseAppendData)
     }
@@ -319,7 +319,7 @@ extension ParserUnitTests {
             (
                 " (\\Answered) ~{456}\r\n",
                 "test",
-                .init(options: .init(flagList: [.answered], internalDate: nil, extensions: []), data: .init(byteCount: 456, needs8BitCleanTransport: true)),
+                .init(options: .init(flagList: [.answered], internalDate: nil, extensions: []), data: .init(byteCount: 456, withoutContentTransferEncoding: true)),
                 #line
             ),
         ]

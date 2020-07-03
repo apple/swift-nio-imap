@@ -74,7 +74,7 @@ extension CommandStream_Tests {
     func testContinuation_nonSynchronizing() throws {
         let parts: [AppendCommand] = [
             .start(tag: "1", appendingTo: .inbox),
-            .beginMessage(messsage: .init(options: .init(flagList: [], extensions: []), data: .init(byteCount: 3, synchronizing: false))),
+            .beginMessage(messsage: .init(options: .init(flagList: [], extensions: []), data: .init(byteCount: 3))),
             .messageBytes("abc"),
             .endMessage,
             .finish,
