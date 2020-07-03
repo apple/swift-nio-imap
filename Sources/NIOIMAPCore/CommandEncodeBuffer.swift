@@ -25,7 +25,7 @@ public struct CommandEncodeBuffer {
 extension CommandEncodeBuffer {
     public var options: CommandEncodingOptions {
         get {
-            guard case .client(let options) = buffer.mode else { fatalError() }
+            guard case .client(let options) = buffer.mode else { preconditionFailure("Command encoder mode must be 'client'.") }
             return options
         }
         set {
