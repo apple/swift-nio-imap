@@ -172,7 +172,7 @@ extension EncodeBuffer {
     }
 
     private mutating func writeCommandType_list(selectOptions: ListSelectOptions?, mailbox: MailboxName, mailboxPatterns: MailboxPatterns, returnOptions: [ReturnOption]) throws -> Int {
-        try self.writeString("LIST") +
+        self.writeString("LIST") +
             self.writeIfExists(selectOptions) { (options) -> Int in
                 self.writeSpace() +
                     self.writeListSelectOptions(options)
@@ -182,10 +182,8 @@ extension EncodeBuffer {
             self.writeSpace() +
             self.writeMailboxPatterns(mailboxPatterns) +
             self.writeIfArrayHasMinimumSize(array: returnOptions, minimum: 1) { (_, self) in
-                try self.throwIfMissingCapabilites(.listExtended) {
-                    self.writeSpace() +
-                        self.writeListReturnOptions(returnOptions)
-                }
+                self.writeSpace() +
+                    self.writeListReturnOptions(returnOptions)
             }
     }
 

@@ -17,23 +17,14 @@ import struct NIO.ByteBuffer
 public struct AppendData: Equatable {
     public var byteCount: Int
 
-    /// `true` is the client needs to wait for the server to send a _command continuation request_ before sending
-    /// the actual data.
+    /// `true` if the message data is sent without a content transfer encoding, i.e. as binary data, See RFC 3516.
     ///
-    /// `false` is only valid if the server advertised the [`LITERAL+`](https://tools.ietf.org/html/rfc2088)
-    /// capability.
-    public var synchronizing: Bool
+    /// When this is `true` the APPEND command will use the `<literal8>` syntax as defined in RFC 3516.
+    public var withoutContentTransferEncoding: Bool
 
-    /// `true` if the data to follow may contain `\0` bytes.
-    ///
-    /// `true` is only valid if the server advertised the [`BINARY`](https://tools.ietf.org/html/rfc3516)
-    /// capability.
-    public var needs8BitCleanTransport: Bool
-
-    public init(byteCount: Int, needs8BitCleanTransport: Bool = false, synchronizing: Bool = true) {
+    public init(byteCount: Int, withoutContentTransferEncoding: Bool = false) {
         self.byteCount = byteCount
-        self.synchronizing = synchronizing
-        self.needs8BitCleanTransport = needs8BitCleanTransport
+        self.withoutContentTransferEncoding = withoutContentTransferEncoding
     }
 }
 
@@ -41,10 +32,20 @@ public struct AppendData: Equatable {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeAppendData(_ data: AppendData) -> Int {
-        let size = self.writeString("\(data.needs8BitCleanTransport ? "~" : ""){\(data.byteCount)\(data.synchronizing ? "" : "+")}\r\n")
-        if data.synchronizing {
+        guard case .client(let options) = mode else { preconditionFailure("Trying to send command, but not in 'client' mode.") }
+        switch (options.useNonSynchronizingLiteral, data.withoutContentTransferEncoding) {
+        case (true, true):
+            return self.writeString("~{\(data.byteCount)+}\r\n")
+        case (_, true):
+            let size = self.writeString("~{\(data.byteCount)}\r\n")
             self.markStopPoint()
+            return size
+        case (true, _):
+            return self.writeString("{\(data.byteCount)+}\r\n")
+        default:
+            let size = self.writeString("{\(data.byteCount)}\r\n")
+            self.markStopPoint()
+            return size
         }
-        return size
     }
 }

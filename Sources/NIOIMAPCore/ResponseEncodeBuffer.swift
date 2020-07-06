@@ -22,8 +22,14 @@ public struct ResponseEncodeBuffer {
         return encodeBuffer.nextChunk().bytes
     }
 
-    public init(buffer: ByteBuffer, capabilities: EncodingCapabilities) {
-        self.buffer = EncodeBuffer(buffer, mode: .client, capabilities: capabilities)
+    public init(buffer: ByteBuffer, options: ResponseEncodingOptions) {
+        self.buffer = .serverEncodeBuffer(buffer: buffer, options: options)
+    }
+}
+
+extension ResponseEncodeBuffer {
+    public init(buffer: ByteBuffer, capabilities: [Capability]) {
+        self.buffer = .serverEncodeBuffer(buffer: buffer, capabilities: capabilities)
     }
 }
 
@@ -65,17 +71,23 @@ extension ResponseEncodeBuffer {
         case .start(let num):
             return self.buffer.writeString("* \(num) FETCH (")
         case .simpleAttribute(let att):
-            if case .server(streamingAttributes: true) = self.buffer.mode {
+            guard case .server(streamingAttributes: let streamingAttributes, let options) = self.buffer.mode else {
+                preconditionFailure("Only server can write responses.")
+            }
+            if streamingAttributes {
                 return self.buffer.writeSpace() + self.buffer.writeMessageAttribute(att)
             } else {
-                self.buffer.mode = .server(streamingAttributes: true)
+                self.buffer.mode = .server(streamingAttributes: true, options: options)
                 return self.buffer.writeMessageAttribute(att)
             }
         case .streamingBegin(let type, let size):
-            if case .server(streamingAttributes: true) = self.buffer.mode {
+            guard case .server(streamingAttributes: let streamingAttributes, let options) = self.buffer.mode else {
+                preconditionFailure("Only server can write responses.")
+            }
+            if streamingAttributes {
                 return self.buffer.writeSpace() + self.writeStreamingType(type, size: size)
             } else {
-                self.buffer.mode = .server(streamingAttributes: true)
+                self.buffer.mode = .server(streamingAttributes: true, options: options)
                 return self.writeStreamingType(type, size: size)
             }
         case .streamingBytes(var bytes):
@@ -83,7 +95,10 @@ extension ResponseEncodeBuffer {
         case .streamingEnd:
             return 0 // do nothing, this is a "fake" event
         case .finish:
-            self.buffer.mode = .server(streamingAttributes: false)
+            guard case .server(_, let options) = self.buffer.mode else {
+                preconditionFailure("Only server can write responses.")
+            }
+            self.buffer.mode = .server(streamingAttributes: false, options: options)
             return self.buffer.writeString(")\r\n")
         }
     }

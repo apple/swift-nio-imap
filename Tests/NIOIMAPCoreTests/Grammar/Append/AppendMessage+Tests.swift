@@ -20,16 +20,14 @@ class AppendMessage_Tests: EncodeTestClass {}
 
 extension AppendMessage_Tests {
     func testEncode() {
-        let inputs: [(AppendMessage, String, UInt)] = [
-            (.init(options: .init(flagList: [], internalDate: nil, extensions: []), data: .init(byteCount: 123)), " {123}\r\n", #line),
-            (.init(options: .init(flagList: [], internalDate: nil, extensions: []), data: .init(byteCount: 456)), " {456}\r\n", #line),
+        let inputs: [(AppendMessage, CommandEncodingOptions, [String], UInt)] = [
+            (.init(options: .init(flagList: [], internalDate: nil, extensions: []), data: .init(byteCount: 123)), .rfc3501, [" {123}\r\n"], #line),
+            (.init(options: .init(flagList: [.draft, .flagged], internalDate: nil, extensions: []), data: .init(byteCount: 123)), .rfc3501, [" (\\Draft \\Flagged) {123}\r\n"], #line),
+            (.init(options: .init(flagList: [.draft, .flagged], internalDate: InternalDate(year: 2020, month: 7, day: 2, hour: 13, minute: 42, second: 52, zoneMinutes: 60), extensions: []), data: .init(byteCount: 123)), .rfc3501, [" (\\Draft \\Flagged) \"2-jul-2020 13:42:52 +0100\" {123}\r\n"], #line),
+            (.init(options: .init(flagList: [], internalDate: InternalDate(year: 2020, month: 7, day: 2, hour: 13, minute: 42, second: 52, zoneMinutes: 60), extensions: []), data: .init(byteCount: 456)), .literalPlus, [" \"2-jul-2020 13:42:52 +0100\" {456+}\r\n"], #line),
+            (.init(options: .init(flagList: [], internalDate: nil, extensions: []), data: .init(byteCount: 456)), .literalPlus, [" {456+}\r\n"], #line),
         ]
 
-        for (test, expectedString, line) in inputs {
-            self.testBuffer.clear()
-            let size = self.testBuffer.writeAppendMessage(test)
-            XCTAssertEqual(size, expectedString.utf8.count, line: line)
-            XCTAssertEqual(self.testBufferString, expectedString, line: line)
-        }
+        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeAppendMessage($0) })
     }
 }

@@ -27,7 +27,7 @@ public class CommandEncoder: MessageToByteEncoder {
         case bytes(remaining: Int)
     }
 
-    var capabilities: EncodingCapabilities = []
+    var capabilities: [Capability] = []
     private var mode = Mode.normal
 
     public init() {}
@@ -37,7 +37,7 @@ public class CommandEncoder: MessageToByteEncoder {
         case .idleDone:
             out.writeString("DONE\r\n")
         case .command(let command):
-            var encodeBuffer = EncodeBuffer(out, mode: .client, capabilities: self.capabilities)
+            var encodeBuffer = EncodeBuffer.clientEncodeBuffer(buffer: out, capabilities: self.capabilities)
             try encodeBuffer.writeCommand(command)
             out = encodeBuffer.nextChunk().bytes
         case .append(let command):
@@ -62,7 +62,7 @@ public class CommandEncoder: MessageToByteEncoder {
 
     private func handleAppendStart(into buffer: inout ByteBuffer, tag: String, mailbox: MailboxName) {
         precondition(self.mode == .normal)
-        var encodeBuffer = EncodeBuffer(buffer, mode: .client, capabilities: self.capabilities)
+        var encodeBuffer = EncodeBuffer.clientEncodeBuffer(buffer: buffer, capabilities: self.capabilities)
         encodeBuffer.writeString("\(tag) APPEND ")
         encodeBuffer.writeMailbox(mailbox)
         buffer = encodeBuffer.nextChunk().bytes
@@ -70,14 +70,14 @@ public class CommandEncoder: MessageToByteEncoder {
 
     private func handleAppendBeginMessage(into buffer: inout ByteBuffer, message: AppendMessage) {
         precondition(self.mode == .normal)
-        var encodeBuffer = EncodeBuffer(buffer, mode: .client, capabilities: self.capabilities)
+        var encodeBuffer = EncodeBuffer.clientEncodeBuffer(buffer: buffer, capabilities: self.capabilities)
         encodeBuffer.writeAppendMessage(message)
         self.mode = .bytes(remaining: message.data.byteCount)
         buffer = encodeBuffer.nextChunk().bytes
     }
 
     private func handleAppendBytes(into buffer: inout ByteBuffer, bytes: ByteBuffer) {
-        var encodeBuffer = EncodeBuffer(buffer, mode: .client, capabilities: self.capabilities)
+        var encodeBuffer = EncodeBuffer.clientEncodeBuffer(buffer: buffer, capabilities: self.capabilities)
         guard case .bytes = self.mode else {
             preconditionFailure("Incorrect mode")
         }
@@ -97,7 +97,7 @@ public class CommandEncoder: MessageToByteEncoder {
     }
 
     private func handleAppendMessageFinish(into buffer: inout ByteBuffer) {
-        var encodeBuffer = EncodeBuffer(buffer, mode: .client, capabilities: self.capabilities)
+        var encodeBuffer = EncodeBuffer.clientEncodeBuffer(buffer: buffer, capabilities: self.capabilities)
         encodeBuffer.writeString("\r\n")
         buffer = encodeBuffer.nextChunk().bytes
     }

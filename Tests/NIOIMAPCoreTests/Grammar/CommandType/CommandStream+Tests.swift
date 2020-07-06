@@ -74,13 +74,15 @@ extension CommandStream_Tests {
     func testContinuation_nonSynchronizing() throws {
         let parts: [AppendCommand] = [
             .start(tag: "1", appendingTo: .inbox),
-            .beginMessage(messsage: .init(options: .init(flagList: [], extensions: []), data: .init(byteCount: 3, synchronizing: false))),
+            .beginMessage(messsage: .init(options: .init(flagList: [], extensions: []), data: .init(byteCount: 3))),
             .messageBytes("abc"),
             .endMessage,
             .finish,
         ]
 
-        var buffer = CommandEncodeBuffer(buffer: "", capabilities: [.nonSynchronizingLiterals])
+        var options = CommandEncodingOptions()
+        options.useNonSynchronizingLiteral = true
+        var buffer = CommandEncodeBuffer(buffer: "", options: options)
         try parts.forEach {
             try buffer.writeAppendCommand($0)
         }

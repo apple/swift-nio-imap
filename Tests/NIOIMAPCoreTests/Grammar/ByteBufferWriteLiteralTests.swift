@@ -21,18 +21,41 @@ class ByteBufferWriteLiteralTests: EncodeTestClass {}
 // MARK: writeIMAPString
 
 extension ByteBufferWriteLiteralTests {
-    func testWriteIMAPString() {
-        let inputs: [(ByteBuffer, EncodingCapabilities, EncodingOptions, String, UInt)] = [
-            ("", [], .default, "\"\"", #line),
-            ("abc", [], .default, #""abc""#, #line),
-            (ByteBuffer(ByteBufferView(repeating: UInt8(ascii: "\""), count: 1)), [], .default, "{1}\r\n\"", #line),
-            (ByteBuffer(ByteBufferView(repeating: UInt8(ascii: "\\"), count: 1)), [], .default, "{1}\r\n\\", #line),
-            ("\\\"", [], .default, "{2}\r\n\\\"", #line),
-            ("a", [], .default, "\"a\"", #line),
+    func testWriteIMAPString_client() {
+        let inputs: [(ByteBuffer, CommandEncodingOptions, [String], UInt)] = [
+            ("", .rfc3501, ["\"\""], #line),
+            ("", .noQuoted, ["{0}\r\n"], #line),
+            ("abc", .rfc3501, [#""abc""#], #line),
+            (ByteBuffer(ByteBufferView(repeating: UInt8(ascii: "\""), count: 1)), .rfc3501, ["{1}\r\n", "\""], #line),
+            (ByteBuffer(ByteBufferView(repeating: UInt8(ascii: "\\"), count: 1)), .rfc3501, ["{1}\r\n", "\\"], #line),
+            (ByteBuffer(ByteBufferView(repeating: UInt8(ascii: "\\"), count: 1)), .literalPlus, ["{1+}\r\n\\"], #line),
+            ("\\\"", .rfc3501, ["{2}\r\n", "\\\""], #line),
+            ("a", .rfc3501, ["\"a\""], #line),
+            ("båd", .literalPlus, ["{4+}\r\nbåd"], #line),
+            ("パリ", .literalPlus, ["{6+}\r\nパリ"], #line),
             (
                 "01234567890123456789012345678901234567890123456789012345678901234567890",
-                [],
-                .default,
+                .rfc3501,
+                ["{71}\r\n", "01234567890123456789012345678901234567890123456789012345678901234567890"],
+                #line
+            ),
+        ]
+        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeIMAPString($0) })
+    }
+
+    func testWriteIMAPString_server() {
+        let inputs: [(ByteBuffer, ResponseEncodingOptions, String, UInt)] = [
+            ("", .rfc3501, "\"\"", #line),
+            ("abc", .rfc3501, #""abc""#, #line),
+            (ByteBuffer(ByteBufferView(repeating: UInt8(ascii: "\""), count: 1)), .rfc3501, "{1}\r\n\"", #line),
+            (ByteBuffer(ByteBufferView(repeating: UInt8(ascii: "\\"), count: 1)), .rfc3501, "{1}\r\n\\", #line),
+            ("\\\"", .rfc3501, "{2}\r\n\\\"", #line),
+            ("a", .rfc3501, "\"a\"", #line),
+            ("båd", .rfc3501, "{4}\r\nbåd", #line),
+            ("パリ", .rfc3501, "{6}\r\nパリ", #line),
+            (
+                "01234567890123456789012345678901234567890123456789012345678901234567890",
+                .rfc3501,
                 "{71}\r\n01234567890123456789012345678901234567890123456789012345678901234567890",
                 #line
             ),
@@ -41,31 +64,13 @@ extension ByteBufferWriteLiteralTests {
     }
 }
 
-// MARK: writeLiteral
-
-extension ByteBufferWriteLiteralTests {
-    func testWriteLiteral() {
-        let inputs: [(ByteBuffer, Bool, String, UInt)] = [
-            ("", true, "{0}\r\n", #line),
-            ("abc", false, "{3+}\r\nabc", #line),
-        ]
-
-        for (test, forceSynchronising, expectedString, line) in inputs {
-            self.testBuffer.clear()
-            let size = self.testBuffer.writeLiteral(Array(test.readableBytesView), synchronising: forceSynchronising)
-            XCTAssertEqual(size, expectedString.utf8.count, line: line)
-            XCTAssertEqual(self.testBufferString, expectedString, line: line)
-        }
-    }
-}
-
 // MARK: writeLiteral8
 
 extension ByteBufferWriteLiteralTests {
     func testWriteLiteral8() {
-        let inputs: [(ByteBuffer, EncodingCapabilities, EncodingOptions, String, UInt)] = [
-            ("", [.binary], .default, "~{0}\r\n", #line),
-            ("abc", [.binary], .default, "~{3}\r\nabc", #line),
+        let inputs: [(ByteBuffer, CommandEncodingOptions, [String], UInt)] = [
+            ("", .rfc3501, ["~{0}\r\n"], #line),
+            ("abc", .rfc3501, ["~{3}\r\n", "abc"], #line),
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeLiteral8($0.readableBytesView) })
     }

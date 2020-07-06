@@ -63,17 +63,17 @@ extension GrammarParser {
     // append-data = literal / literal8 / append-data-ext
     static func parseAppendData(buffer: inout ByteBuffer, tracker: StackTracker) throws -> AppendData {
         try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> AppendData in
-            let needs8BitCleanTransport = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
+            let withoutContentTransferEncoding = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
                 try ParserLibrary.parseFixedString("~", buffer: &buffer, tracker: tracker)
             }.map { () in true } ?? false
             try ParserLibrary.parseFixedString("{", buffer: &buffer, tracker: tracker)
             let length = try Self.parseNumber(buffer: &buffer, tracker: tracker)
-            let synchronising = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
+            _ = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
                 try ParserLibrary.parseFixedString("+", buffer: &buffer, tracker: tracker)
             }.map { () in false } ?? true
             try ParserLibrary.parseFixedString("}", buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseNewline(buffer: &buffer, tracker: tracker)
-            return .init(byteCount: length, needs8BitCleanTransport: needs8BitCleanTransport, synchronizing: synchronising)
+            return .init(byteCount: length, withoutContentTransferEncoding: withoutContentTransferEncoding)
         }
     }
 

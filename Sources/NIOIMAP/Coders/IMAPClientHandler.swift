@@ -26,8 +26,6 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
 
     public struct UnexpectedContinuationRequest: Error {}
 
-    var capabilities: EncodingCapabilities = []
-
     public init(expectGreeting: Bool) {
         self.decoder = NIOSingleStepByteToMessageProcessor(ResponseDecoder(expectGreeting: expectGreeting), maximumBufferSize: 1_000)
     }
@@ -73,7 +71,7 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
 
     public func write(context: ChannelHandlerContext, data: NIOAny, promise: EventLoopPromise<Void>?) {
         let command = self.unwrapOutboundIn(data)
-        var encoder = CommandEncodeBuffer(buffer: context.channel.allocator.buffer(capacity: 1024), capabilities: self.capabilities)
+        var encoder = CommandEncodeBuffer(buffer: context.channel.allocator.buffer(capacity: 1024), capabilities: [])
         do {
             try encoder.writeCommandStream(command)
         } catch {

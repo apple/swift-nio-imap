@@ -27,9 +27,9 @@ extension ContinueRequestTests {
             (.responseText(.init(code: .alert, text: "text")), "+ [ALERT] text\r\n", #line),
         ]
         self.iterateInputs(inputs: inputs, encoder: { req in
-            var encoder = ResponseEncodeBuffer(buffer: self.testBuffer._buffer, capabilities: self.testBuffer.capabilities)
+            var encoder = ResponseEncodeBuffer(buffer: self.testBuffer._buffer, options: ResponseEncodingOptions())
             defer {
-                self.testBuffer = EncodeBuffer(encoder.bytes, mode: .server(), capabilities: self.testBuffer.capabilities)
+                self.testBuffer = EncodeBuffer.serverEncodeBuffer(buffer: encoder.bytes, options: ResponseEncodingOptions())
             }
             return encoder.writeContinueRequest(req)
         })
