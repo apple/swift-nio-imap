@@ -25,7 +25,7 @@ extension AppendOptions_Tests {
         let inputs: [(AppendOptions, String, UInt)] = [
             (.init(flagList: [], internalDate: nil, extensions: []), "", #line),
             (.init(flagList: [.answered], internalDate: nil, extensions: []), " (\\Answered)", #line),
-            (.init(flagList: [.answered], internalDate: date, extensions: []), " (\\Answered) \"25-jun-1994 01:02:03 +0000\"", #line),
+            (.init(flagList: [.answered], internalDate: date, extensions: []), " (\\Answered) \"25-Jun-1994 01:02:03 +0000\"", #line),
         ]
 
         for (test, expectedString, line) in inputs {

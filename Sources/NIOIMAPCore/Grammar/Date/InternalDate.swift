@@ -142,18 +142,18 @@ extension EncodeBuffer {
 
         let monthName: String
         switch p.0.month {
-        case 1: monthName = "jan"
-        case 2: monthName = "feb"
-        case 3: monthName = "mar"
-        case 4: monthName = "apr"
-        case 5: monthName = "may"
-        case 6: monthName = "jun"
-        case 7: monthName = "jul"
-        case 8: monthName = "aug"
-        case 9: monthName = "sep"
-        case 10: monthName = "oct"
-        case 11: monthName = "nov"
-        case 12: monthName = "dec"
+        case 1: monthName = "Jan"
+        case 2: monthName = "Feb"
+        case 3: monthName = "Mar"
+        case 4: monthName = "Apr"
+        case 5: monthName = "May"
+        case 6: monthName = "Jun"
+        case 7: monthName = "Jul"
+        case 8: monthName = "Aug"
+        case 9: monthName = "Sep"
+        case 10: monthName = "Oct"
+        case 11: monthName = "Nov"
+        case 12: monthName = "Dec"
         default: preconditionFailure("Expected 1 <= month <= 12")
         }
 
