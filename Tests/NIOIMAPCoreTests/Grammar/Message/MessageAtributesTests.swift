@@ -35,7 +35,7 @@ extension MessageAttributesTests {
             (.bodySection(.init(kind: .header), offset: 123, data: "test"), "BODY[HEADER]<123> \"test\"", #line),
             (.uid(123), "UID 123", #line),
             (.envelope(Envelope(date: "date", subject: "subject", from: [.init(name: "name", adl: "adl", mailbox: "mailbox", host: "host")], sender: [.init(name: "name", adl: "adl", mailbox: "mailbox", host: "host")], reply: [.init(name: "name", adl: "adl", mailbox: "mailbox", host: "host")], to: [.init(name: "name", adl: "adl", mailbox: "mailbox", host: "host")], cc: [.init(name: "name", adl: "adl", mailbox: "mailbox", host: "host")], bcc: [.init(name: "name", adl: "adl", mailbox: "mailbox", host: "host")], inReplyTo: "replyto", messageID: "abc123")), "ENVELOPE (\"date\" \"subject\" ((\"name\" \"adl\" \"mailbox\" \"host\")) ((\"name\" \"adl\" \"mailbox\" \"host\")) ((\"name\" \"adl\" \"mailbox\" \"host\")) ((\"name\" \"adl\" \"mailbox\" \"host\")) ((\"name\" \"adl\" \"mailbox\" \"host\")) ((\"name\" \"adl\" \"mailbox\" \"host\")) \"replyto\" \"abc123\")", #line),
-            (.internalDate(date), #"INTERNALDATE "25-jun-1994 01:02:03 +0000""#, #line),
+            (.internalDate(date), #"INTERNALDATE "25-Jun-1994 01:02:03 +0000""#, #line),
             (.binarySize(section: [2], size: 3), "BINARY.SIZE[2] 3", #line),
             (.binary(section: [3], data: nil), "BINARY[3] NIL", #line),
             (.binary(section: [3], data: "test"), "BINARY[3] \"test\"", #line),
