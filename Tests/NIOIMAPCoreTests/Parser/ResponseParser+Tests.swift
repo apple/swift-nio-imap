@@ -36,7 +36,6 @@ extension ResponseParser_Tests {
 
 extension ResponseParser_Tests {
     func testParseResponseStream() {
-
         let inputs: [(String, [ResponseOrContinueRequest], UInt)] = [
             ("+ OK Continue", [.continueRequest(.responseText(.init(text: "OK Continue")))], #line),
             ("1 OK NOOP Completed", [.response(.taggedResponse(.init(tag: "1", state: .ok(.init(text: "NOOP Completed")))))], #line),
@@ -142,14 +141,14 @@ extension ResponseParser_Tests {
                                     .singlepart(.init(type: .text(.init(mediaText: "HTML", lines: 32)), fields: .init(parameter: [.init(field: "CHARSET", value: "us-ascii")], id: nil, description: nil, encoding: .quotedPrintable, octets: 2217), extension: .init(fieldMD5: nil, dspLanguage: .init(fieldDisposition: nil, fieldLanguage: .init(languages: [], location: .init(location: nil, extensions: [])))))),
                                     .singlepart(.init(type: .basic(.init(type: .application, subtype: .init("PDF"))), fields: .init(parameter: [.init(field: "X-UNIX-MODE", value: "0666"), .init(field: "NAME", value: "Resume.pdf")], id: nil, description: nil, encoding: .base64, octets: 217550), extension: .init(fieldMD5: nil, dspLanguage: .init(fieldDisposition: .init(string: "INLINE", parameter: [.init(field: "FILENAME", value: "Resume.pdf")]), fieldLanguage: .init(languages: [], location: .init(location: nil, extensions: [])))))),
                                     .singlepart(.init(type: .text(.init(mediaText: "HTML", lines: 62)), fields: .init(parameter: [.init(field: "CHARSET", value: "utf-8")], id: nil, description: nil, encoding: .quotedPrintable, octets: 4450), extension: .init(fieldMD5: nil, dspLanguage: .init(fieldDisposition: nil, fieldLanguage: .init(languages: [], location: .init(location: nil, extensions: [])))))),
-                                ], mediaSubtype: .init("MIXED"), multipartExtension: .init(parameters: [.init(field: "BOUNDARY", value: "Apple-Mail=_1B76125E-EB81-4B78-A023-B30D1F9070F2")], dspLanguage: .init(fieldDisposition: nil, fieldLanguage: .init(languages: [], location: .init(location: nil, extensions: []))))))
+                                ], mediaSubtype: .init("MIXED"), multipartExtension: .init(parameters: [.init(field: "BOUNDARY", value: "Apple-Mail=_1B76125E-EB81-4B78-A023-B30D1F9070F2")], dspLanguage: .init(fieldDisposition: nil, fieldLanguage: .init(languages: [], location: .init(location: nil, extensions: [])))))),
                             ], mediaSubtype: .init("ALTERNATIVE"), multipartExtension: .init(parameters: [.init(field: "BOUNDARY", value: "Apple-Mail=_2F0988E2-CA7E-4379-B088-7E556A97E21F")], dspLanguage: .init(fieldDisposition: nil, fieldLanguage: .init(languages: [], location: .init(location: nil, extensions: [])))))), structure: true))
                         )
                     ),
                     .response(.fetchResponse(.finish)),
                 ],
                 #line
-            )
+            ),
         ]
 
         for (input, expected, line) in inputs {
