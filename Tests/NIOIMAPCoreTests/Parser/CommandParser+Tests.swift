@@ -16,7 +16,7 @@ import NIO
 @testable import NIOIMAPCore
 import XCTest
 
-class CommandParser_Tests: XCTest {}
+class CommandParser_Tests: XCTestCase {}
 
 // MARK: - init
 
@@ -54,13 +54,13 @@ extension CommandParser_Tests {
         XCTAssertNoThrow(
             XCTAssertEqual(
                 try parser.parseCommandStream(buffer: &input),
-                .init(numberOfSynchronisingLiterals: 2, command: .command(.init(tag: "2", command: .noop)))
+                .init(numberOfSynchronisingLiterals: 2, command: .command(.init(tag: "2", command: .login(username: "", password: ""))))
             )
         )
         XCTAssertEqual(input, "")
 
         input = "3 APPEND INBOX {3+}\r\n123 {3+}\r\n456 {3+}\r\n789\r\n"
         XCTAssertEqual(try! parser.parseCommandStream(buffer: &input), .init(numberOfSynchronisingLiterals: 0, command: .append(.start(tag: "3", appendingTo: .inbox))))
-        XCTAssertEqual(input, "")
+        XCTAssertEqual(input, " {3+}\r\n123 {3+}\r\n456 {3+}\r\n789\r\n")
     }
 }

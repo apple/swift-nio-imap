@@ -1741,6 +1741,7 @@ extension ParserUnitTests {
                 )),
                 #line
             ),
+            
         ]
         self.iterateTestInputs(inputs, testFunction: GrammarParser.parseMessageAttribute)
     }
