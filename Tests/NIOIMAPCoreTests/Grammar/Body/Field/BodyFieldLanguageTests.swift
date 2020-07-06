@@ -22,16 +22,15 @@ class BodyFieldLanguageTests: EncodeTestClass {}
 
 extension BodyFieldLanguageTests {
     func testEncode() {
-        let inputs: [(BodyStructure.FieldLanguage, String, UInt)] = [
-            (.single(nil), "NIL", #line),
-            (.single("some"), "\"some\"", #line),
-            (.multiple(["some1"]), "(\"some1\")", #line),
-            (.multiple(["some1", "some2", "some3"]), "(\"some1\" \"some2\" \"some3\")", #line),
+        let inputs: [([String], String, UInt)] = [
+            ([], "NIL", #line),
+            (["some1"], "(\"some1\")", #line),
+            (["some1", "some2", "some3"], "(\"some1\" \"some2\" \"some3\")", #line),
         ]
 
         for (test, expectedString, line) in inputs {
             self.testBuffer.clear()
-            let size = self.testBuffer.writeBodyFieldLanguage(test)
+            let size = self.testBuffer.writeBodyFieldLanguages(test)
             XCTAssertEqual(size, expectedString.utf8.count, line: line)
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }

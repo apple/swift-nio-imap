@@ -58,9 +58,9 @@ extension ResponseParser_Tests {
                     .response(.fetchResponse(.start(12190))),
                     .response(
                         .fetchResponse(.simpleAttribute(.body(.multipart(.init(parts: [
-                            .singlepart(.init(type: .text(.init(mediaText: "PLAIN", lines: 47)), fields: .init(parameter: [.init(field: "CHARSET", value: "utf-8")], id: nil, description: nil, encoding: .quotedPrintable, octets: 1772), extension: .init(fieldMD5: nil, dspLanguage: .init(fieldDisposition: nil, fieldLanguage: .init(language: .single(nil), location: .init(location: nil, extensions: [])))))),
-                            .singlepart(.init(type: .text(.init(mediaText: "HTML", lines: 40)), fields: .init(parameter: [.init(field: "CHARSET", value: "utf-8")], id: nil, description: nil, encoding: .quotedPrintable, octets: 2778), extension: .init(fieldMD5: nil, dspLanguage: .init(fieldDisposition: nil, fieldLanguage: .init(language: .single(nil), location: .init(location: nil, extensions: [])))))),
-                        ], mediaSubtype: .init("ALTERNATIVE"), multipartExtension: .init(parameters: [.init(field: "BOUNDARY", value: "Apple-Mail=_0D97185D-4FF1-42FE-9B8F-A0759D299015")], dspLanguage: .init(fieldDisposition: nil, fieldLanguage: .init(language: .single(nil), location: .init(location: nil, extensions: [])))))), structure: true)))
+                            .singlepart(.init(type: .text(.init(mediaText: "PLAIN", lines: 47)), fields: .init(parameter: [.init(field: "CHARSET", value: "utf-8")], id: nil, description: nil, encoding: .quotedPrintable, octets: 1772), extension: .init(fieldMD5: nil, dspLanguage: .init(fieldDisposition: nil, fieldLanguage: .init(languages: [], location: .init(location: nil, extensions: [])))))),
+                            .singlepart(.init(type: .text(.init(mediaText: "HTML", lines: 40)), fields: .init(parameter: [.init(field: "CHARSET", value: "utf-8")], id: nil, description: nil, encoding: .quotedPrintable, octets: 2778), extension: .init(fieldMD5: nil, dspLanguage: .init(fieldDisposition: nil, fieldLanguage: .init(languages: [], location: .init(location: nil, extensions: [])))))),
+                        ], mediaSubtype: .init("ALTERNATIVE"), multipartExtension: .init(parameters: [.init(field: "BOUNDARY", value: "Apple-Mail=_0D97185D-4FF1-42FE-9B8F-A0759D299015")], dspLanguage: .init(fieldDisposition: nil, fieldLanguage: .init(languages: [], location: .init(location: nil, extensions: [])))))), structure: true)))
                     ),
                     .response(.fetchResponse(.finish)),
                 ],
@@ -72,8 +72,8 @@ extension ResponseParser_Tests {
                     .response(.fetchResponse(.start(12194))),
                     .response(
                         .fetchResponse(.simpleAttribute(.body(.multipart(.init(parts: [
-                            .singlepart(.init(type: .text(.init(mediaText: "HTML", lines: 50)), fields: .init(parameter: [.init(field: "CHARSET", value: "UTF-8")], id: nil, description: nil, encoding: .quotedPrintable, octets: 3034), extension: .init(fieldMD5: nil, dspLanguage: .init(fieldDisposition: nil, fieldLanguage: .init(language: .single(nil), location: .init(location: nil, extensions: [])))))),
-                        ], mediaSubtype: .init("ALTERNATIVE"), multipartExtension: .init(parameters: [.init(field: "BOUNDARY", value: "_____5C088583DDA30A778CEA0F5BFE2856D1")], dspLanguage: .init(fieldDisposition: nil, fieldLanguage: .init(language: .single(nil), location: .init(location: nil, extensions: [])))))), structure: true)))
+                            .singlepart(.init(type: .text(.init(mediaText: "HTML", lines: 50)), fields: .init(parameter: [.init(field: "CHARSET", value: "UTF-8")], id: nil, description: nil, encoding: .quotedPrintable, octets: 3034), extension: .init(fieldMD5: nil, dspLanguage: .init(fieldDisposition: nil, fieldLanguage: .init(languages: [], location: .init(location: nil, extensions: [])))))),
+                        ], mediaSubtype: .init("ALTERNATIVE"), multipartExtension: .init(parameters: [.init(field: "BOUNDARY", value: "_____5C088583DDA30A778CEA0F5BFE2856D1")], dspLanguage: .init(fieldDisposition: nil, fieldLanguage: .init(languages: [], location: .init(location: nil, extensions: [])))))), structure: true)))
                     ),
                     .response(.fetchResponse(.finish)),
                 ],
@@ -85,9 +85,9 @@ extension ResponseParser_Tests {
                     .response(.fetchResponse(.start(12180))),
                     .response(
                         .fetchResponse(.simpleAttribute(.body(.multipart(.init(parts: [
-                            .singlepart(.init(type: .text(.init(mediaText: "PLAIN", lines: 5)), fields: .init(parameter: [.init(field: "CHARSET", value: "UTF-8")], id: nil, description: nil, encoding: .sevenBit, octets: 221), extension: .init(fieldMD5: nil, dspLanguage: .init(fieldDisposition: nil, fieldLanguage: .init(language: .single(nil), location: .init(location: nil, extensions: [])))))),
-                            .singlepart(.init(type: .text(.init(mediaText: "HTML", lines: 20)), fields: .init(parameter: [.init(field: "CHARSET", value: "UTF-8")], id: nil, description: nil, encoding: .sevenBit, octets: 2075), extension: .init(fieldMD5: nil, dspLanguage: .init(fieldDisposition: nil, fieldLanguage: .init(language: .single(nil), location: .init(location: nil, extensions: [])))))),
-                        ], mediaSubtype: .init("ALTERNATIVE"), multipartExtension: .init(parameters: [.init(field: "BOUNDARY", value: "--==_mimepart_5efddab8ca39a_6a343f841aacb93410876c"), .init(field: "CHARSET", value: "UTF-8")], dspLanguage: .init(fieldDisposition: nil, fieldLanguage: .init(language: .single(nil), location: .init(location: nil, extensions: [])))))), structure: true)))
+                            .singlepart(.init(type: .text(.init(mediaText: "PLAIN", lines: 5)), fields: .init(parameter: [.init(field: "CHARSET", value: "UTF-8")], id: nil, description: nil, encoding: .sevenBit, octets: 221), extension: .init(fieldMD5: nil, dspLanguage: .init(fieldDisposition: nil, fieldLanguage: .init(languages: [], location: .init(location: nil, extensions: [])))))),
+                            .singlepart(.init(type: .text(.init(mediaText: "HTML", lines: 20)), fields: .init(parameter: [.init(field: "CHARSET", value: "UTF-8")], id: nil, description: nil, encoding: .sevenBit, octets: 2075), extension: .init(fieldMD5: nil, dspLanguage: .init(fieldDisposition: nil, fieldLanguage: .init(languages: [], location: .init(location: nil, extensions: [])))))),
+                        ], mediaSubtype: .init("ALTERNATIVE"), multipartExtension: .init(parameters: [.init(field: "BOUNDARY", value: "--==_mimepart_5efddab8ca39a_6a343f841aacb93410876c"), .init(field: "CHARSET", value: "UTF-8")], dspLanguage: .init(fieldDisposition: nil, fieldLanguage: .init(languages: [], location: .init(location: nil, extensions: [])))))), structure: true)))
                     ),
                     .response(.fetchResponse(.finish)),
                 ],
@@ -99,9 +99,9 @@ extension ResponseParser_Tests {
                     .response(.fetchResponse(.start(12182))),
                     .response(
                         .fetchResponse(.simpleAttribute(.body(.multipart(.init(parts: [
-                            .singlepart(.init(type: .text(.init(mediaText: "PLAIN", lines: 4078)), fields: .init(parameter: [.init(field: "CHARSET", value: "utf-8")], id: nil, description: nil, encoding: .quotedPrintable, octets: 239844), extension: .init(fieldMD5: nil, dspLanguage: .init(fieldDisposition: nil, fieldLanguage: .init(language: .single(nil), location: .init(location: nil, extensions: [])))))),
-                            .singlepart(.init(type: .text(.init(mediaText: "HTML", lines: 4078)), fields: .init(parameter: [.init(field: "CHARSET", value: "utf-8")], id: nil, description: nil, encoding: .quotedPrintable, octets: 239844), extension: .init(fieldMD5: nil, dspLanguage: .init(fieldDisposition: nil, fieldLanguage: .init(language: .single(nil), location: .init(location: nil, extensions: [])))))),
-                        ], mediaSubtype: .init("ALTERNATIVE"), multipartExtension: .init(parameters: [.init(field: "BOUNDARY", value: "===============8996999810533184102==")], dspLanguage: .init(fieldDisposition: nil, fieldLanguage: .init(language: .single(nil), location: .init(location: nil, extensions: [])))))), structure: true)))
+                            .singlepart(.init(type: .text(.init(mediaText: "PLAIN", lines: 4078)), fields: .init(parameter: [.init(field: "CHARSET", value: "utf-8")], id: nil, description: nil, encoding: .quotedPrintable, octets: 239844), extension: .init(fieldMD5: nil, dspLanguage: .init(fieldDisposition: nil, fieldLanguage: .init(languages: [], location: .init(location: nil, extensions: [])))))),
+                            .singlepart(.init(type: .text(.init(mediaText: "HTML", lines: 4078)), fields: .init(parameter: [.init(field: "CHARSET", value: "utf-8")], id: nil, description: nil, encoding: .quotedPrintable, octets: 239844), extension: .init(fieldMD5: nil, dspLanguage: .init(fieldDisposition: nil, fieldLanguage: .init(languages: [], location: .init(location: nil, extensions: [])))))),
+                        ], mediaSubtype: .init("ALTERNATIVE"), multipartExtension: .init(parameters: [.init(field: "BOUNDARY", value: "===============8996999810533184102==")], dspLanguage: .init(fieldDisposition: nil, fieldLanguage: .init(languages: [], location: .init(location: nil, extensions: [])))))), structure: true)))
                     ),
                     .response(.fetchResponse(.finish)),
                 ],
@@ -112,7 +112,7 @@ extension ResponseParser_Tests {
                 [
                     .response(.fetchResponse(.start(12183))),
                     .response(
-                        .fetchResponse(.simpleAttribute(.body(.singlepart(.init(type: .text(.init(mediaText: "HTML", lines: 603)), fields: .init(parameter: [], id: nil, description: nil, encoding: .binary, octets: 28803), extension: .init(fieldMD5: nil, dspLanguage: .init(fieldDisposition: nil, fieldLanguage: .init(language: .single(nil), location: .init(location: nil, extensions: [])))))), structure: true)))
+                        .fetchResponse(.simpleAttribute(.body(.singlepart(.init(type: .text(.init(mediaText: "HTML", lines: 603)), fields: .init(parameter: [], id: nil, description: nil, encoding: .binary, octets: 28803), extension: .init(fieldMD5: nil, dspLanguage: .init(fieldDisposition: nil, fieldLanguage: .init(languages: [], location: .init(location: nil, extensions: [])))))), structure: true)))
                     ),
                     .response(.fetchResponse(.finish)),
                 ],
@@ -123,7 +123,7 @@ extension ResponseParser_Tests {
                 [
                     .response(.fetchResponse(.start(12184))),
                     .response(
-                        .fetchResponse(.simpleAttribute(.body(.singlepart(.init(type: .text(.init(mediaText: "PLAIN", lines: 30)), fields: .init(parameter: [.init(field: "CHARSET", value: "utf-8")], id: "<DDB621064D883242BBC8DBE205F0250F@pex.exch.apple.com>", description: nil, encoding: .base64, octets: 2340), extension: .init(fieldMD5: nil, dspLanguage: .init(fieldDisposition: nil, fieldLanguage: .init(language: .single(.init("EN-US")), location: .init(location: nil, extensions: [])))))), structure: true)))
+                        .fetchResponse(.simpleAttribute(.body(.singlepart(.init(type: .text(.init(mediaText: "PLAIN", lines: 30)), fields: .init(parameter: [.init(field: "CHARSET", value: "utf-8")], id: "<DDB621064D883242BBC8DBE205F0250F@pex.exch.apple.com>", description: nil, encoding: .base64, octets: 2340), extension: .init(fieldMD5: nil, dspLanguage: .init(fieldDisposition: nil, fieldLanguage: .init(languages: ["EN-US"], location: .init(location: nil, extensions: [])))))), structure: true)))
                     ),
                     .response(.fetchResponse(.finish)),
                 ],

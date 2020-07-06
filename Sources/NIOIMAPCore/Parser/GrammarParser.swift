@@ -387,12 +387,15 @@ extension GrammarParser {
     }
 
     // body-fld-lang   = nstring / "(" string *(SP string) ")"
-    static func parseBodyFieldLanguage(buffer: inout ByteBuffer, tracker: StackTracker) throws -> BodyStructure.FieldLanguage {
-        func parseBodyFieldLanguage_single(buffer: inout ByteBuffer, tracker: StackTracker) throws -> BodyStructure.FieldLanguage {
-            .single(try self.parseNString(buffer: &buffer, tracker: tracker))
+    static func parseBodyFieldLanguage(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [String] {
+        func parseBodyFieldLanguage_single(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [String] {
+            guard let language = try self.parseNString(buffer: &buffer, tracker: tracker) else {
+                return []
+            }
+            return [String(buffer: language)]
         }
 
-        func parseBodyFieldLanguage_multiple(buffer: inout ByteBuffer, tracker: StackTracker) throws -> BodyStructure.FieldLanguage {
+        func parseBodyFieldLanguage_multiple(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [String] {
             try ParserLibrary.parseFixedString("(", buffer: &buffer, tracker: tracker)
             var array = [String(buffer: try self.parseString(buffer: &buffer, tracker: tracker))]
             try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) -> String in
@@ -400,7 +403,7 @@ extension GrammarParser {
                 return String(buffer: try self.parseString(buffer: &buffer, tracker: tracker))
             }
             try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)
-            return .multiple(array)
+            return array
         }
 
         return try ParserLibrary.parseOneOf([
@@ -4195,7 +4198,7 @@ extension GrammarParser {
         let locationExtension = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
             try parseBodyLocationExtension(buffer: &buffer, tracker: tracker)
         }
-        return BodyStructure.FieldLanguageLocation(language: fieldLanguage, location: locationExtension)
+        return BodyStructure.FieldLanguageLocation(languages: fieldLanguage, location: locationExtension)
     }
 
     static func parseBodyDescriptionLanguage(buffer: inout ByteBuffer, tracker: StackTracker) throws -> BodyStructure.FieldDispositionLanguage {

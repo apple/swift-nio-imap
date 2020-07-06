@@ -468,10 +468,10 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseBodyFieldLanguage() {
-        let inputs: [(String, String, BodyStructure.FieldLanguage, UInt)] = [
-            (#""english""#, " ", .single("english"), #line),
-            (#"("english")"#, " ", .multiple(["english"]), #line),
-            (#"("english" "french")"#, " ", .multiple(["english", "french"]), #line),
+        let inputs: [(String, String, [String], UInt)] = [
+            (#""english""#, " ", ["english"], #line),
+            (#"("english")"#, " ", ["english"], #line),
+            (#"("english" "french")"#, " ", ["english", "french"], #line),
         ]
         self.iterateTestInputs(inputs, testFunction: GrammarParser.parseBodyFieldLanguage)
     }
