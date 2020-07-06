@@ -36,9 +36,6 @@ extension ResponseParser_Tests {
 
 extension ResponseParser_Tests {
     func testParseResponseStream() {
-        /*
-         * 12187 FETCH (BODYSTRUCTURE (("TEXT" "PLAIN" ("CHARSET" "utf-8") NIL NIL "QUOTED-PRINTABLE" 6990 170 NIL NIL NIL NIL)(("TEXT" "HTML" ("CHARSET" "utf-8") NIL NIL "QUOTED-PRINTABLE" 18865 274 NIL NIL NIL NIL)("APPLICATION" "OCTET-STREAM" ("X-UNIX-MODE" "0644" "NAME" "Whiteboard on Webex.key") NIL NIL "BASE64" 4876604 NIL ("ATTACHMENT" ("FILENAME" "Whiteboard on Webex.key")) NIL NIL)("TEXT" "HTML" ("CHARSET" "us-ascii") NIL NIL "QUOTED-PRINTABLE" 1143 17 NIL NIL NIL NIL)("APPLICATION" "PDF" ("X-UNIX-MODE" "0644" "NAME" "Whiteboard on Webex.pdf") NIL NIL "BASE64" 1191444 NIL ("INLINE" ("FILENAME" "Whiteboard on Webex.pdf")) NIL NIL)("TEXT" "HTML" ("CHARSET" "us-ascii") NIL NIL "QUOTED-PRINTABLE" 2217 32 NIL NIL NIL NIL)("APPLICATION" "PDF" ("X-UNIX-MODE" "0666" "NAME" "Resume.pdf") NIL NIL "BASE64" 217550 NIL ("INLINE" ("FILENAME" "Resume.pdf")) NIL NIL)("TEXT" "HTML" ("CHARSET" "utf-8") NIL NIL "QUOTED-PRINTABLE" 4450 62 NIL NIL NIL NIL) "MIXED" ("BOUNDARY" "Apple-Mail=_1B76125E-EB81-4B78-A023-B30D1F9070F2") NIL NIL NIL) "ALTERNATIVE" ("BOUNDARY" "Apple-Mail=_2F0988E2-CA7E-4379-B088-7E556A97E21F") NIL NIL NIL))
-         */
 
         let inputs: [(String, [ResponseOrContinueRequest], UInt)] = [
             ("+ OK Continue", [.continueRequest(.responseText(.init(text: "OK Continue")))], #line),
@@ -129,6 +126,30 @@ extension ResponseParser_Tests {
                 ],
                 #line
             ),
+            (
+                #"* 12187 FETCH (BODYSTRUCTURE (("TEXT" "PLAIN" ("CHARSET" "utf-8") NIL NIL "QUOTED-PRINTABLE" 6990 170 NIL NIL NIL NIL)(("TEXT" "HTML" ("CHARSET" "utf-8") NIL NIL "QUOTED-PRINTABLE" 18865 274 NIL NIL NIL NIL)("APPLICATION" "OCTET-STREAM" ("X-UNIX-MODE" "0644" "NAME" "Whiteboard on Webex.key") NIL NIL "BASE64" 4876604 NIL ("ATTACHMENT" ("FILENAME" "Whiteboard on Webex.key")) NIL NIL)("TEXT" "HTML" ("CHARSET" "us-ascii") NIL NIL "QUOTED-PRINTABLE" 1143 17 NIL NIL NIL NIL)("APPLICATION" "PDF" ("X-UNIX-MODE" "0644" "NAME" "Whiteboard on Webex.pdf") NIL NIL "BASE64" 1191444 NIL ("INLINE" ("FILENAME" "Whiteboard on Webex.pdf")) NIL NIL)("TEXT" "HTML" ("CHARSET" "us-ascii") NIL NIL "QUOTED-PRINTABLE" 2217 32 NIL NIL NIL NIL)("APPLICATION" "PDF" ("X-UNIX-MODE" "0666" "NAME" "Resume.pdf") NIL NIL "BASE64" 217550 NIL ("INLINE" ("FILENAME" "Resume.pdf")) NIL NIL)("TEXT" "HTML" ("CHARSET" "utf-8") NIL NIL "QUOTED-PRINTABLE" 4450 62 NIL NIL NIL NIL) "MIXED" ("BOUNDARY" "Apple-Mail=_1B76125E-EB81-4B78-A023-B30D1F9070F2") NIL NIL NIL) "ALTERNATIVE" ("BOUNDARY" "Apple-Mail=_2F0988E2-CA7E-4379-B088-7E556A97E21F") NIL NIL NIL))"#,
+                [
+                    .response(.fetchResponse(.start(12187))),
+                    .response(
+                        .fetchResponse(
+                            .simpleAttribute(.body(.multipart(.init(parts: [
+                                .singlepart(.init(type: .text(.init(mediaText: "PLAIN", lines: 170)), fields: .init(parameter: [.init(field: "CHARSET", value: "utf-8")], id: nil, description: nil, encoding: .quotedPrintable, octets: 6990), extension: .init(fieldMD5: nil, dspLanguage: .init(fieldDisposition: nil, fieldLanguage: .init(languages: [], location: .init(location: nil, extensions: [])))))),
+                                .multipart(.init(parts: [
+                                    .singlepart(.init(type: .text(.init(mediaText: "HTML", lines: 274)), fields: .init(parameter: [.init(field: "CHARSET", value: "utf-8")], id: nil, description: nil, encoding: .quotedPrintable, octets: 18865), extension: .init(fieldMD5: nil, dspLanguage: .init(fieldDisposition: nil, fieldLanguage: .init(languages: [], location: .init(location: nil, extensions: [])))))),
+                                    .singlepart(.init(type: .basic(.init(type: .application, subtype: .init("OCTET-STREAM"))), fields: .init(parameter: [.init(field: "X-UNIX-MODE", value: "0644"), .init(field: "NAME", value: "Whiteboard on Webex.key")], id: nil, description: nil, encoding: .base64, octets: 4876604), extension: .init(fieldMD5: nil, dspLanguage: .init(fieldDisposition: .init(string: "ATTACHMENT", parameter: [.init(field: "FILENAME", value: "Whiteboard on Webex.key")]), fieldLanguage: .init(languages: [], location: .init(location: nil, extensions: [])))))),
+                                    .singlepart(.init(type: .text(.init(mediaText: "HTML", lines: 17)), fields: .init(parameter: [.init(field: "CHARSET", value: "us-ascii")], id: nil, description: nil, encoding: .quotedPrintable, octets: 1143), extension: .init(fieldMD5: nil, dspLanguage: .init(fieldDisposition: nil, fieldLanguage: .init(languages: [], location: .init(location: nil, extensions: [])))))),
+                                    .singlepart(.init(type: .basic(.init(type: .application, subtype: .init("PDF"))), fields: .init(parameter: [.init(field: "X-UNIX-MODE", value: "0644"), .init(field: "NAME", value: "Whiteboard on Webex.pdf")], id: nil, description: nil, encoding: .base64, octets: 1191444), extension: .init(fieldMD5: nil, dspLanguage: .init(fieldDisposition: .init(string: "INLINE", parameter: [.init(field: "FILENAME", value: "Whiteboard on Webex.pdf")]), fieldLanguage: .init(languages: [], location: .init(location: nil, extensions: [])))))),
+                                    .singlepart(.init(type: .text(.init(mediaText: "HTML", lines: 32)), fields: .init(parameter: [.init(field: "CHARSET", value: "us-ascii")], id: nil, description: nil, encoding: .quotedPrintable, octets: 2217), extension: .init(fieldMD5: nil, dspLanguage: .init(fieldDisposition: nil, fieldLanguage: .init(languages: [], location: .init(location: nil, extensions: [])))))),
+                                    .singlepart(.init(type: .basic(.init(type: .application, subtype: .init("PDF"))), fields: .init(parameter: [.init(field: "X-UNIX-MODE", value: "0666"), .init(field: "NAME", value: "Resume.pdf")], id: nil, description: nil, encoding: .base64, octets: 217550), extension: .init(fieldMD5: nil, dspLanguage: .init(fieldDisposition: .init(string: "INLINE", parameter: [.init(field: "FILENAME", value: "Resume.pdf")]), fieldLanguage: .init(languages: [], location: .init(location: nil, extensions: [])))))),
+                                    .singlepart(.init(type: .text(.init(mediaText: "HTML", lines: 62)), fields: .init(parameter: [.init(field: "CHARSET", value: "utf-8")], id: nil, description: nil, encoding: .quotedPrintable, octets: 4450), extension: .init(fieldMD5: nil, dspLanguage: .init(fieldDisposition: nil, fieldLanguage: .init(languages: [], location: .init(location: nil, extensions: [])))))),
+                                ], mediaSubtype: .init("MIXED"), multipartExtension: .init(parameters: [.init(field: "BOUNDARY", value: "Apple-Mail=_1B76125E-EB81-4B78-A023-B30D1F9070F2")], dspLanguage: .init(fieldDisposition: nil, fieldLanguage: .init(languages: [], location: .init(location: nil, extensions: []))))))
+                            ], mediaSubtype: .init("ALTERNATIVE"), multipartExtension: .init(parameters: [.init(field: "BOUNDARY", value: "Apple-Mail=_2F0988E2-CA7E-4379-B088-7E556A97E21F")], dspLanguage: .init(fieldDisposition: nil, fieldLanguage: .init(languages: [], location: .init(location: nil, extensions: [])))))), structure: true))
+                        )
+                    ),
+                    .response(.fetchResponse(.finish)),
+                ],
+                #line
+            )
         ]
 
         for (input, expected, line) in inputs {
