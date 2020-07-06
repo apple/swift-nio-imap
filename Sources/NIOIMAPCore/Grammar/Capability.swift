@@ -189,7 +189,11 @@ extension Capability {
     public static let urlPartial = Self(unchecked: "URL-PARTIAL")
     public static let urlAuth = Self(unchecked: "URLAUTH")
     public static let within = Self(unchecked: "WITHIN")
+    
+    /// RFC 7888 LITERAL+
     public static let literalPlus = Self(unchecked: "LITERAL+")
+    
+    /// RFC7888 LITERAL-
     public static let literalMinus = Self(unchecked: "LITERAL-")
 
     public static func auth(_ type: AuthType) -> Self {
