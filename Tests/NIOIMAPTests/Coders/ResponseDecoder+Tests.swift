@@ -18,7 +18,7 @@ import NIO
 import NIOTestUtils
 import XCTest
 
-class ResponseDecoder_Tests: XCTest {}
+class ResponseDecoder_Tests: XCTestCase {}
 
 extension ResponseDecoder_Tests {
     func testNormalUsage() throws {

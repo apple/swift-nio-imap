@@ -12,27 +12,16 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
-extension BodyStructure {
-    /// IMAPv4 `body-fld-lang`
-    public enum FieldLanguage: Equatable {
-        case single(NString)
-        case multiple([String])
-    }
-}
-
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeBodyFieldLanguage(_ language: BodyStructure.FieldLanguage) -> Int {
-        switch language {
-        case .single(let string):
-            return self.writeNString(string)
-        case .multiple(let strings):
-            return self.writeArray(strings) { (element, self) in
-                self.writeIMAPString(element)
-            }
+    @discardableResult mutating func writeBodyFieldLanguages(_ languages: [String]) -> Int {
+        guard languages.count > 0 else {
+            return self.writeNil()
+        }
+
+        return self.writeArray(languages) { (element, self) in
+            self.writeIMAPString(element)
         }
     }
 }

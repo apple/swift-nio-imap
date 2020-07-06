@@ -17,11 +17,11 @@ import struct NIO.ByteBuffer
 extension BodyStructure {
     /// Extracted from IMAPv4 `body-ext-1part`
     public struct FieldLanguageLocation: Equatable {
-        public var language: FieldLanguage
+        public var languages: [String]
         public var location: FieldLocationExtension?
 
-        public init(language: BodyStructure.FieldLanguage, location: BodyStructure.FieldLocationExtension? = nil) {
-            self.language = language
+        public init(languages: [String], location: BodyStructure.FieldLocationExtension? = nil) {
+            self.languages = languages
             self.location = location
         }
     }
@@ -32,7 +32,7 @@ extension BodyStructure {
 extension EncodeBuffer {
     @discardableResult mutating func writeBodyFieldLanguageLocation(_ langLoc: BodyStructure.FieldLanguageLocation) -> Int {
         self.writeSpace() +
-            self.writeBodyFieldLanguage(langLoc.language) +
+            self.writeBodyFieldLanguages(langLoc.languages) +
             self.writeIfExists(langLoc.location) { (location) -> Int in
                 self.writeBodyFieldLocationExtension(location)
             }
