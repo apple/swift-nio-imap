@@ -50,7 +50,7 @@ extension Flag_Tests {
             (.flagged, "\\Flagged", #line),
             (.seen, "\\Seen", #line),
             (.extension("\\extension"), "\\EXTENSION", #line),
-            (.keyword(.forwarded), "$FORWARDED", #line),
+            (.keyword(.forwarded), "$Forwarded", #line),
         ]
 
         for (test, expectedString, line) in inputs {
