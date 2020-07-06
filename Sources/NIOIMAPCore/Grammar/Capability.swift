@@ -82,21 +82,6 @@ extension Capability {
         }
     }
 
-    public struct LiteralType: Equatable {
-        public static let plus = Self(unchecked: "+")
-        public static let minus = Self(unchecked: "-")
-
-        public var rawValue: String
-
-        public init(_ value: String) {
-            self.rawValue = value.uppercased()
-        }
-
-        fileprivate init(unchecked: String) {
-            self.rawValue = unchecked
-        }
-    }
-
     public struct SortType: Equatable {
         public static let display = Self(unchecked: "DISPLAY")
 
@@ -205,16 +190,18 @@ extension Capability {
     public static let urlAuth = Self(unchecked: "URLAUTH")
     public static let within = Self(unchecked: "WITHIN")
 
+    /// RFC 7888 LITERAL+
+    public static let literalPlus = Self(unchecked: "LITERAL+")
+
+    /// RFC 7888 LITERAL-
+    public static let literalMinus = Self(unchecked: "LITERAL-")
+
     public static func auth(_ type: AuthType) -> Self {
         Self("AUTH=\(type.rawValue)")
     }
 
     public static func context(_ type: ContextType) -> Self {
         Self("CONTEXT=\(type.rawValue)")
-    }
-
-    public static func literal(_ type: LiteralType) -> Self {
-        Self("LITERAL\(type.rawValue)")
     }
 
     public static func sort(_ type: SortType?) -> Self {

@@ -37,7 +37,7 @@ public struct CommandEncodingOptions: Equatable {
 extension CommandEncodingOptions {
     public init(capabilities: [Capability]) {
         self.init()
-        if capabilities.contains(.literal(.plus)) {
+        if capabilities.contains(.literalPlus) {
             self.useNonSynchronizingLiteral = true
         }
         if capabilities.contains(.binary) {
