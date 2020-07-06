@@ -2934,8 +2934,25 @@ extension GrammarParser {
             try ParserLibrary.parseFixedString("SEARCH", buffer: &buffer, tracker: tracker)
             let returnOpts = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseSearchReturnOptions) ?? []
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
-            let program = try self.parseSearchProgram(buffer: &buffer, tracker: tracker)
-            return .search(returnOptions: returnOpts, program: program)
+            let charset = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> String in
+                try ParserLibrary.parseFixedString("CHARSET ", buffer: &buffer, tracker: tracker)
+                let charset = try self.parseCharset(buffer: &buffer, tracker: tracker)
+                try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
+                return charset
+            }
+            var array = [try self.parseSearchKey(buffer: &buffer, tracker: tracker)]
+            try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) -> SearchKey in
+                try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
+                return try self.parseSearchKey(buffer: &buffer, tracker: tracker)
+            }
+
+            if case .and = array.first!, array.count == 1 {
+                return .search(key: array.first!, charset: charset, returnOptions: returnOpts)
+            } else if array.count == 1 {
+                return .search(key: array.first!, charset: charset, returnOptions: returnOpts)
+            } else {
+                return .search(key: .and(array), charset: charset, returnOptions: returnOpts)
+            }
         }
     }
 
@@ -3167,7 +3184,12 @@ extension GrammarParser {
                 return try self.parseSearchKey(buffer: &buffer, tracker: tracker)
             }
             try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)
-            return .and(array)
+
+            if array.count == 1 {
+                return array.first!
+            } else {
+                return .and(array)
+            }
         }
 
         func parseSearchKey_older(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SearchKey {
@@ -3232,24 +3254,6 @@ extension GrammarParser {
     // search-mod-params = tagged-ext-val
     static func parseSearchModifierParams(buffer: inout ByteBuffer, tracker: StackTracker) throws -> TaggedExtensionValue {
         try self.parseTaggedExtensionValue(buffer: &buffer, tracker: tracker)
-    }
-
-    // search-program       = ["CHARSET" SP charset SP] search-key *(SP search-key)
-    static func parseSearchProgram(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SearchProgram {
-        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
-            let charset = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> String in
-                try ParserLibrary.parseFixedString("CHARSET ", buffer: &buffer, tracker: tracker)
-                let charset = try self.parseCharset(buffer: &buffer, tracker: tracker)
-                try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
-                return charset
-            }
-            var array = [try self.parseSearchKey(buffer: &buffer, tracker: tracker)]
-            try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) -> SearchKey in
-                try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
-                return try self.parseSearchKey(buffer: &buffer, tracker: tracker)
-            }
-            return SearchProgram(charset: charset, keys: array)
-        }
     }
 
     // search-ret-data-ext = search-modifier-name SP search-return-value
@@ -4046,10 +4050,10 @@ extension GrammarParser {
         }
 
         func parseUid_search(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Command {
-            guard case .search(let options, let program) = try self.parseSearch(buffer: &buffer, tracker: tracker) else {
+            guard case .search(let key, let charset, let returnOptions) = try self.parseSearch(buffer: &buffer, tracker: tracker) else {
                 fatalError("This should never happen")
             }
-            return .uidSearch(returnOptions: options, program: program)
+            return .uidSearch(key: key, charset: charset, returnOptions: returnOptions)
         }
 
         func parseUid_store(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Command {
