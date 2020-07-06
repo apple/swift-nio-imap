@@ -12,10 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
-extension BodyStructure {}
-
 // MARK: - Encoding
 
 extension EncodeBuffer {
