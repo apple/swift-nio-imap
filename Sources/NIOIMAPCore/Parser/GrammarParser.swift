@@ -2945,8 +2945,8 @@ extension GrammarParser {
                 try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
                 return try self.parseSearchKey(buffer: &buffer, tracker: tracker)
             }
-            
-            if case .and(_) = array.first!, array.count == 1 {
+
+            if case .and = array.first!, array.count == 1 {
                 return .search(key: array.first!, charset: charset, returnOptions: returnOpts)
             } else if array.count == 1 {
                 return .search(key: array.first!, charset: charset, returnOptions: returnOpts)
@@ -3184,7 +3184,7 @@ extension GrammarParser {
                 return try self.parseSearchKey(buffer: &buffer, tracker: tracker)
             }
             try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)
-           
+
             if array.count == 1 {
                 return array.first!
             } else {

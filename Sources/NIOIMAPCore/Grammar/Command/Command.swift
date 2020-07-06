@@ -359,7 +359,7 @@ extension EncodeBuffer {
 
     private mutating func writeCommandType_uidSearch(key: SearchKey, charset: String? = nil, returnOptions: [SearchReturnOption] = []) -> Int {
         self.writeString("UID ") +
-        self.writeCommandType_search(key: key, charset: charset, returnOptions: returnOptions)
+            self.writeCommandType_search(key: key, charset: charset, returnOptions: returnOptions)
     }
 
     private mutating func writeCommandType_move(set: SequenceSet, mailbox: MailboxName) -> Int {

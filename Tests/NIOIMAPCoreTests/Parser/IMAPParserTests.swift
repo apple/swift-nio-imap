@@ -2134,7 +2134,7 @@ extension ParserUnitTests {
                 "\r",
                 .search(key: .or(.and([.from("me"), .from("you")]), .and([.new, .unseen])), charset: "UTF-8", returnOptions: [.min, .max]),
                 #line
-            )
+            ),
         ]
         self.iterateTestInputs(inputs, testFunction: GrammarParser.parseSearch)
     }
