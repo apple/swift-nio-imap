@@ -193,7 +193,7 @@ extension Capability {
     /// RFC 7888 LITERAL+
     public static let literalPlus = Self(unchecked: "LITERAL+")
     
-    /// RFC7888 LITERAL-
+    /// RFC 7888 LITERAL-
     public static let literalMinus = Self(unchecked: "LITERAL-")
 
     public static func auth(_ type: AuthType) -> Self {
