@@ -39,37 +39,37 @@ extension Flag {
 
 extension Flag.Keyword {
     /// `$Forwarded`
-    public static let forwarded = Self(unchecked: "$FORWARDED")
+    public static let forwarded = Self(unchecked: "$Forwarded")
 
     /// `$Junk`
-    public static let junk = Self(unchecked: "$JUNK")
+    public static let junk = Self(unchecked: "$Junk")
 
     /// `$NotJunk`
-    public static let notJunk = Self(unchecked: "$NOTJUNK")
+    public static let notJunk = Self(unchecked: "$NotJunk")
 
     /// `Redirected`
-    public static let unregistered_redirected = Self(unchecked: "REDIRECTED")
+    public static let unregistered_redirected = Self(unchecked: "Redirected")
 
     /// `Forwarded`
-    public static let unregistered_forwarded = Self(unchecked: "FORWARDED")
+    public static let unregistered_forwarded = Self(unchecked: "Forwarded")
 
     /// `Junk`
-    public static let unregistered_junk = Self(unchecked: "JUNK")
+    public static let unregistered_junk = Self(unchecked: "Junk")
 
     /// `NotJunk`
-    public static let unregistered_notJunk = Self(unchecked: "NOTJUNK")
+    public static let unregistered_notJunk = Self(unchecked: "NotJunk")
 
     /// `$MailFlagBit0`
-    public static let colorBit0 = Self(unchecked: "$MAILFLAGBIT0")
+    public static let colorBit0 = Self(unchecked: "$MailFlagBit0")
 
     /// `$MailFlagBit1`
-    public static let colorBit1 = Self(unchecked: "$MAILFLAGBIT1")
+    public static let colorBit1 = Self(unchecked: "$MailFlagBit1")
 
     /// `$MailFlagBit2`
-    public static let colorBit2 = Self(unchecked: "$MAILFLAGBIT2")
+    public static let colorBit2 = Self(unchecked: "$MailFlagBit2")
 
     /// `$MDNSent`
-    public static let mdnSent = Self(unchecked: "$MDNSENT")
+    public static let mdnSent = Self(unchecked: "$MDNSent")
 }
 
 // MARK: - Encoding

@@ -33,17 +33,17 @@ extension FlagKeyword_Tests {
 extension FlagKeyword_Tests {
     func testEncode() {
         let inputs: [(Flag.Keyword, String, UInt)] = [
-            (.forwarded, "$FORWARDED", #line),
-            (.mdnSent, "$MDNSENT", #line),
-            (.colorBit0, "$MAILFLAGBIT0", #line),
-            (.colorBit1, "$MAILFLAGBIT1", #line),
-            (.colorBit2, "$MAILFLAGBIT2", #line),
-            (.junk, "$JUNK", #line),
-            (.notJunk, "$NOTJUNK", #line),
-            (.unregistered_junk, "JUNK", #line),
-            (.unregistered_notJunk, "NOTJUNK", #line),
-            (.unregistered_forwarded, "FORWARDED", #line),
-            (.unregistered_redirected, "REDIRECTED", #line),
+            (.forwarded, "$Forwarded", #line),
+            (.mdnSent, "$MDNSent", #line),
+            (.colorBit0, "$MailFlagBit0", #line),
+            (.colorBit1, "$MailFlagBit1", #line),
+            (.colorBit2, "$MailFlagBit2", #line),
+            (.junk, "$Junk", #line),
+            (.notJunk, "$NotJunk", #line),
+            (.unregistered_junk, "Junk", #line),
+            (.unregistered_notJunk, "NotJunk", #line),
+            (.unregistered_forwarded, "Forwarded", #line),
+            (.unregistered_redirected, "Redirected", #line),
         ]
 
         for (test, expectedString, line) in inputs {
