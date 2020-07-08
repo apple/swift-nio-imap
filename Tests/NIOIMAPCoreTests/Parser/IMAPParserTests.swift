@@ -518,7 +518,7 @@ extension ParserUnitTests {
             XCTAssertEqual(result.id, "id")
             XCTAssertEqual(result.description, "desc")
             XCTAssertEqual(result.encoding, .eightBit)
-            XCTAssertEqual(result.octets, 1234)
+            XCTAssertEqual(result.octetCount, 1234)
         }
     }
 }
@@ -533,7 +533,7 @@ extension ParserUnitTests {
                 "\r\n",
                 .init(
                     type: .basic(.init(type: .audio, subtype: .alternative)),
-                    fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 1),
+                    fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octetCount: 1),
                     extension: nil
                 ),
                 #line
@@ -543,7 +543,7 @@ extension ParserUnitTests {
                 "\r\n",
                 .init(
                     type: .basic(.init(type: .application, subtype: .mixed)),
-                    fields: .init(parameter: [], id: "id", description: "description", encoding: .sevenBit, octets: 2),
+                    fields: .init(parameter: [], id: "id", description: "description", encoding: .sevenBit, octetCount: 2),
                     extension: nil
                 ),
                 #line
@@ -553,7 +553,7 @@ extension ParserUnitTests {
                 "\r\n",
                 .init(
                     type: .basic(.init(type: .video, subtype: .related)),
-                    fields: .init(parameter: [.init(field: "f1", value: "v1")], id: nil, description: nil, encoding: .eightBit, octets: 3),
+                    fields: .init(parameter: [.init(field: "f1", value: "v1")], id: nil, description: nil, encoding: .eightBit, octetCount: 3),
                     extension: nil
                 ),
                 #line
@@ -569,11 +569,11 @@ extension ParserUnitTests {
                         .init(
                             message: .rfc822,
                             envelope: Envelope(date: nil, subject: nil, from: [], sender: [], reply: [], to: [], cc: [], bcc: [], inReplyTo: nil, messageID: nil),
-                            body: .singlepart(.init(type: .basic(.init(type: .image, subtype: .related)), fields: .init(parameter: [], id: nil, description: nil, encoding: .binary, octets: 5))),
+                            body: .singlepart(.init(type: .basic(.init(type: .image, subtype: .related)), fields: .init(parameter: [], id: nil, description: nil, encoding: .binary, octetCount: 5))),
                             fieldLines: 8
                         )
                     ),
-                    fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 4),
+                    fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octetCount: 4),
                     extension: nil
                 ),
                 #line
@@ -586,7 +586,7 @@ extension ParserUnitTests {
                 "\r\n",
                 .init(
                     type: .text(.init(mediaText: "media", lines: 2)),
-                    fields: .init(parameter: [], id: nil, description: nil, encoding: .quotedPrintable, octets: 1),
+                    fields: .init(parameter: [], id: nil, description: nil, encoding: .quotedPrintable, octetCount: 1),
                     extension: nil
                 ),
                 #line

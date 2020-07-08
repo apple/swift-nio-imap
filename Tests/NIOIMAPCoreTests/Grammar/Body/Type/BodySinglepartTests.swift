@@ -26,7 +26,7 @@ extension BodySinglepartTests {
             (
                 .init(
                     type: .basic(.init(type: .application, subtype: .alternative)),
-                    fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 6),
+                    fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octetCount: 6),
                     extension: nil
                 ),
                 "\"APPLICATION\" \"multipart/alternative\" NIL NIL NIL \"BASE64\" 6",
@@ -35,7 +35,7 @@ extension BodySinglepartTests {
             (
                 .init(
                     type: .basic(.init(type: .application, subtype: .related)),
-                    fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 7),
+                    fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octetCount: 7),
                     extension: .init(fieldMD5: "md5", dispositionAndLanguage: nil)
                 ),
                 "\"APPLICATION\" \"multipart/related\" NIL NIL NIL \"BASE64\" 7 \"md5\"",
@@ -44,7 +44,7 @@ extension BodySinglepartTests {
             (
                 .init(
                     type: .text(.init(mediaText: "subtype", lines: 5)),
-                    fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 6),
+                    fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octetCount: 6),
                     extension: nil
                 ),
                 "\"TEXT\" \"subtype\" NIL NIL NIL \"BASE64\" 6 5",
@@ -59,14 +59,14 @@ extension BodySinglepartTests {
                             body: .singlepart(
                                 .init(
                                     type: .text(.init(mediaText: "subtype", lines: 5)),
-                                    fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 6),
+                                    fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octetCount: 6),
                                     extension: nil
                                 )
                             ),
                             fieldLines: 8
                         )
                     ),
-                    fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 6),
+                    fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octetCount: 6),
                     extension: nil
                 ),
                 "\"MESSAGE\" \"RFC822\" NIL NIL NIL \"BASE64\" 6 (\"date\" NIL NIL NIL NIL NIL NIL NIL NIL NIL) (\"TEXT\" \"subtype\" NIL NIL NIL \"BASE64\" 6 5) 8",

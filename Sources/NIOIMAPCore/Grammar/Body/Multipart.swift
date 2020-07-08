@@ -24,7 +24,7 @@ extension BodyStructure {
         public init(parts: [BodyStructure], mediaSubtype: MediaSubtype, extension: Extension? = nil) {
             self.parts = parts
             self.mediaSubtype = mediaSubtype
-            self.`extension` = `extension`
+            self.extension = `extension`
         }
     }
 }
@@ -52,7 +52,7 @@ extension EncodeBuffer {
         } +
             self.writeSpace() +
             self.writeMediaSubtype(part.mediaSubtype) +
-            self.writeIfExists(part.`extension`) { (ext) -> Int in
+            self.writeIfExists(part.extension) { (ext) -> Int in
                 self.writeSpace() +
                     self.writeBodyExtensionMultipart(ext)
             }

@@ -21,14 +21,14 @@ extension BodyStructure {
         public var id: NString
         public var description: NString
         public var encoding: Encoding
-        public var octets: Int
+        public var octetCount: Int
 
-        public init(parameter: [BodyStructure.ParameterPair], id: NString, description: NString, encoding: BodyStructure.Encoding, octets: Int) {
+        public init(parameter: [BodyStructure.ParameterPair], id: NString, description: NString, encoding: BodyStructure.Encoding, octetCount: Int) {
             self.parameter = parameter
             self.id = id
             self.description = description
             self.encoding = encoding
-            self.octets = octets
+            self.octetCount = octetCount
         }
     }
 }
@@ -44,6 +44,6 @@ extension EncodeBuffer {
             self.writeNString(fields.description) +
             self.writeSpace() +
             self.writeBodyEncoding(fields.encoding) +
-            self.writeString(" \(fields.octets)")
+            self.writeString(" \(fields.octetCount)")
     }
 }

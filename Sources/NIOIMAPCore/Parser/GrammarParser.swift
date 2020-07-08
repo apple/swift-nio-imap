@@ -314,7 +314,7 @@ extension GrammarParser {
                 id: fieldID,
                 description: fieldDescription,
                 encoding: Encoding,
-                octets: fieldOctets
+                octetCount: fieldOctets
             )
         }
     }
