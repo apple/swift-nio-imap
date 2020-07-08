@@ -56,11 +56,11 @@ extension BodyStructure.Singlepart {
     /// IMAPv4 `body-type-text`
     public struct Text: Equatable {
         public var mediaText: String
-        public var lines: Int
+        public var lineCount: Int
 
-        public init(mediaText: String, lines: Int) {
+        public init(mediaText: String, lineCount: Int) {
             self.mediaText = mediaText
-            self.lines = lines
+            self.lineCount = lineCount
         }
     }
 
@@ -103,7 +103,7 @@ extension EncodeBuffer {
         self.writeMediaText(body.mediaText) +
             self.writeSpace() +
             self.writeBodyFields(fields) +
-            self.writeString(" \(body.lines)")
+            self.writeString(" \(body.lineCount)")
     }
 
     @discardableResult private mutating func writeBodyTypeMessage(_ message: BodyStructure.Singlepart.Message, fields: BodyStructure.Fields) -> Int {

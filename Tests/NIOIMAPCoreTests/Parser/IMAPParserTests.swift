@@ -585,7 +585,7 @@ extension ParserUnitTests {
                 "\"TEXT\" \"media\" NIL NIL NIL \"QUOTED-PRINTABLE\" 1 2",
                 "\r\n",
                 .init(
-                    type: .text(.init(mediaText: "media", lines: 2)),
+                    type: .text(.init(mediaText: "media", lineCount: 2)),
                     fields: .init(parameter: [], id: nil, description: nil, encoding: .quotedPrintable, octetCount: 1),
                     extension: nil
                 ),

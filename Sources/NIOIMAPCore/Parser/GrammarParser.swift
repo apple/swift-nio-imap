@@ -492,7 +492,7 @@ extension GrammarParser {
             let fields = try self.parseBodyFields(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
             let fieldLines = try self.parseBodyFieldLines(buffer: &buffer, tracker: tracker)
-            let text = BodyStructure.Singlepart.Text(mediaText: media, lines: fieldLines)
+            let text = BodyStructure.Singlepart.Text(mediaText: media, lineCount: fieldLines)
             let ext = try parseBodyTypeSinglePart_extension(buffer: &buffer, tracker: tracker)
             return BodyStructure.Singlepart(type: .text(text), fields: fields, extension: ext)
         }

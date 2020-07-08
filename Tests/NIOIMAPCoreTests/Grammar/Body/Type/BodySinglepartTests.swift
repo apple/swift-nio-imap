@@ -43,7 +43,7 @@ extension BodySinglepartTests {
             ),
             (
                 .init(
-                    type: .text(.init(mediaText: "subtype", lines: 5)),
+                    type: .text(.init(mediaText: "subtype", lineCount: 5)),
                     fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octetCount: 6),
                     extension: nil
                 ),
@@ -58,7 +58,7 @@ extension BodySinglepartTests {
                             envelope: .init(date: "date", subject: nil, from: [], sender: [], reply: [], to: [], cc: [], bcc: [], inReplyTo: nil, messageID: nil),
                             body: .singlepart(
                                 .init(
-                                    type: .text(.init(mediaText: "subtype", lines: 5)),
+                                    type: .text(.init(mediaText: "subtype", lineCount: 5)),
                                     fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octetCount: 6),
                                     extension: nil
                                 )

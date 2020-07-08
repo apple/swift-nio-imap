@@ -164,9 +164,9 @@ extension BodyStructure_Tests {
                 #line
             ),
             (
-                .singlepart(.init(type: .text(.init(mediaText: "media", lines: 3)), fields: BodyStructure.Fields(parameter: [], id: nil, description: nil, encoding: .binary, octetCount: 123))),
+                .singlepart(.init(type: .text(.init(mediaText: "media", lineCount: 3)), fields: BodyStructure.Fields(parameter: [], id: nil, description: nil, encoding: .binary, octetCount: 123))),
                 [1],
-                .singlepart(.init(type: .text(.init(mediaText: "media", lines: 3)), fields: BodyStructure.Fields(parameter: [], id: nil, description: nil, encoding: .binary, octetCount: 123))),
+                .singlepart(.init(type: .text(.init(mediaText: "media", lineCount: 3)), fields: BodyStructure.Fields(parameter: [], id: nil, description: nil, encoding: .binary, octetCount: 123))),
                 #line
             ),
             (
