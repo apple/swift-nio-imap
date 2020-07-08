@@ -27,6 +27,16 @@ public struct MailboxInfo: Equatable {
         self.mailbox = mailbox
         self.extensions = extensions
     }
+
+    /// Splits `mailbox` into constituent path components using the `PathSeparator`. Conversion is lossy and
+    /// for display convenience only, do not use the return value as a mailbox name.
+    /// - returns: [`String`] containing path components
+    public func displayStringComponents() -> [String] {
+        guard let separator = self.pathSeparator else {
+            return [String(buffer: mailbox.storage)]
+        }
+        return self.mailbox.displayStringComponents(separator: separator)
+    }
 }
 
 // MARK: - Types
