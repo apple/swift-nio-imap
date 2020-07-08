@@ -15,32 +15,40 @@
 import struct NIO.ByteBuffer
 
 extension Media {
-    public struct BasicType: Equatable {
-        var _backing: String
+    public struct BasicType: RawRepresentable, CustomStringConvertible, Equatable {
+        public var rawValue: String
+
+        public init(rawValue: String) {
+            self.rawValue = rawValue.uppercased()
+        }
 
         /// IMAP4rev1 APPLICATION
-        public static var application: Self { .init(_backing: "APPLICATION") }
+        public static var application: Self { .init(rawValue: "APPLICATION") }
 
         /// IMAP4rev1 AUDIO
-        public static var audio: Self { .init(_backing: "AUDIO") }
+        public static var audio: Self { .init(rawValue: "AUDIO") }
 
         /// IMAP4rev1 IMAGE
-        public static var image: Self { .init(_backing: "IMAGE") }
+        public static var image: Self { .init(rawValue: "IMAGE") }
 
         /// IMAP4rev1 MESSAGE
-        public static var message: Self { .init(_backing: "MESSAGE") }
+        public static var message: Self { .init(rawValue: "MESSAGE") }
 
         /// IMAP4rev1 VIDEO
-        public static var video: Self { .init(_backing: "VIDEO") }
+        public static var video: Self { .init(rawValue: "VIDEO") }
 
         /// IMAP4rev1 FONT
-        public static var font: Self { .init(_backing: "FONT") }
+        public static var font: Self { .init(rawValue: "FONT") }
 
         /// Creates a new type with the given `String`.
         /// - parameter string: The type to create. Note that the `String` will be uppercased.
         /// - returns: A new type from the given `String`.
         public static func other(_ string: String) -> Self {
-            self.init(_backing: string.uppercased())
+            self.init(rawValue: string)
+        }
+
+        public var description: String {
+            rawValue
         }
     }
 
@@ -62,9 +70,9 @@ extension EncodeBuffer {
     @discardableResult mutating func writeMediaBasicType(_ type: Media.BasicType) -> Int {
         switch type {
         case .application, .audio, .image, .message, .video:
-            return self.writeString("\"\(type._backing)\"")
+            return self.writeString("\"\(type.rawValue)\"")
         default:
-            return self.writeString(type._backing)
+            return self.writeString(type.rawValue)
         }
     }
 
