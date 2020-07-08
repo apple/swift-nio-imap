@@ -36,7 +36,7 @@ public struct Capability: Equatable {
     }
 
     public init(_ value: String) {
-        self.init(unchecked: value.uppercased())
+        self.init(unchecked: value)
     }
 
     fileprivate init(unchecked: String) {
