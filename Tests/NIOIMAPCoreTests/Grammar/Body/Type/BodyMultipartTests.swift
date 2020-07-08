@@ -26,14 +26,14 @@ extension BodyMultipartTests {
             (
                 .init(parts: [
                     .singlepart(BodyStructure.Singlepart(type: .text(.init(mediaText: "subtype", lines: 5)), fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 6), extension: nil)),
-                ], mediaSubtype: .mixed, multipartExtension: nil),
+                ], mediaSubtype: .mixed, extension: nil),
                 "(\"TEXT\" \"subtype\" NIL NIL NIL \"BASE64\" 6 5) \"multipart/mixed\"",
                 #line
             ),
             (
                 .init(parts: [
                     .singlepart(BodyStructure.Singlepart(type: .text(.init(mediaText: "subtype", lines: 5)), fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 6), extension: nil)),
-                ], mediaSubtype: .alternative, multipartExtension: .init(parameters: [], dspLanguage: nil)),
+                ], mediaSubtype: .alternative, extension: .init(parameters: [], dispositionAndLanguage: nil)),
                 "(\"TEXT\" \"subtype\" NIL NIL NIL \"BASE64\" 6 5) \"multipart/alternative\" NIL",
                 #line
             ),
@@ -41,7 +41,7 @@ extension BodyMultipartTests {
                 .init(parts: [
                     .singlepart(BodyStructure.Singlepart(type: .text(.init(mediaText: "subtype", lines: 5)), fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 6), extension: nil)),
                     .singlepart(BodyStructure.Singlepart(type: .text(.init(mediaText: "subtype", lines: 6)), fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 7), extension: nil)),
-                ], mediaSubtype: .related, multipartExtension: nil),
+                ], mediaSubtype: .related, extension: nil),
                 "(\"TEXT\" \"subtype\" NIL NIL NIL \"BASE64\" 6 5)(\"TEXT\" \"subtype\" NIL NIL NIL \"BASE64\" 7 6) \"multipart/related\"",
                 #line
             ),
@@ -51,9 +51,9 @@ extension BodyMultipartTests {
 
     func testEncode_extension() {
         let inputs: [(BodyStructure.Multipart.Extension, String, UInt)] = [
-            (.init(parameters: [.init(field: "f", value: "v")], dspLanguage: nil), "(\"f\" \"v\")", #line),
+            (.init(parameters: [.init(field: "f", value: "v")], dispositionAndLanguage: nil), "(\"f\" \"v\")", #line),
             (
-                .init(parameters: [.init(field: "f1", value: "v1")], dspLanguage: .init(fieldDisposition: .init(string: "string", parameter: [.init(field: "f2", value: "v2")]), fieldLanguage: nil)),
+                .init(parameters: [.init(field: "f1", value: "v1")], dispositionAndLanguage: .init(disposition: .init(string: "string", parameter: [.init(field: "f2", value: "v2")]), language: nil)),
                 "(\"f1\" \"v1\") (\"string\" (\"f2\" \"v2\"))",
                 #line
             ),

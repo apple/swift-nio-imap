@@ -16,13 +16,16 @@ import struct NIO.ByteBuffer
 
 extension BodyStructure {
     /// Extracted from IMAPv4 `body-ext-`1part
-    public struct FieldDispositionLanguage: Equatable {
-        public var fieldDisposition: FieldDispositionData?
-        public var fieldLanguage: FieldLanguageLocation?
+    public struct DispositionAndLanguage: Equatable {
+        /// A parenthesized list, consisting of a disposition type
+        /// string, followed by a parenthesized list of disposition
+        /// attribute/value pairs as defined in RFC 2183.
+        public var disposition: Disposition?
+        public var language: LanguageLocation?
 
-        public init(fieldDisposition: FieldDispositionData? = nil, fieldLanguage: FieldLanguageLocation? = nil) {
-            self.fieldDisposition = fieldDisposition
-            self.fieldLanguage = fieldLanguage
+        public init(disposition: Disposition? = nil, language: LanguageLocation? = nil) {
+            self.disposition = disposition
+            self.language = language
         }
     }
 }
@@ -30,8 +33,8 @@ extension BodyStructure {
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeBodyFieldDispositionLanguage(_ desc: BodyStructure.FieldDispositionLanguage) -> Int {
+    @discardableResult mutating func writeBodyDispositionAndLanguage(_ desc: BodyStructure.DispositionAndLanguage) -> Int {
         self.writeSpace() +
-            self.writeBodyFieldDSP(desc.fieldDisposition)
+            self.writeBodyFieldDisposition(desc.disposition)
     }
 }

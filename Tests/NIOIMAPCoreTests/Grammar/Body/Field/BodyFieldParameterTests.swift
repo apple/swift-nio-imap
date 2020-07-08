@@ -22,7 +22,7 @@ class BodyFieldParameterTests: EncodeTestClass {}
 
 extension BodyFieldParameterTests {
     func testEncode() {
-        let inputs: [([FieldParameterPair], String, UInt)] = [
+        let inputs: [([BodyStructure.ParameterPair], String, UInt)] = [
             ([], "NIL", #line),
             ([.init(field: "f1", value: "v1")], "(\"f1\" \"v1\")", #line),
             ([.init(field: "f1", value: "v1"), .init(field: "f2", value: "v2")], "(\"f1\" \"v1\" \"f2\" \"v2\")", #line),
@@ -30,7 +30,7 @@ extension BodyFieldParameterTests {
 
         for (test, expectedString, line) in inputs {
             self.testBuffer.clear()
-            let size = self.testBuffer.writeBodyFieldParameters(test)
+            let size = self.testBuffer.writeBodyParameterPairs(test)
             XCTAssertEqual(size, expectedString.utf8.count, line: line)
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }

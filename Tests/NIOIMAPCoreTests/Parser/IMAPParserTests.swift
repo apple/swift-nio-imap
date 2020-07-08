@@ -410,7 +410,7 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseBodyExtension() {
-        let inputs: [(String, String, [BodyExtensionType], UInt)] = [
+        let inputs: [(String, String, [BodyExtension], UInt)] = [
             ("1", "\r", [.number(1)], #line),
             ("\"s\"", "\r", [.string("s")], #line),
             ("(1)", "\r", [.number(1)], #line),
@@ -429,7 +429,7 @@ extension ParserUnitTests {
         TestUtilities.withBuffer(#"("astring" ("f1" "v1"))"#) { (buffer) in
             let dsp = try GrammarParser.parseBodyFieldDsp(buffer: &buffer, tracker: .testTracker)
             XCTAssertNotNil(dsp)
-            XCTAssertEqual(dsp, BodyStructure.FieldDispositionData(string: "astring", parameter: [.init(field: "f1", value: "v1")]))
+            XCTAssertEqual(dsp, BodyStructure.Disposition(string: "astring", parameter: [.init(field: "f1", value: "v1")]))
         }
     }
 
@@ -492,7 +492,7 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseBodyFieldParam() {
-        let inputs: [(String, String, [FieldParameterPair], UInt)] = [
+        let inputs: [(String, String, [BodyStructure.ParameterPair], UInt)] = [
             (#"NIL"#, " ", [], #line),
             (#"("f1" "v1")"#, " ", [.init(field: "f1", value: "v1")], #line),
             (#"("f1" "v1" "f2" "v2")"#, " ", [.init(field: "f1", value: "v1"), .init(field: "f2", value: "v2")], #line),

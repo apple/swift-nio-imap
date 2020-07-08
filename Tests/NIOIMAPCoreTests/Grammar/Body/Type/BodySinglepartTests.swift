@@ -36,7 +36,7 @@ extension BodySinglepartTests {
                 .init(
                     type: .basic(.init(type: .application, subtype: .related)),
                     fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 7),
-                    extension: .init(fieldMD5: "md5", dspLanguage: nil)
+                    extension: .init(fieldMD5: "md5", dispositionAndLanguage: nil)
                 ),
                 "\"APPLICATION\" \"multipart/related\" NIL NIL NIL \"BASE64\" 7 \"md5\"",
                 #line
@@ -84,9 +84,9 @@ extension BodySinglepartTests {
 
     func testEncode_extension() {
         let inputs: [(BodyStructure.Singlepart.Extension, String, UInt)] = [
-            (.init(fieldMD5: nil, dspLanguage: nil), "NIL", #line),
-            (.init(fieldMD5: "md5", dspLanguage: nil), "\"md5\"", #line),
-            (.init(fieldMD5: "md5", dspLanguage: .init(fieldDisposition: .init(string: "string", parameter: []), fieldLanguage: nil)), "\"md5\" (\"string\" NIL)", #line),
+            (.init(fieldMD5: nil, dispositionAndLanguage: nil), "NIL", #line),
+            (.init(fieldMD5: "md5", dispositionAndLanguage: nil), "\"md5\"", #line),
+            (.init(fieldMD5: "md5", dispositionAndLanguage: .init(disposition: .init(string: "string", parameter: []), language: nil)), "\"md5\" (\"string\" NIL)", #line),
         ]
 
         for (test, expectedString, line) in inputs {
