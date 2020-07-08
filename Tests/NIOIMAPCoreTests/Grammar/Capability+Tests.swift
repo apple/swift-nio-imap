@@ -18,16 +18,6 @@ import XCTest
 
 class Capability_Tests: EncodeTestClass {}
 
-// MARK: - Equatable
-
-extension Capability_Tests {
-    func testEquatable() {
-        let capability1 = Capability("idle")
-        let capability2 = Capability("IDLE")
-        XCTAssertEqual(capability1, capability2)
-    }
-}
-
 // MARK: - Name/Values
 
 extension Capability_Tests {
