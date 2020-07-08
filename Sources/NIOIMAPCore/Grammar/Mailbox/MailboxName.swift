@@ -54,11 +54,13 @@ public struct MailboxName: Equatable {
     /// Splits `mailbox` into constituent path components using the `PathSeparator`. Conversion is lossy and
     /// for display convenience only, do not use the return value as a mailbox name.
     /// - returns: [`String`] containing path components
-    public func displayStringComponents(separator: Character) -> [String] {
+    public func displayStringComponents(separator: Character, omittingEmptySubsequences: Bool = true) -> [String] {
         guard let first = separator.asciiValue else {
             preconditionFailure("Cannot split on a non-ascii character")
         }
-        return self.storage.readableBytesView.split(separator: first).map { String(decoding: $0, as: Unicode.UTF8.self) }
+        return self.storage.readableBytesView
+            .split(separator: first, omittingEmptySubsequences: omittingEmptySubsequences)
+            .map { String(decoding: $0, as: Unicode.UTF8.self) }
     }
 }
 

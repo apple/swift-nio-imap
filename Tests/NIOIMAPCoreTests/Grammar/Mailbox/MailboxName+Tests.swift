@@ -23,13 +23,17 @@ class MailboxName_Tests: EncodeTestClass {}
 extension MailboxName_Tests {
     
     func testSplitting() {
-        let inputs: [(MailboxName, Character, [String], UInt)] = [
-            (.init("ABC"), .init("B"), ["A", "C"], #line),
-            (.init("ABC"), .init("D"), ["ABC"], #line),
-            (.init(""), .init("D"), [], #line),
+        let inputs: [(MailboxName, Character, Bool, [String], UInt)] = [
+            (.init("ABC"), .init("B"), true, ["A", "C"], #line),
+            (.init("ABC"), .init("D"), true, ["ABC"], #line),
+            (.init(""), .init("D"), true, [], #line),
+            (.init("some/real/mailbox"), .init("/"), true, ["some", "real", "mailbox"], #line),
+            (.init("mailbox#test"), .init("#"), true, ["mailbox", "test"], #line),
+            (.init("//test1//test2//"), .init("/"), true, ["test1", "test2"], #line),
+            (.init("//test1//test2//"), .init("/"), false, ["", "", "test1", "", "test2", "", ""], #line),
         ]
-        for (name, character, expected, line) in inputs {
-            XCTAssertEqual(name.displayStringComponents(separator: character), expected, line: line)
+        for (name, character, ommitEmpty, expected, line) in inputs {
+            XCTAssertEqual(name.displayStringComponents(separator: character, omittingEmptySubsequences: ommitEmpty), expected, line: line)
         }
     }
     
