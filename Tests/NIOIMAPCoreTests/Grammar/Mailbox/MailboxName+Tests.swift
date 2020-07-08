@@ -21,7 +21,6 @@ class MailboxName_Tests: EncodeTestClass {}
 // MARK: - displayStringComponents
 
 extension MailboxName_Tests {
-    
     func testSplitting() {
         let inputs: [(MailboxName, Character, Bool, [String], UInt)] = [
             (.init("ABC"), .init("B"), true, ["A", "C"], #line),
@@ -36,5 +35,4 @@ extension MailboxName_Tests {
             XCTAssertEqual(name.displayStringComponents(separator: character, omittingEmptySubsequences: ommitEmpty), expected, line: line)
         }
     }
-    
 }

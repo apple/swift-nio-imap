@@ -50,7 +50,7 @@ public struct MailboxName: Equatable {
             self.storage = bytes
         }
     }
-    
+
     /// Splits `mailbox` into constituent path components using the `PathSeparator`. Conversion is lossy and
     /// for display convenience only, do not use the return value as a mailbox name.
     /// - returns: [`String`] containing path components
