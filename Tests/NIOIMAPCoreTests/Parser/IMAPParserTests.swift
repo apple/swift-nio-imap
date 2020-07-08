@@ -606,6 +606,8 @@ extension ParserUnitTests {
             ("CONDSTORE", " ", .condStore, #line),
             ("AUTH=PLAIN", " ", .auth(.plain), #line),
             ("SPECIAL-USE", " ", .specialUse, #line),
+            ("XSPECIAL", " ", .init("XSPECIAL"), #line),
+            ("SPECIAL", " ", .init("SPECIAL"), #line),
         ]
         self.iterateTestInputs(inputs, testFunction: GrammarParser.parseCapability)
     }

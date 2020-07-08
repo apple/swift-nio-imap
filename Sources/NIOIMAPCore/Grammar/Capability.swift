@@ -36,7 +36,7 @@ public struct Capability: Equatable {
     }
 
     public init(_ value: String) {
-        self.init(unchecked: value.uppercased())
+        self.init(unchecked: value)
     }
 
     fileprivate init(unchecked: String) {
@@ -140,7 +140,7 @@ extension Capability {
     }
 
     public struct RightsType: Equatable {
-        public static let tekx = Self(unchecked: "tekx")
+        public static let tekx = Self(unchecked: "TEKX")
 
         public var rawValue: String
 
@@ -166,7 +166,7 @@ extension Capability {
     public static let filters = Self(unchecked: "FILTERS")
     public static let id = Self(unchecked: "ID")
     public static let idle = Self(unchecked: "IDLE")
-    public static let imap4rev1 = Self(unchecked: "IMAP4REV1")
+    public static let imap4rev1 = Self(unchecked: "IMAP4rev1")
     public static let imap4 = Self(unchecked: "IMAP4")
     public static let language = Self(unchecked: "LANGUAGE")
     public static let listStatus = Self(unchecked: "LIST-STATUS")
