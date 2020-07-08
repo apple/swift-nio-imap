@@ -332,7 +332,7 @@ extension GrammarParser {
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
             let param = try self.parseBodyFieldParam(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)
-            return BodyStructure.Disposition(string: string, parameter: param)
+            return BodyStructure.Disposition(kind: string, parameter: param)
         }
 
         return try ParserLibrary.parseOneOf([

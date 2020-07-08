@@ -24,12 +24,12 @@ extension BodyFieldDSPTests {
     func testEncode() {
         let inputs: [(BodyStructure.Disposition?, String, UInt)] = [
             (nil, "NIL", #line),
-            (.init(string: "some", parameter: [.init(field: "f1", value: "v1")]), "(\"some\" (\"f1\" \"v1\"))", #line),
+            (.init(kind: "some", parameter: [.init(field: "f1", value: "v1")]), "(\"some\" (\"f1\" \"v1\"))", #line),
         ]
 
         for (test, expectedString, line) in inputs {
             self.testBuffer.clear()
-            let size = self.testBuffer.writeBodyFieldDisposition(test)
+            let size = self.testBuffer.writeBodyDisposition(test)
             XCTAssertEqual(size, expectedString.utf8.count, line: line)
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }

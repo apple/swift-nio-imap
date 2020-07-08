@@ -53,7 +53,7 @@ extension BodyMultipartTests {
         let inputs: [(BodyStructure.Multipart.Extension, String, UInt)] = [
             (.init(parameters: [.init(field: "f", value: "v")], dispositionAndLanguage: nil), "(\"f\" \"v\")", #line),
             (
-                .init(parameters: [.init(field: "f1", value: "v1")], dispositionAndLanguage: .init(disposition: .init(string: "string", parameter: [.init(field: "f2", value: "v2")]), language: nil)),
+                .init(parameters: [.init(field: "f1", value: "v1")], dispositionAndLanguage: .init(disposition: .init(kind: "string", parameter: [.init(field: "f2", value: "v2")]), language: nil)),
                 "(\"f1\" \"v1\") (\"string\" (\"f2\" \"v2\"))",
                 #line
             ),

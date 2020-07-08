@@ -86,7 +86,7 @@ extension BodySinglepartTests {
         let inputs: [(BodyStructure.Singlepart.Extension, String, UInt)] = [
             (.init(fieldMD5: nil, dispositionAndLanguage: nil), "NIL", #line),
             (.init(fieldMD5: "md5", dispositionAndLanguage: nil), "\"md5\"", #line),
-            (.init(fieldMD5: "md5", dispositionAndLanguage: .init(disposition: .init(string: "string", parameter: []), language: nil)), "\"md5\" (\"string\" NIL)", #line),
+            (.init(fieldMD5: "md5", dispositionAndLanguage: .init(disposition: .init(kind: "string", parameter: []), language: nil)), "\"md5\" (\"string\" NIL)", #line),
         ]
 
         for (test, expectedString, line) in inputs {
