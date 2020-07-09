@@ -15,7 +15,7 @@
 import struct NIO.ByteBuffer
 
 /// IMAPv4 `body-extension`
-public enum BodyExtensionType: Equatable {
+public enum BodyExtension: Equatable {
     case string(NString)
     case number(Int)
 }
@@ -23,13 +23,13 @@ public enum BodyExtensionType: Equatable {
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeBodyExtension(_ ext: [BodyExtensionType]) -> Int {
+    @discardableResult mutating func writeBodyExtensions(_ ext: [BodyExtension]) -> Int {
         self.writeArray(ext) { (element, self) in
-            self.writeBodyExtensionType(element)
+            self.writeBodyExtension(element)
         }
     }
 
-    @discardableResult mutating func writeBodyExtensionType(_ type: BodyExtensionType) -> Int {
+    @discardableResult mutating func writeBodyExtension(_ type: BodyExtension) -> Int {
         switch type {
         case .string(let string):
             return self.writeNString(string)

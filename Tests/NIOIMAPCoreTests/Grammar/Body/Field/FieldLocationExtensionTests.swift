@@ -22,7 +22,7 @@ class FieldLocationExtensionTests: EncodeTestClass {}
 
 extension FieldLocationExtensionTests {
     func testEncode() {
-        let inputs: [(BodyStructure.FieldLocationExtension, String, UInt)] = [
+        let inputs: [(BodyStructure.LocationAndExtensions, String, UInt)] = [
             (.init(location: "loc", extensions: []), " \"loc\"", #line),
             (.init(location: "loc", extensions: [[.number(1)]]), " \"loc\" (1)", #line),
             (.init(location: "loc", extensions: [[.number(1), .number(2)]]), " \"loc\" (1 2)", #line),
@@ -30,7 +30,7 @@ extension FieldLocationExtensionTests {
 
         for (test, expectedString, line) in inputs {
             self.testBuffer.clear()
-            let size = self.testBuffer.writeBodyFieldLocationExtension(test)
+            let size = self.testBuffer.writeBodyLocationAndExtensions(test)
             XCTAssertEqual(size, expectedString.utf8.count, line: line)
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }

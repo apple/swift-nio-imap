@@ -15,7 +15,7 @@
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeBodyFieldLanguages(_ languages: [String]) -> Int {
+    @discardableResult mutating func writeBodyLanguages(_ languages: [String]) -> Int {
         guard languages.count > 0 else {
             return self.writeNil()
         }

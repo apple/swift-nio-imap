@@ -15,14 +15,13 @@
 import struct NIO.ByteBuffer
 
 extension BodyStructure {
-    /// IMAPv4 `body-fld-dsp`
-    public struct FieldDispositionData: Equatable {
-        public var string: String
-        public var parameter: [FieldParameterPair]
+    public struct ParameterPair: Equatable {
+        public var field: String
+        public var value: String
 
-        public init(string: String, parameter: [FieldParameterPair]) {
-            self.string = string
-            self.parameter = parameter
+        public init(field: String, value: String) {
+            self.field = field
+            self.value = value
         }
     }
 }
@@ -30,16 +29,18 @@ extension BodyStructure {
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeBodyFieldDSP(_ dsp: BodyStructure.FieldDispositionData?) -> Int {
-        guard let dsp = dsp else {
+    @discardableResult mutating func writeBodyParameterPairs(_ params: [BodyStructure.ParameterPair]) -> Int {
+        guard params.count > 0 else {
             return self.writeNil()
         }
+        return self.writeArray(params) { (element, buffer) in
+            buffer.writeParameterPair(element)
+        }
+    }
 
-        return
-            self.writeString("(") +
-            self.writeIMAPString(dsp.string) +
+    @discardableResult mutating func writeParameterPair(_ pair: BodyStructure.ParameterPair) -> Int {
+        self.writeIMAPString(pair.field) +
             self.writeSpace() +
-            self.writeBodyFieldParameters(dsp.parameter) +
-            self.writeString(")")
+            self.writeIMAPString(pair.value)
     }
 }

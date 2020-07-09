@@ -34,7 +34,7 @@ extension BodyStructure: RandomAccessCollection {
 
         switch self {
         case .singlepart(let part):
-            switch part.type {
+            switch part.kind {
             case .basic:
                 return self
             case .message(let message):

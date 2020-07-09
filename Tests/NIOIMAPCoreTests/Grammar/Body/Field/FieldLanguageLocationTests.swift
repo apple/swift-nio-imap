@@ -22,7 +22,7 @@ class FieldLanguageLocationTests: EncodeTestClass {}
 
 extension FieldLanguageLocationTests {
     func testEncode() {
-        let inputs: [(BodyStructure.FieldLanguageLocation, String, UInt)] = [
+        let inputs: [(BodyStructure.LanguageLocation, String, UInt)] = [
             (.init(languages: ["language"], location: nil), " (\"language\")", #line),
             (.init(languages: ["language"], location: .init(location: "location", extensions: [])), " (\"language\") \"location\"", #line),
         ]

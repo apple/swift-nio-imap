@@ -26,7 +26,7 @@ extension BodySinglepartTests {
             (
                 .init(
                     type: .basic(.init(type: .application, subtype: .alternative)),
-                    fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 6),
+                    fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octetCount: 6),
                     extension: nil
                 ),
                 "\"APPLICATION\" \"multipart/alternative\" NIL NIL NIL \"BASE64\" 6",
@@ -35,16 +35,16 @@ extension BodySinglepartTests {
             (
                 .init(
                     type: .basic(.init(type: .application, subtype: .related)),
-                    fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 7),
-                    extension: .init(fieldMD5: "md5", dspLanguage: nil)
+                    fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octetCount: 7),
+                    extension: .init(fieldMD5: "md5", dispositionAndLanguage: nil)
                 ),
                 "\"APPLICATION\" \"multipart/related\" NIL NIL NIL \"BASE64\" 7 \"md5\"",
                 #line
             ),
             (
                 .init(
-                    type: .text(.init(mediaText: "subtype", lines: 5)),
-                    fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 6),
+                    type: .text(.init(mediaText: "subtype", lineCount: 5)),
+                    fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octetCount: 6),
                     extension: nil
                 ),
                 "\"TEXT\" \"subtype\" NIL NIL NIL \"BASE64\" 6 5",
@@ -58,15 +58,15 @@ extension BodySinglepartTests {
                             envelope: .init(date: "date", subject: nil, from: [], sender: [], reply: [], to: [], cc: [], bcc: [], inReplyTo: nil, messageID: nil),
                             body: .singlepart(
                                 .init(
-                                    type: .text(.init(mediaText: "subtype", lines: 5)),
-                                    fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 6),
+                                    type: .text(.init(mediaText: "subtype", lineCount: 5)),
+                                    fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octetCount: 6),
                                     extension: nil
                                 )
                             ),
                             fieldLines: 8
                         )
                     ),
-                    fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octets: 6),
+                    fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octetCount: 6),
                     extension: nil
                 ),
                 "\"MESSAGE\" \"RFC822\" NIL NIL NIL \"BASE64\" 6 (\"date\" NIL NIL NIL NIL NIL NIL NIL NIL NIL) (\"TEXT\" \"subtype\" NIL NIL NIL \"BASE64\" 6 5) 8",
@@ -84,9 +84,9 @@ extension BodySinglepartTests {
 
     func testEncode_extension() {
         let inputs: [(BodyStructure.Singlepart.Extension, String, UInt)] = [
-            (.init(fieldMD5: nil, dspLanguage: nil), "NIL", #line),
-            (.init(fieldMD5: "md5", dspLanguage: nil), "\"md5\"", #line),
-            (.init(fieldMD5: "md5", dspLanguage: .init(fieldDisposition: .init(string: "string", parameter: []), fieldLanguage: nil)), "\"md5\" (\"string\" NIL)", #line),
+            (.init(fieldMD5: nil, dispositionAndLanguage: nil), "NIL", #line),
+            (.init(fieldMD5: "md5", dispositionAndLanguage: nil), "\"md5\"", #line),
+            (.init(fieldMD5: "md5", dispositionAndLanguage: .init(disposition: .init(kind: "string", parameter: []), language: nil)), "\"md5\" (\"string\" NIL)", #line),
         ]
 
         for (test, expectedString, line) in inputs {

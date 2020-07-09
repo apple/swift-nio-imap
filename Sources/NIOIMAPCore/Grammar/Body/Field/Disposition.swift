@@ -14,31 +14,32 @@
 
 import struct NIO.ByteBuffer
 
-public struct FieldParameterPair: Equatable {
-    public var field: String
-    public var value: String
+extension BodyStructure {
+    /// IMAPv4 `body-fld-dsp`
+    public struct Disposition: Equatable {
+        public var kind: String
+        public var parameter: [ParameterPair]
 
-    public init(field: String, value: String) {
-        self.field = field
-        self.value = value
+        public init(kind: String, parameter: [ParameterPair]) {
+            self.kind = kind
+            self.parameter = parameter
+        }
     }
 }
 
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeBodyFieldParameters(_ params: [FieldParameterPair]) -> Int {
-        guard params.count > 0 else {
+    @discardableResult mutating func writeBodyDisposition(_ dsp: BodyStructure.Disposition?) -> Int {
+        guard let dsp = dsp else {
             return self.writeNil()
         }
-        return self.writeArray(params) { (element, buffer) in
-            buffer.writeFieldParameterPair(element)
-        }
-    }
 
-    @discardableResult mutating func writeFieldParameterPair(_ pair: FieldParameterPair) -> Int {
-        self.writeIMAPString(pair.field) +
+        return
+            self.writeString("(") +
+            self.writeIMAPString(dsp.kind) +
             self.writeSpace() +
-            self.writeIMAPString(pair.value)
+            self.writeBodyParameterPairs(dsp.parameter) +
+            self.writeString(")")
     }
 }

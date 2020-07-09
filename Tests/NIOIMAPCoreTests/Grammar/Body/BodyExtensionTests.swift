@@ -22,7 +22,7 @@ class BodyExtensionTests: EncodeTestClass {}
 
 extension BodyExtensionTests {
     func testEncode() {
-        let inputs: [([BodyExtensionType], String, UInt)] = [
+        let inputs: [([BodyExtension], String, UInt)] = [
             ([.number(1)], "(1)", #line),
             ([.string("apple")], "(\"apple\")", #line),
             ([.string(nil)], "(NIL)", #line),
@@ -32,7 +32,7 @@ extension BodyExtensionTests {
 
         for (test, expectedString, line) in inputs {
             self.testBuffer.clear()
-            let size = self.testBuffer.writeBodyExtension(test)
+            let size = self.testBuffer.writeBodyExtensions(test)
             XCTAssertEqual(size, expectedString.utf8.count, line: line)
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }

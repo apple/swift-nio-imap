@@ -17,12 +17,12 @@ import struct NIO.ByteBuffer
 extension BodyStructure {
     /// IMAPv4 `body-type-1part`
     public struct Singlepart: Equatable {
-        public var type: Kind
+        public var kind: Kind
         public var fields: Fields
         public var `extension`: Extension?
 
         public init(type: BodyStructure.Singlepart.Kind, fields: Fields, extension: Extension? = nil) {
-            self.type = type
+            self.kind = type
             self.fields = fields
             self.extension = `extension`
         }
@@ -43,36 +43,37 @@ extension BodyStructure.Singlepart {
         public var message: Media.Message
         public var envelope: Envelope
         public var body: BodyStructure
-        public var fieldLines: Int
+        public var lineCount: Int
 
         public init(message: Media.Message, envelope: Envelope, body: BodyStructure, fieldLines: Int) {
             self.message = message
             self.envelope = envelope
             self.body = body
-            self.fieldLines = fieldLines
+            self.lineCount = fieldLines
         }
     }
 
     /// IMAPv4 `body-type-text`
     public struct Text: Equatable {
         public var mediaText: String
-        public var lines: Int
+        public var lineCount: Int
 
-        public init(mediaText: String, lines: Int) {
+        public init(mediaText: String, lineCount: Int) {
             self.mediaText = mediaText
-            self.lines = lines
+            self.lineCount = lineCount
         }
     }
 
     /// IMAPv4 `body-ext-1part`
     public struct Extension: Equatable {
-        public let fieldMD5: NString
-        public var dspLanguage: BodyStructure.FieldDispositionLanguage?
+        /// A string giving the body MD5 value.
+        public let digest: NString
+        public var dispositionAndLanguage: BodyStructure.DispositionAndLanguage?
 
         /// Convenience function for a better experience when chaining multiple types.
-        init(fieldMD5: NString, dspLanguage: BodyStructure.FieldDispositionLanguage?) {
-            self.fieldMD5 = fieldMD5
-            self.dspLanguage = dspLanguage
+        init(fieldMD5: NString, dispositionAndLanguage: BodyStructure.DispositionAndLanguage?) {
+            self.digest = fieldMD5
+            self.dispositionAndLanguage = dispositionAndLanguage
         }
     }
 }
@@ -82,7 +83,7 @@ extension BodyStructure.Singlepart {
 extension EncodeBuffer {
     @discardableResult mutating func writeBodyTypeSinglepart(_ part: BodyStructure.Singlepart) -> Int {
         var size = 0
-        switch part.type {
+        switch part.kind {
         case .basic(let basic):
             size += self.writeBodyTypeBasic(mediaType: basic, fields: part.fields)
         case .message(let message):
@@ -102,7 +103,7 @@ extension EncodeBuffer {
         self.writeMediaText(body.mediaText) +
             self.writeSpace() +
             self.writeBodyFields(fields) +
-            self.writeString(" \(body.lines)")
+            self.writeString(" \(body.lineCount)")
     }
 
     @discardableResult private mutating func writeBodyTypeMessage(_ message: BodyStructure.Singlepart.Message, fields: BodyStructure.Fields) -> Int {
@@ -113,7 +114,7 @@ extension EncodeBuffer {
             self.writeEnvelope(message.envelope) +
             self.writeSpace() +
             self.writeBody(message.body) +
-            self.writeString(" \(message.fieldLines)")
+            self.writeString(" \(message.lineCount)")
     }
 
     @discardableResult private mutating func writeBodyTypeBasic(mediaType: Media.Basic, fields: BodyStructure.Fields) -> Int {
@@ -123,9 +124,9 @@ extension EncodeBuffer {
     }
 
     @discardableResult mutating func writeBodyExtensionSinglePart(_ ext: BodyStructure.Singlepart.Extension) -> Int {
-        self.writeNString(ext.fieldMD5) +
-            self.writeIfExists(ext.dspLanguage) { (dspLanguage) -> Int in
-                self.writeBodyFieldDispositionLanguage(dspLanguage)
+        self.writeNString(ext.digest) +
+            self.writeIfExists(ext.dispositionAndLanguage) { (dsp) -> Int in
+                self.writeBodyDispositionAndLanguage(dsp)
             }
     }
 }
