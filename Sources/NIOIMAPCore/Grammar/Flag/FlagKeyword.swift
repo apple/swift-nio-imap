@@ -15,9 +15,21 @@
 import struct NIO.ByteBuffer
 
 extension Flag {
-    /// IMAPv4 `flag-keyword`
+    /// IMAP Flag Keyword
+    ///
+    /// Flags are case preserving, but case insensitive.
+    /// As such e.g. `Flag.Keyword("$Forwarded") == Flag.Keyword("$forwarded")`, but
+    /// it will round-trip preserving its case.
     public struct Keyword: Hashable {
         public var rawValue: String
+
+        public static func == (lhs: Keyword, rhs: Keyword) -> Bool {
+            lhs.rawValue.uppercased() == rhs.rawValue.uppercased()
+        }
+
+        public func hash(into hasher: inout Hasher) {
+            rawValue.uppercased().hash(into: &hasher)
+        }
 
         public init(_ string: String) {
             precondition(string.utf8.allSatisfy { (c) -> Bool in

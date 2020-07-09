@@ -22,8 +22,42 @@ enum _Flag: Hashable {
     case draft
     case keyword(Flag.Keyword)
     case `extension`(String)
+
+    public static func == (lhs: _Flag, rhs: _Flag) -> Bool {
+        switch (lhs, rhs) {
+        case (.answered, .answered): return true
+        case (.flagged, .flagged): return true
+        case (.deleted, .deleted): return true
+        case (.seen, .seen): return true
+        case (.draft, .draft): return true
+        case (.keyword(let a), .keyword(let b)): return a == b
+        case (.extension(let a), .extension(let b)): return a.uppercased() == b.uppercased()
+        default: return false
+        }
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        switch self {
+        case .answered: 1.hash(into: &hasher)
+        case .flagged: 2.hash(into: &hasher)
+        case .deleted: 3.hash(into: &hasher)
+        case .seen: 4.hash(into: &hasher)
+        case .draft: 5.hash(into: &hasher)
+        case .keyword(let k):
+            6.hash(into: &hasher)
+            k.hash(into: &hasher)
+        case .extension(let e):
+            7.hash(into: &hasher)
+            e.uppercased().hash(into: &hasher)
+        }
+    }
 }
 
+/// IMAP Flag
+///
+/// Flags are case preserving, but case insensitive.
+/// As such e.g. `.extension("\\FOOBAR") == .extension("\\FooBar")`, but
+/// it will round-trip preserving its case.
 public struct Flag: Hashable {
     var _backing: _Flag
 
@@ -57,7 +91,6 @@ public struct Flag: Hashable {
     /// - returns: A newly-create `Flag`
     public static func `extension`(_ string: String) -> Self {
         precondition(string.first == "\\", "Flag extensions must begin with \\")
-        let uppercased = string.uppercased()
         switch string.uppercased() {
         case "\\ANSWERED":
             return .answered
@@ -70,7 +103,7 @@ public struct Flag: Hashable {
         case "\\DRAFT":
             return .draft
         default:
-            return Self(_backing: .extension(uppercased))
+            return Self(_backing: .extension(string))
         }
     }
 }
