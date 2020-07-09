@@ -56,7 +56,7 @@ extension ResponseParser_Tests {
                         .fetchResponse(.simpleAttribute(.body(.multipart(.init(parts: [
                             .singlepart(.init(type: .text(.init(mediaText: "PLAIN", lineCount: 47)), fields: .init(parameter: [.init(field: "CHARSET", value: "utf-8")], id: nil, description: nil, encoding: .quotedPrintable, octetCount: 1772), extension: .init(fieldMD5: nil, dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: .init(location: nil, extensions: [])))))),
                             .singlepart(.init(type: .text(.init(mediaText: "HTML", lineCount: 40)), fields: .init(parameter: [.init(field: "CHARSET", value: "utf-8")], id: nil, description: nil, encoding: .quotedPrintable, octetCount: 2778), extension: .init(fieldMD5: nil, dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: .init(location: nil, extensions: [])))))),
-                        ], mediaSubtype: .init("ALTERNATIVE"), extension: .init(parameters: [.init(field: "BOUNDARY", value: "Apple-Mail=_0D97185D-4FF1-42FE-9B8F-A0759D299015")], dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: .init(location: nil, extensions: [])))))), structure: true)))
+                        ], mediaSubtype: .init("ALTERNATIVE"), extension: .init(parameters: [.init(field: "BOUNDARY", value: "Apple-Mail=_0D97185D-4FF1-42FE-9B8F-A0759D299015")], dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: .init(location: nil, extensions: [])))))), hasExtensionData: true)))
                     ),
                     .response(.fetchResponse(.finish)),
                 ],
@@ -69,7 +69,7 @@ extension ResponseParser_Tests {
                     .response(
                         .fetchResponse(.simpleAttribute(.body(.multipart(.init(parts: [
                             .singlepart(.init(type: .text(.init(mediaText: "HTML", lineCount: 50)), fields: .init(parameter: [.init(field: "CHARSET", value: "UTF-8")], id: nil, description: nil, encoding: .quotedPrintable, octetCount: 3034), extension: .init(fieldMD5: nil, dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: .init(location: nil, extensions: [])))))),
-                        ], mediaSubtype: .init("ALTERNATIVE"), extension: .init(parameters: [.init(field: "BOUNDARY", value: "_____5C088583DDA30A778CEA0F5BFE2856D1")], dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: .init(location: nil, extensions: [])))))), structure: true)))
+                        ], mediaSubtype: .init("ALTERNATIVE"), extension: .init(parameters: [.init(field: "BOUNDARY", value: "_____5C088583DDA30A778CEA0F5BFE2856D1")], dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: .init(location: nil, extensions: [])))))), hasExtensionData: true)))
                     ),
                     .response(.fetchResponse(.finish)),
                 ],
@@ -83,7 +83,7 @@ extension ResponseParser_Tests {
                         .fetchResponse(.simpleAttribute(.body(.multipart(.init(parts: [
                             .singlepart(.init(type: .text(.init(mediaText: "PLAIN", lineCount: 5)), fields: .init(parameter: [.init(field: "CHARSET", value: "UTF-8")], id: nil, description: nil, encoding: .sevenBit, octetCount: 221), extension: .init(fieldMD5: nil, dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: .init(location: nil, extensions: [])))))),
                             .singlepart(.init(type: .text(.init(mediaText: "HTML", lineCount: 20)), fields: .init(parameter: [.init(field: "CHARSET", value: "UTF-8")], id: nil, description: nil, encoding: .sevenBit, octetCount: 2075), extension: .init(fieldMD5: nil, dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: .init(location: nil, extensions: [])))))),
-                        ], mediaSubtype: .init("ALTERNATIVE"), extension: .init(parameters: [.init(field: "BOUNDARY", value: "--==_mimepart_5efddab8ca39a_6a343f841aacb93410876c"), .init(field: "CHARSET", value: "UTF-8")], dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: .init(location: nil, extensions: [])))))), structure: true)))
+                        ], mediaSubtype: .init("ALTERNATIVE"), extension: .init(parameters: [.init(field: "BOUNDARY", value: "--==_mimepart_5efddab8ca39a_6a343f841aacb93410876c"), .init(field: "CHARSET", value: "UTF-8")], dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: .init(location: nil, extensions: [])))))), hasExtensionData: true)))
                     ),
                     .response(.fetchResponse(.finish)),
                 ],
@@ -97,7 +97,7 @@ extension ResponseParser_Tests {
                         .fetchResponse(.simpleAttribute(.body(.multipart(.init(parts: [
                             .singlepart(.init(type: .text(.init(mediaText: "PLAIN", lineCount: 4078)), fields: .init(parameter: [.init(field: "CHARSET", value: "utf-8")], id: nil, description: nil, encoding: .quotedPrintable, octetCount: 239844), extension: .init(fieldMD5: nil, dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: .init(location: nil, extensions: [])))))),
                             .singlepart(.init(type: .text(.init(mediaText: "HTML", lineCount: 4078)), fields: .init(parameter: [.init(field: "CHARSET", value: "utf-8")], id: nil, description: nil, encoding: .quotedPrintable, octetCount: 239844), extension: .init(fieldMD5: nil, dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: .init(location: nil, extensions: [])))))),
-                        ], mediaSubtype: .init("ALTERNATIVE"), extension: .init(parameters: [.init(field: "BOUNDARY", value: "===============8996999810533184102==")], dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: .init(location: nil, extensions: [])))))), structure: true)))
+                        ], mediaSubtype: .init("ALTERNATIVE"), extension: .init(parameters: [.init(field: "BOUNDARY", value: "===============8996999810533184102==")], dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: .init(location: nil, extensions: [])))))), hasExtensionData: true)))
                     ),
                     .response(.fetchResponse(.finish)),
                 ],
@@ -108,7 +108,7 @@ extension ResponseParser_Tests {
                 [
                     .response(.fetchResponse(.start(12183))),
                     .response(
-                        .fetchResponse(.simpleAttribute(.body(.singlepart(.init(type: .text(.init(mediaText: "HTML", lineCount: 603)), fields: .init(parameter: [], id: nil, description: nil, encoding: .binary, octetCount: 28803), extension: .init(fieldMD5: nil, dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: .init(location: nil, extensions: [])))))), structure: true)))
+                        .fetchResponse(.simpleAttribute(.body(.singlepart(.init(type: .text(.init(mediaText: "HTML", lineCount: 603)), fields: .init(parameter: [], id: nil, description: nil, encoding: .binary, octetCount: 28803), extension: .init(fieldMD5: nil, dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: .init(location: nil, extensions: [])))))), hasExtensionData: true)))
                     ),
                     .response(.fetchResponse(.finish)),
                 ],
@@ -119,7 +119,7 @@ extension ResponseParser_Tests {
                 [
                     .response(.fetchResponse(.start(12184))),
                     .response(
-                        .fetchResponse(.simpleAttribute(.body(.singlepart(.init(type: .text(.init(mediaText: "PLAIN", lineCount: 30)), fields: .init(parameter: [.init(field: "CHARSET", value: "utf-8")], id: "<DDB621064D883242BBC8DBE205F0250F@pex.exch.apple.com>", description: nil, encoding: .base64, octetCount: 2340), extension: .init(fieldMD5: nil, dispositionAndLanguage: .init(disposition: nil, language: .init(languages: ["EN-US"], location: .init(location: nil, extensions: [])))))), structure: true)))
+                        .fetchResponse(.simpleAttribute(.body(.singlepart(.init(type: .text(.init(mediaText: "PLAIN", lineCount: 30)), fields: .init(parameter: [.init(field: "CHARSET", value: "utf-8")], id: "<DDB621064D883242BBC8DBE205F0250F@pex.exch.apple.com>", description: nil, encoding: .base64, octetCount: 2340), extension: .init(fieldMD5: nil, dispositionAndLanguage: .init(disposition: nil, language: .init(languages: ["EN-US"], location: .init(location: nil, extensions: [])))))), hasExtensionData: true)))
                     ),
                     .response(.fetchResponse(.finish)),
                 ],
@@ -142,7 +142,7 @@ extension ResponseParser_Tests {
                                     .singlepart(.init(type: .basic(.init(type: .application, subtype: .init("PDF"))), fields: .init(parameter: [.init(field: "X-UNIX-MODE", value: "0666"), .init(field: "NAME", value: "Resume.pdf")], id: nil, description: nil, encoding: .base64, octetCount: 217550), extension: .init(fieldMD5: nil, dispositionAndLanguage: .init(disposition: .init(kind: "INLINE", parameter: [.init(field: "FILENAME", value: "Resume.pdf")]), language: .init(languages: [], location: .init(location: nil, extensions: [])))))),
                                     .singlepart(.init(type: .text(.init(mediaText: "HTML", lineCount: 62)), fields: .init(parameter: [.init(field: "CHARSET", value: "utf-8")], id: nil, description: nil, encoding: .quotedPrintable, octetCount: 4450), extension: .init(fieldMD5: nil, dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: .init(location: nil, extensions: [])))))),
                                 ], mediaSubtype: .init("MIXED"), extension: .init(parameters: [.init(field: "BOUNDARY", value: "Apple-Mail=_1B76125E-EB81-4B78-A023-B30D1F9070F2")], dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: .init(location: nil, extensions: [])))))),
-                            ], mediaSubtype: .init("ALTERNATIVE"), extension: .init(parameters: [.init(field: "BOUNDARY", value: "Apple-Mail=_2F0988E2-CA7E-4379-B088-7E556A97E21F")], dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: .init(location: nil, extensions: [])))))), structure: true))
+                            ], mediaSubtype: .init("ALTERNATIVE"), extension: .init(parameters: [.init(field: "BOUNDARY", value: "Apple-Mail=_2F0988E2-CA7E-4379-B088-7E556A97E21F")], dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: .init(location: nil, extensions: [])))))), hasExtensionData: true))
                         )
                     ),
                     .response(.fetchResponse(.finish)),

@@ -33,10 +33,15 @@ public enum MessageAttribute: Equatable {
     case rfc822Text(ByteBuffer?)
     /// `RFC822.SIZE` -- A number expressing the RFC 2822 size of the message.
     case rfc822Size(Int)
+
+    /// `BODYSTRUCTURE` or `BODY` -- A list that describes the MIME body structure of a message.
+    ///
+    /// A `BODYSTRUCTURE` response will have `hasExtensionData` set to `true`.
+    case body(BodyStructure, hasExtensionData: Bool)
+
     /// `BODY[<section>]<<origin octet>>` -- The body contents of the specified section.
-    case body(BodyStructure, structure: Bool)
-    /// `BODYSTRUCTURE` -- A list that describes the MIME body structure of a message.
     case bodySection(SectionSpecifier, offset: Int?, data: ByteBuffer?)
+
     /// `BINARY<section-binary>[<<number>>]` -- The content of the
     /// specified section after removing any content-transfer-encoding related encoding.
     /// - SeeAlso: RFC 3516 “IMAP4 Binary Content Extension”
@@ -70,8 +75,8 @@ extension EncodeBuffer {
             return self.writeMessageAttribute_rfc822Text(string)
         case .rfc822Size(let size):
             return self.writeString("RFC822.SIZE \(size)")
-        case .body(let body, structure: let structure):
-            return self.writeMessageAttribute_body(body, structure: structure)
+        case .body(let body, hasExtensionData: let hasExtensionData):
+            return self.writeMessageAttribute_body(body, hasExtensionData: hasExtensionData)
         case .bodySection(let section, let number, let string):
             return self.writeMessageAttribute_bodySection(section, number: number, string: string)
         case .uid(let uid):
@@ -133,9 +138,9 @@ extension EncodeBuffer {
             self.writeNString(string)
     }
 
-    @discardableResult mutating func writeMessageAttribute_body(_ body: BodyStructure, structure: Bool) -> Int {
+    @discardableResult mutating func writeMessageAttribute_body(_ body: BodyStructure, hasExtensionData: Bool) -> Int {
         self.writeString("BODY") +
-            self.writeIfTrue(structure) { () -> Int in
+            self.writeIfTrue(hasExtensionData) { () -> Int in
                 self.writeString("STRUCTURE")
             } +
             self.writeSpace() +

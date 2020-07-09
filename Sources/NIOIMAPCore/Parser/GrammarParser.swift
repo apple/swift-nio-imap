@@ -2245,7 +2245,7 @@ extension GrammarParser {
 
         func parseMessageAttribute_body(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MessageAttribute {
             try ParserLibrary.parseFixedString("BODY", buffer: &buffer, tracker: tracker)
-            let structure: Bool = {
+            let hasExtensionData: Bool = {
                 do {
                     try ParserLibrary.parseFixedString("STRUCTURE", buffer: &buffer, tracker: tracker)
                     return true
@@ -2255,7 +2255,7 @@ extension GrammarParser {
             }()
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
             let body = try self.parseBody(buffer: &buffer, tracker: tracker)
-            return .body(body, structure: structure)
+            return .body(body, hasExtensionData: hasExtensionData)
         }
 
         func parseMessageAttribute_bodySection(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MessageAttribute {
