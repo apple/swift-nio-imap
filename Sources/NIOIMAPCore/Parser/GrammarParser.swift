@@ -2415,14 +2415,15 @@ extension GrammarParser {
     }
 
     // nstring         = string / nil
-    static func parseNString(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NString {
-        func parseNString_nil(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NString {
+    static func parseNString(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ByteBuffer? {
+        func parseNString_nil(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ByteBuffer? {
             try ParserLibrary.parseFixedString("NIL", buffer: &buffer, tracker: tracker)
             return nil
         }
 
-        func parseNString_some(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NString {
-            try self.parseString(buffer: &buffer, tracker: tracker)
+        func parseNString_some(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ByteBuffer? {
+            let buffer = try self.parseString(buffer: &buffer, tracker: tracker)
+            return .init(buffer: buffer)
         }
 
         return try ParserLibrary.parseOneOf([
