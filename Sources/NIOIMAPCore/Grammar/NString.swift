@@ -19,7 +19,7 @@ import struct NIO.ByteBuffer
 /// IMAPv4 `nstring`
 public struct NString: Equatable {
     var buffer: ByteBuffer?
-    
+
     public init(buffer: ByteBuffer) {
         self.buffer = buffer
     }
@@ -28,21 +28,17 @@ public struct NString: Equatable {
 // MARK: - Conveniences
 
 extension NString: ExpressibleByNilLiteral {
-    
     public init(nilLiteral: ()) {
         self.buffer = nil
     }
-    
 }
 
 extension NString: ExpressibleByStringLiteral {
-    
     public typealias StringLiteralType = String
-    
+
     public init(stringLiteral value: String) {
         self.buffer = ByteBuffer(string: value)
     }
-    
 }
 
 // MARK: - IMAP
