@@ -16,7 +16,7 @@ import struct NIO.ByteBuffer
 
 /// IMAPv4 `body-extension`
 public enum BodyExtension: Equatable {
-    case string(NString)
+    case string(ByteBuffer?)
     case number(Int)
 }
 

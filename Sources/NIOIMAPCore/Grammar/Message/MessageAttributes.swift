@@ -27,20 +27,20 @@ public enum MessageAttribute: Equatable {
     /// The unique identifier of the message.
     case uid(UID)
     /// `RFC822` -- Equivalent to `BODY[]`.
-    case rfc822(NString)
+    case rfc822(ByteBuffer?)
     /// `RFC822.HEADER` -- Equivalent to `BODY[HEADER]`.
-    case rfc822Header(NString)
-    case rfc822Text(NString)
+    case rfc822Header(ByteBuffer?)
+    case rfc822Text(ByteBuffer?)
     /// `RFC822.SIZE` -- A number expressing the RFC 2822 size of the message.
     case rfc822Size(Int)
     /// `BODY[<section>]<<origin octet>>` -- The body contents of the specified section.
     case body(BodyStructure, structure: Bool)
     /// `BODYSTRUCTURE` -- A list that describes the MIME body structure of a message.
-    case bodySection(SectionSpecifier, offset: Int?, data: NString)
+    case bodySection(SectionSpecifier, offset: Int?, data: ByteBuffer?)
     /// `BINARY<section-binary>[<<number>>]` -- The content of the
     /// specified section after removing any content-transfer-encoding related encoding.
     /// - SeeAlso: RFC 3516 “IMAP4 Binary Content Extension”
-    case binary(section: SectionSpecifier.Part, data: NString)
+    case binary(section: SectionSpecifier.Part, data: ByteBuffer?)
     /// `BINARY.SIZE<section-binary>` -- The size of the section after
     /// removing any content-transfer-encoding related encoding.
     /// - SeeAlso: RFC 3516 “IMAP4 Binary Content Extension”
@@ -85,7 +85,7 @@ extension EncodeBuffer {
         }
     }
 
-    @discardableResult mutating func writeMessageAttribute_binaryString(section: SectionSpecifier.Part, string: NString) -> Int {
+    @discardableResult mutating func writeMessageAttribute_binaryString(section: SectionSpecifier.Part, string: ByteBuffer?) -> Int {
         self.writeString("BINARY") +
             self.writeSectionBinary(section) +
             self.writeSpace() +
@@ -115,19 +115,19 @@ extension EncodeBuffer {
             self.writeInternalDate(date)
     }
 
-    @discardableResult mutating func writeMessageAttribute_rfc822(_ string: NString) -> Int {
+    @discardableResult mutating func writeMessageAttribute_rfc822(_ string: ByteBuffer?) -> Int {
         self.writeString("RFC822") +
             self.writeSpace() +
             self.writeNString(string)
     }
 
-    @discardableResult mutating func writeMessageAttribute_rfc822Text(_ string: NString) -> Int {
+    @discardableResult mutating func writeMessageAttribute_rfc822Text(_ string: ByteBuffer?) -> Int {
         self.writeString("RFC822.TEXT") +
             self.writeSpace() +
             self.writeNString(string)
     }
 
-    @discardableResult mutating func writeMessageAttribute_rfc822Header(_ string: NString) -> Int {
+    @discardableResult mutating func writeMessageAttribute_rfc822Header(_ string: ByteBuffer?) -> Int {
         self.writeString("RFC822.HEADER") +
             self.writeSpace() +
             self.writeNString(string)
@@ -142,7 +142,7 @@ extension EncodeBuffer {
             self.writeBody(body)
     }
 
-    @discardableResult mutating func writeMessageAttribute_bodySection(_ section: SectionSpecifier?, number: Int?, string: NString) -> Int {
+    @discardableResult mutating func writeMessageAttribute_bodySection(_ section: SectionSpecifier?, number: Int?, string: ByteBuffer?) -> Int {
         self.writeString("BODY") +
             self.writeSection(section) +
             self.writeIfExists(number) { (number) -> Int in

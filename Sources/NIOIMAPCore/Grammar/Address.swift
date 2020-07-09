@@ -16,12 +16,12 @@ import struct NIO.ByteBuffer
 
 /// IMAPv4 `address`
 public struct Address: Equatable {
-    public var name: NString
-    public var adl: NString
-    public var mailbox: NString
-    public var host: NString
+    public var name: ByteBuffer?
+    public var adl: ByteBuffer?
+    public var mailbox: ByteBuffer?
+    public var host: ByteBuffer?
 
-    public init(name: NString, adl: NString, mailbox: NString, host: NString) {
+    public init(name: ByteBuffer?, adl: ByteBuffer?, mailbox: ByteBuffer?, host: ByteBuffer?) {
         self.name = name
         self.adl = adl
         self.mailbox = mailbox

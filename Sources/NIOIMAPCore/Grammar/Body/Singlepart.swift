@@ -67,11 +67,11 @@ extension BodyStructure.Singlepart {
     /// IMAPv4 `body-ext-1part`
     public struct Extension: Equatable {
         /// A string giving the body MD5 value.
-        public let digest: NString
+        public let digest: ByteBuffer?
         public var dispositionAndLanguage: BodyStructure.DispositionAndLanguage?
 
         /// Convenience function for a better experience when chaining multiple types.
-        init(fieldMD5: NString, dispositionAndLanguage: BodyStructure.DispositionAndLanguage?) {
+        init(fieldMD5: ByteBuffer?, dispositionAndLanguage: BodyStructure.DispositionAndLanguage?) {
             self.digest = fieldMD5
             self.dispositionAndLanguage = dispositionAndLanguage
         }
