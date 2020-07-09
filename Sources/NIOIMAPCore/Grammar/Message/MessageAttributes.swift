@@ -33,9 +33,13 @@ public enum MessageAttribute: Equatable {
     case rfc822Text(NString)
     /// `RFC822.SIZE` -- A number expressing the RFC 2822 size of the message.
     case rfc822Size(Int)
-    /// `BODY[<section>]<<origin octet>>` -- The body contents of the specified section.
+    
+    /// `BODYSTRUCTURE` or `BODY` -- A list that describes the MIME body structure of a message.
+    ///
+    /// A `BODYSTRUCTURE` response will have `hasExtensionData` set to `true`.
     case body(BodyStructure, structure: Bool)
-    /// `BODYSTRUCTURE` -- A list that describes the MIME body structure of a message.
+    
+    /// `BODY[<section>]<<origin octet>>` -- The body contents of the specified section.
     case bodySection(SectionSpecifier, offset: Int?, data: NString)
     /// `BINARY<section-binary>[<<number>>]` -- The content of the
     /// specified section after removing any content-transfer-encoding related encoding.
