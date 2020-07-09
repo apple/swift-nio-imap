@@ -14,38 +14,11 @@
 
 import struct NIO.ByteBuffer
 
-// MARK: - NString
-
-/// IMAPv4 `nstring`
-public struct NString: Equatable {
-    var buffer: ByteBuffer?
-
-    public init(buffer: ByteBuffer) {
-        self.buffer = buffer
-    }
-}
-
-// MARK: - Conveniences
-
-extension NString: ExpressibleByNilLiteral {
-    public init(nilLiteral: ()) {
-        self.buffer = nil
-    }
-}
-
-extension NString: ExpressibleByStringLiteral {
-    public typealias StringLiteralType = String
-
-    public init(stringLiteral value: String) {
-        self.buffer = ByteBuffer(string: value)
-    }
-}
-
 // MARK: - IMAP
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeNString(_ string: NString) -> Int {
-        if let string = string.buffer {
+    @discardableResult mutating func writeNString(_ string: ByteBuffer?) -> Int {
+        if let string = string {
             return self.writeIMAPString(string)
         } else {
             return self.writeNil()

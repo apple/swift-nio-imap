@@ -389,7 +389,7 @@ extension GrammarParser {
     // body-fld-lang   = nstring / "(" string *(SP string) ")"
     static func parseBodyFieldLanguage(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [String] {
         func parseBodyFieldLanguage_single(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [String] {
-            guard let language = try self.parseNString(buffer: &buffer, tracker: tracker).buffer else {
+            guard let language = try self.parseNString(buffer: &buffer, tracker: tracker) else {
                 return []
             }
             return [String(buffer: language)]
@@ -2415,13 +2415,13 @@ extension GrammarParser {
     }
 
     // nstring         = string / nil
-    static func parseNString(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NString {
-        func parseNString_nil(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NString {
+    static func parseNString(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ByteBuffer? {
+        func parseNString_nil(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ByteBuffer? {
             try ParserLibrary.parseFixedString("NIL", buffer: &buffer, tracker: tracker)
             return nil
         }
 
-        func parseNString_some(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NString {
+        func parseNString_some(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ByteBuffer? {
             let buffer = try self.parseString(buffer: &buffer, tracker: tracker)
             return .init(buffer: buffer)
         }
