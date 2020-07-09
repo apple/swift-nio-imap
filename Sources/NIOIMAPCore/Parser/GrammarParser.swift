@@ -2422,8 +2422,7 @@ extension GrammarParser {
         }
 
         func parseNString_some(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ByteBuffer? {
-            let buffer = try self.parseString(buffer: &buffer, tracker: tracker)
-            return .init(buffer: buffer)
+            return try self.parseString(buffer: &buffer, tracker: tracker)
         }
 
         return try ParserLibrary.parseOneOf([
