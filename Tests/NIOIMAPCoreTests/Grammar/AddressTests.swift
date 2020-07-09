@@ -22,10 +22,10 @@ class AddressTests: EncodeTestClass {}
 
 extension AddressTests {
     func testInit() {
-        let name: NString = TestUtilities.createTestByteBuffer(for: "a")
-        let adl: NString = TestUtilities.createTestByteBuffer(for: "b")
-        let mailbox: NString = TestUtilities.createTestByteBuffer(for: "c")
-        let host: NString = TestUtilities.createTestByteBuffer(for: "d")
+        let name: NString = "a"
+        let adl: NString = "b"
+        let mailbox: NString = "c"
+        let host: NString = "d"
         let address = Address(name: name, adl: adl, mailbox: mailbox, host: host)
 
         XCTAssertEqual(address.name, name)
