@@ -66,6 +66,6 @@ extension EncodeBuffer {
     }
 
     @discardableResult mutating func writeMediaSubtype(_ type: BodyStructure.MediaSubtype) -> Int {
-        self.writeString("\"\(type._backing)\"")
+        self.writeString("\"\(type.rawValue)\"")
     }
 }
