@@ -105,7 +105,7 @@ extension ResponseParser {
                 switch response {
                 case .fetchResponse(.streamingEnd): // FETCH MESS (1 2 3 4)
                     try? ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
-                case .fetchResponse(.streamingBegin(type: _, byteCount: let size)):
+                case .fetchResponse(.streamingBegin(kind: _, byteCount: let size)):
                     self.moveStateMachine(expected: .response, next: .attributeBytes(size))
                 default:
                     break

@@ -18,14 +18,14 @@ import XCTest
 
 class EntryTypeResponse_Tests: EncodeTestClass {
     func testEncoding() {
-        let inputs: [(EntryTypeResponse, String, UInt)] = [
+        let inputs: [(EntryKindResponse, String, UInt)] = [
             (.private, "priv", #line),
             (.shared, "shared", #line),
         ]
 
         for (input, expected, line) in inputs {
             self.testBuffer.clear()
-            let size = self.testBuffer.writeEntryTypeResponse(input)
+            let size = self.testBuffer.writeEntryKindResponse(input)
             XCTAssertEqual(size, expected.utf8.count, line: line)
             XCTAssertEqual(self.testBufferString, expected, line: line)
         }

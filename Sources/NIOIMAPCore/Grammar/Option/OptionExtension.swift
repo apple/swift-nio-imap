@@ -14,18 +14,18 @@
 
 import struct NIO.ByteBuffer
 
-public enum OptionExtensionType: Equatable {
+public enum OptionExtensionKind: Equatable {
     case standard(String)
     case vendor(OptionVendorTag)
 }
 
 /// IMAPv4 `option-extension`
 public struct OptionExtension: Equatable {
-    public var type: OptionExtensionType
+    public var kind: OptionExtensionKind
     public var value: OptionValueComp?
 
-    public init(type: OptionExtensionType, value: OptionValueComp? = nil) {
-        self.type = type
+    public init(kind: OptionExtensionKind, value: OptionValueComp? = nil) {
+        self.kind = kind
         self.value = value
     }
 }
@@ -35,7 +35,7 @@ public struct OptionExtension: Equatable {
 extension EncodeBuffer {
     @discardableResult mutating func writeOptionExtension(_ option: OptionExtension) -> Int {
         var size = 0
-        switch option.type {
+        switch option.kind {
         case .standard(let atom):
             size += self.writeString(atom)
         case .vendor(let tag):

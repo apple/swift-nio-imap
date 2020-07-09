@@ -14,7 +14,7 @@
 
 import struct NIO.ByteBuffer
 
-public enum EntryTypeResponse: Equatable {
+public enum EntryKindResponse: Equatable {
     case `private`
     case shared
 }
@@ -22,7 +22,7 @@ public enum EntryTypeResponse: Equatable {
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeEntryTypeResponse(_ response: EntryTypeResponse) -> Int {
+    @discardableResult mutating func writeEntryKindResponse(_ response: EntryKindResponse) -> Int {
         switch response {
         case .private:
             return self.writeString("priv")

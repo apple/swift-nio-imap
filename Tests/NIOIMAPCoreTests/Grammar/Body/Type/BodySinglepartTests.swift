@@ -25,7 +25,7 @@ extension BodySinglepartTests {
         let inputs: [(BodyStructure.Singlepart, String, UInt)] = [
             (
                 .init(
-                    type: .basic(.init(type: .application, subtype: .alternative)),
+                    type: .basic(.init(kind: .application, subtype: .alternative)),
                     fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octetCount: 6),
                     extension: nil
                 ),
@@ -34,7 +34,7 @@ extension BodySinglepartTests {
             ),
             (
                 .init(
-                    type: .basic(.init(type: .application, subtype: .related)),
+                    type: .basic(.init(kind: .application, subtype: .related)),
                     fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octetCount: 7),
                     extension: .init(fieldMD5: "md5", dispositionAndLanguage: nil)
                 ),
@@ -76,7 +76,7 @@ extension BodySinglepartTests {
 
         for (test, expectedString, line) in inputs {
             self.testBuffer.clear()
-            let size = self.testBuffer.writeBodyTypeSinglepart(test)
+            let size = self.testBuffer.writeBodySinglepart(test)
             XCTAssertEqual(size, expectedString.utf8.count, line: line)
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }

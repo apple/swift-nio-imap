@@ -48,7 +48,7 @@ public struct Capability: Equatable {
 // MARK: - Convenience Types
 
 extension Capability {
-    public struct AuthType: Equatable {
+    public struct AuthKind: Equatable {
         public static let token = Self(unchecked: "TOKEN")
         public static let plain = Self(unchecked: "PLAIN")
         public static let pToken = Self(unchecked: "PTOKEN")
@@ -67,7 +67,7 @@ extension Capability {
         }
     }
 
-    public struct ContextType: Equatable {
+    public struct ContextKind: Equatable {
         public static let search = Self(unchecked: "SEARCH")
         public static let sort = Self(unchecked: "SORT")
 
@@ -82,7 +82,7 @@ extension Capability {
         }
     }
 
-    public struct SortType: Equatable {
+    public struct SortKind: Equatable {
         public static let display = Self(unchecked: "DISPLAY")
 
         public var rawValue: String
@@ -96,7 +96,7 @@ extension Capability {
         }
     }
 
-    public struct ThreadType: Equatable {
+    public struct ThreadKind: Equatable {
         public static let orderedSubject = Self(unchecked: "ORDEREDSUBJECT")
         public static let references = Self(unchecked: "REFERENCES")
 
@@ -111,7 +111,7 @@ extension Capability {
         }
     }
 
-    public struct StatusType: Equatable {
+    public struct StatusKind: Equatable {
         public static let size = Self(unchecked: "SIZE")
 
         public var rawValue: String
@@ -125,7 +125,7 @@ extension Capability {
         }
     }
 
-    public struct UTF8Type: Equatable {
+    public struct UTF8Kind: Equatable {
         public static let accept = Self(unchecked: "ACCEPT")
 
         public var rawValue: String
@@ -139,7 +139,7 @@ extension Capability {
         }
     }
 
-    public struct RightsType: Equatable {
+    public struct RightsKind: Equatable {
         public static let tekx = Self(unchecked: "TEKX")
 
         public var rawValue: String
@@ -196,15 +196,15 @@ extension Capability {
     /// RFC 7888 LITERAL-
     public static let literalMinus = Self(unchecked: "LITERAL-")
 
-    public static func auth(_ type: AuthType) -> Self {
+    public static func auth(_ type: AuthKind) -> Self {
         Self("AUTH=\(type.rawValue)")
     }
 
-    public static func context(_ type: ContextType) -> Self {
+    public static func context(_ type: ContextKind) -> Self {
         Self("CONTEXT=\(type.rawValue)")
     }
 
-    public static func sort(_ type: SortType?) -> Self {
+    public static func sort(_ type: SortKind?) -> Self {
         if let type = type {
             return Self("SORT=\(type.rawValue)")
         } else {
@@ -212,19 +212,19 @@ extension Capability {
         }
     }
 
-    public static func utf8(_ type: UTF8Type) -> Self {
+    public static func utf8(_ type: UTF8Kind) -> Self {
         Self("UTF8=\(type.rawValue)")
     }
 
-    public static func thread(_ type: ThreadType) -> Self {
+    public static func thread(_ type: ThreadKind) -> Self {
         Self("THREAD=\(type.rawValue)")
     }
 
-    public static func status(_ type: StatusType) -> Self {
+    public static func status(_ type: StatusKind) -> Self {
         Self("STATUS=\(type.rawValue)")
     }
 
-    public static func rights(_ type: RightsType) -> Self {
+    public static func rights(_ type: RightsKind) -> Self {
         Self("RIGHTS=\(type.rawValue)")
     }
 }

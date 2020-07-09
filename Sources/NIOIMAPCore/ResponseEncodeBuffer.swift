@@ -85,10 +85,10 @@ extension ResponseEncodeBuffer {
                 preconditionFailure("Only server can write responses.")
             }
             if streamingAttributes {
-                return self.buffer.writeSpace() + self.writeStreamingType(type, size: size)
+                return self.buffer.writeSpace() + self.writeStreamingKind(type, size: size)
             } else {
                 self.buffer.mode = .server(streamingAttributes: true, options: options)
-                return self.writeStreamingType(type, size: size)
+                return self.writeStreamingKind(type, size: size)
             }
         case .streamingBytes(var bytes):
             return self.buffer.writeBuffer(&bytes)
@@ -103,7 +103,7 @@ extension ResponseEncodeBuffer {
         }
     }
 
-    @discardableResult mutating func writeStreamingType(_ type: StreamingType, size: Int) -> Int {
+    @discardableResult mutating func writeStreamingKind(_ type: StreamingKind, size: Int) -> Int {
         switch type {
         case .binary:
             return self.buffer.writeString("BINARY {\(size)}\r\n")

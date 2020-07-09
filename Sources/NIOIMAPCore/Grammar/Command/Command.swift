@@ -57,113 +57,113 @@ public enum Command: Equatable {
 // MARK: - IMAP
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeCommandType(_ commandType: Command) throws -> Int {
-        switch commandType {
+    @discardableResult mutating func writeCommand(_ command: Command) throws -> Int {
+        switch command {
         case .capability:
-            return self.writeCommandType_capability()
+            return self.writeCommandKind_capability()
         case .logout:
-            return self.writeCommandType_logout()
+            return self.writeCommandKind_logout()
         case .noop:
-            return self.writeCommandType_noop()
+            return self.writeCommandKind_noop()
         case .create(let mailbox, let params):
-            return self.writeCommandType_create(mailbox: mailbox, parameters: params)
+            return self.writeCommandKind_create(mailbox: mailbox, parameters: params)
         case .delete(let mailbox):
-            return self.writeCommandType_delete(mailbox: mailbox)
+            return self.writeCommandKind_delete(mailbox: mailbox)
         case .examine(let mailbox, let params):
-            return self.writeCommandType_examine(mailbox: mailbox, parameters: params)
+            return self.writeCommandKind_examine(mailbox: mailbox, parameters: params)
         case .list(let selectOptions, let mailbox, let mailboxPatterns, let returnOptions):
-            return try self.writeCommandType_list(selectOptions: selectOptions, mailbox: mailbox, mailboxPatterns: mailboxPatterns, returnOptions: returnOptions)
+            return try self.writeCommandKind_list(selectOptions: selectOptions, mailbox: mailbox, mailboxPatterns: mailboxPatterns, returnOptions: returnOptions)
         case .lsub(let mailbox, let listMailbox):
-            return self.writeCommandType_lsub(mailbox: mailbox, listMailbox: listMailbox)
+            return self.writeCommandKind_lsub(mailbox: mailbox, listMailbox: listMailbox)
         case .rename(let from, let to, let params):
-            return self.writeCommandType_rename(from: from, to: to, parameters: params)
+            return self.writeCommandKind_rename(from: from, to: to, parameters: params)
         case .select(let mailbox, let params):
-            return self.writeCommandType_select(mailbox: mailbox, params: params)
+            return self.writeCommandKind_select(mailbox: mailbox, params: params)
         case .status(let mailbox, let attributes):
-            return self.writeCommandType_status(mailbox: mailbox, attributes: attributes)
+            return self.writeCommandKind_status(mailbox: mailbox, attributes: attributes)
         case .subscribe(let mailbox):
-            return self.writeCommandType_subscribe(mailbox: mailbox)
+            return self.writeCommandKind_subscribe(mailbox: mailbox)
         case .unsubscribe(let mailbox):
-            return self.writeCommandType_unsubscribe(mailbox: mailbox)
+            return self.writeCommandKind_unsubscribe(mailbox: mailbox)
         case .authenticate(let method, let initial, let data):
-            return self.writeCommandType_authenticate(method: method, initial: initial, data: data)
+            return self.writeCommandKind_authenticate(method: method, initial: initial, data: data)
         case .login(let userid, let password):
-            return self.writeCommandType_login(userID: userid, password: password)
+            return self.writeCommandKind_login(userID: userid, password: password)
         case .starttls:
-            return self.writeCommandType_startTLS()
+            return self.writeCommandKind_startTLS()
         case .check:
-            return self.writeCommandType_check()
+            return self.writeCommandKind_check()
         case .close:
-            return self.writeCommandType_close()
+            return self.writeCommandKind_close()
         case .expunge:
-            return self.writeCommandType_expunge()
+            return self.writeCommandKind_expunge()
         case .uidExpunge(let set):
-            return self.writeCommandType_uidExpunge(set)
+            return self.writeCommandKind_uidExpunge(set)
         case .enable(let capabilities):
-            return self.writeCommandType_enable(capabilities: capabilities)
+            return self.writeCommandKind_enable(capabilities: capabilities)
         case .unselect:
-            return self.writeCommandType_unselect()
+            return self.writeCommandKind_unselect()
         case .idleStart:
-            return self.writeCommandType_idleStart()
+            return self.writeCommandKind_idleStart()
         case .idleFinish:
-            return self.writeCommandType_idleFinish()
+            return self.writeCommandKind_idleFinish()
         case .copy(let set, let mailbox):
-            return self.writeCommandType_copy(set: set, mailbox: mailbox)
+            return self.writeCommandKind_copy(set: set, mailbox: mailbox)
         case .uidCopy(let set, let mailbox):
-            return self.writeCommandType_uidCopy(set: set, mailbox: mailbox)
+            return self.writeCommandKind_uidCopy(set: set, mailbox: mailbox)
         case .fetch(let set, let atts, let modifiers):
-            return self.writeCommandType_fetch(set: set, atts: atts, modifiers: modifiers)
+            return self.writeCommandKind_fetch(set: set, atts: atts, modifiers: modifiers)
         case .uidFetch(let set, let atts, let modifiers):
-            return self.writeCommandType_uidFetch(set: set, atts: atts, modifiers: modifiers)
+            return self.writeCommandKind_uidFetch(set: set, atts: atts, modifiers: modifiers)
         case .store(let set, let modifiers, let flags):
-            return self.writeCommandType_store(set: set, modifiers: modifiers, flags: flags)
+            return self.writeCommandKind_store(set: set, modifiers: modifiers, flags: flags)
         case .uidStore(let set, let modifiers, let flags):
-            return self.writeCommandType_uidStore(set: set, modifiers: modifiers, flags: flags)
+            return self.writeCommandKind_uidStore(set: set, modifiers: modifiers, flags: flags)
         case .search(let key, let charset, let returnOptions):
-            return self.writeCommandType_search(key: key, charset: charset, returnOptions: returnOptions)
+            return self.writeCommandKind_search(key: key, charset: charset, returnOptions: returnOptions)
         case .uidSearch(let key, let charset, let returnOptions):
-            return self.writeCommandType_uidSearch(key: key, charset: charset, returnOptions: returnOptions)
+            return self.writeCommandKind_uidSearch(key: key, charset: charset, returnOptions: returnOptions)
         case .move(let set, let mailbox):
-            return self.writeCommandType_move(set: set, mailbox: mailbox)
+            return self.writeCommandKind_move(set: set, mailbox: mailbox)
         case .uidMove(let set, let mailbox):
-            return self.writeCommandType_uidMove(set: set, mailbox: mailbox)
+            return self.writeCommandKind_uidMove(set: set, mailbox: mailbox)
         case .id(let id):
-            return self.writeCommandType_id(id)
+            return self.writeCommandKind_id(id)
         case .namespace:
-            return self.writeCommandType_namespace()
+            return self.writeCommandKind_namespace()
         }
     }
 
-    private mutating func writeCommandType_capability() -> Int {
+    private mutating func writeCommandKind_capability() -> Int {
         self.writeString("CAPABILITY")
     }
 
-    private mutating func writeCommandType_logout() -> Int {
+    private mutating func writeCommandKind_logout() -> Int {
         self.writeString("LOGOUT")
     }
 
-    private mutating func writeCommandType_noop() -> Int {
+    private mutating func writeCommandKind_noop() -> Int {
         self.writeString("NOOP")
     }
 
-    private mutating func writeCommandType_append(to: MailboxName, firstMessageMetadata: AppendMessage) -> Int {
+    private mutating func writeCommandKind_append(to: MailboxName, firstMessageMetadata: AppendMessage) -> Int {
         self.writeString("APPEND ") +
             self.writeMailbox(to) +
             self.writeAppendMessage(firstMessageMetadata)
     }
 
-    private mutating func writeCommandType_create(mailbox: MailboxName, parameters: [CreateParameter]) -> Int {
+    private mutating func writeCommandKind_create(mailbox: MailboxName, parameters: [CreateParameter]) -> Int {
         self.writeString("CREATE ") +
             self.writeMailbox(mailbox) +
             self.writeCreateParameters(parameters)
     }
 
-    private mutating func writeCommandType_delete(mailbox: MailboxName) -> Int {
+    private mutating func writeCommandKind_delete(mailbox: MailboxName) -> Int {
         self.writeString("DELETE ") +
             self.writeMailbox(mailbox)
     }
 
-    private mutating func writeCommandType_examine(mailbox: MailboxName, parameters: [SelectParameter]) -> Int {
+    private mutating func writeCommandKind_examine(mailbox: MailboxName, parameters: [SelectParameter]) -> Int {
         self.writeString("EXAMINE ") +
             self.writeMailbox(mailbox) +
             self.writeIfExists(parameters) { (params) -> Int in
@@ -171,7 +171,7 @@ extension EncodeBuffer {
             }
     }
 
-    private mutating func writeCommandType_list(selectOptions: ListSelectOptions?, mailbox: MailboxName, mailboxPatterns: MailboxPatterns, returnOptions: [ReturnOption]) throws -> Int {
+    private mutating func writeCommandKind_list(selectOptions: ListSelectOptions?, mailbox: MailboxName, mailboxPatterns: MailboxPatterns, returnOptions: [ReturnOption]) throws -> Int {
         self.writeString("LIST") +
             self.writeIfExists(selectOptions) { (options) -> Int in
                 self.writeSpace() +
@@ -187,14 +187,14 @@ extension EncodeBuffer {
             }
     }
 
-    private mutating func writeCommandType_lsub(mailbox: MailboxName, listMailbox: ByteBuffer) -> Int {
+    private mutating func writeCommandKind_lsub(mailbox: MailboxName, listMailbox: ByteBuffer) -> Int {
         self.writeString("LSUB ") +
             self.writeMailbox(mailbox) +
             self.writeSpace() +
             self.writeIMAPString(listMailbox)
     }
 
-    private mutating func writeCommandType_rename(from: MailboxName, to: MailboxName, parameters: [RenameParameter]) -> Int {
+    private mutating func writeCommandKind_rename(from: MailboxName, to: MailboxName, parameters: [RenameParameter]) -> Int {
         self.writeString("RENAME ") +
             self.writeMailbox(from) +
             self.writeSpace() +
@@ -204,7 +204,7 @@ extension EncodeBuffer {
             }
     }
 
-    private mutating func writeCommandType_select(mailbox: MailboxName, params: [SelectParameter]) -> Int {
+    private mutating func writeCommandKind_select(mailbox: MailboxName, params: [SelectParameter]) -> Int {
         self.writeString("SELECT ") +
             self.writeMailbox(mailbox) +
             self.writeIfExists(params) { (params) -> Int in
@@ -212,7 +212,7 @@ extension EncodeBuffer {
             }
     }
 
-    private mutating func writeCommandType_status(mailbox: MailboxName, attributes: [MailboxAttribute]) -> Int {
+    private mutating func writeCommandKind_status(mailbox: MailboxName, attributes: [MailboxAttribute]) -> Int {
         self.writeString("STATUS ") +
             self.writeMailbox(mailbox) +
             self.writeString(" (") +
@@ -220,17 +220,17 @@ extension EncodeBuffer {
             self.writeString(")")
     }
 
-    private mutating func writeCommandType_subscribe(mailbox: MailboxName) -> Int {
+    private mutating func writeCommandKind_subscribe(mailbox: MailboxName) -> Int {
         self.writeString("SUBSCRIBE ") +
             self.writeMailbox(mailbox)
     }
 
-    private mutating func writeCommandType_unsubscribe(mailbox: MailboxName) -> Int {
+    private mutating func writeCommandKind_unsubscribe(mailbox: MailboxName) -> Int {
         self.writeString("UNSUBSCRIBE ") +
             self.writeMailbox(mailbox)
     }
 
-    private mutating func writeCommandType_authenticate(method: String, initial: InitialResponse?, data: [ByteBuffer]) -> Int {
+    private mutating func writeCommandKind_authenticate(method: String, initial: InitialResponse?, data: [ByteBuffer]) -> Int {
         self.writeString("AUTHENTICATE \(method)") +
             self.writeIfExists(initial) { (initial) -> Int in
                 self.writeSpace() +
@@ -242,68 +242,68 @@ extension EncodeBuffer {
             }
     }
 
-    private mutating func writeCommandType_login(userID: String, password: String) -> Int {
+    private mutating func writeCommandKind_login(userID: String, password: String) -> Int {
         self.writeString("LOGIN ") +
             self.writeIMAPString(userID) +
             self.writeSpace() +
             self.writeIMAPString(password)
     }
 
-    private mutating func writeCommandType_startTLS() -> Int {
+    private mutating func writeCommandKind_startTLS() -> Int {
         self.writeString("STARTTLS")
     }
 
-    private mutating func writeCommandType_check() -> Int {
+    private mutating func writeCommandKind_check() -> Int {
         self.writeString("CHECK")
     }
 
-    private mutating func writeCommandType_close() -> Int {
+    private mutating func writeCommandKind_close() -> Int {
         self.writeString("CLOSE")
     }
 
-    private mutating func writeCommandType_expunge() -> Int {
+    private mutating func writeCommandKind_expunge() -> Int {
         self.writeString("EXPUNGE")
     }
 
-    private mutating func writeCommandType_uidExpunge(_ set: UIDSet) -> Int {
+    private mutating func writeCommandKind_uidExpunge(_ set: UIDSet) -> Int {
         self.writeString("EXPUNGE ") +
             self.writeUIDSet(set)
     }
 
-    private mutating func writeCommandType_unselect() -> Int {
+    private mutating func writeCommandKind_unselect() -> Int {
         self.writeString("UNSELECT")
     }
 
-    private mutating func writeCommandType_idleStart() -> Int {
+    private mutating func writeCommandKind_idleStart() -> Int {
         self.writeString("IDLE")
     }
 
-    private mutating func writeCommandType_idleFinish() -> Int {
+    private mutating func writeCommandKind_idleFinish() -> Int {
         self.writeString("DONE")
     }
 
-    private mutating func writeCommandType_enable(capabilities: [Capability]) -> Int {
+    private mutating func writeCommandKind_enable(capabilities: [Capability]) -> Int {
         self.writeString("ENABLE ") +
             self.writeArray(capabilities, parenthesis: false) { (element, self) in
                 self.writeCapability(element)
             }
     }
 
-    private mutating func writeCommandType_copy(set: SequenceSet, mailbox: MailboxName) -> Int {
+    private mutating func writeCommandKind_copy(set: SequenceSet, mailbox: MailboxName) -> Int {
         self.writeString("COPY ") +
             self.writeSequenceSet(set) +
             self.writeSpace() +
             self.writeMailbox(mailbox)
     }
 
-    private mutating func writeCommandType_uidCopy(set: UIDSet, mailbox: MailboxName) -> Int {
+    private mutating func writeCommandKind_uidCopy(set: UIDSet, mailbox: MailboxName) -> Int {
         self.writeString("UID COPY ") +
             self.writeUIDSet(set) +
             self.writeSpace() +
             self.writeMailbox(mailbox)
     }
 
-    private mutating func writeCommandType_fetch(set: SequenceSet, atts: [FetchAttribute], modifiers: [FetchModifier]) -> Int {
+    private mutating func writeCommandKind_fetch(set: SequenceSet, atts: [FetchAttribute], modifiers: [FetchModifier]) -> Int {
         self.writeString("FETCH ") +
             self.writeSequenceSet(set) +
             self.writeSpace() +
@@ -313,7 +313,7 @@ extension EncodeBuffer {
             }
     }
 
-    private mutating func writeCommandType_uidFetch(set: UIDSet, atts: [FetchAttribute], modifiers: [FetchModifier]) -> Int {
+    private mutating func writeCommandKind_uidFetch(set: UIDSet, atts: [FetchAttribute], modifiers: [FetchModifier]) -> Int {
         self.writeString("UID FETCH ") +
             self.writeUIDSet(set) +
             self.writeSpace() +
@@ -323,7 +323,7 @@ extension EncodeBuffer {
             }
     }
 
-    private mutating func writeCommandType_store(set: SequenceSet, modifiers: [StoreModifier], flags: StoreFlags) -> Int {
+    private mutating func writeCommandKind_store(set: SequenceSet, modifiers: [StoreModifier], flags: StoreFlags) -> Int {
         self.writeString("STORE ") +
             self.writeSequenceSet(set) +
             self.writeIfArrayHasMinimumSize(array: modifiers) { (modifiers, self) -> Int in
@@ -333,7 +333,7 @@ extension EncodeBuffer {
             self.writeStoreAttributeFlags(flags)
     }
 
-    private mutating func writeCommandType_uidStore(set: UIDSet, modifiers: [StoreModifier], flags: StoreFlags) -> Int {
+    private mutating func writeCommandKind_uidStore(set: UIDSet, modifiers: [StoreModifier], flags: StoreFlags) -> Int {
         self.writeString("UID STORE ") +
             self.writeUIDSet(set) +
             self.writeIfArrayHasMinimumSize(array: modifiers) { (modifiers, self) -> Int in
@@ -343,7 +343,7 @@ extension EncodeBuffer {
             self.writeStoreAttributeFlags(flags)
     }
 
-    private mutating func writeCommandType_search(key: SearchKey, charset: String? = nil, returnOptions: [SearchReturnOption] = []) -> Int {
+    private mutating func writeCommandKind_search(key: SearchKey, charset: String? = nil, returnOptions: [SearchReturnOption] = []) -> Int {
         self.writeString("SEARCH") +
             self.writeIfExists(returnOptions) { (options) -> Int in
                 self.writeSearchReturnOptions(options)
@@ -355,30 +355,30 @@ extension EncodeBuffer {
             self.writeSearchKey(key)
     }
 
-    private mutating func writeCommandType_uidSearch(key: SearchKey, charset: String? = nil, returnOptions: [SearchReturnOption] = []) -> Int {
+    private mutating func writeCommandKind_uidSearch(key: SearchKey, charset: String? = nil, returnOptions: [SearchReturnOption] = []) -> Int {
         self.writeString("UID ") +
-            self.writeCommandType_search(key: key, charset: charset, returnOptions: returnOptions)
+            self.writeCommandKind_search(key: key, charset: charset, returnOptions: returnOptions)
     }
 
-    private mutating func writeCommandType_move(set: SequenceSet, mailbox: MailboxName) -> Int {
+    private mutating func writeCommandKind_move(set: SequenceSet, mailbox: MailboxName) -> Int {
         self.writeString("MOVE ") +
             self.writeSequenceSet(set) +
             self.writeSpace() +
             self.writeMailbox(mailbox)
     }
 
-    private mutating func writeCommandType_uidMove(set: UIDSet, mailbox: MailboxName) -> Int {
+    private mutating func writeCommandKind_uidMove(set: UIDSet, mailbox: MailboxName) -> Int {
         self.writeString("UID MOVE ") +
             self.writeUIDSet(set) +
             self.writeSpace() +
             self.writeMailbox(mailbox)
     }
 
-    private mutating func writeCommandType_namespace() -> Int {
+    private mutating func writeCommandKind_namespace() -> Int {
         self.writeNamespaceCommand()
     }
 
-    @discardableResult mutating func writeCommandType_id(_ id: [IDParameter]) -> Int {
+    @discardableResult mutating func writeCommandKind_id(_ id: [IDParameter]) -> Int {
         self.writeString("ID ") +
             self.writeIDParameters(id)
     }

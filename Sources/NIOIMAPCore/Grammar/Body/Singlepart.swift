@@ -81,15 +81,15 @@ extension BodyStructure.Singlepart {
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeBodyTypeSinglepart(_ part: BodyStructure.Singlepart) -> Int {
+    @discardableResult mutating func writeBodySinglepart(_ part: BodyStructure.Singlepart) -> Int {
         var size = 0
         switch part.kind {
         case .basic(let basic):
-            size += self.writeBodyTypeBasic(mediaType: basic, fields: part.fields)
+            size += self.writeBodyKindBasic(mediaKind: basic, fields: part.fields)
         case .message(let message):
-            size += self.writeBodyTypeMessage(message, fields: part.fields)
+            size += self.writeBodyKindMessage(message, fields: part.fields)
         case .text(let text):
-            size += self.writeBodyTypeText(text, fields: part.fields)
+            size += self.writeBodyKindText(text, fields: part.fields)
         }
 
         if let ext = part.extension {
@@ -99,14 +99,14 @@ extension EncodeBuffer {
         return size
     }
 
-    @discardableResult private mutating func writeBodyTypeText(_ body: BodyStructure.Singlepart.Text, fields: BodyStructure.Fields) -> Int {
+    @discardableResult private mutating func writeBodyKindText(_ body: BodyStructure.Singlepart.Text, fields: BodyStructure.Fields) -> Int {
         self.writeMediaText(body.mediaText) +
             self.writeSpace() +
             self.writeBodyFields(fields) +
             self.writeString(" \(body.lineCount)")
     }
 
-    @discardableResult private mutating func writeBodyTypeMessage(_ message: BodyStructure.Singlepart.Message, fields: BodyStructure.Fields) -> Int {
+    @discardableResult private mutating func writeBodyKindMessage(_ message: BodyStructure.Singlepart.Message, fields: BodyStructure.Fields) -> Int {
         self.writeMediaMessage(message.message) +
             self.writeSpace() +
             self.writeBodyFields(fields) +
@@ -117,8 +117,8 @@ extension EncodeBuffer {
             self.writeString(" \(message.lineCount)")
     }
 
-    @discardableResult private mutating func writeBodyTypeBasic(mediaType: Media.Basic, fields: BodyStructure.Fields) -> Int {
-        self.writeMediaBasic(mediaType) +
+    @discardableResult private mutating func writeBodyKindBasic(mediaKind: Media.Basic, fields: BodyStructure.Fields) -> Int {
+        self.writeMediaBasic(mediaKind) +
             self.writeSpace() +
             self.writeBodyFields(fields)
     }

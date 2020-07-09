@@ -125,9 +125,9 @@ extension EncodeBuffer {
         size += self.writeString("(")
         switch body {
         case .singlepart(let part):
-            size += self.writeBodyTypeSinglepart(part)
+            size += self.writeBodySinglepart(part)
         case .multipart(let part):
-            size += self.writeBodyTypeMultipart(part)
+            size += self.writeBodyMultipart(part)
         }
         size += self.writeString(")")
         return size

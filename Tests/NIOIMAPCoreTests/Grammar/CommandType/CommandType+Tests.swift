@@ -42,6 +42,6 @@ extension CommandType_Tests {
             (.id([]), CommandEncodingOptions(), ["ID NIL"], #line),
         ]
 
-        self.iterateInputs(inputs: inputs, encoder: { try self.testBuffer.writeCommandType($0) })
+        self.iterateInputs(inputs: inputs, encoder: { try self.testBuffer.writeCommand($0) })
     }
 }

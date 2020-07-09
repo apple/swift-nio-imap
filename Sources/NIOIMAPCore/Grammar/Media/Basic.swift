@@ -15,7 +15,7 @@
 import struct NIO.ByteBuffer
 
 extension Media {
-    public struct BasicType: RawRepresentable, CustomStringConvertible, Equatable {
+    public struct BasicKind: RawRepresentable, CustomStringConvertible, Equatable {
         public var rawValue: String
 
         public init(rawValue: String) {
@@ -54,11 +54,11 @@ extension Media {
 
     /// IMAPv4 `media-basic`
     public struct Basic: Equatable {
-        public var type: BasicType
+        public var kind: BasicKind
         public var subtype: BodyStructure.MediaSubtype
 
-        public init(type: Media.BasicType, subtype: BodyStructure.MediaSubtype) {
-            self.type = type
+        public init(kind: Media.BasicKind, subtype: BodyStructure.MediaSubtype) {
+            self.kind = kind
             self.subtype = subtype
         }
     }
@@ -67,7 +67,7 @@ extension Media {
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeMediaBasicType(_ type: Media.BasicType) -> Int {
+    @discardableResult mutating func writeMediaBasicKind(_ type: Media.BasicKind) -> Int {
         switch type {
         case .application, .audio, .image, .message, .video:
             return self.writeString("\"\(type.rawValue)\"")
@@ -77,7 +77,7 @@ extension EncodeBuffer {
     }
 
     @discardableResult mutating func writeMediaBasic(_ media: Media.Basic) -> Int {
-        self.writeMediaBasicType(media.type) +
+        self.writeMediaBasicKind(media.kind) +
             self.writeSpace() +
             self.writeMediaSubtype(media.subtype)
     }
