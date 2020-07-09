@@ -508,8 +508,9 @@ extension GrammarParser {
     //                   [SP body-ext-mpart]
     static func parseBodyTypeMultipart(buffer: inout ByteBuffer, tracker: StackTracker) throws -> BodyStructure.Multipart {
         try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> BodyStructure.Multipart in
-            let parts = try ParserLibrary.parseOneOrMore(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
-                try self.parseBody(buffer: &buffer, tracker: tracker)
+            let parts = try ParserLibrary.parseOneOrMore(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> BodyStructure in
+                try? ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
+                return try self.parseBody(buffer: &buffer, tracker: tracker)
             }
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
             let media = try self.parseMediaSubtype(buffer: &buffer, tracker: tracker)
@@ -4195,9 +4196,9 @@ extension GrammarParser {
 
     static func parseBodyLanguageLocation(buffer: inout ByteBuffer, tracker: StackTracker) throws -> BodyStructure.LanguageLocation {
         let fieldLanguage = try self.parseBodyFieldLanguage(buffer: &buffer, tracker: tracker)
-        try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
-        let locationExtension = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
-            try parseBodyLocationExtension(buffer: &buffer, tracker: tracker)
+        let locationExtension = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> BodyStructure.LocationAndExtensions in
+            try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
+            return try parseBodyLocationExtension(buffer: &buffer, tracker: tracker)
         }
         return BodyStructure.LanguageLocation(languages: fieldLanguage, location: locationExtension)
     }
