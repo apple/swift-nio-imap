@@ -14,15 +14,6 @@
 
 import struct NIO.ByteBuffer
 
-extension String {
-    init?(maybeBuffer: ByteBuffer?) {
-        guard let buffer = maybeBuffer else {
-            return nil
-        }
-        self.init(buffer: buffer)
-    }
-}
-
 // MARK: - IMAP
 
 extension EncodeBuffer {
