@@ -19,7 +19,7 @@ extension BodyStructure {
     public struct Disposition: Equatable {
         public var kind: String
         public var parameters: [ParameterPair]
-        
+
         /// Attempts to find and convert the vale for the common field "SIZE". If the field doesn't exist or is not a valid integer then `nil` is returned.
         public var size: Int? {
             guard let value = self.parameters.first(where: { (pair) -> Bool in
@@ -29,7 +29,7 @@ extension BodyStructure {
             }
             return Int(value)
         }
-        
+
         /// Attempts to find and convert the vale for the common field "SIZE". If the field doesn't exist then `nil` is returned.
         public var filename: String? {
             self.parameters.first(where: { (pair) -> Bool in
