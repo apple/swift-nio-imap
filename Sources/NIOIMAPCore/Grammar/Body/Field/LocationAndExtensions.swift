@@ -17,10 +17,10 @@ import struct NIO.ByteBuffer
 extension BodyStructure {
     /// Extracted from IMAPv4 `body-ext-1part`
     public struct LocationAndExtensions: Equatable {
-        public var location: ByteBuffer?
+        public var location: String?
         public var extensions: [[BodyExtension]]
 
-        public init(location: ByteBuffer?, extensions: [[BodyExtension]]) {
+        public init(location: String?, extensions: [[BodyExtension]]) {
             self.location = location
             self.extensions = extensions
         }

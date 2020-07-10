@@ -24,4 +24,12 @@ extension EncodeBuffer {
             return self.writeNil()
         }
     }
+
+    @discardableResult mutating func writeNString(_ string: String?) -> Int {
+        if let string = string {
+            return self.writeIMAPString(string)
+        } else {
+            return self.writeNil()
+        }
+    }
 }

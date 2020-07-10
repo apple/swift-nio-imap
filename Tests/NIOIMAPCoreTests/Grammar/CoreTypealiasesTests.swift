@@ -22,8 +22,9 @@ class CoreTypealiasesTests: EncodeTestClass {}
 
 extension CoreTypealiasesTests {
     func testNil() {
-        let expected = "NIL"
-        let size = self.testBuffer.writeNString(nil)
+        let expected: String = "NIL"
+        let input: String? = nil
+        let size = self.testBuffer.writeNString(input)
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }
