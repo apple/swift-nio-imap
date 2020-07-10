@@ -18,11 +18,28 @@ extension BodyStructure {
     /// IMAPv4 `body-fld-dsp`
     public struct Disposition: Equatable {
         public var kind: String
-        public var parameter: [ParameterPair]
+        public var parameters: [ParameterPair]
+        
+        /// Attempts to find and convert the vale for the common field "SIZE". If the field doesn't exist or is not a valid integer then `nil` is returned.
+        public var size: Int? {
+            guard let value = self.parameters.first(where: { (pair) -> Bool in
+                pair.field.lowercased() == "size"
+            })?.value else {
+                return nil
+            }
+            return Int(value)
+        }
+        
+        /// Attempts to find and convert the vale for the common field "SIZE". If the field doesn't exist then `nil` is returned.
+        public var filename: String? {
+            self.parameters.first(where: { (pair) -> Bool in
+                pair.field.lowercased() == "filename"
+            })?.value
+        }
 
         public init(kind: String, parameter: [ParameterPair]) {
             self.kind = kind
-            self.parameter = parameter
+            self.parameters = parameter
         }
     }
 }
@@ -39,7 +56,7 @@ extension EncodeBuffer {
             self.writeString("(") +
             self.writeIMAPString(dsp.kind) +
             self.writeSpace() +
-            self.writeBodyParameterPairs(dsp.parameter) +
+            self.writeBodyParameterPairs(dsp.parameters) +
             self.writeString(")")
     }
 }
