@@ -30,7 +30,7 @@ extension BodyStructure {
             return Int(value)
         }
 
-        /// Attempts to find and convert the vale for the common field "SIZE". If the field doesn't exist then `nil` is returned.
+        /// Attempts to find and convert the value for the common field "SIZE". If the field doesn't exist then `nil` is returned.
         public var filename: String? {
             self.parameters.first(where: { (pair) -> Bool in
                 pair.field.lowercased() == "filename"
