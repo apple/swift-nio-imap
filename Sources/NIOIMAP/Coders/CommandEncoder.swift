@@ -38,7 +38,7 @@ public class CommandEncoder: MessageToByteEncoder {
             out.writeString("DONE\r\n")
         case .command(let command):
             var encodeBuffer = EncodeBuffer.clientEncodeBuffer(buffer: out, capabilities: self.capabilities)
-            try encodeBuffer.writeCommand(command)
+            encodeBuffer.writeCommand(command)
             out = encodeBuffer.nextChunk().bytes
         case .append(let command):
             try self.encodeAppendCommand(command, into: &out)

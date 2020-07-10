@@ -41,7 +41,7 @@ extension CommandStream_Tests {
 
         for (command, expected, line) in inputs {
             var commandEncodeBuffer = CommandEncodeBuffer(buffer: "", capabilities: [])
-            XCTAssertNoThrow(try commandEncodeBuffer.writeAppendCommand(command), line: line)
+            commandEncodeBuffer.writeAppendCommand(command)
             XCTAssertEqual(String(buffer: commandEncodeBuffer.buffer._buffer), expected, line: line)
         }
     }
@@ -56,8 +56,8 @@ extension CommandStream_Tests {
         ]
 
         var buffer = CommandEncodeBuffer(buffer: "", capabilities: [])
-        try parts.forEach {
-            try buffer.writeAppendCommand($0)
+        parts.forEach {
+            buffer.writeAppendCommand($0)
         }
 
         let encodedCommand = buffer.buffer.nextChunk()
@@ -83,8 +83,8 @@ extension CommandStream_Tests {
         var options = CommandEncodingOptions()
         options.useNonSynchronizingLiteral = true
         var buffer = CommandEncodeBuffer(buffer: "", options: options)
-        try parts.forEach {
-            try buffer.writeAppendCommand($0)
+        parts.forEach {
+            buffer.writeAppendCommand($0)
         }
 
         let encodedCommand = buffer.buffer.nextChunk()

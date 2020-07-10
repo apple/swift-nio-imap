@@ -57,7 +57,7 @@ public enum Command: Equatable {
 // MARK: - IMAP
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeCommand(_ command: Command) throws -> Int {
+    @discardableResult mutating func writeCommand(_ command: Command) -> Int {
         switch command {
         case .capability:
             return self.writeCommandKind_capability()
@@ -72,7 +72,7 @@ extension EncodeBuffer {
         case .examine(let mailbox, let params):
             return self.writeCommandKind_examine(mailbox: mailbox, parameters: params)
         case .list(let selectOptions, let mailbox, let mailboxPatterns, let returnOptions):
-            return try self.writeCommandKind_list(selectOptions: selectOptions, mailbox: mailbox, mailboxPatterns: mailboxPatterns, returnOptions: returnOptions)
+            return self.writeCommandKind_list(selectOptions: selectOptions, mailbox: mailbox, mailboxPatterns: mailboxPatterns, returnOptions: returnOptions)
         case .lsub(let mailbox, let listMailbox):
             return self.writeCommandKind_lsub(mailbox: mailbox, listMailbox: listMailbox)
         case .rename(let from, let to, let params):
@@ -171,7 +171,7 @@ extension EncodeBuffer {
             }
     }
 
-    private mutating func writeCommandKind_list(selectOptions: ListSelectOptions?, mailbox: MailboxName, mailboxPatterns: MailboxPatterns, returnOptions: [ReturnOption]) throws -> Int {
+    private mutating func writeCommandKind_list(selectOptions: ListSelectOptions?, mailbox: MailboxName, mailboxPatterns: MailboxPatterns, returnOptions: [ReturnOption]) -> Int {
         self.writeString("LIST") +
             self.writeIfExists(selectOptions) { (options) -> Int in
                 self.writeSpace() +
