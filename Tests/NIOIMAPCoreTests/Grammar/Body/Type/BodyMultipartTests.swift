@@ -46,7 +46,7 @@ extension BodyMultipartTests {
                 #line
             ),
         ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeBodyTypeMultipart($0) })
+        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeBodyMultipart($0) })
     }
 
     func testEncode_extension() {

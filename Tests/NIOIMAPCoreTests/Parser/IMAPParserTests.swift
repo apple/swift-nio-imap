@@ -104,7 +104,7 @@ extension ParserUnitTests {
             (.taggedResponse(.init(tag: "2", state: .ok(.init(code: nil, text: "Login completed.")))), #line),
 
             (.fetchResponse(.start(1)), #line),
-            (.fetchResponse(.streamingBegin(type: .body(partial: 4), byteCount: 3)), #line),
+            (.fetchResponse(.streamingBegin(kind: .body(partial: 4), byteCount: 3)), #line),
             (.fetchResponse(.streamingBytes("abc")), #line),
             (.fetchResponse(.streamingEnd), #line),
             (.fetchResponse(.simpleAttribute(.flags([.seen, .answered]))), #line),
@@ -112,20 +112,20 @@ extension ParserUnitTests {
 
             (.fetchResponse(.start(2)), #line),
             (.fetchResponse(.simpleAttribute(.flags([.deleted]))), #line),
-            (.fetchResponse(.streamingBegin(type: .body(partial: nil), byteCount: 3)), #line),
+            (.fetchResponse(.streamingBegin(kind: .body(partial: nil), byteCount: 3)), #line),
             (.fetchResponse(.streamingBytes("def")), #line),
             (.fetchResponse(.streamingEnd), #line),
             (.fetchResponse(.finish), #line),
 
             (.fetchResponse(.start(3)), #line),
-            (.fetchResponse(.streamingBegin(type: .body(partial: nil), byteCount: 3)), #line),
+            (.fetchResponse(.streamingBegin(kind: .body(partial: nil), byteCount: 3)), #line),
             (.fetchResponse(.streamingBytes("ghi")), #line),
             (.fetchResponse(.streamingEnd), #line),
             (.fetchResponse(.finish), #line),
             (.taggedResponse(.init(tag: "3", state: .ok(.init(code: nil, text: "Fetch completed.")))), #line),
 
             (.fetchResponse(.start(1)), #line),
-            (.fetchResponse(.streamingBegin(type: .binary(section: []), byteCount: 4)), #line),
+            (.fetchResponse(.streamingBegin(kind: .binary(section: []), byteCount: 4)), #line),
             (.fetchResponse(.streamingBytes("1234")), #line),
             (.fetchResponse(.streamingEnd), #line),
             (.fetchResponse(.finish), #line),
@@ -532,7 +532,7 @@ extension ParserUnitTests {
                 "\"AUDIO\" \"multipart/alternative\" NIL NIL NIL \"BASE64\" 1",
                 "\r\n",
                 .init(
-                    type: .basic(.init(type: .audio, subtype: .alternative)),
+                    type: .basic(.init(kind: .audio, subtype: .alternative)),
                     fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octetCount: 1),
                     extension: nil
                 ),
@@ -542,7 +542,7 @@ extension ParserUnitTests {
                 "\"APPLICATION\" \"multipart/mixed\" NIL \"id\" \"description\" \"7BIT\" 2",
                 "\r\n",
                 .init(
-                    type: .basic(.init(type: .application, subtype: .mixed)),
+                    type: .basic(.init(kind: .application, subtype: .mixed)),
                     fields: .init(parameter: [], id: "id", description: "description", encoding: .sevenBit, octetCount: 2),
                     extension: nil
                 ),
@@ -552,7 +552,7 @@ extension ParserUnitTests {
                 "\"VIDEO\" \"multipart/related\" (\"f1\" \"v1\") NIL NIL \"8BIT\" 3",
                 "\r\n",
                 .init(
-                    type: .basic(.init(type: .video, subtype: .related)),
+                    type: .basic(.init(kind: .video, subtype: .related)),
                     fields: .init(parameter: [.init(field: "f1", value: "v1")], id: nil, description: nil, encoding: .eightBit, octetCount: 3),
                     extension: nil
                 ),
@@ -569,7 +569,7 @@ extension ParserUnitTests {
                         .init(
                             message: .rfc822,
                             envelope: Envelope(date: nil, subject: nil, from: [], sender: [], reply: [], to: [], cc: [], bcc: [], inReplyTo: nil, messageID: nil),
-                            body: .singlepart(.init(type: .basic(.init(type: .image, subtype: .related)), fields: .init(parameter: [], id: nil, description: nil, encoding: .binary, octetCount: 5))),
+                            body: .singlepart(.init(type: .basic(.init(kind: .image, subtype: .related)), fields: .init(parameter: [], id: nil, description: nil, encoding: .binary, octetCount: 5))),
                             fieldLines: 8
                         )
                     ),
@@ -594,7 +594,7 @@ extension ParserUnitTests {
         ]
 
         let inputs = basicInputs + messageInputs + textInputs
-        self.iterateTestInputs(inputs, testFunction: GrammarParser.parseBodyTypeSinglePart)
+        self.iterateTestInputs(inputs, testFunction: GrammarParser.parseBodyKindSinglePart)
     }
 }
 
@@ -1188,13 +1188,13 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseEntryTypeRequest() {
-        let inputs: [(String, String, EntryTypeRequest, UInt)] = [
+        let inputs: [(String, String, EntryKindRequest, UInt)] = [
             ("all", " ", .all, #line),
             ("ALL", " ", .all, #line),
             ("aLL", " ", .all, #line),
             ("shared", " ", .response(.shared), #line),
         ]
-        self.iterateTestInputs(inputs, testFunction: GrammarParser.parseEntryTypeRequest)
+        self.iterateTestInputs(inputs, testFunction: GrammarParser.parseEntryKindRequest)
     }
 }
 
@@ -1202,7 +1202,7 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseEntryTypeResponse() {
-        let inputs: [(String, String, EntryTypeResponse, UInt)] = [
+        let inputs: [(String, String, EntryKindResponse, UInt)] = [
             ("priv", " ", .private, #line),
             ("PRIV", " ", .private, #line),
             ("prIV", " ", .private, #line),
@@ -1210,7 +1210,7 @@ extension ParserUnitTests {
             ("SHARED", " ", .shared, #line),
             ("shaRED", " ", .shared, #line),
         ]
-        self.iterateTestInputs(inputs, testFunction: GrammarParser.parseEntryTypeResponse)
+        self.iterateTestInputs(inputs, testFunction: GrammarParser.parseEntryKindResponse)
     }
 }
 
@@ -1620,7 +1620,7 @@ extension ParserUnitTests {
         var buffer = #""APPLICATION" "multipart/mixed""# as ByteBuffer
         do {
             let mediaBasic = try GrammarParser.parseMediaBasic(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(mediaBasic, Media.Basic(type: .application, subtype: .mixed))
+            XCTAssertEqual(mediaBasic, Media.Basic(kind: .application, subtype: .mixed))
         } catch {
             XCTFail("\(error)")
         }
@@ -1630,7 +1630,7 @@ extension ParserUnitTests {
         var buffer = #""STRING" "multipart/related""# as ByteBuffer
         do {
             let mediaBasic = try GrammarParser.parseMediaBasic(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(mediaBasic, Media.Basic(type: .other("STRING"), subtype: .related))
+            XCTAssertEqual(mediaBasic, Media.Basic(kind: .other("STRING"), subtype: .related))
         } catch {
             XCTFail("\(error)")
         }

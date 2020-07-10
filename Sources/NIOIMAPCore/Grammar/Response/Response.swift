@@ -36,13 +36,13 @@ public enum Response: Equatable {
 public enum FetchResponse: Equatable {
     case start(Int)
     case simpleAttribute(MessageAttribute)
-    case streamingBegin(type: StreamingType, byteCount: Int)
+    case streamingBegin(kind: StreamingKind, byteCount: Int)
     case streamingBytes(ByteBuffer)
     case streamingEnd
     case finish
 }
 
-public enum StreamingType: Equatable {
+public enum StreamingKind: Equatable {
     case binary(section: SectionSpecifier.Part) /// BINARY RFC 3516, streams BINARY when using a `literal`
     case body(partial: Int?) /// IMAP4rev1 RFC 3501, streams BODY[TEXT] when using a `literal`
     case rfc822 /// IMAP4rev1 RFC 3501, streams RF822.TEXT when using a `literal`

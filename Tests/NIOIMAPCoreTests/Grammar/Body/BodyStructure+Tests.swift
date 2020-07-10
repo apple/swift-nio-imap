@@ -47,13 +47,13 @@ extension BodyStructure_Tests {
     func testRandomeAccessCollection_startIndex() {
         let inputs: [(BodyStructure, SectionSpecifier.Part, UInt)] = [
             (
-                .singlepart(.init(type: .basic(.init(type: .audio, subtype: .alternative)), fields: .init(parameter: [], id: nil, description: nil, encoding: .binary, octetCount: 0))),
+                .singlepart(.init(type: .basic(.init(kind: .audio, subtype: .alternative)), fields: .init(parameter: [], id: nil, description: nil, encoding: .binary, octetCount: 0))),
                 [1],
                 #line
             ),
             (
                 .multipart(.init(parts: [
-                    .singlepart(.init(type: .basic(.init(type: .application, subtype: .mixed)), fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octetCount: 1))),
+                    .singlepart(.init(type: .basic(.init(kind: .application, subtype: .mixed)), fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octetCount: 1))),
                 ], mediaSubtype: .mixed)),
                 [1],
                 #line
@@ -67,7 +67,7 @@ extension BodyStructure_Tests {
     func testRandomeAccessCollection_endIndex() {
         let inputs: [(BodyStructure, SectionSpecifier.Part, UInt)] = [
             (
-                .singlepart(.init(type: .basic(.init(type: .audio, subtype: .alternative)), fields: .init(parameter: [], id: nil, description: nil, encoding: .binary, octetCount: 0))),
+                .singlepart(.init(type: .basic(.init(kind: .audio, subtype: .alternative)), fields: .init(parameter: [], id: nil, description: nil, encoding: .binary, octetCount: 0))),
                 [2],
                 #line
             ),
@@ -76,7 +76,7 @@ extension BodyStructure_Tests {
                     message: .rfc822,
                     envelope: .init(date: nil, subject: nil, from: [], sender: [], reply: [], to: [], cc: [], bcc: [], inReplyTo: nil, messageID: nil),
                     body: .singlepart(.init(
-                        type: .basic(.init(type: .application, subtype: .mixed)),
+                        type: .basic(.init(kind: .application, subtype: .mixed)),
                         fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octetCount: 0)
                     )
                     ),
@@ -87,16 +87,16 @@ extension BodyStructure_Tests {
             ),
             (
                 .multipart(BodyStructure.Multipart(parts: [
-                    .singlepart(.init(type: .basic(.init(type: .audio, subtype: .mixed)), fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octetCount: 0))),
+                    .singlepart(.init(type: .basic(.init(kind: .audio, subtype: .mixed)), fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octetCount: 0))),
                 ], mediaSubtype: .mixed)),
                 [2],
                 #line
             ),
             (
                 .multipart(BodyStructure.Multipart(parts: [
-                    .singlepart(.init(type: .basic(.init(type: .audio, subtype: .mixed)), fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octetCount: 0))),
-                    .singlepart(.init(type: .basic(.init(type: .audio, subtype: .mixed)), fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octetCount: 0))),
-                    .singlepart(.init(type: .basic(.init(type: .audio, subtype: .mixed)), fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octetCount: 0))),
+                    .singlepart(.init(type: .basic(.init(kind: .audio, subtype: .mixed)), fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octetCount: 0))),
+                    .singlepart(.init(type: .basic(.init(kind: .audio, subtype: .mixed)), fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octetCount: 0))),
+                    .singlepart(.init(type: .basic(.init(kind: .audio, subtype: .mixed)), fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octetCount: 0))),
                 ], mediaSubtype: .mixed)),
                 [4],
                 #line
@@ -110,16 +110,16 @@ extension BodyStructure_Tests {
     func testRandomeAccessCollection_indexBefore() {
         let inputs: [(BodyStructure, SectionSpecifier.Part, SectionSpecifier.Part, UInt)] = [
             (
-                .singlepart(.init(type: .basic(.init(type: .audio, subtype: .alternative)), fields: .init(parameter: [], id: nil, description: nil, encoding: .binary, octetCount: 0))),
+                .singlepart(.init(type: .basic(.init(kind: .audio, subtype: .alternative)), fields: .init(parameter: [], id: nil, description: nil, encoding: .binary, octetCount: 0))),
                 [2],
                 [1],
                 #line
             ),
             (
                 .multipart(BodyStructure.Multipart(parts: [
-                    .singlepart(.init(type: .basic(.init(type: .audio, subtype: .mixed)), fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octetCount: 0))),
-                    .singlepart(.init(type: .basic(.init(type: .audio, subtype: .mixed)), fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octetCount: 0))),
-                    .singlepart(.init(type: .basic(.init(type: .audio, subtype: .mixed)), fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octetCount: 0))),
+                    .singlepart(.init(type: .basic(.init(kind: .audio, subtype: .mixed)), fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octetCount: 0))),
+                    .singlepart(.init(type: .basic(.init(kind: .audio, subtype: .mixed)), fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octetCount: 0))),
+                    .singlepart(.init(type: .basic(.init(kind: .audio, subtype: .mixed)), fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octetCount: 0))),
                 ], mediaSubtype: .mixed)),
                 [3],
                 [2],
@@ -134,16 +134,16 @@ extension BodyStructure_Tests {
     func testRandomeAccessCollection_indexAfter() {
         let inputs: [(BodyStructure, SectionSpecifier.Part, SectionSpecifier.Part, UInt)] = [
             (
-                .singlepart(.init(type: .basic(.init(type: .audio, subtype: .alternative)), fields: .init(parameter: [], id: nil, description: nil, encoding: .binary, octetCount: 0))),
+                .singlepart(.init(type: .basic(.init(kind: .audio, subtype: .alternative)), fields: .init(parameter: [], id: nil, description: nil, encoding: .binary, octetCount: 0))),
                 [1],
                 [2],
                 #line
             ),
             (
                 .multipart(BodyStructure.Multipart(parts: [
-                    .singlepart(.init(type: .basic(.init(type: .audio, subtype: .mixed)), fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octetCount: 0))),
-                    .singlepart(.init(type: .basic(.init(type: .audio, subtype: .mixed)), fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octetCount: 0))),
-                    .singlepart(.init(type: .basic(.init(type: .audio, subtype: .mixed)), fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octetCount: 0))),
+                    .singlepart(.init(type: .basic(.init(kind: .audio, subtype: .mixed)), fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octetCount: 0))),
+                    .singlepart(.init(type: .basic(.init(kind: .audio, subtype: .mixed)), fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octetCount: 0))),
+                    .singlepart(.init(type: .basic(.init(kind: .audio, subtype: .mixed)), fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octetCount: 0))),
                 ], mediaSubtype: .mixed)),
                 [2],
                 [3],
@@ -158,9 +158,9 @@ extension BodyStructure_Tests {
     func testRandomeAccessCollection_position() {
         let inputs: [(BodyStructure, SectionSpecifier.Part, BodyStructure, UInt)] = [
             (
-                .singlepart(.init(type: .basic(.init(type: .audio, subtype: .alternative)), fields: .init(parameter: [], id: nil, description: nil, encoding: .binary, octetCount: 0))),
+                .singlepart(.init(type: .basic(.init(kind: .audio, subtype: .alternative)), fields: .init(parameter: [], id: nil, description: nil, encoding: .binary, octetCount: 0))),
                 [1],
-                .singlepart(.init(type: .basic(.init(type: .audio, subtype: .alternative)), fields: .init(parameter: [], id: nil, description: nil, encoding: .binary, octetCount: 0))),
+                .singlepart(.init(type: .basic(.init(kind: .audio, subtype: .alternative)), fields: .init(parameter: [], id: nil, description: nil, encoding: .binary, octetCount: 0))),
                 #line
             ),
             (
@@ -176,7 +176,7 @@ extension BodyStructure_Tests {
                             .init(
                                 message: .rfc822,
                                 envelope: Envelope(date: nil, subject: nil, from: [], sender: [], reply: [], to: [], cc: [], bcc: [], inReplyTo: nil, messageID: nil),
-                                body: .singlepart(.init(type: .basic(.init(type: .audio, subtype: .alternative)), fields: .init(parameter: [], id: nil, description: nil, encoding: .binary, octetCount: 0))
+                                body: .singlepart(.init(type: .basic(.init(kind: .audio, subtype: .alternative)), fields: .init(parameter: [], id: nil, description: nil, encoding: .binary, octetCount: 0))
                                 ),
                                 fieldLines: 1
                             )
@@ -185,33 +185,33 @@ extension BodyStructure_Tests {
                     )
                 ),
                 [1],
-                .singlepart(.init(type: .basic(.init(type: .audio, subtype: .alternative)), fields: .init(parameter: [], id: nil, description: nil, encoding: .binary, octetCount: 0))),
+                .singlepart(.init(type: .basic(.init(kind: .audio, subtype: .alternative)), fields: .init(parameter: [], id: nil, description: nil, encoding: .binary, octetCount: 0))),
                 #line
             ),
             (
                 .multipart(.init(parts: [
-                    .singlepart(.init(type: .basic(.init(type: .audio, subtype: .alternative)), fields: .init(parameter: [], id: nil, description: nil, encoding: .binary, octetCount: 0))),
-                    .singlepart(.init(type: .basic(.init(type: .audio, subtype: .alternative)), fields: .init(parameter: [], id: nil, description: nil, encoding: .binary, octetCount: 1))),
-                    .singlepart(.init(type: .basic(.init(type: .audio, subtype: .alternative)), fields: .init(parameter: [], id: nil, description: nil, encoding: .binary, octetCount: 2))),
+                    .singlepart(.init(type: .basic(.init(kind: .audio, subtype: .alternative)), fields: .init(parameter: [], id: nil, description: nil, encoding: .binary, octetCount: 0))),
+                    .singlepart(.init(type: .basic(.init(kind: .audio, subtype: .alternative)), fields: .init(parameter: [], id: nil, description: nil, encoding: .binary, octetCount: 1))),
+                    .singlepart(.init(type: .basic(.init(kind: .audio, subtype: .alternative)), fields: .init(parameter: [], id: nil, description: nil, encoding: .binary, octetCount: 2))),
                 ], mediaSubtype: .init("subtype"))),
                 [3],
-                .singlepart(.init(type: .basic(.init(type: .audio, subtype: .alternative)), fields: .init(parameter: [], id: nil, description: nil, encoding: .binary, octetCount: 2))),
+                .singlepart(.init(type: .basic(.init(kind: .audio, subtype: .alternative)), fields: .init(parameter: [], id: nil, description: nil, encoding: .binary, octetCount: 2))),
                 #line
             ),
             (
                 .multipart(.init(parts: [
-                    .singlepart(.init(type: .basic(.init(type: .audio, subtype: .alternative)), fields: .init(parameter: [], id: nil, description: nil, encoding: .binary, octetCount: 0))),
+                    .singlepart(.init(type: .basic(.init(kind: .audio, subtype: .alternative)), fields: .init(parameter: [], id: nil, description: nil, encoding: .binary, octetCount: 0))),
                     .multipart(.init(parts: [
-                        .singlepart(.init(type: .basic(.init(type: .audio, subtype: .alternative)), fields: .init(parameter: [], id: nil, description: nil, encoding: .binary, octetCount: 0))),
+                        .singlepart(.init(type: .basic(.init(kind: .audio, subtype: .alternative)), fields: .init(parameter: [], id: nil, description: nil, encoding: .binary, octetCount: 0))),
                         .multipart(.init(parts: [
-                            .singlepart(.init(type: .basic(.init(type: .audio, subtype: .alternative)), fields: .init(parameter: [], id: nil, description: nil, encoding: .binary, octetCount: 3))),
-                            .singlepart(.init(type: .basic(.init(type: .audio, subtype: .alternative)), fields: .init(parameter: [], id: nil, description: nil, encoding: .binary, octetCount: 4))),
-                            .singlepart(.init(type: .basic(.init(type: .audio, subtype: .alternative)), fields: .init(parameter: [], id: nil, description: nil, encoding: .binary, octetCount: 5))),
+                            .singlepart(.init(type: .basic(.init(kind: .audio, subtype: .alternative)), fields: .init(parameter: [], id: nil, description: nil, encoding: .binary, octetCount: 3))),
+                            .singlepart(.init(type: .basic(.init(kind: .audio, subtype: .alternative)), fields: .init(parameter: [], id: nil, description: nil, encoding: .binary, octetCount: 4))),
+                            .singlepart(.init(type: .basic(.init(kind: .audio, subtype: .alternative)), fields: .init(parameter: [], id: nil, description: nil, encoding: .binary, octetCount: 5))),
                         ], mediaSubtype: .init("subtype"))),
                     ], mediaSubtype: .init("subtype"))),
                 ], mediaSubtype: .init("subtype"))),
                 [2, 2, 1],
-                .singlepart(.init(type: .basic(.init(type: .audio, subtype: .alternative)), fields: .init(parameter: [], id: nil, description: nil, encoding: .binary, octetCount: 3))),
+                .singlepart(.init(type: .basic(.init(kind: .audio, subtype: .alternative)), fields: .init(parameter: [], id: nil, description: nil, encoding: .binary, octetCount: 3))),
                 #line
             ),
         ]
