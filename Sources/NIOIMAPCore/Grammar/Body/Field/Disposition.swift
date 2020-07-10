@@ -20,7 +20,7 @@ extension BodyStructure {
         public var kind: String
         public var parameters: [ParameterPair]
 
-        /// Attempts to find and convert the vale for the common field "SIZE". If the field doesn't exist or is not a valid integer then `nil` is returned.
+        /// Attempts to find and convert the value for the common field "SIZE". If the field doesn't exist or is not a valid integer then `nil` is returned.
         public var size: Int? {
             guard let value = self.parameters.first(where: { (pair) -> Bool in
                 pair.field.lowercased() == "size"
