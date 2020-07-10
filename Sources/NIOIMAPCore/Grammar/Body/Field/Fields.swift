@@ -18,12 +18,12 @@ extension BodyStructure {
     /// IMAPv4 `body-fields`
     public struct Fields: Equatable {
         public var parameter: [BodyStructure.ParameterPair]
-        public var id: ByteBuffer?
-        public var description: ByteBuffer?
+        public var id: String?
+        public var description: String?
         public var encoding: Encoding
         public var octetCount: Int
 
-        public init(parameter: [BodyStructure.ParameterPair], id: ByteBuffer?, description: ByteBuffer?, encoding: BodyStructure.Encoding, octetCount: Int) {
+        public init(parameter: [BodyStructure.ParameterPair], id: String?, description: String?, encoding: BodyStructure.Encoding, octetCount: Int) {
             self.parameter = parameter
             self.id = id
             self.description = description

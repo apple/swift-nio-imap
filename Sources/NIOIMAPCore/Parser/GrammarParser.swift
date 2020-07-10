@@ -275,7 +275,7 @@ extension GrammarParser {
     // body-ext-1part  = body-fld-md5 [SP body-fld-dsp [SP body-fld-lang [SP body-fld-loc *(SP body-extension)]]]
     static func parseBodyExtSinglePart(buffer: inout ByteBuffer, tracker: StackTracker) throws -> BodyStructure.Singlepart.Extension {
         try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> BodyStructure.Singlepart.Extension in
-            let md5 = try self.parseNString(buffer: &buffer, tracker: tracker)
+            let md5 = String(maybeBuffer: try self.parseNString(buffer: &buffer, tracker: tracker))
             let dsp = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> BodyStructure.DispositionAndLanguage in
                 try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
                 return try parseBodyDescriptionLanguage(buffer: &buffer, tracker: tracker)
@@ -302,9 +302,9 @@ extension GrammarParser {
         try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> BodyStructure.Fields in
             let fieldParam = try self.parseBodyFieldParam(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
-            let fieldID = try self.parseNString(buffer: &buffer, tracker: tracker)
+            let fieldID = String(maybeBuffer: try self.parseNString(buffer: &buffer, tracker: tracker))
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
-            let fieldDescription = try self.parseNString(buffer: &buffer, tracker: tracker)
+            let fieldDescription = String(maybeBuffer: try self.parseNString(buffer: &buffer, tracker: tracker))
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
             let Encoding = try self.parseBodyEncoding(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
@@ -996,7 +996,7 @@ extension GrammarParser {
     static func parseEnvelope(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Envelope {
         try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Envelope in
             try ParserLibrary.parseFixedString("(", buffer: &buffer, tracker: tracker)
-            let date = try self.parseNString(buffer: &buffer, tracker: tracker)
+            let date = String(maybeBuffer: try self.parseNString(buffer: &buffer, tracker: tracker))
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
             let subject = try self.parseNString(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
@@ -1014,7 +1014,7 @@ extension GrammarParser {
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
             let inReplyTo = try self.parseNString(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
-            let messageID = try self.parseNString(buffer: &buffer, tracker: tracker)
+            let messageID = String(maybeBuffer: try self.parseNString(buffer: &buffer, tracker: tracker))
             try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)
             return Envelope(
                 date: date,
@@ -4185,7 +4185,7 @@ extension GrammarParser {
 
 extension GrammarParser {
     static func parseBodyLocationExtension(buffer: inout ByteBuffer, tracker: StackTracker) throws -> BodyStructure.LocationAndExtensions {
-        let fieldLocation = try self.parseNString(buffer: &buffer, tracker: tracker)
+        let fieldLocation = String(maybeBuffer: try self.parseNString(buffer: &buffer, tracker: tracker))
         let extensions = try ParserLibrary.parseZeroOrMore(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> [BodyExtension] in
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
             return try self.parseBodyExtension(buffer: &buffer, tracker: tracker)

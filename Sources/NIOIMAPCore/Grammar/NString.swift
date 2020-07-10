@@ -14,10 +14,29 @@
 
 import struct NIO.ByteBuffer
 
+extension String {
+    
+    init?(maybeBuffer: ByteBuffer?) {
+        guard let buffer = maybeBuffer else {
+            return nil
+        }
+        self.init(buffer: buffer)
+    }
+    
+}
+
 // MARK: - IMAP
 
 extension EncodeBuffer {
     @discardableResult mutating func writeNString(_ string: ByteBuffer?) -> Int {
+        if let string = string {
+            return self.writeIMAPString(string)
+        } else {
+            return self.writeNil()
+        }
+    }
+    
+    @discardableResult mutating func writeNString(_ string: String?) -> Int {
         if let string = string {
             return self.writeIMAPString(string)
         } else {
