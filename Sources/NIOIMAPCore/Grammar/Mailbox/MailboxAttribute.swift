@@ -42,21 +42,24 @@ public struct MailboxStatus: Equatable {
     /// The number of messages which do not have the `\Seen` flag set.
     public var unseenCount: Int?
 
+    /// `SIZE`
+    /// RFC 8438
+    /// The total size of the mailbox in octets.
     public var size: Int?
 
-    public var deletedCount: Int?
-
+    /// `HIGHESTMODSEQ`
+    /// RFC 7162
+    /// The highest mod-sequence value of all messages in the mailbox.
     public var modSequence: ModifierSequenceValue?
 
     /// Creates a new `MailboxStatus`. All parameters default to `nil`.
-    /// - parameter messageCount: The number of messages in the mailbox.
-    /// - parameter recentCount: The number of messages with the \Recent flag set.
-    /// - parameter nextUID: The next unique identifier value of the mailbox.
-    /// - parameter uidValidity: The unique identifier validity value of the mailbox.
-    /// - parameter unseenCount: The number of messages which do not have the `\Seen` flag set.
-    /// - parameter size: The number of messages which do not have the `\Seen` flag set.
-    /// - parameter deletedCount: The number of messages with the `\Deleted` flag set.
-    /// - parameter modSequence:
+    /// - parameter messageCount: RFC 3501: `MESSAGES` - The number of messages in the mailbox.
+    /// - parameter recentCount: RFC 3501: `RECENT` - The number of messages with the \Recent flag set.
+    /// - parameter nextUID: RFC 3501: `UIDNEXT` - The next unique identifier value of the mailbox.
+    /// - parameter uidValidity: RFC 3501: `UIDVALIDITY` - The unique identifier validity value of the mailbox.
+    /// - parameter unseenCount: RFC 3501: `UNSEEN` - The number of messages which do not have the `\Seen` flag set.
+    /// - parameter size: RFC 8438: `SIZE` - The number of messages which do not have the `\Seen` flag set.
+    /// - parameter modSequence: RFC 7162: `SIZE` - The total size of the mailbox in octets.
     public init(
         messageCount: Int? = nil,
         recentCount: Int? = nil,
@@ -64,7 +67,6 @@ public struct MailboxStatus: Equatable {
         uidValidity: Int? = nil,
         unseenCount: Int? = nil,
         size: Int? = nil,
-        deletedCount: Int? = nil,
         modSequence: ModifierSequenceValue? = nil
     ) {
         self.messageCount = messageCount
@@ -73,7 +75,6 @@ public struct MailboxStatus: Equatable {
         self.uidValidity = uidValidity
         self.unseenCount = unseenCount
         self.size = size
-        self.deletedCount = deletedCount
         self.modSequence = modSequence
     }
 }
@@ -112,7 +113,6 @@ extension EncodeBuffer {
         append(\.uidValidity, "UIDVALIDITY")
         append(\.unseenCount, "UNSEEN")
         append(\.size, "SIZE")
-        append(\.deletedCount, "DELETED")
         append(\.modSequence, "HIGHESTMODSEQ")
 
         return self.writeArray(array, parenthesis: false) { (element, self) -> Int in

@@ -3672,7 +3672,6 @@ extension GrammarParser {
             case uidNext(Int)
             case uidValidity(Int)
             case unseen(Int)
-            case deleted(Int)
             case size(Int)
             case recent(Int)
             case modSequence(ModifierSequenceValue)
@@ -3698,11 +3697,6 @@ extension GrammarParser {
             return .unseen(try self.parseNumber(buffer: &buffer, tracker: tracker))
         }
 
-        func parseStatusAttributeValue_deleted(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxValue {
-            try ParserLibrary.parseFixedString("DELETED ", buffer: &buffer, tracker: tracker)
-            return .deleted(try self.parseNumber(buffer: &buffer, tracker: tracker))
-        }
-
         func parseStatusAttributeValue_size(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxValue {
             try ParserLibrary.parseFixedString("SIZE ", buffer: &buffer, tracker: tracker)
             return .size(try self.parseNumber(buffer: &buffer, tracker: tracker))
@@ -3724,7 +3718,6 @@ extension GrammarParser {
                 parseStatusAttributeValue_uidnext,
                 parseStatusAttributeValue_uidvalidity,
                 parseStatusAttributeValue_unseen,
-                parseStatusAttributeValue_deleted,
                 parseStatusAttributeValue_size,
                 parseStatusAttributeValue_modSequence,
                 parseStatusAttributeValue_recent,
@@ -3742,8 +3735,6 @@ extension GrammarParser {
             var status = MailboxStatus()
             for value in array {
                 switch value {
-                case .deleted(let deleted):
-                    status.deletedCount = deleted
                 case .messages(let messages):
                     status.messageCount = messages
                 case .modSequence(let modSequence):
