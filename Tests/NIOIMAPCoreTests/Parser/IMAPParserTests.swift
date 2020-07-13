@@ -1525,7 +1525,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     func testParseMailboxData() {
         let inputs: [(String, String, MailboxName.Data, UInt)] = [
-//            ("FLAGS (\\seen \\draft)", " ", .flags([.seen, .draft]), #line),
+            //            ("FLAGS (\\seen \\draft)", " ", .flags([.seen, .draft]), #line),
 //            (
 //                "LIST (\\oflag1 \\oflag2) NIL inbox",
 //                "\r\n",
@@ -2601,9 +2601,9 @@ extension ParserUnitTests {
     func testStatusAttributeList_valid_single() {
         let inputs: [(String, String, MailboxStatus, UInt)] = [
             ("MESSAGES 1", "\r", .init(messageCount: 1), #line),
-            ("MESSAGES 1 RECENT 2 UIDNEXT 3 UIDVALIDITY 4 UNSEEN 5 SIZE 6 DELETED 7 HIGHESTMODSEQ 8", "\r", .init(messageCount: 1, recentCount: 2, nextUID: 3, uidValidity: 4, unseenCount: 5, size: 6, deletedCount: 7, modSequence: 8), #line)
+            ("MESSAGES 1 RECENT 2 UIDNEXT 3 UIDVALIDITY 4 UNSEEN 5 SIZE 6 DELETED 7 HIGHESTMODSEQ 8", "\r", .init(messageCount: 1, recentCount: 2, nextUID: 3, uidValidity: 4, unseenCount: 5, size: 6, deletedCount: 7, modSequence: 8), #line),
         ]
-        
+
         self.iterateTestInputs(inputs, testFunction: GrammarParser.parseMailboxStatus)
     }
 

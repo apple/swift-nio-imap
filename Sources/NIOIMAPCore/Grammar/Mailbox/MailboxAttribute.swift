@@ -26,7 +26,6 @@ public enum MailboxAttribute: String, CaseIterable {
 }
 
 public struct MailboxStatus: Equatable {
-    
     /// `MESSAGES`
     /// The number of messages in the mailbox.
     public var messageCount: Int?
@@ -42,13 +41,13 @@ public struct MailboxStatus: Equatable {
     /// `UNSEEN`
     /// The number of messages which do not have the `\Seen` flag set.
     public var unseenCount: Int?
-    
+
     public var size: Int?
-    
+
     public var deletedCount: Int?
-    
+
     public var modSequence: ModifierSequenceValue?
-    
+
     /// Creates a new `MailboxStatus`. All parameters default to `nil`.
     /// - parameter messageCount: The number of messages in the mailbox.
     /// - parameter recentCount: The number of messages with the \Recent flag set.
@@ -100,14 +99,13 @@ extension EncodeBuffer {
     }
 
     @discardableResult mutating func writeMailboxStatus(_ status: MailboxStatus) -> Int {
-
         var array: [(String, String)] = []
-        
+
         func append<A>(_ keypath: WritableKeyPath<MailboxStatus, A?>, _ string: String) {
             guard let value = status[keyPath: keypath] else { return }
             array.append((string, "\(value)"))
         }
-        
+
         append(\.messageCount, "MESSAGES")
         append(\.recentCount, "RECENT")
         append(\.nextUID, "UIDNEXT")
@@ -116,7 +114,7 @@ extension EncodeBuffer {
         append(\.size, "SIZE")
         append(\.deletedCount, "DELETED")
         append(\.modSequence, "HIGHESTMODSEQ")
-        
+
         return self.writeArray(array, parenthesis: false) { (element, self) -> Int in
             self.writeString("\(element.0) \(element.1)")
         }

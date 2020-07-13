@@ -3667,7 +3667,6 @@ extension GrammarParser {
 
     // status-att-list  = status-att-val *(SP status-att-val)
     static func parseMailboxStatus(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxStatus {
-        
         enum MailboxValue: Equatable {
             case messages(Int)
             case uidNext(Int)
@@ -3678,7 +3677,7 @@ extension GrammarParser {
             case recent(Int)
             case modSequence(ModifierSequenceValue)
         }
-        
+
         func parseStatusAttributeValue_messages(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxValue {
             try ParserLibrary.parseFixedString("MESSAGES ", buffer: &buffer, tracker: tracker)
             return .messages(try self.parseNumber(buffer: &buffer, tracker: tracker))
@@ -3713,14 +3712,14 @@ extension GrammarParser {
             try ParserLibrary.parseFixedString("HIGHESTMODSEQ ", buffer: &buffer, tracker: tracker)
             return .modSequence(try self.parseModifierSequenceValue(buffer: &buffer, tracker: tracker))
         }
-        
+
         func parseStatusAttributeValue_recent(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxValue {
             try ParserLibrary.parseFixedString("RECENT ", buffer: &buffer, tracker: tracker)
             return .recent(try self.parseNumber(buffer: &buffer, tracker: tracker))
         }
 
         func parseStatusAttributeValue(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxValue {
-            return try ParserLibrary.parseOneOf([
+            try ParserLibrary.parseOneOf([
                 parseStatusAttributeValue_messages,
                 parseStatusAttributeValue_uidnext,
                 parseStatusAttributeValue_uidvalidity,
@@ -3728,18 +3727,18 @@ extension GrammarParser {
                 parseStatusAttributeValue_deleted,
                 parseStatusAttributeValue_size,
                 parseStatusAttributeValue_modSequence,
-                parseStatusAttributeValue_recent
+                parseStatusAttributeValue_recent,
             ], buffer: &buffer, tracker: tracker)
         }
-        
+
         return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> MailboxStatus in
-            
+
             var array = [try parseStatusAttributeValue(buffer: &buffer, tracker: tracker)]
             try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) -> MailboxValue in
                 try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
                 return try parseStatusAttributeValue(buffer: &buffer, tracker: tracker)
             }
-            
+
             var status = MailboxStatus()
             for value in array {
                 switch value {
