@@ -29,18 +29,18 @@ public enum CommandStream: Equatable {
 }
 
 extension CommandEncodeBuffer {
-    @discardableResult public mutating func writeCommandStream(_ stream: CommandStream) throws -> Int {
+    @discardableResult public mutating func writeCommandStream(_ stream: CommandStream) -> Int {
         switch stream {
         case .idleDone:
             return self.buffer.writeString("DONE\r\n")
         case .command(let command):
-            return try self.buffer.writeCommand(command)
+            return self.buffer.writeCommand(command)
         case .append(let command):
-            return try self.writeAppendCommand(command)
+            return self.writeAppendCommand(command)
         }
     }
 
-    @discardableResult mutating func writeAppendCommand(_ command: AppendCommand) throws -> Int {
+    @discardableResult mutating func writeAppendCommand(_ command: AppendCommand) -> Int {
         switch command {
         case .start(tag: let tag, appendingTo: let mailbox):
             return

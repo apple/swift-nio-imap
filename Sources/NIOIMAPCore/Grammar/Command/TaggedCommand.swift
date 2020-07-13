@@ -26,11 +26,11 @@ public struct TaggedCommand: Equatable {
 }
 
 extension EncodeBuffer {
-    @discardableResult public mutating func writeCommand(_ command: TaggedCommand) throws -> Int {
+    @discardableResult public mutating func writeCommand(_ command: TaggedCommand) -> Int {
         guard case .client = mode else { preconditionFailure("only clients can send commands") }
         var size = 0
         size += self.writeString("\(command.tag) ")
-        size += try self.writeCommand(command.command)
+        size += self.writeCommand(command.command)
         size += self.writeString("\r\n")
         return size
     }
