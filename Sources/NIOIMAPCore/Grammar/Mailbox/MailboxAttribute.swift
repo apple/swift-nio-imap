@@ -16,12 +16,35 @@ import struct NIO.ByteBuffer
 
 /// IMAPv4 `status-att`
 public enum MailboxAttribute: String, CaseIterable {
+    
+    /// `MESSAGES`
+    /// The number of messages in the mailbox.
     case messageCount = "MESSAGES"
+    
+    /// `RECENT`
+    /// The number of messages with the \Recent flag set.
     case recentCount = "RECENT"
+    
+    /// `UIDNEXT`
+    /// The next unique identifier value of the mailbox.
     case uidNext = "UIDNEXT"
+    
+    /// `UIDVALIDITY`
+    /// The unique identifier validity value of the mailbox.
     case uidValidity = "UIDVALIDITY"
+    
+    /// `UNSEEN`
+    /// The number of messages which do not have the `\Seen` flag set.
     case unseenCount = "UNSEEN"
+    
+    /// `SIZE`
+    /// RFC 8438
+    /// The total size of the mailbox in octets.
     case size = "SIZE"
+    
+    /// `HIGHESTMODSEQ`
+    /// RFC 7162
+    /// The highest mod-sequence value of all messages in the mailbox.
     case highestModificationSequence = "HIGHESTMODSEQ"
 }
 
