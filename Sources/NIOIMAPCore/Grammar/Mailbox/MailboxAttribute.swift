@@ -126,7 +126,7 @@ extension EncodeBuffer {
     @discardableResult mutating func writeMailboxStatus(_ status: MailboxStatus) -> Int {
         var array: [(String, String)] = []
 
-        func append<A>(_ keypath: WritableKeyPath<MailboxStatus, A?>, _ string: String) {
+        func append<A>(_ keypath: KeyPath<MailboxStatus, A?>, _ string: String) {
             guard let value = status[keyPath: keypath] else { return }
             array.append((string, "\(value)"))
         }
