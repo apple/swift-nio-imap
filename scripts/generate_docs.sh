@@ -61,11 +61,11 @@ module_switcher="$jazzy_dir/README.md"
 jazzy_args=(--clean
             --author 'SwiftNIO Team'
             --readme "$module_switcher"
-            --author_url https://github.com/apple/swift-nio-email
-            --github_url https://github.com/apple/swift-nio-email
+            --author_url https://github.com/apple/swift-nio-imap
+            --github_url https://github.com/apple/swift-nio-imap
             --theme fullwidth
-            --github-file-prefix https://github.com/apple/swift-nio-email/tree/$version
-            --xcodebuild-arguments -scheme,swift-nio-email-Package)
+            --github-file-prefix https://github.com/apple/swift-nio-imap/tree/$version
+            --xcodebuild-arguments -scheme,swift-nio-imap-Package)
 cat > "$module_switcher" <<"EOF"
 # SwiftNIO Docs
 SwiftNIO contains multiple modules:
@@ -86,7 +86,7 @@ EOF
 for module in "${modules[@]}"; do
   args=("${jazzy_args[@]}" --output "$jazzy_dir/docs/$version/$module" --docset-path "$jazzy_dir/docset/$version/$module"
         --module "$module" --module-version $version
-        --root-url "https://apple.github.io/swift-nio-email/docs/$version/$module/")
+        --root-url "https://apple.github.io/swift-nio-imap/docs/$version/$module/")
   if [[ -f "$root_path/.build/sourcekitten/$module.json" ]]; then
     args+=(--sourcekitten-sourcefile "$root_path/.build/sourcekitten/$module.json")
   fi
@@ -104,7 +104,7 @@ if [[ $PUSH == true ]]; then
   cp -r "$jazzy_dir/docs/$version" docs/
   cp -r "docs/$version" docs/current
   git add --all docs
-  echo '<html><head><meta http-equiv="refresh" content="0; url=docs/current/NIOEmail/index.html" /></head></html>' > index.html
+  echo '<html><head><meta http-equiv="refresh" content="0; url=docs/current/NIOIMAP/index.html" /></head></html>' > index.html
   git add index.html
   touch .nojekyll
   git add .nojekyll

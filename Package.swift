@@ -4,7 +4,7 @@
 import PackageDescription
 
 let package = Package(
-    name: "swift-nio-email",
+    name: "swift-nio-imap",
     products: [
         .library(name: "NIOIMAP", targets: ["NIOIMAP"]),
     ], dependencies: [
