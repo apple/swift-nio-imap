@@ -1853,11 +1853,9 @@ extension GrammarParser {
             let mailbox = try self.parseMailbox(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseFixedString("(", buffer: &buffer, tracker: tracker)
-            let list = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
-                try self.parseStatusAttributeList(buffer: &buffer, tracker: tracker)
-            } ?? []
+            let status = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseMailboxStatus)
             try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)
-            return .status(mailbox, list)
+            return .status(mailbox, status ?? .init())
         }
 
         func parseMailboxData_exists(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxName.Data {
@@ -3667,14 +3665,18 @@ extension GrammarParser {
         return att
     }
 
-    // status-att-val   = ("MESSAGES" SP number) /
-    //                    ("UIDNEXT" SP nz-number) /
-    //                    ("UIDVALIDITY" SP nz-number) /
-    //                    ("UNSEEN" SP number) /
-    //                    ("DELETED" SP number) /
-    //                    ("SIZE" SP number64)
-    //
-    static func parseStatusAttributeValue(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxValue {
+    // status-att-list  = status-att-val *(SP status-att-val)
+    static func parseMailboxStatus(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxStatus {
+        enum MailboxValue: Equatable {
+            case messages(Int)
+            case uidNext(Int)
+            case uidValidity(Int)
+            case unseen(Int)
+            case size(Int)
+            case recent(Int)
+            case modSequence(ModifierSequenceValue)
+        }
+
         func parseStatusAttributeValue_messages(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxValue {
             try ParserLibrary.parseFixedString("MESSAGES ", buffer: &buffer, tracker: tracker)
             return .messages(try self.parseNumber(buffer: &buffer, tracker: tracker))
@@ -3695,11 +3697,6 @@ extension GrammarParser {
             return .unseen(try self.parseNumber(buffer: &buffer, tracker: tracker))
         }
 
-        func parseStatusAttributeValue_deleted(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxValue {
-            try ParserLibrary.parseFixedString("DELETED ", buffer: &buffer, tracker: tracker)
-            return .deleted(try self.parseNumber(buffer: &buffer, tracker: tracker))
-        }
-
         func parseStatusAttributeValue_size(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxValue {
             try ParserLibrary.parseFixedString("SIZE ", buffer: &buffer, tracker: tracker)
             return .size(try self.parseNumber(buffer: &buffer, tracker: tracker))
@@ -3710,26 +3707,51 @@ extension GrammarParser {
             return .modSequence(try self.parseModifierSequenceValue(buffer: &buffer, tracker: tracker))
         }
 
-        return try ParserLibrary.parseOneOf([
-            parseStatusAttributeValue_messages,
-            parseStatusAttributeValue_uidnext,
-            parseStatusAttributeValue_uidvalidity,
-            parseStatusAttributeValue_unseen,
-            parseStatusAttributeValue_deleted,
-            parseStatusAttributeValue_size,
-            parseStatusAttributeValue_modSequence,
-        ], buffer: &buffer, tracker: tracker)
-    }
+        func parseStatusAttributeValue_recent(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxValue {
+            try ParserLibrary.parseFixedString("RECENT ", buffer: &buffer, tracker: tracker)
+            return .recent(try self.parseNumber(buffer: &buffer, tracker: tracker))
+        }
 
-    // status-att-list  = status-att-val *(SP status-att-val)
-    static func parseStatusAttributeList(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [MailboxValue] {
-        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> [MailboxValue] in
+        func parseStatusAttributeValue(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxValue {
+            try ParserLibrary.parseOneOf([
+                parseStatusAttributeValue_messages,
+                parseStatusAttributeValue_uidnext,
+                parseStatusAttributeValue_uidvalidity,
+                parseStatusAttributeValue_unseen,
+                parseStatusAttributeValue_size,
+                parseStatusAttributeValue_modSequence,
+                parseStatusAttributeValue_recent,
+            ], buffer: &buffer, tracker: tracker)
+        }
+
+        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> MailboxStatus in
+
             var array = [try parseStatusAttributeValue(buffer: &buffer, tracker: tracker)]
             try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) -> MailboxValue in
                 try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
                 return try parseStatusAttributeValue(buffer: &buffer, tracker: tracker)
             }
-            return array
+
+            var status = MailboxStatus()
+            for value in array {
+                switch value {
+                case .messages(let messages):
+                    status.messageCount = messages
+                case .modSequence(let modSequence):
+                    status.modSequence = modSequence
+                case .size(let size):
+                    status.size = size
+                case .uidNext(let uidNext):
+                    status.nextUID = uidNext
+                case .uidValidity(let uidValidity):
+                    status.uidValidity = uidValidity
+                case .unseen(let unseen):
+                    status.unseenCount = unseen
+                case .recent(let recent):
+                    status.recentCount = recent
+                }
+            }
+            return status
         }
     }
 

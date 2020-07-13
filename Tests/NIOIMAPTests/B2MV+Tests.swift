@@ -204,7 +204,7 @@ extension B2MV_Tests {
 
             // MARK: Status
 
-            ("* STATUS INBOX (MESSAGES 231 UIDNEXT 44292)", [.untaggedResponse(.mailboxData(.status(.inbox, [.messages(231), .uidNext(44292)])))]),
+            ("* STATUS INBOX (MESSAGES 231 UIDNEXT 44292)", [.untaggedResponse(.mailboxData(.status(.inbox, .init(messageCount: 231, nextUID: 44292))))]),
 
             // MARK: Flags
 

@@ -16,24 +16,90 @@ import struct NIO.ByteBuffer
 
 /// IMAPv4 `status-att`
 public enum MailboxAttribute: String, CaseIterable {
+    /// `MESSAGES`
+    /// The number of messages in the mailbox.
     case messageCount = "MESSAGES"
+
+    /// `RECENT`
+    /// The number of messages with the \Recent flag set.
     case recentCount = "RECENT"
+
+    /// `UIDNEXT`
+    /// The next unique identifier value of the mailbox.
     case uidNext = "UIDNEXT"
+
+    /// `UIDVALIDITY`
+    /// The unique identifier validity value of the mailbox.
     case uidValidity = "UIDVALIDITY"
+
+    /// `UNSEEN`
+    /// The number of messages which do not have the `\Seen` flag set.
     case unseenCount = "UNSEEN"
+
+    /// `SIZE`
+    /// RFC 8438
+    /// The total size of the mailbox in octets.
     case size = "SIZE"
+
+    /// `HIGHESTMODSEQ`
+    /// RFC 7162
+    /// The highest mod-sequence value of all messages in the mailbox.
     case highestModificationSequence = "HIGHESTMODSEQ"
 }
 
-/// IMAPv4 `status-att-val`
-public enum MailboxValue: Equatable {
-    case messages(Int)
-    case uidNext(Int)
-    case uidValidity(Int)
-    case unseen(Int)
-    case deleted(Int)
-    case size(Int)
-    case modSequence(ModifierSequenceValue)
+/// The (aggregated) information about a mailbox that the server reports as part of the response to e.g. a `SELECT` command.
+public struct MailboxStatus: Equatable {
+    /// `MESSAGES`
+    /// The number of messages in the mailbox.
+    public var messageCount: Int?
+    /// `RECENT`
+    /// The number of messages with the \Recent flag set.
+    public var recentCount: Int?
+    /// `UIDNEXT`
+    /// The next unique identifier value of the mailbox.
+    public var nextUID: Int?
+    /// `UIDVALIDITY`
+    /// The unique identifier validity value of the mailbox.
+    public var uidValidity: Int?
+    /// `UNSEEN`
+    /// The number of messages which do not have the `\Seen` flag set.
+    public var unseenCount: Int?
+
+    /// `SIZE`
+    /// RFC 8438
+    /// The total size of the mailbox in octets.
+    public var size: Int?
+
+    /// `HIGHESTMODSEQ`
+    /// RFC 7162
+    /// The highest mod-sequence value of all messages in the mailbox.
+    public var modSequence: ModifierSequenceValue?
+
+    /// Creates a new `MailboxStatus`. All parameters default to `nil`.
+    /// - parameter messageCount: RFC 3501: `MESSAGES` - The number of messages in the mailbox.
+    /// - parameter recentCount: RFC 3501: `RECENT` - The number of messages with the \Recent flag set.
+    /// - parameter nextUID: RFC 3501: `UIDNEXT` - The next unique identifier value of the mailbox.
+    /// - parameter uidValidity: RFC 3501: `UIDVALIDITY` - The unique identifier validity value of the mailbox.
+    /// - parameter unseenCount: RFC 3501: `UNSEEN` - The number of messages which do not have the `\Seen` flag set.
+    /// - parameter size: RFC 8438: `SIZE` - The number of messages which do not have the `\Seen` flag set.
+    /// - parameter modSequence: RFC 7162: `SIZE` - The total size of the mailbox in octets.
+    public init(
+        messageCount: Int? = nil,
+        recentCount: Int? = nil,
+        nextUID: Int? = nil,
+        uidValidity: Int? = nil,
+        unseenCount: Int? = nil,
+        size: Int? = nil,
+        modSequence: ModifierSequenceValue? = nil
+    ) {
+        self.messageCount = messageCount
+        self.recentCount = recentCount
+        self.nextUID = nextUID
+        self.uidValidity = uidValidity
+        self.unseenCount = unseenCount
+        self.size = size
+        self.modSequence = modSequence
+    }
 }
 
 // MARK: - Encoding
@@ -56,30 +122,24 @@ extension EncodeBuffer {
             }
     }
 
-    @discardableResult mutating func writeMailboxValues(_ list: [MailboxValue]) -> Int {
-        self.writeArray(list, parenthesis: false) { (val, self) in
-            self.writeMailboxValue(val)
-        }
-    }
+    @discardableResult mutating func writeMailboxStatus(_ status: MailboxStatus) -> Int {
+        var array: [(String, String)] = []
 
-    @discardableResult mutating func writeMailboxValue(_ val: MailboxValue) -> Int {
-        switch val {
-        case .messages(let num):
-            return self.writeString("MESSAGES \(num)")
-        case .uidNext(let num):
-            return self.writeString("UIDNEXT \(num)")
-        case .uidValidity(let num):
-            return self.writeString("UIDVALIDITY \(num)")
-        case .unseen(let num):
-            return self.writeString("UNSEEN \(num)")
-        case .deleted(let num):
-            return self.writeString("DELETED \(num)")
-        case .size(let num):
-            return self.writeString("SIZE \(num)")
-        case .modSequence(let value):
-            return
-                self.writeString("HIGHESTMODSEQ ") +
-                self.writeModifierSequenceValue(value)
+        func append<A>(_ keypath: KeyPath<MailboxStatus, A?>, _ string: String) {
+            guard let value = status[keyPath: keypath] else { return }
+            array.append((string, "\(value)"))
+        }
+
+        append(\.messageCount, "MESSAGES")
+        append(\.recentCount, "RECENT")
+        append(\.nextUID, "UIDNEXT")
+        append(\.uidValidity, "UIDVALIDITY")
+        append(\.unseenCount, "UNSEEN")
+        append(\.size, "SIZE")
+        append(\.modSequence, "HIGHESTMODSEQ")
+
+        return self.writeArray(array, parenthesis: false) { (element, self) -> Int in
+            self.writeString("\(element.0) \(element.1)")
         }
     }
 }

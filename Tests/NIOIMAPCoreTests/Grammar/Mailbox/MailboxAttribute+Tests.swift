@@ -34,4 +34,16 @@ extension MailboxAttribute_Tests {
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }
     }
+
+    func testEncode_status() {
+        let inputs: [(MailboxStatus, String, UInt)] = [
+            (.init(), "", #line),
+            (
+                .init(messageCount: 1, recentCount: 2, nextUID: 3, uidValidity: 4, unseenCount: 5, size: 6, modSequence: 7),
+                "MESSAGES 1 RECENT 2 UIDNEXT 3 UIDVALIDITY 4 UNSEEN 5 SIZE 6 HIGHESTMODSEQ 7",
+                #line
+            ),
+        ]
+        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeMailboxStatus($0) })
+    }
 }

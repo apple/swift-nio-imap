@@ -1535,8 +1535,8 @@ extension ParserUnitTests {
             ("ESEARCH MIN 1 MAX 2", "\r\n", .esearch(.init(correlator: nil, uid: false, returnData: [.min(1), .max(2)])), #line),
             ("1234 EXISTS", "\r\n", .exists(1234), #line),
             ("5678 RECENT", "\r\n", .recent(5678), #line),
-            ("STATUS INBOX ()", "\r\n", .status(.inbox, []), #line),
-            ("STATUS INBOX (MESSAGES 2)", "\r\n", .status(.inbox, [.messages(2)]), #line),
+            ("STATUS INBOX ()", "\r\n", .status(.inbox, .init()), #line),
+            ("STATUS INBOX (MESSAGES 2)", "\r\n", .status(.inbox, .init(messageCount: 2)), #line),
             (
                 "LSUB (\\seen \\draft) NIL inbox",
                 "\r\n",
@@ -2595,46 +2595,35 @@ extension ParserUnitTests {
     }
 }
 
-// MARK: - status-att-list parseStatusAttributeList
+// MARK: - status-att-list parseMailboxStatus
 
 extension ParserUnitTests {
     func testStatusAttributeList_valid_single() {
-        TestUtilities.withBuffer("MESSAGES 2", terminator: "\n") { (buffer) in
-            let expected = [MailboxValue.messages(2)]
-            let parsed = try GrammarParser.parseStatusAttributeList(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(parsed, expected)
-        }
-    }
+        let inputs: [(String, String, MailboxStatus, UInt)] = [
+            ("MESSAGES 1", "\r", .init(messageCount: 1), #line),
+            ("MESSAGES 1 RECENT 2 UIDNEXT 3 UIDVALIDITY 4 UNSEEN 5 SIZE 6 HIGHESTMODSEQ 7", "\r", .init(messageCount: 1, recentCount: 2, nextUID: 3, uidValidity: 4, unseenCount: 5, size: 6, modSequence: 7), #line),
+        ]
 
-    func testStatusAttributeList_valid_many() {
-        TestUtilities.withBuffer("MESSAGES 2 UNSEEN 3 DELETED 4", terminator: "\n") { (buffer) in
-            let expected = [
-                MailboxValue.messages(2),
-                MailboxValue.unseen(3),
-                MailboxValue.deleted(4),
-            ]
-            let parsed = try GrammarParser.parseStatusAttributeList(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(parsed, expected)
-        }
+        self.iterateTestInputs(inputs, testFunction: GrammarParser.parseMailboxStatus)
     }
 
     func testStatusAttributeList_invalid_none() {
         var buffer = TestUtilities.createTestByteBuffer(for: "")
-        XCTAssertThrowsError(try GrammarParser.parseStatusAttributeList(buffer: &buffer, tracker: .testTracker)) { e in
+        XCTAssertThrowsError(try GrammarParser.parseMailboxStatus(buffer: &buffer, tracker: .testTracker)) { e in
             XCTAssertTrue(e is _IncompleteMessage)
         }
     }
 
     func testStatusAttributeList_invalid_missing_number() {
         var buffer = TestUtilities.createTestByteBuffer(for: "MESSAGES UNSEEN 3 RECENT 4\n")
-        XCTAssertThrowsError(try GrammarParser.parseStatusAttributeList(buffer: &buffer, tracker: .testTracker)) { e in
+        XCTAssertThrowsError(try GrammarParser.parseMailboxStatus(buffer: &buffer, tracker: .testTracker)) { e in
             XCTAssertTrue(e is ParserError)
         }
     }
 
     func testStatusAttributeList_invalid_missing_attribute() {
         var buffer = TestUtilities.createTestByteBuffer(for: "2 UNSEEN 3 RECENT 4\n")
-        XCTAssertThrowsError(try GrammarParser.parseStatusAttributeList(buffer: &buffer, tracker: .testTracker)) { e in
+        XCTAssertThrowsError(try GrammarParser.parseMailboxStatus(buffer: &buffer, tracker: .testTracker)) { e in
             XCTAssertTrue(e is ParserError)
         }
     }
