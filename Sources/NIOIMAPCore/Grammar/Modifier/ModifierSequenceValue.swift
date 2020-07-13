@@ -39,6 +39,16 @@ extension ModifierSequenceValue: ExpressibleByIntegerLiteral {
     }
 }
 
+// MARK: - CustomStringConvertible
+
+extension ModifierSequenceValue: CustomStringConvertible {
+    
+    public var description: String {
+        "\(self.value)"
+    }
+    
+}
+
 // MARK: - Encoding
 
 extension EncodeBuffer {

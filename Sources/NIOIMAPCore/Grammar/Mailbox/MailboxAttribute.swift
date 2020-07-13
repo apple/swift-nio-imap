@@ -25,15 +25,58 @@ public enum MailboxAttribute: String, CaseIterable {
     case highestModificationSequence = "HIGHESTMODSEQ"
 }
 
-/// IMAPv4 `status-att-val`
-public enum MailboxValue: Equatable {
-    case messages(Int)
-    case uidNext(Int)
-    case uidValidity(Int)
-    case unseen(Int)
-    case deleted(Int)
-    case size(Int)
-    case modSequence(ModifierSequenceValue)
+public struct MailboxStatus: Equatable {
+    
+    /// `MESSAGES`
+    /// The number of messages in the mailbox.
+    public var messageCount: Int?
+    /// `RECENT`
+    /// The number of messages with the \Recent flag set.
+    public var recentCount: Int?
+    /// `UIDNEXT`
+    /// The next unique identifier value of the mailbox.
+    public var nextUID: Int?
+    /// `UIDVALIDITY`
+    /// The unique identifier validity value of the mailbox.
+    public var uidValidity: Int?
+    /// `UNSEEN`
+    /// The number of messages which do not have the `\Seen` flag set.
+    public var unseenCount: Int?
+    
+    public var size: Int?
+    
+    public var deletedCount: Int?
+    
+    public var modSequence: ModifierSequenceValue?
+    
+    /// Creates a new `MailboxStatus`. All parameters default to `nil`.
+    /// - parameter messageCount: The number of messages in the mailbox.
+    /// - parameter recentCount: The number of messages with the \Recent flag set.
+    /// - parameter nextUID: The next unique identifier value of the mailbox.
+    /// - parameter uidValidity: The unique identifier validity value of the mailbox.
+    /// - parameter unseenCount: The number of messages which do not have the `\Seen` flag set.
+    /// - parameter size: The number of messages which do not have the `\Seen` flag set.
+    /// - parameter deletedCount: The number of messages with the `\Deleted` flag set.
+    /// - parameter modSequence:
+    public init(
+        messageCount: Int? = nil,
+        recentCount: Int? = nil,
+        nextUID: Int? = nil,
+        uidValidity: Int? = nil,
+        unseenCount: Int? = nil,
+        size: Int? = nil,
+        deletedCount: Int? = nil,
+        modSequence: ModifierSequenceValue? = nil
+    ) {
+        self.messageCount = messageCount
+        self.recentCount = recentCount
+        self.nextUID = nextUID
+        self.uidValidity = uidValidity
+        self.unseenCount = unseenCount
+        self.size = size
+        self.deletedCount = deletedCount
+        self.modSequence = modSequence
+    }
 }
 
 // MARK: - Encoding
@@ -56,30 +99,26 @@ extension EncodeBuffer {
             }
     }
 
-    @discardableResult mutating func writeMailboxValues(_ list: [MailboxValue]) -> Int {
-        self.writeArray(list, parenthesis: false) { (val, self) in
-            self.writeMailboxValue(val)
-        }
-    }
+    @discardableResult mutating func writeMailboxStatus(_ status: MailboxStatus) -> Int {
 
-    @discardableResult mutating func writeMailboxValue(_ val: MailboxValue) -> Int {
-        switch val {
-        case .messages(let num):
-            return self.writeString("MESSAGES \(num)")
-        case .uidNext(let num):
-            return self.writeString("UIDNEXT \(num)")
-        case .uidValidity(let num):
-            return self.writeString("UIDVALIDITY \(num)")
-        case .unseen(let num):
-            return self.writeString("UNSEEN \(num)")
-        case .deleted(let num):
-            return self.writeString("DELETED \(num)")
-        case .size(let num):
-            return self.writeString("SIZE \(num)")
-        case .modSequence(let value):
-            return
-                self.writeString("HIGHESTMODSEQ ") +
-                self.writeModifierSequenceValue(value)
+        var array: [(String, String)] = []
+        
+        func append<A>(_ keypath: WritableKeyPath<MailboxStatus, A?>, _ string: String) {
+            guard let value = status[keyPath: keypath] else { return }
+            array.append((string, "\(value)"))
+        }
+        
+        append(\.messageCount, "MESSAGES")
+        append(\.recentCount, "RECENT")
+        append(\.nextUID, "UIDNEXT")
+        append(\.uidValidity, "UIDVALIDITY")
+        append(\.unseenCount, "UNSEEN")
+        append(\.size, "SIZE")
+        append(\.deletedCount, "DELETED")
+        append(\.modSequence, "HIGHESTMODSEQ")
+        
+        return self.writeArray(array, parenthesis: false) { (element, self) -> Int in
+            self.writeString("\(element.0) \(element.1)")
         }
     }
 }
