@@ -25,6 +25,7 @@ public enum MailboxAttribute: String, CaseIterable {
     case highestModificationSequence = "HIGHESTMODSEQ"
 }
 
+/// The (aggregated) information about a mailbox that the server reports as part of the response to e.g. a `SELECT` command.
 public struct MailboxStatus: Equatable {
     /// `MESSAGES`
     /// The number of messages in the mailbox.
