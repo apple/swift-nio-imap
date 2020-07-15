@@ -15,18 +15,24 @@
 import struct NIO.ByteBuffer
 
 /// IMAPv4 `tagged-ext-val`
-public enum TaggedExtensionValue: Equatable {
-    case simple(TaggedExtensionSimple)
+public enum ParameterValue: Equatable {
+    case sequence(SequenceSet)
+    case number(Int)
+    case number64(Int)
     case comp([String])
 }
 
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeTaggedExtensionValue(_ value: TaggedExtensionValue) -> Int {
+    @discardableResult mutating func writeParameterValue(_ value: ParameterValue) -> Int {
         switch value {
-        case .simple(let simple):
-            return self.writeTaggedExtensionSimple(simple)
+        case .sequence(let set):
+            return self.writeSequenceSet(set)
+        case .number(let num):
+            return self.writeString("\(num)")
+        case .number64(let num):
+            return self.writeString("\(num)")
         case .comp(let comp):
             return
                 self.writeString("(") +

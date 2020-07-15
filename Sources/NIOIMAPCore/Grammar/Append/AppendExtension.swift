@@ -16,9 +16,9 @@ import struct NIO.ByteBuffer
 
 public struct AppendExtension: Equatable {
     public var name: String
-    public var value: TaggedExtensionValue
+    public var value: ParameterValue
 
-    public init(name: String, value: TaggedExtensionValue) {
+    public init(name: String, value: ParameterValue) {
         self.name = name
         self.value = value
     }
@@ -28,8 +28,8 @@ public struct AppendExtension: Equatable {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeAppendExtension(_ data: AppendExtension) -> Int {
-        self.writeAppendExtensionName(data.name) +
+        self.writeString(data.name) +
             self.writeSpace() +
-            self.writeTaggedExtensionValue(data.value)
+            self.writeParameterValue(data.value)
     }
 }

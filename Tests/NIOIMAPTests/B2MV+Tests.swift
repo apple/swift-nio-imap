@@ -60,21 +60,21 @@ extension B2MV_Tests {
             ("tag SELECT box1", [.command(.init(tag: "tag", command: .select(.init("box1"), [])))]),
             ("tag SELECT \"box2\"", [.command(.init(tag: "tag", command: .select(.init("box2"), [])))]),
             ("tag SELECT {4+}\r\nbox3", [.command(.init(tag: "tag", command: .select(.init("box3"), [])))]),
-            ("tag SELECT box4 (k1 1 k2 2)", [.command(.init(tag: "tag", command: .select(.init("box4"), [.init(name: "k1", value: .simple(.sequence([1]))), .init(name: "k2", value: .simple(.sequence([2])))])))]),
+            ("tag SELECT box4 (k1 1 k2 2)", [.command(.init(tag: "tag", command: .select(.init("box4"), [.init(name: "k1", value: .sequence([1])), .init(name: "k2", value: .sequence([2]))])))]),
 
             // MARK: Examine
 
             ("tag EXAMINE box1", [.command(.init(tag: "tag", command: .examine(.init("box1"), [])))]),
             ("tag EXAMINE \"box2\"", [.command(.init(tag: "tag", command: .examine(.init("box2"), [])))]),
             ("tag EXAMINE {4+}\r\nbox3", [.command(.init(tag: "tag", command: .examine(.init("box3"), [])))]),
-            ("tag EXAMINE box4 (k3 1 k4 2)", [.command(.init(tag: "tag", command: .examine(.init("box4"), [.init(name: "k3", value: .simple(.sequence([1]))), .init(name: "k4", value: .simple(.sequence([2])))])))]),
+            ("tag EXAMINE box4 (k3 1 k4 2)", [.command(.init(tag: "tag", command: .examine(.init("box4"), [.init(name: "k3", value: .sequence([1])), .init(name: "k4", value: .sequence([2]))])))]),
 
             // MARK: Create
 
             ("tag CREATE newBox1", [.command(.init(tag: "tag", command: .create(.init("newBox1"), [])))]),
             ("tag CREATE \"newBox2\"", [.command(.init(tag: "tag", command: .create(.init("newBox2"), [])))]),
             ("tag CREATE {7+}\r\nnewBox3", [.command(.init(tag: "tag", command: .create(.init("newBox3"), [])))]),
-            ("tag CREATE newBox4 (k5 5 k6 6)", [.command(.init(tag: "tag", command: .create(.init("newBox4"), [.init(name: "k5", value: .simple(.sequence([5]))), .init(name: "k6", value: .simple(.sequence([6])))])))]),
+            ("tag CREATE newBox4 (k5 5 k6 6)", [.command(.init(tag: "tag", command: .create(.init("newBox4"), [.init(name: "k5", value: .sequence([5])), .init(name: "k6", value: .sequence([6]))])))]),
 
             // MARK: Delete
 

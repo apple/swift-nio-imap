@@ -94,12 +94,12 @@ extension GrammarParser {
 
     // append-ext-name = tagged-ext-label
     static func parseAppendExtensionName(buffer: inout ByteBuffer, tracker: StackTracker) throws -> String {
-        try self.parseTaggedExtensionLabel(buffer: &buffer, tracker: tracker)
+        try self.parseParameterName(buffer: &buffer, tracker: tracker)
     }
 
     // append-ext-value = tagged-ext-value
-    static func parseAppendExtensionValue(buffer: inout ByteBuffer, tracker: StackTracker) throws -> TaggedExtensionValue {
-        try self.parseTaggedExtensionValue(buffer: &buffer, tracker: tracker)
+    static func parseAppendExtensionValue(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ParameterValue {
+        try self.parseParameterValue(buffer: &buffer, tracker: tracker)
     }
 
     // append-message = appents-opts SP append-data
@@ -770,45 +770,21 @@ extension GrammarParser {
         try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Command in
             try ParserLibrary.parseFixedString("CREATE ", buffer: &buffer, tracker: tracker)
             let mailbox = try self.parseMailbox(buffer: &buffer, tracker: tracker)
-            let params = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseCreateParameters) ?? []
+            let params = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseParameters) ?? []
             return .create(mailbox, params)
         }
     }
 
     // create-param = create-param-name [SP create-param-value]
-    static func parseCreateParameter(buffer: inout ByteBuffer, tracker: StackTracker) throws -> CreateParameter {
+    static func parseParameter(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Parameter {
         try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
-            let name = try self.parseCreateParameterName(buffer: &buffer, tracker: tracker)
-            let value = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> TaggedExtensionValue in
+            let name = try self.parseParameterName(buffer: &buffer, tracker: tracker)
+            let value = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> ParameterValue in
                 try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
-                return try self.parseCreateParameterValue(buffer: &buffer, tracker: tracker)
+                return try self.parseParameterValue(buffer: &buffer, tracker: tracker)
             }
             return .init(name: name, value: value)
         }
-    }
-
-    // create-params = SP "(" create-param *(SP create-param-value) ")"
-    static func parseCreateParameters(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [CreateParameter] {
-        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
-            try ParserLibrary.parseFixedString(" (", buffer: &buffer, tracker: tracker)
-            var array = [try self.parseCreateParameter(buffer: &buffer, tracker: tracker)]
-            try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) -> CreateParameter in
-                try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
-                return try self.parseCreateParameter(buffer: &buffer, tracker: tracker)
-            }
-            try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)
-            return array
-        }
-    }
-
-    // create-param-name = tagged-ext-label
-    static func parseCreateParameterName(buffer: inout ByteBuffer, tracker: StackTracker) throws -> String {
-        try self.parseTaggedExtensionLabel(buffer: &buffer, tracker: tracker)
-    }
-
-    // create-param-value = tagged-ext-val
-    static func parseCreateParameterValue(buffer: inout ByteBuffer, tracker: StackTracker) throws -> TaggedExtensionValue {
-        try self.parseTaggedExtensionValue(buffer: &buffer, tracker: tracker)
     }
 
     // date            = date-text / DQUOTE date-text DQUOTE
@@ -1089,7 +1065,7 @@ extension GrammarParser {
         try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Command in
             try ParserLibrary.parseFixedString("EXAMINE ", buffer: &buffer, tracker: tracker)
             let mailbox = try self.parseMailbox(buffer: &buffer, tracker: tracker)
-            let params = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseSelectParameters) ?? []
+            let params = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseParameters) ?? []
             return .examine(mailbox, params)
         }
     }
@@ -1102,7 +1078,7 @@ extension GrammarParser {
             let sequence = try self.parseSequenceSet(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
             let att = try parseFetch_type(buffer: &buffer, tracker: tracker)
-            let modifiers = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseFetchModifiers) ?? []
+            let modifiers = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseParameters) ?? []
             return .fetch(sequence, att, modifiers)
         }
     }
@@ -1278,42 +1254,6 @@ extension GrammarParser {
             parseFetchAttribute_binary,
             parseFetchAttribute_binarySize,
         ], buffer: &buffer, tracker: tracker)
-    }
-
-    // fetch-modifier = fetch-modifier-name [SP fetch-modifier-params]
-    static func parseFetchModifier(buffer: inout ByteBuffer, tracker: StackTracker) throws -> FetchModifier {
-        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
-            let name = try self.parseFetchModifierName(buffer: &buffer, tracker: tracker)
-            let value = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> TaggedExtensionValue in
-                try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
-                return try self.parseFetchModifierParameter(buffer: &buffer, tracker: tracker)
-            }
-            return .init(name: name, value: value)
-        }
-    }
-
-    // fetch-modifiers = SP "(" fetch-modifier *(SP fetch-modifier) ")"
-    static func parseFetchModifiers(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [FetchModifier] {
-        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
-            try ParserLibrary.parseFixedString(" (", buffer: &buffer, tracker: tracker)
-            var array = [try self.parseFetchModifier(buffer: &buffer, tracker: tracker)]
-            try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) -> FetchModifier in
-                try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
-                return try self.parseFetchModifier(buffer: &buffer, tracker: tracker)
-            }
-            try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)
-            return array
-        }
-    }
-
-    // fetch-modifier-name = tagged-ext-label
-    static func parseFetchModifierName(buffer: inout ByteBuffer, tracker: StackTracker) throws -> String {
-        try self.parseTaggedExtensionLabel(buffer: &buffer, tracker: tracker)
-    }
-
-    // fetch-modifier-params = tagged-ext-val
-    static func parseFetchModifierParameter(buffer: inout ByteBuffer, tracker: StackTracker) throws -> TaggedExtensionValue {
-        try self.parseTaggedExtensionValue(buffer: &buffer, tracker: tracker)
     }
 
     // filter-name = 1*<any ATOM-CHAR except "/">
@@ -1955,7 +1895,7 @@ extension GrammarParser {
         try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> ListExtendedItem in
             let tag = try self.parseMailboxListExtendedItemTag(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
-            let val = try self.parseTaggedExtensionValue(buffer: &buffer, tracker: tracker)
+            let val = try self.parseParameterValue(buffer: &buffer, tracker: tracker)
             return ListExtendedItem(tag: tag, extensionValue: val)
         }
     }
@@ -2585,45 +2525,9 @@ extension GrammarParser {
             let from = try self.parseMailbox(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseFixedString(" ", caseSensitive: false, buffer: &buffer, tracker: tracker)
             let to = try self.parseMailbox(buffer: &buffer, tracker: tracker)
-            let params = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseRenameParameters) ?? []
+            let params = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseParameters) ?? []
             return .rename(from: from, to: to, params: params)
         }
-    }
-
-    // rename-param = rename-param-name [SP rename-param-value]
-    static func parseRenameParameter(buffer: inout ByteBuffer, tracker: StackTracker) throws -> RenameParameter {
-        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
-            let name = try self.parseRenameParameterName(buffer: &buffer, tracker: tracker)
-            let value = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> TaggedExtensionValue in
-                try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
-                return try self.parseCreateParameterValue(buffer: &buffer, tracker: tracker)
-            }
-            return .init(name: name, value: value)
-        }
-    }
-
-    // rename-params = SP "(" rename-param *(SP rename-param-value) ")"
-    static func parseRenameParameters(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [RenameParameter] {
-        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
-            try ParserLibrary.parseFixedString(" (", buffer: &buffer, tracker: tracker)
-            var array = [try self.parseRenameParameter(buffer: &buffer, tracker: tracker)]
-            try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) -> RenameParameter in
-                try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
-                return try self.parseRenameParameter(buffer: &buffer, tracker: tracker)
-            }
-            try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)
-            return array
-        }
-    }
-
-    // rename-param-name = tagged-ext-label
-    static func parseRenameParameterName(buffer: inout ByteBuffer, tracker: StackTracker) throws -> String {
-        try self.parseTaggedExtensionLabel(buffer: &buffer, tracker: tracker)
-    }
-
-    // rename-param-value = tagged-ext-val
-    static func parseRenameParameterValue(buffer: inout ByteBuffer, tracker: StackTracker) throws -> TaggedExtensionValue {
-        try self.parseTaggedExtensionValue(buffer: &buffer, tracker: tracker)
     }
 
     // response-data   = "*" SP response-payload CRLF
@@ -3250,12 +3154,12 @@ extension GrammarParser {
 
     // search-modifier-name = tagged-ext-label
     static func parseSearchModifierName(buffer: inout ByteBuffer, tracker: StackTracker) throws -> String {
-        try self.parseTaggedExtensionLabel(buffer: &buffer, tracker: tracker)
+        try self.parseParameterName(buffer: &buffer, tracker: tracker)
     }
 
     // search-mod-params = tagged-ext-val
-    static func parseSearchModifierParams(buffer: inout ByteBuffer, tracker: StackTracker) throws -> TaggedExtensionValue {
-        try self.parseTaggedExtensionValue(buffer: &buffer, tracker: tracker)
+    static func parseSearchModifierParams(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ParameterValue {
+        try self.parseParameterValue(buffer: &buffer, tracker: tracker)
     }
 
     // search-ret-data-ext = search-modifier-name SP search-return-value
@@ -3372,7 +3276,7 @@ extension GrammarParser {
     static func parseSearchReturnOptionExtension(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SearchReturnOptionExtension {
         try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> SearchReturnOptionExtension in
             let name = try self.parseSearchModifierName(buffer: &buffer, tracker: tracker)
-            let params = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> TaggedExtensionValue in
+            let params = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> ParameterValue in
                 try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
                 return try self.parseSearchModifierParams(buffer: &buffer, tracker: tracker)
             }
@@ -3381,8 +3285,8 @@ extension GrammarParser {
     }
 
     // search-return-value = tagged-ext-val
-    static func parseSearchReturnValue(buffer: inout ByteBuffer, tracker: StackTracker) throws -> TaggedExtensionValue {
-        try self.parseTaggedExtensionValue(buffer: &buffer, tracker: tracker)
+    static func parseSearchReturnValue(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ParameterValue {
+        try self.parseParameterValue(buffer: &buffer, tracker: tracker)
     }
 
     // section         = "[" [section-spec] "]"
@@ -3499,45 +3403,23 @@ extension GrammarParser {
         try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Command in
             try ParserLibrary.parseFixedString("SELECT ", buffer: &buffer, tracker: tracker)
             let mailbox = try self.parseMailbox(buffer: &buffer, tracker: tracker)
-            let params = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseSelectParameters) ?? []
+            let params = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseParameters) ?? []
             return .select(mailbox, params)
         }
     }
 
     // select-params = SP "(" select-param *(SP select-param ")"
-    static func parseSelectParameters(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [SelectParameter] {
-        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> [SelectParameter] in
+    static func parseParameters(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [Parameter] {
+        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> [Parameter] in
             try ParserLibrary.parseFixedString(" (", buffer: &buffer, tracker: tracker)
-            var array = [try self.parseSelectParameter(buffer: &buffer, tracker: tracker)]
-            try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) -> SelectParameter in
+            var array = [try self.parseParameter(buffer: &buffer, tracker: tracker)]
+            try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) -> Parameter in
                 try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
-                return try self.parseSelectParameter(buffer: &buffer, tracker: tracker)
+                return try self.parseParameter(buffer: &buffer, tracker: tracker)
             }
             try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)
             return array
         }
-    }
-
-    // select-param = select-param-name [SP select-param-value]
-    static func parseSelectParameter(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SelectParameter {
-        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> SelectParameter in
-            let name = try self.parseSelectParameterName(buffer: &buffer, tracker: tracker)
-            let value = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> TaggedExtensionValue in
-                try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
-                return try self.parseSelectParameterValue(buffer: &buffer, tracker: tracker)
-            }
-            return .init(name: name, value: value)
-        }
-    }
-
-    // select-param-name = tagged-ext-name
-    static func parseSelectParameterName(buffer: inout ByteBuffer, tracker: StackTracker) throws -> String {
-        try self.parseTaggedExtensionLabel(buffer: &buffer, tracker: tracker)
-    }
-
-    // select-param-value = tagged-ext-value
-    static func parseSelectParameterValue(buffer: inout ByteBuffer, tracker: StackTracker) throws -> TaggedExtensionValue {
-        try self.parseTaggedExtensionValue(buffer: &buffer, tracker: tracker)
     }
 
     // Sequence Range
@@ -3774,7 +3656,7 @@ extension GrammarParser {
         try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Command in
             try ParserLibrary.parseFixedString("STORE ", buffer: &buffer, tracker: tracker)
             let sequence = try self.parseSequenceSet(buffer: &buffer, tracker: tracker)
-            let modifiers = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseStoreModifiers) ?? []
+            let modifiers = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseParameters) ?? []
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
             let flags = try self.parseStoreAttributeFlags(buffer: &buffer, tracker: tracker)
             return .store(sequence, modifiers, flags)
@@ -3833,42 +3715,6 @@ extension GrammarParser {
         }
     }
 
-    // store-modifier = store-modifier-name [SP store-modif-params]
-    static func parseStoreModifier(buffer: inout ByteBuffer, tracker: StackTracker) throws -> StoreModifier {
-        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
-            let name = try self.parseStoreModifierName(buffer: &buffer, tracker: tracker)
-            let params = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> TaggedExtensionValue in
-                try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
-                return try self.parseStoreModifierParameters(buffer: &buffer, tracker: tracker)
-            }
-            return .init(name: name, parameters: params)
-        }
-    }
-
-    // store-modifiers = SP "(" store-modifier *(SP store-modifier ")"
-    static func parseStoreModifiers(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [StoreModifier] {
-        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
-            try ParserLibrary.parseFixedString(" (", buffer: &buffer, tracker: tracker)
-            var array = [try self.parseStoreModifier(buffer: &buffer, tracker: tracker)]
-            try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) -> StoreModifier in
-                try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
-                return try self.parseStoreModifier(buffer: &buffer, tracker: tracker)
-            }
-            try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)
-            return array
-        }
-    }
-
-    // store-modifier-name = tagged-ext-label
-    static func parseStoreModifierName(buffer: inout ByteBuffer, tracker: StackTracker) throws -> String {
-        try self.parseTaggedExtensionLabel(buffer: &buffer, tracker: tracker)
-    }
-
-    // store-modifier-params = tagged-ext-val
-    static func parseStoreModifierParameters(buffer: inout ByteBuffer, tracker: StackTracker) throws -> TaggedExtensionValue {
-        try self.parseTaggedExtensionValue(buffer: &buffer, tracker: tracker)
-    }
-
     // string          = quoted / literal
     static func parseString(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ByteBuffer {
         try ParserLibrary.parseOneOf([
@@ -3901,15 +3747,15 @@ extension GrammarParser {
     // tagged-ext = tagged-ext-label SP tagged-ext-val
     static func parseTaggedExtension(buffer: inout ByteBuffer, tracker: StackTracker) throws -> TaggedExtension {
         try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
-            let label = try self.parseTaggedExtensionLabel(buffer: &buffer, tracker: tracker)
+            let label = try self.parseParameterName(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
-            let value = try self.parseTaggedExtensionValue(buffer: &buffer, tracker: tracker)
+            let value = try self.parseParameterValue(buffer: &buffer, tracker: tracker)
             return .init(label: label, value: value)
         }
     }
 
     // tagged-ext-label    = tagged-label-fchar *tagged-label-char
-    static func parseTaggedExtensionLabel(buffer: inout ByteBuffer, tracker: StackTracker) throws -> String {
+    static func parseParameterName(buffer: inout ByteBuffer, tracker: StackTracker) throws -> String {
         try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> String in
 
             guard let fchar = buffer.readBytes(length: 1)?.first else {
@@ -3993,35 +3839,22 @@ extension GrammarParser {
         return result
     }
 
-    // tagged-ext-simple   = sequence-set / number / number64
-    static func parseTaggedExtensionSimple(buffer: inout ByteBuffer, tracker: StackTracker) throws -> TaggedExtensionSimple {
-        func parseTaggedExtensionSimple_set(buffer: inout ByteBuffer, tracker: StackTracker) throws -> TaggedExtensionSimple {
+    // tagged-ext-val      = tagged-ext-simple /
+    //                       "(" [tagged-ext-comp] ")"
+    static func parseParameterValue(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ParameterValue {
+        func parseTaggedExtensionSimple_set(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ParameterValue {
             .sequence(try self.parseSequenceSet(buffer: &buffer, tracker: tracker))
         }
 
-        func parseTaggedExtensionSimple_number(buffer: inout ByteBuffer, tracker: StackTracker) throws -> TaggedExtensionSimple {
+        func parseTaggedExtensionSimple_number(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ParameterValue {
             .number(try self.parseNumber(buffer: &buffer, tracker: tracker))
         }
 
-        func parseTaggedExtensionSimple_number64(buffer: inout ByteBuffer, tracker: StackTracker) throws -> TaggedExtensionSimple {
+        func parseTaggedExtensionSimple_number64(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ParameterValue {
             .number64(try self.parseNumber(buffer: &buffer, tracker: tracker))
         }
 
-        return try ParserLibrary.parseOneOf([
-            parseTaggedExtensionSimple_set,
-            parseTaggedExtensionSimple_number,
-            parseTaggedExtensionSimple_number64,
-        ], buffer: &buffer, tracker: tracker)
-    }
-
-    // tagged-ext-val      = tagged-ext-simple /
-    //                       "(" [tagged-ext-comp] ")"
-    static func parseTaggedExtensionValue(buffer: inout ByteBuffer, tracker: StackTracker) throws -> TaggedExtensionValue {
-        func parseTaggedExtensionVal_simple(buffer: inout ByteBuffer, tracker: StackTracker) throws -> TaggedExtensionValue {
-            .simple(try self.parseTaggedExtensionSimple(buffer: &buffer, tracker: tracker))
-        }
-
-        func parseTaggedExtensionVal_comp(buffer: inout ByteBuffer, tracker: StackTracker) throws -> TaggedExtensionValue {
+        func parseTaggedExtensionVal_comp(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ParameterValue {
             try ParserLibrary.parseFixedString("(", buffer: &buffer, tracker: tracker)
             let comp = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseTaggedExtensionComplex) ?? []
             try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)
@@ -4029,7 +3862,9 @@ extension GrammarParser {
         }
 
         return try ParserLibrary.parseOneOf([
-            parseTaggedExtensionVal_simple,
+            parseTaggedExtensionSimple_set,
+            parseTaggedExtensionSimple_number,
+            parseTaggedExtensionSimple_number64,
             parseTaggedExtensionVal_comp,
         ], buffer: &buffer, tracker: tracker)
     }
@@ -4070,7 +3905,7 @@ extension GrammarParser {
                 let set = try self.parseUIDSet(buffer: &buffer, tracker: tracker)
                 try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
                 let att = try parseFetch_type(buffer: &buffer, tracker: tracker)
-                let modifiers = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseFetchModifiers) ?? []
+                let modifiers = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseParameters) ?? []
                 return .uidFetch(set, att, modifiers)
             }
         }
@@ -4086,7 +3921,7 @@ extension GrammarParser {
             try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Command in
                 try ParserLibrary.parseFixedString("STORE ", buffer: &buffer, tracker: tracker)
                 let set = try self.parseUIDSet(buffer: &buffer, tracker: tracker)
-                let modifiers = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseStoreModifiers) ?? []
+                let modifiers = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseParameters) ?? []
                 try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
                 let flags = try self.parseStoreAttributeFlags(buffer: &buffer, tracker: tracker)
                 return .uidStore(set, modifiers, flags)

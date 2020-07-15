@@ -18,13 +18,13 @@ public enum Command: Equatable {
     case capability
     case logout
     case noop
-    case create(MailboxName, [CreateParameter])
+    case create(MailboxName, [Parameter])
     case delete(MailboxName)
-    case examine(MailboxName, [SelectParameter] = [])
+    case examine(MailboxName, [Parameter] = [])
     case list(ListSelectOptions? = nil, reference: MailboxName, MailboxPatterns, [ReturnOption] = [])
     case lsub(reference: MailboxName, pattern: ByteBuffer)
-    case rename(from: MailboxName, to: MailboxName, params: [RenameParameter])
-    case select(MailboxName, [SelectParameter] = [])
+    case rename(from: MailboxName, to: MailboxName, params: [Parameter])
+    case select(MailboxName, [Parameter] = [])
     case status(MailboxName, [MailboxAttribute])
     case subscribe(MailboxName)
     case unsubscribe(MailboxName)
@@ -39,8 +39,8 @@ public enum Command: Equatable {
     case idleStart
     case idleFinish
     case copy(SequenceSet, MailboxName)
-    case fetch(SequenceSet, [FetchAttribute], [FetchModifier])
-    case store(SequenceSet, [StoreModifier], StoreFlags)
+    case fetch(SequenceSet, [FetchAttribute], [Parameter])
+    case store(SequenceSet, [Parameter], StoreFlags)
     case search(key: SearchKey, charset: String? = nil, returnOptions: [SearchReturnOption] = [])
     case move(SequenceSet, MailboxName)
     case id([IDParameter])
@@ -48,9 +48,9 @@ public enum Command: Equatable {
 
     case uidCopy(UIDSet, MailboxName)
     case uidMove(UIDSet, MailboxName)
-    case uidFetch(UIDSet, [FetchAttribute], [FetchModifier])
+    case uidFetch(UIDSet, [FetchAttribute], [Parameter])
     case uidSearch(key: SearchKey, charset: String? = nil, returnOptions: [SearchReturnOption] = [])
-    case uidStore(UIDSet, [StoreModifier], StoreFlags)
+    case uidStore(UIDSet, [Parameter], StoreFlags)
     case uidExpunge(UIDSet)
 }
 
@@ -152,10 +152,10 @@ extension EncodeBuffer {
             self.writeAppendMessage(firstMessageMetadata)
     }
 
-    private mutating func writeCommandKind_create(mailbox: MailboxName, parameters: [CreateParameter]) -> Int {
+    private mutating func writeCommandKind_create(mailbox: MailboxName, parameters: [Parameter]) -> Int {
         self.writeString("CREATE ") +
             self.writeMailbox(mailbox) +
-            self.writeCreateParameters(parameters)
+            self.writeParameters(parameters)
     }
 
     private mutating func writeCommandKind_delete(mailbox: MailboxName) -> Int {
@@ -163,11 +163,11 @@ extension EncodeBuffer {
             self.writeMailbox(mailbox)
     }
 
-    private mutating func writeCommandKind_examine(mailbox: MailboxName, parameters: [SelectParameter]) -> Int {
+    private mutating func writeCommandKind_examine(mailbox: MailboxName, parameters: [Parameter]) -> Int {
         self.writeString("EXAMINE ") +
             self.writeMailbox(mailbox) +
             self.writeIfExists(parameters) { (params) -> Int in
-                self.writeSelectParameters(params)
+                self.writeParameters(params)
             }
     }
 
@@ -194,21 +194,21 @@ extension EncodeBuffer {
             self.writeIMAPString(listMailbox)
     }
 
-    private mutating func writeCommandKind_rename(from: MailboxName, to: MailboxName, parameters: [RenameParameter]) -> Int {
+    private mutating func writeCommandKind_rename(from: MailboxName, to: MailboxName, parameters: [Parameter]) -> Int {
         self.writeString("RENAME ") +
             self.writeMailbox(from) +
             self.writeSpace() +
             self.writeMailbox(to) +
             self.writeIfExists(parameters) { (params) -> Int in
-                self.writeRenameParameters(params)
+                self.writeParameters(params)
             }
     }
 
-    private mutating func writeCommandKind_select(mailbox: MailboxName, params: [SelectParameter]) -> Int {
+    private mutating func writeCommandKind_select(mailbox: MailboxName, params: [Parameter]) -> Int {
         self.writeString("SELECT ") +
             self.writeMailbox(mailbox) +
             self.writeIfExists(params) { (params) -> Int in
-                self.writeSelectParameters(params)
+                self.writeParameters(params)
             }
     }
 
@@ -303,41 +303,41 @@ extension EncodeBuffer {
             self.writeMailbox(mailbox)
     }
 
-    private mutating func writeCommandKind_fetch(set: SequenceSet, atts: [FetchAttribute], modifiers: [FetchModifier]) -> Int {
+    private mutating func writeCommandKind_fetch(set: SequenceSet, atts: [FetchAttribute], modifiers: [Parameter]) -> Int {
         self.writeString("FETCH ") +
             self.writeSequenceSet(set) +
             self.writeSpace() +
             self.writeFetchAttributeList(atts) +
             self.writeIfExists(modifiers) { (modifiers) -> Int in
-                self.writeFetchModifiers(modifiers)
+                self.writeParameters(modifiers)
             }
     }
 
-    private mutating func writeCommandKind_uidFetch(set: UIDSet, atts: [FetchAttribute], modifiers: [FetchModifier]) -> Int {
+    private mutating func writeCommandKind_uidFetch(set: UIDSet, atts: [FetchAttribute], modifiers: [Parameter]) -> Int {
         self.writeString("UID FETCH ") +
             self.writeUIDSet(set) +
             self.writeSpace() +
             self.writeFetchAttributeList(atts) +
             self.writeIfExists(modifiers) { (modifiers) -> Int in
-                self.writeFetchModifiers(modifiers)
+                self.writeParameters(modifiers)
             }
     }
 
-    private mutating func writeCommandKind_store(set: SequenceSet, modifiers: [StoreModifier], flags: StoreFlags) -> Int {
+    private mutating func writeCommandKind_store(set: SequenceSet, modifiers: [Parameter], flags: StoreFlags) -> Int {
         self.writeString("STORE ") +
             self.writeSequenceSet(set) +
             self.writeIfArrayHasMinimumSize(array: modifiers) { (modifiers, self) -> Int in
-                self.writeStoreModifiers(modifiers)
+                self.writeParameters(modifiers)
             } +
             self.writeSpace() +
             self.writeStoreAttributeFlags(flags)
     }
 
-    private mutating func writeCommandKind_uidStore(set: UIDSet, modifiers: [StoreModifier], flags: StoreFlags) -> Int {
+    private mutating func writeCommandKind_uidStore(set: UIDSet, modifiers: [Parameter], flags: StoreFlags) -> Int {
         self.writeString("UID STORE ") +
             self.writeUIDSet(set) +
             self.writeIfArrayHasMinimumSize(array: modifiers) { (modifiers, self) -> Int in
-                self.writeStoreModifiers(modifiers)
+                self.writeParameters(modifiers)
             } +
             self.writeSpace() +
             self.writeStoreAttributeFlags(flags)

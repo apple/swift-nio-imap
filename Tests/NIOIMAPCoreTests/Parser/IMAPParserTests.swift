@@ -265,7 +265,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     func testParseAppendDataExtension() {
         let inputs: [(String, String, TaggedExtension, UInt)] = [
-            ("label 1:9", " ", .init(label: "label", value: .simple(.sequence(SequenceSet(1 ... 9)))), #line),
+            ("label 1:9", " ", .init(label: "label", value: .sequence(SequenceSet(1 ... 9))), #line),
         ]
         self.iterateTestInputs(inputs, testFunction: GrammarParser.parseAppendDataExtension)
     }
@@ -276,7 +276,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     func testParseAppendExtension() {
         let inputs: [(String, String, AppendExtension, UInt)] = [
-            ("name 1:9", " ", .init(name: "name", value: .simple(.sequence(SequenceSet(1 ... 9)))), #line),
+            ("name 1:9", " ", .init(name: "name", value: .sequence(SequenceSet(1 ... 9))), #line),
         ]
         self.iterateTestInputs(inputs, testFunction: GrammarParser.parseAppendExtension)
     }
@@ -297,8 +297,8 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseAppendExtensionValue() {
-        let inputs: [(String, String, TaggedExtensionValue, UInt)] = [
-            ("1:9", " ", .simple(.sequence(SequenceSet(1 ... 9))), #line),
+        let inputs: [(String, String, ParameterValue, UInt)] = [
+            ("1:9", " ", .sequence(SequenceSet(1 ... 9)), #line),
         ]
         self.iterateTestInputs(inputs, testFunction: GrammarParser.parseAppendExtensionValue)
     }
@@ -345,16 +345,16 @@ extension ParserUnitTests {
             (
                 " name1 1:2",
                 "\r",
-                .init(flagList: [], internalDate: nil, extensions: [.init(name: "name1", value: .simple(.sequence(SequenceSet(1 ... 2))))]),
+                .init(flagList: [], internalDate: nil, extensions: [.init(name: "name1", value: .sequence(SequenceSet(1 ... 2)))]),
                 #line
             ),
             (
                 " name1 1:2 name2 2:3 name3 3:4",
                 "\r",
                 .init(flagList: [], internalDate: nil, extensions: [
-                    .init(name: "name1", value: .simple(.sequence(SequenceSet(1 ... 2)))),
-                    .init(name: "name2", value: .simple(.sequence(SequenceSet(2 ... 3)))),
-                    .init(name: "name3", value: .simple(.sequence(SequenceSet(3 ... 4)))),
+                    .init(name: "name1", value: .sequence(SequenceSet(1 ... 2))),
+                    .init(name: "name2", value: .sequence(SequenceSet(2 ... 3))),
+                    .init(name: "name3", value: .sequence(SequenceSet(3 ... 4))),
                 ]),
                 #line
             ),
@@ -869,53 +869,6 @@ extension ParserUnitTests {
     }
 }
 
-// MARK: - parseCreateParameter
-
-extension ParserUnitTests {
-    // NOTE: I'm not a huge fan of how a single number gets parsed as a set, we should revisit
-    func testParseCreateParameter() {
-        let inputs: [(String, String, CreateParameter, UInt)] = [
-            ("test", "\r", .init(name: "test", value: nil), #line),
-            ("some 1", "\r", .init(name: "some", value: .simple(.sequence([1]))), #line),
-        ]
-        self.iterateTestInputs(inputs, testFunction: GrammarParser.parseCreateParameter)
-    }
-}
-
-// MARK: - parseCreateParameter
-
-extension ParserUnitTests {
-    func testParseCreateParameters() {
-        let inputs: [(String, String, [CreateParameter], UInt)] = [
-            (" (test)", "\r", [.init(name: "test", value: nil)], #line),
-            (" (test1 test2 test3)", "\r", [.init(name: "test1", value: nil), .init(name: "test2", value: nil), .init(name: "test3", value: nil)], #line),
-        ]
-        self.iterateTestInputs(inputs, testFunction: GrammarParser.parseCreateParameters)
-    }
-}
-
-// MARK: - parseCreateParameterName
-
-extension ParserUnitTests {
-    func testParseCreateParameterName() {
-        let inputs: [(String, String, String, UInt)] = [
-            ("test", "\r", "test", #line),
-        ]
-        self.iterateTestInputs(inputs, testFunction: GrammarParser.parseCreateParameterName)
-    }
-}
-
-// MARK: - parseCreateParameterValue
-
-extension ParserUnitTests {
-    func testParseCreateParameterValue() {
-        let inputs: [(String, String, TaggedExtensionValue, UInt)] = [
-            ("1", "\r", .simple(.sequence([1])), #line),
-        ]
-        self.iterateTestInputs(inputs, testFunction: GrammarParser.parseCreateParameterValue)
-    }
-}
-
 // MARK: - date
 
 extension ParserUnitTests {
@@ -1313,52 +1266,6 @@ extension ParserUnitTests {
             ("BINARY.SIZE[5]", " ", .binarySize(section: [5]), #line),
         ]
         self.iterateTestInputs(inputs, testFunction: GrammarParser.parseFetchAttribute)
-    }
-}
-
-// MARK: - parseFetchModifier
-
-extension ParserUnitTests {
-    func testParseFetchModifier() {
-        let inputs: [(String, String, FetchModifier, UInt)] = [
-            ("test", "\r", .init(name: "test", value: nil), #line),
-            ("some 1", "\r", .init(name: "some", value: .simple(.sequence([1]))), #line),
-        ]
-        self.iterateTestInputs(inputs, testFunction: GrammarParser.parseFetchModifier)
-    }
-}
-
-// MARK: - parseFetchModifiers
-
-extension ParserUnitTests {
-    func testParseFetchModifiers() {
-        let inputs: [(String, String, [FetchModifier], UInt)] = [
-            (" (test)", "\r", [.init(name: "test", value: nil)], #line),
-            (" (test1 test2 test3)", "\r", [.init(name: "test1", value: nil), .init(name: "test2", value: nil), .init(name: "test3", value: nil)], #line),
-        ]
-        self.iterateTestInputs(inputs, testFunction: GrammarParser.parseFetchModifiers)
-    }
-}
-
-// MARK: - parseFetchModifierName
-
-extension ParserUnitTests {
-    func testParseFetchModifierName() {
-        let inputs: [(String, String, String, UInt)] = [
-            ("test", "\r", "test", #line),
-        ]
-        self.iterateTestInputs(inputs, testFunction: GrammarParser.parseFetchModifierName)
-    }
-}
-
-// MARK: - parseFetchModifierParameter
-
-extension ParserUnitTests {
-    func testParseFetchModifierParameter() {
-        let inputs: [(String, String, TaggedExtensionValue, UInt)] = [
-            ("1", "\r", .simple(.sequence([1])), #line),
-        ]
-        self.iterateTestInputs(inputs, testFunction: GrammarParser.parseFetchModifierParameter)
     }
 }
 
@@ -2253,7 +2160,7 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseSearchModifierParams() {
-        let inputs: [(String, String, TaggedExtensionValue, UInt)] = [
+        let inputs: [(String, String, ParameterValue, UInt)] = [
             ("()", "", .comp([]), #line),
         ]
         self.iterateTestInputs(inputs, testFunction: GrammarParser.parseSearchModifierParams)
@@ -2267,7 +2174,7 @@ extension ParserUnitTests {
     // our parser gives priority to "sequence-set"
     func testParseSearchReturnDataExtension() {
         let inputs: [(String, String, SearchReturnDataExtension, UInt)] = [
-            ("modifier 64", "\r", .init(modifier: "modifier", returnValue: .simple(.sequence([64]))), #line),
+            ("modifier 64", "\r", .init(modifier: "modifier", returnValue: .sequence([64])), #line),
         ]
         self.iterateTestInputs(inputs, testFunction: GrammarParser.parseSearchReturnDataExtension)
     }
@@ -2283,7 +2190,7 @@ extension ParserUnitTests {
             ("ALL 3", "\r", .all([3]), #line),
             ("ALL 3,4,5", "\r", .all([3, 4, 5]), #line),
             ("COUNT 4", "\r", .count(4), #line),
-            ("modifier 5", "\r", .dataExtension(.init(modifier: "modifier", returnValue: .simple(.sequence([5])))), #line),
+            ("modifier 5", "\r", .dataExtension(.init(modifier: "modifier", returnValue: .sequence([5]))), #line),
         ]
         self.iterateTestInputs(inputs, testFunction: GrammarParser.parseSearchReturnData)
     }
@@ -2337,7 +2244,7 @@ extension ParserUnitTests {
     func testParseSearchReturnOptionExtension() {
         let inputs: [(String, String, SearchReturnOptionExtension, UInt)] = [
             ("modifier", "\r", .init(modifierName: "modifier", params: nil), #line),
-            ("modifier 4", "\r", .init(modifierName: "modifier", params: .simple(.sequence([4]))), #line),
+            ("modifier 4", "\r", .init(modifierName: "modifier", params: .sequence([4])), #line),
         ]
         self.iterateTestInputs(inputs, testFunction: GrammarParser.parseSearchReturnOptionExtension)
     }
@@ -2433,52 +2340,6 @@ extension ParserUnitTests {
         XCTAssertThrowsError(try GrammarParser.parseSelect(buffer: &buffer, tracker: .testTracker)) { e in
             XCTAssertTrue(e is _IncompleteMessage, "e has type \(e)")
         }
-    }
-}
-
-// MARK: - parseSelectParameter
-
-extension ParserUnitTests {
-    func testParseSelectParameter() {
-        let inputs: [(String, String, SelectParameter, UInt)] = [
-            ("test", "\r", .init(name: "test", value: nil), #line),
-            ("some 1", "\r", .init(name: "some", value: .simple(.sequence([1]))), #line),
-        ]
-        self.iterateTestInputs(inputs, testFunction: GrammarParser.parseSelectParameter)
-    }
-}
-
-// MARK: - parseSelectParameters
-
-extension ParserUnitTests {
-    func testParseSelectParameters() {
-        let inputs: [(String, String, [SelectParameter], UInt)] = [
-            (" (test)", "\r", [.init(name: "test", value: nil)], #line),
-            (" (test1 test2 test3)", "\r", [.init(name: "test1", value: nil), .init(name: "test2", value: nil), .init(name: "test3", value: nil)], #line),
-        ]
-        self.iterateTestInputs(inputs, testFunction: GrammarParser.parseSelectParameters)
-    }
-}
-
-// MARK: - parseSelectParameterName
-
-extension ParserUnitTests {
-    func testParseSelectParameterName() {
-        let inputs: [(String, String, String, UInt)] = [
-            ("test", "\r", "test", #line),
-        ]
-        self.iterateTestInputs(inputs, testFunction: GrammarParser.parseSelectParameterName)
-    }
-}
-
-// MARK: - parseSelectParameterValue
-
-extension ParserUnitTests {
-    func testParseSelectParameterValue() {
-        let inputs: [(String, String, TaggedExtensionValue, UInt)] = [
-            ("1", "\r", .simple(.sequence([1])), #line),
-        ]
-        self.iterateTestInputs(inputs, testFunction: GrammarParser.parseSelectParameterValue)
     }
 }
 
@@ -2635,7 +2496,7 @@ extension ParserUnitTests {
     func testParseStore() {
         let inputs: [(String, String, Command, UInt)] = [
             ("STORE 1 +FLAGS \\answered", "\r", .store([1], [], .add(silent: false, list: [.answered])), #line),
-            ("STORE 1 (label) -FLAGS \\seen", "\r", .store([1], [.init(name: "label", parameters: nil)], .remove(silent: false, list: [.seen])), #line),
+            ("STORE 1 (label) -FLAGS \\seen", "\r", .store([1], [.init(name: "label", value: nil)], .remove(silent: false, list: [.seen])), #line),
         ]
         self.iterateTestInputs(inputs, testFunction: GrammarParser.parseStore)
     }
@@ -2713,52 +2574,6 @@ extension ParserUnitTests {
     }
 }
 
-// MARK: - parseStoreModifier
-
-extension ParserUnitTests {
-    func testParseStoreModifier() {
-        let inputs: [(String, String, StoreModifier, UInt)] = [
-            ("name", "\r", .init(name: "name", parameters: nil), #line),
-            ("name 1:9", "\r", .init(name: "name", parameters: .simple(.sequence([1 ... 9]))), #line),
-        ]
-        self.iterateTestInputs(inputs, testFunction: GrammarParser.parseStoreModifier)
-    }
-}
-
-// MARK: - parseStoreModifiers
-
-extension ParserUnitTests {
-    func testParseStoreModifiers() {
-        let inputs: [(String, String, [StoreModifier], UInt)] = [
-            (" (name1)", "\r", [.init(name: "name1", parameters: nil)], #line),
-            (" (name1 name2 name3)", "\r", [.init(name: "name1", parameters: nil), .init(name: "name2", parameters: nil), .init(name: "name3", parameters: nil)], #line),
-        ]
-        self.iterateTestInputs(inputs, testFunction: GrammarParser.parseStoreModifiers)
-    }
-}
-
-// MARK: - parseStoreModifierName
-
-extension ParserUnitTests {
-    func testParseStoreModifierName() {
-        let inputs: [(String, String, String, UInt)] = [
-            ("test", "\r", "test", #line),
-        ]
-        self.iterateTestInputs(inputs, testFunction: GrammarParser.parseStoreModifierName)
-    }
-}
-
-// MARK: - parseStoreModifierParams
-
-extension ParserUnitTests {
-    func testParseStoreModifierParameters() {
-        let inputs: [(String, String, TaggedExtensionValue, UInt)] = [
-            ("1:9", "\r", .simple(.sequence(SequenceSet(1 ... 9))), #line),
-        ]
-        self.iterateTestInputs(inputs, testFunction: GrammarParser.parseStoreModifierParameters)
-    }
-}
-
 // MARK: - tag parseTag
 
 extension ParserUnitTests {
@@ -2816,7 +2631,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     func testParseTaggedExtension() {
         let inputs: [(String, String, TaggedExtension, UInt)] = [
-            ("label 1", "\r\n", .init(label: "label", value: .simple(.sequence([1]))), #line),
+            ("label 1", "\r\n", .init(label: "label", value: .sequence([1])), #line),
         ]
         self.iterateTestInputs(inputs, testFunction: GrammarParser.parseTaggedExtension)
     }
