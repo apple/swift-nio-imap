@@ -265,7 +265,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     func testParseAppendDataExtension() {
         let inputs: [(String, String, TaggedExtension, UInt)] = [
-            ("label 1:9", " ", .init(label: "label", value: .simple(.sequence(SequenceSet(1 ... 9)))), #line),
+            ("label 1:9", " ", .init(label: "label", value: .sequence(SequenceSet(1 ... 9))), #line),
         ]
         self.iterateTestInputs(inputs, testFunction: GrammarParser.parseAppendDataExtension)
     }
@@ -276,7 +276,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     func testParseAppendExtension() {
         let inputs: [(String, String, AppendExtension, UInt)] = [
-            ("name 1:9", " ", .init(name: "name", value: .simple(.sequence(SequenceSet(1 ... 9)))), #line),
+            ("name 1:9", " ", .init(name: "name", value: .sequence(SequenceSet(1 ... 9))), #line),
         ]
         self.iterateTestInputs(inputs, testFunction: GrammarParser.parseAppendExtension)
     }
@@ -298,7 +298,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     func testParseAppendExtensionValue() {
         let inputs: [(String, String, ParameterValue, UInt)] = [
-            ("1:9", " ", .simple(.sequence(SequenceSet(1 ... 9))), #line),
+            ("1:9", " ", .sequence(SequenceSet(1 ... 9)), #line),
         ]
         self.iterateTestInputs(inputs, testFunction: GrammarParser.parseAppendExtensionValue)
     }
@@ -345,16 +345,16 @@ extension ParserUnitTests {
             (
                 " name1 1:2",
                 "\r",
-                .init(flagList: [], internalDate: nil, extensions: [.init(name: "name1", value: .simple(.sequence(SequenceSet(1 ... 2))))]),
+                .init(flagList: [], internalDate: nil, extensions: [.init(name: "name1", value: .sequence(SequenceSet(1 ... 2)))]),
                 #line
             ),
             (
                 " name1 1:2 name2 2:3 name3 3:4",
                 "\r",
                 .init(flagList: [], internalDate: nil, extensions: [
-                    .init(name: "name1", value: .simple(.sequence(SequenceSet(1 ... 2)))),
-                    .init(name: "name2", value: .simple(.sequence(SequenceSet(2 ... 3)))),
-                    .init(name: "name3", value: .simple(.sequence(SequenceSet(3 ... 4)))),
+                    .init(name: "name1", value: .sequence(SequenceSet(1 ... 2))),
+                    .init(name: "name2", value: .sequence(SequenceSet(2 ... 3))),
+                    .init(name: "name3", value: .sequence(SequenceSet(3 ... 4))),
                 ]),
                 #line
             ),
@@ -2174,7 +2174,7 @@ extension ParserUnitTests {
     // our parser gives priority to "sequence-set"
     func testParseSearchReturnDataExtension() {
         let inputs: [(String, String, SearchReturnDataExtension, UInt)] = [
-            ("modifier 64", "\r", .init(modifier: "modifier", returnValue: .simple(.sequence([64]))), #line),
+            ("modifier 64", "\r", .init(modifier: "modifier", returnValue: .sequence([64])), #line),
         ]
         self.iterateTestInputs(inputs, testFunction: GrammarParser.parseSearchReturnDataExtension)
     }
@@ -2190,7 +2190,7 @@ extension ParserUnitTests {
             ("ALL 3", "\r", .all([3]), #line),
             ("ALL 3,4,5", "\r", .all([3, 4, 5]), #line),
             ("COUNT 4", "\r", .count(4), #line),
-            ("modifier 5", "\r", .dataExtension(.init(modifier: "modifier", returnValue: .simple(.sequence([5])))), #line),
+            ("modifier 5", "\r", .dataExtension(.init(modifier: "modifier", returnValue: .sequence([5]))), #line),
         ]
         self.iterateTestInputs(inputs, testFunction: GrammarParser.parseSearchReturnData)
     }
@@ -2244,7 +2244,7 @@ extension ParserUnitTests {
     func testParseSearchReturnOptionExtension() {
         let inputs: [(String, String, SearchReturnOptionExtension, UInt)] = [
             ("modifier", "\r", .init(modifierName: "modifier", params: nil), #line),
-            ("modifier 4", "\r", .init(modifierName: "modifier", params: .simple(.sequence([4]))), #line),
+            ("modifier 4", "\r", .init(modifierName: "modifier", params: .sequence([4])), #line),
         ]
         self.iterateTestInputs(inputs, testFunction: GrammarParser.parseSearchReturnOptionExtension)
     }
@@ -2631,7 +2631,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     func testParseTaggedExtension() {
         let inputs: [(String, String, TaggedExtension, UInt)] = [
-            ("label 1", "\r\n", .init(label: "label", value: .simple(.sequence([1]))), #line),
+            ("label 1", "\r\n", .init(label: "label", value: .sequence([1])), #line),
         ]
         self.iterateTestInputs(inputs, testFunction: GrammarParser.parseTaggedExtension)
     }

@@ -3839,32 +3839,19 @@ extension GrammarParser {
         return result
     }
 
-    // tagged-ext-simple   = sequence-set / number / number64
-    static func parseTaggedExtensionSimple(buffer: inout ByteBuffer, tracker: StackTracker) throws -> TaggedExtensionSimple {
-        func parseTaggedExtensionSimple_set(buffer: inout ByteBuffer, tracker: StackTracker) throws -> TaggedExtensionSimple {
-            .sequence(try self.parseSequenceSet(buffer: &buffer, tracker: tracker))
-        }
-
-        func parseTaggedExtensionSimple_number(buffer: inout ByteBuffer, tracker: StackTracker) throws -> TaggedExtensionSimple {
-            .number(try self.parseNumber(buffer: &buffer, tracker: tracker))
-        }
-
-        func parseTaggedExtensionSimple_number64(buffer: inout ByteBuffer, tracker: StackTracker) throws -> TaggedExtensionSimple {
-            .number64(try self.parseNumber(buffer: &buffer, tracker: tracker))
-        }
-
-        return try ParserLibrary.parseOneOf([
-            parseTaggedExtensionSimple_set,
-            parseTaggedExtensionSimple_number,
-            parseTaggedExtensionSimple_number64,
-        ], buffer: &buffer, tracker: tracker)
-    }
-
     // tagged-ext-val      = tagged-ext-simple /
     //                       "(" [tagged-ext-comp] ")"
     static func parseParameterValue(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ParameterValue {
-        func parseTaggedExtensionVal_simple(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ParameterValue {
-            .simple(try self.parseTaggedExtensionSimple(buffer: &buffer, tracker: tracker))
+        func parseTaggedExtensionSimple_set(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ParameterValue {
+            .sequence(try self.parseSequenceSet(buffer: &buffer, tracker: tracker))
+        }
+
+        func parseTaggedExtensionSimple_number(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ParameterValue {
+            .number(try self.parseNumber(buffer: &buffer, tracker: tracker))
+        }
+
+        func parseTaggedExtensionSimple_number64(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ParameterValue {
+            .number64(try self.parseNumber(buffer: &buffer, tracker: tracker))
         }
 
         func parseTaggedExtensionVal_comp(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ParameterValue {
@@ -3875,7 +3862,9 @@ extension GrammarParser {
         }
 
         return try ParserLibrary.parseOneOf([
-            parseTaggedExtensionVal_simple,
+            parseTaggedExtensionSimple_set,
+            parseTaggedExtensionSimple_number,
+            parseTaggedExtensionSimple_number64,
             parseTaggedExtensionVal_comp,
         ], buffer: &buffer, tracker: tracker)
     }
