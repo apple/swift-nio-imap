@@ -770,7 +770,7 @@ extension GrammarParser {
         try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Command in
             try ParserLibrary.parseFixedString("CREATE ", buffer: &buffer, tracker: tracker)
             let mailbox = try self.parseMailbox(buffer: &buffer, tracker: tracker)
-            let params = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseCreateParameters) ?? []
+            let params = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseParameters) ?? []
             return .create(mailbox, params)
         }
     }
@@ -786,21 +786,7 @@ extension GrammarParser {
             return .init(name: name, value: value)
         }
     }
-
-    // create-params = SP "(" create-param *(SP create-param-value) ")"
-    static func parseCreateParameters(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [Parameter] {
-        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
-            try ParserLibrary.parseFixedString(" (", buffer: &buffer, tracker: tracker)
-            var array = [try self.parseParameter(buffer: &buffer, tracker: tracker)]
-            try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) -> Parameter in
-                try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
-                return try self.parseParameter(buffer: &buffer, tracker: tracker)
-            }
-            try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)
-            return array
-        }
-    }
-
+    
     // date            = date-text / DQUOTE date-text DQUOTE
     static func parseDate(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Date {
         func parseDateText_quoted(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Date {
@@ -1079,7 +1065,7 @@ extension GrammarParser {
         try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Command in
             try ParserLibrary.parseFixedString("EXAMINE ", buffer: &buffer, tracker: tracker)
             let mailbox = try self.parseMailbox(buffer: &buffer, tracker: tracker)
-            let params = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseSelectParameters) ?? []
+            let params = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseParameters) ?? []
             return .examine(mailbox, params)
         }
     }
@@ -3489,45 +3475,23 @@ extension GrammarParser {
         try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Command in
             try ParserLibrary.parseFixedString("SELECT ", buffer: &buffer, tracker: tracker)
             let mailbox = try self.parseMailbox(buffer: &buffer, tracker: tracker)
-            let params = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseSelectParameters) ?? []
+            let params = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseParameters) ?? []
             return .select(mailbox, params)
         }
     }
 
     // select-params = SP "(" select-param *(SP select-param ")"
-    static func parseSelectParameters(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [SelectParameter] {
-        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> [SelectParameter] in
+    static func parseParameters(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [Parameter] {
+        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> [Parameter] in
             try ParserLibrary.parseFixedString(" (", buffer: &buffer, tracker: tracker)
-            var array = [try self.parseSelectParameter(buffer: &buffer, tracker: tracker)]
-            try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) -> SelectParameter in
+            var array = [try self.parseParameter(buffer: &buffer, tracker: tracker)]
+            try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) -> Parameter in
                 try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
-                return try self.parseSelectParameter(buffer: &buffer, tracker: tracker)
+                return try self.parseParameter(buffer: &buffer, tracker: tracker)
             }
             try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)
             return array
         }
-    }
-
-    // select-param = select-param-name [SP select-param-value]
-    static func parseSelectParameter(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SelectParameter {
-        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> SelectParameter in
-            let name = try self.parseSelectParameterName(buffer: &buffer, tracker: tracker)
-            let value = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> ParameterValue in
-                try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
-                return try self.parseSelectParameterValue(buffer: &buffer, tracker: tracker)
-            }
-            return .init(name: name, value: value)
-        }
-    }
-
-    // select-param-name = tagged-ext-name
-    static func parseSelectParameterName(buffer: inout ByteBuffer, tracker: StackTracker) throws -> String {
-        try self.parseParameterName(buffer: &buffer, tracker: tracker)
-    }
-
-    // select-param-value = tagged-ext-value
-    static func parseSelectParameterValue(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ParameterValue {
-        try self.parseParameterValue(buffer: &buffer, tracker: tracker)
     }
 
     // Sequence Range

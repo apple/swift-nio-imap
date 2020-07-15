@@ -869,18 +869,6 @@ extension ParserUnitTests {
     }
 }
 
-// MARK: - parseCreateParameters
-
-extension ParserUnitTests {
-    func testParseCreateParameters() {
-        let inputs: [(String, String, [Parameter], UInt)] = [
-            (" (test)", "\r", [.init(name: "test", value: nil)], #line),
-            (" (test1 test2 test3)", "\r", [.init(name: "test1", value: nil), .init(name: "test2", value: nil), .init(name: "test3", value: nil)], #line),
-        ]
-        self.iterateTestInputs(inputs, testFunction: GrammarParser.parseCreateParameters)
-    }
-}
-
 // MARK: - date
 
 extension ParserUnitTests {
@@ -2398,52 +2386,6 @@ extension ParserUnitTests {
         XCTAssertThrowsError(try GrammarParser.parseSelect(buffer: &buffer, tracker: .testTracker)) { e in
             XCTAssertTrue(e is _IncompleteMessage, "e has type \(e)")
         }
-    }
-}
-
-// MARK: - parseSelectParameter
-
-extension ParserUnitTests {
-    func testParseSelectParameter() {
-        let inputs: [(String, String, SelectParameter, UInt)] = [
-            ("test", "\r", .init(name: "test", value: nil), #line),
-            ("some 1", "\r", .init(name: "some", value: .simple(.sequence([1]))), #line),
-        ]
-        self.iterateTestInputs(inputs, testFunction: GrammarParser.parseSelectParameter)
-    }
-}
-
-// MARK: - parseSelectParameters
-
-extension ParserUnitTests {
-    func testParseSelectParameters() {
-        let inputs: [(String, String, [SelectParameter], UInt)] = [
-            (" (test)", "\r", [.init(name: "test", value: nil)], #line),
-            (" (test1 test2 test3)", "\r", [.init(name: "test1", value: nil), .init(name: "test2", value: nil), .init(name: "test3", value: nil)], #line),
-        ]
-        self.iterateTestInputs(inputs, testFunction: GrammarParser.parseSelectParameters)
-    }
-}
-
-// MARK: - parseSelectParameterName
-
-extension ParserUnitTests {
-    func testParseSelectParameterName() {
-        let inputs: [(String, String, String, UInt)] = [
-            ("test", "\r", "test", #line),
-        ]
-        self.iterateTestInputs(inputs, testFunction: GrammarParser.parseSelectParameterName)
-    }
-}
-
-// MARK: - parseSelectParameterValue
-
-extension ParserUnitTests {
-    func testParseSelectParameterValue() {
-        let inputs: [(String, String, ParameterValue, UInt)] = [
-            ("1", "\r", .simple(.sequence([1])), #line),
-        ]
-        self.iterateTestInputs(inputs, testFunction: GrammarParser.parseSelectParameterValue)
     }
 }
 

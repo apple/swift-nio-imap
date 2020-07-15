@@ -20,11 +20,11 @@ public enum Command: Equatable {
     case noop
     case create(MailboxName, [Parameter])
     case delete(MailboxName)
-    case examine(MailboxName, [SelectParameter] = [])
+    case examine(MailboxName, [Parameter] = [])
     case list(ListSelectOptions? = nil, reference: MailboxName, MailboxPatterns, [ReturnOption] = [])
     case lsub(reference: MailboxName, pattern: ByteBuffer)
     case rename(from: MailboxName, to: MailboxName, params: [RenameParameter])
-    case select(MailboxName, [SelectParameter] = [])
+    case select(MailboxName, [Parameter] = [])
     case status(MailboxName, [MailboxAttribute])
     case subscribe(MailboxName)
     case unsubscribe(MailboxName)
@@ -155,7 +155,7 @@ extension EncodeBuffer {
     private mutating func writeCommandKind_create(mailbox: MailboxName, parameters: [Parameter]) -> Int {
         self.writeString("CREATE ") +
             self.writeMailbox(mailbox) +
-            self.writeCreateParameters(parameters)
+            self.writeParameters(parameters)
     }
 
     private mutating func writeCommandKind_delete(mailbox: MailboxName) -> Int {
@@ -163,11 +163,11 @@ extension EncodeBuffer {
             self.writeMailbox(mailbox)
     }
 
-    private mutating func writeCommandKind_examine(mailbox: MailboxName, parameters: [SelectParameter]) -> Int {
+    private mutating func writeCommandKind_examine(mailbox: MailboxName, parameters: [Parameter]) -> Int {
         self.writeString("EXAMINE ") +
             self.writeMailbox(mailbox) +
             self.writeIfExists(parameters) { (params) -> Int in
-                self.writeSelectParameters(params)
+                self.writeParameters(params)
             }
     }
 
@@ -204,11 +204,11 @@ extension EncodeBuffer {
             }
     }
 
-    private mutating func writeCommandKind_select(mailbox: MailboxName, params: [SelectParameter]) -> Int {
+    private mutating func writeCommandKind_select(mailbox: MailboxName, params: [Parameter]) -> Int {
         self.writeString("SELECT ") +
             self.writeMailbox(mailbox) +
             self.writeIfExists(params) { (params) -> Int in
-                self.writeSelectParameters(params)
+                self.writeParameters(params)
             }
     }
 

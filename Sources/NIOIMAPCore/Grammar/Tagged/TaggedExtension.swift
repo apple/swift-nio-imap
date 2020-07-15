@@ -43,6 +43,18 @@ extension EncodeBuffer {
             self.writeParameterValue(ext.value)
     }
     
+    @discardableResult mutating func writeParameters(_ params: [Parameter]) -> Int {
+        guard params.count > 0 else {
+            return 0 // don't do anything
+        }
+
+        return
+            self.writeSpace() +
+            self.writeArray(params) { (param, self) -> Int in
+                self.writeParameter(param)
+            }
+    }
+    
     @discardableResult mutating func writeParameter(_ param: Parameter) -> Int {
         self.writeString(param.name) +
             self.writeIfExists(param.value) { (value) -> Int in
