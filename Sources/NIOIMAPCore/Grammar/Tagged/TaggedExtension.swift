@@ -44,8 +44,8 @@ extension EncodeBuffer {
     }
 
     @discardableResult mutating func writeParameters(_ params: [Parameter]) -> Int {
-        guard params.count > 0 else {
-            return 0 // don't do anything
+        if params.isEmpty {
+            return 0
         }
 
         return
