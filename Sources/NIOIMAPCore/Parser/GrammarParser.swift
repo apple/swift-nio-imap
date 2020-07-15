@@ -786,7 +786,7 @@ extension GrammarParser {
             return .init(name: name, value: value)
         }
     }
-    
+
     // date            = date-text / DQUOTE date-text DQUOTE
     static func parseDate(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Date {
         func parseDateText_quoted(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Date {
