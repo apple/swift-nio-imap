@@ -33,7 +33,7 @@ public struct AppendData: Equatable {
 extension EncodeBuffer {
     @discardableResult mutating func writeAppendData(_ data: AppendData) -> Int {
         guard case .client(let options) = mode else { preconditionFailure("Trying to send command, but not in 'client' mode.") }
-        switch (options.useNonSynchronizingLiteral, data.withoutContentTransferEncoding) {
+        switch (options.useNonSynchronizingLiteralPlus, data.withoutContentTransferEncoding) {
         case (true, true):
             return self.writeString("~{\(data.byteCount)+}\r\n")
         case (_, true):

@@ -19,7 +19,12 @@ public struct CommandEncodingOptions: Equatable {
     public var useSynchronizingLiteral: Bool
     /// Use the `{20+}` style non-synchronizing literals
     /// - SeeAlso: https://tools.ietf.org/html/rfc2088
-    public var useNonSynchronizingLiteral: Bool
+    public var useNonSynchronizingLiteralPlus: Bool
+
+    /// Use the `{20-}` style non-synchronizing literals
+    /// - SeeAlso: https://tools.ietf.org/html/rfc2088
+    public var useNonSynchronizingLiteralMinus: Bool
+
     /// Use binary content literals, i.e. `~{20}` style literals as defined in RFC 3516.
     /// - Note: These can only be used in some places, namely `APPEND`.
     /// - SeeAlso: https://tools.ietf.org/html/rfc3516
@@ -29,7 +34,8 @@ public struct CommandEncodingOptions: Equatable {
     public init() {
         self.useQuotedString = true
         self.useSynchronizingLiteral = true
-        self.useNonSynchronizingLiteral = false
+        self.useNonSynchronizingLiteralPlus = false
+        self.useNonSynchronizingLiteralMinus = false
         self.useBinaryLiteral = false
     }
 }
@@ -38,7 +44,9 @@ extension CommandEncodingOptions {
     public init(capabilities: [Capability]) {
         self.init()
         if capabilities.contains(.literalPlus) {
-            self.useNonSynchronizingLiteral = true
+            self.useNonSynchronizingLiteralPlus = true
+        } else if capabilities.contains(.literalMinus) {
+            self.useNonSynchronizingLiteralMinus = true
         }
         if capabilities.contains(.binary) {
             self.useBinaryLiteral = true

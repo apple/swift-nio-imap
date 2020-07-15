@@ -79,7 +79,13 @@ extension CommandEncodingOptions {
     static var rfc3501: CommandEncodingOptions { CommandEncodingOptions() }
     static var literalPlus: CommandEncodingOptions {
         var o = CommandEncodingOptions()
-        o.useNonSynchronizingLiteral = true
+        o.useNonSynchronizingLiteralPlus = true
+        return o
+    }
+
+    static var literalMinus: CommandEncodingOptions {
+        var o = CommandEncodingOptions()
+        o.useNonSynchronizingLiteralMinus = true
         return o
     }
 

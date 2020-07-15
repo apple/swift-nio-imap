@@ -81,7 +81,7 @@ extension CommandStream_Tests {
         ]
 
         var options = CommandEncodingOptions()
-        options.useNonSynchronizingLiteral = true
+        options.useNonSynchronizingLiteralPlus = true
         var buffer = CommandEncodeBuffer(buffer: "", options: options)
         parts.forEach {
             buffer.writeAppendCommand($0)
