@@ -56,7 +56,7 @@ extension EncodeBuffer {
         case .client(options: let options):
             if options.useQuotedString, canUseQuotedString(for: bytes) {
                 return .quotedString
-            } else if options.useNonSynchronizingLiteralMinus && bytes.count <= 4096 {
+            } else if options.useNonSynchronizingLiteralMinus, bytes.count <= 4096 {
                 return .clientNonSynchronizingLiteralMinus
             } else if options.useNonSynchronizingLiteralPlus {
                 return .clientNonSynchronizingLiteralPlus

@@ -20,11 +20,11 @@ public struct CommandEncodingOptions: Equatable {
     /// Use the `{20+}` style non-synchronizing literals
     /// - SeeAlso: https://tools.ietf.org/html/rfc2088
     public var useNonSynchronizingLiteralPlus: Bool
-    
+
     /// Use the `{20-}` style non-synchronizing literals
     /// - SeeAlso: https://tools.ietf.org/html/rfc2088
     public var useNonSynchronizingLiteralMinus: Bool
-    
+
     /// Use binary content literals, i.e. `~{20}` style literals as defined in RFC 3516.
     /// - Note: These can only be used in some places, namely `APPEND`.
     /// - SeeAlso: https://tools.ietf.org/html/rfc3516
