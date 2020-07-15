@@ -39,7 +39,7 @@ public enum Command: Equatable {
     case idleStart
     case idleFinish
     case copy(SequenceSet, MailboxName)
-    case fetch(SequenceSet, [FetchAttribute], [FetchModifier])
+    case fetch(SequenceSet, [FetchAttribute], [Parameter])
     case store(SequenceSet, [Parameter], StoreFlags)
     case search(key: SearchKey, charset: String? = nil, returnOptions: [SearchReturnOption] = [])
     case move(SequenceSet, MailboxName)
@@ -48,7 +48,7 @@ public enum Command: Equatable {
 
     case uidCopy(UIDSet, MailboxName)
     case uidMove(UIDSet, MailboxName)
-    case uidFetch(UIDSet, [FetchAttribute], [FetchModifier])
+    case uidFetch(UIDSet, [FetchAttribute], [Parameter])
     case uidSearch(key: SearchKey, charset: String? = nil, returnOptions: [SearchReturnOption] = [])
     case uidStore(UIDSet, [Parameter], StoreFlags)
     case uidExpunge(UIDSet)
@@ -303,23 +303,23 @@ extension EncodeBuffer {
             self.writeMailbox(mailbox)
     }
 
-    private mutating func writeCommandKind_fetch(set: SequenceSet, atts: [FetchAttribute], modifiers: [FetchModifier]) -> Int {
+    private mutating func writeCommandKind_fetch(set: SequenceSet, atts: [FetchAttribute], modifiers: [Parameter]) -> Int {
         self.writeString("FETCH ") +
             self.writeSequenceSet(set) +
             self.writeSpace() +
             self.writeFetchAttributeList(atts) +
             self.writeIfExists(modifiers) { (modifiers) -> Int in
-                self.writeFetchModifiers(modifiers)
+                self.writeParameters(modifiers)
             }
     }
 
-    private mutating func writeCommandKind_uidFetch(set: UIDSet, atts: [FetchAttribute], modifiers: [FetchModifier]) -> Int {
+    private mutating func writeCommandKind_uidFetch(set: UIDSet, atts: [FetchAttribute], modifiers: [Parameter]) -> Int {
         self.writeString("UID FETCH ") +
             self.writeUIDSet(set) +
             self.writeSpace() +
             self.writeFetchAttributeList(atts) +
             self.writeIfExists(modifiers) { (modifiers) -> Int in
-                self.writeFetchModifiers(modifiers)
+                self.writeParameters(modifiers)
             }
     }
 

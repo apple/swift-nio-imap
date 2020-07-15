@@ -1269,52 +1269,6 @@ extension ParserUnitTests {
     }
 }
 
-// MARK: - parseFetchModifier
-
-extension ParserUnitTests {
-    func testParseFetchModifier() {
-        let inputs: [(String, String, FetchModifier, UInt)] = [
-            ("test", "\r", .init(name: "test", value: nil), #line),
-            ("some 1", "\r", .init(name: "some", value: .simple(.sequence([1]))), #line),
-        ]
-        self.iterateTestInputs(inputs, testFunction: GrammarParser.parseFetchModifier)
-    }
-}
-
-// MARK: - parseFetchModifiers
-
-extension ParserUnitTests {
-    func testParseFetchModifiers() {
-        let inputs: [(String, String, [FetchModifier], UInt)] = [
-            (" (test)", "\r", [.init(name: "test", value: nil)], #line),
-            (" (test1 test2 test3)", "\r", [.init(name: "test1", value: nil), .init(name: "test2", value: nil), .init(name: "test3", value: nil)], #line),
-        ]
-        self.iterateTestInputs(inputs, testFunction: GrammarParser.parseFetchModifiers)
-    }
-}
-
-// MARK: - parseFetchModifierName
-
-extension ParserUnitTests {
-    func testParseFetchModifierName() {
-        let inputs: [(String, String, String, UInt)] = [
-            ("test", "\r", "test", #line),
-        ]
-        self.iterateTestInputs(inputs, testFunction: GrammarParser.parseFetchModifierName)
-    }
-}
-
-// MARK: - parseFetchModifierParameter
-
-extension ParserUnitTests {
-    func testParseFetchModifierParameter() {
-        let inputs: [(String, String, ParameterValue, UInt)] = [
-            ("1", "\r", .simple(.sequence([1])), #line),
-        ]
-        self.iterateTestInputs(inputs, testFunction: GrammarParser.parseFetchModifierParameter)
-    }
-}
-
 // MARK: - filter-name parseFilterName
 
 extension ParserUnitTests {

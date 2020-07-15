@@ -1078,7 +1078,7 @@ extension GrammarParser {
             let sequence = try self.parseSequenceSet(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
             let att = try parseFetch_type(buffer: &buffer, tracker: tracker)
-            let modifiers = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseFetchModifiers) ?? []
+            let modifiers = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseParameters) ?? []
             return .fetch(sequence, att, modifiers)
         }
     }
@@ -1254,42 +1254,6 @@ extension GrammarParser {
             parseFetchAttribute_binary,
             parseFetchAttribute_binarySize,
         ], buffer: &buffer, tracker: tracker)
-    }
-
-    // fetch-modifier = fetch-modifier-name [SP fetch-modifier-params]
-    static func parseFetchModifier(buffer: inout ByteBuffer, tracker: StackTracker) throws -> FetchModifier {
-        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
-            let name = try self.parseFetchModifierName(buffer: &buffer, tracker: tracker)
-            let value = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> ParameterValue in
-                try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
-                return try self.parseFetchModifierParameter(buffer: &buffer, tracker: tracker)
-            }
-            return .init(name: name, value: value)
-        }
-    }
-
-    // fetch-modifiers = SP "(" fetch-modifier *(SP fetch-modifier) ")"
-    static func parseFetchModifiers(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [FetchModifier] {
-        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
-            try ParserLibrary.parseFixedString(" (", buffer: &buffer, tracker: tracker)
-            var array = [try self.parseFetchModifier(buffer: &buffer, tracker: tracker)]
-            try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) -> FetchModifier in
-                try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
-                return try self.parseFetchModifier(buffer: &buffer, tracker: tracker)
-            }
-            try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)
-            return array
-        }
-    }
-
-    // fetch-modifier-name = tagged-ext-label
-    static func parseFetchModifierName(buffer: inout ByteBuffer, tracker: StackTracker) throws -> String {
-        try self.parseParameterName(buffer: &buffer, tracker: tracker)
-    }
-
-    // fetch-modifier-params = tagged-ext-val
-    static func parseFetchModifierParameter(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ParameterValue {
-        try self.parseParameterValue(buffer: &buffer, tracker: tracker)
     }
 
     // filter-name = 1*<any ATOM-CHAR except "/">
@@ -3952,7 +3916,7 @@ extension GrammarParser {
                 let set = try self.parseUIDSet(buffer: &buffer, tracker: tracker)
                 try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
                 let att = try parseFetch_type(buffer: &buffer, tracker: tracker)
-                let modifiers = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseFetchModifiers) ?? []
+                let modifiers = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseParameters) ?? []
                 return .uidFetch(set, att, modifiers)
             }
         }
