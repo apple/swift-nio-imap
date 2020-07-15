@@ -18,6 +18,6 @@ import struct NIO.ByteBuffer
 
 extension EncodeBuffer {
     @discardableResult mutating func writeStoreModifierName(_ name: String) -> Int {
-        self.writeTaggedExtensionLabel(name)
+        self.writeString(name)
     }
 }

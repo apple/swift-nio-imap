@@ -40,7 +40,7 @@ extension EncodeBuffer {
     }
 
     @discardableResult mutating func writeFetchModifier(_ param: FetchModifier) -> Int {
-        self.writeFetchModifierName(param.name) +
+        self.writeString(param.name) +
             self.writeIfExists(param.value) { (value) -> Int in
                 self.writeSpace() +
                     self.writeParameterValue(value)

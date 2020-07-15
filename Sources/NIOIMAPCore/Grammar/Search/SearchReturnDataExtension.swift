@@ -29,7 +29,7 @@ public struct SearchReturnDataExtension: Equatable {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeSearchReturnDataExtension(_ data: SearchReturnDataExtension) -> Int {
-        self.writeTaggedExtensionLabel(data.modifier) +
+        self.writeString(data.modifier) +
             self.writeSpace() +
             self.writeParameterValue(data.returnValue)
     }

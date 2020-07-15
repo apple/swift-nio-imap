@@ -38,7 +38,7 @@ public struct TaggedExtension: Equatable {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeTaggedExtension(_ ext: TaggedExtension) -> Int {
-        self.writeTaggedExtensionLabel(ext.label) +
+        self.writeString(ext.label) +
             self.writeSpace() +
             self.writeParameterValue(ext.value)
     }

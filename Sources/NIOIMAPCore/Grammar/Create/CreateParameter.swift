@@ -40,7 +40,7 @@ extension EncodeBuffer {
     }
 
     @discardableResult mutating func writeCreateParameter(_ param: CreateParameter) -> Int {
-        self.writeCreateParameterName(param.name) +
+        self.writeString(param.name) +
             self.writeIfExists(param.value) { (value) -> Int in
                 self.writeSpace() +
                     self.writeParameterValue(value)

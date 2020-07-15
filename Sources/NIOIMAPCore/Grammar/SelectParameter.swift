@@ -40,14 +40,10 @@ extension EncodeBuffer {
     }
 
     @discardableResult mutating func writeSelectParameter(_ param: SelectParameter) -> Int {
-        self.writeSelectParameterName(param.name) +
+        self.writeString(param.name) +
             self.writeIfExists(param.value) { (value) -> Int in
                 self.writeSpace() +
                     self.writeParameterValue(value)
             }
-    }
-
-    @discardableResult mutating func writeSelectParameterName(_ name: String) -> Int {
-        self.writeTaggedExtensionLabel(name)
     }
 }

@@ -39,7 +39,7 @@ extension EncodeBuffer {
     }
 
     @discardableResult mutating func writeRenameParameter(_ param: RenameParameter) -> Int {
-        self.writeRenameParameterName(param.name) +
+        self.writeString(param.name) +
             self.writeIfExists(param.value) { (value) -> Int in
                 self.writeSpace() +
                     self.writeParameterValue(value)
