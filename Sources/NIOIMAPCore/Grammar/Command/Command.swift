@@ -23,7 +23,7 @@ public enum Command: Equatable {
     case examine(MailboxName, [Parameter] = [])
     case list(ListSelectOptions? = nil, reference: MailboxName, MailboxPatterns, [ReturnOption] = [])
     case lsub(reference: MailboxName, pattern: ByteBuffer)
-    case rename(from: MailboxName, to: MailboxName, params: [RenameParameter])
+    case rename(from: MailboxName, to: MailboxName, params: [Parameter])
     case select(MailboxName, [Parameter] = [])
     case status(MailboxName, [MailboxAttribute])
     case subscribe(MailboxName)
@@ -194,13 +194,13 @@ extension EncodeBuffer {
             self.writeIMAPString(listMailbox)
     }
 
-    private mutating func writeCommandKind_rename(from: MailboxName, to: MailboxName, parameters: [RenameParameter]) -> Int {
+    private mutating func writeCommandKind_rename(from: MailboxName, to: MailboxName, parameters: [Parameter]) -> Int {
         self.writeString("RENAME ") +
             self.writeMailbox(from) +
             self.writeSpace() +
             self.writeMailbox(to) +
             self.writeIfExists(parameters) { (params) -> Int in
-                self.writeRenameParameters(params)
+                self.writeParameters(params)
             }
     }
 

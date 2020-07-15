@@ -2561,45 +2561,9 @@ extension GrammarParser {
             let from = try self.parseMailbox(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseFixedString(" ", caseSensitive: false, buffer: &buffer, tracker: tracker)
             let to = try self.parseMailbox(buffer: &buffer, tracker: tracker)
-            let params = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseRenameParameters) ?? []
+            let params = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseParameters) ?? []
             return .rename(from: from, to: to, params: params)
         }
-    }
-
-    // rename-param = rename-param-name [SP rename-param-value]
-    static func parseRenameParameter(buffer: inout ByteBuffer, tracker: StackTracker) throws -> RenameParameter {
-        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
-            let name = try self.parseRenameParameterName(buffer: &buffer, tracker: tracker)
-            let value = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> ParameterValue in
-                try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
-                return try self.parseParameterValue(buffer: &buffer, tracker: tracker)
-            }
-            return .init(name: name, value: value)
-        }
-    }
-
-    // rename-params = SP "(" rename-param *(SP rename-param-value) ")"
-    static func parseRenameParameters(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [RenameParameter] {
-        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
-            try ParserLibrary.parseFixedString(" (", buffer: &buffer, tracker: tracker)
-            var array = [try self.parseRenameParameter(buffer: &buffer, tracker: tracker)]
-            try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) -> RenameParameter in
-                try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
-                return try self.parseRenameParameter(buffer: &buffer, tracker: tracker)
-            }
-            try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)
-            return array
-        }
-    }
-
-    // rename-param-name = tagged-ext-label
-    static func parseRenameParameterName(buffer: inout ByteBuffer, tracker: StackTracker) throws -> String {
-        try self.parseParameterName(buffer: &buffer, tracker: tracker)
-    }
-
-    // rename-param-value = tagged-ext-val
-    static func parseRenameParameterValue(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ParameterValue {
-        try self.parseParameterValue(buffer: &buffer, tracker: tracker)
     }
 
     // response-data   = "*" SP response-payload CRLF
