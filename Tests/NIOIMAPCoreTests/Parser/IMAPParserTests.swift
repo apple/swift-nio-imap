@@ -869,50 +869,15 @@ extension ParserUnitTests {
     }
 }
 
-// MARK: - parseCreateParameter
-
-extension ParserUnitTests {
-    // NOTE: I'm not a huge fan of how a single number gets parsed as a set, we should revisit
-    func testParseCreateParameter() {
-        let inputs: [(String, String, CreateParameter, UInt)] = [
-            ("test", "\r", .init(name: "test", value: nil), #line),
-            ("some 1", "\r", .init(name: "some", value: .simple(.sequence([1]))), #line),
-        ]
-        self.iterateTestInputs(inputs, testFunction: GrammarParser.parseCreateParameter)
-    }
-}
-
-// MARK: - parseCreateParameter
+// MARK: - parseCreateParameters
 
 extension ParserUnitTests {
     func testParseCreateParameters() {
-        let inputs: [(String, String, [CreateParameter], UInt)] = [
+        let inputs: [(String, String, [Parameter], UInt)] = [
             (" (test)", "\r", [.init(name: "test", value: nil)], #line),
             (" (test1 test2 test3)", "\r", [.init(name: "test1", value: nil), .init(name: "test2", value: nil), .init(name: "test3", value: nil)], #line),
         ]
         self.iterateTestInputs(inputs, testFunction: GrammarParser.parseCreateParameters)
-    }
-}
-
-// MARK: - parseCreateParameterName
-
-extension ParserUnitTests {
-    func testParseCreateParameterName() {
-        let inputs: [(String, String, String, UInt)] = [
-            ("test", "\r", "test", #line),
-        ]
-        self.iterateTestInputs(inputs, testFunction: GrammarParser.parseCreateParameterName)
-    }
-}
-
-// MARK: - parseCreateParameterValue
-
-extension ParserUnitTests {
-    func testParseCreateParameterValue() {
-        let inputs: [(String, String, ParameterValue, UInt)] = [
-            ("1", "\r", .simple(.sequence([1])), #line),
-        ]
-        self.iterateTestInputs(inputs, testFunction: GrammarParser.parseCreateParameterValue)
     }
 }
 

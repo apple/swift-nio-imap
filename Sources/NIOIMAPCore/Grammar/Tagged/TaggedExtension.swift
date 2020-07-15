@@ -16,9 +16,9 @@ import struct NIO.ByteBuffer
 
 public struct Parameter: Equatable {
     public var name: String
-    public var value: ParameterValue
+    public var value: ParameterValue?
     
-    public init(name: String, value: ParameterValue) {
+    public init(name: String, value: ParameterValue? = nil) {
         self.name = name
         self.value = value
     }
@@ -42,4 +42,13 @@ extension EncodeBuffer {
             self.writeSpace() +
             self.writeParameterValue(ext.value)
     }
+    
+    @discardableResult mutating func writeParameter(_ param: Parameter) -> Int {
+        self.writeString(param.name) +
+            self.writeIfExists(param.value) { (value) -> Int in
+                self.writeSpace() +
+                    self.writeParameterValue(value)
+            }
+    }
+    
 }
