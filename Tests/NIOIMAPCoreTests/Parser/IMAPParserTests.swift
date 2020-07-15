@@ -2542,7 +2542,7 @@ extension ParserUnitTests {
     func testParseStore() {
         let inputs: [(String, String, Command, UInt)] = [
             ("STORE 1 +FLAGS \\answered", "\r", .store([1], [], .add(silent: false, list: [.answered])), #line),
-            ("STORE 1 (label) -FLAGS \\seen", "\r", .store([1], [.init(name: "label", parameters: nil)], .remove(silent: false, list: [.seen])), #line),
+            ("STORE 1 (label) -FLAGS \\seen", "\r", .store([1], [.init(name: "label", value: nil)], .remove(silent: false, list: [.seen])), #line),
         ]
         self.iterateTestInputs(inputs, testFunction: GrammarParser.parseStore)
     }
@@ -2617,52 +2617,6 @@ extension ParserUnitTests {
             ("1:2,2:3,3:4", "\r", [1 ... 2, 2 ... 3, 3 ... 4], #line),
         ]
         self.iterateTestInputs(inputs, testFunction: GrammarParser.parseSequenceSet)
-    }
-}
-
-// MARK: - parseStoreModifier
-
-extension ParserUnitTests {
-    func testParseStoreModifier() {
-        let inputs: [(String, String, StoreModifier, UInt)] = [
-            ("name", "\r", .init(name: "name", parameters: nil), #line),
-            ("name 1:9", "\r", .init(name: "name", parameters: .simple(.sequence([1 ... 9]))), #line),
-        ]
-        self.iterateTestInputs(inputs, testFunction: GrammarParser.parseStoreModifier)
-    }
-}
-
-// MARK: - parseStoreModifiers
-
-extension ParserUnitTests {
-    func testParseStoreModifiers() {
-        let inputs: [(String, String, [StoreModifier], UInt)] = [
-            (" (name1)", "\r", [.init(name: "name1", parameters: nil)], #line),
-            (" (name1 name2 name3)", "\r", [.init(name: "name1", parameters: nil), .init(name: "name2", parameters: nil), .init(name: "name3", parameters: nil)], #line),
-        ]
-        self.iterateTestInputs(inputs, testFunction: GrammarParser.parseStoreModifiers)
-    }
-}
-
-// MARK: - parseStoreModifierName
-
-extension ParserUnitTests {
-    func testParseStoreModifierName() {
-        let inputs: [(String, String, String, UInt)] = [
-            ("test", "\r", "test", #line),
-        ]
-        self.iterateTestInputs(inputs, testFunction: GrammarParser.parseStoreModifierName)
-    }
-}
-
-// MARK: - parseStoreModifierParams
-
-extension ParserUnitTests {
-    func testParseStoreModifierParameters() {
-        let inputs: [(String, String, ParameterValue, UInt)] = [
-            ("1:9", "\r", .simple(.sequence(SequenceSet(1 ... 9))), #line),
-        ]
-        self.iterateTestInputs(inputs, testFunction: GrammarParser.parseStoreModifierParameters)
     }
 }
 

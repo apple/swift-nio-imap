@@ -3692,7 +3692,7 @@ extension GrammarParser {
         try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Command in
             try ParserLibrary.parseFixedString("STORE ", buffer: &buffer, tracker: tracker)
             let sequence = try self.parseSequenceSet(buffer: &buffer, tracker: tracker)
-            let modifiers = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseStoreModifiers) ?? []
+            let modifiers = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseParameters) ?? []
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
             let flags = try self.parseStoreAttributeFlags(buffer: &buffer, tracker: tracker)
             return .store(sequence, modifiers, flags)
@@ -3749,42 +3749,6 @@ extension GrammarParser {
             ], buffer: &buffer, tracker: tracker)
             return StoreFlags(operation: operation, silent: silent, flags: flags)
         }
-    }
-
-    // store-modifier = store-modifier-name [SP store-modif-params]
-    static func parseStoreModifier(buffer: inout ByteBuffer, tracker: StackTracker) throws -> StoreModifier {
-        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
-            let name = try self.parseStoreModifierName(buffer: &buffer, tracker: tracker)
-            let params = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> ParameterValue in
-                try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
-                return try self.parseStoreModifierParameters(buffer: &buffer, tracker: tracker)
-            }
-            return .init(name: name, parameters: params)
-        }
-    }
-
-    // store-modifiers = SP "(" store-modifier *(SP store-modifier ")"
-    static func parseStoreModifiers(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [StoreModifier] {
-        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
-            try ParserLibrary.parseFixedString(" (", buffer: &buffer, tracker: tracker)
-            var array = [try self.parseStoreModifier(buffer: &buffer, tracker: tracker)]
-            try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) -> StoreModifier in
-                try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
-                return try self.parseStoreModifier(buffer: &buffer, tracker: tracker)
-            }
-            try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)
-            return array
-        }
-    }
-
-    // store-modifier-name = tagged-ext-label
-    static func parseStoreModifierName(buffer: inout ByteBuffer, tracker: StackTracker) throws -> String {
-        try self.parseParameterName(buffer: &buffer, tracker: tracker)
-    }
-
-    // store-modifier-params = tagged-ext-val
-    static func parseStoreModifierParameters(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ParameterValue {
-        try self.parseParameterValue(buffer: &buffer, tracker: tracker)
     }
 
     // string          = quoted / literal
@@ -4004,7 +3968,7 @@ extension GrammarParser {
             try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Command in
                 try ParserLibrary.parseFixedString("STORE ", buffer: &buffer, tracker: tracker)
                 let set = try self.parseUIDSet(buffer: &buffer, tracker: tracker)
-                let modifiers = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseStoreModifiers) ?? []
+                let modifiers = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseParameters) ?? []
                 try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
                 let flags = try self.parseStoreAttributeFlags(buffer: &buffer, tracker: tracker)
                 return .uidStore(set, modifiers, flags)

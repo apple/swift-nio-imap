@@ -40,7 +40,7 @@ public enum Command: Equatable {
     case idleFinish
     case copy(SequenceSet, MailboxName)
     case fetch(SequenceSet, [FetchAttribute], [FetchModifier])
-    case store(SequenceSet, [StoreModifier], StoreFlags)
+    case store(SequenceSet, [Parameter], StoreFlags)
     case search(key: SearchKey, charset: String? = nil, returnOptions: [SearchReturnOption] = [])
     case move(SequenceSet, MailboxName)
     case id([IDParameter])
@@ -50,7 +50,7 @@ public enum Command: Equatable {
     case uidMove(UIDSet, MailboxName)
     case uidFetch(UIDSet, [FetchAttribute], [FetchModifier])
     case uidSearch(key: SearchKey, charset: String? = nil, returnOptions: [SearchReturnOption] = [])
-    case uidStore(UIDSet, [StoreModifier], StoreFlags)
+    case uidStore(UIDSet, [Parameter], StoreFlags)
     case uidExpunge(UIDSet)
 }
 
@@ -323,21 +323,21 @@ extension EncodeBuffer {
             }
     }
 
-    private mutating func writeCommandKind_store(set: SequenceSet, modifiers: [StoreModifier], flags: StoreFlags) -> Int {
+    private mutating func writeCommandKind_store(set: SequenceSet, modifiers: [Parameter], flags: StoreFlags) -> Int {
         self.writeString("STORE ") +
             self.writeSequenceSet(set) +
             self.writeIfArrayHasMinimumSize(array: modifiers) { (modifiers, self) -> Int in
-                self.writeStoreModifiers(modifiers)
+                self.writeParameters(modifiers)
             } +
             self.writeSpace() +
             self.writeStoreAttributeFlags(flags)
     }
 
-    private mutating func writeCommandKind_uidStore(set: UIDSet, modifiers: [StoreModifier], flags: StoreFlags) -> Int {
+    private mutating func writeCommandKind_uidStore(set: UIDSet, modifiers: [Parameter], flags: StoreFlags) -> Int {
         self.writeString("UID STORE ") +
             self.writeUIDSet(set) +
             self.writeIfArrayHasMinimumSize(array: modifiers) { (modifiers, self) -> Int in
-                self.writeStoreModifiers(modifiers)
+                self.writeParameters(modifiers)
             } +
             self.writeSpace() +
             self.writeStoreAttributeFlags(flags)
