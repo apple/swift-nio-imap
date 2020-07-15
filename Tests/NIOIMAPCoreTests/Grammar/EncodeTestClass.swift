@@ -82,6 +82,12 @@ extension CommandEncodingOptions {
         o.useNonSynchronizingLiteralPlus = true
         return o
     }
+    
+    static var literalMinus: CommandEncodingOptions {
+        var o = CommandEncodingOptions()
+        o.useNonSynchronizingLiteralMinus = true
+        return o
+    }
 
     static var noQuoted: CommandEncodingOptions {
         var o = CommandEncodingOptions()
