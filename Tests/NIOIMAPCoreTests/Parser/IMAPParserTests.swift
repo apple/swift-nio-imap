@@ -297,7 +297,7 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseAppendExtensionValue() {
-        let inputs: [(String, String, TaggedExtensionValue, UInt)] = [
+        let inputs: [(String, String, ParameterValue, UInt)] = [
             ("1:9", " ", .simple(.sequence(SequenceSet(1 ... 9))), #line),
         ]
         self.iterateTestInputs(inputs, testFunction: GrammarParser.parseAppendExtensionValue)
@@ -909,7 +909,7 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseCreateParameterValue() {
-        let inputs: [(String, String, TaggedExtensionValue, UInt)] = [
+        let inputs: [(String, String, ParameterValue, UInt)] = [
             ("1", "\r", .simple(.sequence([1])), #line),
         ]
         self.iterateTestInputs(inputs, testFunction: GrammarParser.parseCreateParameterValue)
@@ -1355,7 +1355,7 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseFetchModifierParameter() {
-        let inputs: [(String, String, TaggedExtensionValue, UInt)] = [
+        let inputs: [(String, String, ParameterValue, UInt)] = [
             ("1", "\r", .simple(.sequence([1])), #line),
         ]
         self.iterateTestInputs(inputs, testFunction: GrammarParser.parseFetchModifierParameter)
@@ -2253,7 +2253,7 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseSearchModifierParams() {
-        let inputs: [(String, String, TaggedExtensionValue, UInt)] = [
+        let inputs: [(String, String, ParameterValue, UInt)] = [
             ("()", "", .comp([]), #line),
         ]
         self.iterateTestInputs(inputs, testFunction: GrammarParser.parseSearchModifierParams)
@@ -2475,7 +2475,7 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseSelectParameterValue() {
-        let inputs: [(String, String, TaggedExtensionValue, UInt)] = [
+        let inputs: [(String, String, ParameterValue, UInt)] = [
             ("1", "\r", .simple(.sequence([1])), #line),
         ]
         self.iterateTestInputs(inputs, testFunction: GrammarParser.parseSelectParameterValue)
@@ -2752,7 +2752,7 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseStoreModifierParameters() {
-        let inputs: [(String, String, TaggedExtensionValue, UInt)] = [
+        let inputs: [(String, String, ParameterValue, UInt)] = [
             ("1:9", "\r", .simple(.sequence(SequenceSet(1 ... 9))), #line),
         ]
         self.iterateTestInputs(inputs, testFunction: GrammarParser.parseStoreModifierParameters)

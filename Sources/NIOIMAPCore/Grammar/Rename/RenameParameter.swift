@@ -16,9 +16,9 @@ import struct NIO.ByteBuffer
 
 public struct RenameParameter: Equatable {
     public var name: String
-    public var value: TaggedExtensionValue?
+    public var value: ParameterValue?
 
-    public init(name: String, value: TaggedExtensionValue? = nil) {
+    public init(name: String, value: ParameterValue? = nil) {
         self.name = name
         self.value = value
     }
@@ -42,7 +42,7 @@ extension EncodeBuffer {
         self.writeRenameParameterName(param.name) +
             self.writeIfExists(param.value) { (value) -> Int in
                 self.writeSpace() +
-                    self.writeTaggedExtensionValue(value)
+                    self.writeParameterValue(value)
             }
     }
 }

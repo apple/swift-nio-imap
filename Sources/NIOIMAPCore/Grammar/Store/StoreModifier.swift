@@ -16,9 +16,9 @@ import struct NIO.ByteBuffer
 
 public struct StoreModifier: Equatable {
     public var name: String
-    public var parameters: TaggedExtensionValue?
+    public var parameters: ParameterValue?
 
-    public init(name: String, parameters: TaggedExtensionValue? = nil) {
+    public init(name: String, parameters: ParameterValue? = nil) {
         self.name = name
         self.parameters = parameters
     }
@@ -31,7 +31,7 @@ extension EncodeBuffer {
         self.writeStoreModifierName(modifier.name) +
             self.writeIfExists(modifier.parameters) { (params) -> Int in
                 self.writeSpace() +
-                    self.writeTaggedExtensionValue(params)
+                    self.writeParameterValue(params)
             }
     }
 

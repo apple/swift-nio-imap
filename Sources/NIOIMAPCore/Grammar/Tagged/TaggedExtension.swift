@@ -14,11 +14,21 @@
 
 import struct NIO.ByteBuffer
 
+public struct Parameter: Equatable {
+    public var name: String
+    public var value: ParameterValue
+    
+    public init(name: String, value: ParameterValue) {
+        self.name = name
+        self.value = value
+    }
+}
+
 public struct TaggedExtension: Equatable {
     public var label: String
-    public var value: TaggedExtensionValue
+    public var value: ParameterValue
 
-    public init(label: String, value: TaggedExtensionValue) {
+    public init(label: String, value: ParameterValue) {
         self.label = label
         self.value = value
     }
@@ -30,6 +40,6 @@ extension EncodeBuffer {
     @discardableResult mutating func writeTaggedExtension(_ ext: TaggedExtension) -> Int {
         self.writeTaggedExtensionLabel(ext.label) +
             self.writeSpace() +
-            self.writeTaggedExtensionValue(ext.value)
+            self.writeParameterValue(ext.value)
     }
 }

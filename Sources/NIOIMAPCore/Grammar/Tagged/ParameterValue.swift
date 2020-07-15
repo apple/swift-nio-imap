@@ -15,7 +15,7 @@
 import struct NIO.ByteBuffer
 
 /// IMAPv4 `tagged-ext-val`
-public enum TaggedExtensionValue: Equatable {
+public enum ParameterValue: Equatable {
     case simple(TaggedExtensionSimple)
     case comp([String])
 }
@@ -23,7 +23,7 @@ public enum TaggedExtensionValue: Equatable {
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeTaggedExtensionValue(_ value: TaggedExtensionValue) -> Int {
+    @discardableResult mutating func writeParameterValue(_ value: ParameterValue) -> Int {
         switch value {
         case .simple(let simple):
             return self.writeTaggedExtensionSimple(simple)

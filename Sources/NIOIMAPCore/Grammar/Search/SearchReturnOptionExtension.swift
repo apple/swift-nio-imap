@@ -17,9 +17,9 @@ import struct NIO.ByteBuffer
 /// IMAPv4 `search-ret-opt-ext`
 public struct SearchReturnOptionExtension: Equatable {
     public var modifierName: String
-    public var params: TaggedExtensionValue?
+    public var params: ParameterValue?
 
-    public init(modifierName: String, params: TaggedExtensionValue? = nil) {
+    public init(modifierName: String, params: ParameterValue? = nil) {
         self.modifierName = modifierName
         self.params = params
     }
@@ -32,7 +32,7 @@ extension EncodeBuffer {
         self.writeTaggedExtensionLabel(option.modifierName) +
             self.writeIfExists(option.params) { (params) -> Int in
                 self.writeSpace() +
-                    self.writeTaggedExtensionValue(params)
+                    self.writeParameterValue(params)
             }
     }
 }

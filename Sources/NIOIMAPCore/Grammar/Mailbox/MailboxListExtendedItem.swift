@@ -17,9 +17,9 @@ import struct NIO.ByteBuffer
 /// IMAPv4 `mbox-list-extended-item`
 public struct ListExtendedItem: Equatable {
     public var tag: ByteBuffer
-    public var extensionValue: TaggedExtensionValue
+    public var extensionValue: ParameterValue
 
-    public init(tag: ByteBuffer, extensionValue: TaggedExtensionValue) {
+    public init(tag: ByteBuffer, extensionValue: ParameterValue) {
         self.tag = tag
         self.extensionValue = extensionValue
     }
