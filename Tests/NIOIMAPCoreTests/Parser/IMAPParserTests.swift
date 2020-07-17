@@ -2812,18 +2812,19 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseUnsubscribe() {
-        let inputs: [(String, String, Command, UInt)] = [
-            ("UNSUBSCRIBE inbox", "\r\n", .unsubscribe(.inbox), #line),
-            ("UNSUBScribe INBOX", "\r\n", .unsubscribe(.inbox), #line),
-        ]
-        self.iterateTestInputs(inputs, testFunction: GrammarParser.parseUnsubscribe)
-    }
-
-    func testUnsubscribe_invalid_incomplete() {
-        var buffer = TestUtilities.createTestByteBuffer(for: "UNSUBSCRIBE ")
-        XCTAssertThrowsError(try GrammarParser.parseUnsubscribe(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertTrue(e is _IncompleteMessage, "e has type \(e)")
-        }
+        self.iterateTests(
+            testFunction: GrammarParser.parseUnsubscribe,
+            validInputs: [
+                ("UNSUBSCRIBE inbox", "\r\n", .unsubscribe(.inbox), #line),
+                ("UNSUBScribe INBOX", "\r\n", .unsubscribe(.inbox), #line),
+            ],
+            parserErrorInputs: [
+                ("UNSUBSCRIBE \r", " ", #line),
+            ],
+            incompleteMessageInputs: [
+                ("UNSUBSCRIBE", " ", #line),
+            ]
+        )
     }
 }
 
