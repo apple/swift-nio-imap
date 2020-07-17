@@ -2691,17 +2691,17 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     func testParseText() {
         let invalid: Set<UInt8> = [UInt8(ascii: "\r"), .init(ascii: "\n"), 0]
-        let valid = Array(Set((UInt8.min...UInt8.max)).subtracting(invalid).subtracting(128 ... UInt8.max))
+        let valid = Array(Set((UInt8.min ... UInt8.max)).subtracting(invalid).subtracting(128 ... UInt8.max))
         let validString = String(decoding: valid, as: UTF8.self)
         self.iterateTests(
             testFunction: GrammarParser.parseText,
             validInputs: [
-                (validString, "\r", ByteBuffer(string: validString), #line)
+                (validString, "\r", ByteBuffer(string: validString), #line),
             ],
             parserErrorInputs: [
                 ("\r", "", #line),
                 ("\n", "", #line),
-                (String(decoding: (UInt8(128)...UInt8.max), as: UTF8.self), " ", #line),
+                (String(decoding: (UInt8(128) ... UInt8.max), as: UTF8.self), " ", #line),
             ],
             incompleteMessageInputs: [
                 ("a", "", #line),
@@ -2748,7 +2748,7 @@ extension ParserUnitTests {
             ],
             parserErrorInputs: [
                 ("!", " ", #line),
-                ("a", " ", #line)
+                ("a", " ", #line),
             ],
             incompleteMessageInputs: [
                 ("1", "", #line),
@@ -2772,7 +2772,7 @@ extension ParserUnitTests {
                     UIDRange(34 ... 56),
                     UIDRange(78 ... 910),
                     UIDRange(11),
-                ])!, #line)
+                ])!, #line),
             ],
             parserErrorInputs: [
                 ("a", " ", #line),
