@@ -28,22 +28,56 @@ let LF = UInt8(ascii: "\n")
 let CRLF = String(decoding: [CR, LF], as: Unicode.UTF8.self)
 
 final class ParserUnitTests: XCTestCase {
-    func iterateTestInputs<T: Equatable>(_ inputs: [(String, String, T, UInt)], testFunction: (inout ByteBuffer, StackTracker) throws -> T) {
+    
+}
+
+extension ParserUnitTests {
+    
+    private func iterateTestInputs<T: Equatable>(_ inputs: [(String, String, T, UInt)], testFunction: (inout ByteBuffer, StackTracker) throws -> T) {
         for (input, terminator, expected, line) in inputs {
-            TestUtilities.withBuffer(input, terminator: terminator, file: magicFile(), line: line) { (buffer) in
+            TestUtilities.withBuffer(input, terminator: terminator, shouldRemainUnchanged: false, file: (#file), line: line) { (buffer) in
                 let testValue = try testFunction(&buffer, .testTracker)
                 XCTAssertEqual(testValue, expected, line: line)
             }
         }
     }
-
-    func iterateInvalidTestInputs<T: Equatable>(_ inputs: [(String, String, UInt)], testFunction: (inout ByteBuffer, StackTracker) throws -> T) {
+    
+    private func iterateInvalidTestInputs_ParserError<T: Equatable>(_ inputs: [(String, String, UInt)], testFunction: (inout ByteBuffer, StackTracker) throws -> T) {
         for (input, terminator, line) in inputs {
-            TestUtilities.withBuffer(input, terminator: terminator, shouldRemainUnchanged: true, file: magicFile(), line: line) { (buffer) in
-                XCTAssertThrowsError(try testFunction(&buffer, .testTracker), line: line)
+            TestUtilities.withBuffer(input, terminator: terminator, shouldRemainUnchanged: true, file: (#file), line: line) { (buffer) in
+                XCTAssertThrowsError(try testFunction(&buffer, .testTracker), line: line) { e in
+                    XCTAssertTrue(e is ParserError)
+                }
             }
         }
     }
+    
+    private func iterateInvalidTestInputs_IncompleteMessage<T: Equatable>(_ inputs: [(String, String, UInt)], testFunction: (inout ByteBuffer, StackTracker) throws -> T) {
+        for (input, terminator, line) in inputs {
+            TestUtilities.withBuffer(input, terminator: terminator, shouldRemainUnchanged: true, file: (#file), line: line) { (buffer) in
+                XCTAssertThrowsError(try testFunction(&buffer, .testTracker), line: line) { e in
+                    XCTAssertTrue(e is _IncompleteMessage)
+                }
+            }
+        }
+    }
+    
+    /// Convenience function to run a variety of happy and non-happy tests.
+    /// - parameter testFunction: The function to be tested, inputs will be provided to this function.
+    /// - parameter validInputs: An array of (Input, Terminator, ExectedResult, Line). These inputs should succeed.
+    /// - parameter parserErrorInputs: An array of (Input, Terminator, ExectedResult, Line). These inputs should fail by throwing a `ParserError`.
+    /// - parameter incompleteMessageInputs: An array of (Input, Terminator, ExectedResult, Line). These inputs should fail by throwing an `_IncompleteMessage`.
+    fileprivate func iterateTests<T: Equatable>(
+        testFunction: (inout ByteBuffer, StackTracker) throws -> T,
+        validInputs: [(String, String, T, UInt)],
+        parserErrorInputs: [(String, String, UInt)],
+        incompleteMessageInputs: [(String, String, UInt)]
+    ) {
+        self.iterateTestInputs(validInputs, testFunction: testFunction)
+        self.iterateInvalidTestInputs_ParserError(parserErrorInputs, testFunction: testFunction)
+        self.iterateInvalidTestInputs_IncompleteMessage(incompleteMessageInputs, testFunction: testFunction)
+    }
+    
 }
 
 // MARK: - General usage tests
@@ -1958,26 +1992,30 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParsePartial() {
-        let inputs: [(String, String, ClosedRange<Int>, UInt)] = [
-            ("<0.1000000000>", " ", 0 ... 999_999_999, #line),
-            ("<0.4294967290>", " ", 0 ... 4_294_967_289, #line),
-            ("<1.2>", " ", 1 ... 2, #line),
-            ("<4294967290.2>", " ", 4294967290 ... 4294967291, #line),
-        ]
-        self.iterateTestInputs(inputs, testFunction: GrammarParser.parsePartial)
-    }
-
-    func testParsePartial_invalid() {
-        let inputs: [(String, String, UInt)] = [
-            ("<0.0>", " ", #line),
-            ("<654.0>", " ", #line),
-            ("<4294967296.2>", " ", #line),
-            ("<4294967294.2>", " ", #line),
-            ("<2.4294967294>", " ", #line),
-            ("<4294967000.4294967000>", " ", #line),
-            ("<2200000000.2200000000>", " ", #line),
-        ]
-        self.iterateInvalidTestInputs(inputs, testFunction: GrammarParser.parsePartial)
+        self.iterateTests(
+            testFunction: GrammarParser.parsePartial,
+            validInputs: [
+                ("<0.1000000000>", " ", ClosedRange(uncheckedBounds: (0, 999_999_999)), #line),
+                ("<0.4294967290>", " ", ClosedRange(uncheckedBounds: (0, 4_294_967_289)), #line),
+                ("<1.2>", " ", ClosedRange(uncheckedBounds: (1, 2)), #line),
+                ("<4294967290.2>", " ", ClosedRange(uncheckedBounds: (4294967290, 4294967291)), #line),
+            ],
+            parserErrorInputs: [
+                ("<0.0>", " ", #line),
+                ("<654.0>", " ", #line),
+                ("<4294967296.2>", " ", #line),
+                ("<4294967294.2>", " ", #line),
+                ("<2.4294967294>", " ", #line),
+                ("<4294967000.4294967000>", " ", #line),
+                ("<2200000000.2200000000>", " ", #line),
+            ],
+            incompleteMessageInputs: [
+                ("<", "", #line),
+                ("<111111111", "", #line),
+                ("<1.", "", #line),
+                ("<1.22222222", "", #line),
+            ]
+        )
     }
 }
 
@@ -2854,30 +2892,22 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func test4digit() {
-        let inputs: [(String, String, Int, UInt)] = [
-            ("1234", " ", 1234, #line),
-        ]
-        self.iterateTestInputs(inputs, testFunction: GrammarParser.parse4Digit)
+        self.iterateTests(
+            testFunction: GrammarParser.parse4Digit,
+            validInputs: [
+                ("1234", " ", 1234, #line),
+            ],
+            parserErrorInputs: [
+                ("abcd", " ", #line),
+                ("12ab", " ", #line)
+            ],
+            incompleteMessageInputs: [
+                ("", "", #line),
+                ("1", "", #line),
+                ("12", "", #line),
+                ("123", "", #line),
+            ]
+        )
     }
-
-    func test4digit_invalid_long() {
-        var buffer = TestUtilities.createTestByteBuffer(for: Array(UInt8(ascii: "1") ... UInt8(ascii: "7")) + [CR])
-        XCTAssertThrowsError(try GrammarParser.parse4Digit(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertTrue(e is ParserError)
-        }
-    }
-
-    func test4digit_invalid_short() {
-        var buffer = TestUtilities.createTestByteBuffer(for: [UInt8(ascii: "1")])
-        XCTAssertThrowsError(try GrammarParser.parse4Digit(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertTrue(e is _IncompleteMessage)
-        }
-    }
-
-    func test4digit_invalid_data() {
-        var buffer = TestUtilities.createTestByteBuffer(for: "abcd")
-        XCTAssertThrowsError(try GrammarParser.parse4Digit(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertTrue(e is ParserError)
-        }
-    }
+    
 }

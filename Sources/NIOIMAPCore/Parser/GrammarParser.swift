@@ -4077,11 +4077,13 @@ extension GrammarParser {
     }
 
     static func parseNDigits(buffer: inout ByteBuffer, tracker: StackTracker, bytes: Int) throws -> Int {
-        let (num, size) = try ParserLibrary.parseUnsignedInteger(buffer: &buffer, tracker: tracker)
-        guard size == bytes else {
-            throw ParserError(hint: "Expected \(bytes) digits, got \(size)")
+        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
+            let (num, size) = try ParserLibrary.parseUnsignedInteger(buffer: &buffer, tracker: tracker)
+            guard size == bytes else {
+                throw ParserError(hint: "Expected \(bytes) digits, got \(size)")
+            }
+            return num
         }
-        return num
     }
 
     // reusable for a lot of the env-* types

@@ -17,12 +17,6 @@ import NIO
 @testable import NIOIMAPCore
 import XCTest
 
-#if swift(>=5.3)
-func magicFile(file: StaticString = #filePath) -> StaticString { file }
-#else
-func magicFile(file: StaticString = #file) -> StaticString { file }
-#endif
-
 enum TestUtilities {}
 
 // MARK: - ByteBuffer
@@ -43,7 +37,7 @@ extension TestUtilities {
     static func withBuffer(_ string: String,
                            terminator: String = "",
                            shouldRemainUnchanged: Bool = false,
-                           file: StaticString = magicFile(), line: UInt = #line, _ body: (inout ByteBuffer) throws -> Void) {
+                           file: StaticString = (#file), line: UInt = #line, _ body: (inout ByteBuffer) throws -> Void) {
         var inputBuffer = ByteBufferAllocator().buffer(capacity: string.utf8.count + terminator.utf8.count + 10)
         inputBuffer.writeString("hello")
         inputBuffer.moveReaderIndex(forwardBy: 5)
@@ -56,10 +50,10 @@ extension TestUtilities {
         let beforeRunningBody = inputBuffer
 
         defer {
-            let expectedString = String(decoding: expected.readableBytesView, as: Unicode.UTF8.self)
-            let remainingString = String(decoding: inputBuffer.readableBytesView, as: Unicode.UTF8.self)
+            let expectedString = String(buffer: expected)
+            let remainingString = String(buffer: inputBuffer)
             if shouldRemainUnchanged {
-                XCTAssertEqual(beforeRunningBody, inputBuffer, file: file, line: line)
+                XCTAssertEqual(String(buffer: beforeRunningBody), remainingString, file: file, line: line)
             } else {
                 XCTAssertEqual(remainingString, expectedString, file: file, line: line)
             }
