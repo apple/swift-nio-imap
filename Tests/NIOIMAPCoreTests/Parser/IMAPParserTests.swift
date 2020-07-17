@@ -2751,14 +2751,23 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testUIDRange() {
-        let inputs: [(String, String, UIDRange, UInt)] = [
-            ("*", "\r\n", UIDRange.all, #line),
-            ("1:*", "\r\n", UIDRange.all, #line),
-            ("12:34", "\r\n", UIDRange(left: 12, right: 34), #line),
-            ("12:*", "\r\n", UIDRange(left: 12, right: .max), #line),
-            ("1:34", "\r\n", UIDRange(left: .min, right: 34), #line),
-        ]
-        self.iterateTestInputs(inputs, testFunction: GrammarParser.parseUIDRange)
+        self.iterateTests(
+            testFunction: GrammarParser.parseUIDRange,
+            validInputs: [
+                ("*", "\r\n", UIDRange.all, #line),
+                ("1:*", "\r\n", UIDRange.all, #line),
+                ("12:34", "\r\n", UIDRange(left: 12, right: 34), #line),
+                ("12:*", "\r\n", UIDRange(left: 12, right: .max), #line),
+                ("1:34", "\r\n", UIDRange(left: .min, right: 34), #line),
+            ],
+            parserErrorInputs: [
+                ("!", " ", #line),
+                ("a", " ", #line)
+            ],
+            incompleteMessageInputs: [
+                ("1", "", #line),
+            ]
+        )
     }
 }
 
