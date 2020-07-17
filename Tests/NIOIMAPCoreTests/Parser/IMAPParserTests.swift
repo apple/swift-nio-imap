@@ -2835,12 +2835,22 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseUserId() {
-        let inputs: [(String, String, String, UInt)] = [
-            ("test", "\r\n", "test", #line),
-            ("{4}\r\ntest", "\r\n", "test", #line),
-            ("\"test\"", "\r\n", "test", #line),
-        ]
-        self.iterateTestInputs(inputs, testFunction: GrammarParser.parseUserId)
+        self.iterateTests(
+            testFunction: GrammarParser.parseUserId,
+            validInputs: [
+                ("test", " ", "test", #line),
+                ("{4}\r\ntest", " ", "test", #line),
+                ("{4+}\r\ntest", " ", "test", #line),
+                ("\"test\"", " ", "test", #line),
+            ],
+            parserErrorInputs: [
+                ("\\\\", "", #line),
+            ],
+            incompleteMessageInputs: [
+                ("aaa", "", #line),
+                ("{1}\r\n", "", #line),
+            ]
+        )
     }
 }
 
