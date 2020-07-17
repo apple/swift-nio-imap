@@ -2844,11 +2844,19 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseVendorToken() {
-        let inputs: [(String, String, String, UInt)] = [
-            ("token", "-atom ", "token", #line),
-            ("token", " ", "token", #line),
-        ]
-        self.iterateTestInputs(inputs, testFunction: GrammarParser.parseVendorToken)
+        self.iterateTests(
+            testFunction: GrammarParser.parseVendorToken,
+            validInputs: [
+                ("token", "-atom ", "token", #line),
+                ("token", " ", "token", #line),
+            ],
+            parserErrorInputs: [
+                ("1a", " ", #line),
+            ],
+            incompleteMessageInputs: [
+                ("token", "", #line),
+            ]
+        )
     }
 }
 
