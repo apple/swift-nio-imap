@@ -2784,27 +2784,21 @@ extension ParserUnitTests {
 // MARK: - uniqueID parseUID
 
 extension ParserUnitTests {
-    // NOTE: Maps to `nz-number`, but let's make sure we didn't break the mapping.
-
-    func testUniqueID_valid() {
-        TestUtilities.withBuffer("123", terminator: " ") { (buffer) in
-            let num = try GrammarParser.parseUID(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(num, 123)
-        }
-    }
-
-    func testUniqueID_invalid_zero() {
-        var buffer = TestUtilities.createTestByteBuffer(for: "0123 ")
-        XCTAssertThrowsError(try GrammarParser.parseUID(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertTrue(e is ParserError)
-        }
-    }
-
-    func testUniqueID_invalid_incomplete() {
-        var buffer = TestUtilities.createTestByteBuffer(for: "123")
-        XCTAssertThrowsError(try GrammarParser.parseUID(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertTrue(e is _IncompleteMessage)
-        }
+    func testUniqueID() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseUID,
+            validInputs: [
+                ("1", " ", 1, #line),
+                ("123", " ", 123, #line),
+            ],
+            parserErrorInputs: [
+                ("0", " ", #line),
+                ("0123", " ", #line),
+            ],
+            incompleteMessageInputs: [
+                ("123", "", #line),
+            ]
+        )
     }
 }
 
