@@ -2729,21 +2729,22 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseUID() {
-        let inputs: [(String, String, Command, UInt)] = [
-            ("UID EXPUNGE 1", "\r\n", .uidExpunge([1]), #line),
-            ("UID COPY 1 Inbox", "\r\n", .uidCopy([1], .inbox), #line),
-            ("UID FETCH 1 FLAGS", "\r\n", .uidFetch([1], [.flags], []), #line),
-            ("UID SEARCH CHARSET UTF8 ALL", "\r\n", .uidSearch(key: .all, charset: "UTF8"), #line),
-            ("UID STORE 1 +FLAGS (Test)", "\r\n", .uidStore([1], [], .add(silent: false, list: [.keyword(.init("Test"))])), #line),
-        ]
-        self.iterateTestInputs(inputs, testFunction: GrammarParser.parseUid)
-    }
-
-    func testParseUID_invalid() {
-        var buffer: ByteBuffer = "UID RENAME inbox other\r"
-        XCTAssertThrowsError(try GrammarParser.parseUid(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertTrue(e is ParserError)
-        }
+        self.iterateTests(
+            testFunction: GrammarParser.parseUid,
+            validInputs: [
+                ("UID EXPUNGE 1", "\r\n", .uidExpunge([1]), #line),
+                ("UID COPY 1 Inbox", "\r\n", .uidCopy([1], .inbox), #line),
+                ("UID FETCH 1 FLAGS", "\r\n", .uidFetch([1], [.flags], []), #line),
+                ("UID SEARCH CHARSET UTF8 ALL", "\r\n", .uidSearch(key: .all, charset: "UTF8"), #line),
+                ("UID STORE 1 +FLAGS (Test)", "\r\n", .uidStore([1], [], .add(silent: false, list: [.keyword(.init("Test"))])), #line),
+            ],
+            parserErrorInputs: [
+                ("UID RENAME inbox other", " ", #line),
+            ],
+            incompleteMessageInputs: [
+                ("UID COPY 1", " ", #line),
+            ]
+        )
     }
 }
 
