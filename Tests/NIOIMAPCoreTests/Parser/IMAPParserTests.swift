@@ -27,12 +27,9 @@ let CR = UInt8(ascii: "\r")
 let LF = UInt8(ascii: "\n")
 let CRLF = String(decoding: [CR, LF], as: Unicode.UTF8.self)
 
-final class ParserUnitTests: XCTestCase {
-    
-}
+final class ParserUnitTests: XCTestCase {}
 
 extension ParserUnitTests {
-    
     private func iterateTestInputs<T: Equatable>(_ inputs: [(String, String, T, UInt)], testFunction: (inout ByteBuffer, StackTracker) throws -> T) {
         for (input, terminator, expected, line) in inputs {
             TestUtilities.withBuffer(input, terminator: terminator, shouldRemainUnchanged: false, file: (#file), line: line) { (buffer) in
@@ -41,7 +38,7 @@ extension ParserUnitTests {
             }
         }
     }
-    
+
     private func iterateInvalidTestInputs_ParserError<T: Equatable>(_ inputs: [(String, String, UInt)], testFunction: (inout ByteBuffer, StackTracker) throws -> T) {
         for (input, terminator, line) in inputs {
             TestUtilities.withBuffer(input, terminator: terminator, shouldRemainUnchanged: true, file: (#file), line: line) { (buffer) in
@@ -51,7 +48,7 @@ extension ParserUnitTests {
             }
         }
     }
-    
+
     private func iterateInvalidTestInputs_IncompleteMessage<T: Equatable>(_ inputs: [(String, String, UInt)], testFunction: (inout ByteBuffer, StackTracker) throws -> T) {
         for (input, terminator, line) in inputs {
             TestUtilities.withBuffer(input, terminator: terminator, shouldRemainUnchanged: true, file: (#file), line: line) { (buffer) in
@@ -61,7 +58,7 @@ extension ParserUnitTests {
             }
         }
     }
-    
+
     /// Convenience function to run a variety of happy and non-happy tests.
     /// - parameter testFunction: The function to be tested, inputs will be provided to this function.
     /// - parameter validInputs: An array of (Input, Terminator, ExectedResult, Line). These inputs should succeed.
@@ -77,7 +74,6 @@ extension ParserUnitTests {
         self.iterateInvalidTestInputs_ParserError(parserErrorInputs, testFunction: testFunction)
         self.iterateInvalidTestInputs_IncompleteMessage(incompleteMessageInputs, testFunction: testFunction)
     }
-    
 }
 
 // MARK: - General usage tests
@@ -2899,7 +2895,7 @@ extension ParserUnitTests {
             ],
             parserErrorInputs: [
                 ("abcd", " ", #line),
-                ("12ab", " ", #line)
+                ("12ab", " ", #line),
             ],
             incompleteMessageInputs: [
                 ("", "", #line),
@@ -2909,5 +2905,4 @@ extension ParserUnitTests {
             ]
         )
     }
-    
 }
