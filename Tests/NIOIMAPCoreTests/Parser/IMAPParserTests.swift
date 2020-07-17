@@ -2856,31 +2856,20 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func test2digit() {
-        let inputs: [(String, String, Int, UInt)] = [
-            ("12", " ", 12, #line),
-        ]
-        self.iterateTestInputs(inputs, testFunction: GrammarParser.parse2Digit)
-    }
-
-    func test2digit_invalid_long() {
-        var buffer = TestUtilities.createTestByteBuffer(for: [UInt8(ascii: "1"), UInt8(ascii: "2"), UInt8(ascii: "3"), UInt8(ascii: "4"), CR])
-        XCTAssertThrowsError(try GrammarParser.parse2Digit(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertTrue(e is ParserError, "\(e)")
-        }
-    }
-
-    func test2digit_invalid_short() {
-        var buffer = TestUtilities.createTestByteBuffer(for: [UInt8(ascii: "1")])
-        XCTAssertThrowsError(try GrammarParser.parse2Digit(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertTrue(e is _IncompleteMessage)
-        }
-    }
-
-    func test2digit_invalid_data() {
-        var buffer = TestUtilities.createTestByteBuffer(for: "ab")
-        XCTAssertThrowsError(try GrammarParser.parse2Digit(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertTrue(e is ParserError)
-        }
+        self.iterateTests(
+            testFunction: GrammarParser.parse2Digit,
+            validInputs: [
+                ("12", " ", 12, #line),
+            ],
+            parserErrorInputs: [
+                ("ab", " ", #line),
+                ("1a", " ", #line),
+            ],
+            incompleteMessageInputs: [
+                ("", "", #line),
+                ("1", "", #line),
+            ]
+        )
     }
 }
 
