@@ -2578,9 +2578,9 @@ extension GrammarParser {
             try ParserLibrary.parseFixedString("COPYUID ", buffer: &buffer, tracker: tracker)
             let num = try self.parseNumber(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
-            let set1 = try self.parseUidSet(buffer: &buffer, tracker: tracker)
+            let set1 = try self.parseUIDSet(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
-            let set2 = try self.parseUidSet(buffer: &buffer, tracker: tracker)
+            let set2 = try self.parseUIDSet(buffer: &buffer, tracker: tracker)
             return ResponseCodeCopy(num: num, set1: set1, set2: set2)
         }
     }
@@ -3944,34 +3944,6 @@ extension GrammarParser {
                 parseUid_store,
                 parseUid_expunge,
             ], buffer: &buffer, tracker: tracker)
-        }
-    }
-
-    // uid-set         = (uniqueid / uid-range) *("," uid-set)
-    static func parseUidSet(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [UIDSet] {
-        func parseUIDSet_id(buffer: inout ByteBuffer, tracker: StackTracker) throws -> UIDSet {
-            let uid = try self.parseUID(buffer: &buffer, tracker: tracker)
-            return UIDSet(UIDRange(uid))
-        }
-
-        func parseUIDSet_range(buffer: inout ByteBuffer, tracker: StackTracker) throws -> UIDSet {
-            UIDSet(try self.parseUIDRange(buffer: &buffer, tracker: tracker))
-        }
-
-        func parseUIDSet(buffer: inout ByteBuffer, tracker: StackTracker) throws -> UIDSet {
-            try ParserLibrary.parseOneOf([
-                parseUIDSet_range,
-                parseUIDSet_id,
-            ], buffer: &buffer, tracker: tracker)
-        }
-
-        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> [UIDSet] in
-            var array = [try parseUIDSet(buffer: &buffer, tracker: tracker)]
-            try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) -> UIDSet in
-                try ParserLibrary.parseFixedString(",", buffer: &buffer, tracker: tracker)
-                return try parseUIDSet(buffer: &buffer, tracker: tracker)
-            }
-            return array
         }
     }
 

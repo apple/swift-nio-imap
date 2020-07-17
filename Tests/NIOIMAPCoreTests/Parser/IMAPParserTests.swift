@@ -2766,18 +2766,27 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseUIDSet() {
-        let inputs: [(String, String, UIDSet, UInt)] = [
-            ("1234", "\r\n", UIDSet(1234), #line),
-            ("12:34", "\r\n", UIDSet(UIDRange(12 ... 34)), #line),
-            ("1,2,34:56,78:910,11", "\r\n", UIDSet([
-                UIDRange(1),
-                UIDRange(2),
-                UIDRange(34 ... 56),
-                UIDRange(78 ... 910),
-                UIDRange(11),
-            ])!, #line),
-        ]
-        self.iterateTestInputs(inputs, testFunction: GrammarParser.parseUIDSet)
+        self.iterateTests(
+            testFunction: GrammarParser.parseUIDSet,
+            validInputs: [
+                ("1234", "\r\n", UIDSet(1234), #line),
+                ("12:34", "\r\n", UIDSet(UIDRange(12 ... 34)), #line),
+                ("1,2,34:56,78:910,11", "\r\n", UIDSet([
+                    UIDRange(1),
+                    UIDRange(2),
+                    UIDRange(34 ... 56),
+                    UIDRange(78 ... 910),
+                    UIDRange(11),
+                ])!, #line)
+            ],
+            parserErrorInputs: [
+                ("a", " ", #line),
+            ],
+            incompleteMessageInputs: [
+                ("1234", "", #line),
+                ("", "", #line),
+            ]
+        )
     }
 }
 
