@@ -2689,39 +2689,24 @@ extension ParserUnitTests {
 // MARK: - parseText
 
 extension ParserUnitTests {
-    func testText_empty() {
-        var buffer = TestUtilities.createTestByteBuffer(for: "")
-        XCTAssertThrowsError(try GrammarParser.parseText(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertTrue(e is _IncompleteMessage, "e has type \(e)")
-        }
-    }
-
-    func testText_incomplete() {
-        var buffer = TestUtilities.createTestByteBuffer(for: "hello world!")
-        XCTAssertThrowsError(try GrammarParser.parseText(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertTrue(e is _IncompleteMessage, "e has type \(e)")
-        }
-    }
-
-    func testText_some() {
-        TestUtilities.withBuffer("hello world!", terminator: "\r\n") { (buffer) in
-            var parsed = try GrammarParser.parseText(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(parsed.readString(length: 12)!, "hello world!")
-        }
-    }
-
-    func testText_CR() {
-        var buffer = TestUtilities.createTestByteBuffer(for: "\r")
-        XCTAssertThrowsError(try GrammarParser.parseText(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertTrue(e is ParserError, "e has type \(e)")
-        }
-    }
-
-    func testText_LF() {
-        var buffer = TestUtilities.createTestByteBuffer(for: "\n")
-        XCTAssertThrowsError(try GrammarParser.parseText(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertTrue(e is ParserError, "e has type \(e)")
-        }
+    func testParseText() {
+        let invalid: Set<UInt8> = [UInt8(ascii: "\r"), .init(ascii: "\n"), 0]
+        let valid = Array(Set((UInt8.min...UInt8.max)).subtracting(invalid).subtracting(128 ... UInt8.max))
+        let validString = String(decoding: valid, as: UTF8.self)
+        self.iterateTests(
+            testFunction: GrammarParser.parseText,
+            validInputs: [
+                (validString, "\r", ByteBuffer(string: validString), #line)
+            ],
+            parserErrorInputs: [
+                ("\r", "", #line),
+                ("\n", "", #line),
+                (String(decoding: (UInt8(128)...UInt8.max), as: UTF8.self), " ", #line),
+            ],
+            incompleteMessageInputs: [
+                ("a", "", #line),
+            ]
+        )
     }
 }
 
