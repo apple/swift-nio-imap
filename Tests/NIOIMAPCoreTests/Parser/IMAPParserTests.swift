@@ -2599,12 +2599,22 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseSequenceSet() {
-        let inputs: [(String, String, SequenceSet, UInt)] = [
-            ("*", "\r", [.all], #line),
-            ("1:2", "\r", [1 ... 2], #line),
-            ("1:2,2:3,3:4", "\r", [1 ... 2, 2 ... 3, 3 ... 4], #line),
-        ]
-        self.iterateTestInputs(inputs, testFunction: GrammarParser.parseSequenceSet)
+        self.iterateTests(
+            testFunction: GrammarParser.parseSequenceSet,
+            validInputs: [
+                ("*", "\r", [.all], #line),
+                ("1:2", "\r", [1 ... 2], #line),
+                ("1:2,2:3,3:4", "\r", [1 ... 2, 2 ... 3, 3 ... 4], #line),
+            ],
+            parserErrorInputs: [
+                (":", "", #line),
+                (":2", "", #line),
+            ],
+            incompleteMessageInputs: [
+                ("1111", "", #line),
+                ("1111:2222", "", #line),
+            ]
+        )
     }
 }
 
