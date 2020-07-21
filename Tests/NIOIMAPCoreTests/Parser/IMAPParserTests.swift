@@ -2649,17 +2649,6 @@ extension ParserUnitTests {
     }
 }
 
-// MARK: - parseTagString
-
-extension ParserUnitTests {
-    func testParseTagString() {
-        let inputs: [(String, String, ByteBuffer, UInt)] = [
-            ("\"test\"", "\r", "test", #line),
-        ]
-        self.iterateTestInputs(inputs, testFunction: GrammarParser.parseTagString)
-    }
-}
-
 // MARK: - parseTaggedExtension
 
 extension ParserUnitTests {

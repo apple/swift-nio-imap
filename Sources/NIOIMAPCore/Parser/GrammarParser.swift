@@ -2866,7 +2866,7 @@ extension GrammarParser {
     static func parseSearchCorrelator(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ByteBuffer {
         try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
             try ParserLibrary.parseFixedString(" (TAG ", buffer: &buffer, tracker: tracker)
-            let tag = try self.parseTagString(buffer: &buffer, tracker: tracker)
+            let tag = try self.parseString(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)
             return tag
         }
@@ -3737,11 +3737,6 @@ extension GrammarParser {
         try ParserLibrary.parseOneOrMoreCharacters(buffer: &buffer, tracker: tracker) { char -> Bool in
             char.isAStringChar && char != UInt8(ascii: "+")
         }
-    }
-
-    // tag-string       = string
-    static func parseTagString(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ByteBuffer {
-        try self.parseString(buffer: &buffer, tracker: tracker)
     }
 
     // tagged-ext = tagged-ext-label SP tagged-ext-val
