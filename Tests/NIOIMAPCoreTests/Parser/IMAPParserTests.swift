@@ -2540,15 +2540,25 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseStoreAttributeFlags() {
-        let inputs: [(String, String, StoreFlags, UInt)] = [
-            ("+FLAGS ()", "\r", .add(silent: false, list: []), #line),
-            ("-FLAGS ()", "\r", .remove(silent: false, list: []), #line),
-            ("FLAGS ()", "\r", .replace(silent: false, list: []), #line),
-            ("+FLAGS.SILENT ()", "\r", .add(silent: true, list: []), #line),
-            ("+FLAGS.SILENT (\\answered \\seen)", "\r", .add(silent: true, list: [.answered, .seen]), #line),
-            ("+FLAGS.SILENT \\answered \\seen", "\r", .add(silent: true, list: [.answered, .seen]), #line),
-        ]
-        self.iterateTestInputs(inputs, testFunction: GrammarParser.parseStoreAttributeFlags)
+        self.iterateTests(
+            testFunction: GrammarParser.parseStoreAttributeFlags,
+            validInputs: [
+                ("+FLAGS ()", "\r", .add(silent: false, list: []), #line),
+                ("-FLAGS ()", "\r", .remove(silent: false, list: []), #line),
+                ("FLAGS ()", "\r", .replace(silent: false, list: []), #line),
+                ("+FLAGS.SILENT ()", "\r", .add(silent: true, list: []), #line),
+                ("+FLAGS.SILENT (\\answered \\seen)", "\r", .add(silent: true, list: [.answered, .seen]), #line),
+                ("+FLAGS.SILENT \\answered \\seen", "\r", .add(silent: true, list: [.answered, .seen]), #line),
+            ],
+            parserErrorInputs: [
+                ("FLAGS.SILEN \\answered", "\r", #line),
+            ],
+            incompleteMessageInputs: [
+                ("+FLAGS ", "", #line),
+                ("-FLAGS ", "", #line),
+                ("FLAGS ", "", #line),
+            ]
+        )
     }
 }
 
