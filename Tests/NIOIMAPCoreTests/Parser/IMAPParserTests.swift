@@ -2556,18 +2556,19 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseSubscribe() {
-        let inputs: [(String, String, Command, UInt)] = [
-            ("SUBSCRIBE inbox", "\r\n", .subscribe(.inbox), #line),
-            ("SUBScribe INBOX", "\r\n", .subscribe(.inbox), #line),
-        ]
-        self.iterateTestInputs(inputs, testFunction: GrammarParser.parseSubscribe)
-    }
-
-    func testSubscribe_invalid_incomplete() {
-        var buffer = TestUtilities.createTestByteBuffer(for: "SUBSCRIBE ")
-        XCTAssertThrowsError(try GrammarParser.parseSubscribe(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertTrue(e is _IncompleteMessage, "e has type \(e)")
-        }
+        self.iterateTests(
+            testFunction: GrammarParser.parseSubscribe,
+            validInputs: [
+                ("SUBSCRIBE inbox", "\r\n", .subscribe(.inbox), #line),
+                ("SUBScribe INBOX", "\r\n", .subscribe(.inbox), #line),
+            ],
+            parserErrorInputs: [
+                ("SUBSCRIBE ", "\r", #line),
+            ],
+            incompleteMessageInputs: [
+                ("SUBSCRIBE ", "", #line),
+            ]
+        )
     }
 }
 
