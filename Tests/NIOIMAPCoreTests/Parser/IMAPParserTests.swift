@@ -2575,12 +2575,20 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseRename() {
-        let inputs: [(String, String, Command, UInt)] = [
-            ("RENAME box1 box2", "\r", .rename(from: .init("box1"), to: .init("box2"), params: []), #line),
-            ("rename box3 box4", "\r", .rename(from: .init("box3"), to: .init("box4"), params: []), #line),
-            ("RENAME box5 box6 (test)", "\r", .rename(from: .init("box5"), to: .init("box6"), params: [.init(name: "test", value: nil)]), #line),
-        ]
-        self.iterateTestInputs(inputs, testFunction: GrammarParser.parseRename)
+        self.iterateTests(
+            testFunction: GrammarParser.parseRename,
+            validInputs: [
+                ("RENAME box1 box2", "\r", .rename(from: .init("box1"), to: .init("box2"), params: []), #line),
+                ("rename box3 box4", "\r", .rename(from: .init("box3"), to: .init("box4"), params: []), #line),
+                ("RENAME box5 box6 (test)", "\r", .rename(from: .init("box5"), to: .init("box6"), params: [.init(name: "test", value: nil)]), #line),
+            ],
+            parserErrorInputs: [
+                ("RENAME box1 ", "\r", #line),
+            ],
+            incompleteMessageInputs: [
+                ("RENAME box1 ", "", #line),
+            ]
+        )
     }
 }
 
