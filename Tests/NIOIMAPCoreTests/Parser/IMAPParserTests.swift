@@ -2452,11 +2452,21 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseStatus() {
-        let inputs: [(String, String, Command, UInt)] = [
-            ("STATUS inbox (messages unseen)", "\r\n", .status(.inbox, [.messageCount, .unseenCount]), #line),
-            ("STATUS Deleted (messages unseen HIGHESTMODSEQ)", "\r\n", .status(MailboxName("Deleted"), [.messageCount, .unseenCount, .highestModificationSequence]), #line),
-        ]
-        self.iterateTestInputs(inputs, testFunction: GrammarParser.parseStatus)
+        self.iterateTests(
+            testFunction: GrammarParser.parseStatus,
+            validInputs: [
+                ("STATUS inbox (messages unseen)", "\r\n", .status(.inbox, [.messageCount, .unseenCount]), #line),
+                ("STATUS Deleted (messages unseen HIGHESTMODSEQ)", "\r\n", .status(MailboxName("Deleted"), [.messageCount, .unseenCount, .highestModificationSequence]), #line),
+            ],
+            parserErrorInputs: [
+                ("MESSAGES UNSEEN 3 RECENT 4", "\r", #line),
+                ("2 UNSEEN 3 RECENT 4", "\r", #line),
+            ],
+            incompleteMessageInputs: [
+                ("", " ", #line),
+                ("MESSAGES 2 UNSEEN ", "", #line),
+            ]
+        )
     }
 }
 
@@ -2494,33 +2504,21 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testStatusAttributeList_valid_single() {
-        let inputs: [(String, String, MailboxStatus, UInt)] = [
-            ("MESSAGES 1", "\r", .init(messageCount: 1), #line),
-            ("MESSAGES 1 RECENT 2 UIDNEXT 3 UIDVALIDITY 4 UNSEEN 5 SIZE 6 HIGHESTMODSEQ 7", "\r", .init(messageCount: 1, recentCount: 2, nextUID: 3, uidValidity: 4, unseenCount: 5, size: 6, modSequence: 7), #line),
-        ]
-
-        self.iterateTestInputs(inputs, testFunction: GrammarParser.parseMailboxStatus)
-    }
-
-    func testStatusAttributeList_invalid_none() {
-        var buffer = TestUtilities.createTestByteBuffer(for: "")
-        XCTAssertThrowsError(try GrammarParser.parseMailboxStatus(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertTrue(e is _IncompleteMessage)
-        }
-    }
-
-    func testStatusAttributeList_invalid_missing_number() {
-        var buffer = TestUtilities.createTestByteBuffer(for: "MESSAGES UNSEEN 3 RECENT 4\n")
-        XCTAssertThrowsError(try GrammarParser.parseMailboxStatus(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertTrue(e is ParserError)
-        }
-    }
-
-    func testStatusAttributeList_invalid_missing_attribute() {
-        var buffer = TestUtilities.createTestByteBuffer(for: "2 UNSEEN 3 RECENT 4\n")
-        XCTAssertThrowsError(try GrammarParser.parseMailboxStatus(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertTrue(e is ParserError)
-        }
+        self.iterateTests(
+            testFunction: GrammarParser.parseMailboxStatus,
+            validInputs: [
+                ("MESSAGES 1", "\r", .init(messageCount: 1), #line),
+                ("MESSAGES 1 RECENT 2 UIDNEXT 3 UIDVALIDITY 4 UNSEEN 5 SIZE 6 HIGHESTMODSEQ 7", "\r", .init(messageCount: 1, recentCount: 2, nextUID: 3, uidValidity: 4, unseenCount: 5, size: 6, modSequence: 7), #line),
+            ],
+            parserErrorInputs: [
+                ("MESSAGES UNSEEN 3 RECENT 4", "\r", #line),
+                ("2 UNSEEN 3 RECENT 4", "\r", #line),
+            ],
+            incompleteMessageInputs: [
+                ("", " ", #line),
+                ("MESSAGES 2 UNSEEN ", "", #line),
+            ]
+        )
     }
 }
 
