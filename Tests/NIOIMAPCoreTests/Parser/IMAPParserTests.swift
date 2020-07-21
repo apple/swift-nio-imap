@@ -53,7 +53,7 @@ extension ParserUnitTests {
         for (input, terminator, line) in inputs {
             TestUtilities.withBuffer(input, terminator: terminator, shouldRemainUnchanged: true, file: (#file), line: line) { (buffer) in
                 XCTAssertThrowsError(try testFunction(&buffer, .testTracker), line: line) { e in
-                    XCTAssertTrue(e is _IncompleteMessage)
+                    XCTAssertTrue(e is _IncompleteMessage, line: line)
                 }
             }
         }
@@ -2528,11 +2528,20 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseStore() {
-        let inputs: [(String, String, Command, UInt)] = [
-            ("STORE 1 +FLAGS \\answered", "\r", .store([1], [], .add(silent: false, list: [.answered])), #line),
-            ("STORE 1 (label) -FLAGS \\seen", "\r", .store([1], [.init(name: "label", value: nil)], .remove(silent: false, list: [.seen])), #line),
-        ]
-        self.iterateTestInputs(inputs, testFunction: GrammarParser.parseStore)
+        self.iterateTests(
+            testFunction: GrammarParser.parseStore,
+            validInputs: [
+                ("STORE 1 +FLAGS \\answered", "\r", .store([1], [], .add(silent: false, list: [.answered])), #line),
+                ("STORE 1 (label) -FLAGS \\seen", "\r", .store([1], [.init(name: "label", value: nil)], .remove(silent: false, list: [.seen])), #line),
+            ],
+            parserErrorInputs: [
+                ("STORE +FLAGS \\answered", "\r", #line),
+            ],
+            incompleteMessageInputs: [
+                ("STORE ", "", #line),
+                ("STORE 1 ", "", #line),
+            ]
+        )
     }
 }
 
