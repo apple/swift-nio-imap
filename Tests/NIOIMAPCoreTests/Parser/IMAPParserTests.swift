@@ -2611,25 +2611,20 @@ extension ParserUnitTests {
 // MARK: - tag parseTag
 
 extension ParserUnitTests {
-    func testTag_valid() {
-        TestUtilities.withBuffer("abc123", terminator: " ") { (buffer) in
-            let tag = try GrammarParser.parseTag(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(tag, "abc123")
-        }
-    }
-
-    func testTag_invalid_short() {
-        var buffer = TestUtilities.createTestByteBuffer(for: "")
-        XCTAssertThrowsError(try GrammarParser.parseTag(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertTrue(e is _IncompleteMessage)
-        }
-    }
-
-    func testTag_invalid_plus() {
-        var buffer = TestUtilities.createTestByteBuffer(for: "+")
-        XCTAssertThrowsError(try GrammarParser.parseTag(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertTrue(e is ParserError)
-        }
+    func testTag() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseTag,
+            validInputs: [
+                ("abc", "\r", "abc", #line),
+                ("abc", "+", "abc", #line),
+            ],
+            parserErrorInputs: [
+                ("+", "", #line),
+            ],
+            incompleteMessageInputs: [
+                ("", "", #line),
+            ]
+        )
     }
 }
 
