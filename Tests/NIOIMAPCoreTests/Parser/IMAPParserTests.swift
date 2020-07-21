@@ -2636,16 +2636,25 @@ extension ParserUnitTests {
 // MARK: - parseTaggedResponse
 
 extension ParserUnitTests {
-    func testParseResponse() {
-        let inputs: [(String, String, TaggedResponse, UInt)] = [
-            (
-                "15.16 OK Fetch completed (0.001 + 0.000 secs).\r\n",
-                "",
-                .init(tag: "15.16", state: .ok(.init(text: "Fetch completed (0.001 + 0.000 secs)."))),
-                #line
-            ),
-        ]
-        self.iterateTestInputs(inputs, testFunction: GrammarParser.parseTaggedResponse)
+    func testParseTaggedResponse() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseTaggedResponse,
+            validInputs: [
+                (
+                    "15.16 OK Fetch completed (0.001 + 0.000 secs).\r\n",
+                    "",
+                    .init(tag: "15.16", state: .ok(.init(text: "Fetch completed (0.001 + 0.000 secs)."))),
+                    #line
+                ),
+            ],
+            parserErrorInputs: [
+                ("1+5.16 OK Fetch completed (0.001 \r\n", "", #line),
+            ],
+            incompleteMessageInputs: [
+                ("15.16 ", "", #line),
+                ("15.16 OK Fetch completed (0.001 + 0.000 secs).", "", #line),
+            ]
+        )
     }
 }
 
