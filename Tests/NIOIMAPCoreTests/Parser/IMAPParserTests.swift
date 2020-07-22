@@ -1885,31 +1885,23 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testNString_nil() {
-        TestUtilities.withBuffer("NIL", terminator: "\n") { (buffer) in
-            let val = try GrammarParser.parseNString(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(val, nil)
-        }
-    }
-
-    func testNString_nil_mixedCase() {
-        TestUtilities.withBuffer("Nil", terminator: "\n") { (buffer) in
-            let val = try GrammarParser.parseNString(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(val, nil)
-        }
-    }
-
-    func testNString_string() {
-        TestUtilities.withBuffer("\"abc123\"") { (buffer) in
-            let val = try GrammarParser.parseNString(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(val, "abc123")
-        }
-    }
-
-    func testNString_invalid() {
-        var buffer = TestUtilities.createTestByteBuffer(for: "hello world")
-        XCTAssertThrowsError(try GrammarParser.parseNString(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertTrue(e is ParserError)
-        }
+        self.iterateTests(
+            testFunction: GrammarParser.parseNString,
+            validInputs: [
+                ("NIL", "", nil, #line),
+                ("{3}\r\nabc", "", "abc", #line),
+                ("{3+}\r\nabc", "", "abc", #line),
+                ("\"abc\"", "", "abc", #line),
+            ],
+            parserErrorInputs: [
+                ("abc", " ", #line)
+            ],
+            incompleteMessageInputs: [
+                ("\"", "", #line),
+                ("NI", "", #line),
+                ("{1}\r\n", "", #line),
+            ]
+        )
     }
 }
 
