@@ -1829,58 +1829,21 @@ extension ParserUnitTests {
 // MARK: - parseNewline
 
 extension ParserUnitTests {
-    func test_parseNewlineSuccessful() {
-        var buffer = TestUtilities.createTestByteBuffer(for: "\nx")
-        XCTAssertNoThrow(try ParserLibrary.parseNewline(buffer: &buffer, tracker: .testTracker))
-        XCTAssertEqual(UInt8(ascii: "x"), buffer.readInteger(as: UInt8.self))
-
-        buffer = TestUtilities.createTestByteBuffer(for: "\n")
-        XCTAssertNoThrow(try ParserLibrary.parseNewline(buffer: &buffer, tracker: .testTracker))
-        XCTAssertNil(buffer.readInteger(as: UInt8.self))
-
-        buffer = TestUtilities.createTestByteBuffer(for: "\r\nx")
-        XCTAssertNoThrow(try ParserLibrary.parseNewline(buffer: &buffer, tracker: .testTracker))
-        XCTAssertEqual(UInt8(ascii: "x"), buffer.readInteger(as: UInt8.self))
-
-        buffer = TestUtilities.createTestByteBuffer(for: "\r\n")
-        XCTAssertNoThrow(try ParserLibrary.parseNewline(buffer: &buffer, tracker: .testTracker))
-        XCTAssertNil(buffer.readInteger(as: UInt8.self))
-
-        buffer = TestUtilities.createTestByteBuffer(for: " \r\nx")
-        XCTAssertNoThrow(try ParserLibrary.parseNewline(buffer: &buffer, tracker: .testTracker))
-        XCTAssertEqual(UInt8(ascii: "x"), buffer.readInteger(as: UInt8.self))
-    }
-
-    func test_parseNewlineFailure() {
-        var buffer = TestUtilities.createTestByteBuffer(for: "\r")
-        XCTAssertThrowsError(try ParserLibrary.parseNewline(buffer: &buffer, tracker: .testTracker)) { error in
-            XCTAssertTrue(error is _IncompleteMessage)
-        }
-        XCTAssertEqual(UInt8(ascii: "\r"), buffer.readInteger(as: UInt8.self))
-
-        buffer = TestUtilities.createTestByteBuffer(for: "\rx")
-        XCTAssertThrowsError(try ParserLibrary.parseNewline(buffer: &buffer, tracker: .testTracker)) { error in
-            XCTAssert(error is ParserError)
-        }
-        XCTAssertEqual(UInt8(ascii: "\r"), buffer.readInteger(as: UInt8.self))
-
-        buffer = TestUtilities.createTestByteBuffer(for: "x")
-        XCTAssertThrowsError(try ParserLibrary.parseNewline(buffer: &buffer, tracker: .testTracker)) { error in
-            XCTAssert(error is ParserError)
-        }
-        XCTAssertEqual(UInt8(ascii: "x"), buffer.readInteger(as: UInt8.self))
-
-        buffer = TestUtilities.createTestByteBuffer(for: " x")
-        XCTAssertThrowsError(try ParserLibrary.parseNewline(buffer: &buffer, tracker: .testTracker)) { error in
-            XCTAssert(error is ParserError)
-        }
-        XCTAssertEqual(UInt8(ascii: " "), buffer.readInteger(as: UInt8.self))
-
-        buffer = TestUtilities.createTestByteBuffer(for: "xy")
-        XCTAssertThrowsError(try ParserLibrary.parseNewline(buffer: &buffer, tracker: .testTracker)) { error in
-            XCTAssert(error is ParserError)
-        }
-        XCTAssertEqual(UInt8(ascii: "x"), buffer.readInteger(as: UInt8.self))
+    func testParseNewline() {
+        self.iterateTests(
+            testFunction: ParserLibrary.parseNewline,
+            validInputs: [
+                ("\n", "", #line),
+                ("\r\n", "", #line),
+            ],
+            parserErrorInputs: [
+                ("\\", " ", #line),
+            ],
+            incompleteMessageInputs: [
+                ("", "", #line),
+                ("\r", "", #line),
+            ]
+        )
     }
 }
 
