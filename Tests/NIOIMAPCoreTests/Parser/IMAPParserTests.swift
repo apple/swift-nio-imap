@@ -1887,48 +1887,31 @@ extension ParserUnitTests {
 // MARK: - parseNil
 
 extension ParserUnitTests {
-    func testNil_valid() {
-        var buffer = TestUtilities.createTestByteBuffer(for: "NIL")
-        XCTAssertNoThrow(try GrammarParser.parseNil(buffer: &buffer, tracker: .testTracker))
-    }
-
-    func testNil_valid_mixedCase() {
-        var buffer = TestUtilities.createTestByteBuffer(for: "nIl")
-        XCTAssertNoThrow(try GrammarParser.parseNil(buffer: &buffer, tracker: .testTracker))
-    }
-
-    func testNil_valid_overcomplete() {
-        var buffer = TestUtilities.createTestByteBuffer(for: "NILL")
-        XCTAssertNoThrow(try GrammarParser.parseNil(buffer: &buffer, tracker: .testTracker))
-        XCTAssertEqual(buffer.readableBytes, 1)
-    }
-
-    func testNil_invalid_incomplete() {
-        var buffer = TestUtilities.createTestByteBuffer(for: "N")
-        XCTAssertThrowsError(try GrammarParser.parseNil(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertTrue(e is _IncompleteMessage, "e has type \(e)")
-        }
-    }
-
-    func testNil_invalid() {
-        var buffer = TestUtilities.createTestByteBuffer(for: "123")
-        XCTAssertThrowsError(try GrammarParser.parseNil(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertTrue(e is ParserError, "e has type \(e)")
-        }
-    }
-
-    func testNil_invalid_text() {
-        var buffer = TestUtilities.createTestByteBuffer(for: #""NIL""#)
-        XCTAssertThrowsError(try GrammarParser.parseNil(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertTrue(e is ParserError, "e has type \(e)")
-        }
+    func testParseNil() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseNil,
+            validInputs: [
+                ("NIL", "", #line),
+                ("nil", "", #line),
+                ("NiL", "", #line),
+            ],
+            parserErrorInputs: [
+                ("NIT", " ", #line),
+                ("\"NIL\"", " ", #line),
+            ],
+            incompleteMessageInputs: [
+                ("", "", #line),
+                ("N", "", #line),
+                ("NI", "", #line),
+            ]
+        )
     }
 }
 
 // MARK: - nstring parseNString
 
 extension ParserUnitTests {
-    func testNString_nil() {
+    func testParseNString() {
         self.iterateTests(
             testFunction: GrammarParser.parseNString,
             validInputs: [
