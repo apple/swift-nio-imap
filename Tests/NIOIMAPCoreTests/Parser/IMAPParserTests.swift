@@ -2426,25 +2426,21 @@ extension ParserUnitTests {
 // MARK: - sequence-set parseSequenceSet
 
 extension ParserUnitTests {
-    func testSequenceSet_valid_one() {
-        TestUtilities.withBuffer("765", terminator: " ") { (buffer) in
-            let set = try GrammarParser.parseSequenceSet(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(set, [765])
-        }
-    }
-
-    func testSequenceSet_valid_many() {
-        TestUtilities.withBuffer("1,2:5,7,9:*", terminator: " ") { (buffer) in
-            let set = try GrammarParser.parseSequenceSet(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(set, SequenceSet([SequenceRange(1), SequenceRange(2 ... 5), SequenceRange(7), SequenceRange(9...)]))
-        }
-    }
-
-    func testSequenceSet_invalid_none() {
-        var buffer = TestUtilities.createTestByteBuffer(for: "")
-        XCTAssertThrowsError(try GrammarParser.parseSequenceSet(buffer: &buffer, tracker: .testTracker)) { error in
-            XCTAssertTrue(error is _IncompleteMessage)
-        }
+    func testSequenceSet() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseSequenceSet,
+            validInputs: [
+                ("765", " ", [765], #line),
+                ("1,2:5,7,9:*", " ", [SequenceRange(1), SequenceRange(2 ... 5), SequenceRange(7), SequenceRange(9...)], #line),
+            ],
+            parserErrorInputs: [
+                ("a", " ", #line),
+            ],
+            incompleteMessageInputs: [
+                ("", "", #line),
+                ("1,", "", #line),
+            ]
+        )
     }
 }
 
