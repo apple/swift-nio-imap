@@ -1942,45 +1942,21 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testNZNumber_valid() {
-        TestUtilities.withBuffer("12345", terminator: " ") { (buffer) in
-            let num = try GrammarParser.parseNumber(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(num, 12345)
-        }
-    }
-
-    func testNZNumber_valid_midZero() {
-        TestUtilities.withBuffer("12045", terminator: " ") { (buffer) in
-            let num = try GrammarParser.parseNumber(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(num, 12045)
-        }
-    }
-
-    func testNZNumber_allZeros() {
-        var buffer = TestUtilities.createTestByteBuffer(for: "0000 ")
-        XCTAssertThrowsError(try ParserLibrary.parseNewline(buffer: &buffer, tracker: .testTracker)) { error in
-            XCTAssert(error is ParserError)
-        }
-    }
-
-    func testNZNumber_startZero() {
-        var buffer = TestUtilities.createTestByteBuffer(for: "0123 ")
-        XCTAssertThrowsError(try ParserLibrary.parseNewline(buffer: &buffer, tracker: .testTracker)) { error in
-            XCTAssert(error is ParserError)
-        }
-    }
-
-    func testNZNumber_invalid_empty() {
-        var buffer = TestUtilities.createTestByteBuffer(for: "")
-        XCTAssertThrowsError(try ParserLibrary.parseNewline(buffer: &buffer, tracker: .testTracker)) { error in
-            XCTAssertTrue(error is _IncompleteMessage)
-        }
-    }
-
-    func testNZNumber_invalid_alpha() {
-        var buffer = TestUtilities.createTestByteBuffer(for: "abc")
-        XCTAssertThrowsError(try ParserLibrary.parseNewline(buffer: &buffer, tracker: .testTracker)) { error in
-            XCTAssert(error is ParserError)
-        }
+        self.iterateTests(
+            testFunction: GrammarParser.parseNZNumber,
+            validInputs: [
+                ("1234", " ", 1234, #line),
+                ("10", " ", 10, #line),
+            ],
+            parserErrorInputs: [
+                ("0123", " ", #line),
+                ("0000", " ", #line),
+                ("abcd", " ", #line)
+            ],
+            incompleteMessageInputs: [
+                ("1234", "", #line),
+            ]
+        )
     }
 }
 
