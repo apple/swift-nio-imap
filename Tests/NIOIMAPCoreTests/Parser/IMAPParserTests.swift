@@ -1917,31 +1917,27 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testNumber_valid() {
-        TestUtilities.withBuffer("12345", terminator: " ") { (buffer) in
-            let num = try GrammarParser.parseNumber(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(num, 12345)
-        }
-    }
-
-    func testNumber_invalid_empty() {
-        var buffer = TestUtilities.createTestByteBuffer(for: "")
-        XCTAssertThrowsError(try ParserLibrary.parseNewline(buffer: &buffer, tracker: .testTracker)) { error in
-            XCTAssertTrue(error is _IncompleteMessage)
-        }
-    }
-
-    func testNumber_invalid_alpha() {
-        var buffer = TestUtilities.createTestByteBuffer(for: "abc")
-        XCTAssertThrowsError(try ParserLibrary.parseNewline(buffer: &buffer, tracker: .testTracker)) { error in
-            XCTAssert(error is ParserError)
-        }
+        self.iterateTests(
+            testFunction: GrammarParser.parseNumber,
+            validInputs: [
+                ("1234", " ", 1234, #line),
+                ("10", " ", 10, #line),
+                ("0", " ", 0, #line),
+            ],
+            parserErrorInputs: [
+                ("abcd", " ", #line)
+            ],
+            incompleteMessageInputs: [
+                ("1234", "", #line),
+            ]
+        )
     }
 }
 
 // MARK: - nz-number parseNZNumber
 
 extension ParserUnitTests {
-    func testNZNumber_valid() {
+    func testNZNumber() {
         self.iterateTests(
             testFunction: GrammarParser.parseNZNumber,
             validInputs: [
