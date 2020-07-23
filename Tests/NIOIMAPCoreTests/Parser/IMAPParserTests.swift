@@ -253,34 +253,20 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testAddress_valid() {
-        TestUtilities.withBuffer(#"("a" "b" "c" "d")"#, terminator: "\n") { (buffer) in
-            let address = try GrammarParser.parseAddress(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(address.name, "a")
-            XCTAssertEqual(address.adl, "b")
-            XCTAssertEqual(address.mailbox, "c")
-            XCTAssertEqual(address.host, "d")
-        }
-    }
-
-    func testAddress_invalid_incomplete() {
-        var buffer = TestUtilities.createTestByteBuffer(for: #"("a" "b" "c""#)
-        XCTAssertThrowsError(try GrammarParser.parseAddress(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertTrue(e is _IncompleteMessage)
-        }
-    }
-
-    func testAddress_invalid_missing_brackets() {
-        var buffer = TestUtilities.createTestByteBuffer(for: #"("a" "b" "c" "d""# + "\n")
-        XCTAssertThrowsError(try GrammarParser.parseAddress(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertTrue(e is ParserError)
-        }
-    }
-
-    func testAddress_invalid_too_few() {
-        var buffer = TestUtilities.createTestByteBuffer(for: #"("a" "b" "c")"# + "\n")
-        XCTAssertThrowsError(try GrammarParser.parseAddress(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertTrue(e is ParserError)
-        }
+        self.iterateTests(
+            testFunction: GrammarParser.parseAddress,
+            validInputs: [
+                ("(NIL NIL NIL NIL)", "", .init(name: nil, adl: nil, mailbox: nil, host: nil), #line),
+                (#"("a" "b" "c" "d")"#, "", .init(name: "a", adl: "b", mailbox: "c", host: "d"), #line),
+            ],
+            parserErrorInputs: [
+                ("(NIL NIL NIL NIL ", "\r", #line),
+            ],
+            incompleteMessageInputs: [
+                ("", "", #line),
+                ("(NIL ", "", #line),
+            ]
+        )
     }
 }
 
