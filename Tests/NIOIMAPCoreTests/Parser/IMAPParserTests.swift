@@ -2413,12 +2413,11 @@ extension ParserUnitTests {
                 ("STATUS Deleted (messages unseen HIGHESTMODSEQ)", "\r\n", .status(MailboxName("Deleted"), [.messageCount, .unseenCount, .highestModificationSequence]), #line),
             ],
             parserErrorInputs: [
-                ("MESSAGES UNSEEN 3 RECENT 4", "\r", #line),
-                ("2 UNSEEN 3 RECENT 4", "\r", #line),
+                ("STATUS inbox (messages unseen", "\r\n", #line),
             ],
             incompleteMessageInputs: [
                 ("", "", #line),
-                ("MESSAGES 2 UNSEEN ", "", #line),
+                ("STATUS Deleted (messages ", "", #line),
             ]
         )
     }
