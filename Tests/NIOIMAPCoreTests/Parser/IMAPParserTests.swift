@@ -2360,15 +2360,24 @@ extension ParserUnitTests {
 // MARK: - SequenceRange
 
 extension ParserUnitTests {
-    func testSequenceRange() {
-        let inputs: [(String, String, SequenceRange, UInt)] = [
-            ("*", "\r\n", SequenceRange.all, #line),
-            ("1:*", "\r\n", SequenceRange.all, #line),
-            ("12:34", "\r\n", SequenceRange(left: 12, right: 34), #line),
-            ("12:*", "\r\n", SequenceRange(left: 12, right: .max), #line),
-            ("1:34", "\r\n", SequenceRange(left: .min, right: 34), #line),
-        ]
-        self.iterateTestInputs_generic(inputs, testFunction: GrammarParser.parseSequenceRange)
+    func testParseSequenceRange() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseSequenceRange,
+            validInputs: [
+                ("*", "\r\n", SequenceRange.all, #line),
+                ("1:*", "\r\n", SequenceRange.all, #line),
+                ("12:34", "\r\n", SequenceRange(left: 12, right: 34), #line),
+                ("12:*", "\r\n", SequenceRange(left: 12, right: .max), #line),
+                ("1:34", "\r\n", SequenceRange(left: .min, right: 34), #line),
+            ],
+            parserErrorInputs: [
+                ("a", "", #line),
+            ],
+            incompleteMessageInputs: [
+                ("", "", #line),
+                ("111", "", #line),
+            ]
+        )
     }
 }
 
