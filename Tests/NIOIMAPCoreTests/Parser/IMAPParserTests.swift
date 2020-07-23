@@ -1782,12 +1782,21 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseNamespaceCommand() {
-        let inputs: [(String, String, Command, UInt)] = [
-            ("NAMESPACE", " ", .namespace, #line),
-            ("nameSPACE", " ", .namespace, #line),
-            ("namespace", " ", .namespace, #line),
-        ]
-        self.iterateTestInputs_generic(inputs, testFunction: GrammarParser.parseNamespaceCommand)
+        self.iterateTests(
+            testFunction: GrammarParser.parseNamespaceCommand,
+            validInputs: [
+                ("NAMESPACE", " ", .namespace, #line),
+                ("nameSPACE", " ", .namespace, #line),
+                ("namespace", " ", .namespace, #line),
+            ],
+            parserErrorInputs: [
+                ("something", " ", #line),
+            ],
+            incompleteMessageInputs: [
+                ("", "", #line),
+                ("name", "", #line),
+            ]
+        )
     }
 }
 
