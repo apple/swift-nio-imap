@@ -2329,31 +2329,23 @@ extension ParserUnitTests {
 // MARK: - seq-number parseSequenceNumber
 
 extension ParserUnitTests {
-    func testSequenceNumber_invalid_wildcard() {
-        TestUtilities.withBuffer("*", shouldRemainUnchanged: true) { (buffer) in
-            XCTAssertThrowsError(try GrammarParser.parseSequenceNumber(buffer: &buffer, tracker: .testTracker))
-        }
-    }
-
-    func testSequenceNumber_valid_number() {
-        TestUtilities.withBuffer("123", terminator: " ") { (buffer) in
-            let num = try GrammarParser.parseSequenceNumber(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(num, 123)
-        }
-    }
-
-    func testSequenceNumber_invalid_letters() {
-        var buffer = TestUtilities.createTestByteBuffer(for: "abc")
-        XCTAssertThrowsError(try GrammarParser.parseSequenceNumber(buffer: &buffer, tracker: .testTracker)) { error in
-            XCTAssert(error is ParserError)
-        }
-    }
-
-    func testSequenceNumber_invalid_nznumber() {
-        var buffer = TestUtilities.createTestByteBuffer(for: "0123 ")
-        XCTAssertThrowsError(try GrammarParser.parseSequenceNumber(buffer: &buffer, tracker: .testTracker)) { error in
-            XCTAssert(error is ParserError)
-        }
+    func testParseSequenceNumber() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseSequenceNumber,
+            validInputs: [
+                ("1", " ", 1, #line),
+                ("10", " ", 1, #line),
+            ],
+            parserErrorInputs: [
+                ("*", "", #line),
+                ("0", "", #line),
+                ("012", "", #line),
+            ],
+            incompleteMessageInputs: [
+                ("", "", #line),
+                ("111", "", #line),
+            ]
+        )
     }
 }
 
@@ -2560,17 +2552,6 @@ extension ParserUnitTests {
                 ("RENAME box1 ", "", #line),
             ]
         )
-    }
-}
-
-// MARK: - parseSequenceNumber
-
-extension ParserUnitTests {
-    func testParseSequenceNumber() {
-        let inputs: [(String, String, SequenceNumber, UInt)] = [
-            ("1", "\r", .init(1), #line),
-        ]
-        self.iterateTestInputs_generic(inputs, testFunction: GrammarParser.parseSequenceNumber)
     }
 }
 
