@@ -43,7 +43,7 @@ extension ParserUnitTests {
         for (input, terminator, line) in inputs {
             TestUtilities.withBuffer(input, terminator: terminator, shouldRemainUnchanged: true, file: (#file), line: line) { (buffer) in
                 XCTAssertThrowsError(try testFunction(&buffer, .testTracker), line: line) { e in
-                    XCTAssertTrue(e is ParserError)
+                    XCTAssertTrue(e is ParserError, "Expected ParserError, got \(e)")
                 }
             }
         }
@@ -53,7 +53,7 @@ extension ParserUnitTests {
         for (input, terminator, line) in inputs {
             TestUtilities.withBuffer(input, terminator: terminator, shouldRemainUnchanged: true, file: (#file), line: line) { (buffer) in
                 XCTAssertThrowsError(try testFunction(&buffer, .testTracker), line: line) { e in
-                    XCTAssertTrue(e is _IncompleteMessage, line: line)
+                    XCTAssertTrue(e is _IncompleteMessage, "Expected IncompleteMessage, got \(e)", line: line)
                 }
             }
         }
@@ -71,7 +71,7 @@ extension ParserUnitTests {
         for (input, terminator, line) in inputs {
             TestUtilities.withBuffer(input, terminator: terminator, shouldRemainUnchanged: true, file: (#file), line: line) { (buffer) in
                 XCTAssertThrowsError(try testFunction(&buffer, .testTracker), line: line) { e in
-                    XCTAssertTrue(e is ParserError)
+                    XCTAssertTrue(e is ParserError, "Expected ParserError, got \(e)", line: line)
                 }
             }
         }
@@ -81,7 +81,7 @@ extension ParserUnitTests {
         for (input, terminator, line) in inputs {
             TestUtilities.withBuffer(input, terminator: terminator, shouldRemainUnchanged: true, file: (#file), line: line) { (buffer) in
                 XCTAssertThrowsError(try testFunction(&buffer, .testTracker), line: line) { e in
-                    XCTAssertTrue(e is _IncompleteMessage, line: line)
+                    XCTAssertTrue(e is _IncompleteMessage, "Expected IncompleteMessage, got \(e)", line: line)
                 }
             }
         }
@@ -2408,7 +2408,7 @@ extension ParserUnitTests {
                 ("2 UNSEEN 3 RECENT 4", "\r", #line),
             ],
             incompleteMessageInputs: [
-                ("", " ", #line),
+                ("", "", #line),
                 ("MESSAGES 2 UNSEEN ", "", #line),
             ]
         )
@@ -2460,7 +2460,7 @@ extension ParserUnitTests {
                 ("2 UNSEEN 3 RECENT 4", "\r", #line),
             ],
             incompleteMessageInputs: [
-                ("", " ", #line),
+                ("", "", #line),
                 ("MESSAGES 2 UNSEEN ", "", #line),
             ]
         )
