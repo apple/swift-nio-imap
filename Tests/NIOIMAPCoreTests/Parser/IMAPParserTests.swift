@@ -2311,18 +2311,19 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseSelect() {
-        let inputs: [(String, String, Command, UInt)] = [
-            ("SELECT inbox", "\r", .select(.inbox, []), #line),
-            ("SELECT inbox (some1)", "\r", .select(.inbox, [.init(name: "some1", value: nil)]), #line),
-        ]
-        self.iterateTestInputs_generic(inputs, testFunction: GrammarParser.parseSelect)
-    }
-
-    func testSelect_invalid_incomplete() {
-        var buffer = TestUtilities.createTestByteBuffer(for: "SELECT ")
-        XCTAssertThrowsError(try GrammarParser.parseSelect(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertTrue(e is _IncompleteMessage, "e has type \(e)")
-        }
+        self.iterateTests(
+            testFunction: GrammarParser.parseSelect,
+            validInputs: [
+                ("SELECT inbox", "\r", .select(.inbox, []), #line),
+                ("SELECT inbox (some1)", "\r", .select(.inbox, [.init(name: "some1", value: nil)]), #line),
+            ],
+            parserErrorInputs: [
+                ("SELECT ", "\r", #line),
+            ],
+            incompleteMessageInputs: [
+                ("SELECT ", "", #line),
+            ]
+        )
     }
 }
 
