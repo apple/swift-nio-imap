@@ -2268,12 +2268,20 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseSectionPart() {
-        let inputs: [(String, String, SectionSpecifier.Part, UInt)] = [
-            ("1", "\r", [1], #line),
-            ("1.2", "\r", [1, 2], #line),
-            ("1.2.3.4.5", "\r", [1, 2, 3, 4, 5], #line),
-        ]
-        self.iterateTestInputs_generic(inputs, testFunction: GrammarParser.parseSectionPart)
+        self.iterateTests(
+            testFunction: GrammarParser.parseSectionPart,
+            validInputs: [
+                ("1", "\r", [1], #line),
+                ("1.2", "\r", [1, 2], #line),
+                ("1.2.3.4.5", "\r", [1, 2, 3, 4, 5], #line),
+            ],
+            parserErrorInputs: [
+                ("", "\r", #line),
+            ],
+            incompleteMessageInputs: [
+                ("1.", "", #line),
+            ]
+        )
     }
 }
 
