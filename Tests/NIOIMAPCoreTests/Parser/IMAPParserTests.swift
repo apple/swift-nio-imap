@@ -2236,18 +2236,22 @@ extension ParserUnitTests {
 // MARK: - parseSection
 
 extension ParserUnitTests {
-    func testParseSection_valid_none() {
-        TestUtilities.withBuffer("[]") { (buffer) in
-            let section = try GrammarParser.parseSection(buffer: &buffer, tracker: .testTracker)
-            XCTAssertNil(section)
-        }
-    }
-
-    func testParseSection_valid_some() {
-        TestUtilities.withBuffer("[HEADER]") { (buffer) in
-            let section = try GrammarParser.parseSection(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(section, SectionSpecifier(kind: .header))
-        }
+    func testParseSection() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseSection,
+            validInputs: [
+                ("[]", "", nil, #line),
+                ("[HEADER]", "", SectionSpecifier(kind: .header), #line)
+            ],
+            parserErrorInputs: [
+                ("[", " ", #line),
+                ("[HEADER", " ", #line)
+            ],
+            incompleteMessageInputs: [
+                ("[", "", #line),
+                ("[HEADER", "", #line)
+            ]
+        )
     }
 }
 
