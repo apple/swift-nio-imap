@@ -2294,16 +2294,24 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseSectionSpecifierKind() {
-        let inputs: [(String, String, SectionSpecifier.Kind, UInt)] = [
-            ("MIME", " ", .MIMEHeader, #line),
-            ("HEADER", " ", .header, #line),
-            ("TEXT", " ", .text, #line),
-            ("HEADER.FIELDS (f1)", " ", .headerFields(["f1"]), #line),
-            ("HEADER.FIELDS (f1 f2 f3)", " ", .headerFields(["f1", "f2", "f3"]), #line),
-            ("HEADER.FIELDS.NOT (f1)", " ", .headerFieldsNot(["f1"]), #line),
-            ("HEADER.FIELDS.NOT (f1 f2 f3)", " ", .headerFieldsNot(["f1", "f2", "f3"]), #line),
-        ]
-        self.iterateTestInputs_generic(inputs, testFunction: GrammarParser.parseSectionSpecifierKind)
+        self.iterateTests(
+            testFunction: GrammarParser.parseSectionSpecifierKind,
+            validInputs: [
+                ("MIME", " ", .MIMEHeader, #line),
+                ("HEADER", " ", .header, #line),
+                ("TEXT", " ", .text, #line),
+                ("HEADER.FIELDS (f1)", " ", .headerFields(["f1"]), #line),
+                ("HEADER.FIELDS (f1 f2 f3)", " ", .headerFields(["f1", "f2", "f3"]), #line),
+                ("HEADER.FIELDS.NOT (f1)", " ", .headerFieldsNot(["f1"]), #line),
+                ("HEADER.FIELDS.NOT (f1 f2 f3)", " ", .headerFieldsNot(["f1", "f2", "f3"]), #line),
+                ("", " ", .complete, #line),
+            ],
+            parserErrorInputs: [],
+            incompleteMessageInputs: [
+                ("HEADER.FIELDS ", "", #line),
+                ("HEADER.FIELDS (f1 f2 f3 ", "", #line),
+            ]
+        )
     }
 }
 
