@@ -2255,12 +2255,24 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseSectionBinary() {
-        let inputs: [(String, String, SectionSpecifier.Part, UInt)] = [
-            ("[]", "\r", [], #line),
-            ("[1]", "\r", [1], #line),
-            ("[1.2.3]", "\r", [1, 2, 3], #line),
-        ]
-        self.iterateTestInputs_generic(inputs, testFunction: GrammarParser.parseSectionBinary)
+       self.iterateTests(
+            testFunction: GrammarParser.parseSectionBinary,
+            validInputs: [
+                ("[]", "\r", [], #line),
+                ("[1]", "\r", [1], #line),
+                ("[1.2.3]", "\r", [1, 2, 3], #line),
+            ],
+            parserErrorInputs: [
+                ("[", "\r", #line),
+                ("1.2", "\r", #line),
+                ("[1.2", "\r", #line),
+            ],
+            incompleteMessageInputs: [
+                ("[", "", #line),
+                ("[1.2", "", #line),
+                ("[1.2.", "", #line),
+            ]
+        )
     }
 }
 
