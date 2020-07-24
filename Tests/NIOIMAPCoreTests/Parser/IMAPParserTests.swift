@@ -2281,12 +2281,20 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseSectionSpecifier() {
-        let inputs: [(String, String, SectionSpecifier, UInt)] = [
-            ("HEADER", "\r", .init(kind: .header), #line),
-            ("1.2.3", "\r", .init(part: [1, 2, 3], kind: .complete), #line),
-            ("1.2.3.HEADER", "\r", .init(part: [1, 2, 3], kind: .header), #line),
-        ]
-        self.iterateTestInputs_generic(inputs, testFunction: GrammarParser.parseSectionSpecifier)
+        self.iterateTests(
+            testFunction: GrammarParser.parseSectionSpecifier,
+            validInputs: [
+                ("HEADER", "\r", .init(kind: .header), #line),
+                ("1.2.3", "\r", .init(part: [1, 2, 3], kind: .complete), #line),
+                ("1.2.3.HEADER", "\r", .init(part: [1, 2, 3], kind: .header), #line),
+            ],
+            parserErrorInputs: [],
+            incompleteMessageInputs: [
+                ("", "", #line),
+                ("1", "", #line),
+                ("1.", "", #line),
+            ]
+        )
     }
 }
 
