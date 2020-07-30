@@ -274,17 +274,6 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {}
 
-// MARK: - parseAppendUID
-
-extension ParserUnitTests {
-    func testParseAppendUID() {
-        TestUtilities.withBuffer("12", terminator: " ") { (buffer) in
-            let num = try GrammarParser.parseAppendUid(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(num, 12)
-        }
-    }
-}
-
 // MARK: - parseAppendData
 
 extension ParserUnitTests {
@@ -321,66 +310,6 @@ extension ParserUnitTests {
                 XCTAssertNotNil(error as? ParserError)
             }
         }
-    }
-}
-
-// MARK: - parseAppendDataExtension
-
-extension ParserUnitTests {
-    func testParseAppendDataExtension() {
-        self.iterateTests(
-            testFunction: GrammarParser.parseAppendDataExtension,
-            validInputs: [
-                ("label 1:9", " ", .init(label: "label", value: .sequence(SequenceSet(1 ... 9))), #line),
-            ],
-            parserErrorInputs: [],
-            incompleteMessageInputs: []
-        )
-    }
-}
-
-// MARK: - parseAppendExtension
-
-extension ParserUnitTests {
-    func testParseAppendExtension() {
-        self.iterateTests(
-            testFunction: GrammarParser.parseAppendExtension,
-            validInputs: [
-                ("name 1:9", " ", .init(name: "name", value: .sequence(SequenceSet(1 ... 9))), #line),
-            ],
-            parserErrorInputs: [],
-            incompleteMessageInputs: []
-        )
-    }
-}
-
-// MARK: - parseAppendExtensionName
-
-extension ParserUnitTests {
-    func testParseAppendExtensionName() {
-        self.iterateTests(
-            testFunction: GrammarParser.parseAppendExtensionName,
-            validInputs: [
-                ("test", " ", "test", #line),
-            ],
-            parserErrorInputs: [],
-            incompleteMessageInputs: []
-        )
-    }
-}
-
-// MARK: - parseAppendExtensionValue
-
-extension ParserUnitTests {
-    func testParseAppendExtensionValue() {
-        self.iterateTests(
-            testFunction: GrammarParser.parseAppendExtensionValue,
-            validInputs: [
-                ("1:9", " ", .sequence(SequenceSet(1 ... 9)), #line),
-            ],
-            parserErrorInputs: [],
-            incompleteMessageInputs: []
-        )
     }
 }
 
@@ -431,16 +360,16 @@ extension ParserUnitTests {
                 (
                     " name1 1:2",
                     "\r",
-                    .init(flagList: [], internalDate: nil, extensions: [.init(name: "name1", value: .sequence(SequenceSet(1 ... 2)))]),
+                    .init(flagList: [], internalDate: nil, extensions: [.init(label: "name1", value: .sequence(SequenceSet(1 ... 2)))]),
                     #line
                 ),
                 (
                     " name1 1:2 name2 2:3 name3 3:4",
                     "\r",
                     .init(flagList: [], internalDate: nil, extensions: [
-                        .init(name: "name1", value: .sequence(SequenceSet(1 ... 2))),
-                        .init(name: "name2", value: .sequence(SequenceSet(2 ... 3))),
-                        .init(name: "name3", value: .sequence(SequenceSet(3 ... 4))),
+                        .init(label: "name1", value: .sequence(SequenceSet(1 ... 2))),
+                        .init(label: "name2", value: .sequence(SequenceSet(2 ... 3))),
+                        .init(label: "name3", value: .sequence(SequenceSet(3 ... 4))),
                     ]),
                     #line
                 ),
@@ -574,17 +503,6 @@ extension ParserUnitTests {
             parserErrorInputs: [],
             incompleteMessageInputs: []
         )
-    }
-}
-
-// MARK: - parseBodyFieldLines
-
-extension ParserUnitTests {
-    func testBodyFieldLines() {
-        TestUtilities.withBuffer("12", terminator: " ") { (buffer) in
-            let num = try GrammarParser.parseBodyFieldLines(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(num, 12)
-        }
     }
 }
 
@@ -1257,21 +1175,6 @@ extension ParserUnitTests {
                 ("ENABLED", "\r", [], #line),
                 ("ENABLED ENABLE", "\r", [.enable], #line),
                 ("ENABLED ENABLE CONDSTORE", "\r", [.enable, .condStore], #line),
-            ],
-            parserErrorInputs: [],
-            incompleteMessageInputs: []
-        )
-    }
-}
-
-// MARK: - parseEItemStandardTag
-
-extension ParserUnitTests {
-    func testParseEItemStandardTag() {
-        self.iterateTests(
-            testFunction: GrammarParser.parseEitemStandardTag,
-            validInputs: [
-                ("test", " ", "test", #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
