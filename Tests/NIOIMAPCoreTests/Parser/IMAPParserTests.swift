@@ -2128,17 +2128,6 @@ extension ParserUnitTests {
     }
 }
 
-// MARK: - `search-modifier-name` parseSearchModifierName
-
-extension ParserUnitTests {
-    func testParseSearchModifierName() {
-        let inputs: [(String, String, String, UInt)] = [
-            ("modifier", " ", "modifier", #line),
-        ]
-        self.iterateTestInputs_generic(inputs, testFunction: GrammarParser.parseSearchModifierName)
-    }
-}
-
 // MARK: - `search-modifier-params` parseSearchModifierParams
 
 extension ParserUnitTests {
@@ -2225,11 +2214,17 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseSearchReturnOptionExtension() {
-        let inputs: [(String, String, SearchReturnOptionExtension, UInt)] = [
-            ("modifier", "\r", .init(modifierName: "modifier", params: nil), #line),
-            ("modifier 4", "\r", .init(modifierName: "modifier", params: .sequence([4])), #line),
-        ]
-        self.iterateTestInputs_generic(inputs, testFunction: GrammarParser.parseSearchReturnOptionExtension)
+        self.iterateTests(
+            testFunction: GrammarParser.parseSearchReturnOptionExtension,
+            validInputs: [
+                ("modifier", "\r", .init(modifierName: "modifier", params: nil), #line),
+                ("modifier 4", "\r", .init(modifierName: "modifier", params: .sequence([4])), #line),
+            ],
+            parserErrorInputs: [],
+            incompleteMessageInputs: [
+                ("modifier ", "", #line),
+            ]
+        )
     }
 }
 
@@ -2375,7 +2370,7 @@ extension ParserUnitTests {
             testFunction: GrammarParser.parseSequenceNumber,
             validInputs: [
                 ("1", " ", 1, #line),
-                ("10", " ", 1, #line),
+                ("10", " ", 10, #line),
             ],
             parserErrorInputs: [
                 ("*", "", #line),

@@ -3152,11 +3152,6 @@ extension GrammarParser {
         ], buffer: &buffer, tracker: tracker)
     }
 
-    // search-modifier-name = tagged-ext-label
-    static func parseSearchModifierName(buffer: inout ByteBuffer, tracker: StackTracker) throws -> String {
-        try self.parseParameterName(buffer: &buffer, tracker: tracker)
-    }
-
     // search-mod-params = tagged-ext-val
     static func parseSearchModifierParams(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ParameterValue {
         try self.parseParameterValue(buffer: &buffer, tracker: tracker)
@@ -3165,7 +3160,7 @@ extension GrammarParser {
     // search-ret-data-ext = search-modifier-name SP search-return-value
     static func parseSearchReturnDataExtension(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SearchReturnDataExtension {
         try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> SearchReturnDataExtension in
-            let modifier = try self.parseSearchModifierName(buffer: &buffer, tracker: tracker)
+            let modifier = try self.parseParameterName(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
             let value = try self.parseSearchReturnValue(buffer: &buffer, tracker: tracker)
             return SearchReturnDataExtension(modifier: modifier, returnValue: value)
@@ -3275,7 +3270,7 @@ extension GrammarParser {
     // search-ret-opt-ext = search-modifier-name [SP search-mod-params]
     static func parseSearchReturnOptionExtension(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SearchReturnOptionExtension {
         try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> SearchReturnOptionExtension in
-            let name = try self.parseSearchModifierName(buffer: &buffer, tracker: tracker)
+            let name = try self.parseParameterName(buffer: &buffer, tracker: tracker)
             let params = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> ParameterValue in
                 try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
                 return try self.parseSearchModifierParams(buffer: &buffer, tracker: tracker)
