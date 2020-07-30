@@ -289,8 +289,6 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseAppendData() {
-        
-        
         self.iterateTests(
             testFunction: GrammarParser.parseAppendData,
             validInputs: [
@@ -330,8 +328,6 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseAppendDataExtension() {
-        
-        
         self.iterateTests(
             testFunction: GrammarParser.parseAppendDataExtension,
             validInputs: [
@@ -347,8 +343,6 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseAppendExtension() {
-        
-        
         self.iterateTests(
             testFunction: GrammarParser.parseAppendExtension,
             validInputs: [
@@ -364,8 +358,6 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseAppendExtensionName() {
-        
-        
         self.iterateTests(
             testFunction: GrammarParser.parseAppendExtensionName,
             validInputs: [
@@ -381,8 +373,6 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseAppendExtensionValue() {
-        
-        
         self.iterateTests(
             testFunction: GrammarParser.parseAppendExtensionValue,
             validInputs: [
@@ -399,8 +389,6 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     // NOTE: Spec is ambiguous when parsing `append-data`, which may contain `append-data-ext`, which is the same as `append-ext`, which is inside `append-opts`
     func testParseMessage() {
-        
-        
         self.iterateTests(
             testFunction: GrammarParser.parseAppendMessage,
             validInputs: [
@@ -725,8 +713,6 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseCapability() {
-        
-        
         self.iterateTests(
             testFunction: GrammarParser.parseCapability,
             validInputs: [
@@ -772,8 +758,6 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseCharset() {
-        
-        
         self.iterateTests(
             testFunction: GrammarParser.parseCharset,
             validInputs: [
@@ -790,8 +774,6 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseChildMailboxFlag() {
-        
-        
         self.iterateTests(
             testFunction: GrammarParser.parseChildMailboxFlag,
             validInputs: [
@@ -812,8 +794,6 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseContinueRequest() {
-        
-        
         self.iterateTests(
             testFunction: GrammarParser.parseContinueRequest,
             validInputs: [
@@ -830,8 +810,6 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseCreate() {
-        
-        
         self.iterateTests(
             testFunction: GrammarParser.parseCreate,
             validInputs: [
@@ -891,8 +869,6 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseCommandAny() {
-        
-        
         self.iterateTests(
             testFunction: GrammarParser.parseCommandAny,
             validInputs: [
@@ -947,8 +923,6 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseCommandAuth() {
-        
-        
         self.iterateTests(
             testFunction: GrammarParser.parseCommandAuth,
             validInputs: [
@@ -966,8 +940,6 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseCommandSelect() {
-        
-        
         self.iterateTests(
             testFunction: GrammarParser.parseCommandSelect,
             validInputs: [
@@ -1298,8 +1270,6 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseEItemStandardTag() {
-        
-        
         self.iterateTests(
             testFunction: GrammarParser.parseEitemStandardTag,
             validInputs: [
@@ -1315,8 +1285,6 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseEItemVendorTag() {
-        
-        
         self.iterateTests(
             testFunction: GrammarParser.parseEitemVendorTag,
             validInputs: [
@@ -1332,8 +1300,6 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseEntryTypeRequest() {
-        
-        
         self.iterateTests(
             testFunction: GrammarParser.parseEntryKindRequest,
             validInputs: [
@@ -1352,8 +1318,6 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseEntryTypeResponse() {
-        
-        
         self.iterateTests(
             testFunction: GrammarParser.parseEntryKindResponse,
             validInputs: [
@@ -1394,8 +1358,6 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseEsearchResponse() {
-        
-        
         self.iterateTests(
             testFunction: GrammarParser.parseEsearchResponse,
             validInputs: [
@@ -1415,8 +1377,6 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseExamine() {
-        
-        
         self.iterateTests(
             testFunction: GrammarParser.parseExamine,
             validInputs: [
@@ -1441,8 +1401,6 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseFetch() {
-        
-        
         self.iterateTests(
             testFunction: GrammarParser.parseFetch,
             validInputs: [
@@ -1498,8 +1456,6 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseFilterName() {
-        
-        
         self.iterateTests(
             testFunction: GrammarParser.parseFilterName,
             validInputs: [
@@ -1516,8 +1472,6 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseFlag() {
-        
-        
         self.iterateTests(
             testFunction: GrammarParser.parseFlag,
             validInputs: [
@@ -1568,8 +1522,6 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseFetchResponse() {
-        
-        
         self.iterateTests(
             testFunction: GrammarParser.parseFetchResponse,
             validInputs: [
@@ -1641,8 +1593,6 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseList() {
-        
-        
         self.iterateTests(
             testFunction: GrammarParser.parseList,
             validInputs: [
@@ -1720,8 +1670,6 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseMailboxList() {
-        
-        
         self.iterateTests(
             testFunction: GrammarParser.parseMailboxList,
             validInputs: [
@@ -1947,8 +1895,6 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseModifierSequenceValue() {
-        
-        
         self.iterateTests(
             testFunction: GrammarParser.parseModifierSequenceValue,
             validInputs: [
@@ -1968,8 +1914,6 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseModifierSequenceValueZero() {
-        
-        
         self.iterateTests(
             testFunction: GrammarParser.parseModifierSequenceValue,
             validInputs: [
@@ -1986,8 +1930,6 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseMove() {
-        
-        
         self.iterateTests(
             testFunction: GrammarParser.parseMove,
             validInputs: [
@@ -2026,8 +1968,6 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseNamespaceDescription() {
-        
-        
         self.iterateTests(
             testFunction: GrammarParser.parseNamespaceDescription,
             validInputs: [
@@ -2044,8 +1984,6 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseNamespaceResponse() {
-        
-        
         self.iterateTests(
             testFunction: GrammarParser.parseNamespaceResponse,
             validInputs: [
@@ -2061,8 +1999,6 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseNamespaceResponseExtension() {
-        
-        
         self.iterateTests(
             testFunction: GrammarParser.parseNamespaceResponseExtension,
             validInputs: [
@@ -2222,8 +2158,6 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseResponseData() {
-        
-        
         self.iterateTests(
             testFunction: GrammarParser.parseResponseData,
             validInputs: [
@@ -2239,8 +2173,6 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseResponsePayload() {
-        
-        
         self.iterateTests(
             testFunction: GrammarParser.parseResponsePayload,
             validInputs: [
@@ -2262,8 +2194,6 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseResponseTextCode() {
-        
-        
         self.iterateTests(
             testFunction: GrammarParser.parseResponseTextCode,
             validInputs: [
@@ -2295,8 +2225,6 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseSearch() {
-        
-        
         self.iterateTests(
             testFunction: GrammarParser.parseSearch,
             validInputs: [
@@ -2328,8 +2256,6 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseSearchCorrelator() {
-        
-        
         self.iterateTests(
             testFunction: GrammarParser.parseSearchCorrelator,
             validInputs: [
@@ -2362,8 +2288,6 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseSearchKey() {
-        
-        
         self.iterateTests(
             testFunction: GrammarParser.parseSearchKey,
             validInputs: [
@@ -2426,8 +2350,6 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseSearchModifierParams() {
-        
-        
         self.iterateTests(
             testFunction: GrammarParser.parseSearchModifierParams,
             validInputs: [
@@ -2445,8 +2367,6 @@ extension ParserUnitTests {
     // the spec is ambiguous when parsing `tagged-ext-simple`, in that a "number" is also a "sequence-set"
     // our parser gives priority to "sequence-set"
     func testParseSearchReturnDataExtension() {
-        
-        
         self.iterateTests(
             testFunction: GrammarParser.parseSearchReturnDataExtension,
             validInputs: [
@@ -2462,8 +2382,6 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseSearchReturnData() {
-        
-        
         self.iterateTests(
             testFunction: GrammarParser.parseSearchReturnData,
             validInputs: [
@@ -2484,8 +2402,6 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseSearchReturnOption() {
-        
-        
         self.iterateTests(
             testFunction: GrammarParser.parseSearchReturnOption,
             validInputs: [
@@ -2986,8 +2902,6 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseTaggedExtension() {
-        
-        
         self.iterateTests(
             testFunction: GrammarParser.parseTaggedExtension,
             validInputs: [
