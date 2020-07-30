@@ -3152,17 +3152,12 @@ extension GrammarParser {
         ], buffer: &buffer, tracker: tracker)
     }
 
-    // search-mod-params = tagged-ext-val
-    static func parseSearchModifierParams(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ParameterValue {
-        try self.parseParameterValue(buffer: &buffer, tracker: tracker)
-    }
-
     // search-ret-data-ext = search-modifier-name SP search-return-value
     static func parseSearchReturnDataExtension(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SearchReturnDataExtension {
         try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> SearchReturnDataExtension in
             let modifier = try self.parseParameterName(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
-            let value = try self.parseSearchReturnValue(buffer: &buffer, tracker: tracker)
+            let value = try self.parseParameterValue(buffer: &buffer, tracker: tracker)
             return SearchReturnDataExtension(modifier: modifier, returnValue: value)
         }
     }
@@ -3273,15 +3268,10 @@ extension GrammarParser {
             let name = try self.parseParameterName(buffer: &buffer, tracker: tracker)
             let params = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> ParameterValue in
                 try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
-                return try self.parseSearchModifierParams(buffer: &buffer, tracker: tracker)
+                return try self.parseParameterValue(buffer: &buffer, tracker: tracker)
             }
             return SearchReturnOptionExtension(modifierName: name, params: params)
         }
-    }
-
-    // search-return-value = tagged-ext-val
-    static func parseSearchReturnValue(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ParameterValue {
-        try self.parseParameterValue(buffer: &buffer, tracker: tracker)
     }
 
     // section         = "[" [section-spec] "]"

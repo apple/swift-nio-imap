@@ -2341,21 +2341,6 @@ extension ParserUnitTests {
     }
 }
 
-// MARK: - `search-modifier-params` parseSearchModifierParams
-
-extension ParserUnitTests {
-    func testParseSearchModifierParams() {
-        self.iterateTests(
-            testFunction: GrammarParser.parseSearchModifierParams,
-            validInputs: [
-                ("()", "", .comp([]), #line),
-            ],
-            parserErrorInputs: [],
-            incompleteMessageInputs: []
-        )
-    }
-}
-
 // MARK: - `search-ret-data-ext` parseSearchReturnDataExtension
 
 extension ParserUnitTests {
