@@ -2832,12 +2832,32 @@ extension GrammarParser {
             return result
         }
 
-        func parseSearchKey_all(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SearchKey {
-            try parseSearchKey_fixed(string: "ALL", result: .all, buffer: &buffer, tracker: tracker)
-        }
-
-        func parseSearchKey_answered(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SearchKey {
-            try parseSearchKey_fixed(string: "ANSWERED", result: .answered, buffer: &buffer, tracker: tracker)
+        func parseSearchKey_fixedOptions(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SearchKey {
+            let inputs: [(String, SearchKey)] = [
+                ("ALL", .all),
+                ("ANSWERED", .answered),
+                ("DELETED", .deleted),
+                ("FLAGGED", .flagged),
+                ("NEW", .new),
+                ("OLD", .old),
+                ("RECENT", .recent),
+                ("SEEN", .seen),
+                ("UNSEEN", .unseen),
+                ("UNANSWERED", .unanswered),
+                ("UNDELETED", .undeleted),
+                ("UNFLAGGED", .unflagged),
+                ("DRAFT", .draft),
+                ("UNDRAFT", .undraft),
+            ]
+            let save = buffer
+            for (key, value) in inputs {
+                do {
+                    return try parseSearchKey_fixed(string: key, result: value, buffer: &buffer, tracker: tracker)
+                } catch is ParserError {
+                    buffer = save
+                }
+            }
+            throw ParserError()
         }
 
         func parseSearchKey_bcc(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SearchKey {
@@ -2860,14 +2880,6 @@ extension GrammarParser {
             return .cc(try self.parseAString(buffer: &buffer, tracker: tracker))
         }
 
-        func parseSearchKey_deleted(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SearchKey {
-            try parseSearchKey_fixed(string: "DELETED", result: .deleted, buffer: &buffer, tracker: tracker)
-        }
-
-        func parseSearchKey_flagged(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SearchKey {
-            try parseSearchKey_fixed(string: "FLAGGED", result: .flagged, buffer: &buffer, tracker: tracker)
-        }
-
         func parseSearchKey_from(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SearchKey {
             try ParserLibrary.parseFixedString("FROM ", buffer: &buffer, tracker: tracker)
             return .from(try self.parseAString(buffer: &buffer, tracker: tracker))
@@ -2876,46 +2888,6 @@ extension GrammarParser {
         func parseSearchKey_keyword(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SearchKey {
             try ParserLibrary.parseFixedString("KEYWORD ", buffer: &buffer, tracker: tracker)
             return .keyword(try self.parseFlagKeyword(buffer: &buffer, tracker: tracker))
-        }
-
-        func parseSearchKey_new(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SearchKey {
-            try parseSearchKey_fixed(string: "NEW", result: .new, buffer: &buffer, tracker: tracker)
-        }
-
-        func parseSearchKey_old(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SearchKey {
-            try parseSearchKey_fixed(string: "OLD", result: .old, buffer: &buffer, tracker: tracker)
-        }
-
-        func parseSearchKey_recent(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SearchKey {
-            try parseSearchKey_fixed(string: "RECENT", result: .recent, buffer: &buffer, tracker: tracker)
-        }
-
-        func parseSearchKey_seen(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SearchKey {
-            try parseSearchKey_fixed(string: "SEEN", result: .seen, buffer: &buffer, tracker: tracker)
-        }
-
-        func parseSearchKey_unseen(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SearchKey {
-            try parseSearchKey_fixed(string: "UNSEEN", result: .unseen, buffer: &buffer, tracker: tracker)
-        }
-
-        func parseSearchKey_unanswered(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SearchKey {
-            try parseSearchKey_fixed(string: "UNANSWERED", result: .unanswered, buffer: &buffer, tracker: tracker)
-        }
-
-        func parseSearchKey_undeleted(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SearchKey {
-            try parseSearchKey_fixed(string: "UNDELETED", result: .undeleted, buffer: &buffer, tracker: tracker)
-        }
-
-        func parseSearchKey_unflagged(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SearchKey {
-            try parseSearchKey_fixed(string: "UNFLAGGED", result: .unflagged, buffer: &buffer, tracker: tracker)
-        }
-
-        func parseSearchKey_draft(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SearchKey {
-            try parseSearchKey_fixed(string: "DRAFT", result: .draft, buffer: &buffer, tracker: tracker)
-        }
-
-        func parseSearchKey_undraft(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SearchKey {
-            try parseSearchKey_fixed(string: "UNDRAFT", result: .undraft, buffer: &buffer, tracker: tracker)
         }
 
         func parseSearchKey_on(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SearchKey {
@@ -3036,27 +3008,14 @@ extension GrammarParser {
 
         return try ParserLibrary.parseOneOf([
             parseSearchKey_older,
+            parseSearchKey_fixedOptions,
             parseSearchKey_younger,
-            parseSearchKey_all,
-            parseSearchKey_answered,
             parseSearchKey_bcc,
             parseSearchKey_before,
             parseSearchKey_body,
             parseSearchKey_cc,
-            parseSearchKey_deleted,
-            parseSearchKey_flagged,
             parseSearchKey_from,
             parseSearchKey_keyword,
-            parseSearchKey_new,
-            parseSearchKey_old,
-            parseSearchKey_recent,
-            parseSearchKey_seen,
-            parseSearchKey_unseen,
-            parseSearchKey_unanswered,
-            parseSearchKey_undeleted,
-            parseSearchKey_unflagged,
-            parseSearchKey_draft,
-            parseSearchKey_undraft,
             parseSearchKey_on,
             parseSearchKey_since,
             parseSearchKey_subject,
