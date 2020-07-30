@@ -299,7 +299,7 @@ extension ParserUnitTests {
             ("{0+}\r\n", "hello", .init(byteCount: 0), #line),
             ("~{\(Int.max)+}\r\n", "hello", .init(byteCount: .max, withoutContentTransferEncoding: true), #line),
         ]
-        self.iterateTestInputs_generic(inputs, testFunction: GrammarParser.parseAppendData)
+        self.iterateTests(testFunction: GrammarParser.parseAppendData, validInputs: inputs, parserErrorInputs: [], incompleteMessageInputs: [])
     }
 
     func testNegativeAppendDataDoesNotParse() {
@@ -327,7 +327,7 @@ extension ParserUnitTests {
         let inputs: [(String, String, TaggedExtension, UInt)] = [
             ("label 1:9", " ", .init(label: "label", value: .sequence(SequenceSet(1 ... 9))), #line),
         ]
-        self.iterateTestInputs_generic(inputs, testFunction: GrammarParser.parseAppendDataExtension)
+        self.iterateTests(testFunction: GrammarParser.parseAppendDataExtension, validInputs: inputs, parserErrorInputs: [], incompleteMessageInputs: [])
     }
 }
 
@@ -338,7 +338,7 @@ extension ParserUnitTests {
         let inputs: [(String, String, AppendExtension, UInt)] = [
             ("name 1:9", " ", .init(name: "name", value: .sequence(SequenceSet(1 ... 9))), #line),
         ]
-        self.iterateTestInputs_generic(inputs, testFunction: GrammarParser.parseAppendExtension)
+        self.iterateTests(testFunction: GrammarParser.parseAppendExtension, validInputs: inputs, parserErrorInputs: [], incompleteMessageInputs: [])
     }
 }
 
@@ -349,7 +349,7 @@ extension ParserUnitTests {
         let inputs: [(String, String, String, UInt)] = [
             ("test", " ", "test", #line),
         ]
-        self.iterateTestInputs_generic(inputs, testFunction: GrammarParser.parseAppendExtensionName)
+        self.iterateTests(testFunction: GrammarParser.parseAppendExtensionName, validInputs: inputs, parserErrorInputs: [], incompleteMessageInputs: [])
     }
 }
 
@@ -360,7 +360,7 @@ extension ParserUnitTests {
         let inputs: [(String, String, ParameterValue, UInt)] = [
             ("1:9", " ", .sequence(SequenceSet(1 ... 9)), #line),
         ]
-        self.iterateTestInputs_generic(inputs, testFunction: GrammarParser.parseAppendExtensionValue)
+        self.iterateTests(testFunction: GrammarParser.parseAppendExtensionValue, validInputs: inputs, parserErrorInputs: [], incompleteMessageInputs: [])
     }
 }
 
@@ -383,7 +383,7 @@ extension ParserUnitTests {
                 #line
             ),
         ]
-        self.iterateTestInputs_generic(inputs, testFunction: GrammarParser.parseAppendMessage)
+        self.iterateTests(testFunction: GrammarParser.parseAppendMessage, validInputs: inputs, parserErrorInputs: [], incompleteMessageInputs: [])
     }
 }
 
@@ -419,7 +419,7 @@ extension ParserUnitTests {
                 #line
             ),
         ]
-        self.iterateTestInputs_generic(inputs, testFunction: GrammarParser.parseAppendOptions)
+        self.iterateTests(testFunction: GrammarParser.parseAppendOptions, validInputs: inputs, parserErrorInputs: [], incompleteMessageInputs: [])
     }
 }
 
@@ -478,7 +478,7 @@ extension ParserUnitTests {
             ("(1 2 3 (4 (5 (6))))", "\r", [.number(1), .number(2), .number(3), .number(4), .number(5), .number(6)], #line),
             ("(((((1)))))", "\r", [.number(1)], #line), // yeh, this is valid, don't ask
         ]
-        self.iterateTestInputs_generic(inputs, testFunction: GrammarParser.parseBodyExtension)
+        self.iterateTests(testFunction: GrammarParser.parseBodyExtension, validInputs: inputs, parserErrorInputs: [], incompleteMessageInputs: [])
     }
 }
 
@@ -513,7 +513,7 @@ extension ParserUnitTests {
             (#""QUOTED-PRINTABLE""#, " ", .quotedPrintable, #line),
             (#""other""#, " ", .init("other"), #line),
         ]
-        self.iterateTestInputs_generic(inputs, testFunction: GrammarParser.parseBodyEncoding)
+        self.iterateTests(testFunction: GrammarParser.parseBodyEncoding, validInputs: inputs, parserErrorInputs: [], incompleteMessageInputs: [])
     }
 
     func testParseBodyEncoding_invalid_missingQuotes() {
@@ -533,7 +533,7 @@ extension ParserUnitTests {
             (#"("english")"#, " ", ["english"], #line),
             (#"("english" "french")"#, " ", ["english", "french"], #line),
         ]
-        self.iterateTestInputs_generic(inputs, testFunction: GrammarParser.parseBodyFieldLanguage)
+        self.iterateTests(testFunction: GrammarParser.parseBodyFieldLanguage, validInputs: inputs, parserErrorInputs: [], incompleteMessageInputs: [])
     }
 }
 
@@ -557,7 +557,7 @@ extension ParserUnitTests {
             (#"("f1" "v1")"#, " ", [.init(field: "f1", value: "v1")], #line),
             (#"("f1" "v1" "f2" "v2")"#, " ", [.init(field: "f1", value: "v1"), .init(field: "f2", value: "v2")], #line),
         ]
-        self.iterateTestInputs_generic(inputs, testFunction: GrammarParser.parseBodyFieldParam)
+        self.iterateTests(testFunction: GrammarParser.parseBodyFieldParam, validInputs: inputs, parserErrorInputs: [], incompleteMessageInputs: [])
     }
 
     func testParseBodyFieldParam_invalid_oneObject() {
@@ -654,7 +654,7 @@ extension ParserUnitTests {
         ]
 
         let inputs = basicInputs + messageInputs + textInputs
-        self.iterateTestInputs_generic(inputs, testFunction: GrammarParser.parseBodyKindSinglePart)
+        self.iterateTests(testFunction: GrammarParser.parseBodyKindSinglePart, validInputs: inputs, parserErrorInputs: [], incompleteMessageInputs: [])
     }
 }
 
@@ -669,7 +669,7 @@ extension ParserUnitTests {
             ("XSPECIAL", " ", .init("XSPECIAL"), #line),
             ("SPECIAL", " ", .init("SPECIAL"), #line),
         ]
-        self.iterateTestInputs_generic(inputs, testFunction: GrammarParser.parseCapability)
+        self.iterateTests(testFunction: GrammarParser.parseCapability, validInputs: inputs, parserErrorInputs: [], incompleteMessageInputs: [])
     }
 
     func testCapability_invalid_empty() {
@@ -691,7 +691,7 @@ extension ParserUnitTests {
             ("CAPABILITY FILTERS IMAP4rev1 ENABLE", "\r", [.filters, .imap4rev1, .enable], #line),
             ("CAPABILITY FILTERS IMAP4rev1 ENABLE IMAP4", "\r", [.filters, .imap4rev1, .enable, .imap4], #line),
         ]
-        self.iterateTestInputs_generic(inputs, testFunction: GrammarParser.parseCapabilityData)
+        self.iterateTests(testFunction: GrammarParser.parseCapabilityData, validInputs: inputs, parserErrorInputs: [], incompleteMessageInputs: [])
     }
 }
 
@@ -703,7 +703,7 @@ extension ParserUnitTests {
             ("UTF8", " ", "UTF8", #line),
             ("\"UTF8\"", " ", "UTF8", #line),
         ]
-        self.iterateTestInputs_generic(inputs, testFunction: GrammarParser.parseCharset)
+        self.iterateTests(testFunction: GrammarParser.parseCharset, validInputs: inputs, parserErrorInputs: [], incompleteMessageInputs: [])
     }
 }
 
@@ -719,7 +719,7 @@ extension ParserUnitTests {
             ("\\hasnochildren", " ", .hasNoChildren, #line),
             ("\\HASNOCHILDREN", " ", .hasNoChildren, #line),
         ]
-        self.iterateTestInputs_generic(inputs, testFunction: GrammarParser.parseChildMailboxFlag)
+        self.iterateTests(testFunction: GrammarParser.parseChildMailboxFlag, validInputs: inputs, parserErrorInputs: [], incompleteMessageInputs: [])
     }
 }
 
@@ -731,7 +731,7 @@ extension ParserUnitTests {
             ("+ OK\r\n", " ", .responseText(.init(code: nil, text: "OK")), #line),
             ("+ abc=\r\n", " ", .base64("abc="), #line),
         ]
-        self.iterateTestInputs_generic(inputs, testFunction: GrammarParser.parseContinueRequest)
+        self.iterateTests(testFunction: GrammarParser.parseContinueRequest, validInputs: inputs, parserErrorInputs: [], incompleteMessageInputs: [])
     }
 }
 
@@ -743,7 +743,7 @@ extension ParserUnitTests {
             ("CREATE inbox", "\r", .create(.inbox, []), #line),
             ("CREATE inbox (some)", "\r", .create(.inbox, [.init(name: "some", value: nil)]), #line),
         ]
-        self.iterateTestInputs_generic(inputs, testFunction: GrammarParser.parseCreate)
+        self.iterateTests(testFunction: GrammarParser.parseCreate, validInputs: inputs, parserErrorInputs: [], incompleteMessageInputs: [])
     }
 
     func testCreate_invalid_incomplete() {
@@ -799,7 +799,7 @@ extension ParserUnitTests {
             ("LOGOUT", " ", .logout, #line),
             ("NOOP", " ", .noop, #line),
         ]
-        self.iterateTestInputs_generic(inputs, testFunction: GrammarParser.parseCommandAny)
+        self.iterateTests(testFunction: GrammarParser.parseCommandAny, validInputs: inputs, parserErrorInputs: [], incompleteMessageInputs: [])
     }
 }
 
@@ -849,7 +849,7 @@ extension ParserUnitTests {
             ("CREATE inbox (something)", " ", .create(.inbox, [.init(name: "something", value: nil)]), #line),
             ("NAMESPACE", " ", .namespace, #line),
         ]
-        self.iterateTestInputs_generic(inputs, testFunction: GrammarParser.parseCommandAuth)
+        self.iterateTests(testFunction: GrammarParser.parseCommandAuth, validInputs: inputs, parserErrorInputs: [], incompleteMessageInputs: [])
     }
 }
 
@@ -862,7 +862,7 @@ extension ParserUnitTests {
             ("unselect", " ", .unselect, #line),
             ("UNSelect", " ", .unselect, #line),
         ]
-        self.iterateTestInputs_generic(inputs, testFunction: GrammarParser.parseCommandSelect)
+        self.iterateTests(testFunction: GrammarParser.parseCommandSelect, validInputs: inputs, parserErrorInputs: [], incompleteMessageInputs: [])
     }
 }
 
@@ -1171,7 +1171,7 @@ extension ParserUnitTests {
             ("ENABLED ENABLE", "\r", [.enable], #line),
             ("ENABLED ENABLE CONDSTORE", "\r", [.enable, .condStore], #line),
         ]
-        self.iterateTestInputs_generic(inputs, testFunction: GrammarParser.parseEnableData)
+        self.iterateTests(testFunction: GrammarParser.parseEnableData, validInputs: inputs, parserErrorInputs: [], incompleteMessageInputs: [])
     }
 }
 
@@ -1182,7 +1182,7 @@ extension ParserUnitTests {
         let inputs: [(String, String, String, UInt)] = [
             ("test", " ", "test", #line),
         ]
-        self.iterateTestInputs_generic(inputs, testFunction: GrammarParser.parseEitemStandardTag)
+        self.iterateTests(testFunction: GrammarParser.parseEitemStandardTag, validInputs: inputs, parserErrorInputs: [], incompleteMessageInputs: [])
     }
 }
 
@@ -1193,7 +1193,7 @@ extension ParserUnitTests {
         let inputs: [(String, String, EItemVendorTag, UInt)] = [
             ("token-atom", " ", EItemVendorTag(token: "token", atom: "atom"), #line),
         ]
-        self.iterateTestInputs_generic(inputs, testFunction: GrammarParser.parseEitemVendorTag)
+        self.iterateTests(testFunction: GrammarParser.parseEitemVendorTag, validInputs: inputs, parserErrorInputs: [], incompleteMessageInputs: [])
     }
 }
 
@@ -1207,7 +1207,7 @@ extension ParserUnitTests {
             ("aLL", " ", .all, #line),
             ("shared", " ", .response(.shared), #line),
         ]
-        self.iterateTestInputs_generic(inputs, testFunction: GrammarParser.parseEntryKindRequest)
+        self.iterateTests(testFunction: GrammarParser.parseEntryKindRequest, validInputs: inputs, parserErrorInputs: [], incompleteMessageInputs: [])
     }
 }
 
@@ -1223,7 +1223,7 @@ extension ParserUnitTests {
             ("SHARED", " ", .shared, #line),
             ("shaRED", " ", .shared, #line),
         ]
-        self.iterateTestInputs_generic(inputs, testFunction: GrammarParser.parseEntryKindResponse)
+        self.iterateTests(testFunction: GrammarParser.parseEntryKindResponse, validInputs: inputs, parserErrorInputs: [], incompleteMessageInputs: [])
     }
 }
 
@@ -1258,7 +1258,7 @@ extension ParserUnitTests {
             ("ESEARCH (TAG \"col\") UID COUNT 2", "\r", .init(correlator: "col", uid: true, returnData: [.count(2)]), #line),
             ("ESEARCH (TAG \"col\") UID MIN 1 MAX 2", "\r", .init(correlator: "col", uid: true, returnData: [.min(1), .max(2)]), #line),
         ]
-        self.iterateTestInputs_generic(inputs, testFunction: GrammarParser.parseEsearchResponse)
+        self.iterateTests(testFunction: GrammarParser.parseEsearchResponse, validInputs: inputs, parserErrorInputs: [], incompleteMessageInputs: [])
     }
 }
 
@@ -1271,7 +1271,7 @@ extension ParserUnitTests {
             ("examine inbox", "\r", .examine(.inbox, []), #line),
             ("EXAMINE inbox (number)", "\r", .examine(.inbox, [.init(name: "number", value: nil)]), #line),
         ]
-        self.iterateTestInputs_generic(inputs, testFunction: GrammarParser.parseExamine)
+        self.iterateTests(testFunction: GrammarParser.parseExamine, validInputs: inputs, parserErrorInputs: [], incompleteMessageInputs: [])
     }
 
     func testExamine_invalid_incomplete() {
@@ -1295,7 +1295,7 @@ extension ParserUnitTests {
             ("FETCH 3:5 FAST (name)", "\r", .fetch([3 ... 5], .fast, [.init(name: "name", value: nil)]), #line),
             ("FETCH 1 BODY[TEXT]", "\r", .fetch([1], [.bodySection(peek: false, .init(kind: .text), nil)], []), #line),
         ]
-        self.iterateTestInputs_generic(inputs, testFunction: GrammarParser.parseFetch)
+        self.iterateTests(testFunction: GrammarParser.parseFetch, validInputs: inputs, parserErrorInputs: [], incompleteMessageInputs: [])
     }
 }
 
@@ -1325,7 +1325,7 @@ extension ParserUnitTests {
             ("BINARY[2]<4.5>", " ", .binary(peek: false, section: [2], partial: 4 ... 8), #line),
             ("BINARY.SIZE[5]", " ", .binarySize(section: [5]), #line),
         ]
-        self.iterateTestInputs_generic(inputs, testFunction: GrammarParser.parseFetchAttribute)
+        self.iterateTests(testFunction: GrammarParser.parseFetchAttribute, validInputs: inputs, parserErrorInputs: [], incompleteMessageInputs: [])
     }
 }
 
@@ -1337,7 +1337,7 @@ extension ParserUnitTests {
             ("a", " ", "a", #line),
             ("abcdefg", " ", "abcdefg", #line),
         ]
-        self.iterateTestInputs_generic(inputs, testFunction: GrammarParser.parseFilterName)
+        self.iterateTests(testFunction: GrammarParser.parseFilterName, validInputs: inputs, parserErrorInputs: [], incompleteMessageInputs: [])
     }
 }
 
@@ -1354,7 +1354,7 @@ extension ParserUnitTests {
             ("keyword", " ", .keyword(Flag.Keyword("keyword")), #line),
             ("\\extension", " ", .extension("\\extension"), #line),
         ]
-        self.iterateTestInputs_generic(inputs, testFunction: GrammarParser.parseFlag)
+        self.iterateTests(testFunction: GrammarParser.parseFlag, validInputs: inputs, parserErrorInputs: [], incompleteMessageInputs: [])
     }
 }
 
@@ -1397,7 +1397,7 @@ extension ParserUnitTests {
             ("RFC822.SIZE 40639", " ", .simpleAttribute(.rfc822Size(40639)), #line),
             (")\r\n", " ", .finish, #line),
         ]
-        self.iterateTestInputs_generic(inputs, testFunction: GrammarParser.parseFetchResponse)
+        self.iterateTests(testFunction: GrammarParser.parseFetchResponse, validInputs: inputs, parserErrorInputs: [], incompleteMessageInputs: [])
     }
 }
 
@@ -1446,7 +1446,7 @@ extension ParserUnitTests {
                 #line
             ),
         ]
-        self.iterateTestInputs_generic(inputs, testFunction: GrammarParser.parseIDParamsList)
+        self.iterateTests(testFunction: GrammarParser.parseIDParamsList, validInputs: inputs, parserErrorInputs: [], incompleteMessageInputs: [])
     }
 }
 
@@ -1457,7 +1457,7 @@ extension ParserUnitTests {
         let inputs: [(String, String, Command, UInt)] = [
             (#"LIST "" """#, "\r", .list(nil, reference: MailboxName(""), .mailbox(""), []), #line),
         ]
-        self.iterateTestInputs_generic(inputs, testFunction: GrammarParser.parseList)
+        self.iterateTests(testFunction: GrammarParser.parseList, validInputs: inputs, parserErrorInputs: [], incompleteMessageInputs: [])
     }
 }
 
@@ -1515,7 +1515,7 @@ extension ParserUnitTests {
             ("SEARCH 1 2 3 4 5", "\r\n", .search([1, 2, 3, 4, 5]), #line),
             ("NAMESPACE NIL NIL NIL", "\r\n", .namespace(.init(userNamespace: [], otherUserNamespace: [], sharedNamespace: [])), #line),
         ]
-        self.iterateTestInputs_generic(inputs, testFunction: GrammarParser.parseMailboxData)
+        self.iterateTests(testFunction: GrammarParser.parseMailboxData, validInputs: inputs, parserErrorInputs: [], incompleteMessageInputs: [])
     }
 }
 
@@ -1549,7 +1549,7 @@ extension ParserUnitTests {
                 #line
             ),
         ]
-        self.iterateTestInputs_generic(inputs, testFunction: GrammarParser.parseMailboxList)
+        self.iterateTests(testFunction: GrammarParser.parseMailboxList, validInputs: inputs, parserErrorInputs: [], incompleteMessageInputs: [])
     }
 
     func testParseMailboxList_invalid_character_incomplete() {
@@ -1576,7 +1576,7 @@ extension ParserUnitTests {
             ("\\marked \\remote", "\r", [.marked, .remote], #line),
             ("\\marked \\o1 \\o2", "\r", [.marked, .init("\\o1"), .init("\\o2")], #line),
         ]
-        self.iterateTestInputs_generic(inputs, testFunction: GrammarParser.parseMailboxListFlags)
+        self.iterateTests(testFunction: GrammarParser.parseMailboxListFlags, validInputs: inputs, parserErrorInputs: [], incompleteMessageInputs: [])
     }
 }
 
@@ -1711,7 +1711,7 @@ extension ParserUnitTests {
                 #line
             ),
         ]
-        self.iterateTestInputs_generic(inputs, testFunction: GrammarParser.parseMessageAttribute)
+        self.iterateTests(testFunction: GrammarParser.parseMessageAttribute, validInputs: inputs, parserErrorInputs: [], incompleteMessageInputs: [])
     }
 }
 
@@ -1721,7 +1721,7 @@ extension ParserUnitTests {
     func testParseMessageData() {
         let inputs: [(String, String, MessageData, UInt)] = [
             ]
-        self.iterateTestInputs_generic(inputs, testFunction: GrammarParser.parseMessageData)
+        self.iterateTests(testFunction: GrammarParser.parseMessageData, validInputs: inputs, parserErrorInputs: [], incompleteMessageInputs: [])
     }
 }
 
@@ -1736,7 +1736,7 @@ extension ParserUnitTests {
             ("1234567", " ", 1234567, #line),
             ("123456789", " ", 123456789, #line),
         ]
-        self.iterateTestInputs_generic(inputs, testFunction: GrammarParser.parseModifierSequenceValue)
+        self.iterateTests(testFunction: GrammarParser.parseModifierSequenceValue, validInputs: inputs, parserErrorInputs: [], incompleteMessageInputs: [])
     }
 }
 
@@ -1748,7 +1748,7 @@ extension ParserUnitTests {
             ("0", " ", .zero, #line),
             ("123", " ", 123, #line),
         ]
-        self.iterateTestInputs_generic(inputs, testFunction: GrammarParser.parseModifierSequenceValue)
+        self.iterateTests(testFunction: GrammarParser.parseModifierSequenceValue, validInputs: inputs, parserErrorInputs: [], incompleteMessageInputs: [])
     }
 }
 
@@ -1760,7 +1760,7 @@ extension ParserUnitTests {
             ("MOVE * inbox", " ", .move(.all, .inbox), #line),
             ("MOVE 1:2,4:5 test", " ", .move(SequenceSet([SequenceRange(1 ... 2), SequenceRange(4 ... 5)])!, .init("test")), #line),
         ]
-        self.iterateTestInputs_generic(inputs, testFunction: GrammarParser.parseMove)
+        self.iterateTests(testFunction: GrammarParser.parseMove, validInputs: inputs, parserErrorInputs: [], incompleteMessageInputs: [])
     }
 }
 
@@ -1794,7 +1794,7 @@ extension ParserUnitTests {
             ("(\"str1\" NIL)", " ", .init(string: "str1", char: nil, responseExtensions: []), #line),
             ("(\"str\" \"a\")", " ", .init(string: "str", char: "a", responseExtensions: []), #line),
         ]
-        self.iterateTestInputs_generic(inputs, testFunction: GrammarParser.parseNamespaceDescription)
+        self.iterateTests(testFunction: GrammarParser.parseNamespaceDescription, validInputs: inputs, parserErrorInputs: [], incompleteMessageInputs: [])
     }
 }
 
@@ -1805,7 +1805,7 @@ extension ParserUnitTests {
         let inputs: [(String, String, NamespaceResponse, UInt)] = [
             ("NAMESPACE nil nil nil", " ", .init(userNamespace: [], otherUserNamespace: [], sharedNamespace: []), #line),
         ]
-        self.iterateTestInputs_generic(inputs, testFunction: GrammarParser.parseNamespaceResponse)
+        self.iterateTests(testFunction: GrammarParser.parseNamespaceResponse, validInputs: inputs, parserErrorInputs: [], incompleteMessageInputs: [])
     }
 }
 
@@ -1817,7 +1817,7 @@ extension ParserUnitTests {
             (" \"str1\" (\"str2\")", " ", .init(string: "str1", array: ["str2"]), #line),
             (" \"str1\" (\"str2\" \"str3\" \"str4\")", " ", .init(string: "str1", array: ["str2", "str3", "str4"]), #line),
         ]
-        self.iterateTestInputs_generic(inputs, testFunction: GrammarParser.parseNamespaceResponseExtension)
+        self.iterateTests(testFunction: GrammarParser.parseNamespaceResponseExtension, validInputs: inputs, parserErrorInputs: [], incompleteMessageInputs: [])
     }
 }
 
@@ -1971,7 +1971,7 @@ extension ParserUnitTests {
         let inputs: [(String, String, ResponsePayload, UInt)] = [
             ("* CAPABILITY ENABLE\r\n", " ", .capabilityData([.enable]), #line),
         ]
-        self.iterateTestInputs_generic(inputs, testFunction: GrammarParser.parseResponseData)
+        self.iterateTests(testFunction: GrammarParser.parseResponseData, validInputs: inputs, parserErrorInputs: [], incompleteMessageInputs: [])
     }
 }
 
@@ -1988,7 +1988,7 @@ extension ParserUnitTests {
             ("ENABLED ENABLE", "\r", .enableData([.enable]), #line),
             ("ID (\"key\" NIL)", "\r", .id([.init(key: "key", value: nil)]), #line),
         ]
-        self.iterateTestInputs_generic(inputs, testFunction: GrammarParser.parseResponsePayload)
+        self.iterateTests(testFunction: GrammarParser.parseResponsePayload, validInputs: inputs, parserErrorInputs: [], incompleteMessageInputs: [])
     }
 }
 
@@ -2015,7 +2015,7 @@ extension ParserUnitTests {
             ("some", "\r", .other("some", nil), #line),
             ("some thing", "\r", .other("some", "thing"), #line),
         ]
-        self.iterateTestInputs_generic(inputs, testFunction: GrammarParser.parseResponseTextCode)
+        self.iterateTests(testFunction: GrammarParser.parseResponseTextCode, validInputs: inputs, parserErrorInputs: [], incompleteMessageInputs: [])
     }
 }
 
@@ -2042,7 +2042,7 @@ extension ParserUnitTests {
                 #line
             ),
         ]
-        self.iterateTestInputs_generic(inputs, testFunction: GrammarParser.parseSearch)
+        self.iterateTests(testFunction: GrammarParser.parseSearch, validInputs: inputs, parserErrorInputs: [], incompleteMessageInputs: [])
     }
 }
 
@@ -2054,7 +2054,7 @@ extension ParserUnitTests {
             (" (TAG \"test1\")", "\r", "test1", #line),
             (" (tag \"test2\")", "\r", "test2", #line),
         ]
-        self.iterateTestInputs_generic(inputs, testFunction: GrammarParser.parseSearchCorrelator)
+        self.iterateTests(testFunction: GrammarParser.parseSearchCorrelator, validInputs: inputs, parserErrorInputs: [], incompleteMessageInputs: [])
     }
 }
 
@@ -2066,7 +2066,7 @@ extension ParserUnitTests {
             ("ALL", "\r", [.all], #line),
             ("ALL ANSWERED DELETED", "\r", [.all, .answered, .deleted], #line),
         ]
-        self.iterateTestInputs_generic(inputs, testFunction: GrammarParser.parseSearchCriteria)
+        self.iterateTests(testFunction: GrammarParser.parseSearchCriteria, validInputs: inputs, parserErrorInputs: [], incompleteMessageInputs: [])
     }
 }
 
@@ -2117,7 +2117,7 @@ extension ParserUnitTests {
             ("OLDER 45", "\r", .older(45), #line),
             ("FILTER something", "\r", .filter("something"), #line),
         ]
-        self.iterateTestInputs_generic(inputs, testFunction: GrammarParser.parseSearchKey)
+        self.iterateTests(testFunction: GrammarParser.parseSearchKey, validInputs: inputs, parserErrorInputs: [], incompleteMessageInputs: [])
     }
 
     func testParseSearchKey_array_none_invalid() {
@@ -2135,7 +2135,7 @@ extension ParserUnitTests {
         let inputs: [(String, String, ParameterValue, UInt)] = [
             ("()", "", .comp([]), #line),
         ]
-        self.iterateTestInputs_generic(inputs, testFunction: GrammarParser.parseSearchModifierParams)
+        self.iterateTests(testFunction: GrammarParser.parseSearchModifierParams, validInputs: inputs, parserErrorInputs: [], incompleteMessageInputs: [])
     }
 }
 
@@ -2148,7 +2148,7 @@ extension ParserUnitTests {
         let inputs: [(String, String, SearchReturnDataExtension, UInt)] = [
             ("modifier 64", "\r", .init(modifier: "modifier", returnValue: .sequence([64])), #line),
         ]
-        self.iterateTestInputs_generic(inputs, testFunction: GrammarParser.parseSearchReturnDataExtension)
+        self.iterateTests(testFunction: GrammarParser.parseSearchReturnDataExtension, validInputs: inputs, parserErrorInputs: [], incompleteMessageInputs: [])
     }
 }
 
@@ -2164,7 +2164,7 @@ extension ParserUnitTests {
             ("COUNT 4", "\r", .count(4), #line),
             ("modifier 5", "\r", .dataExtension(.init(modifier: "modifier", returnValue: .sequence([5]))), #line),
         ]
-        self.iterateTestInputs_generic(inputs, testFunction: GrammarParser.parseSearchReturnData)
+        self.iterateTests(testFunction: GrammarParser.parseSearchReturnData, validInputs: inputs, parserErrorInputs: [], incompleteMessageInputs: [])
     }
 }
 
@@ -2190,7 +2190,7 @@ extension ParserUnitTests {
             ("saVE", "\r", .save, #line),
             ("modifier", "\r", .optionExtension(.init(modifierName: "modifier", params: nil)), #line),
         ]
-        self.iterateTestInputs_generic(inputs, testFunction: GrammarParser.parseSearchReturnOption)
+        self.iterateTests(testFunction: GrammarParser.parseSearchReturnOption, validInputs: inputs, parserErrorInputs: [], incompleteMessageInputs: [])
     }
 }
 
@@ -2206,7 +2206,7 @@ extension ParserUnitTests {
                 .optionExtension(.init(modifierName: "m2", params: nil)),
             ], #line),
         ]
-        self.iterateTestInputs_generic(inputs, testFunction: GrammarParser.parseSearchReturnOptions)
+        self.iterateTests(testFunction: GrammarParser.parseSearchReturnOptions, validInputs: inputs, parserErrorInputs: [], incompleteMessageInputs: [])
     }
 }
 
@@ -2666,7 +2666,7 @@ extension ParserUnitTests {
         let inputs: [(String, String, TaggedExtension, UInt)] = [
             ("label 1", "\r\n", .init(label: "label", value: .sequence([1])), #line),
         ]
-        self.iterateTestInputs_generic(inputs, testFunction: GrammarParser.parseTaggedExtension)
+        self.iterateTests(testFunction: GrammarParser.parseTaggedExtension, validInputs: inputs, parserErrorInputs: [], incompleteMessageInputs: [])
     }
 }
 
@@ -2681,7 +2681,7 @@ extension ParserUnitTests {
             ("test1 test2", "\r\n", ["test1", "test2"], #line),
             ("test1 test2 (test3 test4) test5", "\r\n", ["test1", "test2", "test3", "test4", "test5"], #line),
         ]
-        self.iterateTestInputs_generic(inputs, testFunction: GrammarParser.parseTaggedExtensionComplex)
+        self.iterateTests(testFunction: GrammarParser.parseTaggedExtensionComplex, validInputs: inputs, parserErrorInputs: [], incompleteMessageInputs: [])
     }
 }
 
