@@ -28,7 +28,7 @@ public enum Command: Equatable {
     case status(MailboxName, [MailboxAttribute])
     case subscribe(MailboxName)
     case unsubscribe(MailboxName)
-    case authenticate(method: String, InitialResponse?, [ByteBuffer])
+    case authenticate(method: String, [ByteBuffer])
     case login(username: String, password: String)
     case starttls
     case check
@@ -85,8 +85,8 @@ extension EncodeBuffer {
             return self.writeCommandKind_subscribe(mailbox: mailbox)
         case .unsubscribe(let mailbox):
             return self.writeCommandKind_unsubscribe(mailbox: mailbox)
-        case .authenticate(let method, let initial, let data):
-            return self.writeCommandKind_authenticate(method: method, initial: initial, data: data)
+        case .authenticate(let method, let data):
+            return self.writeCommandKind_authenticate(method: method, data: data)
         case .login(let userid, let password):
             return self.writeCommandKind_login(userID: userid, password: password)
         case .starttls:
@@ -230,12 +230,8 @@ extension EncodeBuffer {
             self.writeMailbox(mailbox)
     }
 
-    private mutating func writeCommandKind_authenticate(method: String, initial: InitialResponse?, data: [ByteBuffer]) -> Int {
+    private mutating func writeCommandKind_authenticate(method: String, data: [ByteBuffer]) -> Int {
         self.writeString("AUTHENTICATE \(method)") +
-            self.writeIfExists(initial) { (initial) -> Int in
-                self.writeSpace() +
-                    self.writeInitialResponse(initial)
-            } +
             self.writeArray(data, separator: "", parenthesis: false) { (base64, self) -> Int in
                 var base64 = base64
                 return self.writeString("\r\n") + self.writeBuffer(&base64)
