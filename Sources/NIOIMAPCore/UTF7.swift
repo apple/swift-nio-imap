@@ -66,12 +66,16 @@ public enum UTF7 {
         
         var buffer = buffer
         while let byte = buffer.readBytes(length: 1)?.first {
+            
             if byte == UInt8(ascii: "&") {
+                
+                // check if the string is &-, if so then ignore the -
                 if buffer.getBytes(at: buffer.readerIndex, length: 1) == [UInt8(ascii: "-")] {
                     buffer.moveReaderIndex(forwardBy: 1)
                     string.append("&")
                 } else {
                     
+                    // get all the specials until we return to normal non-base64
                     var specials: [UInt8] = []
                     while let byte = buffer.readBytes(length: 1)?.first {
                         if byte == UInt8(ascii: "-") {
