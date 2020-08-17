@@ -45,7 +45,7 @@ extension UTF7_Tests {
             ("R&AOk-pertoire", "Répertoire", #line),
         ]
         for (input, expected, line) in inputs {
-            let actual = UTF7.decode(ByteBuffer(string: input))
+            let actual = try! UTF7.decode(ByteBuffer(string: input))
             XCTAssertEqual(expected, actual, line: line)
         }
     }

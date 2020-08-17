@@ -60,8 +60,44 @@ public enum UTF7 {
         return buffer
     }
     
-    public static func decode(_ buffer: ByteBuffer) -> String {
-        return ""
+    public static func decode(_ buffer: ByteBuffer) throws -> String {
+        
+        var string: String = ""
+        
+        var buffer = buffer
+        while let byte = buffer.readBytes(length: 1)?.first {
+            if byte == UInt8(ascii: "&") {
+                if buffer.getBytes(at: buffer.readerIndex, length: 1) == [UInt8(ascii: "-")] {
+                    buffer.moveReaderIndex(forwardBy: 1)
+                    string.append("&")
+                } else {
+                    
+                    var specials: [UInt8] = []
+                    while let byte = buffer.readBytes(length: 1)?.first {
+                        if byte == UInt8(ascii: "-") {
+                            break
+                        } else {
+                            specials.append(byte)
+                        }
+                    }
+                    
+                    let paddingNeeded = 4 - (specials.count % 4)
+                    let padding = [UInt8](repeating: UInt8(ascii: "="), count: paddingNeeded)
+                    let decoded = try Base64.decode(encoded: specials + padding)
+                    var iterator = decoded.makeIterator()
+                    
+                    var output: [UInt16] = []
+                    while let high = iterator.next(), let low = iterator.next() {
+                        output.append(UInt16(high) << 8 | UInt16(low))
+                    }
+                    string.append(String(decoding: output, as: Unicode.UTF16.self))
+                }
+            } else {
+                string.append(Character(.init(byte)))
+            }
+        }
+        
+        return string
     }
     
 }
