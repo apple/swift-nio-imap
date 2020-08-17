@@ -77,9 +77,10 @@ public enum UTF7 {
                         }
                     }
 
-                    let paddingNeeded = 4 - (specials.count % 4)
-                    let padding = [UInt8](repeating: UInt8(ascii: "="), count: paddingNeeded)
-                    let decoded = try Base64.decode(encoded: specials + padding)
+                    while specials.count % 4 > 0 {
+                        specials.append(UInt8(ascii: "="))
+                    }
+                    let decoded = try Base64.decode(encoded: specials)
                     var iterator = decoded.makeIterator()
 
                     precondition(decoded.count % 2 == 0, "Expected an even number of bytes.")
