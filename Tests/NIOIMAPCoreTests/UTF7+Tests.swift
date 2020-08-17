@@ -10,7 +10,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 //
-//===-----------------------------        §q    aA  HYBCV -----------------------------------------===//
+//===----------------------------------------------------------------------===//
                             
 import NIO
 @testable import NIOIMAPCore
@@ -26,6 +26,8 @@ extension UTF7_Tests {
             ("abc", "abc", #line),
             ("&", "&-", #line),
             ("ab&12", "ab&-12", #line),
+            ("mail/€/£", "mail/&IKw-/&AKM-", #line),
+            ("Répertoire", "R&AOk-pertoire", #line),
         ]
         for (input, expected, line) in inputs {
             let actual = UTF7.encode(input)

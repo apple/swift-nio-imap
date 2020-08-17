@@ -23,14 +23,14 @@ public enum UTF7 {
         
         var index = string.startIndex
         while index < string.endIndex {
-            let char = string.utf8[index]
+            let char = string[index]
             
             // check if it's a simple character that can be copied straight in
-            if char > 0x1F && char < 0x7F {
-                if char == UInt8(ascii: "&") {
-                    buffer.writeBytes([char, 0x2D]) // "&" needs to be encoded as "&-"
+            if let ascVal = char.asciiValue, ascVal > 0x1F && ascVal < 0x7F {
+                if char == Character(.init(UInt8(ascii: "&"))) {
+                    buffer.writeBytes(char.utf8 + [0x2D]) // "&" needs to be encoded as "&-"
                 } else {
-                    buffer.writeInteger(char)
+                    buffer.writeBytes(char.utf8)
                 }
                 index = string.index(after: index)
             } else {
@@ -38,18 +38,21 @@ public enum UTF7 {
                 // complicated character, time for Base64
                 var specials: [UInt8] = []
                 while index < string.endIndex { // append all non-ascii chars to an array
-                    let char = string.utf8[index]
-                    if char > 0x1F && char < 0x7F {
+                    let char = string[index]
+                    if let ascVal = char.asciiValue, ascVal > 0x1F && ascVal < 0x7F {
                         break
                     } else {
-                        specials.append(char)
+                        for uint16 in char.utf16 {
+                            specials.append(UInt8(truncatingIfNeeded: uint16 >> 8))
+                            specials.append(UInt8(truncatingIfNeeded: uint16 & 0xFF))
+                        }
                         index = string.index(after: index)
                     }
                 }
                 
                 // convert the buffer to base64
                 let b64 = Base64.encode(bytes: specials)
-                buffer.writeString("&\(b64)-")
+                buffer.writeString("&\(b64.filter { $0 != "="} )-")
                 
             }
         }
