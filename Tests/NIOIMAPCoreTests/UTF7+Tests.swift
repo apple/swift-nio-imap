@@ -11,7 +11,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 //===----------------------------------------------------------------------===//
-                            
+
 import NIO
 @testable import NIOIMAPCore
 import XCTest
@@ -19,7 +19,6 @@ import XCTest
 class UTF7_Tests: XCTestCase {}
 
 extension UTF7_Tests {
- 
     func testEncode() {
         let inputs: [(String, String, UInt)] = [
             ("", "", #line),
@@ -34,7 +33,7 @@ extension UTF7_Tests {
             XCTAssertEqual(expected, String(buffer: actual), line: line)
         }
     }
-    
+
     func testDecode() {
         let inputs: [(String, String, UInt)] = [
             ("", "", #line),
@@ -49,5 +48,4 @@ extension UTF7_Tests {
             XCTAssertEqual(expected, actual, line: line)
         }
     }
-    
 }
