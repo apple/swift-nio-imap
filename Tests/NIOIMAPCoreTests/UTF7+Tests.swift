@@ -37,7 +37,12 @@ extension UTF7_Tests {
     
     func testDecode() {
         let inputs: [(String, String, UInt)] = [
-            ("", "", #line)
+            ("", "", #line),
+            ("abc", "abc", #line),
+            ("&-", "&", #line),
+            ("ab&-12", "ab&12", #line),
+            ("mail/&IKw-/&AKM-", "mail/€/£", #line),
+            ("R&AOk-pertoire", "Répertoire", #line),
         ]
         for (input, expected, line) in inputs {
             let actual = UTF7.decode(ByteBuffer(string: input))
