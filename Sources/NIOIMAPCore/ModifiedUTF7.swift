@@ -116,3 +116,21 @@ public enum ModifiedUTF7 {
         return string
     }
 }
+
+extension ModifiedUTF7 {
+    
+    struct InvalidEncoding: Error {
+        
+    }
+    
+    /// Checks that a given ByteBuffer can rountrip through IMAP's UTF-7 encoding.
+    /// - parameter buffer: The `ByteBuffer` to roundtrip.
+    static func validate(_ buffer: ByteBuffer) throws {
+        let decoded = try self.decode(buffer)
+        let encoded = self.encode(decoded)
+        guard encoded == buffer else {
+            throw InvalidEncoding()
+        }
+    }
+    
+}
