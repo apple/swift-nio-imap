@@ -16,9 +16,9 @@ import NIO
 @testable import NIOIMAPCore
 import XCTest
 
-class UTF7_Tests: XCTestCase {}
+class ModifiedUTF7_Tests: XCTestCase {}
 
-extension UTF7_Tests {
+extension ModifiedUTF7_Tests {
     func testEncode() {
         let inputs: [(String, String, UInt)] = [
             ("", "", #line),
@@ -29,7 +29,7 @@ extension UTF7_Tests {
             ("Répertoire", "R&AOk-pertoire", #line),
         ]
         for (input, expected, line) in inputs {
-            let actual = UTF7.encode(input)
+            let actual = ModifiedUTF7.encode(input)
             XCTAssertEqual(expected, String(buffer: actual), line: line)
         }
     }
@@ -44,7 +44,7 @@ extension UTF7_Tests {
             ("R&AOk-pertoire", "Répertoire", #line),
         ]
         for (input, expected, line) in inputs {
-            let actual = try! UTF7.decode(ByteBuffer(string: input))
+            let actual = try! ModifiedUTF7.decode(ByteBuffer(string: input))
             XCTAssertEqual(expected, actual, line: line)
         }
     }
