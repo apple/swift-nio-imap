@@ -126,23 +126,18 @@ extension GrammarParser {
         }
     }
 
-    // authenticate    = "AUTHENTICATE" SP auth-type [SP initial-resp] *(CRLF base64)
+    // authenticate    = "AUTHENTICATE" SP auth-type *(CRLF base64)
     static func parseAuthenticate(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Command {
         try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Command in
             try ParserLibrary.parseFixedString("AUTHENTICATE ", buffer: &buffer, tracker: tracker)
             let authMethod = try self.parseAtom(buffer: &buffer, tracker: tracker)
-
-            let initial = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> InitialResponse in
-                try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
-                return try self.parseInitialResp(buffer: &buffer, tracker: tracker)
-            }
 
             // NOTE: Spec is super unclear, so we're ignoring the possibility of multiple base 64 chunks right now
 //            let data = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> [ByteBuffer] in
 //                try ParserLibrary.parseFixedString("\r\n", buffer: &buffer, tracker: tracker)
 //                return [try self.parseBase64(buffer: &buffer, tracker: tracker)]
 //            } ?? []
-            return .authenticate(method: authMethod, initial, [])
+            return .authenticate(method: authMethod, [])
         }
     }
 
@@ -1399,23 +1394,6 @@ extension GrammarParser {
     static func parseIdleDone(buffer: inout ByteBuffer, tracker: StackTracker) throws {
         try ParserLibrary.parseFixedString("DONE", buffer: &buffer, tracker: tracker)
         try ParserLibrary.parseNewline(buffer: &buffer, tracker: tracker)
-    }
-
-    // initial-resp    =  (base64 / "=")
-    static func parseInitialResp(buffer: inout ByteBuffer, tracker: StackTracker) throws -> InitialResponse {
-        func parseInitialResp_equals(buffer: inout ByteBuffer, tracker: StackTracker) throws -> InitialResponse {
-            try ParserLibrary.parseFixedString("=", buffer: &buffer, tracker: tracker)
-            return .equals
-        }
-
-        func parseInitialResp_base64(buffer: inout ByteBuffer, tracker: StackTracker) throws -> InitialResponse {
-            .base64(try self.parseBase64(buffer: &buffer, tracker: tracker))
-        }
-
-        return try ParserLibrary.parseOneOf([
-            parseInitialResp_equals,
-            parseInitialResp_base64,
-        ], buffer: &buffer, tracker: tracker)
     }
 
     // list            = "LIST" [SP list-select-opts] SP mailbox SP mbox-or-pat [SP list-return-opts]
