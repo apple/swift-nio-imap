@@ -27,6 +27,14 @@ extension ModifiedUTF7_Tests {
             ("ab&12", "ab&-12", #line),
             ("mail/€/£", "mail/&IKw-/&AKM-", #line),
             ("Répertoire", "R&AOk-pertoire", #line),
+            ("パリ", "&MNEw6g-", #line),
+            ("雑件", "&ltFO9g-", #line),
+            ("🏣🏣", "&2Dzf49g83+M-", #line),
+            ("🧑🏽‍🦳", "&2D7d0dg83,0gDdg+3bM-", #line),
+            ("a/b/c", "a/b/c", #line),
+            (#"a\b\c"#, #"a\b\c"#, #line),
+            ("a+b", "a+b", #line),
+            ("~ab", "~ab", #line),
         ]
         for (input, expected, line) in inputs {
             let actual = ModifiedUTF7.encode(input)
@@ -42,10 +50,17 @@ extension ModifiedUTF7_Tests {
             ("ab&-12", "ab&12", #line),
             ("mail/&IKw-/&AKM-", "mail/€/£", #line),
             ("R&AOk-pertoire", "Répertoire", #line),
+            ("&MNEw6g-", "パリ", #line),
+            ("&ltFO9g-", "雑件", #line),
+            ("&2Dzf49g83+M-", "🏣🏣", #line),
+            ("&2D7d0dg83,0gDdg+3bM-", "🧑🏽‍🦳", #line),
+            ("a/b/c", "a/b/c", #line),
+            (#"a\b\c"#, #"a\b\c"#, #line),
+             ("a+b", "a+b", #line),
+             ("~ab", "~ab", #line),
         ]
         for (input, expected, line) in inputs {
-            let actual = try! ModifiedUTF7.decode(ByteBuffer(string: input))
-            XCTAssertEqual(expected, actual, line: line)
+            XCTAssertNoThrow(XCTAssertEqual(expected, try ModifiedUTF7.decode(ByteBuffer(string: input)), line: line), line: line)
         }
     }
 }
