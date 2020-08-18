@@ -15,7 +15,12 @@
 import Base64Kit
 import struct NIO.ByteBuffer
 
+/// IMAP uses a slightly modified version of UTF7, as documented in RFC 3501 section 5.1.3.
 public enum UTF7 {
+    
+    /// Encodes a `String` into UTF-7 bytes.
+    /// - parameter string: The string to encode.
+    /// - returns: A `ByteBuffer` containing UTF-7 bytes.
     public static func encode(_ string: String) -> ByteBuffer {
         var buffer = ByteBuffer()
         buffer.reserveCapacity(string.utf8.count)
@@ -58,6 +63,9 @@ public enum UTF7 {
         return buffer
     }
 
+    /// Decodes a `ByteBuffer` containing UTF-7 bytes into a `String`
+    /// - parameter buffer: The bytes to decode.
+    /// - returns: A `String` that can be used to e.g. display to a user.
     public static func decode(_ buffer: ByteBuffer) throws -> String {
         var string: String = ""
 
