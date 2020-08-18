@@ -56,14 +56,14 @@ extension ModifiedUTF7_Tests {
             ("&2D7d0dg83,0gDdg+3bM-", "🧑🏽‍🦳", #line),
             ("a/b/c", "a/b/c", #line),
             (#"a\b\c"#, #"a\b\c"#, #line),
-             ("a+b", "a+b", #line),
-             ("~ab", "~ab", #line),
+            ("a+b", "a+b", #line),
+            ("~ab", "~ab", #line),
         ]
         for (input, expected, line) in inputs {
             XCTAssertNoThrow(XCTAssertEqual(expected, try ModifiedUTF7.decode(ByteBuffer(string: input)), line: line), line: line)
         }
     }
-    
+
     func testDecode_error() {
         XCTAssertThrowsError(try ModifiedUTF7.decode(ByteBuffer(string: "&aa==-"))) { e in
             XCTAssertTrue(e is ModifiedUTF7.DecodingError)

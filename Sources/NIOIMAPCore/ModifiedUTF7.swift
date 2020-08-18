@@ -16,11 +16,10 @@ import struct NIO.ByteBuffer
 
 /// IMAP uses a slightly modified version of UTF7, as documented in RFC 3501 section 5.1.3.
 public enum ModifiedUTF7 {
-    
     public enum DecodingError: Error {
         case oddByteCount
     }
-    
+
     /// Encodes a `String` into UTF-7 bytes.
     /// - parameter string: The string to encode.
     /// - returns: A `ByteBuffer` containing UTF-7 bytes.
@@ -102,7 +101,7 @@ public enum ModifiedUTF7 {
                     guard decoded.count % 2 == 0 else {
                         throw DecodingError.oddByteCount
                     }
-                    
+
                     var output: [UInt16] = []
                     while let high = iterator.next(), let low = iterator.next() {
                         output.append(UInt16(high) << 8 | UInt16(low))
