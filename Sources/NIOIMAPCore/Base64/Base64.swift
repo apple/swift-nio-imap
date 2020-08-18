@@ -1,3 +1,5 @@
+// Courtesy of @fabianfett
+// https://github.com/fabianfett/swift-base64-kit
 
 public struct Base64 {}
 
@@ -213,7 +215,7 @@ extension Base64 {
             return decoded!
         }
 
-        return try decode(encoded: encoded + "", options: options)
+        return try self.decode(encoded: encoded + "", options: options)
     }
 
     // MARK: Internal
@@ -332,6 +334,6 @@ extension String {
     public func base64decoded(options: Base64.DecodingOptions = []) throws -> [UInt8] {
         // In Base64, 3 bytes become 4 output characters, and we pad to the nearest multiple
         // of four.
-        return try Base64.decode(encoded: self, options: options)
+        try Base64.decode(encoded: self, options: options)
     }
 }
