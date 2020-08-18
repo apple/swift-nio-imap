@@ -13,7 +13,6 @@ let package = Package(
         .package(url: "https://github.com/apple/swift-nio-ssl", from: "2.7.0"),
         .package(url: "https://github.com/apple/swift-log", from: "1.2.0"),
         .package(url: "https://github.com/nicklockwood/SwiftFormat", .exact("0.44.11")),
-        .package(url: "https://github.com/fabianfett/swift-base64-kit", .exact("0.2.0")),
     ],
     targets: [
         .target(
@@ -36,7 +35,6 @@ let package = Package(
             name: "NIOIMAPCore",
             dependencies: [
                 .product(name: "NIO", package: "swift-nio"),
-                .product(name: "Base64Kit", package: "swift-base64-kit"),
             ]
         ),
         .testTarget(

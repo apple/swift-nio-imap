@@ -12,7 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import Base64Kit
 import struct NIO.ByteBuffer
 
 /// IMAP uses a slightly modified version of UTF7, as documented in RFC 3501 section 5.1.3.
