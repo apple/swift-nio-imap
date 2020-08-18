@@ -25,9 +25,9 @@ public enum UTF7 {
             let char = string[index]
 
             // check if it's a simple character that can be copied straight in
-            if let ascVal = char.asciiValue, ascVal > 0x1F, ascVal < 0x7F {
-                buffer.writeInteger(ascVal)
-                if ascVal == UInt8(ascii: "&") {
+            if let asciiValue = char.asciiValue, asciiValue > 0x1F, asciiValue < 0x7F {
+                buffer.writeInteger(asciiValue)
+                if asciiValue == UInt8(ascii: "&") {
                     buffer.writeInteger(UInt8(ascii: "-"))
                 }
                 index = string.index(after: index)
@@ -49,7 +49,9 @@ public enum UTF7 {
 
                 // convert the buffer to base64
                 let b64 = Base64.encode(bytes: specials)
-                buffer.writeString("&\(b64.filter { $0 != "=" })-")
+                buffer.writeInteger(UInt8(ascii: "&"))
+                buffer.writeSubstring(b64.prefix { $0 != Character(.init(UInt8(ascii: "=")))})
+                buffer.writeInteger(UInt8(ascii: "-"))
             }
         }
 
