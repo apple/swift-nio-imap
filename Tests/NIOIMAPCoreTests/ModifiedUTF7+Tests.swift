@@ -63,4 +63,10 @@ extension ModifiedUTF7_Tests {
             XCTAssertNoThrow(XCTAssertEqual(expected, try ModifiedUTF7.decode(ByteBuffer(string: input)), line: line), line: line)
         }
     }
+    
+    func testDecode_error() {
+        XCTAssertThrowsError(try ModifiedUTF7.decode(ByteBuffer(string: "&aa==-"))) { e in
+            XCTAssertTrue(e is ModifiedUTF7.DecodingError)
+        }
+    }
 }
