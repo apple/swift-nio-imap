@@ -69,7 +69,7 @@ extension ModifiedUTF7_Tests {
             XCTAssertTrue(e is ModifiedUTF7.DecodingError)
         }
     }
-    
+
     func testValidate() {
         XCTAssertNoThrow(try ModifiedUTF7.validate("a"))
         XCTAssertNoThrow(try ModifiedUTF7.validate("a/b/c"))
