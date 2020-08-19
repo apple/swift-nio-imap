@@ -153,7 +153,13 @@ extension GrammarParser {
                     }
                 }
             }
-            return ByteBuffer(bytes: try Base64.decode(encoded: String(buffer: buffer)))
+            
+            do {
+                let decoded = try Base64.decode(encoded: String(buffer: bytes))
+                return ByteBuffer(bytes: decoded)
+            } catch {
+                throw ParserError(hint: "Invalid base64 \(error)")
+            }
         }
     }
 
@@ -677,7 +683,7 @@ extension GrammarParser {
         }
 
         func parseContinueReq_base64(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ContinueRequest {
-            .base64(try self.parseBase64(buffer: &buffer, tracker: tracker))
+            .data(try self.parseBase64(buffer: &buffer, tracker: tracker))
         }
 
         return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> ContinueRequest in
