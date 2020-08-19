@@ -153,10 +153,7 @@ extension GrammarParser {
                     }
                 }
             }
-            guard bytes.readableBytes % 4 == 0 else {
-                throw ParserError(hint: "Base64 not divisible by 4 \(readableBytesView)")
-            }
-            return bytes
+            return ByteBuffer(bytes: try Base64.decode(encoded: String(buffer: buffer)))
         }
     }
 

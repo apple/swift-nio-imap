@@ -79,8 +79,8 @@ extension EncodeBuffer {
     }
 
     @discardableResult mutating func writeBase64(_ base64: ByteBuffer) -> Int {
-        var buffer = base64
-        return self.writeBuffer(&buffer)
+        let encoded = Base64.encode(bytes: base64.readableBytesView)
+        return self.writeString(encoded)
     }
 
     @discardableResult mutating func writeLiteral8<T: Collection>(_ bytes: T) -> Int where T.Element == UInt8 {
