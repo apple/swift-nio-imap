@@ -75,5 +75,7 @@ extension ModifiedUTF7_Tests {
         XCTAssertNoThrow(try ModifiedUTF7.validate("a/b/c"))
         XCTAssertNoThrow(try ModifiedUTF7.validate("&2Dzf49g83+M-"))
         XCTAssertNoThrow(try ModifiedUTF7.validate("&ltFO9g-"))
+        XCTAssertThrowsError(try ModifiedUTF7.validate("&Jjo!"))
+        XCTAssertThrowsError(try ModifiedUTF7.validate("&U,BTFw-&ZeVnLIqe-"))
     }
 }
