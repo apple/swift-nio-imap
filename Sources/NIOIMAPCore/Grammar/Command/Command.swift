@@ -232,9 +232,8 @@ extension EncodeBuffer {
 
     private mutating func writeCommandKind_authenticate(method: String, data: [ByteBuffer]) -> Int {
         self.writeString("AUTHENTICATE \(method)") +
-            self.writeArray(data, separator: "", parenthesis: false) { (base64, self) -> Int in
-                var base64 = base64
-                return self.writeString("\r\n") + self.writeBuffer(&base64)
+            self.writeArray(data, separator: "", parenthesis: false) { (buffer, self) -> Int in
+                return self.writeString("\r\n") + self.writeBufferAsBase64(buffer)
             }
     }
 
