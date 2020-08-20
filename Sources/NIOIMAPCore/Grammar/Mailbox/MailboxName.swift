@@ -22,11 +22,6 @@ public struct MailboxName: Equatable {
     /// The raw bytes, readable as `[UInt8]`
     public var storage: ByteBuffer
 
-    /// The raw bytes decoded into a UTF8 `String`
-    public var stringValue: String {
-        String(buffer: self.storage)
-    }
-
     /// `true` if the internal storage reads "INBOX"
     /// otherwise `false`
     public var isInbox: Bool {
@@ -63,13 +58,18 @@ public struct MailboxName: Equatable {
             .split(separator: first, omittingEmptySubsequences: omittingEmptySubsequences)
             .map { String(decoding: $0, as: Unicode.UTF8.self) }
     }
+    
+    /// A user-displayable UTF-8 string made from decoding the raw modified UTF-7 bytes.
+    public func displayString() throws -> String {
+        try ModifiedUTF7.decode(self.storage)
+    }
 }
 
 // MARK: - CustomStringConvertible
 
 extension MailboxName: CustomStringConvertible {
     public var description: String {
-        self.stringValue
+        String(buffer: self.storage)
     }
 }
 

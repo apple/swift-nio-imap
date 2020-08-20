@@ -16,11 +16,21 @@ import NIO
 @testable import NIOIMAPCore
 import XCTest
 
-class Mailbox_Tests: EncodeTestClass {}
+class Mailbox_Tests: EncodeTestClass {
+    
+    func testDisplayString() {
+        let inputs: [(MailboxName, String, UInt)] = [
+            (.init(ByteBuffer(string: "")), "", #line),
+            (.init(ByteBuffer(string: "a")), "a", #line),
+            (.init(ByteBuffer(string: "a/b")), "a/b", #line),
+            (.init(ByteBuffer(string: "a/&2D7d0dg83,0gDdg+3bM-/c")), "a/🧑🏽‍🦳/c", #line),
+        ]
 
-// MARK: - Encoding
+        for (test, expectedString, line) in inputs {
+            XCTAssertNoThrow(XCTAssertEqual(try test.displayString(), expectedString, line: line), line: line)
+        }
+    }
 
-extension Mailbox_Tests {
     func testEncode() {
         let inputs: [(MailboxName, String, UInt)] = [
             (.inbox, "\"INBOX\"", #line),
@@ -37,4 +47,5 @@ extension Mailbox_Tests {
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }
     }
+    
 }
