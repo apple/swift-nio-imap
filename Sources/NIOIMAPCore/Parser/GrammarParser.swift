@@ -153,7 +153,7 @@ extension GrammarParser {
                     }
                 }
             }
-            
+
             do {
                 let decoded = try Base64.decode(encoded: String(buffer: bytes))
                 return ByteBuffer(bytes: decoded)

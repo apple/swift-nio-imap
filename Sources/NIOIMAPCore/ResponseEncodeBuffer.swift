@@ -43,7 +43,7 @@ extension ResponseEncodeBuffer {
         case .responseText(let text):
             size += self.buffer.writeResponseText(text)
         case .data(let base64):
-            size += self.buffer.writeBase64(base64)
+            size += self.buffer.writeBufferAsBase64(base64)
         }
         size += self.buffer.writeString("\r\n")
         return size

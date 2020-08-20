@@ -78,8 +78,8 @@ extension EncodeBuffer {
         return bytes.count <= 70 && bytes.allSatisfy { $0.isQuotedChar }
     }
 
-    @discardableResult mutating func writeBase64(_ base64: ByteBuffer) -> Int {
-        let encoded = Base64.encode(bytes: base64.readableBytesView)
+    @discardableResult mutating func writeBufferAsBase64(_ buffer: ByteBuffer) -> Int {
+        let encoded = Base64.encode(bytes: buffer.readableBytesView)
         return self.writeString(encoded)
     }
 
