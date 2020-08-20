@@ -58,7 +58,7 @@ public struct MailboxName: Equatable {
             .split(separator: first, omittingEmptySubsequences: omittingEmptySubsequences)
             .map { String(decoding: $0, as: Unicode.UTF8.self) }
     }
-    
+
     /// A user-displayable UTF-8 string made from decoding the raw modified UTF-7 bytes.
     public func displayString() throws -> String {
         try ModifiedUTF7.decode(self.storage)

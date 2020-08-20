@@ -17,7 +17,6 @@ import NIO
 import XCTest
 
 class Mailbox_Tests: EncodeTestClass {
-    
     func testDisplayString() {
         let inputs: [(MailboxName, String, UInt)] = [
             (.init(ByteBuffer(string: "")), "", #line),
@@ -47,5 +46,4 @@ class Mailbox_Tests: EncodeTestClass {
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }
     }
-    
 }
