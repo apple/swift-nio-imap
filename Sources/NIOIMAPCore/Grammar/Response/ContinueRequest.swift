@@ -17,5 +17,5 @@ import struct NIO.ByteBuffer
 /// IMAPv4 `continue-req`
 public enum ContinueRequest: Equatable {
     case responseText(ResponseText)
-    case base64(ByteBuffer)
+    case data(ByteBuffer)
 }

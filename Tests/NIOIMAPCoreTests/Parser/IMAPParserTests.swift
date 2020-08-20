@@ -409,16 +409,16 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseBase64Terminal_valid_short() {
-        TestUtilities.withBuffer("abcd1234", terminator: " ") { (buffer) in
+        TestUtilities.withBuffer("YWFh", terminator: " ") { (buffer) in
             let result = try GrammarParser.parseBase64(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(result, "abcd1234")
+            XCTAssertEqual(result, "aaa")
         }
     }
 
     func testParseBase64Terminal_valid_short_terminal() {
-        TestUtilities.withBuffer("abcd1234++==", terminator: " ") { (buffer) in
+        TestUtilities.withBuffer("YQ==", terminator: " ") { (buffer) in
             let result = try GrammarParser.parseBase64(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(result, "abcd1234++==")
+            XCTAssertEqual(result, "a")
         }
     }
 }
@@ -714,7 +714,7 @@ extension ParserUnitTests {
             testFunction: GrammarParser.parseContinueRequest,
             validInputs: [
                 ("+ OK\r\n", " ", .responseText(.init(code: nil, text: "OK")), #line),
-                ("+ abc=\r\n", " ", .base64("abc="), #line),
+                ("+ YQ==\r\n", " ", .data("a"), #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
