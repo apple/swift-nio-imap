@@ -28,6 +28,9 @@ public enum ResponseTextCode: Equatable {
     case uidValidity(Int)
     case unseen(Int)
     case namespace(NamespaceResponse)
+    case uidAppend(ResponseCodeAppend)
+    case uidCopy(ResponseCodeCopy)
+    case uidNotSticky
     case other(String, String?)
 }
 
@@ -64,6 +67,12 @@ extension EncodeBuffer {
             return self.writeResponseTextCode_other(atom: atom, string: string)
         case .namespace(let namesapce):
             return self.writeNamespaceResponse(namesapce)
+        case .uidCopy(let data):
+        return self.writeResponseCodeCopy(data)
+        case .uidAppend(let data):
+        return self.writeResponseCodeAppend(data)
+        case .uidNotSticky:
+            return self.writeString("UIDNOTSTICKY")
         }
     }
 
