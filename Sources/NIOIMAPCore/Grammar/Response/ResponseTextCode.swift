@@ -68,9 +68,9 @@ extension EncodeBuffer {
         case .namespace(let namesapce):
             return self.writeNamespaceResponse(namesapce)
         case .uidCopy(let data):
-        return self.writeResponseCodeCopy(data)
+            return self.writeResponseCodeCopy(data)
         case .uidAppend(let data):
-        return self.writeResponseCodeAppend(data)
+            return self.writeResponseCodeAppend(data)
         case .uidNotSticky:
             return self.writeString("UIDNOTSTICKY")
         }

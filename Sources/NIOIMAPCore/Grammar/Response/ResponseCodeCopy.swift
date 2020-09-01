@@ -26,13 +26,12 @@ public struct ResponseCodeCopy: Equatable {
 }
 
 // MARK: - Encoding
+
 extension EncodeBuffer {
-    
     @discardableResult mutating func writeResponseCodeCopy(_ data: ResponseCodeCopy) -> Int {
         self.writeString("COPYUID \(data.num) ") +
             self.writeUIDSet(data.set1) +
             self.writeSpace() +
             self.writeUIDSet(data.set2)
     }
-    
 }

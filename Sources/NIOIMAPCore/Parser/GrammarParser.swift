@@ -2694,16 +2694,16 @@ extension GrammarParser {
             }
             return .other(atom, string)
         }
-        
+
         func parseResponseTextCode_uidNotSticky(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ResponseTextCode {
             try ParserLibrary.parseFixedString("UIDNOTSTICKY", buffer: &buffer, tracker: tracker)
             return .uidNotSticky
         }
-        
+
         func parseResponseTextCode_uidCopy(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ResponseTextCode {
             .uidCopy(try self.parseResponseCodeCopy(buffer: &buffer, tracker: tracker))
         }
-        
+
         func parseResponseTextCode_uidAppend(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ResponseTextCode {
             .uidAppend(try self.parseResponseCodeAppend(buffer: &buffer, tracker: tracker))
         }

@@ -42,7 +42,7 @@ extension UIDTests {
 
 extension UIDTests {
     func testEncode_max() {
-        let expected = "4294967295"
+        let expected = "*"
         let size = self.testBuffer.writeUID(.max)
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
