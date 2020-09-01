@@ -32,7 +32,7 @@ extension MailboxName_Tests {
             (.init("//test1//test2//"), .init("/"), false, ["", "", "test1", "", "test2", "", ""], #line),
         ]
         for (name, character, ommitEmpty, expected, line) in inputs {
-            XCTAssertEqual(name.displayStringComponents(separator: character, omittingEmptySubsequences: ommitEmpty), expected, line: line)
+            XCTAssertNoThrow(XCTAssertEqual(try name.displayStringComponents(separator: character, omittingEmptySubsequences: ommitEmpty), expected, line: line))
         }
     }
 }

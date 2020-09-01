@@ -50,13 +50,13 @@ public struct MailboxName: Equatable {
     /// for display purposes only, do not use the return value as a mailbox name.
     /// The conversion to display string using heuristics to determine if the byte stream is the modified version of UTF-7 encoding defined in RFC 2152 (which it should be according to RFC 3501) — or if it is UTF-8 data. Many email clients erroneously encode mailbox names as UTF-8.
     /// - returns: [`String`] containing path components
-    public func displayStringComponents(separator: Character, omittingEmptySubsequences: Bool = true) -> [String] {
+    public func displayStringComponents(separator: Character, omittingEmptySubsequences: Bool = true) throws -> [String] {
         guard let first = separator.asciiValue else {
             preconditionFailure("Cannot split on a non-ascii character")
         }
-        return self.storage.readableBytesView
+        return try self.storage.readableBytesView
             .split(separator: first, omittingEmptySubsequences: omittingEmptySubsequences)
-            .map { String(decoding: $0, as: Unicode.UTF8.self) }
+            .map { try ModifiedUTF7.decode(ByteBuffer($0)) }
     }
 
     /// A user-displayable UTF-8 string made from decoding the raw modified UTF-7 bytes.

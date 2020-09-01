@@ -32,11 +32,11 @@ public struct MailboxInfo: Equatable {
     /// for display purposes only, do not use the return value as a mailbox name.
     /// The conversion to display string using heuristics to determine if the byte stream is the modified version of UTF-7 encoding defined in RFC 2152 (which it should be according to RFC 3501) — or if it is UTF-8 data. Many email clients erroneously encode mailbox names as UTF-8.
     /// - returns: [`String`] containing path components
-    public func displayStringComponents() -> [String] {
+    public func displayStringComponents() throws -> [String] {
         guard let separator = self.pathSeparator else {
             return [String(buffer: mailbox.storage)]
         }
-        return self.mailbox.displayStringComponents(separator: separator)
+        return try self.mailbox.displayStringComponents(separator: separator)
     }
 }
 
