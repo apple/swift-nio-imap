@@ -20,6 +20,7 @@ public enum ReturnOption: Equatable {
     case children
     case statusOption([MailboxAttribute])
     case optionExtension(OptionExtension)
+    case specialUse
 }
 
 // MARK: - Encoding
@@ -35,6 +36,8 @@ extension EncodeBuffer {
             return self.writeMailboxOptions(option)
         case .optionExtension(let option):
             return self.writeOptionExtension(option)
+        case .specialUse:
+            return self.writeString("SPECIAL-USE")
         }
     }
 }

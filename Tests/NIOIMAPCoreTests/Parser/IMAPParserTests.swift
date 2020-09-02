@@ -730,7 +730,7 @@ extension ParserUnitTests {
             testFunction: GrammarParser.parseCreate,
             validInputs: [
                 ("CREATE inbox", "\r", .create(.inbox, []), #line),
-                ("CREATE inbox (some)", "\r", .create(.inbox, [.init(name: "some", value: nil)]), #line),
+                ("CREATE inbox (some)", "\r", .create(.inbox, [.labelled(.init(name: "some", value: nil))]), #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
@@ -842,7 +842,7 @@ extension ParserUnitTests {
             testFunction: GrammarParser.parseCommandAuth,
             validInputs: [
                 ("LSUB inbox someList", " ", .lsub(reference: .inbox, pattern: "someList"), #line),
-                ("CREATE inbox (something)", " ", .create(.inbox, [.init(name: "something", value: nil)]), #line),
+                ("CREATE inbox (something)", " ", .create(.inbox, [.labelled(.init(name: "something", value: nil))]), #line),
                 ("NAMESPACE", " ", .namespace, #line),
             ],
             parserErrorInputs: [],
