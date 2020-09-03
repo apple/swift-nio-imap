@@ -731,6 +731,14 @@ extension ParserUnitTests {
             validInputs: [
                 ("CREATE inbox", "\r", .create(.inbox, []), #line),
                 ("CREATE inbox (some)", "\r", .create(.inbox, [.labelled(.init(name: "some", value: nil))]), #line),
+                ("CREATE inbox (USE (\\All))", "\r", .create(.inbox, [.attributes([.all])]), #line),
+                ("CREATE inbox (USE (\\All \\Flagged))", "\r", .create(.inbox, [.attributes([.all, .flagged])]), #line),
+                (
+                    "CREATE inbox (USE (\\All \\Flagged) some1 2 USE (\\Sent))",
+                    "\r",
+                    .create(.inbox, [.attributes([.all, .flagged]), .labelled(.init(name: "some1", value: .number(2))), .attributes([.sent])]),
+                    #line
+                ),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
@@ -742,6 +750,48 @@ extension ParserUnitTests {
         XCTAssertThrowsError(try GrammarParser.parseCreate(buffer: &buffer, tracker: .testTracker)) { e in
             XCTAssertTrue(e is _IncompleteMessage, "e has type \(e)")
         }
+    }
+}
+
+// MARK: - useAttribute parseUseAttribute
+
+extension ParserUnitTests {
+    func testParseUseAttribute() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseUseAttribute,
+            validInputs: [
+                ("\\All", "", .all, #line),
+                ("\\Archive", "", .archive, #line),
+                ("\\Flagged", "", .flagged, #line),
+                ("\\Trash", "", .trash, #line),
+                ("\\Sent", "", .sent, #line),
+                ("\\Drafts", "", .drafts, #line),
+                ("\\Other", " ", .init(rawValue: "\\Other"), #line),
+            ],
+            parserErrorInputs: [],
+            incompleteMessageInputs: []
+        )
+    }
+}
+
+// MARK: - useAttribute parseUseAttribute
+
+extension ParserUnitTests {
+    func testParseUseAttribute() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseUseAttribute,
+            validInputs: [
+                ("\\All", "", .all, #line),
+                ("\\Archive", "", .archive, #line),
+                ("\\Flagged", "", .flagged, #line),
+                ("\\Trash", "", .trash, #line),
+                ("\\Sent", "", .sent, #line),
+                ("\\Drafts", "", .drafts, #line),
+                ("\\Other", " ", .init(rawValue: "\\Other"), #line),
+            ],
+            parserErrorInputs: [],
+            incompleteMessageInputs: []
+        )
     }
 }
 

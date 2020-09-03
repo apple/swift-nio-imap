@@ -806,8 +806,9 @@ extension GrammarParser {
         }
         
         func parseUseAttribute_other(buffer: inout ByteBuffer, tracker: StackTracker) throws -> UseAttribute {
+            try ParserLibrary.parseFixedString("\\", buffer: &buffer, tracker: tracker)
             let att = try self.parseAtom(buffer: &buffer, tracker: tracker)
-            return .init(rawValue: att)
+            return .init(rawValue: "\\" + att)
         }
         
         return try ParserLibrary.parseOneOf([
