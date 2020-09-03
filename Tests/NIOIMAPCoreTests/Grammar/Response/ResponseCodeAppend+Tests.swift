@@ -12,22 +12,19 @@
 //
 //===----------------------------------------------------------------------===//
 
-/// IMAPv4 `response-code-apnd`
-public struct ResponseCodeAppend: Equatable {
-    public var num: Int
-    public var uid: UID
+import NIO
+@testable import NIOIMAPCore
+import XCTest
 
-    public init(num: Int, uid: UID) {
-        self.num = num
-        self.uid = uid
-    }
-}
+class ResponseCodeAppend_Tests: EncodeTestClass {}
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
-    @discardableResult mutating func writeResponseCodeAppend(_ data: ResponseCodeAppend) -> Int {
-        self.writeString("APPENDUID \(data.num) ") +
-            self.writeUID(data.uid)
+extension ResponseCodeAppend_Tests {
+    func testEncode() {
+        let inputs: [(ResponseCodeAppend, String, UInt)] = [
+            (.init(num: 1, uid: .max), "APPENDUID 1 *", #line),
+        ]
+        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeResponseCodeAppend($0) })
     }
 }
