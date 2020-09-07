@@ -774,27 +774,6 @@ extension ParserUnitTests {
     }
 }
 
-// MARK: - useAttribute parseUseAttribute
-
-extension ParserUnitTests {
-    func testParseUseAttribute() {
-        self.iterateTests(
-            testFunction: GrammarParser.parseUseAttribute,
-            validInputs: [
-                ("\\All", "", .all, #line),
-                ("\\Archive", "", .archive, #line),
-                ("\\Flagged", "", .flagged, #line),
-                ("\\Trash", "", .trash, #line),
-                ("\\Sent", "", .sent, #line),
-                ("\\Drafts", "", .drafts, #line),
-                ("\\Other", " ", .init(rawValue: "\\Other"), #line),
-            ],
-            parserErrorInputs: [],
-            incompleteMessageInputs: []
-        )
-    }
-}
-
 // MARK: - parseCommand
 
 extension ParserUnitTests {
