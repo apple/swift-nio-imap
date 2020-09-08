@@ -686,26 +686,6 @@ extension ParserUnitTests {
     }
 }
 
-// MARK: - parseChildMailboxFlag
-
-extension ParserUnitTests {
-    func testParseChildMailboxFlag() {
-        self.iterateTests(
-            testFunction: GrammarParser.parseChildMailboxFlag,
-            validInputs: [
-                ("\\hasChildren", " ", .hasChildren, #line),
-                ("\\haschildren", " ", .hasChildren, #line),
-                ("\\HASCHILDREN", " ", .hasChildren, #line),
-                ("\\hasNoChildren", " ", .hasNoChildren, #line),
-                ("\\hasnochildren", " ", .hasNoChildren, #line),
-                ("\\HASNOCHILDREN", " ", .hasNoChildren, #line),
-            ],
-            parserErrorInputs: [],
-            incompleteMessageInputs: []
-        )
-    }
-}
-
 // MARK: - parseContinueRequest
 
 extension ParserUnitTests {

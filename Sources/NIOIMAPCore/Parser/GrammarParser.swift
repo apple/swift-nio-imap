@@ -529,24 +529,6 @@ extension GrammarParser {
         }
     }
 
-    // child-mbox-flag =  "\hasChildren" / "\hasNoChildren"
-    static func parseChildMailboxFlag(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ChildMailboxFlag {
-        func parseChildMailboxFlag_children(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ChildMailboxFlag {
-            try ParserLibrary.parseFixedString(#"\hasChildren"#, buffer: &buffer, tracker: tracker)
-            return .hasChildren
-        }
-
-        func parseChildMailboxFlag_noChildren(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ChildMailboxFlag {
-            try ParserLibrary.parseFixedString(#"\hasNoChildren"#, buffer: &buffer, tracker: tracker)
-            return .hasNoChildren
-        }
-
-        return try ParserLibrary.parseOneOf([
-            parseChildMailboxFlag_children,
-            parseChildMailboxFlag_noChildren,
-        ], buffer: &buffer, tracker: tracker)
-    }
-
     // command         = tag SP (command-any / command-auth / command-nonauth /
     //                   command-select) CRLF
     static func parseCommand(buffer: inout ByteBuffer, tracker: StackTracker) throws -> TaggedCommand {
