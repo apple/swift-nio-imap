@@ -15,9 +15,8 @@
 import struct NIO.ByteBuffer
 
 public struct UseAttribute: Equatable, RawRepresentable {
-    
     public typealias RawValue = String
-    
+
     public static var all = Self(rawValue: "\\All")
     public static var archive = Self(rawValue: "\\Archive")
     public static var drafts = Self(rawValue: "\\Drafts")
@@ -25,13 +24,12 @@ public struct UseAttribute: Equatable, RawRepresentable {
     public static var junk = Self(rawValue: "\\Junk")
     public static var sent = Self(rawValue: "\\Sent")
     public static var trash = Self(rawValue: "\\Trash")
-    
+
     public var rawValue: String
-    
+
     public init(rawValue: String) {
         self.rawValue = rawValue
     }
-    
 }
 
 // MARK: - Encoding

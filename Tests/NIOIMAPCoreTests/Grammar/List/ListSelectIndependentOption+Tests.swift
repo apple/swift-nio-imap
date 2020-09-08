@@ -25,7 +25,7 @@ extension ListSelectIndependentOption_Tests {
         let inputs: [(ListSelectIndependentOption, String, UInt)] = [
             (.remote, "REMOTE", #line),
             (.option(.init(kind: .standard("test"), value: nil)), "test", #line),
-            (.specialUse, "SPECIAL-USE", #line)
+            (.specialUse, "SPECIAL-USE", #line),
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeListSelectIndependentOption($0) })
     }

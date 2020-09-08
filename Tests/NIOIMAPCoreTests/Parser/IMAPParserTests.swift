@@ -743,7 +743,7 @@ extension ParserUnitTests {
             parserErrorInputs: [],
             incompleteMessageInputs: [
                 ("CREATE inbox", "", #line),
-                ("CREATE inbox (USE", "", #line)
+                ("CREATE inbox (USE", "", #line),
             ]
         )
     }
@@ -786,13 +786,13 @@ extension ParserUnitTests {
         self.iterateTests(
             testFunction: GrammarParser.parseCreateParameters,
             validInputs: [
-                (" (param1 param2)", "\r", [.labelled(.init(name: "param1")), .labelled(.init(name: "param2"))], #line)
+                (" (param1 param2)", "\r", [.labelled(.init(name: "param1")), .labelled(.init(name: "param2"))], #line),
             ],
             parserErrorInputs: [
-                (" (param1", "\r", #line)
+                (" (param1", "\r", #line),
             ],
             incompleteMessageInputs: [
-                (" (param1", "", #line)
+                (" (param1", "", #line),
             ]
         )
     }

@@ -725,7 +725,7 @@ extension GrammarParser {
     }
 
     // create-param = create-param-name [SP create-param-value]
-    
+
     static func parseCreateParameters(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [CreateParameter] {
         try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
             try ParserLibrary.parseFixedString(" (", buffer: &buffer, tracker: tracker)
@@ -738,13 +738,12 @@ extension GrammarParser {
             return array
         }
     }
-    
+
     static func parseCreateParameter(buffer: inout ByteBuffer, tracker: StackTracker) throws -> CreateParameter {
-        
         func parseCreateParameter_parameter(buffer: inout ByteBuffer, tracker: StackTracker) throws -> CreateParameter {
-            return .labelled(try self.parseParameter(buffer: &buffer, tracker: tracker))
+            .labelled(try self.parseParameter(buffer: &buffer, tracker: tracker))
         }
-        
+
         func parseCreateParameter_specialUse(buffer: inout ByteBuffer, tracker: StackTracker) throws -> CreateParameter {
             try ParserLibrary.parseFixedString("USE (", buffer: &buffer, tracker: tracker)
             var array = [try self.parseUseAttribute(buffer: &buffer, tracker: tracker)]
@@ -755,13 +754,13 @@ extension GrammarParser {
             try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)
             return .attributes(array)
         }
-        
+
         return try ParserLibrary.parseOneOf([
             parseCreateParameter_specialUse,
             parseCreateParameter_parameter,
         ], buffer: &buffer, tracker: tracker)
     }
-    
+
     static func parseParameter(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Parameter {
         try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
             let name = try self.parseParameterName(buffer: &buffer, tracker: tracker)
@@ -772,48 +771,47 @@ extension GrammarParser {
             return .init(name: name, value: value)
         }
     }
-    
+
     static func parseUseAttribute(buffer: inout ByteBuffer, tracker: StackTracker) throws -> UseAttribute {
-        
         func parseUseAttribute_fixed(expected: String, returning: UseAttribute, buffer: inout ByteBuffer, tracker: StackTracker) throws -> UseAttribute {
             try ParserLibrary.parseFixedString(expected, buffer: &buffer, tracker: tracker)
             return returning
         }
-        
+
         func parseUseAttribute_all(buffer: inout ByteBuffer, tracker: StackTracker) throws -> UseAttribute {
             try parseUseAttribute_fixed(expected: "\\All", returning: .all, buffer: &buffer, tracker: tracker)
         }
-        
+
         func parseUseAttribute_archive(buffer: inout ByteBuffer, tracker: StackTracker) throws -> UseAttribute {
             try parseUseAttribute_fixed(expected: "\\Archive", returning: .archive, buffer: &buffer, tracker: tracker)
         }
-        
+
         func parseUseAttribute_drafts(buffer: inout ByteBuffer, tracker: StackTracker) throws -> UseAttribute {
             try parseUseAttribute_fixed(expected: "\\Drafts", returning: .drafts, buffer: &buffer, tracker: tracker)
         }
-        
+
         func parseUseAttribute_flagged(buffer: inout ByteBuffer, tracker: StackTracker) throws -> UseAttribute {
             try parseUseAttribute_fixed(expected: "\\Flagged", returning: .flagged, buffer: &buffer, tracker: tracker)
         }
-        
+
         func parseUseAttribute_junk(buffer: inout ByteBuffer, tracker: StackTracker) throws -> UseAttribute {
             try parseUseAttribute_fixed(expected: "\\Junk", returning: .junk, buffer: &buffer, tracker: tracker)
         }
-        
+
         func parseUseAttribute_sent(buffer: inout ByteBuffer, tracker: StackTracker) throws -> UseAttribute {
             try parseUseAttribute_fixed(expected: "\\Sent", returning: .sent, buffer: &buffer, tracker: tracker)
         }
-        
+
         func parseUseAttribute_trash(buffer: inout ByteBuffer, tracker: StackTracker) throws -> UseAttribute {
             try parseUseAttribute_fixed(expected: "\\Trash", returning: .trash, buffer: &buffer, tracker: tracker)
         }
-        
+
         func parseUseAttribute_other(buffer: inout ByteBuffer, tracker: StackTracker) throws -> UseAttribute {
             try ParserLibrary.parseFixedString("\\", buffer: &buffer, tracker: tracker)
             let att = try self.parseAtom(buffer: &buffer, tracker: tracker)
             return .init(rawValue: "\\" + att)
         }
-        
+
         return try ParserLibrary.parseOneOf([
             parseUseAttribute_all,
             parseUseAttribute_archive,
@@ -822,7 +820,7 @@ extension GrammarParser {
             parseUseAttribute_junk,
             parseUseAttribute_sent,
             parseUseAttribute_trash,
-            parseUseAttribute_other
+            parseUseAttribute_other,
         ], buffer: &buffer, tracker: tracker)
     }
 
