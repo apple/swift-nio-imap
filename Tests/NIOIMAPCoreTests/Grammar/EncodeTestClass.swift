@@ -60,7 +60,7 @@ class EncodeTestClass: XCTestCase {
             }
         }
     }
-    
+
     func iterateCommandInputs<T>(inputs: [(T, CommandEncodingOptions, [String], UInt)], encoder: (T) throws -> Int, file: StaticString = (#file)) {
         for (test, options, expectedStrings, line) in inputs {
             do {

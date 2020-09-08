@@ -41,7 +41,7 @@ extension CommandType_Tests {
             (.move([1], .inbox), CommandEncodingOptions(), ["MOVE 1 \"INBOX\""], #line),
             (.id([]), CommandEncodingOptions(), ["ID NIL"], #line),
         ]
-        
+
         for (test, options, expectedStrings, line) in inputs {
             var encodeBuffer = CommandEncodeBuffer(buffer: ByteBuffer(), options: options)
             let size = encodeBuffer.writeCommand(test)
