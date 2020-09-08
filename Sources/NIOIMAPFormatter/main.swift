@@ -22,9 +22,9 @@ import Glibc
 #if os(Linux) || os(macOS)
 let filePath: String
 #if compiler(>=5.3)
-filePath = #file
+filePath = (#file)
 #else
-filePath = #file
+filePath = (#file)
 #endif
 let swiftFormat = URL(fileURLWithPath: CommandLine.arguments.first!)
     .deletingLastPathComponent()
