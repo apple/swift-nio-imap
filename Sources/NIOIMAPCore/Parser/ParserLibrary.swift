@@ -23,7 +23,7 @@ public struct ParserError: Error {
     var file: String
     var line: Int
 
-    init(hint: String = "Unknown", file: String = #file, line: Int = #line) {
+    init(hint: String = "Unknown", file: String = (#file), line: Int = #line) {
         self.hint = hint
         self.file = file
         self.line = line
@@ -161,7 +161,7 @@ extension ParserLibrary {
         return parsed
     }
 
-    static func parseOneOf<T>(_ subParsers: [SubParser<T>], buffer: inout ByteBuffer, tracker: StackTracker, file: String = #file, line: Int = #line) throws -> T {
+    static func parseOneOf<T>(_ subParsers: [SubParser<T>], buffer: inout ByteBuffer, tracker: StackTracker, file: String = (#file), line: Int = #line) throws -> T {
         for parser in subParsers {
             do {
                 return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker, parser)

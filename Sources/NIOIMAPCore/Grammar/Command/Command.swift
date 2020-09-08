@@ -18,7 +18,7 @@ public enum Command: Equatable {
     case capability
     case logout
     case noop
-    case create(MailboxName, [Parameter])
+    case create(MailboxName, [CreateParameter])
     case delete(MailboxName)
     case examine(MailboxName, [Parameter] = [])
     case list(ListSelectOptions? = nil, reference: MailboxName, MailboxPatterns, [ReturnOption] = [])
@@ -152,10 +152,12 @@ extension EncodeBuffer {
             self.writeAppendMessage(firstMessageMetadata)
     }
 
-    private mutating func writeCommandKind_create(mailbox: MailboxName, parameters: [Parameter]) -> Int {
+    private mutating func writeCommandKind_create(mailbox: MailboxName, parameters: [CreateParameter]) -> Int {
         self.writeString("CREATE ") +
             self.writeMailbox(mailbox) +
-            self.writeParameters(parameters)
+            self.writeArray(parameters, separator: "", parenthesis: false) { (param, buffer) -> Int in
+                buffer.writeCreateParameter(param)
+            }
     }
 
     private mutating func writeCommandKind_delete(mailbox: MailboxName) -> Int {

@@ -16,17 +16,19 @@ import NIO
 @testable import NIOIMAPCore
 import XCTest
 
-class ListSelectIndependentOption_Tests: EncodeTestClass {}
+class CreateParameter_Tests: EncodeTestClass {}
 
 // MARK: - Encoding
 
-extension ListSelectIndependentOption_Tests {
+extension CreateParameter_Tests {
     func testEncode() {
-        let inputs: [(ListSelectIndependentOption, String, UInt)] = [
-            (.remote, "REMOTE", #line),
-            (.option(.init(kind: .standard("test"), value: nil)), "test", #line),
-            (.specialUse, "SPECIAL-USE", #line),
+        let inputs: [(CreateParameter, String, UInt)] = [
+            (.labelled(.init(name: "name")), "name", #line),
+            (.labelled(.init(name: "name", value: .number(1))), "name 1", #line),
+            (.attributes([]), "USE ()", #line),
+            (.attributes([.all]), "USE (\\All)", #line),
+            (.attributes([.all, .flagged]), "USE (\\All \\Flagged)", #line),
         ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeListSelectIndependentOption($0) })
+        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeCreateParameter($0) })
     }
 }

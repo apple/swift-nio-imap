@@ -16,17 +16,22 @@ import NIO
 @testable import NIOIMAPCore
 import XCTest
 
-class ListSelectIndependentOption_Tests: EncodeTestClass {}
+class UseAttribute_Tests: EncodeTestClass {}
 
 // MARK: - Encoding
 
-extension ListSelectIndependentOption_Tests {
+extension UseAttribute_Tests {
     func testEncode() {
-        let inputs: [(ListSelectIndependentOption, String, UInt)] = [
-            (.remote, "REMOTE", #line),
-            (.option(.init(kind: .standard("test"), value: nil)), "test", #line),
-            (.specialUse, "SPECIAL-USE", #line),
+        let inputs: [(UseAttribute, String, UInt)] = [
+            (.all, "\\All", #line),
+            (.archive, "\\Archive", #line),
+            (.drafts, "\\Drafts", #line),
+            (.flagged, "\\Flagged", #line),
+            (.junk, "\\Junk", #line),
+            (.sent, "\\Sent", #line),
+            (.trash, "\\Trash", #line),
+            (.init(rawValue: "\\test"), "\\test", #line),
         ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeListSelectIndependentOption($0) })
+        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeUseAttribute($0) })
     }
 }

@@ -74,7 +74,7 @@ extension B2MV_Tests {
             ("tag CREATE newBox1", [.command(.init(tag: "tag", command: .create(.init("newBox1"), [])))]),
             ("tag CREATE \"newBox2\"", [.command(.init(tag: "tag", command: .create(.init("newBox2"), [])))]),
             ("tag CREATE {7+}\r\nnewBox3", [.command(.init(tag: "tag", command: .create(.init("newBox3"), [])))]),
-            ("tag CREATE newBox4 (k5 5 k6 6)", [.command(.init(tag: "tag", command: .create(.init("newBox4"), [.init(name: "k5", value: .sequence([5])), .init(name: "k6", value: .sequence([6]))])))]),
+            ("tag CREATE newBox4 (k5 5 k6 6)", [.command(.init(tag: "tag", command: .create(.init("newBox4"), [.labelled(.init(name: "k5", value: .sequence([5]))), .labelled(.init(name: "k6", value: .sequence([6])))])))]),
 
             // MARK: Delete
 

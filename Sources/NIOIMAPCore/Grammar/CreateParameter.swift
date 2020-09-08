@@ -14,24 +14,24 @@
 
 import struct NIO.ByteBuffer
 
-/// IMAPv4 `list-select-independent-opt`
-public enum ListSelectIndependentOption: Equatable {
-    case remote
-    case option(OptionExtension)
-    case specialUse
+/// IMAPv4 `envelope`
+public enum CreateParameter: Equatable {
+    case labelled(Parameter)
+    case attributes([UseAttribute])
 }
 
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeListSelectIndependentOption(_ option: ListSelectIndependentOption) -> Int {
-        switch option {
-        case .remote:
-            return self.writeString("REMOTE")
-        case .option(let option):
-            return self.writeOptionExtension(option)
-        case .specialUse:
-            return self.writeString("SPECIAL-USE")
+    @discardableResult mutating func writeCreateParameter(_ parameter: CreateParameter) -> Int {
+        switch parameter {
+        case .attributes(let attributes):
+            return self.writeString("USE ") +
+                self.writeArray(attributes) { (att, buffer) -> Int in
+                    buffer.writeUseAttribute(att)
+                }
+        case .labelled(let parameter):
+            return self.writeParameter(parameter)
         }
     }
 }

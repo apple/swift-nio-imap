@@ -21,9 +21,9 @@ enum TestUtilities {}
 // MARK: - ByteBuffer
 
 #if swift(>=5.3)
-func magicFile(file: StaticString = #filePath) -> StaticString { file }
+func magicFile(file: StaticString = (#file)) -> StaticString { file }
 #else
-func magicFile(file: StaticString = #file) -> StaticString { file }
+func magicFile(file: StaticString = (#file)) -> StaticString { file }
 #endif
 
 extension TestUtilities {

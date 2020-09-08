@@ -31,6 +31,7 @@ public enum ResponseTextCode: Equatable {
     case uidAppend(ResponseCodeAppend)
     case uidCopy(ResponseCodeCopy)
     case uidNotSticky
+    case useAttribute
     case other(String, String?)
 }
 
@@ -73,6 +74,8 @@ extension EncodeBuffer {
             return self.writeResponseCodeAppend(data)
         case .uidNotSticky:
             return self.writeString("UIDNOTSTICKY")
+        case .useAttribute:
+            return self.writeString("USEATTR")
         }
     }
 
