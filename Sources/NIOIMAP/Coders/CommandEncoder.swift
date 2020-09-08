@@ -32,7 +32,7 @@ public class CommandEncoder: MessageToByteEncoder {
 
     public init() {}
 
-    public func encode(data: CommandRStream, out: inout ByteBuffer) throws {
+    public func encode(data: CommandStream, out: inout ByteBuffer) throws {
         var encodeBuffer = CommandEncodeBuffer(buffer: out, capabilities: self.capabilities)
         encodeBuffer.writeCommandStream(data)
     }
