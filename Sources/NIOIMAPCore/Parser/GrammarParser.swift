@@ -730,7 +730,10 @@ extension GrammarParser {
         try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
             try ParserLibrary.parseFixedString(" (", buffer: &buffer, tracker: tracker)
             var array = [try self.parseCreateParameter(buffer: &buffer, tracker: tracker)]
-            try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker, parser: self.parseCreateParameter)
+            try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { buffer, tracker in
+                try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
+                return try self.parseCreateParameter(buffer: &buffer, tracker: tracker)
+            }
             try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)
             return array
         }
@@ -754,8 +757,8 @@ extension GrammarParser {
         }
         
         return try ParserLibrary.parseOneOf([
+            parseCreateParameter_specialUse,
             parseCreateParameter_parameter,
-            parseCreateParameter_specialUse
         ], buffer: &buffer, tracker: tracker)
     }
     

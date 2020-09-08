@@ -736,12 +736,15 @@ extension ParserUnitTests {
                 (
                     "CREATE inbox (USE (\\All \\Flagged) some1 2 USE (\\Sent))",
                     "\r",
-                    .create(.inbox, [.attributes([.all, .flagged]), .labelled(.init(name: "some1", value: .number(2))), .attributes([.sent])]),
+                    .create(.inbox, [.attributes([.all, .flagged]), .labelled(.init(name: "some1", value: .sequence([2]))), .attributes([.sent])]),
                     #line
                 ),
             ],
             parserErrorInputs: [],
-            incompleteMessageInputs: []
+            incompleteMessageInputs: [
+                ("CREATE inbox", "", #line),
+                ("CREATE inbox (USE", "", #line)
+            ]
         )
     }
 
@@ -750,6 +753,48 @@ extension ParserUnitTests {
         XCTAssertThrowsError(try GrammarParser.parseCreate(buffer: &buffer, tracker: .testTracker)) { e in
             XCTAssertTrue(e is _IncompleteMessage, "e has type \(e)")
         }
+    }
+}
+
+// MARK: - parseCreateParameter
+
+extension ParserUnitTests {
+    func testParseCreateParameter() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseCreateParameter,
+            validInputs: [
+                ("param", "\r", .labelled(.init(name: "param")), #line),
+                ("param 1", "\r", .labelled(.init(name: "param", value: .sequence([1]))), #line),
+                ("USE (\\All)", "\r", .attributes([.all]), #line),
+                ("USE (\\All \\Sent \\Drafts)", "\r", .attributes([.all, .sent, .drafts]), #line),
+            ],
+            parserErrorInputs: [],
+            incompleteMessageInputs: [
+                ("param", "", #line),
+                ("param 1", "", #line),
+                ("USE (\\Test", "", #line),
+                ("USE (\\All ", "", #line),
+            ]
+        )
+    }
+}
+
+// MARK: - parseCreateParameters
+
+extension ParserUnitTests {
+    func testParseCreateParameters() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseCreateParameters,
+            validInputs: [
+                (" (param1 param2)", "\r", [.labelled(.init(name: "param1")), .labelled(.init(name: "param2"))], #line)
+            ],
+            parserErrorInputs: [
+                (" (param1", "\r", #line)
+            ],
+            incompleteMessageInputs: [
+                (" (param1", "", #line)
+            ]
+        )
     }
 }
 
