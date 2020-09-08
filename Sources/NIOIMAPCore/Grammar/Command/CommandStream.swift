@@ -16,10 +16,20 @@ import struct NIO.ByteBuffer
 
 public enum AppendCommand: Equatable {
     case start(tag: String, appendingTo: MailboxName)
-    case beginMessage(messsage: AppendMessage)
+    case beginMessage(message: AppendMessage)
     case messageBytes(ByteBuffer)
     case endMessage
+    case beginCatenate(options: AppendOptions)
+    case catenateURL(ByteBuffer)
+    case catenateData(CatenateData)
+    case endCatenate
     case finish
+
+    public enum CatenateData: Equatable {
+        case begin(size: Int)
+        case bytes(ByteBuffer)
+        case end
+    }
 }
 
 public enum CommandStream: Equatable {
@@ -46,12 +56,42 @@ extension CommandEncodeBuffer {
             return
                 self.buffer.writeString("\(tag) APPEND ") +
                 self.buffer.writeMailbox(mailbox)
-        case .beginMessage(messsage: let messsage):
-            return self.buffer.writeAppendMessage(messsage)
+        case .beginMessage(message: let message):
+            return self.buffer.writeAppendMessage(message)
         case .messageBytes(var bytes):
             return self.buffer.writeBuffer(&bytes)
         case .endMessage:
             return 0
+        case .beginCatenate(options: let options):
+            return self.buffer.writeAppendOptions(options) +
+                self.buffer.writeString(" CATENATE (")
+        case .catenateURL(let url):
+            defer {
+                self.encodedAtLeastOneCatenateElement = true
+            }
+
+            return self.buffer.writeIfTrue(self.encodedAtLeastOneCatenateElement) { self.buffer.writeSpace() } +
+                self.buffer.writeString("URL ") +
+                self.buffer.writeIMAPString(url)
+        case .catenateData(.begin(let size)):
+            var written = self.buffer.writeIfTrue(self.encodedAtLeastOneCatenateElement) { self.buffer.writeSpace() } +
+                self.buffer.writeString("TEXT ")
+
+            if self.options.useNonSynchronizingLiteralPlus {
+                written += self.buffer.writeString("{\(size)+}\r\n")
+            } else {
+                written += self.buffer.writeString("{\(size)}\r\n")
+                self.buffer.markStopPoint()
+            }
+            return written
+        case .catenateData(.bytes(var bytes)):
+            return self.buffer.writeBuffer(&bytes)
+        case .catenateData(.end):
+            self.encodedAtLeastOneCatenateElement = true
+            return 0
+        case .endCatenate:
+            self.encodedAtLeastOneCatenateElement = false
+            return self.buffer.writeString(")")
         case .finish:
             return self.buffer.writeString("\r\n")
         }
