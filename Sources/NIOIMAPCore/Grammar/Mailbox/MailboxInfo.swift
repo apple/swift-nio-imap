@@ -53,10 +53,8 @@ extension MailboxInfo {
         public static var noInferiors: Self { Self(_backing: #"\noinferiors"#) }
         public static var subscribed: Self { Self(_backing: #"\subscribed"#) }
         public static var remote: Self { Self(_backing: #"\remote"#) }
-
-        public static func child(_ child: ChildMailboxFlag) -> Self {
-            Self(_backing: child._backing.rawValue)
-        }
+        public static var hasChildren: Self { Self(_backing: #"\HasChildren"#) }
+        public static var hasNoChildren: Self { Self(_backing: #"\HasNoChildren"#) }
 
         init(_backing: String) {
             self._backing = _backing
