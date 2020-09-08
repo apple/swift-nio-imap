@@ -2847,6 +2847,11 @@ extension GrammarParser {
             try ParserLibrary.parseFixedString("UIDNOTSTICKY", buffer: &buffer, tracker: tracker)
             return .uidNotSticky
         }
+        
+        func parseResponseTextCode_closed(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ResponseTextCode {
+            try ParserLibrary.parseFixedString("CLOSED", buffer: &buffer, tracker: tracker)
+            return .closed
+        }
 
         func parseResponseTextCode_uidCopy(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ResponseTextCode {
             .uidCopy(try self.parseResponseCodeCopy(buffer: &buffer, tracker: tracker))
@@ -2879,6 +2884,7 @@ extension GrammarParser {
             parseResponseTextCode_notSaved,
             parseResponseTextCode_uidCopy,
             parseResponseTextCode_uidAppend,
+            parseResponseTextCode_closed,
             parseResponseTextCode_atom,
         ], buffer: &buffer, tracker: tracker)
     }

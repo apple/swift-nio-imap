@@ -170,7 +170,6 @@ extension Capability {
     public static let imap4 = Self(unchecked: "IMAP4")
     public static let language = Self(unchecked: "LANGUAGE")
     public static let listStatus = Self(unchecked: "LIST-STATUS")
-
     public static let listExtended = Self(unchecked: "LIST-EXTENDED")
     public static let loginDisabled = Self(unchecked: "LOGINDISABLED")
     public static let loginReferrals = Self(unchecked: "LOGIN-REFERRALS")
