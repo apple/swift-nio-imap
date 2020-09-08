@@ -60,6 +60,19 @@ class EncodeTestClass: XCTestCase {
             }
         }
     }
+    
+    func iterateCommandInputs<T>(inputs: [(T, CommandEncodingOptions, [String], UInt)], encoder: (T) throws -> Int, file: StaticString = (#file)) {
+        for (test, options, expectedStrings, line) in inputs {
+            do {
+                self.testBuffer.mode = .client(options: options)
+                let size = try encoder(test)
+                XCTAssertEqual(size, expectedStrings.reduce(0) { $0 + $1.utf8.count }, file: file, line: line)
+                XCTAssertEqual(self.testBufferStrings, expectedStrings, file: file, line: line)
+            } catch {
+                XCTFail("\(error)", file: file, line: line)
+            }
+        }
+    }
 
     func iterateInputs<T>(inputs: [(T, ResponseEncodingOptions, String, UInt)], encoder: (T) throws -> Int, file: StaticString = (#file)) {
         for (test, options, expectedString, line) in inputs {
