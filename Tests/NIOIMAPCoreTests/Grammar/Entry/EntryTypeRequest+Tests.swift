@@ -20,14 +20,9 @@ class EntryTypeRequest_Tests: EncodeTestClass {
     func testEncoding() {
         let inputs: [(EntryKindRequest, String, UInt)] = [
             (.all, "all", #line),
-            (.response(.shared), "shared", #line),
+            (.private, "priv", #line),
+            (.shared, "shared", #line),
         ]
-
-        for (input, expected, line) in inputs {
-            self.testBuffer.clear()
-            let size = self.testBuffer.writeEntryKindRequest(input)
-            XCTAssertEqual(size, expected.utf8.count, line: line)
-            XCTAssertEqual(self.testBufferString, expected, line: line)
-        }
+        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeEntryKindRequest($0) })
     }
 }

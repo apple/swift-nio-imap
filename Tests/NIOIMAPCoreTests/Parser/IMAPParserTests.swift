@@ -1385,7 +1385,10 @@ extension ParserUnitTests {
                 ("all", " ", .all, #line),
                 ("ALL", " ", .all, #line),
                 ("aLL", " ", .all, #line),
-                ("shared", " ", .response(.shared), #line),
+                ("priv", " ", .private, #line),
+                ("PRIV", " ", .private, #line),
+                ("shared", " ", .shared, #line),
+                ("SHARED", " ", .shared, #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []

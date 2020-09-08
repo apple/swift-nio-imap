@@ -1098,13 +1098,20 @@ extension GrammarParser {
             return .all
         }
 
-        func parseEntryKindRequest_response(buffer: inout ByteBuffer, tracker: StackTracker) throws -> EntryKindRequest {
-            .response(try self.parseEntryKindResponse(buffer: &buffer, tracker: tracker))
+        func parseEntryKindRequest_private(buffer: inout ByteBuffer, tracker: StackTracker) throws -> EntryKindRequest {
+            try ParserLibrary.parseFixedString("priv", buffer: &buffer, tracker: tracker)
+            return .private
+        }
+        
+        func parseEntryKindRequest_shared(buffer: inout ByteBuffer, tracker: StackTracker) throws -> EntryKindRequest {
+            try ParserLibrary.parseFixedString("shared", buffer: &buffer, tracker: tracker)
+            return .shared
         }
 
         return try ParserLibrary.parseOneOf([
             parseEntryKindRequest_all,
-            parseEntryKindRequest_response,
+            parseEntryKindRequest_private,
+            parseEntryKindRequest_shared
         ], buffer: &buffer, tracker: tracker)
     }
 
