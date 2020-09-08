@@ -33,8 +33,5 @@ extension CommandEncoder_Tests {
 
         out.clear()
         XCTAssertNoThrow(try encoder.encode(data: .append(.messageBytes("12345")), out: &out))
-
-        out.clear()
-        XCTAssertThrowsError(try encoder.encode(data: .append(.endMessage), out: &out))
     }
 }

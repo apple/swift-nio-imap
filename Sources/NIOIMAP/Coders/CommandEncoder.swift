@@ -32,73 +32,8 @@ public class CommandEncoder: MessageToByteEncoder {
 
     public init() {}
 
-    public func encode(data: CommandStream, out: inout ByteBuffer) throws {
-        switch data {
-        case .idleDone:
-            out.writeString("DONE\r\n")
-        case .command(let command):
-            var encodeBuffer = CommandEncodeBuffer(buffer: out, capabilities: self.capabilities)
-            encodeBuffer.writeCommand(command)
-            out = encodeBuffer.buffer.nextChunk().bytes
-        case .append(let command):
-            try self.encodeAppendCommand(command, into: &out)
-        }
-    }
-
-    private func encodeAppendCommand(_ command: AppendCommand, into buffer: inout ByteBuffer) throws {
-        switch command {
-        case .start(tag: let tag, appendingTo: let mailbox):
-            self.handleAppendStart(into: &buffer, tag: tag, mailbox: mailbox)
-        case .beginMessage(messsage: let messsage):
-            self.handleAppendBeginMessage(into: &buffer, message: messsage)
-        case .messageBytes(let bytes):
-            self.handleAppendBytes(into: &buffer, bytes: bytes)
-        case .endMessage:
-            try self.handleAppendEndMessage()
-        case .finish:
-            self.handleAppendMessageFinish(into: &buffer)
-        }
-    }
-
-    private func handleAppendStart(into buffer: inout ByteBuffer, tag: String, mailbox: MailboxName) {
-        precondition(self.mode == .normal)
-        var encodeBuffer = CommandEncodeBuffer(buffer: buffer, capabilities: self.capabilities)
-        encodeBuffer.buffer.writeString("\(tag) APPEND ")
-        encodeBuffer.buffer.writeMailbox(mailbox)
-        buffer = encodeBuffer.buffer.nextChunk().bytes
-    }
-
-    private func handleAppendBeginMessage(into buffer: inout ByteBuffer, message: AppendMessage) {
-        precondition(self.mode == .normal)
-        var encodeBuffer = CommandEncodeBuffer(buffer: buffer, capabilities: self.capabilities)
-        encodeBuffer.buffer.writeAppendMessage(message)
-        self.mode = .bytes(remaining: message.data.byteCount)
-        buffer = encodeBuffer.buffer.nextChunk().bytes
-    }
-
-    private func handleAppendBytes(into buffer: inout ByteBuffer, bytes: ByteBuffer) {
-        var encodeBuffer = CommandEncodeBuffer(buffer: buffer, capabilities: self.capabilities)
-        guard case .bytes = self.mode else {
-            preconditionFailure("Incorrect mode")
-        }
-        var bytes = bytes
-        encodeBuffer.buffer.writeBuffer(&bytes)
-        buffer = encodeBuffer.buffer.nextChunk().bytes
-    }
-
-    private func handleAppendEndMessage() throws {
-        guard case .bytes(let remaining) = self.mode else {
-            preconditionFailure("Incorrect mode")
-        }
-        guard remaining == 0 else {
-            throw CommandEncodingError.missingBytes
-        }
-        self.mode = .normal
-    }
-
-    private func handleAppendMessageFinish(into buffer: inout ByteBuffer) {
-        var encodeBuffer = CommandEncodeBuffer(buffer: buffer, capabilities: self.capabilities)
-        encodeBuffer.buffer.writeString("\r\n")
-        buffer = encodeBuffer.buffer.nextChunk().bytes
+    public func encode(data: CommandRStream, out: inout ByteBuffer) throws {
+        var encodeBuffer = CommandEncodeBuffer(buffer: out, capabilities: self.capabilities)
+        encodeBuffer.writeCommandStream(data)
     }
 }
