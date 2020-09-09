@@ -52,6 +52,15 @@ public enum MessageAttribute: Equatable {
     case binarySize(section: SectionSpecifier.Part, size: Int)
 
     case fetchModifierResponse(FetchModifierResponse)
+
+    /// `X-GM-MSGID`: provides a unique ID for each email stable across multiple folders.
+    case gmailMessageID(UInt64)
+
+    /// `X-GM-THRID`: provides an ID that associates mail with a given gmail thread.
+    case gmailThreadID(UInt64)
+
+    /// `X-GM-LABELS`: provides the labels for a given message
+    case gmailLabels([GmailLabel])
 }
 
 // MARK: - Encoding
@@ -91,6 +100,12 @@ extension EncodeBuffer {
             return self.writeMessageAttributeFlags(flags)
         case .fetchModifierResponse(let resp):
             return self.writeFetchModifierResponse(resp)
+        case .gmailMessageID(let id):
+            return self.writeMessageAttribute_gmailMessageID(id)
+        case .gmailThreadID(let id):
+            return self.writeMessageAttribute_gmailThreadID(id)
+        case .gmailLabels(let labels):
+            return self.writeMessageAttribute_gmailLabels(labels)
         }
     }
 
@@ -167,5 +182,21 @@ extension EncodeBuffer {
                 self.writeString("<\(number)>")
             } +
             self.writeString(" {\(size)}\r\n")
+    }
+
+    @discardableResult mutating func writeMessageAttribute_gmailMessageID(_ id: UInt64) -> Int {
+        self.writeString("X-GM-MSGID \(id)")
+    }
+
+    @discardableResult mutating func writeMessageAttribute_gmailThreadID(_ id: UInt64) -> Int {
+        self.writeString("X-GM-THRID \(id)")
+    }
+
+    @discardableResult mutating func writeMessageAttribute_gmailLabels(_ labels: [GmailLabel]) -> Int {
+        self.writeString("X-GM-LABELS") +
+            self.writeSpace() +
+            self.writeArray(labels) { label, buffer in
+                buffer.writeGmailLabel(label)
+            }
     }
 }

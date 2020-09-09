@@ -188,6 +188,7 @@ extension Capability {
     public static let urlPartial = Self(unchecked: "URL-PARTIAL")
     public static let urlAuth = Self(unchecked: "URLAUTH")
     public static let within = Self(unchecked: "WITHIN")
+    public static let gmailExtensions = Self(unchecked: "X-GM-EXT")
 
     /// RFC 7888 LITERAL+
     public static let literalPlus = Self(unchecked: "LITERAL+")

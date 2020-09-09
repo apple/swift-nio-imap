@@ -1378,6 +1378,21 @@ extension GrammarParser {
             return .binarySize(section: sectionBinary)
         }
 
+        func parseFetchAttribute_gmailMessageID(buffer: inout ByteBuffer, tracker: StackTracker) throws -> FetchAttribute {
+            try ParserLibrary.parseFixedString("X-GM-MSGID", buffer: &buffer, tracker: tracker)
+            return .gmailMessageID
+        }
+
+        func parseFetchAttribute_gmailThreadID(buffer: inout ByteBuffer, tracker: StackTracker) throws -> FetchAttribute {
+            try ParserLibrary.parseFixedString("X-GM-THRID", buffer: &buffer, tracker: tracker)
+            return .gmailThreadID
+        }
+
+        func parseFetchAttribute_gmailLabels(buffer: inout ByteBuffer, tracker: StackTracker) throws -> FetchAttribute {
+            try ParserLibrary.parseFixedString("X-GM-LABELS", buffer: &buffer, tracker: tracker)
+            return .gmailLabels
+        }
+
         return try ParserLibrary.parseOneOf([
             parseFetchAttribute_envelope,
             parseFetchAttribute_flags,
@@ -1390,6 +1405,9 @@ extension GrammarParser {
             parseFetchAttribute_modSequence,
             parseFetchAttribute_binary,
             parseFetchAttribute_binarySize,
+            parseFetchAttribute_gmailMessageID,
+            parseFetchAttribute_gmailThreadID,
+            parseFetchAttribute_gmailLabels,
         ], buffer: &buffer, tracker: tracker)
     }
 
@@ -2396,6 +2414,41 @@ extension GrammarParser {
             .fetchModifierResponse(try self.parseFetchModifierResponse(buffer: &buffer, tracker: tracker))
         }
 
+        func parseMessageAttribute_gmailMessageID(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MessageAttribute {
+            try ParserLibrary.parseFixedString("X-GM-MSGID", buffer: &buffer, tracker: tracker)
+            try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
+            let (id, _) = try ParserLibrary.parseUInt64(buffer: &buffer, tracker: tracker)
+            return .gmailMessageID(id)
+        }
+
+        func parseMessageAttribute_gmailThreadID(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MessageAttribute {
+            try ParserLibrary.parseFixedString("X-GM-THRID", buffer: &buffer, tracker: tracker)
+            try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
+            let (id, _) = try ParserLibrary.parseUInt64(buffer: &buffer, tracker: tracker)
+            return .gmailThreadID(id)
+        }
+
+        func parseMessageAttribute_gmailLabels(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MessageAttribute {
+            var attributes: [GmailLabel] = []
+            try ParserLibrary.parseFixedString("X-GM-LABELS (", buffer: &buffer, tracker: tracker)
+
+            let first: GmailLabel? = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { buffer, tracker in
+                try parseGmailLabel(buffer: &buffer, tracker: tracker)
+            }
+
+            if let first = first {
+                attributes.append(first)
+
+                try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &attributes, tracker: tracker) { buffer, tracker in
+                    try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
+                    return try parseGmailLabel(buffer: &buffer, tracker: tracker)
+                }
+            }
+
+            try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)
+            return .gmailLabels(attributes)
+        }
+
         return try ParserLibrary.parseOneOf([
             parseMessageAttribute_envelope,
             parseMessageAttribute_internalDate,
@@ -2410,6 +2463,27 @@ extension GrammarParser {
             parseMessageAttribute_binary,
             parseMessageAttribute_flags,
             parseMessageAttribute_fetchModifierResponse,
+            parseMessageAttribute_gmailMessageID,
+            parseMessageAttribute_gmailThreadID,
+            parseMessageAttribute_gmailLabels,
+        ], buffer: &buffer, tracker: tracker)
+    }
+
+    static func parseGmailLabel(buffer: inout ByteBuffer, tracker: StackTracker) throws -> GmailLabel {
+        func parseGmailLabel_backslash(buffer: inout ByteBuffer, tracker: StackTracker) throws -> GmailLabel {
+            try ParserLibrary.parseFixedString("\\", buffer: &buffer, tracker: tracker)
+            let att = try self.parseAtom(buffer: &buffer, tracker: tracker)
+            return .init(rawValue: ByteBuffer(string: "\\\(att)"))
+        }
+
+        func parseGmailLabel_string(buffer: inout ByteBuffer, tracker: StackTracker) throws -> GmailLabel {
+            let raw = try parseAString(buffer: &buffer, tracker: tracker)
+            return .init(rawValue: raw)
+        }
+
+        return try ParserLibrary.parseOneOf([
+            parseGmailLabel_backslash,
+            parseGmailLabel_string,
         ], buffer: &buffer, tracker: tracker)
     }
 

@@ -41,6 +41,9 @@ extension FetchAttributeTests {
             (.modifierSequenceValue(.zero), .rfc3501, "0", #line),
             (.modifierSequenceValue(3), .rfc3501, "3", #line),
             (.modifierSequence, .rfc3501, "MODSEQ", #line),
+            (.gmailMessageID, .rfc3501, "X-GM-MSGID", #line),
+            (.gmailThreadID, .rfc3501, "X-GM-THRID", #line),
+            (.gmailLabels, .rfc3501, "X-GM-LABELS", #line),
         ]
         self.iterateInputs(inputs: inputs.map { ($0, $1, [$2], $3) }, encoder: { self.testBuffer.writeFetchAttribute($0) })
     }
@@ -56,6 +59,7 @@ extension FetchAttributeTests {
             ([.flags, .bodyStructure(extensions: false), .rfc822Size, .internalDate, .envelope], .rfc3501, "FULL", #line),
             ([.flags, .bodyStructure(extensions: true), .rfc822Size, .internalDate, .envelope], .rfc3501, "(FLAGS BODYSTRUCTURE RFC822.SIZE INTERNALDATE ENVELOPE)", #line),
             ([.flags, .bodyStructure(extensions: false), .rfc822Size, .internalDate, .envelope, .uid], .rfc3501, "(FLAGS BODY RFC822.SIZE INTERNALDATE ENVELOPE UID)", #line),
+            ([.gmailLabels, .gmailMessageID, .gmailThreadID], .rfc3501, "(X-GM-LABELS X-GM-MSGID X-GM-THRID)", #line),
         ]
         self.iterateInputs(inputs: inputs.map { ($0, $1, [$2], $3) }, encoder: { self.testBuffer.writeFetchAttributeList($0) })
     }

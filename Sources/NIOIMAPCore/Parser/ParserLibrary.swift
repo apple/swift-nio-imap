@@ -230,6 +230,16 @@ extension ParserLibrary {
         return (int, string.count)
     }
 
+    static func parseUInt64(buffer: inout ByteBuffer, tracker: StackTracker) throws -> (number: UInt64, bytesConsumed: Int) {
+        let string = try ParserLibrary.parseOneOrMoreCharacters(buffer: &buffer, tracker: tracker) { char in
+            char >= UInt8(ascii: "0") && char <= UInt8(ascii: "9")
+        }
+        guard let int = UInt64(string) else {
+            throw ParserError(hint: "\(string) is not a number")
+        }
+        return (int, string.count)
+    }
+
     static func parseNewline(buffer: inout ByteBuffer, tracker: StackTracker) throws {
         switch buffer.getInteger(at: buffer.readerIndex, as: UInt16.self) {
         case .some(UInt16(0x0D0A /* CRLF */ )):
