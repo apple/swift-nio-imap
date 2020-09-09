@@ -35,5 +35,6 @@ public class CommandEncoder: MessageToByteEncoder {
     public func encode(data: CommandStream, out: inout ByteBuffer) throws {
         var encodeBuffer = CommandEncodeBuffer(buffer: out, capabilities: self.capabilities)
         encodeBuffer.writeCommandStream(data)
+        out = encodeBuffer.buffer.nextChunk().bytes
     }
 }

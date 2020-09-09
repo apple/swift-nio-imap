@@ -22,16 +22,7 @@ import XCTest
 final class CommandEncoder_Tests: XCTestCase {}
 
 extension CommandEncoder_Tests {
-    func testThrowsIfMissingBytes() {
-        let encoder = CommandEncoder()
-
-        var out = ByteBuffer()
-        XCTAssertNoThrow(try encoder.encode(data: .append(.start(tag: "1", appendingTo: .inbox)), out: &out))
-
-        out.clear()
-        XCTAssertNoThrow(try encoder.encode(data: .append(.beginMessage(messsage: .init(options: .init(flagList: [], extensions: []), data: .init(byteCount: 10)))), out: &out))
-
-        out.clear()
-        XCTAssertNoThrow(try encoder.encode(data: .append(.messageBytes("12345")), out: &out))
-    }
+    
+    
+    
 }
