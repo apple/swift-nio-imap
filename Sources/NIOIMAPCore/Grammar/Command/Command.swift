@@ -52,6 +52,10 @@ public enum Command: Equatable {
     case uidSearch(key: SearchKey, charset: String? = nil, returnOptions: [SearchReturnOption] = [])
     case uidStore(UIDSet, [Parameter], StoreFlags)
     case uidExpunge(UIDSet)
+
+    case getQuota(QuotaRoot)
+    case getQuotaRoot(MailboxName)
+    case setQuota(QuotaRoot, [QuotaLimit])
 }
 
 // MARK: - IMAP
@@ -131,6 +135,12 @@ extension EncodeBuffer {
             return self.writeCommandKind_id(id)
         case .namespace:
             return self.writeCommandKind_namespace()
+        case .getQuota(let quotaRoot):
+            return self.writeCommandKind_getQuota(quotaRoot: quotaRoot)
+        case .getQuotaRoot(let mailbox):
+            return self.writeCommandKind_getQuotaRoot(mailbox: mailbox)
+        case .setQuota(let quotaRoot, let quotaLimits):
+            return self.writeCommandKind_setQuota(quotaRoot: quotaRoot, resourceLimits: quotaLimits)
         }
     }
 
@@ -378,5 +388,24 @@ extension EncodeBuffer {
     @discardableResult mutating func writeCommandKind_id(_ id: [IDParameter]) -> Int {
         self.writeString("ID ") +
             self.writeIDParameters(id)
+    }
+
+    private mutating func writeCommandKind_getQuota(quotaRoot: QuotaRoot) -> Int {
+        self.writeString("GETQUOTA ") +
+            self.writeQuotaRoot(quotaRoot)
+    }
+
+    private mutating func writeCommandKind_getQuotaRoot(mailbox: MailboxName) -> Int {
+        self.writeString("GETQUOTAROOT ") +
+            self.writeMailbox(mailbox)
+    }
+
+    private mutating func writeCommandKind_setQuota(quotaRoot: QuotaRoot, resourceLimits: [QuotaLimit]) -> Int {
+        self.writeString("SETQUOTA ") +
+            self.writeQuotaRoot(quotaRoot) +
+            self.writeSpace() +
+            self.writeArray(resourceLimits, callback: { (limit, self) in
+                self.writeQuotaLimit(limit)
+            })
     }
 }
