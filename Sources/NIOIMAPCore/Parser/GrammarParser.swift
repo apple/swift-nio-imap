@@ -2100,9 +2100,21 @@ extension GrammarParser {
             try ParserLibrary.parseFixedString(" EXPUNGE", buffer: &buffer, tracker: tracker)
             return .expunge(number)
         }
+        
+        func parseMessageData_vanished(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MessageData {
+            try ParserLibrary.parseFixedString("VANISHED ", buffer: &buffer, tracker: tracker)
+            return .vanished(try self.parseSequenceSet(buffer: &buffer, tracker: tracker))
+        }
+        
+        func parseMessageData_vanishedEarlier(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MessageData {
+            try ParserLibrary.parseFixedString("VANISHED (EARLIER) ", buffer: &buffer, tracker: tracker)
+            return .vanishedEarlier(try self.parseSequenceSet(buffer: &buffer, tracker: tracker))
+        }
 
         return try ParserLibrary.parseOneOf([
             parseMessageData_expunge,
+            parseMessageData_vanished,
+            parseMessageData_vanishedEarlier,
         ], buffer: &buffer, tracker: tracker)
     }
 

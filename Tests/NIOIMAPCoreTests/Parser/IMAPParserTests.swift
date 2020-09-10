@@ -1963,7 +1963,10 @@ extension ParserUnitTests {
         self.iterateTests(
             testFunction: GrammarParser.parseMessageData,
             validInputs: [
-                ],
+                ("3 EXPUNGE", "\r", .expunge(3), #line),
+                ("VANISHED *", "\r", .vanished(.all), #line),
+                ("VANISHED (EARLIER) *", "\r", .vanishedEarlier(.all), #line),
+            ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
         )
