@@ -34,7 +34,7 @@ extension CommandEncodeBuffer {
         case .idleDone:
             return self.buffer.writeString("DONE\r\n")
         case .command(let command):
-            return self.buffer.writeCommand(command)
+            return self.writeCommand(command)
         case .append(let command):
             return self.writeAppendCommand(command)
         }

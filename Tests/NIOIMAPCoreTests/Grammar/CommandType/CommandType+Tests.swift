@@ -42,6 +42,12 @@ extension CommandType_Tests {
             (.id([]), CommandEncodingOptions(), ["ID NIL"], #line),
         ]
 
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeCommand($0) })
+        for (test, options, expectedStrings, line) in inputs {
+            var encodeBuffer = CommandEncodeBuffer(buffer: ByteBuffer(), options: options)
+            let size = encodeBuffer.writeCommand(test)
+            self.testBuffer = encodeBuffer.buffer
+            XCTAssertEqual(size, expectedStrings.reduce(0) { $0 + $1.utf8.count }, line: line)
+            XCTAssertEqual(self.testBufferStrings, expectedStrings, line: line)
+        }
     }
 }
