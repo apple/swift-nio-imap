@@ -199,6 +199,14 @@ extension GrammarParser {
             char.isAtomChar
         }
     }
+    
+    // RFC 7162 Condstore
+    // attr-flag           = "\\Answered" / "\\Flagged" / "\\Deleted" /
+    //                          "\\Seen" / "\\Draft" / attr-flag-keyword / attr-flag-extension
+    static func parseAttributeFlag(buffer: inout ByteBuffer, tracker: StackTracker) throws -> AttributeFlag {
+        let rawValue = try self.parseAtom(buffer: &buffer, tracker: tracker)
+        return .init(rawValue: rawValue)
+    }
 
     // authenticate    = "AUTHENTICATE" SP auth-type *(CRLF base64)
     static func parseAuthenticate(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Command {

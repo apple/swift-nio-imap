@@ -530,6 +530,24 @@ extension ParserUnitTests {
     }
 }
 
+// MARK: - atom parseAttributeFlag
+
+extension ParserUnitTests {
+ 
+    func testParseAttributeFlag() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseAttributeFlag,
+            validInputs: [
+                ("\\\\Answered", "", .answered, #line),
+                ("some", " ", .init(rawValue: "some"), #line),
+            ],
+            parserErrorInputs: [],
+            incompleteMessageInputs: []
+        )
+    }
+    
+}
+
 // MARK: - parseBase64
 
 extension ParserUnitTests {
