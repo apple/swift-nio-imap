@@ -4034,12 +4034,10 @@ extension GrammarParser {
             try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker in
                 try ParserLibrary.parseFixedString("(", buffer: &buffer, tracker: tracker)
                 var resources: [QuotaResource] = []
-                try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker in
-                    while let resource = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: parseQuotaResource) {
-                        resources.append(resource)
-                        if try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: ParserLibrary.parseSpace) == nil {
-                            break;
-                        }
+                while let resource = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: parseQuotaResource) {
+                    resources.append(resource)
+                    if try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: ParserLibrary.parseSpace) == nil {
+                        break;
                     }
                 }
                 try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)

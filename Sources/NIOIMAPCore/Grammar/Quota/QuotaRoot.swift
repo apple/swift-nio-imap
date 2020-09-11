@@ -28,7 +28,7 @@ public struct QuotaRoot: Equatable {
     /// Creates a new `QuotaRoot`.
     ///  - parameter string: The quota root name
     public init(_ string: String) {
-        self.storage = ByteBuffer(ByteBufferView(string.utf8))
+        self.storage = ByteBuffer(string: string)
     }
 
     public init(_ bytes: ByteBuffer) {

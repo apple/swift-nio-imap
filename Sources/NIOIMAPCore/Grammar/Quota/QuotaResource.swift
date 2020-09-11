@@ -32,9 +32,6 @@ public struct QuotaResource: Equatable {
 extension EncodeBuffer {
     @discardableResult mutating func writeQuotaResource(_ quotaDetails: QuotaResource) -> Int {
         self.writeAtom(quotaDetails.resourceName) +
-            self.writeSpace() +
-            self.writeString("\(quotaDetails.usage)") +
-            self.writeSpace() +
-            self.writeString("\(quotaDetails.limit)")
+            self.writeString(" \(quotaDetails.usage) \(quotaDetails.limit)")
     }
 }
