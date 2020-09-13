@@ -204,8 +204,22 @@ extension GrammarParser {
     // attr-flag           = "\\Answered" / "\\Flagged" / "\\Deleted" /
     //                          "\\Seen" / "\\Draft" / attr-flag-keyword / attr-flag-extension
     static func parseAttributeFlag(buffer: inout ByteBuffer, tracker: StackTracker) throws -> AttributeFlag {
-        let rawValue = try self.parseAtom(buffer: &buffer, tracker: tracker)
-        return .init(rawValue: rawValue)
+        
+        func parseAttributeFlag_slashed(buffer: inout ByteBuffer, tracker: StackTracker) throws -> AttributeFlag {
+            try ParserLibrary.parseFixedString("\\\\", buffer: &buffer, tracker: tracker)
+            let atom = try self.parseAtom(buffer: &buffer, tracker: tracker)
+            return .init(rawValue: "\\\\\(atom)")
+        }
+        
+        func parseAttributeFlag_unslashed(buffer: inout ByteBuffer, tracker: StackTracker) throws -> AttributeFlag {
+            let atom = try self.parseAtom(buffer: &buffer, tracker: tracker)
+            return .init(rawValue: atom)
+        }
+        
+        return try ParserLibrary.parseOneOf([
+            parseAttributeFlag_slashed,
+            parseAttributeFlag_unslashed
+        ], buffer: &buffer, tracker: tracker)
     }
 
     // authenticate    = "AUTHENTICATE" SP auth-type *(CRLF base64)
@@ -3507,6 +3521,17 @@ extension GrammarParser {
                 return SequenceRange(id1)
             }
         }
+    }
+    
+    static func parseSequenceMatchData(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SequenceMatchData {
+        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker, { (buffer, tracker) in
+            try ParserLibrary.parseFixedString("(", buffer: &buffer, tracker: tracker)
+            let knownSequenceSet = try self.parseSequenceSet(buffer: &buffer, tracker: tracker)
+            try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
+            let knownUidSet = try self.parseSequenceSet(buffer: &buffer, tracker: tracker)
+            try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)
+            return SequenceMatchData(knownSequenceSet: knownSequenceSet, knownUidSet: knownUidSet)
+        })
     }
 
     // SequenceNumber

@@ -533,19 +533,19 @@ extension ParserUnitTests {
 // MARK: - atom parseAttributeFlag
 
 extension ParserUnitTests {
- 
+
     func testParseAttributeFlag() {
         self.iterateTests(
             testFunction: GrammarParser.parseAttributeFlag,
             validInputs: [
-                ("\\\\Answered", "", .answered, #line),
+                ("\\\\Answered", " ", .answered, #line),
                 ("some", " ", .init(rawValue: "some"), #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
         )
     }
-    
+
 }
 
 // MARK: - parseBase64
@@ -2923,6 +2923,27 @@ extension ParserUnitTests {
     }
 }
 
+// MARK: - parseSequenceMatchData
+
+extension ParserUnitTests {
+    func testParseSequenceMatchData() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseSequenceMatchData,
+            validInputs: [
+                ("(* *)", "\r", .init(knownSequenceSet: .all, knownUidSet: .all), #line),
+                ("(1,2 3,4)", "\r", .init(knownSequenceSet: [1, 2], knownUidSet: [3, 4]), #line),
+            ],
+            parserErrorInputs: [
+                ("()", "", #line),
+                ("(* )", "", #line),
+            ],
+            incompleteMessageInputs: [
+                ("(1", "", #line),
+                ("(1111:2222", "", #line),
+            ]
+        )
+    }
+}
 // MARK: - tag parseTag
 
 extension ParserUnitTests {
