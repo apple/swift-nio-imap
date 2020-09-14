@@ -26,6 +26,7 @@ public struct QuotaLimit: Equatable {
 }
 
 // MARK: - Encoding
+
 extension EncodeBuffer {
     @discardableResult mutating func writeQuotaLimit(_ quotaLimit: QuotaLimit) -> Int {
         self.writeAtom(quotaLimit.resourceName) +

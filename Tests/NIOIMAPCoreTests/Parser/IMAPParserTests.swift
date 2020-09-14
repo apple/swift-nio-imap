@@ -3094,7 +3094,7 @@ extension ParserUnitTests {
     }
 }
 
-// MARK:  RFC 2087 - Quota
+// MARK: RFC 2087 - Quota
 
 extension ParserUnitTests {
     func testSetQuota() {
@@ -3110,20 +3110,20 @@ extension ParserUnitTests {
                 (
                     "SETQUOTA \"MASSIVE_POOL\" (STORAGE 512)",
                     "\r",
-                    Command.setQuota(QuotaRoot("MASSIVE_POOL"),  [QuotaLimit(resourceName: "STORAGE", limit: 512)]),
+                    Command.setQuota(QuotaRoot("MASSIVE_POOL"), [QuotaLimit(resourceName: "STORAGE", limit: 512)]),
                     #line
                 ),
                 (
                     "SETQUOTA \"MASSIVE_POOL\" (STORAGE 512 BEANS 50000)",
                     "\r",
-                    Command.setQuota(QuotaRoot("MASSIVE_POOL"),  [QuotaLimit(resourceName: "STORAGE", limit: 512),
-                                                                  QuotaLimit(resourceName: "BEANS", limit: 50000)]),
+                    Command.setQuota(QuotaRoot("MASSIVE_POOL"), [QuotaLimit(resourceName: "STORAGE", limit: 512),
+                                                                 QuotaLimit(resourceName: "BEANS", limit: 50000)]),
                     #line
                 ),
                 (
                     "SETQUOTA \"MASSIVE_POOL\" ()",
                     "\r",
-                    Command.setQuota(QuotaRoot("MASSIVE_POOL"),  []),
+                    Command.setQuota(QuotaRoot("MASSIVE_POOL"), []),
                     #line
                 ),
             ],

@@ -22,7 +22,6 @@ extension EncodeBuffer {
             self.writeQuotaRoot(quotaRoot) +
             self.writeSpace() +
             self.writeQuotaResources(resources)
-
     }
 
     mutating func writeQuotaResources(_ resources: [QuotaResource]) -> Int {

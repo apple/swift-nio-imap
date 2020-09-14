@@ -3970,7 +3970,7 @@ extension GrammarParser {
                     while let limit = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: parseQuotaLimit) {
                         limits.append(limit)
                         if try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: ParserLibrary.parseSpace) == nil {
-                            break;
+                            break
                         }
                     }
                 }
@@ -4037,7 +4037,7 @@ extension GrammarParser {
                 while let resource = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: parseQuotaResource) {
                     resources.append(resource)
                     if try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: ParserLibrary.parseSpace) == nil {
-                        break;
+                        break
                     }
                 }
                 try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)
