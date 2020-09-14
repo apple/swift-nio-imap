@@ -26,12 +26,37 @@ extension MailboxName {
         case exists(Int)
         case recent(Int)
         case namespace(NamespaceResponse)
+        case searchSort(SearchSortMailboxData)
+    }
+}
+
+public struct SearchSortMailboxData: Equatable {
+    
+    public var identifiers: [Int]
+    public var modifierSequence: SearchSortModifierSequence
+    
+    public init(identifiers: [Int], modifierSequence: SearchSortModifierSequence) {
+        self.identifiers = identifiers
+        self.modifierSequence = modifierSequence
     }
 }
 
 // MARK: - Encoding
 
 extension EncodeBuffer {
+    
+    @discardableResult mutating func writeSearchSortMailboxData(_ data: SearchSortMailboxData?) -> Int {
+        self.writeString("SEARCH") +
+            self.writeIfExists(data, callback: { (data) -> Int in
+                self.writeArray(data.identifiers, separator: "", parenthesis: false) { (element, buffer) -> Int in
+                    buffer.writeSpace() +
+                        buffer.writeString("\(element)")
+                } +
+                    self.writeSpace() +
+                    self.writeSearchSortModifierSequence(data.modifierSequence)
+            })
+    }
+    
     @discardableResult mutating func writeMailboxData(_ data: MailboxName.Data) -> Int {
         switch data {
         case .flags(let flags):
@@ -52,6 +77,8 @@ extension EncodeBuffer {
             return self.writeString("\(num) RECENT")
         case .namespace(let namespaceResponse):
             return self.writeNamespaceResponse(namespaceResponse)
+        case .searchSort(let data):
+        return self.writeSearchSortMailboxData(data)
         }
     }
 

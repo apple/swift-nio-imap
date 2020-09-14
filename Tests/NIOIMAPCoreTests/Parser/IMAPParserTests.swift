@@ -1759,6 +1759,7 @@ extension ParserUnitTests {
                 ("SEARCH 1", "\r\n", .search([1]), #line),
                 ("SEARCH 1 2 3 4 5", "\r\n", .search([1, 2, 3, 4, 5]), #line),
                 ("NAMESPACE NIL NIL NIL", "\r\n", .namespace(.init(userNamespace: [], otherUserNamespace: [], sharedNamespace: [])), #line),
+                ("SEARCH 1 2 3 (MODSEQ 4)", "\r\n", .searchSort(.init(identifiers: [1, 2, 3], modifierSequence: .init(modifierSequenceValue: 4))), #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []

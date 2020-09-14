@@ -211,14 +211,13 @@ extension CommandEncodeBuffer {
     }
 
     private mutating func writeCommandKind_select(mailbox: MailboxName, params: [SelectParameter]) -> Int {
-        self.writeString("SELECT ") +
-            self.writeMailbox(mailbox) +
-            self.writeIfArrayHasMinimumSize(array: params, callback: { (array, buffer) -> Int in
-                buffer.writeArray(array, callback: { (element, buffer) -> Int in
-                    buffer.writeSpace() +
-                        buffer.writeSelectParameter(element)
-                    })
-            })
+        self.buffer.writeString("SELECT ") +
+            self.buffer.writeMailbox(mailbox) +
+            self.buffer.writeSpace() + 
+            self.buffer.writeArray(params , callback: { (element, buffer) -> Int in
+                buffer.writeSpace() +
+                    buffer.writeSelectParameter(element)
+                })
     }
 
     private mutating func writeCommandKind_status(mailbox: MailboxName, attributes: [MailboxAttribute]) -> Int {

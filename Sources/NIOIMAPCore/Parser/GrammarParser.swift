@@ -1877,6 +1877,19 @@ extension GrammarParser {
             }
             return .search(nums)
         }
+        
+        func parseMailboxData_searchSort(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxName.Data {
+            try ParserLibrary.parseFixedString("SEARCH", buffer: &buffer, tracker: tracker)
+            try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
+            var array = [try self.parseNZNumber(buffer: &buffer, tracker: tracker)]
+            try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker, parser: { (buffer, tracker) in
+                try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
+                return try self.parseNZNumber(buffer: &buffer, tracker: tracker)
+            })
+            try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
+            let seq = try self.parseSearchSortModifierSequence(buffer: &buffer, tracker: tracker)
+            return .searchSort(.init(identifiers: array, modifierSequence: seq))
+        }
 
         func parseMailboxData_status(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxName.Data {
             try ParserLibrary.parseFixedString("STATUS ", buffer: &buffer, tracker: tracker)
@@ -1912,6 +1925,7 @@ extension GrammarParser {
             parseMailboxData_status,
             parseMailboxData_exists,
             parseMailboxData_recent,
+            parseMailboxData_searchSort,
             parseMailboxData_search,
             parseMailboxData_namespace,
         ], buffer: &buffer, tracker: tracker)
