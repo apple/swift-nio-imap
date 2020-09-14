@@ -3104,7 +3104,7 @@ extension ParserUnitTests {
                 (
                     "SETQUOTA \"\" (STORAGE 512)",
                     "\r",
-                    Command.setQuota(QuotaRoot(""),  [QuotaLimit(resourceName: "STORAGE", limit: 512)]),
+                    Command.setQuota(QuotaRoot(""), [QuotaLimit(resourceName: "STORAGE", limit: 512)]),
                     #line
                 ),
                 (
