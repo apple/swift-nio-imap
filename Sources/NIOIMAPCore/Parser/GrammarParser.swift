@@ -3313,6 +3313,26 @@ extension GrammarParser {
             parseSearchKey_filter,
         ], buffer: &buffer, tracker: tracker)
     }
+    
+    static func parseSearchModifiedSequence(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SearchModifiedSequence {
+        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker, { (buffer, tracker) -> SearchModifiedSequence in
+            try ParserLibrary.parseFixedString("MODSEQ", buffer: &buffer, tracker: tracker)
+            let extensions = try ParserLibrary.parseZeroOrMore(buffer: &buffer, tracker: tracker, parser: self.parseSearchModifiedSequenceExtension)
+            try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
+            let val = try self.parseModifierSequenceValue(buffer: &buffer, tracker: tracker)
+            return .init(extensions: extensions, sequenceValue: val)
+        })
+    }
+    
+    static func parseSearchModifiedSequenceExtension(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SearchModifiedSequenceExtension {
+        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker, { (buffer, tracker) -> SearchModifiedSequenceExtension in
+            try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
+            let flag = try self.parseEntryFlagName(buffer: &buffer, tracker: tracker)
+            try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
+            let request = try self.parseEntryKindRequest(buffer: &buffer, tracker: tracker)
+            return .init(name: flag, request: request)
+        })
+    }
 
     // search-ret-data-ext = search-modifier-name SP search-return-value
     static func parseSearchReturnDataExtension(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SearchReturnDataExtension {

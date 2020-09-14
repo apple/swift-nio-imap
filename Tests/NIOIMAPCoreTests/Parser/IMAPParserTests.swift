@@ -2550,6 +2550,51 @@ extension ParserUnitTests {
     }
 }
 
+// MARK: - parseSearchModifierSequence
+
+extension ParserUnitTests {
+    func testParseSearchModifierSequence() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseSearchModifiedSequence,
+            validInputs: [
+                ("MODSEQ 4", " ", .init(extensions: [], sequenceValue: 4), #line),
+                (
+                    "MODSEQ \"/flags/\\\\Answered\" priv 4",
+                    " ",
+                    .init(extensions: [.init(name: .init(flag: .answered), request: .private)], sequenceValue: 4),
+                    #line
+                ),
+                (
+                    "MODSEQ \"/flags/\\\\Answered\" priv \"/flags/\\\\Seen\" shared 4",
+                    " ",
+                    .init(extensions: [
+                        .init(name: .init(flag: .answered), request: .private),
+                        .init(name: .init(flag: .seen), request: .shared)
+                    ], sequenceValue: 4),
+                    #line
+                )
+            ],
+            parserErrorInputs: [],
+            incompleteMessageInputs: []
+        )
+    }
+}
+
+// MARK: - parseSearchModifierSequenceExtension
+
+extension ParserUnitTests {
+    func testParseSearchModifierSequenceExtension() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseSearchModifiedSequenceExtension,
+            validInputs: [
+                (" \"/flags/\\\\Seen\" all", "", .init(name: .init(flag: .seen), request: .all), #line)
+            ],
+            parserErrorInputs: [],
+            incompleteMessageInputs: []
+        )
+    }
+}
+
 // MARK: - `search-ret-data` parseSearchReturnData
 
 extension ParserUnitTests {
