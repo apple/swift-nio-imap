@@ -1376,6 +1376,15 @@ extension GrammarParser {
             parseFetchAttribute_binarySize,
         ], buffer: &buffer, tracker: tracker)
     }
+    
+    static func parseFetchModifierResponse(buffer: inout ByteBuffer, tracker: StackTracker) throws -> FetchModifierResponse {
+        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker, { (buffer, tracker) -> FetchModifierResponse in
+            try ParserLibrary.parseFixedString("MODSEQ (", buffer: &buffer, tracker: tracker)
+            let val = try self.parseModifierSequenceValue(buffer: &buffer, tracker: tracker)
+            try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)
+            return .init(modifierSequenceValue: val)
+        })
+    }
 
     // filter-name = 1*<any ATOM-CHAR except "/">
     static func parseFilterName(buffer: inout ByteBuffer, tracker: StackTracker) throws -> String {
@@ -3757,7 +3766,7 @@ extension GrammarParser {
             case unseen(Int)
             case size(Int)
             case recent(Int)
-            case modSequence(ModifierSequenceValue)
+            case highestModifierSequence(ModifierSequenceValue)
         }
 
         func parseStatusAttributeValue_messages(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxValue {
@@ -3787,7 +3796,7 @@ extension GrammarParser {
 
         func parseStatusAttributeValue_modSequence(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxValue {
             try ParserLibrary.parseFixedString("HIGHESTMODSEQ ", buffer: &buffer, tracker: tracker)
-            return .modSequence(try self.parseModifierSequenceValue(buffer: &buffer, tracker: tracker))
+            return .highestModifierSequence(try self.parseModifierSequenceValue(buffer: &buffer, tracker: tracker))
         }
 
         func parseStatusAttributeValue_recent(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxValue {
@@ -3820,8 +3829,8 @@ extension GrammarParser {
                 switch value {
                 case .messages(let messages):
                     status.messageCount = messages
-                case .modSequence(let modSequence):
-                    status.modSequence = modSequence
+                case .highestModifierSequence(let modSequence):
+                    status.highestModifierSequence = modSequence
                 case .size(let size):
                     status.size = size
                 case .uidNext(let uidNext):

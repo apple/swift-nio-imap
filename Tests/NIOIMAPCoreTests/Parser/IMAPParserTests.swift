@@ -1655,6 +1655,25 @@ extension ParserUnitTests {
     }
 }
 
+// MARK: - parseFetchModifierResponse
+
+extension ParserUnitTests {
+    func testParseFetchModifierResponse() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseFetchModifierResponse,
+            validInputs: [
+                ("MODSEQ (2)", "", .init(modifierSequenceValue: 2), #line),
+            ],
+            parserErrorInputs: [
+                ("MODSEQ (a)", "", #line),
+            ],
+            incompleteMessageInputs: [
+                ("MODSEQ (1", "", #line),
+            ]
+        )
+    }
+}
+
 // MARK: - parseHeaderList
 
 extension ParserUnitTests {

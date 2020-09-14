@@ -41,6 +41,7 @@ extension MessageAttributesTests {
             (.binary(section: [3], data: "test"), "BINARY[3] \"test\"", #line),
             (.flags([.draft]), "FLAGS (\\Draft)", #line),
             (.flags([.flagged, .draft]), "FLAGS (\\Flagged \\Draft)", #line),
+            (.fetchModifierResponse(.init(modifierSequenceValue: 3)), "MODSEQ (3)", #line)
         ]
 
         for (test, expectedString, line) in inputs {

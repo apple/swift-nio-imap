@@ -73,7 +73,7 @@ public struct MailboxStatus: Equatable {
     /// `HIGHESTMODSEQ`
     /// RFC 7162
     /// The highest mod-sequence value of all messages in the mailbox.
-    public var modSequence: ModifierSequenceValue?
+    public var highestModifierSequence: ModifierSequenceValue?
 
     /// Creates a new `MailboxStatus`. All parameters default to `nil`.
     /// - parameter messageCount: RFC 3501: `MESSAGES` - The number of messages in the mailbox.
@@ -98,7 +98,7 @@ public struct MailboxStatus: Equatable {
         self.uidValidity = uidValidity
         self.unseenCount = unseenCount
         self.size = size
-        self.modSequence = modSequence
+        self.highestModifierSequence = modSequence
     }
 }
 
@@ -136,7 +136,7 @@ extension EncodeBuffer {
         append(\.uidValidity, "UIDVALIDITY")
         append(\.unseenCount, "UNSEEN")
         append(\.size, "SIZE")
-        append(\.modSequence, "HIGHESTMODSEQ")
+        append(\.highestModifierSequence, "HIGHESTMODSEQ")
 
         return self.writeArray(array, parenthesis: false) { (element, self) -> Int in
             self.writeString("\(element.0) \(element.1)")

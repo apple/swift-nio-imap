@@ -50,6 +50,8 @@ public enum MessageAttribute: Equatable {
     /// removing any content-transfer-encoding related encoding.
     /// - SeeAlso: RFC 3516 “IMAP4 Binary Content Extension”
     case binarySize(section: SectionSpecifier.Part, size: Int)
+    
+    case fetchModifierResponse(FetchModifierResponse)
 }
 
 // MARK: - Encoding
@@ -87,6 +89,8 @@ extension EncodeBuffer {
             return self.writeMessageAttribute_binarySize(section: section, number: number)
         case .flags(let flags):
             return self.writeMessageAttributeFlags(flags)
+        case .fetchModifierResponse(let resp):
+        return self.writeFetchModifierResponse(resp)
         }
     }
 
