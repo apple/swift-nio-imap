@@ -829,6 +829,27 @@ extension ParserUnitTests {
     }
 }
 
+// MARK: - parseChangedSinceModifier
+
+extension ParserUnitTests {
+    func testParseChangedSinceModifier() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseChangedSinceModifier,
+            validInputs: [
+                ("CHANGEDSINCE 1", " ", .init(modifiedSequence: 1), #line),
+                ("changedsince 1", " ", .init(modifiedSequence: 1), #line),
+            ],
+            parserErrorInputs: [
+                ("TEST", "", #line),
+                ("CHANGEDSINCE a", "", #line),
+            ],
+            incompleteMessageInputs: [
+                ("CHANGEDSINCE 1", "", #line),
+            ]
+        )
+    }
+}
+
 // MARK: - parseContinueRequest
 
 extension ParserUnitTests {
@@ -1655,6 +1676,28 @@ extension ParserUnitTests {
     }
 }
 
+// MARK: - parseFetchModifier
+
+extension ParserUnitTests {
+    func testParseFetchModifier() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseFetchModifier,
+            validInputs: [
+                ("CHANGEDSINCE 2", " ", .changedSince(.init(modifiedSequence: 2)), #line),
+                ("test", "\r", .other(.init(name: "test")), #line),
+                ("test 1", " ", .other(.init(name: "test", value: .sequence([1]))), #line),
+            ],
+            parserErrorInputs: [
+                ("1", " ", #line),
+            ],
+            incompleteMessageInputs: [
+                ("CHANGEDSINCE 1", "", #line),
+                ("test 1", "", #line),
+            ]
+        )
+    }
+}
+
 // MARK: - parseFetchModifierResponse
 
 extension ParserUnitTests {
@@ -2006,6 +2049,7 @@ extension ParserUnitTests {
                     )),
                     #line
                 ),
+                ("MODSEQ (3)", " ", .fetchModifierResponse(.init(modifierSequenceValue: 3)), #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []

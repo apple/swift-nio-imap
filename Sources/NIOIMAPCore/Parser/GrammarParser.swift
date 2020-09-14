@@ -607,6 +607,14 @@ extension GrammarParser {
             parseCharset_quoted,
         ], buffer: &buffer, tracker: tracker)
     }
+    
+    static func parseChangedSinceModifier(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ChangedSinceModifier {
+        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker, { (buffer, tracker) -> ChangedSinceModifier in
+            try ParserLibrary.parseFixedString("CHANGEDSINCE ", buffer: &buffer, tracker: tracker)
+            let val = try self.parseModifierSequenceValue(buffer: &buffer, tracker: tracker)
+            return .init(modifiedSequence: val)
+        })
+    }
 
     // childinfo-extended-item =  "CHILDINFO" SP "("
     //             list-select-base-opt-quoted
@@ -2220,6 +2228,22 @@ extension GrammarParser {
             parseFetchStreamingResponse_binary,
         ], buffer: &buffer, tracker: tracker)
     }
+    
+    static func parseFetchModifier(buffer: inout ByteBuffer, tracker: StackTracker) throws -> FetchModifier {
+     
+        func parseFetchModifier_changedSince(buffer: inout ByteBuffer, tracker: StackTracker) throws -> FetchModifier {
+            return .changedSince(try self.parseChangedSinceModifier(buffer: &buffer, tracker: tracker))
+        }
+     
+        func parseFetchModifier_other(buffer: inout ByteBuffer, tracker: StackTracker) throws -> FetchModifier {
+            return .other(try self.parseParameter(buffer: &buffer, tracker: tracker))
+        }
+        
+        return try ParserLibrary.parseOneOf([
+            parseFetchModifier_changedSince,
+            parseFetchModifier_other
+        ], buffer: &buffer, tracker: tracker)
+    }
 
     static func parseFetchResponse(buffer: inout ByteBuffer, tracker: StackTracker) throws -> FetchResponse {
         func parseFetchResponse_start(buffer: inout ByteBuffer, tracker: StackTracker) throws -> FetchResponse {
@@ -2360,6 +2384,10 @@ extension GrammarParser {
             let string = try self.parseNString(buffer: &buffer, tracker: tracker)
             return .binary(section: section, data: string)
         }
+        
+        func parseMessageAttribute_fetchModifierResponse(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MessageAttribute {
+            return .fetchModifierResponse(try self.parseFetchModifierResponse(buffer: &buffer, tracker: tracker))
+        }
 
         return try ParserLibrary.parseOneOf([
             parseMessageAttribute_envelope,
@@ -2374,6 +2402,7 @@ extension GrammarParser {
             parseMessageAttribute_binarySize,
             parseMessageAttribute_binary,
             parseMessageAttribute_flags,
+            parseMessageAttribute_fetchModifierResponse
         ], buffer: &buffer, tracker: tracker)
     }
 
