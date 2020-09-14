@@ -607,21 +607,21 @@ extension GrammarParser {
             parseCharset_quoted,
         ], buffer: &buffer, tracker: tracker)
     }
-    
+
     static func parseChangedSinceModifier(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ChangedSinceModifier {
-        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker, { (buffer, tracker) -> ChangedSinceModifier in
+        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> ChangedSinceModifier in
             try ParserLibrary.parseFixedString("CHANGEDSINCE ", buffer: &buffer, tracker: tracker)
             let val = try self.parseModifierSequenceValue(buffer: &buffer, tracker: tracker)
             return .init(modifiedSequence: val)
-        })
+        }
     }
-    
+
     static func parseUnchangedSinceModifier(buffer: inout ByteBuffer, tracker: StackTracker) throws -> UnchangedSinceModifier {
-        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker, { (buffer, tracker) -> UnchangedSinceModifier in
+        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> UnchangedSinceModifier in
             try ParserLibrary.parseFixedString("UNCHANGEDSINCE ", buffer: &buffer, tracker: tracker)
             let val = try self.parseModifierSequenceValue(buffer: &buffer, tracker: tracker)
             return .init(modifiedSequence: val)
-        })
+        }
     }
 
     // childinfo-extended-item =  "CHILDINFO" SP "("
@@ -2236,20 +2236,19 @@ extension GrammarParser {
             parseFetchStreamingResponse_binary,
         ], buffer: &buffer, tracker: tracker)
     }
-    
+
     static func parseFetchModifier(buffer: inout ByteBuffer, tracker: StackTracker) throws -> FetchModifier {
-     
         func parseFetchModifier_changedSince(buffer: inout ByteBuffer, tracker: StackTracker) throws -> FetchModifier {
-            return .changedSince(try self.parseChangedSinceModifier(buffer: &buffer, tracker: tracker))
+            .changedSince(try self.parseChangedSinceModifier(buffer: &buffer, tracker: tracker))
         }
-     
+
         func parseFetchModifier_other(buffer: inout ByteBuffer, tracker: StackTracker) throws -> FetchModifier {
-            return .other(try self.parseParameter(buffer: &buffer, tracker: tracker))
+            .other(try self.parseParameter(buffer: &buffer, tracker: tracker))
         }
-        
+
         return try ParserLibrary.parseOneOf([
             parseFetchModifier_changedSince,
-            parseFetchModifier_other
+            parseFetchModifier_other,
         ], buffer: &buffer, tracker: tracker)
     }
 
@@ -2392,9 +2391,9 @@ extension GrammarParser {
             let string = try self.parseNString(buffer: &buffer, tracker: tracker)
             return .binary(section: section, data: string)
         }
-        
+
         func parseMessageAttribute_fetchModifierResponse(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MessageAttribute {
-            return .fetchModifierResponse(try self.parseFetchModifierResponse(buffer: &buffer, tracker: tracker))
+            .fetchModifierResponse(try self.parseFetchModifierResponse(buffer: &buffer, tracker: tracker))
         }
 
         return try ParserLibrary.parseOneOf([
@@ -2410,7 +2409,7 @@ extension GrammarParser {
             parseMessageAttribute_binarySize,
             parseMessageAttribute_binary,
             parseMessageAttribute_flags,
-            parseMessageAttribute_fetchModifierResponse
+            parseMessageAttribute_fetchModifierResponse,
         ], buffer: &buffer, tracker: tracker)
     }
 
@@ -3290,9 +3289,9 @@ extension GrammarParser {
             try ParserLibrary.parseFixedString("YOUNGER ", buffer: &buffer, tracker: tracker)
             return .younger(try self.parseNumber(buffer: &buffer, tracker: tracker))
         }
-        
+
         func parseSearchKey_modifierSequence(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SearchKey {
-            return .modifierSequence(try self.parseSearchModifiedSequence(buffer: &buffer, tracker: tracker))
+            .modifierSequence(try self.parseSearchModifiedSequence(buffer: &buffer, tracker: tracker))
         }
 
         return try ParserLibrary.parseOneOf([
@@ -3326,25 +3325,25 @@ extension GrammarParser {
             parseSearchKey_modifierSequence,
         ], buffer: &buffer, tracker: tracker)
     }
-    
+
     static func parseSearchModifiedSequence(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SearchModifiedSequence {
-        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker, { (buffer, tracker) -> SearchModifiedSequence in
+        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> SearchModifiedSequence in
             try ParserLibrary.parseFixedString("MODSEQ", buffer: &buffer, tracker: tracker)
             let extensions = try ParserLibrary.parseZeroOrMore(buffer: &buffer, tracker: tracker, parser: self.parseSearchModifiedSequenceExtension)
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
             let val = try self.parseModifierSequenceValue(buffer: &buffer, tracker: tracker)
             return .init(extensions: extensions, sequenceValue: val)
-        })
+        }
     }
-    
+
     static func parseSearchModifiedSequenceExtension(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SearchModifiedSequenceExtension {
-        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker, { (buffer, tracker) -> SearchModifiedSequenceExtension in
+        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> SearchModifiedSequenceExtension in
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
             let flag = try self.parseEntryFlagName(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
             let request = try self.parseEntryKindRequest(buffer: &buffer, tracker: tracker)
             return .init(name: flag, request: request)
-        })
+        }
     }
 
     // search-ret-data-ext = search-modifier-name SP search-return-value
@@ -3962,19 +3961,19 @@ extension GrammarParser {
             return .store(sequence, modifiers, flags)
         }
     }
-    
+
     static func parseStoreModifier(buffer: inout ByteBuffer, tracker: StackTracker) throws -> StoreModifier {
         func parseFetchModifier_unchangedSince(buffer: inout ByteBuffer, tracker: StackTracker) throws -> StoreModifier {
-            return .unchangedSince(try self.parseUnchangedSinceModifier(buffer: &buffer, tracker: tracker))
+            .unchangedSince(try self.parseUnchangedSinceModifier(buffer: &buffer, tracker: tracker))
         }
-     
+
         func parseFetchModifier_other(buffer: inout ByteBuffer, tracker: StackTracker) throws -> StoreModifier {
-            return .other(try self.parseParameter(buffer: &buffer, tracker: tracker))
+            .other(try self.parseParameter(buffer: &buffer, tracker: tracker))
         }
-        
+
         return try ParserLibrary.parseOneOf([
             parseFetchModifier_unchangedSince,
-            parseFetchModifier_other
+            parseFetchModifier_other,
         ], buffer: &buffer, tracker: tracker)
     }
 

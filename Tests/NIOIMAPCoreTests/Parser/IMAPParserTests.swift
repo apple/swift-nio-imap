@@ -2591,10 +2591,10 @@ extension ParserUnitTests {
                     " ",
                     .init(extensions: [
                         .init(name: .init(flag: .answered), request: .private),
-                        .init(name: .init(flag: .seen), request: .shared)
+                        .init(name: .init(flag: .seen), request: .shared),
                     ], sequenceValue: 4),
                     #line
-                )
+                ),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
@@ -2609,7 +2609,7 @@ extension ParserUnitTests {
         self.iterateTests(
             testFunction: GrammarParser.parseSearchModifiedSequenceExtension,
             validInputs: [
-                (" \"/flags/\\\\Seen\" all", "", .init(name: .init(flag: .seen), request: .all), #line)
+                (" \"/flags/\\\\Seen\" all", "", .init(name: .init(flag: .seen), request: .all), #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []

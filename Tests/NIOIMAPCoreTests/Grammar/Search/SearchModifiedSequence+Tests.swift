@@ -21,13 +21,12 @@ class SearchModifiedSequence_Tests: EncodeTestClass {}
 // MARK: - Encoding
 
 extension SearchModifiedSequence_Tests {
-    
     func testEncode() {
         let inputs: [(SearchModifiedSequence, String, UInt)] = [
             (.init(extensions: [], sequenceValue: .init(integerLiteral: 1)), "MODSEQ 1", #line),
             (
                 .init(extensions: [
-                    .init(name: .init(flag: .answered), request: .all)
+                    .init(name: .init(flag: .answered), request: .all),
                 ], sequenceValue: .init(integerLiteral: 1)),
                 "MODSEQ \"/flags/\\\\Answered\" all 1",
                 #line
@@ -35,7 +34,7 @@ extension SearchModifiedSequence_Tests {
             (
                 .init(extensions: [
                     .init(name: .init(flag: .answered), request: .all),
-                    .init(name: .init(flag: .seen), request: .private)
+                    .init(name: .init(flag: .seen), request: .private),
                 ], sequenceValue: .init(integerLiteral: 1)),
                 "MODSEQ \"/flags/\\\\Answered\" all \"/flags/\\\\Seen\" priv 1",
                 #line
@@ -44,7 +43,7 @@ extension SearchModifiedSequence_Tests {
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeSearchModifiedSequence($0) })
     }
-    
+
     func testEncode_extension() {
         let inputs: [(SearchModifiedSequenceExtension, String, UInt)] = [
             (.init(name: .init(flag: .answered), request: .all), " \"/flags/\\\\Answered\" all", #line),

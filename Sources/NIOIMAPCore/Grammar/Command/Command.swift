@@ -330,10 +330,10 @@ extension CommandEncodeBuffer {
         self.buffer.writeString("STORE ") +
             self.buffer.writeSequenceSet(set) +
             self.buffer.writeIfArrayHasMinimumSize(array: modifiers) { (modifiers, buffer) -> Int in
-                buffer.writeSpace() + 
-                buffer.writeArray(modifiers) { (element, buffer) -> Int in
-                    buffer.writeStoreModifier(element)
-                }
+                buffer.writeSpace() +
+                    buffer.writeArray(modifiers) { (element, buffer) -> Int in
+                        buffer.writeStoreModifier(element)
+                    }
             } +
             self.buffer.writeSpace() +
             self.buffer.writeStoreAttributeFlags(flags)

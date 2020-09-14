@@ -14,17 +14,14 @@
 
 /// RFC 7162
 public enum StoreModifier: Equatable {
-    
     case unchangedSince(UnchangedSinceModifier)
-    
+
     case other(Parameter)
-    
 }
 
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    
     @discardableResult mutating func writeStoreModifier(_ val: StoreModifier) -> Int {
         switch val {
         case .unchangedSince(let unchangedSince):
@@ -33,5 +30,4 @@ extension EncodeBuffer {
             return self.writeParameter(param)
         }
     }
-    
 }

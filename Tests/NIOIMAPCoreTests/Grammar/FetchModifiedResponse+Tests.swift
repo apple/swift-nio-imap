@@ -21,12 +21,10 @@ class FetchModifiedResponse_Tests: EncodeTestClass {}
 // MARK: - IMAP
 
 extension FetchModifiedResponse_Tests {
-    
     func testEncode() {
         let inputs: [(FetchModifierResponse, String, UInt)] = [
             (.init(modifierSequenceValue: 3), "MODSEQ (3)", #line),
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeFetchModifierResponse($0) })
     }
-    
 }

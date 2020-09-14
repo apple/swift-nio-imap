@@ -14,10 +14,9 @@
 
 /// RFC 7162
 public struct SearchModifiedSequenceExtension: Equatable {
-
     public var name: EntryFlagName
     public var request: EntryKindRequest
-    
+
     public init(name: EntryFlagName, request: EntryKindRequest) {
         self.name = name
         self.request = request
@@ -26,10 +25,9 @@ public struct SearchModifiedSequenceExtension: Equatable {
 
 /// RFC 7162
 public struct SearchModifiedSequence: Equatable {
-    
     public var extensions: [SearchModifiedSequenceExtension]
     public var sequenceValue: ModifierSequenceValue
-    
+
     public init(extensions: [SearchModifiedSequenceExtension], sequenceValue: ModifierSequenceValue) {
         self.extensions = extensions
         self.sequenceValue = sequenceValue
@@ -37,8 +35,8 @@ public struct SearchModifiedSequence: Equatable {
 }
 
 // MARK: - Encoding
+
 extension EncodeBuffer {
-    
     @discardableResult mutating func writeSearchModifiedSequence(_ data: SearchModifiedSequence) -> Int {
         self.writeString("MODSEQ") +
             self.writeArray(data.extensions, separator: "", parenthesis: false, callback: { (element, self) -> Int in
@@ -47,12 +45,11 @@ extension EncodeBuffer {
             self.writeSpace() +
             self.writeModifierSequenceValue(data.sequenceValue)
     }
-    
+
     @discardableResult mutating func writeSearchModifiedSequenceExtension(_ data: SearchModifiedSequenceExtension) -> Int {
         self.writeSpace() +
             self.writeEntryFlagName(data.name) +
             self.writeSpace() +
             self.writeEntryKindRequest(data.request)
     }
-    
 }
