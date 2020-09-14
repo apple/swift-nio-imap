@@ -540,6 +540,7 @@ extension GrammarParser {
                 self.parseCommandAuth,
                 self.parseCommandNonauth,
                 self.parseCommandSelect,
+                self.parseCommandQuota,
             ], buffer: &buffer, tracker: tracker)
             return TaggedCommand(tag: tag, command: type)
         }
@@ -2650,6 +2651,8 @@ extension GrammarParser {
             parseResponsePayload_capabilityData,
             parseResponsePayload_idResponse,
             parseResponsePayload_enableData,
+            parseResponsePayload_quota,
+            parseResponsePayload_quotaRoot,
         ], buffer: &buffer, tracker: tracker)
     }
 
@@ -3938,6 +3941,128 @@ extension GrammarParser {
     static func parseVendorToken(buffer: inout ByteBuffer, tracker: StackTracker) throws -> String {
         try ParserLibrary.parseOneOrMoreCharacters(buffer: &buffer, tracker: tracker) { char -> Bool in
             char.isAlpha
+        }
+    }
+
+    // RFC 2087 = "GETQUOTA" / "GETQUOTAROOT" / "SETQUOTA"
+    static func parseCommandQuota(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Command {
+        func parseQuotaRoot(buffer: inout ByteBuffer, tracker: StackTracker) throws -> QuotaRoot {
+            let string = try self.parseAString(buffer: &buffer, tracker: tracker)
+            return QuotaRoot(string)
+        }
+
+        // setquota_list   ::= "(" 0#setquota_resource ")"
+        func parseQuotaLimits(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [QuotaLimit] {
+            // setquota_resource ::= atom SP number
+            func parseQuotaLimit(buffer: inout ByteBuffer, tracker: StackTracker) throws -> QuotaLimit {
+                try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
+                    let resourceName = try parseAtom(buffer: &buffer, tracker: tracker)
+                    try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
+                    let limit = try parseNumber(buffer: &buffer, tracker: tracker)
+                    return QuotaLimit(resourceName: resourceName, limit: limit)
+                }
+            }
+
+            return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) throws -> [QuotaLimit] in
+                try ParserLibrary.parseFixedString("(", buffer: &buffer, tracker: tracker)
+                var limits: [QuotaLimit] = []
+                try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker in
+                    while let limit = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: parseQuotaLimit) {
+                        limits.append(limit)
+                        if try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: ParserLibrary.parseSpace) == nil {
+                            break
+                        }
+                    }
+                }
+                try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)
+                return limits
+            }
+        }
+
+        // getquota        ::= "GETQUOTA" SP astring
+        func parseCommandQuota_getQuota(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Command {
+            try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker in
+                try ParserLibrary.parseFixedString("GETQUOTA ", buffer: &buffer, tracker: tracker)
+                let quotaRoot = try parseQuotaRoot(buffer: &buffer, tracker: tracker)
+                return .getQuota(quotaRoot)
+            }
+        }
+
+        // getquotaroot    ::= "GETQUOTAROOT" SP astring
+        func parseCommandQuota_getQuotaRoot(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Command {
+            try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker in
+                try ParserLibrary.parseFixedString("GETQUOTAROOT ", buffer: &buffer, tracker: tracker)
+                let mailbox = try parseMailbox(buffer: &buffer, tracker: tracker)
+                return .getQuotaRoot(mailbox)
+            }
+        }
+
+        // setquota        ::= "SETQUOTA" SP astring SP setquota_list
+        func parseCommandQuota_setQuota(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Command {
+            try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker in
+                try ParserLibrary.parseFixedString("SETQUOTA ", buffer: &buffer, tracker: tracker)
+                let quotaRoot = try parseQuotaRoot(buffer: &buffer, tracker: tracker)
+                try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
+                let quotaLimits = try parseQuotaLimits(buffer: &buffer, tracker: tracker)
+                return .setQuota(quotaRoot, quotaLimits)
+            }
+        }
+
+        return try ParserLibrary.parseOneOf([
+            parseCommandQuota_getQuota,
+            parseCommandQuota_getQuotaRoot,
+            parseCommandQuota_setQuota,
+        ], buffer: &buffer, tracker: tracker)
+    }
+
+    // quota_response  ::= "QUOTA" SP astring SP quota_list
+    static func parseResponsePayload_quota(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ResponsePayload {
+        // quota_resource  ::= atom SP number SP number
+        func parseQuotaResource(buffer: inout ByteBuffer, tracker: StackTracker) throws -> QuotaResource {
+            try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker in
+                let resourceName = try parseAtom(buffer: &buffer, tracker: tracker)
+                try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
+                let usage = try parseNumber(buffer: &buffer, tracker: tracker)
+                try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
+                let limit = try parseNumber(buffer: &buffer, tracker: tracker)
+                return QuotaResource(resourceName: resourceName, usage: usage, limit: limit)
+            }
+        }
+
+        // quota_list      ::= "(" #quota_resource ")"
+        func parseQuotaList(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [QuotaResource] {
+            try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker in
+                try ParserLibrary.parseFixedString("(", buffer: &buffer, tracker: tracker)
+                var resources: [QuotaResource] = []
+                while let resource = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: parseQuotaResource) {
+                    resources.append(resource)
+                    if try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: ParserLibrary.parseSpace) == nil {
+                        break
+                    }
+                }
+                try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)
+                return resources
+            }
+        }
+
+        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker in
+            try ParserLibrary.parseFixedString("QUOTA ", buffer: &buffer, tracker: tracker)
+            let quotaRoot = try parseAString(buffer: &buffer, tracker: tracker)
+            try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
+            let resources = try parseQuotaList(buffer: &buffer, tracker: tracker)
+            return .quota(.init(quotaRoot), resources)
+        }
+    }
+
+    // quotaroot_response ::= "QUOTAROOT" SP astring *(SP astring)
+    static func parseResponsePayload_quotaRoot(buffer: inout ByteBuffer,
+                                               tracker: StackTracker) throws -> ResponsePayload {
+        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker in
+            try ParserLibrary.parseFixedString("QUOTAROOT ", buffer: &buffer, tracker: tracker)
+            let mailbox = try parseMailbox(buffer: &buffer, tracker: tracker)
+            try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
+            let quotaRoot = try parseAString(buffer: &buffer, tracker: tracker)
+            return .quotaRoot(mailbox, .init(quotaRoot))
         }
     }
 }

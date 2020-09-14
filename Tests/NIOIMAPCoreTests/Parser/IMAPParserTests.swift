@@ -3093,3 +3093,125 @@ extension ParserUnitTests {
         )
     }
 }
+
+// MARK: RFC 2087 - Quota
+
+extension ParserUnitTests {
+    func testSetQuota() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseCommandQuota,
+            validInputs: [
+                (
+                    "SETQUOTA \"\" (STORAGE 512)",
+                    "\r",
+                    Command.setQuota(QuotaRoot(""), [QuotaLimit(resourceName: "STORAGE", limit: 512)]),
+                    #line
+                ),
+                (
+                    "SETQUOTA \"MASSIVE_POOL\" (STORAGE 512)",
+                    "\r",
+                    Command.setQuota(QuotaRoot("MASSIVE_POOL"), [QuotaLimit(resourceName: "STORAGE", limit: 512)]),
+                    #line
+                ),
+                (
+                    "SETQUOTA \"MASSIVE_POOL\" (STORAGE 512 BEANS 50000)",
+                    "\r",
+                    Command.setQuota(QuotaRoot("MASSIVE_POOL"), [QuotaLimit(resourceName: "STORAGE", limit: 512),
+                                                                 QuotaLimit(resourceName: "BEANS", limit: 50000)]),
+                    #line
+                ),
+                (
+                    "SETQUOTA \"MASSIVE_POOL\" ()",
+                    "\r",
+                    Command.setQuota(QuotaRoot("MASSIVE_POOL"), []),
+                    #line
+                ),
+            ],
+            parserErrorInputs: [
+                ("SETQUOTA \"MASSIVE_POOL\" (STORAGE BEANS)", "\r", #line),
+                ("SETQUOTA \"MASSIVE_POOL\" (STORAGE 40M)", "\r", #line),
+                ("SETQUOTA \"MASSIVE_POOL\" (STORAGE)", "\r", #line),
+                ("SETQUOTA \"MASSIVE_POOL\" (", "\r", #line),
+                ("SETQUOTA \"MASSIVE_POOL\"", "\r", #line),
+            ],
+            incompleteMessageInputs: []
+        )
+    }
+
+    func testGetQuota() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseCommandQuota,
+            validInputs: [
+                ("GETQUOTA \"\"", "\r", Command.getQuota(QuotaRoot("")), #line),
+                ("GETQUOTA \"MASSIVE_POOL\"", "\r", Command.getQuota(QuotaRoot("MASSIVE_POOL")), #line),
+            ],
+            parserErrorInputs: [
+                ("GETQUOTA", "\r", #line),
+            ],
+            incompleteMessageInputs: []
+        )
+    }
+
+    func testGetQuotaRoot() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseCommandQuota,
+            validInputs: [
+                ("GETQUOTAROOT INBOX", "\r", Command.getQuotaRoot(MailboxName("INBOX")), #line),
+                ("GETQUOTAROOT Other", "\r", Command.getQuotaRoot(MailboxName("Other")), #line),
+            ],
+            parserErrorInputs: [
+                ("GETQUOTAROOT", "\r", #line),
+            ],
+            incompleteMessageInputs: []
+        )
+    }
+
+    func testResponsePayload_quotaRoot() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseResponsePayload_quotaRoot,
+            validInputs: [
+                ("QUOTAROOT INBOX \"Root\"", "\r", .quotaRoot(.init("INBOX"), .init("Root")), #line),
+            ],
+            parserErrorInputs: [
+                ("QUOTAROOT", "\r", #line),
+                ("QUOTAROOT INBOX", "\r", #line),
+            ],
+            incompleteMessageInputs: []
+        )
+    }
+
+    func testResponsePayload_quota() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseResponsePayload_quota,
+            validInputs: [
+                (
+                    "QUOTA \"Root\" (STORAGE 10 512)", "\r",
+                    .quota(.init("Root"), [QuotaResource(resourceName: "STORAGE", usage: 10, limit: 512)]),
+                    #line
+                ),
+                (
+                    "QUOTA \"Root\" (STORAGE 10 512 BEANS 50 100)", "\r",
+                    .quota(.init("Root"), [QuotaResource(resourceName: "STORAGE", usage: 10, limit: 512),
+                                           QuotaResource(resourceName: "BEANS", usage: 50, limit: 100)]),
+                    #line
+                ),
+                (
+                    "QUOTA \"Root\" ()", "\r",
+                    .quota(.init("Root"), []),
+                    #line
+                ),
+            ],
+            parserErrorInputs: [
+                ("QUOTA", "\r", #line),
+                ("QUOTA \"Root\"", "\r", #line),
+                ("QUOTA \"Root\" (", "\r", #line),
+                ("QUOTA \"Root\" (STORAGE", "\r", #line),
+                ("QUOTA \"Root\" (STORAGE)", "\r", #line),
+                ("QUOTA \"Root\" (STORAGE 10", "\r", #line),
+                ("QUOTA \"Root\" (STORAGE 10)", "\r", #line),
+                ("QUOTA \"Root\" (STORAGE 10 512 BEANS)", "\r", #line),
+            ],
+            incompleteMessageInputs: []
+        )
+    }
+}
