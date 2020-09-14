@@ -3357,6 +3357,15 @@ extension GrammarParser {
             return SearchReturnOptionExtension(modifierName: name, params: params)
         }
     }
+    
+    static func parseSearchSortModifierSequence(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SearchSortModifierSequence {
+        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker, { (buffer, tracker) -> SearchSortModifierSequence in
+            try ParserLibrary.parseFixedString("(MODSEQ ", buffer: &buffer, tracker: tracker)
+            let modSeq = try self.parseModifierSequenceValue(buffer: &buffer, tracker: tracker)
+            try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)
+            return .init(modifierSequenceValue: modSeq)
+        })
+    }
 
     // section         = "[" [section-spec] "]"
     static func parseSection(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SectionSpecifier? {

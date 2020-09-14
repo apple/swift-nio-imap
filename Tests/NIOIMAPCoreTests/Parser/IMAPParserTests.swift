@@ -2552,6 +2552,26 @@ extension ParserUnitTests {
     }
 }
 
+// MARK: - parseSearchSortModifierSequence
+
+extension ParserUnitTests {
+    func testParseSearchSortModifierSequence() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseSearchSortModifierSequence,
+            validInputs: [
+                ("(MODSEQ 123)", "\r", .init(modifierSequenceValue: 123), #line),
+            ],
+            parserErrorInputs: [
+                ("(MODSEQ a)", "", #line)
+            ],
+            incompleteMessageInputs: [
+                ("(MODSEQ ", "", #line),
+                ("(MODSEQ 111", "", #line),
+            ]
+        )
+    }
+}
+
 // MARK: - parseSection
 
 extension ParserUnitTests {
