@@ -95,16 +95,16 @@ final class RoundtripTests: XCTestCase {
         ]
 
         for (i, test) in tests.enumerated() {
-            var encodeBuffer = EncodeBuffer.clientEncodeBuffer(buffer: ByteBufferAllocator().buffer(capacity: 128), options: CommandEncodingOptions())
+            var encodeBuffer = CommandEncodeBuffer(buffer: ByteBuffer(), options: .init())
             let commandType = test.0
             let line = test.1
             let tag = "\(i + 1)"
             let command = TaggedCommand(tag: tag, command: commandType)
             encodeBuffer.writeCommand(command)
-            encodeBuffer.writeString("\r\n") // required for commands that might terminate with a literal (e.g. append)
+            encodeBuffer.buffer.writeString("\r\n") // required for commands that might terminate with a literal (e.g. append)
             var buffer = ByteBufferAllocator().buffer(capacity: 128)
             while true {
-                let next = encodeBuffer.nextChunk()
+                let next = encodeBuffer.buffer.nextChunk()
                 var toSend = next.bytes
                 buffer.writeBuffer(&toSend)
                 if !next.waitForContinuation {
