@@ -3282,6 +3282,10 @@ extension GrammarParser {
             try ParserLibrary.parseFixedString("YOUNGER ", buffer: &buffer, tracker: tracker)
             return .younger(try self.parseNumber(buffer: &buffer, tracker: tracker))
         }
+        
+        func parseSearchKey_modifierSequence(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SearchKey {
+            return .modifierSequence(try self.parseSearchModifiedSequence(buffer: &buffer, tracker: tracker))
+        }
 
         return try ParserLibrary.parseOneOf([
             parseSearchKey_older,
@@ -3311,6 +3315,7 @@ extension GrammarParser {
             parseSearchKey_sequenceSet,
             parseSearchKey_array,
             parseSearchKey_filter,
+            parseSearchKey_modifierSequence,
         ], buffer: &buffer, tracker: tracker)
     }
     

@@ -2519,6 +2519,7 @@ extension ParserUnitTests {
                 ("YOUNGER 34", "\r", .younger(34), #line),
                 ("OLDER 45", "\r", .older(45), #line),
                 ("FILTER something", "\r", .filter("something"), #line),
+                ("MODSEQ 5", "\r", .modifierSequence(.init(extensions: [], sequenceValue: 5)), #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
