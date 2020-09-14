@@ -3648,6 +3648,28 @@ extension GrammarParser {
             parseSequenceSet_lastCommand,
         ], buffer: &buffer, tracker: tracker)
     }
+    
+    static func parseSortData(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SortData? {
+        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker, { (buffer, tracker) -> SortData? in
+            try ParserLibrary.parseFixedString("SORT", buffer: &buffer, tracker: tracker)
+            let _components = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> ([Int], SearchSortModifierSequence) in
+                try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
+                var array = [try self.parseNZNumber(buffer: &buffer, tracker: tracker)]
+                try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker, parser: { (buffer, tracker) in
+                    try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
+                    return try self.parseNZNumber(buffer: &buffer, tracker: tracker)
+                })
+                try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
+                let seq = try self.parseSearchSortModifierSequence(buffer: &buffer, tracker: tracker)
+                return (array, seq)
+            }
+            
+            guard let components = _components else {
+                return nil
+            }
+            return SortData(identifiers: components.0, modifierSequence: components.1)
+        })
+    }
 
     // uid-set
     static func parseUIDSet(buffer: inout ByteBuffer, tracker: StackTracker) throws -> UIDSet {
