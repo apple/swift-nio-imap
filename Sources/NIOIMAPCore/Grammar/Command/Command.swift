@@ -40,7 +40,7 @@ public enum Command: Equatable {
     case idleFinish
     case copy(SequenceSet, MailboxName)
     case fetch(SequenceSet, [FetchAttribute], [Parameter])
-    case store(SequenceSet, [Parameter], StoreFlags)
+    case store(SequenceSet, [StoreModifier], StoreFlags)
     case search(key: SearchKey, charset: String? = nil, returnOptions: [SearchReturnOption] = [])
     case move(SequenceSet, MailboxName)
     case id([IDParameter])
@@ -326,11 +326,14 @@ extension CommandEncodeBuffer {
             }
     }
 
-    private mutating func writeCommandKind_store(set: SequenceSet, modifiers: [Parameter], flags: StoreFlags) -> Int {
+    private mutating func writeCommandKind_store(set: SequenceSet, modifiers: [StoreModifier], flags: StoreFlags) -> Int {
         self.buffer.writeString("STORE ") +
             self.buffer.writeSequenceSet(set) +
             self.buffer.writeIfArrayHasMinimumSize(array: modifiers) { (modifiers, buffer) -> Int in
-                buffer.writeParameters(modifiers)
+                buffer.writeSpace() + 
+                buffer.writeArray(modifiers) { (element, buffer) -> Int in
+                    buffer.writeStoreModifier(element)
+                }
             } +
             self.buffer.writeSpace() +
             self.buffer.writeStoreAttributeFlags(flags)

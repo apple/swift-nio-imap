@@ -615,6 +615,14 @@ extension GrammarParser {
             return .init(modifiedSequence: val)
         })
     }
+    
+    static func parseUnchangedSinceModifier(buffer: inout ByteBuffer, tracker: StackTracker) throws -> UnchangedSinceModifier {
+        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker, { (buffer, tracker) -> UnchangedSinceModifier in
+            try ParserLibrary.parseFixedString("UNCHANGEDSINCE ", buffer: &buffer, tracker: tracker)
+            let val = try self.parseModifierSequenceValue(buffer: &buffer, tracker: tracker)
+            return .init(modifiedSequence: val)
+        })
+    }
 
     // childinfo-extended-item =  "CHILDINFO" SP "("
     //             list-select-base-opt-quoted
@@ -3938,11 +3946,36 @@ extension GrammarParser {
         try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Command in
             try ParserLibrary.parseFixedString("STORE ", buffer: &buffer, tracker: tracker)
             let sequence = try self.parseSequenceSet(buffer: &buffer, tracker: tracker)
-            let modifiers = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseParameters) ?? []
+            let modifiers = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { buffer, tracker -> [StoreModifier] in
+                try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
+                try ParserLibrary.parseFixedString("(", buffer: &buffer, tracker: tracker)
+                var array = [try self.parseStoreModifier(buffer: &buffer, tracker: tracker)]
+                try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker, parser: { (buffer, tracker) in
+                    try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
+                    return try self.parseStoreModifier(buffer: &buffer, tracker: tracker)
+                })
+                try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)
+                return array
+            } ?? []
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
             let flags = try self.parseStoreAttributeFlags(buffer: &buffer, tracker: tracker)
             return .store(sequence, modifiers, flags)
         }
+    }
+    
+    static func parseStoreModifier(buffer: inout ByteBuffer, tracker: StackTracker) throws -> StoreModifier {
+        func parseFetchModifier_unchangedSince(buffer: inout ByteBuffer, tracker: StackTracker) throws -> StoreModifier {
+            return .unchangedSince(try self.parseUnchangedSinceModifier(buffer: &buffer, tracker: tracker))
+        }
+     
+        func parseFetchModifier_other(buffer: inout ByteBuffer, tracker: StackTracker) throws -> StoreModifier {
+            return .other(try self.parseParameter(buffer: &buffer, tracker: tracker))
+        }
+        
+        return try ParserLibrary.parseOneOf([
+            parseFetchModifier_unchangedSince,
+            parseFetchModifier_other
+        ], buffer: &buffer, tracker: tracker)
     }
 
     // store-att-flags = (["+" / "-"] "FLAGS" [".SILENT"]) SP

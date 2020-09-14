@@ -850,6 +850,27 @@ extension ParserUnitTests {
     }
 }
 
+// MARK: - parseUnchangedSinceModifier
+
+extension ParserUnitTests {
+    func testParseUnchangedSinceModifier() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseUnchangedSinceModifier,
+            validInputs: [
+                ("UNCHANGEDSINCE 1", " ", .init(modifiedSequence: 1), #line),
+                ("unchangedsince 1", " ", .init(modifiedSequence: 1), #line),
+            ],
+            parserErrorInputs: [
+                ("TEST", "", #line),
+                ("UNCHANGEDSINCE a", "", #line),
+            ],
+            incompleteMessageInputs: [
+                ("UNCHANGEDSINCE 1", "", #line),
+            ]
+        )
+    }
+}
+
 // MARK: - parseContinueRequest
 
 extension ParserUnitTests {
@@ -3019,7 +3040,7 @@ extension ParserUnitTests {
             testFunction: GrammarParser.parseStore,
             validInputs: [
                 ("STORE 1 +FLAGS \\answered", "\r", .store([1], [], .add(silent: false, list: [.answered])), #line),
-                ("STORE 1 (label) -FLAGS \\seen", "\r", .store([1], [.init(name: "label", value: nil)], .remove(silent: false, list: [.seen])), #line),
+                ("STORE 1 (label) -FLAGS \\seen", "\r", .store([1], [.other(.init(name: "label", value: nil))], .remove(silent: false, list: [.seen])), #line),
             ],
             parserErrorInputs: [
                 ("STORE +FLAGS \\answered", "\r", #line),
@@ -3027,6 +3048,28 @@ extension ParserUnitTests {
             incompleteMessageInputs: [
                 ("STORE ", "", #line),
                 ("STORE 1 ", "", #line),
+            ]
+        )
+    }
+}
+
+// MARK: - parseStoreModifier
+
+extension ParserUnitTests {
+    func testParseStoreModifier() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseStoreModifier,
+            validInputs: [
+                ("UNCHANGEDSINCE 2", " ", .unchangedSince(.init(modifiedSequence: 2)), #line),
+                ("test", "\r", .other(.init(name: "test")), #line),
+                ("test 1", " ", .other(.init(name: "test", value: .sequence([1]))), #line),
+            ],
+            parserErrorInputs: [
+                ("1", " ", #line),
+            ],
+            incompleteMessageInputs: [
+                ("UNCHANGEDSINCE 1", "", #line),
+                ("test 1", "", #line),
             ]
         )
     }

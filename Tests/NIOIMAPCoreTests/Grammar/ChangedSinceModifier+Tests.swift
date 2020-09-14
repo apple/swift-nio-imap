@@ -27,4 +27,11 @@ extension ChangedSinceModifier_Tests {
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeChangedSinceModifier($0) })
     }
+    
+    func testEncode_unchanged() {
+        let inputs: [(UnchangedSinceModifier, String, UInt)] = [
+            (.init(modifiedSequence: 3), "UNCHANGEDSINCE 3", #line),
+        ]
+        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeUnchangedSinceModifier($0) })
+    }
 }
