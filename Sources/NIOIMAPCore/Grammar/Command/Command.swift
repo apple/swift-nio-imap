@@ -385,20 +385,20 @@ extension CommandEncodeBuffer {
     }
 
     private mutating func writeCommandKind_getQuota(quotaRoot: QuotaRoot) -> Int {
-        self.writeString("GETQUOTA ") +
-            self.writeQuotaRoot(quotaRoot)
+        self.buffer.writeString("GETQUOTA ") +
+            self.buffer.writeQuotaRoot(quotaRoot)
     }
 
     private mutating func writeCommandKind_getQuotaRoot(mailbox: MailboxName) -> Int {
-        self.writeString("GETQUOTAROOT ") +
-            self.writeMailbox(mailbox)
+        self.buffer.writeString("GETQUOTAROOT ") +
+            self.buffer.writeMailbox(mailbox)
     }
 
     private mutating func writeCommandKind_setQuota(quotaRoot: QuotaRoot, resourceLimits: [QuotaLimit]) -> Int {
-        self.writeString("SETQUOTA ") +
-            self.writeQuotaRoot(quotaRoot) +
-            self.writeSpace() +
-            self.writeArray(resourceLimits, callback: { (limit, self) in
+        self.buffer.writeString("SETQUOTA ") +
+            self.buffer.writeQuotaRoot(quotaRoot) +
+            self.buffer.writeSpace() +
+            self.buffer.writeArray(resourceLimits, callback: { (limit, self) in
                 self.writeQuotaLimit(limit)
             })
     }
