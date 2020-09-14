@@ -21,7 +21,6 @@ class SearchSortModifierSequence_Tests: EncodeTestClass {}
 // MARK: - Encoding
 
 extension SearchSortModifierSequence_Tests {
-    
     func testEncoding() {
         let inputs: [(SearchSortModifierSequence, String, UInt)] = [
             (.init(modifierSequenceValue: 123), "(MODSEQ 123)", #line),

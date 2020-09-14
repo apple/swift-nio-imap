@@ -2552,6 +2552,26 @@ extension ParserUnitTests {
     }
 }
 
+// MARK: - parseSearchSortModifierSequence
+
+extension ParserUnitTests {
+    func testParseSearchSortModifierSequence() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseSearchSortModifierSequence,
+            validInputs: [
+                ("(MODSEQ 123)", "\r", .init(modifierSequenceValue: 123), #line),
+            ],
+            parserErrorInputs: [
+                ("(MODSEQ a)", "", #line),
+            ],
+            incompleteMessageInputs: [
+                ("(MODSEQ ", "", #line),
+                ("(MODSEQ 111", "", #line),
+            ]
+        )
+    }
+}
+
 // MARK: - parseSection
 
 extension ParserUnitTests {
@@ -2695,8 +2715,8 @@ extension ParserUnitTests {
             validInputs: [
                 ("test 1", "\r", .basic(.init(name: "test", value: .sequence([1]))), #line),
                 ("QRESYNC (1 1)", "\r", .qresync(.init(uidValiditiy: 1, modifierSequenceValue: 1, knownUids: nil, sequenceMatchData: nil)), #line),
-                ("QRESYNC (1 1 1:2)", "\r", .qresync(.init(uidValiditiy: 1, modifierSequenceValue: 1, knownUids: [1...2], sequenceMatchData: nil)), #line),
-                ("QRESYNC (1 1 1:2 (* *))", "\r", .qresync(.init(uidValiditiy: 1, modifierSequenceValue: 1, knownUids: [1...2], sequenceMatchData: .init(knownSequenceSet: .all, knownUidSet: .all))), #line),
+                ("QRESYNC (1 1 1:2)", "\r", .qresync(.init(uidValiditiy: 1, modifierSequenceValue: 1, knownUids: [1 ... 2], sequenceMatchData: nil)), #line),
+                ("QRESYNC (1 1 1:2 (* *))", "\r", .qresync(.init(uidValiditiy: 1, modifierSequenceValue: 1, knownUids: [1 ... 2], sequenceMatchData: .init(knownSequenceSet: .all, knownUidSet: .all))), #line),
             ],
             parserErrorInputs: [
                 ("1", "\r", #line),

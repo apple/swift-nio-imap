@@ -214,8 +214,8 @@ extension CommandEncodeBuffer {
         self.writeString("SELECT ") +
             self.writeMailbox(mailbox) +
             self.writeIfArrayHasMinimumSize(array: params, callback: { (array, buffer) -> Int in
-                    buffer.writeArray(array, callback: { (element, buffer) -> Int in
-                        buffer.writeSpace() +
+                buffer.writeArray(array, callback: { (element, buffer) -> Int in
+                    buffer.writeSpace() +
                         buffer.writeSelectParameter(element)
                     })
             })

@@ -16,35 +16,32 @@ import struct NIO.ByteBuffer
 
 /// RFC 7162 Condstore
 public struct AttributeFlag: Equatable, RawRepresentable {
-    
     public var rawValue: String
-    
+
     /// "\\Answered"
     public static var answered = Self(rawValue: "\\\\Answered") // yep, we need 4, because the spec requires 2 literal \\ characters
-    
+
     /// "\\Flagged"
     public static var flagged = Self(rawValue: "\\\\Flagged")
-    
+
     /// "\\Deleted"
     public static var deleted = Self(rawValue: "\\\\Deleted")
-    
+
     /// "\\Seen"
     public static var seen = Self(rawValue: "\\\\Seen")
-    
+
     /// "\\Draft"
     public static var draft = Self(rawValue: "\\\\Draft")
-    
-    
+
     public init(rawValue: String) {
         self.rawValue = rawValue
     }
 }
 
 // MARK: - Encoding
+
 extension EncodeBuffer {
-    
     @discardableResult mutating func writeAttributeFlag(_ flag: AttributeFlag) -> Int {
         self.writeString(flag.rawValue)
     }
-    
 }

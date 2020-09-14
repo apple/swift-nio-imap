@@ -13,11 +13,10 @@
 //===----------------------------------------------------------------------===//
 
 public struct SequenceMatchData: Equatable {
-    
     public var knownSequenceSet: SequenceSet
-    
+
     public var knownUidSet: SequenceSet
-    
+
     public init(knownSequenceSet: SequenceSet, knownUidSet: SequenceSet) {
         self.knownSequenceSet = knownSequenceSet
         self.knownUidSet = knownUidSet
@@ -25,8 +24,8 @@ public struct SequenceMatchData: Equatable {
 }
 
 // MARK: - Encoding
+
 extension EncodeBuffer {
-    
     @discardableResult mutating func writeSequenceMatchData(_ data: SequenceMatchData) -> Int {
         self.writeString("(") +
             self.writeSequenceSet(data.knownSequenceSet) +
@@ -34,5 +33,4 @@ extension EncodeBuffer {
             self.writeSequenceSet(data.knownUidSet) +
             self.writeString(")")
     }
-    
 }

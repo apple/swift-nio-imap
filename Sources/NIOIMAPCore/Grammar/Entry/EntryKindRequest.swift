@@ -15,13 +15,11 @@
 import struct NIO.ByteBuffer
 
 public struct EntryKindRequest: Equatable {
-    
     var _backing: String
-    
+
     public static var `private` = Self(_backing: "priv")
     public static var shared = Self(_backing: "shared")
     public static var all = Self(_backing: "all")
-    
 }
 
 // MARK: - Encoding

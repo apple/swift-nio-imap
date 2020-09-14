@@ -13,15 +13,14 @@
 //===----------------------------------------------------------------------===//
 
 public struct QResyncParameter: Equatable {
-    
     public var uidValiditiy: Int
-    
+
     public var modifierSequenceValue: ModifierSequenceValue
-    
+
     public var knownUids: SequenceSet?
-    
+
     public var sequenceMatchData: SequenceMatchData?
-    
+
     public init(uidValiditiy: Int, modifierSequenceValue: ModifierSequenceValue, knownUids: SequenceSet?, sequenceMatchData: SequenceMatchData?) {
         self.uidValiditiy = uidValiditiy
         self.modifierSequenceValue = modifierSequenceValue
@@ -31,18 +30,16 @@ public struct QResyncParameter: Equatable {
 }
 
 public enum SelectParameter: Equatable {
-    
     case basic(Parameter)
-    
+
     case qresync(QResyncParameter)
-    
+
     case condstore
-    
 }
 
 // MARK: - Encoding
+
 extension EncodeBuffer {
-    
     @discardableResult public mutating func writeSelectParameter(_ param: SelectParameter) -> Int {
         switch param {
         case .qresync(let param):
@@ -53,7 +50,7 @@ extension EncodeBuffer {
             return self.writeString("CONDSTORE")
         }
     }
-    
+
     @discardableResult mutating func writeQResyncParameter(param: QResyncParameter) -> Int {
         self.writeString("QRESYNC (\(param.uidValiditiy) ") +
             self.writeModifierSequenceValue(param.modifierSequenceValue) +
@@ -65,5 +62,4 @@ extension EncodeBuffer {
             }) +
             self.writeString(")")
     }
-    
 }

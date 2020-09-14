@@ -14,7 +14,6 @@
 
 /// RFC 7162
 public struct SearchSortModifierSequence: Equatable {
-
     public var modifierSequenceValue: ModifierSequenceValue
 
     public init(modifierSequenceValue: ModifierSequenceValue) {
@@ -25,11 +24,9 @@ public struct SearchSortModifierSequence: Equatable {
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    
     @discardableResult mutating func writeSearchSortModifierSequence(_ val: SearchSortModifierSequence) -> Int {
         self.writeString("(MODSEQ ") +
             self.writeModifierSequenceValue(val.modifierSequenceValue) +
             self.writeString(")")
     }
-    
 }

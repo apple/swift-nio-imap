@@ -21,7 +21,6 @@ class AttributeFlag_Tests: EncodeTestClass {}
 // MARK: - Encoding
 
 extension AttributeFlag_Tests {
-    
     func testEncoding() {
         let inputs: [(AttributeFlag, String, UInt)] = [
             (.answered, "\\\\Answered", #line),

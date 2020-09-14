@@ -21,7 +21,6 @@ class SelectParameter_Tests: EncodeTestClass {}
 // MARK: - Encoding
 
 extension SelectParameter_Tests {
-    
     func testEncoding() {
         let inputs: [(SelectParameter, String, UInt)] = [
             (.condstore, "CONDSTORE", #line),
