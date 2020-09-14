@@ -44,6 +44,9 @@ extension ResponseTextCodeTests {
             (.useAttribute, "USEATTR", #line),
             (.notSaved, "NOTSAVED", #line),
             (.closed, "CLOSED", #line),
+            (.noModifierSequence, "NOMODSEQ", #line),
+            (.modified([1]), "MODIFIED 1", #line),
+            (.highestModifierSequence(1), "HIGHESTMODSEQ 1", #line),
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeResponseTextCode($0) })
     }

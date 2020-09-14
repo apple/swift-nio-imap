@@ -48,7 +48,7 @@ extension MailboxDataTests {
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }
     }
-    
+
     func testEncode_searchSort() {
         let inputs: [(SearchSortMailboxData?, String, UInt)] = [
             (nil, "SEARCH", #line),

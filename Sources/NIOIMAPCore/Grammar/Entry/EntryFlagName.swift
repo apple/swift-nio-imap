@@ -13,9 +13,8 @@
 //===----------------------------------------------------------------------===//
 
 public struct EntryFlagName: Equatable {
-    
     public var flag: AttributeFlag
-    
+
     public init(flag: AttributeFlag) {
         self.flag = flag
     }

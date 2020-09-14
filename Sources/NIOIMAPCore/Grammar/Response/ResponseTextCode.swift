@@ -36,6 +36,9 @@ public enum ResponseTextCode: Equatable {
     case other(String, String?)
     case notSaved // RFC 5182
     case closed
+    case noModifierSequence
+    case modified(SequenceSet)
+    case highestModifierSequence(ModifierSequenceValue)
 }
 
 // MARK: - Encoding
@@ -83,6 +86,12 @@ extension EncodeBuffer {
             return self.writeString("NOTSAVED")
         case .closed:
             return self.writeString("CLOSED")
+        case .noModifierSequence:
+            return self.writeString("NOMODSEQ")
+        case .modified(let set):
+            return self.writeString("MODIFIED ") + self.writeSequenceSet(set)
+        case .highestModifierSequence(let val):
+            return self.writeString("HIGHESTMODSEQ ") + self.writeModifierSequenceValue(val)
         }
     }
 

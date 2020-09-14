@@ -31,10 +31,9 @@ extension MailboxName {
 }
 
 public struct SearchSortMailboxData: Equatable {
-    
     public var identifiers: [Int]
     public var modifierSequence: SearchSortModifierSequence
-    
+
     public init(identifiers: [Int], modifierSequence: SearchSortModifierSequence) {
         self.identifiers = identifiers
         self.modifierSequence = modifierSequence
@@ -44,7 +43,6 @@ public struct SearchSortMailboxData: Equatable {
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    
     @discardableResult mutating func writeSearchSortMailboxData(_ data: SearchSortMailboxData?) -> Int {
         self.writeString("SEARCH") +
             self.writeIfExists(data, callback: { (data) -> Int in
@@ -56,7 +54,7 @@ extension EncodeBuffer {
                     self.writeSearchSortModifierSequence(data.modifierSequence)
             })
     }
-    
+
     @discardableResult mutating func writeMailboxData(_ data: MailboxName.Data) -> Int {
         switch data {
         case .flags(let flags):
@@ -78,7 +76,7 @@ extension EncodeBuffer {
         case .namespace(let namespaceResponse):
             return self.writeNamespaceResponse(namespaceResponse)
         case .searchSort(let data):
-        return self.writeSearchSortMailboxData(data)
+            return self.writeSearchSortMailboxData(data)
         }
     }
 

@@ -1111,14 +1111,14 @@ extension GrammarParser {
             )
         }
     }
-    
+
     static func parseEntryFlagName(buffer: inout ByteBuffer, tracker: StackTracker) throws -> EntryFlagName {
-        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker, { (buffer, tracker) -> EntryFlagName in
+        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> EntryFlagName in
             try ParserLibrary.parseFixedString("\"/flags/", buffer: &buffer, tracker: tracker)
             let flag = try self.parseAttributeFlag(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseFixedString("\"", buffer: &buffer, tracker: tracker)
             return .init(flag: flag)
-        })
+        }
     }
 
     // entry-type-req = entry-type-resp / all
@@ -1376,14 +1376,14 @@ extension GrammarParser {
             parseFetchAttribute_binarySize,
         ], buffer: &buffer, tracker: tracker)
     }
-    
+
     static func parseFetchModifierResponse(buffer: inout ByteBuffer, tracker: StackTracker) throws -> FetchModifierResponse {
-        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker, { (buffer, tracker) -> FetchModifierResponse in
+        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> FetchModifierResponse in
             try ParserLibrary.parseFixedString("MODSEQ (", buffer: &buffer, tracker: tracker)
             let val = try self.parseModifierSequenceValue(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)
             return .init(modifierSequenceValue: val)
-        })
+        }
     }
 
     // filter-name = 1*<any ATOM-CHAR except "/">
@@ -1895,7 +1895,7 @@ extension GrammarParser {
             }
             return .search(nums)
         }
-        
+
         func parseMailboxData_searchSort(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxName.Data {
             try ParserLibrary.parseFixedString("SEARCH", buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
@@ -2832,6 +2832,21 @@ extension GrammarParser {
             return .alert
         }
 
+        func parseResponseTextCode_noModifierSequence(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ResponseTextCode {
+            try ParserLibrary.parseFixedString("NOMODSEQ", buffer: &buffer, tracker: tracker)
+            return .noModifierSequence
+        }
+
+        func parseResponseTextCode_modified(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ResponseTextCode {
+            try ParserLibrary.parseFixedString("MODIFIED ", buffer: &buffer, tracker: tracker)
+            return .modified(try self.parseSequenceSet(buffer: &buffer, tracker: tracker))
+        }
+
+        func parseResponseTextCode_highestModifiedSequence(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ResponseTextCode {
+            try ParserLibrary.parseFixedString("HIGHESTMODSEQ ", buffer: &buffer, tracker: tracker)
+            return .highestModifierSequence(try self.parseModifierSequenceValue(buffer: &buffer, tracker: tracker))
+        }
+
         func parseResponseTextCode_badCharset(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ResponseTextCode {
             try ParserLibrary.parseFixedString("BADCHARSET", buffer: &buffer, tracker: tracker)
             let charsets = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> [String] in
@@ -2941,6 +2956,9 @@ extension GrammarParser {
 
         return try ParserLibrary.parseOneOf([
             parseResponseTextCode_alert,
+            parseResponseTextCode_noModifierSequence,
+            parseResponseTextCode_modified,
+            parseResponseTextCode_highestModifiedSequence,
             parseResponseTextCode_badCharset,
             parseResponseTextCode_capabilityData,
             parseResponseTextCode_parse,
