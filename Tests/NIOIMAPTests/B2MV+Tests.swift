@@ -60,7 +60,7 @@ extension B2MV_Tests {
             ("tag SELECT box1", [.command(.init(tag: "tag", command: .select(.init("box1"), [])))]),
             ("tag SELECT \"box2\"", [.command(.init(tag: "tag", command: .select(.init("box2"), [])))]),
             ("tag SELECT {4+}\r\nbox3", [.command(.init(tag: "tag", command: .select(.init("box3"), [])))]),
-            ("tag SELECT box4 (k1 1 k2 2)", [.command(.init(tag: "tag", command: .select(.init("box4"), [.init(name: "k1", value: .sequence([1])), .init(name: "k2", value: .sequence([2]))])))]),
+            ("tag SELECT box4 (k1 1 k2 2)", [.command(.init(tag: "tag", command: .select(.init("box4"), [.basic(.init(name: "k1", value: .sequence([1]))), .basic(.init(name: "k2", value: .sequence([2])))])))]),
 
             // MARK: Examine
 

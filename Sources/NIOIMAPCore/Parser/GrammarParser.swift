@@ -3472,9 +3472,57 @@ extension GrammarParser {
         try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Command in
             try ParserLibrary.parseFixedString("SELECT ", buffer: &buffer, tracker: tracker)
             let mailbox = try self.parseMailbox(buffer: &buffer, tracker: tracker)
-            let params = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseParameters) ?? []
-            return .select(mailbox, params)
+            let params = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> [SelectParameter] in
+                try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
+                try ParserLibrary.parseFixedString("(", buffer: &buffer, tracker: tracker)
+                var array = [try self.parseSelectParameter(buffer: &buffer, tracker: tracker)]
+                try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker, parser: { (buffer, tracker) in
+                    try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
+                    return try self.parseSelectParameter(buffer: &buffer, tracker: tracker)
+                })
+                try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)
+                return array
+            }
+            return .select(mailbox, params ?? [])
         }
+    }
+    
+    static func parseSelectParameter(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SelectParameter {
+        
+        func parseSelectParameter_basic(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SelectParameter {
+            .basic(try self.parseParameter(buffer: &buffer, tracker: tracker))
+        }
+        
+        func parseSelectParameter_qresync(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SelectParameter {
+            try ParserLibrary.parseFixedString("QRESYNC (", buffer: &buffer, tracker: tracker)
+            let uidValidity = try self.parseNZNumber(buffer: &buffer, tracker: tracker)
+            try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
+            let modSeqVal = try self.parseModifierSequenceValue(buffer: &buffer, tracker: tracker)
+            let knownUids = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: { (buffer, tracker) -> SequenceSet in
+                try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
+                return try self.parseKnownUids(buffer: &buffer, tracker: tracker)
+            })
+            let seqMatchData = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: { (buffer, tracker) -> SequenceMatchData in
+                try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
+                return try self.parseSequenceMatchData(buffer: &buffer, tracker: tracker)
+            })
+            try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)
+            return .qresync(.init(uidValiditiy: uidValidity, modifierSequenceValue: modSeqVal, knownUids: knownUids, sequenceMatchData: seqMatchData))
+        }
+        
+        return try ParserLibrary.parseOneOf([
+            parseSelectParameter_qresync,
+            parseSelectParameter_basic,
+        ], buffer: &buffer, tracker: tracker)
+    }
+    
+    static func parseKnownUids(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SequenceSet {
+        let set = try self.parseSequenceSet(buffer: &buffer, tracker: tracker)
+        let valid = set.ranges.first { $0 == .all } == nil
+        guard valid else {
+            throw ParserError(hint: "Found * (meaning all) when parseing known uids. This isn't allowed")
+        }
+        return set
     }
 
     // select-params = SP "(" select-param *(SP select-param ")"

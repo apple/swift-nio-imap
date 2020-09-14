@@ -24,7 +24,7 @@ public enum Command: Equatable {
     case list(ListSelectOptions? = nil, reference: MailboxName, MailboxPatterns, [ReturnOption] = [])
     case lsub(reference: MailboxName, pattern: ByteBuffer)
     case rename(from: MailboxName, to: MailboxName, params: [Parameter])
-    case select(MailboxName, [Parameter] = [])
+    case select(MailboxName, [SelectParameter] = [])
     case status(MailboxName, [MailboxAttribute])
     case subscribe(MailboxName)
     case unsubscribe(MailboxName)
@@ -210,12 +210,15 @@ extension CommandEncodeBuffer {
             }
     }
 
-    private mutating func writeCommandKind_select(mailbox: MailboxName, params: [Parameter]) -> Int {
-        self.buffer.writeString("SELECT ") +
-            self.buffer.writeMailbox(mailbox) +
-            self.buffer.writeIfExists(params) { (params) -> Int in
-                self.buffer.writeParameters(params)
-            }
+    private mutating func writeCommandKind_select(mailbox: MailboxName, params: [SelectParameter]) -> Int {
+        self.writeString("SELECT ") +
+            self.writeMailbox(mailbox) +
+            self.writeIfArrayHasMinimumSize(array: params, callback: { (array, buffer) -> Int in
+                    buffer.writeArray(array, callback: { (element, buffer) -> Int in
+                        buffer.writeSpace() +
+                        buffer.writeSelectParameter(element)
+                    })
+            })
     }
 
     private mutating func writeCommandKind_status(mailbox: MailboxName, attributes: [MailboxAttribute]) -> Int {

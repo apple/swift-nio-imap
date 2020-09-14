@@ -2674,13 +2674,37 @@ extension ParserUnitTests {
             testFunction: GrammarParser.parseSelect,
             validInputs: [
                 ("SELECT inbox", "\r", .select(.inbox, []), #line),
-                ("SELECT inbox (some1)", "\r", .select(.inbox, [.init(name: "some1", value: nil)]), #line),
+                ("SELECT inbox (some1)", "\r", .select(.inbox, [.basic(.init(name: "some1", value: nil))]), #line),
             ],
             parserErrorInputs: [
                 ("SELECT ", "\r", #line),
             ],
             incompleteMessageInputs: [
                 ("SELECT ", "", #line),
+            ]
+        )
+    }
+}
+
+// MARK: - parseSelectParameter
+
+extension ParserUnitTests {
+    func testParseSelectParameter() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseSelectParameter,
+            validInputs: [
+                ("test 1", "\r", .basic(.init(name: "test", value: .sequence([1]))), #line),
+                ("QRESYNC (1 1)", "\r", .qresync(.init(uidValiditiy: 1, modifierSequenceValue: 1, knownUids: nil, sequenceMatchData: nil)), #line),
+                ("QRESYNC (1 1 1:2)", "\r", .qresync(.init(uidValiditiy: 1, modifierSequenceValue: 1, knownUids: [1...2], sequenceMatchData: nil)), #line),
+                ("QRESYNC (1 1 1:2 (* *))", "\r", .qresync(.init(uidValiditiy: 1, modifierSequenceValue: 1, knownUids: [1...2], sequenceMatchData: .init(knownSequenceSet: .all, knownUidSet: .all))), #line),
+            ],
+            parserErrorInputs: [
+                ("1", "\r", #line),
+            ],
+            incompleteMessageInputs: [
+                ("test ", "", #line),
+                ("QRESYNC (", "", #line),
+                ("QRESYNC (1 1", "", #line),
             ]
         )
     }
