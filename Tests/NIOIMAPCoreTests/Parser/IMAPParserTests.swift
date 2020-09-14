@@ -2713,6 +2713,8 @@ extension ParserUnitTests {
         self.iterateTests(
             testFunction: GrammarParser.parseSelectParameter,
             validInputs: [
+                ("condstore", "\r", .condstore, #line),
+                ("CONDSTORE", "\r", .condstore, #line),
                 ("test 1", "\r", .basic(.init(name: "test", value: .sequence([1]))), #line),
                 ("QRESYNC (1 1)", "\r", .qresync(.init(uidValiditiy: 1, modifierSequenceValue: 1, knownUids: nil, sequenceMatchData: nil)), #line),
                 ("QRESYNC (1 1 1:2)", "\r", .qresync(.init(uidValiditiy: 1, modifierSequenceValue: 1, knownUids: [1...2], sequenceMatchData: nil)), #line),

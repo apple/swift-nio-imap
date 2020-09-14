@@ -3502,6 +3502,11 @@ extension GrammarParser {
             .basic(try self.parseParameter(buffer: &buffer, tracker: tracker))
         }
         
+        func parseSelectParameter_condstore(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SelectParameter {
+            try ParserLibrary.parseFixedString("CONDSTORE", buffer: &buffer, tracker: tracker)
+            return .condstore
+        }
+        
         func parseSelectParameter_qresync(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SelectParameter {
             try ParserLibrary.parseFixedString("QRESYNC (", buffer: &buffer, tracker: tracker)
             let uidValidity = try self.parseNZNumber(buffer: &buffer, tracker: tracker)
@@ -3521,6 +3526,7 @@ extension GrammarParser {
         
         return try ParserLibrary.parseOneOf([
             parseSelectParameter_qresync,
+            parseSelectParameter_condstore,
             parseSelectParameter_basic,
         ], buffer: &buffer, tracker: tracker)
     }

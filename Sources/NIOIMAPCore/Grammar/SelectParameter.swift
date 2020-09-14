@@ -36,6 +36,8 @@ public enum SelectParameter: Equatable {
     
     case qresync(QResyncParameter)
     
+    case condstore
+    
 }
 
 // MARK: - Encoding
@@ -47,6 +49,8 @@ extension EncodeBuffer {
             return self.writeQResyncParameter(param: param)
         case .basic(let param):
             return self.writeParameter(param)
+        case .condstore:
+            return self.writeString("CONDSTORE")
         }
     }
     
