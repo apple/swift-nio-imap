@@ -1393,6 +1393,25 @@ extension ParserUnitTests {
     }
 }
 
+// MARK: - parseEntryFlagName
+
+extension ParserUnitTests {
+    func testParseEntryFlagName() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseEntryFlagName,
+            validInputs: [
+                ("\"/flags/\\\\Answered\"", "", .init(flag: .answered), #line),
+            ],
+            parserErrorInputs: [
+                ("/flags/\\Answered", "", #line),
+            ],
+            incompleteMessageInputs: [
+                ("\"/flags", "", #line),
+            ]
+        )
+    }
+}
+
 // MARK: - entry-type-resp parseEntryTypeResponse
 
 extension ParserUnitTests {

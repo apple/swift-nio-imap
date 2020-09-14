@@ -1111,6 +1111,15 @@ extension GrammarParser {
             )
         }
     }
+    
+    static func parseEntryFlagName(buffer: inout ByteBuffer, tracker: StackTracker) throws -> EntryFlagName {
+        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker, { (buffer, tracker) -> EntryFlagName in
+            try ParserLibrary.parseFixedString("\"/flags/", buffer: &buffer, tracker: tracker)
+            let flag = try self.parseAttributeFlag(buffer: &buffer, tracker: tracker)
+            try ParserLibrary.parseFixedString("\"", buffer: &buffer, tracker: tracker)
+            return .init(flag: flag)
+        })
+    }
 
     // entry-type-req = entry-type-resp / all
     static func parseEntryKindRequest(buffer: inout ByteBuffer, tracker: StackTracker) throws -> EntryKindRequest {
