@@ -2678,7 +2678,8 @@ extension GrammarParser {
     //                   "READ-ONLY" / "READ-WRITE" / "TRYCREATE" /
     //                   "UIDNEXT" SP nz-number / "UIDVALIDITY" SP nz-number /
     //                   "UNSEEN" SP nz-number
-    //                   atom [SP 1*<any TEXT-CHAR except "]">]
+    //                   atom [SP 1*<any TEXT-CHAR except "]">] /
+    //                   "NOTSAVED"
     static func parseResponseTextCode(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ResponseTextCode {
         func parseResponseTextCode_alert(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ResponseTextCode {
             try ParserLibrary.parseFixedString("ALERT", buffer: &buffer, tracker: tracker)
@@ -2781,6 +2782,12 @@ extension GrammarParser {
             .uidAppend(try self.parseResponseCodeAppend(buffer: &buffer, tracker: tracker))
         }
 
+        // RFC 5182
+        func parseResponseTextCode_notSaved(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ResponseTextCode {
+            try ParserLibrary.parseFixedString("NOTSAVED", buffer: &buffer, tracker: tracker)
+            return .notSaved
+        }
+
         return try ParserLibrary.parseOneOf([
             parseResponseTextCode_alert,
             parseResponseTextCode_badCharset,
@@ -2795,6 +2802,7 @@ extension GrammarParser {
             parseResponseTextCode_unseen,
             parseResponseTextCode_namespace,
             parseResponseTextCode_uidNotSticky,
+            parseResponseTextCode_notSaved,
             parseResponseTextCode_uidCopy,
             parseResponseTextCode_uidAppend,
             parseResponseTextCode_atom,
@@ -3405,6 +3413,9 @@ extension GrammarParser {
     }
 
     // sequence-set    = (seq-number / seq-range) ["," sequence-set]
+    // And from RFC 5182
+    // sequence-set       =/ seq-last-command
+    // seq-last-command   = "$"
     static func parseSequenceSet(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SequenceSet {
         func parseSequenceSet_number(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SequenceRange {
             let num = try self.parseSequenceNumber(buffer: &buffer, tracker: tracker)
@@ -3418,17 +3429,29 @@ extension GrammarParser {
             ], buffer: &buffer, tracker: tracker)
         }
 
-        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker in
-            var output = [try parseSequenceSet_element(buffer: &buffer, tracker: tracker)]
-            try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &output, tracker: tracker) { buffer, tracker in
-                try ParserLibrary.parseFixedString(",", buffer: &buffer, tracker: tracker)
-                return try parseSequenceSet_element(buffer: &buffer, tracker: tracker)
+        func parseSequenceSet_base(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SequenceSet {
+            return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker in
+                var output = [try parseSequenceSet_element(buffer: &buffer, tracker: tracker)]
+                try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &output, tracker: tracker) { buffer, tracker in
+                    try ParserLibrary.parseFixedString(",", buffer: &buffer, tracker: tracker)
+                    return try parseSequenceSet_element(buffer: &buffer, tracker: tracker)
+                }
+                guard let s = SequenceRangeSet(output) else {
+                    throw ParserError(hint: "Sequence set is empty.")
+                }
+                return .range(s)
             }
-            guard let s = SequenceSet(output) else {
-                throw ParserError(hint: "Sequence set is empty.")
-            }
-            return s
         }
+
+        func parseSequenceSet_lastCommand(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SequenceSet {
+            try ParserLibrary.parseFixedString("$", buffer: &buffer, tracker: tracker)
+            return .lastCommand
+        }
+
+        return try ParserLibrary.parseOneOf([
+                parseSequenceSet_base,
+                parseSequenceSet_lastCommand
+            ], buffer: &buffer, tracker: tracker)
     }
 
     // uid-set

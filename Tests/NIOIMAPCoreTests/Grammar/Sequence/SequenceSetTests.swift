@@ -47,4 +47,11 @@ extension SequenceSetTests {
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }
+
+    func testEncodeLastCommand() {
+        let expected = "$"
+        let size = self.testBuffer.writeSequenceSet(.lastCommand)
+        XCTAssertEqual(size, expected.utf8.count)
+        XCTAssertEqual(expected, self.testBufferString)
+    }
 }

@@ -14,49 +14,59 @@
 
 import struct NIO.ByteBuffer
 
-public struct SequenceSet: Equatable {
-    public var ranges: [SequenceRange]
-
-    public init?(_ ranges: [SequenceRange]) {
-        guard !ranges.isEmpty else { return nil }
-        self.ranges = ranges
-    }
+// RFC 5182 extended sequence-set
+public enum SequenceSet : Equatable {
+    // IMAPv4 sequence-set
+    case range(SequenceRangeSet)
+    // RFC 5182 'seq-last-command'
+    case lastCommand
 }
 
 extension SequenceSet {
+    public init?(_ ranges: [SequenceRange]) {
+        if let rangeSet = SequenceRangeSet(ranges) {
+            self = .range(rangeSet)
+        } else {
+            return nil
+        }
+    }
+
     public init(_ range: ClosedRange<SequenceNumber>) {
-        self.init(SequenceRange(range))
+        self = .range(SequenceRangeSet(range))
     }
 
     public init(_ range: PartialRangeThrough<SequenceNumber>) {
-        self.init(SequenceRange(range))
+        self = .range(SequenceRangeSet(range))
     }
 
     public init(_ range: PartialRangeFrom<SequenceNumber>) {
-        self.init(SequenceRange(range))
+        self = .range(SequenceRangeSet(range))
     }
 
     public init(_ range: SequenceRange) {
-        self.ranges = [range]
+        self = .range(SequenceRangeSet(range))
     }
 }
 
 extension SequenceSet: ExpressibleByArrayLiteral {
     public init(arrayLiteral elements: SequenceRange...) {
-        self.init(elements)!
+        self = .range(SequenceRangeSet(elements)!)
     }
 }
 
 extension SequenceSet {
-    public static let all: SequenceSet = SequenceSet(SequenceRange.all)
+    public static let all: SequenceSet = .range(SequenceRangeSet.all)
 }
 
 // MARK: - Encoding
 
 extension EncodeBuffer {
     @discardableResult mutating func writeSequenceSet(_ set: SequenceSet) -> Int {
-        self.writeArray(set.ranges, separator: ",", parenthesis: false) { (element, self) in
-            self.writeSequenceRange(element)
+        switch set {
+        case .range(let sequenceRangeSet):
+            return self.writeSequenceRangeSet(sequenceRangeSet)
+        case .lastCommand:
+            return self.writeString("$")
         }
     }
 }

@@ -2165,6 +2165,7 @@ extension ParserUnitTests {
                 ("NAMESPACE NIL NIL NIL", "\r", .namespace(.init(userNamespace: [], otherUserNamespace: [], sharedNamespace: [])), #line),
                 ("some", "\r", .other("some", nil), #line),
                 ("some thing", "\r", .other("some", "thing"), #line),
+                ("NOTSAVED", "\r", .notSaved, #line)
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
@@ -2592,17 +2593,26 @@ extension ParserUnitTests {
             validInputs: [
                 ("765", " ", [765], #line),
                 ("1,2:5,7,9:*", " ", [SequenceRange(1), SequenceRange(2 ... 5), SequenceRange(7), SequenceRange(9...)], #line),
+                ("*", "\r", [.all], #line),
+                ("1:2", "\r", [1 ... 2], #line),
+                ("1:2,2:3,3:4", "\r", [1 ... 2, 2 ... 3, 3 ... 4], #line),
+                ("$", "\r", .lastCommand, #line),
             ],
             parserErrorInputs: [
                 ("a", " ", #line),
+                (":", "", #line),
+                (":2", "", #line),
             ],
             incompleteMessageInputs: [
                 ("", "", #line),
                 ("1,", "", #line),
+                ("1111", "", #line),
+                ("1111:2222", "", #line),
             ]
         )
     }
 }
+
 
 // MARK: - status parseStatus
 
@@ -2760,29 +2770,6 @@ extension ParserUnitTests {
             ],
             incompleteMessageInputs: [
                 ("RENAME box1 ", "", #line),
-            ]
-        )
-    }
-}
-
-// MARK: - parseSequenceSet
-
-extension ParserUnitTests {
-    func testParseSequenceSet() {
-        self.iterateTests(
-            testFunction: GrammarParser.parseSequenceSet,
-            validInputs: [
-                ("*", "\r", [.all], #line),
-                ("1:2", "\r", [1 ... 2], #line),
-                ("1:2,2:3,3:4", "\r", [1 ... 2, 2 ... 3, 3 ... 4], #line),
-            ],
-            parserErrorInputs: [
-                (":", "", #line),
-                (":2", "", #line),
-            ],
-            incompleteMessageInputs: [
-                ("1111", "", #line),
-                ("1111:2222", "", #line),
             ]
         )
     }
