@@ -26,7 +26,9 @@ public enum ParsingError: Error {
     case lineTooLong
 }
 
-struct _IncompleteMessage: Error {}
+struct _IncompleteMessage: Error {
+    init() {}
+}
 
 public enum GrammarParser {}
 
@@ -87,6 +89,36 @@ extension GrammarParser {
         }
     }
 
+    // Like appendMessage, but with CATENATE at the start instead of regular append data.
+    static func parseCatenateMessage(buffer: inout ByteBuffer, tracker: StackTracker) throws -> AppendOptions {
+        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> AppendOptions in
+            let options = try self.parseAppendOptions(buffer: &buffer, tracker: tracker)
+            try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
+            try ParserLibrary.parseFixedString("CATENATE (", buffer: &buffer, tracker: tracker)
+            return options
+        }
+    }
+
+    enum AppendOrCatenateMessage {
+        case append(AppendMessage)
+        case catenate(AppendOptions)
+    }
+
+    static func parseAppendOrCatenateMessage(buffer: inout ByteBuffer, tracker: StackTracker) throws -> AppendOrCatenateMessage {
+        func parseAppend(buffer: inout ByteBuffer, tracker: StackTracker) throws -> AppendOrCatenateMessage {
+            try .append(self.parseAppendMessage(buffer: &buffer, tracker: tracker))
+        }
+
+        func parseCatenate(buffer: inout ByteBuffer, tracker: StackTracker) throws -> AppendOrCatenateMessage {
+            try .catenate(self.parseCatenateMessage(buffer: &buffer, tracker: tracker))
+        }
+
+        return try ParserLibrary.parseOneOf([
+            parseCatenate,
+            parseAppend,
+        ], buffer: &buffer, tracker: tracker)
+    }
+
     // append-options = [SP flag-list] [SP date-time] *(SP append-ext)
     static func parseAppendOptions(buffer: inout ByteBuffer, tracker: StackTracker) throws -> AppendOptions {
         try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
@@ -104,6 +136,48 @@ extension GrammarParser {
             }
             return .init(flagList: flagList, internalDate: internalDate, extensions: array)
         }
+    }
+
+    enum CatenatePart {
+        case url(ByteBuffer)
+        case text(Int)
+        case end
+    }
+
+    static func parseCatenatePart(expectPrecedingSpace: Bool, buffer: inout ByteBuffer, tracker: StackTracker) throws -> CatenatePart {
+        func parseCatenateURL(buffer: inout ByteBuffer, tracker: StackTracker) throws -> CatenatePart {
+            if expectPrecedingSpace {
+                try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
+            }
+            try ParserLibrary.parseFixedString("URL ", buffer: &buffer, tracker: tracker)
+            let url = try self.parseAString(buffer: &buffer, tracker: tracker)
+            return .url(url)
+        }
+
+        func parseCatenateText(buffer: inout ByteBuffer, tracker: StackTracker) throws -> CatenatePart {
+            if expectPrecedingSpace {
+                try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
+            }
+            try ParserLibrary.parseFixedString("TEXT {", buffer: &buffer, tracker: tracker)
+            let length = try Self.parseNumber(buffer: &buffer, tracker: tracker)
+            _ = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
+                try ParserLibrary.parseFixedString("+", buffer: &buffer, tracker: tracker)
+            }.map { () in false } ?? true
+            try ParserLibrary.parseFixedString("}", buffer: &buffer, tracker: tracker)
+            try ParserLibrary.parseNewline(buffer: &buffer, tracker: tracker)
+            return .text(length)
+        }
+
+        func parseCatenateEnd(buffer: inout ByteBuffer, tracker: StackTracker) throws -> CatenatePart {
+            try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)
+            return .end
+        }
+
+        return try ParserLibrary.parseOneOf([
+            parseCatenateURL,
+            parseCatenateText,
+            parseCatenateEnd,
+        ], buffer: &buffer, tracker: tracker)
     }
 
     // astring         = 1*ASTRING-CHAR / string
@@ -3683,6 +3757,15 @@ extension GrammarParser {
     static func parseTaggedExtension(buffer: inout ByteBuffer, tracker: StackTracker) throws -> TaggedExtension {
         try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
             let label = try self.parseParameterName(buffer: &buffer, tracker: tracker)
+
+            // Warning: weird hack alert.
+            // CATENATE (RFC 4469) has basically identical syntax to tagged extensions, but it is actually append-data.
+            // to avoid that being a problem here, we check if we just parsed `CATENATE`. If we did, we bail out: this is
+            // data now.
+            if label.lowercased() == "catenate" {
+                throw ParserError(hint: "catenate extension")
+            }
+
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
             let value = try self.parseParameterValue(buffer: &buffer, tracker: tracker)
             return .init(label: label, value: value)

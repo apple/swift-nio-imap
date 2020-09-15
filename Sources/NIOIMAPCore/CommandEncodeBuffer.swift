@@ -17,6 +17,9 @@ import struct NIO.ByteBuffer
 public struct CommandEncodeBuffer {
     public var buffer: EncodeBuffer
 
+    /// Tracks whether we have encoded at least one catenate element.
+    internal var encodedAtLeastOneCatenateElement = false
+
     public init(buffer: ByteBuffer, options: CommandEncodingOptions) {
         self.buffer = .clientEncodeBuffer(buffer: buffer, options: options)
     }

@@ -141,11 +141,136 @@ extension ParserUnitTests {
             XCTAssertEqual(buffer.readableBytes, 0)
             XCTAssertEqual(c1, PartialCommandStream(.command(TaggedCommand(tag: "1", command: .noop)), numberOfSynchronisingLiterals: 1))
             XCTAssertEqual(c2_1, PartialCommandStream(.append(.start(tag: "2", appendingTo: .inbox))))
-            XCTAssertEqual(c2_2, PartialCommandStream(.append(.beginMessage(messsage: .init(options: .init(flagList: [], extensions: []), data: .init(byteCount: 10))))))
+            XCTAssertEqual(c2_2, PartialCommandStream(.append(.beginMessage(message: .init(options: .init(flagList: [], extensions: []), data: .init(byteCount: 10))))))
             XCTAssertEqual(c2_3, PartialCommandStream(.append(.messageBytes("0123456789"))))
             XCTAssertEqual(c2_4, PartialCommandStream(.append(.endMessage)))
             XCTAssertEqual(c2_5, PartialCommandStream(.append(.finish)))
             XCTAssertEqual(c3, PartialCommandStream(.command(TaggedCommand(tag: "3", command: .noop))))
+        } catch {
+            XCTFail("\(error)")
+        }
+    }
+
+    func testCommandToStreamToCommand_catenateExampleOne() {
+        var buffer: ByteBuffer = ByteBuffer(string: #"1 NOOP\#r\#n"# +
+            #"A003 APPEND Drafts (\Seen \Draft $MDNSent) CATENATE (URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=HEADER" TEXT {42}\#r\#n"# +
+            #"\#r\#n--------------030308070208000400050907\#r\#n URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=1.MIME" "# +
+            #"URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=1" TEXT {42}\#r\#n"# +
+            #"\#r\#n--------------030308070208000400050907\#r\#n"# +
+            #" URL "/Drafts;UIDVALIDITY=385759045/;UID=30" TEXT {44}\#r\#n"# +
+            #"\#r\#n--------------030308070208000400050907--\#r\#n)\#r\#n"#)
+
+        var parser = CommandParser()
+        do {
+            let c1 = try parser.parseCommandStream(buffer: &buffer)
+            let c2_1 = try parser.parseCommandStream(buffer: &buffer)
+            let c2_2 = try parser.parseCommandStream(buffer: &buffer)
+            let c2_3 = try parser.parseCommandStream(buffer: &buffer)
+            let c2_4 = try parser.parseCommandStream(buffer: &buffer)
+            let c2_5 = try parser.parseCommandStream(buffer: &buffer)
+            let c2_6 = try parser.parseCommandStream(buffer: &buffer)
+            let c2_7 = try parser.parseCommandStream(buffer: &buffer)
+            let c2_8 = try parser.parseCommandStream(buffer: &buffer)
+            let c2_9 = try parser.parseCommandStream(buffer: &buffer)
+            let c2_10 = try parser.parseCommandStream(buffer: &buffer)
+            let c2_11 = try parser.parseCommandStream(buffer: &buffer)
+            let c2_12 = try parser.parseCommandStream(buffer: &buffer)
+            let c2_13 = try parser.parseCommandStream(buffer: &buffer)
+            let c2_14 = try parser.parseCommandStream(buffer: &buffer)
+            let c2_15 = try parser.parseCommandStream(buffer: &buffer)
+            let c2_16 = try parser.parseCommandStream(buffer: &buffer)
+            let c2_17 = try parser.parseCommandStream(buffer: &buffer)
+            XCTAssertEqual(buffer.readableBytes, 0)
+            XCTAssertEqual(c1, PartialCommandStream(.command(TaggedCommand(tag: "1", command: .noop)), numberOfSynchronisingLiterals: 3))
+            XCTAssertEqual(c2_1, PartialCommandStream(.append(.start(tag: "A003", appendingTo: MailboxName("Drafts")))))
+            XCTAssertEqual(c2_2, PartialCommandStream(.append(.beginCatenate(options: .init(flagList: [.seen, .draft, .keyword(.mdnSent)], extensions: [])))))
+            XCTAssertEqual(c2_3, PartialCommandStream(.append(.catenateURL("/Drafts;UIDVALIDITY=385759045/;UID=20/;section=HEADER"))))
+            XCTAssertEqual(c2_4, PartialCommandStream(.append(.catenateData(.begin(size: 42)))))
+            XCTAssertEqual(c2_5, PartialCommandStream(.append(.catenateData(.bytes("\r\n--------------030308070208000400050907\r\n")))))
+            XCTAssertEqual(c2_6, PartialCommandStream(.append(.catenateData(.end))))
+            XCTAssertEqual(c2_7, PartialCommandStream(.append(.catenateURL("/Drafts;UIDVALIDITY=385759045/;UID=20/;section=1.MIME"))))
+            XCTAssertEqual(c2_8, PartialCommandStream(.append(.catenateURL("/Drafts;UIDVALIDITY=385759045/;UID=20/;section=1"))))
+            XCTAssertEqual(c2_9, PartialCommandStream(.append(.catenateData(.begin(size: 42)))))
+            XCTAssertEqual(c2_10, PartialCommandStream(.append(.catenateData(.bytes("\r\n--------------030308070208000400050907\r\n")))))
+            XCTAssertEqual(c2_11, PartialCommandStream(.append(.catenateData(.end))))
+            XCTAssertEqual(c2_12, PartialCommandStream(.append(.catenateURL("/Drafts;UIDVALIDITY=385759045/;UID=30"))))
+            XCTAssertEqual(c2_13, PartialCommandStream(.append(.catenateData(.begin(size: 44)))))
+            XCTAssertEqual(c2_14, PartialCommandStream(.append(.catenateData(.bytes("\r\n--------------030308070208000400050907--\r\n")))))
+            XCTAssertEqual(c2_15, PartialCommandStream(.append(.catenateData(.end))))
+            XCTAssertEqual(c2_16, PartialCommandStream(.append(.endCatenate)))
+            XCTAssertEqual(c2_17, PartialCommandStream(.append(.finish)))
+        } catch {
+            XCTFail("\(error)")
+        }
+    }
+
+    func testCommandToStreamToCommand_catenateShortExample() {
+        var buffer: ByteBuffer = ByteBuffer(string: #"A003 APPEND "Drafts" (\Seen \Draft $MDNSent) CATENATE (URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=HEADER")\#r\#n"#)
+
+        var parser = CommandParser()
+        do {
+            let c2_1 = try parser.parseCommandStream(buffer: &buffer)
+            let c2_2 = try parser.parseCommandStream(buffer: &buffer)
+            let c2_3 = try parser.parseCommandStream(buffer: &buffer)
+            let c2_4 = try parser.parseCommandStream(buffer: &buffer)
+            let c2_5 = try parser.parseCommandStream(buffer: &buffer)
+            XCTAssertEqual(buffer.readableBytes, 0)
+            XCTAssertEqual(c2_1, PartialCommandStream(.append(.start(tag: "A003", appendingTo: MailboxName("Drafts")))))
+            XCTAssertEqual(c2_2, PartialCommandStream(.append(.beginCatenate(options: .init(flagList: [.seen, .draft, .keyword(.mdnSent)], extensions: [])))))
+            XCTAssertEqual(c2_3, PartialCommandStream(.append(.catenateURL("/Drafts;UIDVALIDITY=385759045/;UID=20/;section=HEADER"))))
+            XCTAssertEqual(c2_4, PartialCommandStream(.append(.endCatenate)))
+            XCTAssertEqual(c2_5, PartialCommandStream(.append(.finish)))
+        } catch {
+            XCTFail("\(error)")
+        }
+    }
+
+    func testCatenate_failsToParseWithExtraSpace() {
+        var buffer: ByteBuffer = ByteBuffer(string: #"A003 APPEND "Drafts" (\Seen \Draft $MDNSent) CATENATE ( URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=HEADER")\#r\#n"#)
+
+        var parser = CommandParser()
+        XCTAssertNoThrow(try parser.parseCommandStream(buffer: &buffer)) // .append(.start)
+        XCTAssertNoThrow(try parser.parseCommandStream(buffer: &buffer)) // .append(.beginCatenate)
+        XCTAssertThrowsError(try parser.parseCommandStream(buffer: &buffer))
+    }
+
+    func testCommandToStreamToCommand_catenateAndOptions() {
+        var buffer: ByteBuffer = ByteBuffer(string: #"A003 APPEND "Drafts" (\Seen \Draft $MDNSent) EXTENSION (extdata) CATENATE (URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=HEADER")\#r\#n"#)
+
+        var parser = CommandParser()
+        do {
+            let c2_1 = try parser.parseCommandStream(buffer: &buffer)
+            let c2_2 = try parser.parseCommandStream(buffer: &buffer)
+            let c2_3 = try parser.parseCommandStream(buffer: &buffer)
+            let c2_4 = try parser.parseCommandStream(buffer: &buffer)
+            let c2_5 = try parser.parseCommandStream(buffer: &buffer)
+            XCTAssertEqual(buffer.readableBytes, 0)
+            XCTAssertEqual(c2_1, PartialCommandStream(.append(.start(tag: "A003", appendingTo: MailboxName("Drafts")))))
+            XCTAssertEqual(c2_2, PartialCommandStream(.append(.beginCatenate(options: .init(flagList: [.seen, .draft, .keyword(.mdnSent)], extensions: [TaggedExtension(label: "EXTENSION", value: .comp(["extdata"]))])))))
+            XCTAssertEqual(c2_3, PartialCommandStream(.append(.catenateURL("/Drafts;UIDVALIDITY=385759045/;UID=20/;section=HEADER"))))
+            XCTAssertEqual(c2_4, PartialCommandStream(.append(.endCatenate)))
+            XCTAssertEqual(c2_5, PartialCommandStream(.append(.finish)))
+        } catch {
+            XCTFail("\(error)")
+        }
+    }
+
+    func testCommandToStreamToCommand_catenateAndOptions_weirdCasing() {
+        var buffer: ByteBuffer = ByteBuffer(string: #"A003 APPEND "Drafts" (\Seen \Draft $MDNSent) EXTENSION (extdata) cAtEnAtE (URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=HEADER")\#r\#n"#)
+
+        var parser = CommandParser()
+        do {
+            let c2_1 = try parser.parseCommandStream(buffer: &buffer)
+            let c2_2 = try parser.parseCommandStream(buffer: &buffer)
+            let c2_3 = try parser.parseCommandStream(buffer: &buffer)
+            let c2_4 = try parser.parseCommandStream(buffer: &buffer)
+            let c2_5 = try parser.parseCommandStream(buffer: &buffer)
+            XCTAssertEqual(buffer.readableBytes, 0)
+            XCTAssertEqual(c2_1, PartialCommandStream(.append(.start(tag: "A003", appendingTo: MailboxName("Drafts")))))
+            XCTAssertEqual(c2_2, PartialCommandStream(.append(.beginCatenate(options: .init(flagList: [.seen, .draft, .keyword(.mdnSent)], extensions: [TaggedExtension(label: "EXTENSION", value: .comp(["extdata"]))])))))
+            XCTAssertEqual(c2_3, PartialCommandStream(.append(.catenateURL("/Drafts;UIDVALIDITY=385759045/;UID=20/;section=HEADER"))))
+            XCTAssertEqual(c2_4, PartialCommandStream(.append(.endCatenate)))
+            XCTAssertEqual(c2_5, PartialCommandStream(.append(.finish)))
         } catch {
             XCTFail("\(error)")
         }
