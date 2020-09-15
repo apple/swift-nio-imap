@@ -33,6 +33,7 @@ public enum ResponseTextCode: Equatable {
     case uidNotSticky
     case useAttribute
     case other(String, String?)
+    case notSaved // RFC 5182
 }
 
 // MARK: - Encoding
@@ -76,6 +77,8 @@ extension EncodeBuffer {
             return self.writeString("UIDNOTSTICKY")
         case .useAttribute:
             return self.writeString("USEATTR")
+        case .notSaved:
+            return self.writeString("NOTSAVED")
         }
     }
 
