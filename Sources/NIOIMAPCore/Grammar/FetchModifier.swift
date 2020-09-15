@@ -12,4 +12,22 @@
 //
 //===----------------------------------------------------------------------===//
 
-let FetchModifierSequence = "MODSEQ"
+/// RFC 7162
+public enum FetchModifier: Equatable {
+    case changedSince(ChangedSinceModifier)
+
+    case other(Parameter)
+}
+
+// MARK: - Encoding
+
+extension EncodeBuffer {
+    @discardableResult mutating func writeFetchModifier(_ val: FetchModifier) -> Int {
+        switch val {
+        case .changedSince(let changedSince):
+            return self.writeChangedSinceModifier(changedSince)
+        case .other(let param):
+            return self.writeParameter(param)
+        }
+    }
+}

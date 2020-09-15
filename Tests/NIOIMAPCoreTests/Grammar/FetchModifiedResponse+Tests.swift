@@ -12,19 +12,19 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
+import NIO
+@testable import NIOIMAPCore
+import XCTest
 
-public struct EntryKindResponse: Equatable {
-    var _backing: String
+class FetchModifiedResponse_Tests: EncodeTestClass {}
 
-    public static var `private` = Self(_backing: "priv")
-    public static var shared = Self(_backing: "shared")
-}
+// MARK: - IMAP
 
-// MARK: - Encoding
-
-extension EncodeBuffer {
-    @discardableResult mutating func writeEntryKindResponse(_ response: EntryKindResponse) -> Int {
-        self.writeString(response._backing)
+extension FetchModifiedResponse_Tests {
+    func testEncode() {
+        let inputs: [(FetchModifierResponse, String, UInt)] = [
+            (.init(modifierSequenceValue: 3), "MODSEQ (3)", #line),
+        ]
+        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeFetchModifierResponse($0) })
     }
 }

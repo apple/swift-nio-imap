@@ -16,13 +16,17 @@ import NIO
 @testable import NIOIMAPCore
 import XCTest
 
-class EntryTypeRequest_Tests: EncodeTestClass {
-    func testEncoding() {
-        let inputs: [(EntryKindRequest, String, UInt)] = [
-            (.all, "all", #line),
-            (.private, "priv", #line),
-            (.shared, "shared", #line),
+class FetchModifier_Tests: EncodeTestClass {}
+
+// MARK: - IMAP
+
+extension FetchModifier_Tests {
+    func testEncode() {
+        let inputs: [(FetchModifier, String, UInt)] = [
+            (.changedSince(.init(modifiedSequence: 4)), "CHANGEDSINCE 4", #line),
+            (.other(.init(name: "test")), "test", #line),
+            (.other(.init(name: "test", value: .number(4))), "test 4", #line),
         ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeEntryKindRequest($0) })
+        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeFetchModifier($0) })
     }
 }

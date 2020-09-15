@@ -16,13 +16,16 @@ import NIO
 @testable import NIOIMAPCore
 import XCTest
 
-class EntryTypeRequest_Tests: EncodeTestClass {
-    func testEncoding() {
-        let inputs: [(EntryKindRequest, String, UInt)] = [
-            (.all, "all", #line),
-            (.private, "priv", #line),
-            (.shared, "shared", #line),
+class SequenceMatchData_Tests: EncodeTestClass {}
+
+// MARK: - IMAP
+
+extension SequenceMatchData_Tests {
+    func testEncode() {
+        let inputs: [(SequenceMatchData, String, UInt)] = [
+            (.init(knownSequenceSet: .all, knownUidSet: .all), "(* *)", #line),
+            (.init(knownSequenceSet: [1, 2, 3], knownUidSet: [4, 5, 6]), "(1,2,3 4,5,6)", #line),
         ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeEntryKindRequest($0) })
+        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeSequenceMatchData($0) })
     }
 }

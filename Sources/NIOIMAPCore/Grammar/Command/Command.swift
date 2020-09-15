@@ -24,7 +24,7 @@ public enum Command: Equatable {
     case list(ListSelectOptions? = nil, reference: MailboxName, MailboxPatterns, [ReturnOption] = [])
     case lsub(reference: MailboxName, pattern: ByteBuffer)
     case rename(from: MailboxName, to: MailboxName, params: [Parameter])
-    case select(MailboxName, [Parameter] = [])
+    case select(MailboxName, [SelectParameter] = [])
     case status(MailboxName, [MailboxAttribute])
     case subscribe(MailboxName)
     case unsubscribe(MailboxName)
@@ -40,7 +40,7 @@ public enum Command: Equatable {
     case idleFinish
     case copy(SequenceSet, MailboxName)
     case fetch(SequenceSet, [FetchAttribute], [Parameter])
-    case store(SequenceSet, [Parameter], StoreFlags)
+    case store(SequenceSet, [StoreModifier], StoreFlags)
     case search(key: SearchKey, charset: String? = nil, returnOptions: [SearchReturnOption] = [])
     case move(SequenceSet, MailboxName)
     case id([IDParameter])
@@ -210,12 +210,13 @@ extension CommandEncodeBuffer {
             }
     }
 
-    private mutating func writeCommandKind_select(mailbox: MailboxName, params: [Parameter]) -> Int {
+    private mutating func writeCommandKind_select(mailbox: MailboxName, params: [SelectParameter]) -> Int {
         self.buffer.writeString("SELECT ") +
             self.buffer.writeMailbox(mailbox) +
-            self.buffer.writeIfExists(params) { (params) -> Int in
-                self.buffer.writeParameters(params)
-            }
+            self.buffer.writeSpace() +
+            self.buffer.writeArray(params, callback: { (element, buffer) -> Int in
+                buffer.writeSelectParameter(element)
+                })
     }
 
     private mutating func writeCommandKind_status(mailbox: MailboxName, attributes: [MailboxAttribute]) -> Int {
@@ -324,11 +325,14 @@ extension CommandEncodeBuffer {
             }
     }
 
-    private mutating func writeCommandKind_store(set: SequenceSet, modifiers: [Parameter], flags: StoreFlags) -> Int {
+    private mutating func writeCommandKind_store(set: SequenceSet, modifiers: [StoreModifier], flags: StoreFlags) -> Int {
         self.buffer.writeString("STORE ") +
             self.buffer.writeSequenceSet(set) +
             self.buffer.writeIfArrayHasMinimumSize(array: modifiers) { (modifiers, buffer) -> Int in
-                buffer.writeParameters(modifiers)
+                buffer.writeSpace() +
+                    buffer.writeArray(modifiers) { (element, buffer) -> Int in
+                        buffer.writeStoreModifier(element)
+                    }
             } +
             self.buffer.writeSpace() +
             self.buffer.writeStoreAttributeFlags(flags)

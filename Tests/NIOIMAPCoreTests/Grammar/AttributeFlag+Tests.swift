@@ -16,13 +16,20 @@ import NIO
 @testable import NIOIMAPCore
 import XCTest
 
-class EntryTypeRequest_Tests: EncodeTestClass {
+class AttributeFlag_Tests: EncodeTestClass {}
+
+// MARK: - Encoding
+
+extension AttributeFlag_Tests {
     func testEncoding() {
-        let inputs: [(EntryKindRequest, String, UInt)] = [
-            (.all, "all", #line),
-            (.private, "priv", #line),
-            (.shared, "shared", #line),
+        let inputs: [(AttributeFlag, String, UInt)] = [
+            (.answered, "\\\\Answered", #line),
+            (.deleted, "\\\\Deleted", #line),
+            (.draft, "\\\\Draft", #line),
+            (.flagged, "\\\\Flagged", #line),
+            (.seen, "\\\\Seen", #line),
+            (.init(rawValue: "test"), "test", #line),
         ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeEntryKindRequest($0) })
+        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeAttributeFlag($0) })
     }
 }

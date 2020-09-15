@@ -12,19 +12,21 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
+/// RFC 7162
+public struct SearchSortModifierSequence: Equatable {
+    public var modifierSequenceValue: ModifierSequenceValue
 
-public struct EntryKindResponse: Equatable {
-    var _backing: String
-
-    public static var `private` = Self(_backing: "priv")
-    public static var shared = Self(_backing: "shared")
+    public init(modifierSequenceValue: ModifierSequenceValue) {
+        self.modifierSequenceValue = modifierSequenceValue
+    }
 }
 
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeEntryKindResponse(_ response: EntryKindResponse) -> Int {
-        self.writeString(response._backing)
+    @discardableResult mutating func writeSearchSortModifierSequence(_ val: SearchSortModifierSequence) -> Int {
+        self.writeString("(MODSEQ ") +
+            self.writeModifierSequenceValue(val.modifierSequenceValue) +
+            self.writeString(")")
     }
 }

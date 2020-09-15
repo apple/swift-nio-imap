@@ -14,6 +14,7 @@
 
 import struct NIO.ByteBuffer
 
+// TODO: Convert to struct
 /// IMAPv4 `resp-text-code`
 public enum ResponseTextCode: Equatable {
     case alert
@@ -34,6 +35,10 @@ public enum ResponseTextCode: Equatable {
     case useAttribute
     case other(String, String?)
     case notSaved // RFC 5182
+    case closed
+    case noModifierSequence
+    case modified(SequenceSet)
+    case highestModifierSequence(ModifierSequenceValue)
 }
 
 // MARK: - Encoding
@@ -79,6 +84,14 @@ extension EncodeBuffer {
             return self.writeString("USEATTR")
         case .notSaved:
             return self.writeString("NOTSAVED")
+        case .closed:
+            return self.writeString("CLOSED")
+        case .noModifierSequence:
+            return self.writeString("NOMODSEQ")
+        case .modified(let set):
+            return self.writeString("MODIFIED ") + self.writeSequenceSet(set)
+        case .highestModifierSequence(let val):
+            return self.writeString("HIGHESTMODSEQ ") + self.writeModifierSequenceValue(val)
         }
     }
 

@@ -12,19 +12,19 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
+import NIO
+@testable import NIOIMAPCore
+import XCTest
 
-public struct EntryKindResponse: Equatable {
-    var _backing: String
-
-    public static var `private` = Self(_backing: "priv")
-    public static var shared = Self(_backing: "shared")
-}
+class SearchSortModifierSequence_Tests: EncodeTestClass {}
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
-    @discardableResult mutating func writeEntryKindResponse(_ response: EntryKindResponse) -> Int {
-        self.writeString(response._backing)
+extension SearchSortModifierSequence_Tests {
+    func testEncoding() {
+        let inputs: [(SearchSortModifierSequence, String, UInt)] = [
+            (.init(modifierSequenceValue: 123), "(MODSEQ 123)", #line),
+        ]
+        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeSearchSortModifierSequence($0) })
     }
 }

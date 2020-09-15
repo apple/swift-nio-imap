@@ -12,19 +12,15 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
+import NIO
+@testable import NIOIMAPCore
+import XCTest
 
-public struct EntryKindResponse: Equatable {
-    var _backing: String
-
-    public static var `private` = Self(_backing: "priv")
-    public static var shared = Self(_backing: "shared")
-}
-
-// MARK: - Encoding
-
-extension EncodeBuffer {
-    @discardableResult mutating func writeEntryKindResponse(_ response: EntryKindResponse) -> Int {
-        self.writeString(response._backing)
+class EntryFlagName_Tests: EncodeTestClass {
+    func testEncoding() {
+        let inputs: [(EntryFlagName, String, UInt)] = [
+            (.init(flag: .answered), "\"/flags/\\\\Answered\"", #line), // mad, but absolutely correct
+        ]
+        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeEntryFlagName($0) })
     }
 }

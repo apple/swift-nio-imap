@@ -530,6 +530,22 @@ extension ParserUnitTests {
     }
 }
 
+// MARK: - atom parseAttributeFlag
+
+extension ParserUnitTests {
+    func testParseAttributeFlag() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseAttributeFlag,
+            validInputs: [
+                ("\\\\Answered", " ", .answered, #line),
+                ("some", " ", .init(rawValue: "some"), #line),
+            ],
+            parserErrorInputs: [],
+            incompleteMessageInputs: []
+        )
+    }
+}
+
 // MARK: - parseBase64
 
 extension ParserUnitTests {
@@ -807,6 +823,48 @@ extension ParserUnitTests {
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
+        )
+    }
+}
+
+// MARK: - parseChangedSinceModifier
+
+extension ParserUnitTests {
+    func testParseChangedSinceModifier() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseChangedSinceModifier,
+            validInputs: [
+                ("CHANGEDSINCE 1", " ", .init(modifiedSequence: 1), #line),
+                ("changedsince 1", " ", .init(modifiedSequence: 1), #line),
+            ],
+            parserErrorInputs: [
+                ("TEST", "", #line),
+                ("CHANGEDSINCE a", "", #line),
+            ],
+            incompleteMessageInputs: [
+                ("CHANGEDSINCE 1", "", #line),
+            ]
+        )
+    }
+}
+
+// MARK: - parseUnchangedSinceModifier
+
+extension ParserUnitTests {
+    func testParseUnchangedSinceModifier() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseUnchangedSinceModifier,
+            validInputs: [
+                ("UNCHANGEDSINCE 1", " ", .init(modifiedSequence: 1), #line),
+                ("unchangedsince 1", " ", .init(modifiedSequence: 1), #line),
+            ],
+            parserErrorInputs: [
+                ("TEST", "", #line),
+                ("UNCHANGEDSINCE a", "", #line),
+            ],
+            incompleteMessageInputs: [
+                ("UNCHANGEDSINCE 1", "", #line),
+            ]
         )
     }
 }
@@ -1375,6 +1433,25 @@ extension ParserUnitTests {
     }
 }
 
+// MARK: - parseEntryFlagName
+
+extension ParserUnitTests {
+    func testParseEntryFlagName() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseEntryFlagName,
+            validInputs: [
+                ("\"/flags/\\\\Answered\"", "", .init(flag: .answered), #line),
+            ],
+            parserErrorInputs: [
+                ("/flags/\\Answered", "", #line),
+            ],
+            incompleteMessageInputs: [
+                ("\"/flags", "", #line),
+            ]
+        )
+    }
+}
+
 // MARK: - entry-type-resp parseEntryTypeResponse
 
 extension ParserUnitTests {
@@ -1385,7 +1462,10 @@ extension ParserUnitTests {
                 ("all", " ", .all, #line),
                 ("ALL", " ", .all, #line),
                 ("aLL", " ", .all, #line),
-                ("shared", " ", .response(.shared), #line),
+                ("priv", " ", .private, #line),
+                ("PRIV", " ", .private, #line),
+                ("shared", " ", .shared, #line),
+                ("SHARED", " ", .shared, #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
@@ -1615,6 +1695,47 @@ extension ParserUnitTests {
     }
 }
 
+// MARK: - parseFetchModifier
+
+extension ParserUnitTests {
+    func testParseFetchModifier() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseFetchModifier,
+            validInputs: [
+                ("CHANGEDSINCE 2", " ", .changedSince(.init(modifiedSequence: 2)), #line),
+                ("test", "\r", .other(.init(name: "test")), #line),
+                ("test 1", " ", .other(.init(name: "test", value: .sequence([1]))), #line),
+            ],
+            parserErrorInputs: [
+                ("1", " ", #line),
+            ],
+            incompleteMessageInputs: [
+                ("CHANGEDSINCE 1", "", #line),
+                ("test 1", "", #line),
+            ]
+        )
+    }
+}
+
+// MARK: - parseFetchModifierResponse
+
+extension ParserUnitTests {
+    func testParseFetchModifierResponse() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseFetchModifierResponse,
+            validInputs: [
+                ("MODSEQ (2)", "", .init(modifierSequenceValue: 2), #line),
+            ],
+            parserErrorInputs: [
+                ("MODSEQ (a)", "", #line),
+            ],
+            incompleteMessageInputs: [
+                ("MODSEQ (1", "", #line),
+            ]
+        )
+    }
+}
+
 // MARK: - parseHeaderList
 
 extension ParserUnitTests {
@@ -1738,6 +1859,7 @@ extension ParserUnitTests {
                 ("SEARCH 1", "\r\n", .search([1]), #line),
                 ("SEARCH 1 2 3 4 5", "\r\n", .search([1, 2, 3, 4, 5]), #line),
                 ("NAMESPACE NIL NIL NIL", "\r\n", .namespace(.init(userNamespace: [], otherUserNamespace: [], sharedNamespace: [])), #line),
+                ("SEARCH 1 2 3 (MODSEQ 4)", "\r\n", .searchSort(.init(identifiers: [1, 2, 3], modifierSequence: .init(modifierSequenceValue: 4))), #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
@@ -1946,6 +2068,7 @@ extension ParserUnitTests {
                     )),
                     #line
                 ),
+                ("MODSEQ (3)", " ", .fetchModifierResponse(.init(modifierSequenceValue: 3)), #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
@@ -1960,7 +2083,10 @@ extension ParserUnitTests {
         self.iterateTests(
             testFunction: GrammarParser.parseMessageData,
             validInputs: [
-                ],
+                ("3 EXPUNGE", "\r", .expunge(3), #line),
+                ("VANISHED *", "\r", .vanished(.all), #line),
+                ("VANISHED (EARLIER) *", "\r", .vanishedEarlier(.all), #line),
+            ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
         )
@@ -2287,6 +2413,9 @@ extension ParserUnitTests {
                 ("UIDNEXT 12", "\r", .uidNext(12), #line),
                 ("UIDVALIDITY 34", "\r", .uidValidity(34), #line),
                 ("UNSEEN 56", "\r", .unseen(56), #line),
+                ("NOMODSEQ", "\r", .noModifierSequence, #line),
+                ("MODIFIED 1", "\r", .modified([1]), #line),
+                ("HIGHESTMODSEQ 1", "\r", .highestModifierSequence(.init(integerLiteral: 1)), #line),
                 ("NAMESPACE NIL NIL NIL", "\r", .namespace(.init(userNamespace: [], otherUserNamespace: [], sharedNamespace: [])), #line),
                 ("some", "\r", .other("some", nil), #line),
                 ("some thing", "\r", .other("some", "thing"), #line),
@@ -2409,6 +2538,7 @@ extension ParserUnitTests {
                 ("YOUNGER 34", "\r", .younger(34), #line),
                 ("OLDER 45", "\r", .older(45), #line),
                 ("FILTER something", "\r", .filter("something"), #line),
+                ("MODSEQ 5", "\r", .modifierSequence(.init(extensions: [], sequenceValue: 5)), #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
@@ -2433,6 +2563,51 @@ extension ParserUnitTests {
             testFunction: GrammarParser.parseSearchReturnDataExtension,
             validInputs: [
                 ("modifier 64", "\r", .init(modifier: "modifier", returnValue: .sequence([64])), #line),
+            ],
+            parserErrorInputs: [],
+            incompleteMessageInputs: []
+        )
+    }
+}
+
+// MARK: - parseSearchModifierSequence
+
+extension ParserUnitTests {
+    func testParseSearchModifierSequence() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseSearchModifiedSequence,
+            validInputs: [
+                ("MODSEQ 4", " ", .init(extensions: [], sequenceValue: 4), #line),
+                (
+                    "MODSEQ \"/flags/\\\\Answered\" priv 4",
+                    " ",
+                    .init(extensions: [.init(name: .init(flag: .answered), request: .private)], sequenceValue: 4),
+                    #line
+                ),
+                (
+                    "MODSEQ \"/flags/\\\\Answered\" priv \"/flags/\\\\Seen\" shared 4",
+                    " ",
+                    .init(extensions: [
+                        .init(name: .init(flag: .answered), request: .private),
+                        .init(name: .init(flag: .seen), request: .shared),
+                    ], sequenceValue: 4),
+                    #line
+                ),
+            ],
+            parserErrorInputs: [],
+            incompleteMessageInputs: []
+        )
+    }
+}
+
+// MARK: - parseSearchModifierSequenceExtension
+
+extension ParserUnitTests {
+    func testParseSearchModifierSequenceExtension() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseSearchModifiedSequenceExtension,
+            validInputs: [
+                (" \"/flags/\\\\Seen\" all", "", .init(name: .init(flag: .seen), request: .all), #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
@@ -2523,6 +2698,26 @@ extension ParserUnitTests {
             parserErrorInputs: [],
             incompleteMessageInputs: [
                 ("modifier ", "", #line),
+            ]
+        )
+    }
+}
+
+// MARK: - parseSearchSortModifierSequence
+
+extension ParserUnitTests {
+    func testParseSearchSortModifierSequence() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseSearchSortModifierSequence,
+            validInputs: [
+                ("(MODSEQ 123)", "\r", .init(modifierSequenceValue: 123), #line),
+            ],
+            parserErrorInputs: [
+                ("(MODSEQ a)", "", #line),
+            ],
+            incompleteMessageInputs: [
+                ("(MODSEQ ", "", #line),
+                ("(MODSEQ 111", "", #line),
             ]
         )
     }
@@ -2650,13 +2845,37 @@ extension ParserUnitTests {
             testFunction: GrammarParser.parseSelect,
             validInputs: [
                 ("SELECT inbox", "\r", .select(.inbox, []), #line),
-                ("SELECT inbox (some1)", "\r", .select(.inbox, [.init(name: "some1", value: nil)]), #line),
+                ("SELECT inbox (some1)", "\r", .select(.inbox, [.basic(.init(name: "some1", value: nil))]), #line),
             ],
             parserErrorInputs: [
                 ("SELECT ", "\r", #line),
             ],
             incompleteMessageInputs: [
                 ("SELECT ", "", #line),
+            ]
+        )
+    }
+}
+
+// MARK: - parseSelectParameter
+
+extension ParserUnitTests {
+    func testParseSelectParameter() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseSelectParameter,
+            validInputs: [
+                ("test 1", "\r", .basic(.init(name: "test", value: .sequence([1]))), #line),
+                ("QRESYNC (1 1)", "\r", .qresync(.init(uidValiditiy: 1, modifierSequenceValue: 1, knownUids: nil, sequenceMatchData: nil)), #line),
+                ("QRESYNC (1 1 1:2)", "\r", .qresync(.init(uidValiditiy: 1, modifierSequenceValue: 1, knownUids: [1 ... 2], sequenceMatchData: nil)), #line),
+                ("QRESYNC (1 1 1:2 (* *))", "\r", .qresync(.init(uidValiditiy: 1, modifierSequenceValue: 1, knownUids: [1 ... 2], sequenceMatchData: .init(knownSequenceSet: .all, knownUidSet: .all))), #line),
+            ],
+            parserErrorInputs: [
+                ("1", "\r", #line),
+            ],
+            incompleteMessageInputs: [
+                ("test ", "", #line),
+                ("QRESYNC (", "", #line),
+                ("QRESYNC (1 1", "", #line),
             ]
         )
     }
@@ -2819,7 +3038,7 @@ extension ParserUnitTests {
             testFunction: GrammarParser.parseStore,
             validInputs: [
                 ("STORE 1 +FLAGS \\answered", "\r", .store([1], [], .add(silent: false, list: [.answered])), #line),
-                ("STORE 1 (label) -FLAGS \\seen", "\r", .store([1], [.init(name: "label", value: nil)], .remove(silent: false, list: [.seen])), #line),
+                ("STORE 1 (label) -FLAGS \\seen", "\r", .store([1], [.other(.init(name: "label", value: nil))], .remove(silent: false, list: [.seen])), #line),
             ],
             parserErrorInputs: [
                 ("STORE +FLAGS \\answered", "\r", #line),
@@ -2827,6 +3046,28 @@ extension ParserUnitTests {
             incompleteMessageInputs: [
                 ("STORE ", "", #line),
                 ("STORE 1 ", "", #line),
+            ]
+        )
+    }
+}
+
+// MARK: - parseStoreModifier
+
+extension ParserUnitTests {
+    func testParseStoreModifier() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseStoreModifier,
+            validInputs: [
+                ("UNCHANGEDSINCE 2", " ", .unchangedSince(.init(modifiedSequence: 2)), #line),
+                ("test", "\r", .other(.init(name: "test")), #line),
+                ("test 1", " ", .other(.init(name: "test", value: .sequence([1]))), #line),
+            ],
+            parserErrorInputs: [
+                ("1", " ", #line),
+            ],
+            incompleteMessageInputs: [
+                ("UNCHANGEDSINCE 1", "", #line),
+                ("test 1", "", #line),
             ]
         )
     }
@@ -2894,6 +3135,28 @@ extension ParserUnitTests {
             ],
             incompleteMessageInputs: [
                 ("RENAME box1 ", "", #line),
+            ]
+        )
+    }
+}
+
+// MARK: - parseSequenceMatchData
+
+extension ParserUnitTests {
+    func testParseSequenceMatchData() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseSequenceMatchData,
+            validInputs: [
+                ("(* *)", "\r", .init(knownSequenceSet: .all, knownUidSet: .all), #line),
+                ("(1,2 3,4)", "\r", .init(knownSequenceSet: [1, 2], knownUidSet: [3, 4]), #line),
+            ],
+            parserErrorInputs: [
+                ("()", "", #line),
+                ("(* )", "", #line),
+            ],
+            incompleteMessageInputs: [
+                ("(1", "", #line),
+                ("(1111:2222", "", #line),
             ]
         )
     }

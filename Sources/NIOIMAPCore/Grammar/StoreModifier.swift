@@ -12,19 +12,22 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
+/// RFC 7162
+public enum StoreModifier: Equatable {
+    case unchangedSince(UnchangedSinceModifier)
 
-public struct EntryKindResponse: Equatable {
-    var _backing: String
-
-    public static var `private` = Self(_backing: "priv")
-    public static var shared = Self(_backing: "shared")
+    case other(Parameter)
 }
 
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeEntryKindResponse(_ response: EntryKindResponse) -> Int {
-        self.writeString(response._backing)
+    @discardableResult mutating func writeStoreModifier(_ val: StoreModifier) -> Int {
+        switch val {
+        case .unchangedSince(let unchangedSince):
+            return self.writeUnchangedSinceModifier(unchangedSince)
+        case .other(let param):
+            return self.writeParameter(param)
+        }
     }
 }

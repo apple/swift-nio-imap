@@ -12,19 +12,18 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
+public struct EntryFlagName: Equatable {
+    public var flag: AttributeFlag
 
-public struct EntryKindResponse: Equatable {
-    var _backing: String
-
-    public static var `private` = Self(_backing: "priv")
-    public static var shared = Self(_backing: "shared")
+    public init(flag: AttributeFlag) {
+        self.flag = flag
+    }
 }
 
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeEntryKindResponse(_ response: EntryKindResponse) -> Int {
-        self.writeString(response._backing)
+    @discardableResult mutating func writeEntryFlagName(_ name: EntryFlagName) -> Int {
+        self.writeString("\"/flags/") + self.writeAttributeFlag(name.flag) + self.writeString("\"")
     }
 }

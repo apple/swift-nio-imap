@@ -30,6 +30,7 @@ public enum FetchAttribute: Equatable {
     /// `BODY[<section>]<<partial>>` and `BODY.PEEK[<section>]<<partial>>`
     case bodySection(peek: Bool, _ section: SectionSpecifier?, ClosedRange<Int>?)
     case uid
+    case modifierSequence
     case modifierSequenceValue(ModifierSequenceValue)
     case binary(peek: Bool, section: SectionSpecifier.Part, partial: ClosedRange<Int>?)
     case binarySize(section: SectionSpecifier.Part)
@@ -95,6 +96,8 @@ extension EncodeBuffer {
             return self.writeFetchAttribute_binary(peek: peek, section: section, partial: partial)
         case .binarySize(let section):
             return self.writeFetchAttribute_binarySize(section)
+        case .modifierSequence:
+            return self.writeString("MODSEQ")
         }
     }
 

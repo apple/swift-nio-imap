@@ -40,6 +40,7 @@ extension FetchAttributeTests {
             (.binary(peek: false, section: [3, 4, 5], partial: nil), .rfc3501, "BINARY[3.4.5]", #line),
             (.modifierSequenceValue(.zero), .rfc3501, "0", #line),
             (.modifierSequenceValue(3), .rfc3501, "3", #line),
+            (.modifierSequence, .rfc3501, "MODSEQ", #line),
         ]
         self.iterateInputs(inputs: inputs.map { ($0, $1, [$2], $3) }, encoder: { self.testBuffer.writeFetchAttribute($0) })
     }
