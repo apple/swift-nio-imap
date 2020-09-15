@@ -33,7 +33,7 @@ public enum ResponseTextCode: Equatable {
     case uidNotSticky
     case useAttribute
     case other(String, String?)
-    case notSaved   // RFC 5182
+    case notSaved // RFC 5182
 }
 
 // MARK: - Encoding

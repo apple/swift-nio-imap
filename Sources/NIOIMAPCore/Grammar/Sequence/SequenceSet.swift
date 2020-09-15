@@ -15,7 +15,7 @@
 import struct NIO.ByteBuffer
 
 // RFC 5182 extended sequence-set
-public enum SequenceSet : Equatable {
+public enum SequenceSet: Equatable {
     // IMAPv4 sequence-set
     case range(SequenceRangeSet)
     // RFC 5182 'seq-last-command'

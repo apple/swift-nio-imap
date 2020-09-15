@@ -3450,7 +3450,7 @@ extension GrammarParser {
 
         return try ParserLibrary.parseOneOf([
             parseSequenceSet_base,
-            parseSequenceSet_lastCommand
+            parseSequenceSet_lastCommand,
         ], buffer: &buffer, tracker: tracker)
     }
 
