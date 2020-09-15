@@ -37,6 +37,8 @@ extension CommandType_Tests {
             (.login(username: "\r\n", password: "\\\""), CommandEncodingOptions(), ["LOGIN {2}\r\n", "\r\n {2}\r\n", "\\\""], #line),
 
             (.select(MailboxName("Events")), CommandEncodingOptions(), [#"SELECT "Events" ()"#], #line),
+            (.select(.inbox, [.basic(.init(name: "test"))]), CommandEncodingOptions(), [#"SELECT "INBOX" (test)"#], #line),
+            (.select(.inbox, [.basic(.init(name: "test1")), .basic(.init(name: "test2"))]), CommandEncodingOptions(), [#"SELECT "INBOX" (test1 test2)"#], #line),
             (.examine(MailboxName("Events")), CommandEncodingOptions(), [#"EXAMINE "Events""#], #line),
             (.move([1], .inbox), CommandEncodingOptions(), ["MOVE 1 \"INBOX\""], #line),
             (.id([]), CommandEncodingOptions(), ["ID NIL"], #line),

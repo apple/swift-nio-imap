@@ -215,8 +215,7 @@ extension CommandEncodeBuffer {
             self.buffer.writeMailbox(mailbox) +
             self.buffer.writeSpace() +
             self.buffer.writeArray(params, callback: { (element, buffer) -> Int in
-                buffer.writeSpace() +
-                    buffer.writeSelectParameter(element)
+                buffer.writeSelectParameter(element)
                 })
     }
 
