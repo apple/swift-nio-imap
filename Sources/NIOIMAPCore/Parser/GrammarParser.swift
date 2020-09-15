@@ -3641,12 +3641,7 @@ extension GrammarParser {
     }
 
     static func parseKnownUids(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SequenceSet {
-        let set = try self.parseSequenceSet(buffer: &buffer, tracker: tracker)
-        let valid = set.ranges.first { $0 == .all } == nil
-        guard valid else {
-            throw ParserError(hint: "Found * (meaning all) when parseing known uids. This isn't allowed")
-        }
-        return set
+        try self.parseSequenceSet(buffer: &buffer, tracker: tracker)
     }
 
     // select-params = SP "(" select-param *(SP select-param ")"
