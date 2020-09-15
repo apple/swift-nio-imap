@@ -2165,7 +2165,7 @@ extension ParserUnitTests {
                 ("NAMESPACE NIL NIL NIL", "\r", .namespace(.init(userNamespace: [], otherUserNamespace: [], sharedNamespace: [])), #line),
                 ("some", "\r", .other("some", nil), #line),
                 ("some thing", "\r", .other("some", "thing"), #line),
-                ("NOTSAVED", "\r", .notSaved, #line)
+                ("NOTSAVED", "\r", .notSaved, #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
@@ -2612,7 +2612,6 @@ extension ParserUnitTests {
         )
     }
 }
-
 
 // MARK: - status parseStatus
 

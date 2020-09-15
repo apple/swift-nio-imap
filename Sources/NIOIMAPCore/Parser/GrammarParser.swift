@@ -3430,7 +3430,7 @@ extension GrammarParser {
         }
 
         func parseSequenceSet_base(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SequenceSet {
-            return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker in
+            try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker in
                 var output = [try parseSequenceSet_element(buffer: &buffer, tracker: tracker)]
                 try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &output, tracker: tracker) { buffer, tracker in
                     try ParserLibrary.parseFixedString(",", buffer: &buffer, tracker: tracker)
@@ -3449,9 +3449,9 @@ extension GrammarParser {
         }
 
         return try ParserLibrary.parseOneOf([
-                parseSequenceSet_base,
-                parseSequenceSet_lastCommand
-            ], buffer: &buffer, tracker: tracker)
+            parseSequenceSet_base,
+            parseSequenceSet_lastCommand
+        ], buffer: &buffer, tracker: tracker)
     }
 
     // uid-set
