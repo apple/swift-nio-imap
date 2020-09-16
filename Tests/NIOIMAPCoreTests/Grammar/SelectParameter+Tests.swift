@@ -25,7 +25,7 @@ extension SelectParameter_Tests {
         let inputs: [(SelectParameter, String, UInt)] = [
             (.condstore, "CONDSTORE", #line),
             (.basic(.init(name: "test")), "test", #line),
-            (.basic(.init(name: "test", value: .number(1))), "test 1", #line),
+            (.basic(.init(name: "test", value: .sequence([1]))), "test 1", #line),
             (
                 .qresync(.init(uidValiditiy: 1, modifierSequenceValue: .zero, knownUids: nil, sequenceMatchData: nil)),
                 "QRESYNC (1 0)",

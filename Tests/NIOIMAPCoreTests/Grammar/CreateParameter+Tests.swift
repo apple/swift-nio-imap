@@ -24,7 +24,7 @@ extension CreateParameter_Tests {
     func testEncode() {
         let inputs: [(CreateParameter, String, UInt)] = [
             (.labelled(.init(name: "name")), "name", #line),
-            (.labelled(.init(name: "name", value: .number(1))), "name 1", #line),
+            (.labelled(.init(name: "name", value: .sequence([1]))), "name 1", #line),
             (.attributes([]), "USE ()", #line),
             (.attributes([.all]), "USE (\\All)", #line),
             (.attributes([.all, .flagged]), "USE (\\All \\Flagged)", #line),
