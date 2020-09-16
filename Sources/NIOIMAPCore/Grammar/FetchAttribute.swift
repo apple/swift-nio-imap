@@ -34,6 +34,9 @@ public enum FetchAttribute: Equatable {
     case modifierSequenceValue(ModifierSequenceValue)
     case binary(peek: Bool, section: SectionSpecifier.Part, partial: ClosedRange<Int>?)
     case binarySize(section: SectionSpecifier.Part)
+    case gmailMessageID
+    case gmailThreadID
+    case gmailLabels
 }
 
 extension Array where Element == FetchAttribute {
@@ -98,6 +101,12 @@ extension EncodeBuffer {
             return self.writeFetchAttribute_binarySize(section)
         case .modifierSequence:
             return self.writeString("MODSEQ")
+        case .gmailMessageID:
+            return self.writeFetchAttribute_gmailMessageID()
+        case .gmailThreadID:
+            return self.writeFetchAttribute_gmailThreadID()
+        case .gmailLabels:
+            return self.writeFetchAttribute_gmailLabels()
         }
     }
 
@@ -159,5 +168,17 @@ extension EncodeBuffer {
             self.writeIfExists(partial) { (partial) -> Int in
                 self.writePartial(partial)
             }
+    }
+
+    @discardableResult mutating func writeFetchAttribute_gmailMessageID() -> Int {
+        self.writeString("X-GM-MSGID")
+    }
+
+    @discardableResult mutating func writeFetchAttribute_gmailThreadID() -> Int {
+        self.writeString("X-GM-THRID")
+    }
+
+    @discardableResult mutating func writeFetchAttribute_gmailLabels() -> Int {
+        self.writeString("X-GM-LABELS")
     }
 }

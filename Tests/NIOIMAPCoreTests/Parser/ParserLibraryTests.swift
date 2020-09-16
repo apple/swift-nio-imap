@@ -240,3 +240,24 @@ extension ParserLibraryTests {
         }
     }
 }
+
+// MARK: - parseUInt64
+
+extension ParserLibraryTests {
+    func testParseUInt64() {
+        let inputs: [(ByteBuffer, UInt64, Int, UInt)] = [
+            ("12345\r", 12345, 5, #line),
+            ("18446744073709551615\r", UInt64.max, 20, #line),
+            ("12345 a", 12345, 5, #line),
+            ("18446744073709551615b", UInt64.max, 20, #line),
+        ]
+        for (string, result, consumed, line) in inputs {
+            var string = string
+            var id = UInt64(0)
+            var actualConsumed = 0
+            XCTAssertNoThrow((id, actualConsumed) = try ParserLibrary.parseUInt64(buffer: &string, tracker: .makeNewDefaultLimitStackTracker), line: line)
+            XCTAssertEqual(actualConsumed, consumed, line: line)
+            XCTAssertEqual(id, result, line: line)
+        }
+    }
+}

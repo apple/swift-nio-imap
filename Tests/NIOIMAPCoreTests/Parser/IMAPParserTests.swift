@@ -1604,6 +1604,9 @@ extension ParserUnitTests {
                 ("BINARY.PEEK[1]<3.4>", " ", .binary(peek: true, section: [1], partial: 3 ... 6 as ClosedRange), #line),
                 ("BINARY[2]<4.5>", " ", .binary(peek: false, section: [2], partial: 4 ... 8 as ClosedRange), #line),
                 ("BINARY.SIZE[5]", " ", .binarySize(section: [5]), #line),
+                ("X-GM-MSGID", " ", .gmailMessageID, #line),
+                ("X-GM-THRID", " ", .gmailThreadID, #line),
+                ("X-GM-LABELS", " ", .gmailLabels, #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
@@ -2069,6 +2072,12 @@ extension ParserUnitTests {
                     #line
                 ),
                 ("MODSEQ (3)", " ", .fetchModifierResponse(.init(modifierSequenceValue: 3)), #line),
+                ("X-GM-MSGID 1278455344230334865", " ", .gmailMessageID(1278455344230334865), #line),
+                ("X-GM-THRID 1278455344230334865", " ", .gmailThreadID(1278455344230334865), #line),
+                ("X-GM-LABELS (\\Inbox \\Sent Important \"Muy Importante\")", " ", .gmailLabels([GmailLabel(rawValue: "\\Inbox"), GmailLabel(rawValue: "\\Sent"), GmailLabel(rawValue: "Important"), GmailLabel(rawValue: "Muy Importante")]), #line),
+                ("X-GM-LABELS (foo)", " ", .gmailLabels([GmailLabel(rawValue: "foo")]), #line),
+                ("X-GM-LABELS ()", " ", .gmailLabels([]), #line),
+                ("X-GM-LABELS (\\Drafts)", " ", .gmailLabels([GmailLabel(rawValue: "\\Drafts")]), #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
