@@ -17,8 +17,6 @@ import struct NIO.ByteBuffer
 /// IMAPv4 `tagged-ext-val`
 public enum ParameterValue: Equatable {
     case sequence(SequenceSet)
-    case number(Int)
-    case number64(Int)
     case comp([String])
 }
 
@@ -29,10 +27,6 @@ extension EncodeBuffer {
         switch value {
         case .sequence(let set):
             return self.writeSequenceSet(set)
-        case .number(let num):
-            return self.writeString("\(num)")
-        case .number64(let num):
-            return self.writeString("\(num)")
         case .comp(let comp):
             return
                 self.writeString("(") +

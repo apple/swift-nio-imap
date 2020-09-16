@@ -25,7 +25,7 @@ extension FetchModifier_Tests {
         let inputs: [(FetchModifier, String, UInt)] = [
             (.changedSince(.init(modifiedSequence: 4)), "CHANGEDSINCE 4", #line),
             (.other(.init(name: "test")), "test", #line),
-            (.other(.init(name: "test", value: .number(4))), "test 4", #line),
+            (.other(.init(name: "test", value: .sequence([4]))), "test 4", #line),
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeFetchModifier($0) })
     }

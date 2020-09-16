@@ -4159,14 +4159,6 @@ extension GrammarParser {
             .sequence(try self.parseSequenceSet(buffer: &buffer, tracker: tracker))
         }
 
-        func parseTaggedExtensionSimple_number(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ParameterValue {
-            .number(try self.parseNumber(buffer: &buffer, tracker: tracker))
-        }
-
-        func parseTaggedExtensionSimple_number64(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ParameterValue {
-            .number64(try self.parseNumber(buffer: &buffer, tracker: tracker))
-        }
-
         func parseTaggedExtensionVal_comp(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ParameterValue {
             try ParserLibrary.parseFixedString("(", buffer: &buffer, tracker: tracker)
             let comp = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseTaggedExtensionComplex) ?? []
@@ -4176,8 +4168,6 @@ extension GrammarParser {
 
         return try ParserLibrary.parseOneOf([
             parseTaggedExtensionSimple_set,
-            parseTaggedExtensionSimple_number,
-            parseTaggedExtensionSimple_number64,
             parseTaggedExtensionVal_comp,
         ], buffer: &buffer, tracker: tracker)
     }

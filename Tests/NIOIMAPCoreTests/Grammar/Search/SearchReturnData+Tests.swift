@@ -27,7 +27,7 @@ extension SearchReturnData_Tests {
             (.max(1), "MAX 1", #line),
             (.all(SequenceSet(1 ... 3)), "ALL 1:3", #line),
             (.count(1), "COUNT 1", #line),
-            (.dataExtension(.init(modifier: "modifier", returnValue: .number(3))), "modifier 3", #line),
+            (.dataExtension(.init(modifier: "modifier", returnValue: .sequence([3]))), "modifier 3", #line),
         ]
 
         for (test, expectedString, line) in inputs {

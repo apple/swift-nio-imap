@@ -23,7 +23,7 @@ class TaggedExtension_Tests: EncodeTestClass {}
 extension TaggedExtension_Tests {
     func testEncode() {
         let inputs: [(TaggedExtension, String, UInt)] = [
-            (.init(label: "label", value: .number(1)), "label 1", #line),
+            (.init(label: "label", value: .sequence([1])), "label 1", #line),
         ]
 
         for (test, expectedString, line) in inputs {
