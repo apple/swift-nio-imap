@@ -1086,6 +1086,38 @@ extension GrammarParser {
             }
         }
     }
+    
+    static func parseEntry(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Entry {
+        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker, { buffer, tracker -> Entry in
+            let name = try self.parseAString(buffer: &buffer, tracker: tracker)
+            try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
+            let value = try self.parseMetadataValue(buffer: &buffer, tracker: tracker)
+            return .init(name: name, value: value)
+        })
+    }
+    
+    static func parseEntries(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [Entry] {
+        
+        func parseEntries_singleUnbracketed(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [Entry] {
+            return [try self.parseEntry(buffer: &buffer, tracker: tracker)]
+        }
+        
+        func parseEntries_bracketed(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [Entry] {
+            try ParserLibrary.parseFixedString("(", buffer: &buffer, tracker: tracker)
+            var array = [try self.parseEntry(buffer: &buffer, tracker: tracker)]
+            try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker, parser: { buffer, tracker in
+                try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
+                return try self.parseEntry(buffer: &buffer, tracker: tracker)
+            })
+            try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)
+            return array
+        }
+        
+        return try ParserLibrary.parseOneOf([
+            parseEntries_singleUnbracketed,
+            parseEntries_bracketed
+        ], buffer: &buffer, tracker: tracker)
+    }
 
     // envelope        = "(" env-date SP env-subject SP env-from SP
     //                   env-sender SP env-reply-to SP env-to SP env-cc SP

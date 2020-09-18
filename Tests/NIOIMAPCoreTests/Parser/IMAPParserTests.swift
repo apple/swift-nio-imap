@@ -1451,6 +1451,47 @@ extension ParserUnitTests {
     }
 }
 
+// MARK: - parseEntry
+
+extension ParserUnitTests {
+    func testParseEntry() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseEntry,
+            validInputs: [
+                ("\"name\" \"value\"", "", .init(name: "name", value: .init(rawValue: "value")), #line),
+                ("\"name\" NIL", "", .init(name: "name", value: .init(rawValue: nil)), #line),
+            ],
+            parserErrorInputs: [
+                
+            ],
+            incompleteMessageInputs: [
+                
+            ]
+        )
+    }
+}
+
+// MARK: - parseEntries
+
+extension ParserUnitTests {
+    func testParseEntries() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseEntries,
+            validInputs: [
+                ("\"name\" \"value\"", "", [.init(name: "name", value: .init(rawValue: "value"))], #line),
+                ("(\"name\" \"value\")", "", [.init(name: "name", value: .init(rawValue: "value"))], #line),
+                ("(\"name1\" \"value1\" \"name2\" \"value2\")", "", [.init(name: "name1", value: .init(rawValue: "value1")), .init(name: "name2", value: .init(rawValue: "value2"))], #line),
+            ],
+            parserErrorInputs: [
+                
+            ],
+            incompleteMessageInputs: [
+                
+            ]
+        )
+    }
+}
+
 // MARK: - parseEntryFlagName
 
 extension ParserUnitTests {
