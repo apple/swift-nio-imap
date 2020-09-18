@@ -1849,6 +1849,27 @@ extension GrammarParser {
             }
         }
     }
+    
+    // literal8         = "~{" number ["+"] "}" CRLF *CHAR8
+    static func parseLiteral8(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ByteBuffer {
+        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> ByteBuffer in
+            try ParserLibrary.parseFixedString("~{", buffer: &buffer, tracker: tracker)
+            let length = try Self.parseNumber(buffer: &buffer, tracker: tracker)
+            try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
+                try ParserLibrary.parseFixedString("+", buffer: &buffer, tracker: tracker)
+            }
+            try ParserLibrary.parseFixedString("}", buffer: &buffer, tracker: tracker)
+            try ParserLibrary.parseNewline(buffer: &buffer, tracker: tracker)
+            if let bytes = buffer.readSlice(length: length) {
+                if bytes.readableBytesView.contains(0) {
+                    throw ParserError(hint: "Found NUL byte in literal")
+                }
+                return bytes
+            } else {
+                throw _IncompleteMessage()
+            }
+        }
+    }
 
     // login           = "LOGIN" SP userid SP password
     static func parseLogin(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Command {
@@ -2184,6 +2205,22 @@ extension GrammarParser {
             parseMessageData_expunge,
             parseMessageData_vanished,
             parseMessageData_vanishedEarlier,
+        ], buffer: &buffer, tracker: tracker)
+    }
+    
+    static func parseMetadataValue(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MetadataValue {
+        
+        func parseMetadataValue_nstring(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MetadataValue {
+            return .init(rawValue: try self.parseNString(buffer: &buffer, tracker: tracker))
+        }
+        
+        func parseMetadataValue_literal8(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MetadataValue {
+            return .init(rawValue: try self.parseLiteral8(buffer: &buffer, tracker: tracker))
+        }
+        
+        return try ParserLibrary.parseOneOf([
+            parseMetadataValue_nstring,
+            parseMetadataValue_literal8
         ], buffer: &buffer, tracker: tracker)
     }
 

@@ -465,6 +465,24 @@ extension ParserUnitTests {
     }
 }
 
+// MARK: - parseMetadataValue
+
+extension ParserUnitTests {
+    func testParseMetadataValue() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseMetadataValue,
+            validInputs: [
+                ("NIL", "\r", .init(rawValue: nil), #line),
+                ("\"a\"", "\r", .init(rawValue: "a"), #line),
+                ("{1}\r\na", "\r", .init(rawValue: "a"), #line),
+                ("~{1}\r\na", "\r", .init(rawValue: "a"), #line),
+            ],
+            parserErrorInputs: [],
+            incompleteMessageInputs: []
+        )
+    }
+}
+
 // MARK: - parseAppendOptions
 
 extension ParserUnitTests {
