@@ -2486,6 +2486,23 @@ extension ParserUnitTests {
     }
 }
 
+// MARK: - search parseScopeOption
+
+extension ParserUnitTests {
+    func testParseScopeOption() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseScopeOption,
+            validInputs: [
+                ("DEPTH 0", "\r", .zero, #line),
+                ("DEPTH 1", "\r", .one, #line),
+                ("DEPTH infinity", "\r", .infinity, #line),
+            ],
+            parserErrorInputs: [],
+            incompleteMessageInputs: []
+        )
+    }
+}
+
 // MARK: - search parseSearch
 
 extension ParserUnitTests {

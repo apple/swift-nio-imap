@@ -3112,6 +3112,33 @@ extension GrammarParser {
             parseReturnOption_optionExtension,
         ], buffer: &buffer, tracker: tracker)
     }
+    
+    static func parseScopeOption(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ScopeOption {
+        
+        func parseScopeOption_zero(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ScopeOption {
+            try ParserLibrary.parseFixedString("0", buffer: &buffer, tracker: tracker)
+            return .zero
+        }
+        
+        func parseScopeOption_one(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ScopeOption {
+            try ParserLibrary.parseFixedString("1", buffer: &buffer, tracker: tracker)
+            return .one
+        }
+        
+        func parseScopeOption_infinity(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ScopeOption {
+            try ParserLibrary.parseFixedString("infinity", buffer: &buffer, tracker: tracker)
+            return .infinity
+        }
+        
+        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker, { buffer, tracker in
+            try ParserLibrary.parseFixedString("DEPTH ", buffer: &buffer, tracker: tracker)
+            return try ParserLibrary.parseOneOf([
+                parseScopeOption_zero,
+                parseScopeOption_one,
+                parseScopeOption_infinity
+            ], buffer: &buffer, tracker: tracker)
+        })
+    }
 
     // search          = "SEARCH" [search-return-opts] SP search-program
     static func parseSearch(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Command {
