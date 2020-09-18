@@ -3058,6 +3058,28 @@ extension GrammarParser {
             try ParserLibrary.parseFixedString("NOTSAVED", buffer: &buffer, tracker: tracker)
             return .notSaved
         }
+        
+        func parseResponseTextCode_metadataLongEntries(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ResponseTextCode {
+            try ParserLibrary.parseFixedString("METADATA LONGENTRIES ", buffer: &buffer, tracker: tracker)
+            let num = try self.parseNumber(buffer: &buffer, tracker: tracker)
+            return .metadataLongEntries(num)
+        }
+        
+        func parseResponseTextCode_metadataMaxSize(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ResponseTextCode {
+            try ParserLibrary.parseFixedString("METADATA MAXSIZE ", buffer: &buffer, tracker: tracker)
+            let num = try self.parseNumber(buffer: &buffer, tracker: tracker)
+            return .metadataMaxsize(num)
+        }
+        
+        func parseResponseTextCode_metadataTooMany(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ResponseTextCode {
+            try ParserLibrary.parseFixedString("METADATA TOOMANY", buffer: &buffer, tracker: tracker)
+            return .metadataTooMany
+        }
+        
+        func parseResponseTextCode_metadataNoPrivate(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ResponseTextCode {
+            try ParserLibrary.parseFixedString("METADATA NOPRIVATE", buffer: &buffer, tracker: tracker)
+            return .metadataNoPrivate
+        }
 
         return try ParserLibrary.parseOneOf([
             parseResponseTextCode_alert,
@@ -3080,6 +3102,10 @@ extension GrammarParser {
             parseResponseTextCode_uidCopy,
             parseResponseTextCode_uidAppend,
             parseResponseTextCode_closed,
+            parseResponseTextCode_metadataLongEntries,
+            parseResponseTextCode_metadataMaxSize,
+            parseResponseTextCode_metadataTooMany,
+            parseResponseTextCode_metadataNoPrivate,
             parseResponseTextCode_atom,
         ], buffer: &buffer, tracker: tracker)
     }

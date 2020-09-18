@@ -2479,6 +2479,10 @@ extension ParserUnitTests {
                 ("some", "\r", .other("some", nil), #line),
                 ("some thing", "\r", .other("some", "thing"), #line),
                 ("NOTSAVED", "\r", .notSaved, #line),
+                ("METADATA MAXSIZE 123", "\r", .metadataMaxsize(123), #line),
+                ("METADATA LONGENTRIES 456", "\r", .metadataLongEntries(456), #line),
+                ("METADATA TOOMANY", "\r", .metadataTooMany, #line),
+                ("METADATA NOPRIVATE", "\r", .metadataNoPrivate, #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []

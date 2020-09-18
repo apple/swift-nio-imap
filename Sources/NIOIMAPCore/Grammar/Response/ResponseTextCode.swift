@@ -39,6 +39,10 @@ public enum ResponseTextCode: Equatable {
     case noModifierSequence
     case modified(SequenceSet)
     case highestModifierSequence(ModifierSequenceValue)
+    case metadataLongEntries(Int)
+    case metadataMaxsize(Int)
+    case metadataTooMany
+    case metadataNoPrivate
 }
 
 // MARK: - Encoding
@@ -92,6 +96,14 @@ extension EncodeBuffer {
             return self.writeString("MODIFIED ") + self.writeSequenceSet(set)
         case .highestModifierSequence(let val):
             return self.writeString("HIGHESTMODSEQ ") + self.writeModifierSequenceValue(val)
+        case .metadataLongEntries(let num):
+            return self.writeString("METADATA LONGENTRIES \(num)")
+        case .metadataMaxsize(let num):
+            return self.writeString("METADATA MAXSIZE \(num)")
+        case .metadataTooMany:
+            return self.writeString("METADATA TOOMANY")
+        case .metadataNoPrivate:
+            return self.writeString("METADATA NOPRIVATE")
         }
     }
 
