@@ -2264,6 +2264,41 @@ extension GrammarParser {
         ], buffer: &buffer, tracker: tracker)
     }
     
+    static func parseMetadataOption(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MetadataOption {
+        
+        func parseMetadataOption_maxSize(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MetadataOption {
+            try ParserLibrary.parseFixedString("MAXSIZE ", buffer: &buffer, tracker: tracker)
+            return .maxSize(try self.parseNumber(buffer: &buffer, tracker: tracker))
+        }
+        
+        func parseMetadataOption_scope(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MetadataOption {
+            return .scope(try self.parseScopeOption(buffer: &buffer, tracker: tracker))
+        }
+        
+        func parseMetadataOption_param(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MetadataOption {
+            return .other(try self.parseParameter(buffer: &buffer, tracker: tracker))
+        }
+        
+        return try ParserLibrary.parseOneOf([
+            parseMetadataOption_maxSize,
+            parseMetadataOption_scope,
+            parseMetadataOption_param,
+        ], buffer: &buffer, tracker: tracker)
+    }
+    
+    static func parseMetadataOptions(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [MetadataOption] {
+        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker, { buffer, tracker in
+            try ParserLibrary.parseFixedString("(", buffer: &buffer, tracker: tracker)
+            var array = [try self.parseMetadataOption(buffer: &buffer, tracker: tracker)]
+            try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker, parser: { buffer, tracker in
+                try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
+                return try self.parseMetadataOption(buffer: &buffer, tracker: tracker)
+            })
+            try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)
+            return array
+        })
+    }
+    
     static func parseMetadataValue(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MetadataValue {
         
         func parseMetadataValue_nstring(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MetadataValue {

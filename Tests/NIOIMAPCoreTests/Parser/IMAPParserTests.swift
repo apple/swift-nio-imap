@@ -465,6 +465,39 @@ extension ParserUnitTests {
     }
 }
 
+// MARK: - parseMetadataOption
+
+extension ParserUnitTests {
+    func testParseMetadataOption() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseMetadataOption,
+            validInputs: [
+                ("MAXSIZE 123", "\r", .maxSize(123), #line),
+                ("DEPTH 1", "\r", .scope(.one), #line),
+                ("param", "\r", .other(.init(name: "param")), #line),
+            ],
+            parserErrorInputs: [],
+            incompleteMessageInputs: []
+        )
+    }
+}
+
+// MARK: - parseMetadataOptions
+
+extension ParserUnitTests {
+    func testParseMetadataOptions() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseMetadataOptions,
+            validInputs: [
+                ("(MAXSIZE 123)", "\r", [.maxSize(123)], #line),
+                ("(DEPTH 1 MAXSIZE 123)", "\r", [.scope(.one), .maxSize(123)], #line),
+            ],
+            parserErrorInputs: [],
+            incompleteMessageInputs: []
+        )
+    }
+}
+
 // MARK: - parseMetadataValue
 
 extension ParserUnitTests {
