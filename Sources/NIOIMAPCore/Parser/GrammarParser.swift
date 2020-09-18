@@ -698,7 +698,21 @@ extension GrammarParser {
     //                   rename / select / status / subscribe / unsubscribe /
     //                   idle
     static func parseCommandAuth(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Command {
-        try ParserLibrary.parseOneOf([
+        
+        func parseCommandAuth_getMetadata(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Command {
+            try ParserLibrary.parseFixedString("GETMETADATA", buffer: &buffer, tracker: tracker)
+            let options = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> [MetadataOption] in
+                try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
+                return try self.parseMetadataOptions(buffer: &buffer, tracker: tracker)
+            }) ?? []
+            try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
+            let mailbox = try self.parseMailbox(buffer: &buffer, tracker: tracker)
+            try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
+            let entries = try self.parseEntries(buffer: &buffer, tracker: tracker)
+            return .getMetadata(options: options, mailbox: mailbox, entries: entries)
+        }
+        
+        return try ParserLibrary.parseOneOf([
             self.parseCreate,
             self.parseDelete,
             self.parseExamine,
@@ -711,6 +725,7 @@ extension GrammarParser {
             self.parseUnsubscribe,
             self.parseIdleStart,
             self.parseNamespaceCommand,
+            parseCommandAuth_getMetadata,
         ], buffer: &buffer, tracker: tracker)
     }
 

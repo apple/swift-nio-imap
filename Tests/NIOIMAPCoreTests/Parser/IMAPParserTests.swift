@@ -1132,6 +1132,8 @@ extension ParserUnitTests {
                 ("LSUB inbox someList", " ", .lsub(reference: .inbox, pattern: "someList"), #line),
                 ("CREATE inbox (something)", " ", .create(.inbox, [.labelled(.init(name: "something", value: nil))]), #line),
                 ("NAMESPACE", " ", .namespace, #line),
+                ("GETMETADATA INBOX a", " ", .getMetadata(options: [], mailbox: .inbox, entries: ["a"]), #line),
+                ("GETMETADATA (MAXSIZE 123) INBOX (a b)", " ", .getMetadata(options: [.maxSize(123)], mailbox: .inbox, entries: ["a", "b"]), #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []

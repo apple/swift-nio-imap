@@ -56,6 +56,8 @@ public enum Command: Equatable {
     case getQuota(QuotaRoot)
     case getQuotaRoot(MailboxName)
     case setQuota(QuotaRoot, [QuotaLimit])
+    
+    case getMetadata(options: [MetadataOption], mailbox: MailboxName, entries: [ByteBuffer])
 }
 
 // MARK: - IMAP
@@ -141,7 +143,20 @@ extension CommandEncodeBuffer {
             return self.writeCommandKind_getQuotaRoot(mailbox: mailbox)
         case .setQuota(let quotaRoot, let quotaLimits):
             return self.writeCommandKind_setQuota(quotaRoot: quotaRoot, resourceLimits: quotaLimits)
+        case .getMetadata(options: let options, mailbox: let mailbox, entries: let entries):
+            return self.writeCommandKind_getMetadata(options: options, mailbox: mailbox, entries: entries)
         }
+    }
+    
+    private mutating func writeCommandKind_getMetadata(options: [MetadataOption], mailbox: MailboxName, entries: [ByteBuffer]) -> Int {
+        self.buffer.writeString("GETMETADATA") +
+            self.buffer.writeIfArrayHasMinimumSize(array: options, callback: { array, buffer in
+                buffer.writeSpace() + buffer.writeMetadataOptions(array)
+            }) +
+            self.buffer.writeSpace() +
+            self.buffer.writeMailbox(mailbox) +
+            self.buffer.writeSpace() +
+            self.buffer.writeEntries(entries)
     }
 
     private mutating func writeCommandKind_capability() -> Int {
