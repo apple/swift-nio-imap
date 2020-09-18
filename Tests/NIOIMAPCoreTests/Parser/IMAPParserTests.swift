@@ -1451,15 +1451,45 @@ extension ParserUnitTests {
     }
 }
 
-// MARK: - parseEntry
+// MARK: - parseEntryValue
 
 extension ParserUnitTests {
-    func testParseEntry() {
+    func testParseEntryValue() {
         self.iterateTests(
-            testFunction: GrammarParser.parseEntry,
+            testFunction: GrammarParser.parseEntryValue,
             validInputs: [
                 ("\"name\" \"value\"", "", .init(name: "name", value: .init(rawValue: "value")), #line),
                 ("\"name\" NIL", "", .init(name: "name", value: .init(rawValue: nil)), #line),
+            ],
+            parserErrorInputs: [
+                
+            ],
+            incompleteMessageInputs: [
+                
+            ]
+        )
+    }
+}
+
+// MARK: - parseEntryValues
+
+extension ParserUnitTests {
+    func testParseEntryValues() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseEntryValues,
+            validInputs: [
+                (
+                    "(\"name\" \"value\")",
+                    "",
+                    [.init(name: "name", value: .init(rawValue: "value"))],
+                    #line
+                ),
+                (
+                    "(\"name1\" \"value1\" \"name2\" \"value2\")",
+                    "",
+                    [.init(name: "name1", value: .init(rawValue: "value1")), .init(name: "name2", value: .init(rawValue: "value2"))],
+                    #line
+                ),
             ],
             parserErrorInputs: [
                 
@@ -1478,9 +1508,29 @@ extension ParserUnitTests {
         self.iterateTests(
             testFunction: GrammarParser.parseEntries,
             validInputs: [
-                ("\"name\" \"value\"", "", [.init(name: "name", value: .init(rawValue: "value"))], #line),
-                ("(\"name\" \"value\")", "", [.init(name: "name", value: .init(rawValue: "value"))], #line),
-                ("(\"name1\" \"value1\" \"name2\" \"value2\")", "", [.init(name: "name1", value: .init(rawValue: "value1")), .init(name: "name2", value: .init(rawValue: "value2"))], #line),
+                ("\"name\"", "", ["name"], #line),
+                ("(\"name\")", "", ["name"], #line),
+                ("(\"name1\" \"name2\")", "", ["name1", "name2"], #line),
+            ],
+            parserErrorInputs: [
+                
+            ],
+            incompleteMessageInputs: [
+                
+            ]
+        )
+    }
+}
+
+// MARK: - parseEntryList
+
+extension ParserUnitTests {
+    func testParseEntryList() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseEntryList,
+            validInputs: [
+                ("\"name\"", "\r", ["name"], #line),
+                ("\"name1\" \"name2\"", "\r", ["name1", "name2"], #line),
             ],
             parserErrorInputs: [
                 

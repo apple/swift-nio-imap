@@ -22,14 +22,14 @@ class Entry_Tests: EncodeTestClass {}
 
 extension Entry_Tests {
     func testEncode() {
-        let inputs: [(Entry, String, UInt)] = [
+        let inputs: [(EntryValue, String, UInt)] = [
             (.init(name: "name", value: .init(rawValue: "value")), "\"name\" ~{5}\r\nvalue", #line),
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeEntry($0) })
     }
     
-    func testEncode_array() {
-        let inputs: [([Entry], String, UInt)] = [
+    func testEncode_entryValues() {
+        let inputs: [([EntryValue], String, UInt)] = [
             (
                 [.init(name: "name", value: .init(rawValue: "value"))],
                 "(\"name\" ~{5}\r\nvalue)",
@@ -41,6 +41,38 @@ extension Entry_Tests {
                 #line
             ),
         ]
+        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeEntryValues($0) })
+    }
+    
+    func testEncode_entries() {
+        let inputs: [([ByteBuffer], String, UInt)] = [
+            (
+                ["name"],
+                "(\"name\")",
+                #line
+            ),
+            (
+                ["name1", "name2"],
+                "(\"name1\" \"name2\")",
+                #line
+            ),
+        ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeEntries($0) })
+    }
+    
+    func testEncode_entryList() {
+        let inputs: [([ByteBuffer], String, UInt)] = [
+            (
+                ["name"],
+                "\"name\"",
+                #line
+            ),
+            (
+                ["name1", "name2"],
+                "\"name1\" \"name2\"",
+                #line
+            ),
+        ]
+        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeEntryList($0) })
     }
 }
