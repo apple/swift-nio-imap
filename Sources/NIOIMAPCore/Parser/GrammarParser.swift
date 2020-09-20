@@ -3455,7 +3455,7 @@ extension GrammarParser {
             try ParserLibrary.parseFixedString("COUNT ", buffer: &buffer, tracker: tracker)
             return .count(try self.parseNumber(buffer: &buffer, tracker: tracker))
         }
-        
+
         func parseSearchReturnData_modSeq(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SearchReturnData {
             try ParserLibrary.parseFixedString("MODSEQ ", buffer: &buffer, tracker: tracker)
             return .modSequence(try self.parseModifierSequenceValue(buffer: &buffer, tracker: tracker))
