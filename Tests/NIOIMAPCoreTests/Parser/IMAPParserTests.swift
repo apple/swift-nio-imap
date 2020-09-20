@@ -1151,6 +1151,7 @@ extension ParserUnitTests {
                 ("NAMESPACE", " ", .namespace, #line),
                 ("GETMETADATA INBOX a", " ", .getMetadata(options: [], mailbox: .inbox, entries: ["a"]), #line),
                 ("GETMETADATA (MAXSIZE 123) INBOX (a b)", " ", .getMetadata(options: [.maxSize(123)], mailbox: .inbox, entries: ["a", "b"]), #line),
+                ("SETMETADATA INBOX (a NIL)", " ", .setMetadata(mailbox: .inbox, entries: [.init(name: "a", value: .init(rawValue: nil))]), #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
@@ -2546,6 +2547,7 @@ extension ParserUnitTests {
                 ("2 EXPUNGE", "\r", .messageData(.expunge(2)), #line),
                 ("ENABLED ENABLE", "\r", .enableData([.enable]), #line),
                 ("ID (\"key\" NIL)", "\r", .id([.init(key: "key", value: nil)]), #line),
+                ("METADATA INBOX a", "\r", .metadata(.list(list: ["a"], mailbox: .inbox)), #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []

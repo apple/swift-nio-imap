@@ -712,6 +712,14 @@ extension GrammarParser {
             return .getMetadata(options: options, mailbox: mailbox, entries: entries)
         }
         
+        func parseCommandAuth_setMetadata(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Command {
+            try ParserLibrary.parseFixedString("SETMETADATA ", buffer: &buffer, tracker: tracker)
+            let mailbox = try self.parseMailbox(buffer: &buffer, tracker: tracker)
+            try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
+            let list = try self.parseEntryValues(buffer: &buffer, tracker: tracker)
+            return .setMetadata(mailbox: mailbox, entries: list)
+        }
+        
         return try ParserLibrary.parseOneOf([
             self.parseCreate,
             self.parseDelete,
@@ -726,6 +734,7 @@ extension GrammarParser {
             self.parseIdleStart,
             self.parseNamespaceCommand,
             parseCommandAuth_getMetadata,
+            parseCommandAuth_setMetadata
         ], buffer: &buffer, tracker: tracker)
     }
 
@@ -2991,6 +3000,10 @@ extension GrammarParser {
         func parseResponsePayload_enableData(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ResponsePayload {
             .enableData(try self.parseEnableData(buffer: &buffer, tracker: tracker))
         }
+        
+        func parseResponsePayload_metadata(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ResponsePayload {
+            .metadata(try self.parseMetadataResponse(buffer: &buffer, tracker: tracker))
+        }
 
         return try ParserLibrary.parseOneOf([
             parseResponsePayload_conditionalState,
@@ -3002,6 +3015,7 @@ extension GrammarParser {
             parseResponsePayload_enableData,
             parseResponsePayload_quota,
             parseResponsePayload_quotaRoot,
+            parseResponsePayload_metadata
         ], buffer: &buffer, tracker: tracker)
     }
 

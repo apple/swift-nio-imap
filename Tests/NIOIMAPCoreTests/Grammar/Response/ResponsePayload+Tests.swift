@@ -36,13 +36,8 @@ extension ResponsePayload_Tests {
                 "QUOTA \"Root\" (STORAGE 10 512)",
                 #line
             ),
+            (.metadata(.list(list: ["a"], mailbox: .inbox)), "METADATA \"INBOX\" \"a\"", #line)
         ]
-
-        for (test, expectedString, line) in inputs {
-            self.testBuffer.clear()
-            let size = self.testBuffer.writeResponsePayload(test)
-            XCTAssertEqual(size, expectedString.utf8.count, line: line)
-            XCTAssertEqual(self.testBufferString, expectedString, line: line)
-        }
+        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeResponsePayload($0) })
     }
 }

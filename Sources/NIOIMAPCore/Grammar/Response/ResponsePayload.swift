@@ -25,6 +25,7 @@ public enum ResponsePayload: Equatable {
     case id([IDParameter])
     case quotaRoot(MailboxName, QuotaRoot)
     case quota(QuotaRoot, [QuotaResource])
+    case metadata(MetadataResponse)
 }
 
 // MARK: - Encoding
@@ -52,6 +53,8 @@ extension EncodeBuffer {
             return self.writeQuotaRootResponse(mailbox: mailbox, quotaRoot: quotaRoot)
         case .quota(let quotaRoot, let resources):
             return self.writeQuotaResponse(quotaRoot: quotaRoot, resources: resources)
+        case .metadata(let response):
+            return self.writeMetadataResponse(response)
         }
     }
 }
