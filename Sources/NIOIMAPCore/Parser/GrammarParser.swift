@@ -2314,6 +2314,30 @@ extension GrammarParser {
         })
     }
     
+    static func parseMetadataResponse(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MetadataResponse {
+        
+        func parseMetadataResponse_values(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MetadataResponse {
+            try ParserLibrary.parseFixedString("METADATA ", buffer: &buffer, tracker: tracker)
+            let mailbox = try self.parseMailbox(buffer: &buffer, tracker: tracker)
+            try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
+            let values = try self.parseEntryValues(buffer: &buffer, tracker: tracker)
+            return .values(values: values, mailbox: mailbox)
+        }
+        
+        func parseMetadataResponse_list(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MetadataResponse {
+            try ParserLibrary.parseFixedString("METADATA ", buffer: &buffer, tracker: tracker)
+            let mailbox = try self.parseMailbox(buffer: &buffer, tracker: tracker)
+            try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
+            let list = try self.parseEntryList(buffer: &buffer, tracker: tracker)
+            return .list(list: list, mailbox: mailbox)
+        }
+        
+        return try ParserLibrary.parseOneOf([
+            parseMetadataResponse_values,
+            parseMetadataResponse_list
+        ], buffer: &buffer, tracker: tracker)
+    }
+    
     static func parseMetadataValue(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MetadataValue {
         
         func parseMetadataValue_nstring(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MetadataValue {

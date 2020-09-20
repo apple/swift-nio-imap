@@ -498,6 +498,23 @@ extension ParserUnitTests {
     }
 }
 
+// MARK: - parseMetadatResponse
+
+extension ParserUnitTests {
+    func testParseMetadataResponse() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseMetadataResponse,
+            validInputs: [
+                ("METADATA INBOX \"a\"", "\r", .list(list: ["a"], mailbox: .inbox), #line),
+                ("METADATA INBOX \"a\" \"b\" \"c\"", "\r", .list(list: ["a", "b", "c"], mailbox: .inbox), #line),
+                ("METADATA INBOX (\"a\" NIL)", "\r", .values(values: [.init(name: "a", value: .init(rawValue: nil))], mailbox: .inbox), #line)
+            ],
+            parserErrorInputs: [],
+            incompleteMessageInputs: []
+        )
+    }
+}
+
 // MARK: - parseMetadataValue
 
 extension ParserUnitTests {
