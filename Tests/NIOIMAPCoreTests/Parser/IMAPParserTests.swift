@@ -2636,6 +2636,7 @@ extension ParserUnitTests {
                 ("ALL 3", "\r", .all([3]), #line),
                 ("ALL 3,4,5", "\r", .all([3, 4, 5]), #line),
                 ("COUNT 4", "\r", .count(4), #line),
+                ("MODSEQ 4", "\r", .modSequence(4), #line),
                 ("modifier 5", "\r", .dataExtension(.init(modifier: "modifier", returnValue: .sequence([5]))), #line),
             ],
             parserErrorInputs: [],
