@@ -16,23 +16,20 @@ import struct NIO.ByteBuffer
 
 /// RFC 5464
 public struct MetadataValue: RawRepresentable, Equatable {
-    
     public var rawValue: ByteBuffer?
-    
+
     public init(rawValue: ByteBuffer?) {
         self.rawValue = rawValue
     }
-    
 }
 
 // MARK: - Encoding
+
 extension EncodeBuffer {
-    
     @discardableResult mutating func writeMetadataValue(_ value: MetadataValue) -> Int {
         guard let bytes = value.rawValue else {
             return self.writeNil()
         }
         return self.writeLiteral8(bytes.readableBytesView)
     }
-    
 }

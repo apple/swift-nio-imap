@@ -29,7 +29,7 @@ extension MetadataOption_Tests {
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeMetadataOption($0) })
     }
-    
+
     func testEncode_array() {
         let inputs: [([MetadataOption], String, UInt)] = [
             ([.maxSize(123)], "(MAXSIZE 123)", #line),

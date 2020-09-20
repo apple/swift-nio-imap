@@ -36,7 +36,7 @@ extension ResponsePayload_Tests {
                 "QUOTA \"Root\" (STORAGE 10 512)",
                 #line
             ),
-            (.metadata(.list(list: ["a"], mailbox: .inbox)), "METADATA \"INBOX\" \"a\"", #line)
+            (.metadata(.list(list: ["a"], mailbox: .inbox)), "METADATA \"INBOX\" \"a\"", #line),
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeResponsePayload($0) })
     }

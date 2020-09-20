@@ -18,7 +18,7 @@ import struct NIO.ByteBuffer
 public struct EntryValue: Equatable {
     public var name: ByteBuffer
     public var value: MetadataValue
-    
+
     public init(name: ByteBuffer, value: MetadataValue) {
         self.name = name
         self.value = value
@@ -26,29 +26,27 @@ public struct EntryValue: Equatable {
 }
 
 extension EncodeBuffer {
-    
     @discardableResult mutating func writeEntry(_ entry: EntryValue) -> Int {
         self.writeIMAPString(entry.name) +
             self.writeSpace() +
             self.writeMetadataValue(entry.value)
     }
-    
+
     @discardableResult mutating func writeEntryValues(_ array: [EntryValue]) -> Int {
         self.writeArray(array) { element, buffer in
             buffer.writeEntry(element)
         }
     }
-    
+
     @discardableResult mutating func writeEntries(_ array: [ByteBuffer]) -> Int {
         self.writeArray(array) { element, buffer in
             buffer.writeIMAPString(element)
         }
     }
-    
+
     @discardableResult mutating func writeEntryList(_ array: [ByteBuffer]) -> Int {
         self.writeArray(array, parenthesis: false) { element, buffer in
             buffer.writeIMAPString(element)
         }
     }
-    
 }

@@ -698,7 +698,6 @@ extension GrammarParser {
     //                   rename / select / status / subscribe / unsubscribe /
     //                   idle
     static func parseCommandAuth(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Command {
-        
         func parseCommandAuth_getMetadata(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Command {
             try ParserLibrary.parseFixedString("GETMETADATA", buffer: &buffer, tracker: tracker)
             let options = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> [MetadataOption] in
@@ -711,7 +710,7 @@ extension GrammarParser {
             let entries = try self.parseEntries(buffer: &buffer, tracker: tracker)
             return .getMetadata(options: options, mailbox: mailbox, entries: entries)
         }
-        
+
         func parseCommandAuth_setMetadata(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Command {
             try ParserLibrary.parseFixedString("SETMETADATA ", buffer: &buffer, tracker: tracker)
             let mailbox = try self.parseMailbox(buffer: &buffer, tracker: tracker)
@@ -719,7 +718,7 @@ extension GrammarParser {
             let list = try self.parseEntryValues(buffer: &buffer, tracker: tracker)
             return .setMetadata(mailbox: mailbox, entries: list)
         }
-        
+
         return try ParserLibrary.parseOneOf([
             self.parseCreate,
             self.parseDelete,
@@ -734,7 +733,7 @@ extension GrammarParser {
             self.parseIdleStart,
             self.parseNamespaceCommand,
             parseCommandAuth_getMetadata,
-            parseCommandAuth_setMetadata
+            parseCommandAuth_setMetadata,
         ], buffer: &buffer, tracker: tracker)
     }
 
@@ -1110,18 +1109,18 @@ extension GrammarParser {
             }
         }
     }
-    
+
     static func parseEntryValue(buffer: inout ByteBuffer, tracker: StackTracker) throws -> EntryValue {
-        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker, { buffer, tracker -> EntryValue in
+        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> EntryValue in
             let name = try self.parseAString(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
             let value = try self.parseMetadataValue(buffer: &buffer, tracker: tracker)
             return .init(name: name, value: value)
-        })
+        }
     }
-    
+
     static func parseEntryValues(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [EntryValue] {
-        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker, { buffer, tracker -> [EntryValue] in
+        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> [EntryValue] in
             try ParserLibrary.parseFixedString("(", buffer: &buffer, tracker: tracker)
             var array = [try self.parseEntryValue(buffer: &buffer, tracker: tracker)]
             try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker, parser: { buffer, tracker in
@@ -1130,15 +1129,14 @@ extension GrammarParser {
             })
             try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)
             return array
-        })
-    }
-    
-    static func parseEntries(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [ByteBuffer] {
-        
-        func parseEntries_singleUnbracketed(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [ByteBuffer] {
-            return [try self.parseAString(buffer: &buffer, tracker: tracker)]
         }
-        
+    }
+
+    static func parseEntries(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [ByteBuffer] {
+        func parseEntries_singleUnbracketed(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [ByteBuffer] {
+            [try self.parseAString(buffer: &buffer, tracker: tracker)]
+        }
+
         func parseEntries_bracketed(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [ByteBuffer] {
             try ParserLibrary.parseFixedString("(", buffer: &buffer, tracker: tracker)
             var array = [try self.parseAString(buffer: &buffer, tracker: tracker)]
@@ -1149,22 +1147,22 @@ extension GrammarParser {
             try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)
             return array
         }
-        
+
         return try ParserLibrary.parseOneOf([
             parseEntries_singleUnbracketed,
-            parseEntries_bracketed
+            parseEntries_bracketed,
         ], buffer: &buffer, tracker: tracker)
     }
-    
+
     static func parseEntryList(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [ByteBuffer] {
-        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker, { buffer, tracker in
+        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             var array = [try self.parseAString(buffer: &buffer, tracker: tracker)]
             try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker, parser: { buffer, tracker in
                 try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
                 return try self.parseAString(buffer: &buffer, tracker: tracker)
             })
             return array
-        })
+        }
     }
 
     // envelope        = "(" env-date SP env-subject SP env-from SP
@@ -1929,7 +1927,7 @@ extension GrammarParser {
             }
         }
     }
-    
+
     // literal8         = "~{" number ["+"] "}" CRLF *CHAR8
     static func parseLiteral8(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ByteBuffer {
         try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> ByteBuffer in
@@ -2287,31 +2285,30 @@ extension GrammarParser {
             parseMessageData_vanishedEarlier,
         ], buffer: &buffer, tracker: tracker)
     }
-    
+
     static func parseMetadataOption(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MetadataOption {
-        
         func parseMetadataOption_maxSize(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MetadataOption {
             try ParserLibrary.parseFixedString("MAXSIZE ", buffer: &buffer, tracker: tracker)
             return .maxSize(try self.parseNumber(buffer: &buffer, tracker: tracker))
         }
-        
+
         func parseMetadataOption_scope(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MetadataOption {
-            return .scope(try self.parseScopeOption(buffer: &buffer, tracker: tracker))
+            .scope(try self.parseScopeOption(buffer: &buffer, tracker: tracker))
         }
-        
+
         func parseMetadataOption_param(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MetadataOption {
-            return .other(try self.parseParameter(buffer: &buffer, tracker: tracker))
+            .other(try self.parseParameter(buffer: &buffer, tracker: tracker))
         }
-        
+
         return try ParserLibrary.parseOneOf([
             parseMetadataOption_maxSize,
             parseMetadataOption_scope,
             parseMetadataOption_param,
         ], buffer: &buffer, tracker: tracker)
     }
-    
+
     static func parseMetadataOptions(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [MetadataOption] {
-        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker, { buffer, tracker in
+        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             try ParserLibrary.parseFixedString("(", buffer: &buffer, tracker: tracker)
             var array = [try self.parseMetadataOption(buffer: &buffer, tracker: tracker)]
             try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker, parser: { buffer, tracker in
@@ -2320,11 +2317,10 @@ extension GrammarParser {
             })
             try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)
             return array
-        })
+        }
     }
-    
+
     static func parseMetadataResponse(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MetadataResponse {
-        
         func parseMetadataResponse_values(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MetadataResponse {
             try ParserLibrary.parseFixedString("METADATA ", buffer: &buffer, tracker: tracker)
             let mailbox = try self.parseMailbox(buffer: &buffer, tracker: tracker)
@@ -2332,7 +2328,7 @@ extension GrammarParser {
             let values = try self.parseEntryValues(buffer: &buffer, tracker: tracker)
             return .values(values: values, mailbox: mailbox)
         }
-        
+
         func parseMetadataResponse_list(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MetadataResponse {
             try ParserLibrary.parseFixedString("METADATA ", buffer: &buffer, tracker: tracker)
             let mailbox = try self.parseMailbox(buffer: &buffer, tracker: tracker)
@@ -2340,26 +2336,25 @@ extension GrammarParser {
             let list = try self.parseEntryList(buffer: &buffer, tracker: tracker)
             return .list(list: list, mailbox: mailbox)
         }
-        
+
         return try ParserLibrary.parseOneOf([
             parseMetadataResponse_values,
-            parseMetadataResponse_list
+            parseMetadataResponse_list,
         ], buffer: &buffer, tracker: tracker)
     }
-    
+
     static func parseMetadataValue(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MetadataValue {
-        
         func parseMetadataValue_nstring(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MetadataValue {
-            return .init(rawValue: try self.parseNString(buffer: &buffer, tracker: tracker))
+            .init(rawValue: try self.parseNString(buffer: &buffer, tracker: tracker))
         }
-        
+
         func parseMetadataValue_literal8(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MetadataValue {
-            return .init(rawValue: try self.parseLiteral8(buffer: &buffer, tracker: tracker))
+            .init(rawValue: try self.parseLiteral8(buffer: &buffer, tracker: tracker))
         }
-        
+
         return try ParserLibrary.parseOneOf([
             parseMetadataValue_nstring,
-            parseMetadataValue_literal8
+            parseMetadataValue_literal8,
         ], buffer: &buffer, tracker: tracker)
     }
 
@@ -3000,7 +2995,7 @@ extension GrammarParser {
         func parseResponsePayload_enableData(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ResponsePayload {
             .enableData(try self.parseEnableData(buffer: &buffer, tracker: tracker))
         }
-        
+
         func parseResponsePayload_metadata(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ResponsePayload {
             .metadata(try self.parseMetadataResponse(buffer: &buffer, tracker: tracker))
         }
@@ -3015,7 +3010,7 @@ extension GrammarParser {
             parseResponsePayload_enableData,
             parseResponsePayload_quota,
             parseResponsePayload_quotaRoot,
-            parseResponsePayload_metadata
+            parseResponsePayload_metadata,
         ], buffer: &buffer, tracker: tracker)
     }
 
@@ -3170,24 +3165,24 @@ extension GrammarParser {
             try ParserLibrary.parseFixedString("NOTSAVED", buffer: &buffer, tracker: tracker)
             return .notSaved
         }
-        
+
         func parseResponseTextCode_metadataLongEntries(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ResponseTextCode {
             try ParserLibrary.parseFixedString("METADATA LONGENTRIES ", buffer: &buffer, tracker: tracker)
             let num = try self.parseNumber(buffer: &buffer, tracker: tracker)
             return .metadataLongEntries(num)
         }
-        
+
         func parseResponseTextCode_metadataMaxSize(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ResponseTextCode {
             try ParserLibrary.parseFixedString("METADATA MAXSIZE ", buffer: &buffer, tracker: tracker)
             let num = try self.parseNumber(buffer: &buffer, tracker: tracker)
             return .metadataMaxsize(num)
         }
-        
+
         func parseResponseTextCode_metadataTooMany(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ResponseTextCode {
             try ParserLibrary.parseFixedString("METADATA TOOMANY", buffer: &buffer, tracker: tracker)
             return .metadataTooMany
         }
-        
+
         func parseResponseTextCode_metadataNoPrivate(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ResponseTextCode {
             try ParserLibrary.parseFixedString("METADATA NOPRIVATE", buffer: &buffer, tracker: tracker)
             return .metadataNoPrivate
@@ -3250,32 +3245,31 @@ extension GrammarParser {
             parseReturnOption_optionExtension,
         ], buffer: &buffer, tracker: tracker)
     }
-    
+
     static func parseScopeOption(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ScopeOption {
-        
         func parseScopeOption_zero(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ScopeOption {
             try ParserLibrary.parseFixedString("0", buffer: &buffer, tracker: tracker)
             return .zero
         }
-        
+
         func parseScopeOption_one(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ScopeOption {
             try ParserLibrary.parseFixedString("1", buffer: &buffer, tracker: tracker)
             return .one
         }
-        
+
         func parseScopeOption_infinity(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ScopeOption {
             try ParserLibrary.parseFixedString("infinity", buffer: &buffer, tracker: tracker)
             return .infinity
         }
-        
-        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker, { buffer, tracker in
+
+        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             try ParserLibrary.parseFixedString("DEPTH ", buffer: &buffer, tracker: tracker)
             return try ParserLibrary.parseOneOf([
                 parseScopeOption_zero,
                 parseScopeOption_one,
-                parseScopeOption_infinity
+                parseScopeOption_infinity,
             ], buffer: &buffer, tracker: tracker)
-        })
+        }
     }
 
     // search          = "SEARCH" [search-return-opts] SP search-program

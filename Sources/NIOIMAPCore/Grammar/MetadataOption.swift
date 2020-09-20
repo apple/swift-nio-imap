@@ -15,12 +15,12 @@
 public enum MetadataOption: Equatable {
     case maxSize(Int)
     case scope(ScopeOption)
-    case `other`(Parameter)
+    case other(Parameter)
 }
 
 // MARK: - Encoding
+
 extension EncodeBuffer {
-    
     @discardableResult mutating func writeMetadataOption(_ option: MetadataOption) -> Int {
         switch option {
         case .maxSize(let num):
@@ -31,11 +31,10 @@ extension EncodeBuffer {
             return self.writeParameter(param)
         }
     }
-    
+
     @discardableResult mutating func writeMetadataOptions(_ array: [MetadataOption]) -> Int {
         self.writeArray(array) { element, buffer in
             buffer.writeMetadataOption(element)
         }
     }
-    
 }

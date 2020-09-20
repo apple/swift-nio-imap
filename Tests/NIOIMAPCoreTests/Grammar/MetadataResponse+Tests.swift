@@ -29,7 +29,7 @@ extension MetadataResponse_Tests {
                 .values(values: [.init(name: "a", value: .init(rawValue: nil))], mailbox: .inbox),
                 "METADATA \"INBOX\" (\"a\" NIL)",
                 #line
-            )
+            ),
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeMetadataResponse($0) })
     }

@@ -507,7 +507,7 @@ extension ParserUnitTests {
             validInputs: [
                 ("METADATA INBOX \"a\"", "\r", .list(list: ["a"], mailbox: .inbox), #line),
                 ("METADATA INBOX \"a\" \"b\" \"c\"", "\r", .list(list: ["a", "b", "c"], mailbox: .inbox), #line),
-                ("METADATA INBOX (\"a\" NIL)", "\r", .values(values: [.init(name: "a", value: .init(rawValue: nil))], mailbox: .inbox), #line)
+                ("METADATA INBOX (\"a\" NIL)", "\r", .values(values: [.init(name: "a", value: .init(rawValue: nil))], mailbox: .inbox), #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
@@ -1515,11 +1515,9 @@ extension ParserUnitTests {
                 ("\"name\" NIL", "", .init(name: "name", value: .init(rawValue: nil)), #line),
             ],
             parserErrorInputs: [
-                
-            ],
+                ],
             incompleteMessageInputs: [
-                
-            ]
+                ]
         )
     }
 }
@@ -1545,11 +1543,9 @@ extension ParserUnitTests {
                 ),
             ],
             parserErrorInputs: [
-                
-            ],
+                ],
             incompleteMessageInputs: [
-                
-            ]
+                ]
         )
     }
 }
@@ -1566,11 +1562,9 @@ extension ParserUnitTests {
                 ("(\"name1\" \"name2\")", "", ["name1", "name2"], #line),
             ],
             parserErrorInputs: [
-                
-            ],
+                ],
             incompleteMessageInputs: [
-                
-            ]
+                ]
         )
     }
 }
@@ -1586,11 +1580,9 @@ extension ParserUnitTests {
                 ("\"name1\" \"name2\"", "\r", ["name1", "name2"], #line),
             ],
             parserErrorInputs: [
-                
-            ],
+                ],
             incompleteMessageInputs: [
-                
-            ]
+                ]
         )
     }
 }

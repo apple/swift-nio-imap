@@ -27,7 +27,7 @@ extension Entry_Tests {
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeEntry($0) })
     }
-    
+
     func testEncode_entryValues() {
         let inputs: [([EntryValue], String, UInt)] = [
             (
@@ -43,7 +43,7 @@ extension Entry_Tests {
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeEntryValues($0) })
     }
-    
+
     func testEncode_entries() {
         let inputs: [([ByteBuffer], String, UInt)] = [
             (
@@ -59,7 +59,7 @@ extension Entry_Tests {
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeEntries($0) })
     }
-    
+
     func testEncode_entryList() {
         let inputs: [([ByteBuffer], String, UInt)] = [
             (

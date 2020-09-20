@@ -56,7 +56,7 @@ public enum Command: Equatable {
     case getQuota(QuotaRoot)
     case getQuotaRoot(MailboxName)
     case setQuota(QuotaRoot, [QuotaLimit])
-    
+
     case getMetadata(options: [MetadataOption], mailbox: MailboxName, entries: [ByteBuffer])
     case setMetadata(mailbox: MailboxName, entries: [EntryValue])
 }
@@ -150,7 +150,7 @@ extension CommandEncodeBuffer {
             return self.writeCommandKind_setMetadata(mailbox: mailbox, entries: entries)
         }
     }
-    
+
     private mutating func writeCommandKind_getMetadata(options: [MetadataOption], mailbox: MailboxName, entries: [ByteBuffer]) -> Int {
         self.buffer.writeString("GETMETADATA") +
             self.buffer.writeIfArrayHasMinimumSize(array: options, callback: { array, buffer in
@@ -161,7 +161,7 @@ extension CommandEncodeBuffer {
             self.buffer.writeSpace() +
             self.buffer.writeEntries(entries)
     }
-    
+
     private mutating func writeCommandKind_setMetadata(mailbox: MailboxName, entries: [EntryValue]) -> Int {
         self.buffer.writeString("SETMETADATA ") +
             self.buffer.writeMailbox(mailbox) +
