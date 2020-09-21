@@ -700,11 +700,12 @@ extension GrammarParser {
     static func parseCommandAuth(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Command {
         func parseCommandAuth_getMetadata(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Command {
             try ParserLibrary.parseFixedString("GETMETADATA", buffer: &buffer, tracker: tracker)
-            let options = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> [MetadataOption] in
-                try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
-                return try self.parseMetadataOptions(buffer: &buffer, tracker: tracker)
-            }) ?? []
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
+            let options = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> [MetadataOption] in
+                let options = try self.parseMetadataOptions(buffer: &buffer, tracker: tracker)
+                try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
+                return options
+            }) ?? []
             let mailbox = try self.parseMailbox(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
             let entries = try self.parseEntries(buffer: &buffer, tracker: tracker)
