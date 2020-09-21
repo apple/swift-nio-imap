@@ -3456,6 +3456,11 @@ extension GrammarParser {
             return .count(try self.parseNumber(buffer: &buffer, tracker: tracker))
         }
 
+        func parseSearchReturnData_modSeq(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SearchReturnData {
+            try ParserLibrary.parseFixedString("MODSEQ ", buffer: &buffer, tracker: tracker)
+            return .modSequence(try self.parseModifierSequenceValue(buffer: &buffer, tracker: tracker))
+        }
+
         func parseSearchReturnData_dataExtension(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SearchReturnData {
             .dataExtension(try self.parseSearchReturnDataExtension(buffer: &buffer, tracker: tracker))
         }
@@ -3465,6 +3470,7 @@ extension GrammarParser {
             parseSearchReturnData_max,
             parseSearchReturnData_all,
             parseSearchReturnData_count,
+            parseSearchReturnData_modSeq,
             parseSearchReturnData_dataExtension,
         ], buffer: &buffer, tracker: tracker)
     }
