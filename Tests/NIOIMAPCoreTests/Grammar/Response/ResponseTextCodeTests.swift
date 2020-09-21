@@ -47,6 +47,10 @@ extension ResponseTextCodeTests {
             (.noModifierSequence, "NOMODSEQ", #line),
             (.modified([1]), "MODIFIED 1", #line),
             (.highestModifierSequence(1), "HIGHESTMODSEQ 1", #line),
+            (.metadataMaxsize(123), "METADATA MAXSIZE 123", #line),
+            (.metadataLongEntries(456), "METADATA LONGENTRIES 456", #line),
+            (.metadataTooMany, "METADATA TOOMANY", #line),
+            (.metadataNoPrivate, "METADATA NOPRIVATE", #line),
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeResponseTextCode($0) })
     }

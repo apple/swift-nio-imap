@@ -174,6 +174,7 @@ extension Capability {
     public static let loginDisabled = Self(unchecked: "LOGINDISABLED")
     public static let loginReferrals = Self(unchecked: "LOGIN-REFERRALS")
     public static let metadata = Self(unchecked: "METADATA")
+    public static let metadataServer = Self(unchecked: "METADATA-SERVER")
     public static let move = Self(unchecked: "MOVE")
     public static let multiSearch = Self(unchecked: "MULTISEARCH")
     public static let namespace = Self(unchecked: "NAMESPACE")

@@ -465,6 +465,74 @@ extension ParserUnitTests {
     }
 }
 
+// MARK: - parseMetadataOption
+
+extension ParserUnitTests {
+    func testParseMetadataOption() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseMetadataOption,
+            validInputs: [
+                ("MAXSIZE 123", "\r", .maxSize(123), #line),
+                ("DEPTH 1", "\r", .scope(.one), #line),
+                ("param", "\r", .other(.init(name: "param")), #line),
+            ],
+            parserErrorInputs: [],
+            incompleteMessageInputs: []
+        )
+    }
+}
+
+// MARK: - parseMetadataOptions
+
+extension ParserUnitTests {
+    func testParseMetadataOptions() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseMetadataOptions,
+            validInputs: [
+                ("(MAXSIZE 123)", "\r", [.maxSize(123)], #line),
+                ("(DEPTH 1 MAXSIZE 123)", "\r", [.scope(.one), .maxSize(123)], #line),
+            ],
+            parserErrorInputs: [],
+            incompleteMessageInputs: []
+        )
+    }
+}
+
+// MARK: - parseMetadatResponse
+
+extension ParserUnitTests {
+    func testParseMetadataResponse() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseMetadataResponse,
+            validInputs: [
+                ("METADATA INBOX \"a\"", "\r", .list(list: ["a"], mailbox: .inbox), #line),
+                ("METADATA INBOX \"a\" \"b\" \"c\"", "\r", .list(list: ["a", "b", "c"], mailbox: .inbox), #line),
+                ("METADATA INBOX (\"a\" NIL)", "\r", .values(values: [.init(name: "a", value: .init(rawValue: nil))], mailbox: .inbox), #line),
+            ],
+            parserErrorInputs: [],
+            incompleteMessageInputs: []
+        )
+    }
+}
+
+// MARK: - parseMetadataValue
+
+extension ParserUnitTests {
+    func testParseMetadataValue() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseMetadataValue,
+            validInputs: [
+                ("NIL", "\r", .init(rawValue: nil), #line),
+                ("\"a\"", "\r", .init(rawValue: "a"), #line),
+                ("{1}\r\na", "\r", .init(rawValue: "a"), #line),
+                ("~{1}\r\na", "\r", .init(rawValue: "a"), #line),
+            ],
+            parserErrorInputs: [],
+            incompleteMessageInputs: []
+        )
+    }
+}
+
 // MARK: - parseAppendOptions
 
 extension ParserUnitTests {
@@ -1081,6 +1149,9 @@ extension ParserUnitTests {
                 ("LSUB inbox someList", " ", .lsub(reference: .inbox, pattern: "someList"), #line),
                 ("CREATE inbox (something)", " ", .create(.inbox, [.labelled(.init(name: "something", value: nil))]), #line),
                 ("NAMESPACE", " ", .namespace, #line),
+                ("GETMETADATA INBOX a", " ", .getMetadata(options: [], mailbox: .inbox, entries: ["a"]), #line),
+                ("GETMETADATA (MAXSIZE 123) INBOX (a b)", " ", .getMetadata(options: [.maxSize(123)], mailbox: .inbox, entries: ["a", "b"]), #line),
+                ("SETMETADATA INBOX (a NIL)", " ", .setMetadata(mailbox: .inbox, entries: [.init(name: "a", value: .init(rawValue: nil))]), #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
@@ -1429,6 +1500,89 @@ extension ParserUnitTests {
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
+        )
+    }
+}
+
+// MARK: - parseEntryValue
+
+extension ParserUnitTests {
+    func testParseEntryValue() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseEntryValue,
+            validInputs: [
+                ("\"name\" \"value\"", "", .init(name: "name", value: .init(rawValue: "value")), #line),
+                ("\"name\" NIL", "", .init(name: "name", value: .init(rawValue: nil)), #line),
+            ],
+            parserErrorInputs: [
+                ],
+            incompleteMessageInputs: [
+                ]
+        )
+    }
+}
+
+// MARK: - parseEntryValues
+
+extension ParserUnitTests {
+    func testParseEntryValues() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseEntryValues,
+            validInputs: [
+                (
+                    "(\"name\" \"value\")",
+                    "",
+                    [.init(name: "name", value: .init(rawValue: "value"))],
+                    #line
+                ),
+                (
+                    "(\"name1\" \"value1\" \"name2\" \"value2\")",
+                    "",
+                    [.init(name: "name1", value: .init(rawValue: "value1")), .init(name: "name2", value: .init(rawValue: "value2"))],
+                    #line
+                ),
+            ],
+            parserErrorInputs: [
+                ],
+            incompleteMessageInputs: [
+                ]
+        )
+    }
+}
+
+// MARK: - parseEntries
+
+extension ParserUnitTests {
+    func testParseEntries() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseEntries,
+            validInputs: [
+                ("\"name\"", "", ["name"], #line),
+                ("(\"name\")", "", ["name"], #line),
+                ("(\"name1\" \"name2\")", "", ["name1", "name2"], #line),
+            ],
+            parserErrorInputs: [
+                ],
+            incompleteMessageInputs: [
+                ]
+        )
+    }
+}
+
+// MARK: - parseEntryList
+
+extension ParserUnitTests {
+    func testParseEntryList() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseEntryList,
+            validInputs: [
+                ("\"name\"", "\r", ["name"], #line),
+                ("\"name1\" \"name2\"", "\r", ["name1", "name2"], #line),
+            ],
+            parserErrorInputs: [
+                ],
+            incompleteMessageInputs: [
+                ]
         )
     }
 }
@@ -2394,6 +2548,7 @@ extension ParserUnitTests {
                 ("2 EXPUNGE", "\r", .messageData(.expunge(2)), #line),
                 ("ENABLED ENABLE", "\r", .enableData([.enable]), #line),
                 ("ID (\"key\" NIL)", "\r", .id([.init(key: "key", value: nil)]), #line),
+                ("METADATA INBOX a", "\r", .metadata(.list(list: ["a"], mailbox: .inbox)), #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
@@ -2429,6 +2584,27 @@ extension ParserUnitTests {
                 ("some", "\r", .other("some", nil), #line),
                 ("some thing", "\r", .other("some", "thing"), #line),
                 ("NOTSAVED", "\r", .notSaved, #line),
+                ("METADATA MAXSIZE 123", "\r", .metadataMaxsize(123), #line),
+                ("METADATA LONGENTRIES 456", "\r", .metadataLongEntries(456), #line),
+                ("METADATA TOOMANY", "\r", .metadataTooMany, #line),
+                ("METADATA NOPRIVATE", "\r", .metadataNoPrivate, #line),
+            ],
+            parserErrorInputs: [],
+            incompleteMessageInputs: []
+        )
+    }
+}
+
+// MARK: - search parseScopeOption
+
+extension ParserUnitTests {
+    func testParseScopeOption() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseScopeOption,
+            validInputs: [
+                ("DEPTH 0", "\r", .zero, #line),
+                ("DEPTH 1", "\r", .one, #line),
+                ("DEPTH infinity", "\r", .infinity, #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
