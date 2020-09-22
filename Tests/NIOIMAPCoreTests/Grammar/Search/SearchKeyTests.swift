@@ -63,7 +63,7 @@ extension SearchKeyTests {
             (.and([]), "()", #line),
             (.and([.messageSizeSmaller(444), .messageSizeLarger(333)]), "SMALLER 444 LARGER 333", #line),
             (.filter("name"), "FILTER name", #line),
-            (.modifierSequence(.init(extensions: [], sequenceValue: 5)), "MODSEQ 5", #line),
+            (.modificationSequence(.init(extensions: [], sequenceValue: 5)), "MODSEQ 5", #line),
 
             (.and([.messageSizeSmaller(444)]), "SMALLER 444", #line),
             (.not(.and([.messageSizeSmaller(444)])), "NOT SMALLER 444", #line),

@@ -18,7 +18,7 @@ import struct NIO.ByteBuffer
 public enum ListSelectOption: Equatable {
     case base(ListSelectBaseOption)
     case independent(ListSelectIndependentOption)
-    case mod(ListSelectModOption)
+    case modified(ListSelectModifiedOption)
 }
 
 public enum ListSelectionOptionsData: Equatable {
@@ -38,8 +38,8 @@ extension EncodeBuffer {
             return self.writeListSelectBaseOption(option)
         case .independent(let option):
             return self.writeListSelectIndependentOption(option)
-        case .mod(let option):
-            return self.writeListSelectModOption(option)
+        case .modified(let option):
+            return self.writeListSelectModifiedOption(option)
         }
     }
 

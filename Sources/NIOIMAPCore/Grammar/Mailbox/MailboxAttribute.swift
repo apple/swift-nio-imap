@@ -73,7 +73,7 @@ public struct MailboxStatus: Equatable {
     /// `HIGHESTMODSEQ`
     /// RFC 7162
     /// The highest mod-sequence value of all messages in the mailbox.
-    public var highestModifierSequence: ModifierSequenceValue?
+    public var highestModificationSequence: ModificationSequenceValue?
 
     /// Creates a new `MailboxStatus`. All parameters default to `nil`.
     /// - parameter messageCount: RFC 3501: `MESSAGES` - The number of messages in the mailbox.
@@ -82,7 +82,7 @@ public struct MailboxStatus: Equatable {
     /// - parameter uidValidity: RFC 3501: `UIDVALIDITY` - The unique identifier validity value of the mailbox.
     /// - parameter unseenCount: RFC 3501: `UNSEEN` - The number of messages which do not have the `\Seen` flag set.
     /// - parameter size: RFC 8438: `SIZE` - The number of messages which do not have the `\Seen` flag set.
-    /// - parameter modSequence: RFC 7162: `SIZE` - The total size of the mailbox in octets.
+    /// - parameter highestModificationSequence: RFC 7162: `SIZE` - The total size of the mailbox in octets.
     public init(
         messageCount: Int? = nil,
         recentCount: Int? = nil,
@@ -90,7 +90,7 @@ public struct MailboxStatus: Equatable {
         uidValidity: Int? = nil,
         unseenCount: Int? = nil,
         size: Int? = nil,
-        modSequence: ModifierSequenceValue? = nil
+        highestModificationSequence: ModificationSequenceValue? = nil
     ) {
         self.messageCount = messageCount
         self.recentCount = recentCount
@@ -98,7 +98,7 @@ public struct MailboxStatus: Equatable {
         self.uidValidity = uidValidity
         self.unseenCount = unseenCount
         self.size = size
-        self.highestModifierSequence = modSequence
+        self.highestModificationSequence = highestModificationSequence
     }
 }
 
@@ -136,7 +136,7 @@ extension EncodeBuffer {
         append(\.uidValidity, "UIDVALIDITY")
         append(\.unseenCount, "UNSEEN")
         append(\.size, "SIZE")
-        append(\.highestModifierSequence, "HIGHESTMODSEQ")
+        append(\.highestModificationSequence, "HIGHESTMODSEQ")
 
         return self.writeArray(array, parenthesis: false) { (element, self) -> Int in
             self.writeString("\(element.0) \(element.1)")

@@ -36,9 +36,9 @@ public enum ResponseTextCode: Equatable {
     case other(String, String?)
     case notSaved // RFC 5182
     case closed
-    case noModifierSequence
-    case modified(SequenceSet)
-    case highestModifierSequence(ModifierSequenceValue)
+    case noModificationSequence
+    case modificationSequence(SequenceSet)
+    case highestModificationSequence(ModificationSequenceValue)
     case metadataLongEntries(Int)
     case metadataMaxsize(Int)
     case metadataTooMany
@@ -90,12 +90,12 @@ extension EncodeBuffer {
             return self.writeString("NOTSAVED")
         case .closed:
             return self.writeString("CLOSED")
-        case .noModifierSequence:
+        case .noModificationSequence:
             return self.writeString("NOMODSEQ")
-        case .modified(let set):
+        case .modificationSequence(let set):
             return self.writeString("MODIFIED ") + self.writeSequenceSet(set)
-        case .highestModifierSequence(let val):
-            return self.writeString("HIGHESTMODSEQ ") + self.writeModifierSequenceValue(val)
+        case .highestModificationSequence(let val):
+            return self.writeString("HIGHESTMODSEQ ") + self.writeModificationSequenceValue(val)
         case .metadataLongEntries(let num):
             return self.writeString("METADATA LONGENTRIES \(num)")
         case .metadataMaxsize(let num):

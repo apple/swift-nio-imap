@@ -14,7 +14,8 @@
 
 import struct NIO.ByteBuffer
 
-public struct ModifierSequenceValue: Equatable {
+/// IMAP4 RFC 7162 `mod-sequence-value`
+public struct ModificationSequenceValue: Equatable {
     public var value: Int
 
     public static var zero: Self {
@@ -31,7 +32,7 @@ public struct ModifierSequenceValue: Equatable {
 
 // MARK: - ExpressibleByIntegerLiteral
 
-extension ModifierSequenceValue: ExpressibleByIntegerLiteral {
+extension ModificationSequenceValue: ExpressibleByIntegerLiteral {
     public typealias IntegerLiteralType = Int
 
     public init(integerLiteral value: Int) {
@@ -41,7 +42,7 @@ extension ModifierSequenceValue: ExpressibleByIntegerLiteral {
 
 // MARK: - CustomStringConvertible
 
-extension ModifierSequenceValue: CustomStringConvertible {
+extension ModificationSequenceValue: CustomStringConvertible {
     public var description: String {
         "\(self.value)"
     }
@@ -50,7 +51,7 @@ extension ModifierSequenceValue: CustomStringConvertible {
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeModifierSequenceValue(_ value: ModifierSequenceValue) -> Int {
+    @discardableResult mutating func writeModificationSequenceValue(_ value: ModificationSequenceValue) -> Int {
         self.writeString("\(value.value)")
     }
 }

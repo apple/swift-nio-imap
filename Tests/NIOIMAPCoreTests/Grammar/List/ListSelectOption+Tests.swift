@@ -25,7 +25,7 @@ extension ListSelectOption_Tests {
         let inputs: [(ListSelectOption, String, UInt)] = [
             (.base(.subscribed), "SUBSCRIBED", #line),
             (.independent(.remote), "REMOTE", #line),
-            (.mod(.recursiveMatch), "RECURSIVEMATCH", #line),
+            (.modified(.recursiveMatch), "RECURSIVEMATCH", #line),
         ]
 
         for (test, expectedString, line) in inputs {

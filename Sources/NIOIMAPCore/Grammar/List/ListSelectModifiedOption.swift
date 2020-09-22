@@ -12,21 +12,23 @@
 //
 //===----------------------------------------------------------------------===//
 
-/// RFC 7162
-public struct SearchSortModifierSequence: Equatable {
-    public var modifierSequenceValue: ModifierSequenceValue
+import struct NIO.ByteBuffer
 
-    public init(modifierSequenceValue: ModifierSequenceValue) {
-        self.modifierSequenceValue = modifierSequenceValue
-    }
+/// IMAPv4 `list-select-mod-opt`
+public enum ListSelectModifiedOption: Equatable {
+    case recursiveMatch
+    case option(OptionExtension)
 }
 
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeSearchSortModifierSequence(_ val: SearchSortModifierSequence) -> Int {
-        self.writeString("(MODSEQ ") +
-            self.writeModifierSequenceValue(val.modifierSequenceValue) +
-            self.writeString(")")
+    @discardableResult mutating func writeListSelectModifiedOption(_ option: ListSelectModifiedOption) -> Int {
+        switch option {
+        case .recursiveMatch:
+            return self.writeString("RECURSIVEMATCH")
+        case .option(let option):
+            return self.writeOptionExtension(option)
+        }
     }
 }

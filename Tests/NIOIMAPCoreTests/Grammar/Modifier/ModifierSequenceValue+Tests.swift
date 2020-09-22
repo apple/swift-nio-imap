@@ -18,13 +18,13 @@ import XCTest
 
 class ModifierSequenceValue_Tests: EncodeTestClass {
     func testModifierSequenceValue_encode() {
-        let inputs: [(ModifierSequenceValue, String)] = ClosedRange(uncheckedBounds: (0, 10000)).map { num in
+        let inputs: [(ModificationSequenceValue, String)] = ClosedRange(uncheckedBounds: (0, 10000)).map { num in
             (.init(integerLiteral: num), "\(num)")
         }
 
         for (test, expectedString) in inputs {
             self.testBuffer.clear()
-            self.testBuffer.writeModifierSequenceValue(test)
+            self.testBuffer.writeModificationSequenceValue(test)
             XCTAssertEqual(self.testBufferString, expectedString)
         }
     }

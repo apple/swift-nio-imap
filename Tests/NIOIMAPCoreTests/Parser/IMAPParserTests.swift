@@ -902,8 +902,8 @@ extension ParserUnitTests {
         self.iterateTests(
             testFunction: GrammarParser.parseChangedSinceModifier,
             validInputs: [
-                ("CHANGEDSINCE 1", " ", .init(modifiedSequence: 1), #line),
-                ("changedsince 1", " ", .init(modifiedSequence: 1), #line),
+                ("CHANGEDSINCE 1", " ", .init(modificationSequence: 1), #line),
+                ("changedsince 1", " ", .init(modificationSequence: 1), #line),
             ],
             parserErrorInputs: [
                 ("TEST", "", #line),
@@ -923,8 +923,8 @@ extension ParserUnitTests {
         self.iterateTests(
             testFunction: GrammarParser.parseUnchangedSinceModifier,
             validInputs: [
-                ("UNCHANGEDSINCE 1", " ", .init(modifiedSequence: 1), #line),
-                ("unchangedsince 1", " ", .init(modifiedSequence: 1), #line),
+                ("UNCHANGEDSINCE 1", " ", .init(modificationSequence: 1), #line),
+                ("unchangedsince 1", " ", .init(modificationSequence: 1), #line),
             ],
             parserErrorInputs: [
                 ("TEST", "", #line),
@@ -1859,7 +1859,7 @@ extension ParserUnitTests {
         self.iterateTests(
             testFunction: GrammarParser.parseFetchModifier,
             validInputs: [
-                ("CHANGEDSINCE 2", " ", .changedSince(.init(modifiedSequence: 2)), #line),
+                ("CHANGEDSINCE 2", " ", .changedSince(.init(modificationSequence: 2)), #line),
                 ("test", "\r", .other(.init(name: "test")), #line),
                 ("test 1", " ", .other(.init(name: "test", value: .sequence([1]))), #line),
             ],
@@ -1879,7 +1879,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     func testParseFetchModifierResponse() {
         self.iterateTests(
-            testFunction: GrammarParser.parseFetchModifierResponse,
+            testFunction: GrammarParser.parseFetchModificationResponse,
             validInputs: [
                 ("MODSEQ (2)", "", .init(modifierSequenceValue: 2), #line),
             ],
@@ -2016,7 +2016,7 @@ extension ParserUnitTests {
                 ("SEARCH 1", "\r\n", .search([1]), #line),
                 ("SEARCH 1 2 3 4 5", "\r\n", .search([1, 2, 3, 4, 5]), #line),
                 ("NAMESPACE NIL NIL NIL", "\r\n", .namespace(.init(userNamespace: [], otherUserNamespace: [], sharedNamespace: [])), #line),
-                ("SEARCH 1 2 3 (MODSEQ 4)", "\r\n", .searchSort(.init(identifiers: [1, 2, 3], modifierSequence: .init(modifierSequenceValue: 4))), #line),
+                ("SEARCH 1 2 3 (MODSEQ 4)", "\r\n", .searchSort(.init(identifiers: [1, 2, 3], modificationSequence: .init(modifierSequenceValue: 4))), #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
@@ -2225,7 +2225,7 @@ extension ParserUnitTests {
                     )),
                     #line
                 ),
-                ("MODSEQ (3)", " ", .fetchModifierResponse(.init(modifierSequenceValue: 3)), #line),
+                ("MODSEQ (3)", " ", .fetchModificationResponse(.init(modifierSequenceValue: 3)), #line),
                 ("X-GM-MSGID 1278455344230334865", " ", .gmailMessageID(1278455344230334865), #line),
                 ("X-GM-THRID 1278455344230334865", " ", .gmailThreadID(1278455344230334865), #line),
                 ("X-GM-LABELS (\\Inbox \\Sent Important \"Muy Importante\")", " ", .gmailLabels([GmailLabel(rawValue: "\\Inbox"), GmailLabel(rawValue: "\\Sent"), GmailLabel(rawValue: "Important"), GmailLabel(rawValue: "Muy Importante")]), #line),
@@ -2261,7 +2261,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     func testParseModifierSequenceValue() {
         self.iterateTests(
-            testFunction: GrammarParser.parseModifierSequenceValue,
+            testFunction: GrammarParser.parseModificationSequenceValue,
             validInputs: [
                 ("1", " ", 1, #line),
                 ("123", " ", 123, #line),
@@ -2280,7 +2280,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     func testParseModifierSequenceValueZero() {
         self.iterateTests(
-            testFunction: GrammarParser.parseModifierSequenceValue,
+            testFunction: GrammarParser.parseModificationSequenceValue,
             validInputs: [
                 ("0", " ", .zero, #line),
                 ("123", " ", 123, #line),
@@ -2577,9 +2577,9 @@ extension ParserUnitTests {
                 ("UIDNEXT 12", "\r", .uidNext(12), #line),
                 ("UIDVALIDITY 34", "\r", .uidValidity(34), #line),
                 ("UNSEEN 56", "\r", .unseen(56), #line),
-                ("NOMODSEQ", "\r", .noModifierSequence, #line),
-                ("MODIFIED 1", "\r", .modified([1]), #line),
-                ("HIGHESTMODSEQ 1", "\r", .highestModifierSequence(.init(integerLiteral: 1)), #line),
+                ("NOMODSEQ", "\r", .noModificationSequence, #line),
+                ("MODIFIED 1", "\r", .modificationSequence([1]), #line),
+                ("HIGHESTMODSEQ 1", "\r", .highestModificationSequence(.init(integerLiteral: 1)), #line),
                 ("NAMESPACE NIL NIL NIL", "\r", .namespace(.init(userNamespace: [], otherUserNamespace: [], sharedNamespace: [])), #line),
                 ("some", "\r", .other("some", nil), #line),
                 ("some thing", "\r", .other("some", "thing"), #line),
@@ -2723,7 +2723,7 @@ extension ParserUnitTests {
                 ("YOUNGER 34", "\r", .younger(34), #line),
                 ("OLDER 45", "\r", .older(45), #line),
                 ("FILTER something", "\r", .filter("something"), #line),
-                ("MODSEQ 5", "\r", .modifierSequence(.init(extensions: [], sequenceValue: 5)), #line),
+                ("MODSEQ 5", "\r", .modificationSequence(.init(extensions: [], sequenceValue: 5)), #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
@@ -2747,7 +2747,7 @@ extension ParserUnitTests {
         self.iterateTests(
             testFunction: GrammarParser.parseSearchReturnDataExtension,
             validInputs: [
-                ("modifier 64", "\r", .init(modifier: "modifier", returnValue: .sequence([64])), #line),
+                ("modifier 64", "\r", .init(modifierName: "modifier", returnValue: .sequence([64])), #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
@@ -2760,7 +2760,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     func testParseSearchModifierSequence() {
         self.iterateTests(
-            testFunction: GrammarParser.parseSearchModifiedSequence,
+            testFunction: GrammarParser.parseSearchModificationSequence,
             validInputs: [
                 ("MODSEQ 4", " ", .init(extensions: [], sequenceValue: 4), #line),
                 (
@@ -2790,7 +2790,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     func testParseSearchModifierSequenceExtension() {
         self.iterateTests(
-            testFunction: GrammarParser.parseSearchModifiedSequenceExtension,
+            testFunction: GrammarParser.parseSearchModificationSequenceExtension,
             validInputs: [
                 (" \"/flags/\\\\Seen\" all", "", .init(name: .init(flag: .seen), request: .all), #line),
             ],
@@ -2812,8 +2812,8 @@ extension ParserUnitTests {
                 ("ALL 3", "\r", .all([3]), #line),
                 ("ALL 3,4,5", "\r", .all([3, 4, 5]), #line),
                 ("COUNT 4", "\r", .count(4), #line),
-                ("MODSEQ 4", "\r", .modSequence(4), #line),
-                ("modifier 5", "\r", .dataExtension(.init(modifier: "modifier", returnValue: .sequence([5]))), #line),
+                ("MODSEQ 4", "\r", .modificationSequence(4), #line),
+                ("modifier 5", "\r", .dataExtension(.init(modifierName: "modifier", returnValue: .sequence([5]))), #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
@@ -2894,7 +2894,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     func testParseSearchSortModifierSequence() {
         self.iterateTests(
-            testFunction: GrammarParser.parseSearchSortModifierSequence,
+            testFunction: GrammarParser.parseSearchSortModificationSequence,
             validInputs: [
                 ("(MODSEQ 123)", "\r", .init(modifierSequenceValue: 123), #line),
             ],
@@ -3051,9 +3051,9 @@ extension ParserUnitTests {
             testFunction: GrammarParser.parseSelectParameter,
             validInputs: [
                 ("test 1", "\r", .basic(.init(name: "test", value: .sequence([1]))), #line),
-                ("QRESYNC (1 1)", "\r", .qresync(.init(uidValiditiy: 1, modifierSequenceValue: 1, knownUids: nil, sequenceMatchData: nil)), #line),
-                ("QRESYNC (1 1 1:2)", "\r", .qresync(.init(uidValiditiy: 1, modifierSequenceValue: 1, knownUids: [1 ... 2], sequenceMatchData: nil)), #line),
-                ("QRESYNC (1 1 1:2 (* *))", "\r", .qresync(.init(uidValiditiy: 1, modifierSequenceValue: 1, knownUids: [1 ... 2], sequenceMatchData: .init(knownSequenceSet: .all, knownUidSet: .all))), #line),
+                ("QRESYNC (1 1)", "\r", .qresync(.init(uidValiditiy: 1, modificationSequenceValue: 1, knownUids: nil, sequenceMatchData: nil)), #line),
+                ("QRESYNC (1 1 1:2)", "\r", .qresync(.init(uidValiditiy: 1, modificationSequenceValue: 1, knownUids: [1 ... 2], sequenceMatchData: nil)), #line),
+                ("QRESYNC (1 1 1:2 (* *))", "\r", .qresync(.init(uidValiditiy: 1, modificationSequenceValue: 1, knownUids: [1 ... 2], sequenceMatchData: .init(knownSequenceSet: .all, knownUidSet: .all))), #line),
             ],
             parserErrorInputs: [
                 ("1", "\r", #line),
@@ -3202,7 +3202,7 @@ extension ParserUnitTests {
             testFunction: GrammarParser.parseMailboxStatus,
             validInputs: [
                 ("MESSAGES 1", "\r", .init(messageCount: 1), #line),
-                ("MESSAGES 1 RECENT 2 UIDNEXT 3 UIDVALIDITY 4 UNSEEN 5 SIZE 6 HIGHESTMODSEQ 7", "\r", .init(messageCount: 1, recentCount: 2, nextUID: 3, uidValidity: 4, unseenCount: 5, size: 6, modSequence: 7), #line),
+                ("MESSAGES 1 RECENT 2 UIDNEXT 3 UIDVALIDITY 4 UNSEEN 5 SIZE 6 HIGHESTMODSEQ 7", "\r", .init(messageCount: 1, recentCount: 2, nextUID: 3, uidValidity: 4, unseenCount: 5, size: 6, highestModificationSequence: 7), #line),
             ],
             parserErrorInputs: [
                 ("MESSAGES UNSEEN 3 RECENT 4", "\r", #line),
@@ -3244,7 +3244,7 @@ extension ParserUnitTests {
         self.iterateTests(
             testFunction: GrammarParser.parseStoreModifier,
             validInputs: [
-                ("UNCHANGEDSINCE 2", " ", .unchangedSince(.init(modifiedSequence: 2)), #line),
+                ("UNCHANGEDSINCE 2", " ", .unchangedSince(.init(modificationSequence: 2)), #line),
                 ("test", "\r", .other(.init(name: "test")), #line),
                 ("test 1", " ", .other(.init(name: "test", value: .sequence([1]))), #line),
             ],
