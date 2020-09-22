@@ -41,7 +41,7 @@ public enum Command: Equatable {
     case copy(SequenceSet, MailboxName)
     case fetch(SequenceSet, [FetchAttribute], [Parameter])
     case store(SequenceSet, [StoreModifier], StoreFlags)
-    
+
     case search(key: SearchKey, charset: String? = nil, returnOptions: [SearchReturnOption] = [])
     case move(SequenceSet, MailboxName)
     case id([IDParameter])
