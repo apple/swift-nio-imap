@@ -22,14 +22,14 @@ class ListSelectModOption_Tests: EncodeTestClass {}
 
 extension ListSelectModOption_Tests {
     func testEncode() {
-        let inputs: [(ListSelectModOption, String, UInt)] = [
+        let inputs: [(ListSelectModifiedOption, String, UInt)] = [
             (.recursiveMatch, "RECURSIVEMATCH", #line),
             (.option(.init(kind: .standard("extension"), value: nil)), "extension", #line),
         ]
 
         for (test, expectedString, line) in inputs {
             self.testBuffer.clear()
-            let size = self.testBuffer.writeListSelectModOption(test)
+            let size = self.testBuffer.writeListSelectModifiedOption(test)
             XCTAssertEqual(size, expectedString.utf8.count, line: line)
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }

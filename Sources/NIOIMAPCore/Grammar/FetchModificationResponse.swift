@@ -13,20 +13,20 @@
 //===----------------------------------------------------------------------===//
 
 /// RFC 7162
-public struct FetchModifierResponse: Equatable {
-    public var modifierSequenceValue: ModifierSequenceValue
+public struct FetchModificationResponse: Equatable {
+    public var modificationSequenceValue: ModificationSequenceValue
 
-    public init(modifierSequenceValue: ModifierSequenceValue) {
-        self.modifierSequenceValue = modifierSequenceValue
+    public init(modifierSequenceValue: ModificationSequenceValue) {
+        self.modificationSequenceValue = modifierSequenceValue
     }
 }
 
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeFetchModifierResponse(_ resp: FetchModifierResponse) -> Int {
+    @discardableResult mutating func writeFetchModificationResponse(_ resp: FetchModificationResponse) -> Int {
         self.writeString("MODSEQ (") +
-            self.writeModifierSequenceValue(resp.modifierSequenceValue) +
+            self.writeModificationSequenceValue(resp.modificationSequenceValue) +
             self.writeString(")")
     }
 }

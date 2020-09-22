@@ -2016,7 +2016,7 @@ extension ParserUnitTests {
                 ("SEARCH 1", "\r\n", .search([1]), #line),
                 ("SEARCH 1 2 3 4 5", "\r\n", .search([1, 2, 3, 4, 5]), #line),
                 ("NAMESPACE NIL NIL NIL", "\r\n", .namespace(.init(userNamespace: [], otherUserNamespace: [], sharedNamespace: [])), #line),
-                ("SEARCH 1 2 3 (MODSEQ 4)", "\r\n", .searchSort(.init(identifiers: [1, 2, 3], modifierSequence: .init(modifierSequenceValue: 4))), #line),
+                ("SEARCH 1 2 3 (MODSEQ 4)", "\r\n", .searchSort(.init(identifiers: [1, 2, 3], modificationSequence: .init(modifierSequenceValue: 4))), #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
@@ -2225,7 +2225,7 @@ extension ParserUnitTests {
                     )),
                     #line
                 ),
-                ("MODSEQ (3)", " ", .fetchModifierResponse(.init(modifierSequenceValue: 3)), #line),
+                ("MODSEQ (3)", " ", .fetchModificationResponse(.init(modifierSequenceValue: 3)), #line),
                 ("X-GM-MSGID 1278455344230334865", " ", .gmailMessageID(1278455344230334865), #line),
                 ("X-GM-THRID 1278455344230334865", " ", .gmailThreadID(1278455344230334865), #line),
                 ("X-GM-LABELS (\\Inbox \\Sent Important \"Muy Importante\")", " ", .gmailLabels([GmailLabel(rawValue: "\\Inbox"), GmailLabel(rawValue: "\\Sent"), GmailLabel(rawValue: "Important"), GmailLabel(rawValue: "Muy Importante")]), #line),
@@ -2577,7 +2577,7 @@ extension ParserUnitTests {
                 ("UIDNEXT 12", "\r", .uidNext(12), #line),
                 ("UIDVALIDITY 34", "\r", .uidValidity(34), #line),
                 ("UNSEEN 56", "\r", .unseen(56), #line),
-                ("NOMODSEQ", "\r", .noModifierSequence, #line),
+                ("NOMODSEQ", "\r", .noModificationSequence, #line),
                 ("MODIFIED 1", "\r", .modified([1]), #line),
                 ("HIGHESTMODSEQ 1", "\r", .highestModifierSequence(.init(integerLiteral: 1)), #line),
                 ("NAMESPACE NIL NIL NIL", "\r", .namespace(.init(userNamespace: [], otherUserNamespace: [], sharedNamespace: [])), #line),
@@ -2723,7 +2723,7 @@ extension ParserUnitTests {
                 ("YOUNGER 34", "\r", .younger(34), #line),
                 ("OLDER 45", "\r", .older(45), #line),
                 ("FILTER something", "\r", .filter("something"), #line),
-                ("MODSEQ 5", "\r", .modifierSequence(.init(extensions: [], sequenceValue: 5)), #line),
+                ("MODSEQ 5", "\r", .modificationSequence(.init(extensions: [], sequenceValue: 5)), #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
@@ -3202,7 +3202,7 @@ extension ParserUnitTests {
             testFunction: GrammarParser.parseMailboxStatus,
             validInputs: [
                 ("MESSAGES 1", "\r", .init(messageCount: 1), #line),
-                ("MESSAGES 1 RECENT 2 UIDNEXT 3 UIDVALIDITY 4 UNSEEN 5 SIZE 6 HIGHESTMODSEQ 7", "\r", .init(messageCount: 1, recentCount: 2, nextUID: 3, uidValidity: 4, unseenCount: 5, size: 6, modSequence: 7), #line),
+                ("MESSAGES 1 RECENT 2 UIDNEXT 3 UIDVALIDITY 4 UNSEEN 5 SIZE 6 HIGHESTMODSEQ 7", "\r", .init(messageCount: 1, recentCount: 2, nextUID: 3, uidValidity: 4, unseenCount: 5, size: 6, highestModificationSequence: 7), #line),
             ],
             parserErrorInputs: [
                 ("MESSAGES UNSEEN 3 RECENT 4", "\r", #line),

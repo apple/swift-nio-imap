@@ -24,11 +24,11 @@ public struct SearchModifiedSequenceExtension: Equatable {
 }
 
 /// RFC 7162
-public struct SearchModifiedSequence: Equatable {
+public struct SearchModificationSequence: Equatable {
     public var extensions: [SearchModifiedSequenceExtension]
-    public var sequenceValue: ModifierSequenceValue
+    public var sequenceValue: ModificationSequenceValue
 
-    public init(extensions: [SearchModifiedSequenceExtension], sequenceValue: ModifierSequenceValue) {
+    public init(extensions: [SearchModifiedSequenceExtension], sequenceValue: ModificationSequenceValue) {
         self.extensions = extensions
         self.sequenceValue = sequenceValue
     }
@@ -37,13 +37,13 @@ public struct SearchModifiedSequence: Equatable {
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeSearchModifiedSequence(_ data: SearchModifiedSequence) -> Int {
+    @discardableResult mutating func writeSearchModificationSequence(_ data: SearchModificationSequence) -> Int {
         self.writeString("MODSEQ") +
             self.writeArray(data.extensions, separator: "", parenthesis: false, callback: { (element, self) -> Int in
                 self.writeSearchModifiedSequenceExtension(element)
             }) +
             self.writeSpace() +
-            self.writeModifierSequenceValue(data.sequenceValue)
+            self.writeModificationSequenceValue(data.sequenceValue)
     }
 
     @discardableResult mutating func writeSearchModifiedSequenceExtension(_ data: SearchModifiedSequenceExtension) -> Int {

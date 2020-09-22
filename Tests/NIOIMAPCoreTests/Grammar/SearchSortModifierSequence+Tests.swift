@@ -22,9 +22,9 @@ class SearchSortModifierSequence_Tests: EncodeTestClass {}
 
 extension SearchSortModifierSequence_Tests {
     func testEncoding() {
-        let inputs: [(SearchSortModifierSequence, String, UInt)] = [
+        let inputs: [(SearchSortModificationSequence, String, UInt)] = [
             (.init(modifierSequenceValue: 123), "(MODSEQ 123)", #line),
         ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeSearchSortModifierSequence($0) })
+        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeSearchSortModificationSequence($0) })
     }
 }

@@ -31,7 +31,7 @@ public enum FetchAttribute: Equatable {
     case bodySection(peek: Bool, _ section: SectionSpecifier?, ClosedRange<Int>?)
     case uid
     case modifierSequence
-    case modifierSequenceValue(ModifierSequenceValue)
+    case modifierSequenceValue(ModificationSequenceValue)
     case binary(peek: Bool, section: SectionSpecifier.Part, partial: ClosedRange<Int>?)
     case binarySize(section: SectionSpecifier.Part)
     case gmailMessageID
@@ -94,7 +94,7 @@ extension EncodeBuffer {
         case .uid:
             return self.writeFetchAttribute_uid()
         case .modifierSequenceValue(let value):
-            return self.writeModifierSequenceValue(value)
+            return self.writeModificationSequenceValue(value)
         case .binary(let peek, let section, let partial):
             return self.writeFetchAttribute_binary(peek: peek, section: section, partial: partial)
         case .binarySize(let section):

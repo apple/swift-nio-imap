@@ -20,7 +20,7 @@ public enum SearchReturnData: Equatable {
     case max(Int)
     case all(SequenceSet)
     case count(Int)
-    case modSequence(ModifierSequenceValue)
+    case modSequence(ModificationSequenceValue)
     case dataExtension(SearchReturnDataExtension)
 }
 

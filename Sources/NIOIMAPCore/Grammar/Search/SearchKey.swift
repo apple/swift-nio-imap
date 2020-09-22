@@ -137,7 +137,7 @@ public indirect enum SearchKey: Equatable {
     case filter(String)
 
     /// RFC 7162
-    case modifierSequence(SearchModifiedSequence)
+    case modificationSequence(SearchModificationSequence)
 }
 
 extension SearchKey {
@@ -179,7 +179,7 @@ extension SearchKey {
              .sequenceNumbers,
              .older,
              .younger,
-             .modifierSequence,
+             .modificationSequence,
              .filter:
             return 1
         case .not(let inner):
@@ -370,8 +370,8 @@ extension EncodeBuffer {
                 self.writeString("SENTSINCE ") +
                 self.writeDate(date)
 
-        case .modifierSequence(let seq):
-            return self.writeSearchModifiedSequence(seq)
+        case .modificationSequence(let seq):
+            return self.writeSearchModificationSequence(seq)
         }
     }
 }

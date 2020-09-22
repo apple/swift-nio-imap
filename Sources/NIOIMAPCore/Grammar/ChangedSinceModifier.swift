@@ -14,18 +14,18 @@
 
 /// RFC 7162
 public struct ChangedSinceModifier: Equatable {
-    public var modifiedSequence: ModifierSequenceValue
+    public var modifiedSequence: ModificationSequenceValue
 
-    public init(modifiedSequence: ModifierSequenceValue) {
+    public init(modifiedSequence: ModificationSequenceValue) {
         self.modifiedSequence = modifiedSequence
     }
 }
 
 /// RFC 7162
 public struct UnchangedSinceModifier: Equatable {
-    public var modifiedSequence: ModifierSequenceValue
+    public var modifiedSequence: ModificationSequenceValue
 
-    public init(modifiedSequence: ModifierSequenceValue) {
+    public init(modifiedSequence: ModificationSequenceValue) {
         self.modifiedSequence = modifiedSequence
     }
 }
@@ -34,10 +34,10 @@ public struct UnchangedSinceModifier: Equatable {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeChangedSinceModifier(_ val: ChangedSinceModifier) -> Int {
-        self.writeString("CHANGEDSINCE ") + self.writeModifierSequenceValue(val.modifiedSequence)
+        self.writeString("CHANGEDSINCE ") + self.writeModificationSequenceValue(val.modifiedSequence)
     }
 
     @discardableResult mutating func writeUnchangedSinceModifier(_ val: UnchangedSinceModifier) -> Int {
-        self.writeString("UNCHANGEDSINCE ") + self.writeModifierSequenceValue(val.modifiedSequence)
+        self.writeString("UNCHANGEDSINCE ") + self.writeModificationSequenceValue(val.modifiedSequence)
     }
 }

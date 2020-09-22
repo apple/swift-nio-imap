@@ -32,11 +32,11 @@ extension MailboxName {
 
 public struct SearchSortMailboxData: Equatable {
     public var identifiers: [Int]
-    public var modifierSequence: SearchSortModifierSequence
+    public var modificationSequence: SearchSortModificationSequence
 
-    public init(identifiers: [Int], modifierSequence: SearchSortModifierSequence) {
+    public init(identifiers: [Int], modificationSequence: SearchSortModificationSequence) {
         self.identifiers = identifiers
-        self.modifierSequence = modifierSequence
+        self.modificationSequence = modificationSequence
     }
 }
 
@@ -51,7 +51,7 @@ extension EncodeBuffer {
                         buffer.writeString("\(element)")
                 } +
                     self.writeSpace() +
-                    self.writeSearchSortModifierSequence(data.modifierSequence)
+                    self.writeSearchSortModificationSequence(data.modificationSequence)
             })
     }
 

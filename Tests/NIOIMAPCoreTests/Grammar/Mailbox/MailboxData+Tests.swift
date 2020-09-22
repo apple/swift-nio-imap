@@ -52,8 +52,8 @@ extension MailboxDataTests {
     func testEncode_searchSort() {
         let inputs: [(SearchSortMailboxData?, String, UInt)] = [
             (nil, "SEARCH", #line),
-            (.init(identifiers: [1], modifierSequence: .init(modifierSequenceValue: 2)), "SEARCH 1 (MODSEQ 2)", #line),
-            (.init(identifiers: [1, 2, 3], modifierSequence: .init(modifierSequenceValue: 2)), "SEARCH 1 2 3 (MODSEQ 2)", #line),
+            (.init(identifiers: [1], modificationSequence: .init(modifierSequenceValue: 2)), "SEARCH 1 (MODSEQ 2)", #line),
+            (.init(identifiers: [1, 2, 3], modificationSequence: .init(modifierSequenceValue: 2)), "SEARCH 1 2 3 (MODSEQ 2)", #line),
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeSearchSortMailboxData($0) })
     }

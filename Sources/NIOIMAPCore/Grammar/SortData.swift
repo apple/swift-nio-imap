@@ -18,9 +18,9 @@ import struct NIO.ByteBuffer
 public struct SortData: Equatable {
     public var identifiers: [Int]
 
-    public var modifierSequence: SearchSortModifierSequence
+    public var modifierSequence: SearchSortModificationSequence
 
-    public init(identifiers: [Int], modifierSequence: SearchSortModifierSequence) {
+    public init(identifiers: [Int], modifierSequence: SearchSortModificationSequence) {
         self.identifiers = identifiers
         self.modifierSequence = modifierSequence
     }
@@ -37,7 +37,7 @@ extension EncodeBuffer {
                         buffer.writeString("\(element)")
                 } +
                     self.writeSpace() +
-                    self.writeSearchSortModifierSequence(data.modifierSequence)
+                    self.writeSearchSortModificationSequence(data.modifierSequence)
             })
     }
 }
