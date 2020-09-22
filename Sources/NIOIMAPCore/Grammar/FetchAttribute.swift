@@ -30,8 +30,8 @@ public enum FetchAttribute: Equatable {
     /// `BODY[<section>]<<partial>>` and `BODY.PEEK[<section>]<<partial>>`
     case bodySection(peek: Bool, _ section: SectionSpecifier?, ClosedRange<Int>?)
     case uid
-    case modifierSequence
-    case modifierSequenceValue(ModificationSequenceValue)
+    case modificationSequence
+    case modificationSequenceValue(ModificationSequenceValue)
     case binary(peek: Bool, section: SectionSpecifier.Part, partial: ClosedRange<Int>?)
     case binarySize(section: SectionSpecifier.Part)
     case gmailMessageID
@@ -93,13 +93,13 @@ extension EncodeBuffer {
             return self.writeFetchAttribute_body(peek: peek, section: section, partial: partial)
         case .uid:
             return self.writeFetchAttribute_uid()
-        case .modifierSequenceValue(let value):
+        case .modificationSequenceValue(let value):
             return self.writeModificationSequenceValue(value)
         case .binary(let peek, let section, let partial):
             return self.writeFetchAttribute_binary(peek: peek, section: section, partial: partial)
         case .binarySize(let section):
             return self.writeFetchAttribute_binarySize(section)
-        case .modifierSequence:
+        case .modificationSequence:
             return self.writeString("MODSEQ")
         case .gmailMessageID:
             return self.writeFetchAttribute_gmailMessageID()

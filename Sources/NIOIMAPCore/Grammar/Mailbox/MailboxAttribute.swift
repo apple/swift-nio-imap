@@ -82,7 +82,7 @@ public struct MailboxStatus: Equatable {
     /// - parameter uidValidity: RFC 3501: `UIDVALIDITY` - The unique identifier validity value of the mailbox.
     /// - parameter unseenCount: RFC 3501: `UNSEEN` - The number of messages which do not have the `\Seen` flag set.
     /// - parameter size: RFC 8438: `SIZE` - The number of messages which do not have the `\Seen` flag set.
-    /// - parameter modSequence: RFC 7162: `SIZE` - The total size of the mailbox in octets.
+    /// - parameter highestModificationSequence: RFC 7162: `SIZE` - The total size of the mailbox in octets.
     public init(
         messageCount: Int? = nil,
         recentCount: Int? = nil,

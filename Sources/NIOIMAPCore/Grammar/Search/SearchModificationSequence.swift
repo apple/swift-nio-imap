@@ -13,7 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 /// RFC 7162
-public struct SearchModifiedSequenceExtension: Equatable {
+public struct SearchModificationSequenceExtension: Equatable {
     public var name: EntryFlagName
     public var request: EntryKindRequest
 
@@ -25,10 +25,10 @@ public struct SearchModifiedSequenceExtension: Equatable {
 
 /// RFC 7162
 public struct SearchModificationSequence: Equatable {
-    public var extensions: [SearchModifiedSequenceExtension]
+    public var extensions: [SearchModificationSequenceExtension]
     public var sequenceValue: ModificationSequenceValue
 
-    public init(extensions: [SearchModifiedSequenceExtension], sequenceValue: ModificationSequenceValue) {
+    public init(extensions: [SearchModificationSequenceExtension], sequenceValue: ModificationSequenceValue) {
         self.extensions = extensions
         self.sequenceValue = sequenceValue
     }
@@ -40,13 +40,13 @@ extension EncodeBuffer {
     @discardableResult mutating func writeSearchModificationSequence(_ data: SearchModificationSequence) -> Int {
         self.writeString("MODSEQ") +
             self.writeArray(data.extensions, separator: "", parenthesis: false, callback: { (element, self) -> Int in
-                self.writeSearchModifiedSequenceExtension(element)
+                self.writeSearchModificationSequenceExtension(element)
             }) +
             self.writeSpace() +
             self.writeModificationSequenceValue(data.sequenceValue)
     }
 
-    @discardableResult mutating func writeSearchModifiedSequenceExtension(_ data: SearchModifiedSequenceExtension) -> Int {
+    @discardableResult mutating func writeSearchModificationSequenceExtension(_ data: SearchModificationSequenceExtension) -> Int {
         self.writeSpace() +
             self.writeEntryFlagName(data.name) +
             self.writeSpace() +

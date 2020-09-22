@@ -45,9 +45,9 @@ extension SearchModifiedSequence_Tests {
     }
 
     func testEncode_extension() {
-        let inputs: [(SearchModifiedSequenceExtension, String, UInt)] = [
+        let inputs: [(SearchModificationSequenceExtension, String, UInt)] = [
             (.init(name: .init(flag: .answered), request: .all), " \"/flags/\\\\Answered\" all", #line),
         ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeSearchModifiedSequenceExtension($0) })
+        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeSearchModificationSequenceExtension($0) })
     }
 }

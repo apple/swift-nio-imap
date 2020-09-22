@@ -16,11 +16,11 @@ import struct NIO.ByteBuffer
 
 /// IMAPv4 `search-ret-data-ext`
 public struct SearchReturnDataExtension: Equatable {
-    public var modifier: String
+    public var modifierName: String
     public var returnValue: ParameterValue
 
-    public init(modifier: String, returnValue: ParameterValue) {
-        self.modifier = modifier
+    public init(modifierName: String, returnValue: ParameterValue) {
+        self.modifierName = modifierName
         self.returnValue = returnValue
     }
 }
@@ -29,7 +29,7 @@ public struct SearchReturnDataExtension: Equatable {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeSearchReturnDataExtension(_ data: SearchReturnDataExtension) -> Int {
-        self.writeString(data.modifier) +
+        self.writeString(data.modifierName) +
             self.writeSpace() +
             self.writeParameterValue(data.returnValue)
     }

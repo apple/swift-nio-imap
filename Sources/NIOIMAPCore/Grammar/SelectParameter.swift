@@ -15,15 +15,15 @@
 public struct QResyncParameter: Equatable {
     public var uidValiditiy: Int
 
-    public var modifierSequenceValue: ModificationSequenceValue
+    public var modificationSequenceValue: ModificationSequenceValue
 
     public var knownUids: SequenceSet?
 
     public var sequenceMatchData: SequenceMatchData?
 
-    public init(uidValiditiy: Int, modifierSequenceValue: ModificationSequenceValue, knownUids: SequenceSet?, sequenceMatchData: SequenceMatchData?) {
+    public init(uidValiditiy: Int, modificationSequenceValue: ModificationSequenceValue, knownUids: SequenceSet?, sequenceMatchData: SequenceMatchData?) {
         self.uidValiditiy = uidValiditiy
-        self.modifierSequenceValue = modifierSequenceValue
+        self.modificationSequenceValue = modificationSequenceValue
         self.knownUids = knownUids
         self.sequenceMatchData = sequenceMatchData
     }
@@ -53,7 +53,7 @@ extension EncodeBuffer {
 
     @discardableResult mutating func writeQResyncParameter(param: QResyncParameter) -> Int {
         self.writeString("QRESYNC (\(param.uidValiditiy) ") +
-            self.writeModificationSequenceValue(param.modifierSequenceValue) +
+            self.writeModificationSequenceValue(param.modificationSequenceValue) +
             self.writeIfExists(param.knownUids, callback: { (set) -> Int in
                 self.writeSpace() + self.writeSequenceSet(set)
             }) +

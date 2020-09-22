@@ -902,8 +902,8 @@ extension ParserUnitTests {
         self.iterateTests(
             testFunction: GrammarParser.parseChangedSinceModifier,
             validInputs: [
-                ("CHANGEDSINCE 1", " ", .init(modifiedSequence: 1), #line),
-                ("changedsince 1", " ", .init(modifiedSequence: 1), #line),
+                ("CHANGEDSINCE 1", " ", .init(modificationSequence: 1), #line),
+                ("changedsince 1", " ", .init(modificationSequence: 1), #line),
             ],
             parserErrorInputs: [
                 ("TEST", "", #line),
@@ -923,8 +923,8 @@ extension ParserUnitTests {
         self.iterateTests(
             testFunction: GrammarParser.parseUnchangedSinceModifier,
             validInputs: [
-                ("UNCHANGEDSINCE 1", " ", .init(modifiedSequence: 1), #line),
-                ("unchangedsince 1", " ", .init(modifiedSequence: 1), #line),
+                ("UNCHANGEDSINCE 1", " ", .init(modificationSequence: 1), #line),
+                ("unchangedsince 1", " ", .init(modificationSequence: 1), #line),
             ],
             parserErrorInputs: [
                 ("TEST", "", #line),
@@ -1859,7 +1859,7 @@ extension ParserUnitTests {
         self.iterateTests(
             testFunction: GrammarParser.parseFetchModifier,
             validInputs: [
-                ("CHANGEDSINCE 2", " ", .changedSince(.init(modifiedSequence: 2)), #line),
+                ("CHANGEDSINCE 2", " ", .changedSince(.init(modificationSequence: 2)), #line),
                 ("test", "\r", .other(.init(name: "test")), #line),
                 ("test 1", " ", .other(.init(name: "test", value: .sequence([1]))), #line),
             ],
@@ -1879,7 +1879,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     func testParseFetchModifierResponse() {
         self.iterateTests(
-            testFunction: GrammarParser.parseFetchModifierResponse,
+            testFunction: GrammarParser.parseFetchModificationResponse,
             validInputs: [
                 ("MODSEQ (2)", "", .init(modifierSequenceValue: 2), #line),
             ],
@@ -2261,7 +2261,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     func testParseModifierSequenceValue() {
         self.iterateTests(
-            testFunction: GrammarParser.parseModifierSequenceValue,
+            testFunction: GrammarParser.parseModificationSequenceValue,
             validInputs: [
                 ("1", " ", 1, #line),
                 ("123", " ", 123, #line),
@@ -2280,7 +2280,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     func testParseModifierSequenceValueZero() {
         self.iterateTests(
-            testFunction: GrammarParser.parseModifierSequenceValue,
+            testFunction: GrammarParser.parseModificationSequenceValue,
             validInputs: [
                 ("0", " ", .zero, #line),
                 ("123", " ", 123, #line),
@@ -2578,8 +2578,8 @@ extension ParserUnitTests {
                 ("UIDVALIDITY 34", "\r", .uidValidity(34), #line),
                 ("UNSEEN 56", "\r", .unseen(56), #line),
                 ("NOMODSEQ", "\r", .noModificationSequence, #line),
-                ("MODIFIED 1", "\r", .modified([1]), #line),
-                ("HIGHESTMODSEQ 1", "\r", .highestModifierSequence(.init(integerLiteral: 1)), #line),
+                ("MODIFIED 1", "\r", .modificationSequence([1]), #line),
+                ("HIGHESTMODSEQ 1", "\r", .highestModificationSequence(.init(integerLiteral: 1)), #line),
                 ("NAMESPACE NIL NIL NIL", "\r", .namespace(.init(userNamespace: [], otherUserNamespace: [], sharedNamespace: [])), #line),
                 ("some", "\r", .other("some", nil), #line),
                 ("some thing", "\r", .other("some", "thing"), #line),
@@ -2747,7 +2747,7 @@ extension ParserUnitTests {
         self.iterateTests(
             testFunction: GrammarParser.parseSearchReturnDataExtension,
             validInputs: [
-                ("modifier 64", "\r", .init(modifier: "modifier", returnValue: .sequence([64])), #line),
+                ("modifier 64", "\r", .init(modifierName: "modifier", returnValue: .sequence([64])), #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
@@ -2760,7 +2760,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     func testParseSearchModifierSequence() {
         self.iterateTests(
-            testFunction: GrammarParser.parseSearchModifiedSequence,
+            testFunction: GrammarParser.parseSearchModificationSequence,
             validInputs: [
                 ("MODSEQ 4", " ", .init(extensions: [], sequenceValue: 4), #line),
                 (
@@ -2790,7 +2790,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     func testParseSearchModifierSequenceExtension() {
         self.iterateTests(
-            testFunction: GrammarParser.parseSearchModifiedSequenceExtension,
+            testFunction: GrammarParser.parseSearchModificationSequenceExtension,
             validInputs: [
                 (" \"/flags/\\\\Seen\" all", "", .init(name: .init(flag: .seen), request: .all), #line),
             ],
@@ -2812,8 +2812,8 @@ extension ParserUnitTests {
                 ("ALL 3", "\r", .all([3]), #line),
                 ("ALL 3,4,5", "\r", .all([3, 4, 5]), #line),
                 ("COUNT 4", "\r", .count(4), #line),
-                ("MODSEQ 4", "\r", .modSequence(4), #line),
-                ("modifier 5", "\r", .dataExtension(.init(modifier: "modifier", returnValue: .sequence([5]))), #line),
+                ("MODSEQ 4", "\r", .modificationSequence(4), #line),
+                ("modifier 5", "\r", .dataExtension(.init(modifierName: "modifier", returnValue: .sequence([5]))), #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
@@ -2894,7 +2894,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     func testParseSearchSortModifierSequence() {
         self.iterateTests(
-            testFunction: GrammarParser.parseSearchSortModifierSequence,
+            testFunction: GrammarParser.parseSearchSortModificationSequence,
             validInputs: [
                 ("(MODSEQ 123)", "\r", .init(modifierSequenceValue: 123), #line),
             ],
@@ -3051,9 +3051,9 @@ extension ParserUnitTests {
             testFunction: GrammarParser.parseSelectParameter,
             validInputs: [
                 ("test 1", "\r", .basic(.init(name: "test", value: .sequence([1]))), #line),
-                ("QRESYNC (1 1)", "\r", .qresync(.init(uidValiditiy: 1, modifierSequenceValue: 1, knownUids: nil, sequenceMatchData: nil)), #line),
-                ("QRESYNC (1 1 1:2)", "\r", .qresync(.init(uidValiditiy: 1, modifierSequenceValue: 1, knownUids: [1 ... 2], sequenceMatchData: nil)), #line),
-                ("QRESYNC (1 1 1:2 (* *))", "\r", .qresync(.init(uidValiditiy: 1, modifierSequenceValue: 1, knownUids: [1 ... 2], sequenceMatchData: .init(knownSequenceSet: .all, knownUidSet: .all))), #line),
+                ("QRESYNC (1 1)", "\r", .qresync(.init(uidValiditiy: 1, modificationSequenceValue: 1, knownUids: nil, sequenceMatchData: nil)), #line),
+                ("QRESYNC (1 1 1:2)", "\r", .qresync(.init(uidValiditiy: 1, modificationSequenceValue: 1, knownUids: [1 ... 2], sequenceMatchData: nil)), #line),
+                ("QRESYNC (1 1 1:2 (* *))", "\r", .qresync(.init(uidValiditiy: 1, modificationSequenceValue: 1, knownUids: [1 ... 2], sequenceMatchData: .init(knownSequenceSet: .all, knownUidSet: .all))), #line),
             ],
             parserErrorInputs: [
                 ("1", "\r", #line),
@@ -3244,7 +3244,7 @@ extension ParserUnitTests {
         self.iterateTests(
             testFunction: GrammarParser.parseStoreModifier,
             validInputs: [
-                ("UNCHANGEDSINCE 2", " ", .unchangedSince(.init(modifiedSequence: 2)), #line),
+                ("UNCHANGEDSINCE 2", " ", .unchangedSince(.init(modificationSequence: 2)), #line),
                 ("test", "\r", .other(.init(name: "test")), #line),
                 ("test 1", " ", .other(.init(name: "test", value: .sequence([1]))), #line),
             ],

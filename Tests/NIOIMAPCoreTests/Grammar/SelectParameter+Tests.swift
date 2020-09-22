@@ -27,22 +27,22 @@ extension SelectParameter_Tests {
             (.basic(.init(name: "test")), "test", #line),
             (.basic(.init(name: "test", value: .sequence([1]))), "test 1", #line),
             (
-                .qresync(.init(uidValiditiy: 1, modifierSequenceValue: .zero, knownUids: nil, sequenceMatchData: nil)),
+                .qresync(.init(uidValiditiy: 1, modificationSequenceValue: .zero, knownUids: nil, sequenceMatchData: nil)),
                 "QRESYNC (1 0)",
                 #line
             ),
             (
-                .qresync(.init(uidValiditiy: 1, modifierSequenceValue: .zero, knownUids: [1], sequenceMatchData: nil)),
+                .qresync(.init(uidValiditiy: 1, modificationSequenceValue: .zero, knownUids: [1], sequenceMatchData: nil)),
                 "QRESYNC (1 0 1)",
                 #line
             ),
             (
-                .qresync(.init(uidValiditiy: 1, modifierSequenceValue: .zero, knownUids: nil, sequenceMatchData: .init(knownSequenceSet: .all, knownUidSet: .all))),
+                .qresync(.init(uidValiditiy: 1, modificationSequenceValue: .zero, knownUids: nil, sequenceMatchData: .init(knownSequenceSet: .all, knownUidSet: .all))),
                 "QRESYNC (1 0 (* *))",
                 #line
             ),
             (
-                .qresync(.init(uidValiditiy: 1, modifierSequenceValue: .zero, knownUids: [1], sequenceMatchData: .init(knownSequenceSet: .all, knownUidSet: .all))),
+                .qresync(.init(uidValiditiy: 1, modificationSequenceValue: .zero, knownUids: [1], sequenceMatchData: .init(knownSequenceSet: .all, knownUidSet: .all))),
                 "QRESYNC (1 0 1 (* *))",
                 #line
             ),

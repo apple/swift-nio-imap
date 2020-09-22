@@ -40,7 +40,7 @@ extension FetchAttributeTests {
             (.binary(peek: false, section: [3, 4, 5], partial: nil), .rfc3501, "BINARY[3.4.5]", #line),
             (.modifierSequenceValue(.zero), .rfc3501, "0", #line),
             (.modifierSequenceValue(3), .rfc3501, "3", #line),
-            (.modifierSequence, .rfc3501, "MODSEQ", #line),
+            (.modificationSequence, .rfc3501, "MODSEQ", #line),
             (.gmailMessageID, .rfc3501, "X-GM-MSGID", #line),
             (.gmailThreadID, .rfc3501, "X-GM-THRID", #line),
             (.gmailLabels, .rfc3501, "X-GM-LABELS", #line),
