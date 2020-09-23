@@ -33,8 +33,7 @@ final class RoundtripTests: XCTestCase {
 
             (.login(username: "user", password: "password"), #line),
 
-            (.authenticate(method: "some", nil, []), #line),
-            (.authenticate(method: "some", .equals, []), #line),
+            (.authenticate(method: "some", []), #line),
 
             (.create(.inbox, []), #line),
             (.create(MailboxName("mailbox"), []), #line),
@@ -96,20 +95,16 @@ final class RoundtripTests: XCTestCase {
         ]
 
         for (i, test) in tests.enumerated() {
-            var encodeBuffer = EncodeBuffer.clientEncodeBuffer(buffer: ByteBufferAllocator().buffer(capacity: 128), options: CommandEncodingOptions())
+            var encodeBuffer = CommandEncodeBuffer(buffer: ByteBuffer(), options: .init())
             let commandType = test.0
             let line = test.1
             let tag = "\(i + 1)"
             let command = TaggedCommand(tag: tag, command: commandType)
-            do {
-                try encodeBuffer.writeCommand(command)
-            } catch {
-                XCTFail("\(error)")
-            }
-            encodeBuffer.writeString("\r\n") // required for commands that might terminate with a literal (e.g. append)
+            encodeBuffer.writeCommand(command)
+            encodeBuffer.buffer.writeString("\r\n") // required for commands that might terminate with a literal (e.g. append)
             var buffer = ByteBufferAllocator().buffer(capacity: 128)
             while true {
-                let next = encodeBuffer.nextChunk()
+                let next = encodeBuffer.buffer.nextChunk()
                 var toSend = next.bytes
                 buffer.writeBuffer(&toSend)
                 if !next.waitForContinuation {

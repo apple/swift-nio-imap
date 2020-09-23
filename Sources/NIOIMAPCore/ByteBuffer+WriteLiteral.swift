@@ -31,8 +31,10 @@ extension EncodeBuffer {
             return writeString("{\(bytes.count)}\r\n") + writeBytes(bytes)
         case .clientSynchronizingLiteral:
             return writeString("{\(bytes.count)}\r\n") + markStopPoint() + writeBytes(bytes)
-        case .clientNonSynchronizingLiteral:
+        case .clientNonSynchronizingLiteralPlus:
             return writeString("{\(bytes.count)+}\r\n") + writeBytes(bytes)
+        case .clientNonSynchronizingLiteralMinus:
+            return writeString("{\(bytes.count)-}\r\n") + writeBytes(bytes)
         }
     }
 
@@ -44,7 +46,9 @@ extension EncodeBuffer {
         /// `{7}CRLF` + `foo bar`
         case clientSynchronizingLiteral
         /// `{7+}CRLFfoo bar`
-        case clientNonSynchronizingLiteral
+        case clientNonSynchronizingLiteralPlus
+        /// `{7-}CRLFfoo bar`
+        case clientNonSynchronizingLiteralMinus
     }
 
     func stringEncoding<T: Collection>(for bytes: T) -> StringEncoding where T.Element == UInt8 {
@@ -52,8 +56,10 @@ extension EncodeBuffer {
         case .client(options: let options):
             if options.useQuotedString, canUseQuotedString(for: bytes) {
                 return .quotedString
-            } else if options.useNonSynchronizingLiteral {
-                return .clientNonSynchronizingLiteral
+            } else if options.useNonSynchronizingLiteralMinus, bytes.count <= 4096 {
+                return .clientNonSynchronizingLiteralMinus
+            } else if options.useNonSynchronizingLiteralPlus {
+                return .clientNonSynchronizingLiteralPlus
             } else {
                 return .clientSynchronizingLiteral
             }
@@ -72,9 +78,9 @@ extension EncodeBuffer {
         return bytes.count <= 70 && bytes.allSatisfy { $0.isQuotedChar }
     }
 
-    @discardableResult mutating func writeBase64(_ base64: ByteBuffer) -> Int {
-        var buffer = base64
-        return self.writeBuffer(&buffer)
+    @discardableResult mutating func writeBufferAsBase64(_ buffer: ByteBuffer) -> Int {
+        let encoded = Base64.encode(bytes: buffer.readableBytesView)
+        return self.writeString(encoded)
     }
 
     @discardableResult mutating func writeLiteral8<T: Collection>(_ bytes: T) -> Int where T.Element == UInt8 {

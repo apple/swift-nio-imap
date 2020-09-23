@@ -14,15 +14,18 @@
 
 import struct NIO.ByteBuffer
 
-// MARK: - NString
-
-/// IMAPv4 `nstring`
-public typealias NString = ByteBuffer?
-
 // MARK: - IMAP
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeNString(_ string: NString) -> Int {
+    @discardableResult mutating func writeNString(_ string: ByteBuffer?) -> Int {
+        if let string = string {
+            return self.writeIMAPString(string)
+        } else {
+            return self.writeNil()
+        }
+    }
+
+    @discardableResult mutating func writeNString(_ string: String?) -> Int {
         if let string = string {
             return self.writeIMAPString(string)
         } else {

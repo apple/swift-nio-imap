@@ -24,14 +24,9 @@ extension ListSelectIndependentOption_Tests {
     func testEncode() {
         let inputs: [(ListSelectIndependentOption, String, UInt)] = [
             (.remote, "REMOTE", #line),
-            (.option(.init(type: .standard("test"), value: nil)), "test", #line),
+            (.option(.init(kind: .standard("test"), value: nil)), "test", #line),
+            (.specialUse, "SPECIAL-USE", #line),
         ]
-
-        for (test, expectedString, line) in inputs {
-            self.testBuffer.clear()
-            let size = self.testBuffer.writeListSelectIndependentOption(test)
-            XCTAssertEqual(size, expectedString.utf8.count, line: line)
-            XCTAssertEqual(self.testBufferString, expectedString, line: line)
-        }
+        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeListSelectIndependentOption($0) })
     }
 }

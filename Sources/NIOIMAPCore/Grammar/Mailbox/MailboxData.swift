@@ -22,16 +22,39 @@ extension MailboxName {
         case lsub(MailboxInfo)
         case search([Int])
         case esearch(ESearchResponse)
-        case status(MailboxName, [MailboxValue])
+        case status(MailboxName, MailboxStatus)
         case exists(Int)
         case recent(Int)
         case namespace(NamespaceResponse)
+        case searchSort(SearchSortMailboxData)
+    }
+}
+
+public struct SearchSortMailboxData: Equatable {
+    public var identifiers: [Int]
+    public var modificationSequence: SearchSortModificationSequence
+
+    public init(identifiers: [Int], modificationSequence: SearchSortModificationSequence) {
+        self.identifiers = identifiers
+        self.modificationSequence = modificationSequence
     }
 }
 
 // MARK: - Encoding
 
 extension EncodeBuffer {
+    @discardableResult mutating func writeSearchSortMailboxData(_ data: SearchSortMailboxData?) -> Int {
+        self.writeString("SEARCH") +
+            self.writeIfExists(data, callback: { (data) -> Int in
+                self.writeArray(data.identifiers, separator: "", parenthesis: false) { (element, buffer) -> Int in
+                    buffer.writeSpace() +
+                        buffer.writeString("\(element)")
+                } +
+                    self.writeSpace() +
+                    self.writeSearchSortModificationSequence(data.modificationSequence)
+            })
+    }
+
     @discardableResult mutating func writeMailboxData(_ data: MailboxName.Data) -> Int {
         switch data {
         case .flags(let flags):
@@ -44,14 +67,16 @@ extension EncodeBuffer {
             return self.writeMailboxData_search(list)
         case .esearch(let response):
             return self.writeESearchResponse(response)
-        case .status(let mailbox, let list):
-            return self.writeMailboxData_status(mailbox: mailbox, list: list)
+        case .status(let mailbox, let status):
+            return self.writeMailboxData_status(mailbox: mailbox, status: status)
         case .exists(let num):
             return self.writeString("\(num) EXISTS")
         case .recent(let num):
             return self.writeString("\(num) RECENT")
         case .namespace(let namespaceResponse):
             return self.writeNamespaceResponse(namespaceResponse)
+        case .searchSort(let data):
+            return self.writeSearchSortMailboxData(data)
         }
     }
 
@@ -77,13 +102,11 @@ extension EncodeBuffer {
             self.writeMailboxInfo(list)
     }
 
-    private mutating func writeMailboxData_status(mailbox: MailboxName, list: [MailboxValue]) -> Int {
+    private mutating func writeMailboxData_status(mailbox: MailboxName, status: MailboxStatus) -> Int {
         self.writeString("STATUS ") +
             self.writeMailbox(mailbox) +
             self.writeString(" (") +
-            self.writeIfArrayHasMinimumSize(array: list) { (list, self) -> Int in
-                self.writeMailboxValues(list)
-            } +
+            self.writeMailboxStatus(status) +
             self.writeString(")")
     }
 }

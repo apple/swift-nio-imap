@@ -22,14 +22,14 @@ class TaggedExtensionValue_Tests: EncodeTestClass {}
 
 extension TaggedExtensionValue_Tests {
     func testEncode() {
-        let inputs: [(TaggedExtensionValue, String, UInt)] = [
-            (.simple(.number(123)), "123", #line),
+        let inputs: [(ParameterValue, String, UInt)] = [
+            (.sequence([123]), "123", #line),
             (.comp(["testComp"]), "((\"testComp\"))", #line),
         ]
 
         for (test, expectedString, line) in inputs {
             self.testBuffer.clear()
-            let size = self.testBuffer.writeTaggedExtensionValue(test)
+            let size = self.testBuffer.writeParameterValue(test)
             XCTAssertEqual(size, expectedString.utf8.count, line: line)
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }

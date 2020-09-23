@@ -17,9 +17,9 @@ import struct NIO.ByteBuffer
 // Exracted from `IDParamsList`
 public struct IDParameter: Equatable {
     public var key: String
-    public var value: NString
+    public var value: ByteBuffer?
 
-    public init(key: String, value: NString) {
+    public init(key: String, value: ByteBuffer?) {
         self.key = key
         self.value = value
     }

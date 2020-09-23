@@ -22,7 +22,7 @@ class MediaBasicTests: EncodeTestClass {}
 
 extension MediaBasicTests {
     func testEncode_basicType() {
-        let inputs: [(Media.BasicType, String, UInt)] = [
+        let inputs: [(Media.BasicKind, String, UInt)] = [
             (.application, #""APPLICATION""#, #line),
             (.video, #""VIDEO""#, #line),
             (.image, #""IMAGE""#, #line),
@@ -34,7 +34,7 @@ extension MediaBasicTests {
 
         for (test, expectedString, line) in inputs {
             self.testBuffer.clear()
-            let size = self.testBuffer.writeMediaBasicType(test)
+            let size = self.testBuffer.writeMediaBasicKind(test)
             XCTAssertEqual(size, expectedString.utf8.count, line: line)
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }
@@ -42,7 +42,7 @@ extension MediaBasicTests {
 
     func testEncode() {
         let inputs: [(Media.Basic, String, UInt)] = [
-            (Media.Basic(type: .message, subtype: .mixed), "\"MESSAGE\" \"multipart/mixed\"", #line),
+            (Media.Basic(kind: .message, subtype: .mixed), "\"MESSAGE\" \"multipart/mixed\"", #line),
         ]
 
         for (test, expectedString, line) in inputs {

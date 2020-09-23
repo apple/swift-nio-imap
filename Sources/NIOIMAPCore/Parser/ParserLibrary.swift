@@ -23,7 +23,7 @@ public struct ParserError: Error {
     var file: String
     var line: Int
 
-    init(hint: String = "Unknown", file: String = #file, line: Int = #line) {
+    init(hint: String = "Unknown", file: String = (#file), line: Int = #line) {
         self.hint = hint
         self.file = file
         self.line = line
@@ -161,7 +161,7 @@ extension ParserLibrary {
         return parsed
     }
 
-    static func parseOneOf<T>(_ subParsers: [SubParser<T>], buffer: inout ByteBuffer, tracker: StackTracker, file: String = #file, line: Int = #line) throws -> T {
+    static func parseOneOf<T>(_ subParsers: [SubParser<T>], buffer: inout ByteBuffer, tracker: StackTracker, file: String = (#file), line: Int = #line) throws -> T {
         for parser in subParsers {
             do {
                 return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker, parser)
@@ -225,6 +225,16 @@ extension ParserLibrary {
             char >= UInt8(ascii: "0") && char <= UInt8(ascii: "9")
         }
         guard let int = Int(string) else {
+            throw ParserError(hint: "\(string) is not a number")
+        }
+        return (int, string.count)
+    }
+
+    static func parseUInt64(buffer: inout ByteBuffer, tracker: StackTracker) throws -> (number: UInt64, bytesConsumed: Int) {
+        let string = try ParserLibrary.parseOneOrMoreCharacters(buffer: &buffer, tracker: tracker) { char in
+            char >= UInt8(ascii: "0") && char <= UInt8(ascii: "9")
+        }
+        guard let int = UInt64(string) else {
             throw ParserError(hint: "\(string) is not a number")
         }
         return (int, string.count)

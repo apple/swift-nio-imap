@@ -24,6 +24,8 @@ extension MessageDataTests {
     func testEncode() {
         let inputs: [(MessageData, String, UInt)] = [
             (.expunge(123), "123 EXPUNGE", #line),
+            (.vanished(.all), "VANISHED *", #line),
+            (.vanishedEarlier(.all), "VANISHED (EARLIER) *", #line),
         ]
 
         for (test, expectedString, line) in inputs {

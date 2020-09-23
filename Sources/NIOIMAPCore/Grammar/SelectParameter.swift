@@ -12,42 +12,54 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
+public struct QResyncParameter: Equatable {
+    public var uidValiditiy: Int
 
-public struct SelectParameter: Equatable {
-    public var name: String
-    public var value: TaggedExtensionValue?
+    public var modificationSequenceValue: ModificationSequenceValue
 
-    public init(name: String, value: TaggedExtensionValue? = nil) {
-        self.name = name
-        self.value = value
+    public var knownUids: SequenceSet?
+
+    public var sequenceMatchData: SequenceMatchData?
+
+    public init(uidValiditiy: Int, modificationSequenceValue: ModificationSequenceValue, knownUids: SequenceSet?, sequenceMatchData: SequenceMatchData?) {
+        self.uidValiditiy = uidValiditiy
+        self.modificationSequenceValue = modificationSequenceValue
+        self.knownUids = knownUids
+        self.sequenceMatchData = sequenceMatchData
     }
+}
+
+public enum SelectParameter: Equatable {
+    case basic(Parameter)
+
+    case qresync(QResyncParameter)
+
+    case condstore
 }
 
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeSelectParameters(_ params: [SelectParameter]) -> Int {
-        guard params.count > 0 else {
-            return 0
+    @discardableResult public mutating func writeSelectParameter(_ param: SelectParameter) -> Int {
+        switch param {
+        case .qresync(let param):
+            return self.writeQResyncParameter(param: param)
+        case .basic(let param):
+            return self.writeParameter(param)
+        case .condstore:
+            return self.writeString("CONDSTORE")
         }
-
-        return
-            self.writeSpace() +
-            self.writeArray(params) { (param, self) -> Int in
-                self.writeSelectParameter(param)
-            }
     }
 
-    @discardableResult mutating func writeSelectParameter(_ param: SelectParameter) -> Int {
-        self.writeSelectParameterName(param.name) +
-            self.writeIfExists(param.value) { (value) -> Int in
-                self.writeSpace() +
-                    self.writeTaggedExtensionValue(value)
-            }
-    }
-
-    @discardableResult mutating func writeSelectParameterName(_ name: String) -> Int {
-        self.writeTaggedExtensionLabel(name)
+    @discardableResult mutating func writeQResyncParameter(param: QResyncParameter) -> Int {
+        self.writeString("QRESYNC (\(param.uidValiditiy) ") +
+            self.writeModificationSequenceValue(param.modificationSequenceValue) +
+            self.writeIfExists(param.knownUids, callback: { (set) -> Int in
+                self.writeSpace() + self.writeSequenceSet(set)
+            }) +
+            self.writeIfExists(param.sequenceMatchData, callback: { (data) -> Int in
+                self.writeSpace() + self.writeSequenceMatchData(data)
+            }) +
+            self.writeString(")")
     }
 }

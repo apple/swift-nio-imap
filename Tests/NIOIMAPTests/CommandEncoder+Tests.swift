@@ -22,19 +22,23 @@ import XCTest
 final class CommandEncoder_Tests: XCTestCase {}
 
 extension CommandEncoder_Tests {
-    func testThrowsIfMissingBytes() {
-        let encoder = CommandEncoder()
+    func testEncoding() {
+        // Ror now this is a fairly limited sequence of test
+        // just to ensure that CommandEncoder correctly uses
+        // CommandEncodeBuffer.
+        // When we add a state to CommandEncoder, it'll be more
+        // complex and require more tests.
+        let inputs: [(CommandStream, ByteBuffer, UInt)] = [
+            (.command(.init(tag: "1", command: .noop)), "1 NOOP\r\n", #line),
+            (.append(.start(tag: "2", appendingTo: .inbox)), "2 APPEND \"INBOX\"", #line),
+            (.idleDone, "DONE\r\n", #line),
+        ]
 
-        var out = ByteBuffer()
-        XCTAssertNoThrow(try encoder.encode(data: .append(.start(tag: "1", appendingTo: .inbox)), out: &out))
-
-        out.clear()
-        XCTAssertNoThrow(try encoder.encode(data: .append(.beginMessage(messsage: .init(options: .init(flagList: [], extensions: []), data: .init(byteCount: 10)))), out: &out))
-
-        out.clear()
-        XCTAssertNoThrow(try encoder.encode(data: .append(.messageBytes("12345")), out: &out))
-
-        out.clear()
-        XCTAssertThrowsError(try encoder.encode(data: .append(.endMessage), out: &out))
+        for (command, expected, line) in inputs {
+            var buffer = ByteBuffer()
+            let encoder = CommandEncoder()
+            encoder.encode(data: command, out: &buffer)
+            XCTAssertEqual(expected, buffer, "\(String(buffer: expected)) is not equal to \(String(buffer: buffer))", line: line)
+        }
     }
 }

@@ -16,8 +16,12 @@ import struct NIO.ByteBuffer
 
 extension BodyStructure {
     /// IMAPv4 `body-fld-enc`
-    public struct Encoding: CustomStringConvertible, Equatable {
-        public typealias StringLiteralType = String
+    public struct Encoding: RawRepresentable, CustomStringConvertible, Equatable {
+        public var rawValue: String
+
+        public init(rawValue: String) {
+            self.rawValue = rawValue.uppercased()
+        }
 
         public static var sevenBit: Self { Self("7BIT") }
         public static var eightBit: Self { Self("8BIT") }
@@ -25,10 +29,14 @@ extension BodyStructure {
         public static var base64: Self { Self("BASE64") }
         public static var quotedPrintable: Self { Self("QUOTED-PRINTABLE") }
 
-        public var description: String
+        public var description: String {
+            rawValue
+        }
 
-        public init(_ description: String) {
-            self.description = description
+        /// Creates a new type with the given `String`.
+        /// - Note: the `String` will be uppercased.
+        public init(_ rawValue: String) {
+            self.init(rawValue: rawValue)
         }
     }
 }

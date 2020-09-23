@@ -14,20 +14,17 @@
 
 import struct NIO.ByteBuffer
 
-public enum EntryTypeResponse: Equatable {
-    case `private`
-    case shared
+public struct EntryKindResponse: Equatable {
+    var _backing: String
+
+    public static var `private` = Self(_backing: "priv")
+    public static var shared = Self(_backing: "shared")
 }
 
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeEntryTypeResponse(_ response: EntryTypeResponse) -> Int {
-        switch response {
-        case .private:
-            return self.writeString("priv")
-        case .shared:
-            return self.writeString("shared")
-        }
+    @discardableResult mutating func writeEntryKindResponse(_ response: EntryKindResponse) -> Int {
+        self.writeString(response._backing)
     }
 }

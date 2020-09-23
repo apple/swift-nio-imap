@@ -34,7 +34,7 @@ extension BodyStructure: RandomAccessCollection {
 
         switch self {
         case .singlepart(let part):
-            switch part.type {
+            switch part.kind {
             case .basic:
                 return self
             case .message(let message):
@@ -88,8 +88,12 @@ extension BodyStructure: RandomAccessCollection {
 
 extension BodyStructure {
     /// IMAPv4rev1 media-subtype
-    public struct MediaSubtype: Equatable {
-        var _backing: String
+    public struct MediaSubtype: RawRepresentable, CustomStringConvertible, Equatable {
+        public var rawValue: String
+
+        public init(rawValue: String) {
+            self.rawValue = rawValue.lowercased()
+        }
 
         public static var alternative: Self {
             .init("multipart/alternative")
@@ -103,8 +107,12 @@ extension BodyStructure {
             .init("multipart/mixed")
         }
 
-        public init(_ string: String) {
-            self._backing = string.lowercased()
+        public var description: String {
+            rawValue
+        }
+
+        public init(_ rawValue: String) {
+            self.init(rawValue: rawValue)
         }
     }
 }
@@ -117,9 +125,9 @@ extension EncodeBuffer {
         size += self.writeString("(")
         switch body {
         case .singlepart(let part):
-            size += self.writeBodyTypeSinglepart(part)
+            size += self.writeBodySinglepart(part)
         case .multipart(let part):
-            size += self.writeBodyTypeMultipart(part)
+            size += self.writeBodyMultipart(part)
         }
         size += self.writeString(")")
         return size

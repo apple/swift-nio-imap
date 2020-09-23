@@ -23,7 +23,7 @@ class ContinueRequestTests: EncodeTestClass {}
 extension ContinueRequestTests {
     func testEncode() {
         let inputs: [(ContinueRequest, String, UInt)] = [
-            (.base64("bb=="), "+ bb==\r\n", #line),
+            (.data("a"), "+ YQ==\r\n", #line),
             (.responseText(.init(code: .alert, text: "text")), "+ [ALERT] text\r\n", #line),
         ]
         self.iterateInputs(inputs: inputs, encoder: { req in

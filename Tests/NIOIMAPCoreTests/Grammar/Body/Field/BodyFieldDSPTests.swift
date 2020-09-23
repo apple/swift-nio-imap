@@ -22,16 +22,45 @@ class BodyFieldDSPTests: EncodeTestClass {}
 
 extension BodyFieldDSPTests {
     func testEncode() {
-        let inputs: [(BodyStructure.FieldDispositionData?, String, UInt)] = [
+        let inputs: [(BodyStructure.Disposition?, String, UInt)] = [
             (nil, "NIL", #line),
-            (.init(string: "some", parameter: [.init(field: "f1", value: "v1")]), "(\"some\" (\"f1\" \"v1\"))", #line),
+            (.init(kind: "some", parameter: [.init(field: "f1", value: "v1")]), "(\"some\" (\"f1\" \"v1\"))", #line),
         ]
 
         for (test, expectedString, line) in inputs {
             self.testBuffer.clear()
-            let size = self.testBuffer.writeBodyFieldDSP(test)
+            let size = self.testBuffer.writeBodyDisposition(test)
             XCTAssertEqual(size, expectedString.utf8.count, line: line)
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
+        }
+    }
+}
+
+// MARK: - Convenience methods
+
+extension BodyFieldDSPTests {
+    func testSize() {
+        let inputs: [(BodyStructure.Disposition, Int?, UInt)] = [
+            (.init(kind: "test", parameter: []), nil, #line),
+            (.init(kind: "test", parameter: [.init(field: "size", value: "123")]), 123, #line),
+            (.init(kind: "test", parameter: [.init(field: "SIZE", value: "456")]), 456, #line),
+            (.init(kind: "test", parameter: [.init(field: "SIZE", value: "abc")]), nil, #line),
+        ]
+
+        for (dsp, expected, line) in inputs {
+            XCTAssertEqual(dsp.size, expected, line: line)
+        }
+    }
+
+    func testFilename() {
+        let inputs: [(BodyStructure.Disposition, String?, UInt)] = [
+            (.init(kind: "test", parameter: []), nil, #line),
+            (.init(kind: "test", parameter: [.init(field: "filename", value: "hello")]), "hello", #line),
+            (.init(kind: "test", parameter: [.init(field: "FILENAME", value: "world")]), "world", #line),
+        ]
+
+        for (dsp, expected, line) in inputs {
+            XCTAssertEqual(dsp.filename, expected, line: line)
         }
     }
 }

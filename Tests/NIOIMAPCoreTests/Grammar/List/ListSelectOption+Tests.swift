@@ -25,7 +25,7 @@ extension ListSelectOption_Tests {
         let inputs: [(ListSelectOption, String, UInt)] = [
             (.base(.subscribed), "SUBSCRIBED", #line),
             (.independent(.remote), "REMOTE", #line),
-            (.mod(.recursiveMatch), "RECURSIVEMATCH", #line),
+            (.modified(.recursiveMatch), "RECURSIVEMATCH", #line),
         ]
 
         for (test, expectedString, line) in inputs {
@@ -40,7 +40,7 @@ extension ListSelectOption_Tests {
         let inputs: [(ListSelectOptions, String, UInt)] = [
             (nil, "()", #line),
             (.select([.base(.subscribed)], .subscribed), "(SUBSCRIBED SUBSCRIBED)", #line),
-            (.selectIndependent([.remote, .option(.init(type: .standard("SOME"), value: nil))]), "(REMOTE SOME)", #line),
+            (.selectIndependent([.remote, .option(.init(kind: .standard("SOME"), value: nil))]), "(REMOTE SOME)", #line),
         ]
 
         for (test, expectedString, line) in inputs {

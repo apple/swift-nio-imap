@@ -36,7 +36,7 @@ public struct Capability: Equatable {
     }
 
     public init(_ value: String) {
-        self.init(unchecked: value.uppercased())
+        self.init(unchecked: value)
     }
 
     fileprivate init(unchecked: String) {
@@ -48,7 +48,7 @@ public struct Capability: Equatable {
 // MARK: - Convenience Types
 
 extension Capability {
-    public struct AuthType: Equatable {
+    public struct AuthKind: Equatable {
         public static let token = Self(unchecked: "TOKEN")
         public static let plain = Self(unchecked: "PLAIN")
         public static let pToken = Self(unchecked: "PTOKEN")
@@ -67,7 +67,7 @@ extension Capability {
         }
     }
 
-    public struct ContextType: Equatable {
+    public struct ContextKind: Equatable {
         public static let search = Self(unchecked: "SEARCH")
         public static let sort = Self(unchecked: "SORT")
 
@@ -82,7 +82,7 @@ extension Capability {
         }
     }
 
-    public struct SortType: Equatable {
+    public struct SortKind: Equatable {
         public static let display = Self(unchecked: "DISPLAY")
 
         public var rawValue: String
@@ -96,7 +96,7 @@ extension Capability {
         }
     }
 
-    public struct ThreadType: Equatable {
+    public struct ThreadKind: Equatable {
         public static let orderedSubject = Self(unchecked: "ORDEREDSUBJECT")
         public static let references = Self(unchecked: "REFERENCES")
 
@@ -111,7 +111,7 @@ extension Capability {
         }
     }
 
-    public struct StatusType: Equatable {
+    public struct StatusKind: Equatable {
         public static let size = Self(unchecked: "SIZE")
 
         public var rawValue: String
@@ -125,7 +125,7 @@ extension Capability {
         }
     }
 
-    public struct UTF8Type: Equatable {
+    public struct UTF8Kind: Equatable {
         public static let accept = Self(unchecked: "ACCEPT")
 
         public var rawValue: String
@@ -139,8 +139,8 @@ extension Capability {
         }
     }
 
-    public struct RightsType: Equatable {
-        public static let tekx = Self(unchecked: "tekx")
+    public struct RightsKind: Equatable {
+        public static let tekx = Self(unchecked: "TEKX")
 
         public var rawValue: String
 
@@ -166,15 +166,15 @@ extension Capability {
     public static let filters = Self(unchecked: "FILTERS")
     public static let id = Self(unchecked: "ID")
     public static let idle = Self(unchecked: "IDLE")
-    public static let imap4rev1 = Self(unchecked: "IMAP4REV1")
+    public static let imap4rev1 = Self(unchecked: "IMAP4rev1")
     public static let imap4 = Self(unchecked: "IMAP4")
     public static let language = Self(unchecked: "LANGUAGE")
     public static let listStatus = Self(unchecked: "LIST-STATUS")
-
     public static let listExtended = Self(unchecked: "LIST-EXTENDED")
     public static let loginDisabled = Self(unchecked: "LOGINDISABLED")
     public static let loginReferrals = Self(unchecked: "LOGIN-REFERRALS")
     public static let metadata = Self(unchecked: "METADATA")
+    public static let metadataServer = Self(unchecked: "METADATA-SERVER")
     public static let move = Self(unchecked: "MOVE")
     public static let multiSearch = Self(unchecked: "MULTISEARCH")
     public static let namespace = Self(unchecked: "NAMESPACE")
@@ -189,6 +189,7 @@ extension Capability {
     public static let urlPartial = Self(unchecked: "URL-PARTIAL")
     public static let urlAuth = Self(unchecked: "URLAUTH")
     public static let within = Self(unchecked: "WITHIN")
+    public static let gmailExtensions = Self(unchecked: "X-GM-EXT")
 
     /// RFC 7888 LITERAL+
     public static let literalPlus = Self(unchecked: "LITERAL+")
@@ -196,15 +197,15 @@ extension Capability {
     /// RFC 7888 LITERAL-
     public static let literalMinus = Self(unchecked: "LITERAL-")
 
-    public static func auth(_ type: AuthType) -> Self {
+    public static func auth(_ type: AuthKind) -> Self {
         Self("AUTH=\(type.rawValue)")
     }
 
-    public static func context(_ type: ContextType) -> Self {
+    public static func context(_ type: ContextKind) -> Self {
         Self("CONTEXT=\(type.rawValue)")
     }
 
-    public static func sort(_ type: SortType?) -> Self {
+    public static func sort(_ type: SortKind?) -> Self {
         if let type = type {
             return Self("SORT=\(type.rawValue)")
         } else {
@@ -212,19 +213,19 @@ extension Capability {
         }
     }
 
-    public static func utf8(_ type: UTF8Type) -> Self {
+    public static func utf8(_ type: UTF8Kind) -> Self {
         Self("UTF8=\(type.rawValue)")
     }
 
-    public static func thread(_ type: ThreadType) -> Self {
+    public static func thread(_ type: ThreadKind) -> Self {
         Self("THREAD=\(type.rawValue)")
     }
 
-    public static func status(_ type: StatusType) -> Self {
+    public static func status(_ type: StatusKind) -> Self {
         Self("STATUS=\(type.rawValue)")
     }
 
-    public static func rights(_ type: RightsType) -> Self {
+    public static func rights(_ type: RightsKind) -> Self {
         Self("RIGHTS=\(type.rawValue)")
     }
 }

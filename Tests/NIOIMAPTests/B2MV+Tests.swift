@@ -60,21 +60,21 @@ extension B2MV_Tests {
             ("tag SELECT box1", [.command(.init(tag: "tag", command: .select(.init("box1"), [])))]),
             ("tag SELECT \"box2\"", [.command(.init(tag: "tag", command: .select(.init("box2"), [])))]),
             ("tag SELECT {4+}\r\nbox3", [.command(.init(tag: "tag", command: .select(.init("box3"), [])))]),
-            ("tag SELECT box4 (k1 1 k2 2)", [.command(.init(tag: "tag", command: .select(.init("box4"), [.init(name: "k1", value: .simple(.sequence([1]))), .init(name: "k2", value: .simple(.sequence([2])))])))]),
+            ("tag SELECT box4 (k1 1 k2 2)", [.command(.init(tag: "tag", command: .select(.init("box4"), [.basic(.init(name: "k1", value: .sequence([1]))), .basic(.init(name: "k2", value: .sequence([2])))])))]),
 
             // MARK: Examine
 
             ("tag EXAMINE box1", [.command(.init(tag: "tag", command: .examine(.init("box1"), [])))]),
             ("tag EXAMINE \"box2\"", [.command(.init(tag: "tag", command: .examine(.init("box2"), [])))]),
             ("tag EXAMINE {4+}\r\nbox3", [.command(.init(tag: "tag", command: .examine(.init("box3"), [])))]),
-            ("tag EXAMINE box4 (k3 1 k4 2)", [.command(.init(tag: "tag", command: .examine(.init("box4"), [.init(name: "k3", value: .simple(.sequence([1]))), .init(name: "k4", value: .simple(.sequence([2])))])))]),
+            ("tag EXAMINE box4 (k3 1 k4 2)", [.command(.init(tag: "tag", command: .examine(.init("box4"), [.init(name: "k3", value: .sequence([1])), .init(name: "k4", value: .sequence([2]))])))]),
 
             // MARK: Create
 
             ("tag CREATE newBox1", [.command(.init(tag: "tag", command: .create(.init("newBox1"), [])))]),
             ("tag CREATE \"newBox2\"", [.command(.init(tag: "tag", command: .create(.init("newBox2"), [])))]),
             ("tag CREATE {7+}\r\nnewBox3", [.command(.init(tag: "tag", command: .create(.init("newBox3"), [])))]),
-            ("tag CREATE newBox4 (k5 5 k6 6)", [.command(.init(tag: "tag", command: .create(.init("newBox4"), [.init(name: "k5", value: .simple(.sequence([5]))), .init(name: "k6", value: .simple(.sequence([6])))])))]),
+            ("tag CREATE newBox4 (k5 5 k6 6)", [.command(.init(tag: "tag", command: .create(.init("newBox4"), [.labelled(.init(name: "k5", value: .sequence([5]))), .labelled(.init(name: "k6", value: .sequence([6])))])))]),
 
             // MARK: Delete
 
@@ -126,7 +126,7 @@ extension B2MV_Tests {
 
             ("tag APPEND box (\\Seen) {1+}\r\na", [
                 .append(.start(tag: "tag", appendingTo: .init("box"))),
-                .append(.beginMessage(messsage: .init(options: .init(flagList: [.seen], extensions: []), data: .init(byteCount: 1)))),
+                .append(.beginMessage(message: .init(options: .init(flagList: [.seen], extensions: []), data: .init(byteCount: 1)))),
                 .append(.messageBytes("a")),
                 .append(.endMessage),
                 .append(.finish),
@@ -204,7 +204,7 @@ extension B2MV_Tests {
 
             // MARK: Status
 
-            ("* STATUS INBOX (MESSAGES 231 UIDNEXT 44292)", [.untaggedResponse(.mailboxData(.status(.inbox, [.messages(231), .uidNext(44292)])))]),
+            ("* STATUS INBOX (MESSAGES 231 UIDNEXT 44292)", [.untaggedResponse(.mailboxData(.status(.inbox, .init(messageCount: 231, nextUID: 44292))))]),
 
             // MARK: Flags
 

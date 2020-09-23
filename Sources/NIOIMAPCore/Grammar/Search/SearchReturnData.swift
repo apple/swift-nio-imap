@@ -20,6 +20,7 @@ public enum SearchReturnData: Equatable {
     case max(Int)
     case all(SequenceSet)
     case count(Int)
+    case modificationSequence(ModificationSequenceValue)
     case dataExtension(SearchReturnDataExtension)
 }
 
@@ -40,6 +41,8 @@ extension EncodeBuffer {
             return self.writeString("COUNT \(num)")
         case .dataExtension(let optionExt):
             return self.writeSearchReturnDataExtension(optionExt)
+        case .modificationSequence(let seq):
+            return self.writeString("MODSEQ \(seq)")
         }
     }
 }

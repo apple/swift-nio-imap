@@ -18,16 +18,6 @@ import XCTest
 
 class Capability_Tests: EncodeTestClass {}
 
-// MARK: - Equatable
-
-extension Capability_Tests {
-    func testEquatable() {
-        let capability1 = Capability("idle")
-        let capability2 = Capability("IDLE")
-        XCTAssertEqual(capability1, capability2)
-    }
-}
-
 // MARK: - Name/Values
 
 extension Capability_Tests {
@@ -65,6 +55,7 @@ extension Capability_Tests {
             (.listStatus, "LIST-STATUS", #line),
             (.loginReferrals, "LOGIN-REFERRALS", #line),
             (.metadata, "METADATA", #line),
+            (.metadataServer, "METADATA-SERVER", #line),
             (.move, "MOVE", #line),
             (.multiSearch, "MULTISEARCH", #line),
             (.namespace, "NAMESPACE", #line),

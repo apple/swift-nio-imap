@@ -33,8 +33,8 @@ extension MailboxDataTests {
             ),
             (.esearch(ESearchResponse(correlator: nil, uid: false, returnData: [.count(1)])), "ESEARCH COUNT 1", #line),
             (.esearch(ESearchResponse(correlator: nil, uid: false, returnData: [.count(1), .count(2)])), "ESEARCH COUNT 1 COUNT 2", #line),
-            (.status(.inbox, [.messages(1)]), "STATUS \"INBOX\" (MESSAGES 1)", #line),
-            (.status(.inbox, [.messages(1), .unseen(2)]), "STATUS \"INBOX\" (MESSAGES 1 UNSEEN 2)", #line),
+            (.status(.inbox, .init(messageCount: 1)), "STATUS \"INBOX\" (MESSAGES 1)", #line),
+            (.status(.inbox, .init(messageCount: 1, unseenCount: 2)), "STATUS \"INBOX\" (MESSAGES 1 UNSEEN 2)", #line),
             (.namespace(.init(userNamespace: [], otherUserNamespace: [], sharedNamespace: [])), "NAMESPACE NIL NIL NIL", #line),
             (.search([]), "SEARCH", #line),
             (.search([1]), "SEARCH 1", #line),
@@ -47,5 +47,14 @@ extension MailboxDataTests {
             XCTAssertEqual(size, expectedString.utf8.count, line: line)
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }
+    }
+
+    func testEncode_searchSort() {
+        let inputs: [(SearchSortMailboxData?, String, UInt)] = [
+            (nil, "SEARCH", #line),
+            (.init(identifiers: [1], modificationSequence: .init(modifierSequenceValue: 2)), "SEARCH 1 (MODSEQ 2)", #line),
+            (.init(identifiers: [1, 2, 3], modificationSequence: .init(modifierSequenceValue: 2)), "SEARCH 1 2 3 (MODSEQ 2)", #line),
+        ]
+        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeSearchSortMailboxData($0) })
     }
 }

@@ -18,6 +18,7 @@ import struct NIO.ByteBuffer
 public enum ListSelectIndependentOption: Equatable {
     case remote
     case option(OptionExtension)
+    case specialUse
 }
 
 // MARK: - Encoding
@@ -29,6 +30,8 @@ extension EncodeBuffer {
             return self.writeString("REMOTE")
         case .option(let option):
             return self.writeOptionExtension(option)
+        case .specialUse:
+            return self.writeString("SPECIAL-USE")
         }
     }
 }

@@ -41,13 +41,17 @@ extension ResponseTextCodeTests {
             (.capability([.unselect]), "CAPABILITY IMAP4 IMAP4rev1 UNSELECT", #line),
             (.capability([.unselect, .binary, .children]), "CAPABILITY IMAP4 IMAP4rev1 UNSELECT BINARY CHILDREN", #line),
             (.namespace(.init(userNamespace: [], otherUserNamespace: [], sharedNamespace: [])), "NAMESPACE NIL NIL NIL", #line),
+            (.useAttribute, "USEATTR", #line),
+            (.notSaved, "NOTSAVED", #line),
+            (.closed, "CLOSED", #line),
+            (.noModificationSequence, "NOMODSEQ", #line),
+            (.modificationSequence([1]), "MODIFIED 1", #line),
+            (.highestModificationSequence(1), "HIGHESTMODSEQ 1", #line),
+            (.metadataMaxsize(123), "METADATA MAXSIZE 123", #line),
+            (.metadataLongEntries(456), "METADATA LONGENTRIES 456", #line),
+            (.metadataTooMany, "METADATA TOOMANY", #line),
+            (.metadataNoPrivate, "METADATA NOPRIVATE", #line),
         ]
-
-        for (code, expectedString, line) in inputs {
-            self.testBuffer.clear()
-            let size = self.testBuffer.writeResponseTextCode(code)
-            XCTAssertEqual(size, expectedString.utf8.count, line: line)
-            XCTAssertEqual(self.testBufferString, expectedString, line: line)
-        }
+        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeResponseTextCode($0) })
     }
 }

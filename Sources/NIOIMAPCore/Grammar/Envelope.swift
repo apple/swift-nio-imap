@@ -16,18 +16,18 @@ import struct NIO.ByteBuffer
 
 /// IMAPv4 `envelope`
 public struct Envelope: Equatable {
-    public var date: NString
-    public var subject: NString
+    public var date: String?
+    public var subject: ByteBuffer?
     public var from: [Address]
     public var sender: [Address]
     public var reply: [Address]
     public var to: [Address]
     public var cc: [Address]
     public var bcc: [Address]
-    public var inReplyTo: NString
-    public var messageID: NString
+    public var inReplyTo: ByteBuffer?
+    public var messageID: String?
 
-    public init(date: NString, subject: NString, from: [Address], sender: [Address], reply: [Address], to: [Address], cc: [Address], bcc: [Address], inReplyTo: NString, messageID: NString) {
+    public init(date: String?, subject: ByteBuffer?, from: [Address], sender: [Address], reply: [Address], to: [Address], cc: [Address], bcc: [Address], inReplyTo: ByteBuffer?, messageID: String?) {
         self.date = date
         self.subject = subject
         self.from = from

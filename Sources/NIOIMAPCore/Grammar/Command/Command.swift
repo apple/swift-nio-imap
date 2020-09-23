@@ -20,15 +20,15 @@ public enum Command: Equatable {
     case noop
     case create(MailboxName, [CreateParameter])
     case delete(MailboxName)
-    case examine(MailboxName, [SelectParameter] = [])
+    case examine(MailboxName, [Parameter] = [])
     case list(ListSelectOptions? = nil, reference: MailboxName, MailboxPatterns, [ReturnOption] = [])
     case lsub(reference: MailboxName, pattern: ByteBuffer)
-    case rename(from: MailboxName, to: MailboxName, params: [RenameParameter])
+    case rename(from: MailboxName, to: MailboxName, params: [Parameter])
     case select(MailboxName, [SelectParameter] = [])
     case status(MailboxName, [MailboxAttribute])
     case subscribe(MailboxName)
     case unsubscribe(MailboxName)
-    case authenticate(method: String, InitialResponse?, [ByteBuffer])
+    case authenticate(method: String, [ByteBuffer])
     case login(username: String, password: String)
     case starttls
     case check
@@ -39,8 +39,9 @@ public enum Command: Equatable {
     case idleStart
     case idleFinish
     case copy(SequenceSet, MailboxName)
-    case fetch(SequenceSet, [FetchAttribute], [FetchModifier])
+    case fetch(SequenceSet, [FetchAttribute], [Parameter])
     case store(SequenceSet, [StoreModifier], StoreFlags)
+
     case search(key: SearchKey, charset: String? = nil, returnOptions: [SearchReturnOption] = [])
     case move(SequenceSet, MailboxName)
     case id([IDParameter])
@@ -48,338 +49,387 @@ public enum Command: Equatable {
 
     case uidCopy(UIDSet, MailboxName)
     case uidMove(UIDSet, MailboxName)
-    case uidFetch(UIDSet, [FetchAttribute], [FetchModifier])
+    case uidFetch(UIDSet, [FetchAttribute], [Parameter])
     case uidSearch(key: SearchKey, charset: String? = nil, returnOptions: [SearchReturnOption] = [])
-    case uidStore(UIDSet, [StoreModifier], StoreFlags)
+    case uidStore(UIDSet, [Parameter], StoreFlags)
     case uidExpunge(UIDSet)
+
+    case getQuota(QuotaRoot)
+    case getQuotaRoot(MailboxName)
+    case setQuota(QuotaRoot, [QuotaLimit])
+
+    case getMetadata(options: [MetadataOption], mailbox: MailboxName, entries: [ByteBuffer])
+    case setMetadata(mailbox: MailboxName, entries: [EntryValue])
 }
 
 // MARK: - IMAP
 
-extension EncodeBuffer {
-    @discardableResult mutating func writeCommandType(_ commandType: Command) throws -> Int {
-        switch commandType {
+extension CommandEncodeBuffer {
+    @discardableResult mutating func writeCommand(_ command: Command) -> Int {
+        switch command {
         case .capability:
-            return self.writeCommandType_capability()
+            return self.writeCommandKind_capability()
         case .logout:
-            return self.writeCommandType_logout()
+            return self.writeCommandKind_logout()
         case .noop:
-            return self.writeCommandType_noop()
+            return self.writeCommandKind_noop()
         case .create(let mailbox, let params):
-            return self.writeCommandType_create(mailbox: mailbox, parameters: params)
+            return self.writeCommandKind_create(mailbox: mailbox, parameters: params)
         case .delete(let mailbox):
-            return self.writeCommandType_delete(mailbox: mailbox)
+            return self.writeCommandKind_delete(mailbox: mailbox)
         case .examine(let mailbox, let params):
-            return self.writeCommandType_examine(mailbox: mailbox, parameters: params)
+            return self.writeCommandKind_examine(mailbox: mailbox, parameters: params)
         case .list(let selectOptions, let mailbox, let mailboxPatterns, let returnOptions):
-            return try self.writeCommandType_list(selectOptions: selectOptions, mailbox: mailbox, mailboxPatterns: mailboxPatterns, returnOptions: returnOptions)
+            return self.writeCommandKind_list(selectOptions: selectOptions, mailbox: mailbox, mailboxPatterns: mailboxPatterns, returnOptions: returnOptions)
         case .lsub(let mailbox, let listMailbox):
-            return self.writeCommandType_lsub(mailbox: mailbox, listMailbox: listMailbox)
+            return self.writeCommandKind_lsub(mailbox: mailbox, listMailbox: listMailbox)
         case .rename(let from, let to, let params):
-            return self.writeCommandType_rename(from: from, to: to, parameters: params)
+            return self.writeCommandKind_rename(from: from, to: to, parameters: params)
         case .select(let mailbox, let params):
-            return self.writeCommandType_select(mailbox: mailbox, params: params)
+            return self.writeCommandKind_select(mailbox: mailbox, params: params)
         case .status(let mailbox, let attributes):
-            return self.writeCommandType_status(mailbox: mailbox, attributes: attributes)
+            return self.writeCommandKind_status(mailbox: mailbox, attributes: attributes)
         case .subscribe(let mailbox):
-            return self.writeCommandType_subscribe(mailbox: mailbox)
+            return self.writeCommandKind_subscribe(mailbox: mailbox)
         case .unsubscribe(let mailbox):
-            return self.writeCommandType_unsubscribe(mailbox: mailbox)
-        case .authenticate(let method, let initial, let data):
-            return self.writeCommandType_authenticate(method: method, initial: initial, data: data)
+            return self.writeCommandKind_unsubscribe(mailbox: mailbox)
+        case .authenticate(let method, let data):
+            return self.writeCommandKind_authenticate(method: method, data: data)
         case .login(let userid, let password):
-            return self.writeCommandType_login(userID: userid, password: password)
+            return self.writeCommandKind_login(userID: userid, password: password)
         case .starttls:
-            return self.writeCommandType_startTLS()
+            return self.writeCommandKind_startTLS()
         case .check:
-            return self.writeCommandType_check()
+            return self.writeCommandKind_check()
         case .close:
-            return self.writeCommandType_close()
+            return self.writeCommandKind_close()
         case .expunge:
-            return self.writeCommandType_expunge()
+            return self.writeCommandKind_expunge()
         case .uidExpunge(let set):
-            return self.writeCommandType_uidExpunge(set)
+            return self.writeCommandKind_uidExpunge(set)
         case .enable(let capabilities):
-            return self.writeCommandType_enable(capabilities: capabilities)
+            return self.writeCommandKind_enable(capabilities: capabilities)
         case .unselect:
-            return self.writeCommandType_unselect()
+            return self.writeCommandKind_unselect()
         case .idleStart:
-            return self.writeCommandType_idleStart()
+            return self.writeCommandKind_idleStart()
         case .idleFinish:
-            return self.writeCommandType_idleFinish()
+            return self.writeCommandKind_idleFinish()
         case .copy(let set, let mailbox):
-            return self.writeCommandType_copy(set: set, mailbox: mailbox)
+            return self.writeCommandKind_copy(set: set, mailbox: mailbox)
         case .uidCopy(let set, let mailbox):
-            return self.writeCommandType_uidCopy(set: set, mailbox: mailbox)
+            return self.writeCommandKind_uidCopy(set: set, mailbox: mailbox)
         case .fetch(let set, let atts, let modifiers):
-            return self.writeCommandType_fetch(set: set, atts: atts, modifiers: modifiers)
+            return self.writeCommandKind_fetch(set: set, atts: atts, modifiers: modifiers)
         case .uidFetch(let set, let atts, let modifiers):
-            return self.writeCommandType_uidFetch(set: set, atts: atts, modifiers: modifiers)
+            return self.writeCommandKind_uidFetch(set: set, atts: atts, modifiers: modifiers)
         case .store(let set, let modifiers, let flags):
-            return self.writeCommandType_store(set: set, modifiers: modifiers, flags: flags)
+            return self.writeCommandKind_store(set: set, modifiers: modifiers, flags: flags)
         case .uidStore(let set, let modifiers, let flags):
-            return self.writeCommandType_uidStore(set: set, modifiers: modifiers, flags: flags)
+            return self.writeCommandKind_uidStore(set: set, modifiers: modifiers, flags: flags)
         case .search(let key, let charset, let returnOptions):
-            return self.writeCommandType_search(key: key, charset: charset, returnOptions: returnOptions)
+            return self.writeCommandKind_search(key: key, charset: charset, returnOptions: returnOptions)
         case .uidSearch(let key, let charset, let returnOptions):
-            return self.writeCommandType_uidSearch(key: key, charset: charset, returnOptions: returnOptions)
+            return self.writeCommandKind_uidSearch(key: key, charset: charset, returnOptions: returnOptions)
         case .move(let set, let mailbox):
-            return self.writeCommandType_move(set: set, mailbox: mailbox)
+            return self.writeCommandKind_move(set: set, mailbox: mailbox)
         case .uidMove(let set, let mailbox):
-            return self.writeCommandType_uidMove(set: set, mailbox: mailbox)
+            return self.writeCommandKind_uidMove(set: set, mailbox: mailbox)
         case .id(let id):
-            return self.writeCommandType_id(id)
+            return self.writeCommandKind_id(id)
         case .namespace:
-            return self.writeCommandType_namespace()
+            return self.writeCommandKind_namespace()
+        case .getQuota(let quotaRoot):
+            return self.writeCommandKind_getQuota(quotaRoot: quotaRoot)
+        case .getQuotaRoot(let mailbox):
+            return self.writeCommandKind_getQuotaRoot(mailbox: mailbox)
+        case .setQuota(let quotaRoot, let quotaLimits):
+            return self.writeCommandKind_setQuota(quotaRoot: quotaRoot, resourceLimits: quotaLimits)
+        case .getMetadata(options: let options, mailbox: let mailbox, entries: let entries):
+            return self.writeCommandKind_getMetadata(options: options, mailbox: mailbox, entries: entries)
+        case .setMetadata(mailbox: let mailbox, entries: let entries):
+            return self.writeCommandKind_setMetadata(mailbox: mailbox, entries: entries)
         }
     }
 
-    private mutating func writeCommandType_capability() -> Int {
-        self.writeString("CAPABILITY")
+    private mutating func writeCommandKind_getMetadata(options: [MetadataOption], mailbox: MailboxName, entries: [ByteBuffer]) -> Int {
+        self.buffer.writeString("GETMETADATA") +
+            self.buffer.writeIfArrayHasMinimumSize(array: options, callback: { array, buffer in
+                buffer.writeSpace() + buffer.writeMetadataOptions(array)
+            }) +
+            self.buffer.writeSpace() +
+            self.buffer.writeMailbox(mailbox) +
+            self.buffer.writeSpace() +
+            self.buffer.writeEntries(entries)
     }
 
-    private mutating func writeCommandType_logout() -> Int {
-        self.writeString("LOGOUT")
+    private mutating func writeCommandKind_setMetadata(mailbox: MailboxName, entries: [EntryValue]) -> Int {
+        self.buffer.writeString("SETMETADATA ") +
+            self.buffer.writeMailbox(mailbox) +
+            self.buffer.writeSpace() +
+            self.buffer.writeEntryValues(entries)
     }
 
-    private mutating func writeCommandType_noop() -> Int {
-        self.writeString("NOOP")
+    private mutating func writeCommandKind_capability() -> Int {
+        self.buffer.writeString("CAPABILITY")
     }
 
-    private mutating func writeCommandType_append(to: MailboxName, firstMessageMetadata: AppendMessage) -> Int {
-        self.writeString("APPEND ") +
-            self.writeMailbox(to) +
-            self.writeAppendMessage(firstMessageMetadata)
+    private mutating func writeCommandKind_logout() -> Int {
+        self.buffer.writeString("LOGOUT")
     }
 
-    private mutating func writeCommandType_create(mailbox: MailboxName, parameters: [CreateParameter]) -> Int {
-        self.writeString("CREATE ") +
-            self.writeMailbox(mailbox) +
-            self.writeCreateParameters(parameters)
+    private mutating func writeCommandKind_noop() -> Int {
+        self.buffer.writeString("NOOP")
     }
 
-    private mutating func writeCommandType_delete(mailbox: MailboxName) -> Int {
-        self.writeString("DELETE ") +
-            self.writeMailbox(mailbox)
-    }
-
-    private mutating func writeCommandType_examine(mailbox: MailboxName, parameters: [SelectParameter]) -> Int {
-        self.writeString("EXAMINE ") +
-            self.writeMailbox(mailbox) +
-            self.writeIfExists(parameters) { (params) -> Int in
-                self.writeSelectParameters(params)
+    private mutating func writeCommandKind_create(mailbox: MailboxName, parameters: [CreateParameter]) -> Int {
+        self.buffer.writeString("CREATE ") +
+            self.buffer.writeMailbox(mailbox) +
+            self.buffer.writeArray(parameters, separator: "", parenthesis: false) { (param, buffer) -> Int in
+                buffer.writeCreateParameter(param)
             }
     }
 
-    private mutating func writeCommandType_list(selectOptions: ListSelectOptions?, mailbox: MailboxName, mailboxPatterns: MailboxPatterns, returnOptions: [ReturnOption]) throws -> Int {
-        self.writeString("LIST") +
-            self.writeIfExists(selectOptions) { (options) -> Int in
-                self.writeSpace() +
-                    self.writeListSelectOptions(options)
+    private mutating func writeCommandKind_delete(mailbox: MailboxName) -> Int {
+        self.buffer.writeString("DELETE ") +
+            self.buffer.writeMailbox(mailbox)
+    }
+
+    private mutating func writeCommandKind_examine(mailbox: MailboxName, parameters: [Parameter]) -> Int {
+        self.buffer.writeString("EXAMINE ") +
+            self.buffer.writeMailbox(mailbox) +
+            self.buffer.writeIfExists(parameters) { (params) -> Int in
+                self.buffer.writeParameters(params)
+            }
+    }
+
+    private mutating func writeCommandKind_list(selectOptions: ListSelectOptions?, mailbox: MailboxName, mailboxPatterns: MailboxPatterns, returnOptions: [ReturnOption]) -> Int {
+        self.buffer.writeString("LIST") +
+            self.buffer.writeIfExists(selectOptions) { (options) -> Int in
+                self.buffer.writeSpace() +
+                    self.buffer.writeListSelectOptions(options)
             } +
-            self.writeSpace() +
-            self.writeMailbox(mailbox) +
-            self.writeSpace() +
-            self.writeMailboxPatterns(mailboxPatterns) +
-            self.writeIfArrayHasMinimumSize(array: returnOptions, minimum: 1) { (_, self) in
-                self.writeSpace() +
-                    self.writeListReturnOptions(returnOptions)
+            self.buffer.writeSpace() +
+            self.buffer.writeMailbox(mailbox) +
+            self.buffer.writeSpace() +
+            self.buffer.writeMailboxPatterns(mailboxPatterns) +
+            self.buffer.writeIfArrayHasMinimumSize(array: returnOptions, minimum: 1) { (_, buffer) in
+                buffer.writeSpace() +
+                    buffer.writeListReturnOptions(returnOptions)
             }
     }
 
-    private mutating func writeCommandType_lsub(mailbox: MailboxName, listMailbox: ByteBuffer) -> Int {
-        self.writeString("LSUB ") +
-            self.writeMailbox(mailbox) +
-            self.writeSpace() +
-            self.writeIMAPString(listMailbox)
+    private mutating func writeCommandKind_lsub(mailbox: MailboxName, listMailbox: ByteBuffer) -> Int {
+        self.buffer.writeString("LSUB ") +
+            self.buffer.writeMailbox(mailbox) +
+            self.buffer.writeSpace() +
+            self.buffer.writeIMAPString(listMailbox)
     }
 
-    private mutating func writeCommandType_rename(from: MailboxName, to: MailboxName, parameters: [RenameParameter]) -> Int {
-        self.writeString("RENAME ") +
-            self.writeMailbox(from) +
-            self.writeSpace() +
-            self.writeMailbox(to) +
-            self.writeIfExists(parameters) { (params) -> Int in
-                self.writeRenameParameters(params)
+    private mutating func writeCommandKind_rename(from: MailboxName, to: MailboxName, parameters: [Parameter]) -> Int {
+        self.buffer.writeString("RENAME ") +
+            self.buffer.writeMailbox(from) +
+            self.buffer.writeSpace() +
+            self.buffer.writeMailbox(to) +
+            self.buffer.writeIfExists(parameters) { (params) -> Int in
+                self.buffer.writeParameters(params)
             }
     }
 
-    private mutating func writeCommandType_select(mailbox: MailboxName, params: [SelectParameter]) -> Int {
-        self.writeString("SELECT ") +
-            self.writeMailbox(mailbox) +
-            self.writeIfExists(params) { (params) -> Int in
-                self.writeSelectParameters(params)
+    private mutating func writeCommandKind_select(mailbox: MailboxName, params: [SelectParameter]) -> Int {
+        self.buffer.writeString("SELECT ") +
+            self.buffer.writeMailbox(mailbox) +
+            self.buffer.writeSpace() +
+            self.buffer.writeArray(params, callback: { (element, buffer) -> Int in
+                buffer.writeSelectParameter(element)
+                })
+    }
+
+    private mutating func writeCommandKind_status(mailbox: MailboxName, attributes: [MailboxAttribute]) -> Int {
+        self.buffer.writeString("STATUS ") +
+            self.buffer.writeMailbox(mailbox) +
+            self.buffer.writeString(" (") +
+            self.buffer.writeMailboxAttributes(attributes) +
+            self.buffer.writeString(")")
+    }
+
+    private mutating func writeCommandKind_subscribe(mailbox: MailboxName) -> Int {
+        self.buffer.writeString("SUBSCRIBE ") +
+            self.buffer.writeMailbox(mailbox)
+    }
+
+    private mutating func writeCommandKind_unsubscribe(mailbox: MailboxName) -> Int {
+        self.buffer.writeString("UNSUBSCRIBE ") +
+            self.buffer.writeMailbox(mailbox)
+    }
+
+    private mutating func writeCommandKind_authenticate(method: String, data: [ByteBuffer]) -> Int {
+        self.buffer.writeString("AUTHENTICATE \(method)") +
+            self.buffer.writeArray(data, separator: "", parenthesis: false) { (buffer, self) -> Int in
+                self.writeString("\r\n") + self.writeBufferAsBase64(buffer)
             }
     }
 
-    private mutating func writeCommandType_status(mailbox: MailboxName, attributes: [MailboxAttribute]) -> Int {
-        self.writeString("STATUS ") +
-            self.writeMailbox(mailbox) +
-            self.writeString(" (") +
-            self.writeMailboxAttributes(attributes) +
-            self.writeString(")")
+    private mutating func writeCommandKind_login(userID: String, password: String) -> Int {
+        self.buffer.writeString("LOGIN ") +
+            self.buffer.writeIMAPString(userID) +
+            self.buffer.writeSpace() +
+            self.buffer.writeIMAPString(password)
     }
 
-    private mutating func writeCommandType_subscribe(mailbox: MailboxName) -> Int {
-        self.writeString("SUBSCRIBE ") +
-            self.writeMailbox(mailbox)
+    private mutating func writeCommandKind_startTLS() -> Int {
+        self.buffer.writeString("STARTTLS")
     }
 
-    private mutating func writeCommandType_unsubscribe(mailbox: MailboxName) -> Int {
-        self.writeString("UNSUBSCRIBE ") +
-            self.writeMailbox(mailbox)
+    private mutating func writeCommandKind_check() -> Int {
+        self.buffer.writeString("CHECK")
     }
 
-    private mutating func writeCommandType_authenticate(method: String, initial: InitialResponse?, data: [ByteBuffer]) -> Int {
-        self.writeString("AUTHENTICATE \(method)") +
-            self.writeIfExists(initial) { (initial) -> Int in
-                self.writeSpace() +
-                    self.writeInitialResponse(initial)
-            } +
-            self.writeArray(data, separator: "", parenthesis: false) { (base64, self) -> Int in
-                var base64 = base64
-                return self.writeString("\r\n") + self.writeBuffer(&base64)
-            }
+    private mutating func writeCommandKind_close() -> Int {
+        self.buffer.writeString("CLOSE")
     }
 
-    private mutating func writeCommandType_login(userID: String, password: String) -> Int {
-        self.writeString("LOGIN ") +
-            self.writeIMAPString(userID) +
-            self.writeSpace() +
-            self.writeIMAPString(password)
+    private mutating func writeCommandKind_expunge() -> Int {
+        self.buffer.writeString("EXPUNGE")
     }
 
-    private mutating func writeCommandType_startTLS() -> Int {
-        self.writeString("STARTTLS")
+    private mutating func writeCommandKind_uidExpunge(_ set: UIDSet) -> Int {
+        self.buffer.writeString("EXPUNGE ") +
+            self.buffer.writeUIDSet(set)
     }
 
-    private mutating func writeCommandType_check() -> Int {
-        self.writeString("CHECK")
+    private mutating func writeCommandKind_unselect() -> Int {
+        self.buffer.writeString("UNSELECT")
     }
 
-    private mutating func writeCommandType_close() -> Int {
-        self.writeString("CLOSE")
+    private mutating func writeCommandKind_idleStart() -> Int {
+        self.buffer.writeString("IDLE")
     }
 
-    private mutating func writeCommandType_expunge() -> Int {
-        self.writeString("EXPUNGE")
+    private mutating func writeCommandKind_idleFinish() -> Int {
+        self.buffer.writeString("DONE")
     }
 
-    private mutating func writeCommandType_uidExpunge(_ set: UIDSet) -> Int {
-        self.writeString("EXPUNGE ") +
-            self.writeUIDSet(set)
-    }
-
-    private mutating func writeCommandType_unselect() -> Int {
-        self.writeString("UNSELECT")
-    }
-
-    private mutating func writeCommandType_idleStart() -> Int {
-        self.writeString("IDLE")
-    }
-
-    private mutating func writeCommandType_idleFinish() -> Int {
-        self.writeString("DONE")
-    }
-
-    private mutating func writeCommandType_enable(capabilities: [Capability]) -> Int {
-        self.writeString("ENABLE ") +
-            self.writeArray(capabilities, parenthesis: false) { (element, self) in
+    private mutating func writeCommandKind_enable(capabilities: [Capability]) -> Int {
+        self.buffer.writeString("ENABLE ") +
+            self.buffer.writeArray(capabilities, parenthesis: false) { (element, self) in
                 self.writeCapability(element)
             }
     }
 
-    private mutating func writeCommandType_copy(set: SequenceSet, mailbox: MailboxName) -> Int {
-        self.writeString("COPY ") +
-            self.writeSequenceSet(set) +
-            self.writeSpace() +
-            self.writeMailbox(mailbox)
+    private mutating func writeCommandKind_copy(set: SequenceSet, mailbox: MailboxName) -> Int {
+        self.buffer.writeString("COPY ") +
+            self.buffer.writeSequenceSet(set) +
+            self.buffer.writeSpace() +
+            self.buffer.writeMailbox(mailbox)
     }
 
-    private mutating func writeCommandType_uidCopy(set: UIDSet, mailbox: MailboxName) -> Int {
-        self.writeString("UID COPY ") +
-            self.writeUIDSet(set) +
-            self.writeSpace() +
-            self.writeMailbox(mailbox)
+    private mutating func writeCommandKind_uidCopy(set: UIDSet, mailbox: MailboxName) -> Int {
+        self.buffer.writeString("UID COPY ") +
+            self.buffer.writeUIDSet(set) +
+            self.buffer.writeSpace() +
+            self.buffer.writeMailbox(mailbox)
     }
 
-    private mutating func writeCommandType_fetch(set: SequenceSet, atts: [FetchAttribute], modifiers: [FetchModifier]) -> Int {
-        self.writeString("FETCH ") +
-            self.writeSequenceSet(set) +
-            self.writeSpace() +
-            self.writeFetchAttributeList(atts) +
-            self.writeIfExists(modifiers) { (modifiers) -> Int in
-                self.writeFetchModifiers(modifiers)
+    private mutating func writeCommandKind_fetch(set: SequenceSet, atts: [FetchAttribute], modifiers: [Parameter]) -> Int {
+        self.buffer.writeString("FETCH ") +
+            self.buffer.writeSequenceSet(set) +
+            self.buffer.writeSpace() +
+            self.buffer.writeFetchAttributeList(atts) +
+            self.buffer.writeIfExists(modifiers) { (modifiers) -> Int in
+                self.buffer.writeParameters(modifiers)
             }
     }
 
-    private mutating func writeCommandType_uidFetch(set: UIDSet, atts: [FetchAttribute], modifiers: [FetchModifier]) -> Int {
-        self.writeString("UID FETCH ") +
-            self.writeUIDSet(set) +
-            self.writeSpace() +
-            self.writeFetchAttributeList(atts) +
-            self.writeIfExists(modifiers) { (modifiers) -> Int in
-                self.writeFetchModifiers(modifiers)
+    private mutating func writeCommandKind_uidFetch(set: UIDSet, atts: [FetchAttribute], modifiers: [Parameter]) -> Int {
+        self.buffer.writeString("UID FETCH ") +
+            self.buffer.writeUIDSet(set) +
+            self.buffer.writeSpace() +
+            self.buffer.writeFetchAttributeList(atts) +
+            self.buffer.writeIfExists(modifiers) { (modifiers) -> Int in
+                self.buffer.writeParameters(modifiers)
             }
     }
 
-    private mutating func writeCommandType_store(set: SequenceSet, modifiers: [StoreModifier], flags: StoreFlags) -> Int {
-        self.writeString("STORE ") +
-            self.writeSequenceSet(set) +
-            self.writeIfArrayHasMinimumSize(array: modifiers) { (modifiers, self) -> Int in
-                self.writeStoreModifiers(modifiers)
+    private mutating func writeCommandKind_store(set: SequenceSet, modifiers: [StoreModifier], flags: StoreFlags) -> Int {
+        self.buffer.writeString("STORE ") +
+            self.buffer.writeSequenceSet(set) +
+            self.buffer.writeIfArrayHasMinimumSize(array: modifiers) { (modifiers, buffer) -> Int in
+                buffer.writeSpace() +
+                    buffer.writeArray(modifiers) { (element, buffer) -> Int in
+                        buffer.writeStoreModifier(element)
+                    }
             } +
-            self.writeSpace() +
-            self.writeStoreAttributeFlags(flags)
+            self.buffer.writeSpace() +
+            self.buffer.writeStoreAttributeFlags(flags)
     }
 
-    private mutating func writeCommandType_uidStore(set: UIDSet, modifiers: [StoreModifier], flags: StoreFlags) -> Int {
-        self.writeString("UID STORE ") +
-            self.writeUIDSet(set) +
-            self.writeIfArrayHasMinimumSize(array: modifiers) { (modifiers, self) -> Int in
-                self.writeStoreModifiers(modifiers)
+    private mutating func writeCommandKind_uidStore(set: UIDSet, modifiers: [Parameter], flags: StoreFlags) -> Int {
+        self.buffer.writeString("UID STORE ") +
+            self.buffer.writeUIDSet(set) +
+            self.buffer.writeIfArrayHasMinimumSize(array: modifiers) { (modifiers, buffer) -> Int in
+                buffer.writeParameters(modifiers)
             } +
-            self.writeSpace() +
-            self.writeStoreAttributeFlags(flags)
+            self.buffer.writeSpace() +
+            self.buffer.writeStoreAttributeFlags(flags)
     }
 
-    private mutating func writeCommandType_search(key: SearchKey, charset: String? = nil, returnOptions: [SearchReturnOption] = []) -> Int {
-        self.writeString("SEARCH") +
-            self.writeIfExists(returnOptions) { (options) -> Int in
-                self.writeSearchReturnOptions(options)
+    private mutating func writeCommandKind_search(key: SearchKey, charset: String? = nil, returnOptions: [SearchReturnOption] = []) -> Int {
+        self.buffer.writeString("SEARCH") +
+            self.buffer.writeIfExists(returnOptions) { (options) -> Int in
+                self.buffer.writeSearchReturnOptions(options)
             } +
-            self.writeSpace() +
-            self.writeIfExists(charset) { (charset) -> Int in
-                self.writeString("CHARSET \(charset) ")
+            self.buffer.writeSpace() +
+            self.buffer.writeIfExists(charset) { (charset) -> Int in
+                self.buffer.writeString("CHARSET \(charset) ")
             } +
-            self.writeSearchKey(key)
+            self.buffer.writeSearchKey(key)
     }
 
-    private mutating func writeCommandType_uidSearch(key: SearchKey, charset: String? = nil, returnOptions: [SearchReturnOption] = []) -> Int {
-        self.writeString("UID ") +
-            self.writeCommandType_search(key: key, charset: charset, returnOptions: returnOptions)
+    private mutating func writeCommandKind_uidSearch(key: SearchKey, charset: String? = nil, returnOptions: [SearchReturnOption] = []) -> Int {
+        self.buffer.writeString("UID ") +
+            self.writeCommandKind_search(key: key, charset: charset, returnOptions: returnOptions)
     }
 
-    private mutating func writeCommandType_move(set: SequenceSet, mailbox: MailboxName) -> Int {
-        self.writeString("MOVE ") +
-            self.writeSequenceSet(set) +
-            self.writeSpace() +
-            self.writeMailbox(mailbox)
+    private mutating func writeCommandKind_move(set: SequenceSet, mailbox: MailboxName) -> Int {
+        self.buffer.writeString("MOVE ") +
+            self.buffer.writeSequenceSet(set) +
+            self.buffer.writeSpace() +
+            self.buffer.writeMailbox(mailbox)
     }
 
-    private mutating func writeCommandType_uidMove(set: UIDSet, mailbox: MailboxName) -> Int {
-        self.writeString("UID MOVE ") +
-            self.writeUIDSet(set) +
-            self.writeSpace() +
-            self.writeMailbox(mailbox)
+    private mutating func writeCommandKind_uidMove(set: UIDSet, mailbox: MailboxName) -> Int {
+        self.buffer.writeString("UID MOVE ") +
+            self.buffer.writeUIDSet(set) +
+            self.buffer.writeSpace() +
+            self.buffer.writeMailbox(mailbox)
     }
 
-    private mutating func writeCommandType_namespace() -> Int {
-        self.writeNamespaceCommand()
+    private mutating func writeCommandKind_namespace() -> Int {
+        self.buffer.writeNamespaceCommand()
     }
 
-    @discardableResult mutating func writeCommandType_id(_ id: [IDParameter]) -> Int {
-        self.writeString("ID ") +
-            self.writeIDParameters(id)
+    @discardableResult mutating func writeCommandKind_id(_ id: [IDParameter]) -> Int {
+        self.buffer.writeString("ID ") +
+            self.buffer.writeIDParameters(id)
+    }
+
+    private mutating func writeCommandKind_getQuota(quotaRoot: QuotaRoot) -> Int {
+        self.buffer.writeString("GETQUOTA ") +
+            self.buffer.writeQuotaRoot(quotaRoot)
+    }
+
+    private mutating func writeCommandKind_getQuotaRoot(mailbox: MailboxName) -> Int {
+        self.buffer.writeString("GETQUOTAROOT ") +
+            self.buffer.writeMailbox(mailbox)
+    }
+
+    private mutating func writeCommandKind_setQuota(quotaRoot: QuotaRoot, resourceLimits: [QuotaLimit]) -> Int {
+        self.buffer.writeString("SETQUOTA ") +
+            self.buffer.writeQuotaRoot(quotaRoot) +
+            self.buffer.writeSpace() +
+            self.buffer.writeArray(resourceLimits, callback: { (limit, self) in
+                self.writeQuotaLimit(limit)
+            })
     }
 }

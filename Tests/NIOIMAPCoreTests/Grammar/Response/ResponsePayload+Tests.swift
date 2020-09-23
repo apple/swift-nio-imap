@@ -30,13 +30,14 @@ extension ResponsePayload_Tests {
             (.messageData(.expunge(2)), "2 EXPUNGE", #line),
             (.enableData([.enable]), "ENABLED ENABLE", #line),
             (.id([.init(key: "key", value: nil)]), "ID (\"key\" NIL)", #line),
+            (.quotaRoot(.init("INBOX"), .init("Root")), "QUOTAROOT \"INBOX\" \"Root\"", #line),
+            (
+                .quota(.init("Root"), [.init(resourceName: "STORAGE", usage: 10, limit: 512)]),
+                "QUOTA \"Root\" (STORAGE 10 512)",
+                #line
+            ),
+            (.metadata(.list(list: ["a"], mailbox: .inbox)), "METADATA \"INBOX\" \"a\"", #line),
         ]
-
-        for (test, expectedString, line) in inputs {
-            self.testBuffer.clear()
-            let size = self.testBuffer.writeResponsePayload(test)
-            XCTAssertEqual(size, expectedString.utf8.count, line: line)
-            XCTAssertEqual(self.testBufferString, expectedString, line: line)
-        }
+        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeResponsePayload($0) })
     }
 }

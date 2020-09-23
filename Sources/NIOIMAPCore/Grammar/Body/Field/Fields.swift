@@ -17,18 +17,18 @@ import struct NIO.ByteBuffer
 extension BodyStructure {
     /// IMAPv4 `body-fields`
     public struct Fields: Equatable {
-        public var parameter: [FieldParameterPair]
-        public var id: NString
-        public var description: NString
+        public var parameter: [BodyStructure.ParameterPair]
+        public var id: String?
+        public var description: String?
         public var encoding: Encoding
-        public var octets: Int
+        public var octetCount: Int
 
-        public init(parameter: [FieldParameterPair], id: NString, description: NString, encoding: BodyStructure.Encoding, octets: Int) {
+        public init(parameter: [BodyStructure.ParameterPair], id: String?, description: String?, encoding: BodyStructure.Encoding, octetCount: Int) {
             self.parameter = parameter
             self.id = id
             self.description = description
             self.encoding = encoding
-            self.octets = octets
+            self.octetCount = octetCount
         }
     }
 }
@@ -37,13 +37,13 @@ extension BodyStructure {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeBodyFields(_ fields: BodyStructure.Fields) -> Int {
-        self.writeBodyFieldParameters(fields.parameter) +
+        self.writeBodyParameterPairs(fields.parameter) +
             self.writeSpace() +
             self.writeNString(fields.id) +
             self.writeSpace() +
             self.writeNString(fields.description) +
             self.writeSpace() +
             self.writeBodyEncoding(fields.encoding) +
-            self.writeString(" \(fields.octets)")
+            self.writeString(" \(fields.octetCount)")
     }
 }

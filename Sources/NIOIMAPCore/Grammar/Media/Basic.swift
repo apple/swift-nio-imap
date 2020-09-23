@@ -15,42 +15,50 @@
 import struct NIO.ByteBuffer
 
 extension Media {
-    public struct BasicType: Equatable {
-        var _backing: String
+    public struct BasicKind: RawRepresentable, CustomStringConvertible, Equatable {
+        public var rawValue: String
+
+        public init(rawValue: String) {
+            self.rawValue = rawValue.uppercased()
+        }
 
         /// IMAP4rev1 APPLICATION
-        public static var application: Self { .init(_backing: "APPLICATION") }
+        public static var application: Self { .init(rawValue: "APPLICATION") }
 
         /// IMAP4rev1 AUDIO
-        public static var audio: Self { .init(_backing: "AUDIO") }
+        public static var audio: Self { .init(rawValue: "AUDIO") }
 
         /// IMAP4rev1 IMAGE
-        public static var image: Self { .init(_backing: "IMAGE") }
+        public static var image: Self { .init(rawValue: "IMAGE") }
 
         /// IMAP4rev1 MESSAGE
-        public static var message: Self { .init(_backing: "MESSAGE") }
+        public static var message: Self { .init(rawValue: "MESSAGE") }
 
         /// IMAP4rev1 VIDEO
-        public static var video: Self { .init(_backing: "VIDEO") }
+        public static var video: Self { .init(rawValue: "VIDEO") }
 
         /// IMAP4rev1 FONT
-        public static var font: Self { .init(_backing: "FONT") }
+        public static var font: Self { .init(rawValue: "FONT") }
 
         /// Creates a new type with the given `String`.
         /// - parameter string: The type to create. Note that the `String` will be uppercased.
         /// - returns: A new type from the given `String`.
         public static func other(_ string: String) -> Self {
-            self.init(_backing: string.uppercased())
+            self.init(rawValue: string)
+        }
+
+        public var description: String {
+            rawValue
         }
     }
 
     /// IMAPv4 `media-basic`
     public struct Basic: Equatable {
-        public var type: BasicType
+        public var kind: BasicKind
         public var subtype: BodyStructure.MediaSubtype
 
-        public init(type: Media.BasicType, subtype: BodyStructure.MediaSubtype) {
-            self.type = type
+        public init(kind: Media.BasicKind, subtype: BodyStructure.MediaSubtype) {
+            self.kind = kind
             self.subtype = subtype
         }
     }
@@ -59,17 +67,17 @@ extension Media {
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeMediaBasicType(_ type: Media.BasicType) -> Int {
+    @discardableResult mutating func writeMediaBasicKind(_ type: Media.BasicKind) -> Int {
         switch type {
         case .application, .audio, .image, .message, .video:
-            return self.writeString("\"\(type._backing)\"")
+            return self.writeString("\"\(type.rawValue)\"")
         default:
-            return self.writeString(type._backing)
+            return self.writeString(type.rawValue)
         }
     }
 
     @discardableResult mutating func writeMediaBasic(_ media: Media.Basic) -> Int {
-        self.writeMediaBasicType(media.type) +
+        self.writeMediaBasicKind(media.kind) +
             self.writeSpace() +
             self.writeMediaSubtype(media.subtype)
     }

@@ -54,9 +54,9 @@ extension ResponseParser_Tests {
                     .response(.fetchResponse(.start(12190))),
                     .response(
                         .fetchResponse(.simpleAttribute(.body(.multipart(.init(parts: [
-                            .singlepart(.init(type: .text(.init(mediaText: "PLAIN", lines: 47)), fields: .init(parameter: [.init(field: "CHARSET", value: "utf-8")], id: nil, description: nil, encoding: .quotedPrintable, octets: 1772), extension: .init(fieldMD5: nil, dspLanguage: .init(fieldDisposition: nil, fieldLanguage: .init(languages: [], location: .init(location: nil, extensions: [])))))),
-                            .singlepart(.init(type: .text(.init(mediaText: "HTML", lines: 40)), fields: .init(parameter: [.init(field: "CHARSET", value: "utf-8")], id: nil, description: nil, encoding: .quotedPrintable, octets: 2778), extension: .init(fieldMD5: nil, dspLanguage: .init(fieldDisposition: nil, fieldLanguage: .init(languages: [], location: .init(location: nil, extensions: [])))))),
-                        ], mediaSubtype: .init("ALTERNATIVE"), multipartExtension: .init(parameters: [.init(field: "BOUNDARY", value: "Apple-Mail=_0D97185D-4FF1-42FE-9B8F-A0759D299015")], dspLanguage: .init(fieldDisposition: nil, fieldLanguage: .init(languages: [], location: .init(location: nil, extensions: [])))))), structure: true)))
+                            .singlepart(.init(type: .text(.init(mediaText: "PLAIN", lineCount: 47)), fields: .init(parameter: [.init(field: "CHARSET", value: "utf-8")], id: nil, description: nil, encoding: .quotedPrintable, octetCount: 1772), extension: .init(fieldMD5: nil, dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: .init(location: nil, extensions: [])))))),
+                            .singlepart(.init(type: .text(.init(mediaText: "HTML", lineCount: 40)), fields: .init(parameter: [.init(field: "CHARSET", value: "utf-8")], id: nil, description: nil, encoding: .quotedPrintable, octetCount: 2778), extension: .init(fieldMD5: nil, dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: .init(location: nil, extensions: [])))))),
+                        ], mediaSubtype: .init("ALTERNATIVE"), extension: .init(parameters: [.init(field: "BOUNDARY", value: "Apple-Mail=_0D97185D-4FF1-42FE-9B8F-A0759D299015")], dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: .init(location: nil, extensions: [])))))), hasExtensionData: true)))
                     ),
                     .response(.fetchResponse(.finish)),
                 ],
@@ -68,8 +68,8 @@ extension ResponseParser_Tests {
                     .response(.fetchResponse(.start(12194))),
                     .response(
                         .fetchResponse(.simpleAttribute(.body(.multipart(.init(parts: [
-                            .singlepart(.init(type: .text(.init(mediaText: "HTML", lines: 50)), fields: .init(parameter: [.init(field: "CHARSET", value: "UTF-8")], id: nil, description: nil, encoding: .quotedPrintable, octets: 3034), extension: .init(fieldMD5: nil, dspLanguage: .init(fieldDisposition: nil, fieldLanguage: .init(languages: [], location: .init(location: nil, extensions: [])))))),
-                        ], mediaSubtype: .init("ALTERNATIVE"), multipartExtension: .init(parameters: [.init(field: "BOUNDARY", value: "_____5C088583DDA30A778CEA0F5BFE2856D1")], dspLanguage: .init(fieldDisposition: nil, fieldLanguage: .init(languages: [], location: .init(location: nil, extensions: [])))))), structure: true)))
+                            .singlepart(.init(type: .text(.init(mediaText: "HTML", lineCount: 50)), fields: .init(parameter: [.init(field: "CHARSET", value: "UTF-8")], id: nil, description: nil, encoding: .quotedPrintable, octetCount: 3034), extension: .init(fieldMD5: nil, dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: .init(location: nil, extensions: [])))))),
+                        ], mediaSubtype: .init("ALTERNATIVE"), extension: .init(parameters: [.init(field: "BOUNDARY", value: "_____5C088583DDA30A778CEA0F5BFE2856D1")], dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: .init(location: nil, extensions: [])))))), hasExtensionData: true)))
                     ),
                     .response(.fetchResponse(.finish)),
                 ],
@@ -81,9 +81,9 @@ extension ResponseParser_Tests {
                     .response(.fetchResponse(.start(12180))),
                     .response(
                         .fetchResponse(.simpleAttribute(.body(.multipart(.init(parts: [
-                            .singlepart(.init(type: .text(.init(mediaText: "PLAIN", lines: 5)), fields: .init(parameter: [.init(field: "CHARSET", value: "UTF-8")], id: nil, description: nil, encoding: .sevenBit, octets: 221), extension: .init(fieldMD5: nil, dspLanguage: .init(fieldDisposition: nil, fieldLanguage: .init(languages: [], location: .init(location: nil, extensions: [])))))),
-                            .singlepart(.init(type: .text(.init(mediaText: "HTML", lines: 20)), fields: .init(parameter: [.init(field: "CHARSET", value: "UTF-8")], id: nil, description: nil, encoding: .sevenBit, octets: 2075), extension: .init(fieldMD5: nil, dspLanguage: .init(fieldDisposition: nil, fieldLanguage: .init(languages: [], location: .init(location: nil, extensions: [])))))),
-                        ], mediaSubtype: .init("ALTERNATIVE"), multipartExtension: .init(parameters: [.init(field: "BOUNDARY", value: "--==_mimepart_5efddab8ca39a_6a343f841aacb93410876c"), .init(field: "CHARSET", value: "UTF-8")], dspLanguage: .init(fieldDisposition: nil, fieldLanguage: .init(languages: [], location: .init(location: nil, extensions: [])))))), structure: true)))
+                            .singlepart(.init(type: .text(.init(mediaText: "PLAIN", lineCount: 5)), fields: .init(parameter: [.init(field: "CHARSET", value: "UTF-8")], id: nil, description: nil, encoding: .sevenBit, octetCount: 221), extension: .init(fieldMD5: nil, dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: .init(location: nil, extensions: [])))))),
+                            .singlepart(.init(type: .text(.init(mediaText: "HTML", lineCount: 20)), fields: .init(parameter: [.init(field: "CHARSET", value: "UTF-8")], id: nil, description: nil, encoding: .sevenBit, octetCount: 2075), extension: .init(fieldMD5: nil, dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: .init(location: nil, extensions: [])))))),
+                        ], mediaSubtype: .init("ALTERNATIVE"), extension: .init(parameters: [.init(field: "BOUNDARY", value: "--==_mimepart_5efddab8ca39a_6a343f841aacb93410876c"), .init(field: "CHARSET", value: "UTF-8")], dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: .init(location: nil, extensions: [])))))), hasExtensionData: true)))
                     ),
                     .response(.fetchResponse(.finish)),
                 ],
@@ -95,9 +95,9 @@ extension ResponseParser_Tests {
                     .response(.fetchResponse(.start(12182))),
                     .response(
                         .fetchResponse(.simpleAttribute(.body(.multipart(.init(parts: [
-                            .singlepart(.init(type: .text(.init(mediaText: "PLAIN", lines: 4078)), fields: .init(parameter: [.init(field: "CHARSET", value: "utf-8")], id: nil, description: nil, encoding: .quotedPrintable, octets: 239844), extension: .init(fieldMD5: nil, dspLanguage: .init(fieldDisposition: nil, fieldLanguage: .init(languages: [], location: .init(location: nil, extensions: [])))))),
-                            .singlepart(.init(type: .text(.init(mediaText: "HTML", lines: 4078)), fields: .init(parameter: [.init(field: "CHARSET", value: "utf-8")], id: nil, description: nil, encoding: .quotedPrintable, octets: 239844), extension: .init(fieldMD5: nil, dspLanguage: .init(fieldDisposition: nil, fieldLanguage: .init(languages: [], location: .init(location: nil, extensions: [])))))),
-                        ], mediaSubtype: .init("ALTERNATIVE"), multipartExtension: .init(parameters: [.init(field: "BOUNDARY", value: "===============8996999810533184102==")], dspLanguage: .init(fieldDisposition: nil, fieldLanguage: .init(languages: [], location: .init(location: nil, extensions: [])))))), structure: true)))
+                            .singlepart(.init(type: .text(.init(mediaText: "PLAIN", lineCount: 4078)), fields: .init(parameter: [.init(field: "CHARSET", value: "utf-8")], id: nil, description: nil, encoding: .quotedPrintable, octetCount: 239844), extension: .init(fieldMD5: nil, dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: .init(location: nil, extensions: [])))))),
+                            .singlepart(.init(type: .text(.init(mediaText: "HTML", lineCount: 4078)), fields: .init(parameter: [.init(field: "CHARSET", value: "utf-8")], id: nil, description: nil, encoding: .quotedPrintable, octetCount: 239844), extension: .init(fieldMD5: nil, dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: .init(location: nil, extensions: [])))))),
+                        ], mediaSubtype: .init("ALTERNATIVE"), extension: .init(parameters: [.init(field: "BOUNDARY", value: "===============8996999810533184102==")], dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: .init(location: nil, extensions: [])))))), hasExtensionData: true)))
                     ),
                     .response(.fetchResponse(.finish)),
                 ],
@@ -108,7 +108,7 @@ extension ResponseParser_Tests {
                 [
                     .response(.fetchResponse(.start(12183))),
                     .response(
-                        .fetchResponse(.simpleAttribute(.body(.singlepart(.init(type: .text(.init(mediaText: "HTML", lines: 603)), fields: .init(parameter: [], id: nil, description: nil, encoding: .binary, octets: 28803), extension: .init(fieldMD5: nil, dspLanguage: .init(fieldDisposition: nil, fieldLanguage: .init(languages: [], location: .init(location: nil, extensions: [])))))), structure: true)))
+                        .fetchResponse(.simpleAttribute(.body(.singlepart(.init(type: .text(.init(mediaText: "HTML", lineCount: 603)), fields: .init(parameter: [], id: nil, description: nil, encoding: .binary, octetCount: 28803), extension: .init(fieldMD5: nil, dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: .init(location: nil, extensions: [])))))), hasExtensionData: true)))
                     ),
                     .response(.fetchResponse(.finish)),
                 ],
@@ -119,7 +119,7 @@ extension ResponseParser_Tests {
                 [
                     .response(.fetchResponse(.start(12184))),
                     .response(
-                        .fetchResponse(.simpleAttribute(.body(.singlepart(.init(type: .text(.init(mediaText: "PLAIN", lines: 30)), fields: .init(parameter: [.init(field: "CHARSET", value: "utf-8")], id: "<DDB621064D883242BBC8DBE205F0250F@pex.exch.apple.com>", description: nil, encoding: .base64, octets: 2340), extension: .init(fieldMD5: nil, dspLanguage: .init(fieldDisposition: nil, fieldLanguage: .init(languages: ["EN-US"], location: .init(location: nil, extensions: [])))))), structure: true)))
+                        .fetchResponse(.simpleAttribute(.body(.singlepart(.init(type: .text(.init(mediaText: "PLAIN", lineCount: 30)), fields: .init(parameter: [.init(field: "CHARSET", value: "utf-8")], id: "<DDB621064D883242BBC8DBE205F0250F@pex.exch.apple.com>", description: nil, encoding: .base64, octetCount: 2340), extension: .init(fieldMD5: nil, dispositionAndLanguage: .init(disposition: nil, language: .init(languages: ["EN-US"], location: .init(location: nil, extensions: [])))))), hasExtensionData: true)))
                     ),
                     .response(.fetchResponse(.finish)),
                 ],
@@ -132,18 +132,75 @@ extension ResponseParser_Tests {
                     .response(
                         .fetchResponse(
                             .simpleAttribute(.body(.multipart(.init(parts: [
-                                .singlepart(.init(type: .text(.init(mediaText: "PLAIN", lines: 170)), fields: .init(parameter: [.init(field: "CHARSET", value: "utf-8")], id: nil, description: nil, encoding: .quotedPrintable, octets: 6990), extension: .init(fieldMD5: nil, dspLanguage: .init(fieldDisposition: nil, fieldLanguage: .init(languages: [], location: .init(location: nil, extensions: [])))))),
+                                .singlepart(.init(type: .text(.init(mediaText: "PLAIN", lineCount: 170)), fields: .init(parameter: [.init(field: "CHARSET", value: "utf-8")], id: nil, description: nil, encoding: .quotedPrintable, octetCount: 6990), extension: .init(fieldMD5: nil, dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: .init(location: nil, extensions: [])))))),
                                 .multipart(.init(parts: [
-                                    .singlepart(.init(type: .text(.init(mediaText: "HTML", lines: 274)), fields: .init(parameter: [.init(field: "CHARSET", value: "utf-8")], id: nil, description: nil, encoding: .quotedPrintable, octets: 18865), extension: .init(fieldMD5: nil, dspLanguage: .init(fieldDisposition: nil, fieldLanguage: .init(languages: [], location: .init(location: nil, extensions: [])))))),
-                                    .singlepart(.init(type: .basic(.init(type: .application, subtype: .init("OCTET-STREAM"))), fields: .init(parameter: [.init(field: "X-UNIX-MODE", value: "0644"), .init(field: "NAME", value: "Whiteboard on Webex.key")], id: nil, description: nil, encoding: .base64, octets: 4876604), extension: .init(fieldMD5: nil, dspLanguage: .init(fieldDisposition: .init(string: "ATTACHMENT", parameter: [.init(field: "FILENAME", value: "Whiteboard on Webex.key")]), fieldLanguage: .init(languages: [], location: .init(location: nil, extensions: [])))))),
-                                    .singlepart(.init(type: .text(.init(mediaText: "HTML", lines: 17)), fields: .init(parameter: [.init(field: "CHARSET", value: "us-ascii")], id: nil, description: nil, encoding: .quotedPrintable, octets: 1143), extension: .init(fieldMD5: nil, dspLanguage: .init(fieldDisposition: nil, fieldLanguage: .init(languages: [], location: .init(location: nil, extensions: [])))))),
-                                    .singlepart(.init(type: .basic(.init(type: .application, subtype: .init("PDF"))), fields: .init(parameter: [.init(field: "X-UNIX-MODE", value: "0644"), .init(field: "NAME", value: "Whiteboard on Webex.pdf")], id: nil, description: nil, encoding: .base64, octets: 1191444), extension: .init(fieldMD5: nil, dspLanguage: .init(fieldDisposition: .init(string: "INLINE", parameter: [.init(field: "FILENAME", value: "Whiteboard on Webex.pdf")]), fieldLanguage: .init(languages: [], location: .init(location: nil, extensions: [])))))),
-                                    .singlepart(.init(type: .text(.init(mediaText: "HTML", lines: 32)), fields: .init(parameter: [.init(field: "CHARSET", value: "us-ascii")], id: nil, description: nil, encoding: .quotedPrintable, octets: 2217), extension: .init(fieldMD5: nil, dspLanguage: .init(fieldDisposition: nil, fieldLanguage: .init(languages: [], location: .init(location: nil, extensions: [])))))),
-                                    .singlepart(.init(type: .basic(.init(type: .application, subtype: .init("PDF"))), fields: .init(parameter: [.init(field: "X-UNIX-MODE", value: "0666"), .init(field: "NAME", value: "Resume.pdf")], id: nil, description: nil, encoding: .base64, octets: 217550), extension: .init(fieldMD5: nil, dspLanguage: .init(fieldDisposition: .init(string: "INLINE", parameter: [.init(field: "FILENAME", value: "Resume.pdf")]), fieldLanguage: .init(languages: [], location: .init(location: nil, extensions: [])))))),
-                                    .singlepart(.init(type: .text(.init(mediaText: "HTML", lines: 62)), fields: .init(parameter: [.init(field: "CHARSET", value: "utf-8")], id: nil, description: nil, encoding: .quotedPrintable, octets: 4450), extension: .init(fieldMD5: nil, dspLanguage: .init(fieldDisposition: nil, fieldLanguage: .init(languages: [], location: .init(location: nil, extensions: [])))))),
-                                ], mediaSubtype: .init("MIXED"), multipartExtension: .init(parameters: [.init(field: "BOUNDARY", value: "Apple-Mail=_1B76125E-EB81-4B78-A023-B30D1F9070F2")], dspLanguage: .init(fieldDisposition: nil, fieldLanguage: .init(languages: [], location: .init(location: nil, extensions: [])))))),
-                            ], mediaSubtype: .init("ALTERNATIVE"), multipartExtension: .init(parameters: [.init(field: "BOUNDARY", value: "Apple-Mail=_2F0988E2-CA7E-4379-B088-7E556A97E21F")], dspLanguage: .init(fieldDisposition: nil, fieldLanguage: .init(languages: [], location: .init(location: nil, extensions: [])))))), structure: true))
+                                    .singlepart(.init(type: .text(.init(mediaText: "HTML", lineCount: 274)), fields: .init(parameter: [.init(field: "CHARSET", value: "utf-8")], id: nil, description: nil, encoding: .quotedPrintable, octetCount: 18865), extension: .init(fieldMD5: nil, dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: .init(location: nil, extensions: [])))))),
+                                    .singlepart(.init(type: .basic(.init(kind: .application, subtype: .init("OCTET-STREAM"))), fields: .init(parameter: [.init(field: "X-UNIX-MODE", value: "0644"), .init(field: "NAME", value: "Whiteboard on Webex.key")], id: nil, description: nil, encoding: .base64, octetCount: 4876604), extension: .init(fieldMD5: nil, dispositionAndLanguage: .init(disposition: .init(kind: "ATTACHMENT", parameter: [.init(field: "FILENAME", value: "Whiteboard on Webex.key")]), language: .init(languages: [], location: .init(location: nil, extensions: [])))))),
+                                    .singlepart(.init(type: .text(.init(mediaText: "HTML", lineCount: 17)), fields: .init(parameter: [.init(field: "CHARSET", value: "us-ascii")], id: nil, description: nil, encoding: .quotedPrintable, octetCount: 1143), extension: .init(fieldMD5: nil, dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: .init(location: nil, extensions: [])))))),
+                                    .singlepart(.init(type: .basic(.init(kind: .application, subtype: .init("PDF"))), fields: .init(parameter: [.init(field: "X-UNIX-MODE", value: "0644"), .init(field: "NAME", value: "Whiteboard on Webex.pdf")], id: nil, description: nil, encoding: .base64, octetCount: 1191444), extension: .init(fieldMD5: nil, dispositionAndLanguage: .init(disposition: .init(kind: "INLINE", parameter: [.init(field: "FILENAME", value: "Whiteboard on Webex.pdf")]), language: .init(languages: [], location: .init(location: nil, extensions: [])))))),
+                                    .singlepart(.init(type: .text(.init(mediaText: "HTML", lineCount: 32)), fields: .init(parameter: [.init(field: "CHARSET", value: "us-ascii")], id: nil, description: nil, encoding: .quotedPrintable, octetCount: 2217), extension: .init(fieldMD5: nil, dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: .init(location: nil, extensions: [])))))),
+                                    .singlepart(.init(type: .basic(.init(kind: .application, subtype: .init("PDF"))), fields: .init(parameter: [.init(field: "X-UNIX-MODE", value: "0666"), .init(field: "NAME", value: "Resume.pdf")], id: nil, description: nil, encoding: .base64, octetCount: 217550), extension: .init(fieldMD5: nil, dispositionAndLanguage: .init(disposition: .init(kind: "INLINE", parameter: [.init(field: "FILENAME", value: "Resume.pdf")]), language: .init(languages: [], location: .init(location: nil, extensions: [])))))),
+                                    .singlepart(.init(type: .text(.init(mediaText: "HTML", lineCount: 62)), fields: .init(parameter: [.init(field: "CHARSET", value: "utf-8")], id: nil, description: nil, encoding: .quotedPrintable, octetCount: 4450), extension: .init(fieldMD5: nil, dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: .init(location: nil, extensions: [])))))),
+                                ], mediaSubtype: .init("MIXED"), extension: .init(parameters: [.init(field: "BOUNDARY", value: "Apple-Mail=_1B76125E-EB81-4B78-A023-B30D1F9070F2")], dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: .init(location: nil, extensions: [])))))),
+                            ], mediaSubtype: .init("ALTERNATIVE"), extension: .init(parameters: [.init(field: "BOUNDARY", value: "Apple-Mail=_2F0988E2-CA7E-4379-B088-7E556A97E21F")], dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: .init(location: nil, extensions: [])))))), hasExtensionData: true))
                         )
+                    ),
+                    .response(.fetchResponse(.finish)),
+                ],
+                #line
+            ),
+            (
+                #"* 53 FETCH (BODYSTRUCTURE (("TEXT" "HTML" NIL NIL NIL "7BIT" 151 0 NIL NIL NIL) "MIXED" ("BOUNDARY" "----=rfsewr") NIL NIL))"#,
+                [
+                    .response(.fetchResponse(.start(53))),
+                    .response(.fetchResponse(.simpleAttribute(.body(.multipart(.init(parts: [
+                        .singlepart(.init(type: .text(.init(mediaText: "HTML", lineCount: 0)), fields: BodyStructure.Fields(parameter: [], id: nil, description: nil, encoding: .sevenBit, octetCount: 151), extension: BodyStructure.Singlepart.Extension(fieldMD5: nil, dispositionAndLanguage: BodyStructure.DispositionAndLanguage(disposition: nil, language: BodyStructure.LanguageLocation(languages: [], location: nil))))),
+                    ], mediaSubtype: .init("MIXED"), extension: .init(parameters: [.init(field: "BOUNDARY", value: "----=rfsewr")], dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: nil))))), hasExtensionData: true)))),
+                    .response(.fetchResponse(.finish)),
+                ],
+                #line
+            ),
+            (
+                #"* 433 FETCH (BODYSTRUCTURE (((("TEXT" "PLAIN" ("CHARSET" "ISO-8859-1") NIL NIL "QUOTED-PRINTABLE" 710 20 NIL NIL NIL)("TEXT" "HTML" ("CHARSET" "ISO-8859-1") NIL NIL "QUOTED-PRINTABLE" 4323 42 NIL ("INLINE" NIL) NIL) "ALTERNATIVE" ("BOUNDARY" "4__=rtfgha") NIL NIL)("IMAGE" "JPEG" ("NAME" "bike.jpeg") "<2__=lgkfjr>" NIL "BASE64" 64 NIL ("INLINE" ("FILENAME" "bike.jpeg")) NIL) "RELATED" ("BOUNDARY" "0__=rtfgaa") NIL NIL)("APPLICATION" "PDF" ("NAME" "title.pdf") "<5__=jlgkfr>" NIL "BASE64" 333980 NIL ("ATTACHMENT" ("FILENAME" "list.pdf")) NIL) "MIXED" ("BOUNDARY" "1__=tfgrhs") NIL NIL))"#,
+                [
+                    .response(.fetchResponse(.start(433))),
+                    .response(
+                        .fetchResponse(.simpleAttribute(.body(.multipart(.init(parts: [
+                            .multipart(
+                                .init(parts: [
+                                    .multipart(
+                                        .init(parts: [
+                                            .singlepart(.init(type: .text(.init(mediaText: "PLAIN", lineCount: 20)), fields: .init(parameter: [.init(field: "CHARSET", value: "ISO-8859-1")], id: nil, description: nil, encoding: .quotedPrintable, octetCount: 710), extension: .init(fieldMD5: nil, dispositionAndLanguage: .init(disposition: nil, language: .init(languages: []))))),
+                                            .singlepart(.init(type: .text(.init(mediaText: "HTML", lineCount: 42)), fields: .init(parameter: [.init(field: "CHARSET", value: "ISO-8859-1")], id: nil, description: nil, encoding: .quotedPrintable, octetCount: 4323), extension: .init(fieldMD5: nil, dispositionAndLanguage: .init(disposition: .init(kind: "INLINE", parameter: []), language: .init(languages: []))))),
+                                        ], mediaSubtype: .init("ALTERNATIVE"), extension: .init(parameters: [.init(field: "BOUNDARY", value: "4__=rtfgha")], dispositionAndLanguage: .init(disposition: nil, language: .init(languages: []))))
+                                    ),
+                                    .singlepart(.init(type: .basic(.init(kind: .image, subtype: .init("JPEG"))), fields: .init(parameter: [.init(field: "NAME", value: "bike.jpeg")], id: "<2__=lgkfjr>", description: nil, encoding: .base64, octetCount: 64), extension: .init(fieldMD5: nil, dispositionAndLanguage: .init(disposition: .init(kind: "INLINE", parameter: [.init(field: "FILENAME", value: "bike.jpeg")]), language: .init(languages: []))))),
+                                ], mediaSubtype: .init("RELATED"), extension: .init(parameters: [BodyStructure.ParameterPair(field: "BOUNDARY", value: "0__=rtfgaa")], dispositionAndLanguage: .init(disposition: nil, language: .init(languages: []))))
+                            ),
+                            .singlepart(.init(type: .basic(.init(kind: .application, subtype: .init("PDF"))), fields: .init(parameter: [.init(field: "NAME", value: "title.pdf")], id: "<5__=jlgkfr>", description: nil, encoding: .base64, octetCount: 333980), extension: .init(fieldMD5: nil, dispositionAndLanguage: .init(disposition: .init(kind: "ATTACHMENT", parameter: [.init(field: "FILENAME", value: "list.pdf")]), language: .init(languages: []))))),
+                        ], mediaSubtype: .init("MIXED"), extension: .init(parameters: [.init(field: "BOUNDARY", value: "1__=tfgrhs")], dispositionAndLanguage: .init(disposition: nil, language: .init(languages: []))))), hasExtensionData: true))
+                        )
+                    ),
+                    .response(.fetchResponse(.finish)),
+                ],
+                #line
+            ),
+            (
+                #"* 234 FETCH (BODYSTRUCTURE ((("TEXT" "PLAIN" ("CHARSET" "ISO-8859-1") NIL NIL "QUOTED-PRINTABLE" 410 24 NIL NIL NIL)("TEXT" "HTML" ("CHARSET" "ISO-8859-1") NIL NIL "QUOTED-PRINTABLE" 1407 30 NIL ("INLINE" NIL) NIL) "ALTERNATIVE" ("BOUNDARY" "hqjksdm1__=") NIL NIL)("IMAGE" "PNG" ("NAME" "screenshot.png") "<3__=f2fcxd>" NIL "BASE64" 40655 NIL ("INLINE" ("FILENAME" "screenshot.png")) NIL) "RELATED" ("BOUNDARY" "5__=hsdqjkm") NIL NIL))"#,
+                [
+                    .response(.fetchResponse(.start(234))),
+                    .response(
+                        .fetchResponse(.simpleAttribute(.body(.multipart(.init(parts: [
+                            .multipart(
+                                .init(parts: [
+                                    .singlepart(.init(type: .text(.init(mediaText: "PLAIN", lineCount: 24)), fields: .init(parameter: [.init(field: "CHARSET", value: "ISO-8859-1")], id: nil, description: nil, encoding: .quotedPrintable, octetCount: 410), extension: .init(fieldMD5: nil, dispositionAndLanguage: .init(disposition: nil, language: .init(languages: []))))),
+                                    .singlepart(.init(type: .text(.init(mediaText: "HTML", lineCount: 30)), fields: .init(parameter: [.init(field: "CHARSET", value: "ISO-8859-1")], id: nil, description: nil, encoding: .quotedPrintable, octetCount: 1407), extension: .init(fieldMD5: nil, dispositionAndLanguage: .init(disposition: .init(kind: "INLINE", parameter: []), language: .init(languages: []))))),
+                                ], mediaSubtype: .init("ALTERNATIVE"), extension: .init(parameters: [BodyStructure.ParameterPair(field: "BOUNDARY", value: "hqjksdm1__=")], dispositionAndLanguage: .init(disposition: nil, language: .init(languages: []))))
+                            ),
+                            .singlepart(
+                                .init(type: .basic(.init(kind: .image, subtype: .init("PNG"))), fields: BodyStructure.Fields(parameter: [.init(field: "NAME", value: "screenshot.png")], id: "<3__=f2fcxd>", description: nil, encoding: .base64, octetCount: 40655), extension: .init(fieldMD5: nil, dispositionAndLanguage: .init(disposition: .init(kind: "INLINE", parameter: [.init(field: "FILENAME", value: "screenshot.png")]), language: .init(languages: []))))
+                            ),
+                        ], mediaSubtype: .init("RELATED"), extension: .init(parameters: [.init(field: "BOUNDARY", value: "5__=hsdqjkm")], dispositionAndLanguage: .init(disposition: nil, language: .init(languages: []))))), hasExtensionData: true)))
                     ),
                     .response(.fetchResponse(.finish)),
                 ],

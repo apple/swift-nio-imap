@@ -14,6 +14,7 @@
 
 import struct NIO.ByteBuffer
 
+// TODO: Convert to struct
 /// IMAPv4 `resp-text-code`
 public enum ResponseTextCode: Equatable {
     case alert
@@ -28,7 +29,20 @@ public enum ResponseTextCode: Equatable {
     case uidValidity(Int)
     case unseen(Int)
     case namespace(NamespaceResponse)
+    case uidAppend(ResponseCodeAppend)
+    case uidCopy(ResponseCodeCopy)
+    case uidNotSticky
+    case useAttribute
     case other(String, String?)
+    case notSaved // RFC 5182
+    case closed
+    case noModificationSequence
+    case modificationSequence(SequenceSet)
+    case highestModificationSequence(ModificationSequenceValue)
+    case metadataLongEntries(Int)
+    case metadataMaxsize(Int)
+    case metadataTooMany
+    case metadataNoPrivate
 }
 
 // MARK: - Encoding
@@ -64,6 +78,32 @@ extension EncodeBuffer {
             return self.writeResponseTextCode_other(atom: atom, string: string)
         case .namespace(let namesapce):
             return self.writeNamespaceResponse(namesapce)
+        case .uidCopy(let data):
+            return self.writeResponseCodeCopy(data)
+        case .uidAppend(let data):
+            return self.writeResponseCodeAppend(data)
+        case .uidNotSticky:
+            return self.writeString("UIDNOTSTICKY")
+        case .useAttribute:
+            return self.writeString("USEATTR")
+        case .notSaved:
+            return self.writeString("NOTSAVED")
+        case .closed:
+            return self.writeString("CLOSED")
+        case .noModificationSequence:
+            return self.writeString("NOMODSEQ")
+        case .modificationSequence(let set):
+            return self.writeString("MODIFIED ") + self.writeSequenceSet(set)
+        case .highestModificationSequence(let val):
+            return self.writeString("HIGHESTMODSEQ ") + self.writeModificationSequenceValue(val)
+        case .metadataLongEntries(let num):
+            return self.writeString("METADATA LONGENTRIES \(num)")
+        case .metadataMaxsize(let num):
+            return self.writeString("METADATA MAXSIZE \(num)")
+        case .metadataTooMany:
+            return self.writeString("METADATA TOOMANY")
+        case .metadataNoPrivate:
+            return self.writeString("METADATA NOPRIVATE")
         }
     }
 

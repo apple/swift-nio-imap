@@ -51,12 +51,12 @@ class EncodeTestClass: XCTestCase {
     func resetTestBuffer(_ options: ResponseEncodingOptions) {
         self.testBuffer = EncodeBuffer.serverEncodeBuffer(buffer: ByteBufferAllocator().buffer(capacity: 200), options: options)
     }
-
-    func iterateInputs<T>(inputs: [(T, String, UInt)], encoder: (T) throws -> Int, file: StaticString = magicFile()) {
+  
+    func iterateInputs<T>(inputs: [(T, String, UInt)], encoder: (T) throws -> Int, file: StaticString = (#file)) {
         self.iterateInputs(inputs: inputs.map { ($0.0, ResponseEncodingOptions(), $0.1, $0.2) }, encoder: encoder, file: file)
     }
 
-    func iterateInputs<T>(inputs: [(T, CommandEncodingOptions, [String], UInt)], encoder: (T) throws -> Int, file: StaticString = magicFile()) {
+    func iterateInputs<T>(inputs: [(T, CommandEncodingOptions, [String], UInt)], encoder: (T) throws -> Int, file: StaticString = (#file)) {
         for (test, options, expectedStrings, line) in inputs {
             self.resetTestBuffer(options)
             do {
@@ -69,7 +69,20 @@ class EncodeTestClass: XCTestCase {
         }
     }
 
-    func iterateInputs<T>(inputs: [(T, ResponseEncodingOptions, String, UInt)], encoder: (T) throws -> Int, file: StaticString = magicFile()) {
+    func iterateCommandInputs<T>(inputs: [(T, CommandEncodingOptions, [String], UInt)], encoder: (T) throws -> Int, file: StaticString = (#file)) {
+        for (test, options, expectedStrings, line) in inputs {
+            do {
+                self.testBuffer.mode = .client(options: options)
+                let size = try encoder(test)
+                XCTAssertEqual(size, expectedStrings.reduce(0) { $0 + $1.utf8.count }, file: file, line: line)
+                XCTAssertEqual(self.testBufferStrings, expectedStrings, file: file, line: line)
+            } catch {
+                XCTFail("\(error)", file: file, line: line)
+            }
+        }
+    }
+
+    func iterateInputs<T>(inputs: [(T, ResponseEncodingOptions, String, UInt)], encoder: (T) throws -> Int, file: StaticString = (#file)) {
         for (test, options, expectedString, line) in inputs {
             self.resetTestBuffer(options)
             do {
@@ -87,7 +100,13 @@ extension CommandEncodingOptions {
     static var rfc3501: CommandEncodingOptions { CommandEncodingOptions() }
     static var literalPlus: CommandEncodingOptions {
         var o = CommandEncodingOptions()
-        o.useNonSynchronizingLiteral = true
+        o.useNonSynchronizingLiteralPlus = true
+        return o
+    }
+
+    static var literalMinus: CommandEncodingOptions {
+        var o = CommandEncodingOptions()
+        o.useNonSynchronizingLiteralMinus = true
         return o
     }
 
