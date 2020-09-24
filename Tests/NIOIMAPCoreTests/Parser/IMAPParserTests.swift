@@ -3806,7 +3806,7 @@ extension ParserUnitTests {
         self.iterateTests(
             testFunction: GrammarParser.parseFilterMailboxes,
             validInputs: [
-               (
+                (
                     "inboxes", " ",
                     .inboxes,
                     #line
