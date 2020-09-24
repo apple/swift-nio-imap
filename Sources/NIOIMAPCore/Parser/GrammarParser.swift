@@ -4742,6 +4742,92 @@ extension GrammarParser {
             return .quotaRoot(mailbox, .init(quotaRoot))
         }
     }
+
+    // RFC 5465
+    // one-or-more-mailbox = mailbox / many-mailboxes
+    static func parseOneOrMoreMailbox(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Mailboxes {
+        // many-mailboxes  = "(" mailbox *(SP mailbox) ")
+        func parseManyMailboxes(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Mailboxes {
+            try ParserLibrary.parseFixedString("(", buffer: &buffer, tracker: tracker)
+            var mailboxes: [MailboxName] = [try parseMailbox(buffer: &buffer, tracker: tracker)]
+            while try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: ParserLibrary.parseSpace) != nil {
+                mailboxes.append(try parseMailbox(buffer: &buffer, tracker: tracker))
+            }
+            try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)
+            if let returnValue = Mailboxes(mailboxes) {
+                return returnValue
+            } else {
+                throw ParserError(hint: "Failed to unwrap mailboxes which should be impossible")
+            }
+        }
+
+        func parseSingleMailboxes(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Mailboxes {
+            let mailboxes: [MailboxName] = [try parseMailbox(buffer: &buffer, tracker: tracker)]
+            if let returnValue = Mailboxes(mailboxes) {
+                return returnValue
+            } else {
+                throw ParserError(hint: "Failed to unwrap single mailboxes which should be impossible")
+            }
+        }
+
+        return try ParserLibrary.parseOneOf([
+            parseManyMailboxes,
+            parseSingleMailboxes,
+        ], buffer: &buffer, tracker: tracker)
+    }
+
+    // RFC 5465
+    // filter-mailboxes = filter-mailboxes-selected / filter-mailboxes-other
+    static func parseFilterMailboxes(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxFilter {
+        // filter-mailboxes-selected = "selected" / "selected-delayed"
+        func parseFilterMailboxes_Selected(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxFilter {
+            try ParserLibrary.parseFixedString("selected", buffer: &buffer, tracker: tracker)
+            return .selected
+        }
+
+        func parseFilterMailboxes_SelectedDelayed(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxFilter {
+            try ParserLibrary.parseFixedString("selected-delayed", buffer: &buffer, tracker: tracker)
+            return .selectedDelayed
+        }
+
+        // filter-mailboxes-other = "inboxes" / "personal" / "subscribed" /
+        // ( "subtree" SP one-or-more-mailbox ) /
+        // ( "mailboxes" SP one-or-more-mailbox )
+        func parseFilterMailboxes_Inboxes(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxFilter {
+            try ParserLibrary.parseFixedString("inboxes", buffer: &buffer, tracker: tracker)
+            return .inboxes
+        }
+
+        func parseFilterMailboxes_Personal(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxFilter {
+            try ParserLibrary.parseFixedString("personal", buffer: &buffer, tracker: tracker)
+            return .personal
+        }
+
+        func parseFilterMailboxes_Subscribed(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxFilter {
+            try ParserLibrary.parseFixedString("subscribed", buffer: &buffer, tracker: tracker)
+            return .subscribed
+        }
+
+        func parseFilterMailboxes_Subtree(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxFilter {
+            try ParserLibrary.parseFixedString("subtree ", buffer: &buffer, tracker: tracker)
+            return .subtree(try parseOneOrMoreMailbox(buffer: &buffer, tracker: tracker))
+        }
+
+        func parseFilterMailboxes_Mailboxes(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxFilter {
+            try ParserLibrary.parseFixedString("mailboxes ", buffer: &buffer, tracker: tracker)
+            return .mailboxes(try parseOneOrMoreMailbox(buffer: &buffer, tracker: tracker))
+        }
+
+        return try ParserLibrary.parseOneOf([
+            parseFilterMailboxes_SelectedDelayed,
+            parseFilterMailboxes_Selected,
+            parseFilterMailboxes_Inboxes,
+            parseFilterMailboxes_Personal,
+            parseFilterMailboxes_Subscribed,
+            parseFilterMailboxes_Subtree,
+            parseFilterMailboxes_Mailboxes,
+        ], buffer: &buffer, tracker: tracker)
+    }
 }
 
 // MARK: - Helper Parsers
