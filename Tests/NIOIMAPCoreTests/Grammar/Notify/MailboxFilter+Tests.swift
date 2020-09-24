@@ -26,8 +26,8 @@ extension MailboxFilter_Tests {
             (.inboxes, "inboxes", #line),
             (.personal, "personal", #line),
             (.subscribed, "subscribed", #line),
-            (.subtree(Mailboxes([.init("box1")])!), "subtree \"box1\"", #line),
-            (.mailboxes(Mailboxes([.init("box1")])!), "mailboxes \"box1\"", #line),
+            (.subtree(Mailboxes([.init("box1")])!), "subtree (\"box1\")", #line),
+            (.mailboxes(Mailboxes([.init("box1")])!), "mailboxes (\"box1\")", #line),
             (.selected, "selected", #line),
             (.selectedDelayed, "selected-delayed", #line),
         ]

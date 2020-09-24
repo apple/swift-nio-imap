@@ -28,7 +28,7 @@ extension Mailboxes_Tests {
 
     func testEncode() {
         let inputs: [(Mailboxes, String, UInt)] = [
-            (Mailboxes([.init("box1")])!, "\"box1\"", #line),
+            (Mailboxes([.init("box1")])!, "(\"box1\")", #line),
             (Mailboxes([.init("box1"), .init("box2")])!, "(\"box1\" \"box2\")", #line),
         ]
 

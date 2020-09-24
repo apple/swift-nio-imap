@@ -33,8 +33,7 @@ public struct Mailboxes: Equatable {
 
 extension EncodeBuffer {
     @discardableResult public mutating func writeMailboxes(_ mailboxes: Mailboxes) -> Int {
-        self.writeArray(mailboxes.content,
-                        parenthesis: mailboxes.content.count > 1) { (mailbox, buffer) -> Int in
+        self.writeArray(mailboxes.content) { (mailbox, buffer) -> Int in
             buffer.writeMailbox(mailbox)
         }
     }
