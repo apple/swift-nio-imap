@@ -3774,4 +3774,79 @@ extension ParserUnitTests {
             incompleteMessageInputs: []
         )
     }
+
+    func testParseOneOrMoreMailbox() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseOneOrMoreMailbox,
+            validInputs: [
+                (
+                    "\"box1\"", "\r",
+                    Mailboxes([.init("box1")])!,
+                    #line
+                ),
+                (
+                    "(\"box1\")", "\r",
+                    Mailboxes([.init("box1")])!,
+                    #line
+                ),
+                (
+                    "(\"box1\" \"box2\")", "\r",
+                    Mailboxes([.init("box1"), .init("box2")]),
+                    #line
+                ),
+            ],
+            parserErrorInputs: [
+                ("()", "\r", #line),
+            ],
+            incompleteMessageInputs: []
+        )
+    }
+
+    func testParseFilterMailboxes() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseFilterMailboxes,
+            validInputs: [
+               (
+                    "inboxes", " ",
+                    .inboxes,
+                    #line
+                ),
+                (
+                    "personal", " ",
+                    .personal,
+                    #line
+                ),
+                (
+                    "subscribed", " ",
+                    .subscribed,
+                    #line
+                ),
+                (
+                    "selected", " ",
+                    .selected,
+                    #line
+                ),
+                (
+                    "selected-delayed", " ",
+                    .selectedDelayed,
+                    #line
+                ),
+                (
+                    "subtree \"box1\"", " ",
+                    .subtree(Mailboxes([.init("box1")])!),
+                    #line
+                ),
+                (
+                    "mailboxes \"box1\"", " ",
+                    .mailboxes(Mailboxes([.init("box1")])!),
+                    #line
+                ),
+            ],
+            parserErrorInputs: [
+                ("subtree", "\r", #line),
+                ("mailboxes", "\r", #line),
+            ],
+            incompleteMessageInputs: []
+        )
+    }
 }
