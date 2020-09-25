@@ -21,7 +21,7 @@ public enum Command: Equatable {
     case create(MailboxName, [CreateParameter])
     case delete(MailboxName)
     case examine(MailboxName, [Parameter] = [])
-    case list(ListSelectOptions? = nil, reference: MailboxName, MailboxPatterns, [ReturnOption] = [])
+    case list(ListSelectOptions?, reference: MailboxName, MailboxPatterns, [ReturnOption] = [])
     case lsub(reference: MailboxName, pattern: ByteBuffer)
     case rename(from: MailboxName, to: MailboxName, params: [Parameter])
     case select(MailboxName, [SelectParameter] = [])

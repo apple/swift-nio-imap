@@ -27,27 +27,15 @@ extension ListSelectOption_Tests {
             (.independent(.remote), "REMOTE", #line),
             (.modified(.recursiveMatch), "RECURSIVEMATCH", #line),
         ]
-
-        for (test, expectedString, line) in inputs {
-            self.testBuffer.clear()
-            let size = self.testBuffer.writeListSelectOption(test)
-            XCTAssertEqual(size, expectedString.utf8.count, line: line)
-            XCTAssertEqual(self.testBufferString, expectedString, line: line)
-        }
+        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeListSelectOption($0) })
     }
 
     func testEncode_multiple() {
-        let inputs: [(ListSelectOptions, String, UInt)] = [
+        let inputs: [(ListSelectOptions?, String, UInt)] = [
             (nil, "()", #line),
             (.select([.base(.subscribed)], .subscribed), "(SUBSCRIBED SUBSCRIBED)", #line),
             (.selectIndependent([.remote, .option(.init(kind: .standard("SOME"), value: nil))]), "(REMOTE SOME)", #line),
         ]
-
-        for (test, expectedString, line) in inputs {
-            self.testBuffer.clear()
-            let size = self.testBuffer.writeListSelectOptions(test)
-            XCTAssertEqual(size, expectedString.utf8.count, line: line)
-            XCTAssertEqual(self.testBufferString, expectedString, line: line)
-        }
+        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeListSelectOptions($0) })
     }
 }

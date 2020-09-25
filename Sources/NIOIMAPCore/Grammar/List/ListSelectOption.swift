@@ -21,13 +21,10 @@ public enum ListSelectOption: Equatable {
     case modified(ListSelectModifiedOption)
 }
 
-public enum ListSelectionOptionsData: Equatable {
+public enum ListSelectOptions: Equatable {
     case select([ListSelectOption], ListSelectBaseOption)
     case selectIndependent([ListSelectIndependentOption])
 }
-
-/// IMAPv4 `list-select-options`
-public typealias ListSelectOptions = ListSelectionOptionsData?
 
 // MARK: - Encoding
 
@@ -43,7 +40,7 @@ extension EncodeBuffer {
         }
     }
 
-    @discardableResult mutating func writeListSelectOptions(_ options: ListSelectOptions) -> Int {
+    @discardableResult mutating func writeListSelectOptions(_ options: ListSelectOptions?) -> Int {
         self.writeString("(") +
             self.writeIfExists(options) { (optionsData) -> Int in
                 switch optionsData {

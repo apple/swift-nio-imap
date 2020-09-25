@@ -1813,7 +1813,7 @@ extension GrammarParser {
     //                    *(SP list-select-independent-opt))
     //                      ] ")"
     static func parseListSelectOptions(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ListSelectOptions {
-        func parseListSelectOptions_mixed(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ListSelectionOptionsData {
+        func parseListSelectOptions_mixed(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ListSelectOptions {
             var selectOptions = try ParserLibrary.parseZeroOrMore(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> ListSelectOption in
                 let option = try self.parseListSelectOption(buffer: &buffer, tracker: tracker)
                 try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
@@ -1829,7 +1829,7 @@ extension GrammarParser {
             return .select(selectOptions, baseOption)
         }
 
-        func parseListSelectOptions_independent(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ListSelectionOptionsData {
+        func parseListSelectOptions_independent(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ListSelectOptions {
             var array = [try self.parseListSelectIndependentOption(buffer: &buffer, tracker: tracker)]
             try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) in
                 try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
@@ -1840,12 +1840,10 @@ extension GrammarParser {
 
         return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
             try ParserLibrary.parseFixedString("(", buffer: &buffer, tracker: tracker)
-            let options = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
-                try ParserLibrary.parseOneOf([
-                    parseListSelectOptions_mixed,
-                    parseListSelectOptions_independent,
-                ], buffer: &buffer, tracker: tracker)
-            }
+            let options = try ParserLibrary.parseOneOf([
+                parseListSelectOptions_mixed,
+                parseListSelectOptions_independent,
+            ], buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)
             return options
         }
