@@ -199,27 +199,6 @@ extension ParserLibrary {
         }
     }
 
-    static func parseSpace(buffer: inout ByteBuffer, tracker: StackTracker) throws {
-        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, _ in
-
-            // need at least one readable byte
-            guard buffer.readableBytes > 0 else { throw _IncompleteMessage() }
-
-            // if there are only spaces then just consume it all and move on
-            guard let index = buffer.readableBytesView.firstIndex(where: { $0 != UInt8(ascii: " ") }) else {
-                buffer.moveReaderIndex(to: buffer.writerIndex)
-                return
-            }
-
-            // first character wasn't a space
-            guard index > buffer.readableBytesView.startIndex else {
-                throw ParserError(hint: "Expected space, found \(buffer.readableBytesView[index])")
-            }
-
-            buffer.moveReaderIndex(to: index)
-        }
-    }
-
     static func parseUnsignedInteger(buffer: inout ByteBuffer, tracker: StackTracker) throws -> (number: Int, bytesConsumed: Int) {
         let string = try ParserLibrary.parseOneOrMoreCharacters(buffer: &buffer, tracker: tracker) { char in
             char >= UInt8(ascii: "0") && char <= UInt8(ascii: "9")

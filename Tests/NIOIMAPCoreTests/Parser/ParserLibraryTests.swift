@@ -235,7 +235,7 @@ extension ParserLibraryTests {
         ]
         for (string, remaining, line) in inputs {
             var string = string
-            XCTAssertNoThrow(try ParserLibrary.parseSpace(buffer: &string, tracker: .makeNewDefaultLimitStackTracker), line: line)
+            XCTAssertNoThrow(try GrammarParser.space(buffer: &string, tracker: .makeNewDefaultLimitStackTracker), line: line)
             XCTAssertEqual(string, remaining, line: line)
         }
     }
