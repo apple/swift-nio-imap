@@ -74,23 +74,23 @@ extension ParserLibraryTests {
         var buffer = TestUtilities.createTestByteBuffer(for: "fooFooFOO")
 
         XCTAssertNoThrow(try GrammarParser.fixedString("fooFooFOO",
-                                                            caseSensitive: true,
-                                                            buffer: &buffer,
-                                                            tracker: .testTracker))
+                                                       caseSensitive: true,
+                                                       buffer: &buffer,
+                                                       tracker: .testTracker))
 
         buffer = TestUtilities.createTestByteBuffer(for: "fooFooFOO")
         XCTAssertThrowsError(try GrammarParser.fixedString("foofoofoo",
-                                                                caseSensitive: true,
-                                                                buffer: &buffer,
-                                                                tracker: .testTracker)) { error in
+                                                           caseSensitive: true,
+                                                           buffer: &buffer,
+                                                           tracker: .testTracker)) { error in
             XCTAssert(error is ParserError)
         }
 
         buffer = TestUtilities.createTestByteBuffer(for: "foo")
         XCTAssertThrowsError(try GrammarParser.fixedString("fooFooFOO",
-                                                                caseSensitive: true,
-                                                                buffer: &buffer,
-                                                                tracker: .testTracker)) { error in
+                                                           caseSensitive: true,
+                                                           buffer: &buffer,
+                                                           tracker: .testTracker)) { error in
             XCTAssertTrue(error is _IncompleteMessage)
         }
     }
@@ -99,18 +99,18 @@ extension ParserLibraryTests {
         var buffer = TestUtilities.createTestByteBuffer(for: "fooFooFOO")
 
         XCTAssertNoThrow(try GrammarParser.fixedString("fooFooFOO",
-                                                            buffer: &buffer,
-                                                            tracker: .testTracker))
+                                                       buffer: &buffer,
+                                                       tracker: .testTracker))
 
         buffer = TestUtilities.createTestByteBuffer(for: "fooFooFOO")
         XCTAssertNoThrow(try GrammarParser.fixedString("foofoofoo",
-                                                            buffer: &buffer,
-                                                            tracker: .testTracker))
+                                                       buffer: &buffer,
+                                                       tracker: .testTracker))
 
         buffer = TestUtilities.createTestByteBuffer(for: "foo")
         XCTAssertThrowsError(try GrammarParser.fixedString("fooFooFOO",
-                                                                buffer: &buffer,
-                                                                tracker: .testTracker)) { error in
+                                                           buffer: &buffer,
+                                                           tracker: .testTracker)) { error in
             XCTAssertTrue(error is _IncompleteMessage)
         }
     }
@@ -120,9 +120,9 @@ extension ParserLibraryTests {
 
         buffer = TestUtilities.createTestByteBuffer(for: "fooFooFOÖ")
         XCTAssertThrowsError(try GrammarParser.fixedString("fooFooFOO",
-                                                                caseSensitive: true,
-                                                                buffer: &buffer,
-                                                                tracker: .testTracker)) { error in
+                                                           caseSensitive: true,
+                                                           buffer: &buffer,
+                                                           tracker: .testTracker)) { error in
             XCTAssert(error is ParserError, "\(error)")
         }
     }

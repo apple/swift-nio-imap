@@ -4898,8 +4898,8 @@ struct StackTracker {
 }
 
 // MARK: - Parser Library
+
 extension GrammarParser {
-    
     static func space(buffer: inout ByteBuffer, tracker: StackTracker) throws {
         try composite(buffer: &buffer, tracker: tracker) { buffer, _ in
 
@@ -4920,7 +4920,7 @@ extension GrammarParser {
             buffer.moveReaderIndex(to: index)
         }
     }
-    
+
     static func fixedString(_ needle: String, caseSensitive: Bool = false, buffer: inout ByteBuffer, tracker: StackTracker) throws {
         try composite(buffer: &buffer, tracker: tracker) { buffer, _ in
             let needleCount = needle.utf8.count
@@ -4958,7 +4958,7 @@ extension GrammarParser {
         }
         throw ParserError(hint: "none of the options match", file: file, line: line)
     }
-    
+
     static func optional<T>(buffer: inout ByteBuffer, tracker: StackTracker, parser: SubParser<T>) throws -> T? {
         do {
             return try composite(buffer: &buffer, tracker: tracker, parser)
@@ -4966,7 +4966,7 @@ extension GrammarParser {
             return nil
         }
     }
-    
+
     static func composite<T>(buffer: inout ByteBuffer, tracker: StackTracker, _ body: SubParser<T>) throws -> T {
         var tracker = tracker
         try tracker.newStackFrame()
@@ -4979,7 +4979,7 @@ extension GrammarParser {
             throw error
         }
     }
-    
+
     static func newline(buffer: inout ByteBuffer, tracker: StackTracker) throws {
         switch buffer.getInteger(at: buffer.readerIndex, as: UInt16.self) {
         case .some(UInt16(0x0D0A /* CRLF */ )):
