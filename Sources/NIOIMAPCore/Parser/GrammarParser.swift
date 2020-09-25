@@ -3397,26 +3397,26 @@ extension GrammarParser {
     //                      ; Each correlator MUST appear exactly once.
     // search-correlator =  SP "(" one-correlator *(SP one-correlator) ")"
     static func parseSearchCorrelator(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SearchCorrelator {
-        var tag: ByteBuffer? = nil
-        var mailbox: MailboxName? = nil
-        var uidValidity: Int? = nil
+        var tag: ByteBuffer?
+        var mailbox: MailboxName?
+        var uidValidity: Int?
 
-        func parseSearchCorrelator_tag(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Void {
+        func parseSearchCorrelator_tag(buffer: inout ByteBuffer, tracker: StackTracker) throws {
             try ParserLibrary.parseFixedString("TAG ", buffer: &buffer, tracker: tracker)
             tag = try self.parseString(buffer: &buffer, tracker: tracker)
         }
 
-        func parseSearchCorrelator_mailbox(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Void {
+        func parseSearchCorrelator_mailbox(buffer: inout ByteBuffer, tracker: StackTracker) throws {
             try ParserLibrary.parseFixedString("MAILBOX ", buffer: &buffer, tracker: tracker)
             mailbox = try self.parseMailbox(buffer: &buffer, tracker: tracker)
         }
 
-        func parseSearchCorrelator_uidValidity(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Void {
+        func parseSearchCorrelator_uidValidity(buffer: inout ByteBuffer, tracker: StackTracker) throws {
             try ParserLibrary.parseFixedString("UIDVALIDITY ", buffer: &buffer, tracker: tracker)
             uidValidity = try self.parseNZNumber(buffer: &buffer, tracker: tracker)
         }
 
-        func parseSearchCorrelator_once(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Void {
+        func parseSearchCorrelator_once(buffer: inout ByteBuffer, tracker: StackTracker) throws {
             try ParserLibrary.parseOneOf([
                 parseSearchCorrelator_tag,
                 parseSearchCorrelator_mailbox,
@@ -4924,7 +4924,6 @@ extension GrammarParser {
     // RFC 6237
     // scope-options =  scope-option *(SP scope-option)
     static func parseESearchScopeOptions(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ESearchScopeOptions {
-
         var options: [ESearchScopeOption] = [try parseESearchScopeOption(buffer: &buffer, tracker: tracker)]
         while try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: ParserLibrary.parseSpace) != nil {
             options.append(try parseESearchScopeOption(buffer: &buffer, tracker: tracker))
@@ -4959,7 +4958,7 @@ extension GrammarParser {
         }
 
         func parseEsearchSourceOptions_scopeOptions(buffer: inout ByteBuffer,
-                                                         tracker: StackTracker) throws -> ESearchScopeOptions {
+                                                    tracker: StackTracker) throws -> ESearchScopeOptions {
             try ParserLibrary.parseFixedString(" (", buffer: &buffer, tracker: tracker)
             let result = try parseESearchScopeOptions(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)
