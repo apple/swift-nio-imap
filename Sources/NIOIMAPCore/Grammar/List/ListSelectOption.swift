@@ -26,7 +26,7 @@ public enum ListSelectOption: Equatable {
 public struct ListSelectOptions: Equatable {
     public var baseOption: ListSelectBaseOption
     public var options: [ListSelectOption]
-    
+
     public init(baseOption: ListSelectBaseOption, options: [ListSelectOption]) {
         self.baseOption = baseOption
         self.options = options
@@ -58,7 +58,7 @@ extension EncodeBuffer {
                     self.writeListSelectOption(option) +
                         self.writeSpace()
                 } +
-                self.writeListSelectBaseOption(optionsData.baseOption)
+                    self.writeListSelectBaseOption(optionsData.baseOption)
             } +
             self.writeString(")")
     }

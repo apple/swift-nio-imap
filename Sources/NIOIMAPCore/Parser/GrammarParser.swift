@@ -1770,22 +1770,21 @@ extension GrammarParser {
     // list-select-opt =  list-select-base-opt / list-select-independent-opt
     //                    / list-select-mod-opt
     static func parseListSelectOption(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ListSelectOption {
-        
         func parseListSelectOption_subscribed(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ListSelectOption {
             try ParserLibrary.parseFixedString("SUBSCRIBED", buffer: &buffer, tracker: tracker)
             return .subscribed
         }
-        
+
         func parseListSelectOption_remote(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ListSelectOption {
             try ParserLibrary.parseFixedString("REMOTE", buffer: &buffer, tracker: tracker)
             return .remote
         }
-        
+
         func parseListSelectOption_recursiveMatch(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ListSelectOption {
             try ParserLibrary.parseFixedString("RECURSIVEMATCH", buffer: &buffer, tracker: tracker)
             return .recursiveMatch
         }
-        
+
         func parseListSelectOption_specialUse(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ListSelectOption {
             try ParserLibrary.parseFixedString("SPECIAL-USE", buffer: &buffer, tracker: tracker)
             return .specialUse
@@ -1800,7 +1799,7 @@ extension GrammarParser {
             parseListSelectOption_remote,
             parseListSelectOption_recursiveMatch,
             parseListSelectOption_specialUse,
-            parseListSelectOption_optionExtension
+            parseListSelectOption_optionExtension,
         ], buffer: &buffer, tracker: tracker)
     }
 
@@ -1811,7 +1810,7 @@ extension GrammarParser {
     //                    *(SP list-select-independent-opt))
     //                      ] ")"
     static func parseListSelectOptions(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ListSelectOptions {
-        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
+        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
             try ParserLibrary.parseFixedString("(", buffer: &buffer, tracker: tracker)
             var selectOptions = try ParserLibrary.parseZeroOrMore(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> ListSelectOption in
                 let option = try self.parseListSelectOption(buffer: &buffer, tracker: tracker)

@@ -221,7 +221,7 @@ extension CommandEncodeBuffer {
                     buffer.writeListReturnOptions(returnOptions)
             }
     }
-    
+
     private mutating func writeCommandKind_listIndependent(selectOptions: [ListSelectIndependentOption], mailbox: MailboxName, mailboxPatterns: MailboxPatterns, returnOptions: [ReturnOption]) -> Int {
         self.buffer.writeString("LIST") +
             self.buffer.writeIfArrayHasMinimumSize(array: selectOptions, callback: { array, buffer in
