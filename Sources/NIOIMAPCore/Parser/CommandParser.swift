@@ -105,7 +105,7 @@ public struct CommandParser: Parser {
     }
 
     private mutating func parseCommandStream0(buffer: inout ByteBuffer, tracker: StackTracker) throws -> CommandStream? {
-        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker in
+        try GrammarParser.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             switch self.mode {
             case .idle:
                 return try self.handleIdle(buffer: &buffer, tracker: tracker)

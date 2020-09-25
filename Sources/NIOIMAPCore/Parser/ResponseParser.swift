@@ -94,7 +94,7 @@ extension ResponseParser {
             return .fetchResponse(.finish)
         }
 
-        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker in
+        return try GrammarParser.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             try? GrammarParser.space(buffer: &buffer, tracker: tracker)
             do {
                 let response = try GrammarParser.oneOf([
