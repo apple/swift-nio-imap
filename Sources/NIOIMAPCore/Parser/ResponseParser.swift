@@ -97,7 +97,7 @@ extension ResponseParser {
         return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             try? GrammarParser.space(buffer: &buffer, tracker: tracker)
             do {
-                let response = try ParserLibrary.parseOneOf([
+                let response = try GrammarParser.oneOf([
                     parseResponse_fetch,
                     parseResponse_normal,
                     parseResponse_fetch_end,
@@ -126,7 +126,7 @@ extension ResponseParser {
             .response(.taggedResponse(try GrammarParser.parseTaggedResponse(buffer: &buffer, tracker: tracker)))
         }
 
-        return try ParserLibrary.parseOneOf([
+        return try GrammarParser.oneOf([
             parseResponse_continuation,
             parseResponse_tagged,
         ], buffer: &buffer, tracker: tracker)

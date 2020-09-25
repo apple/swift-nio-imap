@@ -113,7 +113,7 @@ extension GrammarParser {
             try .catenate(self.parseCatenateMessage(buffer: &buffer, tracker: tracker))
         }
 
-        return try ParserLibrary.parseOneOf([
+        return try oneOf([
             parseCatenate,
             parseAppend,
         ], buffer: &buffer, tracker: tracker)
@@ -173,7 +173,7 @@ extension GrammarParser {
             return .end
         }
 
-        return try ParserLibrary.parseOneOf([
+        return try oneOf([
             parseCatenateURL,
             parseCatenateText,
             parseCatenateEnd,
@@ -187,7 +187,7 @@ extension GrammarParser {
                 char.isAStringChar
             }
         }
-        return try ParserLibrary.parseOneOf([
+        return try oneOf([
             Self.parseString,
             parseOneOrMoreASTRINGCHAR,
         ], buffer: &buffer, tracker: tracker)
@@ -215,7 +215,7 @@ extension GrammarParser {
             return .init(rawValue: atom)
         }
 
-        return try ParserLibrary.parseOneOf([
+        return try oneOf([
             parseAttributeFlag_slashed,
             parseAttributeFlag_unslashed,
         ], buffer: &buffer, tracker: tracker)
@@ -274,7 +274,7 @@ extension GrammarParser {
             return .multipart(part)
         }
 
-        return try ParserLibrary.parseOneOf([
+        return try oneOf([
             parseBody_singlePart,
             parseBody_multiPart,
         ], buffer: &buffer, tracker: tracker)
@@ -292,7 +292,7 @@ extension GrammarParser {
         }
 
         func parseBodyExtensionKind(buffer: inout ByteBuffer, tracker: StackTracker, into array: inout [BodyExtension]) throws {
-            let element = try ParserLibrary.parseOneOf([
+            let element = try oneOf([
                 parseBodyExtensionKind_string,
                 parseBodyExtensionKind_number,
             ], buffer: &buffer, tracker: tracker)
@@ -393,7 +393,7 @@ extension GrammarParser {
             return BodyStructure.Disposition(kind: string, parameter: param)
         }
 
-        return try ParserLibrary.parseOneOf([
+        return try oneOf([
             parseBodyFieldDsp_nil,
             parseBodyFieldDsp_some,
         ], buffer: &buffer, tracker: tracker)
@@ -434,7 +434,7 @@ extension GrammarParser {
             try parseBodyEncoding_option("QUOTED-PRINTABLE", result: .quotedPrintable, buffer: &buffer, tracker: tracker)
         }
 
-        return try ParserLibrary.parseOneOf([
+        return try oneOf([
             parseBodyEncoding_7bit,
             parseBodyEncoding_8bit,
             parseBodyEncoding_binary,
@@ -464,7 +464,7 @@ extension GrammarParser {
             return array
         }
 
-        return try ParserLibrary.parseOneOf([
+        return try oneOf([
             parseBodyFieldLanguage_multiple,
             parseBodyFieldLanguage_single,
         ], buffer: &buffer, tracker: tracker)
@@ -495,7 +495,7 @@ extension GrammarParser {
             return array
         }
 
-        return try ParserLibrary.parseOneOf([
+        return try oneOf([
             parseBodyFieldParam_pairs,
             parseBodyFieldParam_nil,
         ], buffer: &buffer, tracker: tracker)
@@ -545,7 +545,7 @@ extension GrammarParser {
             return BodyStructure.Singlepart(type: .text(text), fields: fields, extension: ext)
         }
 
-        return try ParserLibrary.parseOneOf([
+        return try oneOf([
             parseBodyKindSinglePart_message,
             parseBodyKindSinglePart_text,
             parseBodyKindSinglePart_basic,
@@ -602,7 +602,7 @@ extension GrammarParser {
             return string
         }
 
-        return try ParserLibrary.parseOneOf([
+        return try oneOf([
             parseCharset_atom,
             parseCharset_quoted,
         ], buffer: &buffer, tracker: tracker)
@@ -646,7 +646,7 @@ extension GrammarParser {
         try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             let tag = try self.parseTag(buffer: &buffer, tracker: tracker)
             try space(buffer: &buffer, tracker: tracker)
-            let type = try ParserLibrary.parseOneOf([
+            let type = try oneOf([
                 self.parseCommandAny,
                 self.parseCommandAuth,
                 self.parseCommandNonauth,
@@ -684,7 +684,7 @@ extension GrammarParser {
             return enable
         }
 
-        return try ParserLibrary.parseOneOf([
+        return try oneOf([
             parseCommandAny_noop,
             parseCommandAny_logout,
             parseCommandAny_capability,
@@ -720,7 +720,7 @@ extension GrammarParser {
             return .setMetadata(mailbox: mailbox, entries: list)
         }
 
-        return try ParserLibrary.parseOneOf([
+        return try oneOf([
             self.parseCreate,
             self.parseDelete,
             self.parseExamine,
@@ -745,7 +745,7 @@ extension GrammarParser {
             return .starttls
         }
 
-        return try ParserLibrary.parseOneOf([
+        return try oneOf([
             self.parseLogin,
             self.parseAuthenticate,
             parseCommandNonauth_starttls,
@@ -775,7 +775,7 @@ extension GrammarParser {
             return .unselect
         }
 
-        return try ParserLibrary.parseOneOf([
+        return try oneOf([
             parseCommandSelect_check,
             parseCommandSelect_close,
             parseCommandSelect_expunge,
@@ -809,7 +809,7 @@ extension GrammarParser {
             // Allow no space and no additional text after "+":
             let continueReq: ContinueRequest
             if try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: space) != nil {
-                continueReq = try ParserLibrary.parseOneOf([
+                continueReq = try oneOf([
                     parseContinueReq_base64,
                     parseContinueReq_responseText,
                 ], buffer: &buffer, tracker: tracker)
@@ -873,7 +873,7 @@ extension GrammarParser {
             return .attributes(array)
         }
 
-        return try ParserLibrary.parseOneOf([
+        return try oneOf([
             parseCreateParameter_specialUse,
             parseCreateParameter_parameter,
         ], buffer: &buffer, tracker: tracker)
@@ -930,7 +930,7 @@ extension GrammarParser {
             return .init(rawValue: "\\" + att)
         }
 
-        return try ParserLibrary.parseOneOf([
+        return try oneOf([
             parseUseAttribute_all,
             parseUseAttribute_archive,
             parseUseAttribute_drafts,
@@ -953,7 +953,7 @@ extension GrammarParser {
             }
         }
 
-        return try ParserLibrary.parseOneOf([
+        return try oneOf([
             parseDateText,
             parseDateText_quoted,
         ], buffer: &buffer, tracker: tracker)
@@ -975,7 +975,7 @@ extension GrammarParser {
             return try self.parseNDigits(buffer: &buffer, tracker: tracker, bytes: 1)
         }
 
-        return try ParserLibrary.parseOneOf([
+        return try oneOf([
             parseDateDayFixed_spaced,
             parse2Digit,
         ], buffer: &buffer, tracker: tracker)
@@ -1056,7 +1056,7 @@ extension GrammarParser {
                 return -zone
             }
 
-            let zone = try ParserLibrary.parseOneOf([
+            let zone = try oneOf([
                 parseZonePositive,
                 parseZoneNegative,
             ], buffer: &buffer, tracker: tracker)
@@ -1149,7 +1149,7 @@ extension GrammarParser {
             return array
         }
 
-        return try ParserLibrary.parseOneOf([
+        return try oneOf([
             parseEntries_singleUnbracketed,
             parseEntries_bracketed,
         ], buffer: &buffer, tracker: tracker)
@@ -1233,7 +1233,7 @@ extension GrammarParser {
             return .shared
         }
 
-        return try ParserLibrary.parseOneOf([
+        return try oneOf([
             parseEntryKindRequest_all,
             parseEntryKindRequest_private,
             parseEntryKindRequest_shared,
@@ -1252,7 +1252,7 @@ extension GrammarParser {
             return .shared
         }
 
-        return try ParserLibrary.parseOneOf([
+        return try oneOf([
             parseEntryKindResponse_private,
             parseEntryKindResponse_shared,
         ], buffer: &buffer, tracker: tracker)
@@ -1330,7 +1330,7 @@ extension GrammarParser {
             return array
         }
 
-        return try ParserLibrary.parseOneOf([
+        return try oneOf([
             parseFetch_type_all,
             parseFetch_type_full,
             parseFetch_type_fast,
@@ -1389,7 +1389,7 @@ extension GrammarParser {
                 return .rfc822
             }
 
-            return try ParserLibrary.parseOneOf([
+            return try oneOf([
                 parseFetchAttribute_rfc822Size,
                 parseFetchAttribute_rfc822Header,
                 parseFetchAttribute_rfc822Text,
@@ -1472,7 +1472,7 @@ extension GrammarParser {
             return .gmailLabels
         }
 
-        return try ParserLibrary.parseOneOf([
+        return try oneOf([
             parseFetchAttribute_envelope,
             parseFetchAttribute_flags,
             parseFetchAttribute_internalDate,
@@ -1544,7 +1544,7 @@ extension GrammarParser {
             return .extension(word)
         }
 
-        return try ParserLibrary.parseOneOf([
+        return try oneOf([
             parseFlag_seen,
             parseFlag_draft,
             parseFlag_answered,
@@ -1598,7 +1598,7 @@ extension GrammarParser {
             .flag(try self.parseFlag(buffer: &buffer, tracker: tracker))
         }
 
-        return try ParserLibrary.parseOneOf([
+        return try oneOf([
             parseFlagPerm_wildcard,
             parseFlagPerm_flag,
         ], buffer: &buffer, tracker: tracker)
@@ -1616,7 +1616,7 @@ extension GrammarParser {
 
         return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Greeting in
             try fixedString("* ", buffer: &buffer, tracker: tracker)
-            let greeting = try ParserLibrary.parseOneOf([
+            let greeting = try oneOf([
                 parseGreeting_auth,
                 parseGreeting_bye,
             ], buffer: &buffer, tracker: tracker)
@@ -1686,7 +1686,7 @@ extension GrammarParser {
             return array
         }
 
-        return try ParserLibrary.parseOneOf([
+        return try oneOf([
             parseIDParamsList_nil,
             parseIDParamsList_some,
         ], buffer: &buffer, tracker: tracker)
@@ -1734,7 +1734,7 @@ extension GrammarParser {
             .option(try self.parseOptionExtension(buffer: &buffer, tracker: tracker))
         }
 
-        return try ParserLibrary.parseOneOf([
+        return try oneOf([
             parseListSelectBaseOption_subscribed,
             parseListSelectBaseOption_optionExtension,
         ], buffer: &buffer, tracker: tracker)
@@ -1761,7 +1761,7 @@ extension GrammarParser {
             .option(try self.parseOptionExtension(buffer: &buffer, tracker: tracker))
         }
 
-        return try ParserLibrary.parseOneOf([
+        return try oneOf([
             parseListSelectIndependentOption_subscribed,
             parseListSelectIndependentOption_optionExtension,
         ], buffer: &buffer, tracker: tracker)
@@ -1794,7 +1794,7 @@ extension GrammarParser {
             .option(try self.parseOptionExtension(buffer: &buffer, tracker: tracker))
         }
 
-        return try ParserLibrary.parseOneOf([
+        return try oneOf([
             parseListSelectOption_subscribed,
             parseListSelectOption_remote,
             parseListSelectOption_recursiveMatch,
@@ -1851,7 +1851,7 @@ extension GrammarParser {
             .pattern(try self.parsePatterns(buffer: &buffer, tracker: tracker))
         }
 
-        return try ParserLibrary.parseOneOf([
+        return try oneOf([
             parseMailboxPatterns_list,
             parseMailboxPatterns_patterns,
         ], buffer: &buffer, tracker: tracker)
@@ -1886,7 +1886,7 @@ extension GrammarParser {
             }
         }
 
-        return try ParserLibrary.parseOneOf([
+        return try oneOf([
             parseListMailbox_string,
             parseListMailbox_chars,
         ], buffer: &buffer, tracker: tracker)
@@ -2046,7 +2046,7 @@ extension GrammarParser {
             .namespace(try self.parseNamespaceResponse(buffer: &buffer, tracker: tracker))
         }
 
-        return try ParserLibrary.parseOneOf([
+        return try oneOf([
             parseMailboxData_flags,
             parseMailboxData_list,
             parseMailboxData_lsub,
@@ -2090,7 +2090,7 @@ extension GrammarParser {
             let flags = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseMailboxListFlags) ?? []
             try fixedString(")", buffer: &buffer, tracker: tracker)
             try space(buffer: &buffer, tracker: tracker)
-            let character = try ParserLibrary.parseOneOf([
+            let character = try oneOf([
                 parseMailboxList_quotedChar_some,
                 parseMailboxList_quotedChar_nil,
             ], buffer: &buffer, tracker: tracker)
@@ -2143,7 +2143,7 @@ extension GrammarParser {
             .pattern(try self.parsePatterns(buffer: &buffer, tracker: tracker))
         }
 
-        return try ParserLibrary.parseOneOf([
+        return try oneOf([
             parseMailboxOrPat_list,
             parseMailboxOrPat_patterns,
         ], buffer: &buffer, tracker: tracker)
@@ -2203,7 +2203,7 @@ extension GrammarParser {
         }
 
         return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Media.Basic in
-            let basicType = try ParserLibrary.parseOneOf([
+            let basicType = try oneOf([
                 parseMediaBasic_Kind_application,
                 parseMediaBasic_Kind_audio,
                 parseMediaBasic_Kind_image,
@@ -2232,7 +2232,7 @@ extension GrammarParser {
 
         return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> Media.Message in
             try fixedString("\"MESSAGE\" \"", buffer: &buffer, tracker: tracker)
-            let message = try ParserLibrary.parseOneOf([
+            let message = try oneOf([
                 parseMediaMessage_rfc,
                 parseMediaMessage_global,
             ], buffer: &buffer, tracker: tracker)
@@ -2275,7 +2275,7 @@ extension GrammarParser {
             return .vanishedEarlier(try self.parseSequenceSet(buffer: &buffer, tracker: tracker))
         }
 
-        return try ParserLibrary.parseOneOf([
+        return try oneOf([
             parseMessageData_expunge,
             parseMessageData_vanished,
             parseMessageData_vanishedEarlier,
@@ -2296,7 +2296,7 @@ extension GrammarParser {
             .other(try self.parseParameter(buffer: &buffer, tracker: tracker))
         }
 
-        return try ParserLibrary.parseOneOf([
+        return try oneOf([
             parseMetadataOption_maxSize,
             parseMetadataOption_scope,
             parseMetadataOption_param,
@@ -2333,7 +2333,7 @@ extension GrammarParser {
             return .list(list: list, mailbox: mailbox)
         }
 
-        return try ParserLibrary.parseOneOf([
+        return try oneOf([
             parseMetadataResponse_values,
             parseMetadataResponse_list,
         ], buffer: &buffer, tracker: tracker)
@@ -2348,7 +2348,7 @@ extension GrammarParser {
             .init(rawValue: try self.parseLiteral8(buffer: &buffer, tracker: tracker))
         }
 
-        return try ParserLibrary.parseOneOf([
+        return try oneOf([
             parseMetadataValue_nstring,
             parseMetadataValue_literal8,
         ], buffer: &buffer, tracker: tracker)
@@ -2397,7 +2397,7 @@ extension GrammarParser {
             return .binary(section: section)
         }
 
-        return try ParserLibrary.parseOneOf([
+        return try oneOf([
             parseFetchStreamingResponse_rfc822,
             parseFetchStreamingResponse_bodySectionText,
             parseFetchStreamingResponse_binary,
@@ -2413,7 +2413,7 @@ extension GrammarParser {
             .other(try self.parseParameter(buffer: &buffer, tracker: tracker))
         }
 
-        return try ParserLibrary.parseOneOf([
+        return try oneOf([
             parseFetchModifier_changedSince,
             parseFetchModifier_other,
         ], buffer: &buffer, tracker: tracker)
@@ -2445,7 +2445,7 @@ extension GrammarParser {
             return .finish
         }
 
-        return try ParserLibrary.parseOneOf([
+        return try oneOf([
             parseFetchResponse_start,
             parseFetchResponse_streamingBegin,
             parseFetchResponse_simpleAttribute,
@@ -2598,7 +2598,7 @@ extension GrammarParser {
             return .gmailLabels(attributes)
         }
 
-        return try ParserLibrary.parseOneOf([
+        return try oneOf([
             parseMessageAttribute_envelope,
             parseMessageAttribute_internalDate,
             parseMessageAttribute_rfc822,
@@ -2630,7 +2630,7 @@ extension GrammarParser {
             return .init(rawValue: raw)
         }
 
-        return try ParserLibrary.parseOneOf([
+        return try oneOf([
             parseGmailLabel_backslash,
             parseGmailLabel_string,
         ], buffer: &buffer, tracker: tracker)
@@ -2650,7 +2650,7 @@ extension GrammarParser {
             return descriptions
         }
 
-        return try ParserLibrary.parseOneOf([
+        return try oneOf([
             parseNamespace_nil,
             parseNamespace_some,
         ], buffer: &buffer, tracker: tracker)
@@ -2687,7 +2687,7 @@ extension GrammarParser {
             try fixedString("(", buffer: &buffer, tracker: tracker)
             let string = try self.parseString(buffer: &buffer, tracker: tracker)
             try space(buffer: &buffer, tracker: tracker)
-            let char = try ParserLibrary.parseOneOf([
+            let char = try oneOf([
                 parseNamespaceDescr_quotedChar,
                 parseNamespaceDescr_nil,
             ], buffer: &buffer, tracker: tracker)
@@ -2752,7 +2752,7 @@ extension GrammarParser {
             try self.parseString(buffer: &buffer, tracker: tracker)
         }
 
-        return try ParserLibrary.parseOneOf([
+        return try oneOf([
             parseNString_nil,
             parseNString_some,
         ], buffer: &buffer, tracker: tracker)
@@ -2785,7 +2785,7 @@ extension GrammarParser {
         }
 
         return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> OptionExtension in
-            let type = try ParserLibrary.parseOneOf([
+            let type = try oneOf([
                 parseOptionExtensionKind_standard,
                 parseOptionExtensionKind_vendor,
             ], buffer: &buffer, tracker: tracker)
@@ -2821,7 +2821,7 @@ extension GrammarParser {
             return .array(array)
         }
 
-        return try ParserLibrary.parseOneOf([
+        return try oneOf([
             parseOptionValueComp_string,
             parseOptionValueComp_single,
             parseOptionValueComp_array,
@@ -2980,7 +2980,7 @@ extension GrammarParser {
             return .preauth(try self.parseResponseText(buffer: &buffer, tracker: tracker))
         }
 
-        return try ParserLibrary.parseOneOf([
+        return try oneOf([
             parseResponseConditionalAuth_ok,
             parseResponseConditionalAuth_preauth,
         ], buffer: &buffer, tracker: tracker)
@@ -3011,7 +3011,7 @@ extension GrammarParser {
             return .bad(try self.parseResponseText(buffer: &buffer, tracker: tracker))
         }
 
-        return try ParserLibrary.parseOneOf([
+        return try oneOf([
             parseResponseConditionalState_ok,
             parseResponseConditionalState_no,
             parseResponseConditionalState_bad,
@@ -3052,7 +3052,7 @@ extension GrammarParser {
             .metadata(try self.parseMetadataResponse(buffer: &buffer, tracker: tracker))
         }
 
-        return try ParserLibrary.parseOneOf([
+        return try oneOf([
             parseResponsePayload_conditionalState,
             parseResponsePayload_conditionalBye,
             parseResponsePayload_mailboxData,
@@ -3240,7 +3240,7 @@ extension GrammarParser {
             return .metadataNoPrivate
         }
 
-        return try ParserLibrary.parseOneOf([
+        return try oneOf([
             parseResponseTextCode_alert,
             parseResponseTextCode_noModifierSequence,
             parseResponseTextCode_modified,
@@ -3290,7 +3290,7 @@ extension GrammarParser {
             .optionExtension(try self.parseOptionExtension(buffer: &buffer, tracker: tracker))
         }
 
-        return try ParserLibrary.parseOneOf([
+        return try oneOf([
             parseReturnOption_subscribed,
             parseReturnOption_children,
             parseReturnOption_statusOption,
@@ -3316,7 +3316,7 @@ extension GrammarParser {
 
         return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             try fixedString("DEPTH ", buffer: &buffer, tracker: tracker)
-            return try ParserLibrary.parseOneOf([
+            return try oneOf([
                 parseScopeOption_zero,
                 parseScopeOption_one,
                 parseScopeOption_infinity,
@@ -3574,7 +3574,7 @@ extension GrammarParser {
             .modificationSequence(try self.parseSearchModificationSequence(buffer: &buffer, tracker: tracker))
         }
 
-        return try ParserLibrary.parseOneOf([
+        return try oneOf([
             parseSearchKey_older,
             parseSearchKey_fixedOptions,
             parseSearchKey_younger,
@@ -3671,7 +3671,7 @@ extension GrammarParser {
             .dataExtension(try self.parseSearchReturnDataExtension(buffer: &buffer, tracker: tracker))
         }
 
-        return try ParserLibrary.parseOneOf([
+        return try oneOf([
             parseSearchReturnData_min,
             parseSearchReturnData_max,
             parseSearchReturnData_all,
@@ -3732,7 +3732,7 @@ extension GrammarParser {
             return .optionExtension(optionExtension)
         }
 
-        return try ParserLibrary.parseOneOf([
+        return try oneOf([
             parseSearchReturnOption_min,
             parseSearchReturnOption_max,
             parseSearchReturnOption_all,
@@ -3779,7 +3779,7 @@ extension GrammarParser {
             return spec
         }
 
-        return try ParserLibrary.parseOneOf([
+        return try oneOf([
             parseSection_none,
             parseSection_some,
         ], buffer: &buffer, tracker: tracker)
@@ -3825,7 +3825,7 @@ extension GrammarParser {
             return .init(part: part, kind: kind)
         }
 
-        return try ParserLibrary.parseOneOf([
+        return try oneOf([
             parseSectionSpecifier_withPart,
             parseSectionSpecifier_noPart,
         ], buffer: &buffer, tracker: tracker)
@@ -3862,7 +3862,7 @@ extension GrammarParser {
             .complete
         }
 
-        return try ParserLibrary.parseOneOf([
+        return try oneOf([
             parseSectionSpecifierKind_mime,
             parseSectionSpecifierKind_headerFields,
             parseSectionSpecifierKind_notHeaderFields,
@@ -3919,7 +3919,7 @@ extension GrammarParser {
             return .qresync(.init(uidValiditiy: uidValidity, modificationSequenceValue: modSeqVal, knownUids: knownUids, sequenceMatchData: seqMatchData))
         }
 
-        return try ParserLibrary.parseOneOf([
+        return try oneOf([
             parseSelectParameter_qresync,
             parseSelectParameter_condstore,
             parseSelectParameter_basic,
@@ -3952,7 +3952,7 @@ extension GrammarParser {
         }
 
         func parse_SequenceOrWildcard(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SequenceNumber {
-            try ParserLibrary.parseOneOf([
+            try oneOf([
                 parse_wildcard,
                 GrammarParser.parseSequenceNumber,
             ], buffer: &buffer, tracker: tracker)
@@ -4008,7 +4008,7 @@ extension GrammarParser {
         }
 
         func parseSequenceSet_element(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SequenceRange {
-            try ParserLibrary.parseOneOf([
+            try oneOf([
                 self.parseSequenceRange,
                 parseSequenceSet_number,
             ], buffer: &buffer, tracker: tracker)
@@ -4033,7 +4033,7 @@ extension GrammarParser {
             return .lastCommand
         }
 
-        return try ParserLibrary.parseOneOf([
+        return try oneOf([
             parseSequenceSet_base,
             parseSequenceSet_lastCommand,
         ], buffer: &buffer, tracker: tracker)
@@ -4069,7 +4069,7 @@ extension GrammarParser {
         }
 
         func parseUIDSet_element(buffer: inout ByteBuffer, tracker: StackTracker) throws -> UIDRange {
-            try ParserLibrary.parseOneOf([
+            try oneOf([
                 self.parseUIDRange,
                 parseUIDSet_number,
             ], buffer: &buffer, tracker: tracker)
@@ -4165,7 +4165,7 @@ extension GrammarParser {
         }
 
         func parseStatusAttributeValue(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxValue {
-            try ParserLibrary.parseOneOf([
+            try oneOf([
                 parseStatusAttributeValue_messages,
                 parseStatusAttributeValue_uidnext,
                 parseStatusAttributeValue_uidvalidity,
@@ -4252,7 +4252,7 @@ extension GrammarParser {
             .other(try self.parseParameter(buffer: &buffer, tracker: tracker))
         }
 
-        return try ParserLibrary.parseOneOf([
+        return try oneOf([
             parseFetchModifier_unchangedSince,
             parseFetchModifier_other,
         ], buffer: &buffer, tracker: tracker)
@@ -4282,7 +4282,7 @@ extension GrammarParser {
         }
 
         func parseStoreAttributeFlags_operation(buffer: inout ByteBuffer, tracker: StackTracker) throws -> StoreFlags.Operation {
-            try ParserLibrary.parseOneOf([
+            try oneOf([
                 { (buffer: inout ByteBuffer, tracker: StackTracker) -> StoreFlags.Operation in
                     try fixedString("+FLAGS", buffer: &buffer, tracker: tracker)
                     return .add
@@ -4302,7 +4302,7 @@ extension GrammarParser {
             let operation = try parseStoreAttributeFlags_operation(buffer: &buffer, tracker: tracker)
             let silent = parseStoreAttributeFlags_silent(buffer: &buffer, tracker: tracker)
             try space(buffer: &buffer, tracker: tracker)
-            let flags = try ParserLibrary.parseOneOf([
+            let flags = try oneOf([
                 parseStoreAttributeFlags_array,
                 parseFlagList,
             ], buffer: &buffer, tracker: tracker)
@@ -4312,7 +4312,7 @@ extension GrammarParser {
 
     // string          = quoted / literal
     static func parseString(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ByteBuffer {
-        try ParserLibrary.parseOneOf([
+        try oneOf([
             Self.parseQuoted,
             Self.parseLiteral,
         ], buffer: &buffer, tracker: tracker)
@@ -4452,7 +4452,7 @@ extension GrammarParser {
             return .comp(comp)
         }
 
-        return try ParserLibrary.parseOneOf([
+        return try oneOf([
             parseTaggedExtensionSimple_set,
             parseTaggedExtensionVal_comp,
         ], buffer: &buffer, tracker: tracker)
@@ -4525,7 +4525,7 @@ extension GrammarParser {
 
         return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Command in
             try fixedString("UID ", buffer: &buffer, tracker: tracker)
-            return try ParserLibrary.parseOneOf([
+            return try oneOf([
                 parseUid_copy,
                 parseUid_move,
                 parseUid_fetch,
@@ -4544,7 +4544,7 @@ extension GrammarParser {
         }
 
         func parse_UIDOrWildcard(buffer: inout ByteBuffer, tracker: StackTracker) throws -> UID {
-            try ParserLibrary.parseOneOf([
+            try oneOf([
                 parse_wildcard,
                 GrammarParser.parseUID,
             ], buffer: &buffer, tracker: tracker)
@@ -4662,7 +4662,7 @@ extension GrammarParser {
             }
         }
 
-        return try ParserLibrary.parseOneOf([
+        return try oneOf([
             parseCommandQuota_getQuota,
             parseCommandQuota_getQuotaRoot,
             parseCommandQuota_setQuota,
@@ -4747,7 +4747,7 @@ extension GrammarParser {
             }
         }
 
-        return try ParserLibrary.parseOneOf([
+        return try oneOf([
             parseManyMailboxes,
             parseSingleMailboxes,
         ], buffer: &buffer, tracker: tracker)
@@ -4795,7 +4795,7 @@ extension GrammarParser {
             return .mailboxes(try parseOneOrMoreMailbox(buffer: &buffer, tracker: tracker))
         }
 
-        return try ParserLibrary.parseOneOf([
+        return try oneOf([
             parseFilterMailboxes_SelectedDelayed,
             parseFilterMailboxes_Selected,
             parseFilterMailboxes_Inboxes,
@@ -4870,7 +4870,7 @@ extension GrammarParser {
             try self.parseNil(buffer: &buffer, tracker: tracker)
             return []
         }
-        return try ParserLibrary.parseOneOf([
+        return try oneOf([
             parseEnvelopeAddresses,
             parseOptionalEnvelopeAddresses_nil,
         ], buffer: &buffer, tracker: tracker)
@@ -4927,5 +4927,15 @@ extension GrammarParser {
             }
         }
     }
-    
+
+    static func oneOf<T>(_ subParsers: [SubParser<T>], buffer: inout ByteBuffer, tracker: StackTracker, file: String = (#file), line: Int = #line) throws -> T {
+        for parser in subParsers {
+            do {
+                return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker, parser)
+            } catch is ParserError {
+                continue
+            }
+        }
+        throw ParserError(hint: "none of the options match", file: file, line: line)
+    }
 }

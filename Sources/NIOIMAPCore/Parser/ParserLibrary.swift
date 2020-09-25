@@ -161,17 +161,6 @@ extension ParserLibrary {
         return parsed
     }
 
-    static func parseOneOf<T>(_ subParsers: [SubParser<T>], buffer: inout ByteBuffer, tracker: StackTracker, file: String = (#file), line: Int = #line) throws -> T {
-        for parser in subParsers {
-            do {
-                return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker, parser)
-            } catch is ParserError {
-                continue
-            }
-        }
-        throw ParserError(hint: "none of the options match", file: file, line: line)
-    }
-
     static func parseUnsignedInteger(buffer: inout ByteBuffer, tracker: StackTracker) throws -> (number: Int, bytesConsumed: Int) {
         let string = try ParserLibrary.parseOneOrMoreCharacters(buffer: &buffer, tracker: tracker) { char in
             char >= UInt8(ascii: "0") && char <= UInt8(ascii: "9")
