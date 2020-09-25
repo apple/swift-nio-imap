@@ -151,7 +151,7 @@ public struct CommandParser: Parser {
         let save = buffer
         do {
             let command = try parseCommand(buffer: &buffer, tracker: tracker)
-            try ParserLibrary.parseNewline(buffer: &buffer, tracker: tracker)
+            try GrammarParser.newline(buffer: &buffer, tracker: tracker)
             if case .idleStart = command.command {
                 self.mode = .idle
             }
@@ -182,7 +182,7 @@ public struct CommandParser: Parser {
         } catch is ParserError {
             let save = buffer
             do {
-                try ParserLibrary.parseNewline(buffer: &buffer, tracker: tracker)
+                try GrammarParser.newline(buffer: &buffer, tracker: tracker)
                 self.mode = .lines
                 return .append(.finish)
             } catch {

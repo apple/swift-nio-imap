@@ -140,39 +140,4 @@ extension ParserLibrary {
         return (int, string.count)
     }
 
-    static func parseNewline(buffer: inout ByteBuffer, tracker: StackTracker) throws {
-        switch buffer.getInteger(at: buffer.readerIndex, as: UInt16.self) {
-        case .some(UInt16(0x0D0A /* CRLF */ )):
-            // fast path: we find CRLF
-            buffer.moveReaderIndex(forwardBy: 2)
-            return
-        case .some(let x) where UInt8(x >> 8) == UInt8(ascii: "\n"):
-            // other fast path: we find LF + some other byte
-            buffer.moveReaderIndex(forwardBy: 1)
-            return
-        case .some(let x) where UInt8(x >> 8) == UInt8(ascii: " "):
-            // found a space that we’ll skip. Some servers insert an extra space at the end.
-            try GrammarParser.composite(buffer: &buffer, tracker: tracker) { buffer, _ in
-                buffer.moveReaderIndex(forwardBy: 1)
-                try parseNewline(buffer: &buffer, tracker: tracker)
-            }
-        case .none:
-            guard let first = buffer.getInteger(at: buffer.readerIndex, as: UInt8.self) else {
-                throw _IncompleteMessage()
-            }
-            switch first {
-            case UInt8(ascii: "\n"):
-                buffer.moveReaderIndex(forwardBy: 1)
-                return
-            case UInt8(ascii: "\r"):
-                throw _IncompleteMessage()
-            default:
-                // found only one byte which is neither CR nor LF.
-                throw ParserError()
-            }
-        default:
-            // found two bytes but they're neither CRLF, nor start with a NL.
-            throw ParserError()
-        }
-    }
 }

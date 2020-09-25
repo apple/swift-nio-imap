@@ -90,7 +90,7 @@ extension ResponseParser {
 
         func parseResponse_fetch_end(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Response {
             try GrammarParser.fixedString(")", buffer: &buffer, tracker: tracker)
-            try ParserLibrary.parseNewline(buffer: &buffer, tracker: tracker)
+            try GrammarParser.newline(buffer: &buffer, tracker: tracker)
             return .fetchResponse(.finish)
         }
 
