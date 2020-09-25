@@ -172,33 +172,6 @@ extension ParserLibrary {
         throw ParserError(hint: "none of the options match", file: file, line: line)
     }
 
-    static func parseFixedString(_ needle: String, caseSensitive: Bool = false, buffer: inout ByteBuffer, tracker: StackTracker) throws {
-        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, _ in
-            let needleCount = needle.utf8.count
-            guard let actual = buffer.readString(length: needleCount) else {
-                guard needle.utf8.starts(with: buffer.readableBytesView, by: { $0 & 0xDF == $1 & 0xDF }) else {
-                    throw ParserError(hint: "Tried to parse \(needle) in \(String(decoding: buffer.readableBytesView, as: Unicode.UTF8.self))")
-                }
-                throw _IncompleteMessage()
-            }
-
-            assert(needle.utf8.allSatisfy { $0 & 0b1000_0000 == 0 }, "needle needs to be ASCII but \(needle) isn't")
-            if actual == needle {
-                // great, we just match
-                return
-            } else if !caseSensitive {
-                // we know this is all ASCII so we can do an ASCII case-insensitive compare here
-                guard needleCount == actual.utf8.count,
-                    actual.utf8.elementsEqual(needle.utf8, by: { ($0 & 0xDF) == ($1 & 0xDF) }) else {
-                    throw ParserError(hint: "case insensitively looking for \(needle) found \(actual)")
-                }
-                return
-            } else {
-                throw ParserError(hint: "case sensitively looking for \(needle) found \(actual)")
-            }
-        }
-    }
-
     static func parseUnsignedInteger(buffer: inout ByteBuffer, tracker: StackTracker) throws -> (number: Int, bytesConsumed: Int) {
         let string = try ParserLibrary.parseOneOrMoreCharacters(buffer: &buffer, tracker: tracker) { char in
             char >= UInt8(ascii: "0") && char <= UInt8(ascii: "9")
