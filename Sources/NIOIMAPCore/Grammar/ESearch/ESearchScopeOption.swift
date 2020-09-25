@@ -30,11 +30,9 @@ public struct ESearchScopeOption: Equatable {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeESearchScopeOption(_ option: ESearchScopeOption) -> Int {
-        var result = self.writeString(option.name)
-        if let value = option.value {
-            result += self.writeString(" ")
-            result += self.writeParameterValue(value)
-        }
-        return result
+        self.writeString(option.name) +
+            self.writeIfExists(option.value) { value in
+                self.writeString(" ") + self.writeParameterValue(value)
+            }
     }
 }
