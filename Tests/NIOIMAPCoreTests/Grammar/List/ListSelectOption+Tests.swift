@@ -23,9 +23,10 @@ class ListSelectOption_Tests: EncodeTestClass {}
 extension ListSelectOption_Tests {
     func testEncode() {
         let inputs: [(ListSelectOption, String, UInt)] = [
-            (.base(.subscribed), "SUBSCRIBED", #line),
-            (.independent(.remote), "REMOTE", #line),
-            (.modified(.recursiveMatch), "RECURSIVEMATCH", #line),
+            (.subscribed, "SUBSCRIBED", #line),
+            (.remote, "REMOTE", #line),
+            (.recursiveMatch, "RECURSIVEMATCH", #line),
+            (.specialUse, "SPECIAL-USE", #line),
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeListSelectOption($0) })
     }
@@ -33,7 +34,7 @@ extension ListSelectOption_Tests {
     func testEncode_multiple() {
         let inputs: [(ListSelectOptions?, String, UInt)] = [
             (nil, "()", #line),
-            (.init(baseOption: .subscribed, options: [.base(.subscribed)]), "(SUBSCRIBED SUBSCRIBED)", #line),
+            (.init(baseOption: .subscribed, options: [.subscribed]), "(SUBSCRIBED SUBSCRIBED)", #line),
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeListSelectOptions($0) })
     }

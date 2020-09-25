@@ -1767,42 +1767,40 @@ extension GrammarParser {
         ], buffer: &buffer, tracker: tracker)
     }
 
-    // list-select-mod-opt =  "RECURSIVEMATCH" / option-extension
-    static func parseListSelectModifiedOption(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ListSelectModifiedOption {
-        func parseListSelectModifiedOption_subscribed(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ListSelectModifiedOption {
+    // list-select-opt =  list-select-base-opt / list-select-independent-opt
+    //                    / list-select-mod-opt
+    static func parseListSelectOption(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ListSelectOption {
+        
+        func parseListSelectOption_subscribed(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ListSelectOption {
+            try ParserLibrary.parseFixedString("SUBSCRIBED", buffer: &buffer, tracker: tracker)
+            return .subscribed
+        }
+        
+        func parseListSelectOption_remote(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ListSelectOption {
+            try ParserLibrary.parseFixedString("REMOTE", buffer: &buffer, tracker: tracker)
+            return .remote
+        }
+        
+        func parseListSelectOption_recursiveMatch(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ListSelectOption {
             try ParserLibrary.parseFixedString("RECURSIVEMATCH", buffer: &buffer, tracker: tracker)
             return .recursiveMatch
         }
+        
+        func parseListSelectOption_specialUse(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ListSelectOption {
+            try ParserLibrary.parseFixedString("SPECIAL-USE", buffer: &buffer, tracker: tracker)
+            return .specialUse
+        }
 
-        func parseListSelectModifiedOption_optionExtension(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ListSelectModifiedOption {
+        func parseListSelectOption_optionExtension(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ListSelectOption {
             .option(try self.parseOptionExtension(buffer: &buffer, tracker: tracker))
         }
 
         return try ParserLibrary.parseOneOf([
-            parseListSelectModifiedOption_subscribed,
-            parseListSelectModifiedOption_optionExtension,
-        ], buffer: &buffer, tracker: tracker)
-    }
-
-    // list-select-opt =  list-select-base-opt / list-select-independent-opt
-    //                    / list-select-mod-opt
-    static func parseListSelectOption(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ListSelectOption {
-        func parseListSelectOption_base(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ListSelectOption {
-            .base(try self.parseListSelectBaseOption(buffer: &buffer, tracker: tracker))
-        }
-
-        func parseListSelectOption_independent(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ListSelectOption {
-            .independent(try self.parseListSelectIndependentOption(buffer: &buffer, tracker: tracker))
-        }
-
-        func parseListSelectOption_modified(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ListSelectOption {
-            .modified(try self.parseListSelectModifiedOption(buffer: &buffer, tracker: tracker))
-        }
-
-        return try ParserLibrary.parseOneOf([
-            parseListSelectOption_base,
-            parseListSelectOption_independent,
-            parseListSelectOption_modified,
+            parseListSelectOption_subscribed,
+            parseListSelectOption_remote,
+            parseListSelectOption_recursiveMatch,
+            parseListSelectOption_specialUse,
+            parseListSelectOption_optionExtension
         ], buffer: &buffer, tracker: tracker)
     }
 

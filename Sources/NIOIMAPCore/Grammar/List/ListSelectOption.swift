@@ -16,9 +16,11 @@ import struct NIO.ByteBuffer
 
 /// IMAPv4 `list-select-opt`
 public enum ListSelectOption: Equatable {
-    case base(ListSelectBaseOption)
-    case independent(ListSelectIndependentOption)
-    case modified(ListSelectModifiedOption)
+    case subscribed
+    case remote
+    case specialUse
+    case recursiveMatch
+    case option(OptionExtension)
 }
 
 public struct ListSelectOptions: Equatable {
@@ -36,12 +38,16 @@ public struct ListSelectOptions: Equatable {
 extension EncodeBuffer {
     @discardableResult mutating func writeListSelectOption(_ option: ListSelectOption) -> Int {
         switch option {
-        case .base(let option):
-            return self.writeListSelectBaseOption(option)
-        case .independent(let option):
-            return self.writeListSelectIndependentOption(option)
-        case .modified(let option):
-            return self.writeListSelectModifiedOption(option)
+        case .subscribed:
+            return self.writeString("SUBSCRIBED")
+        case .recursiveMatch:
+            return self.writeString("RECURSIVEMATCH")
+        case .remote:
+            return self.writeString("REMOTE")
+        case .specialUse:
+            return self.writeString("SPECIAL-USE")
+        case .option(let option):
+            return self.writeOptionExtension(option)
         }
     }
 
