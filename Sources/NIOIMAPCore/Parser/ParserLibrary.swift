@@ -124,14 +124,6 @@ extension ParserLibrary {
         }
     }
 
-    static func parseOptional<T>(buffer: inout ByteBuffer, tracker: StackTracker, parser: SubParser<T>) throws -> T? {
-        do {
-            return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker, parser)
-        } catch is ParserError {
-            return nil
-        }
-    }
-
     static func parseOneOrMore<T>(buffer: inout ByteBuffer, tracker: StackTracker, parser: SubParser<T>) throws -> [T] {
         var parsed: [T] = []
         try Self.parseOneOrMore(buffer: &buffer, into: &parsed, tracker: tracker, parser: parser)
@@ -141,7 +133,7 @@ extension ParserLibrary {
     static func parseOneOrMore<T>(buffer: inout ByteBuffer, into parsed: inout [T], tracker: StackTracker, parser: SubParser<T>) throws {
         try Self.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             parsed.append(try parser(&buffer, tracker))
-            while let next = try self.parseOptional(buffer: &buffer, tracker: tracker, parser: parser) {
+            while let next = try GrammarParser.optional(buffer: &buffer, tracker: tracker, parser: parser) {
                 parsed.append(next)
             }
         }
@@ -149,7 +141,7 @@ extension ParserLibrary {
 
     static func parseZeroOrMore<T>(buffer: inout ByteBuffer, into parsed: inout [T], tracker: StackTracker, parser: SubParser<T>) throws {
         try Self.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker in
-            while let next = try self.parseOptional(buffer: &buffer, tracker: tracker, parser: parser) {
+            while let next = try GrammarParser.optional(buffer: &buffer, tracker: tracker, parser: parser) {
                 parsed.append(next)
             }
         }
