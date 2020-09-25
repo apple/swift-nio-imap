@@ -60,7 +60,7 @@ final class RoundtripTests: XCTestCase {
 
             (.list(nil, reference: .inbox, .pattern(["pattern"]), []), #line),
             (.list(nil, reference: MailboxName("bar"), .pattern(["pattern"]), []), #line),
-            (.list(reference: .inbox, .mailbox("pattern")), #line),
+            (.list(nil, reference: .inbox, .mailbox("pattern")), #line),
 
             (.lsub(reference: .inbox, pattern: "abcd"), #line),
             (.lsub(reference: .inbox, pattern: "\"something\""), #line),

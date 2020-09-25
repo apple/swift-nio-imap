@@ -1767,42 +1767,39 @@ extension GrammarParser {
         ], buffer: &buffer, tracker: tracker)
     }
 
-    // list-select-mod-opt =  "RECURSIVEMATCH" / option-extension
-    static func parseListSelectModifiedOption(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ListSelectModifiedOption {
-        func parseListSelectModifiedOption_subscribed(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ListSelectModifiedOption {
+    // list-select-opt =  list-select-base-opt / list-select-independent-opt
+    //                    / list-select-mod-opt
+    static func parseListSelectOption(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ListSelectOption {
+        func parseListSelectOption_subscribed(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ListSelectOption {
+            try ParserLibrary.parseFixedString("SUBSCRIBED", buffer: &buffer, tracker: tracker)
+            return .subscribed
+        }
+
+        func parseListSelectOption_remote(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ListSelectOption {
+            try ParserLibrary.parseFixedString("REMOTE", buffer: &buffer, tracker: tracker)
+            return .remote
+        }
+
+        func parseListSelectOption_recursiveMatch(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ListSelectOption {
             try ParserLibrary.parseFixedString("RECURSIVEMATCH", buffer: &buffer, tracker: tracker)
             return .recursiveMatch
         }
 
-        func parseListSelectModifiedOption_optionExtension(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ListSelectModifiedOption {
+        func parseListSelectOption_specialUse(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ListSelectOption {
+            try ParserLibrary.parseFixedString("SPECIAL-USE", buffer: &buffer, tracker: tracker)
+            return .specialUse
+        }
+
+        func parseListSelectOption_optionExtension(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ListSelectOption {
             .option(try self.parseOptionExtension(buffer: &buffer, tracker: tracker))
         }
 
         return try ParserLibrary.parseOneOf([
-            parseListSelectModifiedOption_subscribed,
-            parseListSelectModifiedOption_optionExtension,
-        ], buffer: &buffer, tracker: tracker)
-    }
-
-    // list-select-opt =  list-select-base-opt / list-select-independent-opt
-    //                    / list-select-mod-opt
-    static func parseListSelectOption(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ListSelectOption {
-        func parseListSelectOption_base(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ListSelectOption {
-            .base(try self.parseListSelectBaseOption(buffer: &buffer, tracker: tracker))
-        }
-
-        func parseListSelectOption_independent(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ListSelectOption {
-            .independent(try self.parseListSelectIndependentOption(buffer: &buffer, tracker: tracker))
-        }
-
-        func parseListSelectOption_modified(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ListSelectOption {
-            .modified(try self.parseListSelectModifiedOption(buffer: &buffer, tracker: tracker))
-        }
-
-        return try ParserLibrary.parseOneOf([
-            parseListSelectOption_base,
-            parseListSelectOption_independent,
-            parseListSelectOption_modified,
+            parseListSelectOption_subscribed,
+            parseListSelectOption_remote,
+            parseListSelectOption_recursiveMatch,
+            parseListSelectOption_specialUse,
+            parseListSelectOption_optionExtension,
         ], buffer: &buffer, tracker: tracker)
     }
 
@@ -1813,7 +1810,8 @@ extension GrammarParser {
     //                    *(SP list-select-independent-opt))
     //                      ] ")"
     static func parseListSelectOptions(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ListSelectOptions {
-        func parseListSelectOptions_mixed(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ListSelectionOptionsData {
+        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
+            try ParserLibrary.parseFixedString("(", buffer: &buffer, tracker: tracker)
             var selectOptions = try ParserLibrary.parseZeroOrMore(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> ListSelectOption in
                 let option = try self.parseListSelectOption(buffer: &buffer, tracker: tracker)
                 try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
@@ -1825,29 +1823,8 @@ extension GrammarParser {
                 try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
                 return option
             }
-
-            return .select(selectOptions, baseOption)
-        }
-
-        func parseListSelectOptions_independent(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ListSelectionOptionsData {
-            var array = [try self.parseListSelectIndependentOption(buffer: &buffer, tracker: tracker)]
-            try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) in
-                try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
-                return try self.parseListSelectIndependentOption(buffer: &buffer, tracker: tracker)
-            }
-            return .selectIndependent(array)
-        }
-
-        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
-            try ParserLibrary.parseFixedString("(", buffer: &buffer, tracker: tracker)
-            let options = try ParserLibrary.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
-                try ParserLibrary.parseOneOf([
-                    parseListSelectOptions_mixed,
-                    parseListSelectOptions_independent,
-                ], buffer: &buffer, tracker: tracker)
-            }
             try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)
-            return options
+            return .init(baseOption: baseOption, options: selectOptions)
         }
     }
 

@@ -110,8 +110,8 @@ extension B2MV_Tests {
 
             // MARK: List
 
-            ("tag LIST INBOX \"\"", [.command(.init(tag: "tag", command: .list(reference: .inbox, .mailbox(""))))]),
-            ("tag LIST /Mail/ %", [.command(.init(tag: "tag", command: .list(reference: .init("/Mail/"), .mailbox("%"))))]),
+            ("tag LIST INBOX \"\"", [.command(.init(tag: "tag", command: .list(nil, reference: .inbox, .mailbox(""))))]),
+            ("tag LIST /Mail/ %", [.command(.init(tag: "tag", command: .list(nil, reference: .init("/Mail/"), .mailbox("%"))))]),
 
             // MARK: LSUB
 

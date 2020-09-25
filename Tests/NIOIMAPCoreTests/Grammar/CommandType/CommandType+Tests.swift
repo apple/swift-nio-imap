@@ -24,8 +24,8 @@ extension CommandType_Tests {
     func testEncode() {
         let inputs: [(Command, CommandEncodingOptions, [String], UInt)] = [
             (.list(nil, reference: .init(""), .mailbox(""), []), CommandEncodingOptions(), ["LIST \"\" \"\""], #line),
-            (.list(reference: .init(""), .mailbox("")), CommandEncodingOptions(), ["LIST \"\" \"\""], #line),
-            (.list(reference: .init(""), .mailbox("")), CommandEncodingOptions(), ["LIST \"\" \"\""], #line), // no ret-opts but has capability
+            (.list(nil, reference: .init(""), .mailbox("")), CommandEncodingOptions(), ["LIST \"\" \"\""], #line),
+            (.list(nil, reference: .init(""), .mailbox("")), CommandEncodingOptions(), ["LIST \"\" \"\""], #line), // no ret-opts but has capability
             (.list(nil, reference: .inbox, .mailbox(""), [.children]), CommandEncodingOptions(), ["LIST \"INBOX\" \"\" RETURN (CHILDREN)"], #line), // ret-opts with capability
 
             (.namespace, CommandEncodingOptions(), ["NAMESPACE"], #line),
