@@ -1676,9 +1676,9 @@ extension ParserUnitTests {
             validInputs: [
                 ("ESEARCH", "\r", .init(correlator: nil, uid: false, returnData: []), #line),
                 ("ESEARCH UID", "\r", .init(correlator: nil, uid: true, returnData: []), #line),
-                ("ESEARCH (TAG \"col\") UID", "\r", .init(correlator: "col", uid: true, returnData: []), #line),
-                ("ESEARCH (TAG \"col\") UID COUNT 2", "\r", .init(correlator: "col", uid: true, returnData: [.count(2)]), #line),
-                ("ESEARCH (TAG \"col\") UID MIN 1 MAX 2", "\r", .init(correlator: "col", uid: true, returnData: [.min(1), .max(2)]), #line),
+                ("ESEARCH (TAG \"col\") UID", "\r", .init(correlator: SearchCorrelator(tag: "col"), uid: true, returnData: []), #line),
+                ("ESEARCH (TAG \"col\") UID COUNT 2", "\r", .init(correlator: SearchCorrelator(tag: "col"), uid: true, returnData: [.count(2)]), #line),
+                ("ESEARCH (TAG \"col\") UID MIN 1 MAX 2", "\r", .init(correlator: SearchCorrelator(tag: "col"), uid: true, returnData: [.min(1), .max(2)]), #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
@@ -2650,10 +2650,24 @@ extension ParserUnitTests {
         self.iterateTests(
             testFunction: GrammarParser.parseSearchCorrelator,
             validInputs: [
-                (" (TAG \"test1\")", "\r", "test1", #line),
-                (" (tag \"test2\")", "\r", "test2", #line),
+                (" (TAG \"test1\")", "\r", SearchCorrelator(tag: "test1"), #line),
+                (" (tag \"test2\")", "\r", SearchCorrelator(tag: "test2"), #line),
+                (
+                    " (TAG \"test1\" MAILBOX \"mb\" UIDVALIDITY 5)", "\r",
+                    SearchCorrelator(tag: "test1", mailbox: MailboxName("mb"), uidValidity: 5), #line
+                ),
+                (
+                    " (MAILBOX \"mb\" UIDVALIDITY 5 TAG \"test1\")", "\r",
+                    SearchCorrelator(tag: "test1", mailbox: MailboxName("mb"), uidValidity: 5), #line
+                ),
             ],
-            parserErrorInputs: [],
+            parserErrorInputs: [
+                (" (TAG \"test1\" MAILBOX \"mb\" )", "\r", #line),
+                (" (TAG \"test1\" MAILBOX \"mb\")", "\r", #line),
+                (" (TAG \"test1\" MAILBOX \"mb\" MAILBOX \"mb\")", "\r", #line),
+                (" (MAILBOX \"mb\")", "\r", #line),
+                (" (UIDVALIDITY 5)", "\r", #line),
+            ],
             incompleteMessageInputs: []
         )
     }
@@ -3774,7 +3788,11 @@ extension ParserUnitTests {
             incompleteMessageInputs: []
         )
     }
+}
 
+// MARK: RFC 6237 & required part of RFC 5465
+
+extension ParserUnitTests {
     func testParseOneOrMoreMailbox() {
         self.iterateTests(
             testFunction: GrammarParser.parseOneOrMoreMailbox,
@@ -3837,15 +3855,160 @@ extension ParserUnitTests {
                     #line
                 ),
                 (
+                    "subtree-one \"box1\"", " ",
+                    .subtreeOne(Mailboxes([.init("box1")])!),
+                    #line
+                ),
+                (
                     "mailboxes \"box1\"", " ",
                     .mailboxes(Mailboxes([.init("box1")])!),
                     #line
                 ),
             ],
             parserErrorInputs: [
-                ("subtree", "\r", #line),
+                ("subtree ", "\r", #line),
+                ("subtree-one", "\r", #line),
                 ("mailboxes", "\r", #line),
             ],
+            incompleteMessageInputs: []
+        )
+    }
+
+    func testParseESearchScopeOption() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseESearchScopeOption,
+            validInputs: [
+                (
+                    "name", "\r",
+                    .init(name: "name"),
+                    #line
+                ),
+                (
+                    "name $", "\r",
+                    .init(name: "name", value: .sequence(.lastCommand)),
+                    #line
+                ),
+            ],
+            parserErrorInputs: [],
+            incompleteMessageInputs: []
+        )
+    }
+
+    func testParseESearchScopeOptions() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseESearchScopeOptions,
+            validInputs: [
+                (
+                    "name", "\r",
+                    ESearchScopeOptions([.init(name: "name")])!,
+                    #line
+                ),
+                (
+                    "name $", "\r",
+                    ESearchScopeOptions([.init(name: "name", value: .sequence(.lastCommand))]),
+                    #line
+                ),
+                (
+                    "name name2", "\r",
+                    ESearchScopeOptions([.init(name: "name"), .init(name: "name2")])!,
+                    #line
+                ),
+            ],
+            parserErrorInputs: [],
+            incompleteMessageInputs: []
+        )
+    }
+
+    func testParseEsearchSourceOptions() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseEsearchSourceOptions,
+            validInputs: [
+                (
+                    "IN (inboxes)", "\r",
+                    ESearchSourceOptions(sourceMailbox: [.inboxes]),
+                    #line
+                ),
+                (
+                    "IN (inboxes personal)", "\r",
+                    ESearchSourceOptions(sourceMailbox: [.inboxes, .personal]),
+                    #line
+                ),
+                (
+                    "IN (inboxes (name))", "\r",
+                    ESearchSourceOptions(sourceMailbox: [.inboxes],
+                                         scopeOptions: ESearchScopeOptions([.init(name: "name")])!),
+                    #line
+                ),
+            ],
+            parserErrorInputs: [
+                ("IN (inboxes ())", "\r", #line),
+                ("IN ((name))", "\r", #line),
+                ("IN (inboxes (name)", "\r", #line),
+                ("IN (inboxes (name", "\r", #line),
+                ("IN (inboxes (", "\r", #line),
+                ("IN (inboxes )", "\r", #line),
+                ("IN (", "\r", #line),
+                ("IN", "\r", #line),
+            ],
+            incompleteMessageInputs: []
+        )
+    }
+
+    func testParseEsearchOptions() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseEsearchOptions,
+            validInputs: [
+                (
+                    " ALL", "\r",
+                    ESearchOptions(key: .all),
+                    #line
+                ),
+                (
+                    " RETURN (MIN) ALL", "\r",
+                    ESearchOptions(key: .all, returnOptions: [.min]),
+                    #line
+                ),
+                (
+                    " CHARSET Alien ALL", "\r",
+                    ESearchOptions(key: .all, charset: "Alien"),
+                    #line
+                ),
+                (
+                    " IN (inboxes) ALL", "\r",
+                    ESearchOptions(key: .all, sourceOptions: ESearchSourceOptions(sourceMailbox: [.inboxes])),
+                    #line
+                ),
+                (
+                    " IN (inboxes) CHARSET Alien ALL", "\r",
+                    ESearchOptions(key: .all,
+                                   charset: "Alien",
+                                   sourceOptions: ESearchSourceOptions(sourceMailbox: [.inboxes])),
+                    #line
+                ),
+                (
+                    " IN (inboxes) RETURN (MIN) ALL", "\r",
+                    ESearchOptions(key: .all,
+                                   returnOptions: [.min],
+                                   sourceOptions: ESearchSourceOptions(sourceMailbox: [.inboxes])),
+                    #line
+                ),
+                (
+                    " RETURN (MIN) CHARSET Alien ALL", "\r",
+                    ESearchOptions(key: .all,
+                                   charset: "Alien",
+                                   returnOptions: [.min]),
+                    #line
+                ),
+                (
+                    " IN (inboxes) RETURN (MIN) CHARSET Alien ALL", "\r",
+                    ESearchOptions(key: .all,
+                                   charset: "Alien",
+                                   returnOptions: [.min],
+                                   sourceOptions: ESearchSourceOptions(sourceMailbox: [.inboxes])),
+                    #line
+                ),
+            ],
+            parserErrorInputs: [],
             incompleteMessageInputs: []
         )
     }

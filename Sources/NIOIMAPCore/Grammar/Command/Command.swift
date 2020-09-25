@@ -60,6 +60,7 @@ public enum Command: Equatable {
 
     case getMetadata(options: [MetadataOption], mailbox: MailboxName, entries: [ByteBuffer])
     case setMetadata(mailbox: MailboxName, entries: [EntryValue])
+    case esearch(ESearchOptions)
 }
 
 // MARK: - IMAP
@@ -149,6 +150,8 @@ extension CommandEncodeBuffer {
             return self.writeCommandKind_getMetadata(options: options, mailbox: mailbox, entries: entries)
         case .setMetadata(mailbox: let mailbox, entries: let entries):
             return self.writeCommandKind_setMetadata(mailbox: mailbox, entries: entries)
+        case .esearch(let options):
+            return self.writeCommandKind_esearch(options: options)
         }
     }
 
@@ -431,5 +434,10 @@ extension CommandEncodeBuffer {
             self.buffer.writeArray(resourceLimits, callback: { (limit, self) in
                 self.writeQuotaLimit(limit)
             })
+    }
+
+    private mutating func writeCommandKind_esearch(options: ESearchOptions) -> Int {
+        self.buffer.writeString("ESEARCH") +
+            self.buffer.writeESearchOptions(options)
     }
 }

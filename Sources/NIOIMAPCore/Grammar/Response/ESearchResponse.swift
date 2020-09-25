@@ -16,11 +16,11 @@ import struct NIO.ByteBuffer
 
 /// IMAPv4 `esearch-response`
 public struct ESearchResponse: Equatable {
-    public var correlator: ByteBuffer?
+    public var correlator: SearchCorrelator?
     public var uid: Bool
     public var returnData: [SearchReturnData]
 
-    public init(correlator: ByteBuffer? = nil, uid: Bool, returnData: [SearchReturnData]) {
+    public init(correlator: SearchCorrelator? = nil, uid: Bool, returnData: [SearchReturnData]) {
         self.correlator = correlator
         self.uid = uid
         self.returnData = returnData

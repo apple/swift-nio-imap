@@ -16,22 +16,24 @@ import NIO
 @testable import NIOIMAPCore
 import XCTest
 
-class ESearchResponse_Tests: EncodeTestClass {}
+class ESearchScopeOptions_Tests: EncodeTestClass {}
 
 // MARK: - Encoding
 
-extension ESearchResponse_Tests {
+extension ESearchScopeOptions_Tests {
     func testEncode() {
-        let inputs: [(ESearchResponse, String, UInt)] = [
-            (.init(correlator: nil, uid: false, returnData: []), "ESEARCH", #line),
-            (.init(correlator: nil, uid: true, returnData: []), "ESEARCH UID", #line),
-            (.init(correlator: nil, uid: false, returnData: [.count(2)]), "ESEARCH COUNT 2", #line),
-            (.init(correlator: SearchCorrelator(tag: "some"), uid: false, returnData: []), "ESEARCH (TAG \"some\")", #line),
+        let inputs: [(ESearchScopeOptions, String, UInt)] = [
+            (ESearchScopeOptions([.init(name: "test")])!, "test", #line),
+            (
+                ESearchScopeOptions([.init(name: "test", value: .sequence(.lastCommand)), .init(name: "test2")])!,
+                "test $ test2",
+                #line
+            ),
         ]
 
         for (test, expectedString, line) in inputs {
             self.testBuffer.clear()
-            let size = self.testBuffer.writeESearchResponse(test)
+            let size = self.testBuffer.writeESearchScopeOptions(test)
             XCTAssertEqual(size, expectedString.utf8.count, line: line)
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }

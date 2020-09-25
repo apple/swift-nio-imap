@@ -22,8 +22,9 @@ class SearchCorrelator_Tests: EncodeTestClass {}
 
 extension SearchCorrelator_Tests {
     func testEncode() {
-        let inputs: [(ByteBuffer, String, UInt)] = [
-            ("some", " (TAG \"some\")", #line),
+        let inputs: [(SearchCorrelator, String, UInt)] = [
+            (SearchCorrelator(tag: "some"), " (TAG \"some\")", #line),
+            (SearchCorrelator(tag: "some", mailbox: MailboxName("mb"), uidValidity: 5), " (TAG \"some\" MAILBOX \"mb\" UIDVALIDITY 5)", #line),
         ]
 
         for (test, expectedString, line) in inputs {
