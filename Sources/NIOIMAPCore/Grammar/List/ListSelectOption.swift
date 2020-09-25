@@ -21,9 +21,14 @@ public enum ListSelectOption: Equatable {
     case modified(ListSelectModifiedOption)
 }
 
-public enum ListSelectOptions: Equatable {
-    case select([ListSelectOption], ListSelectBaseOption)
-    case selectIndependent([ListSelectIndependentOption])
+public struct ListSelectOptions: Equatable {
+    public var baseOption: ListSelectBaseOption
+    public var options: [ListSelectOption]
+    
+    public init(baseOption: ListSelectBaseOption, options: [ListSelectOption]) {
+        self.baseOption = baseOption
+        self.options = options
+    }
 }
 
 // MARK: - Encoding
@@ -43,19 +48,11 @@ extension EncodeBuffer {
     @discardableResult mutating func writeListSelectOptions(_ options: ListSelectOptions?) -> Int {
         self.writeString("(") +
             self.writeIfExists(options) { (optionsData) -> Int in
-                switch optionsData {
-                case .select(let selectOptions, let baseOption):
-                    return
-                        self.writeArray(selectOptions, separator: "", parenthesis: false) { (option, self) -> Int in
-                            self.writeListSelectOption(option) +
-                                self.writeSpace()
-                        } +
-                        self.writeListSelectBaseOption(baseOption)
-                case .selectIndependent(let independentOptions):
-                    return self.writeArray(independentOptions, parenthesis: false) { (option, self) in
-                        self.writeListSelectIndependentOption(option)
-                    }
-                }
+                self.writeArray(optionsData.options, separator: "", parenthesis: false) { (option, self) -> Int in
+                    self.writeListSelectOption(option) +
+                        self.writeSpace()
+                } +
+                self.writeListSelectBaseOption(optionsData.baseOption)
             } +
             self.writeString(")")
     }

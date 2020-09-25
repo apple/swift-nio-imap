@@ -22,6 +22,7 @@ public enum Command: Equatable {
     case delete(MailboxName)
     case examine(MailboxName, [Parameter] = [])
     case list(ListSelectOptions?, reference: MailboxName, MailboxPatterns, [ReturnOption] = [])
+    case listIndependent([ListSelectIndependentOption], reference: MailboxName, MailboxPatterns, [ReturnOption] = [])
     case lsub(reference: MailboxName, pattern: ByteBuffer)
     case rename(from: MailboxName, to: MailboxName, params: [Parameter])
     case select(MailboxName, [SelectParameter] = [])
@@ -81,6 +82,8 @@ extension CommandEncodeBuffer {
             return self.writeCommandKind_examine(mailbox: mailbox, parameters: params)
         case .list(let selectOptions, let mailbox, let mailboxPatterns, let returnOptions):
             return self.writeCommandKind_list(selectOptions: selectOptions, mailbox: mailbox, mailboxPatterns: mailboxPatterns, returnOptions: returnOptions)
+        case .listIndependent(let selectOptions, let mailbox, let mailboxPatterns, let returnOptions):
+            return self.writeCommandKind_listIndependent(selectOptions: selectOptions, mailbox: mailbox, mailboxPatterns: mailboxPatterns, returnOptions: returnOptions)
         case .lsub(let mailbox, let listMailbox):
             return self.writeCommandKind_lsub(mailbox: mailbox, listMailbox: listMailbox)
         case .rename(let from, let to, let params):
@@ -209,6 +212,23 @@ extension CommandEncodeBuffer {
                 self.buffer.writeSpace() +
                     self.buffer.writeListSelectOptions(options)
             } +
+            self.buffer.writeSpace() +
+            self.buffer.writeMailbox(mailbox) +
+            self.buffer.writeSpace() +
+            self.buffer.writeMailboxPatterns(mailboxPatterns) +
+            self.buffer.writeIfArrayHasMinimumSize(array: returnOptions, minimum: 1) { (_, buffer) in
+                buffer.writeSpace() +
+                    buffer.writeListReturnOptions(returnOptions)
+            }
+    }
+    
+    private mutating func writeCommandKind_listIndependent(selectOptions: [ListSelectIndependentOption], mailbox: MailboxName, mailboxPatterns: MailboxPatterns, returnOptions: [ReturnOption]) -> Int {
+        self.buffer.writeString("LIST") +
+            self.buffer.writeIfArrayHasMinimumSize(array: selectOptions, callback: { array, buffer in
+                buffer.writeArray(array) { element, buffer in
+                    buffer.writeListSelectIndependentOption(element)
+                }
+            }) +
             self.buffer.writeSpace() +
             self.buffer.writeMailbox(mailbox) +
             self.buffer.writeSpace() +

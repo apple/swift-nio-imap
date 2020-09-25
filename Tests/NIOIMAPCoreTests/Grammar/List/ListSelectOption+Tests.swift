@@ -33,8 +33,7 @@ extension ListSelectOption_Tests {
     func testEncode_multiple() {
         let inputs: [(ListSelectOptions?, String, UInt)] = [
             (nil, "()", #line),
-            (.select([.base(.subscribed)], .subscribed), "(SUBSCRIBED SUBSCRIBED)", #line),
-            (.selectIndependent([.remote, .option(.init(kind: .standard("SOME"), value: nil))]), "(REMOTE SOME)", #line),
+            (.init(baseOption: .subscribed, options: [.base(.subscribed)]), "(SUBSCRIBED SUBSCRIBED)", #line),
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeListSelectOptions($0) })
     }
