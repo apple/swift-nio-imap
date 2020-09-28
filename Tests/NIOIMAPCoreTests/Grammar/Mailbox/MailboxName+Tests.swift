@@ -40,21 +40,20 @@ extension MailboxName_Tests {
 // MARK: - MailboxPath
 
 extension MailboxName_Tests {
-    
     func testInit() {
         let test1 = MailboxPath(name: .init("box"), pathSeparator: nil)
         XCTAssertEqual(test1.name, .init("box"))
         XCTAssertEqual(test1.pathSeparator, nil)
-        
+
         let test2 = MailboxPath(name: .init("box"))
         XCTAssertEqual(test2.name, .init("box"))
         XCTAssertEqual(test2.pathSeparator, nil)
-        
+
         let test3 = MailboxPath(name: .init("box"), pathSeparator: "/")
         XCTAssertEqual(test3.name, .init("box"))
         XCTAssertEqual(test3.pathSeparator, "/")
     }
-    
+
     func testCreateSubMailboxWithDisplayName() {
         let inputs: [(MailboxPath, String, MailboxPath, UInt)] = [
             (
@@ -68,11 +67,10 @@ extension MailboxName_Tests {
                 "£",
                 .init(name: .init("box/&AKM-"), pathSeparator: "/"),
                 #line
-            )
+            ),
         ]
         for (path, newName, newPath, line) in inputs {
             XCTAssertEqual(path.createSubMailboxWithDisplayName(newName), newPath, line: line)
         }
     }
-    
 }

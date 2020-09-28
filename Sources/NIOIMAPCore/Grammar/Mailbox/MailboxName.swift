@@ -18,7 +18,7 @@ import struct NIO.ByteBufferView
 public struct MailboxPath: Equatable {
     public var name: MailboxName
     public var pathSeparator: Character?
-    
+
     public init(name: MailboxName, pathSeparator: Character? = nil) {
         self.name = name
         self.pathSeparator = pathSeparator
@@ -26,20 +26,18 @@ public struct MailboxPath: Equatable {
 }
 
 extension MailboxPath {
-    
     /// Creates a new mailbox path that nested inside the existing path.
-        ///
-        /// This will encode the display string according to RFC 2152
-        /// and make sure that there are no path separators in the name,
-        /// and then append the path separator and the name to the
-        /// existing path’s name.
+    ///
+    /// This will encode the display string according to RFC 2152
+    /// and make sure that there are no path separators in the name,
+    /// and then append the path separator and the name to the
+    /// existing path’s name.
     func createSubMailboxWithDisplayName(_ name: String) -> MailboxPath? {
-        
         // the new name should contain a separator
         if let separator = self.pathSeparator, name.firstIndex(of: separator) != nil {
             return nil
         }
-        
+
         var newStorage = self.name.storage
         if let separator = self.pathSeparator {
             newStorage.writeBytes(separator.utf8)
@@ -47,7 +45,6 @@ extension MailboxPath {
         newStorage.writeBytes(ModifiedUTF7.encode(name).readableBytesView)
         return MailboxPath(name: .init(newStorage), pathSeparator: self.pathSeparator)
     }
-    
 }
 
 /// IMAPv4 `mailbox`
