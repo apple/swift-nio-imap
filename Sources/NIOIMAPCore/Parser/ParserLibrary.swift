@@ -32,29 +32,9 @@ public struct ParserError: Error {
 
 public struct TooDeep: Error {}
 
-struct StackTracker {
-    private var stackDepth = 0
-    private let maximumStackDepth: Int
-
-    static var makeNewDefaultLimitStackTracker: StackTracker {
-        StackTracker(maximumParserStackDepth: 100)
-    }
-
-    init(maximumParserStackDepth: Int) {
-        self.maximumStackDepth = maximumParserStackDepth
-    }
-
-    fileprivate mutating func newStackFrame() throws {
-        self.stackDepth += 1
-        guard self.stackDepth < self.maximumStackDepth else {
-            throw TooDeep()
-        }
-    }
-}
-
 extension ParserLibrary {
     static func parseZeroOrMoreCharacters(buffer: inout ByteBuffer, tracker: StackTracker, where: ((UInt8) -> Bool)) throws -> String {
-        try Self.parseComposite(buffer: &buffer, tracker: tracker) { buffer, _ in
+        try GrammarParser.composite(buffer: &buffer, tracker: tracker) { buffer, _ in
             let maybeFirstBad = buffer.readableBytesView.firstIndex { char in
                 !`where`(char)
             }
@@ -67,7 +47,7 @@ extension ParserLibrary {
     }
 
     static func parseOneOrMoreCharacters(buffer: inout ByteBuffer, tracker: StackTracker, where: ((UInt8) -> Bool)) throws -> String {
-        try Self.parseComposite(buffer: &buffer, tracker: tracker) { buffer, _ in
+        try GrammarParser.composite(buffer: &buffer, tracker: tracker) { buffer, _ in
             let maybeFirstBad = buffer.readableBytesView.firstIndex { char in
                 !`where`(char)
             }
@@ -83,7 +63,7 @@ extension ParserLibrary {
     }
 
     static func parseZeroOrMoreCharactersByteBuffer(buffer: inout ByteBuffer, tracker: StackTracker, where: ((UInt8) -> Bool)) throws -> ByteBuffer {
-        try Self.parseComposite(buffer: &buffer, tracker: tracker) { buffer, _ in
+        try GrammarParser.composite(buffer: &buffer, tracker: tracker) { buffer, _ in
             let maybeFirstBad = buffer.readableBytesView.firstIndex { char in
                 !`where`(char)
             }
@@ -96,7 +76,7 @@ extension ParserLibrary {
     }
 
     static func parseOneOrMoreCharactersByteBuffer(buffer: inout ByteBuffer, tracker: StackTracker, where: ((UInt8) -> Bool)) throws -> ByteBuffer {
-        try Self.parseComposite(buffer: &buffer, tracker: tracker) { buffer, _ in
+        try GrammarParser.composite(buffer: &buffer, tracker: tracker) { buffer, _ in
             let maybeFirstBad = buffer.readableBytesView.firstIndex { char in
                 !`where`(char)
             }
@@ -111,27 +91,6 @@ extension ParserLibrary {
         }
     }
 
-    static func parseComposite<T>(buffer: inout ByteBuffer, tracker: StackTracker, _ body: SubParser<T>) throws -> T {
-        var tracker = tracker
-        try tracker.newStackFrame()
-
-        let save = buffer
-        do {
-            return try body(&buffer, tracker)
-        } catch {
-            buffer = save
-            throw error
-        }
-    }
-
-    static func parseOptional<T>(buffer: inout ByteBuffer, tracker: StackTracker, parser: SubParser<T>) throws -> T? {
-        do {
-            return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker, parser)
-        } catch is ParserError {
-            return nil
-        }
-    }
-
     static func parseOneOrMore<T>(buffer: inout ByteBuffer, tracker: StackTracker, parser: SubParser<T>) throws -> [T] {
         var parsed: [T] = []
         try Self.parseOneOrMore(buffer: &buffer, into: &parsed, tracker: tracker, parser: parser)
@@ -139,17 +98,17 @@ extension ParserLibrary {
     }
 
     static func parseOneOrMore<T>(buffer: inout ByteBuffer, into parsed: inout [T], tracker: StackTracker, parser: SubParser<T>) throws {
-        try Self.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker in
+        try GrammarParser.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             parsed.append(try parser(&buffer, tracker))
-            while let next = try self.parseOptional(buffer: &buffer, tracker: tracker, parser: parser) {
+            while let next = try GrammarParser.optional(buffer: &buffer, tracker: tracker, parser: parser) {
                 parsed.append(next)
             }
         }
     }
 
     static func parseZeroOrMore<T>(buffer: inout ByteBuffer, into parsed: inout [T], tracker: StackTracker, parser: SubParser<T>) throws {
-        try Self.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker in
-            while let next = try self.parseOptional(buffer: &buffer, tracker: tracker, parser: parser) {
+        try GrammarParser.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
+            while let next = try GrammarParser.optional(buffer: &buffer, tracker: tracker, parser: parser) {
                 parsed.append(next)
             }
         }
@@ -159,65 +118,6 @@ extension ParserLibrary {
         var parsed: [T] = []
         try Self.parseZeroOrMore(buffer: &buffer, into: &parsed, tracker: tracker, parser: parser)
         return parsed
-    }
-
-    static func parseOneOf<T>(_ subParsers: [SubParser<T>], buffer: inout ByteBuffer, tracker: StackTracker, file: String = (#file), line: Int = #line) throws -> T {
-        for parser in subParsers {
-            do {
-                return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker, parser)
-            } catch is ParserError {
-                continue
-            }
-        }
-        throw ParserError(hint: "none of the options match", file: file, line: line)
-    }
-
-    static func parseFixedString(_ needle: String, caseSensitive: Bool = false, buffer: inout ByteBuffer, tracker: StackTracker) throws {
-        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, _ in
-            let needleCount = needle.utf8.count
-            guard let actual = buffer.readString(length: needleCount) else {
-                guard needle.utf8.starts(with: buffer.readableBytesView, by: { $0 & 0xDF == $1 & 0xDF }) else {
-                    throw ParserError(hint: "Tried to parse \(needle) in \(String(decoding: buffer.readableBytesView, as: Unicode.UTF8.self))")
-                }
-                throw _IncompleteMessage()
-            }
-
-            assert(needle.utf8.allSatisfy { $0 & 0b1000_0000 == 0 }, "needle needs to be ASCII but \(needle) isn't")
-            if actual == needle {
-                // great, we just match
-                return
-            } else if !caseSensitive {
-                // we know this is all ASCII so we can do an ASCII case-insensitive compare here
-                guard needleCount == actual.utf8.count,
-                    actual.utf8.elementsEqual(needle.utf8, by: { ($0 & 0xDF) == ($1 & 0xDF) }) else {
-                    throw ParserError(hint: "case insensitively looking for \(needle) found \(actual)")
-                }
-                return
-            } else {
-                throw ParserError(hint: "case sensitively looking for \(needle) found \(actual)")
-            }
-        }
-    }
-
-    static func parseSpace(buffer: inout ByteBuffer, tracker: StackTracker) throws {
-        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, _ in
-
-            // need at least one readable byte
-            guard buffer.readableBytes > 0 else { throw _IncompleteMessage() }
-
-            // if there are only spaces then just consume it all and move on
-            guard let index = buffer.readableBytesView.firstIndex(where: { $0 != UInt8(ascii: " ") }) else {
-                buffer.moveReaderIndex(to: buffer.writerIndex)
-                return
-            }
-
-            // first character wasn't a space
-            guard index > buffer.readableBytesView.startIndex else {
-                throw ParserError(hint: "Expected space, found \(buffer.readableBytesView[index])")
-            }
-
-            buffer.moveReaderIndex(to: index)
-        }
     }
 
     static func parseUnsignedInteger(buffer: inout ByteBuffer, tracker: StackTracker) throws -> (number: Int, bytesConsumed: Int) {
@@ -238,41 +138,5 @@ extension ParserLibrary {
             throw ParserError(hint: "\(string) is not a number")
         }
         return (int, string.count)
-    }
-
-    static func parseNewline(buffer: inout ByteBuffer, tracker: StackTracker) throws {
-        switch buffer.getInteger(at: buffer.readerIndex, as: UInt16.self) {
-        case .some(UInt16(0x0D0A /* CRLF */ )):
-            // fast path: we find CRLF
-            buffer.moveReaderIndex(forwardBy: 2)
-            return
-        case .some(let x) where UInt8(x >> 8) == UInt8(ascii: "\n"):
-            // other fast path: we find LF + some other byte
-            buffer.moveReaderIndex(forwardBy: 1)
-            return
-        case .some(let x) where UInt8(x >> 8) == UInt8(ascii: " "):
-            // found a space that we’ll skip. Some servers insert an extra space at the end.
-            try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, _ in
-                buffer.moveReaderIndex(forwardBy: 1)
-                try parseNewline(buffer: &buffer, tracker: tracker)
-            }
-        case .none:
-            guard let first = buffer.getInteger(at: buffer.readerIndex, as: UInt8.self) else {
-                throw _IncompleteMessage()
-            }
-            switch first {
-            case UInt8(ascii: "\n"):
-                buffer.moveReaderIndex(forwardBy: 1)
-                return
-            case UInt8(ascii: "\r"):
-                throw _IncompleteMessage()
-            default:
-                // found only one byte which is neither CR nor LF.
-                throw ParserError()
-            }
-        default:
-            // found two bytes but they're neither CRLF, nor start with a NL.
-            throw ParserError()
-        }
     }
 }

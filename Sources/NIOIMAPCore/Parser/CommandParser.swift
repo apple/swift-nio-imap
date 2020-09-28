@@ -105,7 +105,7 @@ public struct CommandParser: Parser {
     }
 
     private mutating func parseCommandStream0(buffer: inout ByteBuffer, tracker: StackTracker) throws -> CommandStream? {
-        try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker in
+        try GrammarParser.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             switch self.mode {
             case .idle:
                 return try self.handleIdle(buffer: &buffer, tracker: tracker)
@@ -151,7 +151,7 @@ public struct CommandParser: Parser {
         let save = buffer
         do {
             let command = try parseCommand(buffer: &buffer, tracker: tracker)
-            try ParserLibrary.parseNewline(buffer: &buffer, tracker: tracker)
+            try GrammarParser.newline(buffer: &buffer, tracker: tracker)
             if case .idleStart = command.command {
                 self.mode = .idle
             }
@@ -182,7 +182,7 @@ public struct CommandParser: Parser {
         } catch is ParserError {
             let save = buffer
             do {
-                try ParserLibrary.parseNewline(buffer: &buffer, tracker: tracker)
+                try GrammarParser.newline(buffer: &buffer, tracker: tracker)
                 self.mode = .lines
                 return .append(.finish)
             } catch {

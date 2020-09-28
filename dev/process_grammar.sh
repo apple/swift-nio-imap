@@ -55,7 +55,7 @@ function output_last() {
     returnType=$( echo $swift_id | sed "s/Fld/Field\./g" )
 
     echo "func parse$swift_id(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NIOIMAO.$returnType {"
-    echo "    return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker -> $swift_id in"
+    echo "    return try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> $swift_id in"
     echo "        fatalError(\"$last_begin is not implemented yet\")"
     echo "    }"
     echo "}"

@@ -89,22 +89,22 @@ extension ResponseParser {
         }
 
         func parseResponse_fetch_end(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Response {
-            try ParserLibrary.parseFixedString(")", buffer: &buffer, tracker: tracker)
-            try ParserLibrary.parseNewline(buffer: &buffer, tracker: tracker)
+            try GrammarParser.fixedString(")", buffer: &buffer, tracker: tracker)
+            try GrammarParser.newline(buffer: &buffer, tracker: tracker)
             return .fetchResponse(.finish)
         }
 
-        return try ParserLibrary.parseComposite(buffer: &buffer, tracker: tracker) { buffer, tracker in
-            try? ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
+        return try GrammarParser.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
+            try? GrammarParser.space(buffer: &buffer, tracker: tracker)
             do {
-                let response = try ParserLibrary.parseOneOf([
+                let response = try GrammarParser.oneOf([
                     parseResponse_fetch,
                     parseResponse_normal,
                     parseResponse_fetch_end,
                 ], buffer: &buffer, tracker: tracker)
                 switch response {
                 case .fetchResponse(.streamingEnd): // FETCH MESS (1 2 3 4)
-                    try? ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
+                    try? GrammarParser.space(buffer: &buffer, tracker: tracker)
                 case .fetchResponse(.streamingBegin(kind: _, byteCount: let size)):
                     self.moveStateMachine(expected: .response, next: .attributeBytes(size))
                 default:
@@ -126,7 +126,7 @@ extension ResponseParser {
             .response(.taggedResponse(try GrammarParser.parseTaggedResponse(buffer: &buffer, tracker: tracker)))
         }
 
-        return try ParserLibrary.parseOneOf([
+        return try GrammarParser.oneOf([
             parseResponse_continuation,
             parseResponse_tagged,
         ], buffer: &buffer, tracker: tracker)
