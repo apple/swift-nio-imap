@@ -51,7 +51,7 @@ extension MailboxPath {
         if let separator = self.pathSeparator {
             newStorage.writeBytes(separator.utf8)
         }
-        
+
         var encodedNewName = ModifiedUTF7.encode(name)
         newStorage.writeBuffer(&encodedNewName)
         return MailboxPath(name: .init(newStorage), pathSeparator: self.pathSeparator)
