@@ -32,9 +32,9 @@ extension MailboxPath {
     /// and make sure that there are no path separators in the name,
     /// and then append the path separator and the name to the
     /// existing path’s name.
-    func createSubMailboxWithDisplayName(_ name: String) -> MailboxPath? {
+    public func createSubMailboxWithDisplayName(_ name: String) -> MailboxPath? {
         // the new name should not contain a path separator
-        if let separator = self.pathSeparator, name.firstIndex(of: separator) != nil {
+        if let separator = self.pathSeparator, name.contains(separator) {
             return nil
         }
 
@@ -42,7 +42,9 @@ extension MailboxPath {
         if let separator = self.pathSeparator {
             newStorage.writeBytes(separator.utf8)
         }
-        newStorage.writeBytes(ModifiedUTF7.encode(name).readableBytesView)
+        
+        var encodedNewName = ModifiedUTF7.encode(name)
+        newStorage.writeBuffer(&encodedNewName)
         return MailboxPath(name: .init(newStorage), pathSeparator: self.pathSeparator)
     }
 }
