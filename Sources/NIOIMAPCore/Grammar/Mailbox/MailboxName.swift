@@ -32,6 +32,15 @@ extension MailboxPath {
     /// and make sure that there are no path separators in the name,
     /// and then append the path separator and the name to the
     /// existing path’s name.
+    ///
+    /// This should _only_ be used in order to create the path / name for a new mailbox
+    /// that the client wants to create. It should not be used to create paths that already exist
+    /// on the server. The reason is that mailboxes are identified by the exact byte sequence
+    /// of their name. Re-assembling a path and doing the required encoding might produce
+    /// different byte sequences if another client uses a bogus encoding. Sadly that is rather
+    /// common.
+    /// - parameter name: The name of the sub-mailbox to create, which will be UTF-7 encoded.
+    /// - returns: `nil` if the sub-mailbox contains the `pathSeparator`, otherwise a new `MailboxPath`.
     public func createSubMailboxWithDisplayName(_ name: String) -> MailboxPath? {
         // the new name should not contain a path separator
         if let separator = self.pathSeparator, name.contains(separator) {
