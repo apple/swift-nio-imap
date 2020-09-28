@@ -64,9 +64,9 @@ extension MailboxName_Tests {
                 #line
             ),
             (
-                .init(name: .init("box1"), pathSeparator: "/"),
-                "box2",
-                .init(name: .init("box1/box2"), pathSeparator: "/"),
+                .init(name: .init("box"), pathSeparator: "/"),
+                "£",
+                .init(name: .init("box/&AKM-"), pathSeparator: "/"),
                 #line
             )
         ]
