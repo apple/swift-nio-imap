@@ -30,6 +30,7 @@ extension MailboxFilter_Tests {
             (.mailboxes(Mailboxes([.init("box1")])!), "mailboxes (\"box1\")", #line),
             (.selected, "selected", #line),
             (.selectedDelayed, "selected-delayed", #line),
+            (.subtreeOne(Mailboxes([.init("box1")])!), "subtree-one (\"box1\")", #line),
         ]
 
         for (test, expectedString, line) in inputs {

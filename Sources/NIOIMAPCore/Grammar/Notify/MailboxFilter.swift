@@ -37,7 +37,12 @@ public enum MailboxFilter: Equatable {
     case selected
 
     /// Selected mailbox when using MSNs and '*'
+    /// Note:  Forbidden in an RFC 6237 context.
     case selectedDelayed
+
+    /// Specified mailbox and all selectable child mailboxes, one
+    /// hierarchy level down.
+    case subtreeOne(Mailboxes)
 }
 
 // MARK: - Encoding
@@ -59,6 +64,8 @@ extension EncodeBuffer {
             return self.writeString("selected")
         case .selectedDelayed:
             return self.writeString("selected-delayed")
+        case .subtreeOne(let mailboxes):
+            return self.writeString("subtree-one ") + self.writeMailboxes(mailboxes)
         }
     }
 }
