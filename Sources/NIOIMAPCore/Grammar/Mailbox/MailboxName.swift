@@ -33,7 +33,7 @@ extension MailboxPath {
     /// and then append the path separator and the name to the
     /// existing path’s name.
     func createSubMailboxWithDisplayName(_ name: String) -> MailboxPath? {
-        // the new name should contain a separator
+        // the new name should not contain a path separator
         if let separator = self.pathSeparator, name.firstIndex(of: separator) != nil {
             return nil
         }
