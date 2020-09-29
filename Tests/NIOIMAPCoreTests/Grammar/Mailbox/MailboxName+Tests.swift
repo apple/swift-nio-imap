@@ -51,8 +51,7 @@ extension MailboxName_Tests {
             ),
         ]
         for (path, newName, newPath, line) in inputs {
-            XCTAssertEqual(path.createSubMailbox
-                           (displayName: newName), newPath, line: line)
+            XCTAssertEqual(path.makeSubMailbox(displayName: newName), newPath, line: line)
         }
     }
     

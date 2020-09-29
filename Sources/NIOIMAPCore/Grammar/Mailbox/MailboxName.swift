@@ -49,7 +49,7 @@ extension MailboxPath {
     /// - parameter displayName: The name of the new mailbox
     /// - parameter pathSeparator: The optional separator to delimit sub-mailboxes
     /// - returns: `nil` if the `displayName` contains a `pathSeparator`, otherwise a new `MailboxPath`
-    public static func createRootMailbox(displayName: String, pathSeparator: Character? = nil) -> MailboxPath? {
+    public static func makeRoot(displayName: String, pathSeparator: Character? = nil) -> MailboxPath? {
         // the new name should not contain a path separator
         if let separator = pathSeparator, displayName.contains(separator) {
             return nil
@@ -73,7 +73,7 @@ extension MailboxPath {
     /// common.
     /// - parameter displayName: The name of the sub-mailbox to create, which will be UTF-7 encoded.
     /// - returns: `nil` if the sub-mailbox contains the `pathSeparator`, otherwise a new `MailboxPath`.
-    public func createSubMailbox(displayName: String) -> MailboxPath? {
+    public func makeSubMailbox(displayName: String) -> MailboxPath? {
         // the new name should not contain a path separator
         if let separator = self.pathSeparator, displayName.contains(separator) {
             return nil
