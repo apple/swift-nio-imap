@@ -25,9 +25,9 @@ extension MailboxDataTests {
         let inputs: [(MailboxName.Data, String, UInt)] = [
             (.exists(1), "1 EXISTS", #line),
             (.flags([.answered, .deleted]), "FLAGS (\\Answered \\Deleted)", #line),
-            (.list(MailboxInfo(attributes: [], path: .init(name: .inbox), extensions: [])), "LIST () \"INBOX\"", #line),
+            (.list(MailboxInfo(attributes: [], path: try! .init(name: .inbox), extensions: [])), "LIST () \"INBOX\"", #line),
             (
-                .lsub(.init(attributes: [.init("\\draft")], path: .init(name: .init("Drafts"), pathSeparator: "."), extensions: [])),
+                .lsub(.init(attributes: [.init("\\draft")], path: try! .init(name: .init("Drafts"), pathSeparator: "."), extensions: [])),
                 "LSUB (\\draft) . \"Drafts\"",
                 #line
             ),

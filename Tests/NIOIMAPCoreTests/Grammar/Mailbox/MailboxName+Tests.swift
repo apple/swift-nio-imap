@@ -23,15 +23,15 @@ class MailboxName_Tests: EncodeTestClass {}
 extension MailboxName_Tests {
     func testInit() {
         
-        let test1 = MailboxPath(name: .init("box"), pathSeparator: nil)
+        let test1 = try! MailboxPath(name: .init("box"), pathSeparator: nil)
         XCTAssertEqual(test1.name, .init("box"))
         XCTAssertEqual(test1.pathSeparator, nil)
 
-        let test2 = MailboxPath(name: .init("box"))
+        let test2 = try! MailboxPath(name: .init("box"))
         XCTAssertEqual(test2.name, .init("box"))
         XCTAssertEqual(test2.pathSeparator, nil)
 
-        let test3 = MailboxPath(name: .init("box"), pathSeparator: "/")
+        let test3 = try! MailboxPath(name: .init("box"), pathSeparator: "/")
         XCTAssertEqual(test3.name, .init("box"))
         XCTAssertEqual(test3.pathSeparator, "/")
     
@@ -40,15 +40,15 @@ extension MailboxName_Tests {
     func testMakeSubMailboxWithDisplayName() {
         let inputs: [(MailboxPath, String, MailboxPath, UInt)] = [
             (
-                .init(name: .init("box1"), pathSeparator: nil),
+                try! .init(name: .init("box1"), pathSeparator: nil),
                 "box2",
-                .init(name: .init("box1box2"), pathSeparator: nil),
+                try! .init(name: .init("box1box2"), pathSeparator: nil),
                 #line
             ),
             (
-                .init(name: .init("box"), pathSeparator: "/"),
+                try! .init(name: .init("box"), pathSeparator: "/"),
                 "£",
-                .init(name: .init("box/&AKM-"), pathSeparator: "/"),
+                try! .init(name: .init("box/&AKM-"), pathSeparator: "/"),
                 #line
             ),
         ]
@@ -69,13 +69,13 @@ extension MailboxName_Tests {
             (
                 "box2",
                 nil,
-                .init(name: .init("box2"), pathSeparator: nil),
+                try! .init(name: .init("box2"), pathSeparator: nil),
                 #line
             ),
             (
                 "£",
                 "/",
-                .init(name: .init("&AKM-"), pathSeparator: "/"),
+                try! .init(name: .init("&AKM-"), pathSeparator: "/"),
                 #line
             ),
         ]
@@ -93,13 +93,13 @@ extension MailboxName_Tests {
     
     func testSplitting() {
         let inputs: [(MailboxPath, Bool, [String], UInt)] = [
-            (.init(name: .init("ABC"), pathSeparator: "B"), true, ["A", "C"], #line),
-            (.init(name: .init("ABC"), pathSeparator: "D"), true, ["ABC"], #line),
-            (.init(name: .init(""), pathSeparator: "D"), true, [], #line),
-            (.init(name: .init("some/real/mailbox"), pathSeparator: "/"), true, ["some", "real", "mailbox"], #line),
-            (.init(name: .init("mailbox#test"), pathSeparator: "#"), true, ["mailbox", "test"], #line),
-            (.init(name: .init("//test1//test2//"), pathSeparator: "/"), true, ["test1", "test2"], #line),
-            (.init(name: .init("//test1//test2//"), pathSeparator: "/"), false, ["", "", "test1", "", "test2", "", ""], #line),
+            (try! .init(name: .init("ABC"), pathSeparator: "B"), true, ["A", "C"], #line),
+            (try! .init(name: .init("ABC"), pathSeparator: "D"), true, ["ABC"], #line),
+            (try! .init(name: .init(""), pathSeparator: "D"), true, [], #line),
+            (try! .init(name: .init("some/real/mailbox"), pathSeparator: "/"), true, ["some", "real", "mailbox"], #line),
+            (try! .init(name: .init("mailbox#test"), pathSeparator: "#"), true, ["mailbox", "test"], #line),
+            (try! .init(name: .init("//test1//test2//"), pathSeparator: "/"), true, ["test1", "test2"], #line),
+            (try! .init(name: .init("//test1//test2//"), pathSeparator: "/"), false, ["", "", "test1", "", "test2", "", ""], #line),
         ]
         for (path, ommitEmpty, expected, line) in inputs {
             XCTAssertEqual(path.displayStringComponents(omittingEmptySubsequences: ommitEmpty), expected, line: line)

@@ -2100,7 +2100,7 @@ extension GrammarParser {
                 try ParserLibrary.parseSpace(buffer: &buffer, tracker: tracker)
                 return try self.parseMailboxListExtended(buffer: &buffer, tracker: tracker)
             }) ?? []
-            return MailboxInfo(attributes: flags, path: .init(name: mailbox, pathSeparator: character), extensions: listExtended)
+            return MailboxInfo(attributes: flags, path: try .init(name: mailbox, pathSeparator: character), extensions: listExtended)
         }
     }
 
