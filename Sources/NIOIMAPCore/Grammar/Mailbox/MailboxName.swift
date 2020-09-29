@@ -19,6 +19,10 @@ public struct MailboxPath: Equatable {
     public var name: MailboxName
     public var pathSeparator: Character?
 
+    /// Creates a new `MailboxPath` with the given data.
+    /// NOTE: Do not use this initialiser to create a root mailbox that requires validation. Instead us `createRootMailbox(displayName:, pathSeparator)`
+    /// - parameter name: The `MailboxName` containing UTF-7 encoded bytes
+    /// - parameter pathSeparator: An optional `Character` used to delimit sub-mailboxes.
     public init(name: MailboxName, pathSeparator: Character? = nil) {
         self.name = name
         self.pathSeparator = pathSeparator
@@ -26,6 +30,21 @@ public struct MailboxPath: Equatable {
 }
 
 extension MailboxPath {
+    
+    /// Creates a new root mailbox. The given display string will be encoded according to RFC 2152
+    /// and then vlaidate that there are no path separators in the name.
+    /// - parameter displayName: The name of the new mailbox
+    /// - parameter pathSeparator: The optional separator to delimit sub-mailboxes
+    /// - returns: `nil` if the `displayName` contains a `pathSeparator`, otherwise a new `MailboxPath`
+    public static func createRootMailbox(displayName: String, pathSeparator: Character? = nil) -> MailboxPath? {
+        // the new name should not contain a path separator
+        if let separator = pathSeparator, displayName.contains(separator) {
+            return nil
+        }
+        let encodedNewName = ModifiedUTF7.encode(displayName)
+        return MailboxPath(name: .init(encodedNewName), pathSeparator: pathSeparator)
+    }
+    
     /// Creates a new mailbox path that nested inside the existing path.
     ///
     /// This will encode the display string according to RFC 2152
