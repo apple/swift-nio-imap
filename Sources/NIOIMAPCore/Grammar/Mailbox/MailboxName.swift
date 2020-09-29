@@ -71,11 +71,11 @@ extension MailboxPath {
     /// of their name. Re-assembling a path and doing the required encoding might produce
     /// different byte sequences if another client uses a bogus encoding. Sadly that is rather
     /// common.
-    /// - parameter name: The name of the sub-mailbox to create, which will be UTF-7 encoded.
+    /// - parameter displayName: The name of the sub-mailbox to create, which will be UTF-7 encoded.
     /// - returns: `nil` if the sub-mailbox contains the `pathSeparator`, otherwise a new `MailboxPath`.
-    public func createSubMailboxWithDisplayName(_ name: String) -> MailboxPath? {
+    public func createSubMailbox(displayName: String) -> MailboxPath? {
         // the new name should not contain a path separator
-        if let separator = self.pathSeparator, name.contains(separator) {
+        if let separator = self.pathSeparator, displayName.contains(separator) {
             return nil
         }
 
@@ -84,7 +84,7 @@ extension MailboxPath {
             newStorage.writeBytes(separator.utf8)
         }
 
-        var encodedNewName = ModifiedUTF7.encode(name)
+        var encodedNewName = ModifiedUTF7.encode(displayName)
         newStorage.writeBuffer(&encodedNewName)
         return MailboxPath(name: .init(newStorage), pathSeparator: self.pathSeparator)
     }
