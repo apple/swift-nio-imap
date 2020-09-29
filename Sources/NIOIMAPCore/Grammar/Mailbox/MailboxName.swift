@@ -38,6 +38,7 @@ public struct MailboxPath: Equatable {
     /// - parameter pathSeparator: An optional `Character` used to delimit sub-mailboxes.
     public init(name: MailboxName, pathSeparator: Character? = nil) throws {
         
+        // if a path separator is given, it must be a valid ascii character
         if let pathSeparator = pathSeparator {
             guard pathSeparator.asciiValue != nil else {
                 throw InvalidPathSeparatorError(description: "The path separator must be an ascii value")
