@@ -20,7 +20,7 @@ public struct MailboxPath: Equatable {
     public var pathSeparator: Character?
 
     /// Creates a new `MailboxPath` with the given data.
-    /// NOTE: Do not use this initialiser to create a root mailbox that requires validation. Instead us `createRootMailbox(displayName:, pathSeparator)`
+    /// NOTE: Do not use this initialiser to create a root mailbox that requires validation. Instead us `createRootMailbox(displayName:pathSeparator:)`
     /// - parameter name: The `MailboxName` containing UTF-7 encoded bytes
     /// - parameter pathSeparator: An optional `Character` used to delimit sub-mailboxes.
     public init(name: MailboxName, pathSeparator: Character? = nil) {
