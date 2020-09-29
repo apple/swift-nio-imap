@@ -54,7 +54,7 @@ extension MailboxPath {
     /// Splits `mailbox` into constituent path components using the `PathSeparator`. Conversion is lossy and
     /// for display purposes only, do not use the return value as a mailbox name.
     /// The conversion to display string using heuristics to determine if the byte stream is the modified version of UTF-7 encoding defined in RFC 2152 (which it should be according to RFC 3501) — or if it is UTF-8 data. Many email clients erroneously encode mailbox names as UTF-8.
-    /// - returns: [`String`] containing path components
+    /// - returns: `[String]` containing path components
     public func displayStringComponents(omittingEmptySubsequences: Bool = true) -> [String] {
         guard let pathSeparator = self.pathSeparator else {
             do {
