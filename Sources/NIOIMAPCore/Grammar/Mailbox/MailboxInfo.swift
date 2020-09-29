@@ -17,27 +17,15 @@ import struct NIO.ByteBuffer
 /// IMAPv4 `mailbox-list`
 public struct MailboxInfo: Equatable {
     public var attributes: [Attribute]
-    public var pathSeparator: Character?
-    public var mailbox: MailboxName
+    public var path: MailboxPath
     public var extensions: [ListExtendedItem]
 
-    public init(attributes: [Attribute] = [], pathSeparator: Character? = nil, mailbox: MailboxName, extensions: [ListExtendedItem]) {
+    public init(attributes: [Attribute] = [], path: MailboxPath, extensions: [ListExtendedItem]) {
         self.attributes = attributes
-        self.pathSeparator = pathSeparator
-        self.mailbox = mailbox
+        self.path = path
         self.extensions = extensions
     }
-
-    /// Splits `mailbox` into constituent path components using the `PathSeparator`. Conversion is lossy and
-    /// for display purposes only, do not use the return value as a mailbox name.
-    /// The conversion to display string using heuristics to determine if the byte stream is the modified version of UTF-7 encoding defined in RFC 2152 (which it should be according to RFC 3501) — or if it is UTF-8 data. Many email clients erroneously encode mailbox names as UTF-8.
-    /// - returns: [`String`] containing path components
-    public func displayStringComponents() -> [String] {
-        guard let separator = self.pathSeparator else {
-            return [String(buffer: mailbox.storage)]
-        }
-        return self.mailbox.displayStringComponents(separator: separator)
-    }
+    
 }
 
 // MARK: - Types
@@ -75,10 +63,10 @@ extension EncodeBuffer {
                 self.writeMailboxListFlags(flags)
             } +
             self.writeString(") ") +
-            self.writeIfExists(list.pathSeparator) { (char) -> Int in
+            self.writeIfExists(list.path.pathSeparator) { (char) -> Int in
                 self.writeString("\(char) ")
             } +
-            self.writeMailbox(list.mailbox)
+            self.writeMailbox(list.path.name)
     }
 
     @discardableResult mutating func writeMailboxListFlags(_ flags: [MailboxInfo.Attribute]) -> Int {

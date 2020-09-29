@@ -18,25 +18,6 @@ import XCTest
 
 class MailboxName_Tests: EncodeTestClass {}
 
-// MARK: - displayStringComponents
-
-extension MailboxName_Tests {
-    func testSplitting() {
-        let inputs: [(MailboxName, Character, Bool, [String], UInt)] = [
-            (.init("ABC"), .init("B"), true, ["A", "C"], #line),
-            (.init("ABC"), .init("D"), true, ["ABC"], #line),
-            (.init(""), .init("D"), true, [], #line),
-            (.init("some/real/mailbox"), .init("/"), true, ["some", "real", "mailbox"], #line),
-            (.init("mailbox#test"), .init("#"), true, ["mailbox", "test"], #line),
-            (.init("//test1//test2//"), .init("/"), true, ["test1", "test2"], #line),
-            (.init("//test1//test2//"), .init("/"), false, ["", "", "test1", "", "test2", "", ""], #line),
-        ]
-        for (name, character, ommitEmpty, expected, line) in inputs {
-            XCTAssertEqual(name.displayStringComponents(separator: character, omittingEmptySubsequences: ommitEmpty), expected, line: line)
-        }
-    }
-}
-
 // MARK: - MailboxPath
 
 extension MailboxName_Tests {
@@ -71,6 +52,21 @@ extension MailboxName_Tests {
         ]
         for (path, newName, newPath, line) in inputs {
             XCTAssertEqual(path.createSubMailboxWithDisplayName(newName), newPath, line: line)
+        }
+    }
+    
+    func testSplitting() {
+        let inputs: [(MailboxPath, Bool, [String], UInt)] = [
+            (.init(name: .init("ABC"), pathSeparator: "B"), true, ["A", "C"], #line),
+            (.init(name: .init("ABC"), pathSeparator: "D"), true, ["ABC"], #line),
+            (.init(name: .init(""), pathSeparator: "D"), true, [], #line),
+            (.init(name: .init("some/real/mailbox"), pathSeparator: "/"), true, ["some", "real", "mailbox"], #line),
+            (.init(name: .init("mailbox#test"), pathSeparator: "#"), true, ["mailbox", "test"], #line),
+            (.init(name: .init("//test1//test2//"), pathSeparator: "/"), true, ["test1", "test2"], #line),
+            (.init(name: .init("//test1//test2//"), pathSeparator: "/"), false, ["", "", "test1", "", "test2", "", ""], #line),
+        ]
+        for (path, ommitEmpty, expected, line) in inputs {
+            XCTAssertEqual(path.displayStringComponents(omittingEmptySubsequences: ommitEmpty), expected, line: line)
         }
     }
 }
