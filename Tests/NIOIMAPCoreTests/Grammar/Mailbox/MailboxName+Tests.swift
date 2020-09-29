@@ -22,7 +22,6 @@ class MailboxName_Tests: EncodeTestClass {}
 
 extension MailboxName_Tests {
     func testInit() {
-        
         let test1 = try! MailboxPath(name: .init("box"), pathSeparator: nil)
         XCTAssertEqual(test1.name, .init("box"))
         XCTAssertEqual(test1.pathSeparator, nil)
@@ -34,7 +33,6 @@ extension MailboxName_Tests {
         let test3 = try! MailboxPath(name: .init("box"), pathSeparator: "/")
         XCTAssertEqual(test3.name, .init("box"))
         XCTAssertEqual(test3.pathSeparator, "/")
-    
     }
 
     func testMakeSubMailboxWithDisplayName() {
@@ -55,7 +53,7 @@ extension MailboxName_Tests {
         for (path, newName, newPath, line) in inputs {
             XCTAssertNoThrow(XCTAssertEqual(try path.makeSubMailbox(displayName: newName), newPath, line: line), line: line)
         }
-        
+
         // sad path test make sure that mailbox size limit is enforced
         XCTAssertThrowsError(
             try MailboxPath(name: .init(String(repeating: "a", count: 999)), pathSeparator: "/").makeSubMailbox(displayName: "1")
@@ -63,7 +61,7 @@ extension MailboxName_Tests {
             XCTAssertEqual(error as! MailboxTooBigError, MailboxTooBigError(maximumSize: 1000, actualSize: 1001))
         }
     }
-    
+
     func testMakeRootMailboxWithDisplayName() {
         let inputs: [(String, Character?, MailboxPath, UInt)] = [
             (
@@ -82,7 +80,7 @@ extension MailboxName_Tests {
         for (newName, separator, newPath, line) in inputs {
             XCTAssertNoThrow(XCTAssertEqual(try MailboxPath.makeRootMailbox(displayName: newName, pathSeparator: separator), newPath, line: line), line: line)
         }
-        
+
         // sad path test make sure that mailbox size limit is enforced
         XCTAssertThrowsError(
             try MailboxPath.makeRootMailbox(displayName: String(repeating: "a", count: 1001))
@@ -90,7 +88,7 @@ extension MailboxName_Tests {
             XCTAssertEqual(error as! MailboxTooBigError, MailboxTooBigError(maximumSize: 1000, actualSize: 1001))
         }
     }
-    
+
     func testSplitting() {
         let inputs: [(MailboxPath, Bool, [String], UInt)] = [
             (try! .init(name: .init("ABC"), pathSeparator: "B"), true, ["A", "C"], #line),

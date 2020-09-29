@@ -25,7 +25,6 @@ public struct MailboxInfo: Equatable {
         self.path = path
         self.extensions = extensions
     }
-    
 }
 
 // MARK: - Types

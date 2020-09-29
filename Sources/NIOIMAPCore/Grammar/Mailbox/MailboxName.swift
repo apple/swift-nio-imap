@@ -38,27 +38,24 @@ public struct MailboxPath: Equatable {
     /// - parameter pathSeparator: An optional `Character` used to delimit sub-mailboxes.
     /// - throws: `InvalidPathSeparatorError` if the `pathSeparator` is not a valid ascii value.
     public init(name: MailboxName, pathSeparator: Character? = nil) throws {
-        
         // if a path separator is given, it must be a valid ascii character
         if let pathSeparator = pathSeparator, !pathSeparator.isASCII {
             throw InvalidPathSeparatorError(description: "The path separator must be an ascii value")
         }
-        
+
         self.name = name
         self.pathSeparator = pathSeparator
     }
 }
 
 extension MailboxPath {
-    
     static let maximumMailboxSize = 1_000
-    
+
     /// Splits `mailbox` into constituent path components using the `PathSeparator`. Conversion is lossy and
     /// for display purposes only, do not use the return value as a mailbox name.
     /// The conversion to display string using heuristics to determine if the byte stream is the modified version of UTF-7 encoding defined in RFC 2152 (which it should be according to RFC 3501) — or if it is UTF-8 data. Many email clients erroneously encode mailbox names as UTF-8.
     /// - returns: [`String`] containing path components
     public func displayStringComponents(omittingEmptySubsequences: Bool = true) -> [String] {
-        
         guard let pathSeparator = self.pathSeparator else {
             do {
                 return [try ModifiedUTF7.decode(self.name.storage)]
@@ -66,7 +63,7 @@ extension MailboxPath {
                 return [String(buffer: self.name.storage)]
             }
         }
-        
+
         assert(pathSeparator.isASCII)
         return self.name.storage.readableBytesView
             .split(separator: pathSeparator.asciiValue!, omittingEmptySubsequences: omittingEmptySubsequences)
@@ -78,7 +75,7 @@ extension MailboxPath {
                 }
             }
     }
-    
+
     /// Creates a new root mailbox. The given display string will be encoded according to RFC 2152
     /// and then vlaidate that there are no path separators in the name.
     /// - parameter displayName: The name of the new mailbox
@@ -87,23 +84,21 @@ extension MailboxPath {
     /// - throws: `InvalidMailboxNameError` if the `displayName` contains a `pathSeparator`.
     /// - returns: A new `MailboxPath` containing the given name and separator.
     public static func makeRootMailbox(displayName: String, pathSeparator: Character? = nil) throws -> MailboxPath {
-        
         guard displayName.utf8.count <= maximumMailboxSize else {
             throw MailboxTooBigError(maximumSize: maximumMailboxSize, actualSize: displayName.utf8.count)
         }
-    
+
         if let separator = pathSeparator {
-                
             // the new name should not contain a path separator
             if displayName.contains(separator) {
                 throw InvalidMailboxNameError(description: "\(displayName) cannot contain the separator \(separator)")
             }
         }
-        
+
         let encodedNewName = ModifiedUTF7.encode(displayName)
         return try MailboxPath(name: .init(encodedNewName), pathSeparator: pathSeparator)
     }
-    
+
     /// Creates a new mailbox path that nested inside the existing path.
     ///
     /// This will encode the display string according to RFC 2152
@@ -122,7 +117,6 @@ extension MailboxPath {
     /// - throws: `InvalidMailboxNameError` if the `displayName` contains a `pathSeparator`.
     /// - returns: A new `MailboxPath` containing the given name and separator.
     public func makeSubMailbox(displayName: String) throws -> MailboxPath {
-        
         // the new name should not contain a path separator
         if let separator = self.pathSeparator, displayName.contains(separator) {
             throw InvalidMailboxNameError(description: "\(displayName) cannot contain the separator \(separator)")
@@ -136,11 +130,11 @@ extension MailboxPath {
 
         var encodedNewName = ModifiedUTF7.encode(displayName)
         newStorage.writeBuffer(&encodedNewName)
-        
+
         guard newStorage.readableBytes <= Self.maximumMailboxSize else {
             throw MailboxTooBigError(maximumSize: Self.maximumMailboxSize, actualSize: newStorage.readableBytes)
         }
-        
+
         return try MailboxPath(name: .init(newStorage), pathSeparator: self.pathSeparator)
     }
 }
