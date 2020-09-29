@@ -36,13 +36,12 @@ public struct MailboxPath: Equatable {
     /// - Note: Do not use this initialiser to create a root/sub mailbox that requires validation. Instead use `createRootMailbox(displayName:pathSeparator:)`
     /// - parameter name: The `MailboxName` containing UTF-7 encoded bytes
     /// - parameter pathSeparator: An optional `Character` used to delimit sub-mailboxes.
+    /// - throws: `InvalidPathSeparatorError` if the `pathSeparator` is not a valid ascii value.
     public init(name: MailboxName, pathSeparator: Character? = nil) throws {
         
         // if a path separator is given, it must be a valid ascii character
-        if let pathSeparator = pathSeparator {
-            guard pathSeparator.asciiValue != nil else {
-                throw InvalidPathSeparatorError(description: "The path separator must be an ascii value")
-            }
+        if let pathSeparator = pathSeparator, !pathSeparator.isASCII {
+            throw InvalidPathSeparatorError(description: "The path separator must be an ascii value")
         }
         
         self.name = name
@@ -74,7 +73,9 @@ extension MailboxPath {
     /// and then vlaidate that there are no path separators in the name.
     /// - parameter displayName: The name of the new mailbox
     /// - parameter pathSeparator: The optional separator to delimit sub-mailboxes
-    /// - returns: `nil` if the `displayName` contains a `pathSeparator`, otherwise a new `MailboxPath`
+    /// - throws: `MailboxTooBigError` if the `displayName` is > 1000 bytes.
+    /// - throws: `InvalidMailboxNameError` if the `displayName` contains a `pathSeparator`.
+    /// - returns: A new `MailboxPath` containing the given name and separator.
     public static func makeRootMailbox(displayName: String, pathSeparator: Character? = nil) throws -> MailboxPath {
         
         guard displayName.utf8.count <= maximumMailboxSize else {
@@ -86,11 +87,6 @@ extension MailboxPath {
             // the new name should not contain a path separator
             if displayName.contains(separator) {
                 throw InvalidMailboxNameError(description: "\(displayName) cannot contain the separator \(separator)")
-            }
-            
-            // path separatore must be ascii
-            guard separator.asciiValue != nil else {
-                throw InvalidPathSeparatorError(description: "The path separator must be an ascii value")
             }
         }
         
@@ -112,7 +108,9 @@ extension MailboxPath {
     /// different byte sequences if another client uses a bogus encoding. Sadly that is rather
     /// common.
     /// - parameter displayName: The name of the sub-mailbox to create, which will be UTF-7 encoded.
-    /// - returns: `nil` if the sub-mailbox contains the `pathSeparator`, otherwise a new `MailboxPath`.
+    /// - throws: `MailboxTooBigError` if new mailbox path is > 1000 bytes.
+    /// - throws: `InvalidMailboxNameError` if the `displayName` contains a `pathSeparator`.
+    /// - returns: A new `MailboxPath` containing the given name and separator.
     public func makeSubMailbox(displayName: String) throws -> MailboxPath {
         
         // the new name should not contain a path separator
