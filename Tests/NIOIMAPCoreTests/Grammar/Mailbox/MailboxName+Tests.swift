@@ -22,6 +22,7 @@ class MailboxName_Tests: EncodeTestClass {}
 
 extension MailboxName_Tests {
     func testInit() {
+        
         let test1 = MailboxPath(name: .init("box"), pathSeparator: nil)
         XCTAssertEqual(test1.name, .init("box"))
         XCTAssertEqual(test1.pathSeparator, nil)
@@ -33,9 +34,10 @@ extension MailboxName_Tests {
         let test3 = MailboxPath(name: .init("box"), pathSeparator: "/")
         XCTAssertEqual(test3.name, .init("box"))
         XCTAssertEqual(test3.pathSeparator, "/")
+    
     }
 
-    func testCreateSubMailboxWithDisplayName() {
+    func testMakeSubMailboxWithDisplayName() {
         let inputs: [(MailboxPath, String, MailboxPath, UInt)] = [
             (
                 .init(name: .init("box1"), pathSeparator: nil),
@@ -51,7 +53,41 @@ extension MailboxName_Tests {
             ),
         ]
         for (path, newName, newPath, line) in inputs {
-            XCTAssertEqual(path.makeSubMailbox(displayName: newName), newPath, line: line)
+            XCTAssertNoThrow(XCTAssertEqual(try path.makeSubMailbox(displayName: newName), newPath, line: line), line: line)
+        }
+        
+        // sad path test make sure that mailbox size limit is enforced
+        XCTAssertThrowsError(
+            try MailboxPath(name: .init(String(repeating: "a", count: 999)), pathSeparator: "/").makeSubMailbox(displayName: "1")
+        ) { error in
+            XCTAssertEqual(error as! MailboxTooBigError, MailboxTooBigError(maximumSize: 1000, actualSize: 1001))
+        }
+    }
+    
+    func testMakeRootMailboxWithDisplayName() {
+        let inputs: [(String, Character?, MailboxPath, UInt)] = [
+            (
+                "box2",
+                nil,
+                .init(name: .init("box2"), pathSeparator: nil),
+                #line
+            ),
+            (
+                "£",
+                "/",
+                .init(name: .init("&AKM-"), pathSeparator: "/"),
+                #line
+            ),
+        ]
+        for (newName, separator, newPath, line) in inputs {
+            XCTAssertNoThrow(XCTAssertEqual(try MailboxPath.makeRootMailbox(displayName: newName, pathSeparator: separator), newPath, line: line), line: line)
+        }
+        
+        // sad path test make sure that mailbox size limit is enforced
+        XCTAssertThrowsError(
+            try MailboxPath.makeRootMailbox(displayName: String(repeating: "a", count: 1001))
+        ) { error in
+            XCTAssertEqual(error as! MailboxTooBigError, MailboxTooBigError(maximumSize: 1000, actualSize: 1001))
         }
     }
     

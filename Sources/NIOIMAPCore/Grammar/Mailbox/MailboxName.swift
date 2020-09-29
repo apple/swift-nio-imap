@@ -15,6 +15,15 @@
 import struct NIO.ByteBuffer
 import struct NIO.ByteBufferView
 
+public struct MailboxTooBigError: Error, Equatable {
+    public var maximumSize: Int
+    public var actualSize: Int
+}
+
+public struct InvalidMailboxNameError: Error, Equatable {
+    public var description: String
+}
+
 public struct MailboxPath: Equatable {
     public var name: MailboxName
     public var pathSeparator: Character?
@@ -30,6 +39,8 @@ public struct MailboxPath: Equatable {
 }
 
 extension MailboxPath {
+    
+    static let maximumMailboxSize = 1_000
     
     /// Splits `mailbox` into constituent path components using the `PathSeparator`. Conversion is lossy and
     /// for display purposes only, do not use the return value as a mailbox name.
@@ -49,11 +60,17 @@ extension MailboxPath {
     /// - parameter displayName: The name of the new mailbox
     /// - parameter pathSeparator: The optional separator to delimit sub-mailboxes
     /// - returns: `nil` if the `displayName` contains a `pathSeparator`, otherwise a new `MailboxPath`
-    public static func makeRoot(displayName: String, pathSeparator: Character? = nil) -> MailboxPath? {
+    public static func makeRootMailbox(displayName: String, pathSeparator: Character? = nil) throws -> MailboxPath {
+        
+        guard displayName.utf8.count <= maximumMailboxSize else {
+            throw MailboxTooBigError(maximumSize: maximumMailboxSize, actualSize: displayName.utf8.count)
+        }
+        
         // the new name should not contain a path separator
         if let separator = pathSeparator, displayName.contains(separator) {
-            return nil
+            throw InvalidMailboxNameError(description: "\(displayName) cannot contain the separator \(separator)")
         }
+        
         let encodedNewName = ModifiedUTF7.encode(displayName)
         return MailboxPath(name: .init(encodedNewName), pathSeparator: pathSeparator)
     }
@@ -73,12 +90,14 @@ extension MailboxPath {
     /// common.
     /// - parameter displayName: The name of the sub-mailbox to create, which will be UTF-7 encoded.
     /// - returns: `nil` if the sub-mailbox contains the `pathSeparator`, otherwise a new `MailboxPath`.
-    public func makeSubMailbox(displayName: String) -> MailboxPath? {
+    public func makeSubMailbox(displayName: String) throws -> MailboxPath {
+        
         // the new name should not contain a path separator
         if let separator = self.pathSeparator, displayName.contains(separator) {
-            return nil
+            throw InvalidMailboxNameError(description: "\(displayName) cannot contain the separator \(separator)")
         }
 
+        // if a separator exists, write it after the root mailbox
         var newStorage = self.name.storage
         if let separator = self.pathSeparator {
             newStorage.writeBytes(separator.utf8)
@@ -86,6 +105,11 @@ extension MailboxPath {
 
         var encodedNewName = ModifiedUTF7.encode(displayName)
         newStorage.writeBuffer(&encodedNewName)
+        
+        guard newStorage.readableBytes <= Self.maximumMailboxSize else {
+            throw MailboxTooBigError(maximumSize: Self.maximumMailboxSize, actualSize: newStorage.readableBytes)
+        }
+        
         return MailboxPath(name: .init(newStorage), pathSeparator: self.pathSeparator)
     }
 }
