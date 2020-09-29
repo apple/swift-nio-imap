@@ -60,13 +60,23 @@ extension MailboxPath {
     public func displayStringComponents(omittingEmptySubsequences: Bool = true) -> [String] {
         
         guard let pathSeparator = self.pathSeparator else {
-            return [self.name.stringValue] // TODO: Check if UTF7 or UTF8
+            do {
+                return [try ModifiedUTF7.decode(self.name.storage)]
+            } catch {
+                return [String(buffer: self.name.storage)]
+            }
         }
         
         assert(pathSeparator.isASCII)
         return self.name.storage.readableBytesView
             .split(separator: pathSeparator.asciiValue!, omittingEmptySubsequences: omittingEmptySubsequences)
-            .map { String(decoding: $0, as: Unicode.UTF8.self) }
+            .map { bytes in
+                do {
+                    return try ModifiedUTF7.decode(ByteBuffer(bytes))
+                } catch {
+                    return String(decoding: bytes, as: Unicode.UTF8.self)
+                }
+            }
     }
     
     /// Creates a new root mailbox. The given display string will be encoded according to RFC 2152
