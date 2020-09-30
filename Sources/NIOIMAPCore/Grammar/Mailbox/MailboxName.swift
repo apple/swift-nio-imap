@@ -50,6 +50,34 @@ public struct MailboxPath: Equatable {
 
 extension MailboxPath {
     static let maximumMailboxSize = 1_000
+    
+    func validateUTF8String(_ buffer: ByteBuffer) -> String? {
+        var bytesIterator = buffer.readableBytesView.makeIterator()
+        var scalars: [Unicode.Scalar] = []
+        var utf8Decoder = UTF8()
+        while true {
+            switch utf8Decoder.decode(&bytesIterator) {
+            case .scalarValue(let v):
+                scalars.append(v)
+            case .emptyInput:
+                return String(String.UnicodeScalarView(scalars))
+            case .error:
+                return nil
+            }
+        }
+    }
+    
+    func decodeBufferToString(_ buffer: ByteBuffer) -> String {
+        do {
+            return try ModifiedUTF7.decode(buffer)
+        } catch {
+            if let decoded = validateUTF8String(buffer) {
+                return decoded
+            } else {
+                return String(buffer: buffer)
+            }
+        }
+    }
 
     /// Splits `mailbox` into constituent path components using the `PathSeparator`. Conversion is lossy and
     /// for display purposes only, do not use the return value as a mailbox name.
@@ -57,22 +85,14 @@ extension MailboxPath {
     /// - returns: `[String]` containing path components
     public func displayStringComponents(omittingEmptySubsequences: Bool = true) -> [String] {
         guard let pathSeparator = self.pathSeparator else {
-            do {
-                return [try ModifiedUTF7.decode(self.name.storage)]
-            } catch {
-                return [String(buffer: self.name.storage)]
-            }
+            return [self.decodeBufferToString(self.name.storage)]
         }
 
         assert(pathSeparator.isASCII)
         return self.name.storage.readableBytesView
             .split(separator: pathSeparator.asciiValue!, omittingEmptySubsequences: omittingEmptySubsequences)
             .map { bytes in
-                do {
-                    return try ModifiedUTF7.decode(ByteBuffer(bytes))
-                } catch {
-                    return String(decoding: bytes, as: Unicode.UTF8.self)
-                }
+                self.decodeBufferToString(ByteBuffer(bytes: bytes))
             }
     }
 
