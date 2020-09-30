@@ -25,7 +25,7 @@ public struct ResponseParser: Parser {
         case fetchOrNormal
         case fetchMiddle
     }
-    
+
     public enum Mode: Equatable {
         case greeting
         case response(ResponseState)
@@ -83,7 +83,6 @@ extension ResponseParser {
 
 extension ResponseParser {
     fileprivate mutating func parseResponse(state: ResponseState, buffer: inout ByteBuffer, tracker: StackTracker) throws -> ResponseOrContinueRequest {
-        
         func parseResponse_fetch(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Response {
             switch state {
             case .fetchOrNormal:
@@ -97,7 +96,7 @@ extension ResponseParser {
             let response = try GrammarParser.parseResponseData(buffer: &buffer, tracker: tracker)
             return .untaggedResponse(response)
         }
-        
+
         return try GrammarParser.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             try? GrammarParser.space(buffer: &buffer, tracker: tracker)
             do {
@@ -105,7 +104,7 @@ extension ResponseParser {
                     parseResponse_fetch,
                     parseResponse_normal,
                 ], buffer: &buffer, tracker: tracker)
-                
+
                 switch response {
                 case .fetchResponse(.start(_)):
                     self.moveStateMachine(expected: .response(.fetchOrNormal), next: .response(.fetchMiddle))
@@ -118,7 +117,7 @@ extension ResponseParser {
                 default:
                     break
                 }
-                
+
                 return .response(response)
             } catch is ParserError {
                 return try self._parseResponse(buffer: &buffer, tracker: tracker)

@@ -231,15 +231,13 @@ extension ResponseParser_Tests {
 }
 
 // MARK: - Stress tests
+
 extension ResponseParser_Tests {
-    
     func testStateIsEnforce() {
-        
         var parser = ResponseParser(expectGreeting: false)
         var input = ByteBuffer(string: "* 1 FETCH (* 2 FETCH ")
-        
+
         XCTAssertNoThrow(XCTAssertEqual(try parser.parseResponseStream(buffer: &input), .response(.fetchResponse(.start(1)))))
         XCTAssertThrowsError(try parser.parseResponseStream(buffer: &input))
     }
-    
 }
