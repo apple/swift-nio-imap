@@ -1998,7 +1998,7 @@ extension ParserUnitTests {
                 (
                     "LIST (\\oflag1 \\oflag2) NIL inbox",
                     "\r\n",
-                    .list(.init(attributes: [.init("\\oflag1"), .init("\\oflag2")], pathSeparator: nil, mailbox: .inbox, extensions: [])),
+                    .list(.init(attributes: [.init("\\oflag1"), .init("\\oflag2")], path: try! .init(name: .inbox), extensions: [])),
                     #line
                 ),
                 ("ESEARCH MIN 1 MAX 2", "\r\n", .esearch(.init(correlator: nil, uid: false, returnData: [.min(1), .max(2)])), #line),
@@ -2009,7 +2009,7 @@ extension ParserUnitTests {
                 (
                     "LSUB (\\seen \\draft) NIL inbox",
                     "\r\n",
-                    .lsub(.init(attributes: [.init("\\seen"), .init("\\draft")], pathSeparator: nil, mailbox: .inbox, extensions: [])),
+                    .lsub(.init(attributes: [.init("\\seen"), .init("\\draft")], path: try! .init(name: .inbox), extensions: [])),
                     #line
                 ),
                 ("SEARCH", "\r\n", .search([]), #line),
@@ -2034,25 +2034,25 @@ extension ParserUnitTests {
                 (
                     "() NIL inbox",
                     "\r",
-                    .init(attributes: [], pathSeparator: nil, mailbox: .inbox, extensions: []),
+                    .init(attributes: [], path: try! .init(name: .inbox), extensions: []),
                     #line
                 ),
                 (
                     "() \"d\" inbox",
                     "\r",
-                    .init(attributes: [], pathSeparator: "d", mailbox: .inbox, extensions: []),
+                    .init(attributes: [], path: try! .init(name: .inbox, pathSeparator: "d"), extensions: []),
                     #line
                 ),
                 (
                     "(\\oflag1 \\oflag2) NIL inbox",
                     "\r",
-                    .init(attributes: [.init("\\oflag1"), .init("\\oflag2")], pathSeparator: nil, mailbox: .inbox, extensions: []),
+                    .init(attributes: [.init("\\oflag1"), .init("\\oflag2")], path: try! .init(name: .inbox), extensions: []),
                     #line
                 ),
                 (
                     "(\\oflag1 \\oflag2) \"d\" inbox",
                     "\r",
-                    .init(attributes: [.init("\\oflag1"), .init("\\oflag2")], pathSeparator: "d", mailbox: .inbox, extensions: []),
+                    .init(attributes: [.init("\\oflag1"), .init("\\oflag2")], path: try! .init(name: .inbox, pathSeparator: "d"), extensions: []),
                     #line
                 ),
             ],
