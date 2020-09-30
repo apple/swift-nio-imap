@@ -1841,10 +1841,24 @@ extension ParserUnitTests {
         self.iterateTests(
             testFunction: GrammarParser.parseFetchResponse,
             validInputs: [
-                ("* 1 FETCH (", " ", .start(1), #line),
                 ("UID 54", " ", .simpleAttribute(.uid(54)), #line),
                 ("RFC822.SIZE 40639", " ", .simpleAttribute(.rfc822Size(40639)), #line),
                 (")\r\n", " ", .finish, #line),
+            ],
+            parserErrorInputs: [],
+            incompleteMessageInputs: []
+        )
+    }
+}
+
+// MARK: - parseFetchResponseStart
+
+extension ParserUnitTests {
+    func testParseFetchResponseStart() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseFetchResponseStart,
+            validInputs: [
+                ("* 1 FETCH (", " ", .start(1), #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []

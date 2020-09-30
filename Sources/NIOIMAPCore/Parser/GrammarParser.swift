@@ -2424,15 +2424,17 @@ extension GrammarParser {
             parseFetchModifier_other,
         ], buffer: &buffer, tracker: tracker)
     }
-
-    static func parseFetchResponse(buffer: inout ByteBuffer, tracker: StackTracker) throws -> FetchResponse {
-        func parseFetchResponse_start(buffer: inout ByteBuffer, tracker: StackTracker) throws -> FetchResponse {
+    
+    static func parseFetchResponseStart(buffer: inout ByteBuffer, tracker: StackTracker) throws -> FetchResponse {
+        try composite(buffer: &buffer, tracker: tracker, { buffer, tracker in
             try fixedString("* ", buffer: &buffer, tracker: tracker)
             let number = try self.parseNZNumber(buffer: &buffer, tracker: tracker)
             try fixedString(" FETCH (", buffer: &buffer, tracker: tracker)
             return .start(number)
-        }
+        })
+    }
 
+    static func parseFetchResponse(buffer: inout ByteBuffer, tracker: StackTracker) throws -> FetchResponse {
         func parseFetchResponse_simpleAttribute(buffer: inout ByteBuffer, tracker: StackTracker) throws -> FetchResponse {
             let attribute = try self.parseMessageAttribute(buffer: &buffer, tracker: tracker)
             return .simpleAttribute(attribute)
@@ -2452,7 +2454,6 @@ extension GrammarParser {
         }
 
         return try oneOf([
-            parseFetchResponse_start,
             parseFetchResponse_streamingBegin,
             parseFetchResponse_simpleAttribute,
             parseFetchResponse_finish,

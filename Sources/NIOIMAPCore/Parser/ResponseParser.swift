@@ -21,9 +21,14 @@ public struct ResponseParser: Parser {
         case separator
     }
 
+    public enum ResponseState: Equatable {
+        case fetchOrNormal
+        case fetchMiddle
+    }
+    
     public enum Mode: Equatable {
         case greeting
-        case response
+        case response(ResponseState)
         case attributeBytes(Int)
     }
 
@@ -32,7 +37,7 @@ public struct ResponseParser: Parser {
 
     public init(bufferLimit: Int = 1_000, expectGreeting: Bool = true) {
         self.bufferLimit = bufferLimit
-        self.mode = expectGreeting ? .greeting : .response
+        self.mode = expectGreeting ? .greeting : .response(.fetchOrNormal)
     }
 
     public mutating func parseResponseStream(buffer: inout ByteBuffer) throws -> ResponseOrContinueRequest? {
@@ -41,8 +46,8 @@ public struct ResponseParser: Parser {
             switch self.mode {
             case .greeting:
                 return try .response(self.parseGreeting(buffer: &buffer, tracker: tracker))
-            case .response:
-                return try self.parseResponse(buffer: &buffer, tracker: tracker)
+            case .response(let state):
+                return try self.parseResponse(state: state, buffer: &buffer, tracker: tracker)
             case .attributeBytes(let remaining):
                 return .response(self.parseBytes(buffer: &buffer, remaining: remaining))
             }
@@ -70,46 +75,50 @@ public struct ResponseParser: Parser {
 extension ResponseParser {
     fileprivate mutating func parseGreeting(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Response {
         let greeting = try GrammarParser.parseGreeting(buffer: &buffer, tracker: tracker)
-        return self.moveStateMachine(expected: .greeting, next: .response, returnValue: .untaggedResponse(.greeting(greeting)))
+        return self.moveStateMachine(expected: .greeting, next: .response(.fetchOrNormal), returnValue: .untaggedResponse(.greeting(greeting)))
     }
 }
 
 // MARK: - Parse responses
 
 extension ResponseParser {
-    fileprivate mutating func parseResponse(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ResponseOrContinueRequest {
+    fileprivate mutating func parseResponse(state: ResponseState, buffer: inout ByteBuffer, tracker: StackTracker) throws -> ResponseOrContinueRequest {
+        
         func parseResponse_fetch(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Response {
-            let response = try GrammarParser.parseFetchResponse(buffer: &buffer, tracker: tracker)
-            return .fetchResponse(response)
+            switch state {
+            case .fetchOrNormal:
+                return .fetchResponse(try GrammarParser.parseFetchResponseStart(buffer: &buffer, tracker: tracker))
+            case .fetchMiddle:
+                return .fetchResponse(try GrammarParser.parseFetchResponse(buffer: &buffer, tracker: tracker))
+            }
         }
 
         func parseResponse_normal(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Response {
             let response = try GrammarParser.parseResponseData(buffer: &buffer, tracker: tracker)
             return .untaggedResponse(response)
         }
-
-        func parseResponse_fetch_end(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Response {
-            try GrammarParser.fixedString(")", buffer: &buffer, tracker: tracker)
-            try GrammarParser.newline(buffer: &buffer, tracker: tracker)
-            return .fetchResponse(.finish)
-        }
-
+        
         return try GrammarParser.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             try? GrammarParser.space(buffer: &buffer, tracker: tracker)
             do {
                 let response = try GrammarParser.oneOf([
                     parseResponse_fetch,
                     parseResponse_normal,
-                    parseResponse_fetch_end,
                 ], buffer: &buffer, tracker: tracker)
+                
                 switch response {
+                case .fetchResponse(.start(_)):
+                    self.moveStateMachine(expected: .response(.fetchOrNormal), next: .response(.fetchMiddle))
                 case .fetchResponse(.streamingEnd): // FETCH MESS (1 2 3 4)
                     try? GrammarParser.space(buffer: &buffer, tracker: tracker)
                 case .fetchResponse(.streamingBegin(kind: _, byteCount: let size)):
-                    self.moveStateMachine(expected: .response, next: .attributeBytes(size))
+                    self.moveStateMachine(expected: .response(.fetchMiddle), next: .attributeBytes(size))
+                case .fetchResponse(.finish):
+                    self.moveStateMachine(expected: .response(.fetchMiddle), next: .response(.fetchOrNormal))
                 default:
                     break
                 }
+                
                 return .response(response)
             } catch is ParserError {
                 return try self._parseResponse(buffer: &buffer, tracker: tracker)
@@ -145,7 +154,7 @@ extension ResponseParser {
         if remaining == 0 {
             return self.moveStateMachine(
                 expected: .attributeBytes(remaining),
-                next: .response,
+                next: .response(.fetchMiddle),
                 returnValue: .fetchResponse(.streamingEnd)
             )
         } else if buffer.readableBytes >= remaining {
