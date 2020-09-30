@@ -50,7 +50,7 @@ public struct MailboxPath: Equatable {
 
 extension MailboxPath {
     static let maximumMailboxSize = 1_000
-    
+
     func validateUTF8String(_ buffer: ByteBuffer) -> String? {
         var bytesIterator = buffer.readableBytesView.makeIterator()
         var scalars: [Unicode.Scalar] = []
@@ -66,7 +66,7 @@ extension MailboxPath {
             }
         }
     }
-    
+
     func decodeBufferToString(_ buffer: ByteBuffer) -> String {
         do {
             return try ModifiedUTF7.decode(buffer)
