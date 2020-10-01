@@ -2004,6 +2004,48 @@ extension ParserUnitTests {
     }
 }
 
+// MARK: - parseIPartial
+
+extension ParserUnitTests {
+    func testParseIPartial() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseIPartial,
+            validInputs: [
+                ("/;PARTIAL=1", " ", .init(range: .init(offset: 1, length: nil)), #line),
+                ("/;PARTIAL=1.2", " ", .init(range: .init(offset: 1, length: 2)), #line),
+            ],
+            parserErrorInputs: [
+                ("/;PARTIAL=a", " ", #line),
+                ("PARTIAL=a", " ", #line),
+            ],
+            incompleteMessageInputs: [
+                ("/;PARTIAL=1", "", #line),
+            ]
+        )
+    }
+}
+
+// MARK: - parseIPartialOnly
+
+extension ParserUnitTests {
+    func testParseIPartialOnly() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseIPartialOnly,
+            validInputs: [
+                (";PARTIAL=1", " ", .init(range: .init(offset: 1, length: nil)), #line),
+                (";PARTIAL=1.2", " ", .init(range: .init(offset: 1, length: 2)), #line),
+            ],
+            parserErrorInputs: [
+                (";PARTIAL=a", " ", #line),
+                ("PARTIAL=a", " ", #line),
+            ],
+            incompleteMessageInputs: [
+                (";PARTIAL=1", "", #line),
+            ]
+        )
+    }
+}
+
 // MARK: - parseList
 
 extension ParserUnitTests {

@@ -1709,6 +1709,20 @@ extension GrammarParser {
         try newline(buffer: &buffer, tracker: tracker)
     }
     
+    static func parseIPartial(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IPartial {
+        try composite(buffer: &buffer, tracker: tracker, { buffer, tracker -> IPartial in
+            try fixedString("/;PARTIAL=", buffer: &buffer, tracker: tracker)
+            return .init(range: try self.parsePartialRange(buffer: &buffer, tracker: tracker))
+        })
+    }
+    
+    static func parseIPartialOnly(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IPartialOnly {
+        try composite(buffer: &buffer, tracker: tracker, { buffer, tracker -> IPartialOnly in
+            try fixedString(";PARTIAL=", buffer: &buffer, tracker: tracker)
+            return .init(range: try self.parsePartialRange(buffer: &buffer, tracker: tracker))
+        })
+    }
+    
     static func parseIUID(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IUID {
         try composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             try fixedString("/;UID=", buffer: &buffer, tracker: tracker)
