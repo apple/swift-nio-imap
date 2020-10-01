@@ -4642,6 +4642,14 @@ extension GrammarParser {
         }
         return uid
     }
+    
+    // uniqueid        = nz-number
+    static func parseUIDValidity(buffer: inout ByteBuffer, tracker: StackTracker) throws -> UIDValidity {
+        guard let uid = UIDValidity(uid: try self.parseNZNumber(buffer: &buffer, tracker: tracker)) else {
+            throw ParserError(hint: "UID out of range.")
+        }
+        return uid
+    }
 
     // unsubscribe     = "UNSUBSCRIBE" SP mailbox
     static func parseUnsubscribe(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Command {

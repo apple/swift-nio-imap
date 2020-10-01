@@ -3502,6 +3502,27 @@ extension ParserUnitTests {
     }
 }
 
+// MARK: - parseUIDValidity
+
+extension ParserUnitTests {
+    func testParseUIDValidity() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseUIDValidity,
+            validInputs: [
+                ("1", " ", .init(uid: 1)!, #line),
+                ("12", " ", .init(uid: 12)!, #line),
+                ("123", " ", .init(uid: 123)!, #line),
+            ],
+            parserErrorInputs: [
+                ("0", " ", #line),
+            ],
+            incompleteMessageInputs: [
+                ("1", "", #line),
+            ]
+        )
+    }
+}
+
 // MARK: - parseUIDRange
 
 extension ParserUnitTests {
