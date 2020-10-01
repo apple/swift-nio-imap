@@ -21,12 +21,12 @@ public struct ResponseParser: Parser {
         case separator
     }
 
-    public enum ResponseState: Equatable {
+    enum ResponseState: Equatable {
         case fetchOrNormal
         case fetchMiddle
     }
 
-    public enum Mode: Equatable {
+    enum Mode: Equatable {
         case greeting
         case response(ResponseState)
         case attributeBytes(Int)
