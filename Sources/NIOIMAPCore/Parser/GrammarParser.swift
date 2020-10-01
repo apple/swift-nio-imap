@@ -1708,6 +1708,26 @@ extension GrammarParser {
         try fixedString("DONE", buffer: &buffer, tracker: tracker)
         try newline(buffer: &buffer, tracker: tracker)
     }
+    
+    static func parseIUID(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IUID {
+        try composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
+            try fixedString("/;UID=", buffer: &buffer, tracker: tracker)
+            guard let uid = IUID(uid: try self.parseNZNumber(buffer: &buffer, tracker: tracker)) else {
+                throw ParserError(hint: "UID Must be > 0")
+            }
+            return uid
+        }
+    }
+    
+    static func parseIUIDOnly(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IUIDOnly {
+        try composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
+            try fixedString(";UID=", buffer: &buffer, tracker: tracker)
+            guard let uid = IUIDOnly(uid: try self.parseNZNumber(buffer: &buffer, tracker: tracker)) else {
+                throw ParserError(hint: "UID Must be > 0")
+            }
+            return uid
+        }
+    }
 
     // list            = "LIST" [SP list-select-opts] SP mailbox SP mbox-or-pat [SP list-return-opts]
     static func parseList(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Command {

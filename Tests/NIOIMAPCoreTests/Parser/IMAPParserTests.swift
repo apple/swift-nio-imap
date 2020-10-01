@@ -1472,6 +1472,50 @@ extension ParserUnitTests {
     }
 }
 
+// MARK: - IUID
+extension ParserUnitTests {
+    
+    func testParseIUID() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseIUID,
+            validInputs: [
+                ("/;UID=1", " ", .init(uid: 1)!, #line),
+                ("/;UID=12", " ", .init(uid: 12)!, #line),
+                ("/;UID=123", " ", .init(uid: 123)!, #line),
+            ],
+            parserErrorInputs: [
+                ("a", " ", #line),
+            ],
+            incompleteMessageInputs: [
+                ("/;UID=1", "", #line)
+            ]
+        )
+    }
+    
+}
+
+// MARK: - IUIDOnly
+extension ParserUnitTests {
+    
+    func testParseIUIDOnly() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseIUIDOnly,
+            validInputs: [
+                (";UID=1", " ", .init(uid: 1)!, #line),
+                (";UID=12", " ", .init(uid: 12)!, #line),
+                (";UID=123", " ", .init(uid: 123)!, #line),
+            ],
+            parserErrorInputs: [
+                ("a", " ", #line),
+            ],
+            incompleteMessageInputs: [
+                (";UID=1", "", #line)
+            ]
+        )
+    }
+    
+}
+
 // MARK: - enable-data parseEnableData
 
 extension ParserUnitTests {
