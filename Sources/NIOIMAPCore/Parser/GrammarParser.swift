@@ -2895,6 +2895,20 @@ extension GrammarParser {
             return Int(num1) ... Int(upper2.partialValue)
         }
     }
+    
+    static func parsePartialRange(buffer: inout ByteBuffer, tracker: StackTracker) throws -> PartialRange {
+        
+        func parsePartialRange_length(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Int {
+            try fixedString(".", buffer: &buffer, tracker: tracker)
+            return try self.parseNumber(buffer: &buffer, tracker: tracker)
+        }
+        
+        return try composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> PartialRange in
+            let offset = try self.parseNumber(buffer: &buffer, tracker: tracker)
+            let length = try optional(buffer: &buffer, tracker: tracker, parser: parsePartialRange_length)
+            return .init(offset: offset, length: length)
+        }
+    }
 
     // password        = astring
     static func parsePassword(buffer: inout ByteBuffer, tracker: StackTracker) throws -> String {

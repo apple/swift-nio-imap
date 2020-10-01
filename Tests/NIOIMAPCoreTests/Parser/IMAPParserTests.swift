@@ -2577,6 +2577,28 @@ extension ParserUnitTests {
     }
 }
 
+// MARK: - parsePartialRange
+
+extension ParserUnitTests {
+    func testParsePartialRange() {
+        self.iterateTests(
+            testFunction: GrammarParser.parsePartialRange,
+            validInputs: [
+                ("1", " ", .init(offset: 1, length: nil), #line),
+                ("1.2", " ", .init(offset: 1, length: 2), #line),
+            ],
+            parserErrorInputs: [
+                ("a.1", " ", #line),
+            ],
+            incompleteMessageInputs: [
+                ("1", "", #line),
+                ("1.2", "", #line),
+                ("1.", "", #line),
+            ]
+        )
+    }
+}
+
 // MARK: - parseResponseData
 
 extension ParserUnitTests {
