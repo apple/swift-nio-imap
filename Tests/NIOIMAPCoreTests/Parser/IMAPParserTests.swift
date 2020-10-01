@@ -3587,6 +3587,28 @@ extension ParserUnitTests {
     }
 }
 
+// MARK: - parseUchar
+
+extension ParserUnitTests {
+    func testParseUchar() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseUChar,
+            validInputs: [
+                ("%00", "", 0, #line),
+                ("%0A", "", 10, #line),
+                ("%1F", "", 31, #line),
+                ("%FF", "", 255, #line),
+            ],
+            parserErrorInputs: [
+                ("%GG", " ", #line),
+            ],
+            incompleteMessageInputs: [
+                ("%", "", #line),
+            ]
+        )
+    }
+}
+
 // MARK: - parseUID
 
 extension ParserUnitTests {

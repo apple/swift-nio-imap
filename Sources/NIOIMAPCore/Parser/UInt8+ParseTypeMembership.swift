@@ -149,4 +149,35 @@ extension UInt8 {
             return self.isTaggedLabelFchar
         }
     }
+    
+    /// RFC 5092
+    var isSubDelimsSh: Bool {
+        switch self {
+        case UInt8(ascii: "!"),
+             UInt8(ascii: "$"),
+             UInt8(ascii: "'"),
+             UInt8(ascii: "("),
+             UInt8(ascii: ")"),
+             UInt8(ascii: "*"),
+             UInt8(ascii: "+"),
+             UInt8(ascii: ","):
+            return true
+        default:
+            return false
+        }
+    }
+    
+    /// RFC 3986
+    var isUnreserved: Bool {
+        switch self {
+        case _ where self.isAlphaNum,
+             UInt8(ascii: "-"),
+             UInt8(ascii: "."),
+             UInt8(ascii: "_"),
+             UInt8(ascii: "~"):
+            return true
+        default:
+            return false
+        }
+    }
 }

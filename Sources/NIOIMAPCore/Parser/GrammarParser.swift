@@ -1723,6 +1723,79 @@ extension GrammarParser {
         })
     }
     
+    static func parseUChar(buffer: inout ByteBuffer, tracker: StackTracker) throws -> UInt8 {
+        
+        func parseUChar_unreserved(buffer: inout ByteBuffer, tracker: StackTracker) throws -> UInt8 {
+            guard let num = buffer.readInteger(as: UInt8.self) else {
+                throw _IncompleteMessage()
+            }
+            guard num.isUnreserved else {
+                throw ParserError(hint: "Expected unreserved char, got \(num)")
+            }
+            return num
+        }
+        
+        func parseUChar_subDelimsSH(buffer: inout ByteBuffer, tracker: StackTracker) throws -> UInt8 {
+            guard let num = buffer.readInteger(as: UInt8.self) else {
+                throw _IncompleteMessage()
+            }
+            guard num.isSubDelimsSh else {
+                throw ParserError(hint: "Expected sub-delims-sh char, got \(num)")
+            }
+            return num
+        }
+        
+        // "%" HEXDIGIT HEXDIGIT
+        // e.g. %1F
+        func parseUChar_pctEncoded(buffer: inout ByteBuffer, tracker: StackTracker) throws -> UInt8 {
+            try fixedString("%", buffer: &buffer, tracker: tracker)
+            guard
+                let _h1 = buffer.readInteger(as: UInt8.self),
+                let _h2 = buffer.readInteger(as: UInt8.self)
+            else {
+                throw _IncompleteMessage()
+            }
+            
+            var h1 = _h1
+            var h2 = _h2
+            if h1 > 70 {
+                h1 -= 70
+            }
+            if h2 > 70 {
+                h2 -= 70
+            }
+            
+            guard (h1 >= 48 && h1 <= 57) || (h1 >= 65 && h1 <= 70) else {
+                throw ParserError(hint: "Expected hex digit, got \(_h1)")
+            }
+            
+            guard (h2 >= 48 && h2 <= 57) || (h2 >= 65 && h2 <= 70) else {
+                throw ParserError(hint: "Expected hex digit, got \(_h2)")
+            }
+            
+            if (UInt8(ascii: "0")...UInt8(ascii: "9")).contains(h1) {
+                h1 -= 48
+            } else {
+                h1 -= 55
+            }
+            
+            if (UInt8(ascii: "0")...UInt8(ascii: "9")).contains(h2) {
+                h2 -= 48
+            } else {
+                h2 -= 55
+            }
+            
+            let result = (h1 << 4) | (h2 & 0xFF)
+            return result
+        }
+        
+        return try oneOf([
+            parseUChar_unreserved,
+            parseUChar_subDelimsSH,
+            parseUChar_pctEncoded
+        ], buffer: &buffer, tracker: tracker)
+    }
+    
     static func parseIUID(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IUID {
         try composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             try fixedString("/;UID=", buffer: &buffer, tracker: tracker)
