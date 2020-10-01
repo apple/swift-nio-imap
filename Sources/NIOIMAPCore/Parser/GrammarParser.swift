@@ -1106,6 +1106,27 @@ extension GrammarParser {
         }
     }
 
+    static func parseEncodedAuthenticationType(buffer: inout ByteBuffer, tracker: StackTracker) throws -> EncodedAuthenticationType {
+        try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> EncodedAuthenticationType in
+            let array = try ParserLibrary.parseOneOrMore(buffer: &buffer, tracker: tracker, parser: self.parseAChar).reduce([], +)
+            return .init(authType: String(decoding: array, as: Unicode.UTF8.self))
+        }
+    }
+    
+    static func parseEncodedMailbox(buffer: inout ByteBuffer, tracker: StackTracker) throws -> EncodedMailbox {
+        try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> EncodedMailbox in
+            let array = try ParserLibrary.parseOneOrMore(buffer: &buffer, tracker: tracker, parser: self.parseBChar).reduce([], +)
+            return .init(mailbox: String(decoding: array, as: Unicode.UTF8.self))
+        }
+    }
+    
+    static func parseEncodedSearch(buffer: inout ByteBuffer, tracker: StackTracker) throws -> EncodedSearch {
+        try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> EncodedSearch in
+            let array = try ParserLibrary.parseOneOrMore(buffer: &buffer, tracker: tracker, parser: self.parseBChar).reduce([], +)
+            return .init(query: String(decoding: array, as: Unicode.UTF8.self))
+        }
+    }
+
     // enable-data     = "ENABLED" *(SP capability)
     static func parseEnableData(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [Capability] {
         try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> [Capability] in
@@ -1723,31 +1744,31 @@ extension GrammarParser {
         })
     }
     
-    static func parseUChar(buffer: inout ByteBuffer, tracker: StackTracker) throws -> UInt8 {
+    static func parseUChar(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [UInt8] {
         
-        func parseUChar_unreserved(buffer: inout ByteBuffer, tracker: StackTracker) throws -> UInt8 {
+        func parseUChar_unreserved(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [UInt8] {
             guard let num = buffer.readInteger(as: UInt8.self) else {
                 throw _IncompleteMessage()
             }
             guard num.isUnreserved else {
                 throw ParserError(hint: "Expected unreserved char, got \(num)")
             }
-            return num
+            return [num]
         }
         
-        func parseUChar_subDelimsSH(buffer: inout ByteBuffer, tracker: StackTracker) throws -> UInt8 {
+        func parseUChar_subDelimsSH(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [UInt8] {
             guard let num = buffer.readInteger(as: UInt8.self) else {
                 throw _IncompleteMessage()
             }
             guard num.isSubDelimsSh else {
                 throw ParserError(hint: "Expected sub-delims-sh char, got \(num)")
             }
-            return num
+            return [num]
         }
         
         // "%" HEXDIGIT HEXDIGIT
         // e.g. %1F
-        func parseUChar_pctEncoded(buffer: inout ByteBuffer, tracker: StackTracker) throws -> UInt8 {
+        func parseUChar_pctEncoded(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [UInt8] {
             try fixedString("%", buffer: &buffer, tracker: tracker)
             guard
                 let _h1 = buffer.readInteger(as: UInt8.self),
@@ -1773,26 +1794,66 @@ extension GrammarParser {
                 throw ParserError(hint: "Expected hex digit, got \(_h2)")
             }
             
-            if (UInt8(ascii: "0")...UInt8(ascii: "9")).contains(h1) {
-                h1 -= 48
-            } else {
-                h1 -= 55
-            }
+//            if (UInt8(ascii: "0")...UInt8(ascii: "9")).contains(h1) {
+//                h1 -= 48
+//            } else {
+//                h1 -= 55
+//            }
+//
+//            if (UInt8(ascii: "0")...UInt8(ascii: "9")).contains(h2) {
+//                h2 -= 48
+//            } else {
+//                h2 -= 55
+//            }
             
-            if (UInt8(ascii: "0")...UInt8(ascii: "9")).contains(h2) {
-                h2 -= 48
-            } else {
-                h2 -= 55
-            }
-            
-            let result = (h1 << 4) | (h2 & 0xFF)
-            return result
+//            let result = (h1 << 4) | (h2 & 0xFF)
+            return [UInt8(ascii: "%"), h1, h2]
         }
         
         return try oneOf([
             parseUChar_unreserved,
             parseUChar_subDelimsSH,
             parseUChar_pctEncoded
+        ], buffer: &buffer, tracker: tracker)
+    }
+    
+    static func parseAChar(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [UInt8] {
+        
+        func parseAChar_other(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [UInt8] {
+            guard let char = buffer.readInteger(as: UInt8.self) else {
+                throw _IncompleteMessage()
+            }
+            switch char {
+            case UInt8(ascii: "&"), UInt8(ascii: "="):
+                return [char]
+            default:
+                throw ParserError(hint: "Expect achar, got \(char)")
+            }
+        }
+        
+        return try oneOf([
+            parseUChar,
+            parseAChar_other,
+        ], buffer: &buffer, tracker: tracker)
+    }
+    
+    static func parseBChar(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [UInt8] {
+        
+        func parseBChar_other(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [UInt8] {
+            guard let char = buffer.readInteger(as: UInt8.self) else {
+                throw _IncompleteMessage()
+            }
+            switch char {
+            case UInt8(ascii: ":"), UInt8(ascii: "@"), UInt8(ascii: "/"):
+                return [char]
+            default:
+                throw ParserError(hint: "Expect achar, got \(char)")
+            }
+        }
+        
+        return try oneOf([
+            parseAChar,
+            parseBChar_other,
         ], buffer: &buffer, tracker: tracker)
     }
     

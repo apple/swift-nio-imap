@@ -1613,6 +1613,57 @@ extension ParserUnitTests {
     }
 }
 
+// MARK: - parseEncodedAuthenticationType
+
+extension ParserUnitTests {
+    func testParseEncodedAuthenticationType() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseEncodedAuthenticationType,
+            validInputs: [
+                ("hello%FF", " ", .init(authType: "hello%FF"), #line),
+            ],
+            parserErrorInputs: [
+                ],
+            incompleteMessageInputs: [
+                ]
+        )
+    }
+}
+
+// MARK: - parseEncodedMailbox
+
+extension ParserUnitTests {
+    func testParseEncodedMailbox() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseEncodedMailbox,
+            validInputs: [
+                ("hello%FF", " ", .init(mailbox: "hello%FF"), #line),
+            ],
+            parserErrorInputs: [
+                ],
+            incompleteMessageInputs: [
+                ]
+        )
+    }
+}
+
+// MARK: - parseEncodedSearch
+
+extension ParserUnitTests {
+    func testParseEncodedSearch() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseEncodedSearch,
+            validInputs: [
+                ("query%FF", " ", .init(query: "query%FF"), #line),
+            ],
+            parserErrorInputs: [
+                ],
+            incompleteMessageInputs: [
+                ]
+        )
+    }
+}
+
 // MARK: - parseEntryList
 
 extension ParserUnitTests {
@@ -3594,16 +3645,59 @@ extension ParserUnitTests {
         self.iterateTests(
             testFunction: GrammarParser.parseUChar,
             validInputs: [
-                ("%00", "", 0, #line),
-                ("%0A", "", 10, #line),
-                ("%1F", "", 31, #line),
-                ("%FF", "", 255, #line),
+                ("%00", "", [UInt8(ascii: "%"), UInt8(ascii: "0"), UInt8(ascii: "0")], #line),
+                ("%0A", "", [UInt8(ascii: "%"), UInt8(ascii: "0"), UInt8(ascii: "A")], #line),
+                ("%1F", "", [UInt8(ascii: "%"), UInt8(ascii: "1"), UInt8(ascii: "F")], #line),
+                ("%FF", "", [UInt8(ascii: "%"), UInt8(ascii: "F"), UInt8(ascii: "F")], #line),
             ],
             parserErrorInputs: [
                 ("%GG", " ", #line),
             ],
             incompleteMessageInputs: [
                 ("%", "", #line),
+            ]
+        )
+    }
+}
+
+// MARK: - parseAchar
+
+extension ParserUnitTests {
+    func testParseAchar() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseAChar,
+            validInputs: [
+                ("%00", "", [UInt8(ascii: "%"), UInt8(ascii: "0"), UInt8(ascii: "0")], #line),
+                ("&", "", [UInt8(ascii: "&")], #line),
+                ("=", "", [UInt8(ascii: "=")], #line),
+            ],
+            parserErrorInputs: [
+                ("£", " ", #line),
+            ],
+            incompleteMessageInputs: [
+                ("", "", #line),
+            ]
+        )
+    }
+}
+
+// MARK: - parseBchar
+
+extension ParserUnitTests {
+    func testParseBchar() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseBChar,
+            validInputs: [
+                ("%00", "", [UInt8(ascii: "%"), UInt8(ascii: "0"), UInt8(ascii: "0")], #line),
+                ("@", "", [UInt8(ascii: "@")], #line),
+                (":", "", [UInt8(ascii: ":")], #line),
+                ("/", "", [UInt8(ascii: "/")], #line),
+            ],
+            parserErrorInputs: [
+                ("£", " ", #line),
+            ],
+            incompleteMessageInputs: [
+                ("", "", #line),
             ]
         )
     }
