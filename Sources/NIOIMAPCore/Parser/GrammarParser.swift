@@ -1126,6 +1126,13 @@ extension GrammarParser {
             return .init(query: String(decoding: array, as: Unicode.UTF8.self))
         }
     }
+    
+    static func parseEncodedSection(buffer: inout ByteBuffer, tracker: StackTracker) throws -> EncodedSection {
+        try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> EncodedSection in
+            let array = try ParserLibrary.parseOneOrMore(buffer: &buffer, tracker: tracker, parser: self.parseBChar).reduce([], +)
+            return .init(section: String(decoding: array, as: Unicode.UTF8.self))
+        }
+    }
 
     // enable-data     = "ENABLED" *(SP capability)
     static func parseEnableData(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [Capability] {

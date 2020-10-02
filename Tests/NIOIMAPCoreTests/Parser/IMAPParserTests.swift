@@ -1664,6 +1664,23 @@ extension ParserUnitTests {
     }
 }
 
+// MARK: - parseEncodedSection
+
+extension ParserUnitTests {
+    func testParseEncodedSection() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseEncodedSection,
+            validInputs: [
+                ("query%FF", " ", .init(section: "query%FF"), #line),
+            ],
+            parserErrorInputs: [
+                ],
+            incompleteMessageInputs: [
+                ]
+        )
+    }
+}
+
 // MARK: - parseEntryList
 
 extension ParserUnitTests {
