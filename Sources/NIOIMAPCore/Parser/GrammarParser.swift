@@ -1772,6 +1772,14 @@ extension GrammarParser {
         })
     }
     
+    static func parseIMailboxReference(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IMailboxReference {
+        try composite(buffer: &buffer, tracker: tracker, { buffer, tracker -> IMailboxReference in
+            let mailbox = try self.parseEncodedMailbox(buffer: &buffer, tracker: tracker)
+            let uidValidity = try optional(buffer: &buffer, tracker: tracker, parser: self.parseUIDValidity)
+            return .init(encodeMailbox: mailbox, uidValidity: uidValidity)
+        })
+    }
+    
     static func parseUChar(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [UInt8] {
         
         func parseUChar_unreserved(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [UInt8] {
@@ -4855,10 +4863,14 @@ extension GrammarParser {
     
     // uniqueid        = nz-number
     static func parseUIDValidity(buffer: inout ByteBuffer, tracker: StackTracker) throws -> UIDValidity {
-        guard let uid = UIDValidity(uid: try self.parseNZNumber(buffer: &buffer, tracker: tracker)) else {
-            throw ParserError(hint: "UID out of range.")
-        }
-        return uid
+        try composite(buffer: &buffer, tracker: tracker, { buffer, tracker in
+            try fixedString(";UIDVALIDITY=", buffer: &buffer, tracker: tracker)
+            let num = try self.parseNZNumber(buffer: &buffer, tracker: tracker)
+            guard let uid = UIDValidity(uid: num) else {
+                throw ParserError(hint: "\(num) is not a valid UID")
+            }
+            return uid
+        })
     }
 
     // unsubscribe     = "UNSUBSCRIBE" SP mailbox

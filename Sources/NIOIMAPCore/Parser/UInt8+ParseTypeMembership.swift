@@ -18,9 +18,11 @@ import struct NIO.ByteBuffer
 #if os(macOS) || os(iOS) || os(watchOS) || os(tvOS)
 import func Darwin.isalnum
 import func Darwin.isalpha
+import func Darwin.isnumber
 #elseif os(Linux) || os(FreeBSD) || os(Android)
 import func Glibc.isalnum
 import func Glibc.isalpha
+import func Glibc.isnumber
 #else
 let badOS = { fatalError("unsupported OS") }()
 #endif
@@ -122,6 +124,10 @@ extension UInt8 {
 
     var isAlphaNum: Bool {
         isalnum(Int32(self)) != 0
+    }
+    
+    var isNum: Bool {
+        isnumber(Int32(self)) != 0
     }
 
     /// tagged-label-fchar  = ALPHA / "-" / "_" / "."

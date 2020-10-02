@@ -2171,6 +2171,27 @@ extension ParserUnitTests {
     }
 }
 
+// MARK: - parseIMailboxReference
+
+extension ParserUnitTests {
+    func testParseIMailboxReference() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseIMailboxReference,
+            validInputs: [
+                ("abc", " ", .init(encodeMailbox: .init(mailbox: "abc"), uidValidity: nil), #line),
+                ("abc;UIDVALIDITY=123", " ", .init(encodeMailbox: .init(mailbox: "abc"), uidValidity: .init(uid: 123)!), #line),
+            ],
+            parserErrorInputs: [
+                ("¢", " ", #line),
+            ],
+            incompleteMessageInputs: [
+                ("abc", "", #line),
+                ("abc123", "", #line),
+            ]
+        )
+    }
+}
+
 // MARK: - parseList
 
 extension ParserUnitTests {
@@ -3807,15 +3828,15 @@ extension ParserUnitTests {
         self.iterateTests(
             testFunction: GrammarParser.parseUIDValidity,
             validInputs: [
-                ("1", " ", .init(uid: 1)!, #line),
-                ("12", " ", .init(uid: 12)!, #line),
-                ("123", " ", .init(uid: 123)!, #line),
+                (";UIDVALIDITY=1", " ", .init(uid: 1)!, #line),
+                (";UIDVALIDITY=12", " ", .init(uid: 12)!, #line),
+                (";UIDVALIDITY=123", " ", .init(uid: 123)!, #line),
             ],
             parserErrorInputs: [
                 ("0", " ", #line),
             ],
             incompleteMessageInputs: [
-                ("1", "", #line),
+                (";UIDVALIDITY=1", "", #line),
             ]
         )
     }
