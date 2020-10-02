@@ -1681,6 +1681,23 @@ extension ParserUnitTests {
     }
 }
 
+// MARK: - parseEncodedUser
+
+extension ParserUnitTests {
+    func testParseEncodedUser() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseEncodedUser,
+            validInputs: [
+                ("query%FF", " ", .init(data: "query%FF"), #line),
+            ],
+            parserErrorInputs: [
+                ],
+            incompleteMessageInputs: [
+                ]
+        )
+    }
+}
+
 // MARK: - parseEntryList
 
 extension ParserUnitTests {
