@@ -1758,6 +1758,20 @@ extension GrammarParser {
         })
     }
     
+    static func parseISection(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ISection {
+        try composite(buffer: &buffer, tracker: tracker, { buffer, tracker -> ISection in
+            try fixedString("/;SECTION=", buffer: &buffer, tracker: tracker)
+            return .init(encodedSection: try self.parseEncodedSection(buffer: &buffer, tracker: tracker))
+        })
+    }
+    
+    static func parseISectionOnly(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ISectionOnly {
+        try composite(buffer: &buffer, tracker: tracker, { buffer, tracker -> ISectionOnly in
+            try fixedString(";SECTION=", buffer: &buffer, tracker: tracker)
+            return .init(encodedSection: try self.parseEncodedSection(buffer: &buffer, tracker: tracker))
+        })
+    }
+    
     static func parseUChar(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [UInt8] {
         
         func parseUChar_unreserved(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [UInt8] {

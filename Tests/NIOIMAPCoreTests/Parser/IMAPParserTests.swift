@@ -2131,6 +2131,46 @@ extension ParserUnitTests {
     }
 }
 
+// MARK: - parseISection
+
+extension ParserUnitTests {
+    func testParseISection() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseISection,
+            validInputs: [
+                ("/;SECTION=a", " ", ISection(encodedSection: .init(section: "a")), #line),
+                ("/;SECTION=abc", " ", ISection(encodedSection: .init(section: "abc")), #line),
+            ],
+            parserErrorInputs: [
+                ("SECTION=a", " ", #line),
+            ],
+            incompleteMessageInputs: [
+                ("/;SECTION=1", "", #line),
+            ]
+        )
+    }
+}
+
+// MARK: - parseISectionOnly
+
+extension ParserUnitTests {
+    func testParseISectionOnly() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseISectionOnly,
+            validInputs: [
+                (";SECTION=a", " ", ISectionOnly(encodedSection: .init(section: "a")), #line),
+                (";SECTION=abc", " ", ISectionOnly(encodedSection: .init(section: "abc")), #line),
+            ],
+            parserErrorInputs: [
+                ("SECTION=a", " ", #line),
+            ],
+            incompleteMessageInputs: [
+                (";SECTION=1", "", #line),
+            ]
+        )
+    }
+}
+
 // MARK: - parseList
 
 extension ParserUnitTests {
