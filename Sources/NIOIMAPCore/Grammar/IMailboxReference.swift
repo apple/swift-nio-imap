@@ -19,7 +19,7 @@ public struct IMailboxReference: Equatable {
     
     public var uidValidity: UIDValidity?
     
-    public init(encodeMailbox: EncodedMailbox, uidValidity: UIDValidity?) {
+    public init(encodeMailbox: EncodedMailbox, uidValidity: UIDValidity? = nil) {
         self.encodedMailbox = encodeMailbox
         self.uidValidity = uidValidity
     }

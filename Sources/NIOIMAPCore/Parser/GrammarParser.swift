@@ -1867,6 +1867,40 @@ extension GrammarParser {
         })
     }
     
+    static func parseIMessagePart(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IMessagePart {
+        try composite(buffer: &buffer, tracker: tracker, { buffer, tracker -> IMessagePart in
+            var ref = try self.parseIMailboxReference(buffer: &buffer, tracker: tracker)
+            
+            var uid: IUID = IUID(uid: 1)!
+            if ref.uidValidity == nil && ref.encodedMailbox.mailbox.last == Character(.init(UInt8(ascii: "/"))) {
+                try composite(buffer: &buffer, tracker: tracker, { buffer, tracker in
+                    ref.encodedMailbox.mailbox = String(ref.encodedMailbox.mailbox.dropLast())
+                    var newBuffer = ByteBuffer(bytes: [UInt8(ascii: "/")])
+                    newBuffer.writeBuffer(&buffer)
+                    uid = try self.parseIUID(buffer: &newBuffer, tracker: tracker)
+                    buffer = newBuffer
+                })
+            } else {
+                uid = try self.parseIUID(buffer: &buffer, tracker: tracker)
+            }
+            
+            var section = try optional(buffer: &buffer, tracker: tracker, parser: self.parseISection)
+            var partial: IPartial?
+            if section?.encodedSection.section.last == Character(.init(UInt8(ascii: "/"))) {
+                try composite(buffer: &buffer, tracker: tracker, { buffer, tracker in
+                    section!.encodedSection.section = String(section!.encodedSection.section.dropLast())
+                    var newBuffer = ByteBuffer(bytes: [UInt8(ascii: "/")])
+                    newBuffer.writeBuffer(&buffer)
+                    partial = try optional(buffer: &newBuffer, tracker: tracker, parser: self.parseIPartial)
+                    buffer = newBuffer
+                })
+            } else {
+                partial = try optional(buffer: &buffer, tracker: tracker, parser: self.parseIPartial)
+            }
+            return .init(mailboxReference: ref, iUID: uid, iSection: section, iPartial: partial)
+        })
+    }
+    
     static func parseUChar(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [UInt8] {
         
         func parseUChar_unreserved(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [UInt8] {

@@ -2388,6 +2388,52 @@ extension ParserUnitTests {
     }
 }
 
+// MARK: - parseIMessagePart
+
+extension ParserUnitTests {
+    func testParseIMessagePart() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseIMessagePart,
+            validInputs: [
+                (
+                    "test/;UID=123",
+                    " ",
+                    .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: .init(uid: 123)!, iSection: nil, iPartial: nil),
+                    #line
+                ),
+                (
+                    "test/;UID=123/;SECTION=section",
+                    " ",
+                    .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: .init(uid: 123)!, iSection: .init(encodedSection: .init(section: "section")), iPartial: nil),
+                    #line
+                ),
+                (
+                    "test/;UID=123/;PARTIAL=1.2",
+                    " ",
+                    .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: .init(uid: 123)!, iSection: nil, iPartial: .init(range: .init(offset: 1, length: 2))),
+                    #line
+                ),
+                (
+                    "test/;UID=123/;SECTION=section/;PARTIAL=1.2",
+                    " ",
+                    .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: .init(uid: 123)!, iSection: .init(encodedSection: .init(section: "section")), iPartial: .init(range: .init(offset: 1, length: 2))),
+                    #line
+                ),
+                (
+                    "test/;UIDVALIDITY=123/;UID=123/;SECTION=section/;PARTIAL=1.2",
+                    " ",
+                    .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test/"), uidValidity: .init(uid: 123)!), iUID: .init(uid: 123)!, iSection: .init(encodedSection: .init(section: "section")), iPartial: .init(range: .init(offset: 1, length: 2))),
+                    #line
+                )
+            ],
+            parserErrorInputs: [
+            ],
+            incompleteMessageInputs: [
+            ]
+        )
+    }
+}
+
 // MARK: - parseList
 
 extension ParserUnitTests {
