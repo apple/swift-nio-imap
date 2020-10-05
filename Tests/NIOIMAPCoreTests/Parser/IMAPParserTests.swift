@@ -1839,6 +1839,32 @@ extension ParserUnitTests {
     }
 }
 
+// MARK: - parseExpire
+
+extension ParserUnitTests {
+    func testParseExpire() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseExpire,
+            validInputs: [
+                (
+                    ";EXPIRE=1234-12-34T12:34:56",
+                    "\r",
+                    Expire(dateTime: FullDateTime(date: FullDate(year: 1234, month: 12, day: 34), time: FullTime(hour: 12, minute: 34, second: 56))),
+                    #line
+                ),
+                (
+                    ";EXPIRE=1234-12-34t12:34:56",
+                    "\r",
+                    Expire(dateTime: FullDateTime(date: FullDate(year: 1234, month: 12, day: 34), time: FullTime(hour: 12, minute: 34, second: 56))),
+                    #line
+                ),
+            ],
+            parserErrorInputs: [],
+            incompleteMessageInputs: []
+        )
+    }
+}
+
 // MARK: - parseFetch
 
 extension ParserUnitTests {
@@ -1930,6 +1956,70 @@ extension ParserUnitTests {
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
+        )
+    }
+}
+
+// MARK: - parseFullDateTime
+
+extension ParserUnitTests {
+    func testParseFullDateTime() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseFullDateTime,
+            validInputs: [
+                (
+                    "1234-12-34T11:22:33",
+                    " ",
+                    .init(date: .init(year: 1234, month: 12, day: 34), time: .init(hour: 11, minute: 22, second: 33)),
+                    #line
+                )
+            ],
+            parserErrorInputs: [
+                
+            ],
+            incompleteMessageInputs: [
+            
+            ]
+        )
+    }
+}
+
+// MARK: - parseFullDate
+
+extension ParserUnitTests {
+    func testParseFullDate() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseFullDate,
+            validInputs: [
+                ("1234-12-23", " ", .init(year: 1234, month: 12, day: 23), #line)
+            ],
+            parserErrorInputs: [
+                ("a", "", #line)
+            ],
+            incompleteMessageInputs: [
+                ("1234", "", #line)
+            ]
+        )
+    }
+}
+
+// MARK: - parseFullTime
+
+extension ParserUnitTests {
+    func testParseFullTime() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseFullTime,
+            validInputs: [
+                ("12:34:56", " ", .init(hour: 12, minute: 34, second: 56), #line),
+                ("12:34:56.123456", " ", .init(hour: 12, minute: 34, second: 56, fraction: 123456), #line)
+            ],
+            parserErrorInputs: [
+                ("a", "", #line),
+                ("1234:56:12", "", #line)
+            ],
+            incompleteMessageInputs: [
+                ("1234", "", #line)
+            ]
         )
     }
 }

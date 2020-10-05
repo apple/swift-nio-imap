@@ -1326,6 +1326,14 @@ extension GrammarParser {
             return .examine(mailbox, params)
         }
     }
+    
+    static func parseExpire(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Expire {
+        try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Expire in
+            try fixedString(";EXPIRE=", buffer: &buffer, tracker: tracker)
+            let dateTime = try self.parseFullDateTime(buffer: &buffer, tracker: tracker)
+            return .init(dateTime: dateTime)
+        }
+    }
 
     // fetch           = "FETCH" SP sequence-set SP ("ALL" / "FULL" / "FAST" /
     //                   fetch-att / "(" fetch-att *(SP fetch-att) ")") [fetch-modifiers]
@@ -1975,6 +1983,39 @@ extension GrammarParser {
             parseListSelectIndependentOption_subscribed,
             parseListSelectIndependentOption_optionExtension,
         ], buffer: &buffer, tracker: tracker)
+    }
+    
+    static func parseFullDateTime(buffer: inout ByteBuffer, tracker: StackTracker) throws -> FullDateTime {
+        try composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
+            let date = try self.parseFullDate(buffer: &buffer, tracker: tracker)
+            try fixedString("T", buffer: &buffer, tracker: tracker)
+            let time = try self.parseFullTime(buffer: &buffer, tracker: tracker)
+            return .init(date: date, time: time)
+        }
+    }
+    
+    static func parseFullDate(buffer: inout ByteBuffer, tracker: StackTracker) throws -> FullDate {
+        try composite(buffer: &buffer, tracker: tracker, { buffer, tracker in
+            let year = try parse4Digit(buffer: &buffer, tracker: tracker)
+            try fixedString("-", buffer: &buffer, tracker: tracker)
+            let month = try parse2Digit(buffer: &buffer, tracker: tracker)
+            try fixedString("-", buffer: &buffer, tracker: tracker)
+            let day = try parse2Digit(buffer: &buffer, tracker: tracker)
+            return .init(year: year, month: month, day: day)
+        })
+    }
+    
+    static func parseFullTime(buffer: inout ByteBuffer, tracker: StackTracker) throws -> FullTime {
+        let hour = try parse2Digit(buffer: &buffer, tracker: tracker)
+        try fixedString(":", buffer: &buffer, tracker: tracker)
+        let minute = try parse2Digit(buffer: &buffer, tracker: tracker)
+        try fixedString(":", buffer: &buffer, tracker: tracker)
+        let second = try parse2Digit(buffer: &buffer, tracker: tracker)
+        let fraction = try optional(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> Int in
+            try fixedString(".", buffer: &buffer, tracker: tracker)
+            return try self.parseNumber(buffer: &buffer, tracker: tracker)
+        })
+        return .init(hour: hour, minute: minute, second: second, fraction: fraction)
     }
 
     // list-select-opt =  list-select-base-opt / list-select-independent-opt
