@@ -1516,6 +1516,32 @@ extension ParserUnitTests {
     
 }
 
+// MARK: - IURLAuthRump
+extension ParserUnitTests {
+    
+    func testParseIURLAuthRump() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseIURLAuthRump,
+            validInputs: [
+                (";URLAUTH=anonymous", " ", .init(access: .anonymous), #line),
+                (
+                    ";EXPIRE=1234-12-23T12:34:56;URLAUTH=anonymous",
+                    " ",
+                    .init(expire: .init(dateTime: .init(date: .init(year: 1234, month: 12, day: 23), time: .init(hour: 12, minute: 34, second: 56))),access: .anonymous),
+                    #line
+                )
+            ],
+            parserErrorInputs: [
+                
+            ],
+            incompleteMessageInputs: [
+                
+            ]
+        )
+    }
+    
+}
+
 // MARK: - enable-data parseEnableData
 
 extension ParserUnitTests {

@@ -1949,6 +1949,15 @@ extension GrammarParser {
             return uid
         }
     }
+    
+    static func parseIURLAuthRump(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IURLAuthRump {
+        try composite(buffer: &buffer, tracker: tracker, { buffer, tracker -> IURLAuthRump in
+            let expiry = try optional(buffer: &buffer, tracker: tracker, parser: self.parseExpire)
+            try fixedString(";URLAUTH=", buffer: &buffer, tracker: tracker)
+            let access = try self.parseAccess(buffer: &buffer, tracker: tracker)
+            return .init(expire: expiry, access: access)
+        })
+    }
 
     // list            = "LIST" [SP list-select-opts] SP mailbox SP mbox-or-pat [SP list-return-opts]
     static func parseList(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Command {
