@@ -186,4 +186,13 @@ extension UInt8 {
             return false
         }
     }
+    
+    var isHexCharacter: Bool {
+        switch self {
+        case UInt8(ascii: "0")...UInt8(ascii: "9"), UInt8(ascii: "a")...UInt8(ascii: "f"), UInt8(ascii: "A"), UInt8(ascii: "F"):
+            return true
+        default:
+            return false
+        }
+    }
 }

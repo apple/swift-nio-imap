@@ -1724,6 +1724,25 @@ extension ParserUnitTests {
     }
 }
 
+// MARK: - parseEncodedUrlAuth
+
+extension ParserUnitTests {
+    func testParseEncodedUrlAuth() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseEncodedURLAuth,
+            validInputs: [
+                ("0123456789abcdef01234567890abcde", "", .init(data: "0123456789abcdef01234567890abcde "), #line)
+            ], 
+            parserErrorInputs: [
+                ("abcdefg", "", #line)
+                ],
+            incompleteMessageInputs: [
+                ("0123456789", "", #line)
+                ]
+        )
+    }
+}
+
 // MARK: - parseEntryList
 
 extension ParserUnitTests {

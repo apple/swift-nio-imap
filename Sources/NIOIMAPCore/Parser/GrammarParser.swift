@@ -1140,6 +1140,24 @@ extension GrammarParser {
             return .init(data: String(decoding: array, as: Unicode.UTF8.self))
         }
     }
+    
+    static func parseEncodedURLAuth(buffer: inout ByteBuffer, tracker: StackTracker) throws -> EncodedUrlAuth {
+        try composite(buffer: &buffer, tracker: tracker, { buffer, tracker -> EncodedUrlAuth in
+            var numParsed = 0
+            var parsed = ByteBuffer()
+            while numParsed < 32 {
+                guard let char = buffer.readInteger(as: UInt8.self) else {
+                    throw _IncompleteMessage()
+                }
+                guard char.isHexCharacter else {
+                    throw ParserError(hint: "Expected hex character, got \(char)")
+                }
+                parsed.writeInteger(char)
+                numParsed += 1
+            }
+            return .init(data: String(buffer: parsed))
+        })
+    }
 
     // enable-data     = "ENABLED" *(SP capability)
     static func parseEnableData(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [Capability] {
