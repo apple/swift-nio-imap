@@ -1856,6 +1856,17 @@ extension GrammarParser {
         })
     }
     
+    static func parseIMessageList(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IMessageList {
+        try composite(buffer: &buffer, tracker: tracker, { buffer, tracker -> IMessageList in
+            let mailboxRef = try self.parseIMailboxReference(buffer: &buffer, tracker: tracker)
+            let query = try optional(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> EncodedSearch in
+                try fixedString("?", buffer: &buffer, tracker: tracker)
+                return try self.parseEncodedSearch(buffer: &buffer, tracker: tracker)
+            })
+            return .init(mailboxReference: mailboxRef, encodedSearch: query)
+        })
+    }
+    
     static func parseUChar(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [UInt8] {
         
         func parseUChar_unreserved(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [UInt8] {

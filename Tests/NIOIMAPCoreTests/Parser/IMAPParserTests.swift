@@ -2370,6 +2370,24 @@ extension ParserUnitTests {
     }
 }
 
+// MARK: - parseIMessageList
+
+extension ParserUnitTests {
+    func testParseIMessageList() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseIMessageList,
+            validInputs: [
+                ("test", " ", .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test"), uidValidity: nil)), #line),
+                ("test?query", " ", .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test"), uidValidity: nil), encodedSearch: .init(query: "query")), #line),
+            ],
+            parserErrorInputs: [
+            ],
+            incompleteMessageInputs: [
+            ]
+        )
+    }
+}
+
 // MARK: - parseList
 
 extension ParserUnitTests {
