@@ -1997,6 +1997,17 @@ extension GrammarParser {
             return .init(expire: expiry, access: access)
         })
     }
+    
+    static func parseIUserInfo(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IUserInfo {
+        try composite(buffer: &buffer, tracker: tracker, { buffer, tracker -> IUserInfo in
+            let encodedUser = try optional(buffer: &buffer, tracker: tracker, parser: self.parseEncodedUser)
+            let iauth = try optional(buffer: &buffer, tracker: tracker, parser: self.parseIAuth)
+            guard (encodedUser != nil || iauth != nil) else {
+                throw ParserError(hint: "Need one of encoded user or iauth")
+            }
+            return .init(encodedUser: encodedUser, iAuth: iauth)
+        })
+    }
 
     // list            = "LIST" [SP list-select-opts] SP mailbox SP mbox-or-pat [SP list-return-opts]
     static func parseList(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Command {

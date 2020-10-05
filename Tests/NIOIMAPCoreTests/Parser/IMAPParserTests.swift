@@ -1563,6 +1563,28 @@ extension ParserUnitTests {
     
 }
 
+// MARK: - IUserInfo
+extension ParserUnitTests {
+    
+    func testParseIUserInfo() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseIUserInfo,
+            validInputs: [
+                (";AUTH=*", " ", .init(encodedUser: nil, iAuth: .any), #line),
+                ("test", " ", .init(encodedUser: .init(data: "test"), iAuth: nil), #line),
+                ("test;AUTH=*", " ", .init(encodedUser: .init(data: "test"), iAuth: .any), #line),
+            ],
+            parserErrorInputs: [
+                
+            ],
+            incompleteMessageInputs: [
+                
+            ]
+        )
+    }
+    
+}
+
 // MARK: - enable-data parseEnableData
 
 extension ParserUnitTests {
