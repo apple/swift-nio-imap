@@ -1748,6 +1748,27 @@ extension GrammarParser {
             return try parseIDParamsList(buffer: &buffer, tracker: tracker)
         }
     }
+    
+    static func parseIAuth(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IAuth {
+        
+        func parseIAuth_any(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IAuth {
+            try fixedString("*", buffer: &buffer, tracker: tracker)
+            return .any
+        }
+        
+        func parseIAuth_encoded(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IAuth {
+            let type = try self.parseEncodedAuthenticationType(buffer: &buffer, tracker: tracker)
+            return .type(type)
+        }
+        
+        return try composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
+            try fixedString(";AUTH=", buffer: &buffer, tracker: tracker)
+            return try oneOf([
+                parseIAuth_any,
+                parseIAuth_encoded,
+            ], buffer: &buffer, tracker: tracker)
+        }
+    }
 
     // id-response = "ID" SP id-params-list
     static func parseIDResponse(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [IDParameter] {

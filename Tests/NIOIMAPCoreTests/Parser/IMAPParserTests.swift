@@ -1472,6 +1472,27 @@ extension ParserUnitTests {
     }
 }
 
+// MARK: - IAuth
+extension ParserUnitTests {
+    
+    func testParseIAuth() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseIAuth,
+            validInputs: [
+                (";AUTH=*", " ", .any, #line),
+                (";AUTH=test", " ", .type(.init(authType: "test")), #line),
+            ],
+            parserErrorInputs: [
+                
+            ],
+            incompleteMessageInputs: [
+                
+            ]
+        )
+    }
+    
+}
+
 // MARK: - IUID
 extension ParserUnitTests {
     
@@ -1731,7 +1752,7 @@ extension ParserUnitTests {
         self.iterateTests(
             testFunction: GrammarParser.parseEncodedURLAuth,
             validInputs: [
-                ("0123456789abcdef01234567890abcde", "", .init(data: "0123456789abcdef01234567890abcde "), #line)
+                ("0123456789abcdef01234567890abcde", "", .init(data: "0123456789abcdef01234567890abcde"), #line)
             ], 
             parserErrorInputs: [
                 ("abcdefg", "", #line)
