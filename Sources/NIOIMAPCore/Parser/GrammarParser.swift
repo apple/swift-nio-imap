@@ -1347,6 +1347,35 @@ extension GrammarParser {
             return .fetch(sequence, att, modifiers)
         }
     }
+    
+    static func parseAccess(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Access {
+        func parseAccess_submit(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Access {
+            try fixedString("submit+", buffer: &buffer, tracker: tracker)
+            return .submit(try self.parseEncodedUser(buffer: &buffer, tracker: tracker))
+        }
+        
+        func parseAccess_user(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Access {
+            try fixedString("user+", buffer: &buffer, tracker: tracker)
+            return .user(try self.parseEncodedUser(buffer: &buffer, tracker: tracker))
+        }
+        
+        func parseAccess_authuser(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Access {
+            try fixedString("authuser", buffer: &buffer, tracker: tracker)
+            return .authUser
+        }
+        
+        func parseAccess_anonymous(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Access {
+            try fixedString("anonymous", buffer: &buffer, tracker: tracker)
+            return .anonymous
+        }
+        
+        return try oneOf([
+            parseAccess_submit,
+            parseAccess_user,
+            parseAccess_authuser,
+            parseAccess_anonymous
+        ], buffer: &buffer, tracker: tracker)
+    }
 
     fileprivate static func parseFetch_type(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [FetchAttribute] {
         func parseFetch_type_all(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [FetchAttribute] {

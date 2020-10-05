@@ -3866,6 +3866,28 @@ extension ParserUnitTests {
     }
 }
 
+// MARK: - parseAccess
+
+extension ParserUnitTests {
+    func testParseAccess() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseAccess,
+            validInputs: [
+                ("authuser", "", .authUser, #line),
+                ("anonymous", "", .anonymous, #line),
+                ("submit+abc", " ", .submit(.init(data: "abc")), #line),
+                ("user+abc", " ", .user(.init(data: "abc")), #line),
+            ],
+            parserErrorInputs: [
+                
+            ],
+            incompleteMessageInputs: [
+                
+            ]
+        )
+    }
+}
+
 // MARK: - parseBchar
 
 extension ParserUnitTests {
