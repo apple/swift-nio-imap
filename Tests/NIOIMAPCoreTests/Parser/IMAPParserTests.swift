@@ -1537,6 +1537,26 @@ extension ParserUnitTests {
     
 }
 
+// MARK: - IURLAuth
+extension ParserUnitTests {
+    
+    func testParseIURLAuth() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseIURLAuth,
+            validInputs: [
+                (";URLAUTH=anonymous:INTERNAL:01234567890123456789012345678901", " ", .init(auth: .init(access: .anonymous), verifier: .init(uAuthMechanism: .internal, encodedUrlAuth: .init(data: "01234567890123456789012345678901"))), #line),
+            ],
+            parserErrorInputs: [
+                
+            ],
+            incompleteMessageInputs: [
+                
+            ]
+        )
+    }
+    
+}
+
 // MARK: - IURLAuthRump
 extension ParserUnitTests {
     

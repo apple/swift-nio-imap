@@ -2104,6 +2104,14 @@ extension GrammarParser {
         }
     }
     
+    static func parseIURLAuth(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IUrlAuth {
+        try composite(buffer: &buffer, tracker: tracker, { buffer, tracker -> IUrlAuth in
+            let rump = try self.parseIURLAuthRump(buffer: &buffer, tracker: tracker)
+            let verifier = try self.parseIUAVerifier(buffer: &buffer, tracker: tracker)
+            return .init(auth: rump, verifier: verifier)
+        })
+    }
+    
     static func parseIURLAuthRump(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IURLAuthRump {
         try composite(buffer: &buffer, tracker: tracker, { buffer, tracker -> IURLAuthRump in
             let expiry = try optional(buffer: &buffer, tracker: tracker, parser: self.parseExpire)
