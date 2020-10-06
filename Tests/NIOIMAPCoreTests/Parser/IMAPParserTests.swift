@@ -1563,6 +1563,26 @@ extension ParserUnitTests {
     
 }
 
+// MARK: - IUAVerifier
+extension ParserUnitTests {
+    
+    func testParseIUAVerifier() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseIUAVerifier,
+            validInputs: [
+                (":INTERNAL:01234567890123456789012345678901", " ", .init(uAuthMechanism: .internal, encodedUrlAuth: .init(data: "01234567890123456789012345678901")), #line),
+            ],
+            parserErrorInputs: [
+                
+            ],
+            incompleteMessageInputs: [
+                
+            ]
+        )
+    }
+    
+}
+
 // MARK: - IUserInfo
 extension ParserUnitTests {
     

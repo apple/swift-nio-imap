@@ -2113,6 +2113,16 @@ extension GrammarParser {
         })
     }
     
+    static func parseIUAVerifier(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IUAVerifier {
+        try composite(buffer: &buffer, tracker: tracker, { buffer, tracker -> IUAVerifier in
+            try fixedString(":", buffer: &buffer, tracker: tracker)
+            let authMechanism = try self.parseUAuthMechanism(buffer: &buffer, tracker: tracker)
+            try fixedString(":", buffer: &buffer, tracker: tracker)
+            let urlAuth = try self.parseEncodedURLAuth(buffer: &buffer, tracker: tracker)
+            return .init(uAuthMechanism: authMechanism, encodedUrlAuth: urlAuth)
+        })
+    }
+    
     static func parseIUserInfo(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IUserInfo {
         try composite(buffer: &buffer, tracker: tracker, { buffer, tracker -> IUserInfo in
             let encodedUser = try optional(buffer: &buffer, tracker: tracker, parser: self.parseEncodedUser)
