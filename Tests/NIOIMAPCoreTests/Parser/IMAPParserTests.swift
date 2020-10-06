@@ -629,6 +629,46 @@ extension ParserUnitTests {
     }
 }
 
+// MARK: - parseAuthImapUrlFull
+
+extension ParserUnitTests {
+    func testParseAuthImapUrlFull() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseAuthImapUrlFull,
+            validInputs: [
+                (
+                    "imap://localhost/test/;UID=123;URLAUTH=anonymous:INTERNAL:01234567890123456789012345678901",
+                    " ",
+                    .init(imapUrl: .init(server: .init(host: "localhost"), messagePart: .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: .init(uid: 123)!)), urlAuth: .init(auth: .init(access: .anonymous), verifier: .init(uAuthMechanism: .internal, encodedUrlAuth: .init(data: "01234567890123456789012345678901")))),
+                    #line
+                ),
+            ],
+            parserErrorInputs: [],
+            incompleteMessageInputs: []
+        )
+    }
+}
+
+// MARK: - parseAuthImapUrlRump
+
+extension ParserUnitTests {
+    func testParseAuthImapUrlRump() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseAuthImapUrlRump,
+            validInputs: [
+                (
+                    "imap://localhost/test/;UID=123;URLAUTH=anonymous",
+                    " ",
+                    .init(imapUrl: .init(server: .init(host: "localhost"), messagePart: .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: .init(uid: 123)!)), authRump: .init(access: .anonymous)),
+                    #line
+                ),
+            ],
+            parserErrorInputs: [],
+            incompleteMessageInputs: []
+        )
+    }
+}
+
 // MARK: - parseBase64
 
 extension ParserUnitTests {
@@ -1496,6 +1536,28 @@ extension ParserUnitTests {
             validInputs: [
                 (";AUTH=*", " ", .any, #line),
                 (";AUTH=test", " ", .type(.init(authType: "test")), #line),
+            ],
+            parserErrorInputs: [
+                
+            ],
+            incompleteMessageInputs: [
+                
+            ]
+        )
+    }
+    
+}
+
+// MARK: - ICommand
+extension ParserUnitTests {
+    
+    func testParseICommand() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseICommand,
+            validInputs: [
+                ("test", " ", .messageList(.init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")))), #line),
+                ("test/;UID=123", " ", .messagePart(part: .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: .init(uid: 123)!), urlAuth: nil), #line),
+                ("test/;UID=123;URLAUTH=anonymous:INTERNAL:01234567890123456789012345678901", " ", .messagePart(part: .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: .init(uid: 123)!), urlAuth: .init(auth: .init(access: .anonymous), verifier: .init(uAuthMechanism: .internal, encodedUrlAuth: .init(data: "01234567890123456789012345678901")))), #line),
             ],
             parserErrorInputs: [
                 

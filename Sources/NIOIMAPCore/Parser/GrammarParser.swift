@@ -230,6 +230,22 @@ extension GrammarParser {
             return .init(server: server, messagePart: messagePart)
         })
     }
+    
+    static func parseAuthImapUrlFull(buffer: inout ByteBuffer, tracker: StackTracker) throws -> AuthImapUrlFull {
+        try composite(buffer: &buffer, tracker: tracker, { buffer, tracker -> AuthImapUrlFull in
+            let imapUrl = try self.parseAuthImapUrl(buffer: &buffer, tracker: tracker)
+            let urlAuth = try self.parseIURLAuth(buffer: &buffer, tracker: tracker)
+            return .init(imapUrl: imapUrl, urlAuth: urlAuth)
+        })
+    }
+
+    static func parseAuthImapUrlRump(buffer: inout ByteBuffer, tracker: StackTracker) throws -> AuthImapUrlRump {
+        try composite(buffer: &buffer, tracker: tracker, { buffer, tracker -> AuthImapUrlRump in
+            let imapUrl = try self.parseAuthImapUrl(buffer: &buffer, tracker: tracker)
+            let authRump = try self.parseIURLAuthRump(buffer: &buffer, tracker: tracker)
+            return .init(imapUrl: imapUrl, authRump: authRump)
+        })
+    }
 
     // authenticate    = "AUTHENTICATE" SP auth-type *(CRLF base64)
     static func parseAuthenticate(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Command {
@@ -1751,6 +1767,24 @@ extension GrammarParser {
         }
     }
 
+    static func parseICommand(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ICommand {
+        
+        func parseICommand_list(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ICommand {
+            .messageList(try self.parseIMessageList(buffer: &buffer, tracker: tracker))
+        }
+        
+        func parseICommand_part(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ICommand {
+            let part = try self.parseIMessagePart(buffer: &buffer, tracker: tracker)
+            let auth = try optional(buffer: &buffer, tracker: tracker, parser: self.parseIURLAuth)
+            return .messagePart(part: part, urlAuth: auth)
+        }
+    
+        return try oneOf([
+            parseICommand_part,
+            parseICommand_list,
+        ], buffer: &buffer, tracker: tracker)
+    }
+    
     // id = "ID" SP id-params-list
     static func parseID(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [IDParameter] {
         try composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
