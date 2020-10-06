@@ -2349,6 +2349,28 @@ extension ParserUnitTests {
     }
 }
 
+// MARK: - parseIServer
+
+extension ParserUnitTests {
+    func testParseIServer() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseIServer,
+            validInputs: [
+                ("localhost", " ", .init(userInfo: nil, host: "localhost", port: nil), #line),
+                (";AUTH=*@localhost", " ", .init(userInfo: .init(encodedUser: nil, iAuth: .any), host: "localhost", port: nil), #line),
+                ("localhost:1234", " ", .init(userInfo: nil, host: "localhost", port: 1234), #line),
+                (";AUTH=*@localhost:1234", " ", .init(userInfo: .init(encodedUser: nil, iAuth: .any), host: "localhost", port: 1234), #line),
+            ],
+            parserErrorInputs: [
+                
+            ],
+            incompleteMessageInputs: [
+                
+            ]
+        )
+    }
+}
+
 // MARK: - parseIMailboxReference
 
 extension ParserUnitTests {

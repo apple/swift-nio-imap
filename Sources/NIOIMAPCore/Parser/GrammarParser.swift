@@ -1848,6 +1848,76 @@ extension GrammarParser {
         })
     }
     
+    static func parseIServer(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IServer {
+        try composite(buffer: &buffer, tracker: tracker, { buffer, tracker -> IServer in
+            let info = try optional(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> IUserInfo in
+                let info = try self.parseIUserInfo(buffer: &buffer, tracker: tracker)
+                try fixedString("@", buffer: &buffer, tracker: tracker)
+                return info
+            })
+            let host = try self.parseHost(buffer: &buffer, tracker: tracker)
+            let port = try optional(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> Int in
+                try fixedString(":", buffer: &buffer, tracker: tracker)
+                return try self.parseNumber(buffer: &buffer, tracker: tracker)
+            })
+            return .init(userInfo: info, host: host, port: port)
+        })
+    }
+    
+    static func parseHost(buffer: inout ByteBuffer, tracker: StackTracker) throws -> String {
+     
+        // TODO: Enforce IPv6 rules RFC 3986 URI-GEN
+        func parseHost_ipv6(buffer: inout ByteBuffer, tracker: StackTracker) throws -> String {
+            try self.parseAtom(buffer: &buffer, tracker: tracker)
+        }
+        
+        // TODO: Enforce IPv6 rules RFC 3986 URI-GEN
+        func parseHost_future(buffer: inout ByteBuffer, tracker: StackTracker) throws -> String {
+            try self.parseAtom(buffer: &buffer, tracker: tracker)
+        }
+        
+        func parseHost_literal(buffer: inout ByteBuffer, tracker: StackTracker) throws -> String {
+            try fixedString("[", buffer: &buffer, tracker: tracker)
+            let address = try oneOf([
+                parseHost_ipv6,
+                parseHost_future
+            ], buffer: &buffer, tracker: tracker)
+            try fixedString("]", buffer: &buffer, tracker: tracker)
+            return address
+        }
+        
+        func parseHost_regularName(buffer: inout ByteBuffer, tracker: StackTracker) throws -> String {
+            var newBuffer = ByteBuffer()
+            while true {
+                do {
+                    let chars = try self.parseUChar(buffer: &buffer, tracker: tracker)
+                    newBuffer.writeBytes(chars)
+                } catch is ParserError {
+                    break
+                }
+            }
+            return String(buffer: newBuffer)
+        }
+        
+        // TODO: This isn't great, but it is functional. Perhaps make it actually enforce IPv4 rules
+        func parseHost_ipv4(buffer: inout ByteBuffer, tracker: StackTracker) throws -> String {
+            let num1 = try self.parseNumber(buffer: &buffer, tracker: tracker)
+            try fixedString(".", buffer: &buffer, tracker: tracker)
+            let num2 = try self.parseNumber(buffer: &buffer, tracker: tracker)
+            try fixedString(".", buffer: &buffer, tracker: tracker)
+            let num3 = try self.parseNumber(buffer: &buffer, tracker: tracker)
+            try fixedString(".", buffer: &buffer, tracker: tracker)
+            let num4 = try self.parseNumber(buffer: &buffer, tracker: tracker)
+            return "\(num1).\(num2).\(num3).\(num4)"
+        }
+        
+        return try oneOf([
+            parseHost_literal,
+            parseHost_regularName,
+            parseHost_ipv4
+        ], buffer: &buffer, tracker: tracker)
+    }
+    
     static func parseIMailboxReference(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IMailboxReference {
         try composite(buffer: &buffer, tracker: tracker, { buffer, tracker -> IMailboxReference in
             let mailbox = try self.parseEncodedMailbox(buffer: &buffer, tracker: tracker)
