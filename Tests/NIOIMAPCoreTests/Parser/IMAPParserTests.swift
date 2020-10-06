@@ -2447,6 +2447,25 @@ extension ParserUnitTests {
     }
 }
 
+// MARK: - parseIPathQuery
+
+extension ParserUnitTests {
+    func testParseIPathQuery() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseIPathQuery,
+            validInputs: [
+                ("/", " ", .init(command: nil), #line),
+                ("/test", " ", .init(command: .messageList(.init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test"))))), #line),
+            ],
+            parserErrorInputs: [
+            ],
+            incompleteMessageInputs: [
+                
+            ]
+        )
+    }
+}
+
 // MARK: - parseISection
 
 extension ParserUnitTests {

@@ -1886,6 +1886,14 @@ extension GrammarParser {
         })
     }
     
+    static func parseIPathQuery(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IPathQuery {
+        try composite(buffer: &buffer, tracker: tracker, { buffer, tracker -> IPathQuery in
+            try fixedString("/", buffer: &buffer, tracker: tracker)
+            let command = try optional(buffer: &buffer, tracker: tracker, parser: self.parseICommand)
+            return .init(command: command)
+        })
+    }
+    
     static func parseISection(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ISection {
         try composite(buffer: &buffer, tracker: tracker, { buffer, tracker -> ISection in
             try fixedString("/;SECTION=", buffer: &buffer, tracker: tracker)
