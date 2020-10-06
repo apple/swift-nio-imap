@@ -614,6 +614,21 @@ extension ParserUnitTests {
     }
 }
 
+// MARK: - parseAuthImapUrl
+
+extension ParserUnitTests {
+    func testParseAuthImapUrl() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseAuthImapUrl,
+            validInputs: [
+                ("imap://localhost/test/;UID=123", " ", .init(server: .init(host: "localhost"), messagePart: .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: .init(uid: 123)!)), #line),
+            ],
+            parserErrorInputs: [],
+            incompleteMessageInputs: []
+        )
+    }
+}
+
 // MARK: - parseBase64
 
 extension ParserUnitTests {

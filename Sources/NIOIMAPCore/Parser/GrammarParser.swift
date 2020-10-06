@@ -220,6 +220,16 @@ extension GrammarParser {
             parseAttributeFlag_unslashed,
         ], buffer: &buffer, tracker: tracker)
     }
+    
+    static func parseAuthImapUrl(buffer: inout ByteBuffer, tracker: StackTracker) throws -> AuthImapUrl {
+        try composite(buffer: &buffer, tracker: tracker, { buffer, tracker -> AuthImapUrl in
+            try fixedString("imap://", buffer: &buffer, tracker: tracker)
+            let server = try self.parseIServer(buffer: &buffer, tracker: tracker)
+            try fixedString("/", buffer: &buffer, tracker: tracker)
+            let messagePart = try self.parseIMessagePart(buffer: &buffer, tracker: tracker)
+            return .init(server: server, messagePart: messagePart)
+        })
+    }
 
     // authenticate    = "AUTHENTICATE" SP auth-type *(CRLF base64)
     static func parseAuthenticate(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Command {
