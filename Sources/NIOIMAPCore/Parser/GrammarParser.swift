@@ -4993,6 +4993,22 @@ extension GrammarParser {
             char.isTextChar
         }
     }
+    
+    static func parseUAuthMechanism(buffer: inout ByteBuffer, tracker: StackTracker) throws -> UAuthMechanism {
+        let string = try ParserLibrary.parseOneOrMoreCharacters(buffer: &buffer, tracker: tracker, where: { char in
+            switch char {
+            case UInt8(ascii: "a")...UInt8(ascii: "z"),
+                 UInt8(ascii: "A")...UInt8(ascii: "Z"),
+                 UInt8(ascii: "0")...UInt8(ascii: "9"),
+                 UInt8(ascii: "-"),
+                 UInt8(ascii: "."):
+                return true
+            default:
+                return false
+            }
+        })
+        return UAuthMechanism(rawValue: string)
+    }
 
     // uid             = "UID" SP
     //                   (copy / move / fetch / search / store / uid-expunge)

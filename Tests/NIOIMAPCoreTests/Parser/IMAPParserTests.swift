@@ -4084,6 +4084,26 @@ extension ParserUnitTests {
     }
 }
 
+// MARK: - parseUAuthMechanism
+
+extension ParserUnitTests {
+    func testParseUAuthMechanism() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseUAuthMechanism,
+            validInputs: [
+                ("INTERNAL", " ", .internal, #line),
+                ("abcdEFG0123456789", " ", .init(rawValue: "abcdEFG0123456789"), #line),
+            ],
+            parserErrorInputs: [
+                
+            ],
+            incompleteMessageInputs: [
+                
+            ]
+        )
+    }
+}
+
 // MARK: - parseUID
 
 extension ParserUnitTests {
