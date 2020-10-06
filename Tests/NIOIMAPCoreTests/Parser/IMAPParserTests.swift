@@ -1854,6 +1854,23 @@ extension ParserUnitTests {
     }
 }
 
+// MARK: - parseINetworkPath
+
+extension ParserUnitTests {
+    func testParseINetworkPath() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseINetworkPath,
+            validInputs: [
+                ("//localhost/", " ", .init(server: .init(host: "localhost"), query: .init(command: nil)), #line),
+            ],
+            parserErrorInputs: [
+                ],
+            incompleteMessageInputs: [
+                ]
+        )
+    }
+}
+
 // MARK: - parseEncodedSearch
 
 extension ParserUnitTests {
