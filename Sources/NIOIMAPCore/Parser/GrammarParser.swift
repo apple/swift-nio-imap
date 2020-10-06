@@ -1793,6 +1793,14 @@ extension GrammarParser {
         }
     }
     
+    static func parseIAbsolutePath(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IAbsolutePath {
+        try composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> IAbsolutePath in
+            try fixedString("/", buffer: &buffer, tracker: tracker)
+            let command = try optional(buffer: &buffer, tracker: tracker, parser: self.parseICommand)
+            return .init(command: command)
+        }
+    }
+    
     static func parseIAuth(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IAuth {
         
         func parseIAuth_any(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IAuth {
