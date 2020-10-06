@@ -2549,6 +2549,24 @@ extension ParserUnitTests {
     }
 }
 
+// MARK: - parseIMapUrl
+
+extension ParserUnitTests {
+    func testParseImapUrl() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseImapUrl,
+            validInputs: [
+                ("imap://localhost/", " ", .init(server: .init(host: "localhost"), query: .init(command: nil)), #line),
+            ],
+            parserErrorInputs: [
+                
+            ],
+            incompleteMessageInputs: [
+            ]
+        )
+    }
+}
+
 // MARK: - parseIMessageList
 
 extension ParserUnitTests {

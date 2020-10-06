@@ -1997,6 +1997,15 @@ extension GrammarParser {
         })
     }
     
+    static func parseImapUrl(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ImapUrl {
+        try composite(buffer: &buffer, tracker: tracker, { buffer, tracker -> ImapUrl in
+            try fixedString("imap://", buffer: &buffer, tracker: tracker)
+            let server = try self.parseIServer(buffer: &buffer, tracker: tracker)
+            let query = try self.parseIPathQuery(buffer: &buffer, tracker: tracker)
+            return .init(server: server, query: query)
+        })
+    }
+    
     static func parseIMessagePart(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IMessagePart {
         try composite(buffer: &buffer, tracker: tracker, { buffer, tracker -> IMessagePart in
             var ref = try self.parseIMailboxReference(buffer: &buffer, tracker: tracker)
