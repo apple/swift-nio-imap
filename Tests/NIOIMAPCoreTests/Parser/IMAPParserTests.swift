@@ -2605,6 +2605,27 @@ extension ParserUnitTests {
     }
 }
 
+// MARK: - parseIMapUrlRel
+
+extension ParserUnitTests {
+    func testParseImapUrlRel() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseImapUrlRel,
+            validInputs: [
+                ("/test", " ", .absolutePath(.init(command: .messageList(.init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")))))), #line),
+                ("//localhost/", " ", .networkPath(.init(server: .init(host: "localhost"), query: .init(command: nil))), #line),
+                ("test", " ", .relativePath(.list(.init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test"))))), #line),
+                ("", " ", .empty, #line),
+            ],
+            parserErrorInputs: [
+                
+            ],
+            incompleteMessageInputs: [
+            ]
+        )
+    }
+}
+
 // MARK: - parseIMessageList
 
 extension ParserUnitTests {

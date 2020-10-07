@@ -2015,6 +2015,32 @@ extension GrammarParser {
         })
     }
     
+    static func parseImapUrlRel(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ImapUrlRel {
+        
+        func parseImapUrlRef_absolute(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ImapUrlRel {
+            .absolutePath(try self.parseIAbsolutePath(buffer: &buffer, tracker: tracker))
+        }
+        
+        func parseImapUrlRef_network(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ImapUrlRel {
+            .networkPath(try self.parseINetworkPath(buffer: &buffer, tracker: tracker))
+        }
+        
+        func parseImapUrlRef_relative(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ImapUrlRel {
+            .relativePath(try self.parseIRelativePath(buffer: &buffer, tracker: tracker))
+        }
+        
+        func parseImapUrlRef_empty(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ImapUrlRel {
+            .empty
+        }
+        
+        return try oneOf([
+            parseImapUrlRef_network,
+            parseImapUrlRef_absolute,
+            parseImapUrlRef_relative,
+            parseImapUrlRef_empty
+        ], buffer: &buffer, tracker: tracker)
+    }
+    
     static func parseIRelativePath(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IRelativePath {
      
         func parseIRelativePath_list(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IRelativePath {
