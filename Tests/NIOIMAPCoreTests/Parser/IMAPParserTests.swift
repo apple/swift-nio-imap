@@ -2602,6 +2602,88 @@ extension ParserUnitTests {
     }
 }
 
+// MARK: - parseIMessageOrPart
+
+extension ParserUnitTests {
+    func testParseIMessageOrPartial() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseIMessageOrPartial,
+            validInputs: [
+                (
+                    ";PARTIAL=1.2",
+                    " ",
+                    .partialOnly(.init(range: .init(offset: 1, length: 2))),
+                    #line
+                ),
+                (
+                    ";SECTION=test",
+                    " ",
+                    .sectionPartial(section: .init(encodedSection: .init(section: "test")), partial: nil),
+                    #line
+                ),
+                (
+                    ";SECTION=test/;PARTIAL=1.2",
+                    " ",
+                    .sectionPartial(section: .init(encodedSection: .init(section: "test")), partial: .init(range: .init(offset: 1, length: 2))),
+                    #line
+                ),
+                (
+                    ";UID=123",
+                    " ",
+                    .uidSectionPartial(uid: .init(uid: 123)!, section: nil, partial: nil),
+                    #line
+                ),
+                (
+                    ";UID=123/;SECTION=test",
+                    " ",
+                    .uidSectionPartial(uid: .init(uid: 123)!, section: .init(encodedSection: .init(section: "test")), partial: nil),
+                    #line
+                ),
+                (
+                    ";UID=123/;PARTIAL=1.2",
+                    " ",
+                    .uidSectionPartial(uid: .init(uid: 123)!, section: nil, partial: .init(range: .init(offset: 1, length: 2))),
+                    #line
+                ),
+                (
+                    ";UID=123/;SECTION=test/;PARTIAL=1.2",
+                    " ",
+                    .uidSectionPartial(uid: .init(uid: 123)!, section: .init(encodedSection: .init(section: "test")), partial: .init(range: .init(offset: 1, length: 2))),
+                    #line
+                ),
+                (
+                    "test;UID=123",
+                    " ",
+                    .refUidSectionPartial(ref: .init(encodeMailbox: .init(mailbox: "test")), uid: .init(uid: 123)!, section: nil, partial: nil),
+                    #line
+                ),
+                (
+                    "test;UID=123/;SECTION=section",
+                    " ",
+                    .refUidSectionPartial(ref: .init(encodeMailbox: .init(mailbox: "test")), uid: .init(uid: 123)!, section: .init(encodedSection: .init(section: "section")), partial: nil),
+                    #line
+                ),
+                (
+                    "test;UID=123/;PARTIAL=1.2",
+                    " ",
+                    .refUidSectionPartial(ref: .init(encodeMailbox: .init(mailbox: "test")), uid: .init(uid: 123)!, section: nil, partial: .init(range: .init(offset: 1, length: 2))),
+                    #line
+                ),
+                (
+                    "test;UID=123/;SECTION=section/;PARTIAL=1.2",
+                    " ",
+                    .refUidSectionPartial(ref: .init(encodeMailbox: .init(mailbox: "test")), uid: .init(uid: 123)!, section: .init(encodedSection: .init(section: "section")), partial: .init(range: .init(offset: 1, length: 2))),
+                    #line
+                ),
+            ],
+            parserErrorInputs: [
+            ],
+            incompleteMessageInputs: [
+            ]
+        )
+    }
+}
+
 // MARK: - parseIMessagePart
 
 extension ParserUnitTests {

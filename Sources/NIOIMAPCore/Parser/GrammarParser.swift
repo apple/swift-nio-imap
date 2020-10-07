@@ -2049,6 +2049,87 @@ extension GrammarParser {
         })
     }
     
+    static func parseIMessageOrPartial(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IMessageOrPartial {
+        
+        func parseIMessageOrPartial_partialOnly(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IMessageOrPartial {
+            let partial = try self.parseIPartialOnly(buffer: &buffer, tracker: tracker)
+            return .partialOnly(partial)
+        }
+        
+        func parseIMessageOrPartial_sectionPartial(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IMessageOrPartial {
+            var section = try self.parseISectionOnly(buffer: &buffer, tracker: tracker)
+            if section.encodedSection.section.last == Character(.init(UInt8(ascii: "/"))) {
+                section.encodedSection.section = String(section.encodedSection.section.dropLast())
+                do {
+                    let partial = try optional(buffer: &buffer, tracker: tracker, parser: self.parseIPartialOnly)
+                    return .sectionPartial(section: section, partial: partial)
+                } catch is ParserError {
+                    section.encodedSection.section.append("/")
+                    return .sectionPartial(section: section, partial: nil)
+                }
+            }
+            let partial = try optional(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> IPartialOnly in
+                try fixedString("/", buffer: &buffer, tracker: tracker)
+                return try self.parseIPartialOnly(buffer: &buffer, tracker: tracker)
+            })
+            return .sectionPartial(section: section, partial: partial)
+        }
+        
+        func parseIMessageOrPartial_uidSectionPartial(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IMessageOrPartial {
+            let uid = try self.parseIUIDOnly(buffer: &buffer, tracker: tracker)
+            var section = try optional(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> ISectionOnly in
+                try fixedString("/", buffer: &buffer, tracker: tracker)
+                return try self.parseISectionOnly(buffer: &buffer, tracker: tracker)
+            })
+            if section?.encodedSection.section.last == Character(.init(UInt8(ascii: "/"))) {
+                section!.encodedSection.section = String(section!.encodedSection.section.dropLast())
+                do {
+                    let partial = try optional(buffer: &buffer, tracker: tracker, parser: self.parseIPartialOnly)
+                    return .uidSectionPartial(uid: uid, section: section, partial: partial)
+                } catch is ParserError {
+                    section?.encodedSection.section.append("/")
+                    return .uidSectionPartial(uid: uid, section: section, partial: nil)
+                }
+            }
+            let partial = try optional(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> IPartialOnly in
+                try fixedString("/", buffer: &buffer, tracker: tracker)
+                return try self.parseIPartialOnly(buffer: &buffer, tracker: tracker)
+            })
+            return .uidSectionPartial(uid: uid, section: section, partial: partial)
+        }
+        
+        func parseIMessageOrPartial_refUidSectionPartial(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IMessageOrPartial {
+            let ref = try self.parseIMailboxReference(buffer: &buffer, tracker: tracker)
+            let uid = try self.parseIUIDOnly(buffer: &buffer, tracker: tracker)
+            var section = try optional(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> ISectionOnly in
+                try fixedString("/", buffer: &buffer, tracker: tracker)
+                return try self.parseISectionOnly(buffer: &buffer, tracker: tracker)
+            })
+            if section?.encodedSection.section.last == Character(.init(UInt8(ascii: "/"))) {
+                section!.encodedSection.section = String(section!.encodedSection.section.dropLast())
+                do {
+                    let partial = try optional(buffer: &buffer, tracker: tracker, parser: self.parseIPartialOnly)
+                    return .refUidSectionPartial(ref: ref, uid: uid, section: section, partial: partial)
+                } catch is ParserError {
+                    section?.encodedSection.section.append("/")
+                    return .refUidSectionPartial(ref: ref, uid: uid, section: section, partial: nil)
+                }
+            }
+            let partial = try optional(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> IPartialOnly in
+                try fixedString("/", buffer: &buffer, tracker: tracker)
+                return try self.parseIPartialOnly(buffer: &buffer, tracker: tracker)
+            })
+            return .refUidSectionPartial(ref: ref, uid: uid, section: section, partial: partial)
+        }
+        
+        return try oneOf([
+            parseIMessageOrPartial_refUidSectionPartial,
+            parseIMessageOrPartial_uidSectionPartial,
+            parseIMessageOrPartial_sectionPartial,
+            parseIMessageOrPartial_partialOnly,
+        ], buffer: &buffer, tracker: tracker)
+    }
+    
     static func parseUChar(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [UInt8] {
         
         func parseUChar_unreserved(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [UInt8] {

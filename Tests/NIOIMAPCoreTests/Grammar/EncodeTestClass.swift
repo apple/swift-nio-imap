@@ -44,7 +44,7 @@ class EncodeTestClass: XCTestCase {
         self.testBuffer = nil
     }
 
-    func iterateInputs<T>(inputs: [(T, String, UInt)], encoder: (T) throws -> Int, file: StaticString = (#file)) {
+    func iterateInputs<T>(inputs: [(T, String, UInt)], encoder: (T) throws -> Int, file: StaticString = #file) {
         self.iterateInputs(inputs: inputs.map { ($0.0, ResponseEncodingOptions(), $0.1, $0.2) }, encoder: encoder, file: file)
     }
 
@@ -61,7 +61,7 @@ class EncodeTestClass: XCTestCase {
         }
     }
 
-    func iterateCommandInputs<T>(inputs: [(T, CommandEncodingOptions, [String], UInt)], encoder: (T) throws -> Int, file: StaticString = (#file)) {
+    func iterateCommandInputs<T>(inputs: [(T, CommandEncodingOptions, [String], UInt)], encoder: (T) throws -> Int, file: StaticString = #file) {
         for (test, options, expectedStrings, line) in inputs {
             do {
                 self.testBuffer.mode = .client(options: options)
@@ -74,7 +74,7 @@ class EncodeTestClass: XCTestCase {
         }
     }
 
-    func iterateInputs<T>(inputs: [(T, ResponseEncodingOptions, String, UInt)], encoder: (T) throws -> Int, file: StaticString = (#file)) {
+    func iterateInputs<T>(inputs: [(T, ResponseEncodingOptions, String, UInt)], encoder: (T) throws -> Int, file: StaticString = #file) {
         for (test, options, expectedString, line) in inputs {
             self.testBuffer = EncodeBuffer.serverEncodeBuffer(buffer: ByteBufferAllocator().buffer(capacity: 128), options: options)
             do {
