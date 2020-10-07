@@ -24,7 +24,7 @@ extension IMailboxReference_Tests {
     func testEncode() {
         let inputs: [(IMailboxReference, String, UInt)] = [
             (.init(encodeMailbox: .init(mailbox: "mailbox"), uidValidity: nil), "mailbox", #line),
-            (.init(encodeMailbox: .init(mailbox: "mailbox"), uidValidity: .init(uid: 123)!), "mailbox;UIDVALIDITY=123", #line),
+            (.init(encodeMailbox: .init(mailbox: "mailbox"), uidValidity: try! .init(uid: 123)), "mailbox;UIDVALIDITY=123", #line),
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeIMailboxReference($0) })
     }

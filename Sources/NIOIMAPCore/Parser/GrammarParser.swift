@@ -2050,7 +2050,7 @@ extension GrammarParser {
         try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> IMessagePart in
             var ref = try self.parseIMailboxReference(buffer: &buffer, tracker: tracker)
 
-            var uid: IUID = IUID(uid: 1)!
+            var uid = try IUID(uid: 1)
             if ref.uidValidity == nil, ref.encodedMailbox.mailbox.last == Character(.init(UInt8(ascii: "/"))) {
                 try composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
                     ref.encodedMailbox.mailbox = String(ref.encodedMailbox.mailbox.dropLast())
@@ -2208,20 +2208,6 @@ extension GrammarParser {
             guard (h2 >= 48 && h2 <= 57) || (h2 >= 65 && h2 <= 70) else {
                 throw ParserError(hint: "Expected hex digit, got \(_h2)")
             }
-
-//            if (UInt8(ascii: "0")...UInt8(ascii: "9")).contains(h1) {
-//                h1 -= 48
-//            } else {
-//                h1 -= 55
-//            }
-//
-//            if (UInt8(ascii: "0")...UInt8(ascii: "9")).contains(h2) {
-//                h2 -= 48
-//            } else {
-//                h2 -= 55
-//            }
-
-//            let result = (h1 << 4) | (h2 & 0xFF)
             return [UInt8(ascii: "%"), h1, h2]
         }
 
@@ -2273,10 +2259,7 @@ extension GrammarParser {
     static func parseIUID(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IUID {
         try composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             try fixedString("/;UID=", buffer: &buffer, tracker: tracker)
-            guard let uid = IUID(uid: try self.parseNZNumber(buffer: &buffer, tracker: tracker)) else {
-                throw ParserError(hint: "UID Must be > 0")
-            }
-            return uid
+            return try IUID(uid: try self.parseNZNumber(buffer: &buffer, tracker: tracker))
         }
     }
 
@@ -5329,10 +5312,7 @@ extension GrammarParser {
         try composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             try fixedString(";UIDVALIDITY=", buffer: &buffer, tracker: tracker)
             let num = try self.parseNZNumber(buffer: &buffer, tracker: tracker)
-            guard let uid = UIDValidity(uid: num) else {
-                throw ParserError(hint: "\(num) is not a valid UID")
-            }
-            return uid
+            return try UIDValidity(uid: num)
         }
     }
 

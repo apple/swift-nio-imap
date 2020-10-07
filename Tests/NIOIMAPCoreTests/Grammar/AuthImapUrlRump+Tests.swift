@@ -24,7 +24,7 @@ extension AuthIMAPURLRump_Tests {
     func testEncoding() {
         let inputs: [(AuthIMAPURLRump, String, UInt)] = [
             (
-                .init(imapUrl: .init(server: .init(host: "localhost"), messagePart: .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: .init(uid: 123)!)), authRump: .init(access: .anonymous)),
+                .init(imapUrl: .init(server: .init(host: "localhost"), messagePart: .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: try! .init(uid: 123))), authRump: .init(access: .anonymous)),
                 "imap://localhost/test/;UID=123;URLAUTH=anonymous",
                 #line
             ),

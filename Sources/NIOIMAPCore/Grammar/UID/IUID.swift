@@ -12,13 +12,17 @@
 //
 //===----------------------------------------------------------------------===//
 
+public struct InvalidUID: Error {
+    
+}
+
 /// RFC 5092 IMAP URL
 public struct IUID: Equatable {
     public var uid: Int
 
-    public init?(uid: Int) {
+    public init(uid: Int) throws {
         guard uid > 0 else {
-            return nil
+            throw InvalidUID()
         }
         self.uid = uid
     }

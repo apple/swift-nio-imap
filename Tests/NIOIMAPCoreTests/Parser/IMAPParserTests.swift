@@ -43,7 +43,7 @@ extension ParserUnitTests {
         for (input, terminator, line) in inputs {
             TestUtilities.withBuffer(input, terminator: terminator, shouldRemainUnchanged: true, file: (#file), line: line) { (buffer) in
                 XCTAssertThrowsError(try testFunction(&buffer, .testTracker), line: line) { e in
-                    XCTAssertTrue(e is ParserError, "Expected ParserError, got \(e)")
+                    XCTAssertTrue(e is ParserError, "Expected ParserError, got \(e)", line: line)
                 }
             }
         }
@@ -621,7 +621,7 @@ extension ParserUnitTests {
         self.iterateTests(
             testFunction: GrammarParser.parseAuthIMAPURL,
             validInputs: [
-                ("imap://localhost/test/;UID=123", " ", .init(server: .init(host: "localhost"), messagePart: .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: .init(uid: 123)!)), #line),
+                ("imap://localhost/test/;UID=123", " ", .init(server: .init(host: "localhost"), messagePart: .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: try! .init(uid: 123))), #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
@@ -639,7 +639,7 @@ extension ParserUnitTests {
                 (
                     "imap://localhost/test/;UID=123;URLAUTH=anonymous:INTERNAL:01234567890123456789012345678901",
                     " ",
-                    .init(imapUrl: .init(server: .init(host: "localhost"), messagePart: .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: .init(uid: 123)!)), urlAuth: .init(auth: .init(access: .anonymous), verifier: .init(uAuthMechanism: .internal, encodedUrlAuth: .init(data: "01234567890123456789012345678901")))),
+                    .init(imapUrl: .init(server: .init(host: "localhost"), messagePart: .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: try! .init(uid: 123))), urlAuth: .init(auth: .init(access: .anonymous), verifier: .init(uAuthMechanism: .internal, encodedUrlAuth: .init(data: "01234567890123456789012345678901")))),
                     #line
                 ),
             ],
@@ -659,7 +659,7 @@ extension ParserUnitTests {
                 (
                     "imap://localhost/test/;UID=123;URLAUTH=anonymous",
                     " ",
-                    .init(imapUrl: .init(server: .init(host: "localhost"), messagePart: .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: .init(uid: 123)!)), authRump: .init(access: .anonymous)),
+                    .init(imapUrl: .init(server: .init(host: "localhost"), messagePart: .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: try! .init(uid: 123))), authRump: .init(access: .anonymous)),
                     #line
                 ),
             ],
@@ -1589,8 +1589,8 @@ extension ParserUnitTests {
             testFunction: GrammarParser.parseICommand,
             validInputs: [
                 ("test", " ", .messageList(.init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")))), #line),
-                ("test/;UID=123", " ", .messagePart(part: .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: .init(uid: 123)!), urlAuth: nil), #line),
-                ("test/;UID=123;URLAUTH=anonymous:INTERNAL:01234567890123456789012345678901", " ", .messagePart(part: .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: .init(uid: 123)!), urlAuth: .init(auth: .init(access: .anonymous), verifier: .init(uAuthMechanism: .internal, encodedUrlAuth: .init(data: "01234567890123456789012345678901")))), #line),
+                ("test/;UID=123", " ", .messagePart(part: .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: try! .init(uid: 123)), urlAuth: nil), #line),
+                ("test/;UID=123;URLAUTH=anonymous:INTERNAL:01234567890123456789012345678901", " ", .messagePart(part: .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: try! .init(uid: 123)), urlAuth: .init(auth: .init(access: .anonymous), verifier: .init(uAuthMechanism: .internal, encodedUrlAuth: .init(data: "01234567890123456789012345678901")))), #line),
             ],
             parserErrorInputs: [
                 ],
@@ -1607,9 +1607,9 @@ extension ParserUnitTests {
         self.iterateTests(
             testFunction: GrammarParser.parseIUID,
             validInputs: [
-                ("/;UID=1", " ", .init(uid: 1)!, #line),
-                ("/;UID=12", " ", .init(uid: 12)!, #line),
-                ("/;UID=123", " ", .init(uid: 123)!, #line),
+                ("/;UID=1", " ", try! .init(uid: 1), #line),
+                ("/;UID=12", " ", try! .init(uid: 12), #line),
+                ("/;UID=123", " ", try! .init(uid: 123), #line),
             ],
             parserErrorInputs: [
                 ("a", " ", #line),
@@ -1927,7 +1927,7 @@ extension ParserUnitTests {
                 ("0123456789abcdef01234567890abcde", "", .init(data: "0123456789abcdef01234567890abcde"), #line),
             ],
             parserErrorInputs: [
-                ("abcdefg", "", #line),
+                ("0123456789zbcdef01234567890abcde", "", #line),
             ],
             incompleteMessageInputs: [
                 ("0123456789", "", #line),
@@ -2543,7 +2543,7 @@ extension ParserUnitTests {
             testFunction: GrammarParser.parseIMailboxReference,
             validInputs: [
                 ("abc", " ", .init(encodeMailbox: .init(mailbox: "abc"), uidValidity: nil), #line),
-                ("abc;UIDVALIDITY=123", " ", .init(encodeMailbox: .init(mailbox: "abc"), uidValidity: .init(uid: 123)!), #line),
+                ("abc;UIDVALIDITY=123", " ", .init(encodeMailbox: .init(mailbox: "abc"), uidValidity: try! .init(uid: 123)), #line),
             ],
             parserErrorInputs: [
                 ("¢", " ", #line),
@@ -2703,31 +2703,31 @@ extension ParserUnitTests {
                 (
                     "test/;UID=123",
                     " ",
-                    .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: .init(uid: 123)!, iSection: nil, iPartial: nil),
+                    .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: try! .init(uid: 123), iSection: nil, iPartial: nil),
                     #line
                 ),
                 (
                     "test/;UID=123/;SECTION=section",
                     " ",
-                    .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: .init(uid: 123)!, iSection: .init(encodedSection: .init(section: "section")), iPartial: nil),
+                    .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: try! .init(uid: 123), iSection: .init(encodedSection: .init(section: "section")), iPartial: nil),
                     #line
                 ),
                 (
                     "test/;UID=123/;PARTIAL=1.2",
                     " ",
-                    .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: .init(uid: 123)!, iSection: nil, iPartial: .init(range: .init(offset: 1, length: 2))),
+                    .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: try! .init(uid: 123), iSection: nil, iPartial: .init(range: .init(offset: 1, length: 2))),
                     #line
                 ),
                 (
                     "test/;UID=123/;SECTION=section/;PARTIAL=1.2",
                     " ",
-                    .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: .init(uid: 123)!, iSection: .init(encodedSection: .init(section: "section")), iPartial: .init(range: .init(offset: 1, length: 2))),
+                    .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: try! .init(uid: 123), iSection: .init(encodedSection: .init(section: "section")), iPartial: .init(range: .init(offset: 1, length: 2))),
                     #line
                 ),
                 (
                     "test/;UIDVALIDITY=123/;UID=123/;SECTION=section/;PARTIAL=1.2",
                     " ",
-                    .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test/"), uidValidity: .init(uid: 123)!), iUID: .init(uid: 123)!, iSection: .init(encodedSection: .init(section: "section")), iPartial: .init(range: .init(offset: 1, length: 2))),
+                    .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test/"), uidValidity: try! .init(uid: 123)), iUID: try! .init(uid: 123), iSection: .init(encodedSection: .init(section: "section")), iPartial: .init(range: .init(offset: 1, length: 2))),
                     #line
                 ),
             ],
@@ -4413,9 +4413,9 @@ extension ParserUnitTests {
         self.iterateTests(
             testFunction: GrammarParser.parseUIDValidity,
             validInputs: [
-                (";UIDVALIDITY=1", " ", .init(uid: 1)!, #line),
-                (";UIDVALIDITY=12", " ", .init(uid: 12)!, #line),
-                (";UIDVALIDITY=123", " ", .init(uid: 123)!, #line),
+                (";UIDVALIDITY=1", " ", try! .init(uid: 1), #line),
+                (";UIDVALIDITY=12", " ", try! .init(uid: 12), #line),
+                (";UIDVALIDITY=123", " ", try! .init(uid: 123), #line),
             ],
             parserErrorInputs: [
                 ("0", " ", #line),
