@@ -30,9 +30,9 @@ public struct IUID: Equatable {
 public struct IUIDOnly: Equatable {
     public var uid: Int
 
-    public init?(uid: Int) {
+    public init(uid: Int) throws {
         guard uid > 0 else {
-            return nil
+            throw InvalidUID() 
         }
         self.uid = uid
     }
