@@ -18,7 +18,7 @@ public struct IUserInfo: Equatable {
     public var iAuth: IAuth?
 
     public init(encodedUser: EncodedUser?, iAuth: IAuth?) {
-        assert(encodedUser != nil || iAuth != nil, "Need one of `encodedUser` or `iAuth`")
+        precondition(encodedUser != nil || iAuth != nil, "Need one of `encodedUser` or `iAuth`")
         self.encodedUser = encodedUser
         self.iAuth = iAuth
     }

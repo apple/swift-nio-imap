@@ -2186,28 +2186,24 @@ extension GrammarParser {
         func parseUChar_pctEncoded(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [UInt8] {
             try fixedString("%", buffer: &buffer, tracker: tracker)
             guard
-                let _h1 = buffer.readInteger(as: UInt8.self),
-                let _h2 = buffer.readInteger(as: UInt8.self)
+                var h1 = buffer.readInteger(as: UInt8.self),
+                var h2 = buffer.readInteger(as: UInt8.self)
             else {
                 throw _IncompleteMessage()
             }
 
-            var h1 = _h1
-            var h2 = _h2
-            if h1 > 70 {
-                h1 -= 70
+            guard h1.isHexCharacter, h2.isHexCharacter else {
+                throw ParserError(hint: "Expected 2 hex digits, got \(h1) and \(h2)")
             }
-            if h2 > 70 {
-                h2 -= 70
+            
+            
+            if h1 > UInt8(ascii: "F") {
+                h1 -= 32
             }
-
-            guard (h1 >= 48 && h1 <= 57) || (h1 >= 65 && h1 <= 70) else {
-                throw ParserError(hint: "Expected hex digit, got \(_h1)")
+            if h2 > UInt8(ascii: "F") {
+                h2 -= 32
             }
-
-            guard (h2 >= 48 && h2 <= 57) || (h2 >= 65 && h2 <= 70) else {
-                throw ParserError(hint: "Expected hex digit, got \(_h2)")
-            }
+            
             return [UInt8(ascii: "%"), h1, h2]
         }
 
