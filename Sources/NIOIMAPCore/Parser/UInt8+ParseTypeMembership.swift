@@ -125,7 +125,7 @@ extension UInt8 {
     }
 
     var isNum: Bool {
-        (UInt8(ascii: "0")...UInt8(ascii: "9")).contains(self)
+        (UInt8(ascii: "0") ... UInt8(ascii: "9")).contains(self)
     }
 
     /// tagged-label-fchar  = ALPHA / "-" / "_" / "."
@@ -187,7 +187,7 @@ extension UInt8 {
 
     var isHexCharacter: Bool {
         switch self {
-        case UInt8(ascii: "0") ... UInt8(ascii: "9"), UInt8(ascii: "a") ... UInt8(ascii: "f"), UInt8(ascii: "A")...UInt8(ascii: "F"):
+        case UInt8(ascii: "0") ... UInt8(ascii: "9"), UInt8(ascii: "a") ... UInt8(ascii: "f"), UInt8(ascii: "A") ... UInt8(ascii: "F"):
             return true
         default:
             return false

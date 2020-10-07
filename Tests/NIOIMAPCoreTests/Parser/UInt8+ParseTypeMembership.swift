@@ -107,10 +107,10 @@ extension UInt8ParseTypeMembershipTests {
 extension UInt8ParseTypeMembershipTests {
     func testHexCharacter() {
         var valid = Set<UInt8>()
-        valid = valid.union( UInt8(ascii: "0")...UInt8(ascii: "9") )
-        valid = valid.union( UInt8(ascii: "a")...UInt8(ascii: "f") )
-        valid = valid.union( UInt8(ascii: "A")...UInt8(ascii: "F") )
-        
+        valid = valid.union(UInt8(ascii: "0") ... UInt8(ascii: "9"))
+        valid = valid.union(UInt8(ascii: "a") ... UInt8(ascii: "f"))
+        valid = valid.union(UInt8(ascii: "A") ... UInt8(ascii: "F"))
+
         let invalid = self.allChars.subtracting(valid)
         XCTAssertTrue(valid.allSatisfy { $0.isHexCharacter })
         XCTAssertTrue(invalid.allSatisfy { !$0.isHexCharacter })

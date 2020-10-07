@@ -12,9 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-public struct InvalidUID: Error {
-    
-}
+public struct InvalidUID: Error {}
 
 /// RFC 5092 IMAP URL
 public struct IUID: Equatable {

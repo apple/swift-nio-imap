@@ -39,6 +39,11 @@ public struct FullTime: Equatable {
     public var hour: Int
     public var minute: Int
     public var second: Int
+
+    /// This is a partially-dynamic field, and does not directly represent
+    /// milliseconds, microseconds, etc. The number you provide is the number
+    /// that will be written. E.g. `123` will write `HH:mm:ss.123`, and `1234`
+    /// will write `HH:mm:ss.1234`.
     public var fraction: Int?
 
     public init(hour: Int, minute: Int, second: Int, fraction: Int? = nil) {

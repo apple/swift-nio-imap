@@ -1173,7 +1173,7 @@ extension GrammarParser {
                 throw _IncompleteMessage()
             }
             guard bytes.readableBytesView.allSatisfy({ $0.isHexCharacter }) else {
-                throw ParserError(hint: "Found invalid character in \(String(buffer: bytes) )")
+                throw ParserError(hint: "Found invalid character in \(String(buffer: bytes))")
             }
             return .init(data: String(buffer: bytes))
         }
@@ -2195,15 +2195,14 @@ extension GrammarParser {
             guard h1.isHexCharacter, h2.isHexCharacter else {
                 throw ParserError(hint: "Expected 2 hex digits, got \(h1) and \(h2)")
             }
-            
-            
+
             if h1 > UInt8(ascii: "F") {
                 h1 -= 32
             }
             if h2 > UInt8(ascii: "F") {
                 h2 -= 32
             }
-            
+
             return [UInt8(ascii: "%"), h1, h2]
         }
 
