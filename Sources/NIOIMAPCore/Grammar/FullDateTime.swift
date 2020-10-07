@@ -29,6 +29,8 @@ public struct FullDate: Equatable {
     public var day: Int
 
     public init(year: Int, month: Int, day: Int) {
+        precondition(month > 0 && month < 13, "\(month) is not a valid month")
+        precondition(day > 0 && day < 32, "\(day) is not a valid day")
         self.year = year
         self.month = month
         self.day = day
