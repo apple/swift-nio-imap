@@ -21,14 +21,14 @@ class IMAPRangeTests: EncodeTestClass {}
 // MARK: - IMAP
 
 extension IMAPRangeTests {
-    func testImapEncoded_from() {
+    func testIMAPEncoded_from() {
         let expected = "5:*"
         let size = self.testBuffer.writeSequenceRange(SequenceRange(5...))
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }
 
-    func testImapEncoded_range() {
+    func testIMAPEncoded_range() {
         let expected = "2:4"
         let size = self.testBuffer.writeSequenceRange(SequenceRange(2 ... 4))
         XCTAssertEqual(size, expected.utf8.count)

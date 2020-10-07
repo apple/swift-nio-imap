@@ -16,19 +16,19 @@ import NIO
 @testable import NIOIMAPCore
 import XCTest
 
-class AuthImapUrl_Tests: EncodeTestClass {}
+class AuthIMAPURL_Tests: EncodeTestClass {}
 
 // MARK: - Encoding
 
-extension AuthImapUrl_Tests {
+extension AuthIMAPURL_Tests {
     func testEncoding() {
-        let inputs: [(AuthImapUrl, String, UInt)] = [
+        let inputs: [(AuthIMAPURL, String, UInt)] = [
             (
                 .init(server: .init(host: "localhost"), messagePart: .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: .init(uid: 123)!)),
                 "imap://localhost/test/;UID=123",
                 #line
             ),
         ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeAuthImapUrl($0) })
+        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeAuthIMAPURL($0) })
     }
 }

@@ -13,7 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 /// RFC 5092
-public enum ImapUrlRel: Equatable {
+public enum RelativeIMAPURL: Equatable {
     case networkPath(INetworkPath)
     case absolutePath(IAbsolutePath)
     case relativePath(IRelativePath)
@@ -23,7 +23,7 @@ public enum ImapUrlRel: Equatable {
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeImapUrlRel(_ url: ImapUrlRel) -> Int {
+    @discardableResult mutating func writeRelativeIMAPURL(_ url: RelativeIMAPURL) -> Int {
         switch url {
         case .networkPath(let path):
             return self.writeINetworkPath(path)

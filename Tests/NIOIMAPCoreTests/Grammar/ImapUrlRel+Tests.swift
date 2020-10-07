@@ -16,18 +16,18 @@ import NIO
 @testable import NIOIMAPCore
 import XCTest
 
-class ImapUrlRel_Tests: EncodeTestClass {}
+class RelativeIMAPURL_Tests: EncodeTestClass {}
 
 // MARK: - IMAP
 
-extension ImapUrlRel_Tests {
+extension RelativeIMAPURL_Tests {
     func testEncode() {
-        let inputs: [(ImapUrlRel, String, UInt)] = [
+        let inputs: [(RelativeIMAPURL, String, UInt)] = [
             (.absolutePath(.init(command: .messageList(.init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")))))), "/test", #line),
             (.networkPath(.init(server: .init(host: "localhost"), query: .init(command: nil))), "//localhost/", #line),
             (.relativePath(.list(.init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test"))))), "test", #line),
             (.empty, "", #line),
         ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeImapUrlRel($0) })
+        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeRelativeIMAPURL($0) })
     }
 }

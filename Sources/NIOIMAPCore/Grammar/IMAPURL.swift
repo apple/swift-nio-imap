@@ -12,24 +12,23 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// RFC 5092
-public struct AuthImapUrlFull: Equatable {
-    public var imapUrl: AuthImapUrl
-    public var urlAuth: IUrlAuth
+public struct IMAPURL: Equatable {
+    public var server: IServer
+    public var query: IPathQuery
 
-    public init(imapUrl: AuthImapUrl, urlAuth: IUrlAuth) {
-        self.imapUrl = imapUrl
-        self.urlAuth = urlAuth
+    public init(server: IServer, query: IPathQuery) {
+        self.server = server
+        self.query = query
     }
 }
 
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeAuthImapUrlFull(_ data: AuthImapUrlFull) -> Int {
-        self.writeAuthImapUrl(data.imapUrl) +
-            self.writeIUrlAuth(data.urlAuth)
+    @discardableResult mutating func writeIMAPURL(_ url: IMAPURL) -> Int {
+        self.writeString("imap://") +
+            self.writeIServer(url.server) +
+            self.writeIPathQuery(url.query)
     }
 }

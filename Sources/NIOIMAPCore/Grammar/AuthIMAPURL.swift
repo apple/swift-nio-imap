@@ -15,7 +15,7 @@
 import struct NIO.ByteBuffer
 
 /// RFC 5092
-public struct AuthImapUrl: Equatable {
+public struct AuthIMAPURL: Equatable {
     public var server: IServer
     public var messagePart: IMessagePart
 
@@ -28,7 +28,7 @@ public struct AuthImapUrl: Equatable {
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeAuthImapUrl(_ data: AuthImapUrl) -> Int {
+    @discardableResult mutating func writeAuthIMAPURL(_ data: AuthIMAPURL) -> Int {
         self.writeString("imap://") +
             self.writeIServer(data.server) +
             self.writeString("/") +

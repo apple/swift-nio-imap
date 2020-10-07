@@ -614,12 +614,12 @@ extension ParserUnitTests {
     }
 }
 
-// MARK: - parseAuthImapUrl
+// MARK: - parseAuthIMAPUrl
 
 extension ParserUnitTests {
-    func testParseAuthImapUrl() {
+    func testParseAuthIMAPUrl() {
         self.iterateTests(
-            testFunction: GrammarParser.parseAuthImapUrl,
+            testFunction: GrammarParser.parseAuthIMAPURL,
             validInputs: [
                 ("imap://localhost/test/;UID=123", " ", .init(server: .init(host: "localhost"), messagePart: .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: .init(uid: 123)!)), #line),
             ],
@@ -629,12 +629,12 @@ extension ParserUnitTests {
     }
 }
 
-// MARK: - parseAuthImapUrlFull
+// MARK: - parseAuthIMAPUrlFull
 
 extension ParserUnitTests {
-    func testParseAuthImapUrlFull() {
+    func testParseAuthIMAPUrlFull() {
         self.iterateTests(
-            testFunction: GrammarParser.parseAuthImapUrlFull,
+            testFunction: GrammarParser.parseAuthIMAPURLFull,
             validInputs: [
                 (
                     "imap://localhost/test/;UID=123;URLAUTH=anonymous:INTERNAL:01234567890123456789012345678901",
@@ -649,12 +649,12 @@ extension ParserUnitTests {
     }
 }
 
-// MARK: - parseAuthImapUrlRump
+// MARK: - parseAuthIMAPUrlRump
 
 extension ParserUnitTests {
-    func testParseAuthImapUrlRump() {
+    func testParseAuthIMAPUrlRump() {
         self.iterateTests(
-            testFunction: GrammarParser.parseAuthImapUrlRump,
+            testFunction: GrammarParser.parseAuthIMAPURLRump,
             validInputs: [
                 (
                     "imap://localhost/test/;UID=123;URLAUTH=anonymous",
@@ -2559,9 +2559,9 @@ extension ParserUnitTests {
 // MARK: - parseIMapUrl
 
 extension ParserUnitTests {
-    func testParseImapUrl() {
+    func testParseIMAPUrl() {
         self.iterateTests(
-            testFunction: GrammarParser.parseImapUrl,
+            testFunction: GrammarParser.parseIMAPURL,
             validInputs: [
                 ("imap://localhost/", " ", .init(server: .init(host: "localhost"), query: .init(command: nil)), #line),
             ],
@@ -2576,9 +2576,9 @@ extension ParserUnitTests {
 // MARK: - parseIMapUrlRel
 
 extension ParserUnitTests {
-    func testParseImapUrlRel() {
+    func testParseIMAPUrlRel() {
         self.iterateTests(
-            testFunction: GrammarParser.parseImapUrlRel,
+            testFunction: GrammarParser.parseRelativeIMAPURL,
             validInputs: [
                 ("/test", " ", .absolutePath(.init(command: .messageList(.init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")))))), #line),
                 ("//localhost/", " ", .networkPath(.init(server: .init(host: "localhost"), query: .init(command: nil))), #line),

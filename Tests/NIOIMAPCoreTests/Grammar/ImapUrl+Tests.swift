@@ -16,15 +16,15 @@ import NIO
 @testable import NIOIMAPCore
 import XCTest
 
-class ImapUrl_Tests: EncodeTestClass {}
+class IMAPURL_Tests: EncodeTestClass {}
 
 // MARK: - IMAP
 
-extension ImapUrl_Tests {
+extension IMAPURL_Tests {
     func testEncode() {
-        let inputs: [(ImapUrl, String, UInt)] = [
+        let inputs: [(IMAPURL, String, UInt)] = [
             (.init(server: .init(host: "localhost"), query: .init(command: nil)), "imap://localhost/", #line),
         ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeImapUrl($0) })
+        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeIMAPURL($0) })
     }
 }

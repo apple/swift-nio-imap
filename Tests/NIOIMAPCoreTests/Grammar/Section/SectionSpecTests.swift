@@ -21,28 +21,28 @@ class SectionSpecifierTests: EncodeTestClass {}
 // MARK: - SectionSpecifierTests imapEncoded
 
 extension SectionSpecifierTests {
-    func testImapEncoded_optional_none() {
+    func testIMAPEncoded_optional_none() {
         let expected = ""
         let size = self.testBuffer.writeSectionSpecifier(nil)
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }
 
-    func testImapEncoded_text() {
+    func testIMAPEncoded_text() {
         let expected = "HEADER"
         let size = self.testBuffer.writeSectionSpecifier(.init(kind: .header))
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }
 
-    func testImapEncoded_part_notext() {
+    func testIMAPEncoded_part_notext() {
         let expected = "1.2.3.4"
         let size = self.testBuffer.writeSectionSpecifier(.init(part: [1, 2, 3, 4], kind: .complete))
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }
 
-    func testImapEncoded_part_sometext() {
+    func testIMAPEncoded_part_sometext() {
         let expected = "1.2.3.4.HEADER"
         let size = self.testBuffer.writeSectionSpecifier(.init(part: [1, 2, 3, 4], kind: .header))
         XCTAssertEqual(size, expected.utf8.count)
