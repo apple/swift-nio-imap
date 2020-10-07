@@ -21,14 +21,14 @@ class SectionPartTests: EncodeTestClass {}
 // MARK: - SectionPartTests imapEncoded
 
 extension SectionPartTests {
-    func testImapEncoded_empty() {
+    func testIMAPEncoded_empty() {
         let expected = ""
         let size = self.testBuffer.writeSectionPart([])
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }
 
-    func testImapEncoded_full() {
+    func testIMAPEncoded_full() {
         let expected = "1.2.3.5.8.11"
         let size = self.testBuffer.writeSectionPart([1, 2, 3, 5, 8, 11])
         XCTAssertEqual(size, expected.utf8.count)

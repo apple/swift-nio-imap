@@ -10,7 +10,7 @@ extension Base64 {
         public let rawValue: UInt
         public init(rawValue: UInt) { self.rawValue = rawValue }
 
-        public static let base64UrlAlphabet = EncodingOptions(rawValue: UInt(1 << 0))
+        public static let base64URLAlphabet = EncodingOptions(rawValue: UInt(1 << 0))
     }
 
     /// Base64 encode a collection of UInt8 to a string, without the use of Foundation.
@@ -25,8 +25,8 @@ extension Base64 {
         // In Base64, 3 bytes become 4 output characters, and we pad to the
         // nearest multiple of four.
         let newCapacity = ((bytes.count + 2) / 3) * 4
-        let alphabet = options.contains(.base64UrlAlphabet)
-            ? Base64.encodeBase64Url
+        let alphabet = options.contains(.base64URLAlphabet)
+            ? Base64.encodeBase64URL
             : Base64.encodeBase64
 
         var outputBytes = [UInt8]()
@@ -76,7 +76,7 @@ extension Base64 {
     ]
 
     @usableFromInline
-    static let encodeBase64Url: [UInt8] = [
+    static let encodeBase64URL: [UInt8] = [
         UInt8(ascii: "A"), UInt8(ascii: "B"), UInt8(ascii: "C"), UInt8(ascii: "D"),
         UInt8(ascii: "E"), UInt8(ascii: "F"), UInt8(ascii: "G"), UInt8(ascii: "H"),
         UInt8(ascii: "I"), UInt8(ascii: "J"), UInt8(ascii: "K"), UInt8(ascii: "L"),
@@ -144,14 +144,14 @@ extension Base64 {
         public let rawValue: UInt
         public init(rawValue: UInt) { self.rawValue = rawValue }
 
-        public static let base64UrlAlphabet = DecodingOptions(rawValue: UInt(1 << 0))
+        public static let base64URLAlphabet = DecodingOptions(rawValue: UInt(1 << 0))
     }
 
     @inlinable
     public static func decode<Buffer: Collection>(encoded: Buffer, options: DecodingOptions = [])
         throws -> [UInt8] where Buffer.Element == UInt8 {
-        let alphabet = options.contains(.base64UrlAlphabet)
-            ? Base64.decodeBase64Url
+        let alphabet = options.contains(.base64URLAlphabet)
+            ? Base64.decodeBase64URL
             : Base64.decodeBase64
 
         // In Base64 4 encoded bytes, become 3 decoded bytes. We pad to the
@@ -253,7 +253,7 @@ extension Base64 {
     ]
 
     @usableFromInline
-    static let decodeBase64Url: [UInt8] = [
+    static let decodeBase64URL: [UInt8] = [
         //         0    1    2    3    4    5    6    7    8    9
         /*  0 */ 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
         /*  1 */ 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,

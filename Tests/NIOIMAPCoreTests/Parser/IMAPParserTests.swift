@@ -43,7 +43,7 @@ extension ParserUnitTests {
         for (input, terminator, line) in inputs {
             TestUtilities.withBuffer(input, terminator: terminator, shouldRemainUnchanged: true, file: (#file), line: line) { (buffer) in
                 XCTAssertThrowsError(try testFunction(&buffer, .testTracker), line: line) { e in
-                    XCTAssertTrue(e is ParserError, "Expected ParserError, got \(e)")
+                    XCTAssertTrue(e is ParserError, "Expected ParserError, got \(e)", line: line)
                 }
             }
         }
@@ -607,6 +607,61 @@ extension ParserUnitTests {
             validInputs: [
                 ("\\\\Answered", " ", .answered, #line),
                 ("some", " ", .init(rawValue: "some"), #line),
+            ],
+            parserErrorInputs: [],
+            incompleteMessageInputs: []
+        )
+    }
+}
+
+// MARK: - parseAuthIMAPURL
+
+extension ParserUnitTests {
+    func testParseAuthIMAPURL() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseAuthIMAPURL,
+            validInputs: [
+                ("imap://localhost/test/;UID=123", " ", .init(server: .init(host: "localhost"), messagePart: .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: try! .init(uid: 123))), #line),
+            ],
+            parserErrorInputs: [],
+            incompleteMessageInputs: []
+        )
+    }
+}
+
+// MARK: - parseAuthIMAPURLFull
+
+extension ParserUnitTests {
+    func testParseAuthIMAPURLFull() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseAuthIMAPURLFull,
+            validInputs: [
+                (
+                    "imap://localhost/test/;UID=123;URLAUTH=anonymous:INTERNAL:01234567890123456789012345678901",
+                    " ",
+                    .init(imapURL: .init(server: .init(host: "localhost"), messagePart: .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: try! .init(uid: 123))), urlAuth: .init(auth: .init(access: .anonymous), verifier: .init(uAuthMechanism: .internal, encodedURLAuth: .init(data: "01234567890123456789012345678901")))),
+                    #line
+                ),
+            ],
+            parserErrorInputs: [],
+            incompleteMessageInputs: []
+        )
+    }
+}
+
+// MARK: - parseAuthIMAPURLRump
+
+extension ParserUnitTests {
+    func testParseAuthIMAPURLRump() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseAuthIMAPURLRump,
+            validInputs: [
+                (
+                    "imap://localhost/test/;UID=123;URLAUTH=anonymous",
+                    " ",
+                    .init(imapURL: .init(server: .init(host: "localhost"), messagePart: .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: try! .init(uid: 123))), authRump: .init(access: .anonymous)),
+                    #line
+                ),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
@@ -1472,6 +1527,197 @@ extension ParserUnitTests {
     }
 }
 
+// MARK: - IAuth
+
+extension ParserUnitTests {
+    func testParseIAuth() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseIAuth,
+            validInputs: [
+                (";AUTH=*", " ", .any, #line),
+                (";AUTH=test", " ", .type(.init(authType: "test")), #line),
+            ],
+            parserErrorInputs: [
+                ],
+            incompleteMessageInputs: [
+                ]
+        )
+    }
+}
+
+// MARK: - parseIRelativePath
+
+extension ParserUnitTests {
+    func testParseIRelativePath() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseIRelativePath,
+            validInputs: [
+                ("test", " ", .list(.init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")))), #line),
+                (";PARTIAL=1.2", " ", .messageOrPartial(.partialOnly(.init(range: .init(offset: 1, length: 2)))), #line),
+            ],
+            parserErrorInputs: [
+                ],
+            incompleteMessageInputs: [
+                ]
+        )
+    }
+}
+
+// MARK: - IAbsolutePath
+
+extension ParserUnitTests {
+    func testParseIAbsolutePath() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseIAbsolutePath,
+            validInputs: [
+                ("/", " ", .init(command: nil), #line),
+                ("/test", " ", .init(command: .messageList(.init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test"))))), #line),
+            ],
+            parserErrorInputs: [
+                ],
+            incompleteMessageInputs: [
+                ]
+        )
+    }
+}
+
+// MARK: - ICommand
+
+extension ParserUnitTests {
+    func testParseICommand() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseICommand,
+            validInputs: [
+                ("test", " ", .messageList(.init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")))), #line),
+                ("test/;UID=123", " ", .messagePart(part: .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: try! .init(uid: 123)), urlAuth: nil), #line),
+                ("test/;UID=123;URLAUTH=anonymous:INTERNAL:01234567890123456789012345678901", " ", .messagePart(part: .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: try! .init(uid: 123)), urlAuth: .init(auth: .init(access: .anonymous), verifier: .init(uAuthMechanism: .internal, encodedURLAuth: .init(data: "01234567890123456789012345678901")))), #line),
+            ],
+            parserErrorInputs: [
+                ],
+            incompleteMessageInputs: [
+                ]
+        )
+    }
+}
+
+// MARK: - IUID
+
+extension ParserUnitTests {
+    func testParseIUID() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseIUID,
+            validInputs: [
+                ("/;UID=1", " ", try! .init(uid: 1), #line),
+                ("/;UID=12", " ", try! .init(uid: 12), #line),
+                ("/;UID=123", " ", try! .init(uid: 123), #line),
+            ],
+            parserErrorInputs: [
+                ("a", " ", #line),
+            ],
+            incompleteMessageInputs: [
+                ("/;UID=1", "", #line),
+            ]
+        )
+    }
+}
+
+// MARK: - IUIDOnly
+
+extension ParserUnitTests {
+    func testParseIUIDOnly() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseIUIDOnly,
+            validInputs: [
+                (";UID=1", " ", try! .init(uid: 1), #line),
+                (";UID=12", " ", try! .init(uid: 12), #line),
+                (";UID=123", " ", try! .init(uid: 123), #line),
+            ],
+            parserErrorInputs: [
+                ("a", " ", #line),
+            ],
+            incompleteMessageInputs: [
+                (";UID=1", "", #line),
+            ]
+        )
+    }
+}
+
+// MARK: - IURLAuth
+
+extension ParserUnitTests {
+    func testParseIURLAuth() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseIURLAuth,
+            validInputs: [
+                (";URLAUTH=anonymous:INTERNAL:01234567890123456789012345678901", " ", .init(auth: .init(access: .anonymous), verifier: .init(uAuthMechanism: .internal, encodedURLAuth: .init(data: "01234567890123456789012345678901"))), #line),
+            ],
+            parserErrorInputs: [
+                ],
+            incompleteMessageInputs: [
+                ]
+        )
+    }
+}
+
+// MARK: - IURLAuthRump
+
+extension ParserUnitTests {
+    func testParseIURLAuthRump() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseIURLAuthRump,
+            validInputs: [
+                (";URLAUTH=anonymous", " ", .init(access: .anonymous), #line),
+                (
+                    ";EXPIRE=1234-12-23T12:34:56;URLAUTH=anonymous",
+                    " ",
+                    .init(expire: .init(dateTime: .init(date: .init(year: 1234, month: 12, day: 23), time: .init(hour: 12, minute: 34, second: 56))), access: .anonymous),
+                    #line
+                ),
+            ],
+            parserErrorInputs: [
+                ],
+            incompleteMessageInputs: [
+                ]
+        )
+    }
+}
+
+// MARK: - IUAVerifier
+
+extension ParserUnitTests {
+    func testParseIUAVerifier() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseIUAVerifier,
+            validInputs: [
+                (":INTERNAL:01234567890123456789012345678901", " ", .init(uAuthMechanism: .internal, encodedURLAuth: .init(data: "01234567890123456789012345678901")), #line),
+            ],
+            parserErrorInputs: [
+                ],
+            incompleteMessageInputs: [
+                ]
+        )
+    }
+}
+
+// MARK: - IUserInfo
+
+extension ParserUnitTests {
+    func testParseIUserInfo() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseIUserInfo,
+            validInputs: [
+                (";AUTH=*", " ", .init(encodedUser: nil, iAuth: .any), #line),
+                ("test", " ", .init(encodedUser: .init(data: "test"), iAuth: nil), #line),
+                ("test;AUTH=*", " ", .init(encodedUser: .init(data: "test"), iAuth: .any), #line),
+            ],
+            parserErrorInputs: [
+                ],
+            incompleteMessageInputs: [
+                ]
+        )
+    }
+}
+
 // MARK: - enable-data parseEnableData
 
 extension ParserUnitTests {
@@ -1565,6 +1811,127 @@ extension ParserUnitTests {
                 ],
             incompleteMessageInputs: [
                 ]
+        )
+    }
+}
+
+// MARK: - parseEncodedAuthenticationType
+
+extension ParserUnitTests {
+    func testParseEncodedAuthenticationType() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseEncodedAuthenticationType,
+            validInputs: [
+                ("hello%FF", " ", .init(authType: "hello%FF"), #line),
+            ],
+            parserErrorInputs: [
+                ],
+            incompleteMessageInputs: [
+                ]
+        )
+    }
+}
+
+// MARK: - parseEncodedMailbox
+
+extension ParserUnitTests {
+    func testParseEncodedMailbox() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseEncodedMailbox,
+            validInputs: [
+                ("hello%FF", " ", .init(mailbox: "hello%FF"), #line),
+            ],
+            parserErrorInputs: [
+                ],
+            incompleteMessageInputs: [
+                ]
+        )
+    }
+}
+
+// MARK: - parseINetworkPath
+
+extension ParserUnitTests {
+    func testParseINetworkPath() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseINetworkPath,
+            validInputs: [
+                ("//localhost/", " ", .init(server: .init(host: "localhost"), query: .init(command: nil)), #line),
+            ],
+            parserErrorInputs: [
+                ],
+            incompleteMessageInputs: [
+                ]
+        )
+    }
+}
+
+// MARK: - parseEncodedSearch
+
+extension ParserUnitTests {
+    func testParseEncodedSearch() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseEncodedSearch,
+            validInputs: [
+                ("query%FF", " ", .init(query: "query%FF"), #line),
+            ],
+            parserErrorInputs: [
+                ],
+            incompleteMessageInputs: [
+                ]
+        )
+    }
+}
+
+// MARK: - parseEncodedSection
+
+extension ParserUnitTests {
+    func testParseEncodedSection() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseEncodedSection,
+            validInputs: [
+                ("query%FF", " ", .init(section: "query%FF"), #line),
+            ],
+            parserErrorInputs: [
+                ],
+            incompleteMessageInputs: [
+                ]
+        )
+    }
+}
+
+// MARK: - parseEncodedUser
+
+extension ParserUnitTests {
+    func testParseEncodedUser() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseEncodedUser,
+            validInputs: [
+                ("query%FF", " ", .init(data: "query%FF"), #line),
+            ],
+            parserErrorInputs: [
+                ],
+            incompleteMessageInputs: [
+                ]
+        )
+    }
+}
+
+// MARK: - parseEncodedURLAuth
+
+extension ParserUnitTests {
+    func testParseEncodedURLAuth() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseEncodedURLAuth,
+            validInputs: [
+                ("0123456789abcdef01234567890abcde", "", .init(data: "0123456789abcdef01234567890abcde"), #line),
+            ],
+            parserErrorInputs: [
+                ("0123456789zbcdef01234567890abcde", "", #line),
+            ],
+            incompleteMessageInputs: [
+                ("0123456789", "", #line),
+            ]
         )
     }
 }
@@ -1710,6 +2077,32 @@ extension ParserUnitTests {
     }
 }
 
+// MARK: - parseExpire
+
+extension ParserUnitTests {
+    func testParseExpire() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseExpire,
+            validInputs: [
+                (
+                    ";EXPIRE=1234-12-20T12:34:56",
+                    "\r",
+                    Expire(dateTime: FullDateTime(date: FullDate(year: 1234, month: 12, day: 20), time: FullTime(hour: 12, minute: 34, second: 56))),
+                    #line
+                ),
+                (
+                    ";EXPIRE=1234-12-20t12:34:56",
+                    "\r",
+                    Expire(dateTime: FullDateTime(date: FullDate(year: 1234, month: 12, day: 20), time: FullTime(hour: 12, minute: 34, second: 56))),
+                    #line
+                ),
+            ],
+            parserErrorInputs: [],
+            incompleteMessageInputs: []
+        )
+    }
+}
+
 // MARK: - parseFetch
 
 extension ParserUnitTests {
@@ -1801,6 +2194,68 @@ extension ParserUnitTests {
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
+        )
+    }
+}
+
+// MARK: - parseFullDateTime
+
+extension ParserUnitTests {
+    func testParseFullDateTime() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseFullDateTime,
+            validInputs: [
+                (
+                    "1234-12-20T11:22:33",
+                    " ",
+                    .init(date: .init(year: 1234, month: 12, day: 20), time: .init(hour: 11, minute: 22, second: 33)),
+                    #line
+                ),
+            ],
+            parserErrorInputs: [
+                ],
+            incompleteMessageInputs: [
+                ]
+        )
+    }
+}
+
+// MARK: - parseFullDate
+
+extension ParserUnitTests {
+    func testParseFullDate() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseFullDate,
+            validInputs: [
+                ("1234-12-23", " ", .init(year: 1234, month: 12, day: 23), #line),
+            ],
+            parserErrorInputs: [
+                ("a", "", #line),
+            ],
+            incompleteMessageInputs: [
+                ("1234", "", #line),
+            ]
+        )
+    }
+}
+
+// MARK: - parseFullTime
+
+extension ParserUnitTests {
+    func testParseFullTime() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseFullTime,
+            validInputs: [
+                ("12:34:56", " ", .init(hour: 12, minute: 34, second: 56), #line),
+                ("12:34:56.123456", " ", .init(hour: 12, minute: 34, second: 56, fraction: 123456), #line),
+            ],
+            parserErrorInputs: [
+                ("a", "", #line),
+                ("1234:56:12", "", #line),
+            ],
+            incompleteMessageInputs: [
+                ("1234", "", #line),
+            ]
         )
     }
 }
@@ -1956,6 +2411,330 @@ extension ParserUnitTests {
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
+        )
+    }
+}
+
+// MARK: - parseIPartial
+
+extension ParserUnitTests {
+    func testParseIPartial() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseIPartial,
+            validInputs: [
+                ("/;PARTIAL=1", " ", .init(range: .init(offset: 1, length: nil)), #line),
+                ("/;PARTIAL=1.2", " ", .init(range: .init(offset: 1, length: 2)), #line),
+            ],
+            parserErrorInputs: [
+                ("/;PARTIAL=a", " ", #line),
+                ("PARTIAL=a", " ", #line),
+            ],
+            incompleteMessageInputs: [
+                ("/;PARTIAL=1", "", #line),
+            ]
+        )
+    }
+}
+
+// MARK: - parseIPartialOnly
+
+extension ParserUnitTests {
+    func testParseIPartialOnly() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseIPartialOnly,
+            validInputs: [
+                (";PARTIAL=1", " ", .init(range: .init(offset: 1, length: nil)), #line),
+                (";PARTIAL=1.2", " ", .init(range: .init(offset: 1, length: 2)), #line),
+            ],
+            parserErrorInputs: [
+                (";PARTIAL=a", " ", #line),
+                ("PARTIAL=a", " ", #line),
+            ],
+            incompleteMessageInputs: [
+                (";PARTIAL=1", "", #line),
+            ]
+        )
+    }
+}
+
+// MARK: - parseIPathQuery
+
+extension ParserUnitTests {
+    func testParseIPathQuery() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseIPathQuery,
+            validInputs: [
+                ("/", " ", .init(command: nil), #line),
+                ("/test", " ", .init(command: .messageList(.init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test"))))), #line),
+            ],
+            parserErrorInputs: [
+                ],
+            incompleteMessageInputs: [
+                ]
+        )
+    }
+}
+
+// MARK: - parseISection
+
+extension ParserUnitTests {
+    func testParseISection() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseISection,
+            validInputs: [
+                ("/;SECTION=a", " ", ISection(encodedSection: .init(section: "a")), #line),
+                ("/;SECTION=abc", " ", ISection(encodedSection: .init(section: "abc")), #line),
+            ],
+            parserErrorInputs: [
+                ("SECTION=a", " ", #line),
+            ],
+            incompleteMessageInputs: [
+                ("/;SECTION=1", "", #line),
+            ]
+        )
+    }
+}
+
+// MARK: - parseISectionOnly
+
+extension ParserUnitTests {
+    func testParseISectionOnly() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseISectionOnly,
+            validInputs: [
+                (";SECTION=a", " ", ISectionOnly(encodedSection: .init(section: "a")), #line),
+                (";SECTION=abc", " ", ISectionOnly(encodedSection: .init(section: "abc")), #line),
+            ],
+            parserErrorInputs: [
+                ("SECTION=a", " ", #line),
+            ],
+            incompleteMessageInputs: [
+                (";SECTION=1", "", #line),
+            ]
+        )
+    }
+}
+
+// MARK: - parseIServer
+
+extension ParserUnitTests {
+    func testParseIServer() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseIServer,
+            validInputs: [
+                ("localhost", " ", .init(userInfo: nil, host: "localhost", port: nil), #line),
+                (";AUTH=*@localhost", " ", .init(userInfo: .init(encodedUser: nil, iAuth: .any), host: "localhost", port: nil), #line),
+                ("localhost:1234", " ", .init(userInfo: nil, host: "localhost", port: 1234), #line),
+                (";AUTH=*@localhost:1234", " ", .init(userInfo: .init(encodedUser: nil, iAuth: .any), host: "localhost", port: 1234), #line),
+            ],
+            parserErrorInputs: [
+                ],
+            incompleteMessageInputs: [
+                ]
+        )
+    }
+}
+
+// MARK: - parseIMailboxReference
+
+extension ParserUnitTests {
+    func testParseIMailboxReference() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseIMailboxReference,
+            validInputs: [
+                ("abc", " ", .init(encodeMailbox: .init(mailbox: "abc"), uidValidity: nil), #line),
+                ("abc;UIDVALIDITY=123", " ", .init(encodeMailbox: .init(mailbox: "abc"), uidValidity: try! .init(uid: 123)), #line),
+            ],
+            parserErrorInputs: [
+                ("¢", " ", #line),
+            ],
+            incompleteMessageInputs: [
+                ("abc", "", #line),
+                ("abc123", "", #line),
+            ]
+        )
+    }
+}
+
+// MARK: - parseIMapURL
+
+extension ParserUnitTests {
+    func testParseIMAPURL() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseIMAPURL,
+            validInputs: [
+                ("imap://localhost/", " ", .init(server: .init(host: "localhost"), query: .init(command: nil)), #line),
+            ],
+            parserErrorInputs: [
+                ],
+            incompleteMessageInputs: [
+                ]
+        )
+    }
+}
+
+// MARK: - parseIMapURLRel
+
+extension ParserUnitTests {
+    func testParseIMAPURLRel() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseRelativeIMAPURL,
+            validInputs: [
+                ("/test", " ", .absolutePath(.init(command: .messageList(.init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")))))), #line),
+                ("//localhost/", " ", .networkPath(.init(server: .init(host: "localhost"), query: .init(command: nil))), #line),
+                ("test", " ", .relativePath(.list(.init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test"))))), #line),
+                ("", " ", .empty, #line),
+            ],
+            parserErrorInputs: [
+                ],
+            incompleteMessageInputs: [
+                ]
+        )
+    }
+}
+
+// MARK: - parseIMessageList
+
+extension ParserUnitTests {
+    func testParseIMessageList() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseIMessageList,
+            validInputs: [
+                ("test", " ", .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test"), uidValidity: nil)), #line),
+                ("test?query", " ", .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test"), uidValidity: nil), encodedSearch: .init(query: "query")), #line),
+            ],
+            parserErrorInputs: [
+                ],
+            incompleteMessageInputs: [
+                ]
+        )
+    }
+}
+
+// MARK: - parseIMessageOrPart
+
+extension ParserUnitTests {
+    func testParseIMessageOrPartial() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseIMessageOrPartial,
+            validInputs: [
+                (
+                    ";PARTIAL=1.2",
+                    " ",
+                    .partialOnly(.init(range: .init(offset: 1, length: 2))),
+                    #line
+                ),
+                (
+                    ";SECTION=test",
+                    " ",
+                    .sectionPartial(section: .init(encodedSection: .init(section: "test")), partial: nil),
+                    #line
+                ),
+                (
+                    ";SECTION=test/;PARTIAL=1.2",
+                    " ",
+                    .sectionPartial(section: .init(encodedSection: .init(section: "test")), partial: .init(range: .init(offset: 1, length: 2))),
+                    #line
+                ),
+                (
+                    ";UID=123",
+                    " ",
+                    .uidSectionPartial(uid: try! .init(uid: 123), section: nil, partial: nil),
+                    #line
+                ),
+                (
+                    ";UID=123/;SECTION=test",
+                    " ",
+                    .uidSectionPartial(uid: try! .init(uid: 123), section: .init(encodedSection: .init(section: "test")), partial: nil),
+                    #line
+                ),
+                (
+                    ";UID=123/;PARTIAL=1.2",
+                    " ",
+                    .uidSectionPartial(uid: try! .init(uid: 123), section: nil, partial: .init(range: .init(offset: 1, length: 2))),
+                    #line
+                ),
+                (
+                    ";UID=123/;SECTION=test/;PARTIAL=1.2",
+                    " ",
+                    .uidSectionPartial(uid: try! .init(uid: 123), section: .init(encodedSection: .init(section: "test")), partial: .init(range: .init(offset: 1, length: 2))),
+                    #line
+                ),
+                (
+                    "test;UID=123",
+                    " ",
+                    .refUidSectionPartial(ref: .init(encodeMailbox: .init(mailbox: "test")), uid: try! .init(uid: 123), section: nil, partial: nil),
+                    #line
+                ),
+                (
+                    "test;UID=123/;SECTION=section",
+                    " ",
+                    .refUidSectionPartial(ref: .init(encodeMailbox: .init(mailbox: "test")), uid: try! .init(uid: 123), section: .init(encodedSection: .init(section: "section")), partial: nil),
+                    #line
+                ),
+                (
+                    "test;UID=123/;PARTIAL=1.2",
+                    " ",
+                    .refUidSectionPartial(ref: .init(encodeMailbox: .init(mailbox: "test")), uid: try! .init(uid: 123), section: nil, partial: .init(range: .init(offset: 1, length: 2))),
+                    #line
+                ),
+                (
+                    "test;UID=123/;SECTION=section/;PARTIAL=1.2",
+                    " ",
+                    .refUidSectionPartial(ref: .init(encodeMailbox: .init(mailbox: "test")), uid: try! .init(uid: 123), section: .init(encodedSection: .init(section: "section")), partial: .init(range: .init(offset: 1, length: 2))),
+                    #line
+                ),
+            ],
+            parserErrorInputs: [
+                ],
+            incompleteMessageInputs: [
+                ]
+        )
+    }
+}
+
+// MARK: - parseIMessagePart
+
+extension ParserUnitTests {
+    func testParseIMessagePart() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseIMessagePart,
+            validInputs: [
+                (
+                    "test/;UID=123",
+                    " ",
+                    .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: try! .init(uid: 123), iSection: nil, iPartial: nil),
+                    #line
+                ),
+                (
+                    "test/;UID=123/;SECTION=section",
+                    " ",
+                    .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: try! .init(uid: 123), iSection: .init(encodedSection: .init(section: "section")), iPartial: nil),
+                    #line
+                ),
+                (
+                    "test/;UID=123/;PARTIAL=1.2",
+                    " ",
+                    .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: try! .init(uid: 123), iSection: nil, iPartial: .init(range: .init(offset: 1, length: 2))),
+                    #line
+                ),
+                (
+                    "test/;UID=123/;SECTION=section/;PARTIAL=1.2",
+                    " ",
+                    .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: try! .init(uid: 123), iSection: .init(encodedSection: .init(section: "section")), iPartial: .init(range: .init(offset: 1, length: 2))),
+                    #line
+                ),
+                (
+                    "test/;UIDVALIDITY=123/;UID=123/;SECTION=section/;PARTIAL=1.2",
+                    " ",
+                    .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test/"), uidValidity: try! .init(uid: 123)), iUID: try! .init(uid: 123), iSection: .init(encodedSection: .init(section: "section")), iPartial: .init(range: .init(offset: 1, length: 2))),
+                    #line
+                ),
+            ],
+            parserErrorInputs: [
+                ],
+            incompleteMessageInputs: [
+                ]
         )
     }
 }
@@ -2528,6 +3307,28 @@ extension ParserUnitTests {
                 ("<111111111", "", #line),
                 ("<1.", "", #line),
                 ("<1.22222222", "", #line),
+            ]
+        )
+    }
+}
+
+// MARK: - parsePartialRange
+
+extension ParserUnitTests {
+    func testParsePartialRange() {
+        self.iterateTests(
+            testFunction: GrammarParser.parsePartialRange,
+            validInputs: [
+                ("1", " ", .init(offset: 1, length: nil), #line),
+                ("1.2", " ", .init(offset: 1, length: 2), #line),
+            ],
+            parserErrorInputs: [
+                ("a.1", " ", #line),
+            ],
+            incompleteMessageInputs: [
+                ("1", "", #line),
+                ("1.2", "", #line),
+                ("1.", "", #line),
             ]
         )
     }
@@ -3479,6 +4280,109 @@ extension ParserUnitTests {
     }
 }
 
+// MARK: - parseUchar
+
+extension ParserUnitTests {
+    func testParseUchar() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseUChar,
+            validInputs: [
+                ("%00", "", [UInt8(ascii: "%"), UInt8(ascii: "0"), UInt8(ascii: "0")], #line),
+                ("%0A", "", [UInt8(ascii: "%"), UInt8(ascii: "0"), UInt8(ascii: "A")], #line),
+                ("%1F", "", [UInt8(ascii: "%"), UInt8(ascii: "1"), UInt8(ascii: "F")], #line),
+                ("%FF", "", [UInt8(ascii: "%"), UInt8(ascii: "F"), UInt8(ascii: "F")], #line),
+            ],
+            parserErrorInputs: [
+                ("%GG", " ", #line),
+            ],
+            incompleteMessageInputs: [
+                ("%", "", #line),
+            ]
+        )
+    }
+}
+
+// MARK: - parseAchar
+
+extension ParserUnitTests {
+    func testParseAchar() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseAChar,
+            validInputs: [
+                ("%00", "", [UInt8(ascii: "%"), UInt8(ascii: "0"), UInt8(ascii: "0")], #line),
+                ("&", "", [UInt8(ascii: "&")], #line),
+                ("=", "", [UInt8(ascii: "=")], #line),
+            ],
+            parserErrorInputs: [
+                ("£", " ", #line),
+            ],
+            incompleteMessageInputs: [
+                ("", "", #line),
+            ]
+        )
+    }
+}
+
+// MARK: - parseAccess
+
+extension ParserUnitTests {
+    func testParseAccess() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseAccess,
+            validInputs: [
+                ("authuser", "", .authUser, #line),
+                ("anonymous", "", .anonymous, #line),
+                ("submit+abc", " ", .submit(.init(data: "abc")), #line),
+                ("user+abc", " ", .user(.init(data: "abc")), #line),
+            ],
+            parserErrorInputs: [
+                ],
+            incompleteMessageInputs: [
+                ]
+        )
+    }
+}
+
+// MARK: - parseBchar
+
+extension ParserUnitTests {
+    func testParseBchar() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseBChar,
+            validInputs: [
+                ("%00", "", [UInt8(ascii: "%"), UInt8(ascii: "0"), UInt8(ascii: "0")], #line),
+                ("@", "", [UInt8(ascii: "@")], #line),
+                (":", "", [UInt8(ascii: ":")], #line),
+                ("/", "", [UInt8(ascii: "/")], #line),
+            ],
+            parserErrorInputs: [
+                ("£", " ", #line),
+            ],
+            incompleteMessageInputs: [
+                ("", "", #line),
+            ]
+        )
+    }
+}
+
+// MARK: - parseUAuthMechanism
+
+extension ParserUnitTests {
+    func testParseUAuthMechanism() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseUAuthMechanism,
+            validInputs: [
+                ("INTERNAL", " ", .internal, #line),
+                ("abcdEFG0123456789", " ", .init(rawValue: "abcdEFG0123456789"), #line),
+            ],
+            parserErrorInputs: [
+                ],
+            incompleteMessageInputs: [
+                ]
+        )
+    }
+}
+
 // MARK: - parseUID
 
 extension ParserUnitTests {
@@ -3497,6 +4401,27 @@ extension ParserUnitTests {
             ],
             incompleteMessageInputs: [
                 ("UID COPY 1", " ", #line),
+            ]
+        )
+    }
+}
+
+// MARK: - parseUIDValidity
+
+extension ParserUnitTests {
+    func testParseUIDValidity() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseUIDValidity,
+            validInputs: [
+                (";UIDVALIDITY=1", " ", try! .init(uid: 1), #line),
+                (";UIDVALIDITY=12", " ", try! .init(uid: 12), #line),
+                (";UIDVALIDITY=123", " ", try! .init(uid: 123), #line),
+            ],
+            parserErrorInputs: [
+                ("0", " ", #line),
+            ],
+            incompleteMessageInputs: [
+                (";UIDVALIDITY=1", "", #line),
             ]
         )
     }

@@ -124,6 +124,10 @@ extension UInt8 {
         isalnum(Int32(self)) != 0
     }
 
+    var isNum: Bool {
+        (UInt8(ascii: "0") ... UInt8(ascii: "9")).contains(self)
+    }
+
     /// tagged-label-fchar  = ALPHA / "-" / "_" / "."
     var isTaggedLabelFchar: Bool {
         switch self {
@@ -147,6 +151,46 @@ extension UInt8 {
             return true
         default:
             return self.isTaggedLabelFchar
+        }
+    }
+
+    /// RFC 5092
+    var isSubDelimsSh: Bool {
+        switch self {
+        case UInt8(ascii: "!"),
+             UInt8(ascii: "$"),
+             UInt8(ascii: "'"),
+             UInt8(ascii: "("),
+             UInt8(ascii: ")"),
+             UInt8(ascii: "*"),
+             UInt8(ascii: "+"),
+             UInt8(ascii: ","):
+            return true
+        default:
+            return false
+        }
+    }
+
+    /// RFC 3986
+    var isUnreserved: Bool {
+        switch self {
+        case _ where self.isAlphaNum,
+             UInt8(ascii: "-"),
+             UInt8(ascii: "."),
+             UInt8(ascii: "_"),
+             UInt8(ascii: "~"):
+            return true
+        default:
+            return false
+        }
+    }
+
+    var isHexCharacter: Bool {
+        switch self {
+        case UInt8(ascii: "0") ... UInt8(ascii: "9"), UInt8(ascii: "a") ... UInt8(ascii: "f"), UInt8(ascii: "A") ... UInt8(ascii: "F"):
+            return true
+        default:
+            return false
         }
     }
 }
