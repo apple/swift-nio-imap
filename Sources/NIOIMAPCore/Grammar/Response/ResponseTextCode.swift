@@ -43,6 +43,7 @@ public enum ResponseTextCode: Equatable {
     case metadataMaxsize(Int)
     case metadataTooMany
     case metadataNoPrivate
+    case referral(ImapUrl)
 }
 
 // MARK: - Encoding
@@ -104,6 +105,8 @@ extension EncodeBuffer {
             return self.writeString("METADATA TOOMANY")
         case .metadataNoPrivate:
             return self.writeString("METADATA NOPRIVATE")
+        case .referral(let url):
+            return self.writeImapUrl(url)
         }
     }
 

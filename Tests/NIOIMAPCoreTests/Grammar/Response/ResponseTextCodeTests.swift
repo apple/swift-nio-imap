@@ -51,6 +51,7 @@ extension ResponseTextCodeTests {
             (.metadataLongEntries(456), "METADATA LONGENTRIES 456", #line),
             (.metadataTooMany, "METADATA TOOMANY", #line),
             (.metadataNoPrivate, "METADATA NOPRIVATE", #line),
+            (.referral(.init(server: .init(host: "localhost"), query: .init(command: nil))), "REFERRAL imap://localhost/", #line),
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeResponseTextCode($0) })
     }

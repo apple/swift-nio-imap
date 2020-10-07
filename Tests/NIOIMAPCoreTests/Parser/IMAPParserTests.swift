@@ -3403,6 +3403,7 @@ extension ParserUnitTests {
                 ("METADATA LONGENTRIES 456", "\r", .metadataLongEntries(456), #line),
                 ("METADATA TOOMANY", "\r", .metadataTooMany, #line),
                 ("METADATA NOPRIVATE", "\r", .metadataNoPrivate, #line),
+                ("REFERRAL imap://localhost/", "\r", .referral(.init(server: .init(host: "localhost"), query: .init(command: nil))), #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
