@@ -28,7 +28,7 @@ public struct InvalidPathSeparatorError: Error, Equatable {
     public var description: String
 }
 
-public struct MailboxPath: Equatable {
+public struct MailboxPath: Hashable {
     public var name: MailboxName
     public var pathSeparator: Character?
 
@@ -160,7 +160,7 @@ extension MailboxPath {
 }
 
 /// IMAPv4 `mailbox`
-public struct MailboxName: Equatable {
+public struct MailboxName: Hashable {
     public static var inbox = Self("INBOX")
 
     /// The raw bytes, readable as `[UInt8]`
