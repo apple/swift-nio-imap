@@ -92,7 +92,7 @@ extension MailboxPath {
         return self.name.storage.readableBytesView
             .split(separator: pathSeparator.asciiValue!, omittingEmptySubsequences: omittingEmptySubsequences)
             .map { bytes in
-                self.decodeBufferToString(ByteBuffer(bytes: bytes))
+                self.decodeBufferToString(ByteBuffer(ByteBufferView(bytes)))
             }
     }
 
@@ -189,7 +189,7 @@ public struct MailboxName: Hashable {
 
     public init(_ bytes: ByteBuffer) {
         if String(buffer: bytes).uppercased() == "INBOX" {
-            self.storage = ByteBuffer(string: "INBOX")
+            self.storage = ByteBuffer(ByteBufferView("INBOX".utf8))
         } else {
             self.storage = bytes
         }

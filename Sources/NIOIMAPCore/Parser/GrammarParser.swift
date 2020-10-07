@@ -21,6 +21,7 @@ let badOS = { fatalError("unsupported OS") }()
 #endif
 
 import struct NIO.ByteBuffer
+import struct NIO.ByteBufferView
 
 public enum ParsingError: Error {
     case lineTooLong
@@ -277,7 +278,7 @@ extension GrammarParser {
 
             do {
                 let decoded = try Base64.decode(encoded: String(buffer: bytes))
-                return ByteBuffer(bytes: decoded)
+                return ByteBuffer(ByteBufferView(decoded))
             } catch {
                 throw ParserError(hint: "Invalid base64 \(error)")
             }
@@ -2054,7 +2055,7 @@ extension GrammarParser {
             if ref.uidValidity == nil, ref.encodedMailbox.mailbox.last == Character(.init(UInt8(ascii: "/"))) {
                 try composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
                     ref.encodedMailbox.mailbox = String(ref.encodedMailbox.mailbox.dropLast())
-                    var newBuffer = ByteBuffer(bytes: [UInt8(ascii: "/")])
+                    var newBuffer = ByteBuffer(ByteBufferView([UInt8(ascii: "/")]))
                     newBuffer.writeBuffer(&buffer)
                     uid = try self.parseIUID(buffer: &newBuffer, tracker: tracker)
                     buffer = newBuffer
@@ -2068,7 +2069,7 @@ extension GrammarParser {
             if section?.encodedSection.section.last == Character(.init(UInt8(ascii: "/"))) {
                 try composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
                     section!.encodedSection.section = String(section!.encodedSection.section.dropLast())
-                    var newBuffer = ByteBuffer(bytes: [UInt8(ascii: "/")])
+                    var newBuffer = ByteBuffer(ByteBufferView([UInt8(ascii: "/")]))
                     newBuffer.writeBuffer(&buffer)
                     partial = try optional(buffer: &newBuffer, tracker: tracker, parser: self.parseIPartial)
                     buffer = newBuffer
@@ -3256,7 +3257,7 @@ extension GrammarParser {
         func parseGmailLabel_backslash(buffer: inout ByteBuffer, tracker: StackTracker) throws -> GmailLabel {
             try fixedString("\\", buffer: &buffer, tracker: tracker)
             let att = try self.parseAtom(buffer: &buffer, tracker: tracker)
-            return .init(rawValue: ByteBuffer(string: "\\\(att)"))
+            return .init(rawValue: ByteBuffer(ByteBufferView("\\\(att)".utf8)))
         }
 
         func parseGmailLabel_string(buffer: inout ByteBuffer, tracker: StackTracker) throws -> GmailLabel {
