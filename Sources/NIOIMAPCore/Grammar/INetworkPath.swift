@@ -16,7 +16,7 @@
 public struct INetworkPath: Equatable {
     public var server: IServer
     public var query: IPathQuery
-    
+
     public init(server: IServer, query: IPathQuery) {
         self.server = server
         self.query = query

@@ -18,7 +18,7 @@ import struct NIO.ByteBuffer
 public struct AuthImapUrl: Equatable {
     public var server: IServer
     public var messagePart: IMessagePart
-    
+
     public init(server: IServer, messagePart: IMessagePart) {
         self.server = server
         self.messagePart = messagePart

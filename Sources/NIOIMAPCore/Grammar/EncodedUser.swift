@@ -17,7 +17,7 @@ import struct NIO.ByteBuffer
 /// RFC 5092
 public struct EncodedUser: Equatable {
     public var data: String
-    
+
     public init(data: String) {
         self.data = data
     }

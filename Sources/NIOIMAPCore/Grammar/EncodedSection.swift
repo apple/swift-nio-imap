@@ -17,7 +17,7 @@ import struct NIO.ByteBuffer
 /// RFC 5092
 public struct EncodedSection: Equatable {
     public var section: String
-    
+
     public init(section: String) {
         self.section = section
     }

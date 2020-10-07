@@ -18,7 +18,7 @@ import struct NIO.ByteBuffer
 public struct AuthImapUrlFull: Equatable {
     public var imapUrl: AuthImapUrl
     public var urlAuth: IUrlAuth
-    
+
     public init(imapUrl: AuthImapUrl, urlAuth: IUrlAuth) {
         self.imapUrl = imapUrl
         self.urlAuth = urlAuth

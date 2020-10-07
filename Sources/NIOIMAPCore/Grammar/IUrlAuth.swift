@@ -16,7 +16,7 @@
 public struct IUrlAuth: Equatable {
     public var auth: IURLAuthRump
     public var verifier: IUAVerifier
-    
+
     public init(auth: IURLAuthRump, verifier: IUAVerifier) {
         self.auth = auth
         self.verifier = verifier

@@ -14,29 +14,25 @@
 
 /// RFC 5092
 public struct IUserInfo: Equatable {
-    
     public var encodedUser: EncodedUser?
     public var iAuth: IAuth?
-    
+
     public init(encodedUser: EncodedUser?, iAuth: IAuth?) {
         assert(encodedUser != nil || iAuth != nil, "Need one of `encodedUser` or `iAuth`")
         self.encodedUser = encodedUser
         self.iAuth = iAuth
     }
-    
 }
 
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    
     @discardableResult mutating func writeIUserInfo(_ data: IUserInfo) -> Int {
         self.writeIfExists(data.encodedUser) { user in
             self.writeEncodedUser(user)
         } +
-        self.writeIfExists(data.iAuth, callback: { iAuth in
-            self.writeIAuth(iAuth)
+            self.writeIfExists(data.iAuth, callback: { iAuth in
+                self.writeIAuth(iAuth)
         })
     }
-    
 }

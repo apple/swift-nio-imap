@@ -19,8 +19,8 @@ public enum IAuth: Equatable {
 }
 
 // MARK: - Encoding
+
 extension EncodeBuffer {
-    
     @discardableResult mutating func writeIAuth(_ data: IAuth) -> Int {
         switch data {
         case .any:
@@ -29,5 +29,4 @@ extension EncodeBuffer {
             return self.writeString(";AUTH=") + self.writeEncodedAuthenticationType(type)
         }
     }
-    
 }

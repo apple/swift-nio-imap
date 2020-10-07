@@ -21,8 +21,8 @@ public enum ImapUrlRel: Equatable {
 }
 
 // MARK: - Encoding
+
 extension EncodeBuffer {
-    
     @discardableResult mutating func writeImapUrlRel(_ url: ImapUrlRel) -> Int {
         switch url {
         case .networkPath(let path):
@@ -35,5 +35,4 @@ extension EncodeBuffer {
             return 0
         }
     }
-    
 }

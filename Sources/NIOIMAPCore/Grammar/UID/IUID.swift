@@ -15,7 +15,7 @@
 /// RFC 5092 IMAP URL
 public struct IUID: Equatable {
     public var uid: Int
-    
+
     public init?(uid: Int) {
         guard uid > 0 else {
             return nil
@@ -27,7 +27,7 @@ public struct IUID: Equatable {
 /// RFC 5092 IMAP URL
 public struct IUIDOnly: Equatable {
     public var uid: Int
-    
+
     public init?(uid: Int) {
         guard uid > 0 else {
             return nil
@@ -39,13 +39,11 @@ public struct IUIDOnly: Equatable {
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    
     @discardableResult mutating func writeIUID(_ data: IUID) -> Int {
         self.writeString("/;UID=\(data.uid)")
     }
-    
+
     @discardableResult mutating func writeIUIDOnly(_ data: IUIDOnly) -> Int {
         self.writeString(";UID=\(data.uid)")
     }
-    
 }

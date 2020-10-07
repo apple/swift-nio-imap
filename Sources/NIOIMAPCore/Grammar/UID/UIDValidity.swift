@@ -15,7 +15,7 @@
 /// RFC 5092 IMAP URL
 public struct UIDValidity: Equatable {
     public var uid: Int
-    
+
     public init?(uid: Int) {
         guard uid > 0 else {
             return nil
@@ -27,9 +27,7 @@ public struct UIDValidity: Equatable {
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    
     @discardableResult mutating func writeUIDValidaty(_ data: UIDValidity) -> Int {
         self.writeString(";UIDVALIDITY=\(data.uid)")
     }
-    
 }

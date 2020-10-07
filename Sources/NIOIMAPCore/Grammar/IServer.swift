@@ -19,7 +19,7 @@ public struct IServer: Equatable {
     public var userInfo: IUserInfo?
     public var host: String
     public var port: Int?
-    
+
     public init(userInfo: IUserInfo? = nil, host: String, port: Int? = nil) {
         self.userInfo = userInfo
         self.host = host
@@ -28,16 +28,15 @@ public struct IServer: Equatable {
 }
 
 // MARK: - Encoding
+
 extension EncodeBuffer {
-    
     @discardableResult mutating func writeIServer(_ server: IServer) -> Int {
         self.writeIfExists(server.userInfo) { userInfo in
             self.writeIUserInfo(userInfo) + self.writeString("@")
         } +
-        self.writeString("\(server.host)") +
-        self.writeIfExists(server.port, callback: { port in
-            self.writeString(":\(port)")
+            self.writeString("\(server.host)") +
+            self.writeIfExists(server.port, callback: { port in
+                self.writeString(":\(port)")
         })
     }
-    
 }

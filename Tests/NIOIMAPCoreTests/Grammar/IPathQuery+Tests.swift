@@ -24,7 +24,7 @@ extension IPathQuery_Tests {
     func testEncode() {
         let inputs: [(IPathQuery, String, UInt)] = [
             (.init(command: nil), "/", #line),
-            (.init(command: .messageList(.init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test"))))), "/test", #line)
+            (.init(command: .messageList(.init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test"))))), "/test", #line),
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeIPathQuery($0) })
     }

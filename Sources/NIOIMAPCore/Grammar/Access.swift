@@ -23,8 +23,8 @@ public enum Access: Equatable {
 }
 
 // MARK: - Encoding
+
 extension EncodeBuffer {
-    
     @discardableResult mutating func writeAccess(_ data: Access) -> Int {
         switch data {
         case .submit(let user):
@@ -37,5 +37,4 @@ extension EncodeBuffer {
             return self.writeString("anonymous")
         }
     }
-    
 }

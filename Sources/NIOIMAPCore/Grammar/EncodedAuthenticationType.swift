@@ -17,7 +17,7 @@ import struct NIO.ByteBuffer
 /// RFC 5092
 public struct EncodedAuthenticationType: Equatable {
     public var authType: String
-    
+
     public init(authType: String) {
         self.authType = authType
     }

@@ -14,29 +14,25 @@
 
 /// See RFC 5092
 public struct IPartial: Equatable {
-    
     public var range: PartialRange
-    
+
     public init(range: PartialRange) {
         self.range = range
     }
-    
 }
 
 /// See RFC 5092
 public struct IPartialOnly: Equatable {
-    
     public var range: PartialRange
-    
+
     public init(range: PartialRange) {
         self.range = range
     }
-    
 }
 
 // MARK: - Encoding
+
 extension EncodeBuffer {
-    
     @discardableResult mutating func writeIPartial(_ data: IPartial) -> Int {
         self.writeString("/;PARTIAL=") +
             self.writePartialRange(data.range)
@@ -46,5 +42,4 @@ extension EncodeBuffer {
         self.writeString(";PARTIAL=") +
             self.writePartialRange(data.range)
     }
-    
 }

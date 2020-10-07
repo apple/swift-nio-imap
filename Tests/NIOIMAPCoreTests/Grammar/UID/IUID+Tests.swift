@@ -21,19 +21,17 @@ class IUID_Tests: EncodeTestClass {}
 // MARK: - Encoding
 
 extension IUID_Tests {
-    
     func testEncode_IUID() {
         let inputs: [(IUID, String, UInt)] = [
             (.init(uid: 123)!, "/;UID=123", #line),
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeIUID($0) })
     }
-    
+
     func testEncode_IUIDOnly() {
         let inputs: [(IUIDOnly, String, UInt)] = [
             (.init(uid: 123)!, ";UID=123", #line),
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeIUIDOnly($0) })
     }
-    
 }

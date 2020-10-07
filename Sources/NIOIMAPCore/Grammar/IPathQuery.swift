@@ -15,7 +15,7 @@
 /// RFC 5092
 public struct IPathQuery: Equatable {
     public var command: ICommand?
-    
+
     public init(command: ICommand?) {
         self.command = command
     }

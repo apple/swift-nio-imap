@@ -16,7 +16,7 @@
 public struct IUAVerifier: Equatable {
     public var uAuthMechanism: UAuthMechanism
     public var encodedUrlAuth: EncodedUrlAuth
-    
+
     public init(uAuthMechanism: UAuthMechanism, encodedUrlAuth: EncodedUrlAuth) {
         self.uAuthMechanism = uAuthMechanism
         self.encodedUrlAuth = encodedUrlAuth

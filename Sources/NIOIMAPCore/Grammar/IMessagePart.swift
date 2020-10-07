@@ -14,7 +14,6 @@
 
 /// RFC 7162
 public struct IMessagePart: Equatable {
-    
     public var mailboxReference: IMailboxReference
     public var iUID: IUID
     public var iSection: ISection?

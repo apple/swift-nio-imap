@@ -17,7 +17,7 @@ import struct NIO.ByteBuffer
 /// RFC 5092
 public struct EncodedSearch: Equatable {
     public var query: String
-    
+
     public init(query: String) {
         self.query = query
     }

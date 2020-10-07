@@ -14,15 +14,13 @@
 
 /// RFC 5092
 public struct UAuthMechanism: Equatable, RawRepresentable {
-    
     public var rawValue: String
-    
+
     public init(rawValue: String) {
         self.rawValue = rawValue
     }
-    
+
     public static let `internal` = Self(rawValue: "INTERNAL")
-    
 }
 
 // MARK: - Encoding

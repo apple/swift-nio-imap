@@ -14,27 +14,23 @@
 
 /// RFC 5092
 public struct IURLAuthRump: Equatable {
-    
     public var expire: Expire?
     public var access: Access
-    
+
     public init(expire: Expire? = nil, access: Access) {
         self.expire = expire
         self.access = access
     }
-    
 }
 
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    
     @discardableResult mutating func writeIURLAuthRump(_ data: IURLAuthRump) -> Int {
         self.writeIfExists(data.expire) { expire in
             self.writeExpire(expire)
         } +
-        self.writeString(";URLAUTH=") +
-        self.writeAccess(data.access)
+            self.writeString(";URLAUTH=") +
+            self.writeAccess(data.access)
     }
-    
 }

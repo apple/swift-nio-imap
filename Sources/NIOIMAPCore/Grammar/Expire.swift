@@ -14,22 +14,18 @@
 
 /// RFC 5092
 public struct Expire: Equatable {
-    
     public var dateTime: FullDateTime
-    
+
     public init(dateTime: FullDateTime) {
         self.dateTime = dateTime
     }
-    
 }
 
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    
     @discardableResult mutating func writeExpire(_ data: Expire) -> Int {
         self.writeString(";EXPIRE=") +
             self.writeFullDateTime(data.dateTime)
     }
-    
 }

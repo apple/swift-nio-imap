@@ -14,63 +14,57 @@
 
 /// RFC 3339 date-time
 public struct FullDateTime: Equatable {
-    
     public var date: FullDate
     public var time: FullTime
-    
+
     public init(date: FullDate, time: FullTime) {
         self.date = date
         self.time = time
     }
-    
 }
 
 public struct FullDate: Equatable {
-    
     public var year: Int
     public var month: Int
     public var day: Int
-    
+
     public init(year: Int, month: Int, day: Int) {
         self.year = year
         self.month = month
         self.day = day
     }
-    
 }
 
 public struct FullTime: Equatable {
-    
     public var hour: Int
     public var minute: Int
     public var second: Int
     public var fraction: Int?
-    
+
     public init(hour: Int, minute: Int, second: Int, fraction: Int? = nil) {
         self.hour = hour
         self.minute = minute
         self.second = second
         self.fraction = fraction
     }
-    
 }
 
 // MARK: - Encoding
+
 extension EncodeBuffer {
-    
     @discardableResult mutating func writeFullDateTime(_ data: FullDateTime) -> Int {
         self.writeFullDate(data.date) +
             self.writeString("T") +
             self.writeFullTime(data.time)
     }
-    
+
     @discardableResult mutating func writeFullDate(_ data: FullDate) -> Int {
         let year = self.padInteger(data.year, minimum: 4)
         let month = self.padInteger(data.month, minimum: 2)
         let day = self.padInteger(data.day, minimum: 2)
         return self.writeString("\(year)-\(month)-\(day)")
     }
-    
+
     @discardableResult mutating func writeFullTime(_ data: FullTime) -> Int {
         let hour = self.padInteger(data.hour, minimum: 2)
         let minute = self.padInteger(data.minute, minimum: 2)
@@ -80,7 +74,7 @@ extension EncodeBuffer {
                 self.writeString(".\(fraction)")
             })
     }
-    
+
     func padInteger(_ int: Int, minimum: Int) -> String {
         let short = "\(int)"
         if short.count < minimum {
@@ -89,5 +83,4 @@ extension EncodeBuffer {
             return short
         }
     }
-    
 }

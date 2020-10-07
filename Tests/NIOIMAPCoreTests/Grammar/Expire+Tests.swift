@@ -32,9 +32,8 @@ extension Expire_Tests {
                 ),
                 ";EXPIRE=1234-12-34T12:34:56.123456",
                 #line
-            )
+            ),
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeExpire($0) })
     }
-
 }

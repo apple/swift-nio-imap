@@ -32,7 +32,7 @@ extension IMessageList_Tests {
                 .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "box"), uidValidity: nil), encodedSearch: .init(query: "search")),
                 "box?search",
                 #line
-            )
+            ),
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeIMessageList($0) })
     }

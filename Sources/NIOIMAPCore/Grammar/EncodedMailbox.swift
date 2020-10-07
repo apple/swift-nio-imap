@@ -17,7 +17,7 @@ import struct NIO.ByteBuffer
 /// RFC 5092
 public struct EncodedMailbox: Equatable {
     public var mailbox: String
-    
+
     public init(mailbox: String) {
         self.mailbox = mailbox
     }

@@ -17,7 +17,7 @@ import struct NIO.ByteBuffer
 /// RFC 5092
 public struct EncodedUrlAuth: Equatable {
     public var data: String
-    
+
     public init(data: String) {
         self.data = data
     }

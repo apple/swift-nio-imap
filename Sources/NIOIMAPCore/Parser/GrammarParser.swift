@@ -220,31 +220,31 @@ extension GrammarParser {
             parseAttributeFlag_unslashed,
         ], buffer: &buffer, tracker: tracker)
     }
-    
+
     static func parseAuthImapUrl(buffer: inout ByteBuffer, tracker: StackTracker) throws -> AuthImapUrl {
-        try composite(buffer: &buffer, tracker: tracker, { buffer, tracker -> AuthImapUrl in
+        try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> AuthImapUrl in
             try fixedString("imap://", buffer: &buffer, tracker: tracker)
             let server = try self.parseIServer(buffer: &buffer, tracker: tracker)
             try fixedString("/", buffer: &buffer, tracker: tracker)
             let messagePart = try self.parseIMessagePart(buffer: &buffer, tracker: tracker)
             return .init(server: server, messagePart: messagePart)
-        })
+        }
     }
-    
+
     static func parseAuthImapUrlFull(buffer: inout ByteBuffer, tracker: StackTracker) throws -> AuthImapUrlFull {
-        try composite(buffer: &buffer, tracker: tracker, { buffer, tracker -> AuthImapUrlFull in
+        try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> AuthImapUrlFull in
             let imapUrl = try self.parseAuthImapUrl(buffer: &buffer, tracker: tracker)
             let urlAuth = try self.parseIURLAuth(buffer: &buffer, tracker: tracker)
             return .init(imapUrl: imapUrl, urlAuth: urlAuth)
-        })
+        }
     }
 
     static func parseAuthImapUrlRump(buffer: inout ByteBuffer, tracker: StackTracker) throws -> AuthImapUrlRump {
-        try composite(buffer: &buffer, tracker: tracker, { buffer, tracker -> AuthImapUrlRump in
+        try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> AuthImapUrlRump in
             let imapUrl = try self.parseAuthImapUrl(buffer: &buffer, tracker: tracker)
             let authRump = try self.parseIURLAuthRump(buffer: &buffer, tracker: tracker)
             return .init(imapUrl: imapUrl, authRump: authRump)
-        })
+        }
     }
 
     // authenticate    = "AUTHENTICATE" SP auth-type *(CRLF base64)
@@ -1138,37 +1138,37 @@ extension GrammarParser {
             return .init(authType: String(decoding: array, as: Unicode.UTF8.self))
         }
     }
-    
+
     static func parseEncodedMailbox(buffer: inout ByteBuffer, tracker: StackTracker) throws -> EncodedMailbox {
         try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> EncodedMailbox in
             let array = try ParserLibrary.parseOneOrMore(buffer: &buffer, tracker: tracker, parser: self.parseBChar).reduce([], +)
             return .init(mailbox: String(decoding: array, as: Unicode.UTF8.self))
         }
     }
-    
+
     static func parseEncodedSearch(buffer: inout ByteBuffer, tracker: StackTracker) throws -> EncodedSearch {
         try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> EncodedSearch in
             let array = try ParserLibrary.parseOneOrMore(buffer: &buffer, tracker: tracker, parser: self.parseBChar).reduce([], +)
             return .init(query: String(decoding: array, as: Unicode.UTF8.self))
         }
     }
-    
+
     static func parseEncodedSection(buffer: inout ByteBuffer, tracker: StackTracker) throws -> EncodedSection {
         try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> EncodedSection in
             let array = try ParserLibrary.parseOneOrMore(buffer: &buffer, tracker: tracker, parser: self.parseBChar).reduce([], +)
             return .init(section: String(decoding: array, as: Unicode.UTF8.self))
         }
     }
-    
+
     static func parseEncodedUser(buffer: inout ByteBuffer, tracker: StackTracker) throws -> EncodedUser {
         try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> EncodedUser in
             let array = try ParserLibrary.parseOneOrMore(buffer: &buffer, tracker: tracker, parser: self.parseAChar).reduce([], +)
             return .init(data: String(decoding: array, as: Unicode.UTF8.self))
         }
     }
-    
+
     static func parseEncodedURLAuth(buffer: inout ByteBuffer, tracker: StackTracker) throws -> EncodedUrlAuth {
-        try composite(buffer: &buffer, tracker: tracker, { buffer, tracker -> EncodedUrlAuth in
+        try composite(buffer: &buffer, tracker: tracker) { buffer, _ -> EncodedUrlAuth in
             var numParsed = 0
             var parsed = ByteBuffer()
             while numParsed < 32 {
@@ -1182,7 +1182,7 @@ extension GrammarParser {
                 numParsed += 1
             }
             return .init(data: String(buffer: parsed))
-        })
+        }
     }
 
     // enable-data     = "ENABLED" *(SP capability)
@@ -1370,7 +1370,7 @@ extension GrammarParser {
             return .examine(mailbox, params)
         }
     }
-    
+
     static func parseExpire(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Expire {
         try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Expire in
             try fixedString(";EXPIRE=", buffer: &buffer, tracker: tracker)
@@ -1391,33 +1391,33 @@ extension GrammarParser {
             return .fetch(sequence, att, modifiers)
         }
     }
-    
+
     static func parseAccess(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Access {
         func parseAccess_submit(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Access {
             try fixedString("submit+", buffer: &buffer, tracker: tracker)
             return .submit(try self.parseEncodedUser(buffer: &buffer, tracker: tracker))
         }
-        
+
         func parseAccess_user(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Access {
             try fixedString("user+", buffer: &buffer, tracker: tracker)
             return .user(try self.parseEncodedUser(buffer: &buffer, tracker: tracker))
         }
-        
+
         func parseAccess_authuser(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Access {
             try fixedString("authuser", buffer: &buffer, tracker: tracker)
             return .authUser
         }
-        
+
         func parseAccess_anonymous(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Access {
             try fixedString("anonymous", buffer: &buffer, tracker: tracker)
             return .anonymous
         }
-        
+
         return try oneOf([
             parseAccess_submit,
             parseAccess_user,
             parseAccess_authuser,
-            parseAccess_anonymous
+            parseAccess_anonymous,
         ], buffer: &buffer, tracker: tracker)
     }
 
@@ -1768,23 +1768,22 @@ extension GrammarParser {
     }
 
     static func parseICommand(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ICommand {
-        
         func parseICommand_list(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ICommand {
             .messageList(try self.parseIMessageList(buffer: &buffer, tracker: tracker))
         }
-        
+
         func parseICommand_part(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ICommand {
             let part = try self.parseIMessagePart(buffer: &buffer, tracker: tracker)
             let auth = try optional(buffer: &buffer, tracker: tracker, parser: self.parseIURLAuth)
             return .messagePart(part: part, urlAuth: auth)
         }
-    
+
         return try oneOf([
             parseICommand_part,
             parseICommand_list,
         ], buffer: &buffer, tracker: tracker)
     }
-    
+
     // id = "ID" SP id-params-list
     static func parseID(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [IDParameter] {
         try composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
@@ -1792,7 +1791,7 @@ extension GrammarParser {
             return try parseIDParamsList(buffer: &buffer, tracker: tracker)
         }
     }
-    
+
     static func parseINetworkPath(buffer: inout ByteBuffer, tracker: StackTracker) throws -> INetworkPath {
         try composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> INetworkPath in
             try fixedString("//", buffer: &buffer, tracker: tracker)
@@ -1801,7 +1800,7 @@ extension GrammarParser {
             return .init(server: server, query: query)
         }
     }
-    
+
     static func parseIAbsolutePath(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IAbsolutePath {
         try composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> IAbsolutePath in
             try fixedString("/", buffer: &buffer, tracker: tracker)
@@ -1809,19 +1808,18 @@ extension GrammarParser {
             return .init(command: command)
         }
     }
-    
+
     static func parseIAuth(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IAuth {
-        
         func parseIAuth_any(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IAuth {
             try fixedString("*", buffer: &buffer, tracker: tracker)
             return .any
         }
-        
+
         func parseIAuth_encoded(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IAuth {
             let type = try self.parseEncodedAuthenticationType(buffer: &buffer, tracker: tracker)
             return .type(type)
         }
-        
+
         return try composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
             try fixedString(";AUTH=", buffer: &buffer, tracker: tracker)
             return try oneOf([
@@ -1880,45 +1878,45 @@ extension GrammarParser {
         try fixedString("DONE", buffer: &buffer, tracker: tracker)
         try newline(buffer: &buffer, tracker: tracker)
     }
-    
+
     static func parseIPartial(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IPartial {
-        try composite(buffer: &buffer, tracker: tracker, { buffer, tracker -> IPartial in
+        try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> IPartial in
             try fixedString("/;PARTIAL=", buffer: &buffer, tracker: tracker)
             return .init(range: try self.parsePartialRange(buffer: &buffer, tracker: tracker))
-        })
+        }
     }
-    
+
     static func parseIPartialOnly(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IPartialOnly {
-        try composite(buffer: &buffer, tracker: tracker, { buffer, tracker -> IPartialOnly in
+        try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> IPartialOnly in
             try fixedString(";PARTIAL=", buffer: &buffer, tracker: tracker)
             return .init(range: try self.parsePartialRange(buffer: &buffer, tracker: tracker))
-        })
+        }
     }
-    
+
     static func parseIPathQuery(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IPathQuery {
-        try composite(buffer: &buffer, tracker: tracker, { buffer, tracker -> IPathQuery in
+        try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> IPathQuery in
             try fixedString("/", buffer: &buffer, tracker: tracker)
             let command = try optional(buffer: &buffer, tracker: tracker, parser: self.parseICommand)
             return .init(command: command)
-        })
+        }
     }
-    
+
     static func parseISection(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ISection {
-        try composite(buffer: &buffer, tracker: tracker, { buffer, tracker -> ISection in
+        try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> ISection in
             try fixedString("/;SECTION=", buffer: &buffer, tracker: tracker)
             return .init(encodedSection: try self.parseEncodedSection(buffer: &buffer, tracker: tracker))
-        })
+        }
     }
-    
+
     static func parseISectionOnly(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ISectionOnly {
-        try composite(buffer: &buffer, tracker: tracker, { buffer, tracker -> ISectionOnly in
+        try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> ISectionOnly in
             try fixedString(";SECTION=", buffer: &buffer, tracker: tracker)
             return .init(encodedSection: try self.parseEncodedSection(buffer: &buffer, tracker: tracker))
-        })
+        }
     }
-    
+
     static func parseIServer(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IServer {
-        try composite(buffer: &buffer, tracker: tracker, { buffer, tracker -> IServer in
+        try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> IServer in
             let info = try optional(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> IUserInfo in
                 let info = try self.parseIUserInfo(buffer: &buffer, tracker: tracker)
                 try fixedString("@", buffer: &buffer, tracker: tracker)
@@ -1930,31 +1928,30 @@ extension GrammarParser {
                 return try self.parseNumber(buffer: &buffer, tracker: tracker)
             })
             return .init(userInfo: info, host: host, port: port)
-        })
+        }
     }
-    
+
     static func parseHost(buffer: inout ByteBuffer, tracker: StackTracker) throws -> String {
-     
         // TODO: Enforce IPv6 rules RFC 3986 URI-GEN
         func parseHost_ipv6(buffer: inout ByteBuffer, tracker: StackTracker) throws -> String {
             try self.parseAtom(buffer: &buffer, tracker: tracker)
         }
-        
+
         // TODO: Enforce IPv6 rules RFC 3986 URI-GEN
         func parseHost_future(buffer: inout ByteBuffer, tracker: StackTracker) throws -> String {
             try self.parseAtom(buffer: &buffer, tracker: tracker)
         }
-        
+
         func parseHost_literal(buffer: inout ByteBuffer, tracker: StackTracker) throws -> String {
             try fixedString("[", buffer: &buffer, tracker: tracker)
             let address = try oneOf([
                 parseHost_ipv6,
-                parseHost_future
+                parseHost_future,
             ], buffer: &buffer, tracker: tracker)
             try fixedString("]", buffer: &buffer, tracker: tracker)
             return address
         }
-        
+
         func parseHost_regularName(buffer: inout ByteBuffer, tracker: StackTracker) throws -> String {
             var newBuffer = ByteBuffer()
             while true {
@@ -1967,7 +1964,7 @@ extension GrammarParser {
             }
             return String(buffer: newBuffer)
         }
-        
+
         // TODO: This isn't great, but it is functional. Perhaps make it actually enforce IPv4 rules
         func parseHost_ipv4(buffer: inout ByteBuffer, tracker: StackTracker) throws -> String {
             let num1 = try self.parseNumber(buffer: &buffer, tracker: tracker)
@@ -1979,125 +1976,122 @@ extension GrammarParser {
             let num4 = try self.parseNumber(buffer: &buffer, tracker: tracker)
             return "\(num1).\(num2).\(num3).\(num4)"
         }
-        
+
         return try oneOf([
             parseHost_literal,
             parseHost_regularName,
-            parseHost_ipv4
+            parseHost_ipv4,
         ], buffer: &buffer, tracker: tracker)
     }
-    
+
     static func parseIMailboxReference(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IMailboxReference {
-        try composite(buffer: &buffer, tracker: tracker, { buffer, tracker -> IMailboxReference in
+        try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> IMailboxReference in
             let mailbox = try self.parseEncodedMailbox(buffer: &buffer, tracker: tracker)
             let uidValidity = try optional(buffer: &buffer, tracker: tracker, parser: self.parseUIDValidity)
             return .init(encodeMailbox: mailbox, uidValidity: uidValidity)
-        })
+        }
     }
-    
+
     static func parseIMessageList(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IMessageList {
-        try composite(buffer: &buffer, tracker: tracker, { buffer, tracker -> IMessageList in
+        try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> IMessageList in
             let mailboxRef = try self.parseIMailboxReference(buffer: &buffer, tracker: tracker)
             let query = try optional(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> EncodedSearch in
                 try fixedString("?", buffer: &buffer, tracker: tracker)
                 return try self.parseEncodedSearch(buffer: &buffer, tracker: tracker)
             })
             return .init(mailboxReference: mailboxRef, encodedSearch: query)
-        })
+        }
     }
-    
+
     static func parseImapUrl(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ImapUrl {
-        try composite(buffer: &buffer, tracker: tracker, { buffer, tracker -> ImapUrl in
+        try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> ImapUrl in
             try fixedString("imap://", buffer: &buffer, tracker: tracker)
             let server = try self.parseIServer(buffer: &buffer, tracker: tracker)
             let query = try self.parseIPathQuery(buffer: &buffer, tracker: tracker)
             return .init(server: server, query: query)
-        })
+        }
     }
-    
+
     static func parseImapUrlRel(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ImapUrlRel {
-        
         func parseImapUrlRef_absolute(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ImapUrlRel {
             .absolutePath(try self.parseIAbsolutePath(buffer: &buffer, tracker: tracker))
         }
-        
+
         func parseImapUrlRef_network(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ImapUrlRel {
             .networkPath(try self.parseINetworkPath(buffer: &buffer, tracker: tracker))
         }
-        
+
         func parseImapUrlRef_relative(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ImapUrlRel {
             .relativePath(try self.parseIRelativePath(buffer: &buffer, tracker: tracker))
         }
-        
+
         func parseImapUrlRef_empty(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ImapUrlRel {
             .empty
         }
-        
+
         return try oneOf([
             parseImapUrlRef_network,
             parseImapUrlRef_absolute,
             parseImapUrlRef_relative,
-            parseImapUrlRef_empty
+            parseImapUrlRef_empty,
         ], buffer: &buffer, tracker: tracker)
     }
-    
+
     static func parseIRelativePath(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IRelativePath {
-     
         func parseIRelativePath_list(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IRelativePath {
-            return .list(try self.parseIMessageList(buffer: &buffer, tracker: tracker))
+            .list(try self.parseIMessageList(buffer: &buffer, tracker: tracker))
         }
-        
+
         func parseIRelativePath_messageOrPartial(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IRelativePath {
-            return .messageOrPartial(try self.parseIMessageOrPartial(buffer: &buffer, tracker: tracker))
+            .messageOrPartial(try self.parseIMessageOrPartial(buffer: &buffer, tracker: tracker))
         }
-        
+
         return try oneOf([
             parseIRelativePath_list,
-            parseIRelativePath_messageOrPartial
+            parseIRelativePath_messageOrPartial,
         ], buffer: &buffer, tracker: tracker)
     }
-    
+
     static func parseIMessagePart(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IMessagePart {
-        try composite(buffer: &buffer, tracker: tracker, { buffer, tracker -> IMessagePart in
+        try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> IMessagePart in
             var ref = try self.parseIMailboxReference(buffer: &buffer, tracker: tracker)
-            
+
             var uid: IUID = IUID(uid: 1)!
-            if ref.uidValidity == nil && ref.encodedMailbox.mailbox.last == Character(.init(UInt8(ascii: "/"))) {
-                try composite(buffer: &buffer, tracker: tracker, { buffer, tracker in
+            if ref.uidValidity == nil, ref.encodedMailbox.mailbox.last == Character(.init(UInt8(ascii: "/"))) {
+                try composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
                     ref.encodedMailbox.mailbox = String(ref.encodedMailbox.mailbox.dropLast())
                     var newBuffer = ByteBuffer(bytes: [UInt8(ascii: "/")])
                     newBuffer.writeBuffer(&buffer)
                     uid = try self.parseIUID(buffer: &newBuffer, tracker: tracker)
                     buffer = newBuffer
-                })
+                }
             } else {
                 uid = try self.parseIUID(buffer: &buffer, tracker: tracker)
             }
-            
+
             var section = try optional(buffer: &buffer, tracker: tracker, parser: self.parseISection)
             var partial: IPartial?
             if section?.encodedSection.section.last == Character(.init(UInt8(ascii: "/"))) {
-                try composite(buffer: &buffer, tracker: tracker, { buffer, tracker in
+                try composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
                     section!.encodedSection.section = String(section!.encodedSection.section.dropLast())
                     var newBuffer = ByteBuffer(bytes: [UInt8(ascii: "/")])
                     newBuffer.writeBuffer(&buffer)
                     partial = try optional(buffer: &newBuffer, tracker: tracker, parser: self.parseIPartial)
                     buffer = newBuffer
-                })
+                }
             } else {
                 partial = try optional(buffer: &buffer, tracker: tracker, parser: self.parseIPartial)
             }
             return .init(mailboxReference: ref, iUID: uid, iSection: section, iPartial: partial)
-        })
+        }
     }
-    
+
     static func parseIMessageOrPartial(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IMessageOrPartial {
-        
         func parseIMessageOrPartial_partialOnly(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IMessageOrPartial {
             let partial = try self.parseIPartialOnly(buffer: &buffer, tracker: tracker)
             return .partialOnly(partial)
         }
-        
+
         func parseIMessageOrPartial_sectionPartial(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IMessageOrPartial {
             var section = try self.parseISectionOnly(buffer: &buffer, tracker: tracker)
             if section.encodedSection.section.last == Character(.init(UInt8(ascii: "/"))) {
@@ -2116,7 +2110,7 @@ extension GrammarParser {
             })
             return .sectionPartial(section: section, partial: partial)
         }
-        
+
         func parseIMessageOrPartial_uidSectionPartial(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IMessageOrPartial {
             let uid = try self.parseIUIDOnly(buffer: &buffer, tracker: tracker)
             var section = try optional(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> ISectionOnly in
@@ -2139,7 +2133,7 @@ extension GrammarParser {
             })
             return .uidSectionPartial(uid: uid, section: section, partial: partial)
         }
-        
+
         func parseIMessageOrPartial_refUidSectionPartial(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IMessageOrPartial {
             let ref = try self.parseIMailboxReference(buffer: &buffer, tracker: tracker)
             let uid = try self.parseIUIDOnly(buffer: &buffer, tracker: tracker)
@@ -2163,7 +2157,7 @@ extension GrammarParser {
             })
             return .refUidSectionPartial(ref: ref, uid: uid, section: section, partial: partial)
         }
-        
+
         return try oneOf([
             parseIMessageOrPartial_refUidSectionPartial,
             parseIMessageOrPartial_uidSectionPartial,
@@ -2171,9 +2165,8 @@ extension GrammarParser {
             parseIMessageOrPartial_partialOnly,
         ], buffer: &buffer, tracker: tracker)
     }
-    
+
     static func parseUChar(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [UInt8] {
-        
         func parseUChar_unreserved(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [UInt8] {
             guard let num = buffer.readInteger(as: UInt8.self) else {
                 throw _IncompleteMessage()
@@ -2183,7 +2176,7 @@ extension GrammarParser {
             }
             return [num]
         }
-        
+
         func parseUChar_subDelimsSH(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [UInt8] {
             guard let num = buffer.readInteger(as: UInt8.self) else {
                 throw _IncompleteMessage()
@@ -2193,7 +2186,7 @@ extension GrammarParser {
             }
             return [num]
         }
-        
+
         // "%" HEXDIGIT HEXDIGIT
         // e.g. %1F
         func parseUChar_pctEncoded(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [UInt8] {
@@ -2204,7 +2197,7 @@ extension GrammarParser {
             else {
                 throw _IncompleteMessage()
             }
-            
+
             var h1 = _h1
             var h2 = _h2
             if h1 > 70 {
@@ -2213,15 +2206,15 @@ extension GrammarParser {
             if h2 > 70 {
                 h2 -= 70
             }
-            
+
             guard (h1 >= 48 && h1 <= 57) || (h1 >= 65 && h1 <= 70) else {
                 throw ParserError(hint: "Expected hex digit, got \(_h1)")
             }
-            
+
             guard (h2 >= 48 && h2 <= 57) || (h2 >= 65 && h2 <= 70) else {
                 throw ParserError(hint: "Expected hex digit, got \(_h2)")
             }
-            
+
 //            if (UInt8(ascii: "0")...UInt8(ascii: "9")).contains(h1) {
 //                h1 -= 48
 //            } else {
@@ -2233,20 +2226,19 @@ extension GrammarParser {
 //            } else {
 //                h2 -= 55
 //            }
-            
+
 //            let result = (h1 << 4) | (h2 & 0xFF)
             return [UInt8(ascii: "%"), h1, h2]
         }
-        
+
         return try oneOf([
             parseUChar_unreserved,
             parseUChar_subDelimsSH,
-            parseUChar_pctEncoded
+            parseUChar_pctEncoded,
         ], buffer: &buffer, tracker: tracker)
     }
-    
+
     static func parseAChar(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [UInt8] {
-        
         func parseAChar_other(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [UInt8] {
             guard let char = buffer.readInteger(as: UInt8.self) else {
                 throw _IncompleteMessage()
@@ -2258,15 +2250,14 @@ extension GrammarParser {
                 throw ParserError(hint: "Expect achar, got \(char)")
             }
         }
-        
+
         return try oneOf([
             parseUChar,
             parseAChar_other,
         ], buffer: &buffer, tracker: tracker)
     }
-    
+
     static func parseBChar(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [UInt8] {
-        
         func parseBChar_other(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [UInt8] {
             guard let char = buffer.readInteger(as: UInt8.self) else {
                 throw _IncompleteMessage()
@@ -2278,13 +2269,13 @@ extension GrammarParser {
                 throw ParserError(hint: "Expect achar, got \(char)")
             }
         }
-        
+
         return try oneOf([
             parseAChar,
             parseBChar_other,
         ], buffer: &buffer, tracker: tracker)
     }
-    
+
     static func parseIUID(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IUID {
         try composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             try fixedString("/;UID=", buffer: &buffer, tracker: tracker)
@@ -2294,7 +2285,7 @@ extension GrammarParser {
             return uid
         }
     }
-    
+
     static func parseIUIDOnly(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IUIDOnly {
         try composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             try fixedString(";UID=", buffer: &buffer, tracker: tracker)
@@ -2304,43 +2295,43 @@ extension GrammarParser {
             return uid
         }
     }
-    
+
     static func parseIURLAuth(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IUrlAuth {
-        try composite(buffer: &buffer, tracker: tracker, { buffer, tracker -> IUrlAuth in
+        try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> IUrlAuth in
             let rump = try self.parseIURLAuthRump(buffer: &buffer, tracker: tracker)
             let verifier = try self.parseIUAVerifier(buffer: &buffer, tracker: tracker)
             return .init(auth: rump, verifier: verifier)
-        })
+        }
     }
-    
+
     static func parseIURLAuthRump(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IURLAuthRump {
-        try composite(buffer: &buffer, tracker: tracker, { buffer, tracker -> IURLAuthRump in
+        try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> IURLAuthRump in
             let expiry = try optional(buffer: &buffer, tracker: tracker, parser: self.parseExpire)
             try fixedString(";URLAUTH=", buffer: &buffer, tracker: tracker)
             let access = try self.parseAccess(buffer: &buffer, tracker: tracker)
             return .init(expire: expiry, access: access)
-        })
+        }
     }
-    
+
     static func parseIUAVerifier(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IUAVerifier {
-        try composite(buffer: &buffer, tracker: tracker, { buffer, tracker -> IUAVerifier in
+        try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> IUAVerifier in
             try fixedString(":", buffer: &buffer, tracker: tracker)
             let authMechanism = try self.parseUAuthMechanism(buffer: &buffer, tracker: tracker)
             try fixedString(":", buffer: &buffer, tracker: tracker)
             let urlAuth = try self.parseEncodedURLAuth(buffer: &buffer, tracker: tracker)
             return .init(uAuthMechanism: authMechanism, encodedUrlAuth: urlAuth)
-        })
+        }
     }
-    
+
     static func parseIUserInfo(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IUserInfo {
-        try composite(buffer: &buffer, tracker: tracker, { buffer, tracker -> IUserInfo in
+        try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> IUserInfo in
             let encodedUser = try optional(buffer: &buffer, tracker: tracker, parser: self.parseEncodedUser)
             let iauth = try optional(buffer: &buffer, tracker: tracker, parser: self.parseIAuth)
             guard (encodedUser != nil || iauth != nil) else {
                 throw ParserError(hint: "Need one of encoded user or iauth")
             }
             return .init(encodedUser: encodedUser, iAuth: iauth)
-        })
+        }
     }
 
     // list            = "LIST" [SP list-select-opts] SP mailbox SP mbox-or-pat [SP list-return-opts]
@@ -2406,7 +2397,7 @@ extension GrammarParser {
             parseListSelectIndependentOption_optionExtension,
         ], buffer: &buffer, tracker: tracker)
     }
-    
+
     static func parseFullDateTime(buffer: inout ByteBuffer, tracker: StackTracker) throws -> FullDateTime {
         try composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             let date = try self.parseFullDate(buffer: &buffer, tracker: tracker)
@@ -2415,18 +2406,18 @@ extension GrammarParser {
             return .init(date: date, time: time)
         }
     }
-    
+
     static func parseFullDate(buffer: inout ByteBuffer, tracker: StackTracker) throws -> FullDate {
-        try composite(buffer: &buffer, tracker: tracker, { buffer, tracker in
+        try composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             let year = try parse4Digit(buffer: &buffer, tracker: tracker)
             try fixedString("-", buffer: &buffer, tracker: tracker)
             let month = try parse2Digit(buffer: &buffer, tracker: tracker)
             try fixedString("-", buffer: &buffer, tracker: tracker)
             let day = try parse2Digit(buffer: &buffer, tracker: tracker)
             return .init(year: year, month: month, day: day)
-        })
+        }
     }
-    
+
     static func parseFullTime(buffer: inout ByteBuffer, tracker: StackTracker) throws -> FullTime {
         let hour = try parse2Digit(buffer: &buffer, tracker: tracker)
         try fixedString(":", buffer: &buffer, tracker: tracker)
@@ -3542,14 +3533,13 @@ extension GrammarParser {
             return Int(num1) ... Int(upper2.partialValue)
         }
     }
-    
+
     static func parsePartialRange(buffer: inout ByteBuffer, tracker: StackTracker) throws -> PartialRange {
-        
         func parsePartialRange_length(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Int {
             try fixedString(".", buffer: &buffer, tracker: tracker)
             return try self.parseNumber(buffer: &buffer, tracker: tracker)
         }
-        
+
         return try composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> PartialRange in
             let offset = try self.parseNumber(buffer: &buffer, tracker: tracker)
             let length = try optional(buffer: &buffer, tracker: tracker, parser: parsePartialRange_length)
@@ -5212,13 +5202,13 @@ extension GrammarParser {
             char.isTextChar
         }
     }
-    
+
     static func parseUAuthMechanism(buffer: inout ByteBuffer, tracker: StackTracker) throws -> UAuthMechanism {
         let string = try ParserLibrary.parseOneOrMoreCharacters(buffer: &buffer, tracker: tracker, where: { char in
             switch char {
-            case UInt8(ascii: "a")...UInt8(ascii: "z"),
-                 UInt8(ascii: "A")...UInt8(ascii: "Z"),
-                 UInt8(ascii: "0")...UInt8(ascii: "9"),
+            case UInt8(ascii: "a") ... UInt8(ascii: "z"),
+                 UInt8(ascii: "A") ... UInt8(ascii: "Z"),
+                 UInt8(ascii: "0") ... UInt8(ascii: "9"),
                  UInt8(ascii: "-"),
                  UInt8(ascii: "."):
                 return true
@@ -5339,17 +5329,17 @@ extension GrammarParser {
         }
         return uid
     }
-    
+
     // uniqueid        = nz-number
     static func parseUIDValidity(buffer: inout ByteBuffer, tracker: StackTracker) throws -> UIDValidity {
-        try composite(buffer: &buffer, tracker: tracker, { buffer, tracker in
+        try composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             try fixedString(";UIDVALIDITY=", buffer: &buffer, tracker: tracker)
             let num = try self.parseNZNumber(buffer: &buffer, tracker: tracker)
             guard let uid = UIDValidity(uid: num) else {
                 throw ParserError(hint: "\(num) is not a valid UID")
             }
             return uid
-        })
+        }
     }
 
     // unsubscribe     = "UNSUBSCRIBE" SP mailbox

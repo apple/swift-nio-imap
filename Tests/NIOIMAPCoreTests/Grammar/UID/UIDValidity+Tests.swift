@@ -21,12 +21,10 @@ class UIDValidity_Tests: EncodeTestClass {}
 // MARK: - Encoding
 
 extension UIDValidity_Tests {
-    
     func testEncode() {
         let inputs: [(UIDValidity, String, UInt)] = [
             (.init(uid: 123)!, ";UIDVALIDITY=123", #line),
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeUIDValidaty($0) })
     }
-    
 }

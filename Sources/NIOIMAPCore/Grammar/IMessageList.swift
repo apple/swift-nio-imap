@@ -14,25 +14,22 @@
 
 /// RFC 5092
 public struct IMessageList: Equatable {
-    
     public var mailboxReference: IMailboxReference
     public var encodedSearch: EncodedSearch?
-    
+
     public init(mailboxReference: IMailboxReference, encodedSearch: EncodedSearch? = nil) {
         self.mailboxReference = mailboxReference
         self.encodedSearch = encodedSearch
     }
-    
 }
 
 // MARK: - Encoding
+
 extension EncodeBuffer {
-    
     @discardableResult mutating func writeIMessageList(_ ref: IMessageList) -> Int {
         self.writeIMailboxReference(ref.mailboxReference) +
             self.writeIfExists(ref.encodedSearch, callback: { search in
                 self.writeString("?") + self.writeEncodedSearch(search)
             })
     }
-    
 }
