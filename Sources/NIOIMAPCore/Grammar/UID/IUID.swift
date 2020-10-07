@@ -32,7 +32,7 @@ public struct IUIDOnly: Equatable {
 
     public init(uid: Int) throws {
         guard uid > 0 else {
-            throw InvalidUID() 
+            throw InvalidUID()
         }
         self.uid = uid
     }
