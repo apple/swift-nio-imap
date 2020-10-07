@@ -2085,15 +2085,15 @@ extension ParserUnitTests {
             testFunction: GrammarParser.parseExpire,
             validInputs: [
                 (
-                    ";EXPIRE=1234-12-34T12:34:56",
+                    ";EXPIRE=1234-12-20T12:34:56",
                     "\r",
-                    Expire(dateTime: FullDateTime(date: FullDate(year: 1234, month: 12, day: 34), time: FullTime(hour: 12, minute: 34, second: 56))),
+                    Expire(dateTime: FullDateTime(date: FullDate(year: 1234, month: 12, day: 20), time: FullTime(hour: 12, minute: 34, second: 56))),
                     #line
                 ),
                 (
-                    ";EXPIRE=1234-12-34t12:34:56",
+                    ";EXPIRE=1234-12-20t12:34:56",
                     "\r",
-                    Expire(dateTime: FullDateTime(date: FullDate(year: 1234, month: 12, day: 34), time: FullTime(hour: 12, minute: 34, second: 56))),
+                    Expire(dateTime: FullDateTime(date: FullDate(year: 1234, month: 12, day: 20), time: FullTime(hour: 12, minute: 34, second: 56))),
                     #line
                 ),
             ],
@@ -2206,9 +2206,9 @@ extension ParserUnitTests {
             testFunction: GrammarParser.parseFullDateTime,
             validInputs: [
                 (
-                    "1234-12-34T11:22:33",
+                    "1234-12-20T11:22:33",
                     " ",
-                    .init(date: .init(year: 1234, month: 12, day: 34), time: .init(hour: 11, minute: 22, second: 33)),
+                    .init(date: .init(year: 1234, month: 12, day: 20), time: .init(hour: 11, minute: 22, second: 33)),
                     #line
                 ),
             ],

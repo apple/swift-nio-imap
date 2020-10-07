@@ -26,11 +26,11 @@ extension Expire_Tests {
             (
                 .init(
                     dateTime: .init(
-                        date: .init(year: 1234, month: 12, day: 34),
+                        date: .init(year: 1234, month: 12, day: 20),
                         time: .init(hour: 12, minute: 34, second: 56, fraction: 123456)
                     )
                 ),
-                ";EXPIRE=1234-12-34T12:34:56.123456",
+                ";EXPIRE=1234-12-20T12:34:56.123456",
                 #line
             ),
         ]
