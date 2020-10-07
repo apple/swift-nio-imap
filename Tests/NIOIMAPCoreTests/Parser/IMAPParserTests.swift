@@ -614,10 +614,10 @@ extension ParserUnitTests {
     }
 }
 
-// MARK: - parseAuthIMAPUrl
+// MARK: - parseAuthIMAPURL
 
 extension ParserUnitTests {
-    func testParseAuthIMAPUrl() {
+    func testParseAuthIMAPURL() {
         self.iterateTests(
             testFunction: GrammarParser.parseAuthIMAPURL,
             validInputs: [
@@ -629,17 +629,17 @@ extension ParserUnitTests {
     }
 }
 
-// MARK: - parseAuthIMAPUrlFull
+// MARK: - parseAuthIMAPURLFull
 
 extension ParserUnitTests {
-    func testParseAuthIMAPUrlFull() {
+    func testParseAuthIMAPURLFull() {
         self.iterateTests(
             testFunction: GrammarParser.parseAuthIMAPURLFull,
             validInputs: [
                 (
                     "imap://localhost/test/;UID=123;URLAUTH=anonymous:INTERNAL:01234567890123456789012345678901",
                     " ",
-                    .init(imapUrl: .init(server: .init(host: "localhost"), messagePart: .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: try! .init(uid: 123))), urlAuth: .init(auth: .init(access: .anonymous), verifier: .init(uAuthMechanism: .internal, encodedUrlAuth: .init(data: "01234567890123456789012345678901")))),
+                    .init(imapURL: .init(server: .init(host: "localhost"), messagePart: .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: try! .init(uid: 123))), urlAuth: .init(auth: .init(access: .anonymous), verifier: .init(uAuthMechanism: .internal, encodedURLAuth: .init(data: "01234567890123456789012345678901")))),
                     #line
                 ),
             ],
@@ -649,17 +649,17 @@ extension ParserUnitTests {
     }
 }
 
-// MARK: - parseAuthIMAPUrlRump
+// MARK: - parseAuthIMAPURLRump
 
 extension ParserUnitTests {
-    func testParseAuthIMAPUrlRump() {
+    func testParseAuthIMAPURLRump() {
         self.iterateTests(
             testFunction: GrammarParser.parseAuthIMAPURLRump,
             validInputs: [
                 (
                     "imap://localhost/test/;UID=123;URLAUTH=anonymous",
                     " ",
-                    .init(imapUrl: .init(server: .init(host: "localhost"), messagePart: .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: try! .init(uid: 123))), authRump: .init(access: .anonymous)),
+                    .init(imapURL: .init(server: .init(host: "localhost"), messagePart: .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: try! .init(uid: 123))), authRump: .init(access: .anonymous)),
                     #line
                 ),
             ],
@@ -1590,7 +1590,7 @@ extension ParserUnitTests {
             validInputs: [
                 ("test", " ", .messageList(.init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")))), #line),
                 ("test/;UID=123", " ", .messagePart(part: .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: try! .init(uid: 123)), urlAuth: nil), #line),
-                ("test/;UID=123;URLAUTH=anonymous:INTERNAL:01234567890123456789012345678901", " ", .messagePart(part: .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: try! .init(uid: 123)), urlAuth: .init(auth: .init(access: .anonymous), verifier: .init(uAuthMechanism: .internal, encodedUrlAuth: .init(data: "01234567890123456789012345678901")))), #line),
+                ("test/;UID=123;URLAUTH=anonymous:INTERNAL:01234567890123456789012345678901", " ", .messagePart(part: .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: try! .init(uid: 123)), urlAuth: .init(auth: .init(access: .anonymous), verifier: .init(uAuthMechanism: .internal, encodedURLAuth: .init(data: "01234567890123456789012345678901")))), #line),
             ],
             parserErrorInputs: [
                 ],
@@ -1649,7 +1649,7 @@ extension ParserUnitTests {
         self.iterateTests(
             testFunction: GrammarParser.parseIURLAuth,
             validInputs: [
-                (";URLAUTH=anonymous:INTERNAL:01234567890123456789012345678901", " ", .init(auth: .init(access: .anonymous), verifier: .init(uAuthMechanism: .internal, encodedUrlAuth: .init(data: "01234567890123456789012345678901"))), #line),
+                (";URLAUTH=anonymous:INTERNAL:01234567890123456789012345678901", " ", .init(auth: .init(access: .anonymous), verifier: .init(uAuthMechanism: .internal, encodedURLAuth: .init(data: "01234567890123456789012345678901"))), #line),
             ],
             parserErrorInputs: [
                 ],
@@ -1689,7 +1689,7 @@ extension ParserUnitTests {
         self.iterateTests(
             testFunction: GrammarParser.parseIUAVerifier,
             validInputs: [
-                (":INTERNAL:01234567890123456789012345678901", " ", .init(uAuthMechanism: .internal, encodedUrlAuth: .init(data: "01234567890123456789012345678901")), #line),
+                (":INTERNAL:01234567890123456789012345678901", " ", .init(uAuthMechanism: .internal, encodedURLAuth: .init(data: "01234567890123456789012345678901")), #line),
             ],
             parserErrorInputs: [
                 ],
@@ -1917,10 +1917,10 @@ extension ParserUnitTests {
     }
 }
 
-// MARK: - parseEncodedUrlAuth
+// MARK: - parseEncodedURLAuth
 
 extension ParserUnitTests {
-    func testParseEncodedUrlAuth() {
+    func testParseEncodedURLAuth() {
         self.iterateTests(
             testFunction: GrammarParser.parseEncodedURLAuth,
             validInputs: [
@@ -2556,10 +2556,10 @@ extension ParserUnitTests {
     }
 }
 
-// MARK: - parseIMapUrl
+// MARK: - parseIMapURL
 
 extension ParserUnitTests {
-    func testParseIMAPUrl() {
+    func testParseIMAPURL() {
         self.iterateTests(
             testFunction: GrammarParser.parseIMAPURL,
             validInputs: [
@@ -2573,10 +2573,10 @@ extension ParserUnitTests {
     }
 }
 
-// MARK: - parseIMapUrlRel
+// MARK: - parseIMapURLRel
 
 extension ParserUnitTests {
-    func testParseIMAPUrlRel() {
+    func testParseIMAPURLRel() {
         self.iterateTests(
             testFunction: GrammarParser.parseRelativeIMAPURL,
             validInputs: [

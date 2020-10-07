@@ -25,7 +25,7 @@ extension ICommand_Tests {
         let inputs: [(ICommand, String, UInt)] = [
             (.messageList(.init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")))), "test", #line),
             (.messagePart(part: .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: try! .init(uid: 123)), urlAuth: nil), "test/;UID=123", #line),
-            (.messagePart(part: .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: try! .init(uid: 123)), urlAuth: .init(auth: .init(access: .anonymous), verifier: .init(uAuthMechanism: .internal, encodedUrlAuth: .init(data: "01234567890123456789012345678901")))), "test/;UID=123;URLAUTH=anonymous:INTERNAL:01234567890123456789012345678901", #line),
+            (.messagePart(part: .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: try! .init(uid: 123)), urlAuth: .init(auth: .init(access: .anonymous), verifier: .init(uAuthMechanism: .internal, encodedURLAuth: .init(data: "01234567890123456789012345678901")))), "test/;UID=123;URLAUTH=anonymous:INTERNAL:01234567890123456789012345678901", #line),
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeICommand($0) })
     }

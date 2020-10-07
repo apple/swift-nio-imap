@@ -13,7 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 /// RFC 5092
-public struct IUrlAuth: Equatable {
+public struct IURLAuth: Equatable {
     public var auth: IURLAuthRump
     public var verifier: IUAVerifier
 
@@ -26,7 +26,7 @@ public struct IUrlAuth: Equatable {
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeIUrlAuth(_ data: IUrlAuth) -> Int {
+    @discardableResult mutating func writeIURLAuth(_ data: IURLAuth) -> Int {
         self.writeIURLAuthRump(data.auth) +
             self.writeIUAVerifier(data.verifier)
     }

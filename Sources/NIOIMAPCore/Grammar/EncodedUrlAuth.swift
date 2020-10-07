@@ -15,7 +15,7 @@
 import struct NIO.ByteBuffer
 
 /// RFC 5092
-public struct EncodedUrlAuth: Equatable {
+public struct EncodedURLAuth: Equatable {
     public var data: String
 
     public init(data: String) {
@@ -24,7 +24,7 @@ public struct EncodedUrlAuth: Equatable {
 }
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeEncodedUrlAuth(_ data: EncodedUrlAuth) -> Int {
+    @discardableResult mutating func writeEncodedURLAuth(_ data: EncodedURLAuth) -> Int {
         self.writeString(data.data)
     }
 }

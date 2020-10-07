@@ -15,7 +15,7 @@
 /// RFC 5092
 public enum ICommand: Equatable {
     case messageList(IMessageList)
-    case messagePart(part: IMessagePart, urlAuth: IUrlAuth?)
+    case messagePart(part: IMessagePart, urlAuth: IURLAuth?)
 }
 
 // MARK: - Encoding
@@ -28,7 +28,7 @@ extension EncodeBuffer {
         case .messagePart(part: let part, urlAuth: let urlAuth):
             return self.writeIMessagePart(part) +
                 self.writeIfExists(urlAuth, callback: { urlAuth in
-                    self.writeIUrlAuth(urlAuth)
+                    self.writeIURLAuth(urlAuth)
                 })
         }
     }

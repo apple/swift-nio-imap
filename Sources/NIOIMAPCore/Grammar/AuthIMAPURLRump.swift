@@ -16,11 +16,11 @@ import struct NIO.ByteBuffer
 
 /// RFC 5092
 public struct AuthIMAPURLRump: Equatable {
-    public var imapUrl: AuthIMAPURL
+    public var imapURL: AuthIMAPURL
     public var authRump: IURLAuthRump
 
-    public init(imapUrl: AuthIMAPURL, authRump: IURLAuthRump) {
-        self.imapUrl = imapUrl
+    public init(imapURL: AuthIMAPURL, authRump: IURLAuthRump) {
+        self.imapURL = imapURL
         self.authRump = authRump
     }
 }
@@ -29,7 +29,7 @@ public struct AuthIMAPURLRump: Equatable {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeAuthIMAPURLRump(_ data: AuthIMAPURLRump) -> Int {
-        self.writeAuthIMAPURL(data.imapUrl) +
+        self.writeAuthIMAPURL(data.imapURL) +
             self.writeIURLAuthRump(data.authRump)
     }
 }

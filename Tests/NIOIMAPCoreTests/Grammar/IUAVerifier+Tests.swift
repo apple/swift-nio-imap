@@ -23,7 +23,7 @@ class IUAVerifier_Tests: EncodeTestClass {}
 extension IUAVerifier_Tests {
     func testEncode() {
         let inputs: [(IUAVerifier, String, UInt)] = [
-            (.init(uAuthMechanism: .internal, encodedUrlAuth: .init(data: "test")), ":INTERNAL:test", #line),
+            (.init(uAuthMechanism: .internal, encodedURLAuth: .init(data: "test")), ":INTERNAL:test", #line),
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeIUAVerifier($0) })
     }

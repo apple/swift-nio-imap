@@ -15,11 +15,11 @@
 /// RFC 5092
 public struct IUAVerifier: Equatable {
     public var uAuthMechanism: UAuthMechanism
-    public var encodedUrlAuth: EncodedUrlAuth
+    public var encodedURLAuth: EncodedURLAuth
 
-    public init(uAuthMechanism: UAuthMechanism, encodedUrlAuth: EncodedUrlAuth) {
+    public init(uAuthMechanism: UAuthMechanism, encodedURLAuth: EncodedURLAuth) {
         self.uAuthMechanism = uAuthMechanism
-        self.encodedUrlAuth = encodedUrlAuth
+        self.encodedURLAuth = encodedURLAuth
     }
 }
 
@@ -30,6 +30,6 @@ extension EncodeBuffer {
         self.writeString(":") +
             self.writeUAuthMechanism(data.uAuthMechanism) +
             self.writeString(":") +
-            self.writeEncodedUrlAuth(data.encodedUrlAuth)
+            self.writeEncodedURLAuth(data.encodedURLAuth)
     }
 }

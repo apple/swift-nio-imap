@@ -16,15 +16,15 @@ import NIO
 @testable import NIOIMAPCore
 import XCTest
 
-class EncodedUrlAuth_Tests: EncodeTestClass {}
+class EncodedURLAuth_Tests: EncodeTestClass {}
 
 // MARK: - Encoding
 
-extension EncodedUrlAuth_Tests {
+extension EncodedURLAuth_Tests {
     func testEncode() {
-        let inputs: [(EncodedUrlAuth, String, UInt)] = [
+        let inputs: [(EncodedURLAuth, String, UInt)] = [
             (.init(data: "1F"), "1F", #line),
         ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeEncodedUrlAuth($0) })
+        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeEncodedURLAuth($0) })
     }
 }
