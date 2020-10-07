@@ -1548,6 +1548,27 @@ extension ParserUnitTests {
     
 }
 
+// MARK: - parseIRelativePath
+extension ParserUnitTests {
+    
+    func testParseIRelativePath() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseIRelativePath,
+            validInputs: [
+                ("test", " ", .list(.init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")))), #line),
+                (";PARTIAL=1.2", " ", .messageOrPartial(.partialOnly(.init(range: .init(offset: 1, length: 2)))), #line),
+            ],
+            parserErrorInputs: [
+                
+            ],
+            incompleteMessageInputs: [
+                
+            ]
+        )
+    }
+    
+}
+
 // MARK: - IAbsolutePath
 extension ParserUnitTests {
     

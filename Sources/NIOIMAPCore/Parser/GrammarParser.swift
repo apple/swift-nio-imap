@@ -2015,6 +2015,22 @@ extension GrammarParser {
         })
     }
     
+    static func parseIRelativePath(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IRelativePath {
+     
+        func parseIRelativePath_list(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IRelativePath {
+            return .list(try self.parseIMessageList(buffer: &buffer, tracker: tracker))
+        }
+        
+        func parseIRelativePath_messageOrPartial(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IRelativePath {
+            return .messageOrPartial(try self.parseIMessageOrPartial(buffer: &buffer, tracker: tracker))
+        }
+        
+        return try oneOf([
+            parseIRelativePath_list,
+            parseIRelativePath_messageOrPartial
+        ], buffer: &buffer, tracker: tracker)
+    }
+    
     static func parseIMessagePart(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IMessagePart {
         try composite(buffer: &buffer, tracker: tracker, { buffer, tracker -> IMessagePart in
             var ref = try self.parseIMailboxReference(buffer: &buffer, tracker: tracker)
