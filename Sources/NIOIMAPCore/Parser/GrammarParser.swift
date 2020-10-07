@@ -1169,19 +1169,13 @@ extension GrammarParser {
 
     static func parseEncodedURLAuth(buffer: inout ByteBuffer, tracker: StackTracker) throws -> EncodedUrlAuth {
         try composite(buffer: &buffer, tracker: tracker) { buffer, _ -> EncodedUrlAuth in
-            var numParsed = 0
-            var parsed = ByteBuffer()
-            while numParsed < 32 {
-                guard let char = buffer.readInteger(as: UInt8.self) else {
-                    throw _IncompleteMessage()
-                }
-                guard char.isHexCharacter else {
-                    throw ParserError(hint: "Expected hex character, got \(char)")
-                }
-                parsed.writeInteger(char)
-                numParsed += 1
+            guard let bytes = buffer.readSlice(length: 32) else {
+                throw _IncompleteMessage()
             }
-            return .init(data: String(buffer: parsed))
+            guard bytes.readableBytesView.allSatisfy({ $0.isHexCharacter }) else {
+                throw ParserError(hint: "Found invalid character in \(String(buffer: bytes) )")
+            }
+            return .init(data: String(buffer: bytes))
         }
     }
 
@@ -2266,7 +2260,7 @@ extension GrammarParser {
             case UInt8(ascii: ":"), UInt8(ascii: "@"), UInt8(ascii: "/"):
                 return [char]
             default:
-                throw ParserError(hint: "Expect achar, got \(char)")
+                throw ParserError(hint: "Expect bchar, got \(char)")
             }
         }
 
