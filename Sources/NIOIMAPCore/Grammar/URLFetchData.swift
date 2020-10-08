@@ -16,7 +16,12 @@ import struct NIO.ByteBuffer
 
 /// RFC 4467
 public struct URLFetchData: Equatable {
+    
+    // TODO: This is defined in the spec as being an `astring`, however is really a full URL wrapped in quotes
+    // we should consider extracting the data of the quotes and correctly parsing the URL
     public var url: ByteBuffer
+    
+    
     public var data: ByteBuffer?
 
     public init(url: ByteBuffer, data: ByteBuffer?) {
