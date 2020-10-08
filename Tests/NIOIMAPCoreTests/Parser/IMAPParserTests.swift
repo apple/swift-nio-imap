@@ -1161,36 +1161,19 @@ extension ParserUnitTests {
 // MARK: - CommandType parseCommandNonAuth
 
 extension ParserUnitTests {
-    func testParseCommandNonAuth_valid_login() {
-        TestUtilities.withBuffer("LOGIN david evans", terminator: " \r\n") { (buffer) in
-            let result = try GrammarParser.parseCommandNonauth(buffer: &buffer, tracker: .testTracker)
-            guard case .login(let username, let password) = result else {
-                XCTFail("Case mixup \(result)")
-                return
-            }
-            XCTAssertEqual(username, "david")
-            XCTAssertEqual(password, "evans")
-        }
-    }
-
-    func testParseCommandNonAuth_valid_authenticate() {
-        TestUtilities.withBuffer("AUTHENTICATE some", terminator: "\r\n") { (buffer) in
-            let result = try GrammarParser.parseCommandNonauth(buffer: &buffer, tracker: .testTracker)
-            guard case .authenticate(let type, let initialClientResponse, let dataArray) = result else {
-                XCTFail("Case mixup \(result)")
-                return
-            }
-            XCTAssertEqual(type, "some")
-
-            XCTAssertEqual(dataArray, [])
-        }
-    }
-
-    func testParseCommandNonAuth_valid_starttls() {
-        TestUtilities.withBuffer("STARTTLS", terminator: "\r\n") { (buffer) in
-            let result = try GrammarParser.parseCommandNonauth(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(result, .starttls)
-        }
+    
+    func testParseCommandNonAuth() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseCommandNonauth,
+            validInputs: [
+                ("LOGIN david evans", "\r\n", .login(username: "david", password: "evans"), #line),
+                ("AUTHENTICATE some", "\r\n", .authenticate(method: "some", initialClientResponse: nil, []), #line),
+                ("AUTHENTICATE some =", "\r\n", .authenticate(method: "some", initialClientResponse: .empty, []), #line),
+                ("STARTTLS", "\r\n", .starttls, #line),
+            ],
+            parserErrorInputs: [],
+            incompleteMessageInputs: []
+        )
     }
 }
 
@@ -1524,6 +1507,24 @@ extension ParserUnitTests {
         XCTAssertThrowsError(try GrammarParser.parseDelete(buffer: &buffer, tracker: .testTracker)) { e in
             XCTAssertTrue(e is _IncompleteMessage, "e has type \(e)")
         }
+    }
+}
+
+// MARK: - parseInitialClientResponse
+
+extension ParserUnitTests {
+    func testParseInitialClientResponse() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseInitialClientResponse,
+            validInputs: [
+                ("=", " ", .empty, #line),
+                ("YQ==", " ", .data("a"), #line),
+            ],
+            parserErrorInputs: [
+                ],
+            incompleteMessageInputs: [
+                ]
+        )
     }
 }
 
