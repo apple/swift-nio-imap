@@ -248,19 +248,41 @@ extension GrammarParser {
         }
     }
 
-    // authenticate    = "AUTHENTICATE" SP auth-type *(CRLF base64)
+    // authenticate  = "AUTHENTICATE" SP auth-type [SP (base64 / "=")] *(CRLF base64)
     static func parseAuthenticate(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Command {
         try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Command in
             try fixedString("AUTHENTICATE ", buffer: &buffer, tracker: tracker)
             let authMethod = try self.parseAtom(buffer: &buffer, tracker: tracker)
+
+            let parseInitialClientResponse = try optional(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> InitialClientResponse in
+                try space(buffer: &buffer, tracker: tracker)
+                return try self.parseInitialClientResponse(buffer: &buffer, tracker: tracker)
+            })
 
             // NOTE: Spec is super unclear, so we're ignoring the possibility of multiple base 64 chunks right now
 //            let data = try optional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> [ByteBuffer] in
 //                try fixedString("\r\n", buffer: &buffer, tracker: tracker)
 //                return [try self.parseBase64(buffer: &buffer, tracker: tracker)]
 //            } ?? []
-            return .authenticate(method: authMethod, [])
+            return .authenticate(method: authMethod, initialClientResponse: parseInitialClientResponse, [])
         }
+    }
+
+    static func parseInitialClientResponse(buffer: inout ByteBuffer, tracker: StackTracker) throws -> InitialClientResponse {
+        func parseInitialClientResponse_empty(buffer: inout ByteBuffer, tracker: StackTracker) throws -> InitialClientResponse {
+            try fixedString("=", buffer: &buffer, tracker: tracker)
+            return .empty
+        }
+
+        func parseInitialClientResponse_data(buffer: inout ByteBuffer, tracker: StackTracker) throws -> InitialClientResponse {
+            let base64 = try parseBase64(buffer: &buffer, tracker: tracker)
+            return .data(base64)
+        }
+
+        return try oneOf([
+            parseInitialClientResponse_empty,
+            parseInitialClientResponse_data,
+        ], buffer: &buffer, tracker: tracker)
     }
 
     // base64          = *(4base64-char) [base64-terminal]

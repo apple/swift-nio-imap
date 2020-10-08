@@ -29,7 +29,7 @@ public enum Command: Equatable {
     case status(MailboxName, [MailboxAttribute])
     case subscribe(MailboxName)
     case unsubscribe(MailboxName)
-    case authenticate(method: String, [ByteBuffer])
+    case authenticate(method: String, initialClientResponse: InitialClientResponse?, [ByteBuffer])
     case login(username: String, password: String)
     case starttls
     case check
@@ -97,8 +97,8 @@ extension CommandEncodeBuffer {
             return self.writeCommandKind_subscribe(mailbox: mailbox)
         case .unsubscribe(let mailbox):
             return self.writeCommandKind_unsubscribe(mailbox: mailbox)
-        case .authenticate(let method, let data):
-            return self.writeCommandKind_authenticate(method: method, data: data)
+        case .authenticate(let method, let initialClientResponse, let data):
+            return self.writeCommandKind_authenticate(method: method, initialClientResponse: initialClientResponse, data: data)
         case .login(let userid, let password):
             return self.writeCommandKind_login(userID: userid, password: password)
         case .starttls:
@@ -286,8 +286,12 @@ extension CommandEncodeBuffer {
             self.buffer.writeMailbox(mailbox)
     }
 
-    private mutating func writeCommandKind_authenticate(method: String, data: [ByteBuffer]) -> Int {
+    private mutating func writeCommandKind_authenticate(method: String, initialClientResponse: InitialClientResponse?, data: [ByteBuffer]) -> Int {
         self.buffer.writeString("AUTHENTICATE \(method)") +
+            self.buffer.writeIfExists(initialClientResponse, callback: { resp in
+                self.buffer.writeSpace() +
+                    self.buffer.writeInitialClientResponse(resp)
+            }) +
             self.buffer.writeArray(data, separator: "", parenthesis: false) { (buffer, self) -> Int in
                 self.writeString("\r\n") + self.writeBufferAsBase64(buffer)
             }
