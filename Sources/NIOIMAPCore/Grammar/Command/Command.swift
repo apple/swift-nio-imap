@@ -62,6 +62,11 @@ public enum Command: Equatable {
     case getMetadata(options: [MetadataOption], mailbox: MailboxName, entries: [ByteBuffer])
     case setMetadata(mailbox: MailboxName, entries: [EntryValue])
     case esearch(ESearchOptions)
+    
+    case resetKey(mailbox: MailboxName?, mechanisms: [UAuthMechanism])
+    case genURLAuth([URLRumpMechanism])
+    
+    case urlFetch([ByteBuffer])
 }
 
 // MARK: - IMAP
@@ -155,9 +160,44 @@ extension CommandEncodeBuffer {
             return self.writeCommandKind_setMetadata(mailbox: mailbox, entries: entries)
         case .esearch(let options):
             return self.writeCommandKind_esearch(options: options)
+        case .resetKey(mailbox: let mailbox, mechanisms: let mechanisms):
+            return self.writeCommandKind_resetKey(mailbox: mailbox, mechanisms: mechanisms)
+        case .genURLAuth(let mechanisms):
+            return self.writeCommandKind_genURLAuth(mechanisms: mechanisms)
+        case .urlFetch(let urls):
+            return self.writeCommandKind_urlFetch(urls: urls)
         }
     }
+    
+    private mutating func writeCommandKind_urlFetch(urls: [ByteBuffer]) -> Int {
+        self.buffer.writeString("URLFETCH") +
+            self.buffer.writeArray(urls, separator: "", parenthesis: false, callback: { url, buffer in
+                buffer.writeSpace() +
+                    buffer.writeBytes(url.readableBytesView)
+            })
+    }
+    
+    private mutating func writeCommandKind_genURLAuth(mechanisms: [URLRumpMechanism]) -> Int {
+        self.buffer.writeString("GENURLAUTH") +
+            self.buffer.writeArray(mechanisms, separator: "", parenthesis: false, callback: { mechanism, buffer in
+                buffer.writeURLRumpMechanism(mechanism)
+            })
+    }
 
+    private mutating func writeCommandKind_resetKey(mailbox: MailboxName?, mechanisms: [UAuthMechanism]) -> Int {
+        self.buffer.writeString("RESETKEY") +
+            self.buffer.writeIfExists(mailbox, callback: { mailbox in
+                self.buffer.writeSpace() +
+                    self.buffer.writeMailbox(mailbox) +
+                    
+                    // disable the array separator as we need a space before the first one too (if it exists)
+                    self.buffer.writeArray(mechanisms, separator: "", parenthesis: false, callback: { mechanism, buffer in
+                        buffer.writeSpace() +
+                            buffer.writeUAuthMechanism(mechanism)
+                    })
+            })
+    }
+    
     private mutating func writeCommandKind_getMetadata(options: [MetadataOption], mailbox: MailboxName, entries: [ByteBuffer]) -> Int {
         self.buffer.writeString("GETMETADATA") +
             self.buffer.writeIfArrayHasMinimumSize(array: options, callback: { array, buffer in
