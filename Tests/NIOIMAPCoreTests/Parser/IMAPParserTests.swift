@@ -1161,7 +1161,6 @@ extension ParserUnitTests {
 // MARK: - CommandType parseCommandNonAuth
 
 extension ParserUnitTests {
-    
     func testParseCommandNonAuth() {
         self.iterateTests(
             testFunction: GrammarParser.parseCommandNonauth,

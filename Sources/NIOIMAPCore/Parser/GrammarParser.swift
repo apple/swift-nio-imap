@@ -258,7 +258,7 @@ extension GrammarParser {
                 try space(buffer: &buffer, tracker: tracker)
                 return try self.parseInitialClientResponse(buffer: &buffer, tracker: tracker)
             })
-            
+
             // NOTE: Spec is super unclear, so we're ignoring the possibility of multiple base 64 chunks right now
 //            let data = try optional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> [ByteBuffer] in
 //                try fixedString("\r\n", buffer: &buffer, tracker: tracker)
@@ -267,22 +267,21 @@ extension GrammarParser {
             return .authenticate(method: authMethod, initialClientResponse: parseInitialClientResponse, [])
         }
     }
-    
+
     static func parseInitialClientResponse(buffer: inout ByteBuffer, tracker: StackTracker) throws -> InitialClientResponse {
-        
         func parseInitialClientResponse_empty(buffer: inout ByteBuffer, tracker: StackTracker) throws -> InitialClientResponse {
             try fixedString("=", buffer: &buffer, tracker: tracker)
             return .empty
         }
-        
+
         func parseInitialClientResponse_data(buffer: inout ByteBuffer, tracker: StackTracker) throws -> InitialClientResponse {
             let base64 = try parseBase64(buffer: &buffer, tracker: tracker)
             return .data(base64)
         }
-        
+
         return try oneOf([
             parseInitialClientResponse_empty,
-            parseInitialClientResponse_data
+            parseInitialClientResponse_data,
         ], buffer: &buffer, tracker: tracker)
     }
 
