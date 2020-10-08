@@ -3758,7 +3758,7 @@ extension GrammarParser {
             try fixedString("HIGHESTMODSEQ ", buffer: &buffer, tracker: tracker)
             return .highestModificationSequence(try self.parseModificationSequenceValue(buffer: &buffer, tracker: tracker))
         }
-        
+
         func parseResponseTextCode_referral(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ResponseTextCode {
             try fixedString("REFERRAL ", buffer: &buffer, tracker: tracker)
             return .referral(try self.parseImapUrl(buffer: &buffer, tracker: tracker))
