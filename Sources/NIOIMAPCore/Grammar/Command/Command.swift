@@ -181,7 +181,7 @@ extension CommandEncodeBuffer {
         self.buffer.writeString("GENURLAUTH") +
             self.buffer.writeArray(mechanisms, separator: "", parenthesis: false, callback: { mechanism, buffer in
                 buffer.writeSpace() +
-                buffer.writeURLRumpMechanism(mechanism)
+                    buffer.writeURLRumpMechanism(mechanism)
             })
     }
 
