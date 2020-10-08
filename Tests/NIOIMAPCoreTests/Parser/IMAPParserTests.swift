@@ -1176,7 +1176,7 @@ extension ParserUnitTests {
     func testParseCommandNonAuth_valid_authenticate() {
         TestUtilities.withBuffer("AUTHENTICATE some", terminator: "\r\n") { (buffer) in
             let result = try GrammarParser.parseCommandNonauth(buffer: &buffer, tracker: .testTracker)
-            guard case .authenticate(let type, let dataArray) = result else {
+            guard case .authenticate(let type, let initialClientResponse, let dataArray) = result else {
                 XCTFail("Case mixup \(result)")
                 return
             }
