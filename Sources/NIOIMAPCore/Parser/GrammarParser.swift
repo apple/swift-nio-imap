@@ -3918,6 +3918,7 @@ extension GrammarParser {
             parseResponseTextCode_metadataMaxSize,
             parseResponseTextCode_metadataTooMany,
             parseResponseTextCode_metadataNoPrivate,
+            parseResponseTextCode_referral,
             parseResponseTextCode_atom,
         ], buffer: &buffer, tracker: tracker)
     }

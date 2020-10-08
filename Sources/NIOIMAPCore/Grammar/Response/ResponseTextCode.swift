@@ -106,7 +106,7 @@ extension EncodeBuffer {
         case .metadataNoPrivate:
             return self.writeString("METADATA NOPRIVATE")
         case .referral(let url):
-            return self.writeIMAPURL(url)
+            return self.writeString("REFERRAL ") + self.writeIMAPURL(url)
         }
     }
 
