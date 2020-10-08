@@ -23,7 +23,7 @@ class URLRumpMechanism_Tests: EncodeTestClass {}
 extension URLRumpMechanism_Tests {
     func testEncode() {
         let inputs: [(URLRumpMechanism, String, UInt)] = [
-            (.init(urlRump: "test", mechanism: .internal), " \"test\" INTERNAL", #line),
+            (.init(urlRump: "test", mechanism: .internal), "\"test\" INTERNAL", #line),
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeURLRumpMechanism($0) })
     }

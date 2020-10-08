@@ -2588,9 +2588,9 @@ extension ParserUnitTests {
         self.iterateTests(
             testFunction: GrammarParser.parseURLRumpMechanism,
             validInputs: [
-                (" test INTERNAL", " ", .init(urlRump: "test", mechanism: .internal), #line),
-                (" \"test\" INTERNAL", " ", .init(urlRump: "test", mechanism: .internal), #line),
-                (" {4}\r\ntest INTERNAL", " ", .init(urlRump: "test", mechanism: .internal), #line),
+                ("test INTERNAL", " ", .init(urlRump: "test", mechanism: .internal), #line),
+                ("\"test\" INTERNAL", " ", .init(urlRump: "test", mechanism: .internal), #line),
+                ("{4}\r\ntest INTERNAL", " ", .init(urlRump: "test", mechanism: .internal), #line),
             ],
             parserErrorInputs: [
                 ],
@@ -2607,8 +2607,8 @@ extension ParserUnitTests {
         self.iterateTests(
             testFunction: GrammarParser.parseURLFetchData,
             validInputs: [
-                (" url NIL", " ", .init(url: "url", data: nil), #line),
-                (" url \"data\"", " ", .init(url: "url", data: "data"), #line),
+                ("url NIL", " ", .init(url: "url", data: nil), #line),
+                ("url \"data\"", " ", .init(url: "url", data: "data"), #line),
             ],
             parserErrorInputs: [
                 ],
@@ -3161,8 +3161,8 @@ extension ParserUnitTests {
         self.iterateTests(
             testFunction: GrammarParser.parseMechanismBase64,
             validInputs: [
-                (" INTERNAL", " ", .init(mechanism: .internal, base64: nil), #line),
-                (" INTERNAL=YQ==", " ", .init(mechanism: .internal, base64: "a"), #line),
+                ("INTERNAL", " ", .init(mechanism: .internal, base64: nil), #line),
+                ("INTERNAL=YQ==", " ", .init(mechanism: .internal, base64: "a"), #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []

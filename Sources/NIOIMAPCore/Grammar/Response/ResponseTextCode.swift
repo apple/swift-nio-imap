@@ -109,6 +109,7 @@ extension EncodeBuffer {
         case .urlMechanisms(let array):
             return self.writeString("URLMECH INTERNAL") +
                 self.writeArray(array, separator: "", parenthesis: false, callback: { mechanism, buffer in
+                    buffer.writeSpace() +
                     buffer.writeMechanismBase64(mechanism)
                 })
         case .referral(let url):

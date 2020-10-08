@@ -29,7 +29,6 @@ public struct MechanismBase64: Equatable {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeMechanismBase64(_ data: MechanismBase64) -> Int {
-        self.writeSpace() +
             self.writeUAuthMechanism(data.mechanism) +
             self.writeIfExists(data.base64, callback: { base64 in
                 self.writeString("=") +

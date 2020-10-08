@@ -180,6 +180,7 @@ extension CommandEncodeBuffer {
     private mutating func writeCommandKind_genURLAuth(mechanisms: [URLRumpMechanism]) -> Int {
         self.buffer.writeString("GENURLAUTH") +
             self.buffer.writeArray(mechanisms, separator: "", parenthesis: false, callback: { mechanism, buffer in
+                buffer.writeSpace() +
                 buffer.writeURLRumpMechanism(mechanism)
             })
     }

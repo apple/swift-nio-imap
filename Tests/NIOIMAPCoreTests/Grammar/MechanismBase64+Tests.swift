@@ -23,8 +23,8 @@ class MechanismBase64_Tests: EncodeTestClass {}
 extension MechanismBase64_Tests {
     func testEncode() {
         let inputs: [(MechanismBase64, String, UInt)] = [
-            (.init(mechanism: .internal, base64: nil), " INTERNAL", #line),
-            (.init(mechanism: .internal, base64: "base64"), " INTERNAL=base64", #line),
+            (.init(mechanism: .internal, base64: nil), "INTERNAL", #line),
+            (.init(mechanism: .internal, base64: "base64"), "INTERNAL=base64", #line),
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeMechanismBase64($0) })
     }

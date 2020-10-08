@@ -29,7 +29,6 @@ public struct URLRumpMechanism: Equatable {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeURLRumpMechanism(_ data: URLRumpMechanism) -> Int {
-        self.writeSpace() +
             self.writeIMAPString(data.urlRump) +
             self.writeSpace() +
             self.writeUAuthMechanism(data.mechanism)

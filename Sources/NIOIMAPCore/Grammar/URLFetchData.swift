@@ -32,7 +32,6 @@ public struct URLFetchData: Equatable {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeURLFetchData(_ data: URLFetchData) -> Int {
-        self.writeSpace() +
             self.writeIMAPString(data.url) +
             self.writeSpace() +
             self.writeNString(data.data)
