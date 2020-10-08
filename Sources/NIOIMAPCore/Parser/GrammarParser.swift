@@ -3761,7 +3761,7 @@ extension GrammarParser {
 
         func parseResponseTextCode_referral(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ResponseTextCode {
             try fixedString("REFERRAL ", buffer: &buffer, tracker: tracker)
-            return .referral(try self.parseImapUrl(buffer: &buffer, tracker: tracker))
+            return .referral(try self.parseIMAPURL(buffer: &buffer, tracker: tracker))
         }
 
         func parseResponseTextCode_badCharset(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ResponseTextCode {
