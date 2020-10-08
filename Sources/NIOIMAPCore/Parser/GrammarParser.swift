@@ -3781,6 +3781,11 @@ extension GrammarParser {
             return .highestModificationSequence(try self.parseModificationSequenceValue(buffer: &buffer, tracker: tracker))
         }
 
+        func parseResponseTextCode_referral(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ResponseTextCode {
+            try fixedString("REFERRAL ", buffer: &buffer, tracker: tracker)
+            return .referral(try self.parseIMAPURL(buffer: &buffer, tracker: tracker))
+        }
+
         func parseResponseTextCode_badCharset(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ResponseTextCode {
             try fixedString("BADCHARSET", buffer: &buffer, tracker: tracker)
             let charsets = try optional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> [String] in
@@ -3935,6 +3940,7 @@ extension GrammarParser {
             parseResponseTextCode_metadataMaxSize,
             parseResponseTextCode_metadataTooMany,
             parseResponseTextCode_metadataNoPrivate,
+            parseResponseTextCode_referral,
             parseResponseTextCode_atom,
         ], buffer: &buffer, tracker: tracker)
     }
