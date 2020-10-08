@@ -31,6 +31,10 @@ public enum MessageData: Equatable {
     /// UID set parameter to the UID FETCH (VANISHED) command includes UIDs
     /// of messages that are no longer in the mailbox.
     case vanishedEarlier(SequenceSet)
+    
+    case genURLAuth([ByteBuffer])
+    
+    case urlFetch([URLFetchData])
 }
 
 // MARK: - Encoding
@@ -44,6 +48,17 @@ extension EncodeBuffer {
             return self.writeString("VANISHED ") + self.writeSequenceSet(set)
         case .vanishedEarlier(let set):
             return self.writeString("VANISHED (EARLIER) ") + self.writeSequenceSet(set)
+        case .genURLAuth(let array):
+        return self.writeString("GENURLAUTH") +
+            self.writeArray(array, separator: "", parenthesis: false, callback: { data, buffer in
+                buffer.writeSpace() +
+                    buffer.writeIMAPString(data)
+            })
+        case .urlFetch(let array):
+            return self.writeString("URLFETCH") +
+                self.writeArray(array, callback: { data, buffer in
+                    buffer.writeURLFetchData(data)
+                })
         }
     }
 

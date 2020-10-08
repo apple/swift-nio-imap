@@ -26,6 +26,8 @@ extension MessageDataTests {
             (.expunge(123), "123 EXPUNGE", #line),
             (.vanished(.all), "VANISHED *", #line),
             (.vanishedEarlier(.all), "VANISHED (EARLIER) *", #line),
+            (.genURLAuth(["test"]), "GENURLAUTH \"test\"", #line),
+            (.genURLAuth(["test1", "test2"]), "GENURLAUTH \"test1\" \"test2\"", #line),
         ]
 
         for (test, expectedString, line) in inputs {

@@ -2343,6 +2343,16 @@ extension GrammarParser {
             return .init(urlRump: rump, mechanism: mechanism)
         }
     }
+    
+    static func parseURLFetchData(buffer: inout ByteBuffer, tracker: StackTracker) throws -> URLFetchData {
+        try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> URLFetchData in
+            try space(buffer: &buffer, tracker: tracker)
+            let url = try self.parseAString(buffer: &buffer, tracker: tracker)
+            try space(buffer: &buffer, tracker: tracker)
+            let data = try self.parseNString(buffer: &buffer, tracker: tracker)
+            return .init(url: url, data: data)
+        }
+    }
 
     static func parseIURLAuthRump(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IURLAuthRump {
         try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> IURLAuthRump in
@@ -2978,11 +2988,28 @@ extension GrammarParser {
             try fixedString("VANISHED (EARLIER) ", buffer: &buffer, tracker: tracker)
             return .vanishedEarlier(try self.parseSequenceSet(buffer: &buffer, tracker: tracker))
         }
+        
+        func parseMessageData_genURLAuth(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MessageData {
+            try fixedString("GENURLAUTH", buffer: &buffer, tracker: tracker)
+            let array = try ParserLibrary.parseOneOrMore(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> ByteBuffer in
+                try space(buffer: &buffer, tracker: tracker)
+                return try self.parseAString(buffer: &buffer, tracker: tracker)
+            })
+            return .genURLAuth(array)
+        }
+        
+        func parseMessageData_fetchData(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MessageData {
+            try fixedString("URLFETCH", buffer: &buffer, tracker: tracker)
+            let array = try ParserLibrary.parseOneOrMore(buffer: &buffer, tracker: tracker, parser: self.parseURLFetchData)
+            return .urlFetch(array)
+        }
 
         return try oneOf([
             parseMessageData_expunge,
             parseMessageData_vanished,
             parseMessageData_vanishedEarlier,
+            parseMessageData_genURLAuth,
+            parseMessageData_fetchData
         ], buffer: &buffer, tracker: tracker)
     }
 

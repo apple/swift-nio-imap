@@ -2600,6 +2600,24 @@ extension ParserUnitTests {
     }
 }
 
+// MARK: - parseURLFetchData
+
+extension ParserUnitTests {
+    func testParseURLFetchData() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseURLFetchData,
+            validInputs: [
+                (" url NIL", " ", .init(url: "url", data: nil), #line),
+                (" url \"data\"", " ", .init(url: "url", data: "data"), #line),
+            ],
+            parserErrorInputs: [
+                ],
+            incompleteMessageInputs: [
+                ]
+        )
+    }
+}
+
 // MARK: - parseIMapURLRel
 
 extension ParserUnitTests {
@@ -3069,6 +3087,15 @@ extension ParserUnitTests {
                 ("3 EXPUNGE", "\r", .expunge(3), #line),
                 ("VANISHED *", "\r", .vanished(.all), #line),
                 ("VANISHED (EARLIER) *", "\r", .vanishedEarlier(.all), #line),
+                ("GENURLAUTH test", "\r", .genURLAuth(["test"]), #line),
+                ("GENURLAUTH test1 test2", "\r", .genURLAuth(["test1", "test2"]), #line),
+                ("URLFETCH url NIL", "\r", .urlFetch([.init(url: "url", data: nil)]), #line),
+                (
+                    "URLFETCH url1 NIL url2 NIL url3 \"data\"",
+                    "\r",
+                    .urlFetch([.init(url: "url1", data: nil), .init(url: "url2", data: nil), .init(url: "url3", data: "data")]),
+                    #line
+                ),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
