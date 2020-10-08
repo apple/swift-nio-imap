@@ -18,7 +18,7 @@ import struct NIO.ByteBuffer
 public struct URLFetchData: Equatable {
     public var url: ByteBuffer
     public var data: ByteBuffer?
-    
+
     public init(url: ByteBuffer, data: ByteBuffer?) {
         self.url = url
         self.data = data

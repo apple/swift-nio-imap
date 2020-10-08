@@ -2343,7 +2343,7 @@ extension GrammarParser {
             return .init(urlRump: rump, mechanism: mechanism)
         }
     }
-    
+
     static func parseURLFetchData(buffer: inout ByteBuffer, tracker: StackTracker) throws -> URLFetchData {
         try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> URLFetchData in
             try space(buffer: &buffer, tracker: tracker)
@@ -2988,7 +2988,7 @@ extension GrammarParser {
             try fixedString("VANISHED (EARLIER) ", buffer: &buffer, tracker: tracker)
             return .vanishedEarlier(try self.parseSequenceSet(buffer: &buffer, tracker: tracker))
         }
-        
+
         func parseMessageData_genURLAuth(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MessageData {
             try fixedString("GENURLAUTH", buffer: &buffer, tracker: tracker)
             let array = try ParserLibrary.parseOneOrMore(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> ByteBuffer in
@@ -2997,7 +2997,7 @@ extension GrammarParser {
             })
             return .genURLAuth(array)
         }
-        
+
         func parseMessageData_fetchData(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MessageData {
             try fixedString("URLFETCH", buffer: &buffer, tracker: tracker)
             let array = try ParserLibrary.parseOneOrMore(buffer: &buffer, tracker: tracker, parser: self.parseURLFetchData)
@@ -3009,7 +3009,7 @@ extension GrammarParser {
             parseMessageData_vanished,
             parseMessageData_vanishedEarlier,
             parseMessageData_genURLAuth,
-            parseMessageData_fetchData
+            parseMessageData_fetchData,
         ], buffer: &buffer, tracker: tracker)
     }
 

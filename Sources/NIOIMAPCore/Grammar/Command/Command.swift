@@ -62,10 +62,10 @@ public enum Command: Equatable {
     case getMetadata(options: [MetadataOption], mailbox: MailboxName, entries: [ByteBuffer])
     case setMetadata(mailbox: MailboxName, entries: [EntryValue])
     case esearch(ESearchOptions)
-    
+
     case resetKey(mailbox: MailboxName?, mechanisms: [UAuthMechanism])
     case genURLAuth([URLRumpMechanism])
-    
+
     case urlFetch([ByteBuffer])
 }
 
@@ -168,7 +168,7 @@ extension CommandEncodeBuffer {
             return self.writeCommandKind_urlFetch(urls: urls)
         }
     }
-    
+
     private mutating func writeCommandKind_urlFetch(urls: [ByteBuffer]) -> Int {
         self.buffer.writeString("URLFETCH") +
             self.buffer.writeArray(urls, separator: "", parenthesis: false, callback: { url, buffer in
@@ -176,7 +176,7 @@ extension CommandEncodeBuffer {
                     buffer.writeBytes(url.readableBytesView)
             })
     }
-    
+
     private mutating func writeCommandKind_genURLAuth(mechanisms: [URLRumpMechanism]) -> Int {
         self.buffer.writeString("GENURLAUTH") +
             self.buffer.writeArray(mechanisms, separator: "", parenthesis: false, callback: { mechanism, buffer in
@@ -189,7 +189,7 @@ extension CommandEncodeBuffer {
             self.buffer.writeIfExists(mailbox, callback: { mailbox in
                 self.buffer.writeSpace() +
                     self.buffer.writeMailbox(mailbox) +
-                    
+
                     // disable the array separator as we need a space before the first one too (if it exists)
                     self.buffer.writeArray(mechanisms, separator: "", parenthesis: false, callback: { mechanism, buffer in
                         buffer.writeSpace() +
@@ -197,7 +197,7 @@ extension CommandEncodeBuffer {
                     })
             })
     }
-    
+
     private mutating func writeCommandKind_getMetadata(options: [MetadataOption], mailbox: MailboxName, entries: [ByteBuffer]) -> Int {
         self.buffer.writeString("GETMETADATA") +
             self.buffer.writeIfArrayHasMinimumSize(array: options, callback: { array, buffer in

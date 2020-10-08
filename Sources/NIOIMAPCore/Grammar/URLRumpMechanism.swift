@@ -23,7 +23,6 @@ public struct URLRumpMechanism: Equatable {
         self.urlRump = urlRump
         self.mechanism = mechanism
     }
-    
 }
 
 // MARK: - Encoding

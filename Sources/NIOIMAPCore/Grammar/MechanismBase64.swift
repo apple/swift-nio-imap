@@ -18,7 +18,7 @@ import struct NIO.ByteBuffer
 public struct MechanismBase64: Equatable {
     public var mechanism: UAuthMechanism
     public var base64: ByteBuffer?
-    
+
     public init(mechanism: UAuthMechanism, base64: ByteBuffer?) {
         self.mechanism = mechanism
         self.base64 = base64
@@ -30,7 +30,7 @@ public struct MechanismBase64: Equatable {
 extension EncodeBuffer {
     @discardableResult mutating func writeMechanismBase64(_ data: MechanismBase64) -> Int {
         self.writeSpace() +
-        self.writeUAuthMechanism(data.mechanism) +
+            self.writeUAuthMechanism(data.mechanism) +
             self.writeIfExists(data.base64, callback: { base64 in
                 self.writeString("=") +
                     self.writeBuffer(&base64)
