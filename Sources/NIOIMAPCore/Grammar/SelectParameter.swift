@@ -40,6 +40,18 @@ public enum SelectParameter: Equatable {
 // MARK: - Encoding
 
 extension EncodeBuffer {
+    @discardableResult mutating func writeSelectParameters(_ params: [SelectParameter]) -> Int {
+        if params.isEmpty {
+            return 0
+        }
+
+        return
+            self.writeSpace() +
+            self.writeArray(params) { (param, self) -> Int in
+                self.writeSelectParameter(param)
+            }
+    }
+
     @discardableResult public mutating func writeSelectParameter(_ param: SelectParameter) -> Int {
         switch param {
         case .qresync(let param):
