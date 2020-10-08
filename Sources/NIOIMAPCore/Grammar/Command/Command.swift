@@ -204,9 +204,7 @@ extension CommandEncodeBuffer {
     private mutating func writeCommandKind_examine(mailbox: MailboxName, parameters: [Parameter]) -> Int {
         self.buffer.writeString("EXAMINE ") +
             self.buffer.writeMailbox(mailbox) +
-            self.buffer.writeIfExists(parameters) { (params) -> Int in
-                self.buffer.writeParameters(params)
-            }
+            self.buffer.writeParameters(parameters)
     }
 
     private mutating func writeCommandKind_list(selectOptions: ListSelectOptions?, mailbox: MailboxName, mailboxPatterns: MailboxPatterns, returnOptions: [ReturnOption]) -> Int {
@@ -262,10 +260,7 @@ extension CommandEncodeBuffer {
     private mutating func writeCommandKind_select(mailbox: MailboxName, params: [SelectParameter]) -> Int {
         self.buffer.writeString("SELECT ") +
             self.buffer.writeMailbox(mailbox) +
-            self.buffer.writeSpace() +
-            self.buffer.writeArray(params, callback: { (element, buffer) -> Int in
-                buffer.writeSelectParameter(element)
-                })
+            self.buffer.writeSelectParameters(params)
     }
 
     private mutating func writeCommandKind_status(mailbox: MailboxName, attributes: [MailboxAttribute]) -> Int {
