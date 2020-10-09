@@ -137,10 +137,10 @@ extension EncodeBuffer {
         return callback()
     }
 
-    @discardableResult mutating func writeIfArrayHasMinimumSize<T>(array: [T], minimum: Int = 1, callback: ([T], inout EncodeBuffer) throws -> Int) rethrows -> Int {
+    @discardableResult func writeIfArrayHasMinimumSize<T>(array: [T], minimum: Int = 1, callback: ([T]) throws -> Int) rethrows -> Int {
         guard array.count >= minimum else {
             return 0
         }
-        return try callback(array, &self)
+        return try callback(array)
     }
 }

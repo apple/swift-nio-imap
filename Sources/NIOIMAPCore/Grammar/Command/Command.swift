@@ -197,7 +197,7 @@ extension CommandEncodeBuffer {
 
     private mutating func writeCommandKind_getMetadata(options: [MetadataOption], mailbox: MailboxName, entries: [ByteBuffer]) -> Int {
         self.buffer.writeString("GETMETADATA") +
-            self.buffer.writeIfArrayHasMinimumSize(array: options, callback: { array, buffer in
+            self.buffer.writeIfArrayHasMinimumSize(array: options, callback: { array in
                 buffer.writeSpace() + buffer.writeMetadataOptions(array)
             }) +
             self.buffer.writeSpace() +
@@ -254,7 +254,7 @@ extension CommandEncodeBuffer {
             self.buffer.writeMailbox(mailbox) +
             self.buffer.writeSpace() +
             self.buffer.writeMailboxPatterns(mailboxPatterns) +
-            self.buffer.writeIfArrayHasMinimumSize(array: returnOptions, minimum: 1) { (_, buffer) in
+            self.buffer.writeIfArrayHasMinimumSize(array: returnOptions, minimum: 1) { (_) in
                 buffer.writeSpace() +
                     buffer.writeListReturnOptions(returnOptions)
             }
@@ -262,7 +262,7 @@ extension CommandEncodeBuffer {
 
     private mutating func writeCommandKind_listIndependent(selectOptions: [ListSelectIndependentOption], mailbox: MailboxName, mailboxPatterns: MailboxPatterns, returnOptions: [ReturnOption]) -> Int {
         self.buffer.writeString("LIST") +
-            self.buffer.writeIfArrayHasMinimumSize(array: selectOptions, callback: { array, buffer in
+            self.buffer.writeIfArrayHasMinimumSize(array: selectOptions, callback: { array in
                 buffer.writeArray(array) { element, buffer in
                     buffer.writeListSelectIndependentOption(element)
                 }
@@ -271,7 +271,7 @@ extension CommandEncodeBuffer {
             self.buffer.writeMailbox(mailbox) +
             self.buffer.writeSpace() +
             self.buffer.writeMailboxPatterns(mailboxPatterns) +
-            self.buffer.writeIfArrayHasMinimumSize(array: returnOptions, minimum: 1) { (_, buffer) in
+            self.buffer.writeIfArrayHasMinimumSize(array: returnOptions, minimum: 1) { (_) in
                 buffer.writeSpace() +
                     buffer.writeListReturnOptions(returnOptions)
             }
@@ -413,7 +413,7 @@ extension CommandEncodeBuffer {
     private mutating func writeCommandKind_store(set: SequenceSet, modifiers: [StoreModifier], flags: StoreFlags) -> Int {
         self.buffer.writeString("STORE ") +
             self.buffer.writeSequenceSet(set) +
-            self.buffer.writeIfArrayHasMinimumSize(array: modifiers) { (modifiers, buffer) -> Int in
+            self.buffer.writeIfArrayHasMinimumSize(array: modifiers) { (modifiers) -> Int in
                 buffer.writeSpace() +
                     buffer.writeArray(modifiers) { (element, buffer) -> Int in
                         buffer.writeStoreModifier(element)
@@ -426,7 +426,7 @@ extension CommandEncodeBuffer {
     private mutating func writeCommandKind_uidStore(set: UIDSet, modifiers: [Parameter], flags: StoreFlags) -> Int {
         self.buffer.writeString("UID STORE ") +
             self.buffer.writeUIDSet(set) +
-            self.buffer.writeIfArrayHasMinimumSize(array: modifiers) { (modifiers, buffer) -> Int in
+            self.buffer.writeIfArrayHasMinimumSize(array: modifiers) { (modifiers) -> Int in
                 buffer.writeParameters(modifiers)
             } +
             self.buffer.writeSpace() +
