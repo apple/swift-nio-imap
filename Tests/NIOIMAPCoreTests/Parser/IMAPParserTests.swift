@@ -1189,6 +1189,14 @@ extension ParserUnitTests {
                 ("GETMETADATA INBOX a", " ", .getMetadata(options: [], mailbox: .inbox, entries: ["a"]), #line),
                 ("GETMETADATA (MAXSIZE 123) INBOX (a b)", " ", .getMetadata(options: [.maxSize(123)], mailbox: .inbox, entries: ["a", "b"]), #line),
                 ("SETMETADATA INBOX (a NIL)", " ", .setMetadata(mailbox: .inbox, entries: [.init(name: "a", value: .init(rawValue: nil))]), #line),
+                ("RESETKEY", "\r", .resetKey(mailbox: nil, mechanisms: []), #line),
+                ("RESETKEY INBOX", "\r", .resetKey(mailbox: .inbox, mechanisms: []), #line),
+                ("RESETKEY INBOX INTERNAL", "\r", .resetKey(mailbox: .inbox, mechanisms: [.internal]), #line),
+                ("RESETKEY INBOX INTERNAL test", "\r", .resetKey(mailbox: .inbox, mechanisms: [.internal, .init(rawValue: "test")]), #line),
+                ("GENURLAUTH test INTERNAL", "\r", .genURLAuth([.init(urlRump: "test", mechanism: .internal)]), #line),
+                ("GENURLAUTH test INTERNAL test2 INTERNAL", "\r", .genURLAuth([.init(urlRump: "test", mechanism: .internal), .init(urlRump: "test2", mechanism: .internal)]), #line),
+                ("URLFETCH test", "\r", .urlFetch(["test"]), #line),
+                ("URLFETCH test1 test2", "\r", .urlFetch(["test1", "test2"]), #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
@@ -2573,6 +2581,43 @@ extension ParserUnitTests {
     }
 }
 
+// MARK: - parseURLRumpMechanism
+
+extension ParserUnitTests {
+    func testParseURLRumpMechanism() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseURLRumpMechanism,
+            validInputs: [
+                ("test INTERNAL", " ", .init(urlRump: "test", mechanism: .internal), #line),
+                ("\"test\" INTERNAL", " ", .init(urlRump: "test", mechanism: .internal), #line),
+                ("{4}\r\ntest INTERNAL", " ", .init(urlRump: "test", mechanism: .internal), #line),
+            ],
+            parserErrorInputs: [
+                ],
+            incompleteMessageInputs: [
+                ]
+        )
+    }
+}
+
+// MARK: - parseURLFetchData
+
+extension ParserUnitTests {
+    func testParseURLFetchData() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseURLFetchData,
+            validInputs: [
+                ("url NIL", " ", .init(url: "url", data: nil), #line),
+                ("url \"data\"", " ", .init(url: "url", data: "data"), #line),
+            ],
+            parserErrorInputs: [
+                ],
+            incompleteMessageInputs: [
+                ]
+        )
+    }
+}
+
 // MARK: - parseIMapURLRel
 
 extension ParserUnitTests {
@@ -3042,6 +3087,15 @@ extension ParserUnitTests {
                 ("3 EXPUNGE", "\r", .expunge(3), #line),
                 ("VANISHED *", "\r", .vanished(.all), #line),
                 ("VANISHED (EARLIER) *", "\r", .vanishedEarlier(.all), #line),
+                ("GENURLAUTH test", "\r", .genURLAuth(["test"]), #line),
+                ("GENURLAUTH test1 test2", "\r", .genURLAuth(["test1", "test2"]), #line),
+                ("URLFETCH url NIL", "\r", .urlFetch([.init(url: "url", data: nil)]), #line),
+                (
+                    "URLFETCH url1 NIL url2 NIL url3 \"data\"",
+                    "\r",
+                    .urlFetch([.init(url: "url1", data: nil), .init(url: "url2", data: nil), .init(url: "url3", data: "data")]),
+                    #line
+                ),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
@@ -3093,6 +3147,22 @@ extension ParserUnitTests {
             validInputs: [
                 ("MOVE * inbox", " ", .move(.all, .inbox), #line),
                 ("MOVE 1:2,4:5 test", " ", .move(SequenceSet([SequenceRange(1 ... 2), SequenceRange(4 ... 5)])!, .init("test")), #line),
+            ],
+            parserErrorInputs: [],
+            incompleteMessageInputs: []
+        )
+    }
+}
+
+// MARK: - parseMechanismBase64
+
+extension ParserUnitTests {
+    func testParseMechanismBase64() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseMechanismBase64,
+            validInputs: [
+                ("INTERNAL", " ", .init(mechanism: .internal, base64: nil), #line),
+                ("INTERNAL=YQ==", " ", .init(mechanism: .internal, base64: "a"), #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
@@ -3403,6 +3473,9 @@ extension ParserUnitTests {
                 ("METADATA LONGENTRIES 456", "\r", .metadataLongEntries(456), #line),
                 ("METADATA TOOMANY", "\r", .metadataTooMany, #line),
                 ("METADATA NOPRIVATE", "\r", .metadataNoPrivate, #line),
+                ("URLMECH INTERNAL", "\r", .urlMechanisms([]), #line),
+                ("URLMECH INTERNAL INTERNAL", "\r", .urlMechanisms([.init(mechanism: .internal, base64: nil)]), #line),
+                ("URLMECH INTERNAL INTERNAL=YQ==", "\r", .urlMechanisms([.init(mechanism: .internal, base64: "a")]), #line),
                 ("REFERRAL imap://localhost/", "\r", .referral(.init(server: .init(host: "localhost"), query: .init(command: nil))), #line),
             ],
             parserErrorInputs: [],

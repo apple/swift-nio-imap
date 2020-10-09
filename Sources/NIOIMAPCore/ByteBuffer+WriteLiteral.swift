@@ -99,10 +99,13 @@ extension EncodeBuffer {
         self.writeString(" ")
     }
 
-    @discardableResult mutating func writeArray<T>(_ array: [T], separator: String = " ", parenthesis: Bool = true, callback: (T, inout EncodeBuffer) -> Int) -> Int {
-        self.writeIfTrue(parenthesis) { () -> Int in
-            self.writeString("(")
+    @discardableResult mutating func writeArray<T>(_ array: [T], prefix: String = "", separator: String = " ", suffix: String = "", parenthesis: Bool = true, callback: (T, inout EncodeBuffer) -> Int) -> Int {
+        self.writeIfTrue(array.count > 0) {
+            self.writeString(prefix)
         } +
+            self.writeIfTrue(parenthesis) { () -> Int in
+                self.writeString("(")
+            } +
             array.enumerated().reduce(0) { (size, row) in
                 let (i, element) = row
                 return
@@ -114,6 +117,9 @@ extension EncodeBuffer {
             } +
             self.writeIfTrue(parenthesis) { () -> Int in
                 self.writeString(")")
+            } +
+            self.writeIfTrue(array.count > 0) {
+                self.writeString(suffix)
             }
     }
 

@@ -51,6 +51,14 @@ extension ResponseTextCodeTests {
             (.metadataLongEntries(456), "METADATA LONGENTRIES 456", #line),
             (.metadataTooMany, "METADATA TOOMANY", #line),
             (.metadataNoPrivate, "METADATA NOPRIVATE", #line),
+            (.urlMechanisms([]), "URLMECH INTERNAL", #line),
+            (.urlMechanisms([.init(mechanism: .internal, base64: nil)]), "URLMECH INTERNAL INTERNAL", #line),
+            (.urlMechanisms([.init(mechanism: .internal, base64: "test")]), "URLMECH INTERNAL INTERNAL=test", #line),
+            (
+                .urlMechanisms([.init(mechanism: .init(rawValue: "m1"), base64: "b1"), .init(mechanism: .init(rawValue: "m2"), base64: "b2")]),
+                "URLMECH INTERNAL m1=b1 m2=b2",
+                #line
+            ),
             (.referral(.init(server: .init(host: "localhost"), query: .init(command: nil))), "REFERRAL imap://localhost/", #line),
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeResponseTextCode($0) })

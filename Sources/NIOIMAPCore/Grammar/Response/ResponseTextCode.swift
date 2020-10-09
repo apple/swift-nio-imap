@@ -43,6 +43,7 @@ public enum ResponseTextCode: Equatable {
     case metadataMaxsize(Int)
     case metadataTooMany
     case metadataNoPrivate
+    case urlMechanisms([MechanismBase64])
     case referral(IMAPURL)
 }
 
@@ -105,6 +106,11 @@ extension EncodeBuffer {
             return self.writeString("METADATA TOOMANY")
         case .metadataNoPrivate:
             return self.writeString("METADATA NOPRIVATE")
+        case .urlMechanisms(let array):
+            return self.writeString("URLMECH INTERNAL") +
+                self.writeArray(array, prefix: " ", parenthesis: false, callback: { mechanism, buffer in
+                    buffer.writeMechanismBase64(mechanism)
+                })
         case .referral(let url):
             return self.writeString("REFERRAL ") + self.writeIMAPURL(url)
         }
