@@ -28,8 +28,8 @@ public struct IMessageList: Equatable {
 extension EncodeBuffer {
     @discardableResult mutating func writeIMessageList(_ ref: IMessageList) -> Int {
         self.writeIMailboxReference(ref.mailboxReference) +
-            self.writeIfExists(ref.encodedSearch, callback: { search in
+            self.writeIfExists(ref.encodedSearch) { search in
                 self.writeString("?") + self.writeEncodedSearch(search)
-            })
+            }
     }
 }

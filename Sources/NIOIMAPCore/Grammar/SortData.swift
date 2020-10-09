@@ -31,12 +31,12 @@ public struct SortData: Equatable {
 extension EncodeBuffer {
     @discardableResult mutating func writeSortData(_ data: SortData?) -> Int {
         self.writeString("SORT") +
-            self.writeIfExists(data, callback: { (data) -> Int in
+            self.writeIfExists(data) { (data) -> Int in
                 self.writeArray(data.identifiers, prefix: " ", parenthesis: false) { (element, buffer) -> Int in
                     buffer.writeString("\(element)")
                 } +
                     self.writeSpace() +
                     self.writeSearchSortModificationSequence(data.modificationSequence)
-            })
+            }
     }
 }

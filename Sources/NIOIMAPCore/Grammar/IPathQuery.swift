@@ -26,8 +26,8 @@ public struct IPathQuery: Equatable {
 extension EncodeBuffer {
     @discardableResult mutating func writeIPathQuery(_ query: IPathQuery) -> Int {
         self.writeString("/") +
-            self.writeIfExists(query.command, callback: { command in
+            self.writeIfExists(query.command) { command in
                 self.writeICommand(command)
-            })
+            }
     }
 }

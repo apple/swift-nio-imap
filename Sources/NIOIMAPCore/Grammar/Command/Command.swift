@@ -171,35 +171,35 @@ extension CommandEncodeBuffer {
 
     private mutating func writeCommandKind_urlFetch(urls: [ByteBuffer]) -> Int {
         self.buffer.writeString("URLFETCH") +
-            self.buffer.writeArray(urls, prefix: " ", parenthesis: false, callback: { url, buffer in
+            self.buffer.writeArray(urls, prefix: " ", parenthesis: false) { url, buffer in
                 buffer.writeBytes(url.readableBytesView)
-            })
+            }
     }
 
     private mutating func writeCommandKind_genURLAuth(mechanisms: [URLRumpMechanism]) -> Int {
         self.buffer.writeString("GENURLAUTH") +
-            self.buffer.writeArray(mechanisms, prefix: " ", parenthesis: false, callback: { mechanism, buffer in
+            self.buffer.writeArray(mechanisms, prefix: " ", parenthesis: false) { mechanism, buffer in
                 buffer.writeURLRumpMechanism(mechanism)
-            })
+            }
     }
 
     private mutating func writeCommandKind_resetKey(mailbox: MailboxName?, mechanisms: [UAuthMechanism]) -> Int {
         self.buffer.writeString("RESETKEY") +
-            self.buffer.writeIfExists(mailbox, callback: { mailbox in
+            self.buffer.writeIfExists(mailbox) { mailbox in
                 self.buffer.writeSpace() +
                     self.buffer.writeMailbox(mailbox) +
 
-                    self.buffer.writeArray(mechanisms, prefix: " ", parenthesis: false, callback: { mechanism, buffer in
+                    self.buffer.writeArray(mechanisms, prefix: " ", parenthesis: false) { mechanism, buffer in
                         buffer.writeUAuthMechanism(mechanism)
-                    })
-            })
+                    }
+            }
     }
 
     private mutating func writeCommandKind_getMetadata(options: [MetadataOption], mailbox: MailboxName, entries: [ByteBuffer]) -> Int {
         self.buffer.writeString("GETMETADATA") +
-            self.buffer.writeIfArrayHasMinimumSize(array: options, callback: { array in
+            self.buffer.writeIfArrayHasMinimumSize(options) { array in
                 buffer.writeSpace() + buffer.writeMetadataOptions(array)
-            }) +
+            } +
             self.buffer.writeSpace() +
             self.buffer.writeMailbox(mailbox) +
             self.buffer.writeSpace() +
@@ -254,7 +254,7 @@ extension CommandEncodeBuffer {
             self.buffer.writeMailbox(mailbox) +
             self.buffer.writeSpace() +
             self.buffer.writeMailboxPatterns(mailboxPatterns) +
-            self.buffer.writeIfArrayHasMinimumSize(array: returnOptions, minimum: 1) { (_) in
+            self.buffer.writeIfArrayHasMinimumSize(returnOptions, minimum: 1) { (_) in
                 buffer.writeSpace() +
                     buffer.writeListReturnOptions(returnOptions)
             }
@@ -262,16 +262,16 @@ extension CommandEncodeBuffer {
 
     private mutating func writeCommandKind_listIndependent(selectOptions: [ListSelectIndependentOption], mailbox: MailboxName, mailboxPatterns: MailboxPatterns, returnOptions: [ReturnOption]) -> Int {
         self.buffer.writeString("LIST") +
-            self.buffer.writeIfArrayHasMinimumSize(array: selectOptions, callback: { array in
+            self.buffer.writeIfArrayHasMinimumSize(selectOptions) { array in
                 buffer.writeArray(array) { element, buffer in
                     buffer.writeListSelectIndependentOption(element)
                 }
-            }) +
+            } +
             self.buffer.writeSpace() +
             self.buffer.writeMailbox(mailbox) +
             self.buffer.writeSpace() +
             self.buffer.writeMailboxPatterns(mailboxPatterns) +
-            self.buffer.writeIfArrayHasMinimumSize(array: returnOptions, minimum: 1) { (_) in
+            self.buffer.writeIfArrayHasMinimumSize(returnOptions, minimum: 1) { (_) in
                 buffer.writeSpace() +
                     buffer.writeListReturnOptions(returnOptions)
             }
@@ -320,10 +320,10 @@ extension CommandEncodeBuffer {
 
     private mutating func writeCommandKind_authenticate(method: String, initialClientResponse: InitialClientResponse?, data: [ByteBuffer]) -> Int {
         self.buffer.writeString("AUTHENTICATE \(method)") +
-            self.buffer.writeIfExists(initialClientResponse, callback: { resp in
+            self.buffer.writeIfExists(initialClientResponse) { resp in
                 self.buffer.writeSpace() +
                     self.buffer.writeInitialClientResponse(resp)
-            }) +
+            } +
             self.buffer.writeArray(data, separator: "", parenthesis: false) { (buffer, self) -> Int in
                 self.writeString("\r\n") + self.writeBufferAsBase64(buffer)
             }
@@ -413,7 +413,7 @@ extension CommandEncodeBuffer {
     private mutating func writeCommandKind_store(set: SequenceSet, modifiers: [StoreModifier], flags: StoreFlags) -> Int {
         self.buffer.writeString("STORE ") +
             self.buffer.writeSequenceSet(set) +
-            self.buffer.writeIfArrayHasMinimumSize(array: modifiers) { (modifiers) -> Int in
+            self.buffer.writeIfArrayHasMinimumSize(modifiers) { (modifiers) -> Int in
                 buffer.writeSpace() +
                     buffer.writeArray(modifiers) { (element, buffer) -> Int in
                         buffer.writeStoreModifier(element)
@@ -426,7 +426,7 @@ extension CommandEncodeBuffer {
     private mutating func writeCommandKind_uidStore(set: UIDSet, modifiers: [Parameter], flags: StoreFlags) -> Int {
         self.buffer.writeString("UID STORE ") +
             self.buffer.writeUIDSet(set) +
-            self.buffer.writeIfArrayHasMinimumSize(array: modifiers) { (modifiers) -> Int in
+            self.buffer.writeIfArrayHasMinimumSize(modifiers) { (modifiers) -> Int in
                 buffer.writeParameters(modifiers)
             } +
             self.buffer.writeSpace() +
@@ -487,9 +487,9 @@ extension CommandEncodeBuffer {
         self.buffer.writeString("SETQUOTA ") +
             self.buffer.writeQuotaRoot(quotaRoot) +
             self.buffer.writeSpace() +
-            self.buffer.writeArray(resourceLimits, callback: { (limit, self) in
+            self.buffer.writeArray(resourceLimits) { (limit, self) in
                 self.writeQuotaLimit(limit)
-            })
+            }
     }
 
     private mutating func writeCommandKind_esearch(options: ESearchOptions) -> Int {

@@ -20,7 +20,7 @@ extension EncodeBuffer {
     @discardableResult mutating func writeListReturnOptions(_ options: [ReturnOption]) -> Int {
         self.writeString("RETURN ") +
             self.writeString("(") +
-            self.writeIfArrayHasMinimumSize(array: options) { (options) -> Int in
+            self.writeIfArrayHasMinimumSize(options) { (options) -> Int in
                 self.writeArray(options, parenthesis: false) { (option, self) in
                     self.writeReturnOption(option)
                 }

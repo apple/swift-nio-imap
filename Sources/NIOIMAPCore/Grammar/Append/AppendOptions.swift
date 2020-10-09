@@ -30,7 +30,7 @@ public struct AppendOptions: Equatable {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeAppendOptions(_ options: AppendOptions) -> Int {
-        self.writeIfArrayHasMinimumSize(array: options.flagList) { (array) -> Int in
+        self.writeIfArrayHasMinimumSize(options.flagList) { (array) -> Int in
             self.writeSpace() +
                 self.writeFlags(array)
         } +

@@ -28,30 +28,30 @@ extension EncodeBuffer {
         case .refUidSectionPartial(ref: let ref, uid: let uid, section: let section, partial: let partial):
             return self.writeIMailboxReference(ref) +
                 self.writeIUIDOnly(uid) +
-                self.writeIfExists(section, callback: { section in
+                self.writeIfExists(section) { section in
                     self.writeString("/") +
                         self.writeISectionOnly(section)
-                }) +
-                self.writeIfExists(partial, callback: { partial in
+                } +
+                self.writeIfExists(partial) { partial in
                     self.writeString("/") +
                         self.writeIPartialOnly(partial)
-                })
+                }
         case .uidSectionPartial(uid: let uid, section: let section, partial: let partial):
             return self.writeIUIDOnly(uid) +
-                self.writeIfExists(section, callback: { section in
+                self.writeIfExists(section) { section in
                     self.writeString("/") +
                         self.writeISectionOnly(section)
-                }) +
-                self.writeIfExists(partial, callback: { partial in
+                } +
+                self.writeIfExists(partial) { partial in
                     self.writeString("/") +
                         self.writeIPartialOnly(partial)
-                })
+                }
         case .sectionPartial(section: let section, partial: let partial):
             return self.writeISectionOnly(section) +
-                self.writeIfExists(partial, callback: { partial in
+                self.writeIfExists(partial) { partial in
                     self.writeString("/") +
                         self.writeIPartialOnly(partial)
-                })
+                }
         case .partialOnly(let partial):
             return self.writeIPartialOnly(partial)
         }

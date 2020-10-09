@@ -39,9 +39,9 @@ public struct SearchModificationSequence: Equatable {
 extension EncodeBuffer {
     @discardableResult mutating func writeSearchModificationSequence(_ data: SearchModificationSequence) -> Int {
         self.writeString("MODSEQ") +
-            self.writeArray(data.extensions, separator: "", parenthesis: false, callback: { (element, self) -> Int in
+            self.writeArray(data.extensions, separator: "", parenthesis: false) { (element, self) -> Int in
                 self.writeSearchModificationSequenceExtension(element)
-            }) +
+            } +
             self.writeSpace() +
             self.writeModificationSequenceValue(data.sequenceValue)
     }
