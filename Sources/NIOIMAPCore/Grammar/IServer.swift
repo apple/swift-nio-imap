@@ -37,6 +37,6 @@ extension EncodeBuffer {
             self.writeString("\(server.host)") +
             self.writeIfExists(server.port) { port in
                 self.writeString(":\(port)")
-        }
+            }
     }
 }

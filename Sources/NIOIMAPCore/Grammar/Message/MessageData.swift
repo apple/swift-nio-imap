@@ -52,7 +52,7 @@ extension EncodeBuffer {
             return self.writeString("GENURLAUTH") +
                 self.writeArray(array, prefix: " ", parenthesis: false) { data, buffer in
                     buffer.writeIMAPString(data)
-            }
+                }
         case .urlFetch(let array):
             return self.writeString("URLFETCH") +
                 self.writeArray(array) { data, buffer in

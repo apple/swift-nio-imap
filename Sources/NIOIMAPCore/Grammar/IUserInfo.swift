@@ -33,6 +33,6 @@ extension EncodeBuffer {
         } +
             self.writeIfExists(data.iAuth) { iAuth in
                 self.writeIAuth(iAuth)
-        }
+            }
     }
 }

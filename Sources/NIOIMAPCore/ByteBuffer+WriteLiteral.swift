@@ -15,7 +15,6 @@
 import struct NIO.ByteBuffer
 
 extension EncodeBuffer {
-    
     /// Writes an IMAP `string` type as defined by the grammar in RFC 3501.
     /// The function will decide to use either `quoted` or `literal` syntax based
     /// upon what bytes `str` contains, and what encoding types are supported.
