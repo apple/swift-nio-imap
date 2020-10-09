@@ -38,7 +38,7 @@ extension EncodeBuffer {
                 self.writeSpace() +
                     self.writeInternalDate(internalDate)
             } +
-            self.writeArray(options.extensions, prefix: " ", separator: "", parenthesis: false) { (ext, self) -> Int in
+            self.writeArray(options.extensions, prefix: " ", parenthesis: false) { (ext, self) -> Int in
                 self.writeTaggedExtension(ext)
             }
     }

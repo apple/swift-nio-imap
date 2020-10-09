@@ -32,7 +32,7 @@ extension EncodeBuffer {
     @discardableResult mutating func writeSortData(_ data: SortData?) -> Int {
         self.writeString("SORT") +
             self.writeIfExists(data, callback: { (data) -> Int in
-                self.writeArray(data.identifiers, prefix: " ", separator: "", parenthesis: false) { (element, buffer) -> Int in
+                self.writeArray(data.identifiers, prefix: " ", parenthesis: false) { (element, buffer) -> Int in
                     buffer.writeString("\(element)")
                 } +
                     self.writeSpace() +

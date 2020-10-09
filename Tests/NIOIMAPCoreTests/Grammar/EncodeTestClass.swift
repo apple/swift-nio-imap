@@ -45,18 +45,18 @@ class EncodeTestClass: XCTestCase {
     }
 
     func iterateInputs<T>(inputs: [(T, String, UInt)], encoder: (T) throws -> Int, file: StaticString = #file) {
-        self.iterateInputs(inputs: inputs.map { ($0.0, ResponseEncodingOptions(), $0.1, $0.2) }, encoder: encoder, file: file)
+        self.iterateInputs(inputs: inputs.map { ($0.0, ResponseEncodingOptions(), $0.1, $0.2) }, encoder: encoder, file: (file))
     }
 
-    func iterateInputs<T>(inputs: [(T, CommandEncodingOptions, [String], UInt)], encoder: (T) throws -> Int, file: StaticString = (#file)) {
+    func iterateInputs<T>(inputs: [(T, CommandEncodingOptions, [String], UInt)], encoder: (T) throws -> Int, file: StaticString = #file) {
         for (test, options, expectedStrings, line) in inputs {
             self.testBuffer = EncodeBuffer.clientEncodeBuffer(buffer: ByteBufferAllocator().buffer(capacity: 128), options: options)
             do {
                 let size = try encoder(test)
-                XCTAssertEqual(size, expectedStrings.reduce(0) { $0 + $1.utf8.count }, file: file, line: line)
-                XCTAssertEqual(self.testBufferStrings, expectedStrings, file: file, line: line)
+                XCTAssertEqual(size, expectedStrings.reduce(0) { $0 + $1.utf8.count }, file: (file), line: line)
+                XCTAssertEqual(self.testBufferStrings, expectedStrings, file: (file), line: line)
             } catch {
-                XCTFail("\(error)", file: file, line: line)
+                XCTFail("\(error)", file: (file), line: line)
             }
         }
     }
@@ -66,10 +66,10 @@ class EncodeTestClass: XCTestCase {
             do {
                 self.testBuffer.mode = .client(options: options)
                 let size = try encoder(test)
-                XCTAssertEqual(size, expectedStrings.reduce(0) { $0 + $1.utf8.count }, file: file, line: line)
-                XCTAssertEqual(self.testBufferStrings, expectedStrings, file: file, line: line)
+                XCTAssertEqual(size, expectedStrings.reduce(0) { $0 + $1.utf8.count }, file: (file), line: line)
+                XCTAssertEqual(self.testBufferStrings, expectedStrings, file: (file), line: line)
             } catch {
-                XCTFail("\(error)", file: file, line: line)
+                XCTFail("\(error)", file: (file), line: line)
             }
         }
     }
@@ -79,10 +79,10 @@ class EncodeTestClass: XCTestCase {
             self.testBuffer = EncodeBuffer.serverEncodeBuffer(buffer: ByteBufferAllocator().buffer(capacity: 128), options: options)
             do {
                 let size = try encoder(test)
-                XCTAssertEqual(size, expectedString.utf8.count, file: file, line: line)
-                XCTAssertEqual(self.testBufferString, expectedString, file: file, line: line)
+                XCTAssertEqual(size, expectedString.utf8.count, file: (file), line: line)
+                XCTAssertEqual(self.testBufferString, expectedString, file: (file), line: line)
             } catch {
-                XCTFail("\(error)", file: file, line: line)
+                XCTFail("\(error)", file: (file), line: line)
             }
         }
     }
