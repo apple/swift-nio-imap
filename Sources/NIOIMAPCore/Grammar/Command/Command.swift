@@ -189,7 +189,6 @@ extension CommandEncodeBuffer {
                 self.buffer.writeSpace() +
                     self.buffer.writeMailbox(mailbox) +
 
-                    // disable the array separator as we need a space before the first one too (if it exists)
                     self.buffer.writeArray(mechanisms, prefix: " ", parenthesis: false, callback: { mechanism, buffer in
                         buffer.writeUAuthMechanism(mechanism)
                     })
