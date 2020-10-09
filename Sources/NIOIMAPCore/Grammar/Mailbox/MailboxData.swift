@@ -47,7 +47,7 @@ extension EncodeBuffer {
         self.writeString("SEARCH") +
             self.writeIfExists(data, callback: { (data) -> Int in
                 self.writeArray(data.identifiers, prefix: " ", separator: "", parenthesis: false) { (element, buffer) -> Int in
-                        buffer.writeString("\(element)")
+                    buffer.writeString("\(element)")
                 } +
                     self.writeSpace() +
                     self.writeSearchSortModificationSequence(data.modificationSequence)

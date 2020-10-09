@@ -240,7 +240,7 @@ extension EncodeBuffer {
     @discardableResult mutating func writeCapabilityData(_ data: [Capability]) -> Int {
         self.writeString("CAPABILITY IMAP4 IMAP4rev1") +
             self.writeArray(data, prefix: " ", separator: "", parenthesis: false) { (capability, self) -> Int in
-                    self.writeCapability(capability)
+                self.writeCapability(capability)
             }
     }
 }

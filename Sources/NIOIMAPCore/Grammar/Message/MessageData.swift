@@ -51,7 +51,7 @@ extension EncodeBuffer {
         case .genURLAuth(let array):
             return self.writeString("GENURLAUTH") +
                 self.writeArray(array, prefix: " ", separator: "", parenthesis: false, callback: { data, buffer in
-                        buffer.writeIMAPString(data)
+                    buffer.writeIMAPString(data)
             })
         case .urlFetch(let array):
             return self.writeString("URLFETCH") +

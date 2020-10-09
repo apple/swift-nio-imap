@@ -172,14 +172,14 @@ extension CommandEncodeBuffer {
     private mutating func writeCommandKind_urlFetch(urls: [ByteBuffer]) -> Int {
         self.buffer.writeString("URLFETCH") +
             self.buffer.writeArray(urls, prefix: " ", separator: "", parenthesis: false, callback: { url, buffer in
-                    buffer.writeBytes(url.readableBytesView)
+                buffer.writeBytes(url.readableBytesView)
             })
     }
 
     private mutating func writeCommandKind_genURLAuth(mechanisms: [URLRumpMechanism]) -> Int {
         self.buffer.writeString("GENURLAUTH") +
             self.buffer.writeArray(mechanisms, prefix: " ", separator: "", parenthesis: false, callback: { mechanism, buffer in
-                    buffer.writeURLRumpMechanism(mechanism)
+                buffer.writeURLRumpMechanism(mechanism)
             })
     }
 
@@ -191,7 +191,7 @@ extension CommandEncodeBuffer {
 
                     // disable the array separator as we need a space before the first one too (if it exists)
                     self.buffer.writeArray(mechanisms, prefix: " ", separator: "", parenthesis: false, callback: { mechanism, buffer in
-                            buffer.writeUAuthMechanism(mechanism)
+                        buffer.writeUAuthMechanism(mechanism)
                     })
             })
     }
