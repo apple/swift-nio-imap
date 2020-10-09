@@ -46,8 +46,7 @@ extension EncodeBuffer {
     @discardableResult mutating func writeSearchSortMailboxData(_ data: SearchSortMailboxData?) -> Int {
         self.writeString("SEARCH") +
             self.writeIfExists(data, callback: { (data) -> Int in
-                self.writeArray(data.identifiers, separator: "", parenthesis: false) { (element, buffer) -> Int in
-                    buffer.writeSpace() +
+                self.writeArray(data.identifiers, prefix: " ", separator: "", parenthesis: false) { (element, buffer) -> Int in
                         buffer.writeString("\(element)")
                 } +
                     self.writeSpace() +

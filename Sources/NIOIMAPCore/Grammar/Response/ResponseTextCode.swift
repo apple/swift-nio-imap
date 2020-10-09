@@ -108,8 +108,7 @@ extension EncodeBuffer {
             return self.writeString("METADATA NOPRIVATE")
         case .urlMechanisms(let array):
             return self.writeString("URLMECH INTERNAL") +
-                self.writeArray(array, separator: "", parenthesis: false, callback: { mechanism, buffer in
-                    buffer.writeSpace() +
+                self.writeArray(array, prefix: " ", separator: "", parenthesis: false, callback: { mechanism, buffer in
                         buffer.writeMechanismBase64(mechanism)
                 })
         case .referral(let url):

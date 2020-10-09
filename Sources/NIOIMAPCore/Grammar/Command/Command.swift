@@ -171,16 +171,14 @@ extension CommandEncodeBuffer {
 
     private mutating func writeCommandKind_urlFetch(urls: [ByteBuffer]) -> Int {
         self.buffer.writeString("URLFETCH") +
-            self.buffer.writeArray(urls, separator: "", parenthesis: false, callback: { url, buffer in
-                buffer.writeSpace() +
+            self.buffer.writeArray(urls, prefix: " ", separator: "", parenthesis: false, callback: { url, buffer in
                     buffer.writeBytes(url.readableBytesView)
             })
     }
 
     private mutating func writeCommandKind_genURLAuth(mechanisms: [URLRumpMechanism]) -> Int {
         self.buffer.writeString("GENURLAUTH") +
-            self.buffer.writeArray(mechanisms, separator: "", parenthesis: false, callback: { mechanism, buffer in
-                buffer.writeSpace() +
+            self.buffer.writeArray(mechanisms, prefix: " ", separator: "", parenthesis: false, callback: { mechanism, buffer in
                     buffer.writeURLRumpMechanism(mechanism)
             })
     }
@@ -192,8 +190,7 @@ extension CommandEncodeBuffer {
                     self.buffer.writeMailbox(mailbox) +
 
                     // disable the array separator as we need a space before the first one too (if it exists)
-                    self.buffer.writeArray(mechanisms, separator: "", parenthesis: false, callback: { mechanism, buffer in
-                        buffer.writeSpace() +
+                    self.buffer.writeArray(mechanisms, prefix: " ", separator: "", parenthesis: false, callback: { mechanism, buffer in
                             buffer.writeUAuthMechanism(mechanism)
                     })
             })
@@ -333,8 +330,8 @@ extension CommandEncodeBuffer {
                 self.buffer.writeSpace() +
                     self.buffer.writeInitialClientResponse(resp)
             }) +
-            self.buffer.writeArray(data, separator: "", parenthesis: false) { (buffer, self) -> Int in
-                self.writeString("\r\n") + self.writeBufferAsBase64(buffer)
+            self.buffer.writeArray(data, prefix: "\r\n", separator: "", parenthesis: false) { (buffer, self) -> Int in
+                self.writeBufferAsBase64(buffer)
             }
     }
 

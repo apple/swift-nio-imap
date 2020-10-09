@@ -773,13 +773,13 @@ extension GrammarParser {
 
         func parseCommandAuth_resetKey(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Command {
             try fixedString("RESETKEY", buffer: &buffer, tracker: tracker)
-            let mailbox = try optional(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> MailboxName in
+            let _mailbox = try optional(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> MailboxName in
                 try space(buffer: &buffer, tracker: tracker)
                 return try self.parseMailbox(buffer: &buffer, tracker: tracker)
             })
 
             // don't bother parsing mechanisms if there's no mailbox
-            guard mailbox != nil else {
+            guard let mailbox = _mailbox else {
                 return .resetKey(mailbox: nil, mechanisms: [])
             }
 
