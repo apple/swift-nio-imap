@@ -6,7 +6,7 @@ A Swift project that provides an implementation of the IMAP4rev1 protocol, built
 
 `swift-nio-imap` implements the IMAP4rev1 protocol described in RFC 3501 and related RFCs. It is intended as a building block to build mail clients and/or servers. It is built upon SwiftNIO v2.x.
 
-To use the framework use `import NIOIMAP`. We support a variety of IMAP extensions, check `EXTENSIONS.md` for full details.
+To use the framework use `import NIOIMAP`. NIOIMAP supports a variety of IMAP extensions, check `EXTENSIONS.md` for full details.
 
 ### Commands
 
