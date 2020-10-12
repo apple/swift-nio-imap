@@ -35,10 +35,10 @@ extension EncodeBuffer {
             self.writeIfExists(response.correlator) { (correlator) -> Int in
                 self.writeSearchCorrelator(correlator)
             } +
-            self.writeIfTrue(response.uid) {
+            self.write(if: response.uid) {
                 self.writeString(" UID")
             } +
-            self.writeIfTrue(response.returnData.count > 0) {
+            self.write(if: response.returnData.count > 0) {
                 self.writeSpace()
             } +
             self.writeArray(response.returnData, parenthesis: false) { (data, self) in

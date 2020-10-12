@@ -18,7 +18,7 @@ import struct NIO.ByteBuffer
 
 extension EncodeBuffer {
     @discardableResult mutating func writeTaggedExtensionComp(_ comp: [String]) -> Int {
-        self.writeIfArrayHasMinimumSize(comp) { (comp) -> Int in
+        self.write(if: comp.count >= 1) {
             self.writeArray(comp) { (string, self) in
                 self.writeIMAPString(string)
             }

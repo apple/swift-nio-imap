@@ -69,7 +69,7 @@ extension EncodeBuffer {
             return self.writeUID(range.range.upperBound)
         } else {
             return self.writeUID(range.range.lowerBound) +
-                self.writeIfTrue(range.range.lowerBound < range.range.upperBound) {
+                self.write(if: range.range.lowerBound < range.range.upperBound) {
                     self.writeString(":") +
                         self.writeUID(range.range.upperBound)
                 }

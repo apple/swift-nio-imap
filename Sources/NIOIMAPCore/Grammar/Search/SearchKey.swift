@@ -344,7 +344,7 @@ extension EncodeBuffer {
                     return
                         size +
                         self.writeSearchKey(key, encloseInParenthesisIfNeeded: true) +
-                        self.writeIfTrue(i < keys.count - 1) { () -> Int in
+                        self.write(if: i < keys.count - 1) { () -> Int in
                             self.writeString(" ")
                         }
                 }

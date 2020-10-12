@@ -17,22 +17,23 @@ import struct NIO.ByteBuffer
 extension EncodeBuffer {
     /// Writes an IMAP `string` type as defined by the grammar in RFC 3501.
     /// The function will decide to use either `quoted` or `literal` syntax based
-    /// upon what bytes `str` contains, and what encoding types are supported.
+    /// upon what bytes `string` contains, and what encoding types are supported
+    /// by the encoding options on `self`.
     /// - parameters:
-    ///     - str: The string to write.
-    /// - returns: The number of bytes written `self`.
-    @discardableResult mutating func writeIMAPString(_ str: String) -> Int {
-        self.writeIMAPString(str.utf8)
+    ///     - string: The string to write.
+    /// - returns: The number of bytes written.
+    @discardableResult mutating func writeIMAPString(_ string: String) -> Int {
+        self.writeIMAPString(string.utf8)
     }
 
     /// Writes an IMAP `string` type as defined by the grammar in RFC 3501.
     /// The function will decide to use either `quoted` or `literal` syntax based
-    /// upon what bytes `str` contains, and what encoding types are supported.
+    /// upon what bytes `buffer` contains, and what encoding types are supported.
     /// - parameters:
-    ///     - str: The string to write.
-    /// - returns: The number of bytes written `self`.
-    @discardableResult mutating func writeIMAPString(_ str: ByteBuffer) -> Int {
-        self.writeIMAPString(str.readableBytesView)
+    ///     - buffer: The buffer to write.
+    /// - returns: The number of bytes written.
+    @discardableResult mutating func writeIMAPString(_ buffer: ByteBuffer) -> Int {
+        self.writeIMAPString(buffer.readableBytesView)
     }
 
     fileprivate mutating func writeIMAPString<T: Collection>(_ bytes: T) -> Int where T.Element == UInt8 {
@@ -93,7 +94,7 @@ extension EncodeBuffer {
     /// Encodes the given bytes as a Base64 collection, and then writes to `self.`
     /// - parameters:
     ///     - buffer: The `ByteBuffer` to encoded and write.
-    /// - returns: The number of bytes written to `self`.
+    /// - returns: The number of bytes written.
     @discardableResult mutating func writeBufferAsBase64(_ buffer: ByteBuffer) -> Int {
         let encoded = Base64.encode(bytes: buffer.readableBytesView)
         return self.writeString(encoded)
@@ -103,7 +104,7 @@ extension EncodeBuffer {
     /// This function allows the `null` byte `\0` to be written.
     /// - parameters:
     ///     - bytes: The raw bytes to write to `self`.
-    /// - returns: The number of bytes written to `self`.
+    /// - returns: The number of bytes written.
     @discardableResult mutating func writeLiteral8<T: Collection>(_ bytes: T) -> Int where T.Element == UInt8 {
         let length = "~{\(bytes.count)}\r\n"
         return
@@ -112,90 +113,75 @@ extension EncodeBuffer {
             self.writeBytes(bytes)
     }
 
-    /// Writes the string `"NILL"` to self.
-    /// - returns: The number of bytes written to self, always 3.
+    /// Writes the string `"NIL"` to self.
+    /// - returns: The number of bytes written, always 3.
     @discardableResult mutating func writeNil() -> Int {
         self.writeString("NIL")
     }
 
     /// Writes a single space to `self`
-    /// - returns: The number of bytes written to self, always 1.
+    /// - returns: The number of bytes written, always 1.
     @discardableResult mutating func writeSpace() -> Int {
         self.writeString(" ")
     }
 
-    /// Writes to self using the given `closure` for every element in the given `array`. Several convenience exist
-    /// including writing a prefix, suffix, and a per-element separator.
+    /// Writes to self using the given `closure` for every element in the given `array`.
     /// - parameters:
-    ///     - array: The array to write to `self`.
-    ///     - prefix: A string to before anything else. This will only be written if `array` has 1 or more elements.
-    ///     - separator: A string to write inbetween each element.
-    ///     - suffix: A string to write after everything else, including the paranethesis (if enabled).
-    ///     - parenthesis: Writes `(` immediately before the first element, and `)` immediately after the last.
-    ///     - closure: The closure to for each element in the given `array`.
-    /// - returns: The number of bytes written to self.
-    @discardableResult mutating func writeArray<T>(_ array: [T], prefix: String = "", separator: String = " ", suffix: String = "", parenthesis: Bool = true, closure: (T, inout EncodeBuffer) -> Int) -> Int {
-        self.writeIfTrue(array.count > 0) {
+    ///     - array: The elements to write to `self`.
+    ///     - prefix: A string to write before anything else, including the parenthesis. This will only be written if `array` has 1 or more elements. Defaults to "".
+    ///     - separator: A string to write between each element, defaults to `true`
+    ///     - suffix: A string to write after everything else, including the parenthesis (if enabled), defaults to "".
+    ///     - parenthesis: Writes `(` immediately before the first element, and `)` immediately after the last. Enabled by default.
+    ///     - writer: The closure to call for each element that writes the element.
+    /// - returns: The number of bytes written.
+    @discardableResult mutating func writeArray<T>(_ array: [T], prefix: String = "", separator: String = " ", suffix: String = "", parenthesis: Bool = true, writer: (T, inout EncodeBuffer) -> Int) -> Int {
+        self.write(if: array.count > 0) {
             self.writeString(prefix)
         } +
-            self.writeIfTrue(parenthesis) { () -> Int in
+            self.write(if: parenthesis) { () -> Int in
                 self.writeString("(")
             } +
             array.enumerated().reduce(0) { (size, row) in
                 let (i, element) = row
                 return
                     size +
-                    closure(element, &self) +
-                    self.writeIfTrue(i < array.count - 1) { () -> Int in
+                    writer(element, &self) +
+                    self.write(if: i < array.count - 1) { () -> Int in
                         self.writeString(separator)
                     }
             } +
-            self.writeIfTrue(parenthesis) { () -> Int in
+            self.write(if: parenthesis) { () -> Int in
                 self.writeString(")")
             } +
-            self.writeIfTrue(array.count > 0) {
+            self.write(if: array.count > 0) {
                 self.writeString(suffix)
             }
     }
 
-    /// Writes to self using a callback if the given `value` is non-`nil`. This allows for chaining together writes
+    /// Writes to self using a closure if the given `value` is non-`nil`. This allows for chaining together writes
     /// when attempting to perform composite writes and return the total number of bytes written.
     /// - parameters:
     ///     - value: The optional field to evaluate.
-    ///     - closure: The closure to invoke if `value` is non-`nil`. If `value` exists then it is passed as
+    ///     - writer: The closure to invoke if `value` is non-`nil`. If `value` exists then it is passed as
     ///     the only argument to this closure.
-    /// - returns: The number of bytes written to self.
-    @discardableResult func writeIfExists<T>(_ value: T?, closure: (inout T) -> Int) -> Int {
+    /// - returns: The number of bytes written.
+    @discardableResult func writeIfExists<T>(_ value: T?, writer: (inout T) -> Int) -> Int {
         guard var value = value else {
             return 0
         }
-        return closure(&value)
+        return writer(&value)
     }
 
-    /// Writes to self using a callback if a condition is met. This allows for chaining together writes
+    /// Writes to self using a closure if a condition is met. This allows for chaining together writes
     /// when attempting to perform composite writes and return the total number of bytes written.
     /// - parameters:
-    ///     - condition: The condition to evaluate, if `true` then `callback` will be invoked.
-    ///     - closure: The closure to invoke if `condition` is met.
-    /// - returns: The number of bytes written to self.
-    @discardableResult func writeIfTrue(_ condition: Bool, closure: () -> Int) -> Int {
+    ///     - condition: The condition to evaluate, if `true` then `closure` will be invoked.
+    ///     - writer: The closure to invoke if `condition` is met.
+    /// - returns: The number of bytes written.
+    @discardableResult func write(if condition: Bool, writer: () -> Int) -> Int {
         guard condition else {
             return 0
         }
-        return closure()
-    }
-
-    /// Invokes the given `closure` if the given `array` size is great than or equal to `minimum`.
-    /// - parameters:
-    ///     - array: The array who's size to evaluate.
-    ///     - minimum: The minimum number of elements that `array` must have for `closure` to be invoked.
-    ///     - closure: The closure to invoke if `array` has a size great than or equal to `minimum`.
-    ///     the only argument to this closure.
-    /// - returns: The number of bytes written to self.
-    @discardableResult func writeIfArrayHasMinimumSize<T>(_ array: [T], minimum: Int = 1, closure: ([T]) throws -> Int) rethrows -> Int {
-        guard array.count >= minimum else {
-            return 0
-        }
-        return try closure(array)
+        return writer()
     }
 }

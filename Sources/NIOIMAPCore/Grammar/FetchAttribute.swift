@@ -161,7 +161,7 @@ extension EncodeBuffer {
 
     @discardableResult mutating func writeFetchAttribute_binary(peek: Bool, section: SectionSpecifier.Part, partial: ClosedRange<Int>?) -> Int {
         self.writeString("BINARY") +
-            self.writeIfTrue(peek) {
+            self.write(if: peek) {
                 self.writeString(".PEEK")
             } +
             self.writeSectionBinary(section) +

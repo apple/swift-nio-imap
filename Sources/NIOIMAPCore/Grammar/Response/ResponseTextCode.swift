@@ -118,12 +118,12 @@ extension EncodeBuffer {
 
     private mutating func writeResponseTextCode_badCharsets(_ charsets: [String]) -> Int {
         self.writeString("BADCHARSET") +
-            self.writeIfArrayHasMinimumSize(charsets) { (charsets) -> Int in
+            self.write(if: charsets.count >= 1, writer: {
                 self.writeSpace() +
                     self.writeArray(charsets) { (charset, self) in
                         self.writeString(charset)
                     }
-            }
+            })
     }
 
     private mutating func writeResponseTextCode_other(atom: String, string: String?) -> Int {

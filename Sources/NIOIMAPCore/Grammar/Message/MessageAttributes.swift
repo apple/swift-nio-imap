@@ -159,7 +159,7 @@ extension EncodeBuffer {
 
     @discardableResult mutating func writeMessageAttribute_body(_ body: BodyStructure, hasExtensionData: Bool) -> Int {
         self.writeString("BODY") +
-            self.writeIfTrue(hasExtensionData) { () -> Int in
+            self.write(if: hasExtensionData) { () -> Int in
                 self.writeString("STRUCTURE")
             } +
             self.writeSpace() +
