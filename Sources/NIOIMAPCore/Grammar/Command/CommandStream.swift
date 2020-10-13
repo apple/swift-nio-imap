@@ -70,11 +70,11 @@ extension CommandEncodeBuffer {
                 self.encodedAtLeastOneCatenateElement = true
             }
 
-            return self.buffer.writeIfTrue(self.encodedAtLeastOneCatenateElement) { self.buffer.writeSpace() } +
+            return self.buffer.write(if: self.encodedAtLeastOneCatenateElement) { self.buffer.writeSpace() } +
                 self.buffer.writeString("URL ") +
                 self.buffer.writeIMAPString(url)
         case .catenateData(.begin(let size)):
-            var written = self.buffer.writeIfTrue(self.encodedAtLeastOneCatenateElement) { self.buffer.writeSpace() } +
+            var written = self.buffer.write(if: self.encodedAtLeastOneCatenateElement) { self.buffer.writeSpace() } +
                 self.buffer.writeString("TEXT ")
 
             if self.options.useNonSynchronizingLiteralPlus {

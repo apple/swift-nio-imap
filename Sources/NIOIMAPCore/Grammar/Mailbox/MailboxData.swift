@@ -45,13 +45,13 @@ public struct SearchSortMailboxData: Equatable {
 extension EncodeBuffer {
     @discardableResult mutating func writeSearchSortMailboxData(_ data: SearchSortMailboxData?) -> Int {
         self.writeString("SEARCH") +
-            self.writeIfExists(data, callback: { (data) -> Int in
+            self.writeIfExists(data) { (data) -> Int in
                 self.writeArray(data.identifiers, prefix: " ", parenthesis: false) { (element, buffer) -> Int in
                     buffer.writeString("\(element)")
                 } +
                     self.writeSpace() +
                     self.writeSearchSortModificationSequence(data.modificationSequence)
-            })
+            }
     }
 
     @discardableResult mutating func writeMailboxData(_ data: MailboxName.Data) -> Int {

@@ -50,14 +50,14 @@ extension EncodeBuffer {
             return self.writeString("VANISHED (EARLIER) ") + self.writeSequenceSet(set)
         case .genURLAuth(let array):
             return self.writeString("GENURLAUTH") +
-                self.writeArray(array, prefix: " ", parenthesis: false, callback: { data, buffer in
+                self.writeArray(array, prefix: " ", parenthesis: false) { data, buffer in
                     buffer.writeIMAPString(data)
-            })
+                }
         case .urlFetch(let array):
             return self.writeString("URLFETCH") +
-                self.writeArray(array, callback: { data, buffer in
+                self.writeArray(array) { data, buffer in
                     buffer.writeURLFetchData(data)
-                })
+                }
         }
     }
 

@@ -33,11 +33,11 @@ extension EncodeBuffer {
     @discardableResult mutating func writeIMessagePart(_ data: IMessagePart) -> Int {
         self.writeIMailboxReference(data.mailboxReference) +
             self.writeIUID(data.iUID) +
-            self.writeIfExists(data.iSection, callback: { section in
+            self.writeIfExists(data.iSection) { section in
                 self.writeISection(section)
-            }) +
-            self.writeIfExists(data.iPartial, callback: { partial in
+            } +
+            self.writeIfExists(data.iPartial) { partial in
                 self.writeIPartial(partial)
-            })
+            }
     }
 }

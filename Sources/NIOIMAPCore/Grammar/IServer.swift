@@ -35,8 +35,8 @@ extension EncodeBuffer {
             self.writeIUserInfo(userInfo) + self.writeString("@")
         } +
             self.writeString("\(server.host)") +
-            self.writeIfExists(server.port, callback: { port in
+            self.writeIfExists(server.port) { port in
                 self.writeString(":\(port)")
-        })
+            }
     }
 }

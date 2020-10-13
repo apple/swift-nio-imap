@@ -108,9 +108,9 @@ extension EncodeBuffer {
             return self.writeString("METADATA NOPRIVATE")
         case .urlMechanisms(let array):
             return self.writeString("URLMECH INTERNAL") +
-                self.writeArray(array, prefix: " ", parenthesis: false, callback: { mechanism, buffer in
+                self.writeArray(array, prefix: " ", parenthesis: false) { mechanism, buffer in
                     buffer.writeMechanismBase64(mechanism)
-                })
+                }
         case .referral(let url):
             return self.writeString("REFERRAL ") + self.writeIMAPURL(url)
         }
@@ -118,7 +118,7 @@ extension EncodeBuffer {
 
     private mutating func writeResponseTextCode_badCharsets(_ charsets: [String]) -> Int {
         self.writeString("BADCHARSET") +
-            self.writeIfArrayHasMinimumSize(array: charsets) { (charsets, self) -> Int in
+            self.write(if: charsets.count >= 1) {
                 self.writeSpace() +
                     self.writeArray(charsets) { (charset, self) in
                         self.writeString(charset)

@@ -27,9 +27,9 @@ extension EncodeBuffer {
             return self.writeIMessageList(list)
         case .messagePart(part: let part, urlAuth: let urlAuth):
             return self.writeIMessagePart(part) +
-                self.writeIfExists(urlAuth, callback: { urlAuth in
+                self.writeIfExists(urlAuth) { urlAuth in
                     self.writeIURLAuth(urlAuth)
-                })
+                }
         }
     }
 }

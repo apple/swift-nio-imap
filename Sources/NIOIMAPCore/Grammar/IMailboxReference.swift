@@ -29,8 +29,8 @@ public struct IMailboxReference: Equatable {
 extension EncodeBuffer {
     @discardableResult mutating func writeIMailboxReference(_ ref: IMailboxReference) -> Int {
         self.writeEncodedMailbox(ref.encodedMailbox) +
-            self.writeIfExists(ref.uidValidity, callback: { value in
+            self.writeIfExists(ref.uidValidity) { value in
                 self.writeUIDValidaty(value)
-            })
+            }
     }
 }

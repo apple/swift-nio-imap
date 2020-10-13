@@ -31,8 +31,8 @@ extension EncodeBuffer {
         self.writeIfExists(data.encodedUser) { user in
             self.writeEncodedUser(user)
         } +
-            self.writeIfExists(data.iAuth, callback: { iAuth in
+            self.writeIfExists(data.iAuth) { iAuth in
                 self.writeIAuth(iAuth)
-        })
+            }
     }
 }
