@@ -134,7 +134,7 @@ extension EncodeBuffer {
     ///     - parenthesis: Writes `(` immediately before the first element, and `)` immediately after the last. Enabled by default.
     ///     - writer: The closure to call for each element that writes the element.
     /// - returns: The number of bytes written.
-    @discardableResult mutating func writeArray<T>(_ array: [T], prefix: String = "", separator: String = " ", suffix: String = "", parenthesis: Bool = true, writer: (T, inout EncodeBuffer) -> Int) -> Int {
+    @discardableResult mutating func writeArray<T>(_ array: [T], prefix: String = "", separator: String = " ", suffix: String = "", parenthesis: Bool = true, _ writer: (T, inout EncodeBuffer) -> Int) -> Int {
         self.write(if: array.count > 0) {
             self.writeString(prefix)
         } +
@@ -165,7 +165,7 @@ extension EncodeBuffer {
     ///     - writer: The closure to invoke if `value` is non-`nil`. If `value` exists then it is passed as
     ///     the only argument to this closure.
     /// - returns: The number of bytes written.
-    @discardableResult func writeIfExists<T>(_ value: T?, writer: (inout T) -> Int) -> Int {
+    @discardableResult func writeIfExists<T>(_ value: T?, _ writer: (inout T) -> Int) -> Int {
         guard var value = value else {
             return 0
         }
@@ -178,7 +178,7 @@ extension EncodeBuffer {
     ///     - condition: The condition to evaluate, if `true` then `writer` will be invoked.
     ///     - writer: The closure to invoke if `condition` is met.
     /// - returns: The number of bytes written.
-    @discardableResult func write(if condition: Bool, writer: () -> Int) -> Int {
+    @discardableResult func write(if condition: Bool, _ writer: () -> Int) -> Int {
         guard condition else {
             return 0
         }
