@@ -175,7 +175,7 @@ extension EncodeBuffer {
     /// Writes to self using a closure if a condition is met. This allows for chaining together writes
     /// when attempting to perform composite writes and return the total number of bytes written.
     /// - parameters:
-    ///     - condition: The condition to evaluate, if `true` then `closure` will be invoked.
+    ///     - condition: The condition to evaluate, if `true` then `writer` will be invoked.
     ///     - writer: The closure to invoke if `condition` is met.
     /// - returns: The number of bytes written.
     @discardableResult func write(if condition: Bool, writer: () -> Int) -> Int {
