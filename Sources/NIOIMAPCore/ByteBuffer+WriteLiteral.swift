@@ -129,8 +129,8 @@ extension EncodeBuffer {
     /// - parameters:
     ///     - array: The elements to write to `self`.
     ///     - prefix: A string to write before anything else, including the parenthesis. This will only be written if `array` has 1 or more elements. Defaults to "".
-    ///     - separator: A string to write between each element, defaults to `true`
-    ///     - suffix: A string to write after everything else, including the parenthesis (if enabled), defaults to "".
+    ///     - separator: A string to write between each element, defaults to "".
+    ///     - suffix: A string to write after anything else, including the parenthesis. This will only be written if `array` has 1 or more elements. Defaults to "".
     ///     - parenthesis: Writes `(` immediately before the first element, and `)` immediately after the last. Enabled by default.
     ///     - writer: The closure to call for each element that writes the element.
     /// - returns: The number of bytes written.

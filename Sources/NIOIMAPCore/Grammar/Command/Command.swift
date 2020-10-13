@@ -197,9 +197,9 @@ extension CommandEncodeBuffer {
 
     private mutating func writeCommandKind_getMetadata(options: [MetadataOption], mailbox: MailboxName, entries: [ByteBuffer]) -> Int {
         self.buffer.writeString("GETMETADATA") +
-            self.buffer.write(if: options.count >= 1, writer: {
+            self.buffer.write(if: options.count >= 1) {
                 buffer.writeSpace() + buffer.writeMetadataOptions(options)
-            }) +
+            } +
             self.buffer.writeSpace() +
             self.buffer.writeMailbox(mailbox) +
             self.buffer.writeSpace() +
