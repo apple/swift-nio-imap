@@ -23,7 +23,7 @@ class UIDValidity_Tests: EncodeTestClass {}
 extension UIDValidity_Tests {
     func testEncode() {
         let inputs: [(UIDValidity, String, UInt)] = [
-            (try! .init(uid: 123), ";UIDVALIDITY=123", #line),
+            (123, ";UIDVALIDITY=123", #line),
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeUIDValidaty($0) })
     }

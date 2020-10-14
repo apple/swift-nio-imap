@@ -13,14 +13,27 @@
 //===----------------------------------------------------------------------===//
 
 /// RFC 5092 IMAP URL
-public struct UIDValidity: Equatable {
-    public var uid: Int
+public struct UIDValidity: RawRepresentable, Hashable {
+    public var rawValue: Int
+    public init?(rawValue: Int) {
+        guard rawValue >= 1, rawValue <= UInt32.max else { return nil }
+        self.rawValue = rawValue
+    }
+}
 
-    public init(uid: Int) throws {
-        guard uid > 0 else {
-            throw InvalidUID()
-        }
-        self.uid = uid
+// MARK: - Integer literal
+
+extension UIDValidity: ExpressibleByIntegerLiteral {
+    public init(integerLiteral value: Int) {
+        self.init(rawValue: value)!
+    }
+
+    public init(_ value: Int) {
+        self.init(rawValue: value)!
+    }
+
+    public init(_ value: UInt32) {
+        self.rawValue = Int(value)
     }
 }
 
@@ -28,6 +41,6 @@ public struct UIDValidity: Equatable {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeUIDValidaty(_ data: UIDValidity) -> Int {
-        self.writeString(";UIDVALIDITY=\(data.uid)")
+        self.writeString(";UIDVALIDITY=\(data.rawValue)")
     }
 }

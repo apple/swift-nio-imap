@@ -5432,7 +5432,10 @@ extension GrammarParser {
         try composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             try fixedString(";UIDVALIDITY=", buffer: &buffer, tracker: tracker)
             let num = try self.parseNZNumber(buffer: &buffer, tracker: tracker)
-            return try UIDValidity(uid: num)
+            guard let validity = UIDValidity(rawValue: num) else {
+                throw ParserError(hint: "Invalid UID validity")
+            }
+            return validity
         }
     }
 

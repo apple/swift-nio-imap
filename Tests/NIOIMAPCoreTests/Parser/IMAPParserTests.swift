@@ -2551,7 +2551,7 @@ extension ParserUnitTests {
             testFunction: GrammarParser.parseIMailboxReference,
             validInputs: [
                 ("abc", " ", .init(encodeMailbox: .init(mailbox: "abc"), uidValidity: nil), #line),
-                ("abc;UIDVALIDITY=123", " ", .init(encodeMailbox: .init(mailbox: "abc"), uidValidity: try! .init(uid: 123)), #line),
+                ("abc;UIDVALIDITY=123", " ", .init(encodeMailbox: .init(mailbox: "abc"), uidValidity: 123), #line),
             ],
             parserErrorInputs: [
                 ("¢", " ", #line),
@@ -2772,7 +2772,7 @@ extension ParserUnitTests {
                 (
                     "test/;UIDVALIDITY=123/;UID=123/;SECTION=section/;PARTIAL=1.2",
                     " ",
-                    .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test/"), uidValidity: try! .init(uid: 123)), iUID: try! .init(uid: 123), iSection: .init(encodedSection: .init(section: "section")), iPartial: .init(range: .init(offset: 1, length: 2))),
+                    .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test/"), uidValidity: 123), iUID: try! .init(uid: 123), iSection: .init(encodedSection: .init(section: "section")), iPartial: .init(range: .init(offset: 1, length: 2))),
                     #line
                 ),
             ],
@@ -4487,9 +4487,9 @@ extension ParserUnitTests {
         self.iterateTests(
             testFunction: GrammarParser.parseUIDValidity,
             validInputs: [
-                (";UIDVALIDITY=1", " ", try! .init(uid: 1), #line),
-                (";UIDVALIDITY=12", " ", try! .init(uid: 12), #line),
-                (";UIDVALIDITY=123", " ", try! .init(uid: 123), #line),
+                (";UIDVALIDITY=1", " ", 1, #line),
+                (";UIDVALIDITY=12", " ", 12, #line),
+                (";UIDVALIDITY=123", " ", 123, #line),
             ],
             parserErrorInputs: [
                 ("0", " ", #line),
