@@ -15,7 +15,7 @@
 /// Unique Message Identifier
 ///
 /// See RFC 3501 section 2.3.1.1.
-public struct UID: RawRepresentable, Equatable {
+public struct UID: RawRepresentable, Hashable {
     public var rawValue: Int
     public init?(rawValue: Int) {
         guard rawValue >= 1, rawValue <= UInt32.max else { return nil }
