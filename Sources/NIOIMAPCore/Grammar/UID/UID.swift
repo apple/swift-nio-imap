@@ -30,15 +30,21 @@ public struct UID: RawRepresentable, Hashable {
 
 extension UID: ExpressibleByIntegerLiteral {
     public init(integerLiteral value: Int) {
-        self.init(rawValue: value)!
+        self.init(value)
     }
 
+    /// Create a `UID`, asserting with invalid values.
+    /// - parameter value: An integer value that must be a non-zero `UInt32` value.
     public init(_ value: Int) {
-        self.init(rawValue: value)!
+        assert(value <= UInt32.max, "UID must be a UInt32")
+        self.init(UInt32(value))
     }
 
+    /// Create a `UID`, asserting with invalid values.
+    /// - parameter value: A `UInt32` that must be non-zero.
     public init(_ value: UInt32) {
-        self.rawValue = Int(value)
+        assert(value >= 0, "UID cannot be 0")
+        self.init(rawValue: Int(value))!
     }
 }
 
