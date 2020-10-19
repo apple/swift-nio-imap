@@ -84,6 +84,14 @@ extension Flag.Keyword {
     public static let mdnSent = Self(unchecked: "$MDNSent")
 }
 
+// MARK: - String Literal
+
+extension Flag.Keyword: ExpressibleByStringLiteral {
+    public init(stringLiteral value: String) {
+        self.init(value)
+    }
+}
+
 // MARK: - Encoding
 
 extension EncodeBuffer {
