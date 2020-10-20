@@ -15,7 +15,7 @@
 import struct NIO.ByteBuffer
 
 /// IMAPv4 `flag-perm`
-public enum PermanentFlag: Equatable {
+public enum PermanentFlag: Hashable {
     case flag(Flag)
     case wildcard
 }
