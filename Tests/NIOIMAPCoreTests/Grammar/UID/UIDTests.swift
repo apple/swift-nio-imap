@@ -55,3 +55,13 @@ extension UIDTests {
         XCTAssertEqual(expected, self.testBufferString)
     }
 }
+
+// MARK: - Codable
+
+extension UIDTests {
+    func testRoundTripCodable() {
+        XCTAssertEqual(try TestUtilities.roundTripCodable(XCTUnwrap(UID(rawValue: 1))), try XCTUnwrap(UID(rawValue: 1)))
+        XCTAssertEqual(try TestUtilities.roundTripCodable(XCTUnwrap(UID(rawValue: 45_678))), try XCTUnwrap(UID(rawValue: 45_678)))
+        XCTAssertEqual(try TestUtilities.roundTripCodable(XCTUnwrap(UID.max)), try XCTUnwrap(UID.max))
+    }
+}
