@@ -72,3 +72,11 @@ extension ByteBuffer: ExpressibleByStringLiteral {
         self.writeString(value)
     }
 }
+
+extension TestUtilities {
+    static func roundTripCodable<A>(_ value: A) throws -> A where A: Codable {
+        let encoder = JSONEncoder()
+        let decoder = JSONDecoder()
+        return try decoder.decode(A.self, from: encoder.encode(value))
+    }
+}
