@@ -40,8 +40,14 @@ extension Flag_Tests {
 
     func testEquality() {
         func AssertEqualAndEqualHash(_ flagA: Flag, _ flagB: Flag, line: UInt = #line) {
+            func hash(_ flag: Flag) -> Int {
+                var hasher = Hasher()
+                flag.hash(into: &hasher)
+                return hasher.finalize()
+            }
             XCTAssertEqual(flagA, flagB, line: line)
-            XCTAssertEqual(flagA.hashValue, flagB.hashValue, "hash", line: line)
+            XCTAssertEqual(flagA.hashValue, flagB.hashValue, "hashValue", line: line)
+            XCTAssertEqual(hash(flagA), hash(flagB), "hash(into:)", line: line)
         }
 
         AssertEqualAndEqualHash(.answered, .answered)
