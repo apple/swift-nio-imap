@@ -27,7 +27,7 @@ struct _IncompleteMessage: Error {
     init() {}
 }
 
-public enum GrammarParser {}
+enum GrammarParser {}
 
 // MARK: - Grammar Parsers
 
