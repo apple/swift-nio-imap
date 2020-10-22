@@ -20,13 +20,12 @@ import struct NIO.ByteBuffer
 /// as a state is maintained to enable streaming of large amounts
 /// of data.
 public enum Command: Equatable {
-    
     /// (RFC 3501) Requests a server's capabilities.
     case capability
-    
+
     /// (RFC 3501) Returns the session's state to "non-authenticated".
     case logout
-    
+
     /// (RFC 3501) Performs no operation, typically used to test that a server is responding to commands.
     case noop
     case create(MailboxName, [CreateParameter])

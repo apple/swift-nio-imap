@@ -17,13 +17,12 @@ import struct NIO.ByteBuffer
 /// Represents a date with the format `yyyy-MM-dd`.
 /// (RFC 3501)
 public struct Date: Equatable {
-    
     /// 4-digit year in the range (1900, 2500)
     public var year: Int
-    
+
     /// 2-digit month in the range (01, 12)
     public var month: Int
-    
+
     /// 2-digit day in the range (01, 31)
     public var day: Int
 
