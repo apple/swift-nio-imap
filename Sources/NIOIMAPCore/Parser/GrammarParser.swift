@@ -5873,7 +5873,7 @@ struct StackTracker {
     mutating func newStackFrame() throws {
         self.stackDepth += 1
         guard self.stackDepth < self.maximumStackDepth else {
-            throw TooDeep()
+            throw TooMuchRecursion(limit: self.maximumStackDepth)
         }
     }
 }
