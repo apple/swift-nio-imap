@@ -141,11 +141,7 @@ public struct CommandParser: Parser {
 
     private mutating func handleLines(buffer: inout ByteBuffer, tracker: StackTracker) throws -> CommandStream {
         func parseCommand(buffer: inout ByteBuffer, tracker: StackTracker) throws -> TaggedCommand {
-            do {
-                return try GrammarParser.parseCommand(buffer: &buffer, tracker: tracker)
-            } catch is ParsingError {
-                throw _IncompleteMessage()
-            }
+            return try GrammarParser.parseCommand(buffer: &buffer, tracker: tracker)
         }
 
         let save = buffer

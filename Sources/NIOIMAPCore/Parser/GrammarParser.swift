@@ -23,10 +23,6 @@ let badOS = { fatalError("unsupported OS") }()
 import struct NIO.ByteBuffer
 import struct NIO.ByteBufferView
 
-public enum ParsingError: Error {
-    case lineTooLong
-}
-
 struct _IncompleteMessage: Error {
     init() {}
 }
