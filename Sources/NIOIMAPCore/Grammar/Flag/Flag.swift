@@ -27,9 +27,9 @@ public struct Flag: RawRepresentable, Hashable {
     }
 
     public static func == (lhs: Flag, rhs: Flag) -> Bool {
-        return lhs.rawValue.uppercased() == rhs.rawValue.uppercased()
+        lhs.rawValue.uppercased() == rhs.rawValue.uppercased()
     }
-    
+
     public func hash(into hasher: inout Hasher) {
         rawValue.uppercased().hash(into: &hasher)
     }
