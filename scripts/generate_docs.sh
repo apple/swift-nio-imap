@@ -46,7 +46,7 @@ if [[ "$(uname -s)" == "Linux" ]]; then
 fi
 
 [[ -d docs/$version ]] || mkdir -p docs/$version
-[[ -d swift-nio-email.xcodeproj ]] || swift package generate-xcodeproj
+[[ -d swift-nio-imap.xcodeproj ]] || swift package generate-xcodeproj
 
 # run jazzy
 if ! command -v jazzy > /dev/null; then
