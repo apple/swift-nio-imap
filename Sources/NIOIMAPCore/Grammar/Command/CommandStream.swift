@@ -77,7 +77,7 @@ extension AppendCommand {
     }
 }
 
-/// Used by clients to stream commands from a server. Most commands are simple and sent under
+/// Used by clients to stream commands to a server. Most commands are simple and sent under
 /// the `.command(TaggedCommand)` case. Of note are `.idleDone` which will end an idle
 /// session started by a previous idle `TaggedCommand`, and  `.append(AppendCommand)`
 /// which is used to manage the lifecycle of appending multiple messages sequentially.
