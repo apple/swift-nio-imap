@@ -29,7 +29,7 @@ public struct Date: Equatable {
     /// Creates a new `Date` and performs some basic validation on the input provided.
     /// - parameter year: The year, validated to be between 1900 and 2500 inclusive.
     /// - parameter month: The month, validated to be between 01 and 12 inclusive.
-    /// - parameter day: The day, validated to be between 01 and 31 inclusive, however the number of days the given month is not validated.
+    /// - parameter day: The day, validated to be between 01 and 31 inclusive, however the number of days in the given month is not validated.
     /// - returns: A new `Date` if all validation is passed, otherwise `nil`.
     public init?(year: Int, month: Int, day: Int) {
         guard

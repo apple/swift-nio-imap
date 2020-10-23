@@ -58,7 +58,7 @@ public enum AppendCommand: Equatable {
 }
 
 extension AppendCommand {
-    /// Use to manage the lifecycle of catenating data. /
+    /// Use to manage the lifecycle of catenating data.
     /// One `begin(size:)` message must be sent before exactly one
     /// `end` message, with zero or more `bytes(ByteBuffer)` messages
     /// in the middle.
