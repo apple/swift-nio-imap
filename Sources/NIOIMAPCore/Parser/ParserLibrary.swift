@@ -30,7 +30,17 @@ public struct ParserError: Error {
     }
 }
 
-public struct TooDeep: Error {}
+/// Signals that a line was too complex and required too many recursive calls.
+/// Examine `limit` to see how many stack frames are allowed before this error is thrown.
+/// Currently this limit is not able to be modified.
+public struct TooMuchRecursion: Error {
+    /// The maximum number of recursive calls when parsing data before throwing an error.
+    public var limit: Int
+
+    init(limit: Int) {
+        self.limit = limit
+    }
+}
 
 extension ParserLibrary {
     static func parseZeroOrMoreCharacters(buffer: inout ByteBuffer, tracker: StackTracker, where: ((UInt8) -> Bool)) throws -> String {

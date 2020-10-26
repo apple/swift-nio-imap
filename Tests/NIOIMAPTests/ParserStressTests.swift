@@ -85,7 +85,7 @@ final class ParserStressTests: XCTestCase {
                 XCTFail("\(_error)")
                 return
             }
-            XCTAssertTrue(error.parserError is TooDeep, "\(error)")
+            XCTAssertTrue(error.parserError is TooMuchRecursion, "\(error)")
         }
     }
 

@@ -14,9 +14,19 @@
 
 import struct NIO.ByteBuffer
 
+/// Commands are sent by clients, and processed by servers.
+/// A notably exclusion here is the ability to append a message.
+/// This is handled separately using the `AppendCommand` type,
+/// as a state is maintained to enable streaming of large amounts
+/// of data.
 public enum Command: Equatable {
+    /// (RFC 3501) Requests a server's capabilities.
     case capability
+
+    /// (RFC 3501) Returns the session's state to "non-authenticated".
     case logout
+
+    /// (RFC 3501) Performs no operation, typically used to test that a server is responding to commands.
     case noop
     case create(MailboxName, [CreateParameter])
     case delete(MailboxName)
@@ -38,7 +48,6 @@ public enum Command: Equatable {
     case enable([Capability])
     case unselect
     case idleStart
-    case idleFinish
     case copy(SequenceSet, MailboxName)
     case fetch(SequenceSet, [FetchAttribute], [Parameter])
     case store(SequenceSet, [StoreModifier], StoreFlags)
@@ -122,8 +131,6 @@ extension CommandEncodeBuffer {
             return self.writeCommandKind_unselect()
         case .idleStart:
             return self.writeCommandKind_idleStart()
-        case .idleFinish:
-            return self.writeCommandKind_idleFinish()
         case .copy(let set, let mailbox):
             return self.writeCommandKind_copy(set: set, mailbox: mailbox)
         case .uidCopy(let set, let mailbox):

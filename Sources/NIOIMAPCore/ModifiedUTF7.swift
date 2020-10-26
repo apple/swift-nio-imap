@@ -16,8 +16,10 @@ import struct NIO.ByteBuffer
 
 /// IMAP uses a slightly modified version of UTF7, as documented in RFC 3501 section 5.1.3.
 public enum ModifiedUTF7 {
-    public enum DecodingError: Error {
-        case oddByteCount
+    /// Thrown if an odd number of bytes is given to the UTF-7 decoder.
+    public struct OddByteCountError: Error {
+        /// The number of bytes given to the decoder.
+        public var byteCount: Int
     }
 
     /// Encodes a `String` into UTF-7 bytes.
@@ -67,6 +69,7 @@ public enum ModifiedUTF7 {
 
     /// Decodes a `ByteBuffer` containing UTF-7 bytes into a `String`
     /// - parameter buffer: The bytes to decode.
+    /// - throws: An `OddByteCountError` if `buffer` contains an off number of bytes.
     /// - returns: A `String` that can be used to e.g. display to a user.
     public static func decode(_ buffer: ByteBuffer) throws -> String {
         var string: String = ""
@@ -99,7 +102,7 @@ public enum ModifiedUTF7 {
                     var iterator = decoded.makeIterator()
 
                     guard decoded.count % 2 == 0 else {
-                        throw DecodingError.oddByteCount
+                        throw OddByteCountError(byteCount: decoded.count)
                     }
 
                     var output: [UInt16] = []
@@ -118,15 +121,20 @@ public enum ModifiedUTF7 {
 }
 
 extension ModifiedUTF7 {
-    public struct InvalidEncoding: Error {}
+    /// Thrown if bytes cannot successfully roundtrip through the encoder and decoder.
+    public struct EncodingRoundtripError: Error {
+        /// The buffer to roundtrip
+        public var buffer: ByteBuffer
+    }
 
     /// Checks that a given ByteBuffer can rountrip through IMAP's UTF-7 encoding.
     /// - parameter buffer: The `ByteBuffer` to roundtrip.
+    /// - throws: An `EncodingRoundtripError` if round-tripping was not successful.
     public static func validate(_ buffer: ByteBuffer) throws {
         let decoded = try self.decode(buffer)
         let encoded = self.encode(decoded)
         guard encoded == buffer else {
-            throw InvalidEncoding()
+            throw EncodingRoundtripError(buffer: buffer)
         }
     }
 }

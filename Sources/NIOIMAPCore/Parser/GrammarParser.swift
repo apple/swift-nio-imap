@@ -23,15 +23,11 @@ let badOS = { fatalError("unsupported OS") }()
 import struct NIO.ByteBuffer
 import struct NIO.ByteBufferView
 
-public enum ParsingError: Error {
-    case lineTooLong
-}
-
 struct _IncompleteMessage: Error {
     init() {}
 }
 
-public enum GrammarParser {}
+enum GrammarParser {}
 
 // MARK: - Grammar Parsers
 
@@ -5873,7 +5869,7 @@ struct StackTracker {
     mutating func newStackFrame() throws {
         self.stackDepth += 1
         guard self.stackDepth < self.maximumStackDepth else {
-            throw TooDeep()
+            throw TooMuchRecursion(limit: self.maximumStackDepth)
         }
     }
 }

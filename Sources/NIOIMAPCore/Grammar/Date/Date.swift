@@ -14,12 +14,23 @@
 
 import struct NIO.ByteBuffer
 
-/// IMAPv4 `date` (`date-text`)
+/// Represents a date with the format `yyyy-MM-dd`.
+/// (RFC 3501)
 public struct Date: Equatable {
+    /// 4-digit year in the range (1900, 2500)
     public var year: Int
+
+    /// 2-digit month in the range (01, 12)
     public var month: Int
+
+    /// 2-digit day in the range (01, 31)
     public var day: Int
 
+    /// Creates a new `Date` and performs some basic validation on the input provided.
+    /// - parameter year: The year, validated to be between 1900 and 2500 inclusive.
+    /// - parameter month: The month, validated to be between 01 and 12 inclusive.
+    /// - parameter day: The day, validated to be between 01 and 31 inclusive, however the number of days in the given month is not validated.
+    /// - returns: A new `Date` if all validation is passed, otherwise `nil`.
     public init?(year: Int, month: Int, day: Int) {
         guard
             day >= 1,
