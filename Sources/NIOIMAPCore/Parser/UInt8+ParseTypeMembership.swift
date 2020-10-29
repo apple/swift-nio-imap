@@ -62,7 +62,7 @@ extension UInt8 {
 
     var isAtomSpecial: Bool {
         switch self {
-        case UInt8(ascii: "("), UInt8(ascii: ")"), UInt8(ascii: " "), UInt8(ascii: "^"):
+        case 0 ... 31, UInt8(ascii: "("), UInt8(ascii: ")"), UInt8(ascii: "{"), UInt8(ascii: " "):
             return true
         case _ where self.isListWildcard, _ where self.isResponseSpecial, _ where self.isQuotedSpecial:
             return true
