@@ -84,7 +84,7 @@ extension UInt8ParseTypeMembershipTests {
             UInt8(ascii: "%"), UInt8(ascii: "*"), // ListWildcard
             UInt8(ascii: "\""), UInt8(ascii: "\\"), // QuotedSpecial
         ]
-        valid = valid.union(0...31)
+        valid = valid.union(0 ... 31)
         self.allChars.forEach { char in
             if valid.contains(char) {
                 XCTAssertTrue(char.isAtomSpecial)
