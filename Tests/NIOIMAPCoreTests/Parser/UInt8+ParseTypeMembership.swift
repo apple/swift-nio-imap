@@ -84,7 +84,7 @@ extension UInt8ParseTypeMembershipTests {
             UInt8(ascii: "%"), UInt8(ascii: "*"), // ListWildcard
             UInt8(ascii: "\""), UInt8(ascii: "\\"), // QuotedSpecial
         ]
-        let ctl = Set<UInt8>(0...31)
+        let ctl = Set<UInt8>(0 ... 31)
         let invalid = self.allChars.subtracting(valid).subtracting(ctl)
         XCTAssertTrue(valid.allSatisfy { $0.isAtomSpecial })
         XCTAssertTrue(invalid.allSatisfy { !$0.isAtomSpecial })
