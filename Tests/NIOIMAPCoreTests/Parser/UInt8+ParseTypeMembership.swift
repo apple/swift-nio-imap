@@ -79,12 +79,13 @@ extension UInt8ParseTypeMembershipTests {
 extension UInt8ParseTypeMembershipTests {
     func testAtomSpecial() {
         let valid: Set<UInt8> = [
-            UInt8(ascii: "("), UInt8(ascii: ")"), UInt8(ascii: "^"), UInt8(ascii: " "),
+            UInt8(ascii: "("), UInt8(ascii: ")"), UInt8(ascii: " "), UInt8(ascii: "{"),
             UInt8(ascii: "]"), // ResponseSpecial
             UInt8(ascii: "%"), UInt8(ascii: "*"), // ListWildcard
             UInt8(ascii: "\""), UInt8(ascii: "\\"), // QuotedSpecial
         ]
-        let invalid = self.allChars.subtracting(valid)
+        let ctl = Set<UInt8>(0...31)
+        let invalid = self.allChars.subtracting(valid).subtracting(ctl)
         XCTAssertTrue(valid.allSatisfy { $0.isAtomSpecial })
         XCTAssertTrue(invalid.allSatisfy { !$0.isAtomSpecial })
     }
