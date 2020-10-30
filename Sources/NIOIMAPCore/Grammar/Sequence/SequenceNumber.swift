@@ -23,7 +23,7 @@ public struct SequenceNumber: RawRepresentable, Equatable {
         guard rawValue >= 1, rawValue <= UInt32.max else { return nil }
         self.rawValue = UInt32(rawValue)
     }
-    
+
     public init?(rawValue: UInt32) {
         guard rawValue >= 1 else { return nil }
         self.rawValue = UInt32(rawValue)
@@ -52,7 +52,6 @@ extension SequenceNumber: ExpressibleByIntegerLiteral {
 // MARK: - Strideable
 
 extension SequenceNumber: Strideable {
-    
     public static func < (lhs: SequenceNumber, rhs: SequenceNumber) -> Bool {
         lhs.rawValue < rhs.rawValue
     }

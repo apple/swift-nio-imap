@@ -19,7 +19,7 @@ public struct UIDValidity: RawRepresentable, Hashable {
         guard rawValue >= 1, rawValue <= UInt32.max else { return nil }
         self.rawValue = UInt32(rawValue)
     }
-    
+
     public init?(rawValue: UInt32) {
         guard rawValue >= 1 else { return nil }
         self.rawValue = rawValue

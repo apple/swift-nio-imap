@@ -17,12 +17,12 @@
 /// See RFC 3501 section 2.3.1.1.
 public struct UID: RawRepresentable, Hashable, Codable {
     public var rawValue: UInt32
-    
+
     public init?(rawValue: Int) {
         guard rawValue >= 1, rawValue <= UInt32.max else { return nil }
         self.rawValue = UInt32(rawValue)
     }
-    
+
     public init?(rawValue: UInt32) {
         guard rawValue >= 1 else { return nil }
         self.rawValue = rawValue
@@ -57,7 +57,6 @@ extension UID: ExpressibleByIntegerLiteral {
 // MARK: - Strideable
 
 extension UID: Strideable {
-    
     public static func < (lhs: UID, rhs: UID) -> Bool {
         lhs.rawValue < rhs.rawValue
     }
