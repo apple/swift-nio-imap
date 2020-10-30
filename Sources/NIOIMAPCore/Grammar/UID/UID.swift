@@ -16,9 +16,15 @@
 ///
 /// See RFC 3501 section 2.3.1.1.
 public struct UID: RawRepresentable, Hashable, Codable {
-    public var rawValue: Int
+    public var rawValue: UInt32
+    
     public init?(rawValue: Int) {
         guard rawValue >= 1, rawValue <= UInt32.max else { return nil }
+        self.rawValue = UInt32(rawValue)
+    }
+    
+    public init?(rawValue: UInt32) {
+        guard rawValue >= 1 else { return nil }
         self.rawValue = rawValue
     }
 
@@ -51,6 +57,7 @@ extension UID: ExpressibleByIntegerLiteral {
 // MARK: - Comparable
 
 extension UID: Strideable {
+    
     public static func < (lhs: UID, rhs: UID) -> Bool {
         lhs.rawValue < rhs.rawValue
     }
@@ -59,12 +66,19 @@ extension UID: Strideable {
         lhs.rawValue <= rhs.rawValue
     }
 
-    public func distance(to other: UID) -> Int {
-        other.rawValue - self.rawValue
+    public func distance(to other: UID) -> Int64 {
+        Int64(other.rawValue) - Int64(self.rawValue)
     }
 
-    public func advanced(by n: Int) -> UID {
-        UID(rawValue: self.rawValue + n)!
+    /// Advances the current UID by `n`.
+    /// IMPORTANT: `n` *must* be `<= UInt32.max`. `Int64` is used as the stridable type as it is allows
+    /// values equal `UInt32.max` on all platforms (including 32 bit platforms where `Int.max < UInt32.max`.
+    /// - parameter n: How many to advance by.
+    /// - returns: A new `UID`.
+    public func advanced(by n: Int64) -> UID {
+        precondition(n <= UInt32.max, "`n` must be less than UInt32.max")
+        precondition(UInt32(n) + self.rawValue <= UInt32.max, "`self.rawValue + n` must be <= UInt32.max")
+        return UID(rawValue: self.rawValue + UInt32(n))!
     }
 }
 
