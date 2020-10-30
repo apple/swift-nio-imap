@@ -48,7 +48,7 @@ extension SequenceRange {
 }
 
 extension SequenceRange: ExpressibleByIntegerLiteral {
-    public init(integerLiteral value: Int) {
+    public init(integerLiteral value: UInt32) {
         self.init(SequenceNumber(integerLiteral: value))
     }
 

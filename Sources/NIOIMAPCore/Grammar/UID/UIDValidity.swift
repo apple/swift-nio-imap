@@ -14,9 +14,14 @@
 
 /// RFC 5092 IMAP URL
 public struct UIDValidity: RawRepresentable, Hashable {
-    public var rawValue: Int
+    public var rawValue: UInt32
     public init?(rawValue: Int) {
         guard rawValue >= 1, rawValue <= UInt32.max else { return nil }
+        self.rawValue = UInt32(rawValue)
+    }
+
+    public init?(rawValue: UInt32) {
+        guard rawValue >= 1 else { return nil }
         self.rawValue = rawValue
     }
 }
@@ -24,7 +29,7 @@ public struct UIDValidity: RawRepresentable, Hashable {
 // MARK: - Integer literal
 
 extension UIDValidity: ExpressibleByIntegerLiteral {
-    public init(integerLiteral value: Int) {
+    public init(integerLiteral value: UInt32) {
         self.init(value)
     }
 

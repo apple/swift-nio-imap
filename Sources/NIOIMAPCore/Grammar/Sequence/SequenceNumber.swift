@@ -18,10 +18,15 @@
 ///
 /// IMAPv4 `seq-number`
 public struct SequenceNumber: RawRepresentable, Equatable {
-    public var rawValue: Int
+    public var rawValue: UInt32
     public init?(rawValue: Int) {
         guard rawValue >= 1, rawValue <= UInt32.max else { return nil }
-        self.rawValue = rawValue
+        self.rawValue = UInt32(rawValue)
+    }
+
+    public init?(rawValue: UInt32) {
+        guard rawValue >= 1 else { return nil }
+        self.rawValue = UInt32(rawValue)
     }
 
     public static let min = SequenceNumber(1)
@@ -31,7 +36,7 @@ public struct SequenceNumber: RawRepresentable, Equatable {
 // MARK: - Integer literal
 
 extension SequenceNumber: ExpressibleByIntegerLiteral {
-    public init(integerLiteral value: Int) {
+    public init(integerLiteral value: UInt32) {
         self.init(rawValue: value)!
     }
 
@@ -40,11 +45,11 @@ extension SequenceNumber: ExpressibleByIntegerLiteral {
     }
 
     public init(_ value: UInt32) {
-        self.rawValue = Int(value)
+        self.rawValue = value
     }
 }
 
-// MARK: - Comparable
+// MARK: - Strideable
 
 extension SequenceNumber: Strideable {
     public static func < (lhs: SequenceNumber, rhs: SequenceNumber) -> Bool {
@@ -55,12 +60,18 @@ extension SequenceNumber: Strideable {
         lhs.rawValue <= rhs.rawValue
     }
 
-    public func distance(to other: SequenceNumber) -> Int {
-        other.rawValue - self.rawValue
+    public func distance(to other: SequenceNumber) -> Int64 {
+        Int64(other.rawValue) - Int64(self.rawValue)
     }
 
-    public func advanced(by n: Int) -> SequenceNumber {
-        SequenceNumber(rawValue: self.rawValue + n)!
+    /// Advances the current `SequenceNumber` by `n`.
+    /// IMPORTANT: `n` *must* be `<= UInt32.max`. `Int64` is used as the stridable type as it allows
+    /// values equal to `UInt32.max` on all platforms (including 32 bit platforms where `Int.max < UInt32.max`.
+    /// - parameter n: How many to advance by.
+    /// - returns: A new `SequenceNumber`.
+    public func advanced(by n: Int64) -> SequenceNumber {
+        precondition(n <= UInt32.max, "`n` must be less than UInt32.max")
+        return SequenceNumber(rawValue: self.rawValue + UInt32(n))!
     }
 }
 
