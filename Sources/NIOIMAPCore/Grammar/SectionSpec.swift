@@ -123,6 +123,12 @@ extension SectionSpecifier.Part: Comparable {
     }
 }
 
+extension SectionSpecifier.Part: CustomStringConvertible {
+    public var description: String {
+        rawValue.map { "\($0)" }.joined(separator: ".")
+    }
+}
+
 extension SectionSpecifier.Kind: Comparable {
     public static func < (lhs: SectionSpecifier.Kind, rhs: SectionSpecifier.Kind) -> Bool {
         switch (lhs, rhs) {

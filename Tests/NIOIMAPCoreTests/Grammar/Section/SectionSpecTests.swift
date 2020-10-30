@@ -126,3 +126,19 @@ extension SectionSpecifierTests {
         }
     }
 }
+
+// MARK: - CustomStringConvertible
+
+extension SectionSpecifierTests {
+    func testCustomStringConvertible_part() {
+        let inputs: [(SectionSpecifier.Part, String, UInt)] = [
+            ([], "", #line),
+            ([1], "1", #line),
+            ([1, 2], "1.2", #line),
+            ([1, 2, 3, 4], "1.2.3.4", #line),
+        ]
+        inputs.forEach { (part, expected, line) in
+            XCTAssertEqual("\(part)", expected, line: line)
+        }
+    }
+}
