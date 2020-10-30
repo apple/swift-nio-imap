@@ -125,7 +125,7 @@ extension SectionSpecifier.Part: Comparable {
 
 extension SectionSpecifier.Part: CustomStringConvertible {
     public var description: String {
-        return rawValue.map { "\($0)" }.joined(separator: ".")
+        rawValue.map { "\($0)" }.joined(separator: ".")
     }
 }
 
