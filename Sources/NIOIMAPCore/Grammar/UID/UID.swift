@@ -54,7 +54,7 @@ extension UID: ExpressibleByIntegerLiteral {
     }
 }
 
-// MARK: - Comparable
+// MARK: - Strideable
 
 extension UID: Strideable {
     
