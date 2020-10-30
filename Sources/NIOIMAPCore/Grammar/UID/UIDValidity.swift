@@ -29,7 +29,7 @@ public struct UIDValidity: RawRepresentable, Hashable {
 // MARK: - Integer literal
 
 extension UIDValidity: ExpressibleByIntegerLiteral {
-    public init(integerLiteral value: Int) {
+    public init(integerLiteral value: UInt32) {
         self.init(value)
     }
 

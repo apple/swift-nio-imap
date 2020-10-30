@@ -48,7 +48,7 @@ extension UIDRange {
 }
 
 extension UIDRange: ExpressibleByIntegerLiteral {
-    public init(integerLiteral value: Int) {
+    public init(integerLiteral value: UInt32) {
         self.init(UID(integerLiteral: value))
     }
 
