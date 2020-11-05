@@ -23,9 +23,9 @@ public struct SearchCorrelator: Equatable {
     public var mailbox: MailboxName?
 
     /// Required iff using RFC 6237
-    public var uidValidity: Int?
+    public var uidValidity: UIDValidity?
 
-    public init(tag: ByteBuffer, mailbox: MailboxName? = nil, uidValidity: Int? = nil) {
+    public init(tag: ByteBuffer, mailbox: MailboxName? = nil, uidValidity: UIDValidity? = nil) {
         self.tag = tag
         self.mailbox = mailbox
         self.uidValidity = uidValidity
@@ -42,7 +42,7 @@ extension EncodeBuffer {
                 self.writeString(" MAILBOX ") + self.writeMailbox(mailbox)
             } +
             self.writeIfExists(correlator.uidValidity) { uidValidity in
-                self.writeString(" UIDVALIDITY \(uidValidity)")
+                self.writeString(" UIDVALIDITY ") + self.writeUIDValidity(uidValidity)
             } +
             self.writeString(")")
     }

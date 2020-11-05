@@ -51,7 +51,7 @@ extension UIDValidity: ExpressibleByIntegerLiteral {
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeUIDValidaty(_ data: UIDValidity) -> Int {
-        self.writeString(";UIDVALIDITY=\(data.rawValue)")
+    @discardableResult mutating func writeUIDValidity(_ data: UIDValidity) -> Int {
+        self.writeString("\(data.rawValue)")
     }
 }

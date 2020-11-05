@@ -4487,15 +4487,15 @@ extension ParserUnitTests {
         self.iterateTests(
             testFunction: GrammarParser.parseUIDValidity,
             validInputs: [
-                (";UIDVALIDITY=1", " ", 1, #line),
-                (";UIDVALIDITY=12", " ", 12, #line),
-                (";UIDVALIDITY=123", " ", 123, #line),
+                ("1", " ", 1, #line),
+                ("12", " ", 12, #line),
+                ("123", " ", 123, #line),
             ],
             parserErrorInputs: [
                 ("0", " ", #line),
             ],
             incompleteMessageInputs: [
-                (";UIDVALIDITY=1", "", #line),
+                ("1", "", #line),
             ]
         )
     }
