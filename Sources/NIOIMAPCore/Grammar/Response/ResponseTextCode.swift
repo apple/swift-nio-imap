@@ -25,8 +25,8 @@ public enum ResponseTextCode: Equatable {
     case readOnly
     case readWrite
     case tryCreate
-    case uidNext(Int)
-    case uidValidity(Int)
+    case uidNext(UID)
+    case uidValidity(UIDValidity)
     case unseen(Int)
     case namespace(NamespaceResponse)
     case uidAppend(ResponseCodeAppend)
@@ -71,9 +71,9 @@ extension EncodeBuffer {
         case .tryCreate:
             return self.writeString("TRYCREATE")
         case .uidNext(let number):
-            return self.writeString("UIDNEXT \(number)")
+            return self.writeString("UIDNEXT ") + self.writeUID(number)
         case .uidValidity(let number):
-            return self.writeString("UIDVALIDITY \(number)")
+            return self.writeString("UIDVALIDITY ") + self.writeUIDValidity(number)
         case .unseen(let number):
             return self.writeString("UNSEEN \(number)")
         case .other(let atom, let string):

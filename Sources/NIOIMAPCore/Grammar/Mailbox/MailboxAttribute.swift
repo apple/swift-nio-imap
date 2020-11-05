@@ -57,10 +57,10 @@ public struct MailboxStatus: Equatable {
     public var recentCount: Int?
     /// `UIDNEXT`
     /// The next unique identifier value of the mailbox.
-    public var nextUID: Int?
+    public var nextUID: UID?
     /// `UIDVALIDITY`
     /// The unique identifier validity value of the mailbox.
-    public var uidValidity: Int?
+    public var uidValidity: UIDValidity?
     /// `UNSEEN`
     /// The number of messages which do not have the `\Seen` flag set.
     public var unseenCount: Int?
@@ -86,8 +86,8 @@ public struct MailboxStatus: Equatable {
     public init(
         messageCount: Int? = nil,
         recentCount: Int? = nil,
-        nextUID: Int? = nil,
-        uidValidity: Int? = nil,
+        nextUID: UID? = nil,
+        uidValidity: UIDValidity? = nil,
         unseenCount: Int? = nil,
         size: Int? = nil,
         highestModificationSequence: ModificationSequenceValue? = nil
@@ -132,8 +132,8 @@ extension EncodeBuffer {
 
         append(\.messageCount, "MESSAGES")
         append(\.recentCount, "RECENT")
-        append(\.nextUID, "UIDNEXT")
-        append(\.uidValidity, "UIDVALIDITY")
+        append(\.nextUID?.rawValue, "UIDNEXT")
+        append(\.uidValidity?.rawValue, "UIDVALIDITY")
         append(\.unseenCount, "UNSEEN")
         append(\.size, "SIZE")
         append(\.highestModificationSequence, "HIGHESTMODSEQ")

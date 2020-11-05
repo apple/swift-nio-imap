@@ -2040,7 +2040,10 @@ extension GrammarParser {
     static func parseIMailboxReference(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IMailboxReference {
         try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> IMailboxReference in
             let mailbox = try self.parseEncodedMailbox(buffer: &buffer, tracker: tracker)
-            let uidValidity = try optional(buffer: &buffer, tracker: tracker, parser: self.parseUIDValidity)
+            let uidValidity = try optional(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> UIDValidity in
+                try fixedString(";UIDVALIDITY=", buffer: &buffer, tracker: tracker)
+                return try self.parseUIDValidity(buffer: &buffer, tracker: tracker)
+            })
             return .init(encodeMailbox: mailbox, uidValidity: uidValidity)
         }
     }
@@ -3926,12 +3929,12 @@ extension GrammarParser {
 
         func parseResponseTextCode_uidNext(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ResponseTextCode {
             try fixedString("UIDNEXT ", buffer: &buffer, tracker: tracker)
-            return .uidNext(try self.parseNZNumber(buffer: &buffer, tracker: tracker))
+            return .uidNext(try self.parseUID(buffer: &buffer, tracker: tracker))
         }
 
         func parseResponseTextCode_uidValidity(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ResponseTextCode {
             try fixedString("UIDVALIDITY ", buffer: &buffer, tracker: tracker)
-            return .uidValidity(try self.parseNZNumber(buffer: &buffer, tracker: tracker))
+            return .uidValidity(try self.parseUIDValidity(buffer: &buffer, tracker: tracker))
         }
 
         func parseResponseTextCode_unseen(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ResponseTextCode {
@@ -4140,7 +4143,7 @@ extension GrammarParser {
     static func parseSearchCorrelator(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SearchCorrelator {
         var tag: ByteBuffer?
         var mailbox: MailboxName?
-        var uidValidity: Int?
+        var uidValidity: UIDValidity?
 
         func parseSearchCorrelator_tag(buffer: inout ByteBuffer, tracker: StackTracker) throws {
             try fixedString("TAG ", buffer: &buffer, tracker: tracker)
@@ -4154,7 +4157,7 @@ extension GrammarParser {
 
         func parseSearchCorrelator_uidValidity(buffer: inout ByteBuffer, tracker: StackTracker) throws {
             try fixedString("UIDVALIDITY ", buffer: &buffer, tracker: tracker)
-            uidValidity = try self.parseNZNumber(buffer: &buffer, tracker: tracker)
+            uidValidity = try self.parseUIDValidity(buffer: &buffer, tracker: tracker)
         }
 
         func parseSearchCorrelator_once(buffer: inout ByteBuffer, tracker: StackTracker) throws {
@@ -4952,8 +4955,8 @@ extension GrammarParser {
     static func parseMailboxStatus(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxStatus {
         enum MailboxValue: Equatable {
             case messages(Int)
-            case uidNext(Int)
-            case uidValidity(Int)
+            case uidNext(UID)
+            case uidValidity(UIDValidity)
             case unseen(Int)
             case size(Int)
             case recent(Int)
@@ -4967,12 +4970,12 @@ extension GrammarParser {
 
         func parseStatusAttributeValue_uidnext(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxValue {
             try fixedString("UIDNEXT ", buffer: &buffer, tracker: tracker)
-            return .uidNext(try self.parseNumber(buffer: &buffer, tracker: tracker))
+            return .uidNext(try self.parseUID(buffer: &buffer, tracker: tracker))
         }
 
         func parseStatusAttributeValue_uidvalidity(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxValue {
             try fixedString("UIDVALIDITY ", buffer: &buffer, tracker: tracker)
-            return .uidValidity(try self.parseNumber(buffer: &buffer, tracker: tracker))
+            return .uidValidity(try self.parseUIDValidity(buffer: &buffer, tracker: tracker))
         }
 
         func parseStatusAttributeValue_unseen(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxValue {
@@ -5425,14 +5428,10 @@ extension GrammarParser {
 
     // uniqueid        = nz-number
     static func parseUIDValidity(buffer: inout ByteBuffer, tracker: StackTracker) throws -> UIDValidity {
-        try composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
-            try fixedString(";UIDVALIDITY=", buffer: &buffer, tracker: tracker)
-            let num = try self.parseNZNumber(buffer: &buffer, tracker: tracker)
-            guard let validity = UIDValidity(rawValue: num) else {
-                throw ParserError(hint: "Invalid UID validity")
-            }
-            return validity
+        guard let validity = UIDValidity(rawValue: try self.parseNZNumber(buffer: &buffer, tracker: tracker)) else {
+            throw ParserError(hint: "Invalid UID validity.")
         }
+        return validity
     }
 
     // unsubscribe     = "UNSUBSCRIBE" SP mailbox
