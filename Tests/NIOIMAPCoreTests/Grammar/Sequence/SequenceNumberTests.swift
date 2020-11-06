@@ -67,4 +67,3 @@ extension SequenceNumberTests {
         XCTAssertEqual(max.advanced(by: max.distance(to: min)), min)
     }
 }
-
