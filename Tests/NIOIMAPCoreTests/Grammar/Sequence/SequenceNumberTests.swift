@@ -55,3 +55,16 @@ extension SequenceNumberTests {
         XCTAssertEqual(expected, self.testBufferString)
     }
 }
+
+// MARK: - Strideable
+
+extension SequenceNumberTests {
+    func testAdvancedBy() {
+        let min = SequenceNumber(1)
+        let max = SequenceNumber(UInt32.max)
+        XCTAssertEqual(max.advanced(by: 0), max)
+        XCTAssertEqual(min.advanced(by: min.distance(to: max)), max)
+        XCTAssertEqual(max.advanced(by: max.distance(to: min)), min)
+    }
+}
+

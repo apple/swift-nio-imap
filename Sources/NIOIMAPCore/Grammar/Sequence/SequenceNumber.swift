@@ -71,7 +71,7 @@ extension SequenceNumber: Strideable {
     /// - returns: A new `SequenceNumber`.
     public func advanced(by n: Int64) -> SequenceNumber {
         precondition(n <= UInt32.max, "`n` must be less than UInt32.max")
-        return SequenceNumber(rawValue: self.rawValue + UInt32(n))!
+        return SequenceNumber(UInt32(Int64(self.rawValue) + n))
     }
 }
 
