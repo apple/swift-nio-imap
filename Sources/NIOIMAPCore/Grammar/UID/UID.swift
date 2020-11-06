@@ -76,7 +76,7 @@ extension UID: Strideable {
     /// - returns: A new `UID`.
     public func advanced(by n: Int64) -> UID {
         precondition(n <= UInt32.max, "`n` must be less than UInt32.max")
-        return UID(rawValue: self.rawValue + UInt32(n))!
+        return UID(UInt32(Int64(self.rawValue) + n))
     }
 }
 

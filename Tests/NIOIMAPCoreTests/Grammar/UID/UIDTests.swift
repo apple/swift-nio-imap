@@ -65,3 +65,13 @@ extension UIDTests {
         XCTAssertEqual(try TestUtilities.roundTripCodable(XCTUnwrap(UID.max)), try XCTUnwrap(UID.max))
     }
 }
+
+// MARK: - Strideable
+
+extension UIDTests {
+    func testAdvancedBy() {
+        XCTAssertEqual(UID.max.advanced(by: 0), UID.max)
+        XCTAssertEqual(UID.min.advanced(by: UID.min.distance(to: UID.max)), UID.max)
+        XCTAssertEqual(UID.max.advanced(by: UID.max.distance(to: UID.min)), UID.min)
+    }
+}
