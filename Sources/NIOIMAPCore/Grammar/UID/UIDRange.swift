@@ -15,7 +15,7 @@
 import struct NIO.ByteBuffer
 
 /// IMAPv4 `uid-range`
-public struct UIDRange: Equatable, RawRepresentable {
+public struct UIDRange: Hashable, RawRepresentable {
     public var rawValue: ClosedRange<UID>
 
     public var range: ClosedRange<UID> { rawValue }

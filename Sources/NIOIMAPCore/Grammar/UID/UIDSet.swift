@@ -14,7 +14,7 @@
 
 import struct NIO.ByteBuffer
 
-public struct UIDSet: Equatable {
+public struct UIDSet: Hashable {
     public var ranges: [UIDRange]
 
     public init?(_ ranges: [UIDRange]) {
