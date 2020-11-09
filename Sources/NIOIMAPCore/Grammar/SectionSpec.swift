@@ -35,13 +35,13 @@ public struct SectionSpecifier: Equatable {
 extension SectionSpecifier {
     /// Corresponds to no specifier, i.e. the complete message (including its headers).
     public static let complete = SectionSpecifier(kind: .complete)
-    
+
     /// `Header` -- RFC 2822 header of the message
     public static let header = SectionSpecifier(kind: .header)
-    
+
     /// `TEXT` -- text body of the message, omitting the RFC 2822 header.
     public static let text = SectionSpecifier(kind: .text)
-    
+
     /// `HEADER.FIELDS` -- a subset of the RFC 2822 header of the message
     public static func headerFields(_ fields: [String]) -> SectionSpecifier {
         SectionSpecifier(kind: .headerFields(fields))
