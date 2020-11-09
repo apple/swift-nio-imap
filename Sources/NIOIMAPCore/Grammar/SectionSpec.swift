@@ -65,6 +65,27 @@ extension SectionSpecifier: Comparable {
     }
 }
 
+extension SectionSpecifier: CustomStringConvertible {
+    public var description: String {
+        let kind: String
+        switch self.kind {
+        case .complete:
+            kind = ""
+        case .header:
+            kind = ".HEADER"
+        case .headerFields(let fields):
+            kind = ".HEADER.FIELDS (\(fields.joined(separator: ","))"
+        case .headerFieldsNot(let fields):
+            kind = ".HEADER.FIELDS.NOT (\(fields.joined(separator: ","))"
+        case .MIMEHeader:
+            kind = ".MIME"
+        case .text:
+            kind = ".TEXT"
+        }
+        return "\(part)\(kind)"
+    }
+}
+
 // MARK: - Types
 
 extension SectionSpecifier {
