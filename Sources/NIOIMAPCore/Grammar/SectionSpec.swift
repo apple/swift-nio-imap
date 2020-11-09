@@ -23,6 +23,10 @@ public struct SectionSpecifier: Equatable {
     public internal(set) var part: Part
     public internal(set) var kind: Kind
 
+    public init(_ part: Part) {
+        self.init(part: part, kind: .complete)
+    }
+
     public init(part: Part = .init(rawValue: []), kind: Kind) {
         if part.rawValue.count == 0 {
             precondition(kind != .MIMEHeader, "Cannot use MIME with an empty section part")
