@@ -1588,7 +1588,7 @@ extension GrammarParser {
         func parseFetchAttribute_bodySection(buffer: inout ByteBuffer, tracker: StackTracker) throws -> FetchAttribute {
             try fixedString("BODY", buffer: &buffer, tracker: tracker)
             let section = try self.parseSection(buffer: &buffer, tracker: tracker)
-            let chevronNumber = try optional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> ClosedRange<Int> in
+            let chevronNumber = try optional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> ClosedRange<UInt32> in
                 try self.parsePartial(buffer: &buffer, tracker: tracker)
             }
             return .bodySection(peek: false, section, chevronNumber)
@@ -1597,7 +1597,7 @@ extension GrammarParser {
         func parseFetchAttribute_bodyPeekSection(buffer: inout ByteBuffer, tracker: StackTracker) throws -> FetchAttribute {
             try fixedString("BODY.PEEK", buffer: &buffer, tracker: tracker)
             let section = try self.parseSection(buffer: &buffer, tracker: tracker)
-            let chevronNumber = try optional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> ClosedRange<Int> in
+            let chevronNumber = try optional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> ClosedRange<UInt32> in
                 try self.parsePartial(buffer: &buffer, tracker: tracker)
             }
             return .bodySection(peek: true, section, chevronNumber)
@@ -3594,8 +3594,8 @@ extension GrammarParser {
     }
 
     // partial         = "<" number "." nz-number ">"
-    static func parsePartial(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ClosedRange<Int> {
-        try composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> ClosedRange<Int> in
+    static func parsePartial(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ClosedRange<UInt32> {
+        try composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> ClosedRange<UInt32> in
             try fixedString("<", buffer: &buffer, tracker: tracker)
             guard let num1 = UInt32(exactly: try self.parseNumber(buffer: &buffer, tracker: tracker)) else {
                 throw ParserError(hint: "Partial range start is invalid.")
@@ -3610,7 +3610,7 @@ extension GrammarParser {
             guard !upper1.overflow else { throw ParserError(hint: "Range is invalid: <\(num1).\(num2)>.") }
             let upper2 = upper1.partialValue.subtractingReportingOverflow(1)
             guard !upper2.overflow else { throw ParserError(hint: "Range is invalid: <\(num1).\(num2)>.") }
-            return Int(num1) ... Int(upper2.partialValue)
+            return num1 ... upper2.partialValue
         }
     }
 
