@@ -19,7 +19,7 @@ import struct NIO.ByteBuffer
 /// Is used in a `FETCH` command’s `BODY[<section>]<<partial>>` for the `<section>` part.
 ///
 /// Use `SectionSpecifier.complete` for an empty section specifier (i.e. the complete message).
-public struct SectionSpecifier: Equatable {
+public struct SectionSpecifier: Hashable {
     public internal(set) var part: Part
     public internal(set) var kind: Kind
 

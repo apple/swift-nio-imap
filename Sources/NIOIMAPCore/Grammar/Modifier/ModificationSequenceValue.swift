@@ -15,7 +15,7 @@
 import struct NIO.ByteBuffer
 
 /// IMAP4 RFC 7162 `mod-sequence-value`
-public struct ModificationSequenceValue: Equatable {
+public struct ModificationSequenceValue: Hashable {
     public var value: Int
 
     public static var zero: Self {
