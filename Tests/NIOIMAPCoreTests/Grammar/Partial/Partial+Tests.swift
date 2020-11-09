@@ -22,7 +22,7 @@ class Partial_Tests: EncodeTestClass {}
 
 extension Partial_Tests {
     func testEncode() {
-        let inputs: [(ClosedRange<Int>, String, UInt)] = [
+        let inputs: [(ClosedRange<UInt32>, String, UInt)] = [
             /// Encoded format is `<offset.count>`:
             (0 ... 199, "<0.200>", #line),
             (1 ... 2, "<1.2>", #line),
