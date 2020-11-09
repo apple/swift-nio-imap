@@ -15,7 +15,7 @@
 import struct NIO.ByteBuffer
 
 /// IMAPv4 `fetch-att`
-public enum FetchAttribute: Equatable {
+public enum FetchAttribute: Hashable {
     case envelope
     case flags
     case internalDate
