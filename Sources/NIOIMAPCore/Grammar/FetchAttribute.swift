@@ -28,7 +28,7 @@ public enum FetchAttribute: Hashable {
     /// will not.
     case bodyStructure(extensions: Bool)
     /// `BODY[<section>]<<partial>>` and `BODY.PEEK[<section>]<<partial>>`
-    case bodySection(peek: Bool, _ section: SectionSpecifier?, ClosedRange<UInt32>?)
+    case bodySection(peek: Bool, _ section: SectionSpecifier, ClosedRange<UInt32>?)
     case uid
     case modificationSequence
     case modificationSequenceValue(ModificationSequenceValue)

@@ -3819,7 +3819,7 @@ extension ParserUnitTests {
         self.iterateTests(
             testFunction: GrammarParser.parseSection,
             validInputs: [
-                ("[]", "", nil, #line),
+                ("[]", "", .complete, #line),
                 ("[HEADER]", "", SectionSpecifier(kind: .header), #line),
             ],
             parserErrorInputs: [

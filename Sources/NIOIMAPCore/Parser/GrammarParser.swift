@@ -3280,7 +3280,7 @@ extension GrammarParser {
             }
             try space(buffer: &buffer, tracker: tracker)
             let string = try self.parseNString(buffer: &buffer, tracker: tracker)
-            return .bodySection(section ?? SectionSpecifier(kind: .complete), offset: offset, data: string)
+            return .bodySection(section, offset: offset, data: string)
         }
 
         func parseMessageAttribute_uid(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MessageAttribute {
@@ -4598,15 +4598,15 @@ extension GrammarParser {
     }
 
     // section         = "[" [section-spec] "]"
-    static func parseSection(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SectionSpecifier? {
-        func parseSection_none(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SectionSpecifier? {
-            try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> SectionSpecifier? in
+    static func parseSection(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SectionSpecifier {
+        func parseSection_none(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SectionSpecifier {
+            try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> SectionSpecifier in
                 try fixedString("[]", buffer: &buffer, tracker: tracker)
-                return nil
+                return .complete
             }
         }
 
-        func parseSection_some(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SectionSpecifier? {
+        func parseSection_some(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SectionSpecifier {
             try fixedString("[", buffer: &buffer, tracker: tracker)
             let spec = try self.parseSectionSpecifier(buffer: &buffer, tracker: tracker)
             try fixedString("]", buffer: &buffer, tracker: tracker)
