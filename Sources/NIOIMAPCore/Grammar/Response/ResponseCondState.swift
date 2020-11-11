@@ -15,14 +15,12 @@
 import struct NIO.ByteBuffer
 
 extension TaggedResponse {
-    
     /// IMAPv4 `resp-cond-state`
     public enum State: Equatable {
         case ok(ResponseText)
         case no(ResponseText)
         case bad(ResponseText)
     }
-    
 }
 
 // MARK: - Encoding
