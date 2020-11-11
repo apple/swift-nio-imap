@@ -74,6 +74,7 @@ extension UIDRangeTests {
             let size = self.testBuffer.writeUIDRange(test)
             XCTAssertEqual(size, expectedString.utf8.count, line: line)
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
+            XCTAssertEqual("\(test)", expectedString, line: line)
         }
     }
 }
