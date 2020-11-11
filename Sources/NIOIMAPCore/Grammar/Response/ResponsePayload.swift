@@ -18,7 +18,7 @@ public enum ResponsePayload: Equatable {
     case greeting(Greeting)
     case conditionalState(ResponseConditionalState)
     case conditionalBye(ResponseText)
-    case mailboxData(MailboxName.Data)
+    case mailboxData(MailboxData)
     case messageData(MessageData)
     case capabilityData([Capability])
     case enableData([Capability])

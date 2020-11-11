@@ -22,7 +22,7 @@ class MailboxDataTests: EncodeTestClass {}
 
 extension MailboxDataTests {
     func testEncode() {
-        let inputs: [(MailboxName.Data, String, UInt)] = [
+        let inputs: [(MailboxData, String, UInt)] = [
             (.exists(1), "1 EXISTS", #line),
             (.flags([.answered, .deleted]), "FLAGS (\\Answered \\Deleted)", #line),
             (.list(MailboxInfo(attributes: [], path: try! .init(name: .inbox), extensions: [])), "LIST () \"INBOX\"", #line),
@@ -50,11 +50,11 @@ extension MailboxDataTests {
     }
 
     func testEncode_searchSort() {
-        let inputs: [(SearchSortMailboxData?, String, UInt)] = [
+        let inputs: [(MailboxData.SearchSort?, String, UInt)] = [
             (nil, "SEARCH", #line),
             (.init(identifiers: [1], modificationSequence: .init(modifierSequenceValue: 2)), "SEARCH 1 (MODSEQ 2)", #line),
             (.init(identifiers: [1, 2, 3], modificationSequence: .init(modifierSequenceValue: 2)), "SEARCH 1 2 3 (MODSEQ 2)", #line),
         ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeSearchSortMailboxData($0) })
+        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeMailboxDataSearchSort($0) })
     }
 }

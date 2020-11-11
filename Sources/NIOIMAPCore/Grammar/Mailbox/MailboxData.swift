@@ -14,36 +14,36 @@
 
 import struct NIO.ByteBuffer
 
-extension MailboxName {
-    /// IMAPv4 `mailbox-data`
-    public enum Data: Equatable {
-        case flags([Flag])
-        case list(MailboxInfo)
-        case lsub(MailboxInfo)
-        case search([Int])
-        case esearch(ESearchResponse)
-        case status(MailboxName, MailboxStatus)
-        case exists(Int)
-        case recent(Int)
-        case namespace(NamespaceResponse)
-        case searchSort(SearchSortMailboxData)
-    }
+/// IMAPv4 `mailbox-data`
+public enum MailboxData: Equatable {
+    case flags([Flag])
+    case list(MailboxInfo)
+    case lsub(MailboxInfo)
+    case search([Int])
+    case esearch(ESearchResponse)
+    case status(MailboxName, MailboxStatus)
+    case exists(Int)
+    case recent(Int)
+    case namespace(NamespaceResponse)
+    case searchSort(SearchSort)
 }
 
-public struct SearchSortMailboxData: Equatable {
-    public var identifiers: [Int]
-    public var modificationSequence: SearchSortModificationSequence
+extension MailboxData {
+    public struct SearchSort: Equatable {
+        public var identifiers: [Int]
+        public var modificationSequence: SearchSortModificationSequence
 
-    public init(identifiers: [Int], modificationSequence: SearchSortModificationSequence) {
-        self.identifiers = identifiers
-        self.modificationSequence = modificationSequence
+        public init(identifiers: [Int], modificationSequence: SearchSortModificationSequence) {
+            self.identifiers = identifiers
+            self.modificationSequence = modificationSequence
+        }
     }
 }
 
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeSearchSortMailboxData(_ data: SearchSortMailboxData?) -> Int {
+    @discardableResult mutating func writeMailboxDataSearchSort(_ data: MailboxData.SearchSort?) -> Int {
         self.writeString("SEARCH") +
             self.writeIfExists(data) { (data) -> Int in
                 self.writeArray(data.identifiers, prefix: " ", parenthesis: false) { (element, buffer) -> Int in
@@ -54,7 +54,7 @@ extension EncodeBuffer {
             }
     }
 
-    @discardableResult mutating func writeMailboxData(_ data: MailboxName.Data) -> Int {
+    @discardableResult mutating func writeMailboxData(_ data: MailboxData) -> Int {
         switch data {
         case .flags(let flags):
             return self.writeMailboxData_flags(flags)
@@ -75,7 +75,7 @@ extension EncodeBuffer {
         case .namespace(let namespaceResponse):
             return self.writeNamespaceResponse(namespaceResponse)
         case .searchSort(let data):
-            return self.writeSearchSortMailboxData(data)
+            return self.writeMailboxDataSearchSort(data)
         }
     }
 
