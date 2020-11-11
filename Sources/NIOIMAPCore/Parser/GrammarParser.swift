@@ -5410,8 +5410,6 @@ extension GrammarParser {
             let id2 = try optional(buffer: &buffer, tracker: tracker, parser: parse_colonAndUIDOrWildcard)
             if let id = id2 {
                 return UIDRange(left: id1, right: id)
-            } else if id1 == .max {
-                return .all
             } else {
                 return UIDRange(id1)
             }

@@ -4469,6 +4469,7 @@ extension ParserUnitTests {
                 ("UID FETCH 1 FLAGS", "\r\n", .uidFetch([1], [.flags], []), #line),
                 ("UID SEARCH CHARSET UTF8 ALL", "\r\n", .uidSearch(key: .all, charset: "UTF8"), #line),
                 ("UID STORE 1 +FLAGS (Test)", "\r\n", .uidStore([1], [], .add(silent: false, list: [.keyword(.init("Test"))])), #line),
+                ("UID COPY * Inbox", "\r\n", .uidCopy([UIDRange(.max)], .inbox), #line),
             ],
             parserErrorInputs: [
                 ("UID RENAME inbox other", " ", #line),
@@ -4508,7 +4509,7 @@ extension ParserUnitTests {
         self.iterateTests(
             testFunction: GrammarParser.parseUIDRange,
             validInputs: [
-                ("*", "\r\n", UIDRange.all, #line),
+                ("*", "\r\n", UIDRange(.max), #line),
                 ("1:*", "\r\n", UIDRange.all, #line),
                 ("12:34", "\r\n", UIDRange(left: 12, right: 34), #line),
                 ("12:*", "\r\n", UIDRange(left: 12, right: .max), #line),
@@ -4541,6 +4542,8 @@ extension ParserUnitTests {
                     UIDRange(78 ... 910),
                     UIDRange(11),
                 ])!, #line),
+                ("*", "\r\n", UIDSet(UIDRange(.max)), #line),
+                ("1:*", "\r\n", .all, #line),
             ],
             parserErrorInputs: [
                 ("a", " ", #line),
