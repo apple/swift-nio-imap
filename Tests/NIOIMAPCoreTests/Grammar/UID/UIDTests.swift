@@ -38,6 +38,16 @@ extension UIDTests {
     }
 }
 
+// MARK: - CustomStringConvertible
+
+extension UIDTests {
+    func testCustomStringConvertible() {
+        XCTAssertEqual("\(UID.min)", "1")
+        XCTAssertEqual("\(UID.max)", "*")
+        XCTAssertEqual("\(UID(2))", "2")
+    }
+}
+
 // MARK: - Encoding
 
 extension UIDTests {

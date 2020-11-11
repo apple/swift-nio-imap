@@ -18,6 +18,17 @@ import XCTest
 
 class UIDSetTests: EncodeTestClass {}
 
+// MARK: - CustomStringCovertible
+
+extension UIDSetTests {
+    func testCustomStringConvertible() {
+        XCTAssertEqual("\([1 ... 3, UIDRange(4), UIDRange(6)] as UIDSet)", "1:3,4,6")
+        XCTAssertEqual("\([1 ... (.max)] as UIDSet)", "1:*")
+        XCTAssertEqual("\([UIDRange(37)] as UIDSet)", "37")
+        XCTAssertEqual("\([UIDRange(.max)] as UIDSet)", "*")
+    }
+}
+
 // MARK: - UIDSetTests imapEncoded
 
 extension UIDSetTests {

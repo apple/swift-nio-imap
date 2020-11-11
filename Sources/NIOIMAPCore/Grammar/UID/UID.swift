@@ -32,6 +32,18 @@ public struct UID: RawRepresentable, Hashable, Codable {
     public static let max = UID(UInt32.max)
 }
 
+// MARK: - CustomStringConvertible
+
+extension UID: CustomStringConvertible {
+    public var description: String {
+        if self == .max {
+            return "*"
+        } else {
+            return "\(self.rawValue)"
+        }
+    }
+}
+
 // MARK: - Integer literal
 
 extension UID: ExpressibleByIntegerLiteral {

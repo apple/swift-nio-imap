@@ -47,6 +47,20 @@ extension UIDRange {
     }
 }
 
+// MARK: - CustomStringConvertible
+
+extension UIDRange: CustomStringConvertible {
+    public var description: String {
+        if range.lowerBound < range.upperBound {
+            return "\(range.lowerBound):\(range.upperBound)"
+        } else {
+            return "\(range.lowerBound)"
+        }
+    }
+}
+
+// MARK: - Integer Literal
+
 extension UIDRange: ExpressibleByIntegerLiteral {
     public init(integerLiteral value: UInt32) {
         self.init(UID(integerLiteral: value))
