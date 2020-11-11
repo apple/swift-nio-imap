@@ -16,7 +16,7 @@ import struct NIO.ByteBuffer
 
 public enum ResponsePayload: Equatable {
     case greeting(Greeting)
-    case conditionalState(ResponseConditionalState)
+    case conditionalState(TaggedResponse.State)
     case conditionalBye(ResponseText)
     case mailboxData(MailboxName.Data)
     case messageData(MessageData)
@@ -34,7 +34,7 @@ extension EncodeBuffer {
     @discardableResult mutating func writeResponsePayload(_ payload: ResponsePayload) -> Int {
         switch payload {
         case .conditionalState(let data):
-            return self.writeResponseConditionalState(data)
+            return self.writeTaggedResponseState(data)
         case .conditionalBye(let data):
             return self.writeResponseConditionalBye(data)
         case .mailboxData(let data):

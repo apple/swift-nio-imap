@@ -16,21 +16,21 @@ import NIO
 @testable import NIOIMAPCore
 import XCTest
 
-class ResponseConditionalStateTests: EncodeTestClass {}
+class TaggedResponseState_Tests: EncodeTestClass {}
 
 // MARK: - Encoding
 
-extension ResponseConditionalStateTests {
+extension TaggedResponseState_Tests {
     func testEncode() {
-        let inputs: [(ResponseConditionalState, String, UInt)] = [
-            (ResponseConditionalState.bad(.init(code: .parse, text: "something")), "BAD [PARSE] something", #line),
-            (ResponseConditionalState.ok(.init(code: .alert, text: "error")), "OK [ALERT] error", #line),
-            (ResponseConditionalState.no(.init(code: .readOnly, text: "everything")), "NO [READ-ONLY] everything", #line),
+        let inputs: [(TaggedResponse.State, String, UInt)] = [
+            (.bad(.init(code: .parse, text: "something")), "BAD [PARSE] something", #line),
+            (.ok(.init(code: .alert, text: "error")), "OK [ALERT] error", #line),
+            (.no(.init(code: .readOnly, text: "everything")), "NO [READ-ONLY] everything", #line),
         ]
 
         for (test, expectedString, line) in inputs {
             self.testBuffer.clear()
-            let size = self.testBuffer.writeResponseConditionalState(test)
+            let size = self.testBuffer.writeTaggedResponseState(test)
             XCTAssertEqual(size, expectedString.utf8.count, line: line)
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }
