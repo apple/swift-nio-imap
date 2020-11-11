@@ -41,6 +41,16 @@ extension UIDSet {
     }
 }
 
+// MARK: - CustomStringConvertible
+
+extension UIDSet: CustomStringConvertible {
+    public var description: String {
+        ranges.map { "\($0)" }.joined(separator: ",")
+    }
+}
+
+// MARK: - Array Literal
+
 extension UIDSet: ExpressibleByArrayLiteral {
     public init(arrayLiteral elements: UIDRange...) {
         self.init(elements)!
