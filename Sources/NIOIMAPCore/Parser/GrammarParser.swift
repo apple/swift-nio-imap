@@ -2690,28 +2690,28 @@ extension GrammarParser {
     //                    esearch-response /
     //                    "STATUS" SP mailbox SP "(" [status-att-list] ")" /
     //                    number SP "EXISTS" / Namespace-Response
-    static func parseMailboxData(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxName.Data {
-        func parseMailboxData_flags(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxName.Data {
+    static func parseMailboxData(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxData {
+        func parseMailboxData_flags(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxData {
             try fixedString("FLAGS ", buffer: &buffer, tracker: tracker)
             return .flags(try self.parseFlagList(buffer: &buffer, tracker: tracker))
         }
 
-        func parseMailboxData_list(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxName.Data {
+        func parseMailboxData_list(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxData {
             try fixedString("LIST ", buffer: &buffer, tracker: tracker)
             return .list(try self.parseMailboxList(buffer: &buffer, tracker: tracker))
         }
 
-        func parseMailboxData_lsub(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxName.Data {
+        func parseMailboxData_lsub(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxData {
             try fixedString("LSUB ", buffer: &buffer, tracker: tracker)
             return .lsub(try self.parseMailboxList(buffer: &buffer, tracker: tracker))
         }
 
-        func parseMailboxData_esearch(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxName.Data {
+        func parseMailboxData_esearch(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxData {
             let response = try self.parseEsearchResponse(buffer: &buffer, tracker: tracker)
             return .esearch(response)
         }
 
-        func parseMailboxData_search(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxName.Data {
+        func parseMailboxData_search(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxData {
             try fixedString("SEARCH", buffer: &buffer, tracker: tracker)
             let nums = try ParserLibrary.parseZeroOrMore(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> Int in
                 try space(buffer: &buffer, tracker: tracker)
@@ -2720,7 +2720,7 @@ extension GrammarParser {
             return .search(nums)
         }
 
-        func parseMailboxData_searchSort(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxName.Data {
+        func parseMailboxData_searchSort(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxData {
             try fixedString("SEARCH", buffer: &buffer, tracker: tracker)
             try space(buffer: &buffer, tracker: tracker)
             var array = [try self.parseNZNumber(buffer: &buffer, tracker: tracker)]
@@ -2733,7 +2733,7 @@ extension GrammarParser {
             return .searchSort(.init(identifiers: array, modificationSequence: seq))
         }
 
-        func parseMailboxData_status(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxName.Data {
+        func parseMailboxData_status(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxData {
             try fixedString("STATUS ", buffer: &buffer, tracker: tracker)
             let mailbox = try self.parseMailbox(buffer: &buffer, tracker: tracker)
             try space(buffer: &buffer, tracker: tracker)
@@ -2743,19 +2743,19 @@ extension GrammarParser {
             return .status(mailbox, status ?? .init())
         }
 
-        func parseMailboxData_exists(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxName.Data {
+        func parseMailboxData_exists(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxData {
             let number = try self.parseNumber(buffer: &buffer, tracker: tracker)
             try fixedString(" EXISTS", buffer: &buffer, tracker: tracker)
             return .exists(number)
         }
 
-        func parseMailboxData_recent(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxName.Data {
+        func parseMailboxData_recent(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxData {
             let number = try self.parseNumber(buffer: &buffer, tracker: tracker)
             try fixedString(" RECENT", buffer: &buffer, tracker: tracker)
             return .recent(number)
         }
 
-        func parseMailboxData_namespace(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxName.Data {
+        func parseMailboxData_namespace(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxData {
             .namespace(try self.parseNamespaceResponse(buffer: &buffer, tracker: tracker))
         }
 
