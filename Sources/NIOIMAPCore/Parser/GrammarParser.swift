@@ -3696,7 +3696,7 @@ extension GrammarParser {
         try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> TaggedResponse in
             let tag = try self.parseTag(buffer: &buffer, tracker: tracker)
             try space(buffer: &buffer, tracker: tracker)
-            let state = try self.parseResponseConditionalState(buffer: &buffer, tracker: tracker)
+            let state = try self.parseTaggedResponseState(buffer: &buffer, tracker: tracker)
             try newline(buffer: &buffer, tracker: tracker)
             return TaggedResponse(tag: tag, state: state)
         }
@@ -3753,33 +3753,33 @@ extension GrammarParser {
     }
 
     // resp-cond-state = ("OK" / "NO" / "BAD") SP resp-text
-    static func parseResponseConditionalState(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ResponseConditionalState {
-        func parseResponseConditionalState_ok(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ResponseConditionalState {
+    static func parseTaggedResponseState(buffer: inout ByteBuffer, tracker: StackTracker) throws -> TaggedResponse.State {
+        func parseTaggedResponseState_ok(buffer: inout ByteBuffer, tracker: StackTracker) throws -> TaggedResponse.State {
             try fixedString("OK ", buffer: &buffer, tracker: tracker)
             return .ok(try self.parseResponseText(buffer: &buffer, tracker: tracker))
         }
 
-        func parseResponseConditionalState_no(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ResponseConditionalState {
+        func parseTaggedResponseState_no(buffer: inout ByteBuffer, tracker: StackTracker) throws -> TaggedResponse.State {
             try fixedString("NO ", buffer: &buffer, tracker: tracker)
             return .no(try self.parseResponseText(buffer: &buffer, tracker: tracker))
         }
 
-        func parseResponseConditionalState_bad(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ResponseConditionalState {
+        func parseTaggedResponseState_bad(buffer: inout ByteBuffer, tracker: StackTracker) throws -> TaggedResponse.State {
             try fixedString("BAD ", buffer: &buffer, tracker: tracker)
             return .bad(try self.parseResponseText(buffer: &buffer, tracker: tracker))
         }
 
         return try oneOf([
-            parseResponseConditionalState_ok,
-            parseResponseConditionalState_no,
-            parseResponseConditionalState_bad,
+            parseTaggedResponseState_ok,
+            parseTaggedResponseState_no,
+            parseTaggedResponseState_bad,
         ], buffer: &buffer, tracker: tracker)
     }
 
     // response-payload = resp-cond-state / resp-cond-bye / mailbox-data / message-data / capability-data / id-response / enable-data
     static func parseResponsePayload(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ResponsePayload {
         func parseResponsePayload_conditionalState(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ResponsePayload {
-            .conditionalState(try self.parseResponseConditionalState(buffer: &buffer, tracker: tracker))
+            .conditionalState(try self.parseTaggedResponseState(buffer: &buffer, tracker: tracker))
         }
 
         func parseResponsePayload_conditionalBye(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ResponsePayload {

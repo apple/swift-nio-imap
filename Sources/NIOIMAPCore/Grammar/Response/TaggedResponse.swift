@@ -17,9 +17,9 @@ import struct NIO.ByteBuffer
 /// IMAPv4 `response-tagged`
 public struct TaggedResponse: Equatable {
     public var tag: String
-    public var state: ResponseConditionalState
+    public var state: State
 
-    public init(tag: String, state: ResponseConditionalState) {
+    public init(tag: String, state: State) {
         self.tag = tag
         self.state = state
     }
@@ -30,7 +30,7 @@ public struct TaggedResponse: Equatable {
 extension EncodeBuffer {
     @discardableResult mutating func writeTaggedResponse(_ response: TaggedResponse) -> Int {
         self.writeString("\(response.tag) ") +
-            self.writeResponseConditionalState(response.state) +
+            self.writeTaggedResponseState(response.state) +
             self.writeString("\r\n")
     }
 }
