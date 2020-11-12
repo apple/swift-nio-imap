@@ -302,8 +302,8 @@ extension ParserUnitTests {
 
         let expectedResults: [(Response, UInt)] = [
             (.untaggedResponse(.conditionalState(.ok(.init(code: .capability([.imap4rev1]), text: "Ready.")))), #line),
-            (.untaggedResponse(.greeting(.auth(.preauth(.init(text: "IMAP4rev1 server logged in as Smith"))))), #line),
-            (.untaggedResponse(.conditionalBye(.init(text: "Autologout; idle for too long"))), #line),
+            (.untaggedResponse(.conditionalState(.preauth(.init(text: "IMAP4rev1 server logged in as Smith")))), #line),
+            (.untaggedResponse(.conditionalState(.bye(.init(text: "Autologout; idle for too long")))), #line),
 
             (.taggedResponse(.init(tag: "2", state: .ok(.init(code: nil, text: "Login completed.")))), #line),
 
@@ -3432,8 +3432,8 @@ extension ParserUnitTests {
             testFunction: GrammarParser.parseResponsePayload,
             validInputs: [
                 ("CAPABILITY ENABLE", "\r", .capabilityData([.enable]), #line),
-                ("BYE test", "\r\n", .conditionalBye(.init(code: nil, text: "test")), #line),
-                ("OK test", "\r\n", .conditionalState(.ok(.init(code: nil, text: "test"))), #line),
+                ("BYE test", "\r", .conditionalState(.bye(.init(code: nil, text: "test"))), #line),
+                ("OK test", "\r", .conditionalState(.ok(.init(code: nil, text: "test"))), #line),
                 ("1 EXISTS", "\r", .mailboxData(.exists(1)), #line),
                 ("2 EXPUNGE", "\r", .messageData(.expunge(2)), #line),
                 ("ENABLED ENABLE", "\r", .enableData([.enable]), #line),

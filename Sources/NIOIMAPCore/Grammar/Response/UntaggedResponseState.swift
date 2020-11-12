@@ -14,19 +14,21 @@
 
 import struct NIO.ByteBuffer
 
-extension TaggedResponse {
-    /// IMAPv4 `resp-cond-state`
-    public enum State: Equatable {
-        case ok(ResponseText)
-        case no(ResponseText)
-        case bad(ResponseText)
-    }
+/// Untagged status responses
+///
+/// The untagged versions in RFC 3501 section 7.1
+public enum UntaggedStatus: Equatable {
+    case ok(ResponseText)
+    case no(ResponseText)
+    case bad(ResponseText)
+    case preauth(ResponseText)
+    case bye(ResponseText)
 }
 
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeTaggedResponseState(_ cond: TaggedResponse.State) -> Int {
+    @discardableResult mutating func writeUntaggedStatus(_ cond: UntaggedStatus) -> Int {
         switch cond {
         case .ok(let text):
             return
@@ -39,6 +41,14 @@ extension EncodeBuffer {
         case .bad(let text):
             return
                 self.writeString("BAD ") +
+                self.writeResponseText(text)
+        case .preauth(let text):
+            return
+                self.writeString("PREAUTH ") +
+                self.writeResponseText(text)
+        case .bye(let text):
+            return
+                self.writeString("BYE ") +
                 self.writeResponseText(text)
         }
     }

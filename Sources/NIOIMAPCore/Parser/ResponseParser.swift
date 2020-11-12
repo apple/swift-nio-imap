@@ -85,18 +85,12 @@ extension ResponseParser {
             return .untaggedResponse(response)
         }
 
-        func parseResponse_greeting(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Response {
-            let greeting = try GrammarParser.parseGreeting(buffer: &buffer, tracker: tracker)
-            return .untaggedResponse(.greeting(greeting))
-        }
-
         return try GrammarParser.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             try? GrammarParser.space(buffer: &buffer, tracker: tracker)
             do {
                 let response = try GrammarParser.oneOf([
                     parseResponse_normal,
                     parseResponse_fetch,
-                    parseResponse_greeting,
                 ], buffer: &buffer, tracker: tracker)
 
                 switch response {
