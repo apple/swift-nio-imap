@@ -58,7 +58,7 @@ extension RealWorldTests {
             try ByteToMessageDecoderVerifier.verifyDecoder(
                 stringInputOutputPairs: inoutPairs,
                 decoderFactory: { () -> ResponseDecoder in
-                    ResponseDecoder(expectGreeting: false)
+                    ResponseDecoder()
                 }
             )
         } catch {

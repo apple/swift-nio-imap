@@ -284,6 +284,8 @@ extension ParserUnitTests {
 
         let lines = [
             "* OK [CAPABILITY IMAP4rev1] Ready.\r\n",
+            "* PREAUTH IMAP4rev1 server logged in as Smith\r\n",
+            "* BYE Autologout; idle for too long\r\n",
 
             "2 OK Login completed.\r\n",
 
@@ -299,7 +301,10 @@ extension ParserUnitTests {
         buffer.writeString(lines.joined())
 
         let expectedResults: [(Response, UInt)] = [
-            (.untaggedResponse(.greeting(.auth(.ok(.init(code: .capability([.imap4rev1]), text: "Ready."))))), #line),
+            (.untaggedResponse(.conditionalState(.ok(.init(code: .capability([.imap4rev1]), text: "Ready.")))), #line),
+            (.untaggedResponse(.greeting(.auth(.preauth(.init(text: "IMAP4rev1 server logged in as Smith"))))), #line),
+            (.untaggedResponse(.conditionalBye(.init(text: "Autologout; idle for too long"))), #line),
+
             (.taggedResponse(.init(tag: "2", state: .ok(.init(code: nil, text: "Login completed.")))), #line),
 
             (.fetchResponse(.start(1)), #line),

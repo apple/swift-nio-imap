@@ -211,7 +211,7 @@ extension ResponseParser_Tests {
         for (input, expected, line) in inputs {
             var buffer = ByteBuffer(string: input + "\r\n")
             var results = [ResponseOrContinueRequest]()
-            var parser = ResponseParser(expectGreeting: false)
+            var parser = ResponseParser()
             while buffer.readableBytes > 0 {
                 do {
                     guard let resp = try parser.parseResponseStream(buffer: &buffer) else {
@@ -234,7 +234,7 @@ extension ResponseParser_Tests {
 
 extension ResponseParser_Tests {
     func testStateIsEnforce() {
-        var parser = ResponseParser(expectGreeting: false)
+        var parser = ResponseParser()
         var input = ByteBuffer(string: "* 1 FETCH (* 2 FETCH ")
 
         XCTAssertNoThrow(XCTAssertEqual(try parser.parseResponseStream(buffer: &input), .response(.fetchResponse(.start(1)))))

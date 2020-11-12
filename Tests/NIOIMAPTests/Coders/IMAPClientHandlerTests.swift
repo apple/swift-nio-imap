@@ -109,7 +109,7 @@ class IMAPClientHandlerTests: XCTestCase {
 
     override func setUp() {
         XCTAssertNil(self.channel)
-        self.channel = EmbeddedChannel(handler: IMAPClientHandler(expectGreeting: false))
+        self.channel = EmbeddedChannel(handler: IMAPClientHandler())
     }
 
     override func tearDown() {

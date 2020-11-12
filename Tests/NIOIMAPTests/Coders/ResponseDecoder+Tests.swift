@@ -53,7 +53,7 @@ extension ResponseDecoder_Tests {
             try ByteToMessageDecoderVerifier.verifyDecoder(
                 stringInputOutputPairs: inoutPairs.map { ($0, $1.map { .response($0) }) },
                 decoderFactory: { () -> ResponseDecoder in
-                    ResponseDecoder(expectGreeting: false)
+                    ResponseDecoder()
                 }
             )
         } catch {

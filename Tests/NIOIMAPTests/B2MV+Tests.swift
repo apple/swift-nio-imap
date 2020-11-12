@@ -250,7 +250,7 @@ extension B2MV_Tests {
             try ByteToMessageDecoderVerifier.verifyDecoder(
                 stringInputOutputPairs: inputs,
                 decoderFactory: { () -> ResponseDecoder in
-                    ResponseDecoder(expectGreeting: false)
+                    ResponseDecoder()
                 }
             )
         } catch let error as ByteToMessageDecoderVerifier.VerificationError<CommandStream> {
