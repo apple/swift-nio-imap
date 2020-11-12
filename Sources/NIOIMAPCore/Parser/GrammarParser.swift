@@ -1779,27 +1779,6 @@ extension GrammarParser {
         ], buffer: &buffer, tracker: tracker)
     }
 
-    // greeting        = "*" SP (resp-cond-auth / resp-cond-bye) CRLF
-    static func parseGreeting(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Greeting {
-        func parseGreeting_auth(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Greeting {
-            .auth(try self.parseResponseConditionalAuth(buffer: &buffer, tracker: tracker))
-        }
-
-        func parseGreeting_bye(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Greeting {
-            .bye(try self.parseResponseConditionalBye(buffer: &buffer, tracker: tracker))
-        }
-
-        return try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Greeting in
-            try fixedString("* ", buffer: &buffer, tracker: tracker)
-            let greeting = try oneOf([
-                parseGreeting_auth,
-                parseGreeting_bye,
-            ], buffer: &buffer, tracker: tracker)
-            try newline(buffer: &buffer, tracker: tracker)
-            return greeting
-        }
-    }
-
     // header-fld-name = astring
     static func parseHeaderFieldName(buffer: inout ByteBuffer, tracker: StackTracker) throws -> String {
         var buffer = try self.parseAString(buffer: &buffer, tracker: tracker)
@@ -3681,16 +3660,6 @@ extension GrammarParser {
         }
     }
 
-    // response-fatal  = "*" SP resp-cond-bye CRLF
-    static func parseResponseFatal(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ResponseText {
-        try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> ResponseText in
-            try fixedString("* ", buffer: &buffer, tracker: tracker)
-            let bye = try self.parseResponseConditionalBye(buffer: &buffer, tracker: tracker)
-            try newline(buffer: &buffer, tracker: tracker)
-            return bye
-        }
-    }
-
     // response-tagged = tag SP resp-cond-state CRLF
     static func parseTaggedResponse(buffer: inout ByteBuffer, tracker: StackTracker) throws -> TaggedResponse {
         try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> TaggedResponse in
@@ -3726,30 +3695,40 @@ extension GrammarParser {
         }
     }
 
-    // resp-cond-auth  = ("OK" / "PREAUTH") SP resp-text
-    static func parseResponseConditionalAuth(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ResponseConditionalAuth {
-        func parseResponseConditionalAuth_ok(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ResponseConditionalAuth {
+    /// This is a combination of `resp-cond-state`, `resp-cond-bye`, and `greeting`.
+    static func parseUntaggedResponseStatus(buffer: inout ByteBuffer, tracker: StackTracker) throws -> UntaggedStatus {
+        func parseTaggedResponseState_ok(buffer: inout ByteBuffer, tracker: StackTracker) throws -> UntaggedStatus {
             try fixedString("OK ", buffer: &buffer, tracker: tracker)
             return .ok(try self.parseResponseText(buffer: &buffer, tracker: tracker))
         }
 
-        func parseResponseConditionalAuth_preauth(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ResponseConditionalAuth {
+        func parseTaggedResponseState_no(buffer: inout ByteBuffer, tracker: StackTracker) throws -> UntaggedStatus {
+            try fixedString("NO ", buffer: &buffer, tracker: tracker)
+            return .no(try self.parseResponseText(buffer: &buffer, tracker: tracker))
+        }
+
+        func parseTaggedResponseState_bad(buffer: inout ByteBuffer, tracker: StackTracker) throws -> UntaggedStatus {
+            try fixedString("BAD ", buffer: &buffer, tracker: tracker)
+            return .bad(try self.parseResponseText(buffer: &buffer, tracker: tracker))
+        }
+
+        func parseTaggedResponseState_preAuth(buffer: inout ByteBuffer, tracker: StackTracker) throws -> UntaggedStatus {
             try fixedString("PREAUTH ", buffer: &buffer, tracker: tracker)
             return .preauth(try self.parseResponseText(buffer: &buffer, tracker: tracker))
         }
 
-        return try oneOf([
-            parseResponseConditionalAuth_ok,
-            parseResponseConditionalAuth_preauth,
-        ], buffer: &buffer, tracker: tracker)
-    }
-
-    // resp-cond-bye   = "BYE" SP resp-text
-    static func parseResponseConditionalBye(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ResponseText {
-        try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> ResponseText in
+        func parseTaggedResponseState_bye(buffer: inout ByteBuffer, tracker: StackTracker) throws -> UntaggedStatus {
             try fixedString("BYE ", buffer: &buffer, tracker: tracker)
-            return try self.parseResponseText(buffer: &buffer, tracker: tracker)
+            return .bye(try self.parseResponseText(buffer: &buffer, tracker: tracker))
         }
+
+        return try oneOf([
+            parseTaggedResponseState_ok,
+            parseTaggedResponseState_no,
+            parseTaggedResponseState_bad,
+            parseTaggedResponseState_preAuth,
+            parseTaggedResponseState_bye,
+        ], buffer: &buffer, tracker: tracker)
     }
 
     // resp-cond-state = ("OK" / "NO" / "BAD") SP resp-text
@@ -3779,11 +3758,7 @@ extension GrammarParser {
     // response-payload = resp-cond-state / resp-cond-bye / mailbox-data / message-data / capability-data / id-response / enable-data
     static func parseResponsePayload(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ResponsePayload {
         func parseResponsePayload_conditionalState(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ResponsePayload {
-            .conditionalState(try self.parseTaggedResponseState(buffer: &buffer, tracker: tracker))
-        }
-
-        func parseResponsePayload_conditionalBye(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ResponsePayload {
-            .conditionalBye(try self.parseResponseConditionalBye(buffer: &buffer, tracker: tracker))
+            .conditionalState(try self.parseUntaggedResponseStatus(buffer: &buffer, tracker: tracker))
         }
 
         func parseResponsePayload_mailboxData(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ResponsePayload {
@@ -3812,7 +3787,6 @@ extension GrammarParser {
 
         return try oneOf([
             parseResponsePayload_conditionalState,
-            parseResponsePayload_conditionalBye,
             parseResponsePayload_mailboxData,
             parseResponsePayload_messageData,
             parseResponsePayload_capabilityData,

@@ -185,8 +185,8 @@ extension B2MV_Tests {
 
             // MARK: Bye
 
-            ("* BYE logging off", [.untaggedResponse(.conditionalBye(.init(code: nil, text: "logging off")))]),
-            ("* BYE [ALERT] logging off", [.untaggedResponse(.conditionalBye(.init(code: .alert, text: "logging off")))]),
+            ("* BYE logging off", [.untaggedResponse(.conditionalState(.bye(.init(code: nil, text: "logging off"))))]),
+            ("* BYE [ALERT] logging off", [.untaggedResponse(.conditionalState(.bye(.init(code: .alert, text: "logging off"))))]),
 
             // MARK: Capability
 
@@ -250,7 +250,7 @@ extension B2MV_Tests {
             try ByteToMessageDecoderVerifier.verifyDecoder(
                 stringInputOutputPairs: inputs,
                 decoderFactory: { () -> ResponseDecoder in
-                    ResponseDecoder(expectGreeting: false)
+                    ResponseDecoder()
                 }
             )
         } catch let error as ByteToMessageDecoderVerifier.VerificationError<CommandStream> {

@@ -20,8 +20,8 @@ struct ResponseDecoder: NIOSingleStepByteToMessageDecoder {
 
     var parser: ResponseParser
 
-    init(expectGreeting: Bool = true) {
-        self.parser = ResponseParser(expectGreeting: expectGreeting)
+    init() {
+        self.parser = ResponseParser()
     }
 
     mutating func decode(buffer: inout ByteBuffer) throws -> ResponseOrContinueRequest? {

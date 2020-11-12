@@ -26,8 +26,8 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
 
     public struct UnexpectedContinuationRequest: Error {}
 
-    public init(expectGreeting: Bool) {
-        self.decoder = NIOSingleStepByteToMessageProcessor(ResponseDecoder(expectGreeting: expectGreeting), maximumBufferSize: 1_000)
+    public init() {
+        self.decoder = NIOSingleStepByteToMessageProcessor(ResponseDecoder(), maximumBufferSize: 1_000)
     }
 
     public func channelRead(context: ChannelHandlerContext, data: NIOAny) {

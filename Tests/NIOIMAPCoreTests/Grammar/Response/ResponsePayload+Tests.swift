@@ -25,7 +25,7 @@ extension ResponsePayload_Tests {
         let inputs: [(ResponsePayload, String, UInt)] = [
             (.capabilityData([.enable]), "CAPABILITY IMAP4 IMAP4rev1 ENABLE", #line),
             (.conditionalState(.ok(.init(code: nil, text: "test"))), "OK test", #line),
-            (.conditionalBye(.init(code: nil, text: "test")), "BYE test", #line),
+            (.conditionalState(.bye(.init(code: nil, text: "test"))), "BYE test", #line),
             (.mailboxData(.exists(1)), "1 EXISTS", #line),
             (.messageData(.expunge(2)), "2 EXPUNGE", #line),
             (.enableData([.enable]), "ENABLED ENABLE", #line),

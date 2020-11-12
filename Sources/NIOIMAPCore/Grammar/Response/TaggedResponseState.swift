@@ -14,24 +14,34 @@
 
 import struct NIO.ByteBuffer
 
-/// IMAPv4 `resp-cond-auth`
-public enum ResponseConditionalAuth: Equatable {
-    case ok(ResponseText)
-    case preauth(ResponseText)
+/// Tagged status responses
+///
+/// The tagged versions in RFC 3501 section 7.1
+extension TaggedResponse {
+    /// IMAPv4 `resp-cond-state`
+    public enum State: Equatable {
+        case ok(ResponseText)
+        case no(ResponseText)
+        case bad(ResponseText)
+    }
 }
 
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeResponseConditionalAuth(_ cond: ResponseConditionalAuth) -> Int {
+    @discardableResult mutating func writeTaggedResponseState(_ cond: TaggedResponse.State) -> Int {
         switch cond {
         case .ok(let text):
             return
                 self.writeString("OK ") +
                 self.writeResponseText(text)
-        case .preauth(let text):
+        case .no(let text):
             return
-                self.writeString("PREAUTH ") +
+                self.writeString("NO ") +
+                self.writeResponseText(text)
+        case .bad(let text):
+            return
+                self.writeString("BAD ") +
                 self.writeResponseText(text)
         }
     }
