@@ -15,7 +15,7 @@
 import struct NIO.ByteBuffer
 
 // IMAPv4 sequence-set
-public struct SequenceRangeSet: Equatable {
+public struct SequenceRangeSet: Hashable {
     public var ranges: [SequenceRange]
 
     public init?(_ ranges: [SequenceRange]) {
