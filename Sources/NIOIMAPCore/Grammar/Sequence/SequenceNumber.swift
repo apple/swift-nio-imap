@@ -17,7 +17,7 @@
 /// See RFC 3501 section 2.3.1.2.
 ///
 /// IMAPv4 `seq-number`
-public struct SequenceNumber: RawRepresentable, Equatable {
+public struct SequenceNumber: RawRepresentable, Hashable {
     public var rawValue: UInt32
     public init?(rawValue: Int) {
         guard rawValue >= 1, rawValue <= UInt32.max else { return nil }

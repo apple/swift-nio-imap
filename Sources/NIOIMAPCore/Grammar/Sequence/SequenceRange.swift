@@ -15,7 +15,7 @@
 import struct NIO.ByteBuffer
 
 /// IMAPv4 `seq-range`
-public struct SequenceRange: Equatable, RawRepresentable {
+public struct SequenceRange: Hashable, RawRepresentable {
     public var rawValue: ClosedRange<SequenceNumber>
 
     public var range: ClosedRange<SequenceNumber> { rawValue }
