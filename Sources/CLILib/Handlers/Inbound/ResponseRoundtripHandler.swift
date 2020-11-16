@@ -36,7 +36,7 @@ public class ResponseRoundtripHandler: ChannelInboundHandler {
 //        var buffer = self.unwrapInboundIn(data)
 //        let originalString = String(buffer: buffer)
 //
-//        var responses = [ResponseOrContinueRequest]()
+//        var responses = [ResponseOrContinuationRequest]()
 //        do {
 //            try self.processor.process(buffer: buffer) { (response) in
 //                responses.append(response)
@@ -54,8 +54,8 @@ public class ResponseRoundtripHandler: ChannelInboundHandler {
 //            switch response {
 //            case .response(let response):
 //                encodeBuffer.writeResponse(response)
-//            case .continueRequest(let req):
-//                encodeBuffer.writeContinueRequest(req)
+//            case .continuationRequest(let req):
+//                encodeBuffer.writeContinuationRequest(req)
 //            }
 //        }
 //

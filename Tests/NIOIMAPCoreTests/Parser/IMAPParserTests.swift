@@ -997,12 +997,12 @@ extension ParserUnitTests {
     }
 }
 
-// MARK: - parseContinueRequest
+// MARK: - testParseContinuationRequest
 
 extension ParserUnitTests {
-    func testParseContinueRequest() {
+    func testParseContinuationRequest() {
         self.iterateTests(
-            testFunction: GrammarParser.parseContinueRequest,
+            testFunction: GrammarParser.parseContinuationRequest,
             validInputs: [
                 ("+ OK\r\n", " ", .responseText(.init(code: nil, text: "OK")), #line),
                 ("+ YQ==\r\n", " ", .data("a"), #line),
@@ -1244,10 +1244,10 @@ extension ParserUnitTests {
     }
 }
 
-// MARK: - Parse Continue Request
+// MARK: - Parse Continuation Request
 
 extension ParserUnitTests {
-    func testContinueRequest_valid() {
+    func testContinuationRequest_valid() {
         let inputs: [(String, UInt)] = [
             ("+ Ready for additional command text\r\n", #line),
             ("+ \r\n", #line),
@@ -1256,7 +1256,7 @@ extension ParserUnitTests {
 
         for (input, line) in inputs {
             TestUtilities.withBuffer(input, terminator: " ") { (buffer) in
-                XCTAssertNoThrow(try GrammarParser.parseContinueRequest(buffer: &buffer, tracker: .testTracker), line: line)
+                XCTAssertNoThrow(try GrammarParser.parseContinuationRequest(buffer: &buffer, tracker: .testTracker), line: line)
             }
         }
     }

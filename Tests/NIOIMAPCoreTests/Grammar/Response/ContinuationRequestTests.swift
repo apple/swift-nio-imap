@@ -16,13 +16,13 @@ import NIO
 @testable import NIOIMAPCore
 import XCTest
 
-class ContinueRequestTests: EncodeTestClass {}
+class ContinuationRequestTests: EncodeTestClass {}
 
 // MARK: - Encoding
 
-extension ContinueRequestTests {
+extension ContinuationRequestTests {
     func testEncode() {
-        let inputs: [(ContinueRequest, String, UInt)] = [
+        let inputs: [(ContinuationRequest, String, UInt)] = [
             (.data("a"), "+ YQ==\r\n", #line),
             (.responseText(.init(code: .alert, text: "text")), "+ [ALERT] text\r\n", #line),
         ]
@@ -31,7 +31,7 @@ extension ContinueRequestTests {
             defer {
                 self.testBuffer = EncodeBuffer.serverEncodeBuffer(buffer: encoder.bytes, options: ResponseEncodingOptions())
             }
-            return encoder.writeContinueRequest(req)
+            return encoder.writeContinuationRequest(req)
         })
     }
 }

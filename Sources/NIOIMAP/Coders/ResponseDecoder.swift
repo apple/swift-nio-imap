@@ -16,7 +16,7 @@ import NIO
 import NIOIMAPCore
 
 struct ResponseDecoder: NIOSingleStepByteToMessageDecoder {
-    typealias InboundOut = ResponseOrContinueRequest
+    typealias InboundOut = ResponseOrContinuationRequest
 
     var parser: ResponseParser
 
@@ -24,7 +24,7 @@ struct ResponseDecoder: NIOSingleStepByteToMessageDecoder {
         self.parser = ResponseParser()
     }
 
-    mutating func decode(buffer: inout ByteBuffer) throws -> ResponseOrContinueRequest? {
+    mutating func decode(buffer: inout ByteBuffer) throws -> ResponseOrContinuationRequest? {
         let save = buffer
         do {
             return try self.parser.parseResponseStream(buffer: &buffer)
@@ -33,7 +33,7 @@ struct ResponseDecoder: NIOSingleStepByteToMessageDecoder {
         }
     }
 
-    mutating func decodeLast(buffer: inout ByteBuffer, seenEOF: Bool) throws -> ResponseOrContinueRequest? {
+    mutating func decodeLast(buffer: inout ByteBuffer, seenEOF: Bool) throws -> ResponseOrContinuationRequest? {
         try self.decode(buffer: &buffer)
     }
 }

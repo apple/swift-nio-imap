@@ -15,8 +15,8 @@
 import struct NIO.ByteBuffer
 import struct NIO.ByteBufferAllocator
 
-public enum ResponseOrContinueRequest: Equatable {
-    case continueRequest(ContinueRequest)
+public enum ResponseOrContinuationRequest: Equatable {
+    case continuationRequest(ContinuationRequest)
     case response(Response)
 }
 

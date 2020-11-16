@@ -29,7 +29,7 @@ class IMAPServerHandlerTests: XCTestCase {
         self.assertOutboundString("a OK yo\r\n")
     }
 
-    func testSimpleCommandWithContinueRequestWorks() {
+    func testSimpleCommandWithContinuationRequestWorks() {
         self.writeInbound("a LOGIN {4}\r\n")
         XCTAssertNoThrow(XCTAssertNil(try self.channel.readInbound(as: CommandStream.self)))
 
@@ -46,7 +46,7 @@ class IMAPServerHandlerTests: XCTestCase {
         self.assertOutboundString("a OK yo\r\n")
     }
 
-    func testSimpleCommandWithContinueRequestWorksEvenIfClientMisbehavesAndSendsWithoutWaiting() {
+    func testSimpleCommandWithContinuationRequestWorksEvenIfClientMisbehavesAndSendsWithoutWaiting() {
         self.writeInbound("a LOGIN {4}\r\nuser \"password\"\r\n")
         // Nothing happens until `read()`
         XCTAssertNoThrow(XCTAssertNil(try self.channel.readOutbound(as: ByteBuffer.self)))
@@ -59,8 +59,8 @@ class IMAPServerHandlerTests: XCTestCase {
         self.assertOutboundString("+ OK\r\n")
     }
 
-    func testSettingContinueRequestOnLiveHandler() {
-        self.handler.continueRequest = ContinueRequest.responseText(.init(text: "FoO"))
+    func testSettingContinuationRequestOnLiveHandler() {
+        self.handler.continuationRequest = ContinuationRequest.responseText(.init(text: "FoO"))
 
         self.writeInbound("a LOGIN {4}\r\n")
         XCTAssertNoThrow(XCTAssertNil(try self.channel.readInbound(as: CommandStream.self)))
@@ -78,8 +78,8 @@ class IMAPServerHandlerTests: XCTestCase {
         self.assertOutboundString("a OK yo\r\n")
     }
 
-    func testSettingContinueRequestInInit() {
-        self.handler = IMAPServerHandler(continueRequest: ContinueRequest.responseText(.init(text: "FoO")))
+    func testSettingContinuationRequestInInit() {
+        self.handler = IMAPServerHandler(continuationRequest: ContinuationRequest.responseText(.init(text: "FoO")))
         self.channel = EmbeddedChannel(handler: self.handler)
 
         self.writeInbound("a LOGIN {4}\r\n")
