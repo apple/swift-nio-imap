@@ -21,46 +21,46 @@ public final class IMAPServerHandler: ChannelDuplexHandler {
     public typealias OutboundIn = Response
     public typealias OutboundOut = ByteBuffer
 
-    private var _continueRequest: ContinueRequest
-    public var continueRequest: ContinueRequest {
+    private var _continuationRequest: ContinuationRequest
+    public var continuationRequest: ContinuationRequest {
         get {
-            self._continueRequest
+            self._continuationRequest
         }
         set {
-            self._continueRequest = newValue
+            self._continuationRequest = newValue
             let buffer = ByteBufferAllocator().buffer(capacity: 16)
             var encodeBuffer = ResponseEncodeBuffer(buffer: buffer, capabilities: self.capabilities)
-            encodeBuffer.writeContinueRequest(newValue)
-            self.continueRequestBytes = encodeBuffer.bytes
+            encodeBuffer.writeContinuationRequest(newValue)
+            self.continuationRequestBytes = encodeBuffer.bytes
         }
     }
 
     private let decoder: NIOSingleStepByteToMessageProcessor<CommandDecoder>
-    private var numberOfOutstandingContinueRequests = 0
-    private var continueRequestBytes: ByteBuffer
+    private var numberOfOutstandingContinuationRequests = 0
+    private var continuationRequestBytes: ByteBuffer
 
     public var capabilities: [Capability] = []
 
-    public init(continueRequest: ContinueRequest = .responseText(ResponseText(text: "OK"))) {
+    public init(continuationRequest: ContinuationRequest = .responseText(ResponseText(text: "OK"))) {
         self.decoder = NIOSingleStepByteToMessageProcessor(CommandDecoder(), maximumBufferSize: 1_000)
-        self._continueRequest = continueRequest
+        self._continuationRequest = continuationRequest
         let buffer = ByteBufferAllocator().buffer(capacity: 16)
         var encodeBuffer = ResponseEncodeBuffer(buffer: buffer, capabilities: self.capabilities)
-        encodeBuffer.writeContinueRequest(continueRequest)
-        self.continueRequestBytes = encodeBuffer.bytes
+        encodeBuffer.writeContinuationRequest(continuationRequest)
+        self.continuationRequestBytes = encodeBuffer.bytes
     }
 
     public func read(context: ChannelHandlerContext) {
         defer {
             context.read()
         }
-        let outstanding = self.numberOfOutstandingContinueRequests
+        let outstanding = self.numberOfOutstandingContinuationRequests
         if outstanding == 0 {
             return
         }
 
         for _ in 0 ..< outstanding {
-            context.write(self.wrapOutboundOut(self.continueRequestBytes), promise: nil)
+            context.write(self.wrapOutboundOut(self.continuationRequestBytes), promise: nil)
         }
         context.flush()
     }
@@ -68,7 +68,7 @@ public final class IMAPServerHandler: ChannelDuplexHandler {
     public func channelRead(context: ChannelHandlerContext, data: NIOAny) {
         do {
             try self.decoder.process(buffer: self.unwrapInboundIn(data)) { command in
-                self.numberOfOutstandingContinueRequests += command.numberOfSynchronisingLiterals
+                self.numberOfOutstandingContinuationRequests += command.numberOfSynchronisingLiterals
                 if let command = command.command {
                     context.fireChannelRead(self.wrapInboundOut(command))
                 }

@@ -14,8 +14,12 @@
 
 import struct NIO.ByteBuffer
 
+/// A “Command Continuation Request” from the server.
+///
+/// RFC 3501 section 7.5
+///
 /// IMAPv4 `continue-req`
-public enum ContinueRequest: Equatable {
+public enum ContinuationRequest: Equatable {
     case responseText(ResponseText)
     case data(ByteBuffer)
 }

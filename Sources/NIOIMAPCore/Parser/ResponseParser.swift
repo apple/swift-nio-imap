@@ -39,7 +39,7 @@ public struct ResponseParser: Parser {
         self.mode = .response(.fetchOrNormal)
     }
 
-    public mutating func parseResponseStream(buffer: inout ByteBuffer) throws -> ResponseOrContinueRequest? {
+    public mutating func parseResponseStream(buffer: inout ByteBuffer) throws -> ResponseOrContinuationRequest? {
         let tracker = StackTracker.makeNewDefaultLimitStackTracker
         do {
             switch self.mode {
@@ -70,7 +70,7 @@ public struct ResponseParser: Parser {
 // MARK: - Parse responses
 
 extension ResponseParser {
-    fileprivate mutating func parseResponse(state: ResponseState, buffer: inout ByteBuffer, tracker: StackTracker) throws -> ResponseOrContinueRequest {
+    fileprivate mutating func parseResponse(state: ResponseState, buffer: inout ByteBuffer, tracker: StackTracker) throws -> ResponseOrContinuationRequest {
         func parseResponse_fetch(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Response {
             switch state {
             case .fetchOrNormal:
@@ -113,12 +113,12 @@ extension ResponseParser {
         }
     }
 
-    private mutating func _parseResponse(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ResponseOrContinueRequest {
-        func parseResponse_continuation(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ResponseOrContinueRequest {
-            .continueRequest(try GrammarParser.parseContinueRequest(buffer: &buffer, tracker: tracker))
+    private mutating func _parseResponse(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ResponseOrContinuationRequest {
+        func parseResponse_continuation(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ResponseOrContinuationRequest {
+            .continuationRequest(try GrammarParser.parseContinuationRequest(buffer: &buffer, tracker: tracker))
         }
 
-        func parseResponse_tagged(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ResponseOrContinueRequest {
+        func parseResponse_tagged(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ResponseOrContinuationRequest {
             .response(.taggedResponse(try GrammarParser.parseTaggedResponse(buffer: &buffer, tracker: tracker)))
         }
 

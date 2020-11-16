@@ -33,10 +33,10 @@ extension ResponseEncodeBuffer {
     }
 }
 
-// MARK: - Encode ContinueRequest
+// MARK: - Encode ContinuationRequest
 
 extension ResponseEncodeBuffer {
-    @discardableResult public mutating func writeContinueRequest(_ data: ContinueRequest) -> Int {
+    @discardableResult public mutating func writeContinuationRequest(_ data: ContinuationRequest) -> Int {
         var size = 0
         size += self.buffer.writeString("+ ")
         switch data {
