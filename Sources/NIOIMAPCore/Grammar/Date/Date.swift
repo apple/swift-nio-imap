@@ -16,7 +16,7 @@ import struct NIO.ByteBuffer
 
 /// Represents a date with the format `yyyy-MM-dd`.
 /// (RFC 3501)
-public struct Date: Equatable {
+public struct Date: Hashable {
     /// 4-digit year in the range (1900, 2500)
     public var year: Int
 

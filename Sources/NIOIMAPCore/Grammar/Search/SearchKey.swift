@@ -15,7 +15,7 @@
 import struct NIO.ByteBuffer
 
 /// IMAPv4 `search-key`
-public indirect enum SearchKey: Equatable {
+public indirect enum SearchKey: Hashable {
     /// RFC 3501: All messages in the mailbox; the default initial key for ANDing.
     case all
 

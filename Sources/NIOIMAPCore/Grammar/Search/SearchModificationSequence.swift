@@ -13,7 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 /// RFC 7162
-public struct SearchModificationSequenceExtension: Equatable {
+public struct SearchModificationSequenceExtension: Hashable {
     public var name: EntryFlagName
     public var request: EntryKindRequest
 
@@ -24,7 +24,7 @@ public struct SearchModificationSequenceExtension: Equatable {
 }
 
 /// RFC 7162
-public struct SearchModificationSequence: Equatable {
+public struct SearchModificationSequence: Hashable {
     public var extensions: [SearchModificationSequenceExtension]
     public var sequenceValue: ModificationSequenceValue
 

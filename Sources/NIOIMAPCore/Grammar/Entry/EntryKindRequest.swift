@@ -14,7 +14,7 @@
 
 import struct NIO.ByteBuffer
 
-public struct EntryKindRequest: Equatable {
+public struct EntryKindRequest: Hashable {
     var _backing: String
 
     public static var `private` = Self(_backing: "priv")
