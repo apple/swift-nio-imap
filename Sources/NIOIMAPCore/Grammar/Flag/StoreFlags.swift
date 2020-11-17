@@ -14,9 +14,9 @@
 
 import struct NIO.ByteBuffer
 
-public struct StoreFlags: Equatable {
+public struct StoreFlags: Hashable {
     /// What operation to perform on the flags.
-    public enum Operation: String, Equatable {
+    public enum Operation: String, Hashable {
         /// Add to the flags for the message.
         case add = "+"
         /// Remove from the flags for the message.
