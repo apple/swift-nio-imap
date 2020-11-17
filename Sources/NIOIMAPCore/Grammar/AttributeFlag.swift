@@ -15,7 +15,7 @@
 import struct NIO.ByteBuffer
 
 /// RFC 7162 Condstore
-public struct AttributeFlag: Equatable, RawRepresentable {
+public struct AttributeFlag: Hashable, RawRepresentable {
     public var rawValue: String
 
     /// "\\Answered"

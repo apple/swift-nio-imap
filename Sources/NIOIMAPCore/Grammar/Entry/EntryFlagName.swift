@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-public struct EntryFlagName: Equatable {
+public struct EntryFlagName: Hashable {
     public var flag: AttributeFlag
 
     public init(flag: AttributeFlag) {
