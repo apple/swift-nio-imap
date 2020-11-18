@@ -20,6 +20,14 @@ extension BodyStructure {
         public var kind: String
         public var parameters: [ParameterPair]
 
+        /// Creates a new `Disposition`
+        /// - parameter kind: A string representing the disposition type.
+        /// - parameter parameters: An array of *attribute/value* pairs.
+        public init(kind: String, parameters: [ParameterPair]) {
+            self.kind = kind
+            self.parameters = parameters
+        }
+
         /// Attempts to find and convert the value for the common field "SIZE". If the field doesn't exist or is not a valid integer then `nil` is returned.
         public var size: Int? {
             guard let value = self.parameters.first(where: { (pair) -> Bool in

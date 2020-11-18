@@ -435,7 +435,7 @@ extension GrammarParser {
             try space(buffer: &buffer, tracker: tracker)
             let param = try self.parseBodyFieldParam(buffer: &buffer, tracker: tracker)
             try GrammarParser.fixedString(")", buffer: &buffer, tracker: tracker)
-            return BodyStructure.Disposition(kind: string, parameter: param)
+            return BodyStructure.Disposition(kind: string, parameters: param)
         }
 
         return try oneOf([
