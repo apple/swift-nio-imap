@@ -5764,7 +5764,7 @@ extension GrammarParser {
             try space(buffer: &buffer, tracker: tracker)
             return try self.parseBodyExtension(buffer: &buffer, tracker: tracker)
         }
-        return BodyStructure.LocationAndExtensions(location: fieldLocation, extensions: extensions)
+        return BodyStructure.LocationAndExtensions(location: fieldLocation, extensions: extensions.reduce([], +))
     }
 
     static func parseBodyLanguageLocation(buffer: inout ByteBuffer, tracker: StackTracker) throws -> BodyStructure.LanguageLocation {
