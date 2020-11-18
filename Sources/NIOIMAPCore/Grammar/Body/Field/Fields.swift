@@ -15,16 +15,33 @@
 import struct NIO.ByteBuffer
 
 extension BodyStructure {
-    /// IMAPv4 `body-fields`
+    
+    /// Contains fields that are common across bodies of all types (*basic*, *message*, and *text*)
     public struct Fields: Equatable {
-        public var parameter: [BodyStructure.ParameterPair]
+        
+        /// An array of *attritute/value* pairs
+        public var parameters: [BodyStructure.ParameterPair]
+        
+        /// A string giving the content ID as defined in MIME-IMB
         public var id: String?
+        
+        /// A string giving the content description as defined in MIME-IMB
         public var description: String?
+        
+        /// The string giving the content transfer encoding as defined in MIME-IMB
         public var encoding: Encoding
+        
+        /// The size of the body in octets. Note that this is in the encoded state, before any decoding takes place.
         public var octetCount: Int
 
-        public init(parameter: [BodyStructure.ParameterPair], id: String?, description: String?, encoding: BodyStructure.Encoding, octetCount: Int) {
-            self.parameter = parameter
+        /// Creates a new body `Fields`
+        /// - parameter parameters: An array of *attritute/value* pairs
+        /// - parameter id: A string giving the content ID as defined in MIME-IMB
+        /// - parameter description: A string giving the content description as defined in MIME-IMB
+        /// - parameter encoding: The string giving the content transfer encoding as defined in MIME-IMB
+        /// - parameter octetCount: The size of the body in octets. Note that this is in the encoded state, before any decoding takes place.
+        public init(parameters: [BodyStructure.ParameterPair], id: String?, description: String?, encoding: BodyStructure.Encoding, octetCount: Int) {
+            self.parameters = parameters
             self.id = id
             self.description = description
             self.encoding = encoding
@@ -37,7 +54,7 @@ extension BodyStructure {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeBodyFields(_ fields: BodyStructure.Fields) -> Int {
-        self.writeBodyParameterPairs(fields.parameter) +
+        self.writeBodyParameterPairs(fields.parameters) +
             self.writeSpace() +
             self.writeNString(fields.id) +
             self.writeSpace() +
