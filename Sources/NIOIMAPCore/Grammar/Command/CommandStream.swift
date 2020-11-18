@@ -66,7 +66,7 @@ extension AppendCommand {
     /// `end` message, with zero or more `bytes(ByteBuffer)` messages
     /// in the middle.
     public enum CatenateData: Equatable {
-        /// Signals that data is ready to be sent.
+        /// Signals that a given number of bytes is ready to be sent.
         /// - parameter size: The number of bytes to be streamed
         case begin(size: Int)
 
