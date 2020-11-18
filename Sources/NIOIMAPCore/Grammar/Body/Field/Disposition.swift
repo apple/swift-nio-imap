@@ -25,14 +25,6 @@ extension BodyStructure {
         
         /// An array of *attribute/value* pairs.
         public var parameters: [ParameterPair]
-        
-        /// Creates a new `Disposition`
-        /// - parameter kind: A string representing the disposition type.
-        /// - parameter parameters: An array of *attribute/value* pairs.
-        public init(kind: String, parameters: [ParameterPair]) {
-            self.kind = kind
-            self.parameters = parameter
-        }
 
         /// Creates a new `Disposition`
         /// - parameter kind: A string representing the disposition type.
