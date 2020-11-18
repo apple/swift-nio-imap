@@ -32,7 +32,7 @@ extension BodyStructure {
         /// Creates a new `Multipart`.
         /// - parameter parts: The sub-parts that form the `Multipart`
         /// - parameter mediaSubtype: The subtype of the message, e.g. *multipart/mixed*
-        /// - parameter extension: Optional addition fields that not required to form a valid `Multipart`
+        /// - parameter extension: Optional additional fields that are not required to form a valid `Multipart` body
         public init(parts: [BodyStructure], mediaSubtype: MediaSubtype, extension: Extension? = nil) {
             self.parts = parts
             self.mediaSubtype = mediaSubtype
