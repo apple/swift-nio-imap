@@ -15,13 +15,17 @@
 import struct NIO.ByteBuffer
 
 extension BodyStructure {
-    /// Extracted from IMAPv4 `body-ext-1part`
+    /// Pairs languages with a `Location`. An abstraction from RFC 3501
+    /// to make the API slightly easier to work with and enforce validity.
     public struct LanguageLocation: Equatable {
         /// The body language value(s) as defined in BCP 47 and RFC 3066.
         public var languages: [String]
         /// A string list giving the body content URI as defined in RFC 2557.
         public var location: LocationAndExtensions?
 
+        /// Pairs an array of language strings with a location.
+        /// - parameter languages: The body language value(s) as defined in BCP 47 and RFC 3066.
+        /// - parameter location: A *location/extension* pairing.
         public init(languages: [String], location: BodyStructure.LocationAndExtensions? = nil) {
             self.languages = languages
             self.location = location

@@ -413,7 +413,7 @@ extension GrammarParser {
             try space(buffer: &buffer, tracker: tracker)
             let fieldOctets = try self.parseNumber(buffer: &buffer, tracker: tracker)
             return BodyStructure.Fields(
-                parameter: fieldParam,
+                parameters: fieldParam,
                 id: fieldID,
                 description: fieldDescription,
                 encoding: Encoding,
@@ -435,7 +435,7 @@ extension GrammarParser {
             try space(buffer: &buffer, tracker: tracker)
             let param = try self.parseBodyFieldParam(buffer: &buffer, tracker: tracker)
             try GrammarParser.fixedString(")", buffer: &buffer, tracker: tracker)
-            return BodyStructure.Disposition(kind: string, parameter: param)
+            return BodyStructure.Disposition(kind: string, parameters: param)
         }
 
         return try oneOf([
@@ -5764,7 +5764,7 @@ extension GrammarParser {
             try space(buffer: &buffer, tracker: tracker)
             return try self.parseBodyExtension(buffer: &buffer, tracker: tracker)
         }
-        return BodyStructure.LocationAndExtensions(location: fieldLocation, extensions: extensions)
+        return BodyStructure.LocationAndExtensions(location: fieldLocation, extensions: extensions.reduce([], +))
     }
 
     static func parseBodyLanguageLocation(buffer: inout ByteBuffer, tracker: StackTracker) throws -> BodyStructure.LanguageLocation {

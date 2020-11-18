@@ -719,7 +719,7 @@ extension ParserUnitTests {
         TestUtilities.withBuffer(#"("astring" ("f1" "v1"))"#) { (buffer) in
             let dsp = try GrammarParser.parseBodyFieldDsp(buffer: &buffer, tracker: .testTracker)
             XCTAssertNotNil(dsp)
-            XCTAssertEqual(dsp, BodyStructure.Disposition(kind: "astring", parameter: [.init(field: "f1", value: "v1")]))
+            XCTAssertEqual(dsp, BodyStructure.Disposition(kind: "astring", parameters: [.init(field: "f1", value: "v1")]))
         }
     }
 
@@ -805,7 +805,7 @@ extension ParserUnitTests {
     func testParseBodyFields_valid() {
         TestUtilities.withBuffer(#"("f1" "v1") "id" "desc" "8BIT" 1234"#, terminator: " ") { (buffer) in
             let result = try GrammarParser.parseBodyFields(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(result.parameter, [.init(field: "f1", value: "v1")])
+            XCTAssertEqual(result.parameters, [.init(field: "f1", value: "v1")])
             XCTAssertEqual(result.id, "id")
             XCTAssertEqual(result.description, "desc")
             XCTAssertEqual(result.encoding, .eightBit)
@@ -824,7 +824,7 @@ extension ParserUnitTests {
                 "\r\n",
                 .init(
                     type: .basic(.init(kind: .audio, subtype: .alternative)),
-                    fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octetCount: 1),
+                    fields: .init(parameters: [], id: nil, description: nil, encoding: .base64, octetCount: 1),
                     extension: nil
                 ),
                 #line
@@ -834,7 +834,7 @@ extension ParserUnitTests {
                 "\r\n",
                 .init(
                     type: .basic(.init(kind: .application, subtype: .mixed)),
-                    fields: .init(parameter: [], id: "id", description: "description", encoding: .sevenBit, octetCount: 2),
+                    fields: .init(parameters: [], id: "id", description: "description", encoding: .sevenBit, octetCount: 2),
                     extension: nil
                 ),
                 #line
@@ -844,7 +844,7 @@ extension ParserUnitTests {
                 "\r\n",
                 .init(
                     type: .basic(.init(kind: .video, subtype: .related)),
-                    fields: .init(parameter: [.init(field: "f1", value: "v1")], id: nil, description: nil, encoding: .eightBit, octetCount: 3),
+                    fields: .init(parameters: [.init(field: "f1", value: "v1")], id: nil, description: nil, encoding: .eightBit, octetCount: 3),
                     extension: nil
                 ),
                 #line
@@ -860,11 +860,11 @@ extension ParserUnitTests {
                         .init(
                             message: .rfc822,
                             envelope: Envelope(date: nil, subject: nil, from: [], sender: [], reply: [], to: [], cc: [], bcc: [], inReplyTo: nil, messageID: nil),
-                            body: .singlepart(.init(type: .basic(.init(kind: .image, subtype: .related)), fields: .init(parameter: [], id: nil, description: nil, encoding: .binary, octetCount: 5))),
+                            body: .singlepart(.init(type: .basic(.init(kind: .image, subtype: .related)), fields: .init(parameters: [], id: nil, description: nil, encoding: .binary, octetCount: 5))),
                             fieldLines: 8
                         )
                     ),
-                    fields: .init(parameter: [], id: nil, description: nil, encoding: .base64, octetCount: 4),
+                    fields: .init(parameters: [], id: nil, description: nil, encoding: .base64, octetCount: 4),
                     extension: nil
                 ),
                 #line
@@ -877,7 +877,7 @@ extension ParserUnitTests {
                 "\r\n",
                 .init(
                     type: .text(.init(mediaText: "media", lineCount: 2)),
-                    fields: .init(parameter: [], id: nil, description: nil, encoding: .quotedPrintable, octetCount: 1),
+                    fields: .init(parameters: [], id: nil, description: nil, encoding: .quotedPrintable, octetCount: 1),
                     extension: nil
                 ),
                 #line

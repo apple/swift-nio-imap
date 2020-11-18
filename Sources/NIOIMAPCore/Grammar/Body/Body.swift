@@ -14,9 +14,14 @@
 
 import struct NIO.ByteBuffer
 
-/// IMAOv4 body
+/// A parsed representation of the MIME-IMB body structure information of the message.
+/// Recomended reading: RFC 3501 § 2.6.3 and 7.4.2.
 public enum BodyStructure: Equatable {
+    /// A message that at the top level contains only one part. Note that a "message" body contains a nested
+    /// body, which may itself be multipart.
     case singlepart(Singlepart)
+
+    /// A message that at the top level contains one or more parts.
     case multipart(Multipart)
 }
 

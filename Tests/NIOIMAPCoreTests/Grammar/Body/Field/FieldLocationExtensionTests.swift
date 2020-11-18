@@ -24,8 +24,8 @@ extension FieldLocationExtensionTests {
     func testEncode() {
         let inputs: [(BodyStructure.LocationAndExtensions, String, UInt)] = [
             (.init(location: "loc", extensions: []), " \"loc\"", #line),
-            (.init(location: "loc", extensions: [[.number(1)]]), " \"loc\" (1)", #line),
-            (.init(location: "loc", extensions: [[.number(1), .number(2)]]), " \"loc\" (1 2)", #line),
+            (.init(location: "loc", extensions: [.number(1)]), " \"loc\" (1)", #line),
+            (.init(location: "loc", extensions: [.number(1), .number(2)]), " \"loc\" (1 2)", #line),
         ]
 
         for (test, expectedString, line) in inputs {

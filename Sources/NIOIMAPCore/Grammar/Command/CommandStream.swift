@@ -19,16 +19,19 @@ import struct NIO.ByteBuffer
 /// or recieve parts of an email methodically. Multi-append is also supported by sending
 /// multiple `beginMessage`.
 public enum AppendCommand: Equatable {
-    /// The beginning of an `AppendCommand`.
+    /// The beginning of an `AppendCommand`. There must be exactly one `start` for each `finish`.
+    /// Always send this first before sending any other `AppendCommand`.
     /// - parameter tag: An identifier for the command, as in `TaggedCommand`
     /// - parameter appendingTo: The `MailboxName` destination.
     case start(tag: String, appendingTo: MailboxName)
 
-    /// Provides metadata of a new message to append.
+    /// Provides metadata of a new message to append. There must be exactly one `beginMessage` for each `endMessage`.
     /// - parameter message: Metadata of the new message to append.
     case beginMessage(message: AppendMessage)
 
-    /// Streams bytes belonging to the most recent `.beginMessage`.
+    /// Streams bytes belonging to the most recent `.beginMessage`. You may send an arbitrary number of
+    /// `messageBytes` commands, however the total number of bytes sent must match exactly that specified in
+    /// the corresponding `beginMessage`.
     /// - parameter ByteBuffer: The bytes to stream
     case messageBytes(ByteBuffer)
 
@@ -36,7 +39,7 @@ public enum AppendCommand: Equatable {
     /// by sending `.finish`, or start sending the next message.
     case endMessage
 
-    /// Provides metadata to begin catenating.
+    /// Provides metadata to begin catenating. There must be exactly one `beginCatenate` for each `endCatenate`.
     /// - parameter options: The catenation metadata
     case beginCatenate(options: AppendOptions)
 
@@ -63,7 +66,7 @@ extension AppendCommand {
     /// `end` message, with zero or more `bytes(ByteBuffer)` messages
     /// in the middle.
     public enum CatenateData: Equatable {
-        /// Signals that data is ready to be sent.
+        /// Signals that a given number of bytes are ready to be sent.
         /// - parameter size: The number of bytes to be streamed
         case begin(size: Int)
 

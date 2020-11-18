@@ -14,7 +14,6 @@
 
 import struct NIO.ByteBuffer
 
-/// Defined in RFC 5092.
 /// Defines various access levels that may be used to fetch IMAP URLs.
 /// Recomended reading: RFC 5092 § 6.1.
 public enum Access: Equatable {

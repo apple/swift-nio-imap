@@ -15,12 +15,22 @@
 import struct NIO.ByteBuffer
 
 extension BodyStructure {
-    /// IMAPv4 `body-type-mpart`
+    /// Represents a *multipart* body as defined in RFC 3501.
+    /// Recomended reading: RFC 3501 § 6.4.5.
     public struct Multipart: Equatable {
+        /// The parts of the body. Each part is assigned a consecutive part number.
         public var parts: [BodyStructure]
+
+        /// The subtype of the message, e.g. *multipart/mixed*
         public var mediaSubtype: MediaSubtype
+
+        /// Optional additional fields that are not required to form a valid `Multipart`
         public var `extension`: Extension?
 
+        /// Creates a new `Multipart`.
+        /// - parameter parts: The sub-parts that form the `Multipart`
+        /// - parameter mediaSubtype: The subtype of the message, e.g. *multipart/mixed*
+        /// - parameter extension: Optional additional fields that are not required to form a valid `Multipart` body
         public init(parts: [BodyStructure], mediaSubtype: MediaSubtype, extension: Extension? = nil) {
             self.parts = parts
             self.mediaSubtype = mediaSubtype
@@ -30,14 +40,20 @@ extension BodyStructure {
 }
 
 extension BodyStructure.Multipart {
-    /// IMAPv4 `body-ext-multipart`
+    /// Optional fields that are not required to form a valid `Multipart`. Links an array of `ParameterPair` with a `DispositionAndLanguage.
+    /// Partially simplified to make the API nice, for example `DispositionAndLanguage` pairs a disposition and a language.
     public struct Extension: Equatable {
-        public var parameter: [BodyStructure.ParameterPair]
+        /// An array of *key/value* pairs.
+        public var parameters: [BodyStructure.ParameterPair]
+
+        /// A disposition paired to an array of languages.
         public var dispositionAndLanguage: BodyStructure.DispositionAndLanguage?
 
-        /// Convenience function for a better experience when chaining multiple types.
+        /// Creates a new `Multipart.Extension`.
+        /// - parameter parameters : An array of *key/value* pairs.
+        /// - parameter dispositionAndLanguage: A disposition paired to an array of languages.
         public init(parameters: [BodyStructure.ParameterPair], dispositionAndLanguage: BodyStructure.DispositionAndLanguage?) {
-            self.parameter = parameters
+            self.parameters = parameters
             self.dispositionAndLanguage = dispositionAndLanguage
         }
     }
@@ -59,7 +75,7 @@ extension EncodeBuffer {
     }
 
     @discardableResult mutating func writeBodyExtensionMultipart(_ ext: BodyStructure.Multipart.Extension) -> Int {
-        self.writeBodyParameterPairs(ext.parameter) +
+        self.writeBodyParameterPairs(ext.parameters) +
             self.writeIfExists(ext.dispositionAndLanguage) { (dspLanguage) -> Int in
                 self.writeBodyDispositionAndLanguage(dspLanguage)
             }

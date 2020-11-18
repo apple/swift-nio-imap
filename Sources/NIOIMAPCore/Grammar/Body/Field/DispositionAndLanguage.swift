@@ -15,15 +15,19 @@
 import struct NIO.ByteBuffer
 
 extension BodyStructure {
-    /// Extracted from IMAPv4 `body-ext-`1part
+    /// Pairs a body `Disposition` with a `LanguageLocation`. An abstraction from RFC 3501
+    /// to make the API slightly easier to work with and enforce validity.
     public struct DispositionAndLanguage: Equatable {
-        /// A parenthesized list, consisting of a disposition type
-        /// string, followed by a parenthesized list of disposition
-        /// attribute/value pairs as defined in RFC 2183.
+        /// Some body `Disposition`
         public var disposition: Disposition?
+
+        /// Some *Language/Location* pair
         public var language: LanguageLocation?
 
-        public init(disposition: Disposition? = nil, language: LanguageLocation? = nil) {
+        /// Creates a new `DispositionAndLanguage`.
+        /// - parameter disposition: The disposition to pair.
+        /// - parameter language: The language to pair.
+        public init(disposition: Disposition?, language: LanguageLocation? = nil) {
             self.disposition = disposition
             self.language = language
         }

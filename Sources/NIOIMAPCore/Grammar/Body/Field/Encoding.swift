@@ -15,20 +15,32 @@
 import struct NIO.ByteBuffer
 
 extension BodyStructure {
-    /// IMAPv4 `body-fld-enc`
+    /// Represents the body transfer encoding as defined in MIME-IMB.
+    /// Recomended reading: RFC 2045
     public struct Encoding: RawRepresentable, CustomStringConvertible, Equatable {
+        /// The uppercased encoding name
         public var rawValue: String
 
         public init(rawValue: String) {
             self.rawValue = rawValue.uppercased()
         }
 
+        /// Represents 7-bit encoding, octets with a value larger than 127 are forbidden.
         public static var sevenBit: Self { Self("7BIT") }
+
+        /// Represents 8-bit encoding, octets may be in the range 1-255. *NUL* octets are forbidden.
         public static var eightBit: Self { Self("8BIT") }
+
+        /// Represents binary data where octets of any value are allowed, including *NUL*
         public static var binary: Self { Self("BINARY") }
+
+        /// Represents an arbitrary sequence of octets in a non-human-readable form.
         public static var base64: Self { Self("BASE64") }
+
+        /// Represents octets that mostly are printable characters in the US-ASCII character set.
         public static var quotedPrintable: Self { Self("QUOTED-PRINTABLE") }
 
+        /// See `rawValue`.
         public var description: String {
             rawValue
         }

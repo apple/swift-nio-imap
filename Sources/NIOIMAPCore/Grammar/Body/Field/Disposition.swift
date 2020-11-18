@@ -15,10 +15,22 @@
 import struct NIO.ByteBuffer
 
 extension BodyStructure {
-    /// IMAPv4 `body-fld-dsp`
+    /// A parsed representation of a parenthesized list containg a type string, and attribute/value pairs.
+    /// Recomended reading: RFC 3501 § 7.4.2 and RFC 2183
     public struct Disposition: Equatable {
+        /// The disposition type string.
         public var kind: String
+
+        /// An array of *attribute/value* pairs.
         public var parameters: [ParameterPair]
+
+        /// Creates a new `Disposition`
+        /// - parameter kind: A string representing the disposition type.
+        /// - parameter parameters: An array of *attribute/value* pairs.
+        public init(kind: String, parameters: [ParameterPair]) {
+            self.kind = kind
+            self.parameters = parameters
+        }
 
         /// Attempts to find and convert the value for the common field "SIZE". If the field doesn't exist or is not a valid integer then `nil` is returned.
         public var size: Int? {
@@ -35,11 +47,6 @@ extension BodyStructure {
             self.parameters.first(where: { (pair) -> Bool in
                 pair.field.lowercased() == "filename"
             })?.value
-        }
-
-        public init(kind: String, parameter: [ParameterPair]) {
-            self.kind = kind
-            self.parameters = parameter
         }
     }
 }
