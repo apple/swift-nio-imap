@@ -15,14 +15,12 @@
 import struct NIO.ByteBuffer
 
 extension BodyStructure {
-    
     /// A parsed representation of a parenthesized list containg a type string, and attribute/value pairs.
     /// Recomended reading: RFC 3501 § 7.4.2 and RFC 2183
     public struct Disposition: Equatable {
-        
         /// The disposition type string.
         public var kind: String
-        
+
         /// An array of *attribute/value* pairs.
         public var parameters: [ParameterPair]
 
@@ -50,7 +48,6 @@ extension BodyStructure {
                 pair.field.lowercased() == "filename"
             })?.value
         }
-
     }
 }
 

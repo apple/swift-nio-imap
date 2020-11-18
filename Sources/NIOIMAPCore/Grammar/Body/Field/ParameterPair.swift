@@ -15,13 +15,11 @@
 import struct NIO.ByteBuffer
 
 extension BodyStructure {
-    
     /// A convenience type to pair some key with a value
     public struct ParameterPair: Equatable {
-        
         /// The key.
         public var field: String
-        
+
         /// The value.
         public var value: String
 

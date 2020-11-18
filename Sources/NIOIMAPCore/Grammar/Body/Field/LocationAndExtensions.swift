@@ -15,14 +15,12 @@
 import struct NIO.ByteBuffer
 
 extension BodyStructure {
-    
     /// Pairs a location with `BodyExtensions`s. An abstraction from RFC 3501
     /// to make the API slightly easier to work with and enforce validity.
     public struct LocationAndExtensions: Equatable {
-        
         /// A string giving the body content URI. Defined in LOCATION.
         public var location: String?
-        
+
         /// An array of extension fields that are not formally defined, but may be in future capabilities.
         /// This is a method of future proofing clients.
         public var extensions: [BodyExtension]
@@ -45,7 +43,7 @@ extension EncodeBuffer {
             self.writeNString(locationExtension.location) +
             self.write(if: !locationExtension.extensions.isEmpty) {
                 self.writeSpace() +
-                self.writeBodyExtensions(locationExtension.extensions)
+                    self.writeBodyExtensions(locationExtension.extensions)
             }
     }
 }

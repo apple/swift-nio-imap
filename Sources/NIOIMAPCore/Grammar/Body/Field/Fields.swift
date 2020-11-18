@@ -15,22 +15,20 @@
 import struct NIO.ByteBuffer
 
 extension BodyStructure {
-    
     /// Contains fields that are common across bodies of all types (*basic*, *message*, and *text*)
     public struct Fields: Equatable {
-        
         /// An array of *attribute/value* pairs
         public var parameters: [BodyStructure.ParameterPair]
-        
+
         /// A string giving the content ID as defined in MIME-IMB
         public var id: String?
-        
+
         /// A string giving the content description as defined in MIME-IMB
         public var description: String?
-        
+
         /// The string giving the content transfer encoding as defined in MIME-IMB
         public var encoding: Encoding
-        
+
         /// The size of the body in octets. Note that this is in the encoded state, before any decoding takes place.
         public var octetCount: Int
 
