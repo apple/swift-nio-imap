@@ -14,9 +14,14 @@
 
 import struct NIO.ByteBuffer
 
-/// IMAPv4 `body-extension`
+/// Provides support for future extensions. Any future extensions to body fields must
+/// match one case of this enum, either an `nstring` or `number`.
 public enum BodyExtension: Equatable {
+    
+    /// A generic `nstring` field.
     case string(ByteBuffer?)
+    
+    /// A generic `number` field.
     case number(Int)
 }
 
