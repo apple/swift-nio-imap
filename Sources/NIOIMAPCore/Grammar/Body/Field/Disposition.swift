@@ -15,10 +15,24 @@
 import struct NIO.ByteBuffer
 
 extension BodyStructure {
-    /// IMAPv4 `body-fld-dsp`
+    
+    /// A parsed representation of a parenthsized list containg a type string, and attribute/value pairs.
+    /// Recomended reading: RFC 3501 § 7.4.2 and RFC 2183
     public struct Disposition: Equatable {
+        
+        /// The disposition type string.
         public var kind: String
+        
+        /// An array of *attribute/value* pairs.
         public var parameters: [ParameterPair]
+        
+        /// Creates a new `Disposition`
+        /// - parameter kind: A string representing the disposition type.
+        /// - parameter parameters: An array of *attribute/value* pairs.
+        public init(kind: String, parameters: [ParameterPair]) {
+            self.kind = kind
+            self.parameters = parameter
+        }
 
         /// Creates a new `Disposition`
         /// - parameter kind: A string representing the disposition type.
@@ -45,10 +59,6 @@ extension BodyStructure {
             })?.value
         }
 
-        public init(kind: String, parameter: [ParameterPair]) {
-            self.kind = kind
-            self.parameters = parameter
-        }
     }
 }
 
