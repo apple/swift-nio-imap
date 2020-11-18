@@ -15,12 +15,24 @@
 import struct NIO.ByteBuffer
 
 extension BodyStructure {
-    /// IMAPv4 `body-type-mpart`
+    
+    /// Represents a *multipart* body as defined in RFC 3501.
+    /// Recomended reading: RFC 3501 § 6.4.5.
     public struct Multipart: Equatable {
+        
+        /// The parts of the body. Each part is assigned a consecutive part number.
         public var parts: [BodyStructure]
+        
+        /// The subtype of the message, e.g. *multipart/mixed*
         public var mediaSubtype: MediaSubtype
+        
+        /// Optional additional fields that are not required to form a valid `Multipart`
         public var `extension`: Extension?
 
+        /// Creates a new `Multipart`.
+        /// - parameter parts: The sub-parts that form the `Multipart`
+        /// - parameter mediaSubtype: The subtype of the message, e.g. *multipart/mixed*
+        /// - parameter extension: Optional addition fields that not required to form a valid `Multipart`
         public init(parts: [BodyStructure], mediaSubtype: MediaSubtype, extension: Extension? = nil) {
             self.parts = parts
             self.mediaSubtype = mediaSubtype
