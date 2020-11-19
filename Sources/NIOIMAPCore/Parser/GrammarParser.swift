@@ -887,23 +887,20 @@ extension GrammarParser {
 
     // continue-req    = "+" SP (resp-text / base64) CRLF
     static func parseContinuationRequest(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ContinuationRequest {
-        func parseContinuation_responseText(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ContinuationRequest {
-            .responseText(try self.parseResponseText(buffer: &buffer, tracker: tracker))
-        }
-
-        func parseContinuation_base64(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ContinuationRequest {
-            .data(try self.parseBase64(buffer: &buffer, tracker: tracker))
-        }
-
-        return try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> ContinuationRequest in
+        try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> ContinuationRequest in
             try fixedString("+", buffer: &buffer, tracker: tracker)
             // Allow no space and no additional text after "+":
             let req: ContinuationRequest
             if try optional(buffer: &buffer, tracker: tracker, parser: space) != nil {
-                req = try oneOf([
-                    parseContinuation_base64,
-                    parseContinuation_responseText,
-                ], buffer: &buffer, tracker: tracker)
+                if let base64 = try? self.parseBase64(buffer: &buffer, tracker: tracker), base64.readableBytes > 0 {
+                    req = .data(base64)
+                } else {
+                    do {
+                        req = .responseText(try self.parseResponseText(buffer: &buffer, tracker: tracker))
+                    } catch is ParserError {
+                        req = .responseText(ResponseText(code: nil, text: ""))
+                    }
+                }
             } else {
                 req = .responseText(ResponseText(code: nil, text: ""))
             }

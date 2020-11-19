@@ -35,6 +35,14 @@ private let bufferA = ByteBuffer(
      0x00, 0x04, 0x04, 0x04, 0x04]
 )
 
+// "+ ."
+// 1. parse the space
+// "."
+// parseBase64 succeeds with ""
+// parseResponse will also succeed
+// in this case we want response
+
+
 private let fixtures: [(ContinuationRequest, String, UInt)] = [
     (.responseText(.init(text: ".")), "+ .\r\n", #line),
     (.responseText(.init(text: "Ok. Foo")), "+ Ok. Foo\r\n", #line),
