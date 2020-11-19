@@ -54,7 +54,7 @@ extension Capability {
         public static let pToken = Self(unchecked: "PTOKEN")
         public static let weToken = Self(unchecked: "WETOKEN")
         public static let wsToken = Self(unchecked: "WSTOKEN")
-        public static let gsAPI = Self(unchecked: "GSAPI")
+        public static let gssAPI = Self(unchecked: "GSSAPI")
 
         public var rawValue: String
 
