@@ -895,11 +895,7 @@ extension GrammarParser {
                 if let base64 = try? self.parseBase64(buffer: &buffer, tracker: tracker), base64.readableBytes > 0 {
                     req = .data(base64)
                 } else {
-                    do {
-                        req = .responseText(try self.parseResponseText(buffer: &buffer, tracker: tracker))
-                    } catch is ParserError {
-                        req = .responseText(ResponseText(code: nil, text: ""))
-                    }
+                    req = .responseText(try self.parseResponseText(buffer: &buffer, tracker: tracker))
                 }
             } else {
                 req = .responseText(ResponseText(code: nil, text: ""))
@@ -3804,7 +3800,12 @@ extension GrammarParser {
                 try fixedString("] ", buffer: &buffer, tracker: tracker)
                 return code
             }
-            let text = try self.parseText(buffer: &buffer, tracker: tracker)
+            
+            // text requires minimum 1 char, but we want to be lenient here
+            // and allow 0 characters to represent empty text
+            let text = try ParserLibrary.parseZeroOrMoreCharactersByteBuffer(buffer: &buffer, tracker: tracker) { (char) -> Bool in
+                char.isTextChar
+            }
             return ResponseText(code: code, text: String(buffer: text))
         }
     }
