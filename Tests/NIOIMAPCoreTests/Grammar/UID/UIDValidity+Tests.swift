@@ -27,4 +27,11 @@ extension UIDValidity_Tests {
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeUIDValidity($0) })
     }
+
+    func testValidRange() {
+        XCTAssertNil(UIDValidity(exactly: 0))
+        XCTAssertEqual(UIDValidity(exactly: 1)?.rawValue, 1)
+        XCTAssertEqual(UIDValidity(exactly: 4_294_967_295)?.rawValue, 4_294_967_295)
+        XCTAssertNil(UIDValidity(exactly: 4_294_967_296))
+    }
 }

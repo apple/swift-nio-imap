@@ -61,8 +61,15 @@ extension UID: ExpressibleByIntegerLiteral {
     /// Create a `UID`, asserting with invalid values.
     /// - parameter value: A `UInt32` that must be non-zero.
     public init(_ value: UInt32) {
-        assert(value >= 0, "UID cannot be 0")
+        assert(value >= 1, "UID cannot be 0")
         self.init(rawValue: Int(value))!
+    }
+}
+
+extension UID {
+    public init?<T>(exactly source: T) where T: BinaryInteger {
+        guard let rawValue = UInt32(exactly: source) else { return nil }
+        self.init(rawValue: rawValue)
     }
 }
 

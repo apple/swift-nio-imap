@@ -25,6 +25,13 @@ extension UIDTests {
         let num: UID = 5
         XCTAssertEqual(num, 5)
     }
+
+    func testValidRange() {
+        XCTAssertNil(UID(exactly: 0))
+        XCTAssertEqual(UID(exactly: 1)?.rawValue, 1)
+        XCTAssertEqual(UID(exactly: 4_294_967_295)?.rawValue, 4_294_967_295)
+        XCTAssertNil(UID(exactly: 4_294_967_296))
+    }
 }
 
 // MARK: - Comparable
