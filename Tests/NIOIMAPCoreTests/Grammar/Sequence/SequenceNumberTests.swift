@@ -25,6 +25,13 @@ extension SequenceNumberTests {
         let num: SequenceNumber = 5
         XCTAssertEqual(num, 5)
     }
+
+    func testValidRange() {
+        XCTAssertNil(SequenceNumber(exactly: 0))
+        XCTAssertEqual(SequenceNumber(exactly: 1)?.rawValue, 1)
+        XCTAssertEqual(SequenceNumber(exactly: 4_294_967_295)?.rawValue, 4_294_967_295)
+        XCTAssertNil(SequenceNumber(exactly: 4_294_967_296))
+    }
 }
 
 // MARK: - Comparable

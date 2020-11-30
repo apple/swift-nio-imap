@@ -49,6 +49,13 @@ extension SequenceNumber: ExpressibleByIntegerLiteral {
     }
 }
 
+extension SequenceNumber {
+    public init?<T>(exactly source: T) where T: BinaryInteger {
+        guard let rawValue = UInt32(exactly: source) else { return nil }
+        self.init(rawValue: rawValue)
+    }
+}
+
 // MARK: - Strideable
 
 extension SequenceNumber: Strideable {
