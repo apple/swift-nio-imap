@@ -12,6 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+import Dispatch
 import struct NIO.ByteBuffer
 
 // TODO: Remove these
@@ -109,7 +110,7 @@ extension UInt8 {
 
     var isBase64Char: Bool {
         switch self {
-        case UInt8(ascii: "+"), UInt8(ascii: "-"), UInt8(ascii: "/"):
+        case UInt8(ascii: "+"), UInt8(ascii: "/"):
             return true
         default:
             return isalnum(Int32(self)) != 0

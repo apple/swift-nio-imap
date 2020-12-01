@@ -3800,7 +3800,7 @@ extension GrammarParser {
                 try fixedString("] ", buffer: &buffer, tracker: tracker)
                 return code
             }
-            
+
             // text requires minimum 1 char, but we want to be lenient here
             // and allow 0 characters to represent empty text
             let text = try ParserLibrary.parseZeroOrMoreCharactersByteBuffer(buffer: &buffer, tracker: tracker) { (char) -> Bool in
