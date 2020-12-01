@@ -62,7 +62,7 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
                 case .response(let response):
                     let out = ResponseOrContinuationRequest.response(response)
                     switch response {
-                    case .taggedResponse(_):
+                    case .taggedResponse:
                         // continuations must have finished so the state to standard continuation handling
                         self.state = .standard
                     default:
