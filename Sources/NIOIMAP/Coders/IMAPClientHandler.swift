@@ -13,6 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import NIOIMAPCore
 
 /// To be used by a IMAP client implementation.
 public final class IMAPClientHandler: ChannelDuplexHandler {
@@ -46,7 +47,8 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
                 case .continuationRequest:
                     self.writeNextChunks(context: context)
                 case .response(let response):
-                    context.fireChannelRead(self.wrapInboundOut(response))
+                    let out = ResponseOrContinuationRequest.response(response)
+                    context.fireChannelRead(self.wrapInboundOut(out))
                 }
             }
         } catch {
