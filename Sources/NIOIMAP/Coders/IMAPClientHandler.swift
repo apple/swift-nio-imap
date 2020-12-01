@@ -38,13 +38,21 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
     private(set) var state: ClientHandlerState
 
     enum ClientHandlerState: Equatable {
-        case continuations
-        case standard // terrible name
+        
+        /// We're expecting continuations to come back during a command.
+        /// For example when in an IDLE state, the server may periodically send
+        /// back "+ Still here". Not that this does not include continuations for
+        /// synchronising literals.
+        case expectingContinuations
+        
+        /// We expect the server to return standard tagged or untagged responses, without any intermediate
+        /// continuations, with the exception of synchronising literals.
+        case expectingResponses
     }
 
     public init() {
         self.decoder = NIOSingleStepByteToMessageProcessor(ResponseDecoder(), maximumBufferSize: 1_000)
-        self.state = .standard
+        self.state = .expectingResponses
     }
 
     public func channelRead(context: ChannelHandlerContext, data: NIOAny) {
@@ -54,9 +62,9 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
                 switch response {
                 case .continuationRequest:
                     switch self.state {
-                    case .continuations:
+                    case .expectingContinuations:
                         context.fireChannelRead(self.wrapInboundOut(response))
-                    case .standard:
+                    case .expectingResponses:
                         self.writeNextChunks(context: context)
                     }
                 case .response(let response):
@@ -64,7 +72,7 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
                     switch response {
                     case .taggedResponse:
                         // continuations must have finished so the state to standard continuation handling
-                        self.state = .standard
+                        self.state = .expectingResponses
                     default:
                         break
                     }
@@ -108,12 +116,12 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
         case .command(let command):
             switch command.command {
             case .idleStart, .authenticate(method: _, initialClientResponse: _):
-                self.state = .continuations
+                self.state = .expectingContinuations
             default:
-                self.state = .standard
+                self.state = .expectingResponses
             }
         case .idleDone:
-            self.state = .standard
+            self.state = .expectingResponses
         default:
             break
         }

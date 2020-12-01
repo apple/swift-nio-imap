@@ -112,7 +112,7 @@ class IMAPClientHandlerTests: XCTestCase {
 
         // move into an idle state
         XCTAssertNoThrow(try channel.writeOutbound(CommandStream.command(.init(tag: "1", command: .idleStart))))
-        XCTAssertEqual(handler.state, .continuations)
+        XCTAssertEqual(handler.state, .expectingContinuations)
         XCTAssertNoThrow(try channel.readOutbound(as: ByteBuffer.self))
         XCTAssertNoThrow(XCTAssertNil(try channel.readOutbound(as: ByteBuffer.self)))
 
@@ -131,13 +131,13 @@ class IMAPClientHandlerTests: XCTestCase {
 
         // finish being idle
         XCTAssertNoThrow(try channel.writeOutbound(CommandStream.idleDone))
-        XCTAssertEqual(handler.state, .standard)
+        XCTAssertEqual(handler.state, .expectingResponses)
         XCTAssertNoThrow(try channel.readOutbound(as: ByteBuffer.self))
         XCTAssertNoThrow(XCTAssertNil(try channel.readOutbound(as: ByteBuffer.self)))
 
         // start authentication
         XCTAssertNoThrow(try channel.writeOutbound(CommandStream.command(.init(tag: "1", command: .authenticate(method: "test", initialClientResponse: nil)))))
-        XCTAssertEqual(handler.state, .continuations)
+        XCTAssertEqual(handler.state, .expectingContinuations)
         XCTAssertNoThrow(try channel.readOutbound(as: ByteBuffer.self))
         XCTAssertNoThrow(XCTAssertNil(try channel.readOutbound(as: ByteBuffer.self)))
 
@@ -149,7 +149,7 @@ class IMAPClientHandlerTests: XCTestCase {
 
         // client responds
         XCTAssertNoThrow(try channel.writeOutbound(CommandStream.bytes("Yg==")))
-        XCTAssertEqual(handler.state, .continuations)
+        XCTAssertEqual(handler.state, .expectingContinuations)
         XCTAssertEqual(try channel.readOutbound(as: ByteBuffer.self), "Yg==")
 
         // server sends another challenge
@@ -160,7 +160,7 @@ class IMAPClientHandlerTests: XCTestCase {
 
         // client responds
         XCTAssertNoThrow(try channel.writeOutbound(CommandStream.bytes("Yg==")))
-        XCTAssertEqual(handler.state, .continuations)
+        XCTAssertEqual(handler.state, .expectingContinuations)
         XCTAssertEqual(try channel.readOutbound(as: ByteBuffer.self), "Yg==")
     }
 
