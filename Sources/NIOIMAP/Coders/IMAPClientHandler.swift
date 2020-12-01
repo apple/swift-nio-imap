@@ -34,12 +34,12 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
         MarkedCircularBuffer(initialCapacity: 4)
 
     public struct UnexpectedContinuationRequest: Error {}
-    
+
     private(set) var state: ClientHandlerState
-    
+
     enum ClientHandlerState: Equatable {
         case continuations
-        case standard
+        case standard // terrible name
     }
 
     public init() {
@@ -61,6 +61,13 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
                     }
                 case .response(let response):
                     let out = ResponseOrContinuationRequest.response(response)
+                    switch response {
+                    case .taggedResponse(_):
+                        // continuations must have finished so the state to standard continuation handling
+                        self.state = .standard
+                    default:
+                        break
+                    }
                     context.fireChannelRead(self.wrapInboundOut(out))
                 }
             }
@@ -96,11 +103,11 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
         let command = self.unwrapOutboundIn(data)
         var encoder = CommandEncodeBuffer(buffer: context.channel.allocator.buffer(capacity: 1024), capabilities: [])
         encoder.writeCommandStream(command)
-        
+
         switch command {
         case .command(let command):
             switch command.command {
-            case .idleStart, .authenticate(method: _, initialClientResponse: _, _):
+            case .idleStart, .authenticate(method: _, initialClientResponse: _):
                 self.state = .continuations
             default:
                 self.state = .standard
@@ -110,7 +117,7 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
         default:
             break
         }
-        
+
         if self.bufferedWrites.isEmpty {
             let next = encoder.buffer.nextChunk()
 

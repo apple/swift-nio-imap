@@ -1171,8 +1171,8 @@ extension ParserUnitTests {
             testFunction: GrammarParser.parseCommandNonauth,
             validInputs: [
                 ("LOGIN david evans", "\r\n", .login(username: "david", password: "evans"), #line),
-                ("AUTHENTICATE some", "\r\n", .authenticate(method: "some", initialClientResponse: nil, []), #line),
-                ("AUTHENTICATE some =", "\r\n", .authenticate(method: "some", initialClientResponse: .empty, []), #line),
+                ("AUTHENTICATE some", "\r\n", .authenticate(method: "some", initialClientResponse: nil), #line),
+                ("AUTHENTICATE some =", "\r\n", .authenticate(method: "some", initialClientResponse: .empty), #line),
                 ("STARTTLS", "\r\n", .starttls, #line),
             ],
             parserErrorInputs: [],

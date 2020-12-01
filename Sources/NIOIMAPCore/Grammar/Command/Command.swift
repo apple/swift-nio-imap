@@ -64,7 +64,7 @@ public enum Command: Equatable {
 
     /// Begins the process of the client authenticating against the server. The client specifies a authentication method, and the server may respond
     /// with one or more challenges, which the client is also required to respond to using `CommandStream.continuationResponse`.
-    case authenticate(method: String, initialClientResponse: InitialClientResponse?, [ByteBuffer])
+    case authenticate(method: String, initialClientResponse: InitialClientResponse?)
 
     /// Authenticates the client using a username and password
     case login(username: String, password: String)
@@ -206,8 +206,8 @@ extension CommandEncodeBuffer {
             return self.writeCommandKind_subscribe(mailbox: mailbox)
         case .unsubscribe(let mailbox):
             return self.writeCommandKind_unsubscribe(mailbox: mailbox)
-        case .authenticate(let method, let initialClientResponse, let data):
-            return self.writeCommandKind_authenticate(method: method, initialClientResponse: initialClientResponse, data: data)
+        case .authenticate(let method, let initialClientResponse):
+            return self.writeCommandKind_authenticate(method: method, initialClientResponse: initialClientResponse)
         case .login(let userid, let password):
             return self.writeCommandKind_login(userID: userid, password: password)
         case .starttls:
@@ -420,14 +420,11 @@ extension CommandEncodeBuffer {
             self.buffer.writeMailbox(mailbox)
     }
 
-    private mutating func writeCommandKind_authenticate(method: String, initialClientResponse: InitialClientResponse?, data: [ByteBuffer]) -> Int {
+    private mutating func writeCommandKind_authenticate(method: String, initialClientResponse: InitialClientResponse?) -> Int {
         self.buffer.writeString("AUTHENTICATE \(method)") +
             self.buffer.writeIfExists(initialClientResponse) { resp in
                 self.buffer.writeSpace() +
                     self.buffer.writeInitialClientResponse(resp)
-            } +
-            self.buffer.writeArray(data, separator: "", parenthesis: false) { (buffer, self) -> Int in
-                self.writeString("\r\n") + self.writeBufferAsBase64(buffer)
             }
     }
 

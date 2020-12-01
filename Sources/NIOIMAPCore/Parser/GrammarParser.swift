@@ -249,18 +249,11 @@ extension GrammarParser {
         try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Command in
             try fixedString("AUTHENTICATE ", buffer: &buffer, tracker: tracker)
             let authMethod = try self.parseAtom(buffer: &buffer, tracker: tracker)
-
             let parseInitialClientResponse = try optional(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> InitialClientResponse in
                 try space(buffer: &buffer, tracker: tracker)
                 return try self.parseInitialClientResponse(buffer: &buffer, tracker: tracker)
             })
-
-            // NOTE: Spec is super unclear, so we're ignoring the possibility of multiple base 64 chunks right now
-//            let data = try optional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> [ByteBuffer] in
-//                try fixedString("\r\n", buffer: &buffer, tracker: tracker)
-//                return [try self.parseBase64(buffer: &buffer, tracker: tracker)]
-//            } ?? []
-            return .authenticate(method: authMethod, initialClientResponse: parseInitialClientResponse, [])
+            return .authenticate(method: authMethod, initialClientResponse: parseInitialClientResponse)
         }
     }
 
