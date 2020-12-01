@@ -34,9 +34,17 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
         MarkedCircularBuffer(initialCapacity: 4)
 
     public struct UnexpectedContinuationRequest: Error {}
+    
+    private(set) var state: ClientHandlerState
+    
+    enum ClientHandlerState: Equatable {
+        case continuations
+        case standard
+    }
 
     public init() {
         self.decoder = NIOSingleStepByteToMessageProcessor(ResponseDecoder(), maximumBufferSize: 1_000)
+        self.state = .standard
     }
 
     public func channelRead(context: ChannelHandlerContext, data: NIOAny) {
@@ -45,7 +53,12 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
             try self.decoder.process(buffer: data) { response in
                 switch response {
                 case .continuationRequest:
-                    self.writeNextChunks(context: context)
+                    switch self.state {
+                    case .continuations:
+                        context.fireChannelRead(self.wrapInboundOut(response))
+                    case .standard:
+                        self.writeNextChunks(context: context)
+                    }
                 case .response(let response):
                     let out = ResponseOrContinuationRequest.response(response)
                     context.fireChannelRead(self.wrapInboundOut(out))
@@ -83,6 +96,21 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
         let command = self.unwrapOutboundIn(data)
         var encoder = CommandEncodeBuffer(buffer: context.channel.allocator.buffer(capacity: 1024), capabilities: [])
         encoder.writeCommandStream(command)
+        
+        switch command {
+        case .command(let command):
+            switch command.command {
+            case .idleStart, .authenticate(method: _, initialClientResponse: _, _):
+                self.state = .continuations
+            default:
+                self.state = .standard
+            }
+        case .idleDone:
+            self.state = .standard
+        default:
+            break
+        }
+        
         if self.bufferedWrites.isEmpty {
             let next = encoder.buffer.nextChunk()
 

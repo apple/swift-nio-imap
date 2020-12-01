@@ -13,7 +13,8 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
-import NIOIMAP
+@testable import NIOIMAPCore
+@testable import NIOIMAP
 import XCTest
 
 class IMAPClientHandlerTests: XCTestCase {
@@ -103,6 +104,64 @@ class IMAPClientHandlerTests: XCTestCase {
         self.writeInbound("x OK ok\r\n")
         self.assertInbound(.response(.taggedResponse(.init(tag: "x",
                                                  state: .ok(.init(code: nil, text: "ok"))))))
+    }
+    
+    func testStateTransformation() {
+        let handler = IMAPClientHandler()
+        let channel = EmbeddedChannel(handler: handler, loop: .init())
+        
+        // move into an idle state
+        XCTAssertNoThrow(try channel.writeOutbound(CommandStream.command(.init(tag: "1", command: .idleStart))))
+        XCTAssertEqual(handler.state, .continuations)
+        XCTAssertNoThrow(try channel.readOutbound(as: ByteBuffer.self))
+        XCTAssertNoThrow(XCTAssertNil(try channel.readOutbound(as: ByteBuffer.self)))
+        
+        // send some continuations
+        // in this case, 2 idle reminders
+        var inEncodeBuffer = ResponseEncodeBuffer(buffer: ByteBuffer(), capabilities: [])
+        inEncodeBuffer.writeContinuationRequest(.responseText(.init(text: "Waiting")))
+        XCTAssertNoThrow(try channel.writeInbound(inEncodeBuffer.bytes))
+        XCTAssertNoThrow(XCTAssertEqual(try channel.readInbound(), ResponseOrContinuationRequest.continuationRequest(.responseText(.init(text: "Waiting")))))
+        XCTAssertNoThrow(XCTAssertNil(try channel.readInbound(as: ResponseOrContinuationRequest.self)))
+        inEncodeBuffer = ResponseEncodeBuffer(buffer: ByteBuffer(), capabilities: [])
+        inEncodeBuffer.writeContinuationRequest(.responseText(.init(text: "Waiting")))
+        XCTAssertNoThrow(try channel.writeInbound(inEncodeBuffer.bytes))
+        XCTAssertNoThrow(XCTAssertEqual(try channel.readInbound(), ResponseOrContinuationRequest.continuationRequest(.responseText(.init(text: "Waiting")))))
+        XCTAssertNoThrow(XCTAssertNil(try channel.readInbound(as: ResponseOrContinuationRequest.self)))
+        
+        // finish being idle
+        XCTAssertNoThrow(try channel.writeOutbound(CommandStream.idleDone))
+        XCTAssertEqual(handler.state, .standard)
+        XCTAssertNoThrow(try channel.readOutbound(as: ByteBuffer.self))
+        XCTAssertNoThrow(XCTAssertNil(try channel.readOutbound(as: ByteBuffer.self)))
+        
+        // start authentication
+        XCTAssertNoThrow(try channel.writeOutbound(CommandStream.command(.init(tag: "1", command: .authenticate(method: "test", initialClientResponse: nil, [])))))
+        XCTAssertEqual(handler.state, .continuations)
+        XCTAssertNoThrow(try channel.readOutbound(as: ByteBuffer.self))
+        XCTAssertNoThrow(XCTAssertNil(try channel.readOutbound(as: ByteBuffer.self)))
+        
+        // server sends a challenge
+        inEncodeBuffer = ResponseEncodeBuffer(buffer: ByteBuffer(), capabilities: [])
+        inEncodeBuffer.writeContinuationRequest(.data("YQ=="))
+        XCTAssertNoThrow(try channel.writeInbound(inEncodeBuffer.bytes))
+        XCTAssertNoThrow(XCTAssertEqual(try channel.readInbound(), ResponseOrContinuationRequest.continuationRequest(.data("YQ=="))))
+        
+        // client responds
+        XCTAssertNoThrow(try channel.writeOutbound(CommandStream.bytes("Yg==")))
+        XCTAssertEqual(handler.state, .continuations)
+        XCTAssertEqual(try channel.readOutbound(as: ByteBuffer.self), "Yg==")
+        
+        // server sends another challenge
+        inEncodeBuffer = ResponseEncodeBuffer(buffer: ByteBuffer(), capabilities: [])
+        inEncodeBuffer.writeContinuationRequest(.data("YQ=="))
+        XCTAssertNoThrow(try channel.writeInbound(inEncodeBuffer.bytes))
+        XCTAssertNoThrow(XCTAssertEqual(try channel.readInbound(), ResponseOrContinuationRequest.continuationRequest(.data("YQ=="))))
+        
+        // client responds
+        XCTAssertNoThrow(try channel.writeOutbound(CommandStream.bytes("Yg==")))
+        XCTAssertEqual(handler.state, .continuations)
+        XCTAssertEqual(try channel.readOutbound(as: ByteBuffer.self), "Yg==")
     }
 
     // MARK: - setup / tear down
