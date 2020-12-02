@@ -52,6 +52,7 @@ extension BodyStructure {
         public init(_ rawValue: String) {
             self.init(rawValue: rawValue)
         }
+
     }
 }
 
