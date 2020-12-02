@@ -15,8 +15,10 @@
 import struct NIO.ByteBuffer
 
 extension BodyStructure {
+
     /// Represents a single-part body as defined in RFC 3501.
     public struct Singlepart: Equatable {
+
         /// The type of single-part. Note that "message" types may contain a multi-part.
         public var kind: Kind
 
