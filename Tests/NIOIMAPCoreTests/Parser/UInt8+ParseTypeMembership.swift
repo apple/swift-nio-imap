@@ -121,3 +121,19 @@ extension UInt8ParseTypeMembershipTests {
         XCTAssertTrue(invalid.allSatisfy { !$0.isHexCharacter })
     }
 }
+
+// MARK: - test isBase64Char
+
+extension UInt8ParseTypeMembershipTests {
+    func testBase64Character() {
+        var valid = Set<UInt8>()
+        valid = valid.union(UInt8(ascii: "0") ... UInt8(ascii: "9"))
+        valid = valid.union(UInt8(ascii: "a") ... UInt8(ascii: "z"))
+        valid = valid.union(UInt8(ascii: "A") ... UInt8(ascii: "Z"))
+        valid = valid.union([UInt8(ascii: "+"), UInt8(ascii: "/")])
+
+        let invalid = self.allChars.subtracting(valid)
+        XCTAssertTrue(valid.allSatisfy { $0.isBase64Char })
+        XCTAssertTrue(invalid.allSatisfy { !$0.isBase64Char })
+    }
+}

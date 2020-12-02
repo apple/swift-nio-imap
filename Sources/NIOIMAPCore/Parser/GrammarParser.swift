@@ -887,23 +887,16 @@ extension GrammarParser {
 
     // continue-req    = "+" SP (resp-text / base64) CRLF
     static func parseContinuationRequest(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ContinuationRequest {
-        func parseContinuation_responseText(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ContinuationRequest {
-            .responseText(try self.parseResponseText(buffer: &buffer, tracker: tracker))
-        }
-
-        func parseContinuation_base64(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ContinuationRequest {
-            .data(try self.parseBase64(buffer: &buffer, tracker: tracker))
-        }
-
-        return try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> ContinuationRequest in
+        try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> ContinuationRequest in
             try fixedString("+", buffer: &buffer, tracker: tracker)
             // Allow no space and no additional text after "+":
             let req: ContinuationRequest
             if try optional(buffer: &buffer, tracker: tracker, parser: space) != nil {
-                req = try oneOf([
-                    parseContinuation_base64,
-                    parseContinuation_responseText,
-                ], buffer: &buffer, tracker: tracker)
+                if let base64 = try? self.parseBase64(buffer: &buffer, tracker: tracker), base64.readableBytes > 0 {
+                    req = .data(base64)
+                } else {
+                    req = .responseText(try self.parseResponseText(buffer: &buffer, tracker: tracker))
+                }
             } else {
                 req = .responseText(ResponseText(code: nil, text: ""))
             }
@@ -3807,7 +3800,12 @@ extension GrammarParser {
                 try fixedString("] ", buffer: &buffer, tracker: tracker)
                 return code
             }
-            let text = try self.parseText(buffer: &buffer, tracker: tracker)
+
+            // text requires minimum 1 char, but we want to be lenient here
+            // and allow 0 characters to represent empty text
+            let text = try ParserLibrary.parseZeroOrMoreCharactersByteBuffer(buffer: &buffer, tracker: tracker) { (char) -> Bool in
+                char.isTextChar
+            }
             return ResponseText(code: code, text: String(buffer: text))
         }
     }
