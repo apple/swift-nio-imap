@@ -14,11 +14,22 @@
 
 import struct NIO.ByteBuffer
 
+/// Various options that may be added to a message when it is appended to a mailbox.
 public struct AppendOptions: Equatable {
+    
+    /// Flags that will be added to the message
     public var flagList: [Flag]
+    
+    /// The date associated with the message, typically the date of delivery
     public var internalDate: InternalDate?
+    
+    /// Any additional pieces of information to be associated with the message. Implemented as a "catch-all" to support future extensions.
     public var extensions: [TaggedExtension]
 
+    /// Creates a new `AppendOptions`
+    /// - parameter flagList: Flags that will be added to the message.
+    /// - parameter internalDate: An optional date to be associated with the message, typically representing the date of delivery. Defaults to `nil`.
+    /// - parameter extensions: Any additional pieces of information to be associated with the message. Implemented as a "catch-all" to support future extensions.
     public init(flagList: [Flag], internalDate: InternalDate? = nil, extensions: [TaggedExtension]) {
         self.flagList = flagList
         self.internalDate = internalDate
