@@ -38,13 +38,12 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
     private(set) var state: ClientHandlerState
 
     enum ClientHandlerState: Equatable {
-        
         /// We're expecting continuations to come back during a command.
         /// For example when in an IDLE state, the server may periodically send
         /// back "+ Still here". Not that this does not include continuations for
         /// synchronising literals.
         case expectingContinuations
-        
+
         /// We expect the server to return standard tagged or untagged responses, without any intermediate
         /// continuations, with the exception of synchronising literals.
         case expectingResponses
