@@ -87,6 +87,7 @@ extension BodyStructure.Singlepart {
 
     /// Represents a text-based message body.
     public struct Text: Equatable {
+
         /// The type of text message, e.g. `text/html` or `text/plain`
         public var mediaText: String
 
