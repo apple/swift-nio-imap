@@ -57,13 +57,26 @@ extension BodyStructure.Singlepart {
         case text(Text)
     }
 
-    /// IMAPv4 `body-type-message`
+    /// Represents a typical "full" email message, containing an envelope and a child message.
     public struct Message: Equatable {
+        
+        /// Indication if the message contains an encapsulated message.
         public var message: Media.Message
+        
+        /// The envelope of the message, potentially including the message sender, bcc list, etc.
         public var envelope: Envelope
+        
+        /// The child body. Note that this may be a multi-part.
         public var body: BodyStructure
+        
+        /// The number of lines in the message.
         public var lineCount: Int
 
+        /// Creates a new `Message`.
+        /// - parameter message:
+        /// - parameter envelope: The envelope of the message
+        /// - parameter body: The encapsulated message. Note that this may be a multi-part.
+        /// - parameter fieldLines: The number of lines in the message
         public init(message: Media.Message, envelope: Envelope, body: BodyStructure, fieldLines: Int) {
             self.message = message
             self.envelope = envelope
