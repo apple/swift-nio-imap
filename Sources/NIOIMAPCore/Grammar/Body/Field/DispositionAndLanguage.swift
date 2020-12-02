@@ -15,6 +15,7 @@
 import struct NIO.ByteBuffer
 
 extension BodyStructure {
+    
     /// Pairs a body `Disposition` with a `LanguageLocation`. An abstraction from RFC 3501
     /// to make the API slightly easier to work with and enforce validity.
     public struct DispositionAndLanguage: Equatable {
@@ -26,7 +27,7 @@ extension BodyStructure {
 
         /// Creates a new `DispositionAndLanguage`.
         /// - parameter disposition: The disposition to pair.
-        /// - parameter language: The language to pair.
+        /// - parameter language: Some *Language/Location* pair, defaults to `nil`.
         public init(disposition: Disposition?, language: LanguageLocation? = nil) {
             self.disposition = disposition
             self.language = language
