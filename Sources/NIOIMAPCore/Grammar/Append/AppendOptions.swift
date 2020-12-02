@@ -16,6 +16,7 @@ import struct NIO.ByteBuffer
 
 /// Various options that may be added to a message when it is appended to a mailbox.
 public struct AppendOptions: Equatable {
+
     /// Flags that will be added to the message
     public var flagList: [Flag]
 
