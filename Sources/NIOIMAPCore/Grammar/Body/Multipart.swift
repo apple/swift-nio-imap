@@ -16,7 +16,7 @@ import struct NIO.ByteBuffer
 
 extension BodyStructure {
     /// Represents a *multipart* body as defined in RFC 3501.
-    /// Recomended reading: RFC 3501 § 6.4.5.
+    /// Recommended reading: RFC 3501 § 6.4.5.
     public struct Multipart: Equatable {
         /// The parts of the body. Each part is assigned a consecutive part number.
         public var parts: [BodyStructure]

@@ -15,12 +15,23 @@
 import struct NIO.ByteBuffer
 
 extension BodyStructure {
-    /// IMAPv4 `body-type-1part`
+    
+    /// Represents a single-part body as defined in RFC 3501.
     public struct Singlepart: Equatable {
+        
+        /// The type of single-part. Note that "message" types may contain a multi-part.
         public var kind: Kind
+        
+        /// A collection of common message attributes, such as a message identifier.
         public var fields: Fields
+        
+        /// An optional extension to the core message. Not required to construct a valid message.
         public var `extension`: Extension?
 
+        /// Creates a new `SinglePart`.
+        /// - parameter type: The type of single-part. Note that "message" types may contain a multi-part.
+        /// - parameter fields: A collection of common message attributes, such as a message identifier.
+        /// - parameter extension: An optional extension to the core message. Not required to construct a valid message.
         public init(type: BodyStructure.Singlepart.Kind, fields: Fields, extension: Extension? = nil) {
             self.kind = type
             self.fields = fields
