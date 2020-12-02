@@ -103,13 +103,19 @@ extension BodyStructure.Singlepart {
         }
     }
 
-    /// IMAPv4 `body-ext-1part`
+    /// Optional extension fields, initially pairing an MD5 body digest with a `DispositionAndLanguage`.
     public struct Extension: Equatable {
+        
         /// A string giving the body MD5 value.
         public let digest: String?
+        
+        /// A `Disposition` and `LanguageLocation` pairing. `LanguageLocation` can be further expanded, the intention
+        /// of which is to provide a cleaner API.
         public var dispositionAndLanguage: BodyStructure.DispositionAndLanguage?
 
-        /// Convenience function for a better experience when chaining multiple types.
+        /// Creates a new `Extension`
+        /// - parameter fieldMD5: A string giving the body MD5 value.
+        /// - parameter dispositionAndLanguage: An optional `Disposition` and `LanguageLocation` pairing.
         init(fieldMD5: String?, dispositionAndLanguage: BodyStructure.DispositionAndLanguage?) {
             self.digest = fieldMD5
             self.dispositionAndLanguage = dispositionAndLanguage
