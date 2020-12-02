@@ -164,7 +164,7 @@ class IMAPClientHandlerTests: XCTestCase {
         O6652Npft0LQwJvenwDI13YxpwOdMXzkWZN/XrEqOWp6GCgXTB
         vCyLWLlWnbaUkZdEYbKHBPjd8t/1x5Yg==
         """
-        XCTAssertNoThrow(try channel.writeOutbound(CommandStream.bytes(authString1)))
+        XCTAssertNoThrow(try channel.writeOutbound(CommandStream.continuationResponse(authString1)))
         XCTAssertEqual(handler.state, .expectingContinuations)
         XCTAssertEqual(try channel.readOutbound(as: ByteBuffer.self), authString1)
 
@@ -180,7 +180,7 @@ class IMAPClientHandlerTests: XCTestCase {
         XCTAssertNoThrow(XCTAssertEqual(try channel.readInbound(), ResponseOrContinuationRequest.continuationRequest(.data(challengeString1))))
 
         // client responds
-        XCTAssertNoThrow(try channel.writeOutbound(CommandStream.bytes("")))
+        XCTAssertNoThrow(try channel.writeOutbound(CommandStream.continuationResponse("")))
         XCTAssertEqual(handler.state, .expectingContinuations)
         XCTAssertEqual(try channel.readOutbound(as: ByteBuffer.self), "")
 
@@ -199,7 +199,7 @@ class IMAPClientHandlerTests: XCTestCase {
             YDMGCSqGSIb3EgECAgIBAAD/////3LQBHXTpFfZgrejpLlLImP
             wkhbfa2QteAQAgAG1yYwE=
         """
-        XCTAssertNoThrow(try channel.writeOutbound(CommandStream.bytes(authString2)))
+        XCTAssertNoThrow(try channel.writeOutbound(CommandStream.continuationResponse(authString2)))
         XCTAssertEqual(handler.state, .expectingContinuations)
         XCTAssertEqual(try channel.readOutbound(as: ByteBuffer.self), authString2)
 

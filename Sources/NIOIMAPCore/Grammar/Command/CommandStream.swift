@@ -97,7 +97,8 @@ public enum CommandStream: Equatable {
     /// - parameter AppendCommand: The sub-command to send.
     case append(AppendCommand)
 
-    case bytes(ByteBuffer)
+    /// Sends some data in response to a continuation request
+    case continuationResponse(ByteBuffer)
 }
 
 extension CommandEncodeBuffer {
@@ -112,7 +113,7 @@ extension CommandEncodeBuffer {
             return self.writeCommand(command)
         case .append(let command):
             return self.writeAppendCommand(command)
-        case .bytes(let bytes):
+        case .continuationResponse(let bytes):
             return self.writeBytes(bytes)
         }
     }
