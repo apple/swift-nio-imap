@@ -59,6 +59,7 @@ extension BodyStructure.Singlepart {
 
     /// Represents a typical "full" email message, containing an envelope and a child message.
     public struct Message: Equatable {
+
         /// Indication if the message contains an encapsulated message.
         public var message: Media.Message
 
