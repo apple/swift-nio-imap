@@ -12,7 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import Dispatch
 import struct NIO.ByteBuffer
 
 // TODO: Remove these
