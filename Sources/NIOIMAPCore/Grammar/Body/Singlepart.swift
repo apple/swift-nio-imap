@@ -43,8 +43,10 @@ extension BodyStructure {
 // MARK: - Types
 
 extension BodyStructure.Singlepart {
+
     /// Represents the type of a single-part message.
     public indirect enum Kind: Equatable {
+
         /// A simple message containing only one kind of data.
         case basic(Media.Basic)
 
