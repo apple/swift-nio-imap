@@ -85,11 +85,18 @@ extension BodyStructure.Singlepart {
         }
     }
 
-    /// IMAPv4 `body-type-text`
+    /// Represents a text-based message body.
     public struct Text: Equatable {
+        
+        /// The type of text message, e.g. `text/html` or `text/plain`
         public var mediaText: String
+        
+        /// The number of lines in the message.
         public var lineCount: Int
 
+        /// Creates a new `Text`.
+        /// - parameter mediaText: The type of text message, e.g. `text/html` or `text/plain`
+        /// - parameter lineCount: The number of lines in the message.
         public init(mediaText: String, lineCount: Int) {
             self.mediaText = mediaText
             self.lineCount = lineCount
