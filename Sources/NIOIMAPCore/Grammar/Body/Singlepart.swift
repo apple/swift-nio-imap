@@ -105,6 +105,7 @@ extension BodyStructure.Singlepart {
 
     /// Optional extension fields, initially pairing an MD5 body digest with a `DispositionAndLanguage`.
     public struct Extension: Equatable {
+
         /// A string giving the body MD5 value.
         public let digest: String?
 
