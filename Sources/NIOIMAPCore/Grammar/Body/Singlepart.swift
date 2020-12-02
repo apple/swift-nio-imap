@@ -43,9 +43,17 @@ extension BodyStructure {
 // MARK: - Types
 
 extension BodyStructure.Singlepart {
+    
+    /// Represents the type of a single-part message.
     public indirect enum Kind: Equatable {
+        
+        /// A simple message containing only one kind of data.
         case basic(Media.Basic)
+        
+        /// A "full" email message containing an envelope, and a child body.
         case message(Message)
+        
+        /// A message type, for example plain text, or html.
         case text(Text)
     }
 
