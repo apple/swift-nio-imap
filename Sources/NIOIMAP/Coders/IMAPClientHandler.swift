@@ -40,7 +40,7 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
     enum ClientHandlerState: Equatable {
         /// We're expecting continuations to come back during a command.
         /// For example when in an IDLE state, the server may periodically send
-        /// back "+ Still here". Not that this does not include continuations for
+        /// back "+ Still here". Note that this does not include continuations for
         /// synchronising literals.
         case expectingContinuations
 
@@ -70,7 +70,7 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
                     let out = ResponseOrContinuationRequest.response(response)
                     switch response {
                     case .taggedResponse:
-                        // continuations must have finished so the state to standard continuation handling
+                        // continuations must have finished: change the state to standard continuation handling
                         self.state = .expectingResponses
                     default:
                         break
