@@ -15,6 +15,7 @@
 import struct NIO.ByteBuffer
 
 extension BodyStructure {
+    
     /// Pairs a body `Disposition` with a `LanguageLocation`. An abstraction from RFC 3501
     /// to make the API slightly easier to work with and enforce validity.
     public struct DispositionAndLanguage: Equatable {
