@@ -49,10 +49,19 @@ public enum MailboxData: Equatable {
 }
 
 extension MailboxData {
+    
+    /// A container for an array of message identifiers, and a sequence.
     public struct SearchSort: Equatable {
+        
+        /// An array of message identifiers that were matched in a search.
         public var identifiers: [Int]
+        
+        /// The highest `ModificationSequence` of all messages that were found.
         public var modificationSequence: SearchSortModificationSequence
 
+        /// Creates a new `SearchSort`.
+        /// - parameter identifiers: An array of message identifiers that were matched in a search.
+        /// - parameter modificationSequence: The highest `ModificationSequence` of all messages that were found.
         public init(identifiers: [Int], modificationSequence: SearchSortModificationSequence) {
             self.identifiers = identifiers
             self.modificationSequence = modificationSequence
