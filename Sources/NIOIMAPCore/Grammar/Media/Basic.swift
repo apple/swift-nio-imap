@@ -53,11 +53,19 @@ extension Media {
 
     }
 
-    /// IMAPv4 `media-basic`
+    /// A basic media type to form a full data type. It contains a high-level type, e.g. "VIDEO", and a lower-level
+    /// subtype, e.g. "MP4", to construct to construct "VIDEO/MP4".
     public struct Basic: Equatable {
+        
+        /// The top-level media kind.
         public var kind: BasicKind
+        
+        /// The specific media subtype.
         public var subtype: BodyStructure.MediaSubtype
 
+        /// Creates a new `Basic`.
+        /// - parameter kind: The top-level media kind.
+        /// - parameter subtype: The specific media subtype.
         public init(kind: Media.BasicKind, subtype: BodyStructure.MediaSubtype) {
             self.kind = kind
             self.subtype = subtype
