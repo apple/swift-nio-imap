@@ -1,0 +1,1441 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>ResponseTextCode Enumeration Reference</title>
+    <link rel="stylesheet" type="text/css" href="../css/jazzy.css" />
+    <link rel="stylesheet" type="text/css" href="../css/highlight.css" />
+    <meta charset='utf-8'>
+    <script src="../js/jquery.min.js" defer></script>
+    <script src="../js/jazzy.js" defer></script>
+    
+    <script src="../js/lunr.min.js" defer></script>
+    <script src="../js/typeahead.jquery.js" defer></script>
+    <script src="../js/jazzy.search.js" defer></script>
+  </head>
+  <body>
+    <a name="//apple_ref/swift/Enum/ResponseTextCode" class="dashAnchor"></a>
+    <a title="ResponseTextCode Enumeration Reference"></a>
+    <header>
+      <div class="content-wrapper">
+        <p><a href="../index.html">NIOIMAPCore Docs</a> (45% documented)</p>
+        <p class="header-right">
+          <form role="search" action="../search.json">
+            <input type="text" placeholder="Search documentation" data-typeahead>
+          </form>
+        </p>
+      </div>
+    </header>
+    <div class="content-wrapper">
+      <p id="breadcrumbs">
+        <a href="../index.html">NIOIMAPCore Reference</a>
+        <img id="carat" src="../img/carat.png" />
+        ResponseTextCode Enumeration Reference
+      </p>
+    </div>
+    <div class="content-wrapper">
+      <nav class="sidebar">
+        <ul class="nav-groups">
+          <li class="nav-group-name">
+            <a href="../Enums.html">Enumerations</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="../Enums/Access.html">Access</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/AppendCommand.html">AppendCommand</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/AppendCommand/CatenateData.html">– CatenateData</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/BodyExtension.html">BodyExtension</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/BodyStructure.html">BodyStructure</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/BodyStructure/MediaSubtype.html">– MediaSubtype</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/BodyStructure/Disposition.html">– Disposition</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/BodyStructure/DispositionAndLanguage.html">– DispositionAndLanguage</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/BodyStructure/Encoding.html">– Encoding</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/BodyStructure/Fields.html">– Fields</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/BodyStructure/LanguageLocation.html">– LanguageLocation</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/BodyStructure/LocationAndExtensions.html">– LocationAndExtensions</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/BodyStructure/ParameterPair.html">– ParameterPair</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/BodyStructure/Multipart.html">– Multipart</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/BodyStructure/Singlepart.html">– Singlepart</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/Command.html">Command</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/CommandStream.html">CommandStream</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums.html#/s:11NIOIMAPCore16ConditionalStoreO">ConditionalStore</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/ContinuationRequest.html">ContinuationRequest</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/CreateParameter.html">CreateParameter</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/FetchAttribute.html">FetchAttribute</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/FetchModifier.html">FetchModifier</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/FetchResponse.html">FetchResponse</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/IAuth.html">IAuth</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/ICommand.html">ICommand</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/IMessageOrPartial.html">IMessageOrPartial</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/IRelativePath.html">IRelativePath</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/InitialClientResponse.html">InitialClientResponse</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/ListSelectBaseOption.html">ListSelectBaseOption</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/ListSelectIndependentOption.html">ListSelectIndependentOption</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/ListSelectOption.html">ListSelectOption</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/MailboxAttribute.html">MailboxAttribute</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/MailboxData.html">MailboxData</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/MailboxData/SearchSort.html">– SearchSort</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/MailboxFilter.html">MailboxFilter</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/MailboxPatterns.html">MailboxPatterns</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/Media.html">Media</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/Media/BasicKind.html">– BasicKind</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/Media/Basic.html">– Basic</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/Media/Message.html">– Message</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/MessageAttribute.html">MessageAttribute</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/MessageData.html">MessageData</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/MetadataOption.html">MetadataOption</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/MetadataResponse.html">MetadataResponse</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/ModifiedUTF7.html">ModifiedUTF7</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/ModifiedUTF7/OddByteCountError.html">– OddByteCountError</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/ModifiedUTF7/EncodingRoundtripError.html">– EncodingRoundtripError</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/OptionExtensionKind.html">OptionExtensionKind</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/OptionValueComp.html">OptionValueComp</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/ParameterValue.html">ParameterValue</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/PermanentFlag.html">PermanentFlag</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/RelativeIMAPURL.html">RelativeIMAPURL</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/Response.html">Response</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/ResponseOrContinuationRequest.html">ResponseOrContinuationRequest</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/ResponsePayload.html">ResponsePayload</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/ResponseTextCode.html">ResponseTextCode</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/ReturnOption.html">ReturnOption</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/SearchKey.html">SearchKey</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/SearchReturnData.html">SearchReturnData</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/SearchReturnOption.html">SearchReturnOption</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/SelectParameter.html">SelectParameter</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/SequenceSet.html">SequenceSet</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/StoreModifier.html">StoreModifier</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/StreamingKind.html">StreamingKind</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/UntaggedStatus.html">UntaggedStatus</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a href="../Structs.html">Structures</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="../Structs/Address.html">Address</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/AppendData.html">AppendData</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/AppendMessage.html">AppendMessage</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/AppendOptions.html">AppendOptions</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/AttributeFlag.html">AttributeFlag</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/AuthIMAPURL.html">AuthIMAPURL</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/AuthIMAPURLFull.html">AuthIMAPURLFull</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/AuthIMAPURLRump.html">AuthIMAPURLRump</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/Capability.html">Capability</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/Capability/AuthKind.html">– AuthKind</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/Capability/ContextKind.html">– ContextKind</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/Capability/SortKind.html">– SortKind</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/Capability/ThreadKind.html">– ThreadKind</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/Capability/StatusKind.html">– StatusKind</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/Capability/UTF8Kind.html">– UTF8Kind</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/Capability/RightsKind.html">– RightsKind</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/ChangedSinceModifier.html">ChangedSinceModifier</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/CommandEncodeBuffer.html">CommandEncodeBuffer</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/CommandEncodingOptions.html">CommandEncodingOptions</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/CommandParser.html">CommandParser</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/Date.html">Date</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/EItemVendorTag.html">EItemVendorTag</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/ESearchOptions.html">ESearchOptions</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/ESearchResponse.html">ESearchResponse</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/ESearchScopeOption.html">ESearchScopeOption</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/ESearchScopeOptions.html">ESearchScopeOptions</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/ESearchSourceOptions.html">ESearchSourceOptions</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/EncodeBuffer.html">EncodeBuffer</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/EncodeBuffer/Mode.html">– Mode</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/EncodeBuffer/Chunk.html">– Chunk</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/EncodedAuthenticationType.html">EncodedAuthenticationType</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/EncodedMailbox.html">EncodedMailbox</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/EncodedSearch.html">EncodedSearch</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/EncodedSection.html">EncodedSection</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/EncodedURLAuth.html">EncodedURLAuth</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/EncodedUser.html">EncodedUser</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/EntryFlagName.html">EntryFlagName</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/EntryKindRequest.html">EntryKindRequest</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/EntryKindResponse.html">EntryKindResponse</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/EntryValue.html">EntryValue</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/Envelope.html">Envelope</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/Expire.html">Expire</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/FetchModificationResponse.html">FetchModificationResponse</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/Flag.html">Flag</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/Flag/Keyword.html">– Keyword</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/FullDate.html">FullDate</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/FullDateTime.html">FullDateTime</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/FullTime.html">FullTime</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/GmailLabel.html">GmailLabel</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/IAbsolutePath.html">IAbsolutePath</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/IDParameter.html">IDParameter</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/IMAPURL.html">IMAPURL</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/IMailboxReference.html">IMailboxReference</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/IMessageList.html">IMessageList</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/IMessagePart.html">IMessagePart</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/INetworkPath.html">INetworkPath</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/IPartial.html">IPartial</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/IPartialOnly.html">IPartialOnly</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/IPathQuery.html">IPathQuery</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/ISection.html">ISection</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/ISectionOnly.html">ISectionOnly</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/IServer.html">IServer</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/IUAVerifier.html">IUAVerifier</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/IUID.html">IUID</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/IUIDOnly.html">IUIDOnly</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/IURLAuth.html">IURLAuth</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/IURLAuthRump.html">IURLAuthRump</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/IUserInfo.html">IUserInfo</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/InternalDate.html">InternalDate</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/InternalDate/Components.html">– Components</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/InvalidMailboxNameError.html">InvalidMailboxNameError</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/InvalidPathSeparatorError.html">InvalidPathSeparatorError</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs.html#/s:11NIOIMAPCore10InvalidUIDV">InvalidUID</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/ListExtendedItem.html">ListExtendedItem</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/ListSelectOptions.html">ListSelectOptions</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/MailboxInfo.html">MailboxInfo</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/MailboxInfo/Attribute.html">– Attribute</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/MailboxName.html">MailboxName</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/MailboxPath.html">MailboxPath</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/MailboxStatus.html">MailboxStatus</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/MailboxTooBigError.html">MailboxTooBigError</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/Mailboxes.html">Mailboxes</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/MechanismBase64.html">MechanismBase64</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/MetadataValue.html">MetadataValue</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/ModificationSequenceValue.html">ModificationSequenceValue</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/NamespaceDescription.html">NamespaceDescription</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/NamespaceResponse.html">NamespaceResponse</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/NamespaceResponseExtension.html">NamespaceResponseExtension</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/OptionExtension.html">OptionExtension</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/OptionVendorTag.html">OptionVendorTag</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/Parameter.html">Parameter</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/ParserError.html">ParserError</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/PartialCommandStream.html">PartialCommandStream</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/PartialRange.html">PartialRange</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/QResyncParameter.html">QResyncParameter</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/QuotaLimit.html">QuotaLimit</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/QuotaResource.html">QuotaResource</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/QuotaRoot.html">QuotaRoot</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/ResponseCodeAppend.html">ResponseCodeAppend</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/ResponseCodeCopy.html">ResponseCodeCopy</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/ResponseEncodeBuffer.html">ResponseEncodeBuffer</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/ResponseEncodingOptions.html">ResponseEncodingOptions</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/ResponseParser.html">ResponseParser</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/ResponseText.html">ResponseText</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs.html#/s:11NIOIMAPCore11ScopeOptionV">ScopeOption</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/SearchCorrelator.html">SearchCorrelator</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/SearchModificationSequence.html">SearchModificationSequence</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/SearchModificationSequenceExtension.html">SearchModificationSequenceExtension</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/SearchReturnDataExtension.html">SearchReturnDataExtension</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/SearchReturnOptionExtension.html">SearchReturnOptionExtension</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/SearchSortModificationSequence.html">SearchSortModificationSequence</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/SectionSpecifier.html">SectionSpecifier</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/SectionSpecifier/Part.html">– Part</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/SectionSpecifier/Kind.html">– Kind</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/SequenceMatchData.html">SequenceMatchData</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/SequenceNumber.html">SequenceNumber</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/SequenceRange.html">SequenceRange</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/SequenceRangeSet.html">SequenceRangeSet</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/SortData.html">SortData</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/StoreFlags.html">StoreFlags</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/StoreFlags/Operation.html">– Operation</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/SynchronizingLiteralParser.html">SynchronizingLiteralParser</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/SynchronizingLiteralParser/FramingResult.html">– FramingResult</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/TaggedCommand.html">TaggedCommand</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/TaggedExtension.html">TaggedExtension</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/TaggedResponse.html">TaggedResponse</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/TaggedResponse/State.html">– State</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/TooMuchRecursion.html">TooMuchRecursion</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/UAuthMechanism.html">UAuthMechanism</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/UID.html">UID</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/UIDRange.html">UIDRange</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/UIDSet.html">UIDSet</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/UIDValidity.html">UIDValidity</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/URLFetchData.html">URLFetchData</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/URLRumpMechanism.html">URLRumpMechanism</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/UnchangedSinceModifier.html">UnchangedSinceModifier</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/UseAttribute.html">UseAttribute</a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </nav>
+      <article class="main-content">
+        <section>
+          <section class="section">
+            <h1>ResponseTextCode</h1>
+              <div class="declaration">
+                <div class="language">
+                  
+                  <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">enum</span> <span class="kt">ResponseTextCode</span> <span class="p">:</span> <span class="kt">Equatable</span></code></pre>
+
+                </div>
+              </div>
+            <p>IMAPv4 <code>resp-text-code</code></p>
+
+          </section>
+          <section class="section task-group-section">
+            <div class="task-group">
+              <ul>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:11NIOIMAPCore16ResponseTextCodeO5alertyA2CmF"></a>
+                    <a name="//apple_ref/swift/Element/alert" class="dashAnchor"></a>
+                    <a class="token" href="#/s:11NIOIMAPCore16ResponseTextCodeO5alertyA2CmF">alert</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">alert</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:11NIOIMAPCore16ResponseTextCodeO10badCharsetyACSaySSGcACmF"></a>
+                    <a name="//apple_ref/swift/Element/badCharset(_:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:11NIOIMAPCore16ResponseTextCodeO10badCharsetyACSaySSGcACmF">badCharset(_:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="nf">badCharset</span><span class="p">([</span><span class="kt">String</span><span class="p">])</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:11NIOIMAPCore16ResponseTextCodeO10capabilityyACSayAA10CapabilityVGcACmF"></a>
+                    <a name="//apple_ref/swift/Element/capability(_:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:11NIOIMAPCore16ResponseTextCodeO10capabilityyACSayAA10CapabilityVGcACmF">capability(_:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="nf">capability</span><span class="p">([</span><span class="kt"><a href="../Structs/Capability.html">Capability</a></span><span class="p">])</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:11NIOIMAPCore16ResponseTextCodeO5parseyA2CmF"></a>
+                    <a name="//apple_ref/swift/Element/parse" class="dashAnchor"></a>
+                    <a class="token" href="#/s:11NIOIMAPCore16ResponseTextCodeO5parseyA2CmF">parse</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">parse</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:11NIOIMAPCore16ResponseTextCodeO14permanentFlagsyACSayAA13PermanentFlagOGcACmF"></a>
+                    <a name="//apple_ref/swift/Element/permanentFlags(_:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:11NIOIMAPCore16ResponseTextCodeO14permanentFlagsyACSayAA13PermanentFlagOGcACmF">permanentFlags(_:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="nf">permanentFlags</span><span class="p">([</span><span class="kt"><a href="../Enums/PermanentFlag.html">PermanentFlag</a></span><span class="p">])</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:11NIOIMAPCore16ResponseTextCodeO8readOnlyyA2CmF"></a>
+                    <a name="//apple_ref/swift/Element/readOnly" class="dashAnchor"></a>
+                    <a class="token" href="#/s:11NIOIMAPCore16ResponseTextCodeO8readOnlyyA2CmF">readOnly</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">readOnly</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:11NIOIMAPCore16ResponseTextCodeO9readWriteyA2CmF"></a>
+                    <a name="//apple_ref/swift/Element/readWrite" class="dashAnchor"></a>
+                    <a class="token" href="#/s:11NIOIMAPCore16ResponseTextCodeO9readWriteyA2CmF">readWrite</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">readWrite</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:11NIOIMAPCore16ResponseTextCodeO9tryCreateyA2CmF"></a>
+                    <a name="//apple_ref/swift/Element/tryCreate" class="dashAnchor"></a>
+                    <a class="token" href="#/s:11NIOIMAPCore16ResponseTextCodeO9tryCreateyA2CmF">tryCreate</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">tryCreate</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:11NIOIMAPCore16ResponseTextCodeO7uidNextyAcA3UIDVcACmF"></a>
+                    <a name="//apple_ref/swift/Element/uidNext(_:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:11NIOIMAPCore16ResponseTextCodeO7uidNextyAcA3UIDVcACmF">uidNext(_:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="nf">uidNext</span><span class="p">(</span><span class="kt"><a href="../Structs/UID.html">UID</a></span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:11NIOIMAPCore16ResponseTextCodeO11uidValidityyAcA11UIDValidityVcACmF"></a>
+                    <a name="//apple_ref/swift/Element/uidValidity(_:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:11NIOIMAPCore16ResponseTextCodeO11uidValidityyAcA11UIDValidityVcACmF">uidValidity(_:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="nf">uidValidity</span><span class="p">(</span><span class="kt"><a href="../Structs/UIDValidity.html">UIDValidity</a></span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:11NIOIMAPCore16ResponseTextCodeO6unseenyACSicACmF"></a>
+                    <a name="//apple_ref/swift/Element/unseen(_:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:11NIOIMAPCore16ResponseTextCodeO6unseenyACSicACmF">unseen(_:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="nf">unseen</span><span class="p">(</span><span class="kt">Int</span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:11NIOIMAPCore16ResponseTextCodeO9namespaceyAcA09NamespaceB0VcACmF"></a>
+                    <a name="//apple_ref/swift/Element/namespace(_:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:11NIOIMAPCore16ResponseTextCodeO9namespaceyAcA09NamespaceB0VcACmF">namespace(_:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="nf">namespace</span><span class="p">(</span><span class="kt"><a href="../Structs/NamespaceResponse.html">NamespaceResponse</a></span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:11NIOIMAPCore16ResponseTextCodeO9uidAppendyAcA0bdF0VcACmF"></a>
+                    <a name="//apple_ref/swift/Element/uidAppend(_:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:11NIOIMAPCore16ResponseTextCodeO9uidAppendyAcA0bdF0VcACmF">uidAppend(_:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="nf">uidAppend</span><span class="p">(</span><span class="kt"><a href="../Structs/ResponseCodeAppend.html">ResponseCodeAppend</a></span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:11NIOIMAPCore16ResponseTextCodeO7uidCopyyAcA0bdF0VcACmF"></a>
+                    <a name="//apple_ref/swift/Element/uidCopy(_:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:11NIOIMAPCore16ResponseTextCodeO7uidCopyyAcA0bdF0VcACmF">uidCopy(_:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="nf">uidCopy</span><span class="p">(</span><span class="kt"><a href="../Structs/ResponseCodeCopy.html">ResponseCodeCopy</a></span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:11NIOIMAPCore16ResponseTextCodeO12uidNotStickyyA2CmF"></a>
+                    <a name="//apple_ref/swift/Element/uidNotSticky" class="dashAnchor"></a>
+                    <a class="token" href="#/s:11NIOIMAPCore16ResponseTextCodeO12uidNotStickyyA2CmF">uidNotSticky</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">uidNotSticky</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:11NIOIMAPCore16ResponseTextCodeO12useAttributeyA2CmF"></a>
+                    <a name="//apple_ref/swift/Element/useAttribute" class="dashAnchor"></a>
+                    <a class="token" href="#/s:11NIOIMAPCore16ResponseTextCodeO12useAttributeyA2CmF">useAttribute</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">useAttribute</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:11NIOIMAPCore16ResponseTextCodeO5otheryACSS_SSSgtcACmF"></a>
+                    <a name="//apple_ref/swift/Element/other(_:_:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:11NIOIMAPCore16ResponseTextCodeO5otheryACSS_SSSgtcACmF">other(_:<wbr>_:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="nf">other</span><span class="p">(</span><span class="kt">String</span><span class="p">,</span> <span class="kt">String</span><span class="p">?)</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:11NIOIMAPCore16ResponseTextCodeO8notSavedyA2CmF"></a>
+                    <a name="//apple_ref/swift/Element/notSaved" class="dashAnchor"></a>
+                    <a class="token" href="#/s:11NIOIMAPCore16ResponseTextCodeO8notSavedyA2CmF">notSaved</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">notSaved</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:11NIOIMAPCore16ResponseTextCodeO6closedyA2CmF"></a>
+                    <a name="//apple_ref/swift/Element/closed" class="dashAnchor"></a>
+                    <a class="token" href="#/s:11NIOIMAPCore16ResponseTextCodeO6closedyA2CmF">closed</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">closed</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:11NIOIMAPCore16ResponseTextCodeO22noModificationSequenceyA2CmF"></a>
+                    <a name="//apple_ref/swift/Element/noModificationSequence" class="dashAnchor"></a>
+                    <a class="token" href="#/s:11NIOIMAPCore16ResponseTextCodeO22noModificationSequenceyA2CmF">noModificationSequence</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">noModificationSequence</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:11NIOIMAPCore16ResponseTextCodeO20modificationSequenceyAcA0F3SetOcACmF"></a>
+                    <a name="//apple_ref/swift/Element/modificationSequence(_:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:11NIOIMAPCore16ResponseTextCodeO20modificationSequenceyAcA0F3SetOcACmF">modificationSequence(_:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="nf">modificationSequence</span><span class="p">(</span><span class="kt"><a href="../Enums/SequenceSet.html">SequenceSet</a></span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:11NIOIMAPCore16ResponseTextCodeO27highestModificationSequenceyAcA0fG5ValueVcACmF"></a>
+                    <a name="//apple_ref/swift/Element/highestModificationSequence(_:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:11NIOIMAPCore16ResponseTextCodeO27highestModificationSequenceyAcA0fG5ValueVcACmF">highestModificationSequence(_:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="nf">highestModificationSequence</span><span class="p">(</span><span class="kt"><a href="../Structs/ModificationSequenceValue.html">ModificationSequenceValue</a></span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:11NIOIMAPCore16ResponseTextCodeO19metadataLongEntriesyACSicACmF"></a>
+                    <a name="//apple_ref/swift/Element/metadataLongEntries(_:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:11NIOIMAPCore16ResponseTextCodeO19metadataLongEntriesyACSicACmF">metadataLongEntries(_:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="nf">metadataLongEntries</span><span class="p">(</span><span class="kt">Int</span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:11NIOIMAPCore16ResponseTextCodeO15metadataMaxsizeyACSicACmF"></a>
+                    <a name="//apple_ref/swift/Element/metadataMaxsize(_:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:11NIOIMAPCore16ResponseTextCodeO15metadataMaxsizeyACSicACmF">metadataMaxsize(_:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="nf">metadataMaxsize</span><span class="p">(</span><span class="kt">Int</span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:11NIOIMAPCore16ResponseTextCodeO15metadataTooManyyA2CmF"></a>
+                    <a name="//apple_ref/swift/Element/metadataTooMany" class="dashAnchor"></a>
+                    <a class="token" href="#/s:11NIOIMAPCore16ResponseTextCodeO15metadataTooManyyA2CmF">metadataTooMany</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">metadataTooMany</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:11NIOIMAPCore16ResponseTextCodeO17metadataNoPrivateyA2CmF"></a>
+                    <a name="//apple_ref/swift/Element/metadataNoPrivate" class="dashAnchor"></a>
+                    <a class="token" href="#/s:11NIOIMAPCore16ResponseTextCodeO17metadataNoPrivateyA2CmF">metadataNoPrivate</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">metadataNoPrivate</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:11NIOIMAPCore16ResponseTextCodeO13urlMechanismsyACSayAA15MechanismBase64VGcACmF"></a>
+                    <a name="//apple_ref/swift/Element/urlMechanisms(_:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:11NIOIMAPCore16ResponseTextCodeO13urlMechanismsyACSayAA15MechanismBase64VGcACmF">urlMechanisms(_:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="nf">urlMechanisms</span><span class="p">([</span><span class="kt"><a href="../Structs/MechanismBase64.html">MechanismBase64</a></span><span class="p">])</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:11NIOIMAPCore16ResponseTextCodeO8referralyAcA7IMAPURLVcACmF"></a>
+                    <a name="//apple_ref/swift/Element/referral(_:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:11NIOIMAPCore16ResponseTextCodeO8referralyAcA7IMAPURLVcACmF">referral(_:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="nf">referral</span><span class="p">(</span><span class="kt"><a href="../Structs/IMAPURL.html">IMAPURL</a></span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </section>
+        </section>
+        <section id="footer">
+          <p>&copy; 2020 <a class="link" href="" target="_blank" rel="external"></a>. All rights reserved. (Last updated: 2020-12-03)</p>
+          <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.13.6</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external">Realm</a> project.</p>
+        </section>
+      </article>
+    </div>
+  </body>
+</div>
+</html>

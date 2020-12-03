@@ -1,0 +1,4982 @@
+{
+  "warnings": [
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/CommandEncodeBuffer.swift",
+      "line": 17,
+      "symbol": "CommandEncodeBuffer",
+      "symbol_kind": "source.lang.swift.decl.struct",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/CommandEncodeBuffer.swift",
+      "line": 18,
+      "symbol": "CommandEncodeBuffer.buffer",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/CommandEncodeBuffer.swift",
+      "line": 23,
+      "symbol": "CommandEncodeBuffer.init(buffer:options:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/CommandEncodeBuffer.swift",
+      "line": 28,
+      "symbol": "CommandEncodeBuffer",
+      "symbol_kind": "source.lang.swift.decl.extension",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/CommandEncodeBuffer.swift",
+      "line": 29,
+      "symbol": "CommandEncodeBuffer.options",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/CommandEncodeBuffer.swift",
+      "line": 34,
+      "symbol": "CommandEncodeBuffer",
+      "symbol_kind": "source.lang.swift.decl.extension",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/CommandEncodeBuffer.swift",
+      "line": 39,
+      "symbol": "CommandEncodeBuffer.init(buffer:capabilities:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/CommandEncodeBuffer.swift",
+      "line": 101,
+      "symbol": "CommandEncodeBuffer",
+      "symbol_kind": "source.lang.swift.decl.extension",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/CommandEncodingOptions.swift",
+      "line": 15,
+      "symbol": "CommandEncodingOptions",
+      "symbol_kind": "source.lang.swift.decl.struct",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/CommandEncodingOptions.swift",
+      "line": 43,
+      "symbol": "CommandEncodingOptions",
+      "symbol_kind": "source.lang.swift.decl.extension",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/CommandEncodingOptions.swift",
+      "line": 44,
+      "symbol": "CommandEncodingOptions.init(capabilities:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/EncodeBuffer.swift",
+      "line": 17,
+      "symbol": "EncodeBuffer",
+      "symbol_kind": "source.lang.swift.decl.extension",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/EncodeBuffer.swift",
+      "line": 19,
+      "symbol": "EncodeBuffer",
+      "symbol_kind": "source.lang.swift.decl.struct",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/EncodeBuffer.swift",
+      "line": 20,
+      "symbol": "EncodeBuffer.Mode",
+      "symbol_kind": "source.lang.swift.decl.enum",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/EncodeBuffer.swift",
+      "line": 21,
+      "symbol": "EncodeBuffer.Mode.client(options:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/EncodeBuffer.swift",
+      "line": 22,
+      "symbol": "EncodeBuffer.Mode.server(streamingAttributes:options:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/EncodeBuffer.swift",
+      "line": 29,
+      "symbol": "EncodeBuffer.init(_:mode:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/EncodeBuffer.swift",
+      "line": 34,
+      "symbol": "EncodeBuffer",
+      "symbol_kind": "source.lang.swift.decl.extension",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/EncodeBuffer.swift",
+      "line": 34,
+      "symbol": "EncodeBuffer",
+      "symbol_kind": "source.lang.swift.decl.extension",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/EncodeBuffer.swift",
+      "line": 35,
+      "symbol": "EncodeBuffer",
+      "symbol_kind": "source.lang.swift.decl.extension",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/EncodeBuffer.swift",
+      "line": 36,
+      "symbol": "EncodeBuffer",
+      "symbol_kind": "source.lang.swift.decl.extension",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/EncodeBuffer.swift",
+      "line": 36,
+      "symbol": "EncodeBuffer.clientEncodeBuffer(buffer:options:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/EncodeBuffer.swift",
+      "line": 39,
+      "symbol": "EncodeBuffer",
+      "symbol_kind": "source.lang.swift.decl.extension",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/EncodeBuffer.swift",
+      "line": 40,
+      "symbol": "EncodeBuffer.clientEncodeBuffer(buffer:capabilities:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/EncodeBuffer.swift",
+      "line": 42,
+      "symbol": "EncodeBuffer",
+      "symbol_kind": "source.lang.swift.decl.extension",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/EncodeBuffer.swift",
+      "line": 44,
+      "symbol": "EncodeBuffer.serverEncodeBuffer(buffer:options:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/EncodeBuffer.swift",
+      "line": 48,
+      "symbol": "EncodeBuffer.serverEncodeBuffer(buffer:capabilities:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/EncodeBuffer.swift",
+      "line": 49,
+      "symbol": "EncodeBuffer",
+      "symbol_kind": "source.lang.swift.decl.extension",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/EncodeBuffer.swift",
+      "line": 50,
+      "symbol": "EncodeBuffer",
+      "symbol_kind": "source.lang.swift.decl.extension",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/EncodeBuffer.swift",
+      "line": 53,
+      "symbol": "EncodeBuffer",
+      "symbol_kind": "source.lang.swift.decl.extension",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/EncodeBuffer.swift",
+      "line": 54,
+      "symbol": "EncodeBuffer.Chunk",
+      "symbol_kind": "source.lang.swift.decl.struct",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/EncodeBuffer.swift",
+      "line": 55,
+      "symbol": "EncodeBuffer.Chunk.bytes",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/EncodeBuffer.swift",
+      "line": 56,
+      "symbol": "EncodeBuffer.Chunk.waitForContinuation",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/EncodeBuffer.swift",
+      "line": 59,
+      "symbol": "EncodeBuffer.nextChunk()",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/EncodeBuffer.swift",
+      "line": 75,
+      "symbol": "EncodeBuffer.markStopPoint()",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/EncodeBuffer.swift",
+      "line": 83,
+      "symbol": "EncodeBuffer",
+      "symbol_kind": "source.lang.swift.decl.extension",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/EncodeBuffer.swift",
+      "line": 86,
+      "symbol": "EncodeBuffer.writeString(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/EncodeBuffer.swift",
+      "line": 92,
+      "symbol": "EncodeBuffer.writeBytes(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/EncodeBuffer.swift",
+      "line": 98,
+      "symbol": "EncodeBuffer.writeBuffer(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/EncodeBuffer.swift",
+      "line": 103,
+      "symbol": "EncodeBuffer.clear()",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/EncodeBuffer.swift",
+      "line": 209,
+      "symbol": "EncodeBuffer",
+      "symbol_kind": "source.lang.swift.decl.extension",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Address.swift",
+      "line": 19,
+      "symbol": "Address.name",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Address.swift",
+      "line": 20,
+      "symbol": "Address.adl",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Address.swift",
+      "line": 21,
+      "symbol": "Address.mailbox",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Address.swift",
+      "line": 22,
+      "symbol": "Address.host",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Address.swift",
+      "line": 24,
+      "symbol": "Address.init(name:adl:mailbox:host:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Append/AppendMessage.swift",
+      "line": 37,
+      "symbol": "EncodeBuffer.writeAppendMessage(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/AuthIMAPURL.swift",
+      "line": 19,
+      "symbol": "AuthIMAPURL.server",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/AuthIMAPURL.swift",
+      "line": 20,
+      "symbol": "AuthIMAPURL.messagePart",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/AuthIMAPURL.swift",
+      "line": 22,
+      "symbol": "AuthIMAPURL.init(server:messagePart:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/AuthIMAPURLFull.swift",
+      "line": 19,
+      "symbol": "AuthIMAPURLFull.imapURL",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/AuthIMAPURLFull.swift",
+      "line": 20,
+      "symbol": "AuthIMAPURLFull.urlAuth",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/AuthIMAPURLFull.swift",
+      "line": 22,
+      "symbol": "AuthIMAPURLFull.init(imapURL:urlAuth:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/AuthIMAPURLRump.swift",
+      "line": 19,
+      "symbol": "AuthIMAPURLRump.imapURL",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/AuthIMAPURLRump.swift",
+      "line": 20,
+      "symbol": "AuthIMAPURLRump.authRump",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/AuthIMAPURLRump.swift",
+      "line": 22,
+      "symbol": "AuthIMAPURLRump.init(imapURL:authRump:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Capability.swift",
+      "line": 19,
+      "symbol": "Capability.rawValue",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Capability.swift",
+      "line": 22,
+      "symbol": "Capability.name",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Capability.swift",
+      "line": 29,
+      "symbol": "Capability.value",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Capability.swift",
+      "line": 38,
+      "symbol": "Capability.init(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Capability.swift",
+      "line": 51,
+      "symbol": "Capability.AuthKind",
+      "symbol_kind": "source.lang.swift.decl.struct",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Capability.swift",
+      "line": 52,
+      "symbol": "Capability.AuthKind.token",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Capability.swift",
+      "line": 53,
+      "symbol": "Capability.AuthKind.plain",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Capability.swift",
+      "line": 54,
+      "symbol": "Capability.AuthKind.pToken",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Capability.swift",
+      "line": 55,
+      "symbol": "Capability.AuthKind.weToken",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Capability.swift",
+      "line": 56,
+      "symbol": "Capability.AuthKind.wsToken",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Capability.swift",
+      "line": 57,
+      "symbol": "Capability.AuthKind.gssAPI",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Capability.swift",
+      "line": 59,
+      "symbol": "Capability.AuthKind.rawValue",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Capability.swift",
+      "line": 61,
+      "symbol": "Capability.AuthKind.init(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Capability.swift",
+      "line": 70,
+      "symbol": "Capability.ContextKind",
+      "symbol_kind": "source.lang.swift.decl.struct",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Capability.swift",
+      "line": 71,
+      "symbol": "Capability.ContextKind.search",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Capability.swift",
+      "line": 72,
+      "symbol": "Capability.ContextKind.sort",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Capability.swift",
+      "line": 74,
+      "symbol": "Capability.ContextKind.rawValue",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Capability.swift",
+      "line": 76,
+      "symbol": "Capability.ContextKind.init(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Capability.swift",
+      "line": 85,
+      "symbol": "Capability.SortKind",
+      "symbol_kind": "source.lang.swift.decl.struct",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Capability.swift",
+      "line": 86,
+      "symbol": "Capability.SortKind.display",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Capability.swift",
+      "line": 88,
+      "symbol": "Capability.SortKind.rawValue",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Capability.swift",
+      "line": 90,
+      "symbol": "Capability.SortKind.init(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Capability.swift",
+      "line": 99,
+      "symbol": "Capability.ThreadKind",
+      "symbol_kind": "source.lang.swift.decl.struct",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Capability.swift",
+      "line": 100,
+      "symbol": "Capability.ThreadKind.orderedSubject",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Capability.swift",
+      "line": 101,
+      "symbol": "Capability.ThreadKind.references",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Capability.swift",
+      "line": 103,
+      "symbol": "Capability.ThreadKind.rawValue",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Capability.swift",
+      "line": 105,
+      "symbol": "Capability.ThreadKind.init(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Capability.swift",
+      "line": 114,
+      "symbol": "Capability.StatusKind",
+      "symbol_kind": "source.lang.swift.decl.struct",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Capability.swift",
+      "line": 115,
+      "symbol": "Capability.StatusKind.size",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Capability.swift",
+      "line": 117,
+      "symbol": "Capability.StatusKind.rawValue",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Capability.swift",
+      "line": 119,
+      "symbol": "Capability.StatusKind.init(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Capability.swift",
+      "line": 128,
+      "symbol": "Capability.UTF8Kind",
+      "symbol_kind": "source.lang.swift.decl.struct",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Capability.swift",
+      "line": 129,
+      "symbol": "Capability.UTF8Kind.accept",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Capability.swift",
+      "line": 131,
+      "symbol": "Capability.UTF8Kind.rawValue",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Capability.swift",
+      "line": 133,
+      "symbol": "Capability.UTF8Kind.init(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Capability.swift",
+      "line": 142,
+      "symbol": "Capability.RightsKind",
+      "symbol_kind": "source.lang.swift.decl.struct",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Capability.swift",
+      "line": 143,
+      "symbol": "Capability.RightsKind.tekx",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Capability.swift",
+      "line": 145,
+      "symbol": "Capability.RightsKind.rawValue",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Capability.swift",
+      "line": 147,
+      "symbol": "Capability.RightsKind.init(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Capability.swift",
+      "line": 156,
+      "symbol": "Capability.acl",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Capability.swift",
+      "line": 157,
+      "symbol": "Capability.annotateExperiment1",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Capability.swift",
+      "line": 158,
+      "symbol": "Capability.binary",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Capability.swift",
+      "line": 159,
+      "symbol": "Capability.catenate",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Capability.swift",
+      "line": 160,
+      "symbol": "Capability.children",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Capability.swift",
+      "line": 161,
+      "symbol": "Capability.condStore",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Capability.swift",
+      "line": 162,
+      "symbol": "Capability.createSpecialUse",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Capability.swift",
+      "line": 163,
+      "symbol": "Capability.enable",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Capability.swift",
+      "line": 164,
+      "symbol": "Capability.esearch",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Capability.swift",
+      "line": 165,
+      "symbol": "Capability.esort",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Capability.swift",
+      "line": 166,
+      "symbol": "Capability.filters",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Capability.swift",
+      "line": 167,
+      "symbol": "Capability.id",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Capability.swift",
+      "line": 168,
+      "symbol": "Capability.idle",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Capability.swift",
+      "line": 169,
+      "symbol": "Capability.imap4rev1",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Capability.swift",
+      "line": 170,
+      "symbol": "Capability.imap4",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Capability.swift",
+      "line": 171,
+      "symbol": "Capability.language",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Capability.swift",
+      "line": 172,
+      "symbol": "Capability.listStatus",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Capability.swift",
+      "line": 173,
+      "symbol": "Capability.listExtended",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Capability.swift",
+      "line": 174,
+      "symbol": "Capability.loginDisabled",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Capability.swift",
+      "line": 175,
+      "symbol": "Capability.loginReferrals",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Capability.swift",
+      "line": 176,
+      "symbol": "Capability.metadata",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Capability.swift",
+      "line": 177,
+      "symbol": "Capability.metadataServer",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Capability.swift",
+      "line": 178,
+      "symbol": "Capability.move",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Capability.swift",
+      "line": 179,
+      "symbol": "Capability.multiSearch",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Capability.swift",
+      "line": 180,
+      "symbol": "Capability.namespace",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Capability.swift",
+      "line": 181,
+      "symbol": "Capability.qresync",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Capability.swift",
+      "line": 182,
+      "symbol": "Capability.quota",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Capability.swift",
+      "line": 183,
+      "symbol": "Capability.saslIR",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Capability.swift",
+      "line": 184,
+      "symbol": "Capability.searchRes",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Capability.swift",
+      "line": 185,
+      "symbol": "Capability.specialUse",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Capability.swift",
+      "line": 186,
+      "symbol": "Capability.startTLS",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Capability.swift",
+      "line": 187,
+      "symbol": "Capability.uidPlus",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Capability.swift",
+      "line": 188,
+      "symbol": "Capability.unselect",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Capability.swift",
+      "line": 189,
+      "symbol": "Capability.urlPartial",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Capability.swift",
+      "line": 190,
+      "symbol": "Capability.urlAuth",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Capability.swift",
+      "line": 191,
+      "symbol": "Capability.within",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Capability.swift",
+      "line": 192,
+      "symbol": "Capability.gmailExtensions",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Capability.swift",
+      "line": 200,
+      "symbol": "Capability.auth(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Capability.swift",
+      "line": 204,
+      "symbol": "Capability.context(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Capability.swift",
+      "line": 208,
+      "symbol": "Capability.sort(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Capability.swift",
+      "line": 216,
+      "symbol": "Capability.utf8(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Capability.swift",
+      "line": 220,
+      "symbol": "Capability.thread(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Capability.swift",
+      "line": 224,
+      "symbol": "Capability.status(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Capability.swift",
+      "line": 228,
+      "symbol": "Capability.rights(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/ChangedSinceModifier.swift",
+      "line": 17,
+      "symbol": "ChangedSinceModifier.modificationSequence",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/ChangedSinceModifier.swift",
+      "line": 19,
+      "symbol": "ChangedSinceModifier.init(modificationSequence:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/ChangedSinceModifier.swift",
+      "line": 26,
+      "symbol": "UnchangedSinceModifier.modificationSequence",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/ChangedSinceModifier.swift",
+      "line": 28,
+      "symbol": "UnchangedSinceModifier.init(modificationSequence:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Command/CommandStream.swift",
+      "line": 102,
+      "symbol": "CommandEncodeBuffer.writeCommandStream(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Command/TaggedCommand.swift",
+      "line": 35,
+      "symbol": "CommandEncodeBuffer.writeCommand(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/ConditionalStore/ConditionalStore.swift",
+      "line": 17,
+      "symbol": "ConditionalStore",
+      "symbol_kind": "source.lang.swift.decl.enum",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/CreateParameter.swift",
+      "line": 19,
+      "symbol": "CreateParameter.labelled(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/CreateParameter.swift",
+      "line": 20,
+      "symbol": "CreateParameter.attributes(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Date/InternalDate.swift",
+      "line": 26,
+      "symbol": "InternalDate.init(year:month:day:hour:minute:second:zoneMinutes:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Date/InternalDate.swift",
+      "line": 60,
+      "symbol": "InternalDate.Components",
+      "symbol_kind": "source.lang.swift.decl.struct",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Date/InternalDate.swift",
+      "line": 61,
+      "symbol": "InternalDate.Components.year",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Date/InternalDate.swift",
+      "line": 62,
+      "symbol": "InternalDate.Components.month",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Date/InternalDate.swift",
+      "line": 63,
+      "symbol": "InternalDate.Components.day",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Date/InternalDate.swift",
+      "line": 64,
+      "symbol": "InternalDate.Components.hour",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Date/InternalDate.swift",
+      "line": 65,
+      "symbol": "InternalDate.Components.minute",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Date/InternalDate.swift",
+      "line": 66,
+      "symbol": "InternalDate.Components.second",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Date/InternalDate.swift",
+      "line": 70,
+      "symbol": "InternalDate.Components.init(year:month:day:hour:minute:second:zoneMinutes:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Date/InternalDate.swift",
+      "line": 81,
+      "symbol": "InternalDate.init(components:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Date/InternalDate.swift",
+      "line": 85,
+      "symbol": "InternalDate.components",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/EItem/EItem.swift",
+      "line": 17,
+      "symbol": "EItemVendorTag.token",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/EItem/EItem.swift",
+      "line": 18,
+      "symbol": "EItemVendorTag.atom",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/EItem/EItem.swift",
+      "line": 20,
+      "symbol": "EItemVendorTag.init(token:atom:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/ESearch/ESearchOptions.swift",
+      "line": 20,
+      "symbol": "ESearchOptions.key",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/ESearch/ESearchOptions.swift",
+      "line": 21,
+      "symbol": "ESearchOptions.charset",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/ESearch/ESearchOptions.swift",
+      "line": 22,
+      "symbol": "ESearchOptions.returnOptions",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/ESearch/ESearchOptions.swift",
+      "line": 23,
+      "symbol": "ESearchOptions.sourceOptions",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/ESearch/ESearchOptions.swift",
+      "line": 25,
+      "symbol": "ESearchOptions.init(key:charset:returnOptions:sourceOptions:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/ESearch/ESearchScopeOption.swift",
+      "line": 20,
+      "symbol": "ESearchScopeOption.name",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/ESearch/ESearchScopeOption.swift",
+      "line": 21,
+      "symbol": "ESearchScopeOption.value",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/ESearch/ESearchScopeOption.swift",
+      "line": 23,
+      "symbol": "ESearchScopeOption.init(name:value:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/ESearch/ESearchScopeOptions.swift",
+      "line": 35,
+      "symbol": "EncodeBuffer.writeESearchScopeOptions(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/ESearch/ESearchSourceOptions.swift",
+      "line": 40,
+      "symbol": "EncodeBuffer.writeESearchSourceOptions(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/EncodedAuthenticationType.swift",
+      "line": 19,
+      "symbol": "EncodedAuthenticationType.authType",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/EncodedAuthenticationType.swift",
+      "line": 21,
+      "symbol": "EncodedAuthenticationType.init(authType:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/EncodedMailbox.swift",
+      "line": 19,
+      "symbol": "EncodedMailbox.mailbox",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/EncodedMailbox.swift",
+      "line": 21,
+      "symbol": "EncodedMailbox.init(mailbox:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/EncodedSearch.swift",
+      "line": 19,
+      "symbol": "EncodedSearch.query",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/EncodedSearch.swift",
+      "line": 21,
+      "symbol": "EncodedSearch.init(query:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/EncodedSection.swift",
+      "line": 19,
+      "symbol": "EncodedSection.section",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/EncodedSection.swift",
+      "line": 21,
+      "symbol": "EncodedSection.init(section:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/EncodedUrlAuth.swift",
+      "line": 19,
+      "symbol": "EncodedURLAuth.data",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/EncodedUrlAuth.swift",
+      "line": 21,
+      "symbol": "EncodedURLAuth.init(data:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/EncodedUser.swift",
+      "line": 19,
+      "symbol": "EncodedUser.data",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/EncodedUser.swift",
+      "line": 21,
+      "symbol": "EncodedUser.init(data:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Entry/EntryFlagName.swift",
+      "line": 15,
+      "symbol": "EntryFlagName",
+      "symbol_kind": "source.lang.swift.decl.struct",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Entry/EntryFlagName.swift",
+      "line": 16,
+      "symbol": "EntryFlagName.flag",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Entry/EntryFlagName.swift",
+      "line": 18,
+      "symbol": "EntryFlagName.init(flag:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Entry/EntryKindRequest.swift",
+      "line": 17,
+      "symbol": "EntryKindRequest",
+      "symbol_kind": "source.lang.swift.decl.struct",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Entry/EntryKindRequest.swift",
+      "line": 20,
+      "symbol": "EntryKindRequest.private",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Entry/EntryKindRequest.swift",
+      "line": 21,
+      "symbol": "EntryKindRequest.shared",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Entry/EntryKindRequest.swift",
+      "line": 22,
+      "symbol": "EntryKindRequest.all",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Entry/EntryTypeResponse.swift",
+      "line": 17,
+      "symbol": "EntryKindResponse",
+      "symbol_kind": "source.lang.swift.decl.struct",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Entry/EntryTypeResponse.swift",
+      "line": 20,
+      "symbol": "EntryKindResponse.private",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Entry/EntryTypeResponse.swift",
+      "line": 21,
+      "symbol": "EntryKindResponse.shared",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/EntryValue.swift",
+      "line": 19,
+      "symbol": "EntryValue.name",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/EntryValue.swift",
+      "line": 20,
+      "symbol": "EntryValue.value",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/EntryValue.swift",
+      "line": 22,
+      "symbol": "EntryValue.init(name:value:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Envelope.swift",
+      "line": 19,
+      "symbol": "Envelope.date",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Envelope.swift",
+      "line": 20,
+      "symbol": "Envelope.subject",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Envelope.swift",
+      "line": 21,
+      "symbol": "Envelope.from",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Envelope.swift",
+      "line": 22,
+      "symbol": "Envelope.sender",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Envelope.swift",
+      "line": 23,
+      "symbol": "Envelope.reply",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Envelope.swift",
+      "line": 24,
+      "symbol": "Envelope.to",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Envelope.swift",
+      "line": 25,
+      "symbol": "Envelope.cc",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Envelope.swift",
+      "line": 26,
+      "symbol": "Envelope.bcc",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Envelope.swift",
+      "line": 27,
+      "symbol": "Envelope.inReplyTo",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Envelope.swift",
+      "line": 28,
+      "symbol": "Envelope.messageID",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Envelope.swift",
+      "line": 30,
+      "symbol": "Envelope.init(date:subject:from:sender:reply:to:cc:bcc:inReplyTo:messageID:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Expire.swift",
+      "line": 17,
+      "symbol": "Expire.dateTime",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Expire.swift",
+      "line": 19,
+      "symbol": "Expire.init(dateTime:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/FetchAttribute.swift",
+      "line": 19,
+      "symbol": "FetchAttribute.envelope",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/FetchAttribute.swift",
+      "line": 20,
+      "symbol": "FetchAttribute.flags",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/FetchAttribute.swift",
+      "line": 21,
+      "symbol": "FetchAttribute.internalDate",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/FetchAttribute.swift",
+      "line": 22,
+      "symbol": "FetchAttribute.rfc822",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/FetchAttribute.swift",
+      "line": 23,
+      "symbol": "FetchAttribute.rfc822Header",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/FetchAttribute.swift",
+      "line": 24,
+      "symbol": "FetchAttribute.rfc822Size",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/FetchAttribute.swift",
+      "line": 25,
+      "symbol": "FetchAttribute.rfc822Text",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/FetchAttribute.swift",
+      "line": 32,
+      "symbol": "FetchAttribute.uid",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/FetchAttribute.swift",
+      "line": 33,
+      "symbol": "FetchAttribute.modificationSequence",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/FetchAttribute.swift",
+      "line": 34,
+      "symbol": "FetchAttribute.modificationSequenceValue(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/FetchAttribute.swift",
+      "line": 35,
+      "symbol": "FetchAttribute.binary(peek:section:partial:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/FetchAttribute.swift",
+      "line": 36,
+      "symbol": "FetchAttribute.binarySize(section:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/FetchAttribute.swift",
+      "line": 37,
+      "symbol": "FetchAttribute.gmailMessageID",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/FetchAttribute.swift",
+      "line": 38,
+      "symbol": "FetchAttribute.gmailThreadID",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/FetchAttribute.swift",
+      "line": 39,
+      "symbol": "FetchAttribute.gmailLabels",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/FetchModificationResponse.swift",
+      "line": 17,
+      "symbol": "FetchModificationResponse.modificationSequenceValue",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/FetchModificationResponse.swift",
+      "line": 19,
+      "symbol": "FetchModificationResponse.init(modifierSequenceValue:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/FetchModifier.swift",
+      "line": 17,
+      "symbol": "FetchModifier.changedSince(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/FetchModifier.swift",
+      "line": 19,
+      "symbol": "FetchModifier.other(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Flag/Flag.swift",
+      "line": 45,
+      "symbol": "Flag.answered",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Flag/Flag.swift",
+      "line": 46,
+      "symbol": "Flag.flagged",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Flag/Flag.swift",
+      "line": 47,
+      "symbol": "Flag.deleted",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Flag/Flag.swift",
+      "line": 48,
+      "symbol": "Flag.seen",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Flag/Flag.swift",
+      "line": 49,
+      "symbol": "Flag.draft",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Flag/Flag.swift",
+      "line": 51,
+      "symbol": "Flag.keyword(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Flag/FlagKeyword.swift",
+      "line": 24,
+      "symbol": "Flag.Keyword.rawValue",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Flag/FlagKeyword.swift",
+      "line": 34,
+      "symbol": "Flag.Keyword.init(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Flag/PermanentFlag.swift",
+      "line": 19,
+      "symbol": "PermanentFlag.flag(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Flag/PermanentFlag.swift",
+      "line": 20,
+      "symbol": "PermanentFlag.wildcard",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Flag/StoreFlags.swift",
+      "line": 17,
+      "symbol": "StoreFlags",
+      "symbol_kind": "source.lang.swift.decl.struct",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Flag/StoreFlags.swift",
+      "line": 28,
+      "symbol": "StoreFlags.add(silent:list:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Flag/StoreFlags.swift",
+      "line": 32,
+      "symbol": "StoreFlags.remove(silent:list:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Flag/StoreFlags.swift",
+      "line": 36,
+      "symbol": "StoreFlags.replace(silent:list:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Flag/StoreFlags.swift",
+      "line": 40,
+      "symbol": "StoreFlags.operation",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Flag/StoreFlags.swift",
+      "line": 41,
+      "symbol": "StoreFlags.silent",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Flag/StoreFlags.swift",
+      "line": 42,
+      "symbol": "StoreFlags.flags",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/FullDateTime.swift",
+      "line": 17,
+      "symbol": "FullDateTime.date",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/FullDateTime.swift",
+      "line": 18,
+      "symbol": "FullDateTime.time",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/FullDateTime.swift",
+      "line": 20,
+      "symbol": "FullDateTime.init(date:time:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/FullDateTime.swift",
+      "line": 26,
+      "symbol": "FullDate",
+      "symbol_kind": "source.lang.swift.decl.struct",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/FullDateTime.swift",
+      "line": 27,
+      "symbol": "FullDate.year",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/FullDateTime.swift",
+      "line": 28,
+      "symbol": "FullDate.month",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/FullDateTime.swift",
+      "line": 29,
+      "symbol": "FullDate.day",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/FullDateTime.swift",
+      "line": 31,
+      "symbol": "FullDate.init(year:month:day:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/FullDateTime.swift",
+      "line": 40,
+      "symbol": "FullTime",
+      "symbol_kind": "source.lang.swift.decl.struct",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/FullDateTime.swift",
+      "line": 41,
+      "symbol": "FullTime.hour",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/FullDateTime.swift",
+      "line": 42,
+      "symbol": "FullTime.minute",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/FullDateTime.swift",
+      "line": 43,
+      "symbol": "FullTime.second",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/FullDateTime.swift",
+      "line": 51,
+      "symbol": "FullTime.init(hour:minute:second:fraction:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/IAbsolutePath.swift",
+      "line": 17,
+      "symbol": "IAbsolutePath.command",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/IAbsolutePath.swift",
+      "line": 19,
+      "symbol": "IAbsolutePath.init(command:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/IAuth.swift",
+      "line": 17,
+      "symbol": "IAuth.any",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/IAuth.swift",
+      "line": 18,
+      "symbol": "IAuth.type(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/ICommand.swift",
+      "line": 17,
+      "symbol": "ICommand.messageList(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/ICommand.swift",
+      "line": 18,
+      "symbol": "ICommand.messagePart(part:urlAuth:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/ID/ID.swift",
+      "line": 18,
+      "symbol": "IDParameter",
+      "symbol_kind": "source.lang.swift.decl.struct",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/ID/ID.swift",
+      "line": 19,
+      "symbol": "IDParameter.key",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/ID/ID.swift",
+      "line": 20,
+      "symbol": "IDParameter.value",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/ID/ID.swift",
+      "line": 22,
+      "symbol": "IDParameter.init(key:value:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/IMAPURL.swift",
+      "line": 17,
+      "symbol": "IMAPURL.server",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/IMAPURL.swift",
+      "line": 18,
+      "symbol": "IMAPURL.query",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/IMAPURL.swift",
+      "line": 20,
+      "symbol": "IMAPURL.init(server:query:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/IMailboxReference.swift",
+      "line": 17,
+      "symbol": "IMailboxReference.encodedMailbox",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/IMailboxReference.swift",
+      "line": 19,
+      "symbol": "IMailboxReference.uidValidity",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/IMailboxReference.swift",
+      "line": 21,
+      "symbol": "IMailboxReference.init(encodeMailbox:uidValidity:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/IMessageList.swift",
+      "line": 17,
+      "symbol": "IMessageList.mailboxReference",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/IMessageList.swift",
+      "line": 18,
+      "symbol": "IMessageList.encodedSearch",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/IMessageList.swift",
+      "line": 20,
+      "symbol": "IMessageList.init(mailboxReference:encodedSearch:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/IMessageOrPartial.swift",
+      "line": 17,
+      "symbol": "IMessageOrPartial.refUidSectionPartial(ref:uid:section:partial:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/IMessageOrPartial.swift",
+      "line": 18,
+      "symbol": "IMessageOrPartial.uidSectionPartial(uid:section:partial:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/IMessageOrPartial.swift",
+      "line": 19,
+      "symbol": "IMessageOrPartial.sectionPartial(section:partial:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/IMessageOrPartial.swift",
+      "line": 20,
+      "symbol": "IMessageOrPartial.partialOnly(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/IMessagePart.swift",
+      "line": 17,
+      "symbol": "IMessagePart.mailboxReference",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/IMessagePart.swift",
+      "line": 18,
+      "symbol": "IMessagePart.iUID",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/IMessagePart.swift",
+      "line": 19,
+      "symbol": "IMessagePart.iSection",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/IMessagePart.swift",
+      "line": 20,
+      "symbol": "IMessagePart.iPartial",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/IMessagePart.swift",
+      "line": 22,
+      "symbol": "IMessagePart.init(mailboxReference:iUID:iSection:iPartial:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/INetworkPath.swift",
+      "line": 17,
+      "symbol": "INetworkPath.server",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/INetworkPath.swift",
+      "line": 18,
+      "symbol": "INetworkPath.query",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/INetworkPath.swift",
+      "line": 20,
+      "symbol": "INetworkPath.init(server:query:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/IPathQuery.swift",
+      "line": 17,
+      "symbol": "IPathQuery.command",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/IPathQuery.swift",
+      "line": 19,
+      "symbol": "IPathQuery.init(command:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/IRelativePath.swift",
+      "line": 17,
+      "symbol": "IRelativePath.list(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/IRelativePath.swift",
+      "line": 18,
+      "symbol": "IRelativePath.messageOrPartial(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/ISection.swift",
+      "line": 19,
+      "symbol": "ISection.encodedSection",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/ISection.swift",
+      "line": 21,
+      "symbol": "ISection.init(encodedSection:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/ISection.swift",
+      "line": 28,
+      "symbol": "ISectionOnly.encodedSection",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/ISection.swift",
+      "line": 30,
+      "symbol": "ISectionOnly.init(encodedSection:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/IServer.swift",
+      "line": 19,
+      "symbol": "IServer.userInfo",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/IServer.swift",
+      "line": 20,
+      "symbol": "IServer.host",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/IServer.swift",
+      "line": 21,
+      "symbol": "IServer.port",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/IServer.swift",
+      "line": 23,
+      "symbol": "IServer.init(userInfo:host:port:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/IUAVerifier.swift",
+      "line": 17,
+      "symbol": "IUAVerifier.uAuthMechanism",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/IUAVerifier.swift",
+      "line": 18,
+      "symbol": "IUAVerifier.encodedURLAuth",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/IUAVerifier.swift",
+      "line": 20,
+      "symbol": "IUAVerifier.init(uAuthMechanism:encodedURLAuth:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/IURLAuthRump.swift",
+      "line": 17,
+      "symbol": "IURLAuthRump.expire",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/IURLAuthRump.swift",
+      "line": 18,
+      "symbol": "IURLAuthRump.access",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/IURLAuthRump.swift",
+      "line": 20,
+      "symbol": "IURLAuthRump.init(expire:access:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/IUrlAuth.swift",
+      "line": 17,
+      "symbol": "IURLAuth.auth",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/IUrlAuth.swift",
+      "line": 18,
+      "symbol": "IURLAuth.verifier",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/IUrlAuth.swift",
+      "line": 20,
+      "symbol": "IURLAuth.init(auth:verifier:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/IUserInfo.swift",
+      "line": 17,
+      "symbol": "IUserInfo.encodedUser",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/IUserInfo.swift",
+      "line": 18,
+      "symbol": "IUserInfo.iAuth",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/IUserInfo.swift",
+      "line": 20,
+      "symbol": "IUserInfo.init(encodedUser:iAuth:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/InitialClientResponse.swift",
+      "line": 19,
+      "symbol": "InitialClientResponse.empty",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/InitialClientResponse.swift",
+      "line": 20,
+      "symbol": "InitialClientResponse.data(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/List/ListSelectBaseOption.swift",
+      "line": 19,
+      "symbol": "ListSelectBaseOption.subscribed",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/List/ListSelectBaseOption.swift",
+      "line": 20,
+      "symbol": "ListSelectBaseOption.option(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/List/ListSelectIndependentOption.swift",
+      "line": 19,
+      "symbol": "ListSelectIndependentOption.remote",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/List/ListSelectIndependentOption.swift",
+      "line": 20,
+      "symbol": "ListSelectIndependentOption.option(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/List/ListSelectIndependentOption.swift",
+      "line": 21,
+      "symbol": "ListSelectIndependentOption.specialUse",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/List/ListSelectOption.swift",
+      "line": 19,
+      "symbol": "ListSelectOption.subscribed",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/List/ListSelectOption.swift",
+      "line": 20,
+      "symbol": "ListSelectOption.remote",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/List/ListSelectOption.swift",
+      "line": 21,
+      "symbol": "ListSelectOption.specialUse",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/List/ListSelectOption.swift",
+      "line": 22,
+      "symbol": "ListSelectOption.recursiveMatch",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/List/ListSelectOption.swift",
+      "line": 23,
+      "symbol": "ListSelectOption.option(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/List/ListSelectOption.swift",
+      "line": 26,
+      "symbol": "ListSelectOptions",
+      "symbol_kind": "source.lang.swift.decl.struct",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/List/ListSelectOption.swift",
+      "line": 27,
+      "symbol": "ListSelectOptions.baseOption",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/List/ListSelectOption.swift",
+      "line": 28,
+      "symbol": "ListSelectOptions.options",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/List/ListSelectOption.swift",
+      "line": 30,
+      "symbol": "ListSelectOptions.init(baseOption:options:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Mailbox/MailboxData.swift",
+      "line": 19,
+      "symbol": "MailboxData.flags(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Mailbox/MailboxData.swift",
+      "line": 20,
+      "symbol": "MailboxData.list(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Mailbox/MailboxData.swift",
+      "line": 21,
+      "symbol": "MailboxData.lsub(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Mailbox/MailboxData.swift",
+      "line": 22,
+      "symbol": "MailboxData.search(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Mailbox/MailboxData.swift",
+      "line": 23,
+      "symbol": "MailboxData.esearch(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Mailbox/MailboxData.swift",
+      "line": 24,
+      "symbol": "MailboxData.status(_:_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Mailbox/MailboxData.swift",
+      "line": 25,
+      "symbol": "MailboxData.exists(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Mailbox/MailboxData.swift",
+      "line": 26,
+      "symbol": "MailboxData.recent(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Mailbox/MailboxData.swift",
+      "line": 27,
+      "symbol": "MailboxData.namespace(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Mailbox/MailboxData.swift",
+      "line": 28,
+      "symbol": "MailboxData.searchSort(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Mailbox/MailboxData.swift",
+      "line": 32,
+      "symbol": "MailboxData.SearchSort",
+      "symbol_kind": "source.lang.swift.decl.struct",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Mailbox/MailboxData.swift",
+      "line": 33,
+      "symbol": "MailboxData.SearchSort.identifiers",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Mailbox/MailboxData.swift",
+      "line": 34,
+      "symbol": "MailboxData.SearchSort.modificationSequence",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Mailbox/MailboxData.swift",
+      "line": 36,
+      "symbol": "MailboxData.SearchSort.init(identifiers:modificationSequence:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Mailbox/MailboxInfo.swift",
+      "line": 19,
+      "symbol": "MailboxInfo.attributes",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Mailbox/MailboxInfo.swift",
+      "line": 20,
+      "symbol": "MailboxInfo.path",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Mailbox/MailboxInfo.swift",
+      "line": 21,
+      "symbol": "MailboxInfo.extensions",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Mailbox/MailboxInfo.swift",
+      "line": 23,
+      "symbol": "MailboxInfo.init(attributes:path:extensions:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Mailbox/MailboxInfo.swift",
+      "line": 33,
+      "symbol": "MailboxInfo.Attribute",
+      "symbol_kind": "source.lang.swift.decl.struct",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Mailbox/MailboxInfo.swift",
+      "line": 36,
+      "symbol": "MailboxInfo.Attribute.noSelect",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Mailbox/MailboxInfo.swift",
+      "line": 37,
+      "symbol": "MailboxInfo.Attribute.marked",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Mailbox/MailboxInfo.swift",
+      "line": 38,
+      "symbol": "MailboxInfo.Attribute.unmarked",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Mailbox/MailboxInfo.swift",
+      "line": 39,
+      "symbol": "MailboxInfo.Attribute.nonExistent",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Mailbox/MailboxInfo.swift",
+      "line": 40,
+      "symbol": "MailboxInfo.Attribute.noInferiors",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Mailbox/MailboxInfo.swift",
+      "line": 41,
+      "symbol": "MailboxInfo.Attribute.subscribed",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Mailbox/MailboxInfo.swift",
+      "line": 42,
+      "symbol": "MailboxInfo.Attribute.remote",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Mailbox/MailboxInfo.swift",
+      "line": 43,
+      "symbol": "MailboxInfo.Attribute.hasChildren",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Mailbox/MailboxInfo.swift",
+      "line": 44,
+      "symbol": "MailboxInfo.Attribute.hasNoChildren",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Mailbox/MailboxInfo.swift",
+      "line": 50,
+      "symbol": "MailboxInfo.Attribute.init(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Mailbox/MailboxListExtendedItem.swift",
+      "line": 19,
+      "symbol": "ListExtendedItem.tag",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Mailbox/MailboxListExtendedItem.swift",
+      "line": 20,
+      "symbol": "ListExtendedItem.extensionValue",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Mailbox/MailboxListExtendedItem.swift",
+      "line": 22,
+      "symbol": "ListExtendedItem.init(tag:extensionValue:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Mailbox/MailboxName.swift",
+      "line": 18,
+      "symbol": "MailboxTooBigError",
+      "symbol_kind": "source.lang.swift.decl.struct",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Mailbox/MailboxName.swift",
+      "line": 19,
+      "symbol": "MailboxTooBigError.maximumSize",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Mailbox/MailboxName.swift",
+      "line": 20,
+      "symbol": "MailboxTooBigError.actualSize",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Mailbox/MailboxName.swift",
+      "line": 23,
+      "symbol": "InvalidMailboxNameError",
+      "symbol_kind": "source.lang.swift.decl.struct",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Mailbox/MailboxName.swift",
+      "line": 24,
+      "symbol": "InvalidMailboxNameError.description",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Mailbox/MailboxName.swift",
+      "line": 27,
+      "symbol": "InvalidPathSeparatorError",
+      "symbol_kind": "source.lang.swift.decl.struct",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Mailbox/MailboxName.swift",
+      "line": 28,
+      "symbol": "InvalidPathSeparatorError.description",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Mailbox/MailboxName.swift",
+      "line": 31,
+      "symbol": "MailboxPath",
+      "symbol_kind": "source.lang.swift.decl.struct",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Mailbox/MailboxName.swift",
+      "line": 32,
+      "symbol": "MailboxPath.name",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Mailbox/MailboxName.swift",
+      "line": 33,
+      "symbol": "MailboxPath.pathSeparator",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Mailbox/MailboxName.swift",
+      "line": 51,
+      "symbol": "MailboxPath",
+      "symbol_kind": "source.lang.swift.decl.extension",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Mailbox/MailboxName.swift",
+      "line": 164,
+      "symbol": "MailboxName.inbox",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Mailbox/MailboxName.swift",
+      "line": 190,
+      "symbol": "MailboxName.init(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Mailbox/MailboxName.swift",
+      "line": 210,
+      "symbol": "EncodeBuffer.writeMailbox(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Mailbox/MailboxPatterns.swift",
+      "line": 19,
+      "symbol": "MailboxPatterns.mailbox(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Mailbox/MailboxPatterns.swift",
+      "line": 20,
+      "symbol": "MailboxPatterns.pattern(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/MechanismBase64.swift",
+      "line": 18,
+      "symbol": "MechanismBase64",
+      "symbol_kind": "source.lang.swift.decl.struct",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/MechanismBase64.swift",
+      "line": 19,
+      "symbol": "MechanismBase64.mechanism",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/MechanismBase64.swift",
+      "line": 20,
+      "symbol": "MechanismBase64.base64",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/MechanismBase64.swift",
+      "line": 22,
+      "symbol": "MechanismBase64.init(mechanism:base64:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Media/Basic.swift",
+      "line": 18,
+      "symbol": "Media.BasicKind",
+      "symbol_kind": "source.lang.swift.decl.struct",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Media/Basic.swift",
+      "line": 57,
+      "symbol": "Media.Basic.kind",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Media/Basic.swift",
+      "line": 58,
+      "symbol": "Media.Basic.subtype",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Media/Basic.swift",
+      "line": 60,
+      "symbol": "Media.Basic.init(kind:subtype:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Media/Media.swift",
+      "line": 15,
+      "symbol": "Media",
+      "symbol_kind": "source.lang.swift.decl.enum",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Media/Media.swift",
+      "line": 17,
+      "symbol": "Media",
+      "symbol_kind": "source.lang.swift.decl.extension",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Media/Media.swift",
+      "line": 17,
+      "symbol": "Media",
+      "symbol_kind": "source.lang.swift.decl.extension",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Media/Message.swift",
+      "line": 18,
+      "symbol": "Media.Message",
+      "symbol_kind": "source.lang.swift.decl.enum",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Media/Message.swift",
+      "line": 19,
+      "symbol": "Media.Message.rfc822",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Media/Message.swift",
+      "line": 20,
+      "symbol": "Media.Message.global",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Message/GmailLabel.swift",
+      "line": 16,
+      "symbol": "GmailLabel",
+      "symbol_kind": "source.lang.swift.decl.struct",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Message/MessageAttributes.swift",
+      "line": 33,
+      "symbol": "MessageAttribute.rfc822Text(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Message/MessageAttributes.swift",
+      "line": 54,
+      "symbol": "MessageAttribute.fetchModificationResponse(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Message/MessageData.swift",
+      "line": 20,
+      "symbol": "MessageData.expunge(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Message/MessageData.swift",
+      "line": 35,
+      "symbol": "MessageData.genURLAuth(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Message/MessageData.swift",
+      "line": 37,
+      "symbol": "MessageData.urlFetch(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/MetadataOption.swift",
+      "line": 15,
+      "symbol": "MetadataOption",
+      "symbol_kind": "source.lang.swift.decl.enum",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/MetadataOption.swift",
+      "line": 16,
+      "symbol": "MetadataOption.maxSize(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/MetadataOption.swift",
+      "line": 17,
+      "symbol": "MetadataOption.scope(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/MetadataOption.swift",
+      "line": 18,
+      "symbol": "MetadataOption.other(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/MetadataResponse.swift",
+      "line": 17,
+      "symbol": "MetadataResponse",
+      "symbol_kind": "source.lang.swift.decl.enum",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/MetadataResponse.swift",
+      "line": 18,
+      "symbol": "MetadataResponse.values(values:mailbox:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/MetadataResponse.swift",
+      "line": 19,
+      "symbol": "MetadataResponse.list(list:mailbox:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Modifier/ModificationSequenceValue.swift",
+      "line": 19,
+      "symbol": "ModificationSequenceValue.value",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Modifier/ModificationSequenceValue.swift",
+      "line": 21,
+      "symbol": "ModificationSequenceValue.zero",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Modifier/ModificationSequenceValue.swift",
+      "line": 25,
+      "symbol": "ModificationSequenceValue.init(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Namespace/NamespaceDescription.swift",
+      "line": 19,
+      "symbol": "NamespaceDescription.string",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Namespace/NamespaceDescription.swift",
+      "line": 20,
+      "symbol": "NamespaceDescription.char",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Namespace/NamespaceDescription.swift",
+      "line": 21,
+      "symbol": "NamespaceDescription.responseExtensions",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Namespace/NamespaceDescription.swift",
+      "line": 23,
+      "symbol": "NamespaceDescription.init(string:char:responseExtensions:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Namespace/NamespaceResponse.swift",
+      "line": 19,
+      "symbol": "NamespaceResponse.userNamespace",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Namespace/NamespaceResponse.swift",
+      "line": 20,
+      "symbol": "NamespaceResponse.otherUserNamespace",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Namespace/NamespaceResponse.swift",
+      "line": 21,
+      "symbol": "NamespaceResponse.sharedNamespace",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Namespace/NamespaceResponse.swift",
+      "line": 23,
+      "symbol": "NamespaceResponse.init(userNamespace:otherUserNamespace:sharedNamespace:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Namespace/NamespaceResponseExtension.swift",
+      "line": 19,
+      "symbol": "NamespaceResponseExtension.string",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Namespace/NamespaceResponseExtension.swift",
+      "line": 20,
+      "symbol": "NamespaceResponseExtension.array",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Namespace/NamespaceResponseExtension.swift",
+      "line": 22,
+      "symbol": "NamespaceResponseExtension.init(string:array:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Notify/MailboxFilter.swift",
+      "line": 51,
+      "symbol": "EncodeBuffer.writeMailboxFilter(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Notify/Mailboxes.swift",
+      "line": 35,
+      "symbol": "EncodeBuffer.writeMailboxes(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Option/OptionExtension.swift",
+      "line": 17,
+      "symbol": "OptionExtensionKind",
+      "symbol_kind": "source.lang.swift.decl.enum",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Option/OptionExtension.swift",
+      "line": 18,
+      "symbol": "OptionExtensionKind.standard(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Option/OptionExtension.swift",
+      "line": 19,
+      "symbol": "OptionExtensionKind.vendor(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Option/OptionExtension.swift",
+      "line": 24,
+      "symbol": "OptionExtension.kind",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Option/OptionExtension.swift",
+      "line": 25,
+      "symbol": "OptionExtension.value",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Option/OptionExtension.swift",
+      "line": 27,
+      "symbol": "OptionExtension.init(kind:value:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Option/OptionValueComp.swift",
+      "line": 19,
+      "symbol": "OptionValueComp.string(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Option/OptionValueComp.swift",
+      "line": 20,
+      "symbol": "OptionValueComp.array(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Option/OptionVendorTag.swift",
+      "line": 19,
+      "symbol": "OptionVendorTag.token",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Option/OptionVendorTag.swift",
+      "line": 20,
+      "symbol": "OptionVendorTag.atom",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Option/OptionVendorTag.swift",
+      "line": 22,
+      "symbol": "OptionVendorTag.init(token:atom:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Partial/IPartial.swift",
+      "line": 17,
+      "symbol": "IPartial.range",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Partial/IPartial.swift",
+      "line": 19,
+      "symbol": "IPartial.init(range:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Partial/IPartial.swift",
+      "line": 26,
+      "symbol": "IPartialOnly.range",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Partial/IPartial.swift",
+      "line": 28,
+      "symbol": "IPartialOnly.init(range:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Partial/PartialRange.swift",
+      "line": 17,
+      "symbol": "PartialRange.offset",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Partial/PartialRange.swift",
+      "line": 18,
+      "symbol": "PartialRange.length",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Partial/PartialRange.swift",
+      "line": 20,
+      "symbol": "PartialRange.init(offset:length:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Quota/QuotaLimit.swift",
+      "line": 19,
+      "symbol": "QuotaLimit.resourceName",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Quota/QuotaLimit.swift",
+      "line": 20,
+      "symbol": "QuotaLimit.limit",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Quota/QuotaLimit.swift",
+      "line": 22,
+      "symbol": "QuotaLimit.init(resourceName:limit:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Quota/QuotaResource.swift",
+      "line": 19,
+      "symbol": "QuotaResource.resourceName",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Quota/QuotaResource.swift",
+      "line": 20,
+      "symbol": "QuotaResource.usage",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Quota/QuotaResource.swift",
+      "line": 21,
+      "symbol": "QuotaResource.limit",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Quota/QuotaResource.swift",
+      "line": 23,
+      "symbol": "QuotaResource.init(resourceName:usage:limit:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Quota/QuotaRoot.swift",
+      "line": 34,
+      "symbol": "QuotaRoot.init(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Quota/QuotaRoot.swift",
+      "line": 50,
+      "symbol": "EncodeBuffer.writeQuotaRoot(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/RelativeIMAPURL.swift",
+      "line": 17,
+      "symbol": "RelativeIMAPURL.networkPath(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/RelativeIMAPURL.swift",
+      "line": 18,
+      "symbol": "RelativeIMAPURL.absolutePath(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/RelativeIMAPURL.swift",
+      "line": 19,
+      "symbol": "RelativeIMAPURL.relativePath(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/RelativeIMAPURL.swift",
+      "line": 20,
+      "symbol": "RelativeIMAPURL.empty",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Response/ContinuationRequest.swift",
+      "line": 23,
+      "symbol": "ContinuationRequest.responseText(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Response/ContinuationRequest.swift",
+      "line": 24,
+      "symbol": "ContinuationRequest.data(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Response/ESearchResponse.swift",
+      "line": 19,
+      "symbol": "ESearchResponse.correlator",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Response/ESearchResponse.swift",
+      "line": 20,
+      "symbol": "ESearchResponse.uid",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Response/ESearchResponse.swift",
+      "line": 21,
+      "symbol": "ESearchResponse.returnData",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Response/ESearchResponse.swift",
+      "line": 23,
+      "symbol": "ESearchResponse.init(correlator:uid:returnData:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Response/Response.swift",
+      "line": 18,
+      "symbol": "ResponseOrContinuationRequest",
+      "symbol_kind": "source.lang.swift.decl.enum",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Response/Response.swift",
+      "line": 19,
+      "symbol": "ResponseOrContinuationRequest.continuationRequest(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Response/Response.swift",
+      "line": 20,
+      "symbol": "ResponseOrContinuationRequest.response(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Response/Response.swift",
+      "line": 23,
+      "symbol": "Response",
+      "symbol_kind": "source.lang.swift.decl.enum",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Response/Response.swift",
+      "line": 24,
+      "symbol": "Response.untaggedResponse(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Response/Response.swift",
+      "line": 25,
+      "symbol": "Response.fetchResponse(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Response/Response.swift",
+      "line": 26,
+      "symbol": "Response.taggedResponse(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Response/Response.swift",
+      "line": 27,
+      "symbol": "Response.fatalResponse(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Response/Response.swift",
+      "line": 37,
+      "symbol": "FetchResponse.start(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Response/Response.swift",
+      "line": 38,
+      "symbol": "FetchResponse.simpleAttribute(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Response/Response.swift",
+      "line": 39,
+      "symbol": "FetchResponse.streamingBegin(kind:byteCount:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Response/Response.swift",
+      "line": 40,
+      "symbol": "FetchResponse.streamingBytes(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Response/Response.swift",
+      "line": 41,
+      "symbol": "FetchResponse.streamingEnd",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Response/Response.swift",
+      "line": 42,
+      "symbol": "FetchResponse.finish",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Response/Response.swift",
+      "line": 45,
+      "symbol": "StreamingKind",
+      "symbol_kind": "source.lang.swift.decl.enum",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Response/Response.swift",
+      "line": 46,
+      "symbol": "StreamingKind.binary(section:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Response/ResponseCodeAppend.swift",
+      "line": 17,
+      "symbol": "ResponseCodeAppend.num",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Response/ResponseCodeAppend.swift",
+      "line": 18,
+      "symbol": "ResponseCodeAppend.uid",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Response/ResponseCodeAppend.swift",
+      "line": 20,
+      "symbol": "ResponseCodeAppend.init(num:uid:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Response/ResponseCodeCopy.swift",
+      "line": 17,
+      "symbol": "ResponseCodeCopy.num",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Response/ResponseCodeCopy.swift",
+      "line": 18,
+      "symbol": "ResponseCodeCopy.set1",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Response/ResponseCodeCopy.swift",
+      "line": 19,
+      "symbol": "ResponseCodeCopy.set2",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Response/ResponseCodeCopy.swift",
+      "line": 21,
+      "symbol": "ResponseCodeCopy.init(num:set1:set2:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Response/ResponsePayload.swift",
+      "line": 17,
+      "symbol": "ResponsePayload",
+      "symbol_kind": "source.lang.swift.decl.enum",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Response/ResponsePayload.swift",
+      "line": 18,
+      "symbol": "ResponsePayload.conditionalState(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Response/ResponsePayload.swift",
+      "line": 19,
+      "symbol": "ResponsePayload.mailboxData(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Response/ResponsePayload.swift",
+      "line": 20,
+      "symbol": "ResponsePayload.messageData(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Response/ResponsePayload.swift",
+      "line": 21,
+      "symbol": "ResponsePayload.capabilityData(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Response/ResponsePayload.swift",
+      "line": 22,
+      "symbol": "ResponsePayload.enableData(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Response/ResponsePayload.swift",
+      "line": 23,
+      "symbol": "ResponsePayload.id(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Response/ResponsePayload.swift",
+      "line": 24,
+      "symbol": "ResponsePayload.quotaRoot(_:_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Response/ResponsePayload.swift",
+      "line": 25,
+      "symbol": "ResponsePayload.quota(_:_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Response/ResponsePayload.swift",
+      "line": 26,
+      "symbol": "ResponsePayload.metadata(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Response/ResponseText.swift",
+      "line": 19,
+      "symbol": "ResponseText.code",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Response/ResponseText.swift",
+      "line": 20,
+      "symbol": "ResponseText.text",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Response/ResponseText.swift",
+      "line": 22,
+      "symbol": "ResponseText.init(code:text:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Response/ResponseTextCode.swift",
+      "line": 20,
+      "symbol": "ResponseTextCode.alert",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Response/ResponseTextCode.swift",
+      "line": 21,
+      "symbol": "ResponseTextCode.badCharset(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Response/ResponseTextCode.swift",
+      "line": 22,
+      "symbol": "ResponseTextCode.capability(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Response/ResponseTextCode.swift",
+      "line": 23,
+      "symbol": "ResponseTextCode.parse",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Response/ResponseTextCode.swift",
+      "line": 24,
+      "symbol": "ResponseTextCode.permanentFlags(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Response/ResponseTextCode.swift",
+      "line": 25,
+      "symbol": "ResponseTextCode.readOnly",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Response/ResponseTextCode.swift",
+      "line": 26,
+      "symbol": "ResponseTextCode.readWrite",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Response/ResponseTextCode.swift",
+      "line": 27,
+      "symbol": "ResponseTextCode.tryCreate",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Response/ResponseTextCode.swift",
+      "line": 28,
+      "symbol": "ResponseTextCode.uidNext(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Response/ResponseTextCode.swift",
+      "line": 29,
+      "symbol": "ResponseTextCode.uidValidity(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Response/ResponseTextCode.swift",
+      "line": 30,
+      "symbol": "ResponseTextCode.unseen(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Response/ResponseTextCode.swift",
+      "line": 31,
+      "symbol": "ResponseTextCode.namespace(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Response/ResponseTextCode.swift",
+      "line": 32,
+      "symbol": "ResponseTextCode.uidAppend(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Response/ResponseTextCode.swift",
+      "line": 33,
+      "symbol": "ResponseTextCode.uidCopy(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Response/ResponseTextCode.swift",
+      "line": 34,
+      "symbol": "ResponseTextCode.uidNotSticky",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Response/ResponseTextCode.swift",
+      "line": 35,
+      "symbol": "ResponseTextCode.useAttribute",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Response/ResponseTextCode.swift",
+      "line": 36,
+      "symbol": "ResponseTextCode.other(_:_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Response/ResponseTextCode.swift",
+      "line": 37,
+      "symbol": "ResponseTextCode.notSaved",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Response/ResponseTextCode.swift",
+      "line": 38,
+      "symbol": "ResponseTextCode.closed",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Response/ResponseTextCode.swift",
+      "line": 39,
+      "symbol": "ResponseTextCode.noModificationSequence",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Response/ResponseTextCode.swift",
+      "line": 40,
+      "symbol": "ResponseTextCode.modificationSequence(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Response/ResponseTextCode.swift",
+      "line": 41,
+      "symbol": "ResponseTextCode.highestModificationSequence(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Response/ResponseTextCode.swift",
+      "line": 42,
+      "symbol": "ResponseTextCode.metadataLongEntries(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Response/ResponseTextCode.swift",
+      "line": 43,
+      "symbol": "ResponseTextCode.metadataMaxsize(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Response/ResponseTextCode.swift",
+      "line": 44,
+      "symbol": "ResponseTextCode.metadataTooMany",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Response/ResponseTextCode.swift",
+      "line": 45,
+      "symbol": "ResponseTextCode.metadataNoPrivate",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Response/ResponseTextCode.swift",
+      "line": 46,
+      "symbol": "ResponseTextCode.urlMechanisms(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Response/ResponseTextCode.swift",
+      "line": 47,
+      "symbol": "ResponseTextCode.referral(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Response/TaggedResponse.swift",
+      "line": 19,
+      "symbol": "TaggedResponse.tag",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Response/TaggedResponse.swift",
+      "line": 20,
+      "symbol": "TaggedResponse.state",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Response/TaggedResponse.swift",
+      "line": 22,
+      "symbol": "TaggedResponse.init(tag:state:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Response/TaggedResponseState.swift",
+      "line": 23,
+      "symbol": "TaggedResponse.State.ok(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Response/TaggedResponseState.swift",
+      "line": 24,
+      "symbol": "TaggedResponse.State.no(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Response/TaggedResponseState.swift",
+      "line": 25,
+      "symbol": "TaggedResponse.State.bad(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Response/UntaggedResponseState.swift",
+      "line": 21,
+      "symbol": "UntaggedStatus.ok(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Response/UntaggedResponseState.swift",
+      "line": 22,
+      "symbol": "UntaggedStatus.no(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Response/UntaggedResponseState.swift",
+      "line": 23,
+      "symbol": "UntaggedStatus.bad(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Response/UntaggedResponseState.swift",
+      "line": 24,
+      "symbol": "UntaggedStatus.preauth(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Response/UntaggedResponseState.swift",
+      "line": 25,
+      "symbol": "UntaggedStatus.bye(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/ReturnOption.swift",
+      "line": 19,
+      "symbol": "ReturnOption.subscribed",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/ReturnOption.swift",
+      "line": 20,
+      "symbol": "ReturnOption.children",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/ReturnOption.swift",
+      "line": 21,
+      "symbol": "ReturnOption.statusOption(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/ReturnOption.swift",
+      "line": 22,
+      "symbol": "ReturnOption.optionExtension(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/ReturnOption.swift",
+      "line": 23,
+      "symbol": "ReturnOption.specialUse",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/ScopeOption.swift",
+      "line": 16,
+      "symbol": "ScopeOption",
+      "symbol_kind": "source.lang.swift.decl.struct",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Search/SearchCorrelator.swift",
+      "line": 28,
+      "symbol": "SearchCorrelator.init(tag:mailbox:uidValidity:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Search/SearchCriteria.swift",
+      "line": 18,
+      "symbol": "EncodeBuffer.writeSearchCriteria(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Search/SearchModificationSequence.swift",
+      "line": 17,
+      "symbol": "SearchModificationSequenceExtension.name",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Search/SearchModificationSequence.swift",
+      "line": 18,
+      "symbol": "SearchModificationSequenceExtension.request",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Search/SearchModificationSequence.swift",
+      "line": 20,
+      "symbol": "SearchModificationSequenceExtension.init(name:request:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Search/SearchModificationSequence.swift",
+      "line": 28,
+      "symbol": "SearchModificationSequence.extensions",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Search/SearchModificationSequence.swift",
+      "line": 29,
+      "symbol": "SearchModificationSequence.sequenceValue",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Search/SearchModificationSequence.swift",
+      "line": 31,
+      "symbol": "SearchModificationSequence.init(extensions:sequenceValue:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Search/SearchReturnData.swift",
+      "line": 19,
+      "symbol": "SearchReturnData.min(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Search/SearchReturnData.swift",
+      "line": 20,
+      "symbol": "SearchReturnData.max(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Search/SearchReturnData.swift",
+      "line": 21,
+      "symbol": "SearchReturnData.all(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Search/SearchReturnData.swift",
+      "line": 22,
+      "symbol": "SearchReturnData.count(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Search/SearchReturnData.swift",
+      "line": 23,
+      "symbol": "SearchReturnData.modificationSequence(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Search/SearchReturnData.swift",
+      "line": 24,
+      "symbol": "SearchReturnData.dataExtension(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Search/SearchReturnDataExtension.swift",
+      "line": 19,
+      "symbol": "SearchReturnDataExtension.modifierName",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Search/SearchReturnDataExtension.swift",
+      "line": 20,
+      "symbol": "SearchReturnDataExtension.returnValue",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Search/SearchReturnDataExtension.swift",
+      "line": 22,
+      "symbol": "SearchReturnDataExtension.init(modifierName:returnValue:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Search/SearchReturnOption.swift",
+      "line": 19,
+      "symbol": "SearchReturnOption.min",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Search/SearchReturnOption.swift",
+      "line": 20,
+      "symbol": "SearchReturnOption.max",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Search/SearchReturnOption.swift",
+      "line": 21,
+      "symbol": "SearchReturnOption.all",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Search/SearchReturnOption.swift",
+      "line": 22,
+      "symbol": "SearchReturnOption.count",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Search/SearchReturnOption.swift",
+      "line": 23,
+      "symbol": "SearchReturnOption.save",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Search/SearchReturnOption.swift",
+      "line": 24,
+      "symbol": "SearchReturnOption.optionExtension(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Search/SearchReturnOptionExtension.swift",
+      "line": 19,
+      "symbol": "SearchReturnOptionExtension.modifierName",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Search/SearchReturnOptionExtension.swift",
+      "line": 20,
+      "symbol": "SearchReturnOptionExtension.params",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Search/SearchReturnOptionExtension.swift",
+      "line": 22,
+      "symbol": "SearchReturnOptionExtension.init(modifierName:params:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/SectionSpec.swift",
+      "line": 23,
+      "symbol": "SectionSpecifier.part",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/SectionSpec.swift",
+      "line": 24,
+      "symbol": "SectionSpecifier.kind",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/SectionSpec.swift",
+      "line": 26,
+      "symbol": "SectionSpecifier.init(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/SectionSpec.swift",
+      "line": 30,
+      "symbol": "SectionSpecifier.init(part:kind:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/SelectParameter.swift",
+      "line": 15,
+      "symbol": "QResyncParameter",
+      "symbol_kind": "source.lang.swift.decl.struct",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/SelectParameter.swift",
+      "line": 16,
+      "symbol": "QResyncParameter.uidValiditiy",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/SelectParameter.swift",
+      "line": 18,
+      "symbol": "QResyncParameter.modificationSequenceValue",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/SelectParameter.swift",
+      "line": 20,
+      "symbol": "QResyncParameter.knownUids",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/SelectParameter.swift",
+      "line": 22,
+      "symbol": "QResyncParameter.sequenceMatchData",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/SelectParameter.swift",
+      "line": 24,
+      "symbol": "QResyncParameter.init(uidValiditiy:modificationSequenceValue:knownUids:sequenceMatchData:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/SelectParameter.swift",
+      "line": 32,
+      "symbol": "SelectParameter",
+      "symbol_kind": "source.lang.swift.decl.enum",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/SelectParameter.swift",
+      "line": 33,
+      "symbol": "SelectParameter.basic(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/SelectParameter.swift",
+      "line": 35,
+      "symbol": "SelectParameter.qresync(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/SelectParameter.swift",
+      "line": 37,
+      "symbol": "SelectParameter.condstore",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/SelectParameter.swift",
+      "line": 55,
+      "symbol": "EncodeBuffer.writeSelectParameter(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Sequence/SequenceNumber.swift",
+      "line": 22,
+      "symbol": "SequenceNumber.init(rawValue:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Sequence/SequenceNumber.swift",
+      "line": 32,
+      "symbol": "SequenceNumber.min",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Sequence/SequenceNumber.swift",
+      "line": 33,
+      "symbol": "SequenceNumber.max",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Sequence/SequenceNumber.swift",
+      "line": 43,
+      "symbol": "SequenceNumber.init(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Sequence/SequenceNumber.swift",
+      "line": 47,
+      "symbol": "SequenceNumber.init(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Sequence/SequenceNumber.swift",
+      "line": 53,
+      "symbol": "SequenceNumber.init(exactly:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Sequence/SequenceRange.swift",
+      "line": 21,
+      "symbol": "SequenceRange.range",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Sequence/SequenceRange.swift",
+      "line": 29,
+      "symbol": "SequenceRange.init(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Sequence/SequenceRange.swift",
+      "line": 33,
+      "symbol": "SequenceRange.init(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Sequence/SequenceRange.swift",
+      "line": 37,
+      "symbol": "SequenceRange.init(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Sequence/SequenceRange.swift",
+      "line": 55,
+      "symbol": "SequenceRange.init(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Sequence/SequenceRange.swift",
+      "line": 61,
+      "symbol": "SequenceRange.all",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Sequence/SequenceRangeSet.swift",
+      "line": 18,
+      "symbol": "SequenceRangeSet",
+      "symbol_kind": "source.lang.swift.decl.struct",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Sequence/SequenceRangeSet.swift",
+      "line": 19,
+      "symbol": "SequenceRangeSet.ranges",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Sequence/SequenceRangeSet.swift",
+      "line": 21,
+      "symbol": "SequenceRangeSet.init(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Sequence/SequenceRangeSet.swift",
+      "line": 27,
+      "symbol": "SequenceRangeSet",
+      "symbol_kind": "source.lang.swift.decl.extension",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Sequence/SequenceRangeSet.swift",
+      "line": 28,
+      "symbol": "SequenceRangeSet.init(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Sequence/SequenceRangeSet.swift",
+      "line": 32,
+      "symbol": "SequenceRangeSet.init(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Sequence/SequenceRangeSet.swift",
+      "line": 36,
+      "symbol": "SequenceRangeSet.init(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Sequence/SequenceRangeSet.swift",
+      "line": 40,
+      "symbol": "SequenceRangeSet.init(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Sequence/SequenceRangeSet.swift",
+      "line": 45,
+      "symbol": "SequenceRangeSet",
+      "symbol_kind": "source.lang.swift.decl.extension",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Sequence/SequenceRangeSet.swift",
+      "line": 51,
+      "symbol": "SequenceRangeSet",
+      "symbol_kind": "source.lang.swift.decl.extension",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Sequence/SequenceRangeSet.swift",
+      "line": 52,
+      "symbol": "SequenceRangeSet.all",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Sequence/SequenceSet.swift",
+      "line": 18,
+      "symbol": "SequenceSet",
+      "symbol_kind": "source.lang.swift.decl.enum",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Sequence/SequenceSet.swift",
+      "line": 20,
+      "symbol": "SequenceSet.range(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Sequence/SequenceSet.swift",
+      "line": 22,
+      "symbol": "SequenceSet.lastCommand",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Sequence/SequenceSet.swift",
+      "line": 25,
+      "symbol": "SequenceSet",
+      "symbol_kind": "source.lang.swift.decl.extension",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Sequence/SequenceSet.swift",
+      "line": 26,
+      "symbol": "SequenceSet.init(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Sequence/SequenceSet.swift",
+      "line": 34,
+      "symbol": "SequenceSet.init(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Sequence/SequenceSet.swift",
+      "line": 38,
+      "symbol": "SequenceSet.init(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Sequence/SequenceSet.swift",
+      "line": 42,
+      "symbol": "SequenceSet.init(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Sequence/SequenceSet.swift",
+      "line": 46,
+      "symbol": "SequenceSet.init(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Sequence/SequenceSet.swift",
+      "line": 51,
+      "symbol": "SequenceSet",
+      "symbol_kind": "source.lang.swift.decl.extension",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Sequence/SequenceSet.swift",
+      "line": 57,
+      "symbol": "SequenceSet",
+      "symbol_kind": "source.lang.swift.decl.extension",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Sequence/SequenceSet.swift",
+      "line": 58,
+      "symbol": "SequenceSet.all",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/SequenceMatchData.swift",
+      "line": 15,
+      "symbol": "SequenceMatchData",
+      "symbol_kind": "source.lang.swift.decl.struct",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/SequenceMatchData.swift",
+      "line": 16,
+      "symbol": "SequenceMatchData.knownSequenceSet",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/SequenceMatchData.swift",
+      "line": 18,
+      "symbol": "SequenceMatchData.knownUidSet",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/SequenceMatchData.swift",
+      "line": 20,
+      "symbol": "SequenceMatchData.init(knownSequenceSet:knownUidSet:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/SortData.swift",
+      "line": 19,
+      "symbol": "SortData.identifiers",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/SortData.swift",
+      "line": 21,
+      "symbol": "SortData.modificationSequence",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/SortData.swift",
+      "line": 23,
+      "symbol": "SortData.init(identifiers:modificationSequence:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/StoreModifier.swift",
+      "line": 17,
+      "symbol": "StoreModifier.unchangedSince(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/StoreModifier.swift",
+      "line": 19,
+      "symbol": "StoreModifier.other(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Tagged/ParameterValue.swift",
+      "line": 19,
+      "symbol": "ParameterValue.sequence(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Tagged/ParameterValue.swift",
+      "line": 20,
+      "symbol": "ParameterValue.comp(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Tagged/TaggedExtension.swift",
+      "line": 17,
+      "symbol": "Parameter",
+      "symbol_kind": "source.lang.swift.decl.struct",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Tagged/TaggedExtension.swift",
+      "line": 18,
+      "symbol": "Parameter.name",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Tagged/TaggedExtension.swift",
+      "line": 19,
+      "symbol": "Parameter.value",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Tagged/TaggedExtension.swift",
+      "line": 21,
+      "symbol": "Parameter.init(name:value:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Tagged/TaggedExtension.swift",
+      "line": 27,
+      "symbol": "TaggedExtension",
+      "symbol_kind": "source.lang.swift.decl.struct",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Tagged/TaggedExtension.swift",
+      "line": 28,
+      "symbol": "TaggedExtension.label",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Tagged/TaggedExtension.swift",
+      "line": 29,
+      "symbol": "TaggedExtension.value",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Tagged/TaggedExtension.swift",
+      "line": 31,
+      "symbol": "TaggedExtension.init(label:value:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/UAuthMechanism.swift",
+      "line": 23,
+      "symbol": "UAuthMechanism.internal",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/UID/IUID.swift",
+      "line": 15,
+      "symbol": "InvalidUID",
+      "symbol_kind": "source.lang.swift.decl.struct",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/UID/IUID.swift",
+      "line": 19,
+      "symbol": "IUID.uid",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/UID/IUID.swift",
+      "line": 21,
+      "symbol": "IUID.init(uid:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/UID/IUID.swift",
+      "line": 31,
+      "symbol": "IUIDOnly.uid",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/UID/IUID.swift",
+      "line": 33,
+      "symbol": "IUIDOnly.init(uid:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/UID/UID.swift",
+      "line": 21,
+      "symbol": "UID.init(rawValue:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/UID/UID.swift",
+      "line": 31,
+      "symbol": "UID.min",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/UID/UID.swift",
+      "line": 32,
+      "symbol": "UID.max",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/UID/UID.swift",
+      "line": 70,
+      "symbol": "UID.init(exactly:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/UID/UIDRange.swift",
+      "line": 21,
+      "symbol": "UIDRange.range",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/UID/UIDRange.swift",
+      "line": 29,
+      "symbol": "UIDRange.init(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/UID/UIDRange.swift",
+      "line": 33,
+      "symbol": "UIDRange.init(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/UID/UIDRange.swift",
+      "line": 37,
+      "symbol": "UIDRange.init(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/UID/UIDRange.swift",
+      "line": 69,
+      "symbol": "UIDRange.init(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/UID/UIDRange.swift",
+      "line": 75,
+      "symbol": "UIDRange.all",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/UID/UIDSet.swift",
+      "line": 17,
+      "symbol": "UIDSet",
+      "symbol_kind": "source.lang.swift.decl.struct",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/UID/UIDSet.swift",
+      "line": 18,
+      "symbol": "UIDSet.ranges",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/UID/UIDSet.swift",
+      "line": 20,
+      "symbol": "UIDSet.init(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/UID/UIDSet.swift",
+      "line": 26,
+      "symbol": "UIDSet",
+      "symbol_kind": "source.lang.swift.decl.extension",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/UID/UIDSet.swift",
+      "line": 27,
+      "symbol": "UIDSet.init(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/UID/UIDSet.swift",
+      "line": 31,
+      "symbol": "UIDSet.init(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/UID/UIDSet.swift",
+      "line": 35,
+      "symbol": "UIDSet.init(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/UID/UIDSet.swift",
+      "line": 39,
+      "symbol": "UIDSet.init(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/UID/UIDSet.swift",
+      "line": 46,
+      "symbol": "UIDSet",
+      "symbol_kind": "source.lang.swift.decl.extension",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/UID/UIDSet.swift",
+      "line": 54,
+      "symbol": "UIDSet",
+      "symbol_kind": "source.lang.swift.decl.extension",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/UID/UIDSet.swift",
+      "line": 60,
+      "symbol": "UIDSet",
+      "symbol_kind": "source.lang.swift.decl.extension",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/UID/UIDSet.swift",
+      "line": 61,
+      "symbol": "UIDSet.all",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/UID/UIDValidity.swift",
+      "line": 18,
+      "symbol": "UIDValidity.init(rawValue:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/UID/UIDValidity.swift",
+      "line": 52,
+      "symbol": "UIDValidity.init(exactly:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/URLFetchData.swift",
+      "line": 21,
+      "symbol": "URLFetchData.url",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/URLFetchData.swift",
+      "line": 23,
+      "symbol": "URLFetchData.data",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/URLFetchData.swift",
+      "line": 25,
+      "symbol": "URLFetchData.init(url:data:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/URLRumpMechanism.swift",
+      "line": 19,
+      "symbol": "URLRumpMechanism.urlRump",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/URLRumpMechanism.swift",
+      "line": 20,
+      "symbol": "URLRumpMechanism.mechanism",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/URLRumpMechanism.swift",
+      "line": 22,
+      "symbol": "URLRumpMechanism.init(urlRump:mechanism:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/UseAttribute.swift",
+      "line": 17,
+      "symbol": "UseAttribute",
+      "symbol_kind": "source.lang.swift.decl.struct",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/UseAttribute.swift",
+      "line": 20,
+      "symbol": "UseAttribute.all",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/UseAttribute.swift",
+      "line": 21,
+      "symbol": "UseAttribute.archive",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/UseAttribute.swift",
+      "line": 22,
+      "symbol": "UseAttribute.drafts",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/UseAttribute.swift",
+      "line": 23,
+      "symbol": "UseAttribute.flagged",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/UseAttribute.swift",
+      "line": 24,
+      "symbol": "UseAttribute.junk",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/UseAttribute.swift",
+      "line": 25,
+      "symbol": "UseAttribute.sent",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/UseAttribute.swift",
+      "line": 26,
+      "symbol": "UseAttribute.trash",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Parser/CommandParser.swift",
+      "line": 17,
+      "symbol": "PartialCommandStream",
+      "symbol_kind": "source.lang.swift.decl.struct",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Parser/CommandParser.swift",
+      "line": 18,
+      "symbol": "PartialCommandStream.numberOfSynchronisingLiterals",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Parser/CommandParser.swift",
+      "line": 19,
+      "symbol": "PartialCommandStream.command",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Parser/CommandParser.swift",
+      "line": 26,
+      "symbol": "PartialCommandStream.init(_:numberOfSynchronisingLiterals:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Parser/CommandParser.swift",
+      "line": 30,
+      "symbol": "PartialCommandStream.init(numberOfSynchronisingLiterals:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Parser/CommandParser.swift",
+      "line": 35,
+      "symbol": "CommandParser",
+      "symbol_kind": "source.lang.swift.decl.struct",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Parser/CommandParser.swift",
+      "line": 59,
+      "symbol": "CommandParser.init(bufferLimit:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Parser/ParserLibrary.swift",
+      "line": 21,
+      "symbol": "ParserError",
+      "symbol_kind": "source.lang.swift.decl.struct",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Parser/ParserLibrary.swift",
+      "line": 22,
+      "symbol": "ParserError.hint",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Parser/ResponseParser.swift",
+      "line": 17,
+      "symbol": "ResponseParser",
+      "symbol_kind": "source.lang.swift.decl.struct",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Parser/ResponseParser.swift",
+      "line": 37,
+      "symbol": "ResponseParser.init(bufferLimit:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Parser/ResponseParser.swift",
+      "line": 42,
+      "symbol": "ResponseParser.parseResponseStream(buffer:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Parser/SynchronizingLiteralParser.swift",
+      "line": 18,
+      "symbol": "SynchronizingLiteralParser",
+      "symbol_kind": "source.lang.swift.decl.struct",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Parser/SynchronizingLiteralParser.swift",
+      "line": 34,
+      "symbol": "SynchronizingLiteralParser.init()",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Parser/SynchronizingLiteralParser.swift",
+      "line": 100,
+      "symbol": "SynchronizingLiteralParser.FramingResult",
+      "symbol_kind": "source.lang.swift.decl.struct",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Parser/SynchronizingLiteralParser.swift",
+      "line": 101,
+      "symbol": "SynchronizingLiteralParser.FramingResult.maximumValidBytes",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Parser/SynchronizingLiteralParser.swift",
+      "line": 102,
+      "symbol": "SynchronizingLiteralParser.FramingResult.synchronizingLiteralCount",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Parser/SynchronizingLiteralParser.swift",
+      "line": 105,
+      "symbol": "SynchronizingLiteralParser.parseContinuationsNecessary(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Parser/SynchronizingLiteralParser.swift",
+      "line": 148,
+      "symbol": "SynchronizingLiteralParser.consumed(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/ResponseEncodeBuffer.swift",
+      "line": 17,
+      "symbol": "ResponseEncodeBuffer",
+      "symbol_kind": "source.lang.swift.decl.struct",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/ResponseEncodeBuffer.swift",
+      "line": 20,
+      "symbol": "ResponseEncodeBuffer.bytes",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/ResponseEncodeBuffer.swift",
+      "line": 25,
+      "symbol": "ResponseEncodeBuffer.init(buffer:options:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/ResponseEncodeBuffer.swift",
+      "line": 30,
+      "symbol": "ResponseEncodeBuffer",
+      "symbol_kind": "source.lang.swift.decl.extension",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/ResponseEncodeBuffer.swift",
+      "line": 31,
+      "symbol": "ResponseEncodeBuffer.init(buffer:capabilities:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/ResponseEncodeBuffer.swift",
+      "line": 38,
+      "symbol": "ResponseEncodeBuffer",
+      "symbol_kind": "source.lang.swift.decl.extension",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/ResponseEncodeBuffer.swift",
+      "line": 39,
+      "symbol": "ResponseEncodeBuffer.writeContinuationRequest(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/ResponseEncodeBuffer.swift",
+      "line": 55,
+      "symbol": "ResponseEncodeBuffer",
+      "symbol_kind": "source.lang.swift.decl.extension",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/ResponseEncodeBuffer.swift",
+      "line": 56,
+      "symbol": "ResponseEncodeBuffer.writeResponse(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/ResponseEncodingOptions.swift",
+      "line": 15,
+      "symbol": "ResponseEncodingOptions",
+      "symbol_kind": "source.lang.swift.decl.struct",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/ResponseEncodingOptions.swift",
+      "line": 25,
+      "symbol": "ResponseEncodingOptions",
+      "symbol_kind": "source.lang.swift.decl.extension",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/ResponseEncodingOptions.swift",
+      "line": 26,
+      "symbol": "ResponseEncodingOptions.init(capabilities:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/SearchSortModificationSequence.swift",
+      "line": 17,
+      "symbol": "SearchSortModificationSequence.modifierSequenceValue",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/SearchSortModificationSequence.swift",
+      "line": 19,
+      "symbol": "SearchSortModificationSequence.init(modifierSequenceValue:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    }
+  ],
+  "source_directory": "/Users/david/Work/swift-nio-imap"
+}
