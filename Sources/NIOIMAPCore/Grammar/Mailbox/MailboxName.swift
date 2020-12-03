@@ -25,7 +25,10 @@ public struct MailboxTooBigError: Error, Equatable {
     public var actualSize: Int
 }
 
+/// The `MailboxName` was invalid, and probably contained illegal characters.
 public struct InvalidMailboxNameError: Error, Equatable {
+    
+    /// Information on why the `MailboxName` was considered invalid.
     public var description: String
 }
 
