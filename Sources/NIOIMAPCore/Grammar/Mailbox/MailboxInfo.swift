@@ -14,12 +14,22 @@
 
 import struct NIO.ByteBuffer
 
-/// IMAPv4 `mailbox-list`
+/// A collection of mailbox attributes defined in the supported IMAP4 RFCs.
 public struct MailboxInfo: Equatable {
+    
+    /// An array of mailbox attributes.
     public var attributes: [Attribute]
+    
+    /// The mailbox path.
     public var path: MailboxPath
+    
+    /// A catch-all to support any attributes added in future extensions.
     public var extensions: [ListExtendedItem]
 
+    /// Creates a new `MailboxInfo` attribute collection.
+    /// - parameter attributes: An array of mailbox attributes.
+    /// - parameter path: The mailbox path.
+    /// - parameter extensions: A catch-all to support any attributes added in future extensions.
     public init(attributes: [Attribute] = [], path: MailboxPath, extensions: [ListExtendedItem]) {
         self.attributes = attributes
         self.path = path
