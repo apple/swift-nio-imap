@@ -14,9 +14,10 @@
 
 import struct NIO.ByteBuffer
 
-/// IMAPv4 `message-data`
-/// One message attribute is guaranteed
+/// A piece of data regarding a message, returned as an untagged server response.
 public enum MessageData: Equatable {
+    
+    /// The specified message sequence number has been permanently removed from the mailbox
     case expunge(Int)
 
     /// RFC 7162 Condstore
@@ -32,8 +33,10 @@ public enum MessageData: Equatable {
     /// of messages that are no longer in the mailbox.
     case vanishedEarlier(SequenceSet)
 
+    /// An array of URLAUTH-authorized URLs
     case genURLAuth([ByteBuffer])
 
+    /// One or more IMAP URLs
     case urlFetch([URLFetchData])
 }
 
