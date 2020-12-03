@@ -40,23 +40,45 @@ public struct MailboxInfo: Equatable {
 // MARK: - Types
 
 extension MailboxInfo {
+    
+    /// A single attribute of a Mailbox
     public struct Attribute: Hashable {
-        var _backing: String
 
+        /// It is not possible to use this name as a selectable mailbox.
         public static var noSelect: Self { Self(_backing: #"\noselect"#) }
+        
+        /// The mailbox has been marked as "interesting" by the server. It probably contains new messages since the mailbox was selected.
         public static var marked: Self { Self(_backing: #"\marked"#) }
+        
+        /// The mailbox does not have any new messages since the mailbox was last selected.
         public static var unmarked: Self { Self(_backing: #"\unmarked"#) }
+        
+        /// The mailbox does not refer to an existing mailbox.
         public static var nonExistent: Self { Self(_backing: #"\nonexistent"#) }
+        
+        /// It is not possible for this mailbox to have children.
         public static var noInferiors: Self { Self(_backing: #"\noinferiors"#) }
+        
+        /// The mailbox has been subscribed to.
         public static var subscribed: Self { Self(_backing: #"\subscribed"#) }
+        
+        /// The mailbox is a remote mailbox.
         public static var remote: Self { Self(_backing: #"\remote"#) }
+        
+        /// The mailbox has child mailboxes.
         public static var hasChildren: Self { Self(_backing: #"\HasChildren"#) }
+        
+        /// The mailbox does not have child attributes.
         public static var hasNoChildren: Self { Self(_backing: #"\HasNoChildren"#) }
 
+        var _backing: String
+        
         init(_backing: String) {
             self._backing = _backing
         }
 
+        /// Creates a new `Attribute`. It's often safer to use the predefined static helpers. The string provided will be lowercased.
+        /// - parameter str: The string representation of the attribute. Note that this string will be lowercased.
         public init(_ str: String) {
             self._backing = str.lowercased()
         }
