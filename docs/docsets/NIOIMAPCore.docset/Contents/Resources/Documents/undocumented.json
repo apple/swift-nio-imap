@@ -1499,48 +1499,6 @@
       "warning": "undocumented"
     },
     {
-      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Flag/Flag.swift",
-      "line": 45,
-      "symbol": "Flag.answered",
-      "symbol_kind": "source.lang.swift.decl.var.static",
-      "warning": "undocumented"
-    },
-    {
-      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Flag/Flag.swift",
-      "line": 46,
-      "symbol": "Flag.flagged",
-      "symbol_kind": "source.lang.swift.decl.var.static",
-      "warning": "undocumented"
-    },
-    {
-      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Flag/Flag.swift",
-      "line": 47,
-      "symbol": "Flag.deleted",
-      "symbol_kind": "source.lang.swift.decl.var.static",
-      "warning": "undocumented"
-    },
-    {
-      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Flag/Flag.swift",
-      "line": 48,
-      "symbol": "Flag.seen",
-      "symbol_kind": "source.lang.swift.decl.var.static",
-      "warning": "undocumented"
-    },
-    {
-      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Flag/Flag.swift",
-      "line": 49,
-      "symbol": "Flag.draft",
-      "symbol_kind": "source.lang.swift.decl.var.static",
-      "warning": "undocumented"
-    },
-    {
-      "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Flag/Flag.swift",
-      "line": 51,
-      "symbol": "Flag.keyword(_:)",
-      "symbol_kind": "source.lang.swift.decl.function.method.static",
-      "warning": "undocumented"
-    },
-    {
       "file": "/Users/david/Work/swift-nio-imap/Sources/NIOIMAPCore/Grammar/Flag/FlagKeyword.swift",
       "line": 24,
       "symbol": "Flag.Keyword.rawValue",
