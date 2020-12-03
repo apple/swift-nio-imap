@@ -17,7 +17,6 @@ import struct NIO.ByteBuffer
 /// A wrapper around a non-empty array of key/value pairs. This is used to provide
 /// a catch-all for future extensions, as no options are currently explicitly defined.
 public struct ESearchScopeOptions: Equatable {
-    
     /// An array of Scope Option key/value pairs. Note that the array must not be empty.
     public private(set) var content: [Parameter]
 

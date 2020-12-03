@@ -20,7 +20,6 @@ import struct NIO.ByteBuffer
 /// As such e.g. `.extension("\\FOOBAR") == .extension("\\FooBar")`, but
 /// it will round-trip preserving its case.
 public struct Flag: RawRepresentable, Hashable {
-    
     /// The raw case-sensitive `String` value.
     public var rawValue: String
 
@@ -53,22 +52,21 @@ public struct Flag: RawRepresentable, Hashable {
 }
 
 extension Flag {
-    
     /// `\\Answered` - The message has been replied to.
     public static let answered = Self(rawValue: "\\Answered")
-    
+
     /// `\\Flagged` - The message has been marked by the user, typically as a reminder
     /// that some action is required.
     public static let flagged = Self(rawValue: "\\Flagged")
-    
+
     /// `\\Deleted` - The message has been deleted and should no
     /// longer be shown to the user, unless they specifically request to
     /// view deleted messages.
     public static let deleted = Self(rawValue: "\\Deleted")
-    
+
     /// `\\Seen` - The message has been read by the user
     public static let seen = Self(rawValue: "\\Seen")
-    
+
     /// `\\Draft` - The message is not yet complete
     public static let draft = Self(rawValue: "\\Draft")
 

@@ -20,10 +20,10 @@ public struct EntryKindRequest: Hashable {
 
     /// Search private metadata items.
     public static var `private` = Self(_backing: "priv")
-    
+
     /// Search shared metadata items.
     public static var shared = Self(_backing: "shared")
-    
+
     /// The server should use the largest value among `.private` and `.shared` mod-sequences
     /// for the metadata item.
     public static var all = Self(_backing: "all")

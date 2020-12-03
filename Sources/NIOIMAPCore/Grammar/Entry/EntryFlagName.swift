@@ -14,7 +14,6 @@
 
 /// A wrapper around `AttributeFlag`, used in `SearchModificationSequence`
 public struct EntryFlagName: Hashable {
-    
     /// An `AttributeFlag`
     public var flag: AttributeFlag
 

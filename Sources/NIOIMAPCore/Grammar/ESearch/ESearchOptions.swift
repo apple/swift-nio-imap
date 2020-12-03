@@ -16,16 +16,15 @@ import struct NIO.ByteBuffer
 
 /// Options for performing an extended search as defined in RFC 6237
 public struct ESearchOptions: Equatable {
-    
     /// The search criteria.
     public var key: SearchKey
-    
+
     /// The charset to use when performing the search.
     public var charset: String?
-    
+
     /// Return options to filter the data that is returned.
     public var returnOptions: [SearchReturnOption]
-    
+
     /// Specifies where should be searched, for example a single mailbox.
     public var sourceOptions: ESearchSourceOptions?
 

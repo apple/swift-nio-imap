@@ -21,7 +21,6 @@ extension Flag {
     /// As such e.g. `Flag.Keyword("$Forwarded") == Flag.Keyword("$forwarded")`, but
     /// it will round-trip preserving its case.
     public struct Keyword: Hashable {
-        
         /// Performs a case-insensitive equality comparison.
         /// - parameter lhs: The first flag to compare.
         /// - parameter rhs: The second flag to compare.
@@ -29,10 +28,10 @@ extension Flag {
         public static func == (lhs: Keyword, rhs: Keyword) -> Bool {
             lhs.rawValue.uppercased() == rhs.rawValue.uppercased()
         }
-        
+
         /// The raw case-preserved string value of the `Keyword`.
         public var rawValue: String
-        
+
         /// Creates a new `Keyword`.
         /// - parameter string: A raw `String` to create the `Keyword`.  Each character in the`String` must be a valid atom-char as defined in RFC 3501.
         public init(_ string: String) {
@@ -97,7 +96,6 @@ extension Flag.Keyword {
 // MARK: - String Literal
 
 extension Flag.Keyword: ExpressibleByStringLiteral {
-    
     /// Creates a new `Keyword` from a string literal. Mainly used for writing tests.
     /// - parameter stringLiteral: The string literal to construct a `Keyword` from.
     public init(stringLiteral value: String) {

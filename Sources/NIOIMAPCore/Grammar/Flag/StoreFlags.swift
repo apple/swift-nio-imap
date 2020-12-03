@@ -16,16 +16,14 @@ import struct NIO.ByteBuffer
 
 /// Defines if certain flags should be added, removed, or replaced.
 public struct StoreFlags: Hashable {
-    
     /// What operation to perform on the flags.
     public enum Operation: String, Hashable {
-    
         /// Add to the flags for the message.
         case add = "+"
-        
+
         /// Remove from the flags for the message.
         case remove = "-"
-        
+
         /// Replace the flags for the message (other than \Recent).
         case replace = ""
     }
@@ -56,10 +54,10 @@ public struct StoreFlags: Hashable {
 
     /// The type of flag operation e.g. add, remove, or replace.
     public var operation: Operation
-    
+
     /// `false` if the server should return the new `Flag`s list for each message, otherwise `true`.
     public var silent: Bool
-    
+
     /// The `Flag`s to operate on.
     public var flags: [Flag]
 }

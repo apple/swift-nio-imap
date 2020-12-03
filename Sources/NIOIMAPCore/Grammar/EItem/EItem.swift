@@ -14,10 +14,9 @@
 
 /// A vendor-specific tag for extended list data
 public struct EItemVendorTag: Equatable {
-    
     /// A reserved portion of the ACAP namespace. Must be registered with IANA
     public var token: String
-    
+
     /// Used to identify the type of data.
     public var atom: String
 

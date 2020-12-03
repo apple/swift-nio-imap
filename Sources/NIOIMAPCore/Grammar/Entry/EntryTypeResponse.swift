@@ -20,7 +20,7 @@ public struct EntryKindResponse: Equatable {
 
     /// `priv` - Private metadata item type.
     public static var `private` = Self(_backing: "priv")
-    
+
     /// `shared` - Shared metadata item type.
     public static var shared = Self(_backing: "shared")
 }

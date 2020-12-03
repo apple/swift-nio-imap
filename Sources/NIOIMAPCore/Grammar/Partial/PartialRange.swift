@@ -14,10 +14,9 @@
 
 /// Represents a range of bytes in a larger whole. See RFC 5092
 public struct PartialRange: Equatable {
-    
     /// The offset in bytes from the beginning of the message/data in question.
     public var offset: Int
-    
+
     /// The number of bytes the range covers.
     public var length: Int?
 

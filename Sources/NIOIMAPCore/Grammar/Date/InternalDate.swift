@@ -22,7 +22,7 @@
 /// IMAPv4 `date-time`
 public struct InternalDate: Equatable {
     var rawValue: UInt64
-    
+
     // TODO: Minute/second checks don't make sense. 1:60 should just be 2
 
     /// Creates a new `InternalDate`. The data entered is partially validated
@@ -70,29 +70,27 @@ public struct InternalDate: Equatable {
 }
 
 extension InternalDate {
-    
     /// Contains the individual components extracted from an `InternalDate`, and can be used to
     /// construct an `InternalDate`.
     public struct Components {
-        
         /// The year.
         public let year: Int
-        
+
         /// The month.
         public let month: Int
-        
+
         /// The day.
         public let day: Int
-        
+
         /// The hour.
         public let hour: Int
-        
+
         /// The minute.
         public let minute: Int
-        
+
         /// The second.
         public let second: Int
-        
+
         /// Time zone offset in minutes.
         public let zoneMinutes: Int
 
