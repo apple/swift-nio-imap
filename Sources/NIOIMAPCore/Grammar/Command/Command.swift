@@ -20,61 +20,156 @@ import struct NIO.ByteBuffer
 /// as a state is maintained to enable streaming of large amounts
 /// of data.
 public enum Command: Equatable {
-    /// (RFC 3501) Requests a server's capabilities.
+    /// Requests a server's capabilities.
     case capability
 
-    /// (RFC 3501) Returns the session's state to "non-authenticated".
+    /// Returns the session's state to "non-authenticated".
     case logout
 
-    /// (RFC 3501) Performs no operation, typically used to test that a server is responding to commands.
+    /// Performs no operation, typically used to test that a server is responding to commands.
     case noop
+
+    /// Creates a new mailbox.
     case create(MailboxName, [CreateParameter])
+
+    /// Deletes a mailbox.
     case delete(MailboxName)
+
+    /// Similar to `.select` and returns the same data, however the current mailbox is identified as readonly
     case examine(MailboxName, [Parameter] = [])
+
+    /// Returns a subset of names from the complete set of all names available to the client.
     case list(ListSelectOptions?, reference: MailboxName, MailboxPatterns, [ReturnOption] = [])
+
+    /// Similar to `.list`, but uses options that do not syntactically interact with other options
     case listIndependent([ListSelectIndependentOption], reference: MailboxName, MailboxPatterns, [ReturnOption] = [])
+
+    /// Returns a subset of names from the complete set of names that the user has marked as "active" or "subscribed"
     case lsub(reference: MailboxName, pattern: ByteBuffer)
+
+    /// Renames the given mailbox.
     case rename(from: MailboxName, to: MailboxName, params: [Parameter])
+
+    /// Selects the given mailbox in preparation of running more commands.
     case select(MailboxName, [SelectParameter] = [])
+
+    /// Retrieves the status of the given mailbox.
     case status(MailboxName, [MailboxAttribute])
+
+    /// Subscribes to the given mailbox.
     case subscribe(MailboxName)
+
+    /// Unsubscribes from the given mailbox.
     case unsubscribe(MailboxName)
+
+    /// Begins the process of the client authenticating against the server. The client specifies a authentication method, and the server may respond
+    /// with one or more challenges, which the client is also required to respond to using `CommandStream.continuationResponse`.
     case authenticate(method: String, initialClientResponse: InitialClientResponse?, [ByteBuffer])
+
+    /// Authenticates the client using a username and password
     case login(username: String, password: String)
+
+    /// Begins TLS negotiation immediately after this command is sent.
     case starttls
+
+    /// Requests a check-point of the server's in-memory representation of the mailbox. Allows the server to do some housekeeping.
     case check
+
+    /// Permanently deletes all messages in the selected mailbox that have the *\Deleted* flag set, and unselects the mailbox.
     case close
+
+    /// Permanently deletes all messages in the selected mailbox that have the *\Deleted* flag set.
     case expunge
+
+    /// Enables each listed capability, providing the server has advertised support for those capabilities.
     case enable([Capability])
+
+    /// Unselects the currently-select mailbox, and returns to an unselected state.
     case unselect
+
+    /// Moves the server into an idle state. The server may send periodic reminder that it's idle. No more commands may be sent until
+    /// `CommandStream.idleDone` has been sent.
     case idleStart
+
+    /// Copies each message in a given set to a new mailbox, preserving the original in the current mailbox.
     case copy(SequenceSet, MailboxName)
+
+    /// Fetches an array of specified attributes for each message in a given set.
     case fetch(SequenceSet, [FetchAttribute], [Parameter])
+
+    /// Alters data associated with a message, typically returning the new data as an untagged fetch response.
     case store(SequenceSet, [StoreModifier], StoreFlags)
 
+    /// Searches the currently-selected mailbox for messages that match the search criteria.
     case search(key: SearchKey, charset: String? = nil, returnOptions: [SearchReturnOption] = [])
+
+    /// Moves each message in a given set into a new mailbox, removing the copy from the current mailbox.
     case move(SequenceSet, MailboxName)
+
+    /// Identifies the client to the server
     case id([IDParameter])
+
+    /// Retrieves the namespaces available to the user.
     case namespace
 
+    /// Similar to `.copy`, but uses unique identifier instead of sequence numbers to identify messages.
     case uidCopy(UIDSet, MailboxName)
+
+    /// Similar to `.move`, but uses unique identifier instead of sequence numbers to identify messages.
     case uidMove(UIDSet, MailboxName)
+
+    /// Similar to `.fetch`, but uses unique identifier instead of sequence numbers to identify messages.
     case uidFetch(UIDSet, [FetchAttribute], [Parameter])
+
+    /// Similar to `.search`, but uses unique identifier instead of sequence numbers to identify messages.
     case uidSearch(key: SearchKey, charset: String? = nil, returnOptions: [SearchReturnOption] = [])
+
+    /// Similar to `.store`, but uses unique identifier instead of sequence numbers to identify messages.
     case uidStore(UIDSet, [Parameter], StoreFlags)
+
+    /// Similar to `.expunge`, but uses unique identifier instead of sequence numbers to identify messages.
     case uidExpunge(UIDSet)
 
+    /// Takes the name of a quota root and returns the quota root's resource usage and limits.
     case getQuota(QuotaRoot)
+
+    /// Takes the name of a mailbox and returns the list of quota roots for the mailbox in an untagged QUOTAROOT response.
     case getQuotaRoot(MailboxName)
+
+    /// Sets the resource limits for a given quote root.
     case setQuota(QuotaRoot, [QuotaLimit])
 
+    /// When the mailbox name is the empty string, this command retrieves
+    /// server annotations.  When the mailbox name is not empty, this command
+    /// retrieves annotations on the specified mailbox.
     case getMetadata(options: [MetadataOption], mailbox: MailboxName, entries: [ByteBuffer])
+
+    /// Sets the specified list of entries by adding or
+    /// replacing the specified values provided, on the specified existing
+    /// mailboxes or on the server (if the mailbox argument is the empty
+    /// string).
     case setMetadata(mailbox: MailboxName, entries: [EntryValue])
+
+    /// Performs an extended search as defined in RFC 4731.
     case esearch(ESearchOptions)
 
+    /// When sent with no arguments: removes all mailbox access keys
+    /// in the user's mailbox access key table, revoking all URLs currently
+    /// authorized using URLAUTH by the user.
+    /// When sent with arguments: generates a
+    /// new mailbox access key for the given mailbox in the user's mailbox
+    /// access key table, replacing any previous mailbox access key (and
+    /// revoking any URLs that were authorized with a URLAUTH using that key)
+    /// in that table.
     case resetKey(mailbox: MailboxName?, mechanisms: [UAuthMechanism])
+
+    /// Requests that the server generate a URLAUTH-
+    /// authorized URL for each of the given URLs using the given URL
+    /// authorization mechanism.
     case genURLAuth([URLRumpMechanism])
 
+    /// Requests that the server return the text data
+    /// associated with the specified IMAP URLs
     case urlFetch([ByteBuffer])
 }
 

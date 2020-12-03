@@ -26,7 +26,7 @@ extension BodyStructure {
 
         /// Creates a new `DispositionAndLanguage`.
         /// - parameter disposition: The disposition to pair.
-        /// - parameter language: The language to pair.
+        /// - parameter language: Some *Language/Location* pair, defaults to `nil`.
         public init(disposition: Disposition?, language: LanguageLocation? = nil) {
             self.disposition = disposition
             self.language = language

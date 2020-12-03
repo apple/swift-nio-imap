@@ -14,7 +14,9 @@
 
 import struct NIO.ByteBuffer
 
+/// A description of the data that will be sent as part of an append command.
 public struct AppendData: Equatable {
+    /// The size of the message in bytes.
     public var byteCount: Int
 
     /// `true` if the message data is sent without a content transfer encoding, i.e. as binary data, See RFC 3516.
@@ -22,6 +24,9 @@ public struct AppendData: Equatable {
     /// When this is `true` the APPEND command will use the `<literal8>` syntax as defined in RFC 3516.
     public var withoutContentTransferEncoding: Bool
 
+    /// Creates a new `AppendMetadata`.
+    /// - parameter byteCount: The size of the message in bytes.
+    /// - parameter withoutContentTransferEncoding: `true` if the bytes are sent without a content transfer encoding. Defaults to `false`.
     public init(byteCount: Int, withoutContentTransferEncoding: Bool = false) {
         self.byteCount = byteCount
         self.withoutContentTransferEncoding = withoutContentTransferEncoding

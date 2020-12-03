@@ -26,13 +26,23 @@ public enum BodyStructure: Equatable {
 }
 
 extension BodyStructure: RandomAccessCollection {
+    /// The `Element` of a `BodyStructure` is `BodyStructure` itself.
+    /// For example a multi-part body may be thought of as an array of multi-part bodies.
     public typealias Element = BodyStructure
 
+    /// Message bodies are indexed using `SectionSpecifier.Part`. Consider a multi-part message to be an n-ary tree. Each node
+    /// is a separate multi-part, and may contain sub-nodes, each of which is again a multi-part. `SectionSpecifier.Part` is an array
+    /// or integers, where each integer represents the position of a sub-node.
     public typealias Index = SectionSpecifier.Part
 
+    /// Because `BodyStructure` is a recursive type, a `SubSequence` is defined as `Slice<BodyStructure>`.
     public typealias SubSequence = Slice<BodyStructure>
 
+    /// Gets the body at the given `position`.
+    /// - parameter position: The position of the desired body.
+    /// - returns: The body located at the given `position`.
     public subscript(position: SectionSpecifier.Part) -> BodyStructure {
+        // TODO: Can we get rid of this guard if we move the checks to SectionSpecifier.Part.init?
         guard let first = position.rawValue.first, first > 0 else {
             preconditionFailure("Part must contain a first number > 0")
         }
@@ -61,10 +71,13 @@ extension BodyStructure: RandomAccessCollection {
         }
     }
 
+    /// The index of the first part of the body. Note that single-part and multi-part messages always have at least one part. IN
+    /// a single-part message, the only part is the message itself.
     public var startIndex: SectionSpecifier.Part {
-        [1] // both singleparts and multiparts always have at least one part
+        [1]
     }
 
+    /// The last index of the body. Note that this does not go into child nodes, but only considers sibling parts.
     public var endIndex: SectionSpecifier.Part {
         switch self {
         case .singlepart:
@@ -74,6 +87,9 @@ extension BodyStructure: RandomAccessCollection {
         }
     }
 
+    /// Gets the index before the given index. Note that this does not go into child nodes, but only considers sibling parts.
+    /// - parameter i: The index in question.
+    /// - returns: The index required to get the previous body part.
     public func index(before i: SectionSpecifier.Part) -> SectionSpecifier.Part {
         guard let first = i.rawValue.first else {
             fatalError("Must contain at least one number")
@@ -81,6 +97,9 @@ extension BodyStructure: RandomAccessCollection {
         return [first - 1]
     }
 
+    /// Gets the index after the given index. Note that this does not go into child nodes, but only considers sibling parts.
+    /// - parameter i: The index in question.
+    /// - returns: The index required to get the next body.
     public func index(after i: SectionSpecifier.Part) -> SectionSpecifier.Part {
         guard let first = i.rawValue.first else {
             fatalError("Must contain at least one number")
@@ -92,30 +111,39 @@ extension BodyStructure: RandomAccessCollection {
 // MARK: - Types
 
 extension BodyStructure {
-    /// IMAPv4rev1 media-subtype
+    /// The subtype of a multi-part body.
     public struct MediaSubtype: RawRepresentable, CustomStringConvertible, Equatable {
-        public var rawValue: String
-
-        public init(rawValue: String) {
-            self.rawValue = rawValue.lowercased()
-        }
-
+        /// `multipart/alternative`. For representing the same data as different formats.
         public static var alternative: Self {
             .init("multipart/alternative")
         }
 
+        /// `multipart/mixed`. Used for compound objects consisting of several related body parts.
         public static var related: Self {
             .init("multipart/related")
         }
 
+        /// `multipart/mixed`. Specifies a generic set of mixed data types.
         public static var mixed: Self {
             .init("multipart/mixed")
         }
 
+        /// The subtype as a lowercased string
+        public var rawValue: String
+
+        /// See `.rawValue`.
         public var description: String {
             rawValue
         }
 
+        /// Creates a new `MediaSubtype` from the given `String`, which will be lowercased.
+        /// - parameter rawValue: The subtype as a `String`. Note that the string will be lowercased.
+        public init(rawValue: String) {
+            self.rawValue = rawValue.lowercased()
+        }
+
+        /// Creates a new `MediaSubtype` from the given `String`, which will be lowercased.
+        /// - parameter rawValue: The subtype as a `String`. Note that the string will be lowercased.
         public init(_ rawValue: String) {
             self.init(rawValue: rawValue)
         }

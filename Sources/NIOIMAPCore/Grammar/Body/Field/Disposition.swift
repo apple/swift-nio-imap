@@ -15,7 +15,7 @@
 import struct NIO.ByteBuffer
 
 extension BodyStructure {
-    /// A parsed representation of a parenthesized list containg a type string, and attribute/value pairs.
+    /// A parsed representation of a parenthesized list containing a type string, and attribute/value pairs.
     /// Recomended reading: RFC 3501 § 7.4.2 and RFC 2183
     public struct Disposition: Equatable {
         /// The disposition type string.

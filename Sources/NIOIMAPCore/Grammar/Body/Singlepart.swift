@@ -15,12 +15,21 @@
 import struct NIO.ByteBuffer
 
 extension BodyStructure {
-    /// IMAPv4 `body-type-1part`
+    /// Represents a single-part body as defined in RFC 3501.
     public struct Singlepart: Equatable {
+        /// The type of single-part. Note that "message" types may contain a multi-part.
         public var kind: Kind
+
+        /// A collection of common message attributes, such as a message identifier.
         public var fields: Fields
+
+        /// An optional extension to the core message. Not required to construct a valid message.
         public var `extension`: Extension?
 
+        /// Creates a new `SinglePart`.
+        /// - parameter type: The type of single-part. Note that "message" types may contain a multi-part.
+        /// - parameter fields: A collection of common message attributes, such as a message identifier.
+        /// - parameter extension: An optional extension to the core message. Not required to construct a valid message.
         public init(type: BodyStructure.Singlepart.Kind, fields: Fields, extension: Extension? = nil) {
             self.kind = type
             self.fields = fields
@@ -32,19 +41,37 @@ extension BodyStructure {
 // MARK: - Types
 
 extension BodyStructure.Singlepart {
+    /// Represents the type of a single-part message.
     public indirect enum Kind: Equatable {
+        /// A simple message containing only one kind of data.
         case basic(Media.Basic)
+
+        /// A "full" email message containing an envelope, and a child body.
         case message(Message)
+
+        /// A message type, for example plain text, or html.
         case text(Text)
     }
 
-    /// IMAPv4 `body-type-message`
+    /// Represents a typical "full" email message, containing an envelope and a child message.
     public struct Message: Equatable {
+        /// Indication if the message contains an encapsulated message.
         public var message: Media.Message
+
+        /// The envelope of the message, potentially including the message sender, bcc list, etc.
         public var envelope: Envelope
+
+        /// The child body. Note that this may be a multi-part.
         public var body: BodyStructure
+
+        /// The number of lines in the message.
         public var lineCount: Int
 
+        /// Creates a new `Message`.
+        /// - parameter message:
+        /// - parameter envelope: The envelope of the message
+        /// - parameter body: The encapsulated message. Note that this may be a multi-part.
+        /// - parameter fieldLines: The number of lines in the message
         public init(message: Media.Message, envelope: Envelope, body: BodyStructure, fieldLines: Int) {
             self.message = message
             self.envelope = envelope
@@ -53,24 +80,35 @@ extension BodyStructure.Singlepart {
         }
     }
 
-    /// IMAPv4 `body-type-text`
+    /// Represents a text-based message body.
     public struct Text: Equatable {
+        /// The type of text message, e.g. `text/html` or `text/plain`
         public var mediaText: String
+
+        /// The number of lines in the message.
         public var lineCount: Int
 
+        /// Creates a new `Text`.
+        /// - parameter mediaText: The type of text message, e.g. `text/html` or `text/plain`
+        /// - parameter lineCount: The number of lines in the message.
         public init(mediaText: String, lineCount: Int) {
             self.mediaText = mediaText
             self.lineCount = lineCount
         }
     }
 
-    /// IMAPv4 `body-ext-1part`
+    /// Optional extension fields, initially pairing an MD5 body digest with a `DispositionAndLanguage`.
     public struct Extension: Equatable {
         /// A string giving the body MD5 value.
         public let digest: String?
+
+        /// A `Disposition` and `LanguageLocation` pairing. `LanguageLocation` can be further expanded, the intention
+        /// of which is to provide a cleaner API.
         public var dispositionAndLanguage: BodyStructure.DispositionAndLanguage?
 
-        /// Convenience function for a better experience when chaining multiple types.
+        /// Creates a new `Extension`
+        /// - parameter fieldMD5: A string giving the body MD5 value.
+        /// - parameter dispositionAndLanguage: An optional `Disposition` and `LanguageLocation` pairing.
         init(fieldMD5: String?, dispositionAndLanguage: BodyStructure.DispositionAndLanguage?) {
             self.digest = fieldMD5
             self.dispositionAndLanguage = dispositionAndLanguage

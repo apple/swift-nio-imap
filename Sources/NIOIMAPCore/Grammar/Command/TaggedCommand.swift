@@ -14,11 +14,17 @@
 
 import struct NIO.ByteBuffer
 
-/// IMAP4 `command` (`command-any`, `command-auth`, `command-nonauth`, `command-select`)
+/// Represents a IMAP command that is preceded by a tag that can be used for command/response identification.
 public struct TaggedCommand: Equatable {
+    /// The tag, typically a mixture of alphanumeric characters.
     public var tag: String
+
+    /// The command to associate with a tag.
     public var command: Command
 
+    /// Creates a new `TaggedCommand`.
+    /// - parameter tag: The tag, typically a mixture of alphanumeric characters.
+    /// - parameter command: The command to associate with a tag.
     public init(tag: String, command: Command) {
         self.tag = tag
         self.command = command
