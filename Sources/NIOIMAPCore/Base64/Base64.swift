@@ -8,11 +8,11 @@ struct Base64 {}
 // MARK: Encoding
 
 extension Base64 {
-     struct EncodingOptions: OptionSet {
-         let rawValue: UInt
-         init(rawValue: UInt) { self.rawValue = rawValue }
+    struct EncodingOptions: OptionSet {
+        let rawValue: UInt
+        init(rawValue: UInt) { self.rawValue = rawValue }
 
-         static let base64URLAlphabet = EncodingOptions(rawValue: UInt(1 << 0))
+        static let base64URLAlphabet = EncodingOptions(rawValue: UInt(1 << 0))
     }
 
     /// Base64 encode a collection of UInt8 to a string, without the use of Foundation.
@@ -22,7 +22,7 @@ extension Base64 {
     /// now: the purpose of this encoding is to avoid round-tripping through Data, and the perf gain
     /// from avoiding that is more than enough to outweigh the silliness of this code.
     @inlinable
-     static func encode<Buffer: Collection>(bytes: Buffer, options: EncodingOptions = [])
+    static func encode<Buffer: Collection>(bytes: Buffer, options: EncodingOptions = [])
         -> String where Buffer.Element == UInt8 {
         // In Base64, 3 bytes become 4 output characters, and we pad to the
         // nearest multiple of four.
@@ -142,15 +142,15 @@ extension Base64 {
 // MARK: - Decode -
 
 extension Base64 {
-     struct DecodingOptions: OptionSet {
-         let rawValue: UInt
-         init(rawValue: UInt) { self.rawValue = rawValue }
+    struct DecodingOptions: OptionSet {
+        let rawValue: UInt
+        init(rawValue: UInt) { self.rawValue = rawValue }
 
-         static let base64URLAlphabet = DecodingOptions(rawValue: UInt(1 << 0))
+        static let base64URLAlphabet = DecodingOptions(rawValue: UInt(1 << 0))
     }
 
     @inlinable
-     static func decode<Buffer: Collection>(encoded: Buffer, options: DecodingOptions = [])
+    static func decode<Buffer: Collection>(encoded: Buffer, options: DecodingOptions = [])
         throws -> [UInt8] where Buffer.Element == UInt8 {
         let alphabet = options.contains(.base64URLAlphabet)
             ? Base64.decodeBase64URL
@@ -202,7 +202,7 @@ extension Base64 {
     }
 
     @inlinable
-     static func decode(encoded: String, options: DecodingOptions = []) throws -> [UInt8] {
+    static func decode(encoded: String, options: DecodingOptions = []) throws -> [UInt8] {
         // A string can be backed by a contiguous storage (pure swift string)
         // or a nsstring (bridged string from objc). We only get a pointer
         // to the contiguous storage, if the input string is a swift string.
@@ -327,13 +327,12 @@ extension IteratorProtocol where Self.Element == UInt8 {
 // MARK: - Extensions -
 
 extension String {
-
     init<Buffer: Collection>(base64Encoding bytes: Buffer, options: Base64.EncodingOptions = [])
         where Buffer.Element == UInt8 {
         self = Base64.encode(bytes: bytes, options: options)
     }
 
-     func base64decoded(options: Base64.DecodingOptions = []) throws -> [UInt8] {
+    func base64decoded(options: Base64.DecodingOptions = []) throws -> [UInt8] {
         // In Base64, 3 bytes become 4 output characters, and we pad to the nearest multiple
         // of four.
         try Base64.decode(encoded: self, options: options)

@@ -15,10 +15,8 @@
 import struct NIO.ByteBuffer
 
 extension BodyStructure {
-
     /// Represents a single-part body as defined in RFC 3501.
     public struct Singlepart: Equatable {
-
         /// The type of single-part. Note that "message" types may contain a multi-part.
         public var kind: Kind
 
@@ -43,10 +41,8 @@ extension BodyStructure {
 // MARK: - Types
 
 extension BodyStructure.Singlepart {
-
     /// Represents the type of a single-part message.
     public indirect enum Kind: Equatable {
-
         /// A simple message containing only one kind of data.
         case basic(Media.Basic)
 
@@ -59,7 +55,6 @@ extension BodyStructure.Singlepart {
 
     /// Represents a typical "full" email message, containing an envelope and a child message.
     public struct Message: Equatable {
-
         /// Indication if the message contains an encapsulated message.
         public var message: Media.Message
 
@@ -87,7 +82,6 @@ extension BodyStructure.Singlepart {
 
     /// Represents a text-based message body.
     public struct Text: Equatable {
-
         /// The type of text message, e.g. `text/html` or `text/plain`
         public var mediaText: String
 
@@ -105,7 +99,6 @@ extension BodyStructure.Singlepart {
 
     /// Optional extension fields, initially pairing an MD5 body digest with a `DispositionAndLanguage`.
     public struct Extension: Equatable {
-
         /// A string giving the body MD5 value.
         public let digest: String?
 

@@ -26,7 +26,6 @@ public enum BodyStructure: Equatable {
 }
 
 extension BodyStructure: RandomAccessCollection {
-
     /// The `Element` of a `BodyStructure` is `BodyStructure` itself.
     /// For example a multi-part body may be thought of as an array of multi-part bodies.
     public typealias Element = BodyStructure
@@ -43,7 +42,6 @@ extension BodyStructure: RandomAccessCollection {
     /// - parameter position: The position of the desired body.
     /// - returns: The body located at the given `position`.
     public subscript(position: SectionSpecifier.Part) -> BodyStructure {
-
         // TODO: Can we get rid of this guard if we move the checks to SectionSpecifier.Part.init?
         guard let first = position.rawValue.first, first > 0 else {
             preconditionFailure("Part must contain a first number > 0")
@@ -113,10 +111,8 @@ extension BodyStructure: RandomAccessCollection {
 // MARK: - Types
 
 extension BodyStructure {
-
     /// The subtype of a multi-part body.
     public struct MediaSubtype: RawRepresentable, CustomStringConvertible, Equatable {
-
         /// `multipart/alternative`. For representing the same data as different formats.
         public static var alternative: Self {
             .init("multipart/alternative")
@@ -138,12 +134,6 @@ extension BodyStructure {
         /// See `.rawValue`.
         public var description: String {
             rawValue
-        }
-
-        /// Creates a new `MediaSubtype` from the given `String`, which will be lowercased.
-        /// - parameter rawValue: The subtype as a `String`. Note that the string will be lowercased.
-        public init(rawValue: String) {
-            self.rawValue = rawValue.lowercased()
         }
 
         /// Creates a new `MediaSubtype` from the given `String`, which will be lowercased.
