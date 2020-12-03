@@ -15,16 +15,14 @@
 import struct NIO.ByteBuffer
 
 extension BodyStructure {
-    
     /// Represents a single-part body as defined in RFC 3501.
     public struct Singlepart: Equatable {
-        
         /// The type of single-part. Note that "message" types may contain a multi-part.
         public var kind: Kind
-        
+
         /// A collection of common message attributes, such as a message identifier.
         public var fields: Fields
-        
+
         /// An optional extension to the core message. Not required to construct a valid message.
         public var `extension`: Extension?
 
@@ -43,32 +41,29 @@ extension BodyStructure {
 // MARK: - Types
 
 extension BodyStructure.Singlepart {
-    
     /// Represents the type of a single-part message.
     public indirect enum Kind: Equatable {
-        
         /// A simple message containing only one kind of data.
         case basic(Media.Basic)
-        
+
         /// A "full" email message containing an envelope, and a child body.
         case message(Message)
-        
+
         /// A message type, for example plain text, or html.
         case text(Text)
     }
 
     /// Represents a typical "full" email message, containing an envelope and a child message.
     public struct Message: Equatable {
-        
         /// Indication if the message contains an encapsulated message.
         public var message: Media.Message
-        
+
         /// The envelope of the message, potentially including the message sender, bcc list, etc.
         public var envelope: Envelope
-        
+
         /// The child body. Note that this may be a multi-part.
         public var body: BodyStructure
-        
+
         /// The number of lines in the message.
         public var lineCount: Int
 
@@ -87,10 +82,9 @@ extension BodyStructure.Singlepart {
 
     /// Represents a text-based message body.
     public struct Text: Equatable {
-        
         /// The type of text message, e.g. `text/html` or `text/plain`
         public var mediaText: String
-        
+
         /// The number of lines in the message.
         public var lineCount: Int
 
@@ -105,10 +99,9 @@ extension BodyStructure.Singlepart {
 
     /// Optional extension fields, initially pairing an MD5 body digest with a `DispositionAndLanguage`.
     public struct Extension: Equatable {
-        
         /// A string giving the body MD5 value.
         public let digest: String?
-        
+
         /// A `Disposition` and `LanguageLocation` pairing. `LanguageLocation` can be further expanded, the intention
         /// of which is to provide a cleaner API.
         public var dispositionAndLanguage: BodyStructure.DispositionAndLanguage?

@@ -18,7 +18,6 @@ extension BodyStructure {
     /// Represents the body transfer encoding as defined in MIME-IMB.
     /// Recommended reading: RFC 2045
     public struct Encoding: RawRepresentable, CustomStringConvertible, Equatable {
-        
         /// Represents 7-bit encoding, octets with a value larger than 127 are forbidden.
         public static var sevenBit: Self { Self("7BIT") }
 
@@ -33,10 +32,10 @@ extension BodyStructure {
 
         /// Represents octets that mostly are printable characters in the US-ASCII character set.
         public static var quotedPrintable: Self { Self("QUOTED-PRINTABLE") }
-        
+
         /// The uppercased encoding name
         public var rawValue: String
-        
+
         /// See `rawValue`.
         public var description: String {
             rawValue
@@ -47,13 +46,12 @@ extension BodyStructure {
         public init(rawValue: String) {
             self.rawValue = rawValue.uppercased()
         }
-        
+
         /// Creates a new type with the given `String`.
         /// - parameter rawValue: The string representation of the new `Encoding`. Will be upper-cased.
         public init(_ rawValue: String) {
             self.init(rawValue: rawValue)
         }
-
     }
 }
 

@@ -16,7 +16,6 @@ import struct NIO.ByteBuffer
 
 /// A description of the data that will be sent as part of an append command.
 public struct AppendData: Equatable {
-    
     /// The size of the message in bytes.
     public var byteCount: Int
 
