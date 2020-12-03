@@ -15,8 +15,13 @@
 import struct NIO.ByteBuffer
 import struct NIO.ByteBufferView
 
+/// The `MailboxName` was too big - typically > 1000 bytes.
 public struct MailboxTooBigError: Error, Equatable {
+    
+    /// Specifies the maximum size of a `MailboxName`, typically 1000 bytes.
     public var maximumSize: Int
+    
+    /// The actual size of the attempted `MailboxName`.
     public var actualSize: Int
 }
 
