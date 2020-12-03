@@ -3061,11 +3061,8 @@ extension GrammarParser {
 
     // mod-sequence-valzer = "0" / mod-sequence-value
     static func parseModificationSequenceValue(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ModificationSequenceValue {
-        let number = try self.parseNumber(buffer: &buffer, tracker: tracker)
-        guard let value = ModificationSequenceValue(number) else {
-            throw ParserError(hint: "Unable to create ModifiersSequenceValueZero")
-        }
-        return value
+        let number = UInt64(try self.parseNumber(buffer: &buffer, tracker: tracker))
+        return ModificationSequenceValue(number)
     }
 
     // move            = "MOVE" SP sequence-set SP mailbox
