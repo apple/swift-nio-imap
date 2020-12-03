@@ -2884,7 +2884,7 @@ extension GrammarParser {
 
         func parseMediaBasic_Kind_other(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Media.BasicKind {
             let buffer = try self.parseString(buffer: &buffer, tracker: tracker)
-            return .other(String(buffer: buffer))
+            return .init(rawValue: String(buffer: buffer))
         }
 
         return try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Media.Basic in
@@ -2910,16 +2910,10 @@ extension GrammarParser {
             return .rfc822
         }
 
-        func parseMediaMessage_global(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Media.Message {
-            try fixedString("GLOBAL", buffer: &buffer, tracker: tracker)
-            return .global
-        }
-
         return try composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> Media.Message in
             try fixedString("\"MESSAGE\" \"", buffer: &buffer, tracker: tracker)
             let message = try oneOf([
                 parseMediaMessage_rfc,
-                parseMediaMessage_global,
             ], buffer: &buffer, tracker: tracker)
             try fixedString("\"", buffer: &buffer, tracker: tracker)
             return message
