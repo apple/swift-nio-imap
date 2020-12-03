@@ -14,13 +14,16 @@
 
 import struct NIO.ByteBuffer
 
-/// RFC 6237 - One or more scope options
+/// A wrapper around a non-empty array of key/value pairs. This is used to provide
+/// a catch-all for future extensions, as no options are currently explicitly defined.
 public struct ESearchScopeOptions: Equatable {
-    /// Array of at least one scope option.
+    
+    /// An array of Scope Option key/value pairs. Note that the array must not be empty.
     public private(set) var content: [Parameter]
 
-    /// Initialise - there must be at least one scope option in the set.
-    ///  - parameter options: One or more mailboxes.
+    /// Creates a new `ESearchScopeOptions` from a non-empty array of options.
+    ///  - parameter options: One or more options.
+    /// - returns: A `nil` if `options` is empty, otherwise a new `ESearchScopeOptions`.
     init?(_ options: [Parameter]) {
         guard options.count >= 1 else {
             return nil
