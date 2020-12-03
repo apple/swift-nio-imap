@@ -2859,7 +2859,7 @@ extension ParserUnitTests {
                 ("SEARCH 1", "\r\n", .search([1]), #line),
                 ("SEARCH 1 2 3 4 5", "\r\n", .search([1, 2, 3, 4, 5]), #line),
                 ("NAMESPACE NIL NIL NIL", "\r\n", .namespace(.init(userNamespace: [], otherUserNamespace: [], sharedNamespace: [])), #line),
-                ("SEARCH 1 2 3 (MODSEQ 4)", "\r\n", .searchSort(.init(identifiers: [1, 2, 3], modificationSequence: .init(modifierSequenceValue: 4))), #line),
+                ("SEARCH 1 2 3 (MODSEQ 4)", "\r\n", .searchSort(.init(identifiers: [1, 2, 3], modificationSequence: 4)), #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
@@ -3804,7 +3804,7 @@ extension ParserUnitTests {
         self.iterateTests(
             testFunction: GrammarParser.parseSearchSortModificationSequence,
             validInputs: [
-                ("(MODSEQ 123)", "\r", .init(modifierSequenceValue: 123), #line),
+                ("(MODSEQ 123)", "\r", 123, #line),
             ],
             parserErrorInputs: [
                 ("(MODSEQ a)", "", #line),

@@ -24,7 +24,7 @@ extension SortData_Tests {
     func testEncode() {
         let inputs: [(SortData?, String, UInt)] = [
             (nil, "SORT", #line),
-            (.init(identifiers: [1], modificationSequence: .init(modifierSequenceValue: 2)), "SORT 1 (MODSEQ 2)", #line),
+            (.init(identifiers: [1], modificationSequence: 2), "SORT 1 (MODSEQ 2)", #line),
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeSortData($0) })
     }
