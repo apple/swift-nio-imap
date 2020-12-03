@@ -14,9 +14,13 @@
 
 import struct NIO.ByteBuffer
 
-/// IMAPv4 `mbox-or-pat`
+/// Extends the LIST command to allow multiple mailbox patterns
 public enum MailboxPatterns: Equatable {
+    
+    /// Match a single mailbox pattern
     case mailbox(ByteBuffer)
+    
+    /// Match multiple mailbox patterns
     case pattern([ByteBuffer])
 }
 
