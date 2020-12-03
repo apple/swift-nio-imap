@@ -179,6 +179,8 @@ extension MailboxPath {
 
 /// IMAPv4 `mailbox`
 public struct MailboxName: Hashable {
+    
+    /// Represents an inbox.
     public static var inbox = Self("INBOX")
 
     /// The raw bytes, readable as `[UInt8]`
@@ -205,6 +207,8 @@ public struct MailboxName: Hashable {
         }
     }
 
+    /// Creates a new `MailboxName` from the given bytes.
+    /// - parameter bytes: The bytes to construct a `MailboxName` from. Note that if any case-insensitive variation of *INBOX* is provided then it will be uppercased.
     public init(_ bytes: ByteBuffer) {
         if String(buffer: bytes).uppercased() == "INBOX" {
             self.storage = ByteBuffer(ByteBufferView("INBOX".utf8))
@@ -217,6 +221,8 @@ public struct MailboxName: Hashable {
 // MARK: - CustomStringConvertible
 
 extension MailboxName: CustomStringConvertible {
+    
+    /// Provides a human-readable description.
     public var description: String {
         self.stringValue
     }
