@@ -14,7 +14,7 @@
 
 import struct NIO.ByteBuffer
 
-/// IMAPv4 `status-att`
+/// Mailbox attributes that may be requested and returned as part of a *LIST* command.
 public enum MailboxAttribute: String, CaseIterable {
     /// `MESSAGES`
     /// The number of messages in the mailbox.
