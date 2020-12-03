@@ -41,7 +41,7 @@ public enum Command: Equatable {
     /// Returns a subset of names from the complete set of all names available to the client.
     case list(ListSelectOptions?, reference: MailboxName, MailboxPatterns, [ReturnOption] = [])
 
-    ///
+    /// Similar to `.list`, but uses options that do not syntactically interact with other options
     case listIndependent([ListSelectIndependentOption], reference: MailboxName, MailboxPatterns, [ReturnOption] = [])
 
     /// Returns a subset of names from the complete set of names that the user has marked as "active" or "subscribed"
