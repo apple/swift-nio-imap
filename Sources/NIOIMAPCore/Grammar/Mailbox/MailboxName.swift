@@ -39,8 +39,15 @@ public struct InvalidPathSeparatorError: Error, Equatable {
     public var description: String
 }
 
+/// Represents a complete mailbox path, delimited by the `pathSeparator`.
+/// For example, *foo/bar* is the `MailboxName`, and so "/" would be the `pathSeparator`.
+/// Path separators are optional, and so the simple `MailboxName` *foo* has `pathSeparator = nil`.
 public struct MailboxPath: Hashable {
+    
+    /// The full mailbox name, e.g. *foo/bar*
     public var name: MailboxName
+    
+    /// The path separator, e.g. */* in *foo/bar*
     public var pathSeparator: Character?
 
     /// Creates a new `MailboxPath` with the given data.
