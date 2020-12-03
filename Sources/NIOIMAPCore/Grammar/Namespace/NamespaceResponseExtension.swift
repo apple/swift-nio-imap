@@ -14,11 +14,18 @@
 
 import struct NIO.ByteBuffer
 
-/// IMAPv4 `Namespace-Response-Extension`
+/// Designed as a catch-all to support namespace information contained in future IMAP extensions. Pairs a string key with an array of data.
 public struct NamespaceResponseExtension: Equatable {
+    
+    /// A key
     public var string: ByteBuffer
+    
+    /// An array of data
     public var array: [ByteBuffer]
 
+    /// Creates a new `NamespaceResponseExtension`.
+    /// - parameter string: The `String` to use as a key.
+    /// - parameter array: An associated array of data.
     public init(string: ByteBuffer, array: [ByteBuffer]) {
         self.string = string
         self.array = array
