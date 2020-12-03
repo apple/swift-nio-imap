@@ -14,9 +14,13 @@
 
 import struct NIO.ByteBuffer
 
-/// IMAPv4 `flag-perm`
+/// Represents an IMAP permanent flag - a flag that persists across sessions.
 public enum PermanentFlag: Hashable {
+    
+    /// A specific flag that can be or is permanent.
     case flag(Flag)
+    
+    /// A wildcard to say any flag may be made permanent
     case wildcard
 }
 
