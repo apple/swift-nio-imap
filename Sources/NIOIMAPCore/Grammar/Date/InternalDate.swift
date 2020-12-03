@@ -70,16 +70,40 @@ public struct InternalDate: Equatable {
 }
 
 extension InternalDate {
+    
+    /// Contains the individual components extracted from an `InternalDate`, and can be used to
+    /// construct an `InternalDate`.
     public struct Components {
+        
+        /// The year.
         public let year: Int
+        
+        /// The month.
         public let month: Int
+        
+        /// The day.
         public let day: Int
+        
+        /// The hour.
         public let hour: Int
+        
+        /// The minute.
         public let minute: Int
+        
+        /// The second.
         public let second: Int
-        /// Time zone offset in minutes
+        
+        /// Time zone offset in minutes.
         public let zoneMinutes: Int
 
+        /// Creates a new `Components` collection from the given parameters. Note that currently no sanity checks are performed.
+        /// - parameter year: The year, typically to be represented as a 4-digit integer.
+        /// - parameter month: The month, typically represented as a 2-digit integer in the range 1:12
+        /// - parameter day: The day, typically represented as a 2-digit integer in the range 1:31
+        /// - parameter hour: The hour, typically represented as a 2-digit integer in the range 0:23
+        /// - parameter minute: The minute, typically represented as a 2-digit integer in the range 0:59
+        /// - parameter second: The second, typically represented as a 2-digit integer in the range 0:59
+        /// - parameter zoneMinutes: The timezone as an offset in minutes from UTC.
         public init(year: Int, month: Int, day: Int, hour: Int, minute: Int, second: Int, zoneMinutes: Int) {
             self.year = year
             self.month = month
@@ -91,10 +115,13 @@ extension InternalDate {
         }
     }
 
+    /// Creates a new `InternalDate` from a given collection of `Components
+    /// - parameter components: The components containing a year, month, day, hour, minute, second, and timezone.
     public init?(components c: Components) {
         self.init(year: c.year, month: c.month, day: c.day, hour: c.hour, minute: c.month, second: c.second, zoneMinutes: c.zoneMinutes)
     }
 
+    /// The components of the date, such as the day, month, year, etc.
     public var components: Components {
         var remainder = self.rawValue
 
