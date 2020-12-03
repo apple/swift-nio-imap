@@ -15,13 +15,10 @@
 import struct NIO.ByteBuffer
 
 extension Media {
+    
+    /// Represents a simple but common data type such as *APPLICATION* or *INAGE*
     public struct BasicKind: RawRepresentable, CustomStringConvertible, Equatable {
-        public var rawValue: String
-
-        public init(rawValue: String) {
-            self.rawValue = rawValue.uppercased()
-        }
-
+        
         /// IMAP4rev1 APPLICATION
         public static var application: Self { .init(rawValue: "APPLICATION") }
 
@@ -39,17 +36,21 @@ extension Media {
 
         /// IMAP4rev1 FONT
         public static var font: Self { .init(rawValue: "FONT") }
+        
+        /// The raw uppercased string representation of the type.
+        public var rawValue: String
 
-        /// Creates a new type with the given `String`.
-        /// - parameter string: The type to create. Note that the `String` will be uppercased.
-        /// - returns: A new type from the given `String`.
-        public static func other(_ string: String) -> Self {
-            self.init(rawValue: string)
-        }
-
+        /// See `rawValue`
         public var description: String {
             rawValue
         }
+        
+        /// Creates a new `BasicKind` from a given `String`.
+        /// - parameter rawValue: A string that represents the type, note that this will be uppercased.
+        public init(rawValue: String) {
+            self.rawValue = rawValue.uppercased()
+        }
+
     }
 
     /// IMAPv4 `media-basic`
