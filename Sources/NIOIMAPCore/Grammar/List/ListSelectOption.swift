@@ -14,12 +14,24 @@
 
 import struct NIO.ByteBuffer
 
-/// IMAPv4 `list-select-opt`
+/// Options to control what is returned as the response of a list command.
 public enum ListSelectOption: Equatable {
+    
+    /// *SUBSCRIBED* - Returns mailboxes that the user has subscribed to
     case subscribed
+    
+    /// *REMOTE* - Asks the list response to return both remote and local mailboxes
     case remote
+    
+    /// *SPECIAL-USE* - Asks the list response to return special-use mailboxes. E.g. *draft* or *sent* messages.
     case specialUse
+    
+    /// *RECURSIVEMATCH* - Forces the server to return information
+    /// about parent mailboxes that don't match other selection options,
+    /// but have some sub-mailboxes that do.
     case recursiveMatch
+    
+    /// Asks the list response to return special-use mailboxes. E.g. *draft* or *sent* messages.
     case option(OptionExtension)
 }
 
