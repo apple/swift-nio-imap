@@ -32,7 +32,10 @@ public struct InvalidMailboxNameError: Error, Equatable {
     public var description: String
 }
 
+/// The path separator was invalid - path separators have strict requirements. See RFC 3501 for more details.
 public struct InvalidPathSeparatorError: Error, Equatable {
+    
+    /// Information on why the path separator was considered invalid.
     public var description: String
 }
 
