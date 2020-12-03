@@ -13,9 +13,14 @@
 //===----------------------------------------------------------------------===//
 import struct NIO.ByteBuffer
 
+/// GMail treats labels as folders.
 public struct GmailLabel: RawRepresentable, Equatable {
+
+    /// The label's raw value -  a sequence of bytes
     public var rawValue: ByteBuffer
 
+    /// Creates a new GMail label from the given bytes.
+    /// - parameter rawValue: The raw bytes to construct the label
     public init(rawValue: ByteBuffer) {
         self.rawValue = rawValue
     }
