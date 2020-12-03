@@ -20,20 +20,31 @@ import struct NIO.ByteBuffer
 /// As such e.g. `.extension("\\FOOBAR") == .extension("\\FooBar")`, but
 /// it will round-trip preserving its case.
 public struct Flag: RawRepresentable, Hashable {
+    
+    /// The raw case-sensitive `String` value.
     public var rawValue: String
 
+    /// Creates a new `Flag` from the given `String`. Note that casing is preserved, however
+    /// when checking if two `Flag`s are equal, then the comparison is case-insensitive.
     public init(rawValue: String) {
         self.rawValue = rawValue
     }
 
+    /// Compares two flags to see if they are equivalent. Note that the comparison is case-insensitive.
+    /// - parameter lhs: The first flag to compare.
+    /// - parameter rhs: The second flag to compare.
+    /// - returns: `true` if the flags are equal, otherwise `false`.
     public static func == (lhs: Flag, rhs: Flag) -> Bool {
         lhs.rawValue.uppercased() == rhs.rawValue.uppercased()
     }
 
+    /// Hashes the `Flag` using some given `Hasher`. Note that the `Flag` is first upper-cased.
+    /// - parameter hasher: The `Hasher` to hash the `Flag` into.
     public func hash(into hasher: inout Hasher) {
         rawValue.uppercased().hash(into: &hasher)
     }
 
+    /// The hash value of the `Flag`. Typically used as a unique access key in, for example, a `Dictionary` or `Set`.
     public var hashValue: Int {
         var hasher = Hasher()
         hash(into: &hasher)
@@ -42,12 +53,28 @@ public struct Flag: RawRepresentable, Hashable {
 }
 
 extension Flag {
+    
+    /// `\\Answered` - The message has been replied to.
     public static let answered = Self(rawValue: "\\Answered")
+    
+    /// `\\Flagged` - The message has been marked by the user, typically as a reminder
+    /// that some action is required.
     public static let flagged = Self(rawValue: "\\Flagged")
+    
+    /// `\\Deleted` - The message has been deleted and should no
+    /// longer be shown to the user, unless they specifically request to
+    /// view deleted messages.
     public static let deleted = Self(rawValue: "\\Deleted")
+    
+    /// `\\Seen` - The message has been read by the user
     public static let seen = Self(rawValue: "\\Seen")
+    
+    /// `\\Draft` - The message is not yet complete
     public static let draft = Self(rawValue: "\\Draft")
 
+    /// Convenience function to create a new flag from a `Keyword`.
+    /// - parameter keyword: The `Keyword` to use to make the `Flag`.
+    /// - returns: A new `Flag`
     public static func keyword(_ keyword: Keyword) -> Self {
         self.init(rawValue: keyword.rawValue)
     }
