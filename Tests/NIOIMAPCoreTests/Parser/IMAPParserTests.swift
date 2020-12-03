@@ -4895,26 +4895,6 @@ extension ParserUnitTests {
         )
     }
 
-    func testParseESearchScopeOption() {
-        self.iterateTests(
-            testFunction: GrammarParser.parseESearchScopeOption,
-            validInputs: [
-                (
-                    "name", "\r",
-                    .init(name: "name"),
-                    #line
-                ),
-                (
-                    "name $", "\r",
-                    .init(name: "name", value: .sequence(.lastCommand)),
-                    #line
-                ),
-            ],
-            parserErrorInputs: [],
-            incompleteMessageInputs: []
-        )
-    }
-
     func testParseESearchScopeOptions() {
         self.iterateTests(
             testFunction: GrammarParser.parseESearchScopeOptions,

@@ -17,11 +17,11 @@ import struct NIO.ByteBuffer
 /// RFC 6237 - One or more scope options
 public struct ESearchScopeOptions: Equatable {
     /// Array of at least one scope option.
-    public private(set) var content: [ESearchScopeOption]
+    public private(set) var content: [Parameter]
 
     /// Initialise - there must be at least one scope option in the set.
     ///  - parameter options: One or more mailboxes.
-    init?(_ options: [ESearchScopeOption]) {
+    init?(_ options: [Parameter]) {
         guard options.count >= 1 else {
             return nil
         }
@@ -34,7 +34,7 @@ public struct ESearchScopeOptions: Equatable {
 extension EncodeBuffer {
     @discardableResult public mutating func writeESearchScopeOptions(_ options: ESearchScopeOptions) -> Int {
         self.writeArray(options.content, parenthesis: false) { (option, buffer) -> Int in
-            buffer.writeESearchScopeOption(option)
+            buffer.writeParameter(option)
         }
     }
 }

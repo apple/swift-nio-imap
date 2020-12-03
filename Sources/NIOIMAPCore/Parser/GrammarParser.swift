@@ -5643,28 +5643,11 @@ extension GrammarParser {
     }
 
     // RFC 6237
-    // scope-option =  scope-option-name [SP scope-option-value]
-    // scope-option-name =  tagged-ext-label
-    // scope-option-value =  tagged-ext-val
-    static func parseESearchScopeOption(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ESearchScopeOption {
-        func parseESearchScopeOption_value(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ParameterValue {
-            try space(buffer: &buffer, tracker: tracker)
-            return try self.parseParameterValue(buffer: &buffer, tracker: tracker)
-        }
-
-        let label = try self.parseParameterName(buffer: &buffer, tracker: tracker)
-        let value = try optional(buffer: &buffer,
-                                 tracker: tracker,
-                                 parser: parseESearchScopeOption_value)
-        return ESearchScopeOption(name: label, value: value)
-    }
-
-    // RFC 6237
     // scope-options =  scope-option *(SP scope-option)
     static func parseESearchScopeOptions(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ESearchScopeOptions {
-        var options: [ESearchScopeOption] = [try parseESearchScopeOption(buffer: &buffer, tracker: tracker)]
+        var options: [Parameter] = [try parseParameter(buffer: &buffer, tracker: tracker)]
         while try optional(buffer: &buffer, tracker: tracker, parser: space) != nil {
-            options.append(try parseESearchScopeOption(buffer: &buffer, tracker: tracker))
+            options.append(try parseParameter(buffer: &buffer, tracker: tracker))
         }
         if let returnValue = ESearchScopeOptions(options) {
             return returnValue
