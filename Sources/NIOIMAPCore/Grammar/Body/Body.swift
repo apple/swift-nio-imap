@@ -35,7 +35,7 @@ extension BodyStructure: RandomAccessCollection {
     /// or integers, where each integer represents the position of a sub-node.
     public typealias Index = SectionSpecifier.Part
 
-    /// Because `BodyStructure` is a recursive type, a`SubSequence` is defined as `Slice<BodyStructure>`.
+    /// Because `BodyStructure` is a recursive type, a `SubSequence` is defined as `Slice<BodyStructure>`.
     public typealias SubSequence = Slice<BodyStructure>
 
     /// Gets the body at the given `position`.
