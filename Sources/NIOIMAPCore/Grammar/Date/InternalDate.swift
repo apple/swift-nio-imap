@@ -22,7 +22,20 @@
 /// IMAPv4 `date-time`
 public struct InternalDate: Equatable {
     var rawValue: UInt64
+    
+    // TODO: Minute/second checks don't make sense. 1:60 should just be 2
 
+    /// Creates a new `InternalDate`. The data entered is partially validated
+    /// using simple sanity checks, for example month must be in the range 1:12.
+    /// More complicated checks, such as the number of days in a given month, are not
+    /// performed.
+    /// - parameter year: The year.
+    /// - parameter month: The month, required to be in the range 1:12.
+    /// - parameter day: The day, required to be in the range 1:31.
+    /// - parameter hour: The hour, required to be in the range 0:24.
+    /// - parameter minute: The minute, required to be in the range 0:60.
+    /// - parameter second: The second, required to be in the range 0:60.
+    /// - parameter zone: The timezone offset from UTC.
     public init?(year: Int, month: Int, day: Int, hour: Int, minute: Int, second: Int, zoneMinutes: Int) {
         guard
             (1 ... 31).contains(day),
