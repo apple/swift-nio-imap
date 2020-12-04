@@ -14,8 +14,13 @@
 
 import struct NIO.ByteBuffer
 
+/// Specifies the type of `OptionExtension`
 public enum OptionExtensionKind: Equatable {
+    
+    /// A simple string-based value.
     case standard(String)
+    
+    /// Use a `OptionVendorTag` as the extension kind.
     case vendor(OptionVendorTag)
 }
 
