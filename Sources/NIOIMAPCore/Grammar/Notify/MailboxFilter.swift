@@ -14,8 +14,9 @@
 
 import struct NIO.ByteBuffer
 
-/// RFC 5465 filter-mailboxes
+/// Filters to be used when selecting mailboxes to be notified about.
 public enum MailboxFilter: Equatable {
+    
     /// All selectable mailboxes in the user's personal
     /// namespace(s) to which messages may be delivered by a Message Delivery Agent (MDA)
     case inboxes
