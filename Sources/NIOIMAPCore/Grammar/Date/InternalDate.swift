@@ -76,19 +76,19 @@ extension InternalDate {
         /// The year.
         public let year: Int
 
-        /// The month.
+        /// The month, typically represented as a 2-digit integer in the range 1:12
         public let month: Int
 
-        /// The day.
+        /// The day, typically represented as a 2-digit integer in the range 1:31
         public let day: Int
 
-        /// The hour.
+        /// The hour, typically represented as a 2-digit integer in the range 0:23
         public let hour: Int
 
-        /// The minute.
+        /// The minute, typically represented as a 2-digit integer in the range 0:59
         public let minute: Int
 
-        /// The second.
+        /// The second, typically represented as a 2-digit integer in the range 0:59
         public let second: Int
 
         /// Time zone offset in minutes.
@@ -110,6 +110,8 @@ extension InternalDate {
             self.minute = minute
             self.second = second
             self.zoneMinutes = zoneMinutes
+            
+            // TODO: Add sanity checks
         }
     }
 
