@@ -29,7 +29,7 @@ public struct StoreFlags: Hashable {
     }
 
     /// Convenience function to create a new *add* operation.
-    /// - parameter silent: `false` of the server should return the new flags list for the message(s), otherwise `true`.
+    /// - parameter silent: `false` if the server should return the new flags list for the message(s), otherwise `true`.
     /// - parameter list: The `Flag`s to add.
     /// - returns: A new `StoreFlags`
     public static func add(silent: Bool, list: [Flag]) -> Self {
@@ -37,7 +37,7 @@ public struct StoreFlags: Hashable {
     }
 
     /// Convenience function to create a new *remove* operation.
-    /// - parameter silent: `false` of the server should return the new flags list for the message(s), otherwise `true`.
+    /// - parameter silent: `false` if the server should return the new flags list for the message(s), otherwise `true`.
     /// - parameter list: The `Flag`s to remove.
     /// - returns: A new `StoreFlags`
     public static func remove(silent: Bool, list: [Flag]) -> Self {
@@ -45,7 +45,7 @@ public struct StoreFlags: Hashable {
     }
 
     /// Convenience function to create a new *add* operation.
-    /// - parameter silent: `false` of the server should return the new flags list for the message(s), otherwise `true`.
+    /// - parameter silent: `false` if the server should return the new flags list for the message(s), otherwise `true`.
     /// - parameter list: The `Flag`s to replace.
     /// - returns: A new `StoreFlags`
     public static func replace(silent: Bool, list: [Flag]) -> Self {

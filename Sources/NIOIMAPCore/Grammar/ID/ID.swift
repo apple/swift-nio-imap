@@ -25,7 +25,7 @@ public struct IDParameter: Equatable {
 
     /// Creates a new `IDParameter` key/value pair.
     /// - parameter key: Some `String` key.
-    /// - parameter value: Some optional value.
+    /// - parameter value: The value to be associated with `key`?
     public init(key: String, value: ByteBuffer?) {
         self.key = key
         self.value = value
