@@ -41,11 +41,16 @@ public struct QResyncParameter: Equatable {
     }
 }
 
+/// Used to specify the type of `.select` command that should be execuuted.
 public enum SelectParameter: Equatable {
+    
+    /// Perform a basic `.select` command without Condition Store or Quick Resynchronisation.
     case basic(Parameter)
 
+    /// Perform a `.select` command with Quick Resynchronisation. Note that a server must explicitly advertise this capability. See RFC 7162.
     case qresync(QResyncParameter)
 
+    /// Perform a `.select` command with Conditional Store. Note that a server must explicitly advertise this capability. See RFC 7162.
     case condstore
 }
 
