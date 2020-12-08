@@ -36,9 +36,9 @@ extension EncodeBuffer {
                     buffer.writeString("\(element)")
                 } +
                     self.writeSpace() +
-                self.writeString("(MODSEQ ") +
-                self.writeModificationSequenceValue(data.modificationSequence) +
-                self.writeString(")")
+                    self.writeString("(MODSEQ ") +
+                    self.writeModificationSequenceValue(data.modificationSequence) +
+                    self.writeString(")")
             }
     }
 }

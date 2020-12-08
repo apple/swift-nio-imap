@@ -16,13 +16,12 @@ import struct NIO.ByteBuffer
 
 /// A collection of mailbox attributes defined in the supported IMAP4 RFCs.
 public struct MailboxInfo: Equatable {
-    
     /// An array of mailbox attributes.
     public var attributes: [Attribute]
-    
+
     /// The mailbox path.
     public var path: MailboxPath
-    
+
     /// A catch-all to support any attributes added in future extensions.
     public var extensions: [ListExtendedItem]
 
@@ -40,39 +39,37 @@ public struct MailboxInfo: Equatable {
 // MARK: - Types
 
 extension MailboxInfo {
-    
     /// A single attribute of a Mailbox
     public struct Attribute: Hashable {
-
         /// It is not possible to use this name as a selectable mailbox.
         public static var noSelect: Self { Self(_backing: #"\noselect"#) }
-        
+
         /// The mailbox has been marked as "interesting" by the server. It probably contains new messages since the mailbox was selected.
         public static var marked: Self { Self(_backing: #"\marked"#) }
-        
+
         /// The mailbox does not have any new messages since the mailbox was last selected.
         public static var unmarked: Self { Self(_backing: #"\unmarked"#) }
-        
+
         /// The mailbox does not refer to an existing mailbox.
         public static var nonExistent: Self { Self(_backing: #"\nonexistent"#) }
-        
+
         /// It is not possible for this mailbox to have children.
         public static var noInferiors: Self { Self(_backing: #"\noinferiors"#) }
-        
+
         /// The mailbox has been subscribed to.
         public static var subscribed: Self { Self(_backing: #"\subscribed"#) }
-        
+
         /// The mailbox is a remote mailbox.
         public static var remote: Self { Self(_backing: #"\remote"#) }
-        
+
         /// The mailbox has child mailboxes.
         public static var hasChildren: Self { Self(_backing: #"\HasChildren"#) }
-        
+
         /// The mailbox does not have child attributes.
         public static var hasNoChildren: Self { Self(_backing: #"\HasNoChildren"#) }
 
         var _backing: String
-        
+
         init(_backing: String) {
             self._backing = _backing
         }

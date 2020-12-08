@@ -16,49 +16,46 @@ import struct NIO.ByteBuffer
 
 /// Mailbox attributes with associated data, part of a fetch response.
 public enum MailboxData: Equatable {
-    
     /// The flags associated with a mailbox.
     case flags([Flag])
-    
+
     /// Mailbox attributes.
     case list(MailboxInfo)
-    
+
     /// Subscribed mailbox attributes.
     case lsub(MailboxInfo)
-    
+
     /// Response to a search command, containing message sequence numbers.
     case search([Int])
-    
+
     /// Response to an extended search command.
     case esearch(ESearchResponse)
-    
+
     /// The status of the given Mailbox.
     case status(MailboxName, MailboxStatus)
-    
+
     /// The number of messages in a mailbox.
     case exists(Int)
-    
+
     /// The number of messages with the *\\Recent* flag set.
     case recent(Int)
-    
+
     /// Response to a namespace command.
     case namespace(NamespaceResponse)
-    
+
     /// Response to a search-sort command, containing an array of identifiers and sequence information.
     case searchSort(SearchSort)
 }
 
 extension MailboxData {
-    
     /// A container for an array of message identifiers, and a sequence.
     public struct SearchSort: Equatable {
-        
         /// An array of message identifiers that were matched in a search.
         public var identifiers: [Int]
-        
+
         /// The highest `ModificationSequence` of all messages that were found.
         public var modificationSequence: ModificationSequenceValue
-        
+
         /// Creates a new `SearchSort`.
         /// - parameter identifiers: An array of message identifiers that were matched in a search.
         /// - parameter modificationSequence: The highest `ModificationSequence` of all messages that were found.
@@ -78,13 +75,13 @@ extension EncodeBuffer {
                 self.writeArray(data.identifiers, prefix: " ", parenthesis: false) { (element, buffer) -> Int in
                     buffer.writeString("\(element)")
                 } +
-                self.writeSpace() +
-                self.writeString("(MODSEQ ") +
-                self.writeModificationSequenceValue(data.modificationSequence) +
-                self.writeString(")")
+                    self.writeSpace() +
+                    self.writeString("(MODSEQ ") +
+                    self.writeModificationSequenceValue(data.modificationSequence) +
+                    self.writeString(")")
             }
     }
-    
+
     @discardableResult mutating func writeMailboxData(_ data: MailboxData) -> Int {
         switch data {
         case .flags(let flags):
@@ -109,29 +106,29 @@ extension EncodeBuffer {
             return self.writeMailboxDataSearchSort(data)
         }
     }
-    
+
     private mutating func writeMailboxData_search(_ list: [Int]) -> Int {
         self.writeString("SEARCH") +
             self.writeArray(list, separator: "", parenthesis: false) { (num, buffer) -> Int in
                 buffer.writeString(" \(num)")
             }
     }
-    
+
     private mutating func writeMailboxData_flags(_ flags: [Flag]) -> Int {
         self.writeString("FLAGS ") +
             self.writeFlags(flags)
     }
-    
+
     private mutating func writeMailboxData_list(_ list: MailboxInfo) -> Int {
         self.writeString("LIST ") +
             self.writeMailboxInfo(list)
     }
-    
+
     private mutating func writeMailboxData_lsub(_ list: MailboxInfo) -> Int {
         self.writeString("LSUB ") +
             self.writeMailboxInfo(list)
     }
-    
+
     private mutating func writeMailboxData_status(mailbox: MailboxName, status: MailboxStatus) -> Int {
         self.writeString("STATUS ") +
             self.writeMailbox(mailbox) +

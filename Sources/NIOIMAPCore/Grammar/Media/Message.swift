@@ -15,10 +15,8 @@
 import struct NIO.ByteBuffer
 
 extension Media {
-    
     /// Indicates if the media type conforms to a given standard
     public enum Message: String, Equatable {
-        
         /// The media type conforms to RFC822.
         case rfc822 = "RFC822"
     }

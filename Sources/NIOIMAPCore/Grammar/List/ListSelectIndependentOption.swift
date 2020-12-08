@@ -16,13 +16,12 @@ import struct NIO.ByteBuffer
 
 /// Options that do not syntactically interact with other options
 public enum ListSelectIndependentOption: Equatable {
-    
     /// *REMOTE* - Asks the list response to return both remote and local mailboxes
     case remote
-    
+
     /// A catch-all to support future extensions
     case option(OptionExtension)
-    
+
     /// *SPECIAL-USE* - Asks the list response to return special-use mailboxes. E.g. *draft* or *sent* messages.
     case specialUse
 }

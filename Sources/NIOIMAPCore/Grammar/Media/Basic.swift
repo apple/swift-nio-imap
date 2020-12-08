@@ -15,10 +15,8 @@
 import struct NIO.ByteBuffer
 
 extension Media {
-    
     /// Represents a simple but common data type such as *APPLICATION* or *INAGE*
     public struct BasicKind: RawRepresentable, CustomStringConvertible, Equatable {
-        
         /// IMAP4rev1 APPLICATION
         public static var application: Self { .init(rawValue: "APPLICATION") }
 
@@ -36,7 +34,7 @@ extension Media {
 
         /// IMAP4rev1 FONT
         public static var font: Self { .init(rawValue: "FONT") }
-        
+
         /// The raw uppercased string representation of the type.
         public var rawValue: String
 
@@ -44,22 +42,20 @@ extension Media {
         public var description: String {
             rawValue
         }
-        
+
         /// Creates a new `BasicKind` from a given `String`.
         /// - parameter rawValue: A string that represents the type, note that this will be uppercased.
         public init(rawValue: String) {
             self.rawValue = rawValue.uppercased()
         }
-
     }
 
     /// A basic media type to form a full data type. It contains a high-level type, e.g. "VIDEO", and a lower-level
     /// subtype, e.g. "MP4", to construct to construct "VIDEO/MP4".
     public struct Basic: Equatable {
-        
         /// The top-level media kind.
         public var kind: BasicKind
-        
+
         /// The specific media subtype.
         public var subtype: BodyStructure.MediaSubtype
 

@@ -16,10 +16,9 @@ import struct NIO.ByteBuffer
 
 /// A key/value wrapper to use as a catch-all to support future extensions to `MailboxInfo`
 public struct ListExtendedItem: Equatable {
-    
     /// The key
     public var tag: ByteBuffer
-    
+
     /// The value.
     public var extensionValue: ParameterValue
 
