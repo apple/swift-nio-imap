@@ -76,11 +76,19 @@ extension EncodeBuffer {
 }
 
 extension EncodeBuffer {
+    
+    /// Represents a piece of data that is ready to be written to the network.
     public struct Chunk {
+        
+        /// The data that is ready to be written.
         public var bytes: ByteBuffer
+        
+        /// Is a continuation request expected before this data can be written?
         public var waitForContinuation: Bool
     }
 
+    /// Gets the next chunk that is ready to be written to the network.
+    /// - returns: The next chunk that is ready to be written.
     public mutating func nextChunk() -> Chunk {
         switch self.mode {
         case .client:
@@ -96,6 +104,7 @@ extension EncodeBuffer {
         }
     }
 
+    /// Marks the end of the current `Chunk`.
     @discardableResult
     public mutating func markStopPoint() -> Int {
         if case .client = mode {
