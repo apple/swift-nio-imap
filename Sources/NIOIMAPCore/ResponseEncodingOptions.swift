@@ -12,6 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+/// Configuration options for writing Responses to a buffer for transmission.
 public struct ResponseEncodingOptions: Equatable {
     /// Use RFC 3501 _quoted strings_ when possible (and the string is relatively short).
     public var useQuotedString: Bool
