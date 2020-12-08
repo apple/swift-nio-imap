@@ -14,20 +14,29 @@
 
 import struct NIO.ByteBuffer
 
+/// Used to write responses in preparation for sending down a network.
 public struct ResponseEncodeBuffer {
     private var buffer: EncodeBuffer
 
+    /// Data that is waiting to be sent.
     public var bytes: ByteBuffer {
         var encodeBuffer = self.buffer
         return encodeBuffer.nextChunk().bytes
     }
 
+    /// Creates a new `ResponseEncodeBuffer` from an initial `ByteBuffer` and configuration.
+    /// - parameter buffer: The inital `ByteBuffer` to use. Note that this is copied, not taken as `inout`.
+    /// - parameter options: The `ResponseEncodingOptions` to use when writing responses.
     public init(buffer: ByteBuffer, options: ResponseEncodingOptions) {
         self.buffer = .serverEncodeBuffer(buffer: buffer, options: options)
     }
 }
 
 extension ResponseEncodeBuffer {
+    
+    /// Creates a new `ResponseEncodeBuffer` from an initial `ByteBuffer` and configuration.
+    /// - parameter buffer: The inital `ByteBuffer` to use. Note that this is copied, not taken as `inout`.
+    /// - parameter capabilities: Server capabilites to use when writing responses. These will be converted into a `ResponseEncodingOptions`.
     public init(buffer: ByteBuffer, capabilities: [Capability]) {
         self.buffer = .serverEncodeBuffer(buffer: buffer, capabilities: capabilities)
     }
@@ -36,6 +45,10 @@ extension ResponseEncodeBuffer {
 // MARK: - Encode ContinuationRequest
 
 extension ResponseEncodeBuffer {
+    
+    /// Writes a `ContinuationRequest` in the format *+ <data>\r\n*
+    /// - parameter data: The continuation request.
+    /// - returns: The number of bytes written.
     @discardableResult public mutating func writeContinuationRequest(_ data: ContinuationRequest) -> Int {
         var size = 0
         size += self.buffer.writeString("+ ")
@@ -53,6 +66,10 @@ extension ResponseEncodeBuffer {
 // MARK: - Encode Response
 
 extension ResponseEncodeBuffer {
+    
+    /// Writes a `Response`.
+    /// - parameter response: The response to write.
+    /// - returns: The number of bytes written.
     @discardableResult public mutating func writeResponse(_ response: Response) -> Int {
         switch response {
         case .untaggedResponse(let resp):
