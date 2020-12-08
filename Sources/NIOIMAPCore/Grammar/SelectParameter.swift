@@ -12,15 +12,27 @@
 //
 //===----------------------------------------------------------------------===//
 
+/// Quick resynchronisation parameters for the `.select` and `.examine` commands.
+/// Recommended reading: RFC 7162 § 3.2.5.
 public struct QResyncParameter: Equatable {
+    
+    /// The last known UID validity.
     public var uidValiditiy: Int
 
+    /// The last known modification sequence
     public var modificationSequenceValue: ModificationSequenceValue
 
+    /// The optional set of known UIDs.
     public var knownUids: SequenceSet?
 
+    /// An optional parenthesized list of known sequence ranges and their corresponding UIDs.
     public var sequenceMatchData: SequenceMatchData?
 
+    ///
+    /// - parameter uidValidity: The last known UID validity.
+    /// - parameter modificationSequenceValue: The last known modification sequence
+    /// - parameter knownUids: The optional set of known UIDs.
+    /// - parameter sequenceMatchData: An optional parenthesized list of known sequence ranges and their corresponding UIDs.
     public init(uidValiditiy: Int, modificationSequenceValue: ModificationSequenceValue, knownUids: SequenceSet?, sequenceMatchData: SequenceMatchData?) {
         self.uidValiditiy = uidValiditiy
         self.modificationSequenceValue = modificationSequenceValue
