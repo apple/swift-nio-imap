@@ -110,7 +110,7 @@ extension InternalDate {
             self.minute = minute
             self.second = second
             self.zoneMinutes = zoneMinutes
-            
+
             // TODO: Add sanity checks
         }
     }
