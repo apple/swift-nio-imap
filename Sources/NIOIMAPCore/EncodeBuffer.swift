@@ -115,24 +115,35 @@ extension EncodeBuffer {
 }
 
 extension EncodeBuffer {
+    
+    /// Writes a raw `String` to the buffer.
+    /// - parameter string: The string to write.
+    /// - returns: The number of bytes written - always `string.utf8.count`.
     @discardableResult
     @inlinable
     public mutating func writeString(_ string: String) -> Int {
         self._buffer.writeString(string)
     }
 
+    /// Writes raw bytes to the buffer.
+    /// - parameter buffer: The bytes to write.
+    /// - returns: The number of bytes written - always equal to the size of `bytes`.
     @discardableResult
     @inlinable
     public mutating func writeBytes<Bytes: Sequence>(_ bytes: Bytes) -> Int where Bytes.Element == UInt8 {
         return self._buffer.writeBytes(bytes)
     }
 
+    /// Writes a `ByteBuffer` to the buffer.
+    /// - parameter buffer: The `ByteBuffer` to write.
+    /// - returns: The number of bytes written - always equal to `buffer.readableBytes`.
     @discardableResult
     @inlinable
     public mutating func writeBuffer(_ buffer: inout ByteBuffer) -> Int {
         self._buffer.writeBuffer(&buffer)
     }
 
+    /// Erases all data from the buffer.
     @inlinable
     public mutating func clear() {
         self._stopPoints.removeAll()
