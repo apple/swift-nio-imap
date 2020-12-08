@@ -15,13 +15,8 @@
 import struct NIO.ByteBuffer
 
 extension Media {
+    /// Represents a simple but common data type such as *APPLICATION* or *INAGE*
     public struct BasicKind: RawRepresentable, CustomStringConvertible, Equatable {
-        public var rawValue: String
-
-        public init(rawValue: String) {
-            self.rawValue = rawValue.uppercased()
-        }
-
         /// IMAP4rev1 APPLICATION
         public static var application: Self { .init(rawValue: "APPLICATION") }
 
@@ -40,23 +35,33 @@ extension Media {
         /// IMAP4rev1 FONT
         public static var font: Self { .init(rawValue: "FONT") }
 
-        /// Creates a new type with the given `String`.
-        /// - parameter string: The type to create. Note that the `String` will be uppercased.
-        /// - returns: A new type from the given `String`.
-        public static func other(_ string: String) -> Self {
-            self.init(rawValue: string)
-        }
+        /// The raw uppercased string representation of the type.
+        public var rawValue: String
 
+        /// See `rawValue`
         public var description: String {
             rawValue
         }
+
+        /// Creates a new `BasicKind` from a given `String`.
+        /// - parameter rawValue: A string that represents the type, note that this will be uppercased.
+        public init(rawValue: String) {
+            self.rawValue = rawValue.uppercased()
+        }
     }
 
-    /// IMAPv4 `media-basic`
+    /// A basic media type to form a full data type. It contains a high-level type, e.g. "VIDEO", and a lower-level
+    /// subtype, e.g. "MP4", to construct to construct "VIDEO/MP4".
     public struct Basic: Equatable {
+        /// The top-level media kind.
         public var kind: BasicKind
+
+        /// The specific media subtype.
         public var subtype: BodyStructure.MediaSubtype
 
+        /// Creates a new `Basic`.
+        /// - parameter kind: The top-level media kind.
+        /// - parameter subtype: The specific media subtype.
         public init(kind: Media.BasicKind, subtype: BodyStructure.MediaSubtype) {
             self.kind = kind
             self.subtype = subtype

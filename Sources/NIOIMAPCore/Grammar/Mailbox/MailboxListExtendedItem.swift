@@ -14,11 +14,17 @@
 
 import struct NIO.ByteBuffer
 
-/// IMAPv4 `mbox-list-extended-item`
+/// A key/value wrapper to use as a catch-all to support future extensions to `MailboxInfo`
 public struct ListExtendedItem: Equatable {
+    /// The key
     public var tag: ByteBuffer
+
+    /// The value.
     public var extensionValue: ParameterValue
 
+    /// Creates a new `ListExtendedItem`
+    /// - parameter tag: The key
+    /// - parameter extensionValue: The value
     public init(tag: ByteBuffer, extensionValue: ParameterValue) {
         self.tag = tag
         self.extensionValue = extensionValue

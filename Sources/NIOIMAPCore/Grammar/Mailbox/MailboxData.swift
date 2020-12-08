@@ -14,26 +14,52 @@
 
 import struct NIO.ByteBuffer
 
-/// IMAPv4 `mailbox-data`
+/// Mailbox attributes with associated data, part of a fetch response.
 public enum MailboxData: Equatable {
+    /// The flags associated with a mailbox.
     case flags([Flag])
+
+    /// Mailbox attributes.
     case list(MailboxInfo)
+
+    /// Subscribed mailbox attributes.
     case lsub(MailboxInfo)
+
+    /// Response to a search command, containing message sequence numbers.
     case search([Int])
+
+    /// Response to an extended search command.
     case esearch(ESearchResponse)
+
+    /// The status of the given Mailbox.
     case status(MailboxName, MailboxStatus)
+
+    /// The number of messages in a mailbox.
     case exists(Int)
+
+    /// The number of messages with the *\\Recent* flag set.
     case recent(Int)
+
+    /// Response to a namespace command.
     case namespace(NamespaceResponse)
+
+    /// Response to a search-sort command, containing an array of identifiers and sequence information.
     case searchSort(SearchSort)
 }
 
 extension MailboxData {
+    /// A container for an array of message identifiers, and a sequence.
     public struct SearchSort: Equatable {
+        /// An array of message identifiers that were matched in a search.
         public var identifiers: [Int]
-        public var modificationSequence: SearchSortModificationSequence
 
-        public init(identifiers: [Int], modificationSequence: SearchSortModificationSequence) {
+        /// The highest `ModificationSequence` of all messages that were found.
+        public var modificationSequence: ModificationSequenceValue
+
+        /// Creates a new `SearchSort`.
+        /// - parameter identifiers: An array of message identifiers that were matched in a search.
+        /// - parameter modificationSequence: The highest `ModificationSequence` of all messages that were found.
+        public init(identifiers: [Int], modificationSequence: ModificationSequenceValue) {
             self.identifiers = identifiers
             self.modificationSequence = modificationSequence
         }
@@ -50,7 +76,9 @@ extension EncodeBuffer {
                     buffer.writeString("\(element)")
                 } +
                     self.writeSpace() +
-                    self.writeSearchSortModificationSequence(data.modificationSequence)
+                    self.writeString("(MODSEQ ") +
+                    self.writeModificationSequenceValue(data.modificationSequence) +
+                    self.writeString(")")
             }
     }
 

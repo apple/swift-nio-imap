@@ -14,9 +14,12 @@
 
 import struct NIO.ByteBuffer
 
-/// IMAPv4 `list-select-base-opt`
+/// Options that can be used by themselves.
 public enum ListSelectBaseOption: Equatable {
+    /// *SUBSCRIBED* - Lists subscribed mailboxes.
     case subscribed
+
+    /// A catch-all to support future extensions
     case option(OptionExtension)
 }
 

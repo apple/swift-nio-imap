@@ -15,21 +15,35 @@
 import struct NIO.ByteBuffer
 import struct NIO.ByteBufferView
 
+/// The `MailboxName` was too big - typically > 1000 bytes.
 public struct MailboxTooBigError: Error, Equatable {
+    /// Specifies the maximum size of a `MailboxName`, typically 1000 bytes.
     public var maximumSize: Int
+
+    /// The actual size of the attempted `MailboxName`.
     public var actualSize: Int
 }
 
+/// The `MailboxName` was invalid, and probably contained illegal characters.
 public struct InvalidMailboxNameError: Error, Equatable {
+    /// Information on why the `MailboxName` was considered invalid.
     public var description: String
 }
 
+/// The path separator was invalid - path separators have strict requirements. See RFC 3501 for more details.
 public struct InvalidPathSeparatorError: Error, Equatable {
+    /// Information on why the path separator was considered invalid.
     public var description: String
 }
 
+/// Represents a complete mailbox path, delimited by the `pathSeparator`.
+/// For example, *foo/bar* is the `MailboxName`, and so "/" would be the `pathSeparator`.
+/// Path separators are optional, and so the simple `MailboxName` *foo* has `pathSeparator = nil`.
 public struct MailboxPath: Hashable {
+    /// The full mailbox name, e.g. *foo/bar*
     public var name: MailboxName
+
+    /// The path separator, e.g. */* in *foo/bar*
     public var pathSeparator: Character?
 
     /// Creates a new `MailboxPath` with the given data.
@@ -161,6 +175,7 @@ extension MailboxPath {
 
 /// IMAPv4 `mailbox`
 public struct MailboxName: Hashable {
+    /// Represents an inbox.
     public static var inbox = Self("INBOX")
 
     /// The raw bytes, readable as `[UInt8]`
@@ -187,6 +202,8 @@ public struct MailboxName: Hashable {
         }
     }
 
+    /// Creates a new `MailboxName` from the given bytes.
+    /// - parameter bytes: The bytes to construct a `MailboxName` from. Note that if any case-insensitive variation of *INBOX* is provided then it will be uppercased.
     public init(_ bytes: ByteBuffer) {
         if String(buffer: bytes).uppercased() == "INBOX" {
             self.storage = ByteBuffer(ByteBufferView("INBOX".utf8))
@@ -199,6 +216,7 @@ public struct MailboxName: Hashable {
 // MARK: - CustomStringConvertible
 
 extension MailboxName: CustomStringConvertible {
+    /// Provides a human-readable description.
     public var description: String {
         self.stringValue
     }
