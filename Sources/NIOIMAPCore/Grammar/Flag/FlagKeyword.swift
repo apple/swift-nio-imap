@@ -96,7 +96,8 @@ extension Flag.Keyword {
 // MARK: - String Literal
 
 extension Flag.Keyword: ExpressibleByStringLiteral {
-    /// Creates a new `Keyword` from a string literal. Mainly used for writing tests.
+    /// Creates a new `Keyword` from a string literal. Typically used when making static custom keywords
+    /// that are embedded in code (e.g. Mail client features that depend on flags). Also useful when writing tests.
     /// - parameter stringLiteral: The string literal to construct a `Keyword` from.
     public init(stringLiteral value: String) {
         self.init(value)
