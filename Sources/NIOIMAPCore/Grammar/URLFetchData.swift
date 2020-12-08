@@ -14,14 +14,20 @@
 
 import struct NIO.ByteBuffer
 
-/// RFC 4467
+/// Wraps data and a URL that the data is associated with. Returned as part of a `.urlFetch` command.
 public struct URLFetchData: Equatable {
+    
     // TODO: This is defined in the spec as being an `astring`, however is really a full URL wrapped in quotes
     // we should consider extracting the data of the quotes and correctly parsing the URL
+    /// The IMAP URL that's being fetched.
     public var url: ByteBuffer
 
+    /// Data associated with the `.url`.
     public var data: ByteBuffer?
 
+    /// Creates a new `URLFetchData`.
+    /// - parameter url: The IMAP URL that's being fetched.
+    /// - parameter data: Data associated with the `.url`.
     public init(url: ByteBuffer, data: ByteBuffer?) {
         self.url = url
         self.data = data
