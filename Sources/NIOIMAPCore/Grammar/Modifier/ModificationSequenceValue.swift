@@ -16,7 +16,6 @@ import struct NIO.ByteBuffer
 
 /// Represents the a *mod-sequence-value` as defined in RFC 7162.
 public struct ModificationSequenceValue: Hashable {
-    
     /// The raw value.
     public var value: UInt64
 
@@ -35,7 +34,6 @@ public struct ModificationSequenceValue: Hashable {
 // MARK: - ExpressibleByIntegerLiteral
 
 extension ModificationSequenceValue: ExpressibleByIntegerLiteral {
-    
     /// A `ModificationSequenceValue` is defined as a 63-bit number. This means
     /// that the IntegerLiteralType is best represented as `UInt64`.
     public typealias IntegerLiteralType = UInt64
@@ -50,7 +48,6 @@ extension ModificationSequenceValue: ExpressibleByIntegerLiteral {
 // MARK: - CustomStringConvertible
 
 extension ModificationSequenceValue: CustomStringConvertible {
-    
     /// `value` as a `String`.
     public var description: String {
         "\(self.value)"

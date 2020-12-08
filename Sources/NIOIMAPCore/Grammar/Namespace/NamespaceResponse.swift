@@ -17,13 +17,12 @@ import struct NIO.ByteBuffer
 /// A `NamespaceResponse` contains descriptions of the user's personal
 /// namespace(s), other users' namespace(s), and shared namespaces.
 public struct NamespaceResponse: Equatable {
-    
     /// Descriptions of the current user's namespaces.
     public var userNamespace: [NamespaceDescription]
-    
+
     /// Descriptions of other user's namespaces.
     public var otherUserNamespace: [NamespaceDescription]
-    
+
     /// Descriptions of shared namespaces.
     public var sharedNamespace: [NamespaceDescription]
 

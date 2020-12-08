@@ -16,10 +16,9 @@ import struct NIO.ByteBuffer
 
 /// Designed as a catch-all to support namespace information contained in future IMAP extensions. Pairs a string key with an array of data.
 public struct NamespaceResponseExtension: Equatable {
-    
     /// A key
     public var string: ByteBuffer
-    
+
     /// An array of data
     public var array: [ByteBuffer]
 
