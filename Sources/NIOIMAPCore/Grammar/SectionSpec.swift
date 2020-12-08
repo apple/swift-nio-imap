@@ -111,14 +111,21 @@ extension SectionSpecifier {
     ///
     /// Examples are `1`, `4.1`, and `4.2.2.1`.
     public struct Part: RawRepresentable, Hashable, ExpressibleByArrayLiteral {
+        
+        /// Each element in the array can be thought of as an index of the section identified by the previous element.
         public typealias ArrayLiteralElement = Int
 
+        /// The underlying array of integer components, where each integer is a sub-part of the previous.
         public var rawValue: [Int]
 
+        /// Creates a new `Part` from an array of integers..
+        /// - parameter rawValue: The array of integers.
         public init(rawValue: [Int]) {
             self.rawValue = rawValue
         }
 
+        /// Creates a new `Part` from an array of integers..
+        /// - parameter rawValue: The array of integers.
         public init(arrayLiteral elements: Int...) {
             self.rawValue = elements
         }
@@ -142,6 +149,11 @@ extension SectionSpecifier {
 }
 
 extension SectionSpecifier.Part: Comparable {
+    
+    /// Compares two `Part`s to evaluate if one `Part` (`lhs`) is strictly less than the other (`rhs`).
+    /// - parameter lhs: The first `Part` for comparison.
+    /// - parameter rhs: The first `Part` for comparison.
+    /// - returns: `true` if `lhs` evaluates to strictly less than `rhs`, otherwise `false`.
     public static func < (lhs: SectionSpecifier.Part, rhs: SectionSpecifier.Part) -> Bool {
         let minSize = min(lhs.rawValue.count, rhs.rawValue.count)
         for i in 0 ..< minSize {
@@ -164,6 +176,8 @@ extension SectionSpecifier.Part: Comparable {
 }
 
 extension SectionSpecifier.Part: CustomStringConvertible {
+    
+    /// Produces a textual representation as period-separated numbers (as defined in the IMAP RFC).
     public var description: String {
         rawValue.map { "\($0)" }.joined(separator: ".")
     }
