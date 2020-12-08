@@ -28,7 +28,7 @@ public struct QResyncParameter: Equatable {
     /// An optional parenthesized list of known sequence ranges and their corresponding UIDs.
     public var sequenceMatchData: SequenceMatchData?
 
-    ///
+    /// Creates a new `QResyncParameter`.
     /// - parameter uidValidity: The last known UID validity.
     /// - parameter modificationSequenceValue: The last known modification sequence
     /// - parameter knownUids: The optional set of known UIDs.

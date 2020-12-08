@@ -184,6 +184,11 @@ extension SectionSpecifier.Part: CustomStringConvertible {
 }
 
 extension SectionSpecifier.Kind: Comparable {
+    
+    /// Compares two `Kind`s to evaluate if one (`lhs`) is strictly less than the other (`rhs`).
+    /// - parameter lhs: The first `Kind` to compare.
+    /// - parameter rhs: The second `Kind` to compare.
+    /// - returns:`true` if `lhs` evaluate to strictly less than `rhs`.
     public static func < (lhs: SectionSpecifier.Kind, rhs: SectionSpecifier.Kind) -> Bool {
         switch (lhs, rhs) {
         case (complete, complete):
