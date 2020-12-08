@@ -14,12 +14,22 @@
 
 import struct NIO.ByteBuffer
 
-/// IMAPv4 `Namespace-Response`
+/// A `NamespaceResponse` contains descriptions of the user's personal
+/// namespace(s), other users' namespace(s), and shared namespaces.
 public struct NamespaceResponse: Equatable {
+    /// Descriptions of the current user's namespaces.
     public var userNamespace: [NamespaceDescription]
+
+    /// Descriptions of other user's namespaces.
     public var otherUserNamespace: [NamespaceDescription]
+
+    /// Descriptions of shared namespaces.
     public var sharedNamespace: [NamespaceDescription]
 
+    /// Creates a new `NamespaceResponse`
+    /// - parameter userNamespace: Descriptions of the current user's namespaces.
+    /// - parameter otherUserNamespace: Descriptions of other user's namespaces.
+    /// - parameter sharedNamespace: Descriptions of shared namespaces.
     public init(userNamespace: [NamespaceDescription], otherUserNamespace: [NamespaceDescription], sharedNamespace: [NamespaceDescription]) {
         self.userNamespace = userNamespace
         self.otherUserNamespace = otherUserNamespace

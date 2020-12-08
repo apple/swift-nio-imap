@@ -14,16 +14,26 @@
 
 import struct NIO.ByteBuffer
 
+/// Specifies the type of `OptionExtension`
 public enum OptionExtensionKind: Equatable {
+    /// A simple string-based value.
     case standard(String)
+
+    /// Use a `OptionVendorTag` as the extension kind.
     case vendor(OptionVendorTag)
 }
 
-/// IMAPv4 `option-extension`
+/// A catch-all wrapper to support future extensions. Acts as a key/value pair.
 public struct OptionExtension: Equatable {
+    /// Some option kind.
     public var kind: OptionExtensionKind
+
+    /// Some options value.
     public var value: OptionValueComp?
 
+    /// Creates a new `OptionExtension`.
+    /// - parameter kind: The kind of option extension.
+    /// - parameter value: The value of the extension. Defaults to `nil`.
     public init(kind: OptionExtensionKind, value: OptionValueComp? = nil) {
         self.kind = kind
         self.value = value

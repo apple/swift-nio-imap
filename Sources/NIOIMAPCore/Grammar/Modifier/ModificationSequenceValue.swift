@@ -14,18 +14,19 @@
 
 import struct NIO.ByteBuffer
 
-/// IMAP4 RFC 7162 `mod-sequence-value`
+/// Represents the a *mod-sequence-value` as defined in RFC 7162.
 public struct ModificationSequenceValue: Hashable {
-    public var value: Int
+    /// The raw value.
+    public var value: UInt64
 
+    /// A  zero *mod-sequence-value*
     public static var zero: Self {
-        Self(0)
+        0
     }
 
-    public init?(_ value: Int) {
-        guard value >= 0 else {
-            return nil
-        }
+    /// Creates a new ModificationSequenceValue.
+    /// - parameter value: The raw value.
+    public init(_ value: UInt64) {
         self.value = value
     }
 }
@@ -33,9 +34,13 @@ public struct ModificationSequenceValue: Hashable {
 // MARK: - ExpressibleByIntegerLiteral
 
 extension ModificationSequenceValue: ExpressibleByIntegerLiteral {
-    public typealias IntegerLiteralType = Int
+    /// A `ModificationSequenceValue` is defined as a 63-bit number. This means
+    /// that the IntegerLiteralType is best represented as `UInt64`.
+    public typealias IntegerLiteralType = UInt64
 
-    public init(integerLiteral value: Int) {
+    /// Creates a `ModificationSequenceValue` from an integer literal.
+    /// - parameter integerLiteral: The literal value.
+    public init(integerLiteral value: UInt64) {
         self.value = value
     }
 }
@@ -43,6 +48,7 @@ extension ModificationSequenceValue: ExpressibleByIntegerLiteral {
 // MARK: - CustomStringConvertible
 
 extension ModificationSequenceValue: CustomStringConvertible {
+    /// `value` as a `String`.
     public var description: String {
         "\(self.value)"
     }
