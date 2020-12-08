@@ -12,9 +12,12 @@
 //
 //===----------------------------------------------------------------------===//
 
+/// A wrapper around `AttributeFlag`, used in `SearchModificationSequence`
 public struct EntryFlagName: Hashable {
+    /// An `AttributeFlag`
     public var flag: AttributeFlag
 
+    /// Creates a new `EntryFlagName` to wrap an `AttributeFlag`
     public init(flag: AttributeFlag) {
         self.flag = flag
     }

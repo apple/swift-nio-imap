@@ -14,10 +14,14 @@
 
 import struct NIO.ByteBuffer
 
+/// Describes the metadata item type.
 public struct EntryKindResponse: Equatable {
     var _backing: String
 
+    /// `priv` - Private metadata item type.
     public static var `private` = Self(_backing: "priv")
+
+    /// `shared` - Shared metadata item type.
     public static var shared = Self(_backing: "shared")
 }
 

@@ -14,18 +14,31 @@
 
 import struct NIO.ByteBuffer
 
-/// RFC 6237
-/// Options for ESEARCH.
+/// Options for performing an extended search as defined in RFC 6237
 public struct ESearchOptions: Equatable {
+    /// The search criteria.
     public var key: SearchKey
+
+    /// The charset to use when performing the search.
     public var charset: String?
+
+    /// Return options to filter the data that is returned.
     public var returnOptions: [SearchReturnOption]
+
+    /// Specifies where should be searched, for example a single mailbox.
     public var sourceOptions: ESearchSourceOptions?
 
-    public init(key: SearchKey,
-                charset: String? = nil,
-                returnOptions: [SearchReturnOption] = [],
-                sourceOptions: ESearchSourceOptions? = nil) {
+    /// Creates a new `ESearchOptions`
+    /// - parameter key: The search criteria.
+    /// - parameter charset: The charset to use when performing the search.
+    /// - parameter returnOptions: Return options to filter the data that is returned.
+    /// - parameter sourceOptions: Specifies where should be searched, for example a single mailbox.
+    public init(
+        key: SearchKey,
+        charset: String? = nil,
+        returnOptions: [SearchReturnOption] = [],
+        sourceOptions: ESearchSourceOptions? = nil
+    ) {
         self.key = key
         self.charset = charset
         self.returnOptions = returnOptions

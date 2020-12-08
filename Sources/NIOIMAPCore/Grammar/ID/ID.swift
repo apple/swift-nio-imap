@@ -14,11 +14,18 @@
 
 import struct NIO.ByteBuffer
 
-// Exracted from `IDParamsList`
+/// A simple key/value container, used to make the `IDParamsList` API
+/// slightly more palatable.
 public struct IDParameter: Equatable {
+    /// Some `String` key.
     public var key: String
+
+    /// Some optional value.
     public var value: ByteBuffer?
 
+    /// Creates a new `IDParameter` key/value pair.
+    /// - parameter key: Some `String` key.
+    /// - parameter value: The value to be associated with `key`?
     public init(key: String, value: ByteBuffer?) {
         self.key = key
         self.value = value

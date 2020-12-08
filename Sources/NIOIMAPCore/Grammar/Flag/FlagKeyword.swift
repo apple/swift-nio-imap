@@ -17,20 +17,23 @@ import struct NIO.ByteBuffer
 extension Flag {
     /// IMAP Flag Keyword
     ///
-    /// Flags are case preserving, but case insensitive.
+    /// `Keyword`s are case preserving, but case insensitive.
     /// As such e.g. `Flag.Keyword("$Forwarded") == Flag.Keyword("$forwarded")`, but
     /// it will round-trip preserving its case.
     public struct Keyword: Hashable {
-        public var rawValue: String
-
+        /// Performs a case-insensitive equality comparison.
+        /// - parameter lhs: The first flag to compare.
+        /// - parameter rhs: The second flag to compare.
+        /// - returns `true` if the given `Keyword`s are equal, otherwise `false`.
         public static func == (lhs: Keyword, rhs: Keyword) -> Bool {
             lhs.rawValue.uppercased() == rhs.rawValue.uppercased()
         }
 
-        public func hash(into hasher: inout Hasher) {
-            rawValue.uppercased().hash(into: &hasher)
-        }
+        /// The raw case-preserved string value of the `Keyword`.
+        public var rawValue: String
 
+        /// Creates a new `Keyword`.
+        /// - parameter string: A raw `String` to create the `Keyword`.  Each character in the`String` must be a valid atom-char as defined in RFC 3501.
         public init(_ string: String) {
             precondition(string.utf8.allSatisfy { (c) -> Bool in
                 c.isAtomChar
@@ -43,6 +46,12 @@ extension Flag {
                 c.isAtomChar
             })
             self.rawValue = string
+        }
+
+        /// Hashes the `Keyword` using a given hasher, used to insert into a `Set`, `Dictionary`, etc.
+        /// - parameter hasher: The hasher to use.
+        public func hash(into hasher: inout Hasher) {
+            rawValue.uppercased().hash(into: &hasher)
         }
     }
 }
@@ -87,6 +96,9 @@ extension Flag.Keyword {
 // MARK: - String Literal
 
 extension Flag.Keyword: ExpressibleByStringLiteral {
+    /// Creates a new `Keyword` from a string literal. Typically used when making static custom keywords
+    /// that are embedded in code (e.g. Mail client features that depend on flags). Also useful when writing tests.
+    /// - parameter stringLiteral: The string literal to construct a `Keyword` from.
     public init(stringLiteral value: String) {
         self.init(value)
     }

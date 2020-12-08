@@ -12,11 +12,17 @@
 //
 //===----------------------------------------------------------------------===//
 
-/// IMAPv4 `eitem-vendor-tag`
+/// A vendor-specific tag for extended list data
 public struct EItemVendorTag: Equatable {
+    /// A reserved portion of the ACAP namespace. Must be registered with IANA
     public var token: String
+
+    /// Used to identify the type of data.
     public var atom: String
 
+    /// Creates a new `EItemVendorTag`.
+    /// - parameter token: A reserved portion of the ACAP namespace. Must be registered with IANA
+    /// - parameter atom: Used to identify the type of data.
     public init(token: String, atom: String) {
         self.token = token
         self.atom = atom

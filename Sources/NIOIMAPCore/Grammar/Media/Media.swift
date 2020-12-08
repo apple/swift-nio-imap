@@ -12,4 +12,5 @@
 //
 //===----------------------------------------------------------------------===//
 
+/// Namespaces various related types for API cleanliness
 public enum Media {}

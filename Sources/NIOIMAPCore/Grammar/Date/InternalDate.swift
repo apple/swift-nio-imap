@@ -23,6 +23,19 @@
 public struct InternalDate: Equatable {
     var rawValue: UInt64
 
+    // TODO: Minute/second checks don't make sense. 1:60 should just be 2
+
+    /// Creates a new `InternalDate`. The data entered is partially validated
+    /// using simple sanity checks, for example month must be in the range 1:12.
+    /// More complicated checks, such as the number of days in a given month, are not
+    /// performed.
+    /// - parameter year: The year.
+    /// - parameter month: The month, required to be in the range 1:12.
+    /// - parameter day: The day, required to be in the range 1:31.
+    /// - parameter hour: The hour, required to be in the range 0:24.
+    /// - parameter minute: The minute, required to be in the range 0:60.
+    /// - parameter second: The second, required to be in the range 0:60.
+    /// - parameter zone: The timezone offset from UTC.
     public init?(year: Int, month: Int, day: Int, hour: Int, minute: Int, second: Int, zoneMinutes: Int) {
         guard
             (1 ... 31).contains(day),
@@ -57,16 +70,38 @@ public struct InternalDate: Equatable {
 }
 
 extension InternalDate {
+    /// Contains the individual components extracted from an `InternalDate`, and can be used to
+    /// construct an `InternalDate`.
     public struct Components {
+        /// The year.
         public let year: Int
+
+        /// The month, typically represented as a 2-digit integer in the range `1...12`
         public let month: Int
+
+        /// The day, typically represented as a 2-digit integer in the range `1...31`
         public let day: Int
+
+        /// The hour, typically represented as a 2-digit integer in the range `0...23`
         public let hour: Int
+
+        /// The minute, typically represented as a 2-digit integer in the range `0...59`
         public let minute: Int
+
+        /// The second, typically represented as a 2-digit integer in the range `0...59`
         public let second: Int
-        /// Time zone offset in minutes
+
+        /// Time zone offset in minutes.
         public let zoneMinutes: Int
 
+        /// Creates a new `Components` collection from the given parameters. Note that currently no sanity checks are performed.
+        /// - parameter year: The year, typically to be represented as a 4-digit integer.
+        /// - parameter month: The month, typically represented as a 2-digit integer in the range `1...12`
+        /// - parameter day: The day, typically represented as a 2-digit integer in the range `1...31`
+        /// - parameter hour: The hour, typically represented as a 2-digit integer in the range `0...23`
+        /// - parameter minute: The minute, typically represented as a 2-digit integer in the range `0...59`
+        /// - parameter second: The second, typically represented as a 2-digit integer in the range `0...59`
+        /// - parameter zoneMinutes: The timezone as an offset in minutes from UTC.
         public init(year: Int, month: Int, day: Int, hour: Int, minute: Int, second: Int, zoneMinutes: Int) {
             self.year = year
             self.month = month
@@ -75,13 +110,18 @@ extension InternalDate {
             self.minute = minute
             self.second = second
             self.zoneMinutes = zoneMinutes
+
+            // TODO: Add sanity checks
         }
     }
 
+    /// Creates a new `InternalDate` from a given collection of `Components
+    /// - parameter components: The components containing a year, month, day, hour, minute, second, and timezone.
     public init?(components c: Components) {
         self.init(year: c.year, month: c.month, day: c.day, hour: c.hour, minute: c.month, second: c.second, zoneMinutes: c.zoneMinutes)
     }
 
+    /// The components of the date, such as the day, month, year, etc.
     public var components: Components {
         var remainder = self.rawValue
 

@@ -14,7 +14,7 @@
 
 import struct NIO.ByteBuffer
 
-public enum ConditionalStore {
+enum ConditionalStore {
     static let param = "CONDSTORE"
 }
 
