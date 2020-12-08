@@ -14,11 +14,18 @@
 
 import struct NIO.ByteBuffer
 
-/// RFC 4467
+/// Pairs an IMAP "rump" URL with an authentication mechanism
 public struct URLRumpMechanism: Equatable {
+
+    /// The IMAP URL excluding the access mechanism and access token.
     public var urlRump: ByteBuffer
+    
+    /// Used to restrict the usage of a URL-AUTH authorized URL.
     public var mechanism: UAuthMechanism
 
+    /// Creates a new `URLRumpMechanism`.
+    /// - parameter urlRump: The IMAP URL excluding the access mechanism and access token.
+    /// - parameter mechanism: Used to restrict the usage of a URL-AUTH authorized URL.
     public init(urlRump: ByteBuffer, mechanism: UAuthMechanism) {
         self.urlRump = urlRump
         self.mechanism = mechanism
