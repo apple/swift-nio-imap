@@ -12,11 +12,22 @@
 //
 //===----------------------------------------------------------------------===//
 
+/// A wrapper to combine a message sequence set and a corresponding UID set.
+/// Both are provided in ascending order.
+/// Recommended reading RFC 7162 § 3.2.5.2
 public struct SequenceMatchData: Equatable {
+   
+    /// Set of message numbers corresponding to the UIDs in known-uid-set, in ascending order. * is not allowed.
     public var knownSequenceSet: SequenceSet
 
+    /// Set of UIDs corresponding to the messages in known-sequence-set, in ascending order. * is not allowed.
     public var knownUidSet: SequenceSet
 
+    // TODO: Enforce ascneding order.
+    /// Creates a new `SequenceMatchData`. Note that both `knownSequenceSet` and `knownUidSet`
+    /// should be provided in ascending order, though this is not currently enforced.
+    /// - parameter knownSequenceSet: Set of message numbers corresponding to the UIDs in known-uid-set, in ascending order. * is not allowed.
+    /// - parameter knownUidSet: Set of UIDs corresponding to the messages in known-sequence-set, in ascending order. * is not allowed.
     public init(knownSequenceSet: SequenceSet, knownUidSet: SequenceSet) {
         self.knownSequenceSet = knownSequenceSet
         self.knownUidSet = knownUidSet
