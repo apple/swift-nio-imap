@@ -14,13 +14,15 @@
 
 import struct NIO.ByteBuffer
 
-/// IMAPv4 `Namespace-Description`
+/// Represents an IMAP Namespace, providing a delimiter to
+/// break the namespace into it's constituent components.
 public struct NamespaceDescription: Equatable {
     
     /// The full namespace string.
     public var string: ByteBuffer
     
     /// A hierarchy delimiter.
+    // TODO: Rename to "delimiter"
     public var char: Character?
     
     /// A catch-all to provide support fo future extensions.
