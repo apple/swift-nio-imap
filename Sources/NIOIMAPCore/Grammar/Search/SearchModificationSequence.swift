@@ -12,11 +12,18 @@
 //
 //===----------------------------------------------------------------------===//
 
-/// RFC 7162
+/// Implemented as a catch-all to support components defined in future extensions.
 public struct SearchModificationSequenceExtension: Hashable {
+    
+    /// The name of the metadata item.
     public var name: EntryFlagName
+    
+    /// The type of metadata item.
     public var request: EntryKindRequest
 
+    /// Creates a new `SearchModificationSequenceExtension`.
+    /// - parameter name: The name of the metadata item.
+    /// - parameter request: The type of metadata item.
     public init(name: EntryFlagName, request: EntryKindRequest) {
         self.name = name
         self.request = request
