@@ -12,10 +12,14 @@
 //
 //===----------------------------------------------------------------------===//
 
-/// RFC 5092
+/// An absolute IMAP path.
 public struct IAbsolutePath: Equatable {
+    
+    /// A command (including a URL) to execute.
     public var command: ICommand?
 
+    /// Creates a new `IAbsoluteURL`.
+    /// - parameter command: A command (including a URL) to execute.
     public init(command: ICommand?) {
         self.command = command
     }
