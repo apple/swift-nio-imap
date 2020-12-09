@@ -82,12 +82,12 @@ extension SequenceRange {
 extension EncodeBuffer {
     @discardableResult mutating func writeSequenceRange(_ range: SequenceRange) -> Int {
         if range == .all {
-            return self.writeSequenceNumberOrWildcard(range.range.upperBound)
+            return self.writeSequenceNumberOrWildcard(range.rawValue.upperBound)
         } else {
-            return self.writeSequenceNumberOrWildcard(range.range.lowerBound) +
-                self.write(if: range.range.lowerBound < range.range.upperBound) {
+            return self.writeSequenceNumberOrWildcard(range.rawValue.lowerBound) +
+                self.write(if: range.rawValue.lowerBound < range.rawValue.upperBound) {
                     self.writeString(":") +
-                        self.writeSequenceNumberOrWildcard(range.range.upperBound)
+                        self.writeSequenceNumberOrWildcard(range.rawValue.upperBound)
                 }
         }
     }

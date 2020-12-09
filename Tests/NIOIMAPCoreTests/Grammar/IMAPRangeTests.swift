@@ -41,19 +41,19 @@ extension IMAPRangeTests {
 extension IMAPRangeTests {
     func testRange_from() {
         let sut = SequenceRange(7...)
-        XCTAssertEqual(sut.range.lowerBound, 7)
-        XCTAssertEqual(sut.range.upperBound, SequenceNumber(UInt32.max))
+        XCTAssertEqual(sut.rawValue.lowerBound, 7)
+        XCTAssertEqual(sut.rawValue.upperBound, SequenceNumber(UInt32.max))
     }
 
     func testRange_to() {
         let sut = SequenceRange(...7)
-        XCTAssertEqual(sut.range.lowerBound, 1)
-        XCTAssertEqual(sut.range.upperBound, 7)
+        XCTAssertEqual(sut.rawValue.lowerBound, 1)
+        XCTAssertEqual(sut.rawValue.upperBound, 7)
     }
 
     func testRange_closed() {
         let sut = SequenceRange(3 ... 4)
-        XCTAssertEqual(sut.range.lowerBound, 3)
-        XCTAssertEqual(sut.range.upperBound, 4)
+        XCTAssertEqual(sut.rawValue.lowerBound, 3)
+        XCTAssertEqual(sut.rawValue.upperBound, 4)
     }
 }
