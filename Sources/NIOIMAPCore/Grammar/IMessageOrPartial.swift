@@ -14,8 +14,8 @@
 
 /// RFC 5092
 public enum IMessageOrPartial: Equatable {
-    case refUidSectionPartial(ref: IMailboxReference, uid: IUIDOnly, section: ISectionOnly?, partial: IPartial?)
-    case uidSectionPartial(uid: IUIDOnly, section: ISectionOnly?, partial: IPartial?)
+    case refUidSectionPartial(ref: IMailboxReference, uid: IUID, section: ISectionOnly?, partial: IPartial?)
+    case uidSectionPartial(uid: IUID, section: ISectionOnly?, partial: IPartial?)
     case sectionPartial(section: ISectionOnly, partial: IPartial?)
     case partialOnly(IPartial)
 }

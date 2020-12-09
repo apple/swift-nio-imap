@@ -14,22 +14,17 @@
 
 public struct InvalidUID: Error {}
 
-/// RFC 5092 IMAP URL
+/// Wraps an IMAP4 message Unique Identifier (UID), and it
+/// SHOULD be used as the <set> argument to the IMAP4 "UID FETCH"
+/// command.
 public struct IUID: Equatable {
+    
+    /// The wrapped `UID`
     public var uid: Int
 
-    public init(uid: Int) throws {
-        guard uid > 0 else {
-            throw InvalidUID()
-        }
-        self.uid = uid
-    }
-}
-
-/// RFC 5092 IMAP URL
-public struct IUIDOnly: Equatable {
-    public var uid: Int
-
+    /// Creates a new `IUID` from a raw value.
+    /// - parameter uid: The raw value to use.
+    /// - throws: An `InvalidUID` if `uid == 0`.
     public init(uid: Int) throws {
         guard uid > 0 else {
             throw InvalidUID()
@@ -45,7 +40,7 @@ extension EncodeBuffer {
         self.writeString("/;UID=\(data.uid)")
     }
 
-    @discardableResult mutating func writeIUIDOnly(_ data: IUIDOnly) -> Int {
+    @discardableResult mutating func writeIUIDOnly(_ data: IUID) -> Int {
         self.writeString(";UID=\(data.uid)")
     }
 }

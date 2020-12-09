@@ -2292,10 +2292,10 @@ extension GrammarParser {
         }
     }
 
-    static func parseIUIDOnly(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IUIDOnly {
+    static func parseIUIDOnly(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IUID {
         try composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             try fixedString(";UID=", buffer: &buffer, tracker: tracker)
-            return try IUIDOnly(uid: try self.parseNZNumber(buffer: &buffer, tracker: tracker))
+            return try IUID(uid: try self.parseNZNumber(buffer: &buffer, tracker: tracker))
         }
     }
 
