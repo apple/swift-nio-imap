@@ -14,17 +14,22 @@
 
 import struct NIO.ByteBuffer
 
-/// RFC 6237 search-correlator
+/// Multiple searches may be run concurrently, and so a `SearchCorrelator` can be used
+/// to identify the search to which a response belongs.
 public struct SearchCorrelator: Equatable {
-    /// The original option from RFC4466
+    /// The original option from RFC4466 - a random string.
     public var tag: ByteBuffer
 
-    /// Required iff using RFC 6237
+    /// The mailbox being searched. Required iff using RFC 6237
     public var mailbox: MailboxName?
 
     /// Required iff using RFC 6237
     public var uidValidity: UIDValidity?
 
+    /// Creates a new `SearchCorrelator`.
+    /// - parameter tag: The original option from RFC4466 - a random string.
+    /// - parameter mailbox: The mailbox being searched. Required iff using RFC 6237.
+    /// - parameter uidValidity: Required iff using RFC 6237.
     public init(tag: ByteBuffer, mailbox: MailboxName? = nil, uidValidity: UIDValidity? = nil) {
         self.tag = tag
         self.mailbox = mailbox
