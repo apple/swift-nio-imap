@@ -14,13 +14,26 @@
 
 import struct NIO.ByteBuffer
 
-/// IMAPv4 `search-return-opt`
+/// Used to control what data is sent back as part of a search response.
 public enum SearchReturnOption: Equatable {
+    
+    /// Return the lowest message number/UID that satisfies the SEARCH criteria.
     case min
+    
+    /// Return the highest message number/UID that satisfies the SEARCH criteria.
     case max
+    
+    /// Return all message numbers/UIDs that satisfy the SEARCH criteria.
     case all
+    
+    /// Return number of the messages that satisfy the SEARCH criteria.
     case count
+
+    /// Tells the server to remember the result of the SEARCH or UID SEARCH command (as well as any command based on
+    /// SEARCH, e.g., SORT and THREAD [SORT]) and store it
     case save
+    
+    /// Implemented as a catch-all to support future extensions.
     case optionExtension(SearchReturnOptionExtension)
 }
 
