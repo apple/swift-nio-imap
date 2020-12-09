@@ -15,7 +15,10 @@
 import struct NIO.ByteBuffer
 import struct NIO.ByteBufferView
 
-/// RFC2087 quota root
+/// Each mailbox has zero or more implementation-defined named "quota
+/// roots".  Each quota root has zero or more resource limits.  All
+/// mailboxes that share the same named quota root share the resource
+/// limits of the quota root.
 public struct QuotaRoot: Equatable {
     /// The raw bytes, readable as `[UInt8]`
     public var storage: ByteBuffer
@@ -31,6 +34,8 @@ public struct QuotaRoot: Equatable {
         self.storage = ByteBuffer(ByteBufferView(string.utf8))
     }
 
+    /// Creates a new `QuoteRoot`.
+    /// - parameter bytes: The raw bytes that represent the root.
     public init(_ bytes: ByteBuffer) {
         self.storage = bytes
     }
@@ -39,6 +44,8 @@ public struct QuotaRoot: Equatable {
 // MARK: - CustomStringConvertible
 
 extension QuotaRoot: CustomStringConvertible {
+    
+    /// A human-readable representation of the root.
     public var description: String {
         self.stringValue
     }
