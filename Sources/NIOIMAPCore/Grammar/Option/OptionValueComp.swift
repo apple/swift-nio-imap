@@ -14,17 +14,25 @@
 
 import struct NIO.ByteBuffer
 
-/// IMAPv4 `option-val-comp`
+/// A wrapper for an option value.
 public enum OptionValueComp: Equatable {
+    
+    /// A single value
     case string(ByteBuffer)
+    
+    /// An array of values
     case array([OptionValueComp])
 }
 
 // MARK: - Conveniences
 
 extension OptionValueComp: ExpressibleByArrayLiteral {
+    
+    /// Option values can be nested, so this provides recursion.
     public typealias ArrayLiteralElement = Self
 
+    /// Creates a new `OptionalValueComp` from the given elements.
+    /// - parameter elements: The contents of the array.
     public init(arrayLiteral elements: OptionValueComp...) {
         let array = Array(elements)
         self = .array(array)
