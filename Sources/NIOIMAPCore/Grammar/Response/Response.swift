@@ -15,8 +15,13 @@
 import struct NIO.ByteBuffer
 import struct NIO.ByteBufferAllocator
 
+/// Used to wrap if the server has a sent a response or continuation request.
 public enum ResponseOrContinuationRequest: Equatable {
+    
+    /// The server has sent a `ContinuationRequest`, and the client now needs to return some data.
     case continuationRequest(ContinuationRequest)
+    
+    /// The server has sent a `Response` that can now be handled by the client.
     case response(Response)
 }
 
