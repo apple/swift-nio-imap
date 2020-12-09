@@ -14,11 +14,18 @@
 
 import struct NIO.ByteBuffer
 
-/// RFC 5092
+/// Similar to `AuthImapURL`, but with an additional field to help verify the URL authorization.
 public struct AuthIMAPURLFull: Equatable {
+    
+    /// An IMAP url pointing to a message.
     public var imapURL: AuthIMAPURL
+    
+    /// URL authentication details.
     public var urlAuth: IURLAuth
 
+    /// Creates a new `AuthIMAPURL`.
+    /// - parameter imapURL: An IMAP url pointing to a message.
+    /// - parameter urlAuth: URL authentication details.
     public init(imapURL: AuthIMAPURL, urlAuth: IURLAuth) {
         self.imapURL = imapURL
         self.urlAuth = urlAuth
