@@ -14,10 +14,14 @@
 
 import struct NIO.ByteBuffer
 
-/// RFC 5092
+/// A percent-encoded authentication type.
 public struct EncodedAuthenticationType: Equatable {
+    
+    /// The percent-encoded data.
     public var authType: String
 
+    /// Creates a new `EncodedAuthenticationType`.
+    /// - parameter data: The percent-encoded string.
     public init(authType: String) {
         self.authType = authType
     }
