@@ -26,10 +26,15 @@ public struct ChangedSinceModifier: Equatable {
     }
 }
 
-/// RFC 7162
+/// Used in a fetch command to fetch data for all messages that have not had
+/// metadata items changed since some know known modification sequence.
 public struct UnchangedSinceModifier: Equatable {
+    
+    /// The known modification sequence to use as a reference date.
     public var modificationSequence: ModificationSequenceValue
 
+    /// Creates a new `UnchangedSinceModifier` by wrapping a `ModificationSequenceValue`
+    /// - parameter modificationSequence: The known modification sequence to use as a reference date.
     public init(modificationSequence: ModificationSequenceValue) {
         self.modificationSequence = modificationSequence
     }
