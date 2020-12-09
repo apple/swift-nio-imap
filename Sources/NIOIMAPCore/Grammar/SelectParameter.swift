@@ -69,7 +69,7 @@ extension EncodeBuffer {
             }
     }
 
-    @discardableResult public mutating func writeSelectParameter(_ param: SelectParameter) -> Int {
+    @discardableResult mutating func writeSelectParameter(_ param: SelectParameter) -> Int {
         switch param {
         case .qresync(let param):
             return self.writeQResyncParameter(param: param)

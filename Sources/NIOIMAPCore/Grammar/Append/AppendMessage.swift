@@ -34,7 +34,11 @@ public struct AppendMessage: Equatable {
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    @discardableResult public mutating func writeAppendMessage(_ message: AppendMessage) -> Int {
+    
+    /// Writes an `AppendMessage` ready to be sent.
+    /// - parameter `message`: The `AppendMessage` to write.
+    /// - returns: The number of bytes written.
+    @discardableResult mutating func writeAppendMessage(_ message: AppendMessage) -> Int {
         self.writeAppendOptions(message.options) +
             self.writeSpace() +
             self.writeAppendData(message.data)
