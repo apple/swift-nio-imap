@@ -12,11 +12,18 @@
 //
 //===----------------------------------------------------------------------===//
 
-/// RFC 3339 date-time
+/// A date and time defined in RFC 3339.
 public struct FullDateTime: Equatable {
+    
+    /// The date.
     public var date: FullDate
+    
+    /// The time.
     public var time: FullTime
 
+    /// Creates a new `FullDateTime`.
+    /// - parameter date: The date.
+    /// - parameter time: The time.
     public init(date: FullDate, time: FullTime) {
         self.date = date
         self.time = time
