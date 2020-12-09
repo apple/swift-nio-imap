@@ -25,10 +25,24 @@ public enum ResponseOrContinuationRequest: Equatable {
     case response(Response)
 }
 
+/// Wraps the various response types that may be sent by a server.
 public enum Response: Equatable {
+    
+    /// Servers may send one or more untagged response for every tagged response.
+    /// Untagged responses are sent before their corresponding tagged response.
     case untaggedResponse(ResponsePayload)
+    
+    /// `FetchResponse` are handled as a special case to enable streaming of large messages, e.g.
+    /// those that contain attachments.
     case fetchResponse(FetchResponse)
+    
+    /// Exactly one `TaggedResponse` is returned for each command, and is the last piece of data
+    /// to be sent. Upon receiving a `TaggedResponse` the client knows that the server has finished
+    /// processing the command specified by the tag.
     case taggedResponse(TaggedResponse)
+    
+    /// Fatal responses indicate some unrecoverable error has occurred, and
+    /// the server is now going to terminate the connection.
     case fatalResponse(ResponseText)
 }
 
