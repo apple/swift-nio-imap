@@ -14,11 +14,18 @@
 
 import struct NIO.ByteBuffer
 
-/// IMAPv4 `option-vendor-tag`
+/// A non-standard vendor-specific option.
 public struct OptionVendorTag: Equatable {
+    
+    /// The vendor identifier token.
     public var token: String
+    
+    /// The option.
     public var atom: String
 
+    /// Creates a new `OptionVendorTag`
+    /// - parameter token: The vendor identifier token.
+    /// - parameter atom: The option
     public init(token: String, atom: String) {
         self.token = token
         self.atom = atom
