@@ -34,10 +34,19 @@ public enum ListSelectOption: Equatable {
     case option(OptionExtension)
 }
 
+/// Combines an array of `ListSelectOption` with a `ListSelectBaseOption`. Used
+/// when performing a `.list` command.
 public struct ListSelectOptions: Equatable {
+    
+    /// The base option to use.
     public var baseOption: ListSelectBaseOption
+    
+    /// An array of selection options.
     public var options: [ListSelectOption]
 
+    /// Creates a new `ListSelectOptions`.
+    /// - parameter baseOption: The base option to use.
+    /// - parameter options: An array of selection options.
     public init(baseOption: ListSelectBaseOption, options: [ListSelectOption]) {
         self.baseOption = baseOption
         self.options = options
