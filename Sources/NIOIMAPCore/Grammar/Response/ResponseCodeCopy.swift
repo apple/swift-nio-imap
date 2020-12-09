@@ -12,12 +12,24 @@
 //
 //===----------------------------------------------------------------------===//
 
-/// IMAPv4 `response-code-copy`
+/// Matches the `UIDSet` of the messages in the source mailbox to the `UIDSet` of the
+/// copied messages in the destination mailbox.
 public struct ResponseCodeCopy: Equatable {
+    
+    // TODO: Rename to destinationUIDValidity
+    /// The `UIDValidity` of the destination mailbox
     public var num: Int
+    
+    /// The message UIDs in the source mailbox.
     public var set1: UIDSet
+    
+    /// The copied message UIDs in the destination mailbox.
     public var set2: UIDSet
 
+    /// Creates a new `ResponseCodeCopy`.
+    /// - parameter num: The `UIDValidity` of the destination mailbox.
+    /// - parameter set1: The message UIDs in the source mailbox.
+    /// - parameter set2: The copied message UIDs in the destination mailbox.
     public init(num: Int, set1: UIDSet, set2: UIDSet) {
         self.num = num
         self.set1 = set1
