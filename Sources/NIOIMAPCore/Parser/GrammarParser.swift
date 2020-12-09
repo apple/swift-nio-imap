@@ -1911,8 +1911,8 @@ extension GrammarParser {
         }
     }
 
-    static func parseIPartialOnly(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IPartialOnly {
-        try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> IPartialOnly in
+    static func parseIPartialOnly(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IPartial {
+        try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> IPartial in
             try fixedString(";PARTIAL=", buffer: &buffer, tracker: tracker)
             return .init(range: try self.parsePartialRange(buffer: &buffer, tracker: tracker))
         }
@@ -2132,7 +2132,7 @@ extension GrammarParser {
                     return .sectionPartial(section: section, partial: nil)
                 }
             }
-            let partial = try optional(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> IPartialOnly in
+            let partial = try optional(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> IPartial in
                 try fixedString("/", buffer: &buffer, tracker: tracker)
                 return try self.parseIPartialOnly(buffer: &buffer, tracker: tracker)
             })
@@ -2155,7 +2155,7 @@ extension GrammarParser {
                     return .uidSectionPartial(uid: uid, section: section, partial: nil)
                 }
             }
-            let partial = try optional(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> IPartialOnly in
+            let partial = try optional(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> IPartial in
                 try fixedString("/", buffer: &buffer, tracker: tracker)
                 return try self.parseIPartialOnly(buffer: &buffer, tracker: tracker)
             })
@@ -2179,7 +2179,7 @@ extension GrammarParser {
                     return .refUidSectionPartial(ref: ref, uid: uid, section: section, partial: nil)
                 }
             }
-            let partial = try optional(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> IPartialOnly in
+            let partial = try optional(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> IPartial in
                 try fixedString("/", buffer: &buffer, tracker: tracker)
                 return try self.parseIPartialOnly(buffer: &buffer, tracker: tracker)
             })

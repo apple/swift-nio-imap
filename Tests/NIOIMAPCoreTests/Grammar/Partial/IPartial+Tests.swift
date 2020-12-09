@@ -28,12 +28,4 @@ extension IPartial_Tests {
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeIPartial($0) })
     }
-
-    func testEncode_IPartialOnly() {
-        let inputs: [(IPartialOnly, String, UInt)] = [
-            (.init(range: .init(offset: 1, length: nil)), ";PARTIAL=1", #line),
-            (.init(range: .init(offset: 1, length: 2)), ";PARTIAL=1.2", #line),
-        ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeIPartialOnly($0) })
-    }
 }

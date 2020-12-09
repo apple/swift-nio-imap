@@ -12,19 +12,14 @@
 //
 //===----------------------------------------------------------------------===//
 
-/// See RFC 5092
+/// Used to append a `PartialRange` to the end of a *UID FETCH BODY.PEEK*.
 public struct IPartial: Equatable {
+    
+    /// The `PartialRange` to append.
     public var range: PartialRange
 
-    public init(range: PartialRange) {
-        self.range = range
-    }
-}
-
-/// See RFC 5092
-public struct IPartialOnly: Equatable {
-    public var range: PartialRange
-
+    /// Creates a new `IPartial`.
+    /// - parameter range: The `PartialRange` to append.
     public init(range: PartialRange) {
         self.range = range
     }
@@ -37,8 +32,8 @@ extension EncodeBuffer {
         self.writeString("/;PARTIAL=") +
             self.writePartialRange(data.range)
     }
-
-    @discardableResult mutating func writeIPartialOnly(_ data: IPartialOnly) -> Int {
+    
+    @discardableResult mutating func writeIPartialOnly(_ data: IPartial) -> Int {
         self.writeString(";PARTIAL=") +
             self.writePartialRange(data.range)
     }

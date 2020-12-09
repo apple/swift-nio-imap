@@ -14,10 +14,10 @@
 
 /// RFC 5092
 public enum IMessageOrPartial: Equatable {
-    case refUidSectionPartial(ref: IMailboxReference, uid: IUIDOnly, section: ISectionOnly?, partial: IPartialOnly?)
-    case uidSectionPartial(uid: IUIDOnly, section: ISectionOnly?, partial: IPartialOnly?)
-    case sectionPartial(section: ISectionOnly, partial: IPartialOnly?)
-    case partialOnly(IPartialOnly)
+    case refUidSectionPartial(ref: IMailboxReference, uid: IUIDOnly, section: ISectionOnly?, partial: IPartial?)
+    case uidSectionPartial(uid: IUIDOnly, section: ISectionOnly?, partial: IPartial?)
+    case sectionPartial(section: ISectionOnly, partial: IPartial?)
+    case partialOnly(IPartial)
 }
 
 // MARK: - Encoding
