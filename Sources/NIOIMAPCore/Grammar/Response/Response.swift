@@ -53,11 +53,25 @@ public enum Response: Equatable {
 /// Every `streamingBegin` has exaclty one corresponding `streamingEnd`
 /// `streamingBegin` has a `type` that specifies the type of data to be streamed
 public enum FetchResponse: Equatable {
+    
+    /// A fetch response is beginning for the message with the given identifier.
     case start(Int)
+    
+    /// A basic attribute that is small enough to be sent as one chunk, for example flags or an envelope.
     case simpleAttribute(MessageAttribute)
+    
+    /// Signals that streaming a potentially large amount of data is about to begin. Clients
+    /// are notified of the type of stream, and how many bytes are to be expected.
     case streamingBegin(kind: StreamingKind, byteCount: Int)
+    
+    /// Bytes have been received.
     case streamingBytes(ByteBuffer)
+    
+    /// No more bytes will be received in this streaming session, however the server may immediately send
+    /// another `.streamingBegin` message.
     case streamingEnd
+    
+    /// No more data will be sent for this message.
     case finish
 }
 
