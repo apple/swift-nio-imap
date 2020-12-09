@@ -14,11 +14,18 @@
 
 import struct NIO.ByteBuffer
 
-/// RFC2087 `setquota_resource`
+/// A resource with it's corresponding limits.
 public struct QuotaLimit: Equatable {
+    
+    /// The resource that the quota is applied to.
     public var resourceName: String
+    
+    /// The maximum size/count of the resource.
     public var limit: Int
 
+    /// Creates a new `QuotaLimit`.
+    /// - parameter resourceName: The resource that the quota is applied to.
+    /// - parameter limit: The maximum size/count of the resource.
     public init(resourceName: String, limit: Int) {
         self.resourceName = resourceName
         self.limit = limit
