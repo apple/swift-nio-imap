@@ -14,26 +14,35 @@
 
 import struct NIO.ByteBuffer
 
-/// IMAPv4 `uid-range`
+/// Represents a range of `UID`s using lower and upper bounds.
 public struct UIDRange: Hashable, RawRepresentable {
+    
+    /// The range expressed as a native Swift range.
     public var rawValue: ClosedRange<UID>
 
-    public var range: ClosedRange<UID> { rawValue }
-
+    /// Creates a new `UIDRange`.
+    /// - parameter rawValue: A closed range with `UID`s as the upper and lower bound.
     public init(rawValue: ClosedRange<UID>) {
         self.rawValue = rawValue
     }
 }
 
 extension UIDRange {
+    
+    /// Creates a new `UIDRange`.
+    /// - parameter rawValue: A closed range with `UID`s as the upper and lower bound.
     public init(_ range: ClosedRange<UID>) {
         self.init(rawValue: range)
     }
 
+    /// Creates a new `UIDRange` from a partial range, using `.min` as the lower bound.
+    /// - parameter rawValue: A partial with a `UID` as the upper bound.
     public init(_ range: PartialRangeThrough<UID>) {
         self.init(UID.min ... range.upperBound)
     }
 
+    /// Creates a new `UIDRange` from a partial range, using `.max` as the upper bound.
+    /// - parameter rawValue: A partial with a `UID` as the lower bound.
     public init(_ range: PartialRangeFrom<UID>) {
         self.init(range.lowerBound ... UID.max)
     }
@@ -50,11 +59,13 @@ extension UIDRange {
 // MARK: - CustomStringConvertible
 
 extension UIDRange: CustomStringConvertible {
+    
+    /// Creates a human-readable representation of the range.
     public var description: String {
-        if range.lowerBound < range.upperBound {
-            return "\(range.lowerBound):\(range.upperBound)"
+        if self.rawValue.lowerBound < self.rawValue.upperBound {
+            return "\(self.rawValue.lowerBound):\(self.rawValue.upperBound)"
         } else {
-            return "\(range.lowerBound)"
+            return "\(self.rawValue.lowerBound)"
         }
     }
 }
@@ -62,16 +73,23 @@ extension UIDRange: CustomStringConvertible {
 // MARK: - Integer Literal
 
 extension UIDRange: ExpressibleByIntegerLiteral {
+    
+    /// Creates a range from a single number - essentially a range containing one value.
+    /// - parameter value: The raw number to use as both the upper and lower bounds.
     public init(integerLiteral value: UInt32) {
         self.init(UID(integerLiteral: value))
     }
 
+    /// Creates a range from a single number - essentially a range containing one value.
+    /// - parameter value: The raw number to use as both the upper and lower bounds.
     public init(_ value: UID) {
         self.init(rawValue: value ... value)
     }
 }
 
 extension UIDRange {
+    
+    /// Creates a range that covers every valid UID.
     public static let all = UIDRange((.min) ... (.max))
 }
 
@@ -79,10 +97,10 @@ extension UIDRange {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeUIDRange(_ range: UIDRange) -> Int {
-        self.writeUID(range.range.lowerBound) +
-            self.write(if: range.range.lowerBound < range.range.upperBound) {
+        self.writeUID(range.rawValue.lowerBound) +
+            self.write(if: range.rawValue.lowerBound < range.rawValue.upperBound) {
                 self.writeString(":") +
-                    self.writeUID(range.range.upperBound)
+                    self.writeUID(range.rawValue.upperBound)
             }
     }
 }
