@@ -23,11 +23,18 @@ public struct SearchModificationSequenceExtension: Hashable {
     }
 }
 
-/// RFC 7162
+/// Used when performing a search to only include messages modified since a particular moment.
 public struct SearchModificationSequence: Hashable {
+    
+    /// Extensions defined to catch data sent as part of any future extensions.
     public var extensions: [SearchModificationSequenceExtension]
+    
+    /// The minimum `ModificationSequenceValue` that any messages returned as part of the search must have.
     public var sequenceValue: ModificationSequenceValue
 
+    /// Creates a new `SearchModificationSequence`.
+    /// - parameter extensions: Extensions defined to catch data sent as part of any future extensions.
+    /// - parameter sequenceValue: The minimum `ModificationSequenceValue` that any messages returned as part of the search must have.
     public init(extensions: [SearchModificationSequenceExtension], sequenceValue: ModificationSequenceValue) {
         self.extensions = extensions
         self.sequenceValue = sequenceValue
