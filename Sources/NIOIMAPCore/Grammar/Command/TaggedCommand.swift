@@ -32,6 +32,10 @@ public struct TaggedCommand: Equatable {
 }
 
 extension CommandEncodeBuffer {
+    
+    /// Writes a `TaggedCommand` to the buffer ready to be sent down the network.
+    /// - parameter command: The `TaggedCommand` to write.
+    /// - returns: The number of bytes written.
     @discardableResult public mutating func writeCommand(_ command: TaggedCommand) -> Int {
         var size = 0
         size += self.buffer.writeString("\(command.tag) ")
