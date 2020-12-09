@@ -14,13 +14,27 @@
 
 import struct NIO.ByteBuffer
 
-/// IMAPv4 `address`
+/// An address structure is a parenthesized list that describes an
+/// electronic mail address.
 public struct Address: Equatable {
+    
+    /// The addressee's personal name (may be an alias).
     public var name: ByteBuffer?
+    
+    /// The SMTP at-domain-list.
     public var adl: ByteBuffer?
+    
+    /// The mailbox the message.
     public var mailbox: ByteBuffer?
+    
+    /// The host name of the server that sent the message.
     public var host: ByteBuffer?
 
+    /// Creates a new `Address`.
+    /// - parameter name: The addressee's personal name (may be an alias).
+    /// - parameter adl: The SMTP at-domain-list.
+    /// - parameter mailbox: The mailbox the message.
+    /// - parameter host: The host name of the server that sent the message.
     public init(name: ByteBuffer?, adl: ByteBuffer?, mailbox: ByteBuffer?, host: ByteBuffer?) {
         self.name = name
         self.adl = adl
