@@ -20,6 +20,10 @@ import struct NIO.ByteBuffer
 ///
 /// IMAPv4 `continue-req`
 public enum ContinuationRequest: Equatable {
+    
+    /// A continuation request that contains a `ResponseText`.
     case responseText(ResponseText)
+    
+    /// A continuation request that contains some data, typically encoded as base64.
     case data(ByteBuffer)
 }
