@@ -14,10 +14,14 @@
 
 import struct NIO.ByteBuffer
 
-/// RFC 5092
+/// A percent-encoded URL auth.
 public struct EncodedURLAuth: Equatable {
+    
+    /// The percent-encoded data.
     public var data: String
 
+    /// Creates a new `EncodedUrlAuth`.
+    /// - parameter data: The percent-encoded string.
     public init(data: String) {
         self.data = data
     }
