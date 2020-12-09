@@ -14,9 +14,14 @@
 
 import struct NIO.ByteBuffer
 
-/// RFC 4959
+/// Allows a client to optionally send an initial response when authenticating to speed
+/// up the process.
 public enum InitialClientResponse: Equatable {
+    
+    /// No initial response
     case empty
+    
+    /// Data encoded as Base64
     case data(ByteBuffer)
 }
 
