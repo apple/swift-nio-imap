@@ -14,6 +14,7 @@
 
 import struct NIO.ByteBuffer
 
+/// A parser to be used by Clients in order to parse responses sent from a server.
 public struct ResponseParser: Parser {
     enum AttributeState: Equatable {
         case head
@@ -34,11 +35,17 @@ public struct ResponseParser: Parser {
     let bufferLimit: Int
     private var mode: Mode
 
+    /// Creates a new `ResponseParser`.
+    /// - parameter bufferLimit: The maximum amount of data that may be buffered by the parser. If this limit is exceeded then an error will be thrown. Defaults to 1000 bytes.
     public init(bufferLimit: Int = 1_000) {
         self.bufferLimit = bufferLimit
         self.mode = .response(.fetchOrNormal)
     }
 
+    /// Parses a `ResponseStream` and returns the result.
+    /// - parameter buffer: The `ByteBuffer` to parse data from.
+    /// - returns: `nil` if there wasn't enough data, otherwise a `ResponseOrContinuationRequest` if parsing was successful.
+    /// - throws: A `ParserError` with a desription as to why parsing failed.
     public mutating func parseResponseStream(buffer: inout ByteBuffer) throws -> ResponseOrContinuationRequest? {
         let tracker = StackTracker.makeNewDefaultLimitStackTracker
         do {
