@@ -55,9 +55,16 @@ public struct FullDate: Equatable {
     }
 }
 
+/// A time.
 public struct FullTime: Equatable {
+    
+    /// The hour.
     public var hour: Int
+    
+    /// The minute.
     public var minute: Int
+    
+    /// The second.
     public var second: Int
 
     /// This is a partially-dynamic field, and does not directly represent
@@ -66,6 +73,10 @@ public struct FullTime: Equatable {
     /// will write `HH:mm:ss.1234`.
     public var fraction: Int?
 
+    /// Creates a new `FullTime`. Currently no validation takes place.
+    /// - parameter hour: The hour.
+    /// - parameter minute: The minute.
+    /// - parameter second: The second.
     public init(hour: Int, minute: Int, second: Int, fraction: Int? = nil) {
         self.hour = hour
         self.minute = minute
