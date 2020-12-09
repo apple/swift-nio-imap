@@ -15,6 +15,7 @@
 import struct NIO.ByteBuffer
 import struct NIO.ByteBufferView
 
+/// A parser dedicated to handling syncrhonising literals.
 public struct SynchronizingLiteralParser {
     private var offset = 0
     private var synchronisingLiterals = 0
@@ -31,6 +32,7 @@ public struct SynchronizingLiteralParser {
         case nonSynchronisingLiteral(Int)
     }
 
+    /// Creates a new `SynchronisingLiteralParser`.
     public init() {}
 
     private static func reverseParseTrailingNewlines(_ buffer: inout ByteBuffer) throws {
@@ -97,11 +99,19 @@ public struct SynchronizingLiteralParser {
         }
     }
 
+    /// Contains information on the result of a call to `parseContinuationsNecessary`.
     public struct FramingResult {
+        
+        /// The maximum number of bytes that can be consumed by a `ResponseParser` until more data is required.
         public var maximumValidBytes: Int
+        
+        /// How many synchronising literals are in the frame.
         public var synchronizingLiteralCount: Int
     }
 
+    /// Looks for continuations to determine how many there should be, if any, and how many bytes can be consumed before more data is required.
+    /// - parameter buffer: The `ByteBuffer` to scan. Note that this is not a consuming function.
+    /// - returns: A `FramingResult` containing details of the parse.
     public mutating func parseContinuationsNecessary(_ buffer: ByteBuffer) throws -> FramingResult {
         var lastOffset = self.offset
         repeat {
@@ -145,6 +155,8 @@ public struct SynchronizingLiteralParser {
         } while true
     }
 
+    /// Tells the parser that a number of bytes was consumed.
+    /// - parameter numberOfBytes: How many bytes were successfully consumed.
     public mutating func consumed(_ numberOfBytes: Int) {
         precondition(self.offset >= numberOfBytes, "offset=\(self.offset), numberOfBytes consumed=\(numberOfBytes)")
         self.offset -= numberOfBytes
