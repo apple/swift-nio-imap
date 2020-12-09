@@ -14,11 +14,18 @@
 
 import struct NIO.ByteBuffer
 
-/// IMAPv4 `capability`
+/// A `Capability` is advertised as a piece of functionality that a server supports. If the
+/// server does not explicitly advertise a capability then the client should not assume the functionality
+/// is present.
 public struct Capability: Equatable {
+    
+    /// The raw string value of the capability.
     public var rawValue: String
     private var splitIndex: String.Index?
 
+    /// The name of the capability. For simple capabilities such as *STARTTLS*, the value
+    /// will simply be *STARTTLS*. For configurable capabilities such as *AUTH=GSSAPI*, the value
+    /// will be *AUTH*.
     public var name: String {
         guard let index = self.splitIndex else {
             return self.rawValue
@@ -26,6 +33,9 @@ public struct Capability: Equatable {
         return String(self.rawValue[..<index])
     }
 
+    /// If the capability is _simple_, e.g. *STARTTTLS*, then the value will be `nil`.
+    /// Otherwise, if the capability is configurable such as *AUTH=GSSAPI*` then the value will
+    /// be *GSSAPI*.
     public var value: String? {
         guard var index = self.splitIndex else {
             return nil
@@ -35,6 +45,8 @@ public struct Capability: Equatable {
         return String(self.rawValue[index...])
     }
 
+    /// Creates a new capability from a `String`, and parses any configuration if present.
+    /// - parameter value: The raw `String` value of the capability, e.g. *STARTTLS* or *AUTH=GSSAPI*.
     public init(_ value: String) {
         self.init(unchecked: value)
     }
@@ -48,16 +60,32 @@ public struct Capability: Equatable {
 // MARK: - Convenience Types
 
 extension Capability {
+    
+    ///
     public struct AuthKind: Equatable {
+        
+        ///
         public static let token = Self(unchecked: "TOKEN")
+        
+        ///
         public static let plain = Self(unchecked: "PLAIN")
+        
+        ///
         public static let pToken = Self(unchecked: "PTOKEN")
+        
+        ///
         public static let weToken = Self(unchecked: "WETOKEN")
+       
+        ///
         public static let wsToken = Self(unchecked: "WSTOKEN")
+        
+        ///
         public static let gssAPI = Self(unchecked: "GSSAPI")
 
+        ///
         public var rawValue: String
-
+        
+        ///
         public init(_ value: String) {
             self.rawValue = value.uppercased()
         }
