@@ -14,8 +14,13 @@
 
 import struct NIO.ByteBuffer
 
+/// A command and any synchronising literals that are ready to be sent down the network to a server.
 public struct PartialCommandStream: Equatable {
+    
+    /// The number of synchronising literals contained in the corresponding `command`.
     public var numberOfSynchronisingLiterals: Int
+    
+    /// A command to be sent to a server.
     public var command: CommandStream?
 
     internal init(numberOfSynchronisingLiterals: Int, command: CommandStream?) {
@@ -23,15 +28,16 @@ public struct PartialCommandStream: Equatable {
         self.command = command
     }
 
-    public init(_ command: CommandStream, numberOfSynchronisingLiterals: Int = 0) {
+    /// Creates a new `PartialCommandStream`.
+    /// - parameter command: A `commandStream`, if any. Defaults to `nil`.
+    /// - parameter numberOfSynchronisingLiterals: How many synchronising literals are in the corresponding `command`. Defaults to 0.
+    public init(_ command: CommandStream? = nil, numberOfSynchronisingLiterals: Int = 0) {
         self = .init(numberOfSynchronisingLiterals: numberOfSynchronisingLiterals, command: command)
     }
 
-    public init(numberOfSynchronisingLiterals: Int) {
-        self = .init(numberOfSynchronisingLiterals: numberOfSynchronisingLiterals, command: nil)
-    }
 }
 
+/// A parser dedicated to parsing commands sent from a client.
 public struct CommandParser: Parser {
     enum Mode: Equatable {
         case lines
@@ -56,6 +62,8 @@ public struct CommandParser: Parser {
     private(set) var mode: Mode = .lines
     private var synchronisingLiteralParser = SynchronizingLiteralParser()
 
+    /// Creates a new `CommandParser` with a built in buffer limit. Used to prevent DOS attacks, an error will be thrown if this limit is exceeded.
+    /// - parameter bufferLimit. The maximum size of the buffer in bytes at any one time. Defaults to 1000 bytes.
     public init(bufferLimit: Int = 1_000) {
         self.bufferLimit = bufferLimit
     }
