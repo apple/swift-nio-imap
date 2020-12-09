@@ -14,10 +14,14 @@
 
 import struct NIO.ByteBuffer
 
-/// RFC 5092
+/// A percent-encoded section.
 public struct EncodedSection: Equatable {
+    
+    /// The percent-encoded data.
     public var section: String
 
+    /// Creates a new `EncodedSection`.
+    /// - parameter section: The percent-encoded string.
     public init(section: String) {
         self.section = section
     }
