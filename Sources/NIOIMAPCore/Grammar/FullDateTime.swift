@@ -31,19 +31,19 @@ public struct FullDateTime: Equatable {
 
 /// A date.
 public struct FullDate: Equatable {
-    /// The year.
+    /// The year. Any non-negative integer.
     public var year: Int
 
-    /// The month.
+    /// The month in the range `1...12`.
     public var month: Int
 
-    /// The day.
+    /// The day in the range `1...31`.
     public var day: Int
 
     /// Creates a new `FullDate`.
-    /// - parameter year: The year.
-    /// - parameter month: The month.
-    /// - parameter day: The day.
+    /// - parameter year: The year. Any non-negative integer.
+    /// - parameter month: The month in the range `1...12`.
+    /// - parameter day: The day in the range `1...31`.
     public init(year: Int, month: Int, day: Int) {
         precondition(month > 0 && month < 13, "\(month) is not a valid month")
         precondition(day > 0 && day < 32, "\(day) is not a valid day")
