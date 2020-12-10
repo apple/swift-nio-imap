@@ -15,7 +15,6 @@
 /// Quick resynchronisation parameters for the `.select` and `.examine` commands.
 /// Recommended reading: RFC 7162 § 3.2.5.
 public struct QResyncParameter: Equatable {
-    
     /// The last known UID validity.
     public var uidValiditiy: Int
 
@@ -43,7 +42,6 @@ public struct QResyncParameter: Equatable {
 
 /// Used to specify the type of `.select` command that should be execuuted.
 public enum SelectParameter: Equatable {
-    
     /// Perform a basic `.select` command without Condition Store or Quick Resynchronisation.
     case basic(Parameter)
 

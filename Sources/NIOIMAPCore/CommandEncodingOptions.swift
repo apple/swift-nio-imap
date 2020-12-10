@@ -42,7 +42,6 @@ public struct CommandEncodingOptions: Equatable {
 }
 
 extension CommandEncodingOptions {
-    
     /// Creates a new `CommandEncodingOptions` from an array of `Capability`.
     /// - parameter capabilities: An array of `Capability` to convert.
     public init(capabilities: [Capability]) {

@@ -14,10 +14,9 @@
 
 /// A date and time defined in RFC 3339.
 public struct FullDateTime: Equatable {
-    
     /// The date.
     public var date: FullDate
-    
+
     /// The time.
     public var time: FullTime
 
@@ -32,13 +31,12 @@ public struct FullDateTime: Equatable {
 
 /// A date.
 public struct FullDate: Equatable {
-    
     /// The year.
     public var year: Int
-    
+
     /// The month.
     public var month: Int
-    
+
     /// The day.
     public var day: Int
 
@@ -57,13 +55,12 @@ public struct FullDate: Equatable {
 
 /// A time.
 public struct FullTime: Equatable {
-    
     /// The hour. 0-based in the range `0...23`.
     public var hour: Int
-    
+
     /// The minute. 0-based in the range `0...59`.
     public var minute: Int
-    
+
     /// The second. 0-based in the range `0...59`.
     public var second: Int
 

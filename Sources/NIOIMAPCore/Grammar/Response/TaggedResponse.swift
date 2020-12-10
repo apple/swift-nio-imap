@@ -17,10 +17,9 @@ import struct NIO.ByteBuffer
 /// A tagged response that is sent by a server to signal that
 /// a command has finished processing.
 public struct TaggedResponse: Equatable {
-    
     /// The tag of the command that led to this response.
     public var tag: String
-    
+
     /// Signals if the command was successfully executed.
     public var state: State
 

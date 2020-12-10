@@ -19,13 +19,11 @@ import struct NIO.CircularBuffer
 /// A buffer that handles encoding of Swift types into IMAP commands/responses that
 /// will be sent/recieved by clients and servers.
 public struct EncodeBuffer {
-    
     /// Used to define if the buffer should act as a client or server.
     public enum Mode: Equatable {
-        
         /// Act as a client using the given `CommandEncodingOptions`.
         case client(options: CommandEncodingOptions)
-        
+
         /// Act as a server using the given `ResponseEncodingOptions`.
         case server(streamingAttributes: Bool, options: ResponseEncodingOptions)
     }
@@ -41,7 +39,6 @@ public struct EncodeBuffer {
 }
 
 extension EncodeBuffer {
-    
     /// Creates a new `EncodeBuffer` suitable for a client to write commands.
     /// - parameter buffer: An initial `ByteBuffer` to write to. Note that this is copied and not taken as `inout`.
     /// - parameter options: Configuration to use when writing.
@@ -76,13 +73,11 @@ extension EncodeBuffer {
 }
 
 extension EncodeBuffer {
-    
     /// Represents a piece of data that is ready to be written to the network.
     public struct Chunk {
-        
         /// The data that is ready to be written.
         public var bytes: ByteBuffer
-        
+
         /// Is a continuation request expected before this data can be written?
         public var waitForContinuation: Bool
     }
@@ -115,7 +110,6 @@ extension EncodeBuffer {
 }
 
 extension EncodeBuffer {
-    
     /// Writes a raw `String` to the buffer.
     /// - parameter string: The string to write.
     /// - returns: The number of bytes written - always `string.utf8.count`.

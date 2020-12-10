@@ -16,7 +16,6 @@ import struct NIO.ByteBuffer
 
 /// Used to buffer commands before writing to the network.
 public struct CommandEncodeBuffer {
-    
     /// The underlying buffer containing data to be written.
     public var buffer: EncodeBuffer
 
@@ -32,7 +31,6 @@ public struct CommandEncodeBuffer {
 }
 
 extension CommandEncodeBuffer {
-    
     /// The options used when writing commands and data.
     public var options: CommandEncodingOptions {
         get {

@@ -37,10 +37,9 @@ public enum ListSelectOption: Equatable {
 /// Combines an array of `ListSelectOption` with a `ListSelectBaseOption`. Used
 /// when performing a `.list` command.
 public struct ListSelectOptions: Equatable {
-    
     /// The base option to use.
     public var baseOption: ListSelectBaseOption
-    
+
     /// An array of selection options.
     public var options: [ListSelectOption]
 

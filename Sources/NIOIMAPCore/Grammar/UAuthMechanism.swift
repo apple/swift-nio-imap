@@ -14,10 +14,9 @@
 
 /// The name of the algorithm used to generate and verify a URLAUTH.
 public struct UAuthMechanism: Equatable, RawRepresentable {
-    
     /// Uses a token generation algorithm of the server's choosing
     public static let `internal` = Self(rawValue: "INTERNAL")
-    
+
     /// The raw name of the generation algorithm.
     public var rawValue: String
 

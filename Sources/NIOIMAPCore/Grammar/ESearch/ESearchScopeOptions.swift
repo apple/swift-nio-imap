@@ -34,7 +34,6 @@ public struct ESearchScopeOptions: Equatable {
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    
     @discardableResult mutating func writeESearchScopeOptions(_ options: ESearchScopeOptions) -> Int {
         self.writeArray(options.content, parenthesis: false) { (option, buffer) -> Int in
             buffer.writeParameter(option)

@@ -99,7 +99,6 @@ public enum CommandStream: Equatable {
 }
 
 extension CommandEncodeBuffer {
-    
     /// Writes a `CommandStream` to the buffer ready to be sent to the network.
     /// - parameter stream: The `CommandStream` to write.
     /// - returns: The number of bytes written.

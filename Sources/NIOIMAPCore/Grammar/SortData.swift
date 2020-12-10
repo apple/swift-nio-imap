@@ -16,7 +16,6 @@ import struct NIO.ByteBuffer
 
 /// Sent as a response to a `.sort` command.
 public struct SortData: Equatable {
-    
     /// Message sequence numbers that match the search.
     public var identifiers: [Int]
 

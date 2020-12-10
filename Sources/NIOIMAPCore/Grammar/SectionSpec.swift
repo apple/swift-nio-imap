@@ -20,13 +20,12 @@ import struct NIO.ByteBuffer
 ///
 /// Use `SectionSpecifier.complete` for an empty section specifier (i.e. the complete message).
 public struct SectionSpecifier: Hashable {
-    
     /// The part of the body.
     public internal(set) var part: Part
-    
+
     /// The type of section, e.g. *HEADER*.
     public internal(set) var kind: Kind
-    
+
     /// Creates a new *complete* `SectionSpecifier`.
     /// - parameter part: The part of the body. Can only be empty if `kind` is not `.MIMEHeader`.
     /// - parameter kind: The type of section, e.g. *HEADER*. Defaults to `.complete`.
@@ -61,7 +60,6 @@ extension SectionSpecifier {
 }
 
 extension SectionSpecifier: Comparable {
-    
     /// Compares two `SectionSpecifier` to evaluate if one (`lhs`) is strictly less than the other (`rhs`).
     /// First the parts are compared. If they are equal then the kind is compared.
     /// - parameter lhs: The first `SectionSpecifier`.
@@ -79,7 +77,6 @@ extension SectionSpecifier: Comparable {
 }
 
 extension SectionSpecifier: CustomStringConvertible {
-    
     /// A textual representation of the `SectionSpecifier` that is inline with the IMAP RFC.
     /// E.g. *.MIME*.
     public var description: String {
@@ -111,7 +108,6 @@ extension SectionSpecifier {
     ///
     /// Examples are `1`, `4.1`, and `4.2.2.1`.
     public struct Part: RawRepresentable, Hashable, ExpressibleByArrayLiteral {
-        
         /// Each element in the array can be thought of as an index of the section identified by the previous element.
         public typealias ArrayLiteralElement = Int
 
@@ -149,7 +145,6 @@ extension SectionSpecifier {
 }
 
 extension SectionSpecifier.Part: Comparable {
-    
     /// Compares two `Part`s to evaluate if one `Part` (`lhs`) is strictly less than the other (`rhs`).
     /// - parameter lhs: The first `Part` for comparison.
     /// - parameter rhs: The first `Part` for comparison.
@@ -176,7 +171,6 @@ extension SectionSpecifier.Part: Comparable {
 }
 
 extension SectionSpecifier.Part: CustomStringConvertible {
-    
     /// Produces a textual representation as period-separated numbers (as defined in the IMAP RFC).
     public var description: String {
         rawValue.map { "\($0)" }.joined(separator: ".")
@@ -184,7 +178,6 @@ extension SectionSpecifier.Part: CustomStringConvertible {
 }
 
 extension SectionSpecifier.Kind: Comparable {
-    
     /// Compares two `Kind`s to evaluate if one (`lhs`) is strictly less than the other (`rhs`).
     /// - parameter lhs: The first `Kind` to compare.
     /// - parameter rhs: The second `Kind` to compare.
