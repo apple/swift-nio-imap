@@ -37,7 +37,7 @@ public struct ESearchSourceOptions: Equatable {
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    @discardableResult public mutating func writeESearchSourceOptions(_ options: ESearchSourceOptions) -> Int {
+    @discardableResult mutating func writeESearchSourceOptions(_ options: ESearchSourceOptions) -> Int {
         self.writeString("IN (") +
             self.writeArray(options.sourceMailbox, parenthesis: false) { (filter, buffer) -> Int in
                 buffer.writeMailboxFilter(filter)

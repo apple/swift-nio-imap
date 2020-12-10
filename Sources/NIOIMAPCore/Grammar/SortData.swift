@@ -14,12 +14,17 @@
 
 import struct NIO.ByteBuffer
 
-/// RFC 7162
+/// Sent as a response to a `.sort` command.
 public struct SortData: Equatable {
+    /// Message sequence numbers that match the search.
     public var identifiers: [Int]
 
+    /// The highest mod-sequence for all messages being returned.
     public var modificationSequence: ModificationSequenceValue
 
+    /// Creates a new `SortData`.
+    /// - parameter identifiers: Message sequence numbers that match the search.
+    /// - parameter modificationSequence: The highest mod-sequence for all messages being returned.
     public init(identifiers: [Int], modificationSequence: ModificationSequenceValue) {
         self.identifiers = identifiers
         self.modificationSequence = modificationSequence

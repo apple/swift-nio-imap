@@ -18,7 +18,9 @@ enum ParserLibrary {}
 
 typealias SubParser<T> = (inout ByteBuffer, StackTracker) throws -> T
 
+/// An error ocurred when parsing an IMAP command or response.
 public struct ParserError: Error {
+    /// If possible, a description of the error and why it occurred.
     public var hint: String
     var file: String
     var line: Int

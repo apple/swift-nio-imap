@@ -15,35 +15,160 @@
 import struct NIO.ByteBuffer
 
 // TODO: Convert to struct
-/// IMAPv4 `resp-text-code`
+/// Used to help tell a client why a command failed. Machine readable, not guaranteed to
+/// be human readable.
 public enum ResponseTextCode: Equatable {
+    /// The human-readable text contains a special alert that MUST be
+    /// presented to the user in a fashion that calls the user's
+    /// attention to the message.
     case alert
+
+    /// A SEARCH failed because the given charset is not supported by
+    /// this implementation.  If the optional list of charsets is
+    /// given, this lists the charsets that are supported by this
+    /// implementation.
     case badCharset([String])
+
+    /// Followed by a list of capabilities.  This can appear in the
+    /// initial OK or PREAUTH response to transmit an initial
+    /// capabilities list.  This makes it unnecessary for a client to
+    /// send a separate CAPABILITY command if it recognizes this
+    /// response.
     case capability([Capability])
+
+    /// The human-readable text represents an error in parsing the
+    /// [RFC-2822] header or [MIME-IMB] headers of a message in the
+    /// mailbox.
     case parse
+
+    /// Followed by a parenthesized list of flags, indicates which of
+    /// the known flags the client can change permanently.  Any flags
+    /// that are in the FLAGS untagged response, but not the
+    /// PERMANENTFLAGS list, can not be set permanently.  If the client
+    /// attempts to STORE a flag that is not in the PERMANENTFLAGS
+    /// list, the server will either ignore the change or store the
+    /// state change for the remainder of the current session only.
+    /// The PERMANENTFLAGS list can also include the special flag \*,
+    /// which indicates that it is possible to create new keywords by
+    /// attempting to store those flags in the mailbox.
     case permanentFlags([PermanentFlag])
+
+    /// The mailbox is selected read-only, or its access while selected
+    /// has changed from read-write to read-only.
     case readOnly
+
+    /// The mailbox is selected read-write, or its access while
+    /// selected has changed from read-only to read-write.
     case readWrite
+
+    /// An APPEND or COPY attempt is failing because the target mailbox
+    /// does not exist (as opposed to some other reason).  This is a
+    /// hint to the client that the operation can succeed if the
+    /// mailbox is first created by the CREATE command.
     case tryCreate
+
+    /// Indicates the next unique identifier value.
     case uidNext(UID)
+
+    /// Indicates the unique identifier validity value.
     case uidValidity(UIDValidity)
+
+    /// Indicates the number of the first message without the \Seen flag set.
     case unseen(Int)
+
+    /// A command was unable to complete because it attempted to perform
+    /// an option in a namespace the user does not have access.
     case namespace(NamespaceResponse)
+
+    /// Followed by the UIDVALIDITY of the destination mailbox and the UID
+    /// assigned to the appended message in the destination mailbox,
+    /// indicates that the message has been appended to the destination
+    /// mailbox with that UID.
     case uidAppend(ResponseCodeAppend)
+
+    /// Followed by the UIDVALIDITY of the destination mailbox, a UID set
+    /// containing the UIDs of the message(s) in the source mailbox that
+    /// were copied to the destination mailbox and containing the UIDs
+    /// assigned to the copied message(s) in the destination mailbox,
+    /// indicates that the message(s) have been copied to the destination
+    /// mailbox with the stated UID(s).
     case uidCopy(ResponseCodeCopy)
+
+    /// The selected mailbox is supported by a mail store that does not
+    /// support persistent UIDs; that is, UIDVALIDITY will be different
+    /// each time the mailbox is selected.  Consequently, APPEND or COPY
+    /// to this mailbox will not return an APPENDUID or COPYUID response
+    /// code.
     case uidNotSticky
+
+    /// If the server cannot create a mailbox with the designated special use
+    /// defined, for whatever reason, it MUST NOT create the mailbox, and
+    /// MUST respond to the CREATE command with a tagged NO response.  If the
+    /// reason for the failure is related to the special-use attribute (the
+    /// specified special use is not supported or cannot be assigned to the
+    /// specified mailbox)
     case useAttribute
+
+    /// A generic catch-all case to support response codes sent by future extensions.
     case other(String, String?)
-    case notSaved // RFC 5182
+
+    /// The server refused to save a SEARCH (SAVE) result,
+    /// for example, if an internal limit on the number of saved results is
+    /// reached.
+    case notSaved
+
+    /// The CLOSED response code serves as a boundary between responses for the
+    /// previously opened mailbox (which was closed) and the newly selected
+    /// mailbox: all responses before the CLOSED response code relate to the
+    /// mailbox that was closed, and all subsequent responses relate to the
+    /// newly opened mailbox.
     case closed
+
+    /// A server that doesn't support the persistent storage of mod-sequences
+    /// for the mailbox MUST send the OK untagged response including NOMODSEQ
+    /// response code with every successful SELECT or EXAMINE command.
     case noModificationSequence
+
+    /// Used with an OK response to the STORE command.  (It can also be used in a NO
+    /// response.)
     case modificationSequence(SequenceSet)
+
+    /// A server supporting the persistent storage of mod-sequences for the mailbox
+    /// MUST send the OK untagged response including HIGHESTMODSEQ response
+    /// code with every successful SELECT or EXAMINE command:
     case highestModificationSequence(ModificationSequenceValue)
+
+    /// If there are any entries with values
+    /// larger than the MAXSIZE limit, the server MUST include the METADATA
+    /// LONGENTRIES response code in the tagged OK response for the
+    /// GETMETADATA command.  The METADATA LONGENTRIES response code returns
+    /// the size of the biggest entry value requested by the client that
+    /// exceeded the MAXSIZE limit.
     case metadataLongEntries(Int)
+
+    /// the server is unable to set an annotation because the size of its value is too large. The maximum size
+    /// is contained in the response code.
     case metadataMaxsize(Int)
+
+    /// The server is unable to set a new annotation because the maximum
+    /// number of allowed annotations has already been reached
     case metadataTooMany
+
+    /// The server is unable to set a new annotation because it does not
+    /// support private annotations on one of the specified mailboxes
     case metadataNoPrivate
+
+    /// Returned in an untagged OK response in
+    /// response to a RESETKEY, SELECT, or EXAMINE command.  In the case of
+    /// the RESETKEY command, this status response code can be sent in the
+    /// tagged OK response instead of requiring a separate untagged OK
+    /// response.
     case urlMechanisms([MechanismBase64])
+
+    /// An IMAP4 server MAY respond with an untagged BYE and a REFERRAL
+    /// response code that contains an IMAP URL to a home server if it is not
+    /// willing to accept connections and wishes to direct the client to
+    /// another IMAP4 server.
     case referral(IMAPURL)
 }
 

@@ -12,15 +12,19 @@
 //
 //===----------------------------------------------------------------------===//
 
-/// RFC 5092
+/// The name of the algorithm used to generate and verify a URLAUTH.
 public struct UAuthMechanism: Equatable, RawRepresentable {
+    /// Uses a token generation algorithm of the server's choosing
+    public static let `internal` = Self(rawValue: "INTERNAL")
+
+    /// The raw name of the generation algorithm.
     public var rawValue: String
 
+    /// Creates a new UAuthMechanism from the name of an algorithm.
+    /// - parameter rawValue: The name of an algorithm.
     public init(rawValue: String) {
         self.rawValue = rawValue
     }
-
-    public static let `internal` = Self(rawValue: "INTERNAL")
 }
 
 // MARK: - Encoding

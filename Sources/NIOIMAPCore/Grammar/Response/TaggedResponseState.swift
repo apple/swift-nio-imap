@@ -14,14 +14,18 @@
 
 import struct NIO.ByteBuffer
 
-/// Tagged status responses
-///
-/// The tagged versions in RFC 3501 section 7.1
 extension TaggedResponse {
-    /// IMAPv4 `resp-cond-state`
+    /// Tagged status responses
+    ///
+    /// The tagged versions in RFC 3501 section 7.1
     public enum State: Equatable {
+        /// The command executed successfully.
         case ok(ResponseText)
+
+        /// The command was valid, but the server rejected it.
         case no(ResponseText)
+
+        /// The command was likely invalid.
         case bad(ResponseText)
     }
 }

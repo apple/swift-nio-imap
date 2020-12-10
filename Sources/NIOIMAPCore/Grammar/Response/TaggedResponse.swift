@@ -14,11 +14,18 @@
 
 import struct NIO.ByteBuffer
 
-/// IMAPv4 `response-tagged`
+/// A tagged response that is sent by a server to signal that
+/// a command has finished processing.
 public struct TaggedResponse: Equatable {
+    /// The tag of the command that led to this response.
     public var tag: String
+
+    /// Signals if the command was successfully executed.
     public var state: State
 
+    /// Creates a new `TaggedResponse`.
+    /// - parameter tag: The tag of the command that led to this response.
+    /// - parameter state: Signals if the command was successfully executed.
     public init(tag: String, state: State) {
         self.tag = tag
         self.state = state

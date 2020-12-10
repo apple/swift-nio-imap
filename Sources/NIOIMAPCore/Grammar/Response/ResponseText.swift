@@ -14,11 +14,17 @@
 
 import struct NIO.ByteBuffer
 
-/// IMAPv4 `resp-text`
+/// Data sent from the server to signal a success or failure.
 public struct ResponseText: Equatable {
+    /// Used as a quick way to signal, e.g. *[ALERT]*. Not required.
     public var code: ResponseTextCode?
+
+    /// A human-readable description.
     public var text: String
 
+    /// Creates a new `ResponseText`.
+    /// - parameter code: Used as a quick way to signal, e.g. *[ALERT]*. Not required. Defaults to `nil`.
+    /// - parameter text: A human-readable description.
     public init(code: ResponseTextCode? = nil, text: String) {
         self.code = code
         self.text = text

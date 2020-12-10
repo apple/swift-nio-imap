@@ -20,14 +20,16 @@ import struct NIO.ByteBuffer
 ///
 /// Use `SectionSpecifier.complete` for an empty section specifier (i.e. the complete message).
 public struct SectionSpecifier: Hashable {
+    /// The part of the body.
     public internal(set) var part: Part
+
+    /// The type of section, e.g. *HEADER*.
     public internal(set) var kind: Kind
 
-    public init(_ part: Part) {
-        self.init(part: part, kind: .complete)
-    }
-
-    public init(part: Part = .init(rawValue: []), kind: Kind) {
+    /// Creates a new *complete* `SectionSpecifier`.
+    /// - parameter part: The part of the body. Can only be empty if `kind` is not `.MIMEHeader`.
+    /// - parameter kind: The type of section, e.g. *HEADER*. Defaults to `.complete`.
+    public init(part: Part = .init(rawValue: []), kind: Kind = .complete) {
         if part.rawValue.count == 0 {
             precondition(kind != .MIMEHeader, "Cannot use MIME with an empty section part")
         }
@@ -58,6 +60,11 @@ extension SectionSpecifier {
 }
 
 extension SectionSpecifier: Comparable {
+    /// Compares two `SectionSpecifier` to evaluate if one (`lhs`) is strictly less than the other (`rhs`).
+    /// First the parts are compared. If they are equal then the kind is compared.
+    /// - parameter lhs: The first `SectionSpecifier`.
+    /// - parameter rhs: The second `SectionSpecifier`.
+    /// - returns: `true` if `lhs` is considered strictly *less than* `rhs`, otherwise `false.`
     public static func < (lhs: SectionSpecifier, rhs: SectionSpecifier) -> Bool {
         if lhs.part == rhs.part {
             return lhs.kind < rhs.kind
@@ -70,6 +77,8 @@ extension SectionSpecifier: Comparable {
 }
 
 extension SectionSpecifier: CustomStringConvertible {
+    /// A textual representation of the `SectionSpecifier` that is inline with the IMAP RFC.
+    /// E.g. *.MIME*.
     public var description: String {
         let kind: String
         switch self.kind {
@@ -99,14 +108,20 @@ extension SectionSpecifier {
     ///
     /// Examples are `1`, `4.1`, and `4.2.2.1`.
     public struct Part: RawRepresentable, Hashable, ExpressibleByArrayLiteral {
+        /// Each element in the array can be thought of as an index of the section identified by the previous element.
         public typealias ArrayLiteralElement = Int
 
+        /// The underlying array of integer components, where each integer is a sub-part of the previous.
         public var rawValue: [Int]
 
+        /// Creates a new `Part` from an array of integers..
+        /// - parameter rawValue: The array of integers.
         public init(rawValue: [Int]) {
             self.rawValue = rawValue
         }
 
+        /// Creates a new `Part` from an array of integers..
+        /// - parameter rawValue: The array of integers.
         public init(arrayLiteral elements: Int...) {
             self.rawValue = elements
         }
@@ -130,6 +145,10 @@ extension SectionSpecifier {
 }
 
 extension SectionSpecifier.Part: Comparable {
+    /// Compares two `Part`s to evaluate if one `Part` (`lhs`) is strictly less than the other (`rhs`).
+    /// - parameter lhs: The first `Part` for comparison.
+    /// - parameter rhs: The first `Part` for comparison.
+    /// - returns: `true` if `lhs` evaluates to strictly less than `rhs`, otherwise `false`.
     public static func < (lhs: SectionSpecifier.Part, rhs: SectionSpecifier.Part) -> Bool {
         let minSize = min(lhs.rawValue.count, rhs.rawValue.count)
         for i in 0 ..< minSize {
@@ -152,12 +171,17 @@ extension SectionSpecifier.Part: Comparable {
 }
 
 extension SectionSpecifier.Part: CustomStringConvertible {
+    /// Produces a textual representation as period-separated numbers (as defined in the IMAP RFC).
     public var description: String {
         rawValue.map { "\($0)" }.joined(separator: ".")
     }
 }
 
 extension SectionSpecifier.Kind: Comparable {
+    /// Compares two `Kind`s to evaluate if one (`lhs`) is strictly less than the other (`rhs`).
+    /// - parameter lhs: The first `Kind` to compare.
+    /// - parameter rhs: The second `Kind` to compare.
+    /// - returns:`true` if `lhs` evaluate to strictly less than `rhs`.
     public static func < (lhs: SectionSpecifier.Kind, rhs: SectionSpecifier.Kind) -> Bool {
         switch (lhs, rhs) {
         case (complete, complete):
