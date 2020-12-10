@@ -23,7 +23,7 @@ public struct QuotaResource: Equatable {
     /// How big the current resource is.
     public var usage: Int
     
-    // The maximum size/count of the resource.
+    /// The maximum size/count of the resource.
     public var limit: Int
 
     /// Creates a new `QuotaResource`.

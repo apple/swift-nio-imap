@@ -12,6 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+/// The IUID was invalid because the underlying number was not `> 0`.
 public struct InvalidUID: Error {}
 
 /// Wraps an IMAP4 message Unique Identifier (UID), and it

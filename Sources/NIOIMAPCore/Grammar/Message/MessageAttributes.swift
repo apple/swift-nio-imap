@@ -30,6 +30,8 @@ public enum MessageAttribute: Equatable {
     case rfc822(ByteBuffer?)
     /// `RFC822.HEADER` -- Equivalent to `BODY[HEADER]`.
     case rfc822Header(ByteBuffer?)
+    
+    /// `RFC822.TEXT`
     case rfc822Text(ByteBuffer?)
     /// `RFC822.SIZE` -- A number expressing the RFC 2822 size of the message.
     case rfc822Size(Int)
@@ -51,6 +53,7 @@ public enum MessageAttribute: Equatable {
     /// - SeeAlso: RFC 3516 “IMAP4 Binary Content Extension”
     case binarySize(section: SectionSpecifier.Part, size: Int)
 
+    /// The modification time of the message.
     case fetchModificationResponse(FetchModificationResponse)
 
     /// `X-GM-MSGID`: provides a unique ID for each email stable across multiple folders.
