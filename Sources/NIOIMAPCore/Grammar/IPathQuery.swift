@@ -12,10 +12,14 @@
 //
 //===----------------------------------------------------------------------===//
 
-/// RFC 5092
+/// Wraps a command to be executed on a a server once a connection has been established.
 public struct IPathQuery: Equatable {
+    
+    /// A command to execute.
     public var command: ICommand?
 
+    /// Creates a new `IPathQuery`
+    /// - parameter command: The command to execute.
     public init(command: ICommand?) {
         self.command = command
     }
