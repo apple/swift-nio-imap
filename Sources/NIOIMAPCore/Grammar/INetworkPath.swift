@@ -12,11 +12,18 @@
 //
 //===----------------------------------------------------------------------===//
 
-/// RFC 5092
+/// Combines an IMAP server location with a query to be executed once a connection is made.
 public struct INetworkPath: Equatable {
+    
+    /// The server to connect to.
     public var server: IServer
+    
+    /// The query to execute.
     public var query: IPathQuery
 
+    /// Creates a new `INetworkPath`.
+    /// - parameter server: The server to connect to.
+    /// - parameter query: The query to execute.
     public init(server: IServer, query: IPathQuery) {
         self.server = server
         self.query = query
