@@ -12,11 +12,18 @@
 //
 //===----------------------------------------------------------------------===//
 
-/// RFC 5092
+/// Matches an encoded user with a permitted authentication mechanism.
 public struct IUserInfo: Equatable {
+    
+    /// The percent-encoded user data.
     public var encodedUser: EncodedUser?
+    
+    /// The authentication mechanism.
     public var iAuth: IAuth?
 
+    /// Creates a new `IUserInfo`.
+    /// - parameter encodedUser: The percent-encoded user data.
+    /// - parameter iAuth: The authentication mechanism.
     public init(encodedUser: EncodedUser?, iAuth: IAuth?) {
         precondition(encodedUser != nil || iAuth != nil, "Need one of `encodedUser` or `iAuth`")
         self.encodedUser = encodedUser
