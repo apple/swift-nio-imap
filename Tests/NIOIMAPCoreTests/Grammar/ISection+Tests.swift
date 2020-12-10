@@ -29,7 +29,7 @@ extension ISection_Tests {
     }
 
     func testEncode_ISectionOnly() {
-        let inputs: [(ISectionOnly, String, UInt)] = [
+        let inputs: [(ISection, String, UInt)] = [
             (.init(encodedSection: .init(section: "test")), ";SECTION=test", #line),
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeISectionOnly($0) })

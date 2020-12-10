@@ -1933,8 +1933,8 @@ extension GrammarParser {
         }
     }
 
-    static func parseISectionOnly(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ISectionOnly {
-        try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> ISectionOnly in
+    static func parseISectionOnly(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ISection {
+        try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> ISection in
             try fixedString(";SECTION=", buffer: &buffer, tracker: tracker)
             return .init(encodedSection: try self.parseEncodedSection(buffer: &buffer, tracker: tracker))
         }
@@ -2141,7 +2141,7 @@ extension GrammarParser {
 
         func parseIMessageOrPartial_uidSectionPartial(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IMessageOrPartial {
             let uid = try self.parseIUIDOnly(buffer: &buffer, tracker: tracker)
-            var section = try optional(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> ISectionOnly in
+            var section = try optional(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> ISection in
                 try fixedString("/", buffer: &buffer, tracker: tracker)
                 return try self.parseISectionOnly(buffer: &buffer, tracker: tracker)
             })
@@ -2165,7 +2165,7 @@ extension GrammarParser {
         func parseIMessageOrPartial_refUidSectionPartial(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IMessageOrPartial {
             let ref = try self.parseIMailboxReference(buffer: &buffer, tracker: tracker)
             let uid = try self.parseIUIDOnly(buffer: &buffer, tracker: tracker)
-            var section = try optional(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> ISectionOnly in
+            var section = try optional(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> ISection in
                 try fixedString("/", buffer: &buffer, tracker: tracker)
                 return try self.parseISectionOnly(buffer: &buffer, tracker: tracker)
             })

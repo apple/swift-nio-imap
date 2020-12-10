@@ -16,13 +16,13 @@
 public enum IMessageOrPartial: Equatable {
     
     /// Uses a mailbox reference and message UID to load a message, and optional message section and part.
-    case refUidSectionPartial(ref: IMailboxReference, uid: IUID, section: ISectionOnly?, partial: IPartial?)
+    case refUidSectionPartial(ref: IMailboxReference, uid: IUID, section: ISection?, partial: IPartial?)
     
     /// Specifies the section of a message to fetch using a message UID, and optionally a specific part of that message.
-    case uidSectionPartial(uid: IUID, section: ISectionOnly?, partial: IPartial?)
+    case uidSectionPartial(uid: IUID, section: ISection?, partial: IPartial?)
     
     /// Specifies the section of a message to fetch, and optionally a specific part of that message.
-    case sectionPartial(section: ISectionOnly, partial: IPartial?)
+    case sectionPartial(section: ISection, partial: IPartial?)
     
     /// Specifies the part of a message to fetch.
     case partialOnly(IPartial)

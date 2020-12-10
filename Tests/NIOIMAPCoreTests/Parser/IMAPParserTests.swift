@@ -2515,8 +2515,8 @@ extension ParserUnitTests {
         self.iterateTests(
             testFunction: GrammarParser.parseISectionOnly,
             validInputs: [
-                (";SECTION=a", " ", ISectionOnly(encodedSection: .init(section: "a")), #line),
-                (";SECTION=abc", " ", ISectionOnly(encodedSection: .init(section: "abc")), #line),
+                (";SECTION=a", " ", ISection(encodedSection: .init(section: "a")), #line),
+                (";SECTION=abc", " ", ISection(encodedSection: .init(section: "abc")), #line),
             ],
             parserErrorInputs: [
                 ("SECTION=a", " ", #line),

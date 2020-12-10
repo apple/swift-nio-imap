@@ -14,19 +14,14 @@
 
 import struct NIO.ByteBuffer
 
-/// RFC 5092
+/// Wraps a percent-encoded section to be used in an IMAP URL.
 public struct ISection: Equatable {
+    
+    /// The percent-encoded section.
     public var encodedSection: EncodedSection
 
-    public init(encodedSection: EncodedSection) {
-        self.encodedSection = encodedSection
-    }
-}
-
-/// RFC 5092
-public struct ISectionOnly: Equatable {
-    public var encodedSection: EncodedSection
-
+    /// Creates a new `ISection`.
+    /// - parameter encodedSection: The percent-encoded section.
     public init(encodedSection: EncodedSection) {
         self.encodedSection = encodedSection
     }
@@ -39,7 +34,7 @@ extension EncodeBuffer {
         self.writeString("/;SECTION=\(section.encodedSection.section)")
     }
 
-    @discardableResult mutating func writeISectionOnly(_ section: ISectionOnly) -> Int {
+    @discardableResult mutating func writeISectionOnly(_ section: ISection) -> Int {
         self.writeString(";SECTION=\(section.encodedSection.section)")
     }
 }
