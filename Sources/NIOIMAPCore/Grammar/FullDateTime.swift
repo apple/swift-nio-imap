@@ -31,19 +31,19 @@ public struct FullDateTime: Equatable {
 
 /// A date.
 public struct FullDate: Equatable {
-    /// The year.
+    /// The year. Any non-negative integer.
     public var year: Int
 
-    /// The month.
+    /// The month in the range `1...12`.
     public var month: Int
 
-    /// The day.
+    /// The day in the range `1...31`.
     public var day: Int
 
     /// Creates a new `FullDate`.
-    /// - parameter year: The year.
-    /// - parameter month: The month.
-    /// - parameter day: The day.
+    /// - parameter year: The year. Any non-negative integer.
+    /// - parameter month: The month in the range `1...12`.
+    /// - parameter day: The day in the range `1...31`.
     public init(year: Int, month: Int, day: Int) {
         precondition(month > 0 && month < 13, "\(month) is not a valid month")
         precondition(day > 0 && day < 32, "\(day) is not a valid day")
@@ -55,13 +55,13 @@ public struct FullDate: Equatable {
 
 /// A time.
 public struct FullTime: Equatable {
-    /// The hour.
+    /// The hour. 0-based in the range `0...23`.
     public var hour: Int
 
-    /// The minute.
+    /// The minute. 0-based in the range `0...59`.
     public var minute: Int
 
-    /// The second.
+    /// The second. 0-based in the range `0...59`.
     public var second: Int
 
     /// This is a partially-dynamic field, and does not directly represent
@@ -71,9 +71,9 @@ public struct FullTime: Equatable {
     public var fraction: Int?
 
     /// Creates a new `FullTime`. Currently no validation takes place.
-    /// - parameter hour: The hour.
-    /// - parameter minute: The minute.
-    /// - parameter second: The second.
+    /// - parameter hour: The hour. 0-based in the range `0...23`.
+    /// - parameter minute: The minute. 0-based in the range `0...59`.
+    /// - parameter second: The second. 0-based in the range `0...59`.
     public init(hour: Int, minute: Int, second: Int, fraction: Int? = nil) {
         self.hour = hour
         self.minute = minute

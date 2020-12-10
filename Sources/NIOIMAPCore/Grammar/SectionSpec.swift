@@ -64,7 +64,7 @@ extension SectionSpecifier: Comparable {
     /// First the parts are compared. If they are equal then the kind is compared.
     /// - parameter lhs: The first `SectionSpecifier`.
     /// - parameter rhs: The second `SectionSpecifier`.
-    /// - returns: `true` if the two `SectionSpecifier`s are equal, otherwise `false.`
+    /// - returns: `true` if `lhs` is considered strictly *less than* `rhs`, otherwise `false.`
     public static func < (lhs: SectionSpecifier, rhs: SectionSpecifier) -> Bool {
         if lhs.part == rhs.part {
             return lhs.kind < rhs.kind

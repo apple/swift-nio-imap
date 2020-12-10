@@ -204,9 +204,11 @@ extension Capability {
         }
     }
 
-    /// Wraps *RIGHTS=* extensions.
+    /// Wraps *RIGHTS=* extensions. For more information on what each
+    /// letter means see RFC 4314 section 4.
     public struct RightsKind: Equatable {
-        ///
+        /// Allowed operations in auth state: *DELETE*, *APPEND*, *CREATE*, *RENAME*,
+        /// Allowed operations in selected state: *COPY*, *STORE flags*, *EXPUNGE* (required)
         public static let tekx = Self(unchecked: "TEKX")
 
         /// The raw value as an uppercased string.
