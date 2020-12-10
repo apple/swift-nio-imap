@@ -20,7 +20,7 @@ public struct IMAPDecoderError: Error {
     /// The error that was thrown by the IMAP parser.
     public var parserError: Error
 
-    /// The buffer that was providing to the parser.
+    /// The buffer that was provided to the parser.
     public var buffer: ByteBuffer
 }
 
