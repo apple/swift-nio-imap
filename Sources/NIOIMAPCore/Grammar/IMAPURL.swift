@@ -12,11 +12,18 @@
 //
 //===----------------------------------------------------------------------===//
 
-/// RFC 5092
+/// A URL that specifies a server to connect to and a query to run once a connection has been established.
 public struct IMAPURL: Equatable {
+    
+    /// The server to connect to.
     public var server: IServer
+    
+    /// A query to execute once a connection to server has been made.
     public var query: IPathQuery
 
+    /// Creates a new `IMAPURL`.
+    /// - parameter server: The server to connect to.
+    /// - parameter query: A query to execute once a connection to server has been made.
     public init(server: IServer, query: IPathQuery) {
         self.server = server
         self.query = query
