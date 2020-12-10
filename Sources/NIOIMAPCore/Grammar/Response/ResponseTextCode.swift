@@ -77,10 +77,11 @@ public enum ResponseTextCode: Equatable {
     /// Indicates the number of the first message without the \Seen flag set.
     case unseen(Int)
     
-    ///
+    /// A command was unable to complete because it attempted to perform
+    /// an option in a namespace the user does not have access.
     case namespace(NamespaceResponse)
     
-    ///  Followed by the UIDVALIDITY of the destination mailbox and the UID
+    /// Followed by the UIDVALIDITY of the destination mailbox and the UID
     /// assigned to the appended message in the destination mailbox,
     /// indicates that the message has been appended to the destination
     /// mailbox with that UID.
@@ -133,7 +134,7 @@ public enum ResponseTextCode: Equatable {
     /// response.)
     case modificationSequence(SequenceSet)
     
-    ///  A server supporting the persistent storage of mod-sequences for the mailbox
+    /// A server supporting the persistent storage of mod-sequences for the mailbox
     /// MUST send the OK untagged response including HIGHESTMODSEQ response
     /// code with every successful SELECT or EXAMINE command:
     case highestModificationSequence(ModificationSequenceValue)

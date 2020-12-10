@@ -212,10 +212,12 @@ extension Capability {
         }
     }
 
-    /// Wraps *RIGHTS=* extensions.
+    /// Wraps *RIGHTS=* extensions. For more information on what each
+    /// letter means see RFC 4314 section 4.
     public struct RightsKind: Equatable {
        
-        ///
+        /// Allowed operations in auth state: *DELETE*, *APPEND*, *CREATE*, *RENAME*,
+        /// Allowed operations in selected state: *COPY*, *STORE flags*, *EXPUNGE* (required)
         public static let tekx = Self(unchecked: "TEKX")
 
         /// The raw value as an uppercased string.
@@ -241,7 +243,7 @@ extension Capability {
     /// The server supports sending binary message data - RFC 3516
     public static let binary = Self(unchecked: "BINARY")
     
-    /// Allows clients to creates messes containing a combination of new and existing data/messages - RFC 5550.
+    /// Allows clients to create messages containing a combination of new and existing data/messages - RFC 5550.
     public static let catenate = Self(unchecked: "CATENATE")
     
     /// Provides a mechanism for a client to efficiently determine if a particular mailbox has children - RFC 3348.
