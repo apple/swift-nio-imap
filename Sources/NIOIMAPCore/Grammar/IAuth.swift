@@ -14,10 +14,9 @@
 
 /// The type of authentication mechanism
 public enum IAuth: Equatable {
-    
     /// The client should select any appropriate authentication mechanism.
     case any
-    
+
     /// The client must use the specified authentication mechanism.
     case type(EncodedAuthenticationType)
 }

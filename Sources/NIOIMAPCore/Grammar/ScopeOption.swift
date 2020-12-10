@@ -14,7 +14,6 @@
 
 /// Used an option to `.getMetadata` to specify the depth.
 public struct ScopeOption: Equatable {
-    
     /// No entries below the specified entry are returned
     public static var zero = Self(_backing: .zero)
 
@@ -23,7 +22,7 @@ public struct ScopeOption: Equatable {
 
     /// All entries below the specified entry are returned
     public static var infinity = Self(_backing: .infinity)
-    
+
     enum _Backing: String {
         case zero = "0"
         case one = "1"

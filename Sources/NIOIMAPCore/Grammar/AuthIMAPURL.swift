@@ -16,10 +16,9 @@ import struct NIO.ByteBuffer
 
 /// A URL that can be used to point directly at a message part on a specified IMAP server.
 public struct AuthIMAPURL: Equatable {
-    
     /// The server containing the message.
     public var server: IServer
-    
+
     /// The unique URL of the message, and the part of interest.
     public var messagePart: IMessagePart
 

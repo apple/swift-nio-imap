@@ -15,10 +15,9 @@
 /// Returned after a successfully `.uidCopy` command, and provides the new identifier
 /// of the appended message, and the uid validity of the destination mailbox.
 public struct ResponseCodeAppend: Equatable {
-    
     /// The UID validity of the destination mailbox.
     public var num: Int
-    
+
     /// The UID of the message after it has been appended.
     public var uid: UID
 

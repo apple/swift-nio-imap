@@ -14,10 +14,9 @@
 
 /// RFC 5092
 public struct IMessageList: Equatable {
-    
     /// The mailbox to search.
     public var mailboxReference: IMailboxReference
-    
+
     /// A percent-encoded search query.
     public var encodedSearch: EncodedSearch?
 

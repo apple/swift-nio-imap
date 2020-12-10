@@ -16,10 +16,9 @@ import struct NIO.ByteBuffer
 
 /// A simple key/value pair that matches a metadata entry (name) with a value.
 public struct EntryValue: Equatable {
-    
     /// The name of the metadata item.
     public var name: ByteBuffer
-    
+
     /// The value of the metadata item.
     public var value: MetadataValue
 

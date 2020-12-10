@@ -14,16 +14,15 @@
 
 /// Can be used as a direct path to a specific message section and part.
 public struct IMessagePart: Equatable {
-    
     /// Connection details for a server and a specific mailbox hosted on that server.
     public var mailboxReference: IMailboxReference
-    
+
     /// The UID of the message in question.
     public var iUID: IUID
-    
+
     /// An optional section of the message in question.
     public var iSection: ISection?
-    
+
     /// A specific range of bytes of the message/section in question.
     public var iPartial: IPartial?
 

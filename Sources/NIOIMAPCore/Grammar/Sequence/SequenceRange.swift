@@ -16,7 +16,6 @@ import struct NIO.ByteBuffer
 
 /// A range of messages using message `SequenceNumber`s.
 public struct SequenceRange: Hashable, RawRepresentable {
-    
     /// The underlying range.
     public var rawValue: ClosedRange<SequenceNumber>
 
@@ -28,7 +27,6 @@ public struct SequenceRange: Hashable, RawRepresentable {
 }
 
 extension SequenceRange {
-    
     /// Creates a new `SequenceRange` from a closed range.
     /// - parameter range: The underlying range to use.
     public init(_ range: ClosedRange<SequenceNumber>) {
@@ -57,7 +55,6 @@ extension SequenceRange {
 }
 
 extension SequenceRange: ExpressibleByIntegerLiteral {
-    
     /// Creates a new `SequenceRange` using a single number, essentially a range with one element.
     /// - parameter value: The raw value to use as the upper and lower bounds.
     public init(integerLiteral value: UInt32) {
@@ -72,7 +69,6 @@ extension SequenceRange: ExpressibleByIntegerLiteral {
 }
 
 extension SequenceRange {
-    
     /// A `SequenceRange` that covers every possible `SequenceNumber`.
     public static let all = SequenceRange((.min) ... (.max))
 }

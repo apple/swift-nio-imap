@@ -16,63 +16,61 @@ import struct NIO.ByteBuffer
 
 /// Attributes of a message that can be retrieved as part of a `.fetch` command.
 public enum FetchAttribute: Hashable {
-    
     /// The message's envelope including the sender(s), bcc list, cc list, etc.
     case envelope
-    
+
     /// The message's flags.
     case flags
-    
+
     /// The message's internal date - the date the message was received.
     case internalDate
-    
+
     /// Functionally equivalent to `.body`, but the format of the data is different and conforms to the RFC 822 syntax.
     case rfc822
-    
+
     /// Functionally equivalent to `.body(peek: true, section: .header)`, but the format of the data is different and conforms to the RFC 822 syntax.
     case rfc822Header
-    
+
     /// The RFC 822 size of the message in bytes.
     case rfc822Size
-    
+
     /// Functionally equivalent to `.body(peek: false, section: .text)`, but the format of the data is different and conforms to the RFC 822 syntax.
     case rfc822Text
-    
+
     /// `BODY` and `BODYSTRUCTURE` -- the latter will result in the extension parts
     /// of the body structure to be returned as part of the response, whereas the former
     /// will not.
     case bodyStructure(extensions: Bool)
-    
+
     /// `BODY[<section>]<<partial>>` and `BODY.PEEK[<section>]<<partial>>`
     case bodySection(peek: Bool, _ section: SectionSpecifier, ClosedRange<UInt32>?)
-    
+
     /// The unique identifier of the message.
     case uid
-    
+
     /// The modification sequence of the message.
     case modificationSequence
-    
+
     /// The modification sequence value.
     case modificationSequenceValue(ModificationSequenceValue)
-    
+
     /// The binary data of the specified message section.
     case binary(peek: Bool, section: SectionSpecifier.Part, partial: ClosedRange<UInt32>?)
-    
+
     /// The size of the specified message section.
     case binarySize(section: SectionSpecifier.Part)
-    
+
     /// The message's GMail ID.
     case gmailMessageID
-    
+
     /// The messages GMail Thread Id - the group of messages that this message belongs to.
     case gmailThreadID
-    
+
     /// The message's GMail labels.
     case gmailLabels
 }
 
 extension Array where Element == FetchAttribute {
-    
     /// Macro equivalent to `[.flags, .internalDate, .rfc822Size, envelope]`
     public static let all: [Element] = [.flags, .internalDate, .rfc822Size, .envelope]
 

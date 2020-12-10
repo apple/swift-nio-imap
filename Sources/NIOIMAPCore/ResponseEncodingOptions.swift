@@ -24,7 +24,6 @@ public struct ResponseEncodingOptions: Equatable {
 }
 
 extension ResponseEncodingOptions {
-    
     /// Creates a new `ResponseEncodingOptions`.
     /// - parameter capabilities: An array of server capabilities.
     public init(capabilities: [Capability]) {

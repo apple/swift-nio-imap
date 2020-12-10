@@ -17,16 +17,14 @@ import struct NIO.ByteBuffer
 /// Represents a `SequenceRangeSet` using either a literal value, or some
 /// value stored on the server.
 public enum SequenceSet: Hashable {
-    
     /// A literal `SequenceRangeSet` to use.
     case range(SequenceRangeSet)
-    
+
     /// References result of the last command stored on the server.
     case lastCommand
 }
 
 extension SequenceSet {
-    
     /// Creates a `SequenceSet` from a non-empty array of `SequenceRange`.
     /// - parameter ranges: An array of `SequenceRange` to use.
     /// - returns: `nil` if `ranges` is empty, otherwise a new `SequenceSet`.
@@ -64,7 +62,6 @@ extension SequenceSet {
 }
 
 extension SequenceSet: ExpressibleByArrayLiteral {
-    
     /// Creates a `SequenceSet` from an array of `SequenceRange`. The array is assumed
     /// to be non-empty, however the initialiser will crash if this is not the case.
     /// - parameter ranges: An array of `SequenceRange` to use.
@@ -75,7 +72,6 @@ extension SequenceSet: ExpressibleByArrayLiteral {
 }
 
 extension SequenceSet {
-    
     /// A `SequenceSet` that contains a single `SequenceRangeSet`, that in turn covers every possible `SequenceNumber`.
     public static let all: SequenceSet = .range(SequenceRangeSet.all)
 }

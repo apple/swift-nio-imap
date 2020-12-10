@@ -101,10 +101,9 @@ public struct SynchronizingLiteralParser {
 
     /// Contains information on the result of a call to `parseContinuationsNecessary`.
     public struct FramingResult {
-        
         /// The maximum number of bytes that can be consumed by a `ResponseParser` until more data is required.
         public var maximumValidBytes: Int
-        
+
         /// How many synchronising literals are in the frame.
         public var synchronizingLiteralCount: Int
     }

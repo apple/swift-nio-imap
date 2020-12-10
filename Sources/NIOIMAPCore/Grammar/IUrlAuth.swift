@@ -14,10 +14,9 @@
 
 /// Specifies a URL and a verifier that can be used to verify the authorisation URL.
 public struct IURLAuth: Equatable {
-    
     /// The URL.
     public var auth: IURLAuthRump
-    
+
     /// The auth url verifier.
     public var verifier: IUAVerifier
 

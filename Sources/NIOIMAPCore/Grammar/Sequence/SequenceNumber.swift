@@ -18,16 +18,15 @@
 ///
 /// IMAPv4 `seq-number`
 public struct SequenceNumber: RawRepresentable, Hashable {
-    
     /// The minimum sequence number is always 1.
     public static let min = SequenceNumber(1)
-    
+
     /// The maximum sequence number is always `UInt32.max`.
     public static let max = SequenceNumber(UInt32.max)
-    
+
     /// The raw value of the sequence number, defined in RFC 3501 to be an unsigned 32-bit integer.
     public var rawValue: UInt32
-    
+
     /// Creates a new `SequenceNumber` after performing some sanity checks.
     /// - parameter rawValue: An `Int` that is converted for use as the `rawValue`.
     /// - returns: `nil` if `rawValue` is `0` or does not fit within a `UInt32`.
@@ -48,7 +47,6 @@ public struct SequenceNumber: RawRepresentable, Hashable {
 // MARK: - Integer literal
 
 extension SequenceNumber: ExpressibleByIntegerLiteral {
-    
     /// Creates a new `SequenceNumber` from a `UInt32` without performing sanity checks.
     /// - parameter value: The raw value to use.
     public init(integerLiteral value: UInt32) {
@@ -69,7 +67,6 @@ extension SequenceNumber: ExpressibleByIntegerLiteral {
 }
 
 extension SequenceNumber {
-    
     /// Creates a new `SequenceNumber` from a `BinaryInteger` after
     /// ensuring that the value fits within a `UInt32`.
     /// - parameter source: The raw value to use.
@@ -83,7 +80,6 @@ extension SequenceNumber {
 // MARK: - Strideable
 
 extension SequenceNumber: Strideable {
-    
     /// Evaluates if one `SequenceNumber` (`lhs`) is strictly less than another (`rhs`).
     /// - parameter lhs: The first number to compare.
     /// - parameter rhs: The second number to compare.
@@ -137,7 +133,6 @@ extension EncodeBuffer {
 // MARK: - Swift Ranges
 
 extension SequenceNumber {
-    
     /// Creates a new `SequenceRange` from `.min` to `value`.
     /// - parameter value: The upper bound.
     /// - returns: A new `SequenceRange`.

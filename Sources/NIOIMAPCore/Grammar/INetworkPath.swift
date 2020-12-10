@@ -14,10 +14,9 @@
 
 /// Combines an IMAP server location with a query to be executed once a connection is made.
 public struct INetworkPath: Equatable {
-    
     /// The server to connect to.
     public var server: IServer
-    
+
     /// The query to execute.
     public var query: IPathQuery
 

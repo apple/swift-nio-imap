@@ -16,13 +16,12 @@ import struct NIO.ByteBuffer
 
 /// A resource with it's current usage and maximum size.
 public struct QuotaResource: Equatable {
-    
     /// The resource that the quota is applied to.
     public var resourceName: String
-    
+
     /// How big the current resource is.
     public var usage: Int
-    
+
     /// The maximum size/count of the resource.
     public var limit: Int
 

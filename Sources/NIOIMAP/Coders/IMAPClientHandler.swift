@@ -16,16 +16,15 @@ import NIO
 
 /// To be used by a IMAP client implementation.
 public final class IMAPClientHandler: ChannelDuplexHandler {
-    
     /// Should receive a raw buffer in, after any TLS.
     public typealias InboundIn = ByteBuffer
-    
+
     /// Converts a `ByteBuffer` into a `Response` by sending data through a parser.
     public typealias InboundOut = Response
-    
+
     /// Commands are encoding into a ByteBuffer to send to a server.
     public typealias OutboundIn = CommandStream
-    
+
     /// After encoding the bytes may be sent further through the channel to, for example, a TLS handler.
     public typealias OutboundOut = ByteBuffer
 

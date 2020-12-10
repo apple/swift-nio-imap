@@ -17,16 +17,15 @@ import struct NIO.ByteBuffer
 /// An address structure is a parenthesized list that describes an
 /// electronic mail address.
 public struct Address: Equatable {
-    
     /// The addressee's personal name (may be an alias).
     public var name: ByteBuffer?
-    
+
     /// The SMTP at-domain-list.
     public var adl: ByteBuffer?
-    
+
     /// The mailbox the message.
     public var mailbox: ByteBuffer?
-    
+
     /// The host name of the server that sent the message.
     public var host: ByteBuffer?
 

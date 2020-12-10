@@ -16,7 +16,6 @@
 /// Both are provided in ascending order.
 /// Recommended reading RFC 7162 § 3.2.5.2
 public struct SequenceMatchData: Equatable {
-   
     /// Set of message numbers corresponding to the UIDs in known-uid-set, in ascending order. * is not allowed.
     public var knownSequenceSet: SequenceSet
 

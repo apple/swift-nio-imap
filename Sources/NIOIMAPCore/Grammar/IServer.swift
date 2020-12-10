@@ -17,13 +17,12 @@ import struct NIO.ByteBuffer
 /// Represents an IMAP connection configuration that be used to connect
 /// to an IMAP server.
 public struct IServer: Equatable {
-    
     /// If present, authentication details for the server.
     public var userInfo: IUserInfo?
-    
+
     /// The hostname of the server.
     public var host: String
-    
+
     /// The host port of the server.
     public var port: Int?
 

@@ -19,7 +19,6 @@ public struct InvalidUID: Error {}
 /// SHOULD be used as the <set> argument to the IMAP4 "UID FETCH"
 /// command.
 public struct IUID: Equatable {
-    
     /// The wrapped `UID`
     public var uid: Int
 

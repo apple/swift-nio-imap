@@ -14,10 +14,9 @@
 
 /// Matches an encoded user with a permitted authentication mechanism.
 public struct IUserInfo: Equatable {
-    
     /// The percent-encoded user data.
     public var encodedUser: EncodedUser?
-    
+
     /// The authentication mechanism.
     public var iAuth: IAuth?
 

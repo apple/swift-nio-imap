@@ -16,10 +16,9 @@ import struct NIO.ByteBuffer
 
 /// Implemented as a catch-all to support types defined in future extensions.
 public enum ParameterValue: Equatable {
-    
     /// Specifies a `SequenceSet` as the value.
     case sequence(SequenceSet)
-    
+
     /// Uses an array of `String` as the value.
     case comp([String])
 }

@@ -15,7 +15,6 @@
 /// Used in a fetch command to fetch data for all messages that have metadata
 /// items changed since some know known modification sequence.
 public struct ChangedSinceModifier: Equatable {
-    
     /// The known modification sequence to use as a reference date.
     public var modificationSequence: ModificationSequenceValue
 
@@ -29,7 +28,6 @@ public struct ChangedSinceModifier: Equatable {
 /// Used in a fetch command to fetch data for all messages that have not had
 /// metadata items changed since some know known modification sequence.
 public struct UnchangedSinceModifier: Equatable {
-    
     /// The known modification sequence to use as a reference date.
     public var modificationSequence: ModificationSequenceValue
 

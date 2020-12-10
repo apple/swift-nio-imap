@@ -16,7 +16,6 @@ import struct NIO.ByteBuffer
 
 /// The value for a metadata entry.
 public struct MetadataValue: RawRepresentable, Equatable {
-    
     /// The raw value bytes.
     public var rawValue: ByteBuffer?
 

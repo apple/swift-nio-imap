@@ -30,7 +30,7 @@ public enum MessageAttribute: Equatable {
     case rfc822(ByteBuffer?)
     /// `RFC822.HEADER` -- Equivalent to `BODY[HEADER]`.
     case rfc822Header(ByteBuffer?)
-    
+
     /// `RFC822.TEXT`
     case rfc822Text(ByteBuffer?)
     /// `RFC822.SIZE` -- A number expressing the RFC 2822 size of the message.

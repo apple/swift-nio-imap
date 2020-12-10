@@ -16,7 +16,6 @@ import struct NIO.ByteBuffer
 
 /// Represents a range of `UID`s using lower and upper bounds.
 public struct UIDRange: Hashable, RawRepresentable {
-    
     /// The range expressed as a native Swift range.
     public var rawValue: ClosedRange<UID>
 
@@ -28,7 +27,6 @@ public struct UIDRange: Hashable, RawRepresentable {
 }
 
 extension UIDRange {
-    
     /// Creates a new `UIDRange`.
     /// - parameter rawValue: A closed range with `UID`s as the upper and lower bound.
     public init(_ range: ClosedRange<UID>) {
@@ -59,7 +57,6 @@ extension UIDRange {
 // MARK: - CustomStringConvertible
 
 extension UIDRange: CustomStringConvertible {
-    
     /// Creates a human-readable representation of the range.
     public var description: String {
         if self.rawValue.lowerBound < self.rawValue.upperBound {
@@ -73,7 +70,6 @@ extension UIDRange: CustomStringConvertible {
 // MARK: - Integer Literal
 
 extension UIDRange: ExpressibleByIntegerLiteral {
-    
     /// Creates a range from a single number - essentially a range containing one value.
     /// - parameter value: The raw number to use as both the upper and lower bounds.
     public init(integerLiteral value: UInt32) {
@@ -88,7 +84,6 @@ extension UIDRange: ExpressibleByIntegerLiteral {
 }
 
 extension UIDRange {
-    
     /// Creates a range that covers every valid UID.
     public static let all = UIDRange((.min) ... (.max))
 }

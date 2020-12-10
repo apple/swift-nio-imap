@@ -44,7 +44,6 @@ public struct QuotaRoot: Equatable {
 // MARK: - CustomStringConvertible
 
 extension QuotaRoot: CustomStringConvertible {
-    
     /// A human-readable representation of the root.
     public var description: String {
         self.stringValue

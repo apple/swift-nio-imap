@@ -15,7 +15,6 @@
 /// Provides the `UIDValitiy` for a percent-encoded mailbox. If the `UIDValidity` is present
 /// it will be used to ensure the URL is not stale.
 public struct IMailboxReference: Equatable {
-    
     /// The percent-encoded mailbox.
     public var encodedMailbox: EncodedMailbox
 

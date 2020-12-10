@@ -16,10 +16,9 @@ import struct NIO.ByteBuffer
 
 /// Similar to `AuthImapURL`, but with an additional field to help verify the URL authorization.
 public struct AuthIMAPURLFull: Equatable {
-    
     /// An IMAP url pointing to a message.
     public var imapURL: AuthIMAPURL
-    
+
     /// URL authentication details.
     public var urlAuth: IURLAuth
 

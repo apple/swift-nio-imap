@@ -16,10 +16,9 @@ import struct NIO.ByteBuffer
 
 /// Implemented as a catch all to support any data that may be defined in future RFCs.
 public struct SearchReturnDataExtension: Equatable {
-    
     /// The name of the data field.
     public var modifierName: String
-    
+
     /// The data value.
     public var returnValue: ParameterValue
 

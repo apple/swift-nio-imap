@@ -16,10 +16,9 @@ import struct NIO.ByteBuffer
 
 /// A non-standard vendor-specific option.
 public struct OptionVendorTag: Equatable {
-    
     /// The vendor identifier token.
     public var token: String
-    
+
     /// The option.
     public var atom: String
 

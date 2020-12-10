@@ -16,10 +16,9 @@ import struct NIO.ByteBuffer
 
 /// Implemented as a catch all to support any options that may be defined in future RFCs.
 public struct SearchReturnOptionExtension: Equatable {
-    
     /// The search return option name.
     public var modifierName: String
-    
+
     /// Any parameters that may go along with the option.
     public var params: ParameterValue?
 

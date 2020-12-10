@@ -16,10 +16,9 @@ import struct NIO.ByteBuffer
 
 /// A command and any synchronising literals that are ready to be sent down the network to a server.
 public struct PartialCommandStream: Equatable {
-    
     /// The number of synchronising literals contained in the corresponding `command`.
     public var numberOfSynchronisingLiterals: Int
-    
+
     /// A command to be sent to a server.
     public var command: CommandStream?
 
@@ -34,7 +33,6 @@ public struct PartialCommandStream: Equatable {
     public init(_ command: CommandStream? = nil, numberOfSynchronisingLiterals: Int = 0) {
         self = .init(numberOfSynchronisingLiterals: numberOfSynchronisingLiterals, command: command)
     }
-
 }
 
 /// A parser dedicated to parsing commands sent from a client.

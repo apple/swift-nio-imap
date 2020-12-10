@@ -14,7 +14,6 @@
 
 /// Used to append a `PartialRange` to the end of a *UID FETCH BODY.PEEK*.
 public struct IPartial: Equatable {
-    
     /// The `PartialRange` to append.
     public var range: PartialRange
 
@@ -32,7 +31,7 @@ extension EncodeBuffer {
         self.writeString("/;PARTIAL=") +
             self.writePartialRange(data.range)
     }
-    
+
     @discardableResult mutating func writeIPartialOnly(_ data: IPartial) -> Int {
         self.writeString(";PARTIAL=") +
             self.writePartialRange(data.range)

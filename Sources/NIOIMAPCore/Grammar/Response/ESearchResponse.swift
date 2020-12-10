@@ -16,13 +16,12 @@ import struct NIO.ByteBuffer
 
 /// Sent from a server in response to an extended search.
 public struct ESearchResponse: Equatable {
-    
     /// Identifies the search that resulted in this response.
     public var correlator: SearchCorrelator?
-    
+
     /// `true` if this was a UID SEARCH, otherwise `false`.
     public var uid: Bool
-    
+
     /// Data returned from the search.
     public var returnData: [SearchReturnData]
 

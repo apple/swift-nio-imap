@@ -16,10 +16,9 @@ import struct NIO.ByteBuffer
 
 /// Data sent from the server to signal a success or failure.
 public struct ResponseText: Equatable {
-    
     /// Used as a quick way to signal, e.g. *[ALERT]*. Not required.
     public var code: ResponseTextCode?
-    
+
     /// A human-readable description.
     public var text: String
 

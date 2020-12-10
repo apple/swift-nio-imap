@@ -16,7 +16,6 @@ import struct NIO.ByteBuffer
 
 /// A percent-encoded section.
 public struct EncodedSection: Equatable {
-    
     /// The percent-encoded data.
     public var section: String
 

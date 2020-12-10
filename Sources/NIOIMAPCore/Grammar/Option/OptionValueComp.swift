@@ -16,10 +16,9 @@ import struct NIO.ByteBuffer
 
 /// A wrapper for an option value.
 public enum OptionValueComp: Equatable {
-    
     /// A single value
     case string(ByteBuffer)
-    
+
     /// An array of values
     case array([OptionValueComp])
 }
@@ -27,7 +26,6 @@ public enum OptionValueComp: Equatable {
 // MARK: - Conveniences
 
 extension OptionValueComp: ExpressibleByArrayLiteral {
-    
     /// Option values can be nested, so this provides recursion.
     public typealias ArrayLiteralElement = Self
 

@@ -33,7 +33,6 @@ public struct ResponseEncodeBuffer {
 }
 
 extension ResponseEncodeBuffer {
-    
     /// Creates a new `ResponseEncodeBuffer` from an initial `ByteBuffer` and configuration.
     /// - parameter buffer: The inital `ByteBuffer` to use. Note that this is copied, not taken as `inout`.
     /// - parameter capabilities: Server capabilites to use when writing responses. These will be converted into a `ResponseEncodingOptions`.
@@ -45,7 +44,6 @@ extension ResponseEncodeBuffer {
 // MARK: - Encode ContinuationRequest
 
 extension ResponseEncodeBuffer {
-    
     /// Writes a `ContinuationRequest` in the format *+ <data>\r\n*
     /// - parameter data: The continuation request.
     /// - returns: The number of bytes written.
@@ -66,7 +64,6 @@ extension ResponseEncodeBuffer {
 // MARK: - Encode Response
 
 extension ResponseEncodeBuffer {
-    
     /// Writes a `Response`.
     /// - parameter response: The response to write.
     /// - returns: The number of bytes written.

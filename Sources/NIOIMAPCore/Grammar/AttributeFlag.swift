@@ -17,7 +17,6 @@ import struct NIO.ByteBuffer
 /// Used when performing a search with `MODSEQ`. Note that this is similar to `Flag`, however `.recent`
 /// is not present.
 public struct AttributeFlag: Hashable, RawRepresentable {
-    
     /// The raw `String` to use as the flag.
     public var rawValue: String
 

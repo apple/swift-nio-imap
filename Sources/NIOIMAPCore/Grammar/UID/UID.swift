@@ -16,13 +16,12 @@
 ///
 /// See RFC 3501 section 2.3.1.1.
 public struct UID: RawRepresentable, Hashable, Codable {
-    
     /// The minimum `UID` is always *1*.
     public static let min = UID(1)
-    
+
     /// The maximum `UID` is always `UInt32.max`.
     public static let max = UID(UInt32.max)
-    
+
     /// The message's unique identifier.
     public var rawValue: UInt32
 
@@ -46,7 +45,6 @@ public struct UID: RawRepresentable, Hashable, Codable {
 // MARK: - CustomStringConvertible
 
 extension UID: CustomStringConvertible {
-    
     /// Creates a human-readable `String` representation of the `UID`.
     /// `*` if `self = UInt32.max`, otherwise `self.rawValue` as a `String`.
     public var description: String {
@@ -61,7 +59,6 @@ extension UID: CustomStringConvertible {
 // MARK: - Integer literal
 
 extension UID: ExpressibleByIntegerLiteral {
-    
     /// Creates a new `UID` from an integer literal, skipping all validation.
     /// - parameter integerLiteral: The integer literal value.
     public init(integerLiteral value: UInt32) {
@@ -84,7 +81,6 @@ extension UID: ExpressibleByIntegerLiteral {
 }
 
 extension UID {
-    
     /// Creates a `UID` from some `BinaryInteger`, ensuring that the given value fits within a `UInt32`.
     /// - parameter source: The raw value to use.
     /// - returns: `nil` if `source` does not fit within a `UInt32`, otherwise a `UID`.
@@ -97,7 +93,6 @@ extension UID {
 // MARK: - Strideable
 
 extension UID: Strideable {
-    
     /// Evaluates if one `UID` (`lhs`) is strictly less than another (`rhs`).
     /// - parameter lhs: The first `UID` to evaluate.
     /// - parameter rhs: The second `UID` to evaluate.
@@ -147,7 +142,6 @@ extension EncodeBuffer {
 // MARK: - Swift Ranges
 
 extension UID {
-    
     /// Creates a new `UIDRange` from `.min` to the given upper bound.
     /// - parameter value: The upper bound.
     /// - returns: A new `UIDRange`.

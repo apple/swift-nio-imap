@@ -14,10 +14,9 @@
 
 /// Implemented as a catch-all to support components defined in future extensions.
 public struct SearchModificationSequenceExtension: Hashable {
-    
     /// The name of the metadata item.
     public var name: EntryFlagName
-    
+
     /// The type of metadata item.
     public var request: EntryKindRequest
 
@@ -32,10 +31,9 @@ public struct SearchModificationSequenceExtension: Hashable {
 
 /// Used when performing a search to only include messages modified since a particular moment.
 public struct SearchModificationSequence: Hashable {
-    
     /// Extensions defined to catch data sent as part of any future extensions.
     public var extensions: [SearchModificationSequenceExtension]
-    
+
     /// The minimum `ModificationSequenceValue` that any messages returned as part of the search must have.
     public var sequenceValue: ModificationSequenceValue
 

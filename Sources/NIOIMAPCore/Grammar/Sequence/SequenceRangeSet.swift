@@ -16,7 +16,6 @@ import struct NIO.ByteBuffer
 
 /// A collection of SequenceRanges, used to identify a potentially large number of messages.
 public struct SequenceRangeSet: Hashable {
-    
     /// The contained ranges.
     public var ranges: [SequenceRange]
 
@@ -30,7 +29,6 @@ public struct SequenceRangeSet: Hashable {
 }
 
 extension SequenceRangeSet {
-    
     /// Creates a `SequenceRangeSet` containing only one range.
     /// - parameter range: The single range to store.
     public init(_ range: ClosedRange<SequenceNumber>) {
@@ -57,7 +55,6 @@ extension SequenceRangeSet {
 }
 
 extension SequenceRangeSet: ExpressibleByArrayLiteral {
-    
     /// Creates a new `SequenceRangeSet` from a non-empty array of `SequenceRange`. The array is assumed to be
     /// non-empty, and the initialiser will crash if this is not the case.
     /// - parameter elements: The underlying ranges to use.
@@ -67,7 +64,6 @@ extension SequenceRangeSet: ExpressibleByArrayLiteral {
 }
 
 extension SequenceRangeSet {
-    
     /// A `SequenceRangeSet` that contains a single range, that in turn covers every possible `SequenceNumber`.
     public static let all: SequenceRangeSet = SequenceRangeSet(SequenceRange.all)
 }

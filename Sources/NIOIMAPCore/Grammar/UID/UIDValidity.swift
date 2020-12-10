@@ -14,10 +14,9 @@
 
 /// The unique identifier validity value of a mailbox. Combined with a message UID to form a 64-bit identifier.
 public struct UIDValidity: RawRepresentable, Hashable {
-    
     /// The underlying raw value.
     public var rawValue: UInt32
-    
+
     /// Creates a new UIDValidity from an integer, after first checking that the given `Int` can fit
     /// within a `UInt32`.
     /// - parameter rawValue: The value to use.
@@ -39,7 +38,6 @@ public struct UIDValidity: RawRepresentable, Hashable {
 // MARK: - Integer literal
 
 extension UIDValidity: ExpressibleByIntegerLiteral {
-    
     /// Creates a `UIDValidity` from some integer literal value.
     /// - parameter value: The literal value.
     public init(integerLiteral value: UInt32) {
@@ -62,7 +60,6 @@ extension UIDValidity: ExpressibleByIntegerLiteral {
 }
 
 extension UIDValidity {
-    
     /// Creates a `UIDValidity` from some `BinaryInteger` after checking
     /// that the given value fits within a `UInt32`.
     /// - parameter source: Some `BinaryInteger`.

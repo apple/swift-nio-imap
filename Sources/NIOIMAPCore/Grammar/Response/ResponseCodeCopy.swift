@@ -15,14 +15,13 @@
 /// Matches the `UIDSet` of the messages in the source mailbox to the `UIDSet` of the
 /// copied messages in the destination mailbox.
 public struct ResponseCodeCopy: Equatable {
-    
     // TODO: Rename to destinationUIDValidity
     /// The `UIDValidity` of the destination mailbox
     public var num: Int
-    
+
     /// The message UIDs in the source mailbox.
     public var set1: UIDSet
-    
+
     /// The copied message UIDs in the destination mailbox.
     public var set2: UIDSet
 

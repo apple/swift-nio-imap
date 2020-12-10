@@ -16,10 +16,9 @@ import struct NIO.ByteBuffer
 
 /// Pairs an authorization mechanism with base64-encoded authentication data.
 public struct MechanismBase64: Equatable {
-    
     /// The authorization mechanism.
     public var mechanism: UAuthMechanism
-    
+
     /// The authentication data, encoded as base64.
     public var base64: ByteBuffer?
 

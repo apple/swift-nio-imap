@@ -14,10 +14,9 @@
 
 /// Used to verify IMAP URL authorization.
 public struct IUAVerifier: Equatable {
-    
     /// The auth mechanism.
     public var uAuthMechanism: UAuthMechanism
-    
+
     /// The percent-encoded authentication data.
     public var encodedURLAuth: EncodedURLAuth
 

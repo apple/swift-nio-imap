@@ -14,7 +14,6 @@
 
 /// Conditions that must be met in order for a server to perform a store operation
 public enum StoreModifier: Equatable {
-    
     /// If the mod-sequence of every metadata item of the
     /// message affected by the STORE/UID STORE is equal to or less than the
     /// specified UNCHANGEDSINCE value, then the requested operation (as

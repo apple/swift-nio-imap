@@ -14,10 +14,9 @@
 
 /// A command that should be executed once a server has been successfully connected to.
 public enum ICommand: Equatable {
-    
     /// Performs a `.select` or `.examine` command.
     case messageList(IMessageList)
-    
+
     /// Performs a `.fetch` command.
     case messagePart(part: IMessagePart, urlAuth: IURLAuth?)
 }

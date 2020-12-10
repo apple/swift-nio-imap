@@ -16,7 +16,6 @@ import struct NIO.ByteBuffer
 
 /// A set contains an array of `UIDRange` to represent a (potentially large) collection of messages.
 public struct UIDSet: Hashable {
-    
     /// A non-empty array of UID ranges.
     public var ranges: [UIDRange]
 
@@ -30,7 +29,6 @@ public struct UIDSet: Hashable {
 }
 
 extension UIDSet {
-    
     /// Creates a `UIDSet` from a closed range.
     /// - parameter range: The closed range to use.
     public init(_ range: ClosedRange<UID>) {
@@ -59,7 +57,6 @@ extension UIDSet {
 // MARK: - CustomStringConvertible
 
 extension UIDSet: CustomStringConvertible {
-    
     /// Creates a human-readable text representation of the set by joined ranges with a comma.
     public var description: String {
         ranges.map { "\($0)" }.joined(separator: ",")
@@ -69,7 +66,6 @@ extension UIDSet: CustomStringConvertible {
 // MARK: - Array Literal
 
 extension UIDSet: ExpressibleByArrayLiteral {
-    
     /// Creates a new UIDSet from a literal array of ranges.
     /// - parameter arrayLiteral: The elements to use, assumed to be non-empty.
     public init(arrayLiteral elements: UIDRange...) {
@@ -78,7 +74,6 @@ extension UIDSet: ExpressibleByArrayLiteral {
 }
 
 extension UIDSet {
-    
     /// A set that contains a single range, that in turn contains all messages.
     public static let all = UIDSet(UIDRange.all)
 }

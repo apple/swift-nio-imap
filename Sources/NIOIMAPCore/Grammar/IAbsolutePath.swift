@@ -14,7 +14,6 @@
 
 /// An absolute IMAP path.
 public struct IAbsolutePath: Equatable {
-    
     /// A command (including a URL) to execute.
     public var command: ICommand?
 

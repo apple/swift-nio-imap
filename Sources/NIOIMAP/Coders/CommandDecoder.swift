@@ -17,10 +17,9 @@ import NIOIMAPCore
 
 /// Thrown if an error occurs when decoding IMAP data.
 public struct IMAPDecoderError: Error {
-    
     /// The error that was thrown by the IMAP parser.
     public var parserError: Error
-    
+
     /// The buffer that was providing to the parser.
     public var buffer: ByteBuffer
 }

@@ -34,10 +34,9 @@ public struct Parameter: Equatable {
 /// Implemented as a catch-all to support types defined in future extensions.
 /// As as a key/value pair.
 public struct TaggedExtension: Equatable {
-    
     /// Some key.
     public var label: String
-    
+
     /// The value to be associated with `key`.
     public var value: ParameterValue
 
