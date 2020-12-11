@@ -14,12 +14,25 @@
 
 import struct NIO.ByteBuffer
 
-/// IMAPv4 `return-option`
+/// Specifies what items of data should be returned for each matching mailbox when
+/// executing a `.list` command.
 public enum ReturnOption: Equatable {
+    /// Causes the LIST command to return subscription state
+    /// for all matching mailbox names.
     case subscribed
+
+    /// Requests mailbox child information
     case children
+
+    /// The server MUST return an untagged LIST response followed by an untagged STATUS
+    /// response containing the information requested in the STATUS return option.
     case statusOption([MailboxAttribute])
+
+    /// Designed as a catch-all to support return options defined in future extensions
     case optionExtension(OptionExtension)
+
+    /// The LIST command MUST return only those mailboxes that have a
+    /// special-use attribute set.
     case specialUse
 }
 

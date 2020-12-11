@@ -14,10 +14,13 @@
 
 import struct NIO.ByteBuffer
 
-/// RFC 5464
+/// The value for a metadata entry.
 public struct MetadataValue: RawRepresentable, Equatable {
+    /// The raw value bytes.
     public var rawValue: ByteBuffer?
 
+    /// Creates a new `MetadataValue`.
+    /// - parameter rawValue: The raw value bytes - optional.
     public init(rawValue: ByteBuffer?) {
         self.rawValue = rawValue
     }

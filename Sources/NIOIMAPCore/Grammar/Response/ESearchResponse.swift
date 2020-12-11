@@ -14,12 +14,21 @@
 
 import struct NIO.ByteBuffer
 
-/// IMAPv4 `esearch-response`
+/// Sent from a server in response to an extended search.
 public struct ESearchResponse: Equatable {
+    /// Identifies the search that resulted in this response.
     public var correlator: SearchCorrelator?
+
+    /// `true` if this was a UID SEARCH, otherwise `false`.
     public var uid: Bool
+
+    /// Data returned from the search.
     public var returnData: [SearchReturnData]
 
+    /// Creates a new `ESearchResponse`.
+    /// - parameter correlator: Identifies the search that resulted in this response. Defaults to `nil`.
+    /// - parameter uid: `true` if this was a UID SEARCH, otherwise `false`.
+    /// - parameter returnData: Data returned from the search.
     public init(correlator: SearchCorrelator? = nil, uid: Bool, returnData: [SearchReturnData]) {
         self.correlator = correlator
         self.uid = uid

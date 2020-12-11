@@ -14,11 +14,17 @@
 
 import struct NIO.ByteBuffer
 
-/// RFC 5092
+/// Associates an `AuthIMAPURL` with a rump URL to use for authorization verification is required.
 public struct AuthIMAPURLRump: Equatable {
+    /// An IMAP URL pointing to a message.
     public var imapURL: AuthIMAPURL
+
+    /// A rump URL used to validate access if needed.
     public var authRump: IURLAuthRump
 
+    /// Creates a new `AuthIMAPURLRump`.
+    /// - parameter imapURL: An IMAP URL pointing to a message.
+    /// - parameter authRump: A rump URL used to validate access if needed.
     public init(imapURL: AuthIMAPURL, authRump: IURLAuthRump) {
         self.imapURL = imapURL
         self.authRump = authRump

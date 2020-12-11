@@ -12,11 +12,18 @@
 //
 //===----------------------------------------------------------------------===//
 
-/// RFC 5092
+///
 public enum RelativeIMAPURL: Equatable {
+    /// Rarely used, typically it's better to use an absolute path
     case networkPath(INetworkPath)
+
+    /// A path that can be used to connect without any additional information
     case absolutePath(IAbsolutePath)
+
+    /// A relative path. *DO NOT USE*. See RFC 5092 section 7.2 for more information.
     case relativePath(IRelativePath)
+
+    /// References the "same" document, in this cases meaning the current server/mailbox.
     case empty
 }
 

@@ -12,13 +12,25 @@
 //
 //===----------------------------------------------------------------------===//
 
-/// RFC 7162
+/// Can be used as a direct path to a specific message section and part.
 public struct IMessagePart: Equatable {
+    /// Connection details for a server and a specific mailbox hosted on that server.
     public var mailboxReference: IMailboxReference
+
+    /// The UID of the message in question.
     public var iUID: IUID
+
+    /// An optional section of the message in question.
     public var iSection: ISection?
+
+    /// A specific range of bytes of the message/section in question.
     public var iPartial: IPartial?
 
+    /// Create a new `IMessagePart`.
+    /// - parameter mailboxReference: Connection details for a server and a specific mailbox hosted on that server.
+    /// - parameter iUID: The UID of the message in question.
+    /// - parameter iSection: An optional section of the message in question.
+    /// - parameter iPartial: A specific range of bytes of the message/section in question.
     public init(mailboxReference: IMailboxReference, iUID: IUID, iSection: ISection? = nil, iPartial: IPartial? = nil) {
         self.mailboxReference = mailboxReference
         self.iUID = iUID

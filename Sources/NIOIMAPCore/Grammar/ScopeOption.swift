@@ -12,8 +12,17 @@
 //
 //===----------------------------------------------------------------------===//
 
-// RFC 5464
+/// Used an option to `.getMetadata` to specify the depth.
 public struct ScopeOption: Equatable {
+    /// No entries below the specified entry are returned
+    public static var zero = Self(_backing: .zero)
+
+    /// Only entries immediately below the specified entry are returned
+    public static var one = Self(_backing: .one)
+
+    /// All entries below the specified entry are returned
+    public static var infinity = Self(_backing: .infinity)
+
     enum _Backing: String {
         case zero = "0"
         case one = "1"
@@ -21,12 +30,6 @@ public struct ScopeOption: Equatable {
     }
 
     var _backing: _Backing
-
-    static var zero = Self(_backing: .zero)
-
-    static var one = Self(_backing: .one)
-
-    static var infinity = Self(_backing: .infinity)
 }
 
 // MARK: - Encoding

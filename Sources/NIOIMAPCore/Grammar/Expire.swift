@@ -12,10 +12,13 @@
 //
 //===----------------------------------------------------------------------===//
 
-/// RFC 5092
+/// Used optionally in an IMAP URL to specify the latest date and time that the URL is valid.
 public struct Expire: Equatable {
+    /// The latest date and time that an IMAP URL is valid.
     public var dateTime: FullDateTime
 
+    /// Creates a new `Expire`.
+    /// - parameter dateTime: The latest date and time that an IMAP URL is valid.
     public init(dateTime: FullDateTime) {
         self.dateTime = dateTime
     }

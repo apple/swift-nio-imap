@@ -14,10 +14,13 @@
 
 import struct NIO.ByteBuffer
 
-/// RFC 5092
+/// A percent-encoded `MailboxName`
 public struct EncodedMailbox: Equatable {
+    /// The percent-encoded data.
     public var mailbox: String
 
+    /// Creates a new `EncodedMailbox`.
+    /// - parameter mailbox: The percent-encoded string.
     public init(mailbox: String) {
         self.mailbox = mailbox
     }

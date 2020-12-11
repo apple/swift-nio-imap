@@ -14,13 +14,24 @@
 
 import struct NIO.ByteBuffer
 
-/// IMAPv4 `search-return-data`
+/// Contains information returned from a complete search command, not on a per-message basis.
 public enum SearchReturnData: Equatable {
+    /// Return the lowest message number/UID that satisfies the SEARCH criteria.
     case min(Int)
+
+    /// Return the highest message number/UID that satisfies the SEARCH criteria.
     case max(Int)
+
+    /// Return all message numbers/UIDs that satisfy the SEARCH criteria.
     case all(SequenceSet)
+
+    /// Return number of the messages that satisfy the SEARCH criteria.
     case count(Int)
+
+    /// Contains the highest mod-sequence for all messages being returned.
     case modificationSequence(ModificationSequenceValue)
+
+    /// Implemented as a catch-all to support any return data options defined in future extensions.
     case dataExtension(SearchReturnDataExtension)
 }
 

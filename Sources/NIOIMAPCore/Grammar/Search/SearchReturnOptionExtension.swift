@@ -14,11 +14,17 @@
 
 import struct NIO.ByteBuffer
 
-/// IMAPv4 `search-ret-opt-ext`
+/// Implemented as a catch all to support any options that may be defined in future RFCs.
 public struct SearchReturnOptionExtension: Equatable {
+    /// The search return option name.
     public var modifierName: String
+
+    /// Any parameters that may go along with the option.
     public var params: ParameterValue?
 
+    /// Creates a new `SearchReturnOptionExtension`.
+    /// - parameter modifierName: The search return option name.
+    /// - parameter params: Any parameters that may go along with the option. Defaults to `nil`.
     public init(modifierName: String, params: ParameterValue? = nil) {
         self.modifierName = modifierName
         self.params = params

@@ -29,7 +29,7 @@ extension IUID_Tests {
     }
 
     func testEncode_IUIDOnly() {
-        let inputs: [(IUIDOnly, String, UInt)] = [
+        let inputs: [(IUID, String, UInt)] = [
             (try! .init(uid: 123), ";UID=123", #line),
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeIUIDOnly($0) })

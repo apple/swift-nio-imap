@@ -14,12 +14,22 @@
 
 import struct NIO.ByteBuffer
 
-/// RFC 5092
+/// Represents an IMAP connection configuration that be used to connect
+/// to an IMAP server.
 public struct IServer: Equatable {
+    /// If present, authentication details for the server.
     public var userInfo: IUserInfo?
+
+    /// The hostname of the server.
     public var host: String
+
+    /// The host port of the server.
     public var port: Int?
 
+    /// Creates a new `IServer`.
+    /// - parameter userInfo: If present, authentication details for the server. Defaults to `nil`.
+    /// - parameter host: The hostname of the server.
+    /// - parameter port: The host post of the server. Defaults to `nil`.
     public init(userInfo: IUserInfo? = nil, host: String, port: Int? = nil) {
         self.userInfo = userInfo
         self.host = host

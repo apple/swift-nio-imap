@@ -12,12 +12,18 @@
 //
 //===----------------------------------------------------------------------===//
 
-/// RFC 5092
+/// Provides the `UIDValitiy` for a percent-encoded mailbox. If the `UIDValidity` is present
+/// it will be used to ensure the URL is not stale.
 public struct IMailboxReference: Equatable {
+    /// The percent-encoded mailbox.
     public var encodedMailbox: EncodedMailbox
 
+    /// The corresponding `UIDValidity`
     public var uidValidity: UIDValidity?
 
+    /// Creates a new `IMailboxReference`.
+    /// - parameter encodeMailbox: The percent-encoded mailbox.
+    /// - parameter uidValidity: The corresponding `UIDValidity`
     public init(encodeMailbox: EncodedMailbox, uidValidity: UIDValidity? = nil) {
         self.encodedMailbox = encodeMailbox
         self.uidValidity = uidValidity

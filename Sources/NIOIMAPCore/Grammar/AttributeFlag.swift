@@ -14,12 +14,15 @@
 
 import struct NIO.ByteBuffer
 
-/// RFC 7162 Condstore
+/// Used when performing a search with `MODSEQ`. Note that this is similar to `Flag`, however `.recent`
+/// is not present.
 public struct AttributeFlag: Hashable, RawRepresentable {
+    /// The raw `String` to use as the flag.
     public var rawValue: String
 
+    // yep, we need 4, because the spec requires 2 literal \\ characters
     /// "\\Answered"
-    public static var answered = Self(rawValue: "\\\\Answered") // yep, we need 4, because the spec requires 2 literal \\ characters
+    public static var answered = Self(rawValue: "\\\\Answered")
 
     /// "\\Flagged"
     public static var flagged = Self(rawValue: "\\\\Flagged")
@@ -33,6 +36,8 @@ public struct AttributeFlag: Hashable, RawRepresentable {
     /// "\\Draft"
     public static var draft = Self(rawValue: "\\\\Draft")
 
+    /// Creates a new `AttributeFlag` from the give raw `String`.
+    /// - parameter rawValue: The raw `String` to use as the flag.
     public init(rawValue: String) {
         self.rawValue = rawValue
     }

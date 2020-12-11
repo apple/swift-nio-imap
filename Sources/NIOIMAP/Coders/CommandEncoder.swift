@@ -19,8 +19,8 @@ enum CommandEncodingError: Error, Equatable {
     case missingBytes
 }
 
-public class CommandEncoder: MessageToByteEncoder {
-    public typealias OutboundIn = CommandStream
+class CommandEncoder: MessageToByteEncoder {
+    typealias OutboundIn = CommandStream
 
     enum Mode: Equatable {
         case normal
@@ -30,9 +30,9 @@ public class CommandEncoder: MessageToByteEncoder {
     var capabilities: [Capability] = []
     private var mode = Mode.normal
 
-    public init() {}
+    init() {}
 
-    public func encode(data: CommandStream, out: inout ByteBuffer) {
+    func encode(data: CommandStream, out: inout ByteBuffer) {
         var encodeBuffer = CommandEncodeBuffer(buffer: out, capabilities: self.capabilities)
         encodeBuffer.writeCommandStream(data)
         out = encodeBuffer.buffer.nextChunk().bytes

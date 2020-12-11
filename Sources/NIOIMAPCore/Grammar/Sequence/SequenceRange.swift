@@ -14,26 +14,33 @@
 
 import struct NIO.ByteBuffer
 
-/// IMAPv4 `seq-range`
+/// A range of messages using message `SequenceNumber`s.
 public struct SequenceRange: Hashable, RawRepresentable {
+    /// The underlying range.
     public var rawValue: ClosedRange<SequenceNumber>
 
-    public var range: ClosedRange<SequenceNumber> { rawValue }
-
+    /// Creates a new `SequenceRange` from a closed range.
+    /// - parameter rawValue: The underlying range to use.
     public init(rawValue: ClosedRange<SequenceNumber>) {
         self.rawValue = rawValue
     }
 }
 
 extension SequenceRange {
+    /// Creates a new `SequenceRange` from a closed range.
+    /// - parameter range: The underlying range to use.
     public init(_ range: ClosedRange<SequenceNumber>) {
         self.init(rawValue: range)
     }
 
+    /// Creates a new `SequenceRange` using `.min` as the lower bound.
+    /// - parameter rawValue: The underlying range to use.
     public init(_ range: PartialRangeThrough<SequenceNumber>) {
         self.init(SequenceNumber.min ... range.upperBound)
     }
 
+    /// Creates a new `SequenceRange` using `.max` as the upper bound.
+    /// - parameter rawValue: The underlying range to use.
     public init(_ range: PartialRangeFrom<SequenceNumber>) {
         self.init(range.lowerBound ... SequenceNumber.max)
     }
@@ -48,16 +55,21 @@ extension SequenceRange {
 }
 
 extension SequenceRange: ExpressibleByIntegerLiteral {
+    /// Creates a new `SequenceRange` using a single number, essentially a range with one element.
+    /// - parameter value: The raw value to use as the upper and lower bounds.
     public init(integerLiteral value: UInt32) {
         self.init(SequenceNumber(integerLiteral: value))
     }
 
+    /// Creates a new `SequenceRange` using a single number, essentially a range with one element.
+    /// - parameter value: The raw value to use as the upper and lower bounds.
     public init(_ value: SequenceNumber) {
         self.init(rawValue: value ... value)
     }
 }
 
 extension SequenceRange {
+    /// A `SequenceRange` that covers every possible `SequenceNumber`.
     public static let all = SequenceRange((.min) ... (.max))
 }
 
@@ -66,12 +78,12 @@ extension SequenceRange {
 extension EncodeBuffer {
     @discardableResult mutating func writeSequenceRange(_ range: SequenceRange) -> Int {
         if range == .all {
-            return self.writeSequenceNumberOrWildcard(range.range.upperBound)
+            return self.writeSequenceNumberOrWildcard(range.rawValue.upperBound)
         } else {
-            return self.writeSequenceNumberOrWildcard(range.range.lowerBound) +
-                self.write(if: range.range.lowerBound < range.range.upperBound) {
+            return self.writeSequenceNumberOrWildcard(range.rawValue.lowerBound) +
+                self.write(if: range.rawValue.lowerBound < range.rawValue.upperBound) {
                     self.writeString(":") +
-                        self.writeSequenceNumberOrWildcard(range.range.upperBound)
+                        self.writeSequenceNumberOrWildcard(range.rawValue.upperBound)
                 }
         }
     }

@@ -14,11 +14,17 @@
 
 import struct NIO.ByteBuffer
 
-/// IMAPv4 `search-ret-data-ext`
+/// Implemented as a catch all to support any data that may be defined in future RFCs.
 public struct SearchReturnDataExtension: Equatable {
+    /// The name of the data field.
     public var modifierName: String
+
+    /// The data value.
     public var returnValue: ParameterValue
 
+    /// Creates a new `SearchReturnDataExtension`.
+    /// - parameter modifierName: The name of the data field.
+    /// - parameter returnValue: The data value.
     public init(modifierName: String, returnValue: ParameterValue) {
         self.modifierName = modifierName
         self.returnValue = returnValue

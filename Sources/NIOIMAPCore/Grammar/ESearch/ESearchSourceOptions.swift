@@ -25,7 +25,7 @@ public struct ESearchSourceOptions: Equatable {
     /// Creates a new `ESearchSourceOptions` from given scope options and mailbox filters.
     /// - parameter sourceMailbox: One or more mailboxes filters
     /// - parameter scopeOptions: Optional ESearch Scope options.
-    init?(sourceMailbox: [MailboxFilter], scopeOptions: ESearchScopeOptions? = nil) {
+    public init?(sourceMailbox: [MailboxFilter], scopeOptions: ESearchScopeOptions? = nil) {
         guard sourceMailbox.count >= 1 else {
             return nil
         }

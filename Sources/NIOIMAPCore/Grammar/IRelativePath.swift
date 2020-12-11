@@ -12,9 +12,12 @@
 //
 //===----------------------------------------------------------------------===//
 
-/// RFC 5092
+/// Used to specify the type of URL, e.g. one that retrieves a list of messages, or just a single message.
 public enum IRelativePath: Equatable {
+    /// An IMAP URL referring to a list of messages.
     case list(IMessageList)
+
+    /// An IMAP URL referring to a specific message, and optionally a component of message.
     case messageOrPartial(IMessageOrPartial)
 }
 

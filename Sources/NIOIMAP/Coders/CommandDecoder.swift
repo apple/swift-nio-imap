@@ -15,19 +15,23 @@
 import NIO
 import NIOIMAPCore
 
+/// Thrown if an error occurs when decoding IMAP data.
 public struct IMAPDecoderError: Error {
+    /// The error that was thrown by the IMAP parser.
     public var parserError: Error
+
+    /// The buffer that was provided to the parser.
     public var buffer: ByteBuffer
 }
 
 struct CommandDecoder: NIOSingleStepByteToMessageDecoder {
-    public typealias InboundOut = PartialCommandStream
+    typealias InboundOut = PartialCommandStream
 
     private var ok: ByteBuffer?
     private var parser = CommandParser()
     private var synchronisingLiteralParser = SynchronizingLiteralParser()
 
-    public mutating func decode(buffer: inout ByteBuffer) throws -> PartialCommandStream? {
+    mutating func decode(buffer: inout ByteBuffer) throws -> PartialCommandStream? {
         let save = buffer
         do {
             return try self.parser.parseCommandStream(buffer: &buffer)
@@ -36,7 +40,7 @@ struct CommandDecoder: NIOSingleStepByteToMessageDecoder {
         }
     }
 
-    public mutating func decodeLast(buffer: inout ByteBuffer, seenEOF: Bool) throws -> PartialCommandStream? {
+    mutating func decodeLast(buffer: inout ByteBuffer, seenEOF: Bool) throws -> PartialCommandStream? {
         try self.decode(buffer: &buffer)
     }
 }

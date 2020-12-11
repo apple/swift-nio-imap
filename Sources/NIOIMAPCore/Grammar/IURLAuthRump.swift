@@ -12,11 +12,17 @@
 //
 //===----------------------------------------------------------------------===//
 
-/// RFC 5092
+/// Pairs an auth URL rump with an optional expiry date and access restrictions.
 public struct IURLAuthRump: Equatable {
+    /// The optional expiry date of the URL.
     public var expire: Expire?
+
+    /// Access restrictions that apply to the URL.
     public var access: Access
 
+    /// Creates a new `IURLAuthRump`.
+    /// - parameter expire: The optional expiry date of the URL.
+    /// - parameter access: Access restrictions that apply to the URL.
     public init(expire: Expire? = nil, access: Access) {
         self.expire = expire
         self.access = access

@@ -22,7 +22,7 @@ class UIDRangeTests: EncodeTestClass {}
 
 extension UIDRangeTests {
     func testWildcard() {
-        let range = UIDRange.all.range
+        let range = UIDRange.all.rawValue
         XCTAssertEqual(range.lowerBound, UID.min)
         XCTAssertEqual(range.upperBound, UID.max)
     }
@@ -32,7 +32,7 @@ extension UIDRangeTests {
 
 extension UIDRangeTests {
     func testSingle() {
-        let range = UIDRange(999).range
+        let range = UIDRange(999).rawValue
         XCTAssertEqual(range.lowerBound, 999)
         XCTAssertEqual(range.upperBound, 999)
     }
@@ -44,15 +44,15 @@ extension UIDRangeTests {
     // here we always expect the smaller number on the left
 
     func testInit_range() {
-        let range = UIDRange(1 ... 999).range
+        let range = UIDRange(1 ... 999).rawValue
         XCTAssertEqual(range.lowerBound, 1)
         XCTAssertEqual(range.upperBound, 999)
     }
 
     func testInit_integer() {
         let range: UIDRange = 654
-        XCTAssertEqual(range.range.lowerBound, 654)
-        XCTAssertEqual(range.range.upperBound, 654)
+        XCTAssertEqual(range.rawValue.lowerBound, 654)
+        XCTAssertEqual(range.rawValue.upperBound, 654)
     }
 }
 

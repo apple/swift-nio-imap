@@ -20,8 +20,8 @@ public struct NamespaceDescription: Equatable {
     /// The full namespace string.
     public var string: ByteBuffer
 
-    /// A hierarchy delimiter.
     // TODO: Rename to "delimiter"
+    /// A hierarchy delimiter.
     public var char: Character?
 
     /// A catch-all to provide support fo future extensions.

@@ -12,9 +12,16 @@
 //
 //===----------------------------------------------------------------------===//
 
+/// Metadata options use in a `.getMetadata` command.
 public enum MetadataOption: Equatable {
+    /// Only entry values that are less than or equal in octet size to the specified
+    /// MAXSIZE limit are returned.
     case maxSize(Int)
+
+    /// Specifies the maximum depth.
     case scope(ScopeOption)
+
+    /// Implemented as a catch-all to support additions in future extensions.
     case other(Parameter)
 }
 

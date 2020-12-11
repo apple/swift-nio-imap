@@ -22,7 +22,7 @@ public struct Mailboxes: Equatable {
     /// Creates a new `Mailboxes` - there must be at least one mail box in the set.
     /// - parameter mailboxes: One or more mailboxes.
     /// - returns: `nil` if `mailboxes` is empty, otherwise a new `Mailboxes`
-    init?(_ mailboxes: [MailboxName]) {
+    public init?(_ mailboxes: [MailboxName]) {
         guard mailboxes.count >= 1 else {
             return nil
         }

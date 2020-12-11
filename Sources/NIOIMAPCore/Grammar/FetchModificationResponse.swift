@@ -12,10 +12,13 @@
 //
 //===----------------------------------------------------------------------===//
 
-/// RFC 7162
+/// Wraps the modification time of a message that is returned as part of a `.fetch` command.
 public struct FetchModificationResponse: Equatable {
+    /// The date that the message was last modified.
     public var modificationSequenceValue: ModificationSequenceValue
 
+    /// Creates a new `FetchModificationResponse`.
+    /// - parameter modifierSequenceValue: The date that the message was last modified.
     public init(modifierSequenceValue: ModificationSequenceValue) {
         self.modificationSequenceValue = modifierSequenceValue
     }

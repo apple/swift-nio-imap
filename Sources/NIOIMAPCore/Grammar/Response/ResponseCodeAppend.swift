@@ -12,11 +12,18 @@
 //
 //===----------------------------------------------------------------------===//
 
-/// IMAPv4 `response-code-apnd`
+/// Returned after a successfully `.uidCopy` command, and provides the new identifier
+/// of the appended message, and the uid validity of the destination mailbox.
 public struct ResponseCodeAppend: Equatable {
+    /// The UID validity of the destination mailbox.
     public var num: Int
+
+    /// The UID of the message after it has been appended.
     public var uid: UID
 
+    /// Creates a new `ResponseCodeAppend`.
+    /// - parameter num: The UID validity of the destination mailbox.
+    /// - parameter uid: The UID of the message after it has been appended.
     public init(num: Int, uid: UID) {
         self.num = num
         self.uid = uid

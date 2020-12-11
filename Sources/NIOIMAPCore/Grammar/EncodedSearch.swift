@@ -14,10 +14,13 @@
 
 import struct NIO.ByteBuffer
 
-/// RFC 5092
+/// A percent-encoded search.
 public struct EncodedSearch: Equatable {
+    /// The percent-encoded data.
     public var query: String
 
+    /// Creates a new `EncodedSearch`.
+    /// - parameter query: The percent-encoded string.
     public init(query: String) {
         self.query = query
     }
