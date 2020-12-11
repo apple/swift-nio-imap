@@ -234,7 +234,7 @@ extension Capability {
     /// The server supports sending binary message data - RFC 3516
     public static let binary = Self(unchecked: "BINARY")
 
-    /// Allows clients to creates messes containing a combination of new and existing data/messages - RFC 5550.
+    /// Allows clients to create messages containing a combination of new and existing data/messages - RFC 5550.
     public static let catenate = Self(unchecked: "CATENATE")
 
     /// Provides a mechanism for a client to efficiently determine if a particular mailbox has children - RFC 3348.

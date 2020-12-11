@@ -34,7 +34,7 @@ public struct QuotaRoot: Equatable {
         self.storage = ByteBuffer(ByteBufferView(string.utf8))
     }
 
-    /// Creates a new `QuoteRoot`.
+    /// Creates a new `QuotaRoot`.
     /// - parameter bytes: The raw bytes that represent the root.
     public init(_ bytes: ByteBuffer) {
         self.storage = bytes
