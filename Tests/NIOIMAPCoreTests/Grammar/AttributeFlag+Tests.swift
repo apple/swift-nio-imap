@@ -32,7 +32,7 @@ extension AttributeFlag_Tests {
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeAttributeFlag($0) })
     }
-    
+
     func testLowercased() {
         let t1 = AttributeFlag(rawValue: "TEST")
         let t2 = AttributeFlag(rawValue: "test")
