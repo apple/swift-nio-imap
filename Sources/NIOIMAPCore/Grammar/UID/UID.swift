@@ -14,6 +14,9 @@
 
 /// Unique Message Identifier
 ///
+/// Not that valid UIDs are 1 ... 4294967295 (UInt32.max).
+/// The maximum value is often rendered as `*` when encoded.
+///
 /// See RFC 3501 section 2.3.1.1.
 public struct UID: RawRepresentable, Hashable, Codable {
     /// The minimum `UID` is always *1*.

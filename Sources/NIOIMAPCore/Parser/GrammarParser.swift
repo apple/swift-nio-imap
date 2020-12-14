@@ -4878,7 +4878,8 @@ extension GrammarParser {
                 try fixedString(",", buffer: &buffer, tracker: tracker)
                 return try parseUIDSet_element(buffer: &buffer, tracker: tracker)
             }
-            guard let s = UIDSet(output) else {
+            let s = UIDSet(output)
+            guard !s.isEmpty else {
                 throw ParserError(hint: "UID set is empty.")
             }
             return s

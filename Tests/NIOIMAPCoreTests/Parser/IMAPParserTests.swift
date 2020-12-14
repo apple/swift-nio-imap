@@ -4538,7 +4538,7 @@ extension ParserUnitTests {
         self.iterateTests(
             testFunction: GrammarParser.parseUIDSet,
             validInputs: [
-                ("1234", "\r\n", UIDSet(1234), #line),
+                ("1234", "\r\n", UIDSet(1234 as UID), #line),
                 ("12:34", "\r\n", UIDSet(UIDRange(12 ... 34)), #line),
                 ("1,2,34:56,78:910,11", "\r\n", UIDSet([
                     UIDRange(1),
@@ -4546,7 +4546,7 @@ extension ParserUnitTests {
                     UIDRange(34 ... 56),
                     UIDRange(78 ... 910),
                     UIDRange(11),
-                ])!, #line),
+                ]), #line),
                 ("*", "\r\n", UIDSet(UIDRange(.max)), #line),
                 ("1:*", "\r\n", .all, #line),
             ],
