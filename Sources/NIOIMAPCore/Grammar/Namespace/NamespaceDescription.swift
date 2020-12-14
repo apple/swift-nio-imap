@@ -20,9 +20,8 @@ public struct NamespaceDescription: Equatable {
     /// The full namespace string.
     public var string: ByteBuffer
 
-    // TODO: Rename to "delimiter"
     /// A hierarchy delimiter.
-    public var char: Character?
+    public var delimiter: Character?
 
     /// A catch-all to provide support fo future extensions.
     public var responseExtensions: [NamespaceResponseExtension]
@@ -33,7 +32,7 @@ public struct NamespaceDescription: Equatable {
     /// - parameter responseExtensions: A catch-all to provide support fo future extensions.
     public init(string: ByteBuffer, char: Character? = nil, responseExtensions: [NamespaceResponseExtension]) {
         self.string = string
-        self.char = char
+        self.delimiter = char
         self.responseExtensions = responseExtensions
     }
 }
@@ -47,7 +46,7 @@ extension EncodeBuffer {
         size += self.writeIMAPString(description.string)
         size += self.writeSpace()
 
-        if let char = description.char {
+        if let char = description.delimiter {
             size += self.writeString("\"\(char)\"")
         } else {
             size += self.writeNil()
