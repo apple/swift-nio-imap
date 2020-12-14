@@ -26,8 +26,8 @@ extension CreateParameter_Tests {
             (.labelled(.init(name: "name")), "name", #line),
             (.labelled(.init(name: "name", value: .sequence([1]))), "name 1", #line),
             (.attributes([]), "USE ()", #line),
-            (.attributes([.all]), "USE (\\All)", #line),
-            (.attributes([.all, .flagged]), "USE (\\All \\Flagged)", #line),
+            (.attributes([.all]), "USE (\\all)", #line),
+            (.attributes([.all, .flagged]), "USE (\\all \\flagged)", #line),
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeCreateParameter($0) })
     }

@@ -23,15 +23,23 @@ class UseAttribute_Tests: EncodeTestClass {}
 extension UseAttribute_Tests {
     func testEncode() {
         let inputs: [(UseAttribute, String, UInt)] = [
-            (.all, "\\All", #line),
-            (.archive, "\\Archive", #line),
-            (.drafts, "\\Drafts", #line),
-            (.flagged, "\\Flagged", #line),
-            (.junk, "\\Junk", #line),
-            (.sent, "\\Sent", #line),
-            (.trash, "\\Trash", #line),
+            (.all, "\\all", #line),
+            (.archive, "\\archive", #line),
+            (.drafts, "\\drafts", #line),
+            (.flagged, "\\flagged", #line),
+            (.junk, "\\junk", #line),
+            (.sent, "\\sent", #line),
+            (.trash, "\\trash", #line),
             (.init(rawValue: "\\test"), "\\test", #line),
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeUseAttribute($0) })
+    }
+
+    func testLowercasing() {
+        let t1 = UseAttribute(rawValue: "TEST")
+        let t2 = UseAttribute(rawValue: "test")
+        XCTAssertEqual(t1, t2)
+        XCTAssertEqual(t1.rawValue, "test")
+        XCTAssertEqual(t2.rawValue, "test")
     }
 }

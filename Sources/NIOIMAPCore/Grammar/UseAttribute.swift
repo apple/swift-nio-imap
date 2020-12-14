@@ -16,6 +16,8 @@ import struct NIO.ByteBuffer
 
 /// A `UseAttribute` is  a special-use attribute as defined in RFC 6154.
 /// They're used to designate a special use to certain mailboxes.
+/// The raw `String` value is lower-cased on initialisation to ensure
+/// case-insensitive comparison.
 public struct UseAttribute: Equatable, RawRepresentable {
     public typealias RawValue = String
 
@@ -40,14 +42,14 @@ public struct UseAttribute: Equatable, RawRepresentable {
     /// Holds messages that have been deleted or marked for deletion.
     public static var trash = Self(rawValue: "\\Trash")
 
-    /// The raw value of the attribute, e.g. `\\Trash`.
+    /// The raw value of the attribute, e.g. `\\trash`. Always lowercase.
     public var rawValue: String
 
-    // TODO: Make this case-insensitive
     /// Creates a new `UseAttribute` from the raw `String`. Note that
     /// usually it should be sufficient to just use the predefined attributes, e.g. `.drafts`.
+    /// `rawValue` will be lowercased.
     public init(rawValue: String) {
-        self.rawValue = rawValue
+        self.rawValue = rawValue.lowercased()
     }
 }
 
