@@ -37,9 +37,9 @@ public struct AttributeFlag: Hashable, RawRepresentable {
     public static var draft = Self(rawValue: "\\\\Draft")
 
     /// Creates a new `AttributeFlag` from the give raw `String`.
-    /// - parameter rawValue: The raw `String` to use as the flag.
+    /// - parameter rawValue: The raw `String` to use as the flag. Will be lower-cased.
     public init(rawValue: String) {
-        self.rawValue = rawValue
+        self.rawValue = rawValue.lowercased()
     }
 }
 
