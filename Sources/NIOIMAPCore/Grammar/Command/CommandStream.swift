@@ -114,7 +114,7 @@ extension CommandEncodeBuffer {
         case .append(let command):
             return self.writeAppendCommand(command)
         case .continuationResponse(let bytes):
-            return self.writeBytes(bytes)
+            return self.buffer.writeString("\r\n") + self.writeBytes(bytes)
         }
     }
 

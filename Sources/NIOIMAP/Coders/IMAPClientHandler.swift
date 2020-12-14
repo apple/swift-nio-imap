@@ -21,7 +21,7 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
     public typealias InboundIn = ByteBuffer
 
     /// Converts a `ByteBuffer` into a `Response` by sending data through a parser.
-    public typealias InboundOut = Response
+    public typealias InboundOut = ResponseOrContinuationRequest
 
     /// Commands are encoding into a ByteBuffer to send to a server.
     public typealias OutboundIn = CommandStream
