@@ -43,11 +43,11 @@ public struct UseAttribute: Equatable, RawRepresentable {
     /// The raw value of the attribute, e.g. `\\Trash`.
     public var rawValue: String
 
-    // TODO: Make this case-insensitive
     /// Creates a new `UseAttribute` from the raw `String`. Note that
     /// usually it should be sufficient to just use the predefined attributes, e.g. `.drafts`.
+    /// `rawValue` will be lowercased.
     public init(rawValue: String) {
-        self.rawValue = rawValue
+        self.rawValue = rawValue.lowercased()
     }
 }
 
