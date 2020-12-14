@@ -23,13 +23,21 @@ class AttributeFlag_Tests: EncodeTestClass {}
 extension AttributeFlag_Tests {
     func testEncoding() {
         let inputs: [(AttributeFlag, String, UInt)] = [
-            (.answered, "\\\\Answered", #line),
-            (.deleted, "\\\\Deleted", #line),
-            (.draft, "\\\\Draft", #line),
-            (.flagged, "\\\\Flagged", #line),
-            (.seen, "\\\\Seen", #line),
+            (.answered, "\\\\answered", #line),
+            (.deleted, "\\\\deleted", #line),
+            (.draft, "\\\\draft", #line),
+            (.flagged, "\\\\flagged", #line),
+            (.seen, "\\\\seen", #line),
             (.init(rawValue: "test"), "test", #line),
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeAttributeFlag($0) })
+    }
+    
+    func testLowercased() {
+        let t1 = AttributeFlag(rawValue: "TEST")
+        let t2 = AttributeFlag(rawValue: "test")
+        XCTAssertEqual(t1, t2)
+        XCTAssertEqual(t1.rawValue, "test")
+        XCTAssertEqual(t2.rawValue, "test")
     }
 }

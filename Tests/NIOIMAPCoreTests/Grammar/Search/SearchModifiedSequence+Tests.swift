@@ -28,7 +28,7 @@ extension SearchModifiedSequence_Tests {
                 .init(extensions: [
                     .init(name: .init(flag: .answered), request: .all),
                 ], sequenceValue: .init(integerLiteral: 1)),
-                "MODSEQ \"/flags/\\\\Answered\" all 1",
+                "MODSEQ \"/flags/\\\\answered\" all 1",
                 #line
             ),
             (
@@ -36,7 +36,7 @@ extension SearchModifiedSequence_Tests {
                     .init(name: .init(flag: .answered), request: .all),
                     .init(name: .init(flag: .seen), request: .private),
                 ], sequenceValue: .init(integerLiteral: 1)),
-                "MODSEQ \"/flags/\\\\Answered\" all \"/flags/\\\\Seen\" priv 1",
+                "MODSEQ \"/flags/\\\\answered\" all \"/flags/\\\\seen\" priv 1",
                 #line
             ),
             (.init(extensions: [], sequenceValue: .init(integerLiteral: 1)), "MODSEQ 1", #line),
@@ -46,7 +46,7 @@ extension SearchModifiedSequence_Tests {
 
     func testEncode_extension() {
         let inputs: [(SearchModificationSequenceExtension, String, UInt)] = [
-            (.init(name: .init(flag: .answered), request: .all), " \"/flags/\\\\Answered\" all", #line),
+            (.init(name: .init(flag: .answered), request: .all), " \"/flags/\\\\answered\" all", #line),
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeSearchModificationSequenceExtension($0) })
     }
