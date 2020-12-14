@@ -16,6 +16,12 @@ import struct NIO.ByteBuffer
 
 /// A set contains an array of `UIDRange` to represent a (potentially large) collection of messages.
 public struct UIDSet: Hashable {
+    
+    /// `true` if `ranges` contains no `UIDRange`s.
+    public var isEmpty: Bool {
+        return self.ranges.isEmpty
+    }
+    
     /// A non-empty array of UID ranges.
     public var ranges: [UIDRange]
 
