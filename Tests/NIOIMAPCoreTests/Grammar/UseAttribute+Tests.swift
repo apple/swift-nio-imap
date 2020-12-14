@@ -34,7 +34,7 @@ extension UseAttribute_Tests {
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeUseAttribute($0) })
     }
-    
+
     func testLowercasing() {
         let t1 = UseAttribute(rawValue: "TEST")
         let t2 = UseAttribute(rawValue: "test")
@@ -42,5 +42,4 @@ extension UseAttribute_Tests {
         XCTAssertEqual(t1.rawValue, "test")
         XCTAssertEqual(t2.rawValue, "test")
     }
-    
 }
