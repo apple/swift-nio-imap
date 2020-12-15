@@ -28,15 +28,21 @@ public struct UIDRange: Hashable, RawRepresentable {
 
 extension UIDRange {
     /// Creates a new `UIDRange`.
-    /// - parameter rawValue: A closed range with `UID`s as the upper and lower bound.
+    /// - parameter range: A closed range with `UID`s as the upper and lower bound.
     public init(_ range: ClosedRange<UID>) {
         self.init(rawValue: range)
     }
 
     /// Creates a new `UIDRange` from a partial range, using `.min` as the lower bound.
-    /// - parameter rawValue: A partial with a `UID` as the upper bound.
+    /// - parameter range: A partial with a `UID` as the upper bound.
     public init(_ range: PartialRangeThrough<UID>) {
         self.init(UID.min ... range.upperBound)
+    }
+
+    /// Creates a new `UIDRange`.
+    /// - parameter range: An open range with `UID`s as the upper and lower bound.
+    public init?(_: Range<UID>) {
+        fatalError("TODO")
     }
 
     /// Creates a new `UIDRange` from a partial range, using `.max` as the upper bound.

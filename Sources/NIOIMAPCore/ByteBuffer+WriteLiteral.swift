@@ -125,7 +125,7 @@ extension EncodeBuffer {
         self.writeString(" ")
     }
 
-    /// Writes to self using the given `closure` for every element in the given `array`.
+    /// Writes the given `collection` as an IMAP array to self using the given `closure` for every element in the collection.
     /// - parameters:
     ///     - array: The elements to write to `self`.
     ///     - prefix: A string to write before anything else, including the parenthesis. This will only be written if `array` has 1 or more elements. Defaults to "".
@@ -134,26 +134,29 @@ extension EncodeBuffer {
     ///     - parenthesis: Writes `(` immediately before the first element, and `)` immediately after the last. Enabled by default.
     ///     - writer: The closure to call for each element that writes the element.
     /// - returns: The number of bytes written.
-    @discardableResult mutating func writeArray<T>(_ array: [T], prefix: String = "", separator: String = " ", suffix: String = "", parenthesis: Bool = true, _ writer: (T, inout EncodeBuffer) -> Int) -> Int {
-        self.write(if: array.count > 0) {
+    @discardableResult mutating func writeArray<C, T>(_ collection: C, prefix: String = "", separator: String = " ", suffix: String = "", parenthesis: Bool = true, _ writer: (T, inout EncodeBuffer) -> Int) -> Int where C: RandomAccessCollection, C.Element == T {
+        // TODO: This should probably check
+        //   collection.count != 0
+        // such that an empty collection gets encoded as "()".
+        self.write(if: collection.count > 0) {
             self.writeString(prefix)
         } +
             self.write(if: parenthesis) { () -> Int in
                 self.writeString("(")
             } +
-            array.enumerated().reduce(0) { (size, row) in
+            collection.enumerated().reduce(0) { (size, row) in
                 let (i, element) = row
                 return
                     size +
                     writer(element, &self) +
-                    self.write(if: i < array.count - 1) { () -> Int in
+                    self.write(if: i < collection.count - 1) { () -> Int in
                         self.writeString(separator)
                     }
             } +
             self.write(if: parenthesis) { () -> Int in
                 self.writeString(")")
             } +
-            self.write(if: array.count > 0) {
+            self.write(if: collection.count > 0) {
                 self.writeString(suffix)
             }
     }

@@ -12,6 +12,7 @@ let package = Package(
         .package(url: "https://github.com/apple/swift-nio-ssl", from: "2.7.0"),
         .package(url: "https://github.com/apple/swift-log", from: "1.2.0"),
         .package(url: "https://github.com/nicklockwood/SwiftFormat", .exact("0.44.11")),
+        .package(url: "https://github.com/apple/swift-standard-library-preview.git", .exact("0.0.1")),
     ],
     targets: [
         .target(
@@ -34,6 +35,7 @@ let package = Package(
             name: "NIOIMAPCore",
             dependencies: [
                 .product(name: "NIO", package: "swift-nio"),
+                .product(name: "StandardLibraryPreview", package: "swift-standard-library-preview"),
             ]
         ),
         .testTarget(
