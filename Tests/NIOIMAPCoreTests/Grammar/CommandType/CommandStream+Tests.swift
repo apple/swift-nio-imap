@@ -21,7 +21,6 @@ class CommandStream_Tests: EncodeTestClass {}
 // MARK: - Encoding
 
 extension CommandStream_Tests {
-
     func testEncode() {
         let inputs: [(CommandStream, String, UInt)] = [
             (.append(.start(tag: "1", appendingTo: .inbox)), "1 APPEND \"INBOX\"", #line),
@@ -40,7 +39,7 @@ extension CommandStream_Tests {
             (.append(.finish), "\r\n", #line),
             (.command(.init(tag: "1", command: .noop)), "1 NOOP\r\n", #line),
             (.idleDone, "DONE\r\n", #line),
-            (.continuationResponse("test"), "\r\ntest", #line)
+            (.continuationResponse("test"), "\r\ntest", #line),
         ]
 
         for (command, expected, line) in inputs {
