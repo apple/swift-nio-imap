@@ -118,12 +118,12 @@ extension CommandEncodeBuffer {
         }
     }
 
-    @discardableResult mutating func writeBytes(_ bytes: ByteBuffer) -> Int {
+    @discardableResult private mutating func writeBytes(_ bytes: ByteBuffer) -> Int {
         var buffer = bytes
         return self.buffer.writeBuffer(&buffer)
     }
 
-    @discardableResult mutating func writeAppendCommand(_ command: AppendCommand) -> Int {
+    @discardableResult private mutating func writeAppendCommand(_ command: AppendCommand) -> Int {
         switch command {
         case .start(tag: let tag, appendingTo: let mailbox):
             return

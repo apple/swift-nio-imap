@@ -145,10 +145,10 @@ class IMAPClientHandlerTests: XCTestCase {
         inEncodeBuffer = ResponseEncodeBuffer(buffer: ByteBuffer(), capabilities: [])
         inEncodeBuffer.writeContinuationRequest(.data(""))
         XCTAssertNoThrow(try channel.writeInbound(inEncodeBuffer.bytes))
-        XCTAssertNoThrow(XCTAssertEqual(try channel.readInbound(), ResponseOrContinuationRequest.continuationRequest(.data(""))))
+        XCTAssertNoThrow(XCTAssertEqual(try channel.readInbound(), ResponseOrContinuationRequest.continuationRequest(.responseText(.init(text: "")))))
 
         // client responds
-        let authString1: ByteBuffer = """
+        let authString1 = """
         YIIB+wYJKoZIhvcSAQICAQBuggHqMIIB5qADAgEFoQMCAQ6iBw
         MFACAAAACjggEmYYIBIjCCAR6gAwIBBaESGxB1Lndhc2hpbmd0
         b24uZWR1oi0wK6ADAgEDoSQwIhsEaW1hcBsac2hpdmFtcy5jYW
@@ -164,9 +164,9 @@ class IMAPClientHandlerTests: XCTestCase {
         O6652Npft0LQwJvenwDI13YxpwOdMXzkWZN/XrEqOWp6GCgXTB
         vCyLWLlWnbaUkZdEYbKHBPjd8t/1x5Yg==
         """
-        XCTAssertNoThrow(try channel.writeOutbound(CommandStream.continuationResponse(authString1)))
+        XCTAssertNoThrow(try channel.writeOutbound(CommandStream.continuationResponse(ByteBuffer(string: authString1))))
         XCTAssertEqual(handler.state, .expectingContinuations)
-        XCTAssertEqual(try channel.readOutbound(as: ByteBuffer.self), authString1)
+        XCTAssertEqual(try channel.readOutbound(as: ByteBuffer.self), ByteBuffer(string: "\r\n" + authString1))
 
         // server sends another challenge
         let challengeString1: ByteBuffer = """
@@ -182,7 +182,7 @@ class IMAPClientHandlerTests: XCTestCase {
         // client responds
         XCTAssertNoThrow(try channel.writeOutbound(CommandStream.continuationResponse("")))
         XCTAssertEqual(handler.state, .expectingContinuations)
-        XCTAssertEqual(try channel.readOutbound(as: ByteBuffer.self), "")
+        XCTAssertEqual(try channel.readOutbound(as: ByteBuffer.self), "\r\n")
 
         // server sends another challenge
         let challengeString2: ByteBuffer = """
@@ -195,13 +195,13 @@ class IMAPClientHandlerTests: XCTestCase {
         XCTAssertNoThrow(XCTAssertEqual(try channel.readInbound(), ResponseOrContinuationRequest.continuationRequest(.data(challengeString2))))
 
         // client responds
-        let authString2: ByteBuffer = """
+        let authString2 = """
             YDMGCSqGSIb3EgECAgIBAAD/////3LQBHXTpFfZgrejpLlLImP
             wkhbfa2QteAQAgAG1yYwE=
         """
-        XCTAssertNoThrow(try channel.writeOutbound(CommandStream.continuationResponse(authString2)))
+        XCTAssertNoThrow(try channel.writeOutbound(CommandStream.continuationResponse(ByteBuffer(string: authString2))))
         XCTAssertEqual(handler.state, .expectingContinuations)
-        XCTAssertEqual(try channel.readOutbound(as: ByteBuffer.self), authString2)
+        XCTAssertEqual(try channel.readOutbound(as: ByteBuffer.self), ByteBuffer(string: "\r\n" + authString2))
 
         // server finished
         inEncodeBuffer = ResponseEncodeBuffer(buffer: ByteBuffer(), capabilities: [])

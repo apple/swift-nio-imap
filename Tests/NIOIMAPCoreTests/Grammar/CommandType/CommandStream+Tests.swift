@@ -21,27 +21,31 @@ class CommandStream_Tests: EncodeTestClass {}
 // MARK: - Encoding
 
 extension CommandStream_Tests {
+
     func testEncode() {
-        let inputs: [(AppendCommand, String, UInt)] = [
-            (.start(tag: "1", appendingTo: .inbox), "1 APPEND \"INBOX\"", #line),
+        let inputs: [(CommandStream, String, UInt)] = [
+            (.append(.start(tag: "1", appendingTo: .inbox)), "1 APPEND \"INBOX\"", #line),
             (
-                .beginMessage(message: .init(options: .init(flagList: [], extensions: []), data: .init(byteCount: 3))),
+                .append(.beginMessage(message: .init(options: .init(flagList: [], extensions: []), data: .init(byteCount: 3)))),
                 " {3}\r\n",
                 #line
             ),
             (
-                .beginMessage(message: .init(options: .init(flagList: [.seen, .deleted], extensions: []), data: .init(byteCount: 3))),
+                .append(.beginMessage(message: .init(options: .init(flagList: [.seen, .deleted], extensions: []), data: .init(byteCount: 3)))),
                 " (\\Seen \\Deleted) {3}\r\n",
                 #line
             ),
-            (.messageBytes("123"), "123", #line),
-            (.endMessage, "", #line), // dummy command, we don't expect anything
-            (.finish, "\r\n", #line),
+            (.append(.messageBytes("123")), "123", #line),
+            (.append(.endMessage), "", #line), // dummy command, we don't expect anything
+            (.append(.finish), "\r\n", #line),
+            (.command(.init(tag: "1", command: .noop)), "1 NOOP\r\n", #line),
+            (.idleDone, "DONE\r\n", #line),
+            (.continuationResponse("test"), "\r\ntest", #line)
         ]
 
         for (command, expected, line) in inputs {
             var commandEncodeBuffer = CommandEncodeBuffer(buffer: "", capabilities: [])
-            commandEncodeBuffer.writeAppendCommand(command)
+            commandEncodeBuffer.writeCommandStream(command)
             XCTAssertEqual(String(buffer: commandEncodeBuffer.buffer._buffer), expected, line: line)
         }
     }
@@ -56,8 +60,8 @@ extension CommandStream_Tests {
         ]
 
         var buffer = CommandEncodeBuffer(buffer: "", capabilities: [])
-        parts.forEach {
-            buffer.writeAppendCommand($0)
+        parts.map { CommandStream.append($0) }.forEach {
+            buffer.writeCommandStream($0)
         }
 
         let encodedCommand = buffer.buffer.nextChunk()
@@ -83,8 +87,8 @@ extension CommandStream_Tests {
         var options = CommandEncodingOptions()
         options.useNonSynchronizingLiteralPlus = true
         var buffer = CommandEncodeBuffer(buffer: "", options: options)
-        parts.forEach {
-            buffer.writeAppendCommand($0)
+        parts.map { CommandStream.append($0) }.forEach {
+            buffer.writeCommandStream($0)
         }
 
         let encodedCommand = buffer.buffer.nextChunk()
@@ -117,8 +121,8 @@ extension CommandStream_Tests {
         ]
 
         var buffer = CommandEncodeBuffer(buffer: "", capabilities: [])
-        parts.forEach {
-            buffer.writeAppendCommand($0)
+        parts.map { CommandStream.append($0) }.forEach {
+            buffer.writeCommandStream($0)
         }
 
         var encodedCommand = buffer.buffer.nextChunk()
@@ -171,8 +175,8 @@ extension CommandStream_Tests {
         var options = CommandEncodingOptions()
         options.useNonSynchronizingLiteralPlus = true
         var buffer = CommandEncodeBuffer(buffer: "", options: options)
-        parts.forEach {
-            buffer.writeAppendCommand($0)
+        parts.map { CommandStream.append($0) }.forEach {
+            buffer.writeCommandStream($0)
         }
 
         let encodedCommand = buffer.buffer.nextChunk()
@@ -200,8 +204,8 @@ extension CommandStream_Tests {
 
         // Apply parts twice.
         var buffer = CommandEncodeBuffer(buffer: "", capabilities: [])
-        (parts + parts).forEach {
-            buffer.writeAppendCommand($0)
+        (parts + parts).map { CommandStream.append($0) }.forEach {
+            buffer.writeCommandStream($0)
         }
 
         var encodedCommand = buffer.buffer.nextChunk()
