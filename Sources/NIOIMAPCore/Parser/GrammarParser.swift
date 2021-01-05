@@ -3497,7 +3497,7 @@ extension GrammarParser {
                 parseOptionExtensionKind_standard,
                 parseOptionExtensionKind_vendor,
             ], buffer: &buffer, tracker: tracker)
-            let value = try optional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> OptionValueComp in
+            let value = try optional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> OptionValues in
                 try space(buffer: &buffer, tracker: tracker)
                 return try self.parseOptionValue(buffer: &buffer, tracker: tracker)
             }
@@ -3508,25 +3508,27 @@ extension GrammarParser {
     // option-val-comp =  astring /
     //                    option-val-comp *(SP option-val-comp) /
     //                    "(" option-val-comp ")"
-    static func parseOptionValueComp(buffer: inout ByteBuffer, tracker: StackTracker) throws -> OptionValueComp {
-        func parseOptionValueComp_string(buffer: inout ByteBuffer, tracker: StackTracker) throws -> OptionValueComp {
-            .string(try self.parseAString(buffer: &buffer, tracker: tracker))
+    static func parseOptionValueComp(buffer: inout ByteBuffer, tracker: StackTracker) throws -> OptionValues {
+        func parseOptionValueComp_string(buffer: inout ByteBuffer, tracker: StackTracker) throws -> OptionValues {
+            let string = try self.parseAString(buffer: &buffer, tracker: tracker)
+            return [string]
         }
 
-        func parseOptionValueComp_single(buffer: inout ByteBuffer, tracker: StackTracker) throws -> OptionValueComp {
+        func parseOptionValueComp_single(buffer: inout ByteBuffer, tracker: StackTracker) throws -> OptionValues {
             try fixedString("(", buffer: &buffer, tracker: tracker)
             let comp = try self.parseOptionValueComp(buffer: &buffer, tracker: tracker)
             try fixedString(")", buffer: &buffer, tracker: tracker)
-            return .array([comp])
+            return .init(comp.array)
         }
 
-        func parseOptionValueComp_array(buffer: inout ByteBuffer, tracker: StackTracker) throws -> OptionValueComp {
+        func parseOptionValueComp_array(buffer: inout ByteBuffer, tracker: StackTracker) throws -> OptionValues {
             var array = [try self.parseOptionValueComp(buffer: &buffer, tracker: tracker)]
-            try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) -> OptionValueComp in
+            try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) -> OptionValues in
                 try space(buffer: &buffer, tracker: tracker)
                 return try self.parseOptionValueComp(buffer: &buffer, tracker: tracker)
             }
-            return .array(array)
+            let combined = array.map { $0.array }.reduce([], +)
+            return .init(combined)
         }
 
         return try oneOf([
@@ -3537,8 +3539,8 @@ extension GrammarParser {
     }
 
     // option-value =  "(" option-val-comp ")"
-    static func parseOptionValue(buffer: inout ByteBuffer, tracker: StackTracker) throws -> OptionValueComp {
-        try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> OptionValueComp in
+    static func parseOptionValue(buffer: inout ByteBuffer, tracker: StackTracker) throws -> OptionValues {
+        try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> OptionValues in
             try fixedString("(", buffer: &buffer, tracker: tracker)
             let comp = try self.parseOptionValueComp(buffer: &buffer, tracker: tracker)
             try fixedString(")", buffer: &buffer, tracker: tracker)

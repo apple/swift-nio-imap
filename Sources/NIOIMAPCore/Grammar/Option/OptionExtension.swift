@@ -29,12 +29,12 @@ public struct OptionExtension: Equatable {
     public var kind: OptionExtensionKind
 
     /// Some options value.
-    public var value: OptionValueComp?
+    public var value: OptionValues?
 
     /// Creates a new `OptionExtension`.
     /// - parameter kind: The kind of option extension.
     /// - parameter value: The value of the extension. Defaults to `nil`.
-    public init(kind: OptionExtensionKind, value: OptionValueComp? = nil) {
+    public init(kind: OptionExtensionKind, value: OptionValues? = nil) {
         self.kind = kind
         self.value = value
     }

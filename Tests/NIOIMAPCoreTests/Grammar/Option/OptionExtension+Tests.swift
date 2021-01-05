@@ -23,9 +23,9 @@ class OptionExtension_Tests: EncodeTestClass {}
 extension OptionExtension_Tests {
     func testEncode() {
         let inputs: [(OptionExtension, String, UInt)] = [
-            (.init(kind: .standard("test"), value: .string("string")), "test (\"string\")", #line),
+            (.init(kind: .standard("test"), value: ["string"]), "test (\"string\")", #line),
             (.init(kind: .vendor(.init(token: "token", atom: "atom")), value: nil), "token-atom", #line),
-            (.init(kind: .vendor(.init(token: "token", atom: "atom")), value: .string("value")), "token-atom (\"value\")", #line),
+            (.init(kind: .vendor(.init(token: "token", atom: "atom")), value: ["value"]), "token-atom (\"value\")", #line),
         ]
 
         for (test, expectedString, line) in inputs {

@@ -22,16 +22,10 @@ class OptionValueComp_Tests: EncodeTestClass {}
 
 extension OptionValueComp_Tests {
     func testEncode() {
-        let inputs: [(OptionValueComp, String, UInt)] = [
-            (.string("test"), "\"test\"", #line),
-            ([.string("test1"), .string("test2")], "(\"test1\" \"test2\")", #line),
+        let inputs: [(OptionValues, String, UInt)] = [
+            (["test"], "(\"test\")", #line),
+            (["test1", "test2"], "(\"test1\" \"test2\")", #line),
         ]
-
-        for (test, expectedString, line) in inputs {
-            self.testBuffer.clear()
-            let size = self.testBuffer.writeOptionValueComp(test)
-            XCTAssertEqual(size, expectedString.utf8.count, line: line)
-            XCTAssertEqual(self.testBufferString, expectedString, line: line)
-        }
+        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeOptionValue($0) } )
     }
 }
