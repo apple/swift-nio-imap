@@ -72,7 +72,7 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
                     case .taggedResponse:
                         // continuations must have finished: change the state to standard continuation handling
                         self._state = .expectingResponses
-                        
+
                     case .untaggedResponse, .fetchResponse, .fatalResponse:
                         break
                     }
