@@ -15,24 +15,24 @@
 /// Matches the `UIDSet` of the messages in the source mailbox to the `UIDSet` of the
 /// copied messages in the destination mailbox.
 public struct ResponseCodeCopy: Equatable {
-    // TODO: Rename to destinationUIDValidity
+
     /// The `UIDValidity` of the destination mailbox
-    public var num: Int
+    public var destinationUIDValidity: Int
 
     /// The message UIDs in the source mailbox.
-    public var set1: UIDSet
+    public var sourceUidSet: UIDSet
 
     /// The copied message UIDs in the destination mailbox.
-    public var set2: UIDSet
+    public var destinationUidSet: UIDSet
 
     /// Creates a new `ResponseCodeCopy`.
     /// - parameter num: The `UIDValidity` of the destination mailbox.
     /// - parameter set1: The message UIDs in the source mailbox.
     /// - parameter set2: The copied message UIDs in the destination mailbox.
     public init(num: Int, set1: UIDSet, set2: UIDSet) {
-        self.num = num
-        self.set1 = set1
-        self.set2 = set2
+        self.destinationUIDValidity = num
+        self.sourceUidSet = set1
+        self.destinationUidSet = set2
     }
 }
 
@@ -40,9 +40,9 @@ public struct ResponseCodeCopy: Equatable {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeResponseCodeCopy(_ data: ResponseCodeCopy) -> Int {
-        self.writeString("COPYUID \(data.num) ") +
-            self.writeUIDSet(data.set1) +
+        self.writeString("COPYUID \(data.destinationUIDValidity) ") +
+            self.writeUIDSet(data.sourceUidSet) +
             self.writeSpace() +
-            self.writeUIDSet(data.set2)
+            self.writeUIDSet(data.destinationUidSet)
     }
 }
