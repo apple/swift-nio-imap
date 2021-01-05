@@ -788,7 +788,7 @@ extension GrammarParser {
 
         func parseCommandAuth_genURLAuth(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Command {
             try fixedString("GENURLAUTH", buffer: &buffer, tracker: tracker)
-            let array = try ParserLibrary.parseOneOrMore(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> URLRumpMechanism in
+            let array = try ParserLibrary.parseOneOrMore(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> RumpURLAndMechanism in
                 try space(buffer: &buffer, tracker: tracker)
                 return try self.parseURLRumpMechanism(buffer: &buffer, tracker: tracker)
             })
@@ -2307,8 +2307,8 @@ extension GrammarParser {
         }
     }
 
-    static func parseURLRumpMechanism(buffer: inout ByteBuffer, tracker: StackTracker) throws -> URLRumpMechanism {
-        try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> URLRumpMechanism in
+    static func parseURLRumpMechanism(buffer: inout ByteBuffer, tracker: StackTracker) throws -> RumpURLAndMechanism {
+        try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> RumpURLAndMechanism in
             let rump = try self.parseAString(buffer: &buffer, tracker: tracker)
             try space(buffer: &buffer, tracker: tracker)
             let mechanism = try self.parseUAuthMechanism(buffer: &buffer, tracker: tracker)
