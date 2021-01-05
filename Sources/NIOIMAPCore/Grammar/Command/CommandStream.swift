@@ -96,6 +96,9 @@ public enum CommandStream: Equatable {
     /// Sends a sub-command that is used to append messages to a mailbox.
     /// - parameter AppendCommand: The sub-command to send.
     case append(AppendCommand)
+
+    /// Sends some data in response to a continuation request
+    case continuationResponse(ByteBuffer)
 }
 
 extension CommandEncodeBuffer {
@@ -110,10 +113,17 @@ extension CommandEncodeBuffer {
             return self.writeCommand(command)
         case .append(let command):
             return self.writeAppendCommand(command)
+        case .continuationResponse(let bytes):
+            return self.buffer.writeString("\r\n") + self.writeBytes(bytes)
         }
     }
 
-    @discardableResult mutating func writeAppendCommand(_ command: AppendCommand) -> Int {
+    @discardableResult private mutating func writeBytes(_ bytes: ByteBuffer) -> Int {
+        var buffer = bytes
+        return self.buffer.writeBuffer(&buffer)
+    }
+
+    @discardableResult private mutating func writeAppendCommand(_ command: AppendCommand) -> Int {
         switch command {
         case .start(tag: let tag, appendingTo: let mailbox):
             return

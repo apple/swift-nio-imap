@@ -13,6 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import NIOIMAPCore
 
 /// To be used by a IMAP client implementation.
 public final class IMAPClientHandler: ChannelDuplexHandler {
@@ -20,7 +21,7 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
     public typealias InboundIn = ByteBuffer
 
     /// Converts a `ByteBuffer` into a `Response` by sending data through a parser.
-    public typealias InboundOut = Response
+    public typealias InboundOut = ResponseOrContinuationRequest
 
     /// Commands are encoding into a ByteBuffer to send to a server.
     public typealias OutboundIn = CommandStream
@@ -34,8 +35,23 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
 
     public struct UnexpectedContinuationRequest: Error {}
 
+    private(set) var _state: ClientHandlerState
+
+    enum ClientHandlerState: Equatable {
+        /// We're expecting continuations to come back during a command.
+        /// For example when in an IDLE state, the server may periodically send
+        /// back "+ Still here". Note that this does not include continuations for
+        /// synchronising literals.
+        case expectingContinuations
+
+        /// We expect the server to return standard tagged or untagged responses, without any intermediate
+        /// continuations, with the exception of synchronising literals.
+        case expectingResponses
+    }
+
     public init() {
         self.decoder = NIOSingleStepByteToMessageProcessor(ResponseDecoder(), maximumBufferSize: 1_000)
+        self._state = .expectingResponses
     }
 
     public func channelRead(context: ChannelHandlerContext, data: NIOAny) {
@@ -44,9 +60,23 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
             try self.decoder.process(buffer: data) { response in
                 switch response {
                 case .continuationRequest:
-                    self.writeNextChunks(context: context)
+                    switch self._state {
+                    case .expectingContinuations:
+                        context.fireChannelRead(self.wrapInboundOut(response))
+                    case .expectingResponses:
+                        self.writeNextChunks(context: context)
+                    }
                 case .response(let response):
-                    context.fireChannelRead(self.wrapInboundOut(response))
+                    let out = ResponseOrContinuationRequest.response(response)
+                    switch response {
+                    case .taggedResponse:
+                        // continuations must have finished: change the state to standard continuation handling
+                        self._state = .expectingResponses
+
+                    case .untaggedResponse, .fetchResponse, .fatalResponse:
+                        break
+                    }
+                    context.fireChannelRead(self.wrapInboundOut(out))
                 }
             }
         } catch {
@@ -81,6 +111,21 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
         let command = self.unwrapOutboundIn(data)
         var encoder = CommandEncodeBuffer(buffer: context.channel.allocator.buffer(capacity: 1024), capabilities: [])
         encoder.writeCommandStream(command)
+
+        switch command {
+        case .command(let command):
+            switch command.command {
+            case .idleStart, .authenticate(method: _, initialClientResponse: _):
+                self._state = .expectingContinuations
+            default:
+                self._state = .expectingResponses
+            }
+        case .idleDone:
+            self._state = .expectingResponses
+        default:
+            break
+        }
+
         if self.bufferedWrites.isEmpty {
             let next = encoder.buffer.nextChunk()
 
