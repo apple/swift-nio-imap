@@ -15,7 +15,6 @@
 /// Matches the `UIDSet` of the messages in the source mailbox to the `UIDSet` of the
 /// copied messages in the destination mailbox.
 public struct ResponseCodeCopy: Equatable {
-
     /// The `UIDValidity` of the destination mailbox
     public var destinationUIDValidity: Int
 
