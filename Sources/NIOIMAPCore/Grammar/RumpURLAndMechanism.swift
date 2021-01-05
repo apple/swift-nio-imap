@@ -15,7 +15,7 @@
 import struct NIO.ByteBuffer
 
 /// Pairs an IMAP "rump" URL with an authentication mechanism
-public struct URLRumpMechanism: Equatable {
+public struct RumpURLAndMechanism: Equatable {
     /// The IMAP URL excluding the access mechanism and access token.
     public var urlRump: ByteBuffer
 
@@ -34,7 +34,7 @@ public struct URLRumpMechanism: Equatable {
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeURLRumpMechanism(_ data: URLRumpMechanism) -> Int {
+    @discardableResult mutating func writeURLRumpMechanism(_ data: RumpURLAndMechanism) -> Int {
         self.writeIMAPString(data.urlRump) +
             self.writeSpace() +
             self.writeUAuthMechanism(data.mechanism)
