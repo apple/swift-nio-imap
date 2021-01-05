@@ -35,7 +35,7 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
 
     public struct UnexpectedContinuationRequest: Error {}
 
-    private(set) var state: ClientHandlerState
+    private(set) var _state: ClientHandlerState
 
     enum ClientHandlerState: Equatable {
         /// We're expecting continuations to come back during a command.
@@ -51,7 +51,7 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
 
     public init() {
         self.decoder = NIOSingleStepByteToMessageProcessor(ResponseDecoder(), maximumBufferSize: 1_000)
-        self.state = .expectingResponses
+        self._state = .expectingResponses
     }
 
     public func channelRead(context: ChannelHandlerContext, data: NIOAny) {
@@ -60,7 +60,7 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
             try self.decoder.process(buffer: data) { response in
                 switch response {
                 case .continuationRequest:
-                    switch self.state {
+                    switch self._state {
                     case .expectingContinuations:
                         context.fireChannelRead(self.wrapInboundOut(response))
                     case .expectingResponses:
@@ -71,8 +71,9 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
                     switch response {
                     case .taggedResponse:
                         // continuations must have finished: change the state to standard continuation handling
-                        self.state = .expectingResponses
-                    default:
+                        self._state = .expectingResponses
+                        
+                    case .untaggedResponse, .fetchResponse, .fatalResponse:
                         break
                     }
                     context.fireChannelRead(self.wrapInboundOut(out))
@@ -115,12 +116,12 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
         case .command(let command):
             switch command.command {
             case .idleStart, .authenticate(method: _, initialClientResponse: _):
-                self.state = .expectingContinuations
+                self._state = .expectingContinuations
             default:
-                self.state = .expectingResponses
+                self._state = .expectingResponses
             }
         case .idleDone:
-            self.state = .expectingResponses
+            self._state = .expectingResponses
         default:
             break
         }

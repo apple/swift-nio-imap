@@ -112,7 +112,7 @@ class IMAPClientHandlerTests: XCTestCase {
 
         // move into an idle state
         XCTAssertNoThrow(try channel.writeOutbound(CommandStream.command(.init(tag: "1", command: .idleStart))))
-        XCTAssertEqual(handler.state, .expectingContinuations)
+        XCTAssertEqual(handler._state, .expectingContinuations)
         XCTAssertNoThrow(try channel.readOutbound(as: ByteBuffer.self))
         XCTAssertNoThrow(XCTAssertNil(try channel.readOutbound(as: ByteBuffer.self)))
 
@@ -131,13 +131,13 @@ class IMAPClientHandlerTests: XCTestCase {
 
         // finish being idle
         XCTAssertNoThrow(try channel.writeOutbound(CommandStream.idleDone))
-        XCTAssertEqual(handler.state, .expectingResponses)
+        XCTAssertEqual(handler._state, .expectingResponses)
         XCTAssertNoThrow(try channel.readOutbound(as: ByteBuffer.self))
         XCTAssertNoThrow(XCTAssertNil(try channel.readOutbound(as: ByteBuffer.self)))
 
         // start authentication
         XCTAssertNoThrow(try channel.writeOutbound(CommandStream.command(.init(tag: "A001", command: .authenticate(method: "GSSAPI", initialClientResponse: nil)))))
-        XCTAssertEqual(handler.state, .expectingContinuations)
+        XCTAssertEqual(handler._state, .expectingContinuations)
         XCTAssertNoThrow(try channel.readOutbound(as: ByteBuffer.self))
         XCTAssertNoThrow(XCTAssertNil(try channel.readOutbound(as: ByteBuffer.self)))
 
@@ -165,7 +165,7 @@ class IMAPClientHandlerTests: XCTestCase {
         vCyLWLlWnbaUkZdEYbKHBPjd8t/1x5Yg==
         """
         XCTAssertNoThrow(try channel.writeOutbound(CommandStream.continuationResponse(ByteBuffer(string: authString1))))
-        XCTAssertEqual(handler.state, .expectingContinuations)
+        XCTAssertEqual(handler._state, .expectingContinuations)
         XCTAssertEqual(try channel.readOutbound(as: ByteBuffer.self), ByteBuffer(string: "\r\n" + authString1))
 
         // server sends another challenge
@@ -181,7 +181,7 @@ class IMAPClientHandlerTests: XCTestCase {
 
         // client responds
         XCTAssertNoThrow(try channel.writeOutbound(CommandStream.continuationResponse("")))
-        XCTAssertEqual(handler.state, .expectingContinuations)
+        XCTAssertEqual(handler._state, .expectingContinuations)
         XCTAssertEqual(try channel.readOutbound(as: ByteBuffer.self), "\r\n")
 
         // server sends another challenge
@@ -200,7 +200,7 @@ class IMAPClientHandlerTests: XCTestCase {
             wkhbfa2QteAQAgAG1yYwE=
         """
         XCTAssertNoThrow(try channel.writeOutbound(CommandStream.continuationResponse(ByteBuffer(string: authString2))))
-        XCTAssertEqual(handler.state, .expectingContinuations)
+        XCTAssertEqual(handler._state, .expectingContinuations)
         XCTAssertEqual(try channel.readOutbound(as: ByteBuffer.self), ByteBuffer(string: "\r\n" + authString2))
 
         // server finished
@@ -208,7 +208,7 @@ class IMAPClientHandlerTests: XCTestCase {
         inEncodeBuffer.writeResponse(.taggedResponse(.init(tag: "A001", state: .ok(.init(text: "GSSAPI authentication successful")))))
         XCTAssertNoThrow(try channel.writeInbound(inEncodeBuffer.bytes))
         XCTAssertNoThrow(XCTAssertEqual(try channel.readInbound(), ResponseOrContinuationRequest.response(.taggedResponse(.init(tag: "A001", state: .ok(.init(text: "GSSAPI authentication successful")))))))
-        XCTAssertEqual(handler.state, .expectingResponses)
+        XCTAssertEqual(handler._state, .expectingResponses)
     }
 
     // MARK: - setup / tear down
