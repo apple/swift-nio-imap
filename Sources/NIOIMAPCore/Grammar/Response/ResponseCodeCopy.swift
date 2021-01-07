@@ -44,10 +44,10 @@ extension EncodeBuffer {
             self.writeSpace() +
             self.writeUIDRangeArray(data.destinationUIDs)
     }
-    
+
     @discardableResult fileprivate mutating func writeUIDRangeArray(_ array: [UIDRange]) -> Int {
         self.writeArray(array, separator: ",", parenthesis: false) { (element, self) in
-            return self.writeUIDRange(element)
+            self.writeUIDRange(element)
         }
     }
 }

@@ -4878,7 +4878,7 @@ extension GrammarParser {
             return s
         }
     }
-    
+
     static func parseUIDRangeArray(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [UIDRange] {
         func parseUIDArray_number(buffer: inout ByteBuffer, tracker: StackTracker) throws -> UIDRange {
             let num = try self.parseUID(buffer: &buffer, tracker: tracker)
@@ -4898,7 +4898,7 @@ extension GrammarParser {
                 try fixedString(",", buffer: &buffer, tracker: tracker)
                 return try parseUIDArray_element(buffer: &buffer, tracker: tracker)
             }
-            
+
             guard !output.isEmpty else {
                 throw ParserError(hint: "UID set is empty.")
             }
