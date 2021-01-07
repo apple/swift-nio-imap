@@ -1139,10 +1139,12 @@ extension GrammarParser {
             ], buffer: &buffer, tracker: tracker)
 
             try fixedString("\"", buffer: &buffer, tracker: tracker)
-            guard let d = InternalDate(year: year, month: month, day: day, hour: hour, minute: minute, second: second, zoneMinutes: zone) else {
+            guard
+                let components = InternalDate.Components(year: year, month: month, day: day, hour: hour, minute: minute, second: second, zoneMinutes: zone)
+            else {
                 throw ParserError(hint: "Invalid internal date.")
             }
-            return d
+            return InternalDate(components)
         }
     }
 

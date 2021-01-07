@@ -22,31 +22,35 @@
 /// IMAPv4 `date-time`
 public struct InternalDate: Equatable {
     var rawValue: UInt64
+    
+    /// The components of the date, such as the day, month, year, etc.
+    public var components: Components {
+        var remainder = self.rawValue
 
-    /// Creates a new `InternalDate`. The data entered is partially validated
-    /// using simple sanity checks, for example month must be in the range 1:12.
-    /// More complicated checks, such as the number of days in a given month, are not
-    /// performed.
-    /// - parameter year: The year.
-    /// - parameter month: The month, required to be in the range 1:12.
-    /// - parameter day: The day, required to be in the range 1:31.
-    /// - parameter hour: The hour, required to be in the range 0:23.
-    /// - parameter minute: The minute, required to be in the range 0:59.
-    /// - parameter second: The second, required to be in the range 0:59.
-    /// - parameter zone: The timezone offset from UTC.
-    public init?(year: Int, month: Int, day: Int, hour: Int, minute: Int, second: Int, zoneMinutes: Int) {
-        guard
-            (1 ... 31).contains(day),
-            (1 ... 12).contains(month),
-            (0 ... 23).contains(hour),
-            (0 ... 59).contains(minute),
-            (0 ... 59).contains(second),
-            ((-24 * 60) ... (24 * 60)).contains(zoneMinutes),
-            (1 ... Int(UInt16.max)).contains(year),
-            let zoneValue = UInt16(exactly: abs(zoneMinutes))
-        else { return nil }
-        let zoneIsNegative = (zoneMinutes < 0) ? 1 as UInt8 : 0
+        func take(_ a: UInt64) -> Int {
+            let r = remainder % (a + 1)
+            remainder /= (a + 1)
+            return Int(r)
+        }
 
+        let day = take(31)
+        let month = take(12)
+        let hour = take(60)
+        let minute = take(60)
+        let second = take(60)
+        let zoneValue = take(24 * 60)
+        let zoneIsNegative = take(2)
+        let year = take(UInt64(UInt16.max - 1))
+        let zoneMinutes = Int(zoneValue) * ((zoneIsNegative == 0) ? 1 : -1)
+
+        // safe to bang as we can't have an invalid `InternalDate`
+        return Components(year: year, month: month, day: day, hour: hour, minute: minute, second: second, zoneMinutes: zoneMinutes)!
+    }
+    
+    /// Creates a new `InternalDate` from a given collection of `Components`
+    /// - parameter components: The components containing a year, month, day, hour, minute, second, and timezone.
+    public init(_ components: Components) {
+        
         var rawValue = 0 as UInt64
 
         func store<A: UnsignedInteger>(_ value: A, _ a: A) {
@@ -54,14 +58,14 @@ public struct InternalDate: Equatable {
             rawValue += UInt64(value)
         }
 
-        store(UInt16(year), 1)
-        store(UInt8(zoneIsNegative), 2)
-        store(UInt16(zoneValue), 24 * 60)
-        store(UInt8(second), 60)
-        store(UInt8(minute), 60)
-        store(UInt8(hour), 60)
-        store(UInt8(month), 12)
-        store(UInt8(day), 31)
+        store(UInt16(components.year), 1)
+        store(UInt8(components.zoneMinutes < 0 ? 1 : 0), 2)
+        store(UInt16(abs(components.zoneMinutes)), 24 * 60)
+        store(UInt8(components.second), 60)
+        store(UInt8(components.minute), 60)
+        store(UInt8(components.hour), 60)
+        store(UInt8(components.month), 12)
+        store(UInt8(components.day), 31)
 
         self.rawValue = rawValue
     }
@@ -106,7 +110,7 @@ extension InternalDate {
                 (1 ... 12).contains(month),
                 (0 ... 23).contains(hour),
                 (0 ... 59).contains(minute),
-                (0 ... 59).contains(second),
+                (0 ... 60).contains(second),
                 ((-24 * 60) ... (24 * 60)).contains(zoneMinutes),
                 (1 ... Int(UInt16.max)).contains(year)
             else {
@@ -121,36 +125,6 @@ extension InternalDate {
             self.second = second
             self.zoneMinutes = zoneMinutes
         }
-    }
-
-    /// Creates a new `InternalDate` from a given collection of `Components
-    /// - parameter components: The components containing a year, month, day, hour, minute, second, and timezone.
-    public init(components c: Components) {
-        self.init(year: c.year, month: c.month, day: c.day, hour: c.hour, minute: c.month, second: c.second, zoneMinutes: c.zoneMinutes)!
-    }
-
-    /// The components of the date, such as the day, month, year, etc.
-    public var components: Components {
-        var remainder = self.rawValue
-
-        func take(_ a: UInt64) -> Int {
-            let r = remainder % (a + 1)
-            remainder /= (a + 1)
-            return Int(r)
-        }
-
-        let day = take(31)
-        let month = take(12)
-        let hour = take(60)
-        let minute = take(60)
-        let second = take(60)
-        let zoneValue = take(24 * 60)
-        let zoneIsNegative = take(2)
-        let year = take(UInt64(UInt16.max - 1))
-        let zoneMinutes = Int(zoneValue) * ((zoneIsNegative == 0) ? 1 : -1)
-
-        // safe to bang as we can't have an invalid `InternalDate`
-        return Components(year: year, month: month, day: day, hour: hour, minute: minute, second: second, zoneMinutes: zoneMinutes)!
     }
 }
 
