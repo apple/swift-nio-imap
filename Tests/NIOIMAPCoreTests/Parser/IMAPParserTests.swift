@@ -1410,7 +1410,7 @@ extension ParserUnitTests {
     }
 
     func testCreatingMax() throws {
-        XCTAssertNotNil(InternalDate(year: 2567, month: 12, day: 31, hour: 24, minute: 60, second: 60, zoneMinutes: 13 * 60))
+        XCTAssertNotNil(InternalDate(year: 2567, month: 12, day: 31, hour: 23, minute: 59, second: 59, zoneMinutes: 13 * 60))
     }
 
     func testCreatingMin() throws {
