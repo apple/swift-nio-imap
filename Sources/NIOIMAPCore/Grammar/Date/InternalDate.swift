@@ -22,7 +22,7 @@
 /// IMAPv4 `date-time`
 public struct InternalDate: Equatable {
     var rawValue: UInt64
-    
+
     /// The components of the date, such as the day, month, year, etc.
     public var components: Components {
         var remainder = self.rawValue
@@ -46,11 +46,10 @@ public struct InternalDate: Equatable {
         // safe to bang as we can't have an invalid `InternalDate`
         return Components(year: year, month: month, day: day, hour: hour, minute: minute, second: second, zoneMinutes: zoneMinutes)!
     }
-    
+
     /// Creates a new `InternalDate` from a given collection of `Components`
     /// - parameter components: The components containing a year, month, day, hour, minute, second, and timezone.
     public init(_ components: Components) {
-        
         var rawValue = 0 as UInt64
 
         func store<A: UnsignedInteger>(_ value: A, _ a: A) {
