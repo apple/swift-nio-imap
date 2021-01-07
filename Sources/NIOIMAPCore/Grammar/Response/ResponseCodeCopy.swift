@@ -19,19 +19,19 @@ public struct ResponseCodeCopy: Equatable {
     public var destinationUIDValidity: Int
 
     /// The message UIDs in the source mailbox.
-    public var sourceUidSet: UIDSet
+    public var sourceUIDs: [UIDRange]
 
     /// The copied message UIDs in the destination mailbox.
-    public var destinationUidSet: UIDSet
+    public var destinationUIDs: [UIDRange]
 
     /// Creates a new `ResponseCodeCopy`.
     /// - parameter num: The `UIDValidity` of the destination mailbox.
     /// - parameter set1: The message UIDs in the source mailbox.
     /// - parameter set2: The copied message UIDs in the destination mailbox.
-    public init(num: Int, set1: UIDSet, set2: UIDSet) {
-        self.destinationUIDValidity = num
-        self.sourceUidSet = set1
-        self.destinationUidSet = set2
+    public init(destinationUIDValidity: Int, sourceUIDs: [UIDRange], destinationUIDs: [UIDRange]) {
+        self.destinationUIDValidity = destinationUIDValidity
+        self.sourceUIDs = sourceUIDs
+        self.destinationUIDs = destinationUIDs
     }
 }
 
@@ -40,8 +40,14 @@ public struct ResponseCodeCopy: Equatable {
 extension EncodeBuffer {
     @discardableResult mutating func writeResponseCodeCopy(_ data: ResponseCodeCopy) -> Int {
         self.writeString("COPYUID \(data.destinationUIDValidity) ") +
-            self.writeUIDSet(data.sourceUidSet) +
+            self.writeUIDRangeArray(data.sourceUIDs) +
             self.writeSpace() +
-            self.writeUIDSet(data.destinationUidSet)
+            self.writeUIDRangeArray(data.destinationUIDs)
+    }
+    
+    @discardableResult fileprivate mutating func writeUIDRangeArray(_ array: [UIDRange]) -> Int {
+        self.writeArray(array, separator: ",", parenthesis: false) { (element, self) in
+            return self.writeUIDRange(element)
+        }
     }
 }
