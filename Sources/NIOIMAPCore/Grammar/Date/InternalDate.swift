@@ -89,7 +89,7 @@ extension InternalDate {
         /// The minute, typically represented as a 2-digit integer in the range `0...59`
         public let minute: Int
 
-        /// The second, typically represented as a 2-digit integer in the range `0...59`
+        /// The second, typically represented as a 2-digit integer in the range `0...60` (to account for leap seconds)
         public let second: Int
 
         /// Time zone offset in minutes.
@@ -101,7 +101,7 @@ extension InternalDate {
         /// - parameter day: The day, typically represented as a 2-digit integer in the range `1...31`
         /// - parameter hour: The hour, typically represented as a 2-digit integer in the range `0...23`
         /// - parameter minute: The minute, typically represented as a 2-digit integer in the range `0...59`
-        /// - parameter second: The second, typically represented as a 2-digit integer in the range `0...59`
+        /// - parameter second: The second, typically represented as a 2-digit integer in the range `0...60` (to account for leap seconds)
         /// - parameter zoneMinutes: The timezone as an offset in minutes from UTC.
         public init?(year: Int, month: Int, day: Int, hour: Int, minute: Int, second: Int, zoneMinutes: Int) {
             guard
