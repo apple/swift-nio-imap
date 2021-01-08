@@ -28,11 +28,10 @@ public struct SequenceRangeSet: Hashable {
         let rangesToInsert = ranges.map { Range($0) }
         self.ranges = RangeSet(rangesToInsert)
     }
-    
+
     fileprivate init(rangeSet: RangeSet<A>) {
         self.ranges = rangeSet
     }
-    
 }
 
 extension SequenceRangeSet {
@@ -181,17 +180,16 @@ extension SequenceRangeSet.Index: Comparable {
 }
 
 extension SequenceRangeSet: SetAlgebra {
-    
     public typealias Element = SequenceNumber
-    
+
     public init() {
         self.ranges = RangeSet()
     }
-    
+
     public func contains(_ member: SequenceNumber) -> Bool {
         self.ranges.contains(A(member))
     }
-    
+
     public func union(_ other: Self) -> Self {
         Self(rangeSet: self.ranges.union(other.ranges))
     }
@@ -236,7 +234,6 @@ extension SequenceRangeSet: SetAlgebra {
     public mutating func formSymmetricDifference(_ other: SequenceRangeSet) {
         ranges.formSymmetricDifference(other.ranges)
     }
-    
 }
 
 // MARK: - Encoding
@@ -244,7 +241,7 @@ extension SequenceRangeSet: SetAlgebra {
 extension EncodeBuffer {
     @discardableResult mutating func writeSequenceRangeSet(_ set: SequenceRangeSet) -> Int {
         self.writeArray(set.ranges.ranges, separator: ",", parenthesis: false) { (element, self) in
-            return self.writeSequenceRange(SequenceRange(element))
+            self.writeSequenceRange(SequenceRange(element))
         }
     }
 }
