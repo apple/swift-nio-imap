@@ -28,6 +28,11 @@ public struct SequenceRangeSet: Hashable {
         let rangesToInsert = ranges.map { Range($0) }
         self.ranges = RangeSet(rangesToInsert)
     }
+    
+    fileprivate init(rangeSet: RangeSet<A>) {
+        self.ranges = rangeSet
+    }
+    
 }
 
 extension SequenceRangeSet {
@@ -114,6 +119,124 @@ extension Range where Element == SequenceRangeSet.A {
     fileprivate init(_ num: SequenceNumber) {
         self = SequenceRangeSet.A(num) ..< SequenceRangeSet.A(num).advanced(by: 1)
     }
+}
+
+extension SequenceRangeSet: Collection {
+    public struct Index {
+        fileprivate var rangeIndex: RangeSet<A>.Ranges.Index
+        fileprivate var indexInRange: SequenceNumber.Stride
+    }
+
+    public var startIndex: Index { Index(rangeIndex: ranges.ranges.startIndex, indexInRange: 0) }
+    public var endIndex: Index {
+        guard !ranges.ranges.isEmpty else { return Index(rangeIndex: ranges.ranges.endIndex, indexInRange: 0) }
+        return Index(rangeIndex: ranges.ranges.endIndex, indexInRange: SequenceNumber.Stride(ranges.ranges.last!.count))
+    }
+
+    public func index(after i: Index) -> Index {
+        precondition(i.rangeIndex < ranges.ranges.endIndex)
+        let count = SequenceNumber.Stride(ranges.ranges[i.rangeIndex].count)
+        if i.indexInRange.advanced(by: 1) < count {
+            return Index(rangeIndex: i.rangeIndex, indexInRange: i.indexInRange.advanced(by: 1))
+        }
+        let nextRange = ranges.ranges.index(after: i.rangeIndex)
+        guard nextRange < ranges.ranges.endIndex else { return endIndex }
+        return Index(rangeIndex: nextRange, indexInRange: 0)
+    }
+
+    public subscript(position: Index) -> SequenceNumber {
+        SequenceNumber(ranges.ranges[position.rangeIndex].lowerBound).advanced(by: position.indexInRange)
+    }
+
+    public var isEmpty: Bool {
+        ranges.isEmpty
+    }
+
+    /// The number of UIDs in the set.
+    public var count: Int {
+        ranges.ranges.reduce(into: 0) { $0 += $1.count }
+    }
+}
+
+extension SequenceRangeSet.Index: Comparable {
+    public static func < (lhs: SequenceRangeSet.Index, rhs: SequenceRangeSet.Index) -> Bool {
+        if lhs.rangeIndex == rhs.rangeIndex {
+            return lhs.indexInRange < rhs.indexInRange
+        } else {
+            return lhs.rangeIndex < rhs.rangeIndex
+        }
+    }
+
+    public static func > (lhs: SequenceRangeSet.Index, rhs: SequenceRangeSet.Index) -> Bool {
+        if lhs.rangeIndex == rhs.rangeIndex {
+            return lhs.indexInRange > rhs.indexInRange
+        } else {
+            return lhs.rangeIndex > rhs.rangeIndex
+        }
+    }
+
+    public static func == (lhs: SequenceRangeSet.Index, rhs: SequenceRangeSet.Index) -> Bool {
+        (lhs.rangeIndex == rhs.rangeIndex) && (lhs.indexInRange == rhs.indexInRange)
+    }
+}
+
+extension SequenceRangeSet: SetAlgebra {
+    
+    public typealias Element = SequenceNumber
+    
+    public init() {
+        self.ranges = RangeSet()
+    }
+    
+    public func contains(_ member: SequenceNumber) -> Bool {
+        self.ranges.contains(A(member))
+    }
+    
+    public func union(_ other: Self) -> Self {
+        Self(rangeSet: self.ranges.union(other.ranges))
+    }
+
+    public func intersection(_ other: Self) -> Self {
+        Self(rangeSet: ranges.intersection(other.ranges))
+    }
+
+    public func symmetricDifference(_ other: SequenceRangeSet) -> SequenceRangeSet {
+        Self(rangeSet: ranges.symmetricDifference(other.ranges))
+    }
+
+    public mutating func insert(_ newMember: SequenceNumber) -> (inserted: Bool, memberAfterInsert: SequenceNumber) {
+        guard !contains(newMember) else { return (false, newMember) }
+        let r: Range<A> = Range(newMember)
+        ranges.insert(contentsOf: r)
+        return (true, newMember)
+    }
+
+    public mutating func remove(_ member: SequenceNumber) -> SequenceNumber? {
+        guard contains(member) else { return nil }
+        let r: Range<A> = Range(member)
+        ranges.remove(contentsOf: r)
+        return member
+    }
+
+    public mutating func update(with newMember: SequenceNumber) -> SequenceNumber? {
+        guard !contains(newMember) else { return newMember }
+        let r: Range<A> = Range(newMember)
+        ranges.insert(contentsOf: r)
+        return nil
+    }
+
+    public mutating func formUnion(_ other: SequenceRangeSet) {
+        ranges.formUnion(other.ranges)
+    }
+
+    public mutating func formIntersection(_ other: SequenceRangeSet) {
+        ranges.formIntersection(other.ranges)
+    }
+
+    public mutating func formSymmetricDifference(_ other: SequenceRangeSet) {
+        ranges.formSymmetricDifference(other.ranges)
+    }
+    
 }
 
 // MARK: - Encoding
