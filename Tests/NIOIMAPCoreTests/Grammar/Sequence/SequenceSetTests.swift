@@ -36,13 +36,11 @@ extension SequenceSetTests {
     }
 
     func testIMAPEncoded_full() {
-        let expected = "1,2:3,4,5,6:*"
+        let expected = "1,3:10,12:*"
         let size = self.testBuffer.writeSequenceSet(SequenceSet([
             SequenceRange(1),
-            2 ... 3,
-            SequenceRange(4),
-            SequenceRange(5),
-            6...,
+            3 ... 10,
+            12...,
         ])!)
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
