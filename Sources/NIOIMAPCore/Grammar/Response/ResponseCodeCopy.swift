@@ -25,9 +25,9 @@ public struct ResponseCodeCopy: Equatable {
     public var destinationUIDs: [UIDRange]
 
     /// Creates a new `ResponseCodeCopy`.
-    /// - parameter num: The `UIDValidity` of the destination mailbox.
-    /// - parameter set1: The message UIDs in the source mailbox.
-    /// - parameter set2: The copied message UIDs in the destination mailbox.
+    /// - parameter destinationUIDValidity: The `UIDValidity` of the destination mailbox.
+    /// - parameter sourceUIDs: The message UIDs in the source mailbox.
+    /// - parameter destinationUIDs: The copied message UIDs in the destination mailbox.
     public init(destinationUIDValidity: Int, sourceUIDs: [UIDRange], destinationUIDs: [UIDRange]) {
         self.destinationUIDValidity = destinationUIDValidity
         self.sourceUIDs = sourceUIDs
