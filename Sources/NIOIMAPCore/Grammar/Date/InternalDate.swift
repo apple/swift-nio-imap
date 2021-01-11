@@ -44,7 +44,7 @@ public struct InternalDate: Equatable {
         let zoneMinutes = Int(zoneValue) * ((zoneIsNegative == 0) ? 1 : -1)
 
         // safe to bang as we can't have an invalid `InternalDate`
-        return Components(year: year, month: month, day: day, hour: hour, minute: minute, second: second, zoneMinutes: zoneMinutes)!
+        return Components(year: year, month: month, day: day, hour: hour, minute: minute, second: second, timeZoneMinutes: zoneMinutes)!
     }
 
     /// Creates a new `InternalDate` from a given collection of `Components`
@@ -94,7 +94,7 @@ extension InternalDate {
 
         /// Time zone offset in minutes.
         public let zoneMinutes: Int
-
+        
         /// Creates a new `Components` collection from the given parameters. Note that currently no sanity checks are performed.
         /// - parameter year: The year, typically to be represented as a 4-digit integer.
         /// - parameter month: The month, typically represented as a 2-digit integer in the range `1...12`
@@ -103,14 +103,14 @@ extension InternalDate {
         /// - parameter minute: The minute, typically represented as a 2-digit integer in the range `0...59`
         /// - parameter second: The second, typically represented as a 2-digit integer in the range `0...60` (to account for leap seconds)
         /// - parameter zoneMinutes: The timezone as an offset in minutes from UTC.
-        public init?(year: Int, month: Int, day: Int, hour: Int, minute: Int, second: Int, zoneMinutes: Int) {
+        public init?(year: Int, month: Int, day: Int, hour: Int, minute: Int, second: Int, timeZoneMinutes: Int) {
             guard
                 (1 ... 31).contains(day),
                 (1 ... 12).contains(month),
                 (0 ... 23).contains(hour),
                 (0 ... 59).contains(minute),
                 (0 ... 60).contains(second),
-                ((-24 * 60) ... (24 * 60)).contains(zoneMinutes),
+                ((-24 * 60) ... (24 * 60)).contains(timeZoneMinutes),
                 (1 ... Int(UInt16.max)).contains(year)
             else {
                 return nil
@@ -122,7 +122,7 @@ extension InternalDate {
             self.hour = hour
             self.minute = minute
             self.second = second
-            self.zoneMinutes = zoneMinutes
+            self.zoneMinutes = timeZoneMinutes
         }
     }
 }

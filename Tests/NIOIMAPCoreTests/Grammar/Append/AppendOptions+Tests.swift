@@ -20,7 +20,8 @@ class AppendOptions_Tests: EncodeTestClass {}
 
 extension AppendOptions_Tests {
     func testEncode() throws {
-        let date = try XCTUnwrap(InternalDate(.init(year: 1994, month: 6, day: 25, hour: 1, minute: 2, second: 3, zoneMinutes: 0)!))
+        let components = InternalDate.Components(year: 1994, month: 6, day: 25, hour: 1, minute: 2, second: 3, timeZoneMinutes: 0)!
+        let date = InternalDate(components)
 
         let inputs: [(AppendOptions, String, UInt)] = [
             (.init(flagList: [], internalDate: nil, extensions: []), "", #line),
