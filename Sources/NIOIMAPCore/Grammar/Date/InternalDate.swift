@@ -94,7 +94,7 @@ extension InternalDate {
 
         /// Time zone offset in minutes.
         public let zoneMinutes: Int
-        
+
         /// Creates a new `Components` collection from the given parameters. Note that currently no sanity checks are performed.
         /// - parameter year: The year, typically to be represented as a 4-digit integer.
         /// - parameter month: The month, typically represented as a 2-digit integer in the range `1...12`

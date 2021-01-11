@@ -20,10 +20,9 @@ class AppendMessage_Tests: EncodeTestClass {}
 
 extension AppendMessage_Tests {
     func testEncode() {
-        
         let c1 = InternalDate.Components(year: 2020, month: 7, day: 2, hour: 13, minute: 42, second: 52, timeZoneMinutes: 60)!
         let c2 = InternalDate.Components(year: 2020, month: 7, day: 2, hour: 13, minute: 42, second: 52, timeZoneMinutes: 60)!
-        
+
         let inputs: [(AppendMessage, CommandEncodingOptions, [String], UInt)] = [
             (.init(options: .init(flagList: [], internalDate: nil, extensions: []), data: .init(byteCount: 123)), .rfc3501, [" {123}\r\n"], #line),
             (.init(options: .init(flagList: [.draft, .flagged], internalDate: nil, extensions: []), data: .init(byteCount: 123)), .rfc3501, [" (\\Draft \\Flagged) {123}\r\n"], #line),
