@@ -542,7 +542,8 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseAppendOptions() throws {
-        let date = try XCTUnwrap(InternalDate(year: 1994, month: 6, day: 25, hour: 1, minute: 2, second: 3, zoneMinutes: 0))
+        let components = InternalDate.Components(year: 1994, month: 6, day: 25, hour: 1, minute: 2, second: 3, timeZoneMinutes: 0)
+        let date = InternalDate(components!)
 
         self.iterateTests(
             testFunction: GrammarParser.parseAppendOptions,
@@ -1407,14 +1408,6 @@ extension ParserUnitTests {
         XCTAssertThrowsError(try GrammarParser.parseDateText(buffer: &buffer, tracker: .testTracker)) { e in
             XCTAssertTrue(e is _IncompleteMessage)
         }
-    }
-
-    func testCreatingMax() throws {
-        XCTAssertNotNil(InternalDate(year: 2567, month: 12, day: 31, hour: 24, minute: 60, second: 60, zoneMinutes: 13 * 60))
-    }
-
-    func testCreatingMin() throws {
-        XCTAssertNotNil(InternalDate(year: 1900, month: 1, day: 1, hour: 0, minute: 0, second: 0, zoneMinutes: -13 * 60))
     }
 }
 
@@ -3031,7 +3024,8 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseMessageAttribute() throws {
-        let date = try XCTUnwrap(InternalDate(year: 1994, month: 6, day: 25, hour: 1, minute: 2, second: 3, zoneMinutes: 0))
+        let components = InternalDate.Components(year: 1994, month: 6, day: 25, hour: 1, minute: 2, second: 3, timeZoneMinutes: 0)
+        let date = InternalDate(components!)
 
         self.iterateTests(
             testFunction: GrammarParser.parseMessageAttribute,
