@@ -18,7 +18,7 @@ import StandardLibraryPreview
 /// A collection of SequenceRanges, used to identify a potentially large number of messages.
 public struct SequenceRangeSet: Hashable {
     /// The contained ranges.
-    fileprivate var ranges: RangeSet<A>
+    fileprivate var ranges: RangeSet<SequenceNumberWrapper>
 
     /// Creates a new `SequenceRangeSet` from a non-empty array of `SequenceRange`.
     /// - parameter ranges: The underlying array of ranges to use.
@@ -29,7 +29,7 @@ public struct SequenceRangeSet: Hashable {
         self.ranges = RangeSet(rangesToInsert)
     }
 
-    fileprivate init(rangeSet: RangeSet<A>) {
+    fileprivate init(rangeSet: RangeSet<SequenceNumberWrapper>) {
         self.ranges = rangeSet
     }
 }
@@ -37,23 +37,23 @@ public struct SequenceRangeSet: Hashable {
 extension SequenceRangeSet {
     /// SequenceNumberss shifted by 1, such that SequenceNumber 1 -> 0, and SequenceNumber.max -> UInt32.max - 1
     /// This allows us to store SequenceNumber.max + 1 inside a UInt32.
-    fileprivate struct A: RawRepresentable, Hashable {
+    fileprivate struct SequenceNumberWrapper: RawRepresentable, Hashable {
         var rawValue: UInt32
     }
 }
 
-extension SequenceRangeSet.A: Strideable {
+extension SequenceRangeSet.SequenceNumberWrapper: Strideable {
     public init(_ num: SequenceNumber) {
         // Since SequenceNumber.min = 1, we can always do this:
         self.rawValue = num.rawValue - 1
     }
 
-    func distance(to other: SequenceRangeSet.A) -> Int64 {
+    func distance(to other: SequenceRangeSet.SequenceNumberWrapper) -> Int64 {
         Int64(other.rawValue) - Int64(self.rawValue)
     }
 
-    func advanced(by n: Int64) -> SequenceRangeSet.A {
-        SequenceRangeSet.A(rawValue: UInt32(Int64(rawValue) + n))
+    func advanced(by n: Int64) -> SequenceRangeSet.SequenceNumberWrapper {
+        SequenceRangeSet.SequenceNumberWrapper(rawValue: UInt32(Int64(rawValue) + n))
     }
 }
 
@@ -98,31 +98,31 @@ extension SequenceRangeSet {
 }
 
 extension SequenceRange {
-    fileprivate init(_ r: Range<SequenceRangeSet.A>) {
+    fileprivate init(_ r: Range<SequenceRangeSet.SequenceNumberWrapper>) {
         self.init(SequenceNumber(r.lowerBound) ... SequenceNumber(r.upperBound.advanced(by: -1)))
     }
 }
 
 extension SequenceNumber {
-    fileprivate init(_ a: SequenceRangeSet.A) {
+    fileprivate init(_ a: SequenceRangeSet.SequenceNumberWrapper) {
         precondition(a.rawValue < UInt32.max)
         self.init(rawValue: a.rawValue + 1)!
     }
 }
 
-extension Range where Element == SequenceRangeSet.A {
+extension Range where Element == SequenceRangeSet.SequenceNumberWrapper {
     fileprivate init(_ r: SequenceRange) {
-        self = SequenceRangeSet.A(r.rawValue.lowerBound) ..< SequenceRangeSet.A(r.rawValue.upperBound).advanced(by: 1)
+        self = SequenceRangeSet.SequenceNumberWrapper(r.rawValue.lowerBound) ..< SequenceRangeSet.SequenceNumberWrapper(r.rawValue.upperBound).advanced(by: 1)
     }
 
     fileprivate init(_ num: SequenceNumber) {
-        self = SequenceRangeSet.A(num) ..< SequenceRangeSet.A(num).advanced(by: 1)
+        self = SequenceRangeSet.SequenceNumberWrapper(num) ..< SequenceRangeSet.SequenceNumberWrapper(num).advanced(by: 1)
     }
 }
 
 extension SequenceRangeSet: Collection {
     public struct Index {
-        fileprivate var rangeIndex: RangeSet<A>.Ranges.Index
+        fileprivate var rangeIndex: RangeSet<SequenceNumberWrapper>.Ranges.Index
         fileprivate var indexInRange: SequenceNumber.Stride
     }
 
@@ -187,7 +187,7 @@ extension SequenceRangeSet: SetAlgebra {
     }
 
     public func contains(_ member: SequenceNumber) -> Bool {
-        self.ranges.contains(A(member))
+        self.ranges.contains(SequenceNumberWrapper(member))
     }
 
     public func union(_ other: Self) -> Self {
@@ -204,21 +204,21 @@ extension SequenceRangeSet: SetAlgebra {
 
     public mutating func insert(_ newMember: SequenceNumber) -> (inserted: Bool, memberAfterInsert: SequenceNumber) {
         guard !contains(newMember) else { return (false, newMember) }
-        let r: Range<A> = Range(newMember)
+        let r: Range<SequenceNumberWrapper> = Range(newMember)
         ranges.insert(contentsOf: r)
         return (true, newMember)
     }
 
     public mutating func remove(_ member: SequenceNumber) -> SequenceNumber? {
         guard contains(member) else { return nil }
-        let r: Range<A> = Range(member)
+        let r: Range<SequenceNumberWrapper> = Range(member)
         ranges.remove(contentsOf: r)
         return member
     }
 
     public mutating func update(with newMember: SequenceNumber) -> SequenceNumber? {
         guard !contains(newMember) else { return newMember }
-        let r: Range<A> = Range(newMember)
+        let r: Range<SequenceNumberWrapper> = Range(newMember)
         ranges.insert(contentsOf: r)
         return nil
     }
