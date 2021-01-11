@@ -3663,12 +3663,12 @@ extension GrammarParser {
     static func parseResponseCodeCopy(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ResponseCodeCopy {
         try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> ResponseCodeCopy in
             try fixedString("COPYUID ", buffer: &buffer, tracker: tracker)
-            let num = try self.parseNumber(buffer: &buffer, tracker: tracker)
+            let uidValidity = try self.parseNumber(buffer: &buffer, tracker: tracker)
             try space(buffer: &buffer, tracker: tracker)
-            let set1 = try self.parseUIDSet(buffer: &buffer, tracker: tracker)
+            let sourceUIDRanges = try self.parseUIDRangeArray(buffer: &buffer, tracker: tracker)
             try space(buffer: &buffer, tracker: tracker)
-            let set2 = try self.parseUIDSet(buffer: &buffer, tracker: tracker)
-            return ResponseCodeCopy(num: num, set1: set1, set2: set2)
+            let destinationUIDRanges = try self.parseUIDRangeArray(buffer: &buffer, tracker: tracker)
+            return ResponseCodeCopy(destinationUIDValidity: uidValidity, sourceUIDs: sourceUIDRanges, destinationUIDs: destinationUIDRanges)
         }
     }
 
@@ -4876,6 +4876,33 @@ extension GrammarParser {
                 throw ParserError(hint: "UID set is empty.")
             }
             return s
+        }
+    }
+
+    static func parseUIDRangeArray(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [UIDRange] {
+        func parseUIDArray_number(buffer: inout ByteBuffer, tracker: StackTracker) throws -> UIDRange {
+            let num = try self.parseUID(buffer: &buffer, tracker: tracker)
+            return UIDRange(num)
+        }
+
+        func parseUIDArray_element(buffer: inout ByteBuffer, tracker: StackTracker) throws -> UIDRange {
+            try oneOf([
+                self.parseUIDRange,
+                parseUIDArray_number,
+            ], buffer: &buffer, tracker: tracker)
+        }
+
+        return try composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
+            var output = [try parseUIDArray_element(buffer: &buffer, tracker: tracker)]
+            try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &output, tracker: tracker) { buffer, tracker in
+                try fixedString(",", buffer: &buffer, tracker: tracker)
+                return try parseUIDArray_element(buffer: &buffer, tracker: tracker)
+            }
+
+            guard !output.isEmpty else {
+                throw ParserError(hint: "UID set is empty.")
+            }
+            return output
         }
     }
 
