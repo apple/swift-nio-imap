@@ -37,13 +37,14 @@ public struct SequenceRangeSet: Hashable {
 extension SequenceRangeSet {
     /// SequenceNumberss shifted by 1, such that SequenceNumber 1 -> 0, and SequenceNumber.max -> UInt32.max - 1
     /// This allows us to store SequenceNumber.max + 1 inside a UInt32.
-    fileprivate struct SequenceNumberWrapper: RawRepresentable, Hashable {
+    fileprivate struct SequenceNumberWrapper: Hashable {
         var rawValue: UInt32
     }
 }
 
 extension SequenceRangeSet.SequenceNumberWrapper: Strideable {
-    public init(_ num: SequenceNumber) {
+    
+    init(_ num: SequenceNumber) {
         // Since SequenceNumber.min = 1, we can always do this:
         self.rawValue = num.rawValue - 1
     }
