@@ -26,10 +26,6 @@ extension MessageAttributesTests {
         let date = InternalDate(components)
 
         let inputs: [(MessageAttribute, String, UInt)] = [
-            (.rfc822(nil), "RFC822 NIL", #line),
-            (.rfc822Header(nil), "RFC822.HEADER NIL", #line),
-            (.rfc822Header("header"), "RFC822.HEADER \"header\"", #line),
-            (.rfc822Text("text"), "RFC822.TEXT \"text\"", #line),
             (.rfc822Size(123), "RFC822.SIZE 123", #line),
             (.uid(123), "UID 123", #line),
             (.envelope(Envelope(date: "date", subject: "subject", from: [.init(name: "name", adl: "adl", mailbox: "mailbox", host: "host")], sender: [.init(name: "name", adl: "adl", mailbox: "mailbox", host: "host")], reply: [.init(name: "name", adl: "adl", mailbox: "mailbox", host: "host")], to: [.init(name: "name", adl: "adl", mailbox: "mailbox", host: "host")], cc: [.init(name: "name", adl: "adl", mailbox: "mailbox", host: "host")], bcc: [.init(name: "name", adl: "adl", mailbox: "mailbox", host: "host")], inReplyTo: "replyto", messageID: "abc123")), "ENVELOPE (\"date\" \"subject\" ((\"name\" \"adl\" \"mailbox\" \"host\")) ((\"name\" \"adl\" \"mailbox\" \"host\")) ((\"name\" \"adl\" \"mailbox\" \"host\")) ((\"name\" \"adl\" \"mailbox\" \"host\")) ((\"name\" \"adl\" \"mailbox\" \"host\")) ((\"name\" \"adl\" \"mailbox\" \"host\")) \"replyto\" \"abc123\")", #line),

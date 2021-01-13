@@ -3077,9 +3077,14 @@ extension GrammarParser {
     }
 
     static func parseFetchStreamingResponse(buffer: inout ByteBuffer, tracker: StackTracker) throws -> StreamingKind {
-        func parseFetchStreamingResponse_rfc822(buffer: inout ByteBuffer, tracker: StackTracker) throws -> StreamingKind {
+        func parseFetchStreamingResponse_rfc822Text(buffer: inout ByteBuffer, tracker: StackTracker) throws -> StreamingKind {
             try fixedString("RFC822.TEXT", buffer: &buffer, tracker: tracker)
-            return .rfc822
+            return .rfc822Text
+        }
+        
+        func parseFetchStreamingResponse_rfc822Header(buffer: inout ByteBuffer, tracker: StackTracker) throws -> StreamingKind {
+            try fixedString("RFC822.HEADER", buffer: &buffer, tracker: tracker)
+            return .rfc822Header
         }
 
         func parseFetchStreamingResponse_bodySectionText(buffer: inout ByteBuffer, tracker: StackTracker) throws -> StreamingKind {
@@ -3101,7 +3106,8 @@ extension GrammarParser {
         }
 
         return try oneOf([
-            parseFetchStreamingResponse_rfc822,
+            parseFetchStreamingResponse_rfc822Text,
+            parseFetchStreamingResponse_rfc822Header,
             parseFetchStreamingResponse_bodySectionText,
             parseFetchStreamingResponse_binary,
         ], buffer: &buffer, tracker: tracker)
@@ -3198,24 +3204,6 @@ extension GrammarParser {
             return .internalDate(try self.parseInternalDate(buffer: &buffer, tracker: tracker))
         }
 
-        func parseMessageAttribute_rfc822(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MessageAttribute {
-            try fixedString("RFC822 ", buffer: &buffer, tracker: tracker)
-            let string = try self.parseNString(buffer: &buffer, tracker: tracker)
-            return .rfc822(string)
-        }
-
-        func parseMessageAttribute_rfc822Header(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MessageAttribute {
-            try fixedString("RFC822.HEADER ", buffer: &buffer, tracker: tracker)
-            let string = try self.parseNString(buffer: &buffer, tracker: tracker)
-            return .rfc822Header(string)
-        }
-
-        func parseMessageAttribute_rfc822Text(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MessageAttribute {
-            try fixedString("RFC822.TEXT ", buffer: &buffer, tracker: tracker)
-            let string = try self.parseNString(buffer: &buffer, tracker: tracker)
-            return .rfc822Text(string)
-        }
-
         func parseMessageAttribute_rfc822Size(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MessageAttribute {
             try fixedString("RFC822.SIZE ", buffer: &buffer, tracker: tracker)
             return .rfc822Size(try self.parseNumber(buffer: &buffer, tracker: tracker))
@@ -3299,10 +3287,7 @@ extension GrammarParser {
         return try oneOf([
             parseMessageAttribute_envelope,
             parseMessageAttribute_internalDate,
-            parseMessageAttribute_rfc822,
             parseMessageAttribute_rfc822Size,
-            parseMessageAttribute_rfc822Header,
-            parseMessageAttribute_rfc822Text,
             parseMessageAttribute_body,
             parseMessageAttribute_uid,
             parseMessageAttribute_binarySize,

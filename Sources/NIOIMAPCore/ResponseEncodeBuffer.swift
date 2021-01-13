@@ -136,7 +136,11 @@ extension ResponseEncodeBuffer {
                 self.buffer.writeString("<\(offset)>")
             }) + self.buffer.writeString("{\(size)}\r\n")
         case .rfc822:
+            return self.buffer.writeString("RFC822 {\(size)}\r\n")
+        case .rfc822Text:
             return self.buffer.writeString("RFC822.TEXT {\(size)}\r\n")
+        case .rfc822Header:
+            return self.buffer.writeString("RFC822.HEADER {\(size)}\r\n")
         }
     }
 }

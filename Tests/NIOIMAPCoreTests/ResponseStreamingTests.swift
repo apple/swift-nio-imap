@@ -42,6 +42,8 @@ extension ResponseStreamingTests {
             "* 5 FETCH (BODY[5.TEXT]<4> \"asdf\" FLAGS (\\seen \\answered))\r\n",
             "* 6 FETCH (BODY[5.2]<4> {3}\r\nabc FLAGS (\\seen \\answered))\r\n",
             "* 7 FETCH (BODY[5.2.HEADER]<4> {3}\r\nabc FLAGS (\\seen \\answered))\r\n",
+            "* 8 FETCH (RFC822.TEXT {3}\r\nabc)\r\n",
+            "* 9 FETCH (RFC822.HEADER {3}\r\nabc)\r\n",
             "3 OK Fetch completed.\r\n",
 
             "* 1 FETCH (BINARY[] {4}\r\n1234)\r\n",
@@ -103,6 +105,18 @@ extension ResponseStreamingTests {
             (.fetchResponse(.streamingBytes("abc")), #line),
             (.fetchResponse(.streamingEnd), #line),
             (.fetchResponse(.simpleAttribute(.flags([.seen, .answered]))), #line),
+            (.fetchResponse(.finish), #line),
+            
+            (.fetchResponse(.start(8)), #line),
+            (.fetchResponse(.streamingBegin(kind: .rfc822Text, byteCount: 3)), #line),
+            (.fetchResponse(.streamingBytes("abc")), #line),
+            (.fetchResponse(.streamingEnd), #line),
+            (.fetchResponse(.finish), #line),
+            
+            (.fetchResponse(.start(9)), #line),
+            (.fetchResponse(.streamingBegin(kind: .rfc822Header, byteCount: 3)), #line),
+            (.fetchResponse(.streamingBytes("abc")), #line),
+            (.fetchResponse(.streamingEnd), #line),
             (.fetchResponse(.finish), #line),
             
             (.taggedResponse(.init(tag: "3", state: .ok(.init(code: nil, text: "Fetch completed.")))), #line),

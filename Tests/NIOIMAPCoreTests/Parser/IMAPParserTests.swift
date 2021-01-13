@@ -2959,12 +2959,6 @@ extension ParserUnitTests {
             validInputs: [
                 ("UID 1234", " ", .uid(1234), #line),
                 ("RFC822.SIZE 1234", " ", .rfc822Size(1234), #line),
-                (#"RFC822 "some string""#, " ", .rfc822("some string"), #line),
-                (#"RFC822.HEADER "some string""#, " ", .rfc822Header("some string"), #line),
-                (#"RFC822.TEXT "string""#, " ", .rfc822Text("string"), #line),
-                (#"RFC822 NIL"#, " ", .rfc822(nil), #line),
-                (#"RFC822.HEADER NIL"#, " ", .rfc822Header(nil), #line),
-                (#"RFC822.TEXT NIL"#, " ", .rfc822Text(nil), #line),
                 ("BINARY.SIZE[3] 4", " ", .binarySize(section: [3], size: 4), #line),
                 ("BINARY[3] \"hello\"", " ", .binary(section: [3], data: "hello"), #line),
                 (#"INTERNALDATE "25-jun-1994 01:02:03 +0000""#, " ", .internalDate(date), #line),
