@@ -3083,14 +3083,15 @@ extension GrammarParser {
         }
 
         func parseFetchStreamingResponse_bodySectionText(buffer: inout ByteBuffer, tracker: StackTracker) throws -> StreamingKind {
-            try fixedString("BODY[TEXT]", buffer: &buffer, tracker: tracker)
-            let number = try optional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> Int in
+            try fixedString("BODY", buffer: &buffer, tracker: tracker)
+            let section = try optional(buffer: &buffer, tracker: tracker, parser: self.parseSection)
+            let offset = try optional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> Int in
                 try fixedString("<", buffer: &buffer, tracker: tracker)
                 let num = try self.parseNumber(buffer: &buffer, tracker: tracker)
                 try fixedString(">", buffer: &buffer, tracker: tracker)
                 return num
             }
-            return .body(offset: number)
+            return .body(section: section, offset: offset)
         }
 
         func parseFetchStreamingResponse_binary(buffer: inout ByteBuffer, tracker: StackTracker) throws -> StreamingKind {

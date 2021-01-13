@@ -78,7 +78,7 @@ public enum StreamingKind: Equatable {
     case binary(section: SectionSpecifier.Part)
 
     /// IMAP4rev1 RFC 3501, streams BODY[TEXT] when using a `literal`
-    case body(offset: Int?)
+    case body(section: SectionSpecifier?, offset: Int?)
 
     /// IMAP4rev1 RFC 3501, streams RF822.TEXT when using a `literal`
     case rfc822
