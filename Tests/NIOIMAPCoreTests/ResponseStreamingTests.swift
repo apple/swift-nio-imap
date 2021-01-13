@@ -39,7 +39,7 @@ extension ResponseStreamingTests {
             "* 2 FETCH (FLAGS (\\deleted) BODY[TEXT] {3}\r\ndef)\r\n",
             "* 3 FETCH (BODY[TEXT] {3}\r\nghi)\r\n",
             "* 4 FETCH (BODY[4.TEXT]<4> {3}\r\nabc FLAGS (\\seen \\answered))\r\n",
-//            "* 5 FETCH (BODY[5.TEXT]<4> \"asdf\" FLAGS (\\seen \\answered))\r\n",
+            "* 5 FETCH (BODY[5.TEXT]<4> \"asdf\" FLAGS (\\seen \\answered))\r\n",
             "* 6 FETCH (BODY[5.2]<4> {3}\r\nabc FLAGS (\\seen \\answered))\r\n",
             "* 7 FETCH (BODY[5.2.HEADER]<4> {3}\r\nabc FLAGS (\\seen \\answered))\r\n",
             "3 OK Fetch completed.\r\n",
@@ -76,10 +76,17 @@ extension ResponseStreamingTests {
             (.fetchResponse(.streamingBytes("ghi")), #line),
             (.fetchResponse(.streamingEnd), #line),
             (.fetchResponse(.finish), #line),
-            
+
             (.fetchResponse(.start(4)), #line),
             (.fetchResponse(.streamingBegin(kind: .body(section: .init(part: [4], kind: .text), offset: 4), byteCount: 3)), #line),
             (.fetchResponse(.streamingBytes("abc")), #line),
+            (.fetchResponse(.streamingEnd), #line),
+            (.fetchResponse(.simpleAttribute(.flags([.seen, .answered]))), #line),
+            (.fetchResponse(.finish), #line),
+            
+            (.fetchResponse(.start(5)), #line),
+            (.fetchResponse(.streamingBegin(kind: .body(section: .init(part: [5], kind: .text), offset: 4), byteCount: nil)), #line),
+            (.fetchResponse(.streamingBytes("asdf")), #line),
             (.fetchResponse(.streamingEnd), #line),
             (.fetchResponse(.simpleAttribute(.flags([.seen, .answered]))), #line),
             (.fetchResponse(.finish), #line),

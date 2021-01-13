@@ -99,10 +99,18 @@ extension ResponseEncodeBuffer {
                 preconditionFailure("Only server can write responses.")
             }
             if streamingAttributes {
-                return self.buffer.writeSpace() + self.writeStreamingKind(type, size: size)
+                if let size = size {
+                    return self.buffer.writeSpace() + self.writeStreamingKind(type, size: size)
+                } else {
+                    fatalError("We shouldn't ever reach this, we should always write as literal instead of quoted.")
+                }
             } else {
                 self.buffer.mode = .server(streamingAttributes: true, options: options)
-                return self.writeStreamingKind(type, size: size)
+                if let size = size {
+                    return self.writeStreamingKind(type, size: size)
+                } else {
+                    fatalError("We shouldn't ever reach this, we should always write as literal instead of quoted.")
+                }
             }
         case .streamingBytes(var bytes):
             return self.buffer.writeBuffer(&bytes)

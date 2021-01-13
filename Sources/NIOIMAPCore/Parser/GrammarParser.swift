@@ -3143,6 +3143,13 @@ extension GrammarParser {
             let literalSize = try self.parseLiteralSize(buffer: &buffer, tracker: tracker)
             return .streamingBegin(kind: type, byteCount: literalSize)
         }
+        
+        func parseFetchResponse_streamingBeginQuoted(buffer: inout ByteBuffer, tracker: StackTracker) throws -> FetchResponse {
+            let type = try self.parseFetchStreamingResponse(buffer: &buffer, tracker: tracker)
+            try space(buffer: &buffer, tracker: tracker)
+            try fixedString("\"", buffer: &buffer, tracker: tracker)
+            return .streamingBegin(kind: type, byteCount: nil)
+        }
 
         func parseFetchResponse_finish(buffer: inout ByteBuffer, tracker: StackTracker) throws -> FetchResponse {
             try fixedString(")", buffer: &buffer, tracker: tracker)
@@ -3152,6 +3159,7 @@ extension GrammarParser {
 
         return try oneOf([
             parseFetchResponse_streamingBegin,
+            parseFetchResponse_streamingBeginQuoted,
             parseFetchResponse_simpleAttribute,
             parseFetchResponse_finish,
         ], buffer: &buffer, tracker: tracker)

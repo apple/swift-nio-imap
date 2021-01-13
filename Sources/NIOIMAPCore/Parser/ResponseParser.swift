@@ -29,6 +29,7 @@ public struct ResponseParser: Parser {
 
     enum Mode: Equatable {
         case response(ResponseState)
+        case streamingQuoted
         case attributeBytes(Int)
     }
 
@@ -54,6 +55,8 @@ public struct ResponseParser: Parser {
                 return try self.parseResponse(state: state, buffer: &buffer, tracker: tracker)
             case .attributeBytes(let remaining):
                 return .response(self.parseBytes(buffer: &buffer, remaining: remaining))
+            case .streamingQuoted:
+                return .response(self.parseUnknownBytes(buffer: &buffer))
             }
         } catch is _IncompleteMessage {
             return nil
@@ -106,7 +109,11 @@ extension ResponseParser {
                 case .fetchResponse(.streamingEnd): // FETCH MESS (1 2 3 4)
                     try? GrammarParser.space(buffer: &buffer, tracker: tracker)
                 case .fetchResponse(.streamingBegin(kind: _, byteCount: let size)):
-                    self.moveStateMachine(expected: .response(.fetchMiddle), next: .attributeBytes(size))
+                    if let size = size {
+                        self.moveStateMachine(expected: .response(.fetchMiddle), next: .attributeBytes(size))
+                    } else {
+                        self.moveStateMachine(expected: .response(.fetchMiddle), next: .streamingQuoted)
+                    }
                 case .fetchResponse(.finish):
                     self.moveStateMachine(expected: .response(.fetchMiddle), next: .response(.fetchOrNormal))
                 default:
@@ -166,6 +173,25 @@ extension ResponseParser {
                 next: .attributeBytes(leftToRead),
                 returnValue: .fetchResponse(.streamingBytes(bytes))
             )
+        }
+    }
+    
+    fileprivate mutating func parseUnknownBytes(buffer: inout ByteBuffer) -> Response {
+        let quoteIndex = buffer.readableBytesView.firstIndex(of: UInt8(ascii: "\""))
+        if let quoteIndex = quoteIndex {
+            let slice = buffer.readableBytesView[..<quoteIndex]
+            if slice.count > 0 {
+                buffer.moveReaderIndex(to: quoteIndex)
+                let parsedBuffer = ByteBuffer(bytes: slice)
+                let response = FetchResponse.streamingBytes(parsedBuffer)
+                return .fetchResponse(response)
+            } else {
+                buffer.moveReaderIndex(forwardBy: 1)
+                return self.moveStateMachine(expected: .streamingQuoted, next: .response(.fetchMiddle), returnValue: .fetchResponse(.streamingEnd))
+            }
+        } else {
+            let bytes = buffer.readSlice(length: buffer.readableBytes)!
+            return .fetchResponse(.streamingBytes(bytes))
         }
     }
 }
