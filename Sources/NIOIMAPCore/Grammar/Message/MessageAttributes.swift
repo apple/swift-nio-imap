@@ -41,9 +41,6 @@ public enum MessageAttribute: Equatable {
     /// A `BODYSTRUCTURE` response will have `hasExtensionData` set to `true`.
     case body(BodyStructure, hasExtensionData: Bool)
 
-    /// `BODY[<section>]<<origin octet>>` -- The body contents of the specified section.
-    case bodySection(SectionSpecifier, offset: Int?, data: ByteBuffer?)
-
     /// `BINARY<section-binary>[<<number>>]` -- The content of the
     /// specified section after removing any content-transfer-encoding related encoding.
     /// - SeeAlso: RFC 3516 “IMAP4 Binary Content Extension”
@@ -91,8 +88,6 @@ extension EncodeBuffer {
             return self.writeString("RFC822.SIZE \(size)")
         case .body(let body, hasExtensionData: let hasExtensionData):
             return self.writeMessageAttribute_body(body, hasExtensionData: hasExtensionData)
-        case .bodySection(let section, let number, let string):
-            return self.writeMessageAttribute_bodySection(section, number: number, string: string)
         case .uid(let uid):
             return self.writeString("UID \(uid.rawValue)")
         case .binary(section: let section, data: let string):

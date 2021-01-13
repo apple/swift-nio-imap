@@ -3236,20 +3236,6 @@ extension GrammarParser {
             return .body(body, hasExtensionData: hasExtensionData)
         }
 
-        func parseMessageAttribute_bodySection(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MessageAttribute {
-            try fixedString("BODY", buffer: &buffer, tracker: tracker)
-            let section = try self.parseSection(buffer: &buffer, tracker: tracker)
-            let offset = try optional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> Int in
-                try fixedString("<", buffer: &buffer, tracker: tracker)
-                let num = try self.parseNumber(buffer: &buffer, tracker: tracker)
-                try fixedString(">", buffer: &buffer, tracker: tracker)
-                return num
-            }
-            try space(buffer: &buffer, tracker: tracker)
-            let string = try self.parseNString(buffer: &buffer, tracker: tracker)
-            return .bodySection(section, offset: offset, data: string)
-        }
-
         func parseMessageAttribute_uid(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MessageAttribute {
             try fixedString("UID ", buffer: &buffer, tracker: tracker)
             return .uid(try self.parseUID(buffer: &buffer, tracker: tracker))
@@ -3318,7 +3304,6 @@ extension GrammarParser {
             parseMessageAttribute_rfc822Header,
             parseMessageAttribute_rfc822Text,
             parseMessageAttribute_body,
-            parseMessageAttribute_bodySection,
             parseMessageAttribute_uid,
             parseMessageAttribute_binarySize,
             parseMessageAttribute_binary,
