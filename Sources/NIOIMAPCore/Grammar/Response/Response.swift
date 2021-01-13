@@ -79,13 +79,13 @@ public enum StreamingKind: Equatable {
 
     /// IMAP4rev1 RFC 3501, streams BODY[TEXT]
     case body(section: SectionSpecifier?, offset: Int?)
-    
+
     /// IMAP4rev1 RFC 3501, streams RF822 equivalent to BODY[]
     case rfc822
 
     /// IMAP4rev1 RFC 3501, streams RF822.TEXT
     case rfc822Text
-    
+
     /// IMAP4rev1 RFC 3501, streams RF822.HEADER
     case rfc822Header
 }

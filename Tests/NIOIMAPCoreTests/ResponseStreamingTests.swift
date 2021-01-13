@@ -15,13 +15,12 @@
 import Foundation
 import XCTest
 
-import NIOIMAPCore
 import NIO
+import NIOIMAPCore
 
 class ResponseStreamingTests: XCTestCase {}
 
 extension ResponseStreamingTests {
-    
     func testResponseMessageDataStreaming() {
         // first send a greeting
         // then respond to 2 LOGIN {3}\r\nabc {3}\r\nabc
@@ -85,42 +84,41 @@ extension ResponseStreamingTests {
             (.fetchResponse(.streamingEnd), #line),
             (.fetchResponse(.simpleAttribute(.flags([.seen, .answered]))), #line),
             (.fetchResponse(.finish), #line),
-            
+
             (.fetchResponse(.start(5)), #line),
             (.fetchResponse(.streamingBegin(kind: .body(section: .init(part: [5], kind: .text), offset: 4), byteCount: nil)), #line),
             (.fetchResponse(.streamingBytes("asdf")), #line),
             (.fetchResponse(.streamingEnd), #line),
             (.fetchResponse(.simpleAttribute(.flags([.seen, .answered]))), #line),
             (.fetchResponse(.finish), #line),
-            
+
             (.fetchResponse(.start(6)), #line),
             (.fetchResponse(.streamingBegin(kind: .body(section: .init(part: [5, 2], kind: .complete), offset: 4), byteCount: 3)), #line),
             (.fetchResponse(.streamingBytes("abc")), #line),
             (.fetchResponse(.streamingEnd), #line),
             (.fetchResponse(.simpleAttribute(.flags([.seen, .answered]))), #line),
             (.fetchResponse(.finish), #line),
-            
+
             (.fetchResponse(.start(7)), #line),
             (.fetchResponse(.streamingBegin(kind: .body(section: .init(part: [5, 2], kind: .header), offset: 4), byteCount: 3)), #line),
             (.fetchResponse(.streamingBytes("abc")), #line),
             (.fetchResponse(.streamingEnd), #line),
             (.fetchResponse(.simpleAttribute(.flags([.seen, .answered]))), #line),
             (.fetchResponse(.finish), #line),
-            
+
             (.fetchResponse(.start(8)), #line),
             (.fetchResponse(.streamingBegin(kind: .rfc822Text, byteCount: 3)), #line),
             (.fetchResponse(.streamingBytes("abc")), #line),
             (.fetchResponse(.streamingEnd), #line),
             (.fetchResponse(.finish), #line),
-            
+
             (.fetchResponse(.start(9)), #line),
             (.fetchResponse(.streamingBegin(kind: .rfc822Header, byteCount: 3)), #line),
             (.fetchResponse(.streamingBytes("abc")), #line),
             (.fetchResponse(.streamingEnd), #line),
             (.fetchResponse(.finish), #line),
-            
+
             (.taggedResponse(.init(tag: "3", state: .ok(.init(code: nil, text: "Fetch completed.")))), #line),
-            
 
             (.fetchResponse(.start(1)), #line),
             (.fetchResponse(.streamingBegin(kind: .binary(section: []), byteCount: 4)), #line),
@@ -142,5 +140,4 @@ extension ResponseStreamingTests {
         }
         XCTAssertEqual(buffer.readableBytes, 0)
     }
-    
 }

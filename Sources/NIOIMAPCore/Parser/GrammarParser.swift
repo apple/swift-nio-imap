@@ -3081,7 +3081,7 @@ extension GrammarParser {
             try fixedString("RFC822.TEXT", buffer: &buffer, tracker: tracker)
             return .rfc822Text
         }
-        
+
         func parseFetchStreamingResponse_rfc822Header(buffer: inout ByteBuffer, tracker: StackTracker) throws -> StreamingKind {
             try fixedString("RFC822.HEADER", buffer: &buffer, tracker: tracker)
             return .rfc822Header
@@ -3149,7 +3149,7 @@ extension GrammarParser {
             let literalSize = try self.parseLiteralSize(buffer: &buffer, tracker: tracker)
             return .streamingBegin(kind: type, byteCount: literalSize)
         }
-        
+
         func parseFetchResponse_streamingBeginQuoted(buffer: inout ByteBuffer, tracker: StackTracker) throws -> FetchResponse {
             let type = try self.parseFetchStreamingResponse(buffer: &buffer, tracker: tracker)
             try space(buffer: &buffer, tracker: tracker)

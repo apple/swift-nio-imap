@@ -175,7 +175,7 @@ extension ResponseParser {
             )
         }
     }
-    
+
     fileprivate mutating func parseUnknownBytes(buffer: inout ByteBuffer) -> Response {
         let quoteIndex = buffer.readableBytesView.firstIndex(of: UInt8(ascii: "\""))
         if let quoteIndex = quoteIndex {
