@@ -54,7 +54,7 @@ extension ResponseStreamingTests {
             (.taggedResponse(.init(tag: "2", state: .ok(.init(code: nil, text: "Login completed.")))), #line),
 
             (.fetchResponse(.start(1)), #line),
-            (.fetchResponse(.streamingBegin(kind: .body(partial: 4), byteCount: 3)), #line),
+            (.fetchResponse(.streamingBegin(kind: .body(offset: 4), byteCount: 3)), #line),
             (.fetchResponse(.streamingBytes("abc")), #line),
             (.fetchResponse(.streamingEnd), #line),
             (.fetchResponse(.simpleAttribute(.flags([.seen, .answered]))), #line),
@@ -62,13 +62,13 @@ extension ResponseStreamingTests {
 
             (.fetchResponse(.start(2)), #line),
             (.fetchResponse(.simpleAttribute(.flags([.deleted]))), #line),
-            (.fetchResponse(.streamingBegin(kind: .body(partial: nil), byteCount: 3)), #line),
+            (.fetchResponse(.streamingBegin(kind: .body(offset: nil), byteCount: 3)), #line),
             (.fetchResponse(.streamingBytes("def")), #line),
             (.fetchResponse(.streamingEnd), #line),
             (.fetchResponse(.finish), #line),
 
             (.fetchResponse(.start(3)), #line),
-            (.fetchResponse(.streamingBegin(kind: .body(partial: nil), byteCount: 3)), #line),
+            (.fetchResponse(.streamingBegin(kind: .body(offset: nil), byteCount: 3)), #line),
             (.fetchResponse(.streamingBytes("ghi")), #line),
             (.fetchResponse(.streamingEnd), #line),
             (.fetchResponse(.finish), #line),

@@ -3090,7 +3090,7 @@ extension GrammarParser {
                 try fixedString(">", buffer: &buffer, tracker: tracker)
                 return num
             }
-            return .body(partial: number)
+            return .body(offset: number)
         }
 
         func parseFetchStreamingResponse_binary(buffer: inout ByteBuffer, tracker: StackTracker) throws -> StreamingKind {

@@ -40,7 +40,7 @@ extension ResponseDecoder_Tests {
                 [
                     .fetchResponse(.start(2)),
                     .fetchResponse(.simpleAttribute(.flags([.deleted]))),
-                    .fetchResponse(.streamingBegin(kind: .body(partial: nil), byteCount: 1)),
+                    .fetchResponse(.streamingBegin(kind: .body(offset: nil), byteCount: 1)),
                     .fetchResponse(.streamingBytes("X")),
                     .fetchResponse(.streamingEnd),
                     .fetchResponse(.finish),
