@@ -22,18 +22,7 @@ class ResponseStreamingTests: XCTestCase {}
 
 extension ResponseStreamingTests {
     func testResponseMessageDataStreaming() {
-        // first send a greeting
-        // then respond to 2 LOGIN {3}\r\nabc {3}\r\nabc
-        // command tag FETCH 1:3 (BODY[TEXT] FLAGS)
-        // command tag FETCH 1 BINARY[]
-
         let lines = [
-            "* OK [CAPABILITY IMAP4rev1] Ready.\r\n",
-            "* PREAUTH IMAP4rev1 server logged in as Smith\r\n",
-            "* BYE Autologout; idle for too long\r\n",
-
-            "2 OK Login completed.\r\n",
-
             "* 1 FETCH (BODY[TEXT]<4> {3}\r\nabc FLAGS (\\seen \\answered))\r\n",
             "* 2 FETCH (FLAGS (\\deleted) BODY[TEXT] {3}\r\ndef)\r\n",
             "* 3 FETCH (BODY[TEXT] {3}\r\nghi)\r\n",
@@ -46,17 +35,13 @@ extension ResponseStreamingTests {
             "3 OK Fetch completed.\r\n",
 
             "* 1 FETCH (BINARY[] {4}\r\n1234)\r\n",
+            "* 2 FETCH (BINARY[1.2]<77> {4}\r\n1234)\r\n",
             "4 OK Fetch completed.\r\n",
         ]
         var buffer = ByteBuffer(stringLiteral: "")
         buffer.writeString(lines.joined())
 
         let expectedResults: [(Response, UInt)] = [
-            (.untaggedResponse(.conditionalState(.ok(.init(code: .capability([.imap4rev1]), text: "Ready.")))), #line),
-            (.untaggedResponse(.conditionalState(.preauth(.init(text: "IMAP4rev1 server logged in as Smith")))), #line),
-            (.untaggedResponse(.conditionalState(.bye(.init(text: "Autologout; idle for too long")))), #line),
-
-            (.taggedResponse(.init(tag: "2", state: .ok(.init(code: nil, text: "Login completed.")))), #line),
 
             (.fetchResponse(.start(1)), #line),
             (.fetchResponse(.streamingBegin(kind: .body(section: .text, offset: 4), byteCount: 3)), #line),
@@ -121,10 +106,17 @@ extension ResponseStreamingTests {
             (.taggedResponse(.init(tag: "3", state: .ok(.init(code: nil, text: "Fetch completed.")))), #line),
 
             (.fetchResponse(.start(1)), #line),
-            (.fetchResponse(.streamingBegin(kind: .binary(section: []), byteCount: 4)), #line),
+            (.fetchResponse(.streamingBegin(kind: .binary(section: [], offset: nil), byteCount: 4)), #line),
             (.fetchResponse(.streamingBytes("1234")), #line),
             (.fetchResponse(.streamingEnd), #line),
             (.fetchResponse(.finish), #line),
+            
+            (.fetchResponse(.start(2)), #line),
+            (.fetchResponse(.streamingBegin(kind: .binary(section: [1, 2], offset: 77), byteCount: 4)), #line),
+            (.fetchResponse(.streamingBytes("1234")), #line),
+            (.fetchResponse(.streamingEnd), #line),
+            (.fetchResponse(.finish), #line),
+            
             (.taggedResponse(.init(tag: "4", state: .ok(.init(code: nil, text: "Fetch completed.")))), #line),
         ]
 

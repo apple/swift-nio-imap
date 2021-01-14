@@ -75,7 +75,7 @@ public enum FetchResponse: Equatable {
 /// The current type of data that is being streamed.
 public enum StreamingKind: Equatable {
     /// BINARY RFC 3516, streams BINARY when using a `literal`
-    case binary(section: SectionSpecifier.Part)
+    case binary(section: SectionSpecifier.Part, offset: Int?)
 
     /// IMAP4rev1 RFC 3501, streams BODY[TEXT]
     case body(section: SectionSpecifier?, offset: Int?)

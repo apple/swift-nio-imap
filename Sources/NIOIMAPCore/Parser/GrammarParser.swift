@@ -3102,7 +3102,13 @@ extension GrammarParser {
         func parseFetchStreamingResponse_binary(buffer: inout ByteBuffer, tracker: StackTracker) throws -> StreamingKind {
             try fixedString("BINARY", buffer: &buffer, tracker: tracker)
             let section = try self.parseSectionBinary(buffer: &buffer, tracker: tracker)
-            return .binary(section: section)
+            let offset = try optional(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> Int in
+                try fixedString("<", buffer: &buffer, tracker: tracker)
+                let num = try self.parseNumber(buffer: &buffer, tracker: tracker)
+                try fixedString(">", buffer: &buffer, tracker: tracker)
+                return num
+            })
+            return .binary(section: section, offset: offset)
         }
 
         return try oneOf([
