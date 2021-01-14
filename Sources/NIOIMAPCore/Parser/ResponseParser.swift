@@ -112,8 +112,6 @@ extension ResponseParser {
                 case .fetchResponse(.start(let num)):
                     self.moveStateMachine(expected: .response(.fetchOrNormal), next: .response(.fetchMiddle))
                     return .response(.fetchResponse(.start(num)))
-//                case .fetchResponse(.streamingEnd): // FETCH MESS (1 2 3 4)
-//                    try? GrammarParser.space(buffer: &buffer, tracker: tracker)
                 case .fetchResponse(.literalStreamingBegin(kind: let kind, byteCount: let size)):
                     self.moveStateMachine(expected: .response(.fetchMiddle), next: .attributeBytes(size))
                     return .response(.fetchResponse(.streamingBegin(kind: kind, byteCount: size)))
