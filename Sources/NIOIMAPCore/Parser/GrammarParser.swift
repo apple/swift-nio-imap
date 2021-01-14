@@ -3897,7 +3897,7 @@ extension GrammarParser {
 
         func parseResponseTextCode_unseen(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ResponseTextCode {
             try fixedString("UNSEEN ", buffer: &buffer, tracker: tracker)
-            return .unseen(try self.parseNZNumber(buffer: &buffer, tracker: tracker))
+            return .unseen(try self.parseSequenceNumber(buffer: &buffer, tracker: tracker))
         }
 
         func parseResponseTextCode_namespace(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ResponseTextCode {
