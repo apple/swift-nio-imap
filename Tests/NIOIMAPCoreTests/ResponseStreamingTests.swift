@@ -84,7 +84,7 @@ extension ResponseStreamingTests {
 
         self.AssertFetchResponses("* 5 FETCH (BODY[5.TEXT]<4> \"asdf\" FLAGS (\\seen \\answered))\r\n", [
             (.fetchResponse(.start(5)), #line),
-            (.fetchResponse(.streamingBegin(kind: .body(section: .init(part: [5], kind: .text), offset: 4), byteCount: nil)), #line),
+            (.fetchResponse(.streamingBegin(kind: .body(section: .init(part: [5], kind: .text), offset: 4), byteCount: 4)), #line),
             (.fetchResponse(.streamingBytes("asdf")), #line),
             (.fetchResponse(.streamingEnd), #line),
             (.fetchResponse(.simpleAttribute(.flags([.seen, .answered]))), #line),

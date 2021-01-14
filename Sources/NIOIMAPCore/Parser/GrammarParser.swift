@@ -3134,7 +3134,7 @@ extension GrammarParser {
         ], buffer: &buffer, tracker: tracker)
     }
 
-    static func parseFetchResponseStart(buffer: inout ByteBuffer, tracker: StackTracker) throws -> FetchResponse {
+    static func parseFetchResponseStart(buffer: inout ByteBuffer, tracker: StackTracker) throws -> _FetchResponse {
         try composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             try fixedString("* ", buffer: &buffer, tracker: tracker)
             let number = try self.parseNZNumber(buffer: &buffer, tracker: tracker)
@@ -3142,28 +3142,40 @@ extension GrammarParser {
             return .start(number)
         }
     }
+    
+    // needed to tell the response parser which type of streaming is
+    // going to take place, e.g. quoted or literal
+    enum _FetchResponse: Equatable {
+        case start(Int)
+        case simpleAttribute(MessageAttribute)
+        case literalStreamingBegin(kind: StreamingKind, byteCount: Int)
+        case quotedStreamingBegin(kind: StreamingKind, byteCount: Int)
+        case finish
+    }
 
-    static func parseFetchResponse(buffer: inout ByteBuffer, tracker: StackTracker) throws -> FetchResponse {
-        func parseFetchResponse_simpleAttribute(buffer: inout ByteBuffer, tracker: StackTracker) throws -> FetchResponse {
+    static func parseFetchResponse(buffer: inout ByteBuffer, tracker: StackTracker) throws -> _FetchResponse {
+        func parseFetchResponse_simpleAttribute(buffer: inout ByteBuffer, tracker: StackTracker) throws -> _FetchResponse {
             let attribute = try self.parseMessageAttribute(buffer: &buffer, tracker: tracker)
             return .simpleAttribute(attribute)
         }
 
-        func parseFetchResponse_streamingBegin(buffer: inout ByteBuffer, tracker: StackTracker) throws -> FetchResponse {
+        func parseFetchResponse_streamingBegin(buffer: inout ByteBuffer, tracker: StackTracker) throws -> _FetchResponse {
             let type = try self.parseFetchStreamingResponse(buffer: &buffer, tracker: tracker)
             try space(buffer: &buffer, tracker: tracker)
             let literalSize = try self.parseLiteralSize(buffer: &buffer, tracker: tracker)
-            return .streamingBegin(kind: type, byteCount: literalSize)
+            return .literalStreamingBegin(kind: type, byteCount: literalSize)
         }
 
-        func parseFetchResponse_streamingBeginQuoted(buffer: inout ByteBuffer, tracker: StackTracker) throws -> FetchResponse {
+        func parseFetchResponse_streamingBeginQuoted(buffer: inout ByteBuffer, tracker: StackTracker) throws -> _FetchResponse {
             let type = try self.parseFetchStreamingResponse(buffer: &buffer, tracker: tracker)
             try space(buffer: &buffer, tracker: tracker)
-            try fixedString("\"", buffer: &buffer, tracker: tracker)
-            return .streamingBegin(kind: type, byteCount: nil)
+            let save = buffer
+            let quoted = try self.parseQuoted(buffer: &buffer, tracker: tracker)
+            buffer = save
+            return .quotedStreamingBegin(kind: type, byteCount: quoted.readableBytes)
         }
 
-        func parseFetchResponse_finish(buffer: inout ByteBuffer, tracker: StackTracker) throws -> FetchResponse {
+        func parseFetchResponse_finish(buffer: inout ByteBuffer, tracker: StackTracker) throws -> _FetchResponse {
             try fixedString(")", buffer: &buffer, tracker: tracker)
             try newline(buffer: &buffer, tracker: tracker)
             return .finish

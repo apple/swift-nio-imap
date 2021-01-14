@@ -59,7 +59,7 @@ public enum FetchResponse: Equatable {
 
     /// Signals that streaming a potentially large amount of data is about to begin. Clients
     /// are notified of the type of stream, and how many bytes are to be expected.
-    case streamingBegin(kind: StreamingKind, byteCount: Int?)
+    case streamingBegin(kind: StreamingKind, byteCount: Int)
 
     /// Bytes have been received.
     case streamingBytes(ByteBuffer)
