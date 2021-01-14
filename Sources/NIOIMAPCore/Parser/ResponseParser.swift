@@ -54,9 +54,9 @@ public struct ResponseParser: Parser {
             case .response(let state):
                 return try self.parseResponse(state: state, buffer: &buffer, tracker: tracker)
             case .attributeBytes(let remaining):
-                return .response(self.parseBytes(buffer: &buffer, remaining: remaining))
+                return .response(try self.parseBytes(buffer: &buffer, remaining: remaining))
             case .streamingQuoted:
-                return .response(self.parseUnknownBytes(buffer: &buffer))
+                return .response(try self.parseUnknownBytes(buffer: &buffer))
             }
         } catch is _IncompleteMessage {
             return nil
@@ -151,7 +151,7 @@ extension ResponseParser {
     /// `ByteBuffer` will be emptied.
     /// - parameter buffer: The buffer from which bytes should be extracted.
     /// - returns: A new `ByteBuffer` containing extracted bytes.
-    fileprivate mutating func parseBytes(buffer: inout ByteBuffer, remaining: Int) -> Response {
+    fileprivate mutating func parseBytes(buffer: inout ByteBuffer, remaining: Int) throws -> Response {
         if remaining == 0 {
             return self.moveStateMachine(
                 expected: .attributeBytes(remaining),
@@ -166,6 +166,11 @@ extension ResponseParser {
                 returnValue: .fetchResponse(.streamingBytes(bytes))
             )
         } else {
+            
+            guard buffer.readableBytes > 0 else {
+                throw _IncompleteMessage()
+            }
+            
             let bytes = buffer.readSlice(length: buffer.readableBytes)!
             let leftToRead = remaining - bytes.readableBytes
             return self.moveStateMachine(
@@ -176,7 +181,7 @@ extension ResponseParser {
         }
     }
 
-    fileprivate mutating func parseUnknownBytes(buffer: inout ByteBuffer) -> Response {
+    fileprivate mutating func parseUnknownBytes(buffer: inout ByteBuffer) throws -> Response {
         let quoteIndex = buffer.readableBytesView.firstIndex(of: UInt8(ascii: "\""))
         if let quoteIndex = quoteIndex {
             let slice = buffer.readableBytesView[..<quoteIndex]
@@ -190,6 +195,11 @@ extension ResponseParser {
                 return self.moveStateMachine(expected: .streamingQuoted, next: .response(.fetchMiddle), returnValue: .fetchResponse(.streamingEnd))
             }
         } else {
+            
+            guard buffer.readableBytes > 0 else {
+                throw _IncompleteMessage()
+            }
+            
             let bytes = buffer.readSlice(length: buffer.readableBytes)!
             return .fetchResponse(.streamingBytes(bytes))
         }
