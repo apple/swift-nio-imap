@@ -166,11 +166,10 @@ extension ResponseParser {
                 returnValue: .fetchResponse(.streamingBytes(bytes))
             )
         } else {
-            
             guard buffer.readableBytes > 0 else {
                 throw _IncompleteMessage()
             }
-            
+
             let bytes = buffer.readSlice(length: buffer.readableBytes)!
             let leftToRead = remaining - bytes.readableBytes
             return self.moveStateMachine(
@@ -195,11 +194,10 @@ extension ResponseParser {
                 return self.moveStateMachine(expected: .streamingQuoted, next: .response(.fetchMiddle), returnValue: .fetchResponse(.streamingEnd))
             }
         } else {
-            
             guard buffer.readableBytes > 0 else {
                 throw _IncompleteMessage()
             }
-            
+
             let bytes = buffer.readSlice(length: buffer.readableBytes)!
             return .fetchResponse(.streamingBytes(bytes))
         }

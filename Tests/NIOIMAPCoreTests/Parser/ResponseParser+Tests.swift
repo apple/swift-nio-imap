@@ -35,29 +35,28 @@ extension ResponseParser_Tests {
 // MARK: - parseResponseStream
 
 extension ResponseParser_Tests {
-    
     func testAttemptToStreamBytesFromEmptyBuffer() {
         var parser = ResponseParser()
         var buffer: ByteBuffer = ""
-        
+
         // set up getting ready to stream a response
         buffer = "* 1 FETCH (BODY[TEXT]<4> {10}\r\n"
         XCTAssertNotNil(XCTAssertNoThrow(try parser.parseResponseStream(buffer: &buffer)))
         XCTAssertNotNil(XCTAssertNoThrow(try parser.parseResponseStream(buffer: &buffer)))
-    
+
         // now send an empty buffer for parsing, expect nil
         buffer = ""
         XCTAssertNoThrow(XCTAssertNil(try parser.parseResponseStream(buffer: &buffer)))
         XCTAssertNoThrow(XCTAssertNil(try parser.parseResponseStream(buffer: &buffer)))
         XCTAssertNoThrow(XCTAssertNil(try parser.parseResponseStream(buffer: &buffer)))
         XCTAssertNoThrow(XCTAssertNil(try parser.parseResponseStream(buffer: &buffer)))
-        
+
         // send some bytes to make sure it's worked
         buffer = "0123456789"
         XCTAssertNoThrow(XCTAssertEqual(try parser.parseResponseStream(buffer: &buffer), .response(.fetchResponse(.streamingBytes("0123456789")))))
         XCTAssertNoThrow(XCTAssertEqual(try parser.parseResponseStream(buffer: &buffer), .response(.fetchResponse(.streamingEnd))))
     }
-    
+
     func testParseResponseStream() {
         let inputs: [(String, [ResponseOrContinuationRequest], UInt)] = [
             ("+ OK Continue", [.continuationRequest(.responseText(.init(text: "OK Continue")))], #line),
