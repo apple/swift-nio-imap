@@ -43,7 +43,6 @@ extension SequenceRangeSet {
 }
 
 extension SequenceRangeSet.SequenceNumberWrapper: Strideable {
-    
     init(_ num: SequenceNumber) {
         // Since SequenceNumber.min = 1, we can always do this:
         self.rawValue = num.rawValue - 1
