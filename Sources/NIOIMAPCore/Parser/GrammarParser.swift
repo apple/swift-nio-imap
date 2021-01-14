@@ -3142,7 +3142,7 @@ extension GrammarParser {
             return .start(number)
         }
     }
-    
+
     // needed to tell the response parser which type of streaming is
     // going to take place, e.g. quoted or literal
     enum _FetchResponse: Equatable {

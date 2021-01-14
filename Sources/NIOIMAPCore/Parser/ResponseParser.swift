@@ -81,12 +81,11 @@ public struct ResponseParser: Parser {
 
 extension ResponseParser {
     fileprivate mutating func parseResponse(state: ResponseState, buffer: inout ByteBuffer, tracker: StackTracker) throws -> ResponseOrContinuationRequest {
-        
         enum _Response: Equatable {
             case untaggedResponse(ResponsePayload)
             case fetchResponse(GrammarParser._FetchResponse)
         }
-        
+
         func parseResponse_fetch(buffer: inout ByteBuffer, tracker: StackTracker) throws -> _Response {
             switch state {
             case .fetchOrNormal:
@@ -118,18 +117,18 @@ extension ResponseParser {
                 case .fetchResponse(.literalStreamingBegin(kind: let kind, byteCount: let size)):
                     self.moveStateMachine(expected: .response(.fetchMiddle), next: .attributeBytes(size))
                     return .response(.fetchResponse(.streamingBegin(kind: kind, byteCount: size)))
-                    
+
                 case .fetchResponse(.quotedStreamingBegin(kind: let kind, byteCount: let size)):
                     self.moveStateMachine(expected: .response(.fetchMiddle), next: .streamingQuoted)
                     return .response(.fetchResponse(.streamingBegin(kind: kind, byteCount: size)))
-                    
+
                 case .fetchResponse(.finish):
                     self.moveStateMachine(expected: .response(.fetchMiddle), next: .response(.fetchOrNormal))
                     return .response(.fetchResponse(.finish))
-                    
+
                 case .untaggedResponse(let payload):
                     return .response(.untaggedResponse(payload))
-                    
+
                 case .fetchResponse(.simpleAttribute(let att)):
                     return .response(.fetchResponse(.simpleAttribute(att)))
                 }
