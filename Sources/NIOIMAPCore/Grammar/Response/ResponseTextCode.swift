@@ -74,7 +74,7 @@ public enum ResponseTextCode: Equatable {
     case uidValidity(UIDValidity)
 
     /// Indicates the number of the first message without the \Seen flag set.
-    case unseen(Int)
+    case unseen(SequenceNumber)
 
     /// A command was unable to complete because it attempted to perform
     /// an option in a namespace the user does not have access.
@@ -200,7 +200,7 @@ extension EncodeBuffer {
         case .uidValidity(let number):
             return self.writeString("UIDVALIDITY ") + self.writeUIDValidity(number)
         case .unseen(let number):
-            return self.writeString("UNSEEN \(number)")
+            return self.writeString("UNSEEN ") + self.writeSequenceNumber(number)
         case .other(let atom, let string):
             return self.writeResponseTextCode_other(atom: atom, string: string)
         case .namespace(let namesapce):
