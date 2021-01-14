@@ -29,6 +29,7 @@ public struct ResponseParser: Parser {
 
     enum Mode: Equatable {
         case response(ResponseState)
+        case streamingQuoted
         case attributeBytes(Int)
     }
 
@@ -53,7 +54,9 @@ public struct ResponseParser: Parser {
             case .response(let state):
                 return try self.parseResponse(state: state, buffer: &buffer, tracker: tracker)
             case .attributeBytes(let remaining):
-                return .response(self.parseBytes(buffer: &buffer, remaining: remaining))
+                return .response(try self.parseBytes(buffer: &buffer, remaining: remaining))
+            case .streamingQuoted:
+                return .response(try self.parseQuotedBytes(buffer: &buffer))
             }
         } catch is _IncompleteMessage {
             return nil
@@ -78,7 +81,12 @@ public struct ResponseParser: Parser {
 
 extension ResponseParser {
     fileprivate mutating func parseResponse(state: ResponseState, buffer: inout ByteBuffer, tracker: StackTracker) throws -> ResponseOrContinuationRequest {
-        func parseResponse_fetch(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Response {
+        enum _Response: Equatable {
+            case untaggedResponse(ResponsePayload)
+            case fetchResponse(GrammarParser._FetchResponse)
+        }
+
+        func parseResponse_fetch(buffer: inout ByteBuffer, tracker: StackTracker) throws -> _Response {
             switch state {
             case .fetchOrNormal:
                 return .fetchResponse(try GrammarParser.parseFetchResponseStart(buffer: &buffer, tracker: tracker))
@@ -87,7 +95,7 @@ extension ResponseParser {
             }
         }
 
-        func parseResponse_normal(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Response {
+        func parseResponse_normal(buffer: inout ByteBuffer, tracker: StackTracker) throws -> _Response {
             let response = try GrammarParser.parseResponseData(buffer: &buffer, tracker: tracker)
             return .untaggedResponse(response)
         }
@@ -101,19 +109,27 @@ extension ResponseParser {
                 ], buffer: &buffer, tracker: tracker)
 
                 switch response {
-                case .fetchResponse(.start(_)):
+                case .fetchResponse(.start(let num)):
                     self.moveStateMachine(expected: .response(.fetchOrNormal), next: .response(.fetchMiddle))
-                case .fetchResponse(.streamingEnd): // FETCH MESS (1 2 3 4)
-                    try? GrammarParser.space(buffer: &buffer, tracker: tracker)
-                case .fetchResponse(.streamingBegin(kind: _, byteCount: let size)):
+                    return .response(.fetchResponse(.start(num)))
+                case .fetchResponse(.literalStreamingBegin(kind: let kind, byteCount: let size)):
                     self.moveStateMachine(expected: .response(.fetchMiddle), next: .attributeBytes(size))
+                    return .response(.fetchResponse(.streamingBegin(kind: kind, byteCount: size)))
+
+                case .fetchResponse(.quotedStreamingBegin(kind: let kind, byteCount: let size)):
+                    self.moveStateMachine(expected: .response(.fetchMiddle), next: .streamingQuoted)
+                    return .response(.fetchResponse(.streamingBegin(kind: kind, byteCount: size)))
+
                 case .fetchResponse(.finish):
                     self.moveStateMachine(expected: .response(.fetchMiddle), next: .response(.fetchOrNormal))
-                default:
-                    break
-                }
+                    return .response(.fetchResponse(.finish))
 
-                return .response(response)
+                case .untaggedResponse(let payload):
+                    return .response(.untaggedResponse(payload))
+
+                case .fetchResponse(.simpleAttribute(let att)):
+                    return .response(.fetchResponse(.simpleAttribute(att)))
+                }
             } catch is ParserError {
                 return try self._parseResponse(buffer: &buffer, tracker: tracker)
             }
@@ -144,7 +160,7 @@ extension ResponseParser {
     /// `ByteBuffer` will be emptied.
     /// - parameter buffer: The buffer from which bytes should be extracted.
     /// - returns: A new `ByteBuffer` containing extracted bytes.
-    fileprivate mutating func parseBytes(buffer: inout ByteBuffer, remaining: Int) -> Response {
+    fileprivate mutating func parseBytes(buffer: inout ByteBuffer, remaining: Int) throws -> Response {
         if remaining == 0 {
             return self.moveStateMachine(
                 expected: .attributeBytes(remaining),
@@ -159,6 +175,10 @@ extension ResponseParser {
                 returnValue: .fetchResponse(.streamingBytes(bytes))
             )
         } else {
+            guard buffer.readableBytes > 0 else {
+                throw _IncompleteMessage()
+            }
+
             let bytes = buffer.readSlice(length: buffer.readableBytes)!
             let leftToRead = remaining - bytes.readableBytes
             return self.moveStateMachine(
@@ -167,5 +187,10 @@ extension ResponseParser {
                 returnValue: .fetchResponse(.streamingBytes(bytes))
             )
         }
+    }
+
+    fileprivate mutating func parseQuotedBytes(buffer: inout ByteBuffer) throws -> Response {
+        let quoted = try GrammarParser.parseQuoted(buffer: &buffer, tracker: .makeNewDefaultLimitStackTracker)
+        return self.moveStateMachine(expected: .streamingQuoted, next: .attributeBytes(0), returnValue: .fetchResponse(.streamingBytes(quoted)))
     }
 }

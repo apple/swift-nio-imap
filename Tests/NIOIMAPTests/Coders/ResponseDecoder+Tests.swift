@@ -40,7 +40,19 @@ extension ResponseDecoder_Tests {
                 [
                     .fetchResponse(.start(2)),
                     .fetchResponse(.simpleAttribute(.flags([.deleted]))),
-                    .fetchResponse(.streamingBegin(kind: .body(partial: nil), byteCount: 1)),
+                    .fetchResponse(.streamingBegin(kind: .body(section: .text, offset: nil), byteCount: 1)),
+                    .fetchResponse(.streamingBytes("X")),
+                    .fetchResponse(.streamingEnd),
+                    .fetchResponse(.finish),
+                    .taggedResponse(.init(tag: "2", state: .ok(.init(code: nil, text: "Fetch completed.")))),
+                ]
+            ),
+            (
+                "* 2 FETCH (FLAGS (\\deleted) BODY[1.2.TEXT]<4> {1}\r\nX)\r\n2 OK Fetch completed.\r\n",
+                [
+                    .fetchResponse(.start(2)),
+                    .fetchResponse(.simpleAttribute(.flags([.deleted]))),
+                    .fetchResponse(.streamingBegin(kind: .body(section: .init(part: [1, 2], kind: .text), offset: 4), byteCount: 1)),
                     .fetchResponse(.streamingBytes("X")),
                     .fetchResponse(.streamingEnd),
                     .fetchResponse(.finish),

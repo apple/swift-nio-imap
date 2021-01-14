@@ -121,10 +121,18 @@ extension ResponseEncodeBuffer {
         switch type {
         case .binary:
             return self.buffer.writeString("BINARY {\(size)}\r\n")
-        case .body:
-            return self.buffer.writeString("BODY[TEXT] {\(size)}\r\n")
+        case .body(let section, let offset):
+            return self.buffer.writeString("BODY") +
+                self.buffer.writeSection(section) +
+                self.buffer.writeIfExists(offset) { offset in
+                    self.buffer.writeString("<\(offset)>")
+                } + self.buffer.writeString("{\(size)}\r\n")
         case .rfc822:
+            return self.buffer.writeString("RFC822 {\(size)}\r\n")
+        case .rfc822Text:
             return self.buffer.writeString("RFC822.TEXT {\(size)}\r\n")
+        case .rfc822Header:
+            return self.buffer.writeString("RFC822.HEADER {\(size)}\r\n")
         }
     }
 }

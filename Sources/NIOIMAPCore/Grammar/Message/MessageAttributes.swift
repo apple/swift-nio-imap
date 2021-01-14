@@ -26,13 +26,6 @@ public enum MessageAttribute: Equatable {
     case internalDate(InternalDate)
     /// The unique identifier of the message.
     case uid(UID)
-    /// `RFC822` -- Equivalent to `BODY[]`.
-    case rfc822(ByteBuffer?)
-    /// `RFC822.HEADER` -- Equivalent to `BODY[HEADER]`.
-    case rfc822Header(ByteBuffer?)
-
-    /// `RFC822.TEXT`
-    case rfc822Text(ByteBuffer?)
     /// `RFC822.SIZE` -- A number expressing the RFC 2822 size of the message.
     case rfc822Size(Int)
 
@@ -40,9 +33,6 @@ public enum MessageAttribute: Equatable {
     ///
     /// A `BODYSTRUCTURE` response will have `hasExtensionData` set to `true`.
     case body(BodyStructure, hasExtensionData: Bool)
-
-    /// `BODY[<section>]<<origin octet>>` -- The body contents of the specified section.
-    case bodySection(SectionSpecifier, offset: Int?, data: ByteBuffer?)
 
     /// `BINARY<section-binary>[<<number>>]` -- The content of the
     /// specified section after removing any content-transfer-encoding related encoding.
@@ -81,18 +71,10 @@ extension EncodeBuffer {
             return self.writeMessageAttribute_envelope(env)
         case .internalDate(let date):
             return self.writeMessageAttribute_internalDate(date)
-        case .rfc822(let string):
-            return self.writeMessageAttribute_rfc822(string)
-        case .rfc822Header(let string):
-            return self.writeMessageAttribute_rfc822Header(string)
-        case .rfc822Text(let string):
-            return self.writeMessageAttribute_rfc822Text(string)
         case .rfc822Size(let size):
             return self.writeString("RFC822.SIZE \(size)")
         case .body(let body, hasExtensionData: let hasExtensionData):
             return self.writeMessageAttribute_body(body, hasExtensionData: hasExtensionData)
-        case .bodySection(let section, let number, let string):
-            return self.writeMessageAttribute_bodySection(section, number: number, string: string)
         case .uid(let uid):
             return self.writeString("UID \(uid.rawValue)")
         case .binary(section: let section, data: let string):

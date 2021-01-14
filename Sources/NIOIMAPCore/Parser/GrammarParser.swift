@@ -3077,30 +3077,43 @@ extension GrammarParser {
     }
 
     static func parseFetchStreamingResponse(buffer: inout ByteBuffer, tracker: StackTracker) throws -> StreamingKind {
-        func parseFetchStreamingResponse_rfc822(buffer: inout ByteBuffer, tracker: StackTracker) throws -> StreamingKind {
+        func parseFetchStreamingResponse_rfc822Text(buffer: inout ByteBuffer, tracker: StackTracker) throws -> StreamingKind {
             try fixedString("RFC822.TEXT", buffer: &buffer, tracker: tracker)
-            return .rfc822
+            return .rfc822Text
+        }
+
+        func parseFetchStreamingResponse_rfc822Header(buffer: inout ByteBuffer, tracker: StackTracker) throws -> StreamingKind {
+            try fixedString("RFC822.HEADER", buffer: &buffer, tracker: tracker)
+            return .rfc822Header
         }
 
         func parseFetchStreamingResponse_bodySectionText(buffer: inout ByteBuffer, tracker: StackTracker) throws -> StreamingKind {
-            try fixedString("BODY[TEXT]", buffer: &buffer, tracker: tracker)
-            let number = try optional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> Int in
+            try fixedString("BODY", buffer: &buffer, tracker: tracker)
+            let section = try optional(buffer: &buffer, tracker: tracker, parser: self.parseSection) ?? .init()
+            let offset = try optional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> Int in
                 try fixedString("<", buffer: &buffer, tracker: tracker)
                 let num = try self.parseNumber(buffer: &buffer, tracker: tracker)
                 try fixedString(">", buffer: &buffer, tracker: tracker)
                 return num
             }
-            return .body(partial: number)
+            return .body(section: section, offset: offset)
         }
 
         func parseFetchStreamingResponse_binary(buffer: inout ByteBuffer, tracker: StackTracker) throws -> StreamingKind {
             try fixedString("BINARY", buffer: &buffer, tracker: tracker)
             let section = try self.parseSectionBinary(buffer: &buffer, tracker: tracker)
-            return .binary(section: section)
+            let offset = try optional(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> Int in
+                try fixedString("<", buffer: &buffer, tracker: tracker)
+                let num = try self.parseNumber(buffer: &buffer, tracker: tracker)
+                try fixedString(">", buffer: &buffer, tracker: tracker)
+                return num
+            })
+            return .binary(section: section, offset: offset)
         }
 
         return try oneOf([
-            parseFetchStreamingResponse_rfc822,
+            parseFetchStreamingResponse_rfc822Text,
+            parseFetchStreamingResponse_rfc822Header,
             parseFetchStreamingResponse_bodySectionText,
             parseFetchStreamingResponse_binary,
         ], buffer: &buffer, tracker: tracker)
@@ -3121,7 +3134,7 @@ extension GrammarParser {
         ], buffer: &buffer, tracker: tracker)
     }
 
-    static func parseFetchResponseStart(buffer: inout ByteBuffer, tracker: StackTracker) throws -> FetchResponse {
+    static func parseFetchResponseStart(buffer: inout ByteBuffer, tracker: StackTracker) throws -> _FetchResponse {
         try composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             try fixedString("* ", buffer: &buffer, tracker: tracker)
             let number = try self.parseNZNumber(buffer: &buffer, tracker: tracker)
@@ -3130,20 +3143,39 @@ extension GrammarParser {
         }
     }
 
-    static func parseFetchResponse(buffer: inout ByteBuffer, tracker: StackTracker) throws -> FetchResponse {
-        func parseFetchResponse_simpleAttribute(buffer: inout ByteBuffer, tracker: StackTracker) throws -> FetchResponse {
+    // needed to tell the response parser which type of streaming is
+    // going to take place, e.g. quoted or literal
+    enum _FetchResponse: Equatable {
+        case start(Int)
+        case simpleAttribute(MessageAttribute)
+        case literalStreamingBegin(kind: StreamingKind, byteCount: Int)
+        case quotedStreamingBegin(kind: StreamingKind, byteCount: Int)
+        case finish
+    }
+
+    static func parseFetchResponse(buffer: inout ByteBuffer, tracker: StackTracker) throws -> _FetchResponse {
+        func parseFetchResponse_simpleAttribute(buffer: inout ByteBuffer, tracker: StackTracker) throws -> _FetchResponse {
             let attribute = try self.parseMessageAttribute(buffer: &buffer, tracker: tracker)
             return .simpleAttribute(attribute)
         }
 
-        func parseFetchResponse_streamingBegin(buffer: inout ByteBuffer, tracker: StackTracker) throws -> FetchResponse {
+        func parseFetchResponse_streamingBegin(buffer: inout ByteBuffer, tracker: StackTracker) throws -> _FetchResponse {
             let type = try self.parseFetchStreamingResponse(buffer: &buffer, tracker: tracker)
             try space(buffer: &buffer, tracker: tracker)
             let literalSize = try self.parseLiteralSize(buffer: &buffer, tracker: tracker)
-            return .streamingBegin(kind: type, byteCount: literalSize)
+            return .literalStreamingBegin(kind: type, byteCount: literalSize)
         }
 
-        func parseFetchResponse_finish(buffer: inout ByteBuffer, tracker: StackTracker) throws -> FetchResponse {
+        func parseFetchResponse_streamingBeginQuoted(buffer: inout ByteBuffer, tracker: StackTracker) throws -> _FetchResponse {
+            let type = try self.parseFetchStreamingResponse(buffer: &buffer, tracker: tracker)
+            try space(buffer: &buffer, tracker: tracker)
+            let save = buffer
+            let quoted = try self.parseQuoted(buffer: &buffer, tracker: tracker)
+            buffer = save
+            return .quotedStreamingBegin(kind: type, byteCount: quoted.readableBytes)
+        }
+
+        func parseFetchResponse_finish(buffer: inout ByteBuffer, tracker: StackTracker) throws -> _FetchResponse {
             try fixedString(")", buffer: &buffer, tracker: tracker)
             try newline(buffer: &buffer, tracker: tracker)
             return .finish
@@ -3151,6 +3183,7 @@ extension GrammarParser {
 
         return try oneOf([
             parseFetchResponse_streamingBegin,
+            parseFetchResponse_streamingBeginQuoted,
             parseFetchResponse_simpleAttribute,
             parseFetchResponse_finish,
         ], buffer: &buffer, tracker: tracker)
@@ -3189,24 +3222,6 @@ extension GrammarParser {
             return .internalDate(try self.parseInternalDate(buffer: &buffer, tracker: tracker))
         }
 
-        func parseMessageAttribute_rfc822(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MessageAttribute {
-            try fixedString("RFC822 ", buffer: &buffer, tracker: tracker)
-            let string = try self.parseNString(buffer: &buffer, tracker: tracker)
-            return .rfc822(string)
-        }
-
-        func parseMessageAttribute_rfc822Header(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MessageAttribute {
-            try fixedString("RFC822.HEADER ", buffer: &buffer, tracker: tracker)
-            let string = try self.parseNString(buffer: &buffer, tracker: tracker)
-            return .rfc822Header(string)
-        }
-
-        func parseMessageAttribute_rfc822Text(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MessageAttribute {
-            try fixedString("RFC822.TEXT ", buffer: &buffer, tracker: tracker)
-            let string = try self.parseNString(buffer: &buffer, tracker: tracker)
-            return .rfc822Text(string)
-        }
-
         func parseMessageAttribute_rfc822Size(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MessageAttribute {
             try fixedString("RFC822.SIZE ", buffer: &buffer, tracker: tracker)
             return .rfc822Size(try self.parseNumber(buffer: &buffer, tracker: tracker))
@@ -3225,20 +3240,6 @@ extension GrammarParser {
             try space(buffer: &buffer, tracker: tracker)
             let body = try self.parseBody(buffer: &buffer, tracker: tracker)
             return .body(body, hasExtensionData: hasExtensionData)
-        }
-
-        func parseMessageAttribute_bodySection(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MessageAttribute {
-            try fixedString("BODY", buffer: &buffer, tracker: tracker)
-            let section = try self.parseSection(buffer: &buffer, tracker: tracker)
-            let offset = try optional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> Int in
-                try fixedString("<", buffer: &buffer, tracker: tracker)
-                let num = try self.parseNumber(buffer: &buffer, tracker: tracker)
-                try fixedString(">", buffer: &buffer, tracker: tracker)
-                return num
-            }
-            try space(buffer: &buffer, tracker: tracker)
-            let string = try self.parseNString(buffer: &buffer, tracker: tracker)
-            return .bodySection(section, offset: offset, data: string)
         }
 
         func parseMessageAttribute_uid(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MessageAttribute {
@@ -3304,12 +3305,8 @@ extension GrammarParser {
         return try oneOf([
             parseMessageAttribute_envelope,
             parseMessageAttribute_internalDate,
-            parseMessageAttribute_rfc822,
             parseMessageAttribute_rfc822Size,
-            parseMessageAttribute_rfc822Header,
-            parseMessageAttribute_rfc822Text,
             parseMessageAttribute_body,
-            parseMessageAttribute_bodySection,
             parseMessageAttribute_uid,
             parseMessageAttribute_binarySize,
             parseMessageAttribute_binary,
