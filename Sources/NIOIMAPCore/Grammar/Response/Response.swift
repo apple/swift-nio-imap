@@ -91,11 +91,10 @@ public enum StreamingKind: Equatable {
 }
 
 extension StreamingKind {
-    
     var sectionSpecifier: SectionSpecifier {
         switch self {
         case .binary(section: let section, offset: _):
-            return SectionSpecifier(part: section, kind: .complete)
+            return SectionSpecifier(part: section, kind: .text)
         case .body(section: let section, offset: _):
             return section
         case .rfc822:
@@ -106,12 +105,12 @@ extension StreamingKind {
             return SectionSpecifier(part: [], kind: .header)
         }
     }
-    
+
     var offset: Int? {
         switch self {
-        case .binary(section: let section, offset: let offset):
+        case .binary(section: _, offset: let offset):
             return offset
-        case .body(section: let section, offset: let offset):
+        case .body(section: _, offset: let offset):
             return offset
         case .rfc822:
             return nil
@@ -121,5 +120,4 @@ extension StreamingKind {
             return nil
         }
     }
-    
 }
