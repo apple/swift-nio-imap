@@ -89,3 +89,37 @@ public enum StreamingKind: Equatable {
     /// IMAP4rev1 RFC 3501, streams RF822.HEADER
     case rfc822Header
 }
+
+extension StreamingKind {
+    
+    var sectionSpecifier: SectionSpecifier {
+        switch self {
+        case .binary(section: let section, offset: _):
+            return SectionSpecifier(part: section, kind: .complete)
+        case .body(section: let section, offset: _):
+            return section
+        case .rfc822:
+            return SectionSpecifier()
+        case .rfc822Text:
+            return SectionSpecifier(part: [], kind: .text)
+        case .rfc822Header:
+            return SectionSpecifier(part: [], kind: .header)
+        }
+    }
+    
+    var offset: Int? {
+        switch self {
+        case .binary(section: let section, offset: let offset):
+            return offset
+        case .body(section: let section, offset: let offset):
+            return offset
+        case .rfc822:
+            return nil
+        case .rfc822Text:
+            return nil
+        case .rfc822Header:
+            return nil
+        }
+    }
+    
+}
