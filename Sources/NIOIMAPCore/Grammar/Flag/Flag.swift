@@ -19,14 +19,14 @@ import struct NIO.ByteBuffer
 /// Flags are case preserving, but case insensitive.
 /// As such e.g. `.extension("\\FOOBAR") == .extension("\\FooBar")`, but
 /// it will round-trip preserving its case.
-public struct Flag: RawRepresentable, Hashable {
+public struct Flag: Hashable {
     /// The raw case-sensitive `String` value.
-    public var rawValue: String
+    public var stringValue: String
 
     /// Creates a new `Flag` from the given `String`. Note that casing is preserved, however
     /// when checking if two `Flag`s are equal, then the comparison is case-insensitive.
-    public init(rawValue: String) {
-        self.rawValue = rawValue
+    public init(_ stringValue: String) {
+        self.stringValue = stringValue
     }
 
     /// Compares two flags to see if they are equivalent. Note that the comparison is case-insensitive.
@@ -34,13 +34,13 @@ public struct Flag: RawRepresentable, Hashable {
     /// - parameter rhs: The second flag to compare.
     /// - returns: `true` if the flags are equal, otherwise `false`.
     public static func == (lhs: Flag, rhs: Flag) -> Bool {
-        lhs.rawValue.uppercased() == rhs.rawValue.uppercased()
+        lhs.stringValue.uppercased() == rhs.stringValue.uppercased()
     }
 
     /// Hashes the `Flag` using some given `Hasher`. Note that the `Flag` is first upper-cased.
     /// - parameter hasher: The `Hasher` to hash the `Flag` into.
     public func hash(into hasher: inout Hasher) {
-        rawValue.uppercased().hash(into: &hasher)
+        stringValue.uppercased().hash(into: &hasher)
     }
 
     /// The hash value of the `Flag`. Typically used as a unique access key in, for example, a `Dictionary` or `Set`.
@@ -53,28 +53,28 @@ public struct Flag: RawRepresentable, Hashable {
 
 extension Flag {
     /// `\\Answered` - The message has been replied to.
-    public static let answered = Self(rawValue: "\\Answered")
+    public static let answered = Self("\\Answered")
 
     /// `\\Flagged` - The message has been marked by the user, typically as a reminder
     /// that some action is required.
-    public static let flagged = Self(rawValue: "\\Flagged")
+    public static let flagged = Self("\\Flagged")
 
     /// `\\Deleted` - The message has been deleted and should no
     /// longer be shown to the user, unless they specifically request to
     /// view deleted messages.
-    public static let deleted = Self(rawValue: "\\Deleted")
+    public static let deleted = Self("\\Deleted")
 
     /// `\\Seen` - The message has been read by the user
-    public static let seen = Self(rawValue: "\\Seen")
+    public static let seen = Self("\\Seen")
 
     /// `\\Draft` - The message is not yet complete
-    public static let draft = Self(rawValue: "\\Draft")
+    public static let draft = Self("\\Draft")
 
     /// Convenience function to create a new flag from a `Keyword`.
     /// - parameter keyword: The `Keyword` to use to make the `Flag`.
     /// - returns: A new `Flag`
     public static func keyword(_ keyword: Keyword) -> Self {
-        self.init(rawValue: keyword.rawValue)
+        self.init(keyword.rawValue)
     }
 
     /// Creates a new `Flag` that complies to RFC 3501 `flag-extension`
@@ -83,7 +83,7 @@ extension Flag {
     /// - returns: A newly-create `Flag`
     public static func `extension`(_ string: String) -> Self {
         precondition(string.first == "\\", "Flag extensions must begin with \\")
-        return Self(rawValue: string)
+        return Self(string)
     }
 }
 
@@ -97,6 +97,6 @@ extension EncodeBuffer {
     }
 
     @discardableResult mutating func writeFlag(_ flag: Flag) -> Int {
-        writeString(flag.rawValue)
+        writeString(flag.stringValue)
     }
 }
