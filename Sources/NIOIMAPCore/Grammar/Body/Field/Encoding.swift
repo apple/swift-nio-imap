@@ -17,7 +17,7 @@ import struct NIO.ByteBuffer
 extension BodyStructure {
     /// Represents the body transfer encoding as defined in MIME-IMB.
     /// Recommended reading: RFC 2045
-    public struct Encoding: RawRepresentable, CustomStringConvertible, Equatable {
+    public struct Encoding: CustomStringConvertible, Equatable {
         /// Represents 7-bit encoding, octets with a value larger than 127 are forbidden.
         public static var sevenBit: Self { Self("7BIT") }
 
@@ -34,23 +34,15 @@ extension BodyStructure {
         public static var quotedPrintable: Self { Self("QUOTED-PRINTABLE") }
 
         /// The uppercased encoding name
-        public var rawValue: String
+        public var stringValue: String
+        
+        /// The uppercased encoding name
+        public var description: String { stringValue }
 
-        /// See `rawValue`.
-        public var description: String {
-            rawValue
-        }
-
-        /// Creates a new `Encoding` representation. Note that the `rawValue` will be uppercased to make the type easily `Equatable`.
-        /// - parameter rawValue: The string representation of the new `Encoding`. Will be upper-cased.
-        public init(rawValue: String) {
-            self.rawValue = rawValue.uppercased()
-        }
-
-        /// Creates a new type with the given `String`.
-        /// - parameter rawValue: The string representation of the new `Encoding`. Will be upper-cased.
-        public init(_ rawValue: String) {
-            self.init(rawValue: rawValue)
+        /// Creates a new `Encoding` representation. Note that the `stringValue` will be uppercased to make the type easily `Equatable`.
+        /// - parameter stringValue: The string representation of the new `Encoding`. Will be upper-cased.
+        public init(_ stringValue: String) {
+            self.stringValue = stringValue.uppercased()
         }
     }
 }
