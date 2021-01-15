@@ -5409,7 +5409,7 @@ extension GrammarParser {
 
     // uniqueid        = nz-number
     static func parseUIDValidity(buffer: inout ByteBuffer, tracker: StackTracker) throws -> UIDValidity {
-        guard let validity = UIDValidity(rawValue: try self.parseNZNumber(buffer: &buffer, tracker: tracker)) else {
+        guard let validity = UIDValidity(exactly: try self.parseNZNumber(buffer: &buffer, tracker: tracker)) else {
             throw ParserError(hint: "Invalid UID validity.")
         }
         return validity
