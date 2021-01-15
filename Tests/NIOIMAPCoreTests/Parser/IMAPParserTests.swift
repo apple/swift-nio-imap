@@ -2873,7 +2873,7 @@ extension ParserUnitTests {
         var buffer = #""STRING" "multipart/related""# as ByteBuffer
         do {
             let mediaBasic = try GrammarParser.parseMediaBasic(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(mediaBasic, Media.Basic(kind: .init(rawValue: "STRING"), subtype: .related))
+            XCTAssertEqual(mediaBasic, Media.Basic(kind: .init("STRING"), subtype: .related))
         } catch {
             XCTFail("\(error)")
         }

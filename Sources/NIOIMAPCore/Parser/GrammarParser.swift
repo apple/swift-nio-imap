@@ -2879,7 +2879,7 @@ extension GrammarParser {
 
         func parseMediaBasic_Kind_other(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Media.BasicKind {
             let buffer = try self.parseString(buffer: &buffer, tracker: tracker)
-            return .init(rawValue: String(buffer: buffer))
+            return .init(String(buffer: buffer))
         }
 
         return try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Media.Basic in

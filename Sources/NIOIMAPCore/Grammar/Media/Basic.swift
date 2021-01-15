@@ -16,37 +16,37 @@ import struct NIO.ByteBuffer
 
 extension Media {
     /// Represents a simple but common data type such as *APPLICATION* or *INAGE*
-    public struct BasicKind: RawRepresentable, CustomStringConvertible, Equatable {
+    public struct BasicKind: CustomStringConvertible, Equatable {
         /// IMAP4rev1 APPLICATION
-        public static var application: Self { .init(rawValue: "APPLICATION") }
+        public static var application = Self("APPLICATION")
 
         /// IMAP4rev1 AUDIO
-        public static var audio: Self { .init(rawValue: "AUDIO") }
+        public static var audio = Self("AUDIO")
 
         /// IMAP4rev1 IMAGE
-        public static var image: Self { .init(rawValue: "IMAGE") }
+        public static var image = Self("IMAGE")
 
         /// IMAP4rev1 MESSAGE
-        public static var message: Self { .init(rawValue: "MESSAGE") }
+        public static var message = Self("MESSAGE")
 
         /// IMAP4rev1 VIDEO
-        public static var video: Self { .init(rawValue: "VIDEO") }
+        public static var video = Self("VIDEO")
 
         /// IMAP4rev1 FONT
-        public static var font: Self { .init(rawValue: "FONT") }
+        public static var font = Self("FONT")
 
         /// The raw uppercased string representation of the type.
-        public var rawValue: String
+        public var stringValue: String
 
         /// See `rawValue`
         public var description: String {
-            rawValue
+            stringValue
         }
 
         /// Creates a new `BasicKind` from a given `String`.
         /// - parameter rawValue: A string that represents the type, note that this will be uppercased.
-        public init(rawValue: String) {
-            self.rawValue = rawValue.uppercased()
+        public init(_ stringValue: String) {
+            self.stringValue = stringValue.uppercased()
         }
     }
 
@@ -75,9 +75,9 @@ extension EncodeBuffer {
     @discardableResult mutating func writeMediaBasicKind(_ type: Media.BasicKind) -> Int {
         switch type {
         case .application, .audio, .image, .message, .video:
-            return self.writeString("\"\(type.rawValue)\"")
+            return self.writeString("\"\(type.stringValue)\"")
         default:
-            return self.writeString(type.rawValue)
+            return self.writeString(type.stringValue)
         }
     }
 
