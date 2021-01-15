@@ -43,7 +43,7 @@ extension BodyStructure: RandomAccessCollection {
     /// - returns: The body located at the given `position`.
     public subscript(position: SectionSpecifier.Part) -> BodyStructure {
         // TODO: Can we get rid of this guard if we move the checks to SectionSpecifier.Part.init?
-        guard let first = position.rawValue.first, first > 0 else {
+        guard let first = position.array.first, first > 0 else {
             preconditionFailure("Part must contain a first number > 0")
         }
 
@@ -62,10 +62,10 @@ extension BodyStructure: RandomAccessCollection {
             guard first <= part.parts.count else {
                 fatalError("\(first) is out of range")
             }
-            if position.rawValue.count == 1 {
+            if position.array.count == 1 {
                 return part.parts[first - 1]
             } else {
-                let subPosition = SectionSpecifier.Part(rawValue: Array(position.rawValue.dropFirst()))
+                let subPosition = SectionSpecifier.Part(Array(position.array.dropFirst()))
                 return part.parts[first - 1][subPosition]
             }
         }
@@ -91,7 +91,7 @@ extension BodyStructure: RandomAccessCollection {
     /// - parameter i: The index in question.
     /// - returns: The index required to get the previous body part.
     public func index(before i: SectionSpecifier.Part) -> SectionSpecifier.Part {
-        guard let first = i.rawValue.first else {
+        guard let first = i.array.first else {
             fatalError("Must contain at least one number")
         }
         return [first - 1]
@@ -101,7 +101,7 @@ extension BodyStructure: RandomAccessCollection {
     /// - parameter i: The index in question.
     /// - returns: The index required to get the next body.
     public func index(after i: SectionSpecifier.Part) -> SectionSpecifier.Part {
-        guard let first = i.rawValue.first else {
+        guard let first = i.array.first else {
             fatalError("Must contain at least one number")
         }
         return [first + 1]

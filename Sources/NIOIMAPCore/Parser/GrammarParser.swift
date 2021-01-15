@@ -4580,7 +4580,7 @@ extension GrammarParser {
             try fixedString("[", buffer: &buffer, tracker: tracker)
             let part = try optional(buffer: &buffer, tracker: tracker, parser: self.parseSectionPart)
             try fixedString("]", buffer: &buffer, tracker: tracker)
-            return part ?? .init(rawValue: [])
+            return part ?? .init([])
         }
     }
 
@@ -4594,7 +4594,7 @@ extension GrammarParser {
                     return try self.parseNZNumber(buffer: &buffer, tracker: tracker)
                 }
             }
-            return .init(rawValue: output)
+            return .init(output)
         }
     }
 
