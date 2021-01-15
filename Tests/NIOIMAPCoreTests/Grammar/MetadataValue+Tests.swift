@@ -23,10 +23,10 @@ class MetadataValue_Tests: EncodeTestClass {}
 extension MetadataValue_Tests {
     func testEncode() {
         let inputs: [(MetadataValue, CommandEncodingOptions, [String], UInt)] = [
-            (.init(rawValue: nil), .rfc3501, ["NIL"], #line),
-            (.init(rawValue: "test"), .rfc3501, ["~{4}\r\n", "test"], #line),
-            (.init(rawValue: "\\"), .rfc3501, ["~{1}\r\n", "\\"], #line),
-            (.init(rawValue: "\0"), .init(capabilities: [.binary]), ["~{1}\r\n", "\0"], #line),
+            (.init(nil), .rfc3501, ["NIL"], #line),
+            (.init("test"), .rfc3501, ["~{4}\r\n", "test"], #line),
+            (.init("\\"), .rfc3501, ["~{1}\r\n", "\\"], #line),
+            (.init("\0"), .init(capabilities: [.binary]), ["~{1}\r\n", "\0"], #line),
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeMetadataValue($0) })
     }

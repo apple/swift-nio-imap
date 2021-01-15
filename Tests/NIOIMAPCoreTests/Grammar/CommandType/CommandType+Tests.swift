@@ -45,7 +45,7 @@ extension CommandType_Tests {
             (.id([]), CommandEncodingOptions(), ["ID NIL"], #line),
             (.getMetadata(options: [], mailbox: .inbox, entries: ["a"]), CommandEncodingOptions(), ["GETMETADATA \"INBOX\" (\"a\")"], #line),
             (.getMetadata(options: [.maxSize(123)], mailbox: .inbox, entries: ["a"]), CommandEncodingOptions(), ["GETMETADATA (MAXSIZE 123) \"INBOX\" (\"a\")"], #line),
-            (.setMetadata(mailbox: .inbox, entries: [.init(name: "a", value: .init(rawValue: nil))]), CommandEncodingOptions(), ["SETMETADATA \"INBOX\" (\"a\" NIL)"], #line),
+            (.setMetadata(mailbox: .inbox, entries: [.init(name: "a", value: nil)]), CommandEncodingOptions(), ["SETMETADATA \"INBOX\" (\"a\" NIL)"], #line),
 
             (.resetKey(mailbox: nil, mechanisms: []), CommandEncodingOptions(), ["RESETKEY"], #line),
             (.resetKey(mailbox: nil, mechanisms: [.internal]), CommandEncodingOptions(), ["RESETKEY"], #line), // no mailbox, so no mechanisms written

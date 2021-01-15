@@ -439,7 +439,7 @@ extension ParserUnitTests {
             validInputs: [
                 ("METADATA INBOX \"a\"", "\r", .list(list: ["a"], mailbox: .inbox), #line),
                 ("METADATA INBOX \"a\" \"b\" \"c\"", "\r", .list(list: ["a", "b", "c"], mailbox: .inbox), #line),
-                ("METADATA INBOX (\"a\" NIL)", "\r", .values(values: [.init(name: "a", value: .init(rawValue: nil))], mailbox: .inbox), #line),
+                ("METADATA INBOX (\"a\" NIL)", "\r", .values(values: [.init(name: "a", value: .init(nil))], mailbox: .inbox), #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
@@ -454,10 +454,10 @@ extension ParserUnitTests {
         self.iterateTests(
             testFunction: GrammarParser.parseMetadataValue,
             validInputs: [
-                ("NIL", "\r", .init(rawValue: nil), #line),
-                ("\"a\"", "\r", .init(rawValue: "a"), #line),
-                ("{1}\r\na", "\r", .init(rawValue: "a"), #line),
-                ("~{1}\r\na", "\r", .init(rawValue: "a"), #line),
+                ("NIL", "\r", .init(nil), #line),
+                ("\"a\"", "\r", .init("a"), #line),
+                ("{1}\r\na", "\r", .init("a"), #line),
+                ("~{1}\r\na", "\r", .init("a"), #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
@@ -1121,7 +1121,7 @@ extension ParserUnitTests {
                 ("NAMESPACE", " ", .namespace, #line),
                 ("GETMETADATA INBOX a", " ", .getMetadata(options: [], mailbox: .inbox, entries: ["a"]), #line),
                 ("GETMETADATA (MAXSIZE 123) INBOX (a b)", " ", .getMetadata(options: [.maxSize(123)], mailbox: .inbox, entries: ["a", "b"]), #line),
-                ("SETMETADATA INBOX (a NIL)", " ", .setMetadata(mailbox: .inbox, entries: [.init(name: "a", value: .init(rawValue: nil))]), #line),
+                ("SETMETADATA INBOX (a NIL)", " ", .setMetadata(mailbox: .inbox, entries: [.init(name: "a", value: .init(nil))]), #line),
                 ("RESETKEY", "\r", .resetKey(mailbox: nil, mechanisms: []), #line),
                 ("RESETKEY INBOX", "\r", .resetKey(mailbox: .inbox, mechanisms: []), #line),
                 ("RESETKEY INBOX INTERNAL", "\r", .resetKey(mailbox: .inbox, mechanisms: [.internal]), #line),
@@ -1690,8 +1690,8 @@ extension ParserUnitTests {
         self.iterateTests(
             testFunction: GrammarParser.parseEntryValue,
             validInputs: [
-                ("\"name\" \"value\"", "", .init(name: "name", value: .init(rawValue: "value")), #line),
-                ("\"name\" NIL", "", .init(name: "name", value: .init(rawValue: nil)), #line),
+                ("\"name\" \"value\"", "", .init(name: "name", value: .init("value")), #line),
+                ("\"name\" NIL", "", .init(name: "name", value: .init(nil)), #line),
             ],
             parserErrorInputs: [
                 ],
@@ -1711,13 +1711,13 @@ extension ParserUnitTests {
                 (
                     "(\"name\" \"value\")",
                     "",
-                    [.init(name: "name", value: .init(rawValue: "value"))],
+                    [.init(name: "name", value: .init("value"))],
                     #line
                 ),
                 (
                     "(\"name1\" \"value1\" \"name2\" \"value2\")",
                     "",
-                    [.init(name: "name1", value: .init(rawValue: "value1")), .init(name: "name2", value: .init(rawValue: "value2"))],
+                    [.init(name: "name1", value: .init("value1")), .init(name: "name2", value: .init("value2"))],
                     #line
                 ),
             ],

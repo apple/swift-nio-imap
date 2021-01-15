@@ -3035,11 +3035,11 @@ extension GrammarParser {
 
     static func parseMetadataValue(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MetadataValue {
         func parseMetadataValue_nstring(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MetadataValue {
-            .init(rawValue: try self.parseNString(buffer: &buffer, tracker: tracker))
+            .init(try self.parseNString(buffer: &buffer, tracker: tracker))
         }
 
         func parseMetadataValue_literal8(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MetadataValue {
-            .init(rawValue: try self.parseLiteral8(buffer: &buffer, tracker: tracker))
+            .init(try self.parseLiteral8(buffer: &buffer, tracker: tracker))
         }
 
         return try oneOf([
