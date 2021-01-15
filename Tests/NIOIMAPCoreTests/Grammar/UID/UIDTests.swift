@@ -77,9 +77,9 @@ extension UIDTests {
 
 extension UIDTests {
     func testRoundTripCodable() {
-        XCTAssertEqual(try TestUtilities.roundTripCodable(XCTUnwrap(UID(rawValue: 1))), try XCTUnwrap(UID(rawValue: 1)))
-        XCTAssertEqual(try TestUtilities.roundTripCodable(XCTUnwrap(UID(rawValue: 45_678))), try XCTUnwrap(UID(rawValue: 45_678)))
-        XCTAssertEqual(try TestUtilities.roundTripCodable(XCTUnwrap(UID.max)), try XCTUnwrap(UID.max))
+        XCTAssertEqual(try TestUtilities.roundTripCodable(1), 1)
+        XCTAssertEqual(try TestUtilities.roundTripCodable(45_678), 45_678)
+        XCTAssertEqual(try TestUtilities.roundTripCodable(UID.max), UID.max)
     }
 }
 

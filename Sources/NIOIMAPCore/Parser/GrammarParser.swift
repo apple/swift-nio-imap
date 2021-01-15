@@ -5401,7 +5401,7 @@ extension GrammarParser {
 
     // uniqueid        = nz-number
     static func parseUID(buffer: inout ByteBuffer, tracker: StackTracker) throws -> UID {
-        guard let uid = UID(rawValue: try self.parseNZNumber(buffer: &buffer, tracker: tracker)) else {
+        guard let uid = UID(exactly: try self.parseNZNumber(buffer: &buffer, tracker: tracker)) else {
             throw ParserError(hint: "UID out of range.")
         }
         return uid
