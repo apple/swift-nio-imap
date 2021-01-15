@@ -106,7 +106,7 @@ extension SequenceRange {
 extension SequenceNumber {
     fileprivate init(_ a: SequenceRangeSet.SequenceNumberWrapper) {
         precondition(a.rawValue < UInt32.max)
-        self.init(rawValue: a.rawValue + 1)!
+        self.init(exactly: a.rawValue + 1)!
     }
 }
 

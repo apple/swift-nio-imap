@@ -42,7 +42,7 @@ extension IMAPRangeTests {
     func testRange_from() {
         let sut = SequenceRange(7...)
         XCTAssertEqual(sut.rawValue.lowerBound, 7)
-        XCTAssertEqual(sut.rawValue.upperBound, SequenceNumber(UInt32.max))
+        XCTAssertEqual(sut.rawValue.upperBound, .max)
     }
 
     func testRange_to() {

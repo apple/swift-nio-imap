@@ -17,31 +17,32 @@
 /// See RFC 3501 section 2.3.1.2.
 ///
 /// IMAPv4 `seq-number`
-public struct SequenceNumber: RawRepresentable, Hashable {
+public struct SequenceNumber: Hashable {
     /// The minimum sequence number is always 1.
     public static let min = SequenceNumber(1)
 
     /// The maximum sequence number is always `UInt32.max`.
-    public static let max = SequenceNumber(UInt32.max)
+    public static let max = SequenceNumber(exactly: UInt32.max)!
 
     /// The raw value of the sequence number, defined in RFC 3501 to be an unsigned 32-bit integer.
-    public var rawValue: UInt32
+    var rawValue: UInt32
 
     /// Creates a new `SequenceNumber` after performing some sanity checks.
     /// - parameter rawValue: An `Int` that is converted for use as the `rawValue`.
     /// - returns: `nil` if `rawValue` is `0` or does not fit within a `UInt32`.
-    public init?(rawValue: Int) {
-        guard rawValue >= 1, rawValue <= UInt32.max else { return nil }
-        self.rawValue = UInt32(rawValue)
+    public init?<T>(exactly source: T) where T: BinaryInteger {
+        guard source >= 1, source <= UInt32.max else { return nil }
+        self.rawValue = UInt32(source)
     }
+}
 
-    /// Creates a new `SequenceNumber` after performing some sanity checks.
-    /// - parameter rawValue: A raw number that is sanity checked to make sure it's greater than 0 as required.
-    /// - returns: `nil` if `rawValue` is `0`, otherwise a `SequenceNumber`.
-    public init?(rawValue: UInt32) {
-        guard rawValue >= 1 else { return nil }
-        self.rawValue = UInt32(rawValue)
+// MARK: - BinaryInteger
+extension BinaryInteger {
+    
+    init(_ num: SequenceNumber) {
+        self = Self(num.rawValue)
     }
+    
 }
 
 // MARK: - Integer literal
@@ -50,30 +51,7 @@ extension SequenceNumber: ExpressibleByIntegerLiteral {
     /// Creates a new `SequenceNumber` from a `UInt32` without performing sanity checks.
     /// - parameter value: The raw value to use.
     public init(integerLiteral value: UInt32) {
-        self.init(rawValue: value)!
-    }
-
-    /// Creates a new `SequenceNumber` from a `Int` without performing sanity checks.
-    /// - parameter value: The raw value to use.
-    public init(_ value: Int) {
-        self.init(rawValue: value)!
-    }
-
-    /// Creates a new `SequenceNumber` from a `UInt32` without performing sanity checks.
-    /// - parameter value: The raw value to use.
-    public init(_ value: UInt32) {
-        self.rawValue = value
-    }
-}
-
-extension SequenceNumber {
-    /// Creates a new `SequenceNumber` from a `BinaryInteger` after
-    /// ensuring that the value fits within a `UInt32`.
-    /// - parameter source: The raw value to use.
-    /// - returns: `nil` if `source` doesn't fit within a `UInt32`, otherwise a `SequenceNumber`.
-    public init?<T>(exactly source: T) where T: BinaryInteger {
-        guard let rawValue = UInt32(exactly: source) else { return nil }
-        self.init(rawValue: rawValue)
+        self.init(exactly: value)!
     }
 }
 
@@ -110,7 +88,7 @@ extension SequenceNumber: Strideable {
     /// - returns: A new `SequenceNumber`.
     public func advanced(by n: Int64) -> SequenceNumber {
         precondition(n <= UInt32.max, "`n` must be less than UInt32.max")
-        return SequenceNumber(UInt32(Int64(self.rawValue) + n))
+        return SequenceNumber(exactly: Int64(self.rawValue) + n)!
     }
 }
 

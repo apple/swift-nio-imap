@@ -64,8 +64,8 @@ extension UID: ExpressibleByIntegerLiteral {
 
 extension BinaryInteger {
     
-    public init(_ sequenceNumber: SequenceNumber) {
-        self = Self(sequenceNumber.rawValue)
+    public init(_ uid: UID) {
+        self = Self(uid.rawValue)
     }
     
 }

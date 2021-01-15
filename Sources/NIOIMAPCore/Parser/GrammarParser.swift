@@ -4780,7 +4780,7 @@ extension GrammarParser {
     // Note: the formal syntax is bogus here.
     // "*" is a sequence range, but not a sequence number.
     static func parseSequenceNumber(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SequenceNumber {
-        guard let seq = SequenceNumber(rawValue: try self.parseNZNumber(buffer: &buffer, tracker: tracker)) else {
+        guard let seq = SequenceNumber(exactly: try self.parseNZNumber(buffer: &buffer, tracker: tracker)) else {
             throw ParserError(hint: "Sequence number out of range.")
         }
         return seq
