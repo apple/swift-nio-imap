@@ -91,7 +91,7 @@ public enum StreamingKind: Equatable {
 }
 
 extension StreamingKind {
-    var sectionSpecifier: SectionSpecifier {
+    public var sectionSpecifier: SectionSpecifier {
         switch self {
         case .binary(section: let section, offset: _):
             return SectionSpecifier(part: section, kind: .text)
@@ -106,7 +106,7 @@ extension StreamingKind {
         }
     }
 
-    var offset: Int? {
+    public var offset: Int? {
         switch self {
         case .binary(section: _, offset: let offset):
             return offset
