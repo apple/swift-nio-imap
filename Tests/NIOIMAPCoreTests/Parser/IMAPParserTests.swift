@@ -539,7 +539,7 @@ extension ParserUnitTests {
             testFunction: GrammarParser.parseAttributeFlag,
             validInputs: [
                 ("\\\\Answered", " ", .answered, #line),
-                ("some", " ", .init(rawValue: "some"), #line),
+                ("some", " ", .init("some"), #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
