@@ -22,7 +22,7 @@ class UIDRangeTests: EncodeTestClass {}
 
 extension UIDRangeTests {
     func testWildcard() {
-        let range = UIDRange.all.rawValue
+        let range = UIDRange.all.range
         XCTAssertEqual(range.lowerBound, UID.min)
         XCTAssertEqual(range.upperBound, UID.max)
     }
@@ -32,7 +32,7 @@ extension UIDRangeTests {
 
 extension UIDRangeTests {
     func testSingle() {
-        let range = UIDRange(999).rawValue
+        let range = UIDRange(999).range
         XCTAssertEqual(range.lowerBound, 999)
         XCTAssertEqual(range.upperBound, 999)
     }
@@ -44,15 +44,15 @@ extension UIDRangeTests {
     // here we always expect the smaller number on the left
 
     func testInit_range() {
-        let range = UIDRange(1 ... 999).rawValue
+        let range = UIDRange(1 ... 999).range
         XCTAssertEqual(range.lowerBound, 1)
         XCTAssertEqual(range.upperBound, 999)
     }
 
     func testInit_integer() {
         let range: UIDRange = 654
-        XCTAssertEqual(range.rawValue.lowerBound, 654)
-        XCTAssertEqual(range.rawValue.upperBound, 654)
+        XCTAssertEqual(range.range.lowerBound, 654)
+        XCTAssertEqual(range.range.upperBound, 654)
     }
 }
 
@@ -84,28 +84,21 @@ extension UIDRangeTests {
 extension UIDRangeTests {
     func testRangeOperator_prefix() {
         let expected = "5:*"
-        let size = self.testBuffer.writeUIDRange(UIDRange(left: .max, right: 5))
+        let size = self.testBuffer.writeUIDRange(UIDRange(5 ... (.max)))
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }
 
     func testRangeOperator_postfix() {
         let expected = "5:*"
-        let size = self.testBuffer.writeUIDRange(UIDRange(left: 5, right: .max))
+        let size = self.testBuffer.writeUIDRange(UIDRange(5 ... (.max)))
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }
 
     func testRangeOperator_postfix_complete_right_larger() {
         let expected = "44:55"
-        let size = self.testBuffer.writeUIDRange(UIDRange(left: 44, right: 55))
-        XCTAssertEqual(size, expected.utf8.count)
-        XCTAssertEqual(expected, self.testBufferString)
-    }
-
-    func testRangeOperator_postfix_complete_left_larger() {
-        let expected = "44:55"
-        let size = self.testBuffer.writeUIDRange(UIDRange(left: 55, right: 44))
+        let size = self.testBuffer.writeUIDRange(UIDRange(44 ... 55))
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }

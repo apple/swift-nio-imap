@@ -5391,8 +5391,8 @@ extension GrammarParser {
         return try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> UIDRange in
             let id1 = try parse_UIDOrWildcard(buffer: &buffer, tracker: tracker)
             let id2 = try optional(buffer: &buffer, tracker: tracker, parser: parse_colonAndUIDOrWildcard)
-            if let id = id2 {
-                return UIDRange(left: id1, right: id)
+            if let id2 = id2 {
+                return UIDRange(id1 ... id2)
             } else {
                 return UIDRange(id1)
             }

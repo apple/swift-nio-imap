@@ -126,14 +126,14 @@ extension UID {
     /// - parameter value: The upper bound.
     /// - returns: A new `UIDRange`.
     public static prefix func ... (value: Self) -> UIDRange {
-        UIDRange(left: .min, right: value)
+        UIDRange((.min) ... value)
     }
 
     /// Creates a new `UIDRange` from the given lower bound to `.max`
     /// - parameter value: The lower bound.
     /// - returns: A new `UIDRange`.
     public static postfix func ... (value: Self) -> UIDRange {
-        UIDRange(left: value, right: .max)
+        UIDRange(value ... (.max))
     }
 
     /// Creates a `UIDRange` from two `UIDs`.
@@ -141,6 +141,6 @@ extension UID {
     /// - parameter upper: The upper bound of the range.
     /// - returns: A new `UIDRange` using the provided bounds.
     public static func ... (lower: Self, upper: Self) -> UIDRange {
-        UIDRange(left: lower, right: upper)
+        UIDRange(lower ... upper)
     }
 }

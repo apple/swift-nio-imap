@@ -4427,9 +4427,9 @@ extension ParserUnitTests {
             validInputs: [
                 ("*", "\r\n", UIDRange(.max), #line),
                 ("1:*", "\r\n", UIDRange.all, #line),
-                ("12:34", "\r\n", UIDRange(left: 12, right: 34), #line),
-                ("12:*", "\r\n", UIDRange(left: 12, right: .max), #line),
-                ("1:34", "\r\n", UIDRange(left: .min, right: 34), #line),
+                ("12:34", "\r\n", UIDRange(12 ... 34), #line),
+                ("12:*", "\r\n", UIDRange(12 ... .max), #line),
+                ("1:34", "\r\n", UIDRange((.min) ... 34), #line),
             ],
             parserErrorInputs: [
                 ("!", " ", #line),

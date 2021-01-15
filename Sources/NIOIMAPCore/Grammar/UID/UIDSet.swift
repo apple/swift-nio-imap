@@ -73,7 +73,7 @@ extension UID {
 
 extension Range where Element == UIDSet.UIDShiftWrapper {
     fileprivate init(_ r: UIDRange) {
-        self = UIDSet.UIDShiftWrapper(r.rawValue.lowerBound) ..< UIDSet.UIDShiftWrapper(r.rawValue.upperBound).advanced(by: 1)
+        self = UIDSet.UIDShiftWrapper(r.range.lowerBound) ..< UIDSet.UIDShiftWrapper(r.range.upperBound).advanced(by: 1)
     }
 
     fileprivate init(_ uid: UID) {
