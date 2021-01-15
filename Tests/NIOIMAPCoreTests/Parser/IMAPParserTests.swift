@@ -3918,9 +3918,9 @@ extension ParserUnitTests {
             validInputs: [
                 ("*", "\r\n", SequenceRange.all, #line),
                 ("1:*", "\r\n", SequenceRange.all, #line),
-                ("12:34", "\r\n", SequenceRange(left: 12, right: 34), #line),
-                ("12:*", "\r\n", SequenceRange(left: 12, right: .max), #line),
-                ("1:34", "\r\n", SequenceRange(left: .min, right: 34), #line),
+                ("12:34", "\r\n", SequenceRange(12 ... 34), #line),
+                ("12:*", "\r\n", SequenceRange(12 ... (.max)), #line),
+                ("1:34", "\r\n", SequenceRange((.min) ... 34), #line),
             ],
             parserErrorInputs: [
                 ("a", "", #line),

@@ -115,14 +115,14 @@ extension SequenceNumber {
     /// - parameter value: The upper bound.
     /// - returns: A new `SequenceRange`.
     public static prefix func ... (value: Self) -> SequenceRange {
-        SequenceRange(left: .min, right: value)
+        SequenceRange((.min) ... value)
     }
 
     /// Creates a new `SequenceRange` from `value` to `.max`.
     /// - parameter value: The lower bound.
     /// - returns: A new `SequenceRange`.
     public static postfix func ... (value: Self) -> SequenceRange {
-        SequenceRange(left: value, right: .max)
+        SequenceRange(value ... (.max))
     }
 
     /// Creates a `SequenceRange` from lower and upper bounds.
@@ -130,6 +130,6 @@ extension SequenceNumber {
     /// - parameter upper: The upper bound.
     /// - returns: A new `SequenceRange`.
     public static func ... (lower: Self, upper: Self) -> SequenceRange {
-        SequenceRange(left: lower, right: upper)
+        SequenceRange(lower ... upper)
     }
 }

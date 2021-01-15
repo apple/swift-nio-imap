@@ -4755,8 +4755,8 @@ extension GrammarParser {
         return try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> SequenceRange in
             let id1 = try parse_SequenceOrWildcard(buffer: &buffer, tracker: tracker)
             let id2 = try optional(buffer: &buffer, tracker: tracker, parser: parse_colonAndSequenceOrWildcard)
-            if let id = id2 {
-                return SequenceRange(left: id1, right: id)
+            if let id2 = id2 {
+                return SequenceRange(id1 ... id2)
             } else if id1 == .max {
                 return .all
             } else {
