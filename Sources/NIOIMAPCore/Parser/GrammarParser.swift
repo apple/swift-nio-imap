@@ -5295,7 +5295,7 @@ extension GrammarParser {
                 return false
             }
         })
-        return UAuthMechanism(rawValue: string)
+        return UAuthMechanism(string)
     }
 
     // uid             = "UID" SP

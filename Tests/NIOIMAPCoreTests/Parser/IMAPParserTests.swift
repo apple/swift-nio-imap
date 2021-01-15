@@ -1125,7 +1125,7 @@ extension ParserUnitTests {
                 ("RESETKEY", "\r", .resetKey(mailbox: nil, mechanisms: []), #line),
                 ("RESETKEY INBOX", "\r", .resetKey(mailbox: .inbox, mechanisms: []), #line),
                 ("RESETKEY INBOX INTERNAL", "\r", .resetKey(mailbox: .inbox, mechanisms: [.internal]), #line),
-                ("RESETKEY INBOX INTERNAL test", "\r", .resetKey(mailbox: .inbox, mechanisms: [.internal, .init(rawValue: "test")]), #line),
+                ("RESETKEY INBOX INTERNAL test", "\r", .resetKey(mailbox: .inbox, mechanisms: [.internal, .init("test")]), #line),
                 ("GENURLAUTH test INTERNAL", "\r", .genURLAuth([.init(urlRump: "test", mechanism: .internal)]), #line),
                 ("GENURLAUTH test INTERNAL test2 INTERNAL", "\r", .genURLAuth([.init(urlRump: "test", mechanism: .internal), .init(urlRump: "test2", mechanism: .internal)]), #line),
                 ("URLFETCH test", "\r", .urlFetch(["test"]), #line),
@@ -4363,7 +4363,7 @@ extension ParserUnitTests {
             testFunction: GrammarParser.parseUAuthMechanism,
             validInputs: [
                 ("INTERNAL", " ", .internal, #line),
-                ("abcdEFG0123456789", " ", .init(rawValue: "abcdEFG0123456789"), #line),
+                ("abcdEFG0123456789", " ", .init("abcdEFG0123456789"), #line),
             ],
             parserErrorInputs: [
                 ],

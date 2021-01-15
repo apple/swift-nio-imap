@@ -24,7 +24,7 @@ extension UAuthMechanism_Tests {
     func testEncode() {
         let inputs: [(UAuthMechanism, String, UInt)] = [
             (.internal, "INTERNAL", #line),
-            (.init(rawValue: "test"), "test", #line),
+            (.init("test"), "test", #line),
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeUAuthMechanism($0) })
     }

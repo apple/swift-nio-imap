@@ -13,17 +13,17 @@
 //===----------------------------------------------------------------------===//
 
 /// The name of the algorithm used to generate and verify a URLAUTH.
-public struct UAuthMechanism: Equatable, RawRepresentable {
+public struct UAuthMechanism: Equatable {
     /// Uses a token generation algorithm of the server's choosing
-    public static let `internal` = Self(rawValue: "INTERNAL")
+    public static let `internal` = Self("INTERNAL")
 
     /// The raw name of the generation algorithm.
-    public var rawValue: String
+    public var stringValue: String
 
     /// Creates a new UAuthMechanism from the name of an algorithm.
     /// - parameter rawValue: The name of an algorithm.
-    public init(rawValue: String) {
-        self.rawValue = rawValue
+    public init(_ stringValue: String) {
+        self.stringValue = stringValue
     }
 }
 
@@ -31,6 +31,6 @@ public struct UAuthMechanism: Equatable, RawRepresentable {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeUAuthMechanism(_ data: UAuthMechanism) -> Int {
-        self.writeString(data.rawValue)
+        self.writeString(data.stringValue)
     }
 }
