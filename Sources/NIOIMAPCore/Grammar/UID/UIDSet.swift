@@ -44,7 +44,7 @@ public struct UIDSet: Hashable {
 extension UIDSet {
     /// UIDs shifted by 1, such that UID 1 -> 0, and UID.max -> UInt32.max - 1
     /// This allows us to store UID.max + 1 inside a UInt32.
-    fileprivate struct UIDShiftWrapper: RawRepresentable, Hashable {
+    fileprivate struct UIDShiftWrapper: Hashable {
         var rawValue: UInt32
     }
 }
