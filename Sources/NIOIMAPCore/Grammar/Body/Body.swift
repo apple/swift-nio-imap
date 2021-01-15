@@ -112,7 +112,7 @@ extension BodyStructure: RandomAccessCollection {
 
 extension BodyStructure {
     /// The subtype of a multi-part body.
-    public struct MediaSubtype: RawRepresentable, CustomStringConvertible, Equatable {
+    public struct MediaSubtype: CustomStringConvertible, Equatable {
         /// `multipart/alternative`. For representing the same data as different formats.
         public static var alternative: Self {
             .init("multipart/alternative")
@@ -129,23 +129,15 @@ extension BodyStructure {
         }
 
         /// The subtype as a lowercased string
-        public var rawValue: String
+        public var stringValue: String
 
-        /// See `.rawValue`.
-        public var description: String {
-            rawValue
-        }
+        /// The subtype as a lowercased string
+        public var description: String { stringValue }
 
         /// Creates a new `MediaSubtype` from the given `String`, which will be lowercased.
         /// - parameter rawValue: The subtype as a `String`. Note that the string will be lowercased.
-        public init(rawValue: String) {
-            self.rawValue = rawValue.lowercased()
-        }
-
-        /// Creates a new `MediaSubtype` from the given `String`, which will be lowercased.
-        /// - parameter rawValue: The subtype as a `String`. Note that the string will be lowercased.
-        public init(_ rawValue: String) {
-            self.init(rawValue: rawValue)
+        public init(_ stringValue: String) {
+            self.stringValue = stringValue.lowercased()
         }
     }
 }
