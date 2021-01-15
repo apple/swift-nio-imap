@@ -2982,10 +2982,10 @@ extension ParserUnitTests {
                 ("MODSEQ (3)", " ", .fetchModificationResponse(.init(modifierSequenceValue: 3)), #line),
                 ("X-GM-MSGID 1278455344230334865", " ", .gmailMessageID(1278455344230334865), #line),
                 ("X-GM-THRID 1278455344230334865", " ", .gmailThreadID(1278455344230334865), #line),
-                ("X-GM-LABELS (\\Inbox \\Sent Important \"Muy Importante\")", " ", .gmailLabels([GmailLabel(rawValue: "\\Inbox"), GmailLabel(rawValue: "\\Sent"), GmailLabel(rawValue: "Important"), GmailLabel(rawValue: "Muy Importante")]), #line),
-                ("X-GM-LABELS (foo)", " ", .gmailLabels([GmailLabel(rawValue: "foo")]), #line),
+                ("X-GM-LABELS (\\Inbox \\Sent Important \"Muy Importante\")", " ", .gmailLabels([GmailLabel("\\Inbox"), GmailLabel("\\Sent"), GmailLabel("Important"), GmailLabel("Muy Importante")]), #line),
+                ("X-GM-LABELS (foo)", " ", .gmailLabels([GmailLabel("foo")]), #line),
                 ("X-GM-LABELS ()", " ", .gmailLabels([]), #line),
-                ("X-GM-LABELS (\\Drafts)", " ", .gmailLabels([GmailLabel(rawValue: "\\Drafts")]), #line),
+                ("X-GM-LABELS (\\Drafts)", " ", .gmailLabels([GmailLabel("\\Drafts")]), #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []

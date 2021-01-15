@@ -3322,12 +3322,12 @@ extension GrammarParser {
         func parseGmailLabel_backslash(buffer: inout ByteBuffer, tracker: StackTracker) throws -> GmailLabel {
             try fixedString("\\", buffer: &buffer, tracker: tracker)
             let att = try self.parseAtom(buffer: &buffer, tracker: tracker)
-            return .init(rawValue: ByteBuffer(ByteBufferView("\\\(att)".utf8)))
+            return .init(ByteBuffer(ByteBufferView("\\\(att)".utf8)))
         }
 
         func parseGmailLabel_string(buffer: inout ByteBuffer, tracker: StackTracker) throws -> GmailLabel {
             let raw = try parseAString(buffer: &buffer, tracker: tracker)
-            return .init(rawValue: raw)
+            return .init(raw)
         }
 
         return try oneOf([
