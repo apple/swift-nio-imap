@@ -30,16 +30,16 @@ extension UseAttribute_Tests {
             (.junk, "\\junk", #line),
             (.sent, "\\sent", #line),
             (.trash, "\\trash", #line),
-            (.init(rawValue: "\\test"), "\\test", #line),
+            (.init("\\test"), "\\test", #line),
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeUseAttribute($0) })
     }
 
     func testLowercasing() {
-        let t1 = UseAttribute(rawValue: "TEST")
-        let t2 = UseAttribute(rawValue: "test")
+        let t1 = UseAttribute("TEST")
+        let t2 = UseAttribute("test")
         XCTAssertEqual(t1, t2)
-        XCTAssertEqual(t1.rawValue, "test")
-        XCTAssertEqual(t2.rawValue, "test")
+        XCTAssertEqual(t1.stringValue, "test")
+        XCTAssertEqual(t2.stringValue, "test")
     }
 }

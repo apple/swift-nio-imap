@@ -18,38 +18,37 @@ import struct NIO.ByteBuffer
 /// They're used to designate a special use to certain mailboxes.
 /// The raw `String` value is lower-cased on initialisation to ensure
 /// case-insensitive comparison.
-public struct UseAttribute: Equatable, RawRepresentable {
-    public typealias RawValue = String
+public struct UseAttribute: Equatable {
 
     /// A mailbox that presents all messages in the user's store.
-    public static var all = Self(rawValue: "\\All")
+    public static var all = Self("\\All")
 
     /// Used to archive messages - note that the meaning of "archived" will vary from server to server.
-    public static var archive = Self(rawValue: "\\Archive")
+    public static var archive = Self("\\Archive")
 
     /// Used to store draft messages that have not been sent.
-    public static var drafts = Self(rawValue: "\\Drafts")
+    public static var drafts = Self("\\Drafts")
 
     /// Stores messages that have been marked as "important" for some reason.
-    public static var flagged = Self(rawValue: "\\Flagged")
+    public static var flagged = Self("\\Flagged")
 
     /// Stores messages deemed to be spam of junk mail, e.g. from a mailing list.
-    public static var junk = Self(rawValue: "\\Junk")
+    public static var junk = Self("\\Junk")
 
     /// Holds copies of messages that have been sent.
-    public static var sent = Self(rawValue: "\\Sent")
+    public static var sent = Self("\\Sent")
 
     /// Holds messages that have been deleted or marked for deletion.
-    public static var trash = Self(rawValue: "\\Trash")
+    public static var trash = Self("\\Trash")
 
     /// The raw value of the attribute, e.g. `\\trash`. Always lowercase.
-    public var rawValue: String
+    public var stringValue: String
 
     /// Creates a new `UseAttribute` from the raw `String`. Note that
     /// usually it should be sufficient to just use the predefined attributes, e.g. `.drafts`.
     /// `rawValue` will be lowercased.
-    public init(rawValue: String) {
-        self.rawValue = rawValue.lowercased()
+    public init(_ stringValue: String) {
+        self.stringValue = stringValue.lowercased()
     }
 }
 
@@ -57,6 +56,6 @@ public struct UseAttribute: Equatable, RawRepresentable {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeUseAttribute(_ att: UseAttribute) -> Int {
-        self.writeString(att.rawValue)
+        self.writeString(att.stringValue)
     }
 }

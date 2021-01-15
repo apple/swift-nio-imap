@@ -1030,7 +1030,7 @@ extension ParserUnitTests {
                 ("\\Trash", "", .trash, #line),
                 ("\\Sent", "", .sent, #line),
                 ("\\Drafts", "", .drafts, #line),
-                ("\\Other", " ", .init(rawValue: "\\Other"), #line),
+                ("\\Other", " ", .init("\\Other"), #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
