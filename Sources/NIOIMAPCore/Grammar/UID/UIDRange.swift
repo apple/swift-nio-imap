@@ -24,13 +24,13 @@ public struct UIDRange: Hashable {
     public init(_ range: ClosedRange<UID>) {
         self.range = range
     }
-    
+
     /// Creates a new `UIDRange` from a partial range, using `.min` as the lower bound.
     /// - parameter range: A partial with a `UID` as the upper bound.
     public init(_ range: PartialRangeThrough<UID>) {
         self.init(UID.min ... range.upperBound)
     }
-    
+
     /// Creates a new `UIDRange` from a partial range, using `.max` as the upper bound.
     /// - parameter rawValue: A partial with a `UID` as the lower bound.
     public init(_ range: PartialRangeFrom<UID>) {

@@ -27,12 +27,11 @@ public struct MetadataValue: Equatable {
 }
 
 // MARK: - ExpressibleByNilLiteral
+
 extension MetadataValue: ExpressibleByNilLiteral {
-    
     public init(nilLiteral: ()) {
         self.bytes = nil
     }
-    
 }
 
 // MARK: - Encoding

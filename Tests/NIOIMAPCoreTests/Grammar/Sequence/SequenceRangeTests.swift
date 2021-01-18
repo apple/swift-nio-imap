@@ -96,7 +96,7 @@ extension SequenceRangeTests {
 
     func testRangeOperator_postfix_complete_right_larger() {
         let expected = "44:55"
-        let size = self.testBuffer.writeSequenceRange(44...55)
+        let size = self.testBuffer.writeSequenceRange(44 ... 55)
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }

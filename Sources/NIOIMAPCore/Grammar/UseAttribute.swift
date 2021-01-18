@@ -19,7 +19,6 @@ import struct NIO.ByteBuffer
 /// The raw `String` value is lower-cased on initialisation to ensure
 /// case-insensitive comparison.
 public struct UseAttribute: Equatable {
-
     /// A mailbox that presents all messages in the user's store.
     public static let all = Self("\\All")
 

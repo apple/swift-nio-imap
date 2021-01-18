@@ -24,9 +24,9 @@ public struct UID: Hashable, Codable {
 
     /// The maximum `UID` is always `UInt32.max`.
     public static let max = UID(exactly: UInt32.max)!
-    
+
     let rawValue: UInt32
-    
+
     /// Creates a `UID` from some `BinaryInteger`, ensuring that the given value fits within a `UInt32`.
     /// - parameter source: The raw value to use.
     /// - returns: `nil` if `source` does not fit within a `UInt32`, otherwise a `UID`.
@@ -59,15 +59,12 @@ extension UID: ExpressibleByIntegerLiteral {
         assert(value >= 1)
         self.rawValue = value
     }
-
 }
 
 extension BinaryInteger {
-    
     public init(_ uid: UID) {
         self = Self(uid.rawValue)
     }
-    
 }
 
 // MARK: - Strideable

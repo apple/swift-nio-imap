@@ -16,10 +16,9 @@ import struct NIO.ByteBuffer
 
 /// A range of messages using message `SequenceNumber`s.
 public struct SequenceRange: Hashable {
-    
     /// A `SequenceRange` that covers every possible `SequenceNumber`.
     public static let all = SequenceRange((.min) ... (.max))
-    
+
     /// The underlying range.
     public let range: ClosedRange<SequenceNumber>
 
@@ -28,7 +27,7 @@ public struct SequenceRange: Hashable {
     public init(_ range: ClosedRange<SequenceNumber>) {
         self.range = range
     }
-    
+
     /// Creates a new `SequenceRange` using `.min` as the lower bound.
     /// - parameter rawValue: The underlying range to use.
     public init(_ range: PartialRangeThrough<SequenceNumber>) {

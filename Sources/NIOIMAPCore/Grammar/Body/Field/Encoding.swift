@@ -35,7 +35,7 @@ extension BodyStructure {
 
         /// The uppercased encoding name
         public let stringValue: String
-        
+
         /// The uppercased encoding name
         public var description: String { stringValue }
 

@@ -38,12 +38,11 @@ extension UIDValidity: ExpressibleByIntegerLiteral {
 }
 
 // MARK: - Binary Integer
+
 extension BinaryInteger {
-    
     public init(_ value: UIDValidity) {
         self = Self(value.rawValue)
     }
-    
 }
 
 // MARK: - Encoding
