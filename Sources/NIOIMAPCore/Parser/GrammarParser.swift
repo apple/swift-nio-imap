@@ -204,12 +204,12 @@ extension GrammarParser {
         func parseAttributeFlag_slashed(buffer: inout ByteBuffer, tracker: StackTracker) throws -> AttributeFlag {
             try fixedString("\\\\", buffer: &buffer, tracker: tracker)
             let atom = try self.parseAtom(buffer: &buffer, tracker: tracker)
-            return .init(rawValue: "\\\\\(atom)")
+            return .init("\\\\\(atom)")
         }
 
         func parseAttributeFlag_unslashed(buffer: inout ByteBuffer, tracker: StackTracker) throws -> AttributeFlag {
             let atom = try self.parseAtom(buffer: &buffer, tracker: tracker)
-            return .init(rawValue: atom)
+            return .init(atom)
         }
 
         return try oneOf([
@@ -1004,7 +1004,7 @@ extension GrammarParser {
         func parseUseAttribute_other(buffer: inout ByteBuffer, tracker: StackTracker) throws -> UseAttribute {
             try fixedString("\\", buffer: &buffer, tracker: tracker)
             let att = try self.parseAtom(buffer: &buffer, tracker: tracker)
-            return .init(rawValue: "\\" + att)
+            return .init("\\" + att)
         }
 
         return try oneOf([
@@ -2879,7 +2879,7 @@ extension GrammarParser {
 
         func parseMediaBasic_Kind_other(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Media.BasicKind {
             let buffer = try self.parseString(buffer: &buffer, tracker: tracker)
-            return .init(rawValue: String(buffer: buffer))
+            return .init(String(buffer: buffer))
         }
 
         return try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Media.Basic in
@@ -3035,11 +3035,11 @@ extension GrammarParser {
 
     static func parseMetadataValue(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MetadataValue {
         func parseMetadataValue_nstring(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MetadataValue {
-            .init(rawValue: try self.parseNString(buffer: &buffer, tracker: tracker))
+            .init(try self.parseNString(buffer: &buffer, tracker: tracker))
         }
 
         func parseMetadataValue_literal8(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MetadataValue {
-            .init(rawValue: try self.parseLiteral8(buffer: &buffer, tracker: tracker))
+            .init(try self.parseLiteral8(buffer: &buffer, tracker: tracker))
         }
 
         return try oneOf([
@@ -3322,12 +3322,12 @@ extension GrammarParser {
         func parseGmailLabel_backslash(buffer: inout ByteBuffer, tracker: StackTracker) throws -> GmailLabel {
             try fixedString("\\", buffer: &buffer, tracker: tracker)
             let att = try self.parseAtom(buffer: &buffer, tracker: tracker)
-            return .init(rawValue: ByteBuffer(ByteBufferView("\\\(att)".utf8)))
+            return .init(ByteBuffer(ByteBufferView("\\\(att)".utf8)))
         }
 
         func parseGmailLabel_string(buffer: inout ByteBuffer, tracker: StackTracker) throws -> GmailLabel {
             let raw = try parseAString(buffer: &buffer, tracker: tracker)
-            return .init(rawValue: raw)
+            return .init(raw)
         }
 
         return try oneOf([
@@ -4580,7 +4580,7 @@ extension GrammarParser {
             try fixedString("[", buffer: &buffer, tracker: tracker)
             let part = try optional(buffer: &buffer, tracker: tracker, parser: self.parseSectionPart)
             try fixedString("]", buffer: &buffer, tracker: tracker)
-            return part ?? .init(rawValue: [])
+            return part ?? .init([])
         }
     }
 
@@ -4594,7 +4594,7 @@ extension GrammarParser {
                     return try self.parseNZNumber(buffer: &buffer, tracker: tracker)
                 }
             }
-            return .init(rawValue: output)
+            return .init(output)
         }
     }
 
@@ -4755,8 +4755,8 @@ extension GrammarParser {
         return try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> SequenceRange in
             let id1 = try parse_SequenceOrWildcard(buffer: &buffer, tracker: tracker)
             let id2 = try optional(buffer: &buffer, tracker: tracker, parser: parse_colonAndSequenceOrWildcard)
-            if let id = id2 {
-                return SequenceRange(left: id1, right: id)
+            if let id2 = id2 {
+                return SequenceRange(id1 ... id2)
             } else if id1 == .max {
                 return .all
             } else {
@@ -4780,7 +4780,7 @@ extension GrammarParser {
     // Note: the formal syntax is bogus here.
     // "*" is a sequence range, but not a sequence number.
     static func parseSequenceNumber(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SequenceNumber {
-        guard let seq = SequenceNumber(rawValue: try self.parseNZNumber(buffer: &buffer, tracker: tracker)) else {
+        guard let seq = SequenceNumber(exactly: try self.parseNZNumber(buffer: &buffer, tracker: tracker)) else {
             throw ParserError(hint: "Sequence number out of range.")
         }
         return seq
@@ -5295,7 +5295,7 @@ extension GrammarParser {
                 return false
             }
         })
-        return UAuthMechanism(rawValue: string)
+        return UAuthMechanism(string)
     }
 
     // uid             = "UID" SP
@@ -5391,8 +5391,8 @@ extension GrammarParser {
         return try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> UIDRange in
             let id1 = try parse_UIDOrWildcard(buffer: &buffer, tracker: tracker)
             let id2 = try optional(buffer: &buffer, tracker: tracker, parser: parse_colonAndUIDOrWildcard)
-            if let id = id2 {
-                return UIDRange(left: id1, right: id)
+            if let id2 = id2 {
+                return UIDRange(id1 ... id2)
             } else {
                 return UIDRange(id1)
             }
@@ -5401,7 +5401,7 @@ extension GrammarParser {
 
     // uniqueid        = nz-number
     static func parseUID(buffer: inout ByteBuffer, tracker: StackTracker) throws -> UID {
-        guard let uid = UID(rawValue: try self.parseNZNumber(buffer: &buffer, tracker: tracker)) else {
+        guard let uid = UID(exactly: try self.parseNZNumber(buffer: &buffer, tracker: tracker)) else {
             throw ParserError(hint: "UID out of range.")
         }
         return uid
@@ -5409,7 +5409,7 @@ extension GrammarParser {
 
     // uniqueid        = nz-number
     static func parseUIDValidity(buffer: inout ByteBuffer, tracker: StackTracker) throws -> UIDValidity {
-        guard let validity = UIDValidity(rawValue: try self.parseNZNumber(buffer: &buffer, tracker: tracker)) else {
+        guard let validity = UIDValidity(exactly: try self.parseNZNumber(buffer: &buffer, tracker: tracker)) else {
             throw ParserError(hint: "Invalid UID validity.")
         }
         return validity

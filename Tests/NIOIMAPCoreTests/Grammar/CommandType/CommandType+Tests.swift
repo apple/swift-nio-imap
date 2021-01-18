@@ -45,15 +45,15 @@ extension CommandType_Tests {
             (.id([]), CommandEncodingOptions(), ["ID NIL"], #line),
             (.getMetadata(options: [], mailbox: .inbox, entries: ["a"]), CommandEncodingOptions(), ["GETMETADATA \"INBOX\" (\"a\")"], #line),
             (.getMetadata(options: [.maxSize(123)], mailbox: .inbox, entries: ["a"]), CommandEncodingOptions(), ["GETMETADATA (MAXSIZE 123) \"INBOX\" (\"a\")"], #line),
-            (.setMetadata(mailbox: .inbox, entries: [.init(name: "a", value: .init(rawValue: nil))]), CommandEncodingOptions(), ["SETMETADATA \"INBOX\" (\"a\" NIL)"], #line),
+            (.setMetadata(mailbox: .inbox, entries: [.init(name: "a", value: nil)]), CommandEncodingOptions(), ["SETMETADATA \"INBOX\" (\"a\" NIL)"], #line),
 
             (.resetKey(mailbox: nil, mechanisms: []), CommandEncodingOptions(), ["RESETKEY"], #line),
             (.resetKey(mailbox: nil, mechanisms: [.internal]), CommandEncodingOptions(), ["RESETKEY"], #line), // no mailbox, so no mechanisms written
             (.resetKey(mailbox: .inbox, mechanisms: [.internal]), CommandEncodingOptions(), ["RESETKEY \"INBOX\" INTERNAL"], #line),
-            (.resetKey(mailbox: .inbox, mechanisms: [.internal, .init(rawValue: "test")]), CommandEncodingOptions(), ["RESETKEY \"INBOX\" INTERNAL test"], #line),
+            (.resetKey(mailbox: .inbox, mechanisms: [.internal, .init("test")]), CommandEncodingOptions(), ["RESETKEY \"INBOX\" INTERNAL test"], #line),
 
             (.genURLAuth([.init(urlRump: "rump1", mechanism: .internal)]), CommandEncodingOptions(), ["GENURLAUTH \"rump1\" INTERNAL"], #line),
-            (.genURLAuth([.init(urlRump: "rump2", mechanism: .internal), .init(urlRump: "rump3", mechanism: .init(rawValue: "test"))]), CommandEncodingOptions(), ["GENURLAUTH \"rump2\" INTERNAL \"rump3\" test"], #line),
+            (.genURLAuth([.init(urlRump: "rump2", mechanism: .internal), .init(urlRump: "rump3", mechanism: .init("test"))]), CommandEncodingOptions(), ["GENURLAUTH \"rump2\" INTERNAL \"rump3\" test"], #line),
 
             (.urlFetch(["test"]), CommandEncodingOptions(), ["URLFETCH test"], #line),
             (.urlFetch(["test1", "test2"]), CommandEncodingOptions(), ["URLFETCH test1 test2"], #line),

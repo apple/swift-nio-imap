@@ -439,7 +439,7 @@ extension ParserUnitTests {
             validInputs: [
                 ("METADATA INBOX \"a\"", "\r", .list(list: ["a"], mailbox: .inbox), #line),
                 ("METADATA INBOX \"a\" \"b\" \"c\"", "\r", .list(list: ["a", "b", "c"], mailbox: .inbox), #line),
-                ("METADATA INBOX (\"a\" NIL)", "\r", .values(values: [.init(name: "a", value: .init(rawValue: nil))], mailbox: .inbox), #line),
+                ("METADATA INBOX (\"a\" NIL)", "\r", .values(values: [.init(name: "a", value: .init(nil))], mailbox: .inbox), #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
@@ -454,10 +454,10 @@ extension ParserUnitTests {
         self.iterateTests(
             testFunction: GrammarParser.parseMetadataValue,
             validInputs: [
-                ("NIL", "\r", .init(rawValue: nil), #line),
-                ("\"a\"", "\r", .init(rawValue: "a"), #line),
-                ("{1}\r\na", "\r", .init(rawValue: "a"), #line),
-                ("~{1}\r\na", "\r", .init(rawValue: "a"), #line),
+                ("NIL", "\r", .init(nil), #line),
+                ("\"a\"", "\r", .init("a"), #line),
+                ("{1}\r\na", "\r", .init("a"), #line),
+                ("~{1}\r\na", "\r", .init("a"), #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
@@ -539,7 +539,7 @@ extension ParserUnitTests {
             testFunction: GrammarParser.parseAttributeFlag,
             validInputs: [
                 ("\\\\Answered", " ", .answered, #line),
-                ("some", " ", .init(rawValue: "some"), #line),
+                ("some", " ", .init("some"), #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
@@ -1030,7 +1030,7 @@ extension ParserUnitTests {
                 ("\\Trash", "", .trash, #line),
                 ("\\Sent", "", .sent, #line),
                 ("\\Drafts", "", .drafts, #line),
-                ("\\Other", " ", .init(rawValue: "\\Other"), #line),
+                ("\\Other", " ", .init("\\Other"), #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
@@ -1121,11 +1121,11 @@ extension ParserUnitTests {
                 ("NAMESPACE", " ", .namespace, #line),
                 ("GETMETADATA INBOX a", " ", .getMetadata(options: [], mailbox: .inbox, entries: ["a"]), #line),
                 ("GETMETADATA (MAXSIZE 123) INBOX (a b)", " ", .getMetadata(options: [.maxSize(123)], mailbox: .inbox, entries: ["a", "b"]), #line),
-                ("SETMETADATA INBOX (a NIL)", " ", .setMetadata(mailbox: .inbox, entries: [.init(name: "a", value: .init(rawValue: nil))]), #line),
+                ("SETMETADATA INBOX (a NIL)", " ", .setMetadata(mailbox: .inbox, entries: [.init(name: "a", value: .init(nil))]), #line),
                 ("RESETKEY", "\r", .resetKey(mailbox: nil, mechanisms: []), #line),
                 ("RESETKEY INBOX", "\r", .resetKey(mailbox: .inbox, mechanisms: []), #line),
                 ("RESETKEY INBOX INTERNAL", "\r", .resetKey(mailbox: .inbox, mechanisms: [.internal]), #line),
-                ("RESETKEY INBOX INTERNAL test", "\r", .resetKey(mailbox: .inbox, mechanisms: [.internal, .init(rawValue: "test")]), #line),
+                ("RESETKEY INBOX INTERNAL test", "\r", .resetKey(mailbox: .inbox, mechanisms: [.internal, .init("test")]), #line),
                 ("GENURLAUTH test INTERNAL", "\r", .genURLAuth([.init(urlRump: "test", mechanism: .internal)]), #line),
                 ("GENURLAUTH test INTERNAL test2 INTERNAL", "\r", .genURLAuth([.init(urlRump: "test", mechanism: .internal), .init(urlRump: "test2", mechanism: .internal)]), #line),
                 ("URLFETCH test", "\r", .urlFetch(["test"]), #line),
@@ -1690,8 +1690,8 @@ extension ParserUnitTests {
         self.iterateTests(
             testFunction: GrammarParser.parseEntryValue,
             validInputs: [
-                ("\"name\" \"value\"", "", .init(name: "name", value: .init(rawValue: "value")), #line),
-                ("\"name\" NIL", "", .init(name: "name", value: .init(rawValue: nil)), #line),
+                ("\"name\" \"value\"", "", .init(name: "name", value: .init("value")), #line),
+                ("\"name\" NIL", "", .init(name: "name", value: .init(nil)), #line),
             ],
             parserErrorInputs: [
                 ],
@@ -1711,13 +1711,13 @@ extension ParserUnitTests {
                 (
                     "(\"name\" \"value\")",
                     "",
-                    [.init(name: "name", value: .init(rawValue: "value"))],
+                    [.init(name: "name", value: .init("value"))],
                     #line
                 ),
                 (
                     "(\"name1\" \"value1\" \"name2\" \"value2\")",
                     "",
-                    [.init(name: "name1", value: .init(rawValue: "value1")), .init(name: "name2", value: .init(rawValue: "value2"))],
+                    [.init(name: "name1", value: .init("value1")), .init(name: "name2", value: .init("value2"))],
                     #line
                 ),
             ],
@@ -2873,7 +2873,7 @@ extension ParserUnitTests {
         var buffer = #""STRING" "multipart/related""# as ByteBuffer
         do {
             let mediaBasic = try GrammarParser.parseMediaBasic(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(mediaBasic, Media.Basic(kind: .init(rawValue: "STRING"), subtype: .related))
+            XCTAssertEqual(mediaBasic, Media.Basic(kind: .init("STRING"), subtype: .related))
         } catch {
             XCTFail("\(error)")
         }
@@ -2982,10 +2982,10 @@ extension ParserUnitTests {
                 ("MODSEQ (3)", " ", .fetchModificationResponse(.init(modifierSequenceValue: 3)), #line),
                 ("X-GM-MSGID 1278455344230334865", " ", .gmailMessageID(1278455344230334865), #line),
                 ("X-GM-THRID 1278455344230334865", " ", .gmailThreadID(1278455344230334865), #line),
-                ("X-GM-LABELS (\\Inbox \\Sent Important \"Muy Importante\")", " ", .gmailLabels([GmailLabel(rawValue: "\\Inbox"), GmailLabel(rawValue: "\\Sent"), GmailLabel(rawValue: "Important"), GmailLabel(rawValue: "Muy Importante")]), #line),
-                ("X-GM-LABELS (foo)", " ", .gmailLabels([GmailLabel(rawValue: "foo")]), #line),
+                ("X-GM-LABELS (\\Inbox \\Sent Important \"Muy Importante\")", " ", .gmailLabels([GmailLabel("\\Inbox"), GmailLabel("\\Sent"), GmailLabel("Important"), GmailLabel("Muy Importante")]), #line),
+                ("X-GM-LABELS (foo)", " ", .gmailLabels([GmailLabel("foo")]), #line),
                 ("X-GM-LABELS ()", " ", .gmailLabels([]), #line),
-                ("X-GM-LABELS (\\Drafts)", " ", .gmailLabels([GmailLabel(rawValue: "\\Drafts")]), #line),
+                ("X-GM-LABELS (\\Drafts)", " ", .gmailLabels([GmailLabel("\\Drafts")]), #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
@@ -3918,9 +3918,9 @@ extension ParserUnitTests {
             validInputs: [
                 ("*", "\r\n", SequenceRange.all, #line),
                 ("1:*", "\r\n", SequenceRange.all, #line),
-                ("12:34", "\r\n", SequenceRange(left: 12, right: 34), #line),
-                ("12:*", "\r\n", SequenceRange(left: 12, right: .max), #line),
-                ("1:34", "\r\n", SequenceRange(left: .min, right: 34), #line),
+                ("12:34", "\r\n", SequenceRange(12 ... 34), #line),
+                ("12:*", "\r\n", SequenceRange(12 ... (.max)), #line),
+                ("1:34", "\r\n", SequenceRange((.min) ... 34), #line),
             ],
             parserErrorInputs: [
                 ("a", "", #line),
@@ -4363,7 +4363,7 @@ extension ParserUnitTests {
             testFunction: GrammarParser.parseUAuthMechanism,
             validInputs: [
                 ("INTERNAL", " ", .internal, #line),
-                ("abcdEFG0123456789", " ", .init(rawValue: "abcdEFG0123456789"), #line),
+                ("abcdEFG0123456789", " ", .init("abcdEFG0123456789"), #line),
             ],
             parserErrorInputs: [
                 ],
@@ -4427,9 +4427,9 @@ extension ParserUnitTests {
             validInputs: [
                 ("*", "\r\n", UIDRange(.max), #line),
                 ("1:*", "\r\n", UIDRange.all, #line),
-                ("12:34", "\r\n", UIDRange(left: 12, right: 34), #line),
-                ("12:*", "\r\n", UIDRange(left: 12, right: .max), #line),
-                ("1:34", "\r\n", UIDRange(left: .min, right: 34), #line),
+                ("12:34", "\r\n", UIDRange(12 ... 34), #line),
+                ("12:*", "\r\n", UIDRange(12 ... .max), #line),
+                ("1:34", "\r\n", UIDRange((.min) ... 34), #line),
             ],
             parserErrorInputs: [
                 ("!", " ", #line),

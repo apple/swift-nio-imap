@@ -15,22 +15,17 @@
 import struct NIO.ByteBuffer
 
 /// A range of messages using message `SequenceNumber`s.
-public struct SequenceRange: Hashable, RawRepresentable {
+public struct SequenceRange: Hashable {
+    /// A `SequenceRange` that covers every possible `SequenceNumber`.
+    public static let all = SequenceRange((.min) ... (.max))
+
     /// The underlying range.
-    public var rawValue: ClosedRange<SequenceNumber>
+    public let range: ClosedRange<SequenceNumber>
 
     /// Creates a new `SequenceRange` from a closed range.
     /// - parameter rawValue: The underlying range to use.
-    public init(rawValue: ClosedRange<SequenceNumber>) {
-        self.rawValue = rawValue
-    }
-}
-
-extension SequenceRange {
-    /// Creates a new `SequenceRange` from a closed range.
-    /// - parameter range: The underlying range to use.
     public init(_ range: ClosedRange<SequenceNumber>) {
-        self.init(rawValue: range)
+        self.range = range
     }
 
     /// Creates a new `SequenceRange` using `.min` as the lower bound.
@@ -44,14 +39,6 @@ extension SequenceRange {
     public init(_ range: PartialRangeFrom<SequenceNumber>) {
         self.init(range.lowerBound ... SequenceNumber.max)
     }
-
-    internal init(left: SequenceNumber, right: SequenceNumber) {
-        if left <= right {
-            self.init(rawValue: left ... right)
-        } else {
-            self.init(rawValue: right ... left)
-        }
-    }
 }
 
 extension SequenceRange: ExpressibleByIntegerLiteral {
@@ -64,13 +51,8 @@ extension SequenceRange: ExpressibleByIntegerLiteral {
     /// Creates a new `SequenceRange` using a single number, essentially a range with one element.
     /// - parameter value: The raw value to use as the upper and lower bounds.
     public init(_ value: SequenceNumber) {
-        self.init(rawValue: value ... value)
+        self.init(value ... value)
     }
-}
-
-extension SequenceRange {
-    /// A `SequenceRange` that covers every possible `SequenceNumber`.
-    public static let all = SequenceRange((.min) ... (.max))
 }
 
 // MARK: - Encoding
@@ -78,12 +60,12 @@ extension SequenceRange {
 extension EncodeBuffer {
     @discardableResult mutating func writeSequenceRange(_ range: SequenceRange) -> Int {
         if range == .all {
-            return self.writeSequenceNumberOrWildcard(range.rawValue.upperBound)
+            return self.writeSequenceNumberOrWildcard(range.range.upperBound)
         } else {
-            return self.writeSequenceNumberOrWildcard(range.rawValue.lowerBound) +
-                self.write(if: range.rawValue.lowerBound < range.rawValue.upperBound) {
+            return self.writeSequenceNumberOrWildcard(range.range.lowerBound) +
+                self.write(if: range.range.lowerBound < range.range.upperBound) {
                     self.writeString(":") +
-                        self.writeSequenceNumberOrWildcard(range.rawValue.upperBound)
+                        self.writeSequenceNumberOrWildcard(range.range.upperBound)
                 }
         }
     }

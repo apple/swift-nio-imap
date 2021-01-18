@@ -16,30 +16,30 @@ import struct NIO.ByteBuffer
 
 /// Used when performing a search with `MODSEQ`. Note that this is similar to `Flag`, however `.recent`
 /// is not present.
-public struct AttributeFlag: Hashable, RawRepresentable {
+public struct AttributeFlag: Hashable {
     /// The raw `String` to use as the flag.
-    public var rawValue: String
+    public let stringValue: String
 
     // yep, we need 4, because the spec requires 2 literal \\ characters
     /// "\\Answered"
-    public static var answered = Self(rawValue: "\\\\Answered")
+    public static var answered = Self("\\\\Answered")
 
     /// "\\Flagged"
-    public static var flagged = Self(rawValue: "\\\\Flagged")
+    public static var flagged = Self("\\\\Flagged")
 
     /// "\\Deleted"
-    public static var deleted = Self(rawValue: "\\\\Deleted")
+    public static var deleted = Self("\\\\Deleted")
 
     /// "\\Seen"
-    public static var seen = Self(rawValue: "\\\\Seen")
+    public static var seen = Self("\\\\Seen")
 
     /// "\\Draft"
-    public static var draft = Self(rawValue: "\\\\Draft")
+    public static var draft = Self("\\\\Draft")
 
     /// Creates a new `AttributeFlag` from the give raw `String`.
     /// - parameter rawValue: The raw `String` to use as the flag. Will be lower-cased.
-    public init(rawValue: String) {
-        self.rawValue = rawValue.lowercased()
+    public init(_ stringValue: String) {
+        self.stringValue = stringValue.lowercased()
     }
 }
 
@@ -47,6 +47,6 @@ public struct AttributeFlag: Hashable, RawRepresentable {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeAttributeFlag(_ flag: AttributeFlag) -> Int {
-        self.writeString(flag.rawValue)
+        self.writeString(flag.stringValue)
     }
 }

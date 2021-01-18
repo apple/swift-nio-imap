@@ -22,7 +22,7 @@ class SequenceRangeTests: EncodeTestClass {}
 
 extension SequenceRangeTests {
     func testWildcard() {
-        let range = SequenceRange.all.rawValue
+        let range = SequenceRange.all.range
         XCTAssertEqual(range.lowerBound, SequenceNumber.min)
         XCTAssertEqual(range.upperBound, SequenceNumber.max)
     }
@@ -32,7 +32,7 @@ extension SequenceRangeTests {
 
 extension SequenceRangeTests {
     func testSingle() {
-        let range = SequenceRange(999).rawValue
+        let range = SequenceRange(999).range
         XCTAssertEqual(range.lowerBound, 999)
         XCTAssertEqual(range.upperBound, 999)
     }
@@ -44,15 +44,15 @@ extension SequenceRangeTests {
     // here we always expect the smaller number on the left
 
     func testInit_range() {
-        let range = SequenceRange(1 ... 999).rawValue
+        let range = SequenceRange(1 ... 999).range
         XCTAssertEqual(range.lowerBound, 1)
         XCTAssertEqual(range.upperBound, 999)
     }
 
     func testInit_integer() {
         let range: SequenceRange = 654
-        XCTAssertEqual(range.rawValue.lowerBound, 654)
-        XCTAssertEqual(range.rawValue.upperBound, 654)
+        XCTAssertEqual(range.range.lowerBound, 654)
+        XCTAssertEqual(range.range.upperBound, 654)
     }
 }
 
@@ -96,14 +96,7 @@ extension SequenceRangeTests {
 
     func testRangeOperator_postfix_complete_right_larger() {
         let expected = "44:55"
-        let size = self.testBuffer.writeSequenceRange(SequenceRange(left: 44, right: 55))
-        XCTAssertEqual(size, expected.utf8.count)
-        XCTAssertEqual(expected, self.testBufferString)
-    }
-
-    func testRangeOperator_postfix_complete_left_larger() {
-        let expected = "44:55"
-        let size = self.testBuffer.writeSequenceRange(SequenceRange(left: 55, right: 44))
+        let size = self.testBuffer.writeSequenceRange(44 ... 55)
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }

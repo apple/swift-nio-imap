@@ -23,7 +23,7 @@ class BodyStructure_Tests: EncodeTestClass {}
 extension BodyStructure_Tests {
     func testInit_mediaSubtype() {
         let type = BodyStructure.MediaSubtype("TYPE")
-        XCTAssertEqual(type.rawValue, "type")
+        XCTAssertEqual(type.stringValue, "type")
     }
 }
 

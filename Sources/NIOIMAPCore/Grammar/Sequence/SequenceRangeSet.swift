@@ -106,13 +106,13 @@ extension SequenceRange {
 extension SequenceNumber {
     fileprivate init(_ a: SequenceRangeSet.SequenceNumberWrapper) {
         precondition(a.rawValue < UInt32.max)
-        self.init(rawValue: a.rawValue + 1)!
+        self.init(exactly: a.rawValue + 1)!
     }
 }
 
 extension Range where Element == SequenceRangeSet.SequenceNumberWrapper {
     fileprivate init(_ r: SequenceRange) {
-        self = SequenceRangeSet.SequenceNumberWrapper(r.rawValue.lowerBound) ..< SequenceRangeSet.SequenceNumberWrapper(r.rawValue.upperBound).advanced(by: 1)
+        self = SequenceRangeSet.SequenceNumberWrapper(r.range.lowerBound) ..< SequenceRangeSet.SequenceNumberWrapper(r.range.upperBound).advanced(by: 1)
     }
 
     fileprivate init(_ num: SequenceNumber) {

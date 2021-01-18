@@ -15,14 +15,22 @@
 import struct NIO.ByteBuffer
 
 /// The value for a metadata entry.
-public struct MetadataValue: RawRepresentable, Equatable {
+public struct MetadataValue: Equatable {
     /// The raw value bytes.
-    public var rawValue: ByteBuffer?
+    public let bytes: ByteBuffer?
 
     /// Creates a new `MetadataValue`.
     /// - parameter rawValue: The raw value bytes - optional.
-    public init(rawValue: ByteBuffer?) {
-        self.rawValue = rawValue
+    public init(_ bytes: ByteBuffer?) {
+        self.bytes = bytes
+    }
+}
+
+// MARK: - ExpressibleByNilLiteral
+
+extension MetadataValue: ExpressibleByNilLiteral {
+    public init(nilLiteral: ()) {
+        self.bytes = nil
     }
 }
 
@@ -30,7 +38,7 @@ public struct MetadataValue: RawRepresentable, Equatable {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeMetadataValue(_ value: MetadataValue) -> Int {
-        guard let bytes = value.rawValue else {
+        guard let bytes = value.bytes else {
             return self.writeNil()
         }
         return self.writeLiteral8(bytes.readableBytesView)

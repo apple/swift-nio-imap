@@ -28,16 +28,16 @@ extension AttributeFlag_Tests {
             (.draft, "\\\\draft", #line),
             (.flagged, "\\\\flagged", #line),
             (.seen, "\\\\seen", #line),
-            (.init(rawValue: "test"), "test", #line),
+            (.init("test"), "test", #line),
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeAttributeFlag($0) })
     }
 
     func testLowercased() {
-        let t1 = AttributeFlag(rawValue: "TEST")
-        let t2 = AttributeFlag(rawValue: "test")
+        let t1 = AttributeFlag("TEST")
+        let t2 = AttributeFlag("test")
         XCTAssertEqual(t1, t2)
-        XCTAssertEqual(t1.rawValue, "test")
-        XCTAssertEqual(t2.rawValue, "test")
+        XCTAssertEqual(t1.stringValue, "test")
+        XCTAssertEqual(t2.stringValue, "test")
     }
 }

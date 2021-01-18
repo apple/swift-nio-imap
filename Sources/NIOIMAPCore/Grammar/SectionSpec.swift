@@ -29,8 +29,8 @@ public struct SectionSpecifier: Hashable {
     /// Creates a new *complete* `SectionSpecifier`.
     /// - parameter part: The part of the body. Can only be empty if `kind` is not `.MIMEHeader`.
     /// - parameter kind: The type of section, e.g. *HEADER*. Defaults to `.complete`.
-    public init(part: Part = .init(rawValue: []), kind: Kind = .complete) {
-        if part.rawValue.count == 0 {
+    public init(part: Part = .init([]), kind: Kind = .complete) {
+        if part.array.count == 0 {
             precondition(kind != .MIMEHeader, "Cannot use MIME with an empty section part")
         }
         self.part = part
@@ -107,23 +107,23 @@ extension SectionSpecifier {
     /// This corresponds to the part number mentioned in RFC 3501 section 6.4.5.
     ///
     /// Examples are `1`, `4.1`, and `4.2.2.1`.
-    public struct Part: RawRepresentable, Hashable, ExpressibleByArrayLiteral {
+    public struct Part: Hashable, ExpressibleByArrayLiteral {
         /// Each element in the array can be thought of as an index of the section identified by the previous element.
         public typealias ArrayLiteralElement = Int
 
         /// The underlying array of integer components, where each integer is a sub-part of the previous.
-        public var rawValue: [Int]
+        public let array: [Int]
 
         /// Creates a new `Part` from an array of integers..
         /// - parameter rawValue: The array of integers.
-        public init(rawValue: [Int]) {
-            self.rawValue = rawValue
+        public init(_ array: [Int]) {
+            self.array = array
         }
 
         /// Creates a new `Part` from an array of integers..
         /// - parameter rawValue: The array of integers.
         public init(arrayLiteral elements: Int...) {
-            self.rawValue = elements
+            self.array = elements
         }
     }
 
@@ -150,11 +150,11 @@ extension SectionSpecifier.Part: Comparable {
     /// - parameter rhs: The first `Part` for comparison.
     /// - returns: `true` if `lhs` evaluates to strictly less than `rhs`, otherwise `false`.
     public static func < (lhs: SectionSpecifier.Part, rhs: SectionSpecifier.Part) -> Bool {
-        let minSize = min(lhs.rawValue.count, rhs.rawValue.count)
+        let minSize = min(lhs.array.count, rhs.array.count)
         for i in 0 ..< minSize {
-            if lhs.rawValue[i] == rhs.rawValue[i] {
+            if lhs.array[i] == rhs.array[i] {
                 continue
-            } else if lhs.rawValue[i] < rhs.rawValue[i] {
+            } else if lhs.array[i] < rhs.array[i] {
                 return true
             } else {
                 return false
@@ -162,7 +162,7 @@ extension SectionSpecifier.Part: Comparable {
         }
 
         // [1.2.3.4] < [1.2.3.4.5]
-        if lhs.rawValue.count < rhs.rawValue.count {
+        if lhs.array.count < rhs.array.count {
             return true
         } else {
             return false
@@ -173,7 +173,7 @@ extension SectionSpecifier.Part: Comparable {
 extension SectionSpecifier.Part: CustomStringConvertible {
     /// Produces a textual representation as period-separated numbers (as defined in the IMAP RFC).
     public var description: String {
-        rawValue.map { "\($0)" }.joined(separator: ".")
+        self.array.map { "\($0)" }.joined(separator: ".")
     }
 }
 
@@ -284,12 +284,12 @@ extension EncodeBuffer {
 
         return self.writeSectionPart(spec.part)
             + self.writeIfExists(spec.kind) { (kind) -> Int in
-                self.writeSectionKind(kind, dot: spec.part.rawValue.count > 0 && spec.kind != .complete)
+                self.writeSectionKind(kind, dot: spec.part.array.count > 0 && spec.kind != .complete)
             }
     }
 
     @discardableResult mutating func writeSectionPart(_ part: SectionSpecifier.Part) -> Int {
-        self.writeArray(part.rawValue, separator: ".", parenthesis: false) { (element, self) in
+        self.writeArray(part.array, separator: ".", parenthesis: false) { (element, self) in
             self.writeString("\(UInt32(element))")
         }
     }

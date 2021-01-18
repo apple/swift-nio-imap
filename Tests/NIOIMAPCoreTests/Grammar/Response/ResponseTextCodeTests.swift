@@ -55,7 +55,7 @@ extension ResponseTextCodeTests {
             (.urlMechanisms([.init(mechanism: .internal, base64: nil)]), "URLMECH INTERNAL INTERNAL", #line),
             (.urlMechanisms([.init(mechanism: .internal, base64: "test")]), "URLMECH INTERNAL INTERNAL=test", #line),
             (
-                .urlMechanisms([.init(mechanism: .init(rawValue: "m1"), base64: "b1"), .init(mechanism: .init(rawValue: "m2"), base64: "b2")]),
+                .urlMechanisms([.init(mechanism: .init("m1"), base64: "b1"), .init(mechanism: .init("m2"), base64: "b2")]),
                 "URLMECH INTERNAL m1=b1 m2=b2",
                 #line
             ),

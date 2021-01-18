@@ -20,9 +20,9 @@ import StandardLibraryPreview
 /// UIDs are _not_ sorted.
 public struct UIDSet: Hashable {
     /// A non-empty array of UID ranges.
-    fileprivate var ranges: RangeSet<A>
+    fileprivate var ranges: RangeSet<UIDShiftWrapper>
 
-    fileprivate init(_ ranges: RangeSet<A>) {
+    fileprivate init(_ ranges: RangeSet<UIDShiftWrapper>) {
         self.ranges = ranges
     }
 
@@ -44,45 +44,45 @@ public struct UIDSet: Hashable {
 extension UIDSet {
     /// UIDs shifted by 1, such that UID 1 -> 0, and UID.max -> UInt32.max - 1
     /// This allows us to store UID.max + 1 inside a UInt32.
-    fileprivate struct A: RawRepresentable, Hashable {
+    fileprivate struct UIDShiftWrapper: Hashable {
         var rawValue: UInt32
     }
 }
 
-extension UIDSet.A: Strideable {
+extension UIDSet.UIDShiftWrapper: Strideable {
     public init(_ uid: UID) {
         // Since UID.min = 1, we can always do this:
         self.rawValue = uid.rawValue - 1
     }
 
-    func distance(to other: UIDSet.A) -> Int64 {
+    func distance(to other: UIDSet.UIDShiftWrapper) -> Int64 {
         Int64(other.rawValue) - Int64(self.rawValue)
     }
 
-    func advanced(by n: Int64) -> UIDSet.A {
-        UIDSet.A(rawValue: UInt32(Int64(rawValue) + n))
+    func advanced(by n: Int64) -> UIDSet.UIDShiftWrapper {
+        UIDSet.UIDShiftWrapper(rawValue: UInt32(Int64(rawValue) + n))
     }
 }
 
 extension UID {
-    fileprivate init(_ a: UIDSet.A) {
-        precondition(a.rawValue < UInt32.max)
-        self.init(rawValue: a.rawValue + 1)!
+    fileprivate init(_ wrapper: UIDSet.UIDShiftWrapper) {
+        precondition(wrapper.rawValue < UInt32.max)
+        self.init(exactly: wrapper.rawValue + 1)!
     }
 }
 
-extension Range where Element == UIDSet.A {
+extension Range where Element == UIDSet.UIDShiftWrapper {
     fileprivate init(_ r: UIDRange) {
-        self = UIDSet.A(r.rawValue.lowerBound) ..< UIDSet.A(r.rawValue.upperBound).advanced(by: 1)
+        self = UIDSet.UIDShiftWrapper(r.range.lowerBound) ..< UIDSet.UIDShiftWrapper(r.range.upperBound).advanced(by: 1)
     }
 
     fileprivate init(_ uid: UID) {
-        self = UIDSet.A(uid) ..< UIDSet.A(uid).advanced(by: 1)
+        self = UIDSet.UIDShiftWrapper(uid) ..< UIDSet.UIDShiftWrapper(uid).advanced(by: 1)
     }
 }
 
 extension UIDRange {
-    fileprivate init(_ r: Range<UIDSet.A>) {
+    fileprivate init(_ r: Range<UIDSet.UIDShiftWrapper>) {
         self.init(UID(r.lowerBound) ... UID(r.upperBound.advanced(by: -1)))
     }
 }
@@ -111,14 +111,14 @@ extension UIDSet {
     /// Creates a set from a single range.
     /// - parameter range: The `UIDRange` to construct a set from.
     public init(_ range: UIDRange) {
-        let a: Range<A> = Range(range)
+        let a: Range<UIDShiftWrapper> = Range(range)
         self.ranges = RangeSet(a)
     }
 }
 
 extension UIDSet {
     public init(_ uid: UID) {
-        self.ranges = RangeSet(A(uid) ..< (A(uid).advanced(by: 1)))
+        self.ranges = RangeSet(UIDShiftWrapper(uid) ..< (UIDShiftWrapper(uid).advanced(by: 1)))
     }
 }
 
@@ -153,7 +153,7 @@ extension UIDSet {
 
 extension UIDSet: Collection {
     public struct Index {
-        fileprivate var rangeIndex: RangeSet<A>.Ranges.Index
+        fileprivate var rangeIndex: RangeSet<UIDShiftWrapper>.Ranges.Index
         fileprivate var indexInRange: UID.Stride
     }
 
@@ -227,7 +227,7 @@ extension UIDSet: SetAlgebra {
     public typealias Element = UID
 
     public func contains(_ member: UID) -> Bool {
-        ranges.contains(A(member))
+        ranges.contains(UIDShiftWrapper(member))
     }
 
     public func union(_ other: Self) -> Self {
@@ -244,21 +244,21 @@ extension UIDSet: SetAlgebra {
 
     public mutating func insert(_ newMember: UID) -> (inserted: Bool, memberAfterInsert: UID) {
         guard !contains(newMember) else { return (false, newMember) }
-        let r: Range<A> = Range(newMember)
+        let r: Range<UIDShiftWrapper> = Range(newMember)
         ranges.insert(contentsOf: r)
         return (true, newMember)
     }
 
     public mutating func remove(_ member: UID) -> UID? {
         guard contains(member) else { return nil }
-        let r: Range<A> = Range(member)
+        let r: Range<UIDShiftWrapper> = Range(member)
         ranges.remove(contentsOf: r)
         return member
     }
 
     public mutating func update(with newMember: UID) -> UID? {
         guard !contains(newMember) else { return newMember }
-        let r: Range<A> = Range(newMember)
+        let r: Range<UIDShiftWrapper> = Range(newMember)
         ranges.insert(contentsOf: r)
         return nil
     }

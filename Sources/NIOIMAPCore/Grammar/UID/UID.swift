@@ -18,29 +18,20 @@
 /// The maximum value is often rendered as `*` when encoded.
 ///
 /// See RFC 3501 section 2.3.1.1.
-public struct UID: RawRepresentable, Hashable, Codable {
+public struct UID: Hashable, Codable {
     /// The minimum `UID` is always *1*.
     public static let min = UID(1)
 
     /// The maximum `UID` is always `UInt32.max`.
-    public static let max = UID(UInt32.max)
+    public static let max = UID(exactly: UInt32.max)!
 
-    /// The message's unique identifier.
-    public var rawValue: UInt32
+    let rawValue: UInt32
 
-    /// Creates a new UID, performing validation.
-    /// - parameter rawValue: The `UID`s raw value. Validated to be greater than 0 and fit inside a `UInt32`.
-    /// - returns: `nil` if `rawValue` is not a valid `UID` defined in RFC 3501, otherwise a new `UID`.
-    public init?(rawValue: Int) {
-        guard rawValue >= 1, rawValue <= UInt32.max else { return nil }
-        self.rawValue = UInt32(rawValue)
-    }
-
-    /// Creates a new UID, performing validation.
-    /// - parameter rawValue: The `UID`s raw value. Validated to be greater than 0.
-    /// - returns: `nil` if `rawValue` is not a valid `UID` defined in RFC 3501, otherwise a new `UID`.
-    public init?(rawValue: UInt32) {
-        guard rawValue >= 1 else { return nil }
+    /// Creates a `UID` from some `BinaryInteger`, ensuring that the given value fits within a `UInt32`.
+    /// - parameter source: The raw value to use.
+    /// - returns: `nil` if `source` does not fit within a `UInt32`, otherwise a `UID`.
+    public init?<T>(exactly source: T) where T: BinaryInteger {
+        guard source > 0, let rawValue = UInt32(exactly: source) else { return nil }
         self.rawValue = rawValue
     }
 }
@@ -65,31 +56,14 @@ extension UID: ExpressibleByIntegerLiteral {
     /// Creates a new `UID` from an integer literal, skipping all validation.
     /// - parameter integerLiteral: The integer literal value.
     public init(integerLiteral value: UInt32) {
-        self.init(value)
-    }
-
-    /// Create a `UID`, asserting with invalid values.
-    /// - parameter value: An integer value that must be a non-zero `UInt32` value.
-    public init(_ value: Int) {
-        assert(value <= UInt32.max, "UID must be a UInt32")
-        self.init(UInt32(value))
-    }
-
-    /// Create a `UID`, asserting with invalid values.
-    /// - parameter value: A `UInt32` that must be non-zero.
-    public init(_ value: UInt32) {
-        assert(value >= 1, "UID cannot be 0")
-        self.init(rawValue: Int(value))!
+        assert(value >= 1)
+        self.rawValue = value
     }
 }
 
-extension UID {
-    /// Creates a `UID` from some `BinaryInteger`, ensuring that the given value fits within a `UInt32`.
-    /// - parameter source: The raw value to use.
-    /// - returns: `nil` if `source` does not fit within a `UInt32`, otherwise a `UID`.
-    public init?<T>(exactly source: T) where T: BinaryInteger {
-        guard let rawValue = UInt32(exactly: source) else { return nil }
-        self.init(rawValue: rawValue)
+extension BinaryInteger {
+    public init(_ uid: UID) {
+        self = Self(uid.rawValue)
     }
 }
 
@@ -126,7 +100,7 @@ extension UID: Strideable {
     /// - returns: A new `UID`.
     public func advanced(by n: Int64) -> UID {
         precondition(n <= UInt32.max, "`n` must be less than UInt32.max")
-        return UID(UInt32(Int64(self.rawValue) + n))
+        return UID(exactly: Int64(self.rawValue) + n)!
     }
 }
 
@@ -149,14 +123,14 @@ extension UID {
     /// - parameter value: The upper bound.
     /// - returns: A new `UIDRange`.
     public static prefix func ... (value: Self) -> UIDRange {
-        UIDRange(left: .min, right: value)
+        UIDRange((.min) ... value)
     }
 
     /// Creates a new `UIDRange` from the given lower bound to `.max`
     /// - parameter value: The lower bound.
     /// - returns: A new `UIDRange`.
     public static postfix func ... (value: Self) -> UIDRange {
-        UIDRange(left: value, right: .max)
+        UIDRange(value ... (.max))
     }
 
     /// Creates a `UIDRange` from two `UIDs`.
@@ -164,6 +138,6 @@ extension UID {
     /// - parameter upper: The upper bound of the range.
     /// - returns: A new `UIDRange` using the provided bounds.
     public static func ... (lower: Self, upper: Self) -> UIDRange {
-        UIDRange(left: lower, right: upper)
+        UIDRange(lower ... upper)
     }
 }
