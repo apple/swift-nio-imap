@@ -18,7 +18,7 @@ import struct NIO.ByteBuffer
 /// is not present.
 public struct AttributeFlag: Hashable {
     /// The raw `String` to use as the flag.
-    public var stringValue: String
+    public let stringValue: String
 
     // yep, we need 4, because the spec requires 2 literal \\ characters
     /// "\\Answered"

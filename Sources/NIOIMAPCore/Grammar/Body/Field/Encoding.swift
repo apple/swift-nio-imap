@@ -34,7 +34,7 @@ extension BodyStructure {
         public static var quotedPrintable: Self { Self("QUOTED-PRINTABLE") }
 
         /// The uppercased encoding name
-        public var stringValue: String
+        public let stringValue: String
         
         /// The uppercased encoding name
         public var description: String { stringValue }

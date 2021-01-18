@@ -21,7 +21,7 @@ public struct SequenceRange: Hashable {
     public static let all = SequenceRange((.min) ... (.max))
     
     /// The underlying range.
-    public var range: ClosedRange<SequenceNumber>
+    public let range: ClosedRange<SequenceNumber>
 
     /// Creates a new `SequenceRange` from a closed range.
     /// - parameter rawValue: The underlying range to use.

@@ -129,7 +129,7 @@ extension BodyStructure {
         }
 
         /// The subtype as a lowercased string
-        public var stringValue: String
+        public let stringValue: String
 
         /// The subtype as a lowercased string
         public var description: String { stringValue }

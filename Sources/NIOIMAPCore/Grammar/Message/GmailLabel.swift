@@ -16,7 +16,7 @@ import struct NIO.ByteBuffer
 /// GMail treats labels as folders.
 public struct GmailLabel: Equatable {
     /// The label's raw value -  a sequence of bytes
-    public var stringValue: ByteBuffer
+    public let stringValue: ByteBuffer
 
     /// Creates a new GMail label from the given bytes.
     /// - parameter rawValue: The raw bytes to construct the label

@@ -18,7 +18,7 @@ public struct UAuthMechanism: Equatable {
     public static let `internal` = Self("INTERNAL")
 
     /// The raw name of the generation algorithm.
-    public var stringValue: String
+    public let stringValue: String
 
     /// Creates a new UAuthMechanism from the name of an algorithm.
     /// - parameter rawValue: The name of an algorithm.

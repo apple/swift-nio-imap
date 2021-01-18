@@ -15,7 +15,7 @@
 /// The unique identifier validity value of a mailbox. Combined with a message UID to form a 64-bit identifier.
 public struct UIDValidity: Hashable {
     /// The underlying raw value.
-    var rawValue: UInt32
+    let rawValue: UInt32
 
     /// Creates a `UIDValidity` from some `BinaryInteger` after checking
     /// that the given value fits within a `UInt32`.

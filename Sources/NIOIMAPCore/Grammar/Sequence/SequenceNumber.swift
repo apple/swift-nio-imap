@@ -25,7 +25,7 @@ public struct SequenceNumber: Hashable {
     public static let max = SequenceNumber(exactly: UInt32.max)!
 
     /// The raw value of the sequence number, defined in RFC 3501 to be an unsigned 32-bit integer.
-    var rawValue: UInt32
+    let rawValue: UInt32
 
     /// Creates a new `SequenceNumber` after performing some sanity checks.
     /// - parameter rawValue: An `Int` that is converted for use as the `rawValue`.

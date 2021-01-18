@@ -18,25 +18,25 @@ extension Media {
     /// Represents a simple but common data type such as *APPLICATION* or *INAGE*
     public struct BasicKind: CustomStringConvertible, Equatable {
         /// IMAP4rev1 APPLICATION
-        public static var application = Self("APPLICATION")
+        public static let application = Self("APPLICATION")
 
         /// IMAP4rev1 AUDIO
-        public static var audio = Self("AUDIO")
+        public static let audio = Self("AUDIO")
 
         /// IMAP4rev1 IMAGE
-        public static var image = Self("IMAGE")
+        public static let image = Self("IMAGE")
 
         /// IMAP4rev1 MESSAGE
-        public static var message = Self("MESSAGE")
+        public static let message = Self("MESSAGE")
 
         /// IMAP4rev1 VIDEO
-        public static var video = Self("VIDEO")
+        public static let video = Self("VIDEO")
 
         /// IMAP4rev1 FONT
-        public static var font = Self("FONT")
+        public static let font = Self("FONT")
 
         /// The raw uppercased string representation of the type.
-        public var stringValue: String
+        public let stringValue: String
 
         /// See `rawValue`
         public var description: String {

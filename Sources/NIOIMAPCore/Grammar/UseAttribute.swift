@@ -21,25 +21,25 @@ import struct NIO.ByteBuffer
 public struct UseAttribute: Equatable {
 
     /// A mailbox that presents all messages in the user's store.
-    public static var all = Self("\\All")
+    public static let all = Self("\\All")
 
     /// Used to archive messages - note that the meaning of "archived" will vary from server to server.
-    public static var archive = Self("\\Archive")
+    public static let archive = Self("\\Archive")
 
     /// Used to store draft messages that have not been sent.
-    public static var drafts = Self("\\Drafts")
+    public static let drafts = Self("\\Drafts")
 
     /// Stores messages that have been marked as "important" for some reason.
-    public static var flagged = Self("\\Flagged")
+    public static let flagged = Self("\\Flagged")
 
     /// Stores messages deemed to be spam of junk mail, e.g. from a mailing list.
-    public static var junk = Self("\\Junk")
+    public static let junk = Self("\\Junk")
 
     /// Holds copies of messages that have been sent.
-    public static var sent = Self("\\Sent")
+    public static let sent = Self("\\Sent")
 
     /// Holds messages that have been deleted or marked for deletion.
-    public static var trash = Self("\\Trash")
+    public static let trash = Self("\\Trash")
 
     /// The raw value of the attribute, e.g. `\\trash`. Always lowercase.
     public var stringValue: String

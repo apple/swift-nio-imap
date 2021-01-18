@@ -112,7 +112,7 @@ extension SectionSpecifier {
         public typealias ArrayLiteralElement = Int
 
         /// The underlying array of integer components, where each integer is a sub-part of the previous.
-        public var array: [Int]
+        public let array: [Int]
 
         /// Creates a new `Part` from an array of integers..
         /// - parameter rawValue: The array of integers.

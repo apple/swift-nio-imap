@@ -25,7 +25,7 @@ public struct UID: Hashable, Codable {
     /// The maximum `UID` is always `UInt32.max`.
     public static let max = UID(exactly: UInt32.max)!
     
-    var rawValue: UInt32
+    let rawValue: UInt32
     
     /// Creates a `UID` from some `BinaryInteger`, ensuring that the given value fits within a `UInt32`.
     /// - parameter source: The raw value to use.
