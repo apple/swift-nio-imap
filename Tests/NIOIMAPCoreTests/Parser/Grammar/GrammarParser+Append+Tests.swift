@@ -16,15 +16,15 @@ import NIO
 @testable import NIOIMAPCore
 import XCTest
 
-class GrammarParser_Body_Tests: XCTestCase, _ParserTestHelpers {}
+class GrammarParser_Append_Tests: XCTestCase, _ParserTestHelpers {}
 
 // MARK: - append
 
-extension GrammarParser_Body_Tests {}
+extension GrammarParser_Append_Tests {}
 
 // MARK: - parseAppendData
 
-extension GrammarParser_Body_Tests {
+extension GrammarParser_Append_Tests {
     func testParseAppendData() {
         self.iterateTests(
             testFunction: GrammarParser.parseAppendData,
@@ -63,7 +63,7 @@ extension GrammarParser_Body_Tests {
 
 // MARK: - parseAppendMessage
 
-extension GrammarParser_Body_Tests {
+extension GrammarParser_Append_Tests {
     // NOTE: Spec is ambiguous when parsing `append-data`, which may contain `append-data-ext`, which is the same as `append-ext`, which is inside `append-opts`
     func testParseMessage() {
         self.iterateTests(
@@ -90,7 +90,7 @@ extension GrammarParser_Body_Tests {
 
 // MARK: - parseAppendOptions
 
-extension GrammarParser_Body_Tests {
+extension GrammarParser_Append_Tests {
     func testParseAppendOptions() throws {
         let components = InternalDate.Components(year: 1994, month: 6, day: 25, hour: 1, minute: 2, second: 3, timeZoneMinutes: 0)
         let date = InternalDate(components!)

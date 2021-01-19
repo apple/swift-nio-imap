@@ -16,11 +16,11 @@ import NIO
 @testable import NIOIMAPCore
 import XCTest
 
-class GrammarParser_Mailbox_Tests: XCTestCase, _ParserTestHelpers {}
+class GrammarParser_Message_Tests: XCTestCase, _ParserTestHelpers {}
 
 // MARK: - parseMessageAttribute
 
-extension GrammarParser_Mailbox_Tests {
+extension GrammarParser_Message_Tests {
     func testParseMessageAttribute() throws {
         let components = InternalDate.Components(year: 1994, month: 6, day: 25, hour: 1, minute: 2, second: 3, timeZoneMinutes: 0)
         let date = InternalDate(components!)
@@ -66,7 +66,7 @@ extension GrammarParser_Mailbox_Tests {
 
 // MARK: - parseMessageData
 
-extension GrammarParser_Mailbox_Tests {
+extension GrammarParser_Message_Tests {
     func testParseMessageData() {
         self.iterateTests(
             testFunction: GrammarParser.parseMessageData,
