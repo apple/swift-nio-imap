@@ -20,7 +20,7 @@ class GrammarParser_Body_Tests: XCTestCase, _ParserTestHelpers {}
 
 // MARK: - parseBodyExtension
 
-extension ParserUnitTests {
+extension GrammarParser_Body_Tests {
     func testParseBodyExtension() {
         self.iterateTests(
             testFunction: GrammarParser.parseBodyExtension,
@@ -40,7 +40,7 @@ extension ParserUnitTests {
 
 // MARK: - parseBodyFieldDsp
 
-extension ParserUnitTests {
+extension GrammarParser_Body_Tests {
     func testParseBodyFieldDsp_some() {
         TestUtilities.withBuffer(#"("astring" ("f1" "v1"))"#) { (buffer) in
             let dsp = try GrammarParser.parseBodyFieldDsp(buffer: &buffer, tracker: .testTracker)
@@ -59,7 +59,7 @@ extension ParserUnitTests {
 
 // MARK: - parseBodyEncoding
 
-extension ParserUnitTests {
+extension GrammarParser_Body_Tests {
     func testParseBodyEncoding() {
         self.iterateTests(
             testFunction: GrammarParser.parseBodyEncoding,
@@ -86,7 +86,7 @@ extension ParserUnitTests {
 
 // MARK: - parseBodyFieldLanguage
 
-extension ParserUnitTests {
+extension GrammarParser_Body_Tests {
     func testParseBodyFieldLanguage() {
         self.iterateTests(
             testFunction: GrammarParser.parseBodyFieldLanguage,
@@ -103,7 +103,7 @@ extension ParserUnitTests {
 
 // MARK: - parseBodyFieldParam
 
-extension ParserUnitTests {
+extension GrammarParser_Body_Tests {
     func testParseBodyFieldParam() {
         self.iterateTests(
             testFunction: GrammarParser.parseBodyFieldParam,
@@ -127,7 +127,7 @@ extension ParserUnitTests {
 
 // MARK: - parseBodyFields
 
-extension ParserUnitTests {
+extension GrammarParser_Body_Tests {
     func testParseBodyFields_valid() {
         TestUtilities.withBuffer(#"("f1" "v1") "id" "desc" "8BIT" 1234"#, terminator: " ") { (buffer) in
             let result = try GrammarParser.parseBodyFields(buffer: &buffer, tracker: .testTracker)
@@ -142,7 +142,7 @@ extension ParserUnitTests {
 
 // MARK: - parseBodyTypeSinglepart
 
-extension ParserUnitTests {
+extension GrammarParser_Body_Tests {
     func testParseBodyTypeSinglepart() {
         let basicInputs: [(String, String, BodyStructure.Singlepart, UInt)] = [
             (
