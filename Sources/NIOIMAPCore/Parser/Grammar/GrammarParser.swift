@@ -32,7 +32,6 @@ enum GrammarParser {}
 // MARK: - Grammar Parsers
 
 extension GrammarParser {
-
     // astring         = 1*ASTRING-CHAR / string
     static func parseAString(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ByteBuffer {
         func parseOneOrMoreASTRINGCHAR(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ByteBuffer {
@@ -2652,7 +2651,6 @@ extension GrammarParser {
 // MARK: - Helper Parsers
 
 extension GrammarParser {
-
     static func parse2Digit(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Int {
         try self.parseNDigits(buffer: &buffer, tracker: tracker, bytes: 2)
     }
@@ -2670,7 +2668,6 @@ extension GrammarParser {
             return num
         }
     }
-
 }
 
 struct StackTracker {

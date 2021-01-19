@@ -24,7 +24,6 @@ import struct NIO.ByteBuffer
 import struct NIO.ByteBufferView
 
 extension GrammarParser {
- 
     // response-data   = "*" SP response-payload CRLF
     static func parseResponseData(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ResponsePayload {
         try composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
@@ -396,7 +395,7 @@ extension GrammarParser {
             parseResponseTextCode_atom,
         ], buffer: &buffer, tracker: tracker)
     }
-    
+
     // quota_response  ::= "QUOTA" SP astring SP quota_list
     static func parseResponsePayload_quota(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ResponsePayload {
         // quota_resource  ::= atom SP number SP number
@@ -447,5 +446,4 @@ extension GrammarParser {
             return .quotaRoot(mailbox, .init(quotaRoot))
         }
     }
-    
 }

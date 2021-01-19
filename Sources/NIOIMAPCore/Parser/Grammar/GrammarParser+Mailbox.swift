@@ -24,7 +24,6 @@ import struct NIO.ByteBuffer
 import struct NIO.ByteBufferView
 
 extension GrammarParser {
-    
     // mailbox         = "INBOX" / astring
     static func parseMailbox(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxName {
         let string = try self.parseAString(buffer: &buffer, tracker: tracker)
@@ -206,7 +205,7 @@ extension GrammarParser {
             parseMailboxOrPat_patterns,
         ], buffer: &buffer, tracker: tracker)
     }
-    
+
     // mbx-list-flags  = *(mbx-list-oflag SP) mbx-list-sflag
     //                   *(SP mbx-list-oflag) /
     //                   mbx-list-oflag *(SP mbx-list-oflag)
@@ -223,7 +222,7 @@ extension GrammarParser {
         }
         return results
     }
-    
+
     // status-att-list  = status-att-val *(SP status-att-val)
     static func parseMailboxStatus(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxStatus {
         enum MailboxValue: Equatable {
@@ -313,7 +312,7 @@ extension GrammarParser {
             return status
         }
     }
-    
+
     // mbox-or-pat  = list-mailbox / patterns
     static func parseMailboxPatterns(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxPatterns {
         func parseMailboxPatterns_list(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxPatterns {
@@ -329,5 +328,4 @@ extension GrammarParser {
             parseMailboxPatterns_patterns,
         ], buffer: &buffer, tracker: tracker)
     }
-    
 }

@@ -24,7 +24,6 @@ import struct NIO.ByteBuffer
 import struct NIO.ByteBufferView
 
 extension GrammarParser {
-    
     // command         = tag SP (command-any / command-auth / command-nonauth /
     //                   command-select) CRLF
     static func parseCommand(buffer: inout ByteBuffer, tracker: StackTracker) throws -> TaggedCommand {
@@ -219,5 +218,4 @@ extension GrammarParser {
             self.parseEsearch,
         ], buffer: &buffer, tracker: tracker)
     }
-    
 }

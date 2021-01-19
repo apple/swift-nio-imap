@@ -27,9 +27,7 @@ let CR = UInt8(ascii: "\r")
 let LF = UInt8(ascii: "\n")
 let CRLF = String(decoding: [CR, LF], as: Unicode.UTF8.self)
 
-protocol _ParserTestHelpers {
-    
-}
+protocol _ParserTestHelpers {}
 
 final class ParserUnitTests: XCTestCase, _ParserTestHelpers {}
 

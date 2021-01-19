@@ -24,7 +24,6 @@ import struct NIO.ByteBuffer
 import struct NIO.ByteBufferView
 
 extension GrammarParser {
- 
     // message-data    = nz-number SP ("EXPUNGE" / ("FETCH" SP msg-att))
     static func parseMessageData(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MessageData {
         func parseMessageData_expunge(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MessageData {
@@ -69,7 +68,7 @@ extension GrammarParser {
             parseMessageData_fetchData,
         ], buffer: &buffer, tracker: tracker)
     }
-    
+
     // msg-att-static  = "ENVELOPE" SP envelope / "INTERNALDATE" SP date-time /
     //                   "RFC822.SIZE" SP number /
     //                   "BODY" ["STRUCTURE"] SP body /
@@ -198,5 +197,4 @@ extension GrammarParser {
             parseMessageAttribute_gmailLabels,
         ], buffer: &buffer, tracker: tracker)
     }
-    
 }

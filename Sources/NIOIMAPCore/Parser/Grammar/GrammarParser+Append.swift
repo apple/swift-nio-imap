@@ -24,7 +24,6 @@ import struct NIO.ByteBuffer
 import struct NIO.ByteBufferView
 
 extension GrammarParser {
-    
     // append          = "APPEND" SP mailbox 1*append-message
     static func parseAppend(buffer: inout ByteBuffer, tracker: StackTracker) throws -> CommandStream {
         try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> CommandStream in
@@ -152,5 +151,4 @@ extension GrammarParser {
             parseCatenateEnd,
         ], buffer: &buffer, tracker: tracker)
     }
-    
 }

@@ -24,7 +24,6 @@ import struct NIO.ByteBuffer
 import struct NIO.ByteBufferView
 
 extension GrammarParser {
- 
     // list            = "LIST" [SP list-select-opts] SP mailbox SP mbox-or-pat [SP list-return-opts]
     static func parseList(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Command {
         try composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
@@ -88,7 +87,7 @@ extension GrammarParser {
             parseListSelectIndependentOption_optionExtension,
         ], buffer: &buffer, tracker: tracker)
     }
-    
+
     // list-select-opt =  list-select-base-opt / list-select-independent-opt
     //                    / list-select-mod-opt
     static func parseListSelectOption(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ListSelectOption {
@@ -149,7 +148,7 @@ extension GrammarParser {
             return .init(baseOption: baseOption, options: selectOptions)
         }
     }
-    
+
     // list-return-opt = "RETURN" SP "(" [return-option *(SP return-option)] ")"
     static func parseListReturnOptions(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [ReturnOption] {
         try composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
@@ -195,5 +194,4 @@ extension GrammarParser {
         }
         return String(decoding: CollectionOfOne(char), as: Unicode.UTF8.self)
     }
-    
 }

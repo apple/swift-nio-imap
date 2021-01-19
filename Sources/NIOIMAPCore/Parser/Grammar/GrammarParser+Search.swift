@@ -24,7 +24,6 @@ import struct NIO.ByteBuffer
 import struct NIO.ByteBufferView
 
 extension GrammarParser {
-    
     // search          = "SEARCH" [search-return-opts] SP search-program
     static func parseSearch(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Command {
         try composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
@@ -523,5 +522,4 @@ extension GrammarParser {
             return modSeq
         }
     }
-    
 }

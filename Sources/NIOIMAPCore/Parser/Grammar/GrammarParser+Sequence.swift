@@ -24,7 +24,6 @@ import struct NIO.ByteBuffer
 import struct NIO.ByteBufferView
 
 extension GrammarParser {
-    
     // Sequence Range
     static func parseSequenceRange(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SequenceRange {
         func parse_wildcard(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SequenceNumber {
@@ -119,11 +118,10 @@ extension GrammarParser {
             parseSequenceSet_lastCommand,
         ], buffer: &buffer, tracker: tracker)
     }
-    
+
     // mod-sequence-valzer = "0" / mod-sequence-value
     static func parseModificationSequenceValue(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ModificationSequenceValue {
         let number = UInt64(try self.parseNumber(buffer: &buffer, tracker: tracker))
         return ModificationSequenceValue(number)
     }
-    
 }

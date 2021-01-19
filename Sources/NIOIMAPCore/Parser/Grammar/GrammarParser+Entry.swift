@@ -24,7 +24,6 @@ import struct NIO.ByteBuffer
 import struct NIO.ByteBufferView
 
 extension GrammarParser {
-    
     static func parseEntryValue(buffer: inout ByteBuffer, tracker: StackTracker) throws -> EntryValue {
         try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> EntryValue in
             let name = try self.parseAString(buffer: &buffer, tracker: tracker)
@@ -79,7 +78,7 @@ extension GrammarParser {
             return array
         }
     }
-    
+
     static func parseEntryFlagName(buffer: inout ByteBuffer, tracker: StackTracker) throws -> EntryFlagName {
         try composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> EntryFlagName in
             try fixedString("\"/flags/", buffer: &buffer, tracker: tracker)
@@ -130,5 +129,4 @@ extension GrammarParser {
             parseEntryKindResponse_shared,
         ], buffer: &buffer, tracker: tracker)
     }
-    
 }

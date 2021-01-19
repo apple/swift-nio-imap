@@ -24,7 +24,6 @@ import struct NIO.ByteBuffer
 import struct NIO.ByteBufferView
 
 extension GrammarParser {
-    
     // body            = "(" (body-type-1part / body-type-mpart) ")"
     static func parseBody(buffer: inout ByteBuffer, tracker: StackTracker) throws -> BodyStructure {
         func parseBody_singlePart(buffer: inout ByteBuffer, tracker: StackTracker) throws -> BodyStructure {
@@ -336,7 +335,7 @@ extension GrammarParser {
             return BodyStructure.Multipart(parts: parts, mediaSubtype: media, extension: ext)
         }
     }
-    
+
     static func parseBodyLocationExtension(buffer: inout ByteBuffer, tracker: StackTracker) throws -> BodyStructure.LocationAndExtensions {
         let fieldLocation = try self.parseNString(buffer: &buffer, tracker: tracker).flatMap { String(buffer: $0) }
         let extensions = try ParserLibrary.parseZeroOrMore(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> [BodyExtension] in
@@ -363,5 +362,4 @@ extension GrammarParser {
         }
         return BodyStructure.DispositionAndLanguage(disposition: description, language: language)
     }
-    
 }

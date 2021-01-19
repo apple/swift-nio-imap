@@ -24,7 +24,6 @@ import struct NIO.ByteBuffer
 import struct NIO.ByteBufferView
 
 extension GrammarParser {
- 
     // reusable for a lot of the env-* types
     static func parseEnvelopeAddresses(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [Address] {
         try fixedString("(", buffer: &buffer, tracker: tracker)
@@ -45,7 +44,7 @@ extension GrammarParser {
             parseOptionalEnvelopeAddresses_nil,
         ], buffer: &buffer, tracker: tracker)
     }
-    
+
     // address         = "(" addr-name SP addr-adl SP addr-mailbox SP
     //                   addr-host ")"
     static func parseAddress(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Address {
@@ -62,7 +61,7 @@ extension GrammarParser {
             return Address(name: name, adl: adl, mailbox: mailbox, host: host)
         }
     }
-    
+
     // envelope        = "(" env-date SP env-subject SP env-from SP
     //                   env-sender SP env-reply-to SP env-to SP env-cc SP
     //                   env-bcc SP env-in-reply-to SP env-message-id ")"
@@ -103,5 +102,4 @@ extension GrammarParser {
             )
         }
     }
-    
 }

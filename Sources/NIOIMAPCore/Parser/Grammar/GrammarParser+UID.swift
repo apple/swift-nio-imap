@@ -24,7 +24,6 @@ import struct NIO.ByteBuffer
 import struct NIO.ByteBufferView
 
 extension GrammarParser {
-    
     // uid             = "UID" SP
     //                   (copy / move / fetch / search / store / uid-expunge)
     static func parseUid(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Command {
@@ -141,7 +140,7 @@ extension GrammarParser {
         }
         return validity
     }
-    
+
     // uid-set
     static func parseUIDSet(buffer: inout ByteBuffer, tracker: StackTracker) throws -> UIDSet {
         func parseUIDSet_number(buffer: inout ByteBuffer, tracker: StackTracker) throws -> UIDRange {
