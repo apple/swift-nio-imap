@@ -20,7 +20,7 @@ class GrammarParser_Entry_Tests: XCTestCase, _ParserTestHelpers {}
 
 // MARK: - parseEntryValue
 
-extension ParserUnitTests {
+extension GrammarParser_Entry_Tests {
     func testParseEntryValue() {
         self.iterateTests(
             testFunction: GrammarParser.parseEntryValue,
@@ -38,7 +38,7 @@ extension ParserUnitTests {
 
 // MARK: - parseEntryValues
 
-extension ParserUnitTests {
+extension GrammarParser_Entry_Tests {
     func testParseEntryValues() {
         self.iterateTests(
             testFunction: GrammarParser.parseEntryValues,
@@ -66,7 +66,7 @@ extension ParserUnitTests {
 
 // MARK: - parseEntries
 
-extension ParserUnitTests {
+extension GrammarParser_Entry_Tests {
     func testParseEntries() {
         self.iterateTests(
             testFunction: GrammarParser.parseEntries,
@@ -85,7 +85,7 @@ extension ParserUnitTests {
 
 // MARK: - parseEntryList
 
-extension ParserUnitTests {
+extension GrammarParser_Entry_Tests {
     func testParseEntryList() {
         self.iterateTests(
             testFunction: GrammarParser.parseEntryList,
@@ -103,7 +103,7 @@ extension ParserUnitTests {
 
 // MARK: - parseEntryFlagName
 
-extension ParserUnitTests {
+extension GrammarParser_Entry_Tests {
     func testParseEntryFlagName() {
         self.iterateTests(
             testFunction: GrammarParser.parseEntryFlagName,
@@ -122,7 +122,7 @@ extension ParserUnitTests {
 
 // MARK: - entry-type-resp parseEntryTypeResponse
 
-extension ParserUnitTests {
+extension GrammarParser_Entry_Tests {
     func testParseEntryTypeRequest() {
         self.iterateTests(
             testFunction: GrammarParser.parseEntryKindRequest,
@@ -143,7 +143,7 @@ extension ParserUnitTests {
 
 // MARK: - entry-type-resp parseEntryTypeResponse
 
-extension ParserUnitTests {
+extension GrammarParser_Entry_Tests {
     func testParseEntryTypeResponse() {
         self.iterateTests(
             testFunction: GrammarParser.parseEntryKindResponse,
