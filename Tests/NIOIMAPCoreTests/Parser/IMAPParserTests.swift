@@ -2072,47 +2072,6 @@ extension ParserUnitTests {
     }
 }
 
-// MARK: - parseList
-
-extension ParserUnitTests {
-    func testParseList() {
-        self.iterateTests(
-            testFunction: GrammarParser.parseList,
-            validInputs: [
-                (#"LIST "" """#, "\r", .list(nil, reference: MailboxName(""), .mailbox(""), []), #line),
-            ],
-            parserErrorInputs: [],
-            incompleteMessageInputs: []
-        )
-    }
-}
-
-// MARK: - list-wildcard parseListWildcard
-
-extension ParserUnitTests {
-    func testWildcard() {
-        let valid: Set<UInt8> = [UInt8(ascii: "%"), UInt8(ascii: "*")]
-        let invalid: Set<UInt8> = Set(UInt8.min ... UInt8.max).subtracting(valid)
-
-        for v in valid {
-            var buffer = TestUtilities.createTestByteBuffer(for: [v])
-            do {
-                let str = try GrammarParser.parseListWildcards(buffer: &buffer, tracker: .testTracker)
-                XCTAssertEqual(str[str.startIndex], Character(Unicode.Scalar(v)))
-            } catch {
-                XCTFail("\(v) doesn't satisfy \(error)")
-                return
-            }
-        }
-        for v in invalid {
-            var buffer = TestUtilities.createTestByteBuffer(for: [v])
-            XCTAssertThrowsError(try GrammarParser.parseListWildcards(buffer: &buffer, tracker: .testTracker)) { e in
-                XCTAssertTrue(e is ParserError)
-            }
-        }
-    }
-}
-
 // MARK: - parseMailboxData
 
 extension ParserUnitTests {
