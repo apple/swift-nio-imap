@@ -45,10 +45,10 @@ extension UIDTests {
     }
 }
 
-// MARK: - CustomStringConvertible
+// MARK: - CustomDebugStringConvertible
 
 extension UIDTests {
-    func testCustomStringConvertible() {
+    func testCustomDebugStringConvertible() {
         XCTAssertEqual("\(UID.min)", "1")
         XCTAssertEqual("\(UID.max)", "*")
         XCTAssertEqual("\(UID(2))", "2")

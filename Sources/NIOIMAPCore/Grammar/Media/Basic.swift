@@ -16,7 +16,7 @@ import struct NIO.ByteBuffer
 
 extension Media {
     /// Represents a simple but common data type such as *APPLICATION* or *INAGE*
-    public struct BasicKind: CustomStringConvertible, Equatable {
+    public struct BasicKind: CustomDebugStringConvertible, Equatable {
         /// IMAP4rev1 APPLICATION
         public static let application = Self("APPLICATION")
 
@@ -39,7 +39,7 @@ extension Media {
         public let stringValue: String
 
         /// See `rawValue`
-        public var description: String {
+        public var debugDescription: String {
             stringValue
         }
 

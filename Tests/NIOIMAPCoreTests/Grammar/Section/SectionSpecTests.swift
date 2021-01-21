@@ -127,10 +127,10 @@ extension SectionSpecifierTests {
     }
 }
 
-// MARK: - CustomStringConvertible
+// MARK: - CustomDebugStringConvertible
 
 extension SectionSpecifierTests {
-    func testCustomStringConvertible_part() {
+    func testCustomDebugStringConvertible_part() {
         let inputs: [(SectionSpecifier.Part, String, UInt)] = [
             ([], "", #line),
             ([1], "1", #line),

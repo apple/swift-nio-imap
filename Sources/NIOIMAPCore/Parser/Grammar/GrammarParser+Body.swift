@@ -136,7 +136,7 @@ extension GrammarParser {
             return BodyStructure.Fields(
                 parameters: fieldParam,
                 id: fieldID,
-                description: fieldDescription,
+                contentDescription: fieldDescription,
                 encoding: Encoding,
                 octetCount: fieldOctets
             )

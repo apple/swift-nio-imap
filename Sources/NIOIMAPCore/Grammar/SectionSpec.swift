@@ -76,10 +76,10 @@ extension SectionSpecifier: Comparable {
     }
 }
 
-extension SectionSpecifier: CustomStringConvertible {
+extension SectionSpecifier: CustomDebugStringConvertible {
     /// A textual representation of the `SectionSpecifier` that is inline with the IMAP RFC.
     /// E.g. *.MIME*.
-    public var description: String {
+    public var debugDescription: String {
         let kind: String
         switch self.kind {
         case .complete:
@@ -170,9 +170,9 @@ extension SectionSpecifier.Part: Comparable {
     }
 }
 
-extension SectionSpecifier.Part: CustomStringConvertible {
+extension SectionSpecifier.Part: CustomDebugStringConvertible {
     /// Produces a textual representation as period-separated numbers (as defined in the IMAP RFC).
-    public var description: String {
+    public var debugDescription: String {
         self.array.map { "\($0)" }.joined(separator: ".")
     }
 }
