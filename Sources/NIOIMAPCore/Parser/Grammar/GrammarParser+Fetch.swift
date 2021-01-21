@@ -209,6 +209,11 @@ extension GrammarParser {
             try fixedString("X-GM-LABELS", buffer: &buffer, tracker: tracker)
             return .gmailLabels
         }
+        
+        func parseFetchAttribute_modSeq(buffer: inout ByteBuffer, tracker: StackTracker) throws -> FetchAttribute {
+            try fixedString("MODSEQ", buffer: &buffer, tracker: tracker)
+            return .modificationSequence
+        }
 
         return try oneOf([
             parseFetchAttribute_envelope,
@@ -225,6 +230,7 @@ extension GrammarParser {
             parseFetchAttribute_gmailMessageID,
             parseFetchAttribute_gmailThreadID,
             parseFetchAttribute_gmailLabels,
+            parseFetchAttribute_modSeq
         ], buffer: &buffer, tracker: tracker)
     }
 
