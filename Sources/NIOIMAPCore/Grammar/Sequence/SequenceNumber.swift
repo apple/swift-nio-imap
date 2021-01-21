@@ -39,7 +39,7 @@ public struct SequenceNumber: Hashable {
 // MARK: - BinaryInteger
 
 extension BinaryInteger {
-    init(_ num: SequenceNumber) {
+    public init(_ num: SequenceNumber) {
         self = Self(num.rawValue)
     }
 }

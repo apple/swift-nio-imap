@@ -40,14 +40,20 @@ public struct UseAttribute: Equatable {
     /// Holds messages that have been deleted or marked for deletion.
     public static let trash = Self("\\Trash")
 
-    /// The raw value of the attribute, e.g. `\\trash`. Always lowercase.
-    public var stringValue: String
+    internal var stringValue: String
 
     /// Creates a new `UseAttribute` from the raw `String`. Note that
     /// usually it should be sufficient to just use the predefined attributes, e.g. `.drafts`.
     /// `rawValue` will be lowercased.
     public init(_ stringValue: String) {
         self.stringValue = stringValue.lowercased()
+    }
+}
+
+extension String {
+    /// The raw value of the attribute, e.g. `\\trash`. Always lowercase.
+    public init(_ other: UseAttribute) {
+        self = other.stringValue
     }
 }
 

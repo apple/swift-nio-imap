@@ -129,7 +129,7 @@ extension BodyStructure {
         }
 
         /// The subtype as a lowercased string
-        public let stringValue: String
+        internal let stringValue: String
 
         /// The subtype as a lowercased string
         public var debugDescription: String { stringValue }
@@ -139,6 +139,12 @@ extension BodyStructure {
         public init(_ stringValue: String) {
             self.stringValue = stringValue.lowercased()
         }
+    }
+}
+
+extension String {
+    public init(_ other: BodyStructure.MediaSubtype) {
+        self = other.stringValue
     }
 }
 
