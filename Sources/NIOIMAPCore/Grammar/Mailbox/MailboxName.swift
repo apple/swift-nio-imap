@@ -182,6 +182,8 @@ public struct MailboxName: Hashable {
     public var storage: ByteBuffer
 
     /// The raw bytes decoded into a UTF8 `String`
+    ///
+    /// - ToDo: This should not be exposed. Needs to go through the “modified UTF-7” decoding.
     public var stringValue: String {
         String(buffer: self.storage)
     }

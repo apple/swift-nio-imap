@@ -23,11 +23,6 @@ public struct QuotaRoot: Equatable {
     /// The raw bytes, readable as `[UInt8]`
     public var storage: ByteBuffer
 
-    /// The raw bytes decoded into a UTF8 `String`
-    public var stringValue: String {
-        String(buffer: self.storage)
-    }
-
     /// Creates a new `QuotaRoot`.
     ///  - parameter string: The quota root name
     public init(_ string: String) {
@@ -41,12 +36,19 @@ public struct QuotaRoot: Equatable {
     }
 }
 
+extension String {
+    /// The raw bytes decoded into a UTF8 `String`
+    public init(_ other: QuotaRoot) {
+        self.init(buffer: other.storage)
+    }
+}
+
 // MARK: - CustomDebugStringConvertible
 
 extension QuotaRoot: CustomDebugStringConvertible {
     /// A human-readable representation of the root.
     public var debugDescription: String {
-        self.stringValue
+        String(self)
     }
 }
 
