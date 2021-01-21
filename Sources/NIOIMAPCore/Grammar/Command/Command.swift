@@ -330,12 +330,12 @@ extension CommandEncodeBuffer {
     private mutating func writeCommandKind_create(mailbox: MailboxName, parameters: [CreateParameter]) -> Int {
         self.buffer.writeString("CREATE ") +
             self.buffer.writeMailbox(mailbox) +
-        self.buffer.write(if: parameters.count > 0, {
-            self.buffer.writeSpace() +
-            self.buffer.writeArray(parameters, separator: "", parenthesis: false) { (param, buffer) -> Int in
-                buffer.writeCreateParameter(param)
+            self.buffer.write(if: parameters.count > 0) {
+                self.buffer.writeSpace() +
+                    self.buffer.writeArray(parameters, separator: "", parenthesis: false) { (param, buffer) -> Int in
+                        buffer.writeCreateParameter(param)
+                    }
             }
-        })
     }
 
     private mutating func writeCommandKind_delete(mailbox: MailboxName) -> Int {
