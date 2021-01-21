@@ -40,12 +40,6 @@ let commands: [(String, Command)] = [
     ("Fetch (all, lots)", .fetch(.all, [.envelope, .flags, .internalDate, .gmailThreadID, .modificationSequence], [])),
     ("Fetch (set-one, lots)", .fetch([1...10], [.envelope, .flags, .internalDate, .gmailThreadID, .modificationSequence], [])),
     ("Fetch (set-many, lots)", .fetch([1...2, 4...7, 10...100], [.envelope, .flags, .internalDate, .gmailThreadID, .modificationSequence], [])),
-    ("Copy (set-one)", .copy([1 ... 2, 4 ... 5, 10 ... 20], .inbox)),
-    ("Copy (set-many)", .copy([1 ... 100], .inbox)),
-    ("Fetch (last command, lots)", .fetch(.lastCommand, [.envelope, .flags, .internalDate, .gmailThreadID, .modificationSequence], [])),
-    ("Fetch (all, lots)", .fetch(.all, [.envelope, .flags, .internalDate, .gmailThreadID, .modificationSequence], [])),
-    ("Fetch (set-one, lots)", .fetch([1 ... 10], [.envelope, .flags, .internalDate, .gmailThreadID, .modificationSequence], [])),
-    ("Fetch (set-many, lots)", .fetch([1 ... 2, 4 ... 7, 10 ... 100], [.envelope, .flags, .internalDate, .gmailThreadID, .modificationSequence], [])),
 ]
 
 print("Testing \(commands.count) commands")
