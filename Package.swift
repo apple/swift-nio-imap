@@ -16,6 +16,12 @@ let package = Package(
     ],
     targets: [
         .target(
+            name: "Performance",
+            dependencies: [
+                "NIOIMAP"
+            ]
+        ),
+        .target(
             name: "NIOIMAP",
             dependencies: [
                 "NIOIMAPCore",
