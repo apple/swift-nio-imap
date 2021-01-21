@@ -332,7 +332,7 @@ extension CommandEncodeBuffer {
             self.buffer.writeMailbox(mailbox) +
             self.buffer.write(if: parameters.count > 0) {
                 self.buffer.writeSpace() +
-                    self.buffer.writeArray(parameters, separator: "", parenthesis: false) { (param, buffer) -> Int in
+                    self.buffer.writeArray(parameters, separator: "", parenthesis: true) { (param, buffer) -> Int in
                         buffer.writeCreateParameter(param)
                     }
             }
