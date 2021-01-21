@@ -213,11 +213,11 @@ public struct MailboxName: Hashable {
     }
 }
 
-// MARK: - CustomStringConvertible
+// MARK: - CustomDebugStringConvertible
 
-extension MailboxName: CustomStringConvertible {
+extension MailboxName: CustomDebugStringConvertible {
     /// Provides a human-readable description.
-    public var description: String {
+    public var debugDescription: String {
         self.stringValue
     }
 }

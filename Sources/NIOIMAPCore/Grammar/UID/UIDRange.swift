@@ -38,11 +38,11 @@ public struct UIDRange: Hashable {
     }
 }
 
-// MARK: - CustomStringConvertible
+// MARK: - CustomDebugStringConvertible
 
-extension UIDRange: CustomStringConvertible {
+extension UIDRange: CustomDebugStringConvertible {
     /// Creates a human-readable representation of the range.
-    public var description: String {
+    public var debugDescription: String {
         if self.range.lowerBound < self.range.upperBound {
             return "\(self.range.lowerBound):\(self.range.upperBound)"
         } else {

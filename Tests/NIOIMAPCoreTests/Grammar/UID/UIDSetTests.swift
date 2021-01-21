@@ -18,10 +18,10 @@ import XCTest
 
 class UIDSetTests: EncodeTestClass {}
 
-// MARK: - CustomStringConvertible
+// MARK: - CustomDebugStringConvertible
 
 extension UIDSetTests {
-    func testCustomStringConvertible() {
+    func testCustomDebugStringConvertible() {
         XCTAssertEqual("\([1 ... 3, UIDRange(6), UIDRange(88)] as UIDSet)", "1:3,6,88")
         XCTAssertEqual("\([1 ... (.max)] as UIDSet)", "1:*")
         XCTAssertEqual("\([UIDRange(37)] as UIDSet)", "37")

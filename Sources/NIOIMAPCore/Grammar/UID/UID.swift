@@ -36,12 +36,12 @@ public struct UID: Hashable, Codable {
     }
 }
 
-// MARK: - CustomStringConvertible
+// MARK: - CustomDebugStringConvertible
 
-extension UID: CustomStringConvertible {
+extension UID: CustomDebugStringConvertible {
     /// Creates a human-readable `String` representation of the `UID`.
     /// `*` if `self = UInt32.max`, otherwise `self.rawValue` as a `String`.
-    public var description: String {
+    public var debugDescription: String {
         if self == .max {
             return "*"
         } else {

@@ -122,11 +122,11 @@ extension UIDSet {
     }
 }
 
-// MARK: - CustomStringConvertible
+// MARK: - CustomDebugStringConvertible
 
-extension UIDSet: CustomStringConvertible {
+extension UIDSet: CustomDebugStringConvertible {
     /// Creates a human-readable text representation of the set by joined ranges with a comma.
-    public var description: String {
+    public var debugDescription: String {
         ranges
             .ranges
             .map { "\(UIDRange($0))" }

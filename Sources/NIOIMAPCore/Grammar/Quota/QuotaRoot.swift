@@ -41,11 +41,11 @@ public struct QuotaRoot: Equatable {
     }
 }
 
-// MARK: - CustomStringConvertible
+// MARK: - CustomDebugStringConvertible
 
-extension QuotaRoot: CustomStringConvertible {
+extension QuotaRoot: CustomDebugStringConvertible {
     /// A human-readable representation of the root.
-    public var description: String {
+    public var debugDescription: String {
         self.stringValue
     }
 }

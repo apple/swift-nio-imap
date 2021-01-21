@@ -45,11 +45,11 @@ extension ModificationSequenceValue: ExpressibleByIntegerLiteral {
     }
 }
 
-// MARK: - CustomStringConvertible
+// MARK: - CustomDebugStringConvertible
 
-extension ModificationSequenceValue: CustomStringConvertible {
+extension ModificationSequenceValue: CustomDebugStringConvertible {
     /// `value` as a `String`.
-    public var description: String {
+    public var debugDescription: String {
         "\(self.value)"
     }
 }

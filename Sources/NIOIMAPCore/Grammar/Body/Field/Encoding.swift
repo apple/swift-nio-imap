@@ -17,7 +17,7 @@ import struct NIO.ByteBuffer
 extension BodyStructure {
     /// Represents the body transfer encoding as defined in MIME-IMB.
     /// Recommended reading: RFC 2045
-    public struct Encoding: CustomStringConvertible, Equatable {
+    public struct Encoding: CustomDebugStringConvertible, Equatable {
         /// Represents 7-bit encoding, octets with a value larger than 127 are forbidden.
         public static var sevenBit: Self { Self("7BIT") }
 
@@ -34,10 +34,10 @@ extension BodyStructure {
         public static var quotedPrintable: Self { Self("QUOTED-PRINTABLE") }
 
         /// The uppercased encoding name
-        public let stringValue: String
+        internal let stringValue: String
 
         /// The uppercased encoding name
-        public var description: String { stringValue }
+        public var debugDescription: String { stringValue }
 
         /// Creates a new `Encoding` representation. Note that the `stringValue` will be uppercased to make the type easily `Equatable`.
         /// - parameter stringValue: The string representation of the new `Encoding`. Will be upper-cased.
@@ -47,10 +47,16 @@ extension BodyStructure {
     }
 }
 
+extension String {
+    public init(_ other: BodyStructure.Encoding) {
+        self = other.stringValue
+    }
+}
+
 // MARK: - Encoding
 
 extension EncodeBuffer {
     @discardableResult mutating func writeBodyEncoding(_ encoding: BodyStructure.Encoding) -> Int {
-        self.writeString("\"\(encoding.description)\"")
+        self.writeString("\"\(encoding.stringValue)\"")
     }
 }
