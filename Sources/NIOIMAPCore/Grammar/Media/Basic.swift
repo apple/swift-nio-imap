@@ -36,7 +36,7 @@ extension Media {
         public static let font = Self("FONT")
 
         /// The raw uppercased string representation of the type.
-        public let stringValue: String
+        internal let stringValue: String
 
         /// See `rawValue`
         public var debugDescription: String {
@@ -66,6 +66,12 @@ extension Media {
             self.kind = kind
             self.subtype = subtype
         }
+    }
+}
+
+extension String {
+    public init(_ other: Media.BasicKind) {
+        self = other.stringValue
     }
 }
 

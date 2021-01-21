@@ -21,7 +21,7 @@ import struct NIO.ByteBuffer
 /// it will round-trip preserving its case.
 public struct Flag: Hashable {
     /// The raw case-sensitive `String` value.
-    public let stringValue: String
+    internal let stringValue: String
 
     /// Creates a new `Flag` from the given `String`. Note that casing is preserved, however
     /// when checking if two `Flag`s are equal, then the comparison is case-insensitive.
@@ -48,6 +48,12 @@ public struct Flag: Hashable {
         var hasher = Hasher()
         hash(into: &hasher)
         return hasher.finalize()
+    }
+}
+
+extension String {
+    public init(_ other: Flag) {
+        self = other.stringValue
     }
 }
 

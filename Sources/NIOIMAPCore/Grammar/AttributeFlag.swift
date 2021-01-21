@@ -18,7 +18,7 @@ import struct NIO.ByteBuffer
 /// is not present.
 public struct AttributeFlag: Hashable {
     /// The raw `String` to use as the flag.
-    public let stringValue: String
+    internal let stringValue: String
 
     // yep, we need 4, because the spec requires 2 literal \\ characters
     /// "\\Answered"
@@ -40,6 +40,12 @@ public struct AttributeFlag: Hashable {
     /// - parameter rawValue: The raw `String` to use as the flag. Will be lower-cased.
     public init(_ stringValue: String) {
         self.stringValue = stringValue.lowercased()
+    }
+}
+
+extension String {
+    public init(_ other: AttributeFlag) {
+        self = other.stringValue
     }
 }
 
