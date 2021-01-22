@@ -112,7 +112,7 @@ extension SectionSpecifier {
         public typealias ArrayLiteralElement = Int
 
         /// The underlying array of integer components, where each integer is a sub-part of the previous.
-        public let array: [Int]
+        let array: [Int]
 
         /// Creates a new `Part` from an array of integers..
         /// - parameter rawValue: The array of integers.
@@ -141,6 +141,12 @@ extension SectionSpecifier {
         case MIMEHeader
         /// Text body without header, corresponding to e.g. `4.2.TEXT`.
         case text
+    }
+}
+
+extension Array where Element == Int {
+    public init(_ other: SectionSpecifier.Part) {
+        self = other.array
     }
 }
 
