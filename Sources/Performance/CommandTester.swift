@@ -16,15 +16,14 @@ import NIO
 import NIOIMAP
 
 struct CommandTester {
-    
     var iterations: Int
     var command: Command
-    
+
     func run() {
-        for i in 1...iterations {
+        for i in 1 ... self.iterations {
             var commandBuffer = CommandEncodeBuffer(buffer: ByteBuffer(), options: .init())
-            commandBuffer.writeCommand(.init(tag: "\(i)", command: command))
-            
+            commandBuffer.writeCommand(.init(tag: "\(i)", command: self.command))
+
             var buffer = commandBuffer.buffer.nextChunk().bytes
             while commandBuffer.buffer.hasNextChunk {
                 var next = commandBuffer.buffer.nextChunk().bytes
@@ -34,5 +33,4 @@ struct CommandTester {
             _ = try! parser.parseCommandStream(buffer: &buffer)
         }
     }
-    
 }
