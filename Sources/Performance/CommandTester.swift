@@ -15,11 +15,20 @@
 import NIO
 import NIOIMAP
 
-struct CommandTester {
-    var iterations: Int
+class CommandTester: Benchmark {
     var command: Command
+    var iterations: Int
 
-    func run() {
+    init(command: Command, iterations: Int) {
+        self.command = command
+        self.iterations = iterations
+    }
+
+    func setUp() throws {}
+
+    func tearDown() {}
+
+    func run() throws -> Int {
         for i in 1 ... self.iterations {
             var commandBuffer = CommandEncodeBuffer(buffer: ByteBuffer(), options: .init())
             commandBuffer.writeCommand(.init(tag: "\(i)", command: self.command))
@@ -32,5 +41,6 @@ struct CommandTester {
             var parser = CommandParser(bufferLimit: 1000)
             _ = try! parser.parseCommandStream(buffer: &buffer)
         }
+        return self.iterations
     }
 }

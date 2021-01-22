@@ -2,7 +2,7 @@
 //
 // This source file is part of the SwiftNIO open source project
 //
-// Copyright (c) 2020 Apple Inc. and the SwiftNIO project authors
+// Copyright (c) 2019 Apple Inc. and the SwiftNIO project authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
@@ -12,11 +12,11 @@
 //
 //===----------------------------------------------------------------------===//
 
-// Runs a series of interactions between a client and server, aiming to replicate what might happen in the real world.
-
+import Dispatch
 import Foundation
 import NIO
 import NIOIMAP
+import NIOSSL
 
 let commands: [(String, Command)] = [
     ("Check", .check),
@@ -80,20 +80,48 @@ let commands: [(String, Command)] = [
     ("Move (set)", .move([1 ... 100, 200 ... 300, 3000 ... 4000], .inbox)),
 ]
 
-print("Testing \(commands.count) commands")
-print("---------------------------------------------")
+// MARK: Test Harness
 
-let startDate = Date()
+var warning: String = ""
+assert({
+    print("======================================================")
+    print("= YOU ARE RUNNING NIOPerformanceTester IN DEBUG MODE =")
+    print("======================================================")
+    warning = " <<< DEBUG MODE >>>"
+    return true
+}())
 
-for (name, command) in commands {
-    let commandStart = Date()
-    let tester = CommandTester(iterations: 10_000, command: command)
-    tester.run()
-    let commandEnd = Date()
-    print(String(format: "%.2f;Completed \(name)", commandEnd.timeIntervalSince(commandStart)))
+func measure(_ fn: () throws -> Int) rethrows -> [TimeInterval] {
+    func measureOne(_ fn: () throws -> Int) rethrows -> TimeInterval {
+        let start = Date()
+        _ = try fn()
+        let end = Date()
+        return end.timeIntervalSince(start)
+    }
+
+    _ = try measureOne(fn) /* pre-heat and throw away */
+    var measurements = Array(repeating: 0.0, count: 10)
+    for i in 0 ..< 10 {
+        measurements[i] = try measureOne(fn)
+    }
+
+    return measurements
 }
 
-let endDate = Date()
-let timeTaken = endDate.timeIntervalSince(startDate)
-print("---------------------------------------------")
-print(String(format: "Total time taken: %.2fs", timeTaken))
+let limitSet = CommandLine.arguments.dropFirst()
+
+func measureAndPrint(desc: String, fn: () throws -> Int) rethrows {
+    if limitSet.count == 0 || limitSet.contains(desc) {
+        print("measuring\(warning): \(desc): ", terminator: "")
+        let measurements = try measure(fn)
+        print(measurements.reduce("") { $0 + "\($1), " })
+    } else {
+        print("skipping '\(desc)', limit set = \(limitSet)")
+    }
+}
+
+// MARK: Utilities
+
+for (description, command) in commands {
+    try measureAndPrint(desc: description, benchmark: CommandTester(command: command, iterations: 10_000))
+}
