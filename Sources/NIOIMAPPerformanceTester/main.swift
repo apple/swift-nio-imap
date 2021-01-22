@@ -12,11 +12,9 @@
 //
 //===----------------------------------------------------------------------===//
 
-import Dispatch
 import Foundation
 import NIO
 import NIOIMAP
-import NIOSSL
 
 let commands: [(String, Command)] = [
     ("Check", .check),
