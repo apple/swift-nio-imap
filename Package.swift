@@ -19,7 +19,6 @@ let package = Package(
             name: "NIOIMAPPerformanceTester",
             dependencies: [
                 "NIOIMAP",
-                .product(name: "NIO", package: "swift-nio"),
             ]
         ),
         .target(
