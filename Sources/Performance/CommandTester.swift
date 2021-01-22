@@ -26,6 +26,10 @@ struct CommandTester {
             commandBuffer.writeCommand(.init(tag: "\(i)", command: command))
             
             var buffer = commandBuffer.buffer.nextChunk().bytes
+            while commandBuffer.buffer.hasNextChunk {
+                var next = commandBuffer.buffer.nextChunk().bytes
+                buffer.writeBuffer(&next)
+            }
             var parser = CommandParser(bufferLimit: 1000)
             _ = try! parser.parseCommandStream(buffer: &buffer)
         }
