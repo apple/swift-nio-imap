@@ -18,7 +18,8 @@ let package = Package(
         .target(
             name: "Performance",
             dependencies: [
-                "NIOIMAP"
+                "NIOIMAP",
+                .product(name: "NIO", package: "swift-nio"),
             ]
         ),
         .target(
