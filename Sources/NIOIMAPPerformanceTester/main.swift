@@ -73,9 +73,9 @@ let commands: [(String, Command)] = [
     ("parse_store_simple_all", .store(.all, [.unchangedSince(.init(modificationSequence: 124))], .add(silent: false, list: [.answered]))),
     ("parse_store_complex_all", .store(.all, [.unchangedSince(.init(modificationSequence: 124))], .add(silent: false, list: [.answered, .deleted, .flagged, .seen, .draft]))),
     ("parse_store_complex", .store([1 ... 10, 11 ... 20, 21 ... 30, 31 ... 40], [.unchangedSince(.init(modificationSequence: 124))], .add(silent: false, list: [.answered, .deleted, .flagged, .seen, .draft]))),
-    ("parse_move(last command", .move(.lastCommand, .inbox)),
-    ("parse_move(all", .move(.lastCommand, .inbox)),
-    ("parse_move(set", .move([1 ... 100, 200 ... 300, 3000 ... 4000], .inbox)),
+    ("parse_move_last command", .move(.lastCommand, .inbox)),
+    ("parse_move_all", .move(.lastCommand, .inbox)),
+    ("parse_move_set", .move([1 ... 100, 200 ... 300, 3000 ... 4000], .inbox)),
 ]
 
 // MARK: Test Harness
