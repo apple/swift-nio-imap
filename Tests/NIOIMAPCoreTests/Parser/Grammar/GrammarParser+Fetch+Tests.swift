@@ -69,6 +69,7 @@ extension GrammarParser_Fetch_Tests {
                 ("X-GM-MSGID", " ", .gmailMessageID, #line),
                 ("X-GM-THRID", " ", .gmailThreadID, #line),
                 ("X-GM-LABELS", " ", .gmailLabels, #line),
+                ("MODSEQ", " ", .modificationSequence, #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
