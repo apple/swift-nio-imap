@@ -23,7 +23,7 @@ class GrammarParser_Fetch_Tests: XCTestCase, _ParserTestHelpers {}
 extension GrammarParser_Fetch_Tests {
     func testParseFetch() {
         self.iterateTests(
-            testFunction: GrammarParser.parseFetch,
+            testFunction: GrammarParser.parseCommand,
             validInputs: [
                 ("FETCH 1:3 ALL", "\r", .fetch(.set([1 ... 3]), .all, [:]), #line),
                 ("FETCH 2:4 FULL", "\r", .fetch(.set([2 ... 4]), .full, [:]), #line),

@@ -26,9 +26,9 @@ import struct NIO.ByteBufferView
 extension GrammarParser {
     // fetch           = "FETCH" SP sequence-set SP ("ALL" / "FULL" / "FAST" /
     //                   fetch-att / "(" fetch-att *(SP fetch-att) ")") [fetch-modifiers]
-    static func parseFetch(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
-        try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Command in
-            try ParserLibrary.fixedString("FETCH ", buffer: &buffer, tracker: tracker)
+    static func parseFetch(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Command {
+        try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Command in
+            try space(buffer: &buffer, tracker: tracker)
             let sequence = try self.parseSequenceSet(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
             let att = try parseFetch_type(buffer: &buffer, tracker: tracker)

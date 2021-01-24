@@ -23,7 +23,7 @@ class GrammarParser_List_Tests: XCTestCase, _ParserTestHelpers {}
 extension GrammarParser_List_Tests {
     func testParseList() {
         self.iterateTests(
-            testFunction: GrammarParser.parseList,
+            testFunction: GrammarParser.parseCommand,
             validInputs: [
                 (#"LIST "" """#, "\r", .list(nil, reference: MailboxName(""), .mailbox(""), []), #line),
             ],

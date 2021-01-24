@@ -25,11 +25,10 @@ import struct NIO.ByteBufferView
 
 extension GrammarParser {
     // list            = "LIST" [SP list-select-opts] SP mailbox SP mbox-or-pat [SP list-return-opts]
-    static func parseList(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
-        try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
-            try ParserLibrary.fixedString("LIST", buffer: &buffer, tracker: tracker)
-            let selectOptions = try ParserLibrary.optional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> ListSelectOptions in
-                try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
+    static func parseList(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Command {
+        try composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
+            let selectOptions = try optional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> ListSelectOptions in
+                try space(buffer: &buffer, tracker: tracker)
                 return try self.parseListSelectOptions(buffer: &buffer, tracker: tracker)
             }
             try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)

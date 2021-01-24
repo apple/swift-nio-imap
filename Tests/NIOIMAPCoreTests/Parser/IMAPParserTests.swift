@@ -657,8 +657,8 @@ extension ParserUnitTests {
     }
 
     func testCreate_invalid_incomplete() {
-        var buffer = TestUtilities.makeParseBuffer(for: "CREATE ")
-        XCTAssertThrowsError(try GrammarParser.parseCreate(buffer: &buffer, tracker: .testTracker)) { e in
+        var buffer = TestUtilities.createTestByteBuffer(for: "CREATE ")
+        XCTAssertThrowsError(try GrammarParser.parseCommand(buffer: &buffer, tracker: .testTracker)) { e in
             XCTAssertTrue(e is _IncompleteMessage, "e has type \(e)")
         }
     }
@@ -767,9 +767,9 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testCopy_valid() {
-        TestUtilities.withParseBuffer("COPY 1,2,3 inbox", terminator: " ") { (buffer) in
-            let copy = try GrammarParser.parseCopy(buffer: &buffer, tracker: .testTracker)
-            let expectedSequence = LastCommandSet<SequenceRangeSet>([1, 2, 3])!
+        TestUtilities.withBuffer("COPY 1,2,3 inbox", terminator: " ") { (buffer) in
+            let copy = try GrammarParser.parseCommand(buffer: &buffer, tracker: .testTracker)
+            let expectedSequence = SequenceSet([1, 2, 3])!
             let expectedMailbox = MailboxName.inbox
             XCTAssertEqual(copy, Command.copy(expectedSequence, expectedMailbox))
         }
@@ -794,8 +794,8 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testDelete_valid() {
-        TestUtilities.withParseBuffer("DELETE inbox", terminator: "\n") { (buffer) in
-            let commandType = try GrammarParser.parseDelete(buffer: &buffer, tracker: .testTracker)
+        TestUtilities.withBuffer("DELETE inbox", terminator: "\n") { (buffer) in
+            let commandType = try GrammarParser.parseCommand(buffer: &buffer, tracker: .testTracker)
             guard case Command.delete(let mailbox) = commandType else {
                 XCTFail("Didn't parse delete")
                 return
@@ -805,8 +805,8 @@ extension ParserUnitTests {
     }
 
     func testDelete_valid_mixedCase() {
-        TestUtilities.withParseBuffer("DELete inbox", terminator: "\n") { (buffer) in
-            let commandType = try GrammarParser.parseDelete(buffer: &buffer, tracker: .testTracker)
+        TestUtilities.withBuffer("DELete inbox", terminator: "\n") { (buffer) in
+            let commandType = try GrammarParser.parseCommand(buffer: &buffer, tracker: .testTracker)
             guard case Command.delete(let mailbox) = commandType else {
                 XCTFail("Didn't parse delete")
                 return
@@ -816,8 +816,8 @@ extension ParserUnitTests {
     }
 
     func testDelete_invalid_incomplete() {
-        var buffer = TestUtilities.makeParseBuffer(for: "DELETE ")
-        XCTAssertThrowsError(try GrammarParser.parseDelete(buffer: &buffer, tracker: .testTracker)) { e in
+        var buffer = TestUtilities.createTestByteBuffer(for: "DELETE ")
+        XCTAssertThrowsError(try GrammarParser.parseCommand(buffer: &buffer, tracker: .testTracker)) { e in
             XCTAssertTrue(e is _IncompleteMessage, "e has type \(e)")
         }
     }
@@ -1209,7 +1209,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     func testParseExamine() {
         self.iterateTests(
-            testFunction: GrammarParser.parseExamine,
+            testFunction: GrammarParser.parseCommand,
             validInputs: [
                 ("EXAMINE inbox", "\r", .examine(.inbox, [:]), #line),
                 ("examine inbox", "\r", .examine(.inbox, [:]), #line),
@@ -1221,8 +1221,8 @@ extension ParserUnitTests {
     }
 
     func testExamine_invalid_incomplete() {
-        var buffer = TestUtilities.makeParseBuffer(for: "EXAMINE ")
-        XCTAssertThrowsError(try GrammarParser.parseExamine(buffer: &buffer, tracker: .testTracker)) { e in
+        var buffer = TestUtilities.createTestByteBuffer(for: "EXAMINE ")
+        XCTAssertThrowsError(try GrammarParser.parseCommand(buffer: &buffer, tracker: .testTracker)) { e in
             XCTAssertTrue(e is _IncompleteMessage, "e has type \(e)")
         }
     }
@@ -1908,7 +1908,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     func testParseMove() {
         self.iterateTests(
-            testFunction: GrammarParser.parseMove,
+            testFunction: GrammarParser.parseCommand,
             validInputs: [
                 ("MOVE * inbox", " ", .move(.all, .inbox), #line),
                 ("MOVE 1:2,4:5 test", " ", .move(LastCommandSet<SequenceRangeSet>([SequenceRange(1 ... 2), SequenceRange(4 ... 5)])!, .init("test")), #line),
@@ -1940,7 +1940,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     func testParseNamespaceCommand() {
         self.iterateTests(
-            testFunction: GrammarParser.parseNamespaceCommand,
+            testFunction: GrammarParser.parseCommand,
             validInputs: [
                 ("NAMESPACE", " ", .namespace, #line),
                 ("nameSPACE", " ", .namespace, #line),
@@ -2305,7 +2305,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     func testParseSelect() {
         self.iterateTests(
-            testFunction: GrammarParser.parseSelect,
+            testFunction: GrammarParser.parseCommand,
             validInputs: [
                 ("SELECT inbox", "\r", .select(.inbox, []), #line),
                 ("SELECT inbox (some1)", "\r", .select(.inbox, [.basic(.init(key: "some1", value: nil))]), #line),
@@ -2349,7 +2349,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     func testParseStatus() {
         self.iterateTests(
-            testFunction: GrammarParser.parseStatus,
+            testFunction: GrammarParser.parseCommand,
             validInputs: [
                 ("STATUS inbox (messages unseen)", "\r\n", .status(.inbox, [.messageCount, .unseenCount]), #line),
                 ("STATUS Deleted (messages unseen HIGHESTMODSEQ)", "\r\n", .status(MailboxName("Deleted"), [.messageCount, .unseenCount, .highestModificationSequence]), #line),
@@ -2422,7 +2422,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     func testParseStore() {
         self.iterateTests(
-            testFunction: GrammarParser.parseStore,
+            testFunction: GrammarParser.parseCommand,
             validInputs: [
                 ("STORE 1 +FLAGS \\answered", "\r", .store(.set([1]), [], .add(silent: false, list: [.answered])), #line),
                 ("STORE 1 (label) -FLAGS \\seen", "\r", .store(.set([1]), [.other(.init(key: "label", value: nil))], .remove(silent: false, list: [.seen])), #line),
@@ -2491,7 +2491,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     func testParseSubscribe() {
         self.iterateTests(
-            testFunction: GrammarParser.parseSubscribe,
+            testFunction: GrammarParser.parseCommand,
             validInputs: [
                 ("SUBSCRIBE inbox", "\r\n", .subscribe(.inbox), #line),
                 ("SUBScribe INBOX", "\r\n", .subscribe(.inbox), #line),
@@ -2511,7 +2511,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     func testParseRename() {
         self.iterateTests(
-            testFunction: GrammarParser.parseRename,
+            testFunction: GrammarParser.parseCommand,
             validInputs: [
                 ("RENAME box1 box2", "\r", .rename(from: .init("box1"), to: .init("box2"), params: [:]), #line),
                 ("rename box3 box4", "\r", .rename(from: .init("box3"), to: .init("box4"), params: [:]), #line),
@@ -2781,7 +2781,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     func testParseUnsubscribe() {
         self.iterateTests(
-            testFunction: GrammarParser.parseUnsubscribe,
+            testFunction: GrammarParser.parseCommand,
             validInputs: [
                 ("UNSUBSCRIBE inbox", "\r\n", .unsubscribe(.inbox), #line),
                 ("UNSUBScribe INBOX", "\r\n", .unsubscribe(.inbox), #line),

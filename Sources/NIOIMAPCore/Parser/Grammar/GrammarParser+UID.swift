@@ -76,11 +76,14 @@ extension GrammarParser {
             }
         }
 
-        func parseUid_search(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
-            guard case .search(let key, let charset, let returnOptions) = try self.parseSearch(buffer: &buffer, tracker: tracker) else {
-                fatalError("This should never happen")
-            }
-            return .uidSearch(key: key, charset: charset, returnOptions: returnOptions)
+        func parseUid_search(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Command {
+            try composite(buffer: &buffer, tracker: tracker, { buffer, tracker in
+                try fixedString("SEARCH", buffer: &buffer, tracker: tracker)
+                guard case .search(let key, let charset, let returnOptions) = try self.parseSearch(buffer: &buffer, tracker: tracker) else {
+                    fatalError("This should never happen")
+                }
+                return .uidSearch(key: key, charset: charset, returnOptions: returnOptions)
+            })
         }
 
         func parseUid_store(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
@@ -100,9 +103,9 @@ extension GrammarParser {
             return .uidExpunge(set)
         }
 
-        return try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Command in
-            try ParserLibrary.fixedString("UID ", buffer: &buffer, tracker: tracker)
-            return try ParserLibrary.oneOf([
+        return try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Command in
+            try space(buffer: &buffer, tracker: tracker)
+            return try oneOf([
                 parseUid_copy,
                 parseUid_move,
                 parseUid_fetch,

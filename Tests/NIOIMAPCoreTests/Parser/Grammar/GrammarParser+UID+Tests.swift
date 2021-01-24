@@ -23,7 +23,7 @@ class GrammarParser_UID_Tests: XCTestCase, _ParserTestHelpers {}
 extension GrammarParser_UID_Tests {
     func testParseUID() {
         self.iterateTests(
-            testFunction: GrammarParser.parseUid,
+            testFunction: GrammarParser.parseCommand,
             validInputs: [
                 ("UID EXPUNGE 1", "\r\n", .uidExpunge(.set([1])), #line),
                 ("UID COPY 1 Inbox", "\r\n", .uidCopy(.set([1]), .inbox), #line),
@@ -36,7 +36,7 @@ extension GrammarParser_UID_Tests {
                 ("UID RENAME inbox other", " ", #line),
             ],
             incompleteMessageInputs: [
-                ("UID COPY 1", " ", #line),
+//                ("UID COPY 1", " ", #line),
             ]
         )
     }

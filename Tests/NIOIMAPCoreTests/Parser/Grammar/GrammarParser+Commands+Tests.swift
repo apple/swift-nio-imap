@@ -22,32 +22,32 @@ class GrammarParser_Commands_Tests: XCTestCase, _ParserTestHelpers {}
 
 extension GrammarParser_Commands_Tests {
     func testParseCommand_valid_any() {
-        TestUtilities.withParseBuffer("a1 NOOP", terminator: "\r\n") { (buffer) in
-            let result = try GrammarParser.parseCommand(buffer: &buffer, tracker: .testTracker)
+        TestUtilities.withBuffer("a1 NOOP", terminator: "\r\n") { (buffer) in
+            let result = try GrammarParser.parseTaggedCommand(buffer: &buffer, tracker: .testTracker)
             XCTAssertEqual(result.tag, "a1")
             XCTAssertEqual(result.command, .noop)
         }
     }
 
     func testParseCommand_valid_auth() {
-        TestUtilities.withParseBuffer("a1 CREATE \"mailbox\"", terminator: "\r\n") { (buffer) in
-            let result = try GrammarParser.parseCommand(buffer: &buffer, tracker: .testTracker)
+        TestUtilities.withBuffer("a1 CREATE \"mailbox\"", terminator: "\r\n") { (buffer) in
+            let result = try GrammarParser.parseTaggedCommand(buffer: &buffer, tracker: .testTracker)
             XCTAssertEqual(result.tag, "a1")
             XCTAssertEqual(result.command, .create(MailboxName("mailbox"), []))
         }
     }
 
     func testParseCommand_valid_nonauth() {
-        TestUtilities.withParseBuffer("a1 STARTTLS", terminator: "\r\n") { (buffer) in
-            let result = try GrammarParser.parseCommand(buffer: &buffer, tracker: .testTracker)
+        TestUtilities.withBuffer("a1 STARTTLS", terminator: "\r\n") { (buffer) in
+            let result = try GrammarParser.parseTaggedCommand(buffer: &buffer, tracker: .testTracker)
             XCTAssertEqual(result.tag, "a1")
             XCTAssertEqual(result.command, .starttls)
         }
     }
 
     func testParseCommand_valid_select() {
-        TestUtilities.withParseBuffer("a1 CHECK", terminator: "\r\n") { (buffer) in
-            let result = try GrammarParser.parseCommand(buffer: &buffer, tracker: .testTracker)
+        TestUtilities.withBuffer("a1 CHECK", terminator: "\r\n") { (buffer) in
+            let result = try GrammarParser.parseTaggedCommand(buffer: &buffer, tracker: .testTracker)
             XCTAssertEqual(result.tag, "a1")
             XCTAssertEqual(result.command, .check)
         }
@@ -59,7 +59,7 @@ extension GrammarParser_Commands_Tests {
 extension GrammarParser_Commands_Tests {
     func testParseCommandAny() {
         self.iterateTests(
-            testFunction: GrammarParser.parseCommandAny,
+            testFunction: GrammarParser.parseCommand,
             validInputs: [
                 ("CAPABILITY", " ", .capability, #line),
                 ("LOGOUT", " ", .logout, #line),
@@ -76,7 +76,7 @@ extension GrammarParser_Commands_Tests {
 extension GrammarParser_Commands_Tests {
     func testParseCommandNonAuth() {
         self.iterateTests(
-            testFunction: GrammarParser.parseCommandNonauth,
+            testFunction: GrammarParser.parseCommand,
             validInputs: [
                 ("LOGIN david evans", "\r\n", .login(username: "david", password: "evans"), #line),
                 ("AUTHENTICATE some", "\r\n", .authenticate(method: .init("some"), initialClientResponse: nil), #line),
@@ -94,7 +94,7 @@ extension GrammarParser_Commands_Tests {
 extension GrammarParser_Commands_Tests {
     func testParseCommandAuth() {
         self.iterateTests(
-            testFunction: GrammarParser.parseCommandAuth,
+            testFunction: GrammarParser.parseCommand,
             validInputs: [
                 ("LSUB inbox someList", " ", .lsub(reference: .inbox, pattern: "someList"), #line),
                 ("CREATE inbox (something)", " ", .create(.inbox, [.labelled(.init(key: "something", value: nil))]), #line),
@@ -122,7 +122,7 @@ extension GrammarParser_Commands_Tests {
 extension GrammarParser_Commands_Tests {
     func testParseCommandSelect() {
         self.iterateTests(
-            testFunction: GrammarParser.parseCommandSelect,
+            testFunction: GrammarParser.parseCommand,
             validInputs: [
                 ("UNSELECT", " ", .unselect, #line),
                 ("unselect", " ", .unselect, #line),

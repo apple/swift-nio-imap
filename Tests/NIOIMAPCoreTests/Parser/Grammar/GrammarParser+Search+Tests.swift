@@ -23,7 +23,7 @@ class GrammarParser_Search_Tests: XCTestCase, _ParserTestHelpers {}
 extension GrammarParser_Search_Tests {
     func testParseSearch() {
         self.iterateTests(
-            testFunction: GrammarParser.parseSearch,
+            testFunction: GrammarParser.parseCommand,
             validInputs: [
                 ("SEARCH ALL", "\r", .search(key: .all), #line),
                 ("SEARCH ALL DELETED FLAGGED", "\r", .search(key: .and([.all, .deleted, .flagged])), #line),
