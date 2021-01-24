@@ -60,6 +60,9 @@ fileprivate let commandParsers: [String: (inout ByteBuffer, StackTracker) throws
     "LOGIN": GrammarParser.parseLogin,
     "AUTHENTICATE": GrammarParser.parseAuthenticate,
     "CREATE": GrammarParser.parseCreate,
+    "GETQUOTA": GrammarParser.parseGetQuota,
+    "SETQUOTA": GrammarParser.parseSetQuota,
+    "GETQUOTAROOT": GrammarParser.parseGetQuotaRoot,
 ]
 
 extension GrammarParser {

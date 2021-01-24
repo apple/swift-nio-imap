@@ -2888,7 +2888,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     func testSetQuota() {
         self.iterateTests(
-            testFunction: GrammarParser.parseCommandQuota,
+            testFunction: GrammarParser.parseSetQuota,
             validInputs: [
                 (
                     "SETQUOTA \"\" (STORAGE 512)",
@@ -2929,7 +2929,7 @@ extension ParserUnitTests {
 
     func testGetQuota() {
         self.iterateTests(
-            testFunction: GrammarParser.parseCommandQuota,
+            testFunction: GrammarParser.parseGetQuota,
             validInputs: [
                 ("GETQUOTA \"\"", "\r", Command.getQuota(QuotaRoot("")), #line),
                 ("GETQUOTA \"MASSIVE_POOL\"", "\r", Command.getQuota(QuotaRoot("MASSIVE_POOL")), #line),
@@ -2943,7 +2943,7 @@ extension ParserUnitTests {
 
     func testGetQuotaRoot() {
         self.iterateTests(
-            testFunction: GrammarParser.parseCommandQuota,
+            testFunction: GrammarParser.parseGetQuotaRoot,
             validInputs: [
                 ("GETQUOTAROOT INBOX", "\r", Command.getQuotaRoot(MailboxName("INBOX")), #line),
                 ("GETQUOTAROOT Other", "\r", Command.getQuotaRoot(MailboxName("Other")), #line),
