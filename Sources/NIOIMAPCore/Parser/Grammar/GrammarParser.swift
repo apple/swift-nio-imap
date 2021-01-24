@@ -2388,7 +2388,7 @@ extension GrammarParser {
 
     static func parseGetQuota(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Command {
         try composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
-            try fixedString("GETQUOTA ", buffer: &buffer, tracker: tracker)
+            try space(buffer: &buffer, tracker: tracker)
             let quotaRoot = try parseQuotaRoot(buffer: &buffer, tracker: tracker)
             return .getQuota(quotaRoot)
         }
@@ -2396,7 +2396,7 @@ extension GrammarParser {
 
     static func parseSetQuota(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Command {
         try composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
-            try fixedString("SETQUOTA ", buffer: &buffer, tracker: tracker)
+            try space(buffer: &buffer, tracker: tracker)
             let quotaRoot = try parseQuotaRoot(buffer: &buffer, tracker: tracker)
             try space(buffer: &buffer, tracker: tracker)
             let quotaLimits = try parseQuotaLimits(buffer: &buffer, tracker: tracker)
@@ -2406,7 +2406,7 @@ extension GrammarParser {
 
     static func parseGetQuotaRoot(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Command {
         try composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
-            try fixedString("GETQUOTAROOT ", buffer: &buffer, tracker: tracker)
+            try space(buffer: &buffer, tracker: tracker)
             let mailbox = try parseMailbox(buffer: &buffer, tracker: tracker)
             return .getQuotaRoot(mailbox)
         }
