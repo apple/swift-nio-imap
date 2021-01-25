@@ -108,6 +108,16 @@ extension UIDSet {
         self.init(UIDRange(range))
     }
 
+    /// Creates a `UIDSet` from a range.
+    /// - parameter range: The range to use.
+    public init(_ range: Range<UID>) {
+        if range.isEmpty {
+            self.init()
+        } else {
+            self.init(range.lowerBound ... range.upperBound.advanced(by: -1))
+        }
+    }
+
     /// Creates a set from a single range.
     /// - parameter range: The `UIDRange` to construct a set from.
     public init(_ range: UIDRange) {
