@@ -19,7 +19,7 @@ import StandardLibraryPreview
 public struct SequenceRangeSet: Hashable {
     /// The contained ranges.
     fileprivate var ranges: RangeSet<SequenceNumberWrapper>
-    
+
     /// The contained ranges.
     var sequenceRanges: [SequenceRange] {
         self.ranges.ranges.map { SequenceRange($0) }
