@@ -42,7 +42,7 @@ class CommandTester: Benchmark {
                 var chunkBuffer = chunk.bytes
                 buffer.writeBuffer(&chunkBuffer)
             }
-            
+
             var parser = CommandParser(bufferLimit: 1000)
             _ = try! parser.parseCommandStream(buffer: &buffer)
         }
