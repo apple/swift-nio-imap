@@ -23,17 +23,17 @@ class SequenceRangeSet_Tests: EncodeTestClass {}
 extension SequenceRangeSet_Tests {
     func testSequenceRanges() {
         var testSet = SequenceRangeSet()
-        XCTAssertEqual(testSet.sequenceRanges, [])
+        XCTAssertEqual(testSet.sequenceRanges, [] as [SequenceRange])
 
         _ = testSet.insert(1)
-        XCTAssertEqual(testSet.sequenceRanges, [1])
+        XCTAssertEqual(testSet.sequenceRanges, [1] as [SequenceRange])
 
         _ = testSet.insert(3)
-        XCTAssertEqual(testSet.sequenceRanges, [1, 3])
+        XCTAssertEqual(testSet.sequenceRanges, [1, 3] as [SequenceRange])
 
         _ = testSet.insert(5)
         _ = testSet.insert(6)
         _ = testSet.insert(7)
-        XCTAssertEqual(testSet.sequenceRanges, [1, 3, 5 ... 7])
+        XCTAssertEqual(testSet.sequenceRanges, [1, 3, 5 ... 7] as [SequenceRange])
     }
 }
