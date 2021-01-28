@@ -33,11 +33,16 @@ class CommandTester: Benchmark {
             var commandBuffer = CommandEncodeBuffer(buffer: ByteBuffer(), options: .init())
             commandBuffer.writeCommand(.init(tag: "\(i)", command: self.command))
 
-            var buffer = commandBuffer.buffer.nextChunk().bytes
-            while commandBuffer.buffer.hasNextChunk {
-                var next = commandBuffer.buffer.nextChunk().bytes
-                buffer.writeBuffer(&next)
+            var buffer = ByteBuffer()
+            var chunk = commandBuffer.buffer.nextChunk()
+            var chunkBuffer = chunk.bytes
+            buffer.writeBuffer(&chunkBuffer)
+            while chunk.waitForContinuation {
+                chunk = commandBuffer.buffer.nextChunk()
+                var chunkBuffer = chunk.bytes
+                buffer.writeBuffer(&chunkBuffer)
             }
+            
             var parser = CommandParser(bufferLimit: 1000)
             _ = try! parser.parseCommandStream(buffer: &buffer)
         }
