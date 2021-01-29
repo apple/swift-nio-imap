@@ -20,6 +20,11 @@ public struct SequenceRangeSet: Hashable {
     /// The contained ranges.
     fileprivate var ranges: RangeSet<SequenceNumberWrapper>
 
+    /// The contained ranges.
+    public var sequenceRanges: [SequenceRange] {
+        self.ranges.ranges.map { SequenceRange($0) }
+    }
+
     /// Creates a new `SequenceRangeSet` from a non-empty array of `SequenceRange`.
     /// - parameter ranges: The underlying array of ranges to use.
     /// - returns: `nil` if `ranges` is empty, otherwise a `SequenceRangeSet`.
