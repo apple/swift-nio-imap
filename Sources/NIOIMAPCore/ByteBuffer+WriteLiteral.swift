@@ -161,9 +161,9 @@ extension EncodeBuffer {
             }
     }
 
-    /// Writes the given `collection` as an IMAP array to self using the given `closure` for every element in the collection.
+    /// Writes the given `KeyValues<Key, Value>` as an IMAP array to self using the given `closure` for every element in the collection.
     /// - parameters:
-    ///     - array: The elements to write to `self`.
+    ///     - values: The elements to write to `self`.
     ///     - prefix: A string to write before anything else, including the parenthesis. This will only be written if `array` has 1 or more elements. Defaults to "".
     ///     - separator: A string to write between each element, defaults to "".
     ///     - suffix: A string to write after anything else, including the parenthesis. This will only be written if `array` has 1 or more elements. Defaults to "".

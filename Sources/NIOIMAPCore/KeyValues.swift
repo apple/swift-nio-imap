@@ -12,20 +12,25 @@
 //
 //===----------------------------------------------------------------------===//
 
-public struct KeyValues<K: Hashable, V: Hashable> {
-    var _backing: [(K, V)]
+/// A dictionary-like structure that preserves insert order, and provides O(n) lookup based on some `Key`
+public struct KeyValues<Key: Hashable, Value: Hashable> {
+    var _backing: [(Key, Value)]
 
+    /// The number of key/value pairs in the collection.
     public var count: Int { self._backing.count }
 
-    public init(_ array: [(K, V)] = []) {
+    /// Creates a new `KeyValues` from an array of key/value tuples.
+    public init(_ array: [(Key, Value)] = []) {
         self._backing = array
     }
 
-    public init(_ dic: [K: V]) {
+    /// Creates a new `KeyValues` from a dictionary,
+    public init(_ dic: [Key: Value]) {
         self._backing = dic.map { ($0.key, $0.value) }
     }
 
-    public mutating func append(_ pair: (K, V)) {
+    /// Appends an element to the collection
+    public mutating func append(_ pair: (Key, Value)) {
         self._backing.append(pair)
     }
 }
@@ -44,7 +49,7 @@ extension KeyValues: Hashable {
 // MARK: - Eqautable
 
 extension KeyValues: Equatable {
-    public static func == (lhs: KeyValues<K, V>, rhs: KeyValues<K, V>) -> Bool {
+    public static func == (lhs: KeyValues<Key, Value>, rhs: KeyValues<Key, Value>) -> Bool {
         lhs._backing.map { $0.0 } == rhs._backing.map { $0.0 } && lhs._backing.map { $0.1 } == rhs._backing.map { $0.1 }
     }
 }
@@ -52,11 +57,11 @@ extension KeyValues: Equatable {
 // MARK: - ExpressibleByDictionaryLiteral
 
 extension KeyValues: ExpressibleByDictionaryLiteral {
-    public typealias Key = K
+    public typealias Key = Key
 
-    public typealias Value = V
+    public typealias Value = Value
 
-    public init(dictionaryLiteral elements: (K, V)...) {
+    public init(dictionaryLiteral elements: (Key, Value)...) {
         self._backing = elements
     }
 }
@@ -64,7 +69,7 @@ extension KeyValues: ExpressibleByDictionaryLiteral {
 // MARK: - Subscripting
 
 extension KeyValues {
-    subscript(index: K) -> V? {
+    subscript(index: Key) -> Value? {
         self._backing.first(where: { $0.0 == index })?.1
     }
 }
@@ -72,11 +77,11 @@ extension KeyValues {
 // MARK: - Sequence
 
 extension KeyValues: Sequence {
-    public typealias Iterator = IndexingIterator<[(K, V)]>
+    public typealias Iterator = IndexingIterator<[(Key, Value)]>
 
-    public typealias Element = (K, V)
+    public typealias Element = (Key, Value)
 
-    public func makeIterator() -> IndexingIterator<[(K, V)]> {
+    public func makeIterator() -> IndexingIterator<[(Key, Value)]> {
         self._backing.makeIterator()
     }
 }
