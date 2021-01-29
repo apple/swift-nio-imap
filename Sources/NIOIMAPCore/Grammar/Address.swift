@@ -20,7 +20,7 @@ public struct Address: Equatable {
     /// The addressee's personal name (may be an alias).
     public var personName: ByteBuffer?
 
-    /// The SMTP at-domain-list.
+    /// The SMTP at-domain-list (source-root).
     public var sourceRoot: ByteBuffer?
 
     /// The mailbox the message.
