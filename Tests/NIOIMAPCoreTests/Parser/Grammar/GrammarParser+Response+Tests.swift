@@ -46,7 +46,7 @@ extension GrammarParser_Response_Tests {
                 ("1 EXISTS", "\r", .mailboxData(.exists(1)), #line),
                 ("2 EXPUNGE", "\r", .messageData(.expunge(2)), #line),
                 ("ENABLED ENABLE", "\r", .enableData([.enable]), #line),
-                ("ID (\"key\" NIL)", "\r", .id([.init(key: "key", value: nil)]), #line),
+                ("ID (\"key\" NIL)", "\r", .id(["key": nil]), #line),
                 ("METADATA INBOX a", "\r", .metadata(.list(list: ["a"], mailbox: .inbox)), #line),
             ],
             parserErrorInputs: [],

@@ -13,45 +13,47 @@
 //===----------------------------------------------------------------------===//
 
 public struct KeyValues<K: Hashable, V: Hashable> {
-    
     var _backing: [(K, V)]
-    
+
+    public var count: Int { self._backing.count }
+
     public init(_ array: [(K, V)] = []) {
         self._backing = array
     }
-    
+
     public init(_ dic: [K: V]) {
         self._backing = dic.map { ($0.key, $0.value) }
     }
-    
+
+    public mutating func append(_ pair: (K, V)) {
+        self._backing.append(pair)
+    }
 }
 
 // MARK: - Hashable
+
 extension KeyValues: Hashable {
-    
     public func hash(into hasher: inout Hasher) {
         for (key, value) in self._backing {
             hasher.combine(key)
             hasher.combine(value)
         }
     }
-    
 }
 
 // MARK: - Eqautable
+
 extension KeyValues: Equatable {
-    
     public static func == (lhs: KeyValues<K, V>, rhs: KeyValues<K, V>) -> Bool {
-        return lhs._backing.map { $0.0 } == rhs._backing.map { $0.0 } && lhs._backing.map { $0.1 } == rhs._backing.map { $0.1 }
+        lhs._backing.map { $0.0 } == rhs._backing.map { $0.0 } && lhs._backing.map { $0.1 } == rhs._backing.map { $0.1 }
     }
-    
 }
 
 // MARK: - ExpressibleByDictionaryLiteral
-extension KeyValues: ExpressibleByDictionaryLiteral {
 
+extension KeyValues: ExpressibleByDictionaryLiteral {
     public typealias Key = K
-    
+
     public typealias Value = V
 
     public init(dictionaryLiteral elements: (K, V)...) {
@@ -60,23 +62,21 @@ extension KeyValues: ExpressibleByDictionaryLiteral {
 }
 
 // MARK: - Subscripting
+
 extension KeyValues {
-    
     subscript(index: K) -> V? {
         self._backing.first(where: { $0.0 == index })?.1
     }
-    
 }
 
 // MARK: - Sequence
+
 extension KeyValues: Sequence {
-    
     public typealias Iterator = IndexingIterator<[(K, V)]>
-    
+
     public typealias Element = (K, V)
-    
+
     public func makeIterator() -> IndexingIterator<[(K, V)]> {
-        return self._backing.makeIterator()
+        self._backing.makeIterator()
     }
-    
 }

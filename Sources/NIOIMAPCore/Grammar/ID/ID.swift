@@ -14,43 +14,21 @@
 
 import struct NIO.ByteBuffer
 
-/// A simple key/value container, used to make the `IDParamsList` API
-/// slightly more palatable.
-public struct IDParameter: Equatable {
-    /// Some `String` key.
-    public var key: String
-
-    /// Some optional value.
-    public var value: ByteBuffer?
-
-    /// Creates a new `IDParameter` key/value pair.
-    /// - parameter key: Some `String` key.
-    /// - parameter value: The value to be associated with `key`?
-    public init(key: String, value: ByteBuffer?) {
-        self.key = key
-        self.value = value
-    }
-}
-
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeIDParameter(_ parameter: IDParameter) -> Int {
-        self.writeIMAPString(parameter.key) +
-            self.writeSpace() +
-            self.writeNString(parameter.value)
-    }
-
-    @discardableResult mutating func writeIDParameters(_ array: [IDParameter]) -> Int {
-        guard array.count > 0 else {
+    @discardableResult mutating func writeIDParameters(_ values: KeyValues<String, ByteBuffer?>) -> Int {
+        guard values.count > 0 else {
             return self.writeNil()
         }
-        return self.writeArray(array) { (element, self) in
-            self.writeIDParameter(element)
+        return self.writeKeyValues(values) { (e, self) in
+            self.writeIMAPString(e.0) +
+                self.writeSpace() +
+                self.writeNString(e.1)
         }
     }
 
-    @discardableResult mutating func writeIDResponse(_ response: [IDParameter]) -> Int {
+    @discardableResult mutating func writeIDResponse(_ response: KeyValues<String, ByteBuffer?>) -> Int {
         self.writeString("ID ") +
             self.writeIDParameters(response)
     }

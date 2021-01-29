@@ -161,6 +161,42 @@ extension EncodeBuffer {
             }
     }
 
+    /// Writes the given `collection` as an IMAP array to self using the given `closure` for every element in the collection.
+    /// - parameters:
+    ///     - array: The elements to write to `self`.
+    ///     - prefix: A string to write before anything else, including the parenthesis. This will only be written if `array` has 1 or more elements. Defaults to "".
+    ///     - separator: A string to write between each element, defaults to "".
+    ///     - suffix: A string to write after anything else, including the parenthesis. This will only be written if `array` has 1 or more elements. Defaults to "".
+    ///     - parenthesis: Writes `(` immediately before the first element, and `)` immediately after the last. Enabled by default.
+    ///     - writer: The closure to call for each element that writes the element.
+    /// - returns: The number of bytes written.
+    @discardableResult mutating func writeKeyValues<K, V>(_ values: KeyValues<K, V>, prefix: String = "", separator: String = " ", suffix: String = "", parenthesis: Bool = true, _ writer: ((K, V), inout EncodeBuffer) -> Int) -> Int {
+        // TODO: This should probably check
+        //   collection.count != 0
+        // such that an empty collection gets encoded as "()".
+        self.write(if: values.count > 0) {
+            self.writeString(prefix)
+        } +
+            self.write(if: parenthesis) { () -> Int in
+                self.writeString("(")
+            } +
+            values.enumerated().reduce(0) { (size, row) in
+                let (i, element) = row
+                return
+                    size +
+                    writer(element, &self) +
+                    self.write(if: i < values.count - 1) { () -> Int in
+                        self.writeString(separator)
+                    }
+            } +
+            self.write(if: parenthesis) { () -> Int in
+                self.writeString(")")
+            } +
+            self.write(if: values.count > 0) {
+                self.writeString(suffix)
+            }
+    }
+
     /// Writes to self using a closure if the given `value` is non-`nil`. This allows for chaining together writes
     /// when attempting to perform composite writes and return the total number of bytes written.
     /// - parameters:

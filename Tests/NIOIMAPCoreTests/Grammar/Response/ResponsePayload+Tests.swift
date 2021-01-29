@@ -29,7 +29,7 @@ extension ResponsePayload_Tests {
             (.mailboxData(.exists(1)), "1 EXISTS", #line),
             (.messageData(.expunge(2)), "2 EXPUNGE", #line),
             (.enableData([.enable]), "ENABLED ENABLE", #line),
-            (.id([.init(key: "key", value: nil)]), "ID (\"key\" NIL)", #line),
+            (.id(["key": nil]), "ID (\"key\" NIL)", #line),
             (.quotaRoot(.init("INBOX"), .init("Root")), "QUOTAROOT \"INBOX\" \"Root\"", #line),
             (
                 .quota(.init("Root"), [.init(resourceName: "STORAGE", usage: 10, limit: 512)]),

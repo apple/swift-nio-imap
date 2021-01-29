@@ -664,7 +664,7 @@ extension GrammarParser {
     }
 
     // id = "ID" SP id-params-list
-    static func parseID(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [IDParameter] {
+    static func parseID(buffer: inout ByteBuffer, tracker: StackTracker) throws -> KeyValues<String, ByteBuffer?> {
         try composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
             try fixedString("ID ", buffer: &buffer, tracker: tracker)
             return try parseIDParamsList(buffer: &buffer, tracker: tracker)
@@ -709,7 +709,7 @@ extension GrammarParser {
     }
 
     // id-response = "ID" SP id-params-list
-    static func parseIDResponse(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [IDParameter] {
+    static func parseIDResponse(buffer: inout ByteBuffer, tracker: StackTracker) throws -> KeyValues<String, ByteBuffer?> {
         try composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
             try fixedString("ID ", buffer: &buffer, tracker: tracker)
             return try parseIDParamsList(buffer: &buffer, tracker: tracker)
@@ -717,28 +717,29 @@ extension GrammarParser {
     }
 
     // id-params-list = "(" *(string SP nstring) ")" / nil
-    static func parseIDParamsList(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [IDParameter] {
-        func parseIDParamsList_nil(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [IDParameter] {
+    static func parseIDParamsList(buffer: inout ByteBuffer, tracker: StackTracker) throws -> KeyValues<String, ByteBuffer?> {
+        func parseIDParamsList_nil(buffer: inout ByteBuffer, tracker: StackTracker) throws -> KeyValues<String, ByteBuffer?> {
             try self.parseNil(buffer: &buffer, tracker: tracker)
-            return []
+            return [:]
         }
 
-        func parseIDParamsList_element(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IDParameter {
+        func parseIDParamsList_element(buffer: inout ByteBuffer, tracker: StackTracker) throws -> (String, ByteBuffer?) {
             let key = String(buffer: try self.parseString(buffer: &buffer, tracker: tracker))
             try space(buffer: &buffer, tracker: tracker)
             let value = try self.parseNString(buffer: &buffer, tracker: tracker)
-            return .init(key: key, value: value)
+            return (key, value)
         }
 
-        func parseIDParamsList_some(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [IDParameter] {
+        func parseIDParamsList_some(buffer: inout ByteBuffer, tracker: StackTracker) throws -> KeyValues<String, ByteBuffer?> {
             try fixedString("(", buffer: &buffer, tracker: tracker)
-            var array = [try parseIDParamsList_element(buffer: &buffer, tracker: tracker)]
-            try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) -> IDParameter in
+            let (key, value) = try parseIDParamsList_element(buffer: &buffer, tracker: tracker)
+            var dic: KeyValues<String, ByteBuffer?> = [key: value]
+            try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &dic, tracker: tracker) { (buffer, tracker) -> (String, ByteBuffer?) in
                 try space(buffer: &buffer, tracker: tracker)
                 return try parseIDParamsList_element(buffer: &buffer, tracker: tracker)
             }
             try fixedString(")", buffer: &buffer, tracker: tracker)
-            return array
+            return dic
         }
 
         return try oneOf([

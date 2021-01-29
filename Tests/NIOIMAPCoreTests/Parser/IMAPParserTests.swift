@@ -1416,16 +1416,12 @@ extension ParserUnitTests {
         self.iterateTests(
             testFunction: GrammarParser.parseIDParamsList,
             validInputs: [
-                ("NIL", " ", [], #line),
-                (#"("key1" "value1")"#, "", [.init(key: "key1", value: "value1")], #line),
+                ("NIL", " ", [:], #line),
+                (#"("key1" "value1")"#, "", ["key1": "value1"], #line),
                 (
                     #"("key1" "value1" "key2" "value2" "key3" "value3")"#,
                     "",
-                    [
-                        .init(key: "key1", value: "value1"),
-                        .init(key: "key2", value: "value2"),
-                        .init(key: "key3", value: "value3"),
-                    ],
+                    ["key1": "value1", "key2": "value2", "key3": "value3"],
                     #line
                 ),
             ],
