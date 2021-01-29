@@ -14,7 +14,6 @@
 
 /// A dictionary-like structure that preserves insert order, and provides O(n) lookup based on some `Key`
 public struct KeyValues<Key: Hashable, Value: Hashable>: Hashable {
-    
     @usableFromInline struct KeyValue<Key: Hashable, Value: Hashable>: Hashable {
         @usableFromInline var key: Key
         @usableFromInline var value: Value
@@ -75,29 +74,27 @@ extension KeyValues {
 // MARK: - Sequence
 
 extension KeyValues: Collection {
-    
     public struct Index: Comparable {
         public static func < (lhs: KeyValues.Index, rhs: KeyValues.Index) -> Bool {
-            return lhs.index < rhs.index
+            lhs.index < rhs.index
         }
+
         internal var index: Int
     }
 
-
     public func index(after i: Index) -> Index {
-        return Index(index: self._backing.index(after: i.index))
+        Index(index: self._backing.index(after: i.index))
     }
-    
+
     public subscript(position: Index) -> (Key, Value) {
         return (self._backing[position.index].key, self._backing[position.index].value)
     }
-    
+
     public var startIndex: Index {
-        return Index(index: self._backing.startIndex)
+        Index(index: self._backing.startIndex)
     }
-    
+
     public var endIndex: Index {
-        return Index(index: self._backing.endIndex)
+        Index(index: self._backing.endIndex)
     }
-    
 }
