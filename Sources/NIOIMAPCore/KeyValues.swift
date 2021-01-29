@@ -67,3 +67,16 @@ extension KeyValues {
     }
     
 }
+
+// MARK: - Sequence
+extension KeyValues: Sequence {
+    
+    public typealias Iterator = IndexingIterator<[(K, V)]>
+    
+    public typealias Element = (K, V)
+    
+    public func makeIterator() -> IndexingIterator<[(K, V)]> {
+        return self._backing.makeIterator()
+    }
+    
+}
