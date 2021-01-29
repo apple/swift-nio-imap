@@ -39,12 +39,12 @@ extension GrammarParser_Message_Tests {
                     .envelope(Envelope(
                         date: "date",
                         subject: "subject",
-                        from: [.init(name: "from1", adl: "from2", mailbox: "from3", host: "from4")],
-                        sender: [.init(name: "sender1", adl: "sender2", mailbox: "sender3", host: "sender4")],
-                        reply: [.init(name: "reply1", adl: "reply2", mailbox: "reply3", host: "reply4")],
-                        to: [.init(name: "to1", adl: "to2", mailbox: "to3", host: "to4")],
-                        cc: [.init(name: "cc1", adl: "cc2", mailbox: "cc3", host: "cc4")],
-                        bcc: [.init(name: "bcc1", adl: "bcc2", mailbox: "bcc3", host: "bcc4")],
+                        from: [.init(personName: "from1", sourceRoot: "from2", mailbox: "from3", host: "from4")],
+                        sender: [.init(personName: "sender1", sourceRoot: "sender2", mailbox: "sender3", host: "sender4")],
+                        reply: [.init(personName: "reply1", sourceRoot: "reply2", mailbox: "reply3", host: "reply4")],
+                        to: [.init(personName: "to1", sourceRoot: "to2", mailbox: "to3", host: "to4")],
+                        cc: [.init(personName: "cc1", sourceRoot: "cc2", mailbox: "cc3", host: "cc4")],
+                        bcc: [.init(personName: "bcc1", sourceRoot: "bcc2", mailbox: "bcc3", host: "bcc4")],
                         inReplyTo: "inreplyto",
                         messageID: "messageid"
                     )),

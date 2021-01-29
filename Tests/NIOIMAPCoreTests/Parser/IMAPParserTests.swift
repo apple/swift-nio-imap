@@ -315,8 +315,8 @@ extension ParserUnitTests {
         self.iterateTests(
             testFunction: GrammarParser.parseAddress,
             validInputs: [
-                ("(NIL NIL NIL NIL)", "", .init(name: nil, adl: nil, mailbox: nil, host: nil), #line),
-                (#"("a" "b" "c" "d")"#, "", .init(name: "a", adl: "b", mailbox: "c", host: "d"), #line),
+                ("(NIL NIL NIL NIL)", "", .init(personName: nil, sourceRoot: nil, mailbox: nil, host: nil), #line),
+                (#"("a" "b" "c" "d")"#, "", .init(personName: "a", sourceRoot: "b", mailbox: "c", host: "d"), #line),
             ],
             parserErrorInputs: [
                 ("(NIL NIL NIL NIL ", "\r", #line),

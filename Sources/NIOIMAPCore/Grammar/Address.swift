@@ -18,10 +18,10 @@ import struct NIO.ByteBuffer
 /// electronic mail address.
 public struct Address: Equatable {
     /// The addressee's personal name (may be an alias).
-    public var name: ByteBuffer?
+    public var personName: ByteBuffer?
 
     /// The SMTP at-domain-list.
-    public var adl: ByteBuffer?
+    public var sourceRoot: ByteBuffer?
 
     /// The mailbox the message.
     public var mailbox: ByteBuffer?
@@ -34,9 +34,9 @@ public struct Address: Equatable {
     /// - parameter adl: The SMTP at-domain-list.
     /// - parameter mailbox: The mailbox the message.
     /// - parameter host: The host name of the server that sent the message.
-    public init(name: ByteBuffer?, adl: ByteBuffer?, mailbox: ByteBuffer?, host: ByteBuffer?) {
-        self.name = name
-        self.adl = adl
+    public init(personName: ByteBuffer?, sourceRoot: ByteBuffer?, mailbox: ByteBuffer?, host: ByteBuffer?) {
+        self.personName = personName
+        self.sourceRoot = sourceRoot
         self.mailbox = mailbox
         self.host = host
     }
@@ -47,9 +47,9 @@ public struct Address: Equatable {
 extension EncodeBuffer {
     @discardableResult mutating func writeAddress(_ address: Address) -> Int {
         self.writeString("(") +
-            self.writeNString(address.name) +
+            self.writeNString(address.personName) +
             self.writeSpace() +
-            self.writeNString(address.adl) +
+            self.writeNString(address.sourceRoot) +
             self.writeSpace() +
             self.writeNString(address.mailbox) +
             self.writeSpace() +
