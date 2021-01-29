@@ -30,8 +30,8 @@ public struct Address: Equatable {
     public var host: ByteBuffer?
 
     /// Creates a new `Address`.
-    /// - parameter name: The addressee's personal name (may be an alias).
-    /// - parameter adl: The SMTP at-domain-list.
+    /// - parameter personName: The addressee's personal name (may be an alias).
+    /// - parameter sourceRoot: The SMTP at-domain-list (source-root).
     /// - parameter mailbox: The mailbox the message.
     /// - parameter host: The host name of the server that sent the message.
     public init(personName: ByteBuffer?, sourceRoot: ByteBuffer?, mailbox: ByteBuffer?, host: ByteBuffer?) {
