@@ -58,7 +58,7 @@ extension GrammarParser {
             try fixedString(" ", buffer: &buffer, tracker: tracker)
             let host = try self.parseNString(buffer: &buffer, tracker: tracker)
             try fixedString(")", buffer: &buffer, tracker: tracker)
-            return Address(name: name, adl: adl, mailbox: mailbox, host: host)
+            return Address(personName: name, sourceRoot: adl, mailbox: mailbox, host: host)
         }
     }
 

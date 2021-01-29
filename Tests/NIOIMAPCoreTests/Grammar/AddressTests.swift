@@ -26,10 +26,10 @@ extension AddressTests {
         let adl: ByteBuffer? = "b"
         let mailbox: ByteBuffer? = "c"
         let host: ByteBuffer? = "d"
-        let address = Address(name: name, adl: adl, mailbox: mailbox, host: host)
+        let address = Address(personName: name, sourceRoot: adl, mailbox: mailbox, host: host)
 
-        XCTAssertEqual(address.name, name)
-        XCTAssertEqual(address.adl, adl)
+        XCTAssertEqual(address.personName, name)
+        XCTAssertEqual(address.sourceRoot, adl)
         XCTAssertEqual(address.mailbox, mailbox)
         XCTAssertEqual(address.host, host)
     }
@@ -39,7 +39,7 @@ extension AddressTests {
 
 extension AddressTests {
     func testAllNil() {
-        let address = Address(name: nil, adl: nil, mailbox: nil, host: nil)
+        let address = Address(personName: nil, sourceRoot: nil, mailbox: nil, host: nil)
         let expected = "(NIL NIL NIL NIL)"
         let size = self.testBuffer.writeAddress(address)
         XCTAssertEqual(size, expected.utf8.count)
@@ -47,7 +47,7 @@ extension AddressTests {
     }
 
     func testNoneNil() {
-        let address = Address(name: "somename", adl: "someadl", mailbox: "somemailbox", host: "someaddress")
+        let address = Address(personName: "somename", sourceRoot: "someadl", mailbox: "somemailbox", host: "someaddress")
         let expected = "(\"somename\" \"someadl\" \"somemailbox\" \"someaddress\")"
         let size = self.testBuffer.writeAddress(address)
         XCTAssertEqual(size, expected.utf8.count)
@@ -55,7 +55,7 @@ extension AddressTests {
     }
 
     func testMixture() {
-        let address = Address(name: nil, adl: "some", mailbox: "thing", host: nil)
+        let address = Address(personName: nil, sourceRoot: "some", mailbox: "thing", host: nil)
         let expected = "(NIL \"some\" \"thing\" NIL)"
         let size = self.testBuffer.writeAddress(address)
         XCTAssertEqual(size, expected.utf8.count)
