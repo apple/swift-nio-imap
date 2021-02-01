@@ -16,16 +16,15 @@ import struct NIO.ByteBuffer
 
 /// A group of addresses.
 public struct AddressGroup: Equatable {
-    
     /// The name of the group.
     public var groupName: MailboxName
-    
+
     /// The group's source-root.
     public var sourceRoot: ByteBuffer?
-    
+
     /// Any child groups or addresses.
     public var children: [AddressOrGroup]
-    
+
     /// Creates a new `AddressGroup`.
     /// - parameter groupName: The name of the group.
     /// - parameter sourceRoot: The group's source-root.
@@ -39,37 +38,36 @@ public struct AddressGroup: Equatable {
 
 /// Used inside `Envelope` to distinguish between either a single address, or a group of addresses.
 public indirect enum AddressOrGroup: Equatable {
-    
     /// A single address with no children.
     case address(Address)
-    
+
     /// A collection of potentially nested groups and addresses.
     case group(AddressGroup)
 }
 
 // MARK: - Encoding
+
 extension EncodeBuffer {
-    
     @discardableResult mutating func writeAddressGroup(_ group: AddressGroup) -> Int {
-        
         self.writeAddress(.init(
             personName: nil,
             sourceRoot: group.sourceRoot,
             mailbox: group.groupName.storage,
-            host: nil)
-        ) +
-        self.writeArray(group.children, prefix: "", separator: "", suffix: "", parenthesis: false) { (child, self) in
-            self.writeAddressOrGroup(child)
-        } +
-        self.writeAddress(.init(
-            personName: nil,
-            sourceRoot: group.sourceRoot,
-            mailbox: nil,
-            host: nil)
+            host: nil
         )
-        
+        ) +
+            self.writeArray(group.children, prefix: "", separator: "", suffix: "", parenthesis: false) { (child, self) in
+                self.writeAddressOrGroup(child)
+            } +
+            self.writeAddress(.init(
+                personName: nil,
+                sourceRoot: group.sourceRoot,
+                mailbox: nil,
+                host: nil
+            )
+            )
     }
-    
+
     @discardableResult mutating func writeAddressOrGroup(_ aog: AddressOrGroup) -> Int {
         switch aog {
         case .address(let address):
@@ -78,5 +76,4 @@ extension EncodeBuffer {
             return self.writeAddressGroup(group)
         }
     }
-    
 }

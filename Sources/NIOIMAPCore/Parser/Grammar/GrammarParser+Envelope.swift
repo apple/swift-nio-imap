@@ -24,11 +24,8 @@ import struct NIO.ByteBuffer
 import struct NIO.ByteBufferView
 
 extension GrammarParser {
-    
     static func parseEnvelopeAddressGroups(_ addresses: [Address]) throws -> [AddressOrGroup] {
-        
         func _parseEnvelopeAddressGroups(_ addresses: inout [Address]) throws -> [AddressOrGroup] {
-            
             var results: [AddressOrGroup] = []
             while let address = addresses.first {
                 addresses = Array(addresses.dropFirst())
@@ -42,14 +39,14 @@ extension GrammarParser {
                     results.append(.address(address))
                 }
             }
-            
+
             return results
         }
-        
+
         var addresses = addresses
         return try _parseEnvelopeAddressGroups(&addresses)
     }
-    
+
     // reusable for a lot of the env-* types
     static func parseEnvelopeAddresses(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [Address] {
         try fixedString("(", buffer: &buffer, tracker: tracker)
@@ -65,11 +62,11 @@ extension GrammarParser {
             try self.parseNil(buffer: &buffer, tracker: tracker)
             return []
         }
-        let addresses =  try oneOf([
+        let addresses = try oneOf([
             parseEnvelopeAddresses,
             parseOptionalEnvelopeAddresses_nil,
         ], buffer: &buffer, tracker: tracker)
-        
+
         return try self.parseEnvelopeAddressGroups(addresses)
     }
 

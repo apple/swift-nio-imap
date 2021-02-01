@@ -19,79 +19,78 @@ import XCTest
 class GrammarParser_Envelope_Tests: XCTestCase, _ParserTestHelpers {}
 
 // MARK: - parseEnvelopeAddressGroups
+
 extension GrammarParser_Envelope_Tests {
-    
     func testParseEnvelopeAddressGroups() {
         let inputs: [([Address], [AddressOrGroup], UInt)] = [
             ([], [], #line), // extreme case, this should never happen, but we don't want to crash
-            (// single address
+            ( // single address
                 [.init(personName: "a", sourceRoot: "a", mailbox: "a", host: "a")],
                 [.address(.init(personName: "a", sourceRoot: "a", mailbox: "a", host: "a"))],
                 #line
             ),
-            (// multiple addresses
+            ( // multiple addresses
                 [.init(personName: "a", sourceRoot: "a", mailbox: "a", host: "a"), .init(personName: "b", sourceRoot: "b", mailbox: "b", host: "b")],
                 [.address(.init(personName: "a", sourceRoot: "a", mailbox: "a", host: "a")), .address(.init(personName: "b", sourceRoot: "b", mailbox: "b", host: "b"))],
                 #line
             ),
-            (// single group: 1 address
+            ( // single group: 1 address
                 [
                     .init(personName: nil, sourceRoot: nil, mailbox: "group", host: nil),
                     .init(personName: "a", sourceRoot: "a", mailbox: "a", host: "a"),
-                    .init(personName: nil, sourceRoot: nil, mailbox: nil, host: nil)
+                    .init(personName: nil, sourceRoot: nil, mailbox: nil, host: nil),
                 ],
                 [
-                    .group(.init(groupName: .init("group"), sourceRoot: nil, children: [.address(.init(personName: "a", sourceRoot: "a", mailbox: "a", host: "a"))]))
+                    .group(.init(groupName: .init("group"), sourceRoot: nil, children: [.address(.init(personName: "a", sourceRoot: "a", mailbox: "a", host: "a"))])),
                 ],
                 #line
             ),
-            (// single group: 1 address
+            ( // single group: 1 address
                 [
                     .init(personName: nil, sourceRoot: nil, mailbox: "group", host: nil),
                     .init(personName: "a", sourceRoot: "a", mailbox: "a", host: "a"),
-                        .init(personName: "b", sourceRoot: "b", mailbox: "b", host: "b"),
-                        .init(personName: "c", sourceRoot: "c", mailbox: "c", host: "c"),
-                    .init(personName: nil, sourceRoot: nil, mailbox: nil, host: nil)
-                ],
-                [
-                    .group(.init(groupName: .init("group"), sourceRoot: nil, children: [
-                        .address(.init(personName: "a", sourceRoot: "a", mailbox: "a", host: "a")),
-                            .address(.init(personName: "b", sourceRoot: "b", mailbox: "b", host: "b")),
-                            .address(.init(personName: "c", sourceRoot: "c", mailbox: "c", host: "c"))
-                    ]))
-                ],
-                #line
-            ),
-            (// nested groups
-                [
-                    .init(personName: nil, sourceRoot: nil, mailbox: "group1", host: nil),
-                    .init(personName: "a", sourceRoot: "a", mailbox: "a", host: "a"),
-                        .init(personName: nil, sourceRoot: nil, mailbox: "group2", host: nil),
-                        .init(personName: "b", sourceRoot: "b", mailbox: "b", host: "b"),
-                        .init(personName: nil, sourceRoot: nil, mailbox: nil, host: nil),
+                    .init(personName: "b", sourceRoot: "b", mailbox: "b", host: "b"),
+                    .init(personName: "c", sourceRoot: "c", mailbox: "c", host: "c"),
                     .init(personName: nil, sourceRoot: nil, mailbox: nil, host: nil),
                 ],
                 [
                     .group(.init(groupName: .init("group"), sourceRoot: nil, children: [
                         .address(.init(personName: "a", sourceRoot: "a", mailbox: "a", host: "a")),
-                            .group(.init(groupName: .init("group2"), sourceRoot: nil, children: [
-                                .address(.init(personName: "b", sourceRoot: "b", mailbox: "b", host: "b"))
-                            ]))
-                    ]))
+                        .address(.init(personName: "b", sourceRoot: "b", mailbox: "b", host: "b")),
+                        .address(.init(personName: "c", sourceRoot: "c", mailbox: "c", host: "c")),
+                    ])),
                 ],
                 #line
-            )
+            ),
+            ( // nested groups
+                [
+                    .init(personName: nil, sourceRoot: nil, mailbox: "group1", host: nil),
+                    .init(personName: "a", sourceRoot: "a", mailbox: "a", host: "a"),
+                    .init(personName: nil, sourceRoot: nil, mailbox: "group2", host: nil),
+                    .init(personName: "b", sourceRoot: "b", mailbox: "b", host: "b"),
+                    .init(personName: nil, sourceRoot: nil, mailbox: nil, host: nil),
+                    .init(personName: nil, sourceRoot: nil, mailbox: nil, host: nil),
+                ],
+                [
+                    .group(.init(groupName: .init("group"), sourceRoot: nil, children: [
+                        .address(.init(personName: "a", sourceRoot: "a", mailbox: "a", host: "a")),
+                        .group(.init(groupName: .init("group2"), sourceRoot: nil, children: [
+                            .address(.init(personName: "b", sourceRoot: "b", mailbox: "b", host: "b")),
+                        ])),
+                    ])),
+                ],
+                #line
+            ),
         ]
         for (original, expected, line) in inputs {
             XCTAssertNoThrow(XCTAssertEqual(try GrammarParser.parseEnvelopeAddressGroups(original), expected, line: line), line: line)
         }
     }
-    
 }
 
 // MARK: - parseEnvelopeAddresses
+
 extension GrammarParser_Envelope_Tests {
-    
     func testParseEnvelopeAddresses() {
         self.iterateTests(
             testFunction: GrammarParser.parseEnvelopeAddresses,
@@ -115,23 +114,23 @@ extension GrammarParser_Envelope_Tests {
                     #line
                 ),
             ],
-            parserErrorInputs: [], incompleteMessageInputs: [])
+            parserErrorInputs: [], incompleteMessageInputs: []
+        )
     }
-    
 }
 
 // MARK: - parseOptionalEnvelopeAddresses
+
 extension GrammarParser_Envelope_Tests {
-    
     func testParseOptionalEnvelopeAddresses() {
         self.iterateTests(
             testFunction: GrammarParser.parseOptionalEnvelopeAddresses,
             validInputs: [
                 ("NIL", " ", [], #line),
             ],
-            parserErrorInputs: [], incompleteMessageInputs: [])
+            parserErrorInputs: [], incompleteMessageInputs: []
+        )
     }
-    
 }
 
 // MARK: - parseEnvelope
