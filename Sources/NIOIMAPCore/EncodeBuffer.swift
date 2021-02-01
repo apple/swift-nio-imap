@@ -73,7 +73,6 @@ extension EncodeBuffer {
 }
 
 extension EncodeBuffer {
-
     /// Represents a piece of data that is ready to be written to the network.
     public struct Chunk {
         /// The data that is ready to be written.
