@@ -14,24 +14,36 @@
 
 import struct NIO.ByteBuffer
 
+/// A group of addresses.
 public struct AddressGroup: Equatable {
     
+    /// The name of the group.
+    public var groupName: MailboxName
     
-    public var mailboxName: MailboxName
-    
+    /// The group's source-root.
     public var sourceRoot: ByteBuffer?
     
+    /// Any child groups or addresses.
     public var children: [AddressOrGroup]
     
-    public init(mailboxName: MailboxName, sourceRoot: ByteBuffer?, children: [AddressOrGroup]) {
-        self.mailboxName = mailboxName
+    /// Creates a new `AddressGroup`.
+    /// - parameter groupName: The name of the group.
+    /// - parameter sourceRoot: The group's source-root.
+    /// - parameter children: Any child groups or addresses.
+    public init(groupName: MailboxName, sourceRoot: ByteBuffer?, children: [AddressOrGroup]) {
+        self.groupName = groupName
         self.sourceRoot = sourceRoot
         self.children = children
     }
 }
 
+/// Used inside `Envelope` to distinguish between either a single address, or a group of addresses.
 public indirect enum AddressOrGroup: Equatable {
+    
+    /// A single address with no children.
     case address(Address)
+    
+    /// A collection of potentially nested groups and addresses.
     case group(AddressGroup)
 }
 
@@ -43,7 +55,7 @@ extension EncodeBuffer {
         self.writeAddress(.init(
             personName: nil,
             sourceRoot: group.sourceRoot,
-            mailbox: group.mailboxName.storage,
+            mailbox: group.groupName.storage,
             host: nil)
         ) +
         self.writeArray(group.children, prefix: "", separator: "", suffix: "", parenthesis: false) { (child, self) in

@@ -34,7 +34,7 @@ extension GrammarParser {
                 addresses = Array(addresses.dropFirst())
                 if address.host == nil, let mailboxName = address.mailbox { // group start
                     let children = try _parseEnvelopeAddressGroups(&addresses)
-                    let group = AddressGroup(mailboxName: MailboxName(mailboxName), sourceRoot: address.sourceRoot, children: children)
+                    let group = AddressGroup(groupName: MailboxName(mailboxName), sourceRoot: address.sourceRoot, children: children)
                     results.append(.group(group))
                 } else if address.host == nil { // group end
                     break
