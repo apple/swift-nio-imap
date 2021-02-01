@@ -34,7 +34,7 @@ public enum ResponsePayload: Equatable {
 
     /// The servers implementation details, used for identification. For example
     /// this may be used to identify an iCloud server.
-    case id([IDParameter])
+    case id(KeyValues<String, ByteBuffer?>)
 
     /// Matches a quota root with a mailbox.
     case quotaRoot(MailboxName, QuotaRoot)

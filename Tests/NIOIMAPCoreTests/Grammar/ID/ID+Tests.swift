@@ -22,30 +22,10 @@ class ID_Tests: EncodeTestClass {}
 
 extension ID_Tests {
     func testEncode() {
-        let inputs: [(IDParameter, String, UInt)] = [
-            (.init(key: "key", value: "value"), #""key" "value""#, #line),
-            (.init(key: "key", value: nil), #""key" NIL"#, #line),
+        let inputs: [(KeyValues<String, ByteBuffer?>, String, UInt)] = [
+            ([:], "NIL", #line),
+            (["key": "value"], #"("key" "value")"#, #line),
         ]
-
-        for (test, expectedString, line) in inputs {
-            self.testBuffer.clear()
-            let size = self.testBuffer.writeIDParameter(test)
-            XCTAssertEqual(size, expectedString.utf8.count, line: line)
-            XCTAssertEqual(self.testBufferString, expectedString, line: line)
-        }
-    }
-
-    func testEncode_array() {
-        let inputs: [([IDParameter], String, UInt)] = [
-            ([], "NIL", #line),
-            ([.init(key: "key", value: "value")], #"("key" "value")"#, #line),
-        ]
-
-        for (test, expectedString, line) in inputs {
-            self.testBuffer.clear()
-            let size = self.testBuffer.writeIDParameters(test)
-            XCTAssertEqual(size, expectedString.utf8.count, line: line)
-            XCTAssertEqual(self.testBufferString, expectedString, line: line)
-        }
+        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeIDParameters($0) })
     }
 }
