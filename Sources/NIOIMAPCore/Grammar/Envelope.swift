@@ -24,22 +24,22 @@ public struct Envelope: Equatable {
     public var subject: ByteBuffer?
 
     /// The email address, and optionally the name of the author(s).
-    public var from: [Address]
+    public var from: [AddressOrGroup]
 
     /// Address of the actual sender acting on behalf of the author.
-    public var sender: [Address]
+    public var sender: [AddressOrGroup]
 
     /// Who a reply should be sent to.
-    public var reply: [Address]
+    public var reply: [AddressOrGroup]
 
     /// Who the message was sent to
-    public var to: [Address]
+    public var to: [AddressOrGroup]
 
     /// The carbon-copy list.
-    public var cc: [Address]
+    public var cc: [AddressOrGroup]
 
     /// The blind-carbon-copy list
-    public var bcc: [Address]
+    public var bcc: [AddressOrGroup]
 
     /// The message ID that this message replied to.
     public var inReplyTo: ByteBuffer?
@@ -58,7 +58,7 @@ public struct Envelope: Equatable {
     /// - parameter bcc: The blind-carbon-copy list
     /// - parameter inReplyTo: The message ID that this message replied to.
     /// - parameter messageID: A unique identifier for the message.
-    public init(date: String?, subject: ByteBuffer?, from: [Address], sender: [Address], reply: [Address], to: [Address], cc: [Address], bcc: [Address], inReplyTo: ByteBuffer?, messageID: String?) {
+    public init(date: String?, subject: ByteBuffer?, from: [AddressOrGroup], sender: [AddressOrGroup], reply: [AddressOrGroup], to: [AddressOrGroup], cc: [AddressOrGroup], bcc: [AddressOrGroup], inReplyTo: ByteBuffer?, messageID: String?) {
         self.date = date
         self.subject = subject
         self.from = from
@@ -75,15 +75,15 @@ public struct Envelope: Equatable {
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeEnvelopeAddresses(_ addresses: [Address]) -> Int {
+    @discardableResult mutating func writeEnvelopeAddresses(_ addresses: [AddressOrGroup]) -> Int {
         guard addresses.count > 0 else {
             return self.writeNil()
         }
 
         return
             self.writeString("(") +
-            self.writeArray(addresses, separator: "", parenthesis: false) { (address, self) -> Int in
-                self.writeAddress(address)
+            self.writeArray(addresses, separator: "", parenthesis: false) { (aog, self) -> Int in
+                self.writeAddressOrGroup(aog)
             } +
             self.writeString(")")
     }

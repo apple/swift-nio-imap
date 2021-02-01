@@ -32,7 +32,7 @@ public struct AddressGroup: Equatable {
 
 public indirect enum AddressOrGroup: Equatable {
     case address(Address)
-    case group(AddressOrGroup)
+    case group(AddressGroup)
 }
 
 // MARK: - Encoding
@@ -63,7 +63,7 @@ extension EncodeBuffer {
         case .address(let address):
             return self.writeAddress(address)
         case .group(let group):
-            return self.writeAddressOrGroup(group)
+            return self.writeAddressGroup(group)
         }
     }
     
