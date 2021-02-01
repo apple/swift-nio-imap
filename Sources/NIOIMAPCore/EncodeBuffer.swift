@@ -73,7 +73,6 @@ extension EncodeBuffer {
 }
 
 extension EncodeBuffer {
-    public var hasNextChunk: Bool { self._buffer.readableBytes > 0 }
 
     /// Represents a piece of data that is ready to be written to the network.
     public struct Chunk {
