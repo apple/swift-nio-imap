@@ -41,7 +41,7 @@ extension GrammarParser_Envelope_Tests {
                     .init(personName: nil, sourceRoot: nil, mailbox: nil, host: nil),
                 ],
                 [
-                    .group(.init(groupName: .init("group"), sourceRoot: nil, children: [.address(.init(personName: "a", sourceRoot: "a", mailbox: "a", host: "a"))])),
+                    .group(.init(groupName: "group", sourceRoot: nil, children: [.address(.init(personName: "a", sourceRoot: "a", mailbox: "a", host: "a"))])),
                 ],
                 #line
             ),
@@ -54,7 +54,7 @@ extension GrammarParser_Envelope_Tests {
                     .init(personName: nil, sourceRoot: nil, mailbox: nil, host: nil),
                 ],
                 [
-                    .group(.init(groupName: .init("group"), sourceRoot: nil, children: [
+                    .group(.init(groupName: "group", sourceRoot: nil, children: [
                         .address(.init(personName: "a", sourceRoot: "a", mailbox: "a", host: "a")),
                         .address(.init(personName: "b", sourceRoot: "b", mailbox: "b", host: "b")),
                         .address(.init(personName: "c", sourceRoot: "c", mailbox: "c", host: "c")),
@@ -72,9 +72,9 @@ extension GrammarParser_Envelope_Tests {
                     .init(personName: nil, sourceRoot: nil, mailbox: nil, host: nil),
                 ],
                 [
-                    .group(.init(groupName: .init("group1"), sourceRoot: nil, children: [
+                    .group(.init(groupName: "group1", sourceRoot: nil, children: [
                         .address(.init(personName: "a", sourceRoot: "a", mailbox: "a", host: "a")),
-                        .group(.init(groupName: .init("group2"), sourceRoot: nil, children: [
+                        .group(.init(groupName: "group2", sourceRoot: nil, children: [
                             .address(.init(personName: "b", sourceRoot: "b", mailbox: "b", host: "b")),
                         ])),
                     ])),
