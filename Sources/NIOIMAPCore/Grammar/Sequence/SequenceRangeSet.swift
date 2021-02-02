@@ -207,6 +207,7 @@ extension SequenceRangeSet: SetAlgebra {
         Self(rangeSet: ranges.symmetricDifference(other.ranges))
     }
 
+    @discardableResult
     public mutating func insert(_ newMember: SequenceNumber) -> (inserted: Bool, memberAfterInsert: SequenceNumber) {
         guard !contains(newMember) else { return (false, newMember) }
         let r: Range<SequenceNumberWrapper> = Range(newMember)
@@ -214,6 +215,7 @@ extension SequenceRangeSet: SetAlgebra {
         return (true, newMember)
     }
 
+    @discardableResult
     public mutating func remove(_ member: SequenceNumber) -> SequenceNumber? {
         guard contains(member) else { return nil }
         let r: Range<SequenceNumberWrapper> = Range(member)
@@ -221,6 +223,7 @@ extension SequenceRangeSet: SetAlgebra {
         return member
     }
 
+    @discardableResult
     public mutating func update(with newMember: SequenceNumber) -> SequenceNumber? {
         guard !contains(newMember) else { return newMember }
         let r: Range<SequenceNumberWrapper> = Range(newMember)
