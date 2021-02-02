@@ -72,7 +72,7 @@ extension GrammarParser_Envelope_Tests {
                     .init(personName: nil, sourceRoot: nil, mailbox: nil, host: nil),
                 ],
                 [
-                    .group(.init(groupName: .init("group"), sourceRoot: nil, children: [
+                    .group(.init(groupName: .init("group1"), sourceRoot: nil, children: [
                         .address(.init(personName: "a", sourceRoot: "a", mailbox: "a", host: "a")),
                         .group(.init(groupName: .init("group2"), sourceRoot: nil, children: [
                             .address(.init(personName: "b", sourceRoot: "b", mailbox: "b", host: "b")),
@@ -83,7 +83,8 @@ extension GrammarParser_Envelope_Tests {
             ),
         ]
         for (original, expected, line) in inputs {
-            XCTAssertNoThrow(XCTAssertEqual(try GrammarParser.parseEnvelopeAddressGroups(original), expected, line: line), line: line)
+            let actual = GrammarParser.parseEnvelopeAddressGroups(original)
+            XCTAssertEqual(actual, expected, line: line)
         }
     }
 }

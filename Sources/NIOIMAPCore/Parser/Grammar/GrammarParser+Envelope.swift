@@ -24,13 +24,13 @@ import struct NIO.ByteBuffer
 import struct NIO.ByteBufferView
 
 extension GrammarParser {
-    static func parseEnvelopeAddressGroups(_ addresses: [Address]) throws -> [AddressOrGroup] {
-        func _parseEnvelopeAddressGroups(_ addresses: inout [Address]) throws -> [AddressOrGroup] {
+    static func parseEnvelopeAddressGroups(_ addresses: [Address]) -> [AddressOrGroup] {
+        func _parseEnvelopeAddressGroups(_ addresses: inout [Address]) -> [AddressOrGroup] {
             var results: [AddressOrGroup] = []
             while let address = addresses.first {
                 addresses = Array(addresses.dropFirst())
                 if address.host == nil, let mailboxName = address.mailbox { // group start
-                    let children = try _parseEnvelopeAddressGroups(&addresses)
+                    let children = _parseEnvelopeAddressGroups(&addresses)
                     let group = AddressGroup(groupName: MailboxName(mailboxName), sourceRoot: address.sourceRoot, children: children)
                     results.append(.group(group))
                 } else if address.host == nil { // group end
@@ -44,7 +44,7 @@ extension GrammarParser {
         }
 
         var addresses = addresses
-        return try _parseEnvelopeAddressGroups(&addresses)
+        return _parseEnvelopeAddressGroups(&addresses)
     }
 
     // reusable for a lot of the env-* types
@@ -67,7 +67,7 @@ extension GrammarParser {
             parseOptionalEnvelopeAddresses_nil,
         ], buffer: &buffer, tracker: tracker)
 
-        return try self.parseEnvelopeAddressGroups(addresses)
+        return self.parseEnvelopeAddressGroups(addresses)
     }
 
     // address         = "(" addr-name SP addr-adl SP addr-mailbox SP
