@@ -252,6 +252,7 @@ extension UIDSet: SetAlgebra {
         UIDSet(ranges.symmetricDifference(other.ranges))
     }
 
+    @discardableResult
     public mutating func insert(_ newMember: UID) -> (inserted: Bool, memberAfterInsert: UID) {
         guard !contains(newMember) else { return (false, newMember) }
         let r: Range<UIDShiftWrapper> = Range(newMember)
@@ -259,6 +260,7 @@ extension UIDSet: SetAlgebra {
         return (true, newMember)
     }
 
+    @discardableResult
     public mutating func remove(_ member: UID) -> UID? {
         guard contains(member) else { return nil }
         let r: Range<UIDShiftWrapper> = Range(member)
@@ -266,6 +268,7 @@ extension UIDSet: SetAlgebra {
         return member
     }
 
+    @discardableResult
     public mutating func update(with newMember: UID) -> UID? {
         guard !contains(newMember) else { return newMember }
         let r: Range<UIDShiftWrapper> = Range(newMember)
