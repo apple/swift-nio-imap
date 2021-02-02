@@ -24,22 +24,22 @@ public struct Envelope: Equatable {
     public var subject: ByteBuffer?
 
     /// The email address, and optionally the name of the author(s).
-    public var from: [AddressOrGroup]
+    public var from: [AddressListElement]
 
     /// Address of the actual sender acting on behalf of the author.
-    public var sender: [AddressOrGroup]
+    public var sender: [AddressListElement]
 
     /// Who a reply should be sent to.
-    public var reply: [AddressOrGroup]
+    public var reply: [AddressListElement]
 
     /// Who the message was sent to
-    public var to: [AddressOrGroup]
+    public var to: [AddressListElement]
 
     /// The carbon-copy list.
-    public var cc: [AddressOrGroup]
+    public var cc: [AddressListElement]
 
     /// The blind-carbon-copy list
-    public var bcc: [AddressOrGroup]
+    public var bcc: [AddressListElement]
 
     /// The message ID that this message replied to.
     public var inReplyTo: ByteBuffer?
@@ -58,7 +58,7 @@ public struct Envelope: Equatable {
     /// - parameter bcc: The blind-carbon-copy list
     /// - parameter inReplyTo: The message ID that this message replied to.
     /// - parameter messageID: A unique identifier for the message.
-    public init(date: String?, subject: ByteBuffer?, from: [AddressOrGroup], sender: [AddressOrGroup], reply: [AddressOrGroup], to: [AddressOrGroup], cc: [AddressOrGroup], bcc: [AddressOrGroup], inReplyTo: ByteBuffer?, messageID: String?) {
+    public init(date: String?, subject: ByteBuffer?, from: [AddressListElement], sender: [AddressListElement], reply: [AddressListElement], to: [AddressListElement], cc: [AddressListElement], bcc: [AddressListElement], inReplyTo: ByteBuffer?, messageID: String?) {
         self.date = date
         self.subject = subject
         self.from = from
@@ -75,7 +75,7 @@ public struct Envelope: Equatable {
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeEnvelopeAddresses(_ addresses: [AddressOrGroup]) -> Int {
+    @discardableResult mutating func writeEnvelopeAddresses(_ addresses: [AddressListElement]) -> Int {
         guard addresses.count > 0 else {
             return self.writeNil()
         }

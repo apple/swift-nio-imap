@@ -23,13 +23,13 @@ public struct AddressGroup: Equatable {
     public var sourceRoot: ByteBuffer?
 
     /// Any child groups or addresses.
-    public var children: [AddressOrGroup]
+    public var children: [AddressListElement]
 
     /// Creates a new `AddressGroup`.
     /// - parameter groupName: The name of the group.
     /// - parameter sourceRoot: The group's source-root.
     /// - parameter children: Any child groups or addresses.
-    public init(groupName: ByteBuffer, sourceRoot: ByteBuffer?, children: [AddressOrGroup]) {
+    public init(groupName: ByteBuffer, sourceRoot: ByteBuffer?, children: [AddressListElement]) {
         self.groupName = groupName
         self.sourceRoot = sourceRoot
         self.children = children
@@ -37,7 +37,7 @@ public struct AddressGroup: Equatable {
 }
 
 /// Used inside `Envelope` to distinguish between either a single address, or a group of addresses.
-public indirect enum AddressOrGroup: Equatable {
+public indirect enum AddressListElement: Equatable {
     /// A single address with no children.
     case address(Address)
 
@@ -68,7 +68,7 @@ extension EncodeBuffer {
             )
     }
 
-    @discardableResult mutating func writeAddressOrGroup(_ aog: AddressOrGroup) -> Int {
+    @discardableResult mutating func writeAddressOrGroup(_ aog: AddressListElement) -> Int {
         switch aog {
         case .address(let address):
             return self.writeAddress(address)

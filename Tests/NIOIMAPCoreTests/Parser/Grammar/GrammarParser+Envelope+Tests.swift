@@ -22,7 +22,7 @@ class GrammarParser_Envelope_Tests: XCTestCase, _ParserTestHelpers {}
 
 extension GrammarParser_Envelope_Tests {
     func testParseEnvelopeAddressGroups() {
-        let inputs: [([Address], [AddressOrGroup], UInt)] = [
+        let inputs: [([Address], [AddressListElement], UInt)] = [
             ([], [], #line), // extreme case, this should never happen, but we don't want to crash
             ( // single address
                 [.init(personName: "a", sourceRoot: "a", mailbox: "a", host: "a")],
