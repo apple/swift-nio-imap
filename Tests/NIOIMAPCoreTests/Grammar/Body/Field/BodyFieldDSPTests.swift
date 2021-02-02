@@ -24,7 +24,7 @@ extension BodyFieldDSPTests {
     func testEncode() {
         let inputs: [(BodyStructure.Disposition?, String, UInt)] = [
             (nil, "NIL", #line),
-            (.init(kind: "some", parameters: [.init(key: "f1", value: "v1")]), "(\"some\" (\"f1\" \"v1\"))", #line),
+            (.init(kind: "some", parameters: ["f1": "v1"]), "(\"some\" (\"f1\" \"v1\"))", #line),
         ]
 
         for (test, expectedString, line) in inputs {
@@ -41,10 +41,10 @@ extension BodyFieldDSPTests {
 extension BodyFieldDSPTests {
     func testSize() {
         let inputs: [(BodyStructure.Disposition, Int?, UInt)] = [
-            (.init(kind: "test", parameters: []), nil, #line),
-            (.init(kind: "test", parameters: [.init(key: "size", value: "123")]), 123, #line),
-            (.init(kind: "test", parameters: [.init(key: "SIZE", value: "456")]), 456, #line),
-            (.init(kind: "test", parameters: [.init(key: "SIZE", value: "abc")]), nil, #line),
+            (.init(kind: "test", parameters: [:]), nil, #line),
+            (.init(kind: "test", parameters: ["size": "123"]), 123, #line),
+            (.init(kind: "test", parameters: ["SIZE": "456"]), 456, #line),
+            (.init(kind: "test", parameters: ["SIZE": "abc"]), nil, #line),
         ]
 
         for (dsp, expected, line) in inputs {
@@ -54,9 +54,9 @@ extension BodyFieldDSPTests {
 
     func testFilename() {
         let inputs: [(BodyStructure.Disposition, String?, UInt)] = [
-            (.init(kind: "test", parameters: []), nil, #line),
-            (.init(kind: "test", parameters: [.init(key: "filename", value: "hello")]), "hello", #line),
-            (.init(kind: "test", parameters: [.init(key: "FILENAME", value: "world")]), "world", #line),
+            (.init(kind: "test", parameters: [:]), nil, #line),
+            (.init(kind: "test", parameters: ["filename": "hello"]), "hello", #line),
+            (.init(kind: "test", parameters: ["FILENAME": "world"]), "world", #line),
         ]
 
         for (dsp, expected, line) in inputs {

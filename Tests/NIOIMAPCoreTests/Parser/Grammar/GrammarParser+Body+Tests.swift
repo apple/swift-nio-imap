@@ -45,7 +45,7 @@ extension GrammarParser_Body_Tests {
         TestUtilities.withBuffer(#"("astring" ("f1" "v1"))"#) { (buffer) in
             let dsp = try GrammarParser.parseBodyFieldDsp(buffer: &buffer, tracker: .testTracker)
             XCTAssertNotNil(dsp)
-            XCTAssertEqual(dsp, BodyStructure.Disposition(kind: "astring", parameters: [.init(key: "f1", value: "v1")]))
+            XCTAssertEqual(dsp, BodyStructure.Disposition(kind: "astring", parameters: ["f1": "v1"]))
         }
     }
 
@@ -108,9 +108,9 @@ extension GrammarParser_Body_Tests {
         self.iterateTests(
             testFunction: GrammarParser.parseBodyFieldParam,
             validInputs: [
-                (#"NIL"#, " ", [], #line),
-                (#"("f1" "v1")"#, " ", [.init(key: "f1", value: "v1")], #line),
-                (#"("f1" "v1" "f2" "v2")"#, " ", [.init(key: "f1", value: "v1"), .init(key: "f2", value: "v2")], #line),
+                (#"NIL"#, " ", [:], #line),
+                (#"("f1" "v1")"#, " ", ["f1": "v1"], #line),
+                (#"("f1" "v1" "f2" "v2")"#, " ", ["f1": "v1", "f2": "v2"], #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
@@ -131,7 +131,7 @@ extension GrammarParser_Body_Tests {
     func testParseBodyFields_valid() {
         TestUtilities.withBuffer(#"("f1" "v1") "id" "desc" "8BIT" 1234"#, terminator: " ") { (buffer) in
             let result = try GrammarParser.parseBodyFields(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(result.parameters, [.init(key: "f1", value: "v1")])
+            XCTAssertEqual(result.parameters, ["f1": "v1"])
             XCTAssertEqual(result.id, "id")
             XCTAssertEqual(result.contentDescription, "desc")
             XCTAssertEqual(result.encoding, .eightBit)
@@ -150,7 +150,7 @@ extension GrammarParser_Body_Tests {
                 "\r\n",
                 .init(
                     type: .basic(.init(kind: .audio, subtype: .alternative)),
-                    fields: .init(parameters: [], id: nil, contentDescription: nil, encoding: .base64, octetCount: 1),
+                    fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .base64, octetCount: 1),
                     extension: nil
                 ),
                 #line
@@ -160,7 +160,7 @@ extension GrammarParser_Body_Tests {
                 "\r\n",
                 .init(
                     type: .basic(.init(kind: .application, subtype: .mixed)),
-                    fields: .init(parameters: [], id: "id", contentDescription: "description", encoding: .sevenBit, octetCount: 2),
+                    fields: .init(parameters: [:], id: "id", contentDescription: "description", encoding: .sevenBit, octetCount: 2),
                     extension: nil
                 ),
                 #line
@@ -170,7 +170,7 @@ extension GrammarParser_Body_Tests {
                 "\r\n",
                 .init(
                     type: .basic(.init(kind: .video, subtype: .related)),
-                    fields: .init(parameters: [.init(key: "f1", value: "v1")], id: nil, contentDescription: nil, encoding: .eightBit, octetCount: 3),
+                    fields: .init(parameters: ["f1": "v1"], id: nil, contentDescription: nil, encoding: .eightBit, octetCount: 3),
                     extension: nil
                 ),
                 #line
@@ -186,11 +186,11 @@ extension GrammarParser_Body_Tests {
                         .init(
                             message: .rfc822,
                             envelope: Envelope(date: nil, subject: nil, from: [], sender: [], reply: [], to: [], cc: [], bcc: [], inReplyTo: nil, messageID: nil),
-                            body: .singlepart(.init(type: .basic(.init(kind: .image, subtype: .related)), fields: .init(parameters: [], id: nil, contentDescription: nil, encoding: .binary, octetCount: 5))),
+                            body: .singlepart(.init(type: .basic(.init(kind: .image, subtype: .related)), fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .binary, octetCount: 5))),
                             fieldLines: 8
                         )
                     ),
-                    fields: .init(parameters: [], id: nil, contentDescription: nil, encoding: .base64, octetCount: 4),
+                    fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .base64, octetCount: 4),
                     extension: nil
                 ),
                 #line
@@ -203,7 +203,7 @@ extension GrammarParser_Body_Tests {
                 "\r\n",
                 .init(
                     type: .text(.init(mediaText: "media", lineCount: 2)),
-                    fields: .init(parameters: [], id: nil, contentDescription: nil, encoding: .quotedPrintable, octetCount: 1),
+                    fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .quotedPrintable, octetCount: 1),
                     extension: nil
                 ),
                 #line

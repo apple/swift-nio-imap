@@ -12,23 +12,18 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeBodyParameterPairs(_ params: [KeyValue<String, String>]) -> Int {
+    @discardableResult mutating func writeBodyParameterPairs(_ params: KeyValues<String, String>) -> Int {
         guard params.count > 0 else {
             return self.writeNil()
         }
-        return self.writeArray(params) { (element, buffer) in
-            buffer.writeParameterPair(element)
+        return self.writeKeyValues(params) { (element, self) in
+            self.writeIMAPString(element.0) +
+                self.writeSpace() +
+            self.writeIMAPString(element.1)
         }
     }
 
-    @discardableResult mutating func writeParameterPair(_ pair: KeyValue<String, String>) -> Int {
-        self.writeIMAPString(pair.key) +
-            self.writeSpace() +
-            self.writeIMAPString(pair.value)
-    }
 }

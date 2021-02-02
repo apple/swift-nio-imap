@@ -26,7 +26,7 @@ extension BodySinglepartTests {
             (
                 .init(
                     type: .basic(.init(kind: .application, subtype: .alternative)),
-                    fields: .init(parameters: [], id: nil, contentDescription: nil, encoding: .base64, octetCount: 6),
+                    fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .base64, octetCount: 6),
                     extension: nil
                 ),
                 "\"APPLICATION\" \"multipart/alternative\" NIL NIL NIL \"BASE64\" 6",
@@ -35,7 +35,7 @@ extension BodySinglepartTests {
             (
                 .init(
                     type: .basic(.init(kind: .application, subtype: .related)),
-                    fields: .init(parameters: [], id: nil, contentDescription: nil, encoding: .base64, octetCount: 7),
+                    fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .base64, octetCount: 7),
                     extension: .init(fieldMD5: "md5", dispositionAndLanguage: nil)
                 ),
                 "\"APPLICATION\" \"multipart/related\" NIL NIL NIL \"BASE64\" 7 \"md5\"",
@@ -44,7 +44,7 @@ extension BodySinglepartTests {
             (
                 .init(
                     type: .text(.init(mediaText: "subtype", lineCount: 5)),
-                    fields: .init(parameters: [], id: nil, contentDescription: nil, encoding: .base64, octetCount: 6),
+                    fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .base64, octetCount: 6),
                     extension: nil
                 ),
                 "\"TEXT\" \"subtype\" NIL NIL NIL \"BASE64\" 6 5",
@@ -59,14 +59,14 @@ extension BodySinglepartTests {
                             body: .singlepart(
                                 .init(
                                     type: .text(.init(mediaText: "subtype", lineCount: 5)),
-                                    fields: .init(parameters: [], id: nil, contentDescription: nil, encoding: .base64, octetCount: 6),
+                                    fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .base64, octetCount: 6),
                                     extension: nil
                                 )
                             ),
                             fieldLines: 8
                         )
                     ),
-                    fields: .init(parameters: [], id: nil, contentDescription: nil, encoding: .base64, octetCount: 6),
+                    fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .base64, octetCount: 6),
                     extension: nil
                 ),
                 "\"MESSAGE\" \"RFC822\" NIL NIL NIL \"BASE64\" 6 (\"date\" NIL NIL NIL NIL NIL NIL NIL NIL NIL) (\"TEXT\" \"subtype\" NIL NIL NIL \"BASE64\" 6 5) 8",
@@ -86,7 +86,7 @@ extension BodySinglepartTests {
         let inputs: [(BodyStructure.Singlepart.Extension, String, UInt)] = [
             (.init(fieldMD5: nil, dispositionAndLanguage: nil), "NIL", #line),
             (.init(fieldMD5: "md5", dispositionAndLanguage: nil), "\"md5\"", #line),
-            (.init(fieldMD5: "md5", dispositionAndLanguage: .init(disposition: .init(kind: "string", parameters: []), language: nil)), "\"md5\" (\"string\" NIL)", #line),
+            (.init(fieldMD5: "md5", dispositionAndLanguage: .init(disposition: .init(kind: "string", parameters: [:]), language: nil)), "\"md5\" (\"string\" NIL)", #line),
         ]
 
         for (test, expectedString, line) in inputs {

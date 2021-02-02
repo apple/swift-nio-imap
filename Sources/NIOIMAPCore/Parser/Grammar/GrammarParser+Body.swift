@@ -237,28 +237,29 @@ extension GrammarParser {
     }
 
     // body-fld-param  = "(" string SP string *(SP string SP string) ")" / nil
-    static func parseBodyFieldParam(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [KeyValue<String, String>] {
-        func parseBodyFieldParam_nil(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [KeyValue<String, String>] {
+    static func parseBodyFieldParam(buffer: inout ByteBuffer, tracker: StackTracker) throws -> KeyValues<String, String> {
+        func parseBodyFieldParam_nil(buffer: inout ByteBuffer, tracker: StackTracker) throws -> KeyValues<String, String> {
             try parseNil(buffer: &buffer, tracker: tracker)
-            return []
+            return [:]
         }
 
-        func parseBodyFieldParam_singlePair(buffer: inout ByteBuffer, tracker: StackTracker) throws -> KeyValue<String, String> {
+        func parseBodyFieldParam_singlePair(buffer: inout ByteBuffer, tracker: StackTracker) throws -> (String, String) {
             let field = String(buffer: try parseString(buffer: &buffer, tracker: tracker))
             try space(buffer: &buffer, tracker: tracker)
             let value = String(buffer: try parseString(buffer: &buffer, tracker: tracker))
-            return .init(key: field, value: value)
+            return (field, value)
         }
 
-        func parseBodyFieldParam_pairs(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [KeyValue<String, String>] {
+        func parseBodyFieldParam_pairs(buffer: inout ByteBuffer, tracker: StackTracker) throws -> KeyValues<String, String> {
             try fixedString("(", buffer: &buffer, tracker: tracker)
-            var array = [try parseBodyFieldParam_singlePair(buffer: &buffer, tracker: tracker)]
-            try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) -> KeyValue<String, String> in
+            var kvs = KeyValues<String, String>()
+            kvs.append(try parseBodyFieldParam_singlePair(buffer: &buffer, tracker: tracker))
+            try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &kvs, tracker: tracker) { (buffer, tracker) -> (String, String) in
                 try space(buffer: &buffer, tracker: tracker)
                 return try parseBodyFieldParam_singlePair(buffer: &buffer, tracker: tracker)
             }
             try fixedString(")", buffer: &buffer, tracker: tracker)
-            return array
+            return kvs
         }
 
         return try oneOf([

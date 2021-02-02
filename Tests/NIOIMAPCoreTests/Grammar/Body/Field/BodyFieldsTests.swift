@@ -23,7 +23,7 @@ class BodyFieldsTests: EncodeTestClass {}
 extension BodyFieldsTests {
     func testEncode() {
         let inputs: [(BodyStructure.Fields, String, UInt)] = [
-            (.init(parameters: [.init(key: "f1", value: "v1")], id: "fieldID", contentDescription: "desc", encoding: .base64, octetCount: 12), "(\"f1\" \"v1\") \"fieldID\" \"desc\" \"BASE64\" 12", #line),
+            (.init(parameters: ["f1": "v1"], id: "fieldID", contentDescription: "desc", encoding: .base64, octetCount: 12), "(\"f1\" \"v1\") \"fieldID\" \"desc\" \"BASE64\" 12", #line),
         ]
 
         for (test, expectedString, line) in inputs {
