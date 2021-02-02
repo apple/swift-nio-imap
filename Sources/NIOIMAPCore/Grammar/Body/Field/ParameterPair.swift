@@ -22,8 +22,7 @@ extension EncodeBuffer {
         return self.writeKeyValues(params) { (element, self) in
             self.writeIMAPString(element.0) +
                 self.writeSpace() +
-            self.writeIMAPString(element.1)
+                self.writeIMAPString(element.1)
         }
     }
-
 }

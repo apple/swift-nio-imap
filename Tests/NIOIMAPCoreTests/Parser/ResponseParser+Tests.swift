@@ -193,13 +193,13 @@ extension ResponseParser_Tests {
                                     .multipart(
                                         .init(parts: [
                                             .singlepart(.init(type: .text(.init(mediaText: "PLAIN", lineCount: 20)), fields: .init(parameters: ["CHARSET": "ISO-8859-1"], id: nil, contentDescription: nil, encoding: .quotedPrintable, octetCount: 710), extension: .init(fieldMD5: nil, dispositionAndLanguage: .init(disposition: nil, language: .init(languages: []))))),
-                                                .singlepart(.init(type: .text(.init(mediaText: "HTML", lineCount: 42)), fields: .init(parameters: ["CHARSET": "ISO-8859-1"], id: nil, contentDescription: nil, encoding: .quotedPrintable, octetCount: 4323), extension: .init(fieldMD5: nil, dispositionAndLanguage: .init(disposition: .init(kind: "INLINE", parameters: [:]), language: .init(languages: []))))),
+                                            .singlepart(.init(type: .text(.init(mediaText: "HTML", lineCount: 42)), fields: .init(parameters: ["CHARSET": "ISO-8859-1"], id: nil, contentDescription: nil, encoding: .quotedPrintable, octetCount: 4323), extension: .init(fieldMD5: nil, dispositionAndLanguage: .init(disposition: .init(kind: "INLINE", parameters: [:]), language: .init(languages: []))))),
                                         ], mediaSubtype: .init("ALTERNATIVE"), extension: .init(parameters: ["BOUNDARY": "4__=rtfgha"], dispositionAndLanguage: .init(disposition: nil, language: .init(languages: []))))
                                     ),
                                     .singlepart(.init(type: .basic(.init(kind: .image, subtype: .init("JPEG"))), fields: .init(parameters: ["NAME": "bike.jpeg"], id: "<2__=lgkfjr>", contentDescription: nil, encoding: .base64, octetCount: 64), extension: .init(fieldMD5: nil, dispositionAndLanguage: .init(disposition: .init(kind: "INLINE", parameters: ["FILENAME": "bike.jpeg"]), language: .init(languages: []))))),
                                 ], mediaSubtype: .init("RELATED"), extension: .init(parameters: ["BOUNDARY": "0__=rtfgaa"], dispositionAndLanguage: .init(disposition: nil, language: .init(languages: []))))
                             ),
-                                .singlepart(.init(type: .basic(.init(kind: .application, subtype: .init("PDF"))), fields: .init(parameters: ["NAME": "title.pdf"], id: "<5__=jlgkfr>", contentDescription: nil, encoding: .base64, octetCount: 333980), extension: .init(fieldMD5: nil, dispositionAndLanguage: .init(disposition: .init(kind: "ATTACHMENT", parameters: ["FILENAME": "list.pdf"]), language: .init(languages: []))))),
+                            .singlepart(.init(type: .basic(.init(kind: .application, subtype: .init("PDF"))), fields: .init(parameters: ["NAME": "title.pdf"], id: "<5__=jlgkfr>", contentDescription: nil, encoding: .base64, octetCount: 333980), extension: .init(fieldMD5: nil, dispositionAndLanguage: .init(disposition: .init(kind: "ATTACHMENT", parameters: ["FILENAME": "list.pdf"]), language: .init(languages: []))))),
                         ], mediaSubtype: .init("MIXED"), extension: .init(parameters: ["BOUNDARY": "1__=tfgrhs"], dispositionAndLanguage: .init(disposition: nil, language: .init(languages: []))))), hasExtensionData: true))
                         )
                     ),
@@ -216,7 +216,7 @@ extension ResponseParser_Tests {
                             .multipart(
                                 .init(parts: [
                                     .singlepart(.init(type: .text(.init(mediaText: "PLAIN", lineCount: 24)), fields: .init(parameters: ["CHARSET": "ISO-8859-1"], id: nil, contentDescription: nil, encoding: .quotedPrintable, octetCount: 410), extension: .init(fieldMD5: nil, dispositionAndLanguage: .init(disposition: nil, language: .init(languages: []))))),
-                                        .singlepart(.init(type: .text(.init(mediaText: "HTML", lineCount: 30)), fields: .init(parameters: ["CHARSET": "ISO-8859-1"], id: nil, contentDescription: nil, encoding: .quotedPrintable, octetCount: 1407), extension: .init(fieldMD5: nil, dispositionAndLanguage: .init(disposition: .init(kind: "INLINE", parameters: [:]), language: .init(languages: []))))),
+                                    .singlepart(.init(type: .text(.init(mediaText: "HTML", lineCount: 30)), fields: .init(parameters: ["CHARSET": "ISO-8859-1"], id: nil, contentDescription: nil, encoding: .quotedPrintable, octetCount: 1407), extension: .init(fieldMD5: nil, dispositionAndLanguage: .init(disposition: .init(kind: "INLINE", parameters: [:]), language: .init(languages: []))))),
                                 ], mediaSubtype: .init("ALTERNATIVE"), extension: .init(parameters: ["BOUNDARY": "hqjksdm1__="], dispositionAndLanguage: .init(disposition: nil, language: .init(languages: []))))
                             ),
                             .singlepart(
