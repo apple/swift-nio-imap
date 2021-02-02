@@ -17,7 +17,7 @@ import struct NIO.ByteBuffer
 /// A group of addresses.
 public struct AddressGroup: Equatable {
     /// The name of the group.
-    public var groupName: MailboxName
+    public var groupName: ByteBuffer
 
     /// The group's source-root.
     public var sourceRoot: ByteBuffer?
@@ -29,7 +29,7 @@ public struct AddressGroup: Equatable {
     /// - parameter groupName: The name of the group.
     /// - parameter sourceRoot: The group's source-root.
     /// - parameter children: Any child groups or addresses.
-    public init(groupName: MailboxName, sourceRoot: ByteBuffer?, children: [AddressOrGroup]) {
+    public init(groupName: ByteBuffer, sourceRoot: ByteBuffer?, children: [AddressOrGroup]) {
         self.groupName = groupName
         self.sourceRoot = sourceRoot
         self.children = children
@@ -52,7 +52,7 @@ extension EncodeBuffer {
         self.writeAddress(.init(
             personName: nil,
             sourceRoot: group.sourceRoot,
-            mailbox: group.groupName.storage,
+            mailbox: group.groupName,
             host: nil
         )
         ) +
