@@ -25,13 +25,11 @@ import struct NIO.ByteBufferView
 
 extension GrammarParser {
     static func parseEnvelopeAddressGroups(_ addresses: [Address]) -> [AddressListElement] {
-        
         var results: [AddressListElement] = []
         var stack: [AddressGroup] = []
-        
+
         for address in addresses {
-            
-            if address.host == nil , let name = address.mailbox { // start of group
+            if address.host == nil, let name = address.mailbox { // start of group
                 stack.append(AddressGroup(groupName: name, sourceRoot: address.sourceRoot, children: []))
             } else if address.host == nil { // end of group
                 let group = stack.popLast()!
@@ -44,12 +42,11 @@ extension GrammarParser {
                 if stack.last == nil {
                     results.append(.address(address))
                 } else {
-                    stack[stack.count-1].children.append(.address(address))
+                    stack[stack.count - 1].children.append(.address(address))
                 }
             }
-            
         }
-        
+
         return results
     }
 
