@@ -22,10 +22,10 @@ class BodyFieldParameterTests: EncodeTestClass {}
 
 extension BodyFieldParameterTests {
     func testEncode() {
-        let inputs: [([BodyStructure.ParameterPair], String, UInt)] = [
+        let inputs: [([KeyValue<String, String>], String, UInt)] = [
             ([], "NIL", #line),
-            ([.init(field: "f1", value: "v1")], "(\"f1\" \"v1\")", #line),
-            ([.init(field: "f1", value: "v1"), .init(field: "f2", value: "v2")], "(\"f1\" \"v1\" \"f2\" \"v2\")", #line),
+            ([.init(key: "f1", value: "v1")], "(\"f1\" \"v1\")", #line),
+            ([.init(key: "f1", value: "v1"), .init(key: "f2", value: "v2")], "(\"f1\" \"v1\" \"f2\" \"v2\")", #line),
         ]
 
         for (test, expectedString, line) in inputs {

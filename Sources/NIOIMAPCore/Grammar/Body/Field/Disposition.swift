@@ -22,12 +22,12 @@ extension BodyStructure {
         public var kind: String
 
         /// An array of *attribute/value* pairs.
-        public var parameters: [ParameterPair]
+        public var parameters: [KeyValue<String, String>]
 
         /// Creates a new `Disposition`
         /// - parameter kind: A string representing the disposition type.
         /// - parameter parameters: An array of *attribute/value* pairs.
-        public init(kind: String, parameters: [ParameterPair]) {
+        public init(kind: String, parameters: [KeyValue<String, String>]) {
             self.kind = kind
             self.parameters = parameters
         }
@@ -35,7 +35,7 @@ extension BodyStructure {
         /// Attempts to find and convert the value for the common field "SIZE". If the field doesn't exist or is not a valid integer then `nil` is returned.
         public var size: Int? {
             guard let value = self.parameters.first(where: { (pair) -> Bool in
-                pair.field.lowercased() == "size"
+                pair.key.lowercased() == "size"
             })?.value else {
                 return nil
             }
@@ -45,7 +45,7 @@ extension BodyStructure {
         /// Attempts to find and convert the value for the common field "SIZE". If the field doesn't exist then `nil` is returned.
         public var filename: String? {
             self.parameters.first(where: { (pair) -> Bool in
-                pair.field.lowercased() == "filename"
+                pair.key.lowercased() == "filename"
             })?.value
         }
     }
