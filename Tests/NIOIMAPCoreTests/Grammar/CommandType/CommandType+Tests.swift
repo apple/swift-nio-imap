@@ -37,10 +37,10 @@ extension CommandType_Tests {
             (.login(username: "\r\n", password: "\\\""), CommandEncodingOptions(), ["LOGIN {2}\r\n", "\r\n {2}\r\n", "\\\""], #line),
 
             (.select(MailboxName("Events")), CommandEncodingOptions(), [#"SELECT "Events""#], #line),
-            (.select(.inbox, [.basic(.init(name: "test"))]), CommandEncodingOptions(), [#"SELECT "INBOX" (test)"#], #line),
-            (.select(.inbox, [.basic(.init(name: "test1")), .basic(.init(name: "test2"))]), CommandEncodingOptions(), [#"SELECT "INBOX" (test1 test2)"#], #line),
+            (.select(.inbox, [.basic(.init(key: "test", value: nil))]), CommandEncodingOptions(), [#"SELECT "INBOX" (test)"#], #line),
+            (.select(.inbox, [.basic(.init(key: "test1", value: nil)), .basic(.init(key: "test2", value: nil))]), CommandEncodingOptions(), [#"SELECT "INBOX" (test1 test2)"#], #line),
             (.examine(MailboxName("Events")), CommandEncodingOptions(), [#"EXAMINE "Events""#], #line),
-            (.examine(.inbox, [.init(name: "test")]), CommandEncodingOptions(), [#"EXAMINE "INBOX" (test)"#], #line),
+            (.examine(.inbox, [.init(key: "test", value: nil)]), CommandEncodingOptions(), [#"EXAMINE "INBOX" (test)"#], #line),
             (.move([1], .inbox), CommandEncodingOptions(), ["MOVE 1 \"INBOX\""], #line),
             (.id([:]), CommandEncodingOptions(), ["ID NIL"], #line),
             (.getMetadata(options: [], mailbox: .inbox, entries: ["a"]), CommandEncodingOptions(), ["GETMETADATA \"INBOX\" (\"a\")"], #line),

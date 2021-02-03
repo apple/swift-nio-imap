@@ -21,7 +21,7 @@ public enum StoreModifier: Equatable {
     case unchangedSince(UnchangedSinceModifier)
 
     /// Designed as a catch-all to enable support for future extensions.
-    case other(Parameter)
+    case other(KeyValue<String, ParameterValue?>)
 }
 
 // MARK: - Encoding

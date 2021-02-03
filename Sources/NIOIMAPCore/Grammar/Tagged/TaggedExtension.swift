@@ -14,22 +14,22 @@
 
 import struct NIO.ByteBuffer
 
-/// A simple key/value pair where the value is optional.
-public struct Parameter: Equatable {
-    /// The key.
-    public var name: String
-
-    /// The value associated with the key.
-    public var value: ParameterValue?
-
-    /// Creates a new `Parameter`.
-    /// - parameter name: The key.
-    /// - parameter value: The value, defaults to `nil`.
-    public init(name: String, value: ParameterValue? = nil) {
-        self.name = name
-        self.value = value
-    }
-}
+///// A simple key/value pair where the value is optional.
+//public struct Parameter: Equatable {
+//    /// The key.
+//    public var name: String
+//
+//    /// The value associated with the key.
+//    public var value: ParameterValue?
+//
+//    /// Creates a new `Parameter`.
+//    /// - parameter name: The key.
+//    /// - parameter value: The value, defaults to `nil`.
+//    public init(name: String, value: ParameterValue? = nil) {
+//        self.name = name
+//        self.value = value
+//    }
+//}
 
 // MARK: - Encoding
 
@@ -40,7 +40,7 @@ extension EncodeBuffer {
             self.writeParameterValue(ext.value)
     }
 
-    @discardableResult mutating func writeParameters(_ params: [Parameter]) -> Int {
+    @discardableResult mutating func writeParameters(_ params: [KeyValue<String, ParameterValue?>]) -> Int {
         if params.isEmpty {
             return 0
         }
@@ -52,8 +52,8 @@ extension EncodeBuffer {
             }
     }
 
-    @discardableResult mutating func writeParameter(_ param: Parameter) -> Int {
-        self.writeString(param.name) +
+    @discardableResult mutating func writeParameter(_ param: KeyValue<String, ParameterValue?>) -> Int {
+        self.writeString(param.key) +
             self.writeIfExists(param.value) { (value) -> Int in
                 self.writeSpace() +
                     self.writeParameterValue(value)

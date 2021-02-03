@@ -304,14 +304,14 @@ extension GrammarParser {
         ], buffer: &buffer, tracker: tracker)
     }
 
-    static func parseParameter(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Parameter {
+    static func parseParameter(buffer: inout ByteBuffer, tracker: StackTracker) throws -> KeyValue<String, ParameterValue?> {
         try composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
             let name = try self.parseParameterName(buffer: &buffer, tracker: tracker)
             let value = try optional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> ParameterValue in
                 try space(buffer: &buffer, tracker: tracker)
                 return try self.parseParameterValue(buffer: &buffer, tracker: tracker)
             }
-            return .init(name: name, value: value)
+            return .init(key: name, value: value)
         }
     }
 
@@ -2030,11 +2030,11 @@ extension GrammarParser {
     }
 
     // select-params = SP "(" select-param *(SP select-param ")"
-    static func parseParameters(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [Parameter] {
-        try composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> [Parameter] in
+    static func parseParameters(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [KeyValue<String, ParameterValue?>] {
+        try composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> [KeyValue<String, ParameterValue?>] in
             try fixedString(" (", buffer: &buffer, tracker: tracker)
             var array = [try self.parseParameter(buffer: &buffer, tracker: tracker)]
-            try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) -> Parameter in
+            try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) -> KeyValue<String, ParameterValue?> in
                 try space(buffer: &buffer, tracker: tracker)
                 return try self.parseParameter(buffer: &buffer, tracker: tracker)
             }
@@ -2558,7 +2558,7 @@ extension GrammarParser {
     // RFC 6237
     // scope-options =  scope-option *(SP scope-option)
     static func parseESearchScopeOptions(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ESearchScopeOptions {
-        var options: [Parameter] = [try parseParameter(buffer: &buffer, tracker: tracker)]
+        var options: [KeyValue<String, ParameterValue?>] = [try parseParameter(buffer: &buffer, tracker: tracker)]
         while try optional(buffer: &buffer, tracker: tracker, parser: space) != nil {
             options.append(try parseParameter(buffer: &buffer, tracker: tracker))
         }

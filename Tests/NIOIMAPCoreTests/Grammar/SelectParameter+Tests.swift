@@ -24,8 +24,8 @@ extension SelectParameter_Tests {
     func testEncoding() {
         let inputs: [(SelectParameter, String, UInt)] = [
             (.condstore, "CONDSTORE", #line),
-            (.basic(.init(name: "test")), "test", #line),
-            (.basic(.init(name: "test", value: .sequence([1]))), "test 1", #line),
+            (.basic(.init(key: "test", value: nil)), "test", #line),
+            (.basic(.init(key: "test", value: .sequence([1]))), "test 1", #line),
             (
                 .qresync(.init(uidValiditiy: 1, modificationSequenceValue: .zero, knownUids: nil, sequenceMatchData: nil)),
                 "QRESYNC (1 0)",

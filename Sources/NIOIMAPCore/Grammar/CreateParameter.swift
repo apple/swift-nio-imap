@@ -17,7 +17,7 @@ import struct NIO.ByteBuffer
 /// Parameters to use when creating a mailbox.
 public enum CreateParameter: Equatable {
     /// Implemented as a catch-all to provide support for cases defined in future extensions.
-    case labelled(Parameter)
+    case labelled(KeyValue<String, ParameterValue?>)
 
     /// Adds special-use attributes to the newly-created Mailbox.
     case attributes([UseAttribute])
