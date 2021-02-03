@@ -24,6 +24,32 @@ import struct NIO.ByteBuffer
 import struct NIO.ByteBufferView
 
 extension GrammarParser {
+    static func parseEnvelopeAddressGroups(_ addresses: [Address]) -> [AddressListElement] {
+        var results: [AddressListElement] = []
+        var stack: [AddressGroup] = []
+
+        for address in addresses {
+            if address.host == nil, let name = address.mailbox { // start of group
+                stack.append(AddressGroup(groupName: name, sourceRoot: address.sourceRoot, children: []))
+            } else if address.host == nil { // end of group
+                let group = stack.popLast()!
+                if stack.last == nil {
+                    results.append(.group(group))
+                } else {
+                    stack[stack.count - 1].children.append(.group(group))
+                }
+            } else { // normal address
+                if stack.last == nil {
+                    results.append(.address(address))
+                } else {
+                    stack[stack.count - 1].children.append(.address(address))
+                }
+            }
+        }
+
+        return results
+    }
+
     // reusable for a lot of the env-* types
     static func parseEnvelopeAddresses(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [Address] {
         try fixedString("(", buffer: &buffer, tracker: tracker)
@@ -34,15 +60,17 @@ extension GrammarParser {
         return addresses
     }
 
-    static func parseOptionalEnvelopeAddresses(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [Address] {
+    static func parseOptionalEnvelopeAddresses(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [AddressListElement] {
         func parseOptionalEnvelopeAddresses_nil(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [Address] {
             try self.parseNil(buffer: &buffer, tracker: tracker)
             return []
         }
-        return try oneOf([
+        let addresses = try oneOf([
             parseEnvelopeAddresses,
             parseOptionalEnvelopeAddresses_nil,
         ], buffer: &buffer, tracker: tracker)
+
+        return self.parseEnvelopeAddressGroups(addresses)
     }
 
     // address         = "(" addr-name SP addr-adl SP addr-mailbox SP
