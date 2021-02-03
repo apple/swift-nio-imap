@@ -68,6 +68,9 @@ extension GrammarParser_Envelope_Tests {
                     .init(personName: "a", sourceRoot: "a", mailbox: "a", host: "a"),
                     .init(personName: nil, sourceRoot: nil, mailbox: "group2", host: nil),
                     .init(personName: "b", sourceRoot: "b", mailbox: "b", host: "b"),
+                        .init(personName: nil, sourceRoot: nil, mailbox: "group3", host: nil),
+                        .init(personName: "c", sourceRoot: "c", mailbox: "c", host: "c"),
+                        .init(personName: nil, sourceRoot: nil, mailbox: nil, host: nil),
                     .init(personName: nil, sourceRoot: nil, mailbox: nil, host: nil),
                     .init(personName: nil, sourceRoot: nil, mailbox: nil, host: nil),
                 ],
@@ -76,6 +79,9 @@ extension GrammarParser_Envelope_Tests {
                         .address(.init(personName: "a", sourceRoot: "a", mailbox: "a", host: "a")),
                         .group(.init(groupName: "group2", sourceRoot: nil, children: [
                             .address(.init(personName: "b", sourceRoot: "b", mailbox: "b", host: "b")),
+                                .group(.init(groupName: "group3", sourceRoot: nil, children: [
+                                    .address(.init(personName: "c", sourceRoot: "c", mailbox: "c", host: "c")),
+                                ])),
                         ])),
                     ])),
                 ],

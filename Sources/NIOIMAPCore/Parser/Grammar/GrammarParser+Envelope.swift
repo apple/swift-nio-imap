@@ -25,26 +25,32 @@ import struct NIO.ByteBufferView
 
 extension GrammarParser {
     static func parseEnvelopeAddressGroups(_ addresses: [Address]) -> [AddressListElement] {
-        func _parseEnvelopeAddressGroups(_ addresses: inout [Address]) -> [AddressListElement] {
-            var results: [AddressListElement] = []
-            while let address = addresses.first {
-                addresses = Array(addresses.dropFirst())
-                if address.host == nil, let mailboxName = address.mailbox { // group start
-                    let children = _parseEnvelopeAddressGroups(&addresses)
-                    let group = AddressGroup(groupName: mailboxName, sourceRoot: address.sourceRoot, children: children)
+        
+        var results: [AddressListElement] = []
+        var stack: [AddressGroup] = []
+        
+        for address in addresses {
+            
+            if address.host == nil , let name = address.mailbox { // start of group
+                stack.append(AddressGroup(groupName: name, sourceRoot: address.sourceRoot, children: []))
+            } else if address.host == nil { // end of group
+                let group = stack.popLast()!
+                if stack.last == nil {
                     results.append(.group(group))
-                } else if address.host == nil { // group end
-                    break
-                } else { // random address
+                } else {
+                    stack[stack.count - 1].children.append(.group(group))
+                }
+            } else { // normal address
+                if stack.last == nil {
                     results.append(.address(address))
+                } else {
+                    stack[stack.count-1].children.append(.address(address))
                 }
             }
-
-            return results
+            
         }
-
-        var addresses = addresses
-        return _parseEnvelopeAddressGroups(&addresses)
+        
+        return results
     }
 
     // reusable for a lot of the env-* types
