@@ -2222,21 +2222,21 @@ extension GrammarParser {
     }
 
     // tagged-ext = tagged-ext-label SP tagged-ext-val
-    static func parseTaggedExtension(buffer: inout ByteBuffer, tracker: StackTracker) throws -> TaggedExtension {
+    static func parseTaggedExtension(buffer: inout ByteBuffer, tracker: StackTracker) throws -> KeyValue<String, ParameterValue> {
         try composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
-            let label = try self.parseParameterName(buffer: &buffer, tracker: tracker)
+            let key = try self.parseParameterName(buffer: &buffer, tracker: tracker)
 
             // Warning: weird hack alert.
             // CATENATE (RFC 4469) has basically identical syntax to tagged extensions, but it is actually append-data.
             // to avoid that being a problem here, we check if we just parsed `CATENATE`. If we did, we bail out: this is
             // data now.
-            if label.lowercased() == "catenate" {
+            if key.lowercased() == "catenate" {
                 throw ParserError(hint: "catenate extension")
             }
 
             try space(buffer: &buffer, tracker: tracker)
             let value = try self.parseParameterValue(buffer: &buffer, tracker: tracker)
-            return .init(label: label, value: value)
+            return .init(key: key, value: value)
         }
     }
 

@@ -31,29 +31,11 @@ public struct Parameter: Equatable {
     }
 }
 
-/// Implemented as a catch-all to support types defined in future extensions.
-/// As as a key/value pair.
-public struct TaggedExtension: Equatable {
-    /// Some key.
-    public var label: String
-
-    /// The value to be associated with `key`.
-    public var value: ParameterValue
-
-    /// Creates a new `TaggedExtension`.
-    /// - parameter label: Some key.
-    /// - parameter value: The value to be associated with `key`.
-    public init(label: String, value: ParameterValue) {
-        self.label = label
-        self.value = value
-    }
-}
-
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeTaggedExtension(_ ext: TaggedExtension) -> Int {
-        self.writeString(ext.label) +
+    @discardableResult mutating func writeTaggedExtension(_ ext: KeyValue<String, ParameterValue>) -> Int {
+        self.writeString(ext.key) +
             self.writeSpace() +
             self.writeParameterValue(ext.value)
     }

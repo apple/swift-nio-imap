@@ -248,7 +248,7 @@ extension ParserUnitTests {
             let c2_5 = try parser.parseCommandStream(buffer: &buffer)
             XCTAssertEqual(buffer.readableBytes, 0)
             XCTAssertEqual(c2_1, PartialCommandStream(.append(.start(tag: "A003", appendingTo: MailboxName("Drafts")))))
-            XCTAssertEqual(c2_2, PartialCommandStream(.append(.beginCatenate(options: .init(flagList: [.seen, .draft, .keyword(.mdnSent)], extensions: [TaggedExtension(label: "EXTENSION", value: .comp(["extdata"]))])))))
+            XCTAssertEqual(c2_2, PartialCommandStream(.append(.beginCatenate(options: .init(flagList: [.seen, .draft, .keyword(.mdnSent)], extensions: [KeyValue<String, ParameterValue>(key: "EXTENSION", value: .comp(["extdata"]))])))))
             XCTAssertEqual(c2_3, PartialCommandStream(.append(.catenateURL("/Drafts;UIDVALIDITY=385759045/;UID=20/;section=HEADER"))))
             XCTAssertEqual(c2_4, PartialCommandStream(.append(.endCatenate)))
             XCTAssertEqual(c2_5, PartialCommandStream(.append(.finish)))
@@ -269,7 +269,7 @@ extension ParserUnitTests {
             let c2_5 = try parser.parseCommandStream(buffer: &buffer)
             XCTAssertEqual(buffer.readableBytes, 0)
             XCTAssertEqual(c2_1, PartialCommandStream(.append(.start(tag: "A003", appendingTo: MailboxName("Drafts")))))
-            XCTAssertEqual(c2_2, PartialCommandStream(.append(.beginCatenate(options: .init(flagList: [.seen, .draft, .keyword(.mdnSent)], extensions: [TaggedExtension(label: "EXTENSION", value: .comp(["extdata"]))])))))
+            XCTAssertEqual(c2_2, PartialCommandStream(.append(.beginCatenate(options: .init(flagList: [.seen, .draft, .keyword(.mdnSent)], extensions: [KeyValue<String, ParameterValue>(key: "EXTENSION", value: .comp(["extdata"]))])))))
             XCTAssertEqual(c2_3, PartialCommandStream(.append(.catenateURL("/Drafts;UIDVALIDITY=385759045/;UID=20/;section=HEADER"))))
             XCTAssertEqual(c2_4, PartialCommandStream(.append(.endCatenate)))
             XCTAssertEqual(c2_5, PartialCommandStream(.append(.finish)))
@@ -2581,7 +2581,7 @@ extension ParserUnitTests {
         self.iterateTests(
             testFunction: GrammarParser.parseTaggedExtension,
             validInputs: [
-                ("label 1", "\r\n", .init(label: "label", value: .sequence([1])), #line),
+                ("label 1", "\r\n", .init(key: "label", value: .sequence([1])), #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
