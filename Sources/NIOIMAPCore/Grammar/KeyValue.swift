@@ -12,11 +12,18 @@
 //
 //===----------------------------------------------------------------------===//
 
+/// Pairs a key with a value
 public struct KeyValue<Key: Hashable, Value: Hashable>: Hashable {
+    
+    /// The key
     public var key: Key
 
+    /// The value
     public var value: Value
 
+    /// Creates a new `KeyValue`
+    /// - parameter key: The key
+    /// - parameter value: The value
     public init(key: Key, value: Value) {
         self.key = key
         self.value = value
