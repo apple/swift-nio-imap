@@ -22,21 +22,21 @@ class Entry_Tests: EncodeTestClass {}
 
 extension Entry_Tests {
     func testEncode() {
-        let inputs: [(EntryValue, String, UInt)] = [
-            (.init(name: "name", value: .init("value")), "\"name\" ~{5}\r\nvalue", #line),
+        let inputs: [(KeyValue<ByteBuffer, MetadataValue>, String, UInt)] = [
+            (.init(key: "name", value: .init("value")), "\"name\" ~{5}\r\nvalue", #line),
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeEntry($0) })
     }
 
     func testEncode_entryValues() {
-        let inputs: [([EntryValue], String, UInt)] = [
+        let inputs: [([KeyValue<ByteBuffer, MetadataValue>], String, UInt)] = [
             (
-                [.init(name: "name", value: .init("value"))],
+                [.init(key: "name", value: .init("value"))],
                 "(\"name\" ~{5}\r\nvalue)",
                 #line
             ),
             (
-                [.init(name: "name1", value: .init("value1")), .init(name: "name2", value: .init("value2"))],
+                [.init(key: "name1", value: .init("value1")), .init(key: "name2", value: .init("value2"))],
                 "(\"name1\" ~{6}\r\nvalue1 \"name2\" ~{6}\r\nvalue2)",
                 #line
             ),

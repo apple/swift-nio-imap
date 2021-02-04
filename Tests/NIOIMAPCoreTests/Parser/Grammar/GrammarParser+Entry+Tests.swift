@@ -25,8 +25,8 @@ extension GrammarParser_Entry_Tests {
         self.iterateTests(
             testFunction: GrammarParser.parseEntryValue,
             validInputs: [
-                ("\"name\" \"value\"", "", .init(name: "name", value: .init("value")), #line),
-                ("\"name\" NIL", "", .init(name: "name", value: .init(nil)), #line),
+                ("\"name\" \"value\"", "", .init(key: "name", value: .init("value")), #line),
+                ("\"name\" NIL", "", .init(key: "name", value: .init(nil)), #line),
             ],
             parserErrorInputs: [
                 ],
@@ -46,13 +46,13 @@ extension GrammarParser_Entry_Tests {
                 (
                     "(\"name\" \"value\")",
                     "",
-                    [.init(name: "name", value: .init("value"))],
+                    [.init(key: "name", value: .init("value"))],
                     #line
                 ),
                 (
                     "(\"name1\" \"value1\" \"name2\" \"value2\")",
                     "",
-                    [.init(name: "name1", value: .init("value1")), .init(name: "name2", value: .init("value2"))],
+                    [.init(key: "name1", value: .init("value1")), .init(key: "name2", value: .init("value2"))],
                     #line
                 ),
             ],

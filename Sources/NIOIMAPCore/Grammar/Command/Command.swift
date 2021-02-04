@@ -148,7 +148,7 @@ public enum Command: Equatable {
     /// replacing the specified values provided, on the specified existing
     /// mailboxes or on the server (if the mailbox argument is the empty
     /// string).
-    case setMetadata(mailbox: MailboxName, entries: [EntryValue])
+    case setMetadata(mailbox: MailboxName, entries: [KeyValue<ByteBuffer, MetadataValue>])
 
     /// Performs an extended search as defined in RFC 4731.
     case esearch(ESearchOptions)
@@ -308,7 +308,7 @@ extension CommandEncodeBuffer {
             self.buffer.writeEntries(entries)
     }
 
-    private mutating func writeCommandKind_setMetadata(mailbox: MailboxName, entries: [EntryValue]) -> Int {
+    private mutating func writeCommandKind_setMetadata(mailbox: MailboxName, entries: [KeyValue<ByteBuffer, MetadataValue>]) -> Int {
         self.buffer.writeString("SETMETADATA ") +
             self.buffer.writeMailbox(mailbox) +
             self.buffer.writeSpace() +
