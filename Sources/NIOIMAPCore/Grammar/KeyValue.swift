@@ -14,7 +14,6 @@
 
 /// Pairs a key with a value
 public struct KeyValue<Key: Hashable, Value: Hashable>: Hashable {
-    
     /// The key
     public var key: Key
 
