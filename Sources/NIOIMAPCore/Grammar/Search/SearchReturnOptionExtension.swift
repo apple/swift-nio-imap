@@ -14,29 +14,12 @@
 
 import struct NIO.ByteBuffer
 
-/// Implemented as a catch all to support any options that may be defined in future RFCs.
-public struct SearchReturnOptionExtension: Equatable {
-    /// The search return option name.
-    public var modifierName: String
-
-    /// Any parameters that may go along with the option.
-    public var params: ParameterValue?
-
-    /// Creates a new `SearchReturnOptionExtension`.
-    /// - parameter modifierName: The search return option name.
-    /// - parameter params: Any parameters that may go along with the option. Defaults to `nil`.
-    public init(modifierName: String, params: ParameterValue? = nil) {
-        self.modifierName = modifierName
-        self.params = params
-    }
-}
-
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeSearchReturnOptionExtension(_ option: SearchReturnOptionExtension) -> Int {
-        self.writeString(option.modifierName) +
-            self.writeIfExists(option.params) { (params) -> Int in
+    @discardableResult mutating func writeSearchReturnOptionExtension(_ option: KeyValue<String, ParameterValue?>) -> Int {
+        self.writeString(option.key) +
+            self.writeIfExists(option.value) { (params) -> Int in
                 self.writeSpace() +
                     self.writeParameterValue(params)
             }

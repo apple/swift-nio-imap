@@ -504,14 +504,14 @@ extension GrammarParser {
     }
 
     // search-ret-opt-ext = search-modifier-name [SP search-mod-params]
-    static func parseSearchReturnOptionExtension(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SearchReturnOptionExtension {
-        try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> SearchReturnOptionExtension in
+    static func parseSearchReturnOptionExtension(buffer: inout ByteBuffer, tracker: StackTracker) throws -> KeyValue<String, ParameterValue?> {
+        try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> KeyValue<String, ParameterValue?> in
             let name = try self.parseParameterName(buffer: &buffer, tracker: tracker)
             let params = try optional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> ParameterValue in
                 try space(buffer: &buffer, tracker: tracker)
                 return try self.parseParameterValue(buffer: &buffer, tracker: tracker)
             }
-            return SearchReturnOptionExtension(modifierName: name, params: params)
+            return .init(key: name, value: params)
         }
     }
 

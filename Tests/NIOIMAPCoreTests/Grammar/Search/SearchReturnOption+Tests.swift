@@ -28,7 +28,7 @@ extension SearchReturnOption_Tests {
             (.all, "ALL", #line),
             (.count, "COUNT", #line),
             (.save, "SAVE", #line),
-            (.optionExtension(.init(modifierName: "modifier", params: nil)), "modifier", #line),
+            (.optionExtension(.init(key: "modifier", value: nil)), "modifier", #line),
         ]
 
         for (test, expectedString, line) in inputs {
