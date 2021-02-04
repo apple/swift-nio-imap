@@ -41,8 +41,8 @@ final class RoundtripTests: XCTestCase {
             (.delete(.inbox), #line),
             (.delete(MailboxName("mailbox")), #line),
 
-            (.examine(.inbox, []), #line),
-            (.examine(MailboxName("mailbox"), []), #line),
+            (.examine(.inbox, [:]), #line),
+            (.examine(MailboxName("mailbox"), [:]), #line),
             (.examine(MailboxName("mailbox")), #line),
 
             (.subscribe(.inbox), #line),
@@ -55,8 +55,8 @@ final class RoundtripTests: XCTestCase {
             (.select(MailboxName("mailbox"), []), #line),
             (.select(MailboxName("mailbox")), #line),
 
-            (.rename(from: .inbox, to: .inbox, params: []), #line),
-            (.rename(from: MailboxName("test1"), to: MailboxName("test2"), params: []), #line),
+            (.rename(from: .inbox, to: .inbox, params: [:]), #line),
+            (.rename(from: MailboxName("test1"), to: MailboxName("test2"), params: [:]), #line),
 
             (.list(nil, reference: .inbox, .pattern(["pattern"]), []), #line),
             (.list(nil, reference: MailboxName("bar"), .pattern(["pattern"]), []), #line),
@@ -71,14 +71,14 @@ final class RoundtripTests: XCTestCase {
 
             (.copy(SequenceSet(2...), .inbox), #line),
 
-            (.fetch([.all], .all, []), #line),
-            (.fetch([.all], .fast, []), #line),
-            (.fetch([.all], .full, []), #line),
-            (.fetch([5678], [.uid, .flags, .internalDate, .envelope], []), #line),
-            (.fetch([5678], [.flags, .bodyStructure(extensions: true)], []), #line),
-            (.fetch([5678], [.flags, .bodySection(peek: false, .complete, 3 ... 4)], []), #line),
-            (.fetch([5678], [.flags, .bodySection(peek: false, .init(kind: .header), 3 ... 4)], []), #line),
-            (.fetch([5678], [.bodySection(peek: false, .init(part: [12, 34], kind: .headerFields(["some", "header"])), 3 ... 4)], []), #line),
+            (.fetch([.all], .all, [:]), #line),
+            (.fetch([.all], .fast, [:]), #line),
+            (.fetch([.all], .full, [:]), #line),
+            (.fetch([5678], [.uid, .flags, .internalDate, .envelope], [:]), #line),
+            (.fetch([5678], [.flags, .bodyStructure(extensions: true)], [:]), #line),
+            (.fetch([5678], [.flags, .bodySection(peek: false, .complete, 3 ... 4)], [:]), #line),
+            (.fetch([5678], [.flags, .bodySection(peek: false, .init(kind: .header), 3 ... 4)], [:]), #line),
+            (.fetch([5678], [.bodySection(peek: false, .init(part: [12, 34], kind: .headerFields(["some", "header"])), 3 ... 4)], [:]), #line),
 
             (.store(.all, [], .remove(silent: true, list: [.answered, .deleted])), #line),
             (.store(.all, [], .add(silent: true, list: [.draft, .extension("\\some")])), #line),
@@ -86,7 +86,7 @@ final class RoundtripTests: XCTestCase {
 
             (.uidCopy(.all, .inbox), #line),
 
-            (.uidStore(.all, [], .add(silent: true, list: [.draft, .deleted, .answered])), #line),
+            (.uidStore(.all, [:], .add(silent: true, list: [.draft, .deleted, .answered])), #line),
 
             (.search(key: .all), #line),
             (.search(key: .or(.deleted, .unseen), charset: "UTF-7"), #line),

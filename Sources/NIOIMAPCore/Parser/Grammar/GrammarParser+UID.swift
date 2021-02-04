@@ -53,7 +53,7 @@ extension GrammarParser {
                 let set = try self.parseUIDSet(buffer: &buffer, tracker: tracker)
                 try space(buffer: &buffer, tracker: tracker)
                 let att = try parseFetch_type(buffer: &buffer, tracker: tracker)
-                let modifiers = try optional(buffer: &buffer, tracker: tracker, parser: self.parseParameters) ?? []
+                let modifiers = try optional(buffer: &buffer, tracker: tracker, parser: self.parseParameters) ?? [:]
                 return .uidFetch(set, att, modifiers)
             }
         }
@@ -69,7 +69,7 @@ extension GrammarParser {
             try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Command in
                 try fixedString("STORE ", buffer: &buffer, tracker: tracker)
                 let set = try self.parseUIDSet(buffer: &buffer, tracker: tracker)
-                let modifiers = try optional(buffer: &buffer, tracker: tracker, parser: self.parseParameters) ?? []
+                let modifiers = try optional(buffer: &buffer, tracker: tracker, parser: self.parseParameters) ?? [:]
                 try space(buffer: &buffer, tracker: tracker)
                 let flags = try self.parseStoreAttributeFlags(buffer: &buffer, tracker: tracker)
                 return .uidStore(set, modifiers, flags)

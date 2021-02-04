@@ -46,13 +46,13 @@ extension GrammarParser_Entry_Tests {
                 (
                     "(\"name\" \"value\")",
                     "",
-                    [.init(key: "name", value: .init("value"))],
+                    ["name": .init("value")],
                     #line
                 ),
                 (
                     "(\"name1\" \"value1\" \"name2\" \"value2\")",
                     "",
-                    [.init(key: "name1", value: .init("value1")), .init(key: "name2", value: .init("value2"))],
+                    ["name1": .init("value1"), "name2": .init("value2")],
                     #line
                 ),
             ],

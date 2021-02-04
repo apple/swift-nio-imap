@@ -143,7 +143,7 @@ extension ParserUnitTests {
             XCTAssertEqual(buffer.readableBytes, 0)
             XCTAssertEqual(c1, PartialCommandStream(.command(TaggedCommand(tag: "1", command: .noop)), numberOfSynchronisingLiterals: 1))
             XCTAssertEqual(c2_1, PartialCommandStream(.append(.start(tag: "2", appendingTo: .inbox))))
-            XCTAssertEqual(c2_2, PartialCommandStream(.append(.beginMessage(message: .init(options: .init(flagList: [], extensions: []), data: .init(byteCount: 10))))))
+            XCTAssertEqual(c2_2, PartialCommandStream(.append(.beginMessage(message: .init(options: .init(flagList: [], extensions: [:]), data: .init(byteCount: 10))))))
             XCTAssertEqual(c2_3, PartialCommandStream(.append(.messageBytes("0123456789"))))
             XCTAssertEqual(c2_4, PartialCommandStream(.append(.endMessage)))
             XCTAssertEqual(c2_5, PartialCommandStream(.append(.finish)))
@@ -185,7 +185,7 @@ extension ParserUnitTests {
             XCTAssertEqual(buffer.readableBytes, 0)
             XCTAssertEqual(c1, PartialCommandStream(.command(TaggedCommand(tag: "1", command: .noop)), numberOfSynchronisingLiterals: 3))
             XCTAssertEqual(c2_1, PartialCommandStream(.append(.start(tag: "A003", appendingTo: MailboxName("Drafts")))))
-            XCTAssertEqual(c2_2, PartialCommandStream(.append(.beginCatenate(options: .init(flagList: [.seen, .draft, .keyword(.mdnSent)], extensions: [])))))
+            XCTAssertEqual(c2_2, PartialCommandStream(.append(.beginCatenate(options: .init(flagList: [.seen, .draft, .keyword(.mdnSent)], extensions: [:])))))
             XCTAssertEqual(c2_3, PartialCommandStream(.append(.catenateURL("/Drafts;UIDVALIDITY=385759045/;UID=20/;section=HEADER"))))
             XCTAssertEqual(c2_4, PartialCommandStream(.append(.catenateData(.begin(size: 42)))))
             XCTAssertEqual(c2_5, PartialCommandStream(.append(.catenateData(.bytes("\r\n--------------030308070208000400050907\r\n")))))
@@ -218,7 +218,7 @@ extension ParserUnitTests {
             let c2_5 = try parser.parseCommandStream(buffer: &buffer)
             XCTAssertEqual(buffer.readableBytes, 0)
             XCTAssertEqual(c2_1, PartialCommandStream(.append(.start(tag: "A003", appendingTo: MailboxName("Drafts")))))
-            XCTAssertEqual(c2_2, PartialCommandStream(.append(.beginCatenate(options: .init(flagList: [.seen, .draft, .keyword(.mdnSent)], extensions: [])))))
+            XCTAssertEqual(c2_2, PartialCommandStream(.append(.beginCatenate(options: .init(flagList: [.seen, .draft, .keyword(.mdnSent)], extensions: [:])))))
             XCTAssertEqual(c2_3, PartialCommandStream(.append(.catenateURL("/Drafts;UIDVALIDITY=385759045/;UID=20/;section=HEADER"))))
             XCTAssertEqual(c2_4, PartialCommandStream(.append(.endCatenate)))
             XCTAssertEqual(c2_5, PartialCommandStream(.append(.finish)))
@@ -248,7 +248,7 @@ extension ParserUnitTests {
             let c2_5 = try parser.parseCommandStream(buffer: &buffer)
             XCTAssertEqual(buffer.readableBytes, 0)
             XCTAssertEqual(c2_1, PartialCommandStream(.append(.start(tag: "A003", appendingTo: MailboxName("Drafts")))))
-            XCTAssertEqual(c2_2, PartialCommandStream(.append(.beginCatenate(options: .init(flagList: [.seen, .draft, .keyword(.mdnSent)], extensions: [KeyValue<String, ParameterValue>(key: "EXTENSION", value: .comp(["extdata"]))])))))
+            XCTAssertEqual(c2_2, PartialCommandStream(.append(.beginCatenate(options: .init(flagList: [.seen, .draft, .keyword(.mdnSent)], extensions: ["EXTENSION": .comp(["extdata"])])))))
             XCTAssertEqual(c2_3, PartialCommandStream(.append(.catenateURL("/Drafts;UIDVALIDITY=385759045/;UID=20/;section=HEADER"))))
             XCTAssertEqual(c2_4, PartialCommandStream(.append(.endCatenate)))
             XCTAssertEqual(c2_5, PartialCommandStream(.append(.finish)))
@@ -269,7 +269,7 @@ extension ParserUnitTests {
             let c2_5 = try parser.parseCommandStream(buffer: &buffer)
             XCTAssertEqual(buffer.readableBytes, 0)
             XCTAssertEqual(c2_1, PartialCommandStream(.append(.start(tag: "A003", appendingTo: MailboxName("Drafts")))))
-            XCTAssertEqual(c2_2, PartialCommandStream(.append(.beginCatenate(options: .init(flagList: [.seen, .draft, .keyword(.mdnSent)], extensions: [KeyValue<String, ParameterValue>(key: "EXTENSION", value: .comp(["extdata"]))])))))
+            XCTAssertEqual(c2_2, PartialCommandStream(.append(.beginCatenate(options: .init(flagList: [.seen, .draft, .keyword(.mdnSent)], extensions: ["EXTENSION": .comp(["extdata"])])))))
             XCTAssertEqual(c2_3, PartialCommandStream(.append(.catenateURL("/Drafts;UIDVALIDITY=385759045/;UID=20/;section=HEADER"))))
             XCTAssertEqual(c2_4, PartialCommandStream(.append(.endCatenate)))
             XCTAssertEqual(c2_5, PartialCommandStream(.append(.finish)))
@@ -371,7 +371,7 @@ extension ParserUnitTests {
             validInputs: [
                 ("METADATA INBOX \"a\"", "\r", .list(list: ["a"], mailbox: .inbox), #line),
                 ("METADATA INBOX \"a\" \"b\" \"c\"", "\r", .list(list: ["a", "b", "c"], mailbox: .inbox), #line),
-                ("METADATA INBOX (\"a\" NIL)", "\r", .values(values: [.init(key: "a", value: .init(nil))], mailbox: .inbox), #line),
+                ("METADATA INBOX (\"a\" NIL)", "\r", .values(values: ["a": .init(nil)], mailbox: .inbox), #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
@@ -1211,9 +1211,9 @@ extension ParserUnitTests {
         self.iterateTests(
             testFunction: GrammarParser.parseExamine,
             validInputs: [
-                ("EXAMINE inbox", "\r", .examine(.inbox, []), #line),
-                ("examine inbox", "\r", .examine(.inbox, []), #line),
-                ("EXAMINE inbox (number)", "\r", .examine(.inbox, [.init(key: "number", value: nil)]), #line),
+                ("EXAMINE inbox", "\r", .examine(.inbox, [:]), #line),
+                ("examine inbox", "\r", .examine(.inbox, [:]), #line),
+                ("EXAMINE inbox (number)", "\r", .examine(.inbox, ["number": nil]), #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
@@ -2493,9 +2493,9 @@ extension ParserUnitTests {
         self.iterateTests(
             testFunction: GrammarParser.parseRename,
             validInputs: [
-                ("RENAME box1 box2", "\r", .rename(from: .init("box1"), to: .init("box2"), params: []), #line),
-                ("rename box3 box4", "\r", .rename(from: .init("box3"), to: .init("box4"), params: []), #line),
-                ("RENAME box5 box6 (test)", "\r", .rename(from: .init("box5"), to: .init("box6"), params: [.init(key: "test", value: nil)]), #line),
+                ("RENAME box1 box2", "\r", .rename(from: .init("box1"), to: .init("box2"), params: [:]), #line),
+                ("rename box3 box4", "\r", .rename(from: .init("box3"), to: .init("box4"), params: [:]), #line),
+                ("RENAME box5 box6 (test)", "\r", .rename(from: .init("box5"), to: .init("box6"), params: ["test": nil]), #line),
             ],
             parserErrorInputs: [
                 ("RENAME box1 ", "\r", #line),
@@ -3075,17 +3075,17 @@ extension ParserUnitTests {
             validInputs: [
                 (
                     "name", "\r",
-                    ESearchScopeOptions([.init(key: "name", value: nil)])!,
+                    ESearchScopeOptions(["name": nil])!,
                     #line
                 ),
                 (
                     "name $", "\r",
-                    ESearchScopeOptions([.init(key: "name", value: .sequence(.lastCommand))]),
+                    ESearchScopeOptions(["name": .sequence(.lastCommand)]),
                     #line
                 ),
                 (
                     "name name2", "\r",
-                    ESearchScopeOptions([.init(key: "name", value: nil), .init(key: "name2", value: nil)])!,
+                    ESearchScopeOptions(["name": nil, "name2": nil])!,
                     #line
                 ),
             ],
@@ -3111,7 +3111,7 @@ extension ParserUnitTests {
                 (
                     "IN (inboxes (name))", "\r",
                     ESearchSourceOptions(sourceMailbox: [.inboxes],
-                                         scopeOptions: ESearchScopeOptions([.init(key: "name", value: nil)])!),
+                                         scopeOptions: ESearchScopeOptions(["name": nil])!),
                     #line
                 ),
             ],

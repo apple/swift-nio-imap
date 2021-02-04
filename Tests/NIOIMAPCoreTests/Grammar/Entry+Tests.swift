@@ -29,14 +29,14 @@ extension Entry_Tests {
     }
 
     func testEncode_entryValues() {
-        let inputs: [([KeyValue<ByteBuffer, MetadataValue>], String, UInt)] = [
+        let inputs: [(KeyValues<ByteBuffer, MetadataValue>, String, UInt)] = [
             (
-                [.init(key: "name", value: .init("value"))],
+                ["name": .init("value")],
                 "(\"name\" ~{5}\r\nvalue)",
                 #line
             ),
             (
-                [.init(key: "name1", value: .init("value1")), .init(key: "name2", value: .init("value2"))],
+                ["name1": .init("value1"), "name2": .init("value2")],
                 "(\"name1\" ~{6}\r\nvalue1 \"name2\" ~{6}\r\nvalue2)",
                 #line
             ),

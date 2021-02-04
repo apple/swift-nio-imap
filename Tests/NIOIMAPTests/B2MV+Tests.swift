@@ -64,10 +64,10 @@ extension B2MV_Tests {
 
             // MARK: Examine
 
-            ("tag EXAMINE box1", [.command(.init(tag: "tag", command: .examine(.init("box1"), [])))]),
-            ("tag EXAMINE \"box2\"", [.command(.init(tag: "tag", command: .examine(.init("box2"), [])))]),
-            ("tag EXAMINE {4+}\r\nbox3", [.command(.init(tag: "tag", command: .examine(.init("box3"), [])))]),
-            ("tag EXAMINE box4 (k3 1 k4 2)", [.command(.init(tag: "tag", command: .examine(.init("box4"), [.init(key: "k3", value: .sequence([1])), .init(key: "k4", value: .sequence([2]))])))]),
+            ("tag EXAMINE box1", [.command(.init(tag: "tag", command: .examine(.init("box1"), [:])))]),
+            ("tag EXAMINE \"box2\"", [.command(.init(tag: "tag", command: .examine(.init("box2"), [:])))]),
+            ("tag EXAMINE {4+}\r\nbox3", [.command(.init(tag: "tag", command: .examine(.init("box3"), [:])))]),
+            ("tag EXAMINE box4 (k3 1 k4 2)", [.command(.init(tag: "tag", command: .examine(.init("box4"), ["k3": .sequence([1]), "k4": .sequence([2])])))]),
 
             // MARK: Create
 
@@ -84,9 +84,9 @@ extension B2MV_Tests {
 
             // MARK: Rename
 
-            (#"tag RENAME "foo" "bar""#, [.command(TaggedCommand(tag: "tag", command: .rename(from: MailboxName("foo"), to: MailboxName("bar"), params: [])))]),
-            (#"tag RENAME InBoX "inBOX""#, [.command(TaggedCommand(tag: "tag", command: .rename(from: .inbox, to: .inbox, params: [])))]),
-            ("tag RENAME {1+}\r\n1 {1+}\r\n2", [.command(TaggedCommand(tag: "tag", command: .rename(from: MailboxName("1"), to: MailboxName("2"), params: [])))]),
+            (#"tag RENAME "foo" "bar""#, [.command(TaggedCommand(tag: "tag", command: .rename(from: MailboxName("foo"), to: MailboxName("bar"), params: [:])))]),
+            (#"tag RENAME InBoX "inBOX""#, [.command(TaggedCommand(tag: "tag", command: .rename(from: .inbox, to: .inbox, params: [:])))]),
+            ("tag RENAME {1+}\r\n1 {1+}\r\n2", [.command(TaggedCommand(tag: "tag", command: .rename(from: MailboxName("1"), to: MailboxName("2"), params: [:])))]),
 
             // MARK: Subscribe
 
@@ -126,7 +126,7 @@ extension B2MV_Tests {
 
             ("tag APPEND box (\\Seen) {1+}\r\na", [
                 .append(.start(tag: "tag", appendingTo: .init("box"))),
-                .append(.beginMessage(message: .init(options: .init(flagList: [.seen], extensions: []), data: .init(byteCount: 1)))),
+                    .append(.beginMessage(message: .init(options: .init(flagList: [.seen], extensions: [:]), data: .init(byteCount: 1)))),
                 .append(.messageBytes("a")),
                 .append(.endMessage),
                 .append(.finish),
@@ -196,11 +196,11 @@ extension B2MV_Tests {
 
             // MARK: LIST
 
-            ("* LIST (\\noselect) \"/\" ~/Mail/foo", [.untaggedResponse(.mailboxData(.list(.init(attributes: [.noSelect], path: try! .init(name: .init("~/Mail/foo"), pathSeparator: "/"), extensions: []))))]),
+            ("* LIST (\\noselect) \"/\" ~/Mail/foo", [.untaggedResponse(.mailboxData(.list(.init(attributes: [.noSelect], path: try! .init(name: .init("~/Mail/foo"), pathSeparator: "/"), extensions: [:]))))]),
 
             // MARK: LSUB
 
-            ("* LSUB (\\noselect) \"/\" ~/Mail/foo", [.untaggedResponse(.mailboxData(.lsub(.init(attributes: [.noSelect], path: try! .init(name: .init("~/Mail/foo"), pathSeparator: "/"), extensions: []))))]),
+            ("* LSUB (\\noselect) \"/\" ~/Mail/foo", [.untaggedResponse(.mailboxData(.lsub(.init(attributes: [.noSelect], path: try! .init(name: .init("~/Mail/foo"), pathSeparator: "/"), extensions: [:]))))]),
 
             // MARK: Status
 

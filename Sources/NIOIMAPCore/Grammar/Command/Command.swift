@@ -36,7 +36,7 @@ public enum Command: Equatable {
     case delete(MailboxName)
 
     /// Similar to `.select` and returns the same data, however the current mailbox is identified as readonly
-    case examine(MailboxName, [KeyValue<String, ParameterValue?>] = [])
+    case examine(MailboxName, KeyValues<String, ParameterValue?> = [:])
 
     /// Returns a subset of names from the complete set of all names available to the client.
     case list(ListSelectOptions?, reference: MailboxName, MailboxPatterns, [ReturnOption] = [])
@@ -48,7 +48,7 @@ public enum Command: Equatable {
     case lsub(reference: MailboxName, pattern: ByteBuffer)
 
     /// Renames the given mailbox.
-    case rename(from: MailboxName, to: MailboxName, params: [KeyValue<String, ParameterValue?>])
+    case rename(from: MailboxName, to: MailboxName, params: KeyValues<String, ParameterValue?>)
 
     /// Selects the given mailbox in preparation of running more commands.
     case select(MailboxName, [SelectParameter] = [])
@@ -95,7 +95,7 @@ public enum Command: Equatable {
     case copy(SequenceSet, MailboxName)
 
     /// Fetches an array of specified attributes for each message in a given set.
-    case fetch(SequenceSet, [FetchAttribute], [KeyValue<String, ParameterValue?>])
+    case fetch(SequenceSet, [FetchAttribute], KeyValues<String, ParameterValue?>)
 
     /// Alters data associated with a message, typically returning the new data as an untagged fetch response.
     case store(SequenceSet, [StoreModifier], StoreFlags)
@@ -119,13 +119,13 @@ public enum Command: Equatable {
     case uidMove(UIDSet, MailboxName)
 
     /// Similar to `.fetch`, but uses unique identifier instead of sequence numbers to identify messages.
-    case uidFetch(UIDSet, [FetchAttribute], [KeyValue<String, ParameterValue?>])
+    case uidFetch(UIDSet, [FetchAttribute], KeyValues<String, ParameterValue?>)
 
     /// Similar to `.search`, but uses unique identifier instead of sequence numbers to identify messages.
     case uidSearch(key: SearchKey, charset: String? = nil, returnOptions: [SearchReturnOption] = [])
 
     /// Similar to `.store`, but uses unique identifier instead of sequence numbers to identify messages.
-    case uidStore(UIDSet, [KeyValue<String, ParameterValue?>], StoreFlags)
+    case uidStore(UIDSet, KeyValues<String, ParameterValue?>, StoreFlags)
 
     /// Similar to `.expunge`, but uses unique identifier instead of sequence numbers to identify messages.
     case uidExpunge(UIDSet)
@@ -148,7 +148,7 @@ public enum Command: Equatable {
     /// replacing the specified values provided, on the specified existing
     /// mailboxes or on the server (if the mailbox argument is the empty
     /// string).
-    case setMetadata(mailbox: MailboxName, entries: [KeyValue<ByteBuffer, MetadataValue>])
+    case setMetadata(mailbox: MailboxName, entries: KeyValues<ByteBuffer, MetadataValue>)
 
     /// Performs an extended search as defined in RFC 4731.
     case esearch(ESearchOptions)
@@ -308,7 +308,7 @@ extension CommandEncodeBuffer {
             self.buffer.writeEntries(entries)
     }
 
-    private mutating func writeCommandKind_setMetadata(mailbox: MailboxName, entries: [KeyValue<ByteBuffer, MetadataValue>]) -> Int {
+    private mutating func writeCommandKind_setMetadata(mailbox: MailboxName, entries: KeyValues<ByteBuffer, MetadataValue>) -> Int {
         self.buffer.writeString("SETMETADATA ") +
             self.buffer.writeMailbox(mailbox) +
             self.buffer.writeSpace() +
@@ -343,7 +343,7 @@ extension CommandEncodeBuffer {
             self.buffer.writeMailbox(mailbox)
     }
 
-    private mutating func writeCommandKind_examine(mailbox: MailboxName, parameters: [KeyValue<String, ParameterValue?>]) -> Int {
+    private mutating func writeCommandKind_examine(mailbox: MailboxName, parameters: KeyValues<String, ParameterValue?>) -> Int {
         self.buffer.writeString("EXAMINE ") +
             self.buffer.writeMailbox(mailbox) +
             self.buffer.writeParameters(parameters)
@@ -389,7 +389,7 @@ extension CommandEncodeBuffer {
             self.buffer.writeIMAPString(listMailbox)
     }
 
-    private mutating func writeCommandKind_rename(from: MailboxName, to: MailboxName, parameters: [KeyValue<String, ParameterValue?>]) -> Int {
+    private mutating func writeCommandKind_rename(from: MailboxName, to: MailboxName, parameters: KeyValues<String, ParameterValue?>) -> Int {
         self.buffer.writeString("RENAME ") +
             self.buffer.writeMailbox(from) +
             self.buffer.writeSpace() +
@@ -492,7 +492,7 @@ extension CommandEncodeBuffer {
             self.buffer.writeMailbox(mailbox)
     }
 
-    private mutating func writeCommandKind_fetch(set: SequenceSet, atts: [FetchAttribute], modifiers: [KeyValue<String, ParameterValue?>]) -> Int {
+    private mutating func writeCommandKind_fetch(set: SequenceSet, atts: [FetchAttribute], modifiers: KeyValues<String, ParameterValue?>) -> Int {
         self.buffer.writeString("FETCH ") +
             self.buffer.writeSequenceSet(set) +
             self.buffer.writeSpace() +
@@ -502,7 +502,7 @@ extension CommandEncodeBuffer {
             }
     }
 
-    private mutating func writeCommandKind_uidFetch(set: UIDSet, atts: [FetchAttribute], modifiers: [KeyValue<String, ParameterValue?>]) -> Int {
+    private mutating func writeCommandKind_uidFetch(set: UIDSet, atts: [FetchAttribute], modifiers: KeyValues<String, ParameterValue?>) -> Int {
         self.buffer.writeString("UID FETCH ") +
             self.buffer.writeUIDSet(set) +
             self.buffer.writeSpace() +
@@ -525,7 +525,7 @@ extension CommandEncodeBuffer {
             self.buffer.writeStoreAttributeFlags(flags)
     }
 
-    private mutating func writeCommandKind_uidStore(set: UIDSet, modifiers: [KeyValue<String, ParameterValue?>], flags: StoreFlags) -> Int {
+    private mutating func writeCommandKind_uidStore(set: UIDSet, modifiers: KeyValues<String, ParameterValue?>, flags: StoreFlags) -> Int {
         self.buffer.writeString("UID STORE ") +
             self.buffer.writeUIDSet(set) +
             self.buffer.write(if: modifiers.count >= 1) {

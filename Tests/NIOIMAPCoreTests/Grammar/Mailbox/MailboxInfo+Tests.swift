@@ -23,8 +23,8 @@ class MailboxInfo_Tests: EncodeTestClass {}
 extension MailboxInfo_Tests {
     func testEncode() {
         let inputs: [(MailboxInfo, String, UInt)] = [
-            (MailboxInfo(attributes: [], path: try! .init(name: .inbox), extensions: []), "() \"INBOX\"", #line),
-            (MailboxInfo(attributes: [], path: try! .init(name: .inbox, pathSeparator: "a"), extensions: []), "() a \"INBOX\"", #line),
+            (MailboxInfo(attributes: [], path: try! .init(name: .inbox), extensions: [:]), "() \"INBOX\"", #line),
+            (MailboxInfo(attributes: [], path: try! .init(name: .inbox, pathSeparator: "a"), extensions: [:]), "() a \"INBOX\"", #line),
         ]
 
         for (test, expectedString, line) in inputs {

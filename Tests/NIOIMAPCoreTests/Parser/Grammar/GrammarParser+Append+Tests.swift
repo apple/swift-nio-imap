@@ -72,13 +72,13 @@ extension GrammarParser_Append_Tests {
                 (
                     " (\\Answered) {123}\r\n",
                     "test",
-                    .init(options: .init(flagList: [.answered], internalDate: nil, extensions: []), data: .init(byteCount: 123)),
+                        .init(options: .init(flagList: [.answered], internalDate: nil, extensions: [:]), data: .init(byteCount: 123)),
                     #line
                 ),
                 (
                     " (\\Answered) ~{456}\r\n",
                     "test",
-                    .init(options: .init(flagList: [.answered], internalDate: nil, extensions: []), data: .init(byteCount: 456, withoutContentTransferEncoding: true)),
+                        .init(options: .init(flagList: [.answered], internalDate: nil, extensions: [:]), data: .init(byteCount: 456, withoutContentTransferEncoding: true)),
                     #line
                 ),
             ],
@@ -98,27 +98,27 @@ extension GrammarParser_Append_Tests {
         self.iterateTests(
             testFunction: GrammarParser.parseAppendOptions,
             validInputs: [
-                ("", "\r", .init(flagList: [], internalDate: nil, extensions: []), #line),
-                (" (\\Answered)", "\r", .init(flagList: [.answered], internalDate: nil, extensions: []), #line),
+                ("", "\r", .init(flagList: [], internalDate: nil, extensions: [:]), #line),
+                (" (\\Answered)", "\r", .init(flagList: [.answered], internalDate: nil, extensions: [:]), #line),
                 (
                     " \"25-jun-1994 01:02:03 +0000\"",
                     "\r",
-                    .init(flagList: [], internalDate: date, extensions: []),
+                        .init(flagList: [], internalDate: date, extensions: [:]),
                     #line
                 ),
                 (
                     " name1 1:2",
                     "\r",
-                    .init(flagList: [], internalDate: nil, extensions: [.init(key: "name1", value: .sequence(SequenceSet(1 ... 2)))]),
+                    .init(flagList: [], internalDate: nil, extensions: ["name1": .sequence(SequenceSet(1 ... 2))]),
                     #line
                 ),
                 (
                     " name1 1:2 name2 2:3 name3 3:4",
                     "\r",
                     .init(flagList: [], internalDate: nil, extensions: [
-                        .init(key: "name1", value: .sequence(SequenceSet(1 ... 2))),
-                        .init(key: "name2", value: .sequence(SequenceSet(2 ... 3))),
-                        .init(key: "name3", value: .sequence(SequenceSet(3 ... 4))),
+                        "name1": .sequence(SequenceSet(1 ... 2)),
+                        "name2": .sequence(SequenceSet(2 ... 3)),
+                        "name3": .sequence(SequenceSet(3 ... 4)),
                     ]),
                     #line
                 ),

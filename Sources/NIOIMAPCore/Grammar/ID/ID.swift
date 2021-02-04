@@ -22,9 +22,9 @@ extension EncodeBuffer {
             return self.writeNil()
         }
         return self.writeKeyValues(values) { (e, self) in
-            self.writeIMAPString(e.0) +
+            self.writeIMAPString(e.key) +
                 self.writeSpace() +
-                self.writeNString(e.1)
+                self.writeNString(e.value)
         }
     }
 

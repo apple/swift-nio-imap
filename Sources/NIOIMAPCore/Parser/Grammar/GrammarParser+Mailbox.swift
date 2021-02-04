@@ -153,27 +153,28 @@ extension GrammarParser {
             ], buffer: &buffer, tracker: tracker)
             try space(buffer: &buffer, tracker: tracker)
             let mailbox = try self.parseMailbox(buffer: &buffer, tracker: tracker)
-            let listExtended = try optional(buffer: &buffer, tracker: tracker, parser: { (buffer, tracker) -> [ListExtendedItem] in
+            let listExtended = try optional(buffer: &buffer, tracker: tracker, parser: { (buffer, tracker) -> KeyValues<ByteBuffer, ParameterValue> in
                 try space(buffer: &buffer, tracker: tracker)
                 return try self.parseMailboxListExtended(buffer: &buffer, tracker: tracker)
-            }) ?? []
+            }) ?? [:]
             return MailboxInfo(attributes: flags, path: try .init(name: mailbox, pathSeparator: character), extensions: listExtended)
         }
     }
 
     // mbox-list-extended =  "(" [mbox-list-extended-item
     //                       *(SP mbox-list-extended-item)] ")"
-    static func parseMailboxListExtended(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [ListExtendedItem] {
-        try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> [ListExtendedItem] in
+    static func parseMailboxListExtended(buffer: inout ByteBuffer, tracker: StackTracker) throws -> KeyValues<ByteBuffer, ParameterValue> {
+        try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> KeyValues<ByteBuffer, ParameterValue> in
             try fixedString("(", buffer: &buffer, tracker: tracker)
-            let data = try optional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> [ListExtendedItem] in
-                var array = [try self.parseMailboxListExtendedItem(buffer: &buffer, tracker: tracker)]
-                try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) -> ListExtendedItem in
+            let data = try optional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> KeyValues<ByteBuffer, ParameterValue> in
+                var kvs = KeyValues<ByteBuffer, ParameterValue>()
+                kvs.append(try self.parseMailboxListExtendedItem(buffer: &buffer, tracker: tracker))
+                try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &kvs, tracker: tracker) { (buffer, tracker) -> KeyValue<ByteBuffer, ParameterValue> in
                     try space(buffer: &buffer, tracker: tracker)
                     return try self.parseMailboxListExtendedItem(buffer: &buffer, tracker: tracker)
                 }
-                return array
-            } ?? []
+                return kvs
+            } ?? [:]
             try fixedString(")", buffer: &buffer, tracker: tracker)
             return data
         }
@@ -181,12 +182,12 @@ extension GrammarParser {
 
     // mbox-list-extended-item =  mbox-list-extended-item-tag SP
     //                            tagged-ext-val
-    static func parseMailboxListExtendedItem(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ListExtendedItem {
-        try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> ListExtendedItem in
+    static func parseMailboxListExtendedItem(buffer: inout ByteBuffer, tracker: StackTracker) throws -> KeyValue<ByteBuffer, ParameterValue> {
+        try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> KeyValue<ByteBuffer, ParameterValue> in
             let tag = try self.parseAString(buffer: &buffer, tracker: tracker)
             try space(buffer: &buffer, tracker: tracker)
             let val = try self.parseParameterValue(buffer: &buffer, tracker: tracker)
-            return ListExtendedItem(tag: tag, extensionValue: val)
+            return .init(key: tag, value: val)
         }
     }
 

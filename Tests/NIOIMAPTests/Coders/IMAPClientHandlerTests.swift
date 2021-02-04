@@ -34,7 +34,7 @@ class IMAPClientHandlerTests: XCTestCase {
         let f = self.writeOutbound(CommandStream.command(TaggedCommand(tag: "x",
                                                                        command: .rename(from: .init("\n"),
                                                                                         to: .init("to"),
-                                                                                        params: []))),
+                                                                                        params: [:]))),
                                    wait: false)
         self.assertOutboundString("x RENAME {1}\r\n")
         self.writeInbound("+ OK\r\n")
@@ -49,7 +49,7 @@ class IMAPClientHandlerTests: XCTestCase {
         let f = self.writeOutbound(CommandStream.command(TaggedCommand(tag: "x",
                                                                        command: .rename(from: .init("\n"),
                                                                                         to: .init("\r"),
-                                                                                        params: []))),
+                                                                                        params: [:]))),
                                    wait: false)
         self.assertOutboundString("x RENAME {1}\r\n")
         self.writeInbound("+ OK\r\n")
@@ -66,12 +66,12 @@ class IMAPClientHandlerTests: XCTestCase {
         let f1 = self.writeOutbound(CommandStream.command(TaggedCommand(tag: "x",
                                                                         command: .rename(from: .init("\n"),
                                                                                          to: .init("to"),
-                                                                                         params: []))),
+                                                                                         params: [:]))),
                                     wait: false)
         let f2 = self.writeOutbound(CommandStream.command(TaggedCommand(tag: "y",
                                                                         command: .rename(from: .init("from"),
                                                                                          to: .init("\n"),
-                                                                                         params: []))),
+                                                                                         params: [:]))),
                                     wait: false)
         self.assertOutboundString("x RENAME {1}\r\n")
         self.writeInbound("+ OK\r\n")
@@ -93,7 +93,7 @@ class IMAPClientHandlerTests: XCTestCase {
         let f = self.writeOutbound(CommandStream.command(TaggedCommand(tag: "x",
                                                                        command: .rename(from: .init("\n"),
                                                                                         to: .init("to"),
-                                                                                        params: []))),
+                                                                                        params: [:]))),
                                    wait: false)
         self.assertOutboundString("x RENAME {1}\r\n")
         XCTAssertThrowsError(try self.channel.writeInbound(self.buffer(string: "+ OK\r\n+ OK\r\n"))) { error in

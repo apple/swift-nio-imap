@@ -32,7 +32,7 @@ extension GrammarParser {
             let sequence = try self.parseSequenceSet(buffer: &buffer, tracker: tracker)
             try space(buffer: &buffer, tracker: tracker)
             let att = try parseFetch_type(buffer: &buffer, tracker: tracker)
-            let modifiers = try optional(buffer: &buffer, tracker: tracker, parser: self.parseParameters) ?? []
+            let modifiers = try optional(buffer: &buffer, tracker: tracker, parser: self.parseParameters) ?? [:]
             return .fetch(sequence, att, modifiers)
         }
     }
