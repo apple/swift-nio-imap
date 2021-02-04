@@ -143,7 +143,7 @@ extension GrammarParser_Search_Tests {
                 ("YOUNGER 34", "\r", .younger(34), #line),
                 ("OLDER 45", "\r", .older(45), #line),
                 ("FILTER something", "\r", .filter("something"), #line),
-                ("MODSEQ 5", "\r", .modificationSequence(.init(extensions: [], sequenceValue: 5)), #line),
+                ("MODSEQ 5", "\r", .modificationSequence(.init(extensions: [:], sequenceValue: 5)), #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
@@ -182,19 +182,19 @@ extension GrammarParser_Search_Tests {
         self.iterateTests(
             testFunction: GrammarParser.parseSearchModificationSequence,
             validInputs: [
-                ("MODSEQ 4", " ", .init(extensions: [], sequenceValue: 4), #line),
+                ("MODSEQ 4", " ", .init(extensions: [:], sequenceValue: 4), #line),
                 (
                     "MODSEQ \"/flags/\\\\Answered\" priv 4",
                     " ",
-                    .init(extensions: [.init(name: .init(flag: .answered), request: .private)], sequenceValue: 4),
+                    .init(extensions: [.init(flag: .answered): .private], sequenceValue: 4),
                     #line
                 ),
                 (
                     "MODSEQ \"/flags/\\\\Answered\" priv \"/flags/\\\\Seen\" shared 4",
                     " ",
                     .init(extensions: [
-                        .init(name: .init(flag: .answered), request: .private),
-                        .init(name: .init(flag: .seen), request: .shared),
+                        .init(flag: .answered): .private,
+                        .init(flag: .seen): .shared,
                     ], sequenceValue: 4),
                     #line
                 ),
@@ -212,7 +212,7 @@ extension GrammarParser_Search_Tests {
         self.iterateTests(
             testFunction: GrammarParser.parseSearchModificationSequenceExtension,
             validInputs: [
-                (" \"/flags/\\\\Seen\" all", "", .init(name: .init(flag: .seen), request: .all), #line),
+                (" \"/flags/\\\\Seen\" all", "", .init(key: .init(flag: .seen), value: .all), #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []

@@ -369,20 +369,21 @@ extension GrammarParser {
     static func parseSearchModificationSequence(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SearchModificationSequence {
         try composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> SearchModificationSequence in
             try fixedString("MODSEQ", buffer: &buffer, tracker: tracker)
-            let extensions = try ParserLibrary.parseZeroOrMore(buffer: &buffer, tracker: tracker, parser: self.parseSearchModificationSequenceExtension)
+            var extensions = KeyValues<EntryFlagName, EntryKindRequest>()
+            try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &extensions, tracker: tracker, parser: self.parseSearchModificationSequenceExtension)
             try space(buffer: &buffer, tracker: tracker)
             let val = try self.parseModificationSequenceValue(buffer: &buffer, tracker: tracker)
             return .init(extensions: extensions, sequenceValue: val)
         }
     }
 
-    static func parseSearchModificationSequenceExtension(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SearchModificationSequenceExtension {
-        try composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> SearchModificationSequenceExtension in
+    static func parseSearchModificationSequenceExtension(buffer: inout ByteBuffer, tracker: StackTracker) throws -> KeyValue<EntryFlagName, EntryKindRequest> {
+        try composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> KeyValue<EntryFlagName, EntryKindRequest> in
             try space(buffer: &buffer, tracker: tracker)
             let flag = try self.parseEntryFlagName(buffer: &buffer, tracker: tracker)
             try space(buffer: &buffer, tracker: tracker)
             let request = try self.parseEntryKindRequest(buffer: &buffer, tracker: tracker)
-            return .init(name: flag, request: request)
+            return .init(key: flag, value: request)
         }
     }
 
