@@ -24,6 +24,7 @@ public struct KeyValue<Key: Hashable, Value: Hashable>: Hashable {
     /// Creates a new `KeyValue`
     /// - parameter key: The key
     /// - parameter value: The value
+    @inlinable
     public init(key: Key, value: Value) {
         self.key = key
         self.value = value
