@@ -20,7 +20,7 @@ public enum ListSelectIndependentOption: Equatable {
     case remote
 
     /// A catch-all to support future extensions
-    case option(OptionExtension)
+    case option(KeyValue<OptionExtensionKind, OptionValueComp?>)
 
     /// *SPECIAL-USE* - Asks the list response to return special-use mailboxes. E.g. *draft* or *sent* messages.
     case specialUse

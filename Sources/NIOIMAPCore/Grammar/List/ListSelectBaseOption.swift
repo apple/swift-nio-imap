@@ -20,7 +20,7 @@ public enum ListSelectBaseOption: Equatable {
     case subscribed
 
     /// A catch-all to support future extensions
-    case option(OptionExtension)
+    case option(KeyValue<OptionExtensionKind, OptionValueComp?>)
 }
 
 // MARK: - Encoding

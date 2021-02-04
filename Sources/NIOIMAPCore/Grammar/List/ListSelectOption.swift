@@ -31,7 +31,7 @@ public enum ListSelectOption: Equatable {
     case recursiveMatch
 
     /// Asks the list response to return special-use mailboxes. E.g. *draft* or *sent* messages.
-    case option(OptionExtension)
+    case option(KeyValue<OptionExtensionKind, OptionValueComp?>)
 }
 
 /// Combines an array of `ListSelectOption` with a `ListSelectBaseOption`. Used

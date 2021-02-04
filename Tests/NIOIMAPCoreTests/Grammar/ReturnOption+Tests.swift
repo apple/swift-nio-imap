@@ -26,7 +26,7 @@ extension ReturnOption_Tests {
             (.subscribed, "SUBSCRIBED", #line),
             (.children, "CHILDREN", #line),
             (.statusOption([.messageCount]), "STATUS (MESSAGES)", #line),
-            (.optionExtension(.init(kind: .standard("atom"), value: nil)), "atom", #line),
+            (.optionExtension(.init(key: .standard("atom"), value: nil)), "atom", #line),
             (.specialUse, "SPECIAL-USE", #line),
         ]
 

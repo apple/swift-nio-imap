@@ -1656,7 +1656,7 @@ extension GrammarParser {
 
     // option-extension = (option-standard-tag / option-vendor-tag)
     //                    [SP option-value]
-    static func parseOptionExtension(buffer: inout ByteBuffer, tracker: StackTracker) throws -> OptionExtension {
+    static func parseOptionExtension(buffer: inout ByteBuffer, tracker: StackTracker) throws -> KeyValue<OptionExtensionKind, OptionValueComp?> {
         func parseOptionExtensionKind_standard(buffer: inout ByteBuffer, tracker: StackTracker) throws -> OptionExtensionKind {
             .standard(try self.parseAtom(buffer: &buffer, tracker: tracker))
         }
@@ -1665,7 +1665,7 @@ extension GrammarParser {
             .vendor(try self.parseOptionVendorTag(buffer: &buffer, tracker: tracker))
         }
 
-        return try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> OptionExtension in
+        return try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> KeyValue<OptionExtensionKind, OptionValueComp?> in
             let type = try oneOf([
                 parseOptionExtensionKind_standard,
                 parseOptionExtensionKind_vendor,
@@ -1674,7 +1674,7 @@ extension GrammarParser {
                 try space(buffer: &buffer, tracker: tracker)
                 return try self.parseOptionValue(buffer: &buffer, tracker: tracker)
             }
-            return OptionExtension(kind: type, value: value)
+            return .init(key: type, value: value)
         }
     }
 
