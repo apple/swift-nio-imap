@@ -1944,8 +1944,8 @@ extension ParserUnitTests {
         self.iterateTests(
             testFunction: GrammarParser.parseNamespaceDescription,
             validInputs: [
-                ("(\"str1\" NIL)", " ", .init(string: "str1", char: nil, responseExtensions: []), #line),
-                ("(\"str\" \"a\")", " ", .init(string: "str", char: "a", responseExtensions: []), #line),
+                ("(\"str1\" NIL)", " ", .init(string: "str1", char: nil, responseExtensions: [:]), #line),
+                ("(\"str\" \"a\")", " ", .init(string: "str", char: "a", responseExtensions: [:]), #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
@@ -1975,8 +1975,8 @@ extension ParserUnitTests {
         self.iterateTests(
             testFunction: GrammarParser.parseNamespaceResponseExtension,
             validInputs: [
-                (" \"str1\" (\"str2\")", " ", .init(string: "str1", array: ["str2"]), #line),
-                (" \"str1\" (\"str2\" \"str3\" \"str4\")", " ", .init(string: "str1", array: ["str2", "str3", "str4"]), #line),
+                (" \"str1\" (\"str2\")", " ", .init(key: "str1", value: ["str2"]), #line),
+                (" \"str1\" (\"str2\" \"str3\" \"str4\")", " ", .init(key: "str1", value: ["str2", "str3", "str4"]), #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []

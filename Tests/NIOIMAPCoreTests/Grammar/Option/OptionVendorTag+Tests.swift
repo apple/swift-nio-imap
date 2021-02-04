@@ -22,8 +22,8 @@ class OptionVendorTag_Tests: EncodeTestClass {}
 
 extension OptionVendorTag_Tests {
     func testEncode() {
-        let inputs: [(OptionVendorTag, String, UInt)] = [
-            (.init(token: "some", atom: "thing"), "some-thing", #line),
+        let inputs: [(KeyValue<String, String>, String, UInt)] = [
+            (.init(key: "some", value: "thing"), "some-thing", #line),
         ]
 
         for (test, expectedString, line) in inputs {
