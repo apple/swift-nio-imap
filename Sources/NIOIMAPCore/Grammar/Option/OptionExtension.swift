@@ -24,7 +24,7 @@ public enum OptionExtensionKind: Hashable {
 }
 
 /// A catch-all wrapper to support future extensions. Acts as a key/value pair.
-//public struct OptionExtension: Equatable {
+// public struct OptionExtension: Equatable {
 //    /// Some option kind.
 //    public var kind: OptionExtensionKind
 //
@@ -38,7 +38,7 @@ public enum OptionExtensionKind: Hashable {
 //        self.kind = kind
 //        self.value = value
 //    }
-//}
+// }
 
 // MARK: - Encoding
 

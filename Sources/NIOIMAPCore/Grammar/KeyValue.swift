@@ -13,14 +13,12 @@
 //===----------------------------------------------------------------------===//
 
 public struct KeyValue<Key: Hashable, Value: Hashable>: Hashable {
-    
     public var key: Key
-    
+
     public var value: Value
-    
+
     public init(key: Key, value: Value) {
         self.key = key
         self.value = value
     }
-    
 }

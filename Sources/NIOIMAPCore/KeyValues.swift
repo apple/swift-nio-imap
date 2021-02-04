@@ -14,7 +14,6 @@
 
 /// A dictionary-like structure that preserves insert order, and provides O(n) lookup based on some `Key`
 public struct KeyValues<Key: Hashable, Value: Hashable>: Hashable {
-
     @usableFromInline
     var _backing: [KeyValue<Key, Value>]
 
