@@ -18,12 +18,12 @@ import struct NIO.ByteBuffer
 /// a catch-all for future extensions, as no options are currently explicitly defined.
 public struct ESearchScopeOptions: Equatable {
     /// An array of Scope Option key/value pairs. Note that the array must not be empty.
-    public private(set) var content: [Parameter]
+    public private(set) var content: [KeyValue<String, ParameterValue?>]
 
     /// Creates a new `ESearchScopeOptions` from a non-empty array of options.
     ///  - parameter options: One or more options.
     /// - returns: A `nil` if `options` is empty, otherwise a new `ESearchScopeOptions`.
-    init?(_ options: [Parameter]) {
+    init?(_ options: [KeyValue<String, ParameterValue?>]) {
         guard options.count >= 1 else {
             return nil
         }

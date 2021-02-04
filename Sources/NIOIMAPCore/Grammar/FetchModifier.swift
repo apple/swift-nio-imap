@@ -19,7 +19,7 @@ public enum FetchModifier: Equatable {
     case changedSince(ChangedSinceModifier)
 
     /// Implemented as a catch-all to support modifiers defined in future extensions.
-    case other(Parameter)
+    case other(KeyValue<String, ParameterValue?>)
 }
 
 // MARK: - Encoding

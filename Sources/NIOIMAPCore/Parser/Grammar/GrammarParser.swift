@@ -304,14 +304,14 @@ extension GrammarParser {
         ], buffer: &buffer, tracker: tracker)
     }
 
-    static func parseParameter(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Parameter {
+    static func parseParameter(buffer: inout ByteBuffer, tracker: StackTracker) throws -> KeyValue<String, ParameterValue?> {
         try composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
             let name = try self.parseParameterName(buffer: &buffer, tracker: tracker)
             let value = try optional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> ParameterValue in
                 try space(buffer: &buffer, tracker: tracker)
                 return try self.parseParameterValue(buffer: &buffer, tracker: tracker)
             }
-            return .init(name: name, value: value)
+            return .init(key: name, value: value)
         }
     }
 
@@ -1656,7 +1656,7 @@ extension GrammarParser {
 
     // option-extension = (option-standard-tag / option-vendor-tag)
     //                    [SP option-value]
-    static func parseOptionExtension(buffer: inout ByteBuffer, tracker: StackTracker) throws -> OptionExtension {
+    static func parseOptionExtension(buffer: inout ByteBuffer, tracker: StackTracker) throws -> KeyValue<OptionExtensionKind, OptionValueComp?> {
         func parseOptionExtensionKind_standard(buffer: inout ByteBuffer, tracker: StackTracker) throws -> OptionExtensionKind {
             .standard(try self.parseAtom(buffer: &buffer, tracker: tracker))
         }
@@ -1665,7 +1665,7 @@ extension GrammarParser {
             .vendor(try self.parseOptionVendorTag(buffer: &buffer, tracker: tracker))
         }
 
-        return try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> OptionExtension in
+        return try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> KeyValue<OptionExtensionKind, OptionValueComp?> in
             let type = try oneOf([
                 parseOptionExtensionKind_standard,
                 parseOptionExtensionKind_vendor,
@@ -1674,7 +1674,7 @@ extension GrammarParser {
                 try space(buffer: &buffer, tracker: tracker)
                 return try self.parseOptionValue(buffer: &buffer, tracker: tracker)
             }
-            return OptionExtension(kind: type, value: value)
+            return .init(key: type, value: value)
         }
     }
 
@@ -2030,11 +2030,11 @@ extension GrammarParser {
     }
 
     // select-params = SP "(" select-param *(SP select-param ")"
-    static func parseParameters(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [Parameter] {
-        try composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> [Parameter] in
+    static func parseParameters(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [KeyValue<String, ParameterValue?>] {
+        try composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> [KeyValue<String, ParameterValue?>] in
             try fixedString(" (", buffer: &buffer, tracker: tracker)
             var array = [try self.parseParameter(buffer: &buffer, tracker: tracker)]
-            try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) -> Parameter in
+            try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) -> KeyValue<String, ParameterValue?> in
                 try space(buffer: &buffer, tracker: tracker)
                 return try self.parseParameter(buffer: &buffer, tracker: tracker)
             }
@@ -2222,21 +2222,21 @@ extension GrammarParser {
     }
 
     // tagged-ext = tagged-ext-label SP tagged-ext-val
-    static func parseTaggedExtension(buffer: inout ByteBuffer, tracker: StackTracker) throws -> TaggedExtension {
+    static func parseTaggedExtension(buffer: inout ByteBuffer, tracker: StackTracker) throws -> KeyValue<String, ParameterValue> {
         try composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
-            let label = try self.parseParameterName(buffer: &buffer, tracker: tracker)
+            let key = try self.parseParameterName(buffer: &buffer, tracker: tracker)
 
             // Warning: weird hack alert.
             // CATENATE (RFC 4469) has basically identical syntax to tagged extensions, but it is actually append-data.
             // to avoid that being a problem here, we check if we just parsed `CATENATE`. If we did, we bail out: this is
             // data now.
-            if label.lowercased() == "catenate" {
+            if key.lowercased() == "catenate" {
                 throw ParserError(hint: "catenate extension")
             }
 
             try space(buffer: &buffer, tracker: tracker)
             let value = try self.parseParameterValue(buffer: &buffer, tracker: tracker)
-            return .init(label: label, value: value)
+            return .init(key: key, value: value)
         }
     }
 
@@ -2558,7 +2558,7 @@ extension GrammarParser {
     // RFC 6237
     // scope-options =  scope-option *(SP scope-option)
     static func parseESearchScopeOptions(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ESearchScopeOptions {
-        var options: [Parameter] = [try parseParameter(buffer: &buffer, tracker: tracker)]
+        var options: [KeyValue<String, ParameterValue?>] = [try parseParameter(buffer: &buffer, tracker: tracker)]
         while try optional(buffer: &buffer, tracker: tracker, parser: space) != nil {
             options.append(try parseParameter(buffer: &buffer, tracker: tracker))
         }

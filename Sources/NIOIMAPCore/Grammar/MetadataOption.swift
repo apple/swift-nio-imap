@@ -22,7 +22,7 @@ public enum MetadataOption: Equatable {
     case scope(ScopeOption)
 
     /// Implemented as a catch-all to support additions in future extensions.
-    case other(Parameter)
+    case other(KeyValue<String, ParameterValue?>)
 }
 
 // MARK: - Encoding

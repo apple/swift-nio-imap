@@ -14,31 +14,14 @@
 
 import struct NIO.ByteBuffer
 
-/// A simple key/value pair that matches a metadata entry (name) with a value.
-public struct EntryValue: Equatable {
-    /// The name of the metadata item.
-    public var name: ByteBuffer
-
-    /// The value of the metadata item.
-    public var value: MetadataValue
-
-    /// Create a new `EntryValue`.
-    /// - parameter name: The name of the metadata item.
-    /// - parameter value: The value of the metadata item.
-    public init(name: ByteBuffer, value: MetadataValue) {
-        self.name = name
-        self.value = value
-    }
-}
-
 extension EncodeBuffer {
-    @discardableResult mutating func writeEntry(_ entry: EntryValue) -> Int {
-        self.writeIMAPString(entry.name) +
+    @discardableResult mutating func writeEntry(_ entry: KeyValue<ByteBuffer, MetadataValue>) -> Int {
+        self.writeIMAPString(entry.key) +
             self.writeSpace() +
             self.writeMetadataValue(entry.value)
     }
 
-    @discardableResult mutating func writeEntryValues(_ array: [EntryValue]) -> Int {
+    @discardableResult mutating func writeEntryValues(_ array: [KeyValue<ByteBuffer, MetadataValue>]) -> Int {
         self.writeArray(array) { element, buffer in
             buffer.writeEntry(element)
         }

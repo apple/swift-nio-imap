@@ -26,7 +26,7 @@ extension MetadataResponse_Tests {
             (.list(list: ["a"], mailbox: .inbox), "METADATA \"INBOX\" \"a\"", #line),
             (.list(list: ["a", "b", "c"], mailbox: .inbox), "METADATA \"INBOX\" \"a\" \"b\" \"c\"", #line),
             (
-                .values(values: [.init(name: "a", value: .init(nil))], mailbox: .inbox),
+                .values(values: [.init(key: "a", value: .init(nil))], mailbox: .inbox),
                 "METADATA \"INBOX\" (\"a\" NIL)",
                 #line
             ),

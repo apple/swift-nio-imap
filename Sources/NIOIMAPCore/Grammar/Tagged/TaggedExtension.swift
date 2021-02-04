@@ -14,51 +14,16 @@
 
 import struct NIO.ByteBuffer
 
-/// A simple key/value pair where the value is optional.
-public struct Parameter: Equatable {
-    /// The key.
-    public var name: String
-
-    /// The value associated with the key.
-    public var value: ParameterValue?
-
-    /// Creates a new `Parameter`.
-    /// - parameter name: The key.
-    /// - parameter value: The value, defaults to `nil`.
-    public init(name: String, value: ParameterValue? = nil) {
-        self.name = name
-        self.value = value
-    }
-}
-
-/// Implemented as a catch-all to support types defined in future extensions.
-/// As as a key/value pair.
-public struct TaggedExtension: Equatable {
-    /// Some key.
-    public var label: String
-
-    /// The value to be associated with `key`.
-    public var value: ParameterValue
-
-    /// Creates a new `TaggedExtension`.
-    /// - parameter label: Some key.
-    /// - parameter value: The value to be associated with `key`.
-    public init(label: String, value: ParameterValue) {
-        self.label = label
-        self.value = value
-    }
-}
-
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeTaggedExtension(_ ext: TaggedExtension) -> Int {
-        self.writeString(ext.label) +
+    @discardableResult mutating func writeTaggedExtension(_ ext: KeyValue<String, ParameterValue>) -> Int {
+        self.writeString(ext.key) +
             self.writeSpace() +
             self.writeParameterValue(ext.value)
     }
 
-    @discardableResult mutating func writeParameters(_ params: [Parameter]) -> Int {
+    @discardableResult mutating func writeParameters(_ params: [KeyValue<String, ParameterValue?>]) -> Int {
         if params.isEmpty {
             return 0
         }
@@ -70,8 +35,8 @@ extension EncodeBuffer {
             }
     }
 
-    @discardableResult mutating func writeParameter(_ param: Parameter) -> Int {
-        self.writeString(param.name) +
+    @discardableResult mutating func writeParameter(_ param: KeyValue<String, ParameterValue?>) -> Int {
+        self.writeString(param.key) +
             self.writeIfExists(param.value) { (value) -> Int in
                 self.writeSpace() +
                     self.writeParameterValue(value)

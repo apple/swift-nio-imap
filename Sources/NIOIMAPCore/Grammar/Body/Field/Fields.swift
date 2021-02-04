@@ -18,7 +18,7 @@ extension BodyStructure {
     /// Contains fields that are common across bodies of all types (*basic*, *message*, and *text*)
     public struct Fields: Equatable {
         /// An array of *attribute/value* pairs
-        public var parameters: [BodyStructure.ParameterPair]
+        public var parameters: [KeyValue<String, String>]
 
         /// A string giving the content ID as defined in MIME-IMB
         public var id: String?
@@ -38,7 +38,7 @@ extension BodyStructure {
         /// - parameter description: A string giving the content description as defined in MIME-IMB
         /// - parameter encoding: The string giving the content transfer encoding as defined in MIME-IMB
         /// - parameter octetCount: The size of the body in octets. Note that this is in the encoded state, before any decoding takes place.
-        public init(parameters: [BodyStructure.ParameterPair], id: String?, contentDescription: String?, encoding: BodyStructure.Encoding, octetCount: Int) {
+        public init(parameters: [KeyValue<String, String>], id: String?, contentDescription: String?, encoding: BodyStructure.Encoding, octetCount: Int) {
             self.parameters = parameters
             self.id = id
             self.contentDescription = contentDescription

@@ -25,7 +25,7 @@ extension MetadataOption_Tests {
         let inputs: [(MetadataOption, String, UInt)] = [
             (.maxSize(123), "MAXSIZE 123", #line),
             (.scope(.one), "DEPTH 1", #line),
-            (.other(.init(name: "param")), "param", #line),
+            (.other(.init(key: "param", value: nil)), "param", #line),
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeMetadataOption($0) })
     }

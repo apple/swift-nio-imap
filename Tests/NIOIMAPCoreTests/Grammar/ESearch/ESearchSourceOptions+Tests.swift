@@ -30,13 +30,13 @@ extension ESearchSourceOptions_Tests {
             ),
             (
                 ESearchSourceOptions(sourceMailbox: [.inboxes],
-                                     scopeOptions: ESearchScopeOptions([.init(name: "test")]))!,
+                                     scopeOptions: ESearchScopeOptions([.init(key: "test", value: nil)]))!,
                 "IN (inboxes (test))",
                 #line
             ),
             (
                 ESearchSourceOptions(sourceMailbox: [.inboxes, .personal],
-                                     scopeOptions: ESearchScopeOptions([.init(name: "test")]))!,
+                                     scopeOptions: ESearchScopeOptions([.init(key: "test", value: nil)]))!,
                 "IN (inboxes personal (test))",
                 #line
             ),

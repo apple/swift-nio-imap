@@ -15,7 +15,7 @@
 import struct NIO.ByteBuffer
 
 /// A non-standard vendor-specific option.
-public struct OptionVendorTag: Equatable {
+public struct OptionVendorTag: Hashable {
     /// The vendor identifier token.
     public var token: String
 

@@ -24,8 +24,8 @@ extension FetchModifier_Tests {
     func testEncode() {
         let inputs: [(FetchModifier, String, UInt)] = [
             (.changedSince(.init(modificationSequence: 4)), "CHANGEDSINCE 4", #line),
-            (.other(.init(name: "test")), "test", #line),
-            (.other(.init(name: "test", value: .sequence([4]))), "test 4", #line),
+            (.other(.init(key: "test", value: nil)), "test", #line),
+            (.other(.init(key: "test", value: .sequence([4]))), "test 4", #line),
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeFetchModifier($0) })
     }

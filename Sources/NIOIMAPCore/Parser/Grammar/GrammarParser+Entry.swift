@@ -24,17 +24,17 @@ import struct NIO.ByteBuffer
 import struct NIO.ByteBufferView
 
 extension GrammarParser {
-    static func parseEntryValue(buffer: inout ByteBuffer, tracker: StackTracker) throws -> EntryValue {
-        try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> EntryValue in
+    static func parseEntryValue(buffer: inout ByteBuffer, tracker: StackTracker) throws -> KeyValue<ByteBuffer, MetadataValue> {
+        try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> KeyValue<ByteBuffer, MetadataValue> in
             let name = try self.parseAString(buffer: &buffer, tracker: tracker)
             try space(buffer: &buffer, tracker: tracker)
             let value = try self.parseMetadataValue(buffer: &buffer, tracker: tracker)
-            return .init(name: name, value: value)
+            return .init(key: name, value: value)
         }
     }
 
-    static func parseEntryValues(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [EntryValue] {
-        try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> [EntryValue] in
+    static func parseEntryValues(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [KeyValue<ByteBuffer, MetadataValue>] {
+        try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> [KeyValue<ByteBuffer, MetadataValue>] in
             try fixedString("(", buffer: &buffer, tracker: tracker)
             var array = [try self.parseEntryValue(buffer: &buffer, tracker: tracker)]
             try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker, parser: { buffer, tracker in

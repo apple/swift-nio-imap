@@ -14,29 +14,10 @@
 
 import struct NIO.ByteBuffer
 
-extension BodyStructure {
-    /// A convenience type to pair some key with a value
-    public struct ParameterPair: Equatable {
-        /// The key.
-        public var field: String
-
-        /// The value.
-        public var value: String
-
-        /// Creates a new key/value pair
-        /// - parameter field: The `String` key.
-        /// - parameter value: The `String` value.
-        public init(field: String, value: String) {
-            self.field = field
-            self.value = value
-        }
-    }
-}
-
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeBodyParameterPairs(_ params: [BodyStructure.ParameterPair]) -> Int {
+    @discardableResult mutating func writeBodyParameterPairs(_ params: [KeyValue<String, String>]) -> Int {
         guard params.count > 0 else {
             return self.writeNil()
         }
@@ -45,8 +26,8 @@ extension EncodeBuffer {
         }
     }
 
-    @discardableResult mutating func writeParameterPair(_ pair: BodyStructure.ParameterPair) -> Int {
-        self.writeIMAPString(pair.field) +
+    @discardableResult mutating func writeParameterPair(_ pair: KeyValue<String, String>) -> Int {
+        self.writeIMAPString(pair.key) +
             self.writeSpace() +
             self.writeIMAPString(pair.value)
     }

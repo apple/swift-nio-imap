@@ -97,11 +97,11 @@ extension GrammarParser_Commands_Tests {
             testFunction: GrammarParser.parseCommandAuth,
             validInputs: [
                 ("LSUB inbox someList", " ", .lsub(reference: .inbox, pattern: "someList"), #line),
-                ("CREATE inbox (something)", " ", .create(.inbox, [.labelled(.init(name: "something", value: nil))]), #line),
+                ("CREATE inbox (something)", " ", .create(.inbox, [.labelled(.init(key: "something", value: nil))]), #line),
                 ("NAMESPACE", " ", .namespace, #line),
                 ("GETMETADATA INBOX a", " ", .getMetadata(options: [], mailbox: .inbox, entries: ["a"]), #line),
                 ("GETMETADATA (MAXSIZE 123) INBOX (a b)", " ", .getMetadata(options: [.maxSize(123)], mailbox: .inbox, entries: ["a", "b"]), #line),
-                ("SETMETADATA INBOX (a NIL)", " ", .setMetadata(mailbox: .inbox, entries: [.init(name: "a", value: .init(nil))]), #line),
+                ("SETMETADATA INBOX (a NIL)", " ", .setMetadata(mailbox: .inbox, entries: [.init(key: "a", value: .init(nil))]), #line),
                 ("RESETKEY", "\r", .resetKey(mailbox: nil, mechanisms: []), #line),
                 ("RESETKEY INBOX", "\r", .resetKey(mailbox: .inbox, mechanisms: []), #line),
                 ("RESETKEY INBOX INTERNAL", "\r", .resetKey(mailbox: .inbox, mechanisms: [.internal]), #line),

@@ -15,7 +15,7 @@
 import struct NIO.ByteBuffer
 
 /// Specifies the type of `OptionExtension`
-public enum OptionExtensionKind: Equatable {
+public enum OptionExtensionKind: Hashable {
     /// A simple string-based value.
     case standard(String)
 
@@ -23,29 +23,12 @@ public enum OptionExtensionKind: Equatable {
     case vendor(OptionVendorTag)
 }
 
-/// A catch-all wrapper to support future extensions. Acts as a key/value pair.
-public struct OptionExtension: Equatable {
-    /// Some option kind.
-    public var kind: OptionExtensionKind
-
-    /// Some options value.
-    public var value: OptionValueComp?
-
-    /// Creates a new `OptionExtension`.
-    /// - parameter kind: The kind of option extension.
-    /// - parameter value: The value of the extension. Defaults to `nil`.
-    public init(kind: OptionExtensionKind, value: OptionValueComp? = nil) {
-        self.kind = kind
-        self.value = value
-    }
-}
-
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeOptionExtension(_ option: OptionExtension) -> Int {
+    @discardableResult mutating func writeOptionExtension(_ option: KeyValue<OptionExtensionKind, OptionValueComp?>) -> Int {
         var size = 0
-        switch option.kind {
+        switch option.key {
         case .standard(let atom):
             size += self.writeString(atom)
         case .vendor(let tag):

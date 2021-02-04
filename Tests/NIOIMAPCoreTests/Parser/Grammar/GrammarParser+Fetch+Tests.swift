@@ -30,7 +30,7 @@ extension GrammarParser_Fetch_Tests {
                 ("FETCH 3:5 FAST", "\r", .fetch([3 ... 5], .fast, []), #line),
                 ("FETCH 4:6 ENVELOPE", "\r", .fetch([4 ... 6], [.envelope], []), #line),
                 ("FETCH 5:7 (ENVELOPE FLAGS)", "\r", .fetch([5 ... 7], [.envelope, .flags], []), #line),
-                ("FETCH 3:5 FAST (name)", "\r", .fetch([3 ... 5], .fast, [.init(name: "name", value: nil)]), #line),
+                ("FETCH 3:5 FAST (name)", "\r", .fetch([3 ... 5], .fast, [.init(key: "name", value: nil)]), #line),
                 ("FETCH 1 BODY[TEXT]", "\r", .fetch([1], [.bodySection(peek: false, .init(kind: .text), nil)], []), #line),
             ],
             parserErrorInputs: [],
@@ -117,8 +117,8 @@ extension GrammarParser_Fetch_Tests {
             testFunction: GrammarParser.parseFetchModifier,
             validInputs: [
                 ("CHANGEDSINCE 2", " ", .changedSince(.init(modificationSequence: 2)), #line),
-                ("test", "\r", .other(.init(name: "test")), #line),
-                ("test 1", " ", .other(.init(name: "test", value: .sequence([1]))), #line),
+                ("test", "\r", .other(.init(key: "test", value: nil)), #line),
+                ("test 1", " ", .other(.init(key: "test", value: .sequence([1]))), #line),
             ],
             parserErrorInputs: [
                 ("1", " ", #line),

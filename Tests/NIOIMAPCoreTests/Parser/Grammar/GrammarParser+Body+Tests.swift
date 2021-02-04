@@ -45,7 +45,7 @@ extension GrammarParser_Body_Tests {
         TestUtilities.withBuffer(#"("astring" ("f1" "v1"))"#) { (buffer) in
             let dsp = try GrammarParser.parseBodyFieldDsp(buffer: &buffer, tracker: .testTracker)
             XCTAssertNotNil(dsp)
-            XCTAssertEqual(dsp, BodyStructure.Disposition(kind: "astring", parameters: [.init(field: "f1", value: "v1")]))
+            XCTAssertEqual(dsp, BodyStructure.Disposition(kind: "astring", parameters: [.init(key: "f1", value: "v1")]))
         }
     }
 
@@ -109,8 +109,8 @@ extension GrammarParser_Body_Tests {
             testFunction: GrammarParser.parseBodyFieldParam,
             validInputs: [
                 (#"NIL"#, " ", [], #line),
-                (#"("f1" "v1")"#, " ", [.init(field: "f1", value: "v1")], #line),
-                (#"("f1" "v1" "f2" "v2")"#, " ", [.init(field: "f1", value: "v1"), .init(field: "f2", value: "v2")], #line),
+                (#"("f1" "v1")"#, " ", [.init(key: "f1", value: "v1")], #line),
+                (#"("f1" "v1" "f2" "v2")"#, " ", [.init(key: "f1", value: "v1"), .init(key: "f2", value: "v2")], #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
@@ -131,7 +131,7 @@ extension GrammarParser_Body_Tests {
     func testParseBodyFields_valid() {
         TestUtilities.withBuffer(#"("f1" "v1") "id" "desc" "8BIT" 1234"#, terminator: " ") { (buffer) in
             let result = try GrammarParser.parseBodyFields(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(result.parameters, [.init(field: "f1", value: "v1")])
+            XCTAssertEqual(result.parameters, [.init(key: "f1", value: "v1")])
             XCTAssertEqual(result.id, "id")
             XCTAssertEqual(result.contentDescription, "desc")
             XCTAssertEqual(result.encoding, .eightBit)
@@ -170,7 +170,7 @@ extension GrammarParser_Body_Tests {
                 "\r\n",
                 .init(
                     type: .basic(.init(kind: .video, subtype: .related)),
-                    fields: .init(parameters: [.init(field: "f1", value: "v1")], id: nil, contentDescription: nil, encoding: .eightBit, octetCount: 3),
+                    fields: .init(parameters: [.init(key: "f1", value: "v1")], id: nil, contentDescription: nil, encoding: .eightBit, octetCount: 3),
                     extension: nil
                 ),
                 #line

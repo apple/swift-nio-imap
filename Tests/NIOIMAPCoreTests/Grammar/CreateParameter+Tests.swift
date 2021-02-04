@@ -23,8 +23,8 @@ class CreateParameter_Tests: EncodeTestClass {}
 extension CreateParameter_Tests {
     func testEncode() {
         let inputs: [(CreateParameter, String, UInt)] = [
-            (.labelled(.init(name: "name")), "name", #line),
-            (.labelled(.init(name: "name", value: .sequence([1]))), "name 1", #line),
+            (.labelled(.init(key: "name", value: nil)), "name", #line),
+            (.labelled(.init(key: "name", value: .sequence([1]))), "name 1", #line),
             (.attributes([]), "USE ()", #line),
             (.attributes([.all]), "USE (\\all)", #line),
             (.attributes([.all, .flagged]), "USE (\\all \\flagged)", #line),

@@ -248,7 +248,7 @@ extension ParserUnitTests {
             let c2_5 = try parser.parseCommandStream(buffer: &buffer)
             XCTAssertEqual(buffer.readableBytes, 0)
             XCTAssertEqual(c2_1, PartialCommandStream(.append(.start(tag: "A003", appendingTo: MailboxName("Drafts")))))
-            XCTAssertEqual(c2_2, PartialCommandStream(.append(.beginCatenate(options: .init(flagList: [.seen, .draft, .keyword(.mdnSent)], extensions: [TaggedExtension(label: "EXTENSION", value: .comp(["extdata"]))])))))
+            XCTAssertEqual(c2_2, PartialCommandStream(.append(.beginCatenate(options: .init(flagList: [.seen, .draft, .keyword(.mdnSent)], extensions: [KeyValue<String, ParameterValue>(key: "EXTENSION", value: .comp(["extdata"]))])))))
             XCTAssertEqual(c2_3, PartialCommandStream(.append(.catenateURL("/Drafts;UIDVALIDITY=385759045/;UID=20/;section=HEADER"))))
             XCTAssertEqual(c2_4, PartialCommandStream(.append(.endCatenate)))
             XCTAssertEqual(c2_5, PartialCommandStream(.append(.finish)))
@@ -269,7 +269,7 @@ extension ParserUnitTests {
             let c2_5 = try parser.parseCommandStream(buffer: &buffer)
             XCTAssertEqual(buffer.readableBytes, 0)
             XCTAssertEqual(c2_1, PartialCommandStream(.append(.start(tag: "A003", appendingTo: MailboxName("Drafts")))))
-            XCTAssertEqual(c2_2, PartialCommandStream(.append(.beginCatenate(options: .init(flagList: [.seen, .draft, .keyword(.mdnSent)], extensions: [TaggedExtension(label: "EXTENSION", value: .comp(["extdata"]))])))))
+            XCTAssertEqual(c2_2, PartialCommandStream(.append(.beginCatenate(options: .init(flagList: [.seen, .draft, .keyword(.mdnSent)], extensions: [KeyValue<String, ParameterValue>(key: "EXTENSION", value: .comp(["extdata"]))])))))
             XCTAssertEqual(c2_3, PartialCommandStream(.append(.catenateURL("/Drafts;UIDVALIDITY=385759045/;UID=20/;section=HEADER"))))
             XCTAssertEqual(c2_4, PartialCommandStream(.append(.endCatenate)))
             XCTAssertEqual(c2_5, PartialCommandStream(.append(.finish)))
@@ -338,7 +338,7 @@ extension ParserUnitTests {
             validInputs: [
                 ("MAXSIZE 123", "\r", .maxSize(123), #line),
                 ("DEPTH 1", "\r", .scope(.one), #line),
-                ("param", "\r", .other(.init(name: "param")), #line),
+                ("param", "\r", .other(.init(key: "param", value: nil)), #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
@@ -371,7 +371,7 @@ extension ParserUnitTests {
             validInputs: [
                 ("METADATA INBOX \"a\"", "\r", .list(list: ["a"], mailbox: .inbox), #line),
                 ("METADATA INBOX \"a\" \"b\" \"c\"", "\r", .list(list: ["a", "b", "c"], mailbox: .inbox), #line),
-                ("METADATA INBOX (\"a\" NIL)", "\r", .values(values: [.init(name: "a", value: .init(nil))], mailbox: .inbox), #line),
+                ("METADATA INBOX (\"a\" NIL)", "\r", .values(values: [.init(key: "a", value: .init(nil))], mailbox: .inbox), #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
@@ -638,13 +638,13 @@ extension ParserUnitTests {
             testFunction: GrammarParser.parseCreate,
             validInputs: [
                 ("CREATE inbox", "\r", .create(.inbox, []), #line),
-                ("CREATE inbox (some)", "\r", .create(.inbox, [.labelled(.init(name: "some", value: nil))]), #line),
+                ("CREATE inbox (some)", "\r", .create(.inbox, [.labelled(.init(key: "some", value: nil))]), #line),
                 ("CREATE inbox (USE (\\All))", "\r", .create(.inbox, [.attributes([.all])]), #line),
                 ("CREATE inbox (USE (\\All \\Flagged))", "\r", .create(.inbox, [.attributes([.all, .flagged])]), #line),
                 (
                     "CREATE inbox (USE (\\All \\Flagged) some1 2 USE (\\Sent))",
                     "\r",
-                    .create(.inbox, [.attributes([.all, .flagged]), .labelled(.init(name: "some1", value: .sequence([2]))), .attributes([.sent])]),
+                    .create(.inbox, [.attributes([.all, .flagged]), .labelled(.init(key: "some1", value: .sequence([2]))), .attributes([.sent])]),
                     #line
                 ),
             ],
@@ -671,8 +671,8 @@ extension ParserUnitTests {
         self.iterateTests(
             testFunction: GrammarParser.parseCreateParameter,
             validInputs: [
-                ("param", "\r", .labelled(.init(name: "param")), #line),
-                ("param 1", "\r", .labelled(.init(name: "param", value: .sequence([1]))), #line),
+                ("param", "\r", .labelled(.init(key: "param", value: nil)), #line),
+                ("param 1", "\r", .labelled(.init(key: "param", value: .sequence([1]))), #line),
                 ("USE (\\All)", "\r", .attributes([.all]), #line),
                 ("USE (\\All \\Sent \\Drafts)", "\r", .attributes([.all, .sent, .drafts]), #line),
             ],
@@ -694,7 +694,7 @@ extension ParserUnitTests {
         self.iterateTests(
             testFunction: GrammarParser.parseCreateParameters,
             validInputs: [
-                (" (param1 param2)", "\r", [.labelled(.init(name: "param1")), .labelled(.init(name: "param2"))], #line),
+                (" (param1 param2)", "\r", [.labelled(.init(key: "param1", value: nil)), .labelled(.init(key: "param2", value: nil))], #line),
             ],
             parserErrorInputs: [
                 (" (param1", "\r", #line),
@@ -1213,7 +1213,7 @@ extension ParserUnitTests {
             validInputs: [
                 ("EXAMINE inbox", "\r", .examine(.inbox, []), #line),
                 ("examine inbox", "\r", .examine(.inbox, []), #line),
-                ("EXAMINE inbox (number)", "\r", .examine(.inbox, [.init(name: "number", value: nil)]), #line),
+                ("EXAMINE inbox (number)", "\r", .examine(.inbox, [.init(key: "number", value: nil)]), #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
@@ -2288,7 +2288,7 @@ extension ParserUnitTests {
             testFunction: GrammarParser.parseSelect,
             validInputs: [
                 ("SELECT inbox", "\r", .select(.inbox, []), #line),
-                ("SELECT inbox (some1)", "\r", .select(.inbox, [.basic(.init(name: "some1", value: nil))]), #line),
+                ("SELECT inbox (some1)", "\r", .select(.inbox, [.basic(.init(key: "some1", value: nil))]), #line),
             ],
             parserErrorInputs: [
                 ("SELECT ", "\r", #line),
@@ -2307,7 +2307,7 @@ extension ParserUnitTests {
         self.iterateTests(
             testFunction: GrammarParser.parseSelectParameter,
             validInputs: [
-                ("test 1", "\r", .basic(.init(name: "test", value: .sequence([1]))), #line),
+                ("test 1", "\r", .basic(.init(key: "test", value: .sequence([1]))), #line),
                 ("QRESYNC (1 1)", "\r", .qresync(.init(uidValiditiy: 1, modificationSequenceValue: 1, knownUids: nil, sequenceMatchData: nil)), #line),
                 ("QRESYNC (1 1 1:2)", "\r", .qresync(.init(uidValiditiy: 1, modificationSequenceValue: 1, knownUids: [1 ... 2], sequenceMatchData: nil)), #line),
                 ("QRESYNC (1 1 1:2 (* *))", "\r", .qresync(.init(uidValiditiy: 1, modificationSequenceValue: 1, knownUids: [1 ... 2], sequenceMatchData: .init(knownSequenceSet: .all, knownUidSet: .all))), #line),
@@ -2405,7 +2405,7 @@ extension ParserUnitTests {
             testFunction: GrammarParser.parseStore,
             validInputs: [
                 ("STORE 1 +FLAGS \\answered", "\r", .store([1], [], .add(silent: false, list: [.answered])), #line),
-                ("STORE 1 (label) -FLAGS \\seen", "\r", .store([1], [.other(.init(name: "label", value: nil))], .remove(silent: false, list: [.seen])), #line),
+                ("STORE 1 (label) -FLAGS \\seen", "\r", .store([1], [.other(.init(key: "label", value: nil))], .remove(silent: false, list: [.seen])), #line),
             ],
             parserErrorInputs: [
                 ("STORE +FLAGS \\answered", "\r", #line),
@@ -2426,8 +2426,8 @@ extension ParserUnitTests {
             testFunction: GrammarParser.parseStoreModifier,
             validInputs: [
                 ("UNCHANGEDSINCE 2", " ", .unchangedSince(.init(modificationSequence: 2)), #line),
-                ("test", "\r", .other(.init(name: "test")), #line),
-                ("test 1", " ", .other(.init(name: "test", value: .sequence([1]))), #line),
+                ("test", "\r", .other(.init(key: "test", value: nil)), #line),
+                ("test 1", " ", .other(.init(key: "test", value: .sequence([1]))), #line),
             ],
             parserErrorInputs: [
                 ("1", " ", #line),
@@ -2495,7 +2495,7 @@ extension ParserUnitTests {
             validInputs: [
                 ("RENAME box1 box2", "\r", .rename(from: .init("box1"), to: .init("box2"), params: []), #line),
                 ("rename box3 box4", "\r", .rename(from: .init("box3"), to: .init("box4"), params: []), #line),
-                ("RENAME box5 box6 (test)", "\r", .rename(from: .init("box5"), to: .init("box6"), params: [.init(name: "test", value: nil)]), #line),
+                ("RENAME box5 box6 (test)", "\r", .rename(from: .init("box5"), to: .init("box6"), params: [.init(key: "test", value: nil)]), #line),
             ],
             parserErrorInputs: [
                 ("RENAME box1 ", "\r", #line),
@@ -2581,7 +2581,7 @@ extension ParserUnitTests {
         self.iterateTests(
             testFunction: GrammarParser.parseTaggedExtension,
             validInputs: [
-                ("label 1", "\r\n", .init(label: "label", value: .sequence([1])), #line),
+                ("label 1", "\r\n", .init(key: "label", value: .sequence([1])), #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
@@ -3075,17 +3075,17 @@ extension ParserUnitTests {
             validInputs: [
                 (
                     "name", "\r",
-                    ESearchScopeOptions([.init(name: "name")])!,
+                    ESearchScopeOptions([.init(key: "name", value: nil)])!,
                     #line
                 ),
                 (
                     "name $", "\r",
-                    ESearchScopeOptions([.init(name: "name", value: .sequence(.lastCommand))]),
+                    ESearchScopeOptions([.init(key: "name", value: .sequence(.lastCommand))]),
                     #line
                 ),
                 (
                     "name name2", "\r",
-                    ESearchScopeOptions([.init(name: "name"), .init(name: "name2")])!,
+                    ESearchScopeOptions([.init(key: "name", value: nil), .init(key: "name2", value: nil)])!,
                     #line
                 ),
             ],
@@ -3111,7 +3111,7 @@ extension ParserUnitTests {
                 (
                     "IN (inboxes (name))", "\r",
                     ESearchSourceOptions(sourceMailbox: [.inboxes],
-                                         scopeOptions: ESearchScopeOptions([.init(name: "name")])!),
+                                         scopeOptions: ESearchScopeOptions([.init(key: "name", value: nil)])!),
                     #line
                 ),
             ],

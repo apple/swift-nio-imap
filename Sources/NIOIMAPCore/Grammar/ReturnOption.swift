@@ -29,7 +29,7 @@ public enum ReturnOption: Equatable {
     case statusOption([MailboxAttribute])
 
     /// Designed as a catch-all to support return options defined in future extensions
-    case optionExtension(OptionExtension)
+    case optionExtension(KeyValue<OptionExtensionKind, OptionValueComp?>)
 
     /// The LIST command MUST return only those mailboxes that have a
     /// special-use attribute set.
