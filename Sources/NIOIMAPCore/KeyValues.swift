@@ -38,7 +38,7 @@ public struct KeyValues<Key: Hashable, Value: Hashable>: Hashable {
     public mutating func append(_ pair: (Key, Value)) {
         self._backing.append(KeyValue(key: pair.0, value: pair.1))
     }
-    
+
     /// Appends an element to the collection
     @inlinable
     public mutating func append(_ pair: KeyValue<Key, Value>) {

@@ -184,7 +184,7 @@ extension EncodeBuffer {
                 let (i, element) = row
                 return
                     size +
-                writer(.init(key: element.0, value: element.1), &self) +
+                    writer(.init(key: element.0, value: element.1), &self) +
                     self.write(if: i < values.count - 1) { () -> Int in
                         self.writeString(separator)
                     }

@@ -28,7 +28,7 @@ extension Namespace_Tests {
             (
                 [
                     .init(string: "str1", char: nil, responseExtensions: [:]),
-                        .init(string: "str2", char: nil, responseExtensions: [:]),
+                    .init(string: "str2", char: nil, responseExtensions: [:]),
                 ],
                 "((\"str1\" NIL)(\"str2\" NIL))", #line
             ),

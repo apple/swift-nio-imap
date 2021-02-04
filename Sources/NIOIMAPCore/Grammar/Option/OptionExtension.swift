@@ -41,7 +41,7 @@ extension EncodeBuffer {
         }
         return size
     }
-    
+
     @discardableResult mutating func writeOptionVendorTag(_ tag: KeyValue<String, String>) -> Int {
         self.writeString(tag.key) +
             self.writeString("-") +

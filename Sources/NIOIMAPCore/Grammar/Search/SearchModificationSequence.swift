@@ -36,9 +36,9 @@ extension EncodeBuffer {
         self.writeString("MODSEQ") +
             self.writeKeyValues(data.extensions, separator: "", parenthesis: false) { (element, self) -> Int in
                 self.writeSpace() +
-                self.writeEntryFlagName(element.key) +
+                    self.writeEntryFlagName(element.key) +
                     self.writeSpace() +
-                self.writeEntryKindRequest(element.value)
+                    self.writeEntryKindRequest(element.value)
             } +
             self.writeSpace() +
             self.writeModificationSequenceValue(data.sequenceValue)

@@ -126,7 +126,7 @@ extension B2MV_Tests {
 
             ("tag APPEND box (\\Seen) {1+}\r\na", [
                 .append(.start(tag: "tag", appendingTo: .init("box"))),
-                    .append(.beginMessage(message: .init(options: .init(flagList: [.seen], extensions: [:]), data: .init(byteCount: 1)))),
+                .append(.beginMessage(message: .init(options: .init(flagList: [.seen], extensions: [:]), data: .init(byteCount: 1)))),
                 .append(.messageBytes("a")),
                 .append(.endMessage),
                 .append(.finish),

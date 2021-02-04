@@ -133,7 +133,7 @@ extension ParserLibrary {
             }
         }
     }
-    
+
     static func parseZeroOrMore<K, V>(buffer: inout ByteBuffer, into keyValues: inout KeyValues<K, V>, tracker: StackTracker, parser: SubParser<KeyValue<K, V>>) throws {
         try GrammarParser.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             while let next = try GrammarParser.optional(buffer: &buffer, tracker: tracker, parser: parser) {

@@ -72,13 +72,13 @@ extension GrammarParser_Append_Tests {
                 (
                     " (\\Answered) {123}\r\n",
                     "test",
-                        .init(options: .init(flagList: [.answered], internalDate: nil, extensions: [:]), data: .init(byteCount: 123)),
+                    .init(options: .init(flagList: [.answered], internalDate: nil, extensions: [:]), data: .init(byteCount: 123)),
                     #line
                 ),
                 (
                     " (\\Answered) ~{456}\r\n",
                     "test",
-                        .init(options: .init(flagList: [.answered], internalDate: nil, extensions: [:]), data: .init(byteCount: 456, withoutContentTransferEncoding: true)),
+                    .init(options: .init(flagList: [.answered], internalDate: nil, extensions: [:]), data: .init(byteCount: 456, withoutContentTransferEncoding: true)),
                     #line
                 ),
             ],
@@ -103,7 +103,7 @@ extension GrammarParser_Append_Tests {
                 (
                     " \"25-jun-1994 01:02:03 +0000\"",
                     "\r",
-                        .init(flagList: [], internalDate: date, extensions: [:]),
+                    .init(flagList: [], internalDate: date, extensions: [:]),
                     #line
                 ),
                 (
