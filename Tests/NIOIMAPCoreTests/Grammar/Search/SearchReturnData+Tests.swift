@@ -28,7 +28,7 @@ extension SearchReturnData_Tests {
             (.all(SequenceSet(1 ... 3)), "ALL 1:3", #line),
             (.count(1), "COUNT 1", #line),
             (.modificationSequence(1), "MODSEQ 1", #line),
-            (.dataExtension(.init(modifierName: "modifier", returnValue: .sequence([3]))), "modifier 3", #line),
+            (.dataExtension(.init(key: "modifier", value: .sequence([3]))), "modifier 3", #line),
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeSearchReturnData($0) })
     }

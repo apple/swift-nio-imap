@@ -167,7 +167,7 @@ extension GrammarParser_Search_Tests {
         self.iterateTests(
             testFunction: GrammarParser.parseSearchReturnDataExtension,
             validInputs: [
-                ("modifier 64", "\r", .init(modifierName: "modifier", returnValue: .sequence([64])), #line),
+                ("modifier 64", "\r", .init(key: "modifier", value: .sequence([64])), #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
@@ -233,7 +233,7 @@ extension GrammarParser_Search_Tests {
                 ("ALL 3,4,5", "\r", .all([3, 4, 5]), #line),
                 ("COUNT 4", "\r", .count(4), #line),
                 ("MODSEQ 4", "\r", .modificationSequence(4), #line),
-                ("modifier 5", "\r", .dataExtension(.init(modifierName: "modifier", returnValue: .sequence([5]))), #line),
+                ("modifier 5", "\r", .dataExtension(.init(key: "modifier", value: .sequence([5]))), #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []

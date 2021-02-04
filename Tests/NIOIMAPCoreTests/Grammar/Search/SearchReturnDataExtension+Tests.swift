@@ -22,8 +22,8 @@ class SearchReturnDataExtension_Tests: EncodeTestClass {}
 
 extension SearchReturnDataExtension_Tests {
     func testEncode() {
-        let inputs: [(SearchReturnDataExtension, String, UInt)] = [
-            (.init(modifierName: "modifier", returnValue: .sequence([123])), "modifier 123", #line),
+        let inputs: [(KeyValue<String, ParameterValue>, String, UInt)] = [
+            (.init(key: "modifier", value: .sequence([123])), "modifier 123", #line),
         ]
 
         for (test, expectedString, line) in inputs {

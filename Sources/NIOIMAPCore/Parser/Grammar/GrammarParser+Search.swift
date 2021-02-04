@@ -388,12 +388,12 @@ extension GrammarParser {
     }
 
     // search-ret-data-ext = search-modifier-name SP search-return-value
-    static func parseSearchReturnDataExtension(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SearchReturnDataExtension {
-        try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> SearchReturnDataExtension in
+    static func parseSearchReturnDataExtension(buffer: inout ByteBuffer, tracker: StackTracker) throws -> KeyValue<String, ParameterValue> {
+        try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> KeyValue<String, ParameterValue> in
             let modifier = try self.parseParameterName(buffer: &buffer, tracker: tracker)
             try space(buffer: &buffer, tracker: tracker)
             let value = try self.parseParameterValue(buffer: &buffer, tracker: tracker)
-            return SearchReturnDataExtension(modifierName: modifier, returnValue: value)
+            return .init(key: modifier, value: value)
         }
     }
 
