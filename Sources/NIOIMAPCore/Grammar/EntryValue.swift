@@ -21,8 +21,8 @@ extension EncodeBuffer {
             self.writeMetadataValue(entry.value)
     }
 
-    @discardableResult mutating func writeEntryValues(_ array: [KeyValue<ByteBuffer, MetadataValue>]) -> Int {
-        self.writeArray(array) { element, buffer in
+    @discardableResult mutating func writeEntryValues(_ array: KeyValues<ByteBuffer, MetadataValue>) -> Int {
+        self.writeKeyValues(array) { element, buffer in
             buffer.writeEntry(element)
         }
     }

@@ -33,7 +33,7 @@ public enum SearchReturnOption: Equatable {
     case save
 
     /// Implemented as a catch-all to support future extensions.
-    case optionExtension(SearchReturnOptionExtension)
+    case optionExtension(KeyValue<String, ParameterValue?>)
 }
 
 // MARK: - Encoding

@@ -23,13 +23,13 @@ public struct MailboxInfo: Equatable {
     public var path: MailboxPath
 
     /// A catch-all to support any attributes added in future extensions.
-    public var extensions: [ListExtendedItem]
+    public var extensions: KeyValues<ByteBuffer, ParameterValue>
 
     /// Creates a new `MailboxInfo` attribute collection.
     /// - parameter attributes: An array of mailbox attributes.
     /// - parameter path: The mailbox path.
     /// - parameter extensions: A catch-all to support any attributes added in future extensions.
-    public init(attributes: [Attribute] = [], path: MailboxPath, extensions: [ListExtendedItem]) {
+    public init(attributes: [Attribute] = [], path: MailboxPath, extensions: KeyValues<ByteBuffer, ParameterValue>) {
         self.attributes = attributes
         self.path = path
         self.extensions = extensions

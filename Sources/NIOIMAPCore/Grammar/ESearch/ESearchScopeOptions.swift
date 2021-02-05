@@ -18,12 +18,12 @@ import struct NIO.ByteBuffer
 /// a catch-all for future extensions, as no options are currently explicitly defined.
 public struct ESearchScopeOptions: Equatable {
     /// An array of Scope Option key/value pairs. Note that the array must not be empty.
-    public private(set) var content: [KeyValue<String, ParameterValue?>]
+    public private(set) var content: KeyValues<String, ParameterValue?>
 
     /// Creates a new `ESearchScopeOptions` from a non-empty array of options.
     ///  - parameter options: One or more options.
     /// - returns: A `nil` if `options` is empty, otherwise a new `ESearchScopeOptions`.
-    init?(_ options: [KeyValue<String, ParameterValue?>]) {
+    init?(_ options: KeyValues<String, ParameterValue?>) {
         guard options.count >= 1 else {
             return nil
         }
@@ -35,7 +35,7 @@ public struct ESearchScopeOptions: Equatable {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeESearchScopeOptions(_ options: ESearchScopeOptions) -> Int {
-        self.writeArray(options.content, parenthesis: false) { (option, buffer) -> Int in
+        self.writeKeyValues(options.content, parenthesis: false) { (option, buffer) -> Int in
             buffer.writeParameter(option)
         }
     }

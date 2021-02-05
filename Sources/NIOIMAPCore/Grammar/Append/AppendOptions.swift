@@ -23,13 +23,13 @@ public struct AppendOptions: Equatable {
     public var internalDate: InternalDate?
 
     /// Any additional pieces of information to be associated with the message. Implemented as a "catch-all" to support future extensions.
-    public var extensions: [KeyValue<String, ParameterValue>]
+    public var extensions: KeyValues<String, ParameterValue>
 
     /// Creates a new `AppendOptions`
     /// - parameter flagList: Flags that will be added to the message.
     /// - parameter internalDate: An optional date to be associated with the message, typically representing the date of delivery. Defaults to `nil`.
     /// - parameter extensions: Any additional pieces of information to be associated with the message. Implemented as a "catch-all" to support future extensions.
-    public init(flagList: [Flag], internalDate: InternalDate? = nil, extensions: [KeyValue<String, ParameterValue>]) {
+    public init(flagList: [Flag], internalDate: InternalDate? = nil, extensions: KeyValues<String, ParameterValue>) {
         self.flagList = flagList
         self.internalDate = internalDate
         self.extensions = extensions
@@ -47,7 +47,7 @@ extension EncodeBuffer {
                 self.writeSpace() +
                     self.writeInternalDate(internalDate)
             } +
-            self.writeArray(options.extensions, prefix: " ", parenthesis: false) { (ext, self) -> Int in
+            self.writeKeyValues(options.extensions, prefix: " ", parenthesis: false) { (ext, self) -> Int in
                 self.writeTaggedExtension(ext)
             }
     }

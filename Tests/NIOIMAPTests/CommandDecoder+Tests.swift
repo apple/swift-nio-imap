@@ -31,7 +31,7 @@ extension CommandDecoder_Tests {
 
         let output: [(CommandStream, UInt)] = [
             (.append(.start(tag: "tag", appendingTo: .init("box"))), #line),
-            (.append(.beginMessage(message: .init(options: .init(flagList: [.seen], extensions: []), data: .init(byteCount: 1)))), #line),
+            (.append(.beginMessage(message: .init(options: .init(flagList: [.seen], extensions: [:]), data: .init(byteCount: 1)))), #line),
             (.append(.messageBytes("a")), #line),
             (.append(.endMessage), #line),
             (.append(.finish), #line),

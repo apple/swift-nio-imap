@@ -20,7 +20,7 @@ public enum OptionExtensionKind: Hashable {
     case standard(String)
 
     /// Use a `OptionVendorTag` as the extension kind.
-    case vendor(OptionVendorTag)
+    case vendor(KeyValue<String, String>)
 }
 
 // MARK: - Encoding
@@ -40,5 +40,11 @@ extension EncodeBuffer {
             size += self.writeOptionValue(value)
         }
         return size
+    }
+
+    @discardableResult mutating func writeOptionVendorTag(_ tag: KeyValue<String, String>) -> Int {
+        self.writeString(tag.key) +
+            self.writeString("-") +
+            self.writeString(tag.value)
     }
 }

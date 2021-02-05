@@ -33,16 +33,17 @@ extension GrammarParser {
         }
     }
 
-    static func parseEntryValues(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [KeyValue<ByteBuffer, MetadataValue>] {
-        try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> [KeyValue<ByteBuffer, MetadataValue>] in
+    static func parseEntryValues(buffer: inout ByteBuffer, tracker: StackTracker) throws -> KeyValues<ByteBuffer, MetadataValue> {
+        try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> KeyValues<ByteBuffer, MetadataValue> in
             try fixedString("(", buffer: &buffer, tracker: tracker)
-            var array = [try self.parseEntryValue(buffer: &buffer, tracker: tracker)]
-            try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker, parser: { buffer, tracker in
+            var kvs = KeyValues<ByteBuffer, MetadataValue>()
+            kvs.append(try self.parseEntryValue(buffer: &buffer, tracker: tracker))
+            try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &kvs, tracker: tracker, parser: { buffer, tracker -> KeyValue<ByteBuffer, MetadataValue> in
                 try space(buffer: &buffer, tracker: tracker)
                 return try self.parseEntryValue(buffer: &buffer, tracker: tracker)
             })
             try fixedString(")", buffer: &buffer, tracker: tracker)
-            return array
+            return kvs
         }
     }
 

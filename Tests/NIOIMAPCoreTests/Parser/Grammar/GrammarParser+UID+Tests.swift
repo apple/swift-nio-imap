@@ -27,9 +27,9 @@ extension GrammarParser_UID_Tests {
             validInputs: [
                 ("UID EXPUNGE 1", "\r\n", .uidExpunge([1]), #line),
                 ("UID COPY 1 Inbox", "\r\n", .uidCopy([1], .inbox), #line),
-                ("UID FETCH 1 FLAGS", "\r\n", .uidFetch([1], [.flags], []), #line),
+                ("UID FETCH 1 FLAGS", "\r\n", .uidFetch([1], [.flags], [:]), #line),
                 ("UID SEARCH CHARSET UTF8 ALL", "\r\n", .uidSearch(key: .all, charset: "UTF8"), #line),
-                ("UID STORE 1 +FLAGS (Test)", "\r\n", .uidStore([1], [], .add(silent: false, list: [.keyword(.init("Test"))])), #line),
+                ("UID STORE 1 +FLAGS (Test)", "\r\n", .uidStore([1], [:], .add(silent: false, list: [.keyword(.init("Test"))])), #line),
                 ("UID COPY * Inbox", "\r\n", .uidCopy([UIDRange(.max)], .inbox), #line),
             ],
             parserErrorInputs: [

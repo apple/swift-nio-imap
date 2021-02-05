@@ -14,38 +14,17 @@
 
 import struct NIO.ByteBuffer
 
-/// Designed as a catch-all to support namespace information contained in future IMAP extensions. Pairs a string key with an array of data.
-public struct NamespaceResponseExtension: Equatable {
-    /// A key
-    public var string: ByteBuffer
-
-    /// An array of data
-    public var array: [ByteBuffer]
-
-    /// Creates a new `NamespaceResponseExtension`.
-    /// - parameter string: The `String` to use as a key.
-    /// - parameter array: An associated array of data.
-    public init(string: ByteBuffer, array: [ByteBuffer]) {
-        self.string = string
-        self.array = array
-    }
-}
-
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeNamespaceResponseExtensions(_ extensions: [NamespaceResponseExtension]) -> Int {
+    @discardableResult mutating func writeNamespaceResponseExtensions(_ extensions: KeyValues<ByteBuffer, [ByteBuffer]>) -> Int {
         extensions.reduce(into: 0) { (res, ext) in
-            res += self.writeNamespaceResponseExtension(ext)
+            res += self.writeSpace() +
+                self.writeIMAPString(ext.0) +
+                self.writeSpace() +
+                self.writeArray(ext.1) { (string, self) in
+                    self.writeIMAPString(string)
+                }
         }
-    }
-
-    @discardableResult mutating func writeNamespaceResponseExtension(_ response: NamespaceResponseExtension) -> Int {
-        self.writeSpace() +
-            self.writeIMAPString(response.string) +
-            self.writeSpace() +
-            self.writeArray(response.array) { (string, self) in
-                self.writeIMAPString(string)
-            }
     }
 }

@@ -102,11 +102,12 @@ extension GrammarParser {
                 try space(buffer: &buffer, tracker: tracker)
                 return try self.parseInternalDate(buffer: &buffer, tracker: tracker)
             }
-            let array = try ParserLibrary.parseZeroOrMore(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> KeyValue<String, ParameterValue> in
+            var kvs = KeyValues<String, ParameterValue>()
+            try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &kvs, tracker: tracker) { (buffer, tracker) -> KeyValue<String, ParameterValue> in
                 try space(buffer: &buffer, tracker: tracker)
                 return try self.parseTaggedExtension(buffer: &buffer, tracker: tracker)
             }
-            return .init(flagList: flagList, internalDate: internalDate, extensions: array)
+            return .init(flagList: flagList, internalDate: internalDate, extensions: kvs)
         }
     }
 

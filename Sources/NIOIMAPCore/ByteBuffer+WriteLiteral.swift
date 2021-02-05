@@ -170,7 +170,7 @@ extension EncodeBuffer {
     ///     - parenthesis: Writes `(` immediately before the first element, and `)` immediately after the last. Enabled by default.
     ///     - writer: The closure to call for each element that writes the element.
     /// - returns: The number of bytes written.
-    @discardableResult mutating func writeKeyValues<K, V>(_ values: KeyValues<K, V>, prefix: String = "", separator: String = " ", suffix: String = "", parenthesis: Bool = true, _ writer: ((K, V), inout EncodeBuffer) -> Int) -> Int {
+    @discardableResult mutating func writeKeyValues<K, V>(_ values: KeyValues<K, V>, prefix: String = "", separator: String = " ", suffix: String = "", parenthesis: Bool = true, _ writer: (KeyValue<K, V>, inout EncodeBuffer) -> Int) -> Int {
         // TODO: This should probably check
         //   collection.count != 0
         // such that an empty collection gets encoded as "()".
@@ -184,7 +184,7 @@ extension EncodeBuffer {
                 let (i, element) = row
                 return
                     size +
-                    writer(element, &self) +
+                    writer(.init(key: element.0, value: element.1), &self) +
                     self.write(if: i < values.count - 1) { () -> Int in
                         self.writeString(separator)
                     }

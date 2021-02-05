@@ -24,13 +24,13 @@ public struct NamespaceDescription: Equatable {
     public var delimiter: Character?
 
     /// A catch-all to provide support fo future extensions.
-    public var responseExtensions: [NamespaceResponseExtension]
+    public var responseExtensions: KeyValues<ByteBuffer, [ByteBuffer]>
 
     /// Creates a new `NamespaceDescription`.
     /// - parameter string: The full namespace string.
     /// - parameter char: A hierarchy delimiter.
     /// - parameter responseExtensions: A catch-all to provide support fo future extensions.
-    public init(string: ByteBuffer, char: Character? = nil, responseExtensions: [NamespaceResponseExtension]) {
+    public init(string: ByteBuffer, char: Character? = nil, responseExtensions: KeyValues<ByteBuffer, [ByteBuffer]>) {
         self.string = string
         self.delimiter = char
         self.responseExtensions = responseExtensions

@@ -40,12 +40,12 @@ extension CommandType_Tests {
             (.select(.inbox, [.basic(.init(key: "test", value: nil))]), CommandEncodingOptions(), [#"SELECT "INBOX" (test)"#], #line),
             (.select(.inbox, [.basic(.init(key: "test1", value: nil)), .basic(.init(key: "test2", value: nil))]), CommandEncodingOptions(), [#"SELECT "INBOX" (test1 test2)"#], #line),
             (.examine(MailboxName("Events")), CommandEncodingOptions(), [#"EXAMINE "Events""#], #line),
-            (.examine(.inbox, [.init(key: "test", value: nil)]), CommandEncodingOptions(), [#"EXAMINE "INBOX" (test)"#], #line),
+            (.examine(.inbox, ["test": nil]), CommandEncodingOptions(), [#"EXAMINE "INBOX" (test)"#], #line),
             (.move([1], .inbox), CommandEncodingOptions(), ["MOVE 1 \"INBOX\""], #line),
             (.id([:]), CommandEncodingOptions(), ["ID NIL"], #line),
             (.getMetadata(options: [], mailbox: .inbox, entries: ["a"]), CommandEncodingOptions(), ["GETMETADATA \"INBOX\" (\"a\")"], #line),
             (.getMetadata(options: [.maxSize(123)], mailbox: .inbox, entries: ["a"]), CommandEncodingOptions(), ["GETMETADATA (MAXSIZE 123) \"INBOX\" (\"a\")"], #line),
-            (.setMetadata(mailbox: .inbox, entries: [.init(key: "a", value: nil)]), CommandEncodingOptions(), ["SETMETADATA \"INBOX\" (\"a\" NIL)"], #line),
+            (.setMetadata(mailbox: .inbox, entries: ["a": nil]), CommandEncodingOptions(), ["SETMETADATA \"INBOX\" (\"a\" NIL)"], #line),
 
             (.resetKey(mailbox: nil, mechanisms: []), CommandEncodingOptions(), ["RESETKEY"], #line),
             (.resetKey(mailbox: nil, mechanisms: [.internal]), CommandEncodingOptions(), ["RESETKEY"], #line), // no mailbox, so no mechanisms written

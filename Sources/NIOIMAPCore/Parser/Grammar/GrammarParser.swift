@@ -479,7 +479,7 @@ extension GrammarParser {
         try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Command in
             try fixedString("EXAMINE ", buffer: &buffer, tracker: tracker)
             let mailbox = try self.parseMailbox(buffer: &buffer, tracker: tracker)
-            let params = try optional(buffer: &buffer, tracker: tracker, parser: self.parseParameters) ?? []
+            let params = try optional(buffer: &buffer, tracker: tracker, parser: self.parseParameters) ?? [:]
             return .examine(mailbox, params)
         }
     }
@@ -1579,16 +1579,18 @@ extension GrammarParser {
     }
 
     // Namespace-Response-Extensions = *(Namespace-Response-Extension)
-    static func parseNamespaceResponseExtensions(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [NamespaceResponseExtension] {
-        try ParserLibrary.parseZeroOrMore(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> NamespaceResponseExtension in
+    static func parseNamespaceResponseExtensions(buffer: inout ByteBuffer, tracker: StackTracker) throws -> KeyValues<ByteBuffer, [ByteBuffer]> {
+        var kvs = KeyValues<ByteBuffer, [ByteBuffer]>()
+        try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &kvs, tracker: tracker) { (buffer, tracker) -> KeyValue<ByteBuffer, [ByteBuffer]> in
             try self.parseNamespaceResponseExtension(buffer: &buffer, tracker: tracker)
         }
+        return kvs
     }
 
     // Namespace-Response-Extension = SP string SP
     //                   "(" string *(SP string) ")"
-    static func parseNamespaceResponseExtension(buffer: inout ByteBuffer, tracker: StackTracker) throws -> NamespaceResponseExtension {
-        try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> NamespaceResponseExtension in
+    static func parseNamespaceResponseExtension(buffer: inout ByteBuffer, tracker: StackTracker) throws -> KeyValue<ByteBuffer, [ByteBuffer]> {
+        try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> KeyValue<ByteBuffer, [ByteBuffer]> in
             try space(buffer: &buffer, tracker: tracker)
             let s1 = try self.parseString(buffer: &buffer, tracker: tracker)
             try space(buffer: &buffer, tracker: tracker)
@@ -1599,7 +1601,7 @@ extension GrammarParser {
                 return try self.parseString(buffer: &buffer, tracker: tracker)
             }
             try fixedString(")", buffer: &buffer, tracker: tracker)
-            return NamespaceResponseExtension(string: s1, array: array)
+            return .init(key: s1, value: array)
         }
     }
 
@@ -1720,12 +1722,12 @@ extension GrammarParser {
     }
 
     // option-vendor-tag =  vendor-token "-" atom
-    static func parseOptionVendorTag(buffer: inout ByteBuffer, tracker: StackTracker) throws -> OptionVendorTag {
-        try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> OptionVendorTag in
+    static func parseOptionVendorTag(buffer: inout ByteBuffer, tracker: StackTracker) throws -> KeyValue<String, String> {
+        try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> KeyValue<String, String> in
             let token = try self.parseVendorToken(buffer: &buffer, tracker: tracker)
             try fixedString("-", buffer: &buffer, tracker: tracker)
             let atom = try self.parseAtom(buffer: &buffer, tracker: tracker)
-            return OptionVendorTag(token: token, atom: atom)
+            return .init(key: token, value: atom)
         }
     }
 
@@ -1802,7 +1804,7 @@ extension GrammarParser {
             let from = try self.parseMailbox(buffer: &buffer, tracker: tracker)
             try fixedString(" ", caseSensitive: false, buffer: &buffer, tracker: tracker)
             let to = try self.parseMailbox(buffer: &buffer, tracker: tracker)
-            let params = try optional(buffer: &buffer, tracker: tracker, parser: self.parseParameters) ?? []
+            let params = try optional(buffer: &buffer, tracker: tracker, parser: self.parseParameters) ?? [:]
             return .rename(from: from, to: to, params: params)
         }
     }
@@ -2030,16 +2032,17 @@ extension GrammarParser {
     }
 
     // select-params = SP "(" select-param *(SP select-param ")"
-    static func parseParameters(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [KeyValue<String, ParameterValue?>] {
-        try composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> [KeyValue<String, ParameterValue?>] in
+    static func parseParameters(buffer: inout ByteBuffer, tracker: StackTracker) throws -> KeyValues<String, ParameterValue?> {
+        try composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> KeyValues<String, ParameterValue?> in
             try fixedString(" (", buffer: &buffer, tracker: tracker)
-            var array = [try self.parseParameter(buffer: &buffer, tracker: tracker)]
-            try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) -> KeyValue<String, ParameterValue?> in
+            var kvs = KeyValues<String, ParameterValue?>()
+            kvs.append(try self.parseParameter(buffer: &buffer, tracker: tracker))
+            try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &kvs, tracker: tracker) { (buffer, tracker) -> KeyValue<String, ParameterValue?> in
                 try space(buffer: &buffer, tracker: tracker)
                 return try self.parseParameter(buffer: &buffer, tracker: tracker)
             }
             try fixedString(")", buffer: &buffer, tracker: tracker)
-            return array
+            return kvs
         }
     }
 
@@ -2558,7 +2561,8 @@ extension GrammarParser {
     // RFC 6237
     // scope-options =  scope-option *(SP scope-option)
     static func parseESearchScopeOptions(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ESearchScopeOptions {
-        var options: [KeyValue<String, ParameterValue?>] = [try parseParameter(buffer: &buffer, tracker: tracker)]
+        var options = KeyValues<String, ParameterValue?>()
+        options.append(try parseParameter(buffer: &buffer, tracker: tracker))
         while try optional(buffer: &buffer, tracker: tracker, parser: space) != nil {
             options.append(try parseParameter(buffer: &buffer, tracker: tracker))
         }

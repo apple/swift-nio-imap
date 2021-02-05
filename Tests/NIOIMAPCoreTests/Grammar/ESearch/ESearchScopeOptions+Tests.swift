@@ -23,9 +23,9 @@ class ESearchScopeOptions_Tests: EncodeTestClass {}
 extension ESearchScopeOptions_Tests {
     func testEncode() {
         let inputs: [(ESearchScopeOptions, String, UInt)] = [
-            (ESearchScopeOptions([.init(key: "test", value: nil)])!, "test", #line),
+            (ESearchScopeOptions(["test": nil])!, "test", #line),
             (
-                ESearchScopeOptions([.init(key: "test", value: .sequence(.lastCommand)), .init(key: "test2", value: nil)])!,
+                ESearchScopeOptions(["test": .sequence(.lastCommand), "test2": nil])!,
                 "test $ test2",
                 #line
             ),

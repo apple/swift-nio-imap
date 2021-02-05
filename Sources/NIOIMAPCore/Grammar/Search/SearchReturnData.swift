@@ -32,7 +32,7 @@ public enum SearchReturnData: Equatable {
     case modificationSequence(ModificationSequenceValue)
 
     /// Implemented as a catch-all to support any return data options defined in future extensions.
-    case dataExtension(SearchReturnDataExtension)
+    case dataExtension(KeyValue<String, ParameterValue>)
 }
 
 // MARK: - Encoding
