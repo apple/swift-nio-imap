@@ -635,7 +635,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     func testParseCreate() {
         self.iterateTests(
-            testFunction: GrammarParser.parseCreate,
+            testFunction: GrammarParser.parseCommand,
             validInputs: [
                 ("CREATE inbox", "\r", .create(.inbox, []), #line),
                 ("CREATE inbox (some)", "\r", .create(.inbox, [.labelled(.init(key: "some", value: nil))]), #line),
@@ -2888,7 +2888,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     func testSetQuota() {
         self.iterateTests(
-            testFunction: GrammarParser.parseSetQuota,
+            testFunction: GrammarParser.parseCommand,
             validInputs: [
                 (
                     "SETQUOTA \"\" (STORAGE 512)",
@@ -2929,7 +2929,7 @@ extension ParserUnitTests {
 
     func testGetQuota() {
         self.iterateTests(
-            testFunction: GrammarParser.parseGetQuota,
+            testFunction: GrammarParser.parseCommand,
             validInputs: [
                 ("GETQUOTA \"\"", "\r", Command.getQuota(QuotaRoot("")), #line),
                 ("GETQUOTA \"MASSIVE_POOL\"", "\r", Command.getQuota(QuotaRoot("MASSIVE_POOL")), #line),
@@ -2943,7 +2943,7 @@ extension ParserUnitTests {
 
     func testGetQuotaRoot() {
         self.iterateTests(
-            testFunction: GrammarParser.parseGetQuotaRoot,
+            testFunction: GrammarParser.parseCommand,
             validInputs: [
                 ("GETQUOTAROOT INBOX", "\r", Command.getQuotaRoot(MailboxName("INBOX")), #line),
                 ("GETQUOTAROOT Other", "\r", Command.getQuotaRoot(MailboxName("Other")), #line),
