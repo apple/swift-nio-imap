@@ -1382,6 +1382,25 @@ extension ParserUnitTests {
     }
 }
 
+// MARK: - parseFlagList
+
+extension ParserUnitTests {
+    func testParseFlagList() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseFlagList,
+            validInputs: [
+                ("()", " ", [], #line),
+                ("(\\seen)", " ", [.seen], #line),
+                ("(\\seen \\answered \\draft)", " ", [.seen, .answered, .draft], #line),
+            ],
+            parserErrorInputs: [
+                ],
+            incompleteMessageInputs: [
+                ]
+        )
+    }
+}
+
 // MARK: - parseHeaderList
 
 extension ParserUnitTests {

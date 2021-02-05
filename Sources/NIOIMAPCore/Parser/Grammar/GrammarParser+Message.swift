@@ -81,14 +81,10 @@ extension GrammarParser {
     static func parseMessageAttribute(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MessageAttribute {
         func parseMessageAttribute_flags(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MessageAttribute {
             try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> MessageAttribute in
-                try fixedString("FLAGS (", buffer: &buffer, tracker: tracker)
-                var array = [try self.parseFlag(buffer: &buffer, tracker: tracker)]
-                try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) -> Flag in
-                    try space(buffer: &buffer, tracker: tracker)
-                    return try self.parseFlag(buffer: &buffer, tracker: tracker)
-                }
-                try fixedString(")", buffer: &buffer, tracker: tracker)
-                return .flags(array)
+                try fixedString("FLAGS", buffer: &buffer, tracker: tracker)
+                try space(buffer: &buffer, tracker: tracker)
+                let flags = try self.parseFlagList(buffer: &buffer, tracker: tracker)
+                return .flags(flags)
             }
         }
 
