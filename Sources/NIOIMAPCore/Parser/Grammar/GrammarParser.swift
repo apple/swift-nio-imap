@@ -26,7 +26,6 @@ enum GrammarParser {}
 // MARK: - Grammar Parsers
 
 extension GrammarParser {
-
     static func parseFromLookupTable<T>(buffer: inout ByteBuffer, tracker: StackTracker, parsers: [String: (inout ByteBuffer, StackTracker) throws -> T]) throws -> T {
         let save = buffer
         do {

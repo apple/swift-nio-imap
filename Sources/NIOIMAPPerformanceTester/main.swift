@@ -124,7 +124,6 @@ let humanReadable = true
 
 let startDate = Date()
 for (description, command) in commands {
-    
     if humanReadable {
         let commandStart = Date()
         let tester = CommandTester(command: command, iterations: 10_000)
@@ -135,6 +134,7 @@ for (description, command) in commands {
         try measureAndPrint(desc: description, benchmark: CommandTester(command: command, iterations: 10_000))
     }
 }
+
 let endDate = Date()
 print("---------------------------------------")
 print(String(format: "Total timeL %.2fs", endDate.timeIntervalSince(startDate)))

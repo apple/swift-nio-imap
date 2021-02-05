@@ -25,24 +25,24 @@ import struct NIO.ByteBufferView
 
 // MARK: - Parsing map
 
-fileprivate let commandParsers: [String: (inout ByteBuffer, StackTracker) throws -> Command] = [
-    "CAPABILITY" : { _, _ in return .capability },
-    "LOGOUT" : { _, _ in return .logout },
-    "NOOP" : { _, _ in return .noop },
-    "STARTTLS" : { _, _ in return .starttls },
-    "CHECK" : { _, _ in return .check },
-    "CLOSE" : { _, _ in return .close },
-    "EXPUNGE" : { _, _ in return .expunge },
-    "UNSELECT" : { _, _ in return .unselect },
-    "IDLE": { _, _ in return .idleStart },
-    "NAMESPACE": { _, _ in return .namespace },
-    "ID" : GrammarParser.parseID,
-    "ENABLE" : GrammarParser.parseEnable,
-    "GETMETADATA" : GrammarParser.parseCommandAuth_getMetadata,
-    "SETMETADATA" : GrammarParser.parseCommandAuth_setMetadata,
-    "RESETKEY" : GrammarParser.parseCommandAuth_resetKey,
-    "GENURLAUTH" : GrammarParser.parseCommandAuth_genURLAuth,
-    "URLFETCH" : GrammarParser.parseCommandAuth_urlFetch,
+private let commandParsers: [String: (inout ByteBuffer, StackTracker) throws -> Command] = [
+    "CAPABILITY": { _, _ in .capability },
+    "LOGOUT": { _, _ in .logout },
+    "NOOP": { _, _ in .noop },
+    "STARTTLS": { _, _ in .starttls },
+    "CHECK": { _, _ in .check },
+    "CLOSE": { _, _ in .close },
+    "EXPUNGE": { _, _ in .expunge },
+    "UNSELECT": { _, _ in .unselect },
+    "IDLE": { _, _ in .idleStart },
+    "NAMESPACE": { _, _ in .namespace },
+    "ID": GrammarParser.parseID,
+    "ENABLE": GrammarParser.parseEnable,
+    "GETMETADATA": GrammarParser.parseCommandAuth_getMetadata,
+    "SETMETADATA": GrammarParser.parseCommandAuth_setMetadata,
+    "RESETKEY": GrammarParser.parseCommandAuth_resetKey,
+    "GENURLAUTH": GrammarParser.parseCommandAuth_genURLAuth,
+    "URLFETCH": GrammarParser.parseCommandAuth_urlFetch,
     "COPY": GrammarParser.parseCopy,
     "DELETE": GrammarParser.parseDelete,
     "MOVE": GrammarParser.parseMove,
@@ -70,14 +70,13 @@ fileprivate let commandParsers: [String: (inout ByteBuffer, StackTracker) throws
 // MARK: Top-level parser
 
 extension GrammarParser {
-
     static func parseTaggedCommand(buffer: inout ByteBuffer, tracker: StackTracker) throws -> TaggedCommand {
-        try composite(buffer: &buffer, tracker: tracker, { buffer, tracker in
+        try composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             let tag = try self.parseTag(buffer: &buffer, tracker: tracker)
             try space(buffer: &buffer, tracker: tracker)
             let command = try self.parseCommand(buffer: &buffer, tracker: tracker)
             return TaggedCommand(tag: tag, command: command)
-        })
+        }
     }
 
     // command         = tag SP (command-any / command-auth / command-nonauth /
@@ -88,8 +87,8 @@ extension GrammarParser {
 }
 
 // MARK: - Command parsers
-extension GrammarParser {
 
+extension GrammarParser {
     static func parseCommandAuth_urlFetch(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Command {
         let array = try ParserLibrary.parseOneOrMore(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> ByteBuffer in
             try space(buffer: &buffer, tracker: tracker)
@@ -369,5 +368,4 @@ extension GrammarParser {
         })
         return .genURLAuth(array)
     }
-
 }

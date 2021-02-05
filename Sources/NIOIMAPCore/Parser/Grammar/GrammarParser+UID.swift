@@ -77,13 +77,13 @@ extension GrammarParser {
         }
 
         func parseUid_search(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Command {
-            try composite(buffer: &buffer, tracker: tracker, { buffer, tracker in
+            try composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
                 try fixedString("SEARCH", buffer: &buffer, tracker: tracker)
                 guard case .search(let key, let charset, let returnOptions) = try self.parseSearch(buffer: &buffer, tracker: tracker) else {
                     fatalError("This should never happen")
                 }
                 return .uidSearch(key: key, charset: charset, returnOptions: returnOptions)
-            })
+            }
         }
 
         func parseUid_store(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
