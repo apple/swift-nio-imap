@@ -178,9 +178,13 @@ extension GrammarParser {
             let code = try optional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> ResponseTextCode in
                 try fixedString("[", buffer: &buffer, tracker: tracker)
                 let code = try self.parseResponseTextCode(buffer: &buffer, tracker: tracker)
-                try fixedString("] ", buffer: &buffer, tracker: tracker)
+                try fixedString("]", buffer: &buffer, tracker: tracker)
                 return code
             }
+            
+            // because some servers might not send the text (looking at you, iCloud), they might
+            // also not send a space after resp-text-code, so make parsing optional
+            try optional(buffer: &buffer, tracker: tracker, parser: space)
 
             // text requires minimum 1 char, but we want to be lenient here
             // and allow 0 characters to represent empty text

@@ -97,3 +97,26 @@ extension GrammarParser_Response_Tests {
         )
     }
 }
+
+// MARK: - parseResponseText
+
+extension GrammarParser_Response_Tests {
+    func testParseResponseText() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseResponseText,
+            validInputs: [
+                ("", "\r", .init(code: nil, text: ""), #line),
+                (" ", "\r", .init(code: nil, text: ""), #line),
+                ("text", "\r", .init(code: nil, text: "text"), #line),
+                (" text", "\r", .init(code: nil, text: "text"), #line),
+                ("[UNSEEN 1]", "\r", .init(code: .unseen(1), text: ""), #line),
+                ("[UNSEEN 2] ", "\r", .init(code: .unseen(2), text: ""), #line),
+                ("[UNSEEN 2] some text", "\r", .init(code: .unseen(2), text: "some text"), #line),
+                ("[UIDVALIDITY 1561789793]", "\r", .init(code: .uidValidity(1561789793), text: ""), #line),
+                ("[UIDNEXT 171]", "\r", .init(code: .uidNext(171), text: ""), #line),
+            ],
+            parserErrorInputs: [],
+            incompleteMessageInputs: []
+        )
+    }
+}
