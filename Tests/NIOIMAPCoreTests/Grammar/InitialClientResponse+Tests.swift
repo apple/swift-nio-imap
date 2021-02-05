@@ -24,7 +24,7 @@ extension InitialClientResponse_Tests {
     func testEncode() {
         let inputs: [(InitialClientResponse, String, UInt)] = [
             (.empty, "=", #line),
-            (.init(data: "base64"), "YmFzZTY0", #line),
+            (.init("base64"), "YmFzZTY0", #line),
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeInitialClientResponse($0) })
     }

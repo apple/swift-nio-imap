@@ -120,7 +120,7 @@ extension GrammarParser {
 
         func parseInitialClientResponse_data(buffer: inout ByteBuffer, tracker: StackTracker) throws -> InitialClientResponse {
             let base64 = try parseBase64(buffer: &buffer, tracker: tracker)
-            return .init(data: base64)
+            return .init(base64)
         }
 
         return try oneOf([

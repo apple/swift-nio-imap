@@ -18,14 +18,14 @@ import struct NIO.ByteBuffer
 /// up the process.
 public struct InitialClientResponse: Hashable {
     /// Creates a new empty `InitialClientResponse` that will be encoded as `=`.
-    public static var empty: Self = .init(data: ByteBuffer())
+    public static var empty: Self = .init(ByteBuffer())
 
     /// The data to be base-64 encoded.
     var data: ByteBuffer
 
     /// Creates a new `InitialClientResponse`
     /// - parameter data: The data to be base-64 encoded.
-    public init(data: ByteBuffer) {
+    public init(_ data: ByteBuffer) {
         self.data = data
     }
 }
