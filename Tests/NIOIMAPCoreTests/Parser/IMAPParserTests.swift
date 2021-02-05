@@ -1394,10 +1394,9 @@ extension ParserUnitTests {
                 ("(\\seen \\answered \\draft)", " ", [.seen, .answered, .draft], #line),
             ],
             parserErrorInputs: [
-            ],
+                ],
             incompleteMessageInputs: [
-                
-            ]
+                ]
         )
     }
 }
