@@ -181,7 +181,7 @@ extension GrammarParser {
                 try fixedString("]", buffer: &buffer, tracker: tracker)
                 return code
             }
-            
+
             // because some servers might not send the text (looking at you, iCloud), they might
             // also not send a space after resp-text-code, so make parsing optional
             try optional(buffer: &buffer, tracker: tracker, parser: space)
