@@ -43,7 +43,7 @@ let commands: [(String, Command)] = [
     ("parse_fetch_set_many_lots", .fetch([1 ... 2, 4 ... 7, 10 ... 100], [.envelope, .flags, .internalDate, .gmailThreadID, .modificationSequence], [])),
     ("parse_auth_plain_nil", .authenticate(method: "PLAIN", initialClientResponse: nil)),
     ("parse_auth_plain_empty", .authenticate(method: "PLAIN", initialClientResponse: .empty)),
-    ("parse_auth_plain_initial data", .authenticate(method: "PLAIN", initialClientResponse: .data(ByteBuffer(string: "dGhpcyBpcyB0ZXN0IGJhc2U2NA==")))),
+    ("parse_auth_plain_initial data", .authenticate(method: "PLAIN", initialClientResponse: .init(data: ByteBuffer(string: "dGhpcyBpcyB0ZXN0IGJhc2U2NA==")))),
     ("parse_esearch_simple_all", .esearch(.init(key: .all))),
     ("parse_esearch_simple_recursive_date", .esearch(.init(key: .and([.not(.answered), .not(.before(NIOIMAP.Date(year: 2000, month: 12, day: 12)!))])))),
     ("parse_esearch_complex", .esearch(.init(key: .and([.younger(123), .or(.keyword(.colorBit0), .keyword(.colorBit1))]), charset: "UTF-8", returnOptions: [.min, .max, .count], sourceOptions: ESearchSourceOptions(sourceMailbox: [.inboxes])!))),
