@@ -84,8 +84,11 @@ extension GrammarParser_Fetch_Tests {
         self.iterateTests(
             testFunction: GrammarParser.parseFetchResponse,
             validInputs: [
-                ("UID 54", " ", .simpleAttribute(.uid(54)), #line),
-                ("RFC822.SIZE 40639", " ", .simpleAttribute(.rfc822Size(40639)), #line),
+//                ("UID 54", " ", .simpleAttribute(.uid(54)), #line),
+//                ("RFC822.SIZE 40639", " ", .simpleAttribute(.rfc822Size(40639)), #line),
+                ("FLAGS ()", " ", .simpleAttribute(.flags([])), #line),
+                ("FLAGS (\\seen)", " ", .simpleAttribute(.flags([.seen])), #line),
+                ("FLAGS (\\seen \\answered \\draft)", " ", .simpleAttribute(.flags([.seen, .answered, .draft])), #line),
                 (")\r\n", " ", .finish, #line),
             ],
             parserErrorInputs: [],
