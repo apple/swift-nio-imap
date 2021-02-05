@@ -120,6 +120,21 @@ func measureAndPrint(desc: String, fn: () throws -> Int) rethrows {
 
 // MARK: Utilities
 
+let humanReadable = true
+
+let startDate = Date()
 for (description, command) in commands {
-    try measureAndPrint(desc: description, benchmark: CommandTester(command: command, iterations: 10_000))
+    
+    if humanReadable {
+        let commandStart = Date()
+        let tester = CommandTester(command: command, iterations: 10_000)
+        try tester.run()
+        let commandEnd = Date()
+        print(String(format: "(%.2fs) Completed \(description)", commandEnd.timeIntervalSince(commandStart)))
+    } else {
+        try measureAndPrint(desc: description, benchmark: CommandTester(command: command, iterations: 10_000))
+    }
 }
+let endDate = Date()
+print("---------------------------------------")
+print(String(format: "Total timeL %.2fs", endDate.timeIntervalSince(startDate)))
