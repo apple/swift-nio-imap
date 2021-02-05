@@ -17,19 +17,17 @@ import struct NIO.ByteBuffer
 /// Allows a client to optionally send an initial response when authenticating to speed
 /// up the process.
 public struct InitialClientResponse: Hashable {
-    
     /// Creates a new empty `InitialClientResponse` that will be encoded as `=`.
     public static var empty: Self = .init(data: ByteBuffer())
-    
+
     /// The data to be base-64 encoded.
     var data: ByteBuffer
-    
+
     /// Creates a new `InitialClientResponse`
     /// - parameter data: The data to be base-64 encoded.
     public init(data: ByteBuffer) {
         self.data = data
     }
-    
 }
 
 // MARK: - Encoding
