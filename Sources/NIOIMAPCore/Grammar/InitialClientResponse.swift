@@ -24,7 +24,7 @@ public struct InitialClientResponse: Hashable {
     var data: ByteBuffer
 
     /// Creates a new `InitialClientResponse`
-    /// - parameter data: The data to be base-64 encoded.
+    /// - parameter data: The raw (ie. not base64 encoded) data to be sent.
     public init(_ data: ByteBuffer) {
         self.data = data
     }
