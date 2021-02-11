@@ -133,7 +133,7 @@ public indirect enum SearchKey: Hashable {
     /// RFC 5032: Messages that are younger than the given number of seconds.
     case younger(Int)
 
-    /// RFC 3501:
+    /// RFC 5466: References a stored filter by name on the server.
     case filter(String)
 
     /// RFC 7162
@@ -355,8 +355,7 @@ extension EncodeBuffer {
             return self.writeString("OLDER \(seconds)")
         case .filter(let filterName):
             return
-                self.writeString("FILTER ") +
-                self.writeFilterName(filterName)
+                self.writeString("FILTER \(filterName)")
         case .sentBefore(let date):
             return
                 self.writeString("SENTBEFORE ") +
