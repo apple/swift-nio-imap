@@ -26,6 +26,14 @@ enum GrammarParser {}
 // MARK: - Grammar Parsers
 
 extension GrammarParser {
+    
+    /// Attempts to select a parser from the given `parsers` by extracting the first unbroken sequence of alpha characters.
+    /// E.g. for the command `LOGIN username password`, the parser will parse `LOGIN`, and use that as a (case-insensitive) key to find a suitable parser in `parsers`.
+    /// - parameter buffer: The `ByteBuffer` to parse from.
+    /// - parameter tracker: Used to limit the stack depth.
+    /// - parameter parsers: A dictionary that maps a string to a sub-parser.
+    /// - returns: `T` if a suitable sub-parser was located and executed.
+    /// - throws: A `ParserError` if a parser wasn't found.
     static func parseFromLookupTable<T>(buffer: inout ByteBuffer, tracker: StackTracker, parsers: [String: (inout ByteBuffer, StackTracker) throws -> T]) throws -> T {
         let save = buffer
         do {
