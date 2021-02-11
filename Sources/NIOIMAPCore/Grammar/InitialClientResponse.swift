@@ -16,23 +16,29 @@ import struct NIO.ByteBuffer
 
 /// Allows a client to optionally send an initial response when authenticating to speed
 /// up the process.
-public enum InitialClientResponse: Equatable {
-    /// No initial response
-    case empty
+public struct InitialClientResponse: Hashable {
+    /// Creates a new empty `InitialClientResponse` that will be encoded as `=`.
+    public static var empty: Self = .init(ByteBuffer())
 
-    /// Data encoded as Base64
-    case data(ByteBuffer)
+    /// The data to be base-64 encoded.
+    var data: ByteBuffer
+
+    /// Creates a new `InitialClientResponse`
+    /// - parameter data: The raw (ie. not base64 encoded) data to be sent.
+    public init(_ data: ByteBuffer) {
+        self.data = data
+    }
 }
 
 // MARK: - Encoding
 
 extension EncodeBuffer {
     @discardableResult mutating func writeInitialClientResponse(_ resp: InitialClientResponse) -> Int {
-        switch resp {
-        case .empty:
+        if resp.data.readableBytes == 0 {
             return self.writeString("=")
-        case .data(var buffer):
-            return self.writeBuffer(&buffer)
+        } else {
+            let encoded = Base64.encode(bytes: resp.data.readableBytesView)
+            return self.writeString(encoded)
         }
     }
 }

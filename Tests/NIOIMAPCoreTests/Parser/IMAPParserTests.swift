@@ -831,7 +831,7 @@ extension ParserUnitTests {
             testFunction: GrammarParser.parseInitialClientResponse,
             validInputs: [
                 ("=", " ", .empty, #line),
-                ("YQ==", " ", .data("a"), #line),
+                ("YQ==", " ", .init("a"), #line),
             ],
             parserErrorInputs: [
                 ],
