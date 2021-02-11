@@ -32,58 +32,58 @@ protocol _ParserTestHelpers {}
 final class ParserUnitTests: XCTestCase, _ParserTestHelpers {}
 
 extension _ParserTestHelpers {
-    private func iterateTestInputs_generic<T: Equatable>(_ inputs: [(String, String, T, UInt)], testFunction: (inout ParseBuffer, StackTracker) throws -> T) {
+    private func iterateTestInputs_generic<T: Equatable>(_ inputs: [(String, String, T, UInt)], file: StaticString = #file, testFunction: (inout ByteBuffer, StackTracker) throws -> T) {
         for (input, terminator, expected, line) in inputs {
-            TestUtilities.withParseBuffer(input, terminator: terminator, shouldRemainUnchanged: false, file: (#file), line: line) { (buffer) in
+            TestUtilities.withBuffer(input, terminator: terminator, shouldRemainUnchanged: false, file: file, line: line) { (buffer) in
                 let testValue = try testFunction(&buffer, .testTracker)
-                XCTAssertEqual(testValue, expected, line: line)
+                XCTAssertEqual(testValue, expected, file: file, line: line)
             }
         }
     }
 
-    private func iterateInvalidTestInputs_ParserError_generic<T: Equatable>(_ inputs: [(String, String, UInt)], testFunction: (inout ParseBuffer, StackTracker) throws -> T) {
+    private func iterateInvalidTestInputs_ParserError_generic<T: Equatable>(_ inputs: [(String, String, UInt)], file: StaticString = #file, testFunction: (inout ByteBuffer, StackTracker) throws -> T) {
         for (input, terminator, line) in inputs {
-            TestUtilities.withParseBuffer(input, terminator: terminator, shouldRemainUnchanged: true, file: (#file), line: line) { (buffer) in
-                XCTAssertThrowsError(try testFunction(&buffer, .testTracker), line: line) { e in
-                    XCTAssertTrue(e is ParserError, "Expected ParserError, got \(e)", line: line)
+            TestUtilities.withBuffer(input, terminator: terminator, shouldRemainUnchanged: true, file: file, line: line) { (buffer) in
+                XCTAssertThrowsError(try testFunction(&buffer, .testTracker), file: file, line: line) { e in
+                    XCTAssertTrue(e is ParserError, "Expected ParserError, got \(e)", file: file, line: line)
                 }
             }
         }
     }
 
-    private func iterateInvalidTestInputs_IncompleteMessage_generic<T: Equatable>(_ inputs: [(String, String, UInt)], testFunction: (inout ParseBuffer, StackTracker) throws -> T) {
+    private func iterateInvalidTestInputs_IncompleteMessage_generic<T: Equatable>(_ inputs: [(String, String, UInt)], file: StaticString = #file, testFunction: (inout ByteBuffer, StackTracker) throws -> T) {
         for (input, terminator, line) in inputs {
-            TestUtilities.withParseBuffer(input, terminator: terminator, shouldRemainUnchanged: true, file: (#file), line: line) { (buffer) in
-                XCTAssertThrowsError(try testFunction(&buffer, .testTracker), line: line) { e in
-                    XCTAssertTrue(e is _IncompleteMessage, "Expected IncompleteMessage, got \(e)", line: line)
+            TestUtilities.withBuffer(input, terminator: terminator, shouldRemainUnchanged: true, file: file, line: line) { (buffer) in
+                XCTAssertThrowsError(try testFunction(&buffer, .testTracker), file: file, line: line) { e in
+                    XCTAssertTrue(e is _IncompleteMessage, "Expected IncompleteMessage, got \(e)", file: file, line: line)
                 }
             }
         }
     }
 
-    private func iterateTestInputs(_ inputs: [(String, String, UInt)], testFunction: (inout ParseBuffer, StackTracker) throws -> Void) {
+    private func iterateTestInputs(_ inputs: [(String, String, UInt)], file: StaticString = #file, testFunction: (inout ByteBuffer, StackTracker) throws -> Void) {
         for (input, terminator, line) in inputs {
-            TestUtilities.withParseBuffer(input, terminator: terminator, shouldRemainUnchanged: false, file: (#file), line: line) { (buffer) in
+            TestUtilities.withBuffer(input, terminator: terminator, shouldRemainUnchanged: false, file: file, line: line) { (buffer) in
                 try testFunction(&buffer, .testTracker)
             }
         }
     }
 
-    private func iterateInvalidTestInputs_ParserError(_ inputs: [(String, String, UInt)], testFunction: (inout ParseBuffer, StackTracker) throws -> Void) {
+    private func iterateInvalidTestInputs_ParserError(_ inputs: [(String, String, UInt)], file: StaticString = #file, testFunction: (inout ByteBuffer, StackTracker) throws -> Void) {
         for (input, terminator, line) in inputs {
-            TestUtilities.withParseBuffer(input, terminator: terminator, shouldRemainUnchanged: true, file: (#file), line: line) { (buffer) in
-                XCTAssertThrowsError(try testFunction(&buffer, .testTracker), line: line) { e in
-                    XCTAssertTrue(e is ParserError, "Expected ParserError, got \(e)", line: line)
+            TestUtilities.withBuffer(input, terminator: terminator, shouldRemainUnchanged: true, file: file, line: line) { (buffer) in
+                XCTAssertThrowsError(try testFunction(&buffer, .testTracker), file: file, line: line) { e in
+                    XCTAssertTrue(e is ParserError, "Expected ParserError, got \(e)", file: file, line: line)
                 }
             }
         }
     }
 
-    private func iterateInvalidTestInputs_IncompleteMessage(_ inputs: [(String, String, UInt)], testFunction: (inout ParseBuffer, StackTracker) throws -> Void) {
+    private func iterateInvalidTestInputs_IncompleteMessage(_ inputs: [(String, String, UInt)], file: StaticString = #file, testFunction: (inout ByteBuffer, StackTracker) throws -> Void) {
         for (input, terminator, line) in inputs {
-            TestUtilities.withParseBuffer(input, terminator: terminator, shouldRemainUnchanged: true, file: (#file), line: line) { (buffer) in
-                XCTAssertThrowsError(try testFunction(&buffer, .testTracker), line: line) { e in
-                    XCTAssertTrue(e is _IncompleteMessage, "Expected IncompleteMessage, got \(e)", line: line)
+            TestUtilities.withBuffer(input, terminator: terminator, shouldRemainUnchanged: true, file: file, line: line) { (buffer) in
+                XCTAssertThrowsError(try testFunction(&buffer, .testTracker), file: file, line: line) { e in
+                    XCTAssertTrue(e is _IncompleteMessage, "Expected IncompleteMessage, got \(e)", file: file, line: line)
                 }
             }
         }
@@ -98,11 +98,12 @@ extension _ParserTestHelpers {
         testFunction: (inout ParseBuffer, StackTracker) throws -> T,
         validInputs: [(String, String, T, UInt)],
         parserErrorInputs: [(String, String, UInt)],
-        incompleteMessageInputs: [(String, String, UInt)]
+        incompleteMessageInputs: [(String, String, UInt)],
+        file: StaticString = #file
     ) {
-        self.iterateTestInputs_generic(validInputs, testFunction: testFunction)
-        self.iterateInvalidTestInputs_ParserError_generic(parserErrorInputs, testFunction: testFunction)
-        self.iterateInvalidTestInputs_IncompleteMessage_generic(incompleteMessageInputs, testFunction: testFunction)
+        self.iterateTestInputs_generic(validInputs, file: file, testFunction: testFunction)
+        self.iterateInvalidTestInputs_ParserError_generic(parserErrorInputs, file: file, testFunction: testFunction)
+        self.iterateInvalidTestInputs_IncompleteMessage_generic(incompleteMessageInputs, file: file, testFunction: testFunction)
     }
 
     /// Convenience function to run a variety of happy and non-happy tests.
@@ -114,11 +115,12 @@ extension _ParserTestHelpers {
         testFunction: (inout ParseBuffer, StackTracker) throws -> Void,
         validInputs: [(String, String, UInt)],
         parserErrorInputs: [(String, String, UInt)],
-        incompleteMessageInputs: [(String, String, UInt)]
+        incompleteMessageInputs: [(String, String, UInt)],
+        file: StaticString = #file
     ) {
-        self.iterateTestInputs(validInputs, testFunction: testFunction)
-        self.iterateInvalidTestInputs_ParserError(parserErrorInputs, testFunction: testFunction)
-        self.iterateInvalidTestInputs_IncompleteMessage(incompleteMessageInputs, testFunction: testFunction)
+        self.iterateTestInputs(validInputs, file: file, testFunction: testFunction)
+        self.iterateInvalidTestInputs_ParserError(parserErrorInputs, file: file, testFunction: testFunction)
+        self.iterateInvalidTestInputs_IncompleteMessage(incompleteMessageInputs, file: file, testFunction: testFunction)
     }
 }
 
