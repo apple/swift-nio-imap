@@ -59,3 +59,54 @@ extension InternalDateTests {
         XCTAssertEqual(c.zoneMinutes, 959)
     }
 }
+
+// MARK: - Comparable
+extension InternalDateTests {
+    
+    func testLessThan() {
+        
+        // test the same date
+        var d1 = InternalDate(.init(year: 1994, month: 06, day: 25, hour: 01, minute: 02, second: 03, timeZoneMinutes: 0)!)
+        var d2 = d1
+        XCTAssertFalse(d1 < d2)
+        
+        // test the same date, different time zone
+        d1 = InternalDate(.init(year: 1994, month: 06, day: 25, hour: 01, minute: 02, second: 03, timeZoneMinutes: -100)!)
+        d2 = InternalDate(.init(year: 1994, month: 06, day: 25, hour: 01, minute: 02, second: 03, timeZoneMinutes: 0)!)
+        XCTAssertTrue(d1 < d2)
+        
+        // test almost the same, different time zone
+        d1 = InternalDate(.init(year: 2000, month: 1, day: 2, hour: 3, minute: 4, second: 5, timeZoneMinutes: 0)!)
+        d2 = InternalDate(.init(year: 2001, month: 1, day: 2, hour: 3, minute: 4, second: 5, timeZoneMinutes: 0)!)
+        XCTAssertTrue(d1 < d2)
+        
+        // test almost the same, different year
+        d1 = InternalDate(.init(year: 2000, month: 1, day: 2, hour: 3, minute: 4, second: 5, timeZoneMinutes: 0)!)
+        d2 = InternalDate(.init(year: 2001, month: 1, day: 2, hour: 3, minute: 4, second: 5, timeZoneMinutes: 0)!)
+        XCTAssertTrue(d1 < d2)
+        
+        // test almost the same, different year
+        d1 = InternalDate(.init(year: 2000, month: 1, day: 2, hour: 3, minute: 4, second: 5, timeZoneMinutes: 0)!)
+        d2 = InternalDate(.init(year: 2000, month: 2, day: 2, hour: 3, minute: 4, second: 5, timeZoneMinutes: 0)!)
+        XCTAssertTrue(d1 < d2)
+        
+        // test almost the same, different year
+        d1 = InternalDate(.init(year: 2000, month: 1, day: 2, hour: 3, minute: 4, second: 5, timeZoneMinutes: 0)!)
+        d2 = InternalDate(.init(year: 2000, month: 1, day: 3, hour: 3, minute: 4, second: 5, timeZoneMinutes: 0)!)
+        XCTAssertTrue(d1 < d2)
+        
+        d1 = InternalDate(.init(year: 2000, month: 1, day: 2, hour: 3, minute: 4, second: 5, timeZoneMinutes: 0)!)
+        d2 = InternalDate(.init(year: 2000, month: 1, day: 2, hour: 4, minute: 4, second: 5, timeZoneMinutes: 0)!)
+        XCTAssertTrue(d1 < d2)
+        
+        d1 = InternalDate(.init(year: 2000, month: 1, day: 2, hour: 3, minute: 4, second: 5, timeZoneMinutes: 0)!)
+        d2 = InternalDate(.init(year: 2000, month: 1, day: 2, hour: 3, minute: 5, second: 5, timeZoneMinutes: 0)!)
+        XCTAssertTrue(d1 < d2)
+        
+        d1 = InternalDate(.init(year: 2000, month: 1, day: 2, hour: 3, minute: 4, second: 5, timeZoneMinutes: 0)!)
+        d2 = InternalDate(.init(year: 2000, month: 1, day: 2, hour: 3, minute: 4, second: 6, timeZoneMinutes: 0)!)
+        XCTAssertTrue(d1 < d2)
+        
+    }
+    
+}

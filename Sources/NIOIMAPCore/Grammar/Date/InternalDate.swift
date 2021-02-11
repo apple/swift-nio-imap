@@ -127,6 +127,36 @@ extension InternalDate {
     }
 }
 
+extension InternalDate: Comparable {
+    
+    public static func < (lhs: InternalDate, rhs: InternalDate) -> Bool {
+        let c1 = lhs.components, c2 = rhs.components
+        if c1.year < c2.year {
+            return true
+        }
+        if c1.month < c2.month {
+            return true
+        }
+        if c1.day < c2.day {
+            return true
+        }
+        if c1.hour < c2.hour {
+            return true
+        }
+        if c1.minute < c2.minute {
+            return true
+        }
+        if c1.second < c2.second {
+            return true
+        }
+        if c1.zoneMinutes < c2.zoneMinutes {
+            return true
+        }
+        return false
+    }
+    
+}
+
 // MARK: - Internal
 
 extension InternalDate {
