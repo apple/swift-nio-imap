@@ -27,11 +27,11 @@ components that this product depends on.
 
 ---
 
-This product contains "Base64.swift" and "DecodingError.swift" from Fabian Fett's swift-base64-kit
+This product contains "Base64.swift", "DecodingError.swift", and "Chromium.swift" from swift-extras/swift-extras-base64-kit
 
   * LICENSE (Apache 2):
-    * https://github.com/fabianfett/swift-base64-kit/blob/master/LICENSE
+    * https://github.com/swift-extras/swift-extras-base64/blob/main/LICENSE
   * HOMEPAGE:
-    * https://github.com/fabianfett/swift-base64-kit
+    * https://github.com/swift-extras/swift-extras-base64
 
 ---
