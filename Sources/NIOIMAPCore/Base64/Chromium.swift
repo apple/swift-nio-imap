@@ -132,8 +132,7 @@ extension Base64 {
 
     @inlinable
     static func encodeBytes<Buffer: Collection>(bytes: Buffer, options: EncodingOptions = [])
-        -> [UInt8] where Buffer.Element == UInt8
-    {
+        -> [UInt8] where Buffer.Element == UInt8 {
         let newCapacity = ((bytes.count + 2) / 3) * 4
 
         if let result = bytes.withContiguousStorageIfAvailable({ (input) -> [UInt8] in
@@ -149,8 +148,7 @@ extension Base64 {
 
     @inlinable
     static func encodeString<Buffer: Collection>(bytes: Buffer, options: EncodingOptions = [])
-        -> String where Buffer.Element == UInt8
-    {
+        -> String where Buffer.Element == UInt8 {
         let newCapacity = ((bytes.count + 2) / 3) * 4
 
         #if swift(>=5.3)
@@ -277,12 +275,11 @@ extension Base64 {
 
     @inlinable
     static func decode<Buffer: Collection>(bytes: Buffer, options: DecodingOptions = []) throws -> [UInt8] where Buffer.Element == UInt8 {
-        
         // needed to add this to fix a crash
         guard bytes.count > 0 else {
             return []
         }
-        
+
         let decoded = try bytes.withContiguousStorageIfAvailable { (input) -> [UInt8] in
             let outputLength = ((input.count + 3) / 4) * 3
 

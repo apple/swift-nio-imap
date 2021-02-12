@@ -6,32 +6,30 @@
 enum Base64 {
     @usableFromInline
     struct EncodingOptions: OptionSet {
-        
         @usableFromInline
         let rawValue: UInt
-        
+
         @usableFromInline
         init(rawValue: UInt) { self.rawValue = rawValue }
 
         @usableFromInline
         static let base64UrlAlphabet = EncodingOptions(rawValue: UInt(1 << 0))
-        
+
         @usableFromInline
         static let omitPaddingCharacter = EncodingOptions(rawValue: UInt(1 << 1))
     }
 
     @usableFromInline
     struct DecodingOptions: OptionSet {
-        
         @usableFromInline
         let rawValue: UInt
-        
+
         @usableFromInline
         init(rawValue: UInt) { self.rawValue = rawValue }
 
         @usableFromInline
         static let base64UrlAlphabet = DecodingOptions(rawValue: UInt(1 << 0))
-        
+
         @usableFromInline
         static let omitPaddingCharacter = DecodingOptions(rawValue: UInt(1 << 1))
     }
@@ -42,8 +40,7 @@ enum Base64 {
 extension String {
     @usableFromInline
     init<Buffer: Collection>(base64Encoding bytes: Buffer, options: Base64.EncodingOptions = [])
-        where Buffer.Element == UInt8
-    {
+        where Buffer.Element == UInt8 {
         self = Base64.encodeString(bytes: bytes, options: options)
     }
 
