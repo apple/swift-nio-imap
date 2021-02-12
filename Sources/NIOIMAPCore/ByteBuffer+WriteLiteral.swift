@@ -96,8 +96,8 @@ extension EncodeBuffer {
     ///     - buffer: The `ByteBuffer` to encoded and write.
     /// - returns: The number of bytes written.
     @discardableResult mutating func writeBufferAsBase64(_ buffer: ByteBuffer) -> Int {
-        let encoded = Base64.encode(bytes: buffer.readableBytesView)
-        return self.writeString(encoded)
+        let encoded = Base64.encodeBytes(bytes: buffer.readableBytesView)
+        return self.writeBytes(encoded)
     }
 
     /// Writes a collection of bytes in the `literal8` syntax defined in RFC 3516.

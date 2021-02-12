@@ -37,8 +37,8 @@ extension EncodeBuffer {
         if resp.data.readableBytes == 0 {
             return self.writeString("=")
         } else {
-            let encoded = Base64.encode(bytes: resp.data.readableBytesView)
-            return self.writeString(encoded)
+            let encoded = Base64.encodeBytes(bytes: resp.data.readableBytesView)
+            return self.writeBytes(encoded)
         }
     }
 }
