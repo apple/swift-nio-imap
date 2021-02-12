@@ -149,7 +149,6 @@ extension Base64 {
     @inlinable
     static func encodeString<Buffer: Collection>(bytes: Buffer, options: EncodingOptions = [])
         -> String where Buffer.Element == UInt8 {
-
         #if swift(>=5.3)
         let newCapacity = ((bytes.count + 2) / 3) * 4
         if #available(OSX 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) {
