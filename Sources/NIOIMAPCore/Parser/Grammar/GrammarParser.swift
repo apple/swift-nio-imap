@@ -143,7 +143,7 @@ extension GrammarParser {
             }
 
             do {
-                let decoded = try Base64.decode(encoded: String(buffer: bytes))
+                let decoded = try Base64.decode(bytes: bytes.readableBytesView)
                 return ByteBuffer(ByteBufferView(decoded))
             } catch {
                 throw ParserError(hint: "Invalid base64 \(error)")

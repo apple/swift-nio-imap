@@ -38,14 +38,14 @@ extension Base64_Tests {
 
         let allOptions: [(Base64.EncodingOptions, Base64.DecodingOptions)] = [
             ([], []),
-            ([.base64URLAlphabet], [.base64URLAlphabet]),
+            ([.base64UrlAlphabet], [.base64UrlAlphabet]),
         ]
         allOptions.forEach { options in
             buffers.enumerated().forEach { _, element in
                 let bytes = element.1
-                let encoded = Base64.encode(bytes: bytes, options: options.0)
+                let encoded = Base64.encodeBytes(bytes: bytes, options: options.0)
                 do {
-                    let decoded = try Base64.decode(encoded: encoded, options: options.1)
+                    let decoded = try Base64.decode(bytes: encoded, options: options.1)
                     XCTAssertEqual(decoded, bytes, "options: \(options), encoded: \(encoded)", line: element.0)
                 } catch {
                     XCTFail("options: \(options), encoded: \(encoded), error: \(error)", line: element.0)
@@ -127,7 +127,7 @@ extension Base64_Tests {
         buffers.forEach { element in
             let encoded = element.1
             do {
-                let decoded = try Base64.decode(encoded: encoded, options: [])
+                let decoded = try Base64.decode(bytes: encoded.utf8, options: [])
                 XCTAssertEqual(decoded, element.2, "encoded: \(encoded)", line: element.0)
             } catch {
                 XCTFail("encoded: \(encoded), error: \(error)", line: element.0)

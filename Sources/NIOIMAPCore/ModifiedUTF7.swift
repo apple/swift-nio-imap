@@ -57,9 +57,9 @@ public enum ModifiedUTF7 {
                 }
 
                 // convert the buffer to base64
-                let b64 = String(Base64.encode(bytes: specials).map { $0 == "/" ? "," : $0 }.filter { $0 != "=" })
+                let b64 = Base64.encodeBytes(bytes: specials).map { $0 == UInt8(ascii: "/") ? UInt8(ascii: ",") : $0 }.filter { $0 != UInt8(ascii: "=") }
                 buffer.writeInteger(UInt8(ascii: "&"))
-                buffer.writeString(b64)
+                buffer.writeBytes(b64)
                 buffer.writeInteger(UInt8(ascii: "-"))
             }
         }
@@ -98,7 +98,7 @@ public enum ModifiedUTF7 {
                     while specials.count % 4 > 0 {
                         specials.append(UInt8(ascii: "="))
                     }
-                    let decoded = try Base64.decode(encoded: specials)
+                    let decoded = try Base64.decode(bytes: specials)
                     var iterator = decoded.makeIterator()
 
                     guard decoded.count % 2 == 0 else {
