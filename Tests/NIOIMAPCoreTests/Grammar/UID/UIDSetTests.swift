@@ -216,6 +216,145 @@ extension UIDSetTests {
     }
 }
 
+extension UIDSetTests {
+    func testIndexes_singleRange() {
+        let sut = UIDSet(40 ... 89)
+        XCTAssertEqual(sut.index(sut.startIndex, offsetBy: 10),
+                       sut.index(sut.index(sut.startIndex, offsetBy: 4), offsetBy: 6))
+        XCTAssertEqual(sut.index(sut.index(sut.startIndex, offsetBy: 33), offsetBy: -33),
+                       sut.startIndex)
+        XCTAssertEqual(sut.index(sut.startIndex, offsetBy: 50),
+                       sut.endIndex)
+        XCTAssertEqual(sut.index(sut.endIndex, offsetBy: -50),
+                       sut.startIndex)
+
+        XCTAssertEqual(sut.index(sut.startIndex, offsetBy: 10),
+                       sut.index(sut.index(sut.startIndex, offsetBy: 110), offsetBy: -100))
+        XCTAssertEqual(sut.index(sut.startIndex, offsetBy: 10),
+                       sut.index(sut.index(sut.startIndex, offsetBy: -100), offsetBy: 110))
+
+        XCTAssertGreaterThan(sut.index(sut.startIndex, offsetBy: 51),
+                             sut.endIndex)
+        XCTAssertGreaterThan(sut.index(sut.startIndex, offsetBy: 52),
+                             sut.index(sut.startIndex, offsetBy: 51))
+        XCTAssertLessThan(sut.index(sut.endIndex, offsetBy: -51),
+                          sut.startIndex)
+        XCTAssertLessThan(sut.index(sut.endIndex, offsetBy: -52),
+                          sut.index(sut.endIndex, offsetBy: -51))
+
+        XCTAssertEqual(sut.index(sut.endIndex, offsetBy: -50, limitedBy: sut.startIndex), sut.startIndex)
+        XCTAssertNil(sut.index(sut.endIndex, offsetBy: -51, limitedBy: sut.startIndex))
+
+        XCTAssertEqual(sut.index(sut.startIndex, offsetBy: 50, limitedBy: sut.endIndex), sut.endIndex)
+        XCTAssertNil(sut.index(sut.startIndex, offsetBy: 51, limitedBy: sut.endIndex))
+    }
+
+    func testIndexes_multipleSingleValues() {
+        let sut: UIDSet = {
+            var sut = UIDSet()
+            for uid in [762 as UID, 7370, 8568, 11423, 11708, 11889, 12679,
+                        18833, 22152, 22374, 22733, 23838, 30058, 30985, 32465,
+                        33579, 39714, 43224, 44377, 46424, 53884, 61461, 71310,
+                        75310, 77045, 81983, 82711, 85170, 95660, 99173] {
+                sut.insert(uid)
+            }
+            return sut
+        }()
+        XCTAssertEqual(sut.count, 30, "30 values")
+
+        XCTAssertEqual(sut.index(sut.startIndex, offsetBy: 10),
+                       sut.index(sut.index(sut.startIndex, offsetBy: 4), offsetBy: 6))
+        XCTAssertEqual(sut.index(sut.index(sut.startIndex, offsetBy: 17), offsetBy: -17),
+                       sut.startIndex)
+        XCTAssertEqual(sut.index(sut.startIndex, offsetBy: 30),
+                       sut.endIndex)
+        XCTAssertEqual(sut.index(sut.endIndex, offsetBy: -30),
+                       sut.startIndex)
+
+        XCTAssertEqual(sut.index(sut.startIndex, offsetBy: 10),
+                       sut.index(sut.index(sut.startIndex, offsetBy: 110), offsetBy: -100))
+        XCTAssertEqual(sut.index(sut.startIndex, offsetBy: 10),
+                       sut.index(sut.index(sut.startIndex, offsetBy: -100), offsetBy: 110))
+
+        XCTAssertGreaterThan(sut.index(sut.startIndex, offsetBy: 31),
+                             sut.endIndex)
+        XCTAssertGreaterThan(sut.index(sut.startIndex, offsetBy: 32),
+                             sut.index(sut.startIndex, offsetBy: 31))
+        XCTAssertLessThan(sut.index(sut.endIndex, offsetBy: -31),
+                          sut.startIndex)
+        XCTAssertLessThan(sut.index(sut.endIndex, offsetBy: -32),
+                          sut.index(sut.endIndex, offsetBy: -31))
+
+        XCTAssertEqual(sut.index(sut.endIndex, offsetBy: -30, limitedBy: sut.startIndex), sut.startIndex)
+        XCTAssertNil(sut.index(sut.endIndex, offsetBy: -31, limitedBy: sut.startIndex))
+
+        XCTAssertEqual(sut.index(sut.startIndex, offsetBy: 30, limitedBy: sut.endIndex), sut.endIndex)
+        XCTAssertNil(sut.index(sut.startIndex, offsetBy: 31, limitedBy: sut.endIndex))
+    }
+
+    func testIndexes_multipleShortRanges() {
+        let sut = UIDSet([
+            UIDRange(55 ... 57),
+            UIDRange(155 ... 157),
+            UIDRange(255 ... 257),
+            UIDRange(355 ... 357),
+            UIDRange(455 ... 457),
+            UIDRange(555 ... 557),
+            UIDRange(655 ... 657),
+            UIDRange(755 ... 757),
+            UIDRange(855 ... 857),
+            UIDRange(955 ... 957),
+        ])
+        XCTAssertEqual(sut.count, 30, "30 values")
+
+        XCTAssertEqual(sut.index(sut.startIndex, offsetBy: 10),
+                       sut.index(sut.index(sut.startIndex, offsetBy: 4), offsetBy: 6))
+        XCTAssertEqual(sut.index(sut.index(sut.startIndex, offsetBy: 17), offsetBy: -17),
+                       sut.startIndex)
+        XCTAssertEqual(sut.index(sut.startIndex, offsetBy: 30),
+                       sut.endIndex)
+        XCTAssertEqual(sut.index(sut.endIndex, offsetBy: -30),
+                       sut.startIndex)
+
+        for step in 1 ... 15 {
+            let count = sut.count / step
+            var a = sut.startIndex
+            for c in 1 ... count {
+                a = sut.index(a, offsetBy: step)
+                XCTAssertEqual(a,
+                               sut.index(sut.startIndex, offsetBy: step * c),
+                               "c = \(c), step = \(step)")
+                XCTAssertEqual(sut.distance(from: sut.startIndex, to: a),
+                               step * c,
+                               "c = \(c), step = \(step)")
+                XCTAssertEqual(sut.distance(from: sut.endIndex, to: a),
+                               step * c - 30,
+                               "c = \(c), step = \(step)")
+            }
+        }
+
+        XCTAssertEqual(sut.index(sut.startIndex, offsetBy: 10),
+                       sut.index(sut.index(sut.startIndex, offsetBy: 110), offsetBy: -100))
+        XCTAssertEqual(sut.index(sut.startIndex, offsetBy: 10),
+                       sut.index(sut.index(sut.startIndex, offsetBy: -100), offsetBy: 110))
+
+        XCTAssertGreaterThan(sut.index(sut.startIndex, offsetBy: 31),
+                             sut.endIndex)
+        XCTAssertGreaterThan(sut.index(sut.startIndex, offsetBy: 32),
+                             sut.index(sut.startIndex, offsetBy: 31))
+        XCTAssertLessThan(sut.index(sut.endIndex, offsetBy: -31),
+                          sut.startIndex)
+        XCTAssertLessThan(sut.index(sut.endIndex, offsetBy: -32),
+                          sut.index(sut.endIndex, offsetBy: -31))
+
+        XCTAssertEqual(sut.index(sut.endIndex, offsetBy: -30, limitedBy: sut.startIndex), sut.startIndex)
+        XCTAssertNil(sut.index(sut.endIndex, offsetBy: -31, limitedBy: sut.startIndex))
+
+        XCTAssertEqual(sut.index(sut.startIndex, offsetBy: 30, limitedBy: sut.endIndex), sut.endIndex)
+        XCTAssertNil(sut.index(sut.startIndex, offsetBy: 31, limitedBy: sut.endIndex))
+    }
+}
+
 /// Helper to make the result equatable
 private enum InsertResult: Equatable {
     case inserted(UID)
