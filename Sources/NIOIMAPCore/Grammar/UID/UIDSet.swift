@@ -161,7 +161,7 @@ extension UIDSet {
     public static let empty = UIDSet()
 }
 
-extension UIDSet: Collection {
+extension UIDSet: RandomAccessCollection {
     public struct Index {
         fileprivate var rangeIndex: RangeSet<UIDShiftWrapper>.Ranges.Index
         fileprivate var indexInRange: UID.Stride
@@ -169,19 +169,76 @@ extension UIDSet: Collection {
 
     public var startIndex: Index { Index(rangeIndex: ranges.ranges.startIndex, indexInRange: 0) }
     public var endIndex: Index {
-        guard !ranges.ranges.isEmpty else { return Index(rangeIndex: ranges.ranges.endIndex, indexInRange: 0) }
-        return Index(rangeIndex: ranges.ranges.endIndex, indexInRange: UID.Stride(ranges.ranges.last!.count))
+        Index(rangeIndex: ranges.ranges.endIndex, indexInRange: 0)
     }
 
     public func index(after i: Index) -> Index {
-        precondition(i.rangeIndex < ranges.ranges.endIndex)
-        let count = UID.Stride(ranges.ranges[i.rangeIndex].count)
-        if i.indexInRange.advanced(by: 1) < count {
-            return Index(rangeIndex: i.rangeIndex, indexInRange: i.indexInRange.advanced(by: 1))
+        index(i, offsetBy: 1)
+    }
+
+    public func index(before i: Index) -> Index {
+        index(i, offsetBy: -1)
+    }
+
+    /// Returns an index that is the specified distance from the given index.
+    ///
+    /// - Note: The complexity of this is _not_ O(1)
+    ///
+    /// - Complexity: O(n)
+    public func index(_ i: Self.Index, offsetBy distance: Int) -> Self.Index {
+        if distance < 0 {
+            var result = i
+            result.indexInRange = result.indexInRange.advanced(by: distance)
+            while true {
+                if result.indexInRange >= 0 {
+                    break
+                }
+                guard ranges.ranges.startIndex < result.rangeIndex else {
+                    break
+                }
+                // We need to find the previous range:
+                result.rangeIndex = ranges.ranges.index(before: result.rangeIndex)
+                let indexCount = UID.Stride(ranges.ranges[result.rangeIndex].count)
+                result.indexInRange = result.indexInRange.advanced(by: Int(indexCount))
+            }
+            return result
+        } else {
+            var remainingDistance = distance
+            var result = i
+            while remainingDistance > 0 {
+                guard result.rangeIndex < ranges.ranges.endIndex else {
+                    result.indexInRange = result.indexInRange.advanced(by: remainingDistance)
+                    break
+                }
+                let indexesInRangeCount = UID.Stride(ranges.ranges[result.rangeIndex].count)
+                if result.indexInRange.advanced(by: remainingDistance) < indexesInRangeCount {
+                    result.indexInRange = result.indexInRange.advanced(by: remainingDistance)
+                    break
+                }
+                let nextRange = ranges.ranges.index(after: result.rangeIndex)
+                let step = result.indexInRange.distance(to: UID.Stride(ranges.ranges[result.rangeIndex].count))
+                result = Index(rangeIndex: nextRange, indexInRange: 0)
+                remainingDistance -= step
+            }
+            return result
         }
-        let nextRange = ranges.ranges.index(after: i.rangeIndex)
-        guard nextRange < ranges.ranges.endIndex else { return endIndex }
-        return Index(rangeIndex: nextRange, indexInRange: 0)
+    }
+
+    /// Returns the distance between two indices.
+    ///
+    /// - Note: The complexity of this is _not_ O(1)
+    ///
+    /// - Complexity: O(n)
+    public func distance(from start: Self.Index, to end: Self.Index) -> Int {
+        if start.rangeIndex == end.rangeIndex {
+            return start.indexInRange.distance(to: end.indexInRange)
+        } else if start.rangeIndex < end.rangeIndex {
+            let offset = Int(Int64(ranges.ranges[start.rangeIndex].count) - start.indexInRange)
+            let nextRange = ranges.ranges.index(after: start.rangeIndex)
+            return offset + distance(from: Index(rangeIndex: nextRange, indexInRange: 0), to: end)
+        } else {
+            return -distance(from: end, to: start)
+        }
     }
 
     public subscript(position: Index) -> UID {
@@ -193,6 +250,10 @@ extension UIDSet: Collection {
     }
 
     /// The number of UIDs in the set.
+    ///
+    /// - Note: The complexity of this is _not_ O(1)
+    ///
+    /// - Complexity: O(n)
     public var count: Int {
         ranges.ranges.reduce(into: 0) { $0 += $1.count }
     }
