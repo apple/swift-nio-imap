@@ -18,9 +18,8 @@
 ///
 /// Use `String(init(_: InternetMessageDate)` to get the underlying string representation.
 public struct InternetMessageDate: Equatable {
-    
     var value: String
-    
+
     /// Creates a new `InternetMessageDate` from a given `String`.
     /// - parameter string: A `String` containing some textual date value.
     public init(_ string: String) {
@@ -29,7 +28,6 @@ public struct InternetMessageDate: Equatable {
 }
 
 extension String {
-    
     /// Creates a new `String` from an `InternetMessageDate`
     /// - parameter date: The `InternetMessageDate`.
     public init(_ date: InternetMessageDate) {
@@ -38,7 +36,6 @@ extension String {
 }
 
 extension InternetMessageDate: ExpressibleByStringLiteral {
-    
     /// Creates a new `InternetMessageDate` from a given `String`.
     /// - parameter stringLiteral: A `String` containing some textual date value.
     public init(stringLiteral value: String) {
@@ -47,10 +44,9 @@ extension InternetMessageDate: ExpressibleByStringLiteral {
 }
 
 // MARK: - Encoding
+
 extension EncodeBuffer {
-    
     @discardableResult mutating func writeInternetMessageDate(_ date: InternetMessageDate) -> Int {
         self.writeString(date.value)
     }
-    
 }

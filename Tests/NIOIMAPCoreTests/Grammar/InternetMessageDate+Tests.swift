@@ -19,12 +19,10 @@ import XCTest
 class InternetMessageDate_Tests: EncodeTestClass {}
 
 extension InternetMessageDate_Tests {
-    
     func testEncode() {
         self.iterateInputs(
             inputs: [(.init("test"), "test", #line)],
             encoder: { self.testBuffer.writeInternetMessageDate($0) }
         )
     }
-    
 }

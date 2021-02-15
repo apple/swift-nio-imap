@@ -90,7 +90,7 @@ extension EncodeBuffer {
 
     @discardableResult mutating func writeEnvelope(_ envelope: Envelope) -> Int {
         self.writeString("(") +
-        self.writeNString(envelope.date?.value) +
+            self.writeNString(envelope.date?.value) +
             self.writeSpace() +
             self.writeNString(envelope.subject) +
             self.writeSpace() +
