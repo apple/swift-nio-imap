@@ -18,7 +18,7 @@ import struct NIO.ByteBuffer
 /// It's entirely possible for an envelope to be completely empty, though this will be rare.
 public struct Envelope: Equatable {
     /// The local time and date that the message was written.
-    public var date: String?
+    public var date: InternetMessageDate?
 
     /// The subject of the message.
     public var subject: ByteBuffer?
@@ -58,7 +58,7 @@ public struct Envelope: Equatable {
     /// - parameter bcc: The blind-carbon-copy list
     /// - parameter inReplyTo: The message ID that this message replied to.
     /// - parameter messageID: A unique identifier for the message.
-    public init(date: String?, subject: ByteBuffer?, from: [AddressListElement], sender: [AddressListElement], reply: [AddressListElement], to: [AddressListElement], cc: [AddressListElement], bcc: [AddressListElement], inReplyTo: ByteBuffer?, messageID: String?) {
+    public init(date: InternetMessageDate?, subject: ByteBuffer?, from: [AddressListElement], sender: [AddressListElement], reply: [AddressListElement], to: [AddressListElement], cc: [AddressListElement], bcc: [AddressListElement], inReplyTo: ByteBuffer?, messageID: String?) {
         self.date = date
         self.subject = subject
         self.from = from
@@ -90,7 +90,7 @@ extension EncodeBuffer {
 
     @discardableResult mutating func writeEnvelope(_ envelope: Envelope) -> Int {
         self.writeString("(") +
-            self.writeNString(envelope.date) +
+        self.writeNString(envelope.date?.value) +
             self.writeSpace() +
             self.writeNString(envelope.subject) +
             self.writeSpace() +
