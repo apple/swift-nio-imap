@@ -96,7 +96,7 @@ extension GrammarParser {
     static func parseEnvelope(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Envelope {
         try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Envelope in
             try fixedString("(", buffer: &buffer, tracker: tracker)
-            let date = try self.parseNString(buffer: &buffer, tracker: tracker).flatMap { String(buffer: $0) }
+            let date = try self.parseNString(buffer: &buffer, tracker: tracker).flatMap { InternetMessageDate(String(buffer: $0)) }
             try space(buffer: &buffer, tracker: tracker)
             let subject = try self.parseNString(buffer: &buffer, tracker: tracker)
             try space(buffer: &buffer, tracker: tracker)
