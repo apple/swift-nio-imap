@@ -27,7 +27,7 @@ components that this product depends on.
 
 ---
 
-This product contains "Base64.swift", "DecodingError.swift", and "Chromium.swift" from swift-extras/swift-extras-base64-kit
+This product contains "Base64.swift", "DecodingError.swift", and "Chromium.swift" from swift-extras/swift-extras-base64-kit which is derived from "fastbase64" and "stringencoders".
 
   * LICENSE (Apache 2):
     * https://github.com/swift-extras/swift-extras-base64/blob/main/LICENSE
