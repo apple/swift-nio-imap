@@ -353,6 +353,23 @@ extension UIDSetTests {
         XCTAssertEqual(sut.index(sut.startIndex, offsetBy: 30, limitedBy: sut.endIndex), sut.endIndex)
         XCTAssertNil(sut.index(sut.startIndex, offsetBy: 31, limitedBy: sut.endIndex))
     }
+
+    func testRangeView() {
+        XCTAssertEqual(Array(UIDSet().ranges), [])
+        XCTAssertEqual(Array(UIDSet([1_234]).ranges), [
+            UIDRange(1_234 ... 1_234),
+        ])
+        XCTAssertEqual(Array(UIDSet([1, 4]).ranges), [
+            UIDRange(1 ... 1),
+            UIDRange(4 ... 4),
+        ])
+        XCTAssertEqual(Array(UIDSet([17 ... 32, 400 ... 1_234, 2_001, 20_800 ... 21_044]).ranges), [
+            UIDRange(17 ... 32),
+            UIDRange(400 ... 1_234),
+            UIDRange(2_001),
+            UIDRange(20_800 ... 21_044),
+        ])
+    }
 }
 
 /// Helper to make the result equatable
