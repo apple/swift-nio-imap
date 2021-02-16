@@ -20,22 +20,22 @@ import StandardLibraryPreview
 /// UIDs are _not_ sorted.
 public struct UIDSet: Hashable {
     /// A non-empty array of UID ranges.
-    fileprivate var ranges: RangeSet<UIDShiftWrapper>
+    fileprivate var _ranges: RangeSet<UIDShiftWrapper>
 
     fileprivate init(_ ranges: RangeSet<UIDShiftWrapper>) {
-        self.ranges = ranges
+        self._ranges = ranges
     }
 
     /// Creates a new `UIDSet` containing the UIDs in the given ranges.
     public init<S: Sequence>(_ ranges: S) where S.Element == UIDRange {
         self.init()
         ranges.forEach {
-            self.ranges.insert(contentsOf: Range($0))
+            self._ranges.insert(contentsOf: Range($0))
         }
     }
 
     public init() {
-        self.ranges = RangeSet()
+        self._ranges = RangeSet()
     }
 }
 
@@ -90,6 +90,26 @@ extension UIDRange {
 // MARK: -
 
 extension UIDSet {
+    public struct RangeView: Sequence {
+        fileprivate var underlying: RangeSet<UIDShiftWrapper>.Ranges
+
+        public func makeIterator() -> AnyIterator<UIDRange> {
+            var u = underlying.makeIterator()
+            return AnyIterator {
+                guard let r = u.next() else { return nil }
+                return UIDRange(r)
+            }
+        }
+    }
+
+    public var ranges: RangeView {
+        RangeView(underlying: _ranges.ranges)
+    }
+}
+
+// MARK: -
+
+extension UIDSet {
     /// Creates a `UIDSet` from a closed range.
     /// - parameter range: The closed range to use.
     public init(_ range: ClosedRange<UID>) {
@@ -122,13 +142,13 @@ extension UIDSet {
     /// - parameter range: The `UIDRange` to construct a set from.
     public init(_ range: UIDRange) {
         let a: Range<UIDShiftWrapper> = Range(range)
-        self.ranges = RangeSet(a)
+        self._ranges = RangeSet(a)
     }
 }
 
 extension UIDSet {
     public init(_ uid: UID) {
-        self.ranges = RangeSet(UIDShiftWrapper(uid) ..< (UIDShiftWrapper(uid).advanced(by: 1)))
+        self._ranges = RangeSet(UIDShiftWrapper(uid) ..< (UIDShiftWrapper(uid).advanced(by: 1)))
     }
 }
 
@@ -137,7 +157,7 @@ extension UIDSet {
 extension UIDSet: CustomDebugStringConvertible {
     /// Creates a human-readable text representation of the set by joined ranges with a comma.
     public var debugDescription: String {
-        ranges
+        _ranges
             .ranges
             .map { "\(UIDRange($0))" }
             .joined(separator: ",")
@@ -161,15 +181,15 @@ extension UIDSet {
     public static let empty = UIDSet()
 }
 
-extension UIDSet: RandomAccessCollection {
+extension UIDSet: BidirectionalCollection {
     public struct Index {
         fileprivate var rangeIndex: RangeSet<UIDShiftWrapper>.Ranges.Index
         fileprivate var indexInRange: UID.Stride
     }
 
-    public var startIndex: Index { Index(rangeIndex: ranges.ranges.startIndex, indexInRange: 0) }
+    public var startIndex: Index { Index(rangeIndex: _ranges.ranges.startIndex, indexInRange: 0) }
     public var endIndex: Index {
-        Index(rangeIndex: ranges.ranges.endIndex, indexInRange: 0)
+        Index(rangeIndex: _ranges.ranges.endIndex, indexInRange: 0)
     }
 
     public func index(after i: Index) -> Index {
@@ -193,12 +213,12 @@ extension UIDSet: RandomAccessCollection {
                 if result.indexInRange >= 0 {
                     break
                 }
-                guard ranges.ranges.startIndex < result.rangeIndex else {
+                guard _ranges.ranges.startIndex < result.rangeIndex else {
                     break
                 }
                 // We need to find the previous range:
-                result.rangeIndex = ranges.ranges.index(before: result.rangeIndex)
-                let indexCount = UID.Stride(ranges.ranges[result.rangeIndex].count)
+                result.rangeIndex = _ranges.ranges.index(before: result.rangeIndex)
+                let indexCount = UID.Stride(_ranges.ranges[result.rangeIndex].count)
                 result.indexInRange = result.indexInRange.advanced(by: Int(indexCount))
             }
             return result
@@ -206,17 +226,17 @@ extension UIDSet: RandomAccessCollection {
             var remainingDistance = distance
             var result = i
             while remainingDistance > 0 {
-                guard result.rangeIndex < ranges.ranges.endIndex else {
+                guard result.rangeIndex < _ranges.ranges.endIndex else {
                     result.indexInRange = result.indexInRange.advanced(by: remainingDistance)
                     break
                 }
-                let indexesInRangeCount = UID.Stride(ranges.ranges[result.rangeIndex].count)
+                let indexesInRangeCount = UID.Stride(_ranges.ranges[result.rangeIndex].count)
                 if result.indexInRange.advanced(by: remainingDistance) < indexesInRangeCount {
                     result.indexInRange = result.indexInRange.advanced(by: remainingDistance)
                     break
                 }
-                let nextRange = ranges.ranges.index(after: result.rangeIndex)
-                let step = result.indexInRange.distance(to: UID.Stride(ranges.ranges[result.rangeIndex].count))
+                let nextRange = _ranges.ranges.index(after: result.rangeIndex)
+                let step = result.indexInRange.distance(to: UID.Stride(_ranges.ranges[result.rangeIndex].count))
                 result = Index(rangeIndex: nextRange, indexInRange: 0)
                 remainingDistance -= step
             }
@@ -233,8 +253,8 @@ extension UIDSet: RandomAccessCollection {
         if start.rangeIndex == end.rangeIndex {
             return start.indexInRange.distance(to: end.indexInRange)
         } else if start.rangeIndex < end.rangeIndex {
-            let offset = Int(Int64(ranges.ranges[start.rangeIndex].count) - start.indexInRange)
-            let nextRange = ranges.ranges.index(after: start.rangeIndex)
+            let offset = Int(Int64(_ranges.ranges[start.rangeIndex].count) - start.indexInRange)
+            let nextRange = _ranges.ranges.index(after: start.rangeIndex)
             return offset + distance(from: Index(rangeIndex: nextRange, indexInRange: 0), to: end)
         } else {
             return -distance(from: end, to: start)
@@ -242,11 +262,11 @@ extension UIDSet: RandomAccessCollection {
     }
 
     public subscript(position: Index) -> UID {
-        UID(ranges.ranges[position.rangeIndex].lowerBound).advanced(by: position.indexInRange)
+        UID(_ranges.ranges[position.rangeIndex].lowerBound).advanced(by: position.indexInRange)
     }
 
     public var isEmpty: Bool {
-        ranges.isEmpty
+        _ranges.isEmpty
     }
 
     /// The number of UIDs in the set.
@@ -255,7 +275,7 @@ extension UIDSet: RandomAccessCollection {
     ///
     /// - Complexity: O(n)
     public var count: Int {
-        ranges.ranges.reduce(into: 0) { $0 += $1.count }
+        _ranges.ranges.reduce(into: 0) { $0 += $1.count }
     }
 }
 
@@ -285,7 +305,7 @@ extension UIDSet.Index: Comparable {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeUIDSet(_ set: UIDSet) -> Int {
-        self.writeArray(set.ranges.ranges, separator: ",", parenthesis: false) { (element, self) in
+        self.writeArray(set._ranges.ranges, separator: ",", parenthesis: false) { (element, self) in
             let r = UIDRange(element)
             return self.writeUIDRange(r)
         }
@@ -298,26 +318,26 @@ extension UIDSet: SetAlgebra {
     public typealias Element = UID
 
     public func contains(_ member: UID) -> Bool {
-        ranges.contains(UIDShiftWrapper(member))
+        _ranges.contains(UIDShiftWrapper(member))
     }
 
     public func union(_ other: Self) -> Self {
-        UIDSet(ranges.union(other.ranges))
+        UIDSet(_ranges.union(other._ranges))
     }
 
     public func intersection(_ other: Self) -> Self {
-        UIDSet(ranges.intersection(other.ranges))
+        UIDSet(_ranges.intersection(other._ranges))
     }
 
     public func symmetricDifference(_ other: UIDSet) -> UIDSet {
-        UIDSet(ranges.symmetricDifference(other.ranges))
+        UIDSet(_ranges.symmetricDifference(other._ranges))
     }
 
     @discardableResult
     public mutating func insert(_ newMember: UID) -> (inserted: Bool, memberAfterInsert: UID) {
         guard !contains(newMember) else { return (false, newMember) }
         let r: Range<UIDShiftWrapper> = Range(newMember)
-        ranges.insert(contentsOf: r)
+        _ranges.insert(contentsOf: r)
         return (true, newMember)
     }
 
@@ -325,7 +345,7 @@ extension UIDSet: SetAlgebra {
     public mutating func remove(_ member: UID) -> UID? {
         guard contains(member) else { return nil }
         let r: Range<UIDShiftWrapper> = Range(member)
-        ranges.remove(contentsOf: r)
+        _ranges.remove(contentsOf: r)
         return member
     }
 
@@ -333,19 +353,19 @@ extension UIDSet: SetAlgebra {
     public mutating func update(with newMember: UID) -> UID? {
         guard !contains(newMember) else { return newMember }
         let r: Range<UIDShiftWrapper> = Range(newMember)
-        ranges.insert(contentsOf: r)
+        _ranges.insert(contentsOf: r)
         return nil
     }
 
     public mutating func formUnion(_ other: UIDSet) {
-        ranges.formUnion(other.ranges)
+        _ranges.formUnion(other._ranges)
     }
 
     public mutating func formIntersection(_ other: UIDSet) {
-        ranges.formIntersection(other.ranges)
+        _ranges.formIntersection(other._ranges)
     }
 
     public mutating func formSymmetricDifference(_ other: UIDSet) {
-        ranges.formSymmetricDifference(other.ranges)
+        _ranges.formSymmetricDifference(other._ranges)
     }
 }
