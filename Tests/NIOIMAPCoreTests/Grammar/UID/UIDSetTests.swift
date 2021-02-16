@@ -363,10 +363,15 @@ extension UIDSetTests {
             UIDRange(1 ... 1),
             UIDRange(4 ... 4),
         ])
-        XCTAssertEqual(Array(UIDSet([17 ... 32, 400 ... 1_234, 2_001, 20_800 ... 21_044]).ranges), [
+        XCTAssertEqual(Array(UIDSet([
+            17 ... 32,
+            400 ... 1_234,
+            2_001 ... 2_001,
+            20_800 ... 21_044,
+        ]).ranges), [
             UIDRange(17 ... 32),
             UIDRange(400 ... 1_234),
-            UIDRange(2_001),
+            UIDRange(2_001 ... 2_001),
             UIDRange(20_800 ... 21_044),
         ])
     }
