@@ -27,7 +27,7 @@ extension GrammarParser {
     // message-data    = nz-number SP ("EXPUNGE" / ("FETCH" SP msg-att))
     static func parseMessageData(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MessageData {
         func parseMessageData_expunge(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MessageData {
-            let number = try self.parseNZNumber(buffer: &buffer, tracker: tracker)
+            let number = try self.parseSequenceNumber(buffer: &buffer, tracker: tracker)
             try fixedString(" EXPUNGE", buffer: &buffer, tracker: tracker)
             return .expunge(number)
         }

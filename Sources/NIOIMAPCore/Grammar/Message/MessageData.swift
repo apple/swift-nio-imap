@@ -17,7 +17,7 @@ import struct NIO.ByteBuffer
 /// A piece of data regarding a message, returned as an untagged server response.
 public enum MessageData: Equatable {
     /// The specified message sequence number has been permanently removed from the mailbox
-    case expunge(Int)
+    case expunge(SequenceNumber)
 
     /// RFC 7162 Condstore
     /// The VANISHED UID FETCH modifier instructs the server to report those
@@ -45,7 +45,7 @@ extension EncodeBuffer {
     @discardableResult mutating func writeMessageData(_ data: MessageData) -> Int {
         switch data {
         case .expunge(let number):
-            return self.writeString("\(number) EXPUNGE")
+            return self.writeSequenceNumber(number) + self.writeString(" EXPUNGE")
         case .vanished(let set):
             return self.writeString("VANISHED ") + self.writeSequenceSet(set)
         case .vanishedEarlier(let set):
