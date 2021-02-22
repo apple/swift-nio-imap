@@ -58,7 +58,18 @@ public struct Envelope: Equatable {
     /// - parameter bcc: The blind-carbon-copy list
     /// - parameter inReplyTo: The message ID that this message replied to.
     /// - parameter messageID: A unique identifier for the message.
-    public init(date: InternetMessageDate?, subject: ByteBuffer?, from: [AddressListElement], sender: [AddressListElement], reply: [AddressListElement], to: [AddressListElement], cc: [AddressListElement], bcc: [AddressListElement], inReplyTo: MessageID?, messageID: MessageID?) {
+    public init(
+        date: InternetMessageDate?,
+        subject: ByteBuffer?,
+        from: [AddressListElement],
+        sender: [AddressListElement],
+        reply: [AddressListElement],
+        to: [AddressListElement],
+        cc: [AddressListElement],
+        bcc: [AddressListElement],
+        inReplyTo: MessageID?,
+        messageID: MessageID?
+    ) {
         self.date = date
         self.subject = subject
         self.from = from
