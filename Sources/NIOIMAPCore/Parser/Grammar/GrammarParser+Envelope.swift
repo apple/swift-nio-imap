@@ -89,7 +89,7 @@ extension GrammarParser {
             return Address(personName: name, sourceRoot: adl, mailbox: mailbox, host: host)
         }
     }
-    
+
     static func parseMessageID(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MessageID? {
         if let parsed = try self.parseNString(buffer: &buffer, tracker: tracker) {
             return .init(rawValue: String(buffer: parsed))

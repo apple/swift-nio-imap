@@ -14,7 +14,6 @@
 
 /// Represents the identifier of a message stored on a server.
 public struct MessageID: Hashable, RawRepresentable {
-    
     /// The `String` message identifier.
     public var rawValue: String
     
@@ -23,23 +22,20 @@ public struct MessageID: Hashable, RawRepresentable {
     public init(rawValue: String) {
         self.rawValue = rawValue
     }
-    
 }
 
 // MARK: - ExpressibleByStringLiteral
+
 extension MessageID: ExpressibleByStringLiteral {
-    
     public init(stringLiteral value: StringLiteralType) {
         self.rawValue = value
     }
-    
 }
 
 // MARK: - Encoding
+
 extension EncodeBuffer {
-    
     @discardableResult mutating func writeMessageID(_ id: MessageID) -> Int {
         self.writeIMAPString(id.rawValue)
     }
-    
 }
