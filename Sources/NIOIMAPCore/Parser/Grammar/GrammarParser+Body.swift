@@ -152,11 +152,11 @@ extension GrammarParser {
 
         func parseBodyFieldDsp_some(buffer: inout ByteBuffer, tracker: StackTracker) throws -> BodyStructure.Disposition? {
             try fixedString("(", buffer: &buffer, tracker: tracker)
-            let string = String(buffer: try self.parseString(buffer: &buffer, tracker: tracker))
+            let dispositionKind = BodyStructure.DispositionKind(rawValue: String(buffer: try self.parseString(buffer: &buffer, tracker: tracker)))
             try space(buffer: &buffer, tracker: tracker)
             let param = try self.parseBodyFieldParam(buffer: &buffer, tracker: tracker)
             try GrammarParser.fixedString(")", buffer: &buffer, tracker: tracker)
-            return BodyStructure.Disposition(kind: string, parameters: param)
+            return BodyStructure.Disposition(kind: dispositionKind, parameters: param)
         }
 
         return try oneOf([
