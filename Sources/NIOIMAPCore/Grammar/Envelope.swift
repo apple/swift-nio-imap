@@ -42,10 +42,10 @@ public struct Envelope: Equatable {
     public var bcc: [AddressListElement]
 
     /// The message ID that this message replied to.
-    public var inReplyTo: ByteBuffer?
+    public var inReplyTo: MessageID?
 
     /// A unique identifier for the message.
-    public var messageID: String?
+    public var messageID: MessageID?
 
     /// Creates a new envelope.
     /// - parameter date: The local time and date that the message was written.
@@ -58,7 +58,7 @@ public struct Envelope: Equatable {
     /// - parameter bcc: The blind-carbon-copy list
     /// - parameter inReplyTo: The message ID that this message replied to.
     /// - parameter messageID: A unique identifier for the message.
-    public init(date: InternetMessageDate?, subject: ByteBuffer?, from: [AddressListElement], sender: [AddressListElement], reply: [AddressListElement], to: [AddressListElement], cc: [AddressListElement], bcc: [AddressListElement], inReplyTo: ByteBuffer?, messageID: String?) {
+    public init(date: InternetMessageDate?, subject: ByteBuffer?, from: [AddressListElement], sender: [AddressListElement], reply: [AddressListElement], to: [AddressListElement], cc: [AddressListElement], bcc: [AddressListElement], inReplyTo: MessageID?, messageID: MessageID?) {
         self.date = date
         self.subject = subject
         self.from = from
@@ -88,6 +88,13 @@ extension EncodeBuffer {
             self.writeString(")")
     }
 
+    @discardableResult mutating func writeOptionalMessageID(_ id: MessageID?) -> Int {
+        if let id = id {
+            return self.writeMessageID(id)
+        }
+        return self.writeNil()
+    }
+    
     @discardableResult mutating func writeEnvelope(_ envelope: Envelope) -> Int {
         self.writeString("(") +
             self.writeNString(envelope.date?.value) +
@@ -106,9 +113,9 @@ extension EncodeBuffer {
             self.writeSpace() +
             self.writeEnvelopeAddresses(envelope.bcc) +
             self.writeSpace() +
-            self.writeNString(envelope.inReplyTo) +
+            self.writeOptionalMessageID(envelope.inReplyTo) +
             self.writeSpace() +
-            self.writeNString(envelope.messageID) +
+            self.writeOptionalMessageID(envelope.messageID) +
             self.writeString(")")
     }
 }
