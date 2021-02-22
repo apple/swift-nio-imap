@@ -16,7 +16,7 @@
 public struct MessageID: Hashable, RawRepresentable {
     /// The `String` message identifier.
     public var rawValue: String
-    
+
     /// Creates a new `MessageID` from the given string.
     /// - rawValue: The `String` message identifier.
     public init(rawValue: String) {

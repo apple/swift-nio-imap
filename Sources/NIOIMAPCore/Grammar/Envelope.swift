@@ -94,7 +94,7 @@ extension EncodeBuffer {
         }
         return self.writeNil()
     }
-    
+
     @discardableResult mutating func writeEnvelope(_ envelope: Envelope) -> Int {
         self.writeString("(") +
             self.writeNString(envelope.date?.value) +
