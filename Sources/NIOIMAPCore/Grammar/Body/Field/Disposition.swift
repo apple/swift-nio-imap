@@ -15,20 +15,20 @@
 import struct NIO.ByteBuffer
 
 extension BodyStructure {
-    
+
     public struct DispositionKind: Hashable, RawRepresentable {
-        
+
         public static let inline = Self(rawValue: "inline")
         public static let attachment  = Self(rawValue: "attachment")
-        
+
         public var rawValue: String
-        
+
         public init(rawValue: String) {
             self.rawValue = rawValue.lowercased()
         }
-        
+
     }
-    
+
     /// A parsed representation of a parenthesized list containing a type string, and attribute/value pairs.
     /// Recomended reading: RFC 3501 § 7.4.2 and RFC 2183
     public struct Disposition: Equatable {
@@ -83,7 +83,7 @@ extension EncodeBuffer {
 
         return
             self.writeString("(") +
-        self.writeIMAPString(dsp.kind.rawValue) +
+            self.writeIMAPString(dsp.kind.rawValue) +
             self.writeSpace() +
             self.writeBodyParameterPairs(dsp.parameters) +
             self.writeString(")")
