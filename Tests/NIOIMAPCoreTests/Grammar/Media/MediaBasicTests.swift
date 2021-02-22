@@ -23,13 +23,13 @@ class MediaBasicTests: EncodeTestClass {}
 extension MediaBasicTests {
     func testEncode_basicType() {
         let inputs: [(Media.BasicKind, String, UInt)] = [
-            (.application, #""APPLICATION""#, #line),
-            (.video, #""VIDEO""#, #line),
-            (.image, #""IMAGE""#, #line),
-            (.audio, #""AUDIO""#, #line),
-            (.message, #""MESSAGE""#, #line),
-            (.font, #"FONT"#, #line),
-            (.init("type"), "TYPE", #line),
+            (.application, #""application""#, #line),
+            (.video, #""video""#, #line),
+            (.image, #""image""#, #line),
+            (.audio, #""audio""#, #line),
+            (.message, #""message""#, #line),
+            (.font, #"font"#, #line),
+            (.init("TYPE"), "type", #line),
         ]
 
         for (test, expectedString, line) in inputs {
@@ -42,7 +42,7 @@ extension MediaBasicTests {
 
     func testEncode() {
         let inputs: [(Media.Basic, String, UInt)] = [
-            (Media.Basic(kind: .message, subtype: .mixed), "\"MESSAGE\" \"multipart/mixed\"", #line),
+            (Media.Basic(kind: .message, subtype: .mixed), "\"message\" \"multipart/mixed\"", #line),
         ]
 
         for (test, expectedString, line) in inputs {

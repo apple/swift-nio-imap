@@ -29,7 +29,7 @@ extension BodySinglepartTests {
                     fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .base64, octetCount: 6),
                     extension: nil
                 ),
-                "\"APPLICATION\" \"multipart/alternative\" NIL NIL NIL \"BASE64\" 6",
+                "\"application\" \"multipart/alternative\" NIL NIL NIL \"BASE64\" 6",
                 #line
             ),
             (
@@ -38,7 +38,7 @@ extension BodySinglepartTests {
                     fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .base64, octetCount: 7),
                     extension: .init(fieldMD5: "md5", dispositionAndLanguage: nil)
                 ),
-                "\"APPLICATION\" \"multipart/related\" NIL NIL NIL \"BASE64\" 7 \"md5\"",
+                "\"application\" \"multipart/related\" NIL NIL NIL \"BASE64\" 7 \"md5\"",
                 #line
             ),
             (
