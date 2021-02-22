@@ -15,27 +15,27 @@
 import struct NIO.ByteBuffer
 
 extension Media {
-    /// Represents a simple but common data type such as *APPLICATION* or *INAGE*
+    /// Represents a simple but common data type such as *application* or *image*
     public struct BasicKind: CustomDebugStringConvertible, Equatable {
-        /// IMAP4rev1 APPLICATION
-        public static let application = Self("APPLICATION")
+        /// IMAP4rev1 application
+        public static let application = Self("application")
 
-        /// IMAP4rev1 AUDIO
-        public static let audio = Self("AUDIO")
+        /// IMAP4rev1 audio
+        public static let audio = Self("audio")
 
-        /// IMAP4rev1 IMAGE
-        public static let image = Self("IMAGE")
+        /// IMAP4rev1 image
+        public static let image = Self("image")
 
-        /// IMAP4rev1 MESSAGE
-        public static let message = Self("MESSAGE")
+        /// IMAP4rev1 message
+        public static let message = Self("message")
 
-        /// IMAP4rev1 VIDEO
-        public static let video = Self("VIDEO")
+        /// IMAP4rev1 video
+        public static let video = Self("video")
 
-        /// IMAP4rev1 FONT
-        public static let font = Self("FONT")
+        /// IMAP4rev1 font
+        public static let font = Self("font")
 
-        /// The raw uppercased string representation of the type.
+        /// The raw lowercased string representation of the type.
         internal let stringValue: String
 
         /// See `rawValue`
@@ -44,14 +44,14 @@ extension Media {
         }
 
         /// Creates a new `BasicKind` from a given `String`.
-        /// - parameter rawValue: A string that represents the type, note that this will be uppercased.
+        /// - parameter rawValue: A string that represents the type, note that this will be lowercased.
         public init(_ stringValue: String) {
-            self.stringValue = stringValue.uppercased()
+            self.stringValue = stringValue.lowercased()
         }
     }
 
-    /// A basic media type to form a full data type. It contains a high-level type, e.g. "VIDEO", and a lower-level
-    /// subtype, e.g. "MP4", to construct to construct "VIDEO/MP4".
+    /// A basic media type to form a full data type. It contains a high-level type, e.g. "video", and a lower-level
+    /// subtype, e.g. "MP4", to construct to construct "video/mp4".
     public struct Basic: Equatable {
         /// The top-level media kind.
         public var kind: BasicKind
