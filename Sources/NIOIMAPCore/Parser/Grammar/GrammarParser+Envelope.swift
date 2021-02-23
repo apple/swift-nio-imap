@@ -90,6 +90,13 @@ extension GrammarParser {
         }
     }
 
+    static func parseMessageID(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MessageID? {
+        if let parsed = try self.parseNString(buffer: &buffer, tracker: tracker) {
+            return .init(rawValue: String(buffer: parsed))
+        }
+        return nil
+    }
+
     // envelope        = "(" env-date SP env-subject SP env-from SP
     //                   env-sender SP env-reply-to SP env-to SP env-cc SP
     //                   env-bcc SP env-in-reply-to SP env-message-id ")"
@@ -112,9 +119,9 @@ extension GrammarParser {
             try space(buffer: &buffer, tracker: tracker)
             let bcc = try self.parseOptionalEnvelopeAddresses(buffer: &buffer, tracker: tracker)
             try space(buffer: &buffer, tracker: tracker)
-            let inReplyTo = try self.parseNString(buffer: &buffer, tracker: tracker)
+            let inReplyTo = try self.parseMessageID(buffer: &buffer, tracker: tracker)
             try space(buffer: &buffer, tracker: tracker)
-            let messageID = try self.parseNString(buffer: &buffer, tracker: tracker).flatMap { String(buffer: $0) }
+            let messageID = try self.parseMessageID(buffer: &buffer, tracker: tracker)
             try fixedString(")", buffer: &buffer, tracker: tracker)
             return Envelope(
                 date: date,
