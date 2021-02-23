@@ -15,9 +15,7 @@
 import struct NIO.ByteBuffer
 
 extension BodyStructure {
-
     public struct DispositionKind: Hashable, RawRepresentable {
-
         public static let inline = Self(rawValue: "inline")
         public static let attachment  = Self(rawValue: "attachment")
 
@@ -26,7 +24,6 @@ extension BodyStructure {
         public init(rawValue: String) {
             self.rawValue = rawValue.lowercased()
         }
-
     }
 
     /// A parsed representation of a parenthesized list containing a type string, and attribute/value pairs.
@@ -66,11 +63,9 @@ extension BodyStructure {
 }
 
 extension BodyStructure.DispositionKind: ExpressibleByStringLiteral {
-    
     public init(stringLiteral value: StringLiteralType) {
         self.rawValue = value.lowercased()
     }
-    
 }
 
 // MARK: - Encoding
