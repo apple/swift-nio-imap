@@ -17,7 +17,7 @@ import struct NIO.ByteBuffer
 extension BodyStructure {
     public struct DispositionKind: Hashable, RawRepresentable {
         public static let inline = Self(rawValue: "inline")
-        public static let attachment  = Self(rawValue: "attachment")
+        public static let attachment = Self(rawValue: "attachment")
 
         public var rawValue: String
 
