@@ -109,7 +109,7 @@ extension BodyStructure.Singlepart {
         /// Creates a new `Extension`
         /// - parameter fieldMD5: A string giving the body MD5 value.
         /// - parameter dispositionAndLanguage: An optional `Disposition` and `LanguageLocation` pairing.
-        init(digest: String?, dispositionAndLanguage: BodyStructure.DispositionAndLanguage?) {
+        public init(digest: String?, dispositionAndLanguage: BodyStructure.DispositionAndLanguage?) {
             self.digest = digest
             self.dispositionAndLanguage = dispositionAndLanguage
         }
