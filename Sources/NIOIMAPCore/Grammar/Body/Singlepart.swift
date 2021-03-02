@@ -30,8 +30,8 @@ extension BodyStructure {
         /// - parameter type: The type of single-part. Note that "message" types may contain a multi-part.
         /// - parameter fields: A collection of common message attributes, such as a message identifier.
         /// - parameter extension: An optional extension to the core message. Not required to construct a valid message.
-        public init(type: BodyStructure.Singlepart.Kind, fields: Fields, extension: Extension? = nil) {
-            self.kind = type
+        public init(kind: BodyStructure.Singlepart.Kind, fields: Fields, `extension`: Extension? = nil) {
+            self.kind = kind
             self.fields = fields
             self.extension = `extension`
         }
@@ -71,12 +71,12 @@ extension BodyStructure.Singlepart {
         /// - parameter message:
         /// - parameter envelope: The envelope of the message
         /// - parameter body: The encapsulated message. Note that this may be a multi-part.
-        /// - parameter fieldLines: The number of lines in the message
-        public init(message: Media.Message, envelope: Envelope, body: BodyStructure, fieldLines: Int) {
+        /// - parameter lineCount: The number of lines in the message
+        public init(message: Media.Message, envelope: Envelope, body: BodyStructure, lineCount: Int) {
             self.message = message
             self.envelope = envelope
             self.body = body
-            self.lineCount = fieldLines
+            self.lineCount = lineCount
         }
     }
 
@@ -109,8 +109,8 @@ extension BodyStructure.Singlepart {
         /// Creates a new `Extension`
         /// - parameter fieldMD5: A string giving the body MD5 value.
         /// - parameter dispositionAndLanguage: An optional `Disposition` and `LanguageLocation` pairing.
-        init(fieldMD5: String?, dispositionAndLanguage: BodyStructure.DispositionAndLanguage?) {
-            self.digest = fieldMD5
+        init(digest: String?, dispositionAndLanguage: BodyStructure.DispositionAndLanguage?) {
+            self.digest = digest
             self.dispositionAndLanguage = dispositionAndLanguage
         }
     }

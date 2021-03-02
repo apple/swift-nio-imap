@@ -25,7 +25,7 @@ extension BodySinglepartTests {
         let inputs: [(BodyStructure.Singlepart, String, UInt)] = [
             (
                 .init(
-                    type: .basic(.init(kind: .application, subtype: .alternative)),
+                    kind: .basic(.init(kind: .application, subtype: .alternative)),
                     fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .base64, octetCount: 6),
                     extension: nil
                 ),
@@ -34,16 +34,16 @@ extension BodySinglepartTests {
             ),
             (
                 .init(
-                    type: .basic(.init(kind: .application, subtype: .related)),
+                    kind: .basic(.init(kind: .application, subtype: .related)),
                     fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .base64, octetCount: 7),
-                    extension: .init(fieldMD5: "md5", dispositionAndLanguage: nil)
+                    extension: .init(digest: "md5", dispositionAndLanguage: nil)
                 ),
                 "\"application\" \"multipart/related\" NIL NIL NIL \"BASE64\" 7 \"md5\"",
                 #line
             ),
             (
                 .init(
-                    type: .text(.init(mediaText: "subtype", lineCount: 5)),
+                    kind: .text(.init(mediaText: "subtype", lineCount: 5)),
                     fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .base64, octetCount: 6),
                     extension: nil
                 ),
@@ -52,18 +52,18 @@ extension BodySinglepartTests {
             ),
             (
                 .init(
-                    type: .message(
+                    kind: .message(
                         .init(
                             message: .rfc822,
                             envelope: .init(date: "date", subject: nil, from: [], sender: [], reply: [], to: [], cc: [], bcc: [], inReplyTo: nil, messageID: nil),
                             body: .singlepart(
                                 .init(
-                                    type: .text(.init(mediaText: "subtype", lineCount: 5)),
+                                    kind: .text(.init(mediaText: "subtype", lineCount: 5)),
                                     fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .base64, octetCount: 6),
                                     extension: nil
                                 )
                             ),
-                            fieldLines: 8
+                            lineCount: 8
                         )
                     ),
                     fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .base64, octetCount: 6),
@@ -84,9 +84,9 @@ extension BodySinglepartTests {
 
     func testEncode_extension() {
         let inputs: [(BodyStructure.Singlepart.Extension, String, UInt)] = [
-            (.init(fieldMD5: nil, dispositionAndLanguage: nil), "NIL", #line),
-            (.init(fieldMD5: "md5", dispositionAndLanguage: nil), "\"md5\"", #line),
-            (.init(fieldMD5: "md5", dispositionAndLanguage: .init(disposition: .init(kind: "string", parameters: [:]), language: nil)), "\"md5\" (\"string\" NIL)", #line),
+            (.init(digest: nil, dispositionAndLanguage: nil), "NIL", #line),
+            (.init(digest: "md5", dispositionAndLanguage: nil), "\"md5\"", #line),
+            (.init(digest: "md5", dispositionAndLanguage: .init(disposition: .init(kind: "string", parameters: [:]), language: nil)), "\"md5\" (\"string\" NIL)", #line),
         ]
 
         for (test, expectedString, line) in inputs {

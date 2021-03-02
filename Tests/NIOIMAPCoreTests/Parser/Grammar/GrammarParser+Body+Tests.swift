@@ -149,7 +149,7 @@ extension GrammarParser_Body_Tests {
                 "\"AUDIO\" \"multipart/alternative\" NIL NIL NIL \"BASE64\" 1",
                 "\r\n",
                 .init(
-                    type: .basic(.init(kind: .audio, subtype: .alternative)),
+                    kind: .basic(.init(kind: .audio, subtype: .alternative)),
                     fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .base64, octetCount: 1),
                     extension: nil
                 ),
@@ -159,7 +159,7 @@ extension GrammarParser_Body_Tests {
                 "\"APPLICATION\" \"multipart/mixed\" NIL \"id\" \"description\" \"7BIT\" 2",
                 "\r\n",
                 .init(
-                    type: .basic(.init(kind: .application, subtype: .mixed)),
+                    kind: .basic(.init(kind: .application, subtype: .mixed)),
                     fields: .init(parameters: [:], id: "id", contentDescription: "description", encoding: .sevenBit, octetCount: 2),
                     extension: nil
                 ),
@@ -169,7 +169,7 @@ extension GrammarParser_Body_Tests {
                 "\"VIDEO\" \"multipart/related\" (\"f1\" \"v1\") NIL NIL \"8BIT\" 3",
                 "\r\n",
                 .init(
-                    type: .basic(.init(kind: .video, subtype: .related)),
+                    kind: .basic(.init(kind: .video, subtype: .related)),
                     fields: .init(parameters: ["f1": "v1"], id: nil, contentDescription: nil, encoding: .eightBit, octetCount: 3),
                     extension: nil
                 ),
@@ -182,12 +182,12 @@ extension GrammarParser_Body_Tests {
                 "\"MESSAGE\" \"RFC822\" NIL NIL NIL \"BASE64\" 4 (NIL NIL NIL NIL NIL NIL NIL NIL NIL NIL) (\"IMAGE\" \"multipart/related\" NIL NIL NIL \"BINARY\" 5) 8",
                 "\r\n",
                 .init(
-                    type: .message(
+                    kind: .message(
                         .init(
                             message: .rfc822,
                             envelope: Envelope(date: nil, subject: nil, from: [], sender: [], reply: [], to: [], cc: [], bcc: [], inReplyTo: nil, messageID: nil),
-                            body: .singlepart(.init(type: .basic(.init(kind: .image, subtype: .related)), fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .binary, octetCount: 5))),
-                            fieldLines: 8
+                            body: .singlepart(.init(kind: .basic(.init(kind: .image, subtype: .related)), fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .binary, octetCount: 5))),
+                            lineCount: 8
                         )
                     ),
                     fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .base64, octetCount: 4),
@@ -202,7 +202,7 @@ extension GrammarParser_Body_Tests {
                 "\"TEXT\" \"media\" NIL NIL NIL \"QUOTED-PRINTABLE\" 1 2",
                 "\r\n",
                 .init(
-                    type: .text(.init(mediaText: "media", lineCount: 2)),
+                    kind: .text(.init(mediaText: "media", lineCount: 2)),
                     fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .quotedPrintable, octetCount: 1),
                     extension: nil
                 ),
