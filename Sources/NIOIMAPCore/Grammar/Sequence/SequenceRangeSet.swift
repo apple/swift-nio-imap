@@ -246,10 +246,12 @@ extension SequenceRangeSet: SetAlgebra {
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
-    @discardableResult mutating func writeSequenceRangeSet(_ set: SequenceRangeSet) -> Int {
-        self.writeArray(set.ranges.ranges, separator: ",", parenthesis: false) { (element, self) in
-            self.writeSequenceRange(SequenceRange(element))
+extension SequenceRangeSet: LastCommandSetProtocol {
+    
+    public func writeIntoBuffer(_ buffer: inout EncodeBuffer) -> Int {
+        buffer.writeArray(self.ranges.ranges, separator: ",", parenthesis: false) { (element, buffer) in
+            buffer.writeSequenceRange(SequenceRange(element))
         }
     }
+    
 }

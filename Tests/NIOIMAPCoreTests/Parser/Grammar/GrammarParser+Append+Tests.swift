@@ -109,16 +109,16 @@ extension GrammarParser_Append_Tests {
                 (
                     " name1 1:2",
                     "\r",
-                    .init(flagList: [], internalDate: nil, extensions: ["name1": .sequence(SequenceSet(1 ... 2))]),
+                    .init(flagList: [], internalDate: nil, extensions: ["name1": .sequence(.set(.init(1 ... 2)))]),
                     #line
                 ),
                 (
                     " name1 1:2 name2 2:3 name3 3:4",
                     "\r",
                     .init(flagList: [], internalDate: nil, extensions: [
-                        "name1": .sequence(SequenceSet(1 ... 2)),
-                        "name2": .sequence(SequenceSet(2 ... 3)),
-                        "name3": .sequence(SequenceSet(3 ... 4)),
+                        "name1": .sequence(.set(.init(1 ... 2))),
+                        "name2": .sequence(.set(.init(2 ... 3))),
+                        "name3": .sequence(.set(.init(3 ... 4))),
                     ]),
                     #line
                 ),

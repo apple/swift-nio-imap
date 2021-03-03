@@ -49,7 +49,7 @@ let commands: [(String, Command)] = [
     ("parse_esearch_complex", .esearch(.init(key: .and([.younger(123), .or(.keyword(.colorBit0), .keyword(.colorBit1))]), charset: "UTF-8", returnOptions: [.min, .max, .count], sourceOptions: ESearchSourceOptions(sourceMailbox: [.inboxes])!))),
     ("parse_examine_no_params", .examine(.inbox, [:])),
     ("parse_examine_1_param", .examine(.inbox, ["param": nil])),
-    ("parse_examine_lots_param", .examine(.inbox, ["param1": nil, "param2": nil, "param3": .sequence(.range([1 ... 5, 10 ... 100])), "param4": .comp(["str1"])])),
+    ("parse_examine_lots_param", .examine(.inbox, ["param1": nil, "param2": nil, "param3": .sequence(.set([1 ... 5, 10 ... 100])), "param4": .comp(["str1"])])),
     ("parse_expunge", .expunge),
     ("parse_genurlauth_one", .genURLAuth([.init(urlRump: ByteBuffer(string: "test"), mechanism: .internal)])),
     ("parse_genurlauth_many", .genURLAuth([.init(urlRump: ByteBuffer(string: "test1"), mechanism: .internal), .init(urlRump: ByteBuffer(string: "test2"), mechanism: .internal), .init(urlRump: ByteBuffer(string: "test3"), mechanism: .internal)])),

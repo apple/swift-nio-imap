@@ -769,7 +769,7 @@ extension ParserUnitTests {
     func testCopy_valid() {
         TestUtilities.withBuffer("COPY 1,2,3 inbox", terminator: " ") { (buffer) in
             let copy = try GrammarParser.parseCopy(buffer: &buffer, tracker: .testTracker)
-            let expectedSequence = SequenceSet([1, 2, 3])!
+            let expectedSequence = LastCommandSet<SequenceRangeSet>([1, 2, 3])!
             let expectedMailbox = MailboxName.inbox
             XCTAssertEqual(copy, Command.copy(expectedSequence, expectedMailbox))
         }
@@ -1910,7 +1910,7 @@ extension ParserUnitTests {
             testFunction: GrammarParser.parseMove,
             validInputs: [
                 ("MOVE * inbox", " ", .move(.all, .inbox), #line),
-                ("MOVE 1:2,4:5 test", " ", .move(SequenceSet([SequenceRange(1 ... 2), SequenceRange(4 ... 5)])!, .init("test")), #line),
+                ("MOVE 1:2,4:5 test", " ", .move(LastCommandSet<SequenceRangeSet>([SequenceRange(1 ... 2), SequenceRange(4 ... 5)])!, .init("test")), #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []

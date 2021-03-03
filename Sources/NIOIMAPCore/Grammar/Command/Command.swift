@@ -92,19 +92,19 @@ public enum Command: Equatable {
     case idleStart
 
     /// Copies each message in a given set to a new mailbox, preserving the original in the current mailbox.
-    case copy(SequenceSet, MailboxName)
+    case copy(LastCommandSet<SequenceRangeSet>, MailboxName)
 
     /// Fetches an array of specified attributes for each message in a given set.
-    case fetch(SequenceSet, [FetchAttribute], KeyValues<String, ParameterValue?>)
+    case fetch(LastCommandSet<SequenceRangeSet>, [FetchAttribute], KeyValues<String, ParameterValue?>)
 
     /// Alters data associated with a message, typically returning the new data as an untagged fetch response.
-    case store(SequenceSet, [StoreModifier], StoreFlags)
+    case store(LastCommandSet<SequenceRangeSet>, [StoreModifier], StoreFlags)
 
     /// Searches the currently-selected mailbox for messages that match the search criteria.
     case search(key: SearchKey, charset: String? = nil, returnOptions: [SearchReturnOption] = [])
 
     /// Moves each message in a given set into a new mailbox, removing the copy from the current mailbox.
-    case move(SequenceSet, MailboxName)
+    case move(LastCommandSet<SequenceRangeSet>, MailboxName)
 
     /// Identifies the client to the server
     case id(KeyValues<String, ByteBuffer?>)
@@ -478,9 +478,9 @@ extension CommandEncodeBuffer {
             }
     }
 
-    private mutating func writeCommandKind_copy(set: SequenceSet, mailbox: MailboxName) -> Int {
+    private mutating func writeCommandKind_copy(set: LastCommandSet<SequenceRangeSet>, mailbox: MailboxName) -> Int {
         self.buffer.writeString("COPY ") +
-            self.buffer.writeSequenceSet(set) +
+            self.buffer.writeLastCommandSet(set) +
             self.buffer.writeSpace() +
             self.buffer.writeMailbox(mailbox)
     }
@@ -492,9 +492,9 @@ extension CommandEncodeBuffer {
             self.buffer.writeMailbox(mailbox)
     }
 
-    private mutating func writeCommandKind_fetch(set: SequenceSet, atts: [FetchAttribute], modifiers: KeyValues<String, ParameterValue?>) -> Int {
+    private mutating func writeCommandKind_fetch(set: LastCommandSet<SequenceRangeSet>, atts: [FetchAttribute], modifiers: KeyValues<String, ParameterValue?>) -> Int {
         self.buffer.writeString("FETCH ") +
-            self.buffer.writeSequenceSet(set) +
+            self.buffer.writeLastCommandSet(set) +
             self.buffer.writeSpace() +
             self.buffer.writeFetchAttributeList(atts) +
             self.buffer.writeIfExists(modifiers) { (modifiers) -> Int in
@@ -512,9 +512,9 @@ extension CommandEncodeBuffer {
             }
     }
 
-    private mutating func writeCommandKind_store(set: SequenceSet, modifiers: [StoreModifier], flags: StoreFlags) -> Int {
+    private mutating func writeCommandKind_store(set: LastCommandSet<SequenceRangeSet>, modifiers: [StoreModifier], flags: StoreFlags) -> Int {
         self.buffer.writeString("STORE ") +
-            self.buffer.writeSequenceSet(set) +
+            self.buffer.writeLastCommandSet(set) +
             self.buffer.write(if: modifiers.count >= 1) {
                 self.buffer.writeSpace() +
                     self.buffer.writeArray(modifiers) { (element, buffer) -> Int in
@@ -552,9 +552,9 @@ extension CommandEncodeBuffer {
             self.writeCommandKind_search(key: key, charset: charset, returnOptions: returnOptions)
     }
 
-    private mutating func writeCommandKind_move(set: SequenceSet, mailbox: MailboxName) -> Int {
+    private mutating func writeCommandKind_move(set: LastCommandSet<SequenceRangeSet>, mailbox: MailboxName) -> Int {
         self.buffer.writeString("MOVE ") +
-            self.buffer.writeSequenceSet(set) +
+            self.buffer.writeLastCommandSet(set) +
             self.buffer.writeSpace() +
             self.buffer.writeMailbox(mailbox)
     }

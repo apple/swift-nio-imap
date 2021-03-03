@@ -69,7 +69,7 @@ final class RoundtripTests: XCTestCase {
             (.status(.inbox, [.messageCount]), #line),
             (.status(MailboxName("foobar"), [.messageCount, .recentCount, .uidNext]), #line),
 
-            (.copy(SequenceSet(2...), .inbox), #line),
+            (.copy(LastCommandSet(2...), .inbox), #line),
 
             (.fetch([.all], .all, [:]), #line),
             (.fetch([.all], .fast, [:]), #line),

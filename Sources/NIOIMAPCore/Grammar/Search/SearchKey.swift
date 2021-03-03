@@ -122,7 +122,7 @@ public indirect enum SearchKey: Hashable {
     case uid(UIDSet)
 
     /// RFC 3501: Messages that match a given sequence set.
-    case sequenceNumbers(SequenceSet)
+    case sequenceNumbers(LastCommandSet<SequenceRangeSet>)
 
     /// RFC 3501: Messages that match all of the given keys.
     case and([SearchKey])
@@ -331,7 +331,7 @@ extension EncodeBuffer {
                 self.writeUIDSet(set)
 
         case .sequenceNumbers(let set):
-            return self.writeSequenceSet(set)
+            return self.writeLastCommandSet(set)
 
         case .and(let keys):
             if keys.count == 0 {

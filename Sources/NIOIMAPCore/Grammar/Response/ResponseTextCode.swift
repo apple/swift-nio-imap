@@ -131,7 +131,7 @@ public enum ResponseTextCode: Equatable {
 
     /// Used with an OK response to the STORE command.  (It can also be used in a NO
     /// response.)
-    case modificationSequence(SequenceSet)
+    case modificationSequence(LastCommandSet<SequenceRangeSet>)
 
     /// A server supporting the persistent storage of mod-sequences for the mailbox
     /// MUST send the OK untagged response including HIGHESTMODSEQ response
@@ -220,7 +220,7 @@ extension EncodeBuffer {
         case .noModificationSequence:
             return self.writeString("NOMODSEQ")
         case .modificationSequence(let set):
-            return self.writeString("MODIFIED ") + self.writeSequenceSet(set)
+            return self.writeString("MODIFIED ") + self.writeLastCommandSet(set)
         case .highestModificationSequence(let val):
             return self.writeString("HIGHESTMODSEQ ") + self.writeModificationSequenceValue(val)
         case .metadataLongEntries(let num):
