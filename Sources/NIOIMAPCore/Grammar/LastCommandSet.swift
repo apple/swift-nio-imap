@@ -12,16 +12,24 @@
 //
 //===----------------------------------------------------------------------===//
 
+/// Any set-type that wants to be wrapped inside `LastCommandSet` conforms to this
+/// protocol. It is used to provide an interface dictating how the generic type is written to a
+/// `EncodeBuffer`.
 public protocol LastCommandSetProtocol: Hashable {
  
+    /// Writes the set to an `inout EncodeBuffer`.
     func writeIntoBuffer(_ buffer: inout EncodeBuffer) -> Int
     
 }
 
+/// Provides support for using either the result of the last command (`.lastCommand`) or
+/// a concrete set type.
 public enum LastCommandSet<T: LastCommandSetProtocol>: Hashable {
     
+    /// A specific set that will be sent to the IMAP server. E.g. `1, 2:5, 10:*`
     case set(T)
     
+    /// Tells the server to use the result of the last command, described in RFC 5182.
     case lastCommand
     
 }
