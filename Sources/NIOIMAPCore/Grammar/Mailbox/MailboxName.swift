@@ -151,11 +151,10 @@ extension MailboxPath {
     /// - throws: `InvalidMailboxNameError` if the `displayName` contains a `pathSeparator`.
     /// - returns: A new `MailboxPath` containing the given name and separator.
     public func makeSubMailbox(displayName: String) throws -> MailboxPath {
-        
         guard let separator = self.pathSeparator else {
             throw InvalidPathSeparatorError(description: "Need a path separator to make a sub mailbox")
         }
-        
+
         // the new name should not contain a path separator
         if displayName.contains(separator) {
             throw InvalidMailboxNameError(description: "\(displayName) cannot contain the separator \(separator)")

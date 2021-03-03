@@ -97,7 +97,7 @@ extension MailboxName_Tests {
             XCTAssertEqual(path.displayStringComponents(omittingEmptySubsequences: ommitEmpty), expected, line: line)
         }
     }
-    
+
     func testCreateSubmailboxWithoutPathSeparatorThrows() {
         let mailbox = try! MailboxPath(name: .inbox, pathSeparator: nil)
         XCTAssertThrowsError(try mailbox.makeSubMailbox(displayName: "sub")) { e in
