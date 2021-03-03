@@ -14,6 +14,33 @@
 
 import struct NIO.ByteBuffer
 
+public protocol LastCommandSetProtocol: Hashable {
+ 
+    func writeIntoBuffer(_ buffer: inout EncodeBuffer) -> Int
+    
+}
+
+public enum LastCommandSet<T: LastCommandSetProtocol>: Hashable {
+    
+    case set(T)
+    
+    case lastCommand
+    
+}
+
+extension EncodeBuffer {
+    
+    @discardableResult mutating func writeLastCommandSet<T>(_ set: LastCommandSet<T>) -> Int {
+        switch set {
+        case .lastCommand:
+            return self.writeString("$")
+        case .set(let set):
+            return set.writeIntoBuffer(&self)
+        }
+    }
+    
+}
+
 /// Represents a `SequenceRangeSet` using either a literal value, or some
 /// value stored on the server.
 public enum SequenceSet: Hashable {
