@@ -30,7 +30,7 @@ extension BodyStructure {
         /// - parameter type: The type of single-part. Note that "message" types may contain a multi-part.
         /// - parameter fields: A collection of common message attributes, such as a message identifier.
         /// - parameter extension: An optional extension to the core message. Not required to construct a valid message.
-        public init(kind: BodyStructure.Singlepart.Kind, fields: Fields, `extension`: Extension? = nil) {
+        public init(kind: BodyStructure.Singlepart.Kind, fields: Fields, extension: Extension? = nil) {
             self.kind = kind
             self.fields = fields
             self.extension = `extension`

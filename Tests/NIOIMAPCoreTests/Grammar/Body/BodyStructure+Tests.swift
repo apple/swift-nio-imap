@@ -95,8 +95,8 @@ extension BodyStructure_Tests {
             (
                 .multipart(BodyStructure.Multipart(parts: [
                     .singlepart(.init(kind: .basic(.init(kind: .audio, subtype: .mixed)), fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .base64, octetCount: 0))),
-                        .singlepart(.init(kind: .basic(.init(kind: .audio, subtype: .mixed)), fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .base64, octetCount: 0))),
-                        .singlepart(.init(kind: .basic(.init(kind: .audio, subtype: .mixed)), fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .base64, octetCount: 0))),
+                    .singlepart(.init(kind: .basic(.init(kind: .audio, subtype: .mixed)), fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .base64, octetCount: 0))),
+                    .singlepart(.init(kind: .basic(.init(kind: .audio, subtype: .mixed)), fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .base64, octetCount: 0))),
                 ], mediaSubtype: .mixed)),
                 [4],
                 #line
@@ -118,8 +118,8 @@ extension BodyStructure_Tests {
             (
                 .multipart(BodyStructure.Multipart(parts: [
                     .singlepart(.init(kind: .basic(.init(kind: .audio, subtype: .mixed)), fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .base64, octetCount: 0))),
-                        .singlepart(.init(kind: .basic(.init(kind: .audio, subtype: .mixed)), fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .base64, octetCount: 0))),
-                        .singlepart(.init(kind: .basic(.init(kind: .audio, subtype: .mixed)), fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .base64, octetCount: 0))),
+                    .singlepart(.init(kind: .basic(.init(kind: .audio, subtype: .mixed)), fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .base64, octetCount: 0))),
+                    .singlepart(.init(kind: .basic(.init(kind: .audio, subtype: .mixed)), fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .base64, octetCount: 0))),
                 ], mediaSubtype: .mixed)),
                 [3],
                 [2],
@@ -141,8 +141,8 @@ extension BodyStructure_Tests {
             ),
             (
                 .multipart(BodyStructure.Multipart(parts: [
-                    .singlepart(.init(kind: .basic(.init(kind: .audio, subtype: .mixed)), fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .base64, octetCount: 0))),.singlepart(.init(kind: .basic(.init(kind: .audio, subtype: .mixed)), fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .base64, octetCount: 0))),
-                        .singlepart(.init(kind: .basic(.init(kind: .audio, subtype: .mixed)), fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .base64, octetCount: 0))),
+                    .singlepart(.init(kind: .basic(.init(kind: .audio, subtype: .mixed)), fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .base64, octetCount: 0))), .singlepart(.init(kind: .basic(.init(kind: .audio, subtype: .mixed)), fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .base64, octetCount: 0))),
+                    .singlepart(.init(kind: .basic(.init(kind: .audio, subtype: .mixed)), fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .base64, octetCount: 0))),
                 ], mediaSubtype: .mixed)),
                 [2],
                 [3],
@@ -159,13 +159,13 @@ extension BodyStructure_Tests {
             (
                 .singlepart(.init(kind: .basic(.init(kind: .audio, subtype: .alternative)), fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .binary, octetCount: 0))),
                 [1],
-                    .singlepart(.init(kind: .basic(.init(kind: .audio, subtype: .alternative)), fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .binary, octetCount: 0))),
+                .singlepart(.init(kind: .basic(.init(kind: .audio, subtype: .alternative)), fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .binary, octetCount: 0))),
                 #line
             ),
             (
                 .singlepart(.init(kind: .text(.init(mediaText: "media", lineCount: 3)), fields: BodyStructure.Fields(parameters: [:], id: nil, contentDescription: nil, encoding: .binary, octetCount: 123))),
                 [1],
-                    .singlepart(.init(kind: .text(.init(mediaText: "media", lineCount: 3)), fields: BodyStructure.Fields(parameters: [:], id: nil, contentDescription: nil, encoding: .binary, octetCount: 123))),
+                .singlepart(.init(kind: .text(.init(mediaText: "media", lineCount: 3)), fields: BodyStructure.Fields(parameters: [:], id: nil, contentDescription: nil, encoding: .binary, octetCount: 123))),
                 #line
             ),
             (
@@ -184,17 +184,17 @@ extension BodyStructure_Tests {
                     )
                 ),
                 [1],
-                    .singlepart(.init(kind: .basic(.init(kind: .audio, subtype: .alternative)), fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .binary, octetCount: 0))),
+                .singlepart(.init(kind: .basic(.init(kind: .audio, subtype: .alternative)), fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .binary, octetCount: 0))),
                 #line
             ),
             (
                 .multipart(.init(parts: [
                     .singlepart(.init(kind: .basic(.init(kind: .audio, subtype: .alternative)), fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .binary, octetCount: 0))),
-                        .singlepart(.init(kind: .basic(.init(kind: .audio, subtype: .alternative)), fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .binary, octetCount: 1))),
-                        .singlepart(.init(kind: .basic(.init(kind: .audio, subtype: .alternative)), fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .binary, octetCount: 2))),
+                    .singlepart(.init(kind: .basic(.init(kind: .audio, subtype: .alternative)), fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .binary, octetCount: 1))),
+                    .singlepart(.init(kind: .basic(.init(kind: .audio, subtype: .alternative)), fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .binary, octetCount: 2))),
                 ], mediaSubtype: .init("subtype"))),
                 [3],
-                    .singlepart(.init(kind: .basic(.init(kind: .audio, subtype: .alternative)), fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .binary, octetCount: 2))),
+                .singlepart(.init(kind: .basic(.init(kind: .audio, subtype: .alternative)), fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .binary, octetCount: 2))),
                 #line
             ),
             (
@@ -204,13 +204,13 @@ extension BodyStructure_Tests {
                         .singlepart(.init(kind: .basic(.init(kind: .audio, subtype: .alternative)), fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .binary, octetCount: 0))),
                         .multipart(.init(parts: [
                             .singlepart(.init(kind: .basic(.init(kind: .audio, subtype: .alternative)), fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .binary, octetCount: 3))),
-                                .singlepart(.init(kind: .basic(.init(kind: .audio, subtype: .alternative)), fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .binary, octetCount: 4))),
-                                .singlepart(.init(kind: .basic(.init(kind: .audio, subtype: .alternative)), fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .binary, octetCount: 5))),
+                            .singlepart(.init(kind: .basic(.init(kind: .audio, subtype: .alternative)), fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .binary, octetCount: 4))),
+                            .singlepart(.init(kind: .basic(.init(kind: .audio, subtype: .alternative)), fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .binary, octetCount: 5))),
                         ], mediaSubtype: .init("subtype"))),
                     ], mediaSubtype: .init("subtype"))),
                 ], mediaSubtype: .init("subtype"))),
                 [2, 2, 1],
-                    .singlepart(.init(kind: .basic(.init(kind: .audio, subtype: .alternative)), fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .binary, octetCount: 3))),
+                .singlepart(.init(kind: .basic(.init(kind: .audio, subtype: .alternative)), fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .binary, octetCount: 3))),
                 #line
             ),
         ]
