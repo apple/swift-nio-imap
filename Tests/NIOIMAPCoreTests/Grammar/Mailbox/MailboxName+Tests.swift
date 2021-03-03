@@ -50,7 +50,7 @@ extension MailboxName_Tests {
 
         // sad path test make sure that mailbox size limit is enforced
         XCTAssertThrowsError(
-            try MailboxPath(name: .init(String(repeating: "a", count: 999)), pathSeparator: "/").makeSubMailbox(displayName: "1")
+            try MailboxPath(name: .init(ByteBuffer(string: String(repeating: "a", count: 999))), pathSeparator: "/").makeSubMailbox(displayName: "1")
         ) { error in
             XCTAssertEqual(error as! MailboxTooBigError, MailboxTooBigError(maximumSize: 1000, actualSize: 1001))
         }

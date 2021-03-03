@@ -175,35 +175,25 @@ extension MailboxPath {
     }
 }
 
-/// IMAPv4 `mailbox`
+/// A mailbox’s name.
+///
+/// This uniquely identifies a specific mailbox, but does not specify the
+/// path separator. In most cases, using a `MailboxPath` should be preferred since
+/// `MailboxPath` is able to
+/// 1. create a (display) `String` from a path.
+/// 2. create a path from a `String` (for new mailboxes created by a user)
+/// 3. split a path into its components (to figure out how paths are nested into each other).
 public struct MailboxName: Hashable {
     /// Represents an inbox.
-    public static var inbox = Self("INBOX")
+    public static var inbox = Self(ByteBuffer(string: "INBOX"))
 
     /// The raw bytes, readable as `[UInt8]`
     public var storage: ByteBuffer
-
-    /// The raw bytes decoded into a UTF8 `String`
-    ///
-    /// - ToDo: This should not be exposed. Needs to go through the “modified UTF-7” decoding.
-    public var stringValue: String {
-        String(buffer: self.storage)
-    }
 
     /// `true` if the internal storage reads "INBOX"
     /// otherwise `false`
     public var isInbox: Bool {
         storage.readableBytesView.lazy.map { $0 & 0xDF }.elementsEqual("INBOX".utf8)
-    }
-
-    /// Creates a new `MailboxName`. Note if the given string is some variation of "inbox" then we will uppercase it.
-    /// - parameter string: The mailbox name
-    public init(_ string: String) {
-        if string.uppercased() == "INBOX" {
-            self.storage = ByteBuffer(ByteBufferView("INBOX".utf8))
-        } else {
-            self.storage = ByteBuffer(ByteBufferView(string.utf8))
-        }
     }
 
     /// Creates a new `MailboxName` from the given bytes.
@@ -222,7 +212,8 @@ public struct MailboxName: Hashable {
 extension MailboxName: CustomDebugStringConvertible {
     /// Provides a human-readable description.
     public var debugDescription: String {
-        self.stringValue
+        let bytes = storage.readableBytesView.map { $0 & 0xDF }
+        return String(decoding: bytes, as: Unicode.UTF8.self)
     }
 }
 
