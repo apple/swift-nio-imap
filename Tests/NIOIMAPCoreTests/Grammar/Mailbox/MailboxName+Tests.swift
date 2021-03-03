@@ -38,12 +38,6 @@ extension MailboxName_Tests {
     func testMakeSubMailboxWithDisplayName() {
         let inputs: [(MailboxPath, String, MailboxPath, UInt)] = [
             (
-                try! .init(name: .init("box1"), pathSeparator: nil),
-                "box2",
-                try! .init(name: .init("box1box2"), pathSeparator: nil),
-                #line
-            ),
-            (
                 try! .init(name: .init("box"), pathSeparator: "/"),
                 "£",
                 try! .init(name: .init("box/&AKM-"), pathSeparator: "/"),
@@ -101,6 +95,13 @@ extension MailboxName_Tests {
         ]
         for (path, ommitEmpty, expected, line) in inputs {
             XCTAssertEqual(path.displayStringComponents(omittingEmptySubsequences: ommitEmpty), expected, line: line)
+        }
+    }
+    
+    func testCreateSubmailboxWithoutPathSeparatorThrows() {
+        let mailbox = try! MailboxPath(name: .inbox, pathSeparator: nil)
+        XCTAssertThrowsError(try mailbox.makeSubMailbox(displayName: "sub")) { e in
+            XCTAssertTrue(e is InvalidPathSeparatorError)
         }
     }
 }

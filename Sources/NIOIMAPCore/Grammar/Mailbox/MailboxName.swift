@@ -151,16 +151,19 @@ extension MailboxPath {
     /// - throws: `InvalidMailboxNameError` if the `displayName` contains a `pathSeparator`.
     /// - returns: A new `MailboxPath` containing the given name and separator.
     public func makeSubMailbox(displayName: String) throws -> MailboxPath {
+        
+        guard let separator = self.pathSeparator else {
+            throw InvalidPathSeparatorError(description: "Need a path separator to make a sub mailbox")
+        }
+        
         // the new name should not contain a path separator
-        if let separator = self.pathSeparator, displayName.contains(separator) {
+        if displayName.contains(separator) {
             throw InvalidMailboxNameError(description: "\(displayName) cannot contain the separator \(separator)")
         }
 
         // if a separator exists, write it after the root mailbox
         var newStorage = self.name.storage
-        if let separator = self.pathSeparator {
-            newStorage.writeBytes(separator.utf8)
-        }
+        newStorage.writeBytes(separator.utf8)
 
         var encodedNewName = ModifiedUTF7.encode(displayName)
         newStorage.writeBuffer(&encodedNewName)
@@ -169,7 +172,7 @@ extension MailboxPath {
             throw MailboxTooBigError(maximumSize: Self.maximumMailboxSize, actualSize: newStorage.readableBytes)
         }
 
-        return try MailboxPath(name: .init(newStorage), pathSeparator: self.pathSeparator)
+        return try MailboxPath(name: .init(newStorage), pathSeparator: separator)
     }
 }
 
