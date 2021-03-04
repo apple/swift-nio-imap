@@ -28,7 +28,6 @@ public struct EncodingRoundtripError: Error {
 
 /// IMAP uses a slightly modified version of UTF7, as documented in RFC 3501 section 5.1.3.
 enum ModifiedUTF7 {
-
     /// Encodes a `String` into UTF-7 bytes.
     /// - parameter string: The string to encode.
     /// - returns: A `ByteBuffer` containing UTF-7 bytes.
@@ -128,7 +127,6 @@ enum ModifiedUTF7 {
 }
 
 extension ModifiedUTF7 {
-
     /// Checks that a given ByteBuffer can rountrip through IMAP's UTF-7 encoding.
     /// - parameter buffer: The `ByteBuffer` to roundtrip.
     /// - throws: An `EncodingRoundtripError` if round-tripping was not successful.
@@ -139,7 +137,7 @@ extension ModifiedUTF7 {
             throw EncodingRoundtripError(buffer: buffer)
         }
     }
-    
+
     static func isBufferValid(_ buffer: ByteBuffer) -> Bool {
         do {
             try self.validate(buffer)
