@@ -25,13 +25,13 @@ extension GrammarParser_Fetch_Tests {
         self.iterateTests(
             testFunction: GrammarParser.parseFetch,
             validInputs: [
-                ("FETCH 1:3 ALL", "\r", .fetch([1 ... 3], .all, [:]), #line),
-                ("FETCH 2:4 FULL", "\r", .fetch([2 ... 4], .full, [:]), #line),
-                ("FETCH 3:5 FAST", "\r", .fetch([3 ... 5], .fast, [:]), #line),
-                ("FETCH 4:6 ENVELOPE", "\r", .fetch([4 ... 6], [.envelope], [:]), #line),
-                ("FETCH 5:7 (ENVELOPE FLAGS)", "\r", .fetch([5 ... 7], [.envelope, .flags], [:]), #line),
-                ("FETCH 3:5 FAST (name)", "\r", .fetch([3 ... 5], .fast, ["name": nil]), #line),
-                ("FETCH 1 BODY[TEXT]", "\r", .fetch([1], [.bodySection(peek: false, .init(kind: .text), nil)], [:]), #line),
+                ("FETCH 1:3 ALL", "\r", .fetch(.set([1 ... 3]), .all, [:]), #line),
+                ("FETCH 2:4 FULL", "\r", .fetch(.set([2 ... 4]), .full, [:]), #line),
+                ("FETCH 3:5 FAST", "\r", .fetch(.set([3 ... 5]), .fast, [:]), #line),
+                ("FETCH 4:6 ENVELOPE", "\r", .fetch(.set([4 ... 6]), [.envelope], [:]), #line),
+                ("FETCH 5:7 (ENVELOPE FLAGS)", "\r", .fetch(.set([5 ... 7]), [.envelope, .flags], [:]), #line),
+                ("FETCH 3:5 FAST (name)", "\r", .fetch(.set([3 ... 5]), .fast, ["name": nil]), #line),
+                ("FETCH 1 BODY[TEXT]", "\r", .fetch(.set([1]), [.bodySection(peek: false, .init(kind: .text), nil)], [:]), #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
@@ -121,7 +121,7 @@ extension GrammarParser_Fetch_Tests {
             validInputs: [
                 ("CHANGEDSINCE 2", " ", .changedSince(.init(modificationSequence: 2)), #line),
                 ("test", "\r", .other(.init(key: "test", value: nil)), #line),
-                ("test 1", " ", .other(.init(key: "test", value: .sequence([1]))), #line),
+                ("test 1", " ", .other(.init(key: "test", value: .sequence(.set([1])))), #line),
             ],
             parserErrorInputs: [
                 ("1", " ", #line),

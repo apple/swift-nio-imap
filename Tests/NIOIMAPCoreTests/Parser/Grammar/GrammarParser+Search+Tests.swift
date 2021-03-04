@@ -167,7 +167,7 @@ extension GrammarParser_Search_Tests {
         self.iterateTests(
             testFunction: GrammarParser.parseSearchReturnDataExtension,
             validInputs: [
-                ("modifier 64", "\r", .init(key: "modifier", value: .sequence([64])), #line),
+                ("modifier 64", "\r", .init(key: "modifier", value: .sequence(.set([64]))), #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
@@ -229,11 +229,11 @@ extension GrammarParser_Search_Tests {
             validInputs: [
                 ("MIN 1", "\r", .min(1), #line),
                 ("MAX 2", "\r", .max(2), #line),
-                ("ALL 3", "\r", .all([3]), #line),
-                ("ALL 3,4,5", "\r", .all([3, 4, 5]), #line),
+                ("ALL 3", "\r", .all(.set([3])), #line),
+                ("ALL 3,4,5", "\r", .all(.set([3, 4, 5])), #line),
                 ("COUNT 4", "\r", .count(4), #line),
                 ("MODSEQ 4", "\r", .modificationSequence(4), #line),
-                ("modifier 5", "\r", .dataExtension(.init(key: "modifier", value: .sequence([5]))), #line),
+                ("modifier 5", "\r", .dataExtension(.init(key: "modifier", value: .sequence(.set([5])))), #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
@@ -299,7 +299,7 @@ extension GrammarParser_Search_Tests {
             testFunction: GrammarParser.parseSearchReturnOptionExtension,
             validInputs: [
                 ("modifier", "\r", .init(key: "modifier", value: nil), #line),
-                ("modifier 4", "\r", .init(key: "modifier", value: .sequence([4])), #line),
+                ("modifier 4", "\r", .init(key: "modifier", value: .sequence(.set([4]))), #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: [

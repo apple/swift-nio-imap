@@ -14,7 +14,7 @@
 
 import struct NIO.ByteBuffer
 
-extension LastCommandSet where T == SequenceRangeSet {
+extension LastCommandSet where SetType == SequenceRangeSet {
     /// Creates a `SequenceSet` from a non-empty array of `SequenceRange`.
     /// - parameter ranges: An array of `SequenceRange` to use.
     /// - returns: `nil` if `ranges` is empty, otherwise a new `SequenceSet`.
@@ -51,17 +51,7 @@ extension LastCommandSet where T == SequenceRangeSet {
     }
 }
 
-extension LastCommandSet: ExpressibleByArrayLiteral where T == SequenceRangeSet {
-    /// Creates a `SequenceSet` from an array of `SequenceRange`. The array is assumed
-    /// to be non-empty, however the initialiser will crash if this is not the case.
-    /// - parameter ranges: An array of `SequenceRange` to use.
-    /// - returns: `nil` if `ranges` is empty, otherwise a new `SequenceSet`.
-    public init(arrayLiteral elements: SequenceRange...) {
-        self = .set(SequenceRangeSet(elements)!)
-    }
-}
-
-extension LastCommandSet where T == SequenceRangeSet {
+extension LastCommandSet where SetType == SequenceRangeSet {
     /// A `SequenceSet` that contains a single `SequenceRangeSet`, that in turn covers every possible `SequenceNumber`.
     public static let all: Self = .set(SequenceRangeSet.all)
 }

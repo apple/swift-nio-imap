@@ -644,7 +644,7 @@ extension ParserUnitTests {
                 (
                     "CREATE inbox (USE (\\All \\Flagged) some1 2 USE (\\Sent))",
                     "\r",
-                    .create(.inbox, [.attributes([.all, .flagged]), .labelled(.init(key: "some1", value: .sequence([2]))), .attributes([.sent])]),
+                    .create(.inbox, [.attributes([.all, .flagged]), .labelled(.init(key: "some1", value: .sequence(.set([2])))), .attributes([.sent])]),
                     #line
                 ),
             ],
@@ -672,7 +672,7 @@ extension ParserUnitTests {
             testFunction: GrammarParser.parseCreateParameter,
             validInputs: [
                 ("param", "\r", .labelled(.init(key: "param", value: nil)), #line),
-                ("param 1", "\r", .labelled(.init(key: "param", value: .sequence([1]))), #line),
+                ("param 1", "\r", .labelled(.init(key: "param", value: .sequence(.set([1])))), #line),
                 ("USE (\\All)", "\r", .attributes([.all]), #line),
                 ("USE (\\All \\Sent \\Drafts)", "\r", .attributes([.all, .sent, .drafts]), #line),
             ],
@@ -2326,10 +2326,10 @@ extension ParserUnitTests {
         self.iterateTests(
             testFunction: GrammarParser.parseSelectParameter,
             validInputs: [
-                ("test 1", "\r", .basic(.init(key: "test", value: .sequence([1]))), #line),
+                ("test 1", "\r", .basic(.init(key: "test", value: .sequence(.set([1])))), #line),
                 ("QRESYNC (1 1)", "\r", .qresync(.init(uidValiditiy: 1, modificationSequenceValue: 1, knownUids: nil, sequenceMatchData: nil)), #line),
-                ("QRESYNC (1 1 1:2)", "\r", .qresync(.init(uidValiditiy: 1, modificationSequenceValue: 1, knownUids: [1 ... 2], sequenceMatchData: nil)), #line),
-                ("QRESYNC (1 1 1:2 (* *))", "\r", .qresync(.init(uidValiditiy: 1, modificationSequenceValue: 1, knownUids: [1 ... 2], sequenceMatchData: .init(knownSequenceSet: .all, knownUidSet: .all))), #line),
+                ("QRESYNC (1 1 1:2)", "\r", .qresync(.init(uidValiditiy: 1, modificationSequenceValue: 1, knownUids: .set([1 ... 2]), sequenceMatchData: nil)), #line),
+                ("QRESYNC (1 1 1:2 (* *))", "\r", .qresync(.init(uidValiditiy: 1, modificationSequenceValue: 1, knownUids: .set([1 ... 2]), sequenceMatchData: .init(knownSequenceSet: .all, knownUidSet: .all))), #line),
             ],
             parserErrorInputs: [
                 ("1", "\r", #line),
@@ -2423,8 +2423,8 @@ extension ParserUnitTests {
         self.iterateTests(
             testFunction: GrammarParser.parseStore,
             validInputs: [
-                ("STORE 1 +FLAGS \\answered", "\r", .store([1], [], .add(silent: false, list: [.answered])), #line),
-                ("STORE 1 (label) -FLAGS \\seen", "\r", .store([1], [.other(.init(key: "label", value: nil))], .remove(silent: false, list: [.seen])), #line),
+                ("STORE 1 +FLAGS \\answered", "\r", .store(.set([1]), [], .add(silent: false, list: [.answered])), #line),
+                ("STORE 1 (label) -FLAGS \\seen", "\r", .store(.set([1]), [.other(.init(key: "label", value: nil))], .remove(silent: false, list: [.seen])), #line),
             ],
             parserErrorInputs: [
                 ("STORE +FLAGS \\answered", "\r", #line),
@@ -2446,7 +2446,7 @@ extension ParserUnitTests {
             validInputs: [
                 ("UNCHANGEDSINCE 2", " ", .unchangedSince(.init(modificationSequence: 2)), #line),
                 ("test", "\r", .other(.init(key: "test", value: nil)), #line),
-                ("test 1", " ", .other(.init(key: "test", value: .sequence([1]))), #line),
+                ("test 1", " ", .other(.init(key: "test", value: .sequence(.set([1])))), #line),
             ],
             parserErrorInputs: [
                 ("1", " ", #line),
@@ -2534,7 +2534,7 @@ extension ParserUnitTests {
             testFunction: GrammarParser.parseSequenceMatchData,
             validInputs: [
                 ("(* *)", "\r", .init(knownSequenceSet: .all, knownUidSet: .all), #line),
-                ("(1,2 3,4)", "\r", .init(knownSequenceSet: [1, 2], knownUidSet: [3, 4]), #line),
+                ("(1,2 3,4)", "\r", .init(knownSequenceSet: .set([1, 2]), knownUidSet: .set([3, 4])), #line),
             ],
             parserErrorInputs: [
                 ("()", "", #line),
@@ -2600,7 +2600,7 @@ extension ParserUnitTests {
         self.iterateTests(
             testFunction: GrammarParser.parseTaggedExtension,
             validInputs: [
-                ("label 1", "\r\n", .init(key: "label", value: .sequence([1])), #line),
+                ("label 1", "\r\n", .init(key: "label", value: .sequence(.set([1]))), #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []

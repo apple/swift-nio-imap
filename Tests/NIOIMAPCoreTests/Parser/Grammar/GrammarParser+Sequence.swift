@@ -72,11 +72,11 @@ extension GrammarParser_Sequence_Tests {
         self.iterateTests(
             testFunction: GrammarParser.parseSequenceSet,
             validInputs: [
-                ("765", " ", [765], #line),
-                ("1,2:5,7,9:*", " ", [SequenceRange(1), SequenceRange(2 ... 5), SequenceRange(7), SequenceRange(9...)], #line),
-                ("*", "\r", [.all], #line),
-                ("1:2", "\r", [1 ... 2], #line),
-                ("1:2,2:3,3:4", "\r", [1 ... 2, 2 ... 3, 3 ... 4], #line),
+                ("765", " ", .set([765]), #line),
+                ("1,2:5,7,9:*", " ", .set([SequenceRange(1), SequenceRange(2 ... 5), SequenceRange(7), SequenceRange(9...)]), #line),
+                ("*", "\r", .set([.all]), #line),
+                ("1:2", "\r", .set([1 ... 2]), #line),
+                ("1:2,2:3,3:4", "\r", .set([1 ... 2, 2 ... 3, 3 ... 4]), #line),
                 ("$", "\r", .lastCommand, #line),
             ],
             parserErrorInputs: [

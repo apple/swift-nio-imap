@@ -24,7 +24,7 @@ extension SearchReturnOptionExtension_Tests {
     func testEncode() {
         let inputs: [(KeyValue<String, ParameterValue?>, String, UInt)] = [
             (.init(key: "modifier", value: nil), "modifier", #line),
-            (.init(key: "modifier", value: .sequence([4])), "modifier 4", #line),
+            (.init(key: "modifier", value: .sequence(.set([4]))), "modifier 4", #line),
         ]
 
         for (test, expectedString, line) in inputs {
