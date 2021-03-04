@@ -137,4 +137,13 @@ extension ModifiedUTF7 {
             throw EncodingRoundtripError(buffer: buffer)
         }
     }
+    
+    public static func isBufferValid(_ buffer: ByteBuffer) -> Bool {
+        do {
+            try self.validate(buffer)
+            return true
+        } catch {
+            return false
+        }
+    }
 }
