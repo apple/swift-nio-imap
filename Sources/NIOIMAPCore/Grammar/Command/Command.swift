@@ -599,3 +599,69 @@ extension CommandEncodeBuffer {
             self.buffer.writeESearchOptions(options)
     }
 }
+
+// MARK: - Conveniences
+extension Command {
+    
+    /// Convenience for creating a *UID MOVE* command.
+    /// Pass in a `UIDSet`, and if that set is valid (i.e. non-empty) then a command is returned.
+    /// - parameter messages: The set of message UIDs to use.
+    /// - parameter mailbox: The destination mailbox.
+    /// - returns: `nil` if `messages` is empty, otherwise a `Command`.
+    public static func uidMove(messages: UIDSet, mailbox: MailboxName) -> Command? {
+        guard let set = UIDSetNonEmpty(set: messages) else {
+            return nil
+        }
+        return .uidMove(.set(set), mailbox)
+    }
+    
+    /// Convenience for creating a *UID COPY* command.
+    /// Pass in a `UIDSet`, and if that set is valid (i.e. non-empty) then a command is returned.
+    /// - parameter messages: The set of message UIDs to use.
+    /// - parameter mailbox: The destination mailbox.
+    /// - returns: `nil` if `messages` is empty, otherwise a `Command`.
+    public static func uidCopy(messages: UIDSet, mailbox: MailboxName) -> Command? {
+        guard let set = UIDSetNonEmpty(set: messages) else {
+            return nil
+        }
+        return .uidCopy(.set(set), mailbox)
+    }
+    
+    /// Convenience for creating a *UID FETCH* command.
+    /// Pass in a `UIDSet`, and if that set is valid (i.e. non-empty) then a command is returned.
+    /// - parameter messages: The set of message UIDs to use.
+    /// - parameter modifiers: Fetch modifiers.
+    /// - parameter keyValues: .
+    /// - returns: `nil` if `messages` is empty, otherwise a `Command`.
+    public static func uidFetch(messages: UIDSet, attributes: [FetchAttribute], modifiers: KeyValues<String, ParameterValue?>) -> Command? {
+        guard let set = UIDSetNonEmpty(set: messages) else {
+            return nil
+        }
+        return .uidFetch(.set(set), attributes, keyValues)
+    }
+    
+    /// Convenience for creating a *UID STORE* command.
+    /// Pass in a `UIDSet`, and if that set is valid (i.e. non-empty) then a command is returned.
+    /// - parameter messages: The set of message UIDs to use.
+    /// - parameter modifiers: Store modifiers.
+    /// - parameter flags: The flags to store.
+    /// - returns: `nil` if `messages` is empty, otherwise a `Command`.
+    public static func uidStore(messages: UIDSet, modifiers: KeyValues<String, ParameterValue?>, flags: StoreFlags) -> Command? {
+        guard let set = UIDSetNonEmpty(set: messages) else {
+            return nil
+        }
+        return .uidStore(.set(set), attributes, flags)
+    }
+    
+    /// Convenience for creating a *UID EXPUNGE* command.
+    /// Pass in a `UIDSet`, and if that set is valid (i.e. non-empty) then a command is returned.
+    /// - parameter messages: The set of message UIDs to use.
+    /// - returns: `nil` if `messages` is empty, otherwise a `Command`.
+    public static func uidExpunge(messages: UIDSet, mailbox: MailboxName) -> Command? {
+        guard let set = UIDSetNonEmpty(set: messages) else {
+            return nil
+        }
+        return .uidExpunge(.set(set))
+    }
+    
+}
