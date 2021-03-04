@@ -12,17 +12,16 @@
 //
 //===----------------------------------------------------------------------===//
 
-/// Any set-type that wants to be wrapped inside `LastCommandSet` conforms to this
-/// protocol. It is used to provide an interface dictating how the generic type is written to a
-/// `EncodeBuffer`.
-public protocol IMAPEncodable: ExpressibleByArrayLiteral, Hashable {
+/// Defines an interface for a type to be able to serialize itself to an `EncodeBuffer`.
+/// Avoid conforming to this protocol, and use the standard `EncodeBuffer.write` functions.
+public protocol _IMAPEncodable: ExpressibleByArrayLiteral, Hashable {
     /// Writes the set to an `inout EncodeBuffer`.
     func writeIntoBuffer(_ buffer: inout EncodeBuffer) -> Int
 }
 
 /// Provides support for using either the result of the last command (`.lastCommand`) or
 /// a concrete set type.
-public enum LastCommandSet<SetType: IMAPEncodable>: Hashable {
+public enum LastCommandSet<SetType: _IMAPEncodable>: Hashable {
     /// A specific set that will be sent to the IMAP server. E.g. `1, 2:5, 10:*`
     case set(SetType)
 
