@@ -362,14 +362,12 @@ extension UIDSet: SetAlgebra {
 // MARK: - Encoding
 
 extension UIDSet: _IMAPEncodable {
-    
     public func writeIntoBuffer(_ buffer: inout EncodeBuffer) -> Int {
         buffer.writeArray(self._ranges.ranges, separator: ",", parenthesis: false) { (element, buffer) in
             let r = UIDRange(element)
             return buffer.writeUIDRange(r)
         }
     }
-    
 }
 
 extension EncodeBuffer {

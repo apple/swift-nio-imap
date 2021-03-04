@@ -24,13 +24,11 @@ import struct NIO.ByteBuffer
 import struct NIO.ByteBufferView
 
 extension GrammarParser {
-    
     static func parseLastCommandSet<T: _IMAPEncodable>(buffer: inout ByteBuffer, tracker: StackTracker, setParser: (inout ByteBuffer, StackTracker) throws -> T) throws -> LastCommandSet<T> {
-        
         guard let char = buffer.getInteger(at: buffer.readerIndex, as: UInt8.self) else {
             throw _IncompleteMessage()
         }
-        
+
         if char == UInt8(ascii: "$") {
             buffer.moveReaderIndex(forwardBy: 1)
             return .lastCommand
@@ -38,7 +36,7 @@ extension GrammarParser {
             return .set(try setParser(&buffer, tracker))
         }
     }
-    
+
     // uid             = "UID" SP
     //                   (copy / move / fetch / search / store / uid-expunge)
     static func parseUid(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Command {
