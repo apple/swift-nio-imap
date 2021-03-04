@@ -601,8 +601,8 @@ extension CommandEncodeBuffer {
 }
 
 // MARK: - Conveniences
+
 extension Command {
-    
     /// Convenience for creating a *UID MOVE* command.
     /// Pass in a `UIDSet`, and if that set is valid (i.e. non-empty) then a command is returned.
     /// - parameter messages: The set of message UIDs to use.
@@ -614,7 +614,7 @@ extension Command {
         }
         return .uidMove(.set(set), mailbox)
     }
-    
+
     /// Convenience for creating a *UID COPY* command.
     /// Pass in a `UIDSet`, and if that set is valid (i.e. non-empty) then a command is returned.
     /// - parameter messages: The set of message UIDs to use.
@@ -626,7 +626,7 @@ extension Command {
         }
         return .uidCopy(.set(set), mailbox)
     }
-    
+
     /// Convenience for creating a *UID FETCH* command.
     /// Pass in a `UIDSet`, and if that set is valid (i.e. non-empty) then a command is returned.
     /// - parameter messages: The set of message UIDs to use.
@@ -639,7 +639,7 @@ extension Command {
         }
         return .uidFetch(.set(set), attributes, keyValues)
     }
-    
+
     /// Convenience for creating a *UID STORE* command.
     /// Pass in a `UIDSet`, and if that set is valid (i.e. non-empty) then a command is returned.
     /// - parameter messages: The set of message UIDs to use.
@@ -652,7 +652,7 @@ extension Command {
         }
         return .uidStore(.set(set), attributes, flags)
     }
-    
+
     /// Convenience for creating a *UID EXPUNGE* command.
     /// Pass in a `UIDSet`, and if that set is valid (i.e. non-empty) then a command is returned.
     /// - parameter messages: The set of message UIDs to use.
@@ -663,5 +663,4 @@ extension Command {
         }
         return .uidExpunge(.set(set))
     }
-    
 }
