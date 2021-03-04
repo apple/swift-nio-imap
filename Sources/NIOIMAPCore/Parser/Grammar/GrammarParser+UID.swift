@@ -181,7 +181,7 @@ extension GrammarParser {
             return s
         }
     }
-    
+
     static func parseUIDSetNonEmpty(buffer: inout ByteBuffer, tracker: StackTracker) throws -> UIDSetNonEmpty {
         try composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
             guard let set = UIDSetNonEmpty(set: try self.parseUIDSet(buffer: &buffer, tracker: tracker)) else {

@@ -19,12 +19,11 @@ import StandardLibraryPreview
 ///
 /// UIDs are _not_ sorted.
 public struct UIDSet: Hashable {
-    
     /// A set that contains a single range, that in turn contains all messages.
     public static let all = UIDSet(UIDRange.all)
     /// A set that contains no UIDs.
     public static let empty = UIDSet()
-    
+
     /// A non-empty array of UID ranges.
     fileprivate var _ranges: RangeSet<UIDShiftWrapper>
 
@@ -47,13 +46,12 @@ public struct UIDSet: Hashable {
 
 /// A wrapper around a `UIDSet` that enforces at least one element.
 public struct UIDSetNonEmpty: Hashable {
-    
     /// A set that contains a single range, that in turn contains all messages.
     public static let all = UIDSetNonEmpty(set: .all)!
-    
+
     /// The underlying `UIDSet`
-    private(set) public var set: UIDSet
-    
+    public private(set) var set: UIDSet
+
     /// Creates a new `UIDSetNonEmpty` from a `UIDSet`, after first
     /// validating that the set is not emtpy.
     /// - parameter set: The underlying `UIDSet` to use.
@@ -64,7 +62,6 @@ public struct UIDSetNonEmpty: Hashable {
         }
         self.set = set
     }
-    
 }
 
 // MARK: -
@@ -410,7 +407,7 @@ extension EncodeBuffer {
     @discardableResult mutating func writeUIDSet(_ set: UIDSet) -> Int {
         set.writeIntoBuffer(&self)
     }
-    
+
     @discardableResult mutating func writeUIDSet(_ set: UIDSetNonEmpty) -> Int {
         set.writeIntoBuffer(&self)
     }
