@@ -637,7 +637,7 @@ extension Command {
         guard let set = UIDSetNonEmpty(set: messages) else {
             return nil
         }
-        return .uidFetch(.set(set), attributes, keyValues)
+        return .uidFetch(.set(set), attributes, modifiers)
     }
 
     /// Convenience for creating a *UID STORE* command.
@@ -650,7 +650,7 @@ extension Command {
         guard let set = UIDSetNonEmpty(set: messages) else {
             return nil
         }
-        return .uidStore(.set(set), attributes, flags)
+        return .uidStore(.set(set), modifiers, flags)
     }
 
     /// Convenience for creating a *UID EXPUNGE* command.
