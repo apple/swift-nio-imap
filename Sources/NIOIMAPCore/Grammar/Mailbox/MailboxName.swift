@@ -185,7 +185,7 @@ extension MailboxPath {
 /// 3. split a path into its components (to figure out how paths are nested into each other).
 public struct MailboxName: Hashable {
     /// Represents an inbox.
-    public static var inbox = Self(ByteBuffer(string: "INBOX"))
+    public static let inbox = Self(ByteBuffer(string: "INBOX"))
 
     /// The raw bytes, readable as `[UInt8]`
     public let storage: ByteBuffer
@@ -200,7 +200,6 @@ public struct MailboxName: Hashable {
     /// - note: The bytes provided should be UTF-7.
     /// - parameter bytes: The bytes to construct a `MailboxName` from. Note that if any case-insensitive variation of *INBOX* is provided then it will be uppercased.
     public init(_ bytes: ByteBuffer) {
-        assert(ModifiedUTF7.isBufferValid(bytes))
         if String(buffer: bytes).uppercased() == "INBOX" {
             self.storage = ByteBuffer(ByteBufferView("INBOX".utf8))
         } else {
