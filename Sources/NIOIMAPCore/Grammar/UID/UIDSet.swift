@@ -301,17 +301,6 @@ extension UIDSet.Index: Comparable {
     }
 }
 
-// MARK: - Encoding
-
-extension EncodeBuffer {
-    @discardableResult mutating func writeUIDSet(_ set: UIDSet) -> Int {
-        self.writeArray(set._ranges.ranges, separator: ",", parenthesis: false) { (element, self) in
-            let r = UIDRange(element)
-            return self.writeUIDRange(r)
-        }
-    }
-}
-
 // MARK: - Set Algebra
 
 extension UIDSet: SetAlgebra {
@@ -367,5 +356,24 @@ extension UIDSet: SetAlgebra {
 
     public mutating func formSymmetricDifference(_ other: UIDSet) {
         _ranges.formSymmetricDifference(other._ranges)
+    }
+}
+
+// MARK: - Encoding
+
+extension UIDSet: _IMAPEncodable {
+    
+    public func writeIntoBuffer(_ buffer: inout EncodeBuffer) -> Int {
+        buffer.writeArray(self._ranges.ranges, separator: ",", parenthesis: false) { (element, buffer) in
+            let r = UIDRange(element)
+            return buffer.writeUIDRange(r)
+        }
+    }
+    
+}
+
+extension EncodeBuffer {
+    @discardableResult mutating func writeUIDSet(_ set: UIDSet) -> Int {
+        set.writeIntoBuffer(&self)
     }
 }

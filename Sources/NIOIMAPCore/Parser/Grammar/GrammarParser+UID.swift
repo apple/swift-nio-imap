@@ -24,13 +24,28 @@ import struct NIO.ByteBuffer
 import struct NIO.ByteBufferView
 
 extension GrammarParser {
+    
+    static func parseLastCommandSet<T: _IMAPEncodable>(buffer: inout ByteBuffer, tracker: StackTracker, setParser: (inout ByteBuffer, StackTracker) throws -> T) throws -> LastCommandSet<T> {
+        
+        guard let char = buffer.getInteger(at: buffer.readerIndex, as: UInt8.self) else {
+            throw _IncompleteMessage()
+        }
+        
+        if char == UInt8(ascii: "$") {
+            buffer.moveReaderIndex(forwardBy: 1)
+            return .lastCommand
+        } else {
+            return .set(try setParser(&buffer, tracker))
+        }
+    }
+    
     // uid             = "UID" SP
     //                   (copy / move / fetch / search / store / uid-expunge)
     static func parseUid(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Command {
         func parseUid_copy(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Command {
             try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Command in
                 try fixedString("COPY ", buffer: &buffer, tracker: tracker)
-                let set = try self.parseUIDSet(buffer: &buffer, tracker: tracker)
+                let set = try self.parseLastCommandSet(buffer: &buffer, tracker: tracker, setParser: self.parseUIDSet)
                 try fixedString(" ", buffer: &buffer, tracker: tracker)
                 let mailbox = try self.parseMailbox(buffer: &buffer, tracker: tracker)
                 return .uidCopy(set, mailbox)
@@ -40,7 +55,7 @@ extension GrammarParser {
         func parseUid_move(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Command {
             try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Command in
                 try fixedString("MOVE ", buffer: &buffer, tracker: tracker)
-                let set = try self.parseUIDSet(buffer: &buffer, tracker: tracker)
+                let set = try self.parseLastCommandSet(buffer: &buffer, tracker: tracker, setParser: self.parseUIDSet)
                 try space(buffer: &buffer, tracker: tracker)
                 let mailbox = try self.parseMailbox(buffer: &buffer, tracker: tracker)
                 return .uidMove(set, mailbox)
@@ -50,7 +65,7 @@ extension GrammarParser {
         func parseUid_fetch(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Command {
             try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Command in
                 try fixedString("FETCH ", buffer: &buffer, tracker: tracker)
-                let set = try self.parseUIDSet(buffer: &buffer, tracker: tracker)
+                let set = try self.parseLastCommandSet(buffer: &buffer, tracker: tracker, setParser: self.parseUIDSet)
                 try space(buffer: &buffer, tracker: tracker)
                 let att = try parseFetch_type(buffer: &buffer, tracker: tracker)
                 let modifiers = try optional(buffer: &buffer, tracker: tracker, parser: self.parseParameters) ?? [:]
@@ -68,7 +83,7 @@ extension GrammarParser {
         func parseUid_store(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Command {
             try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Command in
                 try fixedString("STORE ", buffer: &buffer, tracker: tracker)
-                let set = try self.parseUIDSet(buffer: &buffer, tracker: tracker)
+                let set = try self.parseLastCommandSet(buffer: &buffer, tracker: tracker, setParser: self.parseUIDSet)
                 let modifiers = try optional(buffer: &buffer, tracker: tracker, parser: self.parseParameters) ?? [:]
                 try space(buffer: &buffer, tracker: tracker)
                 let flags = try self.parseStoreAttributeFlags(buffer: &buffer, tracker: tracker)
@@ -78,7 +93,7 @@ extension GrammarParser {
 
         func parseUid_expunge(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Command {
             try fixedString("EXPUNGE ", buffer: &buffer, tracker: tracker)
-            let set = try self.parseUIDSet(buffer: &buffer, tracker: tracker)
+            let set = try self.parseLastCommandSet(buffer: &buffer, tracker: tracker, setParser: self.parseUIDSet)
             return .uidExpunge(set)
         }
 
