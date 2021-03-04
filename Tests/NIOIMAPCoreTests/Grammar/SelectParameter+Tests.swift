@@ -38,12 +38,12 @@ extension SelectParameter_Tests {
             ),
             (
                 .qresync(.init(uidValiditiy: 1, modificationSequenceValue: .zero, knownUids: nil, sequenceMatchData: .init(knownSequenceSet: .set(.all), knownUidSet: .set(.all)))),
-                "QRESYNC (1 0 (* *))",
+                "QRESYNC (1 0 (1:* 1:*))",
                 #line
             ),
             (
                 .qresync(.init(uidValiditiy: 1, modificationSequenceValue: .zero, knownUids: .set([1]), sequenceMatchData: .init(knownSequenceSet: .set(.all), knownUidSet: .set(.all)))),
-                "QRESYNC (1 0 1 (* *))",
+                "QRESYNC (1 0 1 (1:* 1:*))",
                 #line
             ),
         ]

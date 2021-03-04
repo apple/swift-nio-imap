@@ -63,7 +63,7 @@ extension SequenceRangeTests {
         let inputs: [(SequenceRange, String, UInt)] = [
             (33 ... 44, "33:44", #line),
             (5, "5", #line),
-            (.all, "*", #line),
+            (.all, "1:*", #line),
             (...55, "1:55", #line),
             (66..., "66:*", #line),
         ]
