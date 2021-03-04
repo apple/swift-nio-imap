@@ -39,6 +39,25 @@ public struct UIDSet: Hashable {
     }
 }
 
+/// A wrapper around a `UIDSet` that enforces at least one element.
+public struct UIDSetNonEmpty: Hashable {
+    
+    /// The underlying `UIDSet`
+    private(set) public var set: UIDSet
+    
+    /// Creates a new `UIDSetNonEmpty` from a `UIDSet`, after first
+    /// validating that the set is not emtpy.
+    /// - parameter set: The underlying `UIDSet` to use.
+    /// - returns: `nil` if the given `UIDSet` is empty.
+    public init?(set: UIDSet) {
+        guard set.count > 0 else {
+            return nil
+        }
+        self.set = set
+    }
+    
+}
+
 // MARK: -
 
 extension UIDSet {
@@ -171,6 +190,15 @@ extension UIDSet: ExpressibleByArrayLiteral {
     /// - parameter arrayLiteral: The elements to use, assumed to be non-empty.
     public init(arrayLiteral elements: UIDRange...) {
         self.init(elements)
+    }
+}
+
+extension UIDSetNonEmpty: ExpressibleByArrayLiteral {
+    /// Creates a new UIDSet from a literal array of ranges.
+    /// - parameter arrayLiteral: The elements to use, assumed to be non-empty.
+    public init(arrayLiteral elements: UIDRange...) {
+        precondition(elements.count > 0, "At least one element is required.")
+        self.set = UIDSet(elements)
     }
 }
 
@@ -370,8 +398,18 @@ extension UIDSet: _IMAPEncodable {
     }
 }
 
+extension UIDSetNonEmpty: _IMAPEncodable {
+    public func writeIntoBuffer(_ buffer: inout EncodeBuffer) -> Int {
+        self.set.writeIntoBuffer(&buffer)
+    }
+}
+
 extension EncodeBuffer {
     @discardableResult mutating func writeUIDSet(_ set: UIDSet) -> Int {
+        set.writeIntoBuffer(&self)
+    }
+    
+    @discardableResult mutating func writeUIDSet(_ set: UIDSetNonEmpty) -> Int {
         set.writeIntoBuffer(&self)
     }
 }
