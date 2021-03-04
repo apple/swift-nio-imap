@@ -23,7 +23,7 @@ public enum SearchReturnData: Equatable {
     case max(Int)
 
     /// Return all message numbers/UIDs that satisfy the SEARCH criteria.
-    case all(SequenceSet)
+    case all(LastCommandSet<SequenceRangeSet>)
 
     /// Return number of the messages that satisfy the SEARCH criteria.
     case count(Int)
@@ -47,7 +47,7 @@ extension EncodeBuffer {
         case .all(let set):
             return
                 self.writeString("ALL ") +
-                self.writeSequenceSet(set)
+                self.writeLastCommandSet(set)
         case .count(let num):
             return self.writeString("COUNT \(num)")
         case .dataExtension(let optionExt):

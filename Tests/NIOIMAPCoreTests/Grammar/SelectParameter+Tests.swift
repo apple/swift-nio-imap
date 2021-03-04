@@ -25,14 +25,14 @@ extension SelectParameter_Tests {
         let inputs: [(SelectParameter, String, UInt)] = [
             (.condstore, "CONDSTORE", #line),
             (.basic(.init(key: "test", value: nil)), "test", #line),
-            (.basic(.init(key: "test", value: .sequence([1]))), "test 1", #line),
+            (.basic(.init(key: "test", value: .sequence(.set([1])))), "test 1", #line),
             (
                 .qresync(.init(uidValiditiy: 1, modificationSequenceValue: .zero, knownUids: nil, sequenceMatchData: nil)),
                 "QRESYNC (1 0)",
                 #line
             ),
             (
-                .qresync(.init(uidValiditiy: 1, modificationSequenceValue: .zero, knownUids: [1], sequenceMatchData: nil)),
+                .qresync(.init(uidValiditiy: 1, modificationSequenceValue: .zero, knownUids: .set([1]), sequenceMatchData: nil)),
                 "QRESYNC (1 0 1)",
                 #line
             ),
@@ -42,7 +42,7 @@ extension SelectParameter_Tests {
                 #line
             ),
             (
-                .qresync(.init(uidValiditiy: 1, modificationSequenceValue: .zero, knownUids: [1], sequenceMatchData: .init(knownSequenceSet: .all, knownUidSet: .all))),
+                .qresync(.init(uidValiditiy: 1, modificationSequenceValue: .zero, knownUids: .set([1]), sequenceMatchData: .init(knownSequenceSet: .all, knownUidSet: .all))),
                 "QRESYNC (1 0 1 (* *))",
                 #line
             ),

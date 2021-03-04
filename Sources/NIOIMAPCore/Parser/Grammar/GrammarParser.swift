@@ -2008,7 +2008,7 @@ extension GrammarParser {
             let uidValidity = try self.parseNZNumber(buffer: &buffer, tracker: tracker)
             try space(buffer: &buffer, tracker: tracker)
             let modSeqVal = try self.parseModificationSequenceValue(buffer: &buffer, tracker: tracker)
-            let knownUids = try optional(buffer: &buffer, tracker: tracker, parser: { (buffer, tracker) -> SequenceSet in
+            let knownUids = try optional(buffer: &buffer, tracker: tracker, parser: { (buffer, tracker) -> LastCommandSet<SequenceRangeSet> in
                 try space(buffer: &buffer, tracker: tracker)
                 return try self.parseKnownUids(buffer: &buffer, tracker: tracker)
             })
@@ -2027,7 +2027,7 @@ extension GrammarParser {
         ], buffer: &buffer, tracker: tracker)
     }
 
-    static func parseKnownUids(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SequenceSet {
+    static func parseKnownUids(buffer: inout ByteBuffer, tracker: StackTracker) throws -> LastCommandSet<SequenceRangeSet> {
         try self.parseSequenceSet(buffer: &buffer, tracker: tracker)
     }
 

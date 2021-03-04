@@ -45,7 +45,7 @@ extension ResponseTextCodeTests {
             (.notSaved, "NOTSAVED", #line),
             (.closed, "CLOSED", #line),
             (.noModificationSequence, "NOMODSEQ", #line),
-            (.modificationSequence([1]), "MODIFIED 1", #line),
+            (.modificationSequence(.set([1])), "MODIFIED 1", #line),
             (.highestModificationSequence(1), "HIGHESTMODSEQ 1", #line),
             (.metadataMaxsize(123), "METADATA MAXSIZE 123", #line),
             (.metadataLongEntries(456), "METADATA LONGENTRIES 456", #line),

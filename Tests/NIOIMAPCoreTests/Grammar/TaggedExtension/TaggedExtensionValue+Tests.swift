@@ -23,7 +23,7 @@ class TaggedExtensionValue_Tests: EncodeTestClass {}
 extension TaggedExtensionValue_Tests {
     func testEncode() {
         let inputs: [(ParameterValue, String, UInt)] = [
-            (.sequence([123]), "123", #line),
+            (.sequence(.set([123])), "123", #line),
             (.comp(["testComp"]), "((\"testComp\"))", #line),
         ]
 

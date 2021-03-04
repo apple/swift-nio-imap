@@ -17,7 +17,7 @@ import struct NIO.ByteBuffer
 /// Implemented as a catch-all to support types defined in future extensions.
 public enum ParameterValue: Hashable {
     /// Specifies a `SequenceSet` as the value.
-    case sequence(SequenceSet)
+    case sequence(LastCommandSet<SequenceRangeSet>)
 
     /// Uses an array of `String` as the value.
     case comp([String])
@@ -29,7 +29,7 @@ extension EncodeBuffer {
     @discardableResult mutating func writeParameterValue(_ value: ParameterValue) -> Int {
         switch value {
         case .sequence(let set):
-            return self.writeSequenceSet(set)
+            return self.writeLastCommandSet(set)
         case .comp(let comp):
             return
                 self.writeString("(") +

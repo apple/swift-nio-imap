@@ -81,7 +81,7 @@ extension GrammarParser {
     // And from RFC 5182
     // sequence-set       =/ seq-last-command
     // seq-last-command   = "$"
-    static func parseSequenceSet(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SequenceSet {
+    static func parseSequenceSet(buffer: inout ByteBuffer, tracker: StackTracker) throws -> LastCommandSet<SequenceRangeSet> {
         func parseSequenceSet_number(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SequenceRange {
             let num = try self.parseSequenceNumber(buffer: &buffer, tracker: tracker)
             return SequenceRange(num)
@@ -94,7 +94,7 @@ extension GrammarParser {
             ], buffer: &buffer, tracker: tracker)
         }
 
-        func parseSequenceSet_base(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SequenceSet {
+        func parseSequenceSet_base(buffer: inout ByteBuffer, tracker: StackTracker) throws -> LastCommandSet<SequenceRangeSet> {
             try composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
                 var output = [try parseSequenceSet_element(buffer: &buffer, tracker: tracker)]
                 try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &output, tracker: tracker) { buffer, tracker in
@@ -104,11 +104,11 @@ extension GrammarParser {
                 guard let s = SequenceRangeSet(output) else {
                     throw ParserError(hint: "Sequence set is empty.")
                 }
-                return .range(s)
+                return .set(s)
             }
         }
 
-        func parseSequenceSet_lastCommand(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SequenceSet {
+        func parseSequenceSet_lastCommand(buffer: inout ByteBuffer, tracker: StackTracker) throws -> LastCommandSet<SequenceRangeSet> {
             try fixedString("$", buffer: &buffer, tracker: tracker)
             return .lastCommand
         }

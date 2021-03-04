@@ -22,7 +22,7 @@ public struct QResyncParameter: Equatable {
     public var modificationSequenceValue: ModificationSequenceValue
 
     /// The optional set of known UIDs.
-    public var knownUids: SequenceSet?
+    public var knownUids: LastCommandSet<SequenceRangeSet>?
 
     /// An optional parenthesized list of known sequence ranges and their corresponding UIDs.
     public var sequenceMatchData: SequenceMatchData?
@@ -32,7 +32,7 @@ public struct QResyncParameter: Equatable {
     /// - parameter modificationSequenceValue: The last known modification sequence
     /// - parameter knownUids: The optional set of known UIDs.
     /// - parameter sequenceMatchData: An optional parenthesized list of known sequence ranges and their corresponding UIDs.
-    public init(uidValiditiy: Int, modificationSequenceValue: ModificationSequenceValue, knownUids: SequenceSet?, sequenceMatchData: SequenceMatchData?) {
+    public init(uidValiditiy: Int, modificationSequenceValue: ModificationSequenceValue, knownUids: LastCommandSet<SequenceRangeSet>?, sequenceMatchData: SequenceMatchData?) {
         self.uidValiditiy = uidValiditiy
         self.modificationSequenceValue = modificationSequenceValue
         self.knownUids = knownUids
@@ -82,7 +82,7 @@ extension EncodeBuffer {
         self.writeString("QRESYNC (\(param.uidValiditiy) ") +
             self.writeModificationSequenceValue(param.modificationSequenceValue) +
             self.writeIfExists(param.knownUids) { (set) -> Int in
-                self.writeSpace() + self.writeSequenceSet(set)
+                self.writeSpace() + self.writeLastCommandSet(set)
             } +
             self.writeIfExists(param.sequenceMatchData) { (data) -> Int in
                 self.writeSpace() + self.writeSequenceMatchData(data)

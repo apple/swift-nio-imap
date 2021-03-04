@@ -25,10 +25,10 @@ extension SearchReturnData_Tests {
         let inputs: [(SearchReturnData, String, UInt)] = [
             (.min(1), "MIN 1", #line),
             (.max(1), "MAX 1", #line),
-            (.all(SequenceSet(1 ... 3)), "ALL 1:3", #line),
+            (.all(LastCommandSet(1 ... 3)), "ALL 1:3", #line),
             (.count(1), "COUNT 1", #line),
             (.modificationSequence(1), "MODSEQ 1", #line),
-            (.dataExtension(.init(key: "modifier", value: .sequence([3]))), "modifier 3", #line),
+            (.dataExtension(.init(key: "modifier", value: .sequence(.set([3])))), "modifier 3", #line),
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeSearchReturnData($0) })
     }
