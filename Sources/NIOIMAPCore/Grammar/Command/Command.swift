@@ -113,22 +113,22 @@ public enum Command: Equatable {
     case namespace
 
     /// Similar to `.copy`, but uses unique identifier instead of sequence numbers to identify messages.
-    case uidCopy(LastCommandSet<UIDSet>, MailboxName)
+    case uidCopy(LastCommandSet<UIDSetNonEmpty>, MailboxName)
 
     /// Similar to `.move`, but uses unique identifier instead of sequence numbers to identify messages.
-    case uidMove(LastCommandSet<UIDSet>, MailboxName)
+    case uidMove(LastCommandSet<UIDSetNonEmpty>, MailboxName)
 
     /// Similar to `.fetch`, but uses unique identifier instead of sequence numbers to identify messages.
-    case uidFetch(LastCommandSet<UIDSet>, [FetchAttribute], KeyValues<String, ParameterValue?>)
+    case uidFetch(LastCommandSet<UIDSetNonEmpty>, [FetchAttribute], KeyValues<String, ParameterValue?>)
 
     /// Similar to `.search`, but uses unique identifier instead of sequence numbers to identify messages.
     case uidSearch(key: SearchKey, charset: String? = nil, returnOptions: [SearchReturnOption] = [])
 
     /// Similar to `.store`, but uses unique identifier instead of sequence numbers to identify messages.
-    case uidStore(LastCommandSet<UIDSet>, KeyValues<String, ParameterValue?>, StoreFlags)
+    case uidStore(LastCommandSet<UIDSetNonEmpty>, KeyValues<String, ParameterValue?>, StoreFlags)
 
     /// Similar to `.expunge`, but uses unique identifier instead of sequence numbers to identify messages.
-    case uidExpunge(LastCommandSet<UIDSet>)
+    case uidExpunge(LastCommandSet<UIDSetNonEmpty>)
 
     /// Takes the name of a quota root and returns the quota root's resource usage and limits.
     case getQuota(QuotaRoot)
@@ -454,7 +454,7 @@ extension CommandEncodeBuffer {
         self.buffer.writeString("EXPUNGE")
     }
 
-    private mutating func writeCommandKind_uidExpunge(_ set: LastCommandSet<UIDSet>) -> Int {
+    private mutating func writeCommandKind_uidExpunge(_ set: LastCommandSet<UIDSetNonEmpty>) -> Int {
         self.buffer.writeString("EXPUNGE ") +
             self.buffer.writeLastCommandSet(set)
     }
@@ -485,7 +485,7 @@ extension CommandEncodeBuffer {
             self.buffer.writeMailbox(mailbox)
     }
 
-    private mutating func writeCommandKind_uidCopy(set: LastCommandSet<UIDSet>, mailbox: MailboxName) -> Int {
+    private mutating func writeCommandKind_uidCopy(set: LastCommandSet<UIDSetNonEmpty>, mailbox: MailboxName) -> Int {
         self.buffer.writeString("UID COPY ") +
             self.buffer.writeLastCommandSet(set) +
             self.buffer.writeSpace() +
@@ -502,7 +502,7 @@ extension CommandEncodeBuffer {
             }
     }
 
-    private mutating func writeCommandKind_uidFetch(set: LastCommandSet<UIDSet>, atts: [FetchAttribute], modifiers: KeyValues<String, ParameterValue?>) -> Int {
+    private mutating func writeCommandKind_uidFetch(set: LastCommandSet<UIDSetNonEmpty>, atts: [FetchAttribute], modifiers: KeyValues<String, ParameterValue?>) -> Int {
         self.buffer.writeString("UID FETCH ") +
             self.buffer.writeLastCommandSet(set) +
             self.buffer.writeSpace() +
@@ -525,7 +525,7 @@ extension CommandEncodeBuffer {
             self.buffer.writeStoreAttributeFlags(flags)
     }
 
-    private mutating func writeCommandKind_uidStore(set: LastCommandSet<UIDSet>, modifiers: KeyValues<String, ParameterValue?>, flags: StoreFlags) -> Int {
+    private mutating func writeCommandKind_uidStore(set: LastCommandSet<UIDSetNonEmpty>, modifiers: KeyValues<String, ParameterValue?>, flags: StoreFlags) -> Int {
         self.buffer.writeString("UID STORE ") +
             self.buffer.writeLastCommandSet(set) +
             self.buffer.write(if: modifiers.count >= 1) {
@@ -559,7 +559,7 @@ extension CommandEncodeBuffer {
             self.buffer.writeMailbox(mailbox)
     }
 
-    private mutating func writeCommandKind_uidMove(set: LastCommandSet<UIDSet>, mailbox: MailboxName) -> Int {
+    private mutating func writeCommandKind_uidMove(set: LastCommandSet<UIDSetNonEmpty>, mailbox: MailboxName) -> Int {
         self.buffer.writeString("UID MOVE ") +
             self.buffer.writeLastCommandSet(set) +
             self.buffer.writeSpace() +

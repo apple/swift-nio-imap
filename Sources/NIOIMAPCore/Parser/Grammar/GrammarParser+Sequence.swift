@@ -59,9 +59,9 @@ extension GrammarParser {
     static func parseSequenceMatchData(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SequenceMatchData {
         try composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
             try fixedString("(", buffer: &buffer, tracker: tracker)
-            let knownSequenceSet = try self.parseSequenceSet(buffer: &buffer, tracker: tracker)
+            let knownSequenceSet = try self.parseLastCommandSet(buffer: &buffer, tracker: tracker, setParser: self.parseUIDSetNonEmpty)
             try space(buffer: &buffer, tracker: tracker)
-            let knownUidSet = try self.parseSequenceSet(buffer: &buffer, tracker: tracker)
+            let knownUidSet = try self.parseLastCommandSet(buffer: &buffer, tracker: tracker, setParser: self.parseUIDSetNonEmpty)
             try fixedString(")", buffer: &buffer, tracker: tracker)
             return SequenceMatchData(knownSequenceSet: knownSequenceSet, knownUidSet: knownUidSet)
         }

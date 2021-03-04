@@ -297,7 +297,7 @@ extension GrammarParser {
 
         func parseSearchKey_uid(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SearchKey {
             try fixedString("UID ", buffer: &buffer, tracker: tracker)
-            return .uid(try self.parseUIDSet(buffer: &buffer, tracker: tracker))
+            return .uid(try self.parseLastCommandSet(buffer: &buffer, tracker: tracker, setParser: self.parseUIDSetNonEmpty))
         }
 
         func parseSearchKey_sequenceSet(buffer: inout ByteBuffer, tracker: StackTracker) throws -> SearchKey {

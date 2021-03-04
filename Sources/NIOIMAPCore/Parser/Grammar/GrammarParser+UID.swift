@@ -43,7 +43,7 @@ extension GrammarParser {
         func parseUid_copy(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Command {
             try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Command in
                 try fixedString("COPY ", buffer: &buffer, tracker: tracker)
-                let set = try self.parseLastCommandSet(buffer: &buffer, tracker: tracker, setParser: self.parseUIDSet)
+                let set = try self.parseLastCommandSet(buffer: &buffer, tracker: tracker, setParser: self.parseUIDSetNonEmpty)
                 try fixedString(" ", buffer: &buffer, tracker: tracker)
                 let mailbox = try self.parseMailbox(buffer: &buffer, tracker: tracker)
                 return .uidCopy(set, mailbox)
@@ -53,7 +53,7 @@ extension GrammarParser {
         func parseUid_move(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Command {
             try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Command in
                 try fixedString("MOVE ", buffer: &buffer, tracker: tracker)
-                let set = try self.parseLastCommandSet(buffer: &buffer, tracker: tracker, setParser: self.parseUIDSet)
+                let set = try self.parseLastCommandSet(buffer: &buffer, tracker: tracker, setParser: self.parseUIDSetNonEmpty)
                 try space(buffer: &buffer, tracker: tracker)
                 let mailbox = try self.parseMailbox(buffer: &buffer, tracker: tracker)
                 return .uidMove(set, mailbox)
@@ -63,7 +63,7 @@ extension GrammarParser {
         func parseUid_fetch(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Command {
             try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Command in
                 try fixedString("FETCH ", buffer: &buffer, tracker: tracker)
-                let set = try self.parseLastCommandSet(buffer: &buffer, tracker: tracker, setParser: self.parseUIDSet)
+                let set = try self.parseLastCommandSet(buffer: &buffer, tracker: tracker, setParser: self.parseUIDSetNonEmpty)
                 try space(buffer: &buffer, tracker: tracker)
                 let att = try parseFetch_type(buffer: &buffer, tracker: tracker)
                 let modifiers = try optional(buffer: &buffer, tracker: tracker, parser: self.parseParameters) ?? [:]
@@ -81,7 +81,7 @@ extension GrammarParser {
         func parseUid_store(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Command {
             try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Command in
                 try fixedString("STORE ", buffer: &buffer, tracker: tracker)
-                let set = try self.parseLastCommandSet(buffer: &buffer, tracker: tracker, setParser: self.parseUIDSet)
+                let set = try self.parseLastCommandSet(buffer: &buffer, tracker: tracker, setParser: self.parseUIDSetNonEmpty)
                 let modifiers = try optional(buffer: &buffer, tracker: tracker, parser: self.parseParameters) ?? [:]
                 try space(buffer: &buffer, tracker: tracker)
                 let flags = try self.parseStoreAttributeFlags(buffer: &buffer, tracker: tracker)
@@ -91,7 +91,7 @@ extension GrammarParser {
 
         func parseUid_expunge(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Command {
             try fixedString("EXPUNGE ", buffer: &buffer, tracker: tracker)
-            let set = try self.parseLastCommandSet(buffer: &buffer, tracker: tracker, setParser: self.parseUIDSet)
+            let set = try self.parseLastCommandSet(buffer: &buffer, tracker: tracker, setParser: self.parseUIDSetNonEmpty)
             return .uidExpunge(set)
         }
 
@@ -179,6 +179,15 @@ extension GrammarParser {
                 throw ParserError(hint: "UID set is empty.")
             }
             return s
+        }
+    }
+    
+    static func parseUIDSetNonEmpty(buffer: inout ByteBuffer, tracker: StackTracker) throws -> UIDSetNonEmpty {
+        try composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
+            guard let set = UIDSetNonEmpty(set: try self.parseUIDSet(buffer: &buffer, tracker: tracker)) else {
+                throw ParserError(hint: "Need at least one UID")
+            }
+            return set
         }
     }
 

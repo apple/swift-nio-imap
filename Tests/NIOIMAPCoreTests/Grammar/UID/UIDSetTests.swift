@@ -48,7 +48,7 @@ extension UIDSetTests {
 
     func testIMAPEncoded_all() {
         let expected = "1:*"
-        let size = self.testBuffer.writeUIDSet(.all)
+        let size = self.testBuffer.writeUIDSet(UIDSet.all)
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }
