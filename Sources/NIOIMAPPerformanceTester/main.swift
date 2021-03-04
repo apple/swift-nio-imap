@@ -65,7 +65,7 @@ let commands: [(String, Command)] = [
     ("parse_id_many", .id(["key1": nil, "key2": ByteBuffer(string: "value2"), "key3": ByteBuffer(string: "value3")])),
     ("parse_rename_params_none", .rename(from: .inbox, to: .init(ByteBuffer(string: "not an inbox")), params: [:])),
     ("parse_rename_params_one", .rename(from: .inbox, to: .init(ByteBuffer(string: "not an inbox")), params: ["name": nil])),
-    ("parse_rename_params_many", .rename(from: .inbox, to: .init(ByteBuffer(string: "not an inbox")), params: ["name1": nil, "name2": .sequence([1 ... 2, 3 ... 4])])),
+    ("parse_rename_params_many", .rename(from: .inbox, to: .init(ByteBuffer(string: "not an inbox")), params: ["name1": nil, "name2": .sequence(.set([1 ... 2, 3 ... 4]))])),
     ("parse_subscribe", .subscribe(.inbox)),
     ("parse_unsubscribe", .unsubscribe(.inbox)),
     ("parse_lsub", .lsub(reference: .inbox, pattern: ByteBuffer(string: "pattern"))),
