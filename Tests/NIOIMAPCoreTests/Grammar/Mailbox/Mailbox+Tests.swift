@@ -27,7 +27,7 @@ extension Mailbox_Tests {
             (.init(""), "\"\"", #line),
             (.init("box"), "\"box\"", #line),
             (.init("\""), "{1}\r\n\"", #line),
-            (.init(ByteBuffer(ByteBufferView([0x42, 0xC3, 0xA5, 0x64]))), "{4}\r\nBåd", #line),
+            (.init(ByteBuffer(ByteBufferView([]))), "{4}\r\nab&-12", #line),
         ]
 
         for (test, expectedString, line) in inputs {
