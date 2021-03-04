@@ -41,10 +41,10 @@ public struct InvalidPathSeparatorError: Error, Equatable {
 /// Path separators are optional, and so the simple `MailboxName` *foo* has `pathSeparator = nil`.
 public struct MailboxPath: Hashable {
     /// The full mailbox name, e.g. *foo/bar*
-    public var name: MailboxName
+    public let name: MailboxName
 
     /// The path separator, e.g. */* in *foo/bar*
-    public var pathSeparator: Character?
+    public let pathSeparator: Character?
 
     /// Creates a new `MailboxPath` with the given data.
     /// - Note: Do not use this initialiser to create a root/sub mailbox that requires validation. Instead use `makeRootMailbox(displayName:pathSeparator:)`
@@ -188,7 +188,7 @@ public struct MailboxName: Hashable {
     public static var inbox = Self(ByteBuffer(string: "INBOX"))
 
     /// The raw bytes, readable as `[UInt8]`
-    public var storage: ByteBuffer
+    public let storage: ByteBuffer
 
     /// `true` if the internal storage reads "INBOX"
     /// otherwise `false`
