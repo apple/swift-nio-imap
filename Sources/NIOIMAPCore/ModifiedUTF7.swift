@@ -14,20 +14,21 @@
 
 import struct NIO.ByteBuffer
 
-/// Thrown if an odd number of bytes is given to the UTF-7 decoder.
-public struct OddByteCountError: Error {
-    /// The number of bytes given to the decoder.
-    public var byteCount: Int
-}
-
-/// Thrown if bytes cannot successfully roundtrip through the encoder and decoder.
-public struct EncodingRoundtripError: Error {
-    /// The buffer to roundtrip
-    public var buffer: ByteBuffer
-}
-
 /// IMAP uses a slightly modified version of UTF7, as documented in RFC 3501 section 5.1.3.
-enum ModifiedUTF7 {
+public enum ModifiedUTF7 {
+    
+    /// Thrown if an odd number of bytes is given to the UTF-7 decoder.
+    public struct OddByteCountError: Error {
+        /// The number of bytes given to the decoder.
+        public var byteCount: Int
+    }
+
+    /// Thrown if bytes cannot successfully roundtrip through the encoder and decoder.
+    public struct EncodingRoundtripError: Error {
+        /// The buffer to roundtrip
+        public var buffer: ByteBuffer
+    }
+    
     /// Encodes a `String` into UTF-7 bytes.
     /// - parameter string: The string to encode.
     /// - returns: A `ByteBuffer` containing UTF-7 bytes.
