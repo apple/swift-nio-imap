@@ -14,6 +14,8 @@
 
 /// Matches the `UIDSet` of the messages in the source mailbox to the `UIDSet` of the
 /// copied messages in the destination mailbox.
+/// - Note: This type uses `[UIDRange]` over `UIDSet` as it's important to preserve the array ordering
+/// so that the source UIDs can be matched to destination UIDs.
 public struct ResponseCodeCopy: Equatable {
     /// The `UIDValidity` of the destination mailbox
     public var destinationUIDValidity: Int
