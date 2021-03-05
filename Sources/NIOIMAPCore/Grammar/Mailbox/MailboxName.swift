@@ -41,10 +41,10 @@ public struct InvalidPathSeparatorError: Error, Equatable {
 /// Path separators are optional, and so the simple `MailboxName` *foo* has `pathSeparator = nil`.
 public struct MailboxPath: Hashable {
     /// The full mailbox name, e.g. *foo/bar*
-    public var name: MailboxName
+    public let name: MailboxName
 
     /// The path separator, e.g. */* in *foo/bar*
-    public var pathSeparator: Character?
+    public let pathSeparator: Character?
 
     /// Creates a new `MailboxPath` with the given data.
     /// - Note: Do not use this initialiser to create a root/sub mailbox that requires validation. Instead use `makeRootMailbox(displayName:pathSeparator:)`
@@ -99,11 +99,11 @@ extension MailboxPath {
     /// - returns: `[String]` containing path components
     public func displayStringComponents(omittingEmptySubsequences: Bool = true) -> [String] {
         guard let pathSeparator = self.pathSeparator else {
-            return [self.decodeBufferToString(self.name.storage)]
+            return [self.decodeBufferToString(self.name.bytes)]
         }
 
         assert(pathSeparator.isASCII)
-        return self.name.storage.readableBytesView
+        return self.name.bytes.readableBytesView
             .split(separator: pathSeparator.asciiValue!, omittingEmptySubsequences: omittingEmptySubsequences)
             .map { bytes in
                 self.decodeBufferToString(ByteBuffer(ByteBufferView(bytes)))
@@ -161,7 +161,7 @@ extension MailboxPath {
         }
 
         // if a separator exists, write it after the root mailbox
-        var newStorage = self.name.storage
+        var newStorage = self.name.bytes
         newStorage.writeBytes(separator.utf8)
 
         var encodedNewName = ModifiedUTF7.encode(displayName)
@@ -175,44 +175,35 @@ extension MailboxPath {
     }
 }
 
-/// IMAPv4 `mailbox`
+/// A mailbox’s name.
+///
+/// This uniquely identifies a specific mailbox, but does not specify the
+/// path separator. In most cases, using a `MailboxPath` should be preferred since
+/// `MailboxPath` is able to
+/// 1. create a (display) `String` from a path.
+/// 2. create a path from a `String` (for new mailboxes created by a user)
+/// 3. split a path into its components (to figure out how paths are nested into each other).
 public struct MailboxName: Hashable {
     /// Represents an inbox.
-    public static var inbox = Self("INBOX")
+    public static let inbox = Self(ByteBuffer(string: "INBOX"))
 
     /// The raw bytes, readable as `[UInt8]`
-    public var storage: ByteBuffer
-
-    /// The raw bytes decoded into a UTF8 `String`
-    ///
-    /// - ToDo: This should not be exposed. Needs to go through the “modified UTF-7” decoding.
-    public var stringValue: String {
-        String(buffer: self.storage)
-    }
+    public let bytes: ByteBuffer
 
     /// `true` if the internal storage reads "INBOX"
     /// otherwise `false`
     public var isInbox: Bool {
-        storage.readableBytesView.lazy.map { $0 & 0xDF }.elementsEqual("INBOX".utf8)
-    }
-
-    /// Creates a new `MailboxName`. Note if the given string is some variation of "inbox" then we will uppercase it.
-    /// - parameter string: The mailbox name
-    public init(_ string: String) {
-        if string.uppercased() == "INBOX" {
-            self.storage = ByteBuffer(ByteBufferView("INBOX".utf8))
-        } else {
-            self.storage = ByteBuffer(ByteBufferView(string.utf8))
-        }
+        bytes.readableBytesView.lazy.map { $0 & 0xDF }.elementsEqual("INBOX".utf8)
     }
 
     /// Creates a new `MailboxName` from the given bytes.
+    /// - note: The bytes provided should be UTF-7.
     /// - parameter bytes: The bytes to construct a `MailboxName` from. Note that if any case-insensitive variation of *INBOX* is provided then it will be uppercased.
     public init(_ bytes: ByteBuffer) {
         if String(buffer: bytes).uppercased() == "INBOX" {
-            self.storage = ByteBuffer(ByteBufferView("INBOX".utf8))
+            self.bytes = ByteBuffer(ByteBufferView("INBOX".utf8))
         } else {
-            self.storage = bytes
+            self.bytes = bytes
         }
     }
 }
@@ -222,7 +213,8 @@ public struct MailboxName: Hashable {
 extension MailboxName: CustomDebugStringConvertible {
     /// Provides a human-readable description.
     public var debugDescription: String {
-        self.stringValue
+        let bytes = self.bytes.readableBytesView.map { $0 & 0xDF }
+        return String(decoding: bytes, as: Unicode.UTF8.self)
     }
 }
 
@@ -230,6 +222,6 @@ extension MailboxName: CustomDebugStringConvertible {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeMailbox(_ mailbox: MailboxName) -> Int {
-        self.writeIMAPString(mailbox.storage)
+        self.writeIMAPString(mailbox.bytes)
     }
 }

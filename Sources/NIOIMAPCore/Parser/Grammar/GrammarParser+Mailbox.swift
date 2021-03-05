@@ -26,8 +26,7 @@ import struct NIO.ByteBufferView
 extension GrammarParser {
     // mailbox         = "INBOX" / astring
     static func parseMailbox(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxName {
-        let string = try self.parseAString(buffer: &buffer, tracker: tracker)
-        return MailboxName(string)
+        MailboxName(try self.parseAString(buffer: &buffer, tracker: tracker))
     }
 
     // mailbox-data    =  "FLAGS" SP flag-list / "LIST" SP mailbox-list /
