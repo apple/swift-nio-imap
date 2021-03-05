@@ -24,8 +24,8 @@ extension MessageDataTests {
     func testEncode() {
         let inputs: [(MessageData, String, UInt)] = [
             (.expunge(123), "123 EXPUNGE", #line),
-            (.vanished(.all), "VANISHED *", #line),
-            (.vanishedEarlier(.all), "VANISHED (EARLIER) *", #line),
+            (.vanished(.all), "VANISHED 1:*", #line),
+            (.vanishedEarlier(.all), "VANISHED (EARLIER) 1:*", #line),
             (.genURLAuth(["test"]), "GENURLAUTH \"test\"", #line),
             (.genURLAuth(["test1", "test2"]), "GENURLAUTH \"test1\" \"test2\"", #line),
         ]

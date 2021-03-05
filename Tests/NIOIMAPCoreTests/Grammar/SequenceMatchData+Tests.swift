@@ -23,7 +23,7 @@ class SequenceMatchData_Tests: EncodeTestClass {}
 extension SequenceMatchData_Tests {
     func testEncode() {
         let inputs: [(SequenceMatchData, String, UInt)] = [
-            (.init(knownSequenceSet: .all, knownUidSet: .all), "(* *)", #line),
+            (.init(knownSequenceSet: .set(.all), knownUidSet: .set(.all)), "(1:* 1:*)", #line),
             (.init(knownSequenceSet: .set([1, 2, 3]), knownUidSet: .set([4, 5, 6])), "(1:3 4:6)", #line),
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeSequenceMatchData($0) })

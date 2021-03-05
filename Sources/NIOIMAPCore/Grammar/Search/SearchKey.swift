@@ -119,7 +119,7 @@ public indirect enum SearchKey: Hashable {
     case messageSizeSmaller(Int)
 
     /// RFC 3501: Messages with unique identifiers corresponding to the specified unique identifier set. Sequence set ranges are permitted.
-    case uid(UIDSet)
+    case uid(LastCommandSet<UIDSetNonEmpty>)
 
     /// RFC 3501: Messages that match a given sequence set.
     case sequenceNumbers(LastCommandSet<SequenceRangeSet>)
@@ -328,7 +328,7 @@ extension EncodeBuffer {
         case .uid(let set):
             return
                 self.writeString("UID ") +
-                self.writeUIDSet(set)
+                self.writeLastCommandSet(set)
 
         case .sequenceNumbers(let set):
             return self.writeLastCommandSet(set)

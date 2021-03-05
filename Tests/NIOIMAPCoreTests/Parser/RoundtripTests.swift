@@ -84,9 +84,9 @@ final class RoundtripTests: XCTestCase {
             (.store(.all, [], .add(silent: true, list: [.draft, .extension("\\some")])), #line),
             (.store(.all, [], .replace(silent: true, list: [.keyword(.colorBit0)])), #line),
 
-            (.uidCopy(.all, .inbox), #line),
+            (.uidCopy(.set(.all), .inbox), #line),
 
-            (.uidStore(.all, [:], .add(silent: true, list: [.draft, .deleted, .answered])), #line),
+            (.uidStore(.set(.all), [:], .add(silent: true, list: [.draft, .deleted, .answered])), #line),
 
             (.search(key: .all), #line),
             (.search(key: .or(.deleted, .unseen), charset: "UTF-7"), #line),

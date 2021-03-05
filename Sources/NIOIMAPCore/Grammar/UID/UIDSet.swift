@@ -19,6 +19,11 @@ import StandardLibraryPreview
 ///
 /// UIDs are _not_ sorted.
 public struct UIDSet: Hashable {
+    /// A set that contains a single range, that in turn contains all messages.
+    public static let all = UIDSet(UIDRange.all)
+    /// A set that contains no UIDs.
+    public static let empty = UIDSet()
+
     /// A non-empty array of UID ranges.
     fileprivate var _ranges: RangeSet<UIDShiftWrapper>
 
@@ -36,6 +41,26 @@ public struct UIDSet: Hashable {
 
     public init() {
         self._ranges = RangeSet()
+    }
+}
+
+/// A wrapper around a `UIDSet` that enforces at least one element.
+public struct UIDSetNonEmpty: Hashable {
+    /// A set that contains a single range, that in turn contains all messages.
+    public static let all = UIDSetNonEmpty(set: .all)!
+
+    /// The underlying `UIDSet`
+    public private(set) var set: UIDSet
+
+    /// Creates a new `UIDSetNonEmpty` from a `UIDSet`, after first
+    /// validating that the set is not emtpy.
+    /// - parameter set: The underlying `UIDSet` to use.
+    /// - returns: `nil` if the given `UIDSet` is empty.
+    public init?(set: UIDSet) {
+        guard set.count > 0 else {
+            return nil
+        }
+        self.set = set
     }
 }
 
@@ -174,11 +199,13 @@ extension UIDSet: ExpressibleByArrayLiteral {
     }
 }
 
-extension UIDSet {
-    /// A set that contains a single range, that in turn contains all messages.
-    public static let all = UIDSet(UIDRange.all)
-    /// A set that contains no UIDs.
-    public static let empty = UIDSet()
+extension UIDSetNonEmpty: ExpressibleByArrayLiteral {
+    /// Creates a new UIDSet from a literal array of ranges.
+    /// - parameter arrayLiteral: The elements to use, assumed to be non-empty.
+    public init(arrayLiteral elements: UIDRange...) {
+        precondition(elements.count > 0, "At least one element is required.")
+        self.set = UIDSet(elements)
+    }
 }
 
 extension UIDSet: BidirectionalCollection {
@@ -301,17 +328,6 @@ extension UIDSet.Index: Comparable {
     }
 }
 
-// MARK: - Encoding
-
-extension EncodeBuffer {
-    @discardableResult mutating func writeUIDSet(_ set: UIDSet) -> Int {
-        self.writeArray(set._ranges.ranges, separator: ",", parenthesis: false) { (element, self) in
-            let r = UIDRange(element)
-            return self.writeUIDRange(r)
-        }
-    }
-}
-
 // MARK: - Set Algebra
 
 extension UIDSet: SetAlgebra {
@@ -367,5 +383,32 @@ extension UIDSet: SetAlgebra {
 
     public mutating func formSymmetricDifference(_ other: UIDSet) {
         _ranges.formSymmetricDifference(other._ranges)
+    }
+}
+
+// MARK: - Encoding
+
+extension UIDSet: _IMAPEncodable {
+    public func writeIntoBuffer(_ buffer: inout EncodeBuffer) -> Int {
+        buffer.writeArray(self._ranges.ranges, separator: ",", parenthesis: false) { (element, buffer) in
+            let r = UIDRange(element)
+            return buffer.writeUIDRange(r)
+        }
+    }
+}
+
+extension UIDSetNonEmpty: _IMAPEncodable {
+    public func writeIntoBuffer(_ buffer: inout EncodeBuffer) -> Int {
+        self.set.writeIntoBuffer(&buffer)
+    }
+}
+
+extension EncodeBuffer {
+    @discardableResult mutating func writeUIDSet(_ set: UIDSet) -> Int {
+        set.writeIntoBuffer(&self)
+    }
+
+    @discardableResult mutating func writeUIDSet(_ set: UIDSetNonEmpty) -> Int {
+        set.writeIntoBuffer(&self)
     }
 }

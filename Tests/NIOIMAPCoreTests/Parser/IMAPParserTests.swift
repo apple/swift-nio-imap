@@ -2329,7 +2329,7 @@ extension ParserUnitTests {
                 ("test 1", "\r", .basic(.init(key: "test", value: .sequence(.set([1])))), #line),
                 ("QRESYNC (1 1)", "\r", .qresync(.init(uidValiditiy: 1, modificationSequenceValue: 1, knownUids: nil, sequenceMatchData: nil)), #line),
                 ("QRESYNC (1 1 1:2)", "\r", .qresync(.init(uidValiditiy: 1, modificationSequenceValue: 1, knownUids: .set([1 ... 2]), sequenceMatchData: nil)), #line),
-                ("QRESYNC (1 1 1:2 (* *))", "\r", .qresync(.init(uidValiditiy: 1, modificationSequenceValue: 1, knownUids: .set([1 ... 2]), sequenceMatchData: .init(knownSequenceSet: .all, knownUidSet: .all))), #line),
+                ("QRESYNC (1 1 1:2 (1:* 1:*))", "\r", .qresync(.init(uidValiditiy: 1, modificationSequenceValue: 1, knownUids: .set([1 ... 2]), sequenceMatchData: .init(knownSequenceSet: .set(.all), knownUidSet: .set(.all)))), #line),
             ],
             parserErrorInputs: [
                 ("1", "\r", #line),
@@ -2533,7 +2533,7 @@ extension ParserUnitTests {
         self.iterateTests(
             testFunction: GrammarParser.parseSequenceMatchData,
             validInputs: [
-                ("(* *)", "\r", .init(knownSequenceSet: .all, knownUidSet: .all), #line),
+                ("(1:* 1:*)", "\r", .init(knownSequenceSet: .set(.all), knownUidSet: .set(.all)), #line),
                 ("(1,2 3,4)", "\r", .init(knownSequenceSet: .set([1, 2]), knownUidSet: .set([3, 4])), #line),
             ],
             parserErrorInputs: [

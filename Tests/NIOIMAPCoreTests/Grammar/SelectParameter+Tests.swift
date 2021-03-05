@@ -37,13 +37,13 @@ extension SelectParameter_Tests {
                 #line
             ),
             (
-                .qresync(.init(uidValiditiy: 1, modificationSequenceValue: .zero, knownUids: nil, sequenceMatchData: .init(knownSequenceSet: .all, knownUidSet: .all))),
-                "QRESYNC (1 0 (* *))",
+                .qresync(.init(uidValiditiy: 1, modificationSequenceValue: .zero, knownUids: nil, sequenceMatchData: .init(knownSequenceSet: .set(.all), knownUidSet: .set(.all)))),
+                "QRESYNC (1 0 (1:* 1:*))",
                 #line
             ),
             (
-                .qresync(.init(uidValiditiy: 1, modificationSequenceValue: .zero, knownUids: .set([1]), sequenceMatchData: .init(knownSequenceSet: .all, knownUidSet: .all))),
-                "QRESYNC (1 0 1 (* *))",
+                .qresync(.init(uidValiditiy: 1, modificationSequenceValue: .zero, knownUids: .set([1]), sequenceMatchData: .init(knownSequenceSet: .set(.all), knownUidSet: .set(.all)))),
+                "QRESYNC (1 0 1 (1:* 1:*))",
                 #line
             ),
         ]
