@@ -25,20 +25,19 @@ import struct NIO.ByteBufferView
 
 extension GrammarParser {
     static func parseLastCommandSet<T: _IMAPEncodable>(buffer: inout ByteBuffer, tracker: StackTracker, setParser: SubParser<T>) throws -> LastCommandSet<T> {
-        
         func parseLastCommandSet_lastCommand(buffer: inout ByteBuffer, tracker: StackTracker) throws -> LastCommandSet<T> {
             try fixedString("$", buffer: &buffer, tracker: tracker)
             return .lastCommand
         }
-        
+
         func parseLastCommandSet_set(buffer: inout ByteBuffer, tracker: StackTracker) throws -> LastCommandSet<T> {
             .set(try setParser(&buffer, tracker))
         }
-        
+
         return try withoutActuallyEscaping(parseLastCommandSet_set) { (parseLastCommandSet_set) in
             try oneOf([
                 parseLastCommandSet_lastCommand,
-                parseLastCommandSet_set
+                parseLastCommandSet_set,
             ], buffer: &buffer, tracker: tracker)
         }
     }
