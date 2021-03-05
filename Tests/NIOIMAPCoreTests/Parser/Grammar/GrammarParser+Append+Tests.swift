@@ -44,7 +44,7 @@ extension GrammarParser_Append_Tests {
     }
 
     func testNegativeAppendDataDoesNotParse() {
-        TestUtilities.withBuffer("{-1}\r\n", shouldRemainUnchanged: true) { buffer in
+        TestUtilities.withParseBuffer("{-1}\r\n", shouldRemainUnchanged: true) { buffer in
             XCTAssertThrowsError(try GrammarParser.parseAppendData(buffer: &buffer, tracker: .testTracker)) { error in
                 XCTAssertNotNil(error as? ParserError)
             }
@@ -53,7 +53,7 @@ extension GrammarParser_Append_Tests {
 
     func testHugeAppendDataDoesNotParse() {
         let oneAfterMaxInt = "\(UInt(Int.max) + 1)"
-        TestUtilities.withBuffer("{\(oneAfterMaxInt)}\r\n", shouldRemainUnchanged: true) { buffer in
+        TestUtilities.withParseBuffer("{\(oneAfterMaxInt)}\r\n", shouldRemainUnchanged: true) { buffer in
             XCTAssertThrowsError(try GrammarParser.parseAppendData(buffer: &buffer, tracker: .testTracker)) { error in
                 XCTAssertNotNil(error as? ParserError)
             }

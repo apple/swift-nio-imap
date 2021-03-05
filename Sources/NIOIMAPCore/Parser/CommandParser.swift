@@ -73,7 +73,7 @@ public struct CommandParser: Parser {
     public mutating func parseCommandStream(buffer: inout ByteBuffer) throws -> PartialCommandStream? {
         let save = buffer
         let framingResult = try self.synchronisingLiteralParser.parseContinuationsNecessary(buffer)
-        var actuallyVisible = buffer.getSlice(at: buffer.readerIndex, length: framingResult.maximumValidBytes)!
+        var actuallyVisible = ParseBuffer(buffer.getSlice(at: buffer.readerIndex, length: framingResult.maximumValidBytes)!)
 
         func parseCommand() throws -> CommandStream? {
             do {
@@ -110,8 +110,8 @@ public struct CommandParser: Parser {
         }
     }
 
-    private mutating func parseCommandStream0(buffer: inout ByteBuffer, tracker: StackTracker) throws -> CommandStream? {
-        try GrammarParser.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
+    private mutating func parseCommandStream0(buffer: inout ParseBuffer, tracker: StackTracker) throws -> CommandStream? {
+        try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             switch self.mode {
             case .idle:
                 return try self.handleIdle(buffer: &buffer, tracker: tracker)
@@ -120,40 +120,41 @@ public struct CommandParser: Parser {
             case .waitingForMessage:
                 return try self.handleWaitingForMessage(buffer: &buffer, tracker: tracker)
             case .streamingBytes(let remaining):
-                return self.handleStreamingBytes(buffer: &buffer, remaining: remaining)
+                return try self.handleStreamingBytes(buffer: &buffer, tracker: tracker, remaining: remaining)
             case .streamingEnd:
                 return try self.handleStreamingEnd(buffer: &buffer, tracker: tracker)
             case .waitingForCatenatePart(seenPreviousPart: let seenPreviousPart):
                 return try self.handleCatenatePart(expectPrecedingSpace: seenPreviousPart, buffer: &buffer, tracker: tracker)
             case .streamingCatenateBytes(let remaining):
-                return try self.handleStreamingCatenateBytes(buffer: &buffer, remaining: remaining)
+                return try self.handleStreamingCatenateBytes(buffer: &buffer, tracker: tracker, remaining: remaining)
             case .streamingCatenateEnd:
                 return try self.handleStreamingCatenateEnd(buffer: &buffer, tracker: tracker)
             }
         }
     }
 
-    private mutating func handleStreamingBytes(buffer: inout ByteBuffer, remaining: Int) -> CommandStream {
+    private mutating func handleStreamingBytes(buffer: inout ParseBuffer, tracker: StackTracker, remaining: Int) throws -> CommandStream {
         assert(self.mode.isStreamingAppend)
-        if buffer.readableBytes >= remaining {
-            self.mode = .streamingEnd
-            return .append(.messageBytes(buffer.readSlice(length: remaining)!))
-        }
+        let bytes = try ParserLibrary.parseBytes(buffer: &buffer, tracker: tracker, upTo: remaining)
 
-        let bytes = buffer.readSlice(length: buffer.readableBytes)!
-        self.mode = .streamingBytes(remaining - bytes.readableBytes)
+        assert(bytes.readableBytes <= remaining)
+        if bytes.readableBytes == remaining {
+            self.mode = .streamingEnd
+        } else {
+            self.mode = .streamingBytes(remaining - bytes.readableBytes)
+        }
         return .append(.messageBytes(bytes))
     }
 
-    private mutating func handleLines(buffer: inout ByteBuffer, tracker: StackTracker) throws -> CommandStream {
-        func parseCommand(buffer: inout ByteBuffer, tracker: StackTracker) throws -> TaggedCommand {
+    private mutating func handleLines(buffer: inout ParseBuffer, tracker: StackTracker) throws -> CommandStream {
+        func parseCommand(buffer: inout ParseBuffer, tracker: StackTracker) throws -> TaggedCommand {
             try GrammarParser.parseCommand(buffer: &buffer, tracker: tracker)
         }
 
         let save = buffer
         do {
             let command = try parseCommand(buffer: &buffer, tracker: tracker)
-            try GrammarParser.newline(buffer: &buffer, tracker: tracker)
+            try ParserLibrary.newline(buffer: &buffer, tracker: tracker)
             if case .idleStart = command.command {
                 self.mode = .idle
             }
@@ -169,7 +170,7 @@ public struct CommandParser: Parser {
         }
     }
 
-    private mutating func handleWaitingForMessage(buffer: inout ByteBuffer, tracker: StackTracker) throws -> CommandStream {
+    private mutating func handleWaitingForMessage(buffer: inout ParseBuffer, tracker: StackTracker) throws -> CommandStream {
         do {
             let command = try GrammarParser.parseAppendOrCatenateMessage(buffer: &buffer, tracker: tracker)
 
@@ -184,7 +185,7 @@ public struct CommandParser: Parser {
         } catch is ParserError {
             let save = buffer
             do {
-                try GrammarParser.newline(buffer: &buffer, tracker: tracker)
+                try ParserLibrary.newline(buffer: &buffer, tracker: tracker)
                 self.mode = .lines
                 return .append(.finish)
             } catch {
@@ -194,18 +195,18 @@ public struct CommandParser: Parser {
         }
     }
 
-    private mutating func handleStreamingEnd(buffer: inout ByteBuffer, tracker: StackTracker) throws -> CommandStream {
+    private mutating func handleStreamingEnd(buffer: inout ParseBuffer, tracker: StackTracker) throws -> CommandStream {
         self.mode = .waitingForMessage
         return .append(.endMessage)
     }
 
-    private mutating func handleIdle(buffer: inout ByteBuffer, tracker: StackTracker) throws -> CommandStream {
+    private mutating func handleIdle(buffer: inout ParseBuffer, tracker: StackTracker) throws -> CommandStream {
         try GrammarParser.parseIdleDone(buffer: &buffer, tracker: tracker)
         self.mode = .lines
         return .idleDone
     }
 
-    private mutating func handleCatenatePart(expectPrecedingSpace: Bool, buffer: inout ByteBuffer, tracker: StackTracker) throws -> CommandStream {
+    private mutating func handleCatenatePart(expectPrecedingSpace: Bool, buffer: inout ParseBuffer, tracker: StackTracker) throws -> CommandStream {
         let result = try GrammarParser.parseCatenatePart(expectPrecedingSpace: expectPrecedingSpace, buffer: &buffer, tracker: tracker)
         switch result {
         case .url(let url):
@@ -220,18 +221,20 @@ public struct CommandParser: Parser {
         }
     }
 
-    private mutating func handleStreamingCatenateBytes(buffer: inout ByteBuffer, remaining: Int) throws -> CommandStream {
-        if buffer.readableBytes >= remaining {
+    private mutating func handleStreamingCatenateBytes(buffer: inout ParseBuffer, tracker: StackTracker, remaining: Int) throws -> CommandStream {
+        let bytes = try ParserLibrary.parseBytes(buffer: &buffer, tracker: tracker, upTo: remaining)
+
+        assert(bytes.readableBytes <= remaining)
+        if bytes.readableBytes == remaining {
             self.mode = .streamingCatenateEnd
-            return .append(.catenateData(.bytes(buffer.readSlice(length: remaining)!)))
+        } else {
+            self.mode = .streamingCatenateBytes(remaining - bytes.readableBytes)
         }
 
-        let bytes = buffer.readSlice(length: buffer.readableBytes)!
-        self.mode = .streamingCatenateBytes(remaining - bytes.readableBytes)
         return .append(.catenateData(.bytes(bytes)))
     }
 
-    private mutating func handleStreamingCatenateEnd(buffer: inout ByteBuffer, tracker: StackTracker) throws -> CommandStream {
+    private mutating func handleStreamingCatenateEnd(buffer: inout ParseBuffer, tracker: StackTracker) throws -> CommandStream {
         self.mode = .waitingForCatenatePart(seenPreviousPart: true)
         return .append(.catenateData(.end))
     }

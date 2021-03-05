@@ -29,9 +29,9 @@ extension GrammarParser_Sequence_Tests {
                 ("10", " ", 10, #line),
             ],
             parserErrorInputs: [
-                ("*", "", #line),
-                ("0", "", #line),
-                ("012", "", #line),
+                ("*", " ", #line),
+                ("0", " ", #line),
+                ("012", " ", #line),
             ],
             incompleteMessageInputs: [
                 ("", "", #line),

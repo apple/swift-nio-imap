@@ -14,6 +14,7 @@
 
 import Foundation
 import NIO
+@testable import NIOIMAPCore
 import XCTest
 
 enum TestUtilities {}
@@ -27,13 +28,13 @@ func magicFile(file: StaticString = (#file)) -> StaticString { file }
 #endif
 
 extension TestUtilities {
-    static func createTestByteBuffer(for bytes: [UInt8]) -> ByteBuffer {
+    static func makeParseBuffer(for bytes: [UInt8]) -> ByteBuffer {
         var buffer = ByteBufferAllocator().buffer(capacity: bytes.count)
         buffer.writeBytes(bytes)
         return buffer
     }
 
-    static func createTestByteBuffer(for text: String) -> ByteBuffer {
+    static func makeParseBuffer(for text: String) -> ByteBuffer {
         var buffer = ByteBufferAllocator().buffer(capacity: text.utf8.count)
         buffer.writeString(text)
         return buffer
@@ -54,9 +55,14 @@ extension TestUtilities {
         let expected = inputBuffer.getSlice(at: inputBuffer.readerIndex + string.utf8.count, length: terminator.utf8.count)!
         let beforeRunningBody = inputBuffer
 
+        var parseBuffer = ParseBuffer(inputBuffer)
+
         defer {
-            let expectedString = String(decoding: expected.readableBytesView, as: Unicode.UTF8.self)
-            let remainingString = String(decoding: inputBuffer.readableBytesView, as: Unicode.UTF8.self)
+            let remaining = (try? ParserLibrary.parseBytes(buffer: &parseBuffer,
+                                                           tracker: .makeNewDefaultLimitStackTracker,
+                                                           upTo: .max)) ?? ByteBuffer()
+            let expectedString = String(buffer: expected)
+            let remainingString = String(buffer: remaining)
             if shouldRemainUnchanged {
                 XCTAssertEqual(beforeRunningBody, inputBuffer, file: file, line: line)
             } else {
