@@ -304,7 +304,7 @@ extension GrammarParser {
     static func parseFetchResponseStart(buffer: inout ByteBuffer, tracker: StackTracker) throws -> _FetchResponse {
         try composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             try fixedString("* ", buffer: &buffer, tracker: tracker)
-            let number = try self.parseNZNumber(buffer: &buffer, tracker: tracker)
+            let number = try self.parseSequenceNumber(buffer: &buffer, tracker: tracker)
             try fixedString(" FETCH (", buffer: &buffer, tracker: tracker)
             return .start(number)
         }
@@ -313,7 +313,7 @@ extension GrammarParser {
     // needed to tell the response parser which type of streaming is
     // going to take place, e.g. quoted or literal
     enum _FetchResponse: Equatable {
-        case start(Int)
+        case start(SequenceNumber)
         case simpleAttribute(MessageAttribute)
         case literalStreamingBegin(kind: StreamingKind, byteCount: Int)
         case quotedStreamingBegin(kind: StreamingKind, byteCount: Int)
