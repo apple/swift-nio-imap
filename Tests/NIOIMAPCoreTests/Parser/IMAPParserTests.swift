@@ -1013,12 +1013,12 @@ extension ParserUnitTests {
     }
 }
 
-// MARK: - IUserInfo
+// MARK: - UserInfo
 
 extension ParserUnitTests {
-    func testParseIUserInfo() {
+    func testParseUserInfo() {
         self.iterateTests(
-            testFunction: GrammarParser.parseIUserInfo,
+            testFunction: GrammarParser.parseUserInfo,
             validInputs: [
                 (";AUTH=*", " ", .init(encodedUser: nil, authenticationMechanism: .any), #line),
                 ("test", " ", .init(encodedUser: .init(data: "test"), authenticationMechanism: nil), #line),

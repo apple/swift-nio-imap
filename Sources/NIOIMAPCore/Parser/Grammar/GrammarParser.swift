@@ -797,8 +797,8 @@ extension GrammarParser {
 
     static func parseIMAPServer(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IMAPServer {
         try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> IMAPServer in
-            let info = try optional(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> IUserInfo in
-                let info = try self.parseIUserInfo(buffer: &buffer, tracker: tracker)
+            let info = try optional(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> UserInfo in
+                let info = try self.parseUserInfo(buffer: &buffer, tracker: tracker)
                 try fixedString("@", buffer: &buffer, tracker: tracker)
                 return info
             })
@@ -1199,8 +1199,8 @@ extension GrammarParser {
         }
     }
 
-    static func parseIUserInfo(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IUserInfo {
-        try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> IUserInfo in
+    static func parseUserInfo(buffer: inout ByteBuffer, tracker: StackTracker) throws -> UserInfo {
+        try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> UserInfo in
             let encodedUser = try optional(buffer: &buffer, tracker: tracker, parser: self.parseEncodedUser)
             let authenticationMechanism = try optional(buffer: &buffer, tracker: tracker, parser: self.parseIAuthentication)
             guard (encodedUser != nil || authenticationMechanism != nil) else {
