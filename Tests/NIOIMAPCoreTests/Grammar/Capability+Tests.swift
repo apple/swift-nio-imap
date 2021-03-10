@@ -46,7 +46,7 @@ extension Capability_Tests {
             (.condStore, "CONDSTORE", #line),
             (.createSpecialUse, "CREATE-SPECIAL-USE", #line),
             (.enable, "ENABLE", #line),
-            (.esearch, "ESEARCH", #line),
+            (.extendedSearch, "ESEARCH", #line),
             (.esort, "ESORT", #line),
             (.filters, "FILTERS", #line),
             (.id, "ID", #line),

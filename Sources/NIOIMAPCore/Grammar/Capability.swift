@@ -250,7 +250,7 @@ extension Capability {
     public static let enable = Self(unchecked: "ENABLE")
 
     /// Extends normal search to control what type of data is returned - RFC 4731.
-    public static let esearch = Self(unchecked: "ESEARCH")
+    public static let extendedSearch = Self(unchecked: "ESEARCH")
 
     /// Allows search responses to be sorted according to e.g. *MIN*, *MAX*, etc - RFC 5465.
     public static let esort = Self(unchecked: "ESORT")

@@ -151,7 +151,7 @@ public enum Command: Equatable {
     case setMetadata(mailbox: MailboxName, entries: KeyValues<ByteBuffer, MetadataValue>)
 
     /// Performs an extended search as defined in RFC 4731.
-    case esearch(ESearchOptions)
+    case extendedsearch(ExtendedSearchOptions)
 
     /// When sent with no arguments: removes all mailbox access keys
     /// in the user's mailbox access key table, revoking all URLs currently
@@ -260,8 +260,8 @@ extension CommandEncodeBuffer {
             return self.writeCommandKind_getMetadata(options: options, mailbox: mailbox, entries: entries)
         case .setMetadata(mailbox: let mailbox, entries: let entries):
             return self.writeCommandKind_setMetadata(mailbox: mailbox, entries: entries)
-        case .esearch(let options):
-            return self.writeCommandKind_esearch(options: options)
+        case .extendedsearch(let options):
+            return self.writeCommandKind_extendedsearch(options: options)
         case .resetKey(mailbox: let mailbox, mechanisms: let mechanisms):
             return self.writeCommandKind_resetKey(mailbox: mailbox, mechanisms: mechanisms)
         case .genURLAuth(let mechanisms):
@@ -594,9 +594,9 @@ extension CommandEncodeBuffer {
             }
     }
 
-    private mutating func writeCommandKind_esearch(options: ESearchOptions) -> Int {
+    private mutating func writeCommandKind_extendedsearch(options: ExtendedSearchOptions) -> Int {
         self.buffer.writeString("ESEARCH") +
-            self.buffer.writeESearchOptions(options)
+            self.buffer.writeExtendedSearchOptions(options)
     }
 }
 

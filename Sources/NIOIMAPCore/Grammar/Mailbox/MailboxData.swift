@@ -29,7 +29,7 @@ public enum MailboxData: Equatable {
     case search([Int])
 
     /// Response to an extended search command.
-    case esearch(ESearchResponse)
+    case extendedSearch(ExtendedSearchResponse)
 
     /// The status of the given Mailbox.
     case status(MailboxName, MailboxStatus)
@@ -92,8 +92,8 @@ extension EncodeBuffer {
             return self.writeMailboxData_lsub(list)
         case .search(let list):
             return self.writeMailboxData_search(list)
-        case .esearch(let response):
-            return self.writeESearchResponse(response)
+        case .extendedSearch(let response):
+            return self.writeExtendedSearchResponse(response)
         case .status(let mailbox, let status):
             return self.writeMailboxData_status(mailbox: mailbox, status: status)
         case .exists(let num):

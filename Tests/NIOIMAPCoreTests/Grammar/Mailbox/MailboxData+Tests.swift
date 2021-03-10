@@ -31,8 +31,8 @@ extension MailboxDataTests {
                 "LSUB (\\draft) . \"Drafts\"",
                 #line
             ),
-            (.esearch(ESearchResponse(correlator: nil, uid: false, returnData: [.count(1)])), "ESEARCH COUNT 1", #line),
-            (.esearch(ESearchResponse(correlator: nil, uid: false, returnData: [.count(1), .count(2)])), "ESEARCH COUNT 1 COUNT 2", #line),
+            (.extendedSearch(ExtendedSearchResponse(correlator: nil, uid: false, returnData: [.count(1)])), "ESEARCH COUNT 1", #line),
+            (.extendedSearch(ExtendedSearchResponse(correlator: nil, uid: false, returnData: [.count(1), .count(2)])), "ESEARCH COUNT 1 COUNT 2", #line),
             (.status(.inbox, .init(messageCount: 1)), "STATUS \"INBOX\" (MESSAGES 1)", #line),
             (.status(.inbox, .init(messageCount: 1, unseenCount: 2)), "STATUS \"INBOX\" (MESSAGES 1 UNSEEN 2)", #line),
             (.namespace(.init(userNamespace: [], otherUserNamespace: [], sharedNamespace: [])), "NAMESPACE NIL NIL NIL", #line),

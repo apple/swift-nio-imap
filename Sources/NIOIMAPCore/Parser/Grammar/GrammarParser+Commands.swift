@@ -158,7 +158,7 @@ extension GrammarParser {
             self.parseNamespaceCommand,
             parseCommandAuth_getMetadata,
             parseCommandAuth_setMetadata,
-            parseEsearch,
+            parseExtendedSearch,
             parseCommandAuth_resetKey,
             parseCommandAuth_genURLAuth,
             parseCommandAuth_urlFetch,
@@ -215,7 +215,7 @@ extension GrammarParser {
             self.parseUid,
             self.parseSearch,
             self.parseMove,
-            self.parseEsearch,
+            self.parseExtendedSearch,
         ], buffer: &buffer, tracker: tracker)
     }
 }

@@ -1185,12 +1185,12 @@ extension ParserUnitTests {
     }
 }
 
-// MARK: - parseEsearchResponse
+// MARK: - parseExtendedSearchResponse
 
 extension ParserUnitTests {
-    func testParseEsearchResponse() {
+    func testParseExtendedSearchResponse() {
         self.iterateTests(
-            testFunction: GrammarParser.parseEsearchResponse,
+            testFunction: GrammarParser.parseExtendedSearchResponse,
             validInputs: [
                 ("ESEARCH", "\r", .init(correlator: nil, uid: false, returnData: []), #line),
                 ("ESEARCH UID", "\r", .init(correlator: nil, uid: true, returnData: []), #line),
@@ -3088,23 +3088,23 @@ extension ParserUnitTests {
         )
     }
 
-    func testParseESearchScopeOptions() {
+    func testParseExtendedSearchScopeOptions() {
         self.iterateTests(
-            testFunction: GrammarParser.parseESearchScopeOptions,
+            testFunction: GrammarParser.parseExtendedSearchScopeOptions,
             validInputs: [
                 (
                     "name", "\r",
-                    ESearchScopeOptions(["name": nil])!,
+                    ExtendedSearchScopeOptions(["name": nil])!,
                     #line
                 ),
                 (
                     "name $", "\r",
-                    ESearchScopeOptions(["name": .sequence(.lastCommand)]),
+                    ExtendedSearchScopeOptions(["name": .sequence(.lastCommand)]),
                     #line
                 ),
                 (
                     "name name2", "\r",
-                    ESearchScopeOptions(["name": nil, "name2": nil])!,
+                    ExtendedSearchScopeOptions(["name": nil, "name2": nil])!,
                     #line
                 ),
             ],
@@ -3113,24 +3113,24 @@ extension ParserUnitTests {
         )
     }
 
-    func testParseEsearchSourceOptions() {
+    func testParseExtendedSearchSourceOptions() {
         self.iterateTests(
-            testFunction: GrammarParser.parseEsearchSourceOptions,
+            testFunction: GrammarParser.parseExtendedSearchSourceOptions,
             validInputs: [
                 (
                     "IN (inboxes)", "\r",
-                    ESearchSourceOptions(sourceMailbox: [.inboxes]),
+                    ExtendedSearchSourceOptions(sourceMailbox: [.inboxes]),
                     #line
                 ),
                 (
                     "IN (inboxes personal)", "\r",
-                    ESearchSourceOptions(sourceMailbox: [.inboxes, .personal]),
+                    ExtendedSearchSourceOptions(sourceMailbox: [.inboxes, .personal]),
                     #line
                 ),
                 (
                     "IN (inboxes (name))", "\r",
-                    ESearchSourceOptions(sourceMailbox: [.inboxes],
-                                         scopeOptions: ESearchScopeOptions(["name": nil])!),
+                    ExtendedSearchSourceOptions(sourceMailbox: [.inboxes],
+                                         scopeOptions: ExtendedSearchScopeOptions(["name": nil])!),
                     #line
                 ),
             ],
@@ -3148,57 +3148,57 @@ extension ParserUnitTests {
         )
     }
 
-    func testParseEsearchOptions() {
+    func testParseExtendedSearchOptions() {
         self.iterateTests(
-            testFunction: GrammarParser.parseEsearchOptions,
+            testFunction: GrammarParser.parseExtendedSearchOptions,
             validInputs: [
                 (
                     " ALL", "\r",
-                    ESearchOptions(key: .all),
+                    ExtendedSearchOptions(key: .all),
                     #line
                 ),
                 (
                     " RETURN (MIN) ALL", "\r",
-                    ESearchOptions(key: .all, returnOptions: [.min]),
+                    ExtendedSearchOptions(key: .all, returnOptions: [.min]),
                     #line
                 ),
                 (
                     " CHARSET Alien ALL", "\r",
-                    ESearchOptions(key: .all, charset: "Alien"),
+                    ExtendedSearchOptions(key: .all, charset: "Alien"),
                     #line
                 ),
                 (
                     " IN (inboxes) ALL", "\r",
-                    ESearchOptions(key: .all, sourceOptions: ESearchSourceOptions(sourceMailbox: [.inboxes])),
+                    ExtendedSearchOptions(key: .all, sourceOptions: ExtendedSearchSourceOptions(sourceMailbox: [.inboxes])),
                     #line
                 ),
                 (
                     " IN (inboxes) CHARSET Alien ALL", "\r",
-                    ESearchOptions(key: .all,
+                    ExtendedSearchOptions(key: .all,
                                    charset: "Alien",
-                                   sourceOptions: ESearchSourceOptions(sourceMailbox: [.inboxes])),
+                                   sourceOptions: ExtendedSearchSourceOptions(sourceMailbox: [.inboxes])),
                     #line
                 ),
                 (
                     " IN (inboxes) RETURN (MIN) ALL", "\r",
-                    ESearchOptions(key: .all,
+                    ExtendedSearchOptions(key: .all,
                                    returnOptions: [.min],
-                                   sourceOptions: ESearchSourceOptions(sourceMailbox: [.inboxes])),
+                                   sourceOptions: ExtendedSearchSourceOptions(sourceMailbox: [.inboxes])),
                     #line
                 ),
                 (
                     " RETURN (MIN) CHARSET Alien ALL", "\r",
-                    ESearchOptions(key: .all,
+                    ExtendedSearchOptions(key: .all,
                                    charset: "Alien",
                                    returnOptions: [.min]),
                     #line
                 ),
                 (
                     " IN (inboxes) RETURN (MIN) CHARSET Alien ALL", "\r",
-                    ESearchOptions(key: .all,
+                    ExtendedSearchOptions(key: .all,
                                    charset: "Alien",
                                    returnOptions: [.min],
-                                   sourceOptions: ESearchSourceOptions(sourceMailbox: [.inboxes])),
+                                   sourceOptions: ExtendedSearchSourceOptions(sourceMailbox: [.inboxes])),
                     #line
                 ),
             ],

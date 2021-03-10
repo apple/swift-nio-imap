@@ -458,7 +458,7 @@ extension GrammarParser {
 
     // esearch-response  = "ESEARCH" [search-correlator] [SP "UID"]
     //                     *(SP search-return-data)
-    static func parseEsearchResponse(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ESearchResponse {
+    static func parseExtendedSearchResponse(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ExtendedSearchResponse {
         try composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
             try fixedString("ESEARCH", buffer: &buffer, tracker: tracker)
             let correlator = try optional(buffer: &buffer, tracker: tracker, parser: self.parseSearchCorrelator)
@@ -470,7 +470,7 @@ extension GrammarParser {
                 try space(buffer: &buffer, tracker: tracker)
                 return try self.parseSearchReturnData(buffer: &buffer, tracker: tracker)
             }
-            return ESearchResponse(correlator: correlator, uid: uid, returnData: searchReturnData)
+            return ExtendedSearchResponse(correlator: correlator, uid: uid, returnData: searchReturnData)
         }
     }
 
@@ -2560,13 +2560,13 @@ extension GrammarParser {
 
     // RFC 6237
     // scope-options =  scope-option *(SP scope-option)
-    static func parseESearchScopeOptions(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ESearchScopeOptions {
+    static func parseExtendedSearchScopeOptions(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ExtendedSearchScopeOptions {
         var options = KeyValues<String, ParameterValue?>()
         options.append(try parseParameter(buffer: &buffer, tracker: tracker))
         while try optional(buffer: &buffer, tracker: tracker, parser: space) != nil {
             options.append(try parseParameter(buffer: &buffer, tracker: tracker))
         }
-        if let returnValue = ESearchScopeOptions(options) {
+        if let returnValue = ExtendedSearchScopeOptions(options) {
             return returnValue
         } else {
             throw ParserError(hint: "Failed to unwrap ESearchScopeOptions which should be impossible.")
@@ -2575,42 +2575,42 @@ extension GrammarParser {
 
     // RFC 6237
     // esearch-source-opts =  "IN" SP "(" source-mbox [SP "(" scope-options ")"] ")"
-    static func parseEsearchSourceOptions(buffer: inout ByteBuffer,
-                                          tracker: StackTracker) throws -> ESearchSourceOptions {
-        func parseEsearchSourceOptions_spaceFilter(buffer: inout ByteBuffer,
+    static func parseExtendedSearchSourceOptions(buffer: inout ByteBuffer,
+                                          tracker: StackTracker) throws -> ExtendedSearchSourceOptions {
+        func parseExtendedSearchSourceOptions_spaceFilter(buffer: inout ByteBuffer,
                                                    tracker: StackTracker) throws -> MailboxFilter {
             try space(buffer: &buffer, tracker: tracker)
             return try parseFilterMailboxes(buffer: &buffer, tracker: tracker)
         }
 
         // source-mbox =  filter-mailboxes *(SP filter-mailboxes)
-        func parseEsearchSourceOptions_sourceMBox(buffer: inout ByteBuffer,
+        func parseExtendedSearchSourceOptions_sourceMBox(buffer: inout ByteBuffer,
                                                   tracker: StackTracker) throws -> [MailboxFilter] {
             var sources = [try parseFilterMailboxes(buffer: &buffer, tracker: tracker)]
             while let anotherSource = try optional(buffer: &buffer,
                                                    tracker: tracker,
-                                                   parser: parseEsearchSourceOptions_spaceFilter) {
+                                                   parser: parseExtendedSearchSourceOptions_spaceFilter) {
                 sources.append(anotherSource)
             }
             return sources
         }
 
-        func parseEsearchSourceOptions_scopeOptions(buffer: inout ByteBuffer,
-                                                    tracker: StackTracker) throws -> ESearchScopeOptions {
+        func parseExtendedSearchSourceOptions_scopeOptions(buffer: inout ByteBuffer,
+                                                    tracker: StackTracker) throws -> ExtendedSearchScopeOptions {
             try fixedString(" (", buffer: &buffer, tracker: tracker)
-            let result = try parseESearchScopeOptions(buffer: &buffer, tracker: tracker)
+            let result = try parseExtendedSearchScopeOptions(buffer: &buffer, tracker: tracker)
             try fixedString(")", buffer: &buffer, tracker: tracker)
             return result
         }
 
         return try composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             try fixedString("IN (", buffer: &buffer, tracker: tracker)
-            let sourceMbox = try parseEsearchSourceOptions_sourceMBox(buffer: &buffer, tracker: tracker)
+            let sourceMbox = try parseExtendedSearchSourceOptions_sourceMBox(buffer: &buffer, tracker: tracker)
             let scopeOptions = try optional(buffer: &buffer,
                                             tracker: tracker,
-                                            parser: parseEsearchSourceOptions_scopeOptions)
+                                            parser: parseExtendedSearchSourceOptions_scopeOptions)
             try fixedString(")", buffer: &buffer, tracker: tracker)
-            if let result = ESearchSourceOptions(sourceMailbox: sourceMbox, scopeOptions: scopeOptions) {
+            if let result = ExtendedSearchSourceOptions(sourceMailbox: sourceMbox, scopeOptions: scopeOptions) {
                 return result
             } else {
                 throw ParserError(hint: "Failed to construct esearch source options")
@@ -2622,33 +2622,33 @@ extension GrammarParser {
     // esearch =  "ESEARCH" [SP esearch-source-opts]
     // [SP search-return-opts] SP search-program
     // Ignoring the command here.
-    static func parseEsearchOptions(buffer: inout ByteBuffer,
-                                    tracker: StackTracker) throws -> ESearchOptions {
-        func parseEsearchOptions_sourceOptions(buffer: inout ByteBuffer,
-                                               tracker: StackTracker) throws -> ESearchSourceOptions {
+    static func parseExtendedSearchOptions(buffer: inout ByteBuffer,
+                                    tracker: StackTracker) throws -> ExtendedSearchOptions {
+        func parseExtendedSearchOptions_sourceOptions(buffer: inout ByteBuffer,
+                                               tracker: StackTracker) throws -> ExtendedSearchSourceOptions {
             try space(buffer: &buffer, tracker: tracker)
-            let result = try parseEsearchSourceOptions(buffer: &buffer, tracker: tracker)
+            let result = try parseExtendedSearchSourceOptions(buffer: &buffer, tracker: tracker)
             return result
         }
 
         let sourceOptions = try optional(buffer: &buffer,
                                          tracker: tracker,
-                                         parser: parseEsearchOptions_sourceOptions)
+                                         parser: parseExtendedSearchOptions_sourceOptions)
         let returnOpts = try optional(buffer: &buffer,
                                       tracker: tracker,
                                       parser: self.parseSearchReturnOptions) ?? []
         try space(buffer: &buffer, tracker: tracker)
         let (charset, program) = try parseSearchProgram(buffer: &buffer, tracker: tracker)
-        return ESearchOptions(key: program, charset: charset, returnOptions: returnOpts, sourceOptions: sourceOptions)
+        return ExtendedSearchOptions(key: program, charset: charset, returnOptions: returnOpts, sourceOptions: sourceOptions)
     }
 
     // RFC 6237
     // esearch =  "ESEARCH" [SP esearch-source-opts]
     // [SP search-return-opts] SP search-program
-    static func parseEsearch(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Command {
+    static func parseExtendedSearch(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Command {
         try composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             try fixedString("ESEARCH", buffer: &buffer, tracker: tracker)
-            return .esearch(try parseEsearchOptions(buffer: &buffer, tracker: tracker))
+            return .extendedsearch(try parseExtendedSearchOptions(buffer: &buffer, tracker: tracker))
         }
     }
 }
