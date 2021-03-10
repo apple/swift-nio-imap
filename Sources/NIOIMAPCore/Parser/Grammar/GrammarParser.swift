@@ -2576,16 +2576,16 @@ extension GrammarParser {
     // RFC 6237
     // esearch-source-opts =  "IN" SP "(" source-mbox [SP "(" scope-options ")"] ")"
     static func parseExtendedSearchSourceOptions(buffer: inout ByteBuffer,
-                                          tracker: StackTracker) throws -> ExtendedSearchSourceOptions {
+                                                 tracker: StackTracker) throws -> ExtendedSearchSourceOptions {
         func parseExtendedSearchSourceOptions_spaceFilter(buffer: inout ByteBuffer,
-                                                   tracker: StackTracker) throws -> MailboxFilter {
+                                                          tracker: StackTracker) throws -> MailboxFilter {
             try space(buffer: &buffer, tracker: tracker)
             return try parseFilterMailboxes(buffer: &buffer, tracker: tracker)
         }
 
         // source-mbox =  filter-mailboxes *(SP filter-mailboxes)
         func parseExtendedSearchSourceOptions_sourceMBox(buffer: inout ByteBuffer,
-                                                  tracker: StackTracker) throws -> [MailboxFilter] {
+                                                         tracker: StackTracker) throws -> [MailboxFilter] {
             var sources = [try parseFilterMailboxes(buffer: &buffer, tracker: tracker)]
             while let anotherSource = try optional(buffer: &buffer,
                                                    tracker: tracker,
@@ -2596,7 +2596,7 @@ extension GrammarParser {
         }
 
         func parseExtendedSearchSourceOptions_scopeOptions(buffer: inout ByteBuffer,
-                                                    tracker: StackTracker) throws -> ExtendedSearchScopeOptions {
+                                                           tracker: StackTracker) throws -> ExtendedSearchScopeOptions {
             try fixedString(" (", buffer: &buffer, tracker: tracker)
             let result = try parseExtendedSearchScopeOptions(buffer: &buffer, tracker: tracker)
             try fixedString(")", buffer: &buffer, tracker: tracker)
@@ -2623,9 +2623,9 @@ extension GrammarParser {
     // [SP search-return-opts] SP search-program
     // Ignoring the command here.
     static func parseExtendedSearchOptions(buffer: inout ByteBuffer,
-                                    tracker: StackTracker) throws -> ExtendedSearchOptions {
+                                           tracker: StackTracker) throws -> ExtendedSearchOptions {
         func parseExtendedSearchOptions_sourceOptions(buffer: inout ByteBuffer,
-                                               tracker: StackTracker) throws -> ExtendedSearchSourceOptions {
+                                                      tracker: StackTracker) throws -> ExtendedSearchSourceOptions {
             try space(buffer: &buffer, tracker: tracker)
             let result = try parseExtendedSearchSourceOptions(buffer: &buffer, tracker: tracker)
             return result

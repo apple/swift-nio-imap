@@ -30,13 +30,13 @@ extension ExtendedSearchSourceOptions_Tests {
             ),
             (
                 ExtendedSearchSourceOptions(sourceMailbox: [.inboxes],
-                                     scopeOptions: ExtendedSearchScopeOptions(["test": nil]))!,
+                                            scopeOptions: ExtendedSearchScopeOptions(["test": nil]))!,
                 "IN (inboxes (test))",
                 #line
             ),
             (
                 ExtendedSearchSourceOptions(sourceMailbox: [.inboxes, .personal],
-                                     scopeOptions: ExtendedSearchScopeOptions(["test": nil]))!,
+                                            scopeOptions: ExtendedSearchScopeOptions(["test": nil]))!,
                 "IN (inboxes personal (test))",
                 #line
             ),

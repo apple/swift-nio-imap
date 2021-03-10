@@ -3130,7 +3130,7 @@ extension ParserUnitTests {
                 (
                     "IN (inboxes (name))", "\r",
                     ExtendedSearchSourceOptions(sourceMailbox: [.inboxes],
-                                         scopeOptions: ExtendedSearchScopeOptions(["name": nil])!),
+                                                scopeOptions: ExtendedSearchScopeOptions(["name": nil])!),
                     #line
                 ),
             ],
@@ -3175,30 +3175,30 @@ extension ParserUnitTests {
                 (
                     " IN (inboxes) CHARSET Alien ALL", "\r",
                     ExtendedSearchOptions(key: .all,
-                                   charset: "Alien",
-                                   sourceOptions: ExtendedSearchSourceOptions(sourceMailbox: [.inboxes])),
+                                          charset: "Alien",
+                                          sourceOptions: ExtendedSearchSourceOptions(sourceMailbox: [.inboxes])),
                     #line
                 ),
                 (
                     " IN (inboxes) RETURN (MIN) ALL", "\r",
                     ExtendedSearchOptions(key: .all,
-                                   returnOptions: [.min],
-                                   sourceOptions: ExtendedSearchSourceOptions(sourceMailbox: [.inboxes])),
+                                          returnOptions: [.min],
+                                          sourceOptions: ExtendedSearchSourceOptions(sourceMailbox: [.inboxes])),
                     #line
                 ),
                 (
                     " RETURN (MIN) CHARSET Alien ALL", "\r",
                     ExtendedSearchOptions(key: .all,
-                                   charset: "Alien",
-                                   returnOptions: [.min]),
+                                          charset: "Alien",
+                                          returnOptions: [.min]),
                     #line
                 ),
                 (
                     " IN (inboxes) RETURN (MIN) CHARSET Alien ALL", "\r",
                     ExtendedSearchOptions(key: .all,
-                                   charset: "Alien",
-                                   returnOptions: [.min],
-                                   sourceOptions: ExtendedSearchSourceOptions(sourceMailbox: [.inboxes])),
+                                          charset: "Alien",
+                                          returnOptions: [.min],
+                                          sourceOptions: ExtendedSearchSourceOptions(sourceMailbox: [.inboxes])),
                     #line
                 ),
             ],
