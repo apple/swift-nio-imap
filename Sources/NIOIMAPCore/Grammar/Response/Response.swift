@@ -51,8 +51,8 @@ public enum Response: Equatable {
 /// Every `streamingBegin` has exaclty one corresponding `streamingEnd`
 /// `streamingBegin` has a `type` that specifies the type of data to be streamed
 public enum FetchResponse: Equatable {
-    /// A fetch response is beginning for the message with the given identifier.
-    case start(Int)
+    /// A fetch response is beginning for the message with the given sequence number.
+    case start(SequenceNumber)
 
     /// A basic attribute that is small enough to be sent as one chunk, for example flags or an envelope.
     case simpleAttribute(MessageAttribute)

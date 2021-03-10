@@ -83,7 +83,9 @@ extension ResponseEncodeBuffer {
     @discardableResult mutating func writeFetchResponse(_ response: FetchResponse) -> Int {
         switch response {
         case .start(let num):
-            return self.buffer.writeString("* \(num) FETCH (")
+            return self.buffer.writeString("* ") +
+                self.buffer.writeSequenceNumber(num) +
+                self.buffer.writeString(" FETCH (")
         case .simpleAttribute(let att):
             guard case .server(streamingAttributes: let streamingAttributes, let options) = self.buffer.mode else {
                 preconditionFailure("Only server can write responses.")
