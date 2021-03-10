@@ -74,8 +74,8 @@ extension GrammarParser_Message_Tests {
                 ("3 EXPUNGE", "\r", .expunge(3), #line),
                 ("VANISHED *", "\r", .vanished(.all), #line),
                 ("VANISHED (EARLIER) *", "\r", .vanishedEarlier(.all), #line),
-                ("GENURLAUTH test", "\r", .generateAuthorizationURL(["test"]), #line),
-                ("GENURLAUTH test1 test2", "\r", .generateAuthorizationURL(["test1", "test2"]), #line),
+                ("GENURLAUTH test", "\r", .generateAuthorizedURL(["test"]), #line),
+                ("GENURLAUTH test1 test2", "\r", .generateAuthorizedURL(["test1", "test2"]), #line),
                 ("URLFETCH url NIL", "\r", .urlFetch([.init(url: "url", data: nil)]), #line),
                 (
                     "URLFETCH url1 NIL url2 NIL url3 \"data\"",

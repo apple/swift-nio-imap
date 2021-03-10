@@ -16,15 +16,15 @@ import NIO
 @testable import NIOIMAPCore
 import XCTest
 
-class IUAVerifier_Tests: EncodeTestClass {}
+class AuthenticatedURLVerifier_Tests: EncodeTestClass {}
 
 // MARK: - IMAP
 
-extension IUAVerifier_Tests {
+extension AuthenticatedURLVerifier_Tests {
     func testEncode() {
-        let inputs: [(IUAVerifier, String, UInt)] = [
-            (.init(uAuthMechanism: .internal, encodedURLAuth: .init(data: "test")), ":INTERNAL:test", #line),
+        let inputs: [(AuthenticatedURLVerifier, String, UInt)] = [
+            (.init(urlAuthMechanism: .internal, encodedAuthenticationURL: .init(data: "test")), ":INTERNAL:test", #line),
         ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeIUAVerifier($0) })
+        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeAuthenticatedURLVerifier($0) })
     }
 }

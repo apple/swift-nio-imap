@@ -20,12 +20,12 @@ public struct RumpURLAndMechanism: Equatable {
     public var urlRump: ByteBuffer
 
     /// Used to restrict the usage of a URL-AUTH authorized URL.
-    public var mechanism: UAuthMechanism
+    public var mechanism: URLAuthenticationMechanism
 
     /// Creates a new `URLRumpMechanism`.
     /// - parameter urlRump: The IMAP URL excluding the access mechanism and access token.
     /// - parameter mechanism: Used to restrict the usage of a URL-AUTH authorized URL.
-    public init(urlRump: ByteBuffer, mechanism: UAuthMechanism) {
+    public init(urlRump: ByteBuffer, mechanism: URLAuthenticationMechanism) {
         self.urlRump = urlRump
         self.mechanism = mechanism
     }
@@ -37,6 +37,6 @@ extension EncodeBuffer {
     @discardableResult mutating func writeURLRumpMechanism(_ data: RumpURLAndMechanism) -> Int {
         self.writeIMAPString(data.urlRump) +
             self.writeSpace() +
-            self.writeUAuthMechanism(data.mechanism)
+            self.writeURLAuthenticationMechanism(data.mechanism)
     }
 }

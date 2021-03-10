@@ -24,7 +24,7 @@ extension Access_Tests {
     func testEncoding() {
         let inputs: [(Access, String, UInt)] = [
             (.anonymous, "anonymous", #line),
-            (.authUser, "authuser", #line),
+            (.authenticateUser, "authuser", #line),
             (.submit(.init(data: "abc")), "submit+abc", #line),
             (.user(.init(data: "abc")), "user+abc", #line),
         ]

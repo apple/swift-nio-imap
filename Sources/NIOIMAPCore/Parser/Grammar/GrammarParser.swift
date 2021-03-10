@@ -73,8 +73,8 @@ extension GrammarParser {
         ], buffer: &buffer, tracker: tracker)
     }
 
-    static func parseAuthIMAPURL(buffer: inout ByteBuffer, tracker: StackTracker) throws -> AuthIMAPURL {
-        try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> AuthIMAPURL in
+    static func parseAuthenticatedURL(buffer: inout ByteBuffer, tracker: StackTracker) throws -> AuthenticatedURL {
+        try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> AuthenticatedURL in
             try fixedString("imap://", buffer: &buffer, tracker: tracker)
             let server = try self.parseIServer(buffer: &buffer, tracker: tracker)
             try fixedString("/", buffer: &buffer, tracker: tracker)
@@ -83,19 +83,19 @@ extension GrammarParser {
         }
     }
 
-    static func parseAuthIMAPURLFull(buffer: inout ByteBuffer, tracker: StackTracker) throws -> AuthIMAPURLFull {
-        try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> AuthIMAPURLFull in
-            let imapURL = try self.parseAuthIMAPURL(buffer: &buffer, tracker: tracker)
+    static func parseAuthIMAPURLFull(buffer: inout ByteBuffer, tracker: StackTracker) throws -> FullAuthenticatedURL {
+        try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> FullAuthenticatedURL in
+            let imapURL = try self.parseAuthenticatedURL(buffer: &buffer, tracker: tracker)
             let urlAuth = try self.parseIURLAuth(buffer: &buffer, tracker: tracker)
-            return .init(imapURL: imapURL, urlAuth: urlAuth)
+            return .init(imapURL: imapURL, authenticatedURL: urlAuth)
         }
     }
 
-    static func parseAuthIMAPURLRump(buffer: inout ByteBuffer, tracker: StackTracker) throws -> AuthIMAPURLRump {
-        try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> AuthIMAPURLRump in
-            let imapURL = try self.parseAuthIMAPURL(buffer: &buffer, tracker: tracker)
-            let authRump = try self.parseIURLAuthRump(buffer: &buffer, tracker: tracker)
-            return .init(imapURL: imapURL, authRump: authRump)
+    static func parseAuthIMAPURLRump(buffer: inout ByteBuffer, tracker: StackTracker) throws -> RumpAuthenticatedURL {
+        try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> RumpAuthenticatedURL in
+            let imapURL = try self.parseAuthenticatedURL(buffer: &buffer, tracker: tracker)
+            let rump = try self.parseIRumpAuthenticatedURL(buffer: &buffer, tracker: tracker)
+            return .init(authenticatedURL: imapURL, authenticatedURLRump: rump)
         }
     }
 
@@ -401,7 +401,7 @@ extension GrammarParser {
     static func parseEncodedAuthenticationType(buffer: inout ByteBuffer, tracker: StackTracker) throws -> EncodedAuthenticationType {
         try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> EncodedAuthenticationType in
             let array = try ParserLibrary.parseOneOrMore(buffer: &buffer, tracker: tracker, parser: self.parseAChar).reduce([], +)
-            return .init(authType: String(decoding: array, as: Unicode.UTF8.self))
+            return .init(authenticationType: String(decoding: array, as: Unicode.UTF8.self))
         }
     }
 
@@ -433,8 +433,8 @@ extension GrammarParser {
         }
     }
 
-    static func parseEncodedURLAuth(buffer: inout ByteBuffer, tracker: StackTracker) throws -> EncodedURLAuth {
-        try composite(buffer: &buffer, tracker: tracker) { buffer, _ -> EncodedURLAuth in
+    static func parseEncodedURLAuth(buffer: inout ByteBuffer, tracker: StackTracker) throws -> EncodedAuthenticatedURL {
+        try composite(buffer: &buffer, tracker: tracker) { buffer, _ -> EncodedAuthenticatedURL in
             guard let bytes = buffer.readSlice(length: 32) else {
                 throw _IncompleteMessage()
             }
@@ -503,9 +503,9 @@ extension GrammarParser {
             return .user(try self.parseEncodedUser(buffer: &buffer, tracker: tracker))
         }
 
-        func parseAccess_authuser(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Access {
+        func parseAccess_authenticatedUser(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Access {
             try fixedString("authuser", buffer: &buffer, tracker: tracker)
-            return .authUser
+            return .authenticateUser
         }
 
         func parseAccess_anonymous(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Access {
@@ -516,7 +516,7 @@ extension GrammarParser {
         return try oneOf([
             parseAccess_submit,
             parseAccess_user,
-            parseAccess_authuser,
+            parseAccess_authenticatedUser,
             parseAccess_anonymous,
         ], buffer: &buffer, tracker: tracker)
     }
@@ -654,7 +654,7 @@ extension GrammarParser {
         func parseICommand_part(buffer: inout ByteBuffer, tracker: StackTracker) throws -> ICommand {
             let part = try self.parseIMessagePart(buffer: &buffer, tracker: tracker)
             let auth = try optional(buffer: &buffer, tracker: tracker, parser: self.parseIURLAuth)
-            return .messagePart(part: part, urlAuth: auth)
+            return .messagePart(part: part, authenticatedURL: auth)
         }
 
         return try oneOf([
@@ -688,13 +688,13 @@ extension GrammarParser {
         }
     }
 
-    static func parseIAuth(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IAuth {
-        func parseIAuth_any(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IAuth {
+    static func parseIAuthentication(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IAuthentication {
+        func parseIAuthentication_any(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IAuthentication {
             try fixedString("*", buffer: &buffer, tracker: tracker)
             return .any
         }
 
-        func parseIAuth_encoded(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IAuth {
+        func parseIAuthentication_encoded(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IAuthentication {
             let type = try self.parseEncodedAuthenticationType(buffer: &buffer, tracker: tracker)
             return .type(type)
         }
@@ -702,8 +702,8 @@ extension GrammarParser {
         return try composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
             try fixedString(";AUTH=", buffer: &buffer, tracker: tracker)
             return try oneOf([
-                parseIAuth_any,
-                parseIAuth_encoded,
+                parseIAuthentication_any,
+                parseIAuthentication_encoded,
             ], buffer: &buffer, tracker: tracker)
         }
     }
@@ -1154,11 +1154,11 @@ extension GrammarParser {
         }
     }
 
-    static func parseIURLAuth(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IURLAuth {
-        try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> IURLAuth in
-            let rump = try self.parseIURLAuthRump(buffer: &buffer, tracker: tracker)
-            let verifier = try self.parseIUAVerifier(buffer: &buffer, tracker: tracker)
-            return .init(auth: rump, verifier: verifier)
+    static func parseIURLAuth(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IAuthenticatedURL {
+        try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> IAuthenticatedURL in
+            let rump = try self.parseIRumpAuthenticatedURL(buffer: &buffer, tracker: tracker)
+            let verifier = try self.parseAuthenticatedURLVerifier(buffer: &buffer, tracker: tracker)
+            return .init(authenticatedURL: rump, verifier: verifier)
         }
     }
 
@@ -1180,8 +1180,8 @@ extension GrammarParser {
         }
     }
 
-    static func parseIURLAuthRump(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IURLAuthRump {
-        try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> IURLAuthRump in
+    static func parseIRumpAuthenticatedURL(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IRumpAuthenticatedURL {
+        try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> IRumpAuthenticatedURL in
             let expiry = try optional(buffer: &buffer, tracker: tracker, parser: self.parseExpire)
             try fixedString(";URLAUTH=", buffer: &buffer, tracker: tracker)
             let access = try self.parseAccess(buffer: &buffer, tracker: tracker)
@@ -1189,24 +1189,24 @@ extension GrammarParser {
         }
     }
 
-    static func parseIUAVerifier(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IUAVerifier {
-        try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> IUAVerifier in
+    static func parseAuthenticatedURLVerifier(buffer: inout ByteBuffer, tracker: StackTracker) throws -> AuthenticatedURLVerifier {
+        try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> AuthenticatedURLVerifier in
             try fixedString(":", buffer: &buffer, tracker: tracker)
             let authMechanism = try self.parseUAuthMechanism(buffer: &buffer, tracker: tracker)
             try fixedString(":", buffer: &buffer, tracker: tracker)
             let urlAuth = try self.parseEncodedURLAuth(buffer: &buffer, tracker: tracker)
-            return .init(uAuthMechanism: authMechanism, encodedURLAuth: urlAuth)
+            return .init(urlAuthMechanism: authMechanism, encodedAuthenticationURL: urlAuth)
         }
     }
 
     static func parseIUserInfo(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IUserInfo {
         try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> IUserInfo in
             let encodedUser = try optional(buffer: &buffer, tracker: tracker, parser: self.parseEncodedUser)
-            let iauth = try optional(buffer: &buffer, tracker: tracker, parser: self.parseIAuth)
-            guard (encodedUser != nil || iauth != nil) else {
+            let authenticationMechanism = try optional(buffer: &buffer, tracker: tracker, parser: self.parseIAuthentication)
+            guard (encodedUser != nil || authenticationMechanism != nil) else {
                 throw ParserError(hint: "Need one of encoded user or iauth")
             }
-            return .init(encodedUser: encodedUser, iAuth: iauth)
+            return .init(encodedUser: encodedUser, authenticationMechanism: authenticationMechanism)
         }
     }
 
@@ -2355,7 +2355,7 @@ extension GrammarParser {
         }
     }
 
-    static func parseUAuthMechanism(buffer: inout ByteBuffer, tracker: StackTracker) throws -> UAuthMechanism {
+    static func parseUAuthMechanism(buffer: inout ByteBuffer, tracker: StackTracker) throws -> URLAuthenticationMechanism {
         let string = try ParserLibrary.parseOneOrMoreCharacters(buffer: &buffer, tracker: tracker, where: { char in
             switch char {
             case UInt8(ascii: "a") ... UInt8(ascii: "z"),
@@ -2368,7 +2368,7 @@ extension GrammarParser {
                 return false
             }
         })
-        return UAuthMechanism(string)
+        return URLAuthenticationMechanism(string)
     }
 
     // unsubscribe     = "UNSUBSCRIBE" SP mailbox

@@ -118,20 +118,20 @@ extension GrammarParser {
                 return .resetKey(mailbox: nil, mechanisms: [])
             }
 
-            let mechanisms = try ParserLibrary.parseZeroOrMore(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> UAuthMechanism in
+            let mechanisms = try ParserLibrary.parseZeroOrMore(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> URLAuthenticationMechanism in
                 try space(buffer: &buffer, tracker: tracker)
                 return try self.parseUAuthMechanism(buffer: &buffer, tracker: tracker)
             })
             return .resetKey(mailbox: mailbox, mechanisms: mechanisms)
         }
 
-        func parseCommandAuth_generateAuthorizationURL(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Command {
+        func parseCommandAuth_generateAuthorizedURL(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Command {
             try fixedString("GENURLAUTH", buffer: &buffer, tracker: tracker)
             let array = try ParserLibrary.parseOneOrMore(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> RumpURLAndMechanism in
                 try space(buffer: &buffer, tracker: tracker)
                 return try self.parseURLRumpMechanism(buffer: &buffer, tracker: tracker)
             })
-            return .generateAuthorizationURL(array)
+            return .generateAuthorizedURL(array)
         }
 
         func parseCommandAuth_urlFetch(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Command {
@@ -160,7 +160,7 @@ extension GrammarParser {
             parseCommandAuth_setMetadata,
             parseExtendedSearch,
             parseCommandAuth_resetKey,
-            parseCommandAuth_generateAuthorizationURL,
+            parseCommandAuth_generateAuthorizedURL,
             parseCommandAuth_urlFetch,
         ], buffer: &buffer, tracker: tracker)
     }

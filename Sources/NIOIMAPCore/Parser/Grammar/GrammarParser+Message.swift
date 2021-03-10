@@ -42,13 +42,13 @@ extension GrammarParser {
             return .vanishedEarlier(try self.parseSequenceSet(buffer: &buffer, tracker: tracker))
         }
 
-        func parseMessageData_generateAuthorizationURL(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MessageData {
+        func parseMessageData_generateAuthorizedURL(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MessageData {
             try fixedString("GENURLAUTH", buffer: &buffer, tracker: tracker)
             let array = try ParserLibrary.parseOneOrMore(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> ByteBuffer in
                 try space(buffer: &buffer, tracker: tracker)
                 return try self.parseAString(buffer: &buffer, tracker: tracker)
             })
-            return .generateAuthorizationURL(array)
+            return .generateAuthorizedURL(array)
         }
 
         func parseMessageData_fetchData(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MessageData {
@@ -64,7 +64,7 @@ extension GrammarParser {
             parseMessageData_expunge,
             parseMessageData_vanished,
             parseMessageData_vanishedEarlier,
-            parseMessageData_generateAuthorizationURL,
+            parseMessageData_generateAuthorizedURL,
             parseMessageData_fetchData,
         ], buffer: &buffer, tracker: tracker)
     }

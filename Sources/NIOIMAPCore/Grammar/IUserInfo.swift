@@ -18,15 +18,15 @@ public struct IUserInfo: Equatable {
     public var encodedUser: EncodedUser?
 
     /// The authentication mechanism.
-    public var iAuth: IAuth?
+    public var authenticationMechanism: IAuthentication?
 
     /// Creates a new `IUserInfo`.
     /// - parameter encodedUser: The percent-encoded user data.
-    /// - parameter iAuth: The authentication mechanism.
-    public init(encodedUser: EncodedUser?, iAuth: IAuth?) {
-        precondition(encodedUser != nil || iAuth != nil, "Need one of `encodedUser` or `iAuth`")
+    /// - parameter authenticationMechanism: The authentication mechanism.
+    public init(encodedUser: EncodedUser?, authenticationMechanism: IAuthentication?) {
+        precondition(encodedUser != nil || authenticationMechanism != nil, "Need one of `encodedUser` or `iAuth`")
         self.encodedUser = encodedUser
-        self.iAuth = iAuth
+        self.authenticationMechanism = authenticationMechanism
     }
 }
 
@@ -37,8 +37,8 @@ extension EncodeBuffer {
         self.writeIfExists(data.encodedUser) { user in
             self.writeEncodedUser(user)
         } +
-            self.writeIfExists(data.iAuth) { iAuth in
-                self.writeIAuth(iAuth)
+            self.writeIfExists(data.authenticationMechanism) { iAuth in
+                self.writeIAuthentication(iAuth)
             }
     }
 }

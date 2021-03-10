@@ -161,12 +161,12 @@ public enum Command: Equatable {
     /// access key table, replacing any previous mailbox access key (and
     /// revoking any URLs that were authorized with a URLAUTH using that key)
     /// in that table.
-    case resetKey(mailbox: MailboxName?, mechanisms: [UAuthMechanism])
+    case resetKey(mailbox: MailboxName?, mechanisms: [URLAuthenticationMechanism])
 
     /// Requests that the server generate a URLAUTH-
     /// authorized URL for each of the given URLs using the given URL
     /// authorization mechanism.
-    case generateAuthorizationURL([RumpURLAndMechanism])
+    case generateAuthorizedURL([RumpURLAndMechanism])
 
     /// Requests that the server return the text data
     /// associated with the specified IMAP URLs
@@ -264,8 +264,8 @@ extension CommandEncodeBuffer {
             return self.writeCommandKind_extendedsearch(options: options)
         case .resetKey(mailbox: let mailbox, mechanisms: let mechanisms):
             return self.writeCommandKind_resetKey(mailbox: mailbox, mechanisms: mechanisms)
-        case .generateAuthorizationURL(let mechanisms):
-            return self.writeCommandKind_generateAuthorizationURL(mechanisms: mechanisms)
+        case .generateAuthorizedURL(let mechanisms):
+            return self.writeCommandKind_generateAuthorizedURL(mechanisms: mechanisms)
         case .urlFetch(let urls):
             return self.writeCommandKind_urlFetch(urls: urls)
         }
@@ -278,21 +278,21 @@ extension CommandEncodeBuffer {
             }
     }
 
-    private mutating func writeCommandKind_generateAuthorizationURL(mechanisms: [RumpURLAndMechanism]) -> Int {
+    private mutating func writeCommandKind_generateAuthorizedURL(mechanisms: [RumpURLAndMechanism]) -> Int {
         self.buffer.writeString("GENURLAUTH") +
             self.buffer.writeArray(mechanisms, prefix: " ", parenthesis: false) { mechanism, buffer in
                 buffer.writeURLRumpMechanism(mechanism)
             }
     }
 
-    private mutating func writeCommandKind_resetKey(mailbox: MailboxName?, mechanisms: [UAuthMechanism]) -> Int {
+    private mutating func writeCommandKind_resetKey(mailbox: MailboxName?, mechanisms: [URLAuthenticationMechanism]) -> Int {
         self.buffer.writeString("RESETKEY") +
             self.buffer.writeIfExists(mailbox) { mailbox in
                 self.buffer.writeSpace() +
                     self.buffer.writeMailbox(mailbox) +
 
                     self.buffer.writeArray(mechanisms, prefix: " ", parenthesis: false) { mechanism, buffer in
-                        buffer.writeUAuthMechanism(mechanism)
+                        buffer.writeURLAuthenticationMechanism(mechanism)
                     }
             }
     }

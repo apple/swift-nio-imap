@@ -22,13 +22,13 @@ class AuthIMAPURL_Tests: EncodeTestClass {}
 
 extension AuthIMAPURL_Tests {
     func testEncoding() {
-        let inputs: [(AuthIMAPURL, String, UInt)] = [
+        let inputs: [(AuthenticatedURL, String, UInt)] = [
             (
                 .init(server: .init(host: "localhost"), messagePart: .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: try! .init(uid: 123))),
                 "imap://localhost/test/;UID=123",
                 #line
             ),
         ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeAuthIMAPURL($0) })
+        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeAuthenticatedURL($0) })
     }
 }

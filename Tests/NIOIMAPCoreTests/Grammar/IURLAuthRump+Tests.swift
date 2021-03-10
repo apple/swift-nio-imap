@@ -16,20 +16,20 @@ import NIO
 @testable import NIOIMAPCore
 import XCTest
 
-class IURLAuthRump_Tests: EncodeTestClass {}
+class IRumpAuthenticatedURL_Tests: EncodeTestClass {}
 
 // MARK: - IMAP
 
-extension IURLAuthRump_Tests {
+extension IRumpAuthenticatedURL_Tests {
     func testEncode() {
-        let inputs: [(IURLAuthRump, String, UInt)] = [
+        let inputs: [(IRumpAuthenticatedURL, String, UInt)] = [
             (.init(access: .anonymous), ";URLAUTH=anonymous", #line),
             (
-                .init(expire: .init(dateTime: .init(date: .init(year: 1234, month: 12, day: 23), time: .init(hour: 12, minute: 34, second: 56))), access: .authUser),
+                .init(expire: .init(dateTime: .init(date: .init(year: 1234, month: 12, day: 23), time: .init(hour: 12, minute: 34, second: 56))), access: .authenticateUser),
                 ";EXPIRE=1234-12-23T12:34:56;URLAUTH=authuser",
                 #line
             ),
         ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeIURLAuthRump($0) })
+        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeIRumpAuthenticatedURL($0) })
     }
 }

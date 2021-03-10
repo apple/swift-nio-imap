@@ -15,14 +15,14 @@
 import struct NIO.ByteBuffer
 
 /// A URL that can be used to point directly at a message part on a specified IMAP server.
-public struct AuthIMAPURL: Equatable {
+public struct AuthenticatedURL: Equatable {
     /// The server containing the message.
     public var server: IServer
 
     /// The unique URL of the message, and the part of interest.
     public var messagePart: IMessagePart
 
-    // Creates a new `AuthIMAPURL`.
+    // Creates a new `AuthenticatedURL`.
     /// - parameter server: The server containing the message.
     /// - parameter messagePart: The unique URL of the message, and the part of interest.
     public init(server: IServer, messagePart: IMessagePart) {
@@ -34,7 +34,7 @@ public struct AuthIMAPURL: Equatable {
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeAuthIMAPURL(_ data: AuthIMAPURL) -> Int {
+    @discardableResult mutating func writeAuthenticatedURL(_ data: AuthenticatedURL) -> Int {
         self.writeString("imap://") +
             self.writeIServer(data.server) +
             self.writeString("/") +
