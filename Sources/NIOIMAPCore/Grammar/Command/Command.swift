@@ -166,7 +166,7 @@ public enum Command: Equatable {
     /// Requests that the server generate a URLAUTH-
     /// authorized URL for each of the given URLs using the given URL
     /// authorization mechanism.
-    case genURLAuth([RumpURLAndMechanism])
+    case generateAuthorizationURL([RumpURLAndMechanism])
 
     /// Requests that the server return the text data
     /// associated with the specified IMAP URLs
@@ -264,8 +264,8 @@ extension CommandEncodeBuffer {
             return self.writeCommandKind_extendedsearch(options: options)
         case .resetKey(mailbox: let mailbox, mechanisms: let mechanisms):
             return self.writeCommandKind_resetKey(mailbox: mailbox, mechanisms: mechanisms)
-        case .genURLAuth(let mechanisms):
-            return self.writeCommandKind_genURLAuth(mechanisms: mechanisms)
+        case .generateAuthorizationURL(let mechanisms):
+            return self.writeCommandKind_generateAuthorizationURL(mechanisms: mechanisms)
         case .urlFetch(let urls):
             return self.writeCommandKind_urlFetch(urls: urls)
         }
@@ -278,7 +278,7 @@ extension CommandEncodeBuffer {
             }
     }
 
-    private mutating func writeCommandKind_genURLAuth(mechanisms: [RumpURLAndMechanism]) -> Int {
+    private mutating func writeCommandKind_generateAuthorizationURL(mechanisms: [RumpURLAndMechanism]) -> Int {
         self.buffer.writeString("GENURLAUTH") +
             self.buffer.writeArray(mechanisms, prefix: " ", parenthesis: false) { mechanism, buffer in
                 buffer.writeURLRumpMechanism(mechanism)

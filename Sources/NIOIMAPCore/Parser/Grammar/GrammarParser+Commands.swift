@@ -125,13 +125,13 @@ extension GrammarParser {
             return .resetKey(mailbox: mailbox, mechanisms: mechanisms)
         }
 
-        func parseCommandAuth_genURLAuth(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Command {
+        func parseCommandAuth_generateAuthorizationURL(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Command {
             try fixedString("GENURLAUTH", buffer: &buffer, tracker: tracker)
             let array = try ParserLibrary.parseOneOrMore(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> RumpURLAndMechanism in
                 try space(buffer: &buffer, tracker: tracker)
                 return try self.parseURLRumpMechanism(buffer: &buffer, tracker: tracker)
             })
-            return .genURLAuth(array)
+            return .generateAuthorizationURL(array)
         }
 
         func parseCommandAuth_urlFetch(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Command {
@@ -160,7 +160,7 @@ extension GrammarParser {
             parseCommandAuth_setMetadata,
             parseExtendedSearch,
             parseCommandAuth_resetKey,
-            parseCommandAuth_genURLAuth,
+            parseCommandAuth_generateAuthorizationURL,
             parseCommandAuth_urlFetch,
         ], buffer: &buffer, tracker: tracker)
     }

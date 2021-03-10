@@ -52,8 +52,8 @@ extension CommandType_Tests {
             (.resetKey(mailbox: .inbox, mechanisms: [.internal]), CommandEncodingOptions(), ["RESETKEY \"INBOX\" INTERNAL"], #line),
             (.resetKey(mailbox: .inbox, mechanisms: [.internal, .init("test")]), CommandEncodingOptions(), ["RESETKEY \"INBOX\" INTERNAL test"], #line),
 
-            (.genURLAuth([.init(urlRump: "rump1", mechanism: .internal)]), CommandEncodingOptions(), ["GENURLAUTH \"rump1\" INTERNAL"], #line),
-            (.genURLAuth([.init(urlRump: "rump2", mechanism: .internal), .init(urlRump: "rump3", mechanism: .init("test"))]), CommandEncodingOptions(), ["GENURLAUTH \"rump2\" INTERNAL \"rump3\" test"], #line),
+            (.generateAuthorizationURL([.init(urlRump: "rump1", mechanism: .internal)]), CommandEncodingOptions(), ["GENURLAUTH \"rump1\" INTERNAL"], #line),
+            (.generateAuthorizationURL([.init(urlRump: "rump2", mechanism: .internal), .init(urlRump: "rump3", mechanism: .init("test"))]), CommandEncodingOptions(), ["GENURLAUTH \"rump2\" INTERNAL \"rump3\" test"], #line),
 
             (.urlFetch(["test"]), CommandEncodingOptions(), ["URLFETCH test"], #line),
             (.urlFetch(["test1", "test2"]), CommandEncodingOptions(), ["URLFETCH test1 test2"], #line),
