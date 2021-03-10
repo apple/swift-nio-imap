@@ -1550,12 +1550,12 @@ extension ParserUnitTests {
     }
 }
 
-// MARK: - parseIServer
+// MARK: - parseIMAPServer
 
 extension ParserUnitTests {
-    func testParseIServer() {
+    func testParseIMAPServer() {
         self.iterateTests(
-            testFunction: GrammarParser.parseIServer,
+            testFunction: GrammarParser.parseIMAPServer,
             validInputs: [
                 ("localhost", " ", .init(userInfo: nil, host: "localhost", port: nil), #line),
                 (";AUTH=*@localhost", " ", .init(userInfo: .init(encodedUser: nil, authenticationMechanism: .any), host: "localhost", port: nil), #line),

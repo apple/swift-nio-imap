@@ -15,7 +15,7 @@
 /// A URL that specifies a server to connect to and a query to run once a connection has been established.
 public struct IMAPURL: Equatable {
     /// The server to connect to.
-    public var server: IServer
+    public var server: IMAPServer
 
     /// A query to execute once a connection to server has been made.
     public var query: IPathQuery
@@ -23,7 +23,7 @@ public struct IMAPURL: Equatable {
     /// Creates a new `IMAPURL`.
     /// - parameter server: The server to connect to.
     /// - parameter query: A query to execute once a connection to server has been made.
-    public init(server: IServer, query: IPathQuery) {
+    public init(server: IMAPServer, query: IPathQuery) {
         self.server = server
         self.query = query
     }
@@ -34,7 +34,7 @@ public struct IMAPURL: Equatable {
 extension EncodeBuffer {
     @discardableResult mutating func writeIMAPURL(_ url: IMAPURL) -> Int {
         self.writeString("imap://") +
-            self.writeIServer(url.server) +
+            self.writeIMAPServer(url.server) +
             self.writeIPathQuery(url.query)
     }
 }

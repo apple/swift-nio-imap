@@ -76,7 +76,7 @@ extension GrammarParser {
     static func parseAuthenticatedURL(buffer: inout ByteBuffer, tracker: StackTracker) throws -> AuthenticatedURL {
         try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> AuthenticatedURL in
             try fixedString("imap://", buffer: &buffer, tracker: tracker)
-            let server = try self.parseIServer(buffer: &buffer, tracker: tracker)
+            let server = try self.parseIMAPServer(buffer: &buffer, tracker: tracker)
             try fixedString("/", buffer: &buffer, tracker: tracker)
             let messagePart = try self.parseIMessagePart(buffer: &buffer, tracker: tracker)
             return .init(server: server, messagePart: messagePart)
@@ -674,7 +674,7 @@ extension GrammarParser {
     static func parseINetworkPath(buffer: inout ByteBuffer, tracker: StackTracker) throws -> INetworkPath {
         try composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> INetworkPath in
             try fixedString("//", buffer: &buffer, tracker: tracker)
-            let server = try self.parseIServer(buffer: &buffer, tracker: tracker)
+            let server = try self.parseIMAPServer(buffer: &buffer, tracker: tracker)
             let query = try self.parseIPathQuery(buffer: &buffer, tracker: tracker)
             return .init(server: server, query: query)
         }
@@ -795,8 +795,8 @@ extension GrammarParser {
         }
     }
 
-    static func parseIServer(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IServer {
-        try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> IServer in
+    static func parseIMAPServer(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IMAPServer {
+        try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> IMAPServer in
             let info = try optional(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> IUserInfo in
                 let info = try self.parseIUserInfo(buffer: &buffer, tracker: tracker)
                 try fixedString("@", buffer: &buffer, tracker: tracker)
@@ -889,7 +889,7 @@ extension GrammarParser {
     static func parseIMAPURL(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IMAPURL {
         try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> IMAPURL in
             try fixedString("imap://", buffer: &buffer, tracker: tracker)
-            let server = try self.parseIServer(buffer: &buffer, tracker: tracker)
+            let server = try self.parseIMAPServer(buffer: &buffer, tracker: tracker)
             let query = try self.parseIPathQuery(buffer: &buffer, tracker: tracker)
             return .init(server: server, query: query)
         }
