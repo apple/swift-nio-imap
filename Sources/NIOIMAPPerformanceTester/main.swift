@@ -45,7 +45,7 @@ let commands: [(String, Command)] = [
     ("parse_auth_plain_empty", .authenticate(method: "PLAIN", initialClientResponse: .empty)),
     ("parse_auth_plain_initial data", .authenticate(method: "PLAIN", initialClientResponse: .init(ByteBuffer(string: "dGhpcyBpcyB0ZXN0IGJhc2U2NA==")))),
     ("parse_esearch_simple_all", .esearch(.init(key: .all))),
-    ("parse_esearch_simple_recursive_date", .esearch(.init(key: .and([.not(.answered), .not(.before(NIOIMAP.Date(year: 2000, month: 12, day: 12)!))])))),
+    ("parse_esearch_simple_recursive_date", .esearch(.init(key: .and([.not(.answered), .not(.before(NIOIMAP.IMAPDate(year: 2000, month: 12, day: 12)!))])))),
     ("parse_esearch_complex", .esearch(.init(key: .and([.younger(123), .or(.keyword(.colorBit0), .keyword(.colorBit1))]), charset: "UTF-8", returnOptions: [.min, .max, .count], sourceOptions: ESearchSourceOptions(sourceMailbox: [.inboxes])!))),
     ("parse_examine_no_params", .examine(.inbox, [:])),
     ("parse_examine_1_param", .examine(.inbox, ["param": nil])),

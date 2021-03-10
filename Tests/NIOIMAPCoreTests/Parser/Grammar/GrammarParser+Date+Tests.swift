@@ -24,14 +24,14 @@ extension GrammarParser_Date_Tests {
     func testDate_valid_plain() {
         TestUtilities.withBuffer("25-Jun-1994", terminator: " ") { (buffer) in
             let day = try GrammarParser.parseDate(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(day, Date(year: 1994, month: 6, day: 25))
+            XCTAssertEqual(day, IMAPDate(year: 1994, month: 6, day: 25))
         }
     }
 
     func testDate_valid_quoted() {
         TestUtilities.withBuffer("\"25-Jun-1994\"") { (buffer) in
             let day = try GrammarParser.parseDate(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(day, Date(year: 1994, month: 6, day: 25))
+            XCTAssertEqual(day, IMAPDate(year: 1994, month: 6, day: 25))
         }
     }
 
@@ -127,7 +127,7 @@ extension GrammarParser_Date_Tests {
     func testDateText_valid() {
         TestUtilities.withBuffer("25-Jun-1994", terminator: " ") { (buffer) in
             let date = try GrammarParser.parseDateText(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(date, Date(year: 1994, month: 6, day: 25))
+            XCTAssertEqual(date, IMAPDate(year: 1994, month: 6, day: 25))
         }
     }
 
