@@ -24,13 +24,13 @@ import struct NIO.ByteBuffer
 import struct NIO.ByteBufferView
 
 extension GrammarParser {
-    static func parseEnvelopeAddressGroups(_ addresses: [Address]) -> [AddressListElement] {
-        var results: [AddressListElement] = []
-        var stack: [AddressGroup] = []
+    static func parseEnvelopeEmailAddressGroups(_ addresses: [EmailAddress]) -> [EmailAddressListElement] {
+        var results: [EmailAddressListElement] = []
+        var stack: [EmailAddressGroup] = []
 
         for address in addresses {
             if address.host == nil, let name = address.mailbox { // start of group
-                stack.append(AddressGroup(groupName: name, sourceRoot: address.sourceRoot, children: []))
+                stack.append(EmailAddressGroup(groupName: name, sourceRoot: address.sourceRoot, children: []))
             } else if address.host == nil { // end of group
                 let group = stack.popLast()!
                 if stack.last == nil {
@@ -40,9 +40,9 @@ extension GrammarParser {
                 }
             } else { // normal address
                 if stack.last == nil {
-                    results.append(.address(address))
+                    results.append(.singleAddress(address))
                 } else {
-                    stack[stack.count - 1].children.append(.address(address))
+                    stack[stack.count - 1].children.append(.singleAddress(address))
                 }
             }
         }
@@ -51,32 +51,32 @@ extension GrammarParser {
     }
 
     // reusable for a lot of the env-* types
-    static func parseEnvelopeAddresses(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [Address] {
+    static func parseEnvelopeEmailAddresses(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [EmailAddress] {
         try fixedString("(", buffer: &buffer, tracker: tracker)
         let addresses = try ParserLibrary.parseOneOrMore(buffer: &buffer, tracker: tracker) { buffer, tracker in
-            try self.parseAddress(buffer: &buffer, tracker: tracker)
+            try self.parseEmailAddress(buffer: &buffer, tracker: tracker)
         }
         try fixedString(")", buffer: &buffer, tracker: tracker)
         return addresses
     }
 
-    static func parseOptionalEnvelopeAddresses(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [AddressListElement] {
-        func parseOptionalEnvelopeAddresses_nil(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [Address] {
+    static func parseOptionalEnvelopeEmailAddresses(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [EmailAddressListElement] {
+        func parseOptionalEnvelopeEmailAddresses_nil(buffer: inout ByteBuffer, tracker: StackTracker) throws -> [EmailAddress] {
             try self.parseNil(buffer: &buffer, tracker: tracker)
             return []
         }
         let addresses = try oneOf([
-            parseEnvelopeAddresses,
-            parseOptionalEnvelopeAddresses_nil,
+            parseEnvelopeEmailAddresses,
+            parseOptionalEnvelopeEmailAddresses_nil,
         ], buffer: &buffer, tracker: tracker)
 
-        return self.parseEnvelopeAddressGroups(addresses)
+        return self.parseEnvelopeEmailAddressGroups(addresses)
     }
 
     // address         = "(" addr-name SP addr-adl SP addr-mailbox SP
     //                   addr-host ")"
-    static func parseAddress(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Address {
-        try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Address in
+    static func parseEmailAddress(buffer: inout ByteBuffer, tracker: StackTracker) throws -> EmailAddress {
+        try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> EmailAddress in
             try fixedString("(", buffer: &buffer, tracker: tracker)
             let name = try self.parseNString(buffer: &buffer, tracker: tracker)
             try fixedString(" ", buffer: &buffer, tracker: tracker)
@@ -86,7 +86,7 @@ extension GrammarParser {
             try fixedString(" ", buffer: &buffer, tracker: tracker)
             let host = try self.parseNString(buffer: &buffer, tracker: tracker)
             try fixedString(")", buffer: &buffer, tracker: tracker)
-            return Address(personName: name, sourceRoot: adl, mailbox: mailbox, host: host)
+            return EmailAddress(personName: name, sourceRoot: adl, mailbox: mailbox, host: host)
         }
     }
 
@@ -107,17 +107,17 @@ extension GrammarParser {
             try space(buffer: &buffer, tracker: tracker)
             let subject = try self.parseNString(buffer: &buffer, tracker: tracker)
             try space(buffer: &buffer, tracker: tracker)
-            let from = try self.parseOptionalEnvelopeAddresses(buffer: &buffer, tracker: tracker)
+            let from = try self.parseOptionalEnvelopeEmailAddresses(buffer: &buffer, tracker: tracker)
             try space(buffer: &buffer, tracker: tracker)
-            let sender = try self.parseOptionalEnvelopeAddresses(buffer: &buffer, tracker: tracker)
+            let sender = try self.parseOptionalEnvelopeEmailAddresses(buffer: &buffer, tracker: tracker)
             try space(buffer: &buffer, tracker: tracker)
-            let replyTo = try self.parseOptionalEnvelopeAddresses(buffer: &buffer, tracker: tracker)
+            let replyTo = try self.parseOptionalEnvelopeEmailAddresses(buffer: &buffer, tracker: tracker)
             try space(buffer: &buffer, tracker: tracker)
-            let to = try self.parseOptionalEnvelopeAddresses(buffer: &buffer, tracker: tracker)
+            let to = try self.parseOptionalEnvelopeEmailAddresses(buffer: &buffer, tracker: tracker)
             try space(buffer: &buffer, tracker: tracker)
-            let cc = try self.parseOptionalEnvelopeAddresses(buffer: &buffer, tracker: tracker)
+            let cc = try self.parseOptionalEnvelopeEmailAddresses(buffer: &buffer, tracker: tracker)
             try space(buffer: &buffer, tracker: tracker)
-            let bcc = try self.parseOptionalEnvelopeAddresses(buffer: &buffer, tracker: tracker)
+            let bcc = try self.parseOptionalEnvelopeEmailAddresses(buffer: &buffer, tracker: tracker)
             try space(buffer: &buffer, tracker: tracker)
             let inReplyTo = try self.parseMessageID(buffer: &buffer, tracker: tracker)
             try space(buffer: &buffer, tracker: tracker)

@@ -39,12 +39,12 @@ extension GrammarParser_Message_Tests {
                     .envelope(Envelope(
                         date: "date",
                         subject: "subject",
-                        from: [.address(.init(personName: "from1", sourceRoot: "from2", mailbox: "from3", host: "from4"))],
-                        sender: [.address(.init(personName: "sender1", sourceRoot: "sender2", mailbox: "sender3", host: "sender4"))],
-                        reply: [.address(.init(personName: "reply1", sourceRoot: "reply2", mailbox: "reply3", host: "reply4"))],
-                        to: [.address(.init(personName: "to1", sourceRoot: "to2", mailbox: "to3", host: "to4"))],
-                        cc: [.address(.init(personName: "cc1", sourceRoot: "cc2", mailbox: "cc3", host: "cc4"))],
-                        bcc: [.address(.init(personName: "bcc1", sourceRoot: "bcc2", mailbox: "bcc3", host: "bcc4"))],
+                        from: [.singleAddress(.init(personName: "from1", sourceRoot: "from2", mailbox: "from3", host: "from4"))],
+                        sender: [.singleAddress(.init(personName: "sender1", sourceRoot: "sender2", mailbox: "sender3", host: "sender4"))],
+                        reply: [.singleAddress(.init(personName: "reply1", sourceRoot: "reply2", mailbox: "reply3", host: "reply4"))],
+                        to: [.singleAddress(.init(personName: "to1", sourceRoot: "to2", mailbox: "to3", host: "to4"))],
+                        cc: [.singleAddress(.init(personName: "cc1", sourceRoot: "cc2", mailbox: "cc3", host: "cc4"))],
+                        bcc: [.singleAddress(.init(personName: "bcc1", sourceRoot: "bcc2", mailbox: "bcc3", host: "bcc4"))],
                         inReplyTo: "inreplyto",
                         messageID: "messageid"
                     )),

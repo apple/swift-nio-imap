@@ -24,22 +24,22 @@ public struct Envelope: Equatable {
     public var subject: ByteBuffer?
 
     /// The email address, and optionally the name of the author(s).
-    public var from: [AddressListElement]
+    public var from: [EmailAddressListElement]
 
     /// Address of the actual sender acting on behalf of the author.
-    public var sender: [AddressListElement]
+    public var sender: [EmailAddressListElement]
 
     /// Who a reply should be sent to.
-    public var reply: [AddressListElement]
+    public var reply: [EmailAddressListElement]
 
     /// Who the message was sent to
-    public var to: [AddressListElement]
+    public var to: [EmailAddressListElement]
 
     /// The carbon-copy list.
-    public var cc: [AddressListElement]
+    public var cc: [EmailAddressListElement]
 
     /// The blind-carbon-copy list
-    public var bcc: [AddressListElement]
+    public var bcc: [EmailAddressListElement]
 
     /// The message ID that this message replied to.
     public var inReplyTo: MessageID?
@@ -61,12 +61,12 @@ public struct Envelope: Equatable {
     public init(
         date: InternetMessageDate?,
         subject: ByteBuffer?,
-        from: [AddressListElement],
-        sender: [AddressListElement],
-        reply: [AddressListElement],
-        to: [AddressListElement],
-        cc: [AddressListElement],
-        bcc: [AddressListElement],
+        from: [EmailAddressListElement],
+        sender: [EmailAddressListElement],
+        reply: [EmailAddressListElement],
+        to: [EmailAddressListElement],
+        cc: [EmailAddressListElement],
+        bcc: [EmailAddressListElement],
         inReplyTo: MessageID?,
         messageID: MessageID?
     ) {
@@ -86,7 +86,7 @@ public struct Envelope: Equatable {
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeEnvelopeAddresses(_ addresses: [AddressListElement]) -> Int {
+    @discardableResult mutating func writeEnvelopeAddresses(_ addresses: [EmailAddressListElement]) -> Int {
         guard addresses.count > 0 else {
             return self.writeNil()
         }
@@ -94,7 +94,7 @@ extension EncodeBuffer {
         return
             self.writeString("(") +
             self.writeArray(addresses, separator: "", parenthesis: false) { (aog, self) -> Int in
-                self.writeAddressOrGroup(aog)
+                self.writeEmailAddressOrGroup(aog)
             } +
             self.writeString(")")
     }

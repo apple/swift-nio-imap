@@ -16,17 +16,17 @@ import NIO
 @testable import NIOIMAPCore
 import XCTest
 
-class AddressTests: EncodeTestClass {}
+class EmailAddressTests: EncodeTestClass {}
 
 // MARK: - Address init
 
-extension AddressTests {
+extension EmailAddressTests {
     func testInit() {
         let name: ByteBuffer? = "a"
         let adl: ByteBuffer? = "b"
         let mailbox: ByteBuffer? = "c"
         let host: ByteBuffer? = "d"
-        let address = Address(personName: name, sourceRoot: adl, mailbox: mailbox, host: host)
+        let address = EmailAddress(personName: name, sourceRoot: adl, mailbox: mailbox, host: host)
 
         XCTAssertEqual(address.personName, name)
         XCTAssertEqual(address.sourceRoot, adl)
@@ -37,27 +37,27 @@ extension AddressTests {
 
 // MARK: - Address imapEncoded
 
-extension AddressTests {
+extension EmailAddressTests {
     func testAllNil() {
-        let address = Address(personName: nil, sourceRoot: nil, mailbox: nil, host: nil)
+        let address = EmailAddress(personName: nil, sourceRoot: nil, mailbox: nil, host: nil)
         let expected = "(NIL NIL NIL NIL)"
-        let size = self.testBuffer.writeAddress(address)
+        let size = self.testBuffer.writeEmailAddress(address)
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }
 
     func testNoneNil() {
-        let address = Address(personName: "somename", sourceRoot: "someadl", mailbox: "somemailbox", host: "someaddress")
+        let address = EmailAddress(personName: "somename", sourceRoot: "someadl", mailbox: "somemailbox", host: "someaddress")
         let expected = "(\"somename\" \"someadl\" \"somemailbox\" \"someaddress\")"
-        let size = self.testBuffer.writeAddress(address)
+        let size = self.testBuffer.writeEmailAddress(address)
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }
 
     func testMixture() {
-        let address = Address(personName: nil, sourceRoot: "some", mailbox: "thing", host: nil)
+        let address = EmailAddress(personName: nil, sourceRoot: "some", mailbox: "thing", host: nil)
         let expected = "(NIL \"some\" \"thing\" NIL)"
-        let size = self.testBuffer.writeAddress(address)
+        let size = self.testBuffer.writeEmailAddress(address)
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }

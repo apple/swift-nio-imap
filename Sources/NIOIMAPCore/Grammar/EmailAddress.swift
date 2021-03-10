@@ -16,7 +16,7 @@ import struct NIO.ByteBuffer
 
 /// An address structure is a parenthesized list that describes an
 /// electronic mail address.
-public struct Address: Equatable {
+public struct EmailAddress: Equatable {
     /// The addressee's personal name (may be an alias).
     public var personName: ByteBuffer?
 
@@ -29,7 +29,7 @@ public struct Address: Equatable {
     /// The host name of the server that sent the message.
     public var host: ByteBuffer?
 
-    /// Creates a new `Address`.
+    /// Creates a new `EmailAddress`.
     /// - parameter personName: The addressee's personal name (may be an alias).
     /// - parameter sourceRoot: The SMTP at-domain-list (source-root).
     /// - parameter mailbox: The mailbox the message.
@@ -45,7 +45,7 @@ public struct Address: Equatable {
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeAddress(_ address: Address) -> Int {
+    @discardableResult mutating func writeEmailAddress(_ address: EmailAddress) -> Int {
         self.writeString("(") +
             self.writeNString(address.personName) +
             self.writeSpace() +

@@ -308,12 +308,12 @@ extension ParserUnitTests {
     }
 }
 
-// MARK: - address parseAddress
+// MARK: - parseEmailAddress
 
 extension ParserUnitTests {
-    func testAddress_valid() {
+    func testparseEmailAddress_valid() {
         self.iterateTests(
-            testFunction: GrammarParser.parseAddress,
+            testFunction: GrammarParser.parseEmailAddress,
             validInputs: [
                 ("(NIL NIL NIL NIL)", "", .init(personName: nil, sourceRoot: nil, mailbox: nil, host: nil), #line),
                 (#"("a" "b" "c" "d")"#, "", .init(personName: "a", sourceRoot: "b", mailbox: "c", host: "d"), #line),
