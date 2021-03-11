@@ -22,22 +22,15 @@ enum TestUtilities {}
 // MARK: - ByteBuffer
 
 extension TestUtilities {
-    static func createTestByteBuffer(for bytes: [UInt8]) -> ByteBuffer {
-        var buffer = ByteBufferAllocator().buffer(capacity: bytes.count)
-        buffer.writeBytes(bytes)
-        return buffer
+    static func makeParseBuffer(for text: String) -> ParseBuffer {
+        let buffer = ByteBuffer(string: text)
+        return ParseBuffer(buffer)
     }
 
-    static func createTestByteBuffer(for text: String) -> ByteBuffer {
-        var buffer = ByteBufferAllocator().buffer(capacity: text.utf8.count)
-        buffer.writeString(text)
-        return buffer
-    }
-
-    static func withBuffer(_ string: String,
-                           terminator: String = "",
-                           shouldRemainUnchanged: Bool = false,
-                           file: StaticString = (#file), line: UInt = #line, _ body: (inout ByteBuffer) throws -> Void) {
+    static func withParseBuffer(_ string: String,
+                                terminator: String = "",
+                                shouldRemainUnchanged: Bool = false,
+                                file: StaticString = (#file), line: UInt = #line, _ body: (inout ParseBuffer) throws -> Void) {
         var inputBuffer = ByteBufferAllocator().buffer(capacity: string.utf8.count + terminator.utf8.count + 10)
         inputBuffer.writeString("hello")
         inputBuffer.moveReaderIndex(forwardBy: 5)
@@ -49,9 +42,14 @@ extension TestUtilities {
         let expected = inputBuffer.getSlice(at: inputBuffer.readerIndex + string.utf8.count, length: terminator.utf8.count)!
         let beforeRunningBody = inputBuffer
 
+        var parseBuffer = ParseBuffer(inputBuffer)
+
         defer {
             let expectedString = String(buffer: expected)
-            let remainingString = String(buffer: inputBuffer)
+            let remaining = (try? ParserLibrary.parseBytes(buffer: &parseBuffer,
+                                                           tracker: .makeNewDefaultLimitStackTracker,
+                                                           upTo: .max)) ?? ByteBuffer()
+            let remainingString = String(buffer: remaining)
             if shouldRemainUnchanged {
                 XCTAssertEqual(String(buffer: beforeRunningBody), remainingString, file: file, line: line)
             } else {
@@ -59,7 +57,7 @@ extension TestUtilities {
             }
         }
 
-        XCTAssertNoThrow(try body(&inputBuffer), file: file, line: line)
+        XCTAssertNoThrow(try body(&parseBuffer), file: file, line: line)
     }
 }
 

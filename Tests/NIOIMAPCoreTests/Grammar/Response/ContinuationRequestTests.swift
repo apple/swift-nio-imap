@@ -56,7 +56,7 @@ extension ContinuationRequestTests {
 
     func testParse() {
         for (expected, input, line) in fixtures {
-            var buffer = ByteBuffer(string: input + "a")
+            var buffer = ParseBuffer(ByteBuffer(string: input + "a"))
             do {
                 let cont = try GrammarParser.parseContinuationRequest(buffer: &buffer, tracker: StackTracker(maximumParserStackDepth: 100))
                 XCTAssertEqual(cont, expected, "parse", line: line)

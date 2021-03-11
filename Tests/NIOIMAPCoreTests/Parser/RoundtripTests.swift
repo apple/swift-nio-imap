@@ -114,7 +114,8 @@ final class RoundtripTests: XCTestCase {
                 }
             }
             do {
-                let decoded = try GrammarParser.parseCommand(buffer: &buffer, tracker: .testTracker)
+                var parseBuffer = ParseBuffer(buffer)
+                let decoded = try GrammarParser.parseCommand(buffer: &parseBuffer, tracker: .testTracker)
                 XCTAssertEqual(command, decoded, line: line)
             } catch {
                 XCTFail("\(error) - \(buffer.readString(length: buffer.readableBytesView.count)!)", line: line)

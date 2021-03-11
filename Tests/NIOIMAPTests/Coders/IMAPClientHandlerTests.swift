@@ -30,6 +30,30 @@ class IMAPClientHandlerTests: XCTestCase {
                                                            state: .ok(.init(code: nil, text: "ok"))))))
     }
 
+    func testReferralURLResponse() {
+        let expectedResponse = ResponseOrContinuationRequest.response(.taggedResponse(
+            TaggedResponse(tag: "tag",
+                           state: .ok(ResponseText(code:
+                               .referral(IMAPURL(server: IMAPServer(userInfo: nil, host: "hostname", port: nil),
+                                                 query: IPathQuery(command: ICommand.messagePart(
+                                                     part: IMessagePart(
+                                                         mailboxReference: IMailboxReference(encodeMailbox: EncodedMailbox(mailbox: "foo/bar"),
+                                                                                             uidValidity: nil),
+                                                         iUID: try! IUID(uid: 1234),
+                                                         iSection: nil,
+                                                         iPartial: nil
+                                                     ),
+                                                     authenticatedURL: nil
+                                                 )))),
+                                                   text: "")))))
+        self.writeOutbound(.command(.init(tag: "a", command: .login(username: "foo", password: "bar"))))
+        self.assertOutboundString("a LOGIN \"foo\" \"bar\"\r\n")
+        self.writeInbound("tag OK [REFERRAL imap://hostname/foo/bar/;UID=1234]\r\na OK ok\r\n")
+        self.assertInbound(expectedResponse)
+        self.assertInbound(.response(.taggedResponse(.init(tag: "a",
+                                                           state: .ok(.init(code: nil, text: "ok"))))))
+    }
+
     func testCommandThatNeedsToWaitForContinuationRequest() {
         let f = self.writeOutbound(CommandStream.command(TaggedCommand(tag: "x",
                                                                        command: .rename(from: .init("\\"),

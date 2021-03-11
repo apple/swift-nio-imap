@@ -151,7 +151,7 @@ extension GrammarParser_Search_Tests {
     }
 
     func testParseSearchKey_array_none_invalid() {
-        var buffer = "()" as ByteBuffer
+        var buffer = TestUtilities.makeParseBuffer(for: "()")
         XCTAssertThrowsError(try GrammarParser.parseSearchKey(buffer: &buffer, tracker: .testTracker)) { e in
             XCTAssertTrue(e is ParserError)
         }

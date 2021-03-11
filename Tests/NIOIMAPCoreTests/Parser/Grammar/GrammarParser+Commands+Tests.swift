@@ -22,7 +22,7 @@ class GrammarParser_Commands_Tests: XCTestCase, _ParserTestHelpers {}
 
 extension GrammarParser_Commands_Tests {
     func testParseCommand_valid_any() {
-        TestUtilities.withBuffer("a1 NOOP", terminator: "\r\n") { (buffer) in
+        TestUtilities.withParseBuffer("a1 NOOP", terminator: "\r\n") { (buffer) in
             let result = try GrammarParser.parseCommand(buffer: &buffer, tracker: .testTracker)
             XCTAssertEqual(result.tag, "a1")
             XCTAssertEqual(result.command, .noop)
@@ -30,7 +30,7 @@ extension GrammarParser_Commands_Tests {
     }
 
     func testParseCommand_valid_auth() {
-        TestUtilities.withBuffer("a1 CREATE \"mailbox\"", terminator: "\r\n") { (buffer) in
+        TestUtilities.withParseBuffer("a1 CREATE \"mailbox\"", terminator: "\r\n") { (buffer) in
             let result = try GrammarParser.parseCommand(buffer: &buffer, tracker: .testTracker)
             XCTAssertEqual(result.tag, "a1")
             XCTAssertEqual(result.command, .create(MailboxName("mailbox"), []))
@@ -38,7 +38,7 @@ extension GrammarParser_Commands_Tests {
     }
 
     func testParseCommand_valid_nonauth() {
-        TestUtilities.withBuffer("a1 STARTTLS", terminator: "\r\n") { (buffer) in
+        TestUtilities.withParseBuffer("a1 STARTTLS", terminator: "\r\n") { (buffer) in
             let result = try GrammarParser.parseCommand(buffer: &buffer, tracker: .testTracker)
             XCTAssertEqual(result.tag, "a1")
             XCTAssertEqual(result.command, .starttls)
@@ -46,7 +46,7 @@ extension GrammarParser_Commands_Tests {
     }
 
     func testParseCommand_valid_select() {
-        TestUtilities.withBuffer("a1 CHECK", terminator: "\r\n") { (buffer) in
+        TestUtilities.withParseBuffer("a1 CHECK", terminator: "\r\n") { (buffer) in
             let result = try GrammarParser.parseCommand(buffer: &buffer, tracker: .testTracker)
             XCTAssertEqual(result.tag, "a1")
             XCTAssertEqual(result.command, .check)

@@ -93,14 +93,14 @@ extension GrammarParser_Mailbox_Tests {
     }
 
     func testParseMailboxList_invalid_character_incomplete() {
-        var buffer = "() \"" as ByteBuffer
+        var buffer = TestUtilities.makeParseBuffer(for: "() \"")
         XCTAssertThrowsError(try GrammarParser.parseMailboxList(buffer: &buffer, tracker: .testTracker)) { e in
             XCTAssertTrue(e is _IncompleteMessage)
         }
     }
 
     func testParseMailboxList_invalid_character() {
-        var buffer = "() \"\\\" inbox" as ByteBuffer
+        var buffer = TestUtilities.makeParseBuffer(for: "() \"\\\" inbox")
         XCTAssertThrowsError(try GrammarParser.parseMailboxList(buffer: &buffer, tracker: .testTracker)) { e in
             XCTAssertTrue(e is ParserError)
         }
