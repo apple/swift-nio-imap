@@ -308,12 +308,12 @@ extension ParserUnitTests {
     }
 }
 
-// MARK: - address parseAddress
+// MARK: - parseEmailAddress
 
 extension ParserUnitTests {
-    func testAddress_valid() {
+    func testparseEmailAddress_valid() {
         self.iterateTests(
-            testFunction: GrammarParser.parseAddress,
+            testFunction: GrammarParser.parseEmailAddress,
             validInputs: [
                 ("(NIL NIL NIL NIL)", "", .init(personName: nil, sourceRoot: nil, mailbox: nil, host: nil), #line),
                 (#"("a" "b" "c" "d")"#, "", .init(personName: "a", sourceRoot: "b", mailbox: "c", host: "d"), #line),
@@ -443,7 +443,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     func testParseAuthIMAPURL() {
         self.iterateTests(
-            testFunction: GrammarParser.parseAuthIMAPURL,
+            testFunction: GrammarParser.parseAuthenticatedURL,
             validInputs: [
                 ("imap://localhost/test/;UID=123", " ", .init(server: .init(host: "localhost"), messagePart: .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: try! .init(uid: 123))), #line),
             ],
@@ -463,7 +463,7 @@ extension ParserUnitTests {
                 (
                     "imap://localhost/test/;UID=123;URLAUTH=anonymous:INTERNAL:01234567890123456789012345678901",
                     " ",
-                    .init(imapURL: .init(server: .init(host: "localhost"), messagePart: .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: try! .init(uid: 123))), urlAuth: .init(auth: .init(access: .anonymous), verifier: .init(uAuthMechanism: .internal, encodedURLAuth: .init(data: "01234567890123456789012345678901")))),
+                    .init(imapURL: .init(server: .init(host: "localhost"), messagePart: .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: try! .init(uid: 123))), authenticatedURL: .init(authenticatedURL: .init(access: .anonymous), verifier: .init(urlAuthMechanism: .internal, encodedAuthenticationURL: .init(data: "01234567890123456789012345678901")))),
                     #line
                 ),
             ],
@@ -483,7 +483,7 @@ extension ParserUnitTests {
                 (
                     "imap://localhost/test/;UID=123;URLAUTH=anonymous",
                     " ",
-                    .init(imapURL: .init(server: .init(host: "localhost"), messagePart: .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: try! .init(uid: 123))), authRump: .init(access: .anonymous)),
+                    .init(authenticatedURL: .init(server: .init(host: "localhost"), messagePart: .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: try! .init(uid: 123))), authenticatedURLRump: .init(access: .anonymous)),
                     #line
                 ),
             ],
@@ -519,7 +519,7 @@ extension ParserUnitTests {
             testFunction: GrammarParser.parseCapability,
             validInputs: [
                 ("CONDSTORE", " ", .condStore, #line),
-                ("AUTH=PLAIN", " ", .auth(.plain), #line),
+                ("AUTH=PLAIN", " ", .authenticate(.plain), #line),
                 ("SPECIAL-USE", " ", .specialUse, #line),
                 ("XSPECIAL", " ", .init("XSPECIAL"), #line),
                 ("SPECIAL", " ", .init("SPECIAL"), #line),
@@ -841,15 +841,15 @@ extension ParserUnitTests {
     }
 }
 
-// MARK: - IAuth
+// MARK: - IAuthentication
 
 extension ParserUnitTests {
-    func testParseIAuth() {
+    func testParseIAuthentication() {
         self.iterateTests(
-            testFunction: GrammarParser.parseIAuth,
+            testFunction: GrammarParser.parseIAuthentication,
             validInputs: [
                 (";AUTH=*", " ", .any, #line),
-                (";AUTH=test", " ", .type(.init(authType: "test")), #line),
+                (";AUTH=test", " ", .type(.init(authenticationType: "test")), #line),
             ],
             parserErrorInputs: [
                 ],
@@ -903,8 +903,8 @@ extension ParserUnitTests {
             testFunction: GrammarParser.parseICommand,
             validInputs: [
                 ("test", " ", .messageList(.init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")))), #line),
-                ("test/;UID=123", " ", .messagePart(part: .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: try! .init(uid: 123)), urlAuth: nil), #line),
-                ("test/;UID=123;URLAUTH=anonymous:INTERNAL:01234567890123456789012345678901", " ", .messagePart(part: .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: try! .init(uid: 123)), urlAuth: .init(auth: .init(access: .anonymous), verifier: .init(uAuthMechanism: .internal, encodedURLAuth: .init(data: "01234567890123456789012345678901")))), #line),
+                ("test/;UID=123", " ", .messagePart(part: .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: try! .init(uid: 123)), authenticatedURL: nil), #line),
+                ("test/;UID=123;URLAUTH=anonymous:INTERNAL:01234567890123456789012345678901", " ", .messagePart(part: .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: try! .init(uid: 123)), authenticatedURL: .init(authenticatedURL: .init(access: .anonymous), verifier: .init(urlAuthMechanism: .internal, encodedAuthenticationURL: .init(data: "01234567890123456789012345678901")))), #line),
             ],
             parserErrorInputs: [
                 ],
@@ -963,7 +963,7 @@ extension ParserUnitTests {
         self.iterateTests(
             testFunction: GrammarParser.parseIURLAuth,
             validInputs: [
-                (";URLAUTH=anonymous:INTERNAL:01234567890123456789012345678901", " ", .init(auth: .init(access: .anonymous), verifier: .init(uAuthMechanism: .internal, encodedURLAuth: .init(data: "01234567890123456789012345678901"))), #line),
+                (";URLAUTH=anonymous:INTERNAL:01234567890123456789012345678901", " ", .init(authenticatedURL: .init(access: .anonymous), verifier: .init(urlAuthMechanism: .internal, encodedAuthenticationURL: .init(data: "01234567890123456789012345678901"))), #line),
             ],
             parserErrorInputs: [
                 ],
@@ -973,12 +973,12 @@ extension ParserUnitTests {
     }
 }
 
-// MARK: - IURLAuthRump
+// MARK: - IRumpAuthenticatedURL
 
 extension ParserUnitTests {
-    func testParseIURLAuthRump() {
+    func testParseIRumpAuthenticatedURL() {
         self.iterateTests(
-            testFunction: GrammarParser.parseIURLAuthRump,
+            testFunction: GrammarParser.parseIRumpAuthenticatedURL,
             validInputs: [
                 (";URLAUTH=anonymous", " ", .init(access: .anonymous), #line),
                 (
@@ -996,14 +996,14 @@ extension ParserUnitTests {
     }
 }
 
-// MARK: - IUAVerifier
+// MARK: - AuthenticatedURLVerifier
 
 extension ParserUnitTests {
-    func testParseIUAVerifier() {
+    func testParseAuthenticatedURLVerifier() {
         self.iterateTests(
-            testFunction: GrammarParser.parseIUAVerifier,
+            testFunction: GrammarParser.parseAuthenticatedURLVerifier,
             validInputs: [
-                (":INTERNAL:01234567890123456789012345678901", " ", .init(uAuthMechanism: .internal, encodedURLAuth: .init(data: "01234567890123456789012345678901")), #line),
+                (":INTERNAL:01234567890123456789012345678901", " ", .init(urlAuthMechanism: .internal, encodedAuthenticationURL: .init(data: "01234567890123456789012345678901")), #line),
             ],
             parserErrorInputs: [
                 ],
@@ -1013,16 +1013,16 @@ extension ParserUnitTests {
     }
 }
 
-// MARK: - IUserInfo
+// MARK: - UserInfo
 
 extension ParserUnitTests {
-    func testParseIUserInfo() {
+    func testParseUserInfo() {
         self.iterateTests(
-            testFunction: GrammarParser.parseIUserInfo,
+            testFunction: GrammarParser.parseUserInfo,
             validInputs: [
-                (";AUTH=*", " ", .init(encodedUser: nil, iAuth: .any), #line),
-                ("test", " ", .init(encodedUser: .init(data: "test"), iAuth: nil), #line),
-                ("test;AUTH=*", " ", .init(encodedUser: .init(data: "test"), iAuth: .any), #line),
+                (";AUTH=*", " ", .init(encodedUser: nil, authenticationMechanism: .any), #line),
+                ("test", " ", .init(encodedUser: .init(data: "test"), authenticationMechanism: nil), #line),
+                ("test;AUTH=*", " ", .init(encodedUser: .init(data: "test"), authenticationMechanism: .any), #line),
             ],
             parserErrorInputs: [
                 ],
@@ -1071,7 +1071,7 @@ extension ParserUnitTests {
         self.iterateTests(
             testFunction: GrammarParser.parseEncodedAuthenticationType,
             validInputs: [
-                ("hello%FF", " ", .init(authType: "hello%FF"), #line),
+                ("hello%FF", " ", .init(authenticationType: "hello%FF"), #line),
             ],
             parserErrorInputs: [
                 ],
@@ -1185,12 +1185,12 @@ extension ParserUnitTests {
     }
 }
 
-// MARK: - parseEsearchResponse
+// MARK: - parseExtendedSearchResponse
 
 extension ParserUnitTests {
-    func testParseEsearchResponse() {
+    func testParseExtendedSearchResponse() {
         self.iterateTests(
-            testFunction: GrammarParser.parseEsearchResponse,
+            testFunction: GrammarParser.parseExtendedSearchResponse,
             validInputs: [
                 ("ESEARCH", "\r", .init(correlator: nil, uid: false, returnData: []), #line),
                 ("ESEARCH UID", "\r", .init(correlator: nil, uid: true, returnData: []), #line),
@@ -1550,17 +1550,17 @@ extension ParserUnitTests {
     }
 }
 
-// MARK: - parseIServer
+// MARK: - parseIMAPServer
 
 extension ParserUnitTests {
-    func testParseIServer() {
+    func testParseIMAPServer() {
         self.iterateTests(
-            testFunction: GrammarParser.parseIServer,
+            testFunction: GrammarParser.parseIMAPServer,
             validInputs: [
                 ("localhost", " ", .init(userInfo: nil, host: "localhost", port: nil), #line),
-                (";AUTH=*@localhost", " ", .init(userInfo: .init(encodedUser: nil, iAuth: .any), host: "localhost", port: nil), #line),
+                (";AUTH=*@localhost", " ", .init(userInfo: .init(encodedUser: nil, authenticationMechanism: .any), host: "localhost", port: nil), #line),
                 ("localhost:1234", " ", .init(userInfo: nil, host: "localhost", port: 1234), #line),
-                (";AUTH=*@localhost:1234", " ", .init(userInfo: .init(encodedUser: nil, iAuth: .any), host: "localhost", port: 1234), #line),
+                (";AUTH=*@localhost:1234", " ", .init(userInfo: .init(encodedUser: nil, authenticationMechanism: .any), host: "localhost", port: 1234), #line),
             ],
             parserErrorInputs: [
                 ],
@@ -2701,7 +2701,7 @@ extension ParserUnitTests {
         self.iterateTests(
             testFunction: GrammarParser.parseAccess,
             validInputs: [
-                ("authuser", "", .authUser, #line),
+                ("authuser", "", .authenticateUser, #line),
                 ("anonymous", "", .anonymous, #line),
                 ("submit+abc", " ", .submit(.init(data: "abc")), #line),
                 ("user+abc", " ", .user(.init(data: "abc")), #line),
@@ -3088,23 +3088,23 @@ extension ParserUnitTests {
         )
     }
 
-    func testParseESearchScopeOptions() {
+    func testParseExtendedSearchScopeOptions() {
         self.iterateTests(
-            testFunction: GrammarParser.parseESearchScopeOptions,
+            testFunction: GrammarParser.parseExtendedSearchScopeOptions,
             validInputs: [
                 (
                     "name", "\r",
-                    ESearchScopeOptions(["name": nil])!,
+                    ExtendedSearchScopeOptions(["name": nil])!,
                     #line
                 ),
                 (
                     "name $", "\r",
-                    ESearchScopeOptions(["name": .sequence(.lastCommand)]),
+                    ExtendedSearchScopeOptions(["name": .sequence(.lastCommand)]),
                     #line
                 ),
                 (
                     "name name2", "\r",
-                    ESearchScopeOptions(["name": nil, "name2": nil])!,
+                    ExtendedSearchScopeOptions(["name": nil, "name2": nil])!,
                     #line
                 ),
             ],
@@ -3113,24 +3113,24 @@ extension ParserUnitTests {
         )
     }
 
-    func testParseEsearchSourceOptions() {
+    func testParseExtendedSearchSourceOptions() {
         self.iterateTests(
-            testFunction: GrammarParser.parseEsearchSourceOptions,
+            testFunction: GrammarParser.parseExtendedSearchSourceOptions,
             validInputs: [
                 (
                     "IN (inboxes)", "\r",
-                    ESearchSourceOptions(sourceMailbox: [.inboxes]),
+                    ExtendedSearchSourceOptions(sourceMailbox: [.inboxes]),
                     #line
                 ),
                 (
                     "IN (inboxes personal)", "\r",
-                    ESearchSourceOptions(sourceMailbox: [.inboxes, .personal]),
+                    ExtendedSearchSourceOptions(sourceMailbox: [.inboxes, .personal]),
                     #line
                 ),
                 (
                     "IN (inboxes (name))", "\r",
-                    ESearchSourceOptions(sourceMailbox: [.inboxes],
-                                         scopeOptions: ESearchScopeOptions(["name": nil])!),
+                    ExtendedSearchSourceOptions(sourceMailbox: [.inboxes],
+                                                scopeOptions: ExtendedSearchScopeOptions(["name": nil])!),
                     #line
                 ),
             ],
@@ -3148,57 +3148,57 @@ extension ParserUnitTests {
         )
     }
 
-    func testParseEsearchOptions() {
+    func testParseExtendedSearchOptions() {
         self.iterateTests(
-            testFunction: GrammarParser.parseEsearchOptions,
+            testFunction: GrammarParser.parseExtendedSearchOptions,
             validInputs: [
                 (
                     " ALL", "\r",
-                    ESearchOptions(key: .all),
+                    ExtendedSearchOptions(key: .all),
                     #line
                 ),
                 (
                     " RETURN (MIN) ALL", "\r",
-                    ESearchOptions(key: .all, returnOptions: [.min]),
+                    ExtendedSearchOptions(key: .all, returnOptions: [.min]),
                     #line
                 ),
                 (
                     " CHARSET Alien ALL", "\r",
-                    ESearchOptions(key: .all, charset: "Alien"),
+                    ExtendedSearchOptions(key: .all, charset: "Alien"),
                     #line
                 ),
                 (
                     " IN (inboxes) ALL", "\r",
-                    ESearchOptions(key: .all, sourceOptions: ESearchSourceOptions(sourceMailbox: [.inboxes])),
+                    ExtendedSearchOptions(key: .all, sourceOptions: ExtendedSearchSourceOptions(sourceMailbox: [.inboxes])),
                     #line
                 ),
                 (
                     " IN (inboxes) CHARSET Alien ALL", "\r",
-                    ESearchOptions(key: .all,
-                                   charset: "Alien",
-                                   sourceOptions: ESearchSourceOptions(sourceMailbox: [.inboxes])),
+                    ExtendedSearchOptions(key: .all,
+                                          charset: "Alien",
+                                          sourceOptions: ExtendedSearchSourceOptions(sourceMailbox: [.inboxes])),
                     #line
                 ),
                 (
                     " IN (inboxes) RETURN (MIN) ALL", "\r",
-                    ESearchOptions(key: .all,
-                                   returnOptions: [.min],
-                                   sourceOptions: ESearchSourceOptions(sourceMailbox: [.inboxes])),
+                    ExtendedSearchOptions(key: .all,
+                                          returnOptions: [.min],
+                                          sourceOptions: ExtendedSearchSourceOptions(sourceMailbox: [.inboxes])),
                     #line
                 ),
                 (
                     " RETURN (MIN) CHARSET Alien ALL", "\r",
-                    ESearchOptions(key: .all,
-                                   charset: "Alien",
-                                   returnOptions: [.min]),
+                    ExtendedSearchOptions(key: .all,
+                                          charset: "Alien",
+                                          returnOptions: [.min]),
                     #line
                 ),
                 (
                     " IN (inboxes) RETURN (MIN) CHARSET Alien ALL", "\r",
-                    ESearchOptions(key: .all,
-                                   charset: "Alien",
-                                   returnOptions: [.min],
-                                   sourceOptions: ESearchSourceOptions(sourceMailbox: [.inboxes])),
+                    ExtendedSearchOptions(key: .all,
+                                          charset: "Alien",
+                                          returnOptions: [.min],
+                                          sourceOptions: ExtendedSearchSourceOptions(sourceMailbox: [.inboxes])),
                     #line
                 ),
             ],

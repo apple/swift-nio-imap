@@ -18,20 +18,20 @@ import XCTest
 
 class GrammarParser_Envelope_Tests: XCTestCase, _ParserTestHelpers {}
 
-// MARK: - parseEnvelopeAddressGroups
+// MARK: - parseEnvelopeEmailAddressGroups
 
 extension GrammarParser_Envelope_Tests {
-    func testParseEnvelopeAddressGroups() {
-        let inputs: [([Address], [AddressListElement], UInt)] = [
+    func testParseEnvelopeEmailAddressGroups() {
+        let inputs: [([EmailAddress], [EmailAddressListElement], UInt)] = [
             ([], [], #line), // extreme case, this should never happen, but we don't want to crash
             ( // single address
                 [.init(personName: "a", sourceRoot: "a", mailbox: "a", host: "a")],
-                [.address(.init(personName: "a", sourceRoot: "a", mailbox: "a", host: "a"))],
+                [.singleAddress(.init(personName: "a", sourceRoot: "a", mailbox: "a", host: "a"))],
                 #line
             ),
             ( // multiple addresses
                 [.init(personName: "a", sourceRoot: "a", mailbox: "a", host: "a"), .init(personName: "b", sourceRoot: "b", mailbox: "b", host: "b")],
-                [.address(.init(personName: "a", sourceRoot: "a", mailbox: "a", host: "a")), .address(.init(personName: "b", sourceRoot: "b", mailbox: "b", host: "b"))],
+                [.singleAddress(.init(personName: "a", sourceRoot: "a", mailbox: "a", host: "a")), .singleAddress(.init(personName: "b", sourceRoot: "b", mailbox: "b", host: "b"))],
                 #line
             ),
             ( // single group: 1 address
@@ -41,7 +41,7 @@ extension GrammarParser_Envelope_Tests {
                     .init(personName: nil, sourceRoot: nil, mailbox: nil, host: nil),
                 ],
                 [
-                    .group(.init(groupName: "group", sourceRoot: nil, children: [.address(.init(personName: "a", sourceRoot: "a", mailbox: "a", host: "a"))])),
+                    .group(.init(groupName: "group", sourceRoot: nil, children: [.singleAddress(.init(personName: "a", sourceRoot: "a", mailbox: "a", host: "a"))])),
                 ],
                 #line
             ),
@@ -55,9 +55,9 @@ extension GrammarParser_Envelope_Tests {
                 ],
                 [
                     .group(.init(groupName: "group", sourceRoot: nil, children: [
-                        .address(.init(personName: "a", sourceRoot: "a", mailbox: "a", host: "a")),
-                        .address(.init(personName: "b", sourceRoot: "b", mailbox: "b", host: "b")),
-                        .address(.init(personName: "c", sourceRoot: "c", mailbox: "c", host: "c")),
+                        .singleAddress(.init(personName: "a", sourceRoot: "a", mailbox: "a", host: "a")),
+                        .singleAddress(.init(personName: "b", sourceRoot: "b", mailbox: "b", host: "b")),
+                        .singleAddress(.init(personName: "c", sourceRoot: "c", mailbox: "c", host: "c")),
                     ])),
                 ],
                 #line
@@ -76,11 +76,11 @@ extension GrammarParser_Envelope_Tests {
                 ],
                 [
                     .group(.init(groupName: "group1", sourceRoot: nil, children: [
-                        .address(.init(personName: "a", sourceRoot: "a", mailbox: "a", host: "a")),
+                        .singleAddress(.init(personName: "a", sourceRoot: "a", mailbox: "a", host: "a")),
                         .group(.init(groupName: "group2", sourceRoot: nil, children: [
-                            .address(.init(personName: "b", sourceRoot: "b", mailbox: "b", host: "b")),
+                            .singleAddress(.init(personName: "b", sourceRoot: "b", mailbox: "b", host: "b")),
                             .group(.init(groupName: "group3", sourceRoot: nil, children: [
-                                .address(.init(personName: "c", sourceRoot: "c", mailbox: "c", host: "c")),
+                                .singleAddress(.init(personName: "c", sourceRoot: "c", mailbox: "c", host: "c")),
                             ])),
                         ])),
                     ])),
@@ -89,18 +89,18 @@ extension GrammarParser_Envelope_Tests {
             ),
         ]
         for (original, expected, line) in inputs {
-            let actual = GrammarParser.parseEnvelopeAddressGroups(original)
+            let actual = GrammarParser.parseEnvelopeEmailAddressGroups(original)
             XCTAssertEqual(actual, expected, line: line)
         }
     }
 }
 
-// MARK: - parseEnvelopeAddresses
+// MARK: - parseEnvelopeEmailAddresses
 
 extension GrammarParser_Envelope_Tests {
-    func testParseEnvelopeAddresses() {
+    func testParseEnvelopeEmailAddresses() {
         self.iterateTests(
-            testFunction: GrammarParser.parseEnvelopeAddresses,
+            testFunction: GrammarParser.parseEnvelopeEmailAddresses,
             validInputs: [
                 (
                     "((NIL NIL NIL NIL))",
@@ -126,12 +126,12 @@ extension GrammarParser_Envelope_Tests {
     }
 }
 
-// MARK: - parseOptionalEnvelopeAddresses
+// MARK: - parseOptionalEnvelopeEmailAddresses
 
 extension GrammarParser_Envelope_Tests {
-    func testParseOptionalEnvelopeAddresses() {
+    func testParseOptionalEnvelopeEmailAddresses() {
         self.iterateTests(
-            testFunction: GrammarParser.parseOptionalEnvelopeAddresses,
+            testFunction: GrammarParser.parseOptionalEnvelopeEmailAddresses,
             validInputs: [
                 ("NIL", " ", [], #line),
             ],
@@ -148,12 +148,12 @@ extension GrammarParser_Envelope_Tests {
             let envelope = try GrammarParser.parseEnvelope(buffer: &buffer, tracker: .testTracker)
             XCTAssertEqual(envelope.date, "date")
             XCTAssertEqual(envelope.subject, "subject")
-            XCTAssertEqual(envelope.from, [.address(.init(personName: "name1", sourceRoot: "adl1", mailbox: "mailbox1", host: "host1"))])
-            XCTAssertEqual(envelope.sender, [.address(.init(personName: "name2", sourceRoot: "adl2", mailbox: "mailbox2", host: "host2"))])
-            XCTAssertEqual(envelope.reply, [.address(.init(personName: "name3", sourceRoot: "adl3", mailbox: "mailbox3", host: "host3"))])
-            XCTAssertEqual(envelope.to, [.address(.init(personName: "name4", sourceRoot: "adl4", mailbox: "mailbox4", host: "host4"))])
-            XCTAssertEqual(envelope.cc, [.address(.init(personName: "name5", sourceRoot: "adl5", mailbox: "mailbox5", host: "host5"))])
-            XCTAssertEqual(envelope.bcc, [.address(.init(personName: "name6", sourceRoot: "adl6", mailbox: "mailbox6", host: "host6"))])
+            XCTAssertEqual(envelope.from, [.singleAddress(.init(personName: "name1", sourceRoot: "adl1", mailbox: "mailbox1", host: "host1"))])
+            XCTAssertEqual(envelope.sender, [.singleAddress(.init(personName: "name2", sourceRoot: "adl2", mailbox: "mailbox2", host: "host2"))])
+            XCTAssertEqual(envelope.reply, [.singleAddress(.init(personName: "name3", sourceRoot: "adl3", mailbox: "mailbox3", host: "host3"))])
+            XCTAssertEqual(envelope.to, [.singleAddress(.init(personName: "name4", sourceRoot: "adl4", mailbox: "mailbox4", host: "host4"))])
+            XCTAssertEqual(envelope.cc, [.singleAddress(.init(personName: "name5", sourceRoot: "adl5", mailbox: "mailbox5", host: "host5"))])
+            XCTAssertEqual(envelope.bcc, [.singleAddress(.init(personName: "name6", sourceRoot: "adl6", mailbox: "mailbox6", host: "host6"))])
             XCTAssertEqual(envelope.inReplyTo, "someone")
             XCTAssertEqual(envelope.messageID, "messageid")
         }

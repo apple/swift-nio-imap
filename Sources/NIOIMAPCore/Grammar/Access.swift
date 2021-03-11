@@ -24,7 +24,7 @@ public enum Access: Equatable {
     case user(EncodedUser)
 
     /// Restricts use of an IMAP URL to authenticated IMAP sessions, logged in as a non-anonymous user.
-    case authUser
+    case authenticateUser
 
     /// Allows non-restricted fetching of an IMAP URL, including non-authenticated sessions.
     case anonymous
@@ -39,7 +39,7 @@ extension EncodeBuffer {
             return self.writeString("submit+") + self.writeEncodedUser(user)
         case .user(let user):
             return self.writeString("user+") + self.writeEncodedUser(user)
-        case .authUser:
+        case .authenticateUser:
             return self.writeString("authuser")
         case .anonymous:
             return self.writeString("anonymous")

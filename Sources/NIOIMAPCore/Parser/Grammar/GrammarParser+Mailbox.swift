@@ -49,9 +49,9 @@ extension GrammarParser {
             return .lsub(try self.parseMailboxList(buffer: &buffer, tracker: tracker))
         }
 
-        func parseMailboxData_esearch(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxData {
-            let response = try self.parseEsearchResponse(buffer: &buffer, tracker: tracker)
-            return .esearch(response)
+        func parseMailboxData_extendedSearch(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxData {
+            let response = try self.parseExtendedSearchResponse(buffer: &buffer, tracker: tracker)
+            return .extendedSearch(response)
         }
 
         func parseMailboxData_search(buffer: inout ByteBuffer, tracker: StackTracker) throws -> MailboxData {
@@ -106,7 +106,7 @@ extension GrammarParser {
             parseMailboxData_flags,
             parseMailboxData_list,
             parseMailboxData_lsub,
-            parseMailboxData_esearch,
+            parseMailboxData_extendedSearch,
             parseMailboxData_status,
             parseMailboxData_exists,
             parseMailboxData_recent,

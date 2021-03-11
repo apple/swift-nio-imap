@@ -16,17 +16,17 @@ import NIO
 @testable import NIOIMAPCore
 import XCTest
 
-class IUserInfo_Tests: EncodeTestClass {}
+class UserInfo_Tests: EncodeTestClass {}
 
 // MARK: - IMAP
 
-extension IUserInfo_Tests {
+extension UserInfo_Tests {
     func testEncode() {
-        let inputs: [(IUserInfo, String, UInt)] = [
-            (.init(encodedUser: .init(data: "test"), iAuth: .any), "test;AUTH=*", #line),
-            (.init(encodedUser: .init(data: "test"), iAuth: nil), "test", #line),
-            (.init(encodedUser: nil, iAuth: .any), ";AUTH=*", #line),
+        let inputs: [(UserInfo, String, UInt)] = [
+            (.init(encodedUser: .init(data: "test"), authenticationMechanism: .any), "test;AUTH=*", #line),
+            (.init(encodedUser: .init(data: "test"), authenticationMechanism: nil), "test", #line),
+            (.init(encodedUser: nil, authenticationMechanism: .any), ";AUTH=*", #line),
         ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeIUserInfo($0) })
+        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeUserInfo($0) })
     }
 }

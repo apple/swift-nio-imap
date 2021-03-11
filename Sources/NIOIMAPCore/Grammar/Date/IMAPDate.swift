@@ -16,7 +16,7 @@ import struct NIO.ByteBuffer
 
 /// Represents a date with the format `yyyy-MM-dd`.
 /// (RFC 3501)
-public struct Date: Hashable {
+public struct IMAPDate: Hashable {
     /// 4-digit year in the range (1900, 2500)
     public var year: Int
 
@@ -49,12 +49,12 @@ public struct Date: Hashable {
 // MARK: - IMAP
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeDate(_ date: Date) -> Int {
+    @discardableResult mutating func writeDate(_ date: IMAPDate) -> Int {
         self.writeString("\(date.day)-\(date.monthString)-\(date.year)")
     }
 }
 
-extension Date {
+extension IMAPDate {
     var monthString: String {
         switch month {
         case 1: return "Jan"

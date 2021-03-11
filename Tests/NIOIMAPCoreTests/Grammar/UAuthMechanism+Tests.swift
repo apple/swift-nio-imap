@@ -22,10 +22,10 @@ class UAuthMechanism_Tests: EncodeTestClass {}
 
 extension UAuthMechanism_Tests {
     func testEncode() {
-        let inputs: [(UAuthMechanism, String, UInt)] = [
+        let inputs: [(URLAuthenticationMechanism, String, UInt)] = [
             (.internal, "INTERNAL", #line),
             (.init("test"), "test", #line),
         ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeUAuthMechanism($0) })
+        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeURLAuthenticationMechanism($0) })
     }
 }

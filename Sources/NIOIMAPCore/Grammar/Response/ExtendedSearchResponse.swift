@@ -15,7 +15,7 @@
 import struct NIO.ByteBuffer
 
 /// Sent from a server in response to an extended search.
-public struct ESearchResponse: Equatable {
+public struct ExtendedSearchResponse: Equatable {
     /// Identifies the search that resulted in this response.
     public var correlator: SearchCorrelator?
 
@@ -25,7 +25,7 @@ public struct ESearchResponse: Equatable {
     /// Data returned from the search.
     public var returnData: [SearchReturnData]
 
-    /// Creates a new `ESearchResponse`.
+    /// Creates a new `ExtendedSearchResponse`.
     /// - parameter correlator: Identifies the search that resulted in this response. Defaults to `nil`.
     /// - parameter uid: `true` if this was a UID SEARCH, otherwise `false`.
     /// - parameter returnData: Data returned from the search.
@@ -39,7 +39,7 @@ public struct ESearchResponse: Equatable {
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeESearchResponse(_ response: ESearchResponse) -> Int {
+    @discardableResult mutating func writeExtendedSearchResponse(_ response: ExtendedSearchResponse) -> Int {
         self.writeString("ESEARCH") +
             self.writeIfExists(response.correlator) { (correlator) -> Int in
                 self.writeSearchCorrelator(correlator)

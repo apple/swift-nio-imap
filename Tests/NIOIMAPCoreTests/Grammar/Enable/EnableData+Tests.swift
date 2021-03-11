@@ -22,7 +22,7 @@ class EnableData_Tests: EncodeTestClass {
             ([], "ENABLED", #line),
             ([.enable], "ENABLED ENABLE", #line),
             ([.enable, .condStore], "ENABLED ENABLE CONDSTORE", #line),
-            ([.enable, .condStore, .auth(.init("some"))], "ENABLED ENABLE CONDSTORE AUTH=SOME", #line),
+            ([.enable, .condStore, .authenticate(.init("some"))], "ENABLED ENABLE CONDSTORE AUTH=SOME", #line),
         ]
 
         for (input, expectedString, line) in inputs {

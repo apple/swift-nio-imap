@@ -16,18 +16,18 @@ import NIO
 @testable import NIOIMAPCore
 import XCTest
 
-class IServer_Tests: EncodeTestClass {}
+class IMAPServer_Tests: EncodeTestClass {}
 
 // MARK: - IMAP
 
-extension IServer_Tests {
+extension IMAPServer_Tests {
     func testEncode() {
-        let inputs: [(IServer, String, UInt)] = [
+        let inputs: [(IMAPServer, String, UInt)] = [
             (.init(host: "localhost"), "localhost", #line),
-            (.init(userInfo: .init(encodedUser: nil, iAuth: .any), host: "localhost"), ";AUTH=*@localhost", #line),
+            (.init(userInfo: .init(encodedUser: nil, authenticationMechanism: .any), host: "localhost"), ";AUTH=*@localhost", #line),
             (.init(host: "localhost", port: 1234), "localhost:1234", #line),
-            (.init(userInfo: .init(encodedUser: nil, iAuth: .any), host: "localhost", port: 1234), ";AUTH=*@localhost:1234", #line),
+            (.init(userInfo: .init(encodedUser: nil, authenticationMechanism: .any), host: "localhost", port: 1234), ";AUTH=*@localhost:1234", #line),
         ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeIServer($0) })
+        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeIMAPServer($0) })
     }
 }

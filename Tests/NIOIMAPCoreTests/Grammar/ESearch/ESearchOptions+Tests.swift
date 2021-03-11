@@ -16,59 +16,59 @@ import NIO
 @testable import NIOIMAPCore
 import XCTest
 
-class ESearchOptions_Tests: EncodeTestClass {}
+class ExtendedSearchOptions_Tests: EncodeTestClass {}
 
 // MARK: - Encoding
 
-extension ESearchOptions_Tests {
+extension ExtendedSearchOptions_Tests {
     func testEncode() {
-        let inputs: [(ESearchOptions, String, UInt)] = [
+        let inputs: [(ExtendedSearchOptions, String, UInt)] = [
             (
-                ESearchOptions(key: .all),
+                ExtendedSearchOptions(key: .all),
                 " ALL",
                 #line
             ),
             (
-                ESearchOptions(key: .all, returnOptions: [.min]),
+                ExtendedSearchOptions(key: .all, returnOptions: [.min]),
                 " RETURN (MIN) ALL",
                 #line
             ),
             (
-                ESearchOptions(key: .all, charset: "Alien"),
+                ExtendedSearchOptions(key: .all, charset: "Alien"),
                 " CHARSET Alien ALL",
                 #line
             ),
             (
-                ESearchOptions(key: .all, sourceOptions: ESearchSourceOptions(sourceMailbox: [.inboxes])),
+                ExtendedSearchOptions(key: .all, sourceOptions: ExtendedSearchSourceOptions(sourceMailbox: [.inboxes])),
                 " IN (inboxes) ALL",
                 #line
             ),
             (
-                ESearchOptions(key: .all,
-                               charset: "Alien",
-                               sourceOptions: ESearchSourceOptions(sourceMailbox: [.inboxes])),
+                ExtendedSearchOptions(key: .all,
+                                      charset: "Alien",
+                                      sourceOptions: ExtendedSearchSourceOptions(sourceMailbox: [.inboxes])),
                 " IN (inboxes) CHARSET Alien ALL",
                 #line
             ),
             (
-                ESearchOptions(key: .all,
-                               returnOptions: [.min],
-                               sourceOptions: ESearchSourceOptions(sourceMailbox: [.inboxes])),
+                ExtendedSearchOptions(key: .all,
+                                      returnOptions: [.min],
+                                      sourceOptions: ExtendedSearchSourceOptions(sourceMailbox: [.inboxes])),
                 " IN (inboxes) RETURN (MIN) ALL",
                 #line
             ),
             (
-                ESearchOptions(key: .all,
-                               charset: "Alien",
-                               returnOptions: [.min]),
+                ExtendedSearchOptions(key: .all,
+                                      charset: "Alien",
+                                      returnOptions: [.min]),
                 " RETURN (MIN) CHARSET Alien ALL",
                 #line
             ),
             (
-                ESearchOptions(key: .all,
-                               charset: "Alien",
-                               returnOptions: [.min],
-                               sourceOptions: ESearchSourceOptions(sourceMailbox: [.inboxes])),
+                ExtendedSearchOptions(key: .all,
+                                      charset: "Alien",
+                                      returnOptions: [.min],
+                                      sourceOptions: ExtendedSearchSourceOptions(sourceMailbox: [.inboxes])),
                 " IN (inboxes) RETURN (MIN) CHARSET Alien ALL",
                 #line
             ),
@@ -76,7 +76,7 @@ extension ESearchOptions_Tests {
 
         for (test, expectedString, line) in inputs {
             self.testBuffer.clear()
-            let size = self.testBuffer.writeESearchOptions(test)
+            let size = self.testBuffer.writeExtendedSearchOptions(test)
             XCTAssertEqual(size, expectedString.utf8.count, line: line)
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }

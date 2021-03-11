@@ -33,7 +33,7 @@ public enum MessageData: Equatable {
     case vanishedEarlier(LastCommandSet<SequenceRangeSet>)
 
     /// An array of URLAUTH-authorized URLs
-    case genURLAuth([ByteBuffer])
+    case generateAuthorizedURL([ByteBuffer])
 
     /// One or more IMAP URLs
     case urlFetch([URLFetchData])
@@ -50,7 +50,7 @@ extension EncodeBuffer {
             return self.writeString("VANISHED ") + self.writeLastCommandSet(set)
         case .vanishedEarlier(let set):
             return self.writeString("VANISHED (EARLIER) ") + self.writeLastCommandSet(set)
-        case .genURLAuth(let array):
+        case .generateAuthorizedURL(let array):
             return self.writeString("GENURLAUTH") +
                 self.writeArray(array, prefix: " ", parenthesis: false) { data, buffer in
                     buffer.writeIMAPString(data)

@@ -17,17 +17,17 @@ import struct NIO.ByteBuffer
 /// A percent-encoded authentication type.
 public struct EncodedAuthenticationType: Equatable {
     /// The percent-encoded data.
-    public var authType: String
+    public var authenticationType: String
 
     /// Creates a new `EncodedAuthenticationType`.
     /// - parameter data: The percent-encoded string.
-    public init(authType: String) {
-        self.authType = authType
+    public init(authenticationType: String) {
+        self.authenticationType = authenticationType
     }
 }
 
 extension EncodeBuffer {
     @discardableResult mutating func writeEncodedAuthenticationType(_ type: EncodedAuthenticationType) -> Int {
-        self.writeString(type.authType)
+        self.writeString(type.authenticationType)
     }
 }

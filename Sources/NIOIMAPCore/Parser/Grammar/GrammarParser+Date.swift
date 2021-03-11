@@ -25,8 +25,8 @@ import struct NIO.ByteBufferView
 
 extension GrammarParser {
     // date            = date-text / DQUOTE date-text DQUOTE
-    static func parseDate(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Date {
-        func parseDateText_quoted(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Date {
+    static func parseDate(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IMAPDate {
+        func parseDateText_quoted(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IMAPDate {
             try composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
                 try fixedString("\"", buffer: &buffer, tracker: tracker)
                 let date = try self.parseDateText(buffer: &buffer, tracker: tracker)
@@ -69,21 +69,21 @@ extension GrammarParser {
         let string = try ParserLibrary.parseOneOrMoreCharacters(buffer: &buffer, tracker: tracker) { char -> Bool in
             isalnum(Int32(char)) != 0
         }
-        guard let month = Date.month(text: string.lowercased()) else {
+        guard let month = IMAPDate.month(text: string.lowercased()) else {
             throw ParserError(hint: "No month match for \(string)")
         }
         return month
     }
 
     // date-text       = date-day "-" date-month "-" date-year
-    static func parseDateText(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Date {
+    static func parseDateText(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IMAPDate {
         try composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             let day = try self.parseDateDay(buffer: &buffer, tracker: tracker)
             try fixedString("-", buffer: &buffer, tracker: tracker)
             let month = try self.parseDateMonth(buffer: &buffer, tracker: tracker)
             try fixedString("-", buffer: &buffer, tracker: tracker)
             let year = try self.parse4Digit(buffer: &buffer, tracker: tracker)
-            guard let date = Date(year: year, month: month, day: day) else {
+            guard let date = IMAPDate(year: year, month: month, day: day) else {
                 throw ParserError(hint: "Invalid date components \(year) \(month) \(day)")
             }
             return date

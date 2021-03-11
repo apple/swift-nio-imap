@@ -151,7 +151,7 @@ public enum Command: Equatable {
     case setMetadata(mailbox: MailboxName, entries: KeyValues<ByteBuffer, MetadataValue>)
 
     /// Performs an extended search as defined in RFC 4731.
-    case esearch(ESearchOptions)
+    case extendedsearch(ExtendedSearchOptions)
 
     /// When sent with no arguments: removes all mailbox access keys
     /// in the user's mailbox access key table, revoking all URLs currently
@@ -161,12 +161,12 @@ public enum Command: Equatable {
     /// access key table, replacing any previous mailbox access key (and
     /// revoking any URLs that were authorized with a URLAUTH using that key)
     /// in that table.
-    case resetKey(mailbox: MailboxName?, mechanisms: [UAuthMechanism])
+    case resetKey(mailbox: MailboxName?, mechanisms: [URLAuthenticationMechanism])
 
     /// Requests that the server generate a URLAUTH-
     /// authorized URL for each of the given URLs using the given URL
     /// authorization mechanism.
-    case genURLAuth([RumpURLAndMechanism])
+    case generateAuthorizedURL([RumpURLAndMechanism])
 
     /// Requests that the server return the text data
     /// associated with the specified IMAP URLs
@@ -260,12 +260,12 @@ extension CommandEncodeBuffer {
             return self.writeCommandKind_getMetadata(options: options, mailbox: mailbox, entries: entries)
         case .setMetadata(mailbox: let mailbox, entries: let entries):
             return self.writeCommandKind_setMetadata(mailbox: mailbox, entries: entries)
-        case .esearch(let options):
-            return self.writeCommandKind_esearch(options: options)
+        case .extendedsearch(let options):
+            return self.writeCommandKind_extendedsearch(options: options)
         case .resetKey(mailbox: let mailbox, mechanisms: let mechanisms):
             return self.writeCommandKind_resetKey(mailbox: mailbox, mechanisms: mechanisms)
-        case .genURLAuth(let mechanisms):
-            return self.writeCommandKind_genURLAuth(mechanisms: mechanisms)
+        case .generateAuthorizedURL(let mechanisms):
+            return self.writeCommandKind_generateAuthorizedURL(mechanisms: mechanisms)
         case .urlFetch(let urls):
             return self.writeCommandKind_urlFetch(urls: urls)
         }
@@ -278,21 +278,21 @@ extension CommandEncodeBuffer {
             }
     }
 
-    private mutating func writeCommandKind_genURLAuth(mechanisms: [RumpURLAndMechanism]) -> Int {
+    private mutating func writeCommandKind_generateAuthorizedURL(mechanisms: [RumpURLAndMechanism]) -> Int {
         self.buffer.writeString("GENURLAUTH") +
             self.buffer.writeArray(mechanisms, prefix: " ", parenthesis: false) { mechanism, buffer in
                 buffer.writeURLRumpMechanism(mechanism)
             }
     }
 
-    private mutating func writeCommandKind_resetKey(mailbox: MailboxName?, mechanisms: [UAuthMechanism]) -> Int {
+    private mutating func writeCommandKind_resetKey(mailbox: MailboxName?, mechanisms: [URLAuthenticationMechanism]) -> Int {
         self.buffer.writeString("RESETKEY") +
             self.buffer.writeIfExists(mailbox) { mailbox in
                 self.buffer.writeSpace() +
                     self.buffer.writeMailbox(mailbox) +
 
                     self.buffer.writeArray(mechanisms, prefix: " ", parenthesis: false) { mechanism, buffer in
-                        buffer.writeUAuthMechanism(mechanism)
+                        buffer.writeURLAuthenticationMechanism(mechanism)
                     }
             }
     }
@@ -594,9 +594,9 @@ extension CommandEncodeBuffer {
             }
     }
 
-    private mutating func writeCommandKind_esearch(options: ESearchOptions) -> Int {
+    private mutating func writeCommandKind_extendedsearch(options: ExtendedSearchOptions) -> Int {
         self.buffer.writeString("ESEARCH") +
-            self.buffer.writeESearchOptions(options)
+            self.buffer.writeExtendedSearchOptions(options)
     }
 }
 

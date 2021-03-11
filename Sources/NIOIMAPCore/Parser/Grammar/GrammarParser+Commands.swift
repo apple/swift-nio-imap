@@ -118,20 +118,20 @@ extension GrammarParser {
                 return .resetKey(mailbox: nil, mechanisms: [])
             }
 
-            let mechanisms = try ParserLibrary.parseZeroOrMore(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> UAuthMechanism in
+            let mechanisms = try ParserLibrary.parseZeroOrMore(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> URLAuthenticationMechanism in
                 try space(buffer: &buffer, tracker: tracker)
                 return try self.parseUAuthMechanism(buffer: &buffer, tracker: tracker)
             })
             return .resetKey(mailbox: mailbox, mechanisms: mechanisms)
         }
 
-        func parseCommandAuth_genURLAuth(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Command {
+        func parseCommandAuth_generateAuthorizedURL(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Command {
             try fixedString("GENURLAUTH", buffer: &buffer, tracker: tracker)
             let array = try ParserLibrary.parseOneOrMore(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> RumpURLAndMechanism in
                 try space(buffer: &buffer, tracker: tracker)
                 return try self.parseURLRumpMechanism(buffer: &buffer, tracker: tracker)
             })
-            return .genURLAuth(array)
+            return .generateAuthorizedURL(array)
         }
 
         func parseCommandAuth_urlFetch(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Command {
@@ -158,9 +158,9 @@ extension GrammarParser {
             self.parseNamespaceCommand,
             parseCommandAuth_getMetadata,
             parseCommandAuth_setMetadata,
-            parseEsearch,
+            parseExtendedSearch,
             parseCommandAuth_resetKey,
-            parseCommandAuth_genURLAuth,
+            parseCommandAuth_generateAuthorizedURL,
             parseCommandAuth_urlFetch,
         ], buffer: &buffer, tracker: tracker)
     }
@@ -215,7 +215,7 @@ extension GrammarParser {
             self.parseUid,
             self.parseSearch,
             self.parseMove,
-            self.parseEsearch,
+            self.parseExtendedSearch,
         ], buffer: &buffer, tracker: tracker)
     }
 }

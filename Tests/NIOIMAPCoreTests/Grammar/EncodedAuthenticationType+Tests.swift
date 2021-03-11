@@ -23,7 +23,7 @@ class EncodedAuthenticationType_Tests: EncodeTestClass {}
 extension EncodedAuthenticationType_Tests {
     func testEncode() {
         let inputs: [(EncodedAuthenticationType, String, UInt)] = [
-            (.init(authType: "hello"), "hello", #line),
+            (.init(authenticationType: "hello"), "hello", #line),
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeEncodedAuthenticationType($0) })
     }

@@ -13,32 +13,32 @@
 //===----------------------------------------------------------------------===//
 
 /// Matches an encoded user with a permitted authentication mechanism.
-public struct IUserInfo: Equatable {
+public struct UserInfo: Equatable {
     /// The percent-encoded user data.
     public var encodedUser: EncodedUser?
 
     /// The authentication mechanism.
-    public var iAuth: IAuth?
+    public var authenticationMechanism: IAuthentication?
 
-    /// Creates a new `IUserInfo`.
+    /// Creates a new `UserInfo`.
     /// - parameter encodedUser: The percent-encoded user data.
-    /// - parameter iAuth: The authentication mechanism.
-    public init(encodedUser: EncodedUser?, iAuth: IAuth?) {
-        precondition(encodedUser != nil || iAuth != nil, "Need one of `encodedUser` or `iAuth`")
+    /// - parameter authenticationMechanism: The authentication mechanism.
+    public init(encodedUser: EncodedUser?, authenticationMechanism: IAuthentication?) {
+        precondition(encodedUser != nil || authenticationMechanism != nil, "Need one of `encodedUser` or `iAuth`")
         self.encodedUser = encodedUser
-        self.iAuth = iAuth
+        self.authenticationMechanism = authenticationMechanism
     }
 }
 
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeIUserInfo(_ data: IUserInfo) -> Int {
+    @discardableResult mutating func writeUserInfo(_ data: UserInfo) -> Int {
         self.writeIfExists(data.encodedUser) { user in
             self.writeEncodedUser(user)
         } +
-            self.writeIfExists(data.iAuth) { iAuth in
-                self.writeIAuth(iAuth)
+            self.writeIfExists(data.authenticationMechanism) { iAuth in
+                self.writeIAuthentication(iAuth)
             }
     }
 }

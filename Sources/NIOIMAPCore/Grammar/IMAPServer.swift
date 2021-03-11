@@ -16,9 +16,9 @@ import struct NIO.ByteBuffer
 
 /// Represents an IMAP connection configuration that be used to connect
 /// to an IMAP server.
-public struct IServer: Equatable {
+public struct IMAPServer: Equatable {
     /// If present, authentication details for the server.
-    public var userInfo: IUserInfo?
+    public var userInfo: UserInfo?
 
     /// The hostname of the server.
     public var host: String
@@ -26,11 +26,11 @@ public struct IServer: Equatable {
     /// The host port of the server.
     public var port: Int?
 
-    /// Creates a new `IServer`.
+    /// Creates a new `IMAPServer`.
     /// - parameter userInfo: If present, authentication details for the server. Defaults to `nil`.
     /// - parameter host: The hostname of the server.
     /// - parameter port: The host post of the server. Defaults to `nil`.
-    public init(userInfo: IUserInfo? = nil, host: String, port: Int? = nil) {
+    public init(userInfo: UserInfo? = nil, host: String, port: Int? = nil) {
         self.userInfo = userInfo
         self.host = host
         self.port = port
@@ -40,9 +40,9 @@ public struct IServer: Equatable {
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeIServer(_ server: IServer) -> Int {
+    @discardableResult mutating func writeIMAPServer(_ server: IMAPServer) -> Int {
         self.writeIfExists(server.userInfo) { userInfo in
-            self.writeIUserInfo(userInfo) + self.writeString("@")
+            self.writeUserInfo(userInfo) + self.writeString("@")
         } +
             self.writeString("\(server.host)") +
             self.writeIfExists(server.port) { port in

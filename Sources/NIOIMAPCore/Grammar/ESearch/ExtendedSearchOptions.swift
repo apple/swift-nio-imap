@@ -15,7 +15,7 @@
 import struct NIO.ByteBuffer
 
 /// Options for performing an extended search as defined in RFC 6237
-public struct ESearchOptions: Equatable {
+public struct ExtendedSearchOptions: Equatable {
     /// The search criteria.
     public var key: SearchKey
 
@@ -26,9 +26,9 @@ public struct ESearchOptions: Equatable {
     public var returnOptions: [SearchReturnOption]
 
     /// Specifies where should be searched, for example a single mailbox.
-    public var sourceOptions: ESearchSourceOptions?
+    public var sourceOptions: ExtendedSearchSourceOptions?
 
-    /// Creates a new `ESearchOptions`
+    /// Creates a new `ExtendedSearchOptions`
     /// - parameter key: The search criteria.
     /// - parameter charset: The charset to use when performing the search.
     /// - parameter returnOptions: Return options to filter the data that is returned.
@@ -37,7 +37,7 @@ public struct ESearchOptions: Equatable {
         key: SearchKey,
         charset: String? = nil,
         returnOptions: [SearchReturnOption] = [],
-        sourceOptions: ESearchSourceOptions? = nil
+        sourceOptions: ExtendedSearchSourceOptions? = nil
     ) {
         self.key = key
         self.charset = charset
@@ -49,9 +49,9 @@ public struct ESearchOptions: Equatable {
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeESearchOptions(_ options: ESearchOptions) -> Int {
+    @discardableResult mutating func writeExtendedSearchOptions(_ options: ExtendedSearchOptions) -> Int {
         self.writeIfExists(options.sourceOptions) { (options) -> Int in
-            self.writeSpace() + self.writeESearchSourceOptions(options)
+            self.writeSpace() + self.writeExtendedSearchSourceOptions(options)
         } +
             self.writeIfExists(options.returnOptions) { (options) -> Int in
                 self.writeSearchReturnOptions(options)

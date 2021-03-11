@@ -16,27 +16,27 @@ import NIO
 @testable import NIOIMAPCore
 import XCTest
 
-class ESearchSourceOptions_Tests: EncodeTestClass {}
+class ExtendedSearchSourceOptions_Tests: EncodeTestClass {}
 
 // MARK: - Encoding
 
-extension ESearchSourceOptions_Tests {
+extension ExtendedSearchSourceOptions_Tests {
     func testEncode() {
-        let inputs: [(ESearchSourceOptions, String, UInt)] = [
+        let inputs: [(ExtendedSearchSourceOptions, String, UInt)] = [
             (
-                ESearchSourceOptions(sourceMailbox: [.inboxes])!,
+                ExtendedSearchSourceOptions(sourceMailbox: [.inboxes])!,
                 "IN (inboxes)",
                 #line
             ),
             (
-                ESearchSourceOptions(sourceMailbox: [.inboxes],
-                                     scopeOptions: ESearchScopeOptions(["test": nil]))!,
+                ExtendedSearchSourceOptions(sourceMailbox: [.inboxes],
+                                            scopeOptions: ExtendedSearchScopeOptions(["test": nil]))!,
                 "IN (inboxes (test))",
                 #line
             ),
             (
-                ESearchSourceOptions(sourceMailbox: [.inboxes, .personal],
-                                     scopeOptions: ESearchScopeOptions(["test": nil]))!,
+                ExtendedSearchSourceOptions(sourceMailbox: [.inboxes, .personal],
+                                            scopeOptions: ExtendedSearchScopeOptions(["test": nil]))!,
                 "IN (inboxes personal (test))",
                 #line
             ),
@@ -44,7 +44,7 @@ extension ESearchSourceOptions_Tests {
 
         for (test, expectedString, line) in inputs {
             self.testBuffer.clear()
-            let size = self.testBuffer.writeESearchSourceOptions(test)
+            let size = self.testBuffer.writeExtendedSearchSourceOptions(test)
             XCTAssertEqual(size, expectedString.utf8.count, line: line)
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }

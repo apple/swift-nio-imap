@@ -18,7 +18,7 @@ public enum ICommand: Equatable {
     case messageList(IMessageList)
 
     /// Performs a `.fetch` command.
-    case messagePart(part: IMessagePart, urlAuth: IURLAuth?)
+    case messagePart(part: IMessagePart, authenticatedURL: IAuthenticatedURL?)
 }
 
 // MARK: - Encoding
@@ -28,10 +28,10 @@ extension EncodeBuffer {
         switch ref {
         case .messageList(let list):
             return self.writeIMessageList(list)
-        case .messagePart(part: let part, urlAuth: let urlAuth):
+        case .messagePart(part: let part, authenticatedURL: let authenticatedURL):
             return self.writeIMessagePart(part) +
-                self.writeIfExists(urlAuth) { urlAuth in
-                    self.writeIURLAuth(urlAuth)
+                self.writeIfExists(authenticatedURL) { authenticatedURL in
+                    self.writeIAuthenticatedURL(authenticatedURL)
                 }
         }
     }

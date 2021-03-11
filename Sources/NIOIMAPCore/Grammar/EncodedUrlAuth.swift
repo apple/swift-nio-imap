@@ -15,7 +15,7 @@
 import struct NIO.ByteBuffer
 
 /// A percent-encoded URL auth.
-public struct EncodedURLAuth: Equatable {
+public struct EncodedAuthenticatedURL: Equatable {
     /// The percent-encoded data.
     public var data: String
 
@@ -27,7 +27,7 @@ public struct EncodedURLAuth: Equatable {
 }
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeEncodedURLAuth(_ data: EncodedURLAuth) -> Int {
+    @discardableResult mutating func writeEncodedAuthenticationURL(_ data: EncodedAuthenticatedURL) -> Int {
         self.writeString(data.data)
     }
 }

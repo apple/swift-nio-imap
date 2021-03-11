@@ -22,9 +22,9 @@ class AuthIMAPURLFull_Tests: EncodeTestClass {}
 
 extension AuthIMAPURLFull_Tests {
     func testEncoding() {
-        let inputs: [(AuthIMAPURLFull, String, UInt)] = [
+        let inputs: [(FullAuthenticatedURL, String, UInt)] = [
             (
-                .init(imapURL: .init(server: .init(host: "localhost"), messagePart: .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: try! .init(uid: 123))), urlAuth: .init(auth: .init(access: .anonymous), verifier: .init(uAuthMechanism: .internal, encodedURLAuth: .init(data: "data")))),
+                .init(imapURL: .init(server: .init(host: "localhost"), messagePart: .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: try! .init(uid: 123))), authenticatedURL: .init(authenticatedURL: .init(access: .anonymous), verifier: .init(urlAuthMechanism: .internal, encodedAuthenticationURL: .init(data: "data")))),
                 "imap://localhost/test/;UID=123;URLAUTH=anonymous:INTERNAL:data",
                 #line
             ),

@@ -15,7 +15,7 @@
 import struct NIO.ByteBuffer
 
 /// A group of addresses.
-public struct AddressGroup: Equatable {
+public struct EmailAddressGroup: Equatable {
     /// The name of the group.
     public var groupName: ByteBuffer
 
@@ -23,13 +23,13 @@ public struct AddressGroup: Equatable {
     public var sourceRoot: ByteBuffer?
 
     /// Any child groups or addresses.
-    public var children: [AddressListElement]
+    public var children: [EmailAddressListElement]
 
-    /// Creates a new `AddressGroup`.
+    /// Creates a new `EmailAddressGroup`.
     /// - parameter groupName: The name of the group.
     /// - parameter sourceRoot: The group's source-root.
     /// - parameter children: Any child groups or addresses.
-    public init(groupName: ByteBuffer, sourceRoot: ByteBuffer?, children: [AddressListElement]) {
+    public init(groupName: ByteBuffer, sourceRoot: ByteBuffer?, children: [EmailAddressListElement]) {
         self.groupName = groupName
         self.sourceRoot = sourceRoot
         self.children = children
@@ -37,19 +37,19 @@ public struct AddressGroup: Equatable {
 }
 
 /// Used inside `Envelope` to distinguish between either a single address, or a group of addresses.
-public indirect enum AddressListElement: Equatable {
+public indirect enum EmailAddressListElement: Equatable {
     /// A single address with no children.
-    case address(Address)
+    case singleAddress(EmailAddress)
 
     /// A collection of potentially nested groups and addresses.
-    case group(AddressGroup)
+    case group(EmailAddressGroup)
 }
 
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeAddressGroup(_ group: AddressGroup) -> Int {
-        self.writeAddress(.init(
+    @discardableResult mutating func writeEmailAddressGroup(_ group: EmailAddressGroup) -> Int {
+        self.writeEmailAddress(.init(
             personName: nil,
             sourceRoot: group.sourceRoot,
             mailbox: group.groupName,
@@ -57,9 +57,9 @@ extension EncodeBuffer {
         )
         ) +
             self.writeArray(group.children, prefix: "", separator: "", suffix: "", parenthesis: false) { (child, self) in
-                self.writeAddressOrGroup(child)
+                self.writeEmailAddressOrGroup(child)
             } +
-            self.writeAddress(.init(
+            self.writeEmailAddress(.init(
                 personName: nil,
                 sourceRoot: group.sourceRoot,
                 mailbox: nil,
@@ -68,12 +68,12 @@ extension EncodeBuffer {
             )
     }
 
-    @discardableResult mutating func writeAddressOrGroup(_ aog: AddressListElement) -> Int {
+    @discardableResult mutating func writeEmailAddressOrGroup(_ aog: EmailAddressListElement) -> Int {
         switch aog {
-        case .address(let address):
-            return self.writeAddress(address)
+        case .singleAddress(let address):
+            return self.writeEmailAddress(address)
         case .group(let group):
-            return self.writeAddressGroup(group)
+            return self.writeEmailAddressGroup(group)
         }
     }
 }

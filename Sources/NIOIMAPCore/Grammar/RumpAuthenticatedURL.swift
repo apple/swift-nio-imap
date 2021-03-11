@@ -15,27 +15,27 @@
 import struct NIO.ByteBuffer
 
 /// Associates an `AuthIMAPURL` with a rump URL to use for authorization verification is required.
-public struct AuthIMAPURLRump: Equatable {
+public struct RumpAuthenticatedURL: Equatable {
     /// An IMAP URL pointing to a message.
-    public var imapURL: AuthIMAPURL
+    public var authenticatedURL: AuthenticatedURL
 
     /// A rump URL used to validate access if needed.
-    public var authRump: IURLAuthRump
+    public var authenticatedURLRump: IRumpAuthenticatedURL
 
     /// Creates a new `AuthIMAPURLRump`.
     /// - parameter imapURL: An IMAP URL pointing to a message.
-    /// - parameter authRump: A rump URL used to validate access if needed.
-    public init(imapURL: AuthIMAPURL, authRump: IURLAuthRump) {
-        self.imapURL = imapURL
-        self.authRump = authRump
+    /// - parameter authenticatedURLRump: A rump URL used to validate access if needed.
+    public init(authenticatedURL: AuthenticatedURL, authenticatedURLRump: IRumpAuthenticatedURL) {
+        self.authenticatedURL = authenticatedURL
+        self.authenticatedURLRump = authenticatedURLRump
     }
 }
 
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeAuthIMAPURLRump(_ data: AuthIMAPURLRump) -> Int {
-        self.writeAuthIMAPURL(data.imapURL) +
-            self.writeIURLAuthRump(data.authRump)
+    @discardableResult mutating func writeAuthIMAPURLRump(_ data: RumpAuthenticatedURL) -> Int {
+        self.writeAuthenticatedURL(data.authenticatedURL) +
+            self.writeIRumpAuthenticatedURL(data.authenticatedURLRump)
     }
 }
