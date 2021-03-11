@@ -438,61 +438,6 @@ extension ParserUnitTests {
     }
 }
 
-// MARK: - parseAuthIMAPURL
-
-extension ParserUnitTests {
-    func testParseAuthIMAPURL() {
-        self.iterateTests(
-            testFunction: GrammarParser.parseAuthIMAPURL,
-            validInputs: [
-                ("imap://localhost/test/;UID=123", " ", .init(server: .init(host: "localhost"), messagePart: .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: try! .init(uid: 123))), #line),
-            ],
-            parserErrorInputs: [],
-            incompleteMessageInputs: []
-        )
-    }
-}
-
-// MARK: - parseAuthIMAPURLFull
-
-extension ParserUnitTests {
-    func testParseAuthIMAPURLFull() {
-        self.iterateTests(
-            testFunction: GrammarParser.parseAuthIMAPURLFull,
-            validInputs: [
-                (
-                    "imap://localhost/test/;UID=123;URLAUTH=anonymous:INTERNAL:01234567890123456789012345678901",
-                    " ",
-                    .init(imapURL: .init(server: .init(host: "localhost"), messagePart: .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: try! .init(uid: 123))), urlAuth: .init(auth: .init(access: .anonymous), verifier: .init(uAuthMechanism: .internal, encodedURLAuth: .init(data: "01234567890123456789012345678901")))),
-                    #line
-                ),
-            ],
-            parserErrorInputs: [],
-            incompleteMessageInputs: []
-        )
-    }
-}
-
-// MARK: - parseAuthIMAPURLRump
-
-extension ParserUnitTests {
-    func testParseAuthIMAPURLRump() {
-        self.iterateTests(
-            testFunction: GrammarParser.parseAuthIMAPURLRump,
-            validInputs: [
-                (
-                    "imap://localhost/test/;UID=123;URLAUTH=anonymous",
-                    " ",
-                    .init(imapURL: .init(server: .init(host: "localhost"), messagePart: .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: try! .init(uid: 123))), authRump: .init(access: .anonymous)),
-                    #line
-                ),
-            ],
-            parserErrorInputs: [],
-            incompleteMessageInputs: []
-        )
-    }
-}
-
 // MARK: - parseBase64
 
 extension ParserUnitTests {
@@ -877,24 +822,6 @@ extension ParserUnitTests {
     }
 }
 
-// MARK: - IAbsolutePath
-
-extension ParserUnitTests {
-    func testParseIAbsolutePath() {
-        self.iterateTests(
-            testFunction: GrammarParser.parseIAbsolutePath,
-            validInputs: [
-                ("/", " ", .init(command: nil), #line),
-                ("/test", " ", .init(command: .messageList(.init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test"))))), #line),
-            ],
-            parserErrorInputs: [
-                ],
-            incompleteMessageInputs: [
-                ]
-        )
-    }
-}
-
 // MARK: - ICommand
 
 extension ParserUnitTests {
@@ -1089,23 +1016,6 @@ extension ParserUnitTests {
             testFunction: GrammarParser.parseEncodedMailbox,
             validInputs: [
                 ("hello%FF", " ", .init(mailbox: "hello%FF"), #line),
-            ],
-            parserErrorInputs: [
-                ],
-            incompleteMessageInputs: [
-                ]
-        )
-    }
-}
-
-// MARK: - parseINetworkPath
-
-extension ParserUnitTests {
-    func testParseINetworkPath() {
-        self.iterateTests(
-            testFunction: GrammarParser.parseINetworkPath,
-            validInputs: [
-                ("//localhost/", " ", .init(server: .init(host: "localhost"), query: .init(command: nil)), #line),
             ],
             parserErrorInputs: [
                 ],
@@ -1636,26 +1546,6 @@ extension ParserUnitTests {
             validInputs: [
                 ("url NIL", " ", .init(url: "url", data: nil), #line),
                 ("url \"data\"", " ", .init(url: "url", data: "data"), #line),
-            ],
-            parserErrorInputs: [
-                ],
-            incompleteMessageInputs: [
-                ]
-        )
-    }
-}
-
-// MARK: - parseIMapURLRel
-
-extension ParserUnitTests {
-    func testParseIMAPURLRel() {
-        self.iterateTests(
-            testFunction: GrammarParser.parseRelativeIMAPURL,
-            validInputs: [
-                ("/test", " ", .absolutePath(.init(command: .messageList(.init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")))))), #line),
-                ("//localhost/", " ", .networkPath(.init(server: .init(host: "localhost"), query: .init(command: nil))), #line),
-                ("test", " ", .relativePath(.list(.init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test"))))), #line),
-                ("", " ", .empty, #line),
             ],
             parserErrorInputs: [
                 ],

@@ -73,31 +73,6 @@ extension GrammarParser {
         ], buffer: &buffer, tracker: tracker)
     }
 
-    static func parseAuthIMAPURL(buffer: inout ByteBuffer, tracker: StackTracker) throws -> AuthIMAPURL {
-        try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> AuthIMAPURL in
-            try fixedString("imap://", buffer: &buffer, tracker: tracker)
-            let server = try self.parseIServer(buffer: &buffer, tracker: tracker)
-            try fixedString("/", buffer: &buffer, tracker: tracker)
-            let messagePart = try self.parseIMessagePart(buffer: &buffer, tracker: tracker)
-            return .init(server: server, messagePart: messagePart)
-        }
-    }
-
-    static func parseAuthIMAPURLFull(buffer: inout ByteBuffer, tracker: StackTracker) throws -> AuthIMAPURLFull {
-        try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> AuthIMAPURLFull in
-            let imapURL = try self.parseAuthIMAPURL(buffer: &buffer, tracker: tracker)
-            let urlAuth = try self.parseIURLAuth(buffer: &buffer, tracker: tracker)
-            return .init(imapURL: imapURL, urlAuth: urlAuth)
-        }
-    }
-
-    static func parseAuthIMAPURLRump(buffer: inout ByteBuffer, tracker: StackTracker) throws -> AuthIMAPURLRump {
-        try composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> AuthIMAPURLRump in
-            let imapURL = try self.parseAuthIMAPURL(buffer: &buffer, tracker: tracker)
-            let authRump = try self.parseIURLAuthRump(buffer: &buffer, tracker: tracker)
-            return .init(imapURL: imapURL, authRump: authRump)
-        }
-    }
 
     // authenticate  = "AUTHENTICATE" SP auth-type [SP (base64 / "=")] *(CRLF base64)
     static func parseAuthenticate(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Command {
@@ -670,24 +645,6 @@ extension GrammarParser {
             return try parseIDParamsList(buffer: &buffer, tracker: tracker)
         }
     }
-
-    static func parseINetworkPath(buffer: inout ByteBuffer, tracker: StackTracker) throws -> INetworkPath {
-        try composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> INetworkPath in
-            try fixedString("//", buffer: &buffer, tracker: tracker)
-            let server = try self.parseIServer(buffer: &buffer, tracker: tracker)
-            let query = try self.parseIPathQuery(buffer: &buffer, tracker: tracker)
-            return .init(server: server, query: query)
-        }
-    }
-
-    static func parseIAbsolutePath(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IAbsolutePath {
-        try composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> IAbsolutePath in
-            try fixedString("/", buffer: &buffer, tracker: tracker)
-            let command = try optional(buffer: &buffer, tracker: tracker, parser: self.parseICommand)
-            return .init(command: command)
-        }
-    }
-
     static func parseIAuth(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IAuth {
         func parseIAuth_any(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IAuth {
             try fixedString("*", buffer: &buffer, tracker: tracker)
@@ -895,30 +852,6 @@ extension GrammarParser {
         }
     }
 
-    static func parseRelativeIMAPURL(buffer: inout ByteBuffer, tracker: StackTracker) throws -> RelativeIMAPURL {
-        func parseRelativeIMAPURL_absolute(buffer: inout ByteBuffer, tracker: StackTracker) throws -> RelativeIMAPURL {
-            .absolutePath(try self.parseIAbsolutePath(buffer: &buffer, tracker: tracker))
-        }
-
-        func parseRelativeIMAPURL_network(buffer: inout ByteBuffer, tracker: StackTracker) throws -> RelativeIMAPURL {
-            .networkPath(try self.parseINetworkPath(buffer: &buffer, tracker: tracker))
-        }
-
-        func parseRelativeIMAPURL_relative(buffer: inout ByteBuffer, tracker: StackTracker) throws -> RelativeIMAPURL {
-            .relativePath(try self.parseIRelativePath(buffer: &buffer, tracker: tracker))
-        }
-
-        func parseRelativeIMAPURL_empty(buffer: inout ByteBuffer, tracker: StackTracker) throws -> RelativeIMAPURL {
-            .empty
-        }
-
-        return try oneOf([
-            parseRelativeIMAPURL_network,
-            parseRelativeIMAPURL_absolute,
-            parseRelativeIMAPURL_relative,
-            parseRelativeIMAPURL_empty,
-        ], buffer: &buffer, tracker: tracker)
-    }
 
     static func parseIRelativePath(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IRelativePath {
         func parseIRelativePath_list(buffer: inout ByteBuffer, tracker: StackTracker) throws -> IRelativePath {
