@@ -23,7 +23,7 @@ class ResponsePayload_Tests: EncodeTestClass {}
 extension ResponsePayload_Tests {
     func testEncode() {
         let inputs: [(ResponsePayload, String, UInt)] = [
-            (.capabilityData([.enable]), "CAPABILITY IMAP4 IMAP4rev1 ENABLE", #line),
+            (.capabilityData([.enable]), "CAPABILITY ENABLE", #line),
             (.conditionalState(.ok(.init(code: nil, text: "test"))), "OK test", #line),
             (.conditionalState(.bye(.init(code: nil, text: "test"))), "BYE test", #line),
             (.mailboxData(.exists(1)), "1 EXISTS", #line),

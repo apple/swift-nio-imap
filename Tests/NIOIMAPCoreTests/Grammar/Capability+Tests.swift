@@ -96,9 +96,8 @@ extension Capability_Tests {
 
     func testEncode_multiple() {
         let tests: [([Capability], String, UInt)] = [
-            ([], "CAPABILITY IMAP4 IMAP4rev1", #line),
-            ([.condStore], "CAPABILITY IMAP4 IMAP4rev1 CONDSTORE", #line),
-            ([.condStore, .enable, .filters], "CAPABILITY IMAP4 IMAP4rev1 CONDSTORE ENABLE FILTERS", #line),
+            ([.condStore], "CAPABILITY CONDSTORE", #line),
+            ([.condStore, .enable, .filters], "CAPABILITY CONDSTORE ENABLE FILTERS", #line),
         ]
 
         for (data, expectedString, line) in tests {
