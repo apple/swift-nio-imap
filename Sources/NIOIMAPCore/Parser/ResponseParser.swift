@@ -48,6 +48,11 @@ public struct ResponseParser: Parser {
     /// - returns: `nil` if there wasn't enough data, otherwise a `ResponseOrContinuationRequest` if parsing was successful.
     /// - throws: A `ParserError` with a desription as to why parsing failed.
     public mutating func parseResponseStream(buffer inputBytes: inout ByteBuffer) throws -> ResponseOrContinuationRequest? {
+        
+        guard inputBytes.readableBytes > 0 else {
+            return nil
+        }
+        
         let tracker = StackTracker.makeNewDefaultLimitStackTracker
         var parseBuffer = ParseBuffer(inputBytes)
         defer {
