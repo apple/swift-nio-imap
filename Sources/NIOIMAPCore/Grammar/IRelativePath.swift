@@ -23,7 +23,7 @@ public enum IRelativePath: Equatable {
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeIRelativePath(_ path: IRelativePath) -> Int {
         switch path {
         case .list(let list):

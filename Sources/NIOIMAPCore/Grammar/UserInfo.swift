@@ -32,7 +32,7 @@ public struct UserInfo: Equatable {
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeUserInfo(_ data: UserInfo) -> Int {
         self.writeIfExists(data.encodedUser) { user in
             self.writeEncodedUser(user)

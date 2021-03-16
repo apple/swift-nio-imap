@@ -68,7 +68,7 @@ extension MailboxData {
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeMailboxDataSearchSort(_ data: MailboxData.SearchSort?) -> Int {
         self.writeString("SEARCH") +
             self.writeIfExists(data) { (data) -> Int in

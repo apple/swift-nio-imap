@@ -106,7 +106,7 @@ extension UID: Strideable {
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeUID(_ num: UID) -> Int {
         if num == .max {
             return self.writeString("*")

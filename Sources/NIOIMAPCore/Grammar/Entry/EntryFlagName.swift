@@ -25,7 +25,7 @@ public struct EntryFlagName: Hashable {
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeEntryFlagName(_ name: EntryFlagName) -> Int {
         self.writeString("\"/flags/") + self.writeAttributeFlag(name.flag) + self.writeString("\"")
     }

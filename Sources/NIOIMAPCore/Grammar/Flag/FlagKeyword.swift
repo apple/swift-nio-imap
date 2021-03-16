@@ -106,7 +106,7 @@ extension Flag.Keyword: ExpressibleByStringLiteral {
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeFlagKeyword(_ keyword: Flag.Keyword) -> Int {
         self.writeString(keyword.rawValue)
     }

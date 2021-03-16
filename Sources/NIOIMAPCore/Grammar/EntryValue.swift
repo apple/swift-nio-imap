@@ -14,7 +14,7 @@
 
 import struct NIO.ByteBuffer
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeEntry(_ entry: KeyValue<ByteBuffer, MetadataValue>) -> Int {
         self.writeIMAPString(entry.key) +
             self.writeSpace() +

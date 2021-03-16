@@ -39,7 +39,7 @@ public struct SearchCorrelator: Equatable {
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeSearchCorrelator(_ correlator: SearchCorrelator) -> Int {
         self.writeString(" (TAG ") +
             self.writeTagString(correlator.tag) +

@@ -31,7 +31,7 @@ public struct INetworkPath: Equatable {
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeINetworkPath(_ path: INetworkPath) -> Int {
         self.writeString("//") +
             self.writeIMAPServer(path.server) +

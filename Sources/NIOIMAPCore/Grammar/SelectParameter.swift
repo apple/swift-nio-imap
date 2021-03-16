@@ -54,7 +54,7 @@ public enum SelectParameter: Equatable {
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeSelectParameters(_ params: [SelectParameter]) -> Int {
         if params.isEmpty {
             return 0

@@ -268,7 +268,7 @@ extension SectionSpecifier.Kind: Comparable {
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeSectionBinary(_ binary: SectionSpecifier.Part) -> Int {
         self.writeString("[") +
             self.writeSectionPart(binary) +

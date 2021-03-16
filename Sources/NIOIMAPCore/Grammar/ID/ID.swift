@@ -16,7 +16,7 @@ import struct NIO.ByteBuffer
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeIDParameters(_ values: KeyValues<String, ByteBuffer?>) -> Int {
         guard values.count > 0 else {
             return self.writeNil()

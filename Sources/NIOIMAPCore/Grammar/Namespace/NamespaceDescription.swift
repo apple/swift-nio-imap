@@ -39,7 +39,7 @@ public struct NamespaceDescription: Equatable {
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeNamespaceDescription(_ description: NamespaceDescription) -> Int {
         var size = 0
         size += self.writeString("(")

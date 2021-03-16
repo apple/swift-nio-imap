@@ -158,7 +158,7 @@ extension InternalDate {
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeInternalDate(_ date: InternalDate) -> Int {
         let p = date.makeParts()
 
@@ -188,7 +188,7 @@ extension EncodeBuffer {
     }
 }
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult fileprivate mutating func writeTime(_ time: InternalDate.Time) -> Int {
         let hour = time.hour < 10 ? "0\(time.hour)" : "\(time.hour)"
         let minute = time.minute < 10 ? "0\(time.minute)" : "\(time.minute)"
@@ -197,7 +197,7 @@ extension EncodeBuffer {
     }
 }
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult fileprivate mutating func writeTimezone(_ timezone: InternalDate.TimeZone) -> Int {
         let value = abs(timezone.minutes)
         let minutes = value % 60

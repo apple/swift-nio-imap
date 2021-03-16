@@ -38,7 +38,7 @@ public struct AppendOptions: Equatable {
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeAppendOptions(_ options: AppendOptions) -> Int {
         self.write(if: options.flagList.count >= 1) {
             self.writeSpace() + self.writeFlags(options.flagList)

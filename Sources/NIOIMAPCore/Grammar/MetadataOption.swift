@@ -27,7 +27,7 @@ public enum MetadataOption: Equatable {
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeMetadataOption(_ option: MetadataOption) -> Int {
         switch option {
         case .maxSize(let num):

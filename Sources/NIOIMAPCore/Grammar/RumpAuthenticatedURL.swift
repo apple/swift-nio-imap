@@ -33,7 +33,7 @@ public struct RumpAuthenticatedURL: Equatable {
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeAuthIMAPURLRump(_ data: RumpAuthenticatedURL) -> Int {
         self.writeAuthenticatedURL(data.authenticatedURL) +
             self.writeIRumpAuthenticatedURL(data.authenticatedURLRump)

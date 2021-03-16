@@ -43,7 +43,7 @@ extension Response_Tests {
             let size = test.reduce(into: 0) { (size, response) in
                 size += encoder.writeFetchResponse(response)
             }
-            self.testBuffer = EncodeBuffer.serverEncodeBuffer(buffer: encoder.bytes, options: ResponseEncodingOptions())
+            self.testBuffer = _EncodeBuffer.serverEncodeBuffer(buffer: encoder.bytes, options: ResponseEncodingOptions())
             XCTAssertEqual(size, expectedString.utf8.count, line: line)
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }

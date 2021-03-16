@@ -26,7 +26,7 @@ public enum StoreModifier: Equatable {
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeStoreModifier(_ val: StoreModifier) -> Int {
         switch val {
         case .unchangedSince(let unchangedSince):

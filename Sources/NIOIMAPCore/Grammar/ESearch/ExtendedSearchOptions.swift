@@ -48,7 +48,7 @@ public struct ExtendedSearchOptions: Equatable {
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeExtendedSearchOptions(_ options: ExtendedSearchOptions) -> Int {
         self.writeIfExists(options.sourceOptions) { (options) -> Int in
             self.writeSpace() + self.writeExtendedSearchSourceOptions(options)

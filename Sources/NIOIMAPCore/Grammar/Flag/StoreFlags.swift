@@ -64,7 +64,7 @@ public struct StoreFlags: Hashable {
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeStoreAttributeFlags(_ flags: StoreFlags) -> Int {
         let silentString = flags.silent ? ".SILENT" : ""
         return

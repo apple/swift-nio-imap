@@ -84,7 +84,7 @@ extension MailboxInfo {
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeMailboxInfo(_ list: MailboxInfo) -> Int {
         self.writeString("(") +
             self.writeIfExists(list.attributes) { (flags) -> Int in

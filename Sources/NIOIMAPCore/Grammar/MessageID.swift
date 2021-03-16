@@ -34,7 +34,7 @@ extension MessageID: ExpressibleByStringLiteral {
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeMessageID(_ id: MessageID) -> Int {
         self.writeIMAPString(id.rawValue)
     }

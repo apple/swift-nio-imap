@@ -33,7 +33,7 @@ public struct SortData: Equatable {
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeSortData(_ data: SortData?) -> Int {
         self.writeString("SORT") +
             self.writeIfExists(data) { (data) -> Int in

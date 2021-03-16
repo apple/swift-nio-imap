@@ -17,7 +17,7 @@ import struct NIO.ByteBuffer
 /// Used to buffer commands before writing to the network.
 public struct CommandEncodeBuffer {
     /// The underlying buffer containing data to be written.
-    public var buffer: EncodeBuffer
+    public var buffer: _EncodeBuffer
 
     /// Tracks whether we have encoded at least one catenate element.
     internal var encodedAtLeastOneCatenateElement = false

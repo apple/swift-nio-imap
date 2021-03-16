@@ -220,7 +220,7 @@ extension MailboxName: CustomDebugStringConvertible {
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeMailbox(_ mailbox: MailboxName) -> Int {
         self.writeIMAPString(mailbox.bytes)
     }

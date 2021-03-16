@@ -29,7 +29,7 @@ public enum IMessageOrPartial: Equatable {
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeIMessageOrPartial(_ data: IMessageOrPartial) -> Int {
         switch data {
         case .refUidSectionPartial(ref: let ref, uid: let uid, section: let section, partial: let partial):

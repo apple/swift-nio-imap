@@ -41,7 +41,7 @@ public enum MessageData: Equatable {
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeMessageData(_ data: MessageData) -> Int {
         switch data {
         case .expunge(let number):

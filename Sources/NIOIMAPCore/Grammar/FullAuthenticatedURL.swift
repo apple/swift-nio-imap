@@ -33,7 +33,7 @@ public struct FullAuthenticatedURL: Equatable {
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeAuthIMAPURLFull(_ data: FullAuthenticatedURL) -> Int {
         self.writeAuthenticatedURL(data.imapURL) +
             self.writeIAuthenticatedURL(data.authenticatedURL)

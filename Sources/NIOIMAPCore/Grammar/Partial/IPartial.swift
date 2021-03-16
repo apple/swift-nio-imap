@@ -26,7 +26,7 @@ public struct IPartial: Equatable {
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeIPartial(_ data: IPartial) -> Int {
         self.writeString("/;PARTIAL=") +
             self.writePartialRange(data.range)

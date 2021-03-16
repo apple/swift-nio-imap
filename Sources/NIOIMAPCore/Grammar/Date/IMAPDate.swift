@@ -48,7 +48,7 @@ public struct IMAPDate: Hashable {
 
 // MARK: - IMAP
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeDate(_ date: IMAPDate) -> Int {
         self.writeString("\(date.day)-\(date.monthString)-\(date.year)")
     }

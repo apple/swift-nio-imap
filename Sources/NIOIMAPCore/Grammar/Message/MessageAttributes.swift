@@ -58,7 +58,7 @@ public enum MessageAttribute: Equatable {
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeMessageAttributes(_ atts: [MessageAttribute]) -> Int {
         self.writeArray(atts) { (element, self) in
             self.writeMessageAttribute(element)

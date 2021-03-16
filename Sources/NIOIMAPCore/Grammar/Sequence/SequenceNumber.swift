@@ -93,7 +93,7 @@ extension SequenceNumber: Strideable {
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeSequenceNumber(_ num: SequenceNumber) -> Int {
         self.writeString("\(num.rawValue)")
     }

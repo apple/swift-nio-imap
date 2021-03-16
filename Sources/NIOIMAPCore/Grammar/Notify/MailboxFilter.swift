@@ -47,7 +47,7 @@ public enum MailboxFilter: Equatable {
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeMailboxFilter(_ filter: MailboxFilter) -> Int {
         switch filter {
         case .inboxes:

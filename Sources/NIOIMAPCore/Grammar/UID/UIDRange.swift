@@ -74,7 +74,7 @@ extension UIDRange {
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeUIDRange(_ range: UIDRange) -> Int {
         self.writeUID(range.range.lowerBound) +
             self.write(if: range.range.lowerBound < range.range.upperBound) {

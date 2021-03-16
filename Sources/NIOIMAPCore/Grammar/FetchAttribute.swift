@@ -83,7 +83,7 @@ extension Array where Element == FetchAttribute {
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeFetchAttributeList(_ atts: [FetchAttribute]) -> Int {
         // FAST -> (FLAGS INTERNALDATE RFC822.SIZE)
         // ALL -> (FLAGS INTERNALDATE RFC822.SIZE ENVELOPE)

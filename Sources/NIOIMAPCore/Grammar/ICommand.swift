@@ -23,7 +23,7 @@ public enum ICommand: Equatable {
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeICommand(_ ref: ICommand) -> Int {
         switch ref {
         case .messageList(let list):

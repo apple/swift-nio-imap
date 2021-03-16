@@ -84,7 +84,7 @@ public struct FullTime: Equatable {
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeFullDateTime(_ data: FullDateTime) -> Int {
         self.writeFullDate(data.date) +
             self.writeString("T") +
