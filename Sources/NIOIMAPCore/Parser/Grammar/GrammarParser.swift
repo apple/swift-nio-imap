@@ -597,8 +597,7 @@ extension GrammarParser {
                 }
                 return output
             } ?? []
-            try ParserLibrary.optional(buffer: &buffer, tracker: tracker, parser: ParserLibrary.space)
-            try ParserLibrary.fixedString(")", buffer: &buffer, tracker: tracker)
+            try ParserLibrary.fixedString(")", allowLeadingSpaces: true, buffer: &buffer, tracker: tracker)
             return flags
         }
     }
