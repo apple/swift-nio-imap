@@ -231,7 +231,7 @@ extension ParserLibrary {
             } else {
                 throw ParserError(hint: "case sensitively looking for \(needle) found \(actual)")
             }
-            
+
             if allowLeadingSpaces {
                 try self.optional(buffer: &buffer, tracker: tracker, parser: self.space)
             }
