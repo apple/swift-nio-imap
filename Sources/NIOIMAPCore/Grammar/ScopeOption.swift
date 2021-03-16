@@ -36,6 +36,6 @@ public struct ScopeOption: Equatable {
 
 extension _EncodeBuffer {
     @discardableResult mutating func writeScopeOption(_ opt: ScopeOption) -> Int {
-        self.writeString("DEPTH \(opt._backing.rawValue)")
+        self._writeString("DEPTH \(opt._backing.rawValue)")
     }
 }

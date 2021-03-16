@@ -28,6 +28,6 @@ public struct EncodedUser: Equatable {
 
 extension _EncodeBuffer {
     @discardableResult mutating func writeEncodedUser(_ user: EncodedUser) -> Int {
-        self.writeString(user.data)
+        self._writeString(user.data)
     }
 }

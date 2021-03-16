@@ -59,6 +59,6 @@ extension _EncodeBuffer {
             self.writeNString(fields.contentDescription) +
             self.writeSpace() +
             self.writeBodyEncoding(fields.encoding) +
-            self.writeString(" \(fields.octetCount)")
+            self._writeString(" \(fields.octetCount)")
     }
 }

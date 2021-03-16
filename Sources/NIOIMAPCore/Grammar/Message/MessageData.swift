@@ -45,18 +45,18 @@ extension _EncodeBuffer {
     @discardableResult mutating func writeMessageData(_ data: MessageData) -> Int {
         switch data {
         case .expunge(let number):
-            return self.writeSequenceNumber(number) + self.writeString(" EXPUNGE")
+            return self.writeSequenceNumber(number) + self._writeString(" EXPUNGE")
         case .vanished(let set):
-            return self.writeString("VANISHED ") + self.writeLastCommandSet(set)
+            return self._writeString("VANISHED ") + self.writeLastCommandSet(set)
         case .vanishedEarlier(let set):
-            return self.writeString("VANISHED (EARLIER) ") + self.writeLastCommandSet(set)
+            return self._writeString("VANISHED (EARLIER) ") + self.writeLastCommandSet(set)
         case .generateAuthorizedURL(let array):
-            return self.writeString("GENURLAUTH") +
+            return self._writeString("GENURLAUTH") +
                 self.writeArray(array, prefix: " ", parenthesis: false) { data, buffer in
                     buffer.writeIMAPString(data)
                 }
         case .urlFetch(let array):
-            return self.writeString("URLFETCH") +
+            return self._writeString("URLFETCH") +
                 self.writeArray(array) { data, buffer in
                     buffer.writeURLFetchData(data)
                 }
@@ -64,6 +64,6 @@ extension _EncodeBuffer {
     }
 
     @discardableResult mutating func writeMessageDataEnd(_: MessageData) -> Int {
-        self.writeString(")")
+        self._writeString(")")
     }
 }

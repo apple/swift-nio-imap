@@ -35,15 +35,15 @@ public struct SortData: Equatable {
 
 extension _EncodeBuffer {
     @discardableResult mutating func writeSortData(_ data: SortData?) -> Int {
-        self.writeString("SORT") +
+        self._writeString("SORT") +
             self.writeIfExists(data) { (data) -> Int in
                 self.writeArray(data.identifiers, prefix: " ", parenthesis: false) { (element, buffer) -> Int in
-                    buffer.writeString("\(element)")
+                    buffer._writeString("\(element)")
                 } +
                     self.writeSpace() +
-                    self.writeString("(MODSEQ ") +
+                    self._writeString("(MODSEQ ") +
                     self.writeModificationSequenceValue(data.modificationSequence) +
-                    self.writeString(")")
+                    self._writeString(")")
             }
     }
 }

@@ -31,7 +31,7 @@ extension _EncodeBuffer {
         case .flag(let flag):
             return self.writeFlag(flag)
         case .wildcard:
-            return self.writeString(#"\*"#)
+            return self._writeString(#"\*"#)
         }
     }
 

@@ -29,7 +29,7 @@ extension _EncodeBuffer {
     @discardableResult mutating func writeGmailLabel(_ label: GmailLabel) -> Int {
         if label.stringValue.getInteger(at: label.stringValue.readerIndex) == UInt8(ascii: "\\") {
             var stringValue = label.stringValue
-            return self.writeBuffer(&stringValue)
+            return self._writeBuffer(&stringValue)
         } else {
             return self.writeIMAPString(label.stringValue)
         }

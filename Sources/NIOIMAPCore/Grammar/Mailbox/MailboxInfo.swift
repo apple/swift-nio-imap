@@ -86,20 +86,20 @@ extension MailboxInfo {
 
 extension _EncodeBuffer {
     @discardableResult mutating func writeMailboxInfo(_ list: MailboxInfo) -> Int {
-        self.writeString("(") +
+        self._writeString("(") +
             self.writeIfExists(list.attributes) { (flags) -> Int in
                 self.writeMailboxListFlags(flags)
             } +
-            self.writeString(") ") +
+            self._writeString(") ") +
             self.writeIfExists(list.path.pathSeparator) { (char) -> Int in
-                self.writeString("\(char) ")
+                self._writeString("\(char) ")
             } +
             self.writeMailbox(list.path.name)
     }
 
     @discardableResult mutating func writeMailboxListFlags(_ flags: [MailboxInfo.Attribute]) -> Int {
         self.writeArray(flags, parenthesis: false) { (element, self) in
-            self.writeString(element._backing)
+            self._writeString(element._backing)
         }
     }
 }

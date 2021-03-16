@@ -90,13 +90,13 @@ extension _EncodeBuffer {
         // FULL -> (FLAGS INTERNALDATE RFC822.SIZE ENVELOPE BODY)
         if atts.contains(.flags), atts.contains(.internalDate) {
             if atts.count == 3, atts.contains(.rfc822Size) {
-                return self.writeString("FAST")
+                return self._writeString("FAST")
             }
             if atts.count == 4, atts.contains(.rfc822Size), atts.contains(.envelope) {
-                return self.writeString("ALL")
+                return self._writeString("ALL")
             }
             if atts.count == 5, atts.contains(.rfc822Size), atts.contains(.envelope), atts.contains(.bodyStructure(extensions: false)) {
-                return self.writeString("FULL")
+                return self._writeString("FULL")
             }
         }
 
@@ -134,7 +134,7 @@ extension _EncodeBuffer {
         case .binarySize(let section):
             return self.writeFetchAttribute_binarySize(section)
         case .modificationSequence:
-            return self.writeString("MODSEQ")
+            return self._writeString("MODSEQ")
         case .gmailMessageID:
             return self.writeFetchAttribute_gmailMessageID()
         case .gmailThreadID:
@@ -145,43 +145,43 @@ extension _EncodeBuffer {
     }
 
     @discardableResult mutating func writeFetchAttribute_envelope() -> Int {
-        self.writeString("ENVELOPE")
+        self._writeString("ENVELOPE")
     }
 
     @discardableResult mutating func writeFetchAttribute_flags() -> Int {
-        self.writeString("FLAGS")
+        self._writeString("FLAGS")
     }
 
     @discardableResult mutating func writeFetchAttribute_internalDate() -> Int {
-        self.writeString("INTERNALDATE")
+        self._writeString("INTERNALDATE")
     }
 
     @discardableResult mutating func writeFetchAttribute_uid() -> Int {
-        self.writeString("UID")
+        self._writeString("UID")
     }
 
     @discardableResult mutating func writeFetchAttribute_rfc822() -> Int {
-        self.writeString("RFC822")
+        self._writeString("RFC822")
     }
 
     @discardableResult mutating func writeFetchAttribute_rfc822Size() -> Int {
-        self.writeString("RFC822.SIZE")
+        self._writeString("RFC822.SIZE")
     }
 
     @discardableResult mutating func writeFetchAttribute_rfc822Header() -> Int {
-        self.writeString("RFC822.HEADER")
+        self._writeString("RFC822.HEADER")
     }
 
     @discardableResult mutating func writeFetchAttribute_rfc822Text() -> Int {
-        self.writeString("RFC822.TEXT")
+        self._writeString("RFC822.TEXT")
     }
 
     @discardableResult mutating func writeFetchAttribute_bodyStructure(extensions: Bool) -> Int {
-        self.writeString(extensions ? "BODYSTRUCTURE" : "BODY")
+        self._writeString(extensions ? "BODYSTRUCTURE" : "BODY")
     }
 
     @discardableResult mutating func writeFetchAttribute_body(peek: Bool, section: SectionSpecifier?, partial: ClosedRange<UInt32>?) -> Int {
-        self.writeString(peek ? "BODY.PEEK" : "BODY") +
+        self._writeString(peek ? "BODY.PEEK" : "BODY") +
             self.writeSection(section) +
             self.writeIfExists(partial) { (partial) -> Int in
                 self.writePartial(partial)
@@ -189,14 +189,14 @@ extension _EncodeBuffer {
     }
 
     @discardableResult mutating func writeFetchAttribute_binarySize(_ section: SectionSpecifier.Part) -> Int {
-        self.writeString("BINARY.SIZE") +
+        self._writeString("BINARY.SIZE") +
             self.writeSectionBinary(section)
     }
 
     @discardableResult mutating func writeFetchAttribute_binary(peek: Bool, section: SectionSpecifier.Part, partial: ClosedRange<UInt32>?) -> Int {
-        self.writeString("BINARY") +
+        self._writeString("BINARY") +
             self.write(if: peek) {
-                self.writeString(".PEEK")
+                self._writeString(".PEEK")
             } +
             self.writeSectionBinary(section) +
             self.writeIfExists(partial) { (partial) -> Int in
@@ -205,14 +205,14 @@ extension _EncodeBuffer {
     }
 
     @discardableResult mutating func writeFetchAttribute_gmailMessageID() -> Int {
-        self.writeString("X-GM-MSGID")
+        self._writeString("X-GM-MSGID")
     }
 
     @discardableResult mutating func writeFetchAttribute_gmailThreadID() -> Int {
-        self.writeString("X-GM-THRID")
+        self._writeString("X-GM-THRID")
     }
 
     @discardableResult mutating func writeFetchAttribute_gmailLabels() -> Int {
-        self.writeString("X-GM-LABELS")
+        self._writeString("X-GM-LABELS")
     }
 }

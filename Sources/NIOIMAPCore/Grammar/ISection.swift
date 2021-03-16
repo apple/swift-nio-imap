@@ -30,10 +30,10 @@ public struct ISection: Equatable {
 
 extension _EncodeBuffer {
     @discardableResult mutating func writeISection(_ section: ISection) -> Int {
-        self.writeString("/;SECTION=\(section.encodedSection.section)")
+        self._writeString("/;SECTION=\(section.encodedSection.section)")
     }
 
     @discardableResult mutating func writeISectionOnly(_ section: ISection) -> Int {
-        self.writeString(";SECTION=\(section.encodedSection.section)")
+        self._writeString(";SECTION=\(section.encodedSection.section)")
     }
 }

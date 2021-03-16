@@ -272,331 +272,331 @@ extension CommandEncodeBuffer {
     }
 
     private mutating func writeCommandKind_urlFetch(urls: [ByteBuffer]) -> Int {
-        self.buffer.writeString("URLFETCH") +
-            self.buffer.writeArray(urls, prefix: " ", parenthesis: false) { url, buffer in
-                buffer.writeBytes(url.readableBytesView)
+        self._buffer._writeString("URLFETCH") +
+            self._buffer.writeArray(urls, prefix: " ", parenthesis: false) { url, buffer in
+                buffer._writeBytes(url.readableBytesView)
             }
     }
 
     private mutating func writeCommandKind_generateAuthorizedURL(mechanisms: [RumpURLAndMechanism]) -> Int {
-        self.buffer.writeString("GENURLAUTH") +
-            self.buffer.writeArray(mechanisms, prefix: " ", parenthesis: false) { mechanism, buffer in
+        self._buffer._writeString("GENURLAUTH") +
+            self._buffer.writeArray(mechanisms, prefix: " ", parenthesis: false) { mechanism, buffer in
                 buffer.writeURLRumpMechanism(mechanism)
             }
     }
 
     private mutating func writeCommandKind_resetKey(mailbox: MailboxName?, mechanisms: [URLAuthenticationMechanism]) -> Int {
-        self.buffer.writeString("RESETKEY") +
-            self.buffer.writeIfExists(mailbox) { mailbox in
-                self.buffer.writeSpace() +
-                    self.buffer.writeMailbox(mailbox) +
+        self._buffer._writeString("RESETKEY") +
+            self._buffer.writeIfExists(mailbox) { mailbox in
+                self._buffer.writeSpace() +
+                    self._buffer.writeMailbox(mailbox) +
 
-                    self.buffer.writeArray(mechanisms, prefix: " ", parenthesis: false) { mechanism, buffer in
+                    self._buffer.writeArray(mechanisms, prefix: " ", parenthesis: false) { mechanism, buffer in
                         buffer.writeURLAuthenticationMechanism(mechanism)
                     }
             }
     }
 
     private mutating func writeCommandKind_getMetadata(options: [MetadataOption], mailbox: MailboxName, entries: [ByteBuffer]) -> Int {
-        self.buffer.writeString("GETMETADATA") +
-            self.buffer.write(if: options.count >= 1) {
-                buffer.writeSpace() + buffer.writeMetadataOptions(options)
+        self._buffer._writeString("GETMETADATA") +
+            self._buffer.write(if: options.count >= 1) {
+                _buffer.writeSpace() + _buffer.writeMetadataOptions(options)
             } +
-            self.buffer.writeSpace() +
-            self.buffer.writeMailbox(mailbox) +
-            self.buffer.writeSpace() +
-            self.buffer.writeEntries(entries)
+            self._buffer.writeSpace() +
+            self._buffer.writeMailbox(mailbox) +
+            self._buffer.writeSpace() +
+            self._buffer.writeEntries(entries)
     }
 
     private mutating func writeCommandKind_setMetadata(mailbox: MailboxName, entries: KeyValues<ByteBuffer, MetadataValue>) -> Int {
-        self.buffer.writeString("SETMETADATA ") +
-            self.buffer.writeMailbox(mailbox) +
-            self.buffer.writeSpace() +
-            self.buffer.writeEntryValues(entries)
+        self._buffer._writeString("SETMETADATA ") +
+            self._buffer.writeMailbox(mailbox) +
+            self._buffer.writeSpace() +
+            self._buffer.writeEntryValues(entries)
     }
 
     private mutating func writeCommandKind_capability() -> Int {
-        self.buffer.writeString("CAPABILITY")
+        self._buffer._writeString("CAPABILITY")
     }
 
     private mutating func writeCommandKind_logout() -> Int {
-        self.buffer.writeString("LOGOUT")
+        self._buffer._writeString("LOGOUT")
     }
 
     private mutating func writeCommandKind_noop() -> Int {
-        self.buffer.writeString("NOOP")
+        self._buffer._writeString("NOOP")
     }
 
     private mutating func writeCommandKind_create(mailbox: MailboxName, parameters: [CreateParameter]) -> Int {
-        self.buffer.writeString("CREATE ") +
-            self.buffer.writeMailbox(mailbox) +
-            self.buffer.write(if: parameters.count > 0) {
-                self.buffer.writeSpace() +
-                    self.buffer.writeArray(parameters, separator: "", parenthesis: true) { (param, buffer) -> Int in
+        self._buffer._writeString("CREATE ") +
+            self._buffer.writeMailbox(mailbox) +
+            self._buffer.write(if: parameters.count > 0) {
+                self._buffer.writeSpace() +
+                    self._buffer.writeArray(parameters, separator: "", parenthesis: true) { (param, buffer) -> Int in
                         buffer.writeCreateParameter(param)
                     }
             }
     }
 
     private mutating func writeCommandKind_delete(mailbox: MailboxName) -> Int {
-        self.buffer.writeString("DELETE ") +
-            self.buffer.writeMailbox(mailbox)
+        self._buffer._writeString("DELETE ") +
+            self._buffer.writeMailbox(mailbox)
     }
 
     private mutating func writeCommandKind_examine(mailbox: MailboxName, parameters: KeyValues<String, ParameterValue?>) -> Int {
-        self.buffer.writeString("EXAMINE ") +
-            self.buffer.writeMailbox(mailbox) +
-            self.buffer.writeParameters(parameters)
+        self._buffer._writeString("EXAMINE ") +
+            self._buffer.writeMailbox(mailbox) +
+            self._buffer.writeParameters(parameters)
     }
 
     private mutating func writeCommandKind_list(selectOptions: ListSelectOptions?, mailbox: MailboxName, mailboxPatterns: MailboxPatterns, returnOptions: [ReturnOption]) -> Int {
-        self.buffer.writeString("LIST") +
-            self.buffer.writeIfExists(selectOptions) { (options) -> Int in
-                self.buffer.writeSpace() +
-                    self.buffer.writeListSelectOptions(options)
+        self._buffer._writeString("LIST") +
+            self._buffer.writeIfExists(selectOptions) { (options) -> Int in
+                self._buffer.writeSpace() +
+                    self._buffer.writeListSelectOptions(options)
             } +
-            self.buffer.writeSpace() +
-            self.buffer.writeMailbox(mailbox) +
-            self.buffer.writeSpace() +
-            self.buffer.writeMailboxPatterns(mailboxPatterns) +
-            self.buffer.write(if: returnOptions.count >= 1) {
-                self.buffer.writeSpace() +
-                    self.buffer.writeListReturnOptions(returnOptions)
+            self._buffer.writeSpace() +
+            self._buffer.writeMailbox(mailbox) +
+            self._buffer.writeSpace() +
+            self._buffer.writeMailboxPatterns(mailboxPatterns) +
+            self._buffer.write(if: returnOptions.count >= 1) {
+                self._buffer.writeSpace() +
+                    self._buffer.writeListReturnOptions(returnOptions)
             }
     }
 
     private mutating func writeCommandKind_listIndependent(selectOptions: [ListSelectIndependentOption], mailbox: MailboxName, mailboxPatterns: MailboxPatterns, returnOptions: [ReturnOption]) -> Int {
-        self.buffer.writeString("LIST") +
-            self.buffer.write(if: selectOptions.count >= 1) {
-                self.buffer.writeArray(selectOptions) { element, buffer in
+        self._buffer._writeString("LIST") +
+            self._buffer.write(if: selectOptions.count >= 1) {
+                self._buffer.writeArray(selectOptions) { element, buffer in
                     buffer.writeListSelectIndependentOption(element)
                 }
             } +
-            self.buffer.writeSpace() +
-            self.buffer.writeMailbox(mailbox) +
-            self.buffer.writeSpace() +
-            self.buffer.writeMailboxPatterns(mailboxPatterns) +
-            self.buffer.write(if: returnOptions.count >= 1) {
-                self.buffer.writeSpace() +
-                    self.buffer.writeListReturnOptions(returnOptions)
+            self._buffer.writeSpace() +
+            self._buffer.writeMailbox(mailbox) +
+            self._buffer.writeSpace() +
+            self._buffer.writeMailboxPatterns(mailboxPatterns) +
+            self._buffer.write(if: returnOptions.count >= 1) {
+                self._buffer.writeSpace() +
+                    self._buffer.writeListReturnOptions(returnOptions)
             }
     }
 
     private mutating func writeCommandKind_lsub(mailbox: MailboxName, listMailbox: ByteBuffer) -> Int {
-        self.buffer.writeString("LSUB ") +
-            self.buffer.writeMailbox(mailbox) +
-            self.buffer.writeSpace() +
-            self.buffer.writeIMAPString(listMailbox)
+        self._buffer._writeString("LSUB ") +
+            self._buffer.writeMailbox(mailbox) +
+            self._buffer.writeSpace() +
+            self._buffer.writeIMAPString(listMailbox)
     }
 
     private mutating func writeCommandKind_rename(from: MailboxName, to: MailboxName, parameters: KeyValues<String, ParameterValue?>) -> Int {
-        self.buffer.writeString("RENAME ") +
-            self.buffer.writeMailbox(from) +
-            self.buffer.writeSpace() +
-            self.buffer.writeMailbox(to) +
-            self.buffer.writeIfExists(parameters) { (params) -> Int in
-                self.buffer.writeParameters(params)
+        self._buffer._writeString("RENAME ") +
+            self._buffer.writeMailbox(from) +
+            self._buffer.writeSpace() +
+            self._buffer.writeMailbox(to) +
+            self._buffer.writeIfExists(parameters) { (params) -> Int in
+                self._buffer.writeParameters(params)
             }
     }
 
     private mutating func writeCommandKind_select(mailbox: MailboxName, params: [SelectParameter]) -> Int {
-        self.buffer.writeString("SELECT ") +
-            self.buffer.writeMailbox(mailbox) +
-            self.buffer.writeSelectParameters(params)
+        self._buffer._writeString("SELECT ") +
+            self._buffer.writeMailbox(mailbox) +
+            self._buffer.writeSelectParameters(params)
     }
 
     private mutating func writeCommandKind_status(mailbox: MailboxName, attributes: [MailboxAttribute]) -> Int {
-        self.buffer.writeString("STATUS ") +
-            self.buffer.writeMailbox(mailbox) +
-            self.buffer.writeString(" (") +
-            self.buffer.writeMailboxAttributes(attributes) +
-            self.buffer.writeString(")")
+        self._buffer._writeString("STATUS ") +
+            self._buffer.writeMailbox(mailbox) +
+            self._buffer._writeString(" (") +
+            self._buffer.writeMailboxAttributes(attributes) +
+            self._buffer._writeString(")")
     }
 
     private mutating func writeCommandKind_subscribe(mailbox: MailboxName) -> Int {
-        self.buffer.writeString("SUBSCRIBE ") +
-            self.buffer.writeMailbox(mailbox)
+        self._buffer._writeString("SUBSCRIBE ") +
+            self._buffer.writeMailbox(mailbox)
     }
 
     private mutating func writeCommandKind_unsubscribe(mailbox: MailboxName) -> Int {
-        self.buffer.writeString("UNSUBSCRIBE ") +
-            self.buffer.writeMailbox(mailbox)
+        self._buffer._writeString("UNSUBSCRIBE ") +
+            self._buffer.writeMailbox(mailbox)
     }
 
     private mutating func writeCommandKind_authenticate(method: String, initialClientResponse: InitialClientResponse?) -> Int {
-        self.buffer.writeString("AUTHENTICATE \(method)") +
-            self.buffer.writeIfExists(initialClientResponse) { resp in
-                self.buffer.writeSpace() +
-                    self.buffer.writeInitialClientResponse(resp)
+        self._buffer._writeString("AUTHENTICATE \(method)") +
+            self._buffer.writeIfExists(initialClientResponse) { resp in
+                self._buffer.writeSpace() +
+                    self._buffer.writeInitialClientResponse(resp)
             }
     }
 
     private mutating func writeCommandKind_login(userID: String, password: String) -> Int {
-        self.buffer.writeString("LOGIN ") +
-            self.buffer.writeIMAPString(userID) +
-            self.buffer.writeSpace() +
-            self.buffer.writeIMAPString(password)
+        self._buffer._writeString("LOGIN ") +
+            self._buffer.writeIMAPString(userID) +
+            self._buffer.writeSpace() +
+            self._buffer.writeIMAPString(password)
     }
 
     private mutating func writeCommandKind_startTLS() -> Int {
-        self.buffer.writeString("STARTTLS")
+        self._buffer._writeString("STARTTLS")
     }
 
     private mutating func writeCommandKind_check() -> Int {
-        self.buffer.writeString("CHECK")
+        self._buffer._writeString("CHECK")
     }
 
     private mutating func writeCommandKind_close() -> Int {
-        self.buffer.writeString("CLOSE")
+        self._buffer._writeString("CLOSE")
     }
 
     private mutating func writeCommandKind_expunge() -> Int {
-        self.buffer.writeString("EXPUNGE")
+        self._buffer._writeString("EXPUNGE")
     }
 
     private mutating func writeCommandKind_uidExpunge(_ set: LastCommandSet<UIDSetNonEmpty>) -> Int {
-        self.buffer.writeString("EXPUNGE ") +
-            self.buffer.writeLastCommandSet(set)
+        self._buffer._writeString("EXPUNGE ") +
+            self._buffer.writeLastCommandSet(set)
     }
 
     private mutating func writeCommandKind_unselect() -> Int {
-        self.buffer.writeString("UNSELECT")
+        self._buffer._writeString("UNSELECT")
     }
 
     private mutating func writeCommandKind_idleStart() -> Int {
-        self.buffer.writeString("IDLE")
+        self._buffer._writeString("IDLE")
     }
 
     private mutating func writeCommandKind_idleFinish() -> Int {
-        self.buffer.writeString("DONE")
+        self._buffer._writeString("DONE")
     }
 
     private mutating func writeCommandKind_enable(capabilities: [Capability]) -> Int {
-        self.buffer.writeString("ENABLE ") +
-            self.buffer.writeArray(capabilities, parenthesis: false) { (element, self) in
+        self._buffer._writeString("ENABLE ") +
+            self._buffer.writeArray(capabilities, parenthesis: false) { (element, self) in
                 self.writeCapability(element)
             }
     }
 
     private mutating func writeCommandKind_copy(set: LastCommandSet<SequenceRangeSet>, mailbox: MailboxName) -> Int {
-        self.buffer.writeString("COPY ") +
-            self.buffer.writeLastCommandSet(set) +
-            self.buffer.writeSpace() +
-            self.buffer.writeMailbox(mailbox)
+        self._buffer._writeString("COPY ") +
+            self._buffer.writeLastCommandSet(set) +
+            self._buffer.writeSpace() +
+            self._buffer.writeMailbox(mailbox)
     }
 
     private mutating func writeCommandKind_uidCopy(set: LastCommandSet<UIDSetNonEmpty>, mailbox: MailboxName) -> Int {
-        self.buffer.writeString("UID COPY ") +
-            self.buffer.writeLastCommandSet(set) +
-            self.buffer.writeSpace() +
-            self.buffer.writeMailbox(mailbox)
+        self._buffer._writeString("UID COPY ") +
+            self._buffer.writeLastCommandSet(set) +
+            self._buffer.writeSpace() +
+            self._buffer.writeMailbox(mailbox)
     }
 
     private mutating func writeCommandKind_fetch(set: LastCommandSet<SequenceRangeSet>, atts: [FetchAttribute], modifiers: KeyValues<String, ParameterValue?>) -> Int {
-        self.buffer.writeString("FETCH ") +
-            self.buffer.writeLastCommandSet(set) +
-            self.buffer.writeSpace() +
-            self.buffer.writeFetchAttributeList(atts) +
-            self.buffer.writeIfExists(modifiers) { (modifiers) -> Int in
-                self.buffer.writeParameters(modifiers)
+        self._buffer._writeString("FETCH ") +
+            self._buffer.writeLastCommandSet(set) +
+            self._buffer.writeSpace() +
+            self._buffer.writeFetchAttributeList(atts) +
+            self._buffer.writeIfExists(modifiers) { (modifiers) -> Int in
+                self._buffer.writeParameters(modifiers)
             }
     }
 
     private mutating func writeCommandKind_uidFetch(set: LastCommandSet<UIDSetNonEmpty>, atts: [FetchAttribute], modifiers: KeyValues<String, ParameterValue?>) -> Int {
-        self.buffer.writeString("UID FETCH ") +
-            self.buffer.writeLastCommandSet(set) +
-            self.buffer.writeSpace() +
-            self.buffer.writeFetchAttributeList(atts) +
-            self.buffer.writeIfExists(modifiers) { (modifiers) -> Int in
-                self.buffer.writeParameters(modifiers)
+        self._buffer._writeString("UID FETCH ") +
+            self._buffer.writeLastCommandSet(set) +
+            self._buffer.writeSpace() +
+            self._buffer.writeFetchAttributeList(atts) +
+            self._buffer.writeIfExists(modifiers) { (modifiers) -> Int in
+                self._buffer.writeParameters(modifiers)
             }
     }
 
     private mutating func writeCommandKind_store(set: LastCommandSet<SequenceRangeSet>, modifiers: [StoreModifier], flags: StoreFlags) -> Int {
-        self.buffer.writeString("STORE ") +
-            self.buffer.writeLastCommandSet(set) +
-            self.buffer.write(if: modifiers.count >= 1) {
-                self.buffer.writeSpace() +
-                    self.buffer.writeArray(modifiers) { (element, buffer) -> Int in
+        self._buffer._writeString("STORE ") +
+            self._buffer.writeLastCommandSet(set) +
+            self._buffer.write(if: modifiers.count >= 1) {
+                self._buffer.writeSpace() +
+                    self._buffer.writeArray(modifiers) { (element, buffer) -> Int in
                         buffer.writeStoreModifier(element)
                     }
             } +
-            self.buffer.writeSpace() +
-            self.buffer.writeStoreAttributeFlags(flags)
+            self._buffer.writeSpace() +
+            self._buffer.writeStoreAttributeFlags(flags)
     }
 
     private mutating func writeCommandKind_uidStore(set: LastCommandSet<UIDSetNonEmpty>, modifiers: KeyValues<String, ParameterValue?>, flags: StoreFlags) -> Int {
-        self.buffer.writeString("UID STORE ") +
-            self.buffer.writeLastCommandSet(set) +
-            self.buffer.write(if: modifiers.count >= 1) {
-                self.buffer.writeParameters(modifiers)
+        self._buffer._writeString("UID STORE ") +
+            self._buffer.writeLastCommandSet(set) +
+            self._buffer.write(if: modifiers.count >= 1) {
+                self._buffer.writeParameters(modifiers)
             } +
-            self.buffer.writeSpace() +
-            self.buffer.writeStoreAttributeFlags(flags)
+            self._buffer.writeSpace() +
+            self._buffer.writeStoreAttributeFlags(flags)
     }
 
     private mutating func writeCommandKind_search(key: SearchKey, charset: String? = nil, returnOptions: [SearchReturnOption] = []) -> Int {
-        self.buffer.writeString("SEARCH") +
-            self.buffer.writeIfExists(returnOptions) { (options) -> Int in
-                self.buffer.writeSearchReturnOptions(options)
+        self._buffer._writeString("SEARCH") +
+            self._buffer.writeIfExists(returnOptions) { (options) -> Int in
+                self._buffer.writeSearchReturnOptions(options)
             } +
-            self.buffer.writeSpace() +
-            self.buffer.writeIfExists(charset) { (charset) -> Int in
-                self.buffer.writeString("CHARSET \(charset) ")
+            self._buffer.writeSpace() +
+            self._buffer.writeIfExists(charset) { (charset) -> Int in
+                self._buffer._writeString("CHARSET \(charset) ")
             } +
-            self.buffer.writeSearchKey(key)
+            self._buffer.writeSearchKey(key)
     }
 
     private mutating func writeCommandKind_uidSearch(key: SearchKey, charset: String? = nil, returnOptions: [SearchReturnOption] = []) -> Int {
-        self.buffer.writeString("UID ") +
+        self._buffer._writeString("UID ") +
             self.writeCommandKind_search(key: key, charset: charset, returnOptions: returnOptions)
     }
 
     private mutating func writeCommandKind_move(set: LastCommandSet<SequenceRangeSet>, mailbox: MailboxName) -> Int {
-        self.buffer.writeString("MOVE ") +
-            self.buffer.writeLastCommandSet(set) +
-            self.buffer.writeSpace() +
-            self.buffer.writeMailbox(mailbox)
+        self._buffer._writeString("MOVE ") +
+            self._buffer.writeLastCommandSet(set) +
+            self._buffer.writeSpace() +
+            self._buffer.writeMailbox(mailbox)
     }
 
     private mutating func writeCommandKind_uidMove(set: LastCommandSet<UIDSetNonEmpty>, mailbox: MailboxName) -> Int {
-        self.buffer.writeString("UID MOVE ") +
-            self.buffer.writeLastCommandSet(set) +
-            self.buffer.writeSpace() +
-            self.buffer.writeMailbox(mailbox)
+        self._buffer._writeString("UID MOVE ") +
+            self._buffer.writeLastCommandSet(set) +
+            self._buffer.writeSpace() +
+            self._buffer.writeMailbox(mailbox)
     }
 
     private mutating func writeCommandKind_namespace() -> Int {
-        self.buffer.writeNamespaceCommand()
+        self._buffer.writeNamespaceCommand()
     }
 
     @discardableResult mutating func writeCommandKind_id(_ id: KeyValues<String, ByteBuffer?>) -> Int {
-        self.buffer.writeString("ID ") +
-            self.buffer.writeIDParameters(id)
+        self._buffer._writeString("ID ") +
+            self._buffer.writeIDParameters(id)
     }
 
     private mutating func writeCommandKind_getQuota(quotaRoot: QuotaRoot) -> Int {
-        self.buffer.writeString("GETQUOTA ") +
-            self.buffer.writeQuotaRoot(quotaRoot)
+        self._buffer._writeString("GETQUOTA ") +
+            self._buffer.writeQuotaRoot(quotaRoot)
     }
 
     private mutating func writeCommandKind_getQuotaRoot(mailbox: MailboxName) -> Int {
-        self.buffer.writeString("GETQUOTAROOT ") +
-            self.buffer.writeMailbox(mailbox)
+        self._buffer._writeString("GETQUOTAROOT ") +
+            self._buffer.writeMailbox(mailbox)
     }
 
     private mutating func writeCommandKind_setQuota(quotaRoot: QuotaRoot, resourceLimits: [QuotaLimit]) -> Int {
-        self.buffer.writeString("SETQUOTA ") +
-            self.buffer.writeQuotaRoot(quotaRoot) +
-            self.buffer.writeSpace() +
-            self.buffer.writeArray(resourceLimits) { (limit, self) in
+        self._buffer._writeString("SETQUOTA ") +
+            self._buffer.writeQuotaRoot(quotaRoot) +
+            self._buffer.writeSpace() +
+            self._buffer.writeArray(resourceLimits) { (limit, self) in
                 self.writeQuotaLimit(limit)
             }
     }
 
     private mutating func writeCommandKind_extendedsearch(options: ExtendedSearchOptions) -> Int {
-        self.buffer.writeString("ESEARCH") +
-            self.buffer.writeExtendedSearchOptions(options)
+        self._buffer._writeString("ESEARCH") +
+            self._buffer.writeExtendedSearchOptions(options)
     }
 }
 

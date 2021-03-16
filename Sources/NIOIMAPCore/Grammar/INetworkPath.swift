@@ -33,7 +33,7 @@ public struct INetworkPath: Equatable {
 
 extension _EncodeBuffer {
     @discardableResult mutating func writeINetworkPath(_ path: INetworkPath) -> Int {
-        self.writeString("//") +
+        self._writeString("//") +
             self.writeIMAPServer(path.server) +
             self.writeIPathQuery(path.query)
     }

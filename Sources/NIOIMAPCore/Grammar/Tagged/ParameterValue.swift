@@ -32,9 +32,9 @@ extension _EncodeBuffer {
             return self.writeLastCommandSet(set)
         case .comp(let comp):
             return
-                self.writeString("(") +
+                self._writeString("(") +
                 self.writeTaggedExtensionComp(comp) +
-                self.writeString(")")
+                self._writeString(")")
         }
     }
 }

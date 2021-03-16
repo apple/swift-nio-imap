@@ -39,15 +39,15 @@ extension _EncodeBuffer {
     fileprivate mutating func writeIMAPString<T: Collection>(_ bytes: T) -> Int where T.Element == UInt8 {
         switch stringEncoding(for: bytes) {
         case .quotedString:
-            return writeString("\"") + writeBytes(bytes) + writeString("\"")
+            return _writeString("\"") + _writeBytes(bytes) + _writeString("\"")
         case .serverLiteral:
-            return writeString("{\(bytes.count)}\r\n") + writeBytes(bytes)
+            return _writeString("{\(bytes.count)}\r\n") + _writeBytes(bytes)
         case .clientSynchronizingLiteral:
-            return writeString("{\(bytes.count)}\r\n") + markStopPoint() + writeBytes(bytes)
+            return _writeString("{\(bytes.count)}\r\n") + _markStopPoint() + _writeBytes(bytes)
         case .clientNonSynchronizingLiteralPlus:
-            return writeString("{\(bytes.count)+}\r\n") + writeBytes(bytes)
+            return _writeString("{\(bytes.count)+}\r\n") + _writeBytes(bytes)
         case .clientNonSynchronizingLiteralMinus:
-            return writeString("{\(bytes.count)-}\r\n") + writeBytes(bytes)
+            return _writeString("{\(bytes.count)-}\r\n") + _writeBytes(bytes)
         }
     }
 
@@ -97,7 +97,7 @@ extension _EncodeBuffer {
     /// - returns: The number of bytes written.
     @discardableResult mutating func writeBufferAsBase64(_ buffer: ByteBuffer) -> Int {
         let encoded = Base64.encodeBytes(bytes: buffer.readableBytesView)
-        return self.writeBytes(encoded)
+        return self._writeBytes(encoded)
     }
 
     /// Writes a collection of bytes in the `literal8` syntax defined in RFC 3516.
@@ -108,21 +108,21 @@ extension _EncodeBuffer {
     @discardableResult mutating func writeLiteral8<T: Collection>(_ bytes: T) -> Int where T.Element == UInt8 {
         let length = "~{\(bytes.count)}\r\n"
         return
-            self.writeString(length) +
-            self.markStopPoint() +
-            self.writeBytes(bytes)
+            self._writeString(length) +
+            self._markStopPoint() +
+            self._writeBytes(bytes)
     }
 
     /// Writes the string `"NIL"` to self.
     /// - returns: The number of bytes written, always 3.
     @discardableResult mutating func writeNil() -> Int {
-        self.writeString("NIL")
+        self._writeString("NIL")
     }
 
     /// Writes a single space to `self`
     /// - returns: The number of bytes written, always 1.
     @discardableResult mutating func writeSpace() -> Int {
-        self.writeString(" ")
+        self._writeString(" ")
     }
 
     /// Writes the given `collection` as an IMAP array to self using the given `closure` for every element in the collection.
@@ -139,10 +139,10 @@ extension _EncodeBuffer {
         //   collection.count != 0
         // such that an empty collection gets encoded as "()".
         self.write(if: collection.count > 0) {
-            self.writeString(prefix)
+            self._writeString(prefix)
         } +
             self.write(if: parenthesis) { () -> Int in
-                self.writeString("(")
+                self._writeString("(")
             } +
             collection.enumerated().reduce(0) { (size, row) in
                 let (i, element) = row
@@ -150,14 +150,14 @@ extension _EncodeBuffer {
                     size +
                     writer(element, &self) +
                     self.write(if: i < collection.count - 1) { () -> Int in
-                        self.writeString(separator)
+                        self._writeString(separator)
                     }
             } +
             self.write(if: parenthesis) { () -> Int in
-                self.writeString(")")
+                self._writeString(")")
             } +
             self.write(if: collection.count > 0) {
-                self.writeString(suffix)
+                self._writeString(suffix)
             }
     }
 
@@ -175,10 +175,10 @@ extension _EncodeBuffer {
         //   collection.count != 0
         // such that an empty collection gets encoded as "()".
         self.write(if: values.count > 0) {
-            self.writeString(prefix)
+            self._writeString(prefix)
         } +
             self.write(if: parenthesis) { () -> Int in
-                self.writeString("(")
+                self._writeString("(")
             } +
             values.enumerated().reduce(0) { (size, row) in
                 let (i, element) = row
@@ -186,14 +186,14 @@ extension _EncodeBuffer {
                     size +
                     writer(.init(key: element.0, value: element.1), &self) +
                     self.write(if: i < values.count - 1) { () -> Int in
-                        self.writeString(separator)
+                        self._writeString(separator)
                     }
             } +
             self.write(if: parenthesis) { () -> Int in
-                self.writeString(")")
+                self._writeString(")")
             } +
             self.write(if: values.count > 0) {
-                self.writeString(suffix)
+                self._writeString(suffix)
             }
     }
 

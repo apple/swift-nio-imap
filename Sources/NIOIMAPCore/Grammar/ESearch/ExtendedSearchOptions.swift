@@ -58,7 +58,7 @@ extension _EncodeBuffer {
             } +
             self.writeSpace() +
             self.writeIfExists(options.charset) { (charset) -> Int in
-                self.writeString("CHARSET \(charset) ")
+                self._writeString("CHARSET \(charset) ")
             } +
             self.writeSearchKey(options.key)
     }

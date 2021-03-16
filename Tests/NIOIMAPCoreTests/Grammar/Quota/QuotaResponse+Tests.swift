@@ -23,7 +23,7 @@ class QuotaResponseTests: EncodeTestClass {}
 extension QuotaResponseTests {
     func testEncode() {
         let expectedString = "QUOTA \"Root\" ()"
-        self.testBuffer.clear()
+        self.testBuffer._clear()
         let size = self.testBuffer.writeQuotaResponse(quotaRoot: .init("Root"), resources: [])
         XCTAssertEqual(size, expectedString.utf8.count)
         XCTAssertEqual(self.testBufferString, expectedString)
@@ -36,7 +36,7 @@ extension QuotaResponseTests {
         ]
 
         for (test, expectedString, line) in inputs {
-            self.testBuffer.clear()
+            self.testBuffer._clear()
             let size = self.testBuffer.writeQuotaResources(test)
             XCTAssertEqual(size, expectedString.utf8.count, line: line)
             XCTAssertEqual(self.testBufferString, expectedString, line: line)

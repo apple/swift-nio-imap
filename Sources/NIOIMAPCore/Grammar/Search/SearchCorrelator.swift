@@ -41,14 +41,14 @@ public struct SearchCorrelator: Equatable {
 
 extension _EncodeBuffer {
     @discardableResult mutating func writeSearchCorrelator(_ correlator: SearchCorrelator) -> Int {
-        self.writeString(" (TAG ") +
+        self._writeString(" (TAG ") +
             self.writeTagString(correlator.tag) +
             self.writeIfExists(correlator.mailbox) { mailbox in
-                self.writeString(" MAILBOX ") + self.writeMailbox(mailbox)
+                self._writeString(" MAILBOX ") + self.writeMailbox(mailbox)
             } +
             self.writeIfExists(correlator.uidValidity) { uidValidity in
-                self.writeString(" UIDVALIDITY ") + self.writeUIDValidity(uidValidity)
+                self._writeString(" UIDVALIDITY ") + self.writeUIDValidity(uidValidity)
             } +
-            self.writeString(")")
+            self._writeString(")")
     }
 }

@@ -70,15 +70,15 @@ extension MailboxData {
 
 extension _EncodeBuffer {
     @discardableResult mutating func writeMailboxDataSearchSort(_ data: MailboxData.SearchSort?) -> Int {
-        self.writeString("SEARCH") +
+        self._writeString("SEARCH") +
             self.writeIfExists(data) { (data) -> Int in
                 self.writeArray(data.identifiers, prefix: " ", parenthesis: false) { (element, buffer) -> Int in
-                    buffer.writeString("\(element)")
+                    buffer._writeString("\(element)")
                 } +
                     self.writeSpace() +
-                    self.writeString("(MODSEQ ") +
+                    self._writeString("(MODSEQ ") +
                     self.writeModificationSequenceValue(data.modificationSequence) +
-                    self.writeString(")")
+                    self._writeString(")")
             }
     }
 
@@ -97,9 +97,9 @@ extension _EncodeBuffer {
         case .status(let mailbox, let status):
             return self.writeMailboxData_status(mailbox: mailbox, status: status)
         case .exists(let num):
-            return self.writeString("\(num) EXISTS")
+            return self._writeString("\(num) EXISTS")
         case .recent(let num):
-            return self.writeString("\(num) RECENT")
+            return self._writeString("\(num) RECENT")
         case .namespace(let namespaceResponse):
             return self.writeNamespaceResponse(namespaceResponse)
         case .searchSort(let data):
@@ -108,32 +108,32 @@ extension _EncodeBuffer {
     }
 
     private mutating func writeMailboxData_search(_ list: [Int]) -> Int {
-        self.writeString("SEARCH") +
+        self._writeString("SEARCH") +
             self.writeArray(list, separator: "", parenthesis: false) { (num, buffer) -> Int in
-                buffer.writeString(" \(num)")
+                buffer._writeString(" \(num)")
             }
     }
 
     private mutating func writeMailboxData_flags(_ flags: [Flag]) -> Int {
-        self.writeString("FLAGS ") +
+        self._writeString("FLAGS ") +
             self.writeFlags(flags)
     }
 
     private mutating func writeMailboxData_list(_ list: MailboxInfo) -> Int {
-        self.writeString("LIST ") +
+        self._writeString("LIST ") +
             self.writeMailboxInfo(list)
     }
 
     private mutating func writeMailboxData_lsub(_ list: MailboxInfo) -> Int {
-        self.writeString("LSUB ") +
+        self._writeString("LSUB ") +
             self.writeMailboxInfo(list)
     }
 
     private mutating func writeMailboxData_status(mailbox: MailboxName, status: MailboxStatus) -> Int {
-        self.writeString("STATUS ") +
+        self._writeString("STATUS ") +
             self.writeMailbox(mailbox) +
-            self.writeString(" (") +
+            self._writeString(" (") +
             self.writeMailboxStatus(status) +
-            self.writeString(")")
+            self._writeString(")")
     }
 }

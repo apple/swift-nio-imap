@@ -28,6 +28,6 @@ public struct EncodedAuthenticatedURL: Equatable {
 
 extension _EncodeBuffer {
     @discardableResult mutating func writeEncodedAuthenticationURL(_ data: EncodedAuthenticatedURL) -> Int {
-        self.writeString(data.data)
+        self._writeString(data.data)
     }
 }

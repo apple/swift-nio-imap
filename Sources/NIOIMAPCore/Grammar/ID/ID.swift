@@ -29,7 +29,7 @@ extension _EncodeBuffer {
     }
 
     @discardableResult mutating func writeIDResponse(_ response: KeyValues<String, ByteBuffer?>) -> Int {
-        self.writeString("ID ") +
+        self._writeString("ID ") +
             self.writeIDParameters(response)
     }
 }

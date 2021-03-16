@@ -87,7 +87,7 @@ extension Capability_Tests {
         ]
 
         for (capability, expectedString, line) in tests {
-            self.testBuffer.clear()
+            self.testBuffer._clear()
             let size = self.testBuffer.writeCapability(capability)
             XCTAssertEqual(size, expectedString.utf8.count, line: line)
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
@@ -101,7 +101,7 @@ extension Capability_Tests {
         ]
 
         for (data, expectedString, line) in tests {
-            self.testBuffer.clear()
+            self.testBuffer._clear()
             let size = self.testBuffer.writeCapabilityData(data)
             XCTAssertEqual(size, expectedString.utf8.count, line: line)
             XCTAssertEqual(self.testBufferString, expectedString, line: line)

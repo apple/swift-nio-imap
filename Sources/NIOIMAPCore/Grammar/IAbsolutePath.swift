@@ -28,7 +28,7 @@ public struct IAbsolutePath: Equatable {
 
 extension _EncodeBuffer {
     @discardableResult mutating func writeIAbsolutePath(_ path: IAbsolutePath) -> Int {
-        self.writeString("/") +
+        self._writeString("/") +
             self.writeIfExists(path.command) { command in
                 self.writeICommand(command)
             }

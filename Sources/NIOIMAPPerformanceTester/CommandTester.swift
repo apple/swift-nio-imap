@@ -34,12 +34,12 @@ class CommandTester: Benchmark {
             commandBuffer.writeCommand(.init(tag: "\(i)", command: self.command))
 
             var buffer = ByteBuffer()
-            var chunk = commandBuffer.buffer.nextChunk()
-            var chunkBuffer = chunk.bytes
+            var chunk = commandBuffer._buffer._nextChunk()
+            var chunkBuffer = chunk._bytes
             buffer.writeBuffer(&chunkBuffer)
-            while chunk.waitForContinuation {
-                chunk = commandBuffer.buffer.nextChunk()
-                var chunkBuffer = chunk.bytes
+            while chunk._waitForContinuation {
+                chunk = commandBuffer._buffer._nextChunk()
+                var chunkBuffer = chunk._bytes
                 buffer.writeBuffer(&chunkBuffer)
             }
 

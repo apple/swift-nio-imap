@@ -35,9 +35,9 @@ public struct AuthenticatedURL: Equatable {
 
 extension _EncodeBuffer {
     @discardableResult mutating func writeAuthenticatedURL(_ data: AuthenticatedURL) -> Int {
-        self.writeString("imap://") +
+        self._writeString("imap://") +
             self.writeIMAPServer(data.server) +
-            self.writeString("/") +
+            self._writeString("/") +
             self.writeIMessagePart(data.messagePart)
     }
 }

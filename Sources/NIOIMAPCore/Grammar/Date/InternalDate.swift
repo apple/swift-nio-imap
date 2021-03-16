@@ -180,11 +180,11 @@ extension _EncodeBuffer {
         }
 
         return
-            self.writeString("\"\(p.0.day)-\(monthName)-\(p.0.year) ") +
+            self._writeString("\"\(p.0.day)-\(monthName)-\(p.0.year) ") +
             self.writeTime(p.1) +
             self.writeSpace() +
             self.writeTimezone(p.2) +
-            self.writeString("\"")
+            self._writeString("\"")
     }
 }
 
@@ -193,7 +193,7 @@ extension _EncodeBuffer {
         let hour = time.hour < 10 ? "0\(time.hour)" : "\(time.hour)"
         let minute = time.minute < 10 ? "0\(time.minute)" : "\(time.minute)"
         let second = time.second < 10 ? "0\(time.second)" : "\(time.second)"
-        return self.writeString("\(hour):\(minute):\(second)")
+        return self._writeString("\(hour):\(minute):\(second)")
     }
 }
 
@@ -216,6 +216,6 @@ extension _EncodeBuffer {
         }
 
         let modifier = (timezone.minutes >= 0) ? "+" : "-"
-        return self.writeString("\(modifier)\(zeroedString)")
+        return self._writeString("\(modifier)\(zeroedString)")
     }
 }

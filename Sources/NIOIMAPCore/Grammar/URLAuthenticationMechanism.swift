@@ -37,6 +37,6 @@ extension String {
 
 extension _EncodeBuffer {
     @discardableResult mutating func writeURLAuthenticationMechanism(_ data: URLAuthenticationMechanism) -> Int {
-        self.writeString(data.stringValue)
+        self._writeString(data.stringValue)
     }
 }

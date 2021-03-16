@@ -24,7 +24,7 @@ class EntryTypeResponse_Tests: EncodeTestClass {
         ]
 
         for (input, expected, line) in inputs {
-            self.testBuffer.clear()
+            self.testBuffer._clear()
             let size = self.testBuffer.writeEntryKindResponse(input)
             XCTAssertEqual(size, expected.utf8.count, line: line)
             XCTAssertEqual(self.testBufferString, expected, line: line)

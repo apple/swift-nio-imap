@@ -26,6 +26,6 @@ extension Media {
 
 extension _EncodeBuffer {
     @discardableResult mutating func writeMediaMessage(_ message: Media.Message) -> Int {
-        self.writeString("\"MESSAGE\" \"\(message.rawValue)\"")
+        self._writeString("\"MESSAGE\" \"\(message.rawValue)\"")
     }
 }

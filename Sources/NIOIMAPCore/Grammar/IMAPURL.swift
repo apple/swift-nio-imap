@@ -33,7 +33,7 @@ public struct IMAPURL: Equatable {
 
 extension _EncodeBuffer {
     @discardableResult mutating func writeIMAPURL(_ url: IMAPURL) -> Int {
-        self.writeString("imap://") +
+        self._writeString("imap://") +
             self.writeIMAPServer(url.server) +
             self.writeIPathQuery(url.query)
     }

@@ -42,10 +42,10 @@ public struct UnchangedSinceModifier: Equatable {
 
 extension _EncodeBuffer {
     @discardableResult mutating func writeChangedSinceModifier(_ val: ChangedSinceModifier) -> Int {
-        self.writeString("CHANGEDSINCE ") + self.writeModificationSequenceValue(val.modificationSequence)
+        self._writeString("CHANGEDSINCE ") + self.writeModificationSequenceValue(val.modificationSequence)
     }
 
     @discardableResult mutating func writeUnchangedSinceModifier(_ val: UnchangedSinceModifier) -> Int {
-        self.writeString("UNCHANGEDSINCE ") + self.writeModificationSequenceValue(val.modificationSequence)
+        self._writeString("UNCHANGEDSINCE ") + self.writeModificationSequenceValue(val.modificationSequence)
     }
 }

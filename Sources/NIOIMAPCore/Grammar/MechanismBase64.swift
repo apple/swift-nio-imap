@@ -37,8 +37,8 @@ extension _EncodeBuffer {
     @discardableResult mutating func writeMechanismBase64(_ data: MechanismBase64) -> Int {
         self.writeURLAuthenticationMechanism(data.mechanism) +
             self.writeIfExists(data.base64) { base64 in
-                self.writeString("=") +
-                    self.writeBuffer(&base64)
+                self._writeString("=") +
+                    self._writeBuffer(&base64)
             }
     }
 }

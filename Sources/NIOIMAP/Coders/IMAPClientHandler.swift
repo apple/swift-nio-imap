@@ -95,14 +95,14 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
             context.flush()
         }
         repeat {
-            let next = self.bufferedWrites[self.bufferedWrites.startIndex].0.nextChunk()
+            let next = self.bufferedWrites[self.bufferedWrites.startIndex].0._nextChunk()
 
-            if next.waitForContinuation {
-                context.write(self.wrapOutboundOut(next.bytes), promise: nil)
+            if next._waitForContinuation {
+                context.write(self.wrapOutboundOut(next._bytes), promise: nil)
                 return
             } else {
                 let promise = self.bufferedWrites.removeFirst().1
-                context.write(self.wrapOutboundOut(next.bytes), promise: promise)
+                context.write(self.wrapOutboundOut(next._bytes), promise: promise)
             }
         } while self.bufferedWrites.hasMark
     }
@@ -127,17 +127,17 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
         }
 
         if self.bufferedWrites.isEmpty {
-            let next = encoder.buffer.nextChunk()
+            let next = encoder._buffer._nextChunk()
 
-            if next.waitForContinuation {
-                context.write(self.wrapOutboundOut(next.bytes), promise: nil)
+            if next._waitForContinuation {
+                context.write(self.wrapOutboundOut(next._bytes), promise: nil)
                 // fall through to append below
             } else {
-                context.write(self.wrapOutboundOut(next.bytes), promise: promise)
+                context.write(self.wrapOutboundOut(next._bytes), promise: promise)
                 return
             }
         }
-        self.bufferedWrites.append((encoder.buffer, promise))
+        self.bufferedWrites.append((encoder._buffer, promise))
     }
 
     public func flush(context: ChannelHandlerContext) {

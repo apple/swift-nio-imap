@@ -34,7 +34,7 @@ public struct ResponseCodeAppend: Equatable {
 
 extension _EncodeBuffer {
     @discardableResult mutating func writeResponseCodeAppend(_ data: ResponseCodeAppend) -> Int {
-        self.writeString("APPENDUID \(data.num) ") +
+        self._writeString("APPENDUID \(data.num) ") +
             self.writeUID(data.uid)
     }
 }

@@ -270,17 +270,17 @@ extension SectionSpecifier.Kind: Comparable {
 
 extension _EncodeBuffer {
     @discardableResult mutating func writeSectionBinary(_ binary: SectionSpecifier.Part) -> Int {
-        self.writeString("[") +
+        self._writeString("[") +
             self.writeSectionPart(binary) +
-            self.writeString("]")
+            self._writeString("]")
     }
 
     @discardableResult mutating func writeSection(_ section: SectionSpecifier?) -> Int {
-        self.writeString("[") +
+        self._writeString("[") +
             self.writeIfExists(section) { (spec) -> Int in
                 self.writeSectionSpecifier(spec)
             } +
-            self.writeString("]")
+            self._writeString("]")
     }
 
     @discardableResult mutating func writeSectionSpecifier(_ spec: SectionSpecifier?) -> Int {
@@ -296,27 +296,27 @@ extension _EncodeBuffer {
 
     @discardableResult mutating func writeSectionPart(_ part: SectionSpecifier.Part) -> Int {
         self.writeArray(part.array, separator: ".", parenthesis: false) { (element, self) in
-            self.writeString("\(UInt32(element))")
+            self._writeString("\(UInt32(element))")
         }
     }
 
     @discardableResult mutating func writeSectionKind(_ kind: SectionSpecifier.Kind, dot: Bool) -> Int {
-        let size = dot ? self.writeString(".") : 0
+        let size = dot ? self._writeString(".") : 0
         switch kind {
         case .MIMEHeader:
-            return size + self.writeString("MIME")
+            return size + self._writeString("MIME")
         case .header:
-            return size + self.writeString("HEADER")
+            return size + self._writeString("HEADER")
         case .headerFields(let list):
             return size +
-                self.writeString("HEADER.FIELDS ") +
+                self._writeString("HEADER.FIELDS ") +
                 self.writeHeaderList(list)
         case .headerFieldsNot(let list):
             return size +
-                self.writeString("HEADER.FIELDS.NOT ") +
+                self._writeString("HEADER.FIELDS.NOT ") +
                 self.writeHeaderList(list)
         case .text:
-            return size + self.writeString("TEXT")
+            return size + self._writeString("TEXT")
         case .complete:
             return 0
         }

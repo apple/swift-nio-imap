@@ -389,7 +389,7 @@ extension UIDSet: SetAlgebra {
 // MARK: - Encoding
 
 extension UIDSet: _IMAPEncodable {
-    public func writeIntoBuffer(_ buffer: inout _EncodeBuffer) -> Int {
+    public func _writeIntoBuffer(_ buffer: inout _EncodeBuffer) -> Int {
         buffer.writeArray(self._ranges.ranges, separator: ",", parenthesis: false) { (element, buffer) in
             let r = UIDRange(element)
             return buffer.writeUIDRange(r)
@@ -398,17 +398,17 @@ extension UIDSet: _IMAPEncodable {
 }
 
 extension UIDSetNonEmpty: _IMAPEncodable {
-    public func writeIntoBuffer(_ buffer: inout _EncodeBuffer) -> Int {
-        self.set.writeIntoBuffer(&buffer)
+    public func _writeIntoBuffer(_ buffer: inout _EncodeBuffer) -> Int {
+        self.set._writeIntoBuffer(&buffer)
     }
 }
 
 extension _EncodeBuffer {
     @discardableResult mutating func writeUIDSet(_ set: UIDSet) -> Int {
-        set.writeIntoBuffer(&self)
+        set._writeIntoBuffer(&self)
     }
 
     @discardableResult mutating func writeUIDSet(_ set: UIDSetNonEmpty) -> Int {
-        set.writeIntoBuffer(&self)
+        set._writeIntoBuffer(&self)
     }
 }
