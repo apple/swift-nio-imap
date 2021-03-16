@@ -60,7 +60,7 @@ extension GrammarParser {
         try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
             try ParserLibrary.fixedString("(", buffer: &buffer, tracker: tracker)
             let knownSequenceSet = try self.parseLastCommandSet(buffer: &buffer, tracker: tracker, setParser: self.parseUIDSetNonEmpty)
-            try ParserLibrary.space(buffer: &buffer, tracker: tracker)
+            try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
             let knownUidSet = try self.parseLastCommandSet(buffer: &buffer, tracker: tracker, setParser: self.parseUIDSetNonEmpty)
             try ParserLibrary.fixedString(")", buffer: &buffer, tracker: tracker)
             return SequenceMatchData(knownSequenceSet: knownSequenceSet, knownUidSet: knownUidSet)

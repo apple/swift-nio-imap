@@ -30,7 +30,7 @@ extension GrammarParser {
         try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Command in
             try ParserLibrary.fixedString("FETCH ", buffer: &buffer, tracker: tracker)
             let sequence = try self.parseSequenceSet(buffer: &buffer, tracker: tracker)
-            try ParserLibrary.space(buffer: &buffer, tracker: tracker)
+            try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
             let att = try parseFetch_type(buffer: &buffer, tracker: tracker)
             let modifiers = try ParserLibrary.optional(buffer: &buffer, tracker: tracker, parser: self.parseParameters) ?? [:]
             return .fetch(sequence, att, modifiers)
@@ -328,14 +328,14 @@ extension GrammarParser {
 
         func parseFetchResponse_streamingBegin(buffer: inout ParseBuffer, tracker: StackTracker) throws -> _FetchResponse {
             let type = try self.parseFetchStreamingResponse(buffer: &buffer, tracker: tracker)
-            try ParserLibrary.space(buffer: &buffer, tracker: tracker)
+            try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
             let literalSize = try self.parseLiteralSize(buffer: &buffer, tracker: tracker)
             return .literalStreamingBegin(kind: type, byteCount: literalSize)
         }
 
         func parseFetchResponse_streamingBeginQuoted(buffer: inout ParseBuffer, tracker: StackTracker) throws -> _FetchResponse {
             let type = try self.parseFetchStreamingResponse(buffer: &buffer, tracker: tracker)
-            try ParserLibrary.space(buffer: &buffer, tracker: tracker)
+            try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
             let save = buffer
             let quoted = try self.parseQuoted(buffer: &buffer, tracker: tracker)
             buffer = save

@@ -59,7 +59,7 @@ extension GrammarParser {
             try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Command in
                 try ParserLibrary.fixedString("MOVE ", buffer: &buffer, tracker: tracker)
                 let set = try self.parseLastCommandSet(buffer: &buffer, tracker: tracker, setParser: self.parseUIDSetNonEmpty)
-                try ParserLibrary.space(buffer: &buffer, tracker: tracker)
+                try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
                 let mailbox = try self.parseMailbox(buffer: &buffer, tracker: tracker)
                 return .uidMove(set, mailbox)
             }
@@ -69,7 +69,7 @@ extension GrammarParser {
             try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Command in
                 try ParserLibrary.fixedString("FETCH ", buffer: &buffer, tracker: tracker)
                 let set = try self.parseLastCommandSet(buffer: &buffer, tracker: tracker, setParser: self.parseUIDSetNonEmpty)
-                try ParserLibrary.space(buffer: &buffer, tracker: tracker)
+                try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
                 let att = try parseFetch_type(buffer: &buffer, tracker: tracker)
                 let modifiers = try ParserLibrary.optional(buffer: &buffer, tracker: tracker, parser: self.parseParameters) ?? [:]
                 return .uidFetch(set, att, modifiers)
@@ -88,7 +88,7 @@ extension GrammarParser {
                 try ParserLibrary.fixedString("STORE ", buffer: &buffer, tracker: tracker)
                 let set = try self.parseLastCommandSet(buffer: &buffer, tracker: tracker, setParser: self.parseUIDSetNonEmpty)
                 let modifiers = try ParserLibrary.optional(buffer: &buffer, tracker: tracker, parser: self.parseParameters) ?? [:]
-                try ParserLibrary.space(buffer: &buffer, tracker: tracker)
+                try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
                 let flags = try self.parseStoreAttributeFlags(buffer: &buffer, tracker: tracker)
                 return .uidStore(set, modifiers, flags)
             }

@@ -188,7 +188,7 @@ extension ParserLibrary {
         }
     }
 
-    static func space(buffer: inout ParseBuffer, tracker: StackTracker) throws {
+    static func parseSpaces(buffer: inout ParseBuffer, tracker: StackTracker) throws {
         try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, _ in
 
             // need at least one readable byte
@@ -209,8 +209,13 @@ extension ParserLibrary {
         }
     }
 
-    static func fixedString(_ needle: String, caseSensitive: Bool = false, buffer: inout ParseBuffer, tracker: StackTracker) throws {
+    static func fixedString(_ needle: String, caseSensitive: Bool = false, allowLeadingSpaces: Bool = false, buffer: inout ParseBuffer, tracker: StackTracker) throws {
         try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, _ in
+
+            if allowLeadingSpaces {
+                try self.optional(buffer: &buffer, tracker: tracker, parser: self.parseSpaces)
+            }
+
             let needleCount = needle.utf8.count
             guard let actual = buffer.bytes.readString(length: needleCount) else {
                 guard needle.utf8.starts(with: buffer.bytes.readableBytesView, by: { $0 & 0xDF == $1 & 0xDF }) else {
@@ -222,14 +227,12 @@ extension ParserLibrary {
             assert(needle.utf8.allSatisfy { $0 & 0b1000_0000 == 0 }, "needle needs to be ASCII but \(needle) isn't")
             if actual == needle {
                 // great, we just match
-                return
             } else if !caseSensitive {
                 // we know this is all ASCII so we can do an ASCII case-insensitive compare here
                 guard needleCount == actual.utf8.count,
                     actual.utf8.elementsEqual(needle.utf8, by: { ($0 & 0xDF) == ($1 & 0xDF) }) else {
                     throw ParserError(hint: "case insensitively looking for \(needle) found \(actual)")
                 }
-                return
             } else {
                 throw ParserError(hint: "case sensitively looking for \(needle) found \(actual)")
             }

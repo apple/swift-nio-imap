@@ -55,7 +55,7 @@ extension GrammarParser {
     static func parseAppendMessage(buffer: inout ParseBuffer, tracker: StackTracker) throws -> AppendMessage {
         try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> AppendMessage in
             let options = try self.parseAppendOptions(buffer: &buffer, tracker: tracker)
-            try ParserLibrary.space(buffer: &buffer, tracker: tracker)
+            try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
             let data = try self.parseAppendData(buffer: &buffer, tracker: tracker)
             return .init(options: options, data: data)
         }
@@ -65,7 +65,7 @@ extension GrammarParser {
     static func parseCatenateMessage(buffer: inout ParseBuffer, tracker: StackTracker) throws -> AppendOptions {
         try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> AppendOptions in
             let options = try self.parseAppendOptions(buffer: &buffer, tracker: tracker)
-            try ParserLibrary.space(buffer: &buffer, tracker: tracker)
+            try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
             try ParserLibrary.fixedString("CATENATE (", buffer: &buffer, tracker: tracker)
             return options
         }
@@ -95,16 +95,16 @@ extension GrammarParser {
     static func parseAppendOptions(buffer: inout ParseBuffer, tracker: StackTracker) throws -> AppendOptions {
         try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
             let flagList = try ParserLibrary.optional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> [Flag] in
-                try ParserLibrary.space(buffer: &buffer, tracker: tracker)
+                try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
                 return try self.parseFlagList(buffer: &buffer, tracker: tracker)
             } ?? []
             let internalDate = try ParserLibrary.optional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> InternalDate in
-                try ParserLibrary.space(buffer: &buffer, tracker: tracker)
+                try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
                 return try self.parseInternalDate(buffer: &buffer, tracker: tracker)
             }
             var kvs = KeyValues<String, ParameterValue>()
             try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &kvs, tracker: tracker) { (buffer, tracker) -> KeyValue<String, ParameterValue> in
-                try ParserLibrary.space(buffer: &buffer, tracker: tracker)
+                try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
                 return try self.parseTaggedExtension(buffer: &buffer, tracker: tracker)
             }
             return .init(flagList: flagList, internalDate: internalDate, extensions: kvs)
@@ -120,7 +120,7 @@ extension GrammarParser {
     static func parseCatenatePart(expectPrecedingSpace: Bool, buffer: inout ParseBuffer, tracker: StackTracker) throws -> CatenatePart {
         func parseCatenateURL(buffer: inout ParseBuffer, tracker: StackTracker) throws -> CatenatePart {
             if expectPrecedingSpace {
-                try ParserLibrary.space(buffer: &buffer, tracker: tracker)
+                try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
             }
             try ParserLibrary.fixedString("URL ", buffer: &buffer, tracker: tracker)
             let url = try self.parseAString(buffer: &buffer, tracker: tracker)
@@ -129,7 +129,7 @@ extension GrammarParser {
 
         func parseCatenateText(buffer: inout ParseBuffer, tracker: StackTracker) throws -> CatenatePart {
             if expectPrecedingSpace {
-                try ParserLibrary.space(buffer: &buffer, tracker: tracker)
+                try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
             }
             try ParserLibrary.fixedString("TEXT {", buffer: &buffer, tracker: tracker)
             let length = try Self.parseNumber(buffer: &buffer, tracker: tracker)

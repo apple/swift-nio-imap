@@ -29,15 +29,15 @@ extension GrammarParser {
         try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
             try ParserLibrary.fixedString("LIST", buffer: &buffer, tracker: tracker)
             let selectOptions = try ParserLibrary.optional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> ListSelectOptions in
-                try ParserLibrary.space(buffer: &buffer, tracker: tracker)
+                try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
                 return try self.parseListSelectOptions(buffer: &buffer, tracker: tracker)
             }
-            try ParserLibrary.space(buffer: &buffer, tracker: tracker)
+            try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
             let mailbox = try self.parseMailbox(buffer: &buffer, tracker: tracker)
-            try ParserLibrary.space(buffer: &buffer, tracker: tracker)
+            try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
             let mailboxPatterns = try self.parseMailboxPatterns(buffer: &buffer, tracker: tracker)
             let returnOptions = try ParserLibrary.optional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> [ReturnOption] in
-                try ParserLibrary.space(buffer: &buffer, tracker: tracker)
+                try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
                 return try self.parseListReturnOptions(buffer: &buffer, tracker: tracker)
             } ?? []
             return .list(selectOptions, reference: mailbox, mailboxPatterns, returnOptions)
@@ -135,13 +135,13 @@ extension GrammarParser {
             try ParserLibrary.fixedString("(", buffer: &buffer, tracker: tracker)
             var selectOptions = try ParserLibrary.parseZeroOrMore(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> ListSelectOption in
                 let option = try self.parseListSelectOption(buffer: &buffer, tracker: tracker)
-                try ParserLibrary.space(buffer: &buffer, tracker: tracker)
+                try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
                 return option
             }
             let baseOption = try self.parseListSelectBaseOption(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &selectOptions, tracker: tracker) { (buffer, tracker) -> ListSelectOption in
                 let option = try self.parseListSelectOption(buffer: &buffer, tracker: tracker)
-                try ParserLibrary.space(buffer: &buffer, tracker: tracker)
+                try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
                 return option
             }
             try ParserLibrary.fixedString(")", buffer: &buffer, tracker: tracker)
@@ -156,7 +156,7 @@ extension GrammarParser {
             let options = try ParserLibrary.optional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> [ReturnOption] in
                 var array = [try self.parseReturnOption(buffer: &buffer, tracker: tracker)]
                 try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) -> ReturnOption in
-                    try ParserLibrary.space(buffer: &buffer, tracker: tracker)
+                    try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
                     return try self.parseReturnOption(buffer: &buffer, tracker: tracker)
                 }
                 return array

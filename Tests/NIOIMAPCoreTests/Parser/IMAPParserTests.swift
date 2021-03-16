@@ -1392,6 +1392,7 @@ extension ParserUnitTests {
                 ("()", " ", [], #line),
                 ("(\\seen)", " ", [.seen], #line),
                 ("(\\seen \\answered \\draft)", " ", [.seen, .answered, .draft], #line),
+                ("(\\seen \\answered \\draft )", " ", [.seen, .answered, .draft], #line), // iCloud sends a superfluous terminating space
             ],
             parserErrorInputs: [
                 ],
