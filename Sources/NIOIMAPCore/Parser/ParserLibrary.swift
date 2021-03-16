@@ -211,6 +211,11 @@ extension ParserLibrary {
 
     static func fixedString(_ needle: String, caseSensitive: Bool = false, allowLeadingSpaces: Bool = false, buffer: inout ParseBuffer, tracker: StackTracker) throws {
         try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, _ in
+            
+            if allowLeadingSpaces {
+                try self.optional(buffer: &buffer, tracker: tracker, parser: self.space)
+            }
+            
             let needleCount = needle.utf8.count
             guard let actual = buffer.bytes.readString(length: needleCount) else {
                 guard needle.utf8.starts(with: buffer.bytes.readableBytesView, by: { $0 & 0xDF == $1 & 0xDF }) else {
@@ -230,10 +235,6 @@ extension ParserLibrary {
                 }
             } else {
                 throw ParserError(hint: "case sensitively looking for \(needle) found \(actual)")
-            }
-
-            if allowLeadingSpaces {
-                try self.optional(buffer: &buffer, tracker: tracker, parser: self.space)
             }
         }
     }
