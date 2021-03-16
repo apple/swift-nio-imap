@@ -29,7 +29,7 @@ extension GrammarParser {
     static func parseCommand(buffer: inout ParseBuffer, tracker: StackTracker) throws -> TaggedCommand {
         try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             let tag = try self.parseTag(buffer: &buffer, tracker: tracker)
-            try ParserLibrary.space(buffer: &buffer, tracker: tracker)
+            try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
             let type = try ParserLibrary.oneOf([
                 self.parseCommandAny,
                 self.parseCommandAuth,
@@ -86,14 +86,14 @@ extension GrammarParser {
     static func parseCommandAuth(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
         func parseCommandAuth_getMetadata(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
             try ParserLibrary.fixedString("GETMETADATA", buffer: &buffer, tracker: tracker)
-            try ParserLibrary.space(buffer: &buffer, tracker: tracker)
+            try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
             let options = try ParserLibrary.optional(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> [MetadataOption] in
                 let options = try self.parseMetadataOptions(buffer: &buffer, tracker: tracker)
-                try ParserLibrary.space(buffer: &buffer, tracker: tracker)
+                try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
                 return options
             }) ?? []
             let mailbox = try self.parseMailbox(buffer: &buffer, tracker: tracker)
-            try ParserLibrary.space(buffer: &buffer, tracker: tracker)
+            try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
             let entries = try self.parseEntries(buffer: &buffer, tracker: tracker)
             return .getMetadata(options: options, mailbox: mailbox, entries: entries)
         }
@@ -101,7 +101,7 @@ extension GrammarParser {
         func parseCommandAuth_setMetadata(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
             try ParserLibrary.fixedString("SETMETADATA ", buffer: &buffer, tracker: tracker)
             let mailbox = try self.parseMailbox(buffer: &buffer, tracker: tracker)
-            try ParserLibrary.space(buffer: &buffer, tracker: tracker)
+            try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
             let list = try self.parseEntryValues(buffer: &buffer, tracker: tracker)
             return .setMetadata(mailbox: mailbox, entries: list)
         }
@@ -109,7 +109,7 @@ extension GrammarParser {
         func parseCommandAuth_resetKey(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
             try ParserLibrary.fixedString("RESETKEY", buffer: &buffer, tracker: tracker)
             let _mailbox = try ParserLibrary.optional(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> MailboxName in
-                try ParserLibrary.space(buffer: &buffer, tracker: tracker)
+                try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
                 return try self.parseMailbox(buffer: &buffer, tracker: tracker)
             })
 
@@ -119,7 +119,7 @@ extension GrammarParser {
             }
 
             let mechanisms = try ParserLibrary.parseZeroOrMore(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> URLAuthenticationMechanism in
-                try ParserLibrary.space(buffer: &buffer, tracker: tracker)
+                try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
                 return try self.parseUAuthMechanism(buffer: &buffer, tracker: tracker)
             })
             return .resetKey(mailbox: mailbox, mechanisms: mechanisms)
@@ -128,7 +128,7 @@ extension GrammarParser {
         func parseCommandAuth_generateAuthorizedURL(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
             try ParserLibrary.fixedString("GENURLAUTH", buffer: &buffer, tracker: tracker)
             let array = try ParserLibrary.parseOneOrMore(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> RumpURLAndMechanism in
-                try ParserLibrary.space(buffer: &buffer, tracker: tracker)
+                try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
                 return try self.parseURLRumpMechanism(buffer: &buffer, tracker: tracker)
             })
             return .generateAuthorizedURL(array)
@@ -137,7 +137,7 @@ extension GrammarParser {
         func parseCommandAuth_urlFetch(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
             try ParserLibrary.fixedString("URLFETCH", buffer: &buffer, tracker: tracker)
             let array = try ParserLibrary.parseOneOrMore(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> ByteBuffer in
-                try ParserLibrary.space(buffer: &buffer, tracker: tracker)
+                try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
                 return try self.parseAString(buffer: &buffer, tracker: tracker)
             })
             return .urlFetch(array)

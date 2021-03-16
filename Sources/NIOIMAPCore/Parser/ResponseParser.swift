@@ -109,7 +109,7 @@ extension ResponseParser {
         }
 
         return try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
-            try? ParserLibrary.space(buffer: &buffer, tracker: tracker)
+            try? ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
             do {
                 let response = try ParserLibrary.oneOf([
                     parseResponse_normal,

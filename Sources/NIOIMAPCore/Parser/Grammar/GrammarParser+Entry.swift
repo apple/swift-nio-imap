@@ -27,7 +27,7 @@ extension GrammarParser {
     static func parseEntryValue(buffer: inout ParseBuffer, tracker: StackTracker) throws -> KeyValue<ByteBuffer, MetadataValue> {
         try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> KeyValue<ByteBuffer, MetadataValue> in
             let name = try self.parseAString(buffer: &buffer, tracker: tracker)
-            try ParserLibrary.space(buffer: &buffer, tracker: tracker)
+            try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
             let value = try self.parseMetadataValue(buffer: &buffer, tracker: tracker)
             return .init(key: name, value: value)
         }
@@ -39,7 +39,7 @@ extension GrammarParser {
             var kvs = KeyValues<ByteBuffer, MetadataValue>()
             kvs.append(try self.parseEntryValue(buffer: &buffer, tracker: tracker))
             try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &kvs, tracker: tracker, parser: { buffer, tracker -> KeyValue<ByteBuffer, MetadataValue> in
-                try ParserLibrary.space(buffer: &buffer, tracker: tracker)
+                try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
                 return try self.parseEntryValue(buffer: &buffer, tracker: tracker)
             })
             try ParserLibrary.fixedString(")", buffer: &buffer, tracker: tracker)
@@ -56,7 +56,7 @@ extension GrammarParser {
             try ParserLibrary.fixedString("(", buffer: &buffer, tracker: tracker)
             var array = [try self.parseAString(buffer: &buffer, tracker: tracker)]
             try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker, parser: { buffer, tracker in
-                try ParserLibrary.space(buffer: &buffer, tracker: tracker)
+                try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
                 return try self.parseAString(buffer: &buffer, tracker: tracker)
             })
             try ParserLibrary.fixedString(")", buffer: &buffer, tracker: tracker)
@@ -73,7 +73,7 @@ extension GrammarParser {
         try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             var array = [try self.parseAString(buffer: &buffer, tracker: tracker)]
             try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker, parser: { buffer, tracker in
-                try ParserLibrary.space(buffer: &buffer, tracker: tracker)
+                try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
                 return try self.parseAString(buffer: &buffer, tracker: tracker)
             })
             return array

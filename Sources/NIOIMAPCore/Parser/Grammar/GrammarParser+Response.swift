@@ -38,7 +38,7 @@ extension GrammarParser {
     static func parseTaggedResponse(buffer: inout ParseBuffer, tracker: StackTracker) throws -> TaggedResponse {
         try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> TaggedResponse in
             let tag = try self.parseTag(buffer: &buffer, tracker: tracker)
-            try ParserLibrary.space(buffer: &buffer, tracker: tracker)
+            try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
             let state = try self.parseTaggedResponseState(buffer: &buffer, tracker: tracker)
             try ParserLibrary.newline(buffer: &buffer, tracker: tracker)
             return TaggedResponse(tag: tag, state: state)
@@ -50,7 +50,7 @@ extension GrammarParser {
         try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> ResponseCodeAppend in
             try ParserLibrary.fixedString("APPENDUID ", buffer: &buffer, tracker: tracker)
             let number = try self.parseNZNumber(buffer: &buffer, tracker: tracker)
-            try ParserLibrary.space(buffer: &buffer, tracker: tracker)
+            try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
             let uid = try self.parseUID(buffer: &buffer, tracker: tracker)
             return ResponseCodeAppend(num: number, uid: uid)
         }
@@ -61,9 +61,9 @@ extension GrammarParser {
         try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> ResponseCodeCopy in
             try ParserLibrary.fixedString("COPYUID ", buffer: &buffer, tracker: tracker)
             let uidValidity = try self.parseNumber(buffer: &buffer, tracker: tracker)
-            try ParserLibrary.space(buffer: &buffer, tracker: tracker)
+            try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
             let sourceUIDRanges = try self.parseUIDRangeArray(buffer: &buffer, tracker: tracker)
-            try ParserLibrary.space(buffer: &buffer, tracker: tracker)
+            try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
             let destinationUIDRanges = try self.parseUIDRangeArray(buffer: &buffer, tracker: tracker)
             return ResponseCodeCopy(destinationUIDValidity: uidValidity, sourceUIDs: sourceUIDRanges, destinationUIDs: destinationUIDRanges)
         }
@@ -184,7 +184,7 @@ extension GrammarParser {
 
             // because some servers might not send the text (looking at you, iCloud), they might
             // also not send a space after resp-text-code, so make parsing optional
-            try ParserLibrary.optional(buffer: &buffer, tracker: tracker, parser: ParserLibrary.space)
+            try ParserLibrary.optional(buffer: &buffer, tracker: tracker, parser: ParserLibrary.parseSpaces)
 
             // text requires minimum 1 char, but we want to be lenient here
             // and allow 0 characters to represent empty text
@@ -237,7 +237,7 @@ extension GrammarParser {
                 try ParserLibrary.fixedString(" (", buffer: &buffer, tracker: tracker)
                 var array = [try self.parseCharset(buffer: &buffer, tracker: tracker)]
                 try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) -> String in
-                    try ParserLibrary.space(buffer: &buffer, tracker: tracker)
+                    try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
                     return try self.parseCharset(buffer: &buffer, tracker: tracker)
                 }
                 try ParserLibrary.fixedString(")", buffer: &buffer, tracker: tracker)
@@ -260,7 +260,7 @@ extension GrammarParser {
             let array = try ParserLibrary.optional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> [PermanentFlag] in
                 var array = [try self.parseFlagPerm(buffer: &buffer, tracker: tracker)]
                 try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) in
-                    try ParserLibrary.space(buffer: &buffer, tracker: tracker)
+                    try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
                     return try self.parseFlagPerm(buffer: &buffer, tracker: tracker)
                 }
                 return array
@@ -306,7 +306,7 @@ extension GrammarParser {
         func parseResponseTextCode_atom(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
             let atom = try self.parseAtom(buffer: &buffer, tracker: tracker)
             let string = try ParserLibrary.optional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> String in
-                try ParserLibrary.space(buffer: &buffer, tracker: tracker)
+                try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
                 return try ParserLibrary.parseOneOrMoreCharacters(buffer: &buffer, tracker: tracker) { (char) -> Bool in
                     char.isTextChar && char != UInt8(ascii: "]")
                 }
@@ -363,7 +363,7 @@ extension GrammarParser {
         func parseResponseTextCode_urlMechanisms(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
             try ParserLibrary.fixedString("URLMECH INTERNAL", buffer: &buffer, tracker: tracker)
             let array = try ParserLibrary.parseZeroOrMore(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> MechanismBase64 in
-                try ParserLibrary.space(buffer: &buffer, tracker: tracker)
+                try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
                 return try self.parseMechanismBase64(buffer: &buffer, tracker: tracker)
             })
             return .urlMechanisms(array)
@@ -406,9 +406,9 @@ extension GrammarParser {
         func parseQuotaResource(buffer: inout ParseBuffer, tracker: StackTracker) throws -> QuotaResource {
             try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
                 let resourceName = try parseAtom(buffer: &buffer, tracker: tracker)
-                try ParserLibrary.space(buffer: &buffer, tracker: tracker)
+                try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
                 let usage = try parseNumber(buffer: &buffer, tracker: tracker)
-                try ParserLibrary.space(buffer: &buffer, tracker: tracker)
+                try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
                 let limit = try parseNumber(buffer: &buffer, tracker: tracker)
                 return QuotaResource(resourceName: resourceName, usage: usage, limit: limit)
             }
@@ -421,7 +421,7 @@ extension GrammarParser {
                 var resources: [QuotaResource] = []
                 while let resource = try ParserLibrary.optional(buffer: &buffer, tracker: tracker, parser: parseQuotaResource) {
                     resources.append(resource)
-                    if try ParserLibrary.optional(buffer: &buffer, tracker: tracker, parser: ParserLibrary.space) == nil {
+                    if try ParserLibrary.optional(buffer: &buffer, tracker: tracker, parser: ParserLibrary.parseSpaces) == nil {
                         break
                     }
                 }
@@ -433,7 +433,7 @@ extension GrammarParser {
         return try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             try ParserLibrary.fixedString("QUOTA ", buffer: &buffer, tracker: tracker)
             let quotaRoot = try parseAString(buffer: &buffer, tracker: tracker)
-            try ParserLibrary.space(buffer: &buffer, tracker: tracker)
+            try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
             let resources = try parseQuotaList(buffer: &buffer, tracker: tracker)
             return .quota(.init(quotaRoot), resources)
         }
@@ -445,7 +445,7 @@ extension GrammarParser {
         try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             try ParserLibrary.fixedString("QUOTAROOT ", buffer: &buffer, tracker: tracker)
             let mailbox = try parseMailbox(buffer: &buffer, tracker: tracker)
-            try ParserLibrary.space(buffer: &buffer, tracker: tracker)
+            try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
             let quotaRoot = try parseAString(buffer: &buffer, tracker: tracker)
             return .quotaRoot(mailbox, .init(quotaRoot))
         }

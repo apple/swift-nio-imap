@@ -45,7 +45,7 @@ extension GrammarParser {
         func parseMessageData_generateAuthorizedURL(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageData {
             try ParserLibrary.fixedString("GENURLAUTH", buffer: &buffer, tracker: tracker)
             let array = try ParserLibrary.parseOneOrMore(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> ByteBuffer in
-                try ParserLibrary.space(buffer: &buffer, tracker: tracker)
+                try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
                 return try self.parseAString(buffer: &buffer, tracker: tracker)
             })
             return .generateAuthorizedURL(array)
@@ -54,7 +54,7 @@ extension GrammarParser {
         func parseMessageData_fetchData(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageData {
             try ParserLibrary.fixedString("URLFETCH", buffer: &buffer, tracker: tracker)
             let array = try ParserLibrary.parseOneOrMore(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> URLFetchData in
-                try ParserLibrary.space(buffer: &buffer, tracker: tracker)
+                try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
                 return try self.parseURLFetchData(buffer: &buffer, tracker: tracker)
             })
             return .urlFetch(array)
@@ -82,7 +82,7 @@ extension GrammarParser {
         func parseMessageAttribute_flags(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute {
             try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> MessageAttribute in
                 try ParserLibrary.fixedString("FLAGS", buffer: &buffer, tracker: tracker)
-                try ParserLibrary.space(buffer: &buffer, tracker: tracker)
+                try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
                 let flags = try self.parseFlagList(buffer: &buffer, tracker: tracker)
                 return .flags(flags)
             }
@@ -113,7 +113,7 @@ extension GrammarParser {
                     return false
                 }
             }()
-            try ParserLibrary.space(buffer: &buffer, tracker: tracker)
+            try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
             let body = try self.parseBody(buffer: &buffer, tracker: tracker)
             return .body(body, hasExtensionData: hasExtensionData)
         }
@@ -126,7 +126,7 @@ extension GrammarParser {
         func parseMessageAttribute_binarySize(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute {
             try ParserLibrary.fixedString("BINARY.SIZE", buffer: &buffer, tracker: tracker)
             let section = try self.parseSectionBinary(buffer: &buffer, tracker: tracker)
-            try ParserLibrary.space(buffer: &buffer, tracker: tracker)
+            try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
             let number = try self.parseNumber(buffer: &buffer, tracker: tracker)
             return .binarySize(section: section, size: number)
         }
@@ -134,7 +134,7 @@ extension GrammarParser {
         func parseMessageAttribute_binary(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute {
             try ParserLibrary.fixedString("BINARY", buffer: &buffer, tracker: tracker)
             let section = try self.parseSectionBinary(buffer: &buffer, tracker: tracker)
-            try ParserLibrary.space(buffer: &buffer, tracker: tracker)
+            try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
             let string = try self.parseNString(buffer: &buffer, tracker: tracker)
             return .binary(section: section, data: string)
         }
@@ -145,14 +145,14 @@ extension GrammarParser {
 
         func parseMessageAttribute_gmailMessageID(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute {
             try ParserLibrary.fixedString("X-GM-MSGID", buffer: &buffer, tracker: tracker)
-            try ParserLibrary.space(buffer: &buffer, tracker: tracker)
+            try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
             let (id, _) = try ParserLibrary.parseUInt64(buffer: &buffer, tracker: tracker)
             return .gmailMessageID(id)
         }
 
         func parseMessageAttribute_gmailThreadID(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute {
             try ParserLibrary.fixedString("X-GM-THRID", buffer: &buffer, tracker: tracker)
-            try ParserLibrary.space(buffer: &buffer, tracker: tracker)
+            try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
             let (id, _) = try ParserLibrary.parseUInt64(buffer: &buffer, tracker: tracker)
             return .gmailThreadID(id)
         }
@@ -169,7 +169,7 @@ extension GrammarParser {
                 attributes.append(first)
 
                 try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &attributes, tracker: tracker) { buffer, tracker in
-                    try ParserLibrary.space(buffer: &buffer, tracker: tracker)
+                    try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
                     return try parseGmailLabel(buffer: &buffer, tracker: tracker)
                 }
             }

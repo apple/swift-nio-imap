@@ -236,7 +236,7 @@ extension ParserLibraryTests {
         for (string, remaining, line) in inputs {
             var string = ParseBuffer(ByteBuffer(string: string))
             let remaining = ParseBuffer(ByteBuffer(string: remaining))
-            XCTAssertNoThrow(try ParserLibrary.space(buffer: &string, tracker: .makeNewDefaultLimitStackTracker), line: line)
+            XCTAssertNoThrow(try ParserLibrary.parseSpaces(buffer: &string, tracker: .makeNewDefaultLimitStackTracker), line: line)
             XCTAssertEqual(string, remaining, line: line)
         }
     }

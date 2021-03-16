@@ -188,7 +188,7 @@ extension ParserLibrary {
         }
     }
 
-    static func space(buffer: inout ParseBuffer, tracker: StackTracker) throws {
+    static func parseSpaces(buffer: inout ParseBuffer, tracker: StackTracker) throws {
         try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, _ in
 
             // need at least one readable byte
@@ -213,7 +213,7 @@ extension ParserLibrary {
         try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, _ in
             
             if allowLeadingSpaces {
-                try self.optional(buffer: &buffer, tracker: tracker, parser: self.space)
+                try self.optional(buffer: &buffer, tracker: tracker, parser: self.parseSpaces)
             }
             
             let needleCount = needle.utf8.count
