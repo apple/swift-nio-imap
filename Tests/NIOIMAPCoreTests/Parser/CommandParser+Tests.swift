@@ -35,6 +35,20 @@ extension CommandParser_Tests {
 // MARK: - Test normal usage
 
 extension CommandParser_Tests {
+    // test that we don't just get returned an empty byte case if
+    // we haven't yet recieved any literal data from the network
+    func testParseEmptyByteBufferAppend() {
+        var input = ByteBuffer("1 APPEND INBOX {5}\r\n") // everything except the literal data
+        var parser = CommandParser()
+        XCTAssertNoThrow(XCTAssertNotNil(try parser.parseCommandStream(buffer: &input)))
+        XCTAssertNoThrow(XCTAssertNotNil(try parser.parseCommandStream(buffer: &input)))
+
+        // At this point we should have parse off all the metadata
+        // so should be ready for the literal
+        var literalBuffer = ByteBuffer(string: "")
+        XCTAssertNoThrow(XCTAssertNil(try parser.parseCommandStream(buffer: &literalBuffer)))
+    }
+
     func testNormalUsage() {
         var input = ByteBuffer("")
         var parser = CommandParser()

@@ -71,6 +71,10 @@ public struct CommandParser: Parser {
     /// - parameter buffer: A `ByteBuffer` that will be consumed for parsing.
     /// - returns: A `CommandStream` that can be sent.
     public mutating func parseCommandStream(buffer: inout ByteBuffer) throws -> PartialCommandStream? {
+        guard buffer.readableBytes > 0 else {
+            return nil
+        }
+
         let save = buffer
         let framingResult = try self.synchronisingLiteralParser.parseContinuationsNecessary(buffer)
         var actuallyVisible = ParseBuffer(buffer.getSlice(at: buffer.readerIndex, length: framingResult.maximumValidBytes)!)
