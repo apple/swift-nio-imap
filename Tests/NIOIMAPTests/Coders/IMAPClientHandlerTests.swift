@@ -243,15 +243,15 @@ class IMAPClientHandlerTests: XCTestCase {
         // should be written as a quoted
         let command1 = CommandStream.command(.init(tag: "A1", command: .create(.init(.init(string: "name")), [])))
         XCTAssertNoThrow(try channel.writeOutbound(command1))
-        XCTAssertNoThrow(XCTAssertEqual(try channel.readOutbound(as: ByteBuffer.self), "A1 CREATE \"name\"\r\n"))
+        self.assertOutboundString("A1 CREATE \"name\"\r\n")
 
         // lets disable quoteds, should be literal
         handler.encodingOptions.useQuotedString = false
         let command2 = CommandStream.command(.init(tag: "A2", command: .create(.init(.init(string: "name")), [])))
         XCTAssertNoThrow(try channel.writeOutbound(command2))
-        XCTAssertNoThrow(XCTAssertEqual(try channel.readOutbound(as: ByteBuffer.self), "A2 CREATE {4}\r\n"))
+        self.assertOutboundString("A2 CREATE {4}\r\n")
         XCTAssertNoThrow(try channel.writeInbound(ByteBuffer(string: "+ OK\r\n")))
-        XCTAssertNoThrow(XCTAssertEqual(try channel.readOutbound(as: ByteBuffer.self), "name\r\n"))
+        self.assertOutboundString("name\r\n")
 
         // now force non-sync literals
         handler.encodingOptions.useNonSynchronizingLiteralPlus = true
