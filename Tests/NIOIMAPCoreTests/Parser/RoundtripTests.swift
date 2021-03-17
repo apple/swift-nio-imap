@@ -33,7 +33,7 @@ final class RoundtripTests: XCTestCase {
 
             (.login(username: "user", password: "password"), #line),
 
-            (.authenticate(method: "some", initialClientResponse: nil), #line),
+            (.authenticate(method: .init("some"), initialClientResponse: nil), #line),
 
             (.create(.inbox, []), #line),
             (.create(MailboxName("mailbox"), []), #line),
