@@ -260,7 +260,7 @@ class IMAPClientHandlerTests: XCTestCase {
         XCTAssertNoThrow(XCTAssertEqual(try channel.readOutbound(as: ByteBuffer.self), "A3 CREATE \"name\"\r\n"))
 
     }
-    
+
     func testContinuationRequestsAsUserEvents() {
         let eventExpectation1 = self.channel.eventLoop.makePromise(of: Void.self)
         let eventExpectation2 = self.channel.eventLoop.makePromise(of: Void.self)
