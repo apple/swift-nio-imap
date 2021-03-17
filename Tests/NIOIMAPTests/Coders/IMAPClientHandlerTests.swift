@@ -131,7 +131,7 @@ class IMAPClientHandlerTests: XCTestCase {
     }
 
     func testStateTransformation() {
-        let handler = IMAPClientHandler()
+        let handler = IMAPClientHandler(encodingOptions: .init())
         let channel = EmbeddedChannel(handler: handler, loop: .init())
 
         // move into an idle state
@@ -235,6 +235,32 @@ class IMAPClientHandlerTests: XCTestCase {
         XCTAssertEqual(handler._state, .expectingResponses)
     }
 
+    func testChangingCapabilitesChangesEncoding() {
+        // let's start with default encoding options (RFC 3501 compatible)
+        let handler = IMAPClientHandler(encodingOptions: .init())
+        let channel = EmbeddedChannel(handler: handler, loop: .init())
+
+        // should be written as a quoted
+        let command1 = CommandStream.command(.init(tag: "A1", command: .create(.init(.init(string: "name")), [])))
+        XCTAssertNoThrow(try channel.writeOutbound(command1))
+        XCTAssertNoThrow(XCTAssertEqual(try channel.readOutbound(as: ByteBuffer.self), "A1 CREATE \"name\"\r\n"))
+
+        // lets disable quoteds, should be literal
+        handler.encodingOptions.useQuotedString = false
+        let command2 = CommandStream.command(.init(tag: "A2", command: .create(.init(.init(string: "name")), [])))
+        XCTAssertNoThrow(try channel.writeOutbound(command2))
+        XCTAssertNoThrow(XCTAssertEqual(try channel.readOutbound(as: ByteBuffer.self), "A2 CREATE {4}\r\n"))
+        XCTAssertNoThrow(try channel.writeInbound(ByteBuffer(string: "+ OK\r\n")))
+        XCTAssertNoThrow(XCTAssertEqual(try channel.readOutbound(as: ByteBuffer.self), "name\r\n"))
+
+        // now force non-sync literals
+        handler.encodingOptions.useNonSynchronizingLiteralPlus = true
+        let command3 = CommandStream.command(.init(tag: "A3", command: .create(.init(.init(string: "name")), [])))
+        XCTAssertNoThrow(try channel.writeOutbound(command3))
+        XCTAssertNoThrow(XCTAssertEqual(try channel.readOutbound(as: ByteBuffer.self), "A3 CREATE \"name\"\r\n"))
+
+    }
+    
     func testContinuationRequestsAsUserEvents() {
         let eventExpectation1 = self.channel.eventLoop.makePromise(of: Void.self)
         let eventExpectation2 = self.channel.eventLoop.makePromise(of: Void.self)
@@ -300,7 +326,7 @@ class IMAPClientHandlerTests: XCTestCase {
 
     override func setUp() {
         XCTAssertNil(self.channel)
-        self.channel = EmbeddedChannel(handler: IMAPClientHandler())
+        self.channel = EmbeddedChannel(handler: IMAPClientHandler(encodingOptions: .init()))
     }
 
     override func tearDown() {

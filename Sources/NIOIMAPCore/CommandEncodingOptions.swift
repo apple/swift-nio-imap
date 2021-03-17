@@ -39,6 +39,20 @@ public struct CommandEncodingOptions: Equatable {
         self.useNonSynchronizingLiteralMinus = false
         self.useBinaryLiteral = false
     }
+
+    public init(
+        useQuotedString: Bool,
+        useSynchronizingLiteral: Bool,
+        useNonSynchronizingLiteralPlus: Bool,
+        useNonSynchronizingLiteralMinus: Bool,
+        useBinaryLiteral: Bool
+    ) {
+        self.useQuotedString = useQuotedString
+        self.useSynchronizingLiteral = useSynchronizingLiteral
+        self.useNonSynchronizingLiteralPlus = useNonSynchronizingLiteralPlus
+        self.useNonSynchronizingLiteralMinus = useNonSynchronizingLiteralMinus
+        self.useBinaryLiteral = useBinaryLiteral
+    }
 }
 
 extension CommandEncodingOptions {

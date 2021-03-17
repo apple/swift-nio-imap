@@ -36,13 +36,13 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
     public struct UnexpectedContinuationRequest: Error {}
 
     private(set) var _state: ClientHandlerState
-    
-    /// Capabilites are sent by an IMAP server. Once the desired capabilits have been
-    /// select from the server's response, update this array. The new capabilites will be used
-    /// on the next encode.
+
+    /// Capabilites are sent by an IMAP server. Once the desired capabilities have been
+    /// select from the server's response, update these encoding options to enable or disable
+    /// certain types of literal encodings.
     /// - Note: Make sure to send `.enable` commands for appicable capabilities
     /// - Important: Modifying this value is not thread-safe
-    public var capabilities: [Capability] = []
+    public var encodingOptions: CommandEncodingOptions
 
     enum ClientHandlerState: Equatable {
         /// We're expecting continuations to come back during a command.
@@ -56,9 +56,10 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
         case expectingResponses
     }
 
-    public init() {
+    public init(encodingOptions: CommandEncodingOptions) {
         self.decoder = NIOSingleStepByteToMessageProcessor(ResponseDecoder(), maximumBufferSize: 1_000)
         self._state = .expectingResponses
+        self.encodingOptions = encodingOptions
     }
 
     public func channelRead(context: ChannelHandlerContext, data: NIOAny) {
@@ -116,7 +117,7 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
 
     public func write(context: ChannelHandlerContext, data: NIOAny, promise: EventLoopPromise<Void>?) {
         let command = self.unwrapOutboundIn(data)
-        var encoder = CommandEncodeBuffer(buffer: context.channel.allocator.buffer(capacity: 1024), options: .init(capabilities: self.capabilities))
+        var encoder = CommandEncodeBuffer(buffer: context.channel.allocator.buffer(capacity: 1024), options: self.encodingOptions)
         encoder.writeCommandStream(command)
 
         switch command {
