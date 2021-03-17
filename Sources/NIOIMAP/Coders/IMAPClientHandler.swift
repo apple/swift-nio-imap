@@ -40,7 +40,7 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
     /// Capabilites are sent by an IMAP server. Once the desired capabilities have been
     /// select from the server's response, update these encoding options to enable or disable
     /// certain types of literal encodings.
-    /// - Note: Make sure to send `.enable` commands for appicable capabilities
+    /// - Note: Make sure to send `.enable` commands for applicable capabilities
     /// - Important: Modifying this value is not thread-safe
     public var encodingOptions: CommandEncodingOptions
 
