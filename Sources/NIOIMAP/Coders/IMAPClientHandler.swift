@@ -36,6 +36,13 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
     public struct UnexpectedContinuationRequest: Error {}
 
     private(set) var _state: ClientHandlerState
+    
+    /// Capabilites are sent by an IMAP server. Once the desired capabilits have been
+    /// select from the server's response, update this array. The new capabilites will be used
+    /// on the next encode.
+    /// - Note: Make sure to send `.enable` commands for appicable capabilities
+    /// - Important: Modifying this value is not thread-safe
+    public var capabilities: [Capability] = []
 
     enum ClientHandlerState: Equatable {
         /// We're expecting continuations to come back during a command.
@@ -109,7 +116,7 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
 
     public func write(context: ChannelHandlerContext, data: NIOAny, promise: EventLoopPromise<Void>?) {
         let command = self.unwrapOutboundIn(data)
-        var encoder = CommandEncodeBuffer(buffer: context.channel.allocator.buffer(capacity: 1024), capabilities: [])
+        var encoder = CommandEncodeBuffer(buffer: context.channel.allocator.buffer(capacity: 1024), options: .init(capabilities: self.capabilities))
         encoder.writeCommandStream(command)
 
         switch command {
