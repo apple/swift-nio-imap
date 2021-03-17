@@ -97,7 +97,7 @@ extension GrammarParser {
     static func parseAuthenticate(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
         try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Command in
             try ParserLibrary.fixedString("AUTHENTICATE ", buffer: &buffer, tracker: tracker)
-            let authMethod = try self.parseAtom(buffer: &buffer, tracker: tracker)
+            let authMethod = AuthenticationKind(try self.parseAtom(buffer: &buffer, tracker: tracker))
             let parseInitialClientResponse = try ParserLibrary.optional(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> InitialClientResponse in
                 try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
                 return try self.parseInitialClientResponse(buffer: &buffer, tracker: tracker)
