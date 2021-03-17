@@ -33,7 +33,7 @@ public struct AuthenticationKind: Hashable {
     public static let gssAPI = Self(unchecked: "GSSAPI")
 
     /// The name of the authentication method.
-    public var rawValue: String
+    public let rawValue: String
 
     /// Creates a new `AuthenticationKind`.
     /// - parameter value: The name of the authentication method. Will be uppercased.
