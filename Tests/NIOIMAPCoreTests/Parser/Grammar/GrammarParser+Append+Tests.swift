@@ -98,7 +98,7 @@ extension GrammarParser_Append_Tests {
         self.iterateTests(
             testFunction: GrammarParser.parseAppendOptions,
             validInputs: [
-                ("", "\r", .init(flagList: [], internalDate: nil, extensions: [:]), #line),
+                ("", "\r", .none, #line),
                 (" (\\Answered)", "\r", .init(flagList: [.answered], internalDate: nil, extensions: [:]), #line),
                 (
                     " \"25-jun-1994 01:02:03 +0000\"",
