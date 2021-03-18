@@ -61,13 +61,13 @@ extension GrammarParser_Commands_Tests {
                 ("GETMETADATA INBOX (test)", "\r", .getMetadata(options: [], mailbox: .inbox, entries: ["test"]), #line),
                 ("SETMETADATA INBOX (test NIL)", "\r", .setMetadata(mailbox: .inbox, entries: ["test": nil]), #line),
                 ("RESETKEY INBOX INTERNAL", "\r", .resetKey(mailbox: .inbox, mechanisms: [.internal]), #line),
-                ("GENURLAUTH rump INTERNAL", "\r", .genURLAuth([.init(urlRump: "rump", mechanism: .internal)]), #line),
+                ("GENURLAUTH rump INTERNAL", "\r", .generateAuthorizedURL([.init(urlRump: "rump", mechanism: .internal)]), #line),
                 ("URLFETCH test", "\r", .urlFetch(["test"]), #line),
-                ("COPY 1 INBOX", "\r", .copy([1], .inbox), #line),
+                ("COPY 1 INBOX", "\r", .copy(.set([1]), .inbox), #line),
                 ("DELETE INBOX", "\r", .delete(.inbox), #line),
                 ("MOVE $ INBOX", "\r", .move(.lastCommand, .inbox), #line),
                 ("SEARCH ALL", "\r", .search(key: .all, charset: nil, returnOptions: []), #line),
-                ("ESEARCH ALL", "\r", .esearch(.init(key: .all)), #line),
+                ("ESEARCH ALL", "\r", .extendedsearch(.init(key: .all)), #line),
                 ("STORE $ +FLAGS \\Answered", "\r", .store(.lastCommand, [], .add(silent: false, list: [.answered])), #line),
                 ("EXAMINE INBOX", "\r", .examine(.inbox, .init()), #line),
                 ("LIST INBOX test", "\r", .list(nil, reference: .inbox, .mailbox("test"), []), #line),
@@ -77,10 +77,10 @@ extension GrammarParser_Commands_Tests {
                 ("STATUS INBOX (SIZE)", "\r", .status(.inbox, [.size]), #line),
                 ("SUBSCRIBE INBOX", "\r", .subscribe(.inbox), #line),
                 ("UNSUBSCRIBE INBOX", "\r", .unsubscribe(.inbox), #line),
-                ("UID EXPUNGE 1:2", "\r", .uidExpunge([1...2]), #line),
+                ("UID EXPUNGE 1:2", "\r", .uidExpunge(.set([1...2])), #line),
                 ("FETCH $ (FLAGS)", "\r", .fetch(.lastCommand, [.flags], .init()), #line),
                 ("LOGIN \"user\" \"password\"", "\r", .login(username: "user", password: "password"), #line),
-                ("AUTHENTICATE GSSAPI", "\r", .authenticate(method: "GSSAPI", initialClientResponse: nil), #line),
+                ("AUTHENTICATE GSSAPI", "\r", .authenticate(method: AuthenticationKind("GSSAPI"), initialClientResponse: nil), #line),
                 ("CREATE test", "\r", .create(.init("test"), []), #line),
                 ("GETQUOTA root", "\r", .getQuota(.init("root")), #line),
                 ("GETQUOTAROOT INBOX", "\r", .getQuotaRoot(.inbox), #line),
@@ -107,7 +107,7 @@ extension GrammarParser_Commands_Tests {
         self.iterateTests(
             testFunction: GrammarParser.parseCommandSuffix_id,
             validInputs: [
-
+                
             ],
             parserErrorInputs: [
             ],
@@ -118,22 +118,12 @@ extension GrammarParser_Commands_Tests {
 
     func testParseCommandSuffix_enable() {
         self.iterateTests(
-            testFunction: GrammarParser.parseCommandSuffix_id,
+            testFunction: GrammarParser.parseCommandSuffix_enable,
             validInputs: [
-                ("LSUB inbox someList", " ", .lsub(reference: .inbox, pattern: "someList"), #line),
-                ("CREATE inbox (something)", " ", .create(.inbox, [.labelled(.init(key: "something", value: nil))]), #line),
-                ("NAMESPACE", " ", .namespace, #line),
-                ("GETMETADATA INBOX a", " ", .getMetadata(options: [], mailbox: .inbox, entries: ["a"]), #line),
-                ("GETMETADATA (MAXSIZE 123) INBOX (a b)", " ", .getMetadata(options: [.maxSize(123)], mailbox: .inbox, entries: ["a", "b"]), #line),
-                ("SETMETADATA INBOX (a NIL)", " ", .setMetadata(mailbox: .inbox, entries: ["a": .init(nil)]), #line),
-                ("RESETKEY", "\r", .resetKey(mailbox: nil, mechanisms: []), #line),
-                ("RESETKEY INBOX", "\r", .resetKey(mailbox: .inbox, mechanisms: []), #line),
-                ("RESETKEY INBOX INTERNAL", "\r", .resetKey(mailbox: .inbox, mechanisms: [.internal]), #line),
-                ("RESETKEY INBOX INTERNAL test", "\r", .resetKey(mailbox: .inbox, mechanisms: [.internal, .init("test")]), #line),
-                ("GENURLAUTH test INTERNAL", "\r", .generateAuthorizedURL([.init(urlRump: "test", mechanism: .internal)]), #line),
-                ("GENURLAUTH test INTERNAL test2 INTERNAL", "\r", .generateAuthorizedURL([.init(urlRump: "test", mechanism: .internal), .init(urlRump: "test2", mechanism: .internal)]), #line),
-                ("URLFETCH test", "\r", .urlFetch(["test"]), #line),
-                ("URLFETCH test1 test2", "\r", .urlFetch(["test1", "test2"]), #line),
+                
+            ],
+            parserErrorInputs: [
+            
             ],
             incompleteMessageInputs: [
             ]
@@ -142,9 +132,10 @@ extension GrammarParser_Commands_Tests {
 
     func testParseCommandSuffix_getMetadata() {
         self.iterateTests(
-            testFunction: GrammarParser.parseCommandSuffix_id,
+            testFunction: GrammarParser.parseCommandSuffix_getMetadata,
             validInputs: [
-
+                (" INBOX a", " ", .getMetadata(options: [], mailbox: .inbox, entries: ["a"]), #line),
+                (" (MAXSIZE 123) INBOX (a b)", " ", .getMetadata(options: [.maxSize(123)], mailbox: .inbox, entries: ["a", "b"]), #line),
             ],
             parserErrorInputs: [
             ],
@@ -155,9 +146,9 @@ extension GrammarParser_Commands_Tests {
 
     func testParseCommandSuffix_setMetadata() {
         self.iterateTests(
-            testFunction: GrammarParser.parseCommandSuffix_id,
+            testFunction: GrammarParser.parseCommandSuffix_setMetadata,
             validInputs: [
-
+                (" INBOX (a NIL)", " ", .setMetadata(mailbox: .inbox, entries: ["a": .init(nil)]), #line),
             ],
             parserErrorInputs: [
             ],
@@ -168,9 +159,12 @@ extension GrammarParser_Commands_Tests {
 
     func testParseCommandSuffix_resetKey() {
         self.iterateTests(
-            testFunction: GrammarParser.parseCommandSuffix_id,
+            testFunction: GrammarParser.parseCommandSuffix_resetKey,
             validInputs: [
-
+                ("", "\r", .resetKey(mailbox: nil, mechanisms: []), #line),
+                (" INBOX", "\r", .resetKey(mailbox: .inbox, mechanisms: []), #line),
+                (" INBOX INTERNAL", "\r", .resetKey(mailbox: .inbox, mechanisms: [.internal]), #line),
+                (" INBOX INTERNAL test", "\r", .resetKey(mailbox: .inbox, mechanisms: [.internal, .init("test")]), #line),
             ],
             parserErrorInputs: [
             ],
@@ -181,9 +175,10 @@ extension GrammarParser_Commands_Tests {
 
     func testParseCommandSuffix_genURLAuth() {
         self.iterateTests(
-            testFunction: GrammarParser.parseCommandSuffix_id,
+            testFunction: GrammarParser.parseCommandSuffix_genURLAuth,
             validInputs: [
-
+                (" test INTERNAL", "\r", .generateAuthorizedURL([.init(urlRump: "test", mechanism: .internal)]), #line),
+                (" test INTERNAL test2 INTERNAL", "\r", .generateAuthorizedURL([.init(urlRump: "test", mechanism: .internal), .init(urlRump: "test2", mechanism: .internal)]), #line),
             ],
             parserErrorInputs: [
             ],
@@ -194,9 +189,10 @@ extension GrammarParser_Commands_Tests {
 
     func testParseCommandSuffix_urlFetch() {
         self.iterateTests(
-            testFunction: GrammarParser.parseCommandSuffix_id,
+            testFunction: GrammarParser.parseCommandSuffix_urlFetch,
             validInputs: [
-
+                (" test", "\r", .urlFetch(["test"]), #line),
+                (" test1 test2", "\r", .urlFetch(["test1", "test2"]), #line),
             ],
             parserErrorInputs: [
             ],
@@ -207,7 +203,7 @@ extension GrammarParser_Commands_Tests {
 
     func testParseCommandSuffix_copy() {
         self.iterateTests(
-            testFunction: GrammarParser.parseCommandSuffix_id,
+            testFunction: GrammarParser.parseCommandSuffix_copy,
             validInputs: [
 
             ],
@@ -220,7 +216,7 @@ extension GrammarParser_Commands_Tests {
 
     func testParseCommandSuffix_delete() {
         self.iterateTests(
-            testFunction: GrammarParser.parseCommandSuffix_id,
+            testFunction: GrammarParser.parseCommandSuffix_delete,
             validInputs: [
 
             ],
@@ -233,7 +229,7 @@ extension GrammarParser_Commands_Tests {
 
     func testParseCommandSuffix_move() {
         self.iterateTests(
-            testFunction: GrammarParser.parseCommandSuffix_id,
+            testFunction: GrammarParser.parseCommandSuffix_move,
             validInputs: [
 
             ],
@@ -246,7 +242,7 @@ extension GrammarParser_Commands_Tests {
 
     func testParseCommandSuffix_search() {
         self.iterateTests(
-            testFunction: GrammarParser.parseCommandSuffix_id,
+            testFunction: GrammarParser.parseCommandSuffix_search,
             validInputs: [
 
             ],
@@ -259,7 +255,7 @@ extension GrammarParser_Commands_Tests {
 
     func testParseCommandSuffix_esearch() {
         self.iterateTests(
-            testFunction: GrammarParser.parseCommandSuffix_id,
+            testFunction: GrammarParser.parseCommandSuffix_esearch,
             validInputs: [
 
             ],
@@ -272,7 +268,7 @@ extension GrammarParser_Commands_Tests {
 
     func testParseCommandSuffix_store() {
         self.iterateTests(
-            testFunction: GrammarParser.parseCommandSuffix_id,
+            testFunction: GrammarParser.parseCommandSuffix_store,
             validInputs: [
 
             ],
@@ -285,7 +281,7 @@ extension GrammarParser_Commands_Tests {
 
     func testParseCommandSuffix_examine() {
         self.iterateTests(
-            testFunction: GrammarParser.parseCommandSuffix_id,
+            testFunction: GrammarParser.parseCommandSuffix_examine,
             validInputs: [
 
             ],
@@ -298,7 +294,7 @@ extension GrammarParser_Commands_Tests {
 
     func testParseCommandSuffix_list() {
         self.iterateTests(
-            testFunction: GrammarParser.parseCommandSuffix_id,
+            testFunction: GrammarParser.parseCommandSuffix_list,
             validInputs: [
 
             ],
@@ -311,9 +307,9 @@ extension GrammarParser_Commands_Tests {
 
     func testParseCommandSuffix_LSUB() {
         self.iterateTests(
-            testFunction: GrammarParser.parseCommandSuffix_id,
+            testFunction: GrammarParser.parseCommandSuffix_LSUB,
             validInputs: [
-
+                (" inbox someList", " ", .lsub(reference: .inbox, pattern: "someList"), #line),
             ],
             parserErrorInputs: [
             ],
@@ -324,7 +320,7 @@ extension GrammarParser_Commands_Tests {
 
     func testParseCommandSuffix_rename() {
         self.iterateTests(
-            testFunction: GrammarParser.parseCommandSuffix_id,
+            testFunction: GrammarParser.parseCommandSuffix_rename,
             validInputs: [
 
             ],
@@ -337,7 +333,7 @@ extension GrammarParser_Commands_Tests {
 
     func testParseCommandSuffix_select() {
         self.iterateTests(
-            testFunction: GrammarParser.parseCommandSuffix_id,
+            testFunction: GrammarParser.parseCommandSuffix_select,
             validInputs: [
 
             ],
@@ -350,7 +346,7 @@ extension GrammarParser_Commands_Tests {
 
     func testParseCommandSuffix_status() {
         self.iterateTests(
-            testFunction: GrammarParser.parseCommandSuffix_id,
+            testFunction: GrammarParser.parseCommandSuffix_status,
             validInputs: [
 
             ],
@@ -441,9 +437,9 @@ extension GrammarParser_Commands_Tests {
 
     func testParseCommandSuffix_create() {
         self.iterateTests(
-            testFunction: GrammarParser.parseCommandSuffix_id,
+            testFunction: GrammarParser.parseCommandSuffix_create,
             validInputs: [
-
+                ("CREATE inbox (something)", " ", .create(.inbox, [.labelled(.init(key: "something", value: nil))]), #line),
             ],
             parserErrorInputs: [
             ],
