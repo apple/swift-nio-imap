@@ -88,7 +88,7 @@ extension _EncodeBuffer {
     private mutating func writeMailboxPathSeparator(_ character: Character?) -> Int {
         switch character {
         case nil:
-            return self._writeString("NIL")
+            return self.writeNil()
         case "\\":
             return self._writeString(#""\""#)
         case "\"":
