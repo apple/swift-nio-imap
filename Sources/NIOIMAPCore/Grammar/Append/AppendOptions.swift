@@ -24,7 +24,7 @@ public struct AppendOptions: Equatable {
 
     /// Any additional pieces of information to be associated with the message. Implemented as a "catch-all" to support future extensions.
     public var extensions: KeyValues<String, ParameterValue>
-    
+
     /// Creates a new `AppendOptions` with no flags, internal date, or extensions.
     /// Provided as syntactic sugar to use instead of `.init()`.
     public static let none = Self()
