@@ -23,50 +23,6 @@ let badOS = { fatalError("unsupported OS") }()
 import struct NIO.ByteBuffer
 import struct NIO.ByteBufferView
 
-// MARK: - Parsing map
-
-private let commandParsers: [String: (inout ByteBuffer, StackTracker) throws -> Command] = [
-    "CAPABILITY":   { _, _ in .capability },
-    "LOGOUT":       { _, _ in .logout },
-    "NOOP":         { _, _ in .noop },
-    "STARTTLS":     { _, _ in .starttls },
-    "CHECK":        { _, _ in .check },
-    "CLOSE":        { _, _ in .close },
-    "EXPUNGE":      { _, _ in .expunge },
-    "UNSELECT":     { _, _ in .unselect },
-    "IDLE":         { _, _ in .idleStart },
-    "NAMESPACE":    { _, _ in .namespace },
-    "ID":           GrammarParser.parseCommandSuffix_id,
-    "ENABLE":       GrammarParser.parseCommandSuffix_enable,
-    "GETMETADATA":  GrammarParser.parseCommandSuffix_getMetadata,
-    "SETMETADATA":  GrammarParser.parseCommandSuffix_setMetadata,
-    "RESETKEY":     GrammarParser.parseCommandSuffix_resetKey,
-    "GENURLAUTH":   GrammarParser.parseCommandSuffix_genURLAuth,
-    "URLFETCH":     GrammarParser.parseCommandSuffix_urlFetch,
-    "COPY":         GrammarParser.parseCommandSuffix_copy,
-    "DELETE":       GrammarParser.parseCommandSuffix_delete,
-    "MOVE":         GrammarParser.parseCommandSuffix_move,
-    "SEARCH":       GrammarParser.parseCommandSuffix_search,
-    "ESEARCH":      GrammarParser.parseCommandSuffix_esearch,
-    "STORE":        GrammarParser.parseCommandSuffix_store,
-    "EXAMINE":      GrammarParser.parseCommandSuffix_examine,
-    "LIST":         GrammarParser.parseCommandSuffix_list,
-    "LSUB":         GrammarParser.parseCommandSuffix_LSUB,
-    "RENAME":       GrammarParser.parseCommandSuffix_rename,
-    "SELECT":       GrammarParser.parseCommandSuffix_select,
-    "STATUS":       GrammarParser.parseCommandSuffix_status,
-    "SUBSCRIBE":    GrammarParser.parseCommandSuffix_subscribe,
-    "UNSUBSCRIBE":  GrammarParser.parseCommandSuffix_unsubscribe,
-    "UID":          GrammarParser.parseCommandSuffix_uid,
-    "FETCH":        GrammarParser.parseCommandSuffix_fetch,
-    "LOGIN":        GrammarParser.parseCommandSuffix_login,
-    "AUTHENTICATE": GrammarParser.parseCommandSuffix_authenticate,
-    "CREATE":       GrammarParser.parseCommandSuffix_create,
-    "GETQUOTA":     GrammarParser.parseCommandSuffix_getQuota,
-    "SETQUOTA":     GrammarParser.parseCommandSuffix_setQuota,
-    "GETQUOTAROOT": GrammarParser.parseCommandSuffix_getQuotaRoot,
-]
-
 // MARK: Top-level parser
 
 extension GrammarParser {
@@ -82,7 +38,48 @@ extension GrammarParser {
     // command         = tag SP (command-any / command-auth / command-nonauth /
     //                   command-select) CRLF
     static func parseCommand(buffer: inout ByteBuffer, tracker: StackTracker) throws -> Command {
-        try parseFromLookupTable(buffer: &buffer, tracker: tracker, parsers: commandParsers)
+        let commandParsers: [String: (inout ByteBuffer, StackTracker) throws -> Command] = [
+            "CAPABILITY":   { _, _ in .capability },
+            "LOGOUT":       { _, _ in .logout },
+            "NOOP":         { _, _ in .noop },
+            "STARTTLS":     { _, _ in .starttls },
+            "CHECK":        { _, _ in .check },
+            "CLOSE":        { _, _ in .close },
+            "EXPUNGE":      { _, _ in .expunge },
+            "UNSELECT":     { _, _ in .unselect },
+            "IDLE":         { _, _ in .idleStart },
+            "NAMESPACE":    { _, _ in .namespace },
+            "ID":           GrammarParser.parseCommandSuffix_id,
+            "ENABLE":       GrammarParser.parseCommandSuffix_enable,
+            "GETMETADATA":  GrammarParser.parseCommandSuffix_getMetadata,
+            "SETMETADATA":  GrammarParser.parseCommandSuffix_setMetadata,
+            "RESETKEY":     GrammarParser.parseCommandSuffix_resetKey,
+            "GENURLAUTH":   GrammarParser.parseCommandSuffix_genURLAuth,
+            "URLFETCH":     GrammarParser.parseCommandSuffix_urlFetch,
+            "COPY":         GrammarParser.parseCommandSuffix_copy,
+            "DELETE":       GrammarParser.parseCommandSuffix_delete,
+            "MOVE":         GrammarParser.parseCommandSuffix_move,
+            "SEARCH":       GrammarParser.parseCommandSuffix_search,
+            "ESEARCH":      GrammarParser.parseCommandSuffix_esearch,
+            "STORE":        GrammarParser.parseCommandSuffix_store,
+            "EXAMINE":      GrammarParser.parseCommandSuffix_examine,
+            "LIST":         GrammarParser.parseCommandSuffix_list,
+            "LSUB":         GrammarParser.parseCommandSuffix_LSUB,
+            "RENAME":       GrammarParser.parseCommandSuffix_rename,
+            "SELECT":       GrammarParser.parseCommandSuffix_select,
+            "STATUS":       GrammarParser.parseCommandSuffix_status,
+            "SUBSCRIBE":    GrammarParser.parseCommandSuffix_subscribe,
+            "UNSUBSCRIBE":  GrammarParser.parseCommandSuffix_unsubscribe,
+            "UID":          GrammarParser.parseCommandSuffix_uid,
+            "FETCH":        GrammarParser.parseCommandSuffix_fetch,
+            "LOGIN":        GrammarParser.parseCommandSuffix_login,
+            "AUTHENTICATE": GrammarParser.parseCommandSuffix_authenticate,
+            "CREATE":       GrammarParser.parseCommandSuffix_create,
+            "GETQUOTA":     GrammarParser.parseCommandSuffix_getQuota,
+            "SETQUOTA":     GrammarParser.parseCommandSuffix_setQuota,
+            "GETQUOTAROOT": GrammarParser.parseCommandSuffix_getQuotaRoot,
+        ]
+        return try parseFromLookupTable(buffer: &buffer, tracker: tracker, parsers: commandParsers)
     }
 }
 
