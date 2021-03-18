@@ -16,7 +16,7 @@ import struct NIO.ByteBuffer
 
 // MARK: - IMAP
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeNString(_ string: ByteBuffer?) -> Int {
         if let string = string {
             return self.writeIMAPString(string)

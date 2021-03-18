@@ -57,11 +57,11 @@ extension SequenceRange: ExpressibleByIntegerLiteral {
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeSequenceRange(_ range: SequenceRange) -> Int {
         self.writeSequenceNumberOrWildcard(range.range.lowerBound) +
             self.write(if: range.range.lowerBound < range.range.upperBound) {
-                self.writeString(":") +
+                self._writeString(":") +
                     self.writeSequenceNumberOrWildcard(range.range.upperBound)
             }
     }

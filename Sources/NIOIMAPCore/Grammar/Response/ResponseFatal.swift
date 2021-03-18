@@ -16,10 +16,10 @@ import struct NIO.ByteBuffer
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeResponseFatal(_ fatal: ResponseText) -> Int {
-        self.writeString("* ") +
+        self._writeString("* ") +
             self.writeUntaggedStatus(.bye(fatal)) +
-            self.writeString("\r\n")
+            self._writeString("\r\n")
     }
 }

@@ -54,7 +54,7 @@ public enum SelectParameter: Equatable {
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeSelectParameters(_ params: [SelectParameter]) -> Int {
         if params.isEmpty {
             return 0
@@ -74,12 +74,12 @@ extension EncodeBuffer {
         case .basic(let param):
             return self.writeParameter(param)
         case .condstore:
-            return self.writeString("CONDSTORE")
+            return self._writeString("CONDSTORE")
         }
     }
 
     @discardableResult mutating func writeQResyncParameter(param: QResyncParameter) -> Int {
-        self.writeString("QRESYNC (\(param.uidValiditiy) ") +
+        self._writeString("QRESYNC (\(param.uidValiditiy) ") +
             self.writeModificationSequenceValue(param.modificationSequenceValue) +
             self.writeIfExists(param.knownUids) { (set) -> Int in
                 self.writeSpace() + self.writeLastCommandSet(set)
@@ -87,6 +87,6 @@ extension EncodeBuffer {
             self.writeIfExists(param.sequenceMatchData) { (data) -> Int in
                 self.writeSpace() + self.writeSequenceMatchData(data)
             } +
-            self.writeString(")")
+            self._writeString(")")
     }
 }

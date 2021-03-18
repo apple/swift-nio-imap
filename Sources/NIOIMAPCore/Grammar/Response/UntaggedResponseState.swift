@@ -50,28 +50,28 @@ public enum UntaggedStatus: Equatable {
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeUntaggedStatus(_ cond: UntaggedStatus) -> Int {
         switch cond {
         case .ok(let text):
             return
-                self.writeString("OK ") +
+                self._writeString("OK ") +
                 self.writeResponseText(text)
         case .no(let text):
             return
-                self.writeString("NO ") +
+                self._writeString("NO ") +
                 self.writeResponseText(text)
         case .bad(let text):
             return
-                self.writeString("BAD ") +
+                self._writeString("BAD ") +
                 self.writeResponseText(text)
         case .preauth(let text):
             return
-                self.writeString("PREAUTH ") +
+                self._writeString("PREAUTH ") +
                 self.writeResponseText(text)
         case .bye(let text):
             return
-                self.writeString("BYE ") +
+                self._writeString("BYE ") +
                 self.writeResponseText(text)
         }
     }

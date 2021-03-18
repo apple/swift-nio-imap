@@ -47,25 +47,25 @@ public enum MailboxFilter: Equatable {
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeMailboxFilter(_ filter: MailboxFilter) -> Int {
         switch filter {
         case .inboxes:
-            return self.writeString("inboxes")
+            return self._writeString("inboxes")
         case .personal:
-            return self.writeString("personal")
+            return self._writeString("personal")
         case .subscribed:
-            return self.writeString("subscribed")
+            return self._writeString("subscribed")
         case .subtree(let mailboxes):
-            return self.writeString("subtree ") + self.writeMailboxes(mailboxes)
+            return self._writeString("subtree ") + self.writeMailboxes(mailboxes)
         case .mailboxes(let mailboxes):
-            return self.writeString("mailboxes ") + self.writeMailboxes(mailboxes)
+            return self._writeString("mailboxes ") + self.writeMailboxes(mailboxes)
         case .selected:
-            return self.writeString("selected")
+            return self._writeString("selected")
         case .selectedDelayed:
-            return self.writeString("selected-delayed")
+            return self._writeString("selected-delayed")
         case .subtreeOne(let mailboxes):
-            return self.writeString("subtree-one ") + self.writeMailboxes(mailboxes)
+            return self._writeString("subtree-one ") + self.writeMailboxes(mailboxes)
         }
     }
 }

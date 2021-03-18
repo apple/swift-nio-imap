@@ -31,11 +31,11 @@ public struct IMessageList: Equatable {
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeIMessageList(_ ref: IMessageList) -> Int {
         self.writeIMailboxReference(ref.mailboxReference) +
             self.writeIfExists(ref.encodedSearch) { search in
-                self.writeString("?") + self.writeEncodedSearch(search)
+                self._writeString("?") + self.writeEncodedSearch(search)
             }
     }
 }

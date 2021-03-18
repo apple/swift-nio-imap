@@ -26,7 +26,7 @@ public enum BodyExtension: Equatable {
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeBodyExtensions(_ ext: [BodyExtension]) -> Int {
         self.writeArray(ext) { (element, self) in
             self.writeBodyExtension(element)
@@ -38,7 +38,7 @@ extension EncodeBuffer {
         case .string(let string):
             return self.writeNString(string)
         case .number(let number):
-            return self.writeString("\(number)")
+            return self._writeString("\(number)")
         }
     }
 }

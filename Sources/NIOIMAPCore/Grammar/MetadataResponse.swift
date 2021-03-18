@@ -25,16 +25,16 @@ public enum MetadataResponse: Equatable {
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeMetadataResponse(_ resp: MetadataResponse) -> Int {
         switch resp {
         case .values(values: let values, mailbox: let mailbox):
-            return self.writeString("METADATA ") +
+            return self._writeString("METADATA ") +
                 self.writeMailbox(mailbox) +
                 self.writeSpace() +
                 self.writeEntryValues(values)
         case .list(list: let list, mailbox: let mailbox):
-            return self.writeString("METADATA ") +
+            return self._writeString("METADATA ") +
                 self.writeMailbox(mailbox) +
                 self.writeSpace() +
                 self.writeEntryList(list)

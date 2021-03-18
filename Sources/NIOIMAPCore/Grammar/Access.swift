@@ -32,17 +32,17 @@ public enum Access: Equatable {
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeAccess(_ data: Access) -> Int {
         switch data {
         case .submit(let user):
-            return self.writeString("submit+") + self.writeEncodedUser(user)
+            return self._writeString("submit+") + self.writeEncodedUser(user)
         case .user(let user):
-            return self.writeString("user+") + self.writeEncodedUser(user)
+            return self._writeString("user+") + self.writeEncodedUser(user)
         case .authenticateUser:
-            return self.writeString("authuser")
+            return self._writeString("authuser")
         case .anonymous:
-            return self.writeString("anonymous")
+            return self._writeString("anonymous")
         }
     }
 }

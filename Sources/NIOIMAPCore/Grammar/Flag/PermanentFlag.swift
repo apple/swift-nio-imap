@@ -25,13 +25,13 @@ public enum PermanentFlag: Hashable {
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeFlagPerm(_ flagPerm: PermanentFlag) -> Int {
         switch flagPerm {
         case .flag(let flag):
             return self.writeFlag(flag)
         case .wildcard:
-            return self.writeString(#"\*"#)
+            return self._writeString(#"\*"#)
         }
     }
 

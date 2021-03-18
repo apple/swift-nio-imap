@@ -16,9 +16,9 @@ import struct NIO.ByteBuffer
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeMediaText(_ text: String) -> Int {
-        self.writeString(#""TEXT" "#) +
+        self._writeString(#""TEXT" "#) +
             self.writeIMAPString(text)
     }
 }

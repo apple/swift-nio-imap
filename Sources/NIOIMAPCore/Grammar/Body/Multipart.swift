@@ -61,7 +61,7 @@ extension BodyStructure.Multipart {
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeBodyMultipart(_ part: BodyStructure.Multipart) -> Int {
         part.parts.reduce(into: 0) { (result, body) in
             result += self.writeBody(body)
@@ -82,6 +82,6 @@ extension EncodeBuffer {
     }
 
     @discardableResult mutating func writeMediaSubtype(_ type: BodyStructure.MediaSubtype) -> Int {
-        self.writeString("\"\(type.stringValue)\"")
+        self._writeString("\"\(type.stringValue)\"")
     }
 }

@@ -54,7 +54,7 @@ extension QuotaRoot: CustomDebugStringConvertible {
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeQuotaRoot(_ quotaRoot: QuotaRoot) -> Int {
         self.writeIMAPString(quotaRoot.storage)
     }

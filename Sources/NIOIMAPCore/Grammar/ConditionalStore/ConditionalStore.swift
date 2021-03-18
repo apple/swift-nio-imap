@@ -20,8 +20,8 @@ enum ConditionalStore {
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeConditionalStoreParameter() -> Int {
-        self.writeString(ConditionalStore.param)
+        self._writeString(ConditionalStore.param)
     }
 }

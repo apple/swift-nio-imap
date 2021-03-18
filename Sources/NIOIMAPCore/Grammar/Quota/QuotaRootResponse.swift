@@ -16,9 +16,9 @@ import struct NIO.ByteBuffer
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeQuotaRootResponse(mailbox: MailboxName, quotaRoot: QuotaRoot) -> Int {
-        self.writeString("QUOTAROOT ") +
+        self._writeString("QUOTAROOT ") +
             self.writeMailbox(mailbox) +
             self.writeSpace() +
             self.writeQuotaRoot(quotaRoot)

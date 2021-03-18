@@ -413,13 +413,13 @@ extension Capability {
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeCapability(_ capability: Capability) -> Int {
-        self.writeString(capability.rawValue)
+        self._writeString(capability.rawValue)
     }
 
     @discardableResult mutating func writeCapabilityData(_ data: [Capability]) -> Int {
-        self.writeString("CAPABILITY") +
+        self._writeString("CAPABILITY") +
             self.writeArray(data, prefix: " ", parenthesis: false) { (capability, self) -> Int in
                 self.writeCapability(capability)
             }

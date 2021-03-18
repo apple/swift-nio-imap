@@ -23,13 +23,13 @@ public enum IAuthentication: Equatable {
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeIAuthentication(_ data: IAuthentication) -> Int {
         switch data {
         case .any:
-            return self.writeString(";AUTH=*")
+            return self._writeString(";AUTH=*")
         case .type(let type):
-            return self.writeString(";AUTH=") + self.writeEncodedAuthenticationType(type)
+            return self._writeString(";AUTH=") + self.writeEncodedAuthenticationType(type)
         }
     }
 }

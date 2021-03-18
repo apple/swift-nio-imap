@@ -104,7 +104,7 @@ public struct MailboxStatus: Equatable {
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeMailboxAttributes(_ atts: [MailboxAttribute]) -> Int {
         self.writeArray(atts, parenthesis: false) { (element, self) in
             self.writeMailboxAttribute(element)
@@ -112,11 +112,11 @@ extension EncodeBuffer {
     }
 
     @discardableResult mutating func writeMailboxAttribute(_ att: MailboxAttribute) -> Int {
-        self.writeString(att.rawValue)
+        self._writeString(att.rawValue)
     }
 
     @discardableResult mutating func writeMailboxOptions(_ option: [MailboxAttribute]) -> Int {
-        self.writeString("STATUS ") +
+        self._writeString("STATUS ") +
             self.writeArray(option) { (att, self) in
                 self.writeMailboxAttribute(att)
             }
@@ -139,7 +139,7 @@ extension EncodeBuffer {
         append(\.highestModificationSequence, "HIGHESTMODSEQ")
 
         return self.writeArray(array, parenthesis: false) { (element, self) -> Int in
-            self.writeString("\(element.0) \(element.1)")
+            self._writeString("\(element.0) \(element.1)")
         }
     }
 }

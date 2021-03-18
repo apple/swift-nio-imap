@@ -65,7 +65,7 @@ extension CommandType_Tests {
         for (test, options, expectedStrings, line) in inputs {
             var encodeBuffer = CommandEncodeBuffer(buffer: ByteBuffer(), options: options)
             let size = encodeBuffer.writeCommand(test)
-            self.testBuffer = encodeBuffer.buffer
+            self.testBuffer = encodeBuffer._buffer
             XCTAssertEqual(size, expectedStrings.reduce(0) { $0 + $1.utf8.count }, line: line)
             XCTAssertEqual(self.testBufferStrings, expectedStrings, line: line)
         }

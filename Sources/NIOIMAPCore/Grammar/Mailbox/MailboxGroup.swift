@@ -47,7 +47,7 @@ public indirect enum EmailAddressListElement: Equatable {
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeEmailAddressGroup(_ group: EmailAddressGroup) -> Int {
         self.writeEmailAddress(.init(
             personName: nil,

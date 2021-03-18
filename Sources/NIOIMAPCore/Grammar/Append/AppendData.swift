@@ -35,21 +35,21 @@ public struct AppendData: Equatable {
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeAppendData(_ data: AppendData) -> Int {
         guard case .client(let options) = mode else { preconditionFailure("Trying to send command, but not in 'client' mode.") }
         switch (options.useNonSynchronizingLiteralPlus, data.withoutContentTransferEncoding) {
         case (true, true):
-            return self.writeString("~{\(data.byteCount)+}\r\n")
+            return self._writeString("~{\(data.byteCount)+}\r\n")
         case (_, true):
-            let size = self.writeString("~{\(data.byteCount)}\r\n")
-            self.markStopPoint()
+            let size = self._writeString("~{\(data.byteCount)}\r\n")
+            self._markStopPoint()
             return size
         case (true, _):
-            return self.writeString("{\(data.byteCount)+}\r\n")
+            return self._writeString("{\(data.byteCount)+}\r\n")
         default:
-            let size = self.writeString("{\(data.byteCount)}\r\n")
-            self.markStopPoint()
+            let size = self._writeString("{\(data.byteCount)}\r\n")
+            self._markStopPoint()
             return size
         }
     }

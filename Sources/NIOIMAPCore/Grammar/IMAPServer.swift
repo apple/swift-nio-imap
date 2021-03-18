@@ -39,14 +39,14 @@ public struct IMAPServer: Equatable {
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeIMAPServer(_ server: IMAPServer) -> Int {
         self.writeIfExists(server.userInfo) { userInfo in
-            self.writeUserInfo(userInfo) + self.writeString("@")
+            self.writeUserInfo(userInfo) + self._writeString("@")
         } +
-            self.writeString("\(server.host)") +
+            self._writeString("\(server.host)") +
             self.writeIfExists(server.port) { port in
-                self.writeString(":\(port)")
+                self._writeString(":\(port)")
             }
     }
 }

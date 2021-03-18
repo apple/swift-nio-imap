@@ -158,7 +158,7 @@ extension InternalDate {
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeInternalDate(_ date: InternalDate) -> Int {
         let p = date.makeParts()
 
@@ -180,24 +180,24 @@ extension EncodeBuffer {
         }
 
         return
-            self.writeString("\"\(p.0.day)-\(monthName)-\(p.0.year) ") +
+            self._writeString("\"\(p.0.day)-\(monthName)-\(p.0.year) ") +
             self.writeTime(p.1) +
             self.writeSpace() +
             self.writeTimezone(p.2) +
-            self.writeString("\"")
+            self._writeString("\"")
     }
 }
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult fileprivate mutating func writeTime(_ time: InternalDate.Time) -> Int {
         let hour = time.hour < 10 ? "0\(time.hour)" : "\(time.hour)"
         let minute = time.minute < 10 ? "0\(time.minute)" : "\(time.minute)"
         let second = time.second < 10 ? "0\(time.second)" : "\(time.second)"
-        return self.writeString("\(hour):\(minute):\(second)")
+        return self._writeString("\(hour):\(minute):\(second)")
     }
 }
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult fileprivate mutating func writeTimezone(_ timezone: InternalDate.TimeZone) -> Int {
         let value = abs(timezone.minutes)
         let minutes = value % 60
@@ -216,6 +216,6 @@ extension EncodeBuffer {
         }
 
         let modifier = (timezone.minutes >= 0) ? "+" : "-"
-        return self.writeString("\(modifier)\(zeroedString)")
+        return self._writeString("\(modifier)\(zeroedString)")
     }
 }

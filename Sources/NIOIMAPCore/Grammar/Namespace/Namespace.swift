@@ -16,7 +16,7 @@ import struct NIO.ByteBuffer
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeNamespace(_ namespace: [NamespaceDescription]) -> Int {
         guard namespace.count > 0 else {
             return self.writeNil()

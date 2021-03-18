@@ -16,17 +16,17 @@ import struct NIO.ByteBuffer
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeQuotaResponse(quotaRoot: QuotaRoot, resources: [QuotaResource]) -> Int {
-        self.writeString("QUOTA ") +
+        self._writeString("QUOTA ") +
             self.writeQuotaRoot(quotaRoot) +
             self.writeSpace() +
             self.writeQuotaResources(resources)
     }
 
     mutating func writeQuotaResources(_ resources: [QuotaResource]) -> Int {
-        self.writeString("(") +
+        self._writeString("(") +
             resources.map { resource in self.writeQuotaResource(resource) }.reduce(0, +) +
-            self.writeString(")")
+            self._writeString(")")
     }
 }

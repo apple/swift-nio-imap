@@ -16,9 +16,9 @@ import struct NIO.ByteBuffer
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeEnableData(_ data: [Capability]) -> Int {
-        self.writeString("ENABLED") +
+        self._writeString("ENABLED") +
             data.reduce(0) { (result, capability) in
                 result + self.writeSpace() + self.writeCapability(capability)
             }

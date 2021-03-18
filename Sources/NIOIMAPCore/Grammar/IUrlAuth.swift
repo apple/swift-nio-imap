@@ -31,7 +31,7 @@ public struct IAuthenticatedURL: Equatable {
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeIAuthenticatedURL(_ data: IAuthenticatedURL) -> Int {
         self.writeIRumpAuthenticatedURL(data.authenticatedURL) +
             self.writeAuthenticatedURLVerifier(data.verifier)

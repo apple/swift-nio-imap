@@ -14,7 +14,7 @@
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeBodyParameterPairs(_ params: KeyValues<String, String>) -> Int {
         guard params.count > 0 else {
             return self.writeNil()

@@ -28,7 +28,7 @@ extension FieldLanguageLocationTests {
         ]
 
         for (test, expectedString, line) in inputs {
-            self.testBuffer.clear()
+            self.testBuffer._clear()
             let size = self.testBuffer.writeBodyFieldLanguageLocation(test)
             XCTAssertEqual(size, expectedString.utf8.count, line: line)
             XCTAssertEqual(self.testBufferString, expectedString, line: line)

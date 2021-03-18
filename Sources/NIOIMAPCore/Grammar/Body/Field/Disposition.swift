@@ -70,17 +70,17 @@ extension BodyStructure.DispositionKind: ExpressibleByStringLiteral {
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeBodyDisposition(_ dsp: BodyStructure.Disposition?) -> Int {
         guard let dsp = dsp else {
             return self.writeNil()
         }
 
         return
-            self.writeString("(") +
+            self._writeString("(") +
             self.writeIMAPString(dsp.kind.rawValue) +
             self.writeSpace() +
             self.writeBodyParameterPairs(dsp.parameters) +
-            self.writeString(")")
+            self._writeString(")")
     }
 }

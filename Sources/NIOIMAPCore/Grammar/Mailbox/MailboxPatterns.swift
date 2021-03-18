@@ -26,7 +26,7 @@ public enum MailboxPatterns: Equatable {
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeMailboxPatterns(_ patterns: MailboxPatterns) -> Int {
         switch patterns {
         case .mailbox(let list):

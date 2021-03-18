@@ -38,14 +38,14 @@ public struct ExtendedSearchResponse: Equatable {
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeExtendedSearchResponse(_ response: ExtendedSearchResponse) -> Int {
-        self.writeString("ESEARCH") +
+        self._writeString("ESEARCH") +
             self.writeIfExists(response.correlator) { (correlator) -> Int in
                 self.writeSearchCorrelator(correlator)
             } +
             self.write(if: response.uid) {
-                self.writeString(" UID")
+                self._writeString(" UID")
             } +
             self.write(if: response.returnData.count > 0) {
                 self.writeSpace()

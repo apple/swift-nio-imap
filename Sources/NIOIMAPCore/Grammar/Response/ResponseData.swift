@@ -16,10 +16,10 @@ import struct NIO.ByteBuffer
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeResponseData(_ data: ResponsePayload) -> Int {
-        self.writeString("* ") +
+        self._writeString("* ") +
             self.writeResponsePayload(data) +
-            self.writeString("\r\n")
+            self._writeString("\r\n")
     }
 }

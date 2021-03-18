@@ -16,7 +16,7 @@ import struct NIO.ByteBuffer
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeNamespaceResponseExtensions(_ extensions: KeyValues<ByteBuffer, [ByteBuffer]>) -> Int {
         extensions.reduce(into: 0) { (res, ext) in
             res += self.writeSpace() +

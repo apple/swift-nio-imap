@@ -39,21 +39,21 @@ public struct NamespaceDescription: Equatable {
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeNamespaceDescription(_ description: NamespaceDescription) -> Int {
         var size = 0
-        size += self.writeString("(")
+        size += self._writeString("(")
         size += self.writeIMAPString(description.string)
         size += self.writeSpace()
 
         if let char = description.delimiter {
-            size += self.writeString("\"\(char)\"")
+            size += self._writeString("\"\(char)\"")
         } else {
             size += self.writeNil()
         }
 
         size += self.writeNamespaceResponseExtensions(description.responseExtensions)
-        size += self.writeString(")")
+        size += self._writeString(")")
         return size
     }
 }

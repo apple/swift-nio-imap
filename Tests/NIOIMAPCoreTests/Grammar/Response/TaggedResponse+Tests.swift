@@ -27,7 +27,7 @@ extension TaggedResponse_Tests {
         ]
 
         for (test, expectedString, line) in inputs {
-            self.testBuffer.clear()
+            self.testBuffer._clear()
             let size = self.testBuffer.writeTaggedResponse(test)
             XCTAssertEqual(size, expectedString.utf8.count, line: line)
             XCTAssertEqual(self.testBufferString, expectedString, line: line)

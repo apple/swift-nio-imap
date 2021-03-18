@@ -33,17 +33,17 @@ public struct ResponseText: Equatable {
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeResponseText(_ text: ResponseText) -> Int {
         self.writeIfExists(text.code) { (code) -> Int in
-            self.writeString("[") +
+            self._writeString("[") +
                 self.writeResponseTextCode(code) +
-                self.writeString("] ")
+                self._writeString("] ")
         } +
             self.writeText(text.text)
     }
 
     @discardableResult mutating func writeText(_ text: String) -> Int {
-        self.writeString(text)
+        self._writeString(text)
     }
 }

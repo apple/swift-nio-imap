@@ -47,8 +47,8 @@ extension BinaryInteger {
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeUIDValidity(_ data: UIDValidity) -> Int {
-        self.writeString("\(data.rawValue)")
+        self._writeString("\(data.rawValue)")
     }
 }

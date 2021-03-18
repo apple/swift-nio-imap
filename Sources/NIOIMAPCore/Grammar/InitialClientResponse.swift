@@ -32,13 +32,13 @@ public struct InitialClientResponse: Hashable {
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeInitialClientResponse(_ resp: InitialClientResponse) -> Int {
         if resp.data.readableBytes == 0 {
-            return self.writeString("=")
+            return self._writeString("=")
         } else {
             let encoded = Base64.encodeBytes(bytes: resp.data.readableBytesView)
-            return self.writeBytes(encoded)
+            return self._writeBytes(encoded)
         }
     }
 }

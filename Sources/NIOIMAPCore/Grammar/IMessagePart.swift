@@ -41,7 +41,7 @@ public struct IMessagePart: Equatable {
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeIMessagePart(_ data: IMessagePart) -> Int {
         self.writeIMailboxReference(data.mailboxReference) +
             self.writeIUID(data.iUID) +

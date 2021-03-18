@@ -33,7 +33,7 @@ public struct AppendMessage: Equatable {
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     /// Writes an `AppendMessage` ready to be sent.
     /// - parameter `message`: The `AppendMessage` to write.
     /// - returns: The number of bytes written.

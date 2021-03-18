@@ -38,19 +38,19 @@ public enum SearchReturnOption: Equatable {
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeSearchReturnOption(_ option: SearchReturnOption) -> Int {
         switch option {
         case .min:
-            return self.writeString("MIN")
+            return self._writeString("MIN")
         case .max:
-            return self.writeString("MAX")
+            return self._writeString("MAX")
         case .all:
-            return self.writeString("ALL")
+            return self._writeString("ALL")
         case .count:
-            return self.writeString("COUNT")
+            return self._writeString("COUNT")
         case .save:
-            return self.writeString("SAVE")
+            return self._writeString("SAVE")
         case .optionExtension(let option):
             return self.writeSearchReturnOptionExtension(option)
         }
@@ -61,12 +61,12 @@ extension EncodeBuffer {
             return 0
         }
         return
-            self.writeString(" RETURN (") +
+            self._writeString(" RETURN (") +
             self.writeIfExists(options) { (options) -> Int in
                 self.writeArray(options, parenthesis: false) { (option, self) in
                     self.writeSearchReturnOption(option)
                 }
             } +
-            self.writeString(")")
+            self._writeString(")")
     }
 }

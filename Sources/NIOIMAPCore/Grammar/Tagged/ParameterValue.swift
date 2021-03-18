@@ -25,16 +25,16 @@ public enum ParameterValue: Hashable {
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeParameterValue(_ value: ParameterValue) -> Int {
         switch value {
         case .sequence(let set):
             return self.writeLastCommandSet(set)
         case .comp(let comp):
             return
-                self.writeString("(") +
+                self._writeString("(") +
                 self.writeTaggedExtensionComp(comp) +
-                self.writeString(")")
+                self._writeString(")")
         }
     }
 }

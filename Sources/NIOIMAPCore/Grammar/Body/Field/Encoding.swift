@@ -55,8 +55,8 @@ extension String {
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeBodyEncoding(_ encoding: BodyStructure.Encoding) -> Int {
-        self.writeString("\"\(encoding.stringValue)\"")
+        self._writeString("\"\(encoding.stringValue)\"")
     }
 }

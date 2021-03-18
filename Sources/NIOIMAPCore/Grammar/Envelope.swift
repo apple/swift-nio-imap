@@ -85,18 +85,18 @@ public struct Envelope: Equatable {
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeEnvelopeAddresses(_ addresses: [EmailAddressListElement]) -> Int {
         guard addresses.count > 0 else {
             return self.writeNil()
         }
 
         return
-            self.writeString("(") +
+            self._writeString("(") +
             self.writeArray(addresses, separator: "", parenthesis: false) { (aog, self) -> Int in
                 self.writeEmailAddressOrGroup(aog)
             } +
-            self.writeString(")")
+            self._writeString(")")
     }
 
     @discardableResult mutating func writeOptionalMessageID(_ id: MessageID?) -> Int {
@@ -107,7 +107,7 @@ extension EncodeBuffer {
     }
 
     @discardableResult mutating func writeEnvelope(_ envelope: Envelope) -> Int {
-        self.writeString("(") +
+        self._writeString("(") +
             self.writeNString(envelope.date?.value) +
             self.writeSpace() +
             self.writeNString(envelope.subject) +
@@ -127,6 +127,6 @@ extension EncodeBuffer {
             self.writeOptionalMessageID(envelope.inReplyTo) +
             self.writeSpace() +
             self.writeOptionalMessageID(envelope.messageID) +
-            self.writeString(")")
+            self._writeString(")")
     }
 }

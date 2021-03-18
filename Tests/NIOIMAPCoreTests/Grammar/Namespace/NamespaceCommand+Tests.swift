@@ -27,7 +27,7 @@ extension NamespaceCommand_Tests {
         ]
 
         for (expectedString, line) in inputs {
-            self.testBuffer.clear()
+            self.testBuffer._clear()
             let size = self.testBuffer.writeNamespaceCommand()
             XCTAssertEqual(size, expectedString.utf8.count, line: line)
             XCTAssertEqual(self.testBufferString, expectedString, line: line)

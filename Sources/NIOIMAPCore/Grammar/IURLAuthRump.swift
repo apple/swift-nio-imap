@@ -31,12 +31,12 @@ public struct IRumpAuthenticatedURL: Equatable {
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeIRumpAuthenticatedURL(_ data: IRumpAuthenticatedURL) -> Int {
         self.writeIfExists(data.expire) { expire in
             self.writeExpire(expire)
         } +
-            self.writeString(";URLAUTH=") +
+            self._writeString(";URLAUTH=") +
             self.writeAccess(data.access)
     }
 }

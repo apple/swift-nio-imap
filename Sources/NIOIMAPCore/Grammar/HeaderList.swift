@@ -14,7 +14,7 @@
 
 import struct NIO.ByteBuffer
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeHeaderList(_ headers: [String]) -> Int {
         self.writeArray(headers) { (element, self) in
             self.writeIMAPString(element)

@@ -33,7 +33,7 @@ public struct RumpURLAndMechanism: Equatable {
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeURLRumpMechanism(_ data: RumpURLAndMechanism) -> Int {
         self.writeIMAPString(data.urlRump) +
             self.writeSpace() +

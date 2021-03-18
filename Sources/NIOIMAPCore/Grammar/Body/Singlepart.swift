@@ -118,7 +118,7 @@ extension BodyStructure.Singlepart {
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeBodySinglepart(_ part: BodyStructure.Singlepart) -> Int {
         var size = 0
         switch part.kind {
@@ -141,7 +141,7 @@ extension EncodeBuffer {
         self.writeMediaText(body.mediaText) +
             self.writeSpace() +
             self.writeBodyFields(fields) +
-            self.writeString(" \(body.lineCount)")
+            self._writeString(" \(body.lineCount)")
     }
 
     @discardableResult private mutating func writeBodyKindMessage(_ message: BodyStructure.Singlepart.Message, fields: BodyStructure.Fields) -> Int {
@@ -152,7 +152,7 @@ extension EncodeBuffer {
             self.writeEnvelope(message.envelope) +
             self.writeSpace() +
             self.writeBody(message.body) +
-            self.writeString(" \(message.lineCount)")
+            self._writeString(" \(message.lineCount)")
     }
 
     @discardableResult private mutating func writeBodyKindBasic(mediaKind: Media.Basic, fields: BodyStructure.Fields) -> Int {

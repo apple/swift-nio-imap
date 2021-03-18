@@ -32,20 +32,20 @@ extension TaggedResponse {
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeTaggedResponseState(_ cond: TaggedResponse.State) -> Int {
         switch cond {
         case .ok(let text):
             return
-                self.writeString("OK ") +
+                self._writeString("OK ") +
                 self.writeResponseText(text)
         case .no(let text):
             return
-                self.writeString("NO ") +
+                self._writeString("NO ") +
                 self.writeResponseText(text)
         case .bad(let text):
             return
-                self.writeString("BAD ") +
+                self._writeString("BAD ") +
                 self.writeResponseText(text)
         }
     }

@@ -38,7 +38,7 @@ if #available(macOS 10.13, /* Linux */ *) {
     print("Alright, let's format the source code in \(sourceCode) using \(swiftFormat).")
     let process = Process()
     process.executableURL = swiftFormat
-    process.arguments = [sourceCode.path]
+    process.arguments = [sourceCode.path, "--self", "insert"]
     try process.run()
     process.waitUntilExit()
     switch process.terminationReason {

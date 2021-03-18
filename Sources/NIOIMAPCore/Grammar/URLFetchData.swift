@@ -35,7 +35,7 @@ public struct URLFetchData: Equatable {
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeURLFetchData(_ data: URLFetchData) -> Int {
         self.writeIMAPString(data.url) +
             self.writeSpace() +

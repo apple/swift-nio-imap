@@ -26,8 +26,8 @@ public struct EncodedAuthenticationType: Equatable {
     }
 }
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeEncodedAuthenticationType(_ type: EncodedAuthenticationType) -> Int {
-        self.writeString(type.authenticationType)
+        self._writeString(type.authenticationType)
     }
 }

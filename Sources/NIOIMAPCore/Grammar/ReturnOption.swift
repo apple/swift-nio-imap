@@ -38,19 +38,19 @@ public enum ReturnOption: Equatable {
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeReturnOption(_ option: ReturnOption) -> Int {
         switch option {
         case .subscribed:
-            return self.writeString("SUBSCRIBED")
+            return self._writeString("SUBSCRIBED")
         case .children:
-            return self.writeString("CHILDREN")
+            return self._writeString("CHILDREN")
         case .statusOption(let option):
             return self.writeMailboxOptions(option)
         case .optionExtension(let option):
             return self.writeOptionExtension(option)
         case .specialUse:
-            return self.writeString("SPECIAL-USE")
+            return self._writeString("SPECIAL-USE")
         }
     }
 }
