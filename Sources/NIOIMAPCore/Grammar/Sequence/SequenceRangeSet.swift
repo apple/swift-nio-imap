@@ -99,7 +99,7 @@ extension SequenceRangeSet: ExpressibleByArrayLiteral {
 
 extension SequenceRangeSet {
     /// A `SequenceRangeSet` that contains a single range, that in turn covers every possible `SequenceNumber`.
-    public static let all: SequenceRangeSet = SequenceRangeSet(SequenceRange.all)
+    public static let all = SequenceRangeSet(SequenceRange.all)
 }
 
 extension SequenceRange {

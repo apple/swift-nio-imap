@@ -125,7 +125,7 @@ extension _EncodeBuffer {
     @discardableResult
     @inlinable
     public mutating func _writeBytes<Bytes: Sequence>(_ bytes: Bytes) -> Int where Bytes.Element == UInt8 {
-        return self._buffer.writeBytes(bytes)
+        self._buffer.writeBytes(bytes)
     }
 
     /// Writes a `ByteBuffer` to the buffer.

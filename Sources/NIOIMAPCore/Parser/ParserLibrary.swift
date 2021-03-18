@@ -239,7 +239,8 @@ extension ParserLibrary {
             } else if !caseSensitive {
                 // we know this is all ASCII so we can do an ASCII case-insensitive compare here
                 guard needleCount == actual.utf8.count,
-                    actual.utf8.elementsEqual(needle.utf8, by: { ($0 & 0xDF) == ($1 & 0xDF) }) else {
+                      actual.utf8.elementsEqual(needle.utf8, by: { ($0 & 0xDF) == ($1 & 0xDF) })
+                else {
                     throw ParserError(hint: "case insensitively looking for \(needle) found \(actual)")
                 }
             } else {

@@ -45,7 +45,7 @@ class IMAPClientHandlerTests: XCTestCase {
                                                      ),
                                                      authenticatedURL: nil
                                                  )))),
-                                                   text: "")))))
+                               text: "")))))
         self.writeOutbound(.command(.init(tag: "a", command: .login(username: "foo", password: "bar"))))
         self.assertOutboundString("a LOGIN \"foo\" \"bar\"\r\n")
         self.writeInbound("tag OK [REFERRAL imap://hostname/foo/bar/;UID=1234]\r\na OK ok\r\n")
@@ -59,7 +59,7 @@ class IMAPClientHandlerTests: XCTestCase {
                                                                        command: .rename(from: .init("\\"),
                                                                                         to: .init("to"),
                                                                                         params: [:]))),
-                                   wait: false)
+        wait: false)
         self.assertOutboundString("x RENAME {1}\r\n")
         self.writeInbound("+ OK\r\n")
         self.assertOutboundString("\\ \"to\"\r\n")
@@ -74,7 +74,7 @@ class IMAPClientHandlerTests: XCTestCase {
                                                                        command: .rename(from: .init("\\"),
                                                                                         to: .init("\""),
                                                                                         params: [:]))),
-                                   wait: false)
+        wait: false)
         self.assertOutboundString("x RENAME {1}\r\n")
         self.writeInbound("+ OK\r\n")
         self.assertOutboundString("\\ {1}\r\n")
@@ -91,12 +91,12 @@ class IMAPClientHandlerTests: XCTestCase {
                                                                         command: .rename(from: .init("\\"),
                                                                                          to: .init("to"),
                                                                                          params: [:]))),
-                                    wait: false)
+        wait: false)
         let f2 = self.writeOutbound(CommandStream.command(TaggedCommand(tag: "y",
                                                                         command: .rename(from: .init("from"),
                                                                                          to: .init("\\"),
                                                                                          params: [:]))),
-                                    wait: false)
+        wait: false)
         self.assertOutboundString("x RENAME {1}\r\n")
         self.writeInbound("+ OK\r\n")
         XCTAssertNoThrow(try f1.wait())
@@ -118,7 +118,7 @@ class IMAPClientHandlerTests: XCTestCase {
                                                                        command: .rename(from: .init("\\"),
                                                                                         to: .init("to"),
                                                                                         params: [:]))),
-                                   wait: false)
+        wait: false)
         self.assertOutboundString("x RENAME {1}\r\n")
         XCTAssertThrowsError(try self.channel.writeInbound(self.buffer(string: "+ OK\r\n+ OK\r\n"))) { error in
             XCTAssertTrue(error is IMAPClientHandler.UnexpectedContinuationRequest)

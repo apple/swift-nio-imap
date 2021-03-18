@@ -60,6 +60,6 @@ try ServerBootstrap(group: eventLoopGroup).childChannelInitializer { channel -> 
         MailClientToProxyHandler(serverHost: serverHost, serverPort: serverPort),
     ])
 }
- .serverChannelOption(ChannelOptions.socket(SocketOptionLevel(SOL_SOCKET), SO_REUSEADDR), value: 1)
- .bind(host: host, port: port).wait()
- .closeFuture.wait()
+.serverChannelOption(ChannelOptions.socket(SocketOptionLevel(SOL_SOCKET), SO_REUSEADDR), value: 1)
+.bind(host: host, port: port).wait()
+.closeFuture.wait()
