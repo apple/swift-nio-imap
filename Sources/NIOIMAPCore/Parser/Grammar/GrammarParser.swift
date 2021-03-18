@@ -26,7 +26,6 @@ enum GrammarParser {}
 // MARK: - Grammar Parsers
 
 extension GrammarParser {
-    
     /// Attempts to select a parser from the given `parsers` by extracting the first unbroken sequence of alpha characters.
     /// E.g. for the command `LOGIN username password`, the parser will parse `LOGIN`, and use that as a (case-insensitive) key to find a suitable parser in `parsers`.
     /// - parameter buffer: The `ByteBuffer` to parse from.
@@ -622,24 +621,24 @@ extension GrammarParser {
             return .init(server: server, query: query)
         }
     }
-    
+
     static func parseLastCommandSet<T: _IMAPEncodable>(buffer: inout ParseBuffer, tracker: StackTracker, setParser: SubParser<T>) throws -> LastCommandSet<T> {
-            func parseLastCommandSet_lastCommand(buffer: inout ParseBuffer, tracker: StackTracker) throws -> LastCommandSet<T> {
-                try ParserLibrary.fixedString("$", buffer: &buffer, tracker: tracker)
-                return .lastCommand
-            }
-
-            func parseLastCommandSet_set(buffer: inout ParseBuffer, tracker: StackTracker) throws -> LastCommandSet<T> {
-                .set(try setParser(&buffer, tracker))
-            }
-
-            return try withoutActuallyEscaping(parseLastCommandSet_set) { (parseLastCommandSet_set) in
-                try ParserLibrary.oneOf([
-                    parseLastCommandSet_lastCommand,
-                    parseLastCommandSet_set,
-                ], buffer: &buffer, tracker: tracker)
-            }
+        func parseLastCommandSet_lastCommand(buffer: inout ParseBuffer, tracker: StackTracker) throws -> LastCommandSet<T> {
+            try ParserLibrary.fixedString("$", buffer: &buffer, tracker: tracker)
+            return .lastCommand
         }
+
+        func parseLastCommandSet_set(buffer: inout ParseBuffer, tracker: StackTracker) throws -> LastCommandSet<T> {
+            .set(try setParser(&buffer, tracker))
+        }
+
+        return try withoutActuallyEscaping(parseLastCommandSet_set) { (parseLastCommandSet_set) in
+            try ParserLibrary.oneOf([
+                parseLastCommandSet_lastCommand,
+                parseLastCommandSet_set,
+            ], buffer: &buffer, tracker: tracker)
+        }
+    }
 
     static func parseIAbsolutePath(buffer: inout ParseBuffer, tracker: StackTracker) throws -> IAbsolutePath {
         try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> IAbsolutePath in

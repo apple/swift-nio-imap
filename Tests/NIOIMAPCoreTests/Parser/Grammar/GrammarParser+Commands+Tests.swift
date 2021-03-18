@@ -21,7 +21,6 @@ class GrammarParser_Commands_Tests: XCTestCase, _ParserTestHelpers {}
 // MARK: - Top level
 
 extension GrammarParser_Commands_Tests {
-
     // Make sure we isolate the tag from the command
     func testParseTaggedCommand() {
         self.iterateTests(
@@ -77,7 +76,7 @@ extension GrammarParser_Commands_Tests {
                 ("STATUS INBOX (SIZE)", "\r", .status(.inbox, [.size]), #line),
                 ("SUBSCRIBE INBOX", "\r", .subscribe(.inbox), #line),
                 ("UNSUBSCRIBE INBOX", "\r", .unsubscribe(.inbox), #line),
-                ("UID EXPUNGE 1:2", "\r", .uidExpunge(.set([1...2])), #line),
+                ("UID EXPUNGE 1:2", "\r", .uidExpunge(.set([1 ... 2])), #line),
                 ("FETCH $ (FLAGS)", "\r", .fetch(.lastCommand, [.flags], .init()), #line),
                 ("LOGIN \"user\" \"password\"", "\r", .login(username: "user", password: "password"), #line),
                 ("AUTHENTICATE GSSAPI", "\r", .authenticate(method: AuthenticationKind("GSSAPI"), initialClientResponse: nil), #line),
@@ -97,22 +96,20 @@ extension GrammarParser_Commands_Tests {
             ]
         )
     }
-
 }
 
 // MARK: - Command suffixes
-extension GrammarParser_Commands_Tests {
 
+extension GrammarParser_Commands_Tests {
     func testParseCommandSuffix_id() {
         self.iterateTests(
             testFunction: GrammarParser.parseCommandSuffix_id,
             validInputs: [
-                
-            ],
+                ],
             parserErrorInputs: [
-            ],
+                ],
             incompleteMessageInputs: [
-            ]
+                ]
         )
     }
 
@@ -120,13 +117,11 @@ extension GrammarParser_Commands_Tests {
         self.iterateTests(
             testFunction: GrammarParser.parseCommandSuffix_enable,
             validInputs: [
-                
-            ],
+                ],
             parserErrorInputs: [
-            
-            ],
+                ],
             incompleteMessageInputs: [
-            ]
+                ]
         )
     }
 
@@ -138,9 +133,9 @@ extension GrammarParser_Commands_Tests {
                 (" (MAXSIZE 123) INBOX (a b)", " ", .getMetadata(options: [.maxSize(123)], mailbox: .inbox, entries: ["a", "b"]), #line),
             ],
             parserErrorInputs: [
-            ],
+                ],
             incompleteMessageInputs: [
-            ]
+                ]
         )
     }
 
@@ -151,9 +146,9 @@ extension GrammarParser_Commands_Tests {
                 (" INBOX (a NIL)", " ", .setMetadata(mailbox: .inbox, entries: ["a": .init(nil)]), #line),
             ],
             parserErrorInputs: [
-            ],
+                ],
             incompleteMessageInputs: [
-            ]
+                ]
         )
     }
 
@@ -167,9 +162,9 @@ extension GrammarParser_Commands_Tests {
                 (" INBOX INTERNAL test", "\r", .resetKey(mailbox: .inbox, mechanisms: [.internal, .init("test")]), #line),
             ],
             parserErrorInputs: [
-            ],
+                ],
             incompleteMessageInputs: [
-            ]
+                ]
         )
     }
 
@@ -181,9 +176,9 @@ extension GrammarParser_Commands_Tests {
                 (" test INTERNAL test2 INTERNAL", "\r", .generateAuthorizedURL([.init(urlRump: "test", mechanism: .internal), .init(urlRump: "test2", mechanism: .internal)]), #line),
             ],
             parserErrorInputs: [
-            ],
+                ],
             incompleteMessageInputs: [
-            ]
+                ]
         )
     }
 
@@ -195,9 +190,9 @@ extension GrammarParser_Commands_Tests {
                 (" test1 test2", "\r", .urlFetch(["test1", "test2"]), #line),
             ],
             parserErrorInputs: [
-            ],
+                ],
             incompleteMessageInputs: [
-            ]
+                ]
         )
     }
 
@@ -205,12 +200,11 @@ extension GrammarParser_Commands_Tests {
         self.iterateTests(
             testFunction: GrammarParser.parseCommandSuffix_copy,
             validInputs: [
-
-            ],
+                ],
             parserErrorInputs: [
-            ],
+                ],
             incompleteMessageInputs: [
-            ]
+                ]
         )
     }
 
@@ -218,12 +212,11 @@ extension GrammarParser_Commands_Tests {
         self.iterateTests(
             testFunction: GrammarParser.parseCommandSuffix_delete,
             validInputs: [
-
-            ],
+                ],
             parserErrorInputs: [
-            ],
+                ],
             incompleteMessageInputs: [
-            ]
+                ]
         )
     }
 
@@ -231,12 +224,11 @@ extension GrammarParser_Commands_Tests {
         self.iterateTests(
             testFunction: GrammarParser.parseCommandSuffix_move,
             validInputs: [
-
-            ],
+                ],
             parserErrorInputs: [
-            ],
+                ],
             incompleteMessageInputs: [
-            ]
+                ]
         )
     }
 
@@ -244,12 +236,11 @@ extension GrammarParser_Commands_Tests {
         self.iterateTests(
             testFunction: GrammarParser.parseCommandSuffix_search,
             validInputs: [
-
-            ],
+                ],
             parserErrorInputs: [
-            ],
+                ],
             incompleteMessageInputs: [
-            ]
+                ]
         )
     }
 
@@ -257,12 +248,11 @@ extension GrammarParser_Commands_Tests {
         self.iterateTests(
             testFunction: GrammarParser.parseCommandSuffix_esearch,
             validInputs: [
-
-            ],
+                ],
             parserErrorInputs: [
-            ],
+                ],
             incompleteMessageInputs: [
-            ]
+                ]
         )
     }
 
@@ -270,12 +260,11 @@ extension GrammarParser_Commands_Tests {
         self.iterateTests(
             testFunction: GrammarParser.parseCommandSuffix_store,
             validInputs: [
-
-            ],
+                ],
             parserErrorInputs: [
-            ],
+                ],
             incompleteMessageInputs: [
-            ]
+                ]
         )
     }
 
@@ -283,12 +272,11 @@ extension GrammarParser_Commands_Tests {
         self.iterateTests(
             testFunction: GrammarParser.parseCommandSuffix_examine,
             validInputs: [
-
-            ],
+                ],
             parserErrorInputs: [
-            ],
+                ],
             incompleteMessageInputs: [
-            ]
+                ]
         )
     }
 
@@ -296,12 +284,11 @@ extension GrammarParser_Commands_Tests {
         self.iterateTests(
             testFunction: GrammarParser.parseCommandSuffix_list,
             validInputs: [
-
-            ],
+                ],
             parserErrorInputs: [
-            ],
+                ],
             incompleteMessageInputs: [
-            ]
+                ]
         )
     }
 
@@ -312,9 +299,9 @@ extension GrammarParser_Commands_Tests {
                 (" inbox someList", " ", .lsub(reference: .inbox, pattern: "someList"), #line),
             ],
             parserErrorInputs: [
-            ],
+                ],
             incompleteMessageInputs: [
-            ]
+                ]
         )
     }
 
@@ -322,12 +309,11 @@ extension GrammarParser_Commands_Tests {
         self.iterateTests(
             testFunction: GrammarParser.parseCommandSuffix_rename,
             validInputs: [
-
-            ],
+                ],
             parserErrorInputs: [
-            ],
+                ],
             incompleteMessageInputs: [
-            ]
+                ]
         )
     }
 
@@ -335,12 +321,11 @@ extension GrammarParser_Commands_Tests {
         self.iterateTests(
             testFunction: GrammarParser.parseCommandSuffix_select,
             validInputs: [
-
-            ],
+                ],
             parserErrorInputs: [
-            ],
+                ],
             incompleteMessageInputs: [
-            ]
+                ]
         )
     }
 
@@ -348,12 +333,11 @@ extension GrammarParser_Commands_Tests {
         self.iterateTests(
             testFunction: GrammarParser.parseCommandSuffix_status,
             validInputs: [
-
-            ],
+                ],
             parserErrorInputs: [
-            ],
+                ],
             incompleteMessageInputs: [
-            ]
+                ]
         )
     }
 
@@ -361,12 +345,11 @@ extension GrammarParser_Commands_Tests {
         self.iterateTests(
             testFunction: GrammarParser.parseCommandSuffix_id,
             validInputs: [
-
-            ],
+                ],
             parserErrorInputs: [
-            ],
+                ],
             incompleteMessageInputs: [
-            ]
+                ]
         )
     }
 
@@ -374,12 +357,11 @@ extension GrammarParser_Commands_Tests {
         self.iterateTests(
             testFunction: GrammarParser.parseCommandSuffix_id,
             validInputs: [
-
-            ],
+                ],
             parserErrorInputs: [
-            ],
+                ],
             incompleteMessageInputs: [
-            ]
+                ]
         )
     }
 
@@ -387,12 +369,11 @@ extension GrammarParser_Commands_Tests {
         self.iterateTests(
             testFunction: GrammarParser.parseCommandSuffix_id,
             validInputs: [
-
-            ],
+                ],
             parserErrorInputs: [
-            ],
+                ],
             incompleteMessageInputs: [
-            ]
+                ]
         )
     }
 
@@ -400,12 +381,11 @@ extension GrammarParser_Commands_Tests {
         self.iterateTests(
             testFunction: GrammarParser.parseCommandSuffix_id,
             validInputs: [
-
-            ],
+                ],
             parserErrorInputs: [
-            ],
+                ],
             incompleteMessageInputs: [
-            ]
+                ]
         )
     }
 
@@ -413,12 +393,11 @@ extension GrammarParser_Commands_Tests {
         self.iterateTests(
             testFunction: GrammarParser.parseCommandSuffix_id,
             validInputs: [
-
-            ],
+                ],
             parserErrorInputs: [
-            ],
+                ],
             incompleteMessageInputs: [
-            ]
+                ]
         )
     }
 
@@ -426,12 +405,11 @@ extension GrammarParser_Commands_Tests {
         self.iterateTests(
             testFunction: GrammarParser.parseCommandSuffix_id,
             validInputs: [
-
-            ],
+                ],
             parserErrorInputs: [
-            ],
+                ],
             incompleteMessageInputs: [
-            ]
+                ]
         )
     }
 
@@ -439,12 +417,12 @@ extension GrammarParser_Commands_Tests {
         self.iterateTests(
             testFunction: GrammarParser.parseCommandSuffix_create,
             validInputs: [
-                ("CREATE inbox (something)", " ", .create(.inbox, [.labelled(.init(key: "something", value: nil))]), #line),
+                (" inbox (something)", " ", .create(.inbox, [.labelled(.init(key: "something", value: nil))]), #line),
             ],
             parserErrorInputs: [
-            ],
+                ],
             incompleteMessageInputs: [
-            ]
+                ]
         )
     }
 
@@ -452,12 +430,11 @@ extension GrammarParser_Commands_Tests {
         self.iterateTests(
             testFunction: GrammarParser.parseCommandSuffix_id,
             validInputs: [
-
-            ],
+                ],
             parserErrorInputs: [
-            ],
+                ],
             incompleteMessageInputs: [
-            ]
+                ]
         )
     }
 
@@ -465,12 +442,11 @@ extension GrammarParser_Commands_Tests {
         self.iterateTests(
             testFunction: GrammarParser.parseCommandSuffix_id,
             validInputs: [
-
-            ],
+                ],
             parserErrorInputs: [
-            ],
+                ],
             incompleteMessageInputs: [
-            ]
+                ]
         )
     }
 
@@ -478,13 +454,11 @@ extension GrammarParser_Commands_Tests {
         self.iterateTests(
             testFunction: GrammarParser.parseCommandSuffix_id,
             validInputs: [
-
-            ],
+                ],
             parserErrorInputs: [
-            ],
+                ],
             incompleteMessageInputs: [
-            ]
+                ]
         )
     }
-
 }

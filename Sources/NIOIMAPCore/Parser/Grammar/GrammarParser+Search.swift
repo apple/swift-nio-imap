@@ -24,7 +24,6 @@ import struct NIO.ByteBuffer
 import struct NIO.ByteBufferView
 
 extension GrammarParser {
-
     // search-program     = ["CHARSET" SP charset SP]
     //                         search-key *(SP search-key)
     //                         ;; CHARSET argument to SEARCH MUST be

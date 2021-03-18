@@ -39,44 +39,44 @@ extension GrammarParser {
     //                   command-select) CRLF
     static func parseCommand(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
         let commandParsers: [String: (inout ParseBuffer, StackTracker) throws -> Command] = [
-            "CAPABILITY":   { _, _ in .capability },
-            "LOGOUT":       { _, _ in .logout },
-            "NOOP":         { _, _ in .noop },
-            "STARTTLS":     { _, _ in .starttls },
-            "CHECK":        { _, _ in .check },
-            "CLOSE":        { _, _ in .close },
-            "EXPUNGE":      { _, _ in .expunge },
-            "UNSELECT":     { _, _ in .unselect },
-            "IDLE":         { _, _ in .idleStart },
-            "NAMESPACE":    { _, _ in .namespace },
-            "ID":           GrammarParser.parseCommandSuffix_id,
-            "ENABLE":       GrammarParser.parseCommandSuffix_enable,
-            "GETMETADATA":  GrammarParser.parseCommandSuffix_getMetadata,
-            "SETMETADATA":  GrammarParser.parseCommandSuffix_setMetadata,
-            "RESETKEY":     GrammarParser.parseCommandSuffix_resetKey,
-            "GENURLAUTH":   GrammarParser.parseCommandSuffix_genURLAuth,
-            "URLFETCH":     GrammarParser.parseCommandSuffix_urlFetch,
-            "COPY":         GrammarParser.parseCommandSuffix_copy,
-            "DELETE":       GrammarParser.parseCommandSuffix_delete,
-            "MOVE":         GrammarParser.parseCommandSuffix_move,
-            "SEARCH":       GrammarParser.parseCommandSuffix_search,
-            "ESEARCH":      GrammarParser.parseCommandSuffix_esearch,
-            "STORE":        GrammarParser.parseCommandSuffix_store,
-            "EXAMINE":      GrammarParser.parseCommandSuffix_examine,
-            "LIST":         GrammarParser.parseCommandSuffix_list,
-            "LSUB":         GrammarParser.parseCommandSuffix_LSUB,
-            "RENAME":       GrammarParser.parseCommandSuffix_rename,
-            "SELECT":       GrammarParser.parseCommandSuffix_select,
-            "STATUS":       GrammarParser.parseCommandSuffix_status,
-            "SUBSCRIBE":    GrammarParser.parseCommandSuffix_subscribe,
-            "UNSUBSCRIBE":  GrammarParser.parseCommandSuffix_unsubscribe,
-            "UID":          GrammarParser.parseCommandSuffix_uid,
-            "FETCH":        GrammarParser.parseCommandSuffix_fetch,
-            "LOGIN":        GrammarParser.parseCommandSuffix_login,
+            "CAPABILITY": { _, _ in .capability },
+            "LOGOUT": { _, _ in .logout },
+            "NOOP": { _, _ in .noop },
+            "STARTTLS": { _, _ in .starttls },
+            "CHECK": { _, _ in .check },
+            "CLOSE": { _, _ in .close },
+            "EXPUNGE": { _, _ in .expunge },
+            "UNSELECT": { _, _ in .unselect },
+            "IDLE": { _, _ in .idleStart },
+            "NAMESPACE": { _, _ in .namespace },
+            "ID": GrammarParser.parseCommandSuffix_id,
+            "ENABLE": GrammarParser.parseCommandSuffix_enable,
+            "GETMETADATA": GrammarParser.parseCommandSuffix_getMetadata,
+            "SETMETADATA": GrammarParser.parseCommandSuffix_setMetadata,
+            "RESETKEY": GrammarParser.parseCommandSuffix_resetKey,
+            "GENURLAUTH": GrammarParser.parseCommandSuffix_genURLAuth,
+            "URLFETCH": GrammarParser.parseCommandSuffix_urlFetch,
+            "COPY": GrammarParser.parseCommandSuffix_copy,
+            "DELETE": GrammarParser.parseCommandSuffix_delete,
+            "MOVE": GrammarParser.parseCommandSuffix_move,
+            "SEARCH": GrammarParser.parseCommandSuffix_search,
+            "ESEARCH": GrammarParser.parseCommandSuffix_esearch,
+            "STORE": GrammarParser.parseCommandSuffix_store,
+            "EXAMINE": GrammarParser.parseCommandSuffix_examine,
+            "LIST": GrammarParser.parseCommandSuffix_list,
+            "LSUB": GrammarParser.parseCommandSuffix_LSUB,
+            "RENAME": GrammarParser.parseCommandSuffix_rename,
+            "SELECT": GrammarParser.parseCommandSuffix_select,
+            "STATUS": GrammarParser.parseCommandSuffix_status,
+            "SUBSCRIBE": GrammarParser.parseCommandSuffix_subscribe,
+            "UNSUBSCRIBE": GrammarParser.parseCommandSuffix_unsubscribe,
+            "UID": GrammarParser.parseCommandSuffix_uid,
+            "FETCH": GrammarParser.parseCommandSuffix_fetch,
+            "LOGIN": GrammarParser.parseCommandSuffix_login,
             "AUTHENTICATE": GrammarParser.parseCommandSuffix_authenticate,
-            "CREATE":       GrammarParser.parseCommandSuffix_create,
-            "GETQUOTA":     GrammarParser.parseCommandSuffix_getQuota,
-            "SETQUOTA":     GrammarParser.parseCommandSuffix_setQuota,
+            "CREATE": GrammarParser.parseCommandSuffix_create,
+            "GETQUOTA": GrammarParser.parseCommandSuffix_getQuota,
+            "SETQUOTA": GrammarParser.parseCommandSuffix_setQuota,
             "GETQUOTAROOT": GrammarParser.parseCommandSuffix_getQuotaRoot,
         ]
         return try parseFromLookupTable(buffer: &buffer, tracker: tracker, parsers: commandParsers)
@@ -365,7 +365,7 @@ extension GrammarParser {
         })
         return .generateAuthorizedURL(array)
     }
-    
+
     // search          = "SEARCH" [search-return-opts] SP search-program
     static func parseCommandSuffix_search(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
         try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
@@ -375,7 +375,7 @@ extension GrammarParser {
             return .search(key: program, charset: charset, returnOptions: returnOpts)
         }
     }
-    
+
     // list            = "LIST" [SP list-select-opts] SP mailbox SP mbox-or-pat [SP list-return-opts]
     static func parseCommandSuffix_list(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
         try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
@@ -394,7 +394,7 @@ extension GrammarParser {
             return .list(selectOptions, reference: mailbox, mailboxPatterns, returnOptions)
         }
     }
-    
+
     // uid             = "UID" SP
     //                   (copy / move / fetch / search / store / uid-expunge)
     static func parseCommandSuffix_uid(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
@@ -468,7 +468,7 @@ extension GrammarParser {
             ], buffer: &buffer, tracker: tracker)
         }
     }
-    
+
     // fetch           = "FETCH" SP sequence-set SP ("ALL" / "FULL" / "FAST" /
     //                   fetch-att / "(" fetch-att *(SP fetch-att) ")") [fetch-modifiers]
     static func parseCommandSuffix_fetch(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {

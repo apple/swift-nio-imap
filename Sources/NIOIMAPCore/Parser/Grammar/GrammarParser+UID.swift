@@ -24,7 +24,6 @@ import struct NIO.ByteBuffer
 import struct NIO.ByteBufferView
 
 extension GrammarParser {
-
     // uid-range       = (uniqueid ":" uniqueid)
     static func parseUIDRange(buffer: inout ParseBuffer, tracker: StackTracker) throws -> UIDRange {
         func parse_wildcard(buffer: inout ParseBuffer, tracker: StackTracker) throws -> UID {
