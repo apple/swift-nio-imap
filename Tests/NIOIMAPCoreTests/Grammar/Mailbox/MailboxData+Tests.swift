@@ -25,10 +25,10 @@ extension MailboxDataTests {
         let inputs: [(MailboxData, String, UInt)] = [
             (.exists(1), "1 EXISTS", #line),
             (.flags([.answered, .deleted]), "FLAGS (\\Answered \\Deleted)", #line),
-            (.list(MailboxInfo(attributes: [], path: try! .init(name: .inbox), extensions: [:])), "LIST () \"INBOX\"", #line),
+            (.list(MailboxInfo(attributes: [], path: try! .init(name: .inbox), extensions: [:])), "LIST () NIL \"INBOX\"", #line),
             (
                 .lsub(.init(attributes: [.init("\\draft")], path: try! .init(name: .init("Drafts"), pathSeparator: "."), extensions: [:])),
-                "LSUB (\\draft) . \"Drafts\"",
+                "LSUB (\\draft) \".\" \"Drafts\"",
                 #line
             ),
             (.extendedSearch(ExtendedSearchResponse(correlator: nil, uid: false, returnData: [.count(1)])), "ESEARCH COUNT 1", #line),

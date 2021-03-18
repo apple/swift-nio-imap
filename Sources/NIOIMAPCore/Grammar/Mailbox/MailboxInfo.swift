@@ -85,15 +85,27 @@ extension MailboxInfo {
 // MARK: - Encoding
 
 extension _EncodeBuffer {
+    private mutating func writeMailboxPathSeparator(_ character: Character?) -> Int {
+        switch character {
+        case nil:
+            return self._writeString("NIL")
+        case "\\":
+            return self._writeString(#""\""#)
+        case "\"":
+            return self._writeString(#""\\""#)
+        case let character?:
+            return self._writeString("\"\(character)\"")
+        }
+    }
+
     @discardableResult mutating func writeMailboxInfo(_ list: MailboxInfo) -> Int {
         self._writeString("(") +
             self.writeIfExists(list.attributes) { (flags) -> Int in
                 self.writeMailboxListFlags(flags)
             } +
             self._writeString(") ") +
-            self.writeIfExists(list.path.pathSeparator) { (char) -> Int in
-                self._writeString("\(char) ")
-            } +
+            self.writeMailboxPathSeparator(list.path.pathSeparator) +
+            self.writeSpace() +
             self.writeMailbox(list.path.name)
     }
 
