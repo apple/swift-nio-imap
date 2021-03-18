@@ -160,7 +160,7 @@ class IMAPClientHandlerTests: XCTestCase {
         XCTAssertNoThrow(XCTAssertNil(try channel.readOutbound(as: ByteBuffer.self)))
 
         // start authentication
-        XCTAssertNoThrow(try channel.writeOutbound(CommandStream.command(.init(tag: "A001", command: .authenticate(method: "GSSAPI", initialClientResponse: nil)))))
+        XCTAssertNoThrow(try channel.writeOutbound(CommandStream.command(.init(tag: "A001", command: .authenticate(method: .init("GSSAPI"), initialClientResponse: nil)))))
         XCTAssertEqual(handler._state, .expectingContinuations)
         XCTAssertNoThrow(try channel.readOutbound(as: ByteBuffer.self))
         XCTAssertNoThrow(XCTAssertNil(try channel.readOutbound(as: ByteBuffer.self)))
