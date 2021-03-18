@@ -25,7 +25,7 @@ extension CommandStream_Tests {
         let inputs: [(CommandStream, String, UInt)] = [
             (.append(.start(tag: "1", appendingTo: .inbox)), "1 APPEND \"INBOX\"", #line),
             (
-                .append(.beginMessage(message: .init(options: .init(flagList: [], extensions: [:]), data: .init(byteCount: 3)))),
+                .append(.beginMessage(message: .init(options: .none, data: .init(byteCount: 3)))),
                 " {3}\r\n",
                 #line
             ),
@@ -52,7 +52,7 @@ extension CommandStream_Tests {
     func testContinuation_synchronizing() throws {
         let parts: [AppendCommand] = [
             .start(tag: "1", appendingTo: .inbox),
-            .beginMessage(message: .init(options: .init(flagList: [], extensions: [:]), data: .init(byteCount: 7))),
+            .beginMessage(message: .init(options: .none, data: .init(byteCount: 7))),
             .messageBytes("Foo Bar"),
             .endMessage,
             .finish,
@@ -77,7 +77,7 @@ extension CommandStream_Tests {
     func testContinuation_nonSynchronizing() throws {
         let parts: [AppendCommand] = [
             .start(tag: "1", appendingTo: .inbox),
-            .beginMessage(message: .init(options: .init(flagList: [], extensions: [:]), data: .init(byteCount: 3))),
+            .beginMessage(message: .init(options: .none, data: .init(byteCount: 3))),
             .messageBytes("abc"),
             .endMessage,
             .finish,

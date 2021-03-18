@@ -25,11 +25,15 @@ public struct AppendOptions: Equatable {
     /// Any additional pieces of information to be associated with the message. Implemented as a "catch-all" to support future extensions.
     public var extensions: KeyValues<String, ParameterValue>
 
+    /// Creates a new `AppendOptions` with no flags, internal date, or extensions.
+    /// Provided as syntactic sugar to use instead of `.init()`.
+    public static let none = Self()
+
     /// Creates a new `AppendOptions`
-    /// - parameter flagList: Flags that will be added to the message.
+    /// - parameter flagList: Flags that will be added to the message. Defaults to `[]`.
     /// - parameter internalDate: An optional date to be associated with the message, typically representing the date of delivery. Defaults to `nil`.
-    /// - parameter extensions: Any additional pieces of information to be associated with the message. Implemented as a "catch-all" to support future extensions.
-    public init(flagList: [Flag], internalDate: InternalDate? = nil, extensions: KeyValues<String, ParameterValue>) {
+    /// - parameter extensions: Any additional pieces of information to be associated with the message. Implemented as a "catch-all" to support future extensions. Defaults to `[:]`.
+    public init(flagList: [Flag] = [], internalDate: InternalDate? = nil, extensions: KeyValues<String, ParameterValue> = [:]) {
         self.flagList = flagList
         self.internalDate = internalDate
         self.extensions = extensions

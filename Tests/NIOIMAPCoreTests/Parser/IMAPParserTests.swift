@@ -143,7 +143,7 @@ extension ParserUnitTests {
             XCTAssertEqual(buffer.readableBytes, 0)
             XCTAssertEqual(c1, PartialCommandStream(.command(TaggedCommand(tag: "1", command: .noop)), numberOfSynchronisingLiterals: 1))
             XCTAssertEqual(c2_1, PartialCommandStream(.append(.start(tag: "2", appendingTo: .inbox))))
-            XCTAssertEqual(c2_2, PartialCommandStream(.append(.beginMessage(message: .init(options: .init(flagList: [], extensions: [:]), data: .init(byteCount: 10))))))
+            XCTAssertEqual(c2_2, PartialCommandStream(.append(.beginMessage(message: .init(options: .none, data: .init(byteCount: 10))))))
             XCTAssertEqual(c2_3, PartialCommandStream(.append(.messageBytes("0123456789"))))
             XCTAssertEqual(c2_4, PartialCommandStream(.append(.endMessage)))
             XCTAssertEqual(c2_5, PartialCommandStream(.append(.finish)))
