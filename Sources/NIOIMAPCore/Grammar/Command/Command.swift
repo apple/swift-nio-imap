@@ -424,11 +424,11 @@ extension CommandEncodeBuffer {
     }
 
     private mutating func writeCommandKind_authenticate(method: AuthenticationKind, initialClientResponse: InitialClientResponse?) -> Int {
-        self.buffer.writeString("AUTHENTICATE ") +
-            self.buffer.writeAuthenticationKind(method) +
-            self.buffer.writeIfExists(initialClientResponse) { resp in
-                self.buffer.writeSpace() +
-                    self.buffer.writeInitialClientResponse(resp)
+        self._buffer._writeString("AUTHENTICATE ") +
+            self._buffer.writeAuthenticationKind(method) +
+            self._buffer.writeIfExists(initialClientResponse) { resp in
+                self._buffer.writeSpace() +
+                    self._buffer.writeInitialClientResponse(resp)
             }
     }
 

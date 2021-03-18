@@ -48,8 +48,8 @@ public struct AuthenticationKind: Hashable {
 
 // MARK: - Encoding
 
-extension EncodeBuffer {
+extension _EncodeBuffer {
     @discardableResult mutating func writeAuthenticationKind(_ kind: AuthenticationKind) -> Int {
-        self.writeString(kind.rawValue)
+        self._writeString(kind.rawValue)
     }
 }
