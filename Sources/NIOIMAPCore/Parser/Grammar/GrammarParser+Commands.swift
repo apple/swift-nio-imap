@@ -320,7 +320,7 @@ extension GrammarParser {
     }
 
     static func parseCommandSuffix_getMetadata(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
-        try ParserLibrary.composite(buffer: &buffer, tracker: tracker, { buffer, tracker in
+        try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
             let options = try ParserLibrary.optional(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> [MetadataOption] in
                 let options = try self.parseMetadataOptions(buffer: &buffer, tracker: tracker)
@@ -331,21 +331,21 @@ extension GrammarParser {
             try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
             let entries = try self.parseEntries(buffer: &buffer, tracker: tracker)
             return .getMetadata(options: options, mailbox: mailbox, entries: entries)
-        })
+        }
     }
 
     static func parseCommandSuffix_setMetadata(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
-        try ParserLibrary.composite(buffer: &buffer, tracker: tracker, { buffer, tracker in
+        try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
             let mailbox = try self.parseMailbox(buffer: &buffer, tracker: tracker)
             try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
             let list = try self.parseEntryValues(buffer: &buffer, tracker: tracker)
             return .setMetadata(mailbox: mailbox, entries: list)
-        })
+        }
     }
 
     static func parseCommandSuffix_resetKey(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
-        try ParserLibrary.composite(buffer: &buffer, tracker: tracker, { buffer, tracker in
+        try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             let _mailbox = try ParserLibrary.optional(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> MailboxName in
                 try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
                 return try self.parseMailbox(buffer: &buffer, tracker: tracker)
@@ -361,7 +361,7 @@ extension GrammarParser {
                 return try self.parseUAuthMechanism(buffer: &buffer, tracker: tracker)
             })
             return .resetKey(mailbox: mailbox, mechanisms: mechanisms)
-        })
+        }
     }
 
     static func parseCommandSuffix_genURLAuth(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {

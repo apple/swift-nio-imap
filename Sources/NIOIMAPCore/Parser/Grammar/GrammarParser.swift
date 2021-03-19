@@ -689,7 +689,7 @@ extension GrammarParser {
             let value = try self.parseNString(buffer: &buffer, tracker: tracker)
             return (key, value)
         }
-        
+
         func parseIDParamsList_empty(buffer: inout ParseBuffer, tracker: StackTracker) throws -> KeyValues<String, ByteBuffer?> {
             try ParserLibrary.fixedString("()", buffer: &buffer, tracker: tracker)
             return [:]
