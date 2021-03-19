@@ -17,7 +17,7 @@ import struct NIO.ByteBuffer
 /// RFC 5465 - One or more mailboxes
 public struct Mailboxes: Equatable {
     /// Array of at least one mailbox.
-    public private(set) var content: [MailboxName]
+    public let content: [MailboxName]
 
     /// Creates a new `Mailboxes` - there must be at least one mail box in the set.
     /// - parameter mailboxes: One or more mailboxes.

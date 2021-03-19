@@ -17,10 +17,10 @@ import struct NIO.ByteBuffer
 /// RFC 6237 - Source options
 public struct ExtendedSearchSourceOptions: Equatable {
     /// Array of at least one mailbox filter.
-    public private(set) var sourceMailbox: [MailboxFilter]
+    public let sourceMailbox: [MailboxFilter]
 
     /// Scope Options
-    public private(set) var scopeOptions: ExtendedSearchScopeOptions?
+    public let scopeOptions: ExtendedSearchScopeOptions?
 
     /// Creates a new `ExtendedSearchSourceOptions` from given scope options and mailbox filters.
     /// - parameter sourceMailbox: One or more mailboxes filters

@@ -59,7 +59,7 @@ extension RealWorldTests {
                                                                  part: IMessagePart(
                                                                      mailboxReference: IMailboxReference(encodeMailbox: EncodedMailbox(mailbox: "foo/bar"),
                                                                                                          uidValidity: nil),
-                                                                     iUID: try! IUID(uid: 1234),
+                                                                     iUID: IUID(uid: 1234),
                                                                      iSection: nil,
                                                                      iPartial: nil
                                                                  ),

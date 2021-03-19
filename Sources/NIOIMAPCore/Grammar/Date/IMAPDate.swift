@@ -18,13 +18,13 @@ import struct NIO.ByteBuffer
 /// (RFC 3501)
 public struct IMAPDate: Hashable {
     /// 4-digit year in the range (1900, 2500)
-    public var year: Int
+    public let year: Int
 
     /// 2-digit month in the range (01, 12)
-    public var month: Int
+    public let month: Int
 
     /// 2-digit day in the range (01, 31)
-    public var day: Int
+    public let day: Int
 
     /// Creates a new `Date` and performs some basic validation on the input provided.
     /// - parameter year: The year, validated to be between 1900 and 2500 inclusive.

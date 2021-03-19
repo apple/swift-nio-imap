@@ -15,10 +15,10 @@
 /// Matches an encoded user with a permitted authentication mechanism.
 public struct UserInfo: Equatable {
     /// The percent-encoded user data.
-    public var encodedUser: EncodedUser?
+    public let encodedUser: EncodedUser?
 
     /// The authentication mechanism.
-    public var authenticationMechanism: IAuthentication?
+    public let authenticationMechanism: IAuthentication?
 
     /// Creates a new `UserInfo`.
     /// - parameter encodedUser: The percent-encoded user data.

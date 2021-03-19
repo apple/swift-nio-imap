@@ -32,13 +32,13 @@ public struct FullDateTime: Equatable {
 /// A date.
 public struct FullDate: Equatable {
     /// The year. Any non-negative integer.
-    public var year: Int
+    public let year: Int
 
     /// The month in the range `1...12`.
-    public var month: Int
+    public let month: Int
 
     /// The day in the range `1...31`.
-    public var day: Int
+    public let day: Int
 
     /// Creates a new `FullDate`.
     /// - parameter year: The year. Any non-negative integer.

@@ -40,7 +40,7 @@ public struct UseAttribute: Equatable {
     /// Holds messages that have been deleted or marked for deletion.
     public static let trash = Self("\\Trash")
 
-    internal var stringValue: String
+    internal let stringValue: String
 
     /// Creates a new `UseAttribute` from the raw `String`. Note that
     /// usually it should be sufficient to just use the predefined attributes, e.g. `.drafts`.
