@@ -105,10 +105,18 @@ extension GrammarParser_Commands_Tests {
         self.iterateTests(
             testFunction: GrammarParser.parseCommandSuffix_id,
             validInputs: [
+                (" ()", "\r", .id([:]), #line),
+                (" nil", "\r", .id([:]), #line),
+                (#" ("name" "some")"#, "\r", .id(["name":"some"]), #line),
+                (#" ("k1" "v1" "k2" "v2")"#, "\r", .id(["k1":"v1", "k2":"v2"]), #line),
                 ],
             parserErrorInputs: [
+                (" ~", "", #line),
+                (" []", "", #line),
                 ],
             incompleteMessageInputs: [
+                (" (\"name\"", "", #line),
+                (" (\"name\" \"some\"", "", #line),
                 ]
         )
     }
@@ -117,10 +125,14 @@ extension GrammarParser_Commands_Tests {
         self.iterateTests(
             testFunction: GrammarParser.parseCommandSuffix_enable,
             validInputs: [
+                (" ACL", "\r", .enable([.acl]), #line),
+                (" ACL BINARY CHILDREN", "\r", .enable([.acl, .binary, .children]), #line),
                 ],
             parserErrorInputs: [
+                (" (ACL)", "\r", #line),
                 ],
             incompleteMessageInputs: [
+                (" ACL", "", #line),
                 ]
         )
     }
@@ -133,8 +145,12 @@ extension GrammarParser_Commands_Tests {
                 (" (MAXSIZE 123) INBOX (a b)", " ", .getMetadata(options: [.maxSize(123)], mailbox: .inbox, entries: ["a", "b"]), #line),
             ],
             parserErrorInputs: [
+                (" (MAXSIZE 123 rogue) INBOX", "\r", #line),
                 ],
             incompleteMessageInputs: [
+                (" (key", "", #line),
+                (" (key value", "", #line),
+                (" (MAXSIZE 123) INBOX", "", #line),
                 ]
         )
     }
@@ -146,8 +162,12 @@ extension GrammarParser_Commands_Tests {
                 (" INBOX (a NIL)", " ", .setMetadata(mailbox: .inbox, entries: ["a": .init(nil)]), #line),
             ],
             parserErrorInputs: [
+                (" (a NIL)", "", #line),
                 ],
             incompleteMessageInputs: [
+                (" INBOX", "", #line),
+                (" INBOX (", "", #line),
+                (" INBOX (a", "", #line),
                 ]
         )
     }
@@ -164,6 +184,9 @@ extension GrammarParser_Commands_Tests {
             parserErrorInputs: [
                 ],
             incompleteMessageInputs: [
+                (" INBOX", "", #line),
+                (" INBOX INTERNAL", "", #line),
+                (" INBOX INTERNAL test", "", #line),
                 ]
         )
     }
@@ -176,8 +199,12 @@ extension GrammarParser_Commands_Tests {
                 (" test INTERNAL test2 INTERNAL", "\r", .generateAuthorizedURL([.init(urlRump: "test", mechanism: .internal), .init(urlRump: "test2", mechanism: .internal)]), #line),
             ],
             parserErrorInputs: [
+                (" \\", "", #line),
                 ],
             incompleteMessageInputs: [
+                (" ", "", #line),
+                (" test", "", #line),
+                (" test internal", "", #line),
                 ]
         )
     }
@@ -190,8 +217,11 @@ extension GrammarParser_Commands_Tests {
                 (" test1 test2", "\r", .urlFetch(["test1", "test2"]), #line),
             ],
             parserErrorInputs: [
+                (" \\ ", "", #line),
                 ],
             incompleteMessageInputs: [
+                (" test", "", #line),
+                (" test1 test2 test3", "", #line),
                 ]
         )
     }
@@ -200,10 +230,18 @@ extension GrammarParser_Commands_Tests {
         self.iterateTests(
             testFunction: GrammarParser.parseCommandSuffix_copy,
             validInputs: [
+                (" $ inbox", "\r", .copy(.lastCommand, .inbox), #line),
+                (" 1 inbox", "\r", .copy(.set([1]), .inbox), #line),
+                (" 1,5,7 inbox", "\r", .copy(.set([1, 5, 7]), .inbox), #line),
+                (" 1:100 inbox", "\r", .copy(.set([1...100]), .inbox), #line),
                 ],
             parserErrorInputs: [
+                (" a inbox", "\r", #line),
+                (" 1: inbox", "\r", #line),
                 ],
             incompleteMessageInputs: [
+                (" 1", "", #line),
+                (" 1 inbox", "", #line),
                 ]
         )
     }
@@ -212,10 +250,13 @@ extension GrammarParser_Commands_Tests {
         self.iterateTests(
             testFunction: GrammarParser.parseCommandSuffix_delete,
             validInputs: [
+                (" INBOX", "\r\n", .delete(.inbox), #line),
                 ],
             parserErrorInputs: [
+                (" {5}12345", " ", #line),
                 ],
             incompleteMessageInputs: [
+                (" INBOX", "", #line),
                 ]
         )
     }
@@ -224,10 +265,18 @@ extension GrammarParser_Commands_Tests {
         self.iterateTests(
             testFunction: GrammarParser.parseCommandSuffix_move,
             validInputs: [
+                (" $ inbox", "\r", .move(.lastCommand, .inbox), #line),
+                (" 1 inbox", "\r", .move(.set([1]), .inbox), #line),
+                (" 1,5,7 inbox", "\r", .move(.set([1, 5, 7]), .inbox), #line),
+                (" 1:100 inbox", "\r", .move(.set([1...100]), .inbox), #line),
                 ],
             parserErrorInputs: [
+                (" a inbox", "\r", #line),
+                (" 1: inbox", "\r", #line),
                 ],
             incompleteMessageInputs: [
+                (" 1", "", #line),
+                (" 1 inbox", "", #line),
                 ]
         )
     }
@@ -236,11 +285,18 @@ extension GrammarParser_Commands_Tests {
         self.iterateTests(
             testFunction: GrammarParser.parseCommandSuffix_search,
             validInputs: [
-                ],
+                (
+                    "", "",
+                    .search(key: <#T##SearchKey#>, charset: <#T##String?#>, returnOptions: <#T##[SearchReturnOption]#>),
+                    #line
+                ),
+            ],
             parserErrorInputs: [
-                ],
+                ("", "", #line),
+            ],
             incompleteMessageInputs: [
-                ]
+                ("", "", #line),
+            ]
         )
     }
 
@@ -248,10 +304,13 @@ extension GrammarParser_Commands_Tests {
         self.iterateTests(
             testFunction: GrammarParser.parseCommandSuffix_esearch,
             validInputs: [
+                ("", "", .id([:]), #line),
                 ],
             parserErrorInputs: [
+                ("", "", #line),
                 ],
             incompleteMessageInputs: [
+                ("", "", #line),
                 ]
         )
     }
@@ -260,10 +319,13 @@ extension GrammarParser_Commands_Tests {
         self.iterateTests(
             testFunction: GrammarParser.parseCommandSuffix_store,
             validInputs: [
+                ("", "", .id([:]), #line),
                 ],
             parserErrorInputs: [
+                ("", "", #line),
                 ],
             incompleteMessageInputs: [
+                ("", "", #line),
                 ]
         )
     }
@@ -272,10 +334,14 @@ extension GrammarParser_Commands_Tests {
         self.iterateTests(
             testFunction: GrammarParser.parseCommandSuffix_examine,
             validInputs: [
+                (" INBOX", "\r", .examine(.inbox, [:]), #line),
                 ],
             parserErrorInputs: [
+                (" INBOX ", "", #line),
                 ],
             incompleteMessageInputs: [
+                (" INBOX", "", #line),
+                (" INBOX ()", "", #line),
                 ]
         )
     }
@@ -284,10 +350,13 @@ extension GrammarParser_Commands_Tests {
         self.iterateTests(
             testFunction: GrammarParser.parseCommandSuffix_list,
             validInputs: [
+                ("", "", .id([:]), #line),
                 ],
             parserErrorInputs: [
+                ("", "", #line),
                 ],
             incompleteMessageInputs: [
+                ("", "", #line),
                 ]
         )
     }
@@ -299,8 +368,10 @@ extension GrammarParser_Commands_Tests {
                 (" inbox someList", " ", .lsub(reference: .inbox, pattern: "someList"), #line),
             ],
             parserErrorInputs: [
-                ],
+                ("", "", #line),
+            ],
             incompleteMessageInputs: [
+                ("", "", #line),
                 ]
         )
     }
@@ -309,10 +380,15 @@ extension GrammarParser_Commands_Tests {
         self.iterateTests(
             testFunction: GrammarParser.parseCommandSuffix_rename,
             validInputs: [
+                (" box1 box2", "\r", .rename(from: .init(.init(string: "box1")), to: .init(.init(string: "box2")), params: [:]), #line),
                 ],
             parserErrorInputs: [
+                (" {2}b1 {2}b2", "", #line),
+                (" {2}\r\nb1 {2}b2", "", #line),
                 ],
             incompleteMessageInputs: [
+                (" box1", "", #line),
+                (" box1 box2", "", #line),
                 ]
         )
     }
@@ -321,10 +397,13 @@ extension GrammarParser_Commands_Tests {
         self.iterateTests(
             testFunction: GrammarParser.parseCommandSuffix_select,
             validInputs: [
+                (" INBOX", "\r", .select(.inbox, []), #line),
                 ],
             parserErrorInputs: [
+                ("", "", #line),
                 ],
             incompleteMessageInputs: [
+                (" INBOX", "", #line),
                 ]
         )
     }
@@ -333,82 +412,107 @@ extension GrammarParser_Commands_Tests {
         self.iterateTests(
             testFunction: GrammarParser.parseCommandSuffix_status,
             validInputs: [
+                ("", "", .id([:]), #line),
                 ],
             parserErrorInputs: [
+                ("", "", #line),
                 ],
             incompleteMessageInputs: [
+                ("", "", #line),
                 ]
         )
     }
 
     func testParseCommandSuffix_subscribe() {
         self.iterateTests(
-            testFunction: GrammarParser.parseCommandSuffix_id,
+            testFunction: GrammarParser.parseCommandSuffix_subscribe,
             validInputs: [
+                (" INBOX", "\r", .subscribe(.inbox), #line),
                 ],
             parserErrorInputs: [
+                ("inbox", "", #line),
                 ],
             incompleteMessageInputs: [
+                (" inbox", "", #line),
                 ]
         )
     }
 
     func testParseCommandSuffix_unsubscribe() {
         self.iterateTests(
-            testFunction: GrammarParser.parseCommandSuffix_id,
+            testFunction: GrammarParser.parseCommandSuffix_unsubscribe,
             validInputs: [
+                (" inbox", "\r", .unsubscribe(.inbox), #line),
                 ],
             parserErrorInputs: [
+                ("inbox", "", #line),
                 ],
             incompleteMessageInputs: [
+                (" inbox", "", #line),
                 ]
         )
     }
 
     func testParseCommandSuffix_uid() {
         self.iterateTests(
-            testFunction: GrammarParser.parseCommandSuffix_id,
+            testFunction: GrammarParser.parseCommandSuffix_uid,
             validInputs: [
+                ("", "", .id([:]), #line),
                 ],
             parserErrorInputs: [
+                ("", "", #line),
                 ],
             incompleteMessageInputs: [
+                ("", "", #line),
                 ]
         )
     }
 
     func testParseCommandSuffix_fetch() {
         self.iterateTests(
-            testFunction: GrammarParser.parseCommandSuffix_id,
+            testFunction: GrammarParser.parseCommandSuffix_fetch,
             validInputs: [
+                ("", "", .id([:]), #line),
                 ],
             parserErrorInputs: [
+                ("", "", #line),
                 ],
             incompleteMessageInputs: [
+                ("", "", #line),
                 ]
         )
     }
 
     func testParseCommandSuffix_login() {
         self.iterateTests(
-            testFunction: GrammarParser.parseCommandSuffix_id,
+            testFunction: GrammarParser.parseCommandSuffix_login,
             validInputs: [
+                (" email password", "\r", .login(username: "email", password: "password"), #line),
+                (" \"email\" \"password\"", "\r", .login(username: "email", password: "password"), #line),
+                (" {5}\r\nemail {8}\r\npassword", "\r", .login(username: "email", password: "password"), #line),
                 ],
             parserErrorInputs: [
+                ("email password", "", #line),
                 ],
             incompleteMessageInputs: [
+                (" email", "", #line),
+                (" email password", "", #line),
+                (" {5}\r\nemail {8}", "", #line),
                 ]
         )
     }
 
     func testParseCommandSuffix_authenticate() {
         self.iterateTests(
-            testFunction: GrammarParser.parseCommandSuffix_id,
+            testFunction: GrammarParser.parseCommandSuffix_authenticate,
             validInputs: [
+                (" GSSAPI", "\r", .authenticate(method: .gssAPI, initialClientResponse: nil), #line),
                 ],
             parserErrorInputs: [
+                (" ", "", #line),
                 ],
             incompleteMessageInputs: [
+                ("gssapi", "", #line),
                 ]
         )
     }
@@ -418,10 +522,15 @@ extension GrammarParser_Commands_Tests {
             testFunction: GrammarParser.parseCommandSuffix_create,
             validInputs: [
                 (" inbox (something)", " ", .create(.inbox, [.labelled(.init(key: "something", value: nil))]), #line),
+                (" inbox (k1 v1 $junk)", " ", .create(.inbox, [.labelled(.init(key: "k1", value: .comp(["v1"]))), .attributes([.junk])]), #line),
             ],
             parserErrorInputs: [
+                (" inbox ()", "", #line),
                 ],
             incompleteMessageInputs: [
+                (" inbox", "", #line),
+                (" inbox (k1", "", #line),
+                (" inbox (k1 v1", "", #line),
                 ]
         )
     }
@@ -430,10 +539,13 @@ extension GrammarParser_Commands_Tests {
         self.iterateTests(
             testFunction: GrammarParser.parseCommandSuffix_id,
             validInputs: [
+                ("", "", .id([:]), #line),
                 ],
             parserErrorInputs: [
+                ("", "", #line),
                 ],
             incompleteMessageInputs: [
+                ("", "", #line),
                 ]
         )
     }
@@ -442,10 +554,13 @@ extension GrammarParser_Commands_Tests {
         self.iterateTests(
             testFunction: GrammarParser.parseCommandSuffix_id,
             validInputs: [
+                ("", "", .id([:]), #line),
                 ],
             parserErrorInputs: [
+                ("", "", #line),
                 ],
             incompleteMessageInputs: [
+                ("", "", #line),
                 ]
         )
     }
@@ -454,10 +569,13 @@ extension GrammarParser_Commands_Tests {
         self.iterateTests(
             testFunction: GrammarParser.parseCommandSuffix_id,
             validInputs: [
+                ("", "", .id([:]), #line),
                 ],
             parserErrorInputs: [
+                ("", "", #line),
                 ],
             incompleteMessageInputs: [
+                ("", "", #line),
                 ]
         )
     }
