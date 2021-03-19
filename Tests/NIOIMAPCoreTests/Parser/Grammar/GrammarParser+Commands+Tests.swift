@@ -285,18 +285,26 @@ extension GrammarParser_Commands_Tests {
         self.iterateTests(
             testFunction: GrammarParser.parseCommandSuffix_search,
             validInputs: [
+                (" ALL", "\r", .search(key: .all), #line),
+                (" ALL DELETED FLAGGED", "\r", .search(key: .and([.all, .deleted, .flagged])), #line),
+                (" CHARSET UTF-8 ALL", "\r", .search(key: .all, charset: "UTF-8"), #line),
+                (" RETURN () ALL", "\r", .search(key: .all), #line),
+                (" RETURN (MIN) ALL", "\r", .search(key: .all, returnOptions: [.min]), #line),
                 (
-                    "", "",
-                    .search(key: <#T##SearchKey#>, charset: <#T##String?#>, returnOptions: <#T##[SearchReturnOption]#>),
+                    #" CHARSET UTF-8 (OR FROM "me" FROM "you") (OR NEW UNSEEN)"#,
+                    "\r",
+                    .search(key: .and([.or(.from("me"), .from("you")), .or(.new, .unseen)]), charset: "UTF-8"),
+                    #line
+                ),
+                (
+                    #" RETURN (MIN MAX) CHARSET UTF-8 OR (FROM "me" FROM "you") (NEW UNSEEN)"#,
+                    "\r",
+                    .search(key: .or(.and([.from("me"), .from("you")]), .and([.new, .unseen])), charset: "UTF-8", returnOptions: [.min, .max]),
                     #line
                 ),
             ],
-            parserErrorInputs: [
-                ("", "", #line),
-            ],
-            incompleteMessageInputs: [
-                ("", "", #line),
-            ]
+            parserErrorInputs: [],
+            incompleteMessageInputs: []
         )
     }
 
@@ -304,13 +312,17 @@ extension GrammarParser_Commands_Tests {
         self.iterateTests(
             testFunction: GrammarParser.parseCommandSuffix_esearch,
             validInputs: [
-                ("", "", .id([:]), #line),
+                (" ALL", "\r", .extendedsearch(.init(key: .all)), #line),
+                (
+                    " IN (mailboxes \"folder1\" subtree \"folder2\") unseen", "\r",
+                        .extendedsearch(.init(key: .unseen, charset: nil, returnOptions: [], sourceOptions: .init(sourceMailbox: [.mailboxes(.init([.init(.init(string: "folder1"))])!), .subtree(.init([.init(.init(string: "folder2"))])!)]))),
+                    #line
+                ),
                 ],
             parserErrorInputs: [
-                ("", "", #line),
                 ],
             incompleteMessageInputs: [
-                ("", "", #line),
+                (" IN (mailboxes ", "", #line),
                 ]
         )
     }
@@ -319,30 +331,29 @@ extension GrammarParser_Commands_Tests {
         self.iterateTests(
             testFunction: GrammarParser.parseCommandSuffix_store,
             validInputs: [
-                ("", "", .id([:]), #line),
-                ],
+                (" 1 +FLAGS \\answered", "\r", .store(.set([1]), [], .add(silent: false, list: [.answered])), #line),
+                (" 1 (label) -FLAGS \\seen", "\r", .store(.set([1]), [.other(.init(key: "label", value: nil))], .remove(silent: false, list: [.seen])), #line),
+            ],
             parserErrorInputs: [
-                ("", "", #line),
-                ],
+                (" +FLAGS \\answered", "\r", #line),
+            ],
             incompleteMessageInputs: [
-                ("", "", #line),
-                ]
+                (" ", "", #line),
+                (" 1 ", "", #line),
+            ]
         )
     }
 
     func testParseCommandSuffix_examine() {
         self.iterateTests(
-            testFunction: GrammarParser.parseCommandSuffix_examine,
+            testFunction: GrammarParser.parseCommand,
             validInputs: [
-                (" INBOX", "\r", .examine(.inbox, [:]), #line),
-                ],
-            parserErrorInputs: [
-                (" INBOX ", "", #line),
-                ],
-            incompleteMessageInputs: [
-                (" INBOX", "", #line),
-                (" INBOX ()", "", #line),
-                ]
+                ("EXAMINE inbox", "\r", .examine(.inbox, [:]), #line),
+                ("examine inbox", "\r", .examine(.inbox, [:]), #line),
+                ("EXAMINE inbox (number)", "\r", .examine(.inbox, ["number": nil]), #line),
+            ],
+            parserErrorInputs: [],
+            incompleteMessageInputs: []
         )
     }
 
@@ -350,14 +361,10 @@ extension GrammarParser_Commands_Tests {
         self.iterateTests(
             testFunction: GrammarParser.parseCommandSuffix_list,
             validInputs: [
-                ("", "", .id([:]), #line),
-                ],
-            parserErrorInputs: [
-                ("", "", #line),
-                ],
-            incompleteMessageInputs: [
-                ("", "", #line),
-                ]
+                (#" "" """#, "\r", .list(nil, reference: MailboxName(""), .mailbox(""), []), #line),
+            ],
+            parserErrorInputs: [],
+            incompleteMessageInputs: []
         )
     }
 
@@ -366,12 +373,14 @@ extension GrammarParser_Commands_Tests {
             testFunction: GrammarParser.parseCommandSuffix_LSUB,
             validInputs: [
                 (" inbox someList", " ", .lsub(reference: .inbox, pattern: "someList"), #line),
+                (" \"inbox\" \"someList\"", " ", .lsub(reference: .inbox, pattern: "someList"), #line),
             ],
             parserErrorInputs: [
-                ("", "", #line),
+                (" {5}inbox", "", #line),
             ],
             incompleteMessageInputs: [
-                ("", "", #line),
+                (" inbox", "", #line),
+                (" inbox list", "", #line),
                 ]
         )
     }
@@ -397,14 +406,15 @@ extension GrammarParser_Commands_Tests {
         self.iterateTests(
             testFunction: GrammarParser.parseCommandSuffix_select,
             validInputs: [
-                (" INBOX", "\r", .select(.inbox, []), #line),
-                ],
+                (" inbox", "\r", .select(.inbox, []), #line),
+                (" inbox (some1)", "\r", .select(.inbox, [.basic(.init(key: "some1", value: nil))]), #line),
+            ],
             parserErrorInputs: [
-                ("", "", #line),
-                ],
+                (" ", "\r", #line),
+            ],
             incompleteMessageInputs: [
-                (" INBOX", "", #line),
-                ]
+                (" ", "", #line),
+            ]
         )
     }
 
@@ -412,14 +422,16 @@ extension GrammarParser_Commands_Tests {
         self.iterateTests(
             testFunction: GrammarParser.parseCommandSuffix_status,
             validInputs: [
-                ("", "", .id([:]), #line),
-                ],
+                (" inbox (messages unseen)", "\r\n", .status(.inbox, [.messageCount, .unseenCount]), #line),
+                (" Deleted (messages unseen HIGHESTMODSEQ)", "\r\n", .status(MailboxName("Deleted"), [.messageCount, .unseenCount, .highestModificationSequence]), #line),
+            ],
             parserErrorInputs: [
-                ("", "", #line),
-                ],
+                (" inbox (messages unseen", "\r\n", #line),
+            ],
             incompleteMessageInputs: [
                 ("", "", #line),
-                ]
+                (" Deleted (messages ", "", #line),
+            ]
         )
     }
 
@@ -457,14 +469,19 @@ extension GrammarParser_Commands_Tests {
         self.iterateTests(
             testFunction: GrammarParser.parseCommandSuffix_uid,
             validInputs: [
-                ("", "", .id([:]), #line),
-                ],
+                (" EXPUNGE 1", "\r\n", .uidExpunge(.set([1])), #line),
+                (" COPY 1 Inbox", "\r\n", .uidCopy(.set([1]), .inbox), #line),
+                (" FETCH 1 FLAGS", "\r\n", .uidFetch(.set([1]), [.flags], [:]), #line),
+                (" SEARCH CHARSET UTF8 ALL", "\r\n", .uidSearch(key: .all, charset: "UTF8"), #line),
+                (" STORE 1 +FLAGS (Test)", "\r\n", .uidStore(.set([1]), [:], .add(silent: false, list: [.keyword(.init("Test"))])), #line),
+                (" COPY * Inbox", "\r\n", .uidCopy(.set([UIDRange(.max)]), .inbox), #line),
+            ],
             parserErrorInputs: [
-                ("", "", #line),
-                ],
+                ("UID RENAME inbox other", " ", #line),
+            ],
             incompleteMessageInputs: [
-                ("", "", #line),
-                ]
+                //                ("UID COPY 1", " ", #line),
+            ]
         )
     }
 
@@ -472,14 +489,16 @@ extension GrammarParser_Commands_Tests {
         self.iterateTests(
             testFunction: GrammarParser.parseCommandSuffix_fetch,
             validInputs: [
-                ("", "", .id([:]), #line),
-                ],
-            parserErrorInputs: [
-                ("", "", #line),
-                ],
-            incompleteMessageInputs: [
-                ("", "", #line),
-                ]
+                (" 1:3 ALL", "\r", .fetch(.set([1 ... 3]), .all, [:]), #line),
+                (" 2:4 FULL", "\r", .fetch(.set([2 ... 4]), .full, [:]), #line),
+                (" 3:5 FAST", "\r", .fetch(.set([3 ... 5]), .fast, [:]), #line),
+                (" 4:6 ENVELOPE", "\r", .fetch(.set([4 ... 6]), [.envelope], [:]), #line),
+                (" 5:7 (ENVELOPE FLAGS)", "\r", .fetch(.set([5 ... 7]), [.envelope, .flags], [:]), #line),
+                (" 3:5 FAST (name)", "\r", .fetch(.set([3 ... 5]), .fast, ["name": nil]), #line),
+                (" 1 BODY[TEXT]", "\r", .fetch(.set([1]), [.bodySection(peek: false, .init(kind: .text), nil)], [:]), #line),
+            ],
+            parserErrorInputs: [],
+            incompleteMessageInputs: []
         )
     }
 
@@ -507,12 +526,13 @@ extension GrammarParser_Commands_Tests {
             testFunction: GrammarParser.parseCommandSuffix_authenticate,
             validInputs: [
                 (" GSSAPI", "\r", .authenticate(method: .gssAPI, initialClientResponse: nil), #line),
+                (" GSSAPI aGV5", "\r", .authenticate(method: .gssAPI, initialClientResponse: .init(.init(.init(string: "hey")))), #line),
                 ],
             parserErrorInputs: [
-                (" ", "", #line),
+                (" \"GSSAPI\"", "", #line),
                 ],
             incompleteMessageInputs: [
-                ("gssapi", "", #line),
+                (" gssapi", "", #line),
                 ]
         )
     }
@@ -521,61 +541,78 @@ extension GrammarParser_Commands_Tests {
         self.iterateTests(
             testFunction: GrammarParser.parseCommandSuffix_create,
             validInputs: [
-                (" inbox (something)", " ", .create(.inbox, [.labelled(.init(key: "something", value: nil))]), #line),
-                (" inbox (k1 v1 $junk)", " ", .create(.inbox, [.labelled(.init(key: "k1", value: .comp(["v1"]))), .attributes([.junk])]), #line),
+                (" inbox", "\r", .create(.inbox, []), #line),
+                (" inbox (some)", "\r", .create(.inbox, [.labelled(.init(key: "some", value: nil))]), #line),
+                (" inbox (USE (\\All))", "\r", .create(.inbox, [.attributes([.all])]), #line),
+                (" inbox (USE (\\All \\Flagged))", "\r", .create(.inbox, [.attributes([.all, .flagged])]), #line),
+                (
+                    " inbox (USE (\\All \\Flagged) some1 2 USE (\\Sent))",
+                    "\r",
+                    .create(.inbox, [.attributes([.all, .flagged]), .labelled(.init(key: "some1", value: .sequence(.set([2])))), .attributes([.sent])]),
+                    #line
+                ),
             ],
-            parserErrorInputs: [
-                (" inbox ()", "", #line),
-                ],
+            parserErrorInputs: [],
             incompleteMessageInputs: [
                 (" inbox", "", #line),
-                (" inbox (k1", "", #line),
-                (" inbox (k1 v1", "", #line),
-                ]
+                (" inbox (USE", "", #line),
+            ]
         )
     }
 
     func testParseCommandSuffix_getQuota() {
         self.iterateTests(
-            testFunction: GrammarParser.parseCommandSuffix_id,
+            testFunction: GrammarParser.parseCommandSuffix_getQuota,
             validInputs: [
-                ("", "", .id([:]), #line),
+                (" \"\"", "\r", .getQuota(.init("")), #line),
+                (" \"quota\"", "\r", .getQuota(.init("quota")), #line),
                 ],
             parserErrorInputs: [
-                ("", "", #line),
+                (" {5}quota", "\r", #line),
                 ],
             incompleteMessageInputs: [
-                ("", "", #line),
+                (" \"root", "", #line),
                 ]
         )
     }
 
     func testParseCommandSuffix_setQuota() {
         self.iterateTests(
-            testFunction: GrammarParser.parseCommandSuffix_id,
+            testFunction: GrammarParser.parseCommandSuffix_setQuota,
             validInputs: [
-                ("", "", .id([:]), #line),
+                (#" "" (STORAGE 512)"#, "\r", .setQuota(.init(""), [.init(resourceName: "STORAGE", limit: 512)]), #line),
+                (
+                    #" "" (STORAGE 512 BANDWIDTH 123)"#, "\r",
+                        .setQuota(.init(""), [.init(resourceName: "STORAGE", limit: 512), .init(resourceName: "BANDWIDTH", limit: 123)]),
+                    #line
+                ),
                 ],
             parserErrorInputs: [
-                ("", "", #line),
+                (#" "" STORAGE 512"#, "", #line),
                 ],
             incompleteMessageInputs: [
-                ("", "", #line),
+                (#" ""#, "", #line),
+                (#" "root"#, "", #line),
+                (#" "root" ("#, "", #line),
+                (#" "root" (STORAGE"#, "", #line),
+                (#" "root" (STORAGE 123"#, "", #line),
                 ]
         )
     }
 
     func testParseCommandSuffix_getQuotaRoot() {
         self.iterateTests(
-            testFunction: GrammarParser.parseCommandSuffix_id,
+            testFunction: GrammarParser.parseCommandSuffix_getQuotaRoot,
             validInputs: [
-                ("", "", .id([:]), #line),
+                (" INBOX", "\r", .getQuotaRoot(.inbox), #line),
+                (" \"INBOX\"", "\r", .getQuotaRoot(.inbox), #line),
+                (" {5}\r\nINBOX", "\r", .getQuotaRoot(.inbox), #line),
                 ],
             parserErrorInputs: [
-                ("", "", #line),
+                (" {5}INBOX", "", #line),
                 ],
             incompleteMessageInputs: [
-                ("", "", #line),
+                (" INBOX", "", #line),
                 ]
         )
     }

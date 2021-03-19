@@ -18,30 +18,6 @@ import XCTest
 
 class GrammarParser_UID_Tests: XCTestCase, _ParserTestHelpers {}
 
-// MARK: - parseUID
-
-extension GrammarParser_UID_Tests {
-    func testParseUID() {
-        self.iterateTests(
-            testFunction: GrammarParser.parseCommand,
-            validInputs: [
-                ("UID EXPUNGE 1", "\r\n", .uidExpunge(.set([1])), #line),
-                ("UID COPY 1 Inbox", "\r\n", .uidCopy(.set([1]), .inbox), #line),
-                ("UID FETCH 1 FLAGS", "\r\n", .uidFetch(.set([1]), [.flags], [:]), #line),
-                ("UID SEARCH CHARSET UTF8 ALL", "\r\n", .uidSearch(key: .all, charset: "UTF8"), #line),
-                ("UID STORE 1 +FLAGS (Test)", "\r\n", .uidStore(.set([1]), [:], .add(silent: false, list: [.keyword(.init("Test"))])), #line),
-                ("UID COPY * Inbox", "\r\n", .uidCopy(.set([UIDRange(.max)]), .inbox), #line),
-            ],
-            parserErrorInputs: [
-                ("UID RENAME inbox other", " ", #line),
-            ],
-            incompleteMessageInputs: [
-                //                ("UID COPY 1", " ", #line),
-            ]
-        )
-    }
-}
-
 // MARK: - parseUIDValidity
 
 extension GrammarParser_UID_Tests {

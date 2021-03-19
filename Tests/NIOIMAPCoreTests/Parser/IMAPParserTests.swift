@@ -632,40 +632,6 @@ extension ParserUnitTests {
     }
 }
 
-// MARK: - create parseCreate
-
-extension ParserUnitTests {
-    func testParseCreate() {
-        self.iterateTests(
-            testFunction: GrammarParser.parseCommand,
-            validInputs: [
-                ("CREATE inbox", "\r", .create(.inbox, []), #line),
-                ("CREATE inbox (some)", "\r", .create(.inbox, [.labelled(.init(key: "some", value: nil))]), #line),
-                ("CREATE inbox (USE (\\All))", "\r", .create(.inbox, [.attributes([.all])]), #line),
-                ("CREATE inbox (USE (\\All \\Flagged))", "\r", .create(.inbox, [.attributes([.all, .flagged])]), #line),
-                (
-                    "CREATE inbox (USE (\\All \\Flagged) some1 2 USE (\\Sent))",
-                    "\r",
-                    .create(.inbox, [.attributes([.all, .flagged]), .labelled(.init(key: "some1", value: .sequence(.set([2])))), .attributes([.sent])]),
-                    #line
-                ),
-            ],
-            parserErrorInputs: [],
-            incompleteMessageInputs: [
-                ("CREATE inbox", "", #line),
-                ("CREATE inbox (USE", "", #line),
-            ]
-        )
-    }
-
-    func testCreate_invalid_incomplete() {
-        var buffer = TestUtilities.makeParseBuffer(for: "CREATE ")
-        XCTAssertThrowsError(try GrammarParser.parseCommand(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertTrue(e is _IncompleteMessage, "e has type \(e)")
-        }
-    }
-}
-
 // MARK: - parseCreateParameter
 
 extension ParserUnitTests {
@@ -1203,30 +1169,6 @@ extension ParserUnitTests {
             parserErrorInputs: [],
             incompleteMessageInputs: []
         )
-    }
-}
-
-// MARK: - examine parseExamine
-
-extension ParserUnitTests {
-    func testParseExamine() {
-        self.iterateTests(
-            testFunction: GrammarParser.parseCommand,
-            validInputs: [
-                ("EXAMINE inbox", "\r", .examine(.inbox, [:]), #line),
-                ("examine inbox", "\r", .examine(.inbox, [:]), #line),
-                ("EXAMINE inbox (number)", "\r", .examine(.inbox, ["number": nil]), #line),
-            ],
-            parserErrorInputs: [],
-            incompleteMessageInputs: []
-        )
-    }
-
-    func testExamine_invalid_incomplete() {
-        var buffer = TestUtilities.makeParseBuffer(for: "EXAMINE ")
-        XCTAssertThrowsError(try GrammarParser.parseCommand(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertTrue(e is _IncompleteMessage, "e has type \(e)")
-        }
     }
 }
 
@@ -1905,22 +1847,6 @@ extension ParserUnitTests {
     }
 }
 
-// MARK: - move parseMove
-
-extension ParserUnitTests {
-    func testParseMove() {
-        self.iterateTests(
-            testFunction: GrammarParser.parseCommand,
-            validInputs: [
-                ("MOVE * inbox", " ", .move(.all, .inbox), #line),
-                ("MOVE 1:2,4:5 test", " ", .move(LastCommandSet<SequenceRangeSet>([SequenceRange(1 ... 2), SequenceRange(4 ... 5)])!, .init("test")), #line),
-            ],
-            parserErrorInputs: [],
-            incompleteMessageInputs: []
-        )
-    }
-}
-
 // MARK: - parseMechanismBase64
 
 extension ParserUnitTests {
@@ -2302,26 +2228,6 @@ extension ParserUnitTests {
     }
 }
 
-// MARK: - select parseSelect
-
-extension ParserUnitTests {
-    func testParseSelect() {
-        self.iterateTests(
-            testFunction: GrammarParser.parseCommand,
-            validInputs: [
-                ("SELECT inbox", "\r", .select(.inbox, []), #line),
-                ("SELECT inbox (some1)", "\r", .select(.inbox, [.basic(.init(key: "some1", value: nil))]), #line),
-            ],
-            parserErrorInputs: [
-                ("SELECT ", "\r", #line),
-            ],
-            incompleteMessageInputs: [
-                ("SELECT ", "", #line),
-            ]
-        )
-    }
-}
-
 // MARK: - parseSelectParameter
 
 extension ParserUnitTests {
@@ -2341,27 +2247,6 @@ extension ParserUnitTests {
                 ("test ", "", #line),
                 ("QRESYNC (", "", #line),
                 ("QRESYNC (1 1", "", #line),
-            ]
-        )
-    }
-}
-
-// MARK: - status parseStatus
-
-extension ParserUnitTests {
-    func testParseStatus() {
-        self.iterateTests(
-            testFunction: GrammarParser.parseCommand,
-            validInputs: [
-                ("STATUS inbox (messages unseen)", "\r\n", .status(.inbox, [.messageCount, .unseenCount]), #line),
-                ("STATUS Deleted (messages unseen HIGHESTMODSEQ)", "\r\n", .status(MailboxName("Deleted"), [.messageCount, .unseenCount, .highestModificationSequence]), #line),
-            ],
-            parserErrorInputs: [
-                ("STATUS inbox (messages unseen", "\r\n", #line),
-            ],
-            incompleteMessageInputs: [
-                ("", "", #line),
-                ("STATUS Deleted (messages ", "", #line),
             ]
         )
     }
@@ -2414,27 +2299,6 @@ extension ParserUnitTests {
             incompleteMessageInputs: [
                 ("", "", #line),
                 ("MESSAGES 2 UNSEEN ", "", #line),
-            ]
-        )
-    }
-}
-
-// MARK: - parseStore
-
-extension ParserUnitTests {
-    func testParseStore() {
-        self.iterateTests(
-            testFunction: GrammarParser.parseCommand,
-            validInputs: [
-                ("STORE 1 +FLAGS \\answered", "\r", .store(.set([1]), [], .add(silent: false, list: [.answered])), #line),
-                ("STORE 1 (label) -FLAGS \\seen", "\r", .store(.set([1]), [.other(.init(key: "label", value: nil))], .remove(silent: false, list: [.seen])), #line),
-            ],
-            parserErrorInputs: [
-                ("STORE +FLAGS \\answered", "\r", #line),
-            ],
-            incompleteMessageInputs: [
-                ("STORE ", "", #line),
-                ("STORE 1 ", "", #line),
             ]
         )
     }

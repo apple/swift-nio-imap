@@ -2202,6 +2202,7 @@ extension GrammarParser {
         // setquota_resource ::= atom SP number
         func parseQuotaLimit(buffer: inout ParseBuffer, tracker: StackTracker) throws -> QuotaLimit {
             try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
+                try ParserLibrary.optional(buffer: &buffer, tracker: tracker, parser: ParserLibrary.parseSpaces)
                 let resourceName = try parseAtom(buffer: &buffer, tracker: tracker)
                 try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
                 let limit = try parseNumber(buffer: &buffer, tracker: tracker)
@@ -2211,15 +2212,7 @@ extension GrammarParser {
 
         return try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) throws -> [QuotaLimit] in
             try ParserLibrary.fixedString("(", buffer: &buffer, tracker: tracker)
-            var limits: [QuotaLimit] = []
-            try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
-                while let limit = try ParserLibrary.optional(buffer: &buffer, tracker: tracker, parser: parseQuotaLimit) {
-                    limits.append(limit)
-                    if try ParserLibrary.optional(buffer: &buffer, tracker: tracker, parser: ParserLibrary.parseSpaces) == nil {
-                        break
-                    }
-                }
-            }
+            let limits = try ParserLibrary.parseZeroOrMore(buffer: &buffer, tracker: tracker, parser: parseQuotaLimit)
             try ParserLibrary.fixedString(")", buffer: &buffer, tracker: tracker)
             return limits
         }

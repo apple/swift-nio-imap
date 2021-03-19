@@ -18,27 +18,6 @@ import XCTest
 
 class GrammarParser_Fetch_Tests: XCTestCase, _ParserTestHelpers {}
 
-// MARK: - parseFetch
-
-extension GrammarParser_Fetch_Tests {
-    func testParseFetch() {
-        self.iterateTests(
-            testFunction: GrammarParser.parseCommand,
-            validInputs: [
-                ("FETCH 1:3 ALL", "\r", .fetch(.set([1 ... 3]), .all, [:]), #line),
-                ("FETCH 2:4 FULL", "\r", .fetch(.set([2 ... 4]), .full, [:]), #line),
-                ("FETCH 3:5 FAST", "\r", .fetch(.set([3 ... 5]), .fast, [:]), #line),
-                ("FETCH 4:6 ENVELOPE", "\r", .fetch(.set([4 ... 6]), [.envelope], [:]), #line),
-                ("FETCH 5:7 (ENVELOPE FLAGS)", "\r", .fetch(.set([5 ... 7]), [.envelope, .flags], [:]), #line),
-                ("FETCH 3:5 FAST (name)", "\r", .fetch(.set([3 ... 5]), .fast, ["name": nil]), #line),
-                ("FETCH 1 BODY[TEXT]", "\r", .fetch(.set([1]), [.bodySection(peek: false, .init(kind: .text), nil)], [:]), #line),
-            ],
-            parserErrorInputs: [],
-            incompleteMessageInputs: []
-        )
-    }
-}
-
 // MARK: - parseFetchAttribute
 
 extension GrammarParser_Fetch_Tests {
