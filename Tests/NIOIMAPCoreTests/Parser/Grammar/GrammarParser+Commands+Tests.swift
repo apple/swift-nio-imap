@@ -315,7 +315,7 @@ extension GrammarParser_Commands_Tests {
                 (" ALL", "\r", .extendedsearch(.init(key: .all)), #line),
                 (
                     " IN (mailboxes \"folder1\" subtree \"folder2\") unseen", "\r",
-                    .extendedsearch(.init(key: .unseen, charset: nil, returnOptions: [], sourceOptions: .init(sourceMailbox: [.mailboxes(.init([.init(.init(string: "folder1"))])!), .subtree(.init([.init(.init(string: "folder2"))])!)]))),
+                    .extendedsearch(.init(key: .unseen, charset: nil, returnOptions: [], sourceOptions: .init(sourceMailbox: [.mailboxes(Mailboxes([MailboxName(.init(string: "folder1"))])!), .subtree(Mailboxes([MailboxName(.init(string: "folder2"))])!)]))),
                     #line
                 ),
             ],
