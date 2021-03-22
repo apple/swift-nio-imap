@@ -18,21 +18,6 @@ import XCTest
 
 class GrammarParser_List_Tests: XCTestCase, _ParserTestHelpers {}
 
-// MARK: - parseList
-
-extension GrammarParser_List_Tests {
-    func testParseList() {
-        self.iterateTests(
-            testFunction: GrammarParser.parseList,
-            validInputs: [
-                (#"LIST "" """#, "\r", .list(nil, reference: MailboxName(""), .mailbox(""), []), #line),
-            ],
-            parserErrorInputs: [],
-            incompleteMessageInputs: []
-        )
-    }
-}
-
 // MARK: - list-wildcard parseListWildcard
 
 extension GrammarParser_List_Tests {

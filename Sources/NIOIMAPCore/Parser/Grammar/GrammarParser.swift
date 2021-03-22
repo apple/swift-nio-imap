@@ -26,6 +26,29 @@ enum GrammarParser {}
 // MARK: - Grammar Parsers
 
 extension GrammarParser {
+    /// Attempts to select a parser from the given `parsers` by extracting the first unbroken sequence of alpha characters.
+    /// E.g. for the command `LOGIN username password`, the parser will parse `LOGIN`, and use that as a (case-insensitive) key to find a suitable parser in `parsers`.
+    /// - parameter buffer: The `ByteBuffer` to parse from.
+    /// - parameter tracker: Used to limit the stack depth.
+    /// - parameter parsers: A dictionary that maps a string to a sub-parser.
+    /// - returns: `T` if a suitable sub-parser was located and executed.
+    /// - throws: A `ParserError` if a parser wasn't found.
+    static func parseFromLookupTable<T>(buffer: inout ParseBuffer, tracker: StackTracker, parsers: [String: (inout ParseBuffer, StackTracker) throws -> T]) throws -> T {
+        let save = buffer
+        do {
+            let word = try ParserLibrary.parseOneOrMoreCharacters(buffer: &buffer, tracker: tracker) { char -> Bool in
+                char.isAlpha
+            }.uppercased()
+            guard let parser = parsers[word] else {
+                throw ParserError(hint: "Didn't find parser for \(word)")
+            }
+            return try parser(&buffer, tracker)
+        } catch {
+            buffer = save
+            throw error
+        }
+    }
+
     // astring         = 1*ASTRING-CHAR / string
     static func parseAString(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ByteBuffer {
         func parseOneOrMoreASTRINGCHAR(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ByteBuffer {
@@ -90,19 +113,6 @@ extension GrammarParser {
             let imapURL = try self.parseAuthenticatedURL(buffer: &buffer, tracker: tracker)
             let rump = try self.parseIRumpAuthenticatedURL(buffer: &buffer, tracker: tracker)
             return .init(authenticatedURL: imapURL, authenticatedURLRump: rump)
-        }
-    }
-
-    // authenticate  = "AUTHENTICATE" SP auth-type [SP (base64 / "=")] *(CRLF base64)
-    static func parseAuthenticate(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
-        try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Command in
-            try ParserLibrary.fixedString("AUTHENTICATE ", buffer: &buffer, tracker: tracker)
-            let authMethod = AuthenticationKind(try self.parseAtom(buffer: &buffer, tracker: tracker))
-            let parseInitialClientResponse = try ParserLibrary.optional(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> InitialClientResponse in
-                try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
-                return try self.parseInitialClientResponse(buffer: &buffer, tracker: tracker)
-            })
-            return .authenticate(method: authMethod, initialClientResponse: parseInitialClientResponse)
         }
     }
 
@@ -240,29 +250,7 @@ extension GrammarParser {
         }
     }
 
-    // copy            = "COPY" SP sequence-set SP mailbox
-    static func parseCopy(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
-        try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Command in
-            try ParserLibrary.fixedString("COPY ", buffer: &buffer, tracker: tracker)
-            let sequence = try self.parseSequenceSet(buffer: &buffer, tracker: tracker)
-            try ParserLibrary.fixedString(" ", buffer: &buffer, tracker: tracker)
-            let mailbox = try self.parseMailbox(buffer: &buffer, tracker: tracker)
-            return .copy(sequence, mailbox)
-        }
-    }
-
-    // create          = "CREATE" SP mailbox [create-params]
-    static func parseCreate(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
-        try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Command in
-            try ParserLibrary.fixedString("CREATE ", buffer: &buffer, tracker: tracker)
-            let mailbox = try self.parseMailbox(buffer: &buffer, tracker: tracker)
-            let params = try ParserLibrary.optional(buffer: &buffer, tracker: tracker, parser: self.parseCreateParameters) ?? []
-            return .create(mailbox, params)
-        }
-    }
-
     // create-param = create-param-name [SP create-param-value]
-
     static func parseCreateParameters(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [CreateParameter] {
         try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
             try ParserLibrary.fixedString(" (", buffer: &buffer, tracker: tracker)
@@ -361,15 +349,6 @@ extension GrammarParser {
         ], buffer: &buffer, tracker: tracker)
     }
 
-    // delete          = "DELETE" SP mailbox
-    static func parseDelete(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
-        try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Command in
-            try ParserLibrary.fixedString("DELETE ", buffer: &buffer, tracker: tracker)
-            let mailbox = try self.parseMailbox(buffer: &buffer, tracker: tracker)
-            return .delete(mailbox)
-        }
-    }
-
     // eitem-vendor-tag =  vendor-token "-" atom
     static func parseEitemVendorTag(buffer: inout ParseBuffer, tracker: StackTracker) throws -> EItemVendorTag {
         try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> EItemVendorTag in
@@ -377,18 +356,6 @@ extension GrammarParser {
             try ParserLibrary.fixedString("-", buffer: &buffer, tracker: tracker)
             let atom = try self.parseAtom(buffer: &buffer, tracker: tracker)
             return EItemVendorTag(token: token, atom: atom)
-        }
-    }
-
-    // enable          = "ENABLE" 1*(SP capability)
-    static func parseEnable(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
-        try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Command in
-            try ParserLibrary.fixedString("ENABLE", buffer: &buffer, tracker: tracker)
-            let capabilities = try ParserLibrary.parseOneOrMore(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> Capability in
-                try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
-                return try self.parseCapability(buffer: &buffer, tracker: tracker)
-            }
-            return .enable(capabilities)
         }
     }
 
@@ -464,16 +431,6 @@ extension GrammarParser {
                 return try self.parseSearchReturnData(buffer: &buffer, tracker: tracker)
             }
             return ExtendedSearchResponse(correlator: correlator, uid: uid, returnData: searchReturnData)
-        }
-    }
-
-    // examine         = "EXAMINE" SP mailbox [select-params
-    static func parseExamine(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
-        try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Command in
-            try ParserLibrary.fixedString("EXAMINE ", buffer: &buffer, tracker: tracker)
-            let mailbox = try self.parseMailbox(buffer: &buffer, tracker: tracker)
-            let params = try ParserLibrary.optional(buffer: &buffer, tracker: tracker, parser: self.parseParameters) ?? [:]
-            return .examine(mailbox, params)
         }
     }
 
@@ -656,20 +613,30 @@ extension GrammarParser {
         ], buffer: &buffer, tracker: tracker)
     }
 
-    // id = "ID" SP id-params-list
-    static func parseID(buffer: inout ParseBuffer, tracker: StackTracker) throws -> KeyValues<String, ByteBuffer?> {
-        try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
-            try ParserLibrary.fixedString("ID ", buffer: &buffer, tracker: tracker)
-            return try parseIDParamsList(buffer: &buffer, tracker: tracker)
-        }
-    }
-
     static func parseINetworkPath(buffer: inout ParseBuffer, tracker: StackTracker) throws -> INetworkPath {
         try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> INetworkPath in
             try ParserLibrary.fixedString("//", buffer: &buffer, tracker: tracker)
             let server = try self.parseIMAPServer(buffer: &buffer, tracker: tracker)
             let query = try self.parseIPathQuery(buffer: &buffer, tracker: tracker)
             return .init(server: server, query: query)
+        }
+    }
+
+    static func parseLastCommandSet<T: _IMAPEncodable>(buffer: inout ParseBuffer, tracker: StackTracker, setParser: SubParser<T>) throws -> LastCommandSet<T> {
+        func parseLastCommandSet_lastCommand(buffer: inout ParseBuffer, tracker: StackTracker) throws -> LastCommandSet<T> {
+            try ParserLibrary.fixedString("$", buffer: &buffer, tracker: tracker)
+            return .lastCommand
+        }
+
+        func parseLastCommandSet_set(buffer: inout ParseBuffer, tracker: StackTracker) throws -> LastCommandSet<T> {
+            .set(try setParser(&buffer, tracker))
+        }
+
+        return try withoutActuallyEscaping(parseLastCommandSet_set) { (parseLastCommandSet_set) in
+            try ParserLibrary.oneOf([
+                parseLastCommandSet_lastCommand,
+                parseLastCommandSet_set,
+            ], buffer: &buffer, tracker: tracker)
         }
     }
 
@@ -723,6 +690,11 @@ extension GrammarParser {
             return (key, value)
         }
 
+        func parseIDParamsList_empty(buffer: inout ParseBuffer, tracker: StackTracker) throws -> KeyValues<String, ByteBuffer?> {
+            try ParserLibrary.fixedString("()", buffer: &buffer, tracker: tracker)
+            return [:]
+        }
+
         func parseIDParamsList_some(buffer: inout ParseBuffer, tracker: StackTracker) throws -> KeyValues<String, ByteBuffer?> {
             try ParserLibrary.fixedString("(", buffer: &buffer, tracker: tracker)
             let (key, value) = try parseIDParamsList_element(buffer: &buffer, tracker: tracker)
@@ -737,14 +709,9 @@ extension GrammarParser {
 
         return try ParserLibrary.oneOf([
             parseIDParamsList_nil,
+            parseIDParamsList_empty,
             parseIDParamsList_some,
         ], buffer: &buffer, tracker: tracker)
-    }
-
-    // idle            = "IDLE" CRLF "DONE"
-    static func parseIdleStart(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
-        try ParserLibrary.fixedString("IDLE", buffer: &buffer, tracker: tracker)
-        return .idleStart
     }
 
     static func parseIdleDone(buffer: inout ParseBuffer, tracker: StackTracker) throws {
@@ -1271,28 +1238,6 @@ extension GrammarParser {
         }
     }
 
-    // login           = "LOGIN" SP userid SP password
-    static func parseLogin(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
-        try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Command in
-            try ParserLibrary.fixedString("LOGIN ", buffer: &buffer, tracker: tracker)
-            let userid = try Self.parseUserId(buffer: &buffer, tracker: tracker)
-            try ParserLibrary.fixedString(" ", buffer: &buffer, tracker: tracker)
-            let password = try Self.parsePassword(buffer: &buffer, tracker: tracker)
-            return .login(username: userid, password: password)
-        }
-    }
-
-    // lsub = "LSUB" SP mailbox SP list-mailbox
-    static func parseLSUB(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
-        try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> Command in
-            try ParserLibrary.fixedString("LSUB ", buffer: &buffer, tracker: tracker)
-            let mailbox = try self.parseMailbox(buffer: &buffer, tracker: tracker)
-            try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
-            let listMailbox = try self.parseListMailbox(buffer: &buffer, tracker: tracker)
-            return .lsub(reference: mailbox, pattern: listMailbox)
-        }
-    }
-
     // media-basic     = ((DQUOTE ("APPLICATION" / "AUDIO" / "IMAGE" /
     //                   "MESSAGE" / "VIDEO") DQUOTE) / string) SP
     //                   media-subtype
@@ -1450,17 +1395,6 @@ extension GrammarParser {
         ], buffer: &buffer, tracker: tracker)
     }
 
-    // move            = "MOVE" SP sequence-set SP mailbox
-    static func parseMove(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
-        try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Command in
-            try ParserLibrary.fixedString("MOVE ", buffer: &buffer, tracker: tracker)
-            let set = try self.parseSequenceSet(buffer: &buffer, tracker: tracker)
-            try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
-            let mailbox = try self.parseMailbox(buffer: &buffer, tracker: tracker)
-            return .move(set, mailbox)
-        }
-    }
-
     static func parseMechanismBase64(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MechanismBase64 {
         try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> MechanismBase64 in
             let mechanism = try self.parseUAuthMechanism(buffer: &buffer, tracker: tracker)
@@ -1508,12 +1442,6 @@ extension GrammarParser {
             parseNamespace_nil,
             parseNamespace_some,
         ], buffer: &buffer, tracker: tracker)
-    }
-
-    // Namespace-Command = "NAMESPACE"
-    static func parseNamespaceCommand(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
-        try ParserLibrary.fixedString("NAMESPACE", buffer: &buffer, tracker: tracker)
-        return .namespace
     }
 
     // Namespace-Descr   = "(" string SP
@@ -1764,18 +1692,6 @@ extension GrammarParser {
         }
     }
 
-    // rename          = "RENAME" SP mailbox SP mailbox [rename-params]
-    static func parseRename(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
-        try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Command in
-            try ParserLibrary.fixedString("RENAME ", buffer: &buffer, tracker: tracker)
-            let from = try self.parseMailbox(buffer: &buffer, tracker: tracker)
-            try ParserLibrary.fixedString(" ", caseSensitive: false, buffer: &buffer, tracker: tracker)
-            let to = try self.parseMailbox(buffer: &buffer, tracker: tracker)
-            let params = try ParserLibrary.optional(buffer: &buffer, tracker: tracker, parser: self.parseParameters) ?? [:]
-            return .rename(from: from, to: to, params: params)
-        }
-    }
-
     // return-option   =  "SUBSCRIBED" / "CHILDREN" / status-option /
     //                    option-extension
     static func parseReturnOption(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ReturnOption {
@@ -1940,26 +1856,6 @@ extension GrammarParser {
         ], buffer: &buffer, tracker: tracker)
     }
 
-    // select          = "SELECT" SP mailbox [select-params]
-    static func parseSelect(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
-        try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Command in
-            try ParserLibrary.fixedString("SELECT ", buffer: &buffer, tracker: tracker)
-            let mailbox = try self.parseMailbox(buffer: &buffer, tracker: tracker)
-            let params = try ParserLibrary.optional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> [SelectParameter] in
-                try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
-                try ParserLibrary.fixedString("(", buffer: &buffer, tracker: tracker)
-                var array = [try self.parseSelectParameter(buffer: &buffer, tracker: tracker)]
-                try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker, parser: { (buffer, tracker) in
-                    try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
-                    return try self.parseSelectParameter(buffer: &buffer, tracker: tracker)
-                })
-                try ParserLibrary.fixedString(")", buffer: &buffer, tracker: tracker)
-                return array
-            }
-            return .select(mailbox, params ?? [])
-        }
-    }
-
     static func parseSelectParameter(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SelectParameter {
         func parseSelectParameter_basic(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SelectParameter {
             .basic(try self.parseParameter(buffer: &buffer, tracker: tracker))
@@ -2035,23 +1931,6 @@ extension GrammarParser {
         }
     }
 
-    // status          = "STATUS" SP mailbox SP
-    //                   "(" status-att *(SP status-att) ")"
-    static func parseStatus(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
-        try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Command in
-            try ParserLibrary.fixedString("STATUS ", buffer: &buffer, tracker: tracker)
-            let mailbox = try self.parseMailbox(buffer: &buffer, tracker: tracker)
-            try ParserLibrary.fixedString(" (", buffer: &buffer, tracker: tracker)
-            var atts = [try self.parseStatusAttribute(buffer: &buffer, tracker: tracker)]
-            try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &atts, tracker: tracker) { buffer, tracker -> MailboxAttribute in
-                try ParserLibrary.fixedString(" ", buffer: &buffer, tracker: tracker)
-                return try self.parseStatusAttribute(buffer: &buffer, tracker: tracker)
-            }
-            try ParserLibrary.fixedString(")", buffer: &buffer, tracker: tracker)
-            return .status(mailbox, atts)
-        }
-    }
-
     // status-att      = "MESSAGES" / "UIDNEXT" / "UIDVALIDITY" /
     //                   "UNSEEN" / "DELETED" / "SIZE"
     static func parseStatusAttribute(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxAttribute {
@@ -2075,28 +1954,6 @@ extension GrammarParser {
             }
             try ParserLibrary.fixedString(")", buffer: &buffer, tracker: tracker)
             return array
-        }
-    }
-
-    // store           = "STORE" SP sequence-set SP store-att-flags
-    static func parseStore(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
-        try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Command in
-            try ParserLibrary.fixedString("STORE ", buffer: &buffer, tracker: tracker)
-            let sequence = try self.parseSequenceSet(buffer: &buffer, tracker: tracker)
-            let modifiers = try ParserLibrary.optional(buffer: &buffer, tracker: tracker) { buffer, tracker -> [StoreModifier] in
-                try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
-                try ParserLibrary.fixedString("(", buffer: &buffer, tracker: tracker)
-                var array = [try self.parseStoreModifier(buffer: &buffer, tracker: tracker)]
-                try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker, parser: { (buffer, tracker) in
-                    try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
-                    return try self.parseStoreModifier(buffer: &buffer, tracker: tracker)
-                })
-                try ParserLibrary.fixedString(")", buffer: &buffer, tracker: tracker)
-                return array
-            } ?? []
-            try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
-            let flags = try self.parseStoreAttributeFlags(buffer: &buffer, tracker: tracker)
-            return .store(sequence, modifiers, flags)
         }
     }
 
@@ -2173,15 +2030,6 @@ extension GrammarParser {
             Self.parseQuoted,
             Self.parseLiteral,
         ], buffer: &buffer, tracker: tracker)
-    }
-
-    // subscribe       = "SUBSCRIBE" SP mailbox
-    static func parseSubscribe(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
-        try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Command in
-            try ParserLibrary.fixedString("SUBSCRIBE ", buffer: &buffer, tracker: tracker)
-            let mailbox = try self.parseMailbox(buffer: &buffer, tracker: tracker)
-            return .subscribe(mailbox)
-        }
     }
 
     // tag             = 1*<any ASTRING-CHAR except "+">
@@ -2336,15 +2184,6 @@ extension GrammarParser {
         return URLAuthenticationMechanism(string)
     }
 
-    // unsubscribe     = "UNSUBSCRIBE" SP mailbox
-    static func parseUnsubscribe(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
-        try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Command in
-            try ParserLibrary.fixedString("UNSUBSCRIBE ", buffer: &buffer, tracker: tracker)
-            let mailbox = try self.parseMailbox(buffer: &buffer, tracker: tracker)
-            return .unsubscribe(mailbox)
-        }
-    }
-
     // userid          = astring
     static func parseUserId(buffer: inout ParseBuffer, tracker: StackTracker) throws -> String {
         var astring = try Self.parseAString(buffer: &buffer, tracker: tracker)
@@ -2358,75 +2197,30 @@ extension GrammarParser {
         }
     }
 
-    // RFC 2087 = "GETQUOTA" / "GETQUOTAROOT" / "SETQUOTA"
-    static func parseCommandQuota(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
-        func parseQuotaRoot(buffer: inout ParseBuffer, tracker: StackTracker) throws -> QuotaRoot {
-            let string = try self.parseAString(buffer: &buffer, tracker: tracker)
-            return QuotaRoot(string)
-        }
-
-        // setquota_list   ::= "(" 0#setquota_resource ")"
-        func parseQuotaLimits(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [QuotaLimit] {
-            // setquota_resource ::= atom SP number
-            func parseQuotaLimit(buffer: inout ParseBuffer, tracker: StackTracker) throws -> QuotaLimit {
-                try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
-                    let resourceName = try parseAtom(buffer: &buffer, tracker: tracker)
-                    try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
-                    let limit = try parseNumber(buffer: &buffer, tracker: tracker)
-                    return QuotaLimit(resourceName: resourceName, limit: limit)
-                }
-            }
-
-            return try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) throws -> [QuotaLimit] in
-                try ParserLibrary.fixedString("(", buffer: &buffer, tracker: tracker)
-                var limits: [QuotaLimit] = []
-                try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
-                    while let limit = try ParserLibrary.optional(buffer: &buffer, tracker: tracker, parser: parseQuotaLimit) {
-                        limits.append(limit)
-                        if try ParserLibrary.optional(buffer: &buffer, tracker: tracker, parser: ParserLibrary.parseSpaces) == nil {
-                            break
-                        }
-                    }
-                }
-                try ParserLibrary.fixedString(")", buffer: &buffer, tracker: tracker)
-                return limits
-            }
-        }
-
-        // getquota        ::= "GETQUOTA" SP astring
-        func parseCommandQuota_getQuota(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
-            try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
-                try ParserLibrary.fixedString("GETQUOTA ", buffer: &buffer, tracker: tracker)
-                let quotaRoot = try parseQuotaRoot(buffer: &buffer, tracker: tracker)
-                return .getQuota(quotaRoot)
-            }
-        }
-
-        // getquotaroot    ::= "GETQUOTAROOT" SP astring
-        func parseCommandQuota_getQuotaRoot(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
-            try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
-                try ParserLibrary.fixedString("GETQUOTAROOT ", buffer: &buffer, tracker: tracker)
-                let mailbox = try parseMailbox(buffer: &buffer, tracker: tracker)
-                return .getQuotaRoot(mailbox)
-            }
-        }
-
-        // setquota        ::= "SETQUOTA" SP astring SP setquota_list
-        func parseCommandQuota_setQuota(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
-            try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
-                try ParserLibrary.fixedString("SETQUOTA ", buffer: &buffer, tracker: tracker)
-                let quotaRoot = try parseQuotaRoot(buffer: &buffer, tracker: tracker)
+    // setquota_list   ::= "(" 0#setquota_resource ")"
+    static func parseQuotaLimits(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [QuotaLimit] {
+        // setquota_resource ::= atom SP number
+        func parseQuotaLimit(buffer: inout ParseBuffer, tracker: StackTracker) throws -> QuotaLimit {
+            try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
+                try ParserLibrary.optional(buffer: &buffer, tracker: tracker, parser: ParserLibrary.parseSpaces)
+                let resourceName = try parseAtom(buffer: &buffer, tracker: tracker)
                 try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
-                let quotaLimits = try parseQuotaLimits(buffer: &buffer, tracker: tracker)
-                return .setQuota(quotaRoot, quotaLimits)
+                let limit = try parseNumber(buffer: &buffer, tracker: tracker)
+                return QuotaLimit(resourceName: resourceName, limit: limit)
             }
         }
 
-        return try ParserLibrary.oneOf([
-            parseCommandQuota_getQuota,
-            parseCommandQuota_getQuotaRoot,
-            parseCommandQuota_setQuota,
-        ], buffer: &buffer, tracker: tracker)
+        return try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) throws -> [QuotaLimit] in
+            try ParserLibrary.fixedString("(", buffer: &buffer, tracker: tracker)
+            let limits = try ParserLibrary.parseZeroOrMore(buffer: &buffer, tracker: tracker, parser: parseQuotaLimit)
+            try ParserLibrary.fixedString(")", buffer: &buffer, tracker: tracker)
+            return limits
+        }
+    }
+
+    static func parseQuotaRoot(buffer: inout ParseBuffer, tracker: StackTracker) throws -> QuotaRoot {
+        let string = try self.parseAString(buffer: &buffer, tracker: tracker)
+        return QuotaRoot(string)
     }
 
     // RFC 5465
@@ -2605,16 +2399,6 @@ extension GrammarParser {
         try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
         let (charset, program) = try parseSearchProgram(buffer: &buffer, tracker: tracker)
         return ExtendedSearchOptions(key: program, charset: charset, returnOptions: returnOpts, sourceOptions: sourceOptions)
-    }
-
-    // RFC 6237
-    // esearch =  "ESEARCH" [SP esearch-source-opts]
-    // [SP search-return-opts] SP search-program
-    static func parseExtendedSearch(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
-        try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
-            try ParserLibrary.fixedString("ESEARCH", buffer: &buffer, tracker: tracker)
-            return .extendedsearch(try parseExtendedSearchOptions(buffer: &buffer, tracker: tracker))
-        }
     }
 }
 

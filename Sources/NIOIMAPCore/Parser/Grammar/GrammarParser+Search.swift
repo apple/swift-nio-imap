@@ -24,17 +24,6 @@ import struct NIO.ByteBuffer
 import struct NIO.ByteBufferView
 
 extension GrammarParser {
-    // search          = "SEARCH" [search-return-opts] SP search-program
-    static func parseSearch(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
-        try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
-            try ParserLibrary.fixedString("SEARCH", buffer: &buffer, tracker: tracker)
-            let returnOpts = try ParserLibrary.optional(buffer: &buffer, tracker: tracker, parser: self.parseSearchReturnOptions) ?? []
-            try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
-            let (charset, program) = try parseSearchProgram(buffer: &buffer, tracker: tracker)
-            return .search(key: program, charset: charset, returnOptions: returnOpts)
-        }
-    }
-
     // search-program     = ["CHARSET" SP charset SP]
     //                         search-key *(SP search-key)
     //                         ;; CHARSET argument to SEARCH MUST be

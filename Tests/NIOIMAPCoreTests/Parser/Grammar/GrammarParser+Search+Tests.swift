@@ -18,37 +18,6 @@ import XCTest
 
 class GrammarParser_Search_Tests: XCTestCase, _ParserTestHelpers {}
 
-// MARK: - search parseSearch
-
-extension GrammarParser_Search_Tests {
-    func testParseSearch() {
-        self.iterateTests(
-            testFunction: GrammarParser.parseSearch,
-            validInputs: [
-                ("SEARCH ALL", "\r", .search(key: .all), #line),
-                ("SEARCH ALL DELETED FLAGGED", "\r", .search(key: .and([.all, .deleted, .flagged])), #line),
-                ("SEARCH CHARSET UTF-8 ALL", "\r", .search(key: .all, charset: "UTF-8"), #line),
-                ("SEARCH RETURN () ALL", "\r", .search(key: .all), #line),
-                ("SEARCH RETURN (MIN) ALL", "\r", .search(key: .all, returnOptions: [.min]), #line),
-                (
-                    #"SEARCH CHARSET UTF-8 (OR FROM "me" FROM "you") (OR NEW UNSEEN)"#,
-                    "\r",
-                    .search(key: .and([.or(.from("me"), .from("you")), .or(.new, .unseen)]), charset: "UTF-8"),
-                    #line
-                ),
-                (
-                    #"SEARCH RETURN (MIN MAX) CHARSET UTF-8 OR (FROM "me" FROM "you") (NEW UNSEEN)"#,
-                    "\r",
-                    .search(key: .or(.and([.from("me"), .from("you")]), .and([.new, .unseen])), charset: "UTF-8", returnOptions: [.min, .max]),
-                    #line
-                ),
-            ],
-            parserErrorInputs: [],
-            incompleteMessageInputs: []
-        )
-    }
-}
-
 // MARK: - parseSearchCorrelator
 
 extension GrammarParser_Search_Tests {

@@ -24,26 +24,6 @@ import struct NIO.ByteBuffer
 import struct NIO.ByteBufferView
 
 extension GrammarParser {
-    // list            = "LIST" [SP list-select-opts] SP mailbox SP mbox-or-pat [SP list-return-opts]
-    static func parseList(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
-        try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
-            try ParserLibrary.fixedString("LIST", buffer: &buffer, tracker: tracker)
-            let selectOptions = try ParserLibrary.optional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> ListSelectOptions in
-                try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
-                return try self.parseListSelectOptions(buffer: &buffer, tracker: tracker)
-            }
-            try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
-            let mailbox = try self.parseMailbox(buffer: &buffer, tracker: tracker)
-            try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
-            let mailboxPatterns = try self.parseMailboxPatterns(buffer: &buffer, tracker: tracker)
-            let returnOptions = try ParserLibrary.optional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> [ReturnOption] in
-                try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
-                return try self.parseListReturnOptions(buffer: &buffer, tracker: tracker)
-            } ?? []
-            return .list(selectOptions, reference: mailbox, mailboxPatterns, returnOptions)
-        }
-    }
-
     // list-select-base-opt =  "SUBSCRIBED" / option-extension
     static func parseListSelectBaseOption(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ListSelectBaseOption {
         func parseListSelectBaseOption_subscribed(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ListSelectBaseOption {
