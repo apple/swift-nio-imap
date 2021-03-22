@@ -97,17 +97,16 @@ class IMAPServerHandlerTests: XCTestCase {
         self.writeOutbound(.taggedResponse(.init(tag: "a", state: .ok(.init(text: "yo")))))
         self.assertOutboundString("a OK yo\r\n")
     }
-    
+
     // We previously had a bug where the response encode buffer was dropped with every
     // individual server response, meaning we lost the state. We need to state to insert
     // correct spaces in between streaming fetch attributes. This test prevents regression.
     func testFetchResponsesIncludeSpaces() {
-        
         // note that the same handler (and therefore the same `ResponseEncodeBuffer` is used
         // throughout the test
         self.handler = IMAPServerHandler()
         self.channel = EmbeddedChannel(handler: self.handler)
-        
+
         // single attribute
         self.writeOutbound(.fetchResponse(.start(1)), wait: false)
         self.assertOutboundString("* 1 FETCH (")
@@ -115,7 +114,7 @@ class IMAPServerHandlerTests: XCTestCase {
         self.assertOutboundString("FLAGS (\\Answered \\Draft)")
         self.writeOutbound(.fetchResponse(.finish), wait: false)
         self.assertOutboundString(")\r\n")
-        
+
         // multiple attributes
         self.writeOutbound(.fetchResponse(.start(2)), wait: false)
         self.assertOutboundString("* 2 FETCH (")
@@ -127,7 +126,7 @@ class IMAPServerHandlerTests: XCTestCase {
         self.assertOutboundString(" RFC822.SIZE 876")
         self.writeOutbound(.fetchResponse(.finish), wait: false)
         self.assertOutboundString(")\r\n")
-        
+
         // multiple attributes with streaming
         self.writeOutbound(.fetchResponse(.start(2)), wait: false)
         self.assertOutboundString("* 2 FETCH (")
