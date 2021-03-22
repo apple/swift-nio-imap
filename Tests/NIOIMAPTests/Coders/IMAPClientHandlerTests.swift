@@ -144,12 +144,12 @@ class IMAPClientHandlerTests: XCTestCase {
         // in this case, 2 idle reminders
         var inEncodeBuffer = ResponseEncodeBuffer(buffer: ByteBuffer(), capabilities: [])
         inEncodeBuffer.writeContinuationRequest(.responseText(.init(text: "Waiting")))
-        XCTAssertNoThrow(try channel.writeInbound(inEncodeBuffer.bytes))
+        XCTAssertNoThrow(try channel.writeInbound(inEncodeBuffer.readBytes()))
         XCTAssertNoThrow(XCTAssertEqual(try channel.readInbound(), ResponseOrContinuationRequest.continuationRequest(.responseText(.init(text: "Waiting")))))
         XCTAssertNoThrow(XCTAssertNil(try channel.readInbound(as: ResponseOrContinuationRequest.self)))
         inEncodeBuffer = ResponseEncodeBuffer(buffer: ByteBuffer(), capabilities: [])
         inEncodeBuffer.writeContinuationRequest(.responseText(.init(text: "Waiting")))
-        XCTAssertNoThrow(try channel.writeInbound(inEncodeBuffer.bytes))
+        XCTAssertNoThrow(try channel.writeInbound(inEncodeBuffer.readBytes()))
         XCTAssertNoThrow(XCTAssertEqual(try channel.readInbound(), ResponseOrContinuationRequest.continuationRequest(.responseText(.init(text: "Waiting")))))
         XCTAssertNoThrow(XCTAssertNil(try channel.readInbound(as: ResponseOrContinuationRequest.self)))
 
@@ -168,7 +168,7 @@ class IMAPClientHandlerTests: XCTestCase {
         // server sends a challenge
         inEncodeBuffer = ResponseEncodeBuffer(buffer: ByteBuffer(), capabilities: [])
         inEncodeBuffer.writeContinuationRequest(.data(""))
-        XCTAssertNoThrow(try channel.writeInbound(inEncodeBuffer.bytes))
+        XCTAssertNoThrow(try channel.writeInbound(inEncodeBuffer.readBytes()))
         XCTAssertNoThrow(XCTAssertEqual(try channel.readInbound(), ResponseOrContinuationRequest.continuationRequest(.responseText(.init(text: "")))))
 
         // client responds
@@ -200,7 +200,7 @@ class IMAPClientHandlerTests: XCTestCase {
         """
         inEncodeBuffer = ResponseEncodeBuffer(buffer: ByteBuffer(), capabilities: [])
         inEncodeBuffer.writeContinuationRequest(.data(challengeString1))
-        XCTAssertNoThrow(try channel.writeInbound(inEncodeBuffer.bytes))
+        XCTAssertNoThrow(try channel.writeInbound(inEncodeBuffer.readBytes()))
         XCTAssertNoThrow(XCTAssertEqual(try channel.readInbound(), ResponseOrContinuationRequest.continuationRequest(.data(challengeString1))))
 
         // client responds
@@ -215,7 +215,7 @@ class IMAPClientHandlerTests: XCTestCase {
         """
         inEncodeBuffer = ResponseEncodeBuffer(buffer: ByteBuffer(), capabilities: [])
         inEncodeBuffer.writeContinuationRequest(.data(challengeString2))
-        XCTAssertNoThrow(try channel.writeInbound(inEncodeBuffer.bytes))
+        XCTAssertNoThrow(try channel.writeInbound(inEncodeBuffer.readBytes()))
         XCTAssertNoThrow(XCTAssertEqual(try channel.readInbound(), ResponseOrContinuationRequest.continuationRequest(.data(challengeString2))))
 
         // client responds
@@ -230,7 +230,7 @@ class IMAPClientHandlerTests: XCTestCase {
         // server finished
         inEncodeBuffer = ResponseEncodeBuffer(buffer: ByteBuffer(), capabilities: [])
         inEncodeBuffer.writeResponse(.taggedResponse(.init(tag: "A001", state: .ok(.init(text: "GSSAPI authentication successful")))))
-        XCTAssertNoThrow(try channel.writeInbound(inEncodeBuffer.bytes))
+        XCTAssertNoThrow(try channel.writeInbound(inEncodeBuffer.readBytes()))
         XCTAssertNoThrow(XCTAssertEqual(try channel.readInbound(), ResponseOrContinuationRequest.response(.taggedResponse(.init(tag: "A001", state: .ok(.init(text: "GSSAPI authentication successful")))))))
         XCTAssertEqual(handler._state, .expectingResponses)
     }
