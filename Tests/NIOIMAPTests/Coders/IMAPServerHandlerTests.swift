@@ -97,6 +97,55 @@ class IMAPServerHandlerTests: XCTestCase {
         self.writeOutbound(.taggedResponse(.init(tag: "a", state: .ok(.init(text: "yo")))))
         self.assertOutboundString("a OK yo\r\n")
     }
+    
+    // We previously had a bug where the response encode buffer was dropped with every
+    // individual server response, meaning we lost the state. We need to state to insert
+    // correct spaces in between streaming fetch attributes. This test prevents regression.
+    func testFetchResponsesIncludeSpaces() {
+        
+        // note that the same handler (and therefore the same `ResponseEncodeBuffer` is used
+        // throughout the test
+        self.handler = IMAPServerHandler()
+        self.channel = EmbeddedChannel(handler: self.handler)
+        
+        // single attribute
+        self.writeOutbound(.fetchResponse(.start(1)), wait: false)
+        self.assertOutboundString("* 1 FETCH (")
+        self.writeOutbound(.fetchResponse(.simpleAttribute(.flags([.answered, .draft]))), wait: false)
+        self.assertOutboundString("FLAGS (\\Answered \\Draft)")
+        self.writeOutbound(.fetchResponse(.finish), wait: false)
+        self.assertOutboundString(")\r\n")
+        
+        // multiple attributes
+        self.writeOutbound(.fetchResponse(.start(2)), wait: false)
+        self.assertOutboundString("* 2 FETCH (")
+        self.writeOutbound(.fetchResponse(.simpleAttribute(.flags([.answered, .draft]))), wait: false)
+        self.assertOutboundString("FLAGS (\\Answered \\Draft)")
+        self.writeOutbound(.fetchResponse(.simpleAttribute(.uid(999))), wait: false)
+        self.assertOutboundString(" UID 999")
+        self.writeOutbound(.fetchResponse(.simpleAttribute(.rfc822Size(876))), wait: false)
+        self.assertOutboundString(" RFC822.SIZE 876")
+        self.writeOutbound(.fetchResponse(.finish), wait: false)
+        self.assertOutboundString(")\r\n")
+        
+        // multiple attributes with streaming
+        self.writeOutbound(.fetchResponse(.start(2)), wait: false)
+        self.assertOutboundString("* 2 FETCH (")
+        self.writeOutbound(.fetchResponse(.simpleAttribute(.flags([.answered, .draft]))), wait: false)
+        self.assertOutboundString("FLAGS (\\Answered \\Draft)")
+        self.writeOutbound(.fetchResponse(.simpleAttribute(.uid(999))), wait: false)
+        self.assertOutboundString(" UID 999")
+        self.writeOutbound(.fetchResponse(.streamingBegin(kind: .rfc822, byteCount: 5)), wait: false)
+        self.assertOutboundString(" RFC822 {5}\r\n")
+        self.writeOutbound(.fetchResponse(.streamingBytes("12345")), wait: false)
+        self.assertOutboundString("12345")
+        self.writeOutbound(.fetchResponse(.streamingEnd), wait: false)
+        self.assertOutboundString("")
+        self.writeOutbound(.fetchResponse(.simpleAttribute(.rfc822Size(876))), wait: false)
+        self.assertOutboundString(" RFC822.SIZE 876")
+        self.writeOutbound(.fetchResponse(.finish), wait: false)
+        self.assertOutboundString(")\r\n")
+    }
 
     // MARK: - setup/tear down
 

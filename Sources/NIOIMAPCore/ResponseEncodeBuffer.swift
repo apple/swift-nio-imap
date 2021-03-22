@@ -16,12 +16,12 @@ import struct NIO.ByteBuffer
 
 /// Used to write responses in preparation for sending down a network.
 public struct ResponseEncodeBuffer {
+    
     private var buffer: _EncodeBuffer
 
     /// Data that is waiting to be sent.
-    public var bytes: ByteBuffer {
-        var encodeBuffer = self.buffer
-        return encodeBuffer._nextChunk()._bytes
+    public mutating func readBytes() -> ByteBuffer {
+        return self.buffer._nextChunk()._bytes
     }
 
     /// Creates a new `ResponseEncodeBuffer` from an initial `ByteBuffer` and configuration.
