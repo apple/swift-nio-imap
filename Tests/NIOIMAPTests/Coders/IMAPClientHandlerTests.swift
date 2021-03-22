@@ -237,7 +237,6 @@ class IMAPClientHandlerTests: XCTestCase {
     }
 
     func testChangingCapabilitesChangesEncoding() {
-
         // should be written as a quoted
         self.clientHandler.encodingOptions = CommandEncodingOptions()
         let command1 = CommandStream.command(.init(tag: "A1", command: .create(.init(.init(string: "name")), [])))
@@ -249,7 +248,7 @@ class IMAPClientHandlerTests: XCTestCase {
         let command2 = CommandStream.command(.init(tag: "A2", command: .create(.init(.init(string: "name")), [])))
         self.writeOutbound(command2, wait: false)
         self.assertOutboundString("A2 CREATE {4}\r\n")
-        XCTAssertNoThrow(try channel.writeInbound(ByteBuffer(string: "+ OK\r\n")))
+        XCTAssertNoThrow(try self.channel.writeInbound(ByteBuffer(string: "+ OK\r\n")))
         self.assertOutboundString("name\r\n")
 
         // now force non-sync literals
