@@ -19,6 +19,7 @@ import XCTest
 
 class IMAPClientHandlerTests: XCTestCase {
     var channel: EmbeddedChannel!
+    var clientHandler: IMAPClientHandler!
 
     // MARK: - Tests
 
@@ -236,25 +237,23 @@ class IMAPClientHandlerTests: XCTestCase {
     }
 
     func testChangingCapabilitesChangesEncoding() {
-        // let's start with default encoding options (RFC 3501 compatible)
-        let handler = IMAPClientHandler(encodingOptions: .init())
-        let channel = EmbeddedChannel(handler: handler, loop: .init())
 
         // should be written as a quoted
+        self.clientHandler.encodingOptions = CommandEncodingOptions()
         let command1 = CommandStream.command(.init(tag: "A1", command: .create(.init(.init(string: "name")), [])))
-        XCTAssertNoThrow(try channel.writeOutbound(command1))
+        self.writeOutbound(command1, wait: true)
         self.assertOutboundString("A1 CREATE \"name\"\r\n")
 
         // lets disable quoteds, should be literal
-        handler.encodingOptions.useQuotedString = false
+        self.clientHandler.encodingOptions.useQuotedString = false
         let command2 = CommandStream.command(.init(tag: "A2", command: .create(.init(.init(string: "name")), [])))
-        XCTAssertNoThrow(try channel.writeOutbound(command2))
+        self.writeOutbound(command2, wait: false)
         self.assertOutboundString("A2 CREATE {4}\r\n")
         XCTAssertNoThrow(try channel.writeInbound(ByteBuffer(string: "+ OK\r\n")))
         self.assertOutboundString("name\r\n")
 
         // now force non-sync literals
-        handler.encodingOptions.useNonSynchronizingLiteralPlus = true
+        self.clientHandler.encodingOptions.useNonSynchronizingLiteralPlus = true
         let command3 = CommandStream.command(.init(tag: "A3", command: .create(.init(.init(string: "name")), [])))
         XCTAssertNoThrow(try channel.writeOutbound(command3))
         XCTAssertNoThrow(XCTAssertEqual(try channel.readOutbound(as: ByteBuffer.self), "A3 CREATE \"name\"\r\n"))
@@ -326,7 +325,8 @@ class IMAPClientHandlerTests: XCTestCase {
 
     override func setUp() {
         XCTAssertNil(self.channel)
-        self.channel = EmbeddedChannel(handler: IMAPClientHandler(encodingOptions: .init()))
+        self.clientHandler = IMAPClientHandler(encodingOptions: .init())
+        self.channel = EmbeddedChannel(handler: self.clientHandler)
     }
 
     override func tearDown() {
