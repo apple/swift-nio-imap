@@ -45,6 +45,5 @@ extension ResponseEncodeBuffer_Tests {
         let outputString = String(buffer: buffer.readBytes())
         let expectedString = "* 1 FETCH (BODY[] {10}\r\n0123456789)\r\n"
         XCTAssertEqual(outputString, expectedString)
-
     }
 }
