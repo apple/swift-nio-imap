@@ -20,7 +20,9 @@ public struct ResponseEncodeBuffer {
 
     /// Data that is waiting to be sent.
     public mutating func readBytes() -> ByteBuffer {
-        self.buffer._nextChunk()._bytes
+        let buffer = self.buffer._nextChunk()._bytes
+        self.buffer._buffer.discardReadBytes()
+        return buffer
     }
 
     /// Creates a new `ResponseEncodeBuffer` from an initial `ByteBuffer` and configuration.
