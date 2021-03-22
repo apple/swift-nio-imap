@@ -33,4 +33,18 @@ extension ResponseEncodeBuffer_Tests {
         let expectedString = "* 1 FETCH (FLAGS (\\Answered) UID 999 BINARY.SIZE[1] 665)\r\n"
         XCTAssertEqual(outputString, expectedString)
     }
+
+    func testFetchStreaming() {
+        var buffer = ResponseEncodeBuffer(buffer: ByteBuffer(string: ""), options: .rfc3501)
+        buffer.writeFetchResponse(.start(1))
+        buffer.writeFetchResponse(.streamingBegin(kind: .body(section: .complete, offset: nil), byteCount: 10))
+        buffer.writeFetchResponse(.streamingBytes(ByteBuffer(string: "0123456789")))
+        buffer.writeFetchResponse(.streamingEnd)
+        buffer.writeFetchResponse(.finish)
+
+        let outputString = String(buffer: buffer.readBytes())
+        let expectedString = "* 1 FETCH (BODY[] {10}\r\n0123456789)\r\n"
+        XCTAssertEqual(outputString, expectedString)
+
+    }
 }

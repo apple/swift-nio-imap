@@ -130,7 +130,9 @@ extension ResponseEncodeBuffer {
                 self.buffer.writeSection(section) +
                 self.buffer.writeIfExists(offset) { offset in
                     self.buffer._writeString("<\(offset)>")
-                } + self.buffer._writeString("{\(size)}\r\n")
+                } +
+                self.buffer.writeSpace() +
+                self.buffer._writeString("{\(size)}\r\n")
         case .rfc822:
             return self.buffer._writeString("RFC822 {\(size)}\r\n")
         case .rfc822Text:
