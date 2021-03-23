@@ -42,7 +42,9 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
     /// certain types of literal encodings.
     /// - Note: Make sure to send `.enable` commands for applicable capabilities
     /// - Important: Modifying this value is not thread-safe
-    public var encodingOptions: CommandEncodingOptions
+    var encodingOptions: CommandEncodingOptions
+
+    var encodingChangeCallback: ([Capability]) -> CommandEncodingOptions
 
     enum ClientHandlerState: Equatable {
         /// We're expecting continuations to come back during a command.
@@ -56,10 +58,11 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
         case expectingResponses
     }
 
-    public init(encodingOptions: CommandEncodingOptions) {
+    public init(encodingOptions: CommandEncodingOptions, encodingChangeCallback: @escaping ([Capability]) -> CommandEncodingOptions) {
         self.decoder = NIOSingleStepByteToMessageProcessor(ResponseDecoder(), maximumBufferSize: 1_000)
         self._state = .expectingResponses
         self.encodingOptions = encodingOptions
+        self.encodingChangeCallback = encodingChangeCallback
     }
 
     public func channelRead(context: ChannelHandlerContext, data: NIOAny) {
@@ -77,7 +80,7 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
                     context.fireUserInboundEventTriggered(req)
                 case .response(let response):
                     switch response {
-                    case .taggedResponse:
+                    case .taggedResponse(let tagged):
                         // continuations must have finished: change the state to standard continuation handling
                         self._state = .expectingResponses
 

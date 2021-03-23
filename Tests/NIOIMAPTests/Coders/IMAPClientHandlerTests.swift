@@ -132,7 +132,9 @@ class IMAPClientHandlerTests: XCTestCase {
     }
 
     func testStateTransformation() {
-        let handler = IMAPClientHandler(encodingOptions: .init())
+        let handler = IMAPClientHandler(encodingOptions: .init()) { _ in
+            CommandEncodingOptions.rfc3501
+        }
         let channel = EmbeddedChannel(handler: handler, loop: .init())
 
         // move into an idle state
@@ -319,12 +321,47 @@ class IMAPClientHandlerTests: XCTestCase {
         self.writeOutbound(.idleDone)
         self.assertOutboundString("DONE\r\n")
     }
+    
+    func testCanChangeEncodingOnCallback() {
+        
+        let turnOnLiteralPlusExpectation = XCTestExpectation(description: "Turn on literal +")
+        
+        self.clientHandler = IMAPClientHandler(encodingOptions: .init(), encodingChangeCallback: { caps in
+            if caps == [.literalPlus] {
+                turnOnLiteralPlusExpectation.fulfill()
+            } else {
+                XCTFail("No idea where these caps were sent from, but we didn't make them")
+            }
+            var caps = CommandEncodingOptions.rfc3501
+            caps.useNonSynchronizingLiteralPlus = true
+            return caps
+        })
+        self.channel = EmbeddedChannel(handler: self.clientHandler, loop: .init())
+        
+        self.writeOutbound(.command(.init(tag: "A1", command: .login(username: "\\", password: "\\"))), wait: false)
+        self.assertOutboundString("A1 LOGIN {1}\r\n")
+        self.writeInbound("+ OK\r\n")
+        self.assertOutboundString("\\ {1}\r\n")
+        self.writeInbound("+ OK\r\n")
+        self.assertOutboundString("\\\r\n")
+        
+        // sending the capabilities should trigger the callback
+        self.writeInbound("A1 OK [CAPABILITY LITERAL+]\r\n")
+        self.assertInbound(.response(.taggedResponse(.init(tag: "A1", state: .ok(.init(code: .capability([.literalPlus]), text: ""))))))
+        wait(for: [turnOnLiteralPlusExpectation], timeout: 1.0)
+        
+        // now we should have literal+ turned on
+        self.writeOutbound(.command(.init(tag: "A1", command: .login(username: "\\", password: "\\"))), wait: false)
+        self.assertOutboundString("A1 LOGIN {1+}\r\n\\ {1+}\r\n\\\r\n")
+    }
 
     // MARK: - setup / tear down
 
     override func setUp() {
         XCTAssertNil(self.channel)
-        self.clientHandler = IMAPClientHandler(encodingOptions: .init())
+        self.clientHandler = IMAPClientHandler(encodingOptions: .init()) { _ in
+            CommandEncodingOptions.rfc3501
+        }
         self.channel = EmbeddedChannel(handler: self.clientHandler)
     }
 

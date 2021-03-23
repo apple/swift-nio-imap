@@ -30,6 +30,8 @@ public struct CommandEncodingOptions: Equatable {
     /// - Note: These can only be used in some places, namely `APPEND`.
     /// - SeeAlso: https://tools.ietf.org/html/rfc3516
     public var useBinaryLiteral: Bool
+    
+    public static let rfc3501: Self = .init()
 
     /// Create RFC 3501 compliant encoding options, i.e. without any IMAP extensions.
     public init() {
