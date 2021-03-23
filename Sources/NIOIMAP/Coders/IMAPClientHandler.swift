@@ -44,7 +44,11 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
     /// - Important: Modifying this value is not thread-safe
     var encodingOptions: CommandEncodingOptions
 
-    var encodingChangeCallback: ([Capability]) -> CommandEncodingOptions
+    /// This function is called by the `IMAPChannelHandler` upon receipt of a response containing capabilities.
+    /// The first argument is the capabilities that the server has sent. The second is a mutable set of encoding options.
+    /// The encoding options are pre-populated with what are considered to be the *best* settings for the given
+    /// capabilities.
+    var encodingChangeCallback: ([Capability], inout CommandEncodingOptions) -> Void
 
     enum ClientHandlerState: Equatable {
         /// We're expecting continuations to come back during a command.
@@ -58,10 +62,10 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
         case expectingResponses
     }
 
-    public init(encodingOptions: CommandEncodingOptions, encodingChangeCallback: @escaping ([Capability]) -> CommandEncodingOptions) {
+    public init(encodingChangeCallback: @escaping ([Capability], inout CommandEncodingOptions) -> Void) {
         self.decoder = NIOSingleStepByteToMessageProcessor(ResponseDecoder(), maximumBufferSize: 1_000)
         self._state = .expectingResponses
-        self.encodingOptions = encodingOptions
+        self.encodingOptions = .rfc3501
         self.encodingChangeCallback = encodingChangeCallback
     }
 
@@ -83,8 +87,12 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
                     case .taggedResponse(let tagged):
                         // continuations must have finished: change the state to standard continuation handling
                         self._state = .expectingResponses
-
-                    case .untaggedResponse, .fetchResponse, .fatalResponse, .authenticationChallenge, .idleStarted:
+                        if case .ok(let ok) = tagged.state, let code = ok.code, case .capability(let caps) = code {
+                            var recomended = CommandEncodingOptions(capabilities: caps)
+                            self.encodingChangeCallback(caps, &recomended)
+                            self.encodingOptions = recomended
+                        }
+                    case .untaggedResponse, .fetchResponse, .fatalResponse, .authenticationChallenge:
                         break
                     }
                     context.fireChannelRead(self.wrapInboundOut(response))

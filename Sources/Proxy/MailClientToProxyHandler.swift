@@ -39,9 +39,7 @@ class MailClientToProxyHandler: ChannelInboundHandler {
                 sslHandler,
                 OutboundPrintHandler(type: "CLIENT (Encoded)"),
                 InboundPrintHandler(type: "SERVER (Original)"),
-                IMAPClientHandler(encodingOptions: .init(), encodingChangeCallback: { _ in
-                CommandEncodingOptions.rfc3501
-                }),
+                IMAPClientHandler(encodingChangeCallback: { _, _ in }),
                 ProxyToMailServerHandler(mailAppToProxyChannel: mailClientToProxyChannel),
             ])
         }.connect(host: self.serverHost, port: self.serverPort).map { channel in
