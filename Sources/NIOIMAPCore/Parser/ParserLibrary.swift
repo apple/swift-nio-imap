@@ -34,8 +34,12 @@ internal struct ParseBuffer: Hashable {
     }
 }
 
+/// Parsing a tagged command failed. Includes the tag of the invalid command, and the parsing error.
 public struct BadCommand: Error {
+    /// The tag of the bad command.
     public var commandTag: String
+
+    /// Why parsing failed.
     public var parserError: ParserError
 }
 
