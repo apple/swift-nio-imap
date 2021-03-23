@@ -254,6 +254,8 @@ extension ParserLibrary {
                 return try ParserLibrary.composite(buffer: &buffer, tracker: tracker, parser)
             } catch is ParserError {
                 continue
+            } catch is BadCommand {
+                continue
             }
         }
         throw ParserError(hint: "none of the options match", file: file, line: line)
