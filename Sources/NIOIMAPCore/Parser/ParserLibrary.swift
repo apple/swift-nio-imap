@@ -265,7 +265,8 @@ extension ParserLibrary {
     static func oneOf2<T>(_ parser1: SubParser<T>,
                           _ parser2: SubParser<T>,
                           buffer: inout ParseBuffer,
-                          tracker: StackTracker, file: String = (#file), line: Int = #line) throws -> T {
+                          tracker: StackTracker, file: String = (#file), line: Int = #line) throws -> T
+    {
         do {
             return try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
                 try parser1(&buffer, tracker)
@@ -286,7 +287,8 @@ extension ParserLibrary {
                           _ parser2: SubParser<T>,
                           _ parser3: SubParser<T>,
                           buffer: inout ParseBuffer,
-                          tracker: StackTracker, file: String = (#file), line: Int = #line) throws -> T {
+                          tracker: StackTracker, file: String = (#file), line: Int = #line) throws -> T
+    {
         do {
             return try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
                 try parser1(&buffer, tracker)
