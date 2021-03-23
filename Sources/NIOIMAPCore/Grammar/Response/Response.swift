@@ -121,3 +121,20 @@ extension StreamingKind {
         }
     }
 }
+
+// MARK: - Encode Response
+
+extension ResponseEncodeBuffer {
+    /// Writes a `ResponseOrContinuationRequest`.
+    /// - parameter response: The response to write.
+    /// - returns: The number of bytes written.
+    @discardableResult public mutating func writeResponseOrContinuationRequest(_ response: ResponseOrContinuationRequest) -> Int {
+        switch response {
+        case .continuationRequest(let req):
+            return self.writeContinuationRequest(req)
+        case .response(let resp):
+            return self.writeResponse(resp)
+        }
+    }
+    
+}

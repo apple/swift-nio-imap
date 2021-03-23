@@ -151,31 +151,35 @@ public struct CommandParser: Parser {
     }
 
     private mutating func handleLines(buffer: inout ParseBuffer, tracker: StackTracker) throws -> CommandStream {
-        func parseCommand(buffer: inout ParseBuffer, tracker: StackTracker) throws -> TaggedCommand {
-            try GrammarParser.parseTaggedCommand(buffer: &buffer, tracker: tracker)
-        }
-
-        let save = buffer
-        do {
-            let command = try parseCommand(buffer: &buffer, tracker: tracker)
+        func parseCommand(buffer: inout ParseBuffer, tracker: StackTracker) throws -> CommandStream {
+            let command = try GrammarParser.parseTaggedCommand(buffer: &buffer, tracker: tracker)
             try ParserLibrary.newline(buffer: &buffer, tracker: tracker)
             if case .idleStart = command.command {
                 self.mode = .idle
             }
             return .command(command)
-        } catch is ParserError {
-            buffer = save
+        }
+
+        func parseAppend(buffer: inout ParseBuffer, tracker: StackTracker) throws -> CommandStream {
             let appendCommand = try GrammarParser.parseAppend(buffer: &buffer, tracker: tracker)
             self.mode = .waitingForMessage
             return appendCommand
-        } catch is BadCommand {
-            buffer = save
-            let appendCommand = try GrammarParser.parseAppend(buffer: &buffer, tracker: tracker)
-            self.mode = .waitingForMessage
-            return appendCommand
-        } catch {
-            buffer = save
-            throw error
+        }
+
+        func parseAuthenticationChallengeResponse(buffer: inout ParseBuffer, tracker: StackTracker) throws -> CommandStream {
+            let authenticationChallengeResponse = try GrammarParser.parseBase64(buffer: &buffer, tracker: tracker)
+            try ParserLibrary.newline(buffer: &buffer, tracker: tracker)
+            return .continuationResponse(authenticationChallengeResponse)
+        }
+
+        return try withoutActuallyEscaping(parseCommand) { parseCommand -> CommandStream in
+            return try withoutActuallyEscaping(parseAppend) { parseAppend -> CommandStream in
+                try ParserLibrary.oneOf([
+                    parseCommand,
+                    parseAppend,
+                    parseAuthenticationChallengeResponse
+                ], buffer: &buffer, tracker: tracker)
+            }
         }
     }
 
