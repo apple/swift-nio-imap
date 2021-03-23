@@ -44,7 +44,7 @@ public enum Response: Equatable {
     case fatalResponse(ResponseText)
 
     /// Bytes that will be base-64 encoded and sent to the client
-    /// as art of the authentication flow. The client will send the necessary
+    /// as part of the authentication flow. The client will send the necessary
     /// bytes in response to the challenge.
     case authenticationChallenge(ByteBuffer)
 }
