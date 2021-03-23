@@ -269,7 +269,10 @@ extension ParserLibrary {
             return try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
                 try parser1(&buffer, tracker)
             }
-        } catch is ParserError, is BadCommand {
+        } catch is ParserError {
+            // ok
+            // TODO: Condense when we drop 5.2
+        } catch is BadCommand {
             // ok
         }
 
@@ -287,7 +290,10 @@ extension ParserLibrary {
             return try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
                 try parser1(&buffer, tracker)
             }
-        } catch is ParserError, is BadCommand {
+        } catch is ParserError {
+            // ok
+            // TODO: Condense when we drop 5.2
+        } catch is BadCommand {
             // ok
         }
 
@@ -295,7 +301,10 @@ extension ParserLibrary {
             return try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
                 try parser2(&buffer, tracker)
             }
-        } catch is ParserError, is BadCommand {
+        } catch is ParserError {
+            // ok
+            // TODO: Condense when we drop 5.2
+        } catch is BadCommand {
             // ok
         }
 
@@ -303,7 +312,6 @@ extension ParserLibrary {
             try parser3(&buffer, tracker)
         }
     }
-
 
     static func optional<T>(buffer: inout ParseBuffer, tracker: StackTracker, parser: SubParser<T>) throws -> T? {
         do {
