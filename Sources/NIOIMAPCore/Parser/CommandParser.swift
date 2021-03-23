@@ -168,6 +168,11 @@ public struct CommandParser: Parser {
             let appendCommand = try GrammarParser.parseAppend(buffer: &buffer, tracker: tracker)
             self.mode = .waitingForMessage
             return appendCommand
+        } catch is BadCommand {
+            buffer = save
+            let appendCommand = try GrammarParser.parseAppend(buffer: &buffer, tracker: tracker)
+            self.mode = .waitingForMessage
+            return appendCommand
         } catch {
             buffer = save
             throw error
