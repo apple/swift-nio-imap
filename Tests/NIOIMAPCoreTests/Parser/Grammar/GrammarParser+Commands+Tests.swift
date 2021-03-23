@@ -21,9 +21,7 @@ class GrammarParser_Commands_Tests: XCTestCase, _ParserTestHelpers {}
 // MARK: - Top level
 
 extension GrammarParser_Commands_Tests {
-    
     func testParseTaggedCommand() {
-        
         // the failures here don't have a parseable tag
         self.iterateTests(
             testFunction: GrammarParser.parseTaggedCommand,
@@ -40,11 +38,10 @@ extension GrammarParser_Commands_Tests {
             ]
         )
     }
-    
+
     // here the command tag should be parseable, so we want to
     // include it in a thrown error
     func testParseTaggedCommandThrowsBadCommand() {
-        
         // test that the parser error occurs when parsing the command name
         var buffer1 = TestUtilities.makeParseBuffer(for: "A1 ()\r\n")
         XCTAssertThrowsError(try GrammarParser.parseTaggedCommand(buffer: &buffer1, tracker: .testTracker)) { e in
@@ -54,7 +51,7 @@ extension GrammarParser_Commands_Tests {
             }
             XCTAssertEqual(error.commandTag, "A1")
         }
-        
+
         // test that the parser error occurs when parsing a command component
         var buffer2 = TestUtilities.makeParseBuffer(for: "A2 ID aaaa\r\n")
         XCTAssertThrowsError(try GrammarParser.parseTaggedCommand(buffer: &buffer2, tracker: .testTracker)) { e in
@@ -64,7 +61,7 @@ extension GrammarParser_Commands_Tests {
             }
             XCTAssertEqual(error.commandTag, "A2")
         }
-        
+
         // make sure we still throw incomplete messages
         var buffer3 = TestUtilities.makeParseBuffer(for: "A2 LOGIN")
         XCTAssertThrowsError(try GrammarParser.parseTaggedCommand(buffer: &buffer3, tracker: .testTracker)) { e in
