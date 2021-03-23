@@ -42,6 +42,11 @@ public enum Response: Equatable {
     /// Fatal responses indicate some unrecoverable error has occurred, and
     /// the server is now going to terminate the connection.
     case fatalResponse(ResponseText)
+    
+    /// Bytes that will be base-64 encoded and sent to the client
+    /// as art of the authentication flow. The client will send the necessary
+    /// bytes in response to the challenge
+    case authenticationChallenge(ByteBuffer)
 }
 
 /// The first event will always be `start`
