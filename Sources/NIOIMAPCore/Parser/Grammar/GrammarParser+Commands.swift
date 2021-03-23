@@ -29,9 +29,13 @@ extension GrammarParser {
     static func parseTaggedCommand(buffer: inout ParseBuffer, tracker: StackTracker) throws -> TaggedCommand {
         try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             let tag = try self.parseTag(buffer: &buffer, tracker: tracker)
-            try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
-            let command = try self.parseCommand(buffer: &buffer, tracker: tracker)
-            return TaggedCommand(tag: tag, command: command)
+            do {
+                try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
+                let command = try self.parseCommand(buffer: &buffer, tracker: tracker)
+                return TaggedCommand(tag: tag, command: command)
+            } catch let error as ParserError {
+                throw BadCommand(commandTag: tag, parserError: error)
+            }
         }
     }
 

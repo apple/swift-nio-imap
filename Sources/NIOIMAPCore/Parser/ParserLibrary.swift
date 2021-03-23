@@ -34,6 +34,11 @@ internal struct ParseBuffer: Hashable {
     }
 }
 
+public struct BadCommand: Error {
+    public var commandTag: String
+    public var parserError: ParserError
+}
+
 /// An error ocurred when parsing an IMAP command or response.
 public struct ParserError: Error {
     /// If possible, a description of the error and why it occurred.
