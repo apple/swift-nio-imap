@@ -182,9 +182,9 @@ extension CommandStream_Tests {
         XCTAssertEqual(
             String(buffer: encodedCommand._bytes),
             #"A003 APPEND "Drafts" (\Seen \Draft $MDNSent) CATENATE (URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=HEADER" TEXT {42+}\#r\#n"# +
-            #"\#r\#n--------------030308070208000400050907\#r\#n URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=1.MIME" URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=1" TEXT {42+}\#r\#n"# +
-            #"\#r\#n--------------030308070208000400050907\#r\#n URL "/Drafts;UIDVALIDITY=385759045/;UID=30" TEXT {44+}\#r\#n"# +
-            #"\#r\#n--------------030308070208000400050907--\#r\#n)\#r\#n"#
+                #"\#r\#n--------------030308070208000400050907\#r\#n URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=1.MIME" URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=1" TEXT {42+}\#r\#n"# +
+                #"\#r\#n--------------030308070208000400050907\#r\#n URL "/Drafts;UIDVALIDITY=385759045/;UID=30" TEXT {44+}\#r\#n"# +
+                #"\#r\#n--------------030308070208000400050907--\#r\#n)\#r\#n"#
         )
         XCTAssertFalse(encodedCommand._waitForContinuation, "Should not have additional continuations.")
     }

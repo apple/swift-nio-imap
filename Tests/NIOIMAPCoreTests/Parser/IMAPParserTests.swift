@@ -156,7 +156,7 @@ extension ParserUnitTests {
     }
 
     func testCommandToStreamToCommand_catenateExampleOne() {
-        var buffer: ByteBuffer = ByteBuffer(string: #"1 NOOP\#r\#n"# +
+        var buffer = ByteBuffer(string: #"1 NOOP\#r\#n"# +
             #"A003 APPEND Drafts (\Seen \Draft $MDNSent) CATENATE (URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=HEADER" TEXT {42}\#r\#n"# +
             #"\#r\#n--------------030308070208000400050907\#r\#n URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=1.MIME" "# +
             #"URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=1" TEXT {42}\#r\#n"# +
@@ -209,7 +209,7 @@ extension ParserUnitTests {
     }
 
     func testCommandToStreamToCommand_catenateShortExample() {
-        var buffer: ByteBuffer = ByteBuffer(string: #"A003 APPEND "Drafts" (\Seen \Draft $MDNSent) CATENATE (URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=HEADER")\#r\#n"#)
+        var buffer = ByteBuffer(string: #"A003 APPEND "Drafts" (\Seen \Draft $MDNSent) CATENATE (URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=HEADER")\#r\#n"#)
 
         var parser = CommandParser()
         do {
@@ -230,7 +230,7 @@ extension ParserUnitTests {
     }
 
     func testCatenate_failsToParseWithExtraSpace() {
-        var buffer: ByteBuffer = ByteBuffer(string: #"A003 APPEND "Drafts" (\Seen \Draft $MDNSent) CATENATE ( URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=HEADER")\#r\#n"#)
+        var buffer = ByteBuffer(string: #"A003 APPEND "Drafts" (\Seen \Draft $MDNSent) CATENATE ( URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=HEADER")\#r\#n"#)
 
         var parser = CommandParser()
         XCTAssertNoThrow(try parser.parseCommandStream(buffer: &buffer)) // .append(.start)
@@ -239,7 +239,7 @@ extension ParserUnitTests {
     }
 
     func testCommandToStreamToCommand_catenateAndOptions() {
-        var buffer: ByteBuffer = ByteBuffer(string: #"A003 APPEND "Drafts" (\Seen \Draft $MDNSent) EXTENSION (extdata) CATENATE (URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=HEADER")\#r\#n"#)
+        var buffer = ByteBuffer(string: #"A003 APPEND "Drafts" (\Seen \Draft $MDNSent) EXTENSION (extdata) CATENATE (URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=HEADER")\#r\#n"#)
 
         var parser = CommandParser()
         do {
@@ -260,7 +260,7 @@ extension ParserUnitTests {
     }
 
     func testCommandToStreamToCommand_catenateAndOptions_weirdCasing() {
-        var buffer: ByteBuffer = ByteBuffer(string: #"A003 APPEND "Drafts" (\Seen \Draft $MDNSent) EXTENSION (extdata) cAtEnAtE (URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=HEADER")\#r\#n"#)
+        var buffer = ByteBuffer(string: #"A003 APPEND "Drafts" (\Seen \Draft $MDNSent) EXTENSION (extdata) cAtEnAtE (URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=HEADER")\#r\#n"#)
 
         var parser = CommandParser()
         do {
@@ -802,9 +802,9 @@ extension ParserUnitTests {
                 ("YQ==", " ", .init("a"), #line),
             ],
             parserErrorInputs: [
-                ],
+            ],
             incompleteMessageInputs: [
-                ]
+            ]
         )
     }
 }
@@ -820,9 +820,9 @@ extension ParserUnitTests {
                 (";AUTH=test", " ", .type(.init(authenticationType: "test")), #line),
             ],
             parserErrorInputs: [
-                ],
+            ],
             incompleteMessageInputs: [
-                ]
+            ]
         )
     }
 }
@@ -838,9 +838,9 @@ extension ParserUnitTests {
                 (";PARTIAL=1.2", " ", .messageOrPartial(.partialOnly(.init(range: .init(offset: 1, length: 2)))), #line),
             ],
             parserErrorInputs: [
-                ],
+            ],
             incompleteMessageInputs: [
-                ]
+            ]
         )
     }
 }
@@ -856,9 +856,9 @@ extension ParserUnitTests {
                 ("/test", " ", .init(command: .messageList(.init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test"))))), #line),
             ],
             parserErrorInputs: [
-                ],
+            ],
             incompleteMessageInputs: [
-                ]
+            ]
         )
     }
 }
@@ -875,9 +875,9 @@ extension ParserUnitTests {
                 ("test/;UID=123;URLAUTH=anonymous:INTERNAL:01234567890123456789012345678901", " ", .messagePart(part: .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: .init(uid: 123)), authenticatedURL: .init(authenticatedURL: .init(access: .anonymous), verifier: .init(urlAuthMechanism: .internal, encodedAuthenticationURL: .init(data: "01234567890123456789012345678901")))), #line),
             ],
             parserErrorInputs: [
-                ],
+            ],
             incompleteMessageInputs: [
-                ]
+            ]
         )
     }
 }
@@ -934,9 +934,9 @@ extension ParserUnitTests {
                 (";URLAUTH=anonymous:INTERNAL:01234567890123456789012345678901", " ", .init(authenticatedURL: .init(access: .anonymous), verifier: .init(urlAuthMechanism: .internal, encodedAuthenticationURL: .init(data: "01234567890123456789012345678901"))), #line),
             ],
             parserErrorInputs: [
-                ],
+            ],
             incompleteMessageInputs: [
-                ]
+            ]
         )
     }
 }
@@ -957,9 +957,9 @@ extension ParserUnitTests {
                 ),
             ],
             parserErrorInputs: [
-                ],
+            ],
             incompleteMessageInputs: [
-                ]
+            ]
         )
     }
 }
@@ -974,9 +974,9 @@ extension ParserUnitTests {
                 (":INTERNAL:01234567890123456789012345678901", " ", .init(urlAuthMechanism: .internal, encodedAuthenticationURL: .init(data: "01234567890123456789012345678901")), #line),
             ],
             parserErrorInputs: [
-                ],
+            ],
             incompleteMessageInputs: [
-                ]
+            ]
         )
     }
 }
@@ -993,9 +993,9 @@ extension ParserUnitTests {
                 ("test;AUTH=*", " ", .init(encodedUser: .init(data: "test"), authenticationMechanism: .any), #line),
             ],
             parserErrorInputs: [
-                ],
+            ],
             incompleteMessageInputs: [
-                ]
+            ]
         )
     }
 }
@@ -1042,9 +1042,9 @@ extension ParserUnitTests {
                 ("hello%FF", " ", .init(authenticationType: "hello%FF"), #line),
             ],
             parserErrorInputs: [
-                ],
+            ],
             incompleteMessageInputs: [
-                ]
+            ]
         )
     }
 }
@@ -1059,9 +1059,9 @@ extension ParserUnitTests {
                 ("hello%FF", " ", .init(mailbox: "hello%FF"), #line),
             ],
             parserErrorInputs: [
-                ],
+            ],
             incompleteMessageInputs: [
-                ]
+            ]
         )
     }
 }
@@ -1076,9 +1076,9 @@ extension ParserUnitTests {
                 ("//localhost/", " ", .init(server: .init(host: "localhost"), query: .init(command: nil)), #line),
             ],
             parserErrorInputs: [
-                ],
+            ],
             incompleteMessageInputs: [
-                ]
+            ]
         )
     }
 }
@@ -1093,9 +1093,9 @@ extension ParserUnitTests {
                 ("query%FF", " ", .init(query: "query%FF"), #line),
             ],
             parserErrorInputs: [
-                ],
+            ],
             incompleteMessageInputs: [
-                ]
+            ]
         )
     }
 }
@@ -1110,9 +1110,9 @@ extension ParserUnitTests {
                 ("query%FF", " ", .init(section: "query%FF"), #line),
             ],
             parserErrorInputs: [
-                ],
+            ],
             incompleteMessageInputs: [
-                ]
+            ]
         )
     }
 }
@@ -1127,9 +1127,9 @@ extension ParserUnitTests {
                 ("query%FF", " ", .init(data: "query%FF"), #line),
             ],
             parserErrorInputs: [
-                ],
+            ],
             incompleteMessageInputs: [
-                ]
+            ]
         )
     }
 }
@@ -1250,9 +1250,9 @@ extension ParserUnitTests {
                 ),
             ],
             parserErrorInputs: [
-                ],
+            ],
             incompleteMessageInputs: [
-                ]
+            ]
         )
     }
 }
@@ -1339,9 +1339,9 @@ extension ParserUnitTests {
                 ("(\\seen \\answered \\draft )", " ", [.seen, .answered, .draft], #line), // iCloud sends a superfluous terminating space
             ],
             parserErrorInputs: [
-                ],
+            ],
             incompleteMessageInputs: [
-                ]
+            ]
         )
     }
 }
@@ -1448,9 +1448,9 @@ extension ParserUnitTests {
                 ("/test", " ", .init(command: .messageList(.init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test"))))), #line),
             ],
             parserErrorInputs: [
-                ],
+            ],
             incompleteMessageInputs: [
-                ]
+            ]
         )
     }
 }
@@ -1508,9 +1508,9 @@ extension ParserUnitTests {
                 (";AUTH=*@localhost:1234", " ", .init(userInfo: .init(encodedUser: nil, authenticationMechanism: .any), host: "localhost", port: 1234), #line),
             ],
             parserErrorInputs: [
-                ],
+            ],
             incompleteMessageInputs: [
-                ]
+            ]
         )
     }
 }
@@ -1546,9 +1546,9 @@ extension ParserUnitTests {
                 ("imap://localhost/", " ", .init(server: .init(host: "localhost"), query: .init(command: nil)), #line),
             ],
             parserErrorInputs: [
-                ],
+            ],
             incompleteMessageInputs: [
-                ]
+            ]
         )
     }
 }
@@ -1565,9 +1565,9 @@ extension ParserUnitTests {
                 ("{4}\r\ntest INTERNAL", " ", .init(urlRump: "test", mechanism: .internal), #line),
             ],
             parserErrorInputs: [
-                ],
+            ],
             incompleteMessageInputs: [
-                ]
+            ]
         )
     }
 }
@@ -1583,9 +1583,9 @@ extension ParserUnitTests {
                 ("url \"data\"", " ", .init(url: "url", data: "data"), #line),
             ],
             parserErrorInputs: [
-                ],
+            ],
             incompleteMessageInputs: [
-                ]
+            ]
         )
     }
 }
@@ -1603,9 +1603,9 @@ extension ParserUnitTests {
                 ("", " ", .empty, #line),
             ],
             parserErrorInputs: [
-                ],
+            ],
             incompleteMessageInputs: [
-                ]
+            ]
         )
     }
 }
@@ -1621,9 +1621,9 @@ extension ParserUnitTests {
                 ("test?query", " ", .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test"), uidValidity: nil), encodedSearch: .init(query: "query")), #line),
             ],
             parserErrorInputs: [
-                ],
+            ],
             incompleteMessageInputs: [
-                ]
+            ]
         )
     }
 }
@@ -1703,9 +1703,9 @@ extension ParserUnitTests {
                 ),
             ],
             parserErrorInputs: [
-                ],
+            ],
             incompleteMessageInputs: [
-                ]
+            ]
         )
     }
 }
@@ -1749,9 +1749,9 @@ extension ParserUnitTests {
                 ),
             ],
             parserErrorInputs: [
-                ],
+            ],
             incompleteMessageInputs: [
-                ]
+            ]
         )
     }
 }
@@ -2574,9 +2574,9 @@ extension ParserUnitTests {
                 ("user+abc", " ", .user(.init(data: "abc")), #line),
             ],
             parserErrorInputs: [
-                ],
+            ],
             incompleteMessageInputs: [
-                ]
+            ]
         )
     }
 }
@@ -2614,9 +2614,9 @@ extension ParserUnitTests {
                 ("abcdEFG0123456789", " ", .init("abcdEFG0123456789"), #line),
             ],
             parserErrorInputs: [
-                ],
+            ],
             incompleteMessageInputs: [
-                ]
+            ]
         )
     }
 }

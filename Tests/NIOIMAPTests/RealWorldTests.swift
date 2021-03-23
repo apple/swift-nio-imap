@@ -65,7 +65,7 @@ extension RealWorldTests {
                                                                  ),
                                                                  authenticatedURL: nil
                                                              )))),
-                                                               text: ""))))),
+                                           text: ""))))),
                 ]
             ),
         ]

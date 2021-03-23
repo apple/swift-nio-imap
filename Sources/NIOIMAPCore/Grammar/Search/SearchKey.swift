@@ -210,7 +210,7 @@ extension _EncodeBuffer {
         }
     }
 
-    fileprivate mutating func _writeSearchKey(_ key: SearchKey) -> Int {
+    private mutating func _writeSearchKey(_ key: SearchKey) -> Int {
         switch key {
         case .all:
             return self._writeString("ALL")

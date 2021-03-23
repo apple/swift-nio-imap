@@ -138,7 +138,7 @@ extension ParserLibraryTests {
                                                 try ParserLibrary.fixedString("x", buffer: &buffer, tracker: tracker)
                                                 try ParserLibrary.fixedString("x", buffer: &buffer, tracker: tracker)
                                                 return 1
-            }))
+                                            }))
         }
     }
 
@@ -160,7 +160,7 @@ extension ParserLibraryTests {
                                                 try ParserLibrary.fixedString("x", buffer: &buffer, tracker: tracker)
                                                 try ParserLibrary.fixedString("x", buffer: &buffer, tracker: tracker)
                                                 return 1
-            }))
+                                            }))
         }
     }
 
@@ -171,7 +171,7 @@ extension ParserLibraryTests {
                                                 try ParserLibrary.fixedString("x", buffer: &buffer, tracker: tracker)
                                                 try ParserLibrary.fixedString("x", buffer: &buffer, tracker: tracker)
                                                 return 1
-            }))
+                                            }))
         }
     }
 }
@@ -208,7 +208,7 @@ extension ParserLibraryTests {
                                                 try ParserLibrary.fixedString("x", buffer: &buffer, tracker: tracker)
                                                 try ParserLibrary.fixedString("x", buffer: &buffer, tracker: tracker)
                                                 return 1
-            }))
+                                            }))
         }
     }
 
@@ -219,7 +219,7 @@ extension ParserLibraryTests {
                                                 try ParserLibrary.fixedString("x", buffer: &buffer, tracker: tracker)
                                                 try ParserLibrary.fixedString("x", buffer: &buffer, tracker: tracker)
                                                 return 1
-            }))
+                                            }))
         }
     }
 }

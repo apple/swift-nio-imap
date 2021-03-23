@@ -29,9 +29,9 @@ extension GrammarParser_Entry_Tests {
                 ("\"name\" NIL", "", .init(key: "name", value: .init(nil)), #line),
             ],
             parserErrorInputs: [
-                ],
+            ],
             incompleteMessageInputs: [
-                ]
+            ]
         )
     }
 }
@@ -57,9 +57,9 @@ extension GrammarParser_Entry_Tests {
                 ),
             ],
             parserErrorInputs: [
-                ],
+            ],
             incompleteMessageInputs: [
-                ]
+            ]
         )
     }
 }
@@ -76,9 +76,9 @@ extension GrammarParser_Entry_Tests {
                 ("(\"name1\" \"name2\")", "", ["name1", "name2"], #line),
             ],
             parserErrorInputs: [
-                ],
+            ],
             incompleteMessageInputs: [
-                ]
+            ]
         )
     }
 }
@@ -94,9 +94,9 @@ extension GrammarParser_Entry_Tests {
                 ("\"name1\" \"name2\"", "\r", ["name1", "name2"], #line),
             ],
             parserErrorInputs: [
-                ],
+            ],
             incompleteMessageInputs: [
-                ]
+            ]
         )
     }
 }

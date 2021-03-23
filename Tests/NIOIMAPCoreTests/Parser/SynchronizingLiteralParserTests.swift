@@ -199,7 +199,8 @@ final class SynchronizingLiteralParserTests: XCTestCase {
 
     private func assertMultipleParses(_ expectedStrings: [String], continuationsNecessary: Int = 0,
                                       file: StaticString = (#file),
-                                      line: UInt = #line) {
+                                      line: UInt = #line)
+    {
         guard expectedStrings.count == self.parses.count else {
             XCTFail("Unexpected number of parses: \(self.parses.count)", file: file, line: line)
             return
@@ -231,7 +232,8 @@ final class SynchronizingLiteralParserTests: XCTestCase {
 
     private func assertOneParse(_ string: String, continuationsNecessary: Int = 0,
                                 file: StaticString = (#file),
-                                line: UInt = #line) {
+                                line: UInt = #line)
+    {
         XCTAssertEqual(1, self.parses.count)
         guard let parse = self.parses.first else {
             XCTFail("no parses found", file: file, line: line)

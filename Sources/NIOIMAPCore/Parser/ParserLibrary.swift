@@ -239,7 +239,8 @@ extension ParserLibrary {
             } else if !caseSensitive {
                 // we know this is all ASCII so we can do an ASCII case-insensitive compare here
                 guard needleCount == actual.utf8.count,
-                    actual.utf8.elementsEqual(needle.utf8, by: { ($0 & 0xDF) == ($1 & 0xDF) }) else {
+                      actual.utf8.elementsEqual(needle.utf8, by: { ($0 & 0xDF) == ($1 & 0xDF) })
+                else {
                     throw ParserError(hint: "case insensitively looking for \(needle) found \(actual)")
                 }
             } else {
@@ -264,7 +265,8 @@ extension ParserLibrary {
     static func oneOf2<T>(_ parser1: SubParser<T>,
                           _ parser2: SubParser<T>,
                           buffer: inout ParseBuffer,
-                          tracker: StackTracker, file: String = (#file), line: Int = #line) throws -> T {
+                          tracker: StackTracker, file: String = (#file), line: Int = #line) throws -> T
+    {
         do {
             return try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
                 try parser1(&buffer, tracker)
@@ -285,7 +287,8 @@ extension ParserLibrary {
                           _ parser2: SubParser<T>,
                           _ parser3: SubParser<T>,
                           buffer: inout ParseBuffer,
-                          tracker: StackTracker, file: String = (#file), line: Int = #line) throws -> T {
+                          tracker: StackTracker, file: String = (#file), line: Int = #line) throws -> T
+    {
         do {
             return try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
                 try parser1(&buffer, tracker)

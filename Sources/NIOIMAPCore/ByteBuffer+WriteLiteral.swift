@@ -36,7 +36,7 @@ extension _EncodeBuffer {
         self.writeIMAPString(buffer.readableBytesView)
     }
 
-    fileprivate mutating func writeIMAPString<T: Collection>(_ bytes: T) -> Int where T.Element == UInt8 {
+    private mutating func writeIMAPString<T: Collection>(_ bytes: T) -> Int where T.Element == UInt8 {
         switch stringEncoding(for: bytes) {
         case .quotedString:
             return _writeString("\"") + _writeBytes(bytes) + _writeString("\"")
@@ -64,7 +64,7 @@ extension _EncodeBuffer {
         case clientNonSynchronizingLiteralMinus
     }
 
-    fileprivate func stringEncoding<T: Collection>(for bytes: T) -> StringEncoding where T.Element == UInt8 {
+    private func stringEncoding<T: Collection>(for bytes: T) -> StringEncoding where T.Element == UInt8 {
         switch mode {
         case .client(options: let options):
             if options.useQuotedString, canUseQuotedString(for: bytes) {
@@ -85,10 +85,10 @@ extension _EncodeBuffer {
         }
     }
 
-    fileprivate func canUseQuotedString<T: Collection>(for bytes: T) -> Bool where T.Element == UInt8 {
+    private func canUseQuotedString<T: Collection>(for bytes: T) -> Bool where T.Element == UInt8 {
         // allSatisfy vs contains because IMO it's a little clearer
         // if more than 70 bytes, always use a literal
-        return bytes.count <= 70 && bytes.allSatisfy { $0.isQuotedChar }
+        bytes.count <= 70 && bytes.allSatisfy { $0.isQuotedChar }
     }
 
     /// Encodes the given bytes as a Base64 collection, and then writes to `self.`

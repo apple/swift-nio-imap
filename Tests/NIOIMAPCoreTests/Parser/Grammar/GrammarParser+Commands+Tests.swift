@@ -212,7 +212,7 @@ extension GrammarParser_Commands_Tests {
                 (" INBOX INTERNAL test", "\r", .resetKey(mailbox: .inbox, mechanisms: [.internal, .init("test")]), #line),
             ],
             parserErrorInputs: [
-                ],
+            ],
             incompleteMessageInputs: [
                 (" INBOX", "", #line),
                 (" INBOX INTERNAL", "", #line),
@@ -350,7 +350,7 @@ extension GrammarParser_Commands_Tests {
                 ),
             ],
             parserErrorInputs: [
-                ],
+            ],
             incompleteMessageInputs: [
                 (" IN (mailboxes ", "", #line),
             ]
