@@ -254,9 +254,63 @@ extension ParserLibrary {
                 return try ParserLibrary.composite(buffer: &buffer, tracker: tracker, parser)
             } catch is ParserError {
                 continue
+            } catch is BadCommand {
+                continue
             }
         }
         throw ParserError(hint: "none of the options match", file: file, line: line)
+    }
+
+    static func oneOf2<T>(_ parser1: SubParser<T>,
+                          _ parser2: SubParser<T>,
+                          buffer: inout ParseBuffer,
+                          tracker: StackTracker, file: String = (#file), line: Int = #line) throws -> T {
+        do {
+            return try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
+                try parser1(&buffer, tracker)
+            }
+        } catch is ParserError {
+            // ok
+            // TODO: Condense when we drop 5.2
+        } catch is BadCommand {
+            // ok
+        }
+
+        return try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
+            try parser2(&buffer, tracker)
+        }
+    }
+
+    static func oneOf3<T>(_ parser1: SubParser<T>,
+                          _ parser2: SubParser<T>,
+                          _ parser3: SubParser<T>,
+                          buffer: inout ParseBuffer,
+                          tracker: StackTracker, file: String = (#file), line: Int = #line) throws -> T {
+        do {
+            return try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
+                try parser1(&buffer, tracker)
+            }
+        } catch is ParserError {
+            // ok
+            // TODO: Condense when we drop 5.2
+        } catch is BadCommand {
+            // ok
+        }
+
+        do {
+            return try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
+                try parser2(&buffer, tracker)
+            }
+        } catch is ParserError {
+            // ok
+            // TODO: Condense when we drop 5.2
+        } catch is BadCommand {
+            // ok
+        }
+
+        return try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
+            try parser3(&buffer, tracker)
+        }
     }
 
     static func optional<T>(buffer: inout ParseBuffer, tracker: StackTracker, parser: SubParser<T>) throws -> T? {

@@ -146,6 +146,35 @@ class IMAPServerHandlerTests: XCTestCase {
         self.assertOutboundString(")\r\n")
     }
 
+    func testAuthenticationFlow() {
+        self.handler = IMAPServerHandler()
+        self.channel = EmbeddedChannel(handler: self.handler)
+
+        // client starts authentication
+        self.writeInbound("A1 AUTHENTICATE GSSAPI\r\n")
+        self.assertInbound(.command(.init(tag: "A1", command: .authenticate(method: .gssAPI, initialClientResponse: nil))))
+
+        // server sends challenge
+        self.writeOutbound(.authenticationChallenge("challenge1"))
+        self.assertOutboundBuffer("+ Y2hhbGxlbmdlMQ==\r\n")
+
+        // client responds
+        self.writeInbound("cmVzcG9uc2Ux\r\n")
+        self.assertInbound(.continuationResponse("response1"))
+
+        // server challenge 2
+        self.writeOutbound(.authenticationChallenge("challenge2"))
+        self.assertOutboundBuffer("+ Y2hhbGxlbmdlMg==\r\n")
+
+        // client responds
+        self.writeInbound("cmVzcG9uc2Uy\r\n")
+        self.assertInbound(.continuationResponse("response2"))
+
+        // all done
+        self.writeOutbound(.taggedResponse(.init(tag: "A1", state: .ok(.init(text: "Success")))))
+        self.assertOutboundBuffer("A1 OK Success\r\n")
+    }
+
     // MARK: - setup/tear down
 
     override func setUp() {
@@ -167,14 +196,14 @@ class IMAPServerHandlerTests: XCTestCase {
 // MARK: - Helpers
 
 extension IMAPServerHandlerTests {
-    private func assertInbound(_ response: CommandStream, line: UInt = #line) {
+    private func assertInbound(_ command: CommandStream, line: UInt = #line) {
         var maybeRead: CommandStream?
         XCTAssertNoThrow(maybeRead = try self.channel.readInbound(), line: line)
         guard let read = maybeRead else {
             XCTFail("Inbound buffer empty", line: line)
             return
         }
-        XCTAssertEqual(response, read, line: line)
+        XCTAssertEqual(command, read, line: line)
     }
 
     private func assertOutboundBuffer(_ buffer: ByteBuffer, line: UInt = #line) {
@@ -198,8 +227,8 @@ extension IMAPServerHandlerTests {
     }
 
     @discardableResult
-    private func writeOutbound(_ command: Response, wait: Bool = true, line: UInt = #line) -> EventLoopFuture<Void> {
-        let result = self.channel.writeAndFlush(command)
+    private func writeOutbound(_ response: Response, wait: Bool = true, line: UInt = #line) -> EventLoopFuture<Void> {
+        let result = self.channel.writeAndFlush(response)
         if wait {
             XCTAssertNoThrow(try result.wait(), line: line)
         }

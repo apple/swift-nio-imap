@@ -42,6 +42,11 @@ public enum Response: Equatable {
     /// Fatal responses indicate some unrecoverable error has occurred, and
     /// the server is now going to terminate the connection.
     case fatalResponse(ResponseText)
+
+    /// Bytes that will be base-64 encoded and sent to the client
+    /// as part of the authentication flow. The client will send the necessary
+    /// bytes in response to the challenge.
+    case authenticationChallenge(ByteBuffer)
 }
 
 /// The first event will always be `start`
@@ -118,6 +123,22 @@ extension StreamingKind {
             return nil
         case .rfc822Header:
             return nil
+        }
+    }
+}
+
+// MARK: - Encode Response
+
+extension ResponseEncodeBuffer {
+    /// Writes a `ResponseOrContinuationRequest`.
+    /// - parameter response: The response to write.
+    /// - returns: The number of bytes written.
+    @discardableResult public mutating func writeResponseOrContinuationRequest(_ response: ResponseOrContinuationRequest) -> Int {
+        switch response {
+        case .continuationRequest(let req):
+            return self.writeContinuationRequest(req)
+        case .response(let resp):
+            return self.writeResponse(resp)
         }
     }
 }

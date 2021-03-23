@@ -79,7 +79,16 @@ extension ResponseEncodeBuffer {
             return self.buffer.writeTaggedResponse(end)
         case .fatalResponse(let fatal):
             return self.buffer.writeResponseFatal(fatal)
+        case .authenticationChallenge(let bytes):
+            return self.writeAuthenticationChallenge(bytes)
         }
+    }
+
+    @discardableResult mutating func writeAuthenticationChallenge(_ bytes: ByteBuffer) -> Int {
+        let base64 = Base64.encodeBytes(bytes: bytes.readableBytesView)
+        return self.buffer._writeString("+ ") +
+            self.buffer._writeBytes(base64) +
+            self.buffer._writeString("\r\n")
     }
 
     @discardableResult mutating func writeFetchResponse(_ response: FetchResponse) -> Int {
