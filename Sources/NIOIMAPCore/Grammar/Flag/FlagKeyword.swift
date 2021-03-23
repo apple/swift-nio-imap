@@ -30,7 +30,7 @@ extension Flag {
         }
 
         /// The raw case-preserved string value of the `Keyword`.
-        public var rawValue: String
+        public let rawValue: String
 
         /// Creates a new `Keyword`.
         /// - parameter string: A raw `String` to create the `Keyword`.  Each character in the`String` must be a valid atom-char as defined in RFC 3501.

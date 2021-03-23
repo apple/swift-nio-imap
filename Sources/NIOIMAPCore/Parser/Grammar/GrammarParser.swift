@@ -900,7 +900,7 @@ extension GrammarParser {
         try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> IMessagePart in
             var ref = try self.parseIMailboxReference(buffer: &buffer, tracker: tracker)
 
-            var uid = try IUID(uid: 1)
+            var uid = IUID(uid: 1)
             if ref.uidValidity == nil, ref.encodedMailbox.mailbox.last == Character(.init(UInt8(ascii: "/"))) {
                 try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
                     ref.encodedMailbox.mailbox = String(ref.encodedMailbox.mailbox.dropLast())
@@ -1096,7 +1096,7 @@ extension GrammarParser {
     static func parseIUIDOnly(buffer: inout ParseBuffer, tracker: StackTracker) throws -> IUID {
         try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             try ParserLibrary.fixedString(";UID=", buffer: &buffer, tracker: tracker)
-            return try IUID(uid: try self.parseNZNumber(buffer: &buffer, tracker: tracker))
+            return IUID(uid: try self.parseUID(buffer: &buffer, tracker: tracker))
         }
     }
 

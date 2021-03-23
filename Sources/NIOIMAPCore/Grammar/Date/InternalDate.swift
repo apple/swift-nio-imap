@@ -21,7 +21,7 @@
 ///
 /// IMAPv4 `date-time`
 public struct InternalDate: Hashable {
-    var rawValue: UInt64
+    let rawValue: UInt64
 
     /// The components of the date, such as the day, month, year, etc.
     public var components: Components {

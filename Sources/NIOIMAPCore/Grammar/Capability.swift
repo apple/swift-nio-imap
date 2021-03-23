@@ -68,7 +68,7 @@ extension Capability {
         public static let sort = Self(unchecked: "SORT")
 
         /// The raw value as an uppercased string.
-        public var rawValue: String
+        public let rawValue: String
 
         /// Creates a new `ContextKind`  from a `String`.
         /// - parameter value: The raw `String`. Will be uppercased.

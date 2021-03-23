@@ -20,15 +20,12 @@ public struct InvalidUID: Error {}
 /// command.
 public struct IUID: Equatable {
     /// The wrapped `UID`
-    public var uid: Int
+    public var uid: UID
 
     /// Creates a new `IUID` from a raw value.
     /// - parameter uid: The raw value to use.
     /// - throws: An `InvalidUID` if `uid == 0`.
-    public init(uid: Int) throws {
-        guard uid > 0 else {
-            throw InvalidUID()
-        }
+    public init(uid: UID) {
         self.uid = uid
     }
 }

@@ -19,7 +19,7 @@ extension BodyStructure {
         public static let inline = Self(rawValue: "inline")
         public static let attachment = Self(rawValue: "attachment")
 
-        public var rawValue: String
+        public let rawValue: String
 
         public init(rawValue: String) {
             self.rawValue = rawValue.lowercased()

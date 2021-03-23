@@ -21,10 +21,10 @@ import struct NIO.ByteBuffer
 /// Use `SectionSpecifier.complete` for an empty section specifier (i.e. the complete message).
 public struct SectionSpecifier: Hashable {
     /// The part of the body.
-    public internal(set) var part: Part
+    public let part: Part
 
     /// The type of section, e.g. *HEADER*.
-    public internal(set) var kind: Kind
+    public let kind: Kind
 
     /// Creates a new *complete* `SectionSpecifier`.
     /// - parameter part: The part of the body. Can only be empty if `kind` is not `.MIMEHeader`.

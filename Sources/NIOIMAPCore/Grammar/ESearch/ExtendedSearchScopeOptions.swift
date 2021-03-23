@@ -18,7 +18,7 @@ import struct NIO.ByteBuffer
 /// a catch-all for future extensions, as no options are currently explicitly defined.
 public struct ExtendedSearchScopeOptions: Equatable {
     /// An array of Scope Option key/value pairs. Note that the array must not be empty.
-    public private(set) var content: KeyValues<String, ParameterValue?>
+    public let content: KeyValues<String, ParameterValue?>
 
     /// Creates a new `ExtendedSearchScopeOptions` from a non-empty array of options.
     ///  - parameter options: One or more options.
