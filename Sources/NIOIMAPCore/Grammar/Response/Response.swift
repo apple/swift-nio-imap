@@ -136,5 +136,4 @@ extension ResponseEncodeBuffer {
             return self.writeResponse(resp)
         }
     }
-    
 }

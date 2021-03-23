@@ -145,31 +145,31 @@ class IMAPServerHandlerTests: XCTestCase {
         self.writeOutbound(.response(.fetchResponse(.finish)), wait: false)
         self.assertOutboundString(")\r\n")
     }
-    
+
     func testAuthenticationFlow() {
         self.handler = IMAPServerHandler()
         self.channel = EmbeddedChannel(handler: self.handler)
-        
+
         // client starts authentication
         self.writeInbound("A1 AUTHENTICATE GSSAPI\r\n")
         self.assertInbound(.command(.init(tag: "A1", command: .authenticate(method: .gssAPI, initialClientResponse: nil))))
-        
+
         // server sends challenge
         self.writeOutbound(.continuationRequest(.data("challenge1")))
         self.assertOutboundBuffer("+ Y2hhbGxlbmdlMQ==\r\n")
-        
+
         // client responds
         self.writeInbound("cmVzcG9uc2Ux\r\n")
         self.assertInbound(.continuationResponse("response1"))
-        
+
         // server challenge 2
         self.writeOutbound(.continuationRequest(.data("challenge2")))
         self.assertOutboundBuffer("+ Y2hhbGxlbmdlMg==\r\n")
-        
+
         // client responds
         self.writeInbound("cmVzcG9uc2Uy\r\n")
         self.assertInbound(.continuationResponse("response2"))
-        
+
         // all done
         self.writeOutbound(.response(.taggedResponse(.init(tag: "A1", state: .ok(.init(text: "Success"))))))
         self.assertOutboundBuffer("A1 OK Success\r\n")

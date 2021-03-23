@@ -173,11 +173,11 @@ public struct CommandParser: Parser {
         }
 
         return try withoutActuallyEscaping(parseCommand) { parseCommand -> CommandStream in
-            return try withoutActuallyEscaping(parseAppend) { parseAppend -> CommandStream in
+            try withoutActuallyEscaping(parseAppend) { parseAppend -> CommandStream in
                 try ParserLibrary.oneOf([
                     parseCommand,
                     parseAppend,
-                    parseAuthenticationChallengeResponse
+                    parseAuthenticationChallengeResponse,
                 ], buffer: &buffer, tracker: tracker)
             }
         }
