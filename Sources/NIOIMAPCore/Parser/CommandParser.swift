@@ -172,15 +172,12 @@ public struct CommandParser: Parser {
             return .continuationResponse(authenticationChallengeResponse)
         }
 
-        return try withoutActuallyEscaping(parseCommand) { parseCommand -> CommandStream in
-            try withoutActuallyEscaping(parseAppend) { parseAppend -> CommandStream in
-                try ParserLibrary.oneOf([
-                    parseCommand,
-                    parseAppend,
-                    parseAuthenticationChallengeResponse,
-                ], buffer: &buffer, tracker: tracker)
-            }
-        }
+        return try ParserLibrary.oneOf3(
+            parseCommand,
+            parseAppend,
+            parseAuthenticationChallengeResponse,
+            buffer: &buffer, tracker: tracker
+        )
     }
 
     private mutating func handleWaitingForMessage(buffer: inout ParseBuffer, tracker: StackTracker) throws -> CommandStream {
