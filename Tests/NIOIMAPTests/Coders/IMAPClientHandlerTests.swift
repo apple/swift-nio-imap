@@ -234,6 +234,29 @@ class IMAPClientHandlerTests: XCTestCase {
         XCTAssertNoThrow(XCTAssertEqual(try channel.readInbound(), ResponseOrContinuationRequest.response(.taggedResponse(.init(tag: "A001", state: .ok(.init(text: "GSSAPI authentication successful")))))))
         XCTAssertEqual(handler._state, .expectingResponses)
     }
+    
+    func testIdleFlow() {
+        
+        // begin idle
+        self.writeOutbound(.command(.init(tag: "A1", command: .idleStart)), wait: true)
+        self.assertOutboundString("A1 IDLE\r\n")
+        
+        // recieved n continuations from server
+        self.writeInbound("+ Waiting 1\r\n")
+        self.assertInbound(.response(.idleContinuation(.responseText(.init(text: "Waiting 1")))))
+        
+        self.writeInbound("+ Waiting 2\r\n")
+        self.assertInbound(.response(.idleContinuation(.responseText(.init(text: "Waiting 2")))))
+        
+        self.writeInbound("+ Waiting 3\r\n")
+        self.assertInbound(.response(.idleContinuation(.responseText(.init(text: "Waiting 3")))))
+        
+        self.writeInbound("+ Waiting 4\r\n")
+        self.assertInbound(.response(.idleContinuation(.responseText(.init(text: "Waiting 4")))))
+        
+        self.writeOutbound(.idleDone, wait: true)
+        self.assertOutboundString("DONE\r\n")
+    }
 
     // MARK: - setup / tear down
 

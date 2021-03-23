@@ -147,9 +147,6 @@ class IMAPServerHandlerTests: XCTestCase {
     }
 
     func testAuthenticationFlow() {
-        self.handler = IMAPServerHandler()
-        self.channel = EmbeddedChannel(handler: self.handler)
-
         // client starts authentication
         self.writeInbound("A1 AUTHENTICATE GSSAPI\r\n")
         self.assertInbound(.command(.init(tag: "A1", command: .authenticate(method: .gssAPI, initialClientResponse: nil))))

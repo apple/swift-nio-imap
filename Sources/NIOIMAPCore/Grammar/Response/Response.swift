@@ -47,6 +47,10 @@ public enum Response: Equatable {
     /// as part of the authentication flow. The client will send the necessary
     /// bytes in response to the challenge.
     case authenticationChallenge(ByteBuffer)
+    
+    /// May be sent periodicially by the server to, for example, remind the client
+    /// that the connection is still active, update capabilities, provide status updates, etc.
+    case idleContinuation(ContinuationRequest)
 }
 
 /// The first event will always be `start`

@@ -29,6 +29,7 @@ public struct ResponseParser: Parser {
 
     enum Mode: Equatable {
         case response(ResponseState)
+        case idle
         case streamingQuoted
         case attributeBytes(Int)
     }
@@ -40,6 +41,24 @@ public struct ResponseParser: Parser {
     /// - parameter bufferLimit: The maximum amount of data that may be buffered by the parser. If this limit is exceeded then an error will be thrown. Defaults to 1000 bytes.
     public init(bufferLimit: Int = 1_000) {
         self.bufferLimit = bufferLimit
+        self.mode = .response(.fetchOrNormal)
+    }
+    
+    public mutating func beginIdling() {
+        var correctMode = false
+        if case .response(.fetchOrNormal) = self.mode {
+            correctMode = true
+        }
+        precondition(correctMode)
+        self.mode = .idle
+    }
+    
+    public mutating func finishIdling() {
+        var correctMode = false
+        if case .idle = self.mode {
+            correctMode = true
+        }
+        precondition(correctMode)
         self.mode = .response(.fetchOrNormal)
     }
 
@@ -63,6 +82,8 @@ public struct ResponseParser: Parser {
                 return try self.parseResponse(state: state, buffer: &parseBuffer, tracker: tracker)
             case .attributeBytes(let remaining):
                 return .response(try self.parseBytes(buffer: &parseBuffer, tracker: tracker, remaining: remaining))
+            case .idle:
+                return try self.parseIdleContinuation(buffer: &parseBuffer, tracker: tracker)
             case .streamingQuoted:
                 return .response(try self.parseQuotedBytes(buffer: &parseBuffer))
             }
@@ -88,10 +109,19 @@ public struct ResponseParser: Parser {
 // MARK: - Parse responses
 
 extension ResponseParser {
+    
+    fileprivate mutating func parseIdleContinuation(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseOrContinuationRequest {
+        try ParserLibrary.composite(buffer: &buffer, tracker: tracker, { buffer, tracker in
+            let continuation = try GrammarParser.parseContinuationRequest(buffer: &buffer, tracker: tracker)
+            return .response(.idleContinuation(continuation))
+        })
+    }
+        
+    
     fileprivate mutating func parseResponse(state: ResponseState, buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseOrContinuationRequest {
         enum _Response: Equatable {
-            case untaggedResponse(ResponsePayload)
-            case fetchResponse(GrammarParser._FetchResponse)
+                    case untaggedResponse(ResponsePayload)
+                    case fetchResponse(GrammarParser._FetchResponse)
         }
 
         func parseResponse_fetch(buffer: inout ParseBuffer, tracker: StackTracker) throws -> _Response {

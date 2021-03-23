@@ -250,6 +250,44 @@ extension ResponseParser_Tests {
             XCTAssertEqual(buffer.readableBytes, 0)
         }
     }
+    
+    func testIdleFlow() {
+        
+        var parser = ResponseParser()
+        
+        var buffer1 = ByteBuffer(string: "A1 OK Login completed\r\n")
+        XCTAssertNoThrow(XCTAssertEqual(
+            try parser.parseResponseStream(buffer: &buffer1),
+                .response(.taggedResponse(.init(tag: "A1", state: .ok(.init(text: "Login completed")))))
+        ))
+        
+        // start idling
+        parser.beginIdling()
+        var buffer2 = ByteBuffer(string: "+ Still here 1\r\n")
+        XCTAssertNoThrow(XCTAssertEqual(
+            try parser.parseResponseStream(buffer: &buffer2),
+                .response(.idleContinuation(.responseText(.init(text: "Still here 1"))))
+        ))
+        var buffer3 = ByteBuffer(string: "+ Still here 2\r\n")
+        XCTAssertNoThrow(XCTAssertEqual(
+            try parser.parseResponseStream(buffer: &buffer3),
+                .response(.idleContinuation(.responseText(.init(text: "Still here 2"))))
+        ))
+        var buffer4 = ByteBuffer(string: "+ Still here 3\r\n")
+        XCTAssertNoThrow(XCTAssertEqual(
+            try parser.parseResponseStream(buffer: &buffer4),
+                .response(.idleContinuation(.responseText(.init(text: "Still here 3"))))
+        ))
+        
+        // stop idling
+        parser.finishIdling()
+        var buffer5 = ByteBuffer(string: "A2 OK IDLE completed\r\n")
+        XCTAssertNoThrow(XCTAssertEqual(
+            try parser.parseResponseStream(buffer: &buffer5),
+                .response(.taggedResponse(.init(tag: "A2", state: .ok(.init(text: "IDLE completed")))))
+        ))
+        
+    }
 }
 
 // MARK: - Stress tests
