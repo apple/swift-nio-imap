@@ -31,7 +31,7 @@ class IMAPClientHandlerTests: XCTestCase {
     }
 
     func testReferralURLResponse() {
-        let expectedResponse = ResponseOrContinuationRequest.response(.taggedResponse(
+        let expectedResponse = ServerResponse.response(.taggedResponse(
             TaggedResponse(tag: "tag",
                            state: .ok(ResponseText(code:
                                .referral(IMAPURL(server: IMAPServer(userInfo: nil, host: "hostname", port: nil),
@@ -145,13 +145,13 @@ class IMAPClientHandlerTests: XCTestCase {
         var inEncodeBuffer = ResponseEncodeBuffer(buffer: ByteBuffer(), capabilities: [])
         inEncodeBuffer.writeContinuationRequest(.responseText(.init(text: "Waiting")))
         XCTAssertNoThrow(try channel.writeInbound(inEncodeBuffer.readBytes()))
-        XCTAssertNoThrow(XCTAssertEqual(try channel.readInbound(), ResponseOrContinuationRequest.continuationRequest(.responseText(.init(text: "Waiting")))))
-        XCTAssertNoThrow(XCTAssertNil(try channel.readInbound(as: ResponseOrContinuationRequest.self)))
+        XCTAssertNoThrow(XCTAssertEqual(try channel.readInbound(), ServerResponse.idleContinuationRequest(.responseText(.init(text: "Waiting")))))
+        XCTAssertNoThrow(XCTAssertNil(try channel.readInbound(as: ServerResponse.self)))
         inEncodeBuffer = ResponseEncodeBuffer(buffer: ByteBuffer(), capabilities: [])
         inEncodeBuffer.writeContinuationRequest(.responseText(.init(text: "Waiting")))
         XCTAssertNoThrow(try channel.writeInbound(inEncodeBuffer.readBytes()))
-        XCTAssertNoThrow(XCTAssertEqual(try channel.readInbound(), ResponseOrContinuationRequest.continuationRequest(.responseText(.init(text: "Waiting")))))
-        XCTAssertNoThrow(XCTAssertNil(try channel.readInbound(as: ResponseOrContinuationRequest.self)))
+        XCTAssertNoThrow(XCTAssertEqual(try channel.readInbound(), ServerResponse.idleContinuationRequest(.responseText(.init(text: "Waiting")))))
+        XCTAssertNoThrow(XCTAssertNil(try channel.readInbound(as: ServerResponse.self)))
 
         // finish being idle
         XCTAssertNoThrow(try channel.writeOutbound(CommandStream.idleDone))
@@ -169,7 +169,7 @@ class IMAPClientHandlerTests: XCTestCase {
         inEncodeBuffer = ResponseEncodeBuffer(buffer: ByteBuffer(), capabilities: [])
         inEncodeBuffer.writeContinuationRequest(.data(""))
         XCTAssertNoThrow(try channel.writeInbound(inEncodeBuffer.readBytes()))
-        XCTAssertNoThrow(XCTAssertEqual(try channel.readInbound(), ResponseOrContinuationRequest.continuationRequest(.responseText(.init(text: "")))))
+        XCTAssertNoThrow(XCTAssertEqual(try channel.readInbound(), ServerResponse.idleContinuationRequest(.responseText(.init(text: "")))))
 
         // client responds
         let authString1 = """
@@ -201,7 +201,7 @@ class IMAPClientHandlerTests: XCTestCase {
         inEncodeBuffer = ResponseEncodeBuffer(buffer: ByteBuffer(), capabilities: [])
         inEncodeBuffer.writeContinuationRequest(.data(challengeString1))
         XCTAssertNoThrow(try channel.writeInbound(inEncodeBuffer.readBytes()))
-        XCTAssertNoThrow(XCTAssertEqual(try channel.readInbound(), ResponseOrContinuationRequest.continuationRequest(.data(challengeString1))))
+        XCTAssertNoThrow(XCTAssertEqual(try channel.readInbound(), ServerResponse.idleContinuationRequest(.data(challengeString1))))
 
         // client responds
         XCTAssertNoThrow(try channel.writeOutbound(CommandStream.continuationResponse("")))
@@ -216,7 +216,7 @@ class IMAPClientHandlerTests: XCTestCase {
         inEncodeBuffer = ResponseEncodeBuffer(buffer: ByteBuffer(), capabilities: [])
         inEncodeBuffer.writeContinuationRequest(.data(challengeString2))
         XCTAssertNoThrow(try channel.writeInbound(inEncodeBuffer.readBytes()))
-        XCTAssertNoThrow(XCTAssertEqual(try channel.readInbound(), ResponseOrContinuationRequest.continuationRequest(.data(challengeString2))))
+        XCTAssertNoThrow(XCTAssertEqual(try channel.readInbound(), ServerResponse.idleContinuationRequest(.data(challengeString2))))
 
         // client responds
         let authString2 = """
@@ -231,7 +231,7 @@ class IMAPClientHandlerTests: XCTestCase {
         inEncodeBuffer = ResponseEncodeBuffer(buffer: ByteBuffer(), capabilities: [])
         inEncodeBuffer.writeResponse(.taggedResponse(.init(tag: "A001", state: .ok(.init(text: "GSSAPI authentication successful")))))
         XCTAssertNoThrow(try channel.writeInbound(inEncodeBuffer.readBytes()))
-        XCTAssertNoThrow(XCTAssertEqual(try channel.readInbound(), ResponseOrContinuationRequest.response(.taggedResponse(.init(tag: "A001", state: .ok(.init(text: "GSSAPI authentication successful")))))))
+        XCTAssertNoThrow(XCTAssertEqual(try channel.readInbound(), ServerResponse.response(.taggedResponse(.init(tag: "A001", state: .ok(.init(text: "GSSAPI authentication successful")))))))
         XCTAssertEqual(handler._state, .expectingResponses)
     }
 
@@ -252,8 +252,8 @@ class IMAPClientHandlerTests: XCTestCase {
 // MARK: - Helpers
 
 extension IMAPClientHandlerTests {
-    private func assertInbound(_ response: ResponseOrContinuationRequest, line: UInt = #line) {
-        var maybeRead: ResponseOrContinuationRequest?
+    private func assertInbound(_ response: ServerResponse, line: UInt = #line) {
+        var maybeRead: ServerResponse?
         XCTAssertNoThrow(maybeRead = try self.channel.readInbound(), line: line)
         guard let read = maybeRead else {
             XCTFail("Inbound buffer empty", line: line)

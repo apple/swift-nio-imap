@@ -21,7 +21,7 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
     public typealias InboundIn = ByteBuffer
 
     /// Converts a `ByteBuffer` into a `Response` by sending data through a parser.
-    public typealias InboundOut = ResponseOrContinuationRequest
+    public typealias InboundOut = ServerResponse
 
     /// Commands are encoding into a ByteBuffer to send to a server.
     public typealias OutboundIn = CommandStream
@@ -59,7 +59,7 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
         do {
             try self.decoder.process(buffer: data) { response in
                 switch response {
-                case .continuationRequest:
+                case .idleContinuationRequest:
                     switch self._state {
                     case .expectingContinuations:
                         context.fireChannelRead(self.wrapInboundOut(response))
@@ -67,7 +67,7 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
                         self.writeNextChunks(context: context)
                     }
                 case .response(let response):
-                    let out = ResponseOrContinuationRequest.response(response)
+                    let out = ServerResponse.response(response)
                     switch response {
                     case .taggedResponse:
                         // continuations must have finished: change the state to standard continuation handling

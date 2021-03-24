@@ -16,9 +16,9 @@ import struct NIO.ByteBuffer
 import struct NIO.ByteBufferAllocator
 
 /// Used to wrap if the server has a sent a response or continuation request.
-public enum ResponseOrContinuationRequest: Equatable {
+public enum ServerResponse: Equatable {
     /// The server has sent a `ContinuationRequest`, and the client now needs to return some data.
-    case continuationRequest(ContinuationRequest)
+    case idleContinuationRequest(ContinuationRequest)
 
     /// The server has sent a `Response` that can now be handled by the client.
     case response(Response)
@@ -130,12 +130,12 @@ extension StreamingKind {
 // MARK: - Encode Response
 
 extension ResponseEncodeBuffer {
-    /// Writes a `ResponseOrContinuationRequest`.
+    /// Writes a `ServerResponse`.
     /// - parameter response: The response to write.
     /// - returns: The number of bytes written.
-    @discardableResult public mutating func writeResponseOrContinuationRequest(_ response: ResponseOrContinuationRequest) -> Int {
+    @discardableResult public mutating func writeServerResponse(_ response: ServerResponse) -> Int {
         switch response {
-        case .continuationRequest(let req):
+        case .idleContinuationRequest(let req):
             return self.writeContinuationRequest(req)
         case .response(let resp):
             return self.writeResponse(resp)

@@ -47,7 +47,7 @@ public struct ResponseParser: Parser {
     /// - parameter buffer: The `ByteBuffer` to parse data from.
     /// - returns: `nil` if there wasn't enough data, otherwise a `ResponseOrContinuationRequest` if parsing was successful.
     /// - throws: A `ParserError` with a desription as to why parsing failed.
-    public mutating func parseResponseStream(buffer inputBytes: inout ByteBuffer) throws -> ResponseOrContinuationRequest? {
+    public mutating func parseResponseStream(buffer inputBytes: inout ByteBuffer) throws -> ServerResponse? {
         let tracker = StackTracker.makeNewDefaultLimitStackTracker
         var parseBuffer = ParseBuffer(inputBytes)
         defer {
@@ -88,7 +88,7 @@ public struct ResponseParser: Parser {
 // MARK: - Parse responses
 
 extension ResponseParser {
-    fileprivate mutating func parseResponse(state: ResponseState, buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseOrContinuationRequest {
+    fileprivate mutating func parseResponse(state: ResponseState, buffer: inout ParseBuffer, tracker: StackTracker) throws -> ServerResponse {
         enum _Response: Equatable {
             case untaggedResponse(ResponsePayload)
             case fetchResponse(GrammarParser._FetchResponse)
@@ -144,12 +144,12 @@ extension ResponseParser {
         }
     }
 
-    private mutating func _parseResponse(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseOrContinuationRequest {
-        func parseResponse_continuation(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseOrContinuationRequest {
-            .continuationRequest(try GrammarParser.parseContinuationRequest(buffer: &buffer, tracker: tracker))
+    private mutating func _parseResponse(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ServerResponse {
+        func parseResponse_continuation(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ServerResponse {
+            .idleContinuationRequest(try GrammarParser.parseContinuationRequest(buffer: &buffer, tracker: tracker))
         }
 
-        func parseResponse_tagged(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseOrContinuationRequest {
+        func parseResponse_tagged(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ServerResponse {
             .response(.taggedResponse(try GrammarParser.parseTaggedResponse(buffer: &buffer, tracker: tracker)))
         }
 
