@@ -24,6 +24,11 @@ public enum ServerResponse: Equatable {
     case response(Response)
 }
 
+public enum _ResponseOrContinuationRequest: Equatable {
+    case continuationRequest(ContinuationRequest)
+    case response(Response)
+}
+
 /// Wraps the various response types that may be sent by a server.
 public enum Response: Equatable {
     /// Servers may send one or more untagged response for every tagged response.
