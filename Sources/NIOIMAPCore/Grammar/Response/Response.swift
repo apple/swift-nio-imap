@@ -17,7 +17,7 @@ import struct NIO.ByteBufferAllocator
 
 /// Used to wrap if the server has a sent a response or continuation request.
 public enum ServerResponse: Equatable {
-    /// The server has sent a `ContinuationRequest`, and the client now needs to return some data.
+    /// The server has sent a `ContinuationRequest` to signal that it has started idling.
     case idleContinuationRequest(ContinuationRequest)
 
     /// The server has sent a `Response` that can now be handled by the client.
