@@ -2450,3 +2450,107 @@ struct StackTracker {
         }
     }
 }
+
+// MARK: - ParserLibrary shortcuts
+extension GrammarParser {
+    static func parseZeroOrMoreCharacters(buffer: inout ParseBuffer, tracker: StackTracker, where: ((UInt8) -> Bool)) throws -> String {
+        try ParserLibrary.parseZeroOrMoreCharacters(buffer: &buffer, tracker: tracker, where: `where`)
+    }
+
+    static func parseOneOrMoreCharacters(buffer: inout ParseBuffer, tracker: StackTracker, where: ((UInt8) -> Bool)) throws -> String {
+        try ParserLibrary.parseOneOrMoreCharacters(buffer: &buffer, tracker: tracker, where: `where`)
+    }
+
+    static func parseZeroOrMoreCharactersByteBuffer(buffer: inout ParseBuffer, tracker: StackTracker, where: ((UInt8) -> Bool)) throws -> ByteBuffer {
+        try ParserLibrary.parseZeroOrMoreCharactersByteBuffer(buffer: &buffer, tracker: tracker, where: `where`)
+    }
+
+    static func parseOneOrMoreCharactersByteBuffer(buffer: inout ParseBuffer, tracker: StackTracker, where: ((UInt8) -> Bool)) throws -> ByteBuffer {
+        try ParserLibrary.parseOneOrMoreCharactersByteBuffer(buffer: &buffer, tracker: tracker, where: `where`)
+    }
+
+    static func parseOneOrMore<T>(buffer: inout ParseBuffer, tracker: StackTracker, parser: SubParser<T>) throws -> [T] {
+        try ParserLibrary.parseOneOrMore(buffer: &buffer, tracker: tracker, parser: parser)
+    }
+
+    static func parseOneOrMore<T>(buffer: inout ParseBuffer, into parsed: inout [T], tracker: StackTracker, parser: SubParser<T>) throws {
+        try ParserLibrary.parseOneOrMore(buffer: &buffer, into: &parsed, tracker: tracker, parser: parser)
+    }
+
+    static func parseZeroOrMore<T>(buffer: inout ParseBuffer, into parsed: inout [T], tracker: StackTracker, parser: SubParser<T>) throws {
+        try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &parsed, tracker: tracker, parser: parser)
+    }
+
+    static func parseZeroOrMore<K, V>(buffer: inout ParseBuffer, into keyValues: inout KeyValues<K, V>, tracker: StackTracker, parser: SubParser<(K, V)>) throws {
+        try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &keyValues, tracker: tracker, parser: parser)
+    }
+
+    static func parseZeroOrMore<K, V>(buffer: inout ParseBuffer, into keyValues: inout KeyValues<K, V>, tracker: StackTracker, parser: SubParser<KeyValue<K, V>>) throws {
+        try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &keyValues, tracker: tracker, parser: parser)
+    }
+
+    static func parseZeroOrMore<T>(buffer: inout ParseBuffer, tracker: StackTracker, parser: SubParser<T>) throws -> [T] {
+        try ParserLibrary.parseZeroOrMore(buffer: &buffer, tracker: tracker, parser: parser)
+    }
+
+    static func parseUnsignedInteger(buffer: inout ParseBuffer, tracker: StackTracker, allowLeadingZeros: Bool = false) throws -> (number: Int, bytesConsumed: Int) {
+        try ParserLibrary.parseUnsignedInteger(buffer: &buffer, tracker: tracker, allowLeadingZeros: allowLeadingZeros)
+    }
+
+    static func parseUInt64(buffer: inout ParseBuffer, tracker: StackTracker, allowLeadingZeros: Bool = false) throws -> (number: UInt64, bytesConsumed: Int) {
+        try ParserLibrary.parseUInt64(buffer: &buffer, tracker: tracker, allowLeadingZeros: allowLeadingZeros)
+    }
+
+    static func parseSpaces(buffer: inout ParseBuffer, tracker: StackTracker) throws {
+        try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
+    }
+
+    static func fixedString(_ needle: String, caseSensitive: Bool = false, allowLeadingSpaces: Bool = false, buffer: inout ParseBuffer, tracker: StackTracker) throws {
+        try ParserLibrary.fixedString(needle, caseSensitive: caseSensitive, allowLeadingSpaces: allowLeadingSpaces, buffer: &buffer, tracker: tracker)
+    }
+
+    static func oneOf<T>(_ subParsers: [SubParser<T>], buffer: inout ParseBuffer, tracker: StackTracker, file: String = (#file), line: Int = #line) throws -> T {
+        try ParserLibrary.oneOf(subParsers, buffer: &buffer, tracker: tracker, file: file, line: line)
+    }
+
+    static func oneOf2<T>(_ parser1: SubParser<T>,
+                          _ parser2: SubParser<T>,
+                          buffer: inout ParseBuffer,
+                          tracker: StackTracker, file: String = (#file), line: Int = #line) throws -> T
+    {
+        try ParserLibrary.oneOf2(parser1, parser2, buffer: &buffer, tracker: tracker)
+    }
+
+    static func oneOf3<T>(_ parser1: SubParser<T>,
+                          _ parser2: SubParser<T>,
+                          _ parser3: SubParser<T>,
+                          buffer: inout ParseBuffer,
+                          tracker: StackTracker, file: String = (#file), line: Int = #line) throws -> T
+    {
+        try ParserLibrary.oneOf2(parser1, parser2, buffer: &buffer, tracker: tracker)
+    }
+
+    static func optional<T>(buffer: inout ParseBuffer, tracker: StackTracker, parser: SubParser<T>) throws -> T? {
+        try ParserLibrary.optional(buffer: &buffer, tracker: tracker, parser: parser)
+    }
+
+    static func composite<T>(buffer: inout ParseBuffer, tracker: StackTracker, _ body: SubParser<T>) throws -> T {
+        try ParserLibrary.composite(buffer: &buffer, tracker: tracker, body)
+    }
+
+    static func newline(buffer: inout ParseBuffer, tracker: StackTracker) throws {
+        try ParserLibrary.newline(buffer: &buffer, tracker: tracker)
+    }
+
+    static func parseByte(buffer: inout ParseBuffer, tracker: StackTracker) throws -> UInt8 {
+        try ParserLibrary.parseByte(buffer: &buffer, tracker: tracker)
+    }
+
+    static func parseBytes(buffer: inout ParseBuffer, tracker: StackTracker, length: Int) throws -> ByteBuffer {
+        try ParserLibrary.parseBytes(buffer: &buffer, tracker: tracker, length: length)
+    }
+
+    static func parseBytes(buffer: inout ParseBuffer, tracker: StackTracker, upTo maxLength: Int) throws -> ByteBuffer {
+        try ParserLibrary.parseBytes(buffer: &buffer, tracker: tracker, upTo: maxLength)
+    }
+}
