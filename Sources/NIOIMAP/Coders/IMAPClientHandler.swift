@@ -59,7 +59,7 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
         do {
             try self.decoder.process(buffer: data) { response in
                 switch response {
-                case .idleContinuationRequest:
+                case .idleStarted:
                     switch self._state {
                     case .expectingContinuations:
                         context.fireChannelRead(self.wrapInboundOut(response))

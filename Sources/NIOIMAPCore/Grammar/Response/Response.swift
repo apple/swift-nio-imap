@@ -18,7 +18,7 @@ import struct NIO.ByteBufferAllocator
 /// Used to wrap if the server has a sent a response or continuation request.
 public enum ServerResponse: Equatable {
     /// The server has sent a `ContinuationRequest` to signal that it has started idling.
-    case idleContinuationRequest(ContinuationRequest)
+    case idleStarted(ContinuationRequest)
 
     /// The server has sent a `Response` that can now be handled by the client.
     case response(Response)
@@ -47,6 +47,9 @@ public enum Response: Equatable {
     /// as part of the authentication flow. The client will send the necessary
     /// bytes in response to the challenge.
     case authenticationChallenge(ByteBuffer)
+
+    /// Idle has started
+    case idleStarted(ContinuationRequest)
 }
 
 /// The first event will always be `start`
@@ -135,7 +138,7 @@ extension ResponseEncodeBuffer {
     /// - returns: The number of bytes written.
     @discardableResult public mutating func writeServerResponse(_ response: ServerResponse) -> Int {
         switch response {
-        case .idleContinuationRequest(let req):
+        case .idleStarted(let req):
             return self.writeContinuationRequest(req)
         case .response(let resp):
             return self.writeResponse(resp)

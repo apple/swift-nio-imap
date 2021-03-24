@@ -146,7 +146,7 @@ extension ResponseParser {
 
     private mutating func _parseResponse(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ServerResponse {
         func parseResponse_continuation(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ServerResponse {
-            .idleContinuationRequest(try GrammarParser.parseContinuationRequest(buffer: &buffer, tracker: tracker))
+            .idleStarted(try GrammarParser.parseContinuationRequest(buffer: &buffer, tracker: tracker))
         }
 
         func parseResponse_tagged(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ServerResponse {
