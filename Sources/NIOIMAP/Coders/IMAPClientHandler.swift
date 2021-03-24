@@ -43,7 +43,7 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
     /// - Note: Make sure to send `.enable` commands for applicable capabilities
     /// - Important: Modifying this value is not thread-safe
     private var encodingOptions: CommandEncodingOptions
-    
+
     private var lastKnownCapabilities = [Capability]()
 
     /// This function is called by the `IMAPChannelHandler` upon receipt of a response containing capabilities.
@@ -64,7 +64,7 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
         case expectingResponses
     }
 
-    public init(encodingChangeCallback: @escaping (KeyValues<String, ByteBuffer?>, inout CommandEncodingOptions) -> Void = {_,_ in}) {
+    public init(encodingChangeCallback: @escaping (KeyValues<String, ByteBuffer?>, inout CommandEncodingOptions) -> Void = { _, _ in }) {
         self.decoder = NIOSingleStepByteToMessageProcessor(ResponseDecoder(), maximumBufferSize: 1_000)
         self._state = .expectingResponses
         self.encodingOptions = .rfc3501
@@ -86,7 +86,7 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
                     context.fireUserInboundEventTriggered(req)
                 case .response(let response):
                     switch response {
-                    case .taggedResponse(_):
+                    case .taggedResponse:
                         // continuations must have finished: change the state to standard continuation handling
                         self._state = .expectingResponses
                     case .untaggedResponse(let untagged):
