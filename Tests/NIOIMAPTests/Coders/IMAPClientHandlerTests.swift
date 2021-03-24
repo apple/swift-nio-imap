@@ -236,98 +236,14 @@ class IMAPClientHandlerTests: XCTestCase {
         XCTAssertEqual(handler._state, .expectingResponses)
     }
 
-    func testChangingCapabilitesChangesEncoding() {
-        // should be written as a quoted
-        self.clientHandler.encodingOptions = CommandEncodingOptions()
-        let command1 = CommandStream.command(.init(tag: "A1", command: .create(.init(.init(string: "name")), [])))
-        self.writeOutbound(command1, wait: true)
-        self.assertOutboundString("A1 CREATE \"name\"\r\n")
-
-        // lets disable quoteds, should be literal
-        self.clientHandler.encodingOptions.useQuotedString = false
-        let command2 = CommandStream.command(.init(tag: "A2", command: .create(.init(.init(string: "name")), [])))
-        self.writeOutbound(command2, wait: false)
-        self.assertOutboundString("A2 CREATE {4}\r\n")
-        XCTAssertNoThrow(try self.channel.writeInbound(ByteBuffer(string: "+ OK\r\n")))
-        self.assertOutboundString("name\r\n")
-
-        // now force non-sync literals
-        self.clientHandler.encodingOptions.useNonSynchronizingLiteralPlus = true
-        let command3 = CommandStream.command(.init(tag: "A3", command: .create(.init(.init(string: "name")), [])))
-        XCTAssertNoThrow(try channel.writeOutbound(command3))
-        XCTAssertNoThrow(XCTAssertEqual(try channel.readOutbound(as: ByteBuffer.self), "A3 CREATE \"name\"\r\n"))
-
-    }
-
-    func testContinuationRequestsAsUserEvents() {
-        let eventExpectation1 = self.channel.eventLoop.makePromise(of: Void.self)
-        let eventExpectation2 = self.channel.eventLoop.makePromise(of: Void.self)
-        let eventExpectation3 = self.channel.eventLoop.makePromise(of: Void.self)
-
-        class UserEventHandler: ChannelDuplexHandler {
-            typealias InboundIn = Response
-
-            typealias OutboundIn = CommandStream
-
-            var expectation1: EventLoopPromise<Void>
-            var expectation2: EventLoopPromise<Void>
-            var expectation3: EventLoopPromise<Void>
-
-            init(expectation1: EventLoopPromise<Void>, expectation2: EventLoopPromise<Void>, expectation3: EventLoopPromise<Void>) {
-                self.expectation1 = expectation1
-                self.expectation2 = expectation2
-                self.expectation3 = expectation3
-            }
-
-            public func userInboundEventTriggered(context: ChannelHandlerContext, event: Any) {
-                guard let event = event as? ContinuationRequest, case .responseText(let textEvent) = event else {
-                    XCTFail()
-                    return
-                }
-                switch textEvent.text {
-                case "1": self.expectation1.succeed(())
-                case "2": self.expectation2.succeed(())
-                case "3": self.expectation3.succeed(())
-                default:
-                    XCTFail("Not sure who sent this event, but it wasn't us")
-                }
-            }
-        }
-
-        try! self.channel.pipeline.addHandler(UserEventHandler(
-            expectation1: eventExpectation1,
-            expectation2: eventExpectation2,
-            expectation3: eventExpectation3
-        )).wait()
-
-        // confirm it works for literals
-        self.writeOutbound(.command(.init(tag: "A1", command: .login(username: "\\", password: "\\"))), wait: false)
-        self.assertOutboundString("A1 LOGIN {1}\r\n")
-        self.writeInbound("+ 1\r\n")
-        try! eventExpectation1.futureResult.wait()
-        self.assertOutboundString("\\ {1}\r\n")
-        self.writeInbound("+ 2\r\n")
-        try! eventExpectation2.futureResult.wait()
-        self.assertOutboundString("\\\r\n")
-
-        // now confirm idle
-        self.writeOutbound(.command(.init(tag: "A2", command: .idleStart)), wait: false)
-        self.assertOutboundString("A2 IDLE\r\n")
-        self.writeInbound("+ 3\r\n")
-        try! eventExpectation3.futureResult.wait()
-        self.assertInbound(.idleStarted)
-        self.writeOutbound(.idleDone)
-        self.assertOutboundString("DONE\r\n")
-    }
-
     func testCanChangeEncodingOnCallback() {
         let turnOnLiteralPlusExpectation = XCTestExpectation(description: "Turn on literal +")
 
-        self.clientHandler = IMAPClientHandler(encodingChangeCallback: { caps, options in
-            if caps == [.literalPlus] {
+        self.clientHandler = IMAPClientHandler(encodingChangeCallback: { info, options in
+            if info["name"] == "NIOIMAP" {
                 turnOnLiteralPlusExpectation.fulfill()
             } else {
-                XCTFail("No idea where these caps were sent from, but we didn't make them")
+                XCTFail("No idea where this info was sent from, but we didn't send it")
             }
             options.useNonSynchronizingLiteralPlus = true
         })
@@ -340,14 +256,22 @@ class IMAPClientHandlerTests: XCTestCase {
         self.writeInbound("+ OK\r\n")
         self.assertOutboundString("\\\r\n")
 
-        // sending the capabilities should trigger the callback
+        // send some capabilities
         self.writeInbound("A1 OK [CAPABILITY LITERAL+]\r\n")
         self.assertInbound(.response(.taggedResponse(.init(tag: "A1", state: .ok(.init(code: .capability([.literalPlus]), text: ""))))))
+
+        // send the server ID (client sends a noop
+        self.writeOutbound(.command(.init(tag: "A2", command: .noop)), wait: false)
+        self.assertOutboundString("A2 NOOP\r\n")
+        self.writeInbound("* ID (\"name\" \"NIOIMAP\")\r\n")
+        self.assertInbound(.response(.untaggedResponse(.id(["name": "NIOIMAP"]))))
         wait(for: [turnOnLiteralPlusExpectation], timeout: 1.0)
+        self.writeInbound("A2 OK NOOP complete\r\n")
+        self.assertInbound(.response(.taggedResponse(.init(tag: "A2", state: .ok(.init(text: "NOOP complete"))))))
 
         // now we should have literal+ turned on
-        self.writeOutbound(.command(.init(tag: "A1", command: .login(username: "\\", password: "\\"))), wait: false)
-        self.assertOutboundString("A1 LOGIN {1+}\r\n\\ {1+}\r\n\\\r\n")
+        self.writeOutbound(.command(.init(tag: "A3", command: .login(username: "\\", password: "\\"))), wait: false)
+        self.assertOutboundString("A3 LOGIN {1+}\r\n\\ {1+}\r\n\\\r\n")
     }
 
     // MARK: - setup / tear down

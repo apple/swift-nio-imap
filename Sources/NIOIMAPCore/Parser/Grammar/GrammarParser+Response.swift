@@ -170,7 +170,7 @@ extension GrammarParser {
             parseResponsePayload_quota,
             parseResponsePayload_quotaRoot,
             parseResponsePayload_metadata,
-            parseResponsePayload_conditionalState,
+            parseResponsePayload_conditionalState
         ], buffer: &buffer, tracker: tracker)
     }
 

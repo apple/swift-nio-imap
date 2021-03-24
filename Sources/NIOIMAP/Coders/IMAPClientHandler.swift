@@ -42,13 +42,15 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
     /// certain types of literal encodings.
     /// - Note: Make sure to send `.enable` commands for applicable capabilities
     /// - Important: Modifying this value is not thread-safe
-    var encodingOptions: CommandEncodingOptions
+    private var encodingOptions: CommandEncodingOptions
+    
+    private var lastKnownCapabilities = [Capability]()
 
     /// This function is called by the `IMAPChannelHandler` upon receipt of a response containing capabilities.
     /// The first argument is the capabilities that the server has sent. The second is a mutable set of encoding options.
     /// The encoding options are pre-populated with what are considered to be the *best* settings for the given
     /// capabilities.
-    var encodingChangeCallback: ([Capability], inout CommandEncodingOptions) -> Void
+    var encodingChangeCallback: (KeyValues<String, ByteBuffer?>, inout CommandEncodingOptions) -> Void
 
     enum ClientHandlerState: Equatable {
         /// We're expecting continuations to come back during a command.
@@ -62,7 +64,7 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
         case expectingResponses
     }
 
-    public init(encodingChangeCallback: @escaping ([Capability], inout CommandEncodingOptions) -> Void) {
+    public init(encodingChangeCallback: @escaping (KeyValues<String, ByteBuffer?>, inout CommandEncodingOptions) -> Void) {
         self.decoder = NIOSingleStepByteToMessageProcessor(ResponseDecoder(), maximumBufferSize: 1_000)
         self._state = .expectingResponses
         self.encodingOptions = .rfc3501
@@ -84,15 +86,21 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
                     context.fireUserInboundEventTriggered(req)
                 case .response(let response):
                     switch response {
-                    case .taggedResponse(let tagged):
+                    case .taggedResponse(_):
                         // continuations must have finished: change the state to standard continuation handling
                         self._state = .expectingResponses
-                        if case .ok(let ok) = tagged.state, let code = ok.code, case .capability(let caps) = code {
-                            var recomended = CommandEncodingOptions(capabilities: caps)
-                            self.encodingChangeCallback(caps, &recomended)
+                    case .untaggedResponse(let untagged):
+                        switch untagged {
+                        case .conditionalState, .mailboxData, .messageData, .enableData, .quotaRoot, .quota, .metadata:
+                            break
+                        case .capabilityData(let caps):
+                            self.lastKnownCapabilities = caps
+                        case .id(let info):
+                            var recomended = CommandEncodingOptions(capabilities: self.lastKnownCapabilities)
+                            self.encodingChangeCallback(info, &recomended)
                             self.encodingOptions = recomended
                         }
-                    case .untaggedResponse, .fetchResponse, .fatalResponse, .authenticationChallenge:
+                    case .fetchResponse, .fatalResponse, .authenticationChallenge:
                         break
                     }
                     context.fireChannelRead(self.wrapInboundOut(response))
