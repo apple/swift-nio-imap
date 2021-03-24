@@ -18,7 +18,7 @@ import NIOIMAPCore
 public final class IMAPServerHandler: ChannelDuplexHandler {
     public typealias InboundIn = ByteBuffer
     public typealias InboundOut = CommandStream
-    public typealias OutboundIn = ServerResponse
+    public typealias OutboundIn = Response
     public typealias OutboundOut = ByteBuffer
 
     private var _continuationRequest: ContinuationRequest
@@ -82,7 +82,7 @@ public final class IMAPServerHandler: ChannelDuplexHandler {
 
     public func write(context: ChannelHandlerContext, data: NIOAny, promise: EventLoopPromise<Void>?) {
         let response = self.unwrapOutboundIn(data)
-        self.responseEncodeBuffer.writeServerResponse(response)
+        self.responseEncodeBuffer.writeResponse(response)
         context.write(self.wrapOutboundOut(self.responseEncodeBuffer.readBytes()), promise: promise)
     }
 }

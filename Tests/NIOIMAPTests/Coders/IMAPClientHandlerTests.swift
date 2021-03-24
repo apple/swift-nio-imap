@@ -26,12 +26,12 @@ class IMAPClientHandlerTests: XCTestCase {
         self.writeOutbound(.command(.init(tag: "a", command: .login(username: "foo", password: "bar"))))
         self.assertOutboundString("a LOGIN \"foo\" \"bar\"\r\n")
         self.writeInbound("a OK ok\r\n")
-        self.assertInbound(.response(.taggedResponse(.init(tag: "a",
-                                                           state: .ok(.init(code: nil, text: "ok"))))))
+        self.assertInbound(.taggedResponse(.init(tag: "a",
+                                                           state: .ok(.init(code: nil, text: "ok")))))
     }
 
     func testReferralURLResponse() {
-        let expectedResponse = ServerResponse.response(.taggedResponse(
+        let expectedResponse = Response.taggedResponse(
             TaggedResponse(tag: "tag",
                            state: .ok(ResponseText(code:
                                .referral(IMAPURL(server: IMAPServer(userInfo: nil, host: "hostname", port: nil),
@@ -45,13 +45,13 @@ class IMAPClientHandlerTests: XCTestCase {
                                                      ),
                                                      authenticatedURL: nil
                                                  )))),
-                               text: "")))))
+                               text: ""))))
         self.writeOutbound(.command(.init(tag: "a", command: .login(username: "foo", password: "bar"))))
         self.assertOutboundString("a LOGIN \"foo\" \"bar\"\r\n")
         self.writeInbound("tag OK [REFERRAL imap://hostname/foo/bar/;UID=1234]\r\na OK ok\r\n")
         self.assertInbound(expectedResponse)
-        self.assertInbound(.response(.taggedResponse(.init(tag: "a",
-                                                           state: .ok(.init(code: nil, text: "ok"))))))
+        self.assertInbound(.taggedResponse(.init(tag: "a",
+                                                           state: .ok(.init(code: nil, text: "ok")))))
     }
 
     func testCommandThatNeedsToWaitForContinuationRequest() {
@@ -65,8 +65,8 @@ class IMAPClientHandlerTests: XCTestCase {
         self.assertOutboundString("\\ \"to\"\r\n")
         XCTAssertNoThrow(try f.wait())
         self.writeInbound("x OK ok\r\n")
-        self.assertInbound(.response(.taggedResponse(.init(tag: "x",
-                                                           state: .ok(.init(code: nil, text: "ok"))))))
+        self.assertInbound(.taggedResponse(.init(tag: "x",
+                                                           state: .ok(.init(code: nil, text: "ok")))))
     }
 
     func testCommandThatNeedsToWaitForTwoContinuationRequest() {
@@ -82,8 +82,8 @@ class IMAPClientHandlerTests: XCTestCase {
         self.assertOutboundString("\"\r\n")
         XCTAssertNoThrow(try f.wait())
         self.writeInbound("x OK ok\r\n")
-        self.assertInbound(.response(.taggedResponse(.init(tag: "x",
-                                                           state: .ok(.init(code: nil, text: "ok"))))))
+        self.assertInbound(.taggedResponse(.init(tag: "x",
+                                                           state: .ok(.init(code: nil, text: "ok")))))
     }
 
     func testTwoContReqCommandsEnqueued() {
@@ -106,11 +106,11 @@ class IMAPClientHandlerTests: XCTestCase {
         XCTAssertNoThrow(try f2.wait())
         self.assertOutboundString("\\\r\n")
         self.writeInbound("x OK ok\r\n")
-        self.assertInbound(.response(.taggedResponse(.init(tag: "x",
-                                                           state: .ok(.init(code: nil, text: "ok"))))))
+        self.assertInbound(.taggedResponse(.init(tag: "x",
+                                                           state: .ok(.init(code: nil, text: "ok")))))
         self.writeInbound("y OK ok\r\n")
-        self.assertInbound(.response(.taggedResponse(.init(tag: "y",
-                                                           state: .ok(.init(code: nil, text: "ok"))))))
+        self.assertInbound(.taggedResponse(.init(tag: "y",
+                                                           state: .ok(.init(code: nil, text: "ok")))))
     }
 
     func testUnexpectedContinuationRequest() {
@@ -126,8 +126,8 @@ class IMAPClientHandlerTests: XCTestCase {
         self.assertOutboundString("\\ \"to\"\r\n")
         XCTAssertNoThrow(try f.wait())
         self.writeInbound("x OK ok\r\n")
-        self.assertInbound(.response(.taggedResponse(.init(tag: "x",
-                                                           state: .ok(.init(code: nil, text: "ok"))))))
+        self.assertInbound(.taggedResponse(.init(tag: "x",
+                                                           state: .ok(.init(code: nil, text: "ok")))))
     }
 
     func testStateTransformation() {
@@ -145,13 +145,13 @@ class IMAPClientHandlerTests: XCTestCase {
         var inEncodeBuffer = ResponseEncodeBuffer(buffer: ByteBuffer(), capabilities: [])
         inEncodeBuffer.writeContinuationRequest(.responseText(.init(text: "Waiting")))
         XCTAssertNoThrow(try channel.writeInbound(inEncodeBuffer.readBytes()))
-        XCTAssertNoThrow(XCTAssertEqual(try channel.readInbound(), ServerResponse.idleStarted(.responseText(.init(text: "Waiting")))))
-        XCTAssertNoThrow(XCTAssertNil(try channel.readInbound(as: ServerResponse.self)))
+        XCTAssertNoThrow(XCTAssertEqual(try channel.readInbound(), Response.idleStarted(.responseText(.init(text: "Waiting")))))
+        XCTAssertNoThrow(XCTAssertNil(try channel.readInbound(as: Response.self)))
         inEncodeBuffer = ResponseEncodeBuffer(buffer: ByteBuffer(), capabilities: [])
         inEncodeBuffer.writeContinuationRequest(.responseText(.init(text: "Waiting")))
         XCTAssertNoThrow(try channel.writeInbound(inEncodeBuffer.readBytes()))
-        XCTAssertNoThrow(XCTAssertEqual(try channel.readInbound(), ServerResponse.idleStarted(.responseText(.init(text: "Waiting")))))
-        XCTAssertNoThrow(XCTAssertNil(try channel.readInbound(as: ServerResponse.self)))
+        XCTAssertNoThrow(XCTAssertEqual(try channel.readInbound(), Response.idleStarted(.responseText(.init(text: "Waiting")))))
+        XCTAssertNoThrow(XCTAssertNil(try channel.readInbound(as: Response.self)))
 
         // finish being idle
         XCTAssertNoThrow(try channel.writeOutbound(CommandStream.idleDone))
@@ -169,7 +169,7 @@ class IMAPClientHandlerTests: XCTestCase {
         inEncodeBuffer = ResponseEncodeBuffer(buffer: ByteBuffer(), capabilities: [])
         inEncodeBuffer.writeContinuationRequest(.data(""))
         XCTAssertNoThrow(try channel.writeInbound(inEncodeBuffer.readBytes()))
-        XCTAssertNoThrow(XCTAssertEqual(try channel.readInbound(), ServerResponse.idleStarted(.responseText(.init(text: "")))))
+        XCTAssertNoThrow(XCTAssertEqual(try channel.readInbound(), Response.idleStarted(.responseText(.init(text: "")))))
 
         // client responds
         let authString1 = """
@@ -201,7 +201,7 @@ class IMAPClientHandlerTests: XCTestCase {
         inEncodeBuffer = ResponseEncodeBuffer(buffer: ByteBuffer(), capabilities: [])
         inEncodeBuffer.writeContinuationRequest(.data(challengeString1))
         XCTAssertNoThrow(try channel.writeInbound(inEncodeBuffer.readBytes()))
-        XCTAssertNoThrow(XCTAssertEqual(try channel.readInbound(), ServerResponse.idleStarted(.data(challengeString1))))
+        XCTAssertNoThrow(XCTAssertEqual(try channel.readInbound(), Response.idleStarted(.data(challengeString1))))
 
         // client responds
         XCTAssertNoThrow(try channel.writeOutbound(CommandStream.continuationResponse("")))
@@ -216,7 +216,7 @@ class IMAPClientHandlerTests: XCTestCase {
         inEncodeBuffer = ResponseEncodeBuffer(buffer: ByteBuffer(), capabilities: [])
         inEncodeBuffer.writeContinuationRequest(.data(challengeString2))
         XCTAssertNoThrow(try channel.writeInbound(inEncodeBuffer.readBytes()))
-        XCTAssertNoThrow(XCTAssertEqual(try channel.readInbound(), ServerResponse.idleStarted(.data(challengeString2))))
+        XCTAssertNoThrow(XCTAssertEqual(try channel.readInbound(), Response.idleStarted(.data(challengeString2))))
 
         // client responds
         let authString2 = """
@@ -231,7 +231,7 @@ class IMAPClientHandlerTests: XCTestCase {
         inEncodeBuffer = ResponseEncodeBuffer(buffer: ByteBuffer(), capabilities: [])
         inEncodeBuffer.writeResponse(.taggedResponse(.init(tag: "A001", state: .ok(.init(text: "GSSAPI authentication successful")))))
         XCTAssertNoThrow(try channel.writeInbound(inEncodeBuffer.readBytes()))
-        XCTAssertNoThrow(XCTAssertEqual(try channel.readInbound(), ServerResponse.response(.taggedResponse(.init(tag: "A001", state: .ok(.init(text: "GSSAPI authentication successful")))))))
+        XCTAssertNoThrow(XCTAssertEqual(try channel.readInbound(), Response.taggedResponse(.init(tag: "A001", state: .ok(.init(text: "GSSAPI authentication successful"))))))
         XCTAssertEqual(handler._state, .expectingResponses)
     }
 
@@ -252,8 +252,8 @@ class IMAPClientHandlerTests: XCTestCase {
 // MARK: - Helpers
 
 extension IMAPClientHandlerTests {
-    private func assertInbound(_ response: ServerResponse, line: UInt = #line) {
-        var maybeRead: ServerResponse?
+    private func assertInbound(_ response: Response, line: UInt = #line) {
+        var maybeRead: Response?
         XCTAssertNoThrow(maybeRead = try self.channel.readInbound(), line: line)
         guard let read = maybeRead else {
             XCTFail("Inbound buffer empty", line: line)
