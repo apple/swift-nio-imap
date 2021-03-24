@@ -56,8 +56,8 @@ extension GrammarParser {
 
         func parseMailboxData_search(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxData {
             try self.fixedString("SEARCH", buffer: &buffer, tracker: tracker)
-            let nums = try self.parseZeroOrMore(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> Int in
-                try self.parseSpaces(buffer: &buffer, tracker: tracker)
+            let nums = try self.zeroOrMore(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> Int in
+                try self.spaces(buffer: &buffer, tracker: tracker)
                 return try self.parseNZNumber(buffer: &buffer, tracker: tracker)
             }
             return .search(nums)
@@ -65,13 +65,13 @@ extension GrammarParser {
 
         func parseMailboxData_searchSort(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxData {
             try self.fixedString("SEARCH", buffer: &buffer, tracker: tracker)
-            try self.parseSpaces(buffer: &buffer, tracker: tracker)
+            try self.spaces(buffer: &buffer, tracker: tracker)
             var array = [try self.parseNZNumber(buffer: &buffer, tracker: tracker)]
-            try self.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker, parser: { (buffer, tracker) in
-                try self.parseSpaces(buffer: &buffer, tracker: tracker)
+            try self.zeroOrMore(buffer: &buffer, into: &array, tracker: tracker, parser: { (buffer, tracker) in
+                try self.spaces(buffer: &buffer, tracker: tracker)
                 return try self.parseNZNumber(buffer: &buffer, tracker: tracker)
             })
-            try self.parseSpaces(buffer: &buffer, tracker: tracker)
+            try self.spaces(buffer: &buffer, tracker: tracker)
             let seq = try self.parseSearchSortModificationSequence(buffer: &buffer, tracker: tracker)
             return .searchSort(.init(identifiers: array, modificationSequence: seq))
         }
@@ -79,7 +79,7 @@ extension GrammarParser {
         func parseMailboxData_status(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxData {
             try self.fixedString("STATUS ", buffer: &buffer, tracker: tracker)
             let mailbox = try self.parseMailbox(buffer: &buffer, tracker: tracker)
-            try self.parseSpaces(buffer: &buffer, tracker: tracker)
+            try self.spaces(buffer: &buffer, tracker: tracker)
             try self.fixedString("(", buffer: &buffer, tracker: tracker)
             let status = try self.optional(buffer: &buffer, tracker: tracker, parser: self.parseMailboxStatus)
             try self.fixedString(")", buffer: &buffer, tracker: tracker)
@@ -124,7 +124,7 @@ extension GrammarParser {
             try self.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> Character? in
                 try self.fixedString("\"", buffer: &buffer, tracker: tracker)
 
-                let character = try self.parseByte(buffer: &buffer, tracker: tracker)
+                let character = try self.byte(buffer: &buffer, tracker: tracker)
                 guard character.isQuotedChar else {
                     throw ParserError(hint: "Expected quoted char found \(String(decoding: [character], as: Unicode.UTF8.self))")
                 }
@@ -143,15 +143,15 @@ extension GrammarParser {
             try self.fixedString("(", buffer: &buffer, tracker: tracker)
             let flags = try self.optional(buffer: &buffer, tracker: tracker, parser: self.parseMailboxListFlags) ?? []
             try self.fixedString(")", buffer: &buffer, tracker: tracker)
-            try self.parseSpaces(buffer: &buffer, tracker: tracker)
+            try self.spaces(buffer: &buffer, tracker: tracker)
             let character = try self.oneOf([
                 parseMailboxList_quotedChar_some,
                 parseMailboxList_quotedChar_nil,
             ], buffer: &buffer, tracker: tracker)
-            try self.parseSpaces(buffer: &buffer, tracker: tracker)
+            try self.spaces(buffer: &buffer, tracker: tracker)
             let mailbox = try self.parseMailbox(buffer: &buffer, tracker: tracker)
             let listExtended = try self.optional(buffer: &buffer, tracker: tracker, parser: { (buffer, tracker) -> KeyValues<ByteBuffer, ParameterValue> in
-                try self.parseSpaces(buffer: &buffer, tracker: tracker)
+                try self.spaces(buffer: &buffer, tracker: tracker)
                 return try self.parseMailboxListExtended(buffer: &buffer, tracker: tracker)
             }) ?? [:]
             return MailboxInfo(attributes: flags, path: try .init(name: mailbox, pathSeparator: character), extensions: listExtended)
@@ -166,8 +166,8 @@ extension GrammarParser {
             let data = try self.optional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> KeyValues<ByteBuffer, ParameterValue> in
                 var kvs = KeyValues<ByteBuffer, ParameterValue>()
                 kvs.append(try self.parseMailboxListExtendedItem(buffer: &buffer, tracker: tracker))
-                try self.parseZeroOrMore(buffer: &buffer, into: &kvs, tracker: tracker) { (buffer, tracker) -> KeyValue<ByteBuffer, ParameterValue> in
-                    try self.parseSpaces(buffer: &buffer, tracker: tracker)
+                try self.zeroOrMore(buffer: &buffer, into: &kvs, tracker: tracker) { (buffer, tracker) -> KeyValue<ByteBuffer, ParameterValue> in
+                    try self.spaces(buffer: &buffer, tracker: tracker)
                     return try self.parseMailboxListExtendedItem(buffer: &buffer, tracker: tracker)
                 }
                 return kvs
@@ -182,7 +182,7 @@ extension GrammarParser {
     static func parseMailboxListExtendedItem(buffer: inout ParseBuffer, tracker: StackTracker) throws -> KeyValue<ByteBuffer, ParameterValue> {
         try self.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> KeyValue<ByteBuffer, ParameterValue> in
             let tag = try self.parseAString(buffer: &buffer, tracker: tracker)
-            try self.parseSpaces(buffer: &buffer, tracker: tracker)
+            try self.spaces(buffer: &buffer, tracker: tracker)
             let val = try self.parseParameterValue(buffer: &buffer, tracker: tracker)
             return .init(key: tag, value: val)
         }
@@ -211,7 +211,7 @@ extension GrammarParser {
         var results = [MailboxInfo.Attribute(try self.parseFlagExtension(buffer: &buffer, tracker: tracker))]
         do {
             while true {
-                try self.parseSpaces(buffer: &buffer, tracker: tracker)
+                try self.spaces(buffer: &buffer, tracker: tracker)
                 let att = try self.parseFlagExtension(buffer: &buffer, tracker: tracker)
                 results.append(.init(att))
             }
@@ -283,8 +283,8 @@ extension GrammarParser {
         return try self.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> MailboxStatus in
 
             var array = [try parseStatusAttributeValue(buffer: &buffer, tracker: tracker)]
-            try self.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) -> MailboxValue in
-                try self.parseSpaces(buffer: &buffer, tracker: tracker)
+            try self.zeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) -> MailboxValue in
+                try self.spaces(buffer: &buffer, tracker: tracker)
                 return try parseStatusAttributeValue(buffer: &buffer, tracker: tracker)
             }
 

@@ -53,7 +53,7 @@ extension GrammarParser {
     // reusable for a lot of the env-* types
     static func parseEnvelopeEmailAddresses(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [EmailAddress] {
         try self.fixedString("(", buffer: &buffer, tracker: tracker)
-        let addresses = try self.parseOneOrMore(buffer: &buffer, tracker: tracker) { buffer, tracker in
+        let addresses = try self.oneOrMore(buffer: &buffer, tracker: tracker) { buffer, tracker in
             try self.parseEmailAddress(buffer: &buffer, tracker: tracker)
         }
         try self.fixedString(")", buffer: &buffer, tracker: tracker)
@@ -104,23 +104,23 @@ extension GrammarParser {
         try self.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Envelope in
             try self.fixedString("(", buffer: &buffer, tracker: tracker)
             let date = try self.parseNString(buffer: &buffer, tracker: tracker).flatMap { InternetMessageDate(String(buffer: $0)) }
-            try self.parseSpaces(buffer: &buffer, tracker: tracker)
+            try self.spaces(buffer: &buffer, tracker: tracker)
             let subject = try self.parseNString(buffer: &buffer, tracker: tracker)
-            try self.parseSpaces(buffer: &buffer, tracker: tracker)
+            try self.spaces(buffer: &buffer, tracker: tracker)
             let from = try self.parseOptionalEnvelopeEmailAddresses(buffer: &buffer, tracker: tracker)
-            try self.parseSpaces(buffer: &buffer, tracker: tracker)
+            try self.spaces(buffer: &buffer, tracker: tracker)
             let sender = try self.parseOptionalEnvelopeEmailAddresses(buffer: &buffer, tracker: tracker)
-            try self.parseSpaces(buffer: &buffer, tracker: tracker)
+            try self.spaces(buffer: &buffer, tracker: tracker)
             let replyTo = try self.parseOptionalEnvelopeEmailAddresses(buffer: &buffer, tracker: tracker)
-            try self.parseSpaces(buffer: &buffer, tracker: tracker)
+            try self.spaces(buffer: &buffer, tracker: tracker)
             let to = try self.parseOptionalEnvelopeEmailAddresses(buffer: &buffer, tracker: tracker)
-            try self.parseSpaces(buffer: &buffer, tracker: tracker)
+            try self.spaces(buffer: &buffer, tracker: tracker)
             let cc = try self.parseOptionalEnvelopeEmailAddresses(buffer: &buffer, tracker: tracker)
-            try self.parseSpaces(buffer: &buffer, tracker: tracker)
+            try self.spaces(buffer: &buffer, tracker: tracker)
             let bcc = try self.parseOptionalEnvelopeEmailAddresses(buffer: &buffer, tracker: tracker)
-            try self.parseSpaces(buffer: &buffer, tracker: tracker)
+            try self.spaces(buffer: &buffer, tracker: tracker)
             let inReplyTo = try self.parseMessageID(buffer: &buffer, tracker: tracker)
-            try self.parseSpaces(buffer: &buffer, tracker: tracker)
+            try self.spaces(buffer: &buffer, tracker: tracker)
             let messageID = try self.parseMessageID(buffer: &buffer, tracker: tracker)
             try self.fixedString(")", buffer: &buffer, tracker: tracker)
             return Envelope(

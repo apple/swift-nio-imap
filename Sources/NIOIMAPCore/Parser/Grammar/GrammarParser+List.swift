@@ -113,15 +113,15 @@ extension GrammarParser {
     static func parseListSelectOptions(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ListSelectOptions {
         try self.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
             try self.fixedString("(", buffer: &buffer, tracker: tracker)
-            var selectOptions = try self.parseZeroOrMore(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> ListSelectOption in
+            var selectOptions = try self.zeroOrMore(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> ListSelectOption in
                 let option = try self.parseListSelectOption(buffer: &buffer, tracker: tracker)
-                try self.parseSpaces(buffer: &buffer, tracker: tracker)
+                try self.spaces(buffer: &buffer, tracker: tracker)
                 return option
             }
             let baseOption = try self.parseListSelectBaseOption(buffer: &buffer, tracker: tracker)
-            try self.parseZeroOrMore(buffer: &buffer, into: &selectOptions, tracker: tracker) { (buffer, tracker) -> ListSelectOption in
+            try self.zeroOrMore(buffer: &buffer, into: &selectOptions, tracker: tracker) { (buffer, tracker) -> ListSelectOption in
                 let option = try self.parseListSelectOption(buffer: &buffer, tracker: tracker)
-                try self.parseSpaces(buffer: &buffer, tracker: tracker)
+                try self.spaces(buffer: &buffer, tracker: tracker)
                 return option
             }
             try self.fixedString(")", buffer: &buffer, tracker: tracker)
@@ -135,8 +135,8 @@ extension GrammarParser {
             try self.fixedString("RETURN (", buffer: &buffer, tracker: tracker)
             let options = try self.optional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> [ReturnOption] in
                 var array = [try self.parseReturnOption(buffer: &buffer, tracker: tracker)]
-                try self.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) -> ReturnOption in
-                    try self.parseSpaces(buffer: &buffer, tracker: tracker)
+                try self.zeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) -> ReturnOption in
+                    try self.spaces(buffer: &buffer, tracker: tracker)
                     return try self.parseReturnOption(buffer: &buffer, tracker: tracker)
                 }
                 return array
@@ -153,7 +153,7 @@ extension GrammarParser {
         }
 
         func parseListMailbox_chars(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ByteBuffer {
-            try self.parseOneOrMoreCharactersByteBuffer(buffer: &buffer, tracker: tracker) { char -> Bool in
+            try self.oneOrMoreCharacters(buffer: &buffer, tracker: tracker) { char -> Bool in
                 char.isListChar
             }
         }
@@ -166,7 +166,7 @@ extension GrammarParser {
 
     // list-wildcards  = "%" / "*"
     static func parseListWildcards(buffer: inout ParseBuffer, tracker: StackTracker) throws -> String {
-        let char = try self.parseByte(buffer: &buffer, tracker: tracker)
+        let char = try self.byte(buffer: &buffer, tracker: tracker)
         guard char.isListWildcard else {
             throw ParserError()
         }

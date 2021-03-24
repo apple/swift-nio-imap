@@ -43,7 +43,7 @@ extension GrammarParser {
 
     // date-day        = 1*2DIGIT
     static func parseDateDay(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Int {
-        let (num, size) = try self.parseUnsignedInteger(buffer: &buffer, tracker: tracker, allowLeadingZeros: true)
+        let (num, size) = try self.unsignedInteger(buffer: &buffer, tracker: tracker, allowLeadingZeros: true)
         guard size <= 2 else {
             throw ParserError(hint: "Expected 1 or 2 bytes, got \(size)")
         }
@@ -66,9 +66,10 @@ extension GrammarParser {
     // date-month      = "Jan" / "Feb" / "Mar" / "Apr" / "May" / "Jun" /
     //                   "Jul" / "Aug" / "Sep" / "Oct" / "Nov" / "Dec"
     static func parseDateMonth(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Int {
-        let string = try self.parseOneOrMoreCharacters(buffer: &buffer, tracker: tracker) { char -> Bool in
+        let parsed = try self.oneOrMoreCharacters(buffer: &buffer, tracker: tracker) { char -> Bool in
             isalnum(Int32(char)) != 0
         }
+        let string = String(buffer: parsed)
         guard let month = IMAPDate.month(text: string.lowercased()) else {
             throw ParserError(hint: "No month match for \(string)")
         }

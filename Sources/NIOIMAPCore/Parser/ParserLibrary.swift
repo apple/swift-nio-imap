@@ -70,36 +70,8 @@ public struct TooMuchRecursion: Error {
 }
 
 extension ParserLibrary {
-    static func parseZeroOrMoreCharacters(buffer: inout ParseBuffer, tracker: StackTracker, where: ((UInt8) -> Bool)) throws -> String {
-        try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, _ in
-            let maybeFirstBad = buffer.bytes.readableBytesView.firstIndex { char in
-                !`where`(char)
-            }
 
-            guard let firstBad = maybeFirstBad else {
-                throw _IncompleteMessage()
-            }
-            return buffer.bytes.readString(length: buffer.bytes.readableBytesView.startIndex.distance(to: firstBad))!
-        }
-    }
-
-    static func parseOneOrMoreCharacters(buffer: inout ParseBuffer, tracker: StackTracker, where: ((UInt8) -> Bool)) throws -> String {
-        try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, _ in
-            let maybeFirstBad = buffer.bytes.readableBytesView.firstIndex { char in
-                !`where`(char)
-            }
-
-            guard let firstBad = maybeFirstBad else {
-                throw _IncompleteMessage()
-            }
-            guard firstBad != buffer.bytes.readableBytesView.startIndex else {
-                throw ParserError(hint: "couldn't find one or more of the required characters")
-            }
-            return buffer.bytes.readString(length: buffer.bytes.readableBytesView.startIndex.distance(to: firstBad))!
-        }
-    }
-
-    static func parseZeroOrMoreCharactersByteBuffer(buffer: inout ParseBuffer, tracker: StackTracker, where: ((UInt8) -> Bool)) throws -> ByteBuffer {
+    static func parseZeroOrMoreCharacters(buffer: inout ParseBuffer, tracker: StackTracker, where: ((UInt8) -> Bool)) throws -> ByteBuffer {
         try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, _ in
             let maybeFirstBad = buffer.bytes.readableBytesView.firstIndex { char in
                 !`where`(char)
@@ -112,7 +84,7 @@ extension ParserLibrary {
         }
     }
 
-    static func parseOneOrMoreCharactersByteBuffer(buffer: inout ParseBuffer, tracker: StackTracker, where: ((UInt8) -> Bool)) throws -> ByteBuffer {
+    static func parseOneOrMoreCharacters(buffer: inout ParseBuffer, tracker: StackTracker, where: ((UInt8) -> Bool)) throws -> ByteBuffer {
         try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, _ in
             let maybeFirstBad = buffer.bytes.readableBytesView.firstIndex { char in
                 !`where`(char)
@@ -184,9 +156,10 @@ extension ParserLibrary {
 
     static func parseUInt64(buffer: inout ParseBuffer, tracker: StackTracker, allowLeadingZeros: Bool = false) throws -> (number: UInt64, bytesConsumed: Int) {
         return try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
-            let string = try ParserLibrary.parseOneOrMoreCharacters(buffer: &buffer, tracker: tracker) { char in
+            let parsed = try ParserLibrary.parseOneOrMoreCharacters(buffer: &buffer, tracker: tracker) { char in
                 char >= UInt8(ascii: "0") && char <= UInt8(ascii: "9")
             }
+            let string = String(buffer: parsed)
             guard let int = UInt64(string) else {
                 throw ParserError(hint: "\(string) is not a number")
             }

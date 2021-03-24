@@ -89,7 +89,7 @@ extension GrammarParser {
 
         return try self.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             var output = [try parseUIDSet_element(buffer: &buffer, tracker: tracker)]
-            try self.parseZeroOrMore(buffer: &buffer, into: &output, tracker: tracker) { buffer, tracker in
+            try self.zeroOrMore(buffer: &buffer, into: &output, tracker: tracker) { buffer, tracker in
                 try self.fixedString(",", buffer: &buffer, tracker: tracker)
                 return try parseUIDSet_element(buffer: &buffer, tracker: tracker)
             }
@@ -125,7 +125,7 @@ extension GrammarParser {
 
         return try self.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             var output = [try parseUIDArray_element(buffer: &buffer, tracker: tracker)]
-            try self.parseZeroOrMore(buffer: &buffer, into: &output, tracker: tracker) { buffer, tracker in
+            try self.zeroOrMore(buffer: &buffer, into: &output, tracker: tracker) { buffer, tracker in
                 try self.fixedString(",", buffer: &buffer, tracker: tracker)
                 return try parseUIDArray_element(buffer: &buffer, tracker: tracker)
             }
