@@ -64,7 +64,7 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
         case expectingResponses
     }
 
-    public init(encodingChangeCallback: @escaping (KeyValues<String, ByteBuffer?>, inout CommandEncodingOptions) -> Void) {
+    public init(encodingChangeCallback: @escaping (KeyValues<String, ByteBuffer?>, inout CommandEncodingOptions) -> Void = {_,_ in}) {
         self.decoder = NIOSingleStepByteToMessageProcessor(ResponseDecoder(), maximumBufferSize: 1_000)
         self._state = .expectingResponses
         self.encodingOptions = .rfc3501
