@@ -52,11 +52,11 @@ extension GrammarParser {
 
     // reusable for a lot of the env-* types
     static func parseEnvelopeEmailAddresses(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [EmailAddress] {
-        try ParserLibrary.fixedString("(", buffer: &buffer, tracker: tracker)
-        let addresses = try ParserLibrary.parseOneOrMore(buffer: &buffer, tracker: tracker) { buffer, tracker in
+        try self.fixedString("(", buffer: &buffer, tracker: tracker)
+        let addresses = try self.parseOneOrMore(buffer: &buffer, tracker: tracker) { buffer, tracker in
             try self.parseEmailAddress(buffer: &buffer, tracker: tracker)
         }
-        try ParserLibrary.fixedString(")", buffer: &buffer, tracker: tracker)
+        try self.fixedString(")", buffer: &buffer, tracker: tracker)
         return addresses
     }
 
@@ -65,7 +65,7 @@ extension GrammarParser {
             try self.parseNil(buffer: &buffer, tracker: tracker)
             return []
         }
-        let addresses = try ParserLibrary.oneOf([
+        let addresses = try self.oneOf([
             parseEnvelopeEmailAddresses,
             parseOptionalEnvelopeEmailAddresses_nil,
         ], buffer: &buffer, tracker: tracker)
@@ -76,16 +76,16 @@ extension GrammarParser {
     // address         = "(" addr-name SP addr-adl SP addr-mailbox SP
     //                   addr-host ")"
     static func parseEmailAddress(buffer: inout ParseBuffer, tracker: StackTracker) throws -> EmailAddress {
-        try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> EmailAddress in
-            try ParserLibrary.fixedString("(", buffer: &buffer, tracker: tracker)
+        try self.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> EmailAddress in
+            try self.fixedString("(", buffer: &buffer, tracker: tracker)
             let name = try self.parseNString(buffer: &buffer, tracker: tracker)
-            try ParserLibrary.fixedString(" ", buffer: &buffer, tracker: tracker)
+            try self.fixedString(" ", buffer: &buffer, tracker: tracker)
             let adl = try self.parseNString(buffer: &buffer, tracker: tracker)
-            try ParserLibrary.fixedString(" ", buffer: &buffer, tracker: tracker)
+            try self.fixedString(" ", buffer: &buffer, tracker: tracker)
             let mailbox = try self.parseNString(buffer: &buffer, tracker: tracker)
-            try ParserLibrary.fixedString(" ", buffer: &buffer, tracker: tracker)
+            try self.fixedString(" ", buffer: &buffer, tracker: tracker)
             let host = try self.parseNString(buffer: &buffer, tracker: tracker)
-            try ParserLibrary.fixedString(")", buffer: &buffer, tracker: tracker)
+            try self.fixedString(")", buffer: &buffer, tracker: tracker)
             return EmailAddress(personName: name, sourceRoot: adl, mailbox: mailbox, host: host)
         }
     }
@@ -101,28 +101,28 @@ extension GrammarParser {
     //                   env-sender SP env-reply-to SP env-to SP env-cc SP
     //                   env-bcc SP env-in-reply-to SP env-message-id ")"
     static func parseEnvelope(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Envelope {
-        try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Envelope in
-            try ParserLibrary.fixedString("(", buffer: &buffer, tracker: tracker)
+        try self.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Envelope in
+            try self.fixedString("(", buffer: &buffer, tracker: tracker)
             let date = try self.parseNString(buffer: &buffer, tracker: tracker).flatMap { InternetMessageDate(String(buffer: $0)) }
-            try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
+            try self.parseSpaces(buffer: &buffer, tracker: tracker)
             let subject = try self.parseNString(buffer: &buffer, tracker: tracker)
-            try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
+            try self.parseSpaces(buffer: &buffer, tracker: tracker)
             let from = try self.parseOptionalEnvelopeEmailAddresses(buffer: &buffer, tracker: tracker)
-            try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
+            try self.parseSpaces(buffer: &buffer, tracker: tracker)
             let sender = try self.parseOptionalEnvelopeEmailAddresses(buffer: &buffer, tracker: tracker)
-            try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
+            try self.parseSpaces(buffer: &buffer, tracker: tracker)
             let replyTo = try self.parseOptionalEnvelopeEmailAddresses(buffer: &buffer, tracker: tracker)
-            try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
+            try self.parseSpaces(buffer: &buffer, tracker: tracker)
             let to = try self.parseOptionalEnvelopeEmailAddresses(buffer: &buffer, tracker: tracker)
-            try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
+            try self.parseSpaces(buffer: &buffer, tracker: tracker)
             let cc = try self.parseOptionalEnvelopeEmailAddresses(buffer: &buffer, tracker: tracker)
-            try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
+            try self.parseSpaces(buffer: &buffer, tracker: tracker)
             let bcc = try self.parseOptionalEnvelopeEmailAddresses(buffer: &buffer, tracker: tracker)
-            try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
+            try self.parseSpaces(buffer: &buffer, tracker: tracker)
             let inReplyTo = try self.parseMessageID(buffer: &buffer, tracker: tracker)
-            try ParserLibrary.parseSpaces(buffer: &buffer, tracker: tracker)
+            try self.parseSpaces(buffer: &buffer, tracker: tracker)
             let messageID = try self.parseMessageID(buffer: &buffer, tracker: tracker)
-            try ParserLibrary.fixedString(")", buffer: &buffer, tracker: tracker)
+            try self.fixedString(")", buffer: &buffer, tracker: tracker)
             return Envelope(
                 date: date,
                 subject: subject,
