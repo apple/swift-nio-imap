@@ -85,10 +85,12 @@ extension GrammarParser {
             try .catenate(self.parseCatenateMessage(buffer: &buffer, tracker: tracker))
         }
 
-        return try self.oneOf([
+        return try self.oneOf(
             parseCatenate,
             parseAppend,
-        ], buffer: &buffer, tracker: tracker)
+            buffer: &buffer,
+            tracker: tracker
+        )
     }
 
     // append-options = [SP flag-list] [SP date-time] *(SP append-ext)
@@ -146,10 +148,12 @@ extension GrammarParser {
             return .end
         }
 
-        return try self.oneOf([
+        return try self.oneOf(
             parseCatenateURL,
             parseCatenateText,
             parseCatenateEnd,
-        ], buffer: &buffer, tracker: tracker)
+            buffer: &buffer,
+            tracker: tracker
+        )
     }
 }

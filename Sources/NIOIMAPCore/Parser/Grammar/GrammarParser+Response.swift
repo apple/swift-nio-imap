@@ -122,11 +122,13 @@ extension GrammarParser {
             return .bad(try self.parseResponseText(buffer: &buffer, tracker: tracker))
         }
 
-        return try self.oneOf([
+        return try self.oneOf(
             parseTaggedResponseState_ok,
             parseTaggedResponseState_no,
             parseTaggedResponseState_bad,
-        ], buffer: &buffer, tracker: tracker)
+            buffer: &buffer,
+            tracker: tracker
+        )
     }
 
     // response-payload = resp-cond-state / resp-cond-bye / mailbox-data / message-data / capability-data / id-response / enable-data

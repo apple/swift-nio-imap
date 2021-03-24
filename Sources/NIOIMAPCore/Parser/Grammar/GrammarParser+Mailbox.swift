@@ -144,10 +144,12 @@ extension GrammarParser {
             let flags = try self.optional(buffer: &buffer, tracker: tracker, parser: self.parseMailboxListFlags) ?? []
             try self.fixedString(")", buffer: &buffer, tracker: tracker)
             try self.spaces(buffer: &buffer, tracker: tracker)
-            let character = try self.oneOf([
+            let character = try self.oneOf(
                 parseMailboxList_quotedChar_some,
                 parseMailboxList_quotedChar_nil,
-            ], buffer: &buffer, tracker: tracker)
+                buffer: &buffer,
+                tracker: tracker
+            )
             try self.spaces(buffer: &buffer, tracker: tracker)
             let mailbox = try self.parseMailbox(buffer: &buffer, tracker: tracker)
             let listExtended = try self.optional(buffer: &buffer, tracker: tracker, parser: { (buffer, tracker) -> KeyValues<ByteBuffer, ParameterValue> in
@@ -198,10 +200,12 @@ extension GrammarParser {
             .pattern(try self.parsePatterns(buffer: &buffer, tracker: tracker))
         }
 
-        return try self.oneOf([
+        return try self.oneOf(
             parseMailboxOrPat_list,
             parseMailboxOrPat_patterns,
-        ], buffer: &buffer, tracker: tracker)
+            buffer: &buffer,
+            tracker: tracker
+        )
     }
 
     // mbx-list-flags  = *(mbx-list-oflag SP) mbx-list-sflag
@@ -321,9 +325,11 @@ extension GrammarParser {
             .pattern(try self.parsePatterns(buffer: &buffer, tracker: tracker))
         }
 
-        return try self.oneOf([
+        return try self.oneOf(
             parseMailboxPatterns_list,
             parseMailboxPatterns_patterns,
-        ], buffer: &buffer, tracker: tracker)
+            buffer: &buffer,
+            tracker: tracker
+        )
     }
 }

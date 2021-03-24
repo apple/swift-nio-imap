@@ -35,10 +35,12 @@ extension GrammarParser {
             }
         }
 
-        return try self.oneOf([
+        return try self.oneOf(
             parseDateText,
             parseDateText_quoted,
-        ], buffer: &buffer, tracker: tracker)
+            buffer: &buffer,
+            tracker: tracker
+        )
     }
 
     // date-day        = 1*2DIGIT
@@ -57,10 +59,12 @@ extension GrammarParser {
             return try self.parseNDigits(buffer: &buffer, tracker: tracker, bytes: 1)
         }
 
-        return try self.oneOf([
+        return try self.oneOf(
             parseDateDayFixed_spaced,
             parse2Digit,
-        ], buffer: &buffer, tracker: tracker)
+            buffer: &buffer,
+            tracker: tracker
+        )
     }
 
     // date-month      = "Jan" / "Feb" / "Mar" / "Apr" / "May" / "Jun" /
@@ -139,10 +143,12 @@ extension GrammarParser {
                 return -zone
             }
 
-            let zone = try self.oneOf([
+            let zone = try self.oneOf(
                 parseZonePositive,
                 parseZoneNegative,
-            ], buffer: &buffer, tracker: tracker)
+                buffer: &buffer,
+                tracker: tracker
+            )
 
             try self.fixedString("\"", buffer: &buffer, tracker: tracker)
             guard

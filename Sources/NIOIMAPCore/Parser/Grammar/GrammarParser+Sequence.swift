@@ -32,10 +32,12 @@ extension GrammarParser {
         }
 
         func parse_SequenceOrWildcard(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SequenceNumber {
-            try self.oneOf([
+            try self.oneOf(
                 parse_wildcard,
-                GrammarParser.parseSequenceNumber,
-            ], buffer: &buffer, tracker: tracker)
+                self.parseSequenceNumber,
+                buffer: &buffer,
+                tracker: tracker
+            )
         }
 
         func parse_colonAndSequenceOrWildcard(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SequenceNumber {
@@ -91,10 +93,12 @@ extension GrammarParser {
         }
 
         func parseSequenceSet_element(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SequenceRange {
-            try self.oneOf([
+            try self.oneOf(
                 self.parseSequenceRange,
                 parseSequenceSet_number,
-            ], buffer: &buffer, tracker: tracker)
+                buffer: &buffer,
+                tracker: tracker
+            )
         }
 
         func parseSequenceSet_base(buffer: inout ParseBuffer, tracker: StackTracker) throws -> LastCommandSet<SequenceRangeSet> {
@@ -116,10 +120,12 @@ extension GrammarParser {
             return .lastCommand
         }
 
-        return try self.oneOf([
+        return try self.oneOf(
             parseSequenceSet_base,
             parseSequenceSet_lastCommand,
-        ], buffer: &buffer, tracker: tracker)
+            buffer: &buffer,
+            tracker: tracker
+        )
     }
 
     // mod-sequence-valzer = "0" / mod-sequence-value

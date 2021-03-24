@@ -32,10 +32,12 @@ extension GrammarParser {
         }
 
         func parse_UIDOrWildcard(buffer: inout ParseBuffer, tracker: StackTracker) throws -> UID {
-            try self.oneOf([
+            try self.oneOf(
                 parse_wildcard,
-                GrammarParser.parseUID,
-            ], buffer: &buffer, tracker: tracker)
+                self.parseUID,
+                buffer: &buffer,
+                tracker: tracker
+            )
         }
 
         func parse_colonAndUIDOrWildcard(buffer: inout ParseBuffer, tracker: StackTracker) throws -> UID {
@@ -81,10 +83,12 @@ extension GrammarParser {
         }
 
         func parseUIDSet_element(buffer: inout ParseBuffer, tracker: StackTracker) throws -> UIDRange {
-            try self.oneOf([
+            try self.oneOf(
                 self.parseUIDRange,
                 parseUIDSet_number,
-            ], buffer: &buffer, tracker: tracker)
+                buffer: &buffer,
+                tracker: tracker
+            )
         }
 
         return try self.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
@@ -117,10 +121,12 @@ extension GrammarParser {
         }
 
         func parseUIDArray_element(buffer: inout ParseBuffer, tracker: StackTracker) throws -> UIDRange {
-            try self.oneOf([
+            try self.oneOf(
                 self.parseUIDRange,
                 parseUIDArray_number,
-            ], buffer: &buffer, tracker: tracker)
+                buffer: &buffer,
+                tracker: tracker
+            )
         }
 
         return try self.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in

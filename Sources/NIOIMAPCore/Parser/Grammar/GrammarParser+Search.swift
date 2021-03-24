@@ -76,11 +76,13 @@ extension GrammarParser {
         }
 
         func parseSearchCorrelator_once(buffer: inout ParseBuffer, tracker: StackTracker) throws {
-            try self.oneOf([
+            try self.oneOf(
                 parseSearchCorrelator_tag,
                 parseSearchCorrelator_mailbox,
                 parseSearchCorrelator_uidValidity,
-            ], buffer: &buffer, tracker: tracker)
+                buffer: &buffer,
+                tracker: tracker
+            )
         }
 
         return try self.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in

@@ -35,10 +35,12 @@ extension GrammarParser {
             .option(try self.parseOptionExtension(buffer: &buffer, tracker: tracker))
         }
 
-        return try self.oneOf([
+        return try self.oneOf(
             parseListSelectBaseOption_subscribed,
             parseListSelectBaseOption_optionExtension,
-        ], buffer: &buffer, tracker: tracker)
+            buffer: &buffer,
+            tracker: tracker
+        )
     }
 
     // list-select-base-opt-quoted =  DQUOTE list-select-base-opt DQUOTE
@@ -62,10 +64,12 @@ extension GrammarParser {
             .option(try self.parseOptionExtension(buffer: &buffer, tracker: tracker))
         }
 
-        return try self.oneOf([
+        return try self.oneOf(
             parseListSelectIndependentOption_subscribed,
             parseListSelectIndependentOption_optionExtension,
-        ], buffer: &buffer, tracker: tracker)
+            buffer: &buffer,
+            tracker: tracker
+        )
     }
 
     // list-select-opt =  list-select-base-opt / list-select-independent-opt
@@ -158,10 +162,12 @@ extension GrammarParser {
             }
         }
 
-        return try self.oneOf([
+        return try self.oneOf(
             parseListMailbox_string,
             parseListMailbox_chars,
-        ], buffer: &buffer, tracker: tracker)
+            buffer: &buffer,
+            tracker: tracker
+        )
     }
 
     // list-wildcards  = "%" / "*"

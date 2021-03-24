@@ -63,10 +63,12 @@ extension GrammarParser {
             return array
         }
 
-        return try self.oneOf([
+        return try self.oneOf(
             parseEntries_singleUnbracketed,
             parseEntries_bracketed,
-        ], buffer: &buffer, tracker: tracker)
+            buffer: &buffer,
+            tracker: tracker
+        )
     }
 
     static func parseEntryList(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [ByteBuffer] {
@@ -106,11 +108,13 @@ extension GrammarParser {
             return .shared
         }
 
-        return try self.oneOf([
+        return try self.oneOf(
             parseEntryKindRequest_all,
             parseEntryKindRequest_private,
             parseEntryKindRequest_shared,
-        ], buffer: &buffer, tracker: tracker)
+            buffer: &buffer,
+            tracker: tracker
+        )
     }
 
     // entry-type-resp = "priv" / "shared"
@@ -125,9 +129,11 @@ extension GrammarParser {
             return .shared
         }
 
-        return try self.oneOf([
+        return try self.oneOf(
             parseEntryKindResponse_private,
             parseEntryKindResponse_shared,
-        ], buffer: &buffer, tracker: tracker)
+            buffer: &buffer,
+            tracker: tracker
+        )
     }
 }

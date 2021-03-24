@@ -65,10 +65,12 @@ extension GrammarParser {
             try self.parseNil(buffer: &buffer, tracker: tracker)
             return []
         }
-        let addresses = try self.oneOf([
+        let addresses = try self.oneOf(
             parseEnvelopeEmailAddresses,
             parseOptionalEnvelopeEmailAddresses_nil,
-        ], buffer: &buffer, tracker: tracker)
+            buffer: &buffer,
+            tracker: tracker
+        )
 
         return self.parseEnvelopeEmailAddressGroups(addresses)
     }

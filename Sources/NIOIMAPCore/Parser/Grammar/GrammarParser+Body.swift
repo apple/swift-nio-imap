@@ -40,10 +40,12 @@ extension GrammarParser {
             return .multipart(part)
         }
 
-        return try self.oneOf([
+        return try self.oneOf(
             parseBody_singlePart,
             parseBody_multiPart,
-        ], buffer: &buffer, tracker: tracker)
+            buffer: &buffer,
+            tracker: tracker
+        )
     }
 
     // body-extension  = nstring / number /
@@ -58,10 +60,12 @@ extension GrammarParser {
         }
 
         func parseBodyExtensionKind(buffer: inout ParseBuffer, tracker: StackTracker, into array: inout [BodyExtension]) throws {
-            let element = try self.oneOf([
+            let element = try self.oneOf(
                 parseBodyExtensionKind_string,
                 parseBodyExtensionKind_number,
-            ], buffer: &buffer, tracker: tracker)
+                buffer: &buffer,
+                tracker: tracker
+            )
             array.append(element)
         }
 
@@ -159,10 +163,12 @@ extension GrammarParser {
             return BodyStructure.Disposition(kind: dispositionKind, parameters: param)
         }
 
-        return try self.oneOf([
+        return try self.oneOf(
             parseBodyFieldDsp_nil,
             parseBodyFieldDsp_some,
-        ], buffer: &buffer, tracker: tracker)
+            buffer: &buffer,
+            tracker: tracker
+        )
     }
 
     // body-fld-enc    = (DQUOTE ("7BIT" / "8BIT" / "BINARY" / "BASE64"/
@@ -230,10 +236,12 @@ extension GrammarParser {
             return array
         }
 
-        return try self.oneOf([
+        return try self.oneOf(
             parseBodyFieldLanguage_multiple,
             parseBodyFieldLanguage_single,
-        ], buffer: &buffer, tracker: tracker)
+            buffer: &buffer,
+            tracker: tracker
+        )
     }
 
     // body-fld-param  = "(" string SP string *(SP string SP string) ")" / nil
@@ -262,10 +270,12 @@ extension GrammarParser {
             return kvs
         }
 
-        return try self.oneOf([
+        return try self.oneOf(
             parseBodyFieldParam_pairs,
             parseBodyFieldParam_nil,
-        ], buffer: &buffer, tracker: tracker)
+            buffer: &buffer,
+            tracker: tracker
+        )
     }
 
     // body-type-1part = (body-type-basic / body-type-msg / body-type-text)
@@ -312,11 +322,13 @@ extension GrammarParser {
             return BodyStructure.Singlepart(kind: .text(text), fields: fields, extension: ext)
         }
 
-        return try self.oneOf([
+        return try self.oneOf(
             parseBodyKindSinglePart_message,
             parseBodyKindSinglePart_text,
             parseBodyKindSinglePart_basic,
-        ], buffer: &buffer, tracker: tracker)
+            buffer: &buffer,
+            tracker: tracker
+        )
     }
 
     // body-type-mpart = 1*body SP media-subtype
