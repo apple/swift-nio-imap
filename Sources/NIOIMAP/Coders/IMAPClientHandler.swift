@@ -73,7 +73,7 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
                         // continuations must have finished: change the state to standard continuation handling
                         self._state = .expectingResponses
 
-                    case .untaggedResponse, .fetchResponse, .fatalResponse, .authenticationChallenge:
+                    case .untaggedResponse, .fetchResponse, .fatalResponse, .authenticationChallenge, .idleStarted:
                         break
                     }
                     context.fireChannelRead(self.wrapInboundOut(out))
