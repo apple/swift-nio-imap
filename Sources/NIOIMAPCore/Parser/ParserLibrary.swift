@@ -70,7 +70,6 @@ public struct TooMuchRecursion: Error {
 }
 
 extension ParserLibrary {
-
     static func parseZeroOrMoreCharacters(buffer: inout ParseBuffer, tracker: StackTracker, where: ((UInt8) -> Bool)) throws -> ByteBuffer {
         try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, _ in
             let maybeFirstBad = buffer.bytes.readableBytesView.firstIndex { char in

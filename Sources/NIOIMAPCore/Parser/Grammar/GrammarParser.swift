@@ -650,7 +650,7 @@ extension GrammarParser {
         }
 
         return try withoutActuallyEscaping(parseLastCommandSet_set) { (parseLastCommandSet_set) in
-            return try self.oneOf(
+            try self.oneOf(
                 parseLastCommandSet_lastCommand,
                 parseLastCommandSet_set,
                 buffer: &buffer,
@@ -1330,7 +1330,7 @@ extension GrammarParser {
             try self.fixedString("RFC822", buffer: &buffer, tracker: tracker)
             return .rfc822
         }
-        
+
         return try self.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> Media.Message in
             try self.fixedString("\"MESSAGE\" \"", buffer: &buffer, tracker: tracker)
             let message = try parseMediaMessage_rfc(buffer: &buffer, tracker: tracker)
@@ -2425,8 +2425,8 @@ extension GrammarParser {
         {
             var sources = [try parseFilterMailboxes(buffer: &buffer, tracker: tracker)]
             while let anotherSource = try self.optional(buffer: &buffer,
-                                                                 tracker: tracker,
-                                                                 parser: parseExtendedSearchSourceOptions_spaceFilter)
+                                                        tracker: tracker,
+                                                        parser: parseExtendedSearchSourceOptions_spaceFilter)
             {
                 sources.append(anotherSource)
             }
@@ -2446,8 +2446,8 @@ extension GrammarParser {
             try self.fixedString("IN (", buffer: &buffer, tracker: tracker)
             let sourceMbox = try parseExtendedSearchSourceOptions_sourceMBox(buffer: &buffer, tracker: tracker)
             let scopeOptions = try self.optional(buffer: &buffer,
-                                                          tracker: tracker,
-                                                          parser: parseExtendedSearchSourceOptions_scopeOptions)
+                                                 tracker: tracker,
+                                                 parser: parseExtendedSearchSourceOptions_scopeOptions)
             try self.fixedString(")", buffer: &buffer, tracker: tracker)
             if let result = ExtendedSearchSourceOptions(sourceMailbox: sourceMbox, scopeOptions: scopeOptions) {
                 return result
@@ -2473,11 +2473,11 @@ extension GrammarParser {
         }
 
         let sourceOptions = try self.optional(buffer: &buffer,
-                                                       tracker: tracker,
-                                                       parser: parseExtendedSearchOptions_sourceOptions)
+                                              tracker: tracker,
+                                              parser: parseExtendedSearchOptions_sourceOptions)
         let returnOpts = try self.optional(buffer: &buffer,
-                                                    tracker: tracker,
-                                                    parser: self.parseSearchReturnOptions) ?? []
+                                           tracker: tracker,
+                                           parser: self.parseSearchReturnOptions) ?? []
         try self.spaces(buffer: &buffer, tracker: tracker)
         let (charset, program) = try parseSearchProgram(buffer: &buffer, tracker: tracker)
         return ExtendedSearchOptions(key: program, charset: charset, returnOptions: returnOpts, sourceOptions: sourceOptions)
@@ -2527,8 +2527,8 @@ struct StackTracker {
 }
 
 // MARK: - ParserLibrary shortcuts
-extension GrammarParser {
 
+extension GrammarParser {
     static func oneOrMoreCharacters(buffer: inout ParseBuffer, tracker: StackTracker, where: ((UInt8) -> Bool)) throws -> ByteBuffer {
         try ParserLibrary.parseOneOrMoreCharacters(buffer: &buffer, tracker: tracker, where: `where`)
     }
@@ -2582,18 +2582,18 @@ extension GrammarParser {
     }
 
     static func oneOf<T>(_ parser1: SubParser<T>,
-                          _ parser2: SubParser<T>,
-                          buffer: inout ParseBuffer,
-                          tracker: StackTracker, file: String = (#file), line: Int = #line) throws -> T
+                         _ parser2: SubParser<T>,
+                         buffer: inout ParseBuffer,
+                         tracker: StackTracker, file: String = (#file), line: Int = #line) throws -> T
     {
         try ParserLibrary.oneOf2(parser1, parser2, buffer: &buffer, tracker: tracker)
     }
 
     static func oneOf<T>(_ parser1: SubParser<T>,
-                          _ parser2: SubParser<T>,
-                          _ parser3: SubParser<T>,
-                          buffer: inout ParseBuffer,
-                          tracker: StackTracker, file: String = (#file), line: Int = #line) throws -> T
+                         _ parser2: SubParser<T>,
+                         _ parser3: SubParser<T>,
+                         buffer: inout ParseBuffer,
+                         tracker: StackTracker, file: String = (#file), line: Int = #line) throws -> T
     {
         try ParserLibrary.oneOf3(parser1, parser2, parser3, buffer: &buffer, tracker: tracker)
     }
