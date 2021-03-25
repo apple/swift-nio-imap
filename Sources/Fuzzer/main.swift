@@ -21,7 +21,7 @@ import NIOIMAP
     var buffer = bufferPointer.withMemoryRebound(to: UInt8.self) {
         ByteBuffer(bytes: $0)
     }
-    var parser = CommandParser(bufferLimit: 1000)
+    var parser = CommandParser()
     do {
         _ = try parser.parseCommandStream(buffer: &buffer)
     } catch {
