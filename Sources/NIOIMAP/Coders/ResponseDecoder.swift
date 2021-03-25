@@ -16,7 +16,7 @@ import NIO
 import NIOIMAPCore
 
 struct ResponseDecoder: NIOSingleStepByteToMessageDecoder {
-    typealias InboundOut = _ResponseOrContinuationRequest
+    typealias InboundOut = ResponseOrContinuationRequest
 
     var parser: ResponseParser
 

@@ -34,7 +34,7 @@ extension RealWorldTests {
 
         """
 
-        let inoutPairs: [(String, [_ResponseOrContinuationRequest])] = [
+        let inoutPairs: [(String, [ResponseOrContinuationRequest])] = [
             (
                 input,
                 [

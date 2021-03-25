@@ -58,7 +58,7 @@ extension ResponseParser_Tests {
     }
 
     func testParseResponseStream() {
-        let inputs: [(String, [_ResponseOrContinuationRequest], UInt)] = [
+        let inputs: [(String, [ResponseOrContinuationRequest], UInt)] = [
             ("+ OK Continue", [.continuationRequest(.responseText(.init(text: "OK Continue")))], #line),
             ("1 OK NOOP Completed", [.response(.taggedResponse(.init(tag: "1", state: .ok(.init(text: "NOOP Completed")))))], #line),
             (
@@ -232,7 +232,7 @@ extension ResponseParser_Tests {
 
         for (input, expected, line) in inputs {
             var buffer = ByteBuffer(string: input + "\r\n")
-            var results = [_ResponseOrContinuationRequest]()
+            var results = [ResponseOrContinuationRequest]()
             var parser = ResponseParser()
             while buffer.readableBytes > 0 {
                 do {
