@@ -45,7 +45,7 @@ public enum Response: Equatable {
     case authenticationChallenge(ByteBuffer)
 
     /// Idle has started
-    case idleStarted(ContinuationRequest)
+    case idleStarted
 }
 
 /// The first event will always be `start`
