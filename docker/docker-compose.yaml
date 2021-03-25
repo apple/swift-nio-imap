@@ -29,6 +29,10 @@ services:
   test:
     <<: *common
     command: /bin/bash -xcl "swift test -Xswiftc -warnings-as-errors --enable-test-discovery $${SANITIZER_ARG-}"
+    
+  performance-test:
+    <<: *common
+    command: /bin/bash -xcl "swift build -c release -Xswiftc -Xllvm -Xswiftc -align-all-functions=5 -Xswiftc -Xllvm -Xswiftc -align-all-blocks=5 && ./.build/release/NIOIMAPPerformanceTester"
 
   # util
 
