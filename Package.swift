@@ -92,5 +92,13 @@ let package = Package(
                 .product(name: "swiftformat", package: "SwiftFormat"),
             ]
         ),
+        
+            .target(
+                name: "Fuzzer",
+                dependencies: [
+                    "NIOIMAP",
+                    .product(name: "NIO", package: "swift-nio")
+                ]
+            ),
     ]
 )
