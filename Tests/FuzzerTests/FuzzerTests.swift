@@ -27,7 +27,9 @@ extension FuzzerTests {
     // all examples found by libfuzzer
     func testCommandParser() {
         let inputs: [[UInt8]] = [
-            "+000000000000000000000000000000000000000000000000000000000}\n".utf8.map { $0 },
+            "+000000000000000000000000000000000000000000000000000000000}\n".map { $0.asciiValue! },
+            "eSequence468117eY SEARCH 4:1 000,0\n000059?000000600=)O".map { $0.asciiValue! },
+            [0x41, 0x5d, 0x20, 0x55, 0x49, 0x44, 0x20, 0x43, 0x4f, 0x50, 0x59, 0x20, 0x35, 0x2c, 0x35, 0x3a, 0x34, 0x00, 0x3d, 0x0c, 0x0a, 0x43, 0x20, 0x22, 0xe8]
         ]
         
         for input in inputs {

@@ -47,6 +47,9 @@ extension GrammarParser {
             let id1 = try parse_UIDOrWildcard(buffer: &buffer, tracker: tracker)
             let id2 = try ParserLibrary.optional(buffer: &buffer, tracker: tracker, parser: parse_colonAndUIDOrWildcard)
             if let id2 = id2 {
+                guard id1 <= id2 else {
+                    throw ParserError(hint: "Invalid range \(id1):\(id2)")
+                }
                 return UIDRange(id1 ... id2)
             } else {
                 return UIDRange(id1)
