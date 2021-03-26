@@ -238,10 +238,7 @@ class IMAPClientHandlerTests: XCTestCase {
     func testContinuationRequestsAsUserEvents() {
         let eventExpectation1 = XCTestExpectation(description: "Expected user event")
         let eventExpectation2 = XCTestExpectation(description: "Expected user event")
-        eventExpectation1.expectedFulfillmentCount = 1
-        eventExpectation2.expectedFulfillmentCount = 1
-        eventExpectation1.assertForOverFulfill = true
-        eventExpectation2.assertForOverFulfill = true
+        let eventExpectation3 = XCTestExpectation(description: "Expected user event")
 
         class UserEventHandler: ChannelDuplexHandler {
             typealias InboundIn = Response
@@ -250,10 +247,12 @@ class IMAPClientHandlerTests: XCTestCase {
 
             var expectation1: XCTestExpectation
             var expectation2: XCTestExpectation
+            var expectation3: XCTestExpectation
 
-            init(expectation1: XCTestExpectation, expectation2: XCTestExpectation) {
+            init(expectation1: XCTestExpectation, expectation2: XCTestExpectation, expectation3: XCTestExpectation) {
                 self.expectation1 = expectation1
                 self.expectation2 = expectation2
+                self.expectation3 = expectation3
             }
 
             public func userInboundEventTriggered(context: ChannelHandlerContext, event: Any) {
@@ -261,11 +260,11 @@ class IMAPClientHandlerTests: XCTestCase {
                     XCTFail()
                     return
                 }
-                if textEvent.text == "1" {
-                    self.expectation1.fulfill()
-                } else if textEvent.text == "2" {
-                    self.expectation2.fulfill()
-                } else {
+                switch textEvent.text {
+                case "1": self.expectation1.fulfill()
+                case "2": self.expectation2.fulfill()
+                case "3": self.expectation3.fulfill()
+                default:
                     XCTFail("Not sure who sent this event, but it wasn't us")
                 }
             }
@@ -273,9 +272,11 @@ class IMAPClientHandlerTests: XCTestCase {
 
         try! self.channel.pipeline.addHandler(UserEventHandler(
             expectation1: eventExpectation1,
-            expectation2: eventExpectation2
+            expectation2: eventExpectation2,
+            expectation3: eventExpectation3
         )).wait()
 
+        // confirm it works for literals
         self.writeOutbound(.command(.init(tag: "A1", command: .login(username: "\\", password: "\\"))), wait: false)
         self.assertOutboundString("A1 LOGIN {1}\r\n")
         self.writeInbound("+ 1\r\n")
@@ -284,6 +285,12 @@ class IMAPClientHandlerTests: XCTestCase {
         self.writeInbound("+ 2\r\n")
         wait(for: [eventExpectation2], timeout: 1.0)
         self.assertOutboundString("\\\r\n")
+        
+        // now confirm idle
+        self.writeOutbound(.command(.init(tag: "A2", command: idleStart)), wait: false)
+        self.assertOutboundString("A2 IDLE\r\n")
+        self.writeInbound("+ 3\r\n")
+        wait(for: [eventExpectation3], timeout: 1.0)
     }
 
     // MARK: - setup / tear down
