@@ -85,7 +85,6 @@ public struct SynchronizingLiteralParser {
                 throw ParserError()
             }
         }
-        throw ParserError()
     }
 
     private static func lineFragmentType(_ fragment: ByteBufferView) throws -> LineFragmentType {
