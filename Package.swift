@@ -94,14 +94,14 @@ let package = Package(
         ),
 
         .target(
-            name: "Fuzzer",
+            name: "NIOIMAPFuzzer",
             dependencies: [
                 "NIOIMAP",
                 .product(name: "NIO", package: "swift-nio"),
             ]
         ),
         .testTarget(
-            name: "FuzzerTests",
+            name: "NIOIMAPFuzzerTests",
             dependencies: [
                 "NIOIMAP",
                 .product(name: "NIO", package: "swift-nio"),
