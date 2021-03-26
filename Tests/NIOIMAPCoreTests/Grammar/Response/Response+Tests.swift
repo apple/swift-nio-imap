@@ -21,6 +21,26 @@ class Response_Tests: EncodeTestClass {}
 // MARK: - Encoding
 
 extension Response_Tests {
+    func testEncode_response() {
+        let inputs: [(Response, String, UInt)] = [
+            (.idleStarted, "+ idling\r\n", #line),
+            (.authenticationChallenge("hello"), "+ aGVsbG8=\r\n", #line),
+            (.fatalResponse(.init(text: "Oh no you're dead")), "* BYE Oh no you're dead\r\n", #line),
+            (.taggedResponse(.init(tag: "A1", state: .ok(.init(text: "NOOP complete")))), "A1 OK NOOP complete\r\n", #line),
+            (.untaggedResponse(.id([:])), "* ID NIL\r\n", #line),
+            (.fetchResponse(.start(1)), "* 1 FETCH (", #line),
+        ]
+
+        for (test, expectedString, line) in inputs {
+            self.testBuffer._clear()
+            var encoder = ResponseEncodeBuffer(buffer: self.testBuffer._buffer, options: ResponseEncodingOptions())
+            let size = encoder.writeResponse(test)
+            self.testBuffer = _EncodeBuffer._serverEncodeBuffer(buffer: encoder.readBytes(), options: ResponseEncodingOptions())
+            XCTAssertEqual(size, expectedString.utf8.count, line: line)
+            XCTAssertEqual(self.testBufferString, expectedString, line: line)
+        }
+    }
+
     func testEncode_fetchResponse_multiple() {
         let inputs: [([NIOIMAPCore.FetchResponse], String, UInt)] = [
             ([.start(1), .simpleAttribute(.rfc822Size(123)), .finish], "* 1 FETCH (RFC822.SIZE 123)\r\n", #line),
