@@ -256,7 +256,7 @@ extension ParserLibraryTests {
             var string = ParseBuffer(ByteBuffer(string: string))
             var id = UInt64(0)
             var actualConsumed = 0
-            XCTAssertNoThrow((id, actualConsumed) = try ParserLibrary.parseUInt64(buffer: &string, tracker: .makeNewDefaultLimitStackTracker), line: line)
+            XCTAssertNoThrow((id, actualConsumed) = try ParserLibrary.parseUnsignedInt64(buffer: &string, tracker: .makeNewDefaultLimitStackTracker), line: line)
             XCTAssertEqual(actualConsumed, consumed, line: line)
             XCTAssertEqual(id, result, line: line)
         }

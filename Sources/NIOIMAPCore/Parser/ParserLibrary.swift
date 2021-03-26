@@ -145,7 +145,7 @@ extension ParserLibrary {
     }
 
     static func parseUnsignedInteger(buffer: inout ParseBuffer, tracker: StackTracker, allowLeadingZeros: Bool = false) throws -> (number: Int, bytesConsumed: Int) {
-        let largeInt = try ParserLibrary.parseUInt64(buffer: &buffer, tracker: tracker, allowLeadingZeros: allowLeadingZeros)
+        let largeInt = try self.parseUnsignedInt64(buffer: &buffer, tracker: tracker, allowLeadingZeros: allowLeadingZeros)
         if let int = Int(exactly: largeInt.number) {
             return (number: int, bytesConsumed: largeInt.bytesConsumed)
         } else {
@@ -153,7 +153,7 @@ extension ParserLibrary {
         }
     }
 
-    static func parseUInt64(buffer: inout ParseBuffer, tracker: StackTracker, allowLeadingZeros: Bool = false) throws -> (number: UInt64, bytesConsumed: Int) {
+    static func parseUnsignedInt64(buffer: inout ParseBuffer, tracker: StackTracker, allowLeadingZeros: Bool = false) throws -> (number: UInt64, bytesConsumed: Int) {
         return try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             let parsed = try ParserLibrary.parseOneOrMoreCharacters(buffer: &buffer, tracker: tracker) { char in
                 char >= UInt8(ascii: "0") && char <= UInt8(ascii: "9")
@@ -234,7 +234,7 @@ extension ParserLibrary {
         throw ParserError(hint: "none of the options match", file: file, line: line)
     }
 
-    static func oneOf2<T>(_ parser1: SubParser<T>,
+    static func oneOf<T>(_ parser1: SubParser<T>,
                           _ parser2: SubParser<T>,
                           buffer: inout ParseBuffer,
                           tracker: StackTracker, file: String = (#file), line: Int = #line) throws -> T
@@ -255,7 +255,7 @@ extension ParserLibrary {
         }
     }
 
-    static func oneOf3<T>(_ parser1: SubParser<T>,
+    static func oneOf<T>(_ parser1: SubParser<T>,
                           _ parser2: SubParser<T>,
                           _ parser3: SubParser<T>,
                           buffer: inout ParseBuffer,

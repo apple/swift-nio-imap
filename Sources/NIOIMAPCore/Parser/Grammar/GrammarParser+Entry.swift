@@ -25,24 +25,24 @@ import struct NIO.ByteBufferView
 
 extension GrammarParser {
     static func parseEntryValue(buffer: inout ParseBuffer, tracker: StackTracker) throws -> KeyValue<ByteBuffer, MetadataValue> {
-        try self.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> KeyValue<ByteBuffer, MetadataValue> in
+        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> KeyValue<ByteBuffer, MetadataValue> in
             let name = try self.parseAString(buffer: &buffer, tracker: tracker)
-            try self.spaces(buffer: &buffer, tracker: tracker)
+            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             let value = try self.parseMetadataValue(buffer: &buffer, tracker: tracker)
             return .init(key: name, value: value)
         }
     }
 
     static func parseEntryValues(buffer: inout ParseBuffer, tracker: StackTracker) throws -> KeyValues<ByteBuffer, MetadataValue> {
-        try self.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> KeyValues<ByteBuffer, MetadataValue> in
-            try self.fixedString("(", buffer: &buffer, tracker: tracker)
+        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> KeyValues<ByteBuffer, MetadataValue> in
+            try PL.fixedString("(", buffer: &buffer, tracker: tracker)
             var kvs = KeyValues<ByteBuffer, MetadataValue>()
             kvs.append(try self.parseEntryValue(buffer: &buffer, tracker: tracker))
-            try self.zeroOrMore(buffer: &buffer, into: &kvs, tracker: tracker, parser: { buffer, tracker -> KeyValue<ByteBuffer, MetadataValue> in
-                try self.spaces(buffer: &buffer, tracker: tracker)
+            try PL.parseZeroOrMore(buffer: &buffer, into: &kvs, tracker: tracker, parser: { buffer, tracker -> KeyValue<ByteBuffer, MetadataValue> in
+                try PL.parseSpaces(buffer: &buffer, tracker: tracker)
                 return try self.parseEntryValue(buffer: &buffer, tracker: tracker)
             })
-            try self.fixedString(")", buffer: &buffer, tracker: tracker)
+            try PL.fixedString(")", buffer: &buffer, tracker: tracker)
             return kvs
         }
     }
@@ -53,17 +53,17 @@ extension GrammarParser {
         }
 
         func parseEntries_bracketed(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [ByteBuffer] {
-            try self.fixedString("(", buffer: &buffer, tracker: tracker)
+            try PL.fixedString("(", buffer: &buffer, tracker: tracker)
             var array = [try self.parseAString(buffer: &buffer, tracker: tracker)]
-            try self.zeroOrMore(buffer: &buffer, into: &array, tracker: tracker, parser: { buffer, tracker in
-                try self.spaces(buffer: &buffer, tracker: tracker)
+            try PL.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker, parser: { buffer, tracker in
+                try PL.parseSpaces(buffer: &buffer, tracker: tracker)
                 return try self.parseAString(buffer: &buffer, tracker: tracker)
             })
-            try self.fixedString(")", buffer: &buffer, tracker: tracker)
+            try PL.fixedString(")", buffer: &buffer, tracker: tracker)
             return array
         }
 
-        return try self.oneOf(
+        return try PL.oneOf(
             parseEntries_singleUnbracketed,
             parseEntries_bracketed,
             buffer: &buffer,
@@ -72,10 +72,10 @@ extension GrammarParser {
     }
 
     static func parseEntryList(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [ByteBuffer] {
-        try self.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
+        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             var array = [try self.parseAString(buffer: &buffer, tracker: tracker)]
-            try self.zeroOrMore(buffer: &buffer, into: &array, tracker: tracker, parser: { buffer, tracker in
-                try self.spaces(buffer: &buffer, tracker: tracker)
+            try PL.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker, parser: { buffer, tracker in
+                try PL.parseSpaces(buffer: &buffer, tracker: tracker)
                 return try self.parseAString(buffer: &buffer, tracker: tracker)
             })
             return array
@@ -83,10 +83,10 @@ extension GrammarParser {
     }
 
     static func parseEntryFlagName(buffer: inout ParseBuffer, tracker: StackTracker) throws -> EntryFlagName {
-        try self.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> EntryFlagName in
-            try self.fixedString("\"/flags/", buffer: &buffer, tracker: tracker)
+        try PL.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> EntryFlagName in
+            try PL.fixedString("\"/flags/", buffer: &buffer, tracker: tracker)
             let flag = try self.parseAttributeFlag(buffer: &buffer, tracker: tracker)
-            try self.fixedString("\"", buffer: &buffer, tracker: tracker)
+            try PL.fixedString("\"", buffer: &buffer, tracker: tracker)
             return .init(flag: flag)
         }
     }

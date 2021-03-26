@@ -27,12 +27,12 @@ extension GrammarParser {
     // Sequence Range
     static func parseSequenceRange(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SequenceRange {
         func parse_wildcard(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SequenceNumber {
-            try self.fixedString("*", buffer: &buffer, tracker: tracker)
+            try PL.fixedString("*", buffer: &buffer, tracker: tracker)
             return .max
         }
 
         func parse_SequenceOrWildcard(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SequenceNumber {
-            try self.oneOf(
+            try PL.oneOf(
                 parse_wildcard,
                 self.parseSequenceNumber,
                 buffer: &buffer,
@@ -41,11 +41,11 @@ extension GrammarParser {
         }
 
         func parse_colonAndSequenceOrWildcard(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SequenceNumber {
-            try self.fixedString(":", buffer: &buffer, tracker: tracker)
+            try PL.fixedString(":", buffer: &buffer, tracker: tracker)
             return try parse_SequenceOrWildcard(buffer: &buffer, tracker: tracker)
         }
 
-        return try self.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> SequenceRange in
+        return try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> SequenceRange in
             let id1 = try parse_SequenceOrWildcard(buffer: &buffer, tracker: tracker)
             let id2 = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: parse_colonAndSequenceOrWildcard)
             if let id2 = id2 {
@@ -62,12 +62,12 @@ extension GrammarParser {
     }
 
     static func parseSequenceMatchData(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SequenceMatchData {
-        try self.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
-            try self.fixedString("(", buffer: &buffer, tracker: tracker)
+        try PL.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
+            try PL.fixedString("(", buffer: &buffer, tracker: tracker)
             let knownSequenceSet = try self.parseLastCommandSet(buffer: &buffer, tracker: tracker, setParser: self.parseUIDSetNonEmpty)
-            try self.spaces(buffer: &buffer, tracker: tracker)
+            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             let knownUidSet = try self.parseLastCommandSet(buffer: &buffer, tracker: tracker, setParser: self.parseUIDSetNonEmpty)
-            try self.fixedString(")", buffer: &buffer, tracker: tracker)
+            try PL.fixedString(")", buffer: &buffer, tracker: tracker)
             return SequenceMatchData(knownSequenceSet: knownSequenceSet, knownUidSet: knownUidSet)
         }
     }
@@ -93,7 +93,7 @@ extension GrammarParser {
         }
 
         func parseSequenceSet_element(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SequenceRange {
-            try self.oneOf(
+            try PL.oneOf(
                 self.parseSequenceRange,
                 parseSequenceSet_number,
                 buffer: &buffer,
@@ -102,10 +102,10 @@ extension GrammarParser {
         }
 
         func parseSequenceSet_base(buffer: inout ParseBuffer, tracker: StackTracker) throws -> LastCommandSet<SequenceRangeSet> {
-            try self.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
+            try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
                 var output = [try parseSequenceSet_element(buffer: &buffer, tracker: tracker)]
-                try self.zeroOrMore(buffer: &buffer, into: &output, tracker: tracker) { buffer, tracker in
-                    try self.fixedString(",", buffer: &buffer, tracker: tracker)
+                try PL.parseZeroOrMore(buffer: &buffer, into: &output, tracker: tracker) { buffer, tracker in
+                    try PL.fixedString(",", buffer: &buffer, tracker: tracker)
                     return try parseSequenceSet_element(buffer: &buffer, tracker: tracker)
                 }
                 guard let s = SequenceRangeSet(output) else {
@@ -116,11 +116,11 @@ extension GrammarParser {
         }
 
         func parseSequenceSet_lastCommand(buffer: inout ParseBuffer, tracker: StackTracker) throws -> LastCommandSet<SequenceRangeSet> {
-            try self.fixedString("$", buffer: &buffer, tracker: tracker)
+            try PL.fixedString("$", buffer: &buffer, tracker: tracker)
             return .lastCommand
         }
 
-        return try self.oneOf(
+        return try PL.oneOf(
             parseSequenceSet_base,
             parseSequenceSet_lastCommand,
             buffer: &buffer,

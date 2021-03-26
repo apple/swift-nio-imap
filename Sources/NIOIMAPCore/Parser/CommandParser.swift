@@ -172,7 +172,7 @@ public struct CommandParser: Parser {
             return .continuationResponse(authenticationChallengeResponse)
         }
 
-        return try ParserLibrary.oneOf3(
+        return try ParserLibrary.oneOf(
             parseCommand,
             parseAppend,
             parseAuthenticationChallengeResponse,
