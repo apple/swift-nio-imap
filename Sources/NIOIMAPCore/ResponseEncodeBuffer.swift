@@ -82,7 +82,7 @@ extension ResponseEncodeBuffer {
         case .authenticationChallenge(let bytes):
             return self.writeAuthenticationChallenge(bytes)
         case .idleStarted:
-            return 0
+            return self.writeContinuationRequest(.responseText(.init(code: nil, text: "idling")))
         }
     }
 
