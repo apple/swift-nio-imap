@@ -46,7 +46,7 @@ extension GrammarParser {
         return try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> SequenceRange in
             let id1 = try parse_SequenceOrWildcard(buffer: &buffer, tracker: tracker)
             let id2 = try ParserLibrary.optional(buffer: &buffer, tracker: tracker, parser: parse_colonAndSequenceOrWildcard)
-            
+
             if let id2 = id2 {
                 guard id1 <= id2 else {
                     throw ParserError(hint: "Invalid range, \(id1):\(id2)")

@@ -61,7 +61,7 @@ public struct SynchronizingLiteralParser {
     private static func reverseParseNumber(_ buffer: inout ByteBuffer) throws -> Int {
         var current = 0
         var magnitude = 1
-        while magnitude < 10, current < 4294967295/10 { 
+        while magnitude < 10, current < 4294967295 / 10 {
             switch buffer.readableBytesView.last {
             case .some(let digit) where (UInt8(ascii: "0") ... UInt8(ascii: "9")).contains(digit):
                 current += (magnitude * Int(digit - UInt8(ascii: "0")))

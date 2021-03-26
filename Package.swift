@@ -92,20 +92,20 @@ let package = Package(
                 .product(name: "swiftformat", package: "SwiftFormat"),
             ]
         ),
-        
-            .target(
-                name: "Fuzzer",
-                dependencies: [
-                    "NIOIMAP",
-                    .product(name: "NIO", package: "swift-nio")
-                ]
-            ),
-            .testTarget(
-                name: "FuzzerTests",
-                dependencies: [
-                    "NIOIMAP",
-                    .product(name: "NIO", package: "swift-nio"),
-                ]
-            ),
+
+        .target(
+            name: "Fuzzer",
+            dependencies: [
+                "NIOIMAP",
+                .product(name: "NIO", package: "swift-nio"),
+            ]
+        ),
+        .testTarget(
+            name: "FuzzerTests",
+            dependencies: [
+                "NIOIMAP",
+                .product(name: "NIO", package: "swift-nio"),
+            ]
+        ),
     ]
 )
