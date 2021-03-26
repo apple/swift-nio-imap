@@ -16,7 +16,7 @@ import NIO
 import NIOIMAP
 
 @_cdecl("LLVMFuzzerTestOneInput") public func fuzzMe(data: UnsafePointer<CChar>, size: CInt) -> CInt {
-    let bufferPointer = UnsafeBufferPointer(start: data, count: Int(size))
+    var buffer = ByteBuffer(bytes: UnsafeRawBufferPointer(start: UnsafeRawPointer(data), count: Int(size)))
     var buffer = bufferPointer.withMemoryRebound(to: UInt8.self) {
         ByteBuffer(bytes: $0)
     }
