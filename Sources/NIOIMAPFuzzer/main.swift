@@ -15,11 +15,11 @@
 import NIO
 import NIOIMAP
 
+var buffer = ByteBufferAllocator().buffer(capacity: 1000)
+
 @_cdecl("LLVMFuzzerTestOneInput") public func fuzzMe(data: UnsafePointer<CChar>, size: CInt) -> CInt {
-    var buffer = ByteBuffer(bytes: UnsafeRawBufferPointer(start: UnsafeRawPointer(data), count: Int(size)))
-    var buffer = bufferPointer.withMemoryRebound(to: UInt8.self) {
-        ByteBuffer(bytes: $0)
-    }
+    buffer.clear()
+    buffer.writeBytes(UnsafeRawBufferPointer(start: UnsafeRawPointer(data), count: Int(size)))
     var parser = CommandParser()
     do {
         var oldBytesRemaing = buffer.readableBytes
