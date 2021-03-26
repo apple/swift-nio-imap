@@ -81,6 +81,8 @@ extension ResponseEncodeBuffer {
             return self.buffer.writeResponseFatal(fatal)
         case .authenticationChallenge(let bytes):
             return self.writeAuthenticationChallenge(bytes)
+        case .idleStarted:
+            return self.writeContinuationRequest(.responseText(.init(code: nil, text: "idling")))
         }
     }
 

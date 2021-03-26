@@ -24,7 +24,7 @@ struct ResponseDecoder: NIOSingleStepByteToMessageDecoder {
         self.parser = ResponseParser()
     }
 
-    mutating func decode(buffer: inout ByteBuffer) throws -> ResponseOrContinuationRequest? {
+    mutating func decode(buffer: inout ByteBuffer) throws -> InboundOut? {
         let save = buffer
         do {
             return try self.parser.parseResponseStream(buffer: &buffer)
@@ -33,7 +33,7 @@ struct ResponseDecoder: NIOSingleStepByteToMessageDecoder {
         }
     }
 
-    mutating func decodeLast(buffer: inout ByteBuffer, seenEOF: Bool) throws -> ResponseOrContinuationRequest? {
+    mutating func decodeLast(buffer: inout ByteBuffer, seenEOF: Bool) throws -> InboundOut? {
         try self.decode(buffer: &buffer)
     }
 }

@@ -34,7 +34,7 @@ extension RealWorldTests {
 
         """
 
-        let inoutPairs: [(String, [NIOIMAPCore.ResponseOrContinuationRequest])] = [
+        let inoutPairs: [(String, [ResponseOrContinuationRequest])] = [
             (
                 input,
                 [
