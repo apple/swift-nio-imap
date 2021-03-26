@@ -14,3 +14,6 @@ services:
 
   shell:
     image: swift-nio-imap:20.04-5.4
+    
+  performance-test:
+    image: swift-nio-imap:20.04-5.4
