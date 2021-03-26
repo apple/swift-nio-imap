@@ -77,4 +77,30 @@ extension CommandParser_Tests {
         XCTAssertEqual(try! parser.parseCommandStream(buffer: &input), .init(numberOfSynchronisingLiterals: 0, command: .append(.start(tag: "3", appendingTo: .inbox))))
         XCTAssertEqual(input, " {3+}\r\n123 {3+}\r\n456 {3+}\r\n789\r\n")
     }
+    
+    func testRandomDataDoesntCrash() {
+        
+        let inputs: [[UInt8]] = [
+            Array("+000000000000000000000000000000000000000000000000000000000}\n".utf8),
+            Array("eSequence468117eY SEARCH 4:1 000,0\n000059?000000600=)O".utf8),
+            [0x41, 0x5D, 0x20, 0x55, 0x49, 0x44, 0x20, 0x43, 0x4F, 0x50, 0x59, 0x20, 0x35, 0x2C, 0x35, 0x3A, 0x34, 0x00, 0x3D, 0x0C, 0x0A, 0x43, 0x20, 0x22, 0xE8],
+        ]
+        
+        for input in inputs {
+            var parser = CommandParser()
+            do {
+                var buffer = ByteBuffer(bytes: input)
+                var lastReadableBytes = buffer.readableBytes
+                var newReadableBytes = 0
+                while newReadableBytes < lastReadableBytes {
+                    lastReadableBytes = buffer.readableBytes
+                    _ = try parser.parseCommandStream(buffer: &buffer)
+                    newReadableBytes = buffer.readableBytes
+                }
+            } catch {
+                // do nothing, we don't care
+            }
+        }
+        
+    }
 }

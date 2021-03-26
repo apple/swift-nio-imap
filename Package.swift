@@ -100,12 +100,5 @@ let package = Package(
                 .product(name: "NIO", package: "swift-nio"),
             ]
         ),
-        .testTarget(
-            name: "NIOIMAPFuzzerTests",
-            dependencies: [
-                "NIOIMAP",
-                .product(name: "NIO", package: "swift-nio"),
-            ]
-        ),
     ]
 )
