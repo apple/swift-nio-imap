@@ -23,7 +23,13 @@ import NIOIMAP
     }
     var parser = CommandParser()
     do {
-        _ = try parser.parseCommandStream(buffer: &buffer)
+        var oldBytesRemaing = buffer.readableBytes
+        var newBytesRemaining = 0
+        while newBytesRemaining < oldBytesRemaing {
+            oldBytesRemaing = buffer.readableBytes
+            _ = try parser.parseCommandStream(buffer: &buffer)
+            newBytesRemaining = buffer.readableBytes
+        }
     } catch {
         // do nothing
     }
