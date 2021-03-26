@@ -236,20 +236,20 @@ class IMAPClientHandlerTests: XCTestCase {
     }
 
     func testContinuationRequestsAsUserEvents() {
-        let eventExpectation1 = XCTestExpectation(description: "Expected user event")
-        let eventExpectation2 = XCTestExpectation(description: "Expected user event")
-        let eventExpectation3 = XCTestExpectation(description: "Expected user event")
+        let eventExpectation1 = self.channel.eventLoop.makePromise(of: Void.self)
+        let eventExpectation2 = self.channel.eventLoop.makePromise(of: Void.self)
+        let eventExpectation3 = self.channel.eventLoop.makePromise(of: Void.self)
 
         class UserEventHandler: ChannelDuplexHandler {
             typealias InboundIn = Response
 
             typealias OutboundIn = CommandStream
 
-            var expectation1: XCTestExpectation
-            var expectation2: XCTestExpectation
-            var expectation3: XCTestExpectation
+            var expectation1: EventLoopPromise<Void>
+            var expectation2: EventLoopPromise<Void>
+            var expectation3: EventLoopPromise<Void>
 
-            init(expectation1: XCTestExpectation, expectation2: XCTestExpectation, expectation3: XCTestExpectation) {
+            init(expectation1: EventLoopPromise<Void>, expectation2: EventLoopPromise<Void>, expectation3: EventLoopPromise<Void>) {
                 self.expectation1 = expectation1
                 self.expectation2 = expectation2
                 self.expectation3 = expectation3
@@ -261,9 +261,9 @@ class IMAPClientHandlerTests: XCTestCase {
                     return
                 }
                 switch textEvent.text {
-                case "1": self.expectation1.fulfill()
-                case "2": self.expectation2.fulfill()
-                case "3": self.expectation3.fulfill()
+                case "1": self.expectation1.succeed(())
+                case "2": self.expectation2.succeed(())
+                case "3": self.expectation3.succeed(())
                 default:
                     XCTFail("Not sure who sent this event, but it wasn't us")
                 }
@@ -280,17 +280,17 @@ class IMAPClientHandlerTests: XCTestCase {
         self.writeOutbound(.command(.init(tag: "A1", command: .login(username: "\\", password: "\\"))), wait: false)
         self.assertOutboundString("A1 LOGIN {1}\r\n")
         self.writeInbound("+ 1\r\n")
-        wait(for: [eventExpectation1], timeout: 1.0)
+        try! eventExpectation1.futureResult.wait()
         self.assertOutboundString("\\ {1}\r\n")
         self.writeInbound("+ 2\r\n")
-        wait(for: [eventExpectation2], timeout: 1.0)
+        try! eventExpectation2.futureResult.wait()
         self.assertOutboundString("\\\r\n")
 
         // now confirm idle
         self.writeOutbound(.command(.init(tag: "A2", command: .idleStart)), wait: false)
         self.assertOutboundString("A2 IDLE\r\n")
         self.writeInbound("+ 3\r\n")
-        wait(for: [eventExpectation3], timeout: 1.0)
+        try! eventExpectation3.futureResult.wait()
         self.assertInbound(.idleStarted)
         self.writeOutbound(.idleDone)
         self.assertOutboundString("DONE\r\n")
