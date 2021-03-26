@@ -64,8 +64,12 @@ public struct SynchronizingLiteralParser {
         while magnitude < 10, current < 4294967295 / 10 {
             switch buffer.readableBytesView.last {
             case .some(let digit) where (UInt8(ascii: "0") ... UInt8(ascii: "9")).contains(digit):
-                current += (magnitude * Int(digit - UInt8(ascii: "0")))
-                magnitude *= 10
+                if current.addingReportingOverflow((magnitude * Int(digit - UInt8(ascii: "0")))) {
+                    throw ParserError(hint: "Overflow")
+                }
+                if magnitude.multipliedReportingOverflow(by: 10) {
+                    throw ParserError(hint: "Overflow")
+                }
                 buffer.moveWriterIndex(to: buffer.writerIndex - 1)
             case .some:
                 if magnitude == 1 {
