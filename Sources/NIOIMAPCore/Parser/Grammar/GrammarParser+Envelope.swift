@@ -52,11 +52,11 @@ extension GrammarParser {
 
     // reusable for a lot of the env-* types
     static func parseEnvelopeEmailAddresses(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [EmailAddress] {
-        try PL.fixedString("(", buffer: &buffer, tracker: tracker)
+        try PL.parseFixedString("(", buffer: &buffer, tracker: tracker)
         let addresses = try PL.parseOneOrMore(buffer: &buffer, tracker: tracker) { buffer, tracker in
             try self.parseEmailAddress(buffer: &buffer, tracker: tracker)
         }
-        try PL.fixedString(")", buffer: &buffer, tracker: tracker)
+        try PL.parseFixedString(")", buffer: &buffer, tracker: tracker)
         return addresses
     }
 
@@ -65,7 +65,7 @@ extension GrammarParser {
             try self.parseNil(buffer: &buffer, tracker: tracker)
             return []
         }
-        let addresses = try PL.oneOf(
+        let addresses = try PL.parseOneOf(
             parseEnvelopeEmailAddresses,
             parseOptionalEnvelopeEmailAddresses_nil,
             buffer: &buffer,
@@ -79,15 +79,15 @@ extension GrammarParser {
     //                   addr-host ")"
     static func parseEmailAddress(buffer: inout ParseBuffer, tracker: StackTracker) throws -> EmailAddress {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> EmailAddress in
-            try PL.fixedString("(", buffer: &buffer, tracker: tracker)
+            try PL.parseFixedString("(", buffer: &buffer, tracker: tracker)
             let name = try self.parseNString(buffer: &buffer, tracker: tracker)
-            try PL.fixedString(" ", buffer: &buffer, tracker: tracker)
+            try PL.parseFixedString(" ", buffer: &buffer, tracker: tracker)
             let adl = try self.parseNString(buffer: &buffer, tracker: tracker)
-            try PL.fixedString(" ", buffer: &buffer, tracker: tracker)
+            try PL.parseFixedString(" ", buffer: &buffer, tracker: tracker)
             let mailbox = try self.parseNString(buffer: &buffer, tracker: tracker)
-            try PL.fixedString(" ", buffer: &buffer, tracker: tracker)
+            try PL.parseFixedString(" ", buffer: &buffer, tracker: tracker)
             let host = try self.parseNString(buffer: &buffer, tracker: tracker)
-            try PL.fixedString(")", buffer: &buffer, tracker: tracker)
+            try PL.parseFixedString(")", buffer: &buffer, tracker: tracker)
             return EmailAddress(personName: name, sourceRoot: adl, mailbox: mailbox, host: host)
         }
     }
@@ -104,7 +104,7 @@ extension GrammarParser {
     //                   env-bcc SP env-in-reply-to SP env-message-id ")"
     static func parseEnvelope(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Envelope {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Envelope in
-            try PL.fixedString("(", buffer: &buffer, tracker: tracker)
+            try PL.parseFixedString("(", buffer: &buffer, tracker: tracker)
             let date = try self.parseNString(buffer: &buffer, tracker: tracker).flatMap { InternetMessageDate(String(buffer: $0)) }
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             let subject = try self.parseNString(buffer: &buffer, tracker: tracker)
@@ -124,7 +124,7 @@ extension GrammarParser {
             let inReplyTo = try self.parseMessageID(buffer: &buffer, tracker: tracker)
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             let messageID = try self.parseMessageID(buffer: &buffer, tracker: tracker)
-            try PL.fixedString(")", buffer: &buffer, tracker: tracker)
+            try PL.parseFixedString(")", buffer: &buffer, tracker: tracker)
             return Envelope(
                 date: date,
                 subject: subject,

@@ -153,7 +153,7 @@ public struct CommandParser: Parser {
     private mutating func handleLines(buffer: inout ParseBuffer, tracker: StackTracker) throws -> CommandStream {
         func parseCommand(buffer: inout ParseBuffer, tracker: StackTracker) throws -> CommandStream {
             let command = try GrammarParser.parseTaggedCommand(buffer: &buffer, tracker: tracker)
-            try ParserLibrary.newline(buffer: &buffer, tracker: tracker)
+            try ParserLibrary.parseNewline(buffer: &buffer, tracker: tracker)
             if case .idleStart = command.command {
                 self.mode = .idle
             }
@@ -168,11 +168,11 @@ public struct CommandParser: Parser {
 
         func parseAuthenticationChallengeResponse(buffer: inout ParseBuffer, tracker: StackTracker) throws -> CommandStream {
             let authenticationChallengeResponse = try GrammarParser.parseBase64(buffer: &buffer, tracker: tracker)
-            try ParserLibrary.newline(buffer: &buffer, tracker: tracker)
+            try ParserLibrary.parseNewline(buffer: &buffer, tracker: tracker)
             return .continuationResponse(authenticationChallengeResponse)
         }
 
-        return try ParserLibrary.oneOf(
+        return try ParserLibrary.parseOneOf(
             parseCommand,
             parseAppend,
             parseAuthenticationChallengeResponse,
@@ -195,7 +195,7 @@ public struct CommandParser: Parser {
         } catch is ParserError {
             let save = buffer
             do {
-                try ParserLibrary.newline(buffer: &buffer, tracker: tracker)
+                try ParserLibrary.parseNewline(buffer: &buffer, tracker: tracker)
                 self.mode = .lines
                 return .append(.finish)
             } catch {

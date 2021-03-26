@@ -28,14 +28,14 @@ extension GrammarParser {
     static func parseDate(buffer: inout ParseBuffer, tracker: StackTracker) throws -> IMAPDate {
         func parseDateText_quoted(buffer: inout ParseBuffer, tracker: StackTracker) throws -> IMAPDate {
             try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
-                try PL.fixedString("\"", buffer: &buffer, tracker: tracker)
+                try PL.parseFixedString("\"", buffer: &buffer, tracker: tracker)
                 let date = try self.parseDateText(buffer: &buffer, tracker: tracker)
-                try PL.fixedString("\"", buffer: &buffer, tracker: tracker)
+                try PL.parseFixedString("\"", buffer: &buffer, tracker: tracker)
                 return date
             }
         }
 
-        return try PL.oneOf(
+        return try PL.parseOneOf(
             parseDateText,
             parseDateText_quoted,
             buffer: &buffer,
@@ -55,11 +55,11 @@ extension GrammarParser {
     // date-day-fixed  = (SP DIGIT) / 2DIGIT
     static func parseDateDayFixed(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Int {
         func parseDateDayFixed_spaced(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Int {
-            try PL.fixedString(" ", buffer: &buffer, tracker: tracker)
+            try PL.parseFixedString(" ", buffer: &buffer, tracker: tracker)
             return try self.parseNDigits(buffer: &buffer, tracker: tracker, bytes: 1)
         }
 
-        return try PL.oneOf(
+        return try PL.parseOneOf(
             parseDateDayFixed_spaced,
             parse2Digit,
             buffer: &buffer,
@@ -84,9 +84,9 @@ extension GrammarParser {
     static func parseDateText(buffer: inout ParseBuffer, tracker: StackTracker) throws -> IMAPDate {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             let day = try self.parseDateDay(buffer: &buffer, tracker: tracker)
-            try PL.fixedString("-", buffer: &buffer, tracker: tracker)
+            try PL.parseFixedString("-", buffer: &buffer, tracker: tracker)
             let month = try self.parseDateMonth(buffer: &buffer, tracker: tracker)
-            try PL.fixedString("-", buffer: &buffer, tracker: tracker)
+            try PL.parseFixedString("-", buffer: &buffer, tracker: tracker)
             let year = try self.parse4Digit(buffer: &buffer, tracker: tracker)
             guard let date = IMAPDate(year: year, month: month, day: day) else {
                 throw ParserError(hint: "Invalid date components \(year) \(month) \(day)")
@@ -99,22 +99,22 @@ extension GrammarParser {
     //                   SP time SP zone DQUOTE
     static func parseInternalDate(buffer: inout ParseBuffer, tracker: StackTracker) throws -> InternalDate {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
-            try PL.fixedString("\"", buffer: &buffer, tracker: tracker)
+            try PL.parseFixedString("\"", buffer: &buffer, tracker: tracker)
             let day = try self.parseDateDayFixed(buffer: &buffer, tracker: tracker)
-            try PL.fixedString("-", buffer: &buffer, tracker: tracker)
+            try PL.parseFixedString("-", buffer: &buffer, tracker: tracker)
             let month = try self.parseDateMonth(buffer: &buffer, tracker: tracker)
-            try PL.fixedString("-", buffer: &buffer, tracker: tracker)
+            try PL.parseFixedString("-", buffer: &buffer, tracker: tracker)
             let year = try self.parse4Digit(buffer: &buffer, tracker: tracker)
-            try PL.fixedString(" ", buffer: &buffer, tracker: tracker)
+            try PL.parseFixedString(" ", buffer: &buffer, tracker: tracker)
 
             // time            = 2DIGIT ":" 2DIGIT ":" 2DIGIT
             let hour = try self.parse2Digit(buffer: &buffer, tracker: tracker)
-            try PL.fixedString(":", buffer: &buffer, tracker: tracker)
+            try PL.parseFixedString(":", buffer: &buffer, tracker: tracker)
             let minute = try self.parse2Digit(buffer: &buffer, tracker: tracker)
-            try PL.fixedString(":", buffer: &buffer, tracker: tracker)
+            try PL.parseFixedString(":", buffer: &buffer, tracker: tracker)
             let second = try self.parse2Digit(buffer: &buffer, tracker: tracker)
 
-            try PL.fixedString(" ", buffer: &buffer, tracker: tracker)
+            try PL.parseFixedString(" ", buffer: &buffer, tracker: tracker)
 
             func splitZoneMinutes(_ raw: Int) -> Int? {
                 guard raw >= 0 else { return nil }
@@ -126,7 +126,7 @@ extension GrammarParser {
 
             // zone            = ("+" / "-") 4DIGIT
             func parseZonePositive(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Int {
-                try PL.fixedString("+", buffer: &buffer, tracker: tracker)
+                try PL.parseFixedString("+", buffer: &buffer, tracker: tracker)
                 let num = try self.parse4Digit(buffer: &buffer, tracker: tracker)
                 guard let zone = splitZoneMinutes(num) else {
                     throw ParserError(hint: "Building TimeZone from \(num) failed")
@@ -135,7 +135,7 @@ extension GrammarParser {
             }
 
             func parseZoneNegative(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Int {
-                try PL.fixedString("-", buffer: &buffer, tracker: tracker)
+                try PL.parseFixedString("-", buffer: &buffer, tracker: tracker)
                 let num = try self.parse4Digit(buffer: &buffer, tracker: tracker)
                 guard let zone = splitZoneMinutes(num) else {
                     throw ParserError(hint: "Building TimeZone from \(num) failed")
@@ -143,14 +143,14 @@ extension GrammarParser {
                 return -zone
             }
 
-            let zone = try PL.oneOf(
+            let zone = try PL.parseOneOf(
                 parseZonePositive,
                 parseZoneNegative,
                 buffer: &buffer,
                 tracker: tracker
             )
 
-            try PL.fixedString("\"", buffer: &buffer, tracker: tracker)
+            try PL.parseFixedString("\"", buffer: &buffer, tracker: tracker)
             guard
                 let components = InternalDate.Components(year: year, month: month, day: day, hour: hour, minute: minute, second: second, timeZoneMinutes: zone)
             else {

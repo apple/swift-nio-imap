@@ -28,22 +28,22 @@ extension GrammarParser {
     static func parseMessageData(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageData {
         func parseMessageData_expunge(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageData {
             let number = try self.parseSequenceNumber(buffer: &buffer, tracker: tracker)
-            try PL.fixedString(" EXPUNGE", buffer: &buffer, tracker: tracker)
+            try PL.parseFixedString(" EXPUNGE", buffer: &buffer, tracker: tracker)
             return .expunge(number)
         }
 
         func parseMessageData_vanished(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageData {
-            try PL.fixedString("VANISHED ", buffer: &buffer, tracker: tracker)
+            try PL.parseFixedString("VANISHED ", buffer: &buffer, tracker: tracker)
             return .vanished(try self.parseSequenceSet(buffer: &buffer, tracker: tracker))
         }
 
         func parseMessageData_vanishedEarlier(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageData {
-            try PL.fixedString("VANISHED (EARLIER) ", buffer: &buffer, tracker: tracker)
+            try PL.parseFixedString("VANISHED (EARLIER) ", buffer: &buffer, tracker: tracker)
             return .vanishedEarlier(try self.parseSequenceSet(buffer: &buffer, tracker: tracker))
         }
 
         func parseMessageData_generateAuthorizedURL(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageData {
-            try PL.fixedString("GENURLAUTH", buffer: &buffer, tracker: tracker)
+            try PL.parseFixedString("GENURLAUTH", buffer: &buffer, tracker: tracker)
             let array = try PL.parseOneOrMore(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> ByteBuffer in
                 try PL.parseSpaces(buffer: &buffer, tracker: tracker)
                 return try self.parseAString(buffer: &buffer, tracker: tracker)
@@ -52,7 +52,7 @@ extension GrammarParser {
         }
 
         func parseMessageData_fetchData(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageData {
-            try PL.fixedString("URLFETCH", buffer: &buffer, tracker: tracker)
+            try PL.parseFixedString("URLFETCH", buffer: &buffer, tracker: tracker)
             let array = try PL.parseOneOrMore(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> URLFetchData in
                 try PL.parseSpaces(buffer: &buffer, tracker: tracker)
                 return try self.parseURLFetchData(buffer: &buffer, tracker: tracker)
@@ -60,7 +60,7 @@ extension GrammarParser {
             return .urlFetch(array)
         }
 
-        return try PL.oneOf([
+        return try PL.parseOneOf([
             parseMessageData_expunge,
             parseMessageData_vanished,
             parseMessageData_vanishedEarlier,
@@ -81,7 +81,7 @@ extension GrammarParser {
     static func parseMessageAttribute(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute {
         func parseMessageAttribute_flags(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute {
             try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> MessageAttribute in
-                try PL.fixedString("FLAGS", buffer: &buffer, tracker: tracker)
+                try PL.parseFixedString("FLAGS", buffer: &buffer, tracker: tracker)
                 try PL.parseSpaces(buffer: &buffer, tracker: tracker)
                 let flags = try self.parseFlagList(buffer: &buffer, tracker: tracker)
                 return .flags(flags)
@@ -89,25 +89,25 @@ extension GrammarParser {
         }
 
         func parseMessageAttribute_envelope(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute {
-            try PL.fixedString("ENVELOPE ", buffer: &buffer, tracker: tracker)
+            try PL.parseFixedString("ENVELOPE ", buffer: &buffer, tracker: tracker)
             return .envelope(try self.parseEnvelope(buffer: &buffer, tracker: tracker))
         }
 
         func parseMessageAttribute_internalDate(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute {
-            try PL.fixedString("INTERNALDATE ", buffer: &buffer, tracker: tracker)
+            try PL.parseFixedString("INTERNALDATE ", buffer: &buffer, tracker: tracker)
             return .internalDate(try self.parseInternalDate(buffer: &buffer, tracker: tracker))
         }
 
         func parseMessageAttribute_rfc822Size(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute {
-            try PL.fixedString("RFC822.SIZE ", buffer: &buffer, tracker: tracker)
+            try PL.parseFixedString("RFC822.SIZE ", buffer: &buffer, tracker: tracker)
             return .rfc822Size(try self.parseNumber(buffer: &buffer, tracker: tracker))
         }
 
         func parseMessageAttribute_body(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute {
-            try PL.fixedString("BODY", buffer: &buffer, tracker: tracker)
+            try PL.parseFixedString("BODY", buffer: &buffer, tracker: tracker)
             let hasExtensionData: Bool = {
                 do {
-                    try PL.fixedString("STRUCTURE", buffer: &buffer, tracker: tracker)
+                    try PL.parseFixedString("STRUCTURE", buffer: &buffer, tracker: tracker)
                     return true
                 } catch {
                     return false
@@ -119,12 +119,12 @@ extension GrammarParser {
         }
 
         func parseMessageAttribute_uid(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute {
-            try PL.fixedString("UID ", buffer: &buffer, tracker: tracker)
+            try PL.parseFixedString("UID ", buffer: &buffer, tracker: tracker)
             return .uid(try self.parseUID(buffer: &buffer, tracker: tracker))
         }
 
         func parseMessageAttribute_binarySize(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute {
-            try PL.fixedString("BINARY.SIZE", buffer: &buffer, tracker: tracker)
+            try PL.parseFixedString("BINARY.SIZE", buffer: &buffer, tracker: tracker)
             let section = try self.parseSectionBinary(buffer: &buffer, tracker: tracker)
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             let number = try self.parseNumber(buffer: &buffer, tracker: tracker)
@@ -132,7 +132,7 @@ extension GrammarParser {
         }
 
         func parseMessageAttribute_binary(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute {
-            try PL.fixedString("BINARY", buffer: &buffer, tracker: tracker)
+            try PL.parseFixedString("BINARY", buffer: &buffer, tracker: tracker)
             let section = try self.parseSectionBinary(buffer: &buffer, tracker: tracker)
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             let string = try self.parseNString(buffer: &buffer, tracker: tracker)
@@ -144,14 +144,14 @@ extension GrammarParser {
         }
 
         func parseMessageAttribute_gmailMessageID(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute {
-            try PL.fixedString("X-GM-MSGID", buffer: &buffer, tracker: tracker)
+            try PL.parseFixedString("X-GM-MSGID", buffer: &buffer, tracker: tracker)
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             let (id, _) = try PL.parseUnsignedInt64(buffer: &buffer, tracker: tracker)
             return .gmailMessageID(id)
         }
 
         func parseMessageAttribute_gmailThreadID(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute {
-            try PL.fixedString("X-GM-THRID", buffer: &buffer, tracker: tracker)
+            try PL.parseFixedString("X-GM-THRID", buffer: &buffer, tracker: tracker)
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             let (id, _) = try PL.parseUnsignedInt64(buffer: &buffer, tracker: tracker)
             return .gmailThreadID(id)
@@ -159,9 +159,9 @@ extension GrammarParser {
 
         func parseMessageAttribute_gmailLabels(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute {
             var attributes: [GmailLabel] = []
-            try PL.fixedString("X-GM-LABELS (", buffer: &buffer, tracker: tracker)
+            try PL.parseFixedString("X-GM-LABELS (", buffer: &buffer, tracker: tracker)
 
-            let first: GmailLabel? = try PL.optional(buffer: &buffer, tracker: tracker) { buffer, tracker in
+            let first: GmailLabel? = try PL.parseOptional(buffer: &buffer, tracker: tracker) { buffer, tracker in
                 try parseGmailLabel(buffer: &buffer, tracker: tracker)
             }
 
@@ -174,11 +174,11 @@ extension GrammarParser {
                 }
             }
 
-            try PL.fixedString(")", buffer: &buffer, tracker: tracker)
+            try PL.parseFixedString(")", buffer: &buffer, tracker: tracker)
             return .gmailLabels(attributes)
         }
 
-        return try PL.oneOf([
+        return try PL.parseOneOf([
             parseMessageAttribute_envelope,
             parseMessageAttribute_internalDate,
             parseMessageAttribute_rfc822Size,
