@@ -285,12 +285,15 @@ class IMAPClientHandlerTests: XCTestCase {
         self.writeInbound("+ 2\r\n")
         wait(for: [eventExpectation2], timeout: 1.0)
         self.assertOutboundString("\\\r\n")
-        
+
         // now confirm idle
-        self.writeOutbound(.command(.init(tag: "A2", command: idleStart)), wait: false)
+        self.writeOutbound(.command(.init(tag: "A2", command: .idleStart)), wait: false)
         self.assertOutboundString("A2 IDLE\r\n")
         self.writeInbound("+ 3\r\n")
         wait(for: [eventExpectation3], timeout: 1.0)
+        self.assertInbound(.idleStarted)
+        self.writeOutbound(.idleDone)
+        self.assertOutboundString("DONE\r\n")
     }
 
     // MARK: - setup / tear down
