@@ -234,33 +234,32 @@ class IMAPClientHandlerTests: XCTestCase {
         XCTAssertNoThrow(XCTAssertEqual(try channel.readInbound(), Response.taggedResponse(.init(tag: "A001", state: .ok(.init(text: "GSSAPI authentication successful"))))))
         XCTAssertEqual(handler._state, .expectingResponses)
     }
-    
+
     func testContinuationRequestsAsUserEvents() {
-        
         let eventExpectation1 = XCTestExpectation(description: "Expected user event")
         let eventExpectation2 = XCTestExpectation(description: "Expected user event")
         eventExpectation1.expectedFulfillmentCount = 1
         eventExpectation2.expectedFulfillmentCount = 1
         eventExpectation1.assertForOverFulfill = true
         eventExpectation2.assertForOverFulfill = true
-        
+
         class UserEventHandler: ChannelDuplexHandler {
             typealias InboundIn = Response
-            
+
             typealias OutboundIn = CommandStream
-            
+
             var expectation1: XCTestExpectation
             var expectation2: XCTestExpectation
-            
+
             init(expectation1: XCTestExpectation, expectation2: XCTestExpectation) {
                 self.expectation1 = expectation1
                 self.expectation2 = expectation2
             }
-            
+
             public func userInboundEventTriggered(context: ChannelHandlerContext, event: Any) {
                 guard let event = event as? ContinuationRequest, case .responseText(let textEvent) = event else {
                     XCTFail()
-                    return 
+                    return
                 }
                 if textEvent.text == "1" {
                     self.expectation1.fulfill()
@@ -270,15 +269,13 @@ class IMAPClientHandlerTests: XCTestCase {
                     XCTFail("Not sure who sent this event, but it wasn't us")
                 }
             }
-            
         }
-        
+
         try! self.channel.pipeline.addHandler(UserEventHandler(
             expectation1: eventExpectation1,
             expectation2: eventExpectation2
         )).wait()
-        
-        
+
         self.writeOutbound(.command(.init(tag: "A1", command: .login(username: "\\", password: "\\"))), wait: false)
         self.assertOutboundString("A1 LOGIN {1}\r\n")
         self.writeInbound("+ 1\r\n")
