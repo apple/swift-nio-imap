@@ -60,8 +60,8 @@ extension TestUtilities {
 
         defer {
             let remaining = (try? PL.parseBytes(buffer: &parseBuffer,
-                                                           tracker: .makeNewDefaultLimitStackTracker,
-                                                           upTo: .max)) ?? ByteBuffer()
+                                                tracker: .makeNewDefaultLimitStackTracker,
+                                                upTo: .max)) ?? ByteBuffer()
             let expectedString = String(buffer: expected)
             let remainingString = String(buffer: remaining)
             if shouldRemainUnchanged {

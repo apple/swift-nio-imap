@@ -177,8 +177,8 @@ extension ResponseParser {
             )
         } else {
             let bytes = try PL.parseBytes(buffer: &buffer,
-                                                     tracker: .makeNewDefaultLimitStackTracker,
-                                                     upTo: remaining)
+                                          tracker: .makeNewDefaultLimitStackTracker,
+                                          upTo: remaining)
             let leftToRead = remaining - bytes.readableBytes
             assert(leftToRead >= 0, "\(leftToRead) is negative")
 
