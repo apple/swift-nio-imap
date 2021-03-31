@@ -103,17 +103,15 @@ extension GrammarParser {
         }
 
         func parseMessageAttribute_body(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute {
-            let hasExtensionData: Bool = {
-                do {
-                    try PL.parseFixedString("STRUCTURE", buffer: &buffer, tracker: tracker)
-                    return true
-                } catch {
-                    return false
-                }
-            }()
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             let body = try self.parseBody(buffer: &buffer, tracker: tracker)
-            return .body(body, hasExtensionData: hasExtensionData)
+            return .body(body, hasExtensionData: false)
+        }
+        
+        func parseMessageAttribute_bodyStructure(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute {
+            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+            let body = try self.parseBody(buffer: &buffer, tracker: tracker)
+            return .body(body, hasExtensionData: true)
         }
 
         func parseMessageAttribute_uid(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute {
@@ -185,6 +183,7 @@ extension GrammarParser {
             "INTERNALDATE": parseMessageAttribute_internalDate,
             "RFC822.SIZE": parseMessageAttribute_rfc822Size,
             "BODY": parseMessageAttribute_body,
+            "BODYSTRUCTURE": parseMessageAttribute_bodyStructure,
             "UID": parseMessageAttribute_uid,
             "BINARY.SIZE": parseMessageAttribute_binarySize,
             "BINARY": parseMessageAttribute_binary,

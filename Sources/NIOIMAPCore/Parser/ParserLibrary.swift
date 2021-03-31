@@ -93,7 +93,8 @@ extension ParserLibrary {
                 throw _IncompleteMessage()
             }
             guard firstBad != buffer.bytes.readableBytesView.startIndex else {
-                throw ParserError()
+                let badByte = buffer.bytes.readableBytesView[firstBad]
+                throw ParserError(hint: "Found unexpected \(Character(.init(badByte)))")
             }
             return buffer.bytes.readSlice(length: buffer.bytes.readableBytesView.startIndex.distance(to: firstBad))!
         }
