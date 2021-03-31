@@ -115,7 +115,7 @@ public struct CommandParser: Parser {
     }
 
     private mutating func parseCommandStream0(buffer: inout ParseBuffer, tracker: StackTracker) throws -> CommandStream? {
-        try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
+        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             switch self.mode {
             case .idle:
                 return try self.handleIdle(buffer: &buffer, tracker: tracker)
@@ -139,7 +139,7 @@ public struct CommandParser: Parser {
 
     private mutating func handleStreamingBytes(buffer: inout ParseBuffer, tracker: StackTracker, remaining: Int) throws -> CommandStream {
         assert(self.mode.isStreamingAppend)
-        let bytes = try ParserLibrary.parseBytes(buffer: &buffer, tracker: tracker, upTo: remaining)
+        let bytes = try PL.parseBytes(buffer: &buffer, tracker: tracker, upTo: remaining)
 
         assert(bytes.readableBytes <= remaining)
         if bytes.readableBytes == remaining {
@@ -153,7 +153,7 @@ public struct CommandParser: Parser {
     private mutating func handleLines(buffer: inout ParseBuffer, tracker: StackTracker) throws -> CommandStream {
         func parseCommand(buffer: inout ParseBuffer, tracker: StackTracker) throws -> CommandStream {
             let command = try GrammarParser.parseTaggedCommand(buffer: &buffer, tracker: tracker)
-            try ParserLibrary.parseNewline(buffer: &buffer, tracker: tracker)
+            try PL.parseNewline(buffer: &buffer, tracker: tracker)
             if case .idleStart = command.command {
                 self.mode = .idle
             }
@@ -168,11 +168,11 @@ public struct CommandParser: Parser {
 
         func parseAuthenticationChallengeResponse(buffer: inout ParseBuffer, tracker: StackTracker) throws -> CommandStream {
             let authenticationChallengeResponse = try GrammarParser.parseBase64(buffer: &buffer, tracker: tracker)
-            try ParserLibrary.parseNewline(buffer: &buffer, tracker: tracker)
+            try PL.parseNewline(buffer: &buffer, tracker: tracker)
             return .continuationResponse(authenticationChallengeResponse)
         }
 
-        return try ParserLibrary.parseOneOf(
+        return try PL.parseOneOf(
             parseCommand,
             parseAppend,
             parseAuthenticationChallengeResponse,
@@ -195,7 +195,7 @@ public struct CommandParser: Parser {
         } catch is ParserError {
             let save = buffer
             do {
-                try ParserLibrary.parseNewline(buffer: &buffer, tracker: tracker)
+                try PL.parseNewline(buffer: &buffer, tracker: tracker)
                 self.mode = .lines
                 return .append(.finish)
             } catch {
@@ -232,7 +232,7 @@ public struct CommandParser: Parser {
     }
 
     private mutating func handleStreamingCatenateBytes(buffer: inout ParseBuffer, tracker: StackTracker, remaining: Int) throws -> CommandStream {
-        let bytes = try ParserLibrary.parseBytes(buffer: &buffer, tracker: tracker, upTo: remaining)
+        let bytes = try PL.parseBytes(buffer: &buffer, tracker: tracker, upTo: remaining)
 
         assert(bytes.readableBytes <= remaining)
         if bytes.readableBytes == remaining {
