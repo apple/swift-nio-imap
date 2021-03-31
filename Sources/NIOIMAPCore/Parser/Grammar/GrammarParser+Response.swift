@@ -71,38 +71,39 @@ extension GrammarParser {
 
     /// This is a combination of `resp-cond-state`, `resp-cond-bye`, and `greeting`.
     static func parseUntaggedResponseStatus(buffer: inout ParseBuffer, tracker: StackTracker) throws -> UntaggedStatus {
-        func parseTaggedResponseState_ok(buffer: inout ParseBuffer, tracker: StackTracker) throws -> UntaggedStatus {
-            try PL.parseFixedString("OK ", buffer: &buffer, tracker: tracker)
+        func parseUntaggedResponseStatus_ok(buffer: inout ParseBuffer, tracker: StackTracker) throws -> UntaggedStatus {
+            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             return .ok(try self.parseResponseText(buffer: &buffer, tracker: tracker))
         }
 
-        func parseTaggedResponseState_no(buffer: inout ParseBuffer, tracker: StackTracker) throws -> UntaggedStatus {
-            try PL.parseFixedString("NO ", buffer: &buffer, tracker: tracker)
+        func parseUntaggedResponseStatus_no(buffer: inout ParseBuffer, tracker: StackTracker) throws -> UntaggedStatus {
+            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             return .no(try self.parseResponseText(buffer: &buffer, tracker: tracker))
         }
 
-        func parseTaggedResponseState_bad(buffer: inout ParseBuffer, tracker: StackTracker) throws -> UntaggedStatus {
-            try PL.parseFixedString("BAD ", buffer: &buffer, tracker: tracker)
+        func parseUntaggedResponseStatus_bad(buffer: inout ParseBuffer, tracker: StackTracker) throws -> UntaggedStatus {
+            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             return .bad(try self.parseResponseText(buffer: &buffer, tracker: tracker))
         }
 
-        func parseTaggedResponseState_preAuth(buffer: inout ParseBuffer, tracker: StackTracker) throws -> UntaggedStatus {
-            try PL.parseFixedString("PREAUTH ", buffer: &buffer, tracker: tracker)
+        func parseUntaggedResponseStatus_preAuth(buffer: inout ParseBuffer, tracker: StackTracker) throws -> UntaggedStatus {
+            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             return .preauth(try self.parseResponseText(buffer: &buffer, tracker: tracker))
         }
 
-        func parseTaggedResponseState_bye(buffer: inout ParseBuffer, tracker: StackTracker) throws -> UntaggedStatus {
-            try PL.parseFixedString("BYE ", buffer: &buffer, tracker: tracker)
+        func parseUntaggedResponseStatus_bye(buffer: inout ParseBuffer, tracker: StackTracker) throws -> UntaggedStatus {
+            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             return .bye(try self.parseResponseText(buffer: &buffer, tracker: tracker))
         }
-
-        return try PL.parseOneOf([
-            parseTaggedResponseState_ok,
-            parseTaggedResponseState_no,
-            parseTaggedResponseState_bad,
-            parseTaggedResponseState_preAuth,
-            parseTaggedResponseState_bye,
-        ], buffer: &buffer, tracker: tracker)
+        
+        let parsers: [String: (inout ParseBuffer, StackTracker) throws -> UntaggedStatus] = [
+            "OK": parseUntaggedResponseStatus_ok,
+            "NO": parseUntaggedResponseStatus_no,
+            "BAD": parseUntaggedResponseStatus_bad,
+            "PREAUTH": parseUntaggedResponseStatus_preAuth,
+            "BYE": parseUntaggedResponseStatus_bye,
+        ]
+        return try self.parseFromLookupTable(buffer: &buffer, tracker: tracker, parsers: parsers)
     }
 
     // resp-cond-state = ("OK" / "NO" / "BAD") SP resp-text
