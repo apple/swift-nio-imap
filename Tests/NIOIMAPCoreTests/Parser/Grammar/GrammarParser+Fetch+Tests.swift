@@ -112,22 +112,3 @@ extension GrammarParser_Fetch_Tests {
         )
     }
 }
-
-// MARK: - parseFetchModifierResponse
-
-extension GrammarParser_Fetch_Tests {
-    func testParseFetchModifierResponse() {
-        self.iterateTests(
-            testFunction: GrammarParser.parseFetchModificationResponse,
-            validInputs: [
-                ("MODSEQ (2)", "", .init(modifierSequenceValue: 2), #line),
-            ],
-            parserErrorInputs: [
-                ("MODSEQ (a)", "", #line),
-            ],
-            incompleteMessageInputs: [
-                ("MODSEQ (1", "", #line),
-            ]
-        )
-    }
-}

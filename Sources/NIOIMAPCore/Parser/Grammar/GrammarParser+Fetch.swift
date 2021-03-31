@@ -221,15 +221,6 @@ extension GrammarParser {
         ], buffer: &buffer, tracker: tracker)
     }
 
-    static func parseFetchModificationResponse(buffer: inout ParseBuffer, tracker: StackTracker) throws -> FetchModificationResponse {
-        try PL.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> FetchModificationResponse in
-            try PL.parseFixedString("MODSEQ (", buffer: &buffer, tracker: tracker)
-            let val = try self.parseModificationSequenceValue(buffer: &buffer, tracker: tracker)
-            try PL.parseFixedString(")", buffer: &buffer, tracker: tracker)
-            return .init(modifierSequenceValue: val)
-        }
-    }
-
     static func parseFetchStreamingResponse(buffer: inout ParseBuffer, tracker: StackTracker) throws -> StreamingKind {
         func parseFetchStreamingResponse_rfc822Text(buffer: inout ParseBuffer, tracker: StackTracker) throws -> StreamingKind {
             try PL.parseFixedString("RFC822.TEXT", buffer: &buffer, tracker: tracker)

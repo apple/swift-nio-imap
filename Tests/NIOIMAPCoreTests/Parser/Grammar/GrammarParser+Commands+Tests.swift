@@ -116,7 +116,7 @@ extension GrammarParser_Commands_Tests {
                 ("SETQUOTA ROOT (resource 123)", "\r", .setQuota(.init("ROOT"), [.init(resourceName: "resource", limit: 123)]), #line),
             ],
             parserErrorInputs: [
-                ("123", "", #line),
+                ("123", "\r", #line),
                 ("NOTHING", "\r", #line),
                 ("...", "\r", #line),
             ],
