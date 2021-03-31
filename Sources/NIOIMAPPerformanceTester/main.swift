@@ -120,7 +120,7 @@ func measureAndPrint(desc: String, fn: () throws -> Int) rethrows {
 
 // MARK: Utilities
 
-let humanReadable = true
+let humanReadable = false
 
 let startDate = Date()
 for (description, command) in commands {
