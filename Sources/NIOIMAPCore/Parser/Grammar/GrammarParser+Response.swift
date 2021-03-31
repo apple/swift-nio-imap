@@ -108,27 +108,26 @@ extension GrammarParser {
     // resp-cond-state = ("OK" / "NO" / "BAD") SP resp-text
     static func parseTaggedResponseState(buffer: inout ParseBuffer, tracker: StackTracker) throws -> TaggedResponse.State {
         func parseTaggedResponseState_ok(buffer: inout ParseBuffer, tracker: StackTracker) throws -> TaggedResponse.State {
-            try PL.parseFixedString("OK ", buffer: &buffer, tracker: tracker)
+            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             return .ok(try self.parseResponseText(buffer: &buffer, tracker: tracker))
         }
 
         func parseTaggedResponseState_no(buffer: inout ParseBuffer, tracker: StackTracker) throws -> TaggedResponse.State {
-            try PL.parseFixedString("NO ", buffer: &buffer, tracker: tracker)
+            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             return .no(try self.parseResponseText(buffer: &buffer, tracker: tracker))
         }
 
         func parseTaggedResponseState_bad(buffer: inout ParseBuffer, tracker: StackTracker) throws -> TaggedResponse.State {
-            try PL.parseFixedString("BAD ", buffer: &buffer, tracker: tracker)
+            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             return .bad(try self.parseResponseText(buffer: &buffer, tracker: tracker))
         }
 
-        return try PL.parseOneOf(
-            parseTaggedResponseState_ok,
-            parseTaggedResponseState_no,
-            parseTaggedResponseState_bad,
-            buffer: &buffer,
-            tracker: tracker
-        )
+        let parsers: [String: (inout ParseBuffer, StackTracker) throws -> TaggedResponse.State] = [
+            "OK": parseTaggedResponseState_ok,
+            "NO": parseTaggedResponseState_no,
+            "BAD": parseTaggedResponseState_bad,
+        ]
+        return try self.parseFromLookupTable(buffer: &buffer, tracker: tracker, parsers: parsers)
     }
 
     // response-payload = resp-cond-state / resp-cond-bye / mailbox-data / message-data / capability-data / id-response / enable-data
