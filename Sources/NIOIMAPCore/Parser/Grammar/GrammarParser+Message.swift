@@ -107,7 +107,7 @@ extension GrammarParser {
             let body = try self.parseBody(buffer: &buffer, tracker: tracker)
             return .body(body, hasExtensionData: false)
         }
-        
+
         func parseMessageAttribute_bodyStructure(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute {
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             let body = try self.parseBody(buffer: &buffer, tracker: tracker)
@@ -176,7 +176,7 @@ extension GrammarParser {
             try PL.parseFixedString(")", buffer: &buffer, tracker: tracker)
             return .gmailLabels(attributes)
         }
-        
+
         let parsers: [String: (inout ParseBuffer, StackTracker) throws -> MessageAttribute] = [
             "FLAGS": parseMessageAttribute_flags,
             "ENVELOPE": parseMessageAttribute_envelope,

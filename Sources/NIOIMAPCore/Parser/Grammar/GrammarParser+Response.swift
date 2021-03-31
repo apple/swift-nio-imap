@@ -95,7 +95,7 @@ extension GrammarParser {
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             return .bye(try self.parseResponseText(buffer: &buffer, tracker: tracker))
         }
-        
+
         let parsers: [String: (inout ParseBuffer, StackTracker) throws -> UntaggedStatus] = [
             "OK": parseUntaggedResponseStatus_ok,
             "NO": parseUntaggedResponseStatus_no,
