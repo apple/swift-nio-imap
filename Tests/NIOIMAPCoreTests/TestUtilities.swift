@@ -47,9 +47,9 @@ extension TestUtilities {
 
         defer {
             let expectedString = String(buffer: expected)
-            let remaining = (try? ParserLibrary.parseBytes(buffer: &parseBuffer,
-                                                           tracker: .makeNewDefaultLimitStackTracker,
-                                                           upTo: .max)) ?? ByteBuffer()
+            let remaining = (try? PL.parseBytes(buffer: &parseBuffer,
+                                                tracker: .makeNewDefaultLimitStackTracker,
+                                                upTo: .max)) ?? ByteBuffer()
             let remainingString = String(buffer: remaining)
             if shouldRemainUnchanged {
                 XCTAssertEqual(String(buffer: beforeRunningBody), remainingString, file: file, line: line)

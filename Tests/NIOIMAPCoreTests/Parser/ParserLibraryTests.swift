@@ -24,8 +24,8 @@ final class ParserLibraryTests: XCTestCase {}
 extension ParserLibraryTests {
     func test_parseOptionalWorksForNothing() {
         var buffer = TestUtilities.makeParseBuffer(for: "")
-        XCTAssertThrowsError(try ParserLibrary.optional(buffer: &buffer, tracker: StackTracker.testTracker) { buffer, tracker in
-            try ParserLibrary.fixedString("x", buffer: &buffer, tracker: tracker)
+        XCTAssertThrowsError(try PL.parseOptional(buffer: &buffer, tracker: StackTracker.testTracker) { buffer, tracker in
+            try PL.parseFixedString("x", buffer: &buffer, tracker: tracker)
         }) { error in
             XCTAssertTrue(error is _IncompleteMessage)
         }
@@ -33,24 +33,24 @@ extension ParserLibraryTests {
 
     func test_parseOptionalWorks() {
         var buffer = TestUtilities.makeParseBuffer(for: "x")
-        XCTAssertNoThrow(try ParserLibrary.optional(buffer: &buffer, tracker: StackTracker.testTracker) { buffer, tracker in
-            try ParserLibrary.fixedString("x", buffer: &buffer, tracker: tracker)
+        XCTAssertNoThrow(try PL.parseOptional(buffer: &buffer, tracker: StackTracker.testTracker) { buffer, tracker in
+            try PL.parseFixedString("x", buffer: &buffer, tracker: tracker)
         })
     }
 
     func test_parseOptionalWorksIfNotPresent() {
         var buffer = TestUtilities.makeParseBuffer(for: "y")
-        XCTAssertNoThrow(try ParserLibrary.optional(buffer: &buffer, tracker: StackTracker.testTracker) { buffer, tracker in
-            try ParserLibrary.fixedString("x", buffer: &buffer, tracker: tracker)
+        XCTAssertNoThrow(try PL.parseOptional(buffer: &buffer, tracker: StackTracker.testTracker) { buffer, tracker in
+            try PL.parseFixedString("x", buffer: &buffer, tracker: tracker)
         })
         XCTAssertEqual(1, buffer.readableBytes)
     }
 
     func test_parseOptionalCorrectlyResetsForCompositesIfNotEnough() {
         var buffer = TestUtilities.makeParseBuffer(for: "x")
-        XCTAssertThrowsError(try ParserLibrary.optional(buffer: &buffer, tracker: StackTracker.testTracker) { buffer, tracker in
-            try ParserLibrary.fixedString("x", buffer: &buffer, tracker: tracker)
-            try ParserLibrary.fixedString("y", buffer: &buffer, tracker: tracker)
+        XCTAssertThrowsError(try PL.parseOptional(buffer: &buffer, tracker: StackTracker.testTracker) { buffer, tracker in
+            try PL.parseFixedString("x", buffer: &buffer, tracker: tracker)
+            try PL.parseFixedString("y", buffer: &buffer, tracker: tracker)
         }) { error in
             XCTAssertTrue(error is _IncompleteMessage)
         }
@@ -59,9 +59,9 @@ extension ParserLibraryTests {
 
     func test_parseOptionalCorrectlyResetsForCompositesIfNotMatching() {
         var buffer = TestUtilities.makeParseBuffer(for: "xz")
-        XCTAssertNoThrow(try ParserLibrary.optional(buffer: &buffer, tracker: StackTracker.testTracker) { buffer, tracker in
-            try ParserLibrary.fixedString("x", buffer: &buffer, tracker: tracker)
-            try ParserLibrary.fixedString("y", buffer: &buffer, tracker: tracker)
+        XCTAssertNoThrow(try PL.parseOptional(buffer: &buffer, tracker: StackTracker.testTracker) { buffer, tracker in
+            try PL.parseFixedString("x", buffer: &buffer, tracker: tracker)
+            try PL.parseFixedString("y", buffer: &buffer, tracker: tracker)
         })
         XCTAssertEqual(2, buffer.readableBytes)
     }
@@ -73,24 +73,24 @@ extension ParserLibraryTests {
     func test_fixedStringCaseSensitively() {
         var buffer = TestUtilities.makeParseBuffer(for: "fooFooFOO")
 
-        XCTAssertNoThrow(try ParserLibrary.fixedString("fooFooFOO",
-                                                       caseSensitive: true,
-                                                       buffer: &buffer,
-                                                       tracker: .testTracker))
+        XCTAssertNoThrow(try PL.parseFixedString("fooFooFOO",
+                                                 caseSensitive: true,
+                                                 buffer: &buffer,
+                                                 tracker: .testTracker))
 
         buffer = TestUtilities.makeParseBuffer(for: "fooFooFOO")
-        XCTAssertThrowsError(try ParserLibrary.fixedString("foofoofoo",
-                                                           caseSensitive: true,
-                                                           buffer: &buffer,
-                                                           tracker: .testTracker)) { error in
+        XCTAssertThrowsError(try PL.parseFixedString("foofoofoo",
+                                                     caseSensitive: true,
+                                                     buffer: &buffer,
+                                                     tracker: .testTracker)) { error in
             XCTAssert(error is ParserError)
         }
 
         buffer = TestUtilities.makeParseBuffer(for: "foo")
-        XCTAssertThrowsError(try ParserLibrary.fixedString("fooFooFOO",
-                                                           caseSensitive: true,
-                                                           buffer: &buffer,
-                                                           tracker: .testTracker)) { error in
+        XCTAssertThrowsError(try PL.parseFixedString("fooFooFOO",
+                                                     caseSensitive: true,
+                                                     buffer: &buffer,
+                                                     tracker: .testTracker)) { error in
             XCTAssertTrue(error is _IncompleteMessage)
         }
     }
@@ -98,19 +98,19 @@ extension ParserLibraryTests {
     func test_fixedStringCaseInsensitively() {
         var buffer = TestUtilities.makeParseBuffer(for: "fooFooFOO")
 
-        XCTAssertNoThrow(try ParserLibrary.fixedString("fooFooFOO",
-                                                       buffer: &buffer,
-                                                       tracker: .testTracker))
+        XCTAssertNoThrow(try PL.parseFixedString("fooFooFOO",
+                                                 buffer: &buffer,
+                                                 tracker: .testTracker))
 
         buffer = TestUtilities.makeParseBuffer(for: "fooFooFOO")
-        XCTAssertNoThrow(try ParserLibrary.fixedString("foofoofoo",
-                                                       buffer: &buffer,
-                                                       tracker: .testTracker))
+        XCTAssertNoThrow(try PL.parseFixedString("foofoofoo",
+                                                 buffer: &buffer,
+                                                 tracker: .testTracker))
 
         buffer = TestUtilities.makeParseBuffer(for: "foo")
-        XCTAssertThrowsError(try ParserLibrary.fixedString("fooFooFOO",
-                                                           buffer: &buffer,
-                                                           tracker: .testTracker)) { error in
+        XCTAssertThrowsError(try PL.parseFixedString("fooFooFOO",
+                                                     buffer: &buffer,
+                                                     tracker: .testTracker)) { error in
             XCTAssertTrue(error is _IncompleteMessage)
         }
     }
@@ -119,10 +119,10 @@ extension ParserLibraryTests {
         var buffer = TestUtilities.makeParseBuffer(for: "fooFooFOO")
 
         buffer = TestUtilities.makeParseBuffer(for: "fooFooFOÖ")
-        XCTAssertThrowsError(try ParserLibrary.fixedString("fooFooFOO",
-                                                           caseSensitive: true,
-                                                           buffer: &buffer,
-                                                           tracker: .testTracker)) { error in
+        XCTAssertThrowsError(try PL.parseFixedString("fooFooFOO",
+                                                     caseSensitive: true,
+                                                     buffer: &buffer,
+                                                     tracker: .testTracker)) { error in
             XCTAssert(error is ParserError, "\(error)")
         }
     }
@@ -134,9 +134,9 @@ extension ParserLibraryTests {
     func test_parseZeroOrMoreParsesNothingButThereIsData() {
         TestUtilities.withParseBuffer("", terminator: "xy") { buffer in
             XCTAssertNoThrow(XCTAssertEqual([],
-                                            try ParserLibrary.parseZeroOrMore(buffer: &buffer, tracker: .testTracker) { buffer, tracker -> Int in
-                                                try ParserLibrary.fixedString("x", buffer: &buffer, tracker: tracker)
-                                                try ParserLibrary.fixedString("x", buffer: &buffer, tracker: tracker)
+                                            try PL.parseZeroOrMore(buffer: &buffer, tracker: .testTracker) { buffer, tracker -> Int in
+                                                try PL.parseFixedString("x", buffer: &buffer, tracker: tracker)
+                                                try PL.parseFixedString("x", buffer: &buffer, tracker: tracker)
                                                 return 1
                                             }))
         }
@@ -144,9 +144,9 @@ extension ParserLibraryTests {
 
     func test_parseZeroOrMoreParsesNothingNoData() {
         TestUtilities.withParseBuffer("") { buffer in
-            XCTAssertThrowsError(try ParserLibrary.parseZeroOrMore(buffer: &buffer, tracker: .testTracker) { buffer, tracker in
-                try ParserLibrary.fixedString("x", buffer: &buffer, tracker: tracker)
-                try ParserLibrary.fixedString("x", buffer: &buffer, tracker: tracker)
+            XCTAssertThrowsError(try PL.parseZeroOrMore(buffer: &buffer, tracker: .testTracker) { buffer, tracker in
+                try PL.parseFixedString("x", buffer: &buffer, tracker: tracker)
+                try PL.parseFixedString("x", buffer: &buffer, tracker: tracker)
             }) { error in
                 XCTAssertTrue(error is _IncompleteMessage)
             }
@@ -156,9 +156,9 @@ extension ParserLibraryTests {
     func test_parseZeroOrMoreParsesOneItemAndThereIsMore() {
         TestUtilities.withParseBuffer("xx", terminator: "xy") { buffer in
             XCTAssertNoThrow(XCTAssertEqual([1],
-                                            try ParserLibrary.parseZeroOrMore(buffer: &buffer, tracker: .testTracker) { buffer, tracker -> Int in
-                                                try ParserLibrary.fixedString("x", buffer: &buffer, tracker: tracker)
-                                                try ParserLibrary.fixedString("x", buffer: &buffer, tracker: tracker)
+                                            try PL.parseZeroOrMore(buffer: &buffer, tracker: .testTracker) { buffer, tracker -> Int in
+                                                try PL.parseFixedString("x", buffer: &buffer, tracker: tracker)
+                                                try PL.parseFixedString("x", buffer: &buffer, tracker: tracker)
                                                 return 1
                                             }))
         }
@@ -167,9 +167,9 @@ extension ParserLibraryTests {
     func test_parseZeroOrMoreParsesTwoItemsAndThereIsMore() {
         TestUtilities.withParseBuffer("xxxx", terminator: "xy") { buffer in
             XCTAssertNoThrow(XCTAssertEqual([1, 1],
-                                            try ParserLibrary.parseZeroOrMore(buffer: &buffer, tracker: .testTracker) { buffer, tracker -> Int in
-                                                try ParserLibrary.fixedString("x", buffer: &buffer, tracker: tracker)
-                                                try ParserLibrary.fixedString("x", buffer: &buffer, tracker: tracker)
+                                            try PL.parseZeroOrMore(buffer: &buffer, tracker: .testTracker) { buffer, tracker -> Int in
+                                                try PL.parseFixedString("x", buffer: &buffer, tracker: tracker)
+                                                try PL.parseFixedString("x", buffer: &buffer, tracker: tracker)
                                                 return 1
                                             }))
         }
@@ -181,9 +181,9 @@ extension ParserLibraryTests {
 extension ParserLibraryTests {
     func test_parseOneOrMoreParsesNothingButThereIsData() {
         TestUtilities.withParseBuffer("", terminator: "xy") { buffer in
-            XCTAssertThrowsError(try ParserLibrary.parseOneOrMore(buffer: &buffer, tracker: .testTracker) { buffer, tracker in
-                try ParserLibrary.fixedString("x", buffer: &buffer, tracker: tracker)
-                try ParserLibrary.fixedString("x", buffer: &buffer, tracker: tracker)
+            XCTAssertThrowsError(try PL.parseOneOrMore(buffer: &buffer, tracker: .testTracker) { buffer, tracker in
+                try PL.parseFixedString("x", buffer: &buffer, tracker: tracker)
+                try PL.parseFixedString("x", buffer: &buffer, tracker: tracker)
             }) { error in
                 XCTAssert(error is ParserError)
             }
@@ -192,9 +192,9 @@ extension ParserLibraryTests {
 
     func test_parseOneOrMoreParsesNothingNoData() {
         TestUtilities.withParseBuffer("") { buffer in
-            XCTAssertThrowsError(try ParserLibrary.parseOneOrMore(buffer: &buffer, tracker: .testTracker) { buffer, tracker in
-                try ParserLibrary.fixedString("x", buffer: &buffer, tracker: tracker)
-                try ParserLibrary.fixedString("x", buffer: &buffer, tracker: tracker)
+            XCTAssertThrowsError(try PL.parseOneOrMore(buffer: &buffer, tracker: .testTracker) { buffer, tracker in
+                try PL.parseFixedString("x", buffer: &buffer, tracker: tracker)
+                try PL.parseFixedString("x", buffer: &buffer, tracker: tracker)
             }) { error in
                 XCTAssertTrue(error is _IncompleteMessage)
             }
@@ -204,9 +204,9 @@ extension ParserLibraryTests {
     func test_parseOneOrMoreParsesOneItemAndThereIsMore() {
         TestUtilities.withParseBuffer("xx", terminator: "xy") { buffer in
             XCTAssertNoThrow(XCTAssertEqual([1],
-                                            try ParserLibrary.parseOneOrMore(buffer: &buffer, tracker: .testTracker) { buffer, tracker -> Int in
-                                                try ParserLibrary.fixedString("x", buffer: &buffer, tracker: tracker)
-                                                try ParserLibrary.fixedString("x", buffer: &buffer, tracker: tracker)
+                                            try PL.parseOneOrMore(buffer: &buffer, tracker: .testTracker) { buffer, tracker -> Int in
+                                                try PL.parseFixedString("x", buffer: &buffer, tracker: tracker)
+                                                try PL.parseFixedString("x", buffer: &buffer, tracker: tracker)
                                                 return 1
                                             }))
         }
@@ -215,9 +215,9 @@ extension ParserLibraryTests {
     func test_parseOneOrMoreParsesTwoItemsAndThereIsMore() {
         TestUtilities.withParseBuffer("xxxx", terminator: "xy") { buffer in
             XCTAssertNoThrow(XCTAssertEqual([1, 1],
-                                            try ParserLibrary.parseOneOrMore(buffer: &buffer, tracker: .testTracker) { buffer, tracker -> Int in
-                                                try ParserLibrary.fixedString("x", buffer: &buffer, tracker: tracker)
-                                                try ParserLibrary.fixedString("x", buffer: &buffer, tracker: tracker)
+                                            try PL.parseOneOrMore(buffer: &buffer, tracker: .testTracker) { buffer, tracker -> Int in
+                                                try PL.parseFixedString("x", buffer: &buffer, tracker: tracker)
+                                                try PL.parseFixedString("x", buffer: &buffer, tracker: tracker)
                                                 return 1
                                             }))
         }
@@ -236,7 +236,7 @@ extension ParserLibraryTests {
         for (string, remaining, line) in inputs {
             var string = ParseBuffer(ByteBuffer(string: string))
             let remaining = ParseBuffer(ByteBuffer(string: remaining))
-            XCTAssertNoThrow(try ParserLibrary.parseSpaces(buffer: &string, tracker: .makeNewDefaultLimitStackTracker), line: line)
+            XCTAssertNoThrow(try PL.parseSpaces(buffer: &string, tracker: .makeNewDefaultLimitStackTracker), line: line)
             XCTAssertEqual(string, remaining, line: line)
         }
     }
@@ -256,7 +256,7 @@ extension ParserLibraryTests {
             var string = ParseBuffer(ByteBuffer(string: string))
             var id = UInt64(0)
             var actualConsumed = 0
-            XCTAssertNoThrow((id, actualConsumed) = try ParserLibrary.parseUInt64(buffer: &string, tracker: .makeNewDefaultLimitStackTracker), line: line)
+            XCTAssertNoThrow((id, actualConsumed) = try PL.parseUnsignedInt64(buffer: &string, tracker: .makeNewDefaultLimitStackTracker), line: line)
             XCTAssertEqual(actualConsumed, consumed, line: line)
             XCTAssertEqual(id, result, line: line)
         }

@@ -70,37 +70,8 @@ public struct TooMuchRecursion: Error {
 }
 
 extension ParserLibrary {
-    static func parseZeroOrMoreCharacters(buffer: inout ParseBuffer, tracker: StackTracker, where: ((UInt8) -> Bool)) throws -> String {
-        try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, _ in
-            let maybeFirstBad = buffer.bytes.readableBytesView.firstIndex { char in
-                !`where`(char)
-            }
-
-            guard let firstBad = maybeFirstBad else {
-                throw _IncompleteMessage()
-            }
-            return buffer.bytes.readString(length: buffer.bytes.readableBytesView.startIndex.distance(to: firstBad))!
-        }
-    }
-
-    static func parseOneOrMoreCharacters(buffer: inout ParseBuffer, tracker: StackTracker, where: ((UInt8) -> Bool)) throws -> String {
-        try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, _ in
-            let maybeFirstBad = buffer.bytes.readableBytesView.firstIndex { char in
-                !`where`(char)
-            }
-
-            guard let firstBad = maybeFirstBad else {
-                throw _IncompleteMessage()
-            }
-            guard firstBad != buffer.bytes.readableBytesView.startIndex else {
-                throw ParserError(hint: "couldn't find one or more of the required characters")
-            }
-            return buffer.bytes.readString(length: buffer.bytes.readableBytesView.startIndex.distance(to: firstBad))!
-        }
-    }
-
-    static func parseZeroOrMoreCharactersByteBuffer(buffer: inout ParseBuffer, tracker: StackTracker, where: ((UInt8) -> Bool)) throws -> ByteBuffer {
-        try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, _ in
+    static func parseZeroOrMoreCharacters(buffer: inout ParseBuffer, tracker: StackTracker, where: ((UInt8) -> Bool)) throws -> ByteBuffer {
+        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, _ in
             let maybeFirstBad = buffer.bytes.readableBytesView.firstIndex { char in
                 !`where`(char)
             }
@@ -112,8 +83,8 @@ extension ParserLibrary {
         }
     }
 
-    static func parseOneOrMoreCharactersByteBuffer(buffer: inout ParseBuffer, tracker: StackTracker, where: ((UInt8) -> Bool)) throws -> ByteBuffer {
-        try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, _ in
+    static func parseOneOrMoreCharacters(buffer: inout ParseBuffer, tracker: StackTracker, where: ((UInt8) -> Bool)) throws -> ByteBuffer {
+        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, _ in
             let maybeFirstBad = buffer.bytes.readableBytesView.firstIndex { char in
                 !`where`(char)
             }
@@ -135,33 +106,33 @@ extension ParserLibrary {
     }
 
     static func parseOneOrMore<T>(buffer: inout ParseBuffer, into parsed: inout [T], tracker: StackTracker, parser: SubParser<T>) throws {
-        try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
+        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             parsed.append(try parser(&buffer, tracker))
-            while let next = try ParserLibrary.optional(buffer: &buffer, tracker: tracker, parser: parser) {
+            while let next = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: parser) {
                 parsed.append(next)
             }
         }
     }
 
     static func parseZeroOrMore<T>(buffer: inout ParseBuffer, into parsed: inout [T], tracker: StackTracker, parser: SubParser<T>) throws {
-        try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
-            while let next = try ParserLibrary.optional(buffer: &buffer, tracker: tracker, parser: parser) {
+        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
+            while let next = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: parser) {
                 parsed.append(next)
             }
         }
     }
 
     static func parseZeroOrMore<K, V>(buffer: inout ParseBuffer, into keyValues: inout KeyValues<K, V>, tracker: StackTracker, parser: SubParser<(K, V)>) throws {
-        try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
-            while let next = try ParserLibrary.optional(buffer: &buffer, tracker: tracker, parser: parser) {
+        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
+            while let next = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: parser) {
                 keyValues.append(next)
             }
         }
     }
 
     static func parseZeroOrMore<K, V>(buffer: inout ParseBuffer, into keyValues: inout KeyValues<K, V>, tracker: StackTracker, parser: SubParser<KeyValue<K, V>>) throws {
-        try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
-            while let next = try ParserLibrary.optional(buffer: &buffer, tracker: tracker, parser: parser) {
+        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
+            while let next = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: parser) {
                 keyValues.append(next)
             }
         }
@@ -174,7 +145,7 @@ extension ParserLibrary {
     }
 
     static func parseUnsignedInteger(buffer: inout ParseBuffer, tracker: StackTracker, allowLeadingZeros: Bool = false) throws -> (number: Int, bytesConsumed: Int) {
-        let largeInt = try ParserLibrary.parseUInt64(buffer: &buffer, tracker: tracker, allowLeadingZeros: allowLeadingZeros)
+        let largeInt = try self.parseUnsignedInt64(buffer: &buffer, tracker: tracker, allowLeadingZeros: allowLeadingZeros)
         if let int = Int(exactly: largeInt.number) {
             return (number: int, bytesConsumed: largeInt.bytesConsumed)
         } else {
@@ -182,11 +153,12 @@ extension ParserLibrary {
         }
     }
 
-    static func parseUInt64(buffer: inout ParseBuffer, tracker: StackTracker, allowLeadingZeros: Bool = false) throws -> (number: UInt64, bytesConsumed: Int) {
-        return try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
-            let string = try ParserLibrary.parseOneOrMoreCharacters(buffer: &buffer, tracker: tracker) { char in
+    static func parseUnsignedInt64(buffer: inout ParseBuffer, tracker: StackTracker, allowLeadingZeros: Bool = false) throws -> (number: UInt64, bytesConsumed: Int) {
+        return try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
+            let parsed = try PL.parseOneOrMoreCharacters(buffer: &buffer, tracker: tracker) { char in
                 char >= UInt8(ascii: "0") && char <= UInt8(ascii: "9")
             }
+            let string = String(buffer: parsed)
             guard let int = UInt64(string) else {
                 throw ParserError(hint: "\(string) is not a number")
             }
@@ -198,7 +170,7 @@ extension ParserLibrary {
     }
 
     static func parseSpaces(buffer: inout ParseBuffer, tracker: StackTracker) throws {
-        try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, _ in
+        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, _ in
 
             // need at least one readable byte
             guard buffer.bytes.readableBytes > 0 else { throw _IncompleteMessage() }
@@ -218,11 +190,11 @@ extension ParserLibrary {
         }
     }
 
-    static func fixedString(_ needle: String, caseSensitive: Bool = false, allowLeadingSpaces: Bool = false, buffer: inout ParseBuffer, tracker: StackTracker) throws {
-        try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, _ in
+    static func parseFixedString(_ needle: String, caseSensitive: Bool = false, allowLeadingSpaces: Bool = false, buffer: inout ParseBuffer, tracker: StackTracker) throws {
+        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, _ in
 
             if allowLeadingSpaces {
-                try self.optional(buffer: &buffer, tracker: tracker, parser: self.parseSpaces)
+                try self.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseSpaces)
             }
 
             let needleCount = needle.utf8.count
@@ -249,10 +221,10 @@ extension ParserLibrary {
         }
     }
 
-    static func oneOf<T>(_ subParsers: [SubParser<T>], buffer: inout ParseBuffer, tracker: StackTracker, file: String = (#file), line: Int = #line) throws -> T {
+    static func parseOneOf<T>(_ subParsers: [SubParser<T>], buffer: inout ParseBuffer, tracker: StackTracker, file: String = (#file), line: Int = #line) throws -> T {
         for parser in subParsers {
             do {
-                return try ParserLibrary.composite(buffer: &buffer, tracker: tracker, parser)
+                return try PL.composite(buffer: &buffer, tracker: tracker, parser)
             } catch is ParserError {
                 continue
             } catch is BadCommand {
@@ -262,13 +234,13 @@ extension ParserLibrary {
         throw ParserError(hint: "none of the options match", file: file, line: line)
     }
 
-    static func oneOf2<T>(_ parser1: SubParser<T>,
-                          _ parser2: SubParser<T>,
-                          buffer: inout ParseBuffer,
-                          tracker: StackTracker, file: String = (#file), line: Int = #line) throws -> T
+    static func parseOneOf<T>(_ parser1: SubParser<T>,
+                              _ parser2: SubParser<T>,
+                              buffer: inout ParseBuffer,
+                              tracker: StackTracker, file: String = (#file), line: Int = #line) throws -> T
     {
         do {
-            return try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
+            return try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
                 try parser1(&buffer, tracker)
             }
         } catch is ParserError {
@@ -278,19 +250,19 @@ extension ParserLibrary {
             // ok
         }
 
-        return try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
+        return try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             try parser2(&buffer, tracker)
         }
     }
 
-    static func oneOf3<T>(_ parser1: SubParser<T>,
-                          _ parser2: SubParser<T>,
-                          _ parser3: SubParser<T>,
-                          buffer: inout ParseBuffer,
-                          tracker: StackTracker, file: String = (#file), line: Int = #line) throws -> T
+    static func parseOneOf<T>(_ parser1: SubParser<T>,
+                              _ parser2: SubParser<T>,
+                              _ parser3: SubParser<T>,
+                              buffer: inout ParseBuffer,
+                              tracker: StackTracker, file: String = (#file), line: Int = #line) throws -> T
     {
         do {
-            return try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
+            return try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
                 try parser1(&buffer, tracker)
             }
         } catch is ParserError {
@@ -301,7 +273,7 @@ extension ParserLibrary {
         }
 
         do {
-            return try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
+            return try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
                 try parser2(&buffer, tracker)
             }
         } catch is ParserError {
@@ -311,14 +283,14 @@ extension ParserLibrary {
             // ok
         }
 
-        return try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
+        return try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             try parser3(&buffer, tracker)
         }
     }
 
-    static func optional<T>(buffer: inout ParseBuffer, tracker: StackTracker, parser: SubParser<T>) throws -> T? {
+    static func parseOptional<T>(buffer: inout ParseBuffer, tracker: StackTracker, parser: SubParser<T>) throws -> T? {
         do {
-            return try ParserLibrary.composite(buffer: &buffer, tracker: tracker, parser)
+            return try PL.composite(buffer: &buffer, tracker: tracker, parser)
         } catch is ParserError {
             return nil
         }
@@ -337,7 +309,7 @@ extension ParserLibrary {
         }
     }
 
-    static func newline(buffer: inout ParseBuffer, tracker: StackTracker) throws {
+    static func parseNewline(buffer: inout ParseBuffer, tracker: StackTracker) throws {
         switch buffer.bytes.getInteger(at: buffer.bytes.readerIndex, as: UInt16.self) {
         case .some(UInt16(0x0D0A /* CRLF */ )):
             // fast path: we find CRLF
@@ -349,9 +321,9 @@ extension ParserLibrary {
             return
         case .some(let x) where UInt8(x >> 8) == UInt8(ascii: " "):
             // found a space that we’ll skip. Some servers insert an extra space at the end.
-            try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, _ in
+            try PL.composite(buffer: &buffer, tracker: tracker) { buffer, _ in
                 buffer.bytes.moveReaderIndex(forwardBy: 1)
-                try ParserLibrary.newline(buffer: &buffer, tracker: tracker)
+                try PL.parseNewline(buffer: &buffer, tracker: tracker)
             }
         case .none:
             guard let first = buffer.bytes.getInteger(at: buffer.bytes.readerIndex, as: UInt8.self) else {

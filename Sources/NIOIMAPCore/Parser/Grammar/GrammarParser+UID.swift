@@ -27,25 +27,27 @@ extension GrammarParser {
     // uid-range       = (uniqueid ":" uniqueid)
     static func parseUIDRange(buffer: inout ParseBuffer, tracker: StackTracker) throws -> UIDRange {
         func parse_wildcard(buffer: inout ParseBuffer, tracker: StackTracker) throws -> UID {
-            try ParserLibrary.fixedString("*", buffer: &buffer, tracker: tracker)
+            try PL.parseFixedString("*", buffer: &buffer, tracker: tracker)
             return .max
         }
 
         func parse_UIDOrWildcard(buffer: inout ParseBuffer, tracker: StackTracker) throws -> UID {
-            try ParserLibrary.oneOf([
+            try PL.parseOneOf(
                 parse_wildcard,
-                GrammarParser.parseUID,
-            ], buffer: &buffer, tracker: tracker)
+                self.parseUID,
+                buffer: &buffer,
+                tracker: tracker
+            )
         }
 
         func parse_colonAndUIDOrWildcard(buffer: inout ParseBuffer, tracker: StackTracker) throws -> UID {
-            try ParserLibrary.fixedString(":", buffer: &buffer, tracker: tracker)
+            try PL.parseFixedString(":", buffer: &buffer, tracker: tracker)
             return try parse_UIDOrWildcard(buffer: &buffer, tracker: tracker)
         }
 
-        return try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> UIDRange in
+        return try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> UIDRange in
             let id1 = try parse_UIDOrWildcard(buffer: &buffer, tracker: tracker)
-            let id2 = try ParserLibrary.optional(buffer: &buffer, tracker: tracker, parser: parse_colonAndUIDOrWildcard)
+            let id2 = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: parse_colonAndUIDOrWildcard)
             if let id2 = id2 {
                 guard id1 <= id2 else {
                     throw ParserError(hint: "Invalid range \(id1):\(id2)")
@@ -81,16 +83,18 @@ extension GrammarParser {
         }
 
         func parseUIDSet_element(buffer: inout ParseBuffer, tracker: StackTracker) throws -> UIDRange {
-            try ParserLibrary.oneOf([
+            try PL.parseOneOf(
                 self.parseUIDRange,
                 parseUIDSet_number,
-            ], buffer: &buffer, tracker: tracker)
+                buffer: &buffer,
+                tracker: tracker
+            )
         }
 
-        return try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
+        return try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             var output = [try parseUIDSet_element(buffer: &buffer, tracker: tracker)]
-            try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &output, tracker: tracker) { buffer, tracker in
-                try ParserLibrary.fixedString(",", buffer: &buffer, tracker: tracker)
+            try PL.parseZeroOrMore(buffer: &buffer, into: &output, tracker: tracker) { buffer, tracker in
+                try PL.parseFixedString(",", buffer: &buffer, tracker: tracker)
                 return try parseUIDSet_element(buffer: &buffer, tracker: tracker)
             }
             let s = UIDSet(output)
@@ -102,7 +106,7 @@ extension GrammarParser {
     }
 
     static func parseUIDSetNonEmpty(buffer: inout ParseBuffer, tracker: StackTracker) throws -> UIDSetNonEmpty {
-        try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
+        try PL.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
             guard let set = UIDSetNonEmpty(set: try self.parseUIDSet(buffer: &buffer, tracker: tracker)) else {
                 throw ParserError(hint: "Need at least one UID")
             }
@@ -117,16 +121,18 @@ extension GrammarParser {
         }
 
         func parseUIDArray_element(buffer: inout ParseBuffer, tracker: StackTracker) throws -> UIDRange {
-            try ParserLibrary.oneOf([
+            try PL.parseOneOf(
                 self.parseUIDRange,
                 parseUIDArray_number,
-            ], buffer: &buffer, tracker: tracker)
+                buffer: &buffer,
+                tracker: tracker
+            )
         }
 
-        return try ParserLibrary.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
+        return try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             var output = [try parseUIDArray_element(buffer: &buffer, tracker: tracker)]
-            try ParserLibrary.parseZeroOrMore(buffer: &buffer, into: &output, tracker: tracker) { buffer, tracker in
-                try ParserLibrary.fixedString(",", buffer: &buffer, tracker: tracker)
+            try PL.parseZeroOrMore(buffer: &buffer, into: &output, tracker: tracker) { buffer, tracker in
+                try PL.parseFixedString(",", buffer: &buffer, tracker: tracker)
                 return try parseUIDArray_element(buffer: &buffer, tracker: tracker)
             }
 

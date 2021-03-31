@@ -59,9 +59,9 @@ extension TestUtilities {
         var parseBuffer = ParseBuffer(inputBuffer)
 
         defer {
-            let remaining = (try? ParserLibrary.parseBytes(buffer: &parseBuffer,
-                                                           tracker: .makeNewDefaultLimitStackTracker,
-                                                           upTo: .max)) ?? ByteBuffer()
+            let remaining = (try? PL.parseBytes(buffer: &parseBuffer,
+                                                tracker: .makeNewDefaultLimitStackTracker,
+                                                upTo: .max)) ?? ByteBuffer()
             let expectedString = String(buffer: expected)
             let remainingString = String(buffer: remaining)
             if shouldRemainUnchanged {

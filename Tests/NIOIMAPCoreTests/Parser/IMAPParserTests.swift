@@ -745,14 +745,14 @@ extension ParserUnitTests {
 
     func testCopy_invalid_missing_mailbox() {
         var buffer = TestUtilities.makeParseBuffer(for: "COPY 1,2,3,4 ")
-        XCTAssertThrowsError(try ParserLibrary.newline(buffer: &buffer, tracker: .testTracker)) { error in
+        XCTAssertThrowsError(try PL.parseNewline(buffer: &buffer, tracker: .testTracker)) { error in
             XCTAssert(error is ParserError)
         }
     }
 
     func testCopy_invalid_missing_set() {
         var buffer = TestUtilities.makeParseBuffer(for: "COPY inbox ")
-        XCTAssertThrowsError(try ParserLibrary.newline(buffer: &buffer, tracker: .testTracker)) { error in
+        XCTAssertThrowsError(try PL.parseNewline(buffer: &buffer, tracker: .testTracker)) { error in
             XCTAssert(error is ParserError)
         }
     }
@@ -1937,7 +1937,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     func testParseNewline() {
         self.iterateTests(
-            testFunction: ParserLibrary.newline,
+            testFunction: PL.parseNewline,
             validInputs: [
                 ("\n", "", #line),
                 ("\r\n", "", #line),
