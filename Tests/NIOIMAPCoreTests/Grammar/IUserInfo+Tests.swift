@@ -22,7 +22,7 @@ class UserInfo_Tests: EncodeTestClass {}
 
 extension UserInfo_Tests {
     func testEncode() {
-        let inputs: [(UserInfo, String, UInt)] = [
+        let inputs: [(UserAuthenticationMechanism, String, UInt)] = [
             (.init(encodedUser: .init(data: "test"), authenticationMechanism: .any), "test;AUTH=*", #line),
             (.init(encodedUser: .init(data: "test"), authenticationMechanism: nil), "test", #line),
             (.init(encodedUser: nil, authenticationMechanism: .any), ";AUTH=*", #line),

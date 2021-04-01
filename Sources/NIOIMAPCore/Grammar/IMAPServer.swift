@@ -18,7 +18,7 @@ import struct NIO.ByteBuffer
 /// to an IMAP server.
 public struct IMAPServer: Equatable {
     /// If present, authentication details for the server.
-    public var userInfo: UserInfo?
+    public var userInfo: UserAuthenticationMechanism?
 
     /// The hostname of the server.
     public var host: String
@@ -30,7 +30,7 @@ public struct IMAPServer: Equatable {
     /// - parameter userInfo: If present, authentication details for the server. Defaults to `nil`.
     /// - parameter host: The hostname of the server.
     /// - parameter port: The host post of the server. Defaults to `nil`.
-    public init(userInfo: UserInfo? = nil, host: String, port: Int? = nil) {
+    public init(userInfo: UserAuthenticationMechanism? = nil, host: String, port: Int? = nil) {
         self.userInfo = userInfo
         self.host = host
         self.port = port
