@@ -122,9 +122,9 @@ extension CommandEncodeBuffer {
         var buffer = bytes
         return self._buffer._writeBuffer(&buffer)
     }
-    
+
     @discardableResult private mutating func writeAuthenticationChallengeResponse(_ bytes: ByteBuffer) -> Int {
-        return self._buffer._writeString("\r\n") + self._buffer.writeBufferAsBase64(bytes)
+        self._buffer._writeString("\r\n") + self._buffer.writeBufferAsBase64(bytes)
     }
 
     @discardableResult private mutating func writeAppendCommand(_ command: AppendCommand) -> Int {

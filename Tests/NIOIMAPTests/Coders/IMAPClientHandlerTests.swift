@@ -235,7 +235,7 @@ class IMAPClientHandlerTests: XCTestCase {
         XCTAssertNoThrow(XCTAssertEqual(try channel.readInbound(), Response.taggedResponse(.init(tag: "A001", state: .ok(.init(text: "GSSAPI authentication successful"))))))
         XCTAssertEqual(handler._state, .expectingResponses)
     }
-    
+
     func testAuthenticationFlow() {
         // client starts authentication
         self.writeOutbound(.command(.init(tag: "A1", command: .authenticate(method: .gssAPI, initialClientResponse: nil))))
@@ -256,7 +256,7 @@ class IMAPClientHandlerTests: XCTestCase {
         // client responds
         self.writeOutbound(.continuationResponse("response2"))
         self.assertOutboundString("\r\ncmVzcG9uc2Uy")
-        
+
         // server challenge 3 (empty)
         self.writeInbound("+ \r\n")
         self.assertInbound(.authenticationChallenge(""))

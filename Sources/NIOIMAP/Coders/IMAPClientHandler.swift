@@ -53,7 +53,6 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
     var encodingChangeCallback: (KeyValues<String, String?>, inout CommandEncodingOptions) -> Void
 
     enum ClientHandlerState: Equatable {
-
         /// We're expecting a continuation from an idle command
         case expectingIdleContinuation
 
@@ -122,7 +121,7 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
         switch req {
         case .data(let bytes):
             return .authenticationChallenge(bytes)
-        case .responseText(_):
+        case .responseText:
             // there wasn't any valid base 64
             // so return an empty data
             return .authenticationChallenge(ByteBuffer())

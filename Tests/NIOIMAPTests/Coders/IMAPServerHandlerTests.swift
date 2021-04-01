@@ -169,7 +169,7 @@ class IMAPServerHandlerTests: XCTestCase {
         // client responds
         self.writeInbound("cmVzcG9uc2Uy\r\n")
         self.assertInbound(.continuationResponse("response2"))
-        
+
         // server challenge 3 (empty)
         self.writeOutbound(.authenticationChallenge(""))
         self.assertOutboundBuffer("+ \r\n")
