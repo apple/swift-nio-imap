@@ -35,7 +35,7 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
 
     public struct UnexpectedContinuationRequest: Error {}
 
-    private(set) var _state: ClientHandlerState
+    var state: ClientHandlerState
 
     /// Capabilites are sent by an IMAP server. Once the desired capabilities have been
     /// select from the server's response, update these encoding options to enable or disable
@@ -66,9 +66,7 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
 
     public init(encodingChangeCallback: @escaping (KeyValues<String, String?>, inout CommandEncodingOptions) -> Void = { _, _ in }) {
         self.decoder = NIOSingleStepByteToMessageProcessor(ResponseDecoder(), maximumBufferSize: 1_000)
-        self._state = .expectingResponses
-        self.encodingOptions = .rfc3501
-        self.encodingChangeCallback = encodingChangeCallback
+        self.state = .expectingResponses
     }
 
     public func channelRead(context: ChannelHandlerContext, data: NIOAny) {
@@ -95,7 +93,7 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
         switch response {
         case .taggedResponse:
             // continuations must have finished: change the state to standard continuation handling
-            self._state = .expectingResponses
+            self.state = .expectingResponses
 
         case .untaggedResponse, .fetchResponse, .fatalResponse, .authenticationChallenge, .idleStarted:
             break
@@ -104,10 +102,10 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
     }
 
     private func handleContinuationRequest(_ req: ContinuationRequest, context: ChannelHandlerContext) {
-        switch self._state {
+        switch self.state {
         case .expectingIdleContinuation:
             context.fireChannelRead(self.wrapInboundOut(.idleStarted))
-            self._state = .expectingResponses // there should only be one idle continuation
+            self.state = .expectingResponses // there should only be one idle continuation
         case .expectingAuthenticationChallenges:
             context.fireChannelRead(self.wrapInboundOut(self.handleAuthenticationChallenge(req)))
             return // don't forward as a user event - it should be consumed
@@ -160,14 +158,14 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
         case .command(let command):
             switch command.command {
             case .idleStart:
-                self._state = .expectingIdleContinuation
+                self.state = .expectingIdleContinuation
             case .authenticate(method: _, initialClientResponse: _):
-                self._state = .expectingAuthenticationChallenges
+                self.state = .expectingAuthenticationChallenges
             default:
-                self._state = .expectingResponses
+                self.state = .expectingResponses
             }
         case .idleDone:
-            self._state = .expectingResponses
+            self.state = .expectingResponses
         default:
             break
         }
