@@ -25,7 +25,7 @@ extension DateTests {
         let day = 25
         let month = 6
         let year = 1994
-        let date = try XCTUnwrap(IMAPDate(year: year, month: month, day: day))
+        let date = try XCTUnwrap(IMAPCalendarDay(year: year, month: month, day: day))
 
         XCTAssertEqual(date.day, day)
         XCTAssertEqual(date.month, month)
@@ -38,7 +38,7 @@ extension DateTests {
 extension DateTests {
     func testDateIMAPEncoded() throws {
         let expected = "25-Jun-1994"
-        let size = self.testBuffer.writeDate(try XCTUnwrap(IMAPDate(year: 1994, month: 6, day: 25)))
+        let size = self.testBuffer.writeDate(try XCTUnwrap(IMAPCalendarDay(year: 1994, month: 6, day: 25)))
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }

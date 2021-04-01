@@ -62,7 +62,7 @@ public indirect enum SearchKey: Hashable {
     case bcc(ByteBuffer)
 
     /// RFC 3501: Messages whose internal date (disregarding time and timezone) is earlier than the specified date.
-    case before(IMAPDate)
+    case before(IMAPCalendarDay)
 
     /// RFC 3501: Messages that contain the specified string in the body of the message.
     case body(ByteBuffer)
@@ -77,10 +77,10 @@ public indirect enum SearchKey: Hashable {
     case keyword(Flag.Keyword)
 
     /// RFC 3501: Messages whose internal date (disregarding time and timezone) is within the specified date.
-    case on(IMAPDate)
+    case on(IMAPCalendarDay)
 
     /// RFC 3501: Messages whose internal date (disregarding time and timezone) is within or later than the specified date.
-    case since(IMAPDate)
+    case since(IMAPCalendarDay)
 
     /// RFC 3501: Messages that contain the specified string in the envelope structure’s SUBJECT field.
     case subject(ByteBuffer)
@@ -107,13 +107,13 @@ public indirect enum SearchKey: Hashable {
     case or(SearchKey, SearchKey)
 
     /// RFC 3501: Messages whose [RFC-2822] Date: header (disregarding time and timezone) is earlier than the specified date.
-    case sentBefore(IMAPDate)
+    case sentBefore(IMAPCalendarDay)
 
     /// RFC 3501: Messages whose [RFC-2822] Date: header (disregarding time and timezone) is within the specified date.
-    case sentOn(IMAPDate)
+    case sentOn(IMAPCalendarDay)
 
     /// RFC 3501: Messages whose [RFC-2822] Date: header (disregarding time and timezone) is within or later than the specified date.
-    case sentSince(IMAPDate)
+    case sentSince(IMAPCalendarDay)
 
     /// RFC 3501: Messages with an [RFC-2822] size smaller than the specified number of octets.
     case messageSizeSmaller(Int)
