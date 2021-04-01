@@ -22,8 +22,8 @@ class MessageAttributesTests: EncodeTestClass {}
 
 extension MessageAttributesTests {
     func testEncode() throws {
-        let components = InternalDate.Components(year: 1994, month: 6, day: 25, hour: 1, minute: 2, second: 3, timeZoneMinutes: 0)!
-        let date = InternalDate(components)
+        let components = ServerMessageDate.Components(year: 1994, month: 6, day: 25, hour: 1, minute: 2, second: 3, timeZoneMinutes: 0)!
+        let date = ServerMessageDate(components)
 
         let inputs: [(MessageAttribute, String, UInt)] = [
             (.rfc822Size(123), "RFC822.SIZE 123", #line),

@@ -20,7 +20,7 @@ public struct AppendOptions: Equatable {
     public var flagList: [Flag]
 
     /// The date associated with the message, typically the date of delivery
-    public var internalDate: InternalDate?
+    public var internalDate: ServerMessageDate?
 
     /// Any additional pieces of information to be associated with the message. Implemented as a "catch-all" to support future extensions.
     public var extensions: KeyValues<String, ParameterValue>
@@ -33,7 +33,7 @@ public struct AppendOptions: Equatable {
     /// - parameter flagList: Flags that will be added to the message. Defaults to `[]`.
     /// - parameter internalDate: An optional date to be associated with the message, typically representing the date of delivery. Defaults to `nil`.
     /// - parameter extensions: Any additional pieces of information to be associated with the message. Implemented as a "catch-all" to support future extensions. Defaults to `[:]`.
-    public init(flagList: [Flag] = [], internalDate: InternalDate? = nil, extensions: KeyValues<String, ParameterValue> = [:]) {
+    public init(flagList: [Flag] = [], internalDate: ServerMessageDate? = nil, extensions: KeyValues<String, ParameterValue> = [:]) {
         self.flagList = flagList
         self.internalDate = internalDate
         self.extensions = extensions

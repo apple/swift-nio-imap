@@ -97,7 +97,7 @@ extension GrammarParser {
 
     // date-time       = DQUOTE date-day-fixed "-" date-month "-" date-year
     //                   SP time SP zone DQUOTE
-    static func parseInternalDate(buffer: inout ParseBuffer, tracker: StackTracker) throws -> InternalDate {
+    static func parseInternalDate(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ServerMessageDate {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             try PL.parseFixedString("\"", buffer: &buffer, tracker: tracker)
             let day = try self.parseDateDayFixed(buffer: &buffer, tracker: tracker)
@@ -152,11 +152,11 @@ extension GrammarParser {
 
             try PL.parseFixedString("\"", buffer: &buffer, tracker: tracker)
             guard
-                let components = InternalDate.Components(year: year, month: month, day: day, hour: hour, minute: minute, second: second, timeZoneMinutes: zone)
+                let components = ServerMessageDate.Components(year: year, month: month, day: day, hour: hour, minute: minute, second: second, timeZoneMinutes: zone)
             else {
                 throw ParserError(hint: "Invalid internal date.")
             }
-            return InternalDate(components)
+            return ServerMessageDate(components)
         }
     }
 }

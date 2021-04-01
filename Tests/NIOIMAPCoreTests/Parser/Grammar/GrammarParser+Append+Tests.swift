@@ -92,8 +92,8 @@ extension GrammarParser_Append_Tests {
 
 extension GrammarParser_Append_Tests {
     func testParseAppendOptions() throws {
-        let components = InternalDate.Components(year: 1994, month: 6, day: 25, hour: 1, minute: 2, second: 3, timeZoneMinutes: 0)
-        let date = InternalDate(components!)
+        let components = ServerMessageDate.Components(year: 1994, month: 6, day: 25, hour: 1, minute: 2, second: 3, timeZoneMinutes: 0)
+        let date = ServerMessageDate(components!)
 
         self.iterateTests(
             testFunction: GrammarParser.parseAppendOptions,

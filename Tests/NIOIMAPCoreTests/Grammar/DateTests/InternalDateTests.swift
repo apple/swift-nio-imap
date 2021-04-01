@@ -17,12 +17,12 @@ import XCTest
 
 class InternalDateTests: XCTestCase {}
 
-// MARK: - InternalDate init
+// MARK: - ServerMessageDate init
 
 extension InternalDateTests {
     func testInternalDateInit_1() {
-        let components = InternalDate.Components(year: 1994, month: 6, day: 25, hour: 1, minute: 2, second: 3, timeZoneMinutes: 620)!
-        let date = InternalDate(components)
+        let components = ServerMessageDate.Components(year: 1994, month: 6, day: 25, hour: 1, minute: 2, second: 3, timeZoneMinutes: 620)!
+        let date = ServerMessageDate(components)
         let c = date.components
         XCTAssertEqual(c.year, 1994)
         XCTAssertEqual(c.month, 6)
@@ -34,8 +34,8 @@ extension InternalDateTests {
     }
 
     func testInternalDateInit_2() {
-        let components = InternalDate.Components(year: 1900, month: 1, day: 1, hour: 0, minute: 0, second: 0, timeZoneMinutes: -959)!
-        let date = InternalDate(components)
+        let components = ServerMessageDate.Components(year: 1900, month: 1, day: 1, hour: 0, minute: 0, second: 0, timeZoneMinutes: -959)!
+        let date = ServerMessageDate(components)
         let c = date.components
         XCTAssertEqual(c.year, 1900)
         XCTAssertEqual(c.month, 1)
@@ -47,8 +47,8 @@ extension InternalDateTests {
     }
 
     func testInternalDateInit_3() {
-        let components = InternalDate.Components(year: 2579, month: 12, day: 31, hour: 23, minute: 59, second: 59, timeZoneMinutes: 959)!
-        let date = InternalDate(components)
+        let components = ServerMessageDate.Components(year: 2579, month: 12, day: 31, hour: 23, minute: 59, second: 59, timeZoneMinutes: 959)!
+        let date = ServerMessageDate(components)
         let c = date.components
         XCTAssertEqual(c.year, 2579)
         XCTAssertEqual(c.month, 12)
