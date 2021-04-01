@@ -170,7 +170,7 @@ class IMAPClientHandlerTests: XCTestCase {
         // client responds
         XCTAssertNoThrow(try channel.writeOutbound(CommandStream.continuationResponse("response1")))
         XCTAssertEqual(handler._state, .expectingAuthenticationChallenges)
-        XCTAssertEqual(try channel.readOutbound(as: ByteBuffer.self), "\r\ncmVzcG9uc2Ux")
+        XCTAssertEqual(try channel.readOutbound(as: ByteBuffer.self), "cmVzcG9uc2Ux\r\n")
 
         // server sends another challenge
         inEncodeBuffer = ResponseEncodeBuffer(buffer: ByteBuffer(), capabilities: [])
@@ -192,7 +192,7 @@ class IMAPClientHandlerTests: XCTestCase {
         // client responds
         XCTAssertNoThrow(try channel.writeOutbound(CommandStream.continuationResponse("response3")))
         XCTAssertEqual(handler._state, .expectingAuthenticationChallenges)
-        XCTAssertEqual(try channel.readOutbound(as: ByteBuffer.self), "\r\ncmVzcG9uc2Uz")
+        XCTAssertEqual(try channel.readOutbound(as: ByteBuffer.self), "cmVzcG9uc2Uz\r\n")
 
         // server finished
         inEncodeBuffer = ResponseEncodeBuffer(buffer: ByteBuffer(), capabilities: [])
@@ -213,7 +213,7 @@ class IMAPClientHandlerTests: XCTestCase {
 
         // client responds
         self.writeOutbound(.continuationResponse("response1"))
-        self.assertOutboundString("\r\ncmVzcG9uc2Ux")
+        self.assertOutboundString("cmVzcG9uc2Ux\r\n")
 
         // server challenge 2
         self.writeInbound("+ Y2hhbGxlbmdlMg==\r\n")
@@ -221,7 +221,7 @@ class IMAPClientHandlerTests: XCTestCase {
 
         // client responds
         self.writeOutbound(.continuationResponse("response2"))
-        self.assertOutboundString("\r\ncmVzcG9uc2Uy")
+        self.assertOutboundString("cmVzcG9uc2Uy\r\n")
 
         // server challenge 3 (empty)
         self.writeInbound("+ \r\n")
@@ -229,7 +229,7 @@ class IMAPClientHandlerTests: XCTestCase {
 
         // client responds
         self.writeOutbound(.continuationResponse("response3"))
-        self.assertOutboundString("\r\ncmVzcG9uc2Uz")
+        self.assertOutboundString("cmVzcG9uc2Uz\r\n")
 
         // all done
         self.writeInbound("A1 OK Success\r\n")
