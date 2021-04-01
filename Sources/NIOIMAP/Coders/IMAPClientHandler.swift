@@ -66,7 +66,7 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
         /// We expect the server to return standard tagged or untagged responses, without any intermediate
         /// continuations, with the exception of synchronising literals.
         case expectingResponses
-        
+
         case error
     }
 
@@ -119,7 +119,7 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
             case .response:
                 context.fireErrorCaught(UnexpectedResponse())
             }
-            
+
         case .error:
             context.fireErrorCaught(UnexpectedResponse())
         }
