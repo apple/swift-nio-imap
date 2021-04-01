@@ -83,8 +83,10 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
     private func handleResponseOrContinuationRequest(_ response: ResponseOrContinuationRequest, context: ChannelHandlerContext) {
         switch response {
         case .continuationRequest(let req):
+            assert(self.state != .expectingResponses, "Unexpected state \(self.state)")
             self.handleContinuationRequest(req, context: context)
         case .response(let response):
+            assert(self.state == .expectingResponses, "Unexpected state \(self.state)")
             self.handleResponse(response, context: context)
         }
     }
@@ -104,8 +106,8 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
     private func handleContinuationRequest(_ req: ContinuationRequest, context: ChannelHandlerContext) {
         switch self.state {
         case .expectingIdleContinuation:
-            context.fireChannelRead(self.wrapInboundOut(.idleStarted))
             self.state = .expectingResponses // there should only be one idle continuation
+            context.fireChannelRead(self.wrapInboundOut(.idleStarted))
         case .expectingAuthenticationChallenges:
             context.fireChannelRead(self.wrapInboundOut(self.handleAuthenticationChallenge(req)))
             return // don't forward as a user event - it should be consumed

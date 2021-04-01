@@ -43,7 +43,7 @@ extension _EncodeBuffer {
     /// - parameter buffer: An initial `ByteBuffer` to write to. Note that this is copied and not taken as `inout`.
     /// - parameter options: Configuration to use when writing.
     /// - returns: A new `EncodeBuffer` configured for client use.
-    public static func _clientEncodeBuffer(buffer: ByteBuffer, options: CommandEncodingOptions) -> _EncodeBuffer {
+    static func _clientEncodeBuffer(buffer: ByteBuffer, options: CommandEncodingOptions) -> _EncodeBuffer {
         _EncodeBuffer(buffer, mode: .client(options: options))
     }
 
@@ -51,7 +51,7 @@ extension _EncodeBuffer {
     /// - parameter buffer: An initial `ByteBuffer` to write to. Note that this is copied and not taken as `inout`.
     /// - parameter options: Configuration to use when writing.
     /// - returns: A new `EncodeBuffer` configured for client use.
-    public static func _clientEncodeBuffer(buffer: ByteBuffer, capabilities: [Capability]) -> _EncodeBuffer {
+    static func _clientEncodeBuffer(buffer: ByteBuffer, capabilities: [Capability]) -> _EncodeBuffer {
         _clientEncodeBuffer(buffer: buffer, options: CommandEncodingOptions(capabilities: capabilities))
     }
 
@@ -59,7 +59,7 @@ extension _EncodeBuffer {
     /// - parameter buffer: An initial `ByteBuffer` to write to. Note that this is copied and not taken as `inout`.
     /// - parameter options: Configuration to use when writing.
     /// - returns: A new `EncodeBuffer` configured for server use.
-    public static func _serverEncodeBuffer(buffer: ByteBuffer, options: ResponseEncodingOptions) -> _EncodeBuffer {
+    static func _serverEncodeBuffer(buffer: ByteBuffer, options: ResponseEncodingOptions) -> _EncodeBuffer {
         _EncodeBuffer(buffer, mode: .server(streamingAttributes: false, options: options))
     }
 
@@ -67,7 +67,7 @@ extension _EncodeBuffer {
     /// - parameter buffer: An initial `ByteBuffer` to write to. Note that this is copied and not taken as `inout`.
     /// - parameter options: Configuration to use when writing.
     /// - returns: A new `EncodeBuffer` configured for server use.
-    public static func _serverEncodeBuffer(buffer: ByteBuffer, capabilities: [Capability]) -> _EncodeBuffer {
+    static func _serverEncodeBuffer(buffer: ByteBuffer, capabilities: [Capability]) -> _EncodeBuffer {
         _serverEncodeBuffer(buffer: buffer, options: ResponseEncodingOptions(capabilities: capabilities))
     }
 }
