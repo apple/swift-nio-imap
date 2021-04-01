@@ -148,11 +148,6 @@ class IMAPClientHandlerTests: XCTestCase {
         XCTAssertNoThrow(try channel.writeInbound(inEncodeBuffer.readBytes()))
         XCTAssertNoThrow(XCTAssertEqual(try channel.readInbound(), Response.idleStarted))
         XCTAssertNoThrow(XCTAssertNil(try channel.readInbound(as: Response.self)))
-        inEncodeBuffer = ResponseEncodeBuffer(buffer: ByteBuffer(), capabilities: [])
-        inEncodeBuffer.writeContinuationRequest(.responseText(.init(text: "Waiting")))
-        XCTAssertNoThrow(try channel.writeInbound(inEncodeBuffer.readBytes()))
-        XCTAssertNoThrow(XCTAssertEqual(try channel.readInbound(), Response.idleStarted))
-        XCTAssertNoThrow(XCTAssertNil(try channel.readInbound(as: Response.self)))
 
         // finish being idle
         XCTAssertNoThrow(try channel.writeOutbound(CommandStream.idleDone))
@@ -170,39 +165,18 @@ class IMAPClientHandlerTests: XCTestCase {
         inEncodeBuffer = ResponseEncodeBuffer(buffer: ByteBuffer(), capabilities: [])
         inEncodeBuffer.writeContinuationRequest(.data(""))
         XCTAssertNoThrow(try channel.writeInbound(inEncodeBuffer.readBytes()))
-        XCTAssertNoThrow(XCTAssertEqual(try channel.readInbound(), Response.idleStarted))
+        XCTAssertNoThrow(XCTAssertEqual(try channel.readInbound(), Response.authenticationChallenge(ByteBuffer())))
 
         // client responds
-        let authString1 = """
-        YIIB+wYJKoZIhvcSAQICAQBuggHqMIIB5qADAgEFoQMCAQ6iBw
-        MFACAAAACjggEmYYIBIjCCAR6gAwIBBaESGxB1Lndhc2hpbmd0
-        b24uZWR1oi0wK6ADAgEDoSQwIhsEaW1hcBsac2hpdmFtcy5jYW
-        Mud2FzaGluZ3Rvbi5lZHWjgdMwgdCgAwIBAaEDAgEDooHDBIHA
-        cS1GSa5b+fXnPZNmXB9SjL8Ollj2SKyb+3S0iXMljen/jNkpJX
-        AleKTz6BQPzj8duz8EtoOuNfKgweViyn/9B9bccy1uuAE2HI0y
-        C/PHXNNU9ZrBziJ8Lm0tTNc98kUpjXnHZhsMcz5Mx2GR6dGknb
-        I0iaGcRerMUsWOuBmKKKRmVMMdR9T3EZdpqsBd7jZCNMWotjhi
-        vd5zovQlFqQ2Wjc2+y46vKP/iXxWIuQJuDiisyXF0Y8+5GTpAL
-        pHDc1/pIGmMIGjoAMCAQGigZsEgZg2on5mSuxoDHEA1w9bcW9n
-        FdFxDKpdrQhVGVRDIzcCMCTzvUboqb5KjY1NJKJsfjRQiBYBdE
-        NKfzK+g5DlV8nrw81uOcP8NOQCLR5XkoMHC0Dr/80ziQzbNqhx
-        O6652Npft0LQwJvenwDI13YxpwOdMXzkWZN/XrEqOWp6GCgXTB
-        vCyLWLlWnbaUkZdEYbKHBPjd8t/1x5Yg==
-        """
-        XCTAssertNoThrow(try channel.writeOutbound(CommandStream.continuationResponse(ByteBuffer(string: authString1))))
+        XCTAssertNoThrow(try channel.writeOutbound(CommandStream.continuationResponse("response1")))
         XCTAssertEqual(handler._state, .expectingAuthenticationChallenges)
-        XCTAssertEqual(try channel.readOutbound(as: ByteBuffer.self), ByteBuffer(string: "\r\n" + authString1))
+        XCTAssertEqual(try channel.readOutbound(as: ByteBuffer.self), "\r\ncmVzcG9uc2Ux")
 
         // server sends another challenge
-        let challengeString1: ByteBuffer = """
-            YGgGCSqGSIb3EgECAgIAb1kwV6ADAgEFoQMCAQ+iSzBJoAMC
-            AQGiQgRAtHTEuOP2BXb9sBYFR4SJlDZxmg39IxmRBOhXRKdDA0
-            uHTCOT9Bq3OsUTXUlk0CsFLoa8j+gvGDlgHuqzWHPSQg==
-        """
         inEncodeBuffer = ResponseEncodeBuffer(buffer: ByteBuffer(), capabilities: [])
-        inEncodeBuffer.writeContinuationRequest(.data(challengeString1))
+        inEncodeBuffer.writeContinuationRequest(.data("challenge2"))
         XCTAssertNoThrow(try channel.writeInbound(inEncodeBuffer.readBytes()))
-        XCTAssertNoThrow(XCTAssertEqual(try channel.readInbound(), Response.idleStarted))
+        XCTAssertNoThrow(XCTAssertEqual(try channel.readInbound(), Response.authenticationChallenge("challenge2")))
 
         // client responds
         XCTAssertNoThrow(try channel.writeOutbound(CommandStream.continuationResponse("")))
@@ -210,23 +184,15 @@ class IMAPClientHandlerTests: XCTestCase {
         XCTAssertEqual(try channel.readOutbound(as: ByteBuffer.self), "\r\n")
 
         // server sends another challenge
-        let challengeString2: ByteBuffer = """
-            YDMGCSqGSIb3EgECAgIBAAD/////6jcyG4GE3KkTzBeBiVHe
-            ceP2CWY0SR0fAQAgAAQEBAQ=
-        """
         inEncodeBuffer = ResponseEncodeBuffer(buffer: ByteBuffer(), capabilities: [])
-        inEncodeBuffer.writeContinuationRequest(.data(challengeString2))
+        inEncodeBuffer.writeContinuationRequest(.data("challenge3"))
         XCTAssertNoThrow(try channel.writeInbound(inEncodeBuffer.readBytes()))
-        XCTAssertNoThrow(XCTAssertEqual(try channel.readInbound(), Response.idleStarted))
+        XCTAssertNoThrow(XCTAssertEqual(try channel.readInbound(), Response.authenticationChallenge("challenge3")))
 
         // client responds
-        let authString2 = """
-            YDMGCSqGSIb3EgECAgIBAAD/////3LQBHXTpFfZgrejpLlLImP
-            wkhbfa2QteAQAgAG1yYwE=
-        """
-        XCTAssertNoThrow(try channel.writeOutbound(CommandStream.continuationResponse(ByteBuffer(string: authString2))))
+        XCTAssertNoThrow(try channel.writeOutbound(CommandStream.continuationResponse("response3")))
         XCTAssertEqual(handler._state, .expectingAuthenticationChallenges)
-        XCTAssertEqual(try channel.readOutbound(as: ByteBuffer.self), ByteBuffer(string: "\r\n" + authString2))
+        XCTAssertEqual(try channel.readOutbound(as: ByteBuffer.self), "\r\ncmVzcG9uc2Uz")
 
         // server finished
         inEncodeBuffer = ResponseEncodeBuffer(buffer: ByteBuffer(), capabilities: [])
