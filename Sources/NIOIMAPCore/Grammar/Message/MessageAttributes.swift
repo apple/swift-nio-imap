@@ -23,7 +23,7 @@ public enum MessageAttribute: Equatable {
     /// `ENVELOPE` -- A list that describes the envelope structure of a message.
     case envelope(Envelope)
     /// The internal date of the message.
-    case internalDate(InternalDate)
+    case internalDate(ServerMessageDate)
     /// The unique identifier of the message.
     case uid(UID)
     /// `RFC822.SIZE` -- A number expressing the RFC 2822 size of the message.
@@ -119,7 +119,7 @@ extension _EncodeBuffer {
             self.writeEnvelope(env)
     }
 
-    @discardableResult mutating func writeMessageAttribute_internalDate(_ date: InternalDate) -> Int {
+    @discardableResult mutating func writeMessageAttribute_internalDate(_ date: ServerMessageDate) -> Int {
         self._writeString("INTERNALDATE ") +
             self.writeInternalDate(date)
     }

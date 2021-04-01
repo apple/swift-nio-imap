@@ -20,7 +20,7 @@
 /// See RFC 3501 section 2.3.3. “Internal Date Message Attribute”
 ///
 /// IMAPv4 `date-time`
-public struct InternalDate: Hashable {
+public struct ServerMessageDate: Hashable {
     let rawValue: UInt64
 
     /// The components of the date, such as the day, month, year, etc.
@@ -43,11 +43,11 @@ public struct InternalDate: Hashable {
         let year = take(UInt64(UInt16.max - 1))
         let zoneMinutes = Int(zoneValue) * ((zoneIsNegative == 0) ? 1 : -1)
 
-        // safe to bang as we can't have an invalid `InternalDate`
+        // safe to bang as we can't have an invalid `ServerMessageDate`
         return Components(year: year, month: month, day: day, hour: hour, minute: minute, second: second, timeZoneMinutes: zoneMinutes)!
     }
 
-    /// Creates a new `InternalDate` from a given collection of `Components`
+    /// Creates a new `ServerMessageDate` from a given collection of `Components`
     /// - parameter components: The components containing a year, month, day, hour, minute, second, and timezone.
     public init(_ components: Components) {
         var rawValue = 0 as UInt64
@@ -70,9 +70,9 @@ public struct InternalDate: Hashable {
     }
 }
 
-extension InternalDate {
-    /// Contains the individual components extracted from an `InternalDate`, and can be used to
-    /// construct an `InternalDate`.
+extension ServerMessageDate {
+    /// Contains the individual components extracted from an `ServerMessageDate`, and can be used to
+    /// construct an `ServerMessageDate`.
     public struct Components {
         /// The year.
         public let year: Int
@@ -129,7 +129,7 @@ extension InternalDate {
 
 // MARK: - Internal
 
-extension InternalDate {
+extension ServerMessageDate {
     fileprivate func makeParts() -> (Date, Time, TimeZone) {
         let c = self.components
         return (
@@ -159,7 +159,7 @@ extension InternalDate {
 // MARK: - Encoding
 
 extension _EncodeBuffer {
-    @discardableResult mutating func writeInternalDate(_ date: InternalDate) -> Int {
+    @discardableResult mutating func writeInternalDate(_ date: ServerMessageDate) -> Int {
         let p = date.makeParts()
 
         let monthName: String
@@ -189,7 +189,7 @@ extension _EncodeBuffer {
 }
 
 extension _EncodeBuffer {
-    @discardableResult private mutating func writeTime(_ time: InternalDate.Time) -> Int {
+    @discardableResult private mutating func writeTime(_ time: ServerMessageDate.Time) -> Int {
         let hour = time.hour < 10 ? "0\(time.hour)" : "\(time.hour)"
         let minute = time.minute < 10 ? "0\(time.minute)" : "\(time.minute)"
         let second = time.second < 10 ? "0\(time.second)" : "\(time.second)"
@@ -198,7 +198,7 @@ extension _EncodeBuffer {
 }
 
 extension _EncodeBuffer {
-    @discardableResult private mutating func writeTimezone(_ timezone: InternalDate.TimeZone) -> Int {
+    @discardableResult private mutating func writeTimezone(_ timezone: ServerMessageDate.TimeZone) -> Int {
         let value = abs(timezone.minutes)
         let minutes = value % 60
         let hours = (value - minutes) / 60

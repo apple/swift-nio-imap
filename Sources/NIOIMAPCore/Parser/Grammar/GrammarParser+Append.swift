@@ -100,7 +100,7 @@ extension GrammarParser {
                 try PL.parseSpaces(buffer: &buffer, tracker: tracker)
                 return try self.parseFlagList(buffer: &buffer, tracker: tracker)
             } ?? []
-            let internalDate = try PL.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> InternalDate in
+            let internalDate = try PL.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> ServerMessageDate in
                 try PL.parseSpaces(buffer: &buffer, tracker: tracker)
                 return try self.parseInternalDate(buffer: &buffer, tracker: tracker)
             }
