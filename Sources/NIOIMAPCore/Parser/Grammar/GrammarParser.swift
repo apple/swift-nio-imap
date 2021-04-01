@@ -692,7 +692,7 @@ extension GrammarParser {
     }
 
     // id-response = "ID" SP id-params-list
-    static func parseIDResponse(buffer: inout ParseBuffer, tracker: StackTracker) throws -> KeyValues<String, ByteBuffer?> {
+    static func parseIDResponse(buffer: inout ParseBuffer, tracker: StackTracker) throws -> KeyValues<String, String?> {
         try PL.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
             try PL.parseFixedString("ID ", buffer: &buffer, tracker: tracker)
             return try parseIDParamsList(buffer: &buffer, tracker: tracker)
@@ -700,29 +700,32 @@ extension GrammarParser {
     }
 
     // id-params-list = "(" *(string SP nstring) ")" / nil
-    static func parseIDParamsList(buffer: inout ParseBuffer, tracker: StackTracker) throws -> KeyValues<String, ByteBuffer?> {
-        func parseIDParamsList_nil(buffer: inout ParseBuffer, tracker: StackTracker) throws -> KeyValues<String, ByteBuffer?> {
+    static func parseIDParamsList(buffer: inout ParseBuffer, tracker: StackTracker) throws -> KeyValues<String, String?> {
+        func parseIDParamsList_nil(buffer: inout ParseBuffer, tracker: StackTracker) throws -> KeyValues<String, String?> {
             try self.parseNil(buffer: &buffer, tracker: tracker)
             return [:]
         }
 
-        func parseIDParamsList_element(buffer: inout ParseBuffer, tracker: StackTracker) throws -> (String, ByteBuffer?) {
+        func parseIDParamsList_element(buffer: inout ParseBuffer, tracker: StackTracker) throws -> (String, String?) {
             let key = String(buffer: try self.parseString(buffer: &buffer, tracker: tracker))
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-            let value = try self.parseNString(buffer: &buffer, tracker: tracker)
-            return (key, value)
+            if let value = try self.parseNString(buffer: &buffer, tracker: tracker) {
+                return (key, String(buffer: value))
+            } else {
+                return (key, nil)
+            }
         }
 
-        func parseIDParamsList_empty(buffer: inout ParseBuffer, tracker: StackTracker) throws -> KeyValues<String, ByteBuffer?> {
+        func parseIDParamsList_empty(buffer: inout ParseBuffer, tracker: StackTracker) throws -> KeyValues<String, String?> {
             try PL.parseFixedString("()", buffer: &buffer, tracker: tracker)
             return [:]
         }
 
-        func parseIDParamsList_some(buffer: inout ParseBuffer, tracker: StackTracker) throws -> KeyValues<String, ByteBuffer?> {
+        func parseIDParamsList_some(buffer: inout ParseBuffer, tracker: StackTracker) throws -> KeyValues<String, String?> {
             try PL.parseFixedString("(", buffer: &buffer, tracker: tracker)
             let (key, value) = try parseIDParamsList_element(buffer: &buffer, tracker: tracker)
-            var dic: KeyValues<String, ByteBuffer?> = [key: value]
-            try PL.parseZeroOrMore(buffer: &buffer, into: &dic, tracker: tracker) { (buffer, tracker) -> (String, ByteBuffer?) in
+            var dic: KeyValues<String, String?> = [key: value]
+            try PL.parseZeroOrMore(buffer: &buffer, into: &dic, tracker: tracker) { (buffer, tracker) -> (String, String?) in
                 try PL.parseSpaces(buffer: &buffer, tracker: tracker)
                 return try parseIDParamsList_element(buffer: &buffer, tracker: tracker)
             }
