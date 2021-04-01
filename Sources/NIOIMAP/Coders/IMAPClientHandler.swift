@@ -53,11 +53,12 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
     var encodingChangeCallback: (KeyValues<String, String?>, inout CommandEncodingOptions) -> Void
 
     enum ClientHandlerState: Equatable {
-        /// We're expecting continuations to come back during a command.
-        /// For example when in an IDLE state, the server may periodically send
-        /// back "+ Still here". Note that this does not include continuations for
-        /// synchronising literals.
-        case expectingContinuations
+
+        /// We're expecting a continuation from an idle command
+        case expectingIdleContinuation
+
+        /// We're expecting authentication challenges when running an authentication command
+        case expectingAuthenticationChallenges
 
         /// We expect the server to return standard tagged or untagged responses, without any intermediate
         /// continuations, with the exception of synchronising literals.
@@ -75,41 +76,56 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
         let data = self.unwrapInboundIn(data)
         do {
             try self.decoder.process(buffer: data) { response in
-                switch response {
-                case .continuationRequest(let req):
-                    switch self._state {
-                    case .expectingContinuations:
-                        context.fireChannelRead(self.wrapInboundOut(.idleStarted))
-                    case .expectingResponses:
-                        self.writeNextChunks(context: context)
-                    }
-                    context.fireUserInboundEventTriggered(req)
-                case .response(let response):
-                    switch response {
-                    case .taggedResponse:
-                        // continuations must have finished: change the state to standard continuation handling
-                        self._state = .expectingResponses
-                    case .untaggedResponse(let untagged):
-                        switch untagged {
-                        case .conditionalState, .mailboxData, .messageData, .enableData, .quotaRoot, .quota, .metadata:
-                            break
-                        case .capabilityData(let caps):
-                            self.lastKnownCapabilities = caps
-                        case .id(let info):
-                            var recomended = CommandEncodingOptions(capabilities: self.lastKnownCapabilities)
-                            self.encodingChangeCallback(info, &recomended)
-                            self.encodingOptions = recomended
-                        }
-                    case .fetchResponse, .fatalResponse, .authenticationChallenge:
-                        break
-                    case .idleStarted:
-                        self._state = .expectingContinuations
-                    }
-                    context.fireChannelRead(self.wrapInboundOut(response))
-                }
+                self.handleResponseOrContinuationRequest(response, context: context)
             }
         } catch {
             context.fireErrorCaught(error)
+        }
+    }
+
+    private func handleResponseOrContinuationRequest(_ response: ResponseOrContinuationRequest, context: ChannelHandlerContext) {
+        switch response {
+        case .continuationRequest(let req):
+            self.handleContinuationRequest(req, context: context)
+        case .response(let response):
+            self.handleResponse(response, context: context)
+        }
+    }
+
+    private func handleResponse(_ response: Response, context: ChannelHandlerContext) {
+        switch response {
+        case .taggedResponse:
+            // continuations must have finished: change the state to standard continuation handling
+            self._state = .expectingResponses
+
+        case .untaggedResponse, .fetchResponse, .fatalResponse, .authenticationChallenge, .idleStarted:
+            break
+        }
+        context.fireChannelRead(self.wrapInboundOut(response))
+    }
+
+    private func handleContinuationRequest(_ req: ContinuationRequest, context: ChannelHandlerContext) {
+        switch self._state {
+        case .expectingIdleContinuation:
+            context.fireChannelRead(self.wrapInboundOut(.idleStarted))
+            self._state = .expectingResponses // there should only be one idle continuation
+        case .expectingAuthenticationChallenges:
+            context.fireChannelRead(self.wrapInboundOut(self.handleAuthenticationChallenge(req)))
+            return // don't forward as a user event - it should be consumed
+        case .expectingResponses:
+            self.writeNextChunks(context: context)
+        }
+        context.fireUserInboundEventTriggered(req)
+    }
+
+    private func handleAuthenticationChallenge(_ req: ContinuationRequest) -> InboundOut {
+        switch req {
+        case .data(let bytes):
+            return .authenticationChallenge(bytes)
+        case .responseText(_):
+            // there wasn't any valid base 64
+            // so return an empty data
+            return .authenticationChallenge(ByteBuffer())
         }
     }
 
@@ -144,8 +160,10 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
         switch command {
         case .command(let command):
             switch command.command {
-            case .idleStart, .authenticate(method: _, initialClientResponse: _):
-                self._state = .expectingContinuations
+            case .idleStart:
+                self._state = .expectingIdleContinuation
+            case .authenticate(method: _, initialClientResponse: _):
+                self._state = .expectingAuthenticationChallenges
             default:
                 self._state = .expectingResponses
             }

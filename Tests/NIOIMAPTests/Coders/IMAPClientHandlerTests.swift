@@ -137,7 +137,7 @@ class IMAPClientHandlerTests: XCTestCase {
 
         // move into an idle state
         XCTAssertNoThrow(try channel.writeOutbound(CommandStream.command(.init(tag: "1", command: .idleStart))))
-        XCTAssertEqual(handler._state, .expectingContinuations)
+        XCTAssertEqual(handler._state, .expectingIdleContinuation)
         XCTAssertNoThrow(try channel.readOutbound(as: ByteBuffer.self))
         XCTAssertNoThrow(XCTAssertNil(try channel.readOutbound(as: ByteBuffer.self)))
 
@@ -162,7 +162,7 @@ class IMAPClientHandlerTests: XCTestCase {
 
         // start authentication
         XCTAssertNoThrow(try channel.writeOutbound(CommandStream.command(.init(tag: "A001", command: .authenticate(method: .init("GSSAPI"), initialClientResponse: nil)))))
-        XCTAssertEqual(handler._state, .expectingContinuations)
+        XCTAssertEqual(handler._state, .expectingAuthenticationChallenges)
         XCTAssertNoThrow(try channel.readOutbound(as: ByteBuffer.self))
         XCTAssertNoThrow(XCTAssertNil(try channel.readOutbound(as: ByteBuffer.self)))
 
@@ -190,7 +190,7 @@ class IMAPClientHandlerTests: XCTestCase {
         vCyLWLlWnbaUkZdEYbKHBPjd8t/1x5Yg==
         """
         XCTAssertNoThrow(try channel.writeOutbound(CommandStream.continuationResponse(ByteBuffer(string: authString1))))
-        XCTAssertEqual(handler._state, .expectingContinuations)
+        XCTAssertEqual(handler._state, .expectingAuthenticationChallenges)
         XCTAssertEqual(try channel.readOutbound(as: ByteBuffer.self), ByteBuffer(string: "\r\n" + authString1))
 
         // server sends another challenge
@@ -206,7 +206,7 @@ class IMAPClientHandlerTests: XCTestCase {
 
         // client responds
         XCTAssertNoThrow(try channel.writeOutbound(CommandStream.continuationResponse("")))
-        XCTAssertEqual(handler._state, .expectingContinuations)
+        XCTAssertEqual(handler._state, .expectingAuthenticationChallenges)
         XCTAssertEqual(try channel.readOutbound(as: ByteBuffer.self), "\r\n")
 
         // server sends another challenge
@@ -225,7 +225,7 @@ class IMAPClientHandlerTests: XCTestCase {
             wkhbfa2QteAQAgAG1yYwE=
         """
         XCTAssertNoThrow(try channel.writeOutbound(CommandStream.continuationResponse(ByteBuffer(string: authString2))))
-        XCTAssertEqual(handler._state, .expectingContinuations)
+        XCTAssertEqual(handler._state, .expectingAuthenticationChallenges)
         XCTAssertEqual(try channel.readOutbound(as: ByteBuffer.self), ByteBuffer(string: "\r\n" + authString2))
 
         // server finished
@@ -234,6 +234,40 @@ class IMAPClientHandlerTests: XCTestCase {
         XCTAssertNoThrow(try channel.writeInbound(inEncodeBuffer.readBytes()))
         XCTAssertNoThrow(XCTAssertEqual(try channel.readInbound(), Response.taggedResponse(.init(tag: "A001", state: .ok(.init(text: "GSSAPI authentication successful"))))))
         XCTAssertEqual(handler._state, .expectingResponses)
+    }
+    
+    func testAuthenticationFlow() {
+        // client starts authentication
+        self.writeOutbound(.command(.init(tag: "A1", command: .authenticate(method: .gssAPI, initialClientResponse: nil))))
+        self.assertOutboundString("A1 AUTHENTICATE GSSAPI\r\n")
+
+        // server sends challenge
+        self.writeInbound("+ Y2hhbGxlbmdlMQ==\r\n")
+        self.assertInbound(.authenticationChallenge("challenge1"))
+
+        // client responds
+        self.writeOutbound(.continuationResponse("response1"))
+        self.assertOutboundString("\r\ncmVzcG9uc2Ux")
+
+        // server challenge 2
+        self.writeInbound("+ Y2hhbGxlbmdlMg==\r\n")
+        self.assertInbound(.authenticationChallenge("challenge2"))
+
+        // client responds
+        self.writeOutbound(.continuationResponse("response2"))
+        self.assertOutboundString("\r\ncmVzcG9uc2Uy")
+        
+        // server challenge 3 (empty)
+        self.writeInbound("+ \r\n")
+        self.assertInbound(.authenticationChallenge(""))
+
+        // client responds
+        self.writeOutbound(.continuationResponse("response3"))
+        self.assertOutboundString("\r\ncmVzcG9uc2Uz")
+
+        // all done
+        self.writeInbound("A1 OK Success\r\n")
+        self.assertInbound(.taggedResponse(.init(tag: "A1", state: .ok(.init(text: "Success")))))
     }
 
     func testCanChangeEncodingOnCallback() {
