@@ -58,6 +58,8 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
 
         /// We're expecting authentication challenges when running an authentication command
         case expectingAuthenticationChallenges
+        
+        case expectingLiteralContinuationRequest
 
         /// We expect the server to return standard tagged or untagged responses, without any intermediate
         /// continuations, with the exception of synchronising literals.
@@ -80,14 +82,42 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
         }
     }
 
+    struct Foo: Error {}
+    
     private func handleResponseOrContinuationRequest(_ response: ResponseOrContinuationRequest, context: ChannelHandlerContext) {
-        switch response {
-        case .continuationRequest(let req):
-            assert(self.state != .expectingResponses, "Unexpected state \(self.state)")
-            self.handleContinuationRequest(req, context: context)
-        case .response(let response):
-            assert(self.state == .expectingResponses, "Unexpected state \(self.state)")
-            self.handleResponse(response, context: context)
+        
+        switch self.state {
+        case .expectingLiteralContinuationRequest:
+            switch response {
+            case .continuationRequest(let req):
+                self.handleContinuationRequest(req, context: context)
+            case .response(_):
+                context.fireErrorCaught(Foo())
+            }
+            
+        case .expectingResponses:
+            switch response {
+            case .continuationRequest:
+                context.fireErrorCaught(Foo())
+            case .response(let response):
+                self.handleResponse(response, context: context)
+            }
+                
+        case .expectingAuthenticationChallenges:
+            switch response {
+            case .continuationRequest(let req):
+                self.handleContinuationRequest(req, context: context)
+            case .response(let response):
+                self.handleResponse(response, context: context)
+            }
+            
+        case .expectingIdleContinuation:
+            switch response {
+            case .continuationRequest(let req):
+                self.handleContinuationRequest(req, context: context)
+            case .response:
+                context.fireErrorCaught(Foo())
+            }
         }
     }
 
@@ -112,6 +142,9 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
             context.fireChannelRead(self.wrapInboundOut(self.handleAuthenticationChallenge(req)))
             return // don't forward as a user event - it should be consumed
         case .expectingResponses:
+            context.fireErrorCaught(Foo())
+        case .expectingLiteralContinuationRequest:
+            
             self.writeNextChunks(context: context)
         }
         context.fireUserInboundEventTriggered(req)
@@ -142,9 +175,13 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
             let next = self.bufferedWrites[self.bufferedWrites.startIndex].0._nextChunk()
 
             if next._waitForContinuation {
+                assert(self.state == .expectingResponses || self.state == .expectingLiteralContinuationRequest)
+                self.state = .expectingLiteralContinuationRequest
                 context.write(self.wrapOutboundOut(next._bytes), promise: nil)
                 return
             } else {
+                assert(self.state == .expectingLiteralContinuationRequest)
+                self.state = .expectingResponses
                 let promise = self.bufferedWrites.removeFirst().1
                 context.write(self.wrapOutboundOut(next._bytes), promise: promise)
             }
@@ -160,13 +197,17 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
         case .command(let command):
             switch command.command {
             case .idleStart:
+                assert(self.state == .expectingResponses)
                 self.state = .expectingIdleContinuation
             case .authenticate(method: _, initialClientResponse: _):
+                assert(self.state == .expectingResponses)
                 self.state = .expectingAuthenticationChallenges
             default:
+                assert(self.state == .expectingResponses)
                 self.state = .expectingResponses
             }
         case .idleDone:
+            assert(self.state == .expectingResponses)
             self.state = .expectingResponses
         default:
             break
@@ -176,6 +217,8 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
             let next = encoder._buffer._nextChunk()
 
             if next._waitForContinuation {
+                assert(self.state == .expectingResponses)
+                self.state = .expectingLiteralContinuationRequest
                 context.write(self.wrapOutboundOut(next._bytes), promise: nil)
                 // fall through to append below
             } else {
