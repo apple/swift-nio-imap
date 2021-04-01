@@ -152,15 +152,6 @@ extension GrammarParser {
     static func parseBase64(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ByteBuffer {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> ByteBuffer in
             let bytes = try PL.parseZeroOrMoreCharacters(buffer: &buffer, tracker: tracker) { $0.isBase64Char || $0 == UInt8(ascii: "=") }
-            let readableBytesView = bytes.readableBytesView
-            if let firstEq = readableBytesView.firstIndex(of: UInt8(ascii: "=")) {
-                for index in firstEq ..< readableBytesView.endIndex {
-                    guard readableBytesView[index] == UInt8(ascii: "=") else {
-                        throw ParserError(hint: "Found invalid character (expecting =) \(String(decoding: readableBytesView, as: Unicode.UTF8.self))")
-                    }
-                }
-            }
-
             do {
                 let decoded = try Base64.decode(bytes: bytes.readableBytesView)
                 return ByteBuffer(bytes: decoded)
