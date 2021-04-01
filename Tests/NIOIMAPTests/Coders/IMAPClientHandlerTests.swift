@@ -87,7 +87,7 @@ class IMAPClientHandlerTests: XCTestCase {
                                                  state: .ok(.init(code: nil, text: "ok")))))
     }
 
-    // TODO: Make a new state machine that can handle pipelined commands and uncomment this test
+    // TODO: Make a new state machine that can handle pipelined commands and uncomment this test, issue #528
 //    func testTwoContReqCommandsEnqueued() {
 //        let f1 = self.writeOutbound(CommandStream.command(TaggedCommand(tag: "x",
 //                                                                        command: .rename(from: .init("\\"),

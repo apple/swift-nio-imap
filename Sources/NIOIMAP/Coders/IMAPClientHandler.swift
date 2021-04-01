@@ -66,6 +66,8 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
         /// We expect the server to return standard tagged or untagged responses, without any intermediate
         /// continuations, with the exception of synchronising literals.
         case expectingResponses
+        
+        case error
     }
 
     public init(encodingChangeCallback: @escaping (KeyValues<String, String?>, inout CommandEncodingOptions) -> Void = { _, _ in }) {
@@ -117,6 +119,9 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
             case .response:
                 context.fireErrorCaught(UnexpectedResponse())
             }
+            
+        case .error:
+            context.fireErrorCaught(UnexpectedResponse())
         }
     }
 
@@ -143,8 +148,9 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
         case .expectingResponses:
             context.fireErrorCaught(UnexpectedContinuationRequest())
         case .expectingLiteralContinuationRequest:
-
             self.writeNextChunks(context: context)
+        case .error:
+            context.fireErrorCaught(UnexpectedResponse())
         }
         context.fireUserInboundEventTriggered(req)
     }
@@ -184,7 +190,7 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
     }
 
     public func write(context: ChannelHandlerContext, data: NIOAny, promise: EventLoopPromise<Void>?) {
-        precondition(self.bufferedWrites.isEmpty, "Sorry, we only allow one command at a time right now. We're working on it.")
+        precondition(self.bufferedWrites.isEmpty, "Sorry, we only allow one command at a time right now. We're working on it. Issue #528")
         let command = self.unwrapOutboundIn(data)
         var encoder = CommandEncodeBuffer(buffer: context.channel.allocator.buffer(capacity: 1024), options: self.encodingOptions)
         encoder.writeCommandStream(command)
