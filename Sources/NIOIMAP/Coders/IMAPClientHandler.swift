@@ -34,6 +34,8 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
         MarkedCircularBuffer(initialCapacity: 4)
 
     public struct UnexpectedContinuationRequest: Error {}
+    
+    public struct UnexpectedResponse: Error {}
 
     var state: ClientHandlerState
 
@@ -81,8 +83,6 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
             context.fireErrorCaught(error)
         }
     }
-
-    struct Foo: Error {}
     
     private func handleResponseOrContinuationRequest(_ response: ResponseOrContinuationRequest, context: ChannelHandlerContext) {
         
@@ -92,13 +92,13 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
             case .continuationRequest(let req):
                 self.handleContinuationRequest(req, context: context)
             case .response(_):
-                context.fireErrorCaught(Foo())
+                context.fireErrorCaught(UnexpectedResponse())
             }
             
         case .expectingResponses:
             switch response {
             case .continuationRequest:
-                context.fireErrorCaught(Foo())
+                context.fireErrorCaught(IMAPClientHandler.UnexpectedContinuationRequest())
             case .response(let response):
                 self.handleResponse(response, context: context)
             }
@@ -116,7 +116,7 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
             case .continuationRequest(let req):
                 self.handleContinuationRequest(req, context: context)
             case .response:
-                context.fireErrorCaught(Foo())
+                context.fireErrorCaught(UnexpectedResponse())
             }
         }
     }
@@ -142,7 +142,7 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
             context.fireChannelRead(self.wrapInboundOut(self.handleAuthenticationChallenge(req)))
             return // don't forward as a user event - it should be consumed
         case .expectingResponses:
-            context.fireErrorCaught(Foo())
+            context.fireErrorCaught(UnexpectedContinuationRequest())
         case .expectingLiteralContinuationRequest:
             
             self.writeNextChunks(context: context)
@@ -162,11 +162,7 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
     }
 
     private func writeNextChunks(context: ChannelHandlerContext) {
-        guard self.bufferedWrites.hasMark else {
-            // This is very odd, that's a continuation request that we didn't expect.
-            context.fireErrorCaught(UnexpectedContinuationRequest())
-            return
-        }
+        assert(self.bufferedWrites.hasMark)
         defer {
             // Note, we can `flush` here because this is already flushed (or else the we wouldn't have a mark).
             context.flush()

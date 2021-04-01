@@ -123,7 +123,7 @@ class IMAPClientHandlerTests: XCTestCase {
         wait: false)
         self.assertOutboundString("x RENAME {1}\r\n")
         XCTAssertThrowsError(try self.channel.writeInbound(self.buffer(string: "+ OK\r\n+ OK\r\n"))) { error in
-            XCTAssertTrue(error is IMAPClientHandler.UnexpectedContinuationRequest)
+            XCTAssertTrue(error is IMAPClientHandler.UnexpectedContinuationRequest, "Error is \(error)")
         }
         self.assertOutboundString("\\ \"to\"\r\n")
         XCTAssertNoThrow(try f.wait())
