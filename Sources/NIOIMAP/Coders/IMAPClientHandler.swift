@@ -34,7 +34,7 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
         MarkedCircularBuffer(initialCapacity: 4)
 
     public struct UnexpectedContinuationRequest: Error {}
-    
+
     public struct UnexpectedResponse: Error {}
 
     var state: ClientHandlerState
@@ -60,7 +60,7 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
 
         /// We're expecting authentication challenges when running an authentication command
         case expectingAuthenticationChallenges
-        
+
         case expectingLiteralContinuationRequest
 
         /// We expect the server to return standard tagged or untagged responses, without any intermediate
@@ -83,18 +83,17 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
             context.fireErrorCaught(error)
         }
     }
-    
+
     private func handleResponseOrContinuationRequest(_ response: ResponseOrContinuationRequest, context: ChannelHandlerContext) {
-        
         switch self.state {
         case .expectingLiteralContinuationRequest:
             switch response {
             case .continuationRequest(let req):
                 self.handleContinuationRequest(req, context: context)
-            case .response(_):
+            case .response:
                 context.fireErrorCaught(UnexpectedResponse())
             }
-            
+
         case .expectingResponses:
             switch response {
             case .continuationRequest:
@@ -102,7 +101,7 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
             case .response(let response):
                 self.handleResponse(response, context: context)
             }
-                
+
         case .expectingAuthenticationChallenges:
             switch response {
             case .continuationRequest(let req):
@@ -110,7 +109,7 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
             case .response(let response):
                 self.handleResponse(response, context: context)
             }
-            
+
         case .expectingIdleContinuation:
             switch response {
             case .continuationRequest(let req):
@@ -144,7 +143,7 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
         case .expectingResponses:
             context.fireErrorCaught(UnexpectedContinuationRequest())
         case .expectingLiteralContinuationRequest:
-            
+
             self.writeNextChunks(context: context)
         }
         context.fireUserInboundEventTriggered(req)
@@ -185,6 +184,7 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
     }
 
     public func write(context: ChannelHandlerContext, data: NIOAny, promise: EventLoopPromise<Void>?) {
+        precondition(self.bufferedWrites.isEmpty, "Sorry, we only allow one command at a time right now. We're working on it.")
         let command = self.unwrapOutboundIn(data)
         var encoder = CommandEncodeBuffer(buffer: context.channel.allocator.buffer(capacity: 1024), options: self.encodingOptions)
         encoder.writeCommandStream(command)
