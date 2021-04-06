@@ -22,7 +22,7 @@ class ID_Tests: EncodeTestClass {}
 
 extension ID_Tests {
     func testEncode() {
-        let inputs: [(KeyValues<String, ByteBuffer?>, String, UInt)] = [
+        let inputs: [(KeyValues<String, String?>, String, UInt)] = [
             ([:], "NIL", #line),
             (["key": "value"], #"("key" "value")"#, #line),
         ]

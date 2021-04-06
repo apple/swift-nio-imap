@@ -62,7 +62,7 @@ let commands: [(String, Command)] = [
     ("parse_setquota_many", .setQuota(QuotaRoot("inbox"), [.init(resourceName: "size", limit: 100), .init(resourceName: "messages", limit: 100), .init(resourceName: "disk", limit: 100)])),
     ("parse_getquotaRoot", .getQuotaRoot(.inbox)),
     ("parse_id_one", .id(["key1": nil])),
-    ("parse_id_many", .id(["key1": nil, "key2": ByteBuffer(string: "value2"), "key3": ByteBuffer(string: "value3")])),
+    ("parse_id_many", .id(["key1": nil, "key2": "value2", "key3": "value3"])),
     ("parse_rename_params_none", .rename(from: .inbox, to: .init(ByteBuffer(string: "not an inbox")), params: [:])),
     ("parse_rename_params_one", .rename(from: .inbox, to: .init(ByteBuffer(string: "not an inbox")), params: ["name": nil])),
     ("parse_rename_params_many", .rename(from: .inbox, to: .init(ByteBuffer(string: "not an inbox")), params: ["name1": nil, "name2": .sequence(.set([1 ... 2, 3 ... 4]))])),

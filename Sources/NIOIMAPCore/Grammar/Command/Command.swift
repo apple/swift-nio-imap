@@ -107,7 +107,7 @@ public enum Command: Equatable {
     case move(LastCommandSet<SequenceRangeSet>, MailboxName)
 
     /// Identifies the client to the server
-    case id(KeyValues<String, ByteBuffer?>)
+    case id(KeyValues<String, String?>)
 
     /// Retrieves the namespaces available to the user.
     case namespace
@@ -571,7 +571,7 @@ extension CommandEncodeBuffer {
         self._buffer.writeNamespaceCommand()
     }
 
-    @discardableResult mutating func writeCommandKind_id(_ id: KeyValues<String, ByteBuffer?>) -> Int {
+    @discardableResult mutating func writeCommandKind_id(_ id: KeyValues<String, String?>) -> Int {
         self._buffer._writeString("ID ") +
             self._buffer.writeIDParameters(id)
     }
