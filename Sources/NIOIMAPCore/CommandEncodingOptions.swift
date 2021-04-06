@@ -31,6 +31,8 @@ public struct CommandEncodingOptions: Equatable {
     /// - SeeAlso: https://tools.ietf.org/html/rfc3516
     public var useBinaryLiteral: Bool
 
+    public static let rfc3501: Self = .init()
+
     /// Create RFC 3501 compliant encoding options, i.e. without any IMAP extensions.
     public init() {
         self.useQuotedString = true
@@ -38,6 +40,20 @@ public struct CommandEncodingOptions: Equatable {
         self.useNonSynchronizingLiteralPlus = false
         self.useNonSynchronizingLiteralMinus = false
         self.useBinaryLiteral = false
+    }
+
+    public init(
+        useQuotedString: Bool,
+        useSynchronizingLiteral: Bool,
+        useNonSynchronizingLiteralPlus: Bool,
+        useNonSynchronizingLiteralMinus: Bool,
+        useBinaryLiteral: Bool
+    ) {
+        self.useQuotedString = useQuotedString
+        self.useSynchronizingLiteral = useSynchronizingLiteral
+        self.useNonSynchronizingLiteralPlus = useNonSynchronizingLiteralPlus
+        self.useNonSynchronizingLiteralMinus = useNonSynchronizingLiteralMinus
+        self.useBinaryLiteral = useBinaryLiteral
     }
 }
 

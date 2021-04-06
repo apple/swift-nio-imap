@@ -37,6 +37,21 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
 
     private(set) var _state: ClientHandlerState
 
+    /// Capabilites are sent by an IMAP server. Once the desired capabilities have been
+    /// select from the server's response, update these encoding options to enable or disable
+    /// certain types of literal encodings.
+    /// - Note: Make sure to send `.enable` commands for applicable capabilities
+    /// - Important: Modifying this value is not thread-safe
+    private var encodingOptions: CommandEncodingOptions
+
+    private var lastKnownCapabilities = [Capability]()
+
+    /// This function is called by the `IMAPChannelHandler` upon receipt of a response containing capabilities.
+    /// The first argument is the capabilities that the server has sent. The second is a mutable set of encoding options.
+    /// The encoding options are pre-populated with what are considered to be the *best* settings for the given
+    /// capabilities.
+    var encodingChangeCallback: (KeyValues<String, String?>, inout CommandEncodingOptions) -> Void
+
     enum ClientHandlerState: Equatable {
         /// We're expecting continuations to come back during a command.
         /// For example when in an IDLE state, the server may periodically send
@@ -49,9 +64,11 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
         case expectingResponses
     }
 
-    public init() {
+    public init(encodingChangeCallback: @escaping (KeyValues<String, String?>, inout CommandEncodingOptions) -> Void = { _, _ in }) {
         self.decoder = NIOSingleStepByteToMessageProcessor(ResponseDecoder(), maximumBufferSize: 1_000)
         self._state = .expectingResponses
+        self.encodingOptions = .rfc3501
+        self.encodingChangeCallback = encodingChangeCallback
     }
 
     public func channelRead(context: ChannelHandlerContext, data: NIOAny) {
@@ -72,9 +89,21 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
                     case .taggedResponse:
                         // continuations must have finished: change the state to standard continuation handling
                         self._state = .expectingResponses
-
-                    case .untaggedResponse, .fetchResponse, .fatalResponse, .authenticationChallenge, .idleStarted:
+                    case .untaggedResponse(let untagged):
+                        switch untagged {
+                        case .conditionalState, .mailboxData, .messageData, .enableData, .quotaRoot, .quota, .metadata:
+                            break
+                        case .capabilityData(let caps):
+                            self.lastKnownCapabilities = caps
+                        case .id(let info):
+                            var recomended = CommandEncodingOptions(capabilities: self.lastKnownCapabilities)
+                            self.encodingChangeCallback(info, &recomended)
+                            self.encodingOptions = recomended
+                        }
+                    case .fetchResponse, .fatalResponse, .authenticationChallenge:
                         break
+                    case .idleStarted:
+                        self._state = .expectingContinuations
                     }
                     context.fireChannelRead(self.wrapInboundOut(response))
                 }
@@ -109,7 +138,7 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
 
     public func write(context: ChannelHandlerContext, data: NIOAny, promise: EventLoopPromise<Void>?) {
         let command = self.unwrapOutboundIn(data)
-        var encoder = CommandEncodeBuffer(buffer: context.channel.allocator.buffer(capacity: 1024), capabilities: [])
+        var encoder = CommandEncodeBuffer(buffer: context.channel.allocator.buffer(capacity: 1024), options: self.encodingOptions)
         encoder.writeCommandStream(command)
 
         switch command {
