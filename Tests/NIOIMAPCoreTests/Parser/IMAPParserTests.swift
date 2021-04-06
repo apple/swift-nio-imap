@@ -809,12 +809,12 @@ extension ParserUnitTests {
     }
 }
 
-// MARK: - IAuthentication
+// MARK: - IMAPURLAuthenticationMechanism
 
 extension ParserUnitTests {
-    func testParseIAuthentication() {
+    func testParseIMAPURLAuthenticationMechanism() {
         self.iterateTests(
-            testFunction: GrammarParser.parseIAuthentication,
+            testFunction: GrammarParser.parseIMAPURLAuthenticationMechanism,
             validInputs: [
                 (";AUTH=*", " ", .any, #line),
                 (";AUTH=test", " ", .type(.init(authenticationType: "test")), #line),
