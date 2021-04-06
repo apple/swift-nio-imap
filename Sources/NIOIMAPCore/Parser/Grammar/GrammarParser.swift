@@ -701,6 +701,15 @@ extension GrammarParser {
 
     // id-params-list = "(" *(string SP nstring) ")" / nil
     static func parseIDParamsList(buffer: inout ParseBuffer, tracker: StackTracker) throws -> KeyValues<String, String?> {
+        
+        func parseIDValue(buffer: inout ParseBuffer, tracker: StackTracker) throws -> String? {
+            if let value = try self.parseNString(buffer: &buffer, tracker: tracker) {
+                return try ModifiedUTF7.decode(value)
+            } else {
+                return nil
+            }
+        }
+        
         func parseIDParamsList_nil(buffer: inout ParseBuffer, tracker: StackTracker) throws -> KeyValues<String, String?> {
             try self.parseNil(buffer: &buffer, tracker: tracker)
             return [:]
@@ -709,11 +718,7 @@ extension GrammarParser {
         func parseIDParamsList_element(buffer: inout ParseBuffer, tracker: StackTracker) throws -> (String, String?) {
             let key = String(buffer: try self.parseString(buffer: &buffer, tracker: tracker))
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-            if let value = try self.parseNString(buffer: &buffer, tracker: tracker) {
-                return (key, String(buffer: value))
-            } else {
-                return (key, nil)
-            }
+            return (key, try parseIDValue(buffer: &buffer, tracker: tracker))
         }
 
         func parseIDParamsList_empty(buffer: inout ParseBuffer, tracker: StackTracker) throws -> KeyValues<String, String?> {

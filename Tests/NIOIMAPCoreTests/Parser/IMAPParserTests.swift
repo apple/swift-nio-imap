@@ -1388,6 +1388,12 @@ extension ParserUnitTests {
                     ["key1": "value1", "key2": "value2", "key3": "value3"],
                     #line
                 ),
+                (
+                    #"("key1" "&AKM-")"#,
+                    #""#,
+                    ["key1":"£"],
+                    #line
+                ),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
