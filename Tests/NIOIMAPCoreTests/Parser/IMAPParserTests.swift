@@ -1389,9 +1389,9 @@ extension ParserUnitTests {
                     #line
                 ),
                 (
-                    #"("key1" "&AKM-")"#,
+                    #"("key1" "&AKM-" "flag" "&2Dzf9NtA3GfbQNxi20DcZdtA3G7bQNxn20Dcfw-")"#,
                     #""#,
-                    ["key1":"£"],
+                    ["key1": "£", "flag": "🏴󠁧󠁢󠁥󠁮󠁧󠁿"],
                     #line
                 ),
             ],
