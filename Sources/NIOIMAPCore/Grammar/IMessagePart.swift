@@ -21,7 +21,7 @@ public struct IMessagePart: Equatable {
     public var iUID: IUID
 
     /// An optional section of the message in question.
-    public var IMAPURLSection: IMAPURLSection?
+    public var imapURLSection: IMAPURLSection?
 
     /// A specific range of bytes of the message/section in question.
     public var iPartial: IPartial?
