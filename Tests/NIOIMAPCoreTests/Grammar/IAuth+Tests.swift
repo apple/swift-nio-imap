@@ -16,16 +16,16 @@ import NIO
 @testable import NIOIMAPCore
 import XCTest
 
-class IAuthentication_Tests: EncodeTestClass {}
+class IMAPURLAuthenticationMechanism_Tests: EncodeTestClass {}
 
 // MARK: - IMAP
 
-extension IAuthentication_Tests {
+extension IMAPURLAuthenticationMechanism_Tests {
     func testEncode() {
-        let inputs: [(IAuthentication, String, UInt)] = [
+        let inputs: [(IMAPURLAuthenticationMechanism, String, UInt)] = [
             (.any, ";AUTH=*", #line),
             (.type(.init(authenticationType: "data")), ";AUTH=data", #line),
         ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeIAuthentication($0) })
+        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeIMAPURLAuthenticationMechanism($0) })
     }
 }

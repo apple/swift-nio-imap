@@ -13,7 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 /// The type of authentication mechanism
-public enum IAuthentication: Equatable {
+public enum IMAPURLAuthenticationMechanism: Equatable {
     /// The client should select any appropriate authentication mechanism.
     case any
 
@@ -24,7 +24,7 @@ public enum IAuthentication: Equatable {
 // MARK: - Encoding
 
 extension _EncodeBuffer {
-    @discardableResult mutating func writeIAuthentication(_ data: IAuthentication) -> Int {
+    @discardableResult mutating func writeIMAPURLAuthenticationMechanism(_ data: IMAPURLAuthenticationMechanism) -> Int {
         switch data {
         case .any:
             return self._writeString(";AUTH=*")

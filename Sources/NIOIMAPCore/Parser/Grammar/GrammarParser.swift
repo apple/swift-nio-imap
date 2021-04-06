@@ -669,13 +669,13 @@ extension GrammarParser {
         }
     }
 
-    static func parseIAuthentication(buffer: inout ParseBuffer, tracker: StackTracker) throws -> IAuthentication {
-        func parseIAuthentication_any(buffer: inout ParseBuffer, tracker: StackTracker) throws -> IAuthentication {
+    static func parseIMAPURLAuthenticationMechanism(buffer: inout ParseBuffer, tracker: StackTracker) throws -> IMAPURLAuthenticationMechanism {
+        func parseIMAPURLAuthenticationMechanism_any(buffer: inout ParseBuffer, tracker: StackTracker) throws -> IMAPURLAuthenticationMechanism {
             try PL.parseFixedString("*", buffer: &buffer, tracker: tracker)
             return .any
         }
 
-        func parseIAuthentication_encoded(buffer: inout ParseBuffer, tracker: StackTracker) throws -> IAuthentication {
+        func parseIMAPURLAuthenticationMechanism_encoded(buffer: inout ParseBuffer, tracker: StackTracker) throws -> IMAPURLAuthenticationMechanism {
             let type = try self.parseEncodedAuthenticationType(buffer: &buffer, tracker: tracker)
             return .type(type)
         }
@@ -683,8 +683,8 @@ extension GrammarParser {
         return try PL.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
             try PL.parseFixedString(";AUTH=", buffer: &buffer, tracker: tracker)
             return try PL.parseOneOf(
-                parseIAuthentication_any,
-                parseIAuthentication_encoded,
+                parseIMAPURLAuthenticationMechanism_any,
+                parseIMAPURLAuthenticationMechanism_encoded,
                 buffer: &buffer,
                 tracker: tracker
             )
@@ -1191,7 +1191,7 @@ extension GrammarParser {
     static func parseUserAuthenticationMechanism(buffer: inout ParseBuffer, tracker: StackTracker) throws -> UserAuthenticationMechanism {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> UserAuthenticationMechanism in
             let encodedUser = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseEncodedUser)
-            let authenticationMechanism = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseIAuthentication)
+            let authenticationMechanism = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseIMAPURLAuthenticationMechanism)
             guard (encodedUser != nil || authenticationMechanism != nil) else {
                 throw ParserError(hint: "Need one of encoded user or iauth")
             }

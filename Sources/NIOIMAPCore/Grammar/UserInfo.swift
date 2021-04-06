@@ -18,12 +18,12 @@ public struct UserAuthenticationMechanism: Equatable {
     public let encodedUser: EncodedUser?
 
     /// The authentication mechanism.
-    public let authenticationMechanism: IAuthentication?
+    public let authenticationMechanism: IMAPURLAuthenticationMechanism?
 
     /// Creates a new `UserAuthenticationMechanism`.
     /// - parameter encodedUser: The percent-encoded user data.
     /// - parameter authenticationMechanism: The authentication mechanism.
-    public init(encodedUser: EncodedUser?, authenticationMechanism: IAuthentication?) {
+    public init(encodedUser: EncodedUser?, authenticationMechanism: IMAPURLAuthenticationMechanism?) {
         precondition(encodedUser != nil || authenticationMechanism != nil, "Need one of `encodedUser` or `iAuth`")
         self.encodedUser = encodedUser
         self.authenticationMechanism = authenticationMechanism
@@ -38,7 +38,7 @@ extension _EncodeBuffer {
             self.writeEncodedUser(user)
         } +
             self.writeIfExists(data.authenticationMechanism) { iAuth in
-                self.writeIAuthentication(iAuth)
+                self.writeIMAPURLAuthenticationMechanism(iAuth)
             }
     }
 }
