@@ -15,7 +15,7 @@
 /// Provides a variety of ways to load message data.
 public enum IMessageOrPartial: Equatable {
     /// Uses a mailbox reference and message UID to load a message, and optional message section and part.
-    case refUidSectionPartial(ref: IMailboxReference, uid: IUID, section: ISection?, partial: IPartial?)
+    case refUidSectionPartial(ref: EncodedMailboxUIDValidity, uid: IUID, section: ISection?, partial: IPartial?)
 
     /// Specifies the section of a message to fetch using a message UID, and optionally a specific part of that message.
     case uidSectionPartial(uid: IUID, section: ISection?, partial: IPartial?)
@@ -33,7 +33,7 @@ extension _EncodeBuffer {
     @discardableResult mutating func writeIMessageOrPartial(_ data: IMessageOrPartial) -> Int {
         switch data {
         case .refUidSectionPartial(ref: let ref, uid: let uid, section: let section, partial: let partial):
-            return self.writeIMailboxReference(ref) +
+            return self.writeEncodedMailboxUIDValidity(ref) +
                 self.writeIUIDOnly(uid) +
                 self.writeIfExists(section) { section in
                     self._writeString("/") +

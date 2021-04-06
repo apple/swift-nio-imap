@@ -16,16 +16,16 @@ import NIO
 @testable import NIOIMAPCore
 import XCTest
 
-class IMailboxReference_Tests: EncodeTestClass {}
+class EncodedMailboxUIDValidity_Tests: EncodeTestClass {}
 
 // MARK: - IMAP
 
-extension IMailboxReference_Tests {
+extension EncodedMailboxUIDValidity_Tests {
     func testEncode() {
-        let inputs: [(IMailboxReference, String, UInt)] = [
+        let inputs: [(EncodedMailboxUIDValidity, String, UInt)] = [
             (.init(encodeMailbox: .init(mailbox: "mailbox"), uidValidity: nil), "mailbox", #line),
             (.init(encodeMailbox: .init(mailbox: "mailbox"), uidValidity: 123), "mailbox;UIDVALIDITY=123", #line),
         ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeIMailboxReference($0) })
+        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeEncodedMailboxUIDValidity($0) })
     }
 }

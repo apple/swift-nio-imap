@@ -856,8 +856,8 @@ extension GrammarParser {
         )
     }
 
-    static func parseIMailboxReference(buffer: inout ParseBuffer, tracker: StackTracker) throws -> IMailboxReference {
-        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> IMailboxReference in
+    static func parseEncodedMailboxUIDValidity(buffer: inout ParseBuffer, tracker: StackTracker) throws -> EncodedMailboxUIDValidity {
+        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> EncodedMailboxUIDValidity in
             let mailbox = try self.parseEncodedMailbox(buffer: &buffer, tracker: tracker)
             let uidValidity = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> UIDValidity in
                 try PL.parseFixedString(";UIDVALIDITY=", buffer: &buffer, tracker: tracker)
@@ -867,9 +867,9 @@ extension GrammarParser {
         }
     }
 
-    static func parseEncodedSearchQuery(buffer: inout ParseBuffer, tracker: StackTracker) throws -> EncodedSearchQuery {
-        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> EncodedSearchQuery in
-            let mailboxRef = try self.parseIMailboxReference(buffer: &buffer, tracker: tracker)
+    static func parseEncodedSearchQuery(buffer: inout ParseBuffer, tracker: StackTracker) throws -> IMessageList {
+        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> IMessageList in
+            let mailboxRef = try self.parseEncodedMailboxUIDValidity(buffer: &buffer, tracker: tracker)
             let query = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> EncodedSearch in
                 try PL.parseFixedString("?", buffer: &buffer, tracker: tracker)
                 return try self.parseEncodedSearch(buffer: &buffer, tracker: tracker)
@@ -931,7 +931,7 @@ extension GrammarParser {
 
     static func parseIMessagePart(buffer: inout ParseBuffer, tracker: StackTracker) throws -> IMessagePart {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> IMessagePart in
-            var ref = try self.parseIMailboxReference(buffer: &buffer, tracker: tracker)
+            var ref = try self.parseEncodedMailboxUIDValidity(buffer: &buffer, tracker: tracker)
 
             var uid = IUID(uid: 1)
             if ref.uidValidity == nil, ref.encodedMailbox.mailbox.last == Character(.init(UInt8(ascii: "/"))) {
@@ -1008,7 +1008,7 @@ extension GrammarParser {
         }
 
         func parseIMessageOrPartial_refUidSectionPartial(buffer: inout ParseBuffer, tracker: StackTracker) throws -> IMessageOrPartial {
-            let ref = try self.parseIMailboxReference(buffer: &buffer, tracker: tracker)
+            let ref = try self.parseEncodedMailboxUIDValidity(buffer: &buffer, tracker: tracker)
             let uid = try self.parseIUIDOnly(buffer: &buffer, tracker: tracker)
             var section = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> ISection in
                 try PL.parseFixedString("/", buffer: &buffer, tracker: tracker)

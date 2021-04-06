@@ -15,7 +15,7 @@
 /// RFC 5092
 public struct EncodedSearchQuery: Equatable {
     /// The mailbox to search.
-    public var mailboxReference: IMailboxReference
+    public var mailboxValidity: EncodedMailboxUIDValidity
 
     /// A percent-encoded search query.
     public var encodedSearch: EncodedSearch?
@@ -23,8 +23,8 @@ public struct EncodedSearchQuery: Equatable {
     /// Creates a new `EncodedSearchQuery`.
     /// - parameter mailboxReference: The mailbox to search.
     /// - parameter encodedSearch: A percent-encoded search query.
-    public init(mailboxReference: IMailboxReference, encodedSearch: EncodedSearch? = nil) {
-        self.mailboxReference = mailboxReference
+    public init(mailboxValidity: EncodedMailboxUIDValidity, encodedSearch: EncodedSearch? = nil) {
+        self.mailboxValidity = mailboxValidity
         self.encodedSearch = encodedSearch
     }
 }

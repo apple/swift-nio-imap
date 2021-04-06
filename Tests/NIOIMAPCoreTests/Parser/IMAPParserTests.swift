@@ -1521,12 +1521,12 @@ extension ParserUnitTests {
     }
 }
 
-// MARK: - parseIMailboxReference
+// MARK: - parseEncodedMailboxUIDValidity
 
 extension ParserUnitTests {
-    func testParseIMailboxReference() {
+    func testParseEncodedMailboxUIDValidity() {
         self.iterateTests(
-            testFunction: GrammarParser.parseIMailboxReference,
+            testFunction: GrammarParser.parseEncodedMailboxUIDValidity,
             validInputs: [
                 ("abc", " ", .init(encodeMailbox: .init(mailbox: "abc"), uidValidity: nil), #line),
                 ("abc;UIDVALIDITY=123", " ", .init(encodeMailbox: .init(mailbox: "abc"), uidValidity: 123), #line),
