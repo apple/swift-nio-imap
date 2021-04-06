@@ -21,7 +21,7 @@ public struct IMessagePart: Equatable {
     public var iUID: IUID
 
     /// An optional section of the message in question.
-    public var iSection: ISection?
+    public var IMAPURLSection: IMAPURLSection?
 
     /// A specific range of bytes of the message/section in question.
     public var iPartial: IPartial?
@@ -29,12 +29,12 @@ public struct IMessagePart: Equatable {
     /// Create a new `IMessagePart`.
     /// - parameter mailboxUIDValidity: Connection details for a server and a specific mailbox hosted on that server.
     /// - parameter iUID: The UID of the message in question.
-    /// - parameter iSection: An optional section of the message in question.
+    /// - parameter IMAPURLSection: An optional section of the message in question.
     /// - parameter iPartial: A specific range of bytes of the message/section in question.
-    public init(mailboxReference: MailboxUIDValidity, iUID: IUID, iSection: ISection? = nil, iPartial: IPartial? = nil) {
+    public init(mailboxReference: MailboxUIDValidity, iUID: IUID, iSection: IMAPURLSection? = nil, iPartial: IPartial? = nil) {
         self.mailboxReference = mailboxReference
         self.iUID = iUID
-        self.iSection = iSection
+        self.IMAPURLSection = IMAPURLSection
         self.iPartial = iPartial
     }
 }
@@ -45,8 +45,8 @@ extension _EncodeBuffer {
     @discardableResult mutating func writeIMessagePart(_ data: IMessagePart) -> Int {
         self.writeEncodedMailboxUIDValidity(data.mailboxReference) +
             self.writeIUID(data.iUID) +
-            self.writeIfExists(data.iSection) { section in
-                self.writeISection(section)
+            self.writeIfExists(data.IMAPURLSection) { section in
+                self.writeIMAPURLSection(section)
             } +
             self.writeIfExists(data.iPartial) { partial in
                 self.writeIPartial(partial)

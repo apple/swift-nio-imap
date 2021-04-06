@@ -15,13 +15,13 @@
 /// Provides a variety of ways to load message data.
 public enum IMessageOrPartial: Equatable {
     /// Uses a mailbox reference and message UID to load a message, and optional message section and part.
-    case refUidSectionPartial(ref: MailboxUIDValidity, uid: IUID, section: ISection?, partial: IPartial?)
+    case refUidSectionPartial(ref: MailboxUIDValidity, uid: IUID, section: IMAPURLSection?, partial: IPartial?)
 
     /// Specifies the section of a message to fetch using a message UID, and optionally a specific part of that message.
-    case uidSectionPartial(uid: IUID, section: ISection?, partial: IPartial?)
+    case uidSectionPartial(uid: IUID, section: IMAPURLSection?, partial: IPartial?)
 
     /// Specifies the section of a message to fetch, and optionally a specific part of that message.
-    case sectionPartial(section: ISection, partial: IPartial?)
+    case sectionPartial(section: IMAPURLSection, partial: IPartial?)
 
     /// Specifies the part of a message to fetch.
     case partialOnly(IPartial)
@@ -37,7 +37,7 @@ extension _EncodeBuffer {
                 self.writeIUIDOnly(uid) +
                 self.writeIfExists(section) { section in
                     self._writeString("/") +
-                        self.writeISectionOnly(section)
+                        self.writeIMAPURLSectionOnly(section)
                 } +
                 self.writeIfExists(partial) { partial in
                     self._writeString("/") +
@@ -47,14 +47,14 @@ extension _EncodeBuffer {
             return self.writeIUIDOnly(uid) +
                 self.writeIfExists(section) { section in
                     self._writeString("/") +
-                        self.writeISectionOnly(section)
+                        self.writeIMAPURLSectionOnly(section)
                 } +
                 self.writeIfExists(partial) { partial in
                     self._writeString("/") +
                         self.writeIPartialOnly(partial)
                 }
         case .sectionPartial(section: let section, partial: let partial):
-            return self.writeISectionOnly(section) +
+            return self.writeIMAPURLSectionOnly(section) +
                 self.writeIfExists(partial) { partial in
                     self._writeString("/") +
                         self.writeIPartialOnly(partial)
