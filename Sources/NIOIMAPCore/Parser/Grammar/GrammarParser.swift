@@ -615,7 +615,7 @@ extension GrammarParser {
 
     static func parseICommand(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ICommand {
         func parseICommand_list(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ICommand {
-            .messageList(try self.parseIMessageList(buffer: &buffer, tracker: tracker))
+            .messageList(try self.parseEncodedSearchQuery(buffer: &buffer, tracker: tracker))
         }
 
         func parseICommand_part(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ICommand {
@@ -871,8 +871,8 @@ extension GrammarParser {
         }
     }
 
-    static func parseIMessageList(buffer: inout ParseBuffer, tracker: StackTracker) throws -> IMessageList {
-        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> IMessageList in
+    static func parseEncodedSearchQuery(buffer: inout ParseBuffer, tracker: StackTracker) throws -> EncodedSearchQuery {
+        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> EncodedSearchQuery in
             let mailboxRef = try self.parseIMailboxReference(buffer: &buffer, tracker: tracker)
             let query = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> EncodedSearch in
                 try PL.parseFixedString("?", buffer: &buffer, tracker: tracker)
@@ -918,7 +918,7 @@ extension GrammarParser {
 
     static func parseIRelativePath(buffer: inout ParseBuffer, tracker: StackTracker) throws -> IRelativePath {
         func parseIRelativePath_list(buffer: inout ParseBuffer, tracker: StackTracker) throws -> IRelativePath {
-            .list(try self.parseIMessageList(buffer: &buffer, tracker: tracker))
+            .list(try self.parseEncodedSearchQuery(buffer: &buffer, tracker: tracker))
         }
 
         func parseIRelativePath_messageOrPartial(buffer: inout ParseBuffer, tracker: StackTracker) throws -> IRelativePath {

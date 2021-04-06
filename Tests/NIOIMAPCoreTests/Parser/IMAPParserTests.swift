@@ -1616,12 +1616,12 @@ extension ParserUnitTests {
     }
 }
 
-// MARK: - parseIMessageList
+// MARK: - parseEncodedSearchQuery
 
 extension ParserUnitTests {
-    func testParseIMessageList() {
+    func testParseEncodedSearchQuery() {
         self.iterateTests(
-            testFunction: GrammarParser.parseIMessageList,
+            testFunction: GrammarParser.parseEncodedSearchQuery,
             validInputs: [
                 ("test", " ", .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test"), uidValidity: nil)), #line),
                 ("test?query", " ", .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test"), uidValidity: nil), encodedSearch: .init(query: "query")), #line),

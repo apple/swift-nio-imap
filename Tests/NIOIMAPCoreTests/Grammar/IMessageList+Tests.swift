@@ -16,13 +16,13 @@ import NIO
 @testable import NIOIMAPCore
 import XCTest
 
-class IMessageList_Tests: EncodeTestClass {}
+class EncodedSearchQuery_Tests: EncodeTestClass {}
 
 // MARK: - IMAP
 
-extension IMessageList_Tests {
+extension EncodedSearchQuery_Tests {
     func testEncode() {
-        let inputs: [(IMessageList, String, UInt)] = [
+        let inputs: [(EncodedSearchQuery, String, UInt)] = [
             (
                 .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "box"), uidValidity: nil), encodedSearch: nil),
                 "box",
@@ -34,6 +34,6 @@ extension IMessageList_Tests {
                 #line
             ),
         ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeIMessageList($0) })
+        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeEncodedSearchQuery($0) })
     }
 }
