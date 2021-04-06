@@ -273,7 +273,7 @@ class IMAPClientHandlerTests: XCTestCase {
         self.writeOutbound(.command(.init(tag: "A3", command: .login(username: "\\", password: "\\"))), wait: false)
         self.assertOutboundString("A3 LOGIN {1+}\r\n\\ {1+}\r\n\\\r\n")
     }
-    
+
     func testContinuationRequestsAsUserEvents() {
         let eventExpectation1 = self.channel.eventLoop.makePromise(of: Void.self)
         let eventExpectation2 = self.channel.eventLoop.makePromise(of: Void.self)
