@@ -132,7 +132,7 @@ class IMAPClientHandlerTests: XCTestCase {
     }
 
     func testStateTransformation() {
-        let handler = IMAPClientHandler() { _, _ in }
+        let handler = IMAPClientHandler()
         let channel = EmbeddedChannel(handler: handler, loop: .init())
 
         // move into an idle state
@@ -339,7 +339,7 @@ class IMAPClientHandlerTests: XCTestCase {
 
     override func setUp() {
         XCTAssertNil(self.channel)
-        self.clientHandler = IMAPClientHandler() { _, _ in }
+        self.clientHandler = IMAPClientHandler()
         self.channel = EmbeddedChannel(handler: self.clientHandler)
     }
 
