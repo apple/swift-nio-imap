@@ -50,7 +50,7 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
     /// The first argument is the capabilities that the server has sent. The second is a mutable set of encoding options.
     /// The encoding options are pre-populated with what are considered to be the *best* settings for the given
     /// capabilities.
-    var encodingChangeCallback: (KeyValues<String, ByteBuffer?>, inout CommandEncodingOptions) -> Void
+    var encodingChangeCallback: (KeyValues<String, String?>, inout CommandEncodingOptions) -> Void
 
     enum ClientHandlerState: Equatable {
         /// We're expecting continuations to come back during a command.
@@ -64,7 +64,7 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
         case expectingResponses
     }
 
-    public init(encodingChangeCallback: @escaping (KeyValues<String, ByteBuffer?>, inout CommandEncodingOptions) -> Void = { _, _ in }) {
+    public init(encodingChangeCallback: @escaping (KeyValues<String, String?>, inout CommandEncodingOptions) -> Void = { _, _ in }) {
         self.decoder = NIOSingleStepByteToMessageProcessor(ResponseDecoder(), maximumBufferSize: 1_000)
         self._state = .expectingResponses
         self.encodingOptions = .rfc3501
@@ -102,6 +102,8 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
                         }
                     case .fetchResponse, .fatalResponse, .authenticationChallenge:
                         break
+                    case .idleStarted:
+                        self._state = .expectingContinuations
                     }
                     context.fireChannelRead(self.wrapInboundOut(response))
                 }

@@ -258,16 +258,16 @@ class IMAPClientHandlerTests: XCTestCase {
 
         // send some capabilities
         self.writeInbound("A1 OK [CAPABILITY LITERAL+]\r\n")
-        self.assertInbound(.response(.taggedResponse(.init(tag: "A1", state: .ok(.init(code: .capability([.literalPlus]), text: ""))))))
+        self.assertInbound(.taggedResponse(.init(tag: "A1", state: .ok(.init(code: .capability([.literalPlus]), text: "")))))
 
         // send the server ID (client sends a noop
         self.writeOutbound(.command(.init(tag: "A2", command: .noop)), wait: false)
         self.assertOutboundString("A2 NOOP\r\n")
         self.writeInbound("* ID (\"name\" \"NIOIMAP\")\r\n")
-        self.assertInbound(.response(.untaggedResponse(.id(["name": "NIOIMAP"]))))
+        self.assertInbound(.untaggedResponse(.id(["name": "NIOIMAP"])))
         wait(for: [turnOnLiteralPlusExpectation], timeout: 1.0)
         self.writeInbound("A2 OK NOOP complete\r\n")
-        self.assertInbound(.response(.taggedResponse(.init(tag: "A2", state: .ok(.init(text: "NOOP complete"))))))
+        self.assertInbound(.taggedResponse(.init(tag: "A2", state: .ok(.init(text: "NOOP complete")))))
 
         // now we should have literal+ turned on
         self.writeOutbound(.command(.init(tag: "A3", command: .login(username: "\\", password: "\\"))), wait: false)
