@@ -13,14 +13,14 @@
 //===----------------------------------------------------------------------===//
 
 /// Matches an encoded user with a permitted authentication mechanism.
-public struct UserInfo: Equatable {
+public struct UserAuthenticationMechanism: Equatable {
     /// The percent-encoded user data.
     public let encodedUser: EncodedUser?
 
     /// The authentication mechanism.
     public let authenticationMechanism: IAuthentication?
 
-    /// Creates a new `UserInfo`.
+    /// Creates a new `UserAuthenticationMechanism`.
     /// - parameter encodedUser: The percent-encoded user data.
     /// - parameter authenticationMechanism: The authentication mechanism.
     public init(encodedUser: EncodedUser?, authenticationMechanism: IAuthentication?) {
@@ -33,7 +33,7 @@ public struct UserInfo: Equatable {
 // MARK: - Encoding
 
 extension _EncodeBuffer {
-    @discardableResult mutating func writeUserInfo(_ data: UserInfo) -> Int {
+    @discardableResult mutating func writeUserAuthenticationMechanism(_ data: UserAuthenticationMechanism) -> Int {
         self.writeIfExists(data.encodedUser) { user in
             self.writeEncodedUser(user)
         } +

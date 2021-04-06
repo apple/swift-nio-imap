@@ -981,12 +981,12 @@ extension ParserUnitTests {
     }
 }
 
-// MARK: - UserInfo
+// MARK: - UserAuthenticationMechanism
 
 extension ParserUnitTests {
-    func testParseUserInfo() {
+    func testParseUserAuthenticationMechanism() {
         self.iterateTests(
-            testFunction: GrammarParser.parseUserInfo,
+            testFunction: GrammarParser.parseUserAuthenticationMechanism,
             validInputs: [
                 (";AUTH=*", " ", .init(encodedUser: nil, authenticationMechanism: .any), #line),
                 ("test", " ", .init(encodedUser: .init(data: "test"), authenticationMechanism: nil), #line),
@@ -1508,10 +1508,10 @@ extension ParserUnitTests {
         self.iterateTests(
             testFunction: GrammarParser.parseIMAPServer,
             validInputs: [
-                ("localhost", " ", .init(userInfo: nil, host: "localhost", port: nil), #line),
-                (";AUTH=*@localhost", " ", .init(userInfo: .init(encodedUser: nil, authenticationMechanism: .any), host: "localhost", port: nil), #line),
-                ("localhost:1234", " ", .init(userInfo: nil, host: "localhost", port: 1234), #line),
-                (";AUTH=*@localhost:1234", " ", .init(userInfo: .init(encodedUser: nil, authenticationMechanism: .any), host: "localhost", port: 1234), #line),
+                ("localhost", " ", .init(userAuthenticationMechanism: nil, host: "localhost", port: nil), #line),
+                (";AUTH=*@localhost", " ", .init(userAuthenticationMechanism: .init(encodedUser: nil, authenticationMechanism: .any), host: "localhost", port: nil), #line),
+                ("localhost:1234", " ", .init(userAuthenticationMechanism: nil, host: "localhost", port: 1234), #line),
+                (";AUTH=*@localhost:1234", " ", .init(userAuthenticationMechanism: .init(encodedUser: nil, authenticationMechanism: .any), host: "localhost", port: 1234), #line),
             ],
             parserErrorInputs: [
             ],

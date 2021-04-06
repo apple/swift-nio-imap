@@ -18,7 +18,7 @@ import struct NIO.ByteBuffer
 /// to an IMAP server.
 public struct IMAPServer: Equatable {
     /// If present, authentication details for the server.
-    public var userInfo: UserInfo?
+    public var userAuthenticationMechanism: UserAuthenticationMechanism?
 
     /// The hostname of the server.
     public var host: String
@@ -27,11 +27,11 @@ public struct IMAPServer: Equatable {
     public var port: Int?
 
     /// Creates a new `IMAPServer`.
-    /// - parameter userInfo: If present, authentication details for the server. Defaults to `nil`.
+    /// - parameter userAuthenticationMechanism: If present, authentication details for the server. Defaults to `nil`.
     /// - parameter host: The hostname of the server.
     /// - parameter port: The host post of the server. Defaults to `nil`.
-    public init(userInfo: UserInfo? = nil, host: String, port: Int? = nil) {
-        self.userInfo = userInfo
+    public init(userAuthenticationMechanism: UserAuthenticationMechanism? = nil, host: String, port: Int? = nil) {
+        self.userAuthenticationMechanism = userAuthenticationMechanism
         self.host = host
         self.port = port
     }
@@ -41,8 +41,8 @@ public struct IMAPServer: Equatable {
 
 extension _EncodeBuffer {
     @discardableResult mutating func writeIMAPServer(_ server: IMAPServer) -> Int {
-        self.writeIfExists(server.userInfo) { userInfo in
-            self.writeUserInfo(userInfo) + self._writeString("@")
+        self.writeIfExists(server.userAuthenticationMechanism) { authMechanism in
+            self.writeUserAuthenticationMechanism(authMechanism) + self._writeString("@")
         } +
             self._writeString("\(server.host)") +
             self.writeIfExists(server.port) { port in

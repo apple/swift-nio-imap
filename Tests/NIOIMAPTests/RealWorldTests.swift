@@ -54,7 +54,7 @@ extension RealWorldTests {
                     .response(.taggedResponse(
                         TaggedResponse(tag: "tag",
                                        state: .ok(ResponseText(code:
-                                           .referral(IMAPURL(server: IMAPServer(userInfo: nil, host: "hostname", port: nil),
+                                           .referral(IMAPURL(server: IMAPServer(userAuthenticationMechanism: nil, host: "hostname", port: nil),
                                                              query: IPathQuery(command: ICommand.messagePart(
                                                                  part: IMessagePart(
                                                                      mailboxReference: IMailboxReference(encodeMailbox: EncodedMailbox(mailbox: "foo/bar"),
