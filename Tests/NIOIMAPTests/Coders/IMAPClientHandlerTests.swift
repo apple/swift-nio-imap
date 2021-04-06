@@ -273,6 +273,67 @@ class IMAPClientHandlerTests: XCTestCase {
         self.writeOutbound(.command(.init(tag: "A3", command: .login(username: "\\", password: "\\"))), wait: false)
         self.assertOutboundString("A3 LOGIN {1+}\r\n\\ {1+}\r\n\\\r\n")
     }
+    
+    func testContinuationRequestsAsUserEvents() {
+        let eventExpectation1 = self.channel.eventLoop.makePromise(of: Void.self)
+        let eventExpectation2 = self.channel.eventLoop.makePromise(of: Void.self)
+        let eventExpectation3 = self.channel.eventLoop.makePromise(of: Void.self)
+
+        class UserEventHandler: ChannelDuplexHandler {
+            typealias InboundIn = Response
+
+            typealias OutboundIn = CommandStream
+
+            var expectation1: EventLoopPromise<Void>
+            var expectation2: EventLoopPromise<Void>
+            var expectation3: EventLoopPromise<Void>
+
+            init(expectation1: EventLoopPromise<Void>, expectation2: EventLoopPromise<Void>, expectation3: EventLoopPromise<Void>) {
+                self.expectation1 = expectation1
+                self.expectation2 = expectation2
+                self.expectation3 = expectation3
+            }
+
+            public func userInboundEventTriggered(context: ChannelHandlerContext, event: Any) {
+                guard let event = event as? ContinuationRequest, case .responseText(let textEvent) = event else {
+                    XCTFail()
+                    return
+                }
+                switch textEvent.text {
+                case "1": self.expectation1.succeed(())
+                case "2": self.expectation2.succeed(())
+                case "3": self.expectation3.succeed(())
+                default:
+                    XCTFail("Not sure who sent this event, but it wasn't us")
+                }
+            }
+        }
+
+        try! self.channel.pipeline.addHandler(UserEventHandler(
+            expectation1: eventExpectation1,
+            expectation2: eventExpectation2,
+            expectation3: eventExpectation3
+        )).wait()
+
+        // confirm it works for literals
+        self.writeOutbound(.command(.init(tag: "A1", command: .login(username: "\\", password: "\\"))), wait: false)
+        self.assertOutboundString("A1 LOGIN {1}\r\n")
+        self.writeInbound("+ 1\r\n")
+        try! eventExpectation1.futureResult.wait()
+        self.assertOutboundString("\\ {1}\r\n")
+        self.writeInbound("+ 2\r\n")
+        try! eventExpectation2.futureResult.wait()
+        self.assertOutboundString("\\\r\n")
+
+        // now confirm idle
+        self.writeOutbound(.command(.init(tag: "A2", command: .idleStart)), wait: false)
+        self.assertOutboundString("A2 IDLE\r\n")
+        self.writeInbound("+ 3\r\n")
+        try! eventExpectation3.futureResult.wait()
+        self.assertInbound(.idleStarted)
+        self.writeOutbound(.idleDone)
+        self.assertOutboundString("DONE\r\n")
+    }
 
     // MARK: - setup / tear down
 
