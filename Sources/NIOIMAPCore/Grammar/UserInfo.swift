@@ -33,7 +33,7 @@ public struct UserAuthenticationMechanism: Equatable {
 // MARK: - Encoding
 
 extension _EncodeBuffer {
-    @discardableResult mutating func writeUserInfo(_ data: UserAuthenticationMechanism) -> Int {
+    @discardableResult mutating func writeUserAuthenticationMechanism(_ data: UserAuthenticationMechanism) -> Int {
         self.writeIfExists(data.encodedUser) { user in
             self.writeEncodedUser(user)
         } +

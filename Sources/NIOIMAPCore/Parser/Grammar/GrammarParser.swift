@@ -782,7 +782,7 @@ extension GrammarParser {
     static func parseIMAPServer(buffer: inout ParseBuffer, tracker: StackTracker) throws -> IMAPServer {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> IMAPServer in
             let info = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> UserAuthenticationMechanism in
-                let info = try self.parseUserInfo(buffer: &buffer, tracker: tracker)
+                let info = try self.parseUserAuthenticationMechanism(buffer: &buffer, tracker: tracker)
                 try PL.parseFixedString("@", buffer: &buffer, tracker: tracker)
                 return info
             })
@@ -791,7 +791,7 @@ extension GrammarParser {
                 try PL.parseFixedString(":", buffer: &buffer, tracker: tracker)
                 return try self.parseNumber(buffer: &buffer, tracker: tracker)
             })
-            return .init(userInfo: info, host: host, port: port)
+            return .init(userAuthenticationMechanism: info, host: host, port: port)
         }
     }
 
@@ -1181,7 +1181,7 @@ extension GrammarParser {
         }
     }
 
-    static func parseUserInfo(buffer: inout ParseBuffer, tracker: StackTracker) throws -> UserAuthenticationMechanism {
+    static func parseUserAuthenticationMechanism(buffer: inout ParseBuffer, tracker: StackTracker) throws -> UserAuthenticationMechanism {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> UserAuthenticationMechanism in
             let encodedUser = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseEncodedUser)
             let authenticationMechanism = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseIAuthentication)
