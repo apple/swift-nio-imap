@@ -23,7 +23,7 @@ class ICommand_Tests: EncodeTestClass {}
 extension ICommand_Tests {
     func testEncode() {
         let inputs: [(ICommand, String, UInt)] = [
-            (.messageList(.init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")))), "test", #line),
+            (.messageList(.init(mailboxValidity: .init(encodeMailbox: .init(mailbox: "test")))), "test", #line),
             (.messagePart(part: .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: .init(uid: 123)), authenticatedURL: nil), "test/;UID=123", #line),
             (.messagePart(part: .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: .init(uid: 123)), authenticatedURL: .init(authenticatedURL: .init(access: .anonymous), verifier: .init(urlAuthMechanism: .internal, encodedAuthenticationURL: .init(data: "01234567890123456789012345678901")))), "test/;UID=123;URLAUTH=anonymous:INTERNAL:01234567890123456789012345678901", #line),
         ]

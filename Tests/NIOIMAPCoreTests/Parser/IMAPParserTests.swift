@@ -834,7 +834,7 @@ extension ParserUnitTests {
         self.iterateTests(
             testFunction: GrammarParser.parseIRelativePath,
             validInputs: [
-                ("test", " ", .list(.init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")))), #line),
+                ("test", " ", .list(.init(mailboxValidity: .init(encodeMailbox: .init(mailbox: "test")))), #line),
                 (";PARTIAL=1.2", " ", .messageOrPartial(.partialOnly(.init(range: .init(offset: 1, length: 2)))), #line),
             ],
             parserErrorInputs: [
@@ -853,7 +853,7 @@ extension ParserUnitTests {
             testFunction: GrammarParser.parseIAbsolutePath,
             validInputs: [
                 ("/", " ", .init(command: nil), #line),
-                ("/test", " ", .init(command: .messageList(.init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test"))))), #line),
+                ("/test", " ", .init(command: .messageList(.init(mailboxValidity: .init(encodeMailbox: .init(mailbox: "test"))))), #line),
             ],
             parserErrorInputs: [
             ],
@@ -870,7 +870,7 @@ extension ParserUnitTests {
         self.iterateTests(
             testFunction: GrammarParser.parseICommand,
             validInputs: [
-                ("test", " ", .messageList(.init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")))), #line),
+                ("test", " ", .messageList(.init(mailboxValidity: .init(encodeMailbox: .init(mailbox: "test")))), #line),
                 ("test/;UID=123", " ", .messagePart(part: .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: .init(uid: 123)), authenticatedURL: nil), #line),
                 ("test/;UID=123;URLAUTH=anonymous:INTERNAL:01234567890123456789012345678901", " ", .messagePart(part: .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: .init(uid: 123)), authenticatedURL: .init(authenticatedURL: .init(access: .anonymous), verifier: .init(urlAuthMechanism: .internal, encodedAuthenticationURL: .init(data: "01234567890123456789012345678901")))), #line),
             ],
@@ -1451,7 +1451,7 @@ extension ParserUnitTests {
             testFunction: GrammarParser.parseIPathQuery,
             validInputs: [
                 ("/", " ", .init(command: nil), #line),
-                ("/test", " ", .init(command: .messageList(.init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test"))))), #line),
+                ("/test", " ", .init(command: .messageList(.init(mailboxValidity: .init(encodeMailbox: .init(mailbox: "test"))))), #line),
             ],
             parserErrorInputs: [
             ],
@@ -1603,9 +1603,9 @@ extension ParserUnitTests {
         self.iterateTests(
             testFunction: GrammarParser.parseRelativeIMAPURL,
             validInputs: [
-                ("/test", " ", .absolutePath(.init(command: .messageList(.init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")))))), #line),
+                ("/test", " ", .absolutePath(.init(command: .messageList(.init(mailboxValidity: .init(encodeMailbox: .init(mailbox: "test")))))), #line),
                 ("//localhost/", " ", .networkPath(.init(server: .init(host: "localhost"), query: .init(command: nil))), #line),
-                ("test", " ", .relativePath(.list(.init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test"))))), #line),
+                ("test", " ", .relativePath(.list(.init(mailboxValidity: .init(encodeMailbox: .init(mailbox: "test"))))), #line),
                 ("", " ", .empty, #line),
             ],
             parserErrorInputs: [
@@ -1623,8 +1623,8 @@ extension ParserUnitTests {
         self.iterateTests(
             testFunction: GrammarParser.parseEncodedSearchQuery,
             validInputs: [
-                ("test", " ", .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test"), uidValidity: nil)), #line),
-                ("test?query", " ", .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test"), uidValidity: nil), encodedSearch: .init(query: "query")), #line),
+                ("test", " ", .init(mailboxValidity: .init(encodeMailbox: .init(mailbox: "test"), uidValidity: nil)), #line),
+                ("test?query", " ", .init(mailboxValidity: .init(encodeMailbox: .init(mailbox: "test"), uidValidity: nil), encodedSearch: .init(query: "query")), #line),
             ],
             parserErrorInputs: [
             ],

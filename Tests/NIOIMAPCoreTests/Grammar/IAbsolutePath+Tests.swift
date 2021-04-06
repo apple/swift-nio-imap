@@ -23,7 +23,7 @@ class IAbsolutePath_Tests: EncodeTestClass {}
 extension IAbsolutePath_Tests {
     func testEncode() {
         let inputs: [(IAbsolutePath, String, UInt)] = [
-            (.init(command: .messageList(.init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test"))))), "/test", #line),
+            (.init(command: .messageList(.init(mailboxValidity: .init(encodeMailbox: .init(mailbox: "test"))))), "/test", #line),
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeIAbsolutePath($0) })
     }

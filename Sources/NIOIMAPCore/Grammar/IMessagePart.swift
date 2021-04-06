@@ -27,7 +27,7 @@ public struct IMessagePart: Equatable {
     public var iPartial: IPartial?
 
     /// Create a new `IMessagePart`.
-    /// - parameter mailboxReference: Connection details for a server and a specific mailbox hosted on that server.
+    /// - parameter mailboxValidity: Connection details for a server and a specific mailbox hosted on that server.
     /// - parameter iUID: The UID of the message in question.
     /// - parameter iSection: An optional section of the message in question.
     /// - parameter iPartial: A specific range of bytes of the message/section in question.

@@ -23,9 +23,9 @@ class RelativeIMAPURL_Tests: EncodeTestClass {}
 extension RelativeIMAPURL_Tests {
     func testEncode() {
         let inputs: [(RelativeIMAPURL, String, UInt)] = [
-            (.absolutePath(.init(command: .messageList(.init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")))))), "/test", #line),
+            (.absolutePath(.init(command: .messageList(.init(mailboxValidity: .init(encodeMailbox: .init(mailbox: "test")))))), "/test", #line),
             (.networkPath(.init(server: .init(host: "localhost"), query: .init(command: nil))), "//localhost/", #line),
-            (.relativePath(.list(.init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test"))))), "test", #line),
+            (.relativePath(.list(.init(mailboxValidity: .init(encodeMailbox: .init(mailbox: "test"))))), "test", #line),
             (.empty, "", #line),
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeRelativeIMAPURL($0) })
