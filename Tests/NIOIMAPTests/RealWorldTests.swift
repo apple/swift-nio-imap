@@ -58,7 +58,7 @@ extension RealWorldTests {
                                                              query: IPathQuery(command: ICommand.messagePart(
                                                                  part: IMessagePart(
                                                                      mailboxReference: EncodedMailboxUIDValidity(encodeMailbox: EncodedMailbox(mailbox: "foo/bar"),
-                                                                                                         uidValidity: nil),
+                                                                                                                 uidValidity: nil),
                                                                      iUID: IUID(uid: 1234),
                                                                      iSection: nil,
                                                                      iPartial: nil
