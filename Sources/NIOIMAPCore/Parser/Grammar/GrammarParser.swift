@@ -867,8 +867,8 @@ extension GrammarParser {
         }
     }
 
-    static func parseEncodedSearchQuery(buffer: inout ParseBuffer, tracker: StackTracker) throws -> IMessageList {
-        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> IMessageList in
+    static func parseEncodedSearchQuery(buffer: inout ParseBuffer, tracker: StackTracker) throws -> EncodedSearchQuery {
+        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> EncodedSearchQuery in
             let mailboxRef = try self.parseEncodedMailboxUIDValidity(buffer: &buffer, tracker: tracker)
             let query = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> EncodedSearch in
                 try PL.parseFixedString("?", buffer: &buffer, tracker: tracker)
