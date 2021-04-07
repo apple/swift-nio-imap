@@ -73,6 +73,9 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
     public init(encodingChangeCallback: @escaping (KeyValues<String, String?>, inout CommandEncodingOptions) -> Void = { _, _ in }) {
         self.decoder = NIOSingleStepByteToMessageProcessor(ResponseDecoder(), maximumBufferSize: 1_000)
         self.state = .expectingResponses
+        self.encodingChangeCallback = encodingChangeCallback
+        self.lastKnownCapabilities = []
+        self.encodingOptions = CommandEncodingOptions(capabilities: self.lastKnownCapabilities)
     }
 
     public func channelRead(context: ChannelHandlerContext, data: NIOAny) {
@@ -130,9 +133,21 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
         case .taggedResponse:
             // continuations must have finished: change the state to standard continuation handling
             self.state = .expectingResponses
-
-        case .untaggedResponse, .fetchResponse, .fatalResponse, .authenticationChallenge, .idleStarted:
+        case .untaggedResponse(let untagged):
+            switch untagged {
+            case .conditionalState, .mailboxData, .messageData, .enableData, .quotaRoot, .quota, .metadata:
+                break
+            case .capabilityData(let caps):
+                self.lastKnownCapabilities = caps
+            case .id(let info):
+                var recomended = CommandEncodingOptions(capabilities: self.lastKnownCapabilities)
+                self.encodingChangeCallback(info, &recomended)
+                self.encodingOptions = recomended
+            }
+        case .fetchResponse, .fatalResponse, .authenticationChallenge:
             break
+        case .idleStarted:
+            self.state = .expectingIdleContinuation
         }
         context.fireChannelRead(self.wrapInboundOut(response))
     }
