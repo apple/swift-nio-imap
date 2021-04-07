@@ -39,7 +39,12 @@ extension GrammarParser {
         let save = buffer
         do {
             let parsed = try PL.parseOneOrMoreCharacters(buffer: &buffer, tracker: tracker) { char -> Bool in
-                char.isAlpha
+                switch char {
+                case _ where char.isAlphaNum, UInt8(ascii: "."), UInt8(ascii: "-"):
+                    return true
+                default:
+                    return false
+                }
             }
             let word = String(buffer: parsed).uppercased()
             guard let parser = parsers[word] else {
