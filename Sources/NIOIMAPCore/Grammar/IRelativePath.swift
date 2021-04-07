@@ -15,7 +15,7 @@
 /// Used to specify the type of URL, e.g. one that retrieves a list of messages, or just a single message.
 public enum IRelativePath: Equatable {
     /// An IMAP URL referring to a list of messages.
-    case list(IMessageList)
+    case list(EncodedSearchQuery)
 
     /// An IMAP URL referring to a specific message, and optionally a component of message.
     case messageOrPartial(IMessageOrPartial)
@@ -27,7 +27,7 @@ extension _EncodeBuffer {
     @discardableResult mutating func writeIRelativePath(_ path: IRelativePath) -> Int {
         switch path {
         case .list(let list):
-            return self.writeIMessageList(list)
+            return self.writeEncodedSearchQuery(list)
         case .messageOrPartial(let data):
             return self.writeIMessageOrPartial(data)
         }

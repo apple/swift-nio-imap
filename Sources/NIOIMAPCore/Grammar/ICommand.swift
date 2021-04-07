@@ -15,7 +15,7 @@
 /// A command that should be executed once a server has been successfully connected to.
 public enum ICommand: Equatable {
     /// Performs a `.select` or `.examine` command.
-    case messageList(IMessageList)
+    case messageList(EncodedSearchQuery)
 
     /// Performs a `.fetch` command.
     case messagePart(part: IMessagePart, authenticatedURL: IAuthenticatedURL?)
@@ -27,7 +27,7 @@ extension _EncodeBuffer {
     @discardableResult mutating func writeICommand(_ ref: ICommand) -> Int {
         switch ref {
         case .messageList(let list):
-            return self.writeIMessageList(list)
+            return self.writeEncodedSearchQuery(list)
         case .messagePart(part: let part, authenticatedURL: let authenticatedURL):
             return self.writeIMessagePart(part) +
                 self.writeIfExists(authenticatedURL) { authenticatedURL in
