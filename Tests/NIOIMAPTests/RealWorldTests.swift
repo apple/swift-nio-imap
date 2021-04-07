@@ -55,8 +55,8 @@ extension RealWorldTests {
                         TaggedResponse(tag: "tag",
                                        state: .ok(ResponseText(code:
                                            .referral(IMAPURL(server: IMAPServer(userAuthenticationMechanism: nil, host: "hostname", port: nil),
-                                                             query: IPathQuery(command: ICommand.messagePath(
-                                                                 part: MessagePath(
+                                                             query: IPathQuery(command: ICommand.fetch(
+                                                                 path: MessagePath(
                                                                      mailboxReference: MailboxUIDValidity(encodeMailbox: EncodedMailbox(mailbox: "foo/bar"),
                                                                                                           uidValidity: nil),
                                                                      iUID: IUID(uid: 1234),

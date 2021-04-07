@@ -28,7 +28,7 @@ extension _EncodeBuffer {
         switch ref {
         case .messageList(let list):
             return self.writeEncodedSearchQuery(list)
-        case .messagePath(part: let path, authenticatedURL: let authenticatedURL):
+        case .fetch(path: let path, authenticatedURL: let authenticatedURL):
             return self.writeMessagePath(path) +
                 self.writeIfExists(authenticatedURL) { authenticatedURL in
                     self.writeIAuthenticatedURL(authenticatedURL)
