@@ -14,14 +14,14 @@
 
 /// Provides the `UIDValitiy` for a percent-encoded mailbox. If the `UIDValidity` is present
 /// it will be used to ensure the URL is not stale.
-public struct IMailboxReference: Equatable {
+public struct MailboxUIDValidity: Equatable {
     /// The percent-encoded mailbox.
     public var encodedMailbox: EncodedMailbox
 
     /// The corresponding `UIDValidity`
     public var uidValidity: UIDValidity?
 
-    /// Creates a new `IMailboxReference`.
+    /// Creates a new `MailboxUIDValidity`.
     /// - parameter encodeMailbox: The percent-encoded mailbox.
     /// - parameter uidValidity: The corresponding `UIDValidity`
     public init(encodeMailbox: EncodedMailbox, uidValidity: UIDValidity? = nil) {
@@ -33,7 +33,7 @@ public struct IMailboxReference: Equatable {
 // MARK: - Encoding
 
 extension _EncodeBuffer {
-    @discardableResult mutating func writeIMailboxReference(_ ref: IMailboxReference) -> Int {
+    @discardableResult mutating func writeEncodedMailboxUIDValidity(_ ref: MailboxUIDValidity) -> Int {
         self.writeEncodedMailbox(ref.encodedMailbox) +
             self.writeIfExists(ref.uidValidity) { value in
                 self._writeString(";UIDVALIDITY=") + self.writeUIDValidity(value)
