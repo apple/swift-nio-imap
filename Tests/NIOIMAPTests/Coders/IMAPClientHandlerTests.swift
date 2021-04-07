@@ -36,7 +36,7 @@ class IMAPClientHandlerTests: XCTestCase {
             TaggedResponse(tag: "tag",
                            state: .ok(ResponseText(code:
                                .referral(IMAPURL(server: IMAPServer(userAuthenticationMechanism: nil, host: "hostname", port: nil),
-                                                 query: IPathQuery(command: ICommand.messagePart(
+                                                 query: IPathQuery(command: ICommand.messagePath(
                                                      part: MessagePath(
                                                          mailboxReference: MailboxUIDValidity(encodeMailbox: EncodedMailbox(mailbox: "foo/bar"),
                                                                                               uidValidity: nil),

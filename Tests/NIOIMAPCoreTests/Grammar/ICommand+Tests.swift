@@ -24,8 +24,8 @@ extension ICommand_Tests {
     func testEncode() {
         let inputs: [(ICommand, String, UInt)] = [
             (.messageList(.init(mailboxUIDValidity: .init(encodeMailbox: .init(mailbox: "test")))), "test", #line),
-            (.messagePart(part: .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: .init(uid: 123)), authenticatedURL: nil), "test/;UID=123", #line),
-            (.messagePart(part: .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: .init(uid: 123)), authenticatedURL: .init(authenticatedURL: .init(access: .anonymous), verifier: .init(urlAuthMechanism: .internal, encodedAuthenticationURL: .init(data: "01234567890123456789012345678901")))), "test/;UID=123;URLAUTH=anonymous:INTERNAL:01234567890123456789012345678901", #line),
+            (.messagePath(part: .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: .init(uid: 123)), authenticatedURL: nil), "test/;UID=123", #line),
+            (.messagePath(part: .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: .init(uid: 123)), authenticatedURL: .init(authenticatedURL: .init(access: .anonymous), verifier: .init(urlAuthMechanism: .internal, encodedAuthenticationURL: .init(data: "01234567890123456789012345678901")))), "test/;UID=123;URLAUTH=anonymous:INTERNAL:01234567890123456789012345678901", #line),
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeICommand($0) })
     }

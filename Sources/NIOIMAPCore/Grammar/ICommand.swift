@@ -18,7 +18,7 @@ public enum ICommand: Equatable {
     case messageList(EncodedSearchQuery)
 
     /// Performs a `.fetch` command.
-    case messagePart(part: MessagePath, authenticatedURL: IAuthenticatedURL?)
+    case fetch(path: MessagePath, authenticatedURL: IAuthenticatedURL?)
 }
 
 // MARK: - Encoding
@@ -28,7 +28,7 @@ extension _EncodeBuffer {
         switch ref {
         case .messageList(let list):
             return self.writeEncodedSearchQuery(list)
-        case .messagePart(part: let path, authenticatedURL: let authenticatedURL):
+        case .messagePath(part: let path, authenticatedURL: let authenticatedURL):
             return self.writeMessagePath(path) +
                 self.writeIfExists(authenticatedURL) { authenticatedURL in
                     self.writeIAuthenticatedURL(authenticatedURL)

@@ -24,7 +24,7 @@ public struct AuthenticatedURL: Equatable {
 
     // Creates a new `AuthenticatedURL`.
     /// - parameter server: The server containing the message.
-    /// - parameter messagePart: The unique URL of the message, and the part of interest.
+    /// - parameter messagePath: The unique URL of the message, and the part of interest.
     public init(server: IMAPServer, messagePath: MessagePath) {
         self.server = server
         self.messagePath = messagePath

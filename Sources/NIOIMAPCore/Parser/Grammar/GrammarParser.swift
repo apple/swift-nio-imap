@@ -617,7 +617,7 @@ extension GrammarParser {
         func parseICommand_part(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ICommand {
             let part = try self.parseMessagePath(buffer: &buffer, tracker: tracker)
             let auth = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseIURLAuth)
-            return .messagePart(part: part, authenticatedURL: auth)
+            return .fetch(part: part, authenticatedURL: auth)
         }
 
         return try PL.parseOneOf(
