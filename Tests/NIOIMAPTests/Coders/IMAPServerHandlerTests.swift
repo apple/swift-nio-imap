@@ -170,6 +170,14 @@ class IMAPServerHandlerTests: XCTestCase {
         self.writeInbound("cmVzcG9uc2Uy\r\n")
         self.assertInbound(.continuationResponse("response2"))
 
+        // server challenge 3 (empty)
+        self.writeOutbound(.authenticationChallenge(""))
+        self.assertOutboundBuffer("+ \r\n")
+
+        // client responds
+        self.writeInbound("cmVzcG9uc2Uz\r\n")
+        self.assertInbound(.continuationResponse("response3"))
+
         // all done
         self.writeOutbound(.taggedResponse(.init(tag: "A1", state: .ok(.init(text: "Success")))))
         self.assertOutboundBuffer("A1 OK Success\r\n")

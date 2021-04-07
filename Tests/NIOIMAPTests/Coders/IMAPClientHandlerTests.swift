@@ -87,32 +87,33 @@ class IMAPClientHandlerTests: XCTestCase {
                                                  state: .ok(.init(code: nil, text: "ok")))))
     }
 
-    func testTwoContReqCommandsEnqueued() {
-        let f1 = self.writeOutbound(CommandStream.command(TaggedCommand(tag: "x",
-                                                                        command: .rename(from: .init("\\"),
-                                                                                         to: .init("to"),
-                                                                                         params: [:]))),
-        wait: false)
-        let f2 = self.writeOutbound(CommandStream.command(TaggedCommand(tag: "y",
-                                                                        command: .rename(from: .init("from"),
-                                                                                         to: .init("\\"),
-                                                                                         params: [:]))),
-        wait: false)
-        self.assertOutboundString("x RENAME {1}\r\n")
-        self.writeInbound("+ OK\r\n")
-        XCTAssertNoThrow(try f1.wait())
-        self.assertOutboundString("\\ \"to\"\r\n")
-        self.assertOutboundString("y RENAME \"from\" {1}\r\n")
-        self.writeInbound("+ OK\r\n")
-        XCTAssertNoThrow(try f2.wait())
-        self.assertOutboundString("\\\r\n")
-        self.writeInbound("x OK ok\r\n")
-        self.assertInbound(.taggedResponse(.init(tag: "x",
-                                                 state: .ok(.init(code: nil, text: "ok")))))
-        self.writeInbound("y OK ok\r\n")
-        self.assertInbound(.taggedResponse(.init(tag: "y",
-                                                 state: .ok(.init(code: nil, text: "ok")))))
-    }
+    // TODO: Make a new state machine that can handle pipelined commands and uncomment this test, issue #528
+//    func testTwoContReqCommandsEnqueued() {
+//        let f1 = self.writeOutbound(CommandStream.command(TaggedCommand(tag: "x",
+//                                                                        command: .rename(from: .init("\\"),
+//                                                                                         to: .init("to"),
+//                                                                                         params: [:]))),
+//        wait: false)
+//        let f2 = self.writeOutbound(CommandStream.command(TaggedCommand(tag: "y",
+//                                                                        command: .rename(from: .init("from"),
+//                                                                                         to: .init("\\"),
+//                                                                                         params: [:]))),
+//        wait: false)
+//        self.assertOutboundString("x RENAME {1}\r\n")
+//        self.writeInbound("+ OK\r\n")
+//        XCTAssertNoThrow(try f1.wait())
+//        self.assertOutboundString("\\ \"to\"\r\n")
+//        self.assertOutboundString("y RENAME \"from\" {1}\r\n")
+//        self.writeInbound("+ OK\r\n")
+//        XCTAssertNoThrow(try f2.wait())
+//        self.assertOutboundString("\\\r\n")
+//        self.writeInbound("x OK ok\r\n")
+//        self.assertInbound(.taggedResponse(.init(tag: "x",
+//                                                 state: .ok(.init(code: nil, text: "ok")))))
+//        self.writeInbound("y OK ok\r\n")
+//        self.assertInbound(.taggedResponse(.init(tag: "y",
+//                                                 state: .ok(.init(code: nil, text: "ok")))))
+//    }
 
     func testUnexpectedContinuationRequest() {
         let f = self.writeOutbound(CommandStream.command(TaggedCommand(tag: "x",
@@ -122,7 +123,7 @@ class IMAPClientHandlerTests: XCTestCase {
         wait: false)
         self.assertOutboundString("x RENAME {1}\r\n")
         XCTAssertThrowsError(try self.channel.writeInbound(self.buffer(string: "+ OK\r\n+ OK\r\n"))) { error in
-            XCTAssertTrue(error is IMAPClientHandler.UnexpectedContinuationRequest)
+            XCTAssertTrue(error is IMAPClientHandler.UnexpectedContinuationRequest, "Error is \(error)")
         }
         self.assertOutboundString("\\ \"to\"\r\n")
         XCTAssertNoThrow(try f.wait())
@@ -131,109 +132,73 @@ class IMAPClientHandlerTests: XCTestCase {
                                                  state: .ok(.init(code: nil, text: "ok")))))
     }
 
-    func testStateTransformation() {
-        let handler = IMAPClientHandler()
-        let channel = EmbeddedChannel(handler: handler, loop: .init())
+    func testAuthenticationFlow() {
+        // client starts authentication
+        self.writeOutbound(.command(.init(tag: "A1", command: .authenticate(method: .gssAPI, initialClientResponse: nil))))
+        self.assertOutboundString("A1 AUTHENTICATE GSSAPI\r\n")
 
-        // move into an idle state
-        XCTAssertNoThrow(try channel.writeOutbound(CommandStream.command(.init(tag: "1", command: .idleStart))))
-        XCTAssertEqual(handler._state, .expectingContinuations)
-        XCTAssertNoThrow(try channel.readOutbound(as: ByteBuffer.self))
-        XCTAssertNoThrow(XCTAssertNil(try channel.readOutbound(as: ByteBuffer.self)))
-
-        // send some continuations
-        // in this case, 2 idle reminders
-        var inEncodeBuffer = ResponseEncodeBuffer(buffer: ByteBuffer(), capabilities: [])
-        inEncodeBuffer.writeContinuationRequest(.responseText(.init(text: "Waiting")))
-        XCTAssertNoThrow(try channel.writeInbound(inEncodeBuffer.readBytes()))
-        XCTAssertNoThrow(XCTAssertEqual(try channel.readInbound(), Response.idleStarted))
-        XCTAssertNoThrow(XCTAssertNil(try channel.readInbound(as: Response.self)))
-        inEncodeBuffer = ResponseEncodeBuffer(buffer: ByteBuffer(), capabilities: [])
-        inEncodeBuffer.writeContinuationRequest(.responseText(.init(text: "Waiting")))
-        XCTAssertNoThrow(try channel.writeInbound(inEncodeBuffer.readBytes()))
-        XCTAssertNoThrow(XCTAssertEqual(try channel.readInbound(), Response.idleStarted))
-        XCTAssertNoThrow(XCTAssertNil(try channel.readInbound(as: Response.self)))
-
-        // finish being idle
-        XCTAssertNoThrow(try channel.writeOutbound(CommandStream.idleDone))
-        XCTAssertEqual(handler._state, .expectingResponses)
-        XCTAssertNoThrow(try channel.readOutbound(as: ByteBuffer.self))
-        XCTAssertNoThrow(XCTAssertNil(try channel.readOutbound(as: ByteBuffer.self)))
-
-        // start authentication
-        XCTAssertNoThrow(try channel.writeOutbound(CommandStream.command(.init(tag: "A001", command: .authenticate(method: .init("GSSAPI"), initialClientResponse: nil)))))
-        XCTAssertEqual(handler._state, .expectingContinuations)
-        XCTAssertNoThrow(try channel.readOutbound(as: ByteBuffer.self))
-        XCTAssertNoThrow(XCTAssertNil(try channel.readOutbound(as: ByteBuffer.self)))
-
-        // server sends a challenge
-        inEncodeBuffer = ResponseEncodeBuffer(buffer: ByteBuffer(), capabilities: [])
-        inEncodeBuffer.writeContinuationRequest(.data(""))
-        XCTAssertNoThrow(try channel.writeInbound(inEncodeBuffer.readBytes()))
-        XCTAssertNoThrow(XCTAssertEqual(try channel.readInbound(), Response.idleStarted))
+        // server sends challenge
+        let challengeBytes1 = ""
+        self.writeInbound("+ \(challengeBytes1)\r\n")
+        self.assertInbound(.authenticationChallenge(ByteBuffer()))
 
         // client responds
-        let authString1 = """
-        YIIB+wYJKoZIhvcSAQICAQBuggHqMIIB5qADAgEFoQMCAQ6iBw
-        MFACAAAACjggEmYYIBIjCCAR6gAwIBBaESGxB1Lndhc2hpbmd0
-        b24uZWR1oi0wK6ADAgEDoSQwIhsEaW1hcBsac2hpdmFtcy5jYW
-        Mud2FzaGluZ3Rvbi5lZHWjgdMwgdCgAwIBAaEDAgEDooHDBIHA
-        cS1GSa5b+fXnPZNmXB9SjL8Ollj2SKyb+3S0iXMljen/jNkpJX
-        AleKTz6BQPzj8duz8EtoOuNfKgweViyn/9B9bccy1uuAE2HI0y
-        C/PHXNNU9ZrBziJ8Lm0tTNc98kUpjXnHZhsMcz5Mx2GR6dGknb
-        I0iaGcRerMUsWOuBmKKKRmVMMdR9T3EZdpqsBd7jZCNMWotjhi
-        vd5zovQlFqQ2Wjc2+y46vKP/iXxWIuQJuDiisyXF0Y8+5GTpAL
-        pHDc1/pIGmMIGjoAMCAQGigZsEgZg2on5mSuxoDHEA1w9bcW9n
-        FdFxDKpdrQhVGVRDIzcCMCTzvUboqb5KjY1NJKJsfjRQiBYBdE
-        NKfzK+g5DlV8nrw81uOcP8NOQCLR5XkoMHC0Dr/80ziQzbNqhx
-        O6652Npft0LQwJvenwDI13YxpwOdMXzkWZN/XrEqOWp6GCgXTB
-        vCyLWLlWnbaUkZdEYbKHBPjd8t/1x5Yg==
-        """
-        XCTAssertNoThrow(try channel.writeOutbound(CommandStream.continuationResponse(ByteBuffer(string: authString1))))
-        XCTAssertEqual(handler._state, .expectingContinuations)
-        XCTAssertEqual(try channel.readOutbound(as: ByteBuffer.self), ByteBuffer(string: "\r\n" + authString1))
+        let responseBytes1 = "YIIB+wYJKoZIhvcSAQICAQBuggHqMIIB5qADAgEFoQMCAQ6iBwMFACAAAACjggEmYYIBIjCCAR6gAwIBBaESGxB1Lndhc2hpbmd0b24uZWR1oi0wK6ADAgEDoSQwIhsEaW1hcBsac2hpdmFtcy5jYWMud2FzaGluZ3Rvbi5lZHWjgdMwgdCgAwIBAaEDAgEDooHDBIHAcS1GSa5b+fXnPZNmXB9SjL8Ollj2SKyb+3S0iXMljen/jNkpJXAleKTz6BQPzj8duz8EtoOuNfKgweViyn/9B9bccy1uuAE2HI0yC/PHXNNU9ZrBziJ8Lm0tTNc98kUpjXnHZhsMcz5Mx2GR6dGknbI0iaGcRerMUsWOuBmKKKRmVMMdR9T3EZdpqsBd7jZCNMWotjhivd5zovQlFqQ2Wjc2+y46vKP/iXxWIuQJuDiisyXF0Y8+5GTpALpHDc1/pIGmMIGjoAMCAQGigZsEgZg2on5mSuxoDHEA1w9bcW9nFdFxDKpdrQhVGVRDIzcCMCTzvUboqb5KjY1NJKJsfjRQiBYBdENKfzK+g5DlV8nrw81uOcP8NOQCLR5XkoMHC0Dr/80ziQzbNqhxO6652Npft0LQwJvenwDI13YxpwOdMXzkWZN/XrEqOWp6GCgXTBvCyLWLlWnbaUkZdEYbKHBPjd8t/1x5Yg=="
+        self.writeOutbound(.continuationResponse(ByteBuffer(bytes: [
+            0x60, 0x82, 0x01, 0xFB, 0x06, 0x09, 0x2A, 0x86, 0x48, 0x86, 0xF7, 0x12, 0x01, 0x02, 0x02, 0x01, 0x00,
+            0x6E, 0x82, 0x01, 0xEA, 0x30, 0x82, 0x01, 0xE6, 0xA0, 0x03, 0x02, 0x01, 0x05, 0xA1, 0x03, 0x02, 0x01,
+            0x0E, 0xA2, 0x07, 0x03, 0x05, 0x00, 0x20, 0x00, 0x00, 0x00, 0xA3, 0x82, 0x01, 0x26, 0x61, 0x82, 0x01,
+            0x22, 0x30, 0x82, 0x01, 0x1E, 0xA0, 0x03, 0x02, 0x01, 0x05, 0xA1, 0x12, 0x1B, 0x10, 0x75, 0x2E, 0x77,
+            0x61, 0x73, 0x68, 0x69, 0x6E, 0x67, 0x74, 0x6F, 0x6E, 0x2E, 0x65, 0x64, 0x75, 0xA2, 0x2D, 0x30, 0x2B,
+            0xA0, 0x03, 0x02, 0x01, 0x03, 0xA1, 0x24, 0x30, 0x22, 0x1B, 0x04, 0x69, 0x6D, 0x61, 0x70, 0x1B, 0x1A,
+            0x73, 0x68, 0x69, 0x76, 0x61, 0x6D, 0x73, 0x2E, 0x63, 0x61, 0x63, 0x2E, 0x77, 0x61, 0x73, 0x68, 0x69,
+            0x6E, 0x67, 0x74, 0x6F, 0x6E, 0x2E, 0x65, 0x64, 0x75, 0xA3, 0x81, 0xD3, 0x30, 0x81, 0xD0, 0xA0, 0x03,
+            0x02, 0x01, 0x01, 0xA1, 0x03, 0x02, 0x01, 0x03, 0xA2, 0x81, 0xC3, 0x04, 0x81, 0xC0, 0x71, 0x2D, 0x46,
+            0x49, 0xAE, 0x5B, 0xF9, 0xF5, 0xE7, 0x3D, 0x93, 0x66, 0x5C, 0x1F, 0x52, 0x8C, 0xBF, 0x0E, 0x96, 0x58,
+            0xF6, 0x48, 0xAC, 0x9B, 0xFB, 0x74, 0xB4, 0x89, 0x73, 0x25, 0x8D, 0xE9, 0xFF, 0x8C, 0xD9, 0x29, 0x25,
+            0x70, 0x25, 0x78, 0xA4, 0xF3, 0xE8, 0x14, 0x0F, 0xCE, 0x3F, 0x1D, 0xBB, 0x3F, 0x04, 0xB6, 0x83, 0xAE,
+            0x35, 0xF2, 0xA0, 0xC1, 0xE5, 0x62, 0xCA, 0x7F, 0xFD, 0x07, 0xD6, 0xDC, 0x73, 0x2D, 0x6E, 0xB8, 0x01,
+            0x36, 0x1C, 0x8D, 0x32, 0x0B, 0xF3, 0xC7, 0x5C, 0xD3, 0x54, 0xF5, 0x9A, 0xC1, 0xCE, 0x22, 0x7C, 0x2E,
+            0x6D, 0x2D, 0x4C, 0xD7, 0x3D, 0xF2, 0x45, 0x29, 0x8D, 0x79, 0xC7, 0x66, 0x1B, 0x0C, 0x73, 0x3E, 0x4C,
+            0xC7, 0x61, 0x91, 0xE9, 0xD1, 0xA4, 0x9D, 0xB2, 0x34, 0x89, 0xA1, 0x9C, 0x45, 0xEA, 0xCC, 0x52, 0xC5,
+            0x8E, 0xB8, 0x19, 0x8A, 0x28, 0xA4, 0x66, 0x54, 0xC3, 0x1D, 0x47, 0xD4, 0xF7, 0x11, 0x97, 0x69, 0xAA,
+            0xC0, 0x5D, 0xEE, 0x36, 0x42, 0x34, 0xC5, 0xA8, 0xB6, 0x38, 0x62, 0xBD, 0xDE, 0x73, 0xA2, 0xF4, 0x25,
+            0x16, 0xA4, 0x36, 0x5A, 0x37, 0x36, 0xFB, 0x2E, 0x3A, 0xBC, 0xA3, 0xFF, 0x89, 0x7C, 0x56, 0x22, 0xE4,
+            0x09, 0xB8, 0x38, 0xA2, 0xB3, 0x25, 0xC5, 0xD1, 0x8F, 0x3E, 0xE4, 0x64, 0xE9, 0x00, 0xBA, 0x47, 0x0D,
+            0xCD, 0x7F, 0xA4, 0x81, 0xA6, 0x30, 0x81, 0xA3, 0xA0, 0x03, 0x02, 0x01, 0x01, 0xA2, 0x81, 0x9B, 0x04,
+            0x81, 0x98, 0x36, 0xA2, 0x7E, 0x66, 0x4A, 0xEC, 0x68, 0x0C, 0x71, 0x00, 0xD7, 0x0F, 0x5B, 0x71, 0x6F,
+            0x67, 0x15, 0xD1, 0x71, 0x0C, 0xAA, 0x5D, 0xAD, 0x08, 0x55, 0x19, 0x54, 0x43, 0x23, 0x37, 0x02, 0x30,
+            0x24, 0xF3, 0xBD, 0x46, 0xE8, 0xA9, 0xBE, 0x4A, 0x8D, 0x8D, 0x4D, 0x24, 0xA2, 0x6C, 0x7E, 0x34, 0x50,
+            0x88, 0x16, 0x01, 0x74, 0x43, 0x4A, 0x7F, 0x32, 0xBE, 0x83, 0x90, 0xE5, 0x57, 0xC9, 0xEB, 0xC3, 0xCD,
+            0x6E, 0x39, 0xC3, 0xFC, 0x34, 0xE4, 0x02, 0x2D, 0x1E, 0x57, 0x92, 0x83, 0x07, 0x0B, 0x40, 0xEB, 0xFF,
+            0xCD, 0x33, 0x89, 0x0C, 0xDB, 0x36, 0xA8, 0x71, 0x3B, 0xAE, 0xB9, 0xD8, 0xDA, 0x5F, 0xB7, 0x42, 0xD0,
+            0xC0, 0x9B, 0xDE, 0x9F, 0x00, 0xC8, 0xD7, 0x76, 0x31, 0xA7, 0x03, 0x9D, 0x31, 0x7C, 0xE4, 0x59, 0x93,
+            0x7F, 0x5E, 0xB1, 0x2A, 0x39, 0x6A, 0x7A, 0x18, 0x28, 0x17, 0x4C, 0x1B, 0xC2, 0xC8, 0xB5, 0x8B, 0x95,
+            0x69, 0xDB, 0x69, 0x49, 0x19, 0x74, 0x46, 0x1B, 0x28, 0x70, 0x4F, 0x8D, 0xDF, 0x2D, 0xFF, 0x5C, 0x79,
+            0x62,
+        ])))
+        self.assertOutboundString("\(responseBytes1)\r\n")
 
-        // server sends another challenge
-        let challengeString1: ByteBuffer = """
-            YGgGCSqGSIb3EgECAgIAb1kwV6ADAgEFoQMCAQ+iSzBJoAMC
-            AQGiQgRAtHTEuOP2BXb9sBYFR4SJlDZxmg39IxmRBOhXRKdDA0
-            uHTCOT9Bq3OsUTXUlk0CsFLoa8j+gvGDlgHuqzWHPSQg==
-        """
-        inEncodeBuffer = ResponseEncodeBuffer(buffer: ByteBuffer(), capabilities: [])
-        inEncodeBuffer.writeContinuationRequest(.data(challengeString1))
-        XCTAssertNoThrow(try channel.writeInbound(inEncodeBuffer.readBytes()))
-        XCTAssertNoThrow(XCTAssertEqual(try channel.readInbound(), Response.idleStarted))
+        // server challenge 2
+        let challengeBytes2 = "YGgGCSqGSIb3EgECAgIAb1kwV6ADAgEFoQMCAQ+iSzBJoAMCAQGiQgRAtHTEuOP2BXb9sBYFR4SJlDZxmg39IxmRBOhXRKdDA0uHTCOT9Bq3OsUTXUlk0CsFLoa8j+gvGDlgHuqzWHPSQg=="
+        self.writeInbound("+ \(challengeBytes2)\r\n")
+        self.assertInbound(.authenticationChallenge(ByteBuffer(bytes: [
+            0x60, 0x68, 0x06, 0x09, 0x2A, 0x86, 0x48, 0x86, 0xF7, 0x12, 0x01, 0x02, 0x02, 0x02, 0x00, 0x6F, 0x59,
+            0x30, 0x57, 0xA0, 0x03, 0x02, 0x01, 0x05, 0xA1, 0x03, 0x02, 0x01, 0x0F, 0xA2, 0x4B, 0x30, 0x49, 0xA0,
+            0x03, 0x02, 0x01, 0x01, 0xA2, 0x42, 0x04, 0x40, 0xB4, 0x74, 0xC4, 0xB8, 0xE3, 0xF6, 0x05, 0x76, 0xFD,
+            0xB0, 0x16, 0x05, 0x47, 0x84, 0x89, 0x94, 0x36, 0x71, 0x9A, 0x0D, 0xFD, 0x23, 0x19, 0x91, 0x04, 0xE8,
+            0x57, 0x44, 0xA7, 0x43, 0x03, 0x4B, 0x87, 0x4C, 0x23, 0x93, 0xF4, 0x1A, 0xB7, 0x3A, 0xC5, 0x13, 0x5D,
+            0x49, 0x64, 0xD0, 0x2B, 0x05, 0x2E, 0x86, 0xBC, 0x8F, 0xE8, 0x2F, 0x18, 0x39, 0x60, 0x1E, 0xEA, 0xB3,
+            0x58, 0x73, 0xD2, 0x42,
+        ])))
 
         // client responds
-        XCTAssertNoThrow(try channel.writeOutbound(CommandStream.continuationResponse("")))
-        XCTAssertEqual(handler._state, .expectingContinuations)
-        XCTAssertEqual(try channel.readOutbound(as: ByteBuffer.self), "\r\n")
+        self.writeOutbound(.continuationResponse(""))
+        self.assertOutboundString("\r\n")
 
-        // server sends another challenge
-        let challengeString2: ByteBuffer = """
-            YDMGCSqGSIb3EgECAgIBAAD/////6jcyG4GE3KkTzBeBiVHe
-            ceP2CWY0SR0fAQAgAAQEBAQ=
-        """
-        inEncodeBuffer = ResponseEncodeBuffer(buffer: ByteBuffer(), capabilities: [])
-        inEncodeBuffer.writeContinuationRequest(.data(challengeString2))
-        XCTAssertNoThrow(try channel.writeInbound(inEncodeBuffer.readBytes()))
-        XCTAssertNoThrow(XCTAssertEqual(try channel.readInbound(), Response.idleStarted))
-
-        // client responds
-        let authString2 = """
-            YDMGCSqGSIb3EgECAgIBAAD/////3LQBHXTpFfZgrejpLlLImP
-            wkhbfa2QteAQAgAG1yYwE=
-        """
-        XCTAssertNoThrow(try channel.writeOutbound(CommandStream.continuationResponse(ByteBuffer(string: authString2))))
-        XCTAssertEqual(handler._state, .expectingContinuations)
-        XCTAssertEqual(try channel.readOutbound(as: ByteBuffer.self), ByteBuffer(string: "\r\n" + authString2))
-
-        // server finished
-        inEncodeBuffer = ResponseEncodeBuffer(buffer: ByteBuffer(), capabilities: [])
-        inEncodeBuffer.writeResponse(.taggedResponse(.init(tag: "A001", state: .ok(.init(text: "GSSAPI authentication successful")))))
-        XCTAssertNoThrow(try channel.writeInbound(inEncodeBuffer.readBytes()))
-        XCTAssertNoThrow(XCTAssertEqual(try channel.readInbound(), Response.taggedResponse(.init(tag: "A001", state: .ok(.init(text: "GSSAPI authentication successful"))))))
-        XCTAssertEqual(handler._state, .expectingResponses)
+        // all done
+        self.writeInbound("A1 OK Success\r\n")
+        self.assertInbound(.taggedResponse(.init(tag: "A1", state: .ok(.init(text: "Success")))))
     }
 
     func testCanChangeEncodingOnCallback() {
@@ -335,6 +300,54 @@ class IMAPClientHandlerTests: XCTestCase {
         self.assertOutboundString("DONE\r\n")
     }
 
+    func testProtectAgainstReentrancy() {
+        struct MyOutboundEvent {}
+
+        class PreTestHandler: ChannelDuplexHandler {
+            typealias InboundIn = ByteBuffer
+            typealias InboundOut = ByteBuffer
+            typealias OutboundIn = ByteBuffer
+
+            func write(context: ChannelHandlerContext, data: NIOAny, promise: EventLoopPromise<Void>?) {
+                let data = self.wrapInboundOut(ByteBuffer(string: "+ \r\n"))
+                context.fireChannelRead(data)
+                promise?.succeed(())
+            }
+
+            func triggerUserOutboundEvent(context: ChannelHandlerContext, event: Any, promise: EventLoopPromise<Void>?) {
+                XCTAssert(event is MyOutboundEvent)
+                let data = self.wrapInboundOut(ByteBuffer(string: "A1 OK NOOP complete\r\n"))
+                context.fireChannelRead(data)
+                promise?.succeed(())
+            }
+        }
+
+        class PostTestHandler: ChannelDuplexHandler {
+            typealias InboundIn = Response
+            typealias OutboundIn = Response
+
+            var callCount = 0
+
+            func channelRead(context: ChannelHandlerContext, data: NIOAny) {
+                self.callCount += 1
+                if self.callCount < 3 {
+                    context.triggerUserOutboundEvent(MyOutboundEvent(), promise: nil)
+                }
+            }
+
+            func errorCaught(context: ChannelHandlerContext, error: Error) {
+                XCTFail("Unexpected error \(error)")
+            }
+        }
+
+        XCTAssertNoThrow(try self.channel.pipeline.addHandlers([
+            PreTestHandler(),
+            IMAPClientHandler(),
+            PostTestHandler(),
+        ]).wait())
+        self.writeOutbound(.command(.init(tag: "A1", command: .idleStart)))
+    }
+
     // MARK: - setup / tear down
 
     override func setUp() {
@@ -381,6 +394,10 @@ extension IMAPClientHandlerTests {
 
     private func writeInbound(_ string: String, line: UInt = #line) {
         XCTAssertNoThrow(try self.channel.writeInbound(self.buffer(string: string)), line: line)
+    }
+
+    private func writeInbound(_ bytes: ByteBuffer, line: UInt = #line) {
+        XCTAssertNoThrow(try self.channel.writeInbound(bytes), line: line)
     }
 
     @discardableResult
