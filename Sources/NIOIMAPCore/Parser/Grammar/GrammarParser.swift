@@ -108,8 +108,8 @@ extension GrammarParser {
             try PL.parseFixedString("imap://", buffer: &buffer, tracker: tracker)
             let server = try self.parseIMAPServer(buffer: &buffer, tracker: tracker)
             try PL.parseFixedString("/", buffer: &buffer, tracker: tracker)
-            let messagePart = try self.parseIMessagePart(buffer: &buffer, tracker: tracker)
-            return .init(server: server, messagePart: messagePart)
+            let messagePath = try self.parseMessagePath(buffer: &buffer, tracker: tracker)
+            return .init(server: server, messagePath: messagePath)
         }
     }
 
@@ -615,9 +615,9 @@ extension GrammarParser {
         }
 
         func parseICommand_part(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ICommand {
-            let part = try self.parseIMessagePart(buffer: &buffer, tracker: tracker)
+            let path = try self.parseMessagePath(buffer: &buffer, tracker: tracker)
             let auth = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseIURLAuth)
-            return .messagePart(part: part, authenticatedURL: auth)
+            return .fetch(path: path, authenticatedURL: auth)
         }
 
         return try PL.parseOneOf(
@@ -929,8 +929,8 @@ extension GrammarParser {
         )
     }
 
-    static func parseIMessagePart(buffer: inout ParseBuffer, tracker: StackTracker) throws -> IMessagePart {
-        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> IMessagePart in
+    static func parseMessagePath(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessagePath {
+        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> MessagePath in
             var ref = try self.parseEncodedMailboxUIDValidity(buffer: &buffer, tracker: tracker)
 
             var uid = IUID(uid: 1)
@@ -955,7 +955,7 @@ extension GrammarParser {
             } else {
                 partial = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseIPartial)
             }
-            return .init(mailboxReference: ref, iUID: uid, section: section, iPartial: partial)
+            return .init(mailboxReference: ref, iUID: uid, section: section, range: partial)
         }
     }
 

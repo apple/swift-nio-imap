@@ -20,14 +20,14 @@ public struct AuthenticatedURL: Equatable {
     public var server: IMAPServer
 
     /// The unique URL of the message, and the part of interest.
-    public var messagePart: IMessagePart
+    public var messagePath: MessagePath
 
     // Creates a new `AuthenticatedURL`.
     /// - parameter server: The server containing the message.
-    /// - parameter messagePart: The unique URL of the message, and the part of interest.
-    public init(server: IMAPServer, messagePart: IMessagePart) {
+    /// - parameter messagePath: The unique URL of the message, and the part of interest.
+    public init(server: IMAPServer, messagePath: MessagePath) {
         self.server = server
-        self.messagePart = messagePart
+        self.messagePath = messagePath
     }
 }
 
@@ -38,6 +38,6 @@ extension _EncodeBuffer {
         self._writeString("imap://") +
             self.writeIMAPServer(data.server) +
             self._writeString("/") +
-            self.writeIMessagePart(data.messagePart)
+            self.writeMessagePath(data.messagePath)
     }
 }

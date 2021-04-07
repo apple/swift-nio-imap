@@ -13,7 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 /// Can be used as a direct path to a specific message section and part.
-public struct IMessagePart: Equatable {
+public struct MessagePath: Equatable {
     /// Connection details for a server and a specific mailbox hosted on that server.
     public var mailboxReference: MailboxUIDValidity
 
@@ -24,31 +24,31 @@ public struct IMessagePart: Equatable {
     public var section: URLMessageSection?
 
     /// A specific range of bytes of the message/section in question.
-    public var iPartial: IPartial?
+    public var range: IPartial?
 
-    /// Create a new `IMessagePart`.
+    /// Create a new `MessagePath`.
     /// - parameter mailboxUIDValidity: Connection details for a server and a specific mailbox hosted on that server.
     /// - parameter iUID: The UID of the message in question.
     /// - parameter IMAPURLSection: An optional section of the message in question.
     /// - parameter iPartial: A specific range of bytes of the message/section in question.
-    public init(mailboxReference: MailboxUIDValidity, iUID: IUID, section: URLMessageSection? = nil, iPartial: IPartial? = nil) {
+    public init(mailboxReference: MailboxUIDValidity, iUID: IUID, section: URLMessageSection? = nil, range: IPartial? = nil) {
         self.mailboxReference = mailboxReference
         self.iUID = iUID
         self.section = section
-        self.iPartial = iPartial
+        self.range = range
     }
 }
 
 // MARK: - Encoding
 
 extension _EncodeBuffer {
-    @discardableResult mutating func writeIMessagePart(_ data: IMessagePart) -> Int {
+    @discardableResult mutating func writeMessagePath(_ data: MessagePath) -> Int {
         self.writeEncodedMailboxUIDValidity(data.mailboxReference) +
             self.writeIUID(data.iUID) +
             self.writeIfExists(data.section) { section in
                 self.writeURLMessageSection(section)
             } +
-            self.writeIfExists(data.iPartial) { partial in
+            self.writeIfExists(data.range) { partial in
                 self.writeIPartial(partial)
             }
     }
