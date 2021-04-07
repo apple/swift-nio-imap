@@ -874,7 +874,7 @@ extension GrammarParser {
                 try PL.parseFixedString("?", buffer: &buffer, tracker: tracker)
                 return try self.parseEncodedSearch(buffer: &buffer, tracker: tracker)
             })
-            return .init(mailboxValidity: mailboxRef, encodedSearch: query)
+            return .init(mailboxUIDValidity: mailboxRef, encodedSearch: query)
         }
     }
 

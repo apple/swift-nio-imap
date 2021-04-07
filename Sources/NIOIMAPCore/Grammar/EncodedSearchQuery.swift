@@ -15,7 +15,7 @@
 /// RFC 5092
 public struct EncodedSearchQuery: Equatable {
     /// The mailbox to search.
-    public var mailboxValidity: MailboxUIDValidity
+    public var mailboxUIDValidity: MailboxUIDValidity
 
     /// A percent-encoded search query.
     public var encodedSearch: EncodedSearch?
@@ -23,8 +23,8 @@ public struct EncodedSearchQuery: Equatable {
     /// Creates a new `EncodedSearchQuery`.
     /// - parameter mailboxReference: The mailbox to search.
     /// - parameter encodedSearch: A percent-encoded search query.
-    public init(mailboxValidity: MailboxUIDValidity, encodedSearch: EncodedSearch? = nil) {
-        self.mailboxValidity = mailboxValidity
+    public init(mailboxUIDValidity: MailboxUIDValidity, encodedSearch: EncodedSearch? = nil) {
+        self.mailboxUIDValidity = mailboxUIDValidity
         self.encodedSearch = encodedSearch
     }
 }
@@ -33,7 +33,7 @@ public struct EncodedSearchQuery: Equatable {
 
 extension _EncodeBuffer {
     @discardableResult mutating func writeEncodedSearchQuery(_ ref: EncodedSearchQuery) -> Int {
-        self.writeEncodedMailboxUIDValidity(ref.mailboxValidity) +
+        self.writeEncodedMailboxUIDValidity(ref.mailboxUIDValidity) +
             self.writeIfExists(ref.encodedSearch) { search in
                 self._writeString("?") + self.writeEncodedSearch(search)
             }
