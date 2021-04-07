@@ -22,7 +22,7 @@ class EncodedMailboxUIDValidity_Tests: EncodeTestClass {}
 
 extension EncodedMailboxUIDValidity_Tests {
     func testEncode() {
-        let inputs: [(EncodedMailboxUIDValidity, String, UInt)] = [
+        let inputs: [(MailboxUIDValidity, String, UInt)] = [
             (.init(encodeMailbox: .init(mailbox: "mailbox"), uidValidity: nil), "mailbox", #line),
             (.init(encodeMailbox: .init(mailbox: "mailbox"), uidValidity: 123), "mailbox;UIDVALIDITY=123", #line),
         ]

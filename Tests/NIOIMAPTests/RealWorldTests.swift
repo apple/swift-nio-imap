@@ -57,7 +57,7 @@ extension RealWorldTests {
                                            .referral(IMAPURL(server: IMAPServer(userAuthenticationMechanism: nil, host: "hostname", port: nil),
                                                              query: IPathQuery(command: ICommand.messagePart(
                                                                  part: IMessagePart(
-                                                                     mailboxReference: EncodedMailboxUIDValidity(encodeMailbox: EncodedMailbox(mailbox: "foo/bar"),
+                                                                     mailboxReference: MailboxUIDValidity(encodeMailbox: EncodedMailbox(mailbox: "foo/bar"),
                                                                                                                  uidValidity: nil),
                                                                      iUID: IUID(uid: 1234),
                                                                      iSection: nil,

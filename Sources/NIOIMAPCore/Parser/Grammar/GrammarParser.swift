@@ -856,8 +856,8 @@ extension GrammarParser {
         )
     }
 
-    static func parseEncodedMailboxUIDValidity(buffer: inout ParseBuffer, tracker: StackTracker) throws -> EncodedMailboxUIDValidity {
-        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> EncodedMailboxUIDValidity in
+    static func parseEncodedMailboxUIDValidity(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxUIDValidity {
+        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> MailboxUIDValidity in
             let mailbox = try self.parseEncodedMailbox(buffer: &buffer, tracker: tracker)
             let uidValidity = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> UIDValidity in
                 try PL.parseFixedString(";UIDVALIDITY=", buffer: &buffer, tracker: tracker)

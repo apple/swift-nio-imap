@@ -15,7 +15,7 @@
 /// Can be used as a direct path to a specific message section and part.
 public struct IMessagePart: Equatable {
     /// Connection details for a server and a specific mailbox hosted on that server.
-    public var mailboxReference: EncodedMailboxUIDValidity
+    public var mailboxReference: MailboxUIDValidity
 
     /// The UID of the message in question.
     public var iUID: IUID
@@ -31,7 +31,7 @@ public struct IMessagePart: Equatable {
     /// - parameter iUID: The UID of the message in question.
     /// - parameter iSection: An optional section of the message in question.
     /// - parameter iPartial: A specific range of bytes of the message/section in question.
-    public init(mailboxReference: EncodedMailboxUIDValidity, iUID: IUID, iSection: ISection? = nil, iPartial: IPartial? = nil) {
+    public init(mailboxReference: MailboxUIDValidity, iUID: IUID, iSection: ISection? = nil, iPartial: IPartial? = nil) {
         self.mailboxReference = mailboxReference
         self.iUID = iUID
         self.iSection = iSection
