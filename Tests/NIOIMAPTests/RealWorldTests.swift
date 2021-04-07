@@ -60,7 +60,7 @@ extension RealWorldTests {
                                                                      mailboxReference: MailboxUIDValidity(encodeMailbox: EncodedMailbox(mailbox: "foo/bar"),
                                                                                                           uidValidity: nil),
                                                                      iUID: IUID(uid: 1234),
-                                                                     IMAPURLSection: nil,
+                                                                     section: nil,
                                                                      iPartial: nil
                                                                  ),
                                                                  authenticatedURL: nil

@@ -21,7 +21,7 @@ public struct IMessagePart: Equatable {
     public var iUID: IUID
 
     /// An optional section of the message in question.
-    public var imapURLSection: IMAPURLSection?
+    public var section: URLMessageSection?
 
     /// A specific range of bytes of the message/section in question.
     public var iPartial: IPartial?
@@ -31,10 +31,10 @@ public struct IMessagePart: Equatable {
     /// - parameter iUID: The UID of the message in question.
     /// - parameter IMAPURLSection: An optional section of the message in question.
     /// - parameter iPartial: A specific range of bytes of the message/section in question.
-    public init(mailboxReference: MailboxUIDValidity, iUID: IUID, imapURLSection: IMAPURLSection? = nil, iPartial: IPartial? = nil) {
+    public init(mailboxReference: MailboxUIDValidity, iUID: IUID, section: IMAPURLSection? = nil, iPartial: IPartial? = nil) {
         self.mailboxReference = mailboxReference
         self.iUID = iUID
-        self.IMAPURLSection = IMAPURLSection
+        self.section = section
         self.iPartial = iPartial
     }
 }
@@ -45,8 +45,8 @@ extension _EncodeBuffer {
     @discardableResult mutating func writeIMessagePart(_ data: IMessagePart) -> Int {
         self.writeEncodedMailboxUIDValidity(data.mailboxReference) +
             self.writeIUID(data.iUID) +
-            self.writeIfExists(data.IMAPURLSection) { section in
-                self.writeIMAPURLSection(section)
+            self.writeIfExists(data.section) { section in
+                self.writeURLMessageSection(section)
             } +
             self.writeIfExists(data.iPartial) { partial in
                 self.writeIPartial(partial)

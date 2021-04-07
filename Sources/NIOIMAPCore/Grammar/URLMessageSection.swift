@@ -15,11 +15,11 @@
 import struct NIO.ByteBuffer
 
 /// Wraps a percent-encoded section to be used in an IMAP URL.
-public struct IMAPURLSection: Equatable {
+public struct URLMessageSection: Equatable {
     /// The percent-encoded section.
     public var encodedSection: EncodedSection
 
-    /// Creates a new `IMAPURLSection`.
+    /// Creates a new `URLMessageSection`.
     /// - parameter encodedSection: The percent-encoded section.
     public init(encodedSection: EncodedSection) {
         self.encodedSection = encodedSection
@@ -29,11 +29,11 @@ public struct IMAPURLSection: Equatable {
 // MARK: - Encoding
 
 extension _EncodeBuffer {
-    @discardableResult mutating func writeIMAPURLSection(_ section: IMAPURLSection) -> Int {
+    @discardableResult mutating func writeURLMessageSection(_ section: URLMessageSection) -> Int {
         self._writeString("/;SECTION=\(section.encodedSection.section)")
     }
 
-    @discardableResult mutating func writeIMAPURLSectionOnly(_ section: IMAPURLSection) -> Int {
+    @discardableResult mutating func writeURLMessageSectionOnly(_ section: URLMessageSection) -> Int {
         self._writeString(";SECTION=\(section.encodedSection.section)")
     }
 }
