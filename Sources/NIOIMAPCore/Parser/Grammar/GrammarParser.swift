@@ -768,15 +768,15 @@ extension GrammarParser {
         }
     }
 
-    static func parseISection(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ISection {
-        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> ISection in
+    static func parseIMAPURLSection(buffer: inout ParseBuffer, tracker: StackTracker) throws -> URLMessageSection {
+        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> URLMessageSection in
             try PL.parseFixedString("/;SECTION=", buffer: &buffer, tracker: tracker)
             return .init(encodedSection: try self.parseEncodedSection(buffer: &buffer, tracker: tracker))
         }
     }
 
-    static func parseISectionOnly(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ISection {
-        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> ISection in
+    static func parseIMAPURLSectionOnly(buffer: inout ParseBuffer, tracker: StackTracker) throws -> URLMessageSection {
+        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> URLMessageSection in
             try PL.parseFixedString(";SECTION=", buffer: &buffer, tracker: tracker)
             return .init(encodedSection: try self.parseEncodedSection(buffer: &buffer, tracker: tracker))
         }
@@ -944,7 +944,7 @@ extension GrammarParser {
                 uid = try self.parseIUID(buffer: &buffer, tracker: tracker)
             }
 
-            var section = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseISection)
+            var section = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseIMAPURLSection)
             var partial: IPartial?
             if section?.encodedSection.section.last == Character(.init(UInt8(ascii: "/"))) {
                 try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
@@ -955,7 +955,7 @@ extension GrammarParser {
             } else {
                 partial = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseIPartial)
             }
-            return .init(mailboxReference: ref, iUID: uid, iSection: section, iPartial: partial)
+            return .init(mailboxReference: ref, iUID: uid, section: section, iPartial: partial)
         }
     }
 
@@ -966,7 +966,7 @@ extension GrammarParser {
         }
 
         func parseIMessageOrPartial_sectionPartial(buffer: inout ParseBuffer, tracker: StackTracker) throws -> IMessageOrPartial {
-            var section = try self.parseISectionOnly(buffer: &buffer, tracker: tracker)
+            var section = try self.parseIMAPURLSectionOnly(buffer: &buffer, tracker: tracker)
             if section.encodedSection.section.last == Character(.init(UInt8(ascii: "/"))) {
                 section.encodedSection.section = String(section.encodedSection.section.dropLast())
                 do {
@@ -986,9 +986,9 @@ extension GrammarParser {
 
         func parseIMessageOrPartial_uidSectionPartial(buffer: inout ParseBuffer, tracker: StackTracker) throws -> IMessageOrPartial {
             let uid = try self.parseIUIDOnly(buffer: &buffer, tracker: tracker)
-            var section = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> ISection in
+            var section = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> URLMessageSection in
                 try PL.parseFixedString("/", buffer: &buffer, tracker: tracker)
-                return try self.parseISectionOnly(buffer: &buffer, tracker: tracker)
+                return try self.parseIMAPURLSectionOnly(buffer: &buffer, tracker: tracker)
             })
             if section?.encodedSection.section.last == Character(.init(UInt8(ascii: "/"))) {
                 section!.encodedSection.section = String(section!.encodedSection.section.dropLast())
@@ -1010,9 +1010,9 @@ extension GrammarParser {
         func parseIMessageOrPartial_refUidSectionPartial(buffer: inout ParseBuffer, tracker: StackTracker) throws -> IMessageOrPartial {
             let ref = try self.parseEncodedMailboxUIDValidity(buffer: &buffer, tracker: tracker)
             let uid = try self.parseIUIDOnly(buffer: &buffer, tracker: tracker)
-            var section = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> ISection in
+            var section = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> URLMessageSection in
                 try PL.parseFixedString("/", buffer: &buffer, tracker: tracker)
-                return try self.parseISectionOnly(buffer: &buffer, tracker: tracker)
+                return try self.parseIMAPURLSectionOnly(buffer: &buffer, tracker: tracker)
             })
             if section?.encodedSection.section.last == Character(.init(UInt8(ascii: "/"))) {
                 section!.encodedSection.section = String(section!.encodedSection.section.dropLast())

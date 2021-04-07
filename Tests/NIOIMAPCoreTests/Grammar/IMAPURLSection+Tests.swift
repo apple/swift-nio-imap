@@ -16,22 +16,22 @@ import NIO
 @testable import NIOIMAPCore
 import XCTest
 
-class ISection_Tests: EncodeTestClass {}
+class URLMessageSection_Tests: EncodeTestClass {}
 
 // MARK: - IMAP
 
-extension ISection_Tests {
-    func testEncode_ISection() {
-        let inputs: [(ISection, String, UInt)] = [
+extension URLMessageSection_Tests {
+    func testEncode_URLMessageSection() {
+        let inputs: [(URLMessageSection, String, UInt)] = [
             (.init(encodedSection: .init(section: "test")), "/;SECTION=test", #line),
         ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeISection($0) })
+        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeURLMessageSection($0) })
     }
 
-    func testEncode_ISectionOnly() {
-        let inputs: [(ISection, String, UInt)] = [
+    func testEncode_URLMessageSectionOnly() {
+        let inputs: [(URLMessageSection, String, UInt)] = [
             (.init(encodedSection: .init(section: "test")), ";SECTION=test", #line),
         ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeISectionOnly($0) })
+        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeURLMessageSectionOnly($0) })
     }
 }

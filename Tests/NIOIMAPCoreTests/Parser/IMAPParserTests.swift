@@ -1461,15 +1461,15 @@ extension ParserUnitTests {
     }
 }
 
-// MARK: - parseISection
+// MARK: - parseIMAPURLSection
 
 extension ParserUnitTests {
-    func testParseISection() {
+    func testParseIMAPURLSection() {
         self.iterateTests(
-            testFunction: GrammarParser.parseISection,
+            testFunction: GrammarParser.parseIMAPURLSection,
             validInputs: [
-                ("/;SECTION=a", " ", ISection(encodedSection: .init(section: "a")), #line),
-                ("/;SECTION=abc", " ", ISection(encodedSection: .init(section: "abc")), #line),
+                ("/;SECTION=a", " ", URLMessageSection(encodedSection: .init(section: "a")), #line),
+                ("/;SECTION=abc", " ", URLMessageSection(encodedSection: .init(section: "abc")), #line),
             ],
             parserErrorInputs: [
                 ("SECTION=a", " ", #line),
@@ -1481,15 +1481,15 @@ extension ParserUnitTests {
     }
 }
 
-// MARK: - parseISectionOnly
+// MARK: - parseIMAPURLSectionOnly
 
 extension ParserUnitTests {
-    func testParseISectionOnly() {
+    func testParseIMAPURLSectionOnly() {
         self.iterateTests(
-            testFunction: GrammarParser.parseISectionOnly,
+            testFunction: GrammarParser.parseIMAPURLSectionOnly,
             validInputs: [
-                (";SECTION=a", " ", ISection(encodedSection: .init(section: "a")), #line),
-                (";SECTION=abc", " ", ISection(encodedSection: .init(section: "abc")), #line),
+                (";SECTION=a", " ", URLMessageSection(encodedSection: .init(section: "a")), #line),
+                (";SECTION=abc", " ", URLMessageSection(encodedSection: .init(section: "abc")), #line),
             ],
             parserErrorInputs: [
                 ("SECTION=a", " ", #line),
@@ -1726,31 +1726,31 @@ extension ParserUnitTests {
                 (
                     "test/;UID=123",
                     " ",
-                    .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: .init(uid: 123), iSection: nil, iPartial: nil),
+                    .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: .init(uid: 123), section: nil, iPartial: nil),
                     #line
                 ),
                 (
                     "test/;UID=123/;SECTION=section",
                     " ",
-                    .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: .init(uid: 123), iSection: .init(encodedSection: .init(section: "section")), iPartial: nil),
+                    .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: .init(uid: 123), section: .init(encodedSection: .init(section: "section")), iPartial: nil),
                     #line
                 ),
                 (
                     "test/;UID=123/;PARTIAL=1.2",
                     " ",
-                    .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: .init(uid: 123), iSection: nil, iPartial: .init(range: .init(offset: 1, length: 2))),
+                    .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: .init(uid: 123), section: nil, iPartial: .init(range: .init(offset: 1, length: 2))),
                     #line
                 ),
                 (
                     "test/;UID=123/;SECTION=section/;PARTIAL=1.2",
                     " ",
-                    .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: .init(uid: 123), iSection: .init(encodedSection: .init(section: "section")), iPartial: .init(range: .init(offset: 1, length: 2))),
+                    .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: .init(uid: 123), section: .init(encodedSection: .init(section: "section")), iPartial: .init(range: .init(offset: 1, length: 2))),
                     #line
                 ),
                 (
                     "test/;UIDVALIDITY=123/;UID=123/;SECTION=section/;PARTIAL=1.2",
                     " ",
-                    .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test/"), uidValidity: 123), iUID: .init(uid: 123), iSection: .init(encodedSection: .init(section: "section")), iPartial: .init(range: .init(offset: 1, length: 2))),
+                    .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test/"), uidValidity: 123), iUID: .init(uid: 123), section: .init(encodedSection: .init(section: "section")), iPartial: .init(range: .init(offset: 1, length: 2))),
                     #line
                 ),
             ],
