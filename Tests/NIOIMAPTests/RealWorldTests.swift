@@ -56,12 +56,12 @@ extension RealWorldTests {
                                        state: .ok(ResponseText(code:
                                            .referral(IMAPURL(server: IMAPServer(userAuthenticationMechanism: nil, host: "hostname", port: nil),
                                                              query: IPathQuery(command: ICommand.messagePart(
-                                                                 part: IMessagePart(
+                                                                 part: MessagePath(
                                                                      mailboxReference: MailboxUIDValidity(encodeMailbox: EncodedMailbox(mailbox: "foo/bar"),
                                                                                                           uidValidity: nil),
                                                                      iUID: IUID(uid: 1234),
                                                                      section: nil,
-                                                                     iPartial: nil
+                                                                    range: nil
                                                                  ),
                                                                  authenticatedURL: nil
                                                              )))),

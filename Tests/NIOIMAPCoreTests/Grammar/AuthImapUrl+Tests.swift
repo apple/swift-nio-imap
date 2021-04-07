@@ -24,7 +24,7 @@ extension AuthIMAPURL_Tests {
     func testEncoding() {
         let inputs: [(AuthenticatedURL, String, UInt)] = [
             (
-                .init(server: .init(host: "localhost"), messagePart: .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: .init(uid: 123))),
+                .init(server: .init(host: "localhost"), messagePath: .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: .init(uid: 123))),
                 "imap://localhost/test/;UID=123",
                 #line
             ),
