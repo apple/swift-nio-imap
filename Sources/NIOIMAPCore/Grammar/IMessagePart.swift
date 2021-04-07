@@ -31,7 +31,7 @@ public struct IMessagePart: Equatable {
     /// - parameter iUID: The UID of the message in question.
     /// - parameter IMAPURLSection: An optional section of the message in question.
     /// - parameter iPartial: A specific range of bytes of the message/section in question.
-    public init(mailboxReference: MailboxUIDValidity, iUID: IUID, section: IMAPURLSection? = nil, iPartial: IPartial? = nil) {
+    public init(mailboxReference: MailboxUIDValidity, iUID: IUID, section: URLMessageSection? = nil, iPartial: IPartial? = nil) {
         self.mailboxReference = mailboxReference
         self.iUID = iUID
         self.section = section
