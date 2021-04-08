@@ -36,8 +36,8 @@ extension _EncodeBuffer {
         self._writeString("imap://") +
             self.writeIMAPServer(url.server) +
             self._writeString("/") +
-                        self.writeIfExists(url.command) { command in
-                            self.writeURLCommand(command)
-                        }
+            self.writeIfExists(url.command) { command in
+                self.writeURLCommand(command)
+            }
     }
 }

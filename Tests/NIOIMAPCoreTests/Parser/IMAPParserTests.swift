@@ -1064,7 +1064,7 @@ extension ParserUnitTests {
                         query: .fetch(path: .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: .init(uid: 123)), authenticatedURL: nil)
                     ),
                     #line
-                )
+                ),
             ],
             parserErrorInputs: [
             ],
@@ -1531,7 +1531,7 @@ extension ParserUnitTests {
                         query: .fetch(path: .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: .init(uid: 123)), authenticatedURL: nil)
                     ),
                     #line
-                )
+                ),
             ],
             parserErrorInputs: [
             ],
