@@ -896,10 +896,6 @@ extension GrammarParser {
             .networkPath(try self.parseNetworkPath(buffer: &buffer, tracker: tracker))
         }
 
-        func parseRelativeIMAPURL_relative(buffer: inout ParseBuffer, tracker: StackTracker) throws -> RelativeIMAPURL {
-            .relativePath(try self.parseIRelativePath(buffer: &buffer, tracker: tracker))
-        }
-
         func parseRelativeIMAPURL_empty(buffer: inout ParseBuffer, tracker: StackTracker) throws -> RelativeIMAPURL {
             .empty
         }
@@ -907,26 +903,8 @@ extension GrammarParser {
         return try PL.parseOneOf([
             parseRelativeIMAPURL_network,
             parseRelativeIMAPURL_absolute,
-            parseRelativeIMAPURL_relative,
             parseRelativeIMAPURL_empty,
         ], buffer: &buffer, tracker: tracker)
-    }
-
-    static func parseIRelativePath(buffer: inout ParseBuffer, tracker: StackTracker) throws -> IRelativePath {
-        func parseIRelativePath_list(buffer: inout ParseBuffer, tracker: StackTracker) throws -> IRelativePath {
-            .list(try self.parseEncodedSearchQuery(buffer: &buffer, tracker: tracker))
-        }
-
-        func parseIRelativePath_messageOrPartial(buffer: inout ParseBuffer, tracker: StackTracker) throws -> IRelativePath {
-            .message(try self.parseURLFetchType(buffer: &buffer, tracker: tracker))
-        }
-
-        return try PL.parseOneOf(
-            parseIRelativePath_list,
-            parseIRelativePath_messageOrPartial,
-            buffer: &buffer,
-            tracker: tracker
-        )
     }
 
     static func parseMessagePath(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessagePath {
