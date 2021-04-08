@@ -15,11 +15,11 @@
 /// Wraps a command to be executed on a a server once a connection has been established.
 public struct IPathQuery: Equatable {
     /// A command to execute.
-    public var command: ICommand?
+    public var command: URLCommand?
 
     /// Creates a new `IPathQuery`
     /// - parameter command: The command to execute.
-    public init(command: ICommand?) {
+    public init(command: URLCommand?) {
         self.command = command
     }
 }
@@ -30,7 +30,7 @@ extension _EncodeBuffer {
     @discardableResult mutating func writeIPathQuery(_ query: IPathQuery) -> Int {
         self._writeString("/") +
             self.writeIfExists(query.command) { command in
-                self.writeICommand(command)
+                self.writeURLCommand(command)
             }
     }
 }

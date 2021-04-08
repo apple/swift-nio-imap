@@ -863,12 +863,12 @@ extension ParserUnitTests {
     }
 }
 
-// MARK: - ICommand
+// MARK: - URLCommand
 
 extension ParserUnitTests {
-    func testParseICommand() {
+    func testParseURLCommand() {
         self.iterateTests(
-            testFunction: GrammarParser.parseICommand,
+            testFunction: GrammarParser.parseURLCommand,
             validInputs: [
                 ("test", " ", .messageList(.init(mailboxUIDValidity: .init(encodeMailbox: .init(mailbox: "test")))), #line),
                 ("test/;UID=123", " ", .fetch(path: .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: .init(uid: 123)), authenticatedURL: nil), #line),
