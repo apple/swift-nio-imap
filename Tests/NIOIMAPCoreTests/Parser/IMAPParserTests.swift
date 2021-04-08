@@ -1056,6 +1056,15 @@ extension ParserUnitTests {
             testFunction: GrammarParser.parseNetworkPath,
             validInputs: [
                 ("//localhost/", " ", .init(server: .init(host: "localhost"), query: nil), #line),
+                (
+                    "//localhost/test/;UID=123",
+                    " ",
+                    .init(
+                        server: .init(host: "localhost"),
+                        query: .fetch(path: .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: .init(uid: 123)), authenticatedURL: nil)
+                    ),
+                    #line
+                )
             ],
             parserErrorInputs: [
             ],
@@ -1514,6 +1523,15 @@ extension ParserUnitTests {
             testFunction: GrammarParser.parseIMAPURL,
             validInputs: [
                 ("imap://localhost/", " ", .init(server: .init(host: "localhost"), query: nil), #line),
+                (
+                    "imap://localhost/test/;UID=123",
+                    " ",
+                    .init(
+                        server: .init(host: "localhost"),
+                        query: .fetch(path: .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: .init(uid: 123)), authenticatedURL: nil)
+                    ),
+                    #line
+                )
             ],
             parserErrorInputs: [
             ],
