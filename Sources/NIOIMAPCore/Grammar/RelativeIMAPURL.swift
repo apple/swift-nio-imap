@@ -18,7 +18,7 @@ public enum RelativeIMAPURL: Equatable {
     case networkPath(NetworkPath)
 
     /// A path that can be used to connect without any additional information
-    case absolutePath(IAbsolutePath)
+    case absolutePath(AbsoluteMessagePath)
 
     /// A relative path. *DO NOT USE*. See RFC 5092 section 7.2 for more information.
     case relativePath(IRelativePath)
@@ -35,7 +35,7 @@ extension _EncodeBuffer {
         case .networkPath(let path):
             return self.writeNetworkPath(path)
         case .absolutePath(let path):
-            return self.writeIAbsolutePath(path)
+            return self.writeAbsoluteMessagePath(path)
         case .relativePath(let path):
             return self.writeIRelativePath(path)
         case .empty:

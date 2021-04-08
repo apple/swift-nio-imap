@@ -657,8 +657,8 @@ extension GrammarParser {
         }
     }
 
-    static func parseIAbsolutePath(buffer: inout ParseBuffer, tracker: StackTracker) throws -> IAbsolutePath {
-        try PL.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> IAbsolutePath in
+    static func parseAbsoluteMessagePath(buffer: inout ParseBuffer, tracker: StackTracker) throws -> AbsoluteMessagePath {
+        try PL.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> AbsoluteMessagePath in
             try PL.parseFixedString("/", buffer: &buffer, tracker: tracker)
             let command = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseURLCommand)
             return .init(command: command)
@@ -889,7 +889,7 @@ extension GrammarParser {
 
     static func parseRelativeIMAPURL(buffer: inout ParseBuffer, tracker: StackTracker) throws -> RelativeIMAPURL {
         func parseRelativeIMAPURL_absolute(buffer: inout ParseBuffer, tracker: StackTracker) throws -> RelativeIMAPURL {
-            .absolutePath(try self.parseIAbsolutePath(buffer: &buffer, tracker: tracker))
+            .absolutePath(try self.parseAbsoluteMessagePath(buffer: &buffer, tracker: tracker))
         }
 
         func parseRelativeIMAPURL_network(buffer: inout ParseBuffer, tracker: StackTracker) throws -> RelativeIMAPURL {

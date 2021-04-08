@@ -16,15 +16,15 @@ import NIO
 @testable import NIOIMAPCore
 import XCTest
 
-class IAbsolutePath_Tests: EncodeTestClass {}
+class AbsoluteMessagePath_Tests: EncodeTestClass {}
 
 // MARK: - IMAP
 
-extension IAbsolutePath_Tests {
+extension AbsoluteMessagePath_Tests {
     func testEncode() {
-        let inputs: [(IAbsolutePath, String, UInt)] = [
+        let inputs: [(AbsoluteMessagePath, String, UInt)] = [
             (.init(command: .messageList(.init(mailboxUIDValidity: .init(encodeMailbox: .init(mailbox: "test"))))), "/test", #line),
         ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeIAbsolutePath($0) })
+        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeAbsoluteMessagePath($0) })
     }
 }
