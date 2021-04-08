@@ -1637,9 +1637,9 @@ extension ParserUnitTests {
 // MARK: - parseIMessageOrPart
 
 extension ParserUnitTests {
-    func testParseIMessageOrPartial() {
+    func testParseURLFetchType() {
         self.iterateTests(
-            testFunction: GrammarParser.parseIMessageOrPartial,
+            testFunction: GrammarParser.parseURLFetchType,
             validInputs: [
                 (
                     ";PARTIAL=1.2",
