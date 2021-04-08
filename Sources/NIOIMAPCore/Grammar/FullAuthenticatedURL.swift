@@ -17,7 +17,7 @@ import struct NIO.ByteBuffer
 /// Similar to `AuthImapURL`, but with an additional field to help verify the URL authorization.
 public struct FullAuthenticatedURL: Equatable {
     /// An IMAP url pointing to a message.
-    public var imapURL: AuthenticatedURL
+    public var imapURL: NetworkMessagePath
 
     /// URL authentication details.
     public var authenticatedURL: IAuthenticatedURL
@@ -25,7 +25,7 @@ public struct FullAuthenticatedURL: Equatable {
     /// Creates a new `AuthIMAPURL`.
     /// - parameter imapURL: An IMAP url pointing to a message.
     /// - parameter authenticatedURL: URL authentication details.
-    public init(imapURL: AuthenticatedURL, authenticatedURL: IAuthenticatedURL) {
+    public init(imapURL: NetworkMessagePath, authenticatedURL: IAuthenticatedURL) {
         self.imapURL = imapURL
         self.authenticatedURL = authenticatedURL
     }

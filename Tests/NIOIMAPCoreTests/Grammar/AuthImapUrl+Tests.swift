@@ -22,7 +22,7 @@ class AuthIMAPURL_Tests: EncodeTestClass {}
 
 extension AuthIMAPURL_Tests {
     func testEncoding() {
-        let inputs: [(AuthenticatedURL, String, UInt)] = [
+        let inputs: [(NetworkMessagePath, String, UInt)] = [
             (
                 .init(server: .init(host: "localhost"), messagePath: .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: .init(uid: 123))),
                 "imap://localhost/test/;UID=123",

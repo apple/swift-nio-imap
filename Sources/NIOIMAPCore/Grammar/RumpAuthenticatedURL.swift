@@ -17,7 +17,7 @@ import struct NIO.ByteBuffer
 /// Associates an `AuthIMAPURL` with a rump URL to use for authorization verification is required.
 public struct RumpAuthenticatedURL: Equatable {
     /// An IMAP URL pointing to a message.
-    public var authenticatedURL: AuthenticatedURL
+    public var authenticatedURL: NetworkMessagePath
 
     /// A rump URL used to validate access if needed.
     public var authenticatedURLRump: IRumpAuthenticatedURL
@@ -25,7 +25,7 @@ public struct RumpAuthenticatedURL: Equatable {
     /// Creates a new `AuthIMAPURLRump`.
     /// - parameter imapURL: An IMAP URL pointing to a message.
     /// - parameter authenticatedURLRump: A rump URL used to validate access if needed.
-    public init(authenticatedURL: AuthenticatedURL, authenticatedURLRump: IRumpAuthenticatedURL) {
+    public init(authenticatedURL: NetworkMessagePath, authenticatedURLRump: IRumpAuthenticatedURL) {
         self.authenticatedURL = authenticatedURL
         self.authenticatedURLRump = authenticatedURLRump
     }
