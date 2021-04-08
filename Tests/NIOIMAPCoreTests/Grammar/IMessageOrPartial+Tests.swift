@@ -16,13 +16,13 @@ import NIO
 @testable import NIOIMAPCore
 import XCTest
 
-class IMessageOrPartial_Tests: EncodeTestClass {}
+class URLFetchType_Tests: EncodeTestClass {}
 
 // MARK: - IMAP
 
-extension IMessageOrPartial_Tests {
+extension URLFetchType_Tests {
     func testEncode() {
-        let inputs: [(IMessageOrPartial, String, UInt)] = [
+        let inputs: [(URLFetchType, String, UInt)] = [
             (
                 .partialOnly(.init(range: .init(offset: 1, length: 2))),
                 ";PARTIAL=1.2",
@@ -79,6 +79,6 @@ extension IMessageOrPartial_Tests {
                 #line
             ),
         ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeIMessageOrPartial($0) })
+        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeURLFetchType($0) })
     }
 }

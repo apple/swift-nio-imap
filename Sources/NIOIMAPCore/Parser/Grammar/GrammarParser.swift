@@ -124,7 +124,7 @@ extension GrammarParser {
     static func parseAuthIMAPURLRump(buffer: inout ParseBuffer, tracker: StackTracker) throws -> RumpAuthenticatedURL {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> RumpAuthenticatedURL in
             let imapURL = try self.parseAuthenticatedURL(buffer: &buffer, tracker: tracker)
-            let rump = try self.parseIRumpAuthenticatedURL(buffer: &buffer, tracker: tracker)
+            let rump = try self.parseAuthenticatedURLRump(buffer: &buffer, tracker: tracker)
             return .init(authenticatedURL: imapURL, authenticatedURLRump: rump)
         }
     }
@@ -609,27 +609,27 @@ extension GrammarParser {
         }
     }
 
-    static func parseICommand(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ICommand {
-        func parseICommand_list(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ICommand {
+    static func parseURLCommand(buffer: inout ParseBuffer, tracker: StackTracker) throws -> URLCommand {
+        func parseURLCommand_list(buffer: inout ParseBuffer, tracker: StackTracker) throws -> URLCommand {
             .messageList(try self.parseEncodedSearchQuery(buffer: &buffer, tracker: tracker))
         }
 
-        func parseICommand_part(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ICommand {
+        func parseURLCommand_part(buffer: inout ParseBuffer, tracker: StackTracker) throws -> URLCommand {
             let path = try self.parseMessagePath(buffer: &buffer, tracker: tracker)
             let auth = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseIURLAuth)
             return .fetch(path: path, authenticatedURL: auth)
         }
 
         return try PL.parseOneOf(
-            parseICommand_part,
-            parseICommand_list,
+            parseURLCommand_part,
+            parseURLCommand_list,
             buffer: &buffer,
             tracker: tracker
         )
     }
 
-    static func parseINetworkPath(buffer: inout ParseBuffer, tracker: StackTracker) throws -> INetworkPath {
-        try PL.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> INetworkPath in
+    static func parseNetworkPath(buffer: inout ParseBuffer, tracker: StackTracker) throws -> NetworkPath {
+        try PL.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> NetworkPath in
             try PL.parseFixedString("//", buffer: &buffer, tracker: tracker)
             let server = try self.parseIMAPServer(buffer: &buffer, tracker: tracker)
             let query = try self.parseIPathQuery(buffer: &buffer, tracker: tracker)
@@ -657,10 +657,10 @@ extension GrammarParser {
         }
     }
 
-    static func parseIAbsolutePath(buffer: inout ParseBuffer, tracker: StackTracker) throws -> IAbsolutePath {
-        try PL.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> IAbsolutePath in
+    static func parseAbsoluteMessagePath(buffer: inout ParseBuffer, tracker: StackTracker) throws -> AbsoluteMessagePath {
+        try PL.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> AbsoluteMessagePath in
             try PL.parseFixedString("/", buffer: &buffer, tracker: tracker)
-            let command = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseICommand)
+            let command = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseURLCommand)
             return .init(command: command)
         }
     }
@@ -763,7 +763,7 @@ extension GrammarParser {
     static func parseIPathQuery(buffer: inout ParseBuffer, tracker: StackTracker) throws -> IPathQuery {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> IPathQuery in
             try PL.parseFixedString("/", buffer: &buffer, tracker: tracker)
-            let command = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseICommand)
+            let command = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseURLCommand)
             return .init(command: command)
         }
     }
@@ -889,11 +889,11 @@ extension GrammarParser {
 
     static func parseRelativeIMAPURL(buffer: inout ParseBuffer, tracker: StackTracker) throws -> RelativeIMAPURL {
         func parseRelativeIMAPURL_absolute(buffer: inout ParseBuffer, tracker: StackTracker) throws -> RelativeIMAPURL {
-            .absolutePath(try self.parseIAbsolutePath(buffer: &buffer, tracker: tracker))
+            .absolutePath(try self.parseAbsoluteMessagePath(buffer: &buffer, tracker: tracker))
         }
 
         func parseRelativeIMAPURL_network(buffer: inout ParseBuffer, tracker: StackTracker) throws -> RelativeIMAPURL {
-            .networkPath(try self.parseINetworkPath(buffer: &buffer, tracker: tracker))
+            .networkPath(try self.parseNetworkPath(buffer: &buffer, tracker: tracker))
         }
 
         func parseRelativeIMAPURL_relative(buffer: inout ParseBuffer, tracker: StackTracker) throws -> RelativeIMAPURL {
@@ -918,7 +918,7 @@ extension GrammarParser {
         }
 
         func parseIRelativePath_messageOrPartial(buffer: inout ParseBuffer, tracker: StackTracker) throws -> IRelativePath {
-            .messageOrPartial(try self.parseIMessageOrPartial(buffer: &buffer, tracker: tracker))
+            .message(try self.parseURLFetchType(buffer: &buffer, tracker: tracker))
         }
 
         return try PL.parseOneOf(
@@ -959,13 +959,13 @@ extension GrammarParser {
         }
     }
 
-    static func parseIMessageOrPartial(buffer: inout ParseBuffer, tracker: StackTracker) throws -> IMessageOrPartial {
-        func parseIMessageOrPartial_partialOnly(buffer: inout ParseBuffer, tracker: StackTracker) throws -> IMessageOrPartial {
+    static func parseURLFetchType(buffer: inout ParseBuffer, tracker: StackTracker) throws -> URLFetchType {
+        func parseURLFetchType_partialOnly(buffer: inout ParseBuffer, tracker: StackTracker) throws -> URLFetchType {
             let partial = try self.parseIPartialOnly(buffer: &buffer, tracker: tracker)
             return .partialOnly(partial)
         }
 
-        func parseIMessageOrPartial_sectionPartial(buffer: inout ParseBuffer, tracker: StackTracker) throws -> IMessageOrPartial {
+        func parseURLFetchType_sectionPartial(buffer: inout ParseBuffer, tracker: StackTracker) throws -> URLFetchType {
             var section = try self.parseIMAPURLSectionOnly(buffer: &buffer, tracker: tracker)
             if section.encodedSection.section.last == Character(.init(UInt8(ascii: "/"))) {
                 section.encodedSection.section = String(section.encodedSection.section.dropLast())
@@ -984,7 +984,7 @@ extension GrammarParser {
             return .sectionPartial(section: section, partial: partial)
         }
 
-        func parseIMessageOrPartial_uidSectionPartial(buffer: inout ParseBuffer, tracker: StackTracker) throws -> IMessageOrPartial {
+        func parseURLFetchType_uidSectionPartial(buffer: inout ParseBuffer, tracker: StackTracker) throws -> URLFetchType {
             let uid = try self.parseIUIDOnly(buffer: &buffer, tracker: tracker)
             var section = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> URLMessageSection in
                 try PL.parseFixedString("/", buffer: &buffer, tracker: tracker)
@@ -1007,7 +1007,7 @@ extension GrammarParser {
             return .uidSectionPartial(uid: uid, section: section, partial: partial)
         }
 
-        func parseIMessageOrPartial_refUidSectionPartial(buffer: inout ParseBuffer, tracker: StackTracker) throws -> IMessageOrPartial {
+        func parseURLFetchType_refUidSectionPartial(buffer: inout ParseBuffer, tracker: StackTracker) throws -> URLFetchType {
             let ref = try self.parseEncodedMailboxUIDValidity(buffer: &buffer, tracker: tracker)
             let uid = try self.parseIUIDOnly(buffer: &buffer, tracker: tracker)
             var section = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> URLMessageSection in
@@ -1032,10 +1032,10 @@ extension GrammarParser {
         }
 
         return try PL.parseOneOf([
-            parseIMessageOrPartial_refUidSectionPartial,
-            parseIMessageOrPartial_uidSectionPartial,
-            parseIMessageOrPartial_sectionPartial,
-            parseIMessageOrPartial_partialOnly,
+            parseURLFetchType_refUidSectionPartial,
+            parseURLFetchType_uidSectionPartial,
+            parseURLFetchType_sectionPartial,
+            parseURLFetchType_partialOnly,
         ], buffer: &buffer, tracker: tracker)
     }
 
@@ -1141,7 +1141,7 @@ extension GrammarParser {
 
     static func parseIURLAuth(buffer: inout ParseBuffer, tracker: StackTracker) throws -> IAuthenticatedURL {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> IAuthenticatedURL in
-            let rump = try self.parseIRumpAuthenticatedURL(buffer: &buffer, tracker: tracker)
+            let rump = try self.parseAuthenticatedURLRump(buffer: &buffer, tracker: tracker)
             let verifier = try self.parseAuthenticatedURLVerifier(buffer: &buffer, tracker: tracker)
             return .init(authenticatedURL: rump, verifier: verifier)
         }
@@ -1165,8 +1165,8 @@ extension GrammarParser {
         }
     }
 
-    static func parseIRumpAuthenticatedURL(buffer: inout ParseBuffer, tracker: StackTracker) throws -> IRumpAuthenticatedURL {
-        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> IRumpAuthenticatedURL in
+    static func parseAuthenticatedURLRump(buffer: inout ParseBuffer, tracker: StackTracker) throws -> AuthenticatedURLRump {
+        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> AuthenticatedURLRump in
             let expiry = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseExpire)
             try PL.parseFixedString(";URLAUTH=", buffer: &buffer, tracker: tracker)
             let access = try self.parseAccess(buffer: &buffer, tracker: tracker)

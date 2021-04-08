@@ -15,7 +15,7 @@
 /// Specifies a URL and a verifier that can be used to verify the authorisation URL.
 public struct IAuthenticatedURL: Equatable {
     /// The URL.
-    public var authenticatedURL: IRumpAuthenticatedURL
+    public var authenticatedURL: AuthenticatedURLRump
 
     /// The auth url verifier.
     public var verifier: AuthenticatedURLVerifier
@@ -23,7 +23,7 @@ public struct IAuthenticatedURL: Equatable {
     /// Creates a new `IURLAuth`.
     /// - parameter authenticatedURL: The auth URL.
     /// - parameter verifier: The auth URL verifier.
-    public init(authenticatedURL: IRumpAuthenticatedURL, verifier: AuthenticatedURLVerifier) {
+    public init(authenticatedURL: AuthenticatedURLRump, verifier: AuthenticatedURLVerifier) {
         self.authenticatedURL = authenticatedURL
         self.verifier = verifier
     }
@@ -33,7 +33,7 @@ public struct IAuthenticatedURL: Equatable {
 
 extension _EncodeBuffer {
     @discardableResult mutating func writeIAuthenticatedURL(_ data: IAuthenticatedURL) -> Int {
-        self.writeIRumpAuthenticatedURL(data.authenticatedURL) +
+        self.writeAuthenticatedURLRump(data.authenticatedURL) +
             self.writeAuthenticatedURLVerifier(data.verifier)
     }
 }

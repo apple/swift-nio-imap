@@ -835,7 +835,7 @@ extension ParserUnitTests {
             testFunction: GrammarParser.parseIRelativePath,
             validInputs: [
                 ("test", " ", .list(.init(mailboxUIDValidity: .init(encodeMailbox: .init(mailbox: "test")))), #line),
-                (";PARTIAL=1.2", " ", .messageOrPartial(.partialOnly(.init(range: .init(offset: 1, length: 2)))), #line),
+                (";PARTIAL=1.2", " ", .message(.partialOnly(.init(range: .init(offset: 1, length: 2)))), #line),
             ],
             parserErrorInputs: [
             ],
@@ -845,12 +845,12 @@ extension ParserUnitTests {
     }
 }
 
-// MARK: - IAbsolutePath
+// MARK: - AbsoluteMessagePath
 
 extension ParserUnitTests {
-    func testParseIAbsolutePath() {
+    func testParseAbsoluteMessagePath() {
         self.iterateTests(
-            testFunction: GrammarParser.parseIAbsolutePath,
+            testFunction: GrammarParser.parseAbsoluteMessagePath,
             validInputs: [
                 ("/", " ", .init(command: nil), #line),
                 ("/test", " ", .init(command: .messageList(.init(mailboxUIDValidity: .init(encodeMailbox: .init(mailbox: "test"))))), #line),
@@ -863,12 +863,12 @@ extension ParserUnitTests {
     }
 }
 
-// MARK: - ICommand
+// MARK: - URLCommand
 
 extension ParserUnitTests {
-    func testParseICommand() {
+    func testParseURLCommand() {
         self.iterateTests(
-            testFunction: GrammarParser.parseICommand,
+            testFunction: GrammarParser.parseURLCommand,
             validInputs: [
                 ("test", " ", .messageList(.init(mailboxUIDValidity: .init(encodeMailbox: .init(mailbox: "test")))), #line),
                 ("test/;UID=123", " ", .fetch(path: .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: .init(uid: 123)), authenticatedURL: nil), #line),
@@ -941,12 +941,12 @@ extension ParserUnitTests {
     }
 }
 
-// MARK: - IRumpAuthenticatedURL
+// MARK: - AuthenticatedURLRump
 
 extension ParserUnitTests {
-    func testParseIRumpAuthenticatedURL() {
+    func testParseAuthenticatedURLRump() {
         self.iterateTests(
-            testFunction: GrammarParser.parseIRumpAuthenticatedURL,
+            testFunction: GrammarParser.parseAuthenticatedURLRump,
             validInputs: [
                 (";URLAUTH=anonymous", " ", .init(access: .anonymous), #line),
                 (
@@ -1066,12 +1066,12 @@ extension ParserUnitTests {
     }
 }
 
-// MARK: - parseINetworkPath
+// MARK: - parseNetworkPath
 
 extension ParserUnitTests {
-    func testParseINetworkPath() {
+    func testParseNetworkPath() {
         self.iterateTests(
-            testFunction: GrammarParser.parseINetworkPath,
+            testFunction: GrammarParser.parseNetworkPath,
             validInputs: [
                 ("//localhost/", " ", .init(server: .init(host: "localhost"), query: .init(command: nil)), #line),
             ],
@@ -1637,9 +1637,9 @@ extension ParserUnitTests {
 // MARK: - parseIMessageOrPart
 
 extension ParserUnitTests {
-    func testParseIMessageOrPartial() {
+    func testParseURLFetchType() {
         self.iterateTests(
-            testFunction: GrammarParser.parseIMessageOrPartial,
+            testFunction: GrammarParser.parseURLFetchType,
             validInputs: [
                 (
                     ";PARTIAL=1.2",
