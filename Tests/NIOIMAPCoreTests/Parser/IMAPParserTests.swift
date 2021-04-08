@@ -827,24 +827,6 @@ extension ParserUnitTests {
     }
 }
 
-// MARK: - parseIRelativePath
-
-extension ParserUnitTests {
-    func testParseIRelativePath() {
-        self.iterateTests(
-            testFunction: GrammarParser.parseIRelativePath,
-            validInputs: [
-                ("test", " ", .list(.init(mailboxUIDValidity: .init(encodeMailbox: .init(mailbox: "test")))), #line),
-                (";PARTIAL=1.2", " ", .message(.partialOnly(.init(range: .init(offset: 1, length: 2)))), #line),
-            ],
-            parserErrorInputs: [
-            ],
-            incompleteMessageInputs: [
-            ]
-        )
-    }
-}
-
 // MARK: - AbsoluteMessagePath
 
 extension ParserUnitTests {
@@ -1605,7 +1587,6 @@ extension ParserUnitTests {
             validInputs: [
                 ("/test", " ", .absolutePath(.init(command: .messageList(.init(mailboxUIDValidity: .init(encodeMailbox: .init(mailbox: "test")))))), #line),
                 ("//localhost/", " ", .networkPath(.init(server: .init(host: "localhost"), query: .init(command: nil))), #line),
-                ("test", " ", .relativePath(.list(.init(mailboxUIDValidity: .init(encodeMailbox: .init(mailbox: "test"))))), #line),
                 ("", " ", .empty, #line),
             ],
             parserErrorInputs: [
