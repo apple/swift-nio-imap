@@ -18,7 +18,7 @@ public enum IRelativePath: Equatable {
     case list(EncodedSearchQuery)
 
     /// An IMAP URL referring to a specific message, and optionally a component of message.
-    case messageOrPartial(URLFetchType)
+    case message(URLFetchType)
 }
 
 // MARK: - Encoding
@@ -28,7 +28,7 @@ extension _EncodeBuffer {
         switch path {
         case .list(let list):
             return self.writeEncodedSearchQuery(list)
-        case .messageOrPartial(let data):
+        case .message(let data):
             return self.writeURLFetchType(data)
         }
     }

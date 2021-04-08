@@ -918,7 +918,7 @@ extension GrammarParser {
         }
 
         func parseIRelativePath_messageOrPartial(buffer: inout ParseBuffer, tracker: StackTracker) throws -> IRelativePath {
-            .messageOrPartial(try self.parseURLFetchType(buffer: &buffer, tracker: tracker))
+            .message(try self.parseURLFetchType(buffer: &buffer, tracker: tracker))
         }
 
         return try PL.parseOneOf(
