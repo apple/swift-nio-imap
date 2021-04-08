@@ -36,7 +36,7 @@ class IMAPClientHandlerTests: XCTestCase {
             TaggedResponse(tag: "tag",
                            state: .ok(ResponseText(code:
                                .referral(IMAPURL(server: IMAPServer(userAuthenticationMechanism: nil, host: "hostname", port: nil),
-                                                 query: IPathQuery(command: URLCommand.fetch(
+                                                 query: URLCommand.fetch(
                                                      path: MessagePath(
                                                          mailboxReference: MailboxUIDValidity(encodeMailbox: EncodedMailbox(mailbox: "foo/bar"),
                                                                                               uidValidity: nil),
@@ -45,7 +45,7 @@ class IMAPClientHandlerTests: XCTestCase {
                                                          range: nil
                                                      ),
                                                      authenticatedURL: nil
-                                                 )))),
+                                                 ))),
                                text: ""))))
         self.writeOutbound(.command(.init(tag: "a", command: .login(username: "foo", password: "bar"))))
         self.assertOutboundString("a LOGIN \"foo\" \"bar\"\r\n")

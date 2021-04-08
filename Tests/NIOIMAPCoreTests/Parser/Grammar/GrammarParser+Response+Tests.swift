@@ -90,7 +90,7 @@ extension GrammarParser_Response_Tests {
                 ("URLMECH INTERNAL", "\r", .urlMechanisms([]), #line),
                 ("URLMECH INTERNAL INTERNAL", "\r", .urlMechanisms([.init(mechanism: .internal, base64: nil)]), #line),
                 ("URLMECH INTERNAL INTERNAL=YQ==", "\r", .urlMechanisms([.init(mechanism: .internal, base64: "a")]), #line),
-                ("REFERRAL imap://localhost/", "\r", .referral(.init(server: .init(host: "localhost"), query: .init(command: nil))), #line),
+                ("REFERRAL imap://localhost/", "\r", .referral(.init(server: .init(host: "localhost"), query: nil)), #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []

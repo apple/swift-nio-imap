@@ -632,8 +632,9 @@ extension GrammarParser {
         try PL.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> NetworkPath in
             try PL.parseFixedString("//", buffer: &buffer, tracker: tracker)
             let server = try self.parseIMAPServer(buffer: &buffer, tracker: tracker)
-            let query = try self.parseIPathQuery(buffer: &buffer, tracker: tracker)
-            return .init(server: server, query: query)
+            try PL.parseFixedString("/", buffer: &buffer, tracker: tracker)
+            let command = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseURLCommand)
+            return .init(server: server, query: command)
         }
     }
 
@@ -760,14 +761,6 @@ extension GrammarParser {
         }
     }
 
-    static func parseIPathQuery(buffer: inout ParseBuffer, tracker: StackTracker) throws -> IPathQuery {
-        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> IPathQuery in
-            try PL.parseFixedString("/", buffer: &buffer, tracker: tracker)
-            let command = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseURLCommand)
-            return .init(command: command)
-        }
-    }
-
     static func parseIMAPURLSection(buffer: inout ParseBuffer, tracker: StackTracker) throws -> URLMessageSection {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> URLMessageSection in
             try PL.parseFixedString("/;SECTION=", buffer: &buffer, tracker: tracker)
@@ -882,8 +875,9 @@ extension GrammarParser {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> IMAPURL in
             try PL.parseFixedString("imap://", buffer: &buffer, tracker: tracker)
             let server = try self.parseIMAPServer(buffer: &buffer, tracker: tracker)
-            let query = try self.parseIPathQuery(buffer: &buffer, tracker: tracker)
-            return .init(server: server, query: query)
+            try PL.parseFixedString("/", buffer: &buffer, tracker: tracker)
+            let command = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseURLCommand)
+            return .init(server: server, query: command)
         }
     }
 

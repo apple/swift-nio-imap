@@ -1055,7 +1055,7 @@ extension ParserUnitTests {
         self.iterateTests(
             testFunction: GrammarParser.parseNetworkPath,
             validInputs: [
-                ("//localhost/", " ", .init(server: .init(host: "localhost"), query: .init(command: nil)), #line),
+                ("//localhost/", " ", .init(server: .init(host: "localhost"), query: nil), #line),
             ],
             parserErrorInputs: [
             ],
@@ -1425,24 +1425,6 @@ extension ParserUnitTests {
     }
 }
 
-// MARK: - parseIPathQuery
-
-extension ParserUnitTests {
-    func testParseIPathQuery() {
-        self.iterateTests(
-            testFunction: GrammarParser.parseIPathQuery,
-            validInputs: [
-                ("/", " ", .init(command: nil), #line),
-                ("/test", " ", .init(command: .messageList(.init(mailboxUIDValidity: .init(encodeMailbox: .init(mailbox: "test"))))), #line),
-            ],
-            parserErrorInputs: [
-            ],
-            incompleteMessageInputs: [
-            ]
-        )
-    }
-}
-
 // MARK: - parseIMAPURLSection
 
 extension ParserUnitTests {
@@ -1531,7 +1513,7 @@ extension ParserUnitTests {
         self.iterateTests(
             testFunction: GrammarParser.parseIMAPURL,
             validInputs: [
-                ("imap://localhost/", " ", .init(server: .init(host: "localhost"), query: .init(command: nil)), #line),
+                ("imap://localhost/", " ", .init(server: .init(host: "localhost"), query: nil), #line),
             ],
             parserErrorInputs: [
             ],
@@ -1586,7 +1568,7 @@ extension ParserUnitTests {
             testFunction: GrammarParser.parseRelativeIMAPURL,
             validInputs: [
                 ("/test", " ", .absolutePath(.init(command: .messageList(.init(mailboxUIDValidity: .init(encodeMailbox: .init(mailbox: "test")))))), #line),
-                ("//localhost/", " ", .networkPath(.init(server: .init(host: "localhost"), query: .init(command: nil))), #line),
+                ("//localhost/", " ", .networkPath(.init(server: .init(host: "localhost"), query: nil)), #line),
                 ("", " ", .empty, #line),
             ],
             parserErrorInputs: [

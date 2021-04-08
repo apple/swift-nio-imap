@@ -23,7 +23,7 @@ class IMAPURL_Tests: EncodeTestClass {}
 extension IMAPURL_Tests {
     func testEncode() {
         let inputs: [(IMAPURL, String, UInt)] = [
-            (.init(server: .init(host: "localhost"), query: .init(command: nil)), "imap://localhost/", #line),
+            (.init(server: .init(host: "localhost"), query: nil), "imap://localhost/", #line),
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeIMAPURL($0) })
     }
