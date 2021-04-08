@@ -13,14 +13,14 @@
 //===----------------------------------------------------------------------===//
 
 /// Pairs an auth URL rump with an optional expiry date and access restrictions.
-public struct IRumpAuthenticatedURL: Equatable {
+public struct AuthenticatedURLRump: Equatable {
     /// The optional expiry date of the URL.
     public var expire: Expire?
 
     /// Access restrictions that apply to the URL.
     public var access: Access
 
-    /// Creates a new `IRumpAuthenticatedURL`.
+    /// Creates a new `AuthenticatedURLRump`.
     /// - parameter expire: The optional expiry date of the URL.
     /// - parameter access: Access restrictions that apply to the URL.
     public init(expire: Expire? = nil, access: Access) {
@@ -32,7 +32,7 @@ public struct IRumpAuthenticatedURL: Equatable {
 // MARK: - Encoding
 
 extension _EncodeBuffer {
-    @discardableResult mutating func writeIRumpAuthenticatedURL(_ data: IRumpAuthenticatedURL) -> Int {
+    @discardableResult mutating func writeAuthenticatedURLRump(_ data: AuthenticatedURLRump) -> Int {
         self.writeIfExists(data.expire) { expire in
             self.writeExpire(expire)
         } +

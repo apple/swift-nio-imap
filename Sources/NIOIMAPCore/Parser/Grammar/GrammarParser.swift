@@ -124,7 +124,7 @@ extension GrammarParser {
     static func parseAuthIMAPURLRump(buffer: inout ParseBuffer, tracker: StackTracker) throws -> RumpAuthenticatedURL {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> RumpAuthenticatedURL in
             let imapURL = try self.parseAuthenticatedURL(buffer: &buffer, tracker: tracker)
-            let rump = try self.parseIRumpAuthenticatedURL(buffer: &buffer, tracker: tracker)
+            let rump = try self.parseAuthenticatedURLRump(buffer: &buffer, tracker: tracker)
             return .init(authenticatedURL: imapURL, authenticatedURLRump: rump)
         }
     }
@@ -1141,7 +1141,7 @@ extension GrammarParser {
 
     static func parseIURLAuth(buffer: inout ParseBuffer, tracker: StackTracker) throws -> IAuthenticatedURL {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> IAuthenticatedURL in
-            let rump = try self.parseIRumpAuthenticatedURL(buffer: &buffer, tracker: tracker)
+            let rump = try self.parseAuthenticatedURLRump(buffer: &buffer, tracker: tracker)
             let verifier = try self.parseAuthenticatedURLVerifier(buffer: &buffer, tracker: tracker)
             return .init(authenticatedURL: rump, verifier: verifier)
         }
@@ -1165,8 +1165,8 @@ extension GrammarParser {
         }
     }
 
-    static func parseIRumpAuthenticatedURL(buffer: inout ParseBuffer, tracker: StackTracker) throws -> IRumpAuthenticatedURL {
-        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> IRumpAuthenticatedURL in
+    static func parseAuthenticatedURLRump(buffer: inout ParseBuffer, tracker: StackTracker) throws -> AuthenticatedURLRump {
+        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> AuthenticatedURLRump in
             let expiry = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseExpire)
             try PL.parseFixedString(";URLAUTH=", buffer: &buffer, tracker: tracker)
             let access = try self.parseAccess(buffer: &buffer, tracker: tracker)
