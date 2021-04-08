@@ -1066,12 +1066,12 @@ extension ParserUnitTests {
     }
 }
 
-// MARK: - parseINetworkPath
+// MARK: - parseNetworkPath
 
 extension ParserUnitTests {
-    func testParseINetworkPath() {
+    func testParseNetworkPath() {
         self.iterateTests(
-            testFunction: GrammarParser.parseINetworkPath,
+            testFunction: GrammarParser.parseNetworkPath,
             validInputs: [
                 ("//localhost/", " ", .init(server: .init(host: "localhost"), query: .init(command: nil)), #line),
             ],

@@ -16,19 +16,19 @@ import NIO
 @testable import NIOIMAPCore
 import XCTest
 
-class INetworkPath_Tests: EncodeTestClass {}
+class NetworkPath_Tests: EncodeTestClass {}
 
 // MARK: - IMAP
 
-extension INetworkPath_Tests {
+extension NetworkPath_Tests {
     func testEncode() {
-        let inputs: [(INetworkPath, String, UInt)] = [
+        let inputs: [(NetworkPath, String, UInt)] = [
             (
                 .init(server: .init(host: "localhost"), query: .init(command: nil)),
                 "//localhost/",
                 #line
             ),
         ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeINetworkPath($0) })
+        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeNetworkPath($0) })
     }
 }
