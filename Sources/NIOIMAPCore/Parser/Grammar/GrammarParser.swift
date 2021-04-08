@@ -117,7 +117,7 @@ extension GrammarParser {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> FullAuthenticatedURL in
             let imapURL = try self.parseAuthenticatedURL(buffer: &buffer, tracker: tracker)
             let urlAuth = try self.parseIURLAuth(buffer: &buffer, tracker: tracker)
-            return .init(imapURL: imapURL, authenticatedURL: urlAuth)
+            return .init(networkMessagePath: imapURL, authenticatedURL: urlAuth)
         }
     }
 

@@ -24,7 +24,7 @@ extension AuthIMAPURLFull_Tests {
     func testEncoding() {
         let inputs: [(FullAuthenticatedURL, String, UInt)] = [
             (
-                .init(imapURL: .init(server: .init(host: "localhost"), messagePath: .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: .init(uid: 123))), authenticatedURL: .init(authenticatedURL: .init(access: .anonymous), verifier: .init(urlAuthMechanism: .internal, encodedAuthenticationURL: .init(data: "data")))),
+                .init(networkMessagePath: .init(server: .init(host: "localhost"), messagePath: .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: .init(uid: 123))), authenticatedURL: .init(authenticatedURL: .init(access: .anonymous), verifier: .init(urlAuthMechanism: .internal, encodedAuthenticationURL: .init(data: "data")))),
                 "imap://localhost/test/;UID=123;URLAUTH=anonymous:INTERNAL:data",
                 #line
             ),
