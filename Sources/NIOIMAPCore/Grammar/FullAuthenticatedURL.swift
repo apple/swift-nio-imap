@@ -20,12 +20,12 @@ public struct FullAuthenticatedURL: Equatable {
     public var networkMessagePath: NetworkMessagePath
 
     /// URL authentication details.
-    public var authenticatedURL: IAuthenticatedURL
+    public var authenticatedURL: AuthenticatedURL
 
     /// Creates a new `FullAuthenticatedURL`.
     /// - parameter networkMessagePath: An IMAP url pointing to a remote message.
     /// - parameter authenticatedURL: URL authentication details.
-    public init(networkMessagePath: NetworkMessagePath, authenticatedURL: IAuthenticatedURL) {
+    public init(networkMessagePath: NetworkMessagePath, authenticatedURL: AuthenticatedURL) {
         self.networkMessagePath = networkMessagePath
         self.authenticatedURL = authenticatedURL
     }

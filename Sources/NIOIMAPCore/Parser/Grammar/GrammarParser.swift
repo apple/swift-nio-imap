@@ -1139,8 +1139,8 @@ extension GrammarParser {
         }
     }
 
-    static func parseIURLAuth(buffer: inout ParseBuffer, tracker: StackTracker) throws -> IAuthenticatedURL {
-        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> IAuthenticatedURL in
+    static func parseIURLAuth(buffer: inout ParseBuffer, tracker: StackTracker) throws -> AuthenticatedURL {
+        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> AuthenticatedURL in
             let rump = try self.parseAuthenticatedURLRump(buffer: &buffer, tracker: tracker)
             let verifier = try self.parseAuthenticatedURLVerifier(buffer: &buffer, tracker: tracker)
             return .init(authenticatedURL: rump, verifier: verifier)
