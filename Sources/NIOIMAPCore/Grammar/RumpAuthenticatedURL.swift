@@ -20,12 +20,12 @@ public struct RumpAuthenticatedURL: Equatable {
     public var authenticatedURL: AuthenticatedURL
 
     /// A rump URL used to validate access if needed.
-    public var authenticatedURLRump: IRumpAuthenticatedURL
+    public var authenticatedURLRump: AuthenticatedURLRump
 
     /// Creates a new `AuthIMAPURLRump`.
     /// - parameter imapURL: An IMAP URL pointing to a message.
     /// - parameter authenticatedURLRump: A rump URL used to validate access if needed.
-    public init(authenticatedURL: AuthenticatedURL, authenticatedURLRump: IRumpAuthenticatedURL) {
+    public init(authenticatedURL: AuthenticatedURL, authenticatedURLRump: AuthenticatedURLRump) {
         self.authenticatedURL = authenticatedURL
         self.authenticatedURLRump = authenticatedURLRump
     }
@@ -36,6 +36,6 @@ public struct RumpAuthenticatedURL: Equatable {
 extension _EncodeBuffer {
     @discardableResult mutating func writeAuthIMAPURLRump(_ data: RumpAuthenticatedURL) -> Int {
         self.writeAuthenticatedURL(data.authenticatedURL) +
-            self.writeIRumpAuthenticatedURL(data.authenticatedURLRump)
+            self.writeAuthenticatedURLRump(data.authenticatedURLRump)
     }
 }

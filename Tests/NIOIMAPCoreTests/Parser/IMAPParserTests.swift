@@ -941,12 +941,12 @@ extension ParserUnitTests {
     }
 }
 
-// MARK: - IRumpAuthenticatedURL
+// MARK: - AuthenticatedURLRump
 
 extension ParserUnitTests {
-    func testParseIRumpAuthenticatedURL() {
+    func testParseAuthenticatedURLRump() {
         self.iterateTests(
-            testFunction: GrammarParser.parseIRumpAuthenticatedURL,
+            testFunction: GrammarParser.parseAuthenticatedURLRump,
             validInputs: [
                 (";URLAUTH=anonymous", " ", .init(access: .anonymous), #line),
                 (
