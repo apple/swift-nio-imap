@@ -58,7 +58,7 @@ extension ResponseTextCodeTests {
                 "URLMECH INTERNAL m1=b1 m2=b2",
                 #line
             ),
-            (.referral(.init(server: .init(host: "localhost"), query: .init(command: nil))), "REFERRAL imap://localhost/", #line),
+            (.referral(.init(server: .init(host: "localhost"), query: nil)), "REFERRAL imap://localhost/", #line),
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeResponseTextCode($0) })
     }

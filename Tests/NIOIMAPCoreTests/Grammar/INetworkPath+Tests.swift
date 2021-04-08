@@ -24,7 +24,7 @@ extension NetworkPath_Tests {
     func testEncode() {
         let inputs: [(NetworkPath, String, UInt)] = [
             (
-                .init(server: .init(host: "localhost"), query: .init(command: nil)),
+                .init(server: .init(host: "localhost"), query: nil),
                 "//localhost/",
                 #line
             ),
