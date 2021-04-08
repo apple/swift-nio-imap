@@ -893,7 +893,7 @@ extension GrammarParser {
         }
 
         func parseRelativeIMAPURL_network(buffer: inout ParseBuffer, tracker: StackTracker) throws -> RelativeIMAPURL {
-            .NetworkPath(try self.parseNetworkPath(buffer: &buffer, tracker: tracker))
+            .networkPath(try self.parseNetworkPath(buffer: &buffer, tracker: tracker))
         }
 
         func parseRelativeIMAPURL_relative(buffer: inout ParseBuffer, tracker: StackTracker) throws -> RelativeIMAPURL {

@@ -15,7 +15,7 @@
 ///
 public enum RelativeIMAPURL: Equatable {
     /// Rarely used, typically it's better to use an absolute path
-    case NetworkPath(NetworkPath)
+    case networkPath(NetworkPath)
 
     /// A path that can be used to connect without any additional information
     case absolutePath(IAbsolutePath)
@@ -32,7 +32,7 @@ public enum RelativeIMAPURL: Equatable {
 extension _EncodeBuffer {
     @discardableResult mutating func writeRelativeIMAPURL(_ url: RelativeIMAPURL) -> Int {
         switch url {
-        case .NetworkPath(let path):
+        case .networkPath(let path):
             return self.writeNetworkPath(path)
         case .absolutePath(let path):
             return self.writeIAbsolutePath(path)
