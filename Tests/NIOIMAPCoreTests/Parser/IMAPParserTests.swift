@@ -845,12 +845,12 @@ extension ParserUnitTests {
     }
 }
 
-// MARK: - IAbsolutePath
+// MARK: - AbsoluteMessagePath
 
 extension ParserUnitTests {
-    func testParseIAbsolutePath() {
+    func testParseAbsoluteMessagePath() {
         self.iterateTests(
-            testFunction: GrammarParser.parseIAbsolutePath,
+            testFunction: GrammarParser.parseAbsoluteMessagePath,
             validInputs: [
                 ("/", " ", .init(command: nil), #line),
                 ("/test", " ", .init(command: .messageList(.init(mailboxUIDValidity: .init(encodeMailbox: .init(mailbox: "test"))))), #line),
