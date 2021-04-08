@@ -24,7 +24,7 @@ extension IRelativePath_Tests {
     func testEncode() {
         let inputs: [(IRelativePath, String, UInt)] = [
             (.list(.init(mailboxUIDValidity: .init(encodeMailbox: .init(mailbox: "test")))), "test", #line),
-            (.messageOrPartial(.partialOnly(.init(range: .init(offset: 1, length: 2)))), ";PARTIAL=1.2", #line),
+            (.message(.partialOnly(.init(range: .init(offset: 1, length: 2)))), ";PARTIAL=1.2", #line),
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeIRelativePath($0) })
     }
