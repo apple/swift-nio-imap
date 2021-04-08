@@ -13,7 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 /// Specifies a URL and a verifier that can be used to verify the authorisation URL.
-public struct IAuthenticatedURL: Equatable {
+public struct AuthenticatedURL: Equatable {
     /// The URL.
     public var authenticatedURL: AuthenticatedURLRump
 
@@ -32,7 +32,7 @@ public struct IAuthenticatedURL: Equatable {
 // MARK: - Encoding
 
 extension _EncodeBuffer {
-    @discardableResult mutating func writeIAuthenticatedURL(_ data: IAuthenticatedURL) -> Int {
+    @discardableResult mutating func writeIAuthenticatedURL(_ data: AuthenticatedURL) -> Int {
         self.writeAuthenticatedURLRump(data.authenticatedURL) +
             self.writeAuthenticatedURLVerifier(data.verifier)
     }

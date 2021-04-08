@@ -22,7 +22,7 @@ class IURLAuth_Tests: EncodeTestClass {}
 
 extension IURLAuth_Tests {
     func testEncode() {
-        let inputs: [(IAuthenticatedURL, String, UInt)] = [
+        let inputs: [(AuthenticatedURL, String, UInt)] = [
             (.init(authenticatedURL: .init(access: .anonymous), verifier: .init(urlAuthMechanism: .internal, encodedAuthenticationURL: .init(data: "test"))), ";URLAUTH=anonymous:INTERNAL:test", #line),
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeIAuthenticatedURL($0) })

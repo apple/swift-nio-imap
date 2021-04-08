@@ -18,7 +18,7 @@ public enum URLCommand: Equatable {
     case messageList(EncodedSearchQuery)
 
     /// Performs a `.fetch` command.
-    case fetch(path: MessagePath, authenticatedURL: IAuthenticatedURL?)
+    case fetch(path: MessagePath, authenticatedURL: AuthenticatedURL?)
 }
 
 // MARK: - Encoding
