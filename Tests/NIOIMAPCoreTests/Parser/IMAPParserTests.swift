@@ -1066,12 +1066,12 @@ extension ParserUnitTests {
     }
 }
 
-// MARK: - parseINetworkPath
+// MARK: - parseNetworkPath
 
 extension ParserUnitTests {
-    func testParseINetworkPath() {
+    func testParseNetworkPath() {
         self.iterateTests(
-            testFunction: GrammarParser.parseINetworkPath,
+            testFunction: GrammarParser.parseNetworkPath,
             validInputs: [
                 ("//localhost/", " ", .init(server: .init(host: "localhost"), query: .init(command: nil)), #line),
             ],
@@ -1604,7 +1604,7 @@ extension ParserUnitTests {
             testFunction: GrammarParser.parseRelativeIMAPURL,
             validInputs: [
                 ("/test", " ", .absolutePath(.init(command: .messageList(.init(mailboxUIDValidity: .init(encodeMailbox: .init(mailbox: "test")))))), #line),
-                ("//localhost/", " ", .networkPath(.init(server: .init(host: "localhost"), query: .init(command: nil))), #line),
+                ("//localhost/", " ", .NetworkPath(.init(server: .init(host: "localhost"), query: .init(command: nil))), #line),
                 ("test", " ", .relativePath(.list(.init(mailboxUIDValidity: .init(encodeMailbox: .init(mailbox: "test"))))), #line),
                 ("", " ", .empty, #line),
             ],

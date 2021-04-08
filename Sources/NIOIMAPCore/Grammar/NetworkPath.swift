@@ -13,14 +13,14 @@
 //===----------------------------------------------------------------------===//
 
 /// Combines an IMAP server location with a query to be executed once a connection is made.
-public struct INetworkPath: Equatable {
+public struct NetworkPath: Equatable {
     /// The server to connect to.
     public var server: IMAPServer
 
     /// The query to execute.
     public var query: IPathQuery
 
-    /// Creates a new `INetworkPath`.
+    /// Creates a new `NetworkPath`.
     /// - parameter server: The server to connect to.
     /// - parameter query: The query to execute.
     public init(server: IMAPServer, query: IPathQuery) {
@@ -32,7 +32,7 @@ public struct INetworkPath: Equatable {
 // MARK: - Encoding
 
 extension _EncodeBuffer {
-    @discardableResult mutating func writeINetworkPath(_ path: INetworkPath) -> Int {
+    @discardableResult mutating func writeNetworkPath(_ path: NetworkPath) -> Int {
         self._writeString("//") +
             self.writeIMAPServer(path.server) +
             self.writeIPathQuery(path.query)

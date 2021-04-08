@@ -628,8 +628,8 @@ extension GrammarParser {
         )
     }
 
-    static func parseINetworkPath(buffer: inout ParseBuffer, tracker: StackTracker) throws -> INetworkPath {
-        try PL.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> INetworkPath in
+    static func parseNetworkPath(buffer: inout ParseBuffer, tracker: StackTracker) throws -> NetworkPath {
+        try PL.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> NetworkPath in
             try PL.parseFixedString("//", buffer: &buffer, tracker: tracker)
             let server = try self.parseIMAPServer(buffer: &buffer, tracker: tracker)
             let query = try self.parseIPathQuery(buffer: &buffer, tracker: tracker)
@@ -893,7 +893,7 @@ extension GrammarParser {
         }
 
         func parseRelativeIMAPURL_network(buffer: inout ParseBuffer, tracker: StackTracker) throws -> RelativeIMAPURL {
-            .networkPath(try self.parseINetworkPath(buffer: &buffer, tracker: tracker))
+            .NetworkPath(try self.parseNetworkPath(buffer: &buffer, tracker: tracker))
         }
 
         func parseRelativeIMAPURL_relative(buffer: inout ParseBuffer, tracker: StackTracker) throws -> RelativeIMAPURL {
