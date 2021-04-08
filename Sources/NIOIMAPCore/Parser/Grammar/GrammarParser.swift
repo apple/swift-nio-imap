@@ -103,8 +103,8 @@ extension GrammarParser {
         )
     }
 
-    static func parseAuthenticatedURL(buffer: inout ParseBuffer, tracker: StackTracker) throws -> AuthenticatedURL {
-        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> AuthenticatedURL in
+    static func parseAuthenticatedURL(buffer: inout ParseBuffer, tracker: StackTracker) throws -> NetworkMessagePath {
+        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> NetworkMessagePath in
             try PL.parseFixedString("imap://", buffer: &buffer, tracker: tracker)
             let server = try self.parseIMAPServer(buffer: &buffer, tracker: tracker)
             try PL.parseFixedString("/", buffer: &buffer, tracker: tracker)
@@ -117,7 +117,7 @@ extension GrammarParser {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> FullAuthenticatedURL in
             let imapURL = try self.parseAuthenticatedURL(buffer: &buffer, tracker: tracker)
             let urlAuth = try self.parseIURLAuth(buffer: &buffer, tracker: tracker)
-            return .init(imapURL: imapURL, authenticatedURL: urlAuth)
+            return .init(networkMessagePath: imapURL, authenticatedURL: urlAuth)
         }
     }
 

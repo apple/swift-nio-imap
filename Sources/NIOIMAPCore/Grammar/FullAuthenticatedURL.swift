@@ -16,17 +16,17 @@ import struct NIO.ByteBuffer
 
 /// Similar to `AuthImapURL`, but with an additional field to help verify the URL authorization.
 public struct FullAuthenticatedURL: Equatable {
-    /// An IMAP url pointing to a message.
-    public var imapURL: AuthenticatedURL
+    /// An IMAP url pointing to a remote message.
+    public var networkMessagePath: NetworkMessagePath
 
     /// URL authentication details.
     public var authenticatedURL: IAuthenticatedURL
 
-    /// Creates a new `AuthIMAPURL`.
-    /// - parameter imapURL: An IMAP url pointing to a message.
+    /// Creates a new `FullAuthenticatedURL`.
+    /// - parameter networkMessagePath: An IMAP url pointing to a remote message.
     /// - parameter authenticatedURL: URL authentication details.
-    public init(imapURL: AuthenticatedURL, authenticatedURL: IAuthenticatedURL) {
-        self.imapURL = imapURL
+    public init(networkMessagePath: NetworkMessagePath, authenticatedURL: IAuthenticatedURL) {
+        self.networkMessagePath = networkMessagePath
         self.authenticatedURL = authenticatedURL
     }
 }
@@ -35,7 +35,7 @@ public struct FullAuthenticatedURL: Equatable {
 
 extension _EncodeBuffer {
     @discardableResult mutating func writeAuthIMAPURLFull(_ data: FullAuthenticatedURL) -> Int {
-        self.writeAuthenticatedURL(data.imapURL) +
+        self.writeAuthenticatedURL(data.networkMessagePath) +
             self.writeIAuthenticatedURL(data.authenticatedURL)
     }
 }
