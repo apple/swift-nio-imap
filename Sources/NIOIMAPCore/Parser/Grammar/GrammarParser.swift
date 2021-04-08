@@ -609,20 +609,20 @@ extension GrammarParser {
         }
     }
 
-    static func parseICommand(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ICommand {
-        func parseICommand_list(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ICommand {
+    static func parseURLCommand(buffer: inout ParseBuffer, tracker: StackTracker) throws -> URLCommand {
+        func parseURLCommand_list(buffer: inout ParseBuffer, tracker: StackTracker) throws -> URLCommand {
             .messageList(try self.parseEncodedSearchQuery(buffer: &buffer, tracker: tracker))
         }
 
-        func parseICommand_part(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ICommand {
+        func parseURLCommand_part(buffer: inout ParseBuffer, tracker: StackTracker) throws -> URLCommand {
             let path = try self.parseMessagePath(buffer: &buffer, tracker: tracker)
             let auth = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseIURLAuth)
             return .fetch(path: path, authenticatedURL: auth)
         }
 
         return try PL.parseOneOf(
-            parseICommand_part,
-            parseICommand_list,
+            parseURLCommand_part,
+            parseURLCommand_list,
             buffer: &buffer,
             tracker: tracker
         )
@@ -660,7 +660,7 @@ extension GrammarParser {
     static func parseIAbsolutePath(buffer: inout ParseBuffer, tracker: StackTracker) throws -> IAbsolutePath {
         try PL.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> IAbsolutePath in
             try PL.parseFixedString("/", buffer: &buffer, tracker: tracker)
-            let command = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseICommand)
+            let command = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseURLCommand)
             return .init(command: command)
         }
     }
@@ -763,7 +763,7 @@ extension GrammarParser {
     static func parseIPathQuery(buffer: inout ParseBuffer, tracker: StackTracker) throws -> IPathQuery {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> IPathQuery in
             try PL.parseFixedString("/", buffer: &buffer, tracker: tracker)
-            let command = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseICommand)
+            let command = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseURLCommand)
             return .init(command: command)
         }
     }

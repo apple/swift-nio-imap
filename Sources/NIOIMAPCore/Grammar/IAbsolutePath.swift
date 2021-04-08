@@ -15,11 +15,11 @@
 /// An absolute IMAP path.
 public struct IAbsolutePath: Equatable {
     /// A command (including a URL) to execute.
-    public var command: ICommand?
+    public var command: URLCommand?
 
     /// Creates a new `IAbsoluteURL`.
     /// - parameter command: A command (including a URL) to execute.
-    public init(command: ICommand?) {
+    public init(command: URLCommand?) {
         self.command = command
     }
 }
@@ -30,7 +30,7 @@ extension _EncodeBuffer {
     @discardableResult mutating func writeIAbsolutePath(_ path: IAbsolutePath) -> Int {
         self._writeString("/") +
             self.writeIfExists(path.command) { command in
-                self.writeICommand(command)
+                self.writeURLCommand(command)
             }
     }
 }
