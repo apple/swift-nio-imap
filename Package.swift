@@ -13,6 +13,7 @@ let package = Package(
         .package(url: "https://github.com/apple/swift-log", from: "1.4.0"),
         .package(url: "https://github.com/nicklockwood/SwiftFormat", .exact("0.47.13")),
         .package(url: "https://github.com/apple/swift-standard-library-preview.git", .exact("0.0.1")),
+        .package(url: "https://github.com/apple/swift-collections.git", .exact("0.0.2")),
     ],
     targets: [
         .target(
@@ -42,6 +43,7 @@ let package = Package(
             dependencies: [
                 .product(name: "NIO", package: "swift-nio"),
                 .product(name: "StandardLibraryPreview", package: "swift-standard-library-preview"),
+                .product(name: "OrderedCollections", package: "swift-collections")
             ]
         ),
         .testTarget(
