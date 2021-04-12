@@ -152,7 +152,7 @@ class IMAPServerHandlerTests: XCTestCase {
 
         // client starts authentication
         self.writeInbound("A1 AUTHENTICATE GSSAPI\r\n")
-        self.assertInbound(.command(.init(tag: "A1", command: .authenticate(method: .gssAPI, initialClientResponse: nil))))
+        self.assertInbound(.command(.init(tag: "A1", command: .authenticate(mechanism: .gssAPI, initialResponse: nil))))
 
         // server sends challenge
         self.writeOutbound(.authenticationChallenge("challenge1"))

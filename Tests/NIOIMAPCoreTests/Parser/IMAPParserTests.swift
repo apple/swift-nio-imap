@@ -791,12 +791,12 @@ extension ParserUnitTests {
     }
 }
 
-// MARK: - parseInitialClientResponse
+// MARK: - parseInitialResponse
 
 extension ParserUnitTests {
-    func testParseInitialClientResponse() {
+    func testParseInitialResponse() {
         self.iterateTests(
-            testFunction: GrammarParser.parseInitialClientResponse,
+            testFunction: GrammarParser.parseInitialResponse,
             validInputs: [
                 ("=", " ", .empty, #line),
                 ("YQ==", " ", .init("a"), #line),

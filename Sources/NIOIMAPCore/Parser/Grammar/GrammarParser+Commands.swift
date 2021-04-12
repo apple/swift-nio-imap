@@ -128,12 +128,12 @@ extension GrammarParser {
     static func parseCommandSuffix_authenticate(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Command in
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-            let authMethod = AuthenticationKind(try self.parseAtom(buffer: &buffer, tracker: tracker))
-            let parseInitialClientResponse = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> InitialClientResponse in
+            let mechanism = AuthenticationMechanism(try self.parseAtom(buffer: &buffer, tracker: tracker))
+            let initialResponse = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> InitialResponse in
                 try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-                return try self.parseInitialClientResponse(buffer: &buffer, tracker: tracker)
+                return try self.parseInitialResponse(buffer: &buffer, tracker: tracker)
             })
-            return .authenticate(method: authMethod, initialClientResponse: parseInitialClientResponse)
+            return .authenticate(mechanism: mechanism, initialResponse: initialResponse)
         }
     }
 
