@@ -16,16 +16,16 @@ import NIO
 @testable import NIOIMAPCore
 import XCTest
 
-class InitialClientResponse_Tests: EncodeTestClass {}
+class InitialResponse_Tests: EncodeTestClass {}
 
 // MARK: - IMAP
 
-extension InitialClientResponse_Tests {
+extension InitialResponse_Tests {
     func testEncode() {
         let inputs: [(InitialResponse, String, UInt)] = [
             (.empty, "=", #line),
             (.init("base64"), "YmFzZTY0", #line),
         ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeInitialClientResponse($0) })
+        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeInitialResponse($0) })
     }
 }

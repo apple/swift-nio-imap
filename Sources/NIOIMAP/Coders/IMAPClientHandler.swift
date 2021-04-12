@@ -216,7 +216,7 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
             case .idleStart:
                 assert(self.state == .expectingResponses)
                 self.state = .expectingIdleContinuation
-            case .authenticate(mechanism: _, initialClientResponse: _):
+            case .authenticate(mechanism: _, initialResponse: _):
                 assert(self.state == .expectingResponses)
                 self.state = .expectingAuthenticationChallenges
             default:

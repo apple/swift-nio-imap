@@ -129,11 +129,11 @@ extension GrammarParser {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Command in
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             let mechanism = AuthenticationKind(try self.parseAtom(buffer: &buffer, tracker: tracker))
-            let parseInitialClientResponse = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> InitialResponse in
+            let initialResponse = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> InitialResponse in
                 try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-                return try self.parseInitialClientResponse(buffer: &buffer, tracker: tracker)
+                return try self.parseInitialResponse(buffer: &buffer, tracker: tracker)
             })
-            return .authenticate(mechanism: mechanism, initialClientResponse: parseInitialClientResponse)
+            return .authenticate(mechanism: mechanism, initialResponse: initialResponse)
         }
     }
 
