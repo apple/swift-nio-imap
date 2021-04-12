@@ -632,8 +632,8 @@ extension Command {
     /// Convenience for creating a *UID FETCH* command.
     /// Pass in a `UIDSet`, and if that set is valid (i.e. non-empty) then a command is returned.
     /// - parameter messages: The set of message UIDs to use.
+    /// - parameter attributes: Which attributes to retrieve.
     /// - parameter modifiers: Fetch modifiers.
-    /// - parameter OrderedDictionary: .
     /// - returns: `nil` if `messages` is empty, otherwise a `Command`.
     public static func uidFetch(messages: UIDSet, attributes: [FetchAttribute], modifiers: OrderedDictionary<String, ParameterValue?>) -> Command? {
         guard let set = UIDSetNonEmpty(set: messages) else {
