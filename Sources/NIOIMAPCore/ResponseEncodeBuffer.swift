@@ -21,8 +21,8 @@ public struct ResponseEncodeBuffer {
     /// Data that is waiting to be sent.
     public mutating func readBytes() -> ByteBuffer {
         let buffer = self.buffer._nextChunk()._bytes
-        precondition(self.buffer._buffer.readableBytes == 0)
-        self.buffer._buffer.clear()
+        precondition(self.buffer.buffer.readableBytes == 0)
+        self.buffer.buffer.clear()
         return buffer
     }
 
@@ -30,7 +30,7 @@ public struct ResponseEncodeBuffer {
     /// - parameter buffer: The inital `ByteBuffer` to use. Note that this is copied, not taken as `inout`.
     /// - parameter options: The `ResponseEncodingOptions` to use when writing responses.
     public init(buffer: ByteBuffer, options: ResponseEncodingOptions) {
-        self.buffer = ._serverEncodeBuffer(buffer: buffer, options: options)
+        self.buffer = .serverEncodeBuffer(buffer: buffer, options: options)
     }
 }
 
@@ -39,7 +39,7 @@ extension ResponseEncodeBuffer {
     /// - parameter buffer: The inital `ByteBuffer` to use. Note that this is copied, not taken as `inout`.
     /// - parameter capabilities: Server capabilites to use when writing responses. These will be converted into a `ResponseEncodingOptions`.
     public init(buffer: ByteBuffer, capabilities: [Capability]) {
-        self.buffer = ._serverEncodeBuffer(buffer: buffer, capabilities: capabilities)
+        self.buffer = .serverEncodeBuffer(buffer: buffer, capabilities: capabilities)
     }
 }
 

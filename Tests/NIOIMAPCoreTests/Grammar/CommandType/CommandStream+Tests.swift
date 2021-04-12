@@ -45,7 +45,7 @@ extension CommandStream_Tests {
         for (command, expected, line) in inputs {
             var commandEncodeBuffer = CommandEncodeBuffer(buffer: "", capabilities: [])
             commandEncodeBuffer.writeCommandStream(command)
-            XCTAssertEqual(String(buffer: commandEncodeBuffer._buffer._buffer), expected, line: line)
+            XCTAssertEqual(String(buffer: commandEncodeBuffer._buffer.buffer), expected, line: line)
         }
     }
 

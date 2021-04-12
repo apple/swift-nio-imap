@@ -26,7 +26,7 @@ public struct CommandEncodeBuffer {
     /// - parameter buffer: The initial `ByteBuffer` to build upon.
     /// - parameter options: The options to use when writing commands and data.
     public init(buffer: ByteBuffer, options: CommandEncodingOptions) {
-        self._buffer = ._clientEncodeBuffer(buffer: buffer, options: options)
+        self._buffer = .clientEncodeBuffer(buffer: buffer, options: options)
     }
 }
 
@@ -46,6 +46,6 @@ extension CommandEncodeBuffer {
     /// - parameter buffer: The initial `ByteBuffer` to build upon.
     /// - parameter capabilities: Capabilities to use when writing commands and data. Will be converted to `CommandEncodingOptions`.
     public init(buffer: ByteBuffer, capabilities: [Capability]) {
-        self._buffer = ._clientEncodeBuffer(buffer: buffer, capabilities: capabilities)
+        self._buffer = .clientEncodeBuffer(buffer: buffer, capabilities: capabilities)
     }
 }
