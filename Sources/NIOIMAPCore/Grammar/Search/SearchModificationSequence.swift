@@ -12,10 +12,12 @@
 //
 //===----------------------------------------------------------------------===//
 
+import struct OrderedCollections.OrderedDictionary
+
 /// Used when performing a search to only include messages modified since a particular moment.
 public struct SearchModificationSequence: Hashable {
     /// Extensions defined to catch data sent as part of any future extensions.
-    public var extensions: KeyValues<EntryFlagName, EntryKindRequest>
+    public var extensions: OrderedDictionary<EntryFlagName, EntryKindRequest>
 
     /// The minimum `ModificationSequenceValue` that any messages returned as part of the search must have.
     public var sequenceValue: ModificationSequenceValue
@@ -23,7 +25,7 @@ public struct SearchModificationSequence: Hashable {
     /// Creates a new `SearchModificationSequence`.
     /// - parameter extensions: Extensions defined to catch data sent as part of any future extensions.
     /// - parameter sequenceValue: The minimum `ModificationSequenceValue` that any messages returned as part of the search must have.
-    public init(extensions: KeyValues<EntryFlagName, EntryKindRequest>, sequenceValue: ModificationSequenceValue) {
+    public init(extensions: OrderedDictionary<EntryFlagName, EntryKindRequest>, sequenceValue: ModificationSequenceValue) {
         self.extensions = extensions
         self.sequenceValue = sequenceValue
     }
@@ -34,7 +36,7 @@ public struct SearchModificationSequence: Hashable {
 extension _EncodeBuffer {
     @discardableResult mutating func writeSearchModificationSequence(_ data: SearchModificationSequence) -> Int {
         self.writeString("MODSEQ") +
-            self.writeKeyValues(data.extensions, separator: "", parenthesis: false) { (element, self) -> Int in
+            self.writeOrderedDictionary(data.extensions, separator: "", parenthesis: false) { (element, self) -> Int in
                 self.writeSpace() +
                     self.writeEntryFlagName(element.key) +
                     self.writeSpace() +

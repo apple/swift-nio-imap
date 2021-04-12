@@ -12,6 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+import struct OrderedCollections.OrderedDictionary
 import struct NIO.ByteBuffer
 
 /// A collection of mailbox attributes defined in the supported IMAP4 RFCs.
@@ -23,13 +24,13 @@ public struct MailboxInfo: Equatable {
     public var path: MailboxPath
 
     /// A catch-all to support any attributes added in future extensions.
-    public var extensions: KeyValues<ByteBuffer, ParameterValue>
+    public var extensions: OrderedDictionary<ByteBuffer, ParameterValue>
 
     /// Creates a new `MailboxInfo` attribute collection.
     /// - parameter attributes: An array of mailbox attributes.
     /// - parameter path: The mailbox path.
     /// - parameter extensions: A catch-all to support any attributes added in future extensions.
-    public init(attributes: [Attribute] = [], path: MailboxPath, extensions: KeyValues<ByteBuffer, ParameterValue>) {
+    public init(attributes: [Attribute] = [], path: MailboxPath, extensions: OrderedDictionary<ByteBuffer, ParameterValue>) {
         self.attributes = attributes
         self.path = path
         self.extensions = extensions

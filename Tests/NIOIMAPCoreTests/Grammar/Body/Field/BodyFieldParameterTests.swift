@@ -12,6 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+import OrderedCollections
 import NIO
 @testable import NIOIMAPCore
 import XCTest
@@ -22,7 +23,7 @@ class BodyFieldParameterTests: EncodeTestClass {}
 
 extension BodyFieldParameterTests {
     func testEncode() {
-        let inputs: [(KeyValues<String, String>, String, UInt)] = [
+        let inputs: [(OrderedDictionary<String, String>, String, UInt)] = [
             ([:], "NIL", #line),
             (["f1": "v1"], "(\"f1\" \"v1\")", #line),
             (["f1": "v1", "f2": "v2"], "(\"f1\" \"v1\" \"f2\" \"v2\")", #line),

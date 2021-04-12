@@ -12,6 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+import struct OrderedCollections.OrderedDictionary
 import struct NIO.ByteBuffer
 
 /// Various options that may be added to a message when it is appended to a mailbox.
@@ -23,7 +24,7 @@ public struct AppendOptions: Equatable {
     public var internalDate: ServerMessageDate?
 
     /// Any additional pieces of information to be associated with the message. Implemented as a "catch-all" to support future extensions.
-    public var extensions: KeyValues<String, ParameterValue>
+    public var extensions: OrderedDictionary<String, ParameterValue>
 
     /// Creates a new `AppendOptions` with no flags, internal date, or extensions.
     /// Provided as syntactic sugar to use instead of `.init()`.
@@ -33,7 +34,7 @@ public struct AppendOptions: Equatable {
     /// - parameter flagList: Flags that will be added to the message. Defaults to `[]`.
     /// - parameter internalDate: An optional date to be associated with the message, typically representing the date of delivery. Defaults to `nil`.
     /// - parameter extensions: Any additional pieces of information to be associated with the message. Implemented as a "catch-all" to support future extensions. Defaults to `[:]`.
-    public init(flagList: [Flag] = [], internalDate: ServerMessageDate? = nil, extensions: KeyValues<String, ParameterValue> = [:]) {
+    public init(flagList: [Flag] = [], internalDate: ServerMessageDate? = nil, extensions: OrderedDictionary<String, ParameterValue> = [:]) {
         self.flagList = flagList
         self.internalDate = internalDate
         self.extensions = extensions
@@ -51,7 +52,7 @@ extension _EncodeBuffer {
                 self.writeSpace() +
                     self.writeInternalDate(internalDate)
             } +
-            self.writeKeyValues(options.extensions, prefix: " ", parenthesis: false) { (ext, self) -> Int in
+            self.writeOrderedDictionary(options.extensions, prefix: " ", parenthesis: false) { (ext, self) -> Int in
                 self.writeTaggedExtension(ext)
             }
     }

@@ -12,6 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+import struct OrderedCollections.OrderedDictionary
 import struct NIO.ByteBuffer
 
 extension BodyStructure {
@@ -33,12 +34,12 @@ extension BodyStructure {
         public var kind: DispositionKind
 
         /// An array of *attribute/value* pairs.
-        public var parameters: KeyValues<String, String>
+        public var parameters: OrderedDictionary<String, String>
 
         /// Creates a new `Disposition`
         /// - parameter kind: A string representing the disposition type.
         /// - parameter parameters: An array of *attribute/value* pairs.
-        public init(kind: DispositionKind, parameters: KeyValues<String, String>) {
+        public init(kind: DispositionKind, parameters: OrderedDictionary<String, String>) {
             self.kind = kind
             self.parameters = parameters
         }

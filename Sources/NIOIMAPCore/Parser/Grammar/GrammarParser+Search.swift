@@ -20,6 +20,7 @@ import Glibc
 let badOS = { fatalError("unsupported OS") }()
 #endif
 
+import struct OrderedCollections.OrderedDictionary
 import struct NIO.ByteBuffer
 import struct NIO.ByteBufferView
 
@@ -360,7 +361,7 @@ extension GrammarParser {
     static func parseSearchModificationSequence(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SearchModificationSequence {
         try PL.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> SearchModificationSequence in
             try PL.parseFixedString("MODSEQ", buffer: &buffer, tracker: tracker)
-            var extensions = KeyValues<EntryFlagName, EntryKindRequest>()
+            var extensions = OrderedDictionary<EntryFlagName, EntryKindRequest>()
             try PL.parseZeroOrMore(buffer: &buffer, into: &extensions, tracker: tracker, parser: self.parseSearchModificationSequenceExtension)
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             let val = try self.parseModificationSequenceValue(buffer: &buffer, tracker: tracker)

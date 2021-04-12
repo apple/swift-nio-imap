@@ -12,6 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+import struct OrderedCollections.OrderedDictionary
 import struct NIO.ByteBuffer
 
 extension BodyStructure {
@@ -44,7 +45,7 @@ extension BodyStructure.Multipart {
     /// Partially simplified to make the API nice, for example `DispositionAndLanguage` pairs a disposition and a language.
     public struct Extension: Equatable {
         /// An array of *key/value* pairs.
-        public var parameters: KeyValues<String, String>
+        public var parameters: OrderedDictionary<String, String>
 
         /// A disposition paired to an array of languages.
         public var dispositionAndLanguage: BodyStructure.DispositionAndLanguage?
@@ -52,7 +53,7 @@ extension BodyStructure.Multipart {
         /// Creates a new `Multipart.Extension`.
         /// - parameter parameters : An array of *key/value* pairs.
         /// - parameter dispositionAndLanguage: A disposition paired to an array of languages.
-        public init(parameters: KeyValues<String, String>, dispositionAndLanguage: BodyStructure.DispositionAndLanguage?) {
+        public init(parameters: OrderedDictionary<String, String>, dispositionAndLanguage: BodyStructure.DispositionAndLanguage?) {
             self.parameters = parameters
             self.dispositionAndLanguage = dispositionAndLanguage
         }

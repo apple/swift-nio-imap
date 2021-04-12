@@ -12,6 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+import OrderedCollections
 import NIO
 import NIOIMAPCore
 
@@ -52,7 +53,7 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
     /// The first argument is the capabilities that the server has sent. The second is a mutable set of encoding options.
     /// The encoding options are pre-populated with what are considered to be the *best* settings for the given
     /// capabilities.
-    var encodingChangeCallback: (KeyValues<String, String?>, inout CommandEncodingOptions) -> Void
+    var encodingChangeCallback: (OrderedDictionary<String, String?>, inout CommandEncodingOptions) -> Void
 
     enum ClientHandlerState: Equatable {
         /// We're expecting a continuation from an idle command
@@ -70,7 +71,7 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
         case error
     }
 
-    public init(encodingChangeCallback: @escaping (KeyValues<String, String?>, inout CommandEncodingOptions) -> Void = { _, _ in }) {
+    public init(encodingChangeCallback: @escaping (OrderedDictionary<String, String?>, inout CommandEncodingOptions) -> Void = { _, _ in }) {
         self.decoder = NIOSingleStepByteToMessageProcessor(ResponseDecoder(), maximumBufferSize: 1_000)
         self.state = .expectingResponses
         self.encodingChangeCallback = encodingChangeCallback

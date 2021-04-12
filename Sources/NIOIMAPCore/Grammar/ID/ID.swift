@@ -12,23 +12,24 @@
 //
 //===----------------------------------------------------------------------===//
 
+import struct OrderedCollections.OrderedDictionary
 import struct NIO.ByteBuffer
 
 // MARK: - Encoding
 
 extension _EncodeBuffer {
-    @discardableResult mutating func writeIDParameters(_ values: KeyValues<String, String?>) -> Int {
+    @discardableResult mutating func writeIDParameters(_ values: OrderedDictionary<String, String?>) -> Int {
         guard values.count > 0 else {
             return self.writeNil()
         }
-        return self.writeKeyValues(values) { (e, self) in
+        return self.writeOrderedDictionary(values) { (e, self) in
             self.writeIMAPString(e.key) +
                 self.writeSpace() +
                 self.writeNString(e.value)
         }
     }
 
-    @discardableResult mutating func writeIDResponse(_ response: KeyValues<String, String?>) -> Int {
+    @discardableResult mutating func writeIDResponse(_ response: OrderedDictionary<String, String?>) -> Int {
         self.writeString("ID ") +
             self.writeIDParameters(response)
     }

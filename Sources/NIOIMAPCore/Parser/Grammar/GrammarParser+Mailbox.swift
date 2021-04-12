@@ -20,6 +20,7 @@ import Glibc
 let badOS = { fatalError("unsupported OS") }()
 #endif
 
+import struct OrderedCollections.OrderedDictionary
 import struct NIO.ByteBuffer
 import struct NIO.ByteBufferView
 
@@ -152,7 +153,7 @@ extension GrammarParser {
             )
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             let mailbox = try self.parseMailbox(buffer: &buffer, tracker: tracker)
-            let listExtended = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: { (buffer, tracker) -> KeyValues<ByteBuffer, ParameterValue> in
+            let listExtended = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: { (buffer, tracker) -> OrderedDictionary<ByteBuffer, ParameterValue> in
                 try PL.parseSpaces(buffer: &buffer, tracker: tracker)
                 return try self.parseMailboxListExtended(buffer: &buffer, tracker: tracker)
             }) ?? [:]
@@ -162,12 +163,13 @@ extension GrammarParser {
 
     // mbox-list-extended =  "(" [mbox-list-extended-item
     //                       *(SP mbox-list-extended-item)] ")"
-    static func parseMailboxListExtended(buffer: inout ParseBuffer, tracker: StackTracker) throws -> KeyValues<ByteBuffer, ParameterValue> {
-        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> KeyValues<ByteBuffer, ParameterValue> in
+    static func parseMailboxListExtended(buffer: inout ParseBuffer, tracker: StackTracker) throws -> OrderedDictionary<ByteBuffer, ParameterValue> {
+        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> OrderedDictionary<ByteBuffer, ParameterValue> in
             try PL.parseFixedString("(", buffer: &buffer, tracker: tracker)
-            let data = try PL.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> KeyValues<ByteBuffer, ParameterValue> in
-                var kvs = KeyValues<ByteBuffer, ParameterValue>()
-                kvs.append(try self.parseMailboxListExtendedItem(buffer: &buffer, tracker: tracker))
+            let data = try PL.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> OrderedDictionary<ByteBuffer, ParameterValue> in
+                var kvs = OrderedDictionary<ByteBuffer, ParameterValue>()
+                let item = try self.parseMailboxListExtendedItem(buffer: &buffer, tracker: tracker)
+                kvs[item.key] = item.value
                 try PL.parseZeroOrMore(buffer: &buffer, into: &kvs, tracker: tracker) { (buffer, tracker) -> KeyValue<ByteBuffer, ParameterValue> in
                     try PL.parseSpaces(buffer: &buffer, tracker: tracker)
                     return try self.parseMailboxListExtendedItem(buffer: &buffer, tracker: tracker)

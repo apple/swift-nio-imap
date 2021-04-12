@@ -20,6 +20,7 @@ import Glibc
 let badOS = { fatalError("unsupported OS") }()
 #endif
 
+import struct OrderedCollections.OrderedDictionary
 import struct NIO.ByteBuffer
 enum GrammarParser {}
 
@@ -689,7 +690,7 @@ extension GrammarParser {
     }
 
     // id-response = "ID" SP id-params-list
-    static func parseIDResponse(buffer: inout ParseBuffer, tracker: StackTracker) throws -> KeyValues<String, String?> {
+    static func parseIDResponse(buffer: inout ParseBuffer, tracker: StackTracker) throws -> OrderedDictionary<String, String?> {
         try PL.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
             try PL.parseFixedString("ID ", buffer: &buffer, tracker: tracker)
             return try parseIDParamsList(buffer: &buffer, tracker: tracker)
@@ -697,7 +698,7 @@ extension GrammarParser {
     }
 
     // id-params-list = "(" *(string SP nstring) ")" / nil
-    static func parseIDParamsList(buffer: inout ParseBuffer, tracker: StackTracker) throws -> KeyValues<String, String?> {
+    static func parseIDParamsList(buffer: inout ParseBuffer, tracker: StackTracker) throws -> OrderedDictionary<String, String?> {
         func parseIDValue(buffer: inout ParseBuffer, tracker: StackTracker) throws -> String? {
             if let value = try self.parseNString(buffer: &buffer, tracker: tracker) {
                 return try ModifiedUTF7.decode(value)
@@ -706,7 +707,7 @@ extension GrammarParser {
             }
         }
 
-        func parseIDParamsList_nil(buffer: inout ParseBuffer, tracker: StackTracker) throws -> KeyValues<String, String?> {
+        func parseIDParamsList_nil(buffer: inout ParseBuffer, tracker: StackTracker) throws -> OrderedDictionary<String, String?> {
             try self.parseNil(buffer: &buffer, tracker: tracker)
             return [:]
         }
@@ -717,15 +718,15 @@ extension GrammarParser {
             return (key, try parseIDValue(buffer: &buffer, tracker: tracker))
         }
 
-        func parseIDParamsList_empty(buffer: inout ParseBuffer, tracker: StackTracker) throws -> KeyValues<String, String?> {
+        func parseIDParamsList_empty(buffer: inout ParseBuffer, tracker: StackTracker) throws -> OrderedDictionary<String, String?> {
             try PL.parseFixedString("()", buffer: &buffer, tracker: tracker)
             return [:]
         }
 
-        func parseIDParamsList_some(buffer: inout ParseBuffer, tracker: StackTracker) throws -> KeyValues<String, String?> {
+        func parseIDParamsList_some(buffer: inout ParseBuffer, tracker: StackTracker) throws -> OrderedDictionary<String, String?> {
             try PL.parseFixedString("(", buffer: &buffer, tracker: tracker)
             let (key, value) = try parseIDParamsList_element(buffer: &buffer, tracker: tracker)
-            var dic: KeyValues<String, String?> = [key: value]
+            var dic: OrderedDictionary<String, String?> = [key: value]
             try PL.parseZeroOrMore(buffer: &buffer, into: &dic, tracker: tracker) { (buffer, tracker) -> (String, String?) in
                 try PL.parseSpaces(buffer: &buffer, tracker: tracker)
                 return try parseIDParamsList_element(buffer: &buffer, tracker: tracker)
@@ -1499,8 +1500,8 @@ extension GrammarParser {
     }
 
     // Namespace-Response-Extensions = *(Namespace-Response-Extension)
-    static func parseNamespaceResponseExtensions(buffer: inout ParseBuffer, tracker: StackTracker) throws -> KeyValues<ByteBuffer, [ByteBuffer]> {
-        var kvs = KeyValues<ByteBuffer, [ByteBuffer]>()
+    static func parseNamespaceResponseExtensions(buffer: inout ParseBuffer, tracker: StackTracker) throws -> OrderedDictionary<ByteBuffer, [ByteBuffer]> {
+        var kvs = OrderedDictionary<ByteBuffer, [ByteBuffer]>()
         try PL.parseZeroOrMore(buffer: &buffer, into: &kvs, tracker: tracker) { (buffer, tracker) -> KeyValue<ByteBuffer, [ByteBuffer]> in
             try self.parseNamespaceResponseExtension(buffer: &buffer, tracker: tracker)
         }
@@ -1930,11 +1931,12 @@ extension GrammarParser {
     }
 
     // select-params = SP "(" select-param *(SP select-param ")"
-    static func parseParameters(buffer: inout ParseBuffer, tracker: StackTracker) throws -> KeyValues<String, ParameterValue?> {
-        try PL.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> KeyValues<String, ParameterValue?> in
+    static func parseParameters(buffer: inout ParseBuffer, tracker: StackTracker) throws -> OrderedDictionary<String, ParameterValue?> {
+        try PL.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> OrderedDictionary<String, ParameterValue?> in
             try PL.parseFixedString(" (", buffer: &buffer, tracker: tracker)
-            var kvs = KeyValues<String, ParameterValue?>()
-            kvs.append(try self.parseParameter(buffer: &buffer, tracker: tracker))
+            var kvs = OrderedDictionary<String, ParameterValue?>()
+            let param = try self.parseParameter(buffer: &buffer, tracker: tracker)
+            kvs[param.key] = param.value
             try PL.parseZeroOrMore(buffer: &buffer, into: &kvs, tracker: tracker) { (buffer, tracker) -> KeyValue<String, ParameterValue?> in
                 try PL.parseSpaces(buffer: &buffer, tracker: tracker)
                 return try self.parseParameter(buffer: &buffer, tracker: tracker)
@@ -2372,11 +2374,11 @@ extension GrammarParser {
     // RFC 6237
     // scope-options =  scope-option *(SP scope-option)
     static func parseExtendedSearchScopeOptions(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ExtendedSearchScopeOptions {
-        var options = KeyValues<String, ParameterValue?>()
-        options.append(try parseParameter(buffer: &buffer, tracker: tracker))
-        while try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: PL.parseSpaces) != nil {
-            options.append(try parseParameter(buffer: &buffer, tracker: tracker))
-        }
+        var options = OrderedDictionary<String, ParameterValue?>()
+        repeat {
+            let param = try parseParameter(buffer: &buffer, tracker: tracker)
+            options[param.key] = param.value
+        } while try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: PL.parseSpaces) != nil
         if let returnValue = ExtendedSearchScopeOptions(options) {
             return returnValue
         } else {

@@ -12,6 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+import OrderedCollections
 import NIO
 @testable import NIOIMAPCore
 import XCTest
@@ -22,7 +23,7 @@ class ID_Tests: EncodeTestClass {}
 
 extension ID_Tests {
     func testEncode() {
-        let inputs: [(KeyValues<String, String?>, String, UInt)] = [
+        let inputs: [(OrderedDictionary<String, String?>, String, UInt)] = [
             ([:], "NIL", #line),
             (["key": "value"], #"("key" "value")"#, #line),
         ]
