@@ -324,9 +324,9 @@ extension Capability {
     public static let literalMinus = Self(unchecked: "LITERAL-")
 
     /// Creates a new *AUTH* capability.
-    /// - parameter type: The `AuthenticationKind`.
+    /// - parameter type: The `AuthenticationMechanism`.
     /// - returns: A new `Capability`.
-    public static func authenticate(_ type: AuthenticationKind) -> Self {
+    public static func authenticate(_ type: AuthenticationMechanism) -> Self {
         Self("AUTH=\(type.rawValue)")
     }
 

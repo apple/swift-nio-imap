@@ -64,7 +64,7 @@ public enum Command: Equatable {
 
     /// Begins the process of the client authenticating against the server. The client specifies a authentication `mechanism`, and the server may respond
     /// with one or more challenges, which the client is also required to respond to using `CommandStream.continuationResponse`.
-    case authenticate(mechanism: AuthenticationKind, initialResponse: InitialResponse?)
+    case authenticate(mechanism: AuthenticationMechanism, initialResponse: InitialResponse?)
 
     /// Authenticates the client using a username and password
     case login(username: String, password: String)
@@ -423,9 +423,9 @@ extension CommandEncodeBuffer {
             self._buffer.writeMailbox(mailbox)
     }
 
-    private mutating func writeCommandKind_authenticate(mechanism: AuthenticationKind, initialResponse: InitialResponse?) -> Int {
+    private mutating func writeCommandKind_authenticate(mechanism: AuthenticationMechanism, initialResponse: InitialResponse?) -> Int {
         self._buffer._writeString("AUTHENTICATE ") +
-            self._buffer.writeAuthenticationKind(mechanism) +
+            self._buffer.writeAuthenticationMechanism(mechanism) +
             self._buffer.writeIfExists(initialResponse) { resp in
                 self._buffer.writeSpace() +
                     self._buffer.writeInitialResponse(resp)

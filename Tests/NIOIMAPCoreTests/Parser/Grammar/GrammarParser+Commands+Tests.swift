@@ -109,7 +109,7 @@ extension GrammarParser_Commands_Tests {
                 ("UID EXPUNGE 1:2", "\r", .uidExpunge(.set([1 ... 2])), #line),
                 ("FETCH $ (FLAGS)", "\r", .fetch(.lastCommand, [.flags], .init()), #line),
                 ("LOGIN \"user\" \"password\"", "\r", .login(username: "user", password: "password"), #line),
-                ("AUTHENTICATE GSSAPI", "\r", .authenticate(mechanism: AuthenticationKind("GSSAPI"), initialResponse: nil), #line),
+                ("AUTHENTICATE GSSAPI", "\r", .authenticate(mechanism: AuthenticationMechanism("GSSAPI"), initialResponse: nil), #line),
                 ("CREATE test", "\r", .create(.init("test"), []), #line),
                 ("GETQUOTA root", "\r", .getQuota(.init("root")), #line),
                 ("GETQUOTAROOT INBOX", "\r", .getQuotaRoot(.inbox), #line),
