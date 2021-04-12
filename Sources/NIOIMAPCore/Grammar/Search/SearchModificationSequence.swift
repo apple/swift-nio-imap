@@ -33,7 +33,7 @@ public struct SearchModificationSequence: Hashable {
 
 extension _EncodeBuffer {
     @discardableResult mutating func writeSearchModificationSequence(_ data: SearchModificationSequence) -> Int {
-        self._writeString("MODSEQ") +
+        self.writeString("MODSEQ") +
             self.writeKeyValues(data.extensions, separator: "", parenthesis: false) { (element, self) -> Int in
                 self.writeSpace() +
                     self.writeEntryFlagName(element.key) +

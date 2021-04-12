@@ -27,7 +27,7 @@ extension ResponseDataTests {
         ]
 
         for (test, expectedString, line) in inputs {
-            self.testBuffer._clear()
+            self.testBuffer.clear()
             let size = self.testBuffer.writeResponseData(test)
             XCTAssertEqual(size, expectedString.utf8.count, line: line)
             XCTAssertEqual(self.testBufferString, expectedString, line: line)

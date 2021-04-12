@@ -77,10 +77,10 @@ extension _EncodeBuffer {
         }
 
         return
-            self._writeString("(") +
+            self.writeString("(") +
             self.writeIMAPString(dsp.kind.rawValue) +
             self.writeSpace() +
             self.writeBodyParameterPairs(dsp.parameters) +
-            self._writeString(")")
+            self.writeString(")")
     }
 }

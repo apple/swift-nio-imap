@@ -178,29 +178,29 @@ extension _EncodeBuffer {
     @discardableResult mutating func writeResponseTextCode(_ code: ResponseTextCode) -> Int {
         switch code {
         case .alert:
-            return self._writeString("ALERT")
+            return self.writeString("ALERT")
         case .badCharset(let charsets):
             return self.writeResponseTextCode_badCharsets(charsets)
         case .capability(let data):
             return self.writeCapabilityData(data)
         case .parse:
-            return self._writeString("PARSE")
+            return self.writeString("PARSE")
         case .permanentFlags(let flags):
             return
-                self._writeString("PERMANENTFLAGS ") +
+                self.writeString("PERMANENTFLAGS ") +
                 self.writePermanentFlags(flags)
         case .readOnly:
-            return self._writeString("READ-ONLY")
+            return self.writeString("READ-ONLY")
         case .readWrite:
-            return self._writeString("READ-WRITE")
+            return self.writeString("READ-WRITE")
         case .tryCreate:
-            return self._writeString("TRYCREATE")
+            return self.writeString("TRYCREATE")
         case .uidNext(let number):
-            return self._writeString("UIDNEXT ") + self.writeUID(number)
+            return self.writeString("UIDNEXT ") + self.writeUID(number)
         case .uidValidity(let number):
-            return self._writeString("UIDVALIDITY ") + self.writeUIDValidity(number)
+            return self.writeString("UIDVALIDITY ") + self.writeUIDValidity(number)
         case .unseen(let number):
-            return self._writeString("UNSEEN ") + self.writeSequenceNumber(number)
+            return self.writeString("UNSEEN ") + self.writeSequenceNumber(number)
         case .other(let atom, let string):
             return self.writeResponseTextCode_other(atom: atom, string: string)
         case .namespace(let namesapce):
@@ -210,51 +210,51 @@ extension _EncodeBuffer {
         case .uidAppend(let data):
             return self.writeResponseCodeAppend(data)
         case .uidNotSticky:
-            return self._writeString("UIDNOTSTICKY")
+            return self.writeString("UIDNOTSTICKY")
         case .useAttribute:
-            return self._writeString("USEATTR")
+            return self.writeString("USEATTR")
         case .notSaved:
-            return self._writeString("NOTSAVED")
+            return self.writeString("NOTSAVED")
         case .closed:
-            return self._writeString("CLOSED")
+            return self.writeString("CLOSED")
         case .noModificationSequence:
-            return self._writeString("NOMODSEQ")
+            return self.writeString("NOMODSEQ")
         case .modificationSequence(let set):
-            return self._writeString("MODIFIED ") + self.writeLastCommandSet(set)
+            return self.writeString("MODIFIED ") + self.writeLastCommandSet(set)
         case .highestModificationSequence(let val):
-            return self._writeString("HIGHESTMODSEQ ") + self.writeModificationSequenceValue(val)
+            return self.writeString("HIGHESTMODSEQ ") + self.writeModificationSequenceValue(val)
         case .metadataLongEntries(let num):
-            return self._writeString("METADATA LONGENTRIES \(num)")
+            return self.writeString("METADATA LONGENTRIES \(num)")
         case .metadataMaxsize(let num):
-            return self._writeString("METADATA MAXSIZE \(num)")
+            return self.writeString("METADATA MAXSIZE \(num)")
         case .metadataTooMany:
-            return self._writeString("METADATA TOOMANY")
+            return self.writeString("METADATA TOOMANY")
         case .metadataNoPrivate:
-            return self._writeString("METADATA NOPRIVATE")
+            return self.writeString("METADATA NOPRIVATE")
         case .urlMechanisms(let array):
-            return self._writeString("URLMECH INTERNAL") +
+            return self.writeString("URLMECH INTERNAL") +
                 self.writeArray(array, prefix: " ", parenthesis: false) { mechanism, buffer in
                     buffer.writeMechanismBase64(mechanism)
                 }
         case .referral(let url):
-            return self._writeString("REFERRAL ") + self.writeIMAPURL(url)
+            return self.writeString("REFERRAL ") + self.writeIMAPURL(url)
         }
     }
 
     private mutating func writeResponseTextCode_badCharsets(_ charsets: [String]) -> Int {
-        self._writeString("BADCHARSET") +
+        self.writeString("BADCHARSET") +
             self.write(if: charsets.count >= 1) {
                 self.writeSpace() +
                     self.writeArray(charsets) { (charset, self) in
-                        self._writeString(charset)
+                        self.writeString(charset)
                     }
             }
     }
 
     private mutating func writeResponseTextCode_other(atom: String, string: String?) -> Int {
-        self._writeString(atom) +
+        self.writeString(atom) +
             self.writeIfExists(string) { (string) -> Int in
-                self._writeString(" \(string)")
+                self.writeString(" \(string)")
             }
     }
 }

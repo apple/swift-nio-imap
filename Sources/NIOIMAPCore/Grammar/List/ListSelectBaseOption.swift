@@ -29,15 +29,15 @@ extension _EncodeBuffer {
     @discardableResult mutating func writeListSelectBaseOption(_ option: ListSelectBaseOption) -> Int {
         switch option {
         case .subscribed:
-            return self._writeString("SUBSCRIBED")
+            return self.writeString("SUBSCRIBED")
         case .option(let option):
             return self.writeOptionExtension(option)
         }
     }
 
     @discardableResult mutating func writeListSelectBaseOptionQuoted(_ option: ListSelectBaseOption) -> Int {
-        self._writeString("\"") +
+        self.writeString("\"") +
             self.writeListSelectBaseOption(option) +
-            self._writeString("\"")
+            self.writeString("\"")
     }
 }

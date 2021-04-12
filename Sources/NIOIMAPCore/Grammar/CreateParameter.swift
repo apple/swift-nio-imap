@@ -29,7 +29,7 @@ extension _EncodeBuffer {
     @discardableResult mutating func writeCreateParameter(_ parameter: CreateParameter) -> Int {
         switch parameter {
         case .attributes(let attributes):
-            return self._writeString("USE ") +
+            return self.writeString("USE ") +
                 self.writeArray(attributes) { (att, buffer) -> Int in
                     buffer.writeUseAttribute(att)
                 }

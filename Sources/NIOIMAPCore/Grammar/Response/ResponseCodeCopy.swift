@@ -41,7 +41,7 @@ public struct ResponseCodeCopy: Equatable {
 
 extension _EncodeBuffer {
     @discardableResult mutating func writeResponseCodeCopy(_ data: ResponseCodeCopy) -> Int {
-        self._writeString("COPYUID \(data.destinationUIDValidity) ") +
+        self.writeString("COPYUID \(data.destinationUIDValidity) ") +
             self.writeUIDRangeArray(data.sourceUIDs) +
             self.writeSpace() +
             self.writeUIDRangeArray(data.destinationUIDs)

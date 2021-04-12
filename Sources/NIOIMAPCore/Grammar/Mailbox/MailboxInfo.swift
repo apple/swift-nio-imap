@@ -90,20 +90,20 @@ extension _EncodeBuffer {
         case nil:
             return self.writeNil()
         case "\\":
-            return self._writeString(#""\""#)
+            return self.writeString(#""\""#)
         case "\"":
-            return self._writeString(#""\\""#)
+            return self.writeString(#""\\""#)
         case let character?:
-            return self._writeString("\"\(character)\"")
+            return self.writeString("\"\(character)\"")
         }
     }
 
     @discardableResult mutating func writeMailboxInfo(_ list: MailboxInfo) -> Int {
-        self._writeString("(") +
+        self.writeString("(") +
             self.writeIfExists(list.attributes) { (flags) -> Int in
                 self.writeMailboxListFlags(flags)
             } +
-            self._writeString(") ") +
+            self.writeString(") ") +
             self.writeMailboxPathSeparator(list.path.pathSeparator) +
             self.writeSpace() +
             self.writeMailbox(list.path.name)
@@ -111,7 +111,7 @@ extension _EncodeBuffer {
 
     @discardableResult mutating func writeMailboxListFlags(_ flags: [MailboxInfo.Attribute]) -> Int {
         self.writeArray(flags, parenthesis: false) { (element, self) in
-            self._writeString(element._backing)
+            self.writeString(element._backing)
         }
     }
 }

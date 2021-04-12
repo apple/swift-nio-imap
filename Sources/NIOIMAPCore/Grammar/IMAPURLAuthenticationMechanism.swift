@@ -27,9 +27,9 @@ extension _EncodeBuffer {
     @discardableResult mutating func writeIMAPURLAuthenticationMechanism(_ data: IMAPURLAuthenticationMechanism) -> Int {
         switch data {
         case .any:
-            return self._writeString(";AUTH=*")
+            return self.writeString(";AUTH=*")
         case .type(let type):
-            return self._writeString(";AUTH=") + self.writeEncodedAuthenticationType(type)
+            return self.writeString(";AUTH=") + self.writeEncodedAuthenticationType(type)
         }
     }
 }

@@ -95,14 +95,14 @@ extension SequenceNumber: Strideable {
 
 extension _EncodeBuffer {
     @discardableResult mutating func writeSequenceNumber(_ num: SequenceNumber) -> Int {
-        self._writeString("\(num.rawValue)")
+        self.writeString("\(num.rawValue)")
     }
 
     @discardableResult mutating func writeSequenceNumberOrWildcard(_ num: SequenceNumber) -> Int {
         if num.rawValue == UInt32.max {
-            return self._writeString("*")
+            return self.writeString("*")
         } else {
-            return self._writeString("\(num.rawValue)")
+            return self.writeString("\(num.rawValue)")
         }
     }
 }

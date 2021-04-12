@@ -42,7 +42,7 @@ extension MessageAttributesTests {
         ]
 
         for (test, expectedString, line) in inputs {
-            self.testBuffer._clear()
+            self.testBuffer.clear()
             let size = self.testBuffer.writeMessageAttribute(test)
             XCTAssertEqual(size, expectedString.utf8.count, line: line)
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
@@ -57,7 +57,7 @@ extension MessageAttributesTests {
         ]
 
         for (test, expectedString, line) in inputs {
-            self.testBuffer._clear()
+            self.testBuffer.clear()
             let size = self.testBuffer.writeMessageAttributes(test)
             XCTAssertEqual(size, expectedString.utf8.count, line: line)
             XCTAssertEqual(self.testBufferString, expectedString, line: line)

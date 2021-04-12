@@ -33,7 +33,7 @@ extension _EncodeBuffer {
     @discardableResult mutating func writeLastCommandSet<T>(_ set: LastCommandSet<T>) -> Int {
         switch set {
         case .lastCommand:
-            return self._writeString("$")
+            return self.writeString("$")
         case .set(let set):
             return set._writeIntoBuffer(&self)
         }

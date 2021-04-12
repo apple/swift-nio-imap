@@ -202,9 +202,9 @@ extension _EncodeBuffer {
     @discardableResult mutating func writeSearchKey(_ key: SearchKey, encloseInParenthesisIfNeeded: Bool = false) -> Int {
         let encloseInParenthesis = encloseInParenthesisIfNeeded && key.count > 1
         if encloseInParenthesis {
-            return _writeString("(") +
+            return writeString("(") +
                 _writeSearchKey(key) +
-                _writeString(")")
+                writeString(")")
         } else {
             return _writeSearchKey(key)
         }
@@ -213,121 +213,121 @@ extension _EncodeBuffer {
     private mutating func _writeSearchKey(_ key: SearchKey) -> Int {
         switch key {
         case .all:
-            return self._writeString("ALL")
+            return self.writeString("ALL")
         case .answered:
-            return self._writeString("ANSWERED")
+            return self.writeString("ANSWERED")
         case .deleted:
-            return self._writeString("DELETED")
+            return self.writeString("DELETED")
         case .flagged:
-            return self._writeString("FLAGGED")
+            return self.writeString("FLAGGED")
         case .new:
-            return self._writeString("NEW")
+            return self.writeString("NEW")
         case .old:
-            return self._writeString("OLD")
+            return self.writeString("OLD")
         case .recent:
-            return self._writeString("RECENT")
+            return self.writeString("RECENT")
         case .seen:
-            return self._writeString("SEEN")
+            return self.writeString("SEEN")
         case .unanswered:
-            return self._writeString("UNANSWERED")
+            return self.writeString("UNANSWERED")
         case .undeleted:
-            return self._writeString("UNDELETED")
+            return self.writeString("UNDELETED")
         case .unflagged:
-            return self._writeString("UNFLAGGED")
+            return self.writeString("UNFLAGGED")
         case .unseen:
-            return self._writeString("UNSEEN")
+            return self.writeString("UNSEEN")
         case .draft:
-            return self._writeString("DRAFT")
+            return self.writeString("DRAFT")
         case .undraft:
-            return self._writeString("UNDRAFT")
+            return self.writeString("UNDRAFT")
         case .bcc(let str):
             return
-                self._writeString("BCC ") +
+                self.writeString("BCC ") +
                 self.writeIMAPString(str)
 
         case .before(let date):
             return
-                self._writeString("BEFORE ") +
+                self.writeString("BEFORE ") +
                 self.writeDate(date)
 
         case .body(let str):
             return
-                self._writeString("BODY ") +
+                self.writeString("BODY ") +
                 self.writeIMAPString(str)
 
         case .cc(let str):
             return
-                self._writeString("CC ") +
+                self.writeString("CC ") +
                 self.writeIMAPString(str)
 
         case .from(let str):
             return
-                self._writeString("FROM ") +
+                self.writeString("FROM ") +
                 self.writeIMAPString(str)
 
         case .keyword(let flag):
             return
-                self._writeString("KEYWORD ") +
+                self.writeString("KEYWORD ") +
                 self.writeFlagKeyword(flag)
 
         case .on(let date):
             return
-                self._writeString("ON ") +
+                self.writeString("ON ") +
                 self.writeDate(date)
 
         case .since(let date):
             return
-                self._writeString("SINCE ") +
+                self.writeString("SINCE ") +
                 self.writeDate(date)
 
         case .subject(let str):
             return
-                self._writeString("SUBJECT ") +
+                self.writeString("SUBJECT ") +
                 self.writeIMAPString(str)
 
         case .text(let str):
             return
-                self._writeString("TEXT ") +
+                self.writeString("TEXT ") +
                 self.writeIMAPString(str)
 
         case .to(let str):
             return
-                self._writeString("TO ") +
+                self.writeString("TO ") +
                 self.writeIMAPString(str)
 
         case .unkeyword(let keyword):
             return
-                self._writeString("UNKEYWORD ") +
+                self.writeString("UNKEYWORD ") +
                 self.writeFlagKeyword(keyword)
 
         case .header(let field, let value):
             return
-                self._writeString("HEADER ") +
+                self.writeString("HEADER ") +
                 self.writeIMAPString(field) +
                 self.writeSpace() +
                 self.writeIMAPString(value)
 
         case .messageSizeLarger(let n):
-            return self._writeString("LARGER \(n)")
+            return self.writeString("LARGER \(n)")
 
         case .not(let key):
             return
-                self._writeString("NOT ") +
+                self.writeString("NOT ") +
                 self.writeSearchKey(key, encloseInParenthesisIfNeeded: true)
 
         case .or(let k1, let k2):
             return
-                self._writeString("OR ") +
+                self.writeString("OR ") +
                 self.writeSearchKey(k1, encloseInParenthesisIfNeeded: true) +
                 self.writeSpace() +
                 self.writeSearchKey(k2, encloseInParenthesisIfNeeded: true)
 
         case .messageSizeSmaller(let n):
-            return self._writeString("SMALLER \(n)")
+            return self.writeString("SMALLER \(n)")
 
         case .uid(let set):
             return
-                self._writeString("UID ") +
+                self.writeString("UID ") +
                 self.writeLastCommandSet(set)
 
         case .sequenceNumbers(let set):
@@ -335,7 +335,7 @@ extension _EncodeBuffer {
 
         case .and(let keys):
             if keys.count == 0 {
-                return self._writeString("()")
+                return self.writeString("()")
             } else if keys.count == 1, let key = keys.first {
                 return self.writeSearchKey(key, encloseInParenthesisIfNeeded: true)
             } else {
@@ -345,28 +345,28 @@ extension _EncodeBuffer {
                         size +
                         self.writeSearchKey(key, encloseInParenthesisIfNeeded: true) +
                         self.write(if: i < keys.count - 1) { () -> Int in
-                            self._writeString(" ")
+                            self.writeString(" ")
                         }
                 }
             }
         case .younger(let seconds):
-            return self._writeString("YOUNGER \(seconds)")
+            return self.writeString("YOUNGER \(seconds)")
         case .older(let seconds):
-            return self._writeString("OLDER \(seconds)")
+            return self.writeString("OLDER \(seconds)")
         case .filter(let filterName):
             return
-                self._writeString("FILTER \(filterName)")
+                self.writeString("FILTER \(filterName)")
         case .sentBefore(let date):
             return
-                self._writeString("SENTBEFORE ") +
+                self.writeString("SENTBEFORE ") +
                 self.writeDate(date)
         case .sentOn(let date):
             return
-                self._writeString("SENTON ") +
+                self.writeString("SENTON ") +
                 self.writeDate(date)
         case .sentSince(let date):
             return
-                self._writeString("SENTSINCE ") +
+                self.writeString("SENTSINCE ") +
                 self.writeDate(date)
 
         case .modificationSequence(let seq):

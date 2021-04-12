@@ -115,7 +115,7 @@ extension _EncodeBuffer {
     /// - returns: The number of bytes written - always `string.utf8.count`.
     @discardableResult
     @inlinable
-    public mutating func _writeString(_ string: String) -> Int {
+    public mutating func writeString(_ string: String) -> Int {
         self.buffer.writeString(string)
     }
 
@@ -124,7 +124,7 @@ extension _EncodeBuffer {
     /// - returns: The number of bytes written - always equal to the size of `bytes`.
     @discardableResult
     @inlinable
-    public mutating func _writeBytes<Bytes: Sequence>(_ bytes: Bytes) -> Int where Bytes.Element == UInt8 {
+    public mutating func writeBytes<Bytes: Sequence>(_ bytes: Bytes) -> Int where Bytes.Element == UInt8 {
         self.buffer.writeBytes(bytes)
     }
 
@@ -133,13 +133,13 @@ extension _EncodeBuffer {
     /// - returns: The number of bytes written - always equal to `buffer.readableBytes`.
     @discardableResult
     @inlinable
-    public mutating func _writeBuffer(_ buffer: inout ByteBuffer) -> Int {
+    public mutating func writeBuffer(_ buffer: inout ByteBuffer) -> Int {
         self.buffer.writeBuffer(&buffer)
     }
 
     /// Erases all data from the buffer.
     @inlinable
-    public mutating func _clear() {
+    public mutating func clear() {
         self.stopPoints.removeAll()
         self.buffer.clear()
     }

@@ -42,15 +42,15 @@ extension _EncodeBuffer {
     @discardableResult mutating func writeReturnOption(_ option: ReturnOption) -> Int {
         switch option {
         case .subscribed:
-            return self._writeString("SUBSCRIBED")
+            return self.writeString("SUBSCRIBED")
         case .children:
-            return self._writeString("CHILDREN")
+            return self.writeString("CHILDREN")
         case .statusOption(let option):
             return self.writeMailboxOptions(option)
         case .optionExtension(let option):
             return self.writeOptionExtension(option)
         case .specialUse:
-            return self._writeString("SPECIAL-USE")
+            return self.writeString("SPECIAL-USE")
         }
     }
 }

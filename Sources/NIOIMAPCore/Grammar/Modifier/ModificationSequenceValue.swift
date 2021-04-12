@@ -58,6 +58,6 @@ extension ModificationSequenceValue: CustomDebugStringConvertible {
 
 extension _EncodeBuffer {
     @discardableResult mutating func writeModificationSequenceValue(_ value: ModificationSequenceValue) -> Int {
-        self._writeString("\(value.value)")
+        self.writeString("\(value.value)")
     }
 }

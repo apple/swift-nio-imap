@@ -47,7 +47,7 @@ extension FlagKeyword_Tests {
         ]
 
         for (test, expectedString, line) in inputs {
-            self.testBuffer._clear()
+            self.testBuffer.clear()
             let size = self.testBuffer.writeFlagKeyword(test)
             XCTAssertEqual(size, expectedString.utf8.count, line: line)
             XCTAssertEqual(self.testBufferString, expectedString, line: line)

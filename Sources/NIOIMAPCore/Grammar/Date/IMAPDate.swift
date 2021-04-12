@@ -50,7 +50,7 @@ public struct IMAPCalendarDay: Hashable {
 
 extension _EncodeBuffer {
     @discardableResult mutating func writeDate(_ date: IMAPCalendarDay) -> Int {
-        self._writeString("\(date.day)-\(date.monthString)-\(date.year)")
+        self.writeString("\(date.day)-\(date.monthString)-\(date.year)")
     }
 }
 

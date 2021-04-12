@@ -42,11 +42,11 @@ public struct IMAPServer: Equatable {
 extension _EncodeBuffer {
     @discardableResult mutating func writeIMAPServer(_ server: IMAPServer) -> Int {
         self.writeIfExists(server.userAuthenticationMechanism) { authMechanism in
-            self.writeUserAuthenticationMechanism(authMechanism) + self._writeString("@")
+            self.writeUserAuthenticationMechanism(authMechanism) + self.writeString("@")
         } +
-            self._writeString("\(server.host)") +
+            self.writeString("\(server.host)") +
             self.writeIfExists(server.port) { port in
-                self._writeString(":\(port)")
+                self.writeString(":\(port)")
             }
     }
 }

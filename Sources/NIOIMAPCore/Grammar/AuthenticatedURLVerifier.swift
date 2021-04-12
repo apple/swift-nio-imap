@@ -33,9 +33,9 @@ public struct AuthenticatedURLVerifier: Equatable {
 
 extension _EncodeBuffer {
     @discardableResult mutating func writeAuthenticatedURLVerifier(_ data: AuthenticatedURLVerifier) -> Int {
-        self._writeString(":") +
+        self.writeString(":") +
             self.writeURLAuthenticationMechanism(data.urlAuthenticationMechanism) +
-            self._writeString(":") +
+            self.writeString(":") +
             self.writeEncodedAuthenticationURL(data.encodedAuthenticationURL)
     }
 }

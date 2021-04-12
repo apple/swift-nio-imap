@@ -28,7 +28,7 @@ extension MailboxInfo_Tests {
         ]
 
         for (test, expectedString, line) in inputs {
-            self.testBuffer._clear()
+            self.testBuffer.clear()
             let size = self.testBuffer.writeMailboxInfo(test)
             XCTAssertEqual(size, expectedString.utf8.count, line: line)
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
@@ -44,7 +44,7 @@ extension MailboxInfo_Tests {
         ]
 
         for (test, expectedString, line) in inputs {
-            self.testBuffer._clear()
+            self.testBuffer.clear()
             let size = self.testBuffer.writeMailboxListFlags(test)
             XCTAssertEqual(size, expectedString.utf8.count, line: line)
             XCTAssertEqual(self.testBufferString, expectedString, line: line)

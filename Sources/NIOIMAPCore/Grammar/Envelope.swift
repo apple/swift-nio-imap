@@ -92,11 +92,11 @@ extension _EncodeBuffer {
         }
 
         return
-            self._writeString("(") +
+            self.writeString("(") +
             self.writeArray(addresses, separator: "", parenthesis: false) { (aog, self) -> Int in
                 self.writeEmailAddressOrGroup(aog)
             } +
-            self._writeString(")")
+            self.writeString(")")
     }
 
     @discardableResult mutating func writeOptionalMessageID(_ id: MessageID?) -> Int {
@@ -107,7 +107,7 @@ extension _EncodeBuffer {
     }
 
     @discardableResult mutating func writeEnvelope(_ envelope: Envelope) -> Int {
-        self._writeString("(") +
+        self.writeString("(") +
             self.writeNString(envelope.date?.value) +
             self.writeSpace() +
             self.writeNString(envelope.subject) +
@@ -127,6 +127,6 @@ extension _EncodeBuffer {
             self.writeOptionalMessageID(envelope.inReplyTo) +
             self.writeSpace() +
             self.writeOptionalMessageID(envelope.messageID) +
-            self._writeString(")")
+            self.writeString(")")
     }
 }

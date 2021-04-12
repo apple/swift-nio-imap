@@ -46,7 +46,7 @@ public struct EmailAddress: Equatable {
 
 extension _EncodeBuffer {
     @discardableResult mutating func writeEmailAddress(_ address: EmailAddress) -> Int {
-        self._writeString("(") +
+        self.writeString("(") +
             self.writeNString(address.personName) +
             self.writeSpace() +
             self.writeNString(address.sourceRoot) +
@@ -54,6 +54,6 @@ extension _EncodeBuffer {
             self.writeNString(address.mailbox) +
             self.writeSpace() +
             self.writeNString(address.host) +
-            self._writeString(")")
+            self.writeString(")")
     }
 }

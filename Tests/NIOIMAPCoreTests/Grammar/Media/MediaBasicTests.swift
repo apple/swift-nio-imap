@@ -33,7 +33,7 @@ extension MediaBasicTests {
         ]
 
         for (test, expectedString, line) in inputs {
-            self.testBuffer._clear()
+            self.testBuffer.clear()
             let size = self.testBuffer.writeMediaBasicKind(test)
             XCTAssertEqual(size, expectedString.utf8.count, line: line)
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
@@ -46,7 +46,7 @@ extension MediaBasicTests {
         ]
 
         for (test, expectedString, line) in inputs {
-            self.testBuffer._clear()
+            self.testBuffer.clear()
             let size = self.testBuffer.writeMediaBasic(test)
             XCTAssertEqual(size, expectedString.utf8.count, line: line)
             XCTAssertEqual(self.testBufferString, expectedString, line: line)

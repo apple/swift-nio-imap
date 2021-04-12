@@ -37,15 +37,15 @@ extension _EncodeBuffer {
         switch cond {
         case .ok(let text):
             return
-                self._writeString("OK ") +
+                self.writeString("OK ") +
                 self.writeResponseText(text)
         case .no(let text):
             return
-                self._writeString("NO ") +
+                self.writeString("NO ") +
                 self.writeResponseText(text)
         case .bad(let text):
             return
-                self._writeString("BAD ") +
+                self.writeString("BAD ") +
                 self.writeResponseText(text)
         }
     }

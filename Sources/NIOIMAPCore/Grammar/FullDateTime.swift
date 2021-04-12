@@ -87,7 +87,7 @@ public struct FullTime: Equatable {
 extension _EncodeBuffer {
     @discardableResult mutating func writeFullDateTime(_ data: FullDateTime) -> Int {
         self.writeFullDate(data.date) +
-            self._writeString("T") +
+            self.writeString("T") +
             self.writeFullTime(data.time)
     }
 
@@ -95,16 +95,16 @@ extension _EncodeBuffer {
         let year = self.padInteger(data.year, minimum: 4)
         let month = self.padInteger(data.month, minimum: 2)
         let day = self.padInteger(data.day, minimum: 2)
-        return self._writeString("\(year)-\(month)-\(day)")
+        return self.writeString("\(year)-\(month)-\(day)")
     }
 
     @discardableResult mutating func writeFullTime(_ data: FullTime) -> Int {
         let hour = self.padInteger(data.hour, minimum: 2)
         let minute = self.padInteger(data.minute, minimum: 2)
         let second = self.padInteger(data.second, minimum: 2)
-        return self._writeString("\(hour):\(minute):\(second)") +
+        return self.writeString("\(hour):\(minute):\(second)") +
             self.writeIfExists(data.fraction) { fraction in
-                self._writeString(".\(fraction)")
+                self.writeString(".\(fraction)")
             }
     }
 

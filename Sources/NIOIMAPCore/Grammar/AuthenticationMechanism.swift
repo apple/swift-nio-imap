@@ -50,6 +50,6 @@ public struct AuthenticationMechanism: Hashable {
 
 extension _EncodeBuffer {
     @discardableResult mutating func writeAuthenticationMechanism(_ mechanism: AuthenticationMechanism) -> Int {
-        self._writeString(mechanism.rawValue)
+        self.writeString(mechanism.rawValue)
     }
 }

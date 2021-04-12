@@ -72,11 +72,11 @@ extension _EncodeBuffer {
         case .internalDate(let date):
             return self.writeMessageAttribute_internalDate(date)
         case .rfc822Size(let size):
-            return self._writeString("RFC822.SIZE \(size)")
+            return self.writeString("RFC822.SIZE \(size)")
         case .body(let body, hasExtensionData: let hasExtensionData):
             return self.writeMessageAttribute_body(body, hasExtensionData: hasExtensionData)
         case .uid(let uid):
-            return self._writeString("UID \(uid.rawValue)")
+            return self.writeString("UID \(uid.rawValue)")
         case .binary(section: let section, data: let string):
             return self.writeMessageAttribute_binaryString(section: section, string: string)
         case .binarySize(section: let section, size: let number):
@@ -95,90 +95,90 @@ extension _EncodeBuffer {
     }
 
     @discardableResult mutating func writeMessageAttribute_binaryString(section: SectionSpecifier.Part, string: ByteBuffer?) -> Int {
-        self._writeString("BINARY") +
+        self.writeString("BINARY") +
             self.writeSectionBinary(section) +
             self.writeSpace() +
             self.writeNString(string)
     }
 
     @discardableResult mutating func writeMessageAttribute_binarySize(section: SectionSpecifier.Part, number: Int) -> Int {
-        self._writeString("BINARY.SIZE") +
+        self.writeString("BINARY.SIZE") +
             self.writeSectionBinary(section) +
-            self._writeString(" \(number)")
+            self.writeString(" \(number)")
     }
 
     @discardableResult mutating func writeMessageAttributeFlags(_ atts: [Flag]) -> Int {
-        self._writeString("FLAGS ") +
+        self.writeString("FLAGS ") +
             self.writeArray(atts) { (element, self) in
                 self.writeFlag(element)
             }
     }
 
     @discardableResult mutating func writeMessageAttribute_envelope(_ env: Envelope) -> Int {
-        self._writeString("ENVELOPE ") +
+        self.writeString("ENVELOPE ") +
             self.writeEnvelope(env)
     }
 
     @discardableResult mutating func writeMessageAttribute_internalDate(_ date: ServerMessageDate) -> Int {
-        self._writeString("INTERNALDATE ") +
+        self.writeString("INTERNALDATE ") +
             self.writeInternalDate(date)
     }
 
     @discardableResult mutating func writeMessageAttribute_rfc822(_ string: ByteBuffer?) -> Int {
-        self._writeString("RFC822") +
+        self.writeString("RFC822") +
             self.writeSpace() +
             self.writeNString(string)
     }
 
     @discardableResult mutating func writeMessageAttribute_rfc822Text(_ string: ByteBuffer?) -> Int {
-        self._writeString("RFC822.TEXT") +
+        self.writeString("RFC822.TEXT") +
             self.writeSpace() +
             self.writeNString(string)
     }
 
     @discardableResult mutating func writeMessageAttribute_rfc822Header(_ string: ByteBuffer?) -> Int {
-        self._writeString("RFC822.HEADER") +
+        self.writeString("RFC822.HEADER") +
             self.writeSpace() +
             self.writeNString(string)
     }
 
     @discardableResult mutating func writeMessageAttribute_body(_ body: BodyStructure, hasExtensionData: Bool) -> Int {
-        self._writeString("BODY") +
+        self.writeString("BODY") +
             self.write(if: hasExtensionData) { () -> Int in
-                self._writeString("STRUCTURE")
+                self.writeString("STRUCTURE")
             } +
             self.writeSpace() +
             self.writeBody(body)
     }
 
     @discardableResult mutating func writeMessageAttribute_bodySection(_ section: SectionSpecifier?, number: Int?, string: ByteBuffer?) -> Int {
-        self._writeString("BODY") +
+        self.writeString("BODY") +
             self.writeSection(section) +
             self.writeIfExists(number) { (number) -> Int in
-                self._writeString("<\(number)>")
+                self.writeString("<\(number)>")
             } +
             self.writeSpace() +
             self.writeNString(string)
     }
 
     @discardableResult mutating func writeMessageAttribute_bodySectionText(number: Int?, size: Int) -> Int {
-        self._writeString("BODY[TEXT]") +
+        self.writeString("BODY[TEXT]") +
             self.writeIfExists(number) { (number) -> Int in
-                self._writeString("<\(number)>")
+                self.writeString("<\(number)>")
             } +
-            self._writeString(" {\(size)}\r\n")
+            self.writeString(" {\(size)}\r\n")
     }
 
     @discardableResult mutating func writeMessageAttribute_gmailMessageID(_ id: UInt64) -> Int {
-        self._writeString("X-GM-MSGID \(id)")
+        self.writeString("X-GM-MSGID \(id)")
     }
 
     @discardableResult mutating func writeMessageAttribute_gmailThreadID(_ id: UInt64) -> Int {
-        self._writeString("X-GM-THRID \(id)")
+        self.writeString("X-GM-THRID \(id)")
     }
 
     @discardableResult mutating func writeMessageAttribute_gmailLabels(_ labels: [GmailLabel]) -> Int {
-        self._writeString("X-GM-LABELS") +
+        self.writeString("X-GM-LABELS") +
             self.writeSpace() +
             self.writeArray(labels) { label, buffer in
                 buffer.writeGmailLabel(label)

@@ -68,7 +68,7 @@ extension _EncodeBuffer {
     @discardableResult mutating func writeStoreAttributeFlags(_ flags: StoreFlags) -> Int {
         let silentString = flags.silent ? ".SILENT" : ""
         return
-            self._writeString("\(flags.operation.rawValue)FLAGS\(silentString) ") +
+            self.writeString("\(flags.operation.rawValue)FLAGS\(silentString) ") +
             self.writeFlags(flags.flags)
     }
 }

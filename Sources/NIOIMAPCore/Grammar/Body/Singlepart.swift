@@ -141,7 +141,7 @@ extension _EncodeBuffer {
         self.writeMediaText(body.mediaText) +
             self.writeSpace() +
             self.writeBodyFields(fields) +
-            self._writeString(" \(body.lineCount)")
+            self.writeString(" \(body.lineCount)")
     }
 
     @discardableResult private mutating func writeBodyKindMessage(_ message: BodyStructure.Singlepart.Message, fields: BodyStructure.Fields) -> Int {
@@ -152,7 +152,7 @@ extension _EncodeBuffer {
             self.writeEnvelope(message.envelope) +
             self.writeSpace() +
             self.writeBody(message.body) +
-            self._writeString(" \(message.lineCount)")
+            self.writeString(" \(message.lineCount)")
     }
 
     @discardableResult private mutating func writeBodyKindBasic(mediaKind: Media.Basic, fields: BodyStructure.Fields) -> Int {

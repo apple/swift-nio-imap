@@ -41,19 +41,19 @@ extension _EncodeBuffer {
     @discardableResult mutating func writeSearchReturnData(_ data: SearchReturnData) -> Int {
         switch data {
         case .min(let num):
-            return self._writeString("MIN \(num)")
+            return self.writeString("MIN \(num)")
         case .max(let num):
-            return self._writeString("MAX \(num)")
+            return self.writeString("MAX \(num)")
         case .all(let set):
             return
-                self._writeString("ALL ") +
+                self.writeString("ALL ") +
                 self.writeLastCommandSet(set)
         case .count(let num):
-            return self._writeString("COUNT \(num)")
+            return self.writeString("COUNT \(num)")
         case .dataExtension(let optionExt):
             return self.writeSearchReturnDataExtension(optionExt)
         case .modificationSequence(let seq):
-            return self._writeString("MODSEQ \(seq)")
+            return self.writeString("MODSEQ \(seq)")
         }
     }
 }
