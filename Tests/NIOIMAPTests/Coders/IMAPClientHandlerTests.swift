@@ -134,7 +134,7 @@ class IMAPClientHandlerTests: XCTestCase {
 
     func testAuthenticationFlow() {
         // client starts authentication
-        self.writeOutbound(.command(.init(tag: "A1", command: .authenticate(method: .gssAPI, initialClientResponse: nil))))
+        self.writeOutbound(.command(.init(tag: "A1", command: .authenticate(mechanism: .gssAPI, initialClientResponse: nil))))
         self.assertOutboundString("A1 AUTHENTICATE GSSAPI\r\n")
 
         // server sends challenge

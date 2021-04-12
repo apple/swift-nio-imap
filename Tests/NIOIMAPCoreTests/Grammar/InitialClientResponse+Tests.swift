@@ -22,7 +22,7 @@ class InitialClientResponse_Tests: EncodeTestClass {}
 
 extension InitialClientResponse_Tests {
     func testEncode() {
-        let inputs: [(InitialClientResponse, String, UInt)] = [
+        let inputs: [(InitialResponse, String, UInt)] = [
             (.empty, "=", #line),
             (.init("base64"), "YmFzZTY0", #line),
         ]

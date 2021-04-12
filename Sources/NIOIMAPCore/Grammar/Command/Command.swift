@@ -62,9 +62,9 @@ public enum Command: Equatable {
     /// Unsubscribes from the given mailbox.
     case unsubscribe(MailboxName)
 
-    /// Begins the process of the client authenticating against the server. The client specifies a authentication method, and the server may respond
+    /// Begins the process of the client authenticating against the server. The client specifies a authentication `mechanism`, and the server may respond
     /// with one or more challenges, which the client is also required to respond to using `CommandStream.continuationResponse`.
-    case authenticate(method: AuthenticationKind, initialClientResponse: InitialClientResponse?)
+    case authenticate(mechanism: AuthenticationKind, initialClientResponse: InitialResponse?)
 
     /// Authenticates the client using a username and password
     case login(username: String, password: String)
@@ -206,8 +206,8 @@ extension CommandEncodeBuffer {
             return self.writeCommandKind_subscribe(mailbox: mailbox)
         case .unsubscribe(let mailbox):
             return self.writeCommandKind_unsubscribe(mailbox: mailbox)
-        case .authenticate(let method, let initialClientResponse):
-            return self.writeCommandKind_authenticate(method: method, initialClientResponse: initialClientResponse)
+        case .authenticate(let mechanism, let initialClientResponse):
+            return self.writeCommandKind_authenticate(mechanism: mechanism, initialClientResponse: initialClientResponse)
         case .login(let userid, let password):
             return self.writeCommandKind_login(userID: userid, password: password)
         case .starttls:
@@ -423,9 +423,9 @@ extension CommandEncodeBuffer {
             self._buffer.writeMailbox(mailbox)
     }
 
-    private mutating func writeCommandKind_authenticate(method: AuthenticationKind, initialClientResponse: InitialClientResponse?) -> Int {
+    private mutating func writeCommandKind_authenticate(mechanism: AuthenticationKind, initialClientResponse: InitialResponse?) -> Int {
         self._buffer._writeString("AUTHENTICATE ") +
-            self._buffer.writeAuthenticationKind(method) +
+            self._buffer.writeAuthenticationKind(mechanism) +
             self._buffer.writeIfExists(initialClientResponse) { resp in
                 self._buffer.writeSpace() +
                     self._buffer.writeInitialClientResponse(resp)

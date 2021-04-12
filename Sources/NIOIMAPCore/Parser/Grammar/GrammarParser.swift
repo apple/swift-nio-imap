@@ -129,13 +129,13 @@ extension GrammarParser {
         }
     }
 
-    static func parseInitialClientResponse(buffer: inout ParseBuffer, tracker: StackTracker) throws -> InitialClientResponse {
-        func parseInitialClientResponse_empty(buffer: inout ParseBuffer, tracker: StackTracker) throws -> InitialClientResponse {
+    static func parseInitialClientResponse(buffer: inout ParseBuffer, tracker: StackTracker) throws -> InitialResponse {
+        func parseInitialClientResponse_empty(buffer: inout ParseBuffer, tracker: StackTracker) throws -> InitialResponse {
             try PL.parseFixedString("=", buffer: &buffer, tracker: tracker)
             return .empty
         }
 
-        func parseInitialClientResponse_data(buffer: inout ParseBuffer, tracker: StackTracker) throws -> InitialClientResponse {
+        func parseInitialClientResponse_data(buffer: inout ParseBuffer, tracker: StackTracker) throws -> InitialResponse {
             let base64 = try parseBase64(buffer: &buffer, tracker: tracker)
             return .init(base64)
         }

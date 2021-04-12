@@ -109,7 +109,7 @@ extension GrammarParser_Commands_Tests {
                 ("UID EXPUNGE 1:2", "\r", .uidExpunge(.set([1 ... 2])), #line),
                 ("FETCH $ (FLAGS)", "\r", .fetch(.lastCommand, [.flags], .init()), #line),
                 ("LOGIN \"user\" \"password\"", "\r", .login(username: "user", password: "password"), #line),
-                ("AUTHENTICATE GSSAPI", "\r", .authenticate(method: AuthenticationKind("GSSAPI"), initialClientResponse: nil), #line),
+                ("AUTHENTICATE GSSAPI", "\r", .authenticate(mechanism: AuthenticationKind("GSSAPI"), initialClientResponse: nil), #line),
                 ("CREATE test", "\r", .create(.init("test"), []), #line),
                 ("GETQUOTA root", "\r", .getQuota(.init("root")), #line),
                 ("GETQUOTAROOT INBOX", "\r", .getQuotaRoot(.inbox), #line),
@@ -555,8 +555,8 @@ extension GrammarParser_Commands_Tests {
         self.iterateTests(
             testFunction: GrammarParser.parseCommandSuffix_authenticate,
             validInputs: [
-                (" GSSAPI", "\r", .authenticate(method: .gssAPI, initialClientResponse: nil), #line),
-                (" GSSAPI aGV5", "\r", .authenticate(method: .gssAPI, initialClientResponse: .init(.init(.init(string: "hey")))), #line),
+                (" GSSAPI", "\r", .authenticate(mechanism: .gssAPI, initialClientResponse: nil), #line),
+                (" GSSAPI aGV5", "\r", .authenticate(mechanism: .gssAPI, initialClientResponse: .init(.init(.init(string: "hey")))), #line),
             ],
             parserErrorInputs: [
                 (" \"GSSAPI\"", "", #line),
