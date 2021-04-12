@@ -12,8 +12,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct OrderedCollections.OrderedDictionary
 import struct NIO.ByteBuffer
+import struct OrderedCollections.OrderedDictionary
 
 /// Represents an IMAP Namespace, providing a delimiter to
 /// break the namespace into it's constituent components.

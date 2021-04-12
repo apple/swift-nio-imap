@@ -20,8 +20,8 @@ import Glibc
 let badOS = { fatalError("unsupported OS") }()
 #endif
 
-import struct OrderedCollections.OrderedDictionary
 import struct NIO.ByteBuffer
+import struct OrderedCollections.OrderedDictionary
 enum GrammarParser {}
 
 typealias PL = ParserLibrary

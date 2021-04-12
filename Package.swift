@@ -43,7 +43,7 @@ let package = Package(
             dependencies: [
                 .product(name: "NIO", package: "swift-nio"),
                 .product(name: "StandardLibraryPreview", package: "swift-standard-library-preview"),
-                .product(name: "OrderedCollections", package: "swift-collections")
+                .product(name: "OrderedCollections", package: "swift-collections"),
             ]
         ),
         .testTarget(

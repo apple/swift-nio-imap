@@ -12,8 +12,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct OrderedCollections.OrderedDictionary
 import struct NIO.ByteBuffer
+import struct OrderedCollections.OrderedDictionary
 
 /// A collection of mailbox attributes defined in the supported IMAP4 RFCs.
 public struct MailboxInfo: Equatable {

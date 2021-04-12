@@ -12,9 +12,9 @@
 //
 //===----------------------------------------------------------------------===//
 
-import OrderedCollections
 import NIO
 @testable import NIOIMAPCore
+import OrderedCollections
 import XCTest
 
 class BodyFieldParameterTests: EncodeTestClass {}

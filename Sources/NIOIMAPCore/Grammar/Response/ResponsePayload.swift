@@ -12,8 +12,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct OrderedCollections.OrderedDictionary
 import struct NIO.ByteBuffer
+import struct OrderedCollections.OrderedDictionary
 
 /// Data returned as part of an untagged response. Typically one of these cases will be returned
 /// for each message or mailbox that is of interest.

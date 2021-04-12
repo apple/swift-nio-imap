@@ -20,9 +20,9 @@ import Glibc
 let badOS = { fatalError("unsupported OS") }()
 #endif
 
-import struct OrderedCollections.OrderedDictionary
 import struct NIO.ByteBuffer
 import struct NIO.ByteBufferView
+import struct OrderedCollections.OrderedDictionary
 
 extension GrammarParser {
     // append          = "APPEND" SP mailbox 1*append-message

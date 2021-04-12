@@ -12,8 +12,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct OrderedCollections.OrderedDictionary
 import struct NIO.ByteBuffer
+import struct OrderedCollections.OrderedDictionary
 
 extension _EncodeBuffer {
     @discardableResult mutating func writeEntry(_ entry: KeyValue<ByteBuffer, MetadataValue>) -> Int {

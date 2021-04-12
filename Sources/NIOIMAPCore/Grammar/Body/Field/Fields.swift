@@ -12,8 +12,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct OrderedCollections.OrderedDictionary
 import struct NIO.ByteBuffer
+import struct OrderedCollections.OrderedDictionary
 
 extension BodyStructure {
     /// Contains fields that are common across bodies of all types (*basic*, *message*, and *text*)

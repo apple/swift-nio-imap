@@ -12,9 +12,9 @@
 //
 //===----------------------------------------------------------------------===//
 
-import OrderedCollections
 import NIO
 import NIOIMAPCore
+import OrderedCollections
 
 /// To be used by a IMAP client implementation.
 public final class IMAPClientHandler: ChannelDuplexHandler {

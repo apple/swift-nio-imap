@@ -12,8 +12,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct OrderedCollections.OrderedDictionary
 import struct NIO.ByteBuffer
+import struct OrderedCollections.OrderedDictionary
 
 /// A wrapper around a non-empty array of key/value pairs. This is used to provide
 /// a catch-all for future extensions, as no options are currently explicitly defined.

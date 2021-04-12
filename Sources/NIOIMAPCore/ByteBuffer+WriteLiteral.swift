@@ -12,8 +12,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct OrderedCollections.OrderedDictionary
 import struct NIO.ByteBuffer
+import struct OrderedCollections.OrderedDictionary
 
 extension _EncodeBuffer {
     /// Writes an IMAP `string` type as defined by the grammar in RFC 3501.
