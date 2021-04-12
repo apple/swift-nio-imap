@@ -43,13 +43,13 @@ extension _EncodeBuffer {
             return self._writeString("~{\(data.byteCount)+}\r\n")
         case (_, true):
             let size = self._writeString("~{\(data.byteCount)}\r\n")
-            self._markStopPoint()
+            self.markStopPoint()
             return size
         case (true, _):
             return self._writeString("{\(data.byteCount)+}\r\n")
         default:
             let size = self._writeString("{\(data.byteCount)}\r\n")
-            self._markStopPoint()
+            self.markStopPoint()
             return size
         }
     }

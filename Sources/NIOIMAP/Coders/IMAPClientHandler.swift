@@ -188,18 +188,18 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
             context.flush()
         }
         repeat {
-            let next = self.bufferedWrites[self.bufferedWrites.startIndex].0._nextChunk()
+            let next = self.bufferedWrites[self.bufferedWrites.startIndex].0.nextChunk()
 
-            if next._waitForContinuation {
+            if next.waitForContinuation {
                 assert(self.state == .expectingResponses || self.state == .expectingLiteralContinuationRequest)
                 self.state = .expectingLiteralContinuationRequest
-                context.write(self.wrapOutboundOut(next._bytes), promise: nil)
+                context.write(self.wrapOutboundOut(next.bytes), promise: nil)
                 return
             } else {
                 assert(self.state == .expectingLiteralContinuationRequest)
                 self.state = .expectingResponses
                 let promise = self.bufferedWrites.removeFirst().1
-                context.write(self.wrapOutboundOut(next._bytes), promise: promise)
+                context.write(self.wrapOutboundOut(next.bytes), promise: promise)
             }
         } while self.bufferedWrites.hasMark
     }
@@ -231,15 +231,15 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
         }
 
         if self.bufferedWrites.isEmpty {
-            let next = encoder._buffer._nextChunk()
+            let next = encoder._buffer.nextChunk()
 
-            if next._waitForContinuation {
+            if next.waitForContinuation {
                 assert(self.state == .expectingResponses)
                 self.state = .expectingLiteralContinuationRequest
-                context.write(self.wrapOutboundOut(next._bytes), promise: nil)
+                context.write(self.wrapOutboundOut(next.bytes), promise: nil)
                 // fall through to append below
             } else {
-                context.write(self.wrapOutboundOut(next._bytes), promise: promise)
+                context.write(self.wrapOutboundOut(next.bytes), promise: promise)
                 return
             }
         }

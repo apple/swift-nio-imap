@@ -43,7 +43,7 @@ extension _EncodeBuffer {
         case .serverLiteral:
             return _writeString("{\(bytes.count)}\r\n") + _writeBytes(bytes)
         case .clientSynchronizingLiteral:
-            return _writeString("{\(bytes.count)}\r\n") + _markStopPoint() + _writeBytes(bytes)
+            return _writeString("{\(bytes.count)}\r\n") + markStopPoint() + _writeBytes(bytes)
         case .clientNonSynchronizingLiteralPlus:
             return _writeString("{\(bytes.count)+}\r\n") + _writeBytes(bytes)
         case .clientNonSynchronizingLiteralMinus:
@@ -109,7 +109,7 @@ extension _EncodeBuffer {
         let length = "~{\(bytes.count)}\r\n"
         return
             self._writeString(length) +
-            self._markStopPoint() +
+            self.markStopPoint() +
             self._writeBytes(bytes)
     }
 

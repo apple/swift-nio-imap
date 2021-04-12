@@ -74,34 +74,34 @@ extension _EncodeBuffer {
 
 extension _EncodeBuffer {
     /// Represents a piece of data that is ready to be written to the network.
-    public struct _Chunk {
+    public struct Chunk {
         /// The data that is ready to be written.
-        public var _bytes: ByteBuffer
+        public var bytes: ByteBuffer
 
         /// Is a continuation request expected before this data can be written?
-        public var _waitForContinuation: Bool
+        public var waitForContinuation: Bool
     }
 
     /// Gets the next chunk that is ready to be written to the network.
     /// - returns: The next chunk that is ready to be written.
-    public mutating func _nextChunk() -> _Chunk {
+    public mutating func nextChunk() -> Chunk {
         switch self.mode {
         case .client:
             if let stopPoint = self.stopPoints.popFirst() {
-                return .init(_bytes: self.buffer.readSlice(length: stopPoint - self.buffer.readerIndex)!,
-                             _waitForContinuation: stopPoint != self.buffer.writerIndex)
+                return .init(bytes: self.buffer.readSlice(length: stopPoint - self.buffer.readerIndex)!,
+                             waitForContinuation: stopPoint != self.buffer.writerIndex)
             } else {
                 precondition(self.buffer.readableBytes > 0, "No next chunk to send.")
-                return .init(_bytes: self.buffer.readSlice(length: self.buffer.readableBytes)!, _waitForContinuation: false)
+                return .init(bytes: self.buffer.readSlice(length: self.buffer.readableBytes)!, waitForContinuation: false)
             }
         case .server:
-            return .init(_bytes: self.buffer.readSlice(length: self.buffer.readableBytes)!, _waitForContinuation: false)
+            return .init(bytes: self.buffer.readSlice(length: self.buffer.readableBytes)!, waitForContinuation: false)
         }
     }
 
     /// Marks the end of the current `Chunk`.
     @discardableResult
-    public mutating func _markStopPoint() -> Int {
+    public mutating func markStopPoint() -> Int {
         if case .client = mode {
             stopPoints.append(buffer.writerIndex)
         }

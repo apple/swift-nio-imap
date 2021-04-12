@@ -21,17 +21,17 @@ class EncodeTestClass: XCTestCase {
 
     var testBufferString: String {
         var remaining: _EncodeBuffer = self.testBuffer
-        let nextBit = remaining._nextChunk()._bytes
+        let nextBit = remaining.nextChunk().bytes
         return String(buffer: nextBit)
     }
 
     var testBufferStrings: [String] {
         var remaining: _EncodeBuffer = self.testBuffer
-        var chunk = remaining._nextChunk()
-        var result: [String] = [String(buffer: chunk._bytes)]
-        while chunk._waitForContinuation {
-            chunk = remaining._nextChunk()
-            result.append(String(buffer: chunk._bytes))
+        var chunk = remaining.nextChunk()
+        var result: [String] = [String(buffer: chunk.bytes)]
+        while chunk.waitForContinuation {
+            chunk = remaining.nextChunk()
+            result.append(String(buffer: chunk.bytes))
         }
         return result
     }

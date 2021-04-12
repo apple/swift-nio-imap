@@ -158,7 +158,7 @@ extension CommandEncodeBuffer {
                 written += self._buffer._writeString("{\(size)+}\r\n")
             } else {
                 written += self._buffer._writeString("{\(size)}\r\n")
-                self._buffer._markStopPoint()
+                self._buffer.markStopPoint()
             }
             return written
         case .catenateData(.bytes(var bytes)):
