@@ -73,59 +73,22 @@ extension GrammarParser {
     //                   "BINARY.SIZE" section-binary
     // TODO: rev2
     static func parseFetchAttribute(buffer: inout ParseBuffer, tracker: StackTracker) throws -> FetchAttribute {
-        func parseFetchAttribute_rfc822(buffer: inout ParseBuffer, tracker: StackTracker) throws -> FetchAttribute {
-            func parseFetchAttribute_rfc822Size(buffer: inout ParseBuffer, tracker: StackTracker) throws -> FetchAttribute {
-                try PL.parseFixedString("RFC822.SIZE", buffer: &buffer, tracker: tracker)
-                return .rfc822Size
-            }
-
-            func parseFetchAttribute_rfc822Header(buffer: inout ParseBuffer, tracker: StackTracker) throws -> FetchAttribute {
-                try PL.parseFixedString("RFC822.HEADER", buffer: &buffer, tracker: tracker)
-                return .rfc822Header
-            }
-
-            func parseFetchAttribute_rfc822Text(buffer: inout ParseBuffer, tracker: StackTracker) throws -> FetchAttribute {
-                try PL.parseFixedString("RFC822.TEXT", buffer: &buffer, tracker: tracker)
-                return .rfc822Text
-            }
-
-            func parseFetchAttribute_rfc822(buffer: inout ParseBuffer, tracker: StackTracker) throws -> FetchAttribute {
-                try PL.parseFixedString("RFC822", buffer: &buffer, tracker: tracker)
-                return .rfc822
-            }
-
-            return try PL.parseOneOf([
-                parseFetchAttribute_rfc822Size,
-                parseFetchAttribute_rfc822Header,
-                parseFetchAttribute_rfc822Text,
-                parseFetchAttribute_rfc822,
-            ], buffer: &buffer, tracker: tracker)
-        }
-
-        func parseFetchAttribute_body(buffer: inout ParseBuffer, tracker: StackTracker) throws -> FetchAttribute {
-            try PL.parseFixedString("BODY", buffer: &buffer, tracker: tracker)
-            let extensions: Bool = {
-                do {
-                    try PL.parseFixedString("STRUCTURE", buffer: &buffer, tracker: tracker)
-                    return true
-                } catch {
-                    return false
-                }
-            }()
-            return .bodyStructure(extensions: extensions)
-        }
-
         func parseFetchAttribute_bodySection(buffer: inout ParseBuffer, tracker: StackTracker) throws -> FetchAttribute {
-            try PL.parseFixedString("BODY", buffer: &buffer, tracker: tracker)
-            let section = try self.parseSection(buffer: &buffer, tracker: tracker)
-            let chevronNumber = try PL.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> ClosedRange<UInt32> in
-                try self.parsePartial(buffer: &buffer, tracker: tracker)
+            
+            // Try to parse a section, `[something]`. If this fails, then it's a normal, boring body, without extensions
+            // (with extensions is sent as `BODYSTRUCTURE`).
+            // This is one of the few cases where we need to explicitly catch the "incompleteMessage" case and *NOT*
+            // propogate it forward.
+            if let section = try? self.parseSection(buffer: &buffer, tracker: tracker) {
+                let chevronNumber = try PL.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> ClosedRange<UInt32> in
+                    try self.parsePartial(buffer: &buffer, tracker: tracker)
+                }
+                return .bodySection(peek: false, section, chevronNumber)
             }
-            return .bodySection(peek: false, section, chevronNumber)
+            return .bodyStructure(extensions: false)
         }
 
         func parseFetchAttribute_bodyPeekSection(buffer: inout ParseBuffer, tracker: StackTracker) throws -> FetchAttribute {
-            try PL.parseFixedString("BODY.PEEK", buffer: &buffer, tracker: tracker)
             let section = try self.parseSection(buffer: &buffer, tracker: tracker)
             let chevronNumber = try PL.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> ClosedRange<UInt32> in
                 try self.parsePartial(buffer: &buffer, tracker: tracker)
@@ -138,26 +101,18 @@ extension GrammarParser {
         }
 
         func parseFetchAttribute_binary(buffer: inout ParseBuffer, tracker: StackTracker) throws -> FetchAttribute {
-            func parsePeek(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Bool {
-                let save = buffer
-                do {
-                    try PL.parseFixedString(".PEEK", buffer: &buffer, tracker: tracker)
-                    return true
-                } catch {
-                    buffer = save
-                    return false
-                }
-            }
-
-            try PL.parseFixedString("BINARY", buffer: &buffer, tracker: tracker)
-            let peek = try parsePeek(buffer: &buffer, tracker: tracker)
             let sectionBinary = try self.parseSectionBinary(buffer: &buffer, tracker: tracker)
             let partial = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parsePartial)
-            return .binary(peek: peek, section: sectionBinary, partial: partial)
+            return .binary(peek: false, section: sectionBinary, partial: partial)
+        }
+        
+        func parseFetchAttribute_binaryPeek(buffer: inout ParseBuffer, tracker: StackTracker) throws -> FetchAttribute {
+            let sectionBinary = try self.parseSectionBinary(buffer: &buffer, tracker: tracker)
+            let partial = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parsePartial)
+            return .binary(peek: true, section: sectionBinary, partial: partial)
         }
 
         func parseFetchAttribute_binarySize(buffer: inout ParseBuffer, tracker: StackTracker) throws -> FetchAttribute {
-            try PL.parseFixedString("BINARY.SIZE", buffer: &buffer, tracker: tracker)
             let sectionBinary = try self.parseSectionBinary(buffer: &buffer, tracker: tracker)
             return .binarySize(section: sectionBinary)
         }
@@ -175,18 +130,22 @@ extension GrammarParser {
             "RFC822.HEADER": {_, _ in .rfc822Header},
             "RFC822.TEXT": {_, _ in .rfc822Text},
             "RFC822": {_, _ in .rfc822},
+            "BODYSTRUCTURE": {_, _ in .bodyStructure(extensions: true)},
+            
+            "BODY": parseFetchAttribute_bodySection,
+            "BODY.PEEK": parseFetchAttribute_bodyPeekSection,
             "BINARY.SIZE": parseFetchAttribute_binarySize,
+            "BINARY": parseFetchAttribute_binary,
+            "BINARY.PEEK": parseFetchAttribute_binaryPeek
         ]
         
+        // try to use the lookup table, however obviously an unknown number
+        // cannot be parsed using a lookup table. If the lookup table fails,
+        // fall back and try to parse a modification sequence.
         do {
             return try self.parseFromLookupTable(buffer: &buffer, tracker: tracker, parsers: parsers)
-        } catch {
+        } catch is ParserError {
             return try PL.parseOneOf([
-                parseFetchAttribute_bodySection,
-                parseFetchAttribute_bodyPeekSection,
-                parseFetchAttribute_body,
-                parseFetchAttribute_binary,
-                parseFetchAttribute_binarySize,
                 parseFetchAttribute_modificationSequence,
             ], buffer: &buffer, tracker: tracker)
         }
