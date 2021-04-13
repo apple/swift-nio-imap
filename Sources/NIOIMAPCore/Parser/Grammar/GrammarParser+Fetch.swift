@@ -73,26 +73,6 @@ extension GrammarParser {
     //                   "BINARY.SIZE" section-binary
     // TODO: rev2
     static func parseFetchAttribute(buffer: inout ParseBuffer, tracker: StackTracker) throws -> FetchAttribute {
-        func parseFetchAttribute_envelope(buffer: inout ParseBuffer, tracker: StackTracker) throws -> FetchAttribute {
-            try PL.parseFixedString("ENVELOPE", buffer: &buffer, tracker: tracker)
-            return .envelope
-        }
-
-        func parseFetchAttribute_flags(buffer: inout ParseBuffer, tracker: StackTracker) throws -> FetchAttribute {
-            try PL.parseFixedString("FLAGS", buffer: &buffer, tracker: tracker)
-            return .flags
-        }
-
-        func parseFetchAttribute_internalDate(buffer: inout ParseBuffer, tracker: StackTracker) throws -> FetchAttribute {
-            try PL.parseFixedString("INTERNALDATE", buffer: &buffer, tracker: tracker)
-            return .internalDate
-        }
-
-        func parseFetchAttribute_UID(buffer: inout ParseBuffer, tracker: StackTracker) throws -> FetchAttribute {
-            try PL.parseFixedString("UID", buffer: &buffer, tracker: tracker)
-            return .uid
-        }
-
         func parseFetchAttribute_rfc822(buffer: inout ParseBuffer, tracker: StackTracker) throws -> FetchAttribute {
             func parseFetchAttribute_rfc822Size(buffer: inout ParseBuffer, tracker: StackTracker) throws -> FetchAttribute {
                 try PL.parseFixedString("RFC822.SIZE", buffer: &buffer, tracker: tracker)
@@ -182,43 +162,34 @@ extension GrammarParser {
             return .binarySize(section: sectionBinary)
         }
 
-        func parseFetchAttribute_gmailMessageID(buffer: inout ParseBuffer, tracker: StackTracker) throws -> FetchAttribute {
-            try PL.parseFixedString("X-GM-MSGID", buffer: &buffer, tracker: tracker)
-            return .gmailMessageID
+        let parsers: [String: (inout ParseBuffer, StackTracker) throws -> FetchAttribute] = [
+            "ENVELOPE": {_, _ in .envelope},
+            "FLAGS": {_, _ in .flags},
+            "INTERNALDATE": {_, _ in .internalDate},
+            "UID": {_, _ in .uid},
+            "MODSEQ": {_, _ in .modificationSequence},
+            "X-GM-MSGID": {_, _ in .gmailMessageID},
+            "X-GM-THRID": {_, _ in .gmailThreadID},
+            "X-GM-LABELS": {_, _ in .gmailLabels},
+            "RFC822.SIZE": {_, _ in .rfc822Size},
+            "RFC822.HEADER": {_, _ in .rfc822Header},
+            "RFC822.TEXT": {_, _ in .rfc822Text},
+            "RFC822": {_, _ in .rfc822},
+            "BINARY.SIZE": parseFetchAttribute_binarySize,
+        ]
+        
+        do {
+            return try self.parseFromLookupTable(buffer: &buffer, tracker: tracker, parsers: parsers)
+        } catch {
+            return try PL.parseOneOf([
+                parseFetchAttribute_bodySection,
+                parseFetchAttribute_bodyPeekSection,
+                parseFetchAttribute_body,
+                parseFetchAttribute_binary,
+                parseFetchAttribute_binarySize,
+                parseFetchAttribute_modificationSequence,
+            ], buffer: &buffer, tracker: tracker)
         }
-
-        func parseFetchAttribute_gmailThreadID(buffer: inout ParseBuffer, tracker: StackTracker) throws -> FetchAttribute {
-            try PL.parseFixedString("X-GM-THRID", buffer: &buffer, tracker: tracker)
-            return .gmailThreadID
-        }
-
-        func parseFetchAttribute_gmailLabels(buffer: inout ParseBuffer, tracker: StackTracker) throws -> FetchAttribute {
-            try PL.parseFixedString("X-GM-LABELS", buffer: &buffer, tracker: tracker)
-            return .gmailLabels
-        }
-
-        func parseFetchAttribute_modSeq(buffer: inout ParseBuffer, tracker: StackTracker) throws -> FetchAttribute {
-            try PL.parseFixedString("MODSEQ", buffer: &buffer, tracker: tracker)
-            return .modificationSequence
-        }
-
-        return try PL.parseOneOf([
-            parseFetchAttribute_envelope,
-            parseFetchAttribute_flags,
-            parseFetchAttribute_internalDate,
-            parseFetchAttribute_UID,
-            parseFetchAttribute_rfc822,
-            parseFetchAttribute_bodySection,
-            parseFetchAttribute_bodyPeekSection,
-            parseFetchAttribute_body,
-            parseFetchAttribute_modificationSequence,
-            parseFetchAttribute_binary,
-            parseFetchAttribute_binarySize,
-            parseFetchAttribute_gmailMessageID,
-            parseFetchAttribute_gmailThreadID,
-            parseFetchAttribute_gmailLabels,
-            parseFetchAttribute_modSeq,
-        ], buffer: &buffer, tracker: tracker)
     }
 
     static func parseFetchStreamingResponse(buffer: inout ParseBuffer, tracker: StackTracker) throws -> StreamingKind {
