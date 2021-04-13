@@ -33,9 +33,9 @@ public struct NetworkPath: Equatable {
 
 extension _EncodeBuffer {
     @discardableResult mutating func writeNetworkPath(_ path: NetworkPath) -> Int {
-        self._writeString("//") +
+        self.writeString("//") +
             self.writeIMAPServer(path.server) +
-            self._writeString("/") +
+            self.writeString("/") +
             self.writeIfExists(path.command) { command in
                 self.writeURLCommand(command)
             }

@@ -36,27 +36,27 @@ extension _EncodeBuffer {
             return self.writeEncodedMailboxUIDValidity(ref) +
                 self.writeIUIDOnly(uid) +
                 self.writeIfExists(section) { section in
-                    self._writeString("/") +
+                    self.writeString("/") +
                         self.writeURLMessageSectionOnly(section)
                 } +
                 self.writeIfExists(partial) { partial in
-                    self._writeString("/") +
+                    self.writeString("/") +
                         self.writeIPartialOnly(partial)
                 }
         case .uidSectionPartial(uid: let uid, section: let section, partial: let partial):
             return self.writeIUIDOnly(uid) +
                 self.writeIfExists(section) { section in
-                    self._writeString("/") +
+                    self.writeString("/") +
                         self.writeURLMessageSectionOnly(section)
                 } +
                 self.writeIfExists(partial) { partial in
-                    self._writeString("/") +
+                    self.writeString("/") +
                         self.writeIPartialOnly(partial)
                 }
         case .sectionPartial(section: let section, partial: let partial):
             return self.writeURLMessageSectionOnly(section) +
                 self.writeIfExists(partial) { partial in
-                    self._writeString("/") +
+                    self.writeString("/") +
                         self.writeIPartialOnly(partial)
                 }
         case .partialOnly(let partial):

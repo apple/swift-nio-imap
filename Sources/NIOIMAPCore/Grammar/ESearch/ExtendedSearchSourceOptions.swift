@@ -38,15 +38,15 @@ public struct ExtendedSearchSourceOptions: Equatable {
 
 extension _EncodeBuffer {
     @discardableResult mutating func writeExtendedSearchSourceOptions(_ options: ExtendedSearchSourceOptions) -> Int {
-        self._writeString("IN (") +
+        self.writeString("IN (") +
             self.writeArray(options.sourceMailbox, parenthesis: false) { (filter, buffer) -> Int in
                 buffer.writeMailboxFilter(filter)
             } +
             self.writeIfExists(options.scopeOptions) { scopeOptions in
-                self._writeString(" (") +
+                self.writeString(" (") +
                     self.writeExtendedSearchScopeOptions(scopeOptions) +
-                    self._writeString(")")
+                    self.writeString(")")
             } +
-            self._writeString(")")
+            self.writeString(")")
     }
 }

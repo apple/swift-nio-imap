@@ -61,6 +61,6 @@ extension String {
 
 extension _EncodeBuffer {
     @discardableResult mutating func writeUseAttribute(_ att: UseAttribute) -> Int {
-        self._writeString(att.stringValue)
+        self.writeString(att.stringValue)
     }
 }

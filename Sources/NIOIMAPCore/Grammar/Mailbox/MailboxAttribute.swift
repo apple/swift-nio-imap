@@ -112,11 +112,11 @@ extension _EncodeBuffer {
     }
 
     @discardableResult mutating func writeMailboxAttribute(_ att: MailboxAttribute) -> Int {
-        self._writeString(att.rawValue)
+        self.writeString(att.rawValue)
     }
 
     @discardableResult mutating func writeMailboxOptions(_ option: [MailboxAttribute]) -> Int {
-        self._writeString("STATUS ") +
+        self.writeString("STATUS ") +
             self.writeArray(option) { (att, self) in
                 self.writeMailboxAttribute(att)
             }
@@ -139,7 +139,7 @@ extension _EncodeBuffer {
         append(\.highestModificationSequence, "HIGHESTMODSEQ")
 
         return self.writeArray(array, parenthesis: false) { (element, self) -> Int in
-            self._writeString("\(element.0) \(element.1)")
+            self.writeString("\(element.0) \(element.1)")
         }
     }
 }

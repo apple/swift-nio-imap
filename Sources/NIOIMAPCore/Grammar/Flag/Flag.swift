@@ -103,6 +103,6 @@ extension _EncodeBuffer {
     }
 
     @discardableResult mutating func writeFlag(_ flag: Flag) -> Int {
-        _writeString(flag.stringValue)
+        writeString(flag.stringValue)
     }
 }

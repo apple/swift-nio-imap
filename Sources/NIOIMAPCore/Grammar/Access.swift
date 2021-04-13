@@ -36,13 +36,13 @@ extension _EncodeBuffer {
     @discardableResult mutating func writeAccess(_ data: Access) -> Int {
         switch data {
         case .submit(let user):
-            return self._writeString("submit+") + self.writeEncodedUser(user)
+            return self.writeString("submit+") + self.writeEncodedUser(user)
         case .user(let user):
-            return self._writeString("user+") + self.writeEncodedUser(user)
+            return self.writeString("user+") + self.writeEncodedUser(user)
         case .authenticateUser:
-            return self._writeString("authuser")
+            return self.writeString("authuser")
         case .anonymous:
-            return self._writeString("anonymous")
+            return self.writeString("anonymous")
         }
     }
 }

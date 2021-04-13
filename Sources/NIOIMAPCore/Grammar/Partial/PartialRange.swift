@@ -33,9 +33,9 @@ public struct PartialRange: Equatable {
 
 extension _EncodeBuffer {
     @discardableResult mutating func writePartialRange(_ data: PartialRange) -> Int {
-        self._writeString("\(data.offset)") +
+        self.writeString("\(data.offset)") +
             self.writeIfExists(data.length) { length in
-                self._writeString(".\(length)")
+                self.writeString(".\(length)")
             }
     }
 }

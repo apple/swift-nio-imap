@@ -20,9 +20,9 @@ public struct ResponseEncodeBuffer {
 
     /// Data that is waiting to be sent.
     public mutating func readBytes() -> ByteBuffer {
-        let buffer = self.buffer._nextChunk()._bytes
-        precondition(self.buffer._buffer.readableBytes == 0)
-        self.buffer._buffer.clear()
+        let buffer = self.buffer.nextChunk().bytes
+        precondition(self.buffer.buffer.readableBytes == 0)
+        self.buffer.buffer.clear()
         return buffer
     }
 
@@ -30,7 +30,7 @@ public struct ResponseEncodeBuffer {
     /// - parameter buffer: The inital `ByteBuffer` to use. Note that this is copied, not taken as `inout`.
     /// - parameter options: The `ResponseEncodingOptions` to use when writing responses.
     public init(buffer: ByteBuffer, options: ResponseEncodingOptions) {
-        self.buffer = ._serverEncodeBuffer(buffer: buffer, options: options)
+        self.buffer = .serverEncodeBuffer(buffer: buffer, options: options)
     }
 }
 
@@ -39,7 +39,7 @@ extension ResponseEncodeBuffer {
     /// - parameter buffer: The inital `ByteBuffer` to use. Note that this is copied, not taken as `inout`.
     /// - parameter capabilities: Server capabilites to use when writing responses. These will be converted into a `ResponseEncodingOptions`.
     public init(buffer: ByteBuffer, capabilities: [Capability]) {
-        self.buffer = ._serverEncodeBuffer(buffer: buffer, capabilities: capabilities)
+        self.buffer = .serverEncodeBuffer(buffer: buffer, capabilities: capabilities)
     }
 }
 
@@ -51,14 +51,14 @@ extension ResponseEncodeBuffer {
     /// - returns: The number of bytes written.
     @discardableResult public mutating func writeContinuationRequest(_ data: ContinuationRequest) -> Int {
         var size = 0
-        size += self.buffer._writeString("+ ")
+        size += self.buffer.writeString("+ ")
         switch data {
         case .responseText(let text):
             size += self.buffer.writeResponseText(text)
         case .data(let base64):
             size += self.buffer.writeBufferAsBase64(base64)
         }
-        size += self.buffer._writeString("\r\n")
+        size += self.buffer.writeString("\r\n")
         return size
     }
 }
@@ -88,17 +88,17 @@ extension ResponseEncodeBuffer {
 
     @discardableResult mutating func writeAuthenticationChallenge(_ bytes: ByteBuffer) -> Int {
         let base64 = Base64.encodeBytes(bytes: bytes.readableBytesView)
-        return self.buffer._writeString("+ ") +
-            self.buffer._writeBytes(base64) +
-            self.buffer._writeString("\r\n")
+        return self.buffer.writeString("+ ") +
+            self.buffer.writeBytes(base64) +
+            self.buffer.writeString("\r\n")
     }
 
     @discardableResult mutating func writeFetchResponse(_ response: FetchResponse) -> Int {
         switch response {
         case .start(let num):
-            return self.buffer._writeString("* ") +
+            return self.buffer.writeString("* ") +
                 self.buffer.writeSequenceNumber(num) +
-                self.buffer._writeString(" FETCH (")
+                self.buffer.writeString(" FETCH (")
         case .simpleAttribute(let att):
             guard case .server(streamingAttributes: let streamingAttributes, let options) = self.buffer.mode else {
                 preconditionFailure("Only server can write responses.")
@@ -120,7 +120,7 @@ extension ResponseEncodeBuffer {
                 return self.writeStreamingKind(type, size: size)
             }
         case .streamingBytes(var bytes):
-            return self.buffer._writeBuffer(&bytes)
+            return self.buffer.writeBuffer(&bytes)
         case .streamingEnd:
             return 0 // do nothing, this is a "fake" event
         case .finish:
@@ -128,28 +128,28 @@ extension ResponseEncodeBuffer {
                 preconditionFailure("Only server can write responses.")
             }
             self.buffer.mode = .server(streamingAttributes: false, options: options)
-            return self.buffer._writeString(")\r\n")
+            return self.buffer.writeString(")\r\n")
         }
     }
 
     @discardableResult mutating func writeStreamingKind(_ type: StreamingKind, size: Int) -> Int {
         switch type {
         case .binary:
-            return self.buffer._writeString("BINARY {\(size)}\r\n")
+            return self.buffer.writeString("BINARY {\(size)}\r\n")
         case .body(let section, let offset):
-            return self.buffer._writeString("BODY") +
+            return self.buffer.writeString("BODY") +
                 self.buffer.writeSection(section) +
                 self.buffer.writeIfExists(offset) { offset in
-                    self.buffer._writeString("<\(offset)>")
+                    self.buffer.writeString("<\(offset)>")
                 } +
                 self.buffer.writeSpace() +
-                self.buffer._writeString("{\(size)}\r\n")
+                self.buffer.writeString("{\(size)}\r\n")
         case .rfc822:
-            return self.buffer._writeString("RFC822 {\(size)}\r\n")
+            return self.buffer.writeString("RFC822 {\(size)}\r\n")
         case .rfc822Text:
-            return self.buffer._writeString("RFC822.TEXT {\(size)}\r\n")
+            return self.buffer.writeString("RFC822.TEXT {\(size)}\r\n")
         case .rfc822Header:
-            return self.buffer._writeString("RFC822.HEADER {\(size)}\r\n")
+            return self.buffer.writeString("RFC822.HEADER {\(size)}\r\n")
         }
     }
 }

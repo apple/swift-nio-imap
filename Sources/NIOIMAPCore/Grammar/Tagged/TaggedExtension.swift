@@ -18,7 +18,7 @@ import struct NIO.ByteBuffer
 
 extension _EncodeBuffer {
     @discardableResult mutating func writeTaggedExtension(_ ext: KeyValue<String, ParameterValue>) -> Int {
-        self._writeString(ext.key) +
+        self.writeString(ext.key) +
             self.writeSpace() +
             self.writeParameterValue(ext.value)
     }
@@ -36,7 +36,7 @@ extension _EncodeBuffer {
     }
 
     @discardableResult mutating func writeParameter(_ param: KeyValue<String, ParameterValue?>) -> Int {
-        self._writeString(param.key) +
+        self.writeString(param.key) +
             self.writeIfExists(param.value) { (value) -> Int in
                 self.writeSpace() +
                     self.writeParameterValue(value)

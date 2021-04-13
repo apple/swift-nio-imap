@@ -23,7 +23,7 @@ class ModifierSequenceValue_Tests: EncodeTestClass {
         }
 
         for (test, expectedString) in inputs {
-            self.testBuffer._clear()
+            self.testBuffer.clear()
             self.testBuffer.writeModificationSequenceValue(test)
             XCTAssertEqual(self.testBufferString, expectedString)
         }

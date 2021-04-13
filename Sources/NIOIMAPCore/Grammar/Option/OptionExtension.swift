@@ -30,7 +30,7 @@ extension _EncodeBuffer {
         var size = 0
         switch option.key {
         case .standard(let atom):
-            size += self._writeString(atom)
+            size += self.writeString(atom)
         case .vendor(let tag):
             size += self.writeOptionVendorTag(tag)
         }
@@ -43,8 +43,8 @@ extension _EncodeBuffer {
     }
 
     @discardableResult mutating func writeOptionVendorTag(_ tag: KeyValue<String, String>) -> Int {
-        self._writeString(tag.key) +
-            self._writeString("-") +
-            self._writeString(tag.value)
+        self.writeString(tag.key) +
+            self.writeString("-") +
+            self.writeString(tag.value)
     }
 }

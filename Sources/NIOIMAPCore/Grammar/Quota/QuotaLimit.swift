@@ -37,6 +37,6 @@ extension _EncodeBuffer {
     @discardableResult mutating func writeQuotaLimit(_ quotaLimit: QuotaLimit) -> Int {
         self.writeAtom(quotaLimit.resourceName) +
             self.writeSpace() +
-            self._writeString("\(quotaLimit.limit)")
+            self.writeString("\(quotaLimit.limit)")
     }
 }

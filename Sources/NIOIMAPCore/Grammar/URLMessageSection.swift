@@ -30,10 +30,10 @@ public struct URLMessageSection: Equatable {
 
 extension _EncodeBuffer {
     @discardableResult mutating func writeURLMessageSection(_ section: URLMessageSection) -> Int {
-        self._writeString("/;SECTION=\(section.encodedSection.section)")
+        self.writeString("/;SECTION=\(section.encodedSection.section)")
     }
 
     @discardableResult mutating func writeURLMessageSectionOnly(_ section: URLMessageSection) -> Int {
-        self._writeString(";SECTION=\(section.encodedSection.section)")
+        self.writeString(";SECTION=\(section.encodedSection.section)")
     }
 }

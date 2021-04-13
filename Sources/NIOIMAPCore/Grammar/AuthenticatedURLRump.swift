@@ -36,7 +36,7 @@ extension _EncodeBuffer {
         self.writeIfExists(data.expire) { expire in
             self.writeExpire(expire)
         } +
-            self._writeString(";URLAUTH=") +
+            self.writeString(";URLAUTH=") +
             self.writeAccess(data.access)
     }
 }

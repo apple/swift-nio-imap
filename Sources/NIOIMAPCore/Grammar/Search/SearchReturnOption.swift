@@ -42,15 +42,15 @@ extension _EncodeBuffer {
     @discardableResult mutating func writeSearchReturnOption(_ option: SearchReturnOption) -> Int {
         switch option {
         case .min:
-            return self._writeString("MIN")
+            return self.writeString("MIN")
         case .max:
-            return self._writeString("MAX")
+            return self.writeString("MAX")
         case .all:
-            return self._writeString("ALL")
+            return self.writeString("ALL")
         case .count:
-            return self._writeString("COUNT")
+            return self.writeString("COUNT")
         case .save:
-            return self._writeString("SAVE")
+            return self.writeString("SAVE")
         case .optionExtension(let option):
             return self.writeSearchReturnOptionExtension(option)
         }
@@ -61,12 +61,12 @@ extension _EncodeBuffer {
             return 0
         }
         return
-            self._writeString(" RETURN (") +
+            self.writeString(" RETURN (") +
             self.writeIfExists(options) { (options) -> Int in
                 self.writeArray(options, parenthesis: false) { (option, self) in
                     self.writeSearchReturnOption(option)
                 }
             } +
-            self._writeString(")")
+            self.writeString(")")
     }
 }

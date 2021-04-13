@@ -51,21 +51,21 @@ extension _EncodeBuffer {
     @discardableResult mutating func writeMailboxFilter(_ filter: MailboxFilter) -> Int {
         switch filter {
         case .inboxes:
-            return self._writeString("inboxes")
+            return self.writeString("inboxes")
         case .personal:
-            return self._writeString("personal")
+            return self.writeString("personal")
         case .subscribed:
-            return self._writeString("subscribed")
+            return self.writeString("subscribed")
         case .subtree(let mailboxes):
-            return self._writeString("subtree ") + self.writeMailboxes(mailboxes)
+            return self.writeString("subtree ") + self.writeMailboxes(mailboxes)
         case .mailboxes(let mailboxes):
-            return self._writeString("mailboxes ") + self.writeMailboxes(mailboxes)
+            return self.writeString("mailboxes ") + self.writeMailboxes(mailboxes)
         case .selected:
-            return self._writeString("selected")
+            return self.writeString("selected")
         case .selectedDelayed:
-            return self._writeString("selected-delayed")
+            return self.writeString("selected-delayed")
         case .subtreeOne(let mailboxes):
-            return self._writeString("subtree-one ") + self.writeMailboxes(mailboxes)
+            return self.writeString("subtree-one ") + self.writeMailboxes(mailboxes)
         }
     }
 }

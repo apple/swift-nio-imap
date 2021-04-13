@@ -23,7 +23,7 @@ class QuotaRootResponseTests: EncodeTestClass {}
 extension QuotaRootResponseTests {
     func testEncode() {
         let expectedString = "QUOTAROOT \"INBOX\" \"Root\""
-        self.testBuffer._clear()
+        self.testBuffer.clear()
         let size = self.testBuffer.writeQuotaRootResponse(mailbox: .init("INBOX"), quotaRoot: .init("Root"))
         XCTAssertEqual(size, expectedString.utf8.count)
         XCTAssertEqual(self.testBufferString, expectedString)

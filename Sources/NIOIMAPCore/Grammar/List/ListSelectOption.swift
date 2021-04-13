@@ -58,20 +58,20 @@ extension _EncodeBuffer {
     @discardableResult mutating func writeListSelectOption(_ option: ListSelectOption) -> Int {
         switch option {
         case .subscribed:
-            return self._writeString("SUBSCRIBED")
+            return self.writeString("SUBSCRIBED")
         case .recursiveMatch:
-            return self._writeString("RECURSIVEMATCH")
+            return self.writeString("RECURSIVEMATCH")
         case .remote:
-            return self._writeString("REMOTE")
+            return self.writeString("REMOTE")
         case .specialUse:
-            return self._writeString("SPECIAL-USE")
+            return self.writeString("SPECIAL-USE")
         case .option(let option):
             return self.writeOptionExtension(option)
         }
     }
 
     @discardableResult mutating func writeListSelectOptions(_ options: ListSelectOptions?) -> Int {
-        self._writeString("(") +
+        self.writeString("(") +
             self.writeIfExists(options) { (optionsData) -> Int in
                 self.writeArray(optionsData.options, separator: "", parenthesis: false) { (option, self) -> Int in
                     self.writeListSelectOption(option) +
@@ -79,6 +79,6 @@ extension _EncodeBuffer {
                 } +
                     self.writeListSelectBaseOption(optionsData.baseOption)
             } +
-            self._writeString(")")
+            self.writeString(")")
     }
 }

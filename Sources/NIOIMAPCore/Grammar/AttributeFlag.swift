@@ -53,6 +53,6 @@ extension String {
 
 extension _EncodeBuffer {
     @discardableResult mutating func writeAttributeFlag(_ flag: AttributeFlag) -> Int {
-        self._writeString(flag.stringValue)
+        self.writeString(flag.stringValue)
     }
 }

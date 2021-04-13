@@ -31,7 +31,7 @@ extension _EncodeBuffer {
     @discardableResult mutating func writeMetadataOption(_ option: MetadataOption) -> Int {
         switch option {
         case .maxSize(let num):
-            return self._writeString("MAXSIZE \(num)")
+            return self.writeString("MAXSIZE \(num)")
         case .scope(let opt):
             return self.writeScopeOption(opt)
         case .other(let param):

@@ -29,11 +29,11 @@ public struct _EncodeBuffer {
     }
 
     internal var mode: Mode
-    @usableFromInline internal var _buffer: ByteBuffer
-    @usableFromInline internal var _stopPoints: CircularBuffer<Int> = []
+    @usableFromInline internal var buffer: ByteBuffer
+    @usableFromInline internal var stopPoints: CircularBuffer<Int> = []
 
     init(_ buffer: ByteBuffer, mode: Mode) {
-        self._buffer = buffer
+        self.buffer = buffer
         self.mode = mode
     }
 }
@@ -43,7 +43,7 @@ extension _EncodeBuffer {
     /// - parameter buffer: An initial `ByteBuffer` to write to. Note that this is copied and not taken as `inout`.
     /// - parameter options: Configuration to use when writing.
     /// - returns: A new `EncodeBuffer` configured for client use.
-    static func _clientEncodeBuffer(buffer: ByteBuffer, options: CommandEncodingOptions) -> _EncodeBuffer {
+    static func clientEncodeBuffer(buffer: ByteBuffer, options: CommandEncodingOptions) -> _EncodeBuffer {
         _EncodeBuffer(buffer, mode: .client(options: options))
     }
 
@@ -51,15 +51,15 @@ extension _EncodeBuffer {
     /// - parameter buffer: An initial `ByteBuffer` to write to. Note that this is copied and not taken as `inout`.
     /// - parameter options: Configuration to use when writing.
     /// - returns: A new `EncodeBuffer` configured for client use.
-    static func _clientEncodeBuffer(buffer: ByteBuffer, capabilities: [Capability]) -> _EncodeBuffer {
-        _clientEncodeBuffer(buffer: buffer, options: CommandEncodingOptions(capabilities: capabilities))
+    static func clientEncodeBuffer(buffer: ByteBuffer, capabilities: [Capability]) -> _EncodeBuffer {
+        clientEncodeBuffer(buffer: buffer, options: CommandEncodingOptions(capabilities: capabilities))
     }
 
     /// Creates a new `EncodeBuffer` suitable for a client to write commands.
     /// - parameter buffer: An initial `ByteBuffer` to write to. Note that this is copied and not taken as `inout`.
     /// - parameter options: Configuration to use when writing.
     /// - returns: A new `EncodeBuffer` configured for server use.
-    static func _serverEncodeBuffer(buffer: ByteBuffer, options: ResponseEncodingOptions) -> _EncodeBuffer {
+    static func serverEncodeBuffer(buffer: ByteBuffer, options: ResponseEncodingOptions) -> _EncodeBuffer {
         _EncodeBuffer(buffer, mode: .server(streamingAttributes: false, options: options))
     }
 
@@ -67,43 +67,43 @@ extension _EncodeBuffer {
     /// - parameter buffer: An initial `ByteBuffer` to write to. Note that this is copied and not taken as `inout`.
     /// - parameter options: Configuration to use when writing.
     /// - returns: A new `EncodeBuffer` configured for server use.
-    static func _serverEncodeBuffer(buffer: ByteBuffer, capabilities: [Capability]) -> _EncodeBuffer {
-        _serverEncodeBuffer(buffer: buffer, options: ResponseEncodingOptions(capabilities: capabilities))
+    static func serverEncodeBuffer(buffer: ByteBuffer, capabilities: [Capability]) -> _EncodeBuffer {
+        serverEncodeBuffer(buffer: buffer, options: ResponseEncodingOptions(capabilities: capabilities))
     }
 }
 
 extension _EncodeBuffer {
     /// Represents a piece of data that is ready to be written to the network.
-    public struct _Chunk {
+    public struct Chunk {
         /// The data that is ready to be written.
-        public var _bytes: ByteBuffer
+        public var bytes: ByteBuffer
 
         /// Is a continuation request expected before this data can be written?
-        public var _waitForContinuation: Bool
+        public var waitForContinuation: Bool
     }
 
     /// Gets the next chunk that is ready to be written to the network.
     /// - returns: The next chunk that is ready to be written.
-    public mutating func _nextChunk() -> _Chunk {
+    public mutating func nextChunk() -> Chunk {
         switch self.mode {
         case .client:
-            if let stopPoint = self._stopPoints.popFirst() {
-                return .init(_bytes: self._buffer.readSlice(length: stopPoint - self._buffer.readerIndex)!,
-                             _waitForContinuation: stopPoint != self._buffer.writerIndex)
+            if let stopPoint = self.stopPoints.popFirst() {
+                return .init(bytes: self.buffer.readSlice(length: stopPoint - self.buffer.readerIndex)!,
+                             waitForContinuation: stopPoint != self.buffer.writerIndex)
             } else {
-                precondition(self._buffer.readableBytes > 0, "No next chunk to send.")
-                return .init(_bytes: self._buffer.readSlice(length: self._buffer.readableBytes)!, _waitForContinuation: false)
+                precondition(self.buffer.readableBytes > 0, "No next chunk to send.")
+                return .init(bytes: self.buffer.readSlice(length: self.buffer.readableBytes)!, waitForContinuation: false)
             }
         case .server:
-            return .init(_bytes: self._buffer.readSlice(length: self._buffer.readableBytes)!, _waitForContinuation: false)
+            return .init(bytes: self.buffer.readSlice(length: self.buffer.readableBytes)!, waitForContinuation: false)
         }
     }
 
     /// Marks the end of the current `Chunk`.
     @discardableResult
-    public mutating func _markStopPoint() -> Int {
+    public mutating func markStopPoint() -> Int {
         if case .client = mode {
-            _stopPoints.append(_buffer.writerIndex)
+            stopPoints.append(buffer.writerIndex)
         }
         return 0
     }
@@ -115,8 +115,8 @@ extension _EncodeBuffer {
     /// - returns: The number of bytes written - always `string.utf8.count`.
     @discardableResult
     @inlinable
-    public mutating func _writeString(_ string: String) -> Int {
-        self._buffer.writeString(string)
+    public mutating func writeString(_ string: String) -> Int {
+        self.buffer.writeString(string)
     }
 
     /// Writes raw bytes to the buffer.
@@ -124,8 +124,8 @@ extension _EncodeBuffer {
     /// - returns: The number of bytes written - always equal to the size of `bytes`.
     @discardableResult
     @inlinable
-    public mutating func _writeBytes<Bytes: Sequence>(_ bytes: Bytes) -> Int where Bytes.Element == UInt8 {
-        self._buffer.writeBytes(bytes)
+    public mutating func writeBytes<Bytes: Sequence>(_ bytes: Bytes) -> Int where Bytes.Element == UInt8 {
+        self.buffer.writeBytes(bytes)
     }
 
     /// Writes a `ByteBuffer` to the buffer.
@@ -133,14 +133,14 @@ extension _EncodeBuffer {
     /// - returns: The number of bytes written - always equal to `buffer.readableBytes`.
     @discardableResult
     @inlinable
-    public mutating func _writeBuffer(_ buffer: inout ByteBuffer) -> Int {
-        self._buffer.writeBuffer(&buffer)
+    public mutating func writeBuffer(_ buffer: inout ByteBuffer) -> Int {
+        self.buffer.writeBuffer(&buffer)
     }
 
     /// Erases all data from the buffer.
     @inlinable
-    public mutating func _clear() {
-        self._stopPoints.removeAll()
-        self._buffer.clear()
+    public mutating func clear() {
+        self.stopPoints.removeAll()
+        self.buffer.clear()
     }
 }

@@ -26,7 +26,7 @@ class EnableData_Tests: EncodeTestClass {
         ]
 
         for (input, expectedString, line) in inputs {
-            self.testBuffer._clear()
+            self.testBuffer.clear()
             let size = self.testBuffer.writeEnableData(input)
             XCTAssertEqual(size, expectedString.utf8.count, line: line)
             XCTAssertEqual(self.testBufferString, expectedString, line: line)

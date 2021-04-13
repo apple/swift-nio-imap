@@ -36,8 +36,8 @@ public struct TaggedResponse: Equatable {
 
 extension _EncodeBuffer {
     @discardableResult mutating func writeTaggedResponse(_ response: TaggedResponse) -> Int {
-        self._writeString("\(response.tag) ") +
+        self.writeString("\(response.tag) ") +
             self.writeTaggedResponseState(response.state) +
-            self._writeString("\r\n")
+            self.writeString("\r\n")
     }
 }

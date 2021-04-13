@@ -34,10 +34,10 @@ public struct IUID: Equatable {
 
 extension _EncodeBuffer {
     @discardableResult mutating func writeIUID(_ data: IUID) -> Int {
-        self._writeString("/;UID=\(data.uid)")
+        self.writeString("/;UID=\(data.uid)")
     }
 
     @discardableResult mutating func writeIUIDOnly(_ data: IUID) -> Int {
-        self._writeString(";UID=\(data.uid)")
+        self.writeString(";UID=\(data.uid)")
     }
 }

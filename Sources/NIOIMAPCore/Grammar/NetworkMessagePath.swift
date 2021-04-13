@@ -35,9 +35,9 @@ public struct NetworkMessagePath: Equatable {
 
 extension _EncodeBuffer {
     @discardableResult mutating func writeAuthenticatedURL(_ data: NetworkMessagePath) -> Int {
-        self._writeString("imap://") +
+        self.writeString("imap://") +
             self.writeIMAPServer(data.server) +
-            self._writeString("/") +
+            self.writeString("/") +
             self.writeMessagePath(data.messagePath)
     }
 }

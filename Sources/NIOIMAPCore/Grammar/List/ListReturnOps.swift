@@ -18,13 +18,13 @@ import struct NIO.ByteBuffer
 
 extension _EncodeBuffer {
     @discardableResult mutating func writeListReturnOptions(_ options: [ReturnOption]) -> Int {
-        self._writeString("RETURN ") +
-            self._writeString("(") +
+        self.writeString("RETURN ") +
+            self.writeString("(") +
             self.write(if: options.count >= 1) {
                 self.writeArray(options, parenthesis: false) { (option, self) in
                     self.writeReturnOption(option)
                 }
             } +
-            self._writeString(")")
+            self.writeString(")")
     }
 }

@@ -32,11 +32,11 @@ extension _EncodeBuffer {
     @discardableResult mutating func writeListSelectIndependentOption(_ option: ListSelectIndependentOption) -> Int {
         switch option {
         case .remote:
-            return self._writeString("REMOTE")
+            return self.writeString("REMOTE")
         case .option(let option):
             return self.writeOptionExtension(option)
         case .specialUse:
-            return self._writeString("SPECIAL-USE")
+            return self.writeString("SPECIAL-USE")
         }
     }
 }

@@ -74,12 +74,12 @@ extension _EncodeBuffer {
         case .basic(let param):
             return self.writeParameter(param)
         case .condstore:
-            return self._writeString("CONDSTORE")
+            return self.writeString("CONDSTORE")
         }
     }
 
     @discardableResult mutating func writeQResyncParameter(param: QResyncParameter) -> Int {
-        self._writeString("QRESYNC (\(param.uidValiditiy) ") +
+        self.writeString("QRESYNC (\(param.uidValiditiy) ") +
             self.writeModificationSequenceValue(param.modificationSequenceValue) +
             self.writeIfExists(param.knownUids) { (set) -> Int in
                 self.writeSpace() + self.writeLastCommandSet(set)
@@ -87,6 +87,6 @@ extension _EncodeBuffer {
             self.writeIfExists(param.sequenceMatchData) { (data) -> Int in
                 self.writeSpace() + self.writeSequenceMatchData(data)
             } +
-            self._writeString(")")
+            self.writeString(")")
     }
 }

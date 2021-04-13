@@ -41,7 +41,7 @@ public struct NamespaceResponse: Equatable {
 
 extension _EncodeBuffer {
     @discardableResult mutating func writeNamespaceResponse(_ response: NamespaceResponse) -> Int {
-        self._writeString("NAMESPACE ") +
+        self.writeString("NAMESPACE ") +
             self.writeNamespace(response.userNamespace) +
             self.writeSpace() +
             self.writeNamespace(response.otherUserNamespace) +

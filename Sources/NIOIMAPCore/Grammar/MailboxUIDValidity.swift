@@ -36,7 +36,7 @@ extension _EncodeBuffer {
     @discardableResult mutating func writeEncodedMailboxUIDValidity(_ ref: MailboxUIDValidity) -> Int {
         self.writeEncodedMailbox(ref.encodedMailbox) +
             self.writeIfExists(ref.uidValidity) { value in
-                self._writeString(";UIDVALIDITY=") + self.writeUIDValidity(value)
+                self.writeString(";UIDVALIDITY=") + self.writeUIDValidity(value)
             }
     }
 }
