@@ -74,7 +74,6 @@ extension GrammarParser {
     // TODO: rev2
     static func parseFetchAttribute(buffer: inout ParseBuffer, tracker: StackTracker) throws -> FetchAttribute {
         func parseFetchAttribute_bodySection(buffer: inout ParseBuffer, tracker: StackTracker) throws -> FetchAttribute {
-            
             // Try to parse a section, `[something]`. If this fails, then it's a normal, boring body, without extensions
             // (with extensions is sent as `BODYSTRUCTURE`).
             // This is one of the few cases where we need to explicitly catch the "incompleteMessage" case and *NOT*
@@ -105,7 +104,7 @@ extension GrammarParser {
             let partial = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parsePartial)
             return .binary(peek: false, section: sectionBinary, partial: partial)
         }
-        
+
         func parseFetchAttribute_binaryPeek(buffer: inout ParseBuffer, tracker: StackTracker) throws -> FetchAttribute {
             let sectionBinary = try self.parseSectionBinary(buffer: &buffer, tracker: tracker)
             let partial = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parsePartial)
@@ -118,27 +117,27 @@ extension GrammarParser {
         }
 
         let parsers: [String: (inout ParseBuffer, StackTracker) throws -> FetchAttribute] = [
-            "ENVELOPE": {_, _ in .envelope},
-            "FLAGS": {_, _ in .flags},
-            "INTERNALDATE": {_, _ in .internalDate},
-            "UID": {_, _ in .uid},
-            "MODSEQ": {_, _ in .modificationSequence},
-            "X-GM-MSGID": {_, _ in .gmailMessageID},
-            "X-GM-THRID": {_, _ in .gmailThreadID},
-            "X-GM-LABELS": {_, _ in .gmailLabels},
-            "RFC822.SIZE": {_, _ in .rfc822Size},
-            "RFC822.HEADER": {_, _ in .rfc822Header},
-            "RFC822.TEXT": {_, _ in .rfc822Text},
-            "RFC822": {_, _ in .rfc822},
-            "BODYSTRUCTURE": {_, _ in .bodyStructure(extensions: true)},
-            
+            "ENVELOPE": { _, _ in .envelope },
+            "FLAGS": { _, _ in .flags },
+            "INTERNALDATE": { _, _ in .internalDate },
+            "UID": { _, _ in .uid },
+            "MODSEQ": { _, _ in .modificationSequence },
+            "X-GM-MSGID": { _, _ in .gmailMessageID },
+            "X-GM-THRID": { _, _ in .gmailThreadID },
+            "X-GM-LABELS": { _, _ in .gmailLabels },
+            "RFC822.SIZE": { _, _ in .rfc822Size },
+            "RFC822.HEADER": { _, _ in .rfc822Header },
+            "RFC822.TEXT": { _, _ in .rfc822Text },
+            "RFC822": { _, _ in .rfc822 },
+            "BODYSTRUCTURE": { _, _ in .bodyStructure(extensions: true) },
+
             "BODY": parseFetchAttribute_bodySection,
             "BODY.PEEK": parseFetchAttribute_bodyPeekSection,
             "BINARY.SIZE": parseFetchAttribute_binarySize,
             "BINARY": parseFetchAttribute_binary,
-            "BINARY.PEEK": parseFetchAttribute_binaryPeek
+            "BINARY.PEEK": parseFetchAttribute_binaryPeek,
         ]
-        
+
         // try to use the lookup table, however obviously an unknown number
         // cannot be parsed using a lookup table. If the lookup table fails,
         // fall back and try to parse a modification sequence.
