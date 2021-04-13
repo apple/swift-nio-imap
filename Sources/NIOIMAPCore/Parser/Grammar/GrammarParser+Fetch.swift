@@ -130,7 +130,6 @@ extension GrammarParser {
             "RFC822.TEXT": { _, _ in .rfc822Text },
             "RFC822": { _, _ in .rfc822 },
             "BODYSTRUCTURE": { _, _ in .bodyStructure(extensions: true) },
-
             "BODY": parseFetchAttribute_bodySection,
             "BODY.PEEK": parseFetchAttribute_bodyPeekSection,
             "BINARY.SIZE": parseFetchAttribute_binarySize,
@@ -144,9 +143,7 @@ extension GrammarParser {
         do {
             return try self.parseFromLookupTable(buffer: &buffer, tracker: tracker, parsers: parsers)
         } catch is ParserError {
-            return try PL.parseOneOf([
-                parseFetchAttribute_modificationSequence,
-            ], buffer: &buffer, tracker: tracker)
+            return try parseFetchAttribute_modificationSequence(buffer: &buffer, tracker: tracker)
         }
     }
 
