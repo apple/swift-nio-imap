@@ -2690,7 +2690,10 @@ extension ParserUnitTests {
                 ("BYE [READ-WRITE] hello5", "\n", .bye(.init(code: .readWrite, text: "hello5")), #line),
                 
                 // strange cases
-                
+                ("NO [ALERT] ", "\n", .no(.init(code: .alert, text: "")), #line),
+                ("NO [ALERT]", "\n", .no(.init(code: .alert, text: "")), #line),
+                ("NO ", "\n", .no(.init(code: nil, text: "")), #line),
+                ("NO", "\n", .no(.init(code: nil, text: "")), #line),
             ],
             parserErrorInputs: [
                 ("OOPS [ALERT] hello1", "\n", #line),

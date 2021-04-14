@@ -73,8 +73,25 @@ extension GrammarParser {
     static func parseUntaggedResponseStatus(buffer: inout ParseBuffer, tracker: StackTracker) throws -> UntaggedStatus {
         try PL.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
             let code = try self.parseAtom(buffer: &buffer, tracker: tracker)
-            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-            let responseText = try self.parseResponseText(buffer: &buffer, tracker: tracker)
+            
+            let parsedSpace: Bool
+            do {
+                try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+                parsedSpace = true
+            } catch is ParserError {
+                parsedSpace = false
+            }
+            
+            // we should always be able to parse a space
+            // but, cough, iCloud and Oracle, sometimes doesn't bother sending
+            // a response text.
+            let responseText: ResponseText
+            if parsedSpace {
+                responseText = try self.parseResponseText(buffer: &buffer, tracker: tracker)
+            } else {
+                responseText = .init(code: nil, text: "")
+            }
+            
             guard let state = UntaggedStatus(code: code, responseText: responseText) else {
                 throw ParserError(hint: "Invalid response code: \(code)")
             }
