@@ -22,6 +22,7 @@ let badOS = { fatalError("unsupported OS") }()
 
 import struct NIO.ByteBuffer
 import struct NIO.ByteBufferView
+import struct OrderedCollections.OrderedDictionary
 
 extension GrammarParser {
     static func parseEntryValue(buffer: inout ParseBuffer, tracker: StackTracker) throws -> KeyValue<ByteBuffer, MetadataValue> {
@@ -33,11 +34,12 @@ extension GrammarParser {
         }
     }
 
-    static func parseEntryValues(buffer: inout ParseBuffer, tracker: StackTracker) throws -> KeyValues<ByteBuffer, MetadataValue> {
-        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> KeyValues<ByteBuffer, MetadataValue> in
+    static func parseEntryValues(buffer: inout ParseBuffer, tracker: StackTracker) throws -> OrderedDictionary<ByteBuffer, MetadataValue> {
+        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> OrderedDictionary<ByteBuffer, MetadataValue> in
             try PL.parseFixedString("(", buffer: &buffer, tracker: tracker)
-            var kvs = KeyValues<ByteBuffer, MetadataValue>()
-            kvs.append(try self.parseEntryValue(buffer: &buffer, tracker: tracker))
+            var kvs = OrderedDictionary<ByteBuffer, MetadataValue>()
+            let ev = try self.parseEntryValue(buffer: &buffer, tracker: tracker)
+            kvs[ev.key] = ev.value
             try PL.parseZeroOrMore(buffer: &buffer, into: &kvs, tracker: tracker, parser: { buffer, tracker -> KeyValue<ByteBuffer, MetadataValue> in
                 try PL.parseSpaces(buffer: &buffer, tracker: tracker)
                 return try self.parseEntryValue(buffer: &buffer, tracker: tracker)

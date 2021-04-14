@@ -22,6 +22,7 @@ let badOS = { fatalError("unsupported OS") }()
 
 import struct NIO.ByteBuffer
 import struct NIO.ByteBufferView
+import struct OrderedCollections.OrderedDictionary
 
 extension GrammarParser {
     // append          = "APPEND" SP mailbox 1*append-message
@@ -104,7 +105,7 @@ extension GrammarParser {
                 try PL.parseSpaces(buffer: &buffer, tracker: tracker)
                 return try self.parseInternalDate(buffer: &buffer, tracker: tracker)
             }
-            var kvs = KeyValues<String, ParameterValue>()
+            var kvs = OrderedDictionary<String, ParameterValue>()
             try PL.parseZeroOrMore(buffer: &buffer, into: &kvs, tracker: tracker) { (buffer, tracker) -> KeyValue<String, ParameterValue> in
                 try PL.parseSpaces(buffer: &buffer, tracker: tracker)
                 return try self.parseTaggedExtension(buffer: &buffer, tracker: tracker)

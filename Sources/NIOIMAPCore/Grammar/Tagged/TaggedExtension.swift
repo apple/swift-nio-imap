@@ -13,6 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 import struct NIO.ByteBuffer
+import struct OrderedCollections.OrderedDictionary
 
 // MARK: - Encoding
 
@@ -23,14 +24,14 @@ extension _EncodeBuffer {
             self.writeParameterValue(ext.value)
     }
 
-    @discardableResult mutating func writeParameters(_ params: KeyValues<String, ParameterValue?>) -> Int {
+    @discardableResult mutating func writeParameters(_ params: OrderedDictionary<String, ParameterValue?>) -> Int {
         if params.isEmpty {
             return 0
         }
 
         return
             self.writeSpace() +
-            self.writeKeyValues(params) { (param, self) -> Int in
+            self.writeOrderedDictionary(params) { (param, self) -> Int in
                 self.writeParameter(param)
             }
     }

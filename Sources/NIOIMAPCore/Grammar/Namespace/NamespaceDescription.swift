@@ -13,6 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 import struct NIO.ByteBuffer
+import struct OrderedCollections.OrderedDictionary
 
 /// Represents an IMAP Namespace, providing a delimiter to
 /// break the namespace into it's constituent components.
@@ -24,13 +25,13 @@ public struct NamespaceDescription: Equatable {
     public var delimiter: Character?
 
     /// A catch-all to provide support fo future extensions.
-    public var responseExtensions: KeyValues<ByteBuffer, [ByteBuffer]>
+    public var responseExtensions: OrderedDictionary<ByteBuffer, [ByteBuffer]>
 
     /// Creates a new `NamespaceDescription`.
     /// - parameter string: The full namespace string.
     /// - parameter char: A hierarchy delimiter.
     /// - parameter responseExtensions: A catch-all to provide support fo future extensions.
-    public init(string: ByteBuffer, char: Character? = nil, responseExtensions: KeyValues<ByteBuffer, [ByteBuffer]>) {
+    public init(string: ByteBuffer, char: Character? = nil, responseExtensions: OrderedDictionary<ByteBuffer, [ByteBuffer]>) {
         self.string = string
         self.delimiter = char
         self.responseExtensions = responseExtensions

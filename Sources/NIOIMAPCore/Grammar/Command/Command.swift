@@ -13,6 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 import struct NIO.ByteBuffer
+import struct OrderedCollections.OrderedDictionary
 
 /// Commands are sent by clients, and processed by servers.
 /// A notably exclusion here is the ability to append a message.
@@ -36,7 +37,7 @@ public enum Command: Equatable {
     case delete(MailboxName)
 
     /// Similar to `.select` and returns the same data, however the current mailbox is identified as readonly
-    case examine(MailboxName, KeyValues<String, ParameterValue?> = [:])
+    case examine(MailboxName, OrderedDictionary<String, ParameterValue?> = [:])
 
     /// Returns a subset of names from the complete set of all names available to the client.
     case list(ListSelectOptions?, reference: MailboxName, MailboxPatterns, [ReturnOption] = [])
@@ -48,7 +49,7 @@ public enum Command: Equatable {
     case lsub(reference: MailboxName, pattern: ByteBuffer)
 
     /// Renames the given mailbox.
-    case rename(from: MailboxName, to: MailboxName, params: KeyValues<String, ParameterValue?>)
+    case rename(from: MailboxName, to: MailboxName, params: OrderedDictionary<String, ParameterValue?>)
 
     /// Selects the given mailbox in preparation of running more commands.
     case select(MailboxName, [SelectParameter] = [])
@@ -95,7 +96,7 @@ public enum Command: Equatable {
     case copy(LastCommandSet<SequenceRangeSet>, MailboxName)
 
     /// Fetches an array of specified attributes for each message in a given set.
-    case fetch(LastCommandSet<SequenceRangeSet>, [FetchAttribute], KeyValues<String, ParameterValue?>)
+    case fetch(LastCommandSet<SequenceRangeSet>, [FetchAttribute], OrderedDictionary<String, ParameterValue?>)
 
     /// Alters data associated with a message, typically returning the new data as an untagged fetch response.
     case store(LastCommandSet<SequenceRangeSet>, [StoreModifier], StoreFlags)
@@ -107,7 +108,7 @@ public enum Command: Equatable {
     case move(LastCommandSet<SequenceRangeSet>, MailboxName)
 
     /// Identifies the client to the server
-    case id(KeyValues<String, String?>)
+    case id(OrderedDictionary<String, String?>)
 
     /// Retrieves the namespaces available to the user.
     case namespace
@@ -119,13 +120,13 @@ public enum Command: Equatable {
     case uidMove(LastCommandSet<UIDSetNonEmpty>, MailboxName)
 
     /// Similar to `.fetch`, but uses unique identifier instead of sequence numbers to identify messages.
-    case uidFetch(LastCommandSet<UIDSetNonEmpty>, [FetchAttribute], KeyValues<String, ParameterValue?>)
+    case uidFetch(LastCommandSet<UIDSetNonEmpty>, [FetchAttribute], OrderedDictionary<String, ParameterValue?>)
 
     /// Similar to `.search`, but uses unique identifier instead of sequence numbers to identify messages.
     case uidSearch(key: SearchKey, charset: String? = nil, returnOptions: [SearchReturnOption] = [])
 
     /// Similar to `.store`, but uses unique identifier instead of sequence numbers to identify messages.
-    case uidStore(LastCommandSet<UIDSetNonEmpty>, KeyValues<String, ParameterValue?>, StoreFlags)
+    case uidStore(LastCommandSet<UIDSetNonEmpty>, OrderedDictionary<String, ParameterValue?>, StoreFlags)
 
     /// Similar to `.expunge`, but uses unique identifier instead of sequence numbers to identify messages.
     case uidExpunge(LastCommandSet<UIDSetNonEmpty>)
@@ -148,7 +149,7 @@ public enum Command: Equatable {
     /// replacing the specified values provided, on the specified existing
     /// mailboxes or on the server (if the mailbox argument is the empty
     /// string).
-    case setMetadata(mailbox: MailboxName, entries: KeyValues<ByteBuffer, MetadataValue>)
+    case setMetadata(mailbox: MailboxName, entries: OrderedDictionary<ByteBuffer, MetadataValue>)
 
     /// Performs an extended search as defined in RFC 4731.
     case extendedsearch(ExtendedSearchOptions)
@@ -308,7 +309,7 @@ extension CommandEncodeBuffer {
             self._buffer.writeEntries(entries)
     }
 
-    private mutating func writeCommandKind_setMetadata(mailbox: MailboxName, entries: KeyValues<ByteBuffer, MetadataValue>) -> Int {
+    private mutating func writeCommandKind_setMetadata(mailbox: MailboxName, entries: OrderedDictionary<ByteBuffer, MetadataValue>) -> Int {
         self._buffer.writeString("SETMETADATA ") +
             self._buffer.writeMailbox(mailbox) +
             self._buffer.writeSpace() +
@@ -343,7 +344,7 @@ extension CommandEncodeBuffer {
             self._buffer.writeMailbox(mailbox)
     }
 
-    private mutating func writeCommandKind_examine(mailbox: MailboxName, parameters: KeyValues<String, ParameterValue?>) -> Int {
+    private mutating func writeCommandKind_examine(mailbox: MailboxName, parameters: OrderedDictionary<String, ParameterValue?>) -> Int {
         self._buffer.writeString("EXAMINE ") +
             self._buffer.writeMailbox(mailbox) +
             self._buffer.writeParameters(parameters)
@@ -389,7 +390,7 @@ extension CommandEncodeBuffer {
             self._buffer.writeIMAPString(listMailbox)
     }
 
-    private mutating func writeCommandKind_rename(from: MailboxName, to: MailboxName, parameters: KeyValues<String, ParameterValue?>) -> Int {
+    private mutating func writeCommandKind_rename(from: MailboxName, to: MailboxName, parameters: OrderedDictionary<String, ParameterValue?>) -> Int {
         self._buffer.writeString("RENAME ") +
             self._buffer.writeMailbox(from) +
             self._buffer.writeSpace() +
@@ -493,7 +494,7 @@ extension CommandEncodeBuffer {
             self._buffer.writeMailbox(mailbox)
     }
 
-    private mutating func writeCommandKind_fetch(set: LastCommandSet<SequenceRangeSet>, atts: [FetchAttribute], modifiers: KeyValues<String, ParameterValue?>) -> Int {
+    private mutating func writeCommandKind_fetch(set: LastCommandSet<SequenceRangeSet>, atts: [FetchAttribute], modifiers: OrderedDictionary<String, ParameterValue?>) -> Int {
         self._buffer.writeString("FETCH ") +
             self._buffer.writeLastCommandSet(set) +
             self._buffer.writeSpace() +
@@ -503,7 +504,7 @@ extension CommandEncodeBuffer {
             }
     }
 
-    private mutating func writeCommandKind_uidFetch(set: LastCommandSet<UIDSetNonEmpty>, atts: [FetchAttribute], modifiers: KeyValues<String, ParameterValue?>) -> Int {
+    private mutating func writeCommandKind_uidFetch(set: LastCommandSet<UIDSetNonEmpty>, atts: [FetchAttribute], modifiers: OrderedDictionary<String, ParameterValue?>) -> Int {
         self._buffer.writeString("UID FETCH ") +
             self._buffer.writeLastCommandSet(set) +
             self._buffer.writeSpace() +
@@ -526,7 +527,7 @@ extension CommandEncodeBuffer {
             self._buffer.writeStoreAttributeFlags(flags)
     }
 
-    private mutating func writeCommandKind_uidStore(set: LastCommandSet<UIDSetNonEmpty>, modifiers: KeyValues<String, ParameterValue?>, flags: StoreFlags) -> Int {
+    private mutating func writeCommandKind_uidStore(set: LastCommandSet<UIDSetNonEmpty>, modifiers: OrderedDictionary<String, ParameterValue?>, flags: StoreFlags) -> Int {
         self._buffer.writeString("UID STORE ") +
             self._buffer.writeLastCommandSet(set) +
             self._buffer.write(if: modifiers.count >= 1) {
@@ -571,7 +572,7 @@ extension CommandEncodeBuffer {
         self._buffer.writeNamespaceCommand()
     }
 
-    @discardableResult mutating func writeCommandKind_id(_ id: KeyValues<String, String?>) -> Int {
+    @discardableResult mutating func writeCommandKind_id(_ id: OrderedDictionary<String, String?>) -> Int {
         self._buffer.writeString("ID ") +
             self._buffer.writeIDParameters(id)
     }
@@ -631,10 +632,10 @@ extension Command {
     /// Convenience for creating a *UID FETCH* command.
     /// Pass in a `UIDSet`, and if that set is valid (i.e. non-empty) then a command is returned.
     /// - parameter messages: The set of message UIDs to use.
+    /// - parameter attributes: Which attributes to retrieve.
     /// - parameter modifiers: Fetch modifiers.
-    /// - parameter keyValues: .
     /// - returns: `nil` if `messages` is empty, otherwise a `Command`.
-    public static func uidFetch(messages: UIDSet, attributes: [FetchAttribute], modifiers: KeyValues<String, ParameterValue?>) -> Command? {
+    public static func uidFetch(messages: UIDSet, attributes: [FetchAttribute], modifiers: OrderedDictionary<String, ParameterValue?>) -> Command? {
         guard let set = UIDSetNonEmpty(set: messages) else {
             return nil
         }
@@ -647,7 +648,7 @@ extension Command {
     /// - parameter modifiers: Store modifiers.
     /// - parameter flags: The flags to store.
     /// - returns: `nil` if `messages` is empty, otherwise a `Command`.
-    public static func uidStore(messages: UIDSet, modifiers: KeyValues<String, ParameterValue?>, flags: StoreFlags) -> Command? {
+    public static func uidStore(messages: UIDSet, modifiers: OrderedDictionary<String, ParameterValue?>, flags: StoreFlags) -> Command? {
         guard let set = UIDSetNonEmpty(set: messages) else {
             return nil
         }

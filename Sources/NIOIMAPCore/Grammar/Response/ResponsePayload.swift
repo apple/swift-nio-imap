@@ -13,6 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 import struct NIO.ByteBuffer
+import struct OrderedCollections.OrderedDictionary
 
 /// Data returned as part of an untagged response. Typically one of these cases will be returned
 /// for each message or mailbox that is of interest.
@@ -34,7 +35,7 @@ public enum ResponsePayload: Equatable {
 
     /// The servers implementation details, used for identification. For example
     /// this may be used to identify an iCloud server.
-    case id(KeyValues<String, String?>)
+    case id(OrderedDictionary<String, String?>)
 
     /// Matches a quota root with a mailbox.
     case quotaRoot(MailboxName, QuotaRoot)

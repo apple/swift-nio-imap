@@ -14,12 +14,14 @@
 
 // MARK: - Encoding
 
+import struct OrderedCollections.OrderedDictionary
+
 extension _EncodeBuffer {
-    @discardableResult mutating func writeBodyParameterPairs(_ params: KeyValues<String, String>) -> Int {
+    @discardableResult mutating func writeBodyParameterPairs(_ params: OrderedDictionary<String, String>) -> Int {
         guard params.count > 0 else {
             return self.writeNil()
         }
-        return self.writeKeyValues(params) { (element, self) in
+        return self.writeOrderedDictionary(params) { (element, self) in
             self.writeIMAPString(element.key) +
                 self.writeSpace() +
                 self.writeIMAPString(element.value)

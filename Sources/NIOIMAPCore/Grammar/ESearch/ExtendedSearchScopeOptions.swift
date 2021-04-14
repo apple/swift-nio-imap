@@ -13,17 +13,18 @@
 //===----------------------------------------------------------------------===//
 
 import struct NIO.ByteBuffer
+import struct OrderedCollections.OrderedDictionary
 
 /// A wrapper around a non-empty array of key/value pairs. This is used to provide
 /// a catch-all for future extensions, as no options are currently explicitly defined.
 public struct ExtendedSearchScopeOptions: Equatable {
     /// An array of Scope Option key/value pairs. Note that the array must not be empty.
-    public let content: KeyValues<String, ParameterValue?>
+    public let content: OrderedDictionary<String, ParameterValue?>
 
     /// Creates a new `ExtendedSearchScopeOptions` from a non-empty array of options.
     ///  - parameter options: One or more options.
     /// - returns: A `nil` if `options` is empty, otherwise a new `ExtendedSearchScopeOptions`.
-    init?(_ options: KeyValues<String, ParameterValue?>) {
+    init?(_ options: OrderedDictionary<String, ParameterValue?>) {
         guard options.count >= 1 else {
             return nil
         }
@@ -35,7 +36,7 @@ public struct ExtendedSearchScopeOptions: Equatable {
 
 extension _EncodeBuffer {
     @discardableResult mutating func writeExtendedSearchScopeOptions(_ options: ExtendedSearchScopeOptions) -> Int {
-        self.writeKeyValues(options.content, parenthesis: false) { (option, buffer) -> Int in
+        self.writeOrderedDictionary(options.content, parenthesis: false) { (option, buffer) -> Int in
             buffer.writeParameter(option)
         }
     }

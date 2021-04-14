@@ -14,6 +14,7 @@
 
 import NIO
 @testable import NIOIMAPCore
+import OrderedCollections
 import XCTest
 
 class NamespaceResponseExtension_Tests: EncodeTestClass {}
@@ -22,7 +23,7 @@ class NamespaceResponseExtension_Tests: EncodeTestClass {}
 
 extension NamespaceResponseExtension_Tests {
     func testEncode() {
-        let inputs: [(KeyValues<ByteBuffer, [ByteBuffer]>, String, UInt)] = [
+        let inputs: [(OrderedDictionary<ByteBuffer, [ByteBuffer]>, String, UInt)] = [
             ([:], "", #line),
             (["str1": ["str2"]], " \"str1\" (\"str2\")", #line),
             (

@@ -14,6 +14,7 @@
 
 import NIO
 @testable import NIOIMAPCore
+import OrderedCollections
 import XCTest
 
 class Entry_Tests: EncodeTestClass {}
@@ -29,7 +30,7 @@ extension Entry_Tests {
     }
 
     func testEncode_entryValues() {
-        let inputs: [(KeyValues<ByteBuffer, MetadataValue>, String, UInt)] = [
+        let inputs: [(OrderedDictionary<ByteBuffer, MetadataValue>, String, UInt)] = [
             (
                 ["name": .init("value")],
                 "(\"name\" ~{5}\r\nvalue)",

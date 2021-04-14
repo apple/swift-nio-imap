@@ -13,6 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 import struct NIO.ByteBuffer
+import struct OrderedCollections.OrderedDictionary
 
 extension _EncodeBuffer {
     @discardableResult mutating func writeEntry(_ entry: KeyValue<ByteBuffer, MetadataValue>) -> Int {
@@ -21,8 +22,8 @@ extension _EncodeBuffer {
             self.writeMetadataValue(entry.value)
     }
 
-    @discardableResult mutating func writeEntryValues(_ array: KeyValues<ByteBuffer, MetadataValue>) -> Int {
-        self.writeKeyValues(array) { element, buffer in
+    @discardableResult mutating func writeEntryValues(_ array: OrderedDictionary<ByteBuffer, MetadataValue>) -> Int {
+        self.writeOrderedDictionary(array) { element, buffer in
             buffer.writeEntry(element)
         }
     }

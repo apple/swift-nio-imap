@@ -13,6 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 import struct NIO.ByteBuffer
+import struct OrderedCollections.OrderedDictionary
 
 enum ParserLibrary {}
 
@@ -123,18 +124,18 @@ extension ParserLibrary {
         }
     }
 
-    static func parseZeroOrMore<K, V>(buffer: inout ParseBuffer, into keyValues: inout KeyValues<K, V>, tracker: StackTracker, parser: SubParser<(K, V)>) throws {
+    static func parseZeroOrMore<K, V>(buffer: inout ParseBuffer, into orderedDictionary: inout OrderedDictionary<K, V>, tracker: StackTracker, parser: SubParser<(K, V)>) throws {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             while let next = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: parser) {
-                keyValues.append(next)
+                orderedDictionary[next.0] = next.1
             }
         }
     }
 
-    static func parseZeroOrMore<K, V>(buffer: inout ParseBuffer, into keyValues: inout KeyValues<K, V>, tracker: StackTracker, parser: SubParser<KeyValue<K, V>>) throws {
+    static func parseZeroOrMore<K, V>(buffer: inout ParseBuffer, into orderedDictionary: inout OrderedDictionary<K, V>, tracker: StackTracker, parser: SubParser<KeyValue<K, V>>) throws {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             while let next = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: parser) {
-                keyValues.append(next)
+                orderedDictionary[next.key] = next.value
             }
         }
     }

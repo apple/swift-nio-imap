@@ -22,6 +22,7 @@ let badOS = { fatalError("unsupported OS") }()
 
 import struct NIO.ByteBuffer
 import struct NIO.ByteBufferView
+import struct OrderedCollections.OrderedDictionary
 
 extension GrammarParser {
     // body            = "(" (body-type-1part / body-type-mpart) ")"
@@ -245,8 +246,8 @@ extension GrammarParser {
     }
 
     // body-fld-param  = "(" string SP string *(SP string SP string) ")" / nil
-    static func parseBodyFieldParam(buffer: inout ParseBuffer, tracker: StackTracker) throws -> KeyValues<String, String> {
-        func parseBodyFieldParam_nil(buffer: inout ParseBuffer, tracker: StackTracker) throws -> KeyValues<String, String> {
+    static func parseBodyFieldParam(buffer: inout ParseBuffer, tracker: StackTracker) throws -> OrderedDictionary<String, String> {
+        func parseBodyFieldParam_nil(buffer: inout ParseBuffer, tracker: StackTracker) throws -> OrderedDictionary<String, String> {
             try parseNil(buffer: &buffer, tracker: tracker)
             return [:]
         }
@@ -258,10 +259,11 @@ extension GrammarParser {
             return (field, value)
         }
 
-        func parseBodyFieldParam_pairs(buffer: inout ParseBuffer, tracker: StackTracker) throws -> KeyValues<String, String> {
+        func parseBodyFieldParam_pairs(buffer: inout ParseBuffer, tracker: StackTracker) throws -> OrderedDictionary<String, String> {
             try PL.parseFixedString("(", buffer: &buffer, tracker: tracker)
-            var kvs = KeyValues<String, String>()
-            kvs.append(try parseBodyFieldParam_singlePair(buffer: &buffer, tracker: tracker))
+            var kvs = OrderedDictionary<String, String>()
+            let keyValue = try parseBodyFieldParam_singlePair(buffer: &buffer, tracker: tracker)
+            kvs[keyValue.0] = keyValue.1
             try PL.parseZeroOrMore(buffer: &buffer, into: &kvs, tracker: tracker) { (buffer, tracker) -> (String, String) in
                 try PL.parseSpaces(buffer: &buffer, tracker: tracker)
                 return try parseBodyFieldParam_singlePair(buffer: &buffer, tracker: tracker)
