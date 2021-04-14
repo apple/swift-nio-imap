@@ -16,11 +16,11 @@ import NIO
 @testable import NIOIMAPCore
 import XCTest
 
-class ResponseTextTests: EncodeTestClass {}
+class ResponseText_Tests: EncodeTestClass {}
 
 // MARK: - Encoding
 
-extension ResponseTextTests {
+extension ResponseText_Tests {
     func testEncode() {
         let inputs: [(ResponseText, String, UInt)] = [
             (.init(code: nil, text: "buffer"), "buffer", #line),
