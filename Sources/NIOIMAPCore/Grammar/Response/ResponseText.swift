@@ -40,7 +40,11 @@ extension _EncodeBuffer {
                 self.writeResponseTextCode(code) +
                 self.writeString("] ")
         } +
-            self.writeText(text.text)
+
+            // If the text is empty, write an additional space
+            // to enforce standard compliance. Oddly, this is
+            // perfectly legal IMAP.
+            self.writeText(text.text.count > 0 ? text.text : " ")
     }
 
     @discardableResult mutating func writeText(_ text: String) -> Int {
