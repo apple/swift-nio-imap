@@ -108,14 +108,15 @@ extension GrammarParser {
 
     // resp-cond-state = ("OK" / "NO" / "BAD") SP resp-text
     static func parseTaggedResponseState(buffer: inout ParseBuffer, tracker: StackTracker) throws -> TaggedResponse.State {
-        
-        let code = try self.parseAtom(buffer: &buffer, tracker: tracker)
-        try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-        let responseText = try self.parseResponseText(buffer: &buffer, tracker: tracker)
-        guard let state = TaggedResponse.State(code: code, responseText: responseText) else {
-            throw ParserError(hint: "Invalid response code: \(code)")
+        try PL.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
+            let code = try self.parseAtom(buffer: &buffer, tracker: tracker)
+            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+            let responseText = try self.parseResponseText(buffer: &buffer, tracker: tracker)
+            guard let state = TaggedResponse.State(code: code, responseText: responseText) else {
+                throw ParserError(hint: "Invalid response code: \(code)")
+            }
+            return state
         }
-        return state
     }
 
     // response-payload = resp-cond-state / resp-cond-bye / mailbox-data / message-data / capability-data / id-response / enable-data

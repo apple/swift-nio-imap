@@ -2447,6 +2447,29 @@ extension ParserUnitTests {
     }
 }
 
+// MARK: - parseTaggedResponseState
+
+// resp-cond-state = ("OK" / "NO" / "BAD") SP resp-text
+extension ParserUnitTests {
+    func testParseTaggedResponseState() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseTaggedResponseState,
+            validInputs: [
+                ("OK [ALERT] hello1", "\n", .ok(.init(code: .alert, text: "hello1")), #line),
+                ("NO [CLOSED] hello2", "\n", .no(.init(code: .closed, text: "hello2")), #line),
+                ("BAD [PARSE] hello3", "\n", .bad(.init(code: .parse, text: "hello3")), #line),
+                
+            ],
+            parserErrorInputs: [
+                ("OOPS [ALERT] hello1", "\n", #line),
+            ],
+            incompleteMessageInputs: [
+                ("OOPS", "", #line),
+            ]
+        )
+    }
+}
+
 // MARK: - parseTaggedExtension
 
 extension ParserUnitTests {
