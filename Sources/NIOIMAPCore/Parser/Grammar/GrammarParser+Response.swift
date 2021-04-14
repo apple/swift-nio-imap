@@ -71,39 +71,15 @@ extension GrammarParser {
 
     /// This is a combination of `resp-cond-state`, `resp-cond-bye`, and `greeting`.
     static func parseUntaggedResponseStatus(buffer: inout ParseBuffer, tracker: StackTracker) throws -> UntaggedStatus {
-        func parseUntaggedResponseStatus_ok(buffer: inout ParseBuffer, tracker: StackTracker) throws -> UntaggedStatus {
+        try PL.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
+            let code = try self.parseAtom(buffer: &buffer, tracker: tracker)
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-            return .ok(try self.parseResponseText(buffer: &buffer, tracker: tracker))
+            let responseText = try self.parseResponseText(buffer: &buffer, tracker: tracker)
+            guard let state = UntaggedStatus(code: code, responseText: responseText) else {
+                throw ParserError(hint: "Invalid response code: \(code)")
+            }
+            return state
         }
-
-        func parseUntaggedResponseStatus_no(buffer: inout ParseBuffer, tracker: StackTracker) throws -> UntaggedStatus {
-            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-            return .no(try self.parseResponseText(buffer: &buffer, tracker: tracker))
-        }
-
-        func parseUntaggedResponseStatus_bad(buffer: inout ParseBuffer, tracker: StackTracker) throws -> UntaggedStatus {
-            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-            return .bad(try self.parseResponseText(buffer: &buffer, tracker: tracker))
-        }
-
-        func parseUntaggedResponseStatus_preAuth(buffer: inout ParseBuffer, tracker: StackTracker) throws -> UntaggedStatus {
-            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-            return .preauth(try self.parseResponseText(buffer: &buffer, tracker: tracker))
-        }
-
-        func parseUntaggedResponseStatus_bye(buffer: inout ParseBuffer, tracker: StackTracker) throws -> UntaggedStatus {
-            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-            return .bye(try self.parseResponseText(buffer: &buffer, tracker: tracker))
-        }
-
-        let parsers: [String: (inout ParseBuffer, StackTracker) throws -> UntaggedStatus] = [
-            "OK": parseUntaggedResponseStatus_ok,
-            "NO": parseUntaggedResponseStatus_no,
-            "BAD": parseUntaggedResponseStatus_bad,
-            "PREAUTH": parseUntaggedResponseStatus_preAuth,
-            "BYE": parseUntaggedResponseStatus_bye,
-        ]
-        return try self.parseFromLookupTable(buffer: &buffer, tracker: tracker, parsers: parsers)
     }
 
     // resp-cond-state = ("OK" / "NO" / "BAD") SP resp-text
@@ -120,7 +96,7 @@ extension GrammarParser {
             }
             
             // we should always be able to parse a space
-            // but, cough, iCloud, sometimes doesn't bother sending
+            // but, cough, iCloud and Oracle, sometimes doesn't bother sending
             // a response text.
             let responseText: ResponseText
             if parsedSpace {
