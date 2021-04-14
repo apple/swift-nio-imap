@@ -2459,6 +2459,9 @@ extension ParserUnitTests {
                 ("NO [CLOSED] hello2", "\n", .no(.init(code: .closed, text: "hello2")), #line),
                 ("BAD [PARSE] hello3", "\n", .bad(.init(code: .parse, text: "hello3")), #line),
                 
+                // strange cases
+                ("OK ", "\n", .ok(.init(text: "")), #line),
+                ("OK", "\n", .ok(.init(text: "")), #line),
             ],
             parserErrorInputs: [
                 ("OOPS [ALERT] hello1", "\n", #line),
