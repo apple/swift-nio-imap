@@ -2458,7 +2458,7 @@ extension ParserUnitTests {
                 ("OK [ALERT] hello1", "\n", .ok(.init(code: .alert, text: "hello1")), #line),
                 ("NO [CLOSED] hello2", "\n", .no(.init(code: .closed, text: "hello2")), #line),
                 ("BAD [PARSE] hello3", "\n", .bad(.init(code: .parse, text: "hello3")), #line),
-                
+
                 // strange cases
                 ("OK ", "\n", .ok(.init(text: "")), #line),
                 ("OK", "\n", .ok(.init(text: "")), #line),
@@ -2688,7 +2688,7 @@ extension ParserUnitTests {
                 ("BAD [PARSE] hello3", "\n", .bad(.init(code: .parse, text: "hello3")), #line),
                 ("PREAUTH [READ-ONLY] hello4", "\n", .preauth(.init(code: .readOnly, text: "hello4")), #line),
                 ("BYE [READ-WRITE] hello5", "\n", .bye(.init(code: .readWrite, text: "hello5")), #line),
-                
+
                 // strange cases
                 ("NO [ALERT] ", "\n", .no(.init(code: .alert, text: "")), #line),
                 ("NO [ALERT]", "\n", .no(.init(code: .alert, text: "")), #line),

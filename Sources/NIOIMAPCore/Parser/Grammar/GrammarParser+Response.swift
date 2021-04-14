@@ -73,7 +73,7 @@ extension GrammarParser {
     static func parseUntaggedResponseStatus(buffer: inout ParseBuffer, tracker: StackTracker) throws -> UntaggedStatus {
         try PL.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
             let code = try self.parseAtom(buffer: &buffer, tracker: tracker)
-            
+
             let parsedSpace: Bool
             do {
                 try PL.parseSpaces(buffer: &buffer, tracker: tracker)
@@ -81,7 +81,7 @@ extension GrammarParser {
             } catch is ParserError {
                 parsedSpace = false
             }
-            
+
             // we should always be able to parse a space
             // but, cough, iCloud and Oracle, sometimes doesn't bother sending
             // a response text.
@@ -91,7 +91,7 @@ extension GrammarParser {
             } else {
                 responseText = .init(code: nil, text: "")
             }
-            
+
             guard let state = UntaggedStatus(code: code, responseText: responseText) else {
                 throw ParserError(hint: "Invalid response code: \(code)")
             }
@@ -103,7 +103,7 @@ extension GrammarParser {
     static func parseTaggedResponseState(buffer: inout ParseBuffer, tracker: StackTracker) throws -> TaggedResponse.State {
         try PL.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
             let code = try self.parseAtom(buffer: &buffer, tracker: tracker)
-            
+
             let parsedSpace: Bool
             do {
                 try PL.parseSpaces(buffer: &buffer, tracker: tracker)
@@ -111,7 +111,7 @@ extension GrammarParser {
             } catch is ParserError {
                 parsedSpace = false
             }
-            
+
             // we should always be able to parse a space
             // but, cough, iCloud and Oracle, sometimes doesn't bother sending
             // a response text.
@@ -121,7 +121,7 @@ extension GrammarParser {
             } else {
                 responseText = .init(code: nil, text: "")
             }
-            
+
             guard let state = TaggedResponse.State(code: code, responseText: responseText) else {
                 throw ParserError(hint: "Invalid response code: \(code)")
             }

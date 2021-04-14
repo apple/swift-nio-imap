@@ -46,7 +46,7 @@ public enum UntaggedStatus: Equatable {
     /// is about to close the connection.  The human-readable text MAY be
     /// displayed to the user in a status report by the client.
     case bye(ResponseText)
-    
+
     init?(code: String, responseText: ResponseText) {
         switch code.lowercased() {
         case "ok": self = .ok(responseText)
