@@ -257,7 +257,7 @@ extension ResponseParser_Tests {
 extension ResponseParser_Tests {
     func testStateIsEnforce() {
         var parser = ResponseParser()
-        var input = ByteBuffer(string: "* 1 FETCH (* 2 FETCH ")
+        var input = ByteBuffer(string: "* 1 FETCH (* 2 FETCH \n")
 
         XCTAssertNoThrow(XCTAssertEqual(try parser.parseResponseStream(buffer: &input), .response(.fetchResponse(.start(1)))))
         XCTAssertThrowsError(try parser.parseResponseStream(buffer: &input))

@@ -16,22 +16,20 @@ import NIO
 @testable import NIOIMAPCore
 import XCTest
 
-class ResponseTextTests: EncodeTestClass {}
+class ResponseText_Tests: EncodeTestClass {}
 
 // MARK: - Encoding
 
-extension ResponseTextTests {
+extension ResponseText_Tests {
     func testEncode() {
         let inputs: [(ResponseText, String, UInt)] = [
             (.init(code: nil, text: "buffer"), "buffer", #line),
             (.init(code: .alert, text: "buffer"), "[ALERT] buffer", #line),
-        ]
 
-        for (code, expectedString, line) in inputs {
-            self.testBuffer.clear()
-            let size = self.testBuffer.writeResponseText(code)
-            XCTAssertEqual(size, expectedString.utf8.count, line: line)
-            XCTAssertEqual(self.testBufferString, expectedString, line: line)
-        }
+            // Must insert an additional space to make it standard conformant:
+            (.init(code: nil, text: ""), " ", #line),
+            (.init(code: .alert, text: ""), "[ALERT]  ", #line),
+        ]
+        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeResponseText($0) })
     }
 }

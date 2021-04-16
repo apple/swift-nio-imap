@@ -27,6 +27,15 @@ extension TaggedResponse {
 
         /// The command was likely invalid.
         case bad(ResponseText)
+
+        init?(code: String, responseText: ResponseText) {
+            switch code.lowercased() {
+            case "ok": self = .ok(responseText)
+            case "no": self = .no(responseText)
+            case "bad": self = .bad(responseText)
+            default: return nil
+            }
+        }
     }
 }
 

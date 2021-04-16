@@ -2447,6 +2447,32 @@ extension ParserUnitTests {
     }
 }
 
+// MARK: - parseTaggedResponseState
+
+// resp-cond-state = ("OK" / "NO" / "BAD") SP resp-text
+extension ParserUnitTests {
+    func testParseTaggedResponseState() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseTaggedResponseState,
+            validInputs: [
+                ("OK [ALERT] hello1", "\n", .ok(.init(code: .alert, text: "hello1")), #line),
+                ("NO [CLOSED] hello2", "\n", .no(.init(code: .closed, text: "hello2")), #line),
+                ("BAD [PARSE] hello3", "\n", .bad(.init(code: .parse, text: "hello3")), #line),
+
+                // strange cases
+                ("OK ", "\n", .ok(.init(text: "")), #line),
+                ("OK", "\n", .ok(.init(text: "")), #line),
+            ],
+            parserErrorInputs: [
+                ("OOPS [ALERT] hello1", "\n", #line),
+            ],
+            incompleteMessageInputs: [
+                ("OOPS", "", #line),
+            ]
+        )
+    }
+}
+
 // MARK: - parseTaggedExtension
 
 extension ParserUnitTests {
@@ -2644,6 +2670,36 @@ extension ParserUnitTests {
             ],
             incompleteMessageInputs: [
                 ("UNSUBSCRIBE", " ", #line),
+            ]
+        )
+    }
+}
+
+// MARK: - parseUntaggedResponseStatus
+
+// resp-cond-state = ("OK" / "NO" / "BAD") SP resp-text
+extension ParserUnitTests {
+    func testParseUntaggedResponseStatus() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseUntaggedResponseStatus,
+            validInputs: [
+                ("OK [ALERT] hello1", "\n", .ok(.init(code: .alert, text: "hello1")), #line),
+                ("NO [CLOSED] hello2", "\n", .no(.init(code: .closed, text: "hello2")), #line),
+                ("BAD [PARSE] hello3", "\n", .bad(.init(code: .parse, text: "hello3")), #line),
+                ("PREAUTH [READ-ONLY] hello4", "\n", .preauth(.init(code: .readOnly, text: "hello4")), #line),
+                ("BYE [READ-WRITE] hello5", "\n", .bye(.init(code: .readWrite, text: "hello5")), #line),
+
+                // strange cases
+                ("NO [ALERT] ", "\n", .no(.init(code: .alert, text: "")), #line),
+                ("NO [ALERT]", "\n", .no(.init(code: .alert, text: "")), #line),
+                ("NO ", "\n", .no(.init(code: nil, text: "")), #line),
+                ("NO", "\n", .no(.init(code: nil, text: "")), #line),
+            ],
+            parserErrorInputs: [
+                ("OOPS [ALERT] hello1", "\n", #line),
+            ],
+            incompleteMessageInputs: [
+                ("OOPS", "", #line),
             ]
         )
     }

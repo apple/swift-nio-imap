@@ -46,6 +46,17 @@ public enum UntaggedStatus: Equatable {
     /// is about to close the connection.  The human-readable text MAY be
     /// displayed to the user in a status report by the client.
     case bye(ResponseText)
+
+    init?(code: String, responseText: ResponseText) {
+        switch code.lowercased() {
+        case "ok": self = .ok(responseText)
+        case "no": self = .no(responseText)
+        case "bad": self = .bad(responseText)
+        case "preauth": self = .preauth(responseText)
+        case "bye": self = .bye(responseText)
+        default: return nil
+        }
+    }
 }
 
 // MARK: - Encoding
