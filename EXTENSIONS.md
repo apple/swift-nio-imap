@@ -1,6 +1,6 @@
 ### IMAP Extensions
 
-NIOIMAP supports a variety of known IMAP extensions. If you'd like support for an extension not listed or ticket below, file an issue, or create a PR.
+NIOIMAP supports a variety of known IMAP [extensions](https://www.iana.org/assignments/imap-capabilities/imap-capabilities.xhtml). If you'd like support for an extension not listed or ticket below, file an issue, or create a PR.
 
 | Capability | RFC
 ---|---|---
