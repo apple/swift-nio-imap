@@ -1,77 +1,43 @@
 ### IMAP Extensions
 
-NIOIMAP supports a variety of know IMAP extensions. If you'd like support for an extension not listed or ticket below, file an issue, or create a PR.
+NIOIMAP supports a variety of known IMAP [extensions](https://www.iana.org/assignments/imap-capabilities/imap-capabilities.xhtml). If you'd like support for an extension not listed or ticket below, file an issue, or create a PR.
 
-| Symbol | Meaning |
----|---
-✅|Implemented
-❌|Not implemented
-
-| Capability | RFC | Status |
+| Capability | RFC
 ---|---|---
-ACL|[RFC4314]|❌
-ANNOTATE-EXPERIMENT-1|[RFC5257]|❌
-APPENDLIMIT|[RFC7889]|❌
-AUTH=|[RFC3501]|✅
-BINARY|[RFC3516]|✅
-CATENATE|[RFC4469]|✅
-CHILDREN|[RFC3348]|✅
-COMPRESS=DEFLATE|[RFC4978]|❌
-CONDSTORE|[RFC7162]|✅
-CONTEXT=SEARCH|[RFC5267]|❌
-CONTEXT=SORT|[RFC5267]|❌
-CONVERT|[RFC5259]|❌
-CREATE-SPECIAL-USE|[RFC6154]|✅
-ENABLE|[RFC5161]|✅
-ESEARCH|[RFC4731]|✅
-ESORT|[RFC5267]|❌
-FILTERS|[RFC5466]|✅
-I18NLEVEL=1|[RFC5255]|❌
-I18NLEVEL=2|[RFC5255]|❌
-ID|[RFC2971]|✅
-IDLE|[RFC2177]|✅
-IMAPSIEVE=|[RFC6785]|❌
-IMAPURL=|[RFC5092]|✅
-LANGUAGE|[RFC5255]|❌
-LIST-EXTENDED|[RFC5258]|❌
-LIST-MYRIGHTS|[RFC8440]|❌
-LIST-STATUS|[RFC5819]|✅
-LITERAL+|[RFC7888]|✅
-LITERAL-|[RFC7888]|✅
-LOGIN-REFERRALS|[RFC2221]|✅
-LOGINDISABLED|[RFC2595][RFC3501]|❌
-MAILBOX-REFERRALS|[RFC2193]|❌
-METADATA|[RFC5464]|✅
-METADATA-SERVER|[RFC5464]|✅
-MOVE|[RFC6851]|✅
-MULTIAPPEND|[RFC3502]|✅
-MULTISEARCH|[RFC7377]|❌
-NAMESPACE|[RFC2342]|✅
-NOTIFY|[RFC5465]|❌
-OBJECTID|[RFC8474]|❌
-QRESYNC|[RFC7162]|✅
-QUOTA|[RFC2087]|✅
-REPLACE|[RFC8508]|❌
-RIGHTS=|[RFC4314]|❌
-SASL-IR|[RFC4959]|✅
-SAVEDATE|[RFC8514]|❌
-SEARCH=FUZZY|[RFC6203]|❌
-SEARCHRES|[RFC5182]|✅
-SORT|[RFC5256]|❌
-SORT=DISPLAY|[RFC5957]|❌
-SPECIAL-USE|[RFC6154]|✅
-STARTTLS|[RFC2595][RFC3501]|❌
-STATUS=SIZE|[RFC8438]|❌
-THREAD|[RFC5256]|❌
-UIDPLUS|[RFC4315]|✅
-UNAUTHENTICATE|[RFC8437]|❌
-UNSELECT|[RFC3691]|✅
-URLFETCH=BINARY|[RFC5524]|❌
-URL-PARTIAL|[RFC5550]|❌
-URLAUTH|[RFC4467]|✅
-UTF8=ACCEPT|[RFC6855]|❌
-UTF8=ALL (OBSOLETE)|[RFC5738][RFC6855]|❌
-UTF8=APPEND (OBSOLETE)|[RFC5738][RFC6855]|❌
-UTF8=ONLY|[RFC6855]|❌
-UTF8=USER (OBSOLETE)|[RFC5738][RFC6855]|❌
-WITHIN|[RFC5032]|✅
+AUTH=|[RFC3501](https://www.iana.org/go/rfc3501)
+BINARY|[RFC3516](https://www.iana.org/go/rfc3516)
+CATENATE|[RFC4469](https://www.iana.org/go/rfc4469)
+CHILDREN|[RFC3348](https://www.iana.org/go/rfc3348)
+CONDSTORE|[RFC7162](https://www.iana.org/go/rfc7162)
+CREATE-SPECIAL-USE|[RFC6154](https://www.iana.org/go/rfc6154)
+ENABLE|[RFC5161](https://www.iana.org/go/rfc5161)
+ESEARCH|[RFC4731](https://www.iana.org/go/rfc4731)
+ID|[RFC2971](https://www.iana.org/go/rfc2971)
+IDLE|[RFC2177](https://www.iana.org/go/rfc2177)
+LIST-EXTENDED|[RFC5258](https://www.iana.org/go/rfc5258)
+LIST-STATUS|[RFC5819](https://www.iana.org/go/rfc5819)
+LITERAL+|[RFC7888](https://www.iana.org/go/rfc7888)
+LITERAL-|[RFC7888](https://www.iana.org/go/rfc7888)
+LOGIN-REFERRALS|[RFC2221](https://www.iana.org/go/rfc2221)
+LOGINDISABLED|[RFC3501](https://www.iana.org/go/rfc3501)
+METADATA|[RFC5464](https://www.iana.org/go/rfc5464)
+METADATA-SERVER|[RFC5464](https://www.iana.org/go/rfc5464)
+MOVE|[RFC6851](https://www.iana.org/go/rfc6851)
+MULTIAPPEND|[RFC3502](https://www.iana.org/go/rfc3502)
+MULTISEARCH|[RFC7377](https://www.iana.org/go/rfc7377)
+NAMESPACE|[RFC2342](https://www.iana.org/go/rfc2342)
+QRESYNC|[RFC7162](https://www.iana.org/go/rfc7162)
+QUOTA|[RFC2087](https://www.iana.org/go/rfc2087)
+SASL-IR|[RFC4959](https://www.iana.org/go/rfc4959)
+SEARCHRES|[RFC5182](https://www.iana.org/go/rfc5182)
+SPECIAL-USE|[RFC6154](https://www.iana.org/go/rfc6154)
+STARTTLS|[RFC3501](https://www.iana.org/go/rfc3501)
+STATUS=SIZE|[RFC8438](https://www.iana.org/go/rfc8438)
+UIDPLUS|[RFC4315](https://www.iana.org/go/rfc4315)
+UNSELECT|[RFC3691](https://www.iana.org/go/rfc3691)
+URLAUTH|[RFC4467](https://www.iana.org/go/rfc4467)
+WITHIN|[RFC5032](https://www.iana.org/go/rfc5032)
+
+We have also implemented:
+- "Collected Extensions to IMAP 4", [RFC4466](https://www.iana.org/go/rfc4466).
+- Gmail IMAP extensions https://developers.google.com/gmail/imap/imap-extensions
