@@ -206,10 +206,14 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
     }
 
     public func write(context: ChannelHandlerContext, data: NIOAny, promise: EventLoopPromise<Void>?) {
-        precondition(self.bufferedWrites.isEmpty, "Sorry, we only allow one command at a time right now. We're working on it. Issue #528")
         let command = self.unwrapOutboundIn(data)
         var encoder = CommandEncodeBuffer(buffer: context.channel.allocator.buffer(capacity: 1024), options: self.encodingOptions)
         encoder.writeCommandStream(command)
+        
+        guard self.bufferedWrites.isEmpty else {
+            self.bufferedWrites.append((encoder._buffer, promise))
+            return
+        }
 
         switch command {
         case .command(let command):
