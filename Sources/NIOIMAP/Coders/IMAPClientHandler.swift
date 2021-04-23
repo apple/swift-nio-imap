@@ -209,7 +209,7 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
         let command = self.unwrapOutboundIn(data)
         var encoder = CommandEncodeBuffer(buffer: context.channel.allocator.buffer(capacity: 1024), options: self.encodingOptions)
         encoder.writeCommandStream(command)
-        
+
         guard self.bufferedWrites.isEmpty else {
             self.bufferedWrites.append((encoder._buffer, promise))
             return
