@@ -113,6 +113,22 @@ class IMAPClientHandlerTests: XCTestCase {
         self.assertInbound(.taggedResponse(.init(tag: "y",
                                                  state: .ok(.init(code: nil, text: "ok")))))
     }
+    
+    func testContinueRequestCommandFollowedByAuthenticate() {
+        self.writeOutbound(.command(.init(tag: "1", command: .move(.lastCommand, .init("\\")))), wait: false)
+        self.writeOutbound(.command(.init(tag: "2", command: .authenticate(mechanism: .gssAPI, initialResponse: nil))), wait: false)
+        
+        // send the move command
+        self.assertOutboundString("1 MOVE $ {1}\r\n")
+        self.writeInbound("+ OK\r\n")
+        
+        // respond to the continuation, move straight to authentication
+        self.assertOutboundString("\\\r\n2 AUTHENTICATE GSSAPI\r\n")
+        
+        // server sends an auth challenge
+        self.writeInbound("+\r\n")
+        self.assertInbound(.authenticationChallenge(""))
+    }
 
     func testUnexpectedContinuationRequest() {
         let f = self.writeOutbound(CommandStream.command(TaggedCommand(tag: "x",
