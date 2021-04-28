@@ -31,7 +31,7 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
     public typealias OutboundOut = ByteBuffer
 
     private let decoder: NIOSingleStepByteToMessageProcessor<ResponseDecoder>
-    
+
     private var currentEncodeBuffer: (_EncodeBuffer, EventLoopPromise<Void>?)?
     private var bufferedCommands: MarkedCircularBuffer<(CommandStream, EventLoopPromise<Void>?)> = .init(initialCapacity: 4)
 
@@ -189,13 +189,13 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
             // Note, we can `flush` here because this is already flushed (or else the we wouldn't have a mark).
             context.flush()
         }
-        
+
         guard let bufferPromise = self.currentEncodeBuffer else {
             preconditionFailure("No current buffer to continue writing")
         }
         var currentBuffer = bufferPromise.0
         let currentPromise = bufferPromise.1
-        
+
         // first flush whatever command we currently have buffered
         repeat {
             let nextChunk = currentBuffer.nextChunk()
@@ -212,7 +212,7 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
                 self.currentEncodeBuffer = nil
             }
         } while self.currentEncodeBuffer != nil
-        
+
         // continue writing commands until we find a mark, or need a continuation
         repeat {
             self.writeNextCommand(context: context)
@@ -226,13 +226,13 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
             self.writeNextCommand(context: context)
         }
     }
-    
+
     public func writeNextCommand(context: ChannelHandlerContext) {
         assert(self.currentEncodeBuffer == nil)
         guard let (command, promise) = self.bufferedCommands.popFirst() else {
             return
         }
-        
+
         var commandEncoder = CommandEncodeBuffer(
             buffer: context.channel.allocator.buffer(capacity: 512),
             options: self.encodingOptions
