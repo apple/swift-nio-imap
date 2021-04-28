@@ -2,8 +2,8 @@
 
 NIOIMAP supports a variety of known IMAP [extensions](https://www.iana.org/assignments/imap-capabilities/imap-capabilities.xhtml). If you'd like support for an extension not listed or ticket below, file an issue, or create a PR.
 
-| Capability | RFC
----|---|---
+| Capability | RFC |
+| --- | --- |
 AUTH=|[RFC3501](https://www.iana.org/go/rfc3501)
 BINARY|[RFC3516](https://www.iana.org/go/rfc3516)
 CATENATE|[RFC4469](https://www.iana.org/go/rfc4469)
