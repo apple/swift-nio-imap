@@ -31,8 +31,9 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
     public typealias OutboundOut = ByteBuffer
 
     private let decoder: NIOSingleStepByteToMessageProcessor<ResponseDecoder>
-    private var bufferedWrites: MarkedCircularBuffer<(_EncodeBuffer, EventLoopPromise<Void>?)> =
-        MarkedCircularBuffer(initialCapacity: 4)
+    
+    private var currentEncodeBuffer: (_EncodeBuffer, EventLoopPromise<Void>?)?
+    private var bufferedCommands: MarkedCircularBuffer<(CommandStream, EventLoopPromise<Void>?)> = .init(initialCapacity: 4)
 
     public struct UnexpectedContinuationRequest: Error {}
 
@@ -183,37 +184,60 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
     }
 
     private func writeNextChunks(context: ChannelHandlerContext) {
-        assert(self.bufferedWrites.hasMark)
+        assert(self.bufferedCommands.hasMark || self.bufferedCommands.isEmpty)
         defer {
             // Note, we can `flush` here because this is already flushed (or else the we wouldn't have a mark).
             context.flush()
         }
+        
+        guard let bufferPromise = self.currentEncodeBuffer else {
+            preconditionFailure("No current buffer to continue writing")
+        }
+        var currentBuffer = bufferPromise.0
+        let currentPromise = bufferPromise.1
+        
+        // first flush whatever command we currently have buffered
         repeat {
-            let next = self.bufferedWrites[self.bufferedWrites.startIndex].0.nextChunk()
-
-            if next.waitForContinuation {
+            let nextChunk = currentBuffer.nextChunk()
+            if nextChunk.waitForContinuation {
                 assert(self.state == .expectingResponses || self.state == .expectingLiteralContinuationRequest)
                 self.state = .expectingLiteralContinuationRequest
-                context.write(self.wrapOutboundOut(next.bytes), promise: nil)
+                context.write(self.wrapOutboundOut(nextChunk.bytes), promise: nil)
+                self.currentEncodeBuffer = (currentBuffer, currentPromise)
                 return
             } else {
                 assert(self.state == .expectingLiteralContinuationRequest)
                 self.state = .expectingResponses
-                let promise = self.bufferedWrites.removeFirst().1
-                context.write(self.wrapOutboundOut(next.bytes), promise: promise)
+                context.write(self.wrapOutboundOut(nextChunk.bytes), promise: currentPromise)
+                self.currentEncodeBuffer = nil
             }
-        } while self.bufferedWrites.hasMark
+        } while self.currentEncodeBuffer != nil
+        
+        // continue writing commands until we find a mark, or need a continuation
+        repeat {
+            self.writeNextCommand(context: context)
+        } while self.bufferedCommands.hasMark && self.currentEncodeBuffer == nil
     }
 
     public func write(context: ChannelHandlerContext, data: NIOAny, promise: EventLoopPromise<Void>?) {
         let command = self.unwrapOutboundIn(data)
-        var encoder = CommandEncodeBuffer(buffer: context.channel.allocator.buffer(capacity: 1024), options: self.encodingOptions)
-        encoder.writeCommandStream(command)
-
-        guard self.bufferedWrites.isEmpty else {
-            self.bufferedWrites.append((encoder._buffer, promise))
+        self.bufferedCommands.append((command, promise))
+        if self.currentEncodeBuffer == nil {
+            self.writeNextCommand(context: context)
+        }
+    }
+    
+    public func writeNextCommand(context: ChannelHandlerContext) {
+        assert(self.currentEncodeBuffer == nil)
+        guard let (command, promise) = self.bufferedCommands.popFirst() else {
             return
         }
+        
+        var commandEncoder = CommandEncodeBuffer(
+            buffer: context.channel.allocator.buffer(capacity: 512),
+            options: self.encodingOptions
+        )
+        commandEncoder.writeCommandStream(command)
 
         switch command {
         case .command(let command):
@@ -235,24 +259,20 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
             break
         }
 
-        if self.bufferedWrites.isEmpty {
-            let next = encoder._buffer.nextChunk()
-
-            if next.waitForContinuation {
-                assert(self.state == .expectingResponses)
-                self.state = .expectingLiteralContinuationRequest
-                context.write(self.wrapOutboundOut(next.bytes), promise: nil)
-                // fall through to append below
-            } else {
-                context.write(self.wrapOutboundOut(next.bytes), promise: promise)
-                return
-            }
+        let next = commandEncoder._buffer.nextChunk()
+        if next.waitForContinuation {
+            self.currentEncodeBuffer = (commandEncoder._buffer, promise)
+            assert(self.state == .expectingResponses)
+            self.state = .expectingLiteralContinuationRequest
+            context.write(self.wrapOutboundOut(next.bytes), promise: nil)
+        } else {
+            self.currentEncodeBuffer = nil
+            context.write(self.wrapOutboundOut(next.bytes), promise: promise)
         }
-        self.bufferedWrites.append((encoder._buffer, promise))
     }
 
     public func flush(context: ChannelHandlerContext) {
-        self.bufferedWrites.mark()
+        self.bufferedCommands.mark()
         context.flush()
     }
 }

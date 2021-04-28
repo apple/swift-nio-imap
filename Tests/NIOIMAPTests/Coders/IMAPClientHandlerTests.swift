@@ -114,6 +114,56 @@ class IMAPClientHandlerTests: XCTestCase {
                                                  state: .ok(.init(code: nil, text: "ok")))))
     }
     
+    // This makes sure that we successfully switch from responding to continuation
+    // requests back to "simple" commands that can be written in one shot. This was a bug
+    // in a previous implementation, so this test prevents regression.
+    func testThreeContReqCommandsEnqueuedFollowedBy2BasicOnes() {
+        let f1 = self.writeOutbound(.command(.init(tag: "1", command: .create(.init("\\"), []))), wait: false)
+        let f2 = self.writeOutbound(.command(.init(tag: "2", command: .create(.init("\\"), []))), wait: false)
+        let f3 = self.writeOutbound(.command(.init(tag: "3", command: .create(.init("\\"), []))), wait: false)
+        let f4 = self.writeOutbound(.command(.init(tag: "4", command: .create(.init("a"), []))), wait: false)
+        let f5 = self.writeOutbound(.command(.init(tag: "5", command: .create(.init("b"), []))), wait: false)
+        
+        self.assertOutboundString("1 CREATE {1}\r\n")
+        self.writeInbound("+ OK\r\n")
+        XCTAssertNoThrow(try f1.wait())
+        self.assertOutboundString("\\\r\n")
+        
+        self.assertOutboundString("2 CREATE {1}\r\n")
+        self.writeInbound("+ OK\r\n")
+        XCTAssertNoThrow(try f2.wait())
+        self.assertOutboundString("\\\r\n")
+        
+        self.assertOutboundString("3 CREATE {1}\r\n")
+        self.writeInbound("+ OK\r\n")
+        XCTAssertNoThrow(try f3.wait())
+        self.assertOutboundString("\\\r\n")
+        
+        self.assertOutboundString("4 CREATE \"a\"\r\n")
+        XCTAssertNoThrow(try f4.wait())
+        self.assertOutboundString("5 CREATE \"b\"\r\n")
+        XCTAssertNoThrow(try f5.wait())
+        
+        self.writeInbound("1 OK ok\r\n")
+        self.assertInbound(.taggedResponse(.init(tag: "1",
+                                                 state: .ok(.init(code: nil, text: "ok")))))
+        self.writeInbound("2 OK ok\r\n")
+        self.assertInbound(.taggedResponse(.init(tag: "2",
+                                                 state: .ok(.init(code: nil, text: "ok")))))
+        
+        self.writeInbound("3 OK ok\r\n")
+        self.assertInbound(.taggedResponse(.init(tag: "3",
+                                                 state: .ok(.init(code: nil, text: "ok")))))
+        
+        self.writeInbound("4 OK ok\r\n")
+        self.assertInbound(.taggedResponse(.init(tag: "4",
+                                                 state: .ok(.init(code: nil, text: "ok")))))
+        
+        self.writeInbound("5 OK ok\r\n")
+        self.assertInbound(.taggedResponse(.init(tag: "5",
+                                                 state: .ok(.init(code: nil, text: "ok")))))
+    }
+    
     func testContinueRequestCommandFollowedByAuthenticate() {
         self.writeOutbound(.command(.init(tag: "1", command: .move(.lastCommand, .init("\\")))), wait: false)
         self.writeOutbound(.command(.init(tag: "2", command: .authenticate(mechanism: .gssAPI, initialResponse: nil))), wait: false)
@@ -123,7 +173,8 @@ class IMAPClientHandlerTests: XCTestCase {
         self.writeInbound("+ OK\r\n")
         
         // respond to the continuation, move straight to authentication
-        self.assertOutboundString("\\\r\n2 AUTHENTICATE GSSAPI\r\n")
+        self.assertOutboundString("\\\r\n")
+        self.assertOutboundString("2 AUTHENTICATE GSSAPI\r\n")
         
         // server sends an auth challenge
         self.writeInbound("+\r\n")
