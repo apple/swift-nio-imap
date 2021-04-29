@@ -79,7 +79,7 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
         self.lastKnownCapabilities = []
         self.encodingOptions = CommandEncodingOptions(capabilities: self.lastKnownCapabilities)
     }
-    
+
     public func channelInactive(context: ChannelHandlerContext) {
         self.currentEncodeBuffer?.1?.fail(ChannelError.ioOnClosedChannel)
         self.bufferedCommands.forEach { $0.1?.fail(ChannelError.ioOnClosedChannel) }

@@ -464,7 +464,6 @@ class IMAPClientHandlerTests: XCTestCase {
 //    }
 
     func testWriteCascadesPromiseFailure() {
-        
         struct TestError: Error {}
         class TestOutboundHandlerThatFails: ChannelOutboundHandler {
             typealias OutboundIn = ByteBuffer
@@ -473,9 +472,9 @@ class IMAPClientHandlerTests: XCTestCase {
                 promise?.fail(TestError())
             }
         }
-        
+
         try! self.channel.pipeline.addHandler(TestOutboundHandlerThatFails(), position: .first).wait()
-        
+
         // writing a command that has a continuation
         var didComplete = false
         self.writeOutbound(.command(.init(tag: "A1", command: .create(.init("\\"), []))), wait: false).whenFailure { error in
@@ -484,9 +483,8 @@ class IMAPClientHandlerTests: XCTestCase {
         }
         XCTAssertTrue(didComplete)
     }
-    
+
     func testWriteCascadesContinuationPromiseFailure() {
-        
         struct TestError: Error {}
         class TestOutboundHandlerThatFails: ChannelOutboundHandler {
             var failNextWrite: Bool = false
@@ -500,17 +498,17 @@ class IMAPClientHandlerTests: XCTestCase {
                 context.write(data, promise: promise)
             }
         }
-        
+
         let testHandler = TestOutboundHandlerThatFails()
         try! self.channel.pipeline.addHandler(testHandler, position: .first).wait()
-        
+
         // writing a command that has a continuation
         let future = self.channel.writeAndFlush(CommandStream.command(.init(tag: "A1", command: .rename(from: .init("\\"), to: .init("\\"), params: [:]))))
         self.assertOutboundString("A1 RENAME {1}\r\n")
-        
+
         testHandler.failNextWrite = true
         self.writeInbound("+ OK\r\n")
-        
+
         var didComplete = false
         future.whenFailure { error in
             XCTAssertTrue(error is TestError)
@@ -518,7 +516,7 @@ class IMAPClientHandlerTests: XCTestCase {
         }
         XCTAssertTrue(didComplete)
     }
-    
+
     // MARK: - setup / tear down
 
     override func setUp() {
