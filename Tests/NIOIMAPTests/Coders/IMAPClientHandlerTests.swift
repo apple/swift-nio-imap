@@ -463,6 +463,62 @@ class IMAPClientHandlerTests: XCTestCase {
 //        self.writeOutbound(.command(.init(tag: "A2", command: .noop)), wait: true)
 //    }
 
+    func testWriteCascadesPromiseFailure() {
+        
+        struct TestError: Error {}
+        class TestOutboundHandlerThatFails: ChannelOutboundHandler {
+            typealias OutboundIn = ByteBuffer
+            func write(context: ChannelHandlerContext, data: NIOAny, promise: EventLoopPromise<Void>?) {
+                XCTAssertNotNil(promise)
+                promise?.fail(TestError())
+            }
+        }
+        
+        try! self.channel.pipeline.addHandler(TestOutboundHandlerThatFails(), position: .first).wait()
+        
+        // writing a command that has a continuation
+        var didComplete = false
+        self.writeOutbound(.command(.init(tag: "A1", command: .create(.init("\\"), []))), wait: false).whenFailure { error in
+            XCTAssertTrue(error is TestError)
+            didComplete = true
+        }
+        XCTAssertTrue(didComplete)
+    }
+    
+    func testWriteCascadesContinuationPromiseFailure() {
+        
+        struct TestError: Error {}
+        class TestOutboundHandlerThatFails: ChannelOutboundHandler {
+            var failNextWrite: Bool = false
+            typealias OutboundIn = ByteBuffer
+            func write(context: ChannelHandlerContext, data: NIOAny, promise: EventLoopPromise<Void>?) {
+                if self.failNextWrite {
+                    XCTAssertNotNil(promise)
+                    promise?.fail(TestError())
+                    return
+                }
+                context.write(data, promise: promise)
+            }
+        }
+        
+        let testHandler = TestOutboundHandlerThatFails()
+        try! self.channel.pipeline.addHandler(testHandler, position: .first).wait()
+        
+        // writing a command that has a continuation
+        let future = self.channel.writeAndFlush(CommandStream.command(.init(tag: "A1", command: .rename(from: .init("\\"), to: .init("\\"), params: [:]))))
+        self.assertOutboundString("A1 RENAME {1}\r\n")
+        
+        testHandler.failNextWrite = true
+        self.writeInbound("+ OK\r\n")
+        
+        var didComplete = false
+        future.whenFailure { error in
+            XCTAssertTrue(error is TestError)
+            didComplete = true
+        }
+        XCTAssertTrue(didComplete)
+    }
+    
     // MARK: - setup / tear down
 
     override func setUp() {

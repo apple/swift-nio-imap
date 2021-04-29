@@ -79,6 +79,12 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
         self.lastKnownCapabilities = []
         self.encodingOptions = CommandEncodingOptions(capabilities: self.lastKnownCapabilities)
     }
+    
+    public func channelInactive(context: ChannelHandlerContext) {
+        self.currentEncodeBuffer?.1?.fail(ChannelError.ioOnClosedChannel)
+        self.bufferedCommands.forEach { $0.1?.fail(ChannelError.ioOnClosedChannel) }
+        context.fireChannelInactive()
+    }
 
     public func channelRead(context: ChannelHandlerContext, data: NIOAny) {
         let data = self.unwrapInboundIn(data)
@@ -205,7 +211,7 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
                 assert(self.state == .expectingResponses || self.state == .expectingLiteralContinuationRequest)
                 self.state = .expectingLiteralContinuationRequest
                 self.currentEncodeBuffer = (currentBuffer, currentPromise)
-                context.write(self.wrapOutboundOut(nextChunk.bytes), promise: nil)
+                context.write(self.wrapOutboundOut(nextChunk.bytes)).cascadeFailure(to: currentPromise)
                 return
             } else {
                 assert(self.state == .expectingLiteralContinuationRequest)
@@ -266,7 +272,7 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
             self.currentEncodeBuffer = (commandEncoder._buffer, promise)
             assert(self.state == .expectingResponses)
             self.state = .expectingLiteralContinuationRequest
-            context.write(self.wrapOutboundOut(next.bytes), promise: nil)
+            context.write(self.wrapOutboundOut(next.bytes)).cascadeFailure(to: promise)
         } else {
             self.currentEncodeBuffer = nil
             context.write(self.wrapOutboundOut(next.bytes), promise: promise)
