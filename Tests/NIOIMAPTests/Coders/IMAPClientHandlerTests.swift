@@ -413,7 +413,7 @@ class IMAPClientHandlerTests: XCTestCase {
         ]).wait())
         self.writeOutbound(.command(.init(tag: "A1", command: .idleStart)))
     }
-    
+
 //    func testProtectAgainstReentrancyWithContinuation() {
 //        struct MyOutboundEvent {}
 //
