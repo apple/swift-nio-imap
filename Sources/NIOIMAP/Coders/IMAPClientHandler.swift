@@ -204,14 +204,14 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
             if nextChunk.waitForContinuation {
                 assert(self.state == .expectingResponses || self.state == .expectingLiteralContinuationRequest)
                 self.state = .expectingLiteralContinuationRequest
-                context.write(self.wrapOutboundOut(nextChunk.bytes), promise: nil)
                 self.currentEncodeBuffer = (currentBuffer, currentPromise)
+                context.write(self.wrapOutboundOut(nextChunk.bytes), promise: nil)
                 return
             } else {
                 assert(self.state == .expectingLiteralContinuationRequest)
                 self.state = .expectingResponses
-                context.write(self.wrapOutboundOut(nextChunk.bytes), promise: currentPromise)
                 self.currentEncodeBuffer = nil
+                context.write(self.wrapOutboundOut(nextChunk.bytes), promise: currentPromise)
             }
         } while self.currentEncodeBuffer != nil
 
