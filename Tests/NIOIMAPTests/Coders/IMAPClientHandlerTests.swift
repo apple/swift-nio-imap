@@ -414,54 +414,54 @@ class IMAPClientHandlerTests: XCTestCase {
         self.writeOutbound(.command(.init(tag: "A1", command: .idleStart)))
     }
     
-    func testProtectAgainstReentrancyWithContinuation() {
-        struct MyOutboundEvent {}
-
-        class PreTestHandler: ChannelDuplexHandler {
-            typealias InboundIn = ByteBuffer
-            typealias InboundOut = ByteBuffer
-            typealias OutboundIn = ByteBuffer
-
-            func write(context: ChannelHandlerContext, data: NIOAny, promise: EventLoopPromise<Void>?) {
-                let data = self.wrapInboundOut(ByteBuffer(string: "+ \r\n"))
-                context.fireChannelRead(data)
-                promise?.succeed(())
-            }
-
-            func triggerUserOutboundEvent(context: ChannelHandlerContext, event: Any, promise: EventLoopPromise<Void>?) {
-                XCTAssert(event is MyOutboundEvent)
-                let data = self.wrapInboundOut(ByteBuffer(string: "A1 OK NOOP complete\r\n"))
-                context.fireChannelRead(data)
-                promise?.succeed(())
-            }
-        }
-
-        class PostTestHandler: ChannelDuplexHandler {
-            typealias InboundIn = Response
-            typealias OutboundIn = Response
-
-            var callCount = 0
-
-            func channelRead(context: ChannelHandlerContext, data: NIOAny) {
-                self.callCount += 1
-                if self.callCount < 3 {
-                    context.triggerUserOutboundEvent(MyOutboundEvent(), promise: nil)
-                }
-            }
-
-            func errorCaught(context: ChannelHandlerContext, error: Error) {
-                XCTFail("Unexpected error \(error)")
-            }
-        }
-
-        XCTAssertNoThrow(try self.channel.pipeline.addHandlers([
-            PreTestHandler(),
-            IMAPClientHandler(),
-            PostTestHandler(),
-        ]).wait())
-        self.writeOutbound(.command(.init(tag: "A1", command: .create(.init("\\"), []))), wait: false)
-        self.writeOutbound(.command(.init(tag: "A2", command: .noop)), wait: true)
-    }
+//    func testProtectAgainstReentrancyWithContinuation() {
+//        struct MyOutboundEvent {}
+//
+//        class PreTestHandler: ChannelDuplexHandler {
+//            typealias InboundIn = ByteBuffer
+//            typealias InboundOut = ByteBuffer
+//            typealias OutboundIn = ByteBuffer
+//
+//            func write(context: ChannelHandlerContext, data: NIOAny, promise: EventLoopPromise<Void>?) {
+//                let data = self.wrapInboundOut(ByteBuffer(string: "+ \r\n"))
+//                context.fireChannelRead(data)
+//                promise?.succeed(())
+//            }
+//
+//            func triggerUserOutboundEvent(context: ChannelHandlerContext, event: Any, promise: EventLoopPromise<Void>?) {
+//                XCTAssert(event is MyOutboundEvent)
+//                let data = self.wrapInboundOut(ByteBuffer(string: "A1 OK NOOP complete\r\n"))
+//                context.fireChannelRead(data)
+//                promise?.succeed(())
+//            }
+//        }
+//
+//        class PostTestHandler: ChannelDuplexHandler {
+//            typealias InboundIn = Response
+//            typealias OutboundIn = Response
+//
+//            var callCount = 0
+//
+//            func channelRead(context: ChannelHandlerContext, data: NIOAny) {
+//                self.callCount += 1
+//                if self.callCount < 3 {
+//                    context.triggerUserOutboundEvent(MyOutboundEvent(), promise: nil)
+//                }
+//            }
+//
+//            func errorCaught(context: ChannelHandlerContext, error: Error) {
+//                XCTFail("Unexpected error \(error)")
+//            }
+//        }
+//
+//        XCTAssertNoThrow(try self.channel.pipeline.addHandlers([
+//            PreTestHandler(),
+//            IMAPClientHandler(),
+//            PostTestHandler(),
+//        ]).wait())
+//        self.writeOutbound(.command(.init(tag: "A1", command: .create(.init("\\"), []))), wait: false)
+//        self.writeOutbound(.command(.init(tag: "A2", command: .noop)), wait: true)
+//    }
 
     // MARK: - setup / tear down
 
