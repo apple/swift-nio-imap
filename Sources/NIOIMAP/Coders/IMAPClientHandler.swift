@@ -196,7 +196,9 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
         var currentBuffer = bufferPromise.0
         let currentPromise = bufferPromise.1
 
-        // first flush whatever command we currently have buffered
+        // first write whatever command we've already started
+        // and keep going until the command is finished or we
+        // hit a continuation.
         repeat {
             let nextChunk = currentBuffer.nextChunk()
             if nextChunk.waitForContinuation {
