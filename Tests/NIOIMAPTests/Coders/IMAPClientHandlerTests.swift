@@ -87,33 +87,99 @@ class IMAPClientHandlerTests: XCTestCase {
                                                  state: .ok(.init(code: nil, text: "ok")))))
     }
 
-    // TODO: Make a new state machine that can handle pipelined commands and uncomment this test, issue #528
-//    func testTwoContReqCommandsEnqueued() {
-//        let f1 = self.writeOutbound(CommandStream.command(TaggedCommand(tag: "x",
-//                                                                        command: .rename(from: .init("\\"),
-//                                                                                         to: .init("to"),
-//                                                                                         params: [:]))),
-//        wait: false)
-//        let f2 = self.writeOutbound(CommandStream.command(TaggedCommand(tag: "y",
-//                                                                        command: .rename(from: .init("from"),
-//                                                                                         to: .init("\\"),
-//                                                                                         params: [:]))),
-//        wait: false)
-//        self.assertOutboundString("x RENAME {1}\r\n")
-//        self.writeInbound("+ OK\r\n")
-//        XCTAssertNoThrow(try f1.wait())
-//        self.assertOutboundString("\\ \"to\"\r\n")
-//        self.assertOutboundString("y RENAME \"from\" {1}\r\n")
-//        self.writeInbound("+ OK\r\n")
-//        XCTAssertNoThrow(try f2.wait())
-//        self.assertOutboundString("\\\r\n")
-//        self.writeInbound("x OK ok\r\n")
-//        self.assertInbound(.taggedResponse(.init(tag: "x",
-//                                                 state: .ok(.init(code: nil, text: "ok")))))
-//        self.writeInbound("y OK ok\r\n")
-//        self.assertInbound(.taggedResponse(.init(tag: "y",
-//                                                 state: .ok(.init(code: nil, text: "ok")))))
-//    }
+    func testTwoContReqCommandsEnqueued() {
+        let f1 = self.writeOutbound(CommandStream.command(TaggedCommand(tag: "x",
+                                                                        command: .rename(from: .init("\\"),
+                                                                                         to: .init("to"),
+                                                                                         params: [:]))),
+        wait: false)
+        let f2 = self.writeOutbound(CommandStream.command(TaggedCommand(tag: "y",
+                                                                        command: .rename(from: .init("from"),
+                                                                                         to: .init("\\"),
+                                                                                         params: [:]))),
+        wait: false)
+        self.assertOutboundString("x RENAME {1}\r\n")
+        self.writeInbound("+ OK\r\n")
+        XCTAssertNoThrow(try f1.wait())
+        self.assertOutboundString("\\ \"to\"\r\n")
+        self.assertOutboundString("y RENAME \"from\" {1}\r\n")
+        self.writeInbound("+ OK\r\n")
+        XCTAssertNoThrow(try f2.wait())
+        self.assertOutboundString("\\\r\n")
+        self.writeInbound("x OK ok\r\n")
+        self.assertInbound(.taggedResponse(.init(tag: "x",
+                                                 state: .ok(.init(code: nil, text: "ok")))))
+        self.writeInbound("y OK ok\r\n")
+        self.assertInbound(.taggedResponse(.init(tag: "y",
+                                                 state: .ok(.init(code: nil, text: "ok")))))
+    }
+
+    // This makes sure that we successfully switch from responding to continuation
+    // requests back to "simple" commands that can be written in one shot. This was a bug
+    // in a previous implementation, so this test prevents regression.
+    func testThreeContReqCommandsEnqueuedFollowedBy2BasicOnes() {
+        let f1 = self.writeOutbound(.command(.init(tag: "1", command: .create(.init("\\"), []))), wait: false)
+        let f2 = self.writeOutbound(.command(.init(tag: "2", command: .create(.init("\\"), []))), wait: false)
+        let f3 = self.writeOutbound(.command(.init(tag: "3", command: .create(.init("\\"), []))), wait: false)
+        let f4 = self.writeOutbound(.command(.init(tag: "4", command: .create(.init("a"), []))), wait: false)
+        let f5 = self.writeOutbound(.command(.init(tag: "5", command: .create(.init("b"), []))), wait: false)
+
+        self.assertOutboundString("1 CREATE {1}\r\n")
+        self.writeInbound("+ OK\r\n")
+        XCTAssertNoThrow(try f1.wait())
+        self.assertOutboundString("\\\r\n")
+
+        self.assertOutboundString("2 CREATE {1}\r\n")
+        self.writeInbound("+ OK\r\n")
+        XCTAssertNoThrow(try f2.wait())
+        self.assertOutboundString("\\\r\n")
+
+        self.assertOutboundString("3 CREATE {1}\r\n")
+        self.writeInbound("+ OK\r\n")
+        XCTAssertNoThrow(try f3.wait())
+        self.assertOutboundString("\\\r\n")
+
+        self.assertOutboundString("4 CREATE \"a\"\r\n")
+        XCTAssertNoThrow(try f4.wait())
+        self.assertOutboundString("5 CREATE \"b\"\r\n")
+        XCTAssertNoThrow(try f5.wait())
+
+        self.writeInbound("1 OK ok\r\n")
+        self.assertInbound(.taggedResponse(.init(tag: "1",
+                                                 state: .ok(.init(code: nil, text: "ok")))))
+        self.writeInbound("2 OK ok\r\n")
+        self.assertInbound(.taggedResponse(.init(tag: "2",
+                                                 state: .ok(.init(code: nil, text: "ok")))))
+
+        self.writeInbound("3 OK ok\r\n")
+        self.assertInbound(.taggedResponse(.init(tag: "3",
+                                                 state: .ok(.init(code: nil, text: "ok")))))
+
+        self.writeInbound("4 OK ok\r\n")
+        self.assertInbound(.taggedResponse(.init(tag: "4",
+                                                 state: .ok(.init(code: nil, text: "ok")))))
+
+        self.writeInbound("5 OK ok\r\n")
+        self.assertInbound(.taggedResponse(.init(tag: "5",
+                                                 state: .ok(.init(code: nil, text: "ok")))))
+    }
+
+    func testContinueRequestCommandFollowedByAuthenticate() {
+        self.writeOutbound(.command(.init(tag: "1", command: .move(.lastCommand, .init("\\")))), wait: false)
+        self.writeOutbound(.command(.init(tag: "2", command: .authenticate(mechanism: .gssAPI, initialResponse: nil))), wait: false)
+
+        // send the move command
+        self.assertOutboundString("1 MOVE $ {1}\r\n")
+        self.writeInbound("+ OK\r\n")
+
+        // respond to the continuation, move straight to authentication
+        self.assertOutboundString("\\\r\n")
+        self.assertOutboundString("2 AUTHENTICATE GSSAPI\r\n")
+
+        // server sends an auth challenge
+        self.writeInbound("+\r\n")
+        self.assertInbound(.authenticationChallenge(""))
+    }
 
     func testUnexpectedContinuationRequest() {
         let f = self.writeOutbound(CommandStream.command(TaggedCommand(tag: "x",
@@ -346,6 +412,109 @@ class IMAPClientHandlerTests: XCTestCase {
             PostTestHandler(),
         ]).wait())
         self.writeOutbound(.command(.init(tag: "A1", command: .idleStart)))
+    }
+
+//    func testProtectAgainstReentrancyWithContinuation() {
+//        struct MyOutboundEvent {}
+//
+//        class PreTestHandler: ChannelDuplexHandler {
+//            typealias InboundIn = ByteBuffer
+//            typealias InboundOut = ByteBuffer
+//            typealias OutboundIn = ByteBuffer
+//
+//            func write(context: ChannelHandlerContext, data: NIOAny, promise: EventLoopPromise<Void>?) {
+//                let data = self.wrapInboundOut(ByteBuffer(string: "+ \r\n"))
+//                context.fireChannelRead(data)
+//                promise?.succeed(())
+//            }
+//
+//            func triggerUserOutboundEvent(context: ChannelHandlerContext, event: Any, promise: EventLoopPromise<Void>?) {
+//                XCTAssert(event is MyOutboundEvent)
+//                let data = self.wrapInboundOut(ByteBuffer(string: "A1 OK NOOP complete\r\n"))
+//                context.fireChannelRead(data)
+//                promise?.succeed(())
+//            }
+//        }
+//
+//        class PostTestHandler: ChannelDuplexHandler {
+//            typealias InboundIn = Response
+//            typealias OutboundIn = Response
+//
+//            var callCount = 0
+//
+//            func channelRead(context: ChannelHandlerContext, data: NIOAny) {
+//                self.callCount += 1
+//                if self.callCount < 3 {
+//                    context.triggerUserOutboundEvent(MyOutboundEvent(), promise: nil)
+//                }
+//            }
+//
+//            func errorCaught(context: ChannelHandlerContext, error: Error) {
+//                XCTFail("Unexpected error \(error)")
+//            }
+//        }
+//
+//        XCTAssertNoThrow(try self.channel.pipeline.addHandlers([
+//            PreTestHandler(),
+//            IMAPClientHandler(),
+//            PostTestHandler(),
+//        ]).wait())
+//        self.writeOutbound(.command(.init(tag: "A1", command: .create(.init("\\"), []))), wait: false)
+//        self.writeOutbound(.command(.init(tag: "A2", command: .noop)), wait: true)
+//    }
+
+    func testWriteCascadesPromiseFailure() {
+        struct TestError: Error {}
+        class TestOutboundHandlerThatFails: ChannelOutboundHandler {
+            typealias OutboundIn = ByteBuffer
+            func write(context: ChannelHandlerContext, data: NIOAny, promise: EventLoopPromise<Void>?) {
+                XCTAssertNotNil(promise)
+                promise?.fail(TestError())
+            }
+        }
+
+        try! self.channel.pipeline.addHandler(TestOutboundHandlerThatFails(), position: .first).wait()
+
+        // writing a command that has a continuation
+        var didComplete = false
+        self.writeOutbound(.command(.init(tag: "A1", command: .create(.init("\\"), []))), wait: false).whenFailure { error in
+            XCTAssertTrue(error is TestError)
+            didComplete = true
+        }
+        XCTAssertTrue(didComplete)
+    }
+
+    func testWriteCascadesContinuationPromiseFailure() {
+        struct TestError: Error {}
+        class TestOutboundHandlerThatFails: ChannelOutboundHandler {
+            var failNextWrite: Bool = false
+            typealias OutboundIn = ByteBuffer
+            func write(context: ChannelHandlerContext, data: NIOAny, promise: EventLoopPromise<Void>?) {
+                if self.failNextWrite {
+                    XCTAssertNotNil(promise)
+                    promise?.fail(TestError())
+                    return
+                }
+                context.write(data, promise: promise)
+            }
+        }
+
+        let testHandler = TestOutboundHandlerThatFails()
+        try! self.channel.pipeline.addHandler(testHandler, position: .first).wait()
+
+        // writing a command that has a continuation
+        let future = self.channel.writeAndFlush(CommandStream.command(.init(tag: "A1", command: .rename(from: .init("\\"), to: .init("\\"), params: [:]))))
+        self.assertOutboundString("A1 RENAME {1}\r\n")
+
+        testHandler.failNextWrite = true
+        self.writeInbound("+ OK\r\n")
+
+        var didComplete = false
+        future.whenFailure { error in
+            XCTAssertTrue(error is TestError)
+            didComplete = true
+        }
+        XCTAssertTrue(didComplete)
     }
 
     // MARK: - setup / tear down
