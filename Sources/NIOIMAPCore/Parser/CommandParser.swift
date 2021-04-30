@@ -22,16 +22,12 @@ public struct SynchronizedCommand: Equatable {
     /// A command to be sent to a server.
     public var command: CommandStream?
 
-    internal init(numberOfSynchronisingLiterals: Int, command: CommandStream?) {
-        self.numberOfSynchronisingLiterals = numberOfSynchronisingLiterals
-        self.command = command
-    }
-
     /// Creates a new `SynchronizedCommand`.
     /// - parameter command: A `commandStream`, if any. Defaults to `nil`.
     /// - parameter numberOfSynchronisingLiterals: How many synchronising literals are in the corresponding `command`. Defaults to 0.
     public init(_ command: CommandStream? = nil, numberOfSynchronisingLiterals: Int = 0) {
-        self = .init(numberOfSynchronisingLiterals: numberOfSynchronisingLiterals, command: command)
+        self.command = command
+        self.numberOfSynchronisingLiterals = numberOfSynchronisingLiterals
     }
 }
 
