@@ -248,7 +248,7 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
         commandEncoder.writeCommandStream(command)
 
         switch command {
-        case .command(let command):
+        case .tagged(let command):
             switch command.command {
             case .idleStart:
                 assert(self.state == .expectingResponses)

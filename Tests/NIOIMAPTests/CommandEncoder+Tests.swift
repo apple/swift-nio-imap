@@ -29,7 +29,7 @@ extension CommandEncoder_Tests {
         // When we add a state to CommandEncoder, it'll be more
         // complex and require more tests.
         let inputs: [(CommandStream, ByteBuffer, UInt)] = [
-            (.command(.init(tag: "1", command: .noop)), "1 NOOP\r\n", #line),
+            (.tagged(.init(tag: "1", command: .noop)), "1 NOOP\r\n", #line),
             (.append(.start(tag: "2", appendingTo: .inbox)), "2 APPEND \"INBOX\"", #line),
             (.idleDone, "DONE\r\n", #line),
         ]

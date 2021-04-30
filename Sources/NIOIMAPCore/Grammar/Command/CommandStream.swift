@@ -81,7 +81,7 @@ extension AppendCommand {
 }
 
 /// Used by clients to stream commands to a server. Most commands are simple and sent under
-/// the `.command(TaggedCommand)` case. Of note are `.idleDone` which will end an idle
+/// the `.tagged(TaggedCommand)` case. Of note are `.idleDone` which will end an idle
 /// session started by a previous idle `TaggedCommand`, and  `.append(AppendCommand)`
 /// which is used to manage the lifecycle of appending multiple messages sequentially.
 public enum CommandStream: Equatable {
@@ -91,7 +91,7 @@ public enum CommandStream: Equatable {
 
     /// Sends a simple tagged command with the format `<tag> <command>\r\n`.
     /// - parameter TaggedCommand: The command to send.
-    case command(TaggedCommand)
+    case tagged(TaggedCommand)
 
     /// Sends a sub-command that is used to append messages to a mailbox.
     /// - parameter AppendCommand: The sub-command to send.
@@ -109,7 +109,7 @@ extension CommandEncodeBuffer {
         switch stream {
         case .idleDone:
             return self._buffer.writeString("DONE\r\n")
-        case .command(let command):
+        case .tagged(let command):
             return self.writeCommand(command)
         case .append(let command):
             return self.writeAppendCommand(command)

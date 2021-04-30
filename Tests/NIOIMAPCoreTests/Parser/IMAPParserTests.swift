@@ -143,13 +143,13 @@ extension ParserUnitTests {
             let c2_5 = try parser.parseCommandStream(buffer: &buffer)
             let c3 = try parser.parseCommandStream(buffer: &buffer)
             XCTAssertEqual(buffer.readableBytes, 0)
-            XCTAssertEqual(c1, PartialCommandStream(.command(TaggedCommand(tag: "1", command: .noop)), numberOfSynchronisingLiterals: 1))
+            XCTAssertEqual(c1, PartialCommandStream(.tagged(TaggedCommand(tag: "1", command: .noop)), numberOfSynchronisingLiterals: 1))
             XCTAssertEqual(c2_1, PartialCommandStream(.append(.start(tag: "2", appendingTo: .inbox))))
             XCTAssertEqual(c2_2, PartialCommandStream(.append(.beginMessage(message: .init(options: .none, data: .init(byteCount: 10))))))
             XCTAssertEqual(c2_3, PartialCommandStream(.append(.messageBytes("0123456789"))))
             XCTAssertEqual(c2_4, PartialCommandStream(.append(.endMessage)))
             XCTAssertEqual(c2_5, PartialCommandStream(.append(.finish)))
-            XCTAssertEqual(c3, PartialCommandStream(.command(TaggedCommand(tag: "3", command: .noop))))
+            XCTAssertEqual(c3, PartialCommandStream(.tagged(TaggedCommand(tag: "3", command: .noop))))
         } catch {
             XCTFail("\(error)")
         }
@@ -185,7 +185,7 @@ extension ParserUnitTests {
             let c2_16 = try parser.parseCommandStream(buffer: &buffer)
             let c2_17 = try parser.parseCommandStream(buffer: &buffer)
             XCTAssertEqual(buffer.readableBytes, 0)
-            XCTAssertEqual(c1, PartialCommandStream(.command(TaggedCommand(tag: "1", command: .noop)), numberOfSynchronisingLiterals: 3))
+            XCTAssertEqual(c1, PartialCommandStream(.tagged(TaggedCommand(tag: "1", command: .noop)), numberOfSynchronisingLiterals: 3))
             XCTAssertEqual(c2_1, PartialCommandStream(.append(.start(tag: "A003", appendingTo: MailboxName("Drafts")))))
             XCTAssertEqual(c2_2, PartialCommandStream(.append(.beginCatenate(options: .init(flagList: [.seen, .draft, .keyword(.mdnSent)], extensions: [:])))))
             XCTAssertEqual(c2_3, PartialCommandStream(.append(.catenateURL("/Drafts;UIDVALIDITY=385759045/;UID=20/;section=HEADER"))))
@@ -289,11 +289,11 @@ extension ParserUnitTests {
         var parser = CommandParser()
         do {
             let c1 = try parser.parseCommandStream(buffer: &buffer)
-            XCTAssertEqual(c1, PartialCommandStream(.command(TaggedCommand(tag: "1", command: .noop))))
+            XCTAssertEqual(c1, PartialCommandStream(.tagged(TaggedCommand(tag: "1", command: .noop))))
             XCTAssertEqual(parser.mode, .lines)
 
             let c2_1 = try parser.parseCommandStream(buffer: &buffer)
-            XCTAssertEqual(c2_1, PartialCommandStream(.command(TaggedCommand(tag: "2", command: .idleStart))))
+            XCTAssertEqual(c2_1, PartialCommandStream(.tagged(TaggedCommand(tag: "2", command: .idleStart))))
             XCTAssertEqual(parser.mode, .idle)
 
             let c2_2 = try parser.parseCommandStream(buffer: &buffer)
@@ -302,7 +302,7 @@ extension ParserUnitTests {
 
             let c3 = try parser.parseCommandStream(buffer: &buffer)
             XCTAssertEqual(buffer.readableBytes, 0)
-            XCTAssertEqual(c3, PartialCommandStream(.command(TaggedCommand(tag: "3", command: .noop))))
+            XCTAssertEqual(c3, PartialCommandStream(.tagged(TaggedCommand(tag: "3", command: .noop))))
             XCTAssertEqual(parser.mode, .lines)
         } catch {
             XCTFail("\(error)")

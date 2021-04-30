@@ -157,7 +157,7 @@ public struct CommandParser: Parser {
             if case .idleStart = command.command {
                 self.mode = .idle
             }
-            return .command(command)
+            return .tagged(command)
         }
 
         func parseAppend(buffer: inout ParseBuffer, tracker: StackTracker) throws -> CommandStream {

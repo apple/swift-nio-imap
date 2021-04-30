@@ -24,7 +24,7 @@ class IMAPServerHandlerTests: XCTestCase {
 
     func testSimpleCommandAndResponse() {
         self.writeInbound("a LOGIN \"user\" \"password\"\r\n")
-        self.assertInbound(.command(.init(tag: "a", command: .login(username: "user", password: "password"))))
+        self.assertInbound(.tagged(.init(tag: "a", command: .login(username: "user", password: "password"))))
         self.writeOutbound(.taggedResponse(.init(tag: "a", state: .ok(.init(text: "yo")))))
         self.assertOutboundString("a OK yo\r\n")
     }
@@ -41,7 +41,7 @@ class IMAPServerHandlerTests: XCTestCase {
 
         self.writeInbound("user \"password\"\r\n")
 
-        self.assertInbound(.command(.init(tag: "a", command: .login(username: "user", password: "password"))))
+        self.assertInbound(.tagged(.init(tag: "a", command: .login(username: "user", password: "password"))))
         self.writeOutbound(.taggedResponse(.init(tag: "a", state: .ok(.init(text: "yo")))))
         self.assertOutboundString("a OK yo\r\n")
     }
@@ -51,7 +51,7 @@ class IMAPServerHandlerTests: XCTestCase {
         // Nothing happens until `read()`
         XCTAssertNoThrow(XCTAssertNil(try self.channel.readOutbound(as: ByteBuffer.self)))
 
-        self.assertInbound(.command(.init(tag: "a", command: .login(username: "user", password: "password"))))
+        self.assertInbound(.tagged(.init(tag: "a", command: .login(username: "user", password: "password"))))
         self.writeOutbound(.taggedResponse(.init(tag: "a", state: .ok(.init(text: "yo")))))
         self.assertOutboundString("a OK yo\r\n")
 
@@ -73,7 +73,7 @@ class IMAPServerHandlerTests: XCTestCase {
 
         self.writeInbound("user \"password\"\r\n")
 
-        self.assertInbound(.command(.init(tag: "a", command: .login(username: "user", password: "password"))))
+        self.assertInbound(.tagged(.init(tag: "a", command: .login(username: "user", password: "password"))))
         self.writeOutbound(.taggedResponse(.init(tag: "a", state: .ok(.init(text: "yo")))))
         self.assertOutboundString("a OK yo\r\n")
     }
@@ -93,7 +93,7 @@ class IMAPServerHandlerTests: XCTestCase {
 
         self.writeInbound("user \"password\"\r\n")
 
-        self.assertInbound(.command(.init(tag: "a", command: .login(username: "user", password: "password"))))
+        self.assertInbound(.tagged(.init(tag: "a", command: .login(username: "user", password: "password"))))
         self.writeOutbound(.taggedResponse(.init(tag: "a", state: .ok(.init(text: "yo")))))
         self.assertOutboundString("a OK yo\r\n")
     }
@@ -152,7 +152,7 @@ class IMAPServerHandlerTests: XCTestCase {
 
         // client starts authentication
         self.writeInbound("A1 AUTHENTICATE GSSAPI\r\n")
-        self.assertInbound(.command(.init(tag: "A1", command: .authenticate(mechanism: .gssAPI, initialResponse: nil))))
+        self.assertInbound(.tagged(.init(tag: "A1", command: .authenticate(mechanism: .gssAPI, initialResponse: nil))))
 
         // server sends challenge
         self.writeOutbound(.authenticationChallenge("challenge1"))

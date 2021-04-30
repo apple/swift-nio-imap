@@ -37,7 +37,7 @@ extension CommandStream_Tests {
             (.append(.messageBytes("123")), "123", #line),
             (.append(.endMessage), "", #line), // dummy command, we don't expect anything
             (.append(.finish), "\r\n", #line),
-            (.command(.init(tag: "1", command: .noop)), "1 NOOP\r\n", #line),
+            (.tagged(.init(tag: "1", command: .noop)), "1 NOOP\r\n", #line),
             (.idleDone, "DONE\r\n", #line),
             (.continuationResponse("test"), "dGVzdA==\r\n", #line),
         ]

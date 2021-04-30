@@ -106,7 +106,7 @@ final class ParserStressTests: XCTestCase {
         XCTAssertNoThrow(try self.channel.writeInbound(longBuffer))
         for _ in 1 ... 1_000 {
             XCTAssertNoThrow(XCTAssertEqual(
-                CommandStream.command(.init(tag: "1", command: .noop)),
+                CommandStream.tagged(.init(tag: "1", command: .noop)),
                 try self.channel.readInbound(as: CommandStream.self)
             ))
         }
