@@ -59,7 +59,7 @@ extension CommandParser_Tests {
         XCTAssertNoThrow(
             XCTAssertEqual(
                 try parser.parseCommandStream(buffer: &input),
-                .init(.command(.init(tag: "1", command: .noop)), numberOfSynchronisingLiterals: 0)
+                .init(.tagged(.init(tag: "1", command: .noop)), numberOfSynchronisingLiterals: 0)
             )
         )
         XCTAssertEqual(input, "")
@@ -68,7 +68,7 @@ extension CommandParser_Tests {
         XCTAssertNoThrow(
             XCTAssertEqual(
                 try parser.parseCommandStream(buffer: &input),
-                .init(.command(.init(tag: "2", command: .login(username: "", password: ""))), numberOfSynchronisingLiterals: 2)
+                .init(.tagged(.init(tag: "2", command: .login(username: "", password: ""))), numberOfSynchronisingLiterals: 2)
             )
         )
         XCTAssertEqual(input, "")
