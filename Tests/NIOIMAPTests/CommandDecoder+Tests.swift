@@ -29,7 +29,7 @@ extension CommandDecoder_Tests {
             XCTAssertNoThrow(try channel.writeInbound(self.buffer(feed)), feed)
         }
 
-        let output: [(CommandStream, UInt)] = [
+        let output: [(CommandStreamPart, UInt)] = [
             (.append(.start(tag: "tag", appendingTo: .init("box"))), #line),
             (.append(.beginMessage(message: .init(options: .init(flagList: [.seen], extensions: [:]), data: .init(byteCount: 1)))), #line),
             (.append(.messageBytes("a")), #line),

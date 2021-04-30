@@ -20,7 +20,7 @@ enum CommandEncodingError: Error, Equatable {
 }
 
 class CommandEncoder: MessageToByteEncoder {
-    typealias OutboundIn = CommandStream
+    typealias OutboundIn = CommandStreamPart
 
     enum Mode: Equatable {
         case normal
@@ -32,7 +32,7 @@ class CommandEncoder: MessageToByteEncoder {
 
     init() {}
 
-    func encode(data: CommandStream, out: inout ByteBuffer) {
+    func encode(data: CommandStreamPart, out: inout ByteBuffer) {
         var encodeBuffer = CommandEncodeBuffer(buffer: out, capabilities: self.capabilities)
         encodeBuffer.writeCommandStream(data)
         out = encodeBuffer._buffer.nextChunk().bytes

@@ -17,7 +17,7 @@ import NIOIMAPCore
 
 public final class IMAPServerHandler: ChannelDuplexHandler {
     public typealias InboundIn = ByteBuffer
-    public typealias InboundOut = CommandStream
+    public typealias InboundOut = CommandStreamPart
     public typealias OutboundIn = Response
     public typealias OutboundOut = ByteBuffer
 

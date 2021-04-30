@@ -56,7 +56,7 @@ class IMAPClientHandlerTests: XCTestCase {
     }
 
     func testCommandThatNeedsToWaitForContinuationRequest() {
-        let f = self.writeOutbound(CommandStream.tagged(TaggedCommand(tag: "x",
+        let f = self.writeOutbound(CommandStreamPart.tagged(TaggedCommand(tag: "x",
                                                                       command: .rename(from: .init("\\"),
                                                                                        to: .init("to"),
                                                                                        params: [:]))),
@@ -71,7 +71,7 @@ class IMAPClientHandlerTests: XCTestCase {
     }
 
     func testCommandThatNeedsToWaitForTwoContinuationRequest() {
-        let f = self.writeOutbound(CommandStream.tagged(TaggedCommand(tag: "x",
+        let f = self.writeOutbound(CommandStreamPart.tagged(TaggedCommand(tag: "x",
                                                                       command: .rename(from: .init("\\"),
                                                                                        to: .init("\""),
                                                                                        params: [:]))),
@@ -88,12 +88,12 @@ class IMAPClientHandlerTests: XCTestCase {
     }
 
     func testTwoContReqCommandsEnqueued() {
-        let f1 = self.writeOutbound(CommandStream.tagged(TaggedCommand(tag: "x",
+        let f1 = self.writeOutbound(CommandStreamPart.tagged(TaggedCommand(tag: "x",
                                                                        command: .rename(from: .init("\\"),
                                                                                         to: .init("to"),
                                                                                         params: [:]))),
         wait: false)
-        let f2 = self.writeOutbound(CommandStream.tagged(TaggedCommand(tag: "y",
+        let f2 = self.writeOutbound(CommandStreamPart.tagged(TaggedCommand(tag: "y",
                                                                        command: .rename(from: .init("from"),
                                                                                         to: .init("\\"),
                                                                                         params: [:]))),
@@ -182,7 +182,7 @@ class IMAPClientHandlerTests: XCTestCase {
     }
 
     func testUnexpectedContinuationRequest() {
-        let f = self.writeOutbound(CommandStream.tagged(TaggedCommand(tag: "x",
+        let f = self.writeOutbound(CommandStreamPart.tagged(TaggedCommand(tag: "x",
                                                                       command: .rename(from: .init("\\"),
                                                                                        to: .init("to"),
                                                                                        params: [:]))),
@@ -313,7 +313,7 @@ class IMAPClientHandlerTests: XCTestCase {
         class UserEventHandler: ChannelDuplexHandler {
             typealias InboundIn = Response
 
-            typealias OutboundIn = CommandStream
+            typealias OutboundIn = CommandStreamPart
 
             var expectation1: EventLoopPromise<Void>
             var expectation2: EventLoopPromise<Void>
@@ -503,7 +503,7 @@ class IMAPClientHandlerTests: XCTestCase {
         try! self.channel.pipeline.addHandler(testHandler, position: .first).wait()
 
         // writing a command that has a continuation
-        let future = self.channel.writeAndFlush(CommandStream.tagged(.init(tag: "A1", command: .rename(from: .init("\\"), to: .init("\\"), params: [:]))))
+        let future = self.channel.writeAndFlush(CommandStreamPart.tagged(.init(tag: "A1", command: .rename(from: .init("\\"), to: .init("\\"), params: [:]))))
         self.assertOutboundString("A1 RENAME {1}\r\n")
 
         testHandler.failNextWrite = true
@@ -570,7 +570,7 @@ extension IMAPClientHandlerTests {
     }
 
     @discardableResult
-    private func writeOutbound(_ command: CommandStream, wait: Bool = true, line: UInt = #line) -> EventLoopFuture<Void> {
+    private func writeOutbound(_ command: CommandStreamPart, wait: Bool = true, line: UInt = #line) -> EventLoopFuture<Void> {
         let result = self.channel.writeAndFlush(command)
         if wait {
             XCTAssertNoThrow(try result.wait(), line: line)

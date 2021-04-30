@@ -297,7 +297,7 @@ extension ParserUnitTests {
             XCTAssertEqual(parser.mode, .idle)
 
             let c2_2 = try parser.parseCommandStream(buffer: &buffer)
-            XCTAssertEqual(c2_2, SynchronizedCommand(CommandStream.idleDone))
+            XCTAssertEqual(c2_2, SynchronizedCommand(CommandStreamPart.idleDone))
             XCTAssertEqual(parser.mode, .lines)
 
             let c3 = try parser.parseCommandStream(buffer: &buffer)

@@ -26,8 +26,8 @@ import struct OrderedCollections.OrderedDictionary
 
 extension GrammarParser {
     // append          = "APPEND" SP mailbox 1*append-message
-    static func parseAppend(buffer: inout ParseBuffer, tracker: StackTracker) throws -> CommandStream {
-        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> CommandStream in
+    static func parseAppend(buffer: inout ParseBuffer, tracker: StackTracker) throws -> CommandStreamPart {
+        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> CommandStreamPart in
             let tag = try self.parseTag(buffer: &buffer, tracker: tracker)
             try PL.parseFixedString(" APPEND ", buffer: &buffer, tracker: tracker)
             let mailbox = try self.parseMailbox(buffer: &buffer, tracker: tracker)

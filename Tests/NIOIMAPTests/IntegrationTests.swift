@@ -22,12 +22,12 @@ import XCTest
 final class ParserIntegrationTests: XCTestCase {
     func testItWorksWithAnActualConnection() {
         class CollectEverythingHandler: ChannelInboundHandler {
-            typealias InboundIn = CommandStream
+            typealias InboundIn = CommandStreamPart
 
-            var allCommands: [CommandStream] = []
-            let collectionDonePromise: EventLoopPromise<[CommandStream]>
+            var allCommands: [CommandStreamPart] = []
+            let collectionDonePromise: EventLoopPromise<[CommandStreamPart]>
 
-            init(collectionDonePromise: EventLoopPromise<[CommandStream]>) {
+            init(collectionDonePromise: EventLoopPromise<[CommandStreamPart]>) {
                 self.collectionDonePromise = collectionDonePromise
             }
 
@@ -56,7 +56,7 @@ final class ParserIntegrationTests: XCTestCase {
             XCTAssertNoThrow(try group.syncShutdownGracefully())
         }
 
-        let collectionDonePromise = group.next().makePromise(of: [CommandStream].self)
+        let collectionDonePromise = group.next().makePromise(of: [CommandStreamPart].self)
         var server: Channel?
         XCTAssertNoThrow(server = try ServerBootstrap(group: group)
             .serverChannelOption(ChannelOptions.socket(.init(SOL_SOCKET), .init(SO_REUSEADDR)), value: 1)
@@ -87,7 +87,7 @@ final class ParserIntegrationTests: XCTestCase {
         XCTAssertNoThrow(try client.writeAndFlush("tag NOOP\r\n" as ByteBuffer).wait())
         XCTAssertNoThrow(try client.close().wait())
 
-        let expected: [CommandStream] = [
+        let expected: [CommandStreamPart] = [
             .tagged(.init(tag: "tag", command: .login(username: "1", password: "2"))),
             .tagged(.init(tag: "tag", command: .noop)),
         ]

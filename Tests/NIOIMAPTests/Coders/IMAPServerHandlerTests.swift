@@ -31,7 +31,7 @@ class IMAPServerHandlerTests: XCTestCase {
 
     func testSimpleCommandWithContinuationRequestWorks() {
         self.writeInbound("a LOGIN {4}\r\n")
-        XCTAssertNoThrow(XCTAssertNil(try self.channel.readInbound(as: CommandStream.self)))
+        XCTAssertNoThrow(XCTAssertNil(try self.channel.readInbound(as: CommandStreamPart.self)))
 
         // Nothing happens until `read()`
         XCTAssertNoThrow(XCTAssertNil(try self.channel.readOutbound(as: ByteBuffer.self)))
@@ -63,7 +63,7 @@ class IMAPServerHandlerTests: XCTestCase {
         self.handler.continuationRequest = ContinuationRequest.responseText(.init(text: "FoO"))
 
         self.writeInbound("a LOGIN {4}\r\n")
-        XCTAssertNoThrow(XCTAssertNil(try self.channel.readInbound(as: CommandStream.self)))
+        XCTAssertNoThrow(XCTAssertNil(try self.channel.readInbound(as: CommandStreamPart.self)))
 
         // Nothing happens until `read()`
         XCTAssertNoThrow(XCTAssertNil(try self.channel.readOutbound(as: ByteBuffer.self)))
@@ -83,7 +83,7 @@ class IMAPServerHandlerTests: XCTestCase {
         self.channel = EmbeddedChannel(handler: self.handler)
 
         self.writeInbound("a LOGIN {4}\r\n")
-        XCTAssertNoThrow(XCTAssertNil(try self.channel.readInbound(as: CommandStream.self)))
+        XCTAssertNoThrow(XCTAssertNil(try self.channel.readInbound(as: CommandStreamPart.self)))
 
         // Nothing happens until `read()`
         XCTAssertNoThrow(XCTAssertNil(try self.channel.readOutbound(as: ByteBuffer.self)))
@@ -204,8 +204,8 @@ class IMAPServerHandlerTests: XCTestCase {
 // MARK: - Helpers
 
 extension IMAPServerHandlerTests {
-    private func assertInbound(_ command: CommandStream, line: UInt = #line) {
-        var maybeRead: CommandStream?
+    private func assertInbound(_ command: CommandStreamPart, line: UInt = #line) {
+        var maybeRead: CommandStreamPart?
         XCTAssertNoThrow(maybeRead = try self.channel.readInbound(), line: line)
         guard let read = maybeRead else {
             XCTFail("Inbound buffer empty", line: line)

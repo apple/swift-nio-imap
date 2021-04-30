@@ -26,7 +26,7 @@ final class B2MV_Tests: XCTestCase {}
 
 extension B2MV_Tests {
     func testCommand() {
-        let inoutPairs: [(String, [CommandStream])] = [
+        let inoutPairs: [(String, [CommandStreamPart])] = [
             // MARK: Capability
 
             ("tag CAPABILITY", [.tagged(.init(tag: "tag", command: .capability))]),
@@ -253,7 +253,7 @@ extension B2MV_Tests {
                     ResponseDecoder()
                 }
             )
-        } catch let error as ByteToMessageDecoderVerifier.VerificationError<CommandStream> {
+        } catch let error as ByteToMessageDecoderVerifier.VerificationError<CommandStreamPart> {
             for input in error.inputs {
                 print(" input: \(String(decoding: input.readableBytesView, as: Unicode.UTF8.self))")
             }
