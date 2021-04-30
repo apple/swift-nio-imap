@@ -18,7 +18,7 @@ import NIOIMAPCore
 import NIOSSL
 
 class MailClientToProxyHandler: ChannelInboundHandler {
-    typealias InboundIn = PartialCommandStream
+    typealias InboundIn = SynchronizedCommand
 
     var parser = CommandParser()
     var clientChannel: Channel?

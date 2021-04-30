@@ -15,7 +15,7 @@
 import struct NIO.ByteBuffer
 
 /// A command and any synchronising literals that are ready to be sent down the network to a server.
-public struct PartialCommandStream: Equatable {
+public struct SynchronizedCommand: Equatable {
     /// The number of synchronising literals contained in the corresponding `command`.
     public var numberOfSynchronisingLiterals: Int
 
@@ -27,7 +27,7 @@ public struct PartialCommandStream: Equatable {
         self.command = command
     }
 
-    /// Creates a new `PartialCommandStream`.
+    /// Creates a new `SynchronizedCommand`.
     /// - parameter command: A `commandStream`, if any. Defaults to `nil`.
     /// - parameter numberOfSynchronisingLiterals: How many synchronising literals are in the corresponding `command`. Defaults to 0.
     public init(_ command: CommandStream? = nil, numberOfSynchronisingLiterals: Int = 0) {
@@ -70,7 +70,7 @@ public struct CommandParser: Parser {
     /// Parsing depends on the current mode of the parser.
     /// - parameter buffer: A `ByteBuffer` that will be consumed for parsing.
     /// - returns: A `CommandStream` that can be sent.
-    public mutating func parseCommandStream(buffer: inout ByteBuffer) throws -> PartialCommandStream? {
+    public mutating func parseCommandStream(buffer: inout ByteBuffer) throws -> SynchronizedCommand? {
         guard buffer.readableBytes > 0 else {
             return nil
         }
@@ -106,9 +106,9 @@ public struct CommandParser: Parser {
         }
 
         if let command = try parseCommand() {
-            return PartialCommandStream(command, numberOfSynchronisingLiterals: framingResult.synchronizingLiteralCount)
+            return SynchronizedCommand(command, numberOfSynchronisingLiterals: framingResult.synchronizingLiteralCount)
         } else if framingResult.synchronizingLiteralCount > 0 {
-            return PartialCommandStream(numberOfSynchronisingLiterals: framingResult.synchronizingLiteralCount)
+            return SynchronizedCommand(numberOfSynchronisingLiterals: framingResult.synchronizingLiteralCount)
         } else {
             return nil
         }
