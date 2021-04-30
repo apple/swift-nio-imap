@@ -71,7 +71,7 @@ public final class IMAPServerHandler: ChannelDuplexHandler {
         do {
             try self.decoder.process(buffer: self.unwrapInboundIn(data)) { command in
                 self.numberOfOutstandingContinuationRequests += command.numberOfSynchronisingLiterals
-                if let command = command.command {
+                if let command = command.commandPart {
                     context.fireChannelRead(self.wrapInboundOut(command))
                 }
             }

@@ -14,19 +14,19 @@
 
 import struct NIO.ByteBuffer
 
-/// A command and any synchronising literals that are ready to be sent down the network to a server.
+/// A commandPart and any synchronising literals that are ready to be sent down the network to a server.
 public struct SynchronizedCommand: Equatable {
     /// The number of synchronising literals contained in the corresponding `command`.
     public var numberOfSynchronisingLiterals: Int
 
     /// A command to be sent to a server.
-    public var command: CommandStreamPart?
+    public var commandPart: CommandStreamPart?
 
     /// Creates a new `SynchronizedCommand`.
-    /// - parameter command: A `commandStream`, if any. Defaults to `nil`.
-    /// - parameter numberOfSynchronisingLiterals: How many synchronising literals are in the corresponding `command`. Defaults to 0.
-    public init(_ command: CommandStreamPart? = nil, numberOfSynchronisingLiterals: Int = 0) {
-        self.command = command
+    /// - parameter commandPart: A `commandStream`, if any. Defaults to `nil`.
+    /// - parameter numberOfSynchronisingLiterals: How many synchronising literals are in the corresponding `commandPart`. Defaults to 0.
+    public init(_ commandPart: CommandStreamPart? = nil, numberOfSynchronisingLiterals: Int = 0) {
+        self.commandPart = commandPart
         self.numberOfSynchronisingLiterals = numberOfSynchronisingLiterals
     }
 }
