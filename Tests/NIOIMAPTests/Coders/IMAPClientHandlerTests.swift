@@ -57,9 +57,9 @@ class IMAPClientHandlerTests: XCTestCase {
 
     func testCommandThatNeedsToWaitForContinuationRequest() {
         let f = self.writeOutbound(CommandStream.tagged(TaggedCommand(tag: "x",
-                                                                       command: .rename(from: .init("\\"),
-                                                                                        to: .init("to"),
-                                                                                        params: [:]))),
+                                                                      command: .rename(from: .init("\\"),
+                                                                                       to: .init("to"),
+                                                                                       params: [:]))),
         wait: false)
         self.assertOutboundString("x RENAME {1}\r\n")
         self.writeInbound("+ OK\r\n")
@@ -72,9 +72,9 @@ class IMAPClientHandlerTests: XCTestCase {
 
     func testCommandThatNeedsToWaitForTwoContinuationRequest() {
         let f = self.writeOutbound(CommandStream.tagged(TaggedCommand(tag: "x",
-                                                                       command: .rename(from: .init("\\"),
-                                                                                        to: .init("\""),
-                                                                                        params: [:]))),
+                                                                      command: .rename(from: .init("\\"),
+                                                                                       to: .init("\""),
+                                                                                       params: [:]))),
         wait: false)
         self.assertOutboundString("x RENAME {1}\r\n")
         self.writeInbound("+ OK\r\n")
@@ -89,14 +89,14 @@ class IMAPClientHandlerTests: XCTestCase {
 
     func testTwoContReqCommandsEnqueued() {
         let f1 = self.writeOutbound(CommandStream.tagged(TaggedCommand(tag: "x",
-                                                                        command: .rename(from: .init("\\"),
-                                                                                         to: .init("to"),
-                                                                                         params: [:]))),
+                                                                       command: .rename(from: .init("\\"),
+                                                                                        to: .init("to"),
+                                                                                        params: [:]))),
         wait: false)
         let f2 = self.writeOutbound(CommandStream.tagged(TaggedCommand(tag: "y",
-                                                                        command: .rename(from: .init("from"),
-                                                                                         to: .init("\\"),
-                                                                                         params: [:]))),
+                                                                       command: .rename(from: .init("from"),
+                                                                                        to: .init("\\"),
+                                                                                        params: [:]))),
         wait: false)
         self.assertOutboundString("x RENAME {1}\r\n")
         self.writeInbound("+ OK\r\n")
@@ -183,9 +183,9 @@ class IMAPClientHandlerTests: XCTestCase {
 
     func testUnexpectedContinuationRequest() {
         let f = self.writeOutbound(CommandStream.tagged(TaggedCommand(tag: "x",
-                                                                       command: .rename(from: .init("\\"),
-                                                                                        to: .init("to"),
-                                                                                        params: [:]))),
+                                                                      command: .rename(from: .init("\\"),
+                                                                                       to: .init("to"),
+                                                                                       params: [:]))),
         wait: false)
         self.assertOutboundString("x RENAME {1}\r\n")
         XCTAssertThrowsError(try self.channel.writeInbound(self.buffer(string: "+ OK\r\n+ OK\r\n"))) { error in
