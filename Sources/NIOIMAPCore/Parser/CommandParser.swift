@@ -14,7 +14,7 @@
 
 import struct NIO.ByteBuffer
 
-/// A commandPart and any synchronising literals that are ready to be sent down the network to a server.
+/// A `CommandStreamPart` (i.e. a command or part of a command) and any synchronising literals that are ready to be sent down the network to a server.
 public struct SynchronizedCommand: Equatable {
     /// The number of synchronising literals contained in the corresponding `command`.
     public var numberOfSynchronisingLiterals: Int
@@ -23,8 +23,8 @@ public struct SynchronizedCommand: Equatable {
     public var commandPart: CommandStreamPart?
 
     /// Creates a new `SynchronizedCommand`.
-    /// - parameter commandPart: A `commandStream`, if any. Defaults to `nil`.
-    /// - parameter numberOfSynchronisingLiterals: How many synchronising literals are in the corresponding `commandPart`. Defaults to 0.
+    /// - parameter commandPart: A `CommandStreamPart`, if any. Defaults to `nil`.
+    /// - parameter numberOfSynchronisingLiterals: How many synchronising literals are in the `commandPart`. Defaults to 0.
     public init(_ commandPart: CommandStreamPart? = nil, numberOfSynchronisingLiterals: Int = 0) {
         self.commandPart = commandPart
         self.numberOfSynchronisingLiterals = numberOfSynchronisingLiterals
