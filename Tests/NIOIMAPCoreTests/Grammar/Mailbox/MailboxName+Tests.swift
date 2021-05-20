@@ -105,3 +105,28 @@ extension MailboxName_Tests {
         }
     }
 }
+
+// MARK: - MailboxName
+
+extension MailboxName_Tests {
+    func testMailboxNameInitInbox() {
+        let test1 = MailboxName("INBOX")
+        XCTAssertEqual(test1.bytes, "INBOX")
+        XCTAssertTrue(test1.isInbox)
+
+        let test2 = MailboxName("inbox")
+        XCTAssertEqual(test2.bytes, "INBOX")
+        XCTAssertTrue(test2.isInbox)
+
+        let test3 = MailboxName("notinbox")
+        XCTAssertEqual(test3.bytes, "notinbox")
+        XCTAssertFalse(test3.isInbox)
+    }
+
+    func testMailboxNameInitNonUTF8() {
+        let hexBytes: [UInt8] = [0x80]
+        let test1 = MailboxName(.init(bytes: hexBytes))
+        XCTAssertEqual(test1.bytes, .init(bytes: hexBytes))
+        XCTAssertFalse(test1.isInbox)
+    }
+}

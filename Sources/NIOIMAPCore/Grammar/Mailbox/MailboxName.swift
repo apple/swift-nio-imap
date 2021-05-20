@@ -200,7 +200,8 @@ public struct MailboxName: Hashable {
     /// - note: The bytes provided should be UTF-7.
     /// - parameter bytes: The bytes to construct a `MailboxName` from. Note that if any case-insensitive variation of *INBOX* is provided then it will be uppercased.
     public init(_ bytes: ByteBuffer) {
-        if String(buffer: bytes).uppercased() == "INBOX" {
+        let isInbox = bytes.readableBytesView.lazy.map { $0 & 0xDF }.elementsEqual("INBOX".utf8)
+        if isInbox {
             self.bytes = ByteBuffer(ByteBufferView("INBOX".utf8))
         } else {
             self.bytes = bytes
