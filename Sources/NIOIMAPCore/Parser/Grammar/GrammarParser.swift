@@ -495,7 +495,7 @@ extension GrammarParser {
         let parsed = try PL.parseOneOrMoreCharacters(buffer: &buffer, tracker: tracker) { char -> Bool in
             char.isAtomChar && char != UInt8(ascii: "/")
         }
-        
+
         guard let string = String(validatingUTF8Bytes: parsed.readableBytesView) else {
             throw ParserError()
         }
@@ -841,7 +841,7 @@ extension GrammarParser {
                     break
                 }
             }
-            
+
             guard let hostName = String(validatingUTF8Bytes: newBuffer.readableBytesView) else {
                 throw ParserError()
             }

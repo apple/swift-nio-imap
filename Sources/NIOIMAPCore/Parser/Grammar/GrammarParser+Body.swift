@@ -253,16 +253,16 @@ extension GrammarParser {
 
         func parseBodyFieldLanguage_multiple(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [String] {
             try PL.parseFixedString("(", buffer: &buffer, tracker: tracker)
-            
+
             let parsed = try self.parseString(buffer: &buffer, tracker: tracker)
             guard let string = String(validatingUTF8Bytes: parsed.readableBytesView) else {
                 throw ParserError()
             }
             var array = [string]
-            
+
             try PL.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) -> String in
                 try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-                
+
                 let parsed = try self.parseString(buffer: &buffer, tracker: tracker)
                 guard let string = String(validatingUTF8Bytes: parsed.readableBytesView) else {
                     throw ParserError()

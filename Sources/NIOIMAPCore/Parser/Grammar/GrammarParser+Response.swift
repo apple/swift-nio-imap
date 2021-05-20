@@ -191,7 +191,7 @@ extension GrammarParser {
             let parsed = try PL.parseZeroOrMoreCharacters(buffer: &buffer, tracker: tracker) { (char) -> Bool in
                 char.isTextChar
             }
-            
+
             guard let text = String(validatingUTF8Bytes: parsed.readableBytesView) else {
                 throw ParserError(hint: "Found invalid non-UTF8 bytes.")
             }

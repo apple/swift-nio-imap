@@ -13,24 +13,21 @@
 //===----------------------------------------------------------------------===//
 
 extension String {
-    
     public init?<T: Sequence>(validatingUTF8Bytes bytes: T) where T.Element == UInt8 {
-        
-        // CChar is an alias for Int8, so the bytes need to fit inside Int8
-        let allFitInsideInt8 = bytes.allSatisfy { $0 <= Int8.max && $0 >= 0 }
-        guard allFitInsideInt8 else {
-            return nil
+        var bytesIterator = bytes.makeIterator()
+        var scalars: [Unicode.Scalar] = []
+        var utf8Decoder = UTF8()
+        while true {
+            switch utf8Decoder.decode(&bytesIterator) {
+            case .scalarValue(let v):
+                scalars.append(v)
+            case .emptyInput:
+                self = String(String.UnicodeScalarView(scalars))
+                return
+            case .error:
+                return nil
+            }
         }
-        
-        // The initialiser we use depends on the string being NULL-terminated
-        let chars = bytes.map { CChar($0) } + [0]
-        let maybeString = chars.withUnsafeBytes { body in
-            String(validatingUTF8: body.bindMemory(to: CChar.self).baseAddress!)
-        }
-        guard let string = maybeString else {
-            return nil
-        }
-        self = string
+        preconditionFailure("This should never happen")
     }
-    
 }
