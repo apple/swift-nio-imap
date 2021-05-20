@@ -188,10 +188,14 @@ extension GrammarParser {
 
             // text requires minimum 1 char, but we want to be lenient here
             // and allow 0 characters to represent empty text
-            let text = try PL.parseZeroOrMoreCharacters(buffer: &buffer, tracker: tracker) { (char) -> Bool in
+            let parsed = try PL.parseZeroOrMoreCharacters(buffer: &buffer, tracker: tracker) { (char) -> Bool in
                 char.isTextChar
             }
-            return ResponseText(code: code, text: String(buffer: text))
+            
+            guard let text = String(validatingUTF8Bytes: parsed.readableBytesView) else {
+                throw ParserError(hint: "Found invalid non-UTF8 bytes.")
+            }
+            return ResponseText(code: code, text: text)
         }
     }
 
@@ -310,7 +314,10 @@ extension GrammarParser {
                 let parsed = try PL.parseOneOrMoreCharacters(buffer: &buffer, tracker: tracker) { (char) -> Bool in
                     char.isTextChar && char != UInt8(ascii: "]")
                 }
-                return String(buffer: parsed)
+                guard let string = String(validatingUTF8Bytes: parsed.readableBytesView) else {
+                    throw ParserError(hint: "Found invalid non-UTF8 bytes")
+                }
+                return string
             }
             return .other(atom, string)
         }

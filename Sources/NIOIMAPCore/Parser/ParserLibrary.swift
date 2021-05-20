@@ -160,7 +160,9 @@ extension ParserLibrary {
             let parsed = try PL.parseOneOrMoreCharacters(buffer: &buffer, tracker: tracker) { char in
                 char >= UInt8(ascii: "0") && char <= UInt8(ascii: "9")
             }
-            let string = String(buffer: parsed)
+            guard let string = String(validatingUTF8Bytes: parsed.readableBytesView) else {
+                throw ParserError(hint: "Found invalid non-UTF8 bytes")
+            }
             guard let int = UInt64(string) else {
                 throw ParserError(hint: "\(string) is not a number")
             }

@@ -73,7 +73,9 @@ extension GrammarParser {
         let parsed = try PL.parseOneOrMoreCharacters(buffer: &buffer, tracker: tracker) { char -> Bool in
             isalnum(Int32(char)) != 0
         }
-        let string = String(buffer: parsed)
+        guard let string = String(validatingUTF8Bytes: parsed.readableBytesView) else {
+            throw ParserError()
+        }
         guard let month = IMAPCalendarDay.month(text: string.lowercased()) else {
             throw ParserError(hint: "No month match for \(string)")
         }

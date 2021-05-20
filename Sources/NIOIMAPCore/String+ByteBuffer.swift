@@ -16,12 +16,15 @@ extension String {
     
     public init?<T: Sequence>(validatingUTF8Bytes bytes: T) where T.Element == UInt8 {
         
-        let allFitInsideInt8 = bytes.allSatisfy { $0 < Int8.max && $0 >= 0 }
+        // CChar is an alias for Int8, so the bytes need to fit inside Int8
+        let allFitInsideInt8 = bytes.allSatisfy { $0 <= Int8.max && $0 >= 0 }
         guard allFitInsideInt8 else {
             return nil
         }
         
-        let maybeString = bytes.map { CChar($0) }.withUnsafeBytes { body in
+        // The initialiser we use depends on the string being NULL-terminated
+        let chars = bytes.map { CChar($0) } + [0]
+        let maybeString = chars.withUnsafeBytes { body in
             String(validatingUTF8: body.bindMemory(to: CChar.self).baseAddress!)
         }
         guard let string = maybeString else {
