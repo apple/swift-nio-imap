@@ -32,7 +32,10 @@ extension String_ByteBuffer_Tests {
     }
 
     func testInitValidatingUTF8Valid() {
-        let test = "hello, world".utf8
-        XCTAssertEqual(String(validatingUTF8Bytes: test), "hello, world")
+        let test1 = "hello, world"
+        XCTAssertEqual(String(validatingUTF8Bytes: test1.utf8), test1)
+        
+        let test2: [UInt8] = [0xe2, 0x9a, 0xa1, 0xe2, 0x9a, 0xa2, 0xe2, 0x9a, 0xa3, 0xe2, 0x9a, 0xa4]
+        XCTAssertEqual(String(validatingUTF8Bytes: test2), "⚡⚢⚣⚤")
     }
 }
