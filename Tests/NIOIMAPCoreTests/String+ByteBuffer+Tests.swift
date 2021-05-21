@@ -39,3 +39,20 @@ extension String_ByteBuffer_Tests {
         XCTAssertEqual(String(validatingUTF8Bytes: test2), "⚡⚢⚣⚤")
     }
 }
+
+extension String_ByteBuffer_Tests {
+    
+    func testInitBestEffortDecodingValid() {
+        let test1 = "hello, world"
+        XCTAssertEqual(String(bestEffortDecodingUTF8Bytes: test1.utf8), test1)
+
+        let test2: [UInt8] = [0xE2, 0x9A, 0xA1, 0xE2, 0x9A, 0xA2, 0xE2, 0x9A, 0xA3, 0xE2, 0x9A, 0xA4]
+        XCTAssertEqual(String(bestEffortDecodingUTF8Bytes: test2), "⚡⚢⚣⚤")
+    }
+    
+    func testInitBestEffortDecodingInvalid() {
+        let test2: [UInt8] = [0x41, 0xff, 0x42]
+        XCTAssertEqual(String(bestEffortDecodingUTF8Bytes: test2), "AB")
+    }
+    
+}

@@ -85,11 +85,7 @@ extension MailboxPath {
         do {
             return try ModifiedUTF7.decode(buffer)
         } catch {
-            if let decoded = validateUTF8String(buffer) {
-                return decoded
-            } else {
-                return String(buffer: buffer)
-            }
+            return String(bestEffortDecodingUTF8Bytes: buffer.readableBytesView)
         }
     }
 
