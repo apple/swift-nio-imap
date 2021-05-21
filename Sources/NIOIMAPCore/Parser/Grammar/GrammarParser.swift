@@ -47,7 +47,7 @@ extension GrammarParser {
                     return false
                 }
             }
-            let word = try ParserLibrary.parseBufferAsUTF8(parsed)
+            let word = try ParserLibrary.parseBufferAsUTF8(parsed).uppercased()
             guard let parser = parsers[word] else {
                 throw ParserError(hint: "Didn't find parser for \(word)")
             }
