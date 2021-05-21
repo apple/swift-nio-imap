@@ -25,7 +25,7 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
     public typealias InboundOut = Response
 
     /// Commands are encoding into a ByteBuffer to send to a server.
-    public typealias OutboundIn = CommandStream
+    public typealias OutboundIn = CommandStreamPart
 
     /// After encoding the bytes may be sent further through the channel to, for example, a TLS handler.
     public typealias OutboundOut = ByteBuffer
@@ -33,7 +33,7 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
     private let decoder: NIOSingleStepByteToMessageProcessor<ResponseDecoder>
 
     private var currentEncodeBuffer: (_EncodeBuffer, EventLoopPromise<Void>?)?
-    private var bufferedCommands: MarkedCircularBuffer<(CommandStream, EventLoopPromise<Void>?)> = .init(initialCapacity: 4)
+    private var bufferedCommands: MarkedCircularBuffer<(CommandStreamPart, EventLoopPromise<Void>?)> = .init(initialCapacity: 4)
 
     public struct UnexpectedContinuationRequest: Error {}
 
@@ -248,7 +248,7 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
         commandEncoder.writeCommandStream(command)
 
         switch command {
-        case .command(let command):
+        case .tagged(let command):
             switch command.command {
             case .idleStart:
                 assert(self.state == .expectingResponses)

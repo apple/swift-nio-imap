@@ -22,7 +22,7 @@ class CommandStream_Tests: EncodeTestClass {}
 
 extension CommandStream_Tests {
     func testEncode() {
-        let inputs: [(CommandStream, String, UInt)] = [
+        let inputs: [(CommandStreamPart, String, UInt)] = [
             (.append(.start(tag: "1", appendingTo: .inbox)), "1 APPEND \"INBOX\"", #line),
             (
                 .append(.beginMessage(message: .init(options: .none, data: .init(byteCount: 3)))),
@@ -37,7 +37,7 @@ extension CommandStream_Tests {
             (.append(.messageBytes("123")), "123", #line),
             (.append(.endMessage), "", #line), // dummy command, we don't expect anything
             (.append(.finish), "\r\n", #line),
-            (.command(.init(tag: "1", command: .noop)), "1 NOOP\r\n", #line),
+            (.tagged(.init(tag: "1", command: .noop)), "1 NOOP\r\n", #line),
             (.idleDone, "DONE\r\n", #line),
             (.continuationResponse("test"), "dGVzdA==\r\n", #line),
         ]
@@ -59,7 +59,7 @@ extension CommandStream_Tests {
         ]
 
         var buffer = CommandEncodeBuffer(buffer: "", capabilities: [])
-        parts.map { CommandStream.append($0) }.forEach {
+        parts.map { CommandStreamPart.append($0) }.forEach {
             buffer.writeCommandStream($0)
         }
 
@@ -86,7 +86,7 @@ extension CommandStream_Tests {
         var options = CommandEncodingOptions()
         options.useNonSynchronizingLiteralPlus = true
         var buffer = CommandEncodeBuffer(buffer: "", options: options)
-        parts.map { CommandStream.append($0) }.forEach {
+        parts.map { CommandStreamPart.append($0) }.forEach {
             buffer.writeCommandStream($0)
         }
 
@@ -120,7 +120,7 @@ extension CommandStream_Tests {
         ]
 
         var buffer = CommandEncodeBuffer(buffer: "", capabilities: [])
-        parts.map { CommandStream.append($0) }.forEach {
+        parts.map { CommandStreamPart.append($0) }.forEach {
             buffer.writeCommandStream($0)
         }
 
@@ -174,7 +174,7 @@ extension CommandStream_Tests {
         var options = CommandEncodingOptions()
         options.useNonSynchronizingLiteralPlus = true
         var buffer = CommandEncodeBuffer(buffer: "", options: options)
-        parts.map { CommandStream.append($0) }.forEach {
+        parts.map { CommandStreamPart.append($0) }.forEach {
             buffer.writeCommandStream($0)
         }
 
@@ -203,7 +203,7 @@ extension CommandStream_Tests {
 
         // Apply parts twice.
         var buffer = CommandEncodeBuffer(buffer: "", capabilities: [])
-        (parts + parts).map { CommandStream.append($0) }.forEach {
+        (parts + parts).map { CommandStreamPart.append($0) }.forEach {
             buffer.writeCommandStream($0)
         }
 

@@ -26,22 +26,22 @@ final class B2MV_Tests: XCTestCase {}
 
 extension B2MV_Tests {
     func testCommand() {
-        let inoutPairs: [(String, [CommandStream])] = [
+        let inoutPairs: [(String, [CommandStreamPart])] = [
             // MARK: Capability
 
-            ("tag CAPABILITY", [.command(.init(tag: "tag", command: .capability))]),
+            ("tag CAPABILITY", [.tagged(.init(tag: "tag", command: .capability))]),
 
             // MARK: Noop
 
-            ("tag NOOP", [.command(.init(tag: "tag", command: .noop))]),
+            ("tag NOOP", [.tagged(.init(tag: "tag", command: .noop))]),
 
             // MARK: Logout
 
-            ("tag LOGOUT", [.command(.init(tag: "tag", command: .logout))]),
+            ("tag LOGOUT", [.tagged(.init(tag: "tag", command: .logout))]),
 
             // MARK: StartTLS
 
-            ("tag STARTTLS", [.command(.init(tag: "tag", command: .starttls))]),
+            ("tag STARTTLS", [.tagged(.init(tag: "tag", command: .starttls))]),
 
             // MARK: Authenticate
 
@@ -50,77 +50,77 @@ extension B2MV_Tests {
 
             // MARK: Login
 
-            (#"tag LOGIN "foo" "bar""#, [.command(.init(tag: "tag", command: .login(username: "foo", password: "bar")))]),
-            ("tag LOGIN \"\" {0+}\r\n", [.command(.init(tag: "tag", command: .login(username: "", password: "")))]),
-            (#"tag LOGIN "foo" "bar""#, [.command(.init(tag: "tag", command: .login(username: "foo", password: "bar")))]),
-            (#"tag LOGIN foo bar"#, [.command(.init(tag: "tag", command: .login(username: "foo", password: "bar")))]),
+            (#"tag LOGIN "foo" "bar""#, [.tagged(.init(tag: "tag", command: .login(username: "foo", password: "bar")))]),
+            ("tag LOGIN \"\" {0+}\r\n", [.tagged(.init(tag: "tag", command: .login(username: "", password: "")))]),
+            (#"tag LOGIN "foo" "bar""#, [.tagged(.init(tag: "tag", command: .login(username: "foo", password: "bar")))]),
+            (#"tag LOGIN foo bar"#, [.tagged(.init(tag: "tag", command: .login(username: "foo", password: "bar")))]),
 
             // MARK: Select
 
-            ("tag SELECT box1", [.command(.init(tag: "tag", command: .select(.init("box1"), [])))]),
-            ("tag SELECT \"box2\"", [.command(.init(tag: "tag", command: .select(.init("box2"), [])))]),
-            ("tag SELECT {4+}\r\nbox3", [.command(.init(tag: "tag", command: .select(.init("box3"), [])))]),
-            ("tag SELECT box4 (k1 1 k2 2)", [.command(.init(tag: "tag", command: .select(.init("box4"), [.basic(.init(key: "k1", value: .sequence(.set([1])))), .basic(.init(key: "k2", value: .sequence(.set([2]))))])))]),
+            ("tag SELECT box1", [.tagged(.init(tag: "tag", command: .select(.init("box1"), [])))]),
+            ("tag SELECT \"box2\"", [.tagged(.init(tag: "tag", command: .select(.init("box2"), [])))]),
+            ("tag SELECT {4+}\r\nbox3", [.tagged(.init(tag: "tag", command: .select(.init("box3"), [])))]),
+            ("tag SELECT box4 (k1 1 k2 2)", [.tagged(.init(tag: "tag", command: .select(.init("box4"), [.basic(.init(key: "k1", value: .sequence(.set([1])))), .basic(.init(key: "k2", value: .sequence(.set([2]))))])))]),
 
             // MARK: Examine
 
-            ("tag EXAMINE box1", [.command(.init(tag: "tag", command: .examine(.init("box1"), [:])))]),
-            ("tag EXAMINE \"box2\"", [.command(.init(tag: "tag", command: .examine(.init("box2"), [:])))]),
-            ("tag EXAMINE {4+}\r\nbox3", [.command(.init(tag: "tag", command: .examine(.init("box3"), [:])))]),
-            ("tag EXAMINE box4 (k3 1 k4 2)", [.command(.init(tag: "tag", command: .examine(.init("box4"), ["k3": .sequence(.set([1])), "k4": .sequence(.set([2]))])))]),
+            ("tag EXAMINE box1", [.tagged(.init(tag: "tag", command: .examine(.init("box1"), [:])))]),
+            ("tag EXAMINE \"box2\"", [.tagged(.init(tag: "tag", command: .examine(.init("box2"), [:])))]),
+            ("tag EXAMINE {4+}\r\nbox3", [.tagged(.init(tag: "tag", command: .examine(.init("box3"), [:])))]),
+            ("tag EXAMINE box4 (k3 1 k4 2)", [.tagged(.init(tag: "tag", command: .examine(.init("box4"), ["k3": .sequence(.set([1])), "k4": .sequence(.set([2]))])))]),
 
             // MARK: Create
 
-            ("tag CREATE newBox1", [.command(.init(tag: "tag", command: .create(.init("newBox1"), [])))]),
-            ("tag CREATE \"newBox2\"", [.command(.init(tag: "tag", command: .create(.init("newBox2"), [])))]),
-            ("tag CREATE {7+}\r\nnewBox3", [.command(.init(tag: "tag", command: .create(.init("newBox3"), [])))]),
-            ("tag CREATE newBox4 (k5 5 k6 6)", [.command(.init(tag: "tag", command: .create(.init("newBox4"), [.labelled(.init(key: "k5", value: .sequence(.set([5])))), .labelled(.init(key: "k6", value: .sequence(.set([6]))))])))]),
+            ("tag CREATE newBox1", [.tagged(.init(tag: "tag", command: .create(.init("newBox1"), [])))]),
+            ("tag CREATE \"newBox2\"", [.tagged(.init(tag: "tag", command: .create(.init("newBox2"), [])))]),
+            ("tag CREATE {7+}\r\nnewBox3", [.tagged(.init(tag: "tag", command: .create(.init("newBox3"), [])))]),
+            ("tag CREATE newBox4 (k5 5 k6 6)", [.tagged(.init(tag: "tag", command: .create(.init("newBox4"), [.labelled(.init(key: "k5", value: .sequence(.set([5])))), .labelled(.init(key: "k6", value: .sequence(.set([6]))))])))]),
 
             // MARK: Delete
 
-            ("tag DELETE box1", [.command(.init(tag: "tag", command: .delete(.init("box1"))))]),
-            ("tag DELETE \"box1\"", [.command(.init(tag: "tag", command: .delete(.init("box1"))))]),
-            ("tag DELETE {4+}\r\nbox1", [.command(.init(tag: "tag", command: .delete(.init("box1"))))]),
+            ("tag DELETE box1", [.tagged(.init(tag: "tag", command: .delete(.init("box1"))))]),
+            ("tag DELETE \"box1\"", [.tagged(.init(tag: "tag", command: .delete(.init("box1"))))]),
+            ("tag DELETE {4+}\r\nbox1", [.tagged(.init(tag: "tag", command: .delete(.init("box1"))))]),
 
             // MARK: Rename
 
-            (#"tag RENAME "foo" "bar""#, [.command(TaggedCommand(tag: "tag", command: .rename(from: MailboxName("foo"), to: MailboxName("bar"), params: [:])))]),
-            (#"tag RENAME InBoX "inBOX""#, [.command(TaggedCommand(tag: "tag", command: .rename(from: .inbox, to: .inbox, params: [:])))]),
-            ("tag RENAME {1+}\r\n1 {1+}\r\n2", [.command(TaggedCommand(tag: "tag", command: .rename(from: MailboxName("1"), to: MailboxName("2"), params: [:])))]),
+            (#"tag RENAME "foo" "bar""#, [.tagged(TaggedCommand(tag: "tag", command: .rename(from: MailboxName("foo"), to: MailboxName("bar"), params: [:])))]),
+            (#"tag RENAME InBoX "inBOX""#, [.tagged(TaggedCommand(tag: "tag", command: .rename(from: .inbox, to: .inbox, params: [:])))]),
+            ("tag RENAME {1+}\r\n1 {1+}\r\n2", [.tagged(TaggedCommand(tag: "tag", command: .rename(from: MailboxName("1"), to: MailboxName("2"), params: [:])))]),
 
             // MARK: Subscribe
 
-            ("tag SUBSCRIBE inbox", [.command(.init(tag: "tag", command: .subscribe(.inbox)))]),
-            ("tag SUBSCRIBE INBOX", [.command(.init(tag: "tag", command: .subscribe(.inbox)))]),
-            ("tag SUBSCRIBE iNbOx", [.command(.init(tag: "tag", command: .subscribe(.inbox)))]),
-            ("tag SUBSCRIBE \"INBOX\"", [.command(.init(tag: "tag", command: .subscribe(.inbox)))]),
-            ("tag SUBSCRIBE {5+}\r\nINBOX", [.command(.init(tag: "tag", command: .subscribe(.inbox)))]),
+            ("tag SUBSCRIBE inbox", [.tagged(.init(tag: "tag", command: .subscribe(.inbox)))]),
+            ("tag SUBSCRIBE INBOX", [.tagged(.init(tag: "tag", command: .subscribe(.inbox)))]),
+            ("tag SUBSCRIBE iNbOx", [.tagged(.init(tag: "tag", command: .subscribe(.inbox)))]),
+            ("tag SUBSCRIBE \"INBOX\"", [.tagged(.init(tag: "tag", command: .subscribe(.inbox)))]),
+            ("tag SUBSCRIBE {5+}\r\nINBOX", [.tagged(.init(tag: "tag", command: .subscribe(.inbox)))]),
 
             // MARK: Unsubscribe
 
-            ("tag UNSUBSCRIBE inbox", [.command(.init(tag: "tag", command: .unsubscribe(.inbox)))]),
-            ("tag UNSUBSCRIBE INBOX", [.command(.init(tag: "tag", command: .unsubscribe(.inbox)))]),
-            ("tag UNSUBSCRIBE iNbOx", [.command(.init(tag: "tag", command: .unsubscribe(.inbox)))]),
-            ("tag UNSUBSCRIBE \"INBOX\"", [.command(.init(tag: "tag", command: .unsubscribe(.inbox)))]),
-            ("tag UNSUBSCRIBE {5+}\r\nINBOX", [.command(.init(tag: "tag", command: .unsubscribe(.inbox)))]),
+            ("tag UNSUBSCRIBE inbox", [.tagged(.init(tag: "tag", command: .unsubscribe(.inbox)))]),
+            ("tag UNSUBSCRIBE INBOX", [.tagged(.init(tag: "tag", command: .unsubscribe(.inbox)))]),
+            ("tag UNSUBSCRIBE iNbOx", [.tagged(.init(tag: "tag", command: .unsubscribe(.inbox)))]),
+            ("tag UNSUBSCRIBE \"INBOX\"", [.tagged(.init(tag: "tag", command: .unsubscribe(.inbox)))]),
+            ("tag UNSUBSCRIBE {5+}\r\nINBOX", [.tagged(.init(tag: "tag", command: .unsubscribe(.inbox)))]),
 
             // MARK: Check
 
-            ("tag CHECK", [.command(.init(tag: "tag", command: .check))]),
+            ("tag CHECK", [.tagged(.init(tag: "tag", command: .check))]),
 
             // MARK: List
 
-            ("tag LIST INBOX \"\"", [.command(.init(tag: "tag", command: .list(nil, reference: .inbox, .mailbox(""))))]),
-            ("tag LIST /Mail/ %", [.command(.init(tag: "tag", command: .list(nil, reference: .init("/Mail/"), .mailbox("%"))))]),
+            ("tag LIST INBOX \"\"", [.tagged(.init(tag: "tag", command: .list(nil, reference: .inbox, .mailbox(""))))]),
+            ("tag LIST /Mail/ %", [.tagged(.init(tag: "tag", command: .list(nil, reference: .init("/Mail/"), .mailbox("%"))))]),
 
             // MARK: LSUB
 
-            ("tag LSUB INBOX \"\"", [.command(.init(tag: "tag", command: .lsub(reference: .inbox, pattern: "")))]),
+            ("tag LSUB INBOX \"\"", [.tagged(.init(tag: "tag", command: .lsub(reference: .inbox, pattern: "")))]),
 
             // MARK: Status
 
-            ("tag STATUS INBOX (MESSAGES)", [.command(.init(tag: "tag", command: .status(.inbox, [.messageCount])))]),
-            ("tag STATUS INBOX (MESSAGES RECENT UIDNEXT)", [.command(.init(tag: "tag", command: .status(.inbox, [.messageCount, .recentCount, .uidNext])))]),
+            ("tag STATUS INBOX (MESSAGES)", [.tagged(.init(tag: "tag", command: .status(.inbox, [.messageCount])))]),
+            ("tag STATUS INBOX (MESSAGES RECENT UIDNEXT)", [.tagged(.init(tag: "tag", command: .status(.inbox, [.messageCount, .recentCount, .uidNext])))]),
 
             // MARK: Append
 
@@ -133,7 +133,7 @@ extension B2MV_Tests {
             ]),
         ]
 
-        let input = inoutPairs.map { ($0.0 + CRLF, $0.1.map { PartialCommandStream($0) }) }
+        let input = inoutPairs.map { ($0.0 + CRLF, $0.1.map { SynchronizedCommand($0) }) }
         do {
             try ByteToMessageDecoderVerifier.verifyDecoder(
                 stringInputOutputPairs: input,
@@ -141,7 +141,7 @@ extension B2MV_Tests {
                     CommandDecoder()
                 }
             )
-        } catch let error as ByteToMessageDecoderVerifier.VerificationError<PartialCommandStream> {
+        } catch let error as ByteToMessageDecoderVerifier.VerificationError<SynchronizedCommand> {
             for input in error.inputs {
                 print(" input: \(String(decoding: input.readableBytesView, as: Unicode.UTF8.self))")
             }
@@ -253,7 +253,7 @@ extension B2MV_Tests {
                     ResponseDecoder()
                 }
             )
-        } catch let error as ByteToMessageDecoderVerifier.VerificationError<CommandStream> {
+        } catch let error as ByteToMessageDecoderVerifier.VerificationError<CommandStreamPart> {
             for input in error.inputs {
                 print(" input: \(String(decoding: input.readableBytesView, as: Unicode.UTF8.self))")
             }

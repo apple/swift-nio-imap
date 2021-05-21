@@ -81,17 +81,17 @@ extension AppendCommand {
 }
 
 /// Used by clients to stream commands to a server. Most commands are simple and sent under
-/// the `.command(TaggedCommand)` case. Of note are `.idleDone` which will end an idle
+/// the `.tagged(TaggedCommand)` case. Of note are `.idleDone` which will end an idle
 /// session started by a previous idle `TaggedCommand`, and  `.append(AppendCommand)`
 /// which is used to manage the lifecycle of appending multiple messages sequentially.
-public enum CommandStream: Equatable {
+public enum CommandStreamPart: Equatable {
     /// Signals that a previous `idle` command has finished, and more
     /// commands will now be sent.
     case idleDone
 
     /// Sends a simple tagged command with the format `<tag> <command>\r\n`.
     /// - parameter TaggedCommand: The command to send.
-    case command(TaggedCommand)
+    case tagged(TaggedCommand)
 
     /// Sends a sub-command that is used to append messages to a mailbox.
     /// - parameter AppendCommand: The sub-command to send.
@@ -102,14 +102,14 @@ public enum CommandStream: Equatable {
 }
 
 extension CommandEncodeBuffer {
-    /// Writes a `CommandStream` to the buffer ready to be sent to the network.
-    /// - parameter stream: The `CommandStream` to write.
+    /// Writes a `CommandStreamPart` to the buffer ready to be sent to the network.
+    /// - parameter stream: The `CommandStreamPart` to write.
     /// - returns: The number of bytes written.
-    @discardableResult public mutating func writeCommandStream(_ stream: CommandStream) -> Int {
+    @discardableResult public mutating func writeCommandStream(_ stream: CommandStreamPart) -> Int {
         switch stream {
         case .idleDone:
             return self._buffer.writeString("DONE\r\n")
-        case .command(let command):
+        case .tagged(let command):
             return self.writeCommand(command)
         case .append(let command):
             return self.writeAppendCommand(command)

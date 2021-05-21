@@ -14,24 +14,20 @@
 
 import struct NIO.ByteBuffer
 
-/// A command and any synchronising literals that are ready to be sent down the network to a server.
-public struct PartialCommandStream: Equatable {
+/// A `CommandStreamPart` (i.e. a command or part of a command) and any synchronising literals that are ready to be sent down the network to a server.
+public struct SynchronizedCommand: Equatable {
     /// The number of synchronising literals contained in the corresponding `command`.
     public var numberOfSynchronisingLiterals: Int
 
     /// A command to be sent to a server.
-    public var command: CommandStream?
+    public var commandPart: CommandStreamPart?
 
-    internal init(numberOfSynchronisingLiterals: Int, command: CommandStream?) {
+    /// Creates a new `SynchronizedCommand`.
+    /// - parameter commandPart: A `CommandStreamPart`, if any. Defaults to `nil`.
+    /// - parameter numberOfSynchronisingLiterals: How many synchronising literals are in the `commandPart`. Defaults to 0.
+    public init(_ commandPart: CommandStreamPart? = nil, numberOfSynchronisingLiterals: Int = 0) {
+        self.commandPart = commandPart
         self.numberOfSynchronisingLiterals = numberOfSynchronisingLiterals
-        self.command = command
-    }
-
-    /// Creates a new `PartialCommandStream`.
-    /// - parameter command: A `commandStream`, if any. Defaults to `nil`.
-    /// - parameter numberOfSynchronisingLiterals: How many synchronising literals are in the corresponding `command`. Defaults to 0.
-    public init(_ command: CommandStream? = nil, numberOfSynchronisingLiterals: Int = 0) {
-        self = .init(numberOfSynchronisingLiterals: numberOfSynchronisingLiterals, command: command)
     }
 }
 
@@ -66,11 +62,11 @@ public struct CommandParser: Parser {
         self.bufferLimit = bufferLimit
     }
 
-    /// Parses a given `ByteBuffer` into a `CommandStream` that may then be transmitted.
+    /// Parses a given `ByteBuffer` into a `CommandStreamPart` that may then be transmitted.
     /// Parsing depends on the current mode of the parser.
     /// - parameter buffer: A `ByteBuffer` that will be consumed for parsing.
-    /// - returns: A `CommandStream` that can be sent.
-    public mutating func parseCommandStream(buffer: inout ByteBuffer) throws -> PartialCommandStream? {
+    /// - returns: A `CommandStreamPart` that can be sent.
+    public mutating func parseCommandStream(buffer: inout ByteBuffer) throws -> SynchronizedCommand? {
         guard buffer.readableBytes > 0 else {
             return nil
         }
@@ -79,7 +75,7 @@ public struct CommandParser: Parser {
         let framingResult = try self.synchronisingLiteralParser.parseContinuationsNecessary(buffer)
         var actuallyVisible = ParseBuffer(buffer.getSlice(at: buffer.readerIndex, length: framingResult.maximumValidBytes)!)
 
-        func parseCommand() throws -> CommandStream? {
+        func parseCommand() throws -> CommandStreamPart? {
             do {
                 if let command = try self.parseCommandStream0(buffer: &actuallyVisible, tracker: .makeNewDefaultLimitStackTracker) {
                     // We need to discard the bytes we consumed from the real buffer.
@@ -106,15 +102,15 @@ public struct CommandParser: Parser {
         }
 
         if let command = try parseCommand() {
-            return PartialCommandStream(command, numberOfSynchronisingLiterals: framingResult.synchronizingLiteralCount)
+            return SynchronizedCommand(command, numberOfSynchronisingLiterals: framingResult.synchronizingLiteralCount)
         } else if framingResult.synchronizingLiteralCount > 0 {
-            return PartialCommandStream(numberOfSynchronisingLiterals: framingResult.synchronizingLiteralCount)
+            return SynchronizedCommand(numberOfSynchronisingLiterals: framingResult.synchronizingLiteralCount)
         } else {
             return nil
         }
     }
 
-    private mutating func parseCommandStream0(buffer: inout ParseBuffer, tracker: StackTracker) throws -> CommandStream? {
+    private mutating func parseCommandStream0(buffer: inout ParseBuffer, tracker: StackTracker) throws -> CommandStreamPart? {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             switch self.mode {
             case .idle:
@@ -137,7 +133,7 @@ public struct CommandParser: Parser {
         }
     }
 
-    private mutating func handleStreamingBytes(buffer: inout ParseBuffer, tracker: StackTracker, remaining: Int) throws -> CommandStream {
+    private mutating func handleStreamingBytes(buffer: inout ParseBuffer, tracker: StackTracker, remaining: Int) throws -> CommandStreamPart {
         assert(self.mode.isStreamingAppend)
         let bytes = try PL.parseBytes(buffer: &buffer, tracker: tracker, upTo: remaining)
 
@@ -150,23 +146,23 @@ public struct CommandParser: Parser {
         return .append(.messageBytes(bytes))
     }
 
-    private mutating func handleLines(buffer: inout ParseBuffer, tracker: StackTracker) throws -> CommandStream {
-        func parseCommand(buffer: inout ParseBuffer, tracker: StackTracker) throws -> CommandStream {
+    private mutating func handleLines(buffer: inout ParseBuffer, tracker: StackTracker) throws -> CommandStreamPart {
+        func parseCommand(buffer: inout ParseBuffer, tracker: StackTracker) throws -> CommandStreamPart {
             let command = try GrammarParser.parseTaggedCommand(buffer: &buffer, tracker: tracker)
             try PL.parseNewline(buffer: &buffer, tracker: tracker)
             if case .idleStart = command.command {
                 self.mode = .idle
             }
-            return .command(command)
+            return .tagged(command)
         }
 
-        func parseAppend(buffer: inout ParseBuffer, tracker: StackTracker) throws -> CommandStream {
+        func parseAppend(buffer: inout ParseBuffer, tracker: StackTracker) throws -> CommandStreamPart {
             let appendCommand = try GrammarParser.parseAppend(buffer: &buffer, tracker: tracker)
             self.mode = .waitingForMessage
             return appendCommand
         }
 
-        func parseAuthenticationChallengeResponse(buffer: inout ParseBuffer, tracker: StackTracker) throws -> CommandStream {
+        func parseAuthenticationChallengeResponse(buffer: inout ParseBuffer, tracker: StackTracker) throws -> CommandStreamPart {
             let authenticationChallengeResponse = try GrammarParser.parseBase64(buffer: &buffer, tracker: tracker)
             try PL.parseNewline(buffer: &buffer, tracker: tracker)
             return .continuationResponse(authenticationChallengeResponse)
@@ -180,7 +176,7 @@ public struct CommandParser: Parser {
         )
     }
 
-    private mutating func handleWaitingForMessage(buffer: inout ParseBuffer, tracker: StackTracker) throws -> CommandStream {
+    private mutating func handleWaitingForMessage(buffer: inout ParseBuffer, tracker: StackTracker) throws -> CommandStreamPart {
         do {
             let command = try GrammarParser.parseAppendOrCatenateMessage(buffer: &buffer, tracker: tracker)
 
@@ -205,18 +201,18 @@ public struct CommandParser: Parser {
         }
     }
 
-    private mutating func handleStreamingEnd(buffer: inout ParseBuffer, tracker: StackTracker) throws -> CommandStream {
+    private mutating func handleStreamingEnd(buffer: inout ParseBuffer, tracker: StackTracker) throws -> CommandStreamPart {
         self.mode = .waitingForMessage
         return .append(.endMessage)
     }
 
-    private mutating func handleIdle(buffer: inout ParseBuffer, tracker: StackTracker) throws -> CommandStream {
+    private mutating func handleIdle(buffer: inout ParseBuffer, tracker: StackTracker) throws -> CommandStreamPart {
         try GrammarParser.parseIdleDone(buffer: &buffer, tracker: tracker)
         self.mode = .lines
         return .idleDone
     }
 
-    private mutating func handleCatenatePart(expectPrecedingSpace: Bool, buffer: inout ParseBuffer, tracker: StackTracker) throws -> CommandStream {
+    private mutating func handleCatenatePart(expectPrecedingSpace: Bool, buffer: inout ParseBuffer, tracker: StackTracker) throws -> CommandStreamPart {
         let result = try GrammarParser.parseCatenatePart(expectPrecedingSpace: expectPrecedingSpace, buffer: &buffer, tracker: tracker)
         switch result {
         case .url(let url):
@@ -231,7 +227,7 @@ public struct CommandParser: Parser {
         }
     }
 
-    private mutating func handleStreamingCatenateBytes(buffer: inout ParseBuffer, tracker: StackTracker, remaining: Int) throws -> CommandStream {
+    private mutating func handleStreamingCatenateBytes(buffer: inout ParseBuffer, tracker: StackTracker, remaining: Int) throws -> CommandStreamPart {
         let bytes = try PL.parseBytes(buffer: &buffer, tracker: tracker, upTo: remaining)
 
         assert(bytes.readableBytes <= remaining)
@@ -244,7 +240,7 @@ public struct CommandParser: Parser {
         return .append(.catenateData(.bytes(bytes)))
     }
 
-    private mutating func handleStreamingCatenateEnd(buffer: inout ParseBuffer, tracker: StackTracker) throws -> CommandStream {
+    private mutating func handleStreamingCatenateEnd(buffer: inout ParseBuffer, tracker: StackTracker) throws -> CommandStreamPart {
         self.mode = .waitingForCatenatePart(seenPreviousPart: true)
         return .append(.catenateData(.end))
     }

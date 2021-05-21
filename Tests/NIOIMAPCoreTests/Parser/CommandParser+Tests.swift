@@ -59,7 +59,7 @@ extension CommandParser_Tests {
         XCTAssertNoThrow(
             XCTAssertEqual(
                 try parser.parseCommandStream(buffer: &input),
-                .init(numberOfSynchronisingLiterals: 0, command: .command(.init(tag: "1", command: .noop)))
+                .init(.tagged(.init(tag: "1", command: .noop)), numberOfSynchronisingLiterals: 0)
             )
         )
         XCTAssertEqual(input, "")
@@ -68,13 +68,13 @@ extension CommandParser_Tests {
         XCTAssertNoThrow(
             XCTAssertEqual(
                 try parser.parseCommandStream(buffer: &input),
-                .init(numberOfSynchronisingLiterals: 2, command: .command(.init(tag: "2", command: .login(username: "", password: ""))))
+                .init(.tagged(.init(tag: "2", command: .login(username: "", password: ""))), numberOfSynchronisingLiterals: 2)
             )
         )
         XCTAssertEqual(input, "")
 
         input = "3 APPEND INBOX {3+}\r\n123 {3+}\r\n456 {3+}\r\n789\r\n"
-        XCTAssertEqual(try! parser.parseCommandStream(buffer: &input), .init(numberOfSynchronisingLiterals: 0, command: .append(.start(tag: "3", appendingTo: .inbox))))
+        XCTAssertEqual(try! parser.parseCommandStream(buffer: &input), .init(.append(.start(tag: "3", appendingTo: .inbox)), numberOfSynchronisingLiterals: 0))
         XCTAssertEqual(input, " {3+}\r\n123 {3+}\r\n456 {3+}\r\n789\r\n")
     }
 

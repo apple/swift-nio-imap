@@ -24,14 +24,14 @@ class IMAPServerHandlerTests: XCTestCase {
 
     func testSimpleCommandAndResponse() {
         self.writeInbound("a LOGIN \"user\" \"password\"\r\n")
-        self.assertInbound(.command(.init(tag: "a", command: .login(username: "user", password: "password"))))
+        self.assertInbound(.tagged(.init(tag: "a", command: .login(username: "user", password: "password"))))
         self.writeOutbound(.taggedResponse(.init(tag: "a", state: .ok(.init(text: "yo")))))
         self.assertOutboundString("a OK yo\r\n")
     }
 
     func testSimpleCommandWithContinuationRequestWorks() {
         self.writeInbound("a LOGIN {4}\r\n")
-        XCTAssertNoThrow(XCTAssertNil(try self.channel.readInbound(as: CommandStream.self)))
+        XCTAssertNoThrow(XCTAssertNil(try self.channel.readInbound(as: CommandStreamPart.self)))
 
         // Nothing happens until `read()`
         XCTAssertNoThrow(XCTAssertNil(try self.channel.readOutbound(as: ByteBuffer.self)))
@@ -41,7 +41,7 @@ class IMAPServerHandlerTests: XCTestCase {
 
         self.writeInbound("user \"password\"\r\n")
 
-        self.assertInbound(.command(.init(tag: "a", command: .login(username: "user", password: "password"))))
+        self.assertInbound(.tagged(.init(tag: "a", command: .login(username: "user", password: "password"))))
         self.writeOutbound(.taggedResponse(.init(tag: "a", state: .ok(.init(text: "yo")))))
         self.assertOutboundString("a OK yo\r\n")
     }
@@ -51,7 +51,7 @@ class IMAPServerHandlerTests: XCTestCase {
         // Nothing happens until `read()`
         XCTAssertNoThrow(XCTAssertNil(try self.channel.readOutbound(as: ByteBuffer.self)))
 
-        self.assertInbound(.command(.init(tag: "a", command: .login(username: "user", password: "password"))))
+        self.assertInbound(.tagged(.init(tag: "a", command: .login(username: "user", password: "password"))))
         self.writeOutbound(.taggedResponse(.init(tag: "a", state: .ok(.init(text: "yo")))))
         self.assertOutboundString("a OK yo\r\n")
 
@@ -63,7 +63,7 @@ class IMAPServerHandlerTests: XCTestCase {
         self.handler.continuationRequest = ContinuationRequest.responseText(.init(text: "FoO"))
 
         self.writeInbound("a LOGIN {4}\r\n")
-        XCTAssertNoThrow(XCTAssertNil(try self.channel.readInbound(as: CommandStream.self)))
+        XCTAssertNoThrow(XCTAssertNil(try self.channel.readInbound(as: CommandStreamPart.self)))
 
         // Nothing happens until `read()`
         XCTAssertNoThrow(XCTAssertNil(try self.channel.readOutbound(as: ByteBuffer.self)))
@@ -73,7 +73,7 @@ class IMAPServerHandlerTests: XCTestCase {
 
         self.writeInbound("user \"password\"\r\n")
 
-        self.assertInbound(.command(.init(tag: "a", command: .login(username: "user", password: "password"))))
+        self.assertInbound(.tagged(.init(tag: "a", command: .login(username: "user", password: "password"))))
         self.writeOutbound(.taggedResponse(.init(tag: "a", state: .ok(.init(text: "yo")))))
         self.assertOutboundString("a OK yo\r\n")
     }
@@ -83,7 +83,7 @@ class IMAPServerHandlerTests: XCTestCase {
         self.channel = EmbeddedChannel(handler: self.handler)
 
         self.writeInbound("a LOGIN {4}\r\n")
-        XCTAssertNoThrow(XCTAssertNil(try self.channel.readInbound(as: CommandStream.self)))
+        XCTAssertNoThrow(XCTAssertNil(try self.channel.readInbound(as: CommandStreamPart.self)))
 
         // Nothing happens until `read()`
         XCTAssertNoThrow(XCTAssertNil(try self.channel.readOutbound(as: ByteBuffer.self)))
@@ -93,7 +93,7 @@ class IMAPServerHandlerTests: XCTestCase {
 
         self.writeInbound("user \"password\"\r\n")
 
-        self.assertInbound(.command(.init(tag: "a", command: .login(username: "user", password: "password"))))
+        self.assertInbound(.tagged(.init(tag: "a", command: .login(username: "user", password: "password"))))
         self.writeOutbound(.taggedResponse(.init(tag: "a", state: .ok(.init(text: "yo")))))
         self.assertOutboundString("a OK yo\r\n")
     }
@@ -152,7 +152,7 @@ class IMAPServerHandlerTests: XCTestCase {
 
         // client starts authentication
         self.writeInbound("A1 AUTHENTICATE GSSAPI\r\n")
-        self.assertInbound(.command(.init(tag: "A1", command: .authenticate(mechanism: .gssAPI, initialResponse: nil))))
+        self.assertInbound(.tagged(.init(tag: "A1", command: .authenticate(mechanism: .gssAPI, initialResponse: nil))))
 
         // server sends challenge
         self.writeOutbound(.authenticationChallenge("challenge1"))
@@ -204,8 +204,8 @@ class IMAPServerHandlerTests: XCTestCase {
 // MARK: - Helpers
 
 extension IMAPServerHandlerTests {
-    private func assertInbound(_ command: CommandStream, line: UInt = #line) {
-        var maybeRead: CommandStream?
+    private func assertInbound(_ command: CommandStreamPart, line: UInt = #line) {
+        var maybeRead: CommandStreamPart?
         XCTAssertNoThrow(maybeRead = try self.channel.readInbound(), line: line)
         guard let read = maybeRead else {
             XCTFail("Inbound buffer empty", line: line)

@@ -78,7 +78,7 @@ extension RealWorldTests {
                 }
             )
         } catch {
-            switch error as? ByteToMessageDecoderVerifier.VerificationError<CommandStream> {
+            switch error as? ByteToMessageDecoderVerifier.VerificationError<CommandStreamPart> {
             case .some(let error):
                 for input in error.inputs {
                     print(" input: \(String(decoding: input.readableBytesView, as: Unicode.UTF8.self))")

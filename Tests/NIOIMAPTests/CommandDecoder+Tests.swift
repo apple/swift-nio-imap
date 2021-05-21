@@ -29,7 +29,7 @@ extension CommandDecoder_Tests {
             XCTAssertNoThrow(try channel.writeInbound(self.buffer(feed)), feed)
         }
 
-        let output: [(CommandStream, UInt)] = [
+        let output: [(CommandStreamPart, UInt)] = [
             (.append(.start(tag: "tag", appendingTo: .init("box"))), #line),
             (.append(.beginMessage(message: .init(options: .init(flagList: [.seen], extensions: [:]), data: .init(byteCount: 1)))), #line),
             (.append(.messageBytes("a")), #line),
@@ -40,8 +40,8 @@ extension CommandDecoder_Tests {
         for (expected, line) in output {
             XCTAssertNoThrow(
                 XCTAssertEqual(
-                    try channel.readInbound(as: PartialCommandStream.self),
-                    PartialCommandStream(expected), line: line
+                    try channel.readInbound(as: SynchronizedCommand.self),
+                    SynchronizedCommand(expected), line: line
                 ),
                 line: line
             )

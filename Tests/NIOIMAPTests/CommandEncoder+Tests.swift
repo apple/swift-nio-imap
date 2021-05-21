@@ -28,8 +28,8 @@ extension CommandEncoder_Tests {
         // CommandEncodeBuffer.
         // When we add a state to CommandEncoder, it'll be more
         // complex and require more tests.
-        let inputs: [(CommandStream, ByteBuffer, UInt)] = [
-            (.command(.init(tag: "1", command: .noop)), "1 NOOP\r\n", #line),
+        let inputs: [(CommandStreamPart, ByteBuffer, UInt)] = [
+            (.tagged(.init(tag: "1", command: .noop)), "1 NOOP\r\n", #line),
             (.append(.start(tag: "2", appendingTo: .inbox)), "2 APPEND \"INBOX\"", #line),
             (.idleDone, "DONE\r\n", #line),
         ]

@@ -25,13 +25,13 @@ public struct IMAPDecoderError: Error {
 }
 
 struct CommandDecoder: NIOSingleStepByteToMessageDecoder {
-    typealias InboundOut = PartialCommandStream
+    typealias InboundOut = SynchronizedCommand
 
     private var ok: ByteBuffer?
     private var parser = CommandParser()
     private var synchronisingLiteralParser = SynchronizingLiteralParser()
 
-    mutating func decode(buffer: inout ByteBuffer) throws -> PartialCommandStream? {
+    mutating func decode(buffer: inout ByteBuffer) throws -> SynchronizedCommand? {
         let save = buffer
         do {
             return try self.parser.parseCommandStream(buffer: &buffer)
@@ -40,7 +40,7 @@ struct CommandDecoder: NIOSingleStepByteToMessageDecoder {
         }
     }
 
-    mutating func decodeLast(buffer: inout ByteBuffer, seenEOF: Bool) throws -> PartialCommandStream? {
+    mutating func decodeLast(buffer: inout ByteBuffer, seenEOF: Bool) throws -> SynchronizedCommand? {
         try self.decode(buffer: &buffer)
     }
 }
