@@ -29,6 +29,6 @@ extension String {
                 return nil
             }
         }
-        preconditionFailure("This should never happen")
+        preconditionFailure("This should never happen - either the whole string should be successfully parsed as UTF8, or an error caught.")
     }
 }
