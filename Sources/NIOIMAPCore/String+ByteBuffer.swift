@@ -31,12 +31,12 @@ extension String {
         }
         preconditionFailure("This should never happen - either the whole string should be successfully parsed as UTF8, or an error caught.")
     }
-    
+
     // Will try to decode the bytes as UTF8, skipping any that are invalid.
     init<T: Collection>(bestEffortDecodingUTF8Bytes buffer: T) where T.Element == UInt8 {
         self = ""
         self.reserveCapacity(buffer.count)
-        buffer.withContiguousStorageIfAvailable { pointer in 
+        buffer.withContiguousStorageIfAvailable { pointer in
             var decoder = UTF8()
             var bytes = pointer.makeIterator()
             decodeLoop: while true {
