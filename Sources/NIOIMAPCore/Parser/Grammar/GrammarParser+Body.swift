@@ -105,7 +105,7 @@ extension GrammarParser {
     static func parseBodyExtSinglePart(buffer: inout ParseBuffer, tracker: StackTracker) throws -> BodyStructure.Singlepart.Extension {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> BodyStructure.Singlepart.Extension in
             let md5 = try self.parseNString(buffer: &buffer, tracker: tracker).flatMap { (buffer: ByteBuffer) -> String in
-                return try ParserLibrary.parseBufferAsUTF8(buffer)
+                try ParserLibrary.parseBufferAsUTF8(buffer)
             }
             let dsp = try PL.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> BodyStructure.DispositionAndLanguage in
                 try PL.parseSpaces(buffer: &buffer, tracker: tracker)
@@ -368,7 +368,7 @@ extension GrammarParser {
 
     static func parseBodyLocationExtension(buffer: inout ParseBuffer, tracker: StackTracker) throws -> BodyStructure.LocationAndExtensions {
         let fieldLocation = try self.parseNString(buffer: &buffer, tracker: tracker).flatMap { (buffer: ByteBuffer) -> String in
-            return try ParserLibrary.parseBufferAsUTF8(buffer)
+            try ParserLibrary.parseBufferAsUTF8(buffer)
         }
         let extensions = try PL.parseZeroOrMore(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> [BodyExtension] in
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)

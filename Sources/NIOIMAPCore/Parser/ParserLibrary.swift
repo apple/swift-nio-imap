@@ -46,11 +46,10 @@ public struct BadCommand: Error {
 
 /// An error ocurred when parsing an IMAP command or response.
 public struct ParserError: Error {
-    
     static func invalidUTF8(file: String = (#file), line: Int = #line) -> Self {
         ParserError(hint: "Invalid UTF8", file: file, line: line)
     }
-    
+
     /// If possible, a description of the error and why it occurred.
     public var hint: String
     var file: String
@@ -76,7 +75,6 @@ public struct TooMuchRecursion: Error {
 }
 
 extension ParserLibrary {
-    
     /// Throws `ParserError.invalidUTF8` if the given `ByteBuffer` doesn't
     /// contain a valid UTF8 sequence.
     static func parseBufferAsUTF8(_ buffer: ByteBuffer, file: String = (#file), line: Int = #line) throws -> String {
@@ -85,7 +83,7 @@ extension ParserLibrary {
         }
         return string
     }
-    
+
     static func parseZeroOrMoreCharacters(buffer: inout ParseBuffer, tracker: StackTracker, where: ((UInt8) -> Bool)) throws -> ByteBuffer {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, _ in
             let maybeFirstBad = buffer.bytes.readableBytesView.firstIndex { char in

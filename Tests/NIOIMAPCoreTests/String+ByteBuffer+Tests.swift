@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import NIOIMAPCore
+@testable import NIOIMAPCore
 import XCTest
 
 class String_ByteBuffer_Tests: XCTestCase {}

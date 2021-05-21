@@ -411,7 +411,7 @@ extension GrammarParser {
             guard bytes.readableBytesView.allSatisfy({ $0.isHexCharacter }) else {
                 throw ParserError(hint: "Found invalid character in \(String(buffer: bytes))")
             }
-            
+
             // can used the unsafe String.init here as we've already validated everything is valid hex
             return .init(data: String(buffer: bytes))
         }
