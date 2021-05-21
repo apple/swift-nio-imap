@@ -46,6 +46,11 @@ public struct BadCommand: Error {
 
 /// An error ocurred when parsing an IMAP command or response.
 public struct ParserError: Error {
+    
+    static func invalidUTF8(file: String = (#file), line: Int = #line) -> Self {
+        ParserError(hint: "Invalid UTF8", file: file, line: line)
+    }
+    
     /// If possible, a description of the error and why it occurred.
     public var hint: String
     var file: String
@@ -71,6 +76,16 @@ public struct TooMuchRecursion: Error {
 }
 
 extension ParserLibrary {
+    
+    /// Throws `ParserError.invalidUTF8` if the given `ByteBuffer` doesn't
+    /// contain a valid UTF8 sequence.
+    static func parseBufferAsUTF8(_ buffer: ByteBuffer, file: String = (#file), line: Int = #line) throws -> String {
+        guard let string = String(validatingUTF8Bytes: buffer.readableBytesView) else {
+            throw ParserError.invalidUTF8(file: file, line: line)
+        }
+        return string
+    }
+    
     static func parseZeroOrMoreCharacters(buffer: inout ParseBuffer, tracker: StackTracker, where: ((UInt8) -> Bool)) throws -> ByteBuffer {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, _ in
             let maybeFirstBad = buffer.bytes.readableBytesView.firstIndex { char in
@@ -160,9 +175,7 @@ extension ParserLibrary {
             let parsed = try PL.parseOneOrMoreCharacters(buffer: &buffer, tracker: tracker) { char in
                 char >= UInt8(ascii: "0") && char <= UInt8(ascii: "9")
             }
-            guard let string = String(validatingUTF8Bytes: parsed.readableBytesView) else {
-                throw ParserError(hint: "Found invalid non-UTF8 bytes")
-            }
+            let string = try ParserLibrary.parseBufferAsUTF8(parsed)
             guard let int = UInt64(string) else {
                 throw ParserError(hint: "\(string) is not a number")
             }

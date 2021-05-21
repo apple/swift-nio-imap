@@ -47,9 +47,7 @@ extension GrammarParser {
                     return false
                 }
             }
-            guard let word = String(validatingUTF8Bytes: parsed.readableBytesView)?.uppercased() else {
-                throw ParserError(hint: "Invalid parser found")
-            }
+            let word = try ParserLibrary.parseBufferAsUTF8(parsed)
             guard let parser = parsers[word] else {
                 throw ParserError(hint: "Didn't find parser for \(word)")
             }
@@ -80,10 +78,7 @@ extension GrammarParser {
         let parsed = try PL.parseOneOrMoreCharacters(buffer: &buffer, tracker: tracker) { char -> Bool in
             char.isAtomChar
         }
-        guard let string = String(validatingUTF8Bytes: parsed.readableBytesView) else {
-            throw ParserError(hint: "Found invalid non-utf8 atom.")
-        }
-        return string
+        return try ParserLibrary.parseBufferAsUTF8(parsed)
     }
 
     // RFC 7162 Condstore
@@ -413,13 +408,10 @@ extension GrammarParser {
     static func parseEncodedURLAuth(buffer: inout ParseBuffer, tracker: StackTracker) throws -> EncodedAuthenticatedURL {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, _ -> EncodedAuthenticatedURL in
             let bytes = try PL.parseBytes(buffer: &buffer, tracker: tracker, length: 32)
-            guard
-                bytes.readableBytesView.allSatisfy({ $0.isHexCharacter }),
-                let data = String(validatingUTF8Bytes: bytes.readableBytesView)
-            else {
+            guard bytes.readableBytesView.allSatisfy({ $0.isHexCharacter }) else {
                 throw ParserError(hint: "Found invalid character in \(String(buffer: bytes))")
             }
-            return .init(data: data)
+            return .init(data: try ParserLibrary.parseBufferAsUTF8(bytes))
         }
     }
 
@@ -495,11 +487,7 @@ extension GrammarParser {
         let parsed = try PL.parseOneOrMoreCharacters(buffer: &buffer, tracker: tracker) { char -> Bool in
             char.isAtomChar && char != UInt8(ascii: "/")
         }
-
-        guard let string = String(validatingUTF8Bytes: parsed.readableBytesView) else {
-            throw ParserError()
-        }
-        return string
+        return try ParserLibrary.parseBufferAsUTF8(parsed)
     }
 
     // flag            = "\Answered" / "\Flagged" / "\Deleted" /
@@ -726,9 +714,7 @@ extension GrammarParser {
 
         func parseIDParamsList_element(buffer: inout ParseBuffer, tracker: StackTracker) throws -> (String, String?) {
             let parsedKey = try self.parseString(buffer: &buffer, tracker: tracker)
-            guard let key = String(validatingUTF8Bytes: parsedKey.readableBytesView) else {
-                throw ParserError()
-            }
+            let key = try ParserLibrary.parseBufferAsUTF8(parsedKey)
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             return (key, try parseIDValue(buffer: &buffer, tracker: tracker))
         }
@@ -842,9 +828,7 @@ extension GrammarParser {
                 }
             }
 
-            guard let hostName = String(validatingUTF8Bytes: newBuffer.readableBytesView) else {
-                throw ParserError()
-            }
+            let hostName = try ParserLibrary.parseBufferAsUTF8(newBuffer)
             return hostName
         }
 
@@ -1302,10 +1286,7 @@ extension GrammarParser {
 
         func parseMediaBasic_Kind_other(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Media.BasicKind {
             let parsed = try self.parseString(buffer: &buffer, tracker: tracker)
-            guard let string = String(validatingUTF8Bytes: parsed.readableBytesView) else {
-                throw ParserError()
-            }
-            return .init(string)
+            return .init(try ParserLibrary.parseBufferAsUTF8(parsed))
         }
 
         return try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Media.Basic in
@@ -1342,10 +1323,7 @@ extension GrammarParser {
     // media-subtype   = string
     static func parseMediaSubtype(buffer: inout ParseBuffer, tracker: StackTracker) throws -> BodyStructure.MediaSubtype {
         let parsed = try self.parseString(buffer: &buffer, tracker: tracker)
-        guard let subtype = String(validatingUTF8Bytes: parsed.readableBytesView) else {
-            throw ParserError()
-        }
-        return .init(subtype)
+        return .init(try ParserLibrary.parseBufferAsUTF8(parsed))
     }
 
     // media-text      = DQUOTE "TEXT" DQUOTE SP media-subtype
@@ -1353,10 +1331,7 @@ extension GrammarParser {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> String in
             try PL.parseFixedString("\"TEXT\" ", buffer: &buffer, tracker: tracker)
             let parsed = try self.parseString(buffer: &buffer, tracker: tracker)
-            guard let subtype = String(validatingUTF8Bytes: parsed.readableBytesView) else {
-                throw ParserError()
-            }
-            return subtype
+            return try ParserLibrary.parseBufferAsUTF8(parsed)
         }
     }
 
@@ -2001,9 +1976,7 @@ extension GrammarParser {
         let parsed = try PL.parseOneOrMoreCharacters(buffer: &buffer, tracker: tracker) { c -> Bool in
             isalpha(Int32(c)) != 0
         }
-        guard let string = String(validatingUTF8Bytes: parsed.readableBytesView) else {
-            throw ParserError()
-        }
+        let string = try ParserLibrary.parseBufferAsUTF8(parsed)
         guard let att = MailboxAttribute(rawValue: string.uppercased()) else {
             throw ParserError(hint: "Found \(string) which was not a status attribute")
         }
@@ -2112,10 +2085,7 @@ extension GrammarParser {
         let parsed = try PL.parseOneOrMoreCharacters(buffer: &buffer, tracker: tracker) { char -> Bool in
             char.isAStringChar && char != UInt8(ascii: "+")
         }
-        guard let tag = String(validatingUTF8Bytes: parsed.readableBytesView) else {
-            throw ParserError()
-        }
-        return tag
+        return try ParserLibrary.parseBufferAsUTF8(parsed)
     }
 
     // tagged-ext = tagged-ext-label SP tagged-ext-val
@@ -2149,9 +2119,7 @@ extension GrammarParser {
             let parsed = try PL.parseZeroOrMoreCharacters(buffer: &buffer, tracker: tracker) { char -> Bool in
                 char.isTaggedLabelChar
             }
-            guard let trailing = String(validatingUTF8Bytes: parsed.readableBytesView) else {
-                throw ParserError()
-            }
+            let trailing = try ParserLibrary.parseBufferAsUTF8(parsed)
             return String(decoding: [fchar], as: Unicode.UTF8.self) + trailing
         }
     }
@@ -2185,10 +2153,7 @@ extension GrammarParser {
             tracker: StackTracker
         ) throws {
             let parsed = try self.parseAString(buffer: &buffer, tracker: tracker)
-            guard let string = String(validatingUTF8Bytes: parsed.readableBytesView) else {
-                throw ParserError()
-            }
-            into.append(string)
+            into.append(try ParserLibrary.parseBufferAsUTF8(parsed))
             try self.parseTaggedExtensionComplex_continuation(into: &into, buffer: &buffer, tracker: tracker)
         }
 
@@ -2268,10 +2233,7 @@ extension GrammarParser {
                 return false
             }
         })
-        guard let mech = String(validatingUTF8Bytes: parsed.readableBytesView) else {
-            throw ParserError()
-        }
-        return URLAuthenticationMechanism(mech)
+        return URLAuthenticationMechanism(try ParserLibrary.parseBufferAsUTF8(parsed))
     }
 
     // userid          = astring
@@ -2285,10 +2247,7 @@ extension GrammarParser {
         let parsed = try PL.parseOneOrMoreCharacters(buffer: &buffer, tracker: tracker) { char -> Bool in
             char.isAlpha
         }
-        guard let token = String(validatingUTF8Bytes: parsed.readableBytesView) else {
-            throw ParserError()
-        }
-        return token
+        return try ParserLibrary.parseBufferAsUTF8(parsed)
     }
 
     // setquota_list   ::= "(" 0#setquota_resource ")"

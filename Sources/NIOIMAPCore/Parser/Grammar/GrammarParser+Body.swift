@@ -105,10 +105,7 @@ extension GrammarParser {
     static func parseBodyExtSinglePart(buffer: inout ParseBuffer, tracker: StackTracker) throws -> BodyStructure.Singlepart.Extension {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> BodyStructure.Singlepart.Extension in
             let md5 = try self.parseNString(buffer: &buffer, tracker: tracker).flatMap { (buffer: ByteBuffer) -> String in
-                guard let data = String(validatingUTF8Bytes: buffer.readableBytesView) else {
-                    throw ParserError()
-                }
-                return data
+                return try ParserLibrary.parseBufferAsUTF8(buffer)
             }
             let dsp = try PL.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> BodyStructure.DispositionAndLanguage in
                 try PL.parseSpaces(buffer: &buffer, tracker: tracker)
@@ -137,17 +134,11 @@ extension GrammarParser {
             let fieldParam = try self.parseBodyFieldParam(buffer: &buffer, tracker: tracker)
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             let fieldID = try self.parseNString(buffer: &buffer, tracker: tracker).flatMap { (buffer: ByteBuffer) -> String in
-                guard let data = String(validatingUTF8Bytes: buffer.readableBytesView) else {
-                    throw ParserError()
-                }
-                return data
+                try ParserLibrary.parseBufferAsUTF8(buffer)
             }
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             let fieldDescription = try self.parseNString(buffer: &buffer, tracker: tracker).flatMap { (buffer: ByteBuffer) -> String in
-                guard let data = String(validatingUTF8Bytes: buffer.readableBytesView) else {
-                    throw ParserError()
-                }
-                return data
+                try ParserLibrary.parseBufferAsUTF8(buffer)
             }
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             let Encoding = try self.parseBodyEncoding(buffer: &buffer, tracker: tracker)
@@ -173,9 +164,7 @@ extension GrammarParser {
         func parseBodyFieldDsp_some(buffer: inout ParseBuffer, tracker: StackTracker) throws -> BodyStructure.Disposition? {
             try PL.parseFixedString("(", buffer: &buffer, tracker: tracker)
             let parsed = try self.parseString(buffer: &buffer, tracker: tracker)
-            guard let string = String(validatingUTF8Bytes: parsed.readableBytesView) else {
-                throw ParserError()
-            }
+            let string = try ParserLibrary.parseBufferAsUTF8(parsed)
             let dispositionKind = BodyStructure.DispositionKind(rawValue: string)
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             let param = try self.parseBodyFieldParam(buffer: &buffer, tracker: tracker)
@@ -196,10 +185,7 @@ extension GrammarParser {
     static func parseBodyEncoding(buffer: inout ParseBuffer, tracker: StackTracker) throws -> BodyStructure.Encoding {
         func parseBodyEncoding_string(buffer: inout ParseBuffer, tracker: StackTracker) throws -> BodyStructure.Encoding {
             let parsed = try self.parseString(buffer: &buffer, tracker: tracker)
-            guard let string = String(validatingUTF8Bytes: parsed.readableBytesView) else {
-                throw ParserError()
-            }
-            return .init(string)
+            return .init(try ParserLibrary.parseBufferAsUTF8(parsed))
         }
 
         func parseBodyEncoding_option(_ option: String, result: BodyStructure.Encoding, buffer: inout ParseBuffer, tracker: StackTracker) throws -> BodyStructure.Encoding {
@@ -245,29 +231,20 @@ extension GrammarParser {
             guard let parsed = try self.parseNString(buffer: &buffer, tracker: tracker) else {
                 return []
             }
-            guard let language = String(validatingUTF8Bytes: parsed.readableBytesView) else {
-                throw ParserError()
-            }
-            return [language]
+            return [try ParserLibrary.parseBufferAsUTF8(parsed)]
         }
 
         func parseBodyFieldLanguage_multiple(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [String] {
             try PL.parseFixedString("(", buffer: &buffer, tracker: tracker)
 
             let parsed = try self.parseString(buffer: &buffer, tracker: tracker)
-            guard let string = String(validatingUTF8Bytes: parsed.readableBytesView) else {
-                throw ParserError()
-            }
-            var array = [string]
+            var array = [try ParserLibrary.parseBufferAsUTF8(parsed)]
 
             try PL.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) -> String in
                 try PL.parseSpaces(buffer: &buffer, tracker: tracker)
 
                 let parsed = try self.parseString(buffer: &buffer, tracker: tracker)
-                guard let string = String(validatingUTF8Bytes: parsed.readableBytesView) else {
-                    throw ParserError()
-                }
-                return string
+                return try ParserLibrary.parseBufferAsUTF8(parsed)
             }
             try PL.parseFixedString(")", buffer: &buffer, tracker: tracker)
             return array
@@ -290,14 +267,10 @@ extension GrammarParser {
 
         func parseBodyFieldParam_singlePair(buffer: inout ParseBuffer, tracker: StackTracker) throws -> (String, String) {
             let parsedField = try parseString(buffer: &buffer, tracker: tracker)
-            guard let field = String(validatingUTF8Bytes: parsedField.readableBytesView) else {
-                throw ParserError()
-            }
+            let field = try ParserLibrary.parseBufferAsUTF8(parsedField)
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             let parsedValue = try parseString(buffer: &buffer, tracker: tracker)
-            guard let value = String(validatingUTF8Bytes: parsedValue.readableBytesView) else {
-                throw ParserError()
-            }
+            let value = try ParserLibrary.parseBufferAsUTF8(parsedValue)
             return (field, value)
         }
 
@@ -395,10 +368,7 @@ extension GrammarParser {
 
     static func parseBodyLocationExtension(buffer: inout ParseBuffer, tracker: StackTracker) throws -> BodyStructure.LocationAndExtensions {
         let fieldLocation = try self.parseNString(buffer: &buffer, tracker: tracker).flatMap { (buffer: ByteBuffer) -> String in
-            guard let string = String(validatingUTF8Bytes: buffer.readableBytesView) else {
-                throw ParserError()
-            }
-            return string
+            return try ParserLibrary.parseBufferAsUTF8(buffer)
         }
         let extensions = try PL.parseZeroOrMore(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> [BodyExtension] in
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)

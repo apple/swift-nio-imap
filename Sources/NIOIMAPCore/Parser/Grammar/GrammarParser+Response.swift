@@ -192,9 +192,7 @@ extension GrammarParser {
                 char.isTextChar
             }
 
-            guard let text = String(validatingUTF8Bytes: parsed.readableBytesView) else {
-                throw ParserError(hint: "Found invalid non-UTF8 bytes.")
-            }
+            let text = try ParserLibrary.parseBufferAsUTF8(parsed)
             return ResponseText(code: code, text: text)
         }
     }
@@ -314,9 +312,7 @@ extension GrammarParser {
                 let parsed = try PL.parseOneOrMoreCharacters(buffer: &buffer, tracker: tracker) { (char) -> Bool in
                     char.isTextChar && char != UInt8(ascii: "]")
                 }
-                guard let string = String(validatingUTF8Bytes: parsed.readableBytesView) else {
-                    throw ParserError(hint: "Found invalid non-UTF8 bytes")
-                }
+                let string = try ParserLibrary.parseBufferAsUTF8(parsed)
                 return string
             }
             return .other(atom, string)

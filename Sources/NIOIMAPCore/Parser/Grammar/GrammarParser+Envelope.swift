@@ -94,9 +94,7 @@ extension GrammarParser {
 
     static func parseMessageID(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageID? {
         if let parsed = try self.parseNString(buffer: &buffer, tracker: tracker) {
-            guard let string = String(validatingUTF8Bytes: parsed.readableBytesView) else {
-                throw ParserError()
-            }
+            let string = try ParserLibrary.parseBufferAsUTF8(parsed)
             return .init(rawValue: string)
         }
         return nil
