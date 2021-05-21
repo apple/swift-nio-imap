@@ -13,10 +13,10 @@
 //===----------------------------------------------------------------------===//
 
 extension String {
-    init?<T: Sequence>(validatingUTF8Bytes bytes: T) where T.Element == UInt8 {
+    init?<T: Collection>(validatingUTF8Bytes bytes: T) where T.Element == UInt8 {
         var bytesIterator = bytes.makeIterator()
         var scalars: [Unicode.Scalar] = []
-        scalars.reserveCapacity(bytes.underestimatedCount)
+        scalars.reserveCapacity(bytes.count)
         var utf8Decoder = UTF8()
         while true {
             switch utf8Decoder.decode(&bytesIterator) {
@@ -30,5 +30,27 @@ extension String {
             }
         }
         preconditionFailure("This should never happen - either the whole string should be successfully parsed as UTF8, or an error caught.")
+    }
+
+    /// Will try to decode the bytes as UTF8, skipping any that are invalid.
+    /// This will ignore any invalid UTF8 bytes, and so should *only* be used when
+    /// displaying the string to a user. Don't use over the network.
+    init<T: Collection>(bestEffortDecodingUTF8Bytes buffer: T) where T.Element == UInt8 {
+        self = ""
+        self.reserveCapacity(buffer.count)
+        buffer.withContiguousStorageIfAvailable { pointer in
+            var decoder = UTF8()
+            var bytes = pointer.makeIterator()
+            decodeLoop: while true {
+                switch decoder.decode(&bytes) {
+                case .scalarValue(let s):
+                    unicodeScalars.append(s)
+                case .emptyInput:
+                    break decodeLoop
+                case .error:
+                    break
+                }
+            }
+        }
     }
 }

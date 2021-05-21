@@ -38,8 +38,11 @@ public struct QuotaRoot: Equatable {
 
 extension String {
     /// The raw bytes decoded into a UTF8 `String`
-    public init(_ other: QuotaRoot) {
-        self.init(buffer: other.storage)
+    public init?(_ other: QuotaRoot) {
+        guard let string = String(validatingUTF8Bytes: other.storage.readableBytesView) else {
+            return nil
+        }
+        self = string
     }
 }
 
@@ -48,7 +51,8 @@ extension String {
 extension QuotaRoot: CustomDebugStringConvertible {
     /// A human-readable representation of the root.
     public var debugDescription: String {
-        String(self)
+        // provide some debug information even if the buffer isn't valid UTF-8
+        String(self) ?? String(buffer: self.storage)
     }
 }
 
