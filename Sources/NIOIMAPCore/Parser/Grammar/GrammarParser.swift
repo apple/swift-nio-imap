@@ -47,7 +47,7 @@ extension GrammarParser {
                     return false
                 }
             }
-            let word = String(buffer: parsed).uppercased()
+            let word = try ParserLibrary.parseBufferAsUTF8(parsed).uppercased()
             guard let parser = parsers[word] else {
                 throw ParserError(hint: "Didn't find parser for \(word)")
             }
@@ -78,7 +78,7 @@ extension GrammarParser {
         let parsed = try PL.parseOneOrMoreCharacters(buffer: &buffer, tracker: tracker) { char -> Bool in
             char.isAtomChar
         }
-        return String(buffer: parsed)
+        return try ParserLibrary.parseBufferAsUTF8(parsed)
     }
 
     // RFC 7162 Condstore
@@ -411,6 +411,8 @@ extension GrammarParser {
             guard bytes.readableBytesView.allSatisfy({ $0.isHexCharacter }) else {
                 throw ParserError(hint: "Found invalid character in \(String(buffer: bytes))")
             }
+
+            // can used the unsafe String.init here as we've already validated everything is valid hex
             return .init(data: String(buffer: bytes))
         }
     }
@@ -487,7 +489,7 @@ extension GrammarParser {
         let parsed = try PL.parseOneOrMoreCharacters(buffer: &buffer, tracker: tracker) { char -> Bool in
             char.isAtomChar && char != UInt8(ascii: "/")
         }
-        return String(buffer: parsed)
+        return try ParserLibrary.parseBufferAsUTF8(parsed)
     }
 
     // flag            = "\Answered" / "\Flagged" / "\Deleted" /
@@ -713,7 +715,8 @@ extension GrammarParser {
         }
 
         func parseIDParamsList_element(buffer: inout ParseBuffer, tracker: StackTracker) throws -> (String, String?) {
-            let key = String(buffer: try self.parseString(buffer: &buffer, tracker: tracker))
+            let parsedKey = try self.parseString(buffer: &buffer, tracker: tracker)
+            let key = try ParserLibrary.parseBufferAsUTF8(parsedKey)
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             return (key, try parseIDValue(buffer: &buffer, tracker: tracker))
         }
@@ -826,7 +829,9 @@ extension GrammarParser {
                     break
                 }
             }
-            return String(buffer: newBuffer)
+
+            let hostName = try ParserLibrary.parseBufferAsUTF8(newBuffer)
+            return hostName
         }
 
         // TODO: This isn't great, but it is functional. Perhaps make it actually enforce IPv4 rules
@@ -1282,8 +1287,8 @@ extension GrammarParser {
         }
 
         func parseMediaBasic_Kind_other(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Media.BasicKind {
-            let buffer = try self.parseString(buffer: &buffer, tracker: tracker)
-            return .init(String(buffer: buffer))
+            let parsed = try self.parseString(buffer: &buffer, tracker: tracker)
+            return .init(try ParserLibrary.parseBufferAsUTF8(parsed))
         }
 
         return try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Media.Basic in
@@ -1319,17 +1324,16 @@ extension GrammarParser {
 
     // media-subtype   = string
     static func parseMediaSubtype(buffer: inout ParseBuffer, tracker: StackTracker) throws -> BodyStructure.MediaSubtype {
-        let buffer = try self.parseString(buffer: &buffer, tracker: tracker)
-        let string = String(buffer: buffer)
-        return .init(string)
+        let parsed = try self.parseString(buffer: &buffer, tracker: tracker)
+        return .init(try ParserLibrary.parseBufferAsUTF8(parsed))
     }
 
     // media-text      = DQUOTE "TEXT" DQUOTE SP media-subtype
     static func parseMediaText(buffer: inout ParseBuffer, tracker: StackTracker) throws -> String {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> String in
             try PL.parseFixedString("\"TEXT\" ", buffer: &buffer, tracker: tracker)
-            let subtype = try self.parseString(buffer: &buffer, tracker: tracker)
-            return String(buffer: subtype)
+            let parsed = try self.parseString(buffer: &buffer, tracker: tracker)
+            return try ParserLibrary.parseBufferAsUTF8(parsed)
         }
     }
 
@@ -1974,7 +1978,7 @@ extension GrammarParser {
         let parsed = try PL.parseOneOrMoreCharacters(buffer: &buffer, tracker: tracker) { c -> Bool in
             isalpha(Int32(c)) != 0
         }
-        let string = String(buffer: parsed)
+        let string = try ParserLibrary.parseBufferAsUTF8(parsed)
         guard let att = MailboxAttribute(rawValue: string.uppercased()) else {
             throw ParserError(hint: "Found \(string) which was not a status attribute")
         }
@@ -2080,10 +2084,10 @@ extension GrammarParser {
 
     // tag             = 1*<any ASTRING-CHAR except "+">
     static func parseTag(buffer: inout ParseBuffer, tracker: StackTracker) throws -> String {
-        let parser = try PL.parseOneOrMoreCharacters(buffer: &buffer, tracker: tracker) { char -> Bool in
+        let parsed = try PL.parseOneOrMoreCharacters(buffer: &buffer, tracker: tracker) { char -> Bool in
             char.isAStringChar && char != UInt8(ascii: "+")
         }
-        return String(buffer: parser)
+        return try ParserLibrary.parseBufferAsUTF8(parsed)
     }
 
     // tagged-ext = tagged-ext-label SP tagged-ext-val
@@ -2117,8 +2121,7 @@ extension GrammarParser {
             let parsed = try PL.parseZeroOrMoreCharacters(buffer: &buffer, tracker: tracker) { char -> Bool in
                 char.isTaggedLabelChar
             }
-            let trailing = String(buffer: parsed)
-
+            let trailing = try ParserLibrary.parseBufferAsUTF8(parsed)
             return String(decoding: [fchar], as: Unicode.UTF8.self) + trailing
         }
     }
@@ -2151,7 +2154,8 @@ extension GrammarParser {
             buffer: inout ParseBuffer,
             tracker: StackTracker
         ) throws {
-            into.append(String(buffer: try self.parseAString(buffer: &buffer, tracker: tracker)))
+            let parsed = try self.parseAString(buffer: &buffer, tracker: tracker)
+            into.append(try ParserLibrary.parseBufferAsUTF8(parsed))
             try self.parseTaggedExtensionComplex_continuation(into: &into, buffer: &buffer, tracker: tracker)
         }
 
@@ -2231,8 +2235,7 @@ extension GrammarParser {
                 return false
             }
         })
-        let string = String(buffer: parsed)
-        return URLAuthenticationMechanism(string)
+        return URLAuthenticationMechanism(try ParserLibrary.parseBufferAsUTF8(parsed))
     }
 
     // userid          = astring
@@ -2246,7 +2249,7 @@ extension GrammarParser {
         let parsed = try PL.parseOneOrMoreCharacters(buffer: &buffer, tracker: tracker) { char -> Bool in
             char.isAlpha
         }
-        return String(buffer: parsed)
+        return try ParserLibrary.parseBufferAsUTF8(parsed)
     }
 
     // setquota_list   ::= "(" 0#setquota_resource ")"
