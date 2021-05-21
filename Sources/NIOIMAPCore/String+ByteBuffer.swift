@@ -16,6 +16,7 @@ extension String {
     public init?<T: Sequence>(validatingUTF8Bytes bytes: T) where T.Element == UInt8 {
         var bytesIterator = bytes.makeIterator()
         var scalars: [Unicode.Scalar] = []
+        scalars.reserveCapacity(bytes.underestimatedCount)
         var utf8Decoder = UTF8()
         while true {
             switch utf8Decoder.decode(&bytesIterator) {
