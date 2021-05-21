@@ -32,7 +32,9 @@ extension String {
         preconditionFailure("This should never happen - either the whole string should be successfully parsed as UTF8, or an error caught.")
     }
 
-    // Will try to decode the bytes as UTF8, skipping any that are invalid.
+    /// Will try to decode the bytes as UTF8, skipping any that are invalid.
+    /// This will ignore any invalid UTF8 bytes, and so should *only* be used when
+    /// displaying the string to a user. Don't use over the network.
     init<T: Collection>(bestEffortDecodingUTF8Bytes buffer: T) where T.Element == UInt8 {
         self = ""
         self.reserveCapacity(buffer.count)
