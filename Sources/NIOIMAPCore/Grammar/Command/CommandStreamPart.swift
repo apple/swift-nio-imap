@@ -108,7 +108,7 @@ extension CommandEncodeBuffer {
     @discardableResult public mutating func writeCommandStream(_ stream: CommandStreamPart) -> Int {
         switch stream {
         case .idleDone:
-            return self._buffer.writeString("DONE\r\n")
+            return self.buffer.writeString("DONE\r\n")
         case .tagged(let command):
             return self.writeCommand(command)
         case .append(let command):
@@ -120,57 +120,57 @@ extension CommandEncodeBuffer {
 
     @discardableResult private mutating func writeBytes(_ bytes: ByteBuffer) -> Int {
         var buffer = bytes
-        return self._buffer.writeBuffer(&buffer)
+        return self.buffer.writeBuffer(&buffer)
     }
 
     @discardableResult private mutating func writeAuthenticationChallengeResponse(_ bytes: ByteBuffer) -> Int {
-        self._buffer.writeBufferAsBase64(bytes) + self._buffer.writeString("\r\n")
+        self.buffer.writeBufferAsBase64(bytes) + self.buffer.writeString("\r\n")
     }
 
     @discardableResult private mutating func writeAppendCommand(_ command: AppendCommand) -> Int {
         switch command {
         case .start(tag: let tag, appendingTo: let mailbox):
             return
-                self._buffer.writeString("\(tag) APPEND ") +
-                self._buffer.writeMailbox(mailbox)
+                self.buffer.writeString("\(tag) APPEND ") +
+                self.buffer.writeMailbox(mailbox)
         case .beginMessage(message: let message):
-            return self._buffer.writeAppendMessage(message)
+            return self.buffer.writeAppendMessage(message)
         case .messageBytes(var bytes):
-            return self._buffer.writeBuffer(&bytes)
+            return self.buffer.writeBuffer(&bytes)
         case .endMessage:
             return 0
         case .beginCatenate(options: let options):
-            return self._buffer.writeAppendOptions(options) +
-                self._buffer.writeString(" CATENATE (")
+            return self.buffer.writeAppendOptions(options) +
+                self.buffer.writeString(" CATENATE (")
         case .catenateURL(let url):
             defer {
                 self.encodedAtLeastOneCatenateElement = true
             }
 
-            return self._buffer.write(if: self.encodedAtLeastOneCatenateElement) { self._buffer.writeSpace() } +
-                self._buffer.writeString("URL ") +
-                self._buffer.writeIMAPString(url)
+            return self.buffer.write(if: self.encodedAtLeastOneCatenateElement) { self.buffer.writeSpace() } +
+                self.buffer.writeString("URL ") +
+                self.buffer.writeIMAPString(url)
         case .catenateData(.begin(let size)):
-            var written = self._buffer.write(if: self.encodedAtLeastOneCatenateElement) { self._buffer.writeSpace() } +
-                self._buffer.writeString("TEXT ")
+            var written = self.buffer.write(if: self.encodedAtLeastOneCatenateElement) { self.buffer.writeSpace() } +
+                self.buffer.writeString("TEXT ")
 
             if self.options.useNonSynchronizingLiteralPlus {
-                written += self._buffer.writeString("{\(size)+}\r\n")
+                written += self.buffer.writeString("{\(size)+}\r\n")
             } else {
-                written += self._buffer.writeString("{\(size)}\r\n")
-                self._buffer.markStopPoint()
+                written += self.buffer.writeString("{\(size)}\r\n")
+                self.buffer.markStopPoint()
             }
             return written
         case .catenateData(.bytes(var bytes)):
-            return self._buffer.writeBuffer(&bytes)
+            return self.buffer.writeBuffer(&bytes)
         case .catenateData(.end):
             self.encodedAtLeastOneCatenateElement = true
             return 0
         case .endCatenate:
             self.encodedAtLeastOneCatenateElement = false
-            return self._buffer.writeString(")")
+            return self.buffer.writeString(")")
         case .finish:
-            return self._buffer.writeString("\r\n")
+            return self.buffer.writeString("\r\n")
         }
     }
 }

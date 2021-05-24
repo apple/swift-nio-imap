@@ -267,9 +267,9 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
             break
         }
 
-        let next = commandEncoder._buffer.nextChunk()
+        let next = commandEncoder.buffer.nextChunk()
         if next.waitForContinuation {
-            self.currentEncodeBuffer = (commandEncoder._buffer, promise)
+            self.currentEncodeBuffer = (commandEncoder.buffer, promise)
             assert(self.state == .expectingResponses)
             self.state = .expectingLiteralContinuationRequest
             context.write(self.wrapOutboundOut(next.bytes)).cascadeFailure(to: promise)
