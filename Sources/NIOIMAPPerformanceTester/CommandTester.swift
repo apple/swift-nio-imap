@@ -13,8 +13,8 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
-@_spi(NIOIMAPInternal) import NIOIMAPCore
 import NIOIMAP
+@_spi(NIOIMAPInternal) import NIOIMAPCore
 
 class CommandTester: Benchmark {
     var command: Command
