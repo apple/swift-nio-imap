@@ -55,7 +55,7 @@ extension _ParserTestHelpers {
         for (input, terminator, line) in inputs {
             TestUtilities.withParseBuffer(input, terminator: terminator, shouldRemainUnchanged: true, file: file, line: line) { (buffer) in
                 XCTAssertThrowsError(try testFunction(&buffer, .testTracker), file: file, line: line) { e in
-                    XCTAssertTrue(e is _IncompleteMessage, "Expected IncompleteMessage, got \(e)", file: file, line: line)
+                    XCTAssertTrue(e is IncompleteMessage, "Expected IncompleteMessage, got \(e)", file: file, line: line)
                 }
             }
         }
@@ -83,7 +83,7 @@ extension _ParserTestHelpers {
         for (input, terminator, line) in inputs {
             TestUtilities.withParseBuffer(input, terminator: terminator, shouldRemainUnchanged: true, file: file, line: line) { (buffer) in
                 XCTAssertThrowsError(try testFunction(&buffer, .testTracker), file: file, line: line) { e in
-                    XCTAssertTrue(e is _IncompleteMessage, "Expected IncompleteMessage, got \(e)", file: file, line: line)
+                    XCTAssertTrue(e is IncompleteMessage, "Expected IncompleteMessage, got \(e)", file: file, line: line)
                 }
             }
         }
@@ -422,7 +422,7 @@ extension ParserUnitTests {
     func testAtom_invalid_incomplete() {
         var buffer = TestUtilities.makeParseBuffer(for: "hello")
         XCTAssertThrowsError(try GrammarParser.parseAtom(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertTrue(e is _IncompleteMessage)
+            XCTAssertTrue(e is IncompleteMessage)
         }
     }
 
@@ -544,7 +544,7 @@ extension ParserUnitTests {
     func testCapability_invalid_empty() {
         var buffer = TestUtilities.makeParseBuffer(for: "")
         XCTAssertThrowsError(try GrammarParser.parseSequenceNumber(buffer: &buffer, tracker: .testTracker)) { error in
-            XCTAssertTrue(error is _IncompleteMessage)
+            XCTAssertTrue(error is IncompleteMessage)
         }
     }
 }
@@ -796,7 +796,7 @@ extension ParserUnitTests {
     func testDelete_invalid_incomplete() {
         var buffer = TestUtilities.makeParseBuffer(for: "DELETE ")
         XCTAssertThrowsError(try GrammarParser.parseCommand(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertTrue(e is _IncompleteMessage, "e has type \(e)")
+            XCTAssertTrue(e is IncompleteMessage, "e has type \(e)")
         }
     }
 }
@@ -1807,7 +1807,7 @@ extension ParserUnitTests {
     func testMediaMessage_invalid_partial() {
         var buffer = TestUtilities.makeParseBuffer(for: "\"messAGE\"")
         XCTAssertThrowsError(try GrammarParser.parseMediaMessage(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertTrue(e is _IncompleteMessage, "e has type \(e)")
+            XCTAssertTrue(e is IncompleteMessage, "e has type \(e)")
         }
     }
 }
@@ -1839,7 +1839,7 @@ extension ParserUnitTests {
     func testMediaText_invalid_missingSubtype() {
         var buffer = TestUtilities.makeParseBuffer(for: #""TEXT""#)
         XCTAssertThrowsError(try GrammarParser.parseMediaText(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertTrue(e is _IncompleteMessage, "e has type \(e)")
+            XCTAssertTrue(e is IncompleteMessage, "e has type \(e)")
         }
     }
 }

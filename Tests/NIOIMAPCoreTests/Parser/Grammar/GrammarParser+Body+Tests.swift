@@ -120,7 +120,7 @@ extension GrammarParser_Body_Tests {
     func testParseBodyFieldParam_invalid_oneObject() {
         var buffer = TestUtilities.makeParseBuffer(for: #"("p1" "#)
         XCTAssertThrowsError(try GrammarParser.parseBodyFieldParam(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertTrue(e is _IncompleteMessage)
+            XCTAssertTrue(e is IncompleteMessage)
         }
     }
 }

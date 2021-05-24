@@ -109,7 +109,7 @@ extension GrammarParser_Date_Tests {
     func testDateMonth_invalid_incomplete() {
         var buffer = TestUtilities.makeParseBuffer(for: "ju")
         XCTAssertThrowsError(try GrammarParser.parseDateMonth(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertTrue(e is _IncompleteMessage)
+            XCTAssertTrue(e is IncompleteMessage)
         }
     }
 
@@ -134,7 +134,7 @@ extension GrammarParser_Date_Tests {
     func testDateText_invalid_missing_year() {
         var buffer = TestUtilities.makeParseBuffer(for: "25-Jun-")
         XCTAssertThrowsError(try GrammarParser.parseDateText(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertTrue(e is _IncompleteMessage)
+            XCTAssertTrue(e is IncompleteMessage)
         }
     }
 }
@@ -183,7 +183,7 @@ extension GrammarParser_Date_Tests {
     func testparseInternalDate__invalid_incomplete() {
         var buffer = TestUtilities.makeParseBuffer(for: #""25-Jun-1994 01"#)
         XCTAssertThrowsError(try GrammarParser.parseInternalDate(buffer: &buffer, tracker: .testTracker)) { error in
-            XCTAssertTrue(error is _IncompleteMessage)
+            XCTAssertTrue(error is IncompleteMessage)
         }
     }
 
