@@ -69,7 +69,7 @@ extension MailboxInfo {
         /// The mailbox does not have child attributes.
         public static var hasNoChildren: Self { Self(_backing: #"\HasNoChildren"#) }
 
-        var _backing: String
+        fileprivate var _backing: String
 
         init(_backing: String) {
             self._backing = _backing

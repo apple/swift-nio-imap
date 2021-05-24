@@ -16,7 +16,7 @@ import struct NIO.ByteBuffer
 
 /// Describes the metadata item type.
 public struct EntryKindResponse: Equatable {
-    var _backing: String
+    fileprivate var _backing: String
 
     /// `priv` - Private metadata item type.
     public static var `private` = Self(_backing: "priv")

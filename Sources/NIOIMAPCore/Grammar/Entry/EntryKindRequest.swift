@@ -16,7 +16,7 @@ import struct NIO.ByteBuffer
 
 /// Specifies which type of metadata item to perform a search on.
 public struct EntryKindRequest: Hashable {
-    var _backing: String
+    fileprivate var _backing: String
 
     /// Search private metadata items.
     public static var `private` = Self(_backing: "priv")
