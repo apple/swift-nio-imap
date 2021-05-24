@@ -104,7 +104,7 @@ public struct MailboxStatus: Equatable {
 
 // MARK: - Encoding
 
-extension _EncodeBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeMailboxAttributes(_ atts: [MailboxAttribute]) -> Int {
         self.writeArray(atts, parenthesis: false) { (element, self) in
             self.writeMailboxAttribute(element)

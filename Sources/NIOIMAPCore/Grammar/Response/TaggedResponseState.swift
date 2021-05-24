@@ -41,7 +41,7 @@ extension TaggedResponse {
 
 // MARK: - Encoding
 
-extension _EncodeBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeTaggedResponseState(_ cond: TaggedResponse.State) -> Int {
         switch cond {
         case .ok(let text):

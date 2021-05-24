@@ -32,7 +32,7 @@ public struct InitialResponse: Hashable {
 
 // MARK: - Encoding
 
-extension _EncodeBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeInitialResponse(_ resp: InitialResponse) -> Int {
         if resp.data.readableBytes == 0 {
             return self.writeString("=")

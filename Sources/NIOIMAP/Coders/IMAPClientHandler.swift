@@ -32,7 +32,7 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
 
     private let decoder: NIOSingleStepByteToMessageProcessor<ResponseDecoder>
 
-    private var currentEncodeBuffer: (_EncodeBuffer, EventLoopPromise<Void>?)?
+    private var currentEncodeBuffer: (EncodeBuffer, EventLoopPromise<Void>?)?
     private var bufferedCommands: MarkedCircularBuffer<(CommandStreamPart, EventLoopPromise<Void>?)> = .init(initialCapacity: 4)
 
     public struct UnexpectedContinuationRequest: Error {}

@@ -19,7 +19,7 @@ let NamespaceCommand = "NAMESPACE"
 
 // MARK: - Encoding
 
-extension _EncodeBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeNamespaceCommand() -> Int {
         self.writeString(NamespaceCommand)
     }

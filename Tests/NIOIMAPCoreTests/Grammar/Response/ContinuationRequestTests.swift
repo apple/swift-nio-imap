@@ -48,7 +48,7 @@ extension ContinuationRequestTests {
         self.iterateInputs(inputs: fixtures, encoder: { req in
             var encoder = ResponseEncodeBuffer(buffer: self.testBuffer.buffer, options: ResponseEncodingOptions())
             defer {
-                self.testBuffer = _EncodeBuffer.serverEncodeBuffer(buffer: encoder.readBytes(), options: ResponseEncodingOptions())
+                self.testBuffer = EncodeBuffer.serverEncodeBuffer(buffer: encoder.readBytes(), options: ResponseEncodingOptions())
             }
             return encoder.writeContinuationRequest(req)
         })

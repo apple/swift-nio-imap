@@ -26,7 +26,7 @@ public struct EncodedSearch: Equatable {
     }
 }
 
-extension _EncodeBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeEncodedSearch(_ query: EncodedSearch) -> Int {
         self.writeString(query.query)
     }

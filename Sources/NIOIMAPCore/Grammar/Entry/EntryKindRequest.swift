@@ -31,7 +31,7 @@ public struct EntryKindRequest: Hashable {
 
 // MARK: - Encoding
 
-extension _EncodeBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeEntryKindRequest(_ request: EntryKindRequest) -> Int {
         self.writeString(request._backing)
     }

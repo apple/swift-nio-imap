@@ -26,7 +26,7 @@ public struct FetchModificationResponse: Equatable {
 
 // MARK: - Encoding
 
-extension _EncodeBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeFetchModificationResponse(_ resp: FetchModificationResponse) -> Int {
         self.writeString("MODSEQ (") +
             self.writeModificationSequenceValue(resp.modificationSequenceValue) +

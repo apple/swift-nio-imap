@@ -39,7 +39,7 @@ extension OptionValueComp: ExpressibleByArrayLiteral {
 
 // MARK: - Encoding
 
-extension _EncodeBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeOptionValue(_ value: OptionValueComp) -> Int {
         self.writeString("(") +
             self.writeOptionValueComp(value) +

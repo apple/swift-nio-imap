@@ -85,7 +85,7 @@ extension MailboxInfo {
 
 // MARK: - Encoding
 
-extension _EncodeBuffer {
+extension EncodeBuffer {
     private mutating func writeMailboxPathSeparator(_ character: Character?) -> Int {
         switch character {
         case nil:

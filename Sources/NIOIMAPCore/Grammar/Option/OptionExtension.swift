@@ -25,7 +25,7 @@ public enum OptionExtensionKind: Hashable {
 
 // MARK: - Encoding
 
-extension _EncodeBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeOptionExtension(_ option: KeyValue<OptionExtensionKind, OptionValueComp?>) -> Int {
         var size = 0
         switch option.key {

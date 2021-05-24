@@ -27,7 +27,7 @@ public struct EntryKindResponse: Equatable {
 
 // MARK: - Encoding
 
-extension _EncodeBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeEntryKindResponse(_ response: EntryKindResponse) -> Int {
         self.writeString(response._backing)
     }

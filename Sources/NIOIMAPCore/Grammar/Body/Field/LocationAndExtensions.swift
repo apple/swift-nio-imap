@@ -37,7 +37,7 @@ extension BodyStructure {
 
 // MARK: - Encoding
 
-extension _EncodeBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeBodyLocationAndExtensions(_ locationExtension: BodyStructure.LocationAndExtensions) -> Int {
         self.writeSpace() +
             self.writeNString(locationExtension.location) +

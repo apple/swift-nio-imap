@@ -17,7 +17,7 @@ import struct NIO.ByteBuffer
 /// Used to buffer commands before writing to the network.
 public struct CommandEncodeBuffer {
     /// The underlying buffer containing data to be written.
-    @_spi(NIOIMAPInternal) public var _buffer: _EncodeBuffer
+    @_spi(NIOIMAPInternal) public var _buffer: EncodeBuffer
 
     /// Tracks whether we have encoded at least one catenate element.
     internal var encodedAtLeastOneCatenateElement = false

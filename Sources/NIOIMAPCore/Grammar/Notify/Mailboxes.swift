@@ -32,7 +32,7 @@ public struct Mailboxes: Equatable {
 
 // MARK: - Encoding
 
-extension _EncodeBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeMailboxes(_ mailboxes: Mailboxes) -> Int {
         self.writeArray(mailboxes.content) { (mailbox, buffer) -> Int in
             buffer.writeMailbox(mailbox)

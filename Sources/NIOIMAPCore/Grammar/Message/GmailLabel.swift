@@ -25,7 +25,7 @@ public struct GmailLabel: Equatable {
     }
 }
 
-extension _EncodeBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeGmailLabel(_ label: GmailLabel) -> Int {
         if label.stringValue.getInteger(at: label.stringValue.readerIndex) == UInt8(ascii: "\\") {
             var stringValue = label.stringValue

@@ -34,7 +34,7 @@ public struct ExtendedSearchScopeOptions: Equatable {
 
 // MARK: - Encoding
 
-extension _EncodeBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeExtendedSearchScopeOptions(_ options: ExtendedSearchScopeOptions) -> Int {
         self.writeOrderedDictionary(options.content, parenthesis: false) { (option, buffer) -> Int in
             buffer.writeParameter(option)

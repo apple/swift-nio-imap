@@ -35,7 +35,7 @@ extension BodyStructure {
 
 // MARK: - Encoding
 
-extension _EncodeBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeBodyFieldLanguageLocation(_ langLoc: BodyStructure.LanguageLocation) -> Int {
         self.writeSpace() +
             self.writeBodyLanguages(langLoc.languages) +

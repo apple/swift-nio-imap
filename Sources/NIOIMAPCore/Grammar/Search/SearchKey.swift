@@ -194,7 +194,7 @@ extension SearchKey {
 
 // MARK: - IMAP
 
-extension _EncodeBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeSearchKeys(_ keys: [SearchKey]) -> Int {
         writeSearchKey(.and(keys))
     }

@@ -26,7 +26,7 @@ public struct EncodedSection: Equatable {
     }
 }
 
-extension _EncodeBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeEncodedSection(_ section: EncodedSection) -> Int {
         self.writeString(section.section)
     }

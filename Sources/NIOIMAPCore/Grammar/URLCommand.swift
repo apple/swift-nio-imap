@@ -23,7 +23,7 @@ public enum URLCommand: Equatable {
 
 // MARK: - Encoding
 
-extension _EncodeBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeURLCommand(_ ref: URLCommand) -> Int {
         switch ref {
         case .messageList(let list):

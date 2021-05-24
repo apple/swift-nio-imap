@@ -26,7 +26,7 @@ public enum RelativeIMAPURL: Equatable {
 
 // MARK: - Encoding
 
-extension _EncodeBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeRelativeIMAPURL(_ url: RelativeIMAPURL) -> Int {
         switch url {
         case .networkPath(let path):

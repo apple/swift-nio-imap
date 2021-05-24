@@ -59,7 +59,7 @@ extension String {
 
 // MARK: - Encoding
 
-extension _EncodeBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeUseAttribute(_ att: UseAttribute) -> Int {
         self.writeString(att.stringValue)
     }

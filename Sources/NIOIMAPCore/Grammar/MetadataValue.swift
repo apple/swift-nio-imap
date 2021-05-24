@@ -36,7 +36,7 @@ extension MetadataValue: ExpressibleByNilLiteral {
 
 // MARK: - Encoding
 
-extension _EncodeBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeMetadataValue(_ value: MetadataValue) -> Int {
         guard let bytes = value.bytes else {
             return self.writeNil()

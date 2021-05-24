@@ -25,7 +25,7 @@ public enum ParameterValue: Hashable {
 
 // MARK: - Encoding
 
-extension _EncodeBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeParameterValue(_ value: ParameterValue) -> Int {
         switch value {
         case .sequence(let set):

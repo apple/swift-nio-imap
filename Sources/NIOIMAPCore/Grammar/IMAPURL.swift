@@ -31,7 +31,7 @@ public struct IMAPURL: Equatable {
 
 // MARK: - Encoding
 
-extension _EncodeBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeIMAPURL(_ url: IMAPURL) -> Int {
         self.writeString("imap://") +
             self.writeIMAPServer(url.server) +

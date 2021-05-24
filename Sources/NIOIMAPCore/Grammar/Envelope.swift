@@ -85,7 +85,7 @@ public struct Envelope: Equatable {
 
 // MARK: - Encoding
 
-extension _EncodeBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeEnvelopeAddresses(_ addresses: [EmailAddressListElement]) -> Int {
         guard addresses.count > 0 else {
             return self.writeNil()

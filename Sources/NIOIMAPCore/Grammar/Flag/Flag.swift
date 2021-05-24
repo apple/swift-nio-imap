@@ -95,7 +95,7 @@ extension Flag {
 
 // MARK: - Encoding
 
-extension _EncodeBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeFlags(_ flags: [Flag]) -> Int {
         self.writeArray(flags) { (flag, self) -> Int in
             self.writeFlag(flag)

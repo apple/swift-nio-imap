@@ -24,7 +24,7 @@ public enum FetchModifier: Equatable {
 
 // MARK: - Encoding
 
-extension _EncodeBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeFetchModifier(_ val: FetchModifier) -> Int {
         switch val {
         case .changedSince(let changedSince):

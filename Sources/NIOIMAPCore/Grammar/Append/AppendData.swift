@@ -35,7 +35,7 @@ public struct AppendData: Equatable {
 
 // MARK: - Encoding
 
-extension _EncodeBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeAppendData(_ data: AppendData) -> Int {
         guard case .client(let options) = mode else { preconditionFailure("Trying to send command, but not in 'client' mode.") }
         switch (options.useNonSynchronizingLiteralPlus, data.withoutContentTransferEncoding) {

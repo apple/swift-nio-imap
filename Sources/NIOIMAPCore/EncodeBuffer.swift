@@ -18,7 +18,7 @@ import struct NIO.CircularBuffer
 
 /// A buffer that handles encoding of Swift types into IMAP commands/responses that
 /// will be sent/recieved by clients and servers.
-@_spi(NIOIMAPInternal) public struct _EncodeBuffer {
+@_spi(NIOIMAPInternal) public struct EncodeBuffer {
     /// Used to define if the buffer should act as a client or server.
     public enum Mode: Equatable {
         /// Act as a client using the given `CommandEncodingOptions`.
@@ -38,20 +38,20 @@ import struct NIO.CircularBuffer
     }
 }
 
-extension _EncodeBuffer {
+extension EncodeBuffer {
     /// Creates a new `EncodeBuffer` suitable for a client to write commands.
     /// - parameter buffer: An initial `ByteBuffer` to write to. Note that this is copied and not taken as `inout`.
     /// - parameter options: Configuration to use when writing.
     /// - returns: A new `EncodeBuffer` configured for client use.
-    static func clientEncodeBuffer(buffer: ByteBuffer, options: CommandEncodingOptions) -> _EncodeBuffer {
-        _EncodeBuffer(buffer, mode: .client(options: options))
+    static func clientEncodeBuffer(buffer: ByteBuffer, options: CommandEncodingOptions) -> EncodeBuffer {
+        EncodeBuffer(buffer, mode: .client(options: options))
     }
 
     /// Creates a new `EncodeBuffer` suitable for a client to write commands.
     /// - parameter buffer: An initial `ByteBuffer` to write to. Note that this is copied and not taken as `inout`.
     /// - parameter options: Configuration to use when writing.
     /// - returns: A new `EncodeBuffer` configured for client use.
-    static func clientEncodeBuffer(buffer: ByteBuffer, capabilities: [Capability]) -> _EncodeBuffer {
+    static func clientEncodeBuffer(buffer: ByteBuffer, capabilities: [Capability]) -> EncodeBuffer {
         clientEncodeBuffer(buffer: buffer, options: CommandEncodingOptions(capabilities: capabilities))
     }
 
@@ -59,20 +59,20 @@ extension _EncodeBuffer {
     /// - parameter buffer: An initial `ByteBuffer` to write to. Note that this is copied and not taken as `inout`.
     /// - parameter options: Configuration to use when writing.
     /// - returns: A new `EncodeBuffer` configured for server use.
-    static func serverEncodeBuffer(buffer: ByteBuffer, options: ResponseEncodingOptions) -> _EncodeBuffer {
-        _EncodeBuffer(buffer, mode: .server(streamingAttributes: false, options: options))
+    static func serverEncodeBuffer(buffer: ByteBuffer, options: ResponseEncodingOptions) -> EncodeBuffer {
+        EncodeBuffer(buffer, mode: .server(streamingAttributes: false, options: options))
     }
 
     /// Creates a new `EncodeBuffer` suitable for a client to write commands.
     /// - parameter buffer: An initial `ByteBuffer` to write to. Note that this is copied and not taken as `inout`.
     /// - parameter options: Configuration to use when writing.
     /// - returns: A new `EncodeBuffer` configured for server use.
-    static func serverEncodeBuffer(buffer: ByteBuffer, capabilities: [Capability]) -> _EncodeBuffer {
+    static func serverEncodeBuffer(buffer: ByteBuffer, capabilities: [Capability]) -> EncodeBuffer {
         serverEncodeBuffer(buffer: buffer, options: ResponseEncodingOptions(capabilities: capabilities))
     }
 }
 
-extension _EncodeBuffer {
+extension EncodeBuffer {
     /// Represents a piece of data that is ready to be written to the network.
     public struct Chunk {
         /// The data that is ready to be written.
@@ -109,7 +109,7 @@ extension _EncodeBuffer {
     }
 }
 
-extension _EncodeBuffer {
+extension EncodeBuffer {
     /// Writes a raw `String` to the buffer.
     /// - parameter string: The string to write.
     /// - returns: The number of bytes written - always `string.utf8.count`.
