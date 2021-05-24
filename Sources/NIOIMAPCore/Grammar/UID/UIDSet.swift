@@ -388,7 +388,7 @@ extension UIDSet: SetAlgebra {
 
 // MARK: - Encoding
 
-extension UIDSet: _IMAPEncodable {
+extension UIDSet: IMAPEncodable {
     @_spi(NIOIMAPInternal) public func _writeIntoBuffer(_ buffer: inout EncodeBuffer) -> Int {
         buffer.writeArray(self._ranges.ranges, separator: ",", parenthesis: false) { (element, buffer) in
             let r = UIDRange(element)
@@ -397,7 +397,7 @@ extension UIDSet: _IMAPEncodable {
     }
 }
 
-extension UIDSetNonEmpty: _IMAPEncodable {
+extension UIDSetNonEmpty: IMAPEncodable {
     @_spi(NIOIMAPInternal) public func _writeIntoBuffer(_ buffer: inout EncodeBuffer) -> Int {
         self.set._writeIntoBuffer(&buffer)
     }

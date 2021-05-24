@@ -14,14 +14,14 @@
 
 /// Defines an interface for a type to be able to serialize itself to an `EncodeBuffer`.
 /// Avoid conforming to this protocol, and use the standard `EncodeBuffer.write` functions.
-public protocol _IMAPEncodable: ExpressibleByArrayLiteral, Hashable {
+public protocol IMAPEncodable: ExpressibleByArrayLiteral, Hashable {
     /// Writes the set to an `inout EncodeBuffer`.
     @_spi(NIOIMAPInternal) func _writeIntoBuffer(_ buffer: inout EncodeBuffer) -> Int
 }
 
 /// Provides support for using either the result of the last command (`.lastCommand`) or
 /// a concrete set type.
-public enum LastCommandSet<SetType: _IMAPEncodable>: Hashable {
+public enum LastCommandSet<SetType: IMAPEncodable>: Hashable {
     /// A specific set that will be sent to the IMAP server. E.g. `1, 2:5, 10:*`
     case set(SetType)
 
