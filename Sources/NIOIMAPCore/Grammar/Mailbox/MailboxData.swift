@@ -25,7 +25,7 @@ public enum MailboxData: Equatable {
     /// Subscribed mailbox attributes.
     case lsub(MailboxInfo)
 
-    /// Response to a search command, containing message sequence numbers.
+    /// Response to a search command, containing `SequenceNumber`s from `search`, or `UID`s from `uid search`.
     case search([Int])
 
     /// Response to an extended search command.
