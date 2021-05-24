@@ -16,7 +16,7 @@
 /// Avoid conforming to this protocol, and use the standard `EncodeBuffer.write` functions.
 public protocol _IMAPEncodable: ExpressibleByArrayLiteral, Hashable {
     /// Writes the set to an `inout EncodeBuffer`.
-    func _writeIntoBuffer(_ buffer: inout _EncodeBuffer) -> Int
+    @_spi(NIOIMAPInternal) func _writeIntoBuffer(_ buffer: inout _EncodeBuffer) -> Int
 }
 
 /// Provides support for using either the result of the last command (`.lastCommand`) or

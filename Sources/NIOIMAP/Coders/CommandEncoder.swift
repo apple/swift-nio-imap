@@ -13,7 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
-import NIOIMAPCore
+@_spi(NIOIMAPInternal) import NIOIMAPCore
 
 enum CommandEncodingError: Error, Equatable {
     case missingBytes

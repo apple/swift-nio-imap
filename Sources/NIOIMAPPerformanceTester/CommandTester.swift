@@ -13,6 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+@_spi(NIOIMAPInternal) import NIOIMAPCore
 import NIOIMAP
 
 class CommandTester: Benchmark {

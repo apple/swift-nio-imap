@@ -13,7 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
-import NIOIMAPCore
+@_spi(NIOIMAPInternal) import NIOIMAPCore
 import OrderedCollections
 
 /// To be used by a IMAP client implementation.

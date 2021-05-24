@@ -15,7 +15,7 @@
 import Logging
 import NIO
 import NIOIMAP
-import NIOIMAPCore
+@_spi(NIOIMAPInternal) import NIOIMAPCore
 import NIOSSL
 
 enum CommandRoundtripError: Error {

@@ -18,7 +18,7 @@ import struct NIO.CircularBuffer
 
 /// A buffer that handles encoding of Swift types into IMAP commands/responses that
 /// will be sent/recieved by clients and servers.
-public struct _EncodeBuffer {
+@_spi(NIOIMAPInternal) public struct _EncodeBuffer {
     /// Used to define if the buffer should act as a client or server.
     public enum Mode: Equatable {
         /// Act as a client using the given `CommandEncodingOptions`.
