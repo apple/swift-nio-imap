@@ -16,7 +16,7 @@
 /// Avoid conforming to this protocol, and use the standard `EncodeBuffer.write` functions.
 public protocol IMAPEncodable: ExpressibleByArrayLiteral, Hashable {
     /// Writes the set to an `inout EncodeBuffer`.
-    @_spi(NIOIMAPInternal) func _writeIntoBuffer(_ buffer: inout EncodeBuffer) -> Int
+    @_spi(NIOIMAPInternal) func writeIntoBuffer(_ buffer: inout EncodeBuffer) -> Int
 }
 
 /// Provides support for using either the result of the last command (`.lastCommand`) or
@@ -35,7 +35,7 @@ extension EncodeBuffer {
         case .lastCommand:
             return self.writeString("$")
         case .set(let set):
-            return set._writeIntoBuffer(&self)
+            return set.writeIntoBuffer(&self)
         }
     }
 }
