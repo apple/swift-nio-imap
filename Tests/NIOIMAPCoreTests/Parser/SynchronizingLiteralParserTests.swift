@@ -207,7 +207,7 @@ final class SynchronizingLiteralParserTests: XCTestCase {
         }
 
         var allBytes = self.accumulator!
-        let initialAllByteReader = self.accumulator.readerIndex - self.consumptions.map { $0.consumption }.reduce(0, +)
+        let initialAllByteReader = self.accumulator.readerIndex - self.consumptions.map(\.consumption).reduce(0, +)
         allBytes.moveReaderIndex(to: initialAllByteReader)
         var continuations = 0
         for expected in expectedStrings.enumerated() {
@@ -222,7 +222,7 @@ final class SynchronizingLiteralParserTests: XCTestCase {
 
             let newReader = self.consumptions.filter {
                 $0.numberOfPriorParses <= expected.offset + 1
-            }.map { $0.consumption }.reduce(0, +) + initialAllByteReader
+            }.map(\.consumption).reduce(0, +) + initialAllByteReader
             allBytes.moveReaderIndex(to: newReader)
         }
         XCTAssertEqual(continuationsNecessary, continuations,
