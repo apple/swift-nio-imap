@@ -25,7 +25,7 @@ extension UInt8ParseTypeMembershipTests {
     func testCR() {
         let valid: Set<UInt8> = [UInt8(ascii: "\r")]
         let invalid = self.allChars.subtracting(valid)
-        XCTAssertTrue(valid.allSatisfy { $0.isCR })
+        XCTAssertTrue(valid.allSatisfy(\.isCR))
         XCTAssertTrue(invalid.allSatisfy { !$0.isCR })
     }
 }
@@ -36,7 +36,7 @@ extension UInt8ParseTypeMembershipTests {
     func testLF() {
         let valid: Set<UInt8> = [UInt8(ascii: "\n")]
         let invalid = self.allChars.subtracting(valid)
-        XCTAssertTrue(valid.allSatisfy { $0.isLF })
+        XCTAssertTrue(valid.allSatisfy(\.isLF))
         XCTAssertTrue(invalid.allSatisfy { !$0.isLF })
     }
 }
@@ -47,7 +47,7 @@ extension UInt8ParseTypeMembershipTests {
     func testResponseSpecial() {
         let valid: Set<UInt8> = [UInt8(ascii: "]")]
         let invalid = self.allChars.subtracting(valid)
-        XCTAssertTrue(valid.allSatisfy { $0.isResponseSpecial })
+        XCTAssertTrue(valid.allSatisfy(\.isResponseSpecial))
         XCTAssertTrue(invalid.allSatisfy { !$0.isResponseSpecial })
     }
 }
@@ -58,7 +58,7 @@ extension UInt8ParseTypeMembershipTests {
     func testListWildcard() {
         let valid: Set<UInt8> = [UInt8(ascii: "%"), UInt8(ascii: "*")]
         let invalid = self.allChars.subtracting(valid)
-        XCTAssertTrue(valid.allSatisfy { $0.isListWildcard })
+        XCTAssertTrue(valid.allSatisfy(\.isListWildcard))
         XCTAssertTrue(invalid.allSatisfy { !$0.isListWildcard })
     }
 }
@@ -69,7 +69,7 @@ extension UInt8ParseTypeMembershipTests {
     func testQuotedSpecial() {
         let valid: Set<UInt8> = [UInt8(ascii: "\\"), UInt8(ascii: "\"")]
         let invalid = self.allChars.subtracting(valid)
-        XCTAssertTrue(valid.allSatisfy { $0.isQuotedSpecial })
+        XCTAssertTrue(valid.allSatisfy(\.isQuotedSpecial))
         XCTAssertTrue(invalid.allSatisfy { !$0.isQuotedSpecial })
     }
 }
@@ -102,7 +102,7 @@ extension UInt8ParseTypeMembershipTests {
     func testTextChar() {
         let invalid: Set<UInt8> = [UInt8(ascii: "\r"), .init(ascii: "\n"), 0]
         let valid = self.allChars.subtracting(invalid).subtracting(128 ... UInt8.max)
-        XCTAssertTrue(valid.allSatisfy { $0.isTextChar })
+        XCTAssertTrue(valid.allSatisfy(\.isTextChar))
         XCTAssertTrue(invalid.allSatisfy { !$0.isTextChar })
     }
 }
@@ -117,7 +117,7 @@ extension UInt8ParseTypeMembershipTests {
         valid = valid.union(UInt8(ascii: "A") ... UInt8(ascii: "F"))
 
         let invalid = self.allChars.subtracting(valid)
-        XCTAssertTrue(valid.allSatisfy { $0.isHexCharacter })
+        XCTAssertTrue(valid.allSatisfy(\.isHexCharacter))
         XCTAssertTrue(invalid.allSatisfy { !$0.isHexCharacter })
     }
 }
@@ -133,7 +133,7 @@ extension UInt8ParseTypeMembershipTests {
         valid = valid.union([UInt8(ascii: "+"), UInt8(ascii: "/")])
 
         let invalid = self.allChars.subtracting(valid)
-        XCTAssertTrue(valid.allSatisfy { $0.isBase64Char })
+        XCTAssertTrue(valid.allSatisfy(\.isBase64Char))
         XCTAssertTrue(invalid.allSatisfy { !$0.isBase64Char })
     }
 }
