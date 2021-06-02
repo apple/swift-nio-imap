@@ -89,7 +89,7 @@ extension _EncodeBuffer {
     private func canUseQuotedString<T: Collection>(for bytes: T) -> Bool where T.Element == UInt8 {
         // allSatisfy vs contains because IMO it's a little clearer
         // if more than 70 bytes, always use a literal
-        bytes.count <= 70 && bytes.allSatisfy { $0.isQuotedChar }
+        bytes.count <= 70 && bytes.allSatisfy(\.isQuotedChar)
     }
 
     /// Encodes the given bytes as a Base64 collection, and then writes to `self.`

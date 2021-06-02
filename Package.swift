@@ -1,4 +1,4 @@
-// swift-tools-version:5.3
+// swift-tools-version:5.4
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
@@ -11,12 +11,12 @@ let package = Package(
         .package(url: "https://github.com/apple/swift-nio", from: "2.27.0"),
         .package(url: "https://github.com/apple/swift-nio-ssl", from: "2.10.0"),
         .package(url: "https://github.com/apple/swift-log", from: "1.4.0"),
-        .package(url: "https://github.com/nicklockwood/SwiftFormat", .exact("0.47.13")),
+        .package(url: "https://github.com/nicklockwood/SwiftFormat", .exact("0.48.3")),
         .package(url: "https://github.com/apple/swift-standard-library-preview.git", .exact("0.0.1")),
         .package(url: "https://github.com/apple/swift-collections.git", .exact("0.0.2")),
     ],
     targets: [
-        .target(
+        .executableTarget(
             name: "NIOIMAPPerformanceTester",
             dependencies: [
                 "NIOIMAP",
@@ -55,7 +55,7 @@ let package = Package(
             ]
         ),
 
-        .target(
+        .executableTarget(
             name: "CLI",
             dependencies: [
                 "CLILib",
@@ -79,7 +79,7 @@ let package = Package(
             ]
         ),
 
-        .target(
+        .executableTarget(
             name: "Proxy",
             dependencies: [
                 "NIOIMAP",
@@ -88,14 +88,14 @@ let package = Package(
             ]
         ),
 
-        .target(
+        .executableTarget(
             name: "NIOIMAPFormatter",
             dependencies: [
                 .product(name: "swiftformat", package: "SwiftFormat"),
             ]
         ),
 
-        .target(
+        .executableTarget(
             name: "NIOIMAPFuzzer",
             dependencies: [
                 "NIOIMAP",
