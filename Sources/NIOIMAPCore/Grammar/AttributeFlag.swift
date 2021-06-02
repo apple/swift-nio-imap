@@ -51,7 +51,7 @@ extension String {
 
 // MARK: - Encoding
 
-extension _EncodeBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeAttributeFlag(_ flag: AttributeFlag) -> Int {
         self.writeString(flag.stringValue)
     }

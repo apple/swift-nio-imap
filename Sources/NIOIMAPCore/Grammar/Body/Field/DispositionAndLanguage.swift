@@ -36,7 +36,7 @@ extension BodyStructure {
 
 // MARK: - Encoding
 
-extension _EncodeBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeBodyDispositionAndLanguage(_ desc: BodyStructure.DispositionAndLanguage) -> Int {
         self.writeSpace() +
             self.writeBodyDisposition(desc.disposition)

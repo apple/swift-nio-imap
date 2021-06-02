@@ -27,7 +27,7 @@ extension ParserLibraryTests {
         XCTAssertThrowsError(try PL.parseOptional(buffer: &buffer, tracker: StackTracker.testTracker) { buffer, tracker in
             try PL.parseFixedString("x", buffer: &buffer, tracker: tracker)
         }) { error in
-            XCTAssertTrue(error is _IncompleteMessage)
+            XCTAssertTrue(error is IncompleteMessage)
         }
     }
 
@@ -52,7 +52,7 @@ extension ParserLibraryTests {
             try PL.parseFixedString("x", buffer: &buffer, tracker: tracker)
             try PL.parseFixedString("y", buffer: &buffer, tracker: tracker)
         }) { error in
-            XCTAssertTrue(error is _IncompleteMessage)
+            XCTAssertTrue(error is IncompleteMessage)
         }
         XCTAssertEqual(1, buffer.readableBytes)
     }
@@ -91,7 +91,7 @@ extension ParserLibraryTests {
                                                      caseSensitive: true,
                                                      buffer: &buffer,
                                                      tracker: .testTracker)) { error in
-            XCTAssertTrue(error is _IncompleteMessage)
+            XCTAssertTrue(error is IncompleteMessage)
         }
     }
 
@@ -111,7 +111,7 @@ extension ParserLibraryTests {
         XCTAssertThrowsError(try PL.parseFixedString("fooFooFOO",
                                                      buffer: &buffer,
                                                      tracker: .testTracker)) { error in
-            XCTAssertTrue(error is _IncompleteMessage)
+            XCTAssertTrue(error is IncompleteMessage)
         }
     }
 
@@ -148,7 +148,7 @@ extension ParserLibraryTests {
                 try PL.parseFixedString("x", buffer: &buffer, tracker: tracker)
                 try PL.parseFixedString("x", buffer: &buffer, tracker: tracker)
             }) { error in
-                XCTAssertTrue(error is _IncompleteMessage)
+                XCTAssertTrue(error is IncompleteMessage)
             }
         }
     }
@@ -196,7 +196,7 @@ extension ParserLibraryTests {
                 try PL.parseFixedString("x", buffer: &buffer, tracker: tracker)
                 try PL.parseFixedString("x", buffer: &buffer, tracker: tracker)
             }) { error in
-                XCTAssertTrue(error is _IncompleteMessage)
+                XCTAssertTrue(error is IncompleteMessage)
             }
         }
     }

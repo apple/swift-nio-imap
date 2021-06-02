@@ -65,7 +65,7 @@ extension GrammarParser_Commands_Tests {
         // make sure we still throw incomplete messages
         var buffer3 = TestUtilities.makeParseBuffer(for: "A2 LOGIN")
         XCTAssertThrowsError(try GrammarParser.parseTaggedCommand(buffer: &buffer3, tracker: .testTracker)) { e in
-            XCTAssertTrue(e is _IncompleteMessage)
+            XCTAssertTrue(e is IncompleteMessage)
         }
     }
 

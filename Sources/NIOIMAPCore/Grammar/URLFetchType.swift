@@ -29,7 +29,7 @@ public enum URLFetchType: Equatable {
 
 // MARK: - Encoding
 
-extension _EncodeBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeURLFetchType(_ data: URLFetchType) -> Int {
         switch data {
         case .refUidSectionPartial(ref: let ref, uid: let uid, section: let section, partial: let partial):

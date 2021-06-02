@@ -28,7 +28,7 @@ public struct URLMessageSection: Equatable {
 
 // MARK: - Encoding
 
-extension _EncodeBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeURLMessageSection(_ section: URLMessageSection) -> Int {
         self.writeString("/;SECTION=\(section.encodedSection.section)")
     }

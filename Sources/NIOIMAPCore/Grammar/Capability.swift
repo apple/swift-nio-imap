@@ -379,7 +379,7 @@ extension Capability {
 
 // MARK: - Encoding
 
-extension _EncodeBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeCapability(_ capability: Capability) -> Int {
         self.writeString(capability.rawValue)
     }

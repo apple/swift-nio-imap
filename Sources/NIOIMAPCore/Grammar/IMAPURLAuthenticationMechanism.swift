@@ -23,7 +23,7 @@ public enum IMAPURLAuthenticationMechanism: Equatable {
 
 // MARK: - Encoding
 
-extension _EncodeBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeIMAPURLAuthenticationMechanism(_ data: IMAPURLAuthenticationMechanism) -> Int {
         switch data {
         case .any:

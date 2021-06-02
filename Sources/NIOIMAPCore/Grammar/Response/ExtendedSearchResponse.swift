@@ -38,7 +38,7 @@ public struct ExtendedSearchResponse: Equatable {
 
 // MARK: - Encoding
 
-extension _EncodeBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeExtendedSearchResponse(_ response: ExtendedSearchResponse) -> Int {
         self.writeString("ESEARCH") +
             self.writeIfExists(response.correlator) { (correlator) -> Int in

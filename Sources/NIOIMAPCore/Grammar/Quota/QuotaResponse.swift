@@ -16,7 +16,7 @@ import struct NIO.ByteBuffer
 
 // MARK: - Encoding
 
-extension _EncodeBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeQuotaResponse(quotaRoot: QuotaRoot, resources: [QuotaResource]) -> Int {
         self.writeString("QUOTA ") +
             self.writeQuotaRoot(quotaRoot) +

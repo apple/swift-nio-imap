@@ -26,7 +26,7 @@ public struct AbsoluteMessagePath: Equatable {
 
 // MARK: - Encoding
 
-extension _EncodeBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeAbsoluteMessagePath(_ path: AbsoluteMessagePath) -> Int {
         self.writeString("/") +
             self.writeIfExists(path.command) { command in

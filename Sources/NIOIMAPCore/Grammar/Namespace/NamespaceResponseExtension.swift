@@ -17,7 +17,7 @@ import struct OrderedCollections.OrderedDictionary
 
 // MARK: - Encoding
 
-extension _EncodeBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeNamespaceResponseExtensions(_ extensions: OrderedDictionary<ByteBuffer, [ByteBuffer]>) -> Int {
         extensions.reduce(into: 0) { (res, ext) in
             res += self.writeSpace() +

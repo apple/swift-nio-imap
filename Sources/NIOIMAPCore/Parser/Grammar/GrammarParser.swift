@@ -641,7 +641,7 @@ extension GrammarParser {
         }
     }
 
-    static func parseLastCommandSet<T: _IMAPEncodable>(buffer: inout ParseBuffer, tracker: StackTracker, setParser: SubParser<T>) throws -> LastCommandSet<T> {
+    static func parseLastCommandSet<T: IMAPEncodable>(buffer: inout ParseBuffer, tracker: StackTracker, setParser: SubParser<T>) throws -> LastCommandSet<T> {
         func parseLastCommandSet_lastCommand(buffer: inout ParseBuffer, tracker: StackTracker) throws -> LastCommandSet<T> {
             try PL.parseFixedString("$", buffer: &buffer, tracker: tracker)
             return .lastCommand

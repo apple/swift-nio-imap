@@ -13,7 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
-@testable import NIOIMAPCore
+@_spi(NIOIMAPInternal) @testable import NIOIMAPCore
 import XCTest
 
 class UIDValidity_Tests: EncodeTestClass {}

@@ -17,7 +17,7 @@ import struct OrderedCollections.OrderedDictionary
 
 // MARK: - Encoding
 
-extension _EncodeBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeIDParameters(_ values: OrderedDictionary<String, String?>) -> Int {
         guard values.count > 0 else {
             return self.writeNil()

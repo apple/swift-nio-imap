@@ -38,7 +38,7 @@ public enum ReturnOption: Equatable {
 
 // MARK: - Encoding
 
-extension _EncodeBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeReturnOption(_ option: ReturnOption) -> Int {
         switch option {
         case .subscribed:

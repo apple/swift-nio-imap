@@ -54,7 +54,7 @@ public struct ListSelectOptions: Equatable {
 
 // MARK: - Encoding
 
-extension _EncodeBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeListSelectOption(_ option: ListSelectOption) -> Int {
         switch option {
         case .subscribed:

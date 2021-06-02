@@ -150,7 +150,7 @@ extension String {
 
 // MARK: - Encoding
 
-extension _EncodeBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeBody(_ body: BodyStructure) -> Int {
         var size = 0
         size += self.writeString("(")

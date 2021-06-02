@@ -26,7 +26,7 @@ public enum MetadataResponse: Equatable {
 
 // MARK: - Encoding
 
-extension _EncodeBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeMetadataResponse(_ resp: MetadataResponse) -> Int {
         switch resp {
         case .values(values: let values, mailbox: let mailbox):

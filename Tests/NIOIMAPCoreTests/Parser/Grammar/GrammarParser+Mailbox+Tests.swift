@@ -95,7 +95,7 @@ extension GrammarParser_Mailbox_Tests {
     func testParseMailboxList_invalid_character_incomplete() {
         var buffer = TestUtilities.makeParseBuffer(for: "() \"")
         XCTAssertThrowsError(try GrammarParser.parseMailboxList(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertTrue(e is _IncompleteMessage)
+            XCTAssertTrue(e is IncompleteMessage)
         }
     }
 

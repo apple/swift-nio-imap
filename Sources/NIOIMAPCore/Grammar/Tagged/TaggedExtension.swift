@@ -17,7 +17,7 @@ import struct OrderedCollections.OrderedDictionary
 
 // MARK: - Encoding
 
-extension _EncodeBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeTaggedExtension(_ ext: KeyValue<String, ParameterValue>) -> Int {
         self.writeString(ext.key) +
             self.writeSpace() +

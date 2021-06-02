@@ -246,8 +246,8 @@ extension SequenceRangeSet: SetAlgebra {
 
 // MARK: - Encoding
 
-extension SequenceRangeSet: _IMAPEncodable {
-    public func _writeIntoBuffer(_ buffer: inout _EncodeBuffer) -> Int {
+extension SequenceRangeSet: IMAPEncodable {
+    @_spi(NIOIMAPInternal) public func writeIntoBuffer(_ buffer: inout EncodeBuffer) -> Int {
         buffer.writeArray(self.ranges.ranges, separator: ",", parenthesis: false) { (element, buffer) in
             buffer.writeSequenceRange(SequenceRange(element))
         }

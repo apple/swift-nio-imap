@@ -16,7 +16,7 @@
 
 import struct OrderedCollections.OrderedDictionary
 
-extension _EncodeBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeBodyParameterPairs(_ params: OrderedDictionary<String, String>) -> Int {
         guard params.count > 0 else {
             return self.writeNil()

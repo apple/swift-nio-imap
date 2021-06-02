@@ -61,7 +61,7 @@ public enum UntaggedStatus: Equatable {
 
 // MARK: - Encoding
 
-extension _EncodeBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeUntaggedStatus(_ cond: UntaggedStatus) -> Int {
         switch cond {
         case .ok(let text):

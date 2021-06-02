@@ -48,7 +48,7 @@ public struct AuthenticationMechanism: Hashable {
 
 // MARK: - Encoding
 
-extension _EncodeBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeAuthenticationMechanism(_ mechanism: AuthenticationMechanism) -> Int {
         self.writeString(mechanism.rawValue)
     }

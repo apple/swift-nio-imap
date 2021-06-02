@@ -26,7 +26,7 @@ public struct EncodedMailbox: Equatable {
     }
 }
 
-extension _EncodeBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeEncodedMailbox(_ type: EncodedMailbox) -> Int {
         self.writeString(type.mailbox)
     }

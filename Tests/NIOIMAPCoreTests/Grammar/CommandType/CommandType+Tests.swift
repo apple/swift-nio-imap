@@ -13,7 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
-@testable import NIOIMAPCore
+@_spi(NIOIMAPInternal) @testable import NIOIMAPCore
 import XCTest
 
 class CommandType_Tests: EncodeTestClass {}
@@ -65,7 +65,7 @@ extension CommandType_Tests {
         for (test, options, expectedStrings, line) in inputs {
             var encodeBuffer = CommandEncodeBuffer(buffer: ByteBuffer(), options: options)
             let size = encodeBuffer.writeCommand(test)
-            self.testBuffer = encodeBuffer._buffer
+            self.testBuffer = encodeBuffer.buffer
             XCTAssertEqual(size, expectedStrings.reduce(0) { $0 + $1.utf8.count }, line: line)
             XCTAssertEqual(self.testBufferStrings, expectedStrings, line: line)
         }

@@ -39,7 +39,7 @@ public struct NamespaceResponse: Equatable {
 
 // MARK: - Encoding
 
-extension _EncodeBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeNamespaceResponse(_ response: NamespaceResponse) -> Int {
         self.writeString("NAMESPACE ") +
             self.writeNamespace(response.userNamespace) +

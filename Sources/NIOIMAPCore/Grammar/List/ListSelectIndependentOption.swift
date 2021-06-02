@@ -28,7 +28,7 @@ public enum ListSelectIndependentOption: Equatable {
 
 // MARK: - Encoding
 
-extension _EncodeBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeListSelectIndependentOption(_ option: ListSelectIndependentOption) -> Int {
         switch option {
         case .remote:

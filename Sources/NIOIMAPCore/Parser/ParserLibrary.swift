@@ -17,7 +17,7 @@ import struct OrderedCollections.OrderedDictionary
 
 enum ParserLibrary {}
 
-struct _IncompleteMessage: Error {
+struct IncompleteMessage: Error {
     fileprivate init() {}
 }
 
@@ -91,7 +91,7 @@ extension ParserLibrary {
             }
 
             guard let firstBad = maybeFirstBad else {
-                throw _IncompleteMessage()
+                throw IncompleteMessage()
             }
             return buffer.bytes.readSlice(length: buffer.bytes.readableBytesView.startIndex.distance(to: firstBad))!
         }
@@ -104,7 +104,7 @@ extension ParserLibrary {
             }
 
             guard let firstBad = maybeFirstBad else {
-                throw _IncompleteMessage()
+                throw IncompleteMessage()
             }
             guard firstBad != buffer.bytes.readableBytesView.startIndex else {
                 let badByte = buffer.bytes.readableBytesView[firstBad]
@@ -188,7 +188,7 @@ extension ParserLibrary {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, _ in
 
             // need at least one readable byte
-            guard buffer.bytes.readableBytes > 0 else { throw _IncompleteMessage() }
+            guard buffer.bytes.readableBytes > 0 else { throw IncompleteMessage() }
 
             // if there are only spaces then just consume it all and move on
             guard let index = buffer.bytes.readableBytesView.firstIndex(where: { $0 != UInt8(ascii: " ") }) else {
@@ -217,7 +217,7 @@ extension ParserLibrary {
                 guard needle.utf8.starts(with: buffer.bytes.readableBytesView, by: { $0 & 0xDF == $1 & 0xDF }) else {
                     throw ParserError(hint: "Tried to parse \(needle) in \(String(decoding: buffer.bytes.readableBytesView, as: Unicode.UTF8.self))")
                 }
-                throw _IncompleteMessage()
+                throw IncompleteMessage()
             }
 
             assert(needle.utf8.allSatisfy { $0 & 0b1000_0000 == 0 }, "needle needs to be ASCII but \(needle) isn't")
@@ -342,14 +342,14 @@ extension ParserLibrary {
             }
         case .none:
             guard let first = buffer.bytes.getInteger(at: buffer.bytes.readerIndex, as: UInt8.self) else {
-                throw _IncompleteMessage()
+                throw IncompleteMessage()
             }
             switch first {
             case UInt8(ascii: "\n"):
                 buffer.bytes.moveReaderIndex(forwardBy: 1)
                 return
             case UInt8(ascii: "\r"):
-                throw _IncompleteMessage()
+                throw IncompleteMessage()
             default:
                 // found only one byte which is neither CR nor LF.
                 throw ParserError()
@@ -364,7 +364,7 @@ extension ParserLibrary {
         if let byte = buffer.bytes.readInteger(as: UInt8.self) {
             return byte
         } else {
-            throw _IncompleteMessage()
+            throw IncompleteMessage()
         }
     }
 
@@ -372,13 +372,13 @@ extension ParserLibrary {
         if let bytes = buffer.bytes.readSlice(length: length) {
             return bytes
         } else {
-            throw _IncompleteMessage()
+            throw IncompleteMessage()
         }
     }
 
     static func parseBytes(buffer: inout ParseBuffer, tracker: StackTracker, upTo maxLength: Int) throws -> ByteBuffer {
         guard buffer.readableBytes > 0 else {
-            throw _IncompleteMessage()
+            throw IncompleteMessage()
         }
 
         if buffer.bytes.readableBytes >= maxLength {

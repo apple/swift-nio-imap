@@ -66,7 +66,7 @@ public struct ResponseParser: Parser {
             case .streamingQuoted:
                 return .response(try self.parseQuotedBytes(buffer: &parseBuffer))
             }
-        } catch is _IncompleteMessage {
+        } catch is IncompleteMessage {
             return nil
         }
     }

@@ -96,7 +96,7 @@ public struct CommandParser: Parser {
                            "parser consumed bytes on nil: readableBytes before parse: \(framingResult.maximumValidBytes), buffer: \(actuallyVisible)")
                     return nil
                 }
-            } catch is _IncompleteMessage {
+            } catch is IncompleteMessage {
                 return nil
             }
         }

@@ -31,7 +31,7 @@ public struct EncodedSearchQuery: Equatable {
 
 // MARK: - Encoding
 
-extension _EncodeBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeEncodedSearchQuery(_ ref: EncodedSearchQuery) -> Int {
         self.writeEncodedMailboxUIDValidity(ref.mailboxUIDValidity) +
             self.writeIfExists(ref.encodedSearch) { search in

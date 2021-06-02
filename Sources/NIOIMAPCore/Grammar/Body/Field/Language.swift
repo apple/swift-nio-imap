@@ -14,7 +14,7 @@
 
 // MARK: - Encoding
 
-extension _EncodeBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeBodyLanguages(_ languages: [String]) -> Int {
         guard languages.count > 0 else {
             return self.writeNil()

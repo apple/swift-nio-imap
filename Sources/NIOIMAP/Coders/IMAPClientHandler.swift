@@ -13,7 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
-import NIOIMAPCore
+@_spi(NIOIMAPInternal) import NIOIMAPCore
 import OrderedCollections
 
 /// To be used by a IMAP client implementation.
@@ -32,7 +32,7 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
 
     private let decoder: NIOSingleStepByteToMessageProcessor<ResponseDecoder>
 
-    private var currentEncodeBuffer: (_EncodeBuffer, EventLoopPromise<Void>?)?
+    private var currentEncodeBuffer: (EncodeBuffer, EventLoopPromise<Void>?)?
     private var bufferedCommands: MarkedCircularBuffer<(CommandStreamPart, EventLoopPromise<Void>?)> = .init(initialCapacity: 4)
 
     public struct UnexpectedContinuationRequest: Error {}
@@ -267,9 +267,9 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
             break
         }
 
-        let next = commandEncoder._buffer.nextChunk()
+        let next = commandEncoder.buffer.nextChunk()
         if next.waitForContinuation {
-            self.currentEncodeBuffer = (commandEncoder._buffer, promise)
+            self.currentEncodeBuffer = (commandEncoder.buffer, promise)
             assert(self.state == .expectingResponses)
             self.state = .expectingLiteralContinuationRequest
             context.write(self.wrapOutboundOut(next.bytes)).cascadeFailure(to: promise)

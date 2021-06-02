@@ -174,7 +174,7 @@ public enum ResponseTextCode: Equatable {
 
 // MARK: - Encoding
 
-extension _EncodeBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeResponseTextCode(_ code: ResponseTextCode) -> Int {
         switch code {
         case .alert:

@@ -15,7 +15,7 @@
 import struct NIO.ByteBuffer
 import struct OrderedCollections.OrderedDictionary
 
-extension _EncodeBuffer {
+extension EncodeBuffer {
     /// Writes an IMAP `string` type as defined by the grammar in RFC 3501.
     /// The function will decide to use either `quoted` or `literal` syntax based
     /// upon what bytes `string` contains, and what encoding types are supported
@@ -135,7 +135,7 @@ extension _EncodeBuffer {
     ///     - parenthesis: Writes `(` immediately before the first element, and `)` immediately after the last. Enabled by default.
     ///     - writer: The closure to call for each element that writes the element.
     /// - returns: The number of bytes written.
-    @discardableResult mutating func writeArray<C, T>(_ collection: C, prefix: String = "", separator: String = " ", suffix: String = "", parenthesis: Bool = true, _ writer: (T, inout _EncodeBuffer) -> Int) -> Int where C: RandomAccessCollection, C.Element == T {
+    @discardableResult mutating func writeArray<C, T>(_ collection: C, prefix: String = "", separator: String = " ", suffix: String = "", parenthesis: Bool = true, _ writer: (T, inout EncodeBuffer) -> Int) -> Int where C: RandomAccessCollection, C.Element == T {
         // TODO: This should probably check
         //   collection.count != 0
         // such that an empty collection gets encoded as "()".
@@ -171,7 +171,7 @@ extension _EncodeBuffer {
     ///     - parenthesis: Writes `(` immediately before the first element, and `)` immediately after the last. Enabled by default.
     ///     - writer: The closure to call for each element that writes the element.
     /// - returns: The number of bytes written.
-    @discardableResult mutating func writeOrderedDictionary<K, V>(_ values: OrderedDictionary<K, V>, prefix: String = "", separator: String = " ", suffix: String = "", parenthesis: Bool = true, _ writer: (KeyValue<K, V>, inout _EncodeBuffer) -> Int) -> Int {
+    @discardableResult mutating func writeOrderedDictionary<K, V>(_ values: OrderedDictionary<K, V>, prefix: String = "", separator: String = " ", suffix: String = "", parenthesis: Bool = true, _ writer: (KeyValue<K, V>, inout EncodeBuffer) -> Int) -> Int {
         // TODO: This should probably check
         //   collection.count != 0
         // such that an empty collection gets encoded as "()".

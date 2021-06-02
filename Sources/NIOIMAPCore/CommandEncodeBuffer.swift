@@ -17,7 +17,7 @@ import struct NIO.ByteBuffer
 /// Used to buffer commands before writing to the network.
 public struct CommandEncodeBuffer {
     /// The underlying buffer containing data to be written.
-    public var _buffer: _EncodeBuffer
+    @_spi(NIOIMAPInternal) public var buffer: EncodeBuffer
 
     /// Tracks whether we have encoded at least one catenate element.
     internal var encodedAtLeastOneCatenateElement = false
@@ -26,7 +26,7 @@ public struct CommandEncodeBuffer {
     /// - parameter buffer: The initial `ByteBuffer` to build upon.
     /// - parameter options: The options to use when writing commands and data.
     public init(buffer: ByteBuffer, options: CommandEncodingOptions) {
-        self._buffer = .clientEncodeBuffer(buffer: buffer, options: options)
+        self.buffer = .clientEncodeBuffer(buffer: buffer, options: options)
     }
 }
 
@@ -34,11 +34,11 @@ extension CommandEncodeBuffer {
     /// The options used when writing commands and data.
     public var options: CommandEncodingOptions {
         get {
-            guard case .client(let options) = _buffer.mode else { preconditionFailure("Command encoder mode must be 'client'.") }
+            guard case .client(let options) = buffer.mode else { preconditionFailure("Command encoder mode must be 'client'.") }
             return options
         }
         set {
-            _buffer.mode = .client(options: newValue)
+            buffer.mode = .client(options: newValue)
         }
     }
 
@@ -46,6 +46,6 @@ extension CommandEncodeBuffer {
     /// - parameter buffer: The initial `ByteBuffer` to build upon.
     /// - parameter capabilities: Capabilities to use when writing commands and data. Will be converted to `CommandEncodingOptions`.
     public init(buffer: ByteBuffer, capabilities: [Capability]) {
-        self._buffer = .clientEncodeBuffer(buffer: buffer, capabilities: capabilities)
+        self.buffer = .clientEncodeBuffer(buffer: buffer, capabilities: capabilities)
     }
 }

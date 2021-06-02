@@ -32,7 +32,7 @@ public struct MailboxUIDValidity: Equatable {
 
 // MARK: - Encoding
 
-extension _EncodeBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeEncodedMailboxUIDValidity(_ ref: MailboxUIDValidity) -> Int {
         self.writeEncodedMailbox(ref.encodedMailbox) +
             self.writeIfExists(ref.uidValidity) { value in

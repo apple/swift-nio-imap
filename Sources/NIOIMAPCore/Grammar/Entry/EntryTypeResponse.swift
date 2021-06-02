@@ -16,19 +16,19 @@ import struct NIO.ByteBuffer
 
 /// Describes the metadata item type.
 public struct EntryKindResponse: Equatable {
-    var _backing: String
+    fileprivate var backing: String
 
     /// `priv` - Private metadata item type.
-    public static var `private` = Self(_backing: "priv")
+    public static var `private` = Self(backing: "priv")
 
     /// `shared` - Shared metadata item type.
-    public static var shared = Self(_backing: "shared")
+    public static var shared = Self(backing: "shared")
 }
 
 // MARK: - Encoding
 
-extension _EncodeBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeEntryKindResponse(_ response: EntryKindResponse) -> Int {
-        self.writeString(response._backing)
+        self.writeString(response.backing)
     }
 }

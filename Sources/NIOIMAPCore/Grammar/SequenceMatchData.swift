@@ -35,7 +35,7 @@ public struct SequenceMatchData: Equatable {
 
 // MARK: - Encoding
 
-extension _EncodeBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeSequenceMatchData(_ data: SequenceMatchData) -> Int {
         self.writeString("(") +
             self.writeLastCommandSet(data.knownSequenceSet) +

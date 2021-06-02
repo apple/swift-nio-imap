@@ -31,7 +31,7 @@ public struct AuthenticatedURLRump: Equatable {
 
 // MARK: - Encoding
 
-extension _EncodeBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeAuthenticatedURLRump(_ data: AuthenticatedURLRump) -> Int {
         self.writeIfExists(data.expire) { expire in
             self.writeExpire(expire)

@@ -13,7 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
-import NIOIMAPCore
+@_spi(NIOIMAPInternal) import NIOIMAPCore
 
 enum CommandEncodingError: Error, Equatable {
     case missingBytes
@@ -35,6 +35,6 @@ class CommandEncoder: MessageToByteEncoder {
     func encode(data: CommandStreamPart, out: inout ByteBuffer) {
         var encodeBuffer = CommandEncodeBuffer(buffer: out, capabilities: self.capabilities)
         encodeBuffer.writeCommandStream(data)
-        out = encodeBuffer._buffer.nextChunk().bytes
+        out = encodeBuffer.buffer.nextChunk().bytes
     }
 }

@@ -158,7 +158,7 @@ extension ServerMessageDate {
 
 // MARK: - Encoding
 
-extension _EncodeBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeInternalDate(_ date: ServerMessageDate) -> Int {
         let p = date.makeParts()
 
@@ -188,7 +188,7 @@ extension _EncodeBuffer {
     }
 }
 
-extension _EncodeBuffer {
+extension EncodeBuffer {
     @discardableResult private mutating func writeTime(_ time: ServerMessageDate.Time) -> Int {
         let hour = time.hour < 10 ? "0\(time.hour)" : "\(time.hour)"
         let minute = time.minute < 10 ? "0\(time.minute)" : "\(time.minute)"
@@ -197,7 +197,7 @@ extension _EncodeBuffer {
     }
 }
 
-extension _EncodeBuffer {
+extension EncodeBuffer {
     @discardableResult private mutating func writeTimezone(_ timezone: ServerMessageDate.TimeZone) -> Int {
         let value = abs(timezone.minutes)
         let minutes = value % 60

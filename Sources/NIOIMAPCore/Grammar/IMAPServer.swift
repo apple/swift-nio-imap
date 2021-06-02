@@ -39,7 +39,7 @@ public struct IMAPServer: Equatable {
 
 // MARK: - Encoding
 
-extension _EncodeBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeIMAPServer(_ server: IMAPServer) -> Int {
         self.writeIfExists(server.userAuthenticationMechanism) { authMechanism in
             self.writeUserAuthenticationMechanism(authMechanism) + self.writeString("@")

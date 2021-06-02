@@ -26,7 +26,7 @@ public struct Expire: Equatable {
 
 // MARK: - Encoding
 
-extension _EncodeBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeExpire(_ data: Expire) -> Int {
         self.writeString(";EXPIRE=") +
             self.writeFullDateTime(data.dateTime)

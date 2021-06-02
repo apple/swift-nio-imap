@@ -13,7 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
-@testable import NIOIMAPCore
+@_spi(NIOIMAPInternal) @testable import NIOIMAPCore
 import XCTest
 
 class CommandStream_Tests: EncodeTestClass {}
@@ -45,7 +45,7 @@ extension CommandStream_Tests {
         for (command, expected, line) in inputs {
             var commandEncodeBuffer = CommandEncodeBuffer(buffer: "", capabilities: [])
             commandEncodeBuffer.writeCommandStream(command)
-            XCTAssertEqual(String(buffer: commandEncodeBuffer._buffer.buffer), expected, line: line)
+            XCTAssertEqual(String(buffer: commandEncodeBuffer.buffer.buffer), expected, line: line)
         }
     }
 
@@ -63,13 +63,13 @@ extension CommandStream_Tests {
             buffer.writeCommandStream($0)
         }
 
-        let encodedCommand = buffer._buffer.nextChunk()
+        let encodedCommand = buffer.buffer.nextChunk()
         XCTAssertEqual(String(buffer: encodedCommand.bytes), #"1 APPEND "INBOX" {7}\#r\#n"#)
         guard encodedCommand.waitForContinuation else {
             XCTFail("Should have had a continuation.")
             return
         }
-        let continuation = buffer._buffer.nextChunk()
+        let continuation = buffer.buffer.nextChunk()
         XCTAssertEqual(String(buffer: continuation.bytes), "Foo Bar\r\n")
         XCTAssertFalse(continuation.waitForContinuation, "Should not have additional continuations.")
     }
@@ -90,7 +90,7 @@ extension CommandStream_Tests {
             buffer.writeCommandStream($0)
         }
 
-        let encodedCommand = buffer._buffer.nextChunk()
+        let encodedCommand = buffer.buffer.nextChunk()
         XCTAssertEqual(String(buffer: encodedCommand.bytes), #"1 APPEND "INBOX" {3+}\#r\#nabc\#r\#n"#)
         guard !encodedCommand.waitForContinuation else {
             XCTFail("Should not have had a continuation.")
@@ -124,28 +124,28 @@ extension CommandStream_Tests {
             buffer.writeCommandStream($0)
         }
 
-        var encodedCommand = buffer._buffer.nextChunk()
+        var encodedCommand = buffer.buffer.nextChunk()
         XCTAssertEqual(String(buffer: encodedCommand.bytes), #"A003 APPEND "Drafts" (\Seen \Draft $MDNSent) CATENATE (URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=HEADER" TEXT {42}\#r\#n"#)
         guard encodedCommand.waitForContinuation else {
             XCTFail("Should have had a continuation.")
             return
         }
 
-        encodedCommand = buffer._buffer.nextChunk()
+        encodedCommand = buffer.buffer.nextChunk()
         XCTAssertEqual(String(buffer: encodedCommand.bytes), #"\#r\#n--------------030308070208000400050907\#r\#n URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=1.MIME" URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=1" TEXT {42}\#r\#n"#)
         guard encodedCommand.waitForContinuation else {
             XCTFail("Should have had a continuation.")
             return
         }
 
-        encodedCommand = buffer._buffer.nextChunk()
+        encodedCommand = buffer.buffer.nextChunk()
         XCTAssertEqual(String(buffer: encodedCommand.bytes), #"\#r\#n--------------030308070208000400050907\#r\#n URL "/Drafts;UIDVALIDITY=385759045/;UID=30" TEXT {44}\#r\#n"#)
         guard encodedCommand.waitForContinuation else {
             XCTFail("Should have had a continuation.")
             return
         }
 
-        encodedCommand = buffer._buffer.nextChunk()
+        encodedCommand = buffer.buffer.nextChunk()
         XCTAssertEqual(String(buffer: encodedCommand.bytes), #"\#r\#n--------------030308070208000400050907--\#r\#n)\#r\#n"#)
         XCTAssertFalse(encodedCommand.waitForContinuation, "Should not have additional continuations.")
     }
@@ -178,7 +178,7 @@ extension CommandStream_Tests {
             buffer.writeCommandStream($0)
         }
 
-        let encodedCommand = buffer._buffer.nextChunk()
+        let encodedCommand = buffer.buffer.nextChunk()
         XCTAssertEqual(
             String(buffer: encodedCommand.bytes),
             #"A003 APPEND "Drafts" (\Seen \Draft $MDNSent) CATENATE (URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=HEADER" TEXT {42+}\#r\#n"# +
@@ -207,21 +207,21 @@ extension CommandStream_Tests {
             buffer.writeCommandStream($0)
         }
 
-        var encodedCommand = buffer._buffer.nextChunk()
+        var encodedCommand = buffer.buffer.nextChunk()
         XCTAssertEqual(String(buffer: encodedCommand.bytes), #"A003 APPEND "Drafts" (\Seen \Draft $MDNSent) CATENATE (URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=HEADER" TEXT {5}\#r\#n"#)
         guard encodedCommand.waitForContinuation else {
             XCTFail("Should have had a continuation.")
             return
         }
 
-        encodedCommand = buffer._buffer.nextChunk()
+        encodedCommand = buffer.buffer.nextChunk()
         XCTAssertEqual(String(buffer: encodedCommand.bytes), #"hello)\#r\#nA003 APPEND "Drafts" (\Seen \Draft $MDNSent) CATENATE (URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=HEADER" TEXT {5}\#r\#n"#)
         guard encodedCommand.waitForContinuation else {
             XCTFail("Should have had a continuation.")
             return
         }
 
-        encodedCommand = buffer._buffer.nextChunk()
+        encodedCommand = buffer.buffer.nextChunk()
         XCTAssertEqual(String(buffer: encodedCommand.bytes), #"hello)\#r\#n"#)
         XCTAssertFalse(encodedCommand.waitForContinuation, "Should not have additional continuations.")
     }

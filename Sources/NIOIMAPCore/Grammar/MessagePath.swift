@@ -41,7 +41,7 @@ public struct MessagePath: Equatable {
 
 // MARK: - Encoding
 
-extension _EncodeBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeMessagePath(_ data: MessagePath) -> Int {
         self.writeEncodedMailboxUIDValidity(data.mailboxReference) +
             self.writeIUID(data.iUID) +

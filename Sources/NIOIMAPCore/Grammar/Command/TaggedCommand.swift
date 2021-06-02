@@ -37,9 +37,9 @@ extension CommandEncodeBuffer {
     /// - returns: The number of bytes written.
     @discardableResult public mutating func writeCommand(_ command: TaggedCommand) -> Int {
         var size = 0
-        size += self._buffer.writeString("\(command.tag) ")
+        size += self.buffer.writeString("\(command.tag) ")
         size += self.writeCommand(command.command)
-        size += self._buffer.writeString("\r\n")
+        size += self.buffer.writeString("\r\n")
         return size
     }
 }

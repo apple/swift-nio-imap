@@ -25,7 +25,7 @@ public enum CreateParameter: Equatable {
 
 // MARK: - Encoding
 
-extension _EncodeBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeCreateParameter(_ parameter: CreateParameter) -> Int {
         switch parameter {
         case .attributes(let attributes):

@@ -16,23 +16,23 @@ import struct NIO.ByteBuffer
 
 /// Specifies which type of metadata item to perform a search on.
 public struct EntryKindRequest: Hashable {
-    var _backing: String
+    fileprivate var backing: String
 
     /// Search private metadata items.
-    public static var `private` = Self(_backing: "priv")
+    public static var `private` = Self(backing: "priv")
 
     /// Search shared metadata items.
-    public static var shared = Self(_backing: "shared")
+    public static var shared = Self(backing: "shared")
 
     /// The server should use the largest value among `.private` and `.shared` mod-sequences
     /// for the metadata item.
-    public static var all = Self(_backing: "all")
+    public static var all = Self(backing: "all")
 }
 
 // MARK: - Encoding
 
-extension _EncodeBuffer {
+extension EncodeBuffer {
     @discardableResult mutating func writeEntryKindRequest(_ request: EntryKindRequest) -> Int {
-        self.writeString(request._backing)
+        self.writeString(request.backing)
     }
 }
