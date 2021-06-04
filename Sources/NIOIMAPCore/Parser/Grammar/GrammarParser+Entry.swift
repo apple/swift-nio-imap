@@ -25,12 +25,11 @@ import struct NIO.ByteBufferView
 import struct OrderedCollections.OrderedDictionary
 
 extension GrammarParser {
-    
     static func parseMetadataEntryName(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MetadataEntryName {
         let buffer = try self.parseAString(buffer: &buffer, tracker: tracker)
         return MetadataEntryName(buffer)
     }
-    
+
     static func parseEntryValue(buffer: inout ParseBuffer, tracker: StackTracker) throws -> KeyValue<MetadataEntryName, MetadataValue> {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> KeyValue<MetadataEntryName, MetadataValue> in
             let name = try self.parseMetadataEntryName(buffer: &buffer, tracker: tracker)
