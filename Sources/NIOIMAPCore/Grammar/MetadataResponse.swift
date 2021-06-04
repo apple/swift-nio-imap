@@ -18,10 +18,10 @@ import struct OrderedCollections.OrderedDictionary
 /// Sent by the server as a response to a `.getMetdata` command.
 public enum MetadataResponse: Equatable {
     /// Provides an array of values for the specified mailbox.
-    case values(values: OrderedDictionary<ByteBuffer, MetadataValue>, mailbox: MailboxName)
+    case values(values: OrderedDictionary<MetadataEntryName, MetadataValue>, mailbox: MailboxName)
 
     /// Provided as a catch-all to support future extensions, associates data with a mailbox.
-    case list(list: [ByteBuffer], mailbox: MailboxName)
+    case list(list: [MetadataEntryName], mailbox: MailboxName)
 }
 
 // MARK: - Encoding

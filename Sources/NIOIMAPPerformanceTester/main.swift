@@ -53,7 +53,7 @@ let commands: [(String, Command)] = [
     ("parse_expunge", .expunge),
     ("parse_genurlauth_one", .generateAuthorizedURL([.init(urlRump: ByteBuffer(string: "test"), mechanism: .internal)])),
     ("parse_genurlauth_many", .generateAuthorizedURL([.init(urlRump: ByteBuffer(string: "test1"), mechanism: .internal), .init(urlRump: ByteBuffer(string: "test2"), mechanism: .internal), .init(urlRump: ByteBuffer(string: "test3"), mechanism: .internal)])),
-    ("parse_getmetadata_complex", .getMetadata(options: [.maxSize(123), .scope(.infinity)], mailbox: .inbox, entries: [ByteBuffer(string: "test1"), ByteBuffer(string: "test2")])),
+    ("parse_getmetadata_complex", .getMetadata(options: [.maxSize(123), .scope(.infinity)], mailbox: .inbox, entries: ["test1", "test2"])),
     ("parse_getquota", .getQuota(.init("inbox"))),
     ("parse_select_params_none", .select(.inbox, [])),
     ("parse_select_params_one", .select(.inbox, [.condstore])),

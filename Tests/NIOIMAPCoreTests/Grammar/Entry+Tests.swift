@@ -23,14 +23,14 @@ class Entry_Tests: EncodeTestClass {}
 
 extension Entry_Tests {
     func testEncode() {
-        let inputs: [(KeyValue<ByteBuffer, MetadataValue>, String, UInt)] = [
+        let inputs: [(KeyValue<MetadataEntryName, MetadataValue>, String, UInt)] = [
             (.init(key: "name", value: .init("value")), "\"name\" ~{5}\r\nvalue", #line),
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeEntry($0) })
     }
 
     func testEncode_entryValues() {
-        let inputs: [(OrderedDictionary<ByteBuffer, MetadataValue>, String, UInt)] = [
+        let inputs: [(OrderedDictionary<MetadataEntryName, MetadataValue>, String, UInt)] = [
             (
                 ["name": .init("value")],
                 "(\"name\" ~{5}\r\nvalue)",
@@ -46,7 +46,7 @@ extension Entry_Tests {
     }
 
     func testEncode_entries() {
-        let inputs: [([ByteBuffer], String, UInt)] = [
+        let inputs: [([MetadataEntryName], String, UInt)] = [
             (
                 ["name"],
                 "(\"name\")",
@@ -62,7 +62,7 @@ extension Entry_Tests {
     }
 
     func testEncode_entryList() {
-        let inputs: [([ByteBuffer], String, UInt)] = [
+        let inputs: [([MetadataEntryName], String, UInt)] = [
             (
                 ["name"],
                 "\"name\"",

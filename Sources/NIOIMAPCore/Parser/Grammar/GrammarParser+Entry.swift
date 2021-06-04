@@ -25,22 +25,28 @@ import struct NIO.ByteBufferView
 import struct OrderedCollections.OrderedDictionary
 
 extension GrammarParser {
-    static func parseEntryValue(buffer: inout ParseBuffer, tracker: StackTracker) throws -> KeyValue<ByteBuffer, MetadataValue> {
-        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> KeyValue<ByteBuffer, MetadataValue> in
-            let name = try self.parseAString(buffer: &buffer, tracker: tracker)
+    
+    static func parseMetadataEntryName(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MetadataEntryName {
+        let buffer = try self.parseAString(buffer: &buffer, tracker: tracker)
+        return MetadataEntryName(buffer)
+    }
+    
+    static func parseEntryValue(buffer: inout ParseBuffer, tracker: StackTracker) throws -> KeyValue<MetadataEntryName, MetadataValue> {
+        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> KeyValue<MetadataEntryName, MetadataValue> in
+            let name = try self.parseMetadataEntryName(buffer: &buffer, tracker: tracker)
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             let value = try self.parseMetadataValue(buffer: &buffer, tracker: tracker)
             return .init(key: name, value: value)
         }
     }
 
-    static func parseEntryValues(buffer: inout ParseBuffer, tracker: StackTracker) throws -> OrderedDictionary<ByteBuffer, MetadataValue> {
-        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> OrderedDictionary<ByteBuffer, MetadataValue> in
+    static func parseEntryValues(buffer: inout ParseBuffer, tracker: StackTracker) throws -> OrderedDictionary<MetadataEntryName, MetadataValue> {
+        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> OrderedDictionary<MetadataEntryName, MetadataValue> in
             try PL.parseFixedString("(", buffer: &buffer, tracker: tracker)
-            var kvs = OrderedDictionary<ByteBuffer, MetadataValue>()
+            var kvs = OrderedDictionary<MetadataEntryName, MetadataValue>()
             let ev = try self.parseEntryValue(buffer: &buffer, tracker: tracker)
             kvs[ev.key] = ev.value
-            try PL.parseZeroOrMore(buffer: &buffer, into: &kvs, tracker: tracker, parser: { buffer, tracker -> KeyValue<ByteBuffer, MetadataValue> in
+            try PL.parseZeroOrMore(buffer: &buffer, into: &kvs, tracker: tracker, parser: { buffer, tracker -> KeyValue<MetadataEntryName, MetadataValue> in
                 try PL.parseSpaces(buffer: &buffer, tracker: tracker)
                 return try self.parseEntryValue(buffer: &buffer, tracker: tracker)
             })
@@ -49,17 +55,17 @@ extension GrammarParser {
         }
     }
 
-    static func parseEntries(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [ByteBuffer] {
-        func parseEntries_singleUnbracketed(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [ByteBuffer] {
-            [try self.parseAString(buffer: &buffer, tracker: tracker)]
+    static func parseEntries(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [MetadataEntryName] {
+        func parseEntries_singleUnbracketed(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [MetadataEntryName] {
+            [try self.parseMetadataEntryName(buffer: &buffer, tracker: tracker)]
         }
 
-        func parseEntries_bracketed(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [ByteBuffer] {
+        func parseEntries_bracketed(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [MetadataEntryName] {
             try PL.parseFixedString("(", buffer: &buffer, tracker: tracker)
-            var array = [try self.parseAString(buffer: &buffer, tracker: tracker)]
+            var array = [try self.parseMetadataEntryName(buffer: &buffer, tracker: tracker)]
             try PL.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker, parser: { buffer, tracker in
                 try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-                return try self.parseAString(buffer: &buffer, tracker: tracker)
+                return try self.parseMetadataEntryName(buffer: &buffer, tracker: tracker)
             })
             try PL.parseFixedString(")", buffer: &buffer, tracker: tracker)
             return array
@@ -73,12 +79,12 @@ extension GrammarParser {
         )
     }
 
-    static func parseEntryList(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [ByteBuffer] {
+    static func parseEntryList(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [MetadataEntryName] {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
-            var array = [try self.parseAString(buffer: &buffer, tracker: tracker)]
+            var array = [try self.parseMetadataEntryName(buffer: &buffer, tracker: tracker)]
             try PL.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker, parser: { buffer, tracker in
                 try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-                return try self.parseAString(buffer: &buffer, tracker: tracker)
+                return try self.parseMetadataEntryName(buffer: &buffer, tracker: tracker)
             })
             return array
         }
