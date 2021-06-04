@@ -93,7 +93,7 @@ final class RoundtripTests: XCTestCase {
             (.search(key: .or(.deleted, .unseen), charset: "UTF-7", returnOptions: [.min, .max]), #line),
             (.search(key: .and([.new, .deleted, .unseen]), charset: "UTF-7", returnOptions: [.min, .max]), #line),
 
-            (.extendedsearch(ExtendedSearchOptions(key: .all, sourceOptions: ExtendedSearchSourceOptions(sourceMailbox: [.inboxes]))), #line),
+            (.extendedSearch(ExtendedSearchOptions(key: .all, sourceOptions: ExtendedSearchSourceOptions(sourceMailbox: [.inboxes]))), #line),
         ]
 
         for (i, test) in tests.enumerated() {

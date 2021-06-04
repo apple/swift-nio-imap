@@ -96,7 +96,7 @@ extension GrammarParser_Commands_Tests {
                 ("DELETE INBOX", "\r", .delete(.inbox), #line),
                 ("MOVE $ INBOX", "\r", .move(.lastCommand, .inbox), #line),
                 ("SEARCH ALL", "\r", .search(key: .all, charset: nil, returnOptions: []), #line),
-                ("ESEARCH ALL", "\r", .extendedsearch(.init(key: .all)), #line),
+                ("ESEARCH ALL", "\r", .extendedSearch(.init(key: .all)), #line),
                 ("STORE $ +FLAGS \\Answered", "\r", .store(.lastCommand, [], .add(silent: false, list: [.answered])), #line),
                 ("EXAMINE INBOX", "\r", .examine(.inbox, .init()), #line),
                 ("LIST INBOX test", "\r", .list(nil, reference: .inbox, .mailbox("test"), []), #line),
@@ -342,10 +342,10 @@ extension GrammarParser_Commands_Tests {
         self.iterateTests(
             testFunction: GrammarParser.parseCommandSuffix_esearch,
             validInputs: [
-                (" ALL", "\r", .extendedsearch(.init(key: .all)), #line),
+                (" ALL", "\r", .extendedSearch(.init(key: .all)), #line),
                 (
                     " IN (mailboxes \"folder1\" subtree \"folder2\") unseen", "\r",
-                    .extendedsearch(ExtendedSearchOptions(key: .unseen, charset: nil, returnOptions: [], sourceOptions: ExtendedSearchSourceOptions(sourceMailbox: [.mailboxes(Mailboxes([MailboxName("folder1")])!), .subtree(Mailboxes([MailboxName("folder2")])!)]))),
+                    .extendedSearch(ExtendedSearchOptions(key: .unseen, charset: nil, returnOptions: [], sourceOptions: ExtendedSearchSourceOptions(sourceMailbox: [.mailboxes(Mailboxes([MailboxName("folder1")])!), .subtree(Mailboxes([MailboxName("folder2")])!)]))),
                     #line
                 ),
             ],

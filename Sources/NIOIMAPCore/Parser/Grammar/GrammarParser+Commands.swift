@@ -262,7 +262,7 @@ extension GrammarParser {
     // esearch =  "ESEARCH" [SP esearch-source-opts]
     // [SP search-return-opts] SP search-program
     static func parseCommandSuffix_esearch(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
-        .extendedsearch(try parseExtendedSearchOptions(buffer: &buffer, tracker: tracker))
+        .extendedSearch(try parseExtendedSearchOptions(buffer: &buffer, tracker: tracker))
     }
 
     // move            = "MOVE" SP sequence-set SP mailbox
