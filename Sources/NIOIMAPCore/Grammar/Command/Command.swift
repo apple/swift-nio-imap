@@ -143,13 +143,13 @@ public enum Command: Equatable {
     /// When the mailbox name is the empty string, this command retrieves
     /// server annotations.  When the mailbox name is not empty, this command
     /// retrieves annotations on the specified mailbox.
-    case getMetadata(options: [MetadataOption], mailbox: MailboxName, entries: [ByteBuffer])
+    case getMetadata(options: [MetadataOption], mailbox: MailboxName, entries: [MetadataEntryName])
 
     /// Sets the specified list of entries by adding or
     /// replacing the specified values provided, on the specified existing
     /// mailboxes or on the server (if the mailbox argument is the empty
     /// string).
-    case setMetadata(mailbox: MailboxName, entries: OrderedDictionary<ByteBuffer, MetadataValue>)
+    case setMetadata(mailbox: MailboxName, entries: OrderedDictionary<MetadataEntryName, MetadataValue>)
 
     /// Performs an extended search as defined in RFC 4731.
     case extendedsearch(ExtendedSearchOptions)
@@ -298,7 +298,7 @@ extension CommandEncodeBuffer {
             }
     }
 
-    private mutating func writeCommandKind_getMetadata(options: [MetadataOption], mailbox: MailboxName, entries: [ByteBuffer]) -> Int {
+    private mutating func writeCommandKind_getMetadata(options: [MetadataOption], mailbox: MailboxName, entries: [MetadataEntryName]) -> Int {
         self.buffer.writeString("GETMETADATA") +
             self.buffer.write(if: options.count >= 1) {
                 buffer.writeSpace() + buffer.writeMetadataOptions(options)
@@ -309,7 +309,7 @@ extension CommandEncodeBuffer {
             self.buffer.writeEntries(entries)
     }
 
-    private mutating func writeCommandKind_setMetadata(mailbox: MailboxName, entries: OrderedDictionary<ByteBuffer, MetadataValue>) -> Int {
+    private mutating func writeCommandKind_setMetadata(mailbox: MailboxName, entries: OrderedDictionary<MetadataEntryName, MetadataValue>) -> Int {
         self.buffer.writeString("SETMETADATA ") +
             self.buffer.writeMailbox(mailbox) +
             self.buffer.writeSpace() +

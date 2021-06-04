@@ -16,27 +16,27 @@ import struct NIO.ByteBuffer
 import struct OrderedCollections.OrderedDictionary
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeEntry(_ entry: KeyValue<ByteBuffer, MetadataValue>) -> Int {
-        self.writeIMAPString(entry.key) +
+    @discardableResult mutating func writeEntry(_ entry: KeyValue<MetadataEntryName, MetadataValue>) -> Int {
+        self.writeIMAPString(String(entry.key)) +
             self.writeSpace() +
             self.writeMetadataValue(entry.value)
     }
 
-    @discardableResult mutating func writeEntryValues(_ array: OrderedDictionary<ByteBuffer, MetadataValue>) -> Int {
+    @discardableResult mutating func writeEntryValues(_ array: OrderedDictionary<MetadataEntryName, MetadataValue>) -> Int {
         self.writeOrderedDictionary(array) { element, buffer in
             buffer.writeEntry(element)
         }
     }
 
-    @discardableResult mutating func writeEntries(_ array: [ByteBuffer]) -> Int {
+    @discardableResult mutating func writeEntries(_ array: [MetadataEntryName]) -> Int {
         self.writeArray(array) { element, buffer in
-            buffer.writeIMAPString(element)
+            buffer.writeIMAPString(String(element))
         }
     }
 
-    @discardableResult mutating func writeEntryList(_ array: [ByteBuffer]) -> Int {
+    @discardableResult mutating func writeEntryList(_ array: [MetadataEntryName]) -> Int {
         self.writeArray(array, parenthesis: false) { element, buffer in
-            buffer.writeIMAPString(element)
+            buffer.writeIMAPString(String(element))
         }
     }
 }
