@@ -258,7 +258,7 @@ extension GrammarParser {
         }
     }
 
-    // RFC 6237
+    // RFC 7377
     // esearch =  "ESEARCH" [SP esearch-source-opts]
     // [SP search-return-opts] SP search-program
     static func parseCommandSuffix_esearch(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {

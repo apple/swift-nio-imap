@@ -37,7 +37,7 @@ public enum MailboxFilter: Equatable {
     case selected
 
     /// Selected mailbox when using MSNs and '*'
-    /// Note:  Forbidden in an RFC 6237 context.
+    /// Note:  Forbidden in an RFC 7377 context.
     case selectedDelayed
 
     /// Specified mailbox and all selectable child mailboxes, one

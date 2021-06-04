@@ -51,7 +51,7 @@ extension GrammarParser {
         }
     }
 
-    // RFC 6237
+    // RFC 7377
     // one-correlator =  ("TAG" SP tag-string) / ("MAILBOX" SP astring) /
     //                      ("UIDVALIDITY" SP nz-number)
     //                      ; Each correlator MUST appear exactly once.

@@ -20,16 +20,16 @@ public struct SearchCorrelator: Equatable {
     /// The original option from RFC4466 - a random string.
     public var tag: ByteBuffer
 
-    /// The mailbox being searched. Required iff using RFC 6237
+    /// The mailbox being searched. Required iff using RFC 7377
     public var mailbox: MailboxName?
 
-    /// Required iff using RFC 6237
+    /// Required iff using RFC 7377
     public var uidValidity: UIDValidity?
 
     /// Creates a new `SearchCorrelator`.
     /// - parameter tag: The original option from RFC4466 - a random string.
-    /// - parameter mailbox: The mailbox being searched. Required iff using RFC 6237.
-    /// - parameter uidValidity: Required iff using RFC 6237.
+    /// - parameter mailbox: The mailbox being searched. Required iff using RFC 7377.
+    /// - parameter uidValidity: Required iff using RFC 7377.
     public init(tag: ByteBuffer, mailbox: MailboxName? = nil, uidValidity: UIDValidity? = nil) {
         self.tag = tag
         self.mailbox = mailbox
