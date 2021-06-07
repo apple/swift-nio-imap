@@ -35,7 +35,8 @@ public enum PipeliningRequirement: CaseIterable {
     /// No command besides `FETCH`, `STORE`, and `SEARCH` is running.
     /// This is a requirement for all sequence number based commands.
     case noUntaggedExpungeResponse
-    /// No command is running that uses UIDs to specify messages
+    /// No command is running that uses UIDs to specify messages.
+    /// This is a requirement for all sequence number based commands.
     case noUIDBasedCommandRunning
     /// No STORE command is running.
     case noFlagChanges
@@ -100,55 +101,77 @@ extension Command {
     var pipeliningRequirements: Set<PipeliningRequirement> {
         switch self {
         case .select,
-             .delete,
-             .rename:
+             .unselect,
+             .close,
+             .examine:
             return [.noMailboxCommandsRunning]
+
+        case .search(key: let key, charset: _, returnOptions: _):
+            return key.pipeliningRequirements
+                .union([.noUntaggedExpungeResponse])
         case .uidSearch(key: let key, charset: _, returnOptions: _):
             return key.pipeliningRequirements
+        case .extendedsearch(let options):
+            return options.key.pipeliningRequirements
+
         case .fetch(_, let attribtues, _):
-            return attribtues.pipeliningRequirements.union([.noUntaggedExpungeResponse, .noUIDBasedCommandRunning])
+            return attribtues.pipeliningRequirements
+                .union([.noUntaggedExpungeResponse, .noUIDBasedCommandRunning])
         case .uidFetch(_, let attribtues, _):
             return attribtues.pipeliningRequirements
+
+        case .copy,
+             .move:
+            return [.noUntaggedExpungeResponse, .noUIDBasedCommandRunning]
+
+        case .uidCopy,
+             .uidMove,
+             .uidExpunge,
+             .expunge:
+            return []
+            
+         case .store(_, _, let flags):
+            return flags.silent ?
+                [.noUntaggedExpungeResponse, .noUIDBasedCommandRunning, .noFlagReads] :
+                [.noUntaggedExpungeResponse, .noUIDBasedCommandRunning, .noFlagReads, .noFlagChanges]
         case .uidStore(_, _, let flags):
             return flags.silent ?
                 [.noFlagReads] :
                 [.noFlagReads, .noFlagChanges]
-        case
-             .capability,
+
+        case .capability,
              .logout,
              .noop,
-             .create,
-             .examine,
-             .list,
-             .listIndependent,
-             .lsub,
-             .status,
-             .subscribe,
-             .unsubscribe,
+             .check,
              .authenticate,
              .login,
              .starttls,
-             .check,
-             .close,
-             .expunge,
              .enable,
-             .unselect,
              .idleStart,
-             .copy,
-             .store,
-             .search,
-             .move,
              .id,
              .namespace,
-             .uidCopy,
-             .uidMove,
-             .uidExpunge,
+
+             // Mailbox:
+             .status,
+             .create,
+             .list,
+             .listIndependent,
+             .lsub,
+             .subscribe,
+             .unsubscribe,
+             .delete,
+             .rename,
+
+             // Quota:
              .getQuota,
              .getQuotaRoot,
              .setQuota,
+
+             // Metadata:
              .getMetadata,
              .setMetadata,
-             .extendedsearch,
+
+             // URL Auth:
              .resetKey,
              .generateAuthorizedURL,
              .urlFetch:
@@ -178,70 +201,95 @@ extension CommandStreamPart {
 extension Command {
     var pipeliningBehavior: Set<PipeliningBehavior> {
         switch self {
-        case .select:
+        case .select,
+             .unselect,
+             .examine,
+             .close:
             return [.changesMailboxSelection, .mayTriggerUntaggedExpunge]
+
+        case .expunge:
+            return [.dependsOnMailboxSelection, .mayTriggerUntaggedExpunge]
+        case .uidExpunge:
+            return [.dependsOnMailboxSelection, .isUIDBased, .mayTriggerUntaggedExpunge]
+
         case .fetch(_, let attributes, _):
             return attributes.readsFlags ?
                 [.dependsOnMailboxSelection, .readsFlags] :
                 [.dependsOnMailboxSelection]
-        case .check,
-             .expunge:
-            return [.dependsOnMailboxSelection, .mayTriggerUntaggedExpunge]
         case .uidFetch(_, let attributes, _):
             return attributes.readsFlags ?
                 [.dependsOnMailboxSelection, .mayTriggerUntaggedExpunge, .isUIDBased, .readsFlags] :
                 [.dependsOnMailboxSelection, .mayTriggerUntaggedExpunge, .isUIDBased]
+
+        case .copy, .move:
+            return [.dependsOnMailboxSelection, .mayTriggerUntaggedExpunge]
         case .uidCopy, .uidMove:
             return [.dependsOnMailboxSelection, .mayTriggerUntaggedExpunge, .isUIDBased]
+
+        case .search(key: let key, charset: _, returnOptions: _):
+            return key.pipeliningBehavior.union(
+                [.dependsOnMailboxSelection]
+            )
         case .uidSearch(key: let key, charset: _, returnOptions: _):
-            return key.referencesFlags ?
-                [.dependsOnMailboxSelection, .mayTriggerUntaggedExpunge, .isUIDBased, .readsFlags] :
+            return key.pipeliningBehavior.union(
                 [.dependsOnMailboxSelection, .mayTriggerUntaggedExpunge, .isUIDBased]
+            )
+        case .extendedsearch(let options):
+            // TODO: Figure out how this is supposed to work.
+            // https://github.com/apple/swift-nio-imap/issues/572
+            return options.key.pipeliningBehavior.union(
+                [.dependsOnMailboxSelection, .mayTriggerUntaggedExpunge]
+            )
+
+        case .store(_, _, let flags):
+            return flags.silent ?
+                [.dependsOnMailboxSelection, .isUIDBased, .changesFlags] :
+                [.dependsOnMailboxSelection, .isUIDBased, .changesFlags, .readsFlags]
         case .uidStore(_, _, let flags):
             return flags.silent ?
                 [.dependsOnMailboxSelection, .mayTriggerUntaggedExpunge, .isUIDBased, .changesFlags] :
                 [.dependsOnMailboxSelection, .mayTriggerUntaggedExpunge, .isUIDBased, .changesFlags, .readsFlags]
+
+        case .noop,
+             .check:
+            return [.dependsOnMailboxSelection, .mayTriggerUntaggedExpunge]
+
         case .starttls,
-            .authenticate:
+             .logout,
+             .authenticate,
+             .idleStart:
             return [.barrier]
         case .capability,
-            .noop,
-            .login,
-            .examine,
-            .create,
-            .delete,
-            .rename,
-            .list,
-            .status,
-            .close:
+             .login,
+             .create,
+             .delete,
+             .rename,
+             .list,
+             .listIndependent,
+             .lsub,
+             .status,
+             .id,
+             .namespace,
+             .enable,
+             .resetKey,
+             .generateAuthorizedURL,
+             .urlFetch:
             return [.mayTriggerUntaggedExpunge]
 
-        case
-            .logout,
-            .listIndependent,
-            .lsub,
-            .subscribe,
-            .unsubscribe,
-            .enable,
-            .unselect,
-            .idleStart,
-            .copy,
-            .store,
-            .search,
-            .move,
-            .id,
-            .namespace,
-            .uidExpunge,
-            .getQuota,
-            .getQuotaRoot,
-            .setQuota,
-            .getMetadata,
-            .setMetadata,
-            .extendedsearch,
-            .resetKey,
-            .generateAuthorizedURL,
-            .urlFetch:
-            fatalError("TODO")
+        case .subscribe,
+             .unsubscribe:
+            // TODO: Subscribe vs. LIST / LSUB ?!?
+            return [.mayTriggerUntaggedExpunge]
+
+        case .getQuota,
+             .getQuotaRoot,
+             .setQuota:
+            // TODO: Quota dependencies?
+            return [.mayTriggerUntaggedExpunge]
+
+        case .getMetadata,
+             .setMetadata:
+            // TODO: Metadata dependencies?
             return [.mayTriggerUntaggedExpunge]
         }
     }
@@ -305,6 +353,17 @@ extension SearchKey {
         return result
     }
 
+    var pipeliningBehavior: Set<PipeliningBehavior> {
+        var result = Set<PipeliningBehavior>()
+        if referencesUIDs {
+            result.insert(.isUIDBased)
+        }
+        if referencesFlags {
+            result.insert(.readsFlags)
+        }
+        return result
+    }
+
     fileprivate var referencesSequenceNumbers: Bool {
         switch self {
         case .all,
@@ -353,6 +412,57 @@ extension SearchKey {
             return key.referencesSequenceNumbers
         case .or(let keyA, let keyB):
             return keyA.referencesSequenceNumbers || keyB.referencesSequenceNumbers
+        }
+    }
+
+    fileprivate var referencesUIDs: Bool {
+        switch self {
+        case .all,
+             .answered,
+             .bcc,
+             .before,
+             .body,
+             .cc,
+             .deleted,
+             .flagged,
+             .from,
+             .keyword,
+             .modificationSequence,
+             .new,
+             .old,
+             .on,
+             .recent,
+             .seen,
+             .since,
+             .subject,
+             .text,
+             .to,
+             .unanswered,
+             .undeleted,
+             .unflagged,
+             .unkeyword,
+             .unseen,
+             .draft,
+             .header,
+             .messageSizeLarger,
+             .messageSizeSmaller,
+             .older,
+             .sentBefore,
+             .sentOn,
+             .sentSince,
+             .sequenceNumbers,
+             .undraft,
+             .younger:
+            return false
+        case .filter, // Have to assume yes, since we can't know
+             .uid:
+             return true
+        case let .and(keys):
+            return keys.contains(where: \.referencesUIDs)
+        case .not(let key):
+            return key.referencesUIDs
+        case .or(let keyA, let keyB):
+            return keyA.referencesUIDs || keyB.referencesUIDs
         }
     }
 
