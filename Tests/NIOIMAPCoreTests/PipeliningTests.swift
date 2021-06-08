@@ -708,7 +708,7 @@ extension PipeliningTests {
                 (#line, .search(key: key, charset: nil, returnOptions: [])),
                 (#line, .extendedsearch(ExtendedSearchOptions(key: key))),
                 (#line, .uidSearch(key: key, charset: nil, returnOptions: [])),
-            ], require: .noFlagChanges, "key: \(key)")
+            ], require: .noFlagReads, "key: \(key)")
         }
     }
 }
@@ -1094,12 +1094,6 @@ extension PipeliningTests {
             (#line, .generateAuthorizedURL([.joe])),
             (#line, .urlFetch([.joeURLFetch])),
 
-            // TODO: Cleanup search
-            // Search is ok as long as it doesn’t reference flags:
-            (#line, .uidSearch(key: .all, charset: nil, returnOptions: [])),
-            (#line, .search(key: .all, charset: nil, returnOptions: [])),
-            (#line, .extendedsearch(ExtendedSearchOptions(key: .all))),
-
             // STORE is ok as long as it is SILENT
             (#line, .uidStore(.set([1]), [:], .add(silent: true, list: [.answered]))),
             (#line, .store(.set([1]), [], .add(silent: true, list: [.answered]))),
@@ -1140,11 +1134,6 @@ extension PipeliningTests {
         }
     }
 
-    func testSearchReferencingUIDs() {
-        // TODO
-        XCTFail("TODO")
-    }
-    
     func testCommandBehavior_barrier() {
         /// No additional commands may be sent until these commands complete.
 
