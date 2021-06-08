@@ -798,7 +798,6 @@ extension PipeliningTests {
             (#line, .move(.set([1]), .food)),
             (#line, .store(.set([1]), [], .add(silent: true, list: [.answered]))),
             (#line, .store(.set([1]), [], .add(silent: false, list: [.answered]))),
-            (#line, .search(key: .all, charset: nil, returnOptions: [.all])),
             (#line, .id([:])),
             (#line, .namespace),
             (#line, .uidExpunge(.set([1]))),
@@ -807,7 +806,6 @@ extension PipeliningTests {
             (#line, .setQuota(QuotaRoot("foo"), [])),
             (#line, .getMetadata(options: [], mailbox: .food, entries: ["/shared/comment"])),
             (#line, .setMetadata(mailbox: .food, entries: ["/shared/comment": nil])),
-            (#line, .extendedsearch(ExtendedSearchOptions(key: .all))),
             (#line, .resetKey(mailbox: nil, mechanisms: [.internal])),
             (#line, .generateAuthorizedURL([.joe])),
             (#line, .urlFetch([.joeURLFetch])),
@@ -818,7 +816,9 @@ extension PipeliningTests {
             (#line, .status(.food, [.messageCount])),
             (#line, .check),
             (#line, .expunge),
+            (#line, .search(key: .all, charset: nil, returnOptions: [.all])),
             (#line, .uidSearch(key: .all, charset: nil, returnOptions: [])),
+            (#line, .extendedsearch(ExtendedSearchOptions(key: .all))),
             (#line, .fetch(.set([1]), [.envelope, .uid], [:])),
             (#line, .fetch(.set([1]), [.bodyStructure(extensions: false)], [:])),
             (#line, .uidFetch(.set([1]), [.envelope, .uid], [:])),
@@ -1023,12 +1023,12 @@ extension PipeliningTests {
         SearchKey.keysWithoutUID.forEach { key in
             AssertFalse(commands: [
                 (#line, .search(key: key, charset: nil, returnOptions: [])),
-                (#line, .extendedsearch(ExtendedSearchOptions(key: key))),
             ], haveBehavior: .isUIDBased, "key: \(key)")
             // UID SEARCH has this behavior even if the key does not
             // reference UIDs:
             Assert(commands: [
                 (#line, .uidSearch(key: key, charset: nil, returnOptions: [])),
+                (#line, .extendedsearch(ExtendedSearchOptions(key: key))),
             ], haveBehavior: .isUIDBased, "key: \(key)")
         }
         SearchKey.keysWithUID.forEach { key in

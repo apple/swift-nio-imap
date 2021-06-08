@@ -270,10 +270,8 @@ extension Command {
                 [.dependsOnMailboxSelection, .mayTriggerUntaggedExpunge, .isUIDBased]
             )
         case .extendedsearch(let options):
-            // TODO: Figure out how this is supposed to work.
-            // https://github.com/apple/swift-nio-imap/issues/572
             return options.key.pipeliningBehavior.union(
-                [.dependsOnMailboxSelection, .mayTriggerUntaggedExpunge]
+                [.dependsOnMailboxSelection, .mayTriggerUntaggedExpunge, .isUIDBased]
             )
 
         case .store(_, _, let flags):
