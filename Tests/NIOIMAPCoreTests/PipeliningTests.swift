@@ -123,8 +123,8 @@ extension SearchKey {
 
 extension UIDSetNonEmpty {
     fileprivate static let arbitrarySets: [UIDSetNonEmpty] = [
-        [100...200],
-        [UID.min...UID.min],
+        [100 ... 200],
+        [UID.min ... UID.min],
         [43_195 ... 43_195],
         .all,
     ]
@@ -137,43 +137,43 @@ extension PipeliningRequirement {
         .noUIDBasedCommandRunning,
         .noFlagChanges(.all),
         .noFlagChanges([1]),
-        .noFlagChanges([55...1000]),
+        .noFlagChanges([55 ... 1000]),
         .noFlagReads(.all),
         .noFlagReads([1]),
-        .noFlagReads([55...1000]),
+        .noFlagReads([55 ... 1000]),
     ]
 }
 
 // MARK: -
 
-fileprivate func AssertCanStart(_ requirements: Set<PipeliningRequirement>, whileRunning behavior: Set<PipeliningBehavior>, file: StaticString = #filePath, line: UInt = #line) {
+private func AssertCanStart(_ requirements: Set<PipeliningRequirement>, whileRunning behavior: Set<PipeliningBehavior>, file: StaticString = #filePath, line: UInt = #line) {
     XCTAssert(behavior.satisfies(requirements), file: file, line: line)
 }
 
-fileprivate func AssertCanNotStart(_ requirements: Set<PipeliningRequirement>, whileRunning behavior: Set<PipeliningBehavior>, file: StaticString = #filePath, line: UInt = #line) {
+private func AssertCanNotStart(_ requirements: Set<PipeliningRequirement>, whileRunning behavior: Set<PipeliningBehavior>, file: StaticString = #filePath, line: UInt = #line) {
     XCTAssertFalse(behavior.satisfies(requirements), file: file, line: line)
 }
 
-fileprivate func AssertFalse(commands: [(UInt, Command)], require requirement: PipeliningRequirement, _ message: @autoclosure () -> String = "", file: StaticString = #filePath) {
+private func AssertFalse(commands: [(UInt, Command)], require requirement: PipeliningRequirement, _ message: @autoclosure () -> String = "", file: StaticString = #filePath) {
     commands.forEach { line, command in
         XCTAssertFalse(command.pipeliningRequirements.contains(requirement), "Should not require \(requirement). \(message())", file: file, line: line)
     }
 }
 
-fileprivate func Assert(commands: [(UInt, Command)], require requirement: PipeliningRequirement, _ message: @autoclosure () -> String = "", file: StaticString = #filePath) {
+private func Assert(commands: [(UInt, Command)], require requirement: PipeliningRequirement, _ message: @autoclosure () -> String = "", file: StaticString = #filePath) {
     commands.forEach { line, command in
         let r = command.pipeliningRequirements
         XCTAssert(r.contains(requirement), "Should require \(requirement). Did: \(r). \(message())", file: file, line: line)
     }
 }
 
-fileprivate func AssertFalse(commands: [(UInt, Command)], haveBehavior behavior: PipeliningBehavior, _ message: @autoclosure () -> String = "", file: StaticString = #filePath) {
+private func AssertFalse(commands: [(UInt, Command)], haveBehavior behavior: PipeliningBehavior, _ message: @autoclosure () -> String = "", file: StaticString = #filePath) {
     commands.forEach { line, command in
         XCTAssertFalse(command.pipeliningBehavior.contains(behavior), "Should not have \(behavior) behavior. \(message())", file: file, line: line)
     }
 }
 
-fileprivate func Assert(commands: [(UInt, Command)], haveBehavior behavior: PipeliningBehavior, _ message: @autoclosure () -> String = "", file: StaticString = #filePath) {
+private func Assert(commands: [(UInt, Command)], haveBehavior behavior: PipeliningBehavior, _ message: @autoclosure () -> String = "", file: StaticString = #filePath) {
     commands.forEach { line, command in
         XCTAssert(command.pipeliningBehavior.contains(behavior), "Should have \(behavior) behavior. \(message())", file: file, line: line)
     }
@@ -298,12 +298,12 @@ extension PipeliningTests {
         AssertCanNotStart(Set(PipeliningRequirement.arbitraryRequirements),
                           whileRunning: [.changesFlagsOnAnyMessage])
 
-        AssertCanStart([.noFlagChanges([200...300])],
-                       whileRunning: [.changesFlags([1...100]), .changesFlags([400...500])])
-        AssertCanNotStart([.noFlagChanges([200...300])],
-                          whileRunning: [.changesFlags([100...200])])
-        AssertCanStart([.noFlagChanges([200...300])],
-                       whileRunning: [.readsFlags([100...200])])
+        AssertCanStart([.noFlagChanges([200 ... 300])],
+                       whileRunning: [.changesFlags([1 ... 100]), .changesFlags([400 ... 500])])
+        AssertCanNotStart([.noFlagChanges([200 ... 300])],
+                          whileRunning: [.changesFlags([100 ... 200])])
+        AssertCanStart([.noFlagChanges([200 ... 300])],
+                       whileRunning: [.readsFlags([100 ... 200])])
     }
 
     func testCanStartReadsFlagsBehavior() {
@@ -322,12 +322,12 @@ extension PipeliningTests {
         AssertCanNotStart(Set(PipeliningRequirement.arbitraryRequirements),
                           whileRunning: [.readsFlagsFromAnyMessage])
 
-        AssertCanStart([.noFlagReads([200...300])],
-                       whileRunning: [.readsFlags([1...100]), .readsFlags([400...500])])
-        AssertCanNotStart([.noFlagReads([200...300])],
-                          whileRunning: [.readsFlags([100...200])])
-        AssertCanStart([.noFlagReads([200...300])],
-                          whileRunning: [.changesFlags([100...200])])
+        AssertCanStart([.noFlagReads([200 ... 300])],
+                       whileRunning: [.readsFlags([1 ... 100]), .readsFlags([400 ... 500])])
+        AssertCanNotStart([.noFlagReads([200 ... 300])],
+                          whileRunning: [.readsFlags([100 ... 200])])
+        AssertCanStart([.noFlagReads([200 ... 300])],
+                       whileRunning: [.changesFlags([100 ... 200])])
     }
 
     func testCanStartBarrierBehavior() {
@@ -356,7 +356,7 @@ extension PipeliningTests {
         let append = CommandStreamPart.append(.start(tag: "A1", appendingTo: .food))
         XCTAssertEqual(append.pipeliningRequirements, [])
         XCTAssertEqual(append.pipeliningBehavior, [
-            .mayTriggerUntaggedExpunge
+            .mayTriggerUntaggedExpunge,
         ])
     }
 
@@ -365,7 +365,7 @@ extension PipeliningTests {
         let append = CommandStreamPart.append(.catenateURL(.joeURLFetch))
         XCTAssertEqual(append.pipeliningRequirements, [])
         XCTAssertEqual(append.pipeliningBehavior, [
-            .isUIDBased
+            .isUIDBased,
         ])
     }
 
@@ -472,7 +472,6 @@ extension PipeliningTests {
             (#line, .create(.food, [])),
             (#line, .list(nil, reference: .food, .food, [])),
             (#line, .status(.food, [.messageCount])),
-            //(#line, .append(into: .food, flags: [], date: nil, message: Data()))),
             (#line, .check),
             (#line, .close),
             (#line, .expunge),
@@ -550,7 +549,6 @@ extension PipeliningTests {
             (#line, .create(.food, [])),
             (#line, .list(nil, reference: .food, .food, [])),
             (#line, .status(.food, [.messageCount])),
-            //.append(into: .food, flags: [], date: nil, message: Data()),
             (#line, .check),
             (#line, .close),
             (#line, .expunge),
@@ -581,7 +579,6 @@ extension PipeliningTests {
             (#line, .store(.set([1]), [], .add(silent: true, list: [.answered]))),
             (#line, .store(.set([1]), [], .add(silent: false, list: [.answered]))),
         ], require: .noUIDBasedCommandRunning)
-
 
         // SEARCH, ESEARCH, and UID SEARCH
         // only have this requirement if a search key references sequence numbers.
@@ -643,7 +640,6 @@ extension PipeliningTests {
             (#line, .listIndependent([], reference: .food, .food, [])),
             (#line, .lsub(reference: .food, pattern: "Food")),
             (#line, .status(.food, [.messageCount])),
-            //.append(into: .food, flags: [], date: nil, message: Data()),
             (#line, .check),
             (#line, .close),
             (#line, .expunge),
@@ -737,7 +733,6 @@ extension PipeliningTests {
             (#line, .copy(.set([1]), .food)),
             (#line, .move(.set([1]), .food)),
             (#line, .status(.food, [.messageCount])),
-            //.append(into: .food, flags: [], date: nil, message: Data()),
             (#line, .check),
             (#line, .close),
             (#line, .expunge),
@@ -821,7 +816,6 @@ extension PipeliningTests {
             (#line, .rename(from: .food, to: .food, params: [:])),
             (#line, .create(.food, [])),
             (#line, .status(.food, [.messageCount])),
-            //.append(into: .food, flags: [], date: nil, message: Data()),
             (#line, .check),
             (#line, .expunge),
             (#line, .uidSearch(key: .all, charset: nil, returnOptions: [])),
@@ -863,7 +857,6 @@ extension PipeliningTests {
             (#line, .listIndependent([], reference: .food, .food, [])),
             (#line, .lsub(reference: .food, pattern: "Food")),
             (#line, .status(.food, [.messageCount])),
-            //.append(into: .food, flags: [], date: nil, message: Data()),
 
             (#line, .close),
             (#line, .select(.food)),
@@ -933,7 +926,6 @@ extension PipeliningTests {
             (#line, .create(.food, [])),
             (#line, .list(nil, reference: .food, .food, [])),
             (#line, .status(.food, [.messageCount])),
-            //.append(into: .food, flags: [], date: nil, message: Data()),
             (#line, .close),
             (#line, .select(.food)),
 
@@ -994,7 +986,6 @@ extension PipeliningTests {
             (#line, .subscribe(.food)),
             (#line, .unsubscribe(.food)),
             (#line, .status(.food, [.messageCount])),
-            //.append(into: .food, flags: [], date: nil, message: Data())),
             (#line, .close),
             (#line, .select(.food)),
             (#line, .unselect),
@@ -1072,7 +1063,6 @@ extension PipeliningTests {
             (#line, .listIndependent([], reference: .food, .food, [])),
             (#line, .lsub(reference: .food, pattern: "Food")),
             (#line, .status(.food, [.messageCount])),
-            //.append(into: .food, flags: [], date: nil, message: Data())),
             (#line, .close),
             (#line, .select(.food)),
             (#line, .unselect),
@@ -1141,7 +1131,6 @@ extension PipeliningTests {
             (#line, .listIndependent([], reference: .food, .food, [])),
             (#line, .lsub(reference: .food, pattern: "Food")),
             (#line, .status(.food, [.messageCount])),
-            //.append(into: .food, flags: [], date: nil, message: Data()),
             (#line, .close),
             (#line, .select(.food)),
             (#line, .unselect),
@@ -1189,7 +1178,7 @@ extension PipeliningTests {
                 (#line, .uidStore(.set(uids), [:], .add(silent: false, list: [.answered]))),
             ], haveBehavior: .readsFlags(uids))
         }
-        
+
         // SEARCH, ESEARCH, and UID SEARCH have this behavior only if they
         // reference flags:
         SearchKey.keysWithoutFlags.forEach { key in
@@ -1227,7 +1216,6 @@ extension PipeliningTests {
             (#line, .unsubscribe(.food)),
             (#line, .subscribe(.food)),
             (#line, .status(.food, [.messageCount])),
-            //.append(into: .food, flags: [], date: nil, message: Data()),
             (#line, .close),
             (#line, .select(.food)),
             (#line, .unselect),

@@ -152,8 +152,8 @@ extension Command {
              .uidExpunge,
              .expunge:
             return []
-            
-         case .store(_, _, let flags):
+
+        case .store(_, _, let flags):
             return flags.silent ?
                 [.noUntaggedExpungeResponse, .noUIDBasedCommandRunning, .noFlagReadsFromAnyMessage] :
                 [.noUntaggedExpungeResponse, .noUIDBasedCommandRunning, .noFlagReadsFromAnyMessage, .noFlagChangesToAnyMessage]
@@ -347,9 +347,11 @@ extension Array where Element == FetchAttribute {
     func makePipeliningRequirements(_ uids: UIDSetNonEmpty) -> Set<PipeliningRequirement> {
         reduce(into: Set<PipeliningRequirement>()) { $0.formUnion($1.makePipeliningRequirements(uids)) }
     }
+
     var pipeliningRequirements: Set<PipeliningRequirement> {
         reduce(into: Set<PipeliningRequirement>()) { $0.formUnion($1.pipeliningRequirements) }
     }
+
     var readsFlags: Bool {
         contains { $0.readsFlags }
     }
@@ -357,12 +359,12 @@ extension Array where Element == FetchAttribute {
 
 extension FetchAttribute {
     func makePipeliningRequirements(_ uids: UIDSetNonEmpty) -> Set<PipeliningRequirement> {
-        guard readsFlags else { return [] }
+        guard self.readsFlags else { return [] }
         return [.noFlagChanges(uids)]
     }
 
     var pipeliningRequirements: Set<PipeliningRequirement> {
-        guard readsFlags else { return [] }
+        guard self.readsFlags else { return [] }
         return [.noFlagChangesToAnyMessage]
     }
 
@@ -394,11 +396,11 @@ extension FetchAttribute {
 extension SearchKey {
     var pipeliningRequirements: Set<PipeliningRequirement> {
         var result = Set<PipeliningRequirement>()
-        if referencesSequenceNumbers {
+        if self.referencesSequenceNumbers {
             result.insert(.noUntaggedExpungeResponse)
             result.insert(.noUIDBasedCommandRunning)
         }
-        if referencesFlags {
+        if self.referencesFlags {
             result.insert(.noFlagChangesToAnyMessage)
         }
         return result
@@ -406,16 +408,16 @@ extension SearchKey {
 
     var pipeliningBehavior: Set<PipeliningBehavior> {
         var result = Set<PipeliningBehavior>()
-        if referencesUIDs {
+        if self.referencesUIDs {
             result.insert(.isUIDBased)
         }
-        if referencesFlags {
+        if self.referencesFlags {
             result.insert(.readsFlagsFromAnyMessage)
         }
         return result
     }
 
-    fileprivate var referencesSequenceNumbers: Bool {
+    private var referencesSequenceNumbers: Bool {
         switch self {
         case .all,
              .answered,
@@ -455,9 +457,9 @@ extension SearchKey {
              .younger:
             return false
         case .filter, // Have to assume yes, since we can't know
-            .sequenceNumbers:
+             .sequenceNumbers:
             return true
-        case let .and(keys):
+        case .and(let keys):
             return keys.contains(where: \.referencesSequenceNumbers)
         case .not(let key):
             return key.referencesSequenceNumbers
@@ -466,7 +468,7 @@ extension SearchKey {
         }
     }
 
-    fileprivate var referencesUIDs: Bool {
+    private var referencesUIDs: Bool {
         switch self {
         case .all,
              .answered,
@@ -507,8 +509,8 @@ extension SearchKey {
             return false
         case .filter, // Have to assume yes, since we can't know
              .uid:
-             return true
-        case let .and(keys):
+            return true
+        case .and(let keys):
             return keys.contains(where: \.referencesUIDs)
         case .not(let key):
             return key.referencesUIDs
@@ -558,13 +560,13 @@ extension SearchKey {
              .draft,
              .undraft:
             return true
-        case let .and(keys):
+        case .and(let keys):
             return keys.contains(where: \.referencesFlags)
         case .not(let key):
             return key.referencesFlags
         case .or(let keyA, let keyB):
             return keyA.referencesFlags || keyB.referencesFlags
-        case let .modificationSequence(sequence):
+        case .modificationSequence(let sequence):
             return !sequence.extensions.isEmpty
         }
     }
