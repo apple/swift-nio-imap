@@ -121,6 +121,14 @@ extension SearchKey {
     ]
 }
 
+extension UIDSetNonEmpty {
+    fileprivate static let arbitrarySets: [UIDSetNonEmpty] = [
+        [100...200],
+        [UID.min...UID.min],
+        [43_195 ... 43_195],
+        .all,
+    ]
+}
 
 extension PipeliningRequirement {
     fileprivate static let arbitraryRequirements: [PipeliningRequirement] = [
@@ -154,7 +162,8 @@ fileprivate func AssertFalse(commands: [(UInt, Command)], require requirement: P
 
 fileprivate func Assert(commands: [(UInt, Command)], require requirement: PipeliningRequirement, _ message: @autoclosure () -> String = "", file: StaticString = #filePath) {
     commands.forEach { line, command in
-        XCTAssert(command.pipeliningRequirements.contains(requirement), "Should require \(requirement). \(message())", file: file, line: line)
+        let r = command.pipeliningRequirements
+        XCTAssert(r.contains(requirement), "Should require \(requirement). Did: \(r). \(message())", file: file, line: line)
     }
 }
 
@@ -288,6 +297,13 @@ extension PipeliningTests {
                        whileRunning: [.changesFlagsOnAnyMessage])
         AssertCanNotStart(Set(PipeliningRequirement.arbitraryRequirements),
                           whileRunning: [.changesFlagsOnAnyMessage])
+
+        AssertCanStart([.noFlagChanges([200...300])],
+                       whileRunning: [.changesFlags([1...100]), .changesFlags([400...500])])
+        AssertCanNotStart([.noFlagChanges([200...300])],
+                          whileRunning: [.changesFlags([100...200])])
+        AssertCanStart([.noFlagChanges([200...300])],
+                       whileRunning: [.readsFlags([100...200])])
     }
 
     func testCanStartReadsFlagsBehavior() {
@@ -305,6 +321,13 @@ extension PipeliningTests {
                           whileRunning: [.readsFlagsFromAnyMessage])
         AssertCanNotStart(Set(PipeliningRequirement.arbitraryRequirements),
                           whileRunning: [.readsFlagsFromAnyMessage])
+
+        AssertCanStart([.noFlagReads([200...300])],
+                       whileRunning: [.readsFlags([1...100]), .readsFlags([400...500])])
+        AssertCanNotStart([.noFlagReads([200...300])],
+                          whileRunning: [.readsFlags([100...200])])
+        AssertCanStart([.noFlagReads([200...300])],
+                          whileRunning: [.changesFlags([100...200])])
     }
 
     func testCanStartBarrierBehavior() {
@@ -640,12 +663,20 @@ extension PipeliningTests {
             // FETCH that return flags:
             (#line, .fetch(.set([1]), [.envelope, .uid, .flags], [:])),
             (#line, .fetch(.set([1]), [.uid, .flags], [:])),
-            (#line, .uidFetch(.set([1]), [.envelope, .uid, .flags], [:])),
-            (#line, .uidFetch(.set([1]), [.uid, .flags], [:])),
+            (#line, .uidFetch(.lastCommand, [.envelope, .uid, .flags], [:])),
             // STORE without SILENT will also return flags:
             (#line, .store(.set([1]), [], .add(silent: false, list: [.answered]))),
-            (#line, .uidStore(.set([1]), [:], .add(silent: false, list: [.answered]))),
         ], require: .noFlagChangesToAnyMessage)
+
+        UIDSetNonEmpty.arbitrarySets.forEach { uids in
+            Assert(commands: [
+                // UID FETCH that return flags:
+                (#line, .uidFetch(.set(uids), [.envelope, .uid, .flags], [:])),
+                (#line, .uidFetch(.set(uids), [.uid, .flags], [:])),
+                // UID STORE without SILENT will also return flags:
+                (#line, .uidStore(.set(uids), [:], .add(silent: false, list: [.answered]))),
+            ], require: .noFlagChanges(uids), "uids: \(uids)")
+        }
 
         // SEARCH, ESEARCH, and UID SEARCH have this requirement only if they
         // reference flags:
@@ -724,11 +755,16 @@ extension PipeliningTests {
 
         // STORE / UID STORE are the only ones with this requirement:
         Assert(commands: [
-            (#line, .uidStore(.set([1]), [:], .add(silent: false, list: [.answered]))),
-            (#line, .uidStore(.set([1]), [:], .add(silent: true, list: [.answered]))),
+            (#line, .uidStore(.lastCommand, [:], .add(silent: false, list: [.answered]))),
             (#line, .store(.set([1]), [], .add(silent: true, list: [.answered]))),
             (#line, .store(.set([1]), [], .add(silent: false, list: [.answered]))),
         ], require: .noFlagReadsFromAnyMessage)
+        UIDSetNonEmpty.arbitrarySets.forEach { uids in
+            Assert(commands: [
+                (#line, .uidStore(.set(uids), [:], .add(silent: false, list: [.answered]))),
+                (#line, .uidStore(.set(uids), [:], .add(silent: true, list: [.answered]))),
+            ], require: .noFlagReads(uids), "uids: \(uids)")
+        }
 
         // SEARCH, ESEARCH, and UID SEARCH never have this requirement.
         SearchKey.arbitraryKeys.forEach { key in
@@ -1071,9 +1107,14 @@ extension PipeliningTests {
         Assert(commands: [
             (#line, .store(.set([1]), [], .add(silent: true, list: [.answered]))),
             (#line, .store(.set([1]), [], .add(silent: false, list: [.answered]))),
-            (#line, .uidStore(.set([1]), [:], .add(silent: true, list: [.answered]))),
-            (#line, .uidStore(.set([1]), [:], .add(silent: false, list: [.answered]))),
+            (#line, .uidStore(.lastCommand, [:], .add(silent: true, list: [.answered]))),
         ], haveBehavior: .changesFlagsOnAnyMessage)
+        UIDSetNonEmpty.arbitrarySets.forEach { uids in
+            Assert(commands: [
+                (#line, .uidStore(.set(uids), [:], .add(silent: true, list: [.answered]))),
+                (#line, .uidStore(.set(uids), [:], .add(silent: false, list: [.answered]))),
+            ], haveBehavior: .changesFlags(uids))
+        }
     }
 
     func testCommandBehavior_readsFlags() {
@@ -1133,17 +1174,22 @@ extension PipeliningTests {
         ], haveBehavior: .readsFlagsFromAnyMessage)
 
         Assert(commands: [
-            // This will also return flags:
-            (#line, .uidStore(.set([1]), [:], .add(silent: false, list: [.answered]))),
-            (#line, .uidStore(.set([1]), [:], .add(silent: false, list: [.answered]))),
-            (#line, .store(.set([1]), [], .add(silent: false, list: [.answered]))),
-
             (#line, .fetch(.set([1]), [.envelope, .uid, .flags], [:])),
             (#line, .fetch(.set([1]), [.uid, .flags], [:])),
-            (#line, .uidFetch(.set([1]), [.envelope, .uid, .flags], [:])),
-            (#line, .uidFetch(.set([1]), [.uid, .flags], [:])),
+            // This will also return flags:
+            (#line, .store(.set([1]), [], .add(silent: false, list: [.answered]))),
+            (#line, .uidStore(.lastCommand, [:], .add(silent: false, list: [.answered]))),
         ], haveBehavior: .readsFlagsFromAnyMessage)
-
+        UIDSetNonEmpty.arbitrarySets.forEach { uids in
+            Assert(commands: [
+                (#line, .uidFetch(.set(uids), [.envelope, .uid, .flags], [:])),
+                (#line, .uidFetch(.set(uids), [.uid, .flags], [:])),
+                // This will also return flags:
+                (#line, .uidStore(.set(uids), [:], .add(silent: false, list: [.answered]))),
+                (#line, .uidStore(.set(uids), [:], .add(silent: false, list: [.answered]))),
+            ], haveBehavior: .readsFlags(uids))
+        }
+        
         // SEARCH, ESEARCH, and UID SEARCH have this behavior only if they
         // reference flags:
         SearchKey.keysWithoutFlags.forEach { key in

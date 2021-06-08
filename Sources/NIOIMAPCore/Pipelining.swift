@@ -138,8 +138,10 @@ extension Command {
         case .fetch(_, let attribtues, _):
             return attribtues.pipeliningRequirements
                 .union([.noUntaggedExpungeResponse, .noUIDBasedCommandRunning])
-        case .uidFetch(_, let attribtues, _):
+        case .uidFetch(.lastCommand, let attribtues, _):
             return attribtues.pipeliningRequirements
+        case .uidFetch(.set(let uids), let attribtues, _):
+            return attribtues.makePipeliningRequirements(uids)
 
         case .copy,
              .move:
@@ -155,10 +157,14 @@ extension Command {
             return flags.silent ?
                 [.noUntaggedExpungeResponse, .noUIDBasedCommandRunning, .noFlagReadsFromAnyMessage] :
                 [.noUntaggedExpungeResponse, .noUIDBasedCommandRunning, .noFlagReadsFromAnyMessage, .noFlagChangesToAnyMessage]
-        case .uidStore(_, _, let flags):
+        case .uidStore(.lastCommand, _, let flags):
             return flags.silent ?
                 [.noFlagReadsFromAnyMessage] :
                 [.noFlagReadsFromAnyMessage, .noFlagChangesToAnyMessage]
+        case .uidStore(.set(let uids), _, let flags):
+            return flags.silent ?
+                [.noFlagReads(uids)] :
+                [.noFlagReads(uids), .noFlagChanges(uids)]
 
         case .capability,
              .logout,
@@ -241,9 +247,13 @@ extension Command {
             return attributes.readsFlags ?
                 [.dependsOnMailboxSelection, .readsFlagsFromAnyMessage] :
                 [.dependsOnMailboxSelection]
-        case .uidFetch(_, let attributes, _):
+        case .uidFetch(.lastCommand, let attributes, _):
             return attributes.readsFlags ?
                 [.dependsOnMailboxSelection, .mayTriggerUntaggedExpunge, .isUIDBased, .readsFlagsFromAnyMessage] :
+                [.dependsOnMailboxSelection, .mayTriggerUntaggedExpunge, .isUIDBased]
+        case .uidFetch(.set(let uids), let attributes, _):
+            return attributes.readsFlags ?
+                [.dependsOnMailboxSelection, .mayTriggerUntaggedExpunge, .isUIDBased, .readsFlags(uids)] :
                 [.dependsOnMailboxSelection, .mayTriggerUntaggedExpunge, .isUIDBased]
 
         case .copy, .move:
@@ -270,10 +280,14 @@ extension Command {
             return flags.silent ?
                 [.dependsOnMailboxSelection, .changesFlagsOnAnyMessage] :
                 [.dependsOnMailboxSelection, .changesFlagsOnAnyMessage, .readsFlagsFromAnyMessage]
-        case .uidStore(_, _, let flags):
+        case .uidStore(.lastCommand, _, let flags):
             return flags.silent ?
                 [.dependsOnMailboxSelection, .mayTriggerUntaggedExpunge, .isUIDBased, .changesFlagsOnAnyMessage] :
                 [.dependsOnMailboxSelection, .mayTriggerUntaggedExpunge, .isUIDBased, .changesFlagsOnAnyMessage, .readsFlagsFromAnyMessage]
+        case .uidStore(.set(let uids), _, let flags):
+            return flags.silent ?
+                [.dependsOnMailboxSelection, .mayTriggerUntaggedExpunge, .isUIDBased, .changesFlags(uids)] :
+                [.dependsOnMailboxSelection, .mayTriggerUntaggedExpunge, .isUIDBased, .changesFlags(uids), .readsFlags(uids)]
 
         case .noop,
              .check:
@@ -330,6 +344,9 @@ extension Command {
 // MARK: -
 
 extension Array where Element == FetchAttribute {
+    func makePipeliningRequirements(_ uids: UIDSetNonEmpty) -> Set<PipeliningRequirement> {
+        reduce(into: Set<PipeliningRequirement>()) { $0.formUnion($1.makePipeliningRequirements(uids)) }
+    }
     var pipeliningRequirements: Set<PipeliningRequirement> {
         reduce(into: Set<PipeliningRequirement>()) { $0.formUnion($1.pipeliningRequirements) }
     }
@@ -339,12 +356,14 @@ extension Array where Element == FetchAttribute {
 }
 
 extension FetchAttribute {
+    func makePipeliningRequirements(_ uids: UIDSetNonEmpty) -> Set<PipeliningRequirement> {
+        guard readsFlags else { return [] }
+        return [.noFlagChanges(uids)]
+    }
+
     var pipeliningRequirements: Set<PipeliningRequirement> {
-        var result = Set<PipeliningRequirement>()
-        if readsFlags {
-            result.insert(.noFlagChangesToAnyMessage)
-        }
-        return result
+        guard readsFlags else { return [] }
+        return [.noFlagChangesToAnyMessage]
     }
 
     var readsFlags: Bool {
@@ -569,8 +588,16 @@ extension Set where Element == PipeliningBehavior {
             return !self.contains(.changesFlagsOnAnyMessage)
         case .noFlagReadsFromAnyMessage:
             return !self.contains(.readsFlagsFromAnyMessage)
-        default:
-            fatalError()
+        case .noFlagChanges(let uids):
+            return !self.contains(where: { behavior in
+                guard case .changesFlags(let other) = behavior else { return false }
+                return !other.set.isDisjoint(with: uids.set)
+            })
+        case .noFlagReads(let uids):
+            return !self.contains(where: { behavior in
+                guard case .readsFlags(let other) = behavior else { return false }
+                return !other.set.isDisjoint(with: uids.set)
+            })
         }
     }
 }
