@@ -49,7 +49,7 @@ extension GrammarParser {
     static func parseResponseCodeAppend(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseCodeAppend {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> ResponseCodeAppend in
             try PL.parseFixedString("APPENDUID ", buffer: &buffer, tracker: tracker)
-            let number = try self.parseNZNumber(buffer: &buffer, tracker: tracker)
+            let number = try self.parseUIDValidity(buffer: &buffer, tracker: tracker)
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             let uid = try self.parseUID(buffer: &buffer, tracker: tracker)
             return ResponseCodeAppend(num: number, uid: uid)
