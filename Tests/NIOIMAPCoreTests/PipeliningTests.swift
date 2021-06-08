@@ -121,6 +121,21 @@ extension SearchKey {
     ]
 }
 
+
+extension PipeliningRequirement {
+    fileprivate static let arbitraryRequirements: [PipeliningRequirement] = [
+        .noMailboxCommandsRunning,
+        .noUntaggedExpungeResponse,
+        .noUIDBasedCommandRunning,
+        .noFlagChanges(.all),
+        .noFlagChanges([1]),
+        .noFlagChanges([55...1000]),
+        .noFlagReads(.all),
+        .noFlagReads([1]),
+        .noFlagReads([55...1000]),
+    ]
+}
+
 // MARK: -
 
 fileprivate func AssertCanStart(_ requirements: Set<PipeliningRequirement>, whileRunning behavior: Set<PipeliningBehavior>, file: StaticString = #filePath, line: UInt = #line) {
@@ -172,11 +187,11 @@ extension PipeliningTests {
                        whileRunning: [])
         AssertCanStart([.noUIDBasedCommandRunning],
                        whileRunning: [])
-        AssertCanStart([.noFlagChanges],
+        AssertCanStart([.noFlagChangesToAnyMessage],
                        whileRunning: [])
-        AssertCanStart([.noFlagReads],
+        AssertCanStart([.noFlagReadsFromAnyMessage],
                        whileRunning: [])
-        AssertCanStart(Set(PipeliningRequirement.allCases),
+        AssertCanStart(Set(PipeliningRequirement.arbitraryRequirements),
                        whileRunning: [])
     }
 
@@ -191,12 +206,12 @@ extension PipeliningTests {
                        whileRunning: [.changesMailboxSelection])
         AssertCanStart([.noUIDBasedCommandRunning],
                        whileRunning: [.changesMailboxSelection])
-        AssertCanStart([.noFlagChanges],
+        AssertCanStart([.noFlagChangesToAnyMessage],
                        whileRunning: [.changesMailboxSelection])
-        AssertCanStart([.noFlagReads],
+        AssertCanStart([.noFlagReadsFromAnyMessage],
                        whileRunning: [.changesMailboxSelection])
 
-        AssertCanNotStart(Set(PipeliningRequirement.allCases),
+        AssertCanNotStart(Set(PipeliningRequirement.arbitraryRequirements),
                           whileRunning: [.changesMailboxSelection])
     }
 
@@ -212,12 +227,12 @@ extension PipeliningTests {
                        whileRunning: [.dependsOnMailboxSelection])
         AssertCanStart([.noUIDBasedCommandRunning],
                        whileRunning: [.dependsOnMailboxSelection])
-        AssertCanStart([.noFlagChanges],
+        AssertCanStart([.noFlagChangesToAnyMessage],
                        whileRunning: [.dependsOnMailboxSelection])
-        AssertCanStart([.noFlagReads],
+        AssertCanStart([.noFlagReadsFromAnyMessage],
                        whileRunning: [.dependsOnMailboxSelection])
 
-        AssertCanNotStart(Set(PipeliningRequirement.allCases),
+        AssertCanNotStart(Set(PipeliningRequirement.arbitraryRequirements),
                           whileRunning: [.dependsOnMailboxSelection])
     }
 
@@ -232,12 +247,12 @@ extension PipeliningTests {
                           whileRunning: [.mayTriggerUntaggedExpunge])
         AssertCanStart([.noUIDBasedCommandRunning],
                        whileRunning: [.mayTriggerUntaggedExpunge])
-        AssertCanStart([.noFlagChanges],
+        AssertCanStart([.noFlagChangesToAnyMessage],
                        whileRunning: [.mayTriggerUntaggedExpunge])
-        AssertCanStart([.noFlagReads],
+        AssertCanStart([.noFlagReadsFromAnyMessage],
                        whileRunning: [.mayTriggerUntaggedExpunge])
 
-        AssertCanNotStart(Set(PipeliningRequirement.allCases),
+        AssertCanNotStart(Set(PipeliningRequirement.arbitraryRequirements),
                           whileRunning: [.mayTriggerUntaggedExpunge])
     }
 
@@ -250,46 +265,46 @@ extension PipeliningTests {
                        whileRunning: [.isUIDBased])
         AssertCanNotStart([.noUIDBasedCommandRunning],
                           whileRunning: [.isUIDBased])
-        AssertCanStart([.noFlagChanges],
+        AssertCanStart([.noFlagChangesToAnyMessage],
                        whileRunning: [.isUIDBased])
-        AssertCanStart([.noFlagReads],
+        AssertCanStart([.noFlagReadsFromAnyMessage],
                        whileRunning: [.isUIDBased])
-        AssertCanNotStart(Set(PipeliningRequirement.allCases),
+        AssertCanNotStart(Set(PipeliningRequirement.arbitraryRequirements),
                           whileRunning: [.isUIDBased])
     }
 
     func testCanStartChangesFlagsBehavior() {
         AssertCanStart([],
-                       whileRunning: [.changesFlags])
+                       whileRunning: [.changesFlagsOnAnyMessage])
         AssertCanStart([.noMailboxCommandsRunning],
-                       whileRunning: [.changesFlags])
+                       whileRunning: [.changesFlagsOnAnyMessage])
         AssertCanStart([.noUntaggedExpungeResponse],
-                       whileRunning: [.changesFlags])
+                       whileRunning: [.changesFlagsOnAnyMessage])
         AssertCanStart([.noUIDBasedCommandRunning],
-                       whileRunning: [.changesFlags])
-        AssertCanNotStart([.noFlagChanges],
-                          whileRunning: [.changesFlags])
-        AssertCanStart([.noFlagReads],
-                       whileRunning: [.changesFlags])
-        AssertCanNotStart(Set(PipeliningRequirement.allCases),
-                          whileRunning: [.changesFlags])
+                       whileRunning: [.changesFlagsOnAnyMessage])
+        AssertCanNotStart([.noFlagChangesToAnyMessage],
+                          whileRunning: [.changesFlagsOnAnyMessage])
+        AssertCanStart([.noFlagReadsFromAnyMessage],
+                       whileRunning: [.changesFlagsOnAnyMessage])
+        AssertCanNotStart(Set(PipeliningRequirement.arbitraryRequirements),
+                          whileRunning: [.changesFlagsOnAnyMessage])
     }
 
     func testCanStartReadsFlagsBehavior() {
         AssertCanStart([],
-                       whileRunning: [.readsFlags])
+                       whileRunning: [.readsFlagsFromAnyMessage])
         AssertCanStart([.noMailboxCommandsRunning],
-                       whileRunning: [.readsFlags])
+                       whileRunning: [.readsFlagsFromAnyMessage])
         AssertCanStart([.noUntaggedExpungeResponse],
-                       whileRunning: [.readsFlags])
+                       whileRunning: [.readsFlagsFromAnyMessage])
         AssertCanStart([.noUIDBasedCommandRunning],
-                       whileRunning: [.readsFlags])
-        AssertCanStart([.noFlagChanges],
-                       whileRunning: [.readsFlags])
-        AssertCanNotStart([.noFlagReads],
-                          whileRunning: [.readsFlags])
-        AssertCanNotStart(Set(PipeliningRequirement.allCases),
-                          whileRunning: [.readsFlags])
+                       whileRunning: [.readsFlagsFromAnyMessage])
+        AssertCanStart([.noFlagChangesToAnyMessage],
+                       whileRunning: [.readsFlagsFromAnyMessage])
+        AssertCanNotStart([.noFlagReadsFromAnyMessage],
+                          whileRunning: [.readsFlagsFromAnyMessage])
+        AssertCanNotStart(Set(PipeliningRequirement.arbitraryRequirements),
+                          whileRunning: [.readsFlagsFromAnyMessage])
     }
 
     func testCanStartBarrierBehavior() {
@@ -302,11 +317,11 @@ extension PipeliningTests {
                           whileRunning: [.barrier])
         AssertCanNotStart([.noUIDBasedCommandRunning],
                           whileRunning: [.barrier])
-        AssertCanNotStart([.noFlagChanges],
+        AssertCanNotStart([.noFlagChangesToAnyMessage],
                           whileRunning: [.barrier])
-        AssertCanNotStart([.noFlagReads],
+        AssertCanNotStart([.noFlagReadsFromAnyMessage],
                           whileRunning: [.barrier])
-        AssertCanNotStart(Set(PipeliningRequirement.allCases),
+        AssertCanNotStart(Set(PipeliningRequirement.arbitraryRequirements),
                           whileRunning: [.barrier])
     }
 }
@@ -619,7 +634,7 @@ extension PipeliningTests {
             // STORE is ok if SILENT is set:
             (#line, .uidStore(.set([1]), [:], .add(silent: true, list: [.answered]))),
             (#line, .store(.set([1]), [], .add(silent: true, list: [.answered]))),
-        ], require: .noFlagChanges)
+        ], require: .noFlagChangesToAnyMessage)
 
         Assert(commands: [
             // FETCH that return flags:
@@ -630,7 +645,7 @@ extension PipeliningTests {
             // STORE without SILENT will also return flags:
             (#line, .store(.set([1]), [], .add(silent: false, list: [.answered]))),
             (#line, .uidStore(.set([1]), [:], .add(silent: false, list: [.answered]))),
-        ], require: .noFlagChanges)
+        ], require: .noFlagChangesToAnyMessage)
 
         // SEARCH, ESEARCH, and UID SEARCH have this requirement only if they
         // reference flags:
@@ -639,14 +654,14 @@ extension PipeliningTests {
                 (#line, .search(key: key, charset: nil, returnOptions: [])),
                 (#line, .extendedsearch(ExtendedSearchOptions(key: key))),
                 (#line, .uidSearch(key: key, charset: nil, returnOptions: [])),
-            ], require: .noFlagChanges, "key: \(key)")
+            ], require: .noFlagChangesToAnyMessage, "key: \(key)")
         }
         SearchKey.keysWithFlags.forEach { key in
             Assert(commands: [
                 (#line, .search(key: key, charset: nil, returnOptions: [])),
                 (#line, .extendedsearch(ExtendedSearchOptions(key: key))),
                 (#line, .uidSearch(key: key, charset: nil, returnOptions: [])),
-            ], require: .noFlagChanges, "key: \(key)")
+            ], require: .noFlagChangesToAnyMessage, "key: \(key)")
         }
     }
 
@@ -705,7 +720,7 @@ extension PipeliningTests {
             (#line, .uidFetch(.set([1]), [.uid, .flags], [:])),
             (#line, .uidCopy(.set([1]), .food)),
             (#line, .uidMove(.set([1]), .food)),
-        ], require: .noFlagReads)
+        ], require: .noFlagReadsFromAnyMessage)
 
         // STORE / UID STORE are the only ones with this requirement:
         Assert(commands: [
@@ -713,7 +728,7 @@ extension PipeliningTests {
             (#line, .uidStore(.set([1]), [:], .add(silent: true, list: [.answered]))),
             (#line, .store(.set([1]), [], .add(silent: true, list: [.answered]))),
             (#line, .store(.set([1]), [], .add(silent: false, list: [.answered]))),
-        ], require: .noFlagReads)
+        ], require: .noFlagReadsFromAnyMessage)
 
         // SEARCH, ESEARCH, and UID SEARCH never have this requirement.
         SearchKey.arbitraryKeys.forEach { key in
@@ -721,7 +736,7 @@ extension PipeliningTests {
                 (#line, .search(key: key, charset: nil, returnOptions: [])),
                 (#line, .extendedsearch(ExtendedSearchOptions(key: key))),
                 (#line, .uidSearch(key: key, charset: nil, returnOptions: [])),
-            ], require: .noFlagReads, "key: \(key)")
+            ], require: .noFlagReadsFromAnyMessage, "key: \(key)")
         }
     }
 }
@@ -1051,14 +1066,14 @@ extension PipeliningTests {
             (#line, .resetKey(mailbox: nil, mechanisms: [.internal])),
             (#line, .generateAuthorizedURL([.joe])),
             (#line, .urlFetch([.joeURLFetch])),
-        ], haveBehavior: .changesFlags)
+        ], haveBehavior: .changesFlagsOnAnyMessage)
 
         Assert(commands: [
             (#line, .store(.set([1]), [], .add(silent: true, list: [.answered]))),
             (#line, .store(.set([1]), [], .add(silent: false, list: [.answered]))),
             (#line, .uidStore(.set([1]), [:], .add(silent: true, list: [.answered]))),
             (#line, .uidStore(.set([1]), [:], .add(silent: false, list: [.answered]))),
-        ], haveBehavior: .changesFlags)
+        ], haveBehavior: .changesFlagsOnAnyMessage)
     }
 
     func testCommandBehavior_readsFlags() {
@@ -1115,7 +1130,7 @@ extension PipeliningTests {
             (#line, .fetch(.set([1]), [.envelope, .uid], [:])),
             (#line, .fetch(.set([1]), [.bodyStructure(extensions: false)], [:])),
             (#line, .uidFetch(.set([1]), [.envelope, .uid], [:])),
-        ], haveBehavior: .readsFlags)
+        ], haveBehavior: .readsFlagsFromAnyMessage)
 
         Assert(commands: [
             // This will also return flags:
@@ -1127,7 +1142,7 @@ extension PipeliningTests {
             (#line, .fetch(.set([1]), [.uid, .flags], [:])),
             (#line, .uidFetch(.set([1]), [.envelope, .uid, .flags], [:])),
             (#line, .uidFetch(.set([1]), [.uid, .flags], [:])),
-        ], haveBehavior: .readsFlags)
+        ], haveBehavior: .readsFlagsFromAnyMessage)
 
         // SEARCH, ESEARCH, and UID SEARCH have this behavior only if they
         // reference flags:
@@ -1136,14 +1151,14 @@ extension PipeliningTests {
                 (#line, .search(key: key, charset: nil, returnOptions: [])),
                 (#line, .extendedsearch(ExtendedSearchOptions(key: key))),
                 (#line, .uidSearch(key: key, charset: nil, returnOptions: [])),
-            ], haveBehavior: .readsFlags, "key: \(key)")
+            ], haveBehavior: .readsFlagsFromAnyMessage, "key: \(key)")
         }
         SearchKey.keysWithFlags.forEach { key in
             Assert(commands: [
                 (#line, .search(key: key, charset: nil, returnOptions: [])),
                 (#line, .extendedsearch(ExtendedSearchOptions(key: key))),
                 (#line, .uidSearch(key: key, charset: nil, returnOptions: [])),
-            ], haveBehavior: .readsFlags, "key: \(key)")
+            ], haveBehavior: .readsFlagsFromAnyMessage, "key: \(key)")
         }
     }
 

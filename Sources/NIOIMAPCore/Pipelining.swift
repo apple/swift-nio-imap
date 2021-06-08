@@ -36,7 +36,7 @@
 ///     inter-dependencies. But by being a bit more smart, certain commands can be allowed
 ///     to run in parallel. It’s ok for this logic not to be perfect as long as it errs on the
 ///     side of caution.
-public enum PipeliningRequirement: CaseIterable {
+public enum PipeliningRequirement: Hashable {
     /// No command that depend on the _Selected State_ must be running.
     case noMailboxCommandsRunning
     /// No command besides `FETCH`, `STORE`, and `SEARCH` is running.
@@ -45,19 +45,26 @@ public enum PipeliningRequirement: CaseIterable {
     /// No command is running that uses UIDs to specify messages.
     /// This is a requirement for all sequence number based commands.
     case noUIDBasedCommandRunning
-    /// No STORE command is running.
-    case noFlagChanges
-    /// No command is running that retrieves flags.
-    case noFlagReads
+    /// No flags are being changed on the specific messages.
+    case noFlagChanges(UIDSetNonEmpty)
+    /// No command is running that retrieves flags of the specific messages.
+    case noFlagReads(UIDSetNonEmpty)
 
     // TODO: Add Message metadata read + write
     // TODO: Add mailbox create / delete / subscribe / metadata / quota
 }
 
+extension PipeliningRequirement {
+    /// No flags are being changed.
+    public static let noFlagChangesToAnyMessage = PipeliningRequirement.noFlagChanges(.all)
+    /// No command is running that retrieves flags.
+    public static let noFlagReadsFromAnyMessage = PipeliningRequirement.noFlagReads(.all)
+}
+
 /// Describes the behavior of a running command.
 ///
 /// See `PipeliningRequirement`.
-public enum PipeliningBehavior {
+public enum PipeliningBehavior: Hashable {
     /// This command changes the _mailbox selection_.
     case changesMailboxSelection
     /// This command depends on the _mailbox selection_.
@@ -69,10 +76,10 @@ public enum PipeliningBehavior {
     /// This command uses UIDs to specify messages
     /// — or its a `UID` command (e.g. `UID SEARCH`).
     case isUIDBased
-    /// This command is changing flags on messages.
-    case changesFlags
-    /// This command is querying flags
-    case readsFlags
+    /// This command is changing flags on speicifc messages.
+    case changesFlags(UIDSetNonEmpty)
+    /// This command is querying flags for specific messages.
+    case readsFlags(UIDSetNonEmpty)
     /// No commands may be sent until this command completes.
     ///
     /// This command may be sent while other commands are running, but it acts as a barrier itself.
@@ -86,6 +93,13 @@ public enum PipeliningBehavior {
     ///
     /// Notably, the `IDLE` and `AUTHENTICATE` commands are barrier commands.
     case barrier
+}
+
+extension PipeliningBehavior {
+    /// This command is changing flags on messages.
+    public static let changesFlagsOnAnyMessage = PipeliningBehavior.changesFlags(.all)
+    /// This command is querying flags
+    public static let readsFlagsFromAnyMessage = PipeliningBehavior.readsFlags(.all)
 }
 
 extension CommandStreamPart {
@@ -139,12 +153,12 @@ extension Command {
             
          case .store(_, _, let flags):
             return flags.silent ?
-                [.noUntaggedExpungeResponse, .noUIDBasedCommandRunning, .noFlagReads] :
-                [.noUntaggedExpungeResponse, .noUIDBasedCommandRunning, .noFlagReads, .noFlagChanges]
+                [.noUntaggedExpungeResponse, .noUIDBasedCommandRunning, .noFlagReadsFromAnyMessage] :
+                [.noUntaggedExpungeResponse, .noUIDBasedCommandRunning, .noFlagReadsFromAnyMessage, .noFlagChangesToAnyMessage]
         case .uidStore(_, _, let flags):
             return flags.silent ?
-                [.noFlagReads] :
-                [.noFlagReads, .noFlagChanges]
+                [.noFlagReadsFromAnyMessage] :
+                [.noFlagReadsFromAnyMessage, .noFlagChangesToAnyMessage]
 
         case .capability,
              .logout,
@@ -225,11 +239,11 @@ extension Command {
 
         case .fetch(_, let attributes, _):
             return attributes.readsFlags ?
-                [.dependsOnMailboxSelection, .readsFlags] :
+                [.dependsOnMailboxSelection, .readsFlagsFromAnyMessage] :
                 [.dependsOnMailboxSelection]
         case .uidFetch(_, let attributes, _):
             return attributes.readsFlags ?
-                [.dependsOnMailboxSelection, .mayTriggerUntaggedExpunge, .isUIDBased, .readsFlags] :
+                [.dependsOnMailboxSelection, .mayTriggerUntaggedExpunge, .isUIDBased, .readsFlagsFromAnyMessage] :
                 [.dependsOnMailboxSelection, .mayTriggerUntaggedExpunge, .isUIDBased]
 
         case .copy, .move:
@@ -254,12 +268,12 @@ extension Command {
 
         case .store(_, _, let flags):
             return flags.silent ?
-                [.dependsOnMailboxSelection, .changesFlags] :
-                [.dependsOnMailboxSelection, .changesFlags, .readsFlags]
+                [.dependsOnMailboxSelection, .changesFlagsOnAnyMessage] :
+                [.dependsOnMailboxSelection, .changesFlagsOnAnyMessage, .readsFlagsFromAnyMessage]
         case .uidStore(_, _, let flags):
             return flags.silent ?
-                [.dependsOnMailboxSelection, .mayTriggerUntaggedExpunge, .isUIDBased, .changesFlags] :
-                [.dependsOnMailboxSelection, .mayTriggerUntaggedExpunge, .isUIDBased, .changesFlags, .readsFlags]
+                [.dependsOnMailboxSelection, .mayTriggerUntaggedExpunge, .isUIDBased, .changesFlagsOnAnyMessage] :
+                [.dependsOnMailboxSelection, .mayTriggerUntaggedExpunge, .isUIDBased, .changesFlagsOnAnyMessage, .readsFlagsFromAnyMessage]
 
         case .noop,
              .check:
@@ -328,7 +342,7 @@ extension FetchAttribute {
     var pipeliningRequirements: Set<PipeliningRequirement> {
         var result = Set<PipeliningRequirement>()
         if readsFlags {
-            result.insert(.noFlagChanges)
+            result.insert(.noFlagChangesToAnyMessage)
         }
         return result
     }
@@ -366,7 +380,7 @@ extension SearchKey {
             result.insert(.noUIDBasedCommandRunning)
         }
         if referencesFlags {
-            result.insert(.noFlagChanges)
+            result.insert(.noFlagChangesToAnyMessage)
         }
         return result
     }
@@ -377,7 +391,7 @@ extension SearchKey {
             result.insert(.isUIDBased)
         }
         if referencesFlags {
-            result.insert(.readsFlags)
+            result.insert(.readsFlagsFromAnyMessage)
         }
         return result
     }
@@ -551,10 +565,12 @@ extension Set where Element == PipeliningBehavior {
             return !self.contains(.mayTriggerUntaggedExpunge)
         case .noUIDBasedCommandRunning:
             return !self.contains(.isUIDBased)
-        case .noFlagChanges:
-            return !self.contains(.changesFlags)
-        case .noFlagReads:
-            return !self.contains(.readsFlags)
+        case .noFlagChangesToAnyMessage:
+            return !self.contains(.changesFlagsOnAnyMessage)
+        case .noFlagReadsFromAnyMessage:
+            return !self.contains(.readsFlagsFromAnyMessage)
+        default:
+            fatalError()
         }
     }
 }
