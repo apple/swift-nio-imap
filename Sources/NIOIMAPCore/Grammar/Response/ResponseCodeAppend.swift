@@ -16,16 +16,16 @@
 /// of the appended message, and the uid validity of the destination mailbox.
 public struct ResponseCodeAppend: Equatable {
     /// The UID validity of the destination mailbox.
-    public var num: Int
+    public var uidValidity: UIDValidity
 
     /// The UID of the message after it has been appended.
     public var uid: UID
 
     /// Creates a new `ResponseCodeAppend`.
-    /// - parameter num: The UID validity of the destination mailbox.
+    /// - parameter uidValidity: The UID validity of the destination mailbox.
     /// - parameter uid: The UID of the message after it has been appended.
-    public init(num: Int, uid: UID) {
-        self.num = num
+    public init(num: UIDValidity, uid: UID) {
+        self.uidValidity = num
         self.uid = uid
     }
 }
@@ -34,7 +34,7 @@ public struct ResponseCodeAppend: Equatable {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeResponseCodeAppend(_ data: ResponseCodeAppend) -> Int {
-        self.writeString("APPENDUID \(data.num) ") +
+        self.writeString("APPENDUID \(data.uidValidity.rawValue) ") +
             self.writeUID(data.uid)
     }
 }
