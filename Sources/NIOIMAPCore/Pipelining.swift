@@ -29,6 +29,13 @@
 ///
 /// 4. If the client sends a UID command, it must wait for a completion result
 /// response before sending a command with message sequence numbers.
+///
+/// - Note: This implementation with `PipeliningBehavior` and
+///     `PipeliningRequirement` is intentionally _conservative_.  At the extreme case,
+///     one may want to only ever run a single command at a time. That way there’d be no
+///     inter-dependencies. But by being a bit more smart, certain commands can be allowed
+///     to run in parallel. It’s ok for this logic not to be perfect as long as it errs on the
+///     side of caution.
 public enum PipeliningRequirement: CaseIterable {
     /// No command that depend on the _Selected State_ must be running.
     case noMailboxCommandsRunning
@@ -59,7 +66,8 @@ public enum PipeliningBehavior {
     ///
     /// This is true for _all_ commands except `FETCH`, `STORE`, and `SEARCH`.
     case mayTriggerUntaggedExpunge
-    /// This command uses UIDs to specify messages.
+    /// This command uses UIDs to specify messages
+    /// — or its a `UID` command (e.g. `UID SEARCH`).
     case isUIDBased
     /// This command is changing flags on messages.
     case changesFlags
@@ -108,7 +116,6 @@ extension Command {
 
         case .search(key: let key, charset: _, returnOptions: _):
             return key.pipeliningRequirements
-                .union([.noUntaggedExpungeResponse])
         case .uidSearch(key: let key, charset: _, returnOptions: _):
             return key.pipeliningRequirements
         case .extendedsearch(let options):
@@ -243,8 +250,8 @@ extension Command {
 
         case .store(_, _, let flags):
             return flags.silent ?
-                [.dependsOnMailboxSelection, .isUIDBased, .changesFlags] :
-                [.dependsOnMailboxSelection, .isUIDBased, .changesFlags, .readsFlags]
+                [.dependsOnMailboxSelection, .changesFlags] :
+                [.dependsOnMailboxSelection, .changesFlags, .readsFlags]
         case .uidStore(_, _, let flags):
             return flags.silent ?
                 [.dependsOnMailboxSelection, .mayTriggerUntaggedExpunge, .isUIDBased, .changesFlags] :
@@ -256,11 +263,16 @@ extension Command {
 
         case .starttls,
              .logout,
-             .authenticate,
-             .idleStart:
+             .authenticate:
             return [.barrier]
+
+        case .idleStart:
+            return [.barrier, .dependsOnMailboxSelection, .mayTriggerUntaggedExpunge]
+
+        case .login:
+            return []
+
         case .capability,
-             .login,
              .create,
              .delete,
              .rename,
@@ -271,10 +283,12 @@ extension Command {
              .id,
              .namespace,
              .enable,
-             .resetKey,
-             .generateAuthorizedURL,
-             .urlFetch:
+             .resetKey:
             return [.mayTriggerUntaggedExpunge]
+
+        case .generateAuthorizedURL,
+             .urlFetch:
+            return [.mayTriggerUntaggedExpunge, .isUIDBased]
 
         case .subscribe,
              .unsubscribe:

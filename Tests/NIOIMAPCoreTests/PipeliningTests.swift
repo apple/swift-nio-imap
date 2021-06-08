@@ -32,6 +32,95 @@ extension ByteBuffer {
     fileprivate static let joeURLFetch = ByteBuffer("imap://joe@example.com/INBOX/;uid=20/;section=1.2;urlauth=submit+fred:internal:91354a473744909de610943775f92038")
 }
 
+extension SearchKey {
+    fileprivate static let keysWithoutSequenceNumber: [SearchKey] = [
+        .bcc("foo"),
+        .uid(.set([1])),
+        .answered,
+        .subject("foo"),
+        .or(.unseen, .uid(.set([1]))),
+    ]
+
+    fileprivate static let keysWithSequenceNumber: [SearchKey] = [
+        .sequenceNumbers(.set([1])),
+        .or(.unseen, .sequenceNumbers(.set([1]))),
+        .or(.uid(.set([1])), .sequenceNumbers(.set([1]))),
+        .and([.unseen, .sequenceNumbers(.set([1]))]),
+        .and([.uid(.set([1])), .sequenceNumbers(.set([1]))]),
+    ]
+
+    fileprivate static let keysWithoutUID: [SearchKey] = [
+        .bcc("foo"),
+        .sequenceNumbers(.set([1])),
+        .answered,
+        .subject("foo"),
+        .or(.unseen, .sequenceNumbers(.set([1]))),
+    ]
+
+    fileprivate static let keysWithUID: [SearchKey] = [
+        .uid(.set([1])),
+        .or(.unseen, .uid(.set([1]))),
+        .or(.uid(.set([1])), .sequenceNumbers(.set([1]))),
+        .and([.unseen, .uid(.set([1]))]),
+        .and([.uid(.set([1])), .sequenceNumbers(.set([1]))]),
+    ]
+
+    fileprivate static let keysWithoutFlags: [SearchKey] = [
+        .sequenceNumbers(.set([1])),
+        .uid(.set([1])),
+        .bcc("foo"),
+        .uid(.set([1])),
+        .subject("foo"),
+        .or(.bcc("foo"), .uid(.set([1]))),
+        .and([.uid(.set([1])), .sequenceNumbers(.set([1]))]),
+    ]
+
+    fileprivate static let keysWithFlags: [SearchKey] = [
+        .answered,
+        .unanswered,
+        .seen,
+        .unseen,
+        .keyword("A"),
+        .unkeyword("A"),
+        .flagged,
+        .unflagged,
+        .deleted,
+        .undeleted,
+        .draft,
+        .undraft,
+        .or(.answered, .uid(.set([1]))),
+        .and([.answered, .sequenceNumbers(.set([1]))]),
+    ]
+
+    fileprivate static let arbitraryKeys: [SearchKey] = [
+        .bcc("foo"),
+        .uid(.set([1])),
+        .answered,
+        .subject("foo"),
+        .answered,
+        .unanswered,
+        .seen,
+        .unseen,
+        .keyword("A"),
+        .unkeyword("A"),
+        .flagged,
+        .unflagged,
+        .deleted,
+        .undeleted,
+        .draft,
+        .undraft,
+        .uid(.set([1])),
+        .sequenceNumbers(.set([1])),
+        .or(.answered, .uid(.set([1]))),
+        .and([.answered, .sequenceNumbers(.set([1]))]),
+        .or(.unseen, .uid(.set([1]))),
+        .or(.unseen, .sequenceNumbers(.set([1]))),
+        .or(.uid(.set([1])), .sequenceNumbers(.set([1]))),
+        .and([.unseen, .sequenceNumbers(.set([1]))]),
+        .and([.uid(.set([1])), .sequenceNumbers(.set([1]))]),
+    ]
+}
+
 // MARK: -
 
 fileprivate func AssertCanStart(_ requirements: Set<PipeliningRequirement>, whileRunning behavior: Set<PipeliningBehavior>, file: StaticString = #filePath, line: UInt = #line) {
@@ -42,33 +131,35 @@ fileprivate func AssertCanNotStart(_ requirements: Set<PipeliningRequirement>, w
     XCTAssertFalse(behavior.satisfies(requirements), file: file, line: line)
 }
 
-fileprivate func AssertFalse(commands: [(UInt, Command)], require requirement: PipeliningRequirement, file: StaticString = #filePath) {
+fileprivate func AssertFalse(commands: [(UInt, Command)], require requirement: PipeliningRequirement, _ message: @autoclosure () -> String = "", file: StaticString = #filePath) {
     commands.forEach { line, command in
-        XCTAssertFalse(command.pipeliningRequirements.contains(requirement), "Should not require \(requirement)", file: file, line: line)
+        XCTAssertFalse(command.pipeliningRequirements.contains(requirement), "Should not require \(requirement). \(message())", file: file, line: line)
     }
 }
 
-fileprivate func Assert(commands: [(UInt, Command)], require requirement: PipeliningRequirement, file: StaticString = #filePath) {
+fileprivate func Assert(commands: [(UInt, Command)], require requirement: PipeliningRequirement, _ message: @autoclosure () -> String = "", file: StaticString = #filePath) {
     commands.forEach { line, command in
-        XCTAssert(command.pipeliningRequirements.contains(requirement), "Should require \(requirement)", file: file, line: line)
+        XCTAssert(command.pipeliningRequirements.contains(requirement), "Should require \(requirement). \(message())", file: file, line: line)
     }
 }
 
-fileprivate func AssertFalse(commands: [(UInt, Command)], haveBehavior behavior: PipeliningBehavior, file: StaticString = #filePath) {
+fileprivate func AssertFalse(commands: [(UInt, Command)], haveBehavior behavior: PipeliningBehavior, _ message: @autoclosure () -> String = "", file: StaticString = #filePath) {
     commands.forEach { line, command in
-        XCTAssertFalse(command.pipeliningBehavior.contains(behavior), "Should not have \(behavior) behavior", file: file, line: line)
+        XCTAssertFalse(command.pipeliningBehavior.contains(behavior), "Should not have \(behavior) behavior. \(message())", file: file, line: line)
     }
 }
 
-fileprivate func Assert(commands: [(UInt, Command)], haveBehavior behavior: PipeliningBehavior, file: StaticString = #filePath) {
+fileprivate func Assert(commands: [(UInt, Command)], haveBehavior behavior: PipeliningBehavior, _ message: @autoclosure () -> String = "", file: StaticString = #filePath) {
     commands.forEach { line, command in
-        XCTAssert(command.pipeliningBehavior.contains(behavior), "Should have \(behavior) behavior", file: file, line: line)
+        XCTAssert(command.pipeliningBehavior.contains(behavior), "Should have \(behavior) behavior. \(message())", file: file, line: line)
     }
 }
 
 // MARK: -
 
 final class PipeliningTests: XCTestCase {}
+
+// MARK: Interaction of Requirements and Behavior
 
 extension PipeliningTests {
     func testCanStartEmptyBehavior() {
@@ -227,21 +318,6 @@ extension PipeliningTests {
         XCTFail()
     }
 
-    func testSubscription() {
-        XCTFail()
-    }
-
-    func testMetadata() {
-        // special use
-        //
-        // Flags?!?
-        XCTFail()
-    }
-
-    func testQuota() {
-        XCTFail()
-    }
-
     func testCommandRequires_noMailboxCommandsRunning() {
         // Which commands have the requirements that:
         // > No command that depend on the _Selected State_ must be running.
@@ -259,15 +335,16 @@ extension PipeliningTests {
             (#line, .listIndependent([], reference: .food, .food, [])),
             (#line, .lsub(reference: .food, pattern: "Food")),
 
-            (#line, .examine(.food)),
             (#line, .create(.food, [])),
+            (#line, .delete(.food)),
+            (#line, .rename(from: .food, to: .food, params: [:])),
+
             (#line, .status(.food, [.messageCount])),
             (#line, .copy(.set([1]), .food)),
             (#line, .uidCopy(.set([1]), .food)),
             (#line, .move(.set([1]), .food)),
             (#line, .uidMove(.set([1]), .food)),
             (#line, .check),
-            (#line, .close),
             (#line, .expunge),
             (#line, .uidExpunge(.set([1]))),
             (#line, .search(key: .all, charset: nil, returnOptions: [.all])),
@@ -298,10 +375,10 @@ extension PipeliningTests {
         ], require: .noMailboxCommandsRunning)
 
         Assert(commands: [
+            (#line, .examine(.food)),
             (#line, .select(.food)),
             (#line, .unselect),
-            (#line, .delete(.food)),
-            (#line, .rename(from: .food, to: .food, params: [:])),
+            (#line, .close),
         ], require: .noMailboxCommandsRunning)
     }
 
@@ -309,8 +386,6 @@ extension PipeliningTests {
         // Which commands have the requirements that:
         // > No command besides `FETCH`, `STORE`, and `SEARCH` is running.
         // This is a requirement for all sequence number based commands.
-
-        XCTFail("Search / eSearch only have this requirement if a search key references sequence numbers.")
 
         AssertFalse(commands: [
             (#line, .capability),
@@ -351,12 +426,6 @@ extension PipeliningTests {
             (#line, .close),
             (#line, .expunge),
             (#line, .uidExpunge(.set([1]))),
-            (#line, .extendedsearch(ExtendedSearchOptions(key: .bcc("foo")))),
-            (#line, .extendedsearch(ExtendedSearchOptions(key: .uid(.set([1]))))),
-            (#line, .search(key: .bcc("foo"), charset: nil, returnOptions: [])),
-            (#line, .search(key: .uid(.set([1])), charset: nil, returnOptions: [])),
-            (#line, .uidSearch(key: .bcc("foo"), charset: nil, returnOptions: [])),
-            (#line, .uidSearch(key: .uid(.set([1])), charset: nil, returnOptions: [])),
             (#line, .uidFetch(.set([1]), [.envelope, .uid], [:])),
             (#line, .uidFetch(.set([1]), [.bodyStructure(extensions: false)], [:])),
             (#line, .uidStore(.set([1]), [:], .add(silent: true, list: [.answered]))),
@@ -366,10 +435,6 @@ extension PipeliningTests {
 
         // All commands that reference messages by sequence numbers have this requirement:
         Assert(commands: [
-            (#line, .uidSearch(key: .sequenceNumbers(.set([1])), charset: nil, returnOptions: [])),
-            (#line, .search(key: .sequenceNumbers(.set([1])), charset: nil, returnOptions: [.all])),
-            (#line, .extendedsearch(ExtendedSearchOptions(key: .sequenceNumbers(.set([1]))))),
-
             (#line, .fetch(.set([1]), [.envelope, .uid], [:])),
             (#line, .fetch(.set([1]), [.bodyStructure(extensions: false)], [:])),
             (#line, .copy(.set([1]), .food)),
@@ -377,13 +442,28 @@ extension PipeliningTests {
             (#line, .store(.set([1]), [], .add(silent: true, list: [.answered]))),
             (#line, .store(.set([1]), [], .add(silent: false, list: [.answered]))),
         ], require: .noUntaggedExpungeResponse)
+
+        // SEARCH, ESEARCH, and UID SEARCH
+        // only have this requirement if a search key references sequence numbers.
+        SearchKey.keysWithoutSequenceNumber.forEach { key in
+            AssertFalse(commands: [
+                (#line, .search(key: key, charset: nil, returnOptions: [])),
+                (#line, .extendedsearch(ExtendedSearchOptions(key: key))),
+                (#line, .uidSearch(key: key, charset: nil, returnOptions: [])),
+            ], require: .noUntaggedExpungeResponse, "key: \(key)")
+        }
+        SearchKey.keysWithSequenceNumber.forEach { key in
+            Assert(commands: [
+                (#line, .search(key: key, charset: nil, returnOptions: [])),
+                (#line, .extendedsearch(ExtendedSearchOptions(key: key))),
+                (#line, .uidSearch(key: key, charset: nil, returnOptions: [])),
+            ], require: .noUntaggedExpungeResponse, "key: \(key)")
+        }
     }
 
     func testCommandRequires_noUIDBasedCommandRunning() {
         // Which commands have the requirements that:
         // > No command is running that uses UIDs to specify messages.
-
-        XCTFail("Search / eSearch only have this requirement if a search key references sequence numbers.")
 
         AssertFalse(commands: [
             (#line, .capability),
@@ -435,7 +515,7 @@ extension PipeliningTests {
             (#line, .uidStore(.set([1]), [:], .add(silent: true, list: [.answered]))),
             (#line, .uidCopy(.set([1]), .food)),
             (#line, .uidMove(.set([1]), .food)),
-        ], require: .noUntaggedExpungeResponse)
+        ], require: .noUIDBasedCommandRunning)
 
         // All commands that reference messages by sequence numbers have this requirement:
         Assert(commands: [
@@ -449,7 +529,25 @@ extension PipeliningTests {
             (#line, .move(.set([1]), .food)),
             (#line, .store(.set([1]), [], .add(silent: true, list: [.answered]))),
             (#line, .store(.set([1]), [], .add(silent: false, list: [.answered]))),
-        ], require: .noUntaggedExpungeResponse)
+        ], require: .noUIDBasedCommandRunning)
+
+
+        // SEARCH, ESEARCH, and UID SEARCH
+        // only have this requirement if a search key references sequence numbers.
+        SearchKey.keysWithoutSequenceNumber.forEach { key in
+            AssertFalse(commands: [
+                (#line, .search(key: key, charset: nil, returnOptions: [])),
+                (#line, .extendedsearch(ExtendedSearchOptions(key: key))),
+                (#line, .uidSearch(key: key, charset: nil, returnOptions: [])),
+            ], require: .noUIDBasedCommandRunning, "key: \(key)")
+        }
+        SearchKey.keysWithSequenceNumber.forEach { key in
+            Assert(commands: [
+                (#line, .search(key: key, charset: nil, returnOptions: [])),
+                (#line, .extendedsearch(ExtendedSearchOptions(key: key))),
+                (#line, .uidSearch(key: key, charset: nil, returnOptions: [])),
+            ], require: .noUIDBasedCommandRunning, "key: \(key)")
+        }
     }
 
     func testCommandRequires_noFlagChanges() {
@@ -508,33 +606,9 @@ extension PipeliningTests {
             // STORE is ok if SILENT is set:
             (#line, .uidStore(.set([1]), [:], .add(silent: true, list: [.answered]))),
             (#line, .store(.set([1]), [], .add(silent: true, list: [.answered]))),
-
-            // All search are ok as long as they don’t references flags:
-            (#line, .search(key: .bcc("foo"), charset: nil, returnOptions: [])),
-            (#line, .search(key: .sequenceNumbers(.set([1])), charset: nil, returnOptions: [])),
-            (#line, .uidSearch(key: .bcc("foo"), charset: nil, returnOptions: [])),
-            (#line, .uidSearch(key: .sequenceNumbers(.set([1])), charset: nil, returnOptions: [])),
-            (#line, .extendedsearch(ExtendedSearchOptions(key: .bcc("foo")))),
-            (#line, .extendedsearch(ExtendedSearchOptions(key: .sequenceNumbers(.set([1]))))),
         ], require: .noFlagChanges)
 
         Assert(commands: [
-            // SEARCH, ESEARCH, and UID SEARCH have this requirement _if_ they
-            // reference flags:
-            // TODO: Fix SEARCH
-            (#line, .search(key: .answered, charset: nil, returnOptions: [.all])),
-            (#line, .uidSearch(key: .answered, charset: nil, returnOptions: [])),
-            (#line, .uidSearch(key: .unanswered, charset: nil, returnOptions: [])),
-            (#line, .uidSearch(key: .seen, charset: nil, returnOptions: [])),
-            (#line, .uidSearch(key: .unseen, charset: nil, returnOptions: [])),
-            (#line, .uidSearch(key: .keyword("A"), charset: nil, returnOptions: [])),
-            (#line, .uidSearch(key: .unkeyword("A"), charset: nil, returnOptions: [])),
-            (#line, .uidSearch(key: .flagged, charset: nil, returnOptions: [])),
-            (#line, .uidSearch(key: .unflagged, charset: nil, returnOptions: [])),
-            (#line, .uidSearch(key: .deleted, charset: nil, returnOptions: [])),
-            (#line, .uidSearch(key: .undeleted, charset: nil, returnOptions: [])),
-            (#line, .uidSearch(key: .draft, charset: nil, returnOptions: [])),
-            (#line, .uidSearch(key: .undraft, charset: nil, returnOptions: [])),
             // FETCH that return flags:
             (#line, .fetch(.set([1]), [.envelope, .uid, .flags], [:])),
             (#line, .fetch(.set([1]), [.uid, .flags], [:])),
@@ -544,6 +618,23 @@ extension PipeliningTests {
             (#line, .store(.set([1]), [], .add(silent: false, list: [.answered]))),
             (#line, .uidStore(.set([1]), [:], .add(silent: false, list: [.answered]))),
         ], require: .noFlagChanges)
+
+        // SEARCH, ESEARCH, and UID SEARCH have this requirement only if they
+        // reference flags:
+        SearchKey.keysWithoutFlags.forEach { key in
+            AssertFalse(commands: [
+                (#line, .search(key: key, charset: nil, returnOptions: [])),
+                (#line, .extendedsearch(ExtendedSearchOptions(key: key))),
+                (#line, .uidSearch(key: key, charset: nil, returnOptions: [])),
+            ], require: .noFlagChanges, "key: \(key)")
+        }
+        SearchKey.keysWithFlags.forEach { key in
+            Assert(commands: [
+                (#line, .search(key: key, charset: nil, returnOptions: [])),
+                (#line, .extendedsearch(ExtendedSearchOptions(key: key))),
+                (#line, .uidSearch(key: key, charset: nil, returnOptions: [])),
+            ], require: .noFlagChanges, "key: \(key)")
+        }
     }
 
     func testCommandRequires_noFlagReads() {
@@ -571,7 +662,6 @@ extension PipeliningTests {
             (#line, .setQuota(QuotaRoot("foo"), [])),
             (#line, .getMetadata(options: [], mailbox: .food, entries: ["/shared/comment"])),
             (#line, .setMetadata(mailbox: .food, entries: ["/shared/comment": nil])),
-            (#line, .extendedsearch(ExtendedSearchOptions(key: .all))),
             (#line, .resetKey(mailbox: nil, mechanisms: [.internal])),
             (#line, .generateAuthorizedURL([.joe])),
             (#line, .urlFetch([.joeURLFetch])),
@@ -592,20 +682,6 @@ extension PipeliningTests {
             (#line, .check),
             (#line, .close),
             (#line, .expunge),
-            // TODO: SEARCH vs. UID SEARCH
-            (#line, .search(key: .answered, charset: nil, returnOptions: [.all])),
-            (#line, .uidSearch(key: .answered, charset: nil, returnOptions: [])),
-            (#line, .uidSearch(key: .unanswered, charset: nil, returnOptions: [])),
-            (#line, .uidSearch(key: .seen, charset: nil, returnOptions: [])),
-            (#line, .uidSearch(key: .unseen, charset: nil, returnOptions: [])),
-            (#line, .uidSearch(key: .keyword("A"), charset: nil, returnOptions: [])),
-            (#line, .uidSearch(key: .unkeyword("A"), charset: nil, returnOptions: [])),
-            (#line, .uidSearch(key: .bcc("foo"), charset: nil, returnOptions: [])),
-            (#line, .uidSearch(key: .sequenceNumbers(.set([1])), charset: nil, returnOptions: [])),
-            (#line, .uidSearch(key: .deleted, charset: nil, returnOptions: [])),
-            (#line, .uidSearch(key: .undeleted, charset: nil, returnOptions: [])),
-            (#line, .uidSearch(key: .draft, charset: nil, returnOptions: [])),
-            (#line, .uidSearch(key: .undraft, charset: nil, returnOptions: [])),
             (#line, .fetch(.set([1]), [.envelope, .uid], [:])),
             (#line, .fetch(.set([1]), [.bodyStructure(extensions: false)], [:])),
             (#line, .fetch(.set([1]), [.envelope, .uid, .flags], [:])),
@@ -625,6 +701,15 @@ extension PipeliningTests {
             (#line, .store(.set([1]), [], .add(silent: true, list: [.answered]))),
             (#line, .store(.set([1]), [], .add(silent: false, list: [.answered]))),
         ], require: .noFlagReads)
+
+        // SEARCH, ESEARCH, and UID SEARCH never have this requirement.
+        SearchKey.arbitraryKeys.forEach { key in
+            AssertFalse(commands: [
+                (#line, .search(key: key, charset: nil, returnOptions: [])),
+                (#line, .extendedsearch(ExtendedSearchOptions(key: key))),
+                (#line, .uidSearch(key: key, charset: nil, returnOptions: [])),
+            ], require: .noFlagChanges, "key: \(key)")
+        }
     }
 }
 
@@ -670,12 +755,10 @@ extension PipeliningTests {
 
             (#line, .delete(.food)),
             (#line, .rename(from: .food, to: .food, params: [:])),
-            (#line, .examine(.food)),
             (#line, .create(.food, [])),
             (#line, .status(.food, [.messageCount])),
             //.append(into: .food, flags: [], date: nil, message: Data()),
             (#line, .check),
-            (#line, .close),
             (#line, .expunge),
             (#line, .uidSearch(key: .all, charset: nil, returnOptions: [])),
             (#line, .fetch(.set([1]), [.envelope, .uid], [:])),
@@ -688,7 +771,9 @@ extension PipeliningTests {
 
         Assert(commands: [
             (#line, .select(.food)),
+            (#line, .examine(.food)),
             (#line, .unselect),
+            (#line, .close),
         ], haveBehavior: .changesMailboxSelection)
     }
 
@@ -697,7 +782,6 @@ extension PipeliningTests {
 
         AssertFalse(commands: [
             (#line, .capability),
-            (#line, .noop),
 
             (#line, .starttls),
             (#line, .authenticate(mechanism: .plain, initialResponse: nil)),
@@ -716,9 +800,11 @@ extension PipeliningTests {
             (#line, .lsub(reference: .food, pattern: "Food")),
             (#line, .status(.food, [.messageCount])),
             //.append(into: .food, flags: [], date: nil, message: Data()),
+
             (#line, .close),
             (#line, .select(.food)),
             (#line, .unselect),
+
             (#line, .subscribe(.food)),
             (#line, .unsubscribe(.food)),
 
@@ -734,6 +820,7 @@ extension PipeliningTests {
         ], haveBehavior: .dependsOnMailboxSelection)
 
         Assert(commands: [
+            (#line, .noop),
             (#line, .check),
             (#line, .uidExpunge(.set([1]))),
             (#line, .expunge),
@@ -765,16 +852,16 @@ extension PipeliningTests {
             (#line, .store(.set([1]), [], .add(silent: false, list: [.answered]))),
             (#line, .search(key: .all, charset: nil, returnOptions: [.all])),
             (#line, .search(key: .answered, charset: nil, returnOptions: [.all])),
+            // Does not make sense for these:
+            (#line, .login(username: "user", password: "password")),
+            (#line, .starttls),
+            (#line, .authenticate(mechanism: .plain, initialResponse: nil)),
+            (#line, .logout),
         ], haveBehavior: .mayTriggerUntaggedExpunge)
 
         Assert(commands: [
             (#line, .capability),
             (#line, .noop),
-
-            (#line, .login(username: "user", password: "password")),
-            (#line, .starttls),
-            (#line, .authenticate(mechanism: .plain, initialResponse: nil)),
-            (#line, .logout),
 
             (#line, .delete(.food)),
             (#line, .rename(from: .food, to: .food, params: [:])),
@@ -858,14 +945,7 @@ extension PipeliningTests {
             (#line, .store(.set([1]), [], .add(silent: true, list: [.answered]))),
             (#line, .store(.set([1]), [], .add(silent: false, list: [.answered]))),
 
-            // SEARCH etc. without UID:
-            (#line, .search(key: .answered, charset: nil, returnOptions: [.all])),
-            (#line, .uidSearch(key: .answered, charset: nil, returnOptions: [])),
-            (#line, .extendedsearch(ExtendedSearchOptions(key: .answered))),
-
             (#line, .resetKey(mailbox: nil, mechanisms: [.internal])),
-            (#line, .generateAuthorizedURL([.joe])),
-            (#line, .urlFetch([.joeURLFetch])),
 
             (#line, .getQuota(QuotaRoot("foo"))),
             (#line, .getQuotaRoot(.food)),
@@ -875,16 +955,34 @@ extension PipeliningTests {
         ], haveBehavior: .isUIDBased)
 
         Assert(commands: [
-            // TODO: SEARCH etc.
-            (#line, .search(key: .uid(.set([1])), charset: nil, returnOptions: [.all])),
-            (#line, .uidSearch(key: .uid(.set([1])), charset: nil, returnOptions: [])),
-            (#line, .extendedsearch(ExtendedSearchOptions(key: .uid(.set([1]))))),
             (#line, .uidFetch(.set([1]), [.envelope, .uid], [:])),
             (#line, .uidStore(.set([1]), [:], .add(silent: true, list: [.answered]))),
             (#line, .uidCopy(.set([1]), .food)),
             (#line, .uidMove(.set([1]), .food)),
             (#line, .uidExpunge(.set([1]))),
+            // `GENURLAUTH` and `URLFETCH` (indirectly) reference UIDs:
+            (#line, .generateAuthorizedURL([.joe])),
+            (#line, .urlFetch([.joeURLFetch])),
         ], haveBehavior: .isUIDBased)
+
+        SearchKey.keysWithoutUID.forEach { key in
+            AssertFalse(commands: [
+                (#line, .search(key: key, charset: nil, returnOptions: [])),
+                (#line, .extendedsearch(ExtendedSearchOptions(key: key))),
+            ], haveBehavior: .isUIDBased, "key: \(key)")
+            // UID SEARCH has this behavior even if the key does not
+            // reference UIDs:
+            Assert(commands: [
+                (#line, .uidSearch(key: key, charset: nil, returnOptions: [])),
+            ], haveBehavior: .isUIDBased, "key: \(key)")
+        }
+        SearchKey.keysWithUID.forEach { key in
+            Assert(commands: [
+                (#line, .search(key: key, charset: nil, returnOptions: [])),
+                (#line, .extendedsearch(ExtendedSearchOptions(key: key))),
+                (#line, .uidSearch(key: key, charset: nil, returnOptions: [])),
+            ], haveBehavior: .isUIDBased, "key: \(key)")
+        }
     }
 
     func testCommandBehavior_changesFlags() {
@@ -1018,25 +1116,28 @@ extension PipeliningTests {
             (#line, .uidStore(.set([1]), [:], .add(silent: false, list: [.answered]))),
             (#line, .store(.set([1]), [], .add(silent: false, list: [.answered]))),
 
-            // TODO: 3 x SEARCH
-            (#line, .uidSearch(key: .keyword("A"), charset: nil, returnOptions: [])),
-            (#line, .uidSearch(key: .unkeyword("A"), charset: nil, returnOptions: [])),
-            (#line, .uidSearch(key: .answered, charset: nil, returnOptions: [])),
-            (#line, .uidSearch(key: .unanswered, charset: nil, returnOptions: [])),
-            (#line, .uidSearch(key: .seen, charset: nil, returnOptions: [])),
-            (#line, .uidSearch(key: .unseen, charset: nil, returnOptions: [])),
-            (#line, .uidSearch(key: .flagged, charset: nil, returnOptions: [])),
-            (#line, .uidSearch(key: .unflagged, charset: nil, returnOptions: [])),
-            (#line, .uidSearch(key: .deleted, charset: nil, returnOptions: [])),
-            (#line, .uidSearch(key: .undeleted, charset: nil, returnOptions: [])),
-            (#line, .uidSearch(key: .draft, charset: nil, returnOptions: [])),
-            (#line, .uidSearch(key: .undraft, charset: nil, returnOptions: [])),
-
             (#line, .fetch(.set([1]), [.envelope, .uid, .flags], [:])),
             (#line, .fetch(.set([1]), [.uid, .flags], [:])),
             (#line, .uidFetch(.set([1]), [.envelope, .uid, .flags], [:])),
             (#line, .uidFetch(.set([1]), [.uid, .flags], [:])),
         ], haveBehavior: .readsFlags)
+
+        // SEARCH, ESEARCH, and UID SEARCH have this behavior only if they
+        // reference flags:
+        SearchKey.keysWithoutFlags.forEach { key in
+            AssertFalse(commands: [
+                (#line, .search(key: key, charset: nil, returnOptions: [])),
+                (#line, .extendedsearch(ExtendedSearchOptions(key: key))),
+                (#line, .uidSearch(key: key, charset: nil, returnOptions: [])),
+            ], haveBehavior: .readsFlags, "key: \(key)")
+        }
+        SearchKey.keysWithFlags.forEach { key in
+            Assert(commands: [
+                (#line, .search(key: key, charset: nil, returnOptions: [])),
+                (#line, .extendedsearch(ExtendedSearchOptions(key: key))),
+                (#line, .uidSearch(key: key, charset: nil, returnOptions: [])),
+            ], haveBehavior: .readsFlags, "key: \(key)")
+        }
     }
 
     func testSearchReferencingUIDs() {
