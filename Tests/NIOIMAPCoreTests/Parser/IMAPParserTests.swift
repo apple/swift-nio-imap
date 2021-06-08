@@ -2924,7 +2924,7 @@ extension ParserUnitTests {
     }
 }
 
-// MARK: RFC 6237 & required part of RFC 5465
+// MARK: RFC 7377 & required part of RFC 5465
 
 extension ParserUnitTests {
     func testParseOneOrMoreMailbox() {

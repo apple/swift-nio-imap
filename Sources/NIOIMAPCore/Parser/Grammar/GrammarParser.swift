@@ -2355,7 +2355,7 @@ extension GrammarParser {
             return .mailboxes(try parseOneOrMoreMailbox(buffer: &buffer, tracker: tracker))
         }
 
-        // RFC 6237
+        // RFC 7377
         // filter-mailboxes-other =/  ("subtree-one" SP one-or-more-mailbox)
         func parseFilterMailboxes_SubtreeOne(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxFilter {
             try PL.parseFixedString("subtree-one ", buffer: &buffer, tracker: tracker)
@@ -2374,7 +2374,7 @@ extension GrammarParser {
         ], buffer: &buffer, tracker: tracker)
     }
 
-    // RFC 6237
+    // RFC 7377
     // scope-options =  scope-option *(SP scope-option)
     static func parseExtendedSearchScopeOptions(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ExtendedSearchScopeOptions {
         var options = OrderedDictionary<String, ParameterValue?>()
@@ -2389,7 +2389,7 @@ extension GrammarParser {
         }
     }
 
-    // RFC 6237
+    // RFC 7377
     // esearch-source-opts =  "IN" SP "(" source-mbox [SP "(" scope-options ")"] ")"
     static func parseExtendedSearchSourceOptions(buffer: inout ParseBuffer,
                                                  tracker: StackTracker) throws -> ExtendedSearchSourceOptions
@@ -2439,7 +2439,7 @@ extension GrammarParser {
         }
     }
 
-    // RFC 6237
+    // RFC 7377
     // esearch =  "ESEARCH" [SP esearch-source-opts]
     // [SP search-return-opts] SP search-program
     // Ignoring the command here.

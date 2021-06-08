@@ -14,7 +14,7 @@
 
 import struct NIO.ByteBuffer
 
-/// Options for performing an extended search as defined in RFC 6237
+/// Options for performing an extended search as defined in RFC 7377
 public struct ExtendedSearchOptions: Equatable {
     /// The search criteria.
     public var key: SearchKey
