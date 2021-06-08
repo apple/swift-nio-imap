@@ -78,7 +78,7 @@ extension GrammarParser_Commands_Tests {
                 ("CAPABILITY", "\r", .capability, #line),
                 ("LOGOUT", "\r", .logout, #line),
                 ("NOOP", "\r", .noop, #line),
-                ("STARTTLS", "\r", .starttls, #line),
+                ("STARTTLS", "\r", .startTLS, #line),
                 ("CHECK", "\r", .check, #line),
                 ("CLOSE", "\r", .close, #line),
                 ("EXPUNGE", "\r", .expunge, #line),

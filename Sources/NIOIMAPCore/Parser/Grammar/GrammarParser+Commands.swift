@@ -46,7 +46,7 @@ extension GrammarParser {
             "CAPABILITY": { _, _ in .capability },
             "LOGOUT": { _, _ in .logout },
             "NOOP": { _, _ in .noop },
-            "STARTTLS": { _, _ in .starttls },
+            "STARTTLS": { _, _ in .startTLS },
             "CHECK": { _, _ in .check },
             "CLOSE": { _, _ in .close },
             "EXPUNGE": { _, _ in .expunge },

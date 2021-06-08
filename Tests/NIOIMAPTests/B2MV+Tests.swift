@@ -41,7 +41,7 @@ extension B2MV_Tests {
 
             // MARK: StartTLS
 
-            ("tag STARTTLS", [.tagged(.init(tag: "tag", command: .starttls))]),
+            ("tag STARTTLS", [.tagged(.init(tag: "tag", command: .startTLS))]),
 
             // MARK: Authenticate
 
