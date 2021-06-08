@@ -94,7 +94,7 @@ extension CommandStreamPart {
     public var pipeliningRequirements: Set<PipeliningRequirement> {
         switch self {
         case .idleDone:
-            fatalError("TODO")
+            return []
         case .tagged(let tagged):
             return tagged.command.pipeliningRequirements
         case .append:
@@ -194,11 +194,15 @@ extension CommandStreamPart {
     public var pipeliningBehavior: Set<PipeliningBehavior> {
         switch self {
         case .idleDone:
-            return [.dependsOnMailboxSelection, .mayTriggerUntaggedExpunge]
+            return [.dependsOnMailboxSelection, .mayTriggerUntaggedExpunge, .barrier]
         case .tagged(let tagged):
             return tagged.command.pipeliningBehavior
+        case .append(.start):
+            return [.mayTriggerUntaggedExpunge]
+        case .append(.catenateURL):
+            return [.isUIDBased]
         case .append:
-            return [.dependsOnMailboxSelection, .mayTriggerUntaggedExpunge]
+            return []
         case .continuationResponse:
             return []
         }

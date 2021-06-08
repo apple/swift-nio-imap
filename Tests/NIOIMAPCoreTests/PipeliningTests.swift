@@ -315,7 +315,20 @@ extension PipeliningTests {
 
 extension PipeliningTests {
     func testAppend() {
-        XCTFail()
+        let append = CommandStreamPart.append(.start(tag: "A1", appendingTo: .food))
+        XCTAssertEqual(append.pipeliningRequirements, [])
+        XCTAssertEqual(append.pipeliningBehavior, [
+            .mayTriggerUntaggedExpunge
+        ])
+    }
+
+    func testCatenatePart() {
+        // CATEANTE may reference other messages by UID:
+        let append = CommandStreamPart.append(.catenateURL(.joeURLFetch))
+        XCTAssertEqual(append.pipeliningRequirements, [])
+        XCTAssertEqual(append.pipeliningBehavior, [
+            .isUIDBased
+        ])
     }
 
     func testCommandRequires_noMailboxCommandsRunning() {
