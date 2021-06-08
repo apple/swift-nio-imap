@@ -18,7 +18,7 @@ import NIOIMAP
 
 let commands: [(String, Command)] = [
     ("parse_check", .check),
-    ("parse_starttls", .starttls),
+    ("parse_starttls", .startTLS),
     ("parse_idlestart", .idleStart),
     ("parse_logout", .logout),
     ("parse_login", .login(username: "test", password: "test")),

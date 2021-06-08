@@ -71,7 +71,7 @@ public enum Command: Equatable {
     case login(username: String, password: String)
 
     /// Begins TLS negotiation immediately after this command is sent.
-    case starttls
+    case startTLS
 
     /// Requests a check-point of the server's in-memory representation of the mailbox. Allows the server to do some housekeeping.
     case check
@@ -211,7 +211,7 @@ extension CommandEncodeBuffer {
             return self.writeCommandKind_authenticate(mechanism: mechanism, initialResponse: initialResponse)
         case .login(let userid, let password):
             return self.writeCommandKind_login(userID: userid, password: password)
-        case .starttls:
+        case .startTLS:
             return self.writeCommandKind_startTLS()
         case .check:
             return self.writeCommandKind_check()

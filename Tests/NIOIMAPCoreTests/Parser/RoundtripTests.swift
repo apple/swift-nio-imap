@@ -26,7 +26,7 @@ final class RoundtripTests: XCTestCase {
             (.noop, #line),
             (.capability, #line),
             (.logout, #line),
-            (.starttls, #line),
+            (.startTLS, #line),
             (.check, #line),
             (.close, #line),
             (.expunge, #line),
