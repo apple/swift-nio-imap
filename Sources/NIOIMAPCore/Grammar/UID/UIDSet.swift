@@ -189,6 +189,13 @@ extension UIDSet: CustomDebugStringConvertible {
     }
 }
 
+extension UIDSetNonEmpty: CustomDebugStringConvertible {
+    /// Creates a human-readable text representation of the set by joined ranges with a comma.
+    public var debugDescription: String {
+        self.set.debugDescription
+    }
+}
+
 // MARK: - Array Literal
 
 extension UIDSet: ExpressibleByArrayLiteral {
