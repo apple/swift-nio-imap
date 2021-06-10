@@ -132,7 +132,7 @@ extension Command {
             return key.pipeliningRequirements
         case .uidSearch(key: let key, charset: _, returnOptions: _):
             return key.pipeliningRequirements
-        case .extendedsearch(let options):
+        case .extendedSearch(let options):
             return options.key.pipeliningRequirements
 
         case .fetch(_, let attribtues, _):
@@ -172,7 +172,7 @@ extension Command {
              .check,
              .authenticate,
              .login,
-             .starttls,
+             .startTLS,
              .enable,
              .idleStart,
              .id,
@@ -269,7 +269,7 @@ extension Command {
             return key.pipeliningBehavior.union(
                 [.dependsOnMailboxSelection, .mayTriggerUntaggedExpunge, .isUIDBased]
             )
-        case .extendedsearch(let options):
+        case .extendedSearch(let options):
             return options.key.pipeliningBehavior.union(
                 [.dependsOnMailboxSelection, .mayTriggerUntaggedExpunge, .isUIDBased]
             )
@@ -291,7 +291,7 @@ extension Command {
              .check:
             return [.dependsOnMailboxSelection, .mayTriggerUntaggedExpunge]
 
-        case .starttls,
+        case .startTLS,
              .logout,
              .authenticate:
             return [.barrier]

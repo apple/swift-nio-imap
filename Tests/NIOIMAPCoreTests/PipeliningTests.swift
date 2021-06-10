@@ -377,7 +377,7 @@ extension PipeliningTests {
             (#line, .capability),
             (#line, .noop),
 
-            (#line, .starttls),
+            (#line, .startTLS),
             (#line, .authenticate(mechanism: .plain, initialResponse: nil)),
             (#line, .login(username: "user", password: "password")),
             (#line, .logout),
@@ -400,7 +400,7 @@ extension PipeliningTests {
             (#line, .uidExpunge(.set([1]))),
             (#line, .search(key: .all, charset: nil, returnOptions: [.all])),
             (#line, .uidSearch(key: .all, charset: nil, returnOptions: [])),
-            (#line, .extendedsearch(ExtendedSearchOptions(key: .all))),
+            (#line, .extendedSearch(ExtendedSearchOptions(key: .all))),
             (#line, .fetch(.set([1]), [.envelope, .uid], [:])),
             (#line, .fetch(.set([1]), [.bodyStructure(extensions: false)], [:])),
             (#line, .uidFetch(.set([1]), [.envelope, .uid], [:])),
@@ -442,7 +442,7 @@ extension PipeliningTests {
             (#line, .capability),
             (#line, .noop),
 
-            (#line, .starttls),
+            (#line, .startTLS),
             (#line, .authenticate(mechanism: .plain, initialResponse: nil)),
             (#line, .login(username: "user", password: "password")),
             (#line, .logout),
@@ -498,14 +498,14 @@ extension PipeliningTests {
         SearchKey.keysWithoutSequenceNumber.forEach { key in
             AssertFalse(commands: [
                 (#line, .search(key: key, charset: nil, returnOptions: [])),
-                (#line, .extendedsearch(ExtendedSearchOptions(key: key))),
+                (#line, .extendedSearch(ExtendedSearchOptions(key: key))),
                 (#line, .uidSearch(key: key, charset: nil, returnOptions: [])),
             ], require: .noUntaggedExpungeResponse, "key: \(key)")
         }
         SearchKey.keysWithSequenceNumber.forEach { key in
             Assert(commands: [
                 (#line, .search(key: key, charset: nil, returnOptions: [])),
-                (#line, .extendedsearch(ExtendedSearchOptions(key: key))),
+                (#line, .extendedSearch(ExtendedSearchOptions(key: key))),
                 (#line, .uidSearch(key: key, charset: nil, returnOptions: [])),
             ], require: .noUntaggedExpungeResponse, "key: \(key)")
         }
@@ -519,7 +519,7 @@ extension PipeliningTests {
             (#line, .capability),
             (#line, .noop),
 
-            (#line, .starttls),
+            (#line, .startTLS),
             (#line, .authenticate(mechanism: .plain, initialResponse: nil)),
             (#line, .login(username: "user", password: "password")),
             (#line, .logout),
@@ -553,8 +553,8 @@ extension PipeliningTests {
             (#line, .close),
             (#line, .expunge),
             (#line, .uidExpunge(.set([1]))),
-            (#line, .extendedsearch(ExtendedSearchOptions(key: .bcc("foo")))),
-            (#line, .extendedsearch(ExtendedSearchOptions(key: .uid(.set([1]))))),
+            (#line, .extendedSearch(ExtendedSearchOptions(key: .bcc("foo")))),
+            (#line, .extendedSearch(ExtendedSearchOptions(key: .uid(.set([1]))))),
             (#line, .search(key: .bcc("foo"), charset: nil, returnOptions: [])),
             (#line, .search(key: .uid(.set([1])), charset: nil, returnOptions: [])),
             (#line, .uidSearch(key: .bcc("foo"), charset: nil, returnOptions: [])),
@@ -570,7 +570,7 @@ extension PipeliningTests {
         Assert(commands: [
             (#line, .uidSearch(key: .sequenceNumbers(.set([1])), charset: nil, returnOptions: [])),
             (#line, .search(key: .sequenceNumbers(.set([1])), charset: nil, returnOptions: [.all])),
-            (#line, .extendedsearch(ExtendedSearchOptions(key: .sequenceNumbers(.set([1]))))),
+            (#line, .extendedSearch(ExtendedSearchOptions(key: .sequenceNumbers(.set([1]))))),
 
             (#line, .fetch(.set([1]), [.envelope, .uid], [:])),
             (#line, .fetch(.set([1]), [.bodyStructure(extensions: false)], [:])),
@@ -585,14 +585,14 @@ extension PipeliningTests {
         SearchKey.keysWithoutSequenceNumber.forEach { key in
             AssertFalse(commands: [
                 (#line, .search(key: key, charset: nil, returnOptions: [])),
-                (#line, .extendedsearch(ExtendedSearchOptions(key: key))),
+                (#line, .extendedSearch(ExtendedSearchOptions(key: key))),
                 (#line, .uidSearch(key: key, charset: nil, returnOptions: [])),
             ], require: .noUIDBasedCommandRunning, "key: \(key)")
         }
         SearchKey.keysWithSequenceNumber.forEach { key in
             Assert(commands: [
                 (#line, .search(key: key, charset: nil, returnOptions: [])),
-                (#line, .extendedsearch(ExtendedSearchOptions(key: key))),
+                (#line, .extendedSearch(ExtendedSearchOptions(key: key))),
                 (#line, .uidSearch(key: key, charset: nil, returnOptions: [])),
             ], require: .noUIDBasedCommandRunning, "key: \(key)")
         }
@@ -607,7 +607,7 @@ extension PipeliningTests {
             (#line, .capability),
             (#line, .noop),
 
-            (#line, .starttls),
+            (#line, .startTLS),
             (#line, .authenticate(mechanism: .plain, initialResponse: nil)),
             (#line, .login(username: "user", password: "password")),
 
@@ -679,14 +679,14 @@ extension PipeliningTests {
         SearchKey.keysWithoutFlags.forEach { key in
             AssertFalse(commands: [
                 (#line, .search(key: key, charset: nil, returnOptions: [])),
-                (#line, .extendedsearch(ExtendedSearchOptions(key: key))),
+                (#line, .extendedSearch(ExtendedSearchOptions(key: key))),
                 (#line, .uidSearch(key: key, charset: nil, returnOptions: [])),
             ], require: .noFlagChangesToAnyMessage, "key: \(key)")
         }
         SearchKey.keysWithFlags.forEach { key in
             Assert(commands: [
                 (#line, .search(key: key, charset: nil, returnOptions: [])),
-                (#line, .extendedsearch(ExtendedSearchOptions(key: key))),
+                (#line, .extendedSearch(ExtendedSearchOptions(key: key))),
                 (#line, .uidSearch(key: key, charset: nil, returnOptions: [])),
             ], require: .noFlagChangesToAnyMessage, "key: \(key)")
         }
@@ -700,7 +700,7 @@ extension PipeliningTests {
             (#line, .capability),
             (#line, .noop),
 
-            (#line, .starttls),
+            (#line, .startTLS),
             (#line, .authenticate(mechanism: .plain, initialResponse: nil)),
             (#line, .login(username: "user", password: "password")),
             (#line, .logout),
@@ -765,7 +765,7 @@ extension PipeliningTests {
         SearchKey.arbitraryKeys.forEach { key in
             AssertFalse(commands: [
                 (#line, .search(key: key, charset: nil, returnOptions: [])),
-                (#line, .extendedsearch(ExtendedSearchOptions(key: key))),
+                (#line, .extendedSearch(ExtendedSearchOptions(key: key))),
                 (#line, .uidSearch(key: key, charset: nil, returnOptions: [])),
             ], require: .noFlagReadsFromAnyMessage, "key: \(key)")
         }
@@ -782,7 +782,7 @@ extension PipeliningTests {
             (#line, .capability),
             (#line, .noop),
 
-            (#line, .starttls),
+            (#line, .startTLS),
             (#line, .authenticate(mechanism: .plain, initialResponse: nil)),
             (#line, .login(username: "user", password: "password")),
             (#line, .logout),
@@ -818,7 +818,7 @@ extension PipeliningTests {
             (#line, .expunge),
             (#line, .search(key: .all, charset: nil, returnOptions: [.all])),
             (#line, .uidSearch(key: .all, charset: nil, returnOptions: [])),
-            (#line, .extendedsearch(ExtendedSearchOptions(key: .all))),
+            (#line, .extendedSearch(ExtendedSearchOptions(key: .all))),
             (#line, .fetch(.set([1]), [.envelope, .uid], [:])),
             (#line, .fetch(.set([1]), [.bodyStructure(extensions: false)], [:])),
             (#line, .uidFetch(.set([1]), [.envelope, .uid], [:])),
@@ -841,7 +841,7 @@ extension PipeliningTests {
         AssertFalse(commands: [
             (#line, .capability),
 
-            (#line, .starttls),
+            (#line, .startTLS),
             (#line, .authenticate(mechanism: .plain, initialResponse: nil)),
             (#line, .login(username: "user", password: "password")),
             (#line, .logout),
@@ -883,7 +883,7 @@ extension PipeliningTests {
             (#line, .expunge),
             (#line, .search(key: .all, charset: nil, returnOptions: [.all])),
             (#line, .uidSearch(key: .all, charset: nil, returnOptions: [])),
-            (#line, .extendedsearch(ExtendedSearchOptions(key: .all))),
+            (#line, .extendedSearch(ExtendedSearchOptions(key: .all))),
             (#line, .fetch(.set([1]), [.envelope, .uid], [:])),
             (#line, .fetch(.set([1]), [.bodyStructure(extensions: false)], [:])),
             (#line, .uidFetch(.set([1]), [.envelope, .uid], [:])),
@@ -911,7 +911,7 @@ extension PipeliningTests {
             (#line, .search(key: .answered, charset: nil, returnOptions: [.all])),
             // Does not make sense for these:
             (#line, .login(username: "user", password: "password")),
-            (#line, .starttls),
+            (#line, .startTLS),
             (#line, .authenticate(mechanism: .plain, initialResponse: nil)),
             (#line, .logout),
         ], haveBehavior: .mayTriggerUntaggedExpunge)
@@ -954,7 +954,7 @@ extension PipeliningTests {
             (#line, .setQuota(QuotaRoot("foo"), [])),
             (#line, .getMetadata(options: [], mailbox: .food, entries: ["/shared/comment"])),
             (#line, .setMetadata(mailbox: .food, entries: ["/shared/comment": nil])),
-            (#line, .extendedsearch(ExtendedSearchOptions(key: .all))),
+            (#line, .extendedSearch(ExtendedSearchOptions(key: .all))),
             (#line, .resetKey(mailbox: nil, mechanisms: [.internal])),
             (#line, .generateAuthorizedURL([.joe])),
             (#line, .urlFetch([.joeURLFetch])),
@@ -968,7 +968,7 @@ extension PipeliningTests {
             (#line, .capability),
             (#line, .noop),
 
-            (#line, .starttls),
+            (#line, .startTLS),
             (#line, .authenticate(mechanism: .plain, initialResponse: nil)),
             (#line, .login(username: "user", password: "password")),
             (#line, .logout),
@@ -1028,13 +1028,13 @@ extension PipeliningTests {
             // reference UIDs:
             Assert(commands: [
                 (#line, .uidSearch(key: key, charset: nil, returnOptions: [])),
-                (#line, .extendedsearch(ExtendedSearchOptions(key: key))),
+                (#line, .extendedSearch(ExtendedSearchOptions(key: key))),
             ], haveBehavior: .isUIDBased, "key: \(key)")
         }
         SearchKey.keysWithUID.forEach { key in
             Assert(commands: [
                 (#line, .search(key: key, charset: nil, returnOptions: [])),
-                (#line, .extendedsearch(ExtendedSearchOptions(key: key))),
+                (#line, .extendedSearch(ExtendedSearchOptions(key: key))),
                 (#line, .uidSearch(key: key, charset: nil, returnOptions: [])),
             ], haveBehavior: .isUIDBased, "key: \(key)")
         }
@@ -1047,7 +1047,7 @@ extension PipeliningTests {
             (#line, .capability),
             (#line, .noop),
 
-            (#line, .starttls),
+            (#line, .startTLS),
             (#line, .authenticate(mechanism: .plain, initialResponse: nil)),
             (#line, .login(username: "user", password: "password")),
             (#line, .logout),
@@ -1088,7 +1088,7 @@ extension PipeliningTests {
             (#line, .setQuota(QuotaRoot("foo"), [])),
             (#line, .getMetadata(options: [], mailbox: .food, entries: ["/shared/comment"])),
             (#line, .setMetadata(mailbox: .food, entries: ["/shared/comment": nil])),
-            (#line, .extendedsearch(ExtendedSearchOptions(key: .all))),
+            (#line, .extendedSearch(ExtendedSearchOptions(key: .all))),
             (#line, .resetKey(mailbox: nil, mechanisms: [.internal])),
             (#line, .generateAuthorizedURL([.joe])),
             (#line, .urlFetch([.joeURLFetch])),
@@ -1114,7 +1114,7 @@ extension PipeliningTests {
             (#line, .capability),
             (#line, .noop),
 
-            (#line, .starttls),
+            (#line, .startTLS),
             (#line, .authenticate(mechanism: .plain, initialResponse: nil)),
             (#line, .login(username: "user", password: "password")),
             (#line, .logout),
@@ -1184,14 +1184,14 @@ extension PipeliningTests {
         SearchKey.keysWithoutFlags.forEach { key in
             AssertFalse(commands: [
                 (#line, .search(key: key, charset: nil, returnOptions: [])),
-                (#line, .extendedsearch(ExtendedSearchOptions(key: key))),
+                (#line, .extendedSearch(ExtendedSearchOptions(key: key))),
                 (#line, .uidSearch(key: key, charset: nil, returnOptions: [])),
             ], haveBehavior: .readsFlagsFromAnyMessage, "key: \(key)")
         }
         SearchKey.keysWithFlags.forEach { key in
             Assert(commands: [
                 (#line, .search(key: key, charset: nil, returnOptions: [])),
-                (#line, .extendedsearch(ExtendedSearchOptions(key: key))),
+                (#line, .extendedSearch(ExtendedSearchOptions(key: key))),
                 (#line, .uidSearch(key: key, charset: nil, returnOptions: [])),
             ], haveBehavior: .readsFlagsFromAnyMessage, "key: \(key)")
         }
@@ -1243,14 +1243,14 @@ extension PipeliningTests {
             (#line, .setQuota(QuotaRoot("foo"), [])),
             (#line, .getMetadata(options: [], mailbox: .food, entries: ["/shared/comment"])),
             (#line, .setMetadata(mailbox: .food, entries: ["/shared/comment": nil])),
-            (#line, .extendedsearch(ExtendedSearchOptions(key: .all))),
+            (#line, .extendedSearch(ExtendedSearchOptions(key: .all))),
             (#line, .resetKey(mailbox: nil, mechanisms: [.internal])),
             (#line, .generateAuthorizedURL([.joe])),
             (#line, .urlFetch([.joeURLFetch])),
         ], haveBehavior: .barrier)
 
         Assert(commands: [
-            (#line, .starttls),
+            (#line, .startTLS),
             (#line, .authenticate(mechanism: .plain, initialResponse: nil)),
             (#line, .logout),
             (#line, .idleStart),
