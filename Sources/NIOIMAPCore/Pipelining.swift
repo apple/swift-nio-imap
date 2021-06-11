@@ -2,7 +2,7 @@
 //
 // This source file is part of the SwiftNIO open source project
 //
-// Copyright (c) 2020 Apple Inc. and the SwiftNIO project authors
+// Copyright (c) 2021 Apple Inc. and the SwiftNIO project authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
@@ -135,13 +135,13 @@ extension Command {
         case .extendedSearch(let options):
             return options.key.pipeliningRequirements
 
-        case .fetch(_, let attribtues, _):
-            return attribtues.pipeliningRequirements
+        case .fetch(_, let attributes, _):
+            return attributes.pipeliningRequirements
                 .union([.noUntaggedExpungeResponse, .noUIDBasedCommandRunning])
-        case .uidFetch(.lastCommand, let attribtues, _):
-            return attribtues.pipeliningRequirements
-        case .uidFetch(.set(let uids), let attribtues, _):
-            return attribtues.makePipeliningRequirements(uids)
+        case .uidFetch(.lastCommand, let attributes, _):
+            return attributes.pipeliningRequirements
+        case .uidFetch(.set(let uids), let attributes, _):
+            return attributes.makePipeliningRequirements(uids)
 
         case .copy,
              .move:
