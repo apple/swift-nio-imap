@@ -12,21 +12,22 @@
 //
 //===----------------------------------------------------------------------===//
 
-/// Returned after a successfully `.uidCopy` command, and provides the new identifier
-/// of the appended message, and the uid validity of the destination mailbox.
+/// Returned after a successfully `.uidAppend` command, and provides the new identifiers
+/// of the appended messages, and the uid validity of the destination mailbox. Note that multiple
+/// appends ae only supported if the capability `MULTISEARCH` is enabled.
 public struct ResponseCodeAppend: Equatable {
     /// The UID validity of the destination mailbox.
     public var uidValidity: UIDValidity
 
-    /// The UID of the message after it has been appended.
-    public var uid: UID
+    /// The UIDs of the messages after they have been appended.
+    public var uids: UIDSetNonEmpty
 
     /// Creates a new `ResponseCodeAppend`.
     /// - parameter uidValidity: The UID validity of the destination mailbox.
-    /// - parameter uid: The UID of the message after it has been appended.
-    public init(num: UIDValidity, uid: UID) {
-        self.uidValidity = num
-        self.uid = uid
+    /// - parameter uids: The UIDs of the messages after they have been appended.
+    public init(uidValidity: UIDValidity, uids: UIDSetNonEmpty) {
+        self.uidValidity = uidValidity
+        self.uids = uids
     }
 }
 
@@ -35,6 +36,6 @@ public struct ResponseCodeAppend: Equatable {
 extension EncodeBuffer {
     @discardableResult mutating func writeResponseCodeAppend(_ data: ResponseCodeAppend) -> Int {
         self.writeString("APPENDUID \(data.uidValidity.rawValue) ") +
-            self.writeUID(data.uid)
+            self.writeUIDSet(data.uids)
     }
 }
