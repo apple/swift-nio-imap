@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-/// Returned after a successfully `.uidAppend` command, and provides the new identifiers
+/// Returned after a successful `.uidAppend` command. Provides the new identifiers
 /// of the appended messages, and the uid validity of the destination mailbox. Note that multiple
 /// appends ae only supported if the capability `MULTISEARCH` is enabled.
 public struct ResponseCodeAppend: Equatable {
