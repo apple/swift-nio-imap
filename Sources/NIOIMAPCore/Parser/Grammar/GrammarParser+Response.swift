@@ -51,8 +51,8 @@ extension GrammarParser {
             try PL.parseFixedString("APPENDUID ", buffer: &buffer, tracker: tracker)
             let number = try self.parseUIDValidity(buffer: &buffer, tracker: tracker)
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-            let uid = try self.parseUID(buffer: &buffer, tracker: tracker)
-            return ResponseCodeAppend(num: number, uid: uid)
+            let uids = try self.parseUIDSetNonEmpty(buffer: &buffer, tracker: tracker)
+            return ResponseCodeAppend(uidValidity: number, uids: uids)
         }
     }
 
