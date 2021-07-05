@@ -41,24 +41,12 @@ struct ClientStateMachine: Hashable {
     
     mutating func receiveResponse(_ response: Response) throws {
         switch self.state {
-        case .expectingNormalResponse:
-            break
         case .idle:
             try self.receiveResponse_idle(response)
-        case .authenticating:
-            break
         case .expectingLiteralContinuationRequest:
             try self.receiveResponse_expectingContinuationRequest(response)
-        case .completingCommand:
-            break
-        case .error:
-            break
-        case .appending:
-            break
-        case .startedAppendMessage:
-            break
-        case .startedCatenateMessage:
-            break
+        default:
+            fatalError("TODO")
         }
     }
     
@@ -68,20 +56,8 @@ struct ClientStateMachine: Hashable {
             try self.sendCommand_normalResponse(command)
         case .idle:
             try self.sendCommand_idle(command)
-        case .authenticating:
-            try self.sendCommand_normalResponse(command)
-        case .expectingLiteralContinuationRequest:
-            try self.sendCommand_normalResponse(command)
-        case .completingCommand:
-            try self.sendCommand_normalResponse(command)
-        case .error:
-            try self.sendCommand_normalResponse(command)
-        case .appending:
-            try self.sendCommand_normalResponse(command)
-        case .startedAppendMessage:
-            try self.sendCommand_normalResponse(command)
-        case .startedCatenateMessage:
-            try self.sendCommand_normalResponse(command)
+        default:
+            fatalError("TODO")
         }
     }
 }
@@ -95,8 +71,8 @@ extension ClientStateMachine {
             try self.sendCommandTagged_normalResponse(tagged)
         case .idleDone, .continuationResponse:
             throw InvalidClientState()
-        case .append(let append):
-            try self.sendCommandAppend_normalResponse(append)
+        default:
+            fatalError("TODO")
         }
     }
     
@@ -107,10 +83,6 @@ extension ClientStateMachine {
         default:
             break
         }
-    }
-    
-    mutating private func sendCommandAppend_normalResponse(_ command: AppendCommand) throws {
-        
     }
     
     mutating private func sendCommand_idle(_ command: CommandStreamPart) throws {
@@ -125,34 +97,6 @@ extension ClientStateMachine {
             throw InvalidClientState()
         }
     }
-    
-    private func sendCommand_authenticating(_ command: CommandStreamPart) throws {
-        
-    }
-    
-    private func sendCommand_expectingLiteralContinuationRequest(_ command: CommandStreamPart) throws {
-        
-    }
-    
-    private func sendCommand_completingCommand(_ command: CommandStreamPart) throws {
-        
-    }
-    
-    private func sendCommand_error(_ command: CommandStreamPart) throws {
-        
-    }
-    
-    private func sendCommand_appending(_ command: CommandStreamPart) throws {
-        
-    }
-    
-    private func sendCommand_startedAppendMessage(_ command: CommandStreamPart) throws {
-        
-    }
-    
-    private func sendCommand_startedCatenateMessage(_ command: CommandStreamPart) throws {
-        
-    }
 
 }
 
@@ -161,18 +105,10 @@ extension ClientStateMachine {
     
     mutating private func receiveResponse_idle(_ response: Response) throws {
         switch response {
-        case .untaggedResponse(_):
-            break
-        case .fetchResponse(_):
-            break
-        case .taggedResponse(_):
-            break
-        case .fatalResponse(_):
-            break
-        case .authenticationChallenge(_):
-            break
         case .idleStarted:
             try self.receiveResponseIdleStarted_idle()
+        default:
+            fatalError("TODO")
         }
     }
     
