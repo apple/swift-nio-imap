@@ -175,6 +175,14 @@ public enum Command: Equatable {
     case urlFetch([ByteBuffer])
 }
 
+extension Command: CustomDebugStringConvertible {
+    public var debugDescription: String {
+        var buffer = CommandEncodeBuffer(buffer: ByteBuffer(), options: .rfc3501)
+        buffer.writeCommand(self)
+        return String(buffer: buffer.buffer.nextChunk().bytes)
+    }
+}
+
 // MARK: - IMAP
 
 extension CommandEncodeBuffer {

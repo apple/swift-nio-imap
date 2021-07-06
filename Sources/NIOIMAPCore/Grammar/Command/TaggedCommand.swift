@@ -31,6 +31,14 @@ public struct TaggedCommand: Equatable {
     }
 }
 
+extension TaggedCommand: CustomDebugStringConvertible {
+    public var debugDescription: String {
+        var buffer = CommandEncodeBuffer(buffer: ByteBuffer(), options: .rfc3501)
+        buffer.writeCommand(self)
+        return String(buffer: buffer.buffer.nextChunk().bytes)
+    }
+}
+
 extension CommandEncodeBuffer {
     /// Writes a `TaggedCommand` to the buffer ready to be sent down the network.
     /// - parameter command: The `TaggedCommand` to write.
