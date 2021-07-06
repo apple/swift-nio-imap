@@ -23,7 +23,7 @@ final class CommandEncoder_Tests: XCTestCase {}
 
 extension CommandEncoder_Tests {
     func testEncoding() {
-        // Ror now this is a fairly limited sequence of test
+        // For now this is a fairly limited sequence of test
         // just to ensure that CommandEncoder correctly uses
         // CommandEncodeBuffer.
         // When we add a state to CommandEncoder, it'll be more
@@ -39,6 +39,7 @@ extension CommandEncoder_Tests {
             let encoder = CommandEncoder()
             encoder.encode(data: command, out: &buffer)
             XCTAssertEqual(expected, buffer, "\(String(buffer: expected)) is not equal to \(String(buffer: buffer))", line: line)
+            XCTAssertEqual(String(reflecting: command), String(buffer: expected), line: line)
         }
     }
 }
