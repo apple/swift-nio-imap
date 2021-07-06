@@ -49,12 +49,12 @@ extension ClientStateMachineTests {
             XCTAssertTrue(e is InvalidClientState)
         }
     }
-    
+
     func testIdleWorkflow_commandBeforeIdleConfirmed() {
         // set up the state machine to idle
         var stateMachine = ClientStateMachine()
         XCTAssertNoThrow(try stateMachine.sendCommand(.tagged(.init(tag: "A1", command: .idleStart))))
-        
+
         // machine isn't yet idle, but we've started the process
         // so sending a different command should throw
         XCTAssertThrowsError(try stateMachine.sendCommand(.tagged(.init(tag: "A2", command: .noop)))) { e in

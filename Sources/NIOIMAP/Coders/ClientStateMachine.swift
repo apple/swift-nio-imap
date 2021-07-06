@@ -20,7 +20,7 @@ public struct InvalidClientState: Error {
 }
 
 public struct UnexpectedResponse: Error {
-    public init() { }
+    public init() {}
 }
 
 enum State: Hashable {
@@ -41,7 +41,6 @@ enum IdleState: Hashable {
 }
 
 struct ClientStateMachine: Hashable {
-
     private var state: State = .expectingNormalResponse
 
     mutating func receiveResponse(_ response: Response) throws {
@@ -105,7 +104,7 @@ extension ClientStateMachine {
 // MARK: - Receive
 
 extension ClientStateMachine {
-    private mutating func receiveResponse_idle(_ response: Response) throws {
+    private mutating func receiveResponse_idle(_: Response) throws {
         switch self.state {
         case .idle(.idling):
             // only untagged responses are allowed while idling
