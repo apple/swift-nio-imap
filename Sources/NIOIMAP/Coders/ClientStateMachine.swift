@@ -16,40 +16,43 @@ import NIO
 import NIOIMAPCore
 
 public struct InvalidClientState: Error {
+    public init() {}
+}
+
+public struct UnexpectedResponse: Error {
     public init() { }
 }
 
+enum State: Hashable {
+    case expectingNormalResponse
+    case idle(IdleState)
+    case authenticating
+    case expectingLiteralContinuationRequest
+    case completingCommand
+    case error
+    case appending
+    case startedAppendMessage
+    case startedCatenateMessage
+}
+
+enum IdleState: Hashable {
+    case expectingConfirmation
+    case idling
+}
+
 struct ClientStateMachine: Hashable {
-    
-    enum State: Hashable {
-        case expectingNormalResponse
-        case idle
-        case authenticating
-        case expectingLiteralContinuationRequest
-        case completingCommand
-        case error
-        case appending
-        case startedAppendMessage
-        case startedCatenateMessage
-    }
-    
-    private var stateStack: [State] = [.expectingNormalResponse]
-    
-    private var state: State {
-        self.stateStack.last!
-    }
-    
+
+    private var state: State = .expectingNormalResponse
+
     mutating func receiveResponse(_ response: Response) throws {
         switch self.state {
         case .idle:
             try self.receiveResponse_idle(response)
-        case .expectingLiteralContinuationRequest:
-            try self.receiveResponse_expectingContinuationRequest(response)
         default:
             fatalError("TODO")
         }
     }
-    
+
     mutating func sendCommand(_ command: CommandStreamPart) throws {
         switch self.state {
         case .expectingNormalResponse:
@@ -63,9 +66,9 @@ struct ClientStateMachine: Hashable {
 }
 
 // MARK: - Send
+
 extension ClientStateMachine {
-    
-    mutating private func sendCommand_normalResponse(_ command: CommandStreamPart) throws {
+    private mutating func sendCommand_normalResponse(_ command: CommandStreamPart) throws {
         switch command {
         case .tagged(let tagged):
             try self.sendCommandTagged_normalResponse(tagged)
@@ -75,56 +78,42 @@ extension ClientStateMachine {
             fatalError("TODO")
         }
     }
-    
-    mutating private func sendCommandTagged_normalResponse(_ command: TaggedCommand) throws {
+
+    private mutating func sendCommandTagged_normalResponse(_ command: TaggedCommand) throws {
         switch command.command {
         case .idleStart:
-            self.stateStack.append(contentsOf: [.idle, .expectingLiteralContinuationRequest])
+            self.state = .idle(.expectingConfirmation)
         default:
             break
         }
     }
-    
-    mutating private func sendCommand_idle(_ command: CommandStreamPart) throws {
+
+    private mutating func sendCommand_idle(_ command: CommandStreamPart) throws {
         switch command {
         case .idleDone:
-            guard self.state == .idle else {
+            guard self.state == .idle(.idling) else {
                 throw InvalidClientState()
             }
-            _ = self.stateStack.popLast()
+            self.state = .expectingNormalResponse
             return
         default:
             throw InvalidClientState()
         }
     }
-
 }
 
 // MARK: - Receive
+
 extension ClientStateMachine {
-    
-    mutating private func receiveResponse_idle(_ response: Response) throws {
-        switch response {
-        case .idleStarted:
-            try self.receiveResponseIdleStarted_idle()
+    private mutating func receiveResponse_idle(_ response: Response) throws {
+        switch self.state {
+        case .idle(.idling):
+            // only untagged responses are allowed while idling
+            break
+        case .idle(.expectingConfirmation):
+            self.state = .idle(.idling)
         default:
-            fatalError("TODO")
+            preconditionFailure("Expected an idle state")
         }
     }
-    
-    mutating private func receiveResponse_expectingContinuationRequest(_ response: Response) throws {
-        assert(self.stateStack.count >= 2, "Must have a state to return to.")
-        guard self.state == .expectingLiteralContinuationRequest else {
-            throw InvalidClientState()
-        }
-        _ = self.stateStack.popLast()
-    }
-    
-    mutating private func receiveResponseIdleStarted_idle() throws {
-        assert(self.stateStack.count >= 2)
-        guard self.stateStack.popLast() == .expectingLiteralContinuationRequest else {
-            throw InvalidClientState()
-        }
-    }
-    
 }
