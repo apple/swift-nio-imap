@@ -23,30 +23,26 @@ public struct UnexpectedResponse: Error {
     public init() {}
 }
 
-enum State: Hashable {
-    case expectingNormalResponse
-    case idle(IdleState)
-    case authenticating
-    case expectingLiteralContinuationRequest
-    case completingCommand
-    case error
-    case appending
-    case startedAppendMessage
-    case startedCatenateMessage
-}
-
-enum IdleState: Hashable {
-    case expectingConfirmation
-    case idling
-}
-
 struct ClientStateMachine: Hashable {
+    
+    enum State: Hashable {
+        case expectingNormalResponse
+        case idle(ClientStateMachine.Idle)
+        case authenticating
+        case expectingLiteralContinuationRequest
+        case completingCommand
+        case error
+        case appending
+        case startedAppendMessage
+        case startedCatenateMessage
+    }
+    
     private var state: State = .expectingNormalResponse
 
     mutating func receiveResponse(_ response: Response) throws {
         switch self.state {
-        case .idle:
-            try self.receiveResponse_idle(response)
+        case .idle(let idleStateMachine):
+            try self.handleResponse_idle(idleStateMachine: idleStateMachine, response: response)
         default:
             fatalError("TODO")
         }
@@ -55,64 +51,61 @@ struct ClientStateMachine: Hashable {
     mutating func sendCommand(_ command: CommandStreamPart) throws {
         switch self.state {
         case .expectingNormalResponse:
-            try self.sendCommand_normalResponse(command)
-        case .idle:
-            try self.sendCommand_idle(command)
+            try self.sendCommand_normalResponse(command: command)
+        case .idle(let idleStateMachine):
+            try self.sendCommand_idle(idleStateMachine: idleStateMachine, command: command)
         default:
             fatalError("TODO")
-        }
-    }
-}
-
-// MARK: - Send
-
-extension ClientStateMachine {
-    private mutating func sendCommand_normalResponse(_ command: CommandStreamPart) throws {
-        switch command {
-        case .tagged(let tagged):
-            try self.sendCommandTagged_normalResponse(tagged)
-        case .idleDone, .continuationResponse:
-            throw InvalidClientState()
-        default:
-            fatalError("TODO")
-        }
-    }
-
-    private mutating func sendCommandTagged_normalResponse(_ command: TaggedCommand) throws {
-        switch command.command {
-        case .idleStart:
-            self.state = .idle(.expectingConfirmation)
-        default:
-            break
-        }
-    }
-
-    private mutating func sendCommand_idle(_ command: CommandStreamPart) throws {
-        switch command {
-        case .idleDone:
-            guard self.state == .idle(.idling) else {
-                throw InvalidClientState()
-            }
-            self.state = .expectingNormalResponse
-            return
-        default:
-            throw InvalidClientState()
         }
     }
 }
 
 // MARK: - Receive
-
 extension ClientStateMachine {
-    private mutating func receiveResponse_idle(_: Response) throws {
-        switch self.state {
-        case .idle(.idling):
-            // only untagged responses are allowed while idling
-            break
-        case .idle(.expectingConfirmation):
-            self.state = .idle(.idling)
-        default:
-            preconditionFailure("Expected an idle state")
+    
+    private mutating func handleResponse_idle(idleStateMachine: Idle, response: Response) throws {
+        var idleStateMachine = idleStateMachine
+        try idleStateMachine.receiveResponse(response)
+        self.state = .idle(idleStateMachine)
+    }
+    
+}
+
+// MARK: - Send
+extension ClientStateMachine {
+    
+    private mutating func sendCommand_normalResponse(command: CommandStreamPart) throws {
+        assert(self.state == .expectingNormalResponse)
+        
+        switch command {
+        case .idleDone, .continuationResponse:
+            throw InvalidCommandForState()
+        case .tagged(let taggedCommand):
+            try self.sendTaggedCommand(command: taggedCommand)
+        case .append(_):
+            fatalError("TODO")
         }
     }
+    
+    private mutating func sendTaggedCommand(command: TaggedCommand) throws {
+        assert(self.state == .expectingNormalResponse)
+        
+        switch command.command {
+        case .idleStart:
+            self.state = .idle(Idle())
+        default:
+            break
+        }
+    }
+    
+    private mutating func sendCommand_idle(idleStateMachine: Idle, command: CommandStreamPart) throws {
+        var idleStateMachine = idleStateMachine
+        try idleStateMachine.sendCommand(command)
+        if idleStateMachine.finished {
+            self.state = .expectingNormalResponse
+        } else {
+            self.state = .idle(idleStateMachine)
+        }
+    }
+    
 }
