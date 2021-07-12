@@ -71,13 +71,13 @@ extension ResponseEncodeBuffer {
     /// - returns: The number of bytes written.
     @discardableResult public mutating func writeResponse(_ response: Response) -> Int {
         switch response {
-        case .untaggedResponse(let resp):
+        case .untagged(let resp):
             return self.buffer.writeResponseData(resp)
-        case .fetchResponse(let response):
+        case .fetch(let response):
             return self.writeFetchResponse(response)
-        case .taggedResponse(let end):
+        case .tagged(let end):
             return self.buffer.writeTaggedResponse(end)
-        case .fatalResponse(let fatal):
+        case .fatal(let fatal):
             return self.buffer.writeResponseFatal(fatal)
         case .authenticationChallenge(let bytes):
             return self.writeAuthenticationChallenge(bytes)

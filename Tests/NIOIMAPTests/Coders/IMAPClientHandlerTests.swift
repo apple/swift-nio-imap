@@ -27,12 +27,12 @@ class IMAPClientHandlerTests: XCTestCase {
         self.writeOutbound(.tagged(.init(tag: "a", command: .login(username: "foo", password: "bar"))))
         self.assertOutboundString("a LOGIN \"foo\" \"bar\"\r\n")
         self.writeInbound("a OK ok\r\n")
-        self.assertInbound(.taggedResponse(.init(tag: "a",
-                                                 state: .ok(.init(code: nil, text: "ok")))))
+        self.assertInbound(.tagged(.init(tag: "a",
+                                         state: .ok(.init(code: nil, text: "ok")))))
     }
 
     func testReferralURLResponse() {
-        let expectedResponse = Response.taggedResponse(
+        let expectedResponse = Response.tagged(
             TaggedResponse(tag: "tag",
                            state: .ok(ResponseText(code:
                                .referral(IMAPURL(server: IMAPServer(userAuthenticationMechanism: nil, host: "hostname", port: nil),
@@ -51,8 +51,8 @@ class IMAPClientHandlerTests: XCTestCase {
         self.assertOutboundString("a LOGIN \"foo\" \"bar\"\r\n")
         self.writeInbound("tag OK [REFERRAL imap://hostname/foo/bar/;UID=1234]\r\na OK ok\r\n")
         self.assertInbound(expectedResponse)
-        self.assertInbound(.taggedResponse(.init(tag: "a",
-                                                 state: .ok(.init(code: nil, text: "ok")))))
+        self.assertInbound(.tagged(.init(tag: "a",
+                                         state: .ok(.init(code: nil, text: "ok")))))
     }
 
     func testCommandThatNeedsToWaitForContinuationRequest() {
@@ -66,8 +66,8 @@ class IMAPClientHandlerTests: XCTestCase {
         self.assertOutboundString("\\ \"to\"\r\n")
         XCTAssertNoThrow(try f.wait())
         self.writeInbound("x OK ok\r\n")
-        self.assertInbound(.taggedResponse(.init(tag: "x",
-                                                 state: .ok(.init(code: nil, text: "ok")))))
+        self.assertInbound(.tagged(.init(tag: "x",
+                                         state: .ok(.init(code: nil, text: "ok")))))
     }
 
     func testCommandThatNeedsToWaitForTwoContinuationRequest() {
@@ -83,8 +83,8 @@ class IMAPClientHandlerTests: XCTestCase {
         self.assertOutboundString("\"\r\n")
         XCTAssertNoThrow(try f.wait())
         self.writeInbound("x OK ok\r\n")
-        self.assertInbound(.taggedResponse(.init(tag: "x",
-                                                 state: .ok(.init(code: nil, text: "ok")))))
+        self.assertInbound(.tagged(.init(tag: "x",
+                                         state: .ok(.init(code: nil, text: "ok")))))
     }
 
     func testTwoContReqCommandsEnqueued() {
@@ -107,11 +107,11 @@ class IMAPClientHandlerTests: XCTestCase {
         XCTAssertNoThrow(try f2.wait())
         self.assertOutboundString("\\\r\n")
         self.writeInbound("x OK ok\r\n")
-        self.assertInbound(.taggedResponse(.init(tag: "x",
-                                                 state: .ok(.init(code: nil, text: "ok")))))
+        self.assertInbound(.tagged(.init(tag: "x",
+                                         state: .ok(.init(code: nil, text: "ok")))))
         self.writeInbound("y OK ok\r\n")
-        self.assertInbound(.taggedResponse(.init(tag: "y",
-                                                 state: .ok(.init(code: nil, text: "ok")))))
+        self.assertInbound(.tagged(.init(tag: "y",
+                                         state: .ok(.init(code: nil, text: "ok")))))
     }
 
     // This makes sure that we successfully switch from responding to continuation
@@ -145,23 +145,23 @@ class IMAPClientHandlerTests: XCTestCase {
         XCTAssertNoThrow(try f5.wait())
 
         self.writeInbound("1 OK ok\r\n")
-        self.assertInbound(.taggedResponse(.init(tag: "1",
-                                                 state: .ok(.init(code: nil, text: "ok")))))
+        self.assertInbound(.tagged(.init(tag: "1",
+                                         state: .ok(.init(code: nil, text: "ok")))))
         self.writeInbound("2 OK ok\r\n")
-        self.assertInbound(.taggedResponse(.init(tag: "2",
-                                                 state: .ok(.init(code: nil, text: "ok")))))
+        self.assertInbound(.tagged(.init(tag: "2",
+                                         state: .ok(.init(code: nil, text: "ok")))))
 
         self.writeInbound("3 OK ok\r\n")
-        self.assertInbound(.taggedResponse(.init(tag: "3",
-                                                 state: .ok(.init(code: nil, text: "ok")))))
+        self.assertInbound(.tagged(.init(tag: "3",
+                                         state: .ok(.init(code: nil, text: "ok")))))
 
         self.writeInbound("4 OK ok\r\n")
-        self.assertInbound(.taggedResponse(.init(tag: "4",
-                                                 state: .ok(.init(code: nil, text: "ok")))))
+        self.assertInbound(.tagged(.init(tag: "4",
+                                         state: .ok(.init(code: nil, text: "ok")))))
 
         self.writeInbound("5 OK ok\r\n")
-        self.assertInbound(.taggedResponse(.init(tag: "5",
-                                                 state: .ok(.init(code: nil, text: "ok")))))
+        self.assertInbound(.tagged(.init(tag: "5",
+                                         state: .ok(.init(code: nil, text: "ok")))))
     }
 
     func testContinueRequestCommandFollowedByAuthenticate() {
@@ -194,8 +194,8 @@ class IMAPClientHandlerTests: XCTestCase {
         self.assertOutboundString("\\ \"to\"\r\n")
         XCTAssertNoThrow(try f.wait())
         self.writeInbound("x OK ok\r\n")
-        self.assertInbound(.taggedResponse(.init(tag: "x",
-                                                 state: .ok(.init(code: nil, text: "ok")))))
+        self.assertInbound(.tagged(.init(tag: "x",
+                                         state: .ok(.init(code: nil, text: "ok")))))
     }
 
     func testAuthenticationFlow() {
@@ -264,7 +264,7 @@ class IMAPClientHandlerTests: XCTestCase {
 
         // all done
         self.writeInbound("A1 OK Success\r\n")
-        self.assertInbound(.taggedResponse(.init(tag: "A1", state: .ok(.init(text: "Success")))))
+        self.assertInbound(.tagged(.init(tag: "A1", state: .ok(.init(text: "Success")))))
     }
 
     func testCanChangeEncodingOnCallback() {
@@ -289,16 +289,16 @@ class IMAPClientHandlerTests: XCTestCase {
 
         // send some capabilities
         self.writeInbound("A1 OK [CAPABILITY LITERAL+]\r\n")
-        self.assertInbound(.taggedResponse(.init(tag: "A1", state: .ok(.init(code: .capability([.literalPlus]), text: "")))))
+        self.assertInbound(.tagged(.init(tag: "A1", state: .ok(.init(code: .capability([.literalPlus]), text: "")))))
 
         // send the server ID (client sends a noop
         self.writeOutbound(.tagged(.init(tag: "A2", command: .noop)), wait: false)
         self.assertOutboundString("A2 NOOP\r\n")
         self.writeInbound("* ID (\"name\" \"NIOIMAP\")\r\n")
-        self.assertInbound(.untaggedResponse(.id(["name": "NIOIMAP"])))
+        self.assertInbound(.untagged(.id(["name": "NIOIMAP"])))
         wait(for: [turnOnLiteralPlusExpectation], timeout: 1.0)
         self.writeInbound("A2 OK NOOP complete\r\n")
-        self.assertInbound(.taggedResponse(.init(tag: "A2", state: .ok(.init(text: "NOOP complete")))))
+        self.assertInbound(.tagged(.init(tag: "A2", state: .ok(.init(text: "NOOP complete")))))
 
         // now we should have literal+ turned on
         self.writeOutbound(.tagged(.init(tag: "A3", command: .login(username: "\\", password: "\\"))), wait: false)

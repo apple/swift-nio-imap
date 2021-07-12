@@ -176,73 +176,73 @@ extension B2MV_Tests {
         let inoutPairs: [(String, [Response])] = [
             // MARK: State responses
 
-            ("* OK Server ready", [.untaggedResponse(.conditionalState(.ok(.init(code: nil, text: "Server ready"))))]),
-            ("* OK [ALERT] Server ready", [.untaggedResponse(.conditionalState(.ok(.init(code: .alert, text: "Server ready"))))]),
-            ("* NO Disk full", [.untaggedResponse(.conditionalState(.no(.init(code: nil, text: "Disk full"))))]),
-            ("* NO [READ-ONLY] Disk full", [.untaggedResponse(.conditionalState(.no(.init(code: .readOnly, text: "Disk full"))))]),
-            ("* BAD horrible", [.untaggedResponse(.conditionalState(.bad(.init(code: nil, text: "horrible"))))]),
-            ("* BAD [BADCHARSET (utf123)] horrible", [.untaggedResponse(.conditionalState(.bad(.init(code: .badCharset(["utf123"]), text: "horrible"))))]),
+            ("* OK Server ready", [.untagged(.conditionalState(.ok(.init(code: nil, text: "Server ready"))))]),
+            ("* OK [ALERT] Server ready", [.untagged(.conditionalState(.ok(.init(code: .alert, text: "Server ready"))))]),
+            ("* NO Disk full", [.untagged(.conditionalState(.no(.init(code: nil, text: "Disk full"))))]),
+            ("* NO [READ-ONLY] Disk full", [.untagged(.conditionalState(.no(.init(code: .readOnly, text: "Disk full"))))]),
+            ("* BAD horrible", [.untagged(.conditionalState(.bad(.init(code: nil, text: "horrible"))))]),
+            ("* BAD [BADCHARSET (utf123)] horrible", [.untagged(.conditionalState(.bad(.init(code: .badCharset(["utf123"]), text: "horrible"))))]),
 
             // MARK: Bye
 
-            ("* BYE logging off", [.untaggedResponse(.conditionalState(.bye(.init(code: nil, text: "logging off"))))]),
-            ("* BYE [ALERT] logging off", [.untaggedResponse(.conditionalState(.bye(.init(code: .alert, text: "logging off"))))]),
+            ("* BYE logging off", [.untagged(.conditionalState(.bye(.init(code: nil, text: "logging off"))))]),
+            ("* BYE [ALERT] logging off", [.untagged(.conditionalState(.bye(.init(code: .alert, text: "logging off"))))]),
 
             // MARK: Capability
 
-            ("* CAPABILITY IMAP4rev1 CHILDREN CONDSTORE", [.untaggedResponse(.capabilityData([.imap4rev1, .children, .condStore]))]),
+            ("* CAPABILITY IMAP4rev1 CHILDREN CONDSTORE", [.untagged(.capabilityData([.imap4rev1, .children, .condStore]))]),
             // With trailing space:
-            ("* CAPABILITY IMAP4rev1 CHILDREN CONDSTORE ", [.untaggedResponse(.capabilityData([.imap4rev1, .children, .condStore]))]),
+            ("* CAPABILITY IMAP4rev1 CHILDREN CONDSTORE ", [.untagged(.capabilityData([.imap4rev1, .children, .condStore]))]),
 
             // MARK: LIST
 
-            ("* LIST (\\noselect) \"/\" ~/Mail/foo", [.untaggedResponse(.mailboxData(.list(.init(attributes: [.noSelect], path: try! .init(name: .init("~/Mail/foo"), pathSeparator: "/"), extensions: [:]))))]),
+            ("* LIST (\\noselect) \"/\" ~/Mail/foo", [.untagged(.mailboxData(.list(.init(attributes: [.noSelect], path: try! .init(name: .init("~/Mail/foo"), pathSeparator: "/"), extensions: [:]))))]),
 
             // MARK: LSUB
 
-            ("* LSUB (\\noselect) \"/\" ~/Mail/foo", [.untaggedResponse(.mailboxData(.lsub(.init(attributes: [.noSelect], path: try! .init(name: .init("~/Mail/foo"), pathSeparator: "/"), extensions: [:]))))]),
+            ("* LSUB (\\noselect) \"/\" ~/Mail/foo", [.untagged(.mailboxData(.lsub(.init(attributes: [.noSelect], path: try! .init(name: .init("~/Mail/foo"), pathSeparator: "/"), extensions: [:]))))]),
 
             // MARK: Status
 
-            ("* STATUS INBOX (MESSAGES 231 UIDNEXT 44292)", [.untaggedResponse(.mailboxData(.status(.inbox, .init(messageCount: 231, nextUID: 44292))))]),
+            ("* STATUS INBOX (MESSAGES 231 UIDNEXT 44292)", [.untagged(.mailboxData(.status(.inbox, .init(messageCount: 231, nextUID: 44292))))]),
 
             // MARK: Flags
 
-            ("* FLAGS (\\Answered \\Seen)", [.untaggedResponse(.mailboxData(.flags([.answered, .seen])))]),
+            ("* FLAGS (\\Answered \\Seen)", [.untagged(.mailboxData(.flags([.answered, .seen])))]),
 
             // MARK: Exists
 
-            ("* 23 EXISTS", [.untaggedResponse(.mailboxData(.exists(23)))]),
+            ("* 23 EXISTS", [.untagged(.mailboxData(.exists(23)))]),
 
             // MARK: Recent
 
-            ("* 5 RECENT", [.untaggedResponse(.mailboxData(.recent(5)))]),
+            ("* 5 RECENT", [.untagged(.mailboxData(.recent(5)))]),
 
             // MARK: Expunge
 
-            ("* 20 EXPUNGE", [.untaggedResponse(.messageData(.expunge(20)))]),
+            ("* 20 EXPUNGE", [.untagged(.messageData(.expunge(20)))]),
 
             // MARK: Fetch
 
             (
                 "* 1 FETCH (UID 999)",
-                [.fetchResponse(.start(1)), .fetchResponse(.simpleAttribute(.uid(999))), .fetchResponse(.finish)]
+                [.fetch(.start(1)), .fetch(.simpleAttribute(.uid(999))), .fetch(.finish)]
             ),
             (
                 "* 2 FETCH (UID 111 FLAGS (\\Seen \\Deleted \\Answered))",
                 [
-                    .fetchResponse(.start(2)),
-                    .fetchResponse(.simpleAttribute(.uid(111))),
-                    .fetchResponse(.simpleAttribute(.flags([.seen, .deleted, .answered]))),
-                    .fetchResponse(.finish),
+                    .fetch(.start(2)),
+                    .fetch(.simpleAttribute(.uid(111))),
+                    .fetch(.simpleAttribute(.flags([.seen, .deleted, .answered]))),
+                    .fetch(.finish),
                 ]
             ),
 
             // MARK: Tagged
 
-            ("tag OK Complete", [.taggedResponse(.init(tag: "tag", state: .ok(.init(code: nil, text: "Complete"))))]),
-            ("tag NO [ALERT] Complete", [.taggedResponse(.init(tag: "tag", state: .no(.init(code: .alert, text: "Complete"))))]),
-            ("tag BAD [PARSE] Complete", [.taggedResponse(.init(tag: "tag", state: .bad(.init(code: .parse, text: "Complete"))))]),
+            ("tag OK Complete", [.tagged(.init(tag: "tag", state: .ok(.init(code: nil, text: "Complete"))))]),
+            ("tag NO [ALERT] Complete", [.tagged(.init(tag: "tag", state: .no(.init(code: .alert, text: "Complete"))))]),
+            ("tag BAD [PARSE] Complete", [.tagged(.init(tag: "tag", state: .bad(.init(code: .parse, text: "Complete"))))]),
         ]
 
         let inputs = inoutPairs.map { ($0.0 + CRLF, $0.1.map { ResponseOrContinuationRequest.response($0) }) }

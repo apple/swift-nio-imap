@@ -25,10 +25,10 @@ extension Response_Tests {
         let inputs: [(Response, String, UInt)] = [
             (.idleStarted, "+ idling\r\n", #line),
             (.authenticationChallenge("hello"), "+ aGVsbG8=\r\n", #line),
-            (.fatalResponse(.init(text: "Oh no you're dead")), "* BYE Oh no you're dead\r\n", #line),
-            (.taggedResponse(.init(tag: "A1", state: .ok(.init(text: "NOOP complete")))), "A1 OK NOOP complete\r\n", #line),
-            (.untaggedResponse(.id([:])), "* ID NIL\r\n", #line),
-            (.fetchResponse(.start(1)), "* 1 FETCH (", #line),
+            (.fatal(.init(text: "Oh no you're dead")), "* BYE Oh no you're dead\r\n", #line),
+            (.tagged(.init(tag: "A1", state: .ok(.init(text: "NOOP complete")))), "A1 OK NOOP complete\r\n", #line),
+            (.untagged(.id([:])), "* ID NIL\r\n", #line),
+            (.fetch(.start(1)), "* 1 FETCH (", #line),
         ]
 
         for (test, expectedString, line) in inputs {

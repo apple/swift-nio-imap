@@ -53,106 +53,106 @@ extension ResponseParser_Tests {
 
         // send some bytes to make sure it's worked
         buffer = "0123456789"
-        XCTAssertNoThrow(XCTAssertEqual(try parser.parseResponseStream(buffer: &buffer), .response(.fetchResponse(.streamingBytes("0123456789")))))
-        XCTAssertNoThrow(XCTAssertEqual(try parser.parseResponseStream(buffer: &buffer), .response(.fetchResponse(.streamingEnd))))
+        XCTAssertNoThrow(XCTAssertEqual(try parser.parseResponseStream(buffer: &buffer), .response(.fetch(.streamingBytes("0123456789")))))
+        XCTAssertNoThrow(XCTAssertEqual(try parser.parseResponseStream(buffer: &buffer), .response(.fetch(.streamingEnd))))
     }
 
     func testParseResponseStream() {
         let inputs: [(String, [ResponseOrContinuationRequest], UInt)] = [
             ("+ OK Continue", [.continuationRequest(.responseText(.init(text: "OK Continue")))], #line),
-            ("1 OK NOOP Completed", [.response(.taggedResponse(.init(tag: "1", state: .ok(.init(text: "NOOP Completed")))))], #line),
+            ("1 OK NOOP Completed", [.response(.tagged(.init(tag: "1", state: .ok(.init(text: "NOOP Completed")))))], #line),
             (
                 "* 999 FETCH (FLAGS (\\Seen))",
                 [
-                    .response(.fetchResponse(.start(999))),
-                    .response(.fetchResponse(.simpleAttribute(.flags([.seen])))),
-                    .response(.fetchResponse(.finish)),
+                    .response(.fetch(.start(999))),
+                    .response(.fetch(.simpleAttribute(.flags([.seen])))),
+                    .response(.fetch(.finish)),
                 ],
                 #line
             ),
             (
                 #"* 12190 FETCH (BODYSTRUCTURE (("TEXT" "PLAIN" ("CHARSET" "utf-8") NIL NIL "QUOTED-PRINTABLE" 1772 47 NIL NIL NIL NIL)("TEXT" "HTML" ("CHARSET" "utf-8") NIL NIL "QUOTED-PRINTABLE" 2778 40 NIL NIL NIL NIL) "ALTERNATIVE" ("BOUNDARY" "Apple-Mail=_0D97185D-4FF1-42FE-9B8F-A0759D299015") NIL NIL NIL))"#,
                 [
-                    .response(.fetchResponse(.start(12190))),
+                    .response(.fetch(.start(12190))),
                     .response(
-                        .fetchResponse(.simpleAttribute(.body(.multipart(.init(parts: [
+                        .fetch(.simpleAttribute(.body(.multipart(.init(parts: [
                             .singlepart(.init(kind: .text(.init(mediaText: "PLAIN", lineCount: 47)), fields: .init(parameters: ["CHARSET": "utf-8"], id: nil, contentDescription: nil, encoding: .quotedPrintable, octetCount: 1772), extension: .init(digest: nil, dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: .init(location: nil, extensions: [])))))),
                             .singlepart(.init(kind: .text(.init(mediaText: "HTML", lineCount: 40)), fields: .init(parameters: ["CHARSET": "utf-8"], id: nil, contentDescription: nil, encoding: .quotedPrintable, octetCount: 2778), extension: .init(digest: nil, dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: .init(location: nil, extensions: [])))))),
                         ], mediaSubtype: .init("ALTERNATIVE"), extension: .init(parameters: ["BOUNDARY": "Apple-Mail=_0D97185D-4FF1-42FE-9B8F-A0759D299015"], dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: .init(location: nil, extensions: [])))))), hasExtensionData: true)))
                     ),
-                    .response(.fetchResponse(.finish)),
+                    .response(.fetch(.finish)),
                 ],
                 #line
             ),
             (
                 #"* 12194 FETCH (BODYSTRUCTURE (("TEXT" "HTML" ("CHARSET" "UTF-8") NIL NIL "QUOTED-PRINTABLE" 3034 50 NIL NIL NIL NIL) "ALTERNATIVE" ("BOUNDARY" "_____5C088583DDA30A778CEA0F5BFE2856D1") NIL NIL NIL))"#,
                 [
-                    .response(.fetchResponse(.start(12194))),
+                    .response(.fetch(.start(12194))),
                     .response(
-                        .fetchResponse(.simpleAttribute(.body(.multipart(.init(parts: [
+                        .fetch(.simpleAttribute(.body(.multipart(.init(parts: [
                             .singlepart(.init(kind: .text(.init(mediaText: "HTML", lineCount: 50)), fields: .init(parameters: ["CHARSET": "UTF-8"], id: nil, contentDescription: nil, encoding: .quotedPrintable, octetCount: 3034), extension: .init(digest: nil, dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: .init(location: nil, extensions: [])))))),
                         ], mediaSubtype: .init("ALTERNATIVE"), extension: .init(parameters: ["BOUNDARY": "_____5C088583DDA30A778CEA0F5BFE2856D1"], dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: .init(location: nil, extensions: [])))))), hasExtensionData: true)))
                     ),
-                    .response(.fetchResponse(.finish)),
+                    .response(.fetch(.finish)),
                 ],
                 #line
             ),
             (
                 #"* 12180 FETCH (BODYSTRUCTURE (("TEXT" "PLAIN" ("CHARSET" "UTF-8") NIL NIL "7BIT" 221 5 NIL NIL NIL NIL)("TEXT" "HTML" ("CHARSET" "UTF-8") NIL NIL "7BIT" 2075 20 NIL NIL NIL NIL) "ALTERNATIVE" ("BOUNDARY" "--==_mimepart_5efddab8ca39a_6a343f841aacb93410876c" "CHARSET" "UTF-8") NIL NIL NIL))"#,
                 [
-                    .response(.fetchResponse(.start(12180))),
+                    .response(.fetch(.start(12180))),
                     .response(
-                        .fetchResponse(.simpleAttribute(.body(.multipart(.init(parts: [
+                        .fetch(.simpleAttribute(.body(.multipart(.init(parts: [
                             .singlepart(.init(kind: .text(.init(mediaText: "PLAIN", lineCount: 5)), fields: .init(parameters: ["CHARSET": "UTF-8"], id: nil, contentDescription: nil, encoding: .sevenBit, octetCount: 221), extension: .init(digest: nil, dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: .init(location: nil, extensions: [])))))),
                             .singlepart(.init(kind: .text(.init(mediaText: "HTML", lineCount: 20)), fields: .init(parameters: ["CHARSET": "UTF-8"], id: nil, contentDescription: nil, encoding: .sevenBit, octetCount: 2075), extension: .init(digest: nil, dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: .init(location: nil, extensions: [])))))),
                         ], mediaSubtype: .init("ALTERNATIVE"), extension: .init(parameters: ["BOUNDARY": "--==_mimepart_5efddab8ca39a_6a343f841aacb93410876c", "CHARSET": "UTF-8"], dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: .init(location: nil, extensions: [])))))), hasExtensionData: true)))
                     ),
-                    .response(.fetchResponse(.finish)),
+                    .response(.fetch(.finish)),
                 ],
                 #line
             ),
             (
                 #"* 12182 FETCH (BODYSTRUCTURE (("TEXT" "PLAIN" ("CHARSET" "utf-8") NIL NIL "QUOTED-PRINTABLE" 239844 4078 NIL NIL NIL NIL)("TEXT" "HTML" ("CHARSET" "utf-8") NIL NIL "QUOTED-PRINTABLE" 239844 4078 NIL NIL NIL NIL) "ALTERNATIVE" ("BOUNDARY" "===============8996999810533184102==") NIL NIL NIL))"#,
                 [
-                    .response(.fetchResponse(.start(12182))),
+                    .response(.fetch(.start(12182))),
                     .response(
-                        .fetchResponse(.simpleAttribute(.body(.multipart(.init(parts: [
+                        .fetch(.simpleAttribute(.body(.multipart(.init(parts: [
                             .singlepart(.init(kind: .text(.init(mediaText: "PLAIN", lineCount: 4078)), fields: .init(parameters: ["CHARSET": "utf-8"], id: nil, contentDescription: nil, encoding: .quotedPrintable, octetCount: 239844), extension: .init(digest: nil, dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: .init(location: nil, extensions: [])))))),
                             .singlepart(.init(kind: .text(.init(mediaText: "HTML", lineCount: 4078)), fields: .init(parameters: ["CHARSET": "utf-8"], id: nil, contentDescription: nil, encoding: .quotedPrintable, octetCount: 239844), extension: .init(digest: nil, dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: .init(location: nil, extensions: [])))))),
                         ], mediaSubtype: .init("ALTERNATIVE"), extension: .init(parameters: ["BOUNDARY": "===============8996999810533184102=="], dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: .init(location: nil, extensions: [])))))), hasExtensionData: true)))
                     ),
-                    .response(.fetchResponse(.finish)),
+                    .response(.fetch(.finish)),
                 ],
                 #line
             ),
             (
                 #"* 12183 FETCH (BODYSTRUCTURE ("TEXT" "HTML" NIL NIL NIL "BINARY" 28803 603 NIL NIL NIL NIL))"#,
                 [
-                    .response(.fetchResponse(.start(12183))),
+                    .response(.fetch(.start(12183))),
                     .response(
-                        .fetchResponse(.simpleAttribute(.body(.singlepart(.init(kind: .text(.init(mediaText: "HTML", lineCount: 603)), fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .binary, octetCount: 28803), extension: .init(digest: nil, dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: .init(location: nil, extensions: [])))))), hasExtensionData: true)))
+                        .fetch(.simpleAttribute(.body(.singlepart(.init(kind: .text(.init(mediaText: "HTML", lineCount: 603)), fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .binary, octetCount: 28803), extension: .init(digest: nil, dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: .init(location: nil, extensions: [])))))), hasExtensionData: true)))
                     ),
-                    .response(.fetchResponse(.finish)),
+                    .response(.fetch(.finish)),
                 ],
                 #line
             ),
             (
                 #"* 12184 FETCH (BODYSTRUCTURE ("TEXT" "PLAIN" ("CHARSET" "utf-8") "<DDB621064D883242BBC8DBE205F0250F@pex.exch.apple.com>" NIL "BASE64" 2340 30 NIL NIL ("EN-US") NIL))"#,
                 [
-                    .response(.fetchResponse(.start(12184))),
+                    .response(.fetch(.start(12184))),
                     .response(
-                        .fetchResponse(.simpleAttribute(.body(.singlepart(.init(kind: .text(.init(mediaText: "PLAIN", lineCount: 30)), fields: .init(parameters: ["CHARSET": "utf-8"], id: "<DDB621064D883242BBC8DBE205F0250F@pex.exch.apple.com>", contentDescription: nil, encoding: .base64, octetCount: 2340), extension: .init(digest: nil, dispositionAndLanguage: .init(disposition: nil, language: .init(languages: ["EN-US"], location: .init(location: nil, extensions: [])))))), hasExtensionData: true)))
+                        .fetch(.simpleAttribute(.body(.singlepart(.init(kind: .text(.init(mediaText: "PLAIN", lineCount: 30)), fields: .init(parameters: ["CHARSET": "utf-8"], id: "<DDB621064D883242BBC8DBE205F0250F@pex.exch.apple.com>", contentDescription: nil, encoding: .base64, octetCount: 2340), extension: .init(digest: nil, dispositionAndLanguage: .init(disposition: nil, language: .init(languages: ["EN-US"], location: .init(location: nil, extensions: [])))))), hasExtensionData: true)))
                     ),
-                    .response(.fetchResponse(.finish)),
+                    .response(.fetch(.finish)),
                 ],
                 #line
             ),
             (
                 #"* 12187 FETCH (BODYSTRUCTURE (("TEXT" "PLAIN" ("CHARSET" "utf-8") NIL NIL "QUOTED-PRINTABLE" 6990 170 NIL NIL NIL NIL)(("TEXT" "HTML" ("CHARSET" "utf-8") NIL NIL "QUOTED-PRINTABLE" 18865 274 NIL NIL NIL NIL)("APPLICATION" "OCTET-STREAM" ("X-UNIX-MODE" "0644" "NAME" "Whiteboard on Webex.key") NIL NIL "BASE64" 4876604 NIL ("ATTACHMENT" ("FILENAME" "Whiteboard on Webex.key")) NIL NIL)("TEXT" "HTML" ("CHARSET" "us-ascii") NIL NIL "QUOTED-PRINTABLE" 1143 17 NIL NIL NIL NIL)("APPLICATION" "PDF" ("X-UNIX-MODE" "0644" "NAME" "Whiteboard on Webex.pdf") NIL NIL "BASE64" 1191444 NIL ("INLINE" ("FILENAME" "Whiteboard on Webex.pdf")) NIL NIL)("TEXT" "HTML" ("CHARSET" "us-ascii") NIL NIL "QUOTED-PRINTABLE" 2217 32 NIL NIL NIL NIL)("APPLICATION" "PDF" ("X-UNIX-MODE" "0666" "NAME" "Resume.pdf") NIL NIL "BASE64" 217550 NIL ("INLINE" ("FILENAME" "Resume.pdf")) NIL NIL)("TEXT" "HTML" ("CHARSET" "utf-8") NIL NIL "QUOTED-PRINTABLE" 4450 62 NIL NIL NIL NIL) "MIXED" ("BOUNDARY" "Apple-Mail=_1B76125E-EB81-4B78-A023-B30D1F9070F2") NIL NIL NIL) "ALTERNATIVE" ("BOUNDARY" "Apple-Mail=_2F0988E2-CA7E-4379-B088-7E556A97E21F") NIL NIL NIL))"#,
                 [
-                    .response(.fetchResponse(.start(12187))),
+                    .response(.fetch(.start(12187))),
                     .response(
-                        .fetchResponse(
+                        .fetch(
                             .simpleAttribute(.body(.multipart(.init(parts: [
                                 .singlepart(.init(kind: .text(.init(mediaText: "PLAIN", lineCount: 170)), fields: .init(parameters: ["CHARSET": "utf-8"], id: nil, contentDescription: nil, encoding: .quotedPrintable, octetCount: 6990), extension: .init(digest: nil, dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: .init(location: nil, extensions: [])))))),
                                 .multipart(.init(parts: [
@@ -167,27 +167,27 @@ extension ResponseParser_Tests {
                             ], mediaSubtype: .init("ALTERNATIVE"), extension: .init(parameters: ["BOUNDARY": "Apple-Mail=_2F0988E2-CA7E-4379-B088-7E556A97E21F"], dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: .init(location: nil, extensions: [])))))), hasExtensionData: true))
                         )
                     ),
-                    .response(.fetchResponse(.finish)),
+                    .response(.fetch(.finish)),
                 ],
                 #line
             ),
             (
                 #"* 53 FETCH (BODYSTRUCTURE (("TEXT" "HTML" NIL NIL NIL "7BIT" 151 0 NIL NIL NIL) "MIXED" ("BOUNDARY" "----=rfsewr") NIL NIL))"#,
                 [
-                    .response(.fetchResponse(.start(53))),
-                    .response(.fetchResponse(.simpleAttribute(.body(.multipart(.init(parts: [
+                    .response(.fetch(.start(53))),
+                    .response(.fetch(.simpleAttribute(.body(.multipart(.init(parts: [
                         .singlepart(.init(kind: .text(.init(mediaText: "HTML", lineCount: 0)), fields: BodyStructure.Fields(parameters: [:], id: nil, contentDescription: nil, encoding: .sevenBit, octetCount: 151), extension: BodyStructure.Singlepart.Extension(digest: nil, dispositionAndLanguage: BodyStructure.DispositionAndLanguage(disposition: nil, language: BodyStructure.LanguageLocation(languages: [], location: nil))))),
                     ], mediaSubtype: .init("MIXED"), extension: .init(parameters: ["BOUNDARY": "----=rfsewr"], dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: nil))))), hasExtensionData: true)))),
-                    .response(.fetchResponse(.finish)),
+                    .response(.fetch(.finish)),
                 ],
                 #line
             ),
             (
                 #"* 433 FETCH (BODYSTRUCTURE (((("TEXT" "PLAIN" ("CHARSET" "ISO-8859-1") NIL NIL "QUOTED-PRINTABLE" 710 20 NIL NIL NIL)("TEXT" "HTML" ("CHARSET" "ISO-8859-1") NIL NIL "QUOTED-PRINTABLE" 4323 42 NIL ("INLINE" NIL) NIL) "ALTERNATIVE" ("BOUNDARY" "4__=rtfgha") NIL NIL)("IMAGE" "JPEG" ("NAME" "bike.jpeg") "<2__=lgkfjr>" NIL "BASE64" 64 NIL ("INLINE" ("FILENAME" "bike.jpeg")) NIL) "RELATED" ("BOUNDARY" "0__=rtfgaa") NIL NIL)("APPLICATION" "PDF" ("NAME" "title.pdf") "<5__=jlgkfr>" NIL "BASE64" 333980 NIL ("ATTACHMENT" ("FILENAME" "list.pdf")) NIL) "MIXED" ("BOUNDARY" "1__=tfgrhs") NIL NIL))"#,
                 [
-                    .response(.fetchResponse(.start(433))),
+                    .response(.fetch(.start(433))),
                     .response(
-                        .fetchResponse(.simpleAttribute(.body(.multipart(.init(parts: [
+                        .fetch(.simpleAttribute(.body(.multipart(.init(parts: [
                             .multipart(
                                 .init(parts: [
                                     .multipart(
@@ -203,16 +203,16 @@ extension ResponseParser_Tests {
                         ], mediaSubtype: .init("MIXED"), extension: .init(parameters: ["BOUNDARY": "1__=tfgrhs"], dispositionAndLanguage: .init(disposition: nil, language: .init(languages: []))))), hasExtensionData: true))
                         )
                     ),
-                    .response(.fetchResponse(.finish)),
+                    .response(.fetch(.finish)),
                 ],
                 #line
             ),
             (
                 #"* 234 FETCH (BODYSTRUCTURE ((("TEXT" "PLAIN" ("CHARSET" "ISO-8859-1") NIL NIL "QUOTED-PRINTABLE" 410 24 NIL NIL NIL)("TEXT" "HTML" ("CHARSET" "ISO-8859-1") NIL NIL "QUOTED-PRINTABLE" 1407 30 NIL ("INLINE" NIL) NIL) "ALTERNATIVE" ("BOUNDARY" "hqjksdm1__=") NIL NIL)("IMAGE" "PNG" ("NAME" "screenshot.png") "<3__=f2fcxd>" NIL "BASE64" 40655 NIL ("INLINE" ("FILENAME" "screenshot.png")) NIL) "RELATED" ("BOUNDARY" "5__=hsdqjkm") NIL NIL))"#,
                 [
-                    .response(.fetchResponse(.start(234))),
+                    .response(.fetch(.start(234))),
                     .response(
-                        .fetchResponse(.simpleAttribute(.body(.multipart(.init(parts: [
+                        .fetch(.simpleAttribute(.body(.multipart(.init(parts: [
                             .multipart(
                                 .init(parts: [
                                     .singlepart(.init(kind: .text(.init(mediaText: "PLAIN", lineCount: 24)), fields: .init(parameters: ["CHARSET": "ISO-8859-1"], id: nil, contentDescription: nil, encoding: .quotedPrintable, octetCount: 410), extension: .init(digest: nil, dispositionAndLanguage: .init(disposition: nil, language: .init(languages: []))))),
@@ -224,7 +224,7 @@ extension ResponseParser_Tests {
                             ),
                         ], mediaSubtype: .init("RELATED"), extension: .init(parameters: ["BOUNDARY": "5__=hsdqjkm"], dispositionAndLanguage: .init(disposition: nil, language: .init(languages: []))))), hasExtensionData: true)))
                     ),
-                    .response(.fetchResponse(.finish)),
+                    .response(.fetch(.finish)),
                 ],
                 #line
             ),
@@ -259,7 +259,7 @@ extension ResponseParser_Tests {
         var parser = ResponseParser()
         var input = ByteBuffer(string: "* 1 FETCH (* 2 FETCH \n")
 
-        XCTAssertNoThrow(XCTAssertEqual(try parser.parseResponseStream(buffer: &input), .response(.fetchResponse(.start(1)))))
+        XCTAssertNoThrow(XCTAssertEqual(try parser.parseResponseStream(buffer: &input), .response(.fetch(.start(1)))))
         XCTAssertThrowsError(try parser.parseResponseStream(buffer: &input))
     }
 }
