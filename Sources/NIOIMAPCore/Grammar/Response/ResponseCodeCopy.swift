@@ -18,7 +18,7 @@
 /// so that the source UIDs can be matched to destination UIDs.
 public struct ResponseCodeCopy: Equatable {
     /// The `UIDValidity` of the destination mailbox
-    public var destinationUIDValidity: Int
+    public var destinationUIDValidity: UIDValidity
 
     /// The message UIDs in the source mailbox.
     public var sourceUIDs: [UIDRange]
@@ -30,7 +30,7 @@ public struct ResponseCodeCopy: Equatable {
     /// - parameter destinationUIDValidity: The `UIDValidity` of the destination mailbox.
     /// - parameter sourceUIDs: The message UIDs in the source mailbox.
     /// - parameter destinationUIDs: The copied message UIDs in the destination mailbox.
-    public init(destinationUIDValidity: Int, sourceUIDs: [UIDRange], destinationUIDs: [UIDRange]) {
+    public init(destinationUIDValidity: UIDValidity, sourceUIDs: [UIDRange], destinationUIDs: [UIDRange]) {
         self.destinationUIDValidity = destinationUIDValidity
         self.sourceUIDs = sourceUIDs
         self.destinationUIDs = destinationUIDs
@@ -41,7 +41,7 @@ public struct ResponseCodeCopy: Equatable {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeResponseCodeCopy(_ data: ResponseCodeCopy) -> Int {
-        self.writeString("COPYUID \(data.destinationUIDValidity) ") +
+        self.writeString("COPYUID \(data.destinationUIDValidity.rawValue) ") +
             self.writeUIDRangeArray(data.sourceUIDs) +
             self.writeSpace() +
             self.writeUIDRangeArray(data.destinationUIDs)

@@ -60,7 +60,7 @@ extension GrammarParser {
     static func parseResponseCodeCopy(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseCodeCopy {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> ResponseCodeCopy in
             try PL.parseFixedString("COPYUID ", buffer: &buffer, tracker: tracker)
-            let uidValidity = try self.parseNumber(buffer: &buffer, tracker: tracker)
+            let uidValidity = try self.parseUIDValidity(buffer: &buffer, tracker: tracker)
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             let sourceUIDRanges = try self.parseUIDRangeArray(buffer: &buffer, tracker: tracker)
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
