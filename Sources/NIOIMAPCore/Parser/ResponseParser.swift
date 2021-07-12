@@ -119,24 +119,24 @@ extension ResponseParser {
                 switch response {
                 case .fetchResponse(.start(let num)):
                     self.moveStateMachine(expected: .response(.fetchOrNormal), next: .response(.fetchMiddle))
-                    return .response(.fetchResponse(.start(num)))
+                    return .response(.fetch(.start(num)))
                 case .fetchResponse(.literalStreamingBegin(kind: let kind, byteCount: let size)):
                     self.moveStateMachine(expected: .response(.fetchMiddle), next: .attributeBytes(size))
-                    return .response(.fetchResponse(.streamingBegin(kind: kind, byteCount: size)))
+                    return .response(.fetch(.streamingBegin(kind: kind, byteCount: size)))
 
                 case .fetchResponse(.quotedStreamingBegin(kind: let kind, byteCount: let size)):
                     self.moveStateMachine(expected: .response(.fetchMiddle), next: .streamingQuoted)
-                    return .response(.fetchResponse(.streamingBegin(kind: kind, byteCount: size)))
+                    return .response(.fetch(.streamingBegin(kind: kind, byteCount: size)))
 
                 case .fetchResponse(.finish):
                     self.moveStateMachine(expected: .response(.fetchMiddle), next: .response(.fetchOrNormal))
-                    return .response(.fetchResponse(.finish))
+                    return .response(.fetch(.finish))
 
                 case .untaggedResponse(let payload):
-                    return .response(.untaggedResponse(payload))
+                    return .response(.untagged(payload))
 
                 case .fetchResponse(.simpleAttribute(let att)):
-                    return .response(.fetchResponse(.simpleAttribute(att)))
+                    return .response(.fetch(.simpleAttribute(att)))
                 }
             } catch is ParserError {
                 return try self._parseResponse(buffer: &buffer, tracker: tracker)
@@ -150,7 +150,7 @@ extension ResponseParser {
         }
 
         func parseResponse_tagged(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseOrContinuationRequest {
-            .response(.taggedResponse(try GrammarParser.parseTaggedResponse(buffer: &buffer, tracker: tracker)))
+            .response(.tagged(try GrammarParser.parseTaggedResponse(buffer: &buffer, tracker: tracker)))
         }
 
         return try PL.parseOneOf([
@@ -173,7 +173,7 @@ extension ResponseParser {
             return self.moveStateMachine(
                 expected: .attributeBytes(remaining),
                 next: .response(.fetchMiddle),
-                returnValue: .fetchResponse(.streamingEnd)
+                returnValue: .fetch(.streamingEnd)
             )
         } else {
             let bytes = try PL.parseBytes(buffer: &buffer,
@@ -185,13 +185,13 @@ extension ResponseParser {
             return self.moveStateMachine(
                 expected: .attributeBytes(remaining),
                 next: .attributeBytes(leftToRead),
-                returnValue: .fetchResponse(.streamingBytes(bytes))
+                returnValue: .fetch(.streamingBytes(bytes))
             )
         }
     }
 
     fileprivate mutating func parseQuotedBytes(buffer: inout ParseBuffer) throws -> Response {
         let quoted = try GrammarParser.parseQuoted(buffer: &buffer, tracker: .makeNewDefaultLimitStackTracker)
-        return self.moveStateMachine(expected: .streamingQuoted, next: .attributeBytes(0), returnValue: .fetchResponse(.streamingBytes(quoted)))
+        return self.moveStateMachine(expected: .streamingQuoted, next: .attributeBytes(0), returnValue: .fetch(.streamingBytes(quoted)))
     }
 }

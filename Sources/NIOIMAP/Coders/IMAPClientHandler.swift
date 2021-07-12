@@ -138,10 +138,10 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
 
     private func handleResponse(_ response: Response, context: ChannelHandlerContext) {
         switch response {
-        case .taggedResponse:
+        case .tagged:
             // continuations must have finished: change the state to standard continuation handling
             self.state = .expectingResponses
-        case .untaggedResponse(let untagged):
+        case .untagged(let untagged):
             switch untagged {
             case .conditionalState, .mailboxData, .messageData, .enableData, .quotaRoot, .quota, .metadata:
                 break
@@ -152,7 +152,7 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
                 self.encodingChangeCallback(info, &recomended)
                 self.encodingOptions = recomended
             }
-        case .fetchResponse, .fatalResponse, .authenticationChallenge:
+        case .fetch, .fatal, .authenticationChallenge:
             break
         case .idleStarted:
             self.state = .expectingIdleContinuation

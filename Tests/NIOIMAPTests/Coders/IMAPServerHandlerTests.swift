@@ -25,7 +25,7 @@ class IMAPServerHandlerTests: XCTestCase {
     func testSimpleCommandAndResponse() {
         self.writeInbound("a LOGIN \"user\" \"password\"\r\n")
         self.assertInbound(.tagged(.init(tag: "a", command: .login(username: "user", password: "password"))))
-        self.writeOutbound(.taggedResponse(.init(tag: "a", state: .ok(.init(text: "yo")))))
+        self.writeOutbound(.tagged(.init(tag: "a", state: .ok(.init(text: "yo")))))
         self.assertOutboundString("a OK yo\r\n")
     }
 
@@ -42,7 +42,7 @@ class IMAPServerHandlerTests: XCTestCase {
         self.writeInbound("user \"password\"\r\n")
 
         self.assertInbound(.tagged(.init(tag: "a", command: .login(username: "user", password: "password"))))
-        self.writeOutbound(.taggedResponse(.init(tag: "a", state: .ok(.init(text: "yo")))))
+        self.writeOutbound(.tagged(.init(tag: "a", state: .ok(.init(text: "yo")))))
         self.assertOutboundString("a OK yo\r\n")
     }
 
@@ -52,7 +52,7 @@ class IMAPServerHandlerTests: XCTestCase {
         XCTAssertNoThrow(XCTAssertNil(try self.channel.readOutbound(as: ByteBuffer.self)))
 
         self.assertInbound(.tagged(.init(tag: "a", command: .login(username: "user", password: "password"))))
-        self.writeOutbound(.taggedResponse(.init(tag: "a", state: .ok(.init(text: "yo")))))
+        self.writeOutbound(.tagged(.init(tag: "a", state: .ok(.init(text: "yo")))))
         self.assertOutboundString("a OK yo\r\n")
 
         self.channel.read()
@@ -74,7 +74,7 @@ class IMAPServerHandlerTests: XCTestCase {
         self.writeInbound("user \"password\"\r\n")
 
         self.assertInbound(.tagged(.init(tag: "a", command: .login(username: "user", password: "password"))))
-        self.writeOutbound(.taggedResponse(.init(tag: "a", state: .ok(.init(text: "yo")))))
+        self.writeOutbound(.tagged(.init(tag: "a", state: .ok(.init(text: "yo")))))
         self.assertOutboundString("a OK yo\r\n")
     }
 
@@ -94,7 +94,7 @@ class IMAPServerHandlerTests: XCTestCase {
         self.writeInbound("user \"password\"\r\n")
 
         self.assertInbound(.tagged(.init(tag: "a", command: .login(username: "user", password: "password"))))
-        self.writeOutbound(.taggedResponse(.init(tag: "a", state: .ok(.init(text: "yo")))))
+        self.writeOutbound(.tagged(.init(tag: "a", state: .ok(.init(text: "yo")))))
         self.assertOutboundString("a OK yo\r\n")
     }
 
@@ -108,41 +108,41 @@ class IMAPServerHandlerTests: XCTestCase {
         self.channel = EmbeddedChannel(handler: self.handler)
 
         // single attribute
-        self.writeOutbound(.fetchResponse(.start(1)), wait: false)
+        self.writeOutbound(.fetch(.start(1)), wait: false)
         self.assertOutboundString("* 1 FETCH (")
-        self.writeOutbound(.fetchResponse(.simpleAttribute(.flags([.answered, .draft]))), wait: false)
+        self.writeOutbound(.fetch(.simpleAttribute(.flags([.answered, .draft]))), wait: false)
         self.assertOutboundString("FLAGS (\\Answered \\Draft)")
-        self.writeOutbound(.fetchResponse(.finish), wait: false)
+        self.writeOutbound(.fetch(.finish), wait: false)
         self.assertOutboundString(")\r\n")
 
         // multiple attributes
-        self.writeOutbound(.fetchResponse(.start(2)), wait: false)
+        self.writeOutbound(.fetch(.start(2)), wait: false)
         self.assertOutboundString("* 2 FETCH (")
-        self.writeOutbound(.fetchResponse(.simpleAttribute(.flags([.answered, .draft]))), wait: false)
+        self.writeOutbound(.fetch(.simpleAttribute(.flags([.answered, .draft]))), wait: false)
         self.assertOutboundString("FLAGS (\\Answered \\Draft)")
-        self.writeOutbound(.fetchResponse(.simpleAttribute(.uid(999))), wait: false)
+        self.writeOutbound(.fetch(.simpleAttribute(.uid(999))), wait: false)
         self.assertOutboundString(" UID 999")
-        self.writeOutbound(.fetchResponse(.simpleAttribute(.rfc822Size(876))), wait: false)
+        self.writeOutbound(.fetch(.simpleAttribute(.rfc822Size(876))), wait: false)
         self.assertOutboundString(" RFC822.SIZE 876")
-        self.writeOutbound(.fetchResponse(.finish), wait: false)
+        self.writeOutbound(.fetch(.finish), wait: false)
         self.assertOutboundString(")\r\n")
 
         // multiple attributes with streaming
-        self.writeOutbound(.fetchResponse(.start(2)), wait: false)
+        self.writeOutbound(.fetch(.start(2)), wait: false)
         self.assertOutboundString("* 2 FETCH (")
-        self.writeOutbound(.fetchResponse(.simpleAttribute(.flags([.answered, .draft]))), wait: false)
+        self.writeOutbound(.fetch(.simpleAttribute(.flags([.answered, .draft]))), wait: false)
         self.assertOutboundString("FLAGS (\\Answered \\Draft)")
-        self.writeOutbound(.fetchResponse(.simpleAttribute(.uid(999))), wait: false)
+        self.writeOutbound(.fetch(.simpleAttribute(.uid(999))), wait: false)
         self.assertOutboundString(" UID 999")
-        self.writeOutbound(.fetchResponse(.streamingBegin(kind: .rfc822, byteCount: 5)), wait: false)
+        self.writeOutbound(.fetch(.streamingBegin(kind: .rfc822, byteCount: 5)), wait: false)
         self.assertOutboundString(" RFC822 {5}\r\n")
-        self.writeOutbound(.fetchResponse(.streamingBytes("12345")), wait: false)
+        self.writeOutbound(.fetch(.streamingBytes("12345")), wait: false)
         self.assertOutboundString("12345")
-        self.writeOutbound(.fetchResponse(.streamingEnd), wait: false)
+        self.writeOutbound(.fetch(.streamingEnd), wait: false)
         self.assertOutboundString("")
-        self.writeOutbound(.fetchResponse(.simpleAttribute(.rfc822Size(876))), wait: false)
+        self.writeOutbound(.fetch(.simpleAttribute(.rfc822Size(876))), wait: false)
         self.assertOutboundString(" RFC822.SIZE 876")
-        self.writeOutbound(.fetchResponse(.finish), wait: false)
+        self.writeOutbound(.fetch(.finish), wait: false)
         self.assertOutboundString(")\r\n")
     }
 
@@ -179,7 +179,7 @@ class IMAPServerHandlerTests: XCTestCase {
         self.assertInbound(.continuationResponse("response3"))
 
         // all done
-        self.writeOutbound(.taggedResponse(.init(tag: "A1", state: .ok(.init(text: "Success")))))
+        self.writeOutbound(.tagged(.init(tag: "A1", state: .ok(.init(text: "Success")))))
         self.assertOutboundBuffer("A1 OK Success\r\n")
     }
 
