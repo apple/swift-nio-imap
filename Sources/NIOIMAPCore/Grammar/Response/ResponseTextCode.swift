@@ -17,6 +17,7 @@ import struct NIO.ByteBuffer
 // TODO: Convert to struct
 /// Used to help tell a client why a command failed. Machine readable, not guaranteed to
 /// be human readable.
+/// See also https://www.iana.org/assignments/imap-response-codes/imap-response-codes.xhtml
 public enum ResponseTextCode: Equatable {
     /// The human-readable text contains a special alert that MUST be
     /// presented to the user in a fashion that calls the user's
@@ -170,89 +171,89 @@ public enum ResponseTextCode: Equatable {
     /// willing to accept connections and wishes to direct the client to
     /// another IMAP4 server.
     case referral(IMAPURL)
-    
+
     /// Temporary failure because a subsystem is down.
     case unavailable
-    
+
     /// Authentication failed for some reason on which the server
     /// is unwilling to elaborate.
     case authenticationFailed
-    
+
     // Authentication succeeded in using the authentication identity,
     // but the server cannot or will not allow the authentication
     // identity to act as the requested authorization identity.  This
     // is only applicable when the authentication and authorization
     // identities are different.
     case authorizationFailed
-    
+
     /// Either authentication succeeded or the server no longer had the
     /// necessary data; either way, access is no longer permitted using
     /// that passphrase.  The client or user should get a new
     /// passphrase.
     case expired
-    
+
     /// The operation is not permitted due to a lack of privacy.  If
     /// Transport Layer Security (TLS) is not in use, the client could
     /// try STARTTLS (see Section 6.2.1 of [RFC3501]) and then repeat
     /// the operation.
     case privacyRequired
-    
+
     /// The user should contact the system administrator or support
     /// desk.
     case contactAdmin
-    
+
     /// The access control system (e.g., Access Control List (ACL), see
     /// [RFC4314]) does not permit this user to carry out an operation,
     /// such as selecting or creating a mailbox.
     case noPermission
-    
+
     /// An operation has not been carried out because it involves
     /// sawing off a branch someone else is sitting on.  Someone else
     /// may be holding an exclusive lock needed for this operation, or
     /// the operation may involve deleting a resource someone else is
     /// using, typically a mailbox.
     case inUse
-    
+
     /// Someone else has issued an EXPUNGE for the same mailbox.  The///
     /// client may want to issue NOOP soon.  [RFC2180] discusses this
     /// subject in depth.
     case expungeIssued
-    
+
     /// The server discovered that some relevant data (e.g., the
     /// mailbox) are corrupt.  This response code does not include any
     /// information about what's corrupt, but the server can write that
     /// to its logfiles.
     case corruption
-    
+
     /// The server encountered a bug in itself or violated one of its
     /// own invariants.
     case serverBug
-    
+
     /// The server has detected a client bug.  This can accompany all
     /// of OK, NO, and BAD, depending on what the client bug is.
     case clientBug
-    
+
     /// The operation violates some invariant of the server and can
     /// never succeed.
     case cannot
-    
+
     /// The operation ran up against an implementation limit of some
     /// kind, such as the number of flags on a single message or the
     /// number of flags used in a mailbox.
     case limit
-    
+
     /// The user would be over quota after the operation.  (The user
     /// may or may not be over quota already.)
     /// Note that if the server sends OVERQUOTA but doesn't support the
     /// IMAP QUOTA extension defined by [RFC2087], then there is a
     /// quota, but the client cannot find out what the quota is.
     case overQuota
-    
+
     /// The operation attempts to create something that already exists,
     /// such as when the CREATE or RENAME directories attempt to create
     /// a mailbox and there is already one of that name.
     case alreadyExists
-    
+
     /// The operation attempts to delete something that does not exist.
     /// Similar to ALREADYEXISTS.
     case nonExistent
