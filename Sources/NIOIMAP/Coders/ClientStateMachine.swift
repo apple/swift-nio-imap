@@ -24,7 +24,6 @@ public struct UnexpectedResponse: Error {
 }
 
 struct ClientStateMachine: Hashable {
-    
     enum State: Hashable {
         case expectingNormalResponse
         case idle(ClientStateMachine.Idle)
@@ -36,7 +35,7 @@ struct ClientStateMachine: Hashable {
         case startedAppendMessage
         case startedCatenateMessage
     }
-    
+
     private var state: State = .expectingNormalResponse
 
     mutating func receiveResponse(_ response: Response) throws {
@@ -61,35 +60,34 @@ struct ClientStateMachine: Hashable {
 }
 
 // MARK: - Receive
+
 extension ClientStateMachine {
-    
     private mutating func handleResponse_idle(idleStateMachine: Idle, response: Response) throws {
         var idleStateMachine = idleStateMachine
         try idleStateMachine.receiveResponse(response)
         self.state = .idle(idleStateMachine)
     }
-    
 }
 
 // MARK: - Send
+
 extension ClientStateMachine {
-    
     private mutating func sendCommand_normalResponse(command: CommandStreamPart) throws {
         assert(self.state == .expectingNormalResponse)
-        
+
         switch command {
         case .idleDone, .continuationResponse:
             throw InvalidCommandForState()
         case .tagged(let taggedCommand):
             try self.sendTaggedCommand(command: taggedCommand)
-        case .append(_):
+        case .append:
             fatalError("TODO")
         }
     }
-    
+
     private mutating func sendTaggedCommand(command: TaggedCommand) throws {
         assert(self.state == .expectingNormalResponse)
-        
+
         switch command.command {
         case .idleStart:
             self.state = .idle(Idle())
@@ -97,7 +95,7 @@ extension ClientStateMachine {
             break
         }
     }
-    
+
     private mutating func sendCommand_idle(idleStateMachine: Idle, command: CommandStreamPart) throws {
         var idleStateMachine = idleStateMachine
         try idleStateMachine.sendCommand(command)
@@ -107,5 +105,4 @@ extension ClientStateMachine {
             self.state = .idle(idleStateMachine)
         }
     }
-    
 }
