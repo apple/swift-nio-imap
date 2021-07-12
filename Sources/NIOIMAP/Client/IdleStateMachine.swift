@@ -46,25 +46,25 @@ extension ClientStateMachine {
             }
 
             switch command {
-            case .tagged, .append, .continuationResponse:
-                throw InvalidCommandForState()
             case .idleDone:
                 self.state = .finished
+            case .tagged, .append, .continuationResponse:
+                throw InvalidCommandForState()
             }
         }
 
         mutating func receiveResponse(_ response: Response) throws {
             switch self.state {
             case .waitingForConfirmation:
-                try self.receiveResponse_waiting(response)
+                try self.receiveResponse_waitingState(response)
             case .idling:
-                try self.receiveResponse_idling(response)
+                try self.receiveResponse_idlingState(response)
             case .finished:
-                try self.receiveResponse_finished()
+                try self.receiveResponse_finishedState()
             }
         }
 
-        private mutating func receiveResponse_waiting(_ response: Response) throws {
+        private mutating func receiveResponse_waitingState(_ response: Response) throws {
             switch response {
             case .idleStarted:
                 self.state = .idling
@@ -73,7 +73,7 @@ extension ClientStateMachine {
             }
         }
 
-        private func receiveResponse_idling(_ response: Response) throws {
+        private func receiveResponse_idlingState(_ response: Response) throws {
             switch response {
             case .untaggedResponse:
                 break
@@ -82,7 +82,7 @@ extension ClientStateMachine {
             }
         }
 
-        private func receiveResponse_finished() throws {
+        private func receiveResponse_finishedState() throws {
             throw UnexpectedResponse()
         }
     }
