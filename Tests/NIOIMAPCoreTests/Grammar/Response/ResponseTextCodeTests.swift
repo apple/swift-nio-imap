@@ -59,6 +59,23 @@ extension ResponseTextCodeTests {
                 #line
             ),
             (.referral(.init(server: .init(host: "localhost"), query: nil)), "REFERRAL imap://localhost/", #line),
+            (.unavailable, "UNAVAILABLE", #line),
+            (.authenticationFailed, "AUTHENTICATIONFAILED", #line),
+            (.authorizationFailed, "AUTHORIZATIONFAILED", #line),
+            (.expired, "EXPIRED", #line),
+            (.privacyRequired, "PRIVACYREQUIRED", #line),
+            (.contactAdmin, "CONTACTADMIN", #line),
+            (.noPermission, "NOPERM", #line),
+            (.inUse, "INUSE", #line),
+            (.expungeIssued, "EXPUNGEISSUED", #line),
+            (.corruption, "CORRUPTION", #line),
+            (.serverBug, "SERVERBUG", #line),
+            (.clientBug, "CLIENTBUG", #line),
+            (.cannot, "CANNOT", #line),
+            (.limit, "LIMIT", #line),
+            (.overQuota, "OVERQUOTA", #line),
+            (.alreadyExists, "ALREADYEXISTS", #line),
+            (.nonExistent, "NONEXISTENT", #line),
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeResponseTextCode($0) })
     }
