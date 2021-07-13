@@ -65,7 +65,7 @@ public enum Command: Equatable {
     case unsubscribe(MailboxName)
 
     /// Begins the process of the client authenticating against the server. The client specifies a authentication `mechanism`, and the server may respond
-    /// with one or more challenges, which the client is also required to respond to using `CommandStream.continuationResponse`.
+    /// with one or more challenges, which the client is also required to respond to using `CommandStreamPart.continuationResponse`.
     case authenticate(mechanism: AuthenticationMechanism, initialResponse: InitialResponse?)
 
     /// Authenticates the client using a username and password
@@ -90,7 +90,7 @@ public enum Command: Equatable {
     case unselect
 
     /// Moves the server into an idle state. The server may send periodic reminder that it's idle. No more commands may be sent until
-    /// `CommandStream.idleDone` has been sent.
+    /// `CommandStreamPart.idleDone` has been sent.
     case idleStart
 
     /// Copies each message in a given set to a new mailbox, preserving the original in the current mailbox.
