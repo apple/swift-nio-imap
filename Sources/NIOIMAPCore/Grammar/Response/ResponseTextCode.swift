@@ -257,7 +257,7 @@ public enum ResponseTextCode: Equatable {
     /// The operation attempts to delete something that does not exist.
     /// Similar to ALREADYEXISTS.
     case nonExistent
-    
+
     /// Compression is active.
     case compressionActive
 }

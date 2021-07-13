@@ -173,7 +173,7 @@ public enum Command: Equatable {
     /// Requests that the server return the text data
     /// associated with the specified IMAP URLs
     case urlFetch([ByteBuffer])
-    
+
     /// Instructs the server to use the named compression mechanism.
     case compress(Capability.CompressionKind)
 }
@@ -429,7 +429,7 @@ extension CommandEncodeBuffer {
         self.buffer.writeString("UNSUBSCRIBE ") +
             self.buffer.writeMailbox(mailbox)
     }
-    
+
     private mutating func writeCommandKind_compress(kind: Capability.CompressionKind) -> Int {
         self.buffer.writeString("COMPRESS \(kind.rawValue)")
     }

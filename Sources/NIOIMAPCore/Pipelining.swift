@@ -301,7 +301,7 @@ extension Command {
             return [.barrier, .dependsOnMailboxSelection, .mayTriggerUntaggedExpunge]
 
         case .login,
-            .compress:
+             .compress:
             return []
 
         case .capability,

@@ -190,22 +190,21 @@ extension Capability {
             self.rawValue = unchecked
         }
     }
-    
+
     /// The type of compression used in IMAP  responses.
     public struct CompressionKind: Hashable {
-        
         /// The `DEFLATE` algorithm is used. RFC 4978
         public static let deflate = Self(unchecked: "DEFLATE")
-        
+
         /// The raw value as an uppercased string.
         public var rawValue: String
-        
+
         /// Creates a new `CompressionKind` from a `String`.
         /// - parameter value: The raw `String`. Will be uppercased.
         public init(_ value: String) {
             self.rawValue = value.uppercased()
         }
-        
+
         fileprivate init(unchecked: String) {
             self.rawValue = unchecked
         }
@@ -395,7 +394,7 @@ extension Capability {
     public static func rights(_ type: RightsKind) -> Self {
         Self("RIGHTS=\(type.rawValue)")
     }
-    
+
     /// Creates a new *COMPRESSION* capability.
     /// - parameter type: The `CompressionKind`.
     /// - returns: A new `Capability`.

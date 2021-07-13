@@ -492,7 +492,7 @@ extension GrammarParser {
             return .fetch(sequence, att, modifiers)
         }
     }
-    
+
     // compress    = "COMPRESS" SP algorithm
     // algorithm   = "DEFLATE" (or any atom)
     static func parseCommandSuffix_compress(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
