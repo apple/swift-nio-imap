@@ -14,10 +14,6 @@
 
 import NIOIMAPCore
 
-public struct InvalidCommandForState: Error, Hashable {
-    public init() {}
-}
-
 extension ClientStateMachine {
     struct Idle: Hashable {
         private enum State: Hashable {
@@ -60,11 +56,12 @@ extension ClientStateMachine {
             case .idling:
                 try self.receiveResponse_idlingState(response)
             case .finished:
-                try self.receiveResponse_finishedState()
+                throw UnexpectedResponse()
             }
         }
 
         private mutating func receiveResponse_waitingState(_ response: Response) throws {
+            assert(self.state == .waitingForConfirmation)
             switch response {
             case .idleStarted:
                 self.state = .idling
@@ -74,16 +71,13 @@ extension ClientStateMachine {
         }
 
         private func receiveResponse_idlingState(_ response: Response) throws {
+            assert(self.state == .idling)
             switch response {
             case .untaggedResponse:
                 break
             case .fetchResponse, .taggedResponse, .fatalResponse, .authenticationChallenge, .idleStarted:
                 throw UnexpectedResponse()
             }
-        }
-
-        private func receiveResponse_finishedState() throws {
-            throw UnexpectedResponse()
         }
     }
 }

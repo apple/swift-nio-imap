@@ -23,6 +23,10 @@ public struct UnexpectedResponse: Error {
     public init() {}
 }
 
+public struct InvalidCommandForState: Error, Hashable {
+    public init() {}
+}
+
 struct ClientStateMachine: Hashable {
     enum State: Hashable {
         case expectingNormalResponse
