@@ -257,6 +257,9 @@ public enum ResponseTextCode: Equatable {
     /// The operation attempts to delete something that does not exist.
     /// Similar to ALREADYEXISTS.
     case nonExistent
+    
+    /// Compression is active.
+    case compressionActive
 }
 
 // MARK: - Encoding
@@ -359,6 +362,8 @@ extension EncodeBuffer {
             return self.writeString("ALREADYEXISTS")
         case .nonExistent:
             return self.writeString("NONEXISTENT")
+        case .compressionActive:
+            return self.writeString("COMPRESSIONACTIVE")
         }
     }
 

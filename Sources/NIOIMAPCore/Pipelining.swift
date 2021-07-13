@@ -177,6 +177,7 @@ extension Command {
              .idleStart,
              .id,
              .namespace,
+             .compress,
 
              // Mailbox:
              .status,
@@ -299,7 +300,8 @@ extension Command {
         case .idleStart:
             return [.barrier, .dependsOnMailboxSelection, .mayTriggerUntaggedExpunge]
 
-        case .login:
+        case .login,
+            .compress:
             return []
 
         case .capability,

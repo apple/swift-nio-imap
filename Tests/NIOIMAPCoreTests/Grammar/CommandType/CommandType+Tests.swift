@@ -60,6 +60,7 @@ extension CommandType_Tests {
 
             (.create(.inbox, []), CommandEncodingOptions(), ["CREATE \"INBOX\""], #line),
             (.create(.inbox, [.attributes([.archive, .drafts, .flagged])]), CommandEncodingOptions(), ["CREATE \"INBOX\" (USE (\\archive \\drafts \\flagged))"], #line),
+            (.compress(.deflate), CommandEncodingOptions(), ["COMPRESS DEFLATE"], #line)
         ]
 
         for (test, options, expectedStrings, line) in inputs {

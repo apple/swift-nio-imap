@@ -114,6 +114,7 @@ extension GrammarParser_Commands_Tests {
                 ("GETQUOTA root", "\r", .getQuota(.init("root")), #line),
                 ("GETQUOTAROOT INBOX", "\r", .getQuotaRoot(.inbox), #line),
                 ("SETQUOTA ROOT (resource 123)", "\r", .setQuota(.init("ROOT"), [.init(resourceName: "resource", limit: 123)]), #line),
+                ("COMPRESS DEFLATE", "\r", .compress(.deflate), #line),
             ],
             parserErrorInputs: [
                 ("123", "\r", #line),

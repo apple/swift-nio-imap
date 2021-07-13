@@ -84,6 +84,7 @@ extension Capability_Tests {
             (.thread(.orderedSubject), "THREAD=ORDEREDSUBJECT", #line),
             (.thread(.references), "THREAD=REFERENCES", #line),
             (.utf8(.accept), "UTF8=ACCEPT", #line),
+            (.compression(.deflate), "COMPRESS=DEFLATE", #line),
         ]
 
         for (capability, expectedString, line) in tests {
