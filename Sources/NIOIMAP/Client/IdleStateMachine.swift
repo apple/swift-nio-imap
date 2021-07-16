@@ -23,7 +23,6 @@ extension ClientStateMachine {
         enum State: Hashable {
             case waitingForConfirmation
             case idling
-            case finished
         }
 
         private var state: State = .waitingForConfirmation
@@ -32,13 +31,12 @@ extension ClientStateMachine {
             switch self.state {
             case .idling:
                 break
-            case .waitingForConfirmation, .finished:
+            case .waitingForConfirmation:
                 throw InvalidIdleState()
             }
 
             switch command {
             case .idleDone:
-                self.state = .finished
                 return .expectingNormalResponse
             case .tagged, .append, .continuationResponse:
                 throw InvalidCommandForState()
@@ -51,8 +49,6 @@ extension ClientStateMachine {
                 return try self.receiveResponse_waitingState(response)
             case .idling:
                 return try self.receiveResponse_idlingState(response)
-            case .finished:
-                throw UnexpectedResponse()
             }
         }
 
