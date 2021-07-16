@@ -58,7 +58,7 @@ extension ClientStateMachineTests {
         // machine isn't yet idle, but we've started the process
         // so sending a different command should throw
         XCTAssertThrowsError(try stateMachine.sendCommand(.tagged(.init(tag: "A2", command: .noop)))) { e in
-            XCTAssertTrue(e is InvalidClientState)
+            XCTAssertTrue(e is InvalidIdleState)
         }
     }
 }

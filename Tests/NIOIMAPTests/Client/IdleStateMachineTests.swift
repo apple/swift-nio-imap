@@ -24,9 +24,9 @@ class IdleStateMachineTests: XCTestCase {
         XCTAssertNoThrow(try machine.receiveResponse(.idleStarted))
 
         // server is allowed to send untagged responses while idle
-        XCTAssertNoThrow(try machine.receiveResponse(.untaggedResponse(.id(["Key1": "Value1"]))))
-        XCTAssertNoThrow(try machine.receiveResponse(.untaggedResponse(.id(["Key2": "Value2"]))))
-        XCTAssertNoThrow(try machine.receiveResponse(.untaggedResponse(.id(["Key3": "Value3"]))))
+        XCTAssertNoThrow(try machine.receiveResponse(.untagged(.id(["Key1": "Value1"]))))
+        XCTAssertNoThrow(try machine.receiveResponse(.untagged(.id(["Key2": "Value2"]))))
+        XCTAssertNoThrow(try machine.receiveResponse(.untagged(.id(["Key3": "Value3"]))))
 
         // user ends idle
         XCTAssertNoThrow(try machine.sendCommand(.idleDone))
@@ -56,7 +56,7 @@ class IdleStateMachineTests: XCTestCase {
 
         // expecting a continuation to confirm idle has started
         // but instead let's send a tagged response
-        let badResponse = Response.taggedResponse(.init(tag: "A1", state: .ok(.init(code: nil, text: "ok"))))
+        let badResponse = Response.tagged(.init(tag: "A1", state: .ok(.init(code: nil, text: "ok"))))
         XCTAssertThrowsError(try machine.receiveResponse(badResponse)) { e in
             XCTAssertTrue(e is UnexpectedResponse)
         }
@@ -67,7 +67,7 @@ class IdleStateMachineTests: XCTestCase {
         XCTAssertNoThrow(try machine.receiveResponse(.idleStarted))
         XCTAssertNoThrow(try machine.sendCommand(.idleDone))
 
-        let badResponse = Response.taggedResponse(.init(tag: "A1", state: .ok(.init(code: nil, text: "ok"))))
+        let badResponse = Response.tagged(.init(tag: "A1", state: .ok(.init(code: nil, text: "ok"))))
         XCTAssertThrowsError(try machine.receiveResponse(badResponse)) { e in
             XCTAssertTrue(e is UnexpectedResponse)
         }
