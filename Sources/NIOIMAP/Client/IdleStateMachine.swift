@@ -15,14 +15,11 @@
 import NIOIMAPCore
 
 public struct InvalidIdleState: Error, Hashable {
-    public init() {
-        
-    }
+    public init() {}
 }
 
 extension ClientStateMachine {
     struct Idle: Hashable {
-        
         enum State: Hashable {
             case waitingForConfirmation
             case idling
