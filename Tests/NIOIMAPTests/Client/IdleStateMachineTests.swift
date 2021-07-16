@@ -19,21 +19,17 @@ import XCTest
 class IdleStateMachineTests: XCTestCase {
     func testNormalWorkflow() {
         var machine = ClientStateMachine.Idle()
-        XCTAssertFalse(machine.finished)
 
         // server confirms idle
         XCTAssertNoThrow(try machine.receiveResponse(.idleStarted))
-        XCTAssertFalse(machine.finished)
 
         // server is allowed to send untagged responses while idle
         XCTAssertNoThrow(try machine.receiveResponse(.untaggedResponse(.id(["Key1": "Value1"]))))
         XCTAssertNoThrow(try machine.receiveResponse(.untaggedResponse(.id(["Key2": "Value2"]))))
         XCTAssertNoThrow(try machine.receiveResponse(.untaggedResponse(.id(["Key3": "Value3"]))))
-        XCTAssertFalse(machine.finished)
 
         // user ends idle
         XCTAssertNoThrow(try machine.sendCommand(.idleDone))
-        XCTAssertTrue(machine.finished)
     }
 
     func testMultipleIdleConfirmationsThrowsError() {
@@ -70,7 +66,6 @@ class IdleStateMachineTests: XCTestCase {
         var machine = ClientStateMachine.Idle()
         XCTAssertNoThrow(try machine.receiveResponse(.idleStarted))
         XCTAssertNoThrow(try machine.sendCommand(.idleDone))
-        XCTAssertTrue(machine.finished)
 
         let badResponse = Response.taggedResponse(.init(tag: "A1", state: .ok(.init(code: nil, text: "ok"))))
         XCTAssertThrowsError(try machine.receiveResponse(badResponse)) { e in

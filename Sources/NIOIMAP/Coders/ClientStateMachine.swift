@@ -44,8 +44,8 @@ struct ClientStateMachine: Hashable {
 
     mutating func receiveResponse(_ response: Response) throws {
         switch self.state {
-        case .idle(let idleStateMachine):
-            try self.handleResponse_idle(idleStateMachine: idleStateMachine, response: response)
+        case .idle(var idleStateMachine):
+            self.state = try idleStateMachine.receiveResponse(response)
         default:
             fatalError("TODO")
         }
@@ -55,21 +55,11 @@ struct ClientStateMachine: Hashable {
         switch self.state {
         case .expectingNormalResponse:
             try self.sendCommand_normalResponse(command: command)
-        case .idle(let idleStateMachine):
-            try self.sendCommand_idle(idleStateMachine: idleStateMachine, command: command)
+        case .idle(var idleStateMachine):
+            self.state = try idleStateMachine.sendCommand(command)
         default:
             fatalError("TODO")
         }
-    }
-}
-
-// MARK: - Receive
-
-extension ClientStateMachine {
-    private mutating func handleResponse_idle(idleStateMachine: Idle, response: Response) throws {
-        var idleStateMachine = idleStateMachine
-        try idleStateMachine.receiveResponse(response)
-        self.state = .idle(idleStateMachine)
     }
 }
 
@@ -97,16 +87,6 @@ extension ClientStateMachine {
             self.state = .idle(Idle())
         default:
             break
-        }
-    }
-
-    private mutating func sendCommand_idle(idleStateMachine: Idle, command: CommandStreamPart) throws {
-        var idleStateMachine = idleStateMachine
-        try idleStateMachine.sendCommand(command)
-        if idleStateMachine.finished {
-            self.state = .expectingNormalResponse
-        } else {
-            self.state = .idle(idleStateMachine)
         }
     }
 }

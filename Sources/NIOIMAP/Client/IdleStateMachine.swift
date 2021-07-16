@@ -16,7 +16,7 @@ import NIOIMAPCore
 
 extension ClientStateMachine {
     struct Idle: Hashable {
-        private enum State: Hashable {
+        enum State: Hashable {
             case waitingForConfirmation
             case idling
             case finished
@@ -24,16 +24,7 @@ extension ClientStateMachine {
 
         private var state: State = .waitingForConfirmation
 
-        var finished: Bool {
-            switch self.state {
-            case .waitingForConfirmation, .idling:
-                return false
-            case .finished:
-                return true
-            }
-        }
-
-        mutating func sendCommand(_ command: CommandStreamPart) throws {
+        mutating func sendCommand(_ command: CommandStreamPart) throws -> ClientStateMachine.State {
             switch self.state {
             case .idling:
                 break
@@ -44,37 +35,39 @@ extension ClientStateMachine {
             switch command {
             case .idleDone:
                 self.state = .finished
+                return .expectingNormalResponse
             case .tagged, .append, .continuationResponse:
                 throw InvalidCommandForState()
             }
         }
 
-        mutating func receiveResponse(_ response: Response) throws {
+        mutating func receiveResponse(_ response: Response) throws -> ClientStateMachine.State {
             switch self.state {
             case .waitingForConfirmation:
-                try self.receiveResponse_waitingState(response)
+                return try self.receiveResponse_waitingState(response)
             case .idling:
-                try self.receiveResponse_idlingState(response)
+                return try self.receiveResponse_idlingState(response)
             case .finished:
                 throw UnexpectedResponse()
             }
         }
 
-        private mutating func receiveResponse_waitingState(_ response: Response) throws {
+        private mutating func receiveResponse_waitingState(_ response: Response) throws -> ClientStateMachine.State {
             assert(self.state == .waitingForConfirmation)
             switch response {
             case .idleStarted:
                 self.state = .idling
+                return .idle(self)
             case .fetchResponse, .taggedResponse, .fatalResponse, .authenticationChallenge, .untaggedResponse:
                 throw UnexpectedResponse()
             }
         }
 
-        private func receiveResponse_idlingState(_ response: Response) throws {
+        private func receiveResponse_idlingState(_ response: Response) throws -> ClientStateMachine.State {
             assert(self.state == .idling)
             switch response {
             case .untaggedResponse:
-                break
+                return .idle(self)
             case .fetchResponse, .taggedResponse, .fatalResponse, .authenticationChallenge, .idleStarted:
                 throw UnexpectedResponse()
             }
