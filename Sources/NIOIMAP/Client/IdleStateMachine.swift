@@ -39,7 +39,7 @@ extension ClientStateMachine {
             case .idleDone:
                 return .expectingNormalResponse
             case .tagged, .append, .continuationResponse:
-                throw InvalidCommandForState()
+                throw InvalidCommandForState(command)
             }
         }
 

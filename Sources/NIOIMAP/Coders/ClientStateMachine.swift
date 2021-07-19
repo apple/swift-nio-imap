@@ -23,8 +23,13 @@ public struct UnexpectedResponse: Error {
     public init() {}
 }
 
-public struct InvalidCommandForState: Error, Hashable {
-    public init() {}
+public struct InvalidCommandForState: Error, Equatable {
+    
+    public var command: CommandStreamPart
+    
+    public init(_ command: CommandStreamPart) {
+        self.command = command
+    }
 }
 
 struct ClientStateMachine: Hashable {
@@ -54,7 +59,7 @@ struct ClientStateMachine: Hashable {
     mutating func sendCommand(_ command: CommandStreamPart) throws {
         switch self.state {
         case .expectingNormalResponse:
-            try self.sendCommand_normalResponse(command: command)
+            try self.sendCommand_state_normalResponse(command: command)
         case .idle(var idleStateMachine):
             self.state = try idleStateMachine.sendCommand(command)
         default:
@@ -66,14 +71,14 @@ struct ClientStateMachine: Hashable {
 // MARK: - Send
 
 extension ClientStateMachine {
-    private mutating func sendCommand_normalResponse(command: CommandStreamPart) throws {
+    private mutating func sendCommand_state_normalResponse(command: CommandStreamPart) throws {
         assert(self.state == .expectingNormalResponse)
 
         switch command {
         case .idleDone, .continuationResponse:
-            throw InvalidCommandForState()
-        case .tagged(let taggedCommand):
-            try self.sendTaggedCommand(command: taggedCommand)
+            throw InvalidCommandForState(command)
+        case .tagged(let tc):
+            try self.sendTaggedCommand(command: tc)
         case .append:
             fatalError("TODO")
         }
