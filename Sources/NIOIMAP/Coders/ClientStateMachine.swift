@@ -77,13 +77,13 @@ extension ClientStateMachine {
         case .idleDone, .continuationResponse:
             throw InvalidCommandForState(command)
         case .tagged(let tc):
-            try self.sendTaggedCommand(command: tc)
+            try self.sendTaggedCommand(tc)
         case .append:
             fatalError("TODO")
         }
     }
 
-    private mutating func sendTaggedCommand(command: TaggedCommand) throws {
+    private mutating func sendTaggedCommand(_ command: TaggedCommand) throws {
         assert(self.state == .expectingNormalResponse)
 
         // it's not practical to switch over
