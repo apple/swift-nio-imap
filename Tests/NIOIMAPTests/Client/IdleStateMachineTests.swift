@@ -51,7 +51,7 @@ class IdleStateMachineTests: XCTestCase {
         }
     }
 
-    func testIncorrectResponsetypeThrowsError() {
+    func testIncorrectResponseTypeThrowsError() {
         var machine = ClientStateMachine.Idle()
 
         // expecting a continuation to confirm idle has started
