@@ -24,9 +24,8 @@ public struct UnexpectedResponse: Error {
 }
 
 public struct InvalidCommandForState: Error, Equatable {
-    
     public var command: CommandStreamPart
-    
+
     public init(_ command: CommandStreamPart) {
         self.command = command
     }
