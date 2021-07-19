@@ -87,6 +87,9 @@ extension ClientStateMachine {
     private mutating func sendTaggedCommand(command: TaggedCommand) throws {
         assert(self.state == .expectingNormalResponse)
 
+        // it's not practical to switch over
+        // every command here, there are over
+        // 50 of them...
         switch command.command {
         case .idleStart:
             self.state = .idle(Idle())
