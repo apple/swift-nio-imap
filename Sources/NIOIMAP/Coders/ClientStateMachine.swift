@@ -35,7 +35,7 @@ struct ClientStateMachine: Hashable {
     enum State: Hashable {
         case expectingNormalResponse
         case idle(ClientStateMachine.Idle)
-        case authenticating
+        case authenticating(ClientStateMachine.Authentication)
         case expectingLiteralContinuationRequest
         case completingCommand
         case error
@@ -50,6 +50,8 @@ struct ClientStateMachine: Hashable {
         switch self.state {
         case .idle(var idleStateMachine):
             self.state = try idleStateMachine.receiveResponse(response)
+        case .authenticating(var authStateMachine):
+            self.state = try authStateMachine.receiveResponse(response)
         default:
             fatalError("TODO")
         }
@@ -61,6 +63,8 @@ struct ClientStateMachine: Hashable {
             try self.sendCommand_state_normalResponse(command: command)
         case .idle(var idleStateMachine):
             self.state = try idleStateMachine.sendCommand(command)
+        case .authenticating(var authStateMachine):
+            self.state = try authStateMachine.sendCommand(command)
         default:
             fatalError("TODO")
         }
@@ -92,6 +96,8 @@ extension ClientStateMachine {
         switch command.command {
         case .idleStart:
             self.state = .idle(Idle())
+        case .authenticate:
+            self.state = .authenticating(Authentication())
         default:
             break
         }

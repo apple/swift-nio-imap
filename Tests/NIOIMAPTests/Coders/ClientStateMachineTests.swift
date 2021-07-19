@@ -62,3 +62,50 @@ extension ClientStateMachineTests {
         }
     }
 }
+
+// MARK: - Authentication
+extension ClientStateMachineTests {
+    func testAuthenticationWorkflow_normal() {
+        // set up the state machine, show we can send a command
+        var stateMachine = ClientStateMachine()
+        XCTAssertNoThrow(try stateMachine.sendCommand(.tagged(.init(tag: "A1", command: .noop))))
+
+        // 1. start authenticating
+        // 2. a couple of challenges back and forth
+        XCTAssertNoThrow(try stateMachine.sendCommand(.tagged(.init(tag: "A2", command: .authenticate(mechanism: .gssAPI, initialResponse: nil)))))
+        XCTAssertNoThrow(try stateMachine.receiveResponse(.authenticationChallenge("c1")))
+        XCTAssertNoThrow(try stateMachine.sendCommand(.continuationResponse("r1")))
+        XCTAssertNoThrow(try stateMachine.receiveResponse(.authenticationChallenge("c2")))
+        XCTAssertNoThrow(try stateMachine.sendCommand(.continuationResponse("r2")))
+
+        // finish authenticating
+        XCTAssertNoThrow(try stateMachine.receiveResponse(.tagged(.init(tag: "A2", state: .ok(.init(code: nil, text: "OK"))))))
+        
+        // state machine should have reset, so we can send a normal command again
+        XCTAssertNoThrow(try stateMachine.sendCommand(.tagged(.init(tag: "A3", command: .noop))))
+    }
+
+    func testAuthenticationWorkflow_commandWhileIdle() {
+        // set up the state machine to idle
+        var stateMachine = ClientStateMachine()
+        XCTAssertNoThrow(try stateMachine.sendCommand(.tagged(.init(tag: "A1", command: .idleStart))))
+        XCTAssertNoThrow(try stateMachine.receiveResponse(.idleStarted))
+
+        // machine is idle, so sending a different command should throw
+        XCTAssertThrowsError(try stateMachine.sendCommand(.tagged(.init(tag: "A2", command: .noop)))) { e in
+            XCTAssertTrue(e is InvalidCommandForState)
+        }
+    }
+
+    func testAuthenticationWorkflow_commandBeforeIdleConfirmed() {
+        // set up the state machine to idle
+        var stateMachine = ClientStateMachine()
+        XCTAssertNoThrow(try stateMachine.sendCommand(.tagged(.init(tag: "A1", command: .idleStart))))
+
+        // machine isn't yet idle, but we've started the process
+        // so sending a different command should throw
+        XCTAssertThrowsError(try stateMachine.sendCommand(.tagged(.init(tag: "A2", command: .noop)))) { e in
+            XCTAssertTrue(e is InvalidIdleState)
+        }
+    }
+}
