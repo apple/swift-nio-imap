@@ -86,27 +86,25 @@ extension ClientStateMachineTests {
         XCTAssertNoThrow(try stateMachine.sendCommand(.tagged(.init(tag: "A3", command: .noop))))
     }
 
-    func testAuthenticationWorkflow_commandWhileIdle() {
-        // set up the state machine to idle
+    func testAuthenticationWorkflow_commandWhileAuthenticating() {
+        // set up the state machine to authenticate
         var stateMachine = ClientStateMachine()
-        XCTAssertNoThrow(try stateMachine.sendCommand(.tagged(.init(tag: "A1", command: .idleStart))))
-        XCTAssertNoThrow(try stateMachine.receiveResponse(.idleStarted))
+        XCTAssertNoThrow(try stateMachine.sendCommand(.tagged(.init(tag: "A1", command: .authenticate(mechanism: .gssAPI, initialResponse: nil)))))
 
-        // machine is idle, so sending a different command should throw
+        // machine is authenticating, so sending a different command should throw
         XCTAssertThrowsError(try stateMachine.sendCommand(.tagged(.init(tag: "A2", command: .noop)))) { e in
             XCTAssertTrue(e is InvalidCommandForState)
         }
     }
 
-    func testAuthenticationWorkflow_commandBeforeIdleConfirmed() {
-        // set up the state machine to idle
+    func testAuthenticationWorkflow_unexpectedResponse() {
+        // set up the state machine to authenticate
         var stateMachine = ClientStateMachine()
-        XCTAssertNoThrow(try stateMachine.sendCommand(.tagged(.init(tag: "A1", command: .idleStart))))
+        XCTAssertNoThrow(try stateMachine.sendCommand(.tagged(.init(tag: "A1", command: .authenticate(mechanism: .gssAPI, initialResponse: nil)))))
 
-        // machine isn't yet idle, but we've started the process
-        // so sending a different command should throw
-        XCTAssertThrowsError(try stateMachine.sendCommand(.tagged(.init(tag: "A2", command: .noop)))) { e in
-            XCTAssertTrue(e is InvalidIdleState)
+        // machine is authenticating, so sending an untagged response should throw
+        XCTAssertThrowsError(try stateMachine.receiveResponse(.untagged(.enableData([.metadata])))) { e in
+            XCTAssertTrue(e is UnexpectedResponse)
         }
     }
 }
