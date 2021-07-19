@@ -64,6 +64,7 @@ extension ClientStateMachineTests {
 }
 
 // MARK: - Authentication
+
 extension ClientStateMachineTests {
     func testAuthenticationWorkflow_normal() {
         // set up the state machine, show we can send a command
@@ -80,7 +81,7 @@ extension ClientStateMachineTests {
 
         // finish authenticating
         XCTAssertNoThrow(try stateMachine.receiveResponse(.tagged(.init(tag: "A2", state: .ok(.init(code: nil, text: "OK"))))))
-        
+
         // state machine should have reset, so we can send a normal command again
         XCTAssertNoThrow(try stateMachine.sendCommand(.tagged(.init(tag: "A3", command: .noop))))
     }

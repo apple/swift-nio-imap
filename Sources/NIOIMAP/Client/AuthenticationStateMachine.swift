@@ -15,16 +15,14 @@
 import NIOIMAPCore
 
 extension ClientStateMachine {
-    
     struct Authentication: Hashable {
-        
         enum State: Hashable {
             case authenticating
             case finished
         }
-        
+
         private var state: State = .authenticating
-        
+
         mutating func receiveResponse(_ response: Response) throws -> ClientStateMachine.State {
             switch self.state {
             case .finished:
@@ -32,7 +30,7 @@ extension ClientStateMachine {
             case .authenticating:
                 break
             }
-            
+
             switch response {
             case .untagged, .fetch, .fatal, .idleStarted:
                 throw UnexpectedResponse()
@@ -42,19 +40,19 @@ extension ClientStateMachine {
                 return .authenticating(self)
             }
         }
-        
+
         // we don't care about the specific response
         private mutating func handleTaggedResponse() throws -> ClientStateMachine.State {
             self.state = .finished
             return .expectingNormalResponse
         }
-        
+
         // we don't care about the specific response
-        private mutating func handleAuthenticationChallenge(_ response: Response) throws -> ClientStateMachine.State {
+        private mutating func handleAuthenticationChallenge(_: Response) throws -> ClientStateMachine.State {
             self.state = .authenticating
             return .authenticating(self)
         }
-        
+
         mutating func sendCommand(_ command: CommandStreamPart) throws -> ClientStateMachine.State {
             switch self.state {
             case .finished:
@@ -62,7 +60,7 @@ extension ClientStateMachine {
             case .authenticating:
                 break
             }
-            
+
             // the only reason to send a command when authenticating
             // is to response to a challenge
             switch command {
