@@ -60,4 +60,30 @@ class AuthenticationStateMachineTests: XCTestCase {
             XCTAssertTrue(e is UnexpectedResponse)
         }
     }
+
+    func testDuplicateChallengeThrows() {
+        var stateMachine = ClientStateMachine.Authentication()
+        XCTAssertNoThrow(try stateMachine.receiveResponse(.authenticationChallenge("c1")))
+
+        XCTAssertThrowsError(try stateMachine.receiveResponse(.authenticationChallenge("c2"))) { e in
+            XCTAssertTrue(e is UnexpectedResponse)
+        }
+    }
+
+    func testDuplicateChallengeResponseThrows() {
+        var stateMachine = ClientStateMachine.Authentication()
+        XCTAssertNoThrow(try stateMachine.receiveResponse(.authenticationChallenge("c1")))
+        XCTAssertNoThrow(try stateMachine.sendCommand(.continuationResponse("r1")))
+
+        XCTAssertThrowsError(try stateMachine.sendCommand(.continuationResponse("r2"))) { e in
+            XCTAssertTrue(e is InvalidCommandForState)
+        }
+    }
+
+    func testResponseWithoutChallengeThrows() {
+        var stateMachine = ClientStateMachine.Authentication()
+        XCTAssertThrowsError(try stateMachine.sendCommand(.continuationResponse("r2"))) { e in
+            XCTAssertTrue(e is InvalidCommandForState)
+        }
+    }
 }
