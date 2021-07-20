@@ -85,7 +85,7 @@ extension ClientStateMachineTests {
         // state machine should have reset, so we can send a normal command again
         XCTAssertNoThrow(try stateMachine.sendCommand(.tagged(.init(tag: "A3", command: .noop))))
     }
-    
+
     func testAuthenticationWorkflow_normal_noChallenges() {
         // set up the state machine, show we can send a command
         var stateMachine = ClientStateMachine()
@@ -95,7 +95,7 @@ extension ClientStateMachineTests {
         // 2. server immediately confirms
         XCTAssertNoThrow(try stateMachine.sendCommand(.tagged(.init(tag: "A2", command: .authenticate(mechanism: .gssAPI, initialResponse: nil)))))
         XCTAssertNoThrow(try stateMachine.receiveResponse(.tagged(.init(tag: "A3", state: .ok(.init(code: nil, text: "OK"))))))
-        
+
         // state machine should have reset, so we can send a normal command again
         XCTAssertNoThrow(try stateMachine.sendCommand(.tagged(.init(tag: "A3", command: .noop))))
     }
