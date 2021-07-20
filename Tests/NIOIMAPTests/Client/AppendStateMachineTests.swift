@@ -18,32 +18,30 @@ import XCTest
 
 class AppendStateMachineTests: XCTestCase {
     var stateMachine: ClientStateMachine.Append!
-    
+
     override func setUp() {
         self.stateMachine = .init()
     }
-    
+
     func testNormalWorkflow() {
-        
         // append a message
-        XCTAssertNoThrow(try stateMachine.sendCommand(.append(.beginMessage(message: .init(options: .init(), data: .init(byteCount: 10))))))
-        XCTAssertNoThrow(try stateMachine.receiveContinuationRequest(.data("req")))
-        XCTAssertNoThrow(try stateMachine.sendCommand(.append(.messageBytes("12345"))))
-        XCTAssertNoThrow(try stateMachine.sendCommand(.append(.messageBytes("67890"))))
-        XCTAssertNoThrow(try stateMachine.sendCommand(.append(.endMessage)))
-        
+        XCTAssertNoThrow(try self.stateMachine.sendCommand(.append(.beginMessage(message: .init(options: .init(), data: .init(byteCount: 10))))))
+        XCTAssertNoThrow(try self.stateMachine.receiveContinuationRequest(.data("req")))
+        XCTAssertNoThrow(try self.stateMachine.sendCommand(.append(.messageBytes("12345"))))
+        XCTAssertNoThrow(try self.stateMachine.sendCommand(.append(.messageBytes("67890"))))
+        XCTAssertNoThrow(try self.stateMachine.sendCommand(.append(.endMessage)))
+
         // catenate a message
-        XCTAssertNoThrow(try stateMachine.sendCommand(.append(.beginCatenate(options: .init()))))
-        XCTAssertNoThrow(try stateMachine.sendCommand(.append(.catenateURL("url1"))))
-        XCTAssertNoThrow(try stateMachine.sendCommand(.append(.catenateURL("url2"))))
-        XCTAssertNoThrow(try stateMachine.sendCommand(.append(.catenateURL("url3"))))
-        XCTAssertNoThrow(try stateMachine.sendCommand(.append(.catenateData(.begin(size: 10)))))
-        XCTAssertNoThrow(try stateMachine.receiveContinuationRequest(.data("req")))
-        XCTAssertNoThrow(try stateMachine.sendCommand(.append(.messageBytes("12345"))))
-        XCTAssertNoThrow(try stateMachine.sendCommand(.append(.messageBytes("67890"))))
-        XCTAssertNoThrow(try stateMachine.sendCommand(.append(.endCatenate)))
-        
-        XCTAssertNoThrow(try stateMachine.sendCommand(.append(.finish)))
+        XCTAssertNoThrow(try self.stateMachine.sendCommand(.append(.beginCatenate(options: .init()))))
+        XCTAssertNoThrow(try self.stateMachine.sendCommand(.append(.catenateURL("url1"))))
+        XCTAssertNoThrow(try self.stateMachine.sendCommand(.append(.catenateURL("url2"))))
+        XCTAssertNoThrow(try self.stateMachine.sendCommand(.append(.catenateURL("url3"))))
+        XCTAssertNoThrow(try self.stateMachine.sendCommand(.append(.catenateData(.begin(size: 10)))))
+        XCTAssertNoThrow(try self.stateMachine.receiveContinuationRequest(.data("req")))
+        XCTAssertNoThrow(try self.stateMachine.sendCommand(.append(.messageBytes("12345"))))
+        XCTAssertNoThrow(try self.stateMachine.sendCommand(.append(.messageBytes("67890"))))
+        XCTAssertNoThrow(try self.stateMachine.sendCommand(.append(.endCatenate)))
+
+        XCTAssertNoThrow(try self.stateMachine.sendCommand(.append(.finish)))
     }
-    
 }

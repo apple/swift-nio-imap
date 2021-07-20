@@ -104,8 +104,8 @@ extension ClientStateMachine {
             break
         }
     }
-    
-    private mutating func sendAppendCommand(_ command: AppendCommand) throws {
+
+    private mutating func sendAppendCommand(_: AppendCommand) throws {
         assert(self.state == .expectingNormalResponse)
         self.state = .appending(Append())
     }

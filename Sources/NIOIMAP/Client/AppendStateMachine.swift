@@ -16,41 +16,39 @@ import NIOIMAPCore
 
 extension ClientStateMachine {
     struct Append: Hashable {
-        
         enum State: Hashable {
-            
             /// We've sent the append command to the server, and will now send data
             case started
-            
+
             /// We're appending a message
             case appending
-            
+
             /// We want to send a literal to the server, but first need the server to confirm it's ready
             case waitingForAppendContinuationRequest
-            
+
             /// We're streaming a message to the server
             case sendingMessageBytes
-            
+
             /// We're catenatinf a message
             case catenating
-            
+
             /// We want to send a literal to the server, but first need the server to confirm it's ready
             case waitingForCatenateContinuationRequest
-            
+
             /// We're streaming a catenate message to the server
             case sendingCatenateBytes
-            
+
             /// The server has returned a tagged response to finish the append command
             case finished
         }
-        
+
         var state: State = .started
-        
-        mutating func receiveResponse(_ response: Response) throws -> ClientStateMachine.State {
+
+        mutating func receiveResponse(_: Response) throws -> ClientStateMachine.State {
             fatalError("TODO")
         }
-        
-        mutating func receiveContinuationRequest(_ request: ContinuationRequest) throws -> ClientStateMachine.State {
+
+        mutating func receiveContinuationRequest(_: ContinuationRequest) throws -> ClientStateMachine.State {
             switch self.state {
             case .started, .appending, .sendingMessageBytes, .catenating, .sendingCatenateBytes, .finished:
                 throw UnexpectedResponse()
@@ -63,7 +61,6 @@ extension ClientStateMachine {
         }
 
         mutating func sendCommand(_ command: CommandStreamPart) throws -> ClientStateMachine.State {
-            
             // we only care about append commands, obviously
             let appendCommand: AppendCommand
             switch command {
@@ -72,7 +69,7 @@ extension ClientStateMachine {
             case .append(let _appendCommand):
                 appendCommand = _appendCommand
             }
-            
+
             switch self.state {
             case .started:
                 return try self.sendCommand_startedState(appendCommand)
@@ -92,14 +89,13 @@ extension ClientStateMachine {
                 return try self.sendCommand_finishedState(appendCommand)
             }
         }
-        
     }
 }
 
 // MARK: - Send
+
 extension ClientStateMachine.Append {
-    
-    mutating private func sendCommand_startedState(_ command: AppendCommand) throws -> ClientStateMachine.State {
+    private mutating func sendCommand_startedState(_ command: AppendCommand) throws -> ClientStateMachine.State {
         switch command {
         case .start, .messageBytes, .endMessage, .catenateURL, .catenateData, .endCatenate:
             throw InvalidCommandForState(.append(command))
@@ -112,8 +108,8 @@ extension ClientStateMachine.Append {
         }
         return .appending(self)
     }
-    
-    mutating private func sendCommand_appendingState(_ command: AppendCommand) throws -> ClientStateMachine.State {
+
+    private mutating func sendCommand_appendingState(_ command: AppendCommand) throws -> ClientStateMachine.State {
         switch command {
         case .start, .beginMessage, .endMessage, .beginCatenate, .catenateURL, .catenateData, .endCatenate, .finish:
             throw InvalidCommandForState(.append(command))
@@ -122,12 +118,12 @@ extension ClientStateMachine.Append {
         }
         return .appending(self)
     }
-    
-    mutating private func sendCommand_waitingForAppendContinuationRequestState(_ command: AppendCommand) throws -> ClientStateMachine.State {
+
+    private mutating func sendCommand_waitingForAppendContinuationRequestState(_ command: AppendCommand) throws -> ClientStateMachine.State {
         throw InvalidCommandForState(.append(command))
     }
-    
-    mutating private func sendCommand_sendingMessageBytesState(_ command: AppendCommand) throws -> ClientStateMachine.State {
+
+    private mutating func sendCommand_sendingMessageBytesState(_ command: AppendCommand) throws -> ClientStateMachine.State {
         switch command {
         case .start, .beginMessage, .beginCatenate, .catenateURL, .catenateData, .endCatenate, .finish:
             throw InvalidCommandForState(.append(command))
@@ -138,8 +134,8 @@ extension ClientStateMachine.Append {
         }
         return .appending(self)
     }
-    
-    mutating private func sendCommand_catenatingState(_ command: AppendCommand) throws -> ClientStateMachine.State {
+
+    private mutating func sendCommand_catenatingState(_ command: AppendCommand) throws -> ClientStateMachine.State {
         switch command {
         case .start, .beginMessage, .beginCatenate, .messageBytes, .endMessage, .finish:
             throw InvalidCommandForState(.append(command))
@@ -152,12 +148,12 @@ extension ClientStateMachine.Append {
         }
         return .appending(self)
     }
-    
-    mutating private func sendCommand_waitingForCatenateContinuationRequestState(_ command: AppendCommand) throws -> ClientStateMachine.State {
+
+    private mutating func sendCommand_waitingForCatenateContinuationRequestState(_ command: AppendCommand) throws -> ClientStateMachine.State {
         throw InvalidCommandForState(.append(command))
     }
-    
-    mutating private func sendCommand_sendingCatenateBytesState(_ command: AppendCommand) throws -> ClientStateMachine.State {
+
+    private mutating func sendCommand_sendingCatenateBytesState(_ command: AppendCommand) throws -> ClientStateMachine.State {
         switch command {
         case .start, .beginMessage, .beginCatenate, .endMessage, .catenateURL, .catenateData, .finish:
             throw InvalidCommandForState(.append(command))
@@ -168,9 +164,8 @@ extension ClientStateMachine.Append {
         }
         return .appending(self)
     }
-    
-    mutating private func sendCommand_finishedState(_ command: AppendCommand) throws -> ClientStateMachine.State {
+
+    private mutating func sendCommand_finishedState(_ command: AppendCommand) throws -> ClientStateMachine.State {
         throw InvalidCommandForState(.append(command))
     }
-    
 }
