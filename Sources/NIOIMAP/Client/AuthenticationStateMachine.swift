@@ -73,15 +73,14 @@ extension ClientStateMachine {
             }
 
             // the only reason to send a command when authenticating
-            // is to response to a challenge
+            // is to respond to a challenge
             switch command {
             case .idleDone, .tagged, .append:
                 throw InvalidCommandForState(command)
             case .continuationResponse:
-                break
+                self.state = .waitingForServer
+                return .authenticating(self)
             }
-            self.state = .waitingForServer
-            return .authenticating(self)
         }
     }
 }
