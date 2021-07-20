@@ -44,4 +44,30 @@ class AppendStateMachineTests: XCTestCase {
 
         XCTAssertNoThrow(try self.stateMachine.sendCommand(.append(.finish)))
     }
+
+    func testStartAppendWhenCatenatingThrows() {
+        XCTAssertNoThrow(try self.stateMachine.sendCommand(.append(.beginCatenate(options: .init()))))
+        XCTAssertThrowsError(try self.stateMachine.sendCommand(
+            .append(.beginMessage(message: .init(options: .init(), data: .init(byteCount: 10)))))) { e in
+            XCTAssertTrue(e is InvalidCommandForState)
+        }
+    }
+
+    func testNotWaitingForContinuationThrows() {
+        XCTAssertNoThrow(try self.stateMachine.sendCommand(.append(.beginMessage(message: .init(options: .init(), data: .init(byteCount: 10))))))
+        XCTAssertThrowsError(try self.stateMachine.sendCommand(.append(.messageBytes("message")))) { e in
+            XCTAssertTrue(e is InvalidCommandForState)
+        }
+    }
+
+    // we can't catenate a URL while we're meant to
+    // be sending bytes
+    func testMixingCatenateTypesThrows() {
+        XCTAssertNoThrow(try self.stateMachine.sendCommand(.append(.beginCatenate(options: .init()))))
+        XCTAssertNoThrow(try self.stateMachine.sendCommand(.append(.catenateData(.begin(size: 10)))))
+        XCTAssertNoThrow(try self.stateMachine.receiveContinuationRequest(.data("req")))
+        XCTAssertThrowsError(try self.stateMachine.sendCommand(.append(.catenateURL("url")))) { e in
+            XCTAssertTrue(e is InvalidCommandForState)
+        }
+    }
 }
