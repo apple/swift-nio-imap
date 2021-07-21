@@ -122,3 +122,36 @@ extension ClientStateMachineTests {
         }
     }
 }
+
+// MARK: - Append
+
+extension ClientStateMachineTests {
+    func testAppendWorflow_normal() {
+        var stateMachine = ClientStateMachine()
+        
+        // start the append command
+        XCTAssertNoThrow(try stateMachine.sendCommand(.append(.start(tag: "A1", appendingTo: .inbox))))
+        
+        // append a message
+        XCTAssertNoThrow(try stateMachine.sendCommand(.append(.beginMessage(message: .init(options: .init(), data: .init(byteCount: 10))))))
+        XCTAssertNoThrow(try stateMachine.receiveContinuationRequest(.data("ready1")))
+        XCTAssertNoThrow(try stateMachine.sendCommand(.append(.messageBytes("01234"))))
+        XCTAssertNoThrow(try stateMachine.sendCommand(.append(.messageBytes("56789"))))
+        XCTAssertNoThrow(try stateMachine.sendCommand(.append(.endMessage)))
+        
+        // catenate some urls and a message
+        XCTAssertNoThrow(try stateMachine.sendCommand(.append(.beginCatenate(options: .init()))))
+        XCTAssertNoThrow(try stateMachine.sendCommand(.append(.catenateURL("url1"))))
+        XCTAssertNoThrow(try stateMachine.sendCommand(.append(.catenateURL("url2"))))
+        XCTAssertNoThrow(try stateMachine.sendCommand(.append(.catenateData(.begin(size: 10)))))
+        XCTAssertNoThrow(try stateMachine.receiveContinuationRequest(.data("ready2")))
+        XCTAssertNoThrow(try stateMachine.sendCommand(.append(.messageBytes("01234"))))
+        XCTAssertNoThrow(try stateMachine.sendCommand(.append(.messageBytes("56789"))))
+        XCTAssertNoThrow(try stateMachine.sendCommand(.append(.endCatenate)))
+        
+        // show that we can finish the append command, and then send another different command
+        XCTAssertNoThrow(try stateMachine.sendCommand(.append(.finish)))
+        XCTAssertNoThrow(try stateMachine.receiveResponse(.tagged(.init(tag: "A1", state: .ok(.init(code: nil, text: "OK"))))))
+        XCTAssertNoThrow(try stateMachine.sendCommand(.tagged(.init(tag: "A2", command: .noop))))
+    }
+}

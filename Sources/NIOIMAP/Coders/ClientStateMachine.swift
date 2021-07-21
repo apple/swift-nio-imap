@@ -43,6 +43,15 @@ struct ClientStateMachine: Hashable {
     }
 
     private var state: State = .expectingNormalResponse
+    
+    mutating func receiveContinuationRequest(_ req: ContinuationRequest) throws {
+        switch self.state {
+        case .appending(var appendStateMachine):
+            self.state = try appendStateMachine.receiveContinuationRequest(req)
+        default:
+            fatalError("TODO")
+        }
+    }
 
     mutating func receiveResponse(_ response: Response) throws {
         switch self.state {
