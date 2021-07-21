@@ -34,7 +34,7 @@ extension ClientStateMachine {
 
             /// We're streaming a catenate message to the server
             case sendingCatenateBytes
-            
+
             /// The client has sent the "finish" command, we just need the server to confirm
             case waitingForTaggedResponse
 
@@ -48,12 +48,12 @@ extension ClientStateMachine {
         mutating func receiveResponse(_ response: Response) throws -> ClientStateMachine.State {
             switch self.state {
             case .started, .waitingForAppendContinuationRequest, .sendingMessageBytes, .catenating,
-                    .waitingForCatenateContinuationRequest, .sendingCatenateBytes, .finished:
+                 .waitingForCatenateContinuationRequest, .sendingCatenateBytes, .finished:
                 throw UnexpectedResponse()
             case .waitingForTaggedResponse:
                 break
             }
-            
+
             switch response {
             case .untagged, .fetch, .fatal, .authenticationChallenge, .idleStarted:
                 throw UnexpectedResponse()
@@ -65,7 +65,7 @@ extension ClientStateMachine {
         mutating func receiveContinuationRequest(_: ContinuationRequest) throws -> ClientStateMachine.State {
             switch self.state {
             case .started, .sendingMessageBytes, .catenating,
-                    .sendingCatenateBytes, .finished, .waitingForTaggedResponse:
+                 .sendingCatenateBytes, .finished, .waitingForTaggedResponse:
                 throw UnexpectedResponse()
             case .waitingForAppendContinuationRequest:
                 self.state = .sendingMessageBytes

@@ -43,7 +43,7 @@ struct ClientStateMachine: Hashable {
     }
 
     private var state: State = .expectingNormalResponse
-    
+
     mutating func receiveContinuationRequest(_ req: ContinuationRequest) throws {
         switch self.state {
         case .appending(var appendStateMachine):
