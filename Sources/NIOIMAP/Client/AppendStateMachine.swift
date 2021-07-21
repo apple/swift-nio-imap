@@ -18,27 +18,35 @@ extension ClientStateMachine {
     struct Append: Hashable {
         enum State: Hashable {
             /// We've sent the append command to the server, and will now send data
+            /// Can move to `.waitingForAppend...` or `catenating`
             case started
 
-            /// We want to send a literal to the server, but first need the server to confirm it's ready
+            /// We want to send a literal to the server, but first need the server to confirm it's ready.
+            /// When we receive the continuation request, we'll move to `.sendingMessageBytes`.
             case waitingForAppendContinuationRequest
 
-            /// We're streaming a message to the server
+            /// We're streaming a message to the server.
+            /// Onces the message has been sent, we return to `.started`.
             case sendingMessageBytes
 
-            /// We're catenating a message
+            /// We're catenating messages or URLS. No state transformation is required for URLs, as they're
+            /// done in one shot, but to catenate a message we need to move to `.waitingForCatenate...`
             case catenating
 
-            /// We want to send a literal to the server, but first need the server to confirm it's ready
+            /// We want to send a literal to the server, but first need the server to confirm it's ready.
+            /// Once we've received the continuation, we'll move to `.sendingCatenateBytes`.
             case waitingForCatenateContinuationRequest
 
-            /// We're streaming a catenate message to the server
+            /// We're streaming a catenate message to the server. Once the
+            /// message is sent we return to `.started`.
             case sendingCatenateBytes
 
-            /// The client has sent the "finish" command, we just need the server to confirm
+            /// The client has sent the "finish" command, we just need the server to confirm.
+            /// From here we move to `finished`.
             case waitingForTaggedResponse
 
-            /// The server has returned a tagged response to finish the append command
+            /// The server has returned a tagged response to finish the append command. No
+            /// valid state transformations at this point.
             case finished
         }
 
@@ -125,7 +133,7 @@ extension ClientStateMachine.Append {
         case .endMessage:
             self.state = .started
         case .messageBytes:
-            break
+            self.state = .sendingMessageBytes // continue sending bytes until we're told to stop
         }
         return .appending(self)
     }
@@ -151,7 +159,7 @@ extension ClientStateMachine.Append {
         case .endCatenate:
             self.state = .started
         case .messageBytes:
-            break
+            self.state = .sendingMessageBytes // continue sending bytes until we're told to stop
         }
         return .appending(self)
     }
