@@ -43,6 +43,8 @@ class AppendStateMachineTests: XCTestCase {
         XCTAssertNoThrow(try self.stateMachine.sendCommand(.append(.endCatenate)))
 
         XCTAssertNoThrow(try self.stateMachine.sendCommand(.append(.finish)))
+        XCTAssertNoThrow(XCTAssertEqual(try self.stateMachine.receiveResponse(.tagged(.init(tag: "A1", state: .ok(.init(code: nil, text: "OK"))))), .expectingNormalResponse)
+)
     }
 
     func testStartAppendWhenCatenatingThrows() {
@@ -67,6 +69,12 @@ class AppendStateMachineTests: XCTestCase {
         XCTAssertNoThrow(try self.stateMachine.sendCommand(.append(.catenateData(.begin(size: 10)))))
         XCTAssertNoThrow(try self.stateMachine.receiveContinuationRequest(.data("req")))
         XCTAssertThrowsError(try self.stateMachine.sendCommand(.append(.catenateURL("url")))) { e in
+            XCTAssertTrue(e is InvalidCommandForState)
+        }
+    }
+    
+    func testSendingNonAppendCommandThrows() {
+        XCTAssertThrowsError(try self.stateMachine.sendCommand(.idleDone)) { e in
             XCTAssertTrue(e is InvalidCommandForState)
         }
     }

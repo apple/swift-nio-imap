@@ -20,16 +20,13 @@ extension ClientStateMachine {
             /// We've sent the append command to the server, and will now send data
             case started
 
-            /// We're appending a message
-            case appending
-
             /// We want to send a literal to the server, but first need the server to confirm it's ready
             case waitingForAppendContinuationRequest
 
             /// We're streaming a message to the server
             case sendingMessageBytes
 
-            /// We're catenatinf a message
+            /// We're catenating a message
             case catenating
 
             /// We want to send a literal to the server, but first need the server to confirm it's ready
@@ -37,6 +34,9 @@ extension ClientStateMachine {
 
             /// We're streaming a catenate message to the server
             case sendingCatenateBytes
+            
+            /// The client has sent the "finish" command, we just need the server to confirm
+            case waitingForTaggedResponse
 
             /// The server has returned a tagged response to finish the append command
             case finished
@@ -44,13 +44,28 @@ extension ClientStateMachine {
 
         var state: State = .started
 
-        mutating func receiveResponse(_: Response) throws -> ClientStateMachine.State {
-            fatalError("TODO")
+        // we don't expect any responses when appending
+        mutating func receiveResponse(_ response: Response) throws -> ClientStateMachine.State {
+            switch self.state {
+            case .started, .waitingForAppendContinuationRequest, .sendingMessageBytes, .catenating,
+                    .waitingForCatenateContinuationRequest, .sendingCatenateBytes, .finished:
+                throw UnexpectedResponse()
+            case .waitingForTaggedResponse:
+                break
+            }
+            
+            switch response {
+            case .untagged, .fetch, .fatal, .authenticationChallenge, .idleStarted:
+                throw UnexpectedResponse()
+            case .tagged:
+                return .expectingNormalResponse
+            }
         }
 
         mutating func receiveContinuationRequest(_: ContinuationRequest) throws -> ClientStateMachine.State {
             switch self.state {
-            case .started, .appending, .sendingMessageBytes, .catenating, .sendingCatenateBytes, .finished:
+            case .started, .sendingMessageBytes, .catenating,
+                    .sendingCatenateBytes, .finished, .waitingForTaggedResponse:
                 throw UnexpectedResponse()
             case .waitingForAppendContinuationRequest:
                 self.state = .sendingMessageBytes
@@ -71,22 +86,16 @@ extension ClientStateMachine {
             }
 
             switch self.state {
+            case .waitingForTaggedResponse, .waitingForAppendContinuationRequest, .waitingForCatenateContinuationRequest, .finished:
+                throw InvalidCommandForState(command)
             case .started:
                 return try self.sendCommand_startedState(appendCommand)
-            case .appending:
-                return try self.sendCommand_appendingState(appendCommand)
-            case .waitingForAppendContinuationRequest:
-                return try self.sendCommand_waitingForAppendContinuationRequestState(appendCommand)
             case .sendingMessageBytes:
                 return try self.sendCommand_sendingMessageBytesState(appendCommand)
             case .catenating:
                 return try self.sendCommand_catenatingState(appendCommand)
-            case .waitingForCatenateContinuationRequest:
-                return try self.sendCommand_waitingForCatenateContinuationRequestState(appendCommand)
             case .sendingCatenateBytes:
                 return try self.sendCommand_sendingCatenateBytesState(appendCommand)
-            case .finished:
-                return try self.sendCommand_finishedState(appendCommand)
             }
         }
     }
@@ -104,23 +113,9 @@ extension ClientStateMachine.Append {
         case .beginCatenate:
             self.state = .catenating
         case .finish:
-            self.state = .finished
+            self.state = .waitingForTaggedResponse
         }
         return .appending(self)
-    }
-
-    private mutating func sendCommand_appendingState(_ command: AppendCommand) throws -> ClientStateMachine.State {
-        switch command {
-        case .start, .beginMessage, .endMessage, .beginCatenate, .catenateURL, .catenateData, .endCatenate, .finish:
-            throw InvalidCommandForState(.append(command))
-        case .messageBytes:
-            self.state = .appending
-        }
-        return .appending(self)
-    }
-
-    private mutating func sendCommand_waitingForAppendContinuationRequestState(_ command: AppendCommand) throws -> ClientStateMachine.State {
-        throw InvalidCommandForState(.append(command))
     }
 
     private mutating func sendCommand_sendingMessageBytesState(_ command: AppendCommand) throws -> ClientStateMachine.State {
@@ -149,10 +144,6 @@ extension ClientStateMachine.Append {
         return .appending(self)
     }
 
-    private mutating func sendCommand_waitingForCatenateContinuationRequestState(_ command: AppendCommand) throws -> ClientStateMachine.State {
-        throw InvalidCommandForState(.append(command))
-    }
-
     private mutating func sendCommand_sendingCatenateBytesState(_ command: AppendCommand) throws -> ClientStateMachine.State {
         switch command {
         case .start, .beginMessage, .beginCatenate, .endMessage, .catenateURL, .catenateData, .finish:
@@ -163,9 +154,5 @@ extension ClientStateMachine.Append {
             break
         }
         return .appending(self)
-    }
-
-    private mutating func sendCommand_finishedState(_ command: AppendCommand) throws -> ClientStateMachine.State {
-        throw InvalidCommandForState(.append(command))
     }
 }
