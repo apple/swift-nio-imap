@@ -26,7 +26,7 @@ extension ClientStateMachine {
             case waitingForAppendContinuationRequest
 
             /// We're streaming a message to the server.
-            /// Onces the message has been sent, we return to `.started`.
+            /// Once the message has been sent, we return to `.started`.
             case sendingMessageBytes
 
             /// We're catenating messages or URLS. No state transformation is required for URLs, as they're
