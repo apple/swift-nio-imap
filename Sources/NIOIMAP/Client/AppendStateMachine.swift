@@ -17,6 +17,7 @@ import NIOIMAPCore
 extension ClientStateMachine {
     struct Append: Hashable {
         enum State: Hashable {
+            // TODO: Find a better name than "started".
             /// We've sent the append command to the server, and will now send data
             /// Can move to `.waitingForAppend...` or `catenating`
             case started
