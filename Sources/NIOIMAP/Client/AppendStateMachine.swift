@@ -66,6 +66,7 @@ extension ClientStateMachine {
             case .untagged, .fetch, .fatal, .authenticationChallenge, .idleStarted:
                 throw UnexpectedResponse()
             case .tagged:
+                self.state = .finished
                 return .expectingNormalResponse
             }
         }
