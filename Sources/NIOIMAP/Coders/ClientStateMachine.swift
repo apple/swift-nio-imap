@@ -36,15 +36,22 @@ struct ClientStateMachine: Hashable {
         case expectingNormalResponse
         case idle(ClientStateMachine.Idle)
         case authenticating(ClientStateMachine.Authentication)
+        case appending(ClientStateMachine.Append)
         case expectingLiteralContinuationRequest
         case completingCommand
         case error
-        case appending
-        case startedAppendMessage
-        case startedCatenateMessage
     }
 
     private var state: State = .expectingNormalResponse
+
+    mutating func receiveContinuationRequest(_ req: ContinuationRequest) throws {
+        switch self.state {
+        case .appending(var appendStateMachine):
+            self.state = try appendStateMachine.receiveContinuationRequest(req)
+        default:
+            fatalError("TODO")
+        }
+    }
 
     mutating func receiveResponse(_ response: Response) throws {
         switch self.state {
@@ -52,6 +59,8 @@ struct ClientStateMachine: Hashable {
             self.state = try idleStateMachine.receiveResponse(response)
         case .authenticating(var authStateMachine):
             self.state = try authStateMachine.receiveResponse(response)
+        case .appending(var appendStateMachine):
+            self.state = try appendStateMachine.receiveResponse(response)
         default:
             fatalError("TODO")
         }
@@ -65,6 +74,8 @@ struct ClientStateMachine: Hashable {
             self.state = try idleStateMachine.sendCommand(command)
         case .authenticating(var authStateMachine):
             self.state = try authStateMachine.sendCommand(command)
+        case .appending(var appendingStateMachine):
+            self.state = try appendingStateMachine.sendCommand(command)
         default:
             fatalError("TODO")
         }
@@ -82,8 +93,8 @@ extension ClientStateMachine {
             throw InvalidCommandForState(command)
         case .tagged(let tc):
             try self.sendTaggedCommand(tc)
-        case .append:
-            fatalError("TODO")
+        case .append(let ac):
+            try self.sendAppendCommand(ac)
         }
     }
 
@@ -101,5 +112,10 @@ extension ClientStateMachine {
         default:
             break
         }
+    }
+
+    private mutating func sendAppendCommand(_: AppendCommand) throws {
+        assert(self.state == .expectingNormalResponse)
+        self.state = .appending(Append())
     }
 }
