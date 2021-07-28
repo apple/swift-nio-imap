@@ -19,8 +19,10 @@ extension ClientStateMachine {
         enum State: Hashable {
             // TODO: Find a better name than "started".
             /// We've sent the append command to the server, and will now send data
-            /// Can move to `.waitingForAppend...` or `catenating`
-            case started
+            /// Can move to `.waitingForAppend...` or `catenating`.
+            /// `canFinish` is true iff at least one "standard" append, or one catenate
+            /// has completed.
+            case started(canFinish: Bool)
 
             /// We want to send a literal to the server, but first need the server to confirm it's ready.
             /// When we receive the continuation request, we'll move to `.sendingMessageBytes`.
@@ -51,7 +53,7 @@ extension ClientStateMachine {
             case finished
         }
 
-        var state: State = .started
+        var state: State = .started(canFinish: false)
 
         // we don't expect any responses when appending
         mutating func receiveResponse(_ response: Response) throws -> ClientStateMachine.State {
@@ -123,7 +125,11 @@ extension ClientStateMachine.Append {
         case .beginCatenate:
             self.state = .catenating
         case .finish:
-            throw InvalidCommandForState(.append(command))
+            if self.state == .started(canFinish: true) {
+                self.state = .waitingForTaggedResponse
+            } else {
+                throw InvalidCommandForState(.append(command))
+            }
         }
         return .appending(self)
     }
@@ -133,7 +139,7 @@ extension ClientStateMachine.Append {
         case .start, .beginMessage, .beginCatenate, .catenateURL, .catenateData, .endCatenate, .finish:
             throw InvalidCommandForState(.append(command))
         case .endMessage:
-            self.state = .started
+            self.state = .started(canFinish: true)
         case .messageBytes:
             self.state = .sendingMessageBytes // continue sending bytes until we're told to stop
         }
@@ -149,7 +155,7 @@ extension ClientStateMachine.Append {
         case .catenateData:
             self.state = .waitingForCatenateContinuationRequest
         case .endCatenate:
-            self.state = .started
+            self.state = .started(canFinish: true)
         }
         return .appending(self)
     }
@@ -159,7 +165,7 @@ extension ClientStateMachine.Append {
         case .start, .beginMessage, .beginCatenate, .endMessage, .catenateURL, .catenateData, .finish:
             throw InvalidCommandForState(.append(command))
         case .endCatenate:
-            self.state = .started
+            self.state = .started(canFinish: true)
         case .messageBytes:
             self.state = .sendingCatenateBytes // continue sending bytes until we're told to stop
         }

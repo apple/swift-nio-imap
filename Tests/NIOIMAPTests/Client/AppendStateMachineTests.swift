@@ -78,7 +78,7 @@ class AppendStateMachineTests: XCTestCase {
             XCTAssertTrue(e is InvalidCommandForState)
         }
     }
-    
+
     // Should throw instantly because we shouldn't
     // be able to move straight from a started to
     // a finished state. We need to send _something_.
