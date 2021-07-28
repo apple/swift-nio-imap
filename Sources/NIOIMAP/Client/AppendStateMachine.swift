@@ -122,7 +122,7 @@ extension ClientStateMachine.Append {
         case .beginCatenate:
             self.state = .catenating
         case .finish:
-            self.state = .waitingForTaggedResponse
+            throw InvalidCommandForState(.append(command))
         }
         return .appending(self)
     }

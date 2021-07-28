@@ -79,10 +79,12 @@ class AppendStateMachineTests: XCTestCase {
         }
     }
     
-    func testNeedAtLeastOneAppendOrCatenate_append() {
-        // We haven't sent any append or catenate, so this should fail instantly
-        // because at least one is required.
-        let response = Response.tagged(.init(tag: "A1", state: .ok(.init(text: "OK"))))
-        XCTAssertThrowsError(try self.stateMachine.receiveResponse(response))
+    // Should throw instantly because we shouldn't
+    // be able to move straight from a started to
+    // a finished state. We need to send _something_.
+    func testNeedAtLeastOneAppendOrCatenate() {
+        XCTAssertThrowsError(try self.stateMachine.sendCommand(.append(.finish))) { e in
+            XCTAssertTrue(e is InvalidCommandForState)
+        }
     }
 }
