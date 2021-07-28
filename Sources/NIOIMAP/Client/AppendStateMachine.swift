@@ -159,7 +159,7 @@ extension ClientStateMachine.Append {
         case .endCatenate:
             self.state = .started
         case .messageBytes:
-            self.state = .sendingMessageBytes // continue sending bytes until we're told to stop
+            self.state = .sendingCatenateBytes // continue sending bytes until we're told to stop
         }
         return .appending(self)
     }
