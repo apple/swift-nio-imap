@@ -17,15 +17,54 @@ import NIO
 @testable import NIOIMAPCore
 import XCTest
 
-class ClientStateMachineTests: XCTestCase {}
+class ClientStateMachineTests: XCTestCase {
+    
+    var stateMachine: ClientStateMachine!
+    
+    override func setUp() {
+        self.stateMachine = ClientStateMachine()
+    }
+    
+    func testMultipleCommandsCanRunConcurrently() {
+        XCTAssertNoThrow(try self.stateMachine.sendCommand(.tagged(.init(tag: "A1", command: .noop))))
+        XCTAssertNoThrow(try self.stateMachine.sendCommand(.tagged(.init(tag: "A2", command: .noop))))
+        XCTAssertNoThrow(try self.stateMachine.sendCommand(.tagged(.init(tag: "A3", command: .noop))))
+        XCTAssertNoThrow(try self.stateMachine.sendCommand(.tagged(.init(tag: "A4", command: .noop))))
+        XCTAssertNoThrow(try self.stateMachine.receiveResponse(.tagged(.init(tag: "A2", state: .ok(.init(text: "OK"))))))
+        XCTAssertNoThrow(try self.stateMachine.receiveResponse(.tagged(.init(tag: "A4", state: .ok(.init(text: "OK"))))))
+        XCTAssertNoThrow(try self.stateMachine.receiveResponse(.tagged(.init(tag: "A1", state: .ok(.init(text: "OK"))))))
+        XCTAssertNoThrow(try self.stateMachine.receiveResponse(.tagged(.init(tag: "A3", state: .ok(.init(text: "OK"))))))
+    }
+    
+    func testCantAuthenticateWithAnotherCommand() {
+        XCTAssertNoThrow(try self.stateMachine.sendCommand(.tagged(.init(tag: "A1", command: .noop))))
+        XCTAssertThrowsError(try self.stateMachine.sendCommand(.tagged(.init(tag: "A2", command: .authenticate(mechanism: .gssAPI, initialResponse: nil))))) { e in
+            XCTAssertTrue(e is InvalidCommandForState)
+        }
+    }
+    
+    func testCantAppendWithAnotherCommand() {
+        XCTAssertNoThrow(try self.stateMachine.sendCommand(.tagged(.init(tag: "A1", command: .noop))))
+        XCTAssertThrowsError(try self.stateMachine.sendCommand(.append(.start(tag: "A2", appendingTo: .inbox)))) { e in
+            XCTAssertTrue(e is InvalidCommandForState)
+        }
+    }
+    
+    func testCantIdleWithAnotherCommand() {
+        XCTAssertNoThrow(try self.stateMachine.sendCommand(.tagged(.init(tag: "A1", command: .noop))))
+        XCTAssertThrowsError(try self.stateMachine.sendCommand(.tagged(.init(tag: "A2", command: .idleStart)))) { e in
+            XCTAssertTrue(e is InvalidCommandForState)
+        }
+    }
+}
 
 // MARK: - IDLE
 
 extension ClientStateMachineTests {
     func testIdleWorkflow_normal() {
         // set up the state machine, show we can send a command
-        var stateMachine = ClientStateMachine()
         XCTAssertNoThrow(try stateMachine.sendCommand(.tagged(.init(tag: "A1", command: .noop))))
+        XCTAssertNoThrow(try stateMachine.receiveResponse(.tagged(.init(tag: "A1", state: .ok(.init(text: "OK"))))))
 
         // 1. start idle
         // 2. server confirms idle
@@ -40,7 +79,6 @@ extension ClientStateMachineTests {
 
     func testIdleWorkflow_commandWhileIdle() {
         // set up the state machine to idle
-        var stateMachine = ClientStateMachine()
         XCTAssertNoThrow(try stateMachine.sendCommand(.tagged(.init(tag: "A1", command: .idleStart))))
         XCTAssertNoThrow(try stateMachine.receiveResponse(.idleStarted))
 
@@ -52,7 +90,6 @@ extension ClientStateMachineTests {
 
     func testIdleWorkflow_commandBeforeIdleConfirmed() {
         // set up the state machine to idle
-        var stateMachine = ClientStateMachine()
         XCTAssertNoThrow(try stateMachine.sendCommand(.tagged(.init(tag: "A1", command: .idleStart))))
 
         // machine isn't yet idle, but we've started the process
@@ -68,8 +105,8 @@ extension ClientStateMachineTests {
 extension ClientStateMachineTests {
     func testAuthenticationWorkflow_normal() {
         // set up the state machine, show we can send a command
-        var stateMachine = ClientStateMachine()
         XCTAssertNoThrow(try stateMachine.sendCommand(.tagged(.init(tag: "A1", command: .noop))))
+        XCTAssertNoThrow(try stateMachine.receiveResponse(.tagged(.init(tag: "A1", state: .ok(.init(text: "OK"))))))
 
         // 1. start authenticating
         // 2. a couple of challenges back and forth
@@ -88,13 +125,13 @@ extension ClientStateMachineTests {
 
     func testAuthenticationWorkflow_normal_noChallenges() {
         // set up the state machine, show we can send a command
-        var stateMachine = ClientStateMachine()
         XCTAssertNoThrow(try stateMachine.sendCommand(.tagged(.init(tag: "A1", command: .noop))))
+        XCTAssertNoThrow(try stateMachine.receiveResponse(.tagged(.init(tag: "A1", state: .ok(.init(text: "OK"))))))
 
         // 1. start authenticating
         // 2. server immediately confirms
         XCTAssertNoThrow(try stateMachine.sendCommand(.tagged(.init(tag: "A2", command: .authenticate(mechanism: .gssAPI, initialResponse: nil)))))
-        XCTAssertNoThrow(try stateMachine.receiveResponse(.tagged(.init(tag: "A3", state: .ok(.init(code: nil, text: "OK"))))))
+        XCTAssertNoThrow(try stateMachine.receiveResponse(.tagged(.init(tag: "A2", state: .ok(.init(code: nil, text: "OK"))))))
 
         // state machine should have reset, so we can send a normal command again
         XCTAssertNoThrow(try stateMachine.sendCommand(.tagged(.init(tag: "A3", command: .noop))))
@@ -102,7 +139,6 @@ extension ClientStateMachineTests {
 
     func testAuthenticationWorkflow_commandWhileAuthenticating() {
         // set up the state machine to authenticate
-        var stateMachine = ClientStateMachine()
         XCTAssertNoThrow(try stateMachine.sendCommand(.tagged(.init(tag: "A1", command: .authenticate(mechanism: .gssAPI, initialResponse: nil)))))
 
         // machine is authenticating, so sending a different command should throw
@@ -113,7 +149,6 @@ extension ClientStateMachineTests {
 
     func testAuthenticationWorkflow_unexpectedResponse() {
         // set up the state machine to authenticate
-        var stateMachine = ClientStateMachine()
         XCTAssertNoThrow(try stateMachine.sendCommand(.tagged(.init(tag: "A1", command: .authenticate(mechanism: .gssAPI, initialResponse: nil)))))
 
         // machine is authenticating, so sending an untagged response should throw
@@ -127,7 +162,6 @@ extension ClientStateMachineTests {
 
 extension ClientStateMachineTests {
     func testAppendWorflow_normal() {
-        var stateMachine = ClientStateMachine()
 
         // start the append command
         XCTAssertNoThrow(try stateMachine.sendCommand(.append(.start(tag: "A1", appendingTo: .inbox))))
