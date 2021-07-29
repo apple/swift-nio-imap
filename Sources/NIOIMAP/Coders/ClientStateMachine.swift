@@ -24,9 +24,8 @@ public struct UnexpectedResponse: Error {
 }
 
 public struct DuplicateCommandTag: Error {
-    
     public var tag: String
-    
+
     public init(tag: String) {
         self.tag = tag
     }
