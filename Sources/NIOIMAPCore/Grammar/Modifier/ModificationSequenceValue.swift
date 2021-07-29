@@ -16,8 +16,8 @@ import struct NIO.ByteBuffer
 
 /// Represents the a *mod-sequence-value` as defined in RFC 7162.
 public struct ModificationSequenceValue: Hashable {
-    /// The raw value.
-    public var value: UInt64
+    
+    fileprivate var value: UInt64
 
     /// A  zero *mod-sequence-value*
     public static var zero: Self {
@@ -52,6 +52,15 @@ extension ModificationSequenceValue: CustomDebugStringConvertible {
     public var debugDescription: String {
         "\(self.value)"
     }
+}
+
+// MARK: - BinaryInteger
+extension BinaryInteger {
+    
+    init(_ modificationSequenceValue: ModificationSequenceValue) {
+        self = Self(modificationSequenceValue.value)
+    }
+    
 }
 
 // MARK: - Encoding
