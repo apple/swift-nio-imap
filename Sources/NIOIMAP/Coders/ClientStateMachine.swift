@@ -23,6 +23,10 @@ public struct UnexpectedResponse: Error {
     public init() {}
 }
 
+public struct DuplicateCommandTag: Error {
+    public init() {}
+}
+
 public struct InvalidCommandForState: Error, Equatable {
     public var command: CommandStreamPart
 
@@ -80,6 +84,9 @@ struct ClientStateMachine: Hashable {
 
     mutating func sendCommand(_ command: CommandStreamPart) throws {
         if let tag = self.getTagFromCommand(command) {
+            guard !self.activeCommandTags.contains(tag) else {
+                throw DuplicateCommandTag()
+            }
             self.activeCommandTags.insert(tag)
         }
 
