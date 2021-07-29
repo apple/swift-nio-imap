@@ -49,7 +49,7 @@ public enum SelectParameter: Equatable {
     case qresync(QResyncParameter)
 
     /// Perform a `.select` command with Conditional Store. Note that a server must explicitly advertise this capability. See RFC 7162.
-    case condstore
+    case condStore
 }
 
 // MARK: - Encoding
@@ -73,7 +73,7 @@ extension EncodeBuffer {
             return self.writeQResyncParameter(param: param)
         case .basic(let param):
             return self.writeParameter(param)
-        case .condstore:
+        case .condStore:
             return self.writeString("CONDSTORE")
         }
     }

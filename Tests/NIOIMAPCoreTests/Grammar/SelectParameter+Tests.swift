@@ -23,7 +23,7 @@ class SelectParameter_Tests: EncodeTestClass {}
 extension SelectParameter_Tests {
     func testEncoding() {
         let inputs: [(SelectParameter, String, UInt)] = [
-            (.condstore, "CONDSTORE", #line),
+            (.condStore, "CONDSTORE", #line),
             (.basic(.init(key: "test", value: nil)), "test", #line),
             (.basic(.init(key: "test", value: .sequence(.set([1])))), "test 1", #line),
             (
