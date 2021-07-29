@@ -44,7 +44,7 @@ struct ClientStateMachine: Hashable {
 
     private var state: State = .expectingNormalResponse
     private(set) var activeCommandTags: Set<String> = []
-    
+
     mutating func receiveContinuationRequest(_ req: ContinuationRequest) throws {
         switch self.state {
         case .appending(var appendStateMachine):
@@ -55,14 +55,13 @@ struct ClientStateMachine: Hashable {
     }
 
     mutating func receiveResponse(_ response: Response) throws {
-        
         if let tag = self.getTagFromResponse(response) {
             guard self.activeCommandTags.contains(tag) else {
                 throw UnexpectedResponse()
             }
             self.activeCommandTags.remove(tag)
         }
-        
+
         switch self.state {
         case .idle(var idleStateMachine):
             self.state = try idleStateMachine.receiveResponse(response)
@@ -74,17 +73,16 @@ struct ClientStateMachine: Hashable {
             self.state = try self.handleResponse(response)
         }
     }
-    
-    private mutating func handleResponse(_ response: Response) throws -> ClientStateMachine.State {
+
+    private mutating func handleResponse(_: Response) throws -> ClientStateMachine.State {
         .expectingNormalResponse
     }
 
     mutating func sendCommand(_ command: CommandStreamPart) throws {
-        
         if let tag = self.getTagFromCommand(command) {
             self.activeCommandTags.insert(tag)
         }
-        
+
         switch self.state {
         case .expectingNormalResponse:
             try self.sendCommand_state_normalResponse(command: command)
@@ -98,7 +96,7 @@ struct ClientStateMachine: Hashable {
             fatalError("TODO")
         }
     }
-    
+
     func getTagFromCommand(_ command: CommandStreamPart) -> String? {
         switch command {
         case .idleDone, .continuationResponse:
@@ -110,13 +108,13 @@ struct ClientStateMachine: Hashable {
             case .start(let tag, _):
                 return tag
             case .beginMessage, .messageBytes, .endMessage,
-                    .beginCatenate, .catenateURL, .catenateData,
-                    .endCatenate, .finish:
+                 .beginCatenate, .catenateURL, .catenateData,
+                 .endCatenate, .finish:
                 return nil
             }
         }
     }
-    
+
     func getTagFromResponse(_ response: Response) -> String? {
         switch response {
         case .untagged, .fetch, .fatal, .authenticationChallenge, .idleStarted:
@@ -151,14 +149,14 @@ extension ClientStateMachine {
         // 50 of them...
         switch command.command {
         case .idleStart:
-            
+
             // no other commands can be running when we start idling
             guard self.activeCommandTags.count == 1 else {
                 throw InvalidCommandForState(.tagged(command))
             }
             self.state = .idle(Idle())
         case .authenticate:
-            
+
             // no other commands can be running when we start authenticating
             guard self.activeCommandTags.count == 1 else {
                 throw InvalidCommandForState(.tagged(command))
@@ -171,7 +169,7 @@ extension ClientStateMachine {
 
     private mutating func sendAppendCommand(_ command: AppendCommand) throws {
         assert(self.state == .expectingNormalResponse)
-        
+
         // no other commands can be running when we start appending
         guard self.activeCommandTags.count == 1 else {
             throw InvalidCommandForState(.append(command))
