@@ -24,7 +24,12 @@ public struct UnexpectedResponse: Error {
 }
 
 public struct DuplicateCommandTag: Error {
-    public init() {}
+    
+    public var tag: String
+    
+    public init(tag: String) {
+        self.tag = tag
+    }
 }
 
 public struct InvalidCommandForState: Error, Equatable {
@@ -59,7 +64,7 @@ struct ClientStateMachine: Hashable {
     }
 
     mutating func receiveResponse(_ response: Response) throws {
-        if let tag = self.getTagFromResponse(response) {
+        if let tag = response.tag {
             guard self.activeCommandTags.contains(tag) else {
                 throw UnexpectedResponse()
             }
@@ -74,18 +79,14 @@ struct ClientStateMachine: Hashable {
         case .appending(var appendStateMachine):
             self.state = try appendStateMachine.receiveResponse(response)
         default:
-            self.state = try self.handleResponse(response)
+            self.state = .expectingNormalResponse
         }
     }
 
-    private mutating func handleResponse(_: Response) throws -> ClientStateMachine.State {
-        .expectingNormalResponse
-    }
-
     mutating func sendCommand(_ command: CommandStreamPart) throws {
-        if let tag = self.getTagFromCommand(command) {
+        if let tag = command.tag {
             guard !self.activeCommandTags.contains(tag) else {
-                throw DuplicateCommandTag()
+                throw DuplicateCommandTag(tag: tag)
             }
             self.activeCommandTags.insert(tag)
         }
@@ -101,33 +102,6 @@ struct ClientStateMachine: Hashable {
             self.state = try appendingStateMachine.sendCommand(command)
         default:
             fatalError("TODO")
-        }
-    }
-
-    func getTagFromCommand(_ command: CommandStreamPart) -> String? {
-        switch command {
-        case .idleDone, .continuationResponse:
-            return nil
-        case .tagged(let taggedCommand):
-            return taggedCommand.tag
-        case .append(let appendCommand):
-            switch appendCommand {
-            case .start(let tag, _):
-                return tag
-            case .beginMessage, .messageBytes, .endMessage,
-                 .beginCatenate, .catenateURL, .catenateData,
-                 .endCatenate, .finish:
-                return nil
-            }
-        }
-    }
-
-    func getTagFromResponse(_ response: Response) -> String? {
-        switch response {
-        case .untagged, .fetch, .fatal, .authenticationChallenge, .idleStarted:
-            return nil
-        case .tagged(let tagged):
-            return tagged.tag
         }
     }
 }

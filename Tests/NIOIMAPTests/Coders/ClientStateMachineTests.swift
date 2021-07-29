@@ -58,7 +58,7 @@ class ClientStateMachineTests: XCTestCase {
 
     func testDuplicateTagThrows() {
         XCTAssertNoThrow(try self.stateMachine.sendCommand(.tagged(.init(tag: "A1", command: .noop))))
-        XCTAssertThrowsError(try self.stateMachine.sendCommand(.tagged(.init(tag: "A2", command: .noop)))) { e in
+        XCTAssertThrowsError(try self.stateMachine.sendCommand(.tagged(.init(tag: "A1", command: .noop)))) { e in
             XCTAssertTrue(e is DuplicateCommandTag)
         }
     }
