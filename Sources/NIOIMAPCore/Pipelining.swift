@@ -177,6 +177,7 @@ extension Command {
              .idleStart,
              .id,
              .namespace,
+             .compress,
 
              // Mailbox:
              .status,
@@ -293,7 +294,8 @@ extension Command {
 
         case .startTLS,
              .logout,
-             .authenticate:
+             .authenticate,
+             .compress:
             return [.barrier]
 
         case .idleStart:

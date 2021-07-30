@@ -82,6 +82,7 @@ extension GrammarParser {
             "GETQUOTA": GrammarParser.parseCommandSuffix_getQuota,
             "SETQUOTA": GrammarParser.parseCommandSuffix_setQuota,
             "GETQUOTAROOT": GrammarParser.parseCommandSuffix_getQuotaRoot,
+            "COMPRESS": GrammarParser.parseCommandSuffix_compress,
         ]
         return try parseFromLookupTable(buffer: &buffer, tracker: tracker, parsers: commandParsers)
     }
@@ -489,6 +490,17 @@ extension GrammarParser {
             let att = try parseFetch_type(buffer: &buffer, tracker: tracker)
             let modifiers = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseParameters) ?? [:]
             return .fetch(sequence, att, modifiers)
+        }
+    }
+
+    // compress    = "COMPRESS" SP algorithm
+    // algorithm   = "DEFLATE" (or any atom)
+    static func parseCommandSuffix_compress(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
+        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Command in
+            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+            let rawAlg = try self.parseAtom(buffer: &buffer, tracker: tracker)
+            let alg = Capability.CompressionKind(rawAlg)
+            return .compress(alg)
         }
     }
 }

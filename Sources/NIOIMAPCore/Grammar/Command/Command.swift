@@ -173,6 +173,9 @@ public enum Command: Equatable {
     /// Requests that the server return the text data
     /// associated with the specified IMAP URLs
     case urlFetch([ByteBuffer])
+
+    /// Instructs the server to use the named compression mechanism.
+    case compress(Capability.CompressionKind)
 }
 
 // MARK: - IMAP
@@ -270,6 +273,8 @@ extension CommandEncodeBuffer {
             return self.writeCommandKind_generateAuthorizedURL(mechanisms: mechanisms)
         case .urlFetch(let urls):
             return self.writeCommandKind_urlFetch(urls: urls)
+        case .compress(let kind):
+            return self.writeCommandKind_compress(kind: kind)
         }
     }
 
@@ -423,6 +428,10 @@ extension CommandEncodeBuffer {
     private mutating func writeCommandKind_unsubscribe(mailbox: MailboxName) -> Int {
         self.buffer.writeString("UNSUBSCRIBE ") +
             self.buffer.writeMailbox(mailbox)
+    }
+
+    private mutating func writeCommandKind_compress(kind: Capability.CompressionKind) -> Int {
+        self.buffer.writeString("COMPRESS \(kind.rawValue)")
     }
 
     private mutating func writeCommandKind_authenticate(mechanism: AuthenticationMechanism, initialResponse: InitialResponse?) -> Int {

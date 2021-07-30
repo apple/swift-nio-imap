@@ -19,7 +19,7 @@ import struct NIO.ByteBuffer
 /// is present.
 public struct Capability: Hashable {
     /// The raw string value of the capability.
-    public var rawValue: String
+    var rawValue: String
     private var splitIndex: String.Index?
 
     /// The name of the capability. For simple capabilities such as *STARTTLS*, the value
@@ -67,8 +67,8 @@ extension Capability {
         /// Support the extended SORT command syntax and accepts new return options.
         public static let sort = Self(unchecked: "SORT")
 
-        /// The raw value as an uppercased string.
-        public let rawValue: String
+        /// The raw string value of the capability.
+        var rawValue: String
 
         /// Creates a new `ContextKind`  from a `String`.
         /// - parameter value: The raw `String`. Will be uppercased.
@@ -88,8 +88,8 @@ extension Capability {
         /// "SORT=DISPLAY" in its CAPABILITY response.
         public static let display = Self(unchecked: "DISPLAY")
 
-        /// The raw value as an uppercased string.
-        public var rawValue: String
+        /// The raw string value of the capability.
+        var rawValue: String
 
         /// Creates a new `SortKind`  from a `String`.
         /// - parameter value: The raw `String`. Will be uppercased.
@@ -115,8 +115,8 @@ extension Capability {
         /// relationships based on which messages are replies to others.
         public static let references = Self(unchecked: "REFERENCES")
 
-        /// The raw value as an uppercased string.
-        public var rawValue: String
+        /// The raw string value of the capability.
+        var rawValue: String
 
         /// Creates a new `ThreadKind`  from a `String`.
         /// - parameter value: The raw `String`. Will be uppercased.
@@ -136,8 +136,8 @@ extension Capability {
         /// summing the sizes of all individual messages in that mailbox.
         public static let size = Self(unchecked: "SIZE")
 
-        /// The raw value as an uppercased string.
-        public var rawValue: String
+        /// The raw string value of the capability.
+        var rawValue: String
 
         /// Creates a new `StatusKind`  from a `String`.
         /// - parameter value: The raw `String`. Will be uppercased.
@@ -156,8 +156,8 @@ extension Capability {
         /// UTF8-encoded strings.
         public static let accept = Self(unchecked: "ACCEPT")
 
-        /// The raw value as an uppercased string.
-        public var rawValue: String
+        /// The raw string value of the capability.
+        var rawValue: String
 
         /// Creates a new `UTF8Kind`  from a `String`.
         /// - parameter value: The raw `String`. Will be uppercased.
@@ -177,10 +177,29 @@ extension Capability {
         /// Allowed operations in selected state: *COPY*, *STORE flags*, *EXPUNGE* (required)
         public static let tekx = Self(unchecked: "TEKX")
 
-        /// The raw value as an uppercased string.
-        public var rawValue: String
+        /// The raw string value of the capability.
+        var rawValue: String
 
         /// Creates a new `RightsKind`  from a `String`.
+        /// - parameter value: The raw `String`. Will be uppercased.
+        public init(_ value: String) {
+            self.rawValue = value.uppercased()
+        }
+
+        fileprivate init(unchecked: String) {
+            self.rawValue = unchecked
+        }
+    }
+
+    /// The type of compression used in IMAP  responses.
+    public struct CompressionKind: Hashable {
+        /// The `DEFLATE` algorithm is used. RFC 4978
+        public static let deflate = Self(unchecked: "DEFLATE")
+
+        /// The raw string value of the capability.
+        var rawValue: String
+
+        /// Creates a new `CompressionKind` from a `String`.
         /// - parameter value: The raw `String`. Will be uppercased.
         public init(_ value: String) {
             self.rawValue = value.uppercased()
@@ -374,6 +393,21 @@ extension Capability {
     /// - returns: A new `Capability`.
     public static func rights(_ type: RightsKind) -> Self {
         Self("RIGHTS=\(type.rawValue)")
+    }
+
+    /// Creates a new *COMPRESSION* capability.
+    /// - parameter type: The `CompressionKind`.
+    /// - returns: A new `Capability`.
+    public static func compression(_ type: CompressionKind) -> Self {
+        Self("COMPRESS=\(type.rawValue)")
+    }
+}
+
+// MARK: - Capability to String conversion
+
+extension String {
+    public init(_ capability: Capability) {
+        self = capability.rawValue
     }
 }
 

@@ -444,6 +444,7 @@ extension PipeliningTests {
 
             (#line, .startTLS),
             (#line, .authenticate(mechanism: .plain, initialResponse: nil)),
+            (#line, .compress(.deflate)),
             (#line, .login(username: "user", password: "password")),
             (#line, .logout),
             (#line, .listIndependent([], reference: .food, .food, [])),
@@ -521,6 +522,7 @@ extension PipeliningTests {
 
             (#line, .startTLS),
             (#line, .authenticate(mechanism: .plain, initialResponse: nil)),
+            (#line, .compress(.deflate)),
             (#line, .login(username: "user", password: "password")),
             (#line, .logout),
             (#line, .listIndependent([], reference: .food, .food, [])),
@@ -609,6 +611,7 @@ extension PipeliningTests {
 
             (#line, .startTLS),
             (#line, .authenticate(mechanism: .plain, initialResponse: nil)),
+            (#line, .compress(.deflate)),
             (#line, .login(username: "user", password: "password")),
 
             (#line, .logout),
@@ -702,6 +705,7 @@ extension PipeliningTests {
 
             (#line, .startTLS),
             (#line, .authenticate(mechanism: .plain, initialResponse: nil)),
+            (#line, .compress(.deflate)),
             (#line, .login(username: "user", password: "password")),
             (#line, .logout),
             (#line, .subscribe(.food)),
@@ -784,6 +788,7 @@ extension PipeliningTests {
 
             (#line, .startTLS),
             (#line, .authenticate(mechanism: .plain, initialResponse: nil)),
+            (#line, .compress(.deflate)),
             (#line, .login(username: "user", password: "password")),
             (#line, .logout),
 
@@ -843,6 +848,7 @@ extension PipeliningTests {
 
             (#line, .startTLS),
             (#line, .authenticate(mechanism: .plain, initialResponse: nil)),
+            (#line, .compress(.deflate)),
             (#line, .login(username: "user", password: "password")),
             (#line, .logout),
             (#line, .enable([.condStore])),
@@ -913,6 +919,7 @@ extension PipeliningTests {
             (#line, .login(username: "user", password: "password")),
             (#line, .startTLS),
             (#line, .authenticate(mechanism: .plain, initialResponse: nil)),
+            (#line, .compress(.deflate)),
             (#line, .logout),
         ], haveBehavior: .mayTriggerUntaggedExpunge)
 
@@ -970,6 +977,7 @@ extension PipeliningTests {
 
             (#line, .startTLS),
             (#line, .authenticate(mechanism: .plain, initialResponse: nil)),
+            (#line, .compress(.deflate)),
             (#line, .login(username: "user", password: "password")),
             (#line, .logout),
             (#line, .enable([.condStore])),
@@ -1049,6 +1057,7 @@ extension PipeliningTests {
 
             (#line, .startTLS),
             (#line, .authenticate(mechanism: .plain, initialResponse: nil)),
+            (#line, .compress(.deflate)),
             (#line, .login(username: "user", password: "password")),
             (#line, .logout),
             (#line, .enable([.condStore])),
@@ -1116,6 +1125,7 @@ extension PipeliningTests {
 
             (#line, .startTLS),
             (#line, .authenticate(mechanism: .plain, initialResponse: nil)),
+            (#line, .compress(.deflate)),
             (#line, .login(username: "user", password: "password")),
             (#line, .logout),
             (#line, .id([:])),
@@ -1252,6 +1262,7 @@ extension PipeliningTests {
         Assert(commands: [
             (#line, .startTLS),
             (#line, .authenticate(mechanism: .plain, initialResponse: nil)),
+            (#line, .compress(.deflate)),
             (#line, .logout),
             (#line, .idleStart),
         ], haveBehavior: .barrier)

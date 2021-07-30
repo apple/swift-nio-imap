@@ -76,6 +76,7 @@ extension ResponseTextCodeTests {
             (.overQuota, "OVERQUOTA", #line),
             (.alreadyExists, "ALREADYEXISTS", #line),
             (.nonExistent, "NONEXISTENT", #line),
+            (.compressionActive, "COMPRESSIONACTIVE", #line),
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeResponseTextCode($0) })
     }
