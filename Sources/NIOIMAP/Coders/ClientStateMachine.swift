@@ -64,10 +64,9 @@ struct ClientStateMachine: Hashable {
 
     mutating func receiveResponse(_ response: Response) throws {
         if let tag = response.tag {
-            guard self.activeCommandTags.contains(tag) else {
+            guard self.activeCommandTags.remove(tag) != nil else {
                 throw UnexpectedResponse()
             }
-            self.activeCommandTags.remove(tag)
         }
 
         switch self.state {
@@ -84,10 +83,10 @@ struct ClientStateMachine: Hashable {
 
     mutating func sendCommand(_ command: CommandStreamPart) throws {
         if let tag = command.tag {
-            guard !self.activeCommandTags.contains(tag) else {
+            let (inserted, _) = self.activeCommandTags.insert(tag)
+            guard inserted else {
                 throw DuplicateCommandTag(tag: tag)
             }
-            self.activeCommandTags.insert(tag)
         }
 
         switch self.state {
