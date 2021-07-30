@@ -46,6 +46,15 @@ public enum Response: Equatable {
 
     /// Idle has started
     case idleStarted
+
+    public var tag: String? {
+        switch self {
+        case .untagged, .fetch, .fatal, .authenticationChallenge, .idleStarted:
+            return nil
+        case .tagged(let taggedResponse):
+            return taggedResponse.tag
+        }
+    }
 }
 
 /// The first event will always be `start`

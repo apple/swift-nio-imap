@@ -58,6 +58,17 @@ public enum AppendCommand: Equatable {
     /// Signals that the append command has finished, and no more messages will be recieved
     /// without starting a new command.
     case finish
+
+    public var tag: String? {
+        switch self {
+        case .start(let tag, _):
+            return tag
+        case .beginMessage, .messageBytes, .endMessage,
+             .beginCatenate, .catenateURL, .catenateData,
+             .endCatenate, .finish:
+            return nil
+        }
+    }
 }
 
 extension AppendCommand {
@@ -99,6 +110,18 @@ public enum CommandStreamPart: Equatable {
 
     /// Sends some data in response to a continuation request
     case continuationResponse(ByteBuffer)
+
+    /// The tag of the command. Only applies to `tagged` and `.append(.start)`.
+    public var tag: String? {
+        switch self {
+        case .idleDone, .continuationResponse:
+            return nil
+        case .tagged(let taggedCommand):
+            return taggedCommand.tag
+        case .append(let appendCommand):
+            return appendCommand.tag
+        }
+    }
 }
 
 extension CommandEncodeBuffer {

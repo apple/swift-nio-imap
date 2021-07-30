@@ -23,6 +23,14 @@ public struct UnexpectedResponse: Error {
     public init() {}
 }
 
+public struct DuplicateCommandTag: Error {
+    public var tag: String
+
+    public init(tag: String) {
+        self.tag = tag
+    }
+}
+
 public struct InvalidCommandForState: Error, Equatable {
     public var command: CommandStreamPart
 
@@ -43,6 +51,7 @@ struct ClientStateMachine: Hashable {
     }
 
     private var state: State = .expectingNormalResponse
+    private(set) var activeCommandTags: Set<String> = []
 
     mutating func receiveContinuationRequest(_ req: ContinuationRequest) throws {
         switch self.state {
@@ -54,6 +63,12 @@ struct ClientStateMachine: Hashable {
     }
 
     mutating func receiveResponse(_ response: Response) throws {
+        if let tag = response.tag {
+            guard self.activeCommandTags.remove(tag) != nil else {
+                throw UnexpectedResponse()
+            }
+        }
+
         switch self.state {
         case .idle(var idleStateMachine):
             self.state = try idleStateMachine.receiveResponse(response)
@@ -62,11 +77,18 @@ struct ClientStateMachine: Hashable {
         case .appending(var appendStateMachine):
             self.state = try appendStateMachine.receiveResponse(response)
         default:
-            fatalError("TODO")
+            self.state = .expectingNormalResponse
         }
     }
 
     mutating func sendCommand(_ command: CommandStreamPart) throws {
+        if let tag = command.tag {
+            let (inserted, _) = self.activeCommandTags.insert(tag)
+            guard inserted else {
+                throw DuplicateCommandTag(tag: tag)
+            }
+        }
+
         switch self.state {
         case .expectingNormalResponse:
             try self.sendCommand_state_normalResponse(command: command)
@@ -106,16 +128,31 @@ extension ClientStateMachine {
         // 50 of them...
         switch command.command {
         case .idleStart:
+
+            // no other commands can be running when we start idling
+            guard self.activeCommandTags.count == 1 else {
+                throw InvalidCommandForState(.tagged(command))
+            }
             self.state = .idle(Idle())
         case .authenticate:
+
+            // no other commands can be running when we start authenticating
+            guard self.activeCommandTags.count == 1 else {
+                throw InvalidCommandForState(.tagged(command))
+            }
             self.state = .authenticating(Authentication())
         default:
             break
         }
     }
 
-    private mutating func sendAppendCommand(_: AppendCommand) throws {
+    private mutating func sendAppendCommand(_ command: AppendCommand) throws {
         assert(self.state == .expectingNormalResponse)
+
+        // no other commands can be running when we start appending
+        guard self.activeCommandTags.count == 1 else {
+            throw InvalidCommandForState(.append(command))
+        }
         self.state = .appending(Append())
     }
 }
