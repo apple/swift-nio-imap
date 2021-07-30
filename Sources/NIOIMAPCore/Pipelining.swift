@@ -295,14 +295,14 @@ extension Command {
         case .startTLS,
              .logout,
              .authenticate,
-                 .compress:
+             .compress:
             return [.barrier]
 
         case .idleStart:
             return [.barrier, .dependsOnMailboxSelection, .mayTriggerUntaggedExpunge]
 
         case .login:
-             return []
+            return []
 
         case .capability,
              .create,

@@ -18,7 +18,6 @@ import struct NIO.ByteBuffer
 /// server does not explicitly advertise a capability then the client should not assume the functionality
 /// is present.
 public struct Capability: Hashable {
-    
     var rawValue: String
     private var splitIndex: String.Index?
 
@@ -397,12 +396,11 @@ extension Capability {
 }
 
 // MARK: - Capability to String conversion
+
 extension String {
-    
     public init(_ capability: Capability) {
         self = capability.rawValue
     }
-    
 }
 
 // MARK: - Encoding
