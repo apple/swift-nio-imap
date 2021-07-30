@@ -56,7 +56,7 @@ extension ModificationSequenceValue: CustomDebugStringConvertible {
 // MARK: - BinaryInteger
 
 extension BinaryInteger {
-    init(_ modificationSequenceValue: ModificationSequenceValue) {
+    public init(_ modificationSequenceValue: ModificationSequenceValue) {
         self = Self(modificationSequenceValue.value)
     }
 }
