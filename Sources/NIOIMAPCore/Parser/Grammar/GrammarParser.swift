@@ -1901,7 +1901,7 @@ extension GrammarParser {
 
         func parseSelectParameter_condstore(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SelectParameter {
             try PL.parseFixedString("CONDSTORE", buffer: &buffer, tracker: tracker)
-            return .condstore
+            return .condStore
         }
 
         func parseSelectParameter_qresync(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SelectParameter {
