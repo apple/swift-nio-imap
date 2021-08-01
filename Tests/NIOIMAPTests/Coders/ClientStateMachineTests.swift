@@ -23,6 +23,35 @@ class ClientStateMachineTests: XCTestCase {
     override func setUp() {
         self.stateMachine = ClientStateMachine()
     }
+    
+    func testNormalWorkflow() {
+        
+        // NOOP
+        XCTAssertNoThrow(try self.stateMachine.sendCommand(.tagged(.init(tag: "A1", command: .noop))))
+        XCTAssertNoThrow(try self.stateMachine.receiveResponse(.tagged(.init(tag: "A1", state: .ok(.init(text: "OK"))))))
+        
+        // LOGIN
+        XCTAssertNoThrow(try self.stateMachine.sendCommand(.tagged(.init(tag: "A3", command: .login(username: "\\", password: "\\")))))
+        XCTAssertNoThrow(try self.stateMachine.receiveResponse(.tagged(.init(tag: "A3", state: .no(.init(text: "Invalid"))))))
+        
+        // IDLE
+        XCTAssertNoThrow(try self.stateMachine.sendCommand(.tagged(.init(tag: "A2", command: .idleStart))))
+        XCTAssertNoThrow(try self.stateMachine.receiveResponse(.idleStarted))
+        XCTAssertNoThrow(try self.stateMachine.sendCommand(.idleDone))
+        XCTAssertNoThrow(try self.stateMachine.receiveResponse(.tagged(.init(tag: "A2", state: .ok(.init(text: "OK"))))))
+        
+        // SELECT
+        XCTAssertNoThrow(try self.stateMachine.sendCommand(.tagged(.init(tag: "A5", command: .select(.inbox, [])))))
+        XCTAssertNoThrow(try self.stateMachine.receiveResponse(.tagged(.init(tag: "A5", state: .ok(.init(text: "OK"))))))
+        
+        // APPEND
+        XCTAssertNoThrow(try self.stateMachine.sendCommand(.append(.start(tag: "A4", appendingTo: .inbox))))
+        XCTAssertNoThrow(try self.stateMachine.sendCommand(.append(.beginMessage(message: .init(options: .init(), data: .init(byteCount: 10))))))
+        XCTAssertNoThrow(try self.stateMachine.receiveContinuationRequest(.data("OK")))
+        XCTAssertNoThrow(try self.stateMachine.sendCommand(.append(.messageBytes("0123456789"))))
+        XCTAssertNoThrow(try self.stateMachine.sendCommand(.append(.endMessage)))
+        XCTAssertNoThrow(try self.stateMachine.sendCommand(.append(.finish)))
+    }
 
     func testMultipleCommandsCanRunConcurrently() {
         XCTAssertNoThrow(try self.stateMachine.sendCommand(.tagged(.init(tag: "A1", command: .noop))))
