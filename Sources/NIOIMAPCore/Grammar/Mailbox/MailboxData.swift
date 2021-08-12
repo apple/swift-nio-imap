@@ -26,7 +26,7 @@ public enum MailboxData: Equatable {
     case lsub(MailboxInfo)
 
     /// Response to a search command, containing `SequenceNumber`s from `search`, or `UID`s from `uid search`.
-    case search([Int])
+    case search([Int], ModificationSequenceValue? = nil)
 
     /// Response to an extended search command.
     case extendedSearch(ExtendedSearchResponse)
@@ -90,8 +90,8 @@ extension EncodeBuffer {
             return self.writeMailboxData_list(list)
         case .lsub(let list):
             return self.writeMailboxData_lsub(list)
-        case .search(let list):
-            return self.writeMailboxData_search(list)
+        case .search(let list, let modificationSequence):
+            return self.writeMailboxData_search(list, modificationSequence: modificationSequence)
         case .extendedSearch(let response):
             return self.writeExtendedSearchResponse(response)
         case .status(let mailbox, let status):
@@ -107,10 +107,15 @@ extension EncodeBuffer {
         }
     }
 
-    private mutating func writeMailboxData_search(_ list: [Int]) -> Int {
+    private mutating func writeMailboxData_search(_ list: [Int], modificationSequence: ModificationSequenceValue?) -> Int {
         self.writeString("SEARCH") +
             self.writeArray(list, separator: "", parenthesis: false) { (num, buffer) -> Int in
                 buffer.writeString(" \(num)")
+            } +
+            self.writeIfExists(modificationSequence) { value -> Int in
+                self.writeString(" (MODSEQ ") +
+                    self.writeModificationSequenceValue(value) +
+                    self.writeString(")")
             }
     }
 

@@ -39,6 +39,7 @@ extension MailboxDataTests {
             (.search([]), "SEARCH", #line),
             (.search([1]), "SEARCH 1", #line),
             (.search([1, 2, 3, 4, 5]), "SEARCH 1 2 3 4 5", #line),
+            (.search([20, 23], ModificationSequenceValue(917162500)), "SEARCH 20 23 (MODSEQ 917162500)", #line),
         ]
 
         for (test, expectedString, line) in inputs {
