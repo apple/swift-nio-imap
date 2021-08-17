@@ -68,14 +68,14 @@ class ClientStateMachineTests: XCTestCase {
         XCTAssertNoThrow(try self.stateMachine.sendChunk(currentChunk!))
         
         // receive a continuation, we should then send another chunk
-        XCTAssertNoThrow(currentChunk = try self.stateMachine.receiveResponse(.authenticationChallenge("+ OK")))
+        XCTAssertNoThrow(currentChunk = try self.stateMachine.receiveContinuationRequest(.data("OK")))
         XCTAssertNotNil(currentChunk)
         
         // send the chunk
         XCTAssertNoThrow(try self.stateMachine.sendChunk(currentChunk!))
         
         // receive a continuation again
-        XCTAssertNoThrow(currentChunk = try self.stateMachine.receiveResponse(.authenticationChallenge("+ OK")))
+        XCTAssertNoThrow(currentChunk = try self.stateMachine.receiveContinuationRequest(.data("OK")))
         XCTAssertNotNil(currentChunk)
         
         // send the chunk

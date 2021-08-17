@@ -23,6 +23,15 @@ public struct UnexpectedResponse: Error {
     public init() {}
 }
 
+public struct UnexpectedChunk: Error {
+    public init() {}
+}
+
+public struct UnexpectedContinuationRequest: Error {
+    public init() {
+    }
+}
+
 public struct DuplicateCommandTag: Error {
     public var tag: String
 
@@ -46,22 +55,28 @@ struct ClientStateMachine: Hashable {
         case authenticating(ClientStateMachine.Authentication)
         case appending(ClientStateMachine.Append)
         case expectingLiteralContinuationRequest(CommandEncodeBuffer)
+        case waitingForChunk(CommandEncodeBuffer)
         case error
     }
 
     private var state: State = .expectingNormalResponse
     private(set) var activeCommandTags: Set<String> = []
 
-    mutating func receiveContinuationRequest(_ req: ContinuationRequest) throws {
+    mutating func receiveContinuationRequest(_ req: ContinuationRequest) throws -> EncodeBuffer.Chunk? {
         switch self.state {
         case .appending(var appendStateMachine):
             self.state = try appendStateMachine.receiveContinuationRequest(req)
-        default:
-            fatalError("TODO")
+            return nil
+        case .expectingLiteralContinuationRequest(var buffer):
+            let chunk = buffer.buffer.nextChunk()
+            self.state = .waitingForChunk(buffer)
+            return chunk
+        case .expectingNormalResponse, .idle, .authenticating, .waitingForChunk, .error:
+            throw UnexpectedContinuationRequest()
         }
     }
 
-    mutating func receiveResponse(_ response: Response) throws -> EncodeBuffer.Chunk? {
+    mutating func receiveResponse(_ response: Response) throws {
         if let tag = response.tag {
             guard self.activeCommandTags.remove(tag) != nil else {
                 throw UnexpectedResponse()
@@ -75,11 +90,9 @@ struct ClientStateMachine: Hashable {
             self.state = try authStateMachine.receiveResponse(response)
         case .appending(var appendStateMachine):
             self.state = try appendStateMachine.receiveResponse(response)
-        default:
-            self.state = .expectingNormalResponse
+        case .expectingNormalResponse, .expectingLiteralContinuationRequest, .waitingForChunk, .error:
+            throw UnexpectedResponse()
         }
-        
-        return nil
     }
 
     mutating func sendCommand(_ command: CommandStreamPart) throws -> EncodeBuffer.Chunk {
@@ -98,13 +111,8 @@ struct ClientStateMachine: Hashable {
         switch self.state {
         case .expectingNormalResponse:
             try self.sendCommand_state_normalResponse(command: command)
-            if chunk.waitForContinuation {
-                self.state = .completingCommand(encodeBuffer)
-                return chunk
-            } else {
-                self.state = .expectingNormalResponse
-                return chunk
-            }
+            self.state = .waitingForChunk(encodeBuffer)
+            return chunk
         case .idle(var idleStateMachine):
             self.state = try idleStateMachine.sendCommand(command)
             return chunk // can only be one chunk here
@@ -114,19 +122,25 @@ struct ClientStateMachine: Hashable {
         case .appending(var appendingStateMachine):
             self.state = try appendingStateMachine.sendCommand(command)
             return chunk // can only be one chunk here
-        case .completingCommand:
+        case .expectingLiteralContinuationRequest:
             throw InvalidCommandForState(command)
-        default:
-            fatalError("TODO")
+        case .waitingForChunk:
+            throw InvalidCommandForState(command)
+        case .error:
+            fatalError("Test")
         }
     }
     
     mutating func sendChunk(_ chunk : EncodeBuffer.Chunk) throws {
         switch self.state {
         case .expectingNormalResponse, .error, .idle, .authenticating, .appending, .expectingLiteralContinuationRequest:
-            fatalError("Test")
-        case .completingCommand:
-            break
+            throw UnexpectedChunk()
+        case .waitingForChunk(let buffer):
+            if chunk.waitForContinuation {
+                self.state = .expectingLiteralContinuationRequest(buffer)
+            } else {
+                self.state = .expectingNormalResponse
+            }
         }
     }
 }
