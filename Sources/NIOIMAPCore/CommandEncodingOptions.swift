@@ -13,7 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 /// Options that may change how commands are written to the network.
-public struct CommandEncodingOptions: Equatable {
+public struct CommandEncodingOptions: Hashable {
     /// Use RFC 3501 _quoted strings_ when possible (and the string is relatively short).
     public var useQuotedString: Bool
     /// Use the RFC 3501 `{20}` style literals.
