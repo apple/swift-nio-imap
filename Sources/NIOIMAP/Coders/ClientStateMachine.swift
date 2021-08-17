@@ -90,7 +90,9 @@ struct ClientStateMachine: Hashable {
             self.state = try authStateMachine.receiveResponse(response)
         case .appending(var appendStateMachine):
             self.state = try appendStateMachine.receiveResponse(response)
-        case .expectingNormalResponse, .expectingLiteralContinuationRequest, .waitingForChunk, .error:
+        case .expectingNormalResponse:
+            break
+        case .expectingLiteralContinuationRequest, .waitingForChunk, .error:
             throw UnexpectedResponse()
         }
     }
