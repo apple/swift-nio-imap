@@ -13,7 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
-import NIOIMAPCore
+@_spi(NIOIMAPInternal) import NIOIMAPCore
 
 public struct InvalidClientState: Error {
     public init() {}
@@ -45,8 +45,7 @@ struct ClientStateMachine: Hashable {
         case idle(ClientStateMachine.Idle)
         case authenticating(ClientStateMachine.Authentication)
         case appending(ClientStateMachine.Append)
-        case expectingLiteralContinuationRequest
-        case completingCommand
+        case expectingLiteralContinuationRequest(CommandEncodeBuffer)
         case error
     }
 
@@ -62,7 +61,7 @@ struct ClientStateMachine: Hashable {
         }
     }
 
-    mutating func receiveResponse(_ response: Response) throws {
+    mutating func receiveResponse(_ response: Response) throws -> EncodeBuffer.Chunk? {
         if let tag = response.tag {
             guard self.activeCommandTags.remove(tag) != nil else {
                 throw UnexpectedResponse()
@@ -79,27 +78,55 @@ struct ClientStateMachine: Hashable {
         default:
             self.state = .expectingNormalResponse
         }
+        
+        return nil
     }
 
-    mutating func sendCommand(_ command: CommandStreamPart) throws {
+    mutating func sendCommand(_ command: CommandStreamPart) throws -> EncodeBuffer.Chunk {
         if let tag = command.tag {
             let (inserted, _) = self.activeCommandTags.insert(tag)
             guard inserted else {
                 throw DuplicateCommandTag(tag: tag)
             }
         }
+        
+        // TODO: Pull in the capabilities from somewhere
+        var encodeBuffer = CommandEncodeBuffer(buffer: ByteBuffer(), options: .init())
+        encodeBuffer.writeCommandStream(command)
+        let chunk = encodeBuffer.buffer.nextChunk()
 
         switch self.state {
         case .expectingNormalResponse:
             try self.sendCommand_state_normalResponse(command: command)
+            if chunk.waitForContinuation {
+                self.state = .completingCommand(encodeBuffer)
+                return chunk
+            } else {
+                self.state = .expectingNormalResponse
+                return chunk
+            }
         case .idle(var idleStateMachine):
             self.state = try idleStateMachine.sendCommand(command)
+            return chunk // can only be one chunk here
         case .authenticating(var authStateMachine):
             self.state = try authStateMachine.sendCommand(command)
+            return chunk // can only be one chunk here
         case .appending(var appendingStateMachine):
             self.state = try appendingStateMachine.sendCommand(command)
+            return chunk // can only be one chunk here
+        case .completingCommand:
+            throw InvalidCommandForState(command)
         default:
             fatalError("TODO")
+        }
+    }
+    
+    mutating func sendChunk(_ chunk : EncodeBuffer.Chunk) throws {
+        switch self.state {
+        case .expectingNormalResponse, .error, .idle, .authenticating, .appending, .expectingLiteralContinuationRequest:
+            fatalError("Test")
+        case .completingCommand:
+            break
         }
     }
 }

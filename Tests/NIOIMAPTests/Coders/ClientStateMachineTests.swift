@@ -14,7 +14,7 @@
 
 import NIO
 @testable import NIOIMAP
-@testable import NIOIMAPCore
+@_spi(NIOIMAPInternal) @testable import NIOIMAPCore
 import XCTest
 
 class ClientStateMachineTests: XCTestCase {
@@ -51,6 +51,38 @@ class ClientStateMachineTests: XCTestCase {
         XCTAssertNoThrow(try self.stateMachine.sendCommand(.append(.messageBytes("0123456789"))))
         XCTAssertNoThrow(try self.stateMachine.sendCommand(.append(.endMessage)))
         XCTAssertNoThrow(try self.stateMachine.sendCommand(.append(.finish)))
+    }
+    
+    // send a command that requires chunking
+    // so make sure the action we get back from
+    // the state machine is telling us to chunk
+    func testSendChunk() {
+        let command = TaggedCommand(tag: "A1", command: .login(username: "\\", password: "\\"))
+        
+        // send the command, the state machine should tell us to send the first chunk
+        var currentChunk: EncodeBuffer.Chunk?
+        XCTAssertNoThrow(currentChunk = try self.stateMachine.sendCommand(.tagged(command)))
+        XCTAssertNotNil(currentChunk)
+        
+        // send the chunk
+        XCTAssertNoThrow(try self.stateMachine.sendChunk(currentChunk!))
+        
+        // receive a continuation, we should then send another chunk
+        XCTAssertNoThrow(currentChunk = try self.stateMachine.receiveResponse(.authenticationChallenge("+ OK")))
+        XCTAssertNotNil(currentChunk)
+        
+        // send the chunk
+        XCTAssertNoThrow(try self.stateMachine.sendChunk(currentChunk!))
+        
+        // receive a continuation again
+        XCTAssertNoThrow(currentChunk = try self.stateMachine.receiveResponse(.authenticationChallenge("+ OK")))
+        XCTAssertNotNil(currentChunk)
+        
+        // send the chunk
+        XCTAssertNoThrow(try self.stateMachine.sendChunk(currentChunk!))
+        
+        // this time we expect a tagged response, so let's send one
+        XCTAssertNoThrow(try self.stateMachine.receiveResponse(.tagged(.init(tag: "A1", state: .ok(.init(text: "OK"))))))
     }
 
     func testMultipleCommandsCanRunConcurrently() {
