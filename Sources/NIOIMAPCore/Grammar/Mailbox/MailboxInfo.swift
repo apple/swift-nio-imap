@@ -83,6 +83,13 @@ extension MailboxInfo {
     }
 }
 
+extension String {
+    /// The raw value of the attribute, e.g. `\\trash`. Always lowercase.
+    public init(_ other: MailboxInfo.Attribute) {
+        self = other.backing
+    }
+}
+
 // MARK: - Encoding
 
 extension EncodeBuffer {

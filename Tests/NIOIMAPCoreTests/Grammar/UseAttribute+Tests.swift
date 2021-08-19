@@ -42,4 +42,8 @@ extension UseAttribute_Tests {
         XCTAssertEqual(t1.stringValue, "test")
         XCTAssertEqual(t2.stringValue, "test")
     }
+
+    func testConvertFromMailboxInfoAttribute() {
+        XCTAssertEqual(UseAttribute(MailboxInfo.Attribute(#"\All"#)).stringValue, #"\all"#)
+    }
 }
