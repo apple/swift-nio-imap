@@ -21,7 +21,7 @@ class ClientStateMachineTests: XCTestCase {
     var stateMachine: ClientStateMachine!
 
     override func setUp() {
-        self.stateMachine = ClientStateMachine()
+        self.stateMachine = ClientStateMachine(buffer: ByteBuffer())
     }
     
     func testNormalWorkflow() {
@@ -32,6 +32,8 @@ class ClientStateMachineTests: XCTestCase {
         
         // LOGIN
         XCTAssertNoThrow(try self.stateMachine.sendCommand(.tagged(.init(tag: "A3", command: .login(username: "\\", password: "\\")))))
+        XCTAssertNoThrow(try self.stateMachine.receiveContinuationRequest(.data("OK")))
+        XCTAssertNoThrow(try self.stateMachine.receiveContinuationRequest(.data("OK")))
         XCTAssertNoThrow(try self.stateMachine.receiveResponse(.tagged(.init(tag: "A3", state: .no(.init(text: "Invalid"))))))
         
         // IDLE
@@ -56,7 +58,7 @@ class ClientStateMachineTests: XCTestCase {
     // send a command that requires chunking
     // so make sure the action we get back from
     // the state machine is telling us to chunk
-    func testSendChunk() {
+    func testChunking() {
         let command = TaggedCommand(tag: "A1", command: .login(username: "\\", password: "\\"))
         
         // send the command, the state machine should tell us to send the first chunk
@@ -64,22 +66,13 @@ class ClientStateMachineTests: XCTestCase {
         XCTAssertNoThrow(currentChunk = try self.stateMachine.sendCommand(.tagged(command)))
         XCTAssertNotNil(currentChunk)
         
-        // send the chunk
-        XCTAssertNoThrow(try self.stateMachine.sendChunk(currentChunk!))
-        
         // receive a continuation, we should then send another chunk
         XCTAssertNoThrow(currentChunk = try self.stateMachine.receiveContinuationRequest(.data("OK")))
         XCTAssertNotNil(currentChunk)
         
-        // send the chunk
-        XCTAssertNoThrow(try self.stateMachine.sendChunk(currentChunk!))
-        
-    // receive a continuation again/9
+        // receive a continuation again
         XCTAssertNoThrow(currentChunk = try self.stateMachine.receiveContinuationRequest(.data("OK")))
         XCTAssertNotNil(currentChunk)
-        
-        // send the chunk
-        XCTAssertNoThrow(try self.stateMachine.sendChunk(currentChunk!))
         
         // this time we expect a tagged response, so let's send one
         XCTAssertNoThrow(try self.stateMachine.receiveResponse(.tagged(.init(tag: "A1", state: .ok(.init(text: "OK"))))))
