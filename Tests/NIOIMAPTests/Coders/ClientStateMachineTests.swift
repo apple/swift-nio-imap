@@ -74,7 +74,7 @@ class ClientStateMachineTests: XCTestCase {
         // send the chunk
         XCTAssertNoThrow(try self.stateMachine.sendChunk(currentChunk!))
         
-        // receive a continuation again
+    // receive a continuation again/9
         XCTAssertNoThrow(currentChunk = try self.stateMachine.receiveContinuationRequest(.data("OK")))
         XCTAssertNotNil(currentChunk)
         

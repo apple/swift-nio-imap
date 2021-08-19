@@ -97,7 +97,7 @@ struct ClientStateMachine: Hashable {
         }
     }
 
-    mutating func sendCommand(_ command: CommandStreamPart) throws -> EncodeBuffer.Chunk {
+    mutating func sendCommand(_ command: CommandStreamPart) throws -> EncodeBuffer.Chunk? {
         if let tag = command.tag {
             let (inserted, _) = self.activeCommandTags.insert(tag)
             guard inserted else {
@@ -108,28 +108,27 @@ struct ClientStateMachine: Hashable {
         // TODO: Pull in the capabilities from somewhere
         var encodeBuffer = CommandEncodeBuffer(buffer: ByteBuffer(), options: .init())
         encodeBuffer.writeCommandStream(command)
-        let chunk = encodeBuffer.buffer.nextChunk()
 
         switch self.state {
         case .expectingNormalResponse:
             try self.sendCommand_state_normalResponse(command: command)
             self.state = .waitingForChunk(encodeBuffer)
-            return chunk
+            return encodeBuffer.buffer.nextChunk()
         case .idle(var idleStateMachine):
             self.state = try idleStateMachine.sendCommand(command)
-            return chunk // can only be one chunk here
+            return nil // can only be one chunk here
         case .authenticating(var authStateMachine):
             self.state = try authStateMachine.sendCommand(command)
-            return chunk // can only be one chunk here
+            return nil // can only be one chunk here
         case .appending(var appendingStateMachine):
             self.state = try appendingStateMachine.sendCommand(command)
-            return chunk // can only be one chunk here
+            return nil // can only be one chunk here
         case .expectingLiteralContinuationRequest:
             throw InvalidCommandForState(command)
         case .waitingForChunk:
             throw InvalidCommandForState(command)
         case .error:
-            fatalError("Test")
+            throw InvalidCommandForState(command)
         }
     }
     
