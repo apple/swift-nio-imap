@@ -23,29 +23,28 @@ class ClientStateMachineTests: XCTestCase {
     override func setUp() {
         self.stateMachine = ClientStateMachine(buffer: ByteBuffer())
     }
-    
+
     func testNormalWorkflow() {
-        
         // NOOP
         XCTAssertNoThrow(try self.stateMachine.sendCommand(.tagged(.init(tag: "A1", command: .noop))))
         XCTAssertNoThrow(try self.stateMachine.receiveResponse(.tagged(.init(tag: "A1", state: .ok(.init(text: "OK"))))))
-        
+
         // LOGIN
         XCTAssertNoThrow(try self.stateMachine.sendCommand(.tagged(.init(tag: "A3", command: .login(username: "\\", password: "\\")))))
         XCTAssertNoThrow(try self.stateMachine.receiveContinuationRequest(.data("OK")))
         XCTAssertNoThrow(try self.stateMachine.receiveContinuationRequest(.data("OK")))
         XCTAssertNoThrow(try self.stateMachine.receiveResponse(.tagged(.init(tag: "A3", state: .no(.init(text: "Invalid"))))))
-        
+
         // IDLE
         XCTAssertNoThrow(try self.stateMachine.sendCommand(.tagged(.init(tag: "A2", command: .idleStart))))
         XCTAssertNoThrow(try self.stateMachine.receiveResponse(.idleStarted))
         XCTAssertNoThrow(try self.stateMachine.sendCommand(.idleDone))
         XCTAssertNoThrow(try self.stateMachine.receiveResponse(.tagged(.init(tag: "A2", state: .ok(.init(text: "OK"))))))
-        
+
         // SELECT
         XCTAssertNoThrow(try self.stateMachine.sendCommand(.tagged(.init(tag: "A5", command: .select(.inbox, [])))))
         XCTAssertNoThrow(try self.stateMachine.receiveResponse(.tagged(.init(tag: "A5", state: .ok(.init(text: "OK"))))))
-        
+
         // APPEND
         XCTAssertNoThrow(try self.stateMachine.sendCommand(.append(.start(tag: "A4", appendingTo: .inbox))))
         XCTAssertNoThrow(try self.stateMachine.sendCommand(.append(.beginMessage(message: .init(options: .init(), data: .init(byteCount: 10))))))
@@ -54,26 +53,26 @@ class ClientStateMachineTests: XCTestCase {
         XCTAssertNoThrow(try self.stateMachine.sendCommand(.append(.endMessage)))
         XCTAssertNoThrow(try self.stateMachine.sendCommand(.append(.finish)))
     }
-    
+
     // send a command that requires chunking
     // so make sure the action we get back from
     // the state machine is telling us to chunk
     func testChunking() {
         let command = TaggedCommand(tag: "A1", command: .login(username: "\\", password: "\\"))
-        
+
         // send the command, the state machine should tell us to send the first chunk
         var currentChunk: EncodeBuffer.Chunk?
         XCTAssertNoThrow(currentChunk = try self.stateMachine.sendCommand(.tagged(command)))
         XCTAssertNotNil(currentChunk)
-        
+
         // receive a continuation, we should then send another chunk
         XCTAssertNoThrow(currentChunk = try self.stateMachine.receiveContinuationRequest(.data("OK")))
         XCTAssertNotNil(currentChunk)
-        
+
         // receive a continuation again
         XCTAssertNoThrow(currentChunk = try self.stateMachine.receiveContinuationRequest(.data("OK")))
         XCTAssertNotNil(currentChunk)
-        
+
         // this time we expect a tagged response, so let's send one
         XCTAssertNoThrow(try self.stateMachine.receiveResponse(.tagged(.init(tag: "A1", state: .ok(.init(text: "OK"))))))
     }

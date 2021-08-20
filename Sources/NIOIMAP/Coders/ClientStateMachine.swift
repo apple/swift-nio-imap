@@ -28,8 +28,7 @@ public struct UnexpectedChunk: Error {
 }
 
 public struct UnexpectedContinuationRequest: Error {
-    public init() {
-    }
+    public init() {}
 }
 
 public struct DuplicateCommandTag: Error {
@@ -61,7 +60,7 @@ struct ClientStateMachine: Hashable {
     var encodeBuffer: CommandEncodeBuffer
     private var state: State = .expectingNormalResponse
     private(set) var activeCommandTags: Set<String> = []
-    
+
     init(buffer: ByteBuffer) {
         self.encodeBuffer = CommandEncodeBuffer(buffer: buffer, options: .rfc3501)
     }
@@ -112,7 +111,7 @@ struct ClientStateMachine: Hashable {
                 throw DuplicateCommandTag(tag: tag)
             }
         }
-        
+
         // TODO: Pull in the capabilities from somewhere
         self.encodeBuffer.writeCommandStream(command)
 
@@ -130,7 +129,7 @@ struct ClientStateMachine: Hashable {
         case .error:
             throw InvalidCommandForState(command)
         }
-        
+
         return self.encodeBuffer.buffer.nextChunk()
     }
 }
@@ -155,7 +154,7 @@ extension ClientStateMachine {
         assert(self.state == .expectingNormalResponse)
 
         let chunk = self.encodeBuffer.buffer.nextChunk()
-        
+
         // it's not practical to switch over
         // every command here, there are over
         // 50 of them...
@@ -181,7 +180,7 @@ extension ClientStateMachine {
                 self.state = .expectingNormalResponse
             }
         }
-        
+
         return chunk
     }
 

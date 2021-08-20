@@ -87,7 +87,7 @@ extension EncodeBuffer {
     public mutating func nextChunk() -> Chunk {
         self.nextChunk(allowEmptyChunk: true)
     }
-    
+
     /// Gets the next chunk that is ready to be written to the network.
     /// *NOTE*: Use This function with caution. You probably shouldn't be using it, using nextChunk() instead.
     /// - returns: The next chunk that is ready to be written.
