@@ -33,7 +33,7 @@ class IMAPClientHandlerTests: XCTestCase {
 
     func testReferralURLResponse() {
         let expectedResponse = Response.tagged(
-            TaggedResponse(tag: "tag",
+            TaggedResponse(tag: "A1",
                            state: .ok(ResponseText(code:
                                .referral(IMAPURL(server: IMAPServer(userAuthenticationMechanism: nil, host: "hostname", port: nil),
                                                  query: URLCommand.fetch(
@@ -47,12 +47,10 @@ class IMAPClientHandlerTests: XCTestCase {
                                                      authenticatedURL: nil
                                                  ))),
                                text: ""))))
-        self.writeOutbound(.tagged(.init(tag: "a", command: .login(username: "foo", password: "bar"))))
-        self.assertOutboundString("a LOGIN \"foo\" \"bar\"\r\n")
-        self.writeInbound("tag OK [REFERRAL imap://hostname/foo/bar/;UID=1234]\r\na OK ok\r\n")
+        self.writeOutbound(.tagged(.init(tag: "A1", command: .login(username: "foo", password: "bar"))))
+        self.assertOutboundString("A1 LOGIN \"foo\" \"bar\"\r\n")
+        self.writeInbound("A1 OK [REFERRAL imap://hostname/foo/bar/;UID=1234]\r\n")
         self.assertInbound(expectedResponse)
-        self.assertInbound(.tagged(.init(tag: "a",
-                                         state: .ok(.init(code: nil, text: "ok")))))
     }
 
     func testCommandThatNeedsToWaitForContinuationRequest() {
@@ -189,7 +187,7 @@ class IMAPClientHandlerTests: XCTestCase {
         wait: false)
         self.assertOutboundString("x RENAME {1}\r\n")
         XCTAssertThrowsError(try self.channel.writeInbound(self.buffer(string: "+ OK\r\n+ OK\r\n"))) { error in
-            XCTAssertTrue(error is IMAPClientHandler.UnexpectedContinuationRequest, "Error is \(error)")
+            XCTAssertTrue(error is UnexpectedContinuationRequest, "Error is \(error)")
         }
         self.assertOutboundString("\\ \"to\"\r\n")
         XCTAssertNoThrow(try f.wait())
@@ -205,7 +203,7 @@ class IMAPClientHandlerTests: XCTestCase {
 
         // server sends challenge
         let challengeBytes1 = ""
-        self.writeInbound("+ \(challengeBytes1)\r\n")
+         self.writeInbound("+ \(challengeBytes1)\r\n")
         self.assertInbound(.authenticationChallenge(ByteBuffer()))
 
         // client responds

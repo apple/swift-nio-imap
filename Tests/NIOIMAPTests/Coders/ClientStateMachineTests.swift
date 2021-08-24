@@ -21,7 +21,7 @@ class ClientStateMachineTests: XCTestCase {
     var stateMachine: ClientStateMachine!
 
     override func setUp() {
-        self.stateMachine = ClientStateMachine(buffer: ByteBuffer())
+        self.stateMachine = ClientStateMachine()
     }
 
     func testNormalWorkflow() {
@@ -61,20 +61,44 @@ class ClientStateMachineTests: XCTestCase {
         let command = TaggedCommand(tag: "A1", command: .login(username: "\\", password: "\\"))
 
         // send the command, the state machine should tell us to send the first chunk
-        var currentChunk: EncodeBuffer.Chunk?
-        XCTAssertNoThrow(currentChunk = try self.stateMachine.sendCommand(.tagged(command)))
-        XCTAssertNotNil(currentChunk)
+        var result: [(ByteBuffer, EventLoopPromise<Void>?)] = []
+        XCTAssertNoThrow(result = try self.stateMachine.sendCommand(.tagged(command)))
+        XCTAssertEqual(result.count, 1)
+        XCTAssertEqual(result.first!.0, "A1 LOGIN {1}\r\n")
 
         // receive a continuation, we should then send another chunk
-        XCTAssertNoThrow(currentChunk = try self.stateMachine.receiveContinuationRequest(.data("OK")))
-        XCTAssertNotNil(currentChunk)
+        XCTAssertNoThrow(result = try self.stateMachine.receiveContinuationRequest(.data("OK")))
+        XCTAssertEqual(result.count, 1)
+        XCTAssertEqual(result.first!.0, "\\ {1}\r\n")
 
         // receive a continuation again
-        XCTAssertNoThrow(currentChunk = try self.stateMachine.receiveContinuationRequest(.data("OK")))
-        XCTAssertNotNil(currentChunk)
+        XCTAssertNoThrow(result = try self.stateMachine.receiveContinuationRequest(.data("OK")))
+        XCTAssertEqual(result.count, 1)
+        XCTAssertEqual(result.first!.0, "\\\r\n")
 
         // this time we expect a tagged response, so let's send one
         XCTAssertNoThrow(try self.stateMachine.receiveResponse(.tagged(.init(tag: "A1", state: .ok(.init(text: "OK"))))))
+    }
+    
+    func testChunkingMultipleCommands() {
+        let command = TaggedCommand(tag: "A1", command: .login(username: "\\", password: "pass"))
+        
+        var result1: [(ByteBuffer, EventLoopPromise<Void>?)] = []
+        XCTAssertNoThrow(result1 = try self.stateMachine.sendCommand(.tagged(command)))
+        XCTAssertEqual(result1.count, 1)
+        XCTAssertEqual(result1.first!.0, "A1 LOGIN {1}\r\n")
+        
+        // We haven't yet continued the first command
+        // so we shouldn't get anything back here.
+        var result2: [(ByteBuffer, EventLoopPromise<Void>?)] = []
+        XCTAssertNoThrow(result2 = try self.stateMachine.sendCommand(.tagged(.init(tag: "A2", command: .noop))))
+        XCTAssertEqual(result2.count, 0)
+        
+        var result3: [(ByteBuffer, EventLoopPromise<Void>?)] = []
+        XCTAssertNoThrow(result3 = try self.stateMachine.receiveContinuationRequest(.data("OK")))
+        XCTAssertEqual(result3.count, 2)
+        XCTAssertEqual(result3[0].0, "\\ \"pass\"\r\n")
+        XCTAssertEqual(result3[1].0, "A2 NOOP\r\n")
     }
 
     func testMultipleCommandsCanRunConcurrently() {

@@ -47,7 +47,7 @@ public struct InvalidCommandForState: Error, Equatable {
     }
 }
 
-struct ClientStateMachine: Hashable {
+struct ClientStateMachine {
     enum State: Hashable {
         case expectingNormalResponse
         case idle(ClientStateMachine.Idle)
@@ -57,28 +57,35 @@ struct ClientStateMachine: Hashable {
         case error
     }
 
-    var encodeBuffer: CommandEncodeBuffer
+    private var activeEncodeBuffer: CommandEncodeBuffer!
+    private var activeWritePromise: EventLoopPromise<Void>?
+    private var queuedCommands: MarkedCircularBuffer<(CommandStreamPart, EventLoopPromise<Void>?)> = .init(initialCapacity: 16)
     private var state: State = .expectingNormalResponse
-    private(set) var activeCommandTags: Set<String> = []
+    private var activeCommandTags: Set<String> = []
 
-    init(buffer: ByteBuffer) {
-        self.encodeBuffer = CommandEncodeBuffer(buffer: buffer, options: .rfc3501)
-    }
-
-    mutating func receiveContinuationRequest(_ req: ContinuationRequest) throws -> EncodeBuffer.Chunk {
+    mutating func receiveContinuationRequest(_ req: ContinuationRequest) throws -> [(ByteBuffer, EventLoopPromise<Void>?)] {
         switch self.state {
         case .appending(var appendStateMachine):
             self.state = try appendStateMachine.receiveContinuationRequest(req)
-            return self.encodeBuffer.buffer.nextChunk()
+
+            return self.extractSendableChunks().map { ($0.0, $0.1) }
         case .expectingLiteralContinuationRequest:
-            let chunk = self.encodeBuffer.buffer.nextChunk()
-            if chunk.waitForContinuation {
+            let result = self.extractSendableChunks()
+            if result.last!.2 { // we've found a continuation
                 self.state = .expectingLiteralContinuationRequest
             } else {
                 self.state = .expectingNormalResponse
             }
-            return chunk
-        case .expectingNormalResponse, .idle, .authenticating, .error:
+            return result.map { ($0.0, $0.1) }
+        case .authenticating(var authenticateStateMachine):
+            switch req {
+            case .responseText:
+                throw UnexpectedContinuationRequest()
+            case .data(let byteBuffer):
+                self.state = try authenticateStateMachine.receiveResponse(.authenticationChallenge(byteBuffer))
+                return []
+            }
+        case .expectingNormalResponse, .idle, .error:
             throw UnexpectedContinuationRequest()
         }
     }
@@ -104,56 +111,68 @@ struct ClientStateMachine: Hashable {
         }
     }
 
-    mutating func sendCommand(_ command: CommandStreamPart) throws -> EncodeBuffer.Chunk {
+    mutating func sendCommand(_ command: CommandStreamPart, promise: EventLoopPromise<Void>? = nil) throws -> [(ByteBuffer, EventLoopPromise<Void>?)] {
         if let tag = command.tag {
             let (inserted, _) = self.activeCommandTags.insert(tag)
             guard inserted else {
                 throw DuplicateCommandTag(tag: tag)
             }
         }
-
-        // TODO: Pull in the capabilities from somewhere
-        self.encodeBuffer.writeCommandStream(command)
-
+        self.queuedCommands.append((command, promise))
+        return try self.sendNextCommand()
+    }
+    
+    private mutating func sendNextCommand() throws -> [(ByteBuffer, EventLoopPromise<Void>?)]{
+        assert(self.queuedCommands.count > 0)
+        
+        let (command, promise) = self.queuedCommands.first! // we've asserted there's at least one
+        
         switch self.state {
         case .expectingNormalResponse:
-            return try self.sendCommand_state_normalResponse(command: command)
+            guard self.activeEncodeBuffer == nil else {
+                return []
+            }
+            _ = self.queuedCommands.popFirst()! // we've asserted there's at least one
+            self.activeWritePromise = promise
+            self.activeEncodeBuffer = .init(buffer: ByteBuffer(), options: .rfc3501)
+            self.activeEncodeBuffer.writeCommandStream(command)
+            return try self.sendCommand_state_normalResponse(command: command, promise: promise)
         case .idle(var idleStateMachine):
+            _ = self.queuedCommands.popFirst()!
             self.state = try idleStateMachine.sendCommand(command)
         case .authenticating(var authStateMachine):
+            _ = self.queuedCommands.popFirst()!
             self.state = try authStateMachine.sendCommand(command)
         case .appending(var appendingStateMachine):
+            _ = self.queuedCommands.popFirst()!
             self.state = try appendingStateMachine.sendCommand(command)
-        case .expectingLiteralContinuationRequest:
-            throw InvalidCommandForState(command)
         case .error:
             throw InvalidCommandForState(command)
+        case .expectingLiteralContinuationRequest:
+            break
         }
-
-        return self.encodeBuffer.buffer.nextChunk()
+        return []
     }
 }
 
 // MARK: - Send
 
 extension ClientStateMachine {
-    private mutating func sendCommand_state_normalResponse(command: CommandStreamPart) throws -> EncodeBuffer.Chunk {
+    private mutating func sendCommand_state_normalResponse(command: CommandStreamPart, promise: EventLoopPromise<Void>?) throws -> [(ByteBuffer, EventLoopPromise<Void>?)] {
         assert(self.state == .expectingNormalResponse)
 
         switch command {
         case .idleDone, .continuationResponse:
             throw InvalidCommandForState(command)
         case .tagged(let tc):
-            return try self.sendTaggedCommand(tc)
+            return try self.sendTaggedCommand(tc, promise: promise)
         case .append(let ac):
-            return try self.sendAppendCommand(ac)
+            return try self.sendAppendCommand(ac, promise: promise)
         }
     }
 
-    private mutating func sendTaggedCommand(_ command: TaggedCommand) throws -> EncodeBuffer.Chunk {
+    private mutating func sendTaggedCommand(_ command: TaggedCommand, promise: EventLoopPromise<Void>?) throws -> [(ByteBuffer, EventLoopPromise<Void>?)] {
         assert(self.state == .expectingNormalResponse)
-
-        let chunk = self.encodeBuffer.buffer.nextChunk()
 
         // it's not practical to switch over
         // every command here, there are over
@@ -166,6 +185,12 @@ extension ClientStateMachine {
                 throw InvalidCommandForState(.tagged(command))
             }
             self.state = .idle(Idle())
+            
+            let buffer = self.activeEncodeBuffer.buffer.nextChunk().bytes
+            self.activeEncodeBuffer = nil
+            self.activeWritePromise = nil
+            return [(buffer, promise)]
+            
         case .authenticate:
 
             // no other commands can be running when we start authenticating
@@ -173,18 +198,29 @@ extension ClientStateMachine {
                 throw InvalidCommandForState(.tagged(command))
             }
             self.state = .authenticating(Authentication())
+            
+            // The AUTHENTICATE command will never have a continuation
+            let buffer = self.activeEncodeBuffer.buffer.nextChunk().bytes
+            self.activeEncodeBuffer = nil
+            self.activeWritePromise = nil
+            return [(buffer, promise)]
+            
         default:
+            let chunk = self.activeEncodeBuffer.buffer.nextChunk()
             if chunk.waitForContinuation {
                 self.state = .expectingLiteralContinuationRequest
+                return [(chunk.bytes, nil)] // nil promise because the command required continuation
             } else {
+                self.activeWritePromise = nil
+                self.activeEncodeBuffer = nil
                 self.state = .expectingNormalResponse
+                assert(!chunk.waitForContinuation)
+                return [(chunk.bytes, promise)] // there'll only ever be one chunk here
             }
         }
-
-        return chunk
     }
 
-    private mutating func sendAppendCommand(_ command: AppendCommand) throws -> EncodeBuffer.Chunk {
+    private mutating func sendAppendCommand(_ command: AppendCommand, promise: EventLoopPromise<Void>?) throws -> [(ByteBuffer, EventLoopPromise<Void>?)] {
         assert(self.state == .expectingNormalResponse)
 
         // no other commands can be running when we start appending
@@ -192,6 +228,41 @@ extension ClientStateMachine {
             throw InvalidCommandForState(.append(command))
         }
         self.state = .appending(Append())
-        return self.encodeBuffer.buffer.nextChunk()
+        
+        // TODO: This assumes that the append command doesn't require a continuation - fix this in another PR
+        // Only send bytes if there isn't a command ahead in the queue
+        return [(self.activeEncodeBuffer.buffer.nextChunk().bytes, promise)]
+    }
+    
+    private mutating func extractSendableChunks() -> [(ByteBuffer, EventLoopPromise<Void>?, Bool)] {
+        var result: [(ByteBuffer, EventLoopPromise<Void>?, Bool)] = []
+        
+        while self.activeEncodeBuffer != nil {
+            let chunk = self.activeEncodeBuffer.buffer.nextChunk()
+            if chunk.waitForContinuation {
+                result.append((chunk.bytes, nil, true))
+                break
+            } else {
+                self.activeEncodeBuffer = nil
+                self.activeWritePromise = nil
+                result.append((chunk.bytes, self.activeWritePromise, false))
+                
+                guard let (command, promise) = self.queuedCommands.popFirst() else {
+                    continue
+                }
+                
+                // TODO: Load capabilities from somewhere
+                self.activeWritePromise = promise
+                self.activeEncodeBuffer = .init(buffer: ByteBuffer(), options: .rfc3501)
+                self.activeEncodeBuffer.writeCommandStream(command)
+            }
+        }
+        
+        
+        return result
+    }
+    
+    public mutating func flush() {
+        self.queuedCommands.mark()
     }
 }
