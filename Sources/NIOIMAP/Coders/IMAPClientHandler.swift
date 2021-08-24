@@ -94,10 +94,11 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
         }
     }
     
-    private func writeChunks(_ chunks: [(ByteBuffer, EventLoopPromise<Void>?)], context: ChannelHandlerContext) {
-        for (buffer, promise) in chunks {
-            let outbound = self.wrapOutboundOut(buffer)
-            context.writeAndFlush(outbound, promise: promise)
+    private func writeChunks(_ chunks: [(EncodeBuffer.Chunk, EventLoopPromise<Void>?)], context: ChannelHandlerContext) {
+        for (chunk, promise) in chunks {
+            let outbound = self.wrapOutboundOut(chunk.bytes)
+            context.write(outbound, promise: promise)
         }
+        context.flush()
     }
 }

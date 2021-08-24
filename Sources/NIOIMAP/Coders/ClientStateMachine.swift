@@ -63,20 +63,20 @@ struct ClientStateMachine {
     private var state: State = .expectingNormalResponse
     private var activeCommandTags: Set<String> = []
 
-    mutating func receiveContinuationRequest(_ req: ContinuationRequest) throws -> [(ByteBuffer, EventLoopPromise<Void>?)] {
+    mutating func receiveContinuationRequest(_ req: ContinuationRequest) throws -> [(EncodeBuffer.Chunk, EventLoopPromise<Void>?)] {
         switch self.state {
         case .appending(var appendStateMachine):
             self.state = try appendStateMachine.receiveContinuationRequest(req)
 
-            return self.extractSendableChunks().map { ($0.0, $0.1) }
+            return self.extractSendableChunks()
         case .expectingLiteralContinuationRequest:
             let result = self.extractSendableChunks()
-            if result.last!.2 { // we've found a continuation
+            if result.last!.0.waitForContinuation { // we've found a continuation
                 self.state = .expectingLiteralContinuationRequest
             } else {
                 self.state = .expectingNormalResponse
             }
-            return result.map { ($0.0, $0.1) }
+            return result
         case .authenticating(var authenticateStateMachine):
             switch req {
             case .responseText:
@@ -111,7 +111,7 @@ struct ClientStateMachine {
         }
     }
 
-    mutating func sendCommand(_ command: CommandStreamPart, promise: EventLoopPromise<Void>? = nil) throws -> [(ByteBuffer, EventLoopPromise<Void>?)] {
+    mutating func sendCommand(_ command: CommandStreamPart, promise: EventLoopPromise<Void>? = nil) throws -> [(EncodeBuffer.Chunk, EventLoopPromise<Void>?)] {
         if let tag = command.tag {
             let (inserted, _) = self.activeCommandTags.insert(tag)
             guard inserted else {
@@ -122,7 +122,7 @@ struct ClientStateMachine {
         return try self.sendNextCommand()
     }
     
-    private mutating func sendNextCommand() throws -> [(ByteBuffer, EventLoopPromise<Void>?)]{
+    private mutating func sendNextCommand() throws -> [(EncodeBuffer.Chunk, EventLoopPromise<Void>?)]{
         assert(self.queuedCommands.count > 0)
         
         let (command, promise) = self.queuedCommands.first! // we've asserted there's at least one
@@ -158,7 +158,7 @@ struct ClientStateMachine {
 // MARK: - Send
 
 extension ClientStateMachine {
-    private mutating func sendCommand_state_normalResponse(command: CommandStreamPart, promise: EventLoopPromise<Void>?) throws -> [(ByteBuffer, EventLoopPromise<Void>?)] {
+    private mutating func sendCommand_state_normalResponse(command: CommandStreamPart, promise: EventLoopPromise<Void>?) throws -> [(EncodeBuffer.Chunk, EventLoopPromise<Void>?)] {
         assert(self.state == .expectingNormalResponse)
 
         switch command {
@@ -171,7 +171,7 @@ extension ClientStateMachine {
         }
     }
 
-    private mutating func sendTaggedCommand(_ command: TaggedCommand, promise: EventLoopPromise<Void>?) throws -> [(ByteBuffer, EventLoopPromise<Void>?)] {
+    private mutating func sendTaggedCommand(_ command: TaggedCommand, promise: EventLoopPromise<Void>?) throws -> [(EncodeBuffer.Chunk, EventLoopPromise<Void>?)] {
         assert(self.state == .expectingNormalResponse)
 
         // it's not practical to switch over
@@ -186,10 +186,10 @@ extension ClientStateMachine {
             }
             self.state = .idle(Idle())
             
-            let buffer = self.activeEncodeBuffer.buffer.nextChunk().bytes
+            let chunk = self.activeEncodeBuffer.buffer.nextChunk()
             self.activeEncodeBuffer = nil
             self.activeWritePromise = nil
-            return [(buffer, promise)]
+            return [(chunk, promise)]
             
         case .authenticate:
 
@@ -200,27 +200,27 @@ extension ClientStateMachine {
             self.state = .authenticating(Authentication())
             
             // The AUTHENTICATE command will never have a continuation
-            let buffer = self.activeEncodeBuffer.buffer.nextChunk().bytes
+            let chunk = self.activeEncodeBuffer.buffer.nextChunk()
             self.activeEncodeBuffer = nil
             self.activeWritePromise = nil
-            return [(buffer, promise)]
+            return [(chunk, promise)]
             
         default:
             let chunk = self.activeEncodeBuffer.buffer.nextChunk()
             if chunk.waitForContinuation {
                 self.state = .expectingLiteralContinuationRequest
-                return [(chunk.bytes, nil)] // nil promise because the command required continuation
+                return [(chunk, nil)] // nil promise because the command required continuation
             } else {
                 self.activeWritePromise = nil
                 self.activeEncodeBuffer = nil
                 self.state = .expectingNormalResponse
                 assert(!chunk.waitForContinuation)
-                return [(chunk.bytes, promise)] // there'll only ever be one chunk here
+                return [(chunk, promise)] // there'll only ever be one chunk here
             }
         }
     }
 
-    private mutating func sendAppendCommand(_ command: AppendCommand, promise: EventLoopPromise<Void>?) throws -> [(ByteBuffer, EventLoopPromise<Void>?)] {
+    private mutating func sendAppendCommand(_ command: AppendCommand, promise: EventLoopPromise<Void>?) throws -> [(EncodeBuffer.Chunk, EventLoopPromise<Void>?)] {
         assert(self.state == .expectingNormalResponse)
 
         // no other commands can be running when we start appending
@@ -231,21 +231,21 @@ extension ClientStateMachine {
         
         // TODO: This assumes that the append command doesn't require a continuation - fix this in another PR
         // Only send bytes if there isn't a command ahead in the queue
-        return [(self.activeEncodeBuffer.buffer.nextChunk().bytes, promise)]
+        return [(self.activeEncodeBuffer.buffer.nextChunk(), promise)]
     }
     
-    private mutating func extractSendableChunks() -> [(ByteBuffer, EventLoopPromise<Void>?, Bool)] {
-        var result: [(ByteBuffer, EventLoopPromise<Void>?, Bool)] = []
+    private mutating func extractSendableChunks() -> [(EncodeBuffer.Chunk, EventLoopPromise<Void>?)] {
+        var result: [(EncodeBuffer.Chunk, EventLoopPromise<Void>?)] = []
         
         while self.activeEncodeBuffer != nil {
             let chunk = self.activeEncodeBuffer.buffer.nextChunk()
             if chunk.waitForContinuation {
-                result.append((chunk.bytes, nil, true))
+                result.append((chunk, nil))
                 break
             } else {
                 self.activeEncodeBuffer = nil
                 self.activeWritePromise = nil
-                result.append((chunk.bytes, self.activeWritePromise, false))
+                result.append((chunk, self.activeWritePromise))
                 
                 guard let (command, promise) = self.queuedCommands.popFirst() else {
                     continue
