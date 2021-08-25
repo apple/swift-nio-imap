@@ -63,13 +63,13 @@ struct ClientStateMachine {
     /// - Note: Make sure to send `.enable` commands for applicable capabilities
     /// - Important: Modifying this value is not thread-safe
     var encodingOptions: CommandEncodingOptions
-    
+
     private var activeEncodeBuffer: CommandEncodeBuffer!
     private var activeWritePromise: EventLoopPromise<Void>?
     private var queuedCommands: MarkedCircularBuffer<(CommandStreamPart, EventLoopPromise<Void>?)> = .init(initialCapacity: 16)
     private var state: State = .expectingNormalResponse
     private var activeCommandTags: Set<String> = []
-    
+
     var authenticating: Bool {
         switch self.state {
         case .authenticating:
@@ -78,7 +78,7 @@ struct ClientStateMachine {
             return false
         }
     }
-    
+
     var idling: Bool {
         switch self.state {
         case .idle:
@@ -87,7 +87,7 @@ struct ClientStateMachine {
             return false
         }
     }
-    
+
     init(encodingOptions: CommandEncodingOptions) {
         self.encodingOptions = encodingOptions
     }
@@ -155,12 +155,12 @@ struct ClientStateMachine {
         self.queuedCommands.append((command, promise))
         return try self.sendNextCommand()
     }
-    
-    private mutating func sendNextCommand() throws -> [(EncodeBuffer.Chunk, EventLoopPromise<Void>?)]{
+
+    private mutating func sendNextCommand() throws -> [(EncodeBuffer.Chunk, EventLoopPromise<Void>?)] {
         assert(self.queuedCommands.count > 0)
-        
+
         let (command, promise) = self.queuedCommands.first! // we've asserted there's at least one
-        
+
         switch self.state {
         case .expectingNormalResponse:
             guard self.activeEncodeBuffer == nil else {
@@ -182,7 +182,7 @@ struct ClientStateMachine {
         case .expectingLiteralContinuationRequest:
             return []
         }
-        
+
         // For every state that can reach this code, there can only ever be one
         // chunk to write to the network.
         _ = self.queuedCommands.popFirst()! // we've asserted there's at least one
@@ -227,15 +227,15 @@ extension ClientStateMachine {
                 throw InvalidCommandForState(.tagged(command))
             }
             self.state = .idle(Idle())
-            
+
             defer {
                 self.activeEncodeBuffer = nil
                 self.activeWritePromise = nil
             }
-            
+
             let chunk = self.activeEncodeBuffer.buffer.nextChunk()
             return [(chunk, self.activeWritePromise)]
-            
+
         case .authenticate:
 
             // no other commands can be running when we start authenticating
@@ -243,7 +243,7 @@ extension ClientStateMachine {
                 throw InvalidCommandForState(.tagged(command))
             }
             self.state = .authenticating(Authentication())
-            
+
             // The AUTHENTICATE command will never have a continuation
             let chunk = self.activeEncodeBuffer.buffer.nextChunk()
             defer {
@@ -251,7 +251,7 @@ extension ClientStateMachine {
                 self.activeWritePromise = nil
             }
             return [(chunk, self.activeWritePromise)]
-            
+
         default:
             let chunk = self.activeEncodeBuffer.buffer.nextChunk()
             if chunk.waitForContinuation {
@@ -277,17 +277,17 @@ extension ClientStateMachine {
             throw InvalidCommandForState(.append(command))
         }
         self.state = .appending(Append())
-        
+
         // TODO: This assumes that the append command doesn't require a continuation - fix this in another PR
         // Only send bytes if there isn't a command ahead in the queue
         return [(self.activeEncodeBuffer.buffer.nextChunk(), self.activeWritePromise)]
     }
-    
+
     private mutating func extractSendableChunks() throws -> [(EncodeBuffer.Chunk, EventLoopPromise<Void>?)] {
         guard self.activeEncodeBuffer != nil else {
             return []
         }
-        
+
         let chunk = self.activeEncodeBuffer.buffer.nextChunk()
         if chunk.waitForContinuation {
             return [(chunk, self.activeWritePromise)]
@@ -296,7 +296,7 @@ extension ClientStateMachine {
             result.append((chunk, self.activeWritePromise))
             self.activeEncodeBuffer = nil
             self.activeWritePromise = nil
-            while self.queuedCommands.hasMark && !result.last!.0.waitForContinuation {
+            while self.queuedCommands.hasMark, !result.last!.0.waitForContinuation {
                 for val in try self.sendNextCommand() {
                     result.append(val)
                 }
@@ -304,7 +304,7 @@ extension ClientStateMachine {
             return result
         }
     }
-    
+
     public mutating func flush() {
         self.queuedCommands.mark()
     }

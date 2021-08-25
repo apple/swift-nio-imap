@@ -363,10 +363,10 @@ class IMAPClientHandlerTests: XCTestCase {
             typealias OutboundIn = ByteBuffer
 
             var callCount = 0
-            
+
             func write(context: ChannelHandlerContext, data: NIOAny, promise: EventLoopPromise<Void>?) {
                 self.callCount += 1
-                if callCount == 1 {
+                if self.callCount == 1 {
                     let data = self.wrapInboundOut(ByteBuffer(string: "+ \r\n"))
                     context.fireChannelRead(data)
                     promise?.succeed(())

@@ -12,10 +12,10 @@
 //
 //===----------------------------------------------------------------------===//
 
+import CoreImage
 import NIO
 @_spi(NIOIMAPInternal) import NIOIMAPCore
 import OrderedCollections
-import CoreImage
 
 /// To be used by a IMAP client implementation.
 public final class IMAPClientHandler: ChannelDuplexHandler {
@@ -101,7 +101,7 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
             }
         }
     }
-    
+
     public func write(context: ChannelHandlerContext, data: NIOAny, promise: EventLoopPromise<Void>?) {
         let command = self.unwrapOutboundIn(data)
         do {
@@ -111,7 +111,7 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
             // TODO: Handle
         }
     }
-    
+
     private func writeChunks(_ chunks: [(EncodeBuffer.Chunk, EventLoopPromise<Void>?)], context: ChannelHandlerContext) {
         for (chunk, promise) in chunks {
             let outbound = self.wrapOutboundOut(chunk.bytes)
@@ -123,7 +123,7 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
         }
         context.flush()
     }
-    
+
     public func flush(context: ChannelHandlerContext) {
         self.state.flush()
         context.flush()

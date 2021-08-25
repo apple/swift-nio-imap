@@ -79,22 +79,22 @@ class ClientStateMachineTests: XCTestCase {
         // this time we expect a tagged response, so let's send one
         XCTAssertNoThrow(try self.stateMachine.receiveResponse(.tagged(.init(tag: "A1", state: .ok(.init(text: "OK"))))))
     }
-    
+
     func testChunkingMultipleCommands() {
         let command = TaggedCommand(tag: "A1", command: .login(username: "\\", password: "pass"))
-        
+
         var result1: [(EncodeBuffer.Chunk, EventLoopPromise<Void>?)] = []
         XCTAssertNoThrow(result1 = try self.stateMachine.sendCommand(.tagged(command)))
         XCTAssertEqual(result1.count, 1)
         XCTAssertEqual(result1.first!.0.bytes, "A1 LOGIN {1}\r\n")
-        
+
         // We haven't yet continued the first command
         // so we shouldn't get anything back here.
         var result2: [(EncodeBuffer.Chunk, EventLoopPromise<Void>?)] = []
         XCTAssertNoThrow(result2 = try self.stateMachine.sendCommand(.tagged(.init(tag: "A2", command: .noop))))
         XCTAssertEqual(result2.count, 0)
         self.stateMachine.flush()
-        
+
         var result3: [(EncodeBuffer.Chunk, EventLoopPromise<Void>?)] = []
         XCTAssertNoThrow(result3 = try self.stateMachine.receiveContinuationRequest(.data("OK")))
         XCTAssertEqual(result3.count, 2)
