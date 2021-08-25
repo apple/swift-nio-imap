@@ -35,13 +35,6 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
 
     private var state: ClientStateMachine
 
-    /// Capabilites are sent by an IMAP server. Once the desired capabilities have been
-    /// select from the server's response, update these encoding options to enable or disable
-    /// certain types of literal encodings.
-    /// - Note: Make sure to send `.enable` commands for applicable capabilities
-    /// - Important: Modifying this value is not thread-safe
-    private var encodingOptions: CommandEncodingOptions
-
     private var lastKnownCapabilities = [Capability]()
 
     /// This function is called by the `IMAPChannelHandler` upon receipt of a response containing capabilities.
@@ -51,11 +44,10 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
     var encodingChangeCallback: (OrderedDictionary<String, String?>, inout CommandEncodingOptions) -> Void
 
     public init(encodingChangeCallback: @escaping (OrderedDictionary<String, String?>, inout CommandEncodingOptions) -> Void = { _, _ in }) {
-        self.state = .init()
+        self.state = .init(encodingOptions: CommandEncodingOptions(capabilities: self.lastKnownCapabilities))
         self.decoder = NIOSingleStepByteToMessageProcessor(ResponseDecoder(), maximumBufferSize: 1_000)
         self.encodingChangeCallback = encodingChangeCallback
         self.lastKnownCapabilities = []
-        self.encodingOptions = CommandEncodingOptions(capabilities: self.lastKnownCapabilities)
     }
 
     public func channelInactive(context: ChannelHandlerContext) {
@@ -78,9 +70,35 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
         case .continuationRequest(let continuationRequest):
             let chunks = try self.state.receiveContinuationRequest(continuationRequest)
             self.writeChunks(chunks, context: context)
+            if self.state.authenticating {
+                switch continuationRequest {
+                case .responseText:
+                    // No valid base64, so forward on an empty BB
+                    context.fireChannelRead(self.wrapInboundOut(.authenticationChallenge(context.channel.allocator.buffer(capacity: 0))))
+                case .data(let byteBuffer):
+                    context.fireChannelRead(self.wrapInboundOut(.authenticationChallenge(byteBuffer)))
+                }
+            } else if self.state.idling {
+                // If we've received a continuation request and the state machine is
+                // idling then IDLE must have started.
+                context.fireChannelRead(self.wrapInboundOut(.idleStarted))
+                context.fireUserInboundEventTriggered(continuationRequest)
+            } else {
+                context.fireUserInboundEventTriggered(continuationRequest)
+            }
         case .response(let response):
             try self.state.receiveResponse(response)
             context.fireChannelRead(self.wrapInboundOut(response))
+            switch response {
+            case .untagged(.capabilityData(let caps)):
+                self.lastKnownCapabilities = caps
+            case .untagged(.id(let info)):
+                var recomended = CommandEncodingOptions(capabilities: self.lastKnownCapabilities)
+                self.encodingChangeCallback(info, &recomended)
+                self.state.encodingOptions = recomended
+            default:
+                break
+            }
         }
     }
     
@@ -97,8 +115,17 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
     private func writeChunks(_ chunks: [(EncodeBuffer.Chunk, EventLoopPromise<Void>?)], context: ChannelHandlerContext) {
         for (chunk, promise) in chunks {
             let outbound = self.wrapOutboundOut(chunk.bytes)
-            context.write(outbound, promise: promise)
+            if chunk.waitForContinuation {
+                context.write(outbound).cascadeFailure(to: promise)
+            } else {
+                context.write(outbound, promise: promise)
+            }
         }
+        context.flush()
+    }
+    
+    public func flush(context: ChannelHandlerContext) {
+        self.state.flush()
         context.flush()
     }
 }

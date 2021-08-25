@@ -162,23 +162,6 @@ class IMAPClientHandlerTests: XCTestCase {
                                          state: .ok(.init(code: nil, text: "ok")))))
     }
 
-    func testContinueRequestCommandFollowedByAuthenticate() {
-        self.writeOutbound(.tagged(.init(tag: "1", command: .move(.lastCommand, .init("\\")))), wait: false)
-        self.writeOutbound(.tagged(.init(tag: "2", command: .authenticate(mechanism: .gssAPI, initialResponse: nil))), wait: false)
-
-        // send the move command
-        self.assertOutboundString("1 MOVE $ {1}\r\n")
-        self.writeInbound("+ OK\r\n")
-
-        // respond to the continuation, move straight to authentication
-        self.assertOutboundString("\\\r\n")
-        self.assertOutboundString("2 AUTHENTICATE GSSAPI\r\n")
-
-        // server sends an auth challenge
-        self.writeInbound("+\r\n")
-        self.assertInbound(.authenticationChallenge(""))
-    }
-
     func testUnexpectedContinuationRequest() {
         let f = self.writeOutbound(CommandStreamPart.tagged(TaggedCommand(tag: "x",
                                                                           command: .rename(from: .init("\\"),
@@ -203,7 +186,7 @@ class IMAPClientHandlerTests: XCTestCase {
 
         // server sends challenge
         let challengeBytes1 = ""
-         self.writeInbound("+ \(challengeBytes1)\r\n")
+        self.writeInbound("+ \(challengeBytes1)\r\n")
         self.assertInbound(.authenticationChallenge(ByteBuffer()))
 
         // client responds
@@ -278,29 +261,32 @@ class IMAPClientHandlerTests: XCTestCase {
         })
         self.channel = EmbeddedChannel(handler: self.clientHandler, loop: .init())
 
-        self.writeOutbound(.tagged(.init(tag: "A1", command: .login(username: "\\", password: "\\"))), wait: false)
+        let f1 = self.writeOutbound(.tagged(.init(tag: "A1", command: .login(username: "\\", password: "\\"))), wait: false)
         self.assertOutboundString("A1 LOGIN {1}\r\n")
         self.writeInbound("+ OK\r\n")
         self.assertOutboundString("\\ {1}\r\n")
         self.writeInbound("+ OK\r\n")
         self.assertOutboundString("\\\r\n")
+        XCTAssertNoThrow(try f1.wait())
 
         // send some capabilities
         self.writeInbound("A1 OK [CAPABILITY LITERAL+]\r\n")
         self.assertInbound(.tagged(.init(tag: "A1", state: .ok(.init(code: .capability([.literalPlus]), text: "")))))
 
         // send the server ID (client sends a noop
-        self.writeOutbound(.tagged(.init(tag: "A2", command: .noop)), wait: false)
+        let f2 = self.writeOutbound(.tagged(.init(tag: "A2", command: .noop)), wait: false)
         self.assertOutboundString("A2 NOOP\r\n")
         self.writeInbound("* ID (\"name\" \"NIOIMAP\")\r\n")
         self.assertInbound(.untagged(.id(["name": "NIOIMAP"])))
         wait(for: [turnOnLiteralPlusExpectation], timeout: 1.0)
         self.writeInbound("A2 OK NOOP complete\r\n")
         self.assertInbound(.tagged(.init(tag: "A2", state: .ok(.init(text: "NOOP complete")))))
+        XCTAssertNoThrow(try f2.wait())
 
         // now we should have literal+ turned on
-        self.writeOutbound(.tagged(.init(tag: "A3", command: .login(username: "\\", password: "\\"))), wait: false)
+        let f3 = self.writeOutbound(.tagged(.init(tag: "A3", command: .login(username: "\\", password: "\\"))), wait: false)
         self.assertOutboundString("A3 LOGIN {1+}\r\n\\ {1+}\r\n\\\r\n")
+        XCTAssertNoThrow(try f3.wait())
     }
 
     func testContinuationRequestsAsUserEvents() {
@@ -353,6 +339,8 @@ class IMAPClientHandlerTests: XCTestCase {
         self.writeInbound("+ 2\r\n")
         try! eventExpectation2.futureResult.wait()
         self.assertOutboundString("\\\r\n")
+        self.writeInbound("A1 OK\r\n")
+        self.assertInbound(.tagged(.init(tag: "A1", state: .ok(.init(code: nil, text: "")))))
 
         // now confirm idle
         self.writeOutbound(.tagged(.init(tag: "A2", command: .idleStart)), wait: false)
@@ -362,6 +350,8 @@ class IMAPClientHandlerTests: XCTestCase {
         self.assertInbound(.idleStarted)
         self.writeOutbound(.idleDone)
         self.assertOutboundString("DONE\r\n")
+        self.writeInbound("A2 OK\r\n")
+        self.assertInbound(.tagged(.init(tag: "A2", state: .ok(.init(code: nil, text: "")))))
     }
 
     func testProtectAgainstReentrancy() {
@@ -372,10 +362,15 @@ class IMAPClientHandlerTests: XCTestCase {
             typealias InboundOut = ByteBuffer
             typealias OutboundIn = ByteBuffer
 
+            var callCount = 0
+            
             func write(context: ChannelHandlerContext, data: NIOAny, promise: EventLoopPromise<Void>?) {
-                let data = self.wrapInboundOut(ByteBuffer(string: "+ \r\n"))
-                context.fireChannelRead(data)
-                promise?.succeed(())
+                self.callCount += 1
+                if callCount == 1 {
+                    let data = self.wrapInboundOut(ByteBuffer(string: "+ \r\n"))
+                    context.fireChannelRead(data)
+                    promise?.succeed(())
+                }
             }
 
             func triggerUserOutboundEvent(context: ChannelHandlerContext, event: Any, promise: EventLoopPromise<Void>?) {
@@ -389,12 +384,14 @@ class IMAPClientHandlerTests: XCTestCase {
         class PostTestHandler: ChannelDuplexHandler {
             typealias InboundIn = Response
             typealias OutboundIn = Response
+            typealias OutboundOut = CommandStreamPart
 
             var callCount = 0
 
             func channelRead(context: ChannelHandlerContext, data: NIOAny) {
                 self.callCount += 1
-                if self.callCount < 3 {
+                if self.callCount == 1 {
+                    context.writeAndFlush(self.wrapOutboundOut(.continuationResponse("")), promise: nil)
                     context.triggerUserOutboundEvent(MyOutboundEvent(), promise: nil)
                 }
             }
@@ -409,7 +406,7 @@ class IMAPClientHandlerTests: XCTestCase {
             IMAPClientHandler(),
             PostTestHandler(),
         ]).wait())
-        self.writeOutbound(.tagged(.init(tag: "A1", command: .idleStart)))
+        self.writeOutbound(.tagged(.init(tag: "A1", command: .authenticate(mechanism: .gssAPI, initialResponse: nil))))
     }
 
 //    func testProtectAgainstReentrancyWithContinuation() {

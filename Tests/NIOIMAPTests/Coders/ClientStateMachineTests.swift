@@ -21,7 +21,7 @@ class ClientStateMachineTests: XCTestCase {
     var stateMachine: ClientStateMachine!
 
     override func setUp() {
-        self.stateMachine = ClientStateMachine()
+        self.stateMachine = ClientStateMachine(encodingOptions: .rfc3501)
     }
 
     func testNormalWorkflow() {
@@ -93,6 +93,7 @@ class ClientStateMachineTests: XCTestCase {
         var result2: [(EncodeBuffer.Chunk, EventLoopPromise<Void>?)] = []
         XCTAssertNoThrow(result2 = try self.stateMachine.sendCommand(.tagged(.init(tag: "A2", command: .noop))))
         XCTAssertEqual(result2.count, 0)
+        self.stateMachine.flush()
         
         var result3: [(EncodeBuffer.Chunk, EventLoopPromise<Void>?)] = []
         XCTAssertNoThrow(result3 = try self.stateMachine.receiveContinuationRequest(.data("OK")))

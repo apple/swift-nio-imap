@@ -57,20 +57,49 @@ struct ClientStateMachine {
         case error
     }
 
+    /// Capabilites are sent by an IMAP server. Once the desired capabilities have been
+    /// select from the server's response, update these encoding options to enable or disable
+    /// certain types of literal encodings.
+    /// - Note: Make sure to send `.enable` commands for applicable capabilities
+    /// - Important: Modifying this value is not thread-safe
+    var encodingOptions: CommandEncodingOptions
+    
     private var activeEncodeBuffer: CommandEncodeBuffer!
     private var activeWritePromise: EventLoopPromise<Void>?
     private var queuedCommands: MarkedCircularBuffer<(CommandStreamPart, EventLoopPromise<Void>?)> = .init(initialCapacity: 16)
     private var state: State = .expectingNormalResponse
     private var activeCommandTags: Set<String> = []
+    
+    var authenticating: Bool {
+        switch self.state {
+        case .authenticating:
+            return true
+        case .expectingNormalResponse, .expectingLiteralContinuationRequest, .appending, .error, .idle:
+            return false
+        }
+    }
+    
+    var idling: Bool {
+        switch self.state {
+        case .idle:
+            return true
+        case .expectingNormalResponse, .expectingLiteralContinuationRequest, .appending, .error, .authenticating:
+            return false
+        }
+    }
+    
+    init(encodingOptions: CommandEncodingOptions) {
+        self.encodingOptions = encodingOptions
+    }
 
     mutating func receiveContinuationRequest(_ req: ContinuationRequest) throws -> [(EncodeBuffer.Chunk, EventLoopPromise<Void>?)] {
         switch self.state {
         case .appending(var appendStateMachine):
             self.state = try appendStateMachine.receiveContinuationRequest(req)
-
-            return self.extractSendableChunks()
+            return try self.extractSendableChunks()
         case .expectingLiteralContinuationRequest:
-            let result = self.extractSendableChunks()
+            self.state = .expectingNormalResponse
+            let result = try self.extractSendableChunks()
             if result.last!.0.waitForContinuation { // we've found a continuation
                 self.state = .expectingLiteralContinuationRequest
             } else {
@@ -80,12 +109,17 @@ struct ClientStateMachine {
         case .authenticating(var authenticateStateMachine):
             switch req {
             case .responseText:
-                throw UnexpectedContinuationRequest()
+                // no valid base 64, so we can assume it was empty
+                self.state = try authenticateStateMachine.receiveResponse(.authenticationChallenge(ByteBuffer()))
             case .data(let byteBuffer):
                 self.state = try authenticateStateMachine.receiveResponse(.authenticationChallenge(byteBuffer))
-                return []
             }
-        case .expectingNormalResponse, .idle, .error:
+            return []
+        case .idle(var idleStateMachine):
+            // A continuation when in idle state means it's been confirmed
+            self.state = try idleStateMachine.receiveResponse(.idleStarted)
+            return []
+        case .expectingNormalResponse, .error:
             throw UnexpectedContinuationRequest()
         }
     }
@@ -134,44 +168,52 @@ struct ClientStateMachine {
             }
             _ = self.queuedCommands.popFirst()! // we've asserted there's at least one
             self.activeWritePromise = promise
-            self.activeEncodeBuffer = .init(buffer: ByteBuffer(), options: .rfc3501)
+            self.activeEncodeBuffer = .init(buffer: ByteBuffer(), options: self.encodingOptions)
             self.activeEncodeBuffer.writeCommandStream(command)
-            return try self.sendCommand_state_normalResponse(command: command, promise: promise)
+            return try self.sendCommand_state_normalResponse(command: command)
         case .idle(var idleStateMachine):
-            _ = self.queuedCommands.popFirst()!
             self.state = try idleStateMachine.sendCommand(command)
         case .authenticating(var authStateMachine):
-            _ = self.queuedCommands.popFirst()!
             self.state = try authStateMachine.sendCommand(command)
         case .appending(var appendingStateMachine):
-            _ = self.queuedCommands.popFirst()!
             self.state = try appendingStateMachine.sendCommand(command)
         case .error:
             throw InvalidCommandForState(command)
         case .expectingLiteralContinuationRequest:
-            break
+            return []
         }
-        return []
+        
+        // For every state that can reach this code, there can only ever be one
+        // chunk to write to the network.
+        _ = self.queuedCommands.popFirst()! // we've asserted there's at least one
+        self.activeWritePromise = promise
+        self.activeEncodeBuffer = .init(buffer: ByteBuffer(), options: self.encodingOptions)
+        self.activeEncodeBuffer.writeCommandStream(command)
+        defer {
+            self.activeWritePromise = nil
+            self.activeEncodeBuffer = nil
+        }
+        return [(self.activeEncodeBuffer.buffer.nextChunk(), self.activeWritePromise)]
     }
 }
 
 // MARK: - Send
 
 extension ClientStateMachine {
-    private mutating func sendCommand_state_normalResponse(command: CommandStreamPart, promise: EventLoopPromise<Void>?) throws -> [(EncodeBuffer.Chunk, EventLoopPromise<Void>?)] {
+    private mutating func sendCommand_state_normalResponse(command: CommandStreamPart) throws -> [(EncodeBuffer.Chunk, EventLoopPromise<Void>?)] {
         assert(self.state == .expectingNormalResponse)
 
         switch command {
         case .idleDone, .continuationResponse:
             throw InvalidCommandForState(command)
         case .tagged(let tc):
-            return try self.sendTaggedCommand(tc, promise: promise)
+            return try self.sendTaggedCommand(tc)
         case .append(let ac):
-            return try self.sendAppendCommand(ac, promise: promise)
+            return try self.sendAppendCommand(ac)
         }
     }
 
-    private mutating func sendTaggedCommand(_ command: TaggedCommand, promise: EventLoopPromise<Void>?) throws -> [(EncodeBuffer.Chunk, EventLoopPromise<Void>?)] {
+    private mutating func sendTaggedCommand(_ command: TaggedCommand) throws -> [(EncodeBuffer.Chunk, EventLoopPromise<Void>?)] {
         assert(self.state == .expectingNormalResponse)
 
         // it's not practical to switch over
@@ -186,10 +228,13 @@ extension ClientStateMachine {
             }
             self.state = .idle(Idle())
             
+            defer {
+                self.activeEncodeBuffer = nil
+                self.activeWritePromise = nil
+            }
+            
             let chunk = self.activeEncodeBuffer.buffer.nextChunk()
-            self.activeEncodeBuffer = nil
-            self.activeWritePromise = nil
-            return [(chunk, promise)]
+            return [(chunk, self.activeWritePromise)]
             
         case .authenticate:
 
@@ -201,26 +246,30 @@ extension ClientStateMachine {
             
             // The AUTHENTICATE command will never have a continuation
             let chunk = self.activeEncodeBuffer.buffer.nextChunk()
-            self.activeEncodeBuffer = nil
-            self.activeWritePromise = nil
-            return [(chunk, promise)]
+            defer {
+                self.activeEncodeBuffer = nil
+                self.activeWritePromise = nil
+            }
+            return [(chunk, self.activeWritePromise)]
             
         default:
             let chunk = self.activeEncodeBuffer.buffer.nextChunk()
             if chunk.waitForContinuation {
                 self.state = .expectingLiteralContinuationRequest
-                return [(chunk, nil)] // nil promise because the command required continuation
+                return [(chunk, self.activeWritePromise)] // nil promise because the command required continuation
             } else {
-                self.activeWritePromise = nil
-                self.activeEncodeBuffer = nil
+                defer {
+                    self.activeEncodeBuffer = nil
+                    self.activeWritePromise = nil
+                }
                 self.state = .expectingNormalResponse
                 assert(!chunk.waitForContinuation)
-                return [(chunk, promise)] // there'll only ever be one chunk here
+                return [(chunk, self.activeWritePromise)] // there'll only ever be one chunk here
             }
         }
     }
 
-    private mutating func sendAppendCommand(_ command: AppendCommand, promise: EventLoopPromise<Void>?) throws -> [(EncodeBuffer.Chunk, EventLoopPromise<Void>?)] {
+    private mutating func sendAppendCommand(_ command: AppendCommand) throws -> [(EncodeBuffer.Chunk, EventLoopPromise<Void>?)] {
         assert(self.state == .expectingNormalResponse)
 
         // no other commands can be running when we start appending
@@ -231,35 +280,29 @@ extension ClientStateMachine {
         
         // TODO: This assumes that the append command doesn't require a continuation - fix this in another PR
         // Only send bytes if there isn't a command ahead in the queue
-        return [(self.activeEncodeBuffer.buffer.nextChunk(), promise)]
+        return [(self.activeEncodeBuffer.buffer.nextChunk(), self.activeWritePromise)]
     }
     
-    private mutating func extractSendableChunks() -> [(EncodeBuffer.Chunk, EventLoopPromise<Void>?)] {
-        var result: [(EncodeBuffer.Chunk, EventLoopPromise<Void>?)] = []
-        
-        while self.activeEncodeBuffer != nil {
-            let chunk = self.activeEncodeBuffer.buffer.nextChunk()
-            if chunk.waitForContinuation {
-                result.append((chunk, nil))
-                break
-            } else {
-                self.activeEncodeBuffer = nil
-                self.activeWritePromise = nil
-                result.append((chunk, self.activeWritePromise))
-                
-                guard let (command, promise) = self.queuedCommands.popFirst() else {
-                    continue
-                }
-                
-                // TODO: Load capabilities from somewhere
-                self.activeWritePromise = promise
-                self.activeEncodeBuffer = .init(buffer: ByteBuffer(), options: .rfc3501)
-                self.activeEncodeBuffer.writeCommandStream(command)
-            }
+    private mutating func extractSendableChunks() throws -> [(EncodeBuffer.Chunk, EventLoopPromise<Void>?)] {
+        guard self.activeEncodeBuffer != nil else {
+            return []
         }
         
-        
-        return result
+        let chunk = self.activeEncodeBuffer.buffer.nextChunk()
+        if chunk.waitForContinuation {
+            return [(chunk, self.activeWritePromise)]
+        } else {
+            var result: [(EncodeBuffer.Chunk, EventLoopPromise<Void>?)] = []
+            result.append((chunk, self.activeWritePromise))
+            self.activeEncodeBuffer = nil
+            self.activeWritePromise = nil
+            while self.queuedCommands.hasMark && !result.last!.0.waitForContinuation {
+                for val in try self.sendNextCommand() {
+                    result.append(val)
+                }
+            }
+            return result
+        }
     }
     
     public mutating func flush() {
