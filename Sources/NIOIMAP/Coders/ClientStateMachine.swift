@@ -96,6 +96,14 @@ struct ClientStateMachine {
         switch self.state {
         case .appending(var appendStateMachine):
             self.state = try appendStateMachine.receiveContinuationRequest(req)
+            self.activeEncodeBuffer = nil
+            self.activeWritePromise = nil
+            if let (command, promise) = self.queuedCommands.popFirst() {
+                var encodeBuffer = CommandEncodeBuffer(buffer: ByteBuffer(), options: self.encodingOptions)
+                encodeBuffer.writeCommandStream(command)
+                self.activeEncodeBuffer = encodeBuffer
+                self.activeWritePromise = promise
+            }
             return try self.extractSendableChunks()
         case .expectingLiteralContinuationRequest:
             self.state = .expectingNormalResponse
@@ -103,6 +111,8 @@ struct ClientStateMachine {
             if result.last!.0.waitForContinuation { // we've found a continuation
                 self.state = .expectingLiteralContinuationRequest
             } else {
+                self.activeWritePromise = nil
+                self.activeEncodeBuffer = nil
                 self.state = .expectingNormalResponse
             }
             return result
@@ -153,20 +163,25 @@ struct ClientStateMachine {
             }
         }
         self.queuedCommands.append((command, promise))
-        return try self.sendNextCommand()
+        do {
+            return try self.sendNextCommand()
+        } catch {
+            self.state = .error
+            throw error
+        }
     }
 
     private mutating func sendNextCommand() throws -> [(EncodeBuffer.Chunk, EventLoopPromise<Void>?)] {
         assert(self.queuedCommands.count > 0)
 
-        let (command, promise) = self.queuedCommands.first! // we've asserted there's at least one
-
+        guard self.activeEncodeBuffer == nil else {
+            return []
+        }
+        
+        let (command, promise) = self.queuedCommands.popFirst()! // we've asserted there's at least one
+        
         switch self.state {
         case .expectingNormalResponse:
-            guard self.activeEncodeBuffer == nil else {
-                return []
-            }
-            _ = self.queuedCommands.popFirst()! // we've asserted there's at least one
             self.activeWritePromise = promise
             self.activeEncodeBuffer = .init(buffer: ByteBuffer(), options: self.encodingOptions)
             self.activeEncodeBuffer.writeCommandStream(command)
@@ -177,15 +192,28 @@ struct ClientStateMachine {
             self.state = try authStateMachine.sendCommand(command)
         case .appending(var appendingStateMachine):
             self.state = try appendingStateMachine.sendCommand(command)
+            switch command {
+            case .append(.beginMessage), .append(.catenateData):
+                self.activeWritePromise = promise
+                self.activeEncodeBuffer = .init(buffer: ByteBuffer(), options: self.encodingOptions)
+                self.activeEncodeBuffer.writeCommandStream(command)
+                return [(self.activeEncodeBuffer.buffer.nextChunk(), self.activeWritePromise)]
+            default:
+                defer {
+                    self.activeWritePromise = nil
+                    self.activeEncodeBuffer = nil
+                }
+                self.activeWritePromise = promise
+                self.activeEncodeBuffer = .init(buffer: ByteBuffer(), options: self.encodingOptions)
+                self.activeEncodeBuffer.writeCommandStream(command)
+                return [(self.activeEncodeBuffer.buffer.nextChunk(), self.activeWritePromise)]
+            }
         case .error:
             throw InvalidCommandForState(command)
         case .expectingLiteralContinuationRequest:
             return []
         }
 
-        // For every state that can reach this code, there can only ever be one
-        // chunk to write to the network.
-        _ = self.queuedCommands.popFirst()! // we've asserted there's at least one
         self.activeWritePromise = promise
         self.activeEncodeBuffer = .init(buffer: ByteBuffer(), options: self.encodingOptions)
         self.activeEncodeBuffer.writeCommandStream(command)
@@ -280,6 +308,10 @@ extension ClientStateMachine {
 
         // TODO: This assumes that the append command doesn't require a continuation - fix this in another PR
         // Only send bytes if there isn't a command ahead in the queue
+        defer {
+            self.activeEncodeBuffer = nil
+            self.activeWritePromise = nil
+        }
         return [(self.activeEncodeBuffer.buffer.nextChunk(), self.activeWritePromise)]
     }
 
@@ -294,9 +326,9 @@ extension ClientStateMachine {
         } else {
             var result: [(EncodeBuffer.Chunk, EventLoopPromise<Void>?)] = []
             result.append((chunk, self.activeWritePromise))
-            self.activeEncodeBuffer = nil
-            self.activeWritePromise = nil
             while self.queuedCommands.hasMark, !result.last!.0.waitForContinuation {
+                self.activeEncodeBuffer = nil
+                self.activeWritePromise = nil
                 for val in try self.sendNextCommand() {
                     result.append(val)
                 }

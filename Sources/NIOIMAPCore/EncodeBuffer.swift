@@ -74,7 +74,7 @@ extension EncodeBuffer {
 
 extension EncodeBuffer {
     /// Represents a piece of data that is ready to be written to the network.
-    public struct Chunk {
+    public struct Chunk: Hashable {
         /// The data that is ready to be written.
         public var bytes: ByteBuffer
 

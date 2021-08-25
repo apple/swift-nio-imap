@@ -108,11 +108,15 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
             let chunks = try self.state.sendCommand(command, promise: promise)
             self.writeChunks(chunks, context: context)
         } catch {
-            // TODO: Handle
+            print(error)
+            context.fireErrorCaught(error)
+            promise?.fail(error)
         }
     }
 
     private func writeChunks(_ chunks: [(EncodeBuffer.Chunk, EventLoopPromise<Void>?)], context: ChannelHandlerContext) {
+        guard chunks.count > 0 else { return }
+        
         for (chunk, promise) in chunks {
             let outbound = self.wrapOutboundOut(chunk.bytes)
             if chunk.waitForContinuation {
