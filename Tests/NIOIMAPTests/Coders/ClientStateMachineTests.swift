@@ -271,39 +271,39 @@ extension ClientStateMachineTests {
         XCTAssertNoThrow(try self.stateMachine.receiveResponse(.tagged(.init(tag: "A1", state: .ok(.init(code: nil, text: "OK"))))))
         XCTAssertNoThrow(try self.stateMachine.sendCommand(.tagged(.init(tag: "A2", command: .noop))))
     }
-    
+
     func testAppeandPreloading() {
         var result: [(EncodeBuffer.Chunk, EventLoopPromise<Void>?)] = []
         XCTAssertNoThrow(result = try self.stateMachine.sendCommand(.append(.start(tag: "A1", appendingTo: .inbox))))
         XCTAssertEqual(result.count, 1)
         XCTAssertEqual(result[0].0, .init(bytes: "A1 APPEND \"INBOX\"", waitForContinuation: false))
-        
+
         XCTAssertNoThrow(result = try self.stateMachine.sendCommand(.append(.beginMessage(message: .init(options: .none, data: .init(byteCount: 5))))))
         XCTAssertEqual(result.count, 1)
         XCTAssertEqual(result[0].0, .init(bytes: " {5}\r\n", waitForContinuation: false))
-        
+
         XCTAssertNoThrow(result = try self.stateMachine.sendCommand(.append(.messageBytes("0"))))
         XCTAssertEqual(result.count, 0)
         XCTAssertNoThrow(result = try self.stateMachine.sendCommand(.append(.messageBytes("1"))))
         XCTAssertEqual(result.count, 0)
-        
+
         XCTAssertNoThrow(result = try self.stateMachine.sendCommand(.append(.messageBytes("2"))))
         XCTAssertEqual(result.count, 0)
-        
+
         XCTAssertNoThrow(result = try self.stateMachine.sendCommand(.append(.messageBytes("3"))))
         XCTAssertEqual(result.count, 0)
-        
+
         XCTAssertNoThrow(result = try self.stateMachine.sendCommand(.append(.messageBytes("4"))))
         XCTAssertEqual(result.count, 0)
-        
+
         XCTAssertNoThrow(result = try self.stateMachine.sendCommand(.append(.endMessage)))
         XCTAssertEqual(result.count, 0)
-        
+
         XCTAssertNoThrow(result = try self.stateMachine.sendCommand(.append(.finish)))
         XCTAssertEqual(result.count, 0)
-        
+
         self.stateMachine.flush()
-        
+
         XCTAssertNoThrow(result = try self.stateMachine.receiveContinuationRequest(.data("OK")))
         XCTAssertEqual(result.count, 7)
         XCTAssertEqual(result[0].0, .init(bytes: "0", waitForContinuation: false))
@@ -313,6 +313,5 @@ extension ClientStateMachineTests {
         XCTAssertEqual(result[4].0, .init(bytes: "4", waitForContinuation: false))
         XCTAssertEqual(result[5].0, .init(bytes: "", waitForContinuation: false))
         XCTAssertEqual(result[6].0, .init(bytes: "\r\n", waitForContinuation: false))
-        
     }
 }

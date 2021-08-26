@@ -177,9 +177,9 @@ struct ClientStateMachine {
         guard self.activeEncodeBuffer == nil else {
             return []
         }
-        
+
         let (command, promise) = self.queuedCommands.popFirst()! // we've asserted there's at least one
-        
+
         switch self.state {
         case .expectingNormalResponse:
             self.activeWritePromise = promise

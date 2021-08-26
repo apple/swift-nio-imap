@@ -511,7 +511,7 @@ class IMAPClientHandlerTests: XCTestCase {
         }
         XCTAssertTrue(didComplete)
     }
-    
+
     func testAppendWaitsForContinuation() {
         self.writeOutbound(.append(.start(tag: "A1", appendingTo: .inbox)))
         self.writeOutbound(.append(.beginMessage(message: .init(options: .none, data: .init(byteCount: 5)))))
@@ -522,12 +522,12 @@ class IMAPClientHandlerTests: XCTestCase {
         let p5 = self.writeOutbound(.append(.messageBytes("4")), wait: false)
         let p6 = self.writeOutbound(.append(.endMessage), wait: false)
         let p7 = self.writeOutbound(.append(.finish), wait: false)
-        
+
         self.assertOutboundString("A1 APPEND \"INBOX\"")
         self.assertOutboundString(" {5}\r\n")
-        
+
         self.writeInbound("+ OK\r\n")
-        
+
         self.assertOutboundString("0")
         self.assertOutboundString("1")
         self.assertOutboundString("2")
@@ -535,7 +535,7 @@ class IMAPClientHandlerTests: XCTestCase {
         self.assertOutboundString("4")
         self.assertOutboundString("")
         self.assertOutboundString("\r\n")
-        
+
         // make sure all the promises are succeeded
         XCTAssertNoThrow(try p1.wait())
         XCTAssertNoThrow(try p2.wait())
