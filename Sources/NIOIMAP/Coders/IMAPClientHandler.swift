@@ -48,6 +48,11 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
         self.encodingChangeCallback = encodingChangeCallback
         self.lastKnownCapabilities = []
     }
+    
+    public func channelActive(context: ChannelHandlerContext) {
+        self.state.allocator = context.channel.allocator
+        context.fireChannelActive()
+    }
 
     public func channelInactive(context: ChannelHandlerContext) {
         context.fireChannelInactive()
@@ -107,7 +112,6 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
             let chunks = try self.state.sendCommand(command, promise: promise)
             self.writeChunks(chunks, context: context)
         } catch {
-            print(error)
             context.fireErrorCaught(error)
             promise?.fail(error)
         }

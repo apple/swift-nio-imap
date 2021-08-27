@@ -64,11 +64,30 @@ struct ClientStateMachine {
     /// - Important: Modifying this value is not thread-safe
     var encodingOptions: CommandEncodingOptions
 
+    // We won't always have an active encode buffer, but anytime we go to use one it
+    // should exist, so IUO is fine IMHO.
     private var activeEncodeBuffer: CommandEncodeBuffer!
     private var activeWritePromise: EventLoopPromise<Void>?
-    private var queuedCommands: MarkedCircularBuffer<(CommandStreamPart, EventLoopPromise<Void>?)> = .init(initialCapacity: 16)
     private var state: State = .expectingNormalResponse
     private var activeCommandTags: Set<String> = []
+    
+    // This pattern is used to provide a bit of extra security around the allocator
+    // As the state machine will likely exist before we are able to get an allocator
+    // from the channel.
+    private var _allocator: ByteBufferAllocator!
+    var allocator: ByteBufferAllocator {
+        set {
+            self._allocator = newValue
+        }
+        get {
+            assert(self._allocator != nil, "Always set the allocator before trying to access it")
+            return self._allocator
+        }
+    }
+    
+    // We mark where we should write up to at the next oppurtunity
+    // using the `flush` method called from the channel handler.
+    private var queuedCommands: MarkedCircularBuffer<(CommandStreamPart, EventLoopPromise<Void>?)> = .init(initialCapacity: 16)
 
     var authenticating: Bool {
         switch self.state {
@@ -99,7 +118,7 @@ struct ClientStateMachine {
             self.activeEncodeBuffer = nil
             self.activeWritePromise = nil
             if let (command, promise) = self.queuedCommands.popFirst() {
-                var encodeBuffer = CommandEncodeBuffer(buffer: ByteBuffer(), options: self.encodingOptions)
+                var encodeBuffer = CommandEncodeBuffer(buffer: self.makeNewBuffer(), options: self.encodingOptions)
                 encodeBuffer.writeCommandStream(command)
                 self.activeEncodeBuffer = encodeBuffer
                 self.activeWritePromise = promise
@@ -108,6 +127,9 @@ struct ClientStateMachine {
         case .expectingLiteralContinuationRequest:
             self.state = .expectingNormalResponse
             let result = try self.extractSendableChunks()
+            
+            // safe to bang as if we've successfully received a continuation request then there
+            // MUST be something to send
             if result.last!.0.waitForContinuation { // we've found a continuation
                 self.state = .expectingLiteralContinuationRequest
             } else {
@@ -120,7 +142,7 @@ struct ClientStateMachine {
             switch req {
             case .responseText:
                 // no valid base 64, so we can assume it was empty
-                self.state = try authenticateStateMachine.receiveResponse(.authenticationChallenge(ByteBuffer()))
+                self.state = try authenticateStateMachine.receiveResponse(.authenticationChallenge(self.makeNewBuffer()))
             case .data(let byteBuffer):
                 self.state = try authenticateStateMachine.receiveResponse(.authenticationChallenge(byteBuffer))
             }
@@ -183,7 +205,7 @@ struct ClientStateMachine {
         switch self.state {
         case .expectingNormalResponse:
             self.activeWritePromise = promise
-            self.activeEncodeBuffer = .init(buffer: ByteBuffer(), options: self.encodingOptions)
+            self.activeEncodeBuffer = .init(buffer: self.makeNewBuffer(), options: self.encodingOptions)
             self.activeEncodeBuffer.writeCommandStream(command)
             return try self.sendCommand_state_normalResponse(command: command)
         case .idle(var idleStateMachine):
@@ -195,7 +217,7 @@ struct ClientStateMachine {
             switch command {
             case .append(.beginMessage), .append(.catenateData):
                 self.activeWritePromise = promise
-                self.activeEncodeBuffer = .init(buffer: ByteBuffer(), options: self.encodingOptions)
+                self.activeEncodeBuffer = .init(buffer: self.makeNewBuffer(), options: self.encodingOptions)
                 self.activeEncodeBuffer.writeCommandStream(command)
                 return [(self.activeEncodeBuffer.buffer.nextChunk(), self.activeWritePromise)]
             default:
@@ -204,7 +226,7 @@ struct ClientStateMachine {
                     self.activeEncodeBuffer = nil
                 }
                 self.activeWritePromise = promise
-                self.activeEncodeBuffer = .init(buffer: ByteBuffer(), options: self.encodingOptions)
+                self.activeEncodeBuffer = .init(buffer: self.makeNewBuffer(), options: self.encodingOptions)
                 self.activeEncodeBuffer.writeCommandStream(command)
                 return [(self.activeEncodeBuffer.buffer.nextChunk(), self.activeWritePromise)]
             }
@@ -215,7 +237,7 @@ struct ClientStateMachine {
         }
 
         self.activeWritePromise = promise
-        self.activeEncodeBuffer = .init(buffer: ByteBuffer(), options: self.encodingOptions)
+        self.activeEncodeBuffer = .init(buffer: self.makeNewBuffer(), options: self.encodingOptions)
         self.activeEncodeBuffer.writeCommandStream(command)
         defer {
             self.activeWritePromise = nil
@@ -337,7 +359,11 @@ extension ClientStateMachine {
         }
     }
 
-    public mutating func flush() {
+    mutating func flush() {
         self.queuedCommands.mark()
+    }
+    
+    private func makeNewBuffer() -> ByteBuffer {
+        self.allocator.buffer(capacity: 128)
     }
 }
