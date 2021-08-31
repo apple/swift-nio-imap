@@ -22,6 +22,7 @@ class ClientStateMachineTests: XCTestCase {
 
     override func setUp() {
         self.stateMachine = ClientStateMachine(encodingOptions: .rfc3501)
+        self.stateMachine.allocator = ByteBufferAllocator()
     }
 
     func testNormalWorkflow() {

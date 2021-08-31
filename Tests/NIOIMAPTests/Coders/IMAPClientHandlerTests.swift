@@ -260,6 +260,7 @@ class IMAPClientHandlerTests: XCTestCase {
             options.useNonSynchronizingLiteralPlus = true
         })
         self.channel = EmbeddedChannel(handler: self.clientHandler, loop: .init())
+        self.channel.pipeline.fireChannelActive()
 
         let f1 = self.writeOutbound(.tagged(.init(tag: "A1", command: .login(username: "\\", password: "\\"))), wait: false)
         self.assertOutboundString("A1 LOGIN {1}\r\n")
@@ -552,6 +553,7 @@ class IMAPClientHandlerTests: XCTestCase {
         XCTAssertNil(self.channel)
         self.clientHandler = IMAPClientHandler()
         self.channel = EmbeddedChannel(handler: self.clientHandler)
+        self.channel.pipeline.fireChannelActive()
     }
 
     override func tearDown() {
