@@ -221,14 +221,7 @@ struct ClientStateMachine {
                 self.activeEncodeBuffer.writeCommandStream(command)
                 return [(self.activeEncodeBuffer.buffer.nextChunk(), self.activeWritePromise)]
             default:
-                defer {
-                    self.activeWritePromise = nil
-                    self.activeEncodeBuffer = nil
-                }
-                self.activeWritePromise = promise
-                self.activeEncodeBuffer = .init(buffer: self.makeNewBuffer(), options: self.encodingOptions)
-                self.activeEncodeBuffer.writeCommandStream(command)
-                return [(self.activeEncodeBuffer.buffer.nextChunk(), self.activeWritePromise)]
+                break
             }
         case .error:
             throw InvalidCommandForState(command)
@@ -236,14 +229,11 @@ struct ClientStateMachine {
             return []
         }
 
-        self.activeWritePromise = promise
-        self.activeEncodeBuffer = .init(buffer: self.makeNewBuffer(), options: self.encodingOptions)
-        self.activeEncodeBuffer.writeCommandStream(command)
-        defer {
-            self.activeWritePromise = nil
-            self.activeEncodeBuffer = nil
-        }
-        return [(self.activeEncodeBuffer.buffer.nextChunk(), self.activeWritePromise)]
+        self.activeWritePromise = nil
+        self.activeEncodeBuffer = nil
+        var encodeBuffer = CommandEncodeBuffer(buffer: self.makeNewBuffer(), options: self.encodingOptions)
+        encodeBuffer.writeCommandStream(command)
+        return [(encodeBuffer.buffer.nextChunk(), promise)]
     }
 }
 
@@ -278,13 +268,11 @@ extension ClientStateMachine {
             }
             self.state = .idle(Idle())
 
-            defer {
-                self.activeEncodeBuffer = nil
-                self.activeWritePromise = nil
-            }
-
             let chunk = self.activeEncodeBuffer.buffer.nextChunk()
-            return [(chunk, self.activeWritePromise)]
+            let promise = self.activeWritePromise
+            self.activeEncodeBuffer = nil
+            self.activeWritePromise = nil
+            return [(chunk, promise)]
 
         case .authenticate:
 
@@ -296,11 +284,10 @@ extension ClientStateMachine {
 
             // The AUTHENTICATE command will never have a continuation
             let chunk = self.activeEncodeBuffer.buffer.nextChunk()
-            defer {
-                self.activeEncodeBuffer = nil
-                self.activeWritePromise = nil
-            }
-            return [(chunk, self.activeWritePromise)]
+            let promise = self.activeWritePromise
+            self.activeEncodeBuffer = nil
+            self.activeWritePromise = nil
+            return [(chunk, promise)]
 
         default:
             let chunk = self.activeEncodeBuffer.buffer.nextChunk()
@@ -308,13 +295,11 @@ extension ClientStateMachine {
                 self.state = .expectingLiteralContinuationRequest
                 return [(chunk, self.activeWritePromise)] // nil promise because the command required continuation
             } else {
-                defer {
-                    self.activeEncodeBuffer = nil
-                    self.activeWritePromise = nil
-                }
+                let promise = self.activeWritePromise
                 self.state = .expectingNormalResponse
-                assert(!chunk.waitForContinuation)
-                return [(chunk, self.activeWritePromise)] // there'll only ever be one chunk here
+                self.activeWritePromise = nil
+                self.activeEncodeBuffer = nil
+                return [(chunk, promise)] // there'll only ever be one chunk here
             }
         }
     }
@@ -337,6 +322,8 @@ extension ClientStateMachine {
         return [(self.activeEncodeBuffer.buffer.nextChunk(), self.activeWritePromise)]
     }
 
+    /// Iterate through the current command queue until we reached the marked position
+    /// or encounter a command that requires a continuation request to complete.
     private mutating func extractSendableChunks() throws -> [(EncodeBuffer.Chunk, EventLoopPromise<Void>?)] {
         guard self.activeEncodeBuffer != nil else {
             return []
@@ -359,6 +346,10 @@ extension ClientStateMachine {
         }
     }
 
+    /// Mark the back of the current command queue, and write up to and including
+    /// this point next time we receive a continuation request or send a command.
+    /// Note that we might not actually reach the mark as we may encounter a command
+    /// that requires a continuation request.
     mutating func flush() {
         self.queuedCommands.mark()
     }
