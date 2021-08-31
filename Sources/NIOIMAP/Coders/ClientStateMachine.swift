@@ -255,62 +255,34 @@ extension ClientStateMachine {
 
     private mutating func sendTaggedCommand(_ command: TaggedCommand) throws -> [(EncodeBuffer.Chunk, EventLoopPromise<Void>?)] {
         assert(self.state == .expectingNormalResponse)
-
-        // it's not practical to switch over
-        // every command here, there are over
-        // 50 of them...
+        
+        // update the state
+        let chunk = self.activeEncodeBuffer.buffer.nextChunk()
         switch command.command {
         case .idleStart:
-
-            // no other commands can be running when we start idling
-            guard self.activeCommandTags.count == 1 else {
-                throw InvalidCommandForState(.tagged(command))
-            }
+            try self.guardAgainstMultipleRunningCommands(.tagged(command))
             self.state = .idle(Idle())
-
-            let chunk = self.activeEncodeBuffer.buffer.nextChunk()
-            let promise = self.activeWritePromise
-            self.activeEncodeBuffer = nil
-            self.activeWritePromise = nil
-            return [(chunk, promise)]
-
         case .authenticate:
-
-            // no other commands can be running when we start authenticating
-            guard self.activeCommandTags.count == 1 else {
-                throw InvalidCommandForState(.tagged(command))
-            }
+            try self.guardAgainstMultipleRunningCommands(.tagged(command))
             self.state = .authenticating(Authentication())
-
-            // The AUTHENTICATE command will never have a continuation
-            let chunk = self.activeEncodeBuffer.buffer.nextChunk()
-            let promise = self.activeWritePromise
-            self.activeEncodeBuffer = nil
-            self.activeWritePromise = nil
-            return [(chunk, promise)]
-
         default:
-            let chunk = self.activeEncodeBuffer.buffer.nextChunk()
             if chunk.waitForContinuation {
                 self.state = .expectingLiteralContinuationRequest
                 return [(chunk, self.activeWritePromise)] // nil promise because the command required continuation
-            } else {
-                let promise = self.activeWritePromise
-                self.state = .expectingNormalResponse
-                self.activeWritePromise = nil
-                self.activeEncodeBuffer = nil
-                return [(chunk, promise)] // there'll only ever be one chunk here
             }
         }
+        
+        let promise = self.activeWritePromise
+        self.activeEncodeBuffer = nil
+        self.activeWritePromise = nil
+        return [(chunk, promise)]
     }
 
     private mutating func sendAppendCommand(_ command: AppendCommand) throws -> [(EncodeBuffer.Chunk, EventLoopPromise<Void>?)] {
         assert(self.state == .expectingNormalResponse)
 
         // no other commands can be running when we start appending
-        guard self.activeCommandTags.count == 1 else {
-            throw InvalidCommandForState(.append(command))
-        }
+        try self.guardAgainstMultipleRunningCommands(.append(command))
         self.state = .appending(Append())
 
         // TODO: This assumes that the append command doesn't require a continuation - fix this in another PR
@@ -343,6 +315,13 @@ extension ClientStateMachine {
                 }
             }
             return result
+        }
+    }
+    
+    /// Throws an error if more than one command is runnning, otherwise does nothing
+    private func guardAgainstMultipleRunningCommands(_ command: CommandStreamPart) throws {
+        guard self.activeCommandTags.count == 1 else {
+            throw InvalidCommandForState(command)
         }
     }
 
