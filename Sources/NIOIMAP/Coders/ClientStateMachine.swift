@@ -113,47 +113,80 @@ struct ClientStateMachine {
 
     mutating func receiveContinuationRequest(_ req: ContinuationRequest) throws -> [(EncodeBuffer.Chunk, EventLoopPromise<Void>?)] {
         switch self.state {
-        case .appending(var appendStateMachine):
-            self.state = try appendStateMachine.receiveContinuationRequest(req)
-            self.activeEncodeBuffer = nil
-            self.activeWritePromise = nil
-            if let (command, promise) = self.queuedCommands.popFirst() {
-                var encodeBuffer = CommandEncodeBuffer(buffer: self.makeNewBuffer(), options: self.encodingOptions)
-                encodeBuffer.writeCommandStream(command)
-                self.activeEncodeBuffer = encodeBuffer
-                self.activeWritePromise = promise
-            }
-            return try self.extractSendableChunks()
+        case .appending(let stateMachine):
+            return try self.receiveContinuationRequest_appending(stateMachine: stateMachine, request: req)
         case .expectingLiteralContinuationRequest:
-            self.state = .expectingNormalResponse
-            let result = try self.extractSendableChunks()
-            
-            // safe to bang as if we've successfully received a continuation request then there
-            // MUST be something to send
-            if result.last!.0.waitForContinuation { // we've found a continuation
-                self.state = .expectingLiteralContinuationRequest
-            } else {
-                self.activeWritePromise = nil
-                self.activeEncodeBuffer = nil
-                self.state = .expectingNormalResponse
-            }
-            return result
-        case .authenticating(var authenticateStateMachine):
-            switch req {
-            case .responseText:
-                // no valid base 64, so we can assume it was empty
-                self.state = try authenticateStateMachine.receiveResponse(.authenticationChallenge(self.makeNewBuffer()))
-            case .data(let byteBuffer):
-                self.state = try authenticateStateMachine.receiveResponse(.authenticationChallenge(byteBuffer))
-            }
-            return []
-        case .idle(var idleStateMachine):
-            // A continuation when in idle state means it's been confirmed
-            self.state = try idleStateMachine.receiveResponse(.idleStarted)
-            return []
+            return try self.receiveContinuationRequest_expectingLiteralContinuationRequest(request: req)
+        case .authenticating(let stateMachine):
+            return try self.receiveContinuationRequest_authenticating(stateMachine: stateMachine, request: req)
+        case .idle(let stateMachine):
+            return try self.receiveContinuationRequest_idle(stateMachine: stateMachine, request: req)
         case .expectingNormalResponse, .error:
             throw UnexpectedContinuationRequest()
         }
+    }
+    
+    mutating func receiveContinuationRequest_appending(stateMachine: Append, request: ContinuationRequest) throws -> [(EncodeBuffer.Chunk, EventLoopPromise<Void>?)] {
+        guard case .appending = self.state else {
+            assert(false, "Invalid state")
+        }
+        
+        var stateMachine = stateMachine
+        self.state = try stateMachine.receiveContinuationRequest(request)
+        self.activeEncodeBuffer = nil
+        self.activeWritePromise = nil
+        if let (command, promise) = self.queuedCommands.popFirst() {
+            var encodeBuffer = CommandEncodeBuffer(buffer: self.makeNewBuffer(), options: self.encodingOptions)
+            encodeBuffer.writeCommandStream(command)
+            self.activeEncodeBuffer = encodeBuffer
+            self.activeWritePromise = promise
+        }
+        return try self.extractSendableChunks()
+    }
+    
+    mutating func receiveContinuationRequest_expectingLiteralContinuationRequest(request: ContinuationRequest) throws -> [(EncodeBuffer.Chunk, EventLoopPromise<Void>?)] {
+        assert(self.state == .expectingLiteralContinuationRequest)
+        
+        self.state = .expectingNormalResponse
+        let result = try self.extractSendableChunks()
+        
+        // safe to bang as if we've successfully received a continuation request then there
+        // MUST be something to send
+        if result.last!.0.waitForContinuation { // we've found a continuation
+            self.state = .expectingLiteralContinuationRequest
+        } else {
+            self.activeWritePromise = nil
+            self.activeEncodeBuffer = nil
+            self.state = .expectingNormalResponse
+        }
+        return result
+    }
+    
+    mutating func receiveContinuationRequest_authenticating(stateMachine: Authentication, request: ContinuationRequest) throws -> [(EncodeBuffer.Chunk, EventLoopPromise<Void>?)] {
+        guard case .authenticating = self.state else {
+            assert(false, "Invalid state")
+        }
+        
+        var stateMachine = stateMachine
+        switch request {
+        case .responseText:
+            // no valid base 64, so we can assume it was empty
+            self.state = try stateMachine.receiveResponse(.authenticationChallenge(self.makeNewBuffer()))
+        case .data(let byteBuffer):
+            self.state = try stateMachine.receiveResponse(.authenticationChallenge(byteBuffer))
+        }
+        return []
+    }
+    
+    mutating func receiveContinuationRequest_idle(stateMachine: Idle, request: ContinuationRequest) throws -> [(EncodeBuffer.Chunk, EventLoopPromise<Void>?)] {
+        guard case .idle = self.state else {
+            assert(false, "Invalid state")
+        }
+        
+        var stateMachine = stateMachine
+        // A continuation when in idle state means it's been confirmed
+        self.state = try stateMachine.receiveResponse(.idleStarted)
+        return []
     }
 
     mutating func receiveResponse(_ response: Response) throws {
