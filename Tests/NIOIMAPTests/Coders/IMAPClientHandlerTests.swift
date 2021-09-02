@@ -163,12 +163,11 @@ class IMAPClientHandlerTests: XCTestCase {
     }
 
     func testUnexpectedContinuationRequest() {
-        let f = self.writeOutbound(CommandStreamPart.tagged(TaggedCommand(tag: "x",
-                                                                          command: .rename(from: .init("\\"),
+        self.writeOutbound(CommandStreamPart.tagged(TaggedCommand(tag: "x",
+                                                                          command: .rename(from: .init("from"),
                                                                                            to: .init("to"),
-                                                                                           params: [:]))),
-        wait: false)
-        self.assertOutboundString("x RENAME {1}\r\n")
+                                                                                           params: [:]))))
+        self.assertOutboundString("x RENAME \"from\" \"to\"\r\n")
         XCTAssertThrowsError(try self.channel.writeInbound(self.buffer(string: "+ OK\r\n+ OK\r\n"))) { error in
             XCTAssertTrue(error is UnexpectedContinuationRequest, "Error is \(error)")
         }
