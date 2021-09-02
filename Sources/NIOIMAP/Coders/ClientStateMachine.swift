@@ -161,6 +161,7 @@ struct ClientStateMachine {
             return try self._receiveResponse(response)
         } catch {
             self.state = .error
+            throw error
         }
     }
     
