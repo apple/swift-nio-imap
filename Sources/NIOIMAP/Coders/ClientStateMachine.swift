@@ -355,17 +355,19 @@ extension ClientStateMachine {
         self.state = .appending(Append())
 
         // TODO: This assumes that the append command doesn't require a continuation - fix this in another PR
-        // Only send bytes if there isn't a command ahead in the queue
-        defer {
-            self.activeEncodeBuffer = nil
-            self.activeWritePromise = nil
-        }
-        return [(self.activeEncodeBuffer.buffer.nextChunk(), self.activeWritePromise)]
+        let chunk = self.activeEncodeBuffer.buffer.nextChunk()
+        let promise = self.activeWritePromise
+        self.activeEncodeBuffer = nil
+        self.activeWritePromise = nil
+        return [(chunk, promise)]
     }
 
     /// Iterate through the current command queue until we reached the marked position
     /// or encounter a command that requires a continuation request to complete.
     private mutating func extractSendableChunks() throws -> [(EncodeBuffer.Chunk, EventLoopPromise<Void>?)] {
+        
+        // If we have an encode buffer then we're waiting on a continuation
+        // request, so there are no sendable chunks.
         guard self.activeEncodeBuffer != nil else {
             return []
         }
@@ -379,9 +381,7 @@ extension ClientStateMachine {
             while self.queuedCommands.hasMark, !result.last!.0.waitForContinuation {
                 self.activeEncodeBuffer = nil
                 self.activeWritePromise = nil
-                for val in try self.sendNextCommand() {
-                    result.append(val)
-                }
+                result.append(contentsOf: try self.sendNextCommand())
             }
             return result
         }
@@ -415,10 +415,10 @@ extension ClientStateMachine {
             return try self.sendNextCommand_authenticating(command: command, promise: promise, authenticationStateMachine: authStateMachine)
         case .appending(let appendingStateMachine):
             return try self.sendNextCommand_appending(command: command, promise: promise, appendingStateMachine: appendingStateMachine)
-        case .error:
-            throw InvalidCommandForState(command)
         case .expectingLiteralContinuationRequest:
             return try self.sendNextCommand_expectingLiteralContinuationRequest()
+        case .error:
+            throw InvalidCommandForState(command)
         }
     }
     
@@ -453,8 +453,6 @@ extension ClientStateMachine {
         
         var idleStateMachine = idleStateMachine
         self.state = try idleStateMachine.sendCommand(command)
-        self.activeWritePromise = nil
-        self.activeEncodeBuffer = nil
         var encodeBuffer = CommandEncodeBuffer(buffer: self.makeNewBuffer(), options: self.encodingOptions)
         encodeBuffer.writeCommandStream(command)
         return [(encodeBuffer.buffer.nextChunk(), promise)]
@@ -473,8 +471,6 @@ extension ClientStateMachine {
         
         var authStateMachine = authenticationStateMachine
         self.state = try authStateMachine.sendCommand(command)
-        self.activeWritePromise = nil
-        self.activeEncodeBuffer = nil
         var encodeBuffer = CommandEncodeBuffer(buffer: self.makeNewBuffer(), options: self.encodingOptions)
         encodeBuffer.writeCommandStream(command)
         return [(encodeBuffer.buffer.nextChunk(), promise)]
@@ -504,8 +500,6 @@ extension ClientStateMachine {
             return [(self.activeEncodeBuffer.buffer.nextChunk(), self.activeWritePromise)]
             
         default:
-            self.activeWritePromise = nil
-            self.activeEncodeBuffer = nil
             var encodeBuffer = CommandEncodeBuffer(buffer: self.makeNewBuffer(), options: self.encodingOptions)
             encodeBuffer.writeCommandStream(command)
             return [(encodeBuffer.buffer.nextChunk(), promise)]
