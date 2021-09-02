@@ -172,11 +172,6 @@ class IMAPClientHandlerTests: XCTestCase {
         XCTAssertThrowsError(try self.channel.writeInbound(self.buffer(string: "+ OK\r\n+ OK\r\n"))) { error in
             XCTAssertTrue(error is UnexpectedContinuationRequest, "Error is \(error)")
         }
-        self.assertOutboundString("\\ \"to\"\r\n")
-        XCTAssertNoThrow(try f.wait())
-        self.writeInbound("x OK ok\r\n")
-        self.assertInbound(.tagged(.init(tag: "x",
-                                         state: .ok(.init(code: nil, text: "ok")))))
     }
 
     func testAuthenticationFlow() {
