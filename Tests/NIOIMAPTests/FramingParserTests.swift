@@ -78,4 +78,38 @@ extension FramingParserTests {
         buffer = "\n"
         XCTAssertEqual(self.parser.appendAndFrameBuffer(&buffer), ["A1 NOOP\r\n"])
     }
+    
+    // Note this isn't strictly a valid login command, but it doesn't matter.
+    // Rememeber that the framing parser is just there to look for frames.
+    func testParsingLiteral() {
+        var buffer: ByteBuffer = "A1 LOGIN {3}\r\nhey\r\n"
+        XCTAssertEqual(self.parser.appendAndFrameBuffer(&buffer), ["A1 LOGIN {3}\r\n", "hey", "\r\n"])
+    }
+    
+    // full command "A1 LOGIN {3}\r\n123 test\r\n
+    func testDripfeedingLiteral() {
+        var buffer: ByteBuffer = "A1 LOGIN {3"
+        XCTAssertEqual(self.parser.appendAndFrameBuffer(&buffer), [])
+        
+        buffer = "}"
+        XCTAssertEqual(self.parser.appendAndFrameBuffer(&buffer), [])
+        
+        buffer = "\r"
+        XCTAssertEqual(self.parser.appendAndFrameBuffer(&buffer), [])
+        
+        buffer = "\n"
+        XCTAssertEqual(self.parser.appendAndFrameBuffer(&buffer), ["A1 LOGIN {3}\r\n"])
+        
+        buffer = "1"
+        XCTAssertEqual(self.parser.appendAndFrameBuffer(&buffer), ["1"])
+        
+        buffer = "2"
+        XCTAssertEqual(self.parser.appendAndFrameBuffer(&buffer), ["2"])
+        
+        buffer = "3"
+        XCTAssertEqual(self.parser.appendAndFrameBuffer(&buffer), ["3"])
+        
+        buffer = " test\r\n"
+        XCTAssertEqual(self.parser.appendAndFrameBuffer(&buffer), [" test\r\n"])
+    }
 }
