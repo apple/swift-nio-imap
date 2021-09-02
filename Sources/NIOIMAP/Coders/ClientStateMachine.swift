@@ -400,38 +400,114 @@ extension ClientStateMachine {
         }
 
         let (command, promise) = self.queuedCommands.popFirst()! // we've asserted there's at least one
-
         switch self.state {
         case .expectingNormalResponse:
-            self.activeWritePromise = promise
-            self.activeEncodeBuffer = .init(buffer: self.makeNewBuffer(), options: self.encodingOptions)
-            self.activeEncodeBuffer.writeCommandStream(command)
-            return try self.sendCommand_state_normalResponse(command: command)
-        case .idle(var idleStateMachine):
-            self.state = try idleStateMachine.sendCommand(command)
-        case .authenticating(var authStateMachine):
-            self.state = try authStateMachine.sendCommand(command)
-        case .appending(var appendingStateMachine):
-            self.state = try appendingStateMachine.sendCommand(command)
-            switch command {
-            case .append(.beginMessage), .append(.catenateData):
-                self.activeWritePromise = promise
-                self.activeEncodeBuffer = .init(buffer: self.makeNewBuffer(), options: self.encodingOptions)
-                self.activeEncodeBuffer.writeCommandStream(command)
-                return [(self.activeEncodeBuffer.buffer.nextChunk(), self.activeWritePromise)]
-            default:
-                break
-            }
+            return try self.sendNextCommand_expectingNormalResponse(command: command, promise: promise)
+        case .idle(let idleStateMachine):
+            return try self.sendNextCommand_idle(command: command, promise: promise, idleStateMachine: idleStateMachine)
+        case .authenticating(let authStateMachine):
+            return try self.sendNextCommand_authenticating(command: command, promise: promise, authenticationStateMachine: authStateMachine)
+        case .appending(let appendingStateMachine):
+            return try self.sendNextCommand_appending(command: command, promise: promise, appendingStateMachine: appendingStateMachine)
         case .error:
             throw InvalidCommandForState(command)
         case .expectingLiteralContinuationRequest:
-            return []
+            return try self.sendNextCommand_expectingLiteralContinuationRequest()
         }
-
+    }
+    
+    /// If we're "expecting a normal response" then we aren't waiting for a continuation request. However, the
+    /// command we want to send may require a continuation itself. We begin by writing the command to
+    /// an encode buffer to isolate any required continuations, and then send every chunk until we run out of chunks
+    /// to send, or we find a chunk that requires a continuation request.
+    private mutating func sendNextCommand_expectingNormalResponse(command: CommandStreamPart, promise: EventLoopPromise<Void>?) throws -> [(EncodeBuffer.Chunk, EventLoopPromise<Void>?)] {
+        switch self.state {
+        case .idle, .authenticating, .appending, .expectingLiteralContinuationRequest, .error:
+            throw InvalidCommandForState(command)
+        case .expectingNormalResponse:
+            break
+        }
+        
+        self.activeWritePromise = promise
+        self.activeEncodeBuffer = .init(buffer: self.makeNewBuffer(), options: self.encodingOptions)
+        self.activeEncodeBuffer.writeCommandStream(command)
+        return try self.sendCommand_state_normalResponse(command: command)
+    }
+    
+    /// When idle we need to first defer to the idle state machine to make sure we can send the
+    /// the next part of the authentication. If we can, then just send the message. There's no need
+    /// to wait for a continuation request.
+    private mutating func sendNextCommand_idle(command: CommandStreamPart, promise: EventLoopPromise<Void>?, idleStateMachine: Idle) throws -> [(EncodeBuffer.Chunk, EventLoopPromise<Void>?)] {
+        switch self.state {
+        case .expectingNormalResponse, .authenticating, .appending, .expectingLiteralContinuationRequest, .error:
+            throw InvalidCommandForState(command)
+        case .idle:
+            break
+        }
+        
+        var idleStateMachine = idleStateMachine
+        self.state = try idleStateMachine.sendCommand(command)
         self.activeWritePromise = nil
         self.activeEncodeBuffer = nil
         var encodeBuffer = CommandEncodeBuffer(buffer: self.makeNewBuffer(), options: self.encodingOptions)
         encodeBuffer.writeCommandStream(command)
         return [(encodeBuffer.buffer.nextChunk(), promise)]
+    }
+    
+    /// When authenticating we need to first defer to the authentication state machine to make sure
+    /// can send the next part of the authentication. If we can, then just send the message. There's
+    /// no need to wait for a continuation request.
+    private mutating func sendNextCommand_authenticating(command: CommandStreamPart, promise: EventLoopPromise<Void>?, authenticationStateMachine: Authentication) throws -> [(EncodeBuffer.Chunk, EventLoopPromise<Void>?)] {
+        switch self.state {
+        case .expectingNormalResponse, .idle, .appending, .expectingLiteralContinuationRequest, .error:
+            throw InvalidCommandForState(command)
+        case .authenticating:
+            break
+        }
+        
+        var authStateMachine = authenticationStateMachine
+        self.state = try authStateMachine.sendCommand(command)
+        self.activeWritePromise = nil
+        self.activeEncodeBuffer = nil
+        var encodeBuffer = CommandEncodeBuffer(buffer: self.makeNewBuffer(), options: self.encodingOptions)
+        encodeBuffer.writeCommandStream(command)
+        return [(encodeBuffer.buffer.nextChunk(), promise)]
+    }
+    
+    /// When appending we need to first defer to the appending state machine to see if we can actually
+    /// a command given our current state. If we can then we need to check what kind of command is
+    /// being sent. If we're beginning an append or catenation then we need to wait for a continuation
+    /// request, otherwise we can send the command and continue.
+    private mutating func sendNextCommand_appending(command: CommandStreamPart, promise: EventLoopPromise<Void>?, appendingStateMachine: Append) throws -> [(EncodeBuffer.Chunk, EventLoopPromise<Void>?)] {
+        switch self.state {
+        case .expectingNormalResponse, .idle, .authenticating, .expectingLiteralContinuationRequest, .error:
+            throw InvalidCommandForState(command)
+        case .appending:
+            break
+        }
+     
+        var appendingStateMachine = appendingStateMachine
+        self.state = try appendingStateMachine.sendCommand(command)
+        
+        switch command {
+            
+        case .append(.beginMessage), .append(.catenateData):
+            self.activeWritePromise = promise
+            self.activeEncodeBuffer = .init(buffer: self.makeNewBuffer(), options: self.encodingOptions)
+            self.activeEncodeBuffer.writeCommandStream(command)
+            return [(self.activeEncodeBuffer.buffer.nextChunk(), self.activeWritePromise)]
+            
+        default:
+            self.activeWritePromise = nil
+            self.activeEncodeBuffer = nil
+            var encodeBuffer = CommandEncodeBuffer(buffer: self.makeNewBuffer(), options: self.encodingOptions)
+            encodeBuffer.writeCommandStream(command)
+            return [(encodeBuffer.buffer.nextChunk(), promise)]
+        }
+    }
+    
+    /// If we're currently waiting for a continuation request then we can't send a command, so return nothing.
+    private mutating func sendNextCommand_expectingLiteralContinuationRequest() throws -> [(EncodeBuffer.Chunk, EventLoopPromise<Void>?)] {
+        return []
     }
 }
