@@ -48,12 +48,29 @@ public struct InvalidCommandForState: Error, Equatable {
 }
 
 struct ClientStateMachine {
+    
     enum State: Hashable {
+        
+        /// We're expecting either a tagged or untagged response
         case expectingNormalResponse
+        
+        /// We're in some part of the idle flow
         case idle(ClientStateMachine.Idle)
+        
+        /// We're in some part of the authentication flow
         case authenticating(ClientStateMachine.Authentication)
+        
+        /// We're in some part of the appending flow
         case appending(ClientStateMachine.Append)
+        
+        /// We've sent a command that requires a continuation request
+        /// for example `A1 LOGIN {1}\r\n\\ {1}\r\n\\`, and
+        /// we're waiting for the continuation request from the server
+        /// before sending another chunk.
         case expectingLiteralContinuationRequest
+        
+        /// An error has occurred and the connection should
+        /// now be closed.
         case error
     }
 
@@ -114,6 +131,15 @@ struct ClientStateMachine {
     /// Tells the state machine that a continuation request has been received from the network.
     /// Returns the next batch of chunks to write.
     mutating func receiveContinuationRequest(_ req: ContinuationRequest) throws -> [(EncodeBuffer.Chunk, EventLoopPromise<Void>?)] {
+        do {
+            return try self._receiveContinuationRequest(req)
+        } catch {
+            self.state = .error
+            throw error
+        }
+    }
+    
+    private mutating func _receiveContinuationRequest(_ req: ContinuationRequest) throws -> [(EncodeBuffer.Chunk, EventLoopPromise<Void>?)] {
         switch self.state {
         case .appending(let stateMachine):
             return try self.receiveContinuationRequest_appending(stateMachine: stateMachine, request: req)
@@ -131,6 +157,14 @@ struct ClientStateMachine {
     /// Tells the state machine that some response has been received. Note that receiving a response
     /// will never result in the client having to perform some action.
     mutating func receiveResponse(_ response: Response) throws {
+        do {
+            return try self._receiveResponse(response)
+        } catch {
+            self.state = .error
+        }
+    }
+    
+    mutating func _receiveResponse(_ response: Response) throws {
         if let tag = response.tag {
             guard self.activeCommandTags.remove(tag) != nil else {
                 throw UnexpectedResponse()
@@ -200,7 +234,12 @@ extension ClientStateMachine {
     }
 
     private mutating func receiveContinuationRequest_expectingLiteralContinuationRequest(request: ContinuationRequest) throws -> [(EncodeBuffer.Chunk, EventLoopPromise<Void>?)] {
-        assert(self.state == .expectingLiteralContinuationRequest)
+        switch self.state {
+        case .expectingNormalResponse, .idle, .authenticating, .appending, .error:
+            throw UnexpectedContinuationRequest()
+        case .expectingLiteralContinuationRequest:
+            break
+        }
 
         self.state = .expectingNormalResponse
         let result = try self.extractSendableChunks()
@@ -249,7 +288,12 @@ extension ClientStateMachine {
 
 extension ClientStateMachine {
     private mutating func sendCommand_state_normalResponse(command: CommandStreamPart) throws -> [(EncodeBuffer.Chunk, EventLoopPromise<Void>?)] {
-        assert(self.state == .expectingNormalResponse)
+        switch self.state {
+        case .expectingLiteralContinuationRequest, .idle, .authenticating, .appending, .error:
+            throw UnexpectedContinuationRequest()
+        case .expectingNormalResponse:
+            break
+        }
 
         switch command {
         case .idleDone, .continuationResponse:
@@ -262,7 +306,12 @@ extension ClientStateMachine {
     }
 
     private mutating func sendTaggedCommand(_ command: TaggedCommand) throws -> [(EncodeBuffer.Chunk, EventLoopPromise<Void>?)] {
-        assert(self.state == .expectingNormalResponse)
+        switch self.state {
+        case .expectingLiteralContinuationRequest, .idle, .authenticating, .appending, .error:
+            throw UnexpectedContinuationRequest()
+        case .expectingNormalResponse:
+            break
+        }
 
         // update the state
         let chunk = self.activeEncodeBuffer.buffer.nextChunk()
@@ -287,7 +336,12 @@ extension ClientStateMachine {
     }
 
     private mutating func sendAppendCommand(_ command: AppendCommand) throws -> [(EncodeBuffer.Chunk, EventLoopPromise<Void>?)] {
-        assert(self.state == .expectingNormalResponse)
+        switch self.state {
+        case .expectingLiteralContinuationRequest, .idle, .authenticating, .appending, .error:
+            throw UnexpectedContinuationRequest()
+        case .expectingNormalResponse:
+            break
+        }
 
         // no other commands can be running when we start appending
         try self.guardAgainstMultipleRunningCommands(.append(command))
