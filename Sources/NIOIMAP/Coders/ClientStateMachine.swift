@@ -47,6 +47,12 @@ public struct InvalidCommandForState: Error, Equatable {
     }
 }
 
+// TODO: See note below.
+// This state machine could potentially be improved by
+// splitting into 2. One that manages command logic
+// (can this command be sent), and one that handles
+// continuation logic once a command has been given the
+// ok.
 struct ClientStateMachine {
     
     enum State: Hashable {
