@@ -217,6 +217,23 @@ struct ClientStateMachine {
     mutating func flush() {
         self.queuedCommands.mark()
     }
+    
+    /// Returns all of the promises for the writes that have not yet completed.
+    /// These should probably be failed.
+    mutating func channelInactive() -> [EventLoopPromise<Void>] {
+       
+        // we don't care whate state we were in, all we want is
+        // to move to the error state so that nothing else is sent
+        self.state = .error
+        
+        var promises: [EventLoopPromise<Void>] = []
+        if let current = self.activeWritePromise {
+            promises.append(current)
+        }
+        
+        promises.append(contentsOf: self.queuedCommands.compactMap { $0.1 } )
+        return promises
+    }
 }
 
 // MARK: - Receive

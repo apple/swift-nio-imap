@@ -50,6 +50,8 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
     }
 
     public func channelInactive(context: ChannelHandlerContext) {
+        let pendingWritePromises = self.state.channelInactive()
+        pendingWritePromises.forEach { $0.fail(ChannelError.ioOnClosedChannel) }
         context.fireChannelInactive()
     }
 
