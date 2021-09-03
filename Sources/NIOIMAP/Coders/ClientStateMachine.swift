@@ -105,7 +105,6 @@ struct ClientStateMachine {
     /// select from the server's response, update these encoding options to enable or disable
     /// certain types of literal encodings.
     /// - Note: Make sure to send `.enable` commands for applicable capabilities
-    /// - Important: Modifying this value is not thread-safe
     var encodingOptions: CommandEncodingOptions
 
     // We won't always have an active encode buffer, but anytime we go to use one it
@@ -132,24 +131,6 @@ struct ClientStateMachine {
     // We mark where we should write up to at the next oppurtunity
     // using the `flush` method called from the channel handler.
     private var queuedCommands: MarkedCircularBuffer<(CommandStreamPart, EventLoopPromise<Void>?)> = .init(initialCapacity: 16)
-
-    var authenticating: Bool {
-        switch self.state {
-        case .authenticating:
-            return true
-        case .expectingNormalResponse, .expectingLiteralContinuationRequest, .appending, .error, .idle:
-            return false
-        }
-    }
-
-    var idling: Bool {
-        switch self.state {
-        case .idle:
-            return true
-        case .expectingNormalResponse, .expectingLiteralContinuationRequest, .appending, .error, .authenticating:
-            return false
-        }
-    }
 
     init(encodingOptions: CommandEncodingOptions) {
         self.encodingOptions = encodingOptions
