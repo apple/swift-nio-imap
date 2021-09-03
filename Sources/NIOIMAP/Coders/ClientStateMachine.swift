@@ -62,11 +62,7 @@ struct ClientStateMachine {
         static func == (lhs: ClientStateMachine.ContinuationRequestAction, rhs: ClientStateMachine.ContinuationRequestAction) -> Bool {
             switch (lhs, rhs) {
             case (.sendChunks(let c1), .sendChunks(let c2)):
-
-                // inefficient, I know, but it;s only used in tests so I don't think it matters
-                return zip(c1, c2).map { t1, t2 in
-                    t1.0 == t2.0 && t1.1?.futureResult === t2.1?.futureResult
-                }.allSatisfy { $0 }
+                c1.elementsEqual(c2, by: { $0.0 == $1.0 && t0.1?.futureResult === $1.1?.futureResult })
             case (.fireIdleStarted, .fireIdleStarted):
                 return true
             case (.fireAuthenticationChallenge, .fireAuthenticationChallenge):
