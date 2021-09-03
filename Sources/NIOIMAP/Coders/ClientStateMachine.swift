@@ -241,7 +241,7 @@ struct ClientStateMachine {
 extension ClientStateMachine {
     private mutating func receiveContinuationRequest_appending(stateMachine: Append, request: ContinuationRequest) throws -> [(EncodeBuffer.Chunk, EventLoopPromise<Void>?)] {
         guard case .appending = self.state else {
-            assert(false, "Invalid state")
+            preconditionFailure("Invalid state")
         }
 
         var stateMachine = stateMachine
@@ -282,7 +282,7 @@ extension ClientStateMachine {
 
     private mutating func receiveContinuationRequest_authenticating(stateMachine: Authentication, request: ContinuationRequest) throws -> [(EncodeBuffer.Chunk, EventLoopPromise<Void>?)] {
         guard case .authenticating = self.state else {
-            assert(false, "Invalid state")
+            preconditionFailure("Invalid state")
         }
 
         var stateMachine = stateMachine
@@ -298,7 +298,7 @@ extension ClientStateMachine {
 
     private mutating func receiveContinuationRequest_idle(stateMachine: Idle, request: ContinuationRequest) throws -> [(EncodeBuffer.Chunk, EventLoopPromise<Void>?)] {
         guard case .idle = self.state else {
-            assert(false, "Invalid state")
+            preconditionFailure("Invalid state")
         }
 
         var stateMachine = stateMachine
@@ -314,7 +314,7 @@ extension ClientStateMachine {
     private mutating func sendCommand_state_normalResponse(command: CommandStreamPart) throws -> [(EncodeBuffer.Chunk, EventLoopPromise<Void>?)] {
         switch self.state {
         case .expectingLiteralContinuationRequest, .idle, .authenticating, .appending, .error:
-            throw UnexpectedContinuationRequest()
+            preconditionFailure("Invalid state")
         case .expectingNormalResponse:
             break
         }
@@ -332,7 +332,7 @@ extension ClientStateMachine {
     private mutating func sendTaggedCommand(_ command: TaggedCommand) throws -> [(EncodeBuffer.Chunk, EventLoopPromise<Void>?)] {
         switch self.state {
         case .expectingLiteralContinuationRequest, .idle, .authenticating, .appending, .error:
-            throw UnexpectedContinuationRequest()
+            preconditionFailure("Invalid state")
         case .expectingNormalResponse:
             break
         }
@@ -362,7 +362,7 @@ extension ClientStateMachine {
     private mutating func sendAppendCommand(_ command: AppendCommand) throws -> [(EncodeBuffer.Chunk, EventLoopPromise<Void>?)] {
         switch self.state {
         case .expectingLiteralContinuationRequest, .idle, .authenticating, .appending, .error:
-            throw UnexpectedContinuationRequest()
+            preconditionFailure("Invalid state")
         case .expectingNormalResponse:
             break
         }
@@ -446,7 +446,7 @@ extension ClientStateMachine {
     private mutating func sendNextCommand_expectingNormalResponse(command: CommandStreamPart, promise: EventLoopPromise<Void>?) throws -> [(EncodeBuffer.Chunk, EventLoopPromise<Void>?)] {
         switch self.state {
         case .idle, .authenticating, .appending, .expectingLiteralContinuationRequest, .error:
-            throw InvalidCommandForState(command)
+            preconditionFailure("Invalid state")
         case .expectingNormalResponse:
             break
         }
@@ -463,7 +463,7 @@ extension ClientStateMachine {
     private mutating func sendNextCommand_idle(command: CommandStreamPart, promise: EventLoopPromise<Void>?, idleStateMachine: Idle) throws -> [(EncodeBuffer.Chunk, EventLoopPromise<Void>?)] {
         switch self.state {
         case .expectingNormalResponse, .authenticating, .appending, .expectingLiteralContinuationRequest, .error:
-            throw InvalidCommandForState(command)
+            preconditionFailure("Invalid state")
         case .idle:
             break
         }
@@ -481,7 +481,7 @@ extension ClientStateMachine {
     private mutating func sendNextCommand_authenticating(command: CommandStreamPart, promise: EventLoopPromise<Void>?, authenticationStateMachine: Authentication) throws -> [(EncodeBuffer.Chunk, EventLoopPromise<Void>?)] {
         switch self.state {
         case .expectingNormalResponse, .idle, .appending, .expectingLiteralContinuationRequest, .error:
-            throw InvalidCommandForState(command)
+            preconditionFailure("Invalid state")
         case .authenticating:
             break
         }
@@ -500,7 +500,7 @@ extension ClientStateMachine {
     private mutating func sendNextCommand_appending(command: CommandStreamPart, promise: EventLoopPromise<Void>?, appendingStateMachine: Append) throws -> [(EncodeBuffer.Chunk, EventLoopPromise<Void>?)] {
         switch self.state {
         case .expectingNormalResponse, .idle, .authenticating, .expectingLiteralContinuationRequest, .error:
-            throw InvalidCommandForState(command)
+            preconditionFailure("Invalid state")
         case .appending:
             break
         }
