@@ -303,7 +303,7 @@ extension ClientStateMachine {
 
         var stateMachine = stateMachine
         // A continuation when in idle state means it's been confirmed
-        self.state = try stateMachine.receiveResponse(.idleStarted)
+        self.state = try stateMachine.receiveContinuationRequest(request)
         return []
     }
 }

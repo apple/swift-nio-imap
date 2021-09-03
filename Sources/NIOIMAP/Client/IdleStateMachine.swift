@@ -46,20 +46,19 @@ extension ClientStateMachine {
         mutating func receiveResponse(_ response: Response) throws -> ClientStateMachine.State {
             switch self.state {
             case .waitingForConfirmation:
-                return try self.receiveResponse_waitingState(response)
+                throw UnexpectedResponse()
             case .idling:
                 return try self.receiveResponse_idlingState(response)
             }
         }
-
-        private mutating func receiveResponse_waitingState(_ response: Response) throws -> ClientStateMachine.State {
-            assert(self.state == .waitingForConfirmation)
-            switch response {
-            case .idleStarted:
+        
+        mutating func receiveContinuationRequest(_ request: ContinuationRequest) throws -> ClientStateMachine.State {
+            switch self.state {
+            case .waitingForConfirmation:
                 self.state = .idling
                 return .idle(self)
-            case .fetch, .tagged, .fatal, .authenticationChallenge, .untagged:
-                throw UnexpectedResponse()
+            case .idling:
+                throw UnexpectedContinuationRequest()
             }
         }
 

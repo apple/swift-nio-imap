@@ -38,7 +38,7 @@ class ClientStateMachineTests: XCTestCase {
 
         // IDLE
         XCTAssertNoThrow(try self.stateMachine.sendCommand(.tagged(.init(tag: "A2", command: .idleStart))))
-        XCTAssertNoThrow(try self.stateMachine.receiveResponse(.idleStarted))
+        XCTAssertNoThrow(try self.stateMachine.receiveContinuationRequest(.responseText(.init(text: "OK"))))
         XCTAssertNoThrow(try self.stateMachine.sendCommand(.idleDone))
         XCTAssertNoThrow(try self.stateMachine.receiveResponse(.tagged(.init(tag: "A2", state: .ok(.init(text: "OK"))))))
 
@@ -155,7 +155,7 @@ extension ClientStateMachineTests {
         // 2. server confirms idle
         // 3. end idle
         XCTAssertNoThrow(try self.stateMachine.sendCommand(.tagged(.init(tag: "A2", command: .idleStart))))
-        XCTAssertNoThrow(try self.stateMachine.receiveResponse(.idleStarted))
+        XCTAssertNoThrow(try self.stateMachine.receiveContinuationRequest(.responseText(.init(text: "IDLE started"))))
         XCTAssertNoThrow(try self.stateMachine.sendCommand(.idleDone))
 
         // state machine should have reset, so we can send a normal command again
@@ -165,11 +165,22 @@ extension ClientStateMachineTests {
     func testIdleWorkflow_commandWhileIdle() {
         // set up the state machine to idle
         XCTAssertNoThrow(try self.stateMachine.sendCommand(.tagged(.init(tag: "A1", command: .idleStart))))
-        XCTAssertNoThrow(try self.stateMachine.receiveResponse(.idleStarted))
+        XCTAssertNoThrow(try self.stateMachine.receiveContinuationRequest(.responseText(.init(text: "IDLE started"))))
 
         // machine is idle, so sending a different command should throw
         XCTAssertThrowsError(try self.stateMachine.sendCommand(.tagged(.init(tag: "A2", command: .noop)))) { e in
             XCTAssertTrue(e is InvalidCommandForState)
+        }
+    }
+    
+    func testIdleWorkflow_multipleContinuationRequests() {
+        // set up the state machine to idle
+        XCTAssertNoThrow(try self.stateMachine.sendCommand(.tagged(.init(tag: "A1", command: .idleStart))))
+        XCTAssertNoThrow(try self.stateMachine.receiveContinuationRequest(.responseText(.init(text: "IDLE started"))))
+
+        // machine is idle, so sending a different command should throw
+        XCTAssertThrowsError(try self.stateMachine.receiveContinuationRequest(.responseText(.init(text: "IDLE started")))) { e in
+            XCTAssertTrue(e is UnexpectedContinuationRequest)
         }
     }
 

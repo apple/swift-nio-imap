@@ -21,7 +21,7 @@ class IdleStateMachineTests: XCTestCase {
         var machine = ClientStateMachine.Idle()
 
         // server confirms idle
-        XCTAssertNoThrow(try machine.receiveResponse(.idleStarted))
+        XCTAssertNoThrow(try machine.receiveContinuationRequest(.responseText(.init(text: "OK"))))
 
         // server is allowed to send untagged responses while idle
         XCTAssertNoThrow(try machine.receiveResponse(.untagged(.id(["Key1": "Value1"]))))
@@ -34,17 +34,17 @@ class IdleStateMachineTests: XCTestCase {
 
     func testMultipleIdleConfirmationsThrowsError() {
         var machine = ClientStateMachine.Idle()
-        XCTAssertNoThrow(try machine.receiveResponse(.idleStarted))
+        XCTAssertNoThrow(try machine.receiveContinuationRequest(.responseText(.init(text: "OK"))))
 
         // server cannot confirm idle twice
-        XCTAssertThrowsError(try machine.receiveResponse(.idleStarted)) { e in
-            XCTAssertTrue(e is UnexpectedResponse)
+        XCTAssertThrowsError(try machine.receiveContinuationRequest(.responseText(.init(text: "OK")))) { e in
+            XCTAssertTrue(e is UnexpectedContinuationRequest)
         }
     }
 
     func testSendingCommandWhileIdleThrowsErrors() {
         var machine = ClientStateMachine.Idle()
-        XCTAssertNoThrow(try machine.receiveResponse(.idleStarted))
+        XCTAssertNoThrow(try machine.receiveContinuationRequest(.responseText(.init(text: "OK"))))
 
         XCTAssertThrowsError(try machine.sendCommand(.tagged(.init(tag: "A1", command: .noop)))) { e in
             XCTAssertTrue(e is InvalidCommandForState)
@@ -64,7 +64,7 @@ class IdleStateMachineTests: XCTestCase {
 
     func testSendResponseAfterFinishedThrows() {
         var machine = ClientStateMachine.Idle()
-        XCTAssertNoThrow(try machine.receiveResponse(.idleStarted))
+        XCTAssertNoThrow(try machine.receiveContinuationRequest(.responseText(.init(text: "OK"))))
         XCTAssertNoThrow(try machine.sendCommand(.idleDone))
 
         let badResponse = Response.tagged(.init(tag: "A1", state: .ok(.init(code: nil, text: "ok"))))
