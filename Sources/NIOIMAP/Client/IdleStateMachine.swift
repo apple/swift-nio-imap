@@ -51,8 +51,8 @@ extension ClientStateMachine {
                 return try self.receiveResponse_idlingState(response)
             }
         }
-        
-        mutating func receiveContinuationRequest(_ request: ContinuationRequest) throws -> ClientStateMachine.State {
+
+        mutating func receiveContinuationRequest(_: ContinuationRequest) throws -> ClientStateMachine.State {
             switch self.state {
             case .waitingForConfirmation:
                 self.state = .idling

@@ -164,9 +164,9 @@ class IMAPClientHandlerTests: XCTestCase {
 
     func testUnexpectedContinuationRequest() {
         self.writeOutbound(CommandStreamPart.tagged(TaggedCommand(tag: "x",
-                                                                          command: .rename(from: .init("from"),
-                                                                                           to: .init("to"),
-                                                                                           params: [:]))))
+                                                                  command: .rename(from: .init("from"),
+                                                                                   to: .init("to"),
+                                                                                   params: [:]))))
         self.assertOutboundString("x RENAME \"from\" \"to\"\r\n")
         XCTAssertThrowsError(try self.channel.writeInbound(self.buffer(string: "+ OK\r\n+ OK\r\n"))) { error in
             XCTAssertTrue(error is UnexpectedContinuationRequest, "Error is \(error)")
@@ -348,16 +348,14 @@ class IMAPClientHandlerTests: XCTestCase {
         self.writeInbound("A2 OK\r\n")
         self.assertInbound(.tagged(.init(tag: "A2", state: .ok(.init(code: nil, text: "")))))
     }
-    
+
     func testPromisesAreFailedOnChannelClose() {
-        
         // p1 will be the active promise
         let p1 = self.writeOutbound(.tagged(.init(tag: "A1", command: .login(username: "\\", password: "\\"))), wait: false)
-        
+
         // p2 is  a promise loaded from the queue
         let p2 = self.writeOutbound(.tagged(.init(tag: "A2", command: .noop)), wait: false)
-                                    
-        
+
         // at this point we'll be held by the continuation requirement for p1
         self.assertOutboundString("A1 LOGIN {1}\r\n")
         self.channel.pipeline.fireChannelInactive()

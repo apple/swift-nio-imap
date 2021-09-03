@@ -74,24 +74,8 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
     private func handleResponseOrContinuationRequest(_ response: ResponseOrContinuationRequest, context: ChannelHandlerContext) throws {
         switch response {
         case .continuationRequest(let continuationRequest):
-            let chunks = try self.state.receiveContinuationRequest(continuationRequest)
-            self.writeChunks(chunks, context: context)
-            if self.state.authenticating {
-                switch continuationRequest {
-                case .responseText:
-                    // No valid base64, so forward on an empty BB
-                    context.fireChannelRead(self.wrapInboundOut(.authenticationChallenge(context.channel.allocator.buffer(capacity: 0))))
-                case .data(let byteBuffer):
-                    context.fireChannelRead(self.wrapInboundOut(.authenticationChallenge(byteBuffer)))
-                }
-            } else if self.state.idling {
-                // If we've received a continuation request and the state machine is
-                // idling then IDLE must have started.
-                context.fireChannelRead(self.wrapInboundOut(.idleStarted))
-                context.fireUserInboundEventTriggered(continuationRequest)
-            } else {
-                context.fireUserInboundEventTriggered(continuationRequest)
-            }
+            let action = try self.state.receiveContinuationRequest(continuationRequest)
+            self.handleContinuationRequestAction(action, request: continuationRequest, context: context)
         case .response(let response):
             try self.state.receiveResponse(response)
             context.fireChannelRead(self.wrapInboundOut(response))
@@ -104,6 +88,25 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
                 self.state.encodingOptions = recomended
             default:
                 break
+            }
+        }
+    }
+
+    private func handleContinuationRequestAction(_ action: ClientStateMachine.ContinuationRequestAction, request: ContinuationRequest, context: ChannelHandlerContext) {
+        switch action {
+        case .sendChunks(let chunks):
+            self.writeChunks(chunks, context: context)
+            context.fireUserInboundEventTriggered(request)
+        case .fireIdleStarted:
+            context.fireChannelRead(self.wrapInboundOut(.idleStarted))
+            context.fireUserInboundEventTriggered(request)
+        case .fireAuthenticationChallenge:
+            switch request {
+            case .responseText:
+                // No valid base64, so forward on an empty BB
+                context.fireChannelRead(self.wrapInboundOut(.authenticationChallenge(context.channel.allocator.buffer(capacity: 0))))
+            case .data(let byteBuffer):
+                context.fireChannelRead(self.wrapInboundOut(.authenticationChallenge(byteBuffer)))
             }
         }
     }

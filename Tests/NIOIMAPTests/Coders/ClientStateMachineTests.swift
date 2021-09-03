@@ -68,14 +68,13 @@ class ClientStateMachineTests: XCTestCase {
         XCTAssertEqual(result.first!.0.bytes, "A1 LOGIN {1}\r\n")
 
         // receive a continuation, we should then send another chunk
-        XCTAssertNoThrow(result = try self.stateMachine.receiveContinuationRequest(.data("OK")))
-        XCTAssertEqual(result.count, 1)
-        XCTAssertEqual(result.first!.0.bytes, "\\ {1}\r\n")
+        var action: ClientStateMachine.ContinuationRequestAction!
+        XCTAssertNoThrow(action = try self.stateMachine.receiveContinuationRequest(.data("OK")))
+        XCTAssertEqual(action, .sendChunks([(.init(bytes: "\\ {1}\r\n", waitForContinuation: true), nil)]))
 
         // receive a continuation again
-        XCTAssertNoThrow(result = try self.stateMachine.receiveContinuationRequest(.data("OK")))
-        XCTAssertEqual(result.count, 1)
-        XCTAssertEqual(result.first!.0.bytes, "\\\r\n")
+        XCTAssertNoThrow(action = try self.stateMachine.receiveContinuationRequest(.data("OK")))
+        XCTAssertEqual(action, .sendChunks([(.init(bytes: "\\\r\n", waitForContinuation: false), nil)]))
 
         // this time we expect a tagged response, so let's send one
         XCTAssertNoThrow(try self.stateMachine.receiveResponse(.tagged(.init(tag: "A1", state: .ok(.init(text: "OK"))))))
@@ -96,11 +95,12 @@ class ClientStateMachineTests: XCTestCase {
         XCTAssertEqual(result2.count, 0)
         self.stateMachine.flush()
 
-        var result3: [(EncodeBuffer.Chunk, EventLoopPromise<Void>?)] = []
+        var result3: ClientStateMachine.ContinuationRequestAction!
         XCTAssertNoThrow(result3 = try self.stateMachine.receiveContinuationRequest(.data("OK")))
-        XCTAssertEqual(result3.count, 2)
-        XCTAssertEqual(result3[0].0.bytes, "\\ \"pass\"\r\n")
-        XCTAssertEqual(result3[1].0.bytes, "A2 NOOP\r\n")
+        XCTAssertEqual(result3, .sendChunks([
+            (.init(bytes: "\\ \"pass\"\r\n", waitForContinuation: false), nil),
+            (.init(bytes: "A2 NOOP\r\n", waitForContinuation: false), nil),
+        ]))
     }
 
     func testMultipleCommandsCanRunConcurrently() {
@@ -172,7 +172,7 @@ extension ClientStateMachineTests {
             XCTAssertTrue(e is InvalidCommandForState)
         }
     }
-    
+
     func testIdleWorkflow_multipleContinuationRequests() {
         // set up the state machine to idle
         XCTAssertNoThrow(try self.stateMachine.sendCommand(.tagged(.init(tag: "A1", command: .idleStart))))
@@ -316,14 +316,16 @@ extension ClientStateMachineTests {
 
         self.stateMachine.flush()
 
-        XCTAssertNoThrow(result = try self.stateMachine.receiveContinuationRequest(.data("OK")))
-        XCTAssertEqual(result.count, 7)
-        XCTAssertEqual(result[0].0, .init(bytes: "0", waitForContinuation: false))
-        XCTAssertEqual(result[1].0, .init(bytes: "1", waitForContinuation: false))
-        XCTAssertEqual(result[2].0, .init(bytes: "2", waitForContinuation: false))
-        XCTAssertEqual(result[3].0, .init(bytes: "3", waitForContinuation: false))
-        XCTAssertEqual(result[4].0, .init(bytes: "4", waitForContinuation: false))
-        XCTAssertEqual(result[5].0, .init(bytes: "", waitForContinuation: false))
-        XCTAssertEqual(result[6].0, .init(bytes: "\r\n", waitForContinuation: false))
+        var resultAction: ClientStateMachine.ContinuationRequestAction!
+        XCTAssertNoThrow(resultAction = try self.stateMachine.receiveContinuationRequest(.data("OK")))
+        XCTAssertEqual(resultAction, .sendChunks([
+            (.init(bytes: "0", waitForContinuation: false), nil),
+            (.init(bytes: "1", waitForContinuation: false), nil),
+            (.init(bytes: "2", waitForContinuation: false), nil),
+            (.init(bytes: "3", waitForContinuation: false), nil),
+            (.init(bytes: "4", waitForContinuation: false), nil),
+            (.init(bytes: "", waitForContinuation: false), nil),
+            (.init(bytes: "\r\n", waitForContinuation: false), nil),
+        ]))
     }
 }
