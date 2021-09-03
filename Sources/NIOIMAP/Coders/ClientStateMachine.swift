@@ -192,7 +192,7 @@ struct ClientStateMachine {
         }
     }
 
-    /// Tells the state machine that the client woulud like to send a command.
+    /// Tells the state machine that the client would like to send a command.
     /// We then return any chunks that can be written.
     mutating func sendCommand(_ command: CommandStreamPart, promise: EventLoopPromise<Void>? = nil) throws -> [(EncodeBuffer.Chunk, EventLoopPromise<Void>?)] {
         if let tag = command.tag {
@@ -228,6 +228,7 @@ struct ClientStateMachine {
         
         var promises: [EventLoopPromise<Void>] = []
         if let current = self.activeWritePromise {
+            self.activeWritePromise = nil
             promises.append(current)
         }
         
