@@ -62,7 +62,7 @@ struct ClientStateMachine {
         static func == (lhs: ClientStateMachine.ContinuationRequestAction, rhs: ClientStateMachine.ContinuationRequestAction) -> Bool {
             switch (lhs, rhs) {
             case (.sendChunks(let c1), .sendChunks(let c2)):
-                c1.elementsEqual(c2, by: { $0.0 == $1.0 && t0.1?.futureResult === $1.1?.futureResult })
+                return c1.elementsEqual(c2, by: { $0.0 == $1.0 && $0.1?.futureResult === $1.1?.futureResult })
             case (.fireIdleStarted, .fireIdleStarted):
                 return true
             case (.fireAuthenticationChallenge, .fireAuthenticationChallenge):
