@@ -14,6 +14,14 @@
 
 import NIO
 
+fileprivate let LITERAL_HEADER_START = UInt8(ascii: "{")
+fileprivate let LITERAL_HEADER_END = UInt8(ascii: "}")
+fileprivate let CR = UInt8(ascii: "\r")
+fileprivate let LF = UInt8(ascii: "\n")
+fileprivate let BINARY_FLAG = UInt8(ascii: "~")
+fileprivate let LITERAL_PLUS = UInt8(ascii: "+")
+fileprivate let LITERAL_MINUS = UInt8(ascii: "-")
+
 public struct InvalidFrame: Error, Hashable {
     public init() {}
 }
@@ -33,7 +41,7 @@ struct FramingParser: Hashable {
         case foundCR
         case foundLF
         case searchingForLiteralHeader(LiteralSubstate)
-        case insideLiteral(remainig: Int)
+        case insideLiteral(remaining: Int)
     }
 
     var state: State = .normalTraversal
@@ -61,10 +69,15 @@ struct FramingParser: Hashable {
         }
         return results
     }
+    
+    private mutating func readFrame() -> ByteBuffer? {
+        let buffer = self.buffer.readSlice(length: self.frameLength)
+        self.frameLength = 0
+        return buffer
+    }
 
     private mutating func parseFrame() throws -> ByteBuffer? {
-        var foundFrame = false
-        while self.frameLength < self.buffer.readableBytes, !foundFrame {
+        while self.frameLength < self.buffer.readableBytes {
             switch self.state {
             case .normalTraversal:
                 self.readByte_state_normalTraversal()
@@ -72,29 +85,23 @@ struct FramingParser: Hashable {
             case .foundCR:
                 self.readByte_state_foundCR()
                 self.state = .normalTraversal
-                foundFrame = true
+                return readFrame()
 
             case .foundLF:
                 self.state = .normalTraversal
-                foundFrame = true
+                return readFrame()
 
             case .searchingForLiteralHeader(let substate):
-                foundFrame = try self.readByte_state_searchingForLiteralHeader(substate: substate)
+                if try self.readByte_state_searchingForLiteralHeader(substate: substate) {
+                    return readFrame()
+                }
 
-            case .insideLiteral(remainig: let remaining):
+            case .insideLiteral(remaining: let remaining):
                 // always instantly forward any bytes within a literal
                 self.readByte_state_insideLiteral(remainingLiteralBytes: remaining)
-                foundFrame = true
+                return readFrame()
             }
         }
-
-        if foundFrame {
-            defer {
-                self.frameLength = 0
-            }
-            return self.buffer.readSlice(length: self.frameLength)
-        }
-
         return nil
     }
 
@@ -102,7 +109,7 @@ struct FramingParser: Hashable {
         assert(self.buffer.readableBytes > 0)
         assert(self.frameLength < self.buffer.readableBytes)
         defer {
-            self.frameLength += 1
+            self.frameLength &+= 1
         }
         return self.buffer.getInteger(at: self.buffer.readerIndex + self.frameLength)! // we've asserted this is ok
     }
@@ -111,7 +118,7 @@ struct FramingParser: Hashable {
         guard let value = self.buffer.getInteger(at: self.buffer.readerIndex + self.frameLength, as: T.self) else {
             return nil
         }
-        self.frameLength += T.bitWidth / 8
+        self.frameLength &+= T.bitWidth / 8
         return value
     }
 }
@@ -120,11 +127,11 @@ extension FramingParser {
     private mutating func readByte_state_normalTraversal() {
         let byte = self.readByte()
         switch byte {
-        case UInt8(ascii: "\r"):
+        case CR:
             self.state = .foundCR
-        case UInt8(ascii: "\n"):
+        case LF:
             self.state = .foundLF
-        case UInt8(ascii: "{"):
+        case LITERAL_HEADER_START:
             self.state = .searchingForLiteralHeader(.findingBinaryFlag)
         default:
             break
@@ -137,7 +144,7 @@ extension FramingParser {
         // that, otherwise consider go back a byte and consider
         // that to be the end of the frame
         let byte = self.readByte()
-        if byte != UInt8(ascii: "\n") {
+        if byte != LF {
             self.frameLength -= 1
         }
     }
@@ -165,7 +172,7 @@ extension FramingParser {
         guard let binaryByte = self.maybeReadByte(as: UInt8.self) else {
             return false
         }
-        if binaryByte != UInt8(ascii: "~") {
+        if binaryByte != BINARY_FLAG {
             self.frameLength -= 1
         }
         self.state = .searchingForLiteralHeader(.findingSize(ByteBuffer()))
@@ -179,7 +186,7 @@ extension FramingParser {
         } else {
             let readableLength = self.buffer.readableBytes - self.frameLength
             self.frameLength += readableLength
-            self.state = .insideLiteral(remainig: remainingLiteralBytes - readableLength)
+            self.state = .insideLiteral(remaining: remainingLiteralBytes - readableLength)
         }
     }
 
@@ -189,22 +196,13 @@ extension FramingParser {
         // First scan for the end of the literal size
         while let byte = self.maybeReadByte(as: UInt8.self) {
             switch byte {
-            case UInt8(ascii: "0"),
-                 UInt8(ascii: "1"),
-                 UInt8(ascii: "2"),
-                 UInt8(ascii: "3"),
-                 UInt8(ascii: "4"),
-                 UInt8(ascii: "5"),
-                 UInt8(ascii: "6"),
-                 UInt8(ascii: "7"),
-                 UInt8(ascii: "8"),
-                 UInt8(ascii: "9"):
+            case UInt8(ascii: "0")...UInt8(ascii: "9"):
                 sizeBuffer.writeInteger(byte)
-            case UInt8(ascii: "+"), UInt8(ascii: "-"):
+            case LITERAL_PLUS, LITERAL_MINUS:
                 let size = Int(sizeBuffer.readString(length: sizeBuffer.readableBytes)!)!
                 self.state = .searchingForLiteralHeader(.findingClosingCurly(size))
                 return try self.readByte_state_searchingForLiteralHeader_findingClosingCurly(size)
-            case UInt8(ascii: "}"):
+            case LITERAL_HEADER_END:
                 let size = Int(sizeBuffer.readString(length: sizeBuffer.readableBytes)!)!
                 self.state = .searchingForLiteralHeader(.findingCR(size))
                 return try self.readByte_state_searchingForLiteralHeader_findingCR(size)
@@ -224,9 +222,9 @@ extension FramingParser {
         }
 
         switch byte {
-        case UInt8(ascii: "+"), UInt8(ascii: "-"):
+        case LITERAL_PLUS, LITERAL_MINUS:
             self.state = .searchingForLiteralHeader(.findingClosingCurly(size))
-        case UInt8(ascii: "}"):
+        case LITERAL_HEADER_END:
             self.frameLength -= 1
             self.state = .searchingForLiteralHeader(.findingCR(size))
         default:
@@ -242,7 +240,7 @@ extension FramingParser {
             return false
         }
 
-        if byte == UInt8(ascii: "}") {
+        if byte == LITERAL_HEADER_END {
             self.state = .searchingForLiteralHeader(.findingCR(size))
             return try self.readByte_state_searchingForLiteralHeader_findingCR(size)
         } else {
@@ -251,13 +249,11 @@ extension FramingParser {
     }
 
     private mutating func readByte_state_searchingForLiteralHeader_findingCR(_ size: Int) throws -> Bool {
-        // Now scan for the CR
         guard let byte = self.maybeReadByte(as: UInt8.self) else {
             return false
         }
 
-        // 0d0a is CRLF
-        if byte == UInt8(ascii: "\r") {
+        if byte == CR {
             self.state = .searchingForLiteralHeader(.findingLF(size))
             return try self.readByte_state_searchingForLiteralHeader_findingLF(size)
         } else {
@@ -266,13 +262,12 @@ extension FramingParser {
     }
 
     private mutating func readByte_state_searchingForLiteralHeader_findingLF(_ size: Int) throws -> Bool {
-        // Now scan for the CR
         guard let byte = self.maybeReadByte(as: UInt8.self) else {
             return false
         }
 
-        if byte == UInt8(ascii: "\n") {
-            self.state = .insideLiteral(remainig: size)
+        if byte == LF {
+            self.state = .insideLiteral(remaining: size)
             return true
         } else {
             throw InvalidFrame()
