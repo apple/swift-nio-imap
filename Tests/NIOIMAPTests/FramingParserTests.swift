@@ -20,12 +20,12 @@ import XCTest
 
 final class FramingParserTests: XCTestCase {
     
-    var parser = ClientFramingParser()
+    var parser = FramingParser()
     
     // The parser has a state so we need to recreate with every test
     // as some tests may intentionally have leftovers.
     override func setUp() {
-        self.parser = ClientFramingParser()
+        self.parser = FramingParser()
     }
     
 }

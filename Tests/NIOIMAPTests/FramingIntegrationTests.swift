@@ -24,7 +24,7 @@ final class FramingIntegrationTests: XCTestCase {
     var channel: EmbeddedChannel!
     
     override func setUp() {
-        self.channel = EmbeddedChannel(handlers: [ByteToMessageHandler(ClientFrameDecoder()), IMAPServerHandler()])
+        self.channel = EmbeddedChannel(handlers: [ByteToMessageHandler(FrameDecoder()), IMAPServerHandler()])
     }
     
     func writeInbound(_ buffer: ByteBuffer, line: UInt = #line) {

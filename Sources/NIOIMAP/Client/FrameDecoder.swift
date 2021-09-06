@@ -15,11 +15,11 @@
 import NIO
 import NIOIMAPCore
 
-struct ClientFrameDecoder: ByteToMessageDecoder {
+struct FrameDecoder: ByteToMessageDecoder {
     
     typealias InboundOut = ByteBuffer
     
-    var framingParser = ClientFramingParser()
+    var framingParser = FramingParser()
     
     mutating func decode(context: ChannelHandlerContext, buffer: inout ByteBuffer) throws -> DecodingState {
         let frames = self.framingParser.appendAndFrameBuffer(&buffer)

@@ -14,9 +14,7 @@
 
 import NIO
 
-
-
-struct ClientFramingParser: Hashable {
+struct FramingParser: Hashable {
     
     enum LiteralSubstate: Hashable {
         case findingBinaryFlag
@@ -119,7 +117,7 @@ struct ClientFramingParser: Hashable {
     }
 }
 
-extension ClientFramingParser {
+extension FramingParser {
     
     private mutating func readByte_state_normalTraversal() {
         let byte = self.readByte()
