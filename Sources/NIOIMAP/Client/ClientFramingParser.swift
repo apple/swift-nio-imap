@@ -167,6 +167,14 @@ extension ClientFramingParser {
     
     private mutating func readByte_state_searchingForLiteralHeader_findSize(sizeBuffer: ByteBuffer) -> Bool {
         var sizeBuffer = sizeBuffer
+        
+        guard let binaryByte = self.maybeReadByte(as: UInt8.self) else {
+            return false
+        }
+        if binaryByte != UInt8(ascii: "~") {
+            self.frameLength -= 1
+        }
+        
         // First scan for the end of the literal size
         var foundSize = false
         while self.frameLength < self.buffer.readableBytes && !foundSize {
@@ -183,6 +191,16 @@ extension ClientFramingParser {
                 UInt8(ascii: "8"),
                 UInt8(ascii: "9"):
                 sizeBuffer.writeInteger(byte)
+            case UInt8(ascii: "+"), UInt8(ascii: "-"):
+                // TODO: Drip feeding byte still doesn't work
+                guard let byte = self.maybeReadByte(as: UInt8.self) else {
+                    return false
+                }
+                if byte == UInt8(ascii: "}") {
+                    foundSize = true
+                } else {
+                    fatalError("Frame will never be valid")
+                }
             case UInt8(ascii: "}"):
                 foundSize = true
             default:
