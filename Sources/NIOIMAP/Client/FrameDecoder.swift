@@ -16,21 +16,19 @@ import NIO
 import NIOIMAPCore
 
 struct FrameDecoder: ByteToMessageDecoder {
-    
     typealias InboundOut = ByteBuffer
-    
+
     var framingParser = FramingParser()
-    
+
     mutating func decode(context: ChannelHandlerContext, buffer: inout ByteBuffer) throws -> DecodingState {
         let frames = try self.framingParser.appendAndFrameBuffer(&buffer)
         guard frames.count > 0 else {
             return .needMoreData
         }
-        
+
         for frame in frames {
             context.fireChannelRead(self.wrapInboundOut(frame))
         }
         return .continue
     }
-    
 }
