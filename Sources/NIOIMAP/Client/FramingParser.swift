@@ -14,13 +14,13 @@
 
 import NIO
 
-fileprivate let LITERAL_HEADER_START = UInt8(ascii: "{")
-fileprivate let LITERAL_HEADER_END = UInt8(ascii: "}")
-fileprivate let CR = UInt8(ascii: "\r")
-fileprivate let LF = UInt8(ascii: "\n")
-fileprivate let BINARY_FLAG = UInt8(ascii: "~")
-fileprivate let LITERAL_PLUS = UInt8(ascii: "+")
-fileprivate let LITERAL_MINUS = UInt8(ascii: "-")
+private let LITERAL_HEADER_START = UInt8(ascii: "{")
+private let LITERAL_HEADER_END = UInt8(ascii: "}")
+private let CR = UInt8(ascii: "\r")
+private let LF = UInt8(ascii: "\n")
+private let BINARY_FLAG = UInt8(ascii: "~")
+private let LITERAL_PLUS = UInt8(ascii: "+")
+private let LITERAL_MINUS = UInt8(ascii: "-")
 
 public struct InvalidFrame: Error, Hashable {
     public init() {}
@@ -72,7 +72,7 @@ struct FramingParser: Hashable {
         }
         return results
     }
-    
+
     private mutating func readFrame() -> ByteBuffer? {
         let buffer = self.buffer.readSlice(length: self.frameLength)
         self.frameLength = 0
@@ -125,24 +125,24 @@ struct FramingParser: Hashable {
 }
 
 extension FramingParser {
-    private mutating func readByte_state_normalTraversal(swallowLF: Bool) -> Bool{
+    private mutating func readByte_state_normalTraversal(swallowLF: Bool) -> Bool {
         let byte = self.readByte()
         switch byte {
         case CR:
             self.state = .normalTraversal(swallowLF: true)
             return true
-            
+
         case LF:
             if swallowLF {
                 // we want to completely remove the byte from the buffer
                 _ = self.buffer.readBytes(length: 1)
             }
             return !swallowLF // if we are swallowing the line feed then we don't want a frame
-            
+
         case LITERAL_HEADER_START:
             self.state = .searchingForLiteralHeader(.findingBinaryFlag)
             return false
-            
+
         default:
             // We don't need to do anything this byte, as it's just a "normal" part of a
             // command. We "consume" it in the call to readByte above, which just makes
@@ -202,7 +202,7 @@ extension FramingParser {
             self.state = .insideLiteral(remaining: remainingLiteralBytes - readableLength)
         }
     }
-    
+
     private func parseIntegerFromBuffer(_ buffer: ByteBuffer) throws -> Int {
         guard let value = Int(String(buffer: buffer)) else {
             throw IntegerOverflow()
@@ -216,7 +216,7 @@ extension FramingParser {
         // First scan for the end of the literal size
         while let byte = self.maybeReadByte(as: UInt8.self) {
             switch byte {
-            case UInt8(ascii: "0")...UInt8(ascii: "9"):
+            case UInt8(ascii: "0") ... UInt8(ascii: "9"):
                 sizeBuffer.writeInteger(byte)
             case LITERAL_PLUS, LITERAL_MINUS:
                 let size = try self.parseIntegerFromBuffer(sizeBuffer)
