@@ -14,6 +14,12 @@
 
 import NIO
 
+public struct InvalidFrame: Error, Hashable {
+    public init() {
+        
+    }
+}
+
 struct FramingParser: Hashable {
     
     enum LiteralSubstate: Hashable {
@@ -41,7 +47,7 @@ struct FramingParser: Hashable {
         
     }
     
-    mutating func appendAndFrameBuffer(_ buffer: inout ByteBuffer) -> [ByteBuffer] {
+    mutating func appendAndFrameBuffer(_ buffer: inout ByteBuffer) throws -> [ByteBuffer] {
         
         // fast paths should be fast
         guard buffer.readableBytes > 0 else {
@@ -49,20 +55,20 @@ struct FramingParser: Hashable {
         }
         
         self.buffer.writeBuffer(&buffer)
-        return self.parseFrames()
+        return try self.parseFrames()
     }
     
-    private mutating func parseFrames() -> [ByteBuffer] {
+    private mutating func parseFrames() throws -> [ByteBuffer] {
         assert(self.buffer.readableBytes > 0)
         
         var results: [ByteBuffer] = []
-        while let frame = self.parseFrame() {
+        while let frame = try self.parseFrame() {
             results.append(frame)
         }
         return results
     }
     
-    private mutating func parseFrame() -> ByteBuffer? {
+    private mutating func parseFrame() throws -> ByteBuffer? {
         var foundFrame = false
         while self.frameLength < self.buffer.readableBytes && !foundFrame {
             switch self.state {
@@ -80,7 +86,7 @@ struct FramingParser: Hashable {
                 foundFrame = true
                 
             case .searchingForLiteralHeader(let substate):
-                foundFrame = self.readByte_state_searchingForLiteralHeader(substate: substate)
+                foundFrame = try self.readByte_state_searchingForLiteralHeader(substate: substate)
                 
             case .insideLiteral(remainig: let remaining):
                 // always instantly forward any bytes within a literal
@@ -144,26 +150,26 @@ extension FramingParser {
         }
     }
     
-    private mutating func readByte_state_searchingForLiteralHeader(substate: LiteralSubstate) -> Bool {
+    private mutating func readByte_state_searchingForLiteralHeader(substate: LiteralSubstate) throws -> Bool {
         // Note that to reach this point we must have already found a `{`.
         
         switch substate {
         case .findingBinaryFlag:
-            return self.readByte_state_searchingForLiteralHeader_findingBinaryFlag()
+            return try self.readByte_state_searchingForLiteralHeader_findingBinaryFlag()
         case .findingSize(let byteBuffer):
-            return self.readByte_state_searchingForLiteralHeader_findingSize(sizeBuffer: byteBuffer)
+            return try self.readByte_state_searchingForLiteralHeader_findingSize(sizeBuffer: byteBuffer)
         case .findingLiteralExtension(let size):
-            return self.readByte_state_searchingForLiteralHeader_findingLiteralExtension(size)
+            return try self.readByte_state_searchingForLiteralHeader_findingLiteralExtension(size)
         case .findingClosingCurly(let size):
-            return self.readByte_state_searchingForLiteralHeader_findingClosingCurly(size)
+            return try self.readByte_state_searchingForLiteralHeader_findingClosingCurly(size)
         case .findingCR(let size):
-            return self.readByte_state_searchingForLiteralHeader_findingCR(size)
+            return try self.readByte_state_searchingForLiteralHeader_findingCR(size)
         case .findingLF(let size):
-            return self.readByte_state_searchingForLiteralHeader_findingLF(size)
+            return try self.readByte_state_searchingForLiteralHeader_findingLF(size)
         }
     }
     
-    private mutating func readByte_state_searchingForLiteralHeader_findingBinaryFlag() -> Bool {
+    private mutating func readByte_state_searchingForLiteralHeader_findingBinaryFlag() throws -> Bool {
         guard let binaryByte = self.maybeReadByte(as: UInt8.self) else {
             return false
         }
@@ -171,7 +177,7 @@ extension FramingParser {
             self.frameLength -= 1
         }
         self.state = .searchingForLiteralHeader(.findingSize(ByteBuffer()))
-        return self.readByte_state_searchingForLiteralHeader_findingSize(sizeBuffer: ByteBuffer())
+        return try self.readByte_state_searchingForLiteralHeader_findingSize(sizeBuffer: ByteBuffer())
     }
     
     private mutating func readByte_state_insideLiteral(remainingLiteralBytes: Int) {
@@ -185,7 +191,7 @@ extension FramingParser {
         }
     }
     
-    private mutating func readByte_state_searchingForLiteralHeader_findingSize(sizeBuffer: ByteBuffer) -> Bool {
+    private mutating func readByte_state_searchingForLiteralHeader_findingSize(sizeBuffer: ByteBuffer) throws -> Bool {
         var sizeBuffer = sizeBuffer
         
         // First scan for the end of the literal size
@@ -206,13 +212,13 @@ extension FramingParser {
             case UInt8(ascii: "+"), UInt8(ascii: "-"):
                 let size = Int(sizeBuffer.readString(length: sizeBuffer.readableBytes)!)!
                 self.state = .searchingForLiteralHeader(.findingClosingCurly(size))
-                return self.readByte_state_searchingForLiteralHeader_findingClosingCurly(size)
+                return try self.readByte_state_searchingForLiteralHeader_findingClosingCurly(size)
             case UInt8(ascii: "}"):
                 let size = Int(sizeBuffer.readString(length: sizeBuffer.readableBytes)!)!
                 self.state = .searchingForLiteralHeader(.findingCR(size))
-                return self.readByte_state_searchingForLiteralHeader_findingCR(size)
+                return try self.readByte_state_searchingForLiteralHeader_findingCR(size)
             default:
-                fatalError("Invalid frame")
+                throw InvalidFrame()
             }
         }
         
@@ -220,7 +226,7 @@ extension FramingParser {
         return false
     }
     
-    private mutating func readByte_state_searchingForLiteralHeader_findingLiteralExtension(_ size: Int) -> Bool {
+    private mutating func readByte_state_searchingForLiteralHeader_findingLiteralExtension(_ size: Int) throws -> Bool {
         
         // Now scan for the CRLF
         guard let byte = self.maybeReadByte(as: UInt8.self) else {
@@ -234,14 +240,14 @@ extension FramingParser {
             self.frameLength -= 1
             self.state = .searchingForLiteralHeader(.findingCR(size))
         default:
-            fatalError("Frame will never be valid")
+            throw InvalidFrame()
         }
         
         self.state = .searchingForLiteralHeader(.findingCR(size))
-        return self.readByte_state_searchingForLiteralHeader_findingCR(size)
+        return try self.readByte_state_searchingForLiteralHeader_findingCR(size)
     }
     
-    private mutating func readByte_state_searchingForLiteralHeader_findingClosingCurly(_ size: Int) -> Bool {
+    private mutating func readByte_state_searchingForLiteralHeader_findingClosingCurly(_ size: Int) throws -> Bool {
         
         guard let byte = self.maybeReadByte(as: UInt8.self) else {
             return false
@@ -249,13 +255,13 @@ extension FramingParser {
         
         if byte == UInt8(ascii: "}") {
             self.state = .searchingForLiteralHeader(.findingCR(size))
-            return self.readByte_state_searchingForLiteralHeader_findingCR(size)
+            return try self.readByte_state_searchingForLiteralHeader_findingCR(size)
         } else {
-            fatalError("Handle this - the frame will never be valid")
+            throw InvalidFrame()
         }
     }
     
-    private mutating func readByte_state_searchingForLiteralHeader_findingCR(_ size: Int) -> Bool {
+    private mutating func readByte_state_searchingForLiteralHeader_findingCR(_ size: Int) throws -> Bool {
         
         // Now scan for the CR
         guard let byte = self.maybeReadByte(as: UInt8.self) else {
@@ -265,13 +271,13 @@ extension FramingParser {
         // 0d0a is CRLF
         if byte == UInt8(ascii: "\r") {
             self.state = .searchingForLiteralHeader(.findingLF(size))
-            return self.readByte_state_searchingForLiteralHeader_findingLF(size)
+            return try self.readByte_state_searchingForLiteralHeader_findingLF(size)
         } else {
-            fatalError("Handle this - the frame will never be valid")
+            throw InvalidFrame()
         }
     }
     
-    private mutating func readByte_state_searchingForLiteralHeader_findingLF(_ size: Int) -> Bool {
+    private mutating func readByte_state_searchingForLiteralHeader_findingLF(_ size: Int) throws -> Bool {
         
         // Now scan for the CR
         guard let byte = self.maybeReadByte(as: UInt8.self) else {
@@ -282,7 +288,7 @@ extension FramingParser {
             self.state = .insideLiteral(remainig: size)
             return true
         } else {
-            fatalError("Handle this - the frame will never be valid")
+            throw InvalidFrame()
         }
     }
 }

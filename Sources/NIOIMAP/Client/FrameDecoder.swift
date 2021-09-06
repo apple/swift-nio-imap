@@ -22,7 +22,7 @@ struct FrameDecoder: ByteToMessageDecoder {
     var framingParser = FramingParser()
     
     mutating func decode(context: ChannelHandlerContext, buffer: inout ByteBuffer) throws -> DecodingState {
-        let frames = self.framingParser.appendAndFrameBuffer(&buffer)
+        let frames = try self.framingParser.appendAndFrameBuffer(&buffer)
         guard frames.count > 0 else {
             return .needMoreData
         }
