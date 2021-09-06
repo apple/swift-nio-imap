@@ -137,9 +137,6 @@ extension FramingParserTests {
         var buffer: ByteBuffer = "A1 LOGIN {3+"
         XCTAssertEqual(self.parser.appendAndFrameBuffer(&buffer), [])
         
-        buffer = "1"
-        XCTAssertEqual(self.parser.appendAndFrameBuffer(&buffer), [])
-        
         buffer = "}"
         XCTAssertEqual(self.parser.appendAndFrameBuffer(&buffer), [])
         
