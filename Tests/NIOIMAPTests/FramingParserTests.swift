@@ -37,6 +37,26 @@ extension FramingParserTests {
         var buffer: ByteBuffer = "A1 NOOP\r\n"
         XCTAssertNoThrow(XCTAssertEqual(try self.parser.appendAndFrameBuffer(&buffer), ["A1 NOOP\r\n"]))
     }
+    
+    // Shows that we don't need a CR to complete a frame
+    // as some IMAP implementations don't bother with them.
+    func testSimpleCommandNoCR() {
+        var buffer: ByteBuffer = "A1 NOOP\n"
+        XCTAssertNoThrow(XCTAssertEqual(try self.parser.appendAndFrameBuffer(&buffer), ["A1 NOOP\n"]))
+    }
+    
+    // Shows that we can send a frame as soon as we've got the CR, and can then
+    // ignore the next byte if it's a LF.
+    func testSimpleCommandNoLF() {
+        var buffer: ByteBuffer = "A1 NOOP\r"
+        XCTAssertNoThrow(XCTAssertEqual(try self.parser.appendAndFrameBuffer(&buffer), ["A1 NOOP\r"]))
+        
+        buffer = "\n"
+        XCTAssertNoThrow(XCTAssertEqual(try self.parser.appendAndFrameBuffer(&buffer), []))
+        
+        buffer = "A2 NOOP\r"
+        XCTAssertNoThrow(XCTAssertEqual(try self.parser.appendAndFrameBuffer(&buffer), ["A2 NOOP\r"]))
+    }
 
     func testSimpleCommandTimes2() {
         var buffer: ByteBuffer = "A1 NOOP\r\nA2 NOOP\r\n"
@@ -90,6 +110,13 @@ extension FramingParserTests {
     func testParsingLiteralPlus() {
         var buffer: ByteBuffer = "A1 LOGIN {3+}\r\nhey\r\n"
         XCTAssertNoThrow(XCTAssertEqual(try self.parser.appendAndFrameBuffer(&buffer), ["A1 LOGIN {3+}\r\n", "hey", "\r\n"]))
+    }
+    
+    func testParsingLiteralIntegerOverflow() {
+        var buffer: ByteBuffer = "A1 LOGIN {99999999999999999999999999999999999999999999999999999999999999}\r\nhey\r\n"
+        XCTAssertThrowsError(try self.parser.appendAndFrameBuffer(&buffer)) { e in
+            XCTAssertTrue(e is IntegerOverflow)
+        }
     }
 
     func testParsingLiteralMinus() {

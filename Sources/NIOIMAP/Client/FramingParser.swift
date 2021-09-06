@@ -26,6 +26,10 @@ public struct InvalidFrame: Error, Hashable {
     public init() {}
 }
 
+public struct IntegerOverflow: Error, Hashable {
+    public init() {}
+}
+
 struct FramingParser: Hashable {
     enum LiteralSubstate: Hashable {
         case findingBinaryFlag
@@ -37,14 +41,13 @@ struct FramingParser: Hashable {
     }
 
     enum State: Hashable {
-        case normalTraversal
+        case normalTraversal(swallowLF: Bool)
         case foundCR
-        case foundLF
         case searchingForLiteralHeader(LiteralSubstate)
         case insideLiteral(remaining: Int)
     }
 
-    var state: State = .normalTraversal
+    var state: State = .normalTraversal(swallowLF: false)
     var frameLength: Int = 0
     var buffer = ByteBuffer()
 
@@ -79,27 +82,25 @@ struct FramingParser: Hashable {
     private mutating func parseFrame() throws -> ByteBuffer? {
         while self.frameLength < self.buffer.readableBytes {
             switch self.state {
-            case .normalTraversal:
-                self.readByte_state_normalTraversal()
+            case .normalTraversal(swallowLF: let swallowsLF):
+                if self.readByte_state_normalTraversal(swallowLF: swallowsLF) {
+                    return self.readFrame()
+                }
 
             case .foundCR:
                 self.readByte_state_foundCR()
-                self.state = .normalTraversal
-                return readFrame()
-
-            case .foundLF:
-                self.state = .normalTraversal
-                return readFrame()
+                self.state = .normalTraversal(swallowLF: true)
+                return self.readFrame()
 
             case .searchingForLiteralHeader(let substate):
                 if try self.readByte_state_searchingForLiteralHeader(substate: substate) {
-                    return readFrame()
+                    return self.readFrame()
                 }
 
             case .insideLiteral(remaining: let remaining):
                 // always instantly forward any bytes within a literal
                 self.readByte_state_insideLiteral(remainingLiteralBytes: remaining)
-                return readFrame()
+                return self.readFrame()
             }
         }
         return nil
@@ -124,17 +125,29 @@ struct FramingParser: Hashable {
 }
 
 extension FramingParser {
-    private mutating func readByte_state_normalTraversal() {
+    private mutating func readByte_state_normalTraversal(swallowLF: Bool) -> Bool{
         let byte = self.readByte()
         switch byte {
         case CR:
-            self.state = .foundCR
+            self.state = .normalTraversal(swallowLF: true)
+            return true
+            
         case LF:
-            self.state = .foundLF
+            if swallowLF {
+                // we want to completely remove the byte from the buffer
+                _ = self.buffer.readBytes(length: 1)
+            }
+            return !swallowLF // if we are swallowing the line feed then we don't want a frame
+            
         case LITERAL_HEADER_START:
             self.state = .searchingForLiteralHeader(.findingBinaryFlag)
+            return false
+            
         default:
-            break
+            // We don't need to do anything this byte, as it's just a "normal" part of a
+            // command. We "consume" it in the call to readByte above, which just makes
+            // the current frame one byte longer.
+            return false
         }
     }
 
@@ -182,12 +195,19 @@ extension FramingParser {
     private mutating func readByte_state_insideLiteral(remainingLiteralBytes: Int) {
         if self.buffer.readableBytes - self.frameLength >= remainingLiteralBytes {
             self.frameLength += remainingLiteralBytes
-            self.state = .normalTraversal
+            self.state = .normalTraversal(swallowLF: false)
         } else {
             let readableLength = self.buffer.readableBytes - self.frameLength
             self.frameLength += readableLength
             self.state = .insideLiteral(remaining: remainingLiteralBytes - readableLength)
         }
+    }
+    
+    private func parseIntegerFromBuffer(_ buffer: ByteBuffer) throws -> Int {
+        guard let value = Int(String(buffer: buffer)) else {
+            throw IntegerOverflow()
+        }
+        return value
     }
 
     private mutating func readByte_state_searchingForLiteralHeader_findingSize(sizeBuffer: ByteBuffer) throws -> Bool {
@@ -199,11 +219,11 @@ extension FramingParser {
             case UInt8(ascii: "0")...UInt8(ascii: "9"):
                 sizeBuffer.writeInteger(byte)
             case LITERAL_PLUS, LITERAL_MINUS:
-                let size = Int(sizeBuffer.readString(length: sizeBuffer.readableBytes)!)!
+                let size = try self.parseIntegerFromBuffer(sizeBuffer)
                 self.state = .searchingForLiteralHeader(.findingClosingCurly(size))
                 return try self.readByte_state_searchingForLiteralHeader_findingClosingCurly(size)
             case LITERAL_HEADER_END:
-                let size = Int(sizeBuffer.readString(length: sizeBuffer.readableBytes)!)!
+                let size = try self.parseIntegerFromBuffer(sizeBuffer)
                 self.state = .searchingForLiteralHeader(.findingCR(size))
                 return try self.readByte_state_searchingForLiteralHeader_findingCR(size)
             default:
