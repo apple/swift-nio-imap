@@ -204,15 +204,14 @@ extension ClientStateMachineTests {
 // MARK: - Append
 
 extension ClientStateMachineTests {
-    
-    func assert (
+    func assert(
         _ expected: [(EncodeBuffer.Chunk, EventLoopPromise<Void>?)],
         _ closure: @autoclosure () throws -> [(EncodeBuffer.Chunk, EventLoopPromise<Void>?)],
         line: UInt = #line
     ) {
         var result: [(EncodeBuffer.Chunk, EventLoopPromise<Void>?)] = []
         XCTAssertNoThrow(result = try closure(), line: line)
-        
+
         // used this instead of elementsEqual because it works better with
         // XCTAssert
         for (lhs, rhs) in zip(expected, result) {
@@ -220,9 +219,8 @@ extension ClientStateMachineTests {
             XCTAssertEqual(lhs.0, rhs.0, line: line)
         }
     }
-    
+
     func testAppendWorflow_normal() {
-        
         // start the append command
         self.assert(
             [(.init(bytes: "A1 APPEND \"INBOX\"", waitForContinuation: false), nil)],

@@ -54,7 +54,7 @@ extension ClientStateMachine {
         }
 
         var state: State = .started(canFinish: false)
-        
+
         var hasCatenatedAtLeastOneObject: Bool {
             switch self.state {
             case .started, .waitingForAppendContinuationRequest, .sendingMessageBytes, .waitingForCatenateContinuationRequest, .sendingCatenateBytes, .waitingForTaggedResponse, .finished:

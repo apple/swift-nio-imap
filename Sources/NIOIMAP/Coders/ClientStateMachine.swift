@@ -241,21 +241,21 @@ extension ClientStateMachine {
 
         try appendingStateMachine.receiveContinuationRequest(request)
         self.state = .appending(appendingStateMachine)
-        
+
         // We need to get the client handler to fullfil the existing promise, but the bytes
         // will have already been written to the network. The `nextChunk` here will always be
         // empty.
         var results = [(self.activeEncodeBuffer.buffer.nextChunk(), self.activeWritePromise)]
         self.activeEncodeBuffer = nil
         self.activeWritePromise = nil
-        
+
         if let (command, promise) = self.queuedCommands.popFirst() {
             self.activeEncodeBuffer = CommandEncodeBuffer(buffer: self.makeNewBuffer(), options: self.encodingOptions)
             self.activeEncodeBuffer.writeCommandStream(command)
             self.activeWritePromise = promise
             results.append(contentsOf: self.extractSendableChunks())
         }
-        
+
         return .sendChunks(results)
     }
 
@@ -408,7 +408,7 @@ extension ClientStateMachine {
 
     /// Throws an error if more than one command is runnning, otherwise does nothing.
     /// End users are required to ensure command pipelining compatibility.
-    private func guardAgainstMultipleRunningCommands(_ command: CommandStreamPart) {
+    private func guardAgainstMultipleRunningCommands(_: CommandStreamPart) {
         precondition(self.activeCommandTags.count == 1)
     }
 
@@ -499,12 +499,12 @@ extension ClientStateMachine {
         guard case .appending(var appendingStateMachine) = self.state else {
             preconditionFailure("Invalid state: \(self.state)")
         }
-        
+
         defer {
             appendingStateMachine.sendCommand(command)
             self.state = .appending(appendingStateMachine)
         }
-        
+
         switch command {
         case .append(.beginMessage), .append(.catenateData(.begin)):
             self.activeWritePromise = promise

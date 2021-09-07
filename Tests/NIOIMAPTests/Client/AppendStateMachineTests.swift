@@ -45,6 +45,7 @@ class AppendStateMachineTests: XCTestCase {
 
         self.stateMachine.sendCommand(.append(.finish))
         XCTAssertNoThrow(XCTAssertEqual(
-            try self.stateMachine.receiveResponse(.tagged(.init(tag: "A1", state: .ok(.init(code: nil, text: "OK"))))), true))
+            try self.stateMachine.receiveResponse(.tagged(.init(tag: "A1", state: .ok(.init(code: nil, text: "OK"))))), true
+        ))
     }
 }

@@ -528,10 +528,10 @@ class IMAPClientHandlerTests: XCTestCase {
     func testAppendWaitsForContinuation() {
         self.writeOutbound(.append(.start(tag: "A1", appendingTo: .inbox)))
         self.assertOutboundString("A1 APPEND \"INBOX\"")
-        
+
         let literalPromise = self.writeOutbound(.append(.beginMessage(message: .init(options: .none, data: .init(byteCount: 5)))), wait: false)
         self.assertOutboundString(" {5}\r\n")
-        
+
         let p1 = self.writeOutbound(.append(.messageBytes("0")), wait: false)
         self.assertNoOutboundString()
         let p2 = self.writeOutbound(.append(.messageBytes("1")), wait: false)
@@ -613,7 +613,7 @@ extension IMAPClientHandlerTests {
         buffer.writeString(string)
         self.assertOutboundBuffer(buffer, line: line)
     }
-    
+
     private func assertNoOutboundString(line: UInt = #line) {
         XCTAssertNoThrow(XCTAssertNil(try self.channel.readOutbound(as: ByteBuffer.self)))
     }
