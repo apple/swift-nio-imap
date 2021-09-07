@@ -182,7 +182,11 @@ struct ClientStateMachine {
         case .authenticating(var authStateMachine):
             self.state = try authStateMachine.receiveResponse(response)
         case .appending(var appendStateMachine):
-            self.state = try appendStateMachine.receiveResponse(response)
+            if try appendStateMachine.receiveResponse(response) {
+                self.state = .expectingNormalResponse
+            } else {
+                self.state = .appending(appendStateMachine)
+            }
         case .expectingNormalResponse:
             break
         case .expectingLiteralContinuationRequest, .error:
@@ -243,7 +247,9 @@ extension ClientStateMachine {
         }
 
         var stateMachine = stateMachine
-        self.state = try stateMachine.receiveContinuationRequest(request)
+        try stateMachine.receiveContinuationRequest(request)
+        self.state = .appending(stateMachine)
+        
         self.activeEncodeBuffer = nil
         self.activeWritePromise = nil
         if let (command, promise) = self.queuedCommands.popFirst() {
@@ -503,7 +509,8 @@ extension ClientStateMachine {
         }
 
         var appendingStateMachine = appendingStateMachine
-        self.state = try appendingStateMachine.sendCommand(command)
+        try appendingStateMachine.sendCommand(command)
+        self.state = .appending(appendingStateMachine)
 
         switch command {
         case .append(.beginMessage), .append(.catenateData):
