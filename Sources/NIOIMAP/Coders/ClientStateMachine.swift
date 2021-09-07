@@ -178,7 +178,8 @@ struct ClientStateMachine {
 
         switch self.state {
         case .idle(var idleStateMachine):
-            self.state = try idleStateMachine.receiveResponse(response)
+            try idleStateMachine.receiveResponse(response)
+            self.state = .idle(idleStateMachine)
         case .authenticating(var authStateMachine):
             self.state = try authStateMachine.receiveResponse(response)
         case .appending(var appendStateMachine):
@@ -307,7 +308,8 @@ extension ClientStateMachine {
 
         var stateMachine = stateMachine
         // A continuation when in idle state means it's been confirmed
-        self.state = try stateMachine.receiveContinuationRequest(request)
+        try stateMachine.receiveContinuationRequest(request)
+        self.state = .idle(stateMachine)
         return .fireIdleStarted
     }
 }
@@ -472,7 +474,11 @@ extension ClientStateMachine {
         }
 
         var idleStateMachine = idleStateMachine
-        self.state = try idleStateMachine.sendCommand(command)
+        if try idleStateMachine.sendCommand(command) {
+            self.state = .expectingNormalResponse
+        } else {
+            self.state = .idle(idleStateMachine)
+        }
         var encodeBuffer = CommandEncodeBuffer(buffer: self.makeNewBuffer(), options: self.encodingOptions)
         encodeBuffer.writeCommandStream(command)
         return [(encodeBuffer.buffer.nextChunk(), promise)]
