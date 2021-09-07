@@ -25,66 +25,25 @@ class AppendStateMachineTests: XCTestCase {
 
     func testNormalWorkflow() {
         // append a message
-        XCTAssertNoThrow(try self.stateMachine.sendCommand(.append(.beginMessage(message: .init(options: .init(), data: .init(byteCount: 10))))))
+        self.stateMachine.sendCommand(.append(.beginMessage(message: .init(options: .init(), data: .init(byteCount: 10)))))
         XCTAssertNoThrow(try self.stateMachine.receiveContinuationRequest(.data("req")))
-        XCTAssertNoThrow(try self.stateMachine.sendCommand(.append(.messageBytes("12345"))))
-        XCTAssertNoThrow(try self.stateMachine.sendCommand(.append(.messageBytes("67890"))))
-        XCTAssertNoThrow(try self.stateMachine.sendCommand(.append(.endMessage)))
+        self.stateMachine.sendCommand(.append(.messageBytes("12345")))
+        self.stateMachine.sendCommand(.append(.messageBytes("67890")))
+        self.stateMachine.sendCommand(.append(.endMessage))
 
         // catenate a message
-        XCTAssertNoThrow(try self.stateMachine.sendCommand(.append(.beginCatenate(options: .init()))))
-        XCTAssertNoThrow(try self.stateMachine.sendCommand(.append(.catenateURL("url1"))))
-        XCTAssertNoThrow(try self.stateMachine.sendCommand(.append(.catenateURL("url2"))))
-        XCTAssertNoThrow(try self.stateMachine.sendCommand(.append(.catenateURL("url3"))))
-        XCTAssertNoThrow(try self.stateMachine.sendCommand(.append(.catenateData(.begin(size: 10)))))
+        self.stateMachine.sendCommand(.append(.beginCatenate(options: .init())))
+        self.stateMachine.sendCommand(.append(.catenateURL("url1")))
+        self.stateMachine.sendCommand(.append(.catenateURL("url2")))
+        self.stateMachine.sendCommand(.append(.catenateURL("url3")))
+        self.stateMachine.sendCommand(.append(.catenateData(.begin(size: 10))))
         XCTAssertNoThrow(try self.stateMachine.receiveContinuationRequest(.data("req")))
-        XCTAssertNoThrow(try self.stateMachine.sendCommand(.append(.messageBytes("12345"))))
-        XCTAssertNoThrow(try self.stateMachine.sendCommand(.append(.messageBytes("67890"))))
-        XCTAssertNoThrow(try self.stateMachine.sendCommand(.append(.endCatenate)))
+        self.stateMachine.sendCommand(.append(.messageBytes("12345")))
+        self.stateMachine.sendCommand(.append(.messageBytes("67890")))
+        self.stateMachine.sendCommand(.append(.endCatenate))
 
-        XCTAssertNoThrow(try self.stateMachine.sendCommand(.append(.finish)))
+        self.stateMachine.sendCommand(.append(.finish))
         XCTAssertNoThrow(XCTAssertEqual(try self.stateMachine.receiveResponse(.tagged(.init(tag: "A1", state: .ok(.init(code: nil, text: "OK"))))), true)
         )
-    }
-
-    func testStartAppendWhenCatenatingThrows() {
-        XCTAssertNoThrow(try self.stateMachine.sendCommand(.append(.beginCatenate(options: .init()))))
-        XCTAssertThrowsError(try self.stateMachine.sendCommand(
-            .append(.beginMessage(message: .init(options: .init(), data: .init(byteCount: 10)))))) { e in
-            XCTAssertTrue(e is InvalidCommandForState)
-        }
-    }
-
-    func testNotWaitingForContinuationThrows() {
-        XCTAssertNoThrow(try self.stateMachine.sendCommand(.append(.beginMessage(message: .init(options: .init(), data: .init(byteCount: 10))))))
-        XCTAssertThrowsError(try self.stateMachine.sendCommand(.append(.messageBytes("message")))) { e in
-            XCTAssertTrue(e is InvalidCommandForState)
-        }
-    }
-
-    // we can't catenate a URL while we're meant to
-    // be sending bytes
-    func testMixingCatenateTypesThrows() {
-        XCTAssertNoThrow(try self.stateMachine.sendCommand(.append(.beginCatenate(options: .init()))))
-        XCTAssertNoThrow(try self.stateMachine.sendCommand(.append(.catenateData(.begin(size: 10)))))
-        XCTAssertNoThrow(try self.stateMachine.receiveContinuationRequest(.data("req")))
-        XCTAssertThrowsError(try self.stateMachine.sendCommand(.append(.catenateURL("url")))) { e in
-            XCTAssertTrue(e is InvalidCommandForState)
-        }
-    }
-
-    func testSendingNonAppendCommandThrows() {
-        XCTAssertThrowsError(try self.stateMachine.sendCommand(.idleDone)) { e in
-            XCTAssertTrue(e is InvalidCommandForState)
-        }
-    }
-
-    // Should throw instantly because we shouldn't
-    // be able to move straight from a started to
-    // a finished state. We need to send _something_.
-    func testNeedAtLeastOneAppendOrCatenate() {
-        XCTAssertThrowsError(try self.stateMachine.sendCommand(.append(.finish))) { e in
-            XCTAssertTrue(e is InvalidCommandForState)
-        }
     }
 }

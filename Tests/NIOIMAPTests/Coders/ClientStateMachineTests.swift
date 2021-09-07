@@ -114,27 +114,6 @@ class ClientStateMachineTests: XCTestCase {
         XCTAssertNoThrow(try self.stateMachine.receiveResponse(.tagged(.init(tag: "A3", state: .ok(.init(text: "OK"))))))
     }
 
-    func testCantAuthenticateWithAnotherCommand() {
-        XCTAssertNoThrow(try self.stateMachine.sendCommand(.tagged(.init(tag: "A1", command: .noop))))
-        XCTAssertThrowsError(try self.stateMachine.sendCommand(.tagged(.init(tag: "A2", command: .authenticate(mechanism: .gssAPI, initialResponse: nil))))) { e in
-            XCTAssertTrue(e is InvalidCommandForState)
-        }
-    }
-
-    func testCantAppendWithAnotherCommand() {
-        XCTAssertNoThrow(try self.stateMachine.sendCommand(.tagged(.init(tag: "A1", command: .noop))))
-        XCTAssertThrowsError(try self.stateMachine.sendCommand(.append(.start(tag: "A2", appendingTo: .inbox)))) { e in
-            XCTAssertTrue(e is InvalidCommandForState)
-        }
-    }
-
-    func testCantIdleWithAnotherCommand() {
-        XCTAssertNoThrow(try self.stateMachine.sendCommand(.tagged(.init(tag: "A1", command: .noop))))
-        XCTAssertThrowsError(try self.stateMachine.sendCommand(.tagged(.init(tag: "A2", command: .idleStart)))) { e in
-            XCTAssertTrue(e is InvalidCommandForState)
-        }
-    }
-
     func testDuplicateTagThrows() {
         XCTAssertNoThrow(try self.stateMachine.sendCommand(.tagged(.init(tag: "A1", command: .noop))))
         XCTAssertThrowsError(try self.stateMachine.sendCommand(.tagged(.init(tag: "A1", command: .noop)))) { e in
@@ -162,17 +141,6 @@ extension ClientStateMachineTests {
         XCTAssertNoThrow(try self.stateMachine.sendCommand(.tagged(.init(tag: "A3", command: .noop))))
     }
 
-    func testIdleWorkflow_commandWhileIdle() {
-        // set up the state machine to idle
-        XCTAssertNoThrow(try self.stateMachine.sendCommand(.tagged(.init(tag: "A1", command: .idleStart))))
-        XCTAssertNoThrow(try self.stateMachine.receiveContinuationRequest(.responseText(.init(text: "IDLE started"))))
-
-        // machine is idle, so sending a different command should throw
-        XCTAssertThrowsError(try self.stateMachine.sendCommand(.tagged(.init(tag: "A2", command: .noop)))) { e in
-            XCTAssertTrue(e is InvalidCommandForState)
-        }
-    }
-
     func testIdleWorkflow_multipleContinuationRequests() {
         // set up the state machine to idle
         XCTAssertNoThrow(try self.stateMachine.sendCommand(.tagged(.init(tag: "A1", command: .idleStart))))
@@ -181,17 +149,6 @@ extension ClientStateMachineTests {
         // machine is idle, so sending a different command should throw
         XCTAssertThrowsError(try self.stateMachine.receiveContinuationRequest(.responseText(.init(text: "IDLE started")))) { e in
             XCTAssertTrue(e is UnexpectedContinuationRequest)
-        }
-    }
-
-    func testIdleWorkflow_commandBeforeIdleConfirmed() {
-        // set up the state machine to idle
-        XCTAssertNoThrow(try self.stateMachine.sendCommand(.tagged(.init(tag: "A1", command: .idleStart))))
-
-        // machine isn't yet idle, but we've started the process
-        // so sending a different command should throw
-        XCTAssertThrowsError(try self.stateMachine.sendCommand(.tagged(.init(tag: "A2", command: .noop)))) { e in
-            XCTAssertTrue(e is InvalidIdleState)
         }
     }
 }
@@ -231,16 +188,6 @@ extension ClientStateMachineTests {
 
         // state machine should have reset, so we can send a normal command again
         XCTAssertNoThrow(try self.stateMachine.sendCommand(.tagged(.init(tag: "A3", command: .noop))))
-    }
-
-    func testAuthenticationWorkflow_commandWhileAuthenticating() {
-        // set up the state machine to authenticate
-        XCTAssertNoThrow(try self.stateMachine.sendCommand(.tagged(.init(tag: "A1", command: .authenticate(mechanism: .gssAPI, initialResponse: nil)))))
-
-        // machine is authenticating, so sending a different command should throw
-        XCTAssertThrowsError(try self.stateMachine.sendCommand(.tagged(.init(tag: "A2", command: .noop)))) { e in
-            XCTAssertTrue(e is InvalidCommandForState)
-        }
     }
 
     func testAuthenticationWorkflow_unexpectedResponse() {

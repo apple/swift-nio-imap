@@ -68,10 +68,10 @@ extension ClientStateMachine {
             return true
         }
 
-        mutating func sendCommand(_ command: CommandStreamPart) throws {
+        mutating func sendCommand(_ command: CommandStreamPart) {
             switch self.state {
             case .finished, .waitingForServer:
-                throw InvalidCommandForState(command)
+                preconditionFailure("Invalid state: \(self.state)")
             case .waitingForChallengeResponse:
                 break
             }
@@ -80,7 +80,7 @@ extension ClientStateMachine {
             // is to respond to a challenge
             switch command {
             case .idleDone, .tagged, .append:
-                throw InvalidCommandForState(command)
+                preconditionFailure("Invalid command when authenticating")
             case .continuationResponse:
                 self.state = .waitingForServer
             }
