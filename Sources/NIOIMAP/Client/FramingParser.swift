@@ -88,8 +88,8 @@ struct FramingParser: Hashable {
                 }
 
             case .foundCR:
-                self.readByte_state_foundCR()
-                self.state = .normalTraversal(swallowLF: true)
+                let swallowLF = self.readByte_state_foundCR()
+                self.state = .normalTraversal(swallowLF: swallowLF)
                 return self.readFrame()
 
             case .searchingForLiteralHeader(let substate):
@@ -129,7 +129,7 @@ extension FramingParser {
         let byte = self.readByte()
         switch byte {
         case CR:
-            self.state = .normalTraversal(swallowLF: true)
+            self.readByte_state_foundCR()
             return true
 
         case LF:
@@ -151,14 +151,24 @@ extension FramingParser {
         }
     }
 
-    private mutating func readByte_state_foundCR() {
+    /// Returns true if the first LF should be consumed, otherwise false
+    private mutating func readByte_state_foundCR() -> Bool {
         // We've found the end of a frame here.
         // If the next byte is an LF then we need to also consume
         // that, otherwise consider go back a byte and consider
         // that to be the end of the frame
-        let byte = self.readByte()
-        if byte != LF {
+        
+        guard let byte = self.maybeReadByte(as: UInt8.self) else {
+            self.
+        }
+        
+        if let byte = self.maybeReadByte(as: UInt8.self), byte == LF {
+            self.state = .normalTraversal(swallowLF: false)
+            return false
+        } else {
             self.frameLength -= 1
+            self.state = .normalTraversal(swallowLF: true)
+            return true
         }
     }
 
