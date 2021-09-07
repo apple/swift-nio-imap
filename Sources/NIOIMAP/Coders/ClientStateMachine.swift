@@ -124,7 +124,7 @@ struct ClientStateMachine {
         }
     }
 
-    // We mark where we should write up to at the next oppurtunity
+    // We mark where we should write up to at the next opportunity
     // using the `flush` method called from the channel handler.
     private var queuedCommands: MarkedCircularBuffer<(CommandStreamPart, EventLoopPromise<Void>?)> = .init(initialCapacity: 16)
 
@@ -228,7 +228,7 @@ struct ClientStateMachine {
     /// Returns all of the promises for the writes that have not yet completed.
     /// These should probably be failed.
     mutating func channelInactive() -> [EventLoopPromise<Void>] {
-        // we don't care whate state we were in, all we want is
+        // we don't care what state we were in, all we want is
         // to move to the error state so that nothing else is sent
         self.state = .error
 
