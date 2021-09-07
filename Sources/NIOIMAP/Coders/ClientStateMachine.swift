@@ -494,8 +494,8 @@ extension ClientStateMachine {
     }
 
     /// When appending we need to first defer to the appending state machine to see if we can actually
-    /// a command given our current state. If we can then we need to check what kind of command is
-    /// being sent. If we're beginning an append or catenation then we need to wait for a continuation
+    /// send a command given our current state. If we can then we need to check what kind of command
+    /// is being sent. If we're beginning an append or catenation then we need to wait for a continuation
     /// request, otherwise we can send the command and continue.
     private mutating func sendNextCommand_appending(command: CommandStreamPart, promise: EventLoopPromise<Void>?, appendingStateMachine: Append) -> [(EncodeBuffer.Chunk, EventLoopPromise<Void>?)] {
         switch self.state {
