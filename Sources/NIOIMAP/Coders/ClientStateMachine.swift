@@ -145,14 +145,14 @@ struct ClientStateMachine {
 
     private mutating func _receiveContinuationRequest(_ req: ContinuationRequest) throws -> ContinuationRequestAction {
         switch self.state {
-        case .appending(let stateMachine):
-            return try self.receiveContinuationRequest_appending(stateMachine: stateMachine, request: req)
+        case .appending(let appendingStateMachine):
+            return try self.receiveContinuationRequest_appending(appendingStateMachine: appendingStateMachine, request: req)
         case .expectingLiteralContinuationRequest:
             return try self.receiveContinuationRequest_expectingLiteralContinuationRequest(request: req)
-        case .authenticating(let stateMachine):
-            return try self.receiveContinuationRequest_authenticating(stateMachine: stateMachine, request: req)
-        case .idle(let stateMachine):
-            return try self.receiveContinuationRequest_idle(stateMachine: stateMachine, request: req)
+        case .authenticating(let authenticatingStateMachine):
+            return try self.receiveContinuationRequest_authenticating(authenticatingStateMachine: authenticatingStateMachine, request: req)
+        case .idle(let idleStateMachine):
+            return try self.receiveContinuationRequest_idle(idleStateMachine: idleStateMachine, request: req)
         case .expectingNormalResponse, .error:
             throw UnexpectedContinuationRequest()
         }
@@ -246,14 +246,14 @@ struct ClientStateMachine {
 // MARK: - Receive
 
 extension ClientStateMachine {
-    private mutating func receiveContinuationRequest_appending(stateMachine: Append, request: ContinuationRequest) throws -> ContinuationRequestAction {
+    private mutating func receiveContinuationRequest_appending(appendingStateMachine: Append, request: ContinuationRequest) throws -> ContinuationRequestAction {
         guard case .appending = self.state else {
             preconditionFailure("Invalid state: \(self.state)")
         }
 
-        var stateMachine = stateMachine
-        try stateMachine.receiveContinuationRequest(request)
-        self.state = .appending(stateMachine)
+        var appendingStateMachine = appendingStateMachine
+        try appendingStateMachine.receiveContinuationRequest(request)
+        self.state = .appending(appendingStateMachine)
         
         self.activeEncodeBuffer = nil
         self.activeWritePromise = nil
@@ -289,33 +289,33 @@ extension ClientStateMachine {
         return .sendChunks(result)
     }
 
-    private mutating func receiveContinuationRequest_authenticating(stateMachine: Authentication, request: ContinuationRequest) throws -> ContinuationRequestAction {
+    private mutating func receiveContinuationRequest_authenticating(authenticatingStateMachine: Authentication, request: ContinuationRequest) throws -> ContinuationRequestAction {
         guard case .authenticating = self.state else {
             preconditionFailure("Invalid state: \(self.state)")
         }
 
-        var stateMachine = stateMachine
+        var authenticatingStateMachine = authenticatingStateMachine
         switch request {
         case .responseText:
             // no valid base 64, so we can assume it was empty
-            try stateMachine.receiveContinuationRequest(.data(self.makeNewBuffer()))
-            self.state = .authenticating(stateMachine)
+            try authenticatingStateMachine.receiveContinuationRequest(.data(self.makeNewBuffer()))
+            self.state = .authenticating(authenticatingStateMachine)
         case .data(let byteBuffer):
-            try stateMachine.receiveContinuationRequest(.data(byteBuffer))
-            self.state = .authenticating(stateMachine)
+            try authenticatingStateMachine.receiveContinuationRequest(.data(byteBuffer))
+            self.state = .authenticating(authenticatingStateMachine)
         }
         return .fireAuthenticationChallenge
     }
 
-    private mutating func receiveContinuationRequest_idle(stateMachine: Idle, request: ContinuationRequest) throws -> ContinuationRequestAction {
+    private mutating func receiveContinuationRequest_idle(idleStateMachine: Idle, request: ContinuationRequest) throws -> ContinuationRequestAction {
         guard case .idle = self.state else {
             preconditionFailure("Invalid state: \(self.state)")
         }
 
-        var stateMachine = stateMachine
+        var idleStateMachine = idleStateMachine
         // A continuation when in idle state means it's been confirmed
-        try stateMachine.receiveContinuationRequest(request)
-        self.state = .idle(stateMachine)
+        try idleStateMachine.receiveContinuationRequest(request)
+        self.state = .idle(idleStateMachine)
         return .fireIdleStarted
     }
 }
