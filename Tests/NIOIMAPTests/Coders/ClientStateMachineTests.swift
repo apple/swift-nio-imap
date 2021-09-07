@@ -207,9 +207,9 @@ extension ClientStateMachineTests {
         // 1. start authenticating
         // 2. a couple of challenges back and forth
         XCTAssertNoThrow(try self.stateMachine.sendCommand(.tagged(.init(tag: "A2", command: .authenticate(mechanism: .gssAPI, initialResponse: nil)))))
-        XCTAssertNoThrow(try self.stateMachine.receiveResponse(.authenticationChallenge("c1")))
+        XCTAssertNoThrow(try stateMachine.receiveContinuationRequest(.data("c1")))
         XCTAssertNoThrow(try self.stateMachine.sendCommand(.continuationResponse("r1")))
-        XCTAssertNoThrow(try self.stateMachine.receiveResponse(.authenticationChallenge("c2")))
+        XCTAssertNoThrow(try stateMachine.receiveContinuationRequest(.data("c2")))
         XCTAssertNoThrow(try self.stateMachine.sendCommand(.continuationResponse("r2")))
 
         // finish authenticating

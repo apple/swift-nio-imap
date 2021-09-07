@@ -181,7 +181,11 @@ struct ClientStateMachine {
             try idleStateMachine.receiveResponse(response)
             self.state = .idle(idleStateMachine)
         case .authenticating(var authStateMachine):
-            self.state = try authStateMachine.receiveResponse(response)
+            if try authStateMachine.receiveResponse(response) {
+                self.state = .expectingNormalResponse
+            } else {
+                self.state = .authenticating(authStateMachine)
+            }
         case .appending(var appendStateMachine):
             if try appendStateMachine.receiveResponse(response) {
                 self.state = .expectingNormalResponse
@@ -294,9 +298,11 @@ extension ClientStateMachine {
         switch request {
         case .responseText:
             // no valid base 64, so we can assume it was empty
-            self.state = try stateMachine.receiveResponse(.authenticationChallenge(self.makeNewBuffer()))
+            try stateMachine.receiveContinuationRequest(.data(self.makeNewBuffer()))
+            self.state = .authenticating(stateMachine)
         case .data(let byteBuffer):
-            self.state = try stateMachine.receiveResponse(.authenticationChallenge(byteBuffer))
+            try stateMachine.receiveContinuationRequest(.data(byteBuffer))
+            self.state = .authenticating(stateMachine)
         }
         return .fireAuthenticationChallenge
     }
@@ -496,7 +502,8 @@ extension ClientStateMachine {
         }
 
         var authStateMachine = authenticationStateMachine
-        self.state = try authStateMachine.sendCommand(command)
+        try authStateMachine.sendCommand(command)
+        self.state = .authenticating(authStateMachine)
         var encodeBuffer = CommandEncodeBuffer(buffer: self.makeNewBuffer(), options: self.encodingOptions)
         encodeBuffer.writeCommandStream(command)
         return [(encodeBuffer.buffer.nextChunk(), promise)]

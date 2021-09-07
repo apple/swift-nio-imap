@@ -21,11 +21,11 @@ class AuthenticationStateMachineTests: XCTestCase {
         var stateMachine = ClientStateMachine.Authentication()
 
         // send and respond to a couple of challenges
-        XCTAssertNoThrow(try stateMachine.receiveResponse(.authenticationChallenge("challenge1")))
+        XCTAssertNoThrow(try stateMachine.receiveContinuationRequest(.data("challenge1")))
         XCTAssertNoThrow(try stateMachine.sendCommand(.continuationResponse("response1")))
-        XCTAssertNoThrow(try stateMachine.receiveResponse(.authenticationChallenge("challenge2")))
+        XCTAssertNoThrow(try stateMachine.receiveContinuationRequest(.data("challenge2")))
         XCTAssertNoThrow(try stateMachine.sendCommand(.continuationResponse("response2")))
-        XCTAssertNoThrow(try stateMachine.receiveResponse(.authenticationChallenge("challenge3")))
+        XCTAssertNoThrow(try stateMachine.receiveContinuationRequest(.data("challenge3")))
         XCTAssertNoThrow(try stateMachine.sendCommand(.continuationResponse("response3")))
 
         // finish
@@ -63,7 +63,7 @@ class AuthenticationStateMachineTests: XCTestCase {
 
     func testDuplicateChallengeThrows() {
         var stateMachine = ClientStateMachine.Authentication()
-        XCTAssertNoThrow(try stateMachine.receiveResponse(.authenticationChallenge("c1")))
+        XCTAssertNoThrow(try stateMachine.receiveContinuationRequest(.data("c1")))
 
         XCTAssertThrowsError(try stateMachine.receiveResponse(.authenticationChallenge("c2"))) { e in
             XCTAssertTrue(e is UnexpectedResponse)
@@ -72,7 +72,7 @@ class AuthenticationStateMachineTests: XCTestCase {
 
     func testDuplicateChallengeResponseThrows() {
         var stateMachine = ClientStateMachine.Authentication()
-        XCTAssertNoThrow(try stateMachine.receiveResponse(.authenticationChallenge("c1")))
+        XCTAssertNoThrow(try stateMachine.receiveContinuationRequest(.data("c1")))
         XCTAssertNoThrow(try stateMachine.sendCommand(.continuationResponse("r1")))
 
         XCTAssertThrowsError(try stateMachine.sendCommand(.continuationResponse("r2"))) { e in

@@ -35,7 +35,7 @@ extension ClientStateMachine {
 
         private var state: State = .waitingForServer
 
-        mutating func receiveResponse(_ response: Response) throws -> ClientStateMachine.State {
+        mutating func receiveResponse(_ response: Response) throws -> Bool {
             switch self.state {
             case .finished, .waitingForChallengeResponse:
                 throw UnexpectedResponse()
@@ -44,27 +44,31 @@ extension ClientStateMachine {
             }
 
             switch response {
-            case .untagged, .fetch, .fatal, .idleStarted:
+            case .untagged, .fetch, .fatal, .idleStarted, .authenticationChallenge:
                 throw UnexpectedResponse()
             case .tagged:
                 return try self.handleTaggedResponse()
-            case .authenticationChallenge:
-                return try self.handleAuthenticationChallenge()
             }
+        }
+        
+        mutating func receiveContinuationRequest(_ req: ContinuationRequest) throws {
+            switch self.state {
+            case .finished, .waitingForChallengeResponse:
+                throw UnexpectedResponse()
+            case .waitingForServer:
+                break
+            }
+
+            self.state = .waitingForChallengeResponse
         }
 
         // we don't care about the specific response
-        private mutating func handleTaggedResponse() throws -> ClientStateMachine.State {
+        private mutating func handleTaggedResponse() throws -> Bool {
             self.state = .finished
-            return .expectingNormalResponse
+            return true
         }
 
-        private mutating func handleAuthenticationChallenge() throws -> ClientStateMachine.State {
-            self.state = .waitingForChallengeResponse
-            return .authenticating(self)
-        }
-
-        mutating func sendCommand(_ command: CommandStreamPart) throws -> ClientStateMachine.State {
+        mutating func sendCommand(_ command: CommandStreamPart) throws {
             switch self.state {
             case .finished, .waitingForServer:
                 throw InvalidCommandForState(command)
@@ -79,7 +83,6 @@ extension ClientStateMachine {
                 throw InvalidCommandForState(command)
             case .continuationResponse:
                 self.state = .waitingForServer
-                return .authenticating(self)
             }
         }
     }
