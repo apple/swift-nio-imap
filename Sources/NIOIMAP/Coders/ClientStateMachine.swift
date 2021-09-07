@@ -325,13 +325,13 @@ extension ClientStateMachine {
         case .idleDone, .continuationResponse:
             throw InvalidCommandForState(command)
         case .tagged(let tc):
-            return try self.sendTaggedCommand(tc)
+            return self.sendTaggedCommand(tc)
         case .append(let ac):
-            return try self.sendAppendCommand(ac)
+            return self.sendAppendCommand(ac)
         }
     }
 
-    private mutating func sendTaggedCommand(_ command: TaggedCommand) throws -> [(EncodeBuffer.Chunk, EventLoopPromise<Void>?)] {
+    private mutating func sendTaggedCommand(_ command: TaggedCommand) -> [(EncodeBuffer.Chunk, EventLoopPromise<Void>?)] {
         switch self.state {
         case .expectingLiteralContinuationRequest, .idle, .authenticating, .appending, .error:
             preconditionFailure("Invalid state: \(self.state)")
@@ -343,10 +343,10 @@ extension ClientStateMachine {
         let chunk = self.activeEncodeBuffer.buffer.nextChunk()
         switch command.command {
         case .idleStart:
-            try self.guardAgainstMultipleRunningCommands(.tagged(command))
+            self.guardAgainstMultipleRunningCommands(.tagged(command))
             self.state = .idle(Idle())
         case .authenticate:
-            try self.guardAgainstMultipleRunningCommands(.tagged(command))
+            self.guardAgainstMultipleRunningCommands(.tagged(command))
             self.state = .authenticating(Authentication())
         default:
             if chunk.waitForContinuation {
@@ -361,7 +361,7 @@ extension ClientStateMachine {
         return [(chunk, promise)]
     }
 
-    private mutating func sendAppendCommand(_ command: AppendCommand) throws -> [(EncodeBuffer.Chunk, EventLoopPromise<Void>?)] {
+    private mutating func sendAppendCommand(_ command: AppendCommand) -> [(EncodeBuffer.Chunk, EventLoopPromise<Void>?)] {
         switch self.state {
         case .expectingLiteralContinuationRequest, .idle, .authenticating, .appending, .error:
             preconditionFailure("Invalid state: \(self.state)")
@@ -370,7 +370,7 @@ extension ClientStateMachine {
         }
 
         // no other commands can be running when we start appending
-        try self.guardAgainstMultipleRunningCommands(.append(command))
+        self.guardAgainstMultipleRunningCommands(.append(command))
         self.state = .appending(Append())
 
         // TODO: This assumes that the append command doesn't require a continuation - fix this in another PR
@@ -405,11 +405,10 @@ extension ClientStateMachine {
         }
     }
 
-    /// Throws an error if more than one command is runnning, otherwise does nothing
-    private func guardAgainstMultipleRunningCommands(_ command: CommandStreamPart) throws {
-        guard self.activeCommandTags.count == 1 else {
-            throw InvalidCommandForState(command)
-        }
+    /// Throws an error if more than one command is runnning, otherwise does nothing.
+    /// End users are required to ensure command pipelining compatibility.
+    private func guardAgainstMultipleRunningCommands(_ command: CommandStreamPart) {
+        precondition(self.activeCommandTags.count == 1)
     }
 
     private func makeNewBuffer() -> ByteBuffer {
