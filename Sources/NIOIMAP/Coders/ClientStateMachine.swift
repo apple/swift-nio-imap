@@ -110,19 +110,12 @@ struct ClientStateMachine {
     private var state: State = .expectingNormalResponse
     private var activeCommandTags: Set<String> = []
 
-    // This pattern is used to provide a bit of extra security around the allocator
-    // As the state machine will likely exist before we are able to get an allocator
-    // from the channel.
-    private var _allocator: ByteBufferAllocator!
-    var allocator: ByteBufferAllocator {
-        set {
-            self._allocator = newValue
-        }
-        get {
-            assert(self._allocator != nil, "Always set the allocator before trying to access it")
-            return self._allocator
-        }
-    }
+    /// This pattern is used to provide a bit of extra security around the allocator
+    /// As the state machine will likely exist before we are able to get an allocator
+    /// from the channel. We have to use an IUO because the state machine is likely to
+    /// be created before it's added to a channel, so we have no way of getting the
+    /// allocator. Make sure to set the allocator as soon as possible.
+    private var allocator: ByteBufferAllocator!
 
     // We mark where we should write up to at the next opportunity
     // using the `flush` method called from the channel handler.
