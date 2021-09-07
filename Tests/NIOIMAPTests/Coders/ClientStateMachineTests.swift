@@ -212,12 +212,13 @@ extension ClientStateMachineTests {
     ) {
         var result: [(EncodeBuffer.Chunk, EventLoopPromise<Void>?)] = []
         XCTAssertNoThrow(result = try closure(), line: line)
-        let equal = result.elementsEqual(expected) { lhs, rhs in
+        
+        // used this instead of elementsEqual because it works better with
+        // XCTAssert
+        for (lhs, rhs) in zip(expected, result) {
             XCTAssertTrue(lhs.1?.futureResult === rhs.1?.futureResult, line: line)
-            XCTAssertTrue(lhs.0 == rhs.0, line: line)
-            return lhs.0 == rhs.0 && lhs.1?.futureResult === rhs.1?.futureResult
+            XCTAssertEqual(lhs.0, rhs.0, line: line)
         }
-        XCTAssertTrue(equal, line: line)
     }
     
     func testAppendWorflow_normal() {
@@ -230,12 +231,12 @@ extension ClientStateMachineTests {
 
         // append a message
         self.assert(
-            [(.init(bytes: " {10}\r\n", waitForContinuation: false), nil)],
+            [(.init(bytes: " {10}\r\n", waitForContinuation: true), nil)],
             try self.stateMachine.sendCommand(.append(.beginMessage(message: .init(options: .init(), data: .init(byteCount: 10)))))
         )
         XCTAssertNoThrow(XCTAssertEqual(
             try self.stateMachine.receiveContinuationRequest(.data("ready2")),
-                .sendChunks([])
+            .sendChunks([(.init(bytes: ByteBuffer(), waitForContinuation: false), nil)])
         ))
         self.assert(
             [(.init(bytes: "01234", waitForContinuation: false), nil)],
@@ -260,21 +261,25 @@ extension ClientStateMachineTests {
             try self.stateMachine.sendCommand(.append(.catenateURL("url1")))
         )
         self.assert(
-            [(.init(bytes: "URL \"url2\"", waitForContinuation: false), nil)],
+            [(.init(bytes: " URL \"url2\"", waitForContinuation: false), nil)],
             try self.stateMachine.sendCommand(.append(.catenateURL("url2")))
         )
         self.assert(
-            [(.init(bytes: "TEXT {10}\r\n", waitForContinuation: true), nil)],
+            [(.init(bytes: " TEXT {10}\r\n", waitForContinuation: true), nil)],
             try self.stateMachine.sendCommand(.append(.catenateData(.begin(size: 10))))
         )
         XCTAssertNoThrow(try self.stateMachine.receiveContinuationRequest(.data("ready2")))
         self.assert(
             [(.init(bytes: "01234", waitForContinuation: false), nil)],
-            try self.stateMachine.sendCommand(.append(.catenateData(.begin(size: 10))))
+            try self.stateMachine.sendCommand(.append(.catenateData(.bytes("01234"))))
         )
         self.assert(
             [(.init(bytes: "56789", waitForContinuation: false), nil)],
-            try self.stateMachine.sendCommand(.append(.catenateData(.begin(size: 10))))
+            try self.stateMachine.sendCommand(.append(.catenateData(.bytes("56789"))))
+        )
+        self.assert(
+            [(.init(bytes: "", waitForContinuation: false), nil)],
+            try self.stateMachine.sendCommand(.append(.catenateData(.end)))
         )
         self.assert(
             [(.init(bytes: ")", waitForContinuation: false), nil)],
@@ -301,7 +306,7 @@ extension ClientStateMachineTests {
 
         XCTAssertNoThrow(result = try self.stateMachine.sendCommand(.append(.beginMessage(message: .init(options: .none, data: .init(byteCount: 5))))))
         XCTAssertEqual(result.count, 1)
-        XCTAssertEqual(result[0].0, .init(bytes: " {5}\r\n", waitForContinuation: false))
+        XCTAssertEqual(result[0].0, .init(bytes: " {5}\r\n", waitForContinuation: true))
 
         XCTAssertNoThrow(result = try self.stateMachine.sendCommand(.append(.messageBytes("0"))))
         XCTAssertEqual(result.count, 0)
@@ -328,6 +333,7 @@ extension ClientStateMachineTests {
         var resultAction: ClientStateMachine.ContinuationRequestAction!
         XCTAssertNoThrow(resultAction = try self.stateMachine.receiveContinuationRequest(.data("OK")))
         XCTAssertEqual(resultAction, .sendChunks([
+            (.init(bytes: "", waitForContinuation: false), nil),
             (.init(bytes: "0", waitForContinuation: false), nil),
             (.init(bytes: "1", waitForContinuation: false), nil),
             (.init(bytes: "2", waitForContinuation: false), nil),

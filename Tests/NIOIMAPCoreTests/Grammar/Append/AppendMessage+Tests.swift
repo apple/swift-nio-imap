@@ -24,9 +24,9 @@ extension AppendMessage_Tests {
         let c2 = ServerMessageDate.Components(year: 2020, month: 7, day: 2, hour: 13, minute: 42, second: 52, timeZoneMinutes: 60)!
 
         let inputs: [(AppendMessage, CommandEncodingOptions, [String], UInt)] = [
-            (.init(options: .none, data: .init(byteCount: 123)), .rfc3501, [" {123}\r\n"], #line),
-            (.init(options: .init(flagList: [.draft, .flagged], internalDate: nil, extensions: [:]), data: .init(byteCount: 123)), .rfc3501, [" (\\Draft \\Flagged) {123}\r\n"], #line),
-            (.init(options: .init(flagList: [.draft, .flagged], internalDate: ServerMessageDate(c1), extensions: [:]), data: .init(byteCount: 123)), .rfc3501, [" (\\Draft \\Flagged) \"2-Jul-2020 13:42:52 +0100\" {123}\r\n"], #line),
+            (.init(options: .none, data: .init(byteCount: 123)), .rfc3501, [" {123}\r\n", ""], #line),
+            (.init(options: .init(flagList: [.draft, .flagged], internalDate: nil, extensions: [:]), data: .init(byteCount: 123)), .rfc3501, [" (\\Draft \\Flagged) {123}\r\n", ""], #line),
+            (.init(options: .init(flagList: [.draft, .flagged], internalDate: ServerMessageDate(c1), extensions: [:]), data: .init(byteCount: 123)), .rfc3501, [" (\\Draft \\Flagged) \"2-Jul-2020 13:42:52 +0100\" {123}\r\n", ""], #line),
             (.init(options: .init(flagList: [], internalDate: ServerMessageDate(c2), extensions: [:]), data: .init(byteCount: 456)), .literalPlus, [" \"2-Jul-2020 13:42:52 +0100\" {456+}\r\n"], #line),
             (.init(options: .none, data: .init(byteCount: 456)), .literalPlus, [" {456+}\r\n"], #line),
         ]

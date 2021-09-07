@@ -34,7 +34,7 @@ extension ClientStateMachine {
 
             /// We're catenating messages or URLS. No state transformation is required for URLs, as they're
             /// done in one shot, but to catenate a message we need to move to `.waitingForCatenate...`
-            case catenating
+            case catenating(sentFirstObject: Bool)
 
             /// We want to send a literal to the server, but first need the server to confirm it's ready.
             /// Once we've received the continuation, we'll move to `.sendingCatenateBytes`.
@@ -54,6 +54,15 @@ extension ClientStateMachine {
         }
 
         var state: State = .started(canFinish: false)
+        
+        var hasCatenatedAtLeastOneObject: Bool {
+            switch self.state {
+            case .started, .waitingForAppendContinuationRequest, .sendingMessageBytes, .waitingForCatenateContinuationRequest, .sendingCatenateBytes, .waitingForTaggedResponse, .finished:
+                return false
+            case .catenating(sentFirstObject: let sentFirstObject):
+                return sentFirstObject
+            }
+        }
 
         // We don't expect any responses when appending other than the
         // final tagged response.
@@ -61,7 +70,7 @@ extension ClientStateMachine {
             switch self.state {
             case .started, .waitingForAppendContinuationRequest, .sendingMessageBytes, .catenating,
                  .waitingForCatenateContinuationRequest, .sendingCatenateBytes, .finished:
-                throw UnexpectedResponse()
+                throw UnexpectedContinuationRequest()
             case .waitingForTaggedResponse:
                 break
             }
@@ -123,7 +132,7 @@ extension ClientStateMachine.Append {
         case .beginMessage:
             self.state = .waitingForAppendContinuationRequest
         case .beginCatenate:
-            self.state = .catenating
+            self.state = .catenating(sentFirstObject: false)
         case .finish:
             if self.state == .started(canFinish: true) {
                 self.state = .waitingForTaggedResponse
@@ -146,11 +155,11 @@ extension ClientStateMachine.Append {
 
     private mutating func sendCommand_catenatingState(_ command: AppendCommand) {
         switch command {
-        case .start, .beginMessage, .beginCatenate, .messageBytes, .endMessage, .finish:
+        case .start, .beginMessage, .beginCatenate, .messageBytes, .endMessage, .finish, .catenateData(.bytes), .catenateData(.end):
             preconditionFailure("Invalid command for state: \(self.state)")
         case .catenateURL:
-            self.state = .catenating
-        case .catenateData:
+            self.state = .catenating(sentFirstObject: true)
+        case .catenateData(.begin):
             self.state = .waitingForCatenateContinuationRequest
         case .endCatenate:
             self.state = .started(canFinish: true)
@@ -159,11 +168,11 @@ extension ClientStateMachine.Append {
 
     private mutating func sendCommand_sendingCatenateBytesState(_ command: AppendCommand) {
         switch command {
-        case .start, .beginMessage, .beginCatenate, .endMessage, .catenateURL, .catenateData, .finish:
+        case .start, .beginMessage, .beginCatenate, .endMessage, .catenateURL, .messageBytes, .finish, .endCatenate, .catenateData(.begin):
             preconditionFailure("Invalid command for state: \(self.state)")
-        case .endCatenate:
-            self.state = .started(canFinish: true)
-        case .messageBytes:
+        case .catenateData(.end):
+            self.state = .catenating(sentFirstObject: true)
+        case .catenateData(.bytes):
             self.state = .sendingCatenateBytes // continue sending bytes until we're told to stop
         }
     }

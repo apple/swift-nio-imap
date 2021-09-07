@@ -527,20 +527,30 @@ class IMAPClientHandlerTests: XCTestCase {
 
     func testAppendWaitsForContinuation() {
         self.writeOutbound(.append(.start(tag: "A1", appendingTo: .inbox)))
-        self.writeOutbound(.append(.beginMessage(message: .init(options: .none, data: .init(byteCount: 5)))))
-        let p1 = self.writeOutbound(.append(.messageBytes("0")), wait: false)
-        let p2 = self.writeOutbound(.append(.messageBytes("1")), wait: false)
-        let p3 = self.writeOutbound(.append(.messageBytes("2")), wait: false)
-        let p4 = self.writeOutbound(.append(.messageBytes("3")), wait: false)
-        let p5 = self.writeOutbound(.append(.messageBytes("4")), wait: false)
-        let p6 = self.writeOutbound(.append(.endMessage), wait: false)
-        let p7 = self.writeOutbound(.append(.finish), wait: false)
-
         self.assertOutboundString("A1 APPEND \"INBOX\"")
+        
+        let literalPromise = self.writeOutbound(.append(.beginMessage(message: .init(options: .none, data: .init(byteCount: 5)))), wait: false)
         self.assertOutboundString(" {5}\r\n")
+        
+        let p1 = self.writeOutbound(.append(.messageBytes("0")), wait: false)
+        self.assertNoOutboundString()
+        let p2 = self.writeOutbound(.append(.messageBytes("1")), wait: false)
+        self.assertNoOutboundString()
+        let p3 = self.writeOutbound(.append(.messageBytes("2")), wait: false)
+        self.assertNoOutboundString()
+        let p4 = self.writeOutbound(.append(.messageBytes("3")), wait: false)
+        self.assertNoOutboundString()
+        let p5 = self.writeOutbound(.append(.messageBytes("4")), wait: false)
+        self.assertNoOutboundString()
+        let p6 = self.writeOutbound(.append(.endMessage), wait: false)
+        self.assertNoOutboundString()
+        let p7 = self.writeOutbound(.append(.finish), wait: false)
+        self.assertNoOutboundString()
 
+        // send a continuation, we should now get outbound strings
         self.writeInbound("+ OK\r\n")
-
+        XCTAssertNoThrow(try literalPromise.wait())
+        self.assertOutboundString("")
         self.assertOutboundString("0")
         self.assertOutboundString("1")
         self.assertOutboundString("2")
@@ -602,6 +612,10 @@ extension IMAPClientHandlerTests {
         var buffer = self.channel.allocator.buffer(capacity: string.utf8.count)
         buffer.writeString(string)
         self.assertOutboundBuffer(buffer, line: line)
+    }
+    
+    private func assertNoOutboundString(line: UInt = #line) {
+        XCTAssertNoThrow(XCTAssertNil(try self.channel.readOutbound(as: ByteBuffer.self)))
     }
 
     private func writeInbound(_ string: String, line: UInt = #line) {

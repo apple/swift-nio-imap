@@ -21,8 +21,8 @@ class AppendData_Tests: EncodeTestClass {}
 extension AppendData_Tests {
     func testEncode() {
         let inputs: [(AppendData, CommandEncodingOptions, [String], UInt)] = [
-            (.init(byteCount: 123), .rfc3501, ["{123}\r\n"], #line),
-            (.init(byteCount: 456, withoutContentTransferEncoding: true), .rfc3501, ["~{456}\r\n"], #line),
+            (.init(byteCount: 123), .rfc3501, ["{123}\r\n", ""], #line),
+            (.init(byteCount: 456, withoutContentTransferEncoding: true), .rfc3501, ["~{456}\r\n", ""], #line),
             (.init(byteCount: 123), .literalPlus, ["{123+}\r\n"], #line),
             (.init(byteCount: 456, withoutContentTransferEncoding: true), .literalPlus, ["~{456+}\r\n"], #line),
         ]

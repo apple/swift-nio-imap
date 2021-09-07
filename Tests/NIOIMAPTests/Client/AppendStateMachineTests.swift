@@ -38,12 +38,13 @@ class AppendStateMachineTests: XCTestCase {
         self.stateMachine.sendCommand(.append(.catenateURL("url3")))
         self.stateMachine.sendCommand(.append(.catenateData(.begin(size: 10))))
         XCTAssertNoThrow(try self.stateMachine.receiveContinuationRequest(.data("req")))
-        self.stateMachine.sendCommand(.append(.messageBytes("12345")))
-        self.stateMachine.sendCommand(.append(.messageBytes("67890")))
+        self.stateMachine.sendCommand(.append(.catenateData(.bytes("12345"))))
+        self.stateMachine.sendCommand(.append(.catenateData(.bytes("67890"))))
+        self.stateMachine.sendCommand(.append(.catenateData(.end)))
         self.stateMachine.sendCommand(.append(.endCatenate))
 
         self.stateMachine.sendCommand(.append(.finish))
-        XCTAssertNoThrow(XCTAssertEqual(try self.stateMachine.receiveResponse(.tagged(.init(tag: "A1", state: .ok(.init(code: nil, text: "OK"))))), true)
-        )
+        XCTAssertNoThrow(XCTAssertEqual(
+            try self.stateMachine.receiveResponse(.tagged(.init(tag: "A1", state: .ok(.init(code: nil, text: "OK"))))), true))
     }
 }

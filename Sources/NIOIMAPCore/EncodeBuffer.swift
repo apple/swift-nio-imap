@@ -96,7 +96,7 @@ extension EncodeBuffer {
         case .client:
             if let stopPoint = self.stopPoints.popFirst() {
                 return .init(bytes: self.buffer.readSlice(length: stopPoint - self.buffer.readerIndex)!,
-                             waitForContinuation: stopPoint != self.buffer.writerIndex)
+                             waitForContinuation: true)
             } else {
                 precondition(allowEmptyChunk || self.buffer.readableBytes > 0, "No next chunk to send.")
                 return .init(bytes: self.buffer.readSlice(length: self.buffer.readableBytes)!, waitForContinuation: false)
