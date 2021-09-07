@@ -235,7 +235,7 @@ extension ClientStateMachineTests {
         )
         XCTAssertNoThrow(XCTAssertEqual(
             try self.stateMachine.receiveContinuationRequest(.data("ready2")),
-                .sendChunks([(.init(bytes: "", waitForContinuation: false), nil)])
+                .sendChunks([])
         ))
         self.assert(
             [(.init(bytes: "01234", waitForContinuation: false), nil)],
@@ -251,19 +251,46 @@ extension ClientStateMachineTests {
         )
 
         // catenate some urls and a message
-        XCTAssertNoThrow(try self.stateMachine.sendCommand(.append(.beginCatenate(options: .init()))))
-        XCTAssertNoThrow(try self.stateMachine.sendCommand(.append(.catenateURL("url1"))))
-        XCTAssertNoThrow(try self.stateMachine.sendCommand(.append(.catenateURL("url2"))))
-        XCTAssertNoThrow(try self.stateMachine.sendCommand(.append(.catenateData(.begin(size: 10)))))
+        self.assert(
+            [(.init(bytes: " CATENATE (", waitForContinuation: false), nil)],
+            try self.stateMachine.sendCommand(.append(.beginCatenate(options: .init())))
+        )
+        self.assert(
+            [(.init(bytes: "URL \"url1\"", waitForContinuation: false), nil)],
+            try self.stateMachine.sendCommand(.append(.catenateURL("url1")))
+        )
+        self.assert(
+            [(.init(bytes: "URL \"url2\"", waitForContinuation: false), nil)],
+            try self.stateMachine.sendCommand(.append(.catenateURL("url2")))
+        )
+        self.assert(
+            [(.init(bytes: "TEXT {10}\r\n", waitForContinuation: true), nil)],
+            try self.stateMachine.sendCommand(.append(.catenateData(.begin(size: 10))))
+        )
         XCTAssertNoThrow(try self.stateMachine.receiveContinuationRequest(.data("ready2")))
-        XCTAssertNoThrow(try self.stateMachine.sendCommand(.append(.messageBytes("01234"))))
-        XCTAssertNoThrow(try self.stateMachine.sendCommand(.append(.messageBytes("56789"))))
-        XCTAssertNoThrow(try self.stateMachine.sendCommand(.append(.endCatenate)))
+        self.assert(
+            [(.init(bytes: "01234", waitForContinuation: false), nil)],
+            try self.stateMachine.sendCommand(.append(.catenateData(.begin(size: 10))))
+        )
+        self.assert(
+            [(.init(bytes: "56789", waitForContinuation: false), nil)],
+            try self.stateMachine.sendCommand(.append(.catenateData(.begin(size: 10))))
+        )
+        self.assert(
+            [(.init(bytes: ")", waitForContinuation: false), nil)],
+            try self.stateMachine.sendCommand(.append(.endCatenate))
+        )
 
         // show that we can finish the append command, and then send another different command
-        XCTAssertNoThrow(try self.stateMachine.sendCommand(.append(.finish)))
+        self.assert(
+            [(.init(bytes: "\r\n", waitForContinuation: false), nil)],
+            try self.stateMachine.sendCommand(.append(.finish))
+        )
         XCTAssertNoThrow(try self.stateMachine.receiveResponse(.tagged(.init(tag: "A1", state: .ok(.init(code: nil, text: "OK"))))))
-        XCTAssertNoThrow(try self.stateMachine.sendCommand(.tagged(.init(tag: "A2", command: .noop))))
+        self.assert(
+            [(.init(bytes: "A2 NOOP\r\n", waitForContinuation: false), nil)],
+            try self.stateMachine.sendCommand(.tagged(.init(tag: "A2", command: .noop)))
+        )
     }
 
     func testAppeandPreloading() {
