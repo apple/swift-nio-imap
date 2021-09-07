@@ -50,8 +50,8 @@ extension ClientStateMachine {
                 return try self.handleTaggedResponse()
             }
         }
-        
-        mutating func receiveContinuationRequest(_ req: ContinuationRequest) throws {
+
+        mutating func receiveContinuationRequest(_: ContinuationRequest) throws {
             switch self.state {
             case .finished, .waitingForChallengeResponse:
                 throw UnexpectedResponse()

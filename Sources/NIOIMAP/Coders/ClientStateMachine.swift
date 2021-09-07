@@ -254,7 +254,7 @@ extension ClientStateMachine {
         var appendingStateMachine = appendingStateMachine
         try appendingStateMachine.receiveContinuationRequest(request)
         self.state = .appending(appendingStateMachine)
-        
+
         self.activeEncodeBuffer = nil
         self.activeWritePromise = nil
         if let (command, promise) = self.queuedCommands.popFirst() {
