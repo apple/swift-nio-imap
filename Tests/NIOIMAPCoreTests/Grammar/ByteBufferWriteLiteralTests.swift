@@ -24,7 +24,7 @@ extension ByteBufferWriteLiteralTests {
     func testWriteIMAPString_client() {
         let inputs: [(ByteBuffer, CommandEncodingOptions, [String], UInt)] = [
             ("", .rfc3501, ["\"\""], #line),
-            ("", .noQuoted, ["{0}\r\n", ""], #line),
+            ("", .noQuoted, ["{0}\r\n"], #line),
             ("abc", .rfc3501, [#""abc""#], #line),
             (ByteBuffer(ByteBufferView(repeating: UInt8(ascii: "\""), count: 1)), .rfc3501, ["{1}\r\n", "\""], #line),
             (ByteBuffer(ByteBufferView(repeating: UInt8(ascii: "\\"), count: 1)), .rfc3501, ["{1}\r\n", "\\"], #line),
@@ -71,7 +71,7 @@ extension ByteBufferWriteLiteralTests {
 extension ByteBufferWriteLiteralTests {
     func testWriteLiteral8() {
         let inputs: [(ByteBuffer, CommandEncodingOptions, [String], UInt)] = [
-            ("", .rfc3501, ["~{0}\r\n", ""], #line),
+            ("", .rfc3501, ["~{0}\r\n"], #line),
             ("abc", .rfc3501, ["~{3}\r\n", "abc"], #line),
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeLiteral8($0.readableBytesView) })

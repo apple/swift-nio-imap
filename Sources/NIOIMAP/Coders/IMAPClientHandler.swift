@@ -114,8 +114,9 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
     public func write(context: ChannelHandlerContext, data: NIOAny, promise: EventLoopPromise<Void>?) {
         let command = self.unwrapOutboundIn(data)
         do {
-            let chunks = try self.state.sendCommand(command, promise: promise)
-            self.writeChunks(chunks, context: context)
+            if let chunk = try self.state.sendCommand(command, promise: promise) {
+                self.writeChunk(chunk, context: context)
+            }
         } catch {
             context.fireErrorCaught(error)
             promise?.fail(error)
@@ -124,16 +125,19 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
 
     private func writeChunks(_ chunks: [(EncodeBuffer.Chunk, EventLoopPromise<Void>?)], context: ChannelHandlerContext) {
         guard chunks.count > 0 else { return }
-
-        for (chunk, promise) in chunks {
-            let outbound = self.wrapOutboundOut(chunk.bytes)
-            if chunk.waitForContinuation {
-                context.write(outbound).cascadeFailure(to: promise)
-            } else {
-                context.write(outbound, promise: promise)
-            }
+        chunks.forEach { chunk in
+            self.writeChunk(chunk, context: context)
         }
-        context.flush()
+    }
+    
+    private func writeChunk(_ chunk: (EncodeBuffer.Chunk, EventLoopPromise<Void>?), context: ChannelHandlerContext) {
+        let (chunk, promise) = chunk
+        let outbound = self.wrapOutboundOut(chunk.bytes)
+        if chunk.waitForContinuation {
+            context.write(outbound).cascadeFailure(to: promise)
+        } else {
+            context.write(outbound, promise: promise)
+        }
     }
 
     public func flush(context: ChannelHandlerContext) {

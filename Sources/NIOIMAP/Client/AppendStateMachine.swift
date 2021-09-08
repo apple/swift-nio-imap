@@ -96,7 +96,8 @@ extension ClientStateMachine {
             }
         }
 
-        mutating func sendCommand(_ command: CommandStreamPart) {
+        /// `true` if a continuation is required, otherwise `false`
+        mutating func sendCommand(_ command: CommandStreamPart) -> Bool {
             // we only care about append commands, obviously
             let appendCommand: AppendCommand
             switch command {
@@ -110,13 +111,13 @@ extension ClientStateMachine {
             case .waitingForTaggedResponse, .waitingForAppendContinuationRequest, .waitingForCatenateContinuationRequest, .finished:
                 preconditionFailure("Invalid state: \(self.state)")
             case .started:
-                self.sendCommand_startedState(appendCommand)
+                return self.sendCommand_startedState(appendCommand)
             case .sendingMessageBytes:
-                self.sendCommand_sendingMessageBytesState(appendCommand)
+                return self.sendCommand_sendingMessageBytesState(appendCommand)
             case .catenating:
-                self.sendCommand_catenatingState(appendCommand)
+                return self.sendCommand_catenatingState(appendCommand)
             case .sendingCatenateBytes:
-                self.sendCommand_sendingCatenateBytesState(appendCommand)
+                return self.sendCommand_sendingCatenateBytesState(appendCommand)
             }
         }
     }
@@ -125,55 +126,70 @@ extension ClientStateMachine {
 // MARK: - Send
 
 extension ClientStateMachine.Append {
-    private mutating func sendCommand_startedState(_ command: AppendCommand) {
+    
+    /// `true` if a continuation is required, otherwise `false`
+    private mutating func sendCommand_startedState(_ command: AppendCommand) -> Bool {
         switch command {
         case .start, .messageBytes, .endMessage, .catenateURL, .catenateData, .endCatenate:
             preconditionFailure("Invalid command for state: \(self.state)")
         case .beginMessage:
             self.state = .waitingForAppendContinuationRequest
+            return true
         case .beginCatenate:
             self.state = .catenating(sentFirstObject: false)
+            return false
         case .finish:
             if self.state == .started(canFinish: true) {
                 self.state = .waitingForTaggedResponse
+                return false
             } else {
                 preconditionFailure("Invalid command for state: \(self.state)")
             }
         }
     }
 
-    private mutating func sendCommand_sendingMessageBytesState(_ command: AppendCommand) {
+    /// `true` if a continuation is required, otherwise `false`
+    private mutating func sendCommand_sendingMessageBytesState(_ command: AppendCommand) -> Bool {
         switch command {
         case .start, .beginMessage, .beginCatenate, .catenateURL, .catenateData, .endCatenate, .finish:
             preconditionFailure("Invalid command for state: \(self.state)")
         case .endMessage:
             self.state = .started(canFinish: true)
+            return false
         case .messageBytes:
             self.state = .sendingMessageBytes // continue sending bytes until we're told to stop
+            return false
         }
     }
 
-    private mutating func sendCommand_catenatingState(_ command: AppendCommand) {
+    /// `true` if a continuation is required, otherwise `false`
+    private mutating func sendCommand_catenatingState(_ command: AppendCommand) -> Bool {
         switch command {
         case .start, .beginMessage, .beginCatenate, .messageBytes, .endMessage, .finish, .catenateData(.bytes), .catenateData(.end):
             preconditionFailure("Invalid command for state: \(self.state)")
         case .catenateURL:
             self.state = .catenating(sentFirstObject: true)
+            return false
         case .catenateData(.begin):
             self.state = .waitingForCatenateContinuationRequest
+            return true
         case .endCatenate:
             self.state = .started(canFinish: true)
+            return false
         }
     }
 
-    private mutating func sendCommand_sendingCatenateBytesState(_ command: AppendCommand) {
+    /// `true` if a continuation is required, otherwise `false`
+    private mutating func sendCommand_sendingCatenateBytesState(_ command: AppendCommand) -> Bool {
         switch command {
         case .start, .beginMessage, .beginCatenate, .endMessage, .catenateURL, .messageBytes, .finish, .endCatenate, .catenateData(.begin):
             preconditionFailure("Invalid command for state: \(self.state)")
         case .catenateData(.end):
             self.state = .catenating(sentFirstObject: true)
+            return false
         case .catenateData(.bytes):
             self.state = .sendingCatenateBytes // continue sending bytes until we're told to stop
+            return false
         }
     }
 }

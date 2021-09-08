@@ -531,6 +531,7 @@ class IMAPClientHandlerTests: XCTestCase {
 
         let literalPromise = self.writeOutbound(.append(.beginMessage(message: .init(options: .none, data: .init(byteCount: 5)))), wait: false)
         self.assertOutboundString(" {5}\r\n")
+        XCTAssertNoThrow(try literalPromise.wait())
 
         let p1 = self.writeOutbound(.append(.messageBytes("0")), wait: false)
         self.assertNoOutboundString()
@@ -549,8 +550,6 @@ class IMAPClientHandlerTests: XCTestCase {
 
         // send a continuation, we should now get outbound strings
         self.writeInbound("+ OK\r\n")
-        XCTAssertNoThrow(try literalPromise.wait())
-        self.assertOutboundString("")
         self.assertOutboundString("0")
         self.assertOutboundString("1")
         self.assertOutboundString("2")
