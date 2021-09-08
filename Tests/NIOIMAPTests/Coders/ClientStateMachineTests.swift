@@ -341,4 +341,16 @@ extension ClientStateMachineTests {
             (.init(bytes: "\r\n", waitForContinuation: false), nil),
         ]))
     }
+    
+    func testSendingAnAuthencationChallengeWhenUnexpectedThrows() {
+        XCTAssertThrowsError(try self.stateMachine.receiveResponse(.authenticationChallenge("challenge"))) { e in
+            XCTAssertTrue(e is UnexpectedResponse)
+        }
+    }
+    
+    func testSendingIdleStartedWhenUnexpectedThrows() {
+        XCTAssertThrowsError(try self.stateMachine.receiveResponse(.idleStarted)) { e in
+            XCTAssertTrue(e is UnexpectedResponse)
+        }
+    }
 }

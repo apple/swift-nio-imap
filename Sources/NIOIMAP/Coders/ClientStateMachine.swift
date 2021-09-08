@@ -185,10 +185,22 @@ struct ClientStateMachine {
             } else {
                 self.state = .appending(appendStateMachine)
             }
-        case .expectingNormalResponse:
-            break
         case .expectingLiteralContinuationRequest, .error:
             throw UnexpectedResponse()
+        
+        case .expectingNormalResponse:
+            switch response {
+            case .untagged, .fetch, .tagged:
+                // we expected a normal response and receievd a normal
+                // response, nothing to see here
+                break
+            case .fatal:
+                // if the server has sent a fatal then we shouldn't be able to do anything else
+                self.state = .error
+            case .authenticationChallenge, .idleStarted:
+                // we should be in a substate to be receiving these responses
+                throw UnexpectedResponse()
+            }
         }
     }
 
@@ -245,7 +257,9 @@ extension ClientStateMachine {
         // We need to get the client handler to fullfil the existing promise, but the bytes
         // will have already been written to the network. The `nextChunk` here will always be
         // empty.
-        var results = [(self.activeEncodeBuffer.buffer.nextChunk(), self.activeWritePromise)]
+        let nextBuffer = self.activeEncodeBuffer.buffer.nextChunk()
+        precondition(nextBuffer.bytes.readableBytes == 0 && !nextBuffer.waitForContinuation)
+        var results = [(nextBuffer, self.activeWritePromise)]
         self.activeEncodeBuffer = nil
         self.activeWritePromise = nil
 
@@ -406,7 +420,7 @@ extension ClientStateMachine {
         }
     }
 
-    /// Throws an error if more than one command is runnning, otherwise does nothing.
+    /// Throws an error if more than one command is running, otherwise does nothing.
     /// End users are required to ensure command pipelining compatibility.
     private func guardAgainstMultipleRunningCommands(_: CommandStreamPart) {
         precondition(self.activeCommandTags.count == 1)

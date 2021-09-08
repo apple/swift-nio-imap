@@ -42,6 +42,24 @@ extension ClientStateMachine {
             case .waitingForServer:
                 break
             }
+            
+            // Note the `authenticationChallenge` case below.
+            // An authenticationChallenge is really a continuationRequest,
+            // not a response. The only reason we have it in the
+            // response enum is that Johannes wanted continuations
+            // to be completely hidden from the end user (I agree
+            // with him), however this obviously isn't possible for
+            // authentication. The solution we came up with was to consume
+            // an authentication continuation request and deliver it as
+            // a response, meaning we don't need to expose the words
+            // "continuation request" to the user.
+
+            // The previous implementation took in this faux
+            // authenticationChallenge response case and treated
+            // it as a continuation request, however after
+            // reconsidering I figured it's probably nicer to
+            // just handle it as a continuation request, so I added
+            // the function below.
 
             switch response {
             case .untagged, .fetch, .fatal, .idleStarted, .authenticationChallenge:
