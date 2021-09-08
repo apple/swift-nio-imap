@@ -54,16 +54,15 @@ public struct InvalidCommandForState: Error, Equatable {
 // continuation logic once a command has been given the
 // ok.
 struct ClientStateMachine {
-    
     struct ActiveEncodeContext {
         private var buffer: CommandEncodeBuffer
         private var promise: EventLoopPromise<Void>?
-        
+
         init(buffer: CommandEncodeBuffer, promise: EventLoopPromise<Void>?) {
             self.buffer = buffer
             self.promise = promise
         }
-        
+
         mutating func drop() -> EventLoopPromise<Void>? {
             defer {
                 self.promise = nil
@@ -71,7 +70,7 @@ struct ClientStateMachine {
             }
             return self.promise
         }
-        
+
         mutating func nextChunk() -> (EncodeBuffer.Chunk, EventLoopPromise<Void>?) {
             let chunk = self.buffer.buffer.nextChunk()
             if chunk.waitForContinuation {
@@ -81,7 +80,7 @@ struct ClientStateMachine {
             return (chunk, promise)
         }
     }
-    
+
     enum ContinuationRequestAction: Equatable {
         case sendChunks([(EncodeBuffer.Chunk, EventLoopPromise<Void>?)])
         case fireIdleStarted
@@ -119,7 +118,7 @@ struct ClientStateMachine {
         /// we're waiting for the continuation request from the server
         /// before sending another chunk.
         case expectingLiteralContinuationRequest(ActiveEncodeContext)
-        
+
         /// An error has occurred and the connection should
         /// now be closed.
         case error
@@ -252,7 +251,6 @@ struct ClientStateMachine {
     /// Returns all of the promises for the writes that have not yet completed.
     /// These should probably be failed.
     mutating func channelInactive() -> [EventLoopPromise<Void>] {
-        
         var activeEncodeContext: ActiveEncodeContext?
         switch self.state {
         case .expectingNormalResponse, .error, .appending, .authenticating, .idle:
@@ -278,7 +276,6 @@ struct ClientStateMachine {
 // MARK: - Receive
 
 extension ClientStateMachine {
-    
     private mutating func receiveContinuationRequest_appending(request: ContinuationRequest) throws -> ContinuationRequestAction {
         guard case .appending(var appendingStateMachine) = self.state else {
             throw UnexpectedContinuationRequest()
@@ -345,7 +342,6 @@ extension ClientStateMachine {
 // MARK: - Send
 
 extension ClientStateMachine {
-
     private mutating func sendTaggedCommand(_ command: TaggedCommand, promise: EventLoopPromise<Void>?) -> (EncodeBuffer.Chunk, EventLoopPromise<Void>?) {
         guard case .expectingNormalResponse = self.state else {
             preconditionFailure("Invalid state: \(self.state)")
@@ -353,7 +349,7 @@ extension ClientStateMachine {
 
         let buffer = self.makeEncodeBuffer(.tagged(command))
         var context = ActiveEncodeContext(buffer: buffer, promise: promise)
-        
+
         switch command.command {
         case .idleStart:
             self.guardAgainstMultipleRunningCommands()
@@ -392,14 +388,13 @@ extension ClientStateMachine {
 
     /// Iterate through the current command queue until we reached the marked position
     /// or encounter a command that requires a continuation request to complete.
-    
+
     struct SendableChunks {
         var chunkPromisePairs: [(EncodeBuffer.Chunk, EventLoopPromise<Void>?)]
         var nextContext: ActiveEncodeContext?
     }
-    
+
     private mutating func extractSendableChunks(currentContext: ActiveEncodeContext? = nil) -> SendableChunks {
-        
         var results: [(EncodeBuffer.Chunk, EventLoopPromise<Void>?)] = []
         if var currentContext = currentContext {
             let (chunk, promise) = currentContext.nextChunk()
@@ -409,7 +404,7 @@ extension ClientStateMachine {
                 results.append((chunk, promise))
             }
         }
-        
+
         while let (command, promise) = self.queuedCommands.popFirst() {
             var buffer = self.makeEncodeBuffer(command)
             let chunk = buffer.buffer.nextChunk()
@@ -420,7 +415,7 @@ extension ClientStateMachine {
                 results.append((chunk, promise))
             }
         }
-        
+
         return .init(chunkPromisePairs: results, nextContext: nil)
     }
 
@@ -440,7 +435,6 @@ extension ClientStateMachine {
     }
 
     private mutating func sendNextCommand() -> (EncodeBuffer.Chunk, EventLoopPromise<Void>?)? {
-        
         guard let (command, promise) = self.queuedCommands.popFirst() else {
             preconditionFailure("You can't send a non-existent command")
         }
@@ -471,7 +465,7 @@ extension ClientStateMachine {
         guard case .expectingNormalResponse = self.state else {
             preconditionFailure("Invalid state: \(self.state)")
         }
-        
+
         switch command {
         case .idleDone, .continuationResponse:
             preconditionFailure("Invalid command for state")
@@ -534,7 +528,7 @@ extension ClientStateMachine {
             encodedAtLeastOneCatenateElement: appendingStateMachine.hasCatenatedAtLeastOneObject
         )
         encodeBuffer.writeCommandStream(.append(command))
-        
+
         let chunk = encodeBuffer.buffer.nextChunk()
         if appendingStateMachine.sendCommand(.append(command)) {
             fatalError("TODO")

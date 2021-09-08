@@ -126,7 +126,6 @@ extension ClientStateMachine {
 // MARK: - Send
 
 extension ClientStateMachine.Append {
-    
     /// `true` if a continuation is required, otherwise `false`
     private mutating func sendCommand_startedState(_ command: AppendCommand) -> Bool {
         switch command {

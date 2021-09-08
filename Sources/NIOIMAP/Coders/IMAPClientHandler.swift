@@ -129,7 +129,7 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
             self.writeChunk(chunk, context: context)
         }
     }
-    
+
     private func writeChunk(_ chunk: (EncodeBuffer.Chunk, EventLoopPromise<Void>?), context: ChannelHandlerContext) {
         let (chunk, promise) = chunk
         let outbound = self.wrapOutboundOut(chunk.bytes)

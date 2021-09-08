@@ -82,9 +82,9 @@ extension EncodeBuffer {
         /// Is a continuation request expected before this data can be written?
         public var waitForContinuation: Bool
     }
-    
+
     @_spi(NIOIMAPInternal) var hasChunks: Bool {
-        return self.stopPoints.count > 0
+        self.stopPoints.count > 0
     }
 
     /// Gets the next chunk that is ready to be written to the network.

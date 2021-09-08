@@ -34,7 +34,7 @@ class ClientStateMachineTests: XCTestCase {
         XCTAssertNoThrow(try self.stateMachine.sendCommand(.tagged(.init(tag: "A3", command: .login(username: "\\", password: "hey")))))
         XCTAssertNoThrow(try self.stateMachine.receiveContinuationRequest(.data("OK")))
         XCTAssertNoThrow(try self.stateMachine.receiveResponse(.tagged(.init(tag: "A3", state: .no(.init(text: "Invalid"))))))
-        
+
         // LOGIN two continuations
         XCTAssertNoThrow(try self.stateMachine.sendCommand(.tagged(.init(tag: "A3", command: .login(username: "\\", password: "\\")))))
         XCTAssertNoThrow(try self.stateMachine.receiveContinuationRequest(.data("OK")))
