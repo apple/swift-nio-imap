@@ -187,7 +187,7 @@ struct ClientStateMachine {
             }
         case .expectingLiteralContinuationRequest, .error:
             throw UnexpectedResponse()
-        
+
         case .expectingNormalResponse:
             switch response {
             case .untagged, .fetch, .tagged:

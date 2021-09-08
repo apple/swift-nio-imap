@@ -42,7 +42,7 @@ extension ClientStateMachine {
             case .waitingForServer:
                 break
             }
-            
+
             // Note the `authenticationChallenge` case below.
             // An authenticationChallenge is really a continuationRequest,
             // not a response. The only reason we have it in the
