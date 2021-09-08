@@ -164,11 +164,8 @@ struct ClientStateMachine {
         switch self.state {
         case .appending:
             return try self.receiveContinuationRequest_appending(request: req)
-        case .expectingLiteralContinuationRequest(let encodeContext):
-            return try self.receiveContinuationRequest_expectingLiteralContinuationRequest(
-                request: req,
-                encodeContext: encodeContext
-            )
+        case .expectingLiteralContinuationRequest:
+            return try self.receiveContinuationRequest_expectingLiteralContinuationRequest(request: req)
         case .authenticating:
             return try self.receiveContinuationRequest_authenticating(request: req)
         case .idle:
@@ -293,34 +290,27 @@ extension ClientStateMachine {
         if self.queuedCommands.isEmpty {
             return .sendChunks([])
         } else {
-            return .sendChunks(self.extractSendableChunks())
+            return .sendChunks(self.extractSendableChunks().chunkPromisePairs)
         }
     }
 
     private mutating func receiveContinuationRequest_expectingLiteralContinuationRequest(
-        request: ContinuationRequest,
-        encodeContext: ActiveEncodeContext
+        request: ContinuationRequest
     ) throws -> ContinuationRequestAction {
-        switch self.state {
-        case .expectingNormalResponse, .idle, .authenticating, .appending, .error:
+        guard case .expectingLiteralContinuationRequest(let context) = self.state else {
             throw UnexpectedContinuationRequest()
-        case .expectingLiteralContinuationRequest:
-            break
         }
 
-        self.state = .expectingNormalResponse
-        let result = self.extractSendableChunks()
+        let result = self.extractSendableChunks(currentContext: context)
 
-        // safe to bang as if we've successfully received a continuation request then there
-        // MUST be something to send
-        if result.last!.0.waitForContinuation { // we've found a continuation
-            let (encodeBuffer, promise) = result.last!
-//            self.state = .expectingLiteralContinuationRequest(ActiveEncodeContext(buffer: encodeBuffer, promise: promise))
-            fatalError("todo")
+        // safe to bang as if we've successfully received a
+        // continuation request then MUST be something to send
+        if let nextContext = result.nextContext { // we've found another continuation
+            self.state = .expectingLiteralContinuationRequest(nextContext)
         } else {
             self.state = .expectingNormalResponse
         }
-        return .sendChunks(result)
+        return .sendChunks(result.chunkPromisePairs)
     }
 
     private mutating func receiveContinuationRequest_authenticating(request: ContinuationRequest) throws -> ContinuationRequestAction {
@@ -402,8 +392,36 @@ extension ClientStateMachine {
 
     /// Iterate through the current command queue until we reached the marked position
     /// or encounter a command that requires a continuation request to complete.
-    private mutating func extractSendableChunks() -> [(EncodeBuffer.Chunk, EventLoopPromise<Void>?)] {
-        return []
+    
+    struct SendableChunks {
+        var chunkPromisePairs: [(EncodeBuffer.Chunk, EventLoopPromise<Void>?)]
+        var nextContext: ActiveEncodeContext?
+    }
+    
+    private mutating func extractSendableChunks(currentContext: ActiveEncodeContext? = nil) -> SendableChunks {
+        
+        var results: [(EncodeBuffer.Chunk, EventLoopPromise<Void>?)] = []
+        if var currentContext = currentContext {
+            let (chunk, promise) = currentContext.nextChunk()
+            if chunk.waitForContinuation {
+                return .init(chunkPromisePairs: [(chunk, promise)], nextContext: currentContext)
+            } else {
+                results.append((chunk, promise))
+            }
+        }
+        
+        while let (command, promise) = self.queuedCommands.popFirst() {
+            var buffer = self.makeEncodeBuffer(command)
+            let chunk = buffer.buffer.nextChunk()
+            if chunk.waitForContinuation {
+                results.append((chunk, nil))
+                return .init(chunkPromisePairs: results, nextContext: .init(buffer: buffer, promise: promise))
+            } else {
+                results.append((chunk, promise))
+            }
+        }
+        
+        return .init(chunkPromisePairs: results, nextContext: nil)
     }
 
     /// Throws an error if more than one command is running, otherwise does nothing.
