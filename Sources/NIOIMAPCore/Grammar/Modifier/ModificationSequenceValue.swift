@@ -92,7 +92,7 @@ extension ModificationSequenceValue: Strideable {
     /// - parameter n: How many to advance by.
     /// - returns: A new `ModificationSequenceValue`.
     public func advanced(by n: Int64) -> ModificationSequenceValue {
-        return ModificationSequenceValue(UInt64(Int64(self.value) + n))
+        ModificationSequenceValue(UInt64(Int64(self.value) + n))
     }
 }
 
