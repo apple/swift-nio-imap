@@ -34,12 +34,12 @@ extension GrammarParser {
 
         func parseMessageData_vanished(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageData {
             try PL.parseFixedString("VANISHED ", buffer: &buffer, tracker: tracker)
-            return .vanished(try self.parseSequenceSet(buffer: &buffer, tracker: tracker))
+            return .vanished(try self.parseUIDSet(buffer: &buffer, tracker: tracker))
         }
 
         func parseMessageData_vanishedEarlier(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageData {
             try PL.parseFixedString("VANISHED (EARLIER) ", buffer: &buffer, tracker: tracker)
-            return .vanishedEarlier(try self.parseSequenceSet(buffer: &buffer, tracker: tracker))
+            return .vanishedEarlier(try self.parseUIDSet(buffer: &buffer, tracker: tracker))
         }
 
         func parseMessageData_generateAuthorizedURL(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageData {

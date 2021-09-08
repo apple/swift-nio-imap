@@ -23,14 +23,14 @@ public enum MessageData: Equatable {
     /// The VANISHED UID FETCH modifier instructs the server to report those
     /// messages from the UID set parameter that have been expunged and whose
     /// associated mod-sequence is larger than the specified mod-sequence.
-    case vanished(LastCommandSet<SequenceRangeSet>)
+    case vanished(UIDSet)
 
     /// RFC 7162 Condstore
     /// The VANISHED (EARLIER) response is caused by a UID FETCH (VANISHED)
     /// or a SELECT/EXAMINE (QRESYNC) command.  This response is sent if the
     /// UID set parameter to the UID FETCH (VANISHED) command includes UIDs
     /// of messages that are no longer in the mailbox.
-    case vanishedEarlier(LastCommandSet<SequenceRangeSet>)
+    case vanishedEarlier(UIDSet)
 
     /// An array of URLAUTH-authorized URLs
     case generateAuthorizedURL([ByteBuffer])
@@ -47,9 +47,9 @@ extension EncodeBuffer {
         case .expunge(let number):
             return self.writeSequenceNumber(number) + self.writeString(" EXPUNGE")
         case .vanished(let set):
-            return self.writeString("VANISHED ") + self.writeLastCommandSet(set)
+            return self.writeString("VANISHED ") + self.writeUIDSet(set)
         case .vanishedEarlier(let set):
-            return self.writeString("VANISHED (EARLIER) ") + self.writeLastCommandSet(set)
+            return self.writeString("VANISHED (EARLIER) ") + self.writeUIDSet(set)
         case .generateAuthorizedURL(let array):
             return self.writeString("GENURLAUTH") +
                 self.writeArray(array, prefix: " ", parenthesis: false) { data, buffer in
