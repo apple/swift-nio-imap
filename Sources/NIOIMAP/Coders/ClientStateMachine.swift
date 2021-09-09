@@ -20,9 +20,8 @@ public struct InvalidClientState: Error {
 }
 
 public struct UnexpectedResponse: Error {
-    
     public var activePromise: EventLoopPromise<Void>?
-    
+
     public init(activePromise: EventLoopPromise<Void>?) {
         self.activePromise = activePromise
     }
@@ -56,9 +55,9 @@ struct OutgoingChunk: Equatable {
     var bytes: ByteBuffer
     var promise: EventLoopPromise<Void>?
     var shouldSucceedPromise: Bool
- 
+
     static func == (lhs: OutgoingChunk, rhs: OutgoingChunk) -> Bool {
-        return lhs.shouldSucceedPromise == rhs.shouldSucceedPromise && lhs.bytes == rhs.bytes && lhs.promise?.futureResult === rhs.promise?.futureResult
+        lhs.shouldSucceedPromise == rhs.shouldSucceedPromise && lhs.bytes == rhs.bytes && lhs.promise?.futureResult === rhs.promise?.futureResult
     }
 }
 
@@ -91,9 +90,9 @@ struct ClientStateMachine {
             let promise = self.promise
             return .init(bytes: chunk.bytes, promise: promise, shouldSucceedPromise: !chunk.waitForContinuation)
         }
-        
+
         static func == (lhs: ClientStateMachine.ActiveEncodeContext, rhs: ClientStateMachine.ActiveEncodeContext) -> Bool {
-            return lhs.buffer == rhs.buffer && lhs.promise?.futureResult == rhs.promise?.futureResult
+            lhs.buffer == rhs.buffer && lhs.promise?.futureResult == rhs.promise?.futureResult
         }
     }
 
@@ -104,7 +103,6 @@ struct ClientStateMachine {
     }
 
     enum State: Equatable {
-        
         /// We're expecting either a tagged or untagged response
         case expectingNormalResponse
 
@@ -145,7 +143,7 @@ struct ClientStateMachine {
     init(encodingOptions: CommandEncodingOptions) {
         self.encodingOptions = encodingOptions
     }
-    
+
     mutating func handlerAdded(_ allocator: ByteBufferAllocator) {
         self.allocator = allocator
     }
@@ -180,7 +178,7 @@ struct ClientStateMachine {
     /// will never result in the client having to perform some action.
     mutating func receiveResponse(_ response: Response) throws {
         precondition(self.state != .error, "Already in an error state, make sure to handle errors.")
-        
+
         do {
             return try self._receiveResponse(response)
         } catch {
@@ -213,7 +211,7 @@ struct ClientStateMachine {
         case .expectingLiteralContinuationRequest(var context):
             let promise = context.drop()
             throw UnexpectedResponse(activePromise: promise)
-            
+
         case .error:
             throw UnexpectedResponse(activePromise: nil)
 
@@ -237,7 +235,7 @@ struct ClientStateMachine {
     /// We then return any chunks that can be written.
     mutating func sendCommand(_ command: CommandStreamPart, promise: EventLoopPromise<Void>? = nil) throws -> OutgoingChunk? {
         precondition(self.state != .error, "Already in error state, make sure to handle appropriately")
-        
+
         if let tag = command.tag {
             let (inserted, _) = self.activeCommandTags.insert(tag)
             guard inserted else {
@@ -245,9 +243,8 @@ struct ClientStateMachine {
             }
         }
         self.queuedCommands.append((command, promise))
-        
+
         if let result = self.sendNextCommand() {
-            
             // We only bother with "first" as:
             // 1. if first has a continuation then we will be in the continuation state
             // 2. if first doesn't have a continuation then there won't be a next chunk
@@ -297,7 +294,7 @@ struct ClientStateMachine {
 extension ClientStateMachine {
     private mutating func receiveContinuationRequest_appending(request: ContinuationRequest) throws -> ContinuationRequestAction {
         guard case .appending(var appendingStateMachine, pendingContinuation: let pendingContinuation) = self.state else {
-            preconditionFailure("Invalid state: \(state)")
+            preconditionFailure("Invalid state: \(self.state)")
         }
         precondition(pendingContinuation)
 
@@ -310,9 +307,9 @@ extension ClientStateMachine {
         request: ContinuationRequest
     ) -> ContinuationRequestAction {
         guard case .expectingLiteralContinuationRequest(let context) = self.state else {
-            preconditionFailure("Invalid state: \(state)")
+            preconditionFailure("Invalid state: \(self.state)")
         }
-        
+
         self.state = .expectingNormalResponse
         let result = self.extractSendableChunks(currentContext: context)
 
@@ -328,7 +325,7 @@ extension ClientStateMachine {
 
     private mutating func receiveContinuationRequest_authenticating(request: ContinuationRequest) throws -> ContinuationRequestAction {
         guard case .authenticating(var authenticatingStateMachine) = self.state else {
-            preconditionFailure("Invalid state: \(state)")
+            preconditionFailure("Invalid state: \(self.state)")
         }
 
         switch request {
@@ -345,7 +342,7 @@ extension ClientStateMachine {
 
     private mutating func receiveContinuationRequest_idle(request: ContinuationRequest) throws -> ContinuationRequestAction {
         guard case .idle(var idleStateMachine) = self.state else {
-            preconditionFailure("Invalid state: \(state)")
+            preconditionFailure("Invalid state: \(self.state)")
         }
 
         // A continuation when in idle state means it's been confirmed
@@ -360,7 +357,7 @@ extension ClientStateMachine {
 extension ClientStateMachine {
     private mutating func sendTaggedCommand(_ command: TaggedCommand, promise: EventLoopPromise<Void>?) -> SendableChunks {
         guard case .expectingNormalResponse = self.state else {
-            preconditionFailure("Invalid state: \(state)")
+            preconditionFailure("Invalid state: \(self.state)")
         }
 
         let buffer = self.makeEncodeBuffer(.tagged(command))
@@ -377,7 +374,7 @@ extension ClientStateMachine {
             return .init(chunks: [context.nextChunk()], nextContext: nil)
         default:
             let chunk = context.nextChunk()
-            
+
             // if we're meant to succeed the promise then there can't be any next context
             if chunk.shouldSucceedPromise {
                 precondition(context.nextChunk().bytes.readableBytes == 0)
@@ -392,7 +389,7 @@ extension ClientStateMachine {
 
     private mutating func sendAppendCommand(_ command: AppendCommand, promise: EventLoopPromise<Void>?) -> SendableChunks {
         guard case .expectingNormalResponse = self.state else {
-            preconditionFailure("Invalid state: \(state)")
+            preconditionFailure("Invalid state: \(self.state)")
         }
 
         // no other commands can be running when we start appending
@@ -451,18 +448,17 @@ extension ClientStateMachine {
     }
 
     private mutating func sendNextCommand() -> SendableChunks? {
-        
         switch self.state {
         case .appending(_, pendingContinuation: let pendingContinuation):
             if pendingContinuation {
-               return nil
+                return nil
             }
         case .expectingLiteralContinuationRequest:
             return nil
         case .expectingNormalResponse, .idle, .authenticating, .error:
             break
         }
-        
+
         guard let (command, promise) = self.queuedCommands.popFirst() else {
             preconditionFailure("You can't send a non-existent command")
         }
@@ -491,7 +487,7 @@ extension ClientStateMachine {
     /// to send, or we find a chunk that requires a continuation request.
     private mutating func sendNextCommand_expectingNormalResponse(command: CommandStreamPart, promise: EventLoopPromise<Void>?) -> SendableChunks {
         guard case .expectingNormalResponse = self.state else {
-            preconditionFailure("Invalid state: \(state)")
+            preconditionFailure("Invalid state: \(self.state)")
         }
 
         switch command {
@@ -509,7 +505,7 @@ extension ClientStateMachine {
     /// to wait for a continuation request.
     private mutating func sendNextCommand_idle(command: CommandStreamPart, promise: EventLoopPromise<Void>?) -> SendableChunks {
         guard case .idle(var idleStateMachine) = self.state else {
-            preconditionFailure("Invalid state: \(state)")
+            preconditionFailure("Invalid state: \(self.state)")
         }
         guard command == .idleDone else {
             preconditionFailure("Invalid command when idle \(command)")
@@ -527,7 +523,7 @@ extension ClientStateMachine {
     /// no need to wait for a continuation request.
     private mutating func sendNextCommand_authenticating(command: CommandStreamPart, promise: EventLoopPromise<Void>?) -> SendableChunks {
         guard case .authenticating(var authenticatingStateMachine) = self.state else {
-            preconditionFailure("Invalid state: \(state)")
+            preconditionFailure("Invalid state: \(self.state)")
         }
         guard case .continuationResponse(let data) = command else {
             preconditionFailure("Continuation responses only")
@@ -546,12 +542,12 @@ extension ClientStateMachine {
     /// request, otherwise we can send the command and continue.
     private mutating func sendNextCommand_appending(command: CommandStreamPart, promise: EventLoopPromise<Void>?) -> SendableChunks? {
         guard case .appending(var appendingStateMachine, pendingContinuation: let pendingContinuation) = self.state else {
-            preconditionFailure("Invalid state: \(state)")
+            preconditionFailure("Invalid state: \(self.state)")
         }
         guard case .append(let command) = command else {
             preconditionFailure("Append commands only in this state")
         }
-        
+
         // If we're pending a continuation (e.g. after sending a message literal header)
         // then we can't write the command yet.
         guard !pendingContinuation else {
@@ -568,7 +564,7 @@ extension ClientStateMachine {
         let chunkRequiresContinuation = appendingStateMachine.sendCommand(.append(command))
         let chunk = encodeBuffer.buffer.nextChunk()
         self.state = .appending(appendingStateMachine, pendingContinuation: chunkRequiresContinuation)
-        
+
         // We always need append commands to be sent instantly so we can receive continuations
         // so the write promise should always be succeeded.
         return .init(chunks: [.init(bytes: chunk.bytes, promise: promise, shouldSucceedPromise: true)], nextContext: nil)

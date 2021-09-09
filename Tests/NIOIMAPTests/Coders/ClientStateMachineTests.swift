@@ -102,7 +102,7 @@ class ClientStateMachineTests: XCTestCase {
         XCTAssertNoThrow(result3 = try self.stateMachine.receiveContinuationRequest(.data("OK")))
         XCTAssertEqual(result3, .sendChunks([
             .init(bytes: "\\ \"pass\"\r\n", promise: nil, shouldSucceedPromise: true),
-            .init(bytes: "A2 NOOP\r\n", promise: nil, shouldSucceedPromise: true)
+            .init(bytes: "A2 NOOP\r\n", promise: nil, shouldSucceedPromise: true),
         ]))
     }
 
@@ -322,7 +322,7 @@ extension ClientStateMachineTests {
 
         var resultAction: ClientStateMachine.ContinuationRequestAction!
         XCTAssertNoThrow(resultAction = try self.stateMachine.receiveContinuationRequest(.data("OK")))
-        
+
         XCTAssertEqual(resultAction, .sendChunks([
             .init(bytes: "0", promise: nil, shouldSucceedPromise: true),
             .init(bytes: "1", promise: nil, shouldSucceedPromise: true),
