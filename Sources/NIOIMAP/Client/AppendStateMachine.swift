@@ -77,7 +77,7 @@ extension ClientStateMachine {
 
             switch response {
             case .untagged, .fetch, .fatal, .authenticationChallenge, .idleStarted:
-                throw UnexpectedResponse()
+                throw UnexpectedResponse(activePromise: nil)
             case .tagged:
                 self.state = .finished
                 return true

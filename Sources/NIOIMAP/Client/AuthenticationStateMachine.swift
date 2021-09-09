@@ -38,7 +38,7 @@ extension ClientStateMachine {
         mutating func receiveResponse(_ response: Response) throws -> Bool {
             switch self.state {
             case .finished, .waitingForChallengeResponse:
-                throw UnexpectedResponse()
+                throw UnexpectedResponse(activePromise: nil)
             case .waitingForServer:
                 break
             }
@@ -63,7 +63,7 @@ extension ClientStateMachine {
 
             switch response {
             case .untagged, .fetch, .fatal, .idleStarted, .authenticationChallenge:
-                throw UnexpectedResponse()
+                throw UnexpectedResponse(activePromise: nil)
             case .tagged:
                 return try self.handleTaggedResponse()
             }
@@ -72,7 +72,7 @@ extension ClientStateMachine {
         mutating func receiveContinuationRequest(_: ContinuationRequest) throws {
             switch self.state {
             case .finished, .waitingForChallengeResponse:
-                throw UnexpectedResponse()
+                throw UnexpectedResponse(activePromise: nil)
             case .waitingForServer:
                 break
             }

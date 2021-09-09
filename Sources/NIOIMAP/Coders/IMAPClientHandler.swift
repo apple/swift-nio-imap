@@ -61,6 +61,9 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
             try self.decoder.process(buffer: data) { response in
                 try self.handleResponseOrContinuationRequest(response, context: context)
             }
+        } catch let error as UnexpectedResponse {
+            error.activePromise?.fail(error)
+            context.fireErrorCaught(error)
         } catch {
             context.fireErrorCaught(error)
         }

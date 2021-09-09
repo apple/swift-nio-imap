@@ -20,7 +20,12 @@ public struct InvalidClientState: Error {
 }
 
 public struct UnexpectedResponse: Error {
-    public init() {}
+    
+    var activePromise: EventLoopPromise<Void>?
+    
+    public init(activePromise: EventLoopPromise<Void>?) {
+        self.activePromise = activePromise
+    }
 }
 
 public struct UnexpectedChunk: Error {
@@ -163,7 +168,7 @@ struct ClientStateMachine {
         case .appending:
             return try self.receiveContinuationRequest_appending(request: req)
         case .expectingLiteralContinuationRequest:
-            return try self.receiveContinuationRequest_expectingLiteralContinuationRequest(request: req)
+            return self.receiveContinuationRequest_expectingLiteralContinuationRequest(request: req)
         case .authenticating:
             return try self.receiveContinuationRequest_authenticating(request: req)
         case .idle:
@@ -189,7 +194,7 @@ struct ClientStateMachine {
     mutating func _receiveResponse(_ response: Response) throws {
         if let tag = response.tag {
             guard self.activeCommandTags.remove(tag) != nil else {
-                throw UnexpectedResponse()
+                throw UnexpectedResponse(activePromise: nil)
             }
         }
 
@@ -209,13 +214,17 @@ struct ClientStateMachine {
             } else {
                 self.state = .appending(appendStateMachine, pendingContinuation: false)
             }
-        case .expectingLiteralContinuationRequest, .error:
-            throw UnexpectedResponse()
+        case .expectingLiteralContinuationRequest(var context):
+            let promise = context.drop()
+            throw UnexpectedResponse(activePromise: promise)
+            
+        case .error:
+            throw UnexpectedResponse(activePromise: nil)
 
         case .expectingNormalResponse:
             switch response {
             case .untagged, .fetch, .tagged:
-                // we expected a normal response and receievd a normal
+                // we expected a normal response and received a normal
                 // response, nothing to see here
                 break
             case .fatal:
@@ -223,7 +232,7 @@ struct ClientStateMachine {
                 self.state = .error
             case .authenticationChallenge, .idleStarted:
                 // we should be in a substate to be receiving these responses
-                throw UnexpectedResponse()
+                throw UnexpectedResponse(activePromise: nil)
             }
         }
     }
@@ -286,7 +295,7 @@ struct ClientStateMachine {
 extension ClientStateMachine {
     private mutating func receiveContinuationRequest_appending(request: ContinuationRequest) throws -> ContinuationRequestAction {
         guard case .appending(var appendingStateMachine, pendingContinuation: _ /* always false */) = self.state else {
-            throw UnexpectedContinuationRequest()
+            preconditionFailure("Expected to be in appending state")
         }
 
         try appendingStateMachine.receiveContinuationRequest(request)
@@ -301,9 +310,9 @@ extension ClientStateMachine {
 
     private mutating func receiveContinuationRequest_expectingLiteralContinuationRequest(
         request: ContinuationRequest
-    ) throws -> ContinuationRequestAction {
+    ) -> ContinuationRequestAction {
         guard case .expectingLiteralContinuationRequest(let context) = self.state else {
-            throw UnexpectedContinuationRequest()
+            preconditionFailure("Expected literal continuation state")
         }
         
         self.state = .expectingNormalResponse
@@ -321,7 +330,7 @@ extension ClientStateMachine {
 
     private mutating func receiveContinuationRequest_authenticating(request: ContinuationRequest) throws -> ContinuationRequestAction {
         guard case .authenticating(var authenticatingStateMachine) = self.state else {
-            throw UnexpectedContinuationRequest()
+            preconditionFailure("Expected authenticating state")
         }
 
         switch request {

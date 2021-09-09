@@ -567,6 +567,16 @@ class IMAPClientHandlerTests: XCTestCase {
         XCTAssertNoThrow(try p6.wait())
         XCTAssertNoThrow(try p7.wait())
     }
+    
+    func testPromiseIsntLeakedOnUnexpectedResponse() {
+        // We need to get into a state where we are
+        // expecting a continuation, but actually
+        // receive a response.
+        let promise = self.writeOutbound(.tagged(.init(tag: "A1", command: .login(username: "\\", password: "test"))), wait: false)
+        self.assertOutboundBuffer("A1 LOGIN {1}\r\n")
+        XCTAssertThrowsError(try self.channel.writeInbound(ByteBuffer("A1 OK\r\n")))
+        XCTAssertThrowsError(try promise.wait())
+    }
 
     // MARK: - setup / tear down
 
