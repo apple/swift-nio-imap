@@ -203,7 +203,8 @@ struct ClientStateMachine {
         case .authenticating(var authStateMachine):
             try authStateMachine.receiveResponse(response)
             self.state = .expectingNormalResponse
-        case .appending(var appendStateMachine, pendingContinuation: _ /*always false*/):
+        case .appending(var appendStateMachine, pendingContinuation: let pendingContinuation):
+            precondition(!pendingContinuation)
             if try appendStateMachine.receiveResponse(response) {
                 self.state = .expectingNormalResponse
             } else {
@@ -246,6 +247,10 @@ struct ClientStateMachine {
         self.queuedCommands.append((command, promise))
         
         if let result = self.sendNextCommand() {
+            
+            // We only bother with "first" as:
+            // 1. if first has a continuation then we will be in the continuation state
+            // 2. if first doesn't have a continuation then there won't be a next chunk
             guard let first = result.chunks.first else {
                 preconditionFailure("Somehow we have a result without any chunks to send")
             }
@@ -291,18 +296,14 @@ struct ClientStateMachine {
 
 extension ClientStateMachine {
     private mutating func receiveContinuationRequest_appending(request: ContinuationRequest) throws -> ContinuationRequestAction {
-        guard case .appending(var appendingStateMachine, pendingContinuation: _ /* always false */) = self.state else {
+        guard case .appending(var appendingStateMachine, pendingContinuation: let pendingContinuation) = self.state else {
             preconditionFailure("Invalid state: \(state)")
         }
+        precondition(pendingContinuation)
 
         try appendingStateMachine.receiveContinuationRequest(request)
         self.state = .appending(appendingStateMachine, pendingContinuation: false)
-
-        if self.queuedCommands.isEmpty {
-            return .sendChunks([])
-        } else {
-            return .sendChunks(self.extractSendableChunks().chunks)
-        }
+        return .sendChunks(self.extractSendableChunks().chunks)
     }
 
     private mutating func receiveContinuationRequest_expectingLiteralContinuationRequest(

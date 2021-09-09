@@ -15,7 +15,6 @@
 import struct NIO.ByteBuffer
 import struct NIO.ByteBufferView
 import struct NIO.CircularBuffer
-import SwiftUI
 
 /// A buffer that handles encoding of Swift types into IMAP commands/responses that
 /// will be sent/recieved by clients and servers.
