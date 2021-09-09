@@ -67,18 +67,18 @@ class ClientStateMachineTests: XCTestCase {
         let command = TaggedCommand(tag: "A1", command: .login(username: "\\", password: "\\"))
 
         // send the command, the state machine should tell us to send the first chunk
-        var result: (EncodeBuffer.Chunk, EventLoopPromise<Void>?)?
+        var result: OutgoingChunk?
         XCTAssertNoThrow(result = try self.stateMachine.sendCommand(.tagged(command)))
-        XCTAssertEqual(result?.0.bytes, "A1 LOGIN {1}\r\n")
+        XCTAssertEqual(result?.bytes, "A1 LOGIN {1}\r\n")
 
         // receive a continuation, we should then send another chunk
         var action: ClientStateMachine.ContinuationRequestAction!
         XCTAssertNoThrow(action = try self.stateMachine.receiveContinuationRequest(.data("OK")))
-        XCTAssertEqual(action, .sendChunks([(.init(bytes: "\\ {1}\r\n", waitForContinuation: true), nil)]))
+        XCTAssertEqual(action, .sendChunks([.init(bytes: "\\ {1}\r\n", promise: nil, shouldSucceedPromise: false)]))
 
         // receive a continuation again
         XCTAssertNoThrow(action = try self.stateMachine.receiveContinuationRequest(.data("OK")))
-        XCTAssertEqual(action, .sendChunks([(.init(bytes: "\\\r\n", waitForContinuation: false), nil)]))
+        XCTAssertEqual(action, .sendChunks([.init(bytes: "\\\r\n", promise: nil, shouldSucceedPromise: true)]))
 
         // this time we expect a tagged response, so let's send one
         XCTAssertNoThrow(try self.stateMachine.receiveResponse(.tagged(.init(tag: "A1", state: .ok(.init(text: "OK"))))))
@@ -87,21 +87,22 @@ class ClientStateMachineTests: XCTestCase {
     func testChunkingMultipleCommands() {
         let command = TaggedCommand(tag: "A1", command: .login(username: "\\", password: "pass"))
 
-        var result1: (EncodeBuffer.Chunk, EventLoopPromise<Void>?)?
+        var result1: OutgoingChunk?
         XCTAssertNoThrow(result1 = try self.stateMachine.sendCommand(.tagged(command)))
-        XCTAssertEqual(result1!.0.bytes, "A1 LOGIN {1}\r\n")
+        XCTAssertEqual(result1!.bytes, "A1 LOGIN {1}\r\n")
 
         // We haven't yet continued the first command
         // so we shouldn't get anything back here.
-        var result2: (EncodeBuffer.Chunk, EventLoopPromise<Void>?)?
+        var result2: OutgoingChunk?
         XCTAssertNoThrow(result2 = try self.stateMachine.sendCommand(.tagged(.init(tag: "A2", command: .noop))))
+        XCTAssertNil(result2)
         self.stateMachine.flush()
 
         var result3: ClientStateMachine.ContinuationRequestAction!
         XCTAssertNoThrow(result3 = try self.stateMachine.receiveContinuationRequest(.data("OK")))
         XCTAssertEqual(result3, .sendChunks([
-            (.init(bytes: "\\ \"pass\"\r\n", waitForContinuation: false), nil),
-            (.init(bytes: "A2 NOOP\r\n", waitForContinuation: false), nil),
+            .init(bytes: "\\ \"pass\"\r\n", promise: nil, shouldSucceedPromise: true),
+            .init(bytes: "A2 NOOP\r\n", promise: nil, shouldSucceedPromise: true)
         ]))
     }
 
@@ -207,27 +208,28 @@ extension ClientStateMachineTests {
 
 extension ClientStateMachineTests {
     func assert(
-        _ expected: (EncodeBuffer.Chunk, EventLoopPromise<Void>?),
-        _ closure: @autoclosure () throws -> (EncodeBuffer.Chunk, EventLoopPromise<Void>?)?,
+        _ expected: OutgoingChunk,
+        _ closure: @autoclosure () throws -> OutgoingChunk?,
         line: UInt = #line
     ) {
-        var result: (EncodeBuffer.Chunk, EventLoopPromise<Void>?)?
+        var result: OutgoingChunk?
         XCTAssertNoThrow(result = try closure(), line: line)
 
-        XCTAssertTrue(expected.1?.futureResult === result?.1?.futureResult, line: line)
-        XCTAssertEqual(expected.0, result?.0, line: line)
+        XCTAssertTrue(expected.promise?.futureResult === result?.promise?.futureResult, line: line)
+        XCTAssertEqual(expected.bytes, result?.bytes, line: line)
+        XCTAssertEqual(expected.shouldSucceedPromise, result?.shouldSucceedPromise, line: line)
     }
 
     func testAppendWorflow_normal() {
         // start the append command
         self.assert(
-            (.init(bytes: "A1 APPEND \"INBOX\"", waitForContinuation: false), nil),
+            .init(bytes: "A1 APPEND \"INBOX\"", promise: nil, shouldSucceedPromise: true),
             try self.stateMachine.sendCommand(.append(.start(tag: "A1", appendingTo: .inbox)))
         )
 
         // append a message
         self.assert(
-            (.init(bytes: " {10}\r\n", waitForContinuation: true), nil),
+            .init(bytes: " {10}\r\n", promise: nil, shouldSucceedPromise: false),
             try self.stateMachine.sendCommand(.append(.beginMessage(message: .init(options: .init(), data: .init(byteCount: 10)))))
         )
         XCTAssertNoThrow(XCTAssertEqual(
@@ -235,72 +237,72 @@ extension ClientStateMachineTests {
             .sendChunks([])
         ))
         self.assert(
-            (.init(bytes: "01234", waitForContinuation: false), nil),
+            .init(bytes: "01234", promise: nil, shouldSucceedPromise: true),
             try self.stateMachine.sendCommand(.append(.messageBytes("01234")))
         )
         self.assert(
-            (.init(bytes: "56789", waitForContinuation: false), nil),
+            .init(bytes: "56789", promise: nil, shouldSucceedPromise: true),
             try self.stateMachine.sendCommand(.append(.messageBytes("56789")))
         )
         self.assert(
-            (.init(bytes: "", waitForContinuation: false), nil),
+            .init(bytes: "", promise: nil, shouldSucceedPromise: true),
             try self.stateMachine.sendCommand(.append(.endMessage))
         )
 
         // catenate some urls and a message
         self.assert(
-            (.init(bytes: " CATENATE (", waitForContinuation: false), nil),
+            .init(bytes: " CATENATE (", promise: nil, shouldSucceedPromise: true),
             try self.stateMachine.sendCommand(.append(.beginCatenate(options: .init())))
         )
         self.assert(
-            (.init(bytes: "URL \"url1\"", waitForContinuation: false), nil),
+            .init(bytes: "URL \"url1\"", promise: nil, shouldSucceedPromise: true),
             try self.stateMachine.sendCommand(.append(.catenateURL("url1")))
         )
         self.assert(
-            (.init(bytes: " URL \"url2\"", waitForContinuation: false), nil),
+            .init(bytes: " URL \"url2\"", promise: nil, shouldSucceedPromise: true),
             try self.stateMachine.sendCommand(.append(.catenateURL("url2")))
         )
         self.assert(
-            (.init(bytes: " TEXT {10}\r\n", waitForContinuation: true), nil),
+            .init(bytes: " TEXT {10}\r\n", promise: nil, shouldSucceedPromise: false),
             try self.stateMachine.sendCommand(.append(.catenateData(.begin(size: 10))))
         )
         XCTAssertNoThrow(try self.stateMachine.receiveContinuationRequest(.data("ready2")))
         self.assert(
-            (.init(bytes: "01234", waitForContinuation: false), nil),
+            .init(bytes: "01234", promise: nil, shouldSucceedPromise: true),
             try self.stateMachine.sendCommand(.append(.catenateData(.bytes("01234"))))
         )
         self.assert(
-            (.init(bytes: "56789", waitForContinuation: false), nil),
+            .init(bytes: "56789", promise: nil, shouldSucceedPromise: true),
             try self.stateMachine.sendCommand(.append(.catenateData(.bytes("56789"))))
         )
         self.assert(
-            (.init(bytes: "", waitForContinuation: false), nil),
+            .init(bytes: "", promise: nil, shouldSucceedPromise: true),
             try self.stateMachine.sendCommand(.append(.catenateData(.end)))
         )
         self.assert(
-            (.init(bytes: ")", waitForContinuation: false), nil),
+            .init(bytes: ")", promise: nil, shouldSucceedPromise: true),
             try self.stateMachine.sendCommand(.append(.endCatenate))
         )
 
         // show that we can finish the append command, and then send another different command
         self.assert(
-            (.init(bytes: "\r\n", waitForContinuation: false), nil),
+            .init(bytes: "\r\n", promise: nil, shouldSucceedPromise: true),
             try self.stateMachine.sendCommand(.append(.finish))
         )
         XCTAssertNoThrow(try self.stateMachine.receiveResponse(.tagged(.init(tag: "A1", state: .ok(.init(code: nil, text: "OK"))))))
         self.assert(
-            (.init(bytes: "A2 NOOP\r\n", waitForContinuation: false), nil),
+            .init(bytes: "A2 NOOP\r\n", promise: nil, shouldSucceedPromise: true),
             try self.stateMachine.sendCommand(.tagged(.init(tag: "A2", command: .noop)))
         )
     }
 
     func testAppeandPreloading() {
-        var result: (EncodeBuffer.Chunk, EventLoopPromise<Void>?)?
+        var result: OutgoingChunk?
         XCTAssertNoThrow(result = try self.stateMachine.sendCommand(.append(.start(tag: "A1", appendingTo: .inbox))))
-        XCTAssertEqual(result?.0, .init(bytes: "A1 APPEND \"INBOX\"", waitForContinuation: false))
+        XCTAssertEqual(result, .init(bytes: "A1 APPEND \"INBOX\"", promise: nil, shouldSucceedPromise: true))
 
         XCTAssertNoThrow(result = try self.stateMachine.sendCommand(.append(.beginMessage(message: .init(options: .none, data: .init(byteCount: 5))))))
-        XCTAssertEqual(result?.0, .init(bytes: " {5}\r\n", waitForContinuation: true))
+        XCTAssertEqual(result, .init(bytes: " {5}\r\n", promise: nil, shouldSucceedPromise: false))
 
         XCTAssertNoThrow(result = try self.stateMachine.sendCommand(.append(.messageBytes("0"))))
         XCTAssertNil(result)
@@ -320,15 +322,19 @@ extension ClientStateMachineTests {
 
         var resultAction: ClientStateMachine.ContinuationRequestAction!
         XCTAssertNoThrow(resultAction = try self.stateMachine.receiveContinuationRequest(.data("OK")))
+        
+        guard case .sendChunks(let chunks) = resultAction else {
+            fatalError()
+        }
+        
         XCTAssertEqual(resultAction, .sendChunks([
-            (.init(bytes: "", waitForContinuation: false), nil),
-            (.init(bytes: "0", waitForContinuation: false), nil),
-            (.init(bytes: "1", waitForContinuation: false), nil),
-            (.init(bytes: "2", waitForContinuation: false), nil),
-            (.init(bytes: "3", waitForContinuation: false), nil),
-            (.init(bytes: "4", waitForContinuation: false), nil),
-            (.init(bytes: "", waitForContinuation: false), nil),
-            (.init(bytes: "\r\n", waitForContinuation: false), nil),
+            .init(bytes: "0", promise: nil, shouldSucceedPromise: true),
+            .init(bytes: "1", promise: nil, shouldSucceedPromise: true),
+            .init(bytes: "2", promise: nil, shouldSucceedPromise: true),
+            .init(bytes: "3", promise: nil, shouldSucceedPromise: true),
+            .init(bytes: "4", promise: nil, shouldSucceedPromise: true),
+            .init(bytes: "", promise: nil, shouldSucceedPromise: true),
+            .init(bytes: "\r\n", promise: nil, shouldSucceedPromise: true),
         ]))
     }
 

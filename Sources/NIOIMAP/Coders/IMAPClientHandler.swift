@@ -123,20 +123,20 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
         }
     }
 
-    private func writeChunks(_ chunks: [(EncodeBuffer.Chunk, EventLoopPromise<Void>?)], context: ChannelHandlerContext) {
+    private func writeChunks(_ chunks: [OutgoingChunk], context: ChannelHandlerContext) {
         guard chunks.count > 0 else { return }
         chunks.forEach { chunk in
             self.writeChunk(chunk, context: context)
         }
+        context.flush() // we wouldn't reach this point if we hadn't already flushed
     }
 
-    private func writeChunk(_ chunk: (EncodeBuffer.Chunk, EventLoopPromise<Void>?), context: ChannelHandlerContext) {
-        let (chunk, promise) = chunk
+    private func writeChunk(_ chunk: OutgoingChunk, context: ChannelHandlerContext) {
         let outbound = self.wrapOutboundOut(chunk.bytes)
-        if chunk.waitForContinuation {
-            context.write(outbound).cascadeFailure(to: promise)
+        if chunk.shouldSucceedPromise {
+            context.write(outbound, promise: chunk.promise)
         } else {
-            context.write(outbound, promise: promise)
+            context.write(outbound).cascadeFailure(to: chunk.promise)
         }
     }
 

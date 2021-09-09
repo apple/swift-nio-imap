@@ -25,25 +25,25 @@ class AppendStateMachineTests: XCTestCase {
 
     func testNormalWorkflow() {
         // append a message
-        self.stateMachine.sendCommand(.append(.beginMessage(message: .init(options: .init(), data: .init(byteCount: 10)))))
+        XCTAssertTrue(self.stateMachine.sendCommand(.append(.beginMessage(message: .init(options: .init(), data: .init(byteCount: 10))))))
         XCTAssertNoThrow(try self.stateMachine.receiveContinuationRequest(.data("req")))
-        self.stateMachine.sendCommand(.append(.messageBytes("12345")))
-        self.stateMachine.sendCommand(.append(.messageBytes("67890")))
-        self.stateMachine.sendCommand(.append(.endMessage))
+        XCTAssertFalse(self.stateMachine.sendCommand(.append(.messageBytes("12345"))))
+        XCTAssertFalse(self.stateMachine.sendCommand(.append(.messageBytes("67890"))))
+        XCTAssertFalse(self.stateMachine.sendCommand(.append(.endMessage)))
 
         // catenate a message
-        self.stateMachine.sendCommand(.append(.beginCatenate(options: .init())))
-        self.stateMachine.sendCommand(.append(.catenateURL("url1")))
-        self.stateMachine.sendCommand(.append(.catenateURL("url2")))
-        self.stateMachine.sendCommand(.append(.catenateURL("url3")))
-        self.stateMachine.sendCommand(.append(.catenateData(.begin(size: 10))))
+        XCTAssertFalse(self.stateMachine.sendCommand(.append(.beginCatenate(options: .init()))))
+        XCTAssertFalse(self.stateMachine.sendCommand(.append(.catenateURL("url1"))))
+        XCTAssertFalse(self.stateMachine.sendCommand(.append(.catenateURL("url2"))))
+        XCTAssertFalse(self.stateMachine.sendCommand(.append(.catenateURL("url3"))))
+        XCTAssertTrue(self.stateMachine.sendCommand(.append(.catenateData(.begin(size: 10)))))
         XCTAssertNoThrow(try self.stateMachine.receiveContinuationRequest(.data("req")))
-        self.stateMachine.sendCommand(.append(.catenateData(.bytes("12345"))))
-        self.stateMachine.sendCommand(.append(.catenateData(.bytes("67890"))))
-        self.stateMachine.sendCommand(.append(.catenateData(.end)))
-        self.stateMachine.sendCommand(.append(.endCatenate))
+        XCTAssertFalse(self.stateMachine.sendCommand(.append(.catenateData(.bytes("12345")))))
+        XCTAssertFalse(self.stateMachine.sendCommand(.append(.catenateData(.bytes("67890")))))
+        XCTAssertFalse(self.stateMachine.sendCommand(.append(.catenateData(.end))))
+        XCTAssertFalse(self.stateMachine.sendCommand(.append(.endCatenate)))
 
-        self.stateMachine.sendCommand(.append(.finish))
+        XCTAssertFalse(self.stateMachine.sendCommand(.append(.finish)))
         XCTAssertNoThrow(XCTAssertEqual(
             try self.stateMachine.receiveResponse(.tagged(.init(tag: "A1", state: .ok(.init(code: nil, text: "OK"))))), true
         ))
