@@ -21,7 +21,7 @@ public struct InvalidClientState: Error {
 
 public struct UnexpectedResponse: Error {
     
-    var activePromise: EventLoopPromise<Void>?
+    public var activePromise: EventLoopPromise<Void>?
     
     public init(activePromise: EventLoopPromise<Void>?) {
         self.activePromise = activePromise
