@@ -245,12 +245,11 @@ struct ClientStateMachine {
         self.queuedCommands.append((command, promise))
 
         if let result = self.sendNextCommand() {
-            // We only bother with "first" as:
+            // There can only be one chunk
             // 1. if first has a continuation then we will be in the continuation state
             // 2. if first doesn't have a continuation then there won't be a next chunk
-            guard let first = result.chunks.first else {
-                preconditionFailure("Somehow we have a result without any chunks to send")
-            }
+            precondition(result.chunks.count == 1)
+            return result.chunks.first!
             return first
         }
         return nil
@@ -515,7 +514,8 @@ extension ClientStateMachine {
         self.state = .expectingNormalResponse
         var encodeBuffer = self.makeEncodeBuffer(command)
         let chunk = encodeBuffer.buffer.nextChunk()
-        return .init(chunks: [.init(bytes: chunk.bytes, promise: promise, shouldSucceedPromise: !chunk.waitForContinuation)], nextContext: nil)
+        precondition(!chunk.waitForContinuation)
+        return .init(chunks: [.init(bytes: chunk.bytes, promise: promise, shouldSucceedPromise: true)], nextContext: nil)
     }
 
     /// When authenticating we need to first defer to the authentication state machine to make sure
@@ -533,7 +533,8 @@ extension ClientStateMachine {
         self.state = .authenticating(authenticatingStateMachine)
         var encodeBuffer = self.makeEncodeBuffer(.continuationResponse(data))
         let chunk = encodeBuffer.buffer.nextChunk()
-        return .init(chunks: [.init(bytes: chunk.bytes, promise: promise, shouldSucceedPromise: !chunk.waitForContinuation)], nextContext: nil)
+        precondition(!chunk.waitForContinuation)
+        return .init(chunks: [.init(bytes: chunk.bytes, promise: promise, shouldSucceedPromise: true)], nextContext: nil)
     }
 
     /// When appending we need to first defer to the appending state machine to see if we can actually
