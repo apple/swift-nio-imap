@@ -562,19 +562,8 @@ extension ClientStateMachine {
         let chunk = encodeBuffer.buffer.nextChunk()
         self.state = .appending(appendingStateMachine, pendingContinuation: chunkRequiresContinuation)
         
-        switch command {
-        case .start,
-                .messageBytes,
-                .endMessage,
-                .beginCatenate,
-                .catenateURL,
-                .endCatenate,
-                .finish,
-                .catenateData(.bytes),
-                .catenateData(.end):
-            return .init(chunks: [.init(bytes: chunk.bytes, promise: promise, shouldSucceedPromise: true)], nextContext: nil)
-        case .beginMessage, .catenateData(.begin):
-            return .init(chunks: [.init(bytes: chunk.bytes, promise: promise, shouldSucceedPromise: false)], nextContext: nil)
-        }
+        // We always need append commands to be sent instantly so we can receive continuations
+        // so the write promise should always be succeeded.
+        return .init(chunks: [.init(bytes: chunk.bytes, promise: promise, shouldSucceedPromise: true)], nextContext: nil)
     }
 }

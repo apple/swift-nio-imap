@@ -229,7 +229,7 @@ extension ClientStateMachineTests {
 
         // append a message
         self.assert(
-            .init(bytes: " {10}\r\n", promise: nil, shouldSucceedPromise: false),
+            .init(bytes: " {10}\r\n", promise: nil, shouldSucceedPromise: true),
             try self.stateMachine.sendCommand(.append(.beginMessage(message: .init(options: .init(), data: .init(byteCount: 10)))))
         )
         XCTAssertNoThrow(XCTAssertEqual(
@@ -263,7 +263,7 @@ extension ClientStateMachineTests {
             try self.stateMachine.sendCommand(.append(.catenateURL("url2")))
         )
         self.assert(
-            .init(bytes: " TEXT {10}\r\n", promise: nil, shouldSucceedPromise: false),
+            .init(bytes: " TEXT {10}\r\n", promise: nil, shouldSucceedPromise: true),
             try self.stateMachine.sendCommand(.append(.catenateData(.begin(size: 10))))
         )
         XCTAssertNoThrow(try self.stateMachine.receiveContinuationRequest(.data("ready2")))
@@ -302,7 +302,7 @@ extension ClientStateMachineTests {
         XCTAssertEqual(result, .init(bytes: "A1 APPEND \"INBOX\"", promise: nil, shouldSucceedPromise: true))
 
         XCTAssertNoThrow(result = try self.stateMachine.sendCommand(.append(.beginMessage(message: .init(options: .none, data: .init(byteCount: 5))))))
-        XCTAssertEqual(result, .init(bytes: " {5}\r\n", promise: nil, shouldSucceedPromise: false))
+        XCTAssertEqual(result, .init(bytes: " {5}\r\n", promise: nil, shouldSucceedPromise: true))
 
         XCTAssertNoThrow(result = try self.stateMachine.sendCommand(.append(.messageBytes("0"))))
         XCTAssertNil(result)
