@@ -27,7 +27,7 @@ extension ClientStateMachine {
 
         private var state: State = .waitingForConfirmation
 
-        mutating func sendCommand(_ command: CommandStreamPart) -> Bool {
+        mutating func sendCommand(_ command: CommandStreamPart) {
             switch self.state {
             case .idling:
                 break
@@ -37,7 +37,7 @@ extension ClientStateMachine {
 
             switch command {
             case .idleDone:
-                return true
+                break
             case .tagged, .append, .continuationResponse:
                 preconditionFailure("Invalid command for idle state")
             }

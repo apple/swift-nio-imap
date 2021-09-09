@@ -136,13 +136,7 @@ struct ClientStateMachine {
 
     private var state: State = .expectingNormalResponse
     private var activeCommandTags: Set<String> = []
-
-    /// This pattern is used to provide a bit of extra security around the allocator
-    /// As the state machine will likely exist before we are able to get an allocator
-    /// from the channel. We have to use an IUO because the state machine is likely to
-    /// be created before it's added to a channel, so we have no way of getting the
-    /// allocator. Make sure to set the allocator as soon as possible.
-    var allocator: ByteBufferAllocator!
+    private var allocator: ByteBufferAllocator!
 
     // We mark where we should write up to at the next opportunity
     // using the `flush` method called from the channel handler.
@@ -150,6 +144,10 @@ struct ClientStateMachine {
 
     init(encodingOptions: CommandEncodingOptions) {
         self.encodingOptions = encodingOptions
+    }
+    
+    mutating func handlerAdded(_ allocator: ByteBufferAllocator) {
+        self.allocator = allocator
     }
 
     /// Tells the state machine that a continuation request has been received from the network.
@@ -203,11 +201,8 @@ struct ClientStateMachine {
             try idleStateMachine.receiveResponse(response)
             self.state = .idle(idleStateMachine)
         case .authenticating(var authStateMachine):
-            if try authStateMachine.receiveResponse(response) {
-                self.state = .expectingNormalResponse
-            } else {
-                self.state = .authenticating(authStateMachine)
-            }
+            try authStateMachine.receiveResponse(response)
+            self.state = .expectingNormalResponse
         case .appending(var appendStateMachine, pendingContinuation: _ /*always false*/):
             if try appendStateMachine.receiveResponse(response) {
                 self.state = .expectingNormalResponse
@@ -240,6 +235,8 @@ struct ClientStateMachine {
     /// Tells the state machine that the client would like to send a command.
     /// We then return any chunks that can be written.
     mutating func sendCommand(_ command: CommandStreamPart, promise: EventLoopPromise<Void>? = nil) throws -> OutgoingChunk? {
+        precondition(self.state != .error, "Already in error state, make sure to handle appropriately")
+        
         if let tag = command.tag {
             let (inserted, _) = self.activeCommandTags.insert(tag)
             guard inserted else {
@@ -295,7 +292,7 @@ struct ClientStateMachine {
 extension ClientStateMachine {
     private mutating func receiveContinuationRequest_appending(request: ContinuationRequest) throws -> ContinuationRequestAction {
         guard case .appending(var appendingStateMachine, pendingContinuation: _ /* always false */) = self.state else {
-            preconditionFailure("Expected to be in appending state")
+            preconditionFailure("Invalid state: \(state)")
         }
 
         try appendingStateMachine.receiveContinuationRequest(request)
@@ -312,7 +309,7 @@ extension ClientStateMachine {
         request: ContinuationRequest
     ) -> ContinuationRequestAction {
         guard case .expectingLiteralContinuationRequest(let context) = self.state else {
-            preconditionFailure("Expected literal continuation state")
+            preconditionFailure("Invalid state: \(state)")
         }
         
         self.state = .expectingNormalResponse
@@ -330,7 +327,7 @@ extension ClientStateMachine {
 
     private mutating func receiveContinuationRequest_authenticating(request: ContinuationRequest) throws -> ContinuationRequestAction {
         guard case .authenticating(var authenticatingStateMachine) = self.state else {
-            preconditionFailure("Expected authenticating state")
+            preconditionFailure("Invalid state: \(state)")
         }
 
         switch request {
@@ -347,7 +344,7 @@ extension ClientStateMachine {
 
     private mutating func receiveContinuationRequest_idle(request: ContinuationRequest) throws -> ContinuationRequestAction {
         guard case .idle(var idleStateMachine) = self.state else {
-            preconditionFailure("Invalid state: \(self.state)")
+            preconditionFailure("Invalid state: \(state)")
         }
 
         // A continuation when in idle state means it's been confirmed
@@ -362,7 +359,7 @@ extension ClientStateMachine {
 extension ClientStateMachine {
     private mutating func sendTaggedCommand(_ command: TaggedCommand, promise: EventLoopPromise<Void>?) -> SendableChunks {
         guard case .expectingNormalResponse = self.state else {
-            preconditionFailure("Invalid state: \(self.state)")
+            preconditionFailure("Invalid state: \(state)")
         }
 
         let buffer = self.makeEncodeBuffer(.tagged(command))
@@ -394,7 +391,7 @@ extension ClientStateMachine {
 
     private mutating func sendAppendCommand(_ command: AppendCommand, promise: EventLoopPromise<Void>?) -> SendableChunks {
         guard case .expectingNormalResponse = self.state else {
-            preconditionFailure("Invalid state: \(self.state)")
+            preconditionFailure("Invalid state: \(state)")
         }
 
         // no other commands can be running when we start appending
@@ -493,12 +490,12 @@ extension ClientStateMachine {
     /// to send, or we find a chunk that requires a continuation request.
     private mutating func sendNextCommand_expectingNormalResponse(command: CommandStreamPart, promise: EventLoopPromise<Void>?) -> SendableChunks {
         guard case .expectingNormalResponse = self.state else {
-            preconditionFailure("Invalid state: \(self.state)")
+            preconditionFailure("Invalid state: \(state)")
         }
 
         switch command {
         case .idleDone, .continuationResponse:
-            preconditionFailure("Invalid command for state")
+            preconditionFailure("Invalid command for state: \(command)")
         case .tagged(let tc):
             return self.sendTaggedCommand(tc, promise: promise)
         case .append(let ac):
@@ -511,14 +508,14 @@ extension ClientStateMachine {
     /// to wait for a continuation request.
     private mutating func sendNextCommand_idle(command: CommandStreamPart, promise: EventLoopPromise<Void>?) -> SendableChunks {
         guard case .idle(var idleStateMachine) = self.state else {
-            preconditionFailure("Invalid state: \(self.state)")
+            preconditionFailure("Invalid state: \(state)")
+        }
+        guard command == .idleDone else {
+            preconditionFailure("Invalid command when idle \(command)")
         }
 
-        if idleStateMachine.sendCommand(command) {
-            self.state = .expectingNormalResponse
-        } else {
-            self.state = .idle(idleStateMachine)
-        }
+        idleStateMachine.sendCommand(command)
+        self.state = .expectingNormalResponse
         var encodeBuffer = self.makeEncodeBuffer(command)
         let chunk = encodeBuffer.buffer.nextChunk()
         return .init(chunks: [.init(bytes: chunk.bytes, promise: promise, shouldSucceedPromise: !chunk.waitForContinuation)], nextContext: nil)
@@ -529,7 +526,7 @@ extension ClientStateMachine {
     /// no need to wait for a continuation request.
     private mutating func sendNextCommand_authenticating(command: CommandStreamPart, promise: EventLoopPromise<Void>?) -> SendableChunks {
         guard case .authenticating(var authenticatingStateMachine) = self.state else {
-            preconditionFailure("Invalid state: \(self.state)")
+            preconditionFailure("Invalid state: \(state)")
         }
         guard case .continuationResponse(let data) = command else {
             preconditionFailure("Continuation responses only")
@@ -548,7 +545,7 @@ extension ClientStateMachine {
     /// request, otherwise we can send the command and continue.
     private mutating func sendNextCommand_appending(command: CommandStreamPart, promise: EventLoopPromise<Void>?) -> SendableChunks? {
         guard case .appending(var appendingStateMachine, pendingContinuation: let pendingContinuation) = self.state else {
-            preconditionFailure("Invalid state: \(self.state)")
+            preconditionFailure("Invalid state: \(state)")
         }
         guard case .append(let command) = command else {
             preconditionFailure("Append commands only in this state")

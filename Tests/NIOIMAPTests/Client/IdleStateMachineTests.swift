@@ -29,7 +29,7 @@ class IdleStateMachineTests: XCTestCase {
         XCTAssertNoThrow(try machine.receiveResponse(.untagged(.id(["Key3": "Value3"]))))
 
         // user ends idle
-        XCTAssertEqual(machine.sendCommand(.idleDone), true)
+        machine.sendCommand(.idleDone)
     }
 
     func testMultipleIdleConfirmationsThrowsError() {
@@ -56,7 +56,7 @@ class IdleStateMachineTests: XCTestCase {
     func testSendResponseAfterFinishedThrows() {
         var machine = ClientStateMachine.Idle()
         XCTAssertNoThrow(try machine.receiveContinuationRequest(.responseText(.init(text: "OK"))))
-        XCTAssertEqual(machine.sendCommand(.idleDone), true)
+        machine.sendCommand(.idleDone)
 
         let badResponse = Response.tagged(.init(tag: "A1", state: .ok(.init(code: nil, text: "ok"))))
         XCTAssertThrowsError(try machine.receiveResponse(badResponse)) { e in

@@ -35,7 +35,7 @@ extension ClientStateMachine {
 
         private var state: State = .waitingForServer
 
-        mutating func receiveResponse(_ response: Response) throws -> Bool {
+        mutating func receiveResponse(_ response: Response) throws {
             switch self.state {
             case .finished, .waitingForChallengeResponse:
                 throw UnexpectedResponse(activePromise: nil)
@@ -65,7 +65,7 @@ extension ClientStateMachine {
             case .untagged, .fetch, .fatal, .idleStarted, .authenticationChallenge:
                 throw UnexpectedResponse(activePromise: nil)
             case .tagged:
-                return try self.handleTaggedResponse()
+                try self.handleTaggedResponse()
             }
         }
 
@@ -81,9 +81,8 @@ extension ClientStateMachine {
         }
 
         // we don't care about the specific response
-        private mutating func handleTaggedResponse() throws -> Bool {
+        private mutating func handleTaggedResponse() throws {
             self.state = .finished
-            return true
         }
 
         mutating func sendCommand(_ command: CommandStreamPart) {
