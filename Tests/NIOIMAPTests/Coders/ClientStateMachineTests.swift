@@ -323,10 +323,6 @@ extension ClientStateMachineTests {
         var resultAction: ClientStateMachine.ContinuationRequestAction!
         XCTAssertNoThrow(resultAction = try self.stateMachine.receiveContinuationRequest(.data("OK")))
         
-        guard case .sendChunks(let chunks) = resultAction else {
-            fatalError()
-        }
-        
         XCTAssertEqual(resultAction, .sendChunks([
             .init(bytes: "0", promise: nil, shouldSucceedPromise: true),
             .init(bytes: "1", promise: nil, shouldSucceedPromise: true),
