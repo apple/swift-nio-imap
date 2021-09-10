@@ -27,49 +27,47 @@ extension ClientStateMachine {
 
         private var state: State = .waitingForConfirmation
 
-        mutating func sendCommand(_ command: CommandStreamPart) throws -> ClientStateMachine.State {
+        mutating func sendCommand(_ command: CommandStreamPart) {
             switch self.state {
             case .idling:
                 break
             case .waitingForConfirmation:
-                throw InvalidIdleState()
+                preconditionFailure("Invalid state: \(self.state)")
             }
 
             switch command {
             case .idleDone:
-                return .expectingNormalResponse
+                break
             case .tagged, .append, .continuationResponse:
-                throw InvalidCommandForState(command)
+                preconditionFailure("Invalid command for idle state")
             }
         }
 
-        mutating func receiveResponse(_ response: Response) throws -> ClientStateMachine.State {
+        mutating func receiveResponse(_ response: Response) throws {
             switch self.state {
             case .waitingForConfirmation:
-                return try self.receiveResponse_waitingState(response)
+                throw UnexpectedResponse(activePromise: nil)
             case .idling:
-                return try self.receiveResponse_idlingState(response)
+                try self.receiveResponse_idlingState(response)
             }
         }
 
-        private mutating func receiveResponse_waitingState(_ response: Response) throws -> ClientStateMachine.State {
-            assert(self.state == .waitingForConfirmation)
-            switch response {
-            case .idleStarted:
+        mutating func receiveContinuationRequest(_: ContinuationRequest) throws {
+            switch self.state {
+            case .waitingForConfirmation:
                 self.state = .idling
-                return .idle(self)
-            case .fetch, .tagged, .fatal, .authenticationChallenge, .untagged:
-                throw UnexpectedResponse()
+            case .idling:
+                throw UnexpectedContinuationRequest()
             }
         }
 
-        private func receiveResponse_idlingState(_ response: Response) throws -> ClientStateMachine.State {
+        private func receiveResponse_idlingState(_ response: Response) throws {
             assert(self.state == .idling)
             switch response {
             case .untagged:
-                return .idle(self)
+                break
             case .fetch, .tagged, .fatal, .authenticationChallenge, .idleStarted:
-                throw UnexpectedResponse()
+                throw UnexpectedResponse(activePromise: nil)
             }
         }
     }

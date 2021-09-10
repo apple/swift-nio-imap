@@ -35,39 +35,60 @@ extension ClientStateMachine {
 
         private var state: State = .waitingForServer
 
-        mutating func receiveResponse(_ response: Response) throws -> ClientStateMachine.State {
+        mutating func receiveResponse(_ response: Response) throws {
             switch self.state {
             case .finished, .waitingForChallengeResponse:
-                throw UnexpectedResponse()
+                throw UnexpectedResponse(activePromise: nil)
             case .waitingForServer:
                 break
             }
 
+            // Note the `authenticationChallenge` case below.
+            // An authenticationChallenge is really a continuationRequest,
+            // not a response. The only reason we have it in the
+            // response enum is that Johannes wanted continuations
+            // to be completely hidden from the end user (I agree
+            // with him), however this obviously isn't possible for
+            // authentication. The solution we came up with was to consume
+            // an authentication continuation request and deliver it as
+            // a response, meaning we don't need to expose the words
+            // "continuation request" to the user.
+
+            // The previous implementation took in this faux
+            // authenticationChallenge response case and treated
+            // it as a continuation request, however after
+            // reconsidering I figured it's probably nicer to
+            // just handle it as a continuation request, so I added
+            // the function below.
+
             switch response {
-            case .untagged, .fetch, .fatal, .idleStarted:
-                throw UnexpectedResponse()
+            case .untagged, .fetch, .fatal, .idleStarted, .authenticationChallenge:
+                throw UnexpectedResponse(activePromise: nil)
             case .tagged:
-                return try self.handleTaggedResponse()
-            case .authenticationChallenge:
-                return try self.handleAuthenticationChallenge()
+                try self.handleTaggedResponse()
             }
         }
 
-        // we don't care about the specific response
-        private mutating func handleTaggedResponse() throws -> ClientStateMachine.State {
-            self.state = .finished
-            return .expectingNormalResponse
-        }
+        mutating func receiveContinuationRequest(_: ContinuationRequest) throws {
+            switch self.state {
+            case .finished, .waitingForChallengeResponse:
+                throw UnexpectedResponse(activePromise: nil)
+            case .waitingForServer:
+                break
+            }
 
-        private mutating func handleAuthenticationChallenge() throws -> ClientStateMachine.State {
             self.state = .waitingForChallengeResponse
-            return .authenticating(self)
         }
 
-        mutating func sendCommand(_ command: CommandStreamPart) throws -> ClientStateMachine.State {
+        // we don't care about the specific response
+        private mutating func handleTaggedResponse() throws {
+            self.state = .finished
+        }
+
+        mutating func sendCommand(_ command: CommandStreamPart) {
             switch self.state {
             case .finished, .waitingForServer:
-                throw InvalidCommandForState(command)
+                preconditionFailure("Invalid state: \(self.state)")
             case .waitingForChallengeResponse:
                 break
             }
@@ -76,10 +97,9 @@ extension ClientStateMachine {
             // is to respond to a challenge
             switch command {
             case .idleDone, .tagged, .append:
-                throw InvalidCommandForState(command)
+                preconditionFailure("Invalid command when authenticating")
             case .continuationResponse:
                 self.state = .waitingForServer
-                return .authenticating(self)
             }
         }
     }

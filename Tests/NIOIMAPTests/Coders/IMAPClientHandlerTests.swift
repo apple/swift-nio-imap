@@ -33,7 +33,7 @@ class IMAPClientHandlerTests: XCTestCase {
 
     func testReferralURLResponse() {
         let expectedResponse = Response.tagged(
-            TaggedResponse(tag: "tag",
+            TaggedResponse(tag: "A1",
                            state: .ok(ResponseText(code:
                                .referral(IMAPURL(server: IMAPServer(userAuthenticationMechanism: nil, host: "hostname", port: nil),
                                                  query: URLCommand.fetch(
@@ -47,12 +47,10 @@ class IMAPClientHandlerTests: XCTestCase {
                                                      authenticatedURL: nil
                                                  ))),
                                text: ""))))
-        self.writeOutbound(.tagged(.init(tag: "a", command: .login(username: "foo", password: "bar"))))
-        self.assertOutboundString("a LOGIN \"foo\" \"bar\"\r\n")
-        self.writeInbound("tag OK [REFERRAL imap://hostname/foo/bar/;UID=1234]\r\na OK ok\r\n")
+        self.writeOutbound(.tagged(.init(tag: "A1", command: .login(username: "foo", password: "bar"))))
+        self.assertOutboundString("A1 LOGIN \"foo\" \"bar\"\r\n")
+        self.writeInbound("A1 OK [REFERRAL imap://hostname/foo/bar/;UID=1234]\r\n")
         self.assertInbound(expectedResponse)
-        self.assertInbound(.tagged(.init(tag: "a",
-                                         state: .ok(.init(code: nil, text: "ok")))))
     }
 
     func testCommandThatNeedsToWaitForContinuationRequest() {
@@ -164,38 +162,15 @@ class IMAPClientHandlerTests: XCTestCase {
                                          state: .ok(.init(code: nil, text: "ok")))))
     }
 
-    func testContinueRequestCommandFollowedByAuthenticate() {
-        self.writeOutbound(.tagged(.init(tag: "1", command: .move(.lastCommand, .init("\\")))), wait: false)
-        self.writeOutbound(.tagged(.init(tag: "2", command: .authenticate(mechanism: .gssAPI, initialResponse: nil))), wait: false)
-
-        // send the move command
-        self.assertOutboundString("1 MOVE $ {1}\r\n")
-        self.writeInbound("+ OK\r\n")
-
-        // respond to the continuation, move straight to authentication
-        self.assertOutboundString("\\\r\n")
-        self.assertOutboundString("2 AUTHENTICATE GSSAPI\r\n")
-
-        // server sends an auth challenge
-        self.writeInbound("+\r\n")
-        self.assertInbound(.authenticationChallenge(""))
-    }
-
     func testUnexpectedContinuationRequest() {
-        let f = self.writeOutbound(CommandStreamPart.tagged(TaggedCommand(tag: "x",
-                                                                          command: .rename(from: .init("\\"),
-                                                                                           to: .init("to"),
-                                                                                           params: [:]))),
-        wait: false)
-        self.assertOutboundString("x RENAME {1}\r\n")
+        self.writeOutbound(CommandStreamPart.tagged(TaggedCommand(tag: "x",
+                                                                  command: .rename(from: .init("from"),
+                                                                                   to: .init("to"),
+                                                                                   params: [:]))))
+        self.assertOutboundString("x RENAME \"from\" \"to\"\r\n")
         XCTAssertThrowsError(try self.channel.writeInbound(self.buffer(string: "+ OK\r\n+ OK\r\n"))) { error in
-            XCTAssertTrue(error is IMAPClientHandler.UnexpectedContinuationRequest, "Error is \(error)")
+            XCTAssertTrue(error is UnexpectedContinuationRequest, "Error is \(error)")
         }
-        self.assertOutboundString("\\ \"to\"\r\n")
-        XCTAssertNoThrow(try f.wait())
-        self.writeInbound("x OK ok\r\n")
-        self.assertInbound(.tagged(.init(tag: "x",
-                                         state: .ok(.init(code: nil, text: "ok")))))
     }
 
     func testAuthenticationFlow() {
@@ -279,30 +254,34 @@ class IMAPClientHandlerTests: XCTestCase {
             options.useNonSynchronizingLiteralPlus = true
         })
         self.channel = EmbeddedChannel(handler: self.clientHandler, loop: .init())
+        self.channel.pipeline.fireChannelActive()
 
-        self.writeOutbound(.tagged(.init(tag: "A1", command: .login(username: "\\", password: "\\"))), wait: false)
+        let f1 = self.writeOutbound(.tagged(.init(tag: "A1", command: .login(username: "\\", password: "\\"))), wait: false)
         self.assertOutboundString("A1 LOGIN {1}\r\n")
         self.writeInbound("+ OK\r\n")
         self.assertOutboundString("\\ {1}\r\n")
         self.writeInbound("+ OK\r\n")
         self.assertOutboundString("\\\r\n")
+        XCTAssertNoThrow(try f1.wait())
 
         // send some capabilities
         self.writeInbound("A1 OK [CAPABILITY LITERAL+]\r\n")
         self.assertInbound(.tagged(.init(tag: "A1", state: .ok(.init(code: .capability([.literalPlus]), text: "")))))
 
         // send the server ID (client sends a noop
-        self.writeOutbound(.tagged(.init(tag: "A2", command: .noop)), wait: false)
+        let f2 = self.writeOutbound(.tagged(.init(tag: "A2", command: .noop)), wait: false)
         self.assertOutboundString("A2 NOOP\r\n")
         self.writeInbound("* ID (\"name\" \"NIOIMAP\")\r\n")
         self.assertInbound(.untagged(.id(["name": "NIOIMAP"])))
         wait(for: [turnOnLiteralPlusExpectation], timeout: 1.0)
         self.writeInbound("A2 OK NOOP complete\r\n")
         self.assertInbound(.tagged(.init(tag: "A2", state: .ok(.init(text: "NOOP complete")))))
+        XCTAssertNoThrow(try f2.wait())
 
         // now we should have literal+ turned on
-        self.writeOutbound(.tagged(.init(tag: "A3", command: .login(username: "\\", password: "\\"))), wait: false)
+        let f3 = self.writeOutbound(.tagged(.init(tag: "A3", command: .login(username: "\\", password: "\\"))), wait: false)
         self.assertOutboundString("A3 LOGIN {1+}\r\n\\ {1+}\r\n\\\r\n")
+        XCTAssertNoThrow(try f3.wait())
     }
 
     func testContinuationRequestsAsUserEvents() {
@@ -355,6 +334,8 @@ class IMAPClientHandlerTests: XCTestCase {
         self.writeInbound("+ 2\r\n")
         try! eventExpectation2.futureResult.wait()
         self.assertOutboundString("\\\r\n")
+        self.writeInbound("A1 OK\r\n")
+        self.assertInbound(.tagged(.init(tag: "A1", state: .ok(.init(code: nil, text: "")))))
 
         // now confirm idle
         self.writeOutbound(.tagged(.init(tag: "A2", command: .idleStart)), wait: false)
@@ -364,6 +345,26 @@ class IMAPClientHandlerTests: XCTestCase {
         self.assertInbound(.idleStarted)
         self.writeOutbound(.idleDone)
         self.assertOutboundString("DONE\r\n")
+        self.writeInbound("A2 OK\r\n")
+        self.assertInbound(.tagged(.init(tag: "A2", state: .ok(.init(code: nil, text: "")))))
+    }
+
+    func testPromisesAreFailedOnChannelClose() {
+        // p1 will be the active promise
+        let p1 = self.writeOutbound(.tagged(.init(tag: "A1", command: .login(username: "\\", password: "\\"))), wait: false)
+
+        // p2 is  a promise loaded from the queue
+        let p2 = self.writeOutbound(.tagged(.init(tag: "A2", command: .noop)), wait: false)
+
+        // at this point we'll be held by the continuation requirement for p1
+        self.assertOutboundString("A1 LOGIN {1}\r\n")
+        self.channel.pipeline.fireChannelInactive()
+        XCTAssertThrowsError(try p1.wait()) { e in
+            XCTAssertEqual(e as? ChannelError, .ioOnClosedChannel)
+        }
+        XCTAssertThrowsError(try p2.wait()) { e in
+            XCTAssertEqual(e as? ChannelError, .ioOnClosedChannel)
+        }
     }
 
     func testProtectAgainstReentrancy() {
@@ -374,10 +375,15 @@ class IMAPClientHandlerTests: XCTestCase {
             typealias InboundOut = ByteBuffer
             typealias OutboundIn = ByteBuffer
 
+            var callCount = 0
+
             func write(context: ChannelHandlerContext, data: NIOAny, promise: EventLoopPromise<Void>?) {
-                let data = self.wrapInboundOut(ByteBuffer(string: "+ \r\n"))
-                context.fireChannelRead(data)
-                promise?.succeed(())
+                self.callCount += 1
+                if self.callCount == 1 {
+                    let data = self.wrapInboundOut(ByteBuffer(string: "+ \r\n"))
+                    context.fireChannelRead(data)
+                    promise?.succeed(())
+                }
             }
 
             func triggerUserOutboundEvent(context: ChannelHandlerContext, event: Any, promise: EventLoopPromise<Void>?) {
@@ -391,12 +397,14 @@ class IMAPClientHandlerTests: XCTestCase {
         class PostTestHandler: ChannelDuplexHandler {
             typealias InboundIn = Response
             typealias OutboundIn = Response
+            typealias OutboundOut = CommandStreamPart
 
             var callCount = 0
 
             func channelRead(context: ChannelHandlerContext, data: NIOAny) {
                 self.callCount += 1
-                if self.callCount < 3 {
+                if self.callCount == 1 {
+                    context.writeAndFlush(self.wrapOutboundOut(.continuationResponse("")), promise: nil)
                     context.triggerUserOutboundEvent(MyOutboundEvent(), promise: nil)
                 }
             }
@@ -411,7 +419,7 @@ class IMAPClientHandlerTests: XCTestCase {
             IMAPClientHandler(),
             PostTestHandler(),
         ]).wait())
-        self.writeOutbound(.tagged(.init(tag: "A1", command: .idleStart)))
+        self.writeOutbound(.tagged(.init(tag: "A1", command: .authenticate(mechanism: .gssAPI, initialResponse: nil))))
     }
 
 //    func testProtectAgainstReentrancyWithContinuation() {
@@ -517,12 +525,66 @@ class IMAPClientHandlerTests: XCTestCase {
         XCTAssertTrue(didComplete)
     }
 
+    func testAppendWaitsForContinuation() {
+        self.writeOutbound(.append(.start(tag: "A1", appendingTo: .inbox)))
+        self.assertOutboundString("A1 APPEND \"INBOX\"")
+
+        let literalPromise = self.writeOutbound(.append(.beginMessage(message: .init(options: .none, data: .init(byteCount: 5)))), wait: false)
+        self.assertOutboundString(" {5}\r\n")
+        XCTAssertNoThrow(try literalPromise.wait())
+
+        let p1 = self.writeOutbound(.append(.messageBytes("0")), wait: false)
+        self.assertNoOutboundString()
+        let p2 = self.writeOutbound(.append(.messageBytes("1")), wait: false)
+        self.assertNoOutboundString()
+        let p3 = self.writeOutbound(.append(.messageBytes("2")), wait: false)
+        self.assertNoOutboundString()
+        let p4 = self.writeOutbound(.append(.messageBytes("3")), wait: false)
+        self.assertNoOutboundString()
+        let p5 = self.writeOutbound(.append(.messageBytes("4")), wait: false)
+        self.assertNoOutboundString()
+        let p6 = self.writeOutbound(.append(.endMessage), wait: false)
+        self.assertNoOutboundString()
+        let p7 = self.writeOutbound(.append(.finish), wait: false)
+        self.assertNoOutboundString()
+
+        // send a continuation, we should now get outbound strings
+        self.writeInbound("+ OK\r\n")
+        self.assertOutboundString("0")
+        self.assertOutboundString("1")
+        self.assertOutboundString("2")
+        self.assertOutboundString("3")
+        self.assertOutboundString("4")
+        self.assertOutboundString("")
+        self.assertOutboundString("\r\n")
+
+        // make sure all the promises are succeeded
+        XCTAssertNoThrow(try p1.wait())
+        XCTAssertNoThrow(try p2.wait())
+        XCTAssertNoThrow(try p3.wait())
+        XCTAssertNoThrow(try p4.wait())
+        XCTAssertNoThrow(try p5.wait())
+        XCTAssertNoThrow(try p6.wait())
+        XCTAssertNoThrow(try p7.wait())
+    }
+
+    func testPromiseIsntLeakedOnUnexpectedResponse() {
+        // We need to get into a state where we are
+        // expecting a continuation, but actually
+        // receive a response.
+        let promise = self.writeOutbound(.tagged(.init(tag: "A1", command: .login(username: "\\", password: "test"))), wait: false)
+        self.assertOutboundBuffer("A1 LOGIN {1}\r\n")
+        XCTAssertThrowsError(try self.channel.writeInbound(ByteBuffer("A1 OK\r\n")))
+        XCTAssertThrowsError(try promise.wait())
+    }
+
     // MARK: - setup / tear down
 
     override func setUp() {
         XCTAssertNil(self.channel)
         self.clientHandler = IMAPClientHandler()
         self.channel = EmbeddedChannel(handler: self.clientHandler)
+        self.channel.pipeline.fireChannelActive()
     }
 
     override func tearDown() {
@@ -559,6 +621,10 @@ extension IMAPClientHandlerTests {
         var buffer = self.channel.allocator.buffer(capacity: string.utf8.count)
         buffer.writeString(string)
         self.assertOutboundBuffer(buffer, line: line)
+    }
+
+    private func assertNoOutboundString(line: UInt = #line) {
+        XCTAssertNoThrow(XCTAssertNil(try self.channel.readOutbound(as: ByteBuffer.self)))
     }
 
     private func writeInbound(_ string: String, line: UInt = #line) {

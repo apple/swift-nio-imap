@@ -74,7 +74,7 @@ extension EncodeBuffer {
 
 extension EncodeBuffer {
     /// Represents a piece of data that is ready to be written to the network.
-    public struct Chunk {
+    public struct Chunk: Hashable {
         /// The data that is ready to be written.
         public var bytes: ByteBuffer
 
@@ -82,16 +82,27 @@ extension EncodeBuffer {
         public var waitForContinuation: Bool
     }
 
+    @_spi(NIOIMAPInternal) var hasChunks: Bool {
+        self.stopPoints.count > 0
+    }
+
     /// Gets the next chunk that is ready to be written to the network.
     /// - returns: The next chunk that is ready to be written.
     public mutating func nextChunk() -> Chunk {
+        self.nextChunk(allowEmptyChunk: true)
+    }
+
+    /// Gets the next chunk that is ready to be written to the network.
+    /// *NOTE*: Use This function with caution. You probably shouldn't be using it, using nextChunk() instead.
+    /// - returns: The next chunk that is ready to be written.
+    @_spi(NIOIMAPInternal) public mutating func nextChunk(allowEmptyChunk: Bool) -> Chunk {
         switch self.mode {
         case .client:
             if let stopPoint = self.stopPoints.popFirst() {
                 return .init(bytes: self.buffer.readSlice(length: stopPoint - self.buffer.readerIndex)!,
                              waitForContinuation: stopPoint != self.buffer.writerIndex)
             } else {
-                precondition(self.buffer.readableBytes > 0, "No next chunk to send.")
+                precondition(allowEmptyChunk || self.buffer.readableBytes > 0, "No next chunk to send.")
                 return .init(bytes: self.buffer.readSlice(length: self.buffer.readableBytes)!, waitForContinuation: false)
             }
         case .server:
