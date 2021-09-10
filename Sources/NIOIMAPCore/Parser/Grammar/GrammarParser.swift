@@ -2048,8 +2048,8 @@ extension GrammarParser {
         try PL.composite(buffer: &buffer, tracker: tracker, { buffer, tracker in
             let operation = try self.parseStoreOperation(buffer: &buffer, tracker: tracker)
             try PL.parseFixedString("X-GM-LABELS", allowLeadingSpaces: false, buffer: &buffer, tracker: tracker)
-            try PL.parseFixedString(" (", buffer: &buffer, tracker: tracker)
             let silent = try self.parseStoreSilent(buffer: &buffer, tracker: tracker)
+            try PL.parseFixedString(" (", buffer: &buffer, tracker: tracker)
             var labels = [try self.parseGmailLabel(buffer: &buffer, tracker: tracker)]
             try PL.parseZeroOrMore(buffer: &buffer, into: &labels, tracker: tracker) { buffer, tracker in
                 try PL.parseSpaces(buffer: &buffer, tracker: tracker)

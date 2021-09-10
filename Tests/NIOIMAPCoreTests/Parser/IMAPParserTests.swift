@@ -2349,6 +2349,30 @@ extension ParserUnitTests {
     }
 }
 
+// MARK: - parseStoreGmailLabels
+
+extension ParserUnitTests {
+    func testParseStoreGmailLabels() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseStoreGmailLabels,
+            validInputs: [
+                ("+X-GM-LABELS (foo)", "\r", .add(silent: false, gmailLabels: [.init("foo")]), #line),
+                ("-X-GM-LABELS (foo bar)", "\r", .remove(silent: false, gmailLabels: [.init("foo"), .init("bar")]), #line),
+                ("X-GM-LABELS (foo bar boo far)", "\r", .replace(silent: false, gmailLabels: [.init("foo"), .init("bar"), .init("boo"), .init("far")]), #line),
+                ("X-GM-LABELS.SILENT (foo)", "\r", .replace(silent: true, gmailLabels: [.init("foo")]), #line),
+            ],
+            parserErrorInputs: [
+                ("+X-GM-LABEL.SILEN (foo)", "\r", #line),
+            ],
+            incompleteMessageInputs: [
+                ("+X-GM-LABELS ", "", #line),
+                ("-X-GM-LABELS ", "", #line),
+                ("X-GM-LABELS ", "", #line),
+            ]
+        )
+    }
+}
+
 // MARK: - subscribe parseSubscribe
 
 extension ParserUnitTests {
