@@ -100,7 +100,7 @@ public enum Command: Equatable {
     case fetch(LastCommandSet<SequenceRangeSet>, [FetchAttribute], OrderedDictionary<String, ParameterValue?>)
 
     /// Alters data associated with a message, typically returning the new data as an untagged fetch response.
-    case store(LastCommandSet<SequenceRangeSet>, [StoreModifier], StoreFlags)
+    case store(LastCommandSet<SequenceRangeSet>, [StoreModifier], StoreData)
 
     /// Searches the currently-selected mailbox for messages that match the search criteria.
     case search(key: SearchKey, charset: String? = nil, returnOptions: [SearchReturnOption] = [])
@@ -127,7 +127,7 @@ public enum Command: Equatable {
     case uidSearch(key: SearchKey, charset: String? = nil, returnOptions: [SearchReturnOption] = [])
 
     /// Similar to `.store`, but uses unique identifier instead of sequence numbers to identify messages.
-    case uidStore(LastCommandSet<UIDSetNonEmpty>, OrderedDictionary<String, ParameterValue?>, StoreFlags)
+    case uidStore(LastCommandSet<UIDSetNonEmpty>, OrderedDictionary<String, ParameterValue?>, StoreData)
 
     /// Similar to `.expunge`, but uses unique identifier instead of sequence numbers to identify messages.
     case uidExpunge(LastCommandSet<UIDSetNonEmpty>)
@@ -239,10 +239,10 @@ extension CommandEncodeBuffer {
             return self.writeCommandKind_fetch(set: set, atts: atts, modifiers: modifiers)
         case .uidFetch(let set, let atts, let modifiers):
             return self.writeCommandKind_uidFetch(set: set, atts: atts, modifiers: modifiers)
-        case .store(let set, let modifiers, let flags):
-            return self.writeCommandKind_store(set: set, modifiers: modifiers, flags: flags)
-        case .uidStore(let set, let modifiers, let flags):
-            return self.writeCommandKind_uidStore(set: set, modifiers: modifiers, flags: flags)
+        case .store(let set, let modifiers, let data):
+            return self.writeCommandKind_store(set: set, modifiers: modifiers, data: data)
+        case .uidStore(let set, let modifiers, let data):
+            return self.writeCommandKind_uidStore(set: set, modifiers: modifiers, data: data)
         case .search(let key, let charset, let returnOptions):
             return self.writeCommandKind_search(key: key, charset: charset, returnOptions: returnOptions)
         case .uidSearch(let key, let charset, let returnOptions):
@@ -524,7 +524,7 @@ extension CommandEncodeBuffer {
             }
     }
 
-    private mutating func writeCommandKind_store(set: LastCommandSet<SequenceRangeSet>, modifiers: [StoreModifier], flags: StoreFlags) -> Int {
+    private mutating func writeCommandKind_store(set: LastCommandSet<SequenceRangeSet>, modifiers: [StoreModifier], data: StoreData) -> Int {
         self.buffer.writeString("STORE ") +
             self.buffer.writeLastCommandSet(set) +
             self.buffer.write(if: modifiers.count >= 1) {
@@ -534,17 +534,17 @@ extension CommandEncodeBuffer {
                     }
             } +
             self.buffer.writeSpace() +
-            self.buffer.writeStoreAttributeFlags(flags)
+            self.buffer.writeStoreData(data)
     }
 
-    private mutating func writeCommandKind_uidStore(set: LastCommandSet<UIDSetNonEmpty>, modifiers: OrderedDictionary<String, ParameterValue?>, flags: StoreFlags) -> Int {
+    private mutating func writeCommandKind_uidStore(set: LastCommandSet<UIDSetNonEmpty>, modifiers: OrderedDictionary<String, ParameterValue?>, data: StoreData) -> Int {
         self.buffer.writeString("UID STORE ") +
             self.buffer.writeLastCommandSet(set) +
             self.buffer.write(if: modifiers.count >= 1) {
                 self.buffer.writeParameters(modifiers)
             } +
             self.buffer.writeSpace() +
-            self.buffer.writeStoreAttributeFlags(flags)
+            self.buffer.writeStoreData(data)
     }
 
     private mutating func writeCommandKind_search(key: SearchKey, charset: String? = nil, returnOptions: [SearchReturnOption] = []) -> Int {
@@ -658,11 +658,11 @@ extension Command {
     /// - parameter modifiers: Store modifiers.
     /// - parameter flags: The flags to store.
     /// - returns: `nil` if `messages` is empty, otherwise a `Command`.
-    public static func uidStore(messages: UIDSet, modifiers: OrderedDictionary<String, ParameterValue?>, flags: StoreFlags) -> Command? {
+    public static func uidStore(messages: UIDSet, modifiers: OrderedDictionary<String, ParameterValue?>, data: StoreData) -> Command? {
         guard let set = UIDSetNonEmpty(set: messages) else {
             return nil
         }
-        return .uidStore(.set(set), modifiers, flags)
+        return .uidStore(.set(set), modifiers, data)
     }
 
     /// Convenience for creating a *UID EXPUNGE* command.

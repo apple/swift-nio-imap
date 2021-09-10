@@ -153,18 +153,39 @@ extension Command {
              .expunge:
             return []
 
-        case .store(_, _, let flags):
-            return flags.silent ?
-                [.noUntaggedExpungeResponse, .noUIDBasedCommandRunning, .noFlagReadsFromAnyMessage] :
-                [.noUntaggedExpungeResponse, .noUIDBasedCommandRunning, .noFlagReadsFromAnyMessage, .noFlagChangesToAnyMessage]
-        case .uidStore(.lastCommand, _, let flags):
-            return flags.silent ?
-                [.noFlagReadsFromAnyMessage] :
-                [.noFlagReadsFromAnyMessage, .noFlagChangesToAnyMessage]
-        case .uidStore(.set(let uids), _, let flags):
-            return flags.silent ?
+        case .store(_, _, let data):
+            switch data {
+            case .flags(let flags):
+                return flags.silent ?
+                    [.noUntaggedExpungeResponse, .noUIDBasedCommandRunning, .noFlagReadsFromAnyMessage] :
+                    [.noUntaggedExpungeResponse, .noUIDBasedCommandRunning, .noFlagReadsFromAnyMessage, .noFlagChangesToAnyMessage]
+            case .gmailLabels(let labels):
+                return labels.silent ?
+                    [.noUntaggedExpungeResponse, .noUIDBasedCommandRunning, .noFlagReadsFromAnyMessage] :
+                    [.noUntaggedExpungeResponse, .noUIDBasedCommandRunning, .noFlagReadsFromAnyMessage, .noFlagChangesToAnyMessage]
+            }
+        case .uidStore(.lastCommand, _, let data):
+            switch data {
+            case .flags(let flags):
+                return flags.silent ?
+                    [.noFlagReadsFromAnyMessage] :
+                    [.noFlagReadsFromAnyMessage, .noFlagChangesToAnyMessage]
+            case .gmailLabels(let labels):
+                return labels.silent ?
+                    [.noFlagReadsFromAnyMessage] :
+                    [.noFlagReadsFromAnyMessage, .noFlagChangesToAnyMessage]
+            }
+        case .uidStore(.set(let uids), _, let data):
+            switch data {
+            case .flags(let flags):
+                return flags.silent ?
                 [.noFlagReads(uids)] :
                 [.noFlagReads(uids), .noFlagChanges(uids)]
+            case .gmailLabels(let labels):
+                return labels.silent ?
+                [.noFlagReads(uids)] :
+                [.noFlagReads(uids), .noFlagChanges(uids)]
+            }
 
         case .capability,
              .logout,
@@ -275,18 +296,39 @@ extension Command {
                 [.dependsOnMailboxSelection, .mayTriggerUntaggedExpunge, .isUIDBased]
             )
 
-        case .store(_, _, let flags):
-            return flags.silent ?
-                [.dependsOnMailboxSelection, .changesFlagsOnAnyMessage] :
-                [.dependsOnMailboxSelection, .changesFlagsOnAnyMessage, .readsFlagsFromAnyMessage]
-        case .uidStore(.lastCommand, _, let flags):
-            return flags.silent ?
-                [.dependsOnMailboxSelection, .mayTriggerUntaggedExpunge, .isUIDBased, .changesFlagsOnAnyMessage] :
-                [.dependsOnMailboxSelection, .mayTriggerUntaggedExpunge, .isUIDBased, .changesFlagsOnAnyMessage, .readsFlagsFromAnyMessage]
-        case .uidStore(.set(let uids), _, let flags):
-            return flags.silent ?
+        case .store(_, _, let data):
+            switch data {
+            case .flags(let storeFlags):
+                return storeFlags.silent ?
+                    [.dependsOnMailboxSelection, .changesFlagsOnAnyMessage] :
+                    [.dependsOnMailboxSelection, .changesFlagsOnAnyMessage, .readsFlagsFromAnyMessage]
+            case .gmailLabels(let storeGmailLabels):
+                return storeGmailLabels.silent ?
+                    [.dependsOnMailboxSelection, .changesFlagsOnAnyMessage] :
+                    [.dependsOnMailboxSelection, .changesFlagsOnAnyMessage, .readsFlagsFromAnyMessage]
+            }
+        case .uidStore(.lastCommand, _, let data):
+            switch data {
+            case .flags(let storeFlags):
+                return storeFlags.silent ?
+                    [.dependsOnMailboxSelection, .mayTriggerUntaggedExpunge, .isUIDBased, .changesFlagsOnAnyMessage] :
+                    [.dependsOnMailboxSelection, .mayTriggerUntaggedExpunge, .isUIDBased, .changesFlagsOnAnyMessage, .readsFlagsFromAnyMessage]
+            case .gmailLabels(let storeGmailLabels):
+                return storeGmailLabels.silent ?
+                    [.dependsOnMailboxSelection, .mayTriggerUntaggedExpunge, .isUIDBased, .changesFlagsOnAnyMessage] :
+                    [.dependsOnMailboxSelection, .mayTriggerUntaggedExpunge, .isUIDBased, .changesFlagsOnAnyMessage, .readsFlagsFromAnyMessage]
+            }
+        case .uidStore(.set(let uids), _, let data):
+            switch data {
+            case .flags(let storeFlags):
+                return storeFlags.silent ?
                 [.dependsOnMailboxSelection, .mayTriggerUntaggedExpunge, .isUIDBased, .changesFlags(uids)] :
                 [.dependsOnMailboxSelection, .mayTriggerUntaggedExpunge, .isUIDBased, .changesFlags(uids), .readsFlags(uids)]
+            case .gmailLabels(let storeGmailLabels):
+                return storeGmailLabels.silent ?
+                [.dependsOnMailboxSelection, .mayTriggerUntaggedExpunge, .isUIDBased, .changesFlags(uids)] :
+                [.dependsOnMailboxSelection, .mayTriggerUntaggedExpunge, .isUIDBased, .changesFlags(uids), .readsFlags(uids)]
+            }
 
         case .noop,
              .check:

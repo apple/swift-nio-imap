@@ -2323,12 +2323,12 @@ extension ParserUnitTests {
     }
 }
 
-// MARK: - parseStoreAttributeFlags
+// MARK: - parseStoreFlags
 
 extension ParserUnitTests {
-    func testParseStoreAttributeFlags() {
+    func testParseStoreFlags() {
         self.iterateTests(
-            testFunction: GrammarParser.parseStoreAttributeFlags,
+            testFunction: GrammarParser.parseStoreFlags,
             validInputs: [
                 ("+FLAGS ()", "\r", .add(silent: false, list: []), #line),
                 ("-FLAGS ()", "\r", .remove(silent: false, list: []), #line),

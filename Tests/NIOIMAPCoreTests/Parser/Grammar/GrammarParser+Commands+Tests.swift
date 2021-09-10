@@ -97,7 +97,7 @@ extension GrammarParser_Commands_Tests {
                 ("MOVE $ INBOX", "\r", .move(.lastCommand, .inbox), #line),
                 ("SEARCH ALL", "\r", .search(key: .all, charset: nil, returnOptions: []), #line),
                 ("ESEARCH ALL", "\r", .extendedSearch(.init(key: .all)), #line),
-                ("STORE $ +FLAGS \\Answered", "\r", .store(.lastCommand, [], .add(silent: false, list: [.answered])), #line),
+                ("STORE $ +FLAGS \\Answered", "\r", .store(.lastCommand, [], .flags(.add(silent: false, list: [.answered]))), #line),
                 ("EXAMINE INBOX", "\r", .examine(.inbox, .init()), #line),
                 ("LIST INBOX test", "\r", .list(nil, reference: .inbox, .mailbox("test"), []), #line),
                 ("LSUB INBOX test", "\r", .lsub(reference: .inbox, pattern: "test"), #line),
@@ -362,8 +362,8 @@ extension GrammarParser_Commands_Tests {
         self.iterateTests(
             testFunction: GrammarParser.parseCommandSuffix_store,
             validInputs: [
-                (" 1 +FLAGS \\answered", "\r", .store(.set([1]), [], .add(silent: false, list: [.answered])), #line),
-                (" 1 (label) -FLAGS \\seen", "\r", .store(.set([1]), [.other(.init(key: "label", value: nil))], .remove(silent: false, list: [.seen])), #line),
+                (" 1 +FLAGS \\answered", "\r", .store(.set([1]), [], .flags(.add(silent: false, list: [.answered]))), #line),
+                (" 1 (label) -FLAGS \\seen", "\r", .store(.set([1]), [.other(.init(key: "label", value: nil))], .flags(.remove(silent: false, list: [.seen]))), #line),
             ],
             parserErrorInputs: [
                 (" +FLAGS \\answered", "\r", #line),
@@ -504,7 +504,7 @@ extension GrammarParser_Commands_Tests {
                 (" COPY 1 Inbox", "\r\n", .uidCopy(.set([1]), .inbox), #line),
                 (" FETCH 1 FLAGS", "\r\n", .uidFetch(.set([1]), [.flags], [:]), #line),
                 (" SEARCH CHARSET UTF8 ALL", "\r\n", .uidSearch(key: .all, charset: "UTF8"), #line),
-                (" STORE 1 +FLAGS (Test)", "\r\n", .uidStore(.set([1]), [:], .add(silent: false, list: [.keyword(.init("Test"))])), #line),
+                (" STORE 1 +FLAGS (Test)", "\r\n", .uidStore(.set([1]), [:], .flags(.add(silent: false, list: [.keyword(.init("Test"))]))), #line),
                 (" COPY * Inbox", "\r\n", .uidCopy(.set([UIDRange(.max)]), .inbox), #line),
             ],
             parserErrorInputs: [
