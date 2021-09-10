@@ -2323,12 +2323,34 @@ extension ParserUnitTests {
     }
 }
 
-// MARK: - parseStoreAttributeFlags
+// MARK: - parseStoreData
 
 extension ParserUnitTests {
-    func testParseStoreAttributeFlags() {
+    func testParseStoreData() {
         self.iterateTests(
-            testFunction: GrammarParser.parseStoreAttributeFlags,
+            testFunction: GrammarParser.parseStoreData,
+            validInputs: [
+                ("+FLAGS (foo)", "\r", .flags(.add(silent: false, list: [.init("foo")])), #line),
+                ("-X-GM-LABELS (bar)", "\r", .gmailLabels(.remove(silent: false, gmailLabels: [.init("bar")])), #line),
+            ],
+            parserErrorInputs: [
+                ("+SOMETHING \\answered", "\r", #line),
+            ],
+            incompleteMessageInputs: [
+                ("+", "", #line),
+                ("-", "", #line),
+                ("", "", #line),
+            ]
+        )
+    }
+}
+
+// MARK: - parseStoreFlags
+
+extension ParserUnitTests {
+    func testParseStoreFlags() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseStoreFlags,
             validInputs: [
                 ("+FLAGS ()", "\r", .add(silent: false, list: []), #line),
                 ("-FLAGS ()", "\r", .remove(silent: false, list: []), #line),
@@ -2344,6 +2366,30 @@ extension ParserUnitTests {
                 ("+FLAGS ", "", #line),
                 ("-FLAGS ", "", #line),
                 ("FLAGS ", "", #line),
+            ]
+        )
+    }
+}
+
+// MARK: - parseStoreGmailLabels
+
+extension ParserUnitTests {
+    func testParseStoreGmailLabels() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseStoreGmailLabels,
+            validInputs: [
+                ("+X-GM-LABELS (foo)", "\r", .add(silent: false, gmailLabels: [.init("foo")]), #line),
+                ("-X-GM-LABELS (foo bar)", "\r", .remove(silent: false, gmailLabels: [.init("foo"), .init("bar")]), #line),
+                ("X-GM-LABELS (foo bar boo far)", "\r", .replace(silent: false, gmailLabels: [.init("foo"), .init("bar"), .init("boo"), .init("far")]), #line),
+                ("X-GM-LABELS.SILENT (foo)", "\r", .replace(silent: true, gmailLabels: [.init("foo")]), #line),
+            ],
+            parserErrorInputs: [
+                ("+X-GM-LABEL.SILEN (foo)", "\r", #line),
+            ],
+            incompleteMessageInputs: [
+                ("+X-GM-LABELS ", "", #line),
+                ("-X-GM-LABELS ", "", #line),
+                ("X-GM-LABELS ", "", #line),
             ]
         )
     }

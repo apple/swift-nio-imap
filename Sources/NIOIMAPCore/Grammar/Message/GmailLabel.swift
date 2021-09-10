@@ -14,7 +14,7 @@
 import struct NIO.ByteBuffer
 
 /// GMail treats labels as folders.
-public struct GmailLabel: Equatable {
+public struct GmailLabel: Hashable {
     /// The label's raw value -  a sequence of bytes
     public let stringValue: ByteBuffer
 
@@ -26,6 +26,12 @@ public struct GmailLabel: Equatable {
 }
 
 extension EncodeBuffer {
+    @discardableResult mutating func writeGmailLabels(_ labels: [GmailLabel]) -> Int {
+        self.writeArray(labels) { (label, self) -> Int in
+            self.writeGmailLabel(label)
+        }
+    }
+
     @discardableResult mutating func writeGmailLabel(_ label: GmailLabel) -> Int {
         if label.stringValue.getInteger(at: label.stringValue.readerIndex) == UInt8(ascii: "\\") {
             var stringValue = label.stringValue

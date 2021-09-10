@@ -80,13 +80,13 @@ final class RoundtripTests: XCTestCase {
             (.fetch(.set([5678]), [.flags, .bodySection(peek: false, .init(kind: .header), 3 ... 4)], [:]), #line),
             (.fetch(.set([5678]), [.bodySection(peek: false, .init(part: [12, 34], kind: .headerFields(["some", "header"])), 3 ... 4)], [:]), #line),
 
-            (.store(.all, [], .remove(silent: true, list: [.answered, .deleted])), #line),
-            (.store(.all, [], .add(silent: true, list: [.draft, .extension("\\some")])), #line),
-            (.store(.all, [], .replace(silent: true, list: [.keyword(.colorBit0)])), #line),
+            (.store(.all, [], .flags(.remove(silent: true, list: [.answered, .deleted]))), #line),
+            (.store(.all, [], .flags(.add(silent: true, list: [.draft, .extension("\\some")]))), #line),
+            (.store(.all, [], .flags(.replace(silent: true, list: [.keyword(.colorBit0)]))), #line),
 
             (.uidCopy(.set(.all), .inbox), #line),
 
-            (.uidStore(.set(.all), [:], .add(silent: true, list: [.draft, .deleted, .answered])), #line),
+            (.uidStore(.set(.all), [:], .flags(.add(silent: true, list: [.draft, .deleted, .answered]))), #line),
 
             (.search(key: .all), #line),
             (.search(key: .or(.deleted, .unseen), charset: "UTF-7"), #line),

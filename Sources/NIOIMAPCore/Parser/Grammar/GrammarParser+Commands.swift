@@ -254,8 +254,8 @@ extension GrammarParser {
                 return array
             } ?? []
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-            let flags = try self.parseStoreAttributeFlags(buffer: &buffer, tracker: tracker)
-            return .store(sequence, modifiers, flags)
+            let storeData = try self.parseStoreData(buffer: &buffer, tracker: tracker)
+            return .store(sequence, modifiers, storeData)
         }
     }
 
@@ -456,8 +456,8 @@ extension GrammarParser {
                 let set = try self.parseUIDSetNonEmpty(buffer: &buffer, tracker: tracker)
                 let modifiers = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseParameters) ?? [:]
                 try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-                let flags = try self.parseStoreAttributeFlags(buffer: &buffer, tracker: tracker)
-                return .uidStore(.set(set), modifiers, flags)
+                let storeData = try self.parseStoreData(buffer: &buffer, tracker: tracker)
+                return .uidStore(.set(set), modifiers, storeData)
             }
         }
 
