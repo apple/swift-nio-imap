@@ -179,12 +179,12 @@ extension Command {
             switch data {
             case .flags(let flags):
                 return flags.silent ?
-                [.noFlagReads(uids)] :
-                [.noFlagReads(uids), .noFlagChanges(uids)]
+                    [.noFlagReads(uids)] :
+                    [.noFlagReads(uids), .noFlagChanges(uids)]
             case .gmailLabels(let labels):
                 return labels.silent ?
-                [.noFlagReads(uids)] :
-                [.noFlagReads(uids), .noFlagChanges(uids)]
+                    [.noFlagReads(uids)] :
+                    [.noFlagReads(uids), .noFlagChanges(uids)]
             }
 
         case .capability,
@@ -322,12 +322,12 @@ extension Command {
             switch data {
             case .flags(let storeFlags):
                 return storeFlags.silent ?
-                [.dependsOnMailboxSelection, .mayTriggerUntaggedExpunge, .isUIDBased, .changesFlags(uids)] :
-                [.dependsOnMailboxSelection, .mayTriggerUntaggedExpunge, .isUIDBased, .changesFlags(uids), .readsFlags(uids)]
+                    [.dependsOnMailboxSelection, .mayTriggerUntaggedExpunge, .isUIDBased, .changesFlags(uids)] :
+                    [.dependsOnMailboxSelection, .mayTriggerUntaggedExpunge, .isUIDBased, .changesFlags(uids), .readsFlags(uids)]
             case .gmailLabels(let storeGmailLabels):
                 return storeGmailLabels.silent ?
-                [.dependsOnMailboxSelection, .mayTriggerUntaggedExpunge, .isUIDBased, .changesFlags(uids)] :
-                [.dependsOnMailboxSelection, .mayTriggerUntaggedExpunge, .isUIDBased, .changesFlags(uids), .readsFlags(uids)]
+                    [.dependsOnMailboxSelection, .mayTriggerUntaggedExpunge, .isUIDBased, .changesFlags(uids)] :
+                    [.dependsOnMailboxSelection, .mayTriggerUntaggedExpunge, .isUIDBased, .changesFlags(uids), .readsFlags(uids)]
             }
 
         case .noop,

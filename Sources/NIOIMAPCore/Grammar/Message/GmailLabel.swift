@@ -26,13 +26,12 @@ public struct GmailLabel: Hashable {
 }
 
 extension EncodeBuffer {
-    
     @discardableResult mutating func writeGmailLabels(_ labels: [GmailLabel]) -> Int {
         self.writeArray(labels) { (label, self) -> Int in
             self.writeGmailLabel(label)
         }
     }
-    
+
     @discardableResult mutating func writeGmailLabel(_ label: GmailLabel) -> Int {
         if label.stringValue.getInteger(at: label.stringValue.readerIndex) == UInt8(ascii: "\\") {
             var stringValue = label.stringValue

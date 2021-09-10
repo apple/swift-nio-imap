@@ -32,7 +32,6 @@ public enum StoreData: Hashable {
 }
 
 public struct StoreGmailLabels: Hashable {
-    
     /// Convenience function to create a new *add* operation.
     /// - parameter silent: `false` if the server should return the new flags list for the message(s), otherwise `true`.
     /// - parameter list: The `Flag`s to add.
@@ -56,7 +55,7 @@ public struct StoreGmailLabels: Hashable {
     public static func replace(silent: Bool, gmailLabels: [GmailLabel] = []) -> Self {
         Self(operation: .replace, silent: silent, gmailLabels: gmailLabels)
     }
-    
+
     /// The type of flag operation e.g. add, remove, or replace.
     public var operation: StoreOperation
 
@@ -69,7 +68,6 @@ public struct StoreGmailLabels: Hashable {
 
 /// Defines if certain flags should be added, removed, or replaced.
 public struct StoreFlags: Hashable {
-
     /// Convenience function to create a new *add* operation.
     /// - parameter silent: `false` if the server should return the new flags list for the message(s), otherwise `true`.
     /// - parameter list: The `Flag`s to add.
@@ -99,7 +97,7 @@ public struct StoreFlags: Hashable {
 
     /// `false` if the server should return the new `Flag`s list for each message, otherwise `true`.
     public var silent: Bool
-    
+
     /// The `Flag`s to operate on.
     public var flags: [Flag]
 }
@@ -113,7 +111,7 @@ extension EncodeBuffer {
             self.writeString("\(flags.operation.rawValue)FLAGS\(silentString) ") +
             self.writeFlags(flags.flags)
     }
-    
+
     @discardableResult mutating func writeStoreData(_ data: StoreData) -> Int {
         switch data {
         case .flags(let storeFlags):
@@ -122,7 +120,7 @@ extension EncodeBuffer {
             return self.writeStoreGmailLabels(storeGmailLabels)
         }
     }
-    
+
     @discardableResult mutating func writeStoreGmailLabels(_ labels: StoreGmailLabels) -> Int {
         let silentString = labels.silent ? ".SILENT" : ""
         return

@@ -2015,7 +2015,7 @@ extension GrammarParser {
             tracker: tracker
         )
     }
-    
+
     static func parseStoreOperation(buffer: inout ParseBuffer, tracker: StackTracker) throws -> StoreOperation {
         try PL.parseOneOf(
             { (buffer: inout ParseBuffer, tracker: StackTracker) -> StoreOperation in
@@ -2034,7 +2034,7 @@ extension GrammarParser {
             tracker: tracker
         )
     }
-    
+
     static func parseStoreSilent(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Bool {
         do {
             try PL.parseFixedString(".SILENT", buffer: &buffer, tracker: tracker)
@@ -2043,9 +2043,9 @@ extension GrammarParser {
             return false
         }
     }
-    
+
     static func parseStoreGmailLabels(buffer: inout ParseBuffer, tracker: StackTracker) throws -> StoreGmailLabels {
-        try PL.composite(buffer: &buffer, tracker: tracker, { buffer, tracker in
+        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             let operation = try self.parseStoreOperation(buffer: &buffer, tracker: tracker)
             try PL.parseFixedString("X-GM-LABELS", allowLeadingSpaces: false, buffer: &buffer, tracker: tracker)
             let silent = try self.parseStoreSilent(buffer: &buffer, tracker: tracker)
@@ -2057,13 +2057,12 @@ extension GrammarParser {
             }
             try PL.parseFixedString(")", buffer: &buffer, tracker: tracker)
             return .init(operation: operation, silent: silent, gmailLabels: labels)
-        })
+        }
     }
 
     // store-att-flags = (["+" / "-"] "FLAGS" [".SILENT"]) SP
     //                   (flag-list / (flag *(SP flag)))
     static func parseStoreFlags(buffer: inout ParseBuffer, tracker: StackTracker) throws -> StoreFlags {
-        
         func parseStoreFlags_array(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [Flag] {
             var flags = [try self.parseFlag(buffer: &buffer, tracker: tracker)]
             try PL.parseZeroOrMore(buffer: &buffer, into: &flags, tracker: tracker) { buffer, tracker in
@@ -2072,7 +2071,7 @@ extension GrammarParser {
             }
             return flags
         }
-        
+
         return try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> StoreFlags in
             let operation = try self.parseStoreOperation(buffer: &buffer, tracker: tracker)
             try PL.parseFixedString("FLAGS", allowLeadingSpaces: false, buffer: &buffer, tracker: tracker)
@@ -2085,7 +2084,7 @@ extension GrammarParser {
             return .init(operation: operation, silent: silent, flags: flags)
         }
     }
-    
+
     static func parseStoreData(buffer: inout ParseBuffer, tracker: StackTracker) throws -> StoreData {
         try PL.parseOneOf(
             { (buffer: inout ParseBuffer, tracker: StackTracker) -> StoreData in
