@@ -23,17 +23,17 @@ public struct GmailLabel: Equatable {
     public init(_ buffer: ByteBuffer) {
         self.buffer = buffer
     }
-    
+
     /// Creates a new `GmailLabel` from the given `MailboxName`.
     public init(mailboxName: MailboxName) {
         self.buffer = mailboxName.bytes
     }
-    
+
     /// Creates a new `GmailLabel` from the given `UseAttribute`.
     public init(useAttribute: UseAttribute) {
         self.buffer = ByteBuffer(string: useAttribute.stringValue)
     }
-    
+
     /// Creates a display string to be used in UI.
     ///
     /// Note that the conversion may be lossy. This will
