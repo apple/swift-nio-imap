@@ -177,8 +177,6 @@ struct ClientStateMachine {
     /// Tells the state machine that some response has been received. Note that receiving a response
     /// will never result in the client having to perform some action.
     mutating func receiveResponse(_ response: Response) throws {
-        precondition(self.state != .error, "Already in an error state, make sure to handle errors.")
-
         do {
             return try self._receiveResponse(response)
         } catch {
@@ -202,7 +200,7 @@ struct ClientStateMachine {
             try authStateMachine.receiveResponse(response)
             self.state = .expectingNormalResponse
         case .appending(var appendStateMachine, pendingContinuation: let pendingContinuation):
-            precondition(!pendingContinuation)
+            if pendingContinuation { throw UnexpectedResponse(activePromise: nil) }
             if try appendStateMachine.receiveResponse(response) {
                 self.state = .expectingNormalResponse
             } else {
@@ -295,7 +293,8 @@ extension ClientStateMachine {
         guard case .appending(var appendingStateMachine, pendingContinuation: let pendingContinuation) = self.state else {
             preconditionFailure("Invalid state: \(self.state)")
         }
-        precondition(pendingContinuation)
+        guard pendingContinuation else {
+            throw UnexpectedContinuationRequest()
 
         try appendingStateMachine.receiveContinuationRequest(request)
         self.state = .appending(appendingStateMachine, pendingContinuation: false)
