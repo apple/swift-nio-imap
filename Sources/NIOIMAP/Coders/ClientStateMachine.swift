@@ -248,7 +248,6 @@ struct ClientStateMachine {
             // 2. if first doesn't have a continuation then there won't be a next chunk
             precondition(result.chunks.count == 1)
             return result.chunks.first!
-            return first
         }
         return nil
     }
@@ -295,6 +294,7 @@ extension ClientStateMachine {
         }
         guard pendingContinuation else {
             throw UnexpectedContinuationRequest()
+        }
 
         try appendingStateMachine.receiveContinuationRequest(request)
         self.state = .appending(appendingStateMachine, pendingContinuation: false)
