@@ -16,22 +16,45 @@ import struct NIO.ByteBuffer
 /// GMail treats labels as folders.
 public struct GmailLabel: Equatable {
     /// The label's raw value -  a sequence of bytes
-    public let stringValue: ByteBuffer
+    let buffer: ByteBuffer
 
-    /// Creates a new GMail label from the given bytes.
+    /// Creates a new `GmailLabel` from the given bytes.
     /// - parameter rawValue: The raw bytes to construct the label
-    public init(_ stringValue: ByteBuffer) {
-        self.stringValue = stringValue
+    public init(_ buffer: ByteBuffer) {
+        self.buffer = buffer
+    }
+    
+    /// Creates a new `GmailLabel` from the given `MailboxName`.
+    public init(mailboxName: MailboxName) {
+        self.buffer = mailboxName.bytes
+    }
+    
+    /// Creates a new `GmailLabel` from the given `UseAttribute`.
+    public init(useAttribute: UseAttribute) {
+        self.buffer = ByteBuffer(string: useAttribute.stringValue)
+    }
+    
+    /// Creates a display string to be used in UI.
+    ///
+    /// Note that the conversion may be lossy. This will
+    /// attempt to decode as “modified UTF-7”, and fall
+    /// back to lossy UTF-8 decoding.
+    public func makeDisplayString() -> String {
+        do {
+            return try ModifiedUTF7.decode(self.buffer)
+        } catch {
+            return String(bestEffortDecodingUTF8Bytes: self.buffer.readableBytesView)
+        }
     }
 }
 
 extension EncodeBuffer {
     @discardableResult mutating func writeGmailLabel(_ label: GmailLabel) -> Int {
-        if label.stringValue.getInteger(at: label.stringValue.readerIndex) == UInt8(ascii: "\\") {
-            var stringValue = label.stringValue
+        if label.buffer.getInteger(at: label.buffer.readerIndex) == UInt8(ascii: "\\") {
+            var stringValue = label.buffer
             return self.writeBuffer(&stringValue)
         } else {
-            return self.writeIMAPString(label.stringValue)
+            return self.writeIMAPString(label.buffer)
         }
     }
 }
