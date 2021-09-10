@@ -2323,6 +2323,28 @@ extension ParserUnitTests {
     }
 }
 
+// MARK: - parseStoreData
+
+extension ParserUnitTests {
+    func testParseStoreData() {
+        self.iterateTests(
+            testFunction: GrammarParser.parseStoreData,
+            validInputs: [
+                ("+FLAGS (foo)", "\r", .flags(.add(silent: false, list: [.init("foo")])), #line),
+                ("-X-GM-LABELS (bar)", "\r", .gmailLabels(.remove(silent: false, gmailLabels: [.init("bar")])), #line),
+            ],
+            parserErrorInputs: [
+                ("+SOMETHING \\answered", "\r", #line),
+            ],
+            incompleteMessageInputs: [
+                ("+", "", #line),
+                ("-", "", #line),
+                ("", "", #line),
+            ]
+        )
+    }
+}
+
 // MARK: - parseStoreFlags
 
 extension ParserUnitTests {
