@@ -119,22 +119,19 @@ struct FramingParser: Hashable {
         return self.buffer.getInteger(at: self.buffer.readerIndex + self.frameLength)! // we've asserted this is ok
     }
 
-    private mutating func maybeReadByte<T: FixedWidthInteger>(as: T.Type) -> T? {
-        guard let value = self.buffer.getInteger(at: self.buffer.readerIndex + self.frameLength, as: T.self) else {
+    private mutating func maybeReadByte() -> UInt8? {
+        guard let value = self.buffer.getInteger(at: self.buffer.readerIndex + self.frameLength, as: UInt8.self) else {
             return nil
         }
-        self.frameLength &+= T.bitWidth / 8
+        self.frameLength &+= 1
         return value
     }
     
-    private mutating func peekByte<T: FixedWidthInteger>(as: T.Type) -> T? {
-        assert(self.buffer.readableBytes > 0)
-        assert(self.frameLength < self.buffer.readableBytes)
-        return self.buffer.getInteger(at: self.buffer.readerIndex + self.frameLength, as: T.self)! // we've asserted this is ok
-    }
-    
     private mutating func peekByte() -> UInt8? {
-        self.peekByte(as: UInt8.self)
+        guard self.frameLength < self.buffer.readableBytes else {
+            return nil
+        }
+        return self.buffer.getInteger(at: self.buffer.readerIndex + self.frameLength, as: UInt8.self)! // we've asserted this is ok
     }
 }
 
@@ -175,15 +172,18 @@ extension FramingParser {
         // that, otherwise consider go back a byte and consider
         // that to be the end of the frame
         
-        guard let byte = self.maybeReadByte(as: UInt8.self) else {
+        // If there's no next byte then assume we need to consume
+        // whatever comes next. Note that this will only actually
+        // be consumed if we find an LF.
+        guard let byte = self.peekByte() else {
             return true
         }
         
         if byte == LF {
+            self.frameLength += 1 // might as well read the byte if it's here
             self.state = .normalTraversal(swallowLF: false)
             return false
         } else {
-            self.frameLength -= 1
             self.state = .normalTraversal(swallowLF: true)
             return true
         }
@@ -211,11 +211,11 @@ extension FramingParser {
 
     /// Returns `true` if the frame is complete.
     private mutating func readByte_state_searchingForLiteralHeader_findingBinaryFlag() throws -> Bool {
-        guard let binaryByte = self.maybeReadByte(as: UInt8.self) else {
+        guard let binaryByte = self.peekByte() else {
             return false
         }
-        if binaryByte != BINARY_FLAG {
-            self.frameLength -= 1
+        if binaryByte == BINARY_FLAG {
+            self.frameLength &+= 1
         }
         self.state = .searchingForLiteralHeader(.findingSize(ByteBuffer()))
         return try self.readByte_state_searchingForLiteralHeader_findingSize(sizeBuffer: ByteBuffer())
@@ -228,7 +228,7 @@ extension FramingParser {
             self.state = .normalTraversal(swallowLF: false)
         } else {
             let readableLength = self.buffer.readableBytes - self.frameLength
-            self.frameLength += readableLength
+            self.frameLength &+= readableLength
             self.state = .insideLiteral(remaining: remainingLiteralBytes - readableLength)
         }
     }
@@ -245,7 +245,7 @@ extension FramingParser {
         var sizeBuffer = sizeBuffer
 
         // First scan for the end of the literal size
-        while let byte = self.maybeReadByte(as: UInt8.self) {
+        while let byte = self.maybeReadByte() {
             switch byte {
             case UInt8(ascii: "0") ... UInt8(ascii: "9"):
                 sizeBuffer.writeInteger(byte)
@@ -269,7 +269,7 @@ extension FramingParser {
     /// Returns `true` if the frame is complete.
     private mutating func readByte_state_searchingForLiteralHeader_findingLiteralExtension(_ size: Int) throws -> Bool {
         // Now scan for the CRLF
-        guard let byte = self.maybeReadByte(as: UInt8.self) else {
+        guard let byte = self.maybeReadByte() else {
             return false
         }
 
@@ -289,7 +289,7 @@ extension FramingParser {
 
     /// Returns `true` if the frame is complete.
     private mutating func readByte_state_searchingForLiteralHeader_findingClosingCurly(_ size: Int) throws -> Bool {
-        guard let byte = self.maybeReadByte(as: UInt8.self) else {
+        guard let byte = self.maybeReadByte() else {
             return false
         }
 
@@ -303,7 +303,7 @@ extension FramingParser {
 
     /// Returns `true` if the frame is complete.
     private mutating func readByte_state_searchingForLiteralHeader_findingCR(_ size: Int) throws -> Bool {
-        guard let byte = self.maybeReadByte(as: UInt8.self) else {
+        guard let byte = self.maybeReadByte() else {
             return false
         }
 
@@ -317,7 +317,7 @@ extension FramingParser {
 
     /// Returns `true` if the frame is complete.
     private mutating func readByte_state_searchingForLiteralHeader_findingLF(_ size: Int) throws -> Bool {
-        guard let byte = self.maybeReadByte(as: UInt8.self) else {
+        guard let byte = self.maybeReadByte() else {
             return false
         }
 
