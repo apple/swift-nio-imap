@@ -34,8 +34,8 @@ extension FramingParserTests {
     }
 
     func testSimpleCommand() {
-        var buffer: ByteBuffer = "A1 NOOP\r\n"
-        XCTAssertNoThrow(XCTAssertEqual(try self.parser.appendAndFrameBuffer(&buffer), ["A1 NOOP\r\n"]))
+        var buffer: ByteBuffer = "A1 NOOP\r"
+        XCTAssertNoThrow(XCTAssertEqual(try self.parser.appendAndFrameBuffer(&buffer), ["A1 NOOP\r"]))
     }
 
     // Shows that we don't need a CR to complete a frame
@@ -89,10 +89,10 @@ extension FramingParserTests {
         XCTAssertNoThrow(XCTAssertEqual(try self.parser.appendAndFrameBuffer(&buffer), []))
 
         buffer = "\r"
-        XCTAssertNoThrow(XCTAssertEqual(try self.parser.appendAndFrameBuffer(&buffer), []))
+        XCTAssertNoThrow(XCTAssertEqual(try self.parser.appendAndFrameBuffer(&buffer), ["A1 NOOP\r"]))
 
         buffer = "\n"
-        XCTAssertNoThrow(XCTAssertEqual(try self.parser.appendAndFrameBuffer(&buffer), ["A1 NOOP\r\n"]))
+        XCTAssertNoThrow(XCTAssertEqual(try self.parser.appendAndFrameBuffer(&buffer), []))
     }
 
     // Note this isn't strictly a valid login command, but it doesn't matter.
