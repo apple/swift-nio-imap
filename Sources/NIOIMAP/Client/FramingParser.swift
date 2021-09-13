@@ -30,6 +30,21 @@ public struct IntegerOverflow: Error, Hashable {
     public init() {}
 }
 
+/// How to handle a potential `\n` in a CRLF if you've found
+/// the CR.
+enum LineFeedByteStrategy: Hashable {
+    
+    /// There's not currently any line feed byte present,
+    /// and we don't know what comes next. So mark the
+    /// current frame as complete and jsut ignore the next
+    /// byte if it's a `\n`.
+    case ignoreFirst
+    
+    /// The byte is already present, we might as well
+    /// include it in the current frame.
+    case includeInFrame
+}
+
 struct FramingParser: Hashable {
     enum LiteralSubstate: Hashable {
         case findingBinaryFlag
@@ -41,13 +56,13 @@ struct FramingParser: Hashable {
     }
 
     enum State: Hashable {
-        case normalTraversal(swallowLF: Bool)
+        case normalTraversal(LineFeedByteStrategy)
         case foundCR
         case searchingForLiteralHeader(LiteralSubstate)
         case insideLiteral(remaining: Int)
     }
 
-    var state: State = .normalTraversal(swallowLF: false)
+    var state: State = .normalTraversal(.includeInFrame)
     var frameLength: Int = 0
     var buffer = ByteBuffer()
 
@@ -78,6 +93,10 @@ struct FramingParser: Hashable {
     }
 
     private mutating func readFrame() -> ByteBuffer? {
+        guard self.frameLength > 0 else {
+            return nil
+        }
+        
         let buffer = self.buffer.readSlice(length: self.frameLength)
         self.frameLength = 0
         return buffer
@@ -86,14 +105,13 @@ struct FramingParser: Hashable {
     private mutating func parseFrame() throws -> ByteBuffer? {
         while self.frameLength < self.buffer.readableBytes {
             switch self.state {
-            case .normalTraversal(swallowLF: let swallowsLF):
-                if self.readByte_state_normalTraversal(swallowLF: swallowsLF) {
+            case .normalTraversal(let lineFeedStrategy):
+                if self.readByte_state_normalTraversal(lineFeedStrategy: lineFeedStrategy) {
                     return self.readFrame()
                 }
 
             case .foundCR:
-                let swallowLF = self.readByte_state_foundCR()
-                self.state = .normalTraversal(swallowLF: swallowLF)
+                self.readByte_state_foundCR()
                 return self.readFrame()
 
             case .searchingForLiteralHeader(let substate):
@@ -138,20 +156,25 @@ struct FramingParser: Hashable {
 extension FramingParser {
     
     /// Returns `true` if the frame is complete.
-    private mutating func readByte_state_normalTraversal(swallowLF: Bool) -> Bool {
+    private mutating func readByte_state_normalTraversal(lineFeedStrategy: LineFeedByteStrategy) -> Bool {
         let byte = self.readByte()
         switch byte {
         case CR:
-            let swallowLF = self.readByte_state_foundCR()
-            self.state = .normalTraversal(swallowLF: swallowLF)
+            self.readByte_state_foundCR()
             return true
 
         case LF:
-            if swallowLF {
-                // we want to completely remove the byte from the buffer
-                _ = self.buffer.readBytes(length: 1)
+            switch lineFeedStrategy {
+            case .ignoreFirst:
+                _ = self.buffer.readBytes(length: 1) // skip the byte as we're meant to ignore it
+                self.frameLength -= 1 // need to backtrack here so we don't
+                self.state = .normalTraversal(.includeInFrame)
+                return true
+            case .includeInFrame:
+                // if we weren't meant to ignore the LF then it
+                // must be the end of the current frame
+                return true
             }
-            return !swallowLF // if we are swallowing the line feed then we don't want a frame
 
         case LITERAL_HEADER_START:
             self.state = .searchingForLiteralHeader(.findingBinaryFlag)
@@ -165,27 +188,25 @@ extension FramingParser {
         }
     }
 
-    /// Returns `true` if the first LF should be consumed, otherwise false
-    private mutating func readByte_state_foundCR() -> Bool {
-        // We've found the end of a frame here.
-        // If the next byte is an LF then we need to also consume
-        // that, otherwise consider go back a byte and consider
-        // that to be the end of the frame
+    private mutating func readByte_state_foundCR() {
         
-        // If there's no next byte then assume we need to consume
-        // whatever comes next. Note that this will only actually
-        // be consumed if we find an LF.
         guard let byte = self.peekByte() else {
-            return true
+            // As we don't yet have the next byte we have to assume
+            // if might be an LF, in which case we want to skip it.
+            self.state = .normalTraversal(.ignoreFirst)
+            return
         }
         
+        // We read a byte and it was a line feed, we might as well
+        // include it in the frame if it's already here.
         if byte == LF {
-            self.frameLength += 1 // might as well read the byte if it's here
-            self.state = .normalTraversal(swallowLF: false)
-            return false
+            self.frameLength += 1
+            self.state = .normalTraversal(.includeInFrame)
         } else {
-            self.state = .normalTraversal(swallowLF: true)
-            return true
+            
+            // The next byte wasn't a line feed, so just default
+            // back to including any line feed in the frame.
+            self.state = .normalTraversal(.includeInFrame)
         }
     }
 
@@ -225,7 +246,7 @@ extension FramingParser {
     private mutating func readByte_state_insideLiteral(remainingLiteralBytes: Int) {
         if self.buffer.readableBytes - self.frameLength >= remainingLiteralBytes {
             self.frameLength += remainingLiteralBytes
-            self.state = .normalTraversal(swallowLF: false)
+            self.state = .normalTraversal(.includeInFrame)
         } else {
             let readableLength = self.buffer.readableBytes - self.frameLength
             self.frameLength &+= readableLength
