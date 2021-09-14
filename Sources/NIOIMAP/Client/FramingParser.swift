@@ -196,6 +196,14 @@ enum FrameStatus: Hashable {
         self.frameLength &+= 1
         return value
     }
+    
+    // We've read a byte we don't care about (probably a LF), so
+    // we need to decrement the frame length, and move the reader
+    // index forward to ensure it's ignored.
+    private mutating func stepBackAndIgnoreByte() {
+        self.buffer.moveReaderIndex(forwardBy: 1)
+        self.frameLength &-= 1
+    }
 
     private mutating func peekByte() -> UInt8? {
         guard self.frameLength < self.buffer.readableBytes else {
@@ -218,10 +226,7 @@ extension FramingParser {
             switch lineFeedStrategy {
             case .ignoreFirst:
                 precondition(self.frameLength == 1)
-                // we now need to skip the LF without incrementing
-                // the frame size
-                self.buffer.moveReaderIndex(forwardBy: 1)
-                self.frameLength &-= 1
+                self.stepBackAndIgnoreByte()
                 self.state = .normalTraversal(.includeInFrame)
             case .includeInFrame:
                 // if we weren't meant to ignore the LF then it
