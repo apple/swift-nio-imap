@@ -154,7 +154,7 @@ enum FrameStatus: Hashable {
                 case .complete:
                     return self.readFrame()
                 case .incomplete:
-                    break
+                    ()
                 }
 
             case .foundCR:
@@ -167,7 +167,7 @@ enum FrameStatus: Hashable {
                 case .complete:
                     return self.readFrame()
                 case .incomplete:
-                    break
+                    ()
                 }
 
             case .insideLiteral(remaining: let remaining):
