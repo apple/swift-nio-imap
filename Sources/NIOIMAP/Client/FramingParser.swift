@@ -61,7 +61,7 @@ extension FixedWidthInteger {
 enum LineFeedByteStrategy: Hashable {
     /// There's not currently any line feed byte present,
     /// and we don't know what comes next. So mark the
-    /// current frame as complete and jsut ignore the next
+    /// current frame as complete and just ignore the next
     /// byte if it's a `\n`.
     case ignoreFirst
 
