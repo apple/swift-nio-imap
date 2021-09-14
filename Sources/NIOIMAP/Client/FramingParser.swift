@@ -331,15 +331,13 @@ extension FramingParser {
         switch byte {
         case LITERAL_PLUS, LITERAL_MINUS:
             self.state = .searchingForLiteralHeader(.findingClosingCurly(size))
+            return .incomplete
         case LITERAL_HEADER_END:
-            self.frameLength -= 1
             self.state = .searchingForLiteralHeader(.findingCR(size))
+            return try self.readByte_state_searchingForLiteralHeader_findingCR(size)
         default:
             throw InvalidFrame()
         }
-
-        self.state = .searchingForLiteralHeader(.findingCR(size))
-        return try self.readByte_state_searchingForLiteralHeader_findingCR(size)
     }
 
     /// Returns `true` if the frame is complete.
