@@ -133,10 +133,7 @@ enum FrameStatus: Hashable {
     }
 
     private mutating func readFrame() -> ByteBuffer? {
-        guard self.frameLength > 0 else {
-            return nil
-        }
-
+        assert(frameLength > 0)
         let buffer = self.buffer.readSlice(length: self.frameLength)
         self.frameLength = 0
         return buffer
@@ -224,12 +221,12 @@ extension FramingParser {
                 precondition(self.frameLength == 1)
                 self.stepBackAndIgnoreByte()
                 self.state = .normalTraversal(.includeInFrame)
+                return .incomplete
             case .includeInFrame:
                 // if we weren't meant to ignore the LF then it
                 // must be the end of the current frame
-                break
+                return .complete
             }
-            return .complete
 
         case LITERAL_HEADER_START:
             self.state = .searchingForLiteralHeader(.findingBinaryFlag)
