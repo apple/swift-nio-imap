@@ -293,8 +293,9 @@ extension FramingParser {
         if binaryByte == BINARY_FLAG {
             self.frameLength &+= 1
         }
-        self.state = .searchingForLiteralHeader(.findingSize(ByteBuffer()))
-        return try self.readByte_state_searchingForLiteralHeader_findingSize(sizeBuffer: ByteBuffer())
+        let sizeBuffer = ByteBuffer()
+        self.state = .searchingForLiteralHeader(.findingSize(sizeBuffer))
+        return try self.readByte_state_searchingForLiteralHeader_findingSize(sizeBuffer: sizeBuffer)
     }
 
     private mutating func readByte_state_insideLiteral(remainingLiteralBytes: UInt64) {
