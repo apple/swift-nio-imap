@@ -21,6 +21,8 @@ private let LF = UInt8(ascii: "\n")
 private let BINARY_FLAG = UInt8(ascii: "~")
 private let LITERAL_PLUS = UInt8(ascii: "+")
 private let LITERAL_MINUS = UInt8(ascii: "-")
+private let DIGIT_0 = UInt8(ascii: "0")
+private let DIGIT_9 = UInt8(ascii: "9")
 
 public struct InvalidFrame: Error, Hashable {
     public init() {}
@@ -292,7 +294,7 @@ extension FramingParser {
         // First scan for the end of the literal size
         while let byte = self.maybeReadByte() {
             switch byte {
-            case UInt8(ascii: "0") ... UInt8(ascii: "9"):
+            case DIGIT_0 ... DIGIT_9:
                 sizeBuffer.writeInteger(byte)
             case LITERAL_PLUS, LITERAL_MINUS:
                 guard let size = Int(String(buffer: buffer)) else {
