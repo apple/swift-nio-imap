@@ -89,14 +89,13 @@ enum FrameStatus: Hashable {
         case findingLiteralExtension(UInt64)
         case findingClosingCurly(UInt64)
         case findingCR(UInt64)
-        case findingLF(UInt64)
     }
 
     enum State: Hashable {
         case normalTraversal(LineFeedByteStrategy)
         case foundCR
         case searchingForLiteralHeader(LiteralHeaderState)
-        case insideLiteral(remaining: UInt64)
+        case insideLiteral(lineFeedStrategy: LineFeedByteStrategy, remaining: UInt64)
     }
 
     var state: State = .normalTraversal(.includeInFrame)
@@ -170,10 +169,11 @@ enum FrameStatus: Hashable {
                     ()
                 }
 
-            case .insideLiteral(remaining: let remaining):
-                // always instantly forward any bytes within a literal
-                self.readByte_state_insideLiteral(remainingLiteralBytes: remaining)
-                return self.readFrame()
+            case .insideLiteral(lineFeedStrategy: let lfs, remaining: let remaining):
+                self.readByte_state_insideLiteral(lineFeedStrategy: lfs, remainingLiteralBytes: remaining)
+                if self.frameLength > 0 {
+                    return self.readFrame()
+                }
             }
         }
         return nil
@@ -280,8 +280,6 @@ extension FramingParser {
             return try self.readByte_state_searchingForLiteralHeader_findingClosingCurly(size)
         case .findingCR(let size):
             return try self.readByte_state_searchingForLiteralHeader_findingCR(size)
-        case .findingLF(let size):
-            return try self.readByte_state_searchingForLiteralHeader_findingLF(size)
         }
     }
 
@@ -297,14 +295,24 @@ extension FramingParser {
         return try self.readByte_state_searchingForLiteralHeader_findingSize(sizeBuffer: sizeBuffer)
     }
 
-    private mutating func readByte_state_insideLiteral(remainingLiteralBytes: UInt64) {
+    private mutating func readByte_state_insideLiteral(lineFeedStrategy: LineFeedByteStrategy, remainingLiteralBytes: UInt64) {
+        
+        switch lineFeedStrategy {
+        case .ignoreFirst:
+            if let byte = self.peekByte(), byte == LF {
+                self.buffer.moveReaderIndex(forwardBy: 1)
+            }
+        case .includeInFrame:
+            break
+        }
+        
         let bytesAvailable = self.buffer.readableBytes - self.frameLength
         if bytesAvailable >= remainingLiteralBytes {
             self.frameLength &+= Int(remainingLiteralBytes)
             self.state = .normalTraversal(.includeInFrame)
         } else {
             self.frameLength &+= bytesAvailable
-            self.state = .insideLiteral(remaining: remainingLiteralBytes - UInt64(bytesAvailable))
+            self.state = .insideLiteral(lineFeedStrategy: .includeInFrame, remaining: remainingLiteralBytes - UInt64(bytesAvailable))
         }
     }
 
@@ -357,7 +365,6 @@ extension FramingParser {
         }
     }
 
-    /// Returns `true` if the frame is complete.
     private mutating func readByte_state_searchingForLiteralHeader_findingClosingCurly(_ size: UInt64) throws -> FrameStatus {
         guard let byte = self.maybeReadByte() else {
             return .incomplete
@@ -376,24 +383,27 @@ extension FramingParser {
             return .incomplete
         }
 
-        if byte == CR {
-            self.state = .searchingForLiteralHeader(.findingLF(size))
-            return try self.readByte_state_searchingForLiteralHeader_findingLF(size)
-        } else {
+        switch byte {
+        case CR:
+            self.readByte_state_searchingForLiteralHeader_findingLF(size)
+        case LF:
+            self.state = .insideLiteral(lineFeedStrategy: .includeInFrame, remaining: size)
+        default:
             throw InvalidFrame()
         }
+        
+        return .complete
     }
 
-    private mutating func readByte_state_searchingForLiteralHeader_findingLF(_ size: UInt64) throws -> FrameStatus {
-        guard let byte = self.maybeReadByte() else {
-            return .incomplete
+    private mutating func readByte_state_searchingForLiteralHeader_findingLF(_ size: UInt64)  {
+        guard let byte = self.peekByte() else {
+            self.state = .insideLiteral(lineFeedStrategy: .ignoreFirst, remaining: size)
+            return
         }
-
+        
         if byte == LF {
-            self.state = .insideLiteral(remaining: size)
-            return .complete
-        } else {
-            throw InvalidFrame()
+            frameLength &+= 1
         }
+        self.state = .insideLiteral(lineFeedStrategy: .includeInFrame, remaining: size)
     }
 }
