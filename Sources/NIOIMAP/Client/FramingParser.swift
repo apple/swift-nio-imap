@@ -53,7 +53,7 @@ extension FixedWidthInteger {
     }
 
     static var maximumAllowedCharacters: Int {
-        Int(floor(log10(Float80(Self.max)))) + 1
+        Int(floor(log10(Float64(Self.max)))) + 1
     }
 }
 
