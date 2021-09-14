@@ -83,7 +83,7 @@ enum FrameStatus: Hashable {
 }
 
 @_spi(NIOIMAPInternal) public struct FramingParser: Hashable {
-    enum LiteralSubstate: Hashable {
+    enum LiteralHeaderState: Hashable {
         case findingBinaryFlag
         case findingSize(ByteBuffer)
         case findingLiteralExtension(UInt64)
@@ -95,7 +95,7 @@ enum FrameStatus: Hashable {
     enum State: Hashable {
         case normalTraversal(LineFeedByteStrategy)
         case foundCR
-        case searchingForLiteralHeader(LiteralSubstate)
+        case searchingForLiteralHeader(LiteralHeaderState)
         case insideLiteral(remaining: UInt64)
     }
 
@@ -267,7 +267,7 @@ extension FramingParser {
         }
     }
 
-    private mutating func readByte_state_searchingForLiteralHeader(substate: LiteralSubstate) throws -> FrameStatus {
+    private mutating func readByte_state_searchingForLiteralHeader(substate: LiteralHeaderState) throws -> FrameStatus {
         // Note that to reach this point we must have already found a `{`.
 
         switch substate {
