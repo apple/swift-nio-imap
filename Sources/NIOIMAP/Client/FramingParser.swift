@@ -41,6 +41,10 @@ extension FixedWidthInteger {
         self.init(String(buffer: buffer))
     }
     
+    static var maximumAllowedCharacters: Int {
+        return Int(floor(log10(Float80(Self.max)))) + 1
+    }
+    
 }
 
 /// How to handle a potential `\n` in a CRLF if you've found
@@ -295,6 +299,9 @@ extension FramingParser {
             switch byte {
             case DIGIT_0 ... DIGIT_9:
                 sizeBuffer.writeInteger(byte)
+                guard sizeBuffer.readableBytes <= UInt64.maximumAllowedCharacters else {
+                    throw LiteralSizeParsingError(buffer: buffer)
+                }
             case LITERAL_PLUS, LITERAL_MINUS:
                 guard let size = Int(String(buffer: sizeBuffer)) else {
                     throw LiteralSizeParsingError(buffer: buffer)

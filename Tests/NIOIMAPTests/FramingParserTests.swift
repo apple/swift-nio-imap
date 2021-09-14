@@ -113,7 +113,7 @@ extension FramingParserTests {
     }
 
     func testParsingLiteralIntegerOverflow() {
-        var buffer: ByteBuffer = "A1 LOGIN {99999999999999999999999999999999999999999999999999999999999999}\r\nhey\r\n"
+        var buffer: ByteBuffer = "A1 LOGIN {99999999999999999999999999999999999999999999999999999999999999"
         XCTAssertThrowsError(try self.parser.appendAndFrameBuffer(&buffer)) { e in
             XCTAssertTrue(e is LiteralSizeParsingError)
         }
