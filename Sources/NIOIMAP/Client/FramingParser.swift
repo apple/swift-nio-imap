@@ -119,6 +119,12 @@ enum FrameStatus: Hashable {
         }
 
         self.buffer.writeBuffer(&buffer)
+        
+        // Discard bytes when we've read 1KB
+        if self.buffer.readerIndex > 1000 {
+            self.buffer.discardReadBytes()
+        }
+        
         return try self.parseFrames()
     }
 
