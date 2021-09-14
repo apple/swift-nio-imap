@@ -122,10 +122,6 @@ enum FrameStatus: Hashable {
         return try self.parseFrames()
     }
 
-    private func _debugCurrentFrame() -> ByteBuffer {
-        self.buffer.getSlice(at: self.buffer.readerIndex, length: self.frameLength)!
-    }
-
     private mutating func parseFrames() throws -> [ByteBuffer] {
         assert(self.buffer.readableBytes > 0)
 
