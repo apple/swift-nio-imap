@@ -13,7 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
-@testable import NIOIMAP
+@_spi(NIOIMAPInternal) import NIOIMAP
 import NIOTestUtils
 import XCTest
 
