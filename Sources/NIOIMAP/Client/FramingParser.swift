@@ -24,12 +24,23 @@ private let LITERAL_MINUS = UInt8(ascii: "-")
 private let DIGIT_0 = UInt8(ascii: "0")
 private let DIGIT_9 = UInt8(ascii: "9")
 
+/// The frame contained bytes that can never lead to a
+/// valid command or response, and so can be safely
+/// discarded without having to close the connection.
 public struct InvalidFrame: Error, Hashable {
     public init() {}
 }
 
+/// An error occurred when attempting to parse the size
+/// of a `literal`. The bytes in question are attached.
 public struct LiteralSizeParsingError: Error, Hashable {
+    
+    /// The bytes that resulted in a parsing error.
     public var buffer: ByteBuffer
+    
+    /// Creates a new `LiteralSizeParsingError` with
+    /// the bytes that failed to parse into a `UInt64`.
+    /// - parameter buffer: The bytes that resulted in a parsing error
     public init(buffer: ByteBuffer) {
         self.buffer = buffer
     }
@@ -70,7 +81,7 @@ enum FrameStatus: Hashable {
     case incomplete
 }
 
-struct FramingParser: Hashable {
+@_spi(NIOIMAPInternal) public struct FramingParser: Hashable {
     enum LiteralSubstate: Hashable {
         case findingBinaryFlag
         case findingSize(ByteBuffer)
@@ -93,7 +104,14 @@ struct FramingParser: Hashable {
 
     init() {}
 
-    mutating func appendAndFrameBuffer(_ buffer: inout ByteBuffer) throws -> [ByteBuffer] {
+    /// Appends the given `ByteBuffer` to the parsing buffer, and parses as many frames as possible.
+    /// Each frame should be fully parsable by the client or server parsers, meaning they shouldn't throw
+    /// an `IncompleteError` message from any frame that this parser outputs.
+    /// - parameter buffer: The `ByteBuffer` containing new bytes from the network, to be appended to the current buffer.
+    /// - returns: An array of frames.
+    /// - throws: `InvalidFrame` if a frame was found to be unparsable.
+    /// - throws: `LiteralSizeParsingError` if when parsing a literal header we found an invalid size field.
+    @_spi(NIOIMAPInternal) public mutating func appendAndFrameBuffer(_ buffer: inout ByteBuffer) throws -> [ByteBuffer] {
         // fast paths should be fast
         guard buffer.readableBytes > 0 else {
             return []
