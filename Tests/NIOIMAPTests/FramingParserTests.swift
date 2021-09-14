@@ -101,17 +101,17 @@ extension FramingParserTests {
         var buffer: ByteBuffer = "A1 LOGIN {3}\r\nhey\r\n"
         XCTAssertNoThrow(XCTAssertEqual(try self.parser.appendAndFrameBuffer(&buffer), ["A1 LOGIN {3}\r\n", "hey", "\r\n"]))
     }
-    
+
     func testParsingLiteralNoLF() {
         var buffer: ByteBuffer = "A1 LOGIN {3}\rhey\r\n"
         XCTAssertNoThrow(XCTAssertEqual(try self.parser.appendAndFrameBuffer(&buffer), ["A1 LOGIN {3}\r", "hey", "\r\n"]))
     }
-    
+
     func testParsingLiteralNoCR() {
         var buffer: ByteBuffer = "A1 LOGIN {3}\nhey\r\n"
         XCTAssertNoThrow(XCTAssertEqual(try self.parser.appendAndFrameBuffer(&buffer), ["A1 LOGIN {3}\n", "hey", "\r\n"]))
     }
-    
+
     func testParsingLiteralNoCRLF() {
         var buffer: ByteBuffer = "A1 LOGIN {3}hey\r\n"
         XCTAssertThrowsError(try self.parser.appendAndFrameBuffer(&buffer)) { e in

@@ -12,8 +12,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-import NIO
 import Darwin
+import NIO
 
 private let LITERAL_HEADER_START = UInt8(ascii: "{")
 private let LITERAL_HEADER_END = UInt8(ascii: "}")
@@ -35,10 +35,9 @@ public struct InvalidFrame: Error, Hashable {
 /// An error occurred when attempting to parse the size
 /// of a `literal`. The bytes in question are attached.
 public struct LiteralSizeParsingError: Error, Hashable {
-    
     /// The bytes that resulted in a parsing error.
     public var buffer: ByteBuffer
-    
+
     /// Creates a new `LiteralSizeParsingError` with
     /// the bytes that failed to parse into a `UInt64`.
     /// - parameter buffer: The bytes that resulted in a parsing error
@@ -118,12 +117,12 @@ enum FrameStatus: Hashable {
         }
 
         self.buffer.writeBuffer(&buffer)
-        
+
         // Discard bytes when we've read 1KB
         if self.buffer.readerIndex > 1000 {
             self.buffer.discardReadBytes()
         }
-        
+
         return try self.parseFrames()
     }
 
@@ -138,7 +137,7 @@ enum FrameStatus: Hashable {
     }
 
     private mutating func readFrame() -> ByteBuffer? {
-        assert(frameLength > 0)
+        assert(self.frameLength > 0)
         let buffer = self.buffer.readSlice(length: self.frameLength)
         self.frameLength = 0
         return buffer
@@ -195,7 +194,7 @@ enum FrameStatus: Hashable {
         self.frameLength &+= 1
         return value
     }
-    
+
     // We've read a byte we don't care about (probably a LF), so
     // we need to decrement the frame length, and move the reader
     // index forward to ensure it's ignored.
@@ -296,7 +295,6 @@ extension FramingParser {
     }
 
     private mutating func readByte_state_insideLiteral(lineFeedStrategy: LineFeedByteStrategy, remainingLiteralBytes: UInt64) {
-        
         switch lineFeedStrategy {
         case .ignoreFirst:
             if let byte = self.peekByte(), byte == LF {
@@ -305,7 +303,7 @@ extension FramingParser {
         case .includeInFrame:
             break
         }
-        
+
         let bytesAvailable = self.buffer.readableBytes - self.frameLength
         if bytesAvailable >= remainingLiteralBytes {
             self.frameLength &+= Int(remainingLiteralBytes)
@@ -391,18 +389,18 @@ extension FramingParser {
         default:
             throw InvalidFrame()
         }
-        
+
         return .complete
     }
 
-    private mutating func readByte_state_searchingForLiteralHeader_findingLF(_ size: UInt64)  {
+    private mutating func readByte_state_searchingForLiteralHeader_findingLF(_ size: UInt64) {
         guard let byte = self.peekByte() else {
             self.state = .insideLiteral(lineFeedStrategy: .ignoreFirst, remaining: size)
             return
         }
-        
+
         if byte == LF {
-            frameLength &+= 1
+            self.frameLength &+= 1
         }
         self.state = .insideLiteral(lineFeedStrategy: .includeInFrame, remaining: size)
     }
