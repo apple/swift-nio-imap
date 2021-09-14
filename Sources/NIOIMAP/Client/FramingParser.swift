@@ -199,8 +199,11 @@ extension FramingParser {
         case LF:
             switch lineFeedStrategy {
             case .ignoreFirst:
-                _ = self.buffer.readBytes(length: 1) // skip the byte as we're meant to ignore it
-                self.frameLength -= 1 // need to backtrack here so we don't
+                precondition(self.frameLength == 1)
+                // we now need to skip the LF without incrementing
+                // the frame size
+                self.buffer.moveReaderIndex(forwardBy: 1)
+                self.frameLength &-= 1
                 self.state = .normalTraversal(.includeInFrame)
             case .includeInFrame:
                 // if we weren't meant to ignore the LF then it
@@ -233,7 +236,7 @@ extension FramingParser {
         // We read a byte and it was a line feed, we might as well
         // include it in the frame if it's already here.
         if byte == LF {
-            self.frameLength += 1
+            self.frameLength &+= 1
             self.state = .normalTraversal(.includeInFrame)
         } else {
             
@@ -243,7 +246,6 @@ extension FramingParser {
         }
     }
 
-    /// Returns `true` if the frame is complete.
     private mutating func readByte_state_searchingForLiteralHeader(substate: LiteralSubstate) throws -> FrameStatus {
         // Note that to reach this point we must have already found a `{`.
 
@@ -263,7 +265,6 @@ extension FramingParser {
         }
     }
 
-    /// Returns `true` if the frame is complete.
     private mutating func readByte_state_searchingForLiteralHeader_findingBinaryFlag() throws -> FrameStatus {
         guard let binaryByte = self.peekByte() else {
             return .incomplete
@@ -275,19 +276,17 @@ extension FramingParser {
         return try self.readByte_state_searchingForLiteralHeader_findingSize(sizeBuffer: ByteBuffer())
     }
 
-    /// Returns `true` if the frame is complete.
     private mutating func readByte_state_insideLiteral(remainingLiteralBytes: Int) {
-        if self.buffer.readableBytes - self.frameLength >= remainingLiteralBytes {
-            self.frameLength += remainingLiteralBytes
+        let bytesAvailable = self.buffer.readableBytes - self.frameLength
+        if bytesAvailable >= remainingLiteralBytes {
+            self.frameLength &+= remainingLiteralBytes
             self.state = .normalTraversal(.includeInFrame)
         } else {
-            let readableLength = self.buffer.readableBytes - self.frameLength
-            self.frameLength &+= readableLength
-            self.state = .insideLiteral(remaining: remainingLiteralBytes - readableLength)
+            self.frameLength &+= bytesAvailable
+            self.state = .insideLiteral(remaining: remainingLiteralBytes - bytesAvailable)
         }
     }
 
-    /// Returns `true` if the frame is complete.
     private mutating func readByte_state_searchingForLiteralHeader_findingSize(sizeBuffer: ByteBuffer) throws -> FrameStatus {
         var sizeBuffer = sizeBuffer
 
@@ -297,13 +296,13 @@ extension FramingParser {
             case DIGIT_0 ... DIGIT_9:
                 sizeBuffer.writeInteger(byte)
             case LITERAL_PLUS, LITERAL_MINUS:
-                guard let size = Int(String(buffer: buffer)) else {
+                guard let size = Int(String(buffer: sizeBuffer)) else {
                     throw LiteralSizeParsingError(buffer: buffer)
                 }
                 self.state = .searchingForLiteralHeader(.findingClosingCurly(size))
                 return try self.readByte_state_searchingForLiteralHeader_findingClosingCurly(size)
             case LITERAL_HEADER_END:
-                guard let size = Int(String(buffer: buffer)) else {
+                guard let size = Int(String(buffer: sizeBuffer)) else {
                     throw LiteralSizeParsingError(buffer: buffer)
                 }
                 self.state = .searchingForLiteralHeader(.findingCR(size))
@@ -317,9 +316,7 @@ extension FramingParser {
         return .incomplete
     }
 
-    /// Returns `true` if the frame is complete.
     private mutating func readByte_state_searchingForLiteralHeader_findingLiteralExtension(_ size: Int) throws -> FrameStatus {
-        // Now scan for the CRLF
         guard let byte = self.maybeReadByte() else {
             return .incomplete
         }
@@ -352,7 +349,6 @@ extension FramingParser {
         }
     }
 
-    /// Returns `true` if the frame is complete.
     private mutating func readByte_state_searchingForLiteralHeader_findingCR(_ size: Int) throws -> FrameStatus {
         guard let byte = self.maybeReadByte() else {
             return .incomplete
@@ -366,7 +362,6 @@ extension FramingParser {
         }
     }
 
-    /// Returns `true` if the frame is complete.
     private mutating func readByte_state_searchingForLiteralHeader_findingLF(_ size: Int) throws -> FrameStatus {
         guard let byte = self.maybeReadByte() else {
             return .incomplete
