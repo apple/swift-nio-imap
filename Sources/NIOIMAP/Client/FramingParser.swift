@@ -36,27 +36,24 @@ public struct LiteralSizeParsingError: Error, Hashable {
 }
 
 extension FixedWidthInteger {
-    
     init?(buffer: ByteBuffer) {
         self.init(String(buffer: buffer))
     }
-    
+
     static var maximumAllowedCharacters: Int {
-        return Int(floor(log10(Float80(Self.max)))) + 1
+        Int(floor(log10(Float80(Self.max)))) + 1
     }
-    
 }
 
 /// How to handle a potential `\n` in a CRLF if you've found
 /// the CR.
 enum LineFeedByteStrategy: Hashable {
-    
     /// There's not currently any line feed byte present,
     /// and we don't know what comes next. So mark the
     /// current frame as complete and jsut ignore the next
     /// byte if it's a `\n`.
     case ignoreFirst
-    
+
     /// The byte is already present, we might as well
     /// include it in the current frame.
     case includeInFrame
@@ -65,11 +62,10 @@ enum LineFeedByteStrategy: Hashable {
 /// `complete` means that `self.readFrame()` will produce
 /// a full IMAP frame that can be sent for parsing.
 enum FrameStatus: Hashable {
-    
     /// A full IMAP frame has been found, call `self.readFrame()`
     /// to get it.
     case complete
-    
+
     /// A complete frame has not yet been found.
     case incomplete
 }
@@ -106,7 +102,7 @@ struct FramingParser: Hashable {
         self.buffer.writeBuffer(&buffer)
         return try self.parseFrames()
     }
-    
+
     private func _debugCurrentFrame() -> ByteBuffer {
         self.buffer.getSlice(at: self.buffer.readerIndex, length: self.frameLength)!
     }
@@ -125,7 +121,7 @@ struct FramingParser: Hashable {
         guard self.frameLength > 0 else {
             return nil
         }
-        
+
         let buffer = self.buffer.readSlice(length: self.frameLength)
         self.frameLength = 0
         return buffer
@@ -181,7 +177,7 @@ struct FramingParser: Hashable {
         self.frameLength &+= 1
         return value
     }
-    
+
     private mutating func peekByte() -> UInt8? {
         guard self.frameLength < self.buffer.readableBytes else {
             return nil
@@ -191,7 +187,6 @@ struct FramingParser: Hashable {
 }
 
 extension FramingParser {
-    
     /// Returns `true` if the frame is complete.
     private mutating func readByte_state_normalTraversal(lineFeedStrategy: LineFeedByteStrategy) -> FrameStatus {
         let byte = self.readByte()
@@ -229,21 +224,19 @@ extension FramingParser {
     }
 
     private mutating func readByte_state_foundCR() {
-        
         guard let byte = self.peekByte() else {
             // As we don't yet have the next byte we have to assume
             // if might be an LF, in which case we want to skip it.
             self.state = .normalTraversal(.ignoreFirst)
             return
         }
-        
+
         // We read a byte and it was a line feed, we might as well
         // include it in the frame if it's already here.
         if byte == LF {
             self.frameLength &+= 1
             self.state = .normalTraversal(.includeInFrame)
         } else {
-            
             // The next byte wasn't a line feed, so just default
             // back to including any line feed in the frame.
             self.state = .normalTraversal(.includeInFrame)
@@ -300,17 +293,17 @@ extension FramingParser {
             case DIGIT_0 ... DIGIT_9:
                 sizeBuffer.writeInteger(byte)
                 guard sizeBuffer.readableBytes <= UInt64.maximumAllowedCharacters else {
-                    throw LiteralSizeParsingError(buffer: buffer)
+                    throw LiteralSizeParsingError(buffer: self.buffer)
                 }
             case LITERAL_PLUS, LITERAL_MINUS:
                 guard let size = Int(String(buffer: sizeBuffer)) else {
-                    throw LiteralSizeParsingError(buffer: buffer)
+                    throw LiteralSizeParsingError(buffer: self.buffer)
                 }
                 self.state = .searchingForLiteralHeader(.findingClosingCurly(size))
                 return try self.readByte_state_searchingForLiteralHeader_findingClosingCurly(size)
             case LITERAL_HEADER_END:
                 guard let size = Int(String(buffer: sizeBuffer)) else {
-                    throw LiteralSizeParsingError(buffer: buffer)
+                    throw LiteralSizeParsingError(buffer: self.buffer)
                 }
                 self.state = .searchingForLiteralHeader(.findingCR(size))
                 return try self.readByte_state_searchingForLiteralHeader_findingCR(size)
