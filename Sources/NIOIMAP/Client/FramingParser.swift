@@ -150,8 +150,8 @@ enum FrameStatus: Hashable {
         while self.frameLength < self.buffer.readableBytes {
             switch self.state {
             case .normalTraversal(let lineFeedStrategy):
-                let frameSatus = self.readByte_state_normalTraversal(lineFeedStrategy: lineFeedStrategy)
-                switch frameSatus {
+                let frameStatus = self.readByte_state_normalTraversal(lineFeedStrategy: lineFeedStrategy)
+                switch frameStatus {
                 case .complete:
                     return self.readFrame()
                 case .incomplete:
@@ -163,8 +163,8 @@ enum FrameStatus: Hashable {
                 return self.readFrame()
 
             case .searchingForLiteralHeader(let substate):
-                let frameSatus = try self.readByte_state_searchingForLiteralHeader(substate: substate)
-                switch frameSatus {
+                let frameStatus = try self.readByte_state_searchingForLiteralHeader(substate: substate)
+                switch frameStatus {
                 case .complete:
                     return self.readFrame()
                 case .incomplete:
