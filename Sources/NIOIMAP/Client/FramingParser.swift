@@ -24,26 +24,9 @@ private let LITERAL_MINUS = UInt8(ascii: "-")
 private let DIGIT_0 = UInt8(ascii: "0")
 private let DIGIT_9 = UInt8(ascii: "9")
 
-/// The frame contained bytes that can never lead to a
-/// valid command or response, and so can be safely
-/// discarded without having to close the connection.
-public struct InvalidFrame: Error, Hashable {
-    public init() {}
-}
+struct InvalidFrame: Error, Hashable {}
 
-/// An error occurred when attempting to parse the size
-/// of a `literal`. The bytes in question are attached.
-public struct LiteralSizeParsingError: Error, Hashable {
-    /// The bytes that resulted in a parsing error.
-    public var buffer: ByteBuffer
-
-    /// Creates a new `LiteralSizeParsingError` with
-    /// the bytes that failed to parse into a `UInt64`.
-    /// - parameter buffer: The bytes that resulted in a parsing error
-    public init(buffer: ByteBuffer) {
-        self.buffer = buffer
-    }
-}
+struct LiteralSizeParsingError: Error, Hashable {}
 
 extension FixedWidthInteger {
     init?(buffer: ByteBuffer) {
@@ -52,6 +35,30 @@ extension FixedWidthInteger {
 
     static var maximumAllowedCharacters: Int {
         Int(floor(log10(Float64(Self.max)))) + 1
+    }
+}
+
+public enum FramingResult: Hashable, CustomDebugStringConvertible {
+
+    /// We've found a complete frame, and this is the result
+    case complete(ByteBuffer)
+
+    /// The frame isn't yet complete, and how many bytes
+    /// are needed to complete the frame.
+    case incomplete(Int)
+
+    /// The frame was determined to be incorrect, and these are the bytes.
+    case invalid(ByteBuffer)
+
+    public var debugDescription: String {
+        switch self {
+        case .complete(let buffer):
+            return "COMPLETE: \(String(buffer: buffer))"
+        case .incomplete(let bytesNeeded):
+            return "INCOMPLETE: \(bytesNeeded) bytes required)"
+        case .invalid(let buffer):
+            return "INVALID: \(String(buffer: buffer))"
+        }
     }
 }
 
@@ -109,7 +116,7 @@ enum FrameStatus: Hashable {
     /// - returns: An array of frames.
     /// - throws: `InvalidFrame` if a frame was found to be unparsable.
     /// - throws: `LiteralSizeParsingError` if when parsing a literal header we found an invalid size field.
-    @_spi(NIOIMAPInternal) public mutating func appendAndFrameBuffer(_ buffer: inout ByteBuffer) throws -> [ByteBuffer] {
+    @_spi(NIOIMAPInternal) public mutating func appendAndFrameBuffer(_ buffer: inout ByteBuffer) -> [FramingResult] {
         // fast paths should be fast
         guard buffer.readableBytes > 0 else {
             return []
@@ -124,59 +131,104 @@ enum FrameStatus: Hashable {
             }
         }
 
-        return try self.parseFrames()
+        return self.parseFrames()
     }
 
-    private mutating func parseFrames() throws -> [ByteBuffer] {
+    private mutating func parseFrames() -> [FramingResult] {
         assert(self.buffer.readableBytes > 0)
 
-        var results: [ByteBuffer] = []
-        while let frame = try self.parseFrame() {
+        var results: [FramingResult] = []
+        while self.buffer.readableBytes > 0 {
+            let frame = self.parseFrame()
             results.append(frame)
+            switch frame {
+            case .incomplete:
+                // we need to stop at the first incomplete frame
+                return results
+            case .invalid, .complete:
+                ()
+            }
         }
         return results
     }
 
-    private mutating func readFrame() -> ByteBuffer? {
-        precondition(self.frameLength > 0)
+    private mutating func readFrame() -> ByteBuffer {
+        assert(self.frameLength > 0)
+        assert(self.buffer.readableBytes >= self.frameLength)
         let buffer = self.buffer.readSlice(length: self.frameLength)
         self.frameLength = 0
-        return buffer
+        return buffer!
     }
 
-    private mutating func parseFrame() throws -> ByteBuffer? {
+    private mutating func parseFrame() -> FramingResult {
         while self.frameLength < self.buffer.readableBytes {
             switch self.state {
             case .normalTraversal(let lineFeedStrategy):
-                let frameStatus = self.readByte_state_normalTraversal(lineFeedStrategy: lineFeedStrategy)
-                switch frameStatus {
+                let status = self.readByte_state_normalTraversal(lineFeedStrategy: lineFeedStrategy)
+                switch status {
                 case .complete:
-                    return self.readFrame()
+                    return .complete(self.readFrame())
                 case .incomplete:
                     ()
                 }
 
             case .foundCR:
                 self.readByte_state_foundCR()
-                return self.readFrame()
+                return .complete(self.readFrame())
 
             case .searchingForLiteralHeader(let substate):
-                let frameStatus = try self.readByte_state_searchingForLiteralHeader(substate: substate)
-                switch frameStatus {
-                case .complete:
-                    return self.readFrame()
-                case .incomplete:
-                    ()
-                }
+                return self.parseFrame_searchingForLiteralHeader(substate: substate)
 
             case .insideLiteral(lineFeedStrategy: let lfs, remaining: let remaining):
                 self.readByte_state_insideLiteral(lineFeedStrategy: lfs, remainingLiteralBytes: remaining)
                 if self.frameLength > 0 {
-                    return self.readFrame()
+                    return .complete(self.readFrame())
+                } else {
+                    return .incomplete(self.generateIncompleteFramingResult())
                 }
             }
         }
-        return nil
+        return .incomplete(self.generateIncompleteFramingResult())
+    }
+
+    private mutating func parseFrame_searchingForLiteralHeader(substate: LiteralHeaderState) -> FramingResult {
+        do {
+            let frameStatus = try self.readByte_state_searchingForLiteralHeader(substate: substate)
+            switch frameStatus {
+            case .complete:
+                return .complete(self.readFrame())
+            case .incomplete:
+                return .incomplete(self.generateIncompleteFramingResult())
+            }
+        } catch {
+            self.state = .normalTraversal(.includeInFrame)
+            return .invalid(self.readFrame())
+        }
+    }
+
+    private func generateIncompleteFramingResult() -> Int {
+        switch self.state {
+        case .normalTraversal:
+            return 2 // we need the CRLF (not strictly _need_ as we're lenient)
+        case .foundCR:
+            return 0
+        case .searchingForLiteralHeader(let substate):
+            switch substate {
+            case .findingBinaryFlag:
+                return 4 // <size(1 byte minimum)> + } + CRLF
+            case .findingSize(let buffer):
+                // if we have some size bytes already we don't strictly _need_ more
+                return buffer.readableBytes > 0 ? 3 : 4
+            case .findingLiteralExtension:
+                return 3 // } + CRLF
+            case .findingClosingCurly:
+                return 3 // } + CRLF
+            case .findingCR:
+                return 2 // CRLF
+            }
+        case .insideLiteral:
+            return 1 // always forward on bytes instantly
+        }
     }
 
     private mutating func readByte() -> UInt8 {
@@ -217,6 +269,7 @@ extension FramingParser {
     private mutating func readByte_state_normalTraversal(lineFeedStrategy: LineFeedByteStrategy) -> FrameStatus {
         let byte = self.readByte()
         switch byte {
+
         case CR:
             self.readByte_state_foundCR()
             return .complete
@@ -324,17 +377,17 @@ extension FramingParser {
             case DIGIT_0 ... DIGIT_9:
                 sizeBuffer.writeInteger(byte)
                 guard sizeBuffer.readableBytes <= UInt64.maximumAllowedCharacters else {
-                    throw LiteralSizeParsingError(buffer: self.buffer)
+                    throw LiteralSizeParsingError()
                 }
             case LITERAL_PLUS, LITERAL_MINUS:
                 guard let size = UInt64(String(buffer: sizeBuffer)) else {
-                    throw LiteralSizeParsingError(buffer: self.buffer)
+                    throw LiteralSizeParsingError()
                 }
                 self.state = .searchingForLiteralHeader(.findingClosingCurly(size))
                 return try self.readByte_state_searchingForLiteralHeader_findingClosingCurly(size)
             case LITERAL_HEADER_END:
                 guard let size = UInt64(String(buffer: sizeBuffer)) else {
-                    throw LiteralSizeParsingError(buffer: self.buffer)
+                    throw LiteralSizeParsingError()
                 }
                 self.state = .searchingForLiteralHeader(.findingCR(size))
                 return try self.readByte_state_searchingForLiteralHeader_findingCR(size)
