@@ -138,7 +138,7 @@ enum FrameStatus: Hashable {
     }
 
     private mutating func readFrame() -> ByteBuffer? {
-        preconditionFailure(self.frameLength > 0)
+        precondition(self.frameLength > 0)
         let buffer = self.buffer.readSlice(length: self.frameLength)
         self.frameLength = 0
         return buffer
