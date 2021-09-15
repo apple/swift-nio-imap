@@ -12,7 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import Darwin
 import NIO
 
 private let LITERAL_HEADER_START = UInt8(ascii: "{")
