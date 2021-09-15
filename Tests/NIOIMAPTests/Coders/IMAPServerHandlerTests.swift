@@ -80,7 +80,7 @@ class IMAPServerHandlerTests: XCTestCase {
 
     func testSettingContinuationRequestInInit() {
         self.handler = IMAPServerHandler(continuationRequest: ContinuationRequest.responseText(.init(text: "FoO")))
-        self.channel = EmbeddedChannel(handler: self.handler)
+        self.channel = EmbeddedChannel(handlers: [ByteToMessageHandler(FrameDecoder()), self.handler])
 
         self.writeInbound("a LOGIN {4}\r\n")
         XCTAssertNoThrow(XCTAssertNil(try self.channel.readInbound(as: CommandStreamPart.self)))
@@ -148,7 +148,7 @@ class IMAPServerHandlerTests: XCTestCase {
 
     func testAuthenticationFlow() {
         self.handler = IMAPServerHandler()
-        self.channel = EmbeddedChannel(handler: self.handler)
+        self.channel = EmbeddedChannel(handlers: [ByteToMessageHandler(FrameDecoder()), self.handler])
 
         // client starts authentication
         self.writeInbound("A1 AUTHENTICATE GSSAPI\r\n")
@@ -189,7 +189,7 @@ class IMAPServerHandlerTests: XCTestCase {
         XCTAssertNil(self.handler)
         XCTAssertNil(self.channel)
         self.handler = IMAPServerHandler()
-        self.channel = EmbeddedChannel(handler: self.handler)
+        self.channel = EmbeddedChannel(handlers: [ByteToMessageHandler(FrameDecoder()), self.handler])
     }
 
     override func tearDown() {
