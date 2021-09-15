@@ -28,7 +28,7 @@ final class ParserStressTests: XCTestCase {
 
     override func setUp() {
         XCTAssertNil(self.channel)
-        self.channel = EmbeddedChannel(handler: IMAPServerHandler())
+        self.channel = EmbeddedChannel(handlers: [ByteToMessageHandler(FrameDecoder()), IMAPServerHandler()])
     }
 
     override func tearDown() {
