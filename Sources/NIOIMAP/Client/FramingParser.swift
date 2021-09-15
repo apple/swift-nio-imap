@@ -117,9 +117,9 @@ enum FrameStatus: Hashable {
 
         self.buffer.writeBuffer(&buffer)
 
-        // Discard bytes when we've read 1KB
+        // Discard bytes when we've read over half the buffer
         defer {
-            if self.buffer.readerIndex > 1000 {
+            if self.buffer.readerIndex > (self.buffer.writerIndex / 2) {
                 self.buffer.discardReadBytes()
             }
         }
