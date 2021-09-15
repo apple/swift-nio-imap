@@ -39,7 +39,6 @@ extension FixedWidthInteger {
 }
 
 public enum FramingResult: Hashable, CustomDebugStringConvertible {
-
     /// We've found a complete frame, and this is the result
     case complete(ByteBuffer)
 
@@ -269,7 +268,6 @@ extension FramingParser {
     private mutating func readByte_state_normalTraversal(lineFeedStrategy: LineFeedByteStrategy) -> FrameStatus {
         let byte = self.readByte()
         switch byte {
-
         case CR:
             self.readByte_state_foundCR()
             return .complete

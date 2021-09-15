@@ -212,7 +212,7 @@ extension FramingParserTests {
         var b3: ByteBuffer = "A1 LOGIN {3a}\r\n"
         XCTAssertEqual(parser.appendAndFrameBuffer(&b3), [.invalid("A1 LOGIN {3a"), .complete("}\r\n")])
     }
-    
+
     func testShowWeCanSkipPastInvalidFrames() {
         var buffer: ByteBuffer = "A1 LOGIN {a\r\nA1 NOOP\r\n"
         XCTAssertEqual(self.parser.appendAndFrameBuffer(&buffer), [.invalid("A1 LOGIN {a"), .complete("\r\n"), .complete("A1 NOOP\r\n")])
