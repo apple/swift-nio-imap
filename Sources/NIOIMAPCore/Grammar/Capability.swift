@@ -334,7 +334,8 @@ extension Capability {
     public static let within = Self(unchecked: "WITHIN")
 
     /// Enables GMail-specific features.
-    public static let gmailExtensions = Self(unchecked: "X-GM-EXT")
+    /// https://developers.google.com/gmail/imap/imap-extensions
+    public static let gmailExtensions = Self(unchecked: "X-GM-EXT-1")
 
     /// The server supports non-synchronising literals - RFC 7888.
     public static let literalPlus = Self(unchecked: "LITERAL+")
