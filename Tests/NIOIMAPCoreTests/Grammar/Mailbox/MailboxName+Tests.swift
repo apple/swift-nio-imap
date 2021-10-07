@@ -104,6 +104,22 @@ extension MailboxName_Tests {
             XCTAssertTrue(e is InvalidPathSeparatorError)
         }
     }
+
+    func testCustomDebugStringConvertible() {
+        let inputs: [(MailboxName, String, UInt)] = [
+            (.inbox, "INBOX", #line),
+            (.init(ByteBuffer()), "", #line),
+            (.init(ByteBuffer("Food")), "Food", #line),
+            (.init(ByteBuffer("food")), "food", #line),
+            (.init(ByteBuffer("FOOD")), "FOOD", #line),
+            (.init(ByteBuffer("box/&AKM-")), "box/&AKM-", #line),
+            (.init(ByteBuffer("a\u{11}b")), "a\u{11}b", #line),
+            (.init(ByteBuffer("båd")), "båd", #line),
+        ]
+        for (name, expected, line) in inputs {
+            XCTAssertEqual(name.debugDescription, expected, line: line)
+        }
+    }
 }
 
 // MARK: - MailboxName
