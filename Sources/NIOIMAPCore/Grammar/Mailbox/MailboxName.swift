@@ -210,8 +210,7 @@ public struct MailboxName: Hashable {
 extension MailboxName: CustomDebugStringConvertible {
     /// Provides a human-readable description.
     public var debugDescription: String {
-        let bytes = self.bytes.readableBytesView.map { $0 & 0xDF }
-        return String(decoding: bytes, as: Unicode.UTF8.self)
+        String(bestEffortDecodingUTF8Bytes: self.bytes.readableBytesView)
     }
 }
 
