@@ -1906,19 +1906,19 @@ extension GrammarParser {
 
         func parseSelectParameter_qresync(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SelectParameter {
             try PL.parseFixedString("QRESYNC (", buffer: &buffer, tracker: tracker)
-            let uidValidity = try self.parseNZNumber(buffer: &buffer, tracker: tracker)
+            let uidValidity = try self.parseUIDValidity(buffer: &buffer, tracker: tracker)
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             let modSeqVal = try self.parseModificationSequenceValue(buffer: &buffer, tracker: tracker)
-            let knownUids = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: { (buffer, tracker) -> LastCommandSet<SequenceRangeSet> in
+            let knownUIDs = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: { (buffer, tracker) -> UIDSet in
                 try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-                return try self.parseKnownUids(buffer: &buffer, tracker: tracker)
+                return try self.parseUIDSet(buffer: &buffer, tracker: tracker)
             })
             let seqMatchData = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: { (buffer, tracker) -> SequenceMatchData in
                 try PL.parseSpaces(buffer: &buffer, tracker: tracker)
                 return try self.parseSequenceMatchData(buffer: &buffer, tracker: tracker)
             })
             try PL.parseFixedString(")", buffer: &buffer, tracker: tracker)
-            return .qresync(.init(uidValiditiy: uidValidity, modificationSequenceValue: modSeqVal, knownUids: knownUids, sequenceMatchData: seqMatchData))
+            return .qresync(.init(uidValidity: uidValidity, modificationSequenceValue: modSeqVal, knownUIDs: knownUIDs, sequenceMatchData: seqMatchData))
         }
 
         return try PL.parseOneOf(
@@ -1928,10 +1928,6 @@ extension GrammarParser {
             buffer: &buffer,
             tracker: tracker
         )
-    }
-
-    static func parseKnownUids(buffer: inout ParseBuffer, tracker: StackTracker) throws -> LastCommandSet<SequenceRangeSet> {
-        try self.parseSequenceSet(buffer: &buffer, tracker: tracker)
     }
 
     // select-params = SP "(" select-param *(SP select-param ")"

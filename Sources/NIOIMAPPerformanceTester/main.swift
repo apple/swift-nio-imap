@@ -57,7 +57,7 @@ let commands: [(String, Command)] = [
     ("parse_getquota", .getQuota(.init("inbox"))),
     ("parse_select_params_none", .select(.inbox, [])),
     ("parse_select_params_one", .select(.inbox, [.condStore])),
-    ("parse_select_params_complex", .select(.inbox, [.condStore, .basic(.init(key: "param1", value: nil)), .qresync(.init(uidValiditiy: 123, modificationSequenceValue: .zero, knownUids: .set([1 ... 3, 5 ... 7, 10 ... 1000]), sequenceMatchData: .init(knownSequenceSet: .set([1 ... 10, 10 ... 20, 30 ... 100]), knownUidSet: .set([100 ... 200, 300 ... 400]))))])),
+    ("parse_select_params_complex", .select(.inbox, [.condStore, .basic(.init(key: "param1", value: nil)), .qresync(.init(uidValidity: 123, modificationSequenceValue: .zero, knownUIDs: [1 ... 3, 5 ... 7, 10 ... 1000], sequenceMatchData: .init(knownSequenceSet: .set([1 ... 10, 10 ... 20, 30 ... 100]), knownUidSet: .set([100 ... 200, 300 ... 400]))))])),
     ("parse_setquota_one", .setQuota(QuotaRoot("inbox"), [.init(resourceName: "size", limit: 100)])),
     ("parse_setquota_many", .setQuota(QuotaRoot("inbox"), [.init(resourceName: "size", limit: 100), .init(resourceName: "messages", limit: 100), .init(resourceName: "disk", limit: 100)])),
     ("parse_getquotaRoot", .getQuotaRoot(.inbox)),

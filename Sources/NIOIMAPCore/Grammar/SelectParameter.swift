@@ -16,13 +16,13 @@
 /// Recommended reading: RFC 7162 § 3.2.5.
 public struct QResyncParameter: Equatable {
     /// The last known UID validity.
-    public var uidValiditiy: Int
+    public var uidValidity: UIDValidity
 
     /// The last known modification sequence
     public var modificationSequenceValue: ModificationSequenceValue
 
     /// The optional set of known UIDs.
-    public var knownUids: LastCommandSet<SequenceRangeSet>?
+    public var knownUIDs: UIDSet?
 
     /// An optional parenthesized list of known sequence ranges and their corresponding UIDs.
     public var sequenceMatchData: SequenceMatchData?
@@ -30,12 +30,12 @@ public struct QResyncParameter: Equatable {
     /// Creates a new `QResyncParameter`.
     /// - parameter uidValidity: The last known UID validity.
     /// - parameter modificationSequenceValue: The last known modification sequence
-    /// - parameter knownUids: The optional set of known UIDs.
+    /// - parameter knownUIDs: The optional set of known UIDs.
     /// - parameter sequenceMatchData: An optional parenthesized list of known sequence ranges and their corresponding UIDs.
-    public init(uidValiditiy: Int, modificationSequenceValue: ModificationSequenceValue, knownUids: LastCommandSet<SequenceRangeSet>?, sequenceMatchData: SequenceMatchData?) {
-        self.uidValiditiy = uidValiditiy
+    public init(uidValidity: UIDValidity, modificationSequenceValue: ModificationSequenceValue, knownUIDs: UIDSet?, sequenceMatchData: SequenceMatchData?) {
+        self.uidValidity = uidValidity
         self.modificationSequenceValue = modificationSequenceValue
-        self.knownUids = knownUids
+        self.knownUIDs = knownUIDs
         self.sequenceMatchData = sequenceMatchData
     }
 }
@@ -79,10 +79,10 @@ extension EncodeBuffer {
     }
 
     @discardableResult mutating func writeQResyncParameter(param: QResyncParameter) -> Int {
-        self.writeString("QRESYNC (\(param.uidValiditiy) ") +
+        self.writeString("QRESYNC (\(param.uidValidity.rawValue) ") +
             self.writeModificationSequenceValue(param.modificationSequenceValue) +
-            self.writeIfExists(param.knownUids) { (set) -> Int in
-                self.writeSpace() + self.writeLastCommandSet(set)
+            self.writeIfExists(param.knownUIDs) { (set) -> Int in
+                self.writeSpace() + self.writeUIDSet(set)
             } +
             self.writeIfExists(param.sequenceMatchData) { (data) -> Int in
                 self.writeSpace() + self.writeSequenceMatchData(data)
