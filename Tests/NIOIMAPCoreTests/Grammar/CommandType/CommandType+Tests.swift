@@ -40,7 +40,7 @@ extension CommandType_Tests {
             (.select(.inbox, [.basic(.init(key: "test", value: nil))]), CommandEncodingOptions(), [#"SELECT "INBOX" (test)"#], #line),
             (.select(.inbox, [.basic(.init(key: "test1", value: nil)), .basic(.init(key: "test2", value: nil))]), CommandEncodingOptions(), [#"SELECT "INBOX" (test1 test2)"#], #line),
             (.examine(MailboxName("Events")), CommandEncodingOptions(), [#"EXAMINE "Events""#], #line),
-            (.examine(.inbox, ["test": nil]), CommandEncodingOptions(), [#"EXAMINE "INBOX" (test)"#], #line),
+            (.examine(.inbox, [.basic(.init(key: "test", value: nil))]), CommandEncodingOptions(), [#"EXAMINE "INBOX" (test)"#], #line),
             (.move(.set([1]), .inbox), CommandEncodingOptions(), ["MOVE 1 \"INBOX\""], #line),
             (.id([:]), CommandEncodingOptions(), ["ID NIL"], #line),
             (.getMetadata(options: [], mailbox: .inbox, entries: ["a"]), CommandEncodingOptions(), ["GETMETADATA \"INBOX\" (\"a\")"], #line),
