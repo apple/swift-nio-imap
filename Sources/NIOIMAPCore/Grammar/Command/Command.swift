@@ -50,7 +50,7 @@ public enum Command: Equatable {
     case lsub(reference: MailboxName, pattern: ByteBuffer)
 
     /// Renames the given mailbox.
-    case rename(from: MailboxName, to: MailboxName, params: OrderedDictionary<String, ParameterValue?>)
+    case rename(from: MailboxName, to: MailboxName, parameters: OrderedDictionary<String, ParameterValue?>)
 
     /// Selects the given mailbox in preparation of running more commands.
     case select(MailboxName, [SelectParameter] = [])

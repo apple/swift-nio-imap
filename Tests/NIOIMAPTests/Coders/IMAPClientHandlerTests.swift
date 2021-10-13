@@ -57,7 +57,7 @@ class IMAPClientHandlerTests: XCTestCase {
         let f = self.writeOutbound(CommandStreamPart.tagged(TaggedCommand(tag: "x",
                                                                           command: .rename(from: .init("\\"),
                                                                                            to: .init("to"),
-                                                                                           params: [:]))),
+                                                                                           parameters: [:]))),
         wait: false)
         self.assertOutboundString("x RENAME {1}\r\n")
         self.writeInbound("+ OK\r\n")
@@ -72,7 +72,7 @@ class IMAPClientHandlerTests: XCTestCase {
         let f = self.writeOutbound(CommandStreamPart.tagged(TaggedCommand(tag: "x",
                                                                           command: .rename(from: .init("\\"),
                                                                                            to: .init("\""),
-                                                                                           params: [:]))),
+                                                                                           parameters: [:]))),
         wait: false)
         self.assertOutboundString("x RENAME {1}\r\n")
         self.writeInbound("+ OK\r\n")
@@ -89,12 +89,12 @@ class IMAPClientHandlerTests: XCTestCase {
         let f1 = self.writeOutbound(CommandStreamPart.tagged(TaggedCommand(tag: "x",
                                                                            command: .rename(from: .init("\\"),
                                                                                             to: .init("to"),
-                                                                                            params: [:]))),
+                                                                                            parameters: [:]))),
         wait: false)
         let f2 = self.writeOutbound(CommandStreamPart.tagged(TaggedCommand(tag: "y",
                                                                            command: .rename(from: .init("from"),
                                                                                             to: .init("\\"),
-                                                                                            params: [:]))),
+                                                                                            parameters: [:]))),
         wait: false)
         self.assertOutboundString("x RENAME {1}\r\n")
         self.writeInbound("+ OK\r\n")
@@ -166,7 +166,7 @@ class IMAPClientHandlerTests: XCTestCase {
         self.writeOutbound(CommandStreamPart.tagged(TaggedCommand(tag: "x",
                                                                   command: .rename(from: .init("from"),
                                                                                    to: .init("to"),
-                                                                                   params: [:]))))
+                                                                                   parameters: [:]))))
         self.assertOutboundString("x RENAME \"from\" \"to\"\r\n")
         XCTAssertThrowsError(try self.channel.writeInbound(self.buffer(string: "+ OK\r\n+ OK\r\n"))) { error in
             XCTAssertTrue(error is UnexpectedContinuationRequest, "Error is \(error)")
@@ -511,7 +511,7 @@ class IMAPClientHandlerTests: XCTestCase {
         try! self.channel.pipeline.addHandler(testHandler, position: .first).wait()
 
         // writing a command that has a continuation
-        let future = self.channel.writeAndFlush(CommandStreamPart.tagged(.init(tag: "A1", command: .rename(from: .init("\\"), to: .init("\\"), params: [:]))))
+        let future = self.channel.writeAndFlush(CommandStreamPart.tagged(.init(tag: "A1", command: .rename(from: .init("\\"), to: .init("\\"), parameters: [:]))))
         self.assertOutboundString("A1 RENAME {1}\r\n")
 
         testHandler.failNextWrite = true

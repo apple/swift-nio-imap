@@ -202,7 +202,7 @@ extension GrammarParser {
             try PL.parseFixedString(" ", caseSensitive: false, buffer: &buffer, tracker: tracker)
             let to = try self.parseMailbox(buffer: &buffer, tracker: tracker)
             let params = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseParameters) ?? [:]
-            return .rename(from: from, to: to, params: params)
+            return .rename(from: from, to: to, parameters: params)
         }
     }
 
