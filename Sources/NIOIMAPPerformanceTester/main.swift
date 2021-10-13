@@ -49,7 +49,7 @@ let commands: [(String, Command)] = [
     ("parse_esearch_complex", .extendedSearch(.init(key: .and([.younger(123), .or(.keyword(.colorBit0), .keyword(.colorBit1))]), charset: "UTF-8", returnOptions: [.min, .max, .count], sourceOptions: ExtendedSearchSourceOptions(sourceMailbox: [.inboxes])!))),
     ("parse_examine_no_params", .examine(.inbox, [])),
     ("parse_examine_1_param", .examine(.inbox, [.condStore])),
-    ("parse_examine_lots_param", .examine(.inbox, [.basic(.init(key: "param1", value: nil)), .basic(.init(key: "param2", value: nil)), .basic(.init(key: "param3", value: .sequence(.set([1 ... 5, 10 ... 100])))),, .basic(.init(key: "param4", value: .comp(["str1"])))])),
+    ("parse_examine_lots_param", .examine(.inbox, [.basic(.init(key: "param1", value: nil)), .basic(.init(key: "param2", value: nil)), .basic(.init(key: "param3", value: .sequence(.set([1 ... 5, 10 ... 100])))), .basic(.init(key: "param4", value: .comp(["str1"])))])),
     ("parse_expunge", .expunge),
     ("parse_genurlauth_one", .generateAuthorizedURL([.init(urlRump: ByteBuffer(string: "test"), mechanism: .internal)])),
     ("parse_genurlauth_many", .generateAuthorizedURL([.init(urlRump: ByteBuffer(string: "test1"), mechanism: .internal), .init(urlRump: ByteBuffer(string: "test2"), mechanism: .internal), .init(urlRump: ByteBuffer(string: "test3"), mechanism: .internal)])),
