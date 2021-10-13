@@ -64,10 +64,12 @@ extension B2MV_Tests {
 
             // MARK: Examine
 
-            ("tag EXAMINE box1", [.tagged(.init(tag: "tag", command: .examine(.init("box1"), [:])))]),
-            ("tag EXAMINE \"box2\"", [.tagged(.init(tag: "tag", command: .examine(.init("box2"), [:])))]),
-            ("tag EXAMINE {4+}\r\nbox3", [.tagged(.init(tag: "tag", command: .examine(.init("box3"), [:])))]),
-            ("tag EXAMINE box4 (k3 1 k4 2)", [.tagged(.init(tag: "tag", command: .examine(.init("box4"), ["k3": .sequence(.set([1])), "k4": .sequence(.set([2]))])))]),
+            ("tag EXAMINE box1", [.tagged(.init(tag: "tag", command: .examine(.init("box1"), [])))]),
+            ("tag EXAMINE \"box2\"", [.tagged(.init(tag: "tag", command: .examine(.init("box2"), [])))]),
+            ("tag EXAMINE {4+}\r\nbox3", [.tagged(.init(tag: "tag", command: .examine(.init("box3"), [])))]),
+            ("tag EXAMINE box4 (k3 1 k4 2)", [.tagged(.init(tag: "tag", command: .examine(.init("box4"), [.basic(.init(key: "k3", value: .sequence(.set([1])))), .basic(.init(key: "k4", value: .sequence(.set([2]))))])))]),
+            ("tag EXAMINE box4 (QRESYNC (67890007 20050715194045000 41,43:211,214:541))", [.tagged(.init(tag: "tag", command: .examine(.init("box4"), [.qresync(QResyncParameter(uidValidity: 67890007, modificationSequenceValue: 20050715194045000, knownUIDs: [41, 43 ... 211, 214 ... 541], sequenceMatchData: nil))])))]),
+            ("tag EXAMINE box4 (CONDSTORE)", [.tagged(.init(tag: "tag", command: .examine(.init("box4"), [.condStore])))]),
 
             // MARK: Create
 

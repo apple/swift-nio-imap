@@ -189,18 +189,8 @@ extension GrammarParser {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Command in
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             let mailbox = try self.parseMailbox(buffer: &buffer, tracker: tracker)
-            let params = try PL.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> [SelectParameter] in
-                try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-                try PL.parseFixedString("(", buffer: &buffer, tracker: tracker)
-                var array = [try self.parseSelectParameter(buffer: &buffer, tracker: tracker)]
-                try PL.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker, parser: { (buffer, tracker) in
-                    try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-                    return try self.parseSelectParameter(buffer: &buffer, tracker: tracker)
-                })
-                try PL.parseFixedString(")", buffer: &buffer, tracker: tracker)
-                return array
-            }
-            return .select(mailbox, params ?? [])
+            let params = try self.parseSelectParameters(buffer: &buffer, tracker: tracker)
+            return .select(mailbox, params)
         }
     }
 
@@ -232,7 +222,7 @@ extension GrammarParser {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Command in
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             let mailbox = try self.parseMailbox(buffer: &buffer, tracker: tracker)
-            let params = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseParameters) ?? [:]
+            let params = try self.parseSelectParameters(buffer: &buffer, tracker: tracker)
             return .examine(mailbox, params)
         }
     }
@@ -502,5 +492,19 @@ extension GrammarParser {
             let alg = Capability.CompressionKind(rawAlg)
             return .compress(alg)
         }
+    }
+
+    static func parseSelectParameters(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [SelectParameter] {
+        try PL.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> [SelectParameter] in
+            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+            try PL.parseFixedString("(", buffer: &buffer, tracker: tracker)
+            var array = [try self.parseSelectParameter(buffer: &buffer, tracker: tracker)]
+            try PL.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker, parser: { (buffer, tracker) in
+                try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+                return try self.parseSelectParameter(buffer: &buffer, tracker: tracker)
+            })
+            try PL.parseFixedString(")", buffer: &buffer, tracker: tracker)
+            return array
+        } ?? []
     }
 }

@@ -38,7 +38,7 @@ public enum Command: Equatable {
     case delete(MailboxName)
 
     /// Similar to `.select` and returns the same data, however the current mailbox is identified as readonly
-    case examine(MailboxName, OrderedDictionary<String, ParameterValue?> = [:])
+    case examine(MailboxName, [SelectParameter] = [])
 
     /// Returns a subset of names from the complete set of all names available to the client.
     case list(ListSelectOptions?, reference: MailboxName, MailboxPatterns, [ReturnOption] = [])
@@ -204,7 +204,7 @@ extension CommandEncodeBuffer {
         case .rename(let from, let to, let params):
             return self.writeCommandKind_rename(from: from, to: to, parameters: params)
         case .select(let mailbox, let params):
-            return self.writeCommandKind_select(mailbox: mailbox, params: params)
+            return self.writeCommandKind_select(mailbox: mailbox, parameters: params)
         case .status(let mailbox, let attributes):
             return self.writeCommandKind_status(mailbox: mailbox, attributes: attributes)
         case .subscribe(let mailbox):
@@ -350,10 +350,10 @@ extension CommandEncodeBuffer {
             self.buffer.writeMailbox(mailbox)
     }
 
-    private mutating func writeCommandKind_examine(mailbox: MailboxName, parameters: OrderedDictionary<String, ParameterValue?>) -> Int {
+    private mutating func writeCommandKind_examine(mailbox: MailboxName, parameters: [SelectParameter]) -> Int {
         self.buffer.writeString("EXAMINE ") +
             self.buffer.writeMailbox(mailbox) +
-            self.buffer.writeParameters(parameters)
+            self.buffer.writeSelectParameters(parameters)
     }
 
     private mutating func writeCommandKind_list(selectOptions: ListSelectOptions?, mailbox: MailboxName, mailboxPatterns: MailboxPatterns, returnOptions: [ReturnOption]) -> Int {
@@ -406,10 +406,10 @@ extension CommandEncodeBuffer {
             }
     }
 
-    private mutating func writeCommandKind_select(mailbox: MailboxName, params: [SelectParameter]) -> Int {
+    private mutating func writeCommandKind_select(mailbox: MailboxName, parameters: [SelectParameter]) -> Int {
         self.buffer.writeString("SELECT ") +
             self.buffer.writeMailbox(mailbox) +
-            self.buffer.writeSelectParameters(params)
+            self.buffer.writeSelectParameters(parameters)
     }
 
     private mutating func writeCommandKind_status(mailbox: MailboxName, attributes: [MailboxAttribute]) -> Int {

@@ -41,8 +41,8 @@ final class RoundtripTests: XCTestCase {
             (.delete(.inbox), #line),
             (.delete(MailboxName("mailbox")), #line),
 
-            (.examine(.inbox, [:]), #line),
-            (.examine(MailboxName("mailbox"), [:]), #line),
+            (.examine(.inbox, []), #line),
+            (.examine(MailboxName("mailbox"), []), #line),
             (.examine(MailboxName("mailbox")), #line),
 
             (.subscribe(.inbox), #line),

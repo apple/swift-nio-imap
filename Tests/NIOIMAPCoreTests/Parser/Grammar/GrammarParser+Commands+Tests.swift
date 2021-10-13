@@ -379,9 +379,9 @@ extension GrammarParser_Commands_Tests {
         self.iterateTests(
             testFunction: GrammarParser.parseCommand,
             validInputs: [
-                ("EXAMINE inbox", "\r", .examine(.inbox, [:]), #line),
-                ("examine inbox", "\r", .examine(.inbox, [:]), #line),
-                ("EXAMINE inbox (number)", "\r", .examine(.inbox, ["number": nil]), #line),
+                ("EXAMINE inbox", "\r", .examine(.inbox, []), #line),
+                ("examine inbox", "\r", .examine(.inbox, []), #line),
+                ("EXAMINE inbox (number)", "\r", .examine(.inbox, [.basic(.init(key: "number", value: nil))]), #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
