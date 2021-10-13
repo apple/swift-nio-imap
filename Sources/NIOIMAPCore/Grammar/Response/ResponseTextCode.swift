@@ -384,3 +384,12 @@ extension EncodeBuffer {
             }
     }
 }
+
+extension ResponseTextCode: CustomDebugStringConvertible {
+    public var debugDescription: String {
+        var encoder = EncodeBuffer
+            .serverEncodeBuffer(buffer: ByteBuffer(), options: ResponseEncodingOptions())
+        _ = encoder.writeResponseTextCode(self)
+        return String(bestEffortDecodingUTF8Bytes: encoder.buffer.readableBytesView)
+    }
+}

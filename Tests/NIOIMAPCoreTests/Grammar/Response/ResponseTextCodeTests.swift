@@ -80,4 +80,16 @@ extension ResponseTextCodeTests {
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeResponseTextCode($0) })
     }
+
+    func testDebugDescription() {
+        let inputs: [(ResponseTextCode, String, UInt)] = [
+            (.noPermission, "NOPERM", #line),
+            (.badCharset(["some", "string"]), "BADCHARSET (some string)", #line),
+            (.permanentFlags([.wildcard]), #"PERMANENTFLAGS (\*)"#, #line),
+            (.permanentFlags([.wildcard, .wildcard]), #"PERMANENTFLAGS (\* \*)"#, #line),
+        ]
+        for input in inputs {
+            XCTAssertEqual(String(reflecting: input.0), input.1, line: input.2)
+        }
+    }
 }
