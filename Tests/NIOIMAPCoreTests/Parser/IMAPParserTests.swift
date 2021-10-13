@@ -2422,9 +2422,9 @@ extension ParserUnitTests {
         self.iterateTests(
             testFunction: GrammarParser.parseCommand,
             validInputs: [
-                ("RENAME box1 box2", "\r", .rename(from: .init("box1"), to: .init("box2"), params: [:]), #line),
-                ("rename box3 box4", "\r", .rename(from: .init("box3"), to: .init("box4"), params: [:]), #line),
-                ("RENAME box5 box6 (test)", "\r", .rename(from: .init("box5"), to: .init("box6"), params: ["test": nil]), #line),
+                ("RENAME box1 box2", "\r", .rename(from: .init("box1"), to: .init("box2"), parameters: [:]), #line),
+                ("rename box3 box4", "\r", .rename(from: .init("box3"), to: .init("box4"), parameters: [:]), #line),
+                ("RENAME box5 box6 (test)", "\r", .rename(from: .init("box5"), to: .init("box6"), parameters: ["test": nil]), #line),
             ],
             parserErrorInputs: [
                 ("RENAME box1 ", "\r", #line),

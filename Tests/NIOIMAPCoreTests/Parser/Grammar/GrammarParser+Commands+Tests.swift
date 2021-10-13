@@ -101,7 +101,7 @@ extension GrammarParser_Commands_Tests {
                 ("EXAMINE INBOX", "\r", .examine(.inbox, .init()), #line),
                 ("LIST INBOX test", "\r", .list(nil, reference: .inbox, .mailbox("test"), []), #line),
                 ("LSUB INBOX test", "\r", .lsub(reference: .inbox, pattern: "test"), #line),
-                ("RENAME INBOX inbox2", "\r", .rename(from: .inbox, to: .init("inbox2"), params: .init()), #line),
+                ("RENAME INBOX inbox2", "\r", .rename(from: .inbox, to: .init("inbox2"), parameters: .init()), #line),
                 ("SELECT INBOX", "\r", .select(.inbox, []), #line),
                 ("STATUS INBOX (SIZE)", "\r", .status(.inbox, [.size]), #line),
                 ("SUBSCRIBE INBOX", "\r", .subscribe(.inbox), #line),
@@ -420,7 +420,7 @@ extension GrammarParser_Commands_Tests {
         self.iterateTests(
             testFunction: GrammarParser.parseCommandSuffix_rename,
             validInputs: [
-                (" box1 box2", "\r", .rename(from: .init(.init(string: "box1")), to: .init(.init(string: "box2")), params: [:]), #line),
+                (" box1 box2", "\r", .rename(from: .init(.init(string: "box1")), to: .init(.init(string: "box2")), parameters: [:]), #line),
             ],
             parserErrorInputs: [
                 (" {2}b1 {2}b2", "", #line),

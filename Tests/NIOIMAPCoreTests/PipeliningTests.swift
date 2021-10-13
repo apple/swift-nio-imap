@@ -388,7 +388,7 @@ extension PipeliningTests {
 
             (#line, .create(.food, [])),
             (#line, .delete(.food)),
-            (#line, .rename(from: .food, to: .food, params: [:])),
+            (#line, .rename(from: .food, to: .food, parameters: [:])),
 
             (#line, .status(.food, [.messageCount])),
             (#line, .copy(.set([1]), .food)),
@@ -468,7 +468,7 @@ extension PipeliningTests {
 
             (#line, .select(.food)),
             (#line, .delete(.food)),
-            (#line, .rename(from: .food, to: .food, params: [:])),
+            (#line, .rename(from: .food, to: .food, parameters: [:])),
             (#line, .examine(.food)),
             (#line, .create(.food, [])),
             (#line, .list(nil, reference: .food, .food, [])),
@@ -546,7 +546,7 @@ extension PipeliningTests {
 
             (#line, .select(.food)),
             (#line, .delete(.food)),
-            (#line, .rename(from: .food, to: .food, params: [:])),
+            (#line, .rename(from: .food, to: .food, parameters: [:])),
             (#line, .examine(.food)),
             (#line, .create(.food, [])),
             (#line, .list(nil, reference: .food, .food, [])),
@@ -636,7 +636,7 @@ extension PipeliningTests {
 
             (#line, .select(.food)),
             (#line, .delete(.food)),
-            (#line, .rename(from: .food, to: .food, params: [:])),
+            (#line, .rename(from: .food, to: .food, parameters: [:])),
             (#line, .examine(.food)),
             (#line, .create(.food, [])),
             (#line, .list(nil, reference: .food, .food, [])),
@@ -727,7 +727,7 @@ extension PipeliningTests {
 
             (#line, .select(.food)),
             (#line, .delete(.food)),
-            (#line, .rename(from: .food, to: .food, params: [:])),
+            (#line, .rename(from: .food, to: .food, parameters: [:])),
             (#line, .examine(.food)),
             (#line, .create(.food, [])),
             (#line, .list(nil, reference: .food, .food, [])),
@@ -816,7 +816,7 @@ extension PipeliningTests {
             (#line, .urlFetch([.joeURLFetch])),
 
             (#line, .delete(.food)),
-            (#line, .rename(from: .food, to: .food, params: [:])),
+            (#line, .rename(from: .food, to: .food, parameters: [:])),
             (#line, .create(.food, [])),
             (#line, .status(.food, [.messageCount])),
             (#line, .check),
@@ -856,7 +856,7 @@ extension PipeliningTests {
             (#line, .namespace),
 
             (#line, .delete(.food)),
-            (#line, .rename(from: .food, to: .food, params: [:])),
+            (#line, .rename(from: .food, to: .food, parameters: [:])),
             (#line, .examine(.food)),
             (#line, .create(.food, [])),
             (#line, .list(nil, reference: .food, .food, [])),
@@ -928,7 +928,7 @@ extension PipeliningTests {
             (#line, .noop),
 
             (#line, .delete(.food)),
-            (#line, .rename(from: .food, to: .food, params: [:])),
+            (#line, .rename(from: .food, to: .food, parameters: [:])),
             (#line, .examine(.food)),
             (#line, .create(.food, [])),
             (#line, .list(nil, reference: .food, .food, [])),
@@ -985,7 +985,7 @@ extension PipeliningTests {
             (#line, .namespace),
 
             (#line, .delete(.food)),
-            (#line, .rename(from: .food, to: .food, params: [:])),
+            (#line, .rename(from: .food, to: .food, parameters: [:])),
             (#line, .examine(.food)),
             (#line, .create(.food, [])),
             (#line, .list(nil, reference: .food, .food, [])),
@@ -1065,7 +1065,7 @@ extension PipeliningTests {
             (#line, .namespace),
 
             (#line, .delete(.food)),
-            (#line, .rename(from: .food, to: .food, params: [:])),
+            (#line, .rename(from: .food, to: .food, parameters: [:])),
             (#line, .examine(.food)),
             (#line, .create(.food, [])),
             (#line, .list(nil, reference: .food, .food, [])),
@@ -1134,7 +1134,7 @@ extension PipeliningTests {
             (#line, .enable([.condStore])),
 
             (#line, .delete(.food)),
-            (#line, .rename(from: .food, to: .food, params: [:])),
+            (#line, .rename(from: .food, to: .food, parameters: [:])),
             (#line, .examine(.food)),
             (#line, .create(.food, [])),
             (#line, .list(nil, reference: .food, .food, [])),
@@ -1217,7 +1217,7 @@ extension PipeliningTests {
             (#line, .login(username: "user", password: "password")),
 
             (#line, .delete(.food)),
-            (#line, .rename(from: .food, to: .food, params: [:])),
+            (#line, .rename(from: .food, to: .food, parameters: [:])),
             (#line, .examine(.food)),
             (#line, .create(.food, [])),
             (#line, .list(nil, reference: .food, .food, [])),

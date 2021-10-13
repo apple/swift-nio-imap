@@ -86,9 +86,9 @@ extension B2MV_Tests {
 
             // MARK: Rename
 
-            (#"tag RENAME "foo" "bar""#, [.tagged(TaggedCommand(tag: "tag", command: .rename(from: MailboxName("foo"), to: MailboxName("bar"), params: [:])))]),
-            (#"tag RENAME InBoX "inBOX""#, [.tagged(TaggedCommand(tag: "tag", command: .rename(from: .inbox, to: .inbox, params: [:])))]),
-            ("tag RENAME {1+}\r\n1 {1+}\r\n2", [.tagged(TaggedCommand(tag: "tag", command: .rename(from: MailboxName("1"), to: MailboxName("2"), params: [:])))]),
+            (#"tag RENAME "foo" "bar""#, [.tagged(TaggedCommand(tag: "tag", command: .rename(from: MailboxName("foo"), to: MailboxName("bar"), parameters: [:])))]),
+            (#"tag RENAME InBoX "inBOX""#, [.tagged(TaggedCommand(tag: "tag", command: .rename(from: .inbox, to: .inbox, parameters: [:])))]),
+            ("tag RENAME {1+}\r\n1 {1+}\r\n2", [.tagged(TaggedCommand(tag: "tag", command: .rename(from: MailboxName("1"), to: MailboxName("2"), parameters: [:])))]),
 
             // MARK: Subscribe
 
