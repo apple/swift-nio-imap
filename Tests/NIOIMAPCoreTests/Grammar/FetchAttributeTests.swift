@@ -48,6 +48,36 @@ extension FetchAttributeTests {
         self.iterateInputs(inputs: inputs.map { ($0, $1, [$2], $3) }, encoder: { self.testBuffer.writeFetchAttribute($0) })
     }
 
+    func testCustomDebugStringConvertible() {
+        let inputs: [(FetchAttribute, String, UInt)] = [
+            (.envelope, "ENVELOPE", #line),
+            (.flags, "FLAGS", #line),
+            (.uid, "UID", #line),
+            (.internalDate, "INTERNALDATE", #line),
+            (.rfc822Header, "RFC822.HEADER", #line),
+            (.rfc822Size, "RFC822.SIZE", #line),
+            (.rfc822Text, "RFC822.TEXT", #line),
+            (.rfc822, "RFC822", #line),
+            (.bodyStructure(extensions: false), "BODY", #line),
+            (.bodyStructure(extensions: true), "BODYSTRUCTURE", #line),
+            (.bodySection(peek: false, .init(kind: .header), nil), "BODY[HEADER]", #line),
+            (.bodySection(peek: false, .init(kind: .header), nil), "BODY[HEADER]", #line),
+            (.bodySection(peek: true, .init(kind: .headerFields(["message-id", "in-reply-to"])), nil), #"BODY.PEEK[HEADER.FIELDS ("message-id" "in-reply-to")]"#, #line),
+            (.binarySize(section: [1]), "BINARY.SIZE[1]", #line),
+            (.binary(peek: true, section: [1, 2, 3], partial: nil), "BINARY.PEEK[1.2.3]", #line),
+            (.binary(peek: false, section: [3, 4, 5], partial: nil), "BINARY[3.4.5]", #line),
+            (.modificationSequenceValue(.zero), "0", #line),
+            (.modificationSequenceValue(3), "3", #line),
+            (.modificationSequence, "MODSEQ", #line),
+            (.gmailMessageID, "X-GM-MSGID", #line),
+            (.gmailThreadID, "X-GM-THRID", #line),
+            (.gmailLabels, "X-GM-LABELS", #line),
+        ]
+        for (attr, expected, line) in inputs {
+            XCTAssertEqual(String(reflecting: attr), expected, line: line)
+        }
+    }
+
     func testEncodeList() {
         let inputs: [([FetchAttribute], CommandEncodingOptions, String, UInt)] = [
             ([.envelope], .rfc3501, "(ENVELOPE)", #line),
