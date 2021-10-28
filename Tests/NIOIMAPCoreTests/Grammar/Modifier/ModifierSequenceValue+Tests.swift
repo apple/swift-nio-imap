@@ -17,6 +17,17 @@ import NIO
 import XCTest
 
 class ModifierSequenceValue_Tests: EncodeTestClass {
+    func testLossyConversionFromInteger() {
+        XCTAssertEqual(ModificationSequenceValue(exactly: 0)?.value, 0)
+        XCTAssertEqual(ModificationSequenceValue(exactly: 100 as Int64)?.value, 100)
+        XCTAssertEqual(ModificationSequenceValue(exactly: 100 as UInt64)?.value, 100)
+        XCTAssertEqual(ModificationSequenceValue(exactly: Int64.max)?.value, UInt64(Int64.max))
+
+        XCTAssertNil(ModificationSequenceValue(exactly: -1))
+        XCTAssertNil(ModificationSequenceValue(exactly: UInt64(Int64.max) + 1))
+        XCTAssertNil(ModificationSequenceValue(exactly: UInt64.max))
+    }
+
     func testModifierSequenceValue_encode() {
         let inputs: [(ModificationSequenceValue, String)] = ClosedRange(uncheckedBounds: (0, 10000)).map { num in
             (.init(integerLiteral: num), "\(num)")
