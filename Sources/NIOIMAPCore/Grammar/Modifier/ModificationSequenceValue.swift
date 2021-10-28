@@ -16,7 +16,7 @@ import struct NIO.ByteBuffer
 
 /// Represents the a *mod-sequence-value` as defined in RFC 7162.
 public struct ModificationSequenceValue: Hashable {
-    fileprivate var value: UInt64
+    var value: UInt64
 
     /// A  zero *mod-sequence-value*
     public static var zero: Self {
@@ -27,6 +27,18 @@ public struct ModificationSequenceValue: Hashable {
     /// - parameter value: The raw value.
     public init(_ value: UInt64) {
         precondition(value <= UInt64(Int64.max), "mod-sequence-values are 63-bit")
+        self.value = value
+    }
+
+    /// Creates a `ModificationSequenceValue` from some `BinaryInteger`, ensuring that the given value fits within the valid range `0...Int64.max`.
+    /// - parameter source: The raw value to use.
+    /// - returns: `nil` if `source` is not within the valid range.
+    public init?<T>(exactly source: T) where T: BinaryInteger {
+        guard
+            source >= 0,
+            let value = UInt64(exactly: source),
+            value <= UInt64(Int64.max)
+        else { return nil }
         self.value = value
     }
 }
