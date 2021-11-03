@@ -59,7 +59,7 @@ extension CommandType_Tests {
             (.urlFetch(["test1", "test2"]), CommandEncodingOptions(), ["URLFETCH test1 test2"], #line),
 
             (.create(.inbox, []), CommandEncodingOptions(), ["CREATE \"INBOX\""], #line),
-            (.create(.inbox, [.attributes([.archive, .drafts, .flagged])]), CommandEncodingOptions(), ["CREATE \"INBOX\" (USE (\\archive \\drafts \\flagged))"], #line),
+            (.create(.inbox, [.attributes([.archive, .drafts, .flagged])]), CommandEncodingOptions(), ["CREATE \"INBOX\" (USE (\\Archive \\Drafts \\Flagged))"], #line),
             (.compress(.deflate), CommandEncodingOptions(), ["COMPRESS DEFLATE"], #line),
         ]
 

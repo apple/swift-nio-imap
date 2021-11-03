@@ -23,13 +23,13 @@ class UseAttribute_Tests: EncodeTestClass {}
 extension UseAttribute_Tests {
     func testEncode() {
         let inputs: [(UseAttribute, String, UInt)] = [
-            (.all, "\\all", #line),
-            (.archive, "\\archive", #line),
-            (.drafts, "\\drafts", #line),
-            (.flagged, "\\flagged", #line),
-            (.junk, "\\junk", #line),
-            (.sent, "\\sent", #line),
-            (.trash, "\\trash", #line),
+            (.all, "\\All", #line),
+            (.archive, "\\Archive", #line),
+            (.drafts, "\\Drafts", #line),
+            (.flagged, "\\Flagged", #line),
+            (.junk, "\\Junk", #line),
+            (.sent, "\\Sent", #line),
+            (.trash, "\\Trash", #line),
             (.init("\\test"), "\\test", #line),
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeUseAttribute($0) })
@@ -39,11 +39,11 @@ extension UseAttribute_Tests {
         let t1 = UseAttribute("TEST")
         let t2 = UseAttribute("test")
         XCTAssertEqual(t1, t2)
-        XCTAssertEqual(t1.stringValue, "test")
+        XCTAssertEqual(t1.stringValue, "TEST")
         XCTAssertEqual(t2.stringValue, "test")
     }
 
     func testConvertFromMailboxInfoAttribute() {
-        XCTAssertEqual(UseAttribute(MailboxInfo.Attribute(#"\All"#)).stringValue, #"\all"#)
+        XCTAssertEqual(UseAttribute(MailboxInfo.Attribute(#"\All"#)).stringValue, #"\All"#)
     }
 }
