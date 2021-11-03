@@ -38,9 +38,9 @@ extension MailboxInfo_Tests {
     func testEncode_flags() {
         let inputs: [([MailboxInfo.Attribute], String, UInt)] = [
             ([], "", #line),
-            ([.marked], "\\marked", #line),
-            ([.noInferiors], "\\noinferiors", #line),
-            ([.marked, .noInferiors, .init("\\test")], "\\marked \\noinferiors \\test", #line),
+            ([.marked], "\\Marked", #line),
+            ([.noInferiors], "\\Noinferiors", #line),
+            ([.marked, .noInferiors, .init("\\test")], "\\Marked \\Noinferiors \\test", #line),
         ]
 
         for (test, expectedString, line) in inputs {
