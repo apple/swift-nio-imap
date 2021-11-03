@@ -76,8 +76,8 @@ extension MailboxInfo {
         public init(_ str: String) {
             self.backing = str
         }
-        
-        public static func ==(lhs: Self, rhs: Self) -> Bool {
+
+        public static func == (lhs: Self, rhs: Self) -> Bool {
             lhs.backing.lowercased() == rhs.backing.lowercased()
         }
     }

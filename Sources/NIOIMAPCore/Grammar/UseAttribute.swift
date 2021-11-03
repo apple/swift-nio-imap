@@ -48,9 +48,9 @@ public struct UseAttribute: Equatable {
     public init(_ stringValue: String) {
         self.stringValue = stringValue
     }
-    
-    public static func ==(lhs: Self, rhs: Self) -> Bool {
-        return lhs.stringValue.lowercased() == rhs.stringValue.lowercased()
+
+    public static func == (lhs: Self, rhs: Self) -> Bool {
+        lhs.stringValue.lowercased() == rhs.stringValue.lowercased()
     }
 }
 
