@@ -46,7 +46,11 @@ public struct UseAttribute: Equatable {
     /// usually it should be sufficient to just use the predefined attributes, e.g. `.drafts`.
     /// `rawValue` will be lowercased.
     public init(_ stringValue: String) {
-        self.stringValue = stringValue.lowercased()
+        self.stringValue = stringValue
+    }
+    
+    public static func ==(lhs: Self, rhs: Self) -> Bool {
+        return lhs.stringValue.lowercased() == rhs.stringValue.lowercased()
     }
 }
 
