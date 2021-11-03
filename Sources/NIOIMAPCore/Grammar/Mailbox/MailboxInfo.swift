@@ -43,42 +43,42 @@ extension MailboxInfo {
     /// A single attribute of a Mailbox
     public struct Attribute: Hashable {
         /// It is not possible to use this name as a selectable mailbox.
-        public static var noSelect: Self { Self(backing: #"\noselect"#) }
+        public static var noSelect: Self { Self(#"\Noselect"#) }
 
         /// The mailbox has been marked as "interesting" by the server. It probably contains new messages since the mailbox was selected.
-        public static var marked: Self { Self(backing: #"\marked"#) }
+        public static var marked: Self { Self(#"\Marked"#) }
 
         /// The mailbox does not have any new messages since the mailbox was last selected.
-        public static var unmarked: Self { Self(backing: #"\unmarked"#) }
+        public static var unmarked: Self { Self(#"\Unmarked"#) }
 
         /// The mailbox does not refer to an existing mailbox.
-        public static var nonExistent: Self { Self(backing: #"\nonexistent"#) }
+        public static var nonExistent: Self { Self(#"\Nonexistent"#) }
 
         /// It is not possible for this mailbox to have children.
-        public static var noInferiors: Self { Self(backing: #"\noinferiors"#) }
+        public static var noInferiors: Self { Self(#"\Noinferiors"#) }
 
         /// The mailbox has been subscribed to.
-        public static var subscribed: Self { Self(backing: #"\subscribed"#) }
+        public static var subscribed: Self { Self(#"\Subscribed"#) }
 
         /// The mailbox is a remote mailbox.
-        public static var remote: Self { Self(backing: #"\remote"#) }
+        public static var remote: Self { Self(#"\Remote"#) }
 
         /// The mailbox has child mailboxes.
-        public static var hasChildren: Self { Self(backing: #"\HasChildren"#) }
+        public static var hasChildren: Self { Self(#"\HasChildren"#) }
 
         /// The mailbox does not have child attributes.
-        public static var hasNoChildren: Self { Self(backing: #"\HasNoChildren"#) }
+        public static var hasNoChildren: Self { Self(#"\HasNoChildren"#) }
 
         fileprivate var backing: String
 
-        init(backing: String) {
-            self.backing = backing
-        }
-
-        /// Creates a new `Attribute`. It's often safer to use the predefined static helpers. The string provided will be lowercased.
-        /// - parameter str: The string representation of the attribute. Note that this string will be lowercased.
+        /// Creates a new `Attribute`. It's often safer to use the predefined static helpers.
+        /// - parameter str: The string representation of the attribute.
         public init(_ str: String) {
-            self.backing = str.lowercased()
+            self.backing = str
+        }
+        
+        public static func ==(lhs: Self, rhs: Self) -> Bool {
+            lhs.backing.lowercased() == rhs.backing.lowercased()
         }
     }
 }
