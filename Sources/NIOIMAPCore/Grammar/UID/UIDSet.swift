@@ -66,48 +66,51 @@ public struct UIDSetNonEmpty: Hashable {
 
 // MARK: -
 
-extension UIDSet {
-    /// UIDs shifted by 1, such that UID 1 -> 0, and UID.max -> UInt32.max - 1
-    /// This allows us to store UID.max + 1 inside a UInt32.
-    fileprivate struct MessageIdentificationShiftWrapper: Hashable {
-        var rawValue: UInt32
-    }
+/// UIDs shifted by 1, such that UID 1 -> 0, and UID.max -> UInt32.max - 1
+/// This allows us to store UID.max + 1 inside a UInt32.
+struct MessageIdentificationShiftWrapper: Hashable {
+    var rawValue: UInt32
 }
 
-extension UIDSet.MessageIdentificationShiftWrapper: Strideable {
-    public init(_ uid: UID) {
+extension MessageIdentificationShiftWrapper: Strideable {
+    init(_ uid: UID) {
         // Since UID.min = 1, we can always do this:
         self.rawValue = uid.rawValue - 1
     }
+    
+    init(_ num: SequenceNumber) {
+        // Since SequenceNumber.min = 1, we can always do this:
+        self.rawValue = num.rawValue - 1
+    }
 
-    func distance(to other: UIDSet.MessageIdentificationShiftWrapper) -> Int64 {
+    func distance(to other: MessageIdentificationShiftWrapper) -> Int64 {
         Int64(other.rawValue) - Int64(self.rawValue)
     }
 
-    func advanced(by n: Int64) -> UIDSet.MessageIdentificationShiftWrapper {
-        UIDSet.MessageIdentificationShiftWrapper(rawValue: UInt32(Int64(rawValue) + n))
+    func advanced(by n: Int64) -> MessageIdentificationShiftWrapper {
+        MessageIdentificationShiftWrapper(rawValue: UInt32(Int64(rawValue) + n))
     }
 }
 
 extension UID {
-    fileprivate init(_ wrapper: UIDSet.MessageIdentificationShiftWrapper) {
+    fileprivate init(_ wrapper: MessageIdentificationShiftWrapper) {
         precondition(wrapper.rawValue < UInt32.max)
         self.init(exactly: wrapper.rawValue + 1)!
     }
 }
 
-extension Range where Element == UIDSet.MessageIdentificationShiftWrapper {
+extension Range where Element == MessageIdentificationShiftWrapper {
     fileprivate init(_ r: UIDRange) {
-        self = UIDSet.MessageIdentificationShiftWrapper(r.range.lowerBound) ..< UIDSet.MessageIdentificationShiftWrapper(r.range.upperBound).advanced(by: 1)
+        self = MessageIdentificationShiftWrapper(r.range.lowerBound) ..< MessageIdentificationShiftWrapper(r.range.upperBound).advanced(by: 1)
     }
 
     fileprivate init(_ uid: UID) {
-        self = UIDSet.MessageIdentificationShiftWrapper(uid) ..< UIDSet.MessageIdentificationShiftWrapper(uid).advanced(by: 1)
+        self = MessageIdentificationShiftWrapper(uid) ..< MessageIdentificationShiftWrapper(uid).advanced(by: 1)
     }
 }
 
 extension UIDRange {
-    fileprivate init(_ r: Range<UIDSet.MessageIdentificationShiftWrapper>) {
+    fileprivate init(_ r: Range<MessageIdentificationShiftWrapper>) {
         self.init(UID(r.lowerBound) ... UID(r.upperBound.advanced(by: -1)))
     }
 }
