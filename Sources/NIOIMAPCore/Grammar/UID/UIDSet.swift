@@ -66,8 +66,9 @@ public struct UIDSetNonEmpty: Hashable {
 
 // MARK: -
 
-/// UIDs shifted by 1, such that UID 1 -> 0, and UID.max -> UInt32.max - 1
-/// This allows us to store UID.max + 1 inside a UInt32.
+/// UIDs/SequenceNumbers shifted by 1, such that 1 -> 0, and `type`.max -> UInt32.max - 1
+/// This allows us to store `type`.max + 1 inside a UInt32.
+/// This applies for both UIDs and SequenceNumbers.
 struct MessageIdentificationShiftWrapper: Hashable {
     var rawValue: UInt32
 }
