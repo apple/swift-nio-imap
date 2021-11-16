@@ -25,9 +25,9 @@ public struct UIDSet: Hashable {
     public static let empty = UIDSet()
 
     /// A non-empty array of UID ranges.
-    fileprivate var _ranges: RangeSet<UIDShiftWrapper>
+    fileprivate var _ranges: RangeSet<MessageIdentificationShiftWrapper>
 
-    fileprivate init(_ ranges: RangeSet<UIDShiftWrapper>) {
+    fileprivate init(_ ranges: RangeSet<MessageIdentificationShiftWrapper>) {
         self._ranges = ranges
     }
 
@@ -66,48 +66,52 @@ public struct UIDSetNonEmpty: Hashable {
 
 // MARK: -
 
-extension UIDSet {
-    /// UIDs shifted by 1, such that UID 1 -> 0, and UID.max -> UInt32.max - 1
-    /// This allows us to store UID.max + 1 inside a UInt32.
-    fileprivate struct UIDShiftWrapper: Hashable {
-        var rawValue: UInt32
-    }
+/// UIDs/SequenceNumbers shifted by 1, such that 1 -> 0, and `type`.max -> UInt32.max - 1
+/// This allows us to store `type`.max + 1 inside a UInt32.
+/// This applies for both UIDs and SequenceNumbers.
+struct MessageIdentificationShiftWrapper: Hashable {
+    var rawValue: UInt32
 }
 
-extension UIDSet.UIDShiftWrapper: Strideable {
-    public init(_ uid: UID) {
+extension MessageIdentificationShiftWrapper: Strideable {
+    init(_ uid: UID) {
         // Since UID.min = 1, we can always do this:
         self.rawValue = uid.rawValue - 1
     }
 
-    func distance(to other: UIDSet.UIDShiftWrapper) -> Int64 {
+    init(_ num: SequenceNumber) {
+        // Since SequenceNumber.min = 1, we can always do this:
+        self.rawValue = num.rawValue - 1
+    }
+
+    func distance(to other: MessageIdentificationShiftWrapper) -> Int64 {
         Int64(other.rawValue) - Int64(self.rawValue)
     }
 
-    func advanced(by n: Int64) -> UIDSet.UIDShiftWrapper {
-        UIDSet.UIDShiftWrapper(rawValue: UInt32(Int64(rawValue) + n))
+    func advanced(by n: Int64) -> MessageIdentificationShiftWrapper {
+        MessageIdentificationShiftWrapper(rawValue: UInt32(Int64(rawValue) + n))
     }
 }
 
 extension UID {
-    fileprivate init(_ wrapper: UIDSet.UIDShiftWrapper) {
+    fileprivate init(_ wrapper: MessageIdentificationShiftWrapper) {
         precondition(wrapper.rawValue < UInt32.max)
         self.init(exactly: wrapper.rawValue + 1)!
     }
 }
 
-extension Range where Element == UIDSet.UIDShiftWrapper {
+extension Range where Element == MessageIdentificationShiftWrapper {
     fileprivate init(_ r: UIDRange) {
-        self = UIDSet.UIDShiftWrapper(r.range.lowerBound) ..< UIDSet.UIDShiftWrapper(r.range.upperBound).advanced(by: 1)
+        self = MessageIdentificationShiftWrapper(r.range.lowerBound) ..< MessageIdentificationShiftWrapper(r.range.upperBound).advanced(by: 1)
     }
 
     fileprivate init(_ uid: UID) {
-        self = UIDSet.UIDShiftWrapper(uid) ..< UIDSet.UIDShiftWrapper(uid).advanced(by: 1)
+        self = MessageIdentificationShiftWrapper(uid) ..< MessageIdentificationShiftWrapper(uid).advanced(by: 1)
     }
 }
 
 extension UIDRange {
-    fileprivate init(_ r: Range<UIDSet.UIDShiftWrapper>) {
+    fileprivate init(_ r: Range<MessageIdentificationShiftWrapper>) {
         self.init(UID(r.lowerBound) ... UID(r.upperBound.advanced(by: -1)))
     }
 }
@@ -116,7 +120,7 @@ extension UIDRange {
 
 extension UIDSet {
     public struct RangeView: Sequence {
-        fileprivate var underlying: RangeSet<UIDShiftWrapper>.Ranges
+        fileprivate var underlying: RangeSet<MessageIdentificationShiftWrapper>.Ranges
 
         public func makeIterator() -> AnyIterator<UIDRange> {
             var u = underlying.makeIterator()
@@ -166,14 +170,14 @@ extension UIDSet {
     /// Creates a set from a single range.
     /// - parameter range: The `UIDRange` to construct a set from.
     public init(_ range: UIDRange) {
-        let a: Range<UIDShiftWrapper> = Range(range)
+        let a: Range<MessageIdentificationShiftWrapper> = Range(range)
         self._ranges = RangeSet(a)
     }
 }
 
 extension UIDSet {
     public init(_ uid: UID) {
-        self._ranges = RangeSet(UIDShiftWrapper(uid) ..< (UIDShiftWrapper(uid).advanced(by: 1)))
+        self._ranges = RangeSet(MessageIdentificationShiftWrapper(uid) ..< (MessageIdentificationShiftWrapper(uid).advanced(by: 1)))
     }
 }
 
@@ -217,7 +221,7 @@ extension UIDSetNonEmpty: ExpressibleByArrayLiteral {
 
 extension UIDSet: BidirectionalCollection {
     public struct Index {
-        fileprivate var rangeIndex: RangeSet<UIDShiftWrapper>.Ranges.Index
+        fileprivate var rangeIndex: RangeSet<MessageIdentificationShiftWrapper>.Ranges.Index
         fileprivate var indexInRange: UID.Stride
     }
 
@@ -341,7 +345,7 @@ extension UIDSet: SetAlgebra {
     public typealias Element = UID
 
     public func contains(_ member: UID) -> Bool {
-        _ranges.contains(UIDShiftWrapper(member))
+        _ranges.contains(MessageIdentificationShiftWrapper(member))
     }
 
     public func union(_ other: Self) -> Self {
@@ -359,7 +363,7 @@ extension UIDSet: SetAlgebra {
     @discardableResult
     public mutating func insert(_ newMember: UID) -> (inserted: Bool, memberAfterInsert: UID) {
         guard !contains(newMember) else { return (false, newMember) }
-        let r: Range<UIDShiftWrapper> = Range(newMember)
+        let r: Range<MessageIdentificationShiftWrapper> = Range(newMember)
         _ranges.insert(contentsOf: r)
         return (true, newMember)
     }
@@ -367,7 +371,7 @@ extension UIDSet: SetAlgebra {
     @discardableResult
     public mutating func remove(_ member: UID) -> UID? {
         guard contains(member) else { return nil }
-        let r: Range<UIDShiftWrapper> = Range(member)
+        let r: Range<MessageIdentificationShiftWrapper> = Range(member)
         _ranges.remove(contentsOf: r)
         return member
     }
@@ -375,7 +379,7 @@ extension UIDSet: SetAlgebra {
     @discardableResult
     public mutating func update(with newMember: UID) -> UID? {
         guard !contains(newMember) else { return newMember }
-        let r: Range<UIDShiftWrapper> = Range(newMember)
+        let r: Range<MessageIdentificationShiftWrapper> = Range(newMember)
         _ranges.insert(contentsOf: r)
         return nil
     }
