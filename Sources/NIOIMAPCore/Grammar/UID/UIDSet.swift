@@ -78,7 +78,7 @@ extension MessageIdentificationShiftWrapper: Strideable {
         // Since UID.min = 1, we can always do this:
         self.rawValue = uid.rawValue - 1
     }
-    
+
     init(_ num: SequenceNumber) {
         // Since SequenceNumber.min = 1, we can always do this:
         self.rawValue = num.rawValue - 1
