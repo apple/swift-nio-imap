@@ -12,33 +12,32 @@
 //
 //===----------------------------------------------------------------------===//
 
-/// Unique Message Identifier
-///
-/// Not that valid UIDs are 1 ... 4294967295 (UInt32.max).
-/// The maximum value is often rendered as `*` when encoded.
-///
-/// See RFC 3501 section 2.3.1.1.
-public struct UID: Hashable, Codable {
+protocol MessageIdentifier: Hashable, Codable, CustomDebugStringConvertible, ExpressibleByIntegerLiteral {
+    var rawValue: UInt32 { get set }
+    
+    init(rawValue: UInt32)
+}
+
+extension MessageIdentifier {
+    
     /// The minimum `UID` is always *1*.
-    public static let min = UID(1)
+    public static var min: Self {
+        self.init(rawValue: 1)
+    }
 
     /// The maximum `UID` is always `UInt32.max`.
-    public static let max = UID(exactly: UInt32.max)!
-
-    let rawValue: UInt32
-
+    public static var max: Self {
+        self.init(rawValue: UInt32.max)
+    }
+    
     /// Creates a `UID` from some `BinaryInteger`, ensuring that the given value fits within a `UInt32`.
     /// - parameter source: The raw value to use.
     /// - returns: `nil` if `source` does not fit within a `UInt32`, otherwise a `UID`.
     public init?<T>(exactly source: T) where T: BinaryInteger {
         guard source > 0, let rawValue = UInt32(exactly: source) else { return nil }
-        self.rawValue = rawValue
+        self.init(rawValue: rawValue)
     }
-}
-
-// MARK: - CustomDebugStringConvertible
-
-extension UID: CustomDebugStringConvertible {
+    
     /// Creates a human-readable `String` representation of the `UID`.
     /// `*` if `self = UInt32.max`, otherwise `self.rawValue` as a `String`.
     public var debugDescription: String {
@@ -48,16 +47,26 @@ extension UID: CustomDebugStringConvertible {
             return "\(self.rawValue)"
         }
     }
-}
-
-// MARK: - Integer literal
-
-extension UID: ExpressibleByIntegerLiteral {
+    
     /// Creates a new `UID` from an integer literal, skipping all validation.
     /// - parameter integerLiteral: The integer literal value.
     public init(integerLiteral value: UInt32) {
         assert(value >= 1)
-        self.rawValue = value
+        self.init(rawValue: value)
+    }
+}
+
+/// Unique Message Identifier
+///
+/// Not that valid UIDs are 1 ... 4294967295 (UInt32.max).
+/// The maximum value is often rendered as `*` when encoded.
+///
+/// See RFC 3501 section 2.3.1.1.
+public struct UID: MessageIdentifier {
+    var rawValue: UInt32
+    
+    public init(rawValue: UInt32) {
+        self.rawValue = rawValue
     }
 }
 
