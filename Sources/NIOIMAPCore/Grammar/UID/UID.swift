@@ -14,12 +14,11 @@
 
 public protocol MessageIdentifier: Hashable, Codable, CustomDebugStringConvertible, ExpressibleByIntegerLiteral, Comparable {
     var rawValue: UInt32 { get set }
-    
+
     init(rawValue: UInt32)
 }
 
 extension MessageIdentifier {
-    
     /// The minimum `UID` is always *1*.
     public static var min: Self {
         self.init(rawValue: 1)
@@ -29,7 +28,7 @@ extension MessageIdentifier {
     public static var max: Self {
         self.init(rawValue: UInt32.max)
     }
-    
+
     /// Creates a `UID` from some `BinaryInteger`, ensuring that the given value fits within a `UInt32`.
     /// - parameter source: The raw value to use.
     /// - returns: `nil` if `source` does not fit within a `UInt32`, otherwise a `UID`.
@@ -37,12 +36,12 @@ extension MessageIdentifier {
         guard source > 0, let rawValue = UInt32(exactly: source) else { return nil }
         self.init(rawValue: rawValue)
     }
-    
+
     init(_ wrapper: MessageIdentificationShiftWrapper) {
         precondition(wrapper.rawValue < UInt32.max)
         self.init(exactly: wrapper.rawValue + 1)!
     }
-    
+
     /// Creates a human-readable `String` representation of the `UID`.
     /// `*` if `self = UInt32.max`, otherwise `self.rawValue` as a `String`.
     public var debugDescription: String {
@@ -52,7 +51,7 @@ extension MessageIdentifier {
             return "\(self.rawValue)"
         }
     }
-    
+
     /// Creates a new `UID` from an integer literal, skipping all validation.
     /// - parameter integerLiteral: The integer literal value.
     public init(integerLiteral value: UInt32) {
@@ -62,11 +61,9 @@ extension MessageIdentifier {
 }
 
 extension MessageIdentifier {
-    
-    public static func <(lhs: Self, rhs: Self) -> Bool {
+    public static func < (lhs: Self, rhs: Self) -> Bool {
         lhs.rawValue < rhs.rawValue
     }
-    
 }
 
 /// Unique Message Identifier
@@ -77,7 +74,7 @@ extension MessageIdentifier {
 /// See RFC 3501 section 2.3.1.1.
 public struct UID: MessageIdentifier {
     public var rawValue: UInt32
-    
+
     public init(rawValue: UInt32) {
         self.rawValue = rawValue
     }
@@ -136,7 +133,7 @@ extension EncodeBuffer {
             return self.writeString("\(num.rawValue)")
         }
     }
-    
+
     @discardableResult mutating func writeMessageIdentifier<T: MessageIdentifier>(_ id: T) -> Int {
         if id == .max {
             return self.writeString("*")

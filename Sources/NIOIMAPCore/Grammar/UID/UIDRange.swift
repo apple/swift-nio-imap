@@ -36,7 +36,6 @@ public struct MessageIdentifierRange<T: MessageIdentifier>: Hashable {
     public init(_ range: PartialRangeFrom<T>) {
         self.init(range.lowerBound ... T.max)
     }
-    
 }
 
 // MARK: - CustomDebugStringConvertible

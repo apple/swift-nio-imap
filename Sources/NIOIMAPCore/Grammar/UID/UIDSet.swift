@@ -111,7 +111,7 @@ extension Range where Element == MessageIdentificationShiftWrapper {
 }
 
 extension MessageIdentifierRange {
-    fileprivate init(_ r: Range<MessageIdentificationShiftWrapper>) {
+    private init(_ r: Range<MessageIdentificationShiftWrapper>) {
         self.init(T(r.lowerBound) ... T(r.upperBound.advanced(by: -1)))
     }
 }
