@@ -22,7 +22,7 @@ class UIDRangeTests: EncodeTestClass {}
 
 extension UIDRangeTests {
     func testWildcard() {
-        let range = UIDRange.all.range
+        let range = MessageIdentifierRange<UID>.all.range
         XCTAssertEqual(range.lowerBound, UID.min)
         XCTAssertEqual(range.upperBound, UID.max)
     }
@@ -32,7 +32,7 @@ extension UIDRangeTests {
 
 extension UIDRangeTests {
     func testSingle() {
-        let range = UIDRange(999).range
+        let range = MessageIdentifierRange<UID>(999).range
         XCTAssertEqual(range.lowerBound, 999)
         XCTAssertEqual(range.upperBound, 999)
     }
@@ -44,13 +44,13 @@ extension UIDRangeTests {
     // here we always expect the smaller number on the left
 
     func testInit_range() {
-        let range = UIDRange(1 ... 999).range
+        let range = MessageIdentifierRange<UID>(1 ... 999).range
         XCTAssertEqual(range.lowerBound, 1)
         XCTAssertEqual(range.upperBound, 999)
     }
 
     func testInit_integer() {
-        let range: UIDRange = 654
+        let range: MessageIdentifierRange<UID> = 654
         XCTAssertEqual(range.range.lowerBound, 654)
         XCTAssertEqual(range.range.upperBound, 654)
     }
@@ -60,10 +60,10 @@ extension UIDRangeTests {
 
 extension UIDRangeTests {
     func testEncode() {
-        let inputs: [(UIDRange, String, UInt)] = [
+        let inputs: [(MessageIdentifierRange<UID>, String, UInt)] = [
             (33 ... 44, "33:44", #line),
             (5, "5", #line),
-            (UIDRange(.max), "*", #line),
+            (MessageIdentifierRange<UID>(.max), "*", #line),
             (.all, "1:*", #line),
             (...55, "1:55", #line),
             (66..., "66:*", #line),
@@ -71,7 +71,7 @@ extension UIDRangeTests {
 
         for (test, expectedString, line) in inputs {
             self.testBuffer.clear()
-            let size = self.testBuffer.writeUIDRange(test)
+            let size = self.testBuffer.writeMessageIdentifierRange(test)
             XCTAssertEqual(size, expectedString.utf8.count, line: line)
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
             XCTAssertEqual("\(test)", expectedString, line: line)
@@ -84,21 +84,21 @@ extension UIDRangeTests {
 extension UIDRangeTests {
     func testRangeOperator_prefix() {
         let expected = "5:*"
-        let size = self.testBuffer.writeUIDRange(UIDRange(5 ... (.max)))
+        let size = self.testBuffer.writeMessageIdentifierRange(MessageIdentifierRange<UID>(5 ... (.max)))
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }
 
     func testRangeOperator_postfix() {
         let expected = "5:*"
-        let size = self.testBuffer.writeUIDRange(UIDRange(5 ... (.max)))
+        let size = self.testBuffer.writeMessageIdentifierRange(MessageIdentifierRange<UID>(5 ... (.max)))
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }
 
     func testRangeOperator_postfix_complete_right_larger() {
         let expected = "44:55"
-        let size = self.testBuffer.writeUIDRange(UIDRange(44 ... 55))
+        let size = self.testBuffer.writeMessageIdentifierRange(MessageIdentifierRange<UID>(44 ... 55))
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }

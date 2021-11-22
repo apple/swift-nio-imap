@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-protocol MessageIdentifier: Hashable, Codable, CustomDebugStringConvertible, ExpressibleByIntegerLiteral {
+public protocol MessageIdentifier: Hashable, Codable, CustomDebugStringConvertible, ExpressibleByIntegerLiteral, Comparable {
     var rawValue: UInt32 { get set }
     
     init(rawValue: UInt32)
@@ -38,6 +38,11 @@ extension MessageIdentifier {
         self.init(rawValue: rawValue)
     }
     
+    init(_ wrapper: MessageIdentificationShiftWrapper) {
+        precondition(wrapper.rawValue < UInt32.max)
+        self.init(exactly: wrapper.rawValue + 1)!
+    }
+    
     /// Creates a human-readable `String` representation of the `UID`.
     /// `*` if `self = UInt32.max`, otherwise `self.rawValue` as a `String`.
     public var debugDescription: String {
@@ -56,6 +61,14 @@ extension MessageIdentifier {
     }
 }
 
+extension MessageIdentifier {
+    
+    public static func <(lhs: Self, rhs: Self) -> Bool {
+        lhs.rawValue < rhs.rawValue
+    }
+    
+}
+
 /// Unique Message Identifier
 ///
 /// Not that valid UIDs are 1 ... 4294967295 (UInt32.max).
@@ -63,7 +76,7 @@ extension MessageIdentifier {
 ///
 /// See RFC 3501 section 2.3.1.1.
 public struct UID: MessageIdentifier {
-    var rawValue: UInt32
+    public var rawValue: UInt32
     
     public init(rawValue: UInt32) {
         self.rawValue = rawValue
@@ -123,6 +136,14 @@ extension EncodeBuffer {
             return self.writeString("\(num.rawValue)")
         }
     }
+    
+    @discardableResult mutating func writeMessageIdentifier<T: MessageIdentifier>(_ id: T) -> Int {
+        if id == .max {
+            return self.writeString("*")
+        } else {
+            return self.writeString("\(id.rawValue)")
+        }
+    }
 }
 
 // MARK: - Swift Ranges
@@ -131,22 +152,22 @@ extension UID {
     /// Creates a new `UIDRange` from `.min` to the given upper bound.
     /// - parameter value: The upper bound.
     /// - returns: A new `UIDRange`.
-    public static prefix func ... (value: Self) -> UIDRange {
-        UIDRange((.min) ... value)
+    public static prefix func ... (value: Self) -> MessageIdentifierRange<UID> {
+        MessageIdentifierRange((.min) ... value)
     }
 
     /// Creates a new `UIDRange` from the given lower bound to `.max`
     /// - parameter value: The lower bound.
     /// - returns: A new `UIDRange`.
-    public static postfix func ... (value: Self) -> UIDRange {
-        UIDRange(value ... (.max))
+    public static postfix func ... (value: Self) -> MessageIdentifierRange<UID> {
+        MessageIdentifierRange(value ... (.max))
     }
 
     /// Creates a `UIDRange` from two `UIDs`.
     /// - parameter lower: The lower bound of the range.
     /// - parameter upper: The upper bound of the range.
     /// - returns: A new `UIDRange` using the provided bounds.
-    public static func ... (lower: Self, upper: Self) -> UIDRange {
-        UIDRange(lower ... upper)
+    public static func ... (lower: Self, upper: Self) -> MessageIdentifierRange<UID> {
+        MessageIdentifierRange(lower ... upper)
     }
 }

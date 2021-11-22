@@ -15,32 +15,33 @@
 import struct NIO.ByteBuffer
 
 /// Represents a range of `UID`s using lower and upper bounds.
-public struct UIDRange: Hashable {
+public struct MessageIdentifierRange<T: MessageIdentifier>: Hashable {
     /// The range expressed as a native Swift range.
-    public var range: ClosedRange<UID>
+    public var range: ClosedRange<T>
 
     /// Creates a new `UIDRange`.
     /// - parameter range: A closed range with `UID`s as the upper and lower bound.
-    public init(_ range: ClosedRange<UID>) {
+    public init(_ range: ClosedRange<T>) {
         self.range = range
     }
 
     /// Creates a new `UIDRange` from a partial range, using `.min` as the lower bound.
     /// - parameter range: A partial with a `UID` as the upper bound.
-    public init(_ range: PartialRangeThrough<UID>) {
-        self.init(UID.min ... range.upperBound)
+    public init(_ range: PartialRangeThrough<T>) {
+        self.init(T.min ... range.upperBound)
     }
 
     /// Creates a new `UIDRange` from a partial range, using `.max` as the upper bound.
     /// - parameter rawValue: A partial with a `UID` as the lower bound.
-    public init(_ range: PartialRangeFrom<UID>) {
-        self.init(range.lowerBound ... UID.max)
+    public init(_ range: PartialRangeFrom<T>) {
+        self.init(range.lowerBound ... T.max)
     }
+    
 }
 
 // MARK: - CustomDebugStringConvertible
 
-extension UIDRange: CustomDebugStringConvertible {
+extension MessageIdentifierRange: CustomDebugStringConvertible {
     /// Creates a human-readable representation of the range.
     public var debugDescription: String {
         if self.range.lowerBound < self.range.upperBound {
@@ -53,33 +54,35 @@ extension UIDRange: CustomDebugStringConvertible {
 
 // MARK: - Integer Literal
 
-extension UIDRange: ExpressibleByIntegerLiteral {
+extension MessageIdentifierRange: ExpressibleByIntegerLiteral {
     /// Creates a range from a single number - essentially a range containing one value.
     /// - parameter value: The raw number to use as both the upper and lower bounds.
     public init(integerLiteral value: UInt32) {
-        self.init(UID(integerLiteral: value))
+        self.init(T(integerLiteral: value))
     }
 
     /// Creates a range from a single number - essentially a range containing one value.
     /// - parameter value: The raw number to use as both the upper and lower bounds.
-    public init(_ value: UID) {
+    public init(_ value: T) {
         self.init(value ... value)
     }
 }
 
-extension UIDRange {
+extension MessageIdentifierRange {
     /// Creates a range that covers every valid UID.
-    public static let all = UIDRange((.min) ... (.max))
+    public static var all: Self {
+        Self((.min) ... (.max))
+    }
 }
 
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeUIDRange(_ range: UIDRange) -> Int {
-        self.writeUID(range.range.lowerBound) +
+    @discardableResult mutating func writeMessageIdentifierRange<T>(_ range: MessageIdentifierRange<T>) -> Int {
+        self.writeMessageIdentifier(range.range.lowerBound) +
             self.write(if: range.range.lowerBound < range.range.upperBound) {
                 self.writeString(":") +
-                    self.writeUID(range.range.upperBound)
+                    self.writeMessageIdentifier(range.range.upperBound)
             }
     }
 }
