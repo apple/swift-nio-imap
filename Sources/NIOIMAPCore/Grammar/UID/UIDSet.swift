@@ -20,7 +20,7 @@ import StandardLibraryPreview
 /// UIDs are _not_ sorted.
 public struct UIDSet: Hashable {
     /// A set that contains a single range, that in turn contains all messages.
-    public static let all = UIDSet(UIDRange.all)
+    public static let all = UIDSet(MessageIdentifierRange<UID>.all)
     /// A set that contains no UIDs.
     public static let empty = UIDSet()
 
@@ -32,7 +32,7 @@ public struct UIDSet: Hashable {
     }
 
     /// Creates a new `UIDSet` containing the UIDs in the given ranges.
-    public init<S: Sequence>(_ ranges: S) where S.Element == UIDRange {
+    public init<S: Sequence>(_ ranges: S) where S.Element == MessageIdentifierRange<UID> {
         self.init()
         ranges.forEach {
             self._ranges.insert(contentsOf: Range($0))
@@ -101,7 +101,7 @@ extension UID {
 }
 
 extension Range where Element == MessageIdentificationShiftWrapper {
-    fileprivate init(_ r: UIDRange) {
+    fileprivate init(_ r: MessageIdentifierRange<UID>) {
         self = MessageIdentificationShiftWrapper(r.range.lowerBound) ..< MessageIdentificationShiftWrapper(r.range.upperBound).advanced(by: 1)
     }
 
@@ -110,9 +110,9 @@ extension Range where Element == MessageIdentificationShiftWrapper {
     }
 }
 
-extension UIDRange {
-    fileprivate init(_ r: Range<MessageIdentificationShiftWrapper>) {
-        self.init(UID(r.lowerBound) ... UID(r.upperBound.advanced(by: -1)))
+extension MessageIdentifierRange {
+    init(_ r: Range<MessageIdentificationShiftWrapper>) {
+        self.init(T(r.lowerBound) ... T(r.upperBound.advanced(by: -1)))
     }
 }
 
@@ -122,11 +122,11 @@ extension UIDSet {
     public struct RangeView: Sequence {
         fileprivate var underlying: RangeSet<MessageIdentificationShiftWrapper>.Ranges
 
-        public func makeIterator() -> AnyIterator<UIDRange> {
+        public func makeIterator() -> AnyIterator<MessageIdentifierRange<UID>> {
             var u = underlying.makeIterator()
             return AnyIterator {
                 guard let r = u.next() else { return nil }
-                return UIDRange(r)
+                return MessageIdentifierRange<UID>(r)
             }
         }
     }
@@ -142,19 +142,19 @@ extension UIDSet {
     /// Creates a `UIDSet` from a closed range.
     /// - parameter range: The closed range to use.
     public init(_ range: ClosedRange<UID>) {
-        self.init(UIDRange(range))
+        self.init(MessageIdentifierRange<UID>(range))
     }
 
     /// Creates a `UIDSet` from a partial range.
     /// - parameter range: The partial range to use.
     public init(_ range: PartialRangeThrough<UID>) {
-        self.init(UIDRange(range))
+        self.init(MessageIdentifierRange<UID>(range))
     }
 
     /// Creates a `UIDSet` from a partial range.
     /// - parameter range: The partial range to use.
     public init(_ range: PartialRangeFrom<UID>) {
-        self.init(UIDRange(range))
+        self.init(MessageIdentifierRange<UID>(range))
     }
 
     /// Creates a `UIDSet` from a range.
@@ -169,7 +169,7 @@ extension UIDSet {
 
     /// Creates a set from a single range.
     /// - parameter range: The `UIDRange` to construct a set from.
-    public init(_ range: UIDRange) {
+    public init(_ range: MessageIdentifierRange<UID>) {
         let a: Range<MessageIdentificationShiftWrapper> = Range(range)
         self._ranges = RangeSet(a)
     }
@@ -188,7 +188,7 @@ extension UIDSet: CustomDebugStringConvertible {
     public var debugDescription: String {
         _ranges
             .ranges
-            .map { "\(UIDRange($0))" }
+            .map { "\(MessageIdentifierRange<UID>($0))" }
             .joined(separator: ",")
     }
 }
@@ -205,7 +205,7 @@ extension UIDSetNonEmpty: CustomDebugStringConvertible {
 extension UIDSet: ExpressibleByArrayLiteral {
     /// Creates a new UIDSet from a literal array of ranges.
     /// - parameter arrayLiteral: The elements to use, assumed to be non-empty.
-    public init(arrayLiteral elements: UIDRange...) {
+    public init(arrayLiteral elements: MessageIdentifierRange<UID>...) {
         self.init(elements)
     }
 }
@@ -213,7 +213,7 @@ extension UIDSet: ExpressibleByArrayLiteral {
 extension UIDSetNonEmpty: ExpressibleByArrayLiteral {
     /// Creates a new UIDSet from a literal array of ranges.
     /// - parameter arrayLiteral: The elements to use, assumed to be non-empty.
-    public init(arrayLiteral elements: UIDRange...) {
+    public init(arrayLiteral elements: MessageIdentifierRange<UID>...) {
         precondition(elements.count > 0, "At least one element is required.")
         self.set = UIDSet(elements)
     }
@@ -402,8 +402,8 @@ extension UIDSet: SetAlgebra {
 extension UIDSet: IMAPEncodable {
     @_spi(NIOIMAPInternal) public func writeIntoBuffer(_ buffer: inout EncodeBuffer) -> Int {
         buffer.writeArray(self._ranges.ranges, separator: ",", parenthesis: false) { (element, buffer) in
-            let r = UIDRange(element)
-            return buffer.writeUIDRange(r)
+            let r = MessageIdentifierRange<UID>(element)
+            return buffer.writeMessageIdentifierRange(r)
         }
     }
 }

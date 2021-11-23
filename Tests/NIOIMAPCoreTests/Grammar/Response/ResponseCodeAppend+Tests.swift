@@ -23,7 +23,7 @@ class ResponseCodeAppend_Tests: EncodeTestClass {}
 extension ResponseCodeAppend_Tests {
     func testEncode() {
         let inputs: [(ResponseCodeAppend, String, UInt)] = [
-            (.init(uidValidity: 1, uids: [UIDRange(.max)]), "APPENDUID 1 *", #line),
+            (.init(uidValidity: 1, uids: [MessageIdentifierRange<UID>(.max)]), "APPENDUID 1 *", #line),
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeResponseCodeAppend($0) })
     }

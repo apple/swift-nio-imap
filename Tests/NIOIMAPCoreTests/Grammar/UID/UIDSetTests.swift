@@ -22,10 +22,10 @@ class UIDSetTests: EncodeTestClass {}
 
 extension UIDSetTests {
     func testCustomDebugStringConvertible() {
-        XCTAssertEqual("\([1 ... 3, UIDRange(6), UIDRange(88)] as UIDSet)", "1:3,6,88")
+        XCTAssertEqual("\([1 ... 3, MessageIdentifierRange<UID>(6), MessageIdentifierRange<UID>(88)] as UIDSet)", "1:3,6,88")
         XCTAssertEqual("\([1 ... (.max)] as UIDSet)", "1:*")
-        XCTAssertEqual("\([UIDRange(37)] as UIDSet)", "37")
-        XCTAssertEqual("\([UIDRange(.max)] as UIDSet)", "*")
+        XCTAssertEqual("\([MessageIdentifierRange<UID>(37)] as UIDSet)", "37")
+        XCTAssertEqual("\([MessageIdentifierRange<UID>(.max)] as UIDSet)", "*")
     }
 }
 
@@ -63,11 +63,11 @@ extension UIDSetTests {
     func testIMAPEncoded_full() {
         let expected = "1,22:30,47,55,66:*"
         let size = self.testBuffer.writeUIDSet(UIDSet([
-            UIDRange(1),
-            UIDRange(22 ... 30),
-            UIDRange(47),
-            UIDRange(55),
-            UIDRange(66...),
+            MessageIdentifierRange<UID>(1),
+            MessageIdentifierRange<UID>(22 ... 30),
+            MessageIdentifierRange<UID>(47),
+            MessageIdentifierRange<UID>(55),
+            MessageIdentifierRange<UID>(66...),
         ]))
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
@@ -202,14 +202,14 @@ extension UIDSetTests {
     }
 
     func testCollection_A() {
-        let sut = UIDSet([UIDRange(55 ... 57), UIDRange(80)])
+        let sut = UIDSet([MessageIdentifierRange<UID>(55 ... 57), MessageIdentifierRange<UID>(80)])
         XCTAssertEqual(sut.map { "\($0)" }, ["55", "56", "57", "80"])
         XCTAssertEqual(sut.count, 4)
         XCTAssertFalse(sut.isEmpty)
     }
 
     func testCollection_B() {
-        let sut = UIDSet([UIDRange(8), UIDRange(55 ... 57)])
+        let sut = UIDSet([MessageIdentifierRange<UID>(8), MessageIdentifierRange<UID>(55 ... 57)])
         XCTAssertEqual(sut.map { "\($0)" }, ["8", "55", "56", "57"])
         XCTAssertEqual(sut.count, 4)
         XCTAssertFalse(sut.isEmpty)
@@ -295,16 +295,16 @@ extension UIDSetTests {
 
     func testIndexes_multipleShortRanges() {
         let sut = UIDSet([
-            UIDRange(55 ... 57),
-            UIDRange(155 ... 157),
-            UIDRange(255 ... 257),
-            UIDRange(355 ... 357),
-            UIDRange(455 ... 457),
-            UIDRange(555 ... 557),
-            UIDRange(655 ... 657),
-            UIDRange(755 ... 757),
-            UIDRange(855 ... 857),
-            UIDRange(955 ... 957),
+            MessageIdentifierRange<UID>(55 ... 57),
+            MessageIdentifierRange<UID>(155 ... 157),
+            MessageIdentifierRange<UID>(255 ... 257),
+            MessageIdentifierRange<UID>(355 ... 357),
+            MessageIdentifierRange<UID>(455 ... 457),
+            MessageIdentifierRange<UID>(555 ... 557),
+            MessageIdentifierRange<UID>(655 ... 657),
+            MessageIdentifierRange<UID>(755 ... 757),
+            MessageIdentifierRange<UID>(855 ... 857),
+            MessageIdentifierRange<UID>(955 ... 957),
         ])
         XCTAssertEqual(sut.count, 30, "30 values")
 
@@ -358,11 +358,11 @@ extension UIDSetTests {
     func testRangeView() {
         XCTAssertEqual(Array(UIDSet().ranges), [])
         XCTAssertEqual(Array(UIDSet([1_234]).ranges), [
-            UIDRange(1_234 ... 1_234),
+            MessageIdentifierRange<UID>(1_234 ... 1_234),
         ])
         XCTAssertEqual(Array(UIDSet([1, 4]).ranges), [
-            UIDRange(1 ... 1),
-            UIDRange(4 ... 4),
+            MessageIdentifierRange<UID>(1 ... 1),
+            MessageIdentifierRange<UID>(4 ... 4),
         ])
         XCTAssertEqual(Array(UIDSet([
             17 ... 32,
@@ -370,10 +370,10 @@ extension UIDSetTests {
             2_001 ... 2_001,
             20_800 ... 21_044,
         ]).ranges), [
-            UIDRange(17 ... 32),
-            UIDRange(400 ... 1_234),
-            UIDRange(2_001 ... 2_001),
-            UIDRange(20_800 ... 21_044),
+            MessageIdentifierRange<UID>(17 ... 32),
+            MessageIdentifierRange<UID>(400 ... 1_234),
+            MessageIdentifierRange<UID>(2_001 ... 2_001),
+            MessageIdentifierRange<UID>(20_800 ... 21_044),
         ])
     }
 }
