@@ -18,10 +18,10 @@ import StandardLibraryPreview
 /// A set contains an array of `UIDRange` to represent a (potentially large) collection of messages.
 ///
 /// UIDs are _not_ sorted.
-public struct MessageIdentifierSet<T: MessageIdentifier>: Hashable {
+public struct MessageIdentifierSet<IdentifierType: MessageIdentifier>: Hashable {
     /// A set that contains a single range, that in turn contains all messages.
     public static var all: Self {
-        MessageIdentifierSet(MessageIdentifierRange<T>.all)
+        MessageIdentifierSet(MessageIdentifierRange<IdentifierType>.all)
     }
 
     /// A set that contains no UIDs.
@@ -37,7 +37,7 @@ public struct MessageIdentifierSet<T: MessageIdentifier>: Hashable {
     }
 
     /// Creates a new `UIDSet` containing the UIDs in the given ranges.
-    public init<S: Sequence>(_ ranges: S) where S.Element == MessageIdentifierRange<T> {
+    public init<S: Sequence>(_ ranges: S) where S.Element == MessageIdentifierRange<IdentifierType> {
         self.init()
         ranges.forEach {
             self._ranges.insert(contentsOf: Range($0))
@@ -48,26 +48,26 @@ public struct MessageIdentifierSet<T: MessageIdentifier>: Hashable {
         self._ranges = RangeSet()
     }
 
-    public init(_ id: T) {
+    public init(_ id: IdentifierType) {
         self._ranges = RangeSet(MessageIdentificationShiftWrapper(id) ..< (MessageIdentificationShiftWrapper(id).advanced(by: 1)))
     }
 }
 
 /// A wrapper around a `UIDSet` that enforces at least one element.
-public struct MessageIdentifierSetNonEmpty<T: MessageIdentifier>: Hashable {
+public struct MessageIdentifierSetNonEmpty<IdentifierType: MessageIdentifier>: Hashable {
     /// A set that contains a single range, that in turn contains all messages.
     public static var all: Self {
         MessageIdentifierSetNonEmpty(set: .all)!
     }
 
     /// The underlying `UIDSet`
-    public private(set) var set: MessageIdentifierSet<T>
+    public private(set) var set: MessageIdentifierSet<IdentifierType>
 
     /// Creates a new `UIDSetNonEmpty` from a `UIDSet`, after first
     /// validating that the set is not emtpy.
     /// - parameter set: The underlying `UIDSet` to use.
     /// - returns: `nil` if the given `UIDSet` is empty.
-    public init?(set: MessageIdentifierSet<T>) {
+    public init?(set: MessageIdentifierSet<IdentifierType>) {
         guard set.count > 0 else {
             return nil
         }
@@ -87,7 +87,7 @@ struct MessageIdentificationShiftWrapper: Hashable {
         self.rawValue = rawValue
     }
 
-    init<T: MessageIdentifier>(_ id: T) {
+    init<IdentifierType: MessageIdentifier>(_ id: IdentifierType) {
         // Since UID.min = 1, we can always do this:
         self.rawValue = id.rawValue - 1
     }
@@ -104,11 +104,11 @@ extension MessageIdentificationShiftWrapper: Strideable {
 }
 
 extension Range where Element == MessageIdentificationShiftWrapper {
-    fileprivate init<T: MessageIdentifier>(_ r: MessageIdentifierRange<T>) {
+    fileprivate init<IdentifierType: MessageIdentifier>(_ r: MessageIdentifierRange<IdentifierType>) {
         self = MessageIdentificationShiftWrapper(r.range.lowerBound) ..< MessageIdentificationShiftWrapper(r.range.upperBound).advanced(by: 1)
     }
 
-    fileprivate init<T: MessageIdentifier>(_ id: T) {
+    fileprivate init<IdentifierType: MessageIdentifier>(_ id: IdentifierType) {
         self = MessageIdentificationShiftWrapper(id) ..< MessageIdentificationShiftWrapper(id).advanced(by: 1)
     }
 }
@@ -125,11 +125,11 @@ extension MessageIdentifierSet {
     public struct RangeView: Sequence {
         fileprivate var underlying: RangeSet<MessageIdentificationShiftWrapper>.Ranges
 
-        public func makeIterator() -> AnyIterator<MessageIdentifierRange<T>> {
+        public func makeIterator() -> AnyIterator<MessageIdentifierRange<IdentifierType>> {
             var u = underlying.makeIterator()
             return AnyIterator {
                 guard let r = u.next() else { return nil }
-                return MessageIdentifierRange<T>(r)
+                return MessageIdentifierRange<IdentifierType>(r)
             }
         }
     }
@@ -144,25 +144,25 @@ extension MessageIdentifierSet {
 extension MessageIdentifierSet {
     /// Creates a `UIDSet` from a closed range.
     /// - parameter range: The closed range to use.
-    public init(_ range: ClosedRange<T>) {
-        self.init(MessageIdentifierRange<T>(range))
+    public init(_ range: ClosedRange<IdentifierType>) {
+        self.init(MessageIdentifierRange<IdentifierType>(range))
     }
 
     /// Creates a `UIDSet` from a partial range.
     /// - parameter range: The partial range to use.
-    public init(_ range: PartialRangeThrough<T>) {
-        self.init(MessageIdentifierRange<T>(range))
+    public init(_ range: PartialRangeThrough<IdentifierType>) {
+        self.init(MessageIdentifierRange<IdentifierType>(range))
     }
 
     /// Creates a `UIDSet` from a partial range.
     /// - parameter range: The partial range to use.
-    public init(_ range: PartialRangeFrom<T>) {
-        self.init(MessageIdentifierRange<T>(range))
+    public init(_ range: PartialRangeFrom<IdentifierType>) {
+        self.init(MessageIdentifierRange<IdentifierType>(range))
     }
 
     /// Creates a `UIDSet` from a range.
     /// - parameter range: The range to use.
-    public init(_ range: Range<T>) {
+    public init(_ range: Range<IdentifierType>) {
         if range.isEmpty {
             self.init()
         } else {
@@ -172,7 +172,7 @@ extension MessageIdentifierSet {
 
     /// Creates a set from a single range.
     /// - parameter range: The `UIDRange` to construct a set from.
-    public init(_ range: MessageIdentifierRange<T>) {
+    public init(_ range: MessageIdentifierRange<IdentifierType>) {
         let a: Range<MessageIdentificationShiftWrapper> = Range(range)
         self._ranges = RangeSet(a)
     }
@@ -185,7 +185,7 @@ extension MessageIdentifierSet: CustomDebugStringConvertible {
     public var debugDescription: String {
         _ranges
             .ranges
-            .map { "\(MessageIdentifierRange<T>($0))" }
+            .map { "\(MessageIdentifierRange<IdentifierType>($0))" }
             .joined(separator: ",")
     }
 }
@@ -202,7 +202,7 @@ extension MessageIdentifierSetNonEmpty: CustomDebugStringConvertible {
 extension MessageIdentifierSet: ExpressibleByArrayLiteral {
     /// Creates a new UIDSet from a literal array of ranges.
     /// - parameter arrayLiteral: The elements to use, assumed to be non-empty.
-    public init(arrayLiteral elements: MessageIdentifierRange<T>...) {
+    public init(arrayLiteral elements: MessageIdentifierRange<IdentifierType>...) {
         self.init(elements)
     }
 }
@@ -210,7 +210,7 @@ extension MessageIdentifierSet: ExpressibleByArrayLiteral {
 extension MessageIdentifierSetNonEmpty: ExpressibleByArrayLiteral {
     /// Creates a new UIDSet from a literal array of ranges.
     /// - parameter arrayLiteral: The elements to use, assumed to be non-empty.
-    public init(arrayLiteral elements: MessageIdentifierRange<T>...) {
+    public init(arrayLiteral elements: MessageIdentifierRange<IdentifierType>...) {
         precondition(elements.count > 0, "At least one element is required.")
         self.set = MessageIdentifierSet(elements)
     }
@@ -219,7 +219,7 @@ extension MessageIdentifierSetNonEmpty: ExpressibleByArrayLiteral {
 extension MessageIdentifierSet: BidirectionalCollection {
     public struct Index {
         fileprivate var rangeIndex: RangeSet<MessageIdentificationShiftWrapper>.Ranges.Index
-        fileprivate var indexInRange: T.Stride
+        fileprivate var indexInRange: IdentifierType.Stride
     }
 
     public var startIndex: Index { Index(rangeIndex: _ranges.ranges.startIndex, indexInRange: 0) }
@@ -253,7 +253,7 @@ extension MessageIdentifierSet: BidirectionalCollection {
                 }
                 // We need to find the previous range:
                 result.rangeIndex = _ranges.ranges.index(before: result.rangeIndex)
-                let indexCount = T.Stride(_ranges.ranges[result.rangeIndex].count)
+                let indexCount = IdentifierType.Stride(_ranges.ranges[result.rangeIndex].count)
                 result.indexInRange = result.indexInRange.advanced(by: Int(indexCount))
             }
             return result
@@ -265,13 +265,13 @@ extension MessageIdentifierSet: BidirectionalCollection {
                     result.indexInRange = result.indexInRange.advanced(by: remainingDistance)
                     break
                 }
-                let indexesInRangeCount = T.Stride(_ranges.ranges[result.rangeIndex].count)
+                let indexesInRangeCount = IdentifierType.Stride(_ranges.ranges[result.rangeIndex].count)
                 if result.indexInRange.advanced(by: remainingDistance) < indexesInRangeCount {
                     result.indexInRange = result.indexInRange.advanced(by: remainingDistance)
                     break
                 }
                 let nextRange = _ranges.ranges.index(after: result.rangeIndex)
-                let step = result.indexInRange.distance(to: T.Stride(_ranges.ranges[result.rangeIndex].count))
+                let step = result.indexInRange.distance(to: IdentifierType.Stride(_ranges.ranges[result.rangeIndex].count))
                 result = Index(rangeIndex: nextRange, indexInRange: 0)
                 remainingDistance -= step
             }
@@ -296,7 +296,7 @@ extension MessageIdentifierSet: BidirectionalCollection {
         }
     }
 
-    public subscript(position: Index) -> T {
+    public subscript(position: Index) -> IdentifierType {
         T(_ranges.ranges[position.rangeIndex].lowerBound).advanced(by: position.indexInRange)
     }
 
@@ -339,9 +339,9 @@ extension MessageIdentifierSet.Index: Comparable {
 // MARK: - Set Algebra
 
 extension MessageIdentifierSet: SetAlgebra {
-    public typealias Element = T
+    public typealias Element = IdentifierType
 
-    public func contains(_ member: T) -> Bool {
+    public func contains(_ member: IdentifierType) -> Bool {
         _ranges.contains(MessageIdentificationShiftWrapper(member))
     }
 
@@ -358,7 +358,7 @@ extension MessageIdentifierSet: SetAlgebra {
     }
 
     @discardableResult
-    public mutating func insert(_ newMember: T) -> (inserted: Bool, memberAfterInsert: T) {
+    public mutating func insert(_ newMember: IdentifierType) -> (inserted: Bool, memberAfterInsert: IdentifierType) {
         guard !contains(newMember) else { return (false, newMember) }
         let r: Range<MessageIdentificationShiftWrapper> = Range(newMember)
         _ranges.insert(contentsOf: r)
@@ -366,7 +366,7 @@ extension MessageIdentifierSet: SetAlgebra {
     }
 
     @discardableResult
-    public mutating func remove(_ member: T) -> T? {
+    public mutating func remove(_ member: IdentifierType) -> IdentifierType? {
         guard contains(member) else { return nil }
         let r: Range<MessageIdentificationShiftWrapper> = Range(member)
         _ranges.remove(contentsOf: r)
@@ -374,7 +374,7 @@ extension MessageIdentifierSet: SetAlgebra {
     }
 
     @discardableResult
-    public mutating func update(with newMember: T) -> T? {
+    public mutating func update(with newMember: IdentifierType) -> IdentifierType? {
         guard !contains(newMember) else { return newMember }
         let r: Range<MessageIdentificationShiftWrapper> = Range(newMember)
         _ranges.insert(contentsOf: r)
@@ -399,7 +399,7 @@ extension MessageIdentifierSet: SetAlgebra {
 extension MessageIdentifierSet: IMAPEncodable {
     @_spi(NIOIMAPInternal) public func writeIntoBuffer(_ buffer: inout EncodeBuffer) -> Int {
         buffer.writeArray(self._ranges.ranges, separator: ",", parenthesis: false) { (element, buffer) in
-            let r = MessageIdentifierRange<T>(element)
+            let r = MessageIdentifierRange<IdentifierType>(element)
             return buffer.writeMessageIdentifierRange(r)
         }
     }
@@ -412,11 +412,11 @@ extension MessageIdentifierSetNonEmpty: IMAPEncodable {
 }
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeUIDSet<T: MessageIdentifier>(_ set: MessageIdentifierSet<T>) -> Int {
+    @discardableResult mutating func writeUIDSet<IdentifierType: MessageIdentifier>(_ set: MessageIdentifierSet<IdentifierType>) -> Int {
         set.writeIntoBuffer(&self)
     }
 
-    @discardableResult mutating func writeUIDSet<T: MessageIdentifier>(_ set: MessageIdentifierSetNonEmpty<T>) -> Int {
+    @discardableResult mutating func writeUIDSet<IdentifierType: MessageIdentifier>(_ set: MessageIdentifierSetNonEmpty<IdentifierType>) -> Int {
         set.writeIntoBuffer(&self)
     }
 }

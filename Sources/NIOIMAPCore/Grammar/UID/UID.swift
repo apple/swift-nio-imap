@@ -75,7 +75,7 @@ public struct UID: MessageIdentifier {
 }
 
 extension BinaryInteger {
-    public init<T: MessageIdentifier>(_ id: T) {
+    public init<IdentifierType: MessageIdentifier>(_ id: IdentifierType) {
         self = Self(id.rawValue)
     }
 }
@@ -128,7 +128,7 @@ extension EncodeBuffer {
         }
     }
 
-    @discardableResult mutating func writeMessageIdentifier<T: MessageIdentifier>(_ id: T) -> Int {
+    @discardableResult mutating func writeMessageIdentifier<IdentifierType: MessageIdentifier>(_ id: IdentifierType) -> Int {
         if id == .max {
             return self.writeString("*")
         } else {

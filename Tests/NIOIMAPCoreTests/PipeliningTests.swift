@@ -121,11 +121,11 @@ extension SearchKey {
     ]
 }
 
-extension MessageIdentifierSetNonEmpty where T == UID {
+extension MessageIdentifierSetNonEmpty where IdentifierType == UID {
     fileprivate static var arbitrarySets: [Self] {
         [
             [100 ... 200],
-            [T.min ... T.min],
+            [IdentifierType.min ... IdentifierType.min],
             [43_195 ... 43_195],
             .all,
         ]
