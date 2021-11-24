@@ -115,7 +115,7 @@ extension Range where Element == MessageIdentificationShiftWrapper {
 
 extension MessageIdentifierRange {
     init(_ r: Range<MessageIdentificationShiftWrapper>) {
-        self.init(T(r.lowerBound) ... T(r.upperBound.advanced(by: -1)))
+        self.init(IdentifierType(r.lowerBound) ... IdentifierType(r.upperBound.advanced(by: -1)))
     }
 }
 
@@ -297,7 +297,7 @@ extension MessageIdentifierSet: BidirectionalCollection {
     }
 
     public subscript(position: Index) -> IdentifierType {
-        T(_ranges.ranges[position.rangeIndex].lowerBound).advanced(by: position.indexInRange)
+        IdentifierType(_ranges.ranges[position.rangeIndex].lowerBound).advanced(by: position.indexInRange)
     }
 
     public var isEmpty: Bool {

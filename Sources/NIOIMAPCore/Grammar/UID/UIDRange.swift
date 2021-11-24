@@ -57,7 +57,7 @@ extension MessageIdentifierRange: ExpressibleByIntegerLiteral {
     /// Creates a range from a single number - essentially a range containing one value.
     /// - parameter value: The raw number to use as both the upper and lower bounds.
     public init(integerLiteral value: UInt32) {
-        self.init(T(integerLiteral: value))
+        self.init(IdentifierType(integerLiteral: value))
     }
 
     /// Creates a range from a single number - essentially a range containing one value.
