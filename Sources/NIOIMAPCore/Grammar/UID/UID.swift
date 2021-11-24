@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-public protocol MessageIdentifier: Hashable, Codable, CustomDebugStringConvertible, ExpressibleByIntegerLiteral, Comparable {
+public protocol MessageIdentifier: Hashable, Codable, CustomDebugStringConvertible, ExpressibleByIntegerLiteral, Strideable where Stride == Int64 {
     var rawValue: UInt32 { get set }
 
     init(rawValue: UInt32)
@@ -60,12 +60,6 @@ extension MessageIdentifier {
     }
 }
 
-extension MessageIdentifier {
-    public static func < (lhs: Self, rhs: Self) -> Bool {
-        lhs.rawValue < rhs.rawValue
-    }
-}
-
 /// Unique Message Identifier
 ///
 /// Not that valid UIDs are 1 ... 4294967295 (UInt32.max).
@@ -81,19 +75,19 @@ public struct UID: MessageIdentifier {
 }
 
 extension BinaryInteger {
-    public init(_ uid: UID) {
-        self = Self(uid.rawValue)
+    public init<IdentifierType: MessageIdentifier>(_ id: IdentifierType) {
+        self = Self(id.rawValue)
     }
 }
 
 // MARK: - Strideable
 
-extension UID: Strideable {
+extension MessageIdentifier {
     /// Evaluates if one `UID` (`lhs`) is strictly less than another (`rhs`).
     /// - parameter lhs: The first `UID` to evaluate.
     /// - parameter rhs: The second `UID` to evaluate.
     /// - returns: `true` if `lhs` strictly less than`rhs`, otherwise `false`.
-    public static func < (lhs: UID, rhs: UID) -> Bool {
+    public static func < (lhs: Self, rhs: Self) -> Bool {
         lhs.rawValue < rhs.rawValue
     }
 
@@ -101,14 +95,14 @@ extension UID: Strideable {
     /// - parameter lhs: The first `UID` to evaluate.
     /// - parameter rhs: The second `UID` to evaluate.
     /// - returns: `true` if `lhs` is less than or equal to `rhs`, otherwise `false`.
-    public static func <= (lhs: UID, rhs: UID) -> Bool {
+    public static func <= (lhs: Self, rhs: Self) -> Bool {
         lhs.rawValue <= rhs.rawValue
     }
 
     /// Gets the distance to the given `UID`.
     /// - parameter other: The `UID` to get the distance to.
     /// - returns: The distance.
-    public func distance(to other: UID) -> Int64 {
+    public func distance(to other: Self) -> Int64 {
         Int64(other.rawValue) - Int64(self.rawValue)
     }
 
@@ -117,9 +111,9 @@ extension UID: Strideable {
     /// values equal to `UInt32.max` on all platforms (including 32 bit platforms where `Int.max < UInt32.max`.
     /// - parameter n: How many to advance by.
     /// - returns: A new `UID`.
-    public func advanced(by n: Int64) -> UID {
+    public func advanced(by n: Int64) -> Self {
         precondition(n <= UInt32.max, "`n` must be less than UInt32.max")
-        return UID(exactly: Int64(self.rawValue) + n)!
+        return Self(exactly: Int64(self.rawValue) + n)!
     }
 }
 
@@ -134,7 +128,7 @@ extension EncodeBuffer {
         }
     }
 
-    @discardableResult mutating func writeMessageIdentifier<T: MessageIdentifier>(_ id: T) -> Int {
+    @discardableResult mutating func writeMessageIdentifier<IdentifierType: MessageIdentifier>(_ id: IdentifierType) -> Int {
         if id == .max {
             return self.writeString("*")
         } else {

@@ -15,26 +15,26 @@
 import struct NIO.ByteBuffer
 
 /// Represents a range of `UID`s using lower and upper bounds.
-public struct MessageIdentifierRange<T: MessageIdentifier>: Hashable {
+public struct MessageIdentifierRange<IdentifierType: MessageIdentifier>: Hashable {
     /// The range expressed as a native Swift range.
-    public var range: ClosedRange<T>
+    public var range: ClosedRange<IdentifierType>
 
     /// Creates a new `UIDRange`.
     /// - parameter range: A closed range with `UID`s as the upper and lower bound.
-    public init(_ range: ClosedRange<T>) {
+    public init(_ range: ClosedRange<IdentifierType>) {
         self.range = range
     }
 
     /// Creates a new `UIDRange` from a partial range, using `.min` as the lower bound.
     /// - parameter range: A partial with a `UID` as the upper bound.
-    public init(_ range: PartialRangeThrough<T>) {
-        self.init(T.min ... range.upperBound)
+    public init(_ range: PartialRangeThrough<IdentifierType>) {
+        self.init(IdentifierType.min ... range.upperBound)
     }
 
     /// Creates a new `UIDRange` from a partial range, using `.max` as the upper bound.
     /// - parameter rawValue: A partial with a `UID` as the lower bound.
-    public init(_ range: PartialRangeFrom<T>) {
-        self.init(range.lowerBound ... T.max)
+    public init(_ range: PartialRangeFrom<IdentifierType>) {
+        self.init(range.lowerBound ... IdentifierType.max)
     }
 }
 
@@ -57,12 +57,12 @@ extension MessageIdentifierRange: ExpressibleByIntegerLiteral {
     /// Creates a range from a single number - essentially a range containing one value.
     /// - parameter value: The raw number to use as both the upper and lower bounds.
     public init(integerLiteral value: UInt32) {
-        self.init(T(integerLiteral: value))
+        self.init(IdentifierType(integerLiteral: value))
     }
 
     /// Creates a range from a single number - essentially a range containing one value.
     /// - parameter value: The raw number to use as both the upper and lower bounds.
-    public init(_ value: T) {
+    public init(_ value: IdentifierType) {
         self.init(value ... value)
     }
 }

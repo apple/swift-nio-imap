@@ -119,7 +119,7 @@ public indirect enum SearchKey: Hashable {
     case messageSizeSmaller(Int)
 
     /// RFC 3501: Messages with unique identifiers corresponding to the specified unique identifier set. Sequence set ranges are permitted.
-    case uid(LastCommandSet<UIDSetNonEmpty>)
+    case uid(LastCommandSet<MessageIdentifierSetNonEmpty<UID>>)
 
     /// RFC 3501: Messages that match a given sequence set.
     case sequenceNumbers(LastCommandSet<SequenceRangeSet>)

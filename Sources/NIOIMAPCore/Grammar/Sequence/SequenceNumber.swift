@@ -17,22 +17,12 @@
 /// See RFC 3501 section 2.3.1.2.
 ///
 /// IMAPv4 `seq-number`
-public struct SequenceNumber: Hashable {
-    /// The minimum sequence number is always 1.
-    public static let min = SequenceNumber(1)
-
-    /// The maximum sequence number is always `UInt32.max`.
-    public static let max = SequenceNumber(exactly: UInt32.max)!
-
+public struct SequenceNumber: Hashable, MessageIdentifier {
     /// The raw value of the sequence number, defined in RFC 3501 to be an unsigned 32-bit integer.
-    let rawValue: UInt32
+    public var rawValue: UInt32
 
-    /// Creates a new `SequenceNumber` after performing some sanity checks.
-    /// - parameter rawValue: An `Int` that is converted for use as the `rawValue`.
-    /// - returns: `nil` if `rawValue` is `0` or does not fit within a `UInt32`.
-    public init?<T>(exactly source: T) where T: BinaryInteger {
-        guard source >= 1, source <= UInt32.max else { return nil }
-        self.rawValue = UInt32(source)
+    public init(rawValue: UInt32) {
+        self.rawValue = rawValue
     }
 }
 
