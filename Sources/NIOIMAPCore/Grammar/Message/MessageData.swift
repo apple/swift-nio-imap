@@ -23,14 +23,14 @@ public enum MessageData: Equatable {
     /// The VANISHED UID FETCH modifier instructs the server to report those
     /// messages from the UID set parameter that have been expunged and whose
     /// associated mod-sequence is larger than the specified mod-sequence.
-    case vanished(UIDSet)
+    case vanished(MessageIdentifierSet<UID>)
 
     /// RFC 7162 Condstore
     /// The VANISHED (EARLIER) response is caused by a UID FETCH (VANISHED)
     /// or a SELECT/EXAMINE (QRESYNC) command.  This response is sent if the
     /// UID set parameter to the UID FETCH (VANISHED) command includes UIDs
     /// of messages that are no longer in the mailbox.
-    case vanishedEarlier(UIDSet)
+    case vanishedEarlier(MessageIdentifierSet<UID>)
 
     /// An array of URLAUTH-authorized URLs
     case generateAuthorizedURL([ByteBuffer])

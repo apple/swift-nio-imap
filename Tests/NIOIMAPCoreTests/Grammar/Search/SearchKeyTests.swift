@@ -57,7 +57,7 @@ extension SearchKeyTests {
             (.sentBefore(IMAPCalendarDay(year: 2018, month: 12, day: 7)!), "SENTBEFORE 7-Dec-2018", #line),
             (.sentSince(IMAPCalendarDay(year: 2018, month: 12, day: 7)!), "SENTSINCE 7-Dec-2018", #line),
             (.messageSizeSmaller(555), "SMALLER 555", #line),
-            (.uid(.set(UIDSetNonEmpty(set: UIDSet(333 ... 444))!)), "UID 333:444", #line),
+            (.uid(.set(MessageIdentifierSetNonEmpty(set: MessageIdentifierSet<UID>(333 ... 444))!)), "UID 333:444", #line),
             (.sequenceNumbers(.set(SequenceRangeSet(1 ... 222))), "1:222", #line),
             (.sequenceNumbers(.set(SequenceRangeSet(222...))), "222:*", #line),
             (.and([]), "()", #line),

@@ -46,9 +46,9 @@ public enum PipeliningRequirement: Hashable {
     /// This is a requirement for all sequence number based commands.
     case noUIDBasedCommandRunning
     /// No flags are being changed on the specific messages.
-    case noFlagChanges(UIDSetNonEmpty)
+    case noFlagChanges(MessageIdentifierSetNonEmpty<UID>)
     /// No command is running that retrieves flags of the specific messages.
-    case noFlagReads(UIDSetNonEmpty)
+    case noFlagReads(MessageIdentifierSetNonEmpty<UID>)
 
     // TODO: Add Message metadata read + write
     // TODO: Add mailbox create / delete / subscribe / metadata / quota
@@ -77,9 +77,9 @@ public enum PipeliningBehavior: Hashable {
     /// — or its a `UID` command (e.g. `UID SEARCH`).
     case isUIDBased
     /// This command is changing flags on speicifc messages.
-    case changesFlags(UIDSetNonEmpty)
+    case changesFlags(MessageIdentifierSetNonEmpty<UID>)
     /// This command is querying flags for specific messages.
-    case readsFlags(UIDSetNonEmpty)
+    case readsFlags(MessageIdentifierSetNonEmpty<UID>)
     /// No commands may be sent until this command completes.
     ///
     /// This command may be sent while other commands are running, but it acts as a barrier itself.
@@ -386,7 +386,7 @@ extension Command {
 // MARK: -
 
 extension Array where Element == FetchAttribute {
-    func makePipeliningRequirements(_ uids: UIDSetNonEmpty) -> Set<PipeliningRequirement> {
+    func makePipeliningRequirements(_ uids: MessageIdentifierSetNonEmpty<UID>) -> Set<PipeliningRequirement> {
         reduce(into: Set<PipeliningRequirement>()) { $0.formUnion($1.makePipeliningRequirements(uids)) }
     }
 
@@ -400,7 +400,7 @@ extension Array where Element == FetchAttribute {
 }
 
 extension FetchAttribute {
-    func makePipeliningRequirements(_ uids: UIDSetNonEmpty) -> Set<PipeliningRequirement> {
+    func makePipeliningRequirements(_ uids: MessageIdentifierSetNonEmpty<UID>) -> Set<PipeliningRequirement> {
         guard self.readsFlags else { return [] }
         return [.noFlagChanges(uids)]
     }

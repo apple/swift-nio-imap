@@ -76,7 +76,7 @@ extension GrammarParser {
     }
 
     // uid-set
-    static func parseUIDSet(buffer: inout ParseBuffer, tracker: StackTracker) throws -> UIDSet {
+    static func parseUIDSet(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageIdentifierSet<UID> {
         func parseUIDSet_number(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageIdentifierRange<UID> {
             let num = try self.parseUID(buffer: &buffer, tracker: tracker)
             return MessageIdentifierRange<UID>(num)
@@ -97,7 +97,7 @@ extension GrammarParser {
                 try PL.parseFixedString(",", buffer: &buffer, tracker: tracker)
                 return try parseUIDSet_element(buffer: &buffer, tracker: tracker)
             }
-            let s = UIDSet(output)
+            let s = MessageIdentifierSet(output)
             guard !s.isEmpty else {
                 throw ParserError(hint: "UID set is empty.")
             }
@@ -105,9 +105,9 @@ extension GrammarParser {
         }
     }
 
-    static func parseUIDSetNonEmpty(buffer: inout ParseBuffer, tracker: StackTracker) throws -> UIDSetNonEmpty {
+    static func parseUIDSetNonEmpty(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageIdentifierSetNonEmpty<UID> {
         try PL.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
-            guard let set = UIDSetNonEmpty(set: try self.parseUIDSet(buffer: &buffer, tracker: tracker)) else {
+            guard let set = MessageIdentifierSetNonEmpty(set: try self.parseUIDSet(buffer: &buffer, tracker: tracker)) else {
                 throw ParserError(hint: "Need at least one UID")
             }
             return set

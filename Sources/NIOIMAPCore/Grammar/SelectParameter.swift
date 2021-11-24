@@ -22,7 +22,7 @@ public struct QResyncParameter: Equatable {
     public var modificationSequenceValue: ModificationSequenceValue
 
     /// The optional set of known UIDs.
-    public var knownUIDs: UIDSet?
+    public var knownUIDs: MessageIdentifierSet<UID>?
 
     /// An optional parenthesized list of known sequence ranges and their corresponding UIDs.
     public var sequenceMatchData: SequenceMatchData?
@@ -32,7 +32,7 @@ public struct QResyncParameter: Equatable {
     /// - parameter modificationSequenceValue: The last known modification sequence
     /// - parameter knownUIDs: The optional set of known UIDs.
     /// - parameter sequenceMatchData: An optional parenthesized list of known sequence ranges and their corresponding UIDs.
-    public init(uidValidity: UIDValidity, modificationSequenceValue: ModificationSequenceValue, knownUIDs: UIDSet?, sequenceMatchData: SequenceMatchData?) {
+    public init(uidValidity: UIDValidity, modificationSequenceValue: ModificationSequenceValue, knownUIDs: MessageIdentifierSet<UID>?, sequenceMatchData: SequenceMatchData?) {
         self.uidValidity = uidValidity
         self.modificationSequenceValue = modificationSequenceValue
         self.knownUIDs = knownUIDs

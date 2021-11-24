@@ -121,13 +121,15 @@ extension SearchKey {
     ]
 }
 
-extension UIDSetNonEmpty {
-    fileprivate static let arbitrarySets: [UIDSetNonEmpty] = [
-        [100 ... 200],
-        [UID.min ... UID.min],
-        [43_195 ... 43_195],
-        .all,
-    ]
+extension MessageIdentifierSetNonEmpty where T == UID {
+    fileprivate static var arbitrarySets: [Self] {
+        [
+            [100 ... 200],
+            [T.min ... T.min],
+            [43_195 ... 43_195],
+            .all,
+        ]
+    }
 }
 
 extension PipeliningRequirement {
@@ -667,7 +669,7 @@ extension PipeliningTests {
             (#line, .store(.set([1]), [], .flags(.add(silent: false, list: [.answered])))),
         ], require: .noFlagChangesToAnyMessage)
 
-        UIDSetNonEmpty.arbitrarySets.forEach { uids in
+        MessageIdentifierSetNonEmpty<UID>.arbitrarySets.forEach { uids in
             Assert(commands: [
                 // UID FETCH that return flags:
                 (#line, .uidFetch(.set(uids), [.envelope, .uid, .flags], [:])),
@@ -758,7 +760,7 @@ extension PipeliningTests {
             (#line, .store(.set([1]), [], .flags(.add(silent: true, list: [.answered])))),
             (#line, .store(.set([1]), [], .flags(.add(silent: false, list: [.answered])))),
         ], require: .noFlagReadsFromAnyMessage)
-        UIDSetNonEmpty.arbitrarySets.forEach { uids in
+        MessageIdentifierSetNonEmpty<UID>.arbitrarySets.forEach { uids in
             Assert(commands: [
                 (#line, .uidStore(.set(uids), [:], .flags(.add(silent: false, list: [.answered])))),
                 (#line, .uidStore(.set(uids), [:], .flags(.add(silent: true, list: [.answered])))),
@@ -1108,7 +1110,7 @@ extension PipeliningTests {
             (#line, .store(.set([1]), [], .flags(.add(silent: false, list: [.answered])))),
             (#line, .uidStore(.lastCommand, [:], .flags(.add(silent: true, list: [.answered])))),
         ], haveBehavior: .changesFlagsOnAnyMessage)
-        UIDSetNonEmpty.arbitrarySets.forEach { uids in
+        MessageIdentifierSetNonEmpty<UID>.arbitrarySets.forEach { uids in
             Assert(commands: [
                 (#line, .uidStore(.set(uids), [:], .flags(.add(silent: true, list: [.answered])))),
                 (#line, .uidStore(.set(uids), [:], .flags(.add(silent: false, list: [.answered])))),
@@ -1179,7 +1181,7 @@ extension PipeliningTests {
             (#line, .store(.set([1]), [], .flags(.add(silent: false, list: [.answered])))),
             (#line, .uidStore(.lastCommand, [:], .flags(.add(silent: false, list: [.answered])))),
         ], haveBehavior: .readsFlagsFromAnyMessage)
-        UIDSetNonEmpty.arbitrarySets.forEach { uids in
+        MessageIdentifierSetNonEmpty<UID>.arbitrarySets.forEach { uids in
             Assert(commands: [
                 (#line, .uidFetch(.set(uids), [.envelope, .uid, .flags], [:])),
                 (#line, .uidFetch(.set(uids), [.uid, .flags], [:])),

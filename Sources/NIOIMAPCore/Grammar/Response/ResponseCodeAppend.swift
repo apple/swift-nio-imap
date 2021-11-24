@@ -20,12 +20,12 @@ public struct ResponseCodeAppend: Equatable {
     public var uidValidity: UIDValidity
 
     /// The UIDs of the messages after they have been appended.
-    public var uids: UIDSetNonEmpty
+    public var uids: MessageIdentifierSetNonEmpty<UID>
 
     /// Creates a new `ResponseCodeAppend`.
     /// - parameter uidValidity: The UID validity of the destination mailbox.
     /// - parameter uids: The UIDs of the messages after they have been appended.
-    public init(uidValidity: UIDValidity, uids: UIDSetNonEmpty) {
+    public init(uidValidity: UIDValidity, uids: MessageIdentifierSetNonEmpty<UID>) {
         self.uidValidity = uidValidity
         self.uids = uids
     }

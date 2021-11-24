@@ -70,16 +70,16 @@ extension GrammarParser_UID_Tests {
         self.iterateTests(
             testFunction: GrammarParser.parseUIDSet,
             validInputs: [
-                ("1234", "\r\n", UIDSet(1234 as UID), #line),
-                ("12:34", "\r\n", UIDSet(MessageIdentifierRange<UID>(12 ... 34)), #line),
-                ("1,2,34:56,78:910,11", "\r\n", UIDSet([
+                ("1234", "\r\n", MessageIdentifierSet(1234 as UID), #line),
+                ("12:34", "\r\n", MessageIdentifierSet(MessageIdentifierRange<UID>(12 ... 34)), #line),
+                ("1,2,34:56,78:910,11", "\r\n", MessageIdentifierSet([
                     MessageIdentifierRange<UID>(1),
                     MessageIdentifierRange<UID>(2),
                     MessageIdentifierRange<UID>(34 ... 56),
                     MessageIdentifierRange<UID>(78 ... 910),
                     MessageIdentifierRange<UID>(11),
                 ]), #line),
-                ("*", "\r\n", UIDSet(MessageIdentifierRange<UID>(.max)), #line),
+                ("*", "\r\n", MessageIdentifierSet(MessageIdentifierRange<UID>(.max)), #line),
                 ("1:*", "\r\n", .all, #line),
             ],
             parserErrorInputs: [
