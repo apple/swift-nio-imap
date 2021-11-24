@@ -18,12 +18,6 @@
 ///
 /// IMAPv4 `seq-number`
 public struct SequenceNumber: Hashable, MessageIdentifier {
-    /// The minimum sequence number is always 1.
-    public static let min = SequenceNumber(1)
-
-    /// The maximum sequence number is always `UInt32.max`.
-    public static let max = SequenceNumber(exactly: UInt32.max)!
-
     /// The raw value of the sequence number, defined in RFC 3501 to be an unsigned 32-bit integer.
     public var rawValue: UInt32
 
