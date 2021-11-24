@@ -12,7 +12,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-public protocol MessageIdentifier: Hashable, Codable, CustomDebugStringConvertible, ExpressibleByIntegerLiteral, Strideable {
+public protocol MessageIdentifier: Hashable, Codable, CustomDebugStringConvertible, ExpressibleByIntegerLiteral, Strideable where Stride == Int64 {
+    
     var rawValue: UInt32 { get set }
 
     init(rawValue: UInt32)
@@ -83,7 +84,6 @@ extension BinaryInteger {
 // MARK: - Strideable
 
 extension MessageIdentifier {
-    public typealias Stride = Int64
 
     /// Evaluates if one `UID` (`lhs`) is strictly less than another (`rhs`).
     /// - parameter lhs: The first `UID` to evaluate.
