@@ -23,6 +23,7 @@ public struct MessageIdentifierSet<T: MessageIdentifier>: Hashable {
     public static var all: Self {
         MessageIdentifierSet(MessageIdentifierRange<T>.all)
     }
+
     /// A set that contains no UIDs.
     public static var empty: Self {
         MessageIdentifierSet()
@@ -42,15 +43,14 @@ public struct MessageIdentifierSet<T: MessageIdentifier>: Hashable {
             self._ranges.insert(contentsOf: Range($0))
         }
     }
-    
+
     public init() {
         self._ranges = RangeSet()
     }
-    
+
     public init(_ id: T) {
         self._ranges = RangeSet(MessageIdentificationShiftWrapper(id) ..< (MessageIdentificationShiftWrapper(id).advanced(by: 1)))
     }
-    
 }
 
 /// A wrapper around a `UIDSet` that enforces at least one element.
@@ -82,11 +82,11 @@ public struct MessageIdentifierSetNonEmpty<T: MessageIdentifier>: Hashable {
 /// This applies for both UIDs and SequenceNumbers.
 struct MessageIdentificationShiftWrapper: Hashable {
     var rawValue: UInt32
-    
+
     init(rawValue: UInt32) {
         self.rawValue = rawValue
     }
-    
+
     init<T: MessageIdentifier>(_ id: T) {
         // Since UID.min = 1, we can always do this:
         self.rawValue = id.rawValue - 1

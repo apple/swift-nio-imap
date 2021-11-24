@@ -83,9 +83,8 @@ extension BinaryInteger {
 // MARK: - Strideable
 
 extension MessageIdentifier {
-    
     public typealias Stride = Int64
-    
+
     /// Evaluates if one `UID` (`lhs`) is strictly less than another (`rhs`).
     /// - parameter lhs: The first `UID` to evaluate.
     /// - parameter rhs: The second `UID` to evaluate.
