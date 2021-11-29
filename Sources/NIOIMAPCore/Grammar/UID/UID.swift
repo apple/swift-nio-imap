@@ -136,29 +136,3 @@ extension EncodeBuffer {
         }
     }
 }
-
-// MARK: - Swift Ranges
-
-extension UID {
-    /// Creates a new `UIDRange` from `.min` to the given upper bound.
-    /// - parameter value: The upper bound.
-    /// - returns: A new `UIDRange`.
-    public static prefix func ... (value: Self) -> MessageIdentifierRange<UID> {
-        MessageIdentifierRange((.min) ... value)
-    }
-
-    /// Creates a new `UIDRange` from the given lower bound to `.max`
-    /// - parameter value: The lower bound.
-    /// - returns: A new `UIDRange`.
-    public static postfix func ... (value: Self) -> MessageIdentifierRange<UID> {
-        MessageIdentifierRange(value ... (.max))
-    }
-
-    /// Creates a `UIDRange` from two `UIDs`.
-    /// - parameter lower: The lower bound of the range.
-    /// - parameter upper: The upper bound of the range.
-    /// - returns: A new `UIDRange` using the provided bounds.
-    public static func ... (lower: Self, upper: Self) -> MessageIdentifierRange<UID> {
-        MessageIdentifierRange(lower ... upper)
-    }
-}
