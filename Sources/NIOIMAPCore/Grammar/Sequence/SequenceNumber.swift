@@ -48,22 +48,22 @@ extension SequenceNumber {
     /// Creates a new `SequenceRange` from `.min` to `value`.
     /// - parameter value: The upper bound.
     /// - returns: A new `SequenceRange`.
-    public static prefix func ... (value: Self) -> SequenceRange {
-        SequenceRange((.min) ... value)
+    public static prefix func ... (value: Self) -> MessageIdentifierRange<SequenceNumber> {
+        MessageIdentifierRange<SequenceNumber>((.min) ... value)
     }
 
     /// Creates a new `SequenceRange` from `value` to `.max`.
     /// - parameter value: The lower bound.
     /// - returns: A new `SequenceRange`.
-    public static postfix func ... (value: Self) -> SequenceRange {
-        SequenceRange(value ... (.max))
+    public static postfix func ... (value: Self) -> MessageIdentifierRange<SequenceNumber> {
+        MessageIdentifierRange<SequenceNumber>(value ... (.max))
     }
 
     /// Creates a `SequenceRange` from lower and upper bounds.
     /// - parameter lower: The lower bound.
     /// - parameter upper: The upper bound.
     /// - returns: A new `SequenceRange`.
-    public static func ... (lower: Self, upper: Self) -> SequenceRange {
-        SequenceRange(lower ... upper)
+    public static func ... (lower: Self, upper: Self) -> MessageIdentifierRange<SequenceNumber> {
+        MessageIdentifierRange<SequenceNumber>(lower ... upper)
     }
 }

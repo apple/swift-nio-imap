@@ -23,14 +23,14 @@ class IMAPRangeTests: EncodeTestClass {}
 extension IMAPRangeTests {
     func testIMAPEncoded_from() {
         let expected = "5:*"
-        let size = self.testBuffer.writeSequenceRange(SequenceRange(5...))
+        let size = self.testBuffer.writeSequenceRange(MessageIdentifierRange<SequenceNumber>(5...))
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }
 
     func testIMAPEncoded_range() {
         let expected = "2:4"
-        let size = self.testBuffer.writeSequenceRange(SequenceRange(2 ... 4))
+        let size = self.testBuffer.writeSequenceRange(MessageIdentifierRange<SequenceNumber>(2 ... 4))
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }
@@ -40,19 +40,19 @@ extension IMAPRangeTests {
 
 extension IMAPRangeTests {
     func testRange_from() {
-        let sut = SequenceRange(7...)
+        let sut = MessageIdentifierRange<SequenceNumber>(7...)
         XCTAssertEqual(sut.range.lowerBound, 7)
         XCTAssertEqual(sut.range.upperBound, .max)
     }
 
     func testRange_to() {
-        let sut = SequenceRange(...7)
+        let sut = MessageIdentifierRange<SequenceNumber>(...7)
         XCTAssertEqual(sut.range.lowerBound, 1)
         XCTAssertEqual(sut.range.upperBound, 7)
     }
 
     func testRange_closed() {
-        let sut = SequenceRange(3 ... 4)
+        let sut = MessageIdentifierRange<SequenceNumber>(3 ... 4)
         XCTAssertEqual(sut.range.lowerBound, 3)
         XCTAssertEqual(sut.range.upperBound, 4)
     }

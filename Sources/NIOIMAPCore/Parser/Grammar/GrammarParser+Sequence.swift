@@ -25,7 +25,7 @@ import struct NIO.ByteBufferView
 
 extension GrammarParser {
     // Sequence Range
-    static func parseSequenceRange(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SequenceRange {
+    static func parseSequenceRange(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageIdentifierRange<SequenceNumber> {
         func parse_wildcard(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SequenceNumber {
             try PL.parseFixedString("*", buffer: &buffer, tracker: tracker)
             return .max
@@ -45,18 +45,18 @@ extension GrammarParser {
             return try parse_SequenceOrWildcard(buffer: &buffer, tracker: tracker)
         }
 
-        return try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> SequenceRange in
+        return try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> MessageIdentifierRange<SequenceNumber> in
             let id1 = try parse_SequenceOrWildcard(buffer: &buffer, tracker: tracker)
             let id2 = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: parse_colonAndSequenceOrWildcard)
             if let id2 = id2 {
                 guard id1 <= id2 else {
                     throw ParserError(hint: "Invalid range, \(id1):\(id2)")
                 }
-                return SequenceRange(id1 ... id2)
+                return MessageIdentifierRange<SequenceNumber>(id1 ... id2)
             } else if id1 == .max {
                 return .all
             } else {
-                return SequenceRange(id1)
+                return MessageIdentifierRange<SequenceNumber>(id1)
             }
         }
     }
@@ -86,13 +86,13 @@ extension GrammarParser {
     // And from RFC 5182
     // sequence-set       =/ seq-last-command
     // seq-last-command   = "$"
-    static func parseSequenceSet(buffer: inout ParseBuffer, tracker: StackTracker) throws -> LastCommandSet<SequenceRangeSet> {
-        func parseSequenceSet_number(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SequenceRange {
+    static func parseSequenceSet(buffer: inout ParseBuffer, tracker: StackTracker) throws -> LastCommandSet<MessageIdentifierSet<SequenceNumber>> {
+        func parseSequenceSet_number(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageIdentifierRange<SequenceNumber> {
             let num = try self.parseSequenceNumber(buffer: &buffer, tracker: tracker)
-            return SequenceRange(num)
+            return MessageIdentifierRange<SequenceNumber>(num)
         }
 
-        func parseSequenceSet_element(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SequenceRange {
+        func parseSequenceSet_element(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageIdentifierRange<SequenceNumber> {
             try PL.parseOneOf(
                 self.parseSequenceRange,
                 parseSequenceSet_number,
@@ -101,21 +101,21 @@ extension GrammarParser {
             )
         }
 
-        func parseSequenceSet_base(buffer: inout ParseBuffer, tracker: StackTracker) throws -> LastCommandSet<SequenceRangeSet> {
+        func parseSequenceSet_base(buffer: inout ParseBuffer, tracker: StackTracker) throws -> LastCommandSet<MessageIdentifierSet<SequenceNumber>> {
             try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
                 var output = [try parseSequenceSet_element(buffer: &buffer, tracker: tracker)]
                 try PL.parseZeroOrMore(buffer: &buffer, into: &output, tracker: tracker) { buffer, tracker in
                     try PL.parseFixedString(",", buffer: &buffer, tracker: tracker)
                     return try parseSequenceSet_element(buffer: &buffer, tracker: tracker)
                 }
-                guard let s = SequenceRangeSet(output) else {
+                guard !output.isEmpty else {
                     throw ParserError(hint: "Sequence set is empty.")
                 }
-                return .set(s)
+                return .set(.init(output))
             }
         }
 
-        func parseSequenceSet_lastCommand(buffer: inout ParseBuffer, tracker: StackTracker) throws -> LastCommandSet<SequenceRangeSet> {
+        func parseSequenceSet_lastCommand(buffer: inout ParseBuffer, tracker: StackTracker) throws -> LastCommandSet<MessageIdentifierSet<SequenceNumber>> {
             try PL.parseFixedString("$", buffer: &buffer, tracker: tracker)
             return .lastCommand
         }

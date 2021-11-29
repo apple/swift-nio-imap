@@ -132,7 +132,7 @@ public enum ResponseTextCode: Equatable {
 
     /// Used with an OK response to the STORE command.  (It can also be used in a NO
     /// response.)
-    case modificationSequence(LastCommandSet<SequenceRangeSet>)
+    case modificationSequence(LastCommandSet<MessageIdentifierSet<SequenceNumber>>)
 
     /// A server supporting the persistent storage of mod-sequences for the mailbox
     /// MUST send the OK untagged response including HIGHESTMODSEQ response
