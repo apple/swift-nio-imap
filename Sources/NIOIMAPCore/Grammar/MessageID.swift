@@ -13,14 +13,25 @@
 //===----------------------------------------------------------------------===//
 
 /// Represents the identifier of a message stored on a server.
-public struct MessageID: Hashable, RawRepresentable {
+///
+/// This is the “full” Message-ID, including the angled brackets, e.g.
+/// `<B27397-0100000@cac.washington.edu>`.
+///
+/// See RFC 2822 section 3.6.4.
+public struct MessageID: Hashable {
     /// The `String` message identifier.
-    public var rawValue: String
+    var rawValue: String
 
     /// Creates a new `MessageID` from the given string.
     /// - rawValue: The `String` message identifier.
-    public init(rawValue: String) {
+    public init(_ rawValue: String) {
         self.rawValue = rawValue
+    }
+}
+
+extension String {
+    public init(_ id: MessageID) {
+        self = id.rawValue
     }
 }
 
