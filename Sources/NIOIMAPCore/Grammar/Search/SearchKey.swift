@@ -122,7 +122,7 @@ public indirect enum SearchKey: Hashable {
     case uid(LastCommandSet<MessageIdentifierSetNonEmpty<UID>>)
 
     /// RFC 3501: Messages that match a given sequence set.
-    case sequenceNumbers(LastCommandSet<MessageIdentifierSet<SequenceNumber>>)
+    case sequenceNumbers(LastCommandSet<SequenceSet>)
 
     /// RFC 3501: Messages that match all of the given keys.
     case and([SearchKey])

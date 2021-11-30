@@ -1909,7 +1909,7 @@ extension GrammarParser {
             let uidValidity = try self.parseUIDValidity(buffer: &buffer, tracker: tracker)
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             let modSeqVal = try self.parseModificationSequenceValue(buffer: &buffer, tracker: tracker)
-            let knownUIDs = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: { (buffer, tracker) -> MessageIdentifierSet<UID> in
+            let knownUIDs = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: { (buffer, tracker) -> UIDSet in
                 try PL.parseSpaces(buffer: &buffer, tracker: tracker)
                 return try self.parseUIDSet(buffer: &buffer, tracker: tracker)
             })

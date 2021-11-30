@@ -17,7 +17,7 @@ import struct NIO.ByteBuffer
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeSequenceRange(_ range: MessageIdentifierRange<SequenceNumber>) -> Int {
+    @discardableResult mutating func writeSequenceRange(_ range: SequenceRange) -> Int {
         self.writeSequenceNumberOrWildcard(range.range.lowerBound) +
             self.write(if: range.range.lowerBound < range.range.upperBound) {
                 self.writeString(":") +

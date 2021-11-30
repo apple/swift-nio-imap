@@ -94,19 +94,19 @@ public enum Command: Equatable {
     case idleStart
 
     /// Copies each message in a given set to a new mailbox, preserving the original in the current mailbox.
-    case copy(LastCommandSet<MessageIdentifierSet<SequenceNumber>>, MailboxName)
+    case copy(LastCommandSet<SequenceSet>, MailboxName)
 
     /// Fetches an array of specified attributes for each message in a given set.
-    case fetch(LastCommandSet<MessageIdentifierSet<SequenceNumber>>, [FetchAttribute], OrderedDictionary<String, ParameterValue?>)
+    case fetch(LastCommandSet<SequenceSet>, [FetchAttribute], OrderedDictionary<String, ParameterValue?>)
 
     /// Alters data associated with a message, typically returning the new data as an untagged fetch response.
-    case store(LastCommandSet<MessageIdentifierSet<SequenceNumber>>, [StoreModifier], StoreData)
+    case store(LastCommandSet<SequenceSet>, [StoreModifier], StoreData)
 
     /// Searches the currently-selected mailbox for messages that match the search criteria.
     case search(key: SearchKey, charset: String? = nil, returnOptions: [SearchReturnOption] = [])
 
     /// Moves each message in a given set into a new mailbox, removing the copy from the current mailbox.
-    case move(LastCommandSet<MessageIdentifierSet<SequenceNumber>>, MailboxName)
+    case move(LastCommandSet<SequenceSet>, MailboxName)
 
     /// Identifies the client to the server
     case id(OrderedDictionary<String, String?>)
@@ -490,7 +490,7 @@ extension CommandEncodeBuffer {
             }
     }
 
-    private mutating func writeCommandKind_copy(set: LastCommandSet<MessageIdentifierSet<SequenceNumber>>, mailbox: MailboxName) -> Int {
+    private mutating func writeCommandKind_copy(set: LastCommandSet<SequenceSet>, mailbox: MailboxName) -> Int {
         self.buffer.writeString("COPY ") +
             self.buffer.writeLastCommandSet(set) +
             self.buffer.writeSpace() +
@@ -504,7 +504,7 @@ extension CommandEncodeBuffer {
             self.buffer.writeMailbox(mailbox)
     }
 
-    private mutating func writeCommandKind_fetch(set: LastCommandSet<MessageIdentifierSet<SequenceNumber>>, atts: [FetchAttribute], modifiers: OrderedDictionary<String, ParameterValue?>) -> Int {
+    private mutating func writeCommandKind_fetch(set: LastCommandSet<SequenceSet>, atts: [FetchAttribute], modifiers: OrderedDictionary<String, ParameterValue?>) -> Int {
         self.buffer.writeString("FETCH ") +
             self.buffer.writeLastCommandSet(set) +
             self.buffer.writeSpace() +
@@ -524,7 +524,7 @@ extension CommandEncodeBuffer {
             }
     }
 
-    private mutating func writeCommandKind_store(set: LastCommandSet<MessageIdentifierSet<SequenceNumber>>, modifiers: [StoreModifier], data: StoreData) -> Int {
+    private mutating func writeCommandKind_store(set: LastCommandSet<SequenceSet>, modifiers: [StoreModifier], data: StoreData) -> Int {
         self.buffer.writeString("STORE ") +
             self.buffer.writeLastCommandSet(set) +
             self.buffer.write(if: modifiers.count >= 1) {
@@ -564,7 +564,7 @@ extension CommandEncodeBuffer {
             self.writeCommandKind_search(key: key, charset: charset, returnOptions: returnOptions)
     }
 
-    private mutating func writeCommandKind_move(set: LastCommandSet<MessageIdentifierSet<SequenceNumber>>, mailbox: MailboxName) -> Int {
+    private mutating func writeCommandKind_move(set: LastCommandSet<SequenceSet>, mailbox: MailboxName) -> Int {
         self.buffer.writeString("MOVE ") +
             self.buffer.writeLastCommandSet(set) +
             self.buffer.writeSpace() +
@@ -620,7 +620,7 @@ extension Command {
     /// - parameter messages: The set of message UIDs to use.
     /// - parameter mailbox: The destination mailbox.
     /// - returns: `nil` if `messages` is empty, otherwise a `Command`.
-    public static func uidMove(messages: MessageIdentifierSet<UID>, mailbox: MailboxName) -> Command? {
+    public static func uidMove(messages: UIDSet, mailbox: MailboxName) -> Command? {
         guard let set = MessageIdentifierSetNonEmpty(set: messages) else {
             return nil
         }
@@ -632,7 +632,7 @@ extension Command {
     /// - parameter messages: The set of message UIDs to use.
     /// - parameter mailbox: The destination mailbox.
     /// - returns: `nil` if `messages` is empty, otherwise a `Command`.
-    public static func uidCopy(messages: MessageIdentifierSet<UID>, mailbox: MailboxName) -> Command? {
+    public static func uidCopy(messages: UIDSet, mailbox: MailboxName) -> Command? {
         guard let set = MessageIdentifierSetNonEmpty(set: messages) else {
             return nil
         }
@@ -645,7 +645,7 @@ extension Command {
     /// - parameter attributes: Which attributes to retrieve.
     /// - parameter modifiers: Fetch modifiers.
     /// - returns: `nil` if `messages` is empty, otherwise a `Command`.
-    public static func uidFetch(messages: MessageIdentifierSet<UID>, attributes: [FetchAttribute], modifiers: OrderedDictionary<String, ParameterValue?>) -> Command? {
+    public static func uidFetch(messages: UIDSet, attributes: [FetchAttribute], modifiers: OrderedDictionary<String, ParameterValue?>) -> Command? {
         guard let set = MessageIdentifierSetNonEmpty(set: messages) else {
             return nil
         }
@@ -658,7 +658,7 @@ extension Command {
     /// - parameter modifiers: Store modifiers.
     /// - parameter flags: The flags to store.
     /// - returns: `nil` if `messages` is empty, otherwise a `Command`.
-    public static func uidStore(messages: MessageIdentifierSet<UID>, modifiers: OrderedDictionary<String, ParameterValue?>, data: StoreData) -> Command? {
+    public static func uidStore(messages: UIDSet, modifiers: OrderedDictionary<String, ParameterValue?>, data: StoreData) -> Command? {
         guard let set = MessageIdentifierSetNonEmpty(set: messages) else {
             return nil
         }
@@ -669,7 +669,7 @@ extension Command {
     /// Pass in a `UIDSet`, and if that set is valid (i.e. non-empty) then a command is returned.
     /// - parameter messages: The set of message UIDs to use.
     /// - returns: `nil` if `messages` is empty, otherwise a `Command`.
-    public static func uidExpunge(messages: MessageIdentifierSet<UID>, mailbox: MailboxName) -> Command? {
+    public static func uidExpunge(messages: UIDSet, mailbox: MailboxName) -> Command? {
         guard let set = MessageIdentifierSetNonEmpty(set: messages) else {
             return nil
         }
