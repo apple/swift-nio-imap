@@ -14,11 +14,11 @@
 
 import struct NIO.ByteBuffer
 
-extension LastCommandSet where SetType == MessageIdentifierSet<SequenceNumber> {
+extension LastCommandSet where SetType == SequenceSet {
     /// Creates a `SequenceSet` from a non-empty array of `SequenceRange`.
     /// - parameter ranges: An array of `SequenceRange` to use.
     /// - returns: `nil` if `ranges` is empty, otherwise a new `SequenceSet`.
-    public init?(_ ranges: [MessageIdentifierRange<SequenceNumber>]) {
+    public init?(_ ranges: [SequenceRange]) {
         guard !ranges.isEmpty else {
             return nil
         }
@@ -28,29 +28,29 @@ extension LastCommandSet where SetType == MessageIdentifierSet<SequenceNumber> {
     /// Creates a `SequenceSet` from a single range.
     /// - parameter range: The underlying range to use.
     public init(_ range: ClosedRange<SequenceNumber>) {
-        self = .set(MessageIdentifierSet<SequenceNumber>(range))
+        self = .set(SequenceSet(range))
     }
 
     /// Creates a `SequenceSet` from a single range.
     /// - parameter range: The underlying range to use from `.min`.
     public init(_ range: PartialRangeThrough<SequenceNumber>) {
-        self = .set(MessageIdentifierSet<SequenceNumber>(range))
+        self = .set(SequenceSet(range))
     }
 
     /// Creates a `SequenceSet` from a single range.
     /// - parameter range: The underlying range to use, up to `.max`.
     public init(_ range: PartialRangeFrom<SequenceNumber>) {
-        self = .set(MessageIdentifierSet<SequenceNumber>(range))
+        self = .set(SequenceSet(range))
     }
 
     /// Creates a `SequenceSet` from a single range.
     /// - parameter range: The underlying range to use.
-    public init(_ range: MessageIdentifierRange<SequenceNumber>) {
-        self = .set(MessageIdentifierSet<SequenceNumber>(range))
+    public init(_ range: SequenceRange) {
+        self = .set(SequenceSet(range))
     }
 }
 
-extension LastCommandSet where SetType == MessageIdentifierSet<SequenceNumber> {
+extension LastCommandSet where SetType == SequenceSet {
     /// A `SequenceSet` that contains a single `SequenceRangeSet`, that in turn covers every possible `SequenceNumber`.
-    public static let all: Self = .set(MessageIdentifierSet<SequenceNumber>.all)
+    public static let all: Self = .set(SequenceSet.all)
 }

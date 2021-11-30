@@ -21,16 +21,16 @@ public struct ResponseCodeCopy: Equatable {
     public var destinationUIDValidity: UIDValidity
 
     /// The message UIDs in the source mailbox.
-    public var sourceUIDs: [MessageIdentifierRange<UID>]
+    public var sourceUIDs: [UIDRange]
 
     /// The copied message UIDs in the destination mailbox.
-    public var destinationUIDs: [MessageIdentifierRange<UID>]
+    public var destinationUIDs: [UIDRange]
 
     /// Creates a new `ResponseCodeCopy`.
     /// - parameter destinationUIDValidity: The `UIDValidity` of the destination mailbox.
     /// - parameter sourceUIDs: The message UIDs in the source mailbox.
     /// - parameter destinationUIDs: The copied message UIDs in the destination mailbox.
-    public init(destinationUIDValidity: UIDValidity, sourceUIDs: [MessageIdentifierRange<UID>], destinationUIDs: [MessageIdentifierRange<UID>]) {
+    public init(destinationUIDValidity: UIDValidity, sourceUIDs: [UIDRange], destinationUIDs: [UIDRange]) {
         self.destinationUIDValidity = destinationUIDValidity
         self.sourceUIDs = sourceUIDs
         self.destinationUIDs = destinationUIDs
@@ -47,7 +47,7 @@ extension EncodeBuffer {
             self.writeUIDRangeArray(data.destinationUIDs)
     }
 
-    @discardableResult private mutating func writeUIDRangeArray(_ array: [MessageIdentifierRange<UID>]) -> Int {
+    @discardableResult private mutating func writeUIDRangeArray(_ array: [UIDRange]) -> Int {
         self.writeArray(array, separator: ",", parenthesis: false) { (element, self) in
             self.writeMessageIdentifierRange(element)
         }

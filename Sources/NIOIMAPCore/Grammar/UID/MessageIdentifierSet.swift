@@ -15,6 +15,21 @@
 import struct NIO.ByteBuffer
 import StandardLibraryPreview
 
+/// See `MessageIdentifierRange<SequenceNumber>`
+public typealias SequenceRange = MessageIdentifierRange<SequenceNumber>
+
+/// See `MessageIdentifierRange<UID>`
+public typealias UIDRange = MessageIdentifierRange<UID>
+
+/// See `MessageIdentifierSet<SequenceNumber>`
+public typealias SequenceSet = MessageIdentifierSet<SequenceNumber>
+
+/// See `MessageIdentifierSet<UID>`
+public typealias UIDSet = MessageIdentifierSet<UID>
+
+/// See `MessageIdentifierSetNonEmpty<UID>`
+public typealias UIDSetNonEmpty = MessageIdentifierSetNonEmpty<UID>
+
 /// A set contains an array of `UIDRange` to represent a (potentially large) collection of messages.
 ///
 /// UIDs are _not_ sorted.
