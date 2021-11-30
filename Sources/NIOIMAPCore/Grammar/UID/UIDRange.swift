@@ -74,6 +74,30 @@ extension MessageIdentifierRange {
     }
 }
 
+extension MessageIdentifier {
+    /// Creates a new `SequenceRange` from `.min` to `value`.
+    /// - parameter value: The upper bound.
+    /// - returns: A new `SequenceRange`.
+    public static prefix func ... (value: Self) -> MessageIdentifierRange<Self> {
+        MessageIdentifierRange<Self>((.min) ... value)
+    }
+
+    /// Creates a new `SequenceRange` from `value` to `.max`.
+    /// - parameter value: The lower bound.
+    /// - returns: A new `SequenceRange`.
+    public static postfix func ... (value: Self) -> MessageIdentifierRange<Self> {
+        MessageIdentifierRange<Self>(value ... (.max))
+    }
+
+    /// Creates a `SequenceRange` from lower and upper bounds.
+    /// - parameter lower: The lower bound.
+    /// - parameter upper: The upper bound.
+    /// - returns: A new `SequenceRange`.
+    public static func ... (lower: Self, upper: Self) -> MessageIdentifierRange<Self> {
+        MessageIdentifierRange<Self>(lower ... upper)
+    }
+}
+
 // MARK: - Encoding
 
 extension EncodeBuffer {

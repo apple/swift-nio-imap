@@ -139,6 +139,21 @@ extension MessageIdentifierSet {
     }
 }
 
+extension MessageIdentifierSet.RangeView: ExpressibleByArrayLiteral {
+    public typealias ArrayLiteralElement = MessageIdentifierRange<IdentifierType>
+
+    public init(arrayLiteral elements: ArrayLiteralElement...) {
+        let set = MessageIdentifierSet(elements)
+        self = set.ranges
+    }
+}
+
+extension MessageIdentifierSet.RangeView: Equatable {
+    public static func == (lhs: MessageIdentifierSet<IdentifierType>.RangeView, rhs: MessageIdentifierSet<IdentifierType>.RangeView) -> Bool {
+        lhs.elementsEqual(rhs)
+    }
+}
+
 // MARK: -
 
 extension MessageIdentifierSet {

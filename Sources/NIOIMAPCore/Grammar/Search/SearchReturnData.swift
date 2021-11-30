@@ -23,7 +23,7 @@ public enum SearchReturnData: Equatable {
     case max(Int)
 
     /// Return all message numbers/UIDs that satisfy the SEARCH criteria.
-    case all(LastCommandSet<SequenceRangeSet>)
+    case all(LastCommandSet<MessageIdentifierSet<SequenceNumber>>)
 
     /// Return number of the messages that satisfy the SEARCH criteria.
     case count(Int)
