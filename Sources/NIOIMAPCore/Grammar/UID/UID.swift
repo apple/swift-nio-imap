@@ -62,11 +62,11 @@ extension MessageIdentifier {
 
 /// Unique Message Identifier
 ///
-/// Not that valid `MessageIdentifier`s are 1 ... 4294967295 (UInt32.max).
+/// Not that valid `UID`s are 1 ... 4294967295 (UInt32.max).
 /// The maximum value is often rendered as `*` when encoded.
 ///
 /// See RFC 3501 section 2.3.1.1.
-public struct MessageIdentifier: MessageIdentifier {
+public struct UID: MessageIdentifier {
     public var rawValue: UInt32
 
     public init(rawValue: UInt32) {

@@ -286,7 +286,7 @@ extension EncodeBuffer {
         case .tryCreate:
             return self.writeString("TRYCREATE")
         case .uidNext(let number):
-            return self.writeString("UIDNEXT ") + self.writeUID(number)
+            return self.writeString("UIDNEXT ") + self.writeMessageIdentifier(number)
         case .uidValidity(let number):
             return self.writeString("UIDVALIDITY ") + self.writeUIDValidity(number)
         case .unseen(let number):
