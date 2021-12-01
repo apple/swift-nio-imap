@@ -30,28 +30,28 @@ public typealias UIDSet = MessageIdentifierSet<UID>
 /// See `MessageIdentifierSetNonEmpty<UID>`
 public typealias UIDSetNonEmpty = MessageIdentifierSetNonEmpty<UID>
 
-/// A set contains an array of `UIDRange` to represent a (potentially large) collection of messages.
+/// A set contains an array of `MessageIdentifierRange<MessageIdentifier>>` to represent a (potentially large) collection of messages.
 ///
-/// UIDs are _not_ sorted.
+/// `MessageIdentifier`s are _not_ sorted.
 public struct MessageIdentifierSet<IdentifierType: MessageIdentifier>: Hashable {
     /// A set that contains a single range, that in turn contains all messages.
     public static var all: Self {
         MessageIdentifierSet(MessageIdentifierRange<IdentifierType>.all)
     }
 
-    /// A set that contains no UIDs.
+    /// A set that contains no `MessageIdentifier`s.
     public static var empty: Self {
         MessageIdentifierSet()
     }
 
-    /// A non-empty array of UID ranges.
+    /// A non-empty array of `MessageIdentifier` ranges.
     fileprivate var _ranges: RangeSet<MessageIdentificationShiftWrapper>
 
     fileprivate init(_ ranges: RangeSet<MessageIdentificationShiftWrapper>) {
         self._ranges = ranges
     }
 
-    /// Creates a new `UIDSet` containing the UIDs in the given ranges.
+    /// Creates a new `MessageIdentifierSet` containing the `MessageIdentifier`s in the given ranges.
     public init<S: Sequence>(_ ranges: S) where S.Element == MessageIdentifierRange<IdentifierType> {
         self.init()
         ranges.forEach {
@@ -68,20 +68,20 @@ public struct MessageIdentifierSet<IdentifierType: MessageIdentifier>: Hashable 
     }
 }
 
-/// A wrapper around a `UIDSet` that enforces at least one element.
+/// A wrapper around a `MessageIdentifierSet` that enforces at least one element.
 public struct MessageIdentifierSetNonEmpty<IdentifierType: MessageIdentifier>: Hashable {
     /// A set that contains a single range, that in turn contains all messages.
     public static var all: Self {
         MessageIdentifierSetNonEmpty(set: .all)!
     }
 
-    /// The underlying `UIDSet`
+    /// The underlying `MessageIdentifierSet`
     public private(set) var set: MessageIdentifierSet<IdentifierType>
 
-    /// Creates a new `UIDSetNonEmpty` from a `UIDSet`, after first
+    /// Creates a new `MessageIdentifierSetNonEmpty` from a `MessageIdentifierSet`, after first
     /// validating that the set is not emtpy.
-    /// - parameter set: The underlying `UIDSet` to use.
-    /// - returns: `nil` if the given `UIDSet` is empty.
+    /// - parameter set: The underlying `MessageIdentifierSet` to use.
+    /// - returns: `nil` if the given `MessageIdentifierSet` is empty.
     public init?(set: MessageIdentifierSet<IdentifierType>) {
         guard set.count > 0 else {
             return nil
@@ -172,25 +172,25 @@ extension MessageIdentifierSet.RangeView: Equatable {
 // MARK: -
 
 extension MessageIdentifierSet {
-    /// Creates a `UIDSet` from a closed range.
+    /// Creates a `MessageIdentifierSet` from a closed range.
     /// - parameter range: The closed range to use.
     public init(_ range: ClosedRange<IdentifierType>) {
         self.init(MessageIdentifierRange<IdentifierType>(range))
     }
 
-    /// Creates a `UIDSet` from a partial range.
+    /// Creates a `MessageIdentifierSet` from a partial range.
     /// - parameter range: The partial range to use.
     public init(_ range: PartialRangeThrough<IdentifierType>) {
         self.init(MessageIdentifierRange<IdentifierType>(range))
     }
 
-    /// Creates a `UIDSet` from a partial range.
+    /// Creates a `MessageIdentifierSet` from a partial range.
     /// - parameter range: The partial range to use.
     public init(_ range: PartialRangeFrom<IdentifierType>) {
         self.init(MessageIdentifierRange<IdentifierType>(range))
     }
 
-    /// Creates a `UIDSet` from a range.
+    /// Creates a `MessageIdentifierSet` from a range.
     /// - parameter range: The range to use.
     public init(_ range: Range<IdentifierType>) {
         if range.isEmpty {
@@ -201,7 +201,7 @@ extension MessageIdentifierSet {
     }
 
     /// Creates a set from a single range.
-    /// - parameter range: The `UIDRange` to construct a set from.
+    /// - parameter range: The `MessageIdentifierRange` to construct a set from.
     public init(_ range: MessageIdentifierRange<IdentifierType>) {
         let a: Range<MessageIdentificationShiftWrapper> = Range(range)
         self._ranges = RangeSet(a)
@@ -230,7 +230,7 @@ extension MessageIdentifierSetNonEmpty: CustomDebugStringConvertible {
 // MARK: - Array Literal
 
 extension MessageIdentifierSet: ExpressibleByArrayLiteral {
-    /// Creates a new UIDSet from a literal array of ranges.
+    /// Creates a new MessageIdentifierSet from a literal array of ranges.
     /// - parameter arrayLiteral: The elements to use, assumed to be non-empty.
     public init(arrayLiteral elements: MessageIdentifierRange<IdentifierType>...) {
         self.init(elements)
@@ -238,7 +238,7 @@ extension MessageIdentifierSet: ExpressibleByArrayLiteral {
 }
 
 extension MessageIdentifierSetNonEmpty: ExpressibleByArrayLiteral {
-    /// Creates a new UIDSet from a literal array of ranges.
+    /// Creates a new MessageIdentifierSet from a literal array of ranges.
     /// - parameter arrayLiteral: The elements to use, assumed to be non-empty.
     public init(arrayLiteral elements: MessageIdentifierRange<IdentifierType>...) {
         precondition(elements.count > 0, "At least one element is required.")
@@ -334,7 +334,7 @@ extension MessageIdentifierSet: BidirectionalCollection {
         _ranges.isEmpty
     }
 
-    /// The number of UIDs in the set.
+    /// The number of `MessageIdentifier`s in the set.
     ///
     /// - Note: The complexity of this is _not_ O(1)
     ///

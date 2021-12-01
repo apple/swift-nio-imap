@@ -60,14 +60,14 @@ extension UIDTests {
 extension UIDTests {
     func testEncode_max() {
         let expected = "*"
-        let size = self.testBuffer.writeUID(.max)
+        let size = self.testBuffer.writeMessageIdentifier(UID.max)
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }
 
     func testEncode_number() {
         let expected = "1234"
-        let size = self.testBuffer.writeUID(1234)
+        let size = self.testBuffer.writeMessageIdentifier(UID(1234))
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }

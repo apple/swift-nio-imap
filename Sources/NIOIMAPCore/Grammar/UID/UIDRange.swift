@@ -14,25 +14,25 @@
 
 import struct NIO.ByteBuffer
 
-/// Represents a range of `UID`s using lower and upper bounds.
+/// Represents a range of `MessageIdentifier`s using lower and upper bounds.
 public struct MessageIdentifierRange<IdentifierType: MessageIdentifier>: Hashable {
     /// The range expressed as a native Swift range.
     public var range: ClosedRange<IdentifierType>
 
-    /// Creates a new `UIDRange`.
-    /// - parameter range: A closed range with `UID`s as the upper and lower bound.
+    /// Creates a new `MessageIdentifierRange`.
+    /// - parameter range: A closed range with `MessageIdentifier`s as the upper and lower bound.
     public init(_ range: ClosedRange<IdentifierType>) {
         self.range = range
     }
 
-    /// Creates a new `UIDRange` from a partial range, using `.min` as the lower bound.
-    /// - parameter range: A partial with a `UID` as the upper bound.
+    /// Creates a new `MessageIdentifierRange` from a partial range, using `.min` as the lower bound.
+    /// - parameter range: A partial with a `MessageIdentifier` as the upper bound.
     public init(_ range: PartialRangeThrough<IdentifierType>) {
         self.init(IdentifierType.min ... range.upperBound)
     }
 
-    /// Creates a new `UIDRange` from a partial range, using `.max` as the upper bound.
-    /// - parameter rawValue: A partial with a `UID` as the lower bound.
+    /// Creates a new `MessageIdentifierRange` from a partial range, using `.max` as the upper bound.
+    /// - parameter rawValue: A partial with a `MessageIdentifier` as the lower bound.
     public init(_ range: PartialRangeFrom<IdentifierType>) {
         self.init(range.lowerBound ... IdentifierType.max)
     }
@@ -68,31 +68,31 @@ extension MessageIdentifierRange: ExpressibleByIntegerLiteral {
 }
 
 extension MessageIdentifierRange {
-    /// Creates a range that covers every valid UID.
+    /// Creates a range that covers every valid `MessageIdentifier`.
     public static var all: Self {
         Self((.min) ... (.max))
     }
 }
 
 extension MessageIdentifier {
-    /// Creates a new `SequenceRange` from `.min` to `value`.
+    /// Creates a new `MessageIdentifierRange` from `.min` to `value`.
     /// - parameter value: The upper bound.
-    /// - returns: A new `SequenceRange`.
+    /// - returns: A new `MessageIdentifierRange`.
     public static prefix func ... (value: Self) -> MessageIdentifierRange<Self> {
         MessageIdentifierRange<Self>((.min) ... value)
     }
 
-    /// Creates a new `SequenceRange` from `value` to `.max`.
+    /// Creates a new `MessageIdentifierRange` from `value` to `.max`.
     /// - parameter value: The lower bound.
-    /// - returns: A new `SequenceRange`.
+    /// - returns: A new `MessageIdentifierRange`.
     public static postfix func ... (value: Self) -> MessageIdentifierRange<Self> {
         MessageIdentifierRange<Self>(value ... (.max))
     }
 
-    /// Creates a `SequenceRange` from lower and upper bounds.
+    /// Creates a `MessageIdentifierRange` from lower and upper bounds.
     /// - parameter lower: The lower bound.
     /// - parameter upper: The upper bound.
-    /// - returns: A new `SequenceRange`.
+    /// - returns: A new `MessageIdentifier`.
     public static func ... (lower: Self, upper: Self) -> MessageIdentifierRange<Self> {
         MessageIdentifierRange<Self>(lower ... upper)
     }
