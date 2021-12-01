@@ -62,7 +62,7 @@ extension MessageIdentifier {
 
 /// Unique Message Identifier
 ///
-/// Not that valid `UID`s are 1 ... 4294967295 (UInt32.max).
+/// Note that valid `UID`s are 1 ... 4294967295 (UInt32.max).
 /// The maximum value is often rendered as `*` when encoded.
 ///
 /// See RFC 3501 section 2.3.1.1.
