@@ -1113,7 +1113,7 @@ extension GrammarParser {
     static func parseIUIDOnly(buffer: inout ParseBuffer, tracker: StackTracker) throws -> IUID {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             try PL.parseFixedString(";UID=", buffer: &buffer, tracker: tracker)
-            return IUID(uid: try self.parseUID(buffer: &buffer, tracker: tracker))
+            return IUID(uid: try self.parseMessageIdentifier(buffer: &buffer, tracker: tracker))
         }
     }
 

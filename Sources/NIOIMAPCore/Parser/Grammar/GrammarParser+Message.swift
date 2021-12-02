@@ -27,7 +27,7 @@ extension GrammarParser {
     // message-data    = nz-number SP ("EXPUNGE" / ("FETCH" SP msg-att))
     static func parseMessageData(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageData {
         func parseMessageData_expunge(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageData {
-            let number = try self.parseSequenceNumber(buffer: &buffer, tracker: tracker)
+            let number: SequenceNumber = try self.parseMessageIdentifier(buffer: &buffer, tracker: tracker)
             try PL.parseFixedString(" EXPUNGE", buffer: &buffer, tracker: tracker)
             return .expunge(number)
         }
@@ -116,7 +116,7 @@ extension GrammarParser {
 
         func parseMessageAttribute_uid(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute {
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-            return .uid(try self.parseUID(buffer: &buffer, tracker: tracker))
+            return .uid(try self.parseMessageIdentifier(buffer: &buffer, tracker: tracker))
         }
 
         func parseMessageAttribute_binarySize(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute {

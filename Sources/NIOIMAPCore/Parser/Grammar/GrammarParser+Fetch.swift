@@ -210,7 +210,7 @@ extension GrammarParser {
     static func parseFetchResponseStart(buffer: inout ParseBuffer, tracker: StackTracker) throws -> _FetchResponse {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             try PL.parseFixedString("* ", buffer: &buffer, tracker: tracker)
-            let number = try self.parseSequenceNumber(buffer: &buffer, tracker: tracker)
+            let number: SequenceNumber = try self.parseMessageIdentifier(buffer: &buffer, tracker: tracker)
             try PL.parseFixedString(" FETCH (", buffer: &buffer, tracker: tracker)
             return .start(number)
         }

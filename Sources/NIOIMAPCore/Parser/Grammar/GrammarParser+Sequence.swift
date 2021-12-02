@@ -34,7 +34,7 @@ extension GrammarParser {
         func parse_SequenceOrWildcard(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SequenceNumber {
             try PL.parseOneOf(
                 parse_wildcard,
-                self.parseSequenceNumber,
+                self.parseMessageIdentifier,
                 buffer: &buffer,
                 tracker: tracker
             )
@@ -72,14 +72,14 @@ extension GrammarParser {
         }
     }
 
-    // SequenceNumber
-    // Note: the formal syntax is bogus here.
+    // Parses a `MessageIdentifier`
+    // Note: the formal syntax for `UID` and `SequenceNumber` is bogus here.
     // "*" is a sequence range, but not a sequence number.
-    static func parseSequenceNumber(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SequenceNumber {
-        guard let seq = SequenceNumber(exactly: try self.parseNZNumber(buffer: &buffer, tracker: tracker)) else {
+    static func parseMessageIdentifier<T: MessageIdentifier>(buffer: inout ParseBuffer, tracker: StackTracker) throws -> T {
+        guard let id = T(exactly: try self.parseNZNumber(buffer: &buffer, tracker: tracker)) else {
             throw ParserError(hint: "Sequence number out of range.")
         }
-        return seq
+        return id
     }
 
     // sequence-set    = (seq-number / seq-range) ["," sequence-set]
@@ -88,8 +88,7 @@ extension GrammarParser {
     // seq-last-command   = "$"
     static func parseSequenceSet(buffer: inout ParseBuffer, tracker: StackTracker) throws -> LastCommandSet<SequenceSet> {
         func parseSequenceSet_number(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SequenceRange {
-            let num = try self.parseSequenceNumber(buffer: &buffer, tracker: tracker)
-            return SequenceRange(num)
+            SequenceRange(try self.parseMessageIdentifier(buffer: &buffer, tracker: tracker))
         }
 
         func parseSequenceSet_element(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SequenceRange {

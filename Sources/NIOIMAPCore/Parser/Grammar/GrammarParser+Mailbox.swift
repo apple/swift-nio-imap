@@ -246,7 +246,7 @@ extension GrammarParser {
 
         func parseStatusAttributeValue_uidnext(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxValue {
             try PL.parseFixedString("UIDNEXT ", buffer: &buffer, tracker: tracker)
-            return .uidNext(try self.parseUID(buffer: &buffer, tracker: tracker))
+            return .uidNext(try self.parseMessageIdentifier(buffer: &buffer, tracker: tracker))
         }
 
         func parseStatusAttributeValue_uidvalidity(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxValue {

@@ -543,7 +543,7 @@ extension ParserUnitTests {
 
     func testCapability_invalid_empty() {
         var buffer = TestUtilities.makeParseBuffer(for: "")
-        XCTAssertThrowsError(try GrammarParser.parseSequenceNumber(buffer: &buffer, tracker: .testTracker)) { error in
+        XCTAssertThrowsError(try GrammarParser.parseCapability(buffer: &buffer, tracker: .testTracker)) { error in
             XCTAssertTrue(error is IncompleteMessage)
         }
     }
@@ -2685,27 +2685,6 @@ extension ParserUnitTests {
             parserErrorInputs: [
             ],
             incompleteMessageInputs: [
-            ]
-        )
-    }
-}
-
-// MARK: - uniqueID parseUID
-
-extension ParserUnitTests {
-    func testUniqueID() {
-        self.iterateTests(
-            testFunction: GrammarParser.parseUID,
-            validInputs: [
-                ("1", " ", 1, #line),
-                ("123", " ", 123, #line),
-            ],
-            parserErrorInputs: [
-                ("0", " ", #line),
-                ("0123", " ", #line),
-            ],
-            incompleteMessageInputs: [
-                ("123", "", #line),
             ]
         )
     }
