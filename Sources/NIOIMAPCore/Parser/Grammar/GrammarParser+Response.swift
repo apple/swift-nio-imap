@@ -288,7 +288,7 @@ extension GrammarParser {
 
         func parseResponseTextCode_uidNext(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
             try PL.parseFixedString("UIDNEXT ", buffer: &buffer, tracker: tracker)
-            return .uidNext(try self.parseUID(buffer: &buffer, tracker: tracker))
+            return .uidNext(try self.parseMessageIdentifier(buffer: &buffer, tracker: tracker))
         }
 
         func parseResponseTextCode_uidValidity(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
@@ -298,7 +298,7 @@ extension GrammarParser {
 
         func parseResponseTextCode_unseen(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
             try PL.parseFixedString("UNSEEN ", buffer: &buffer, tracker: tracker)
-            return .unseen(try self.parseSequenceNumber(buffer: &buffer, tracker: tracker))
+            return .unseen(try self.parseMessageIdentifier(buffer: &buffer, tracker: tracker))
         }
 
         func parseResponseTextCode_namespace(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {

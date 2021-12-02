@@ -34,7 +34,7 @@ extension GrammarParser {
         func parse_UIDOrWildcard(buffer: inout ParseBuffer, tracker: StackTracker) throws -> UID {
             try PL.parseOneOf(
                 parse_wildcard,
-                self.parseUID,
+                self.parseMessageIdentifier,
                 buffer: &buffer,
                 tracker: tracker
             )
@@ -60,14 +60,6 @@ extension GrammarParser {
     }
 
     // uniqueid        = nz-number
-    static func parseUID(buffer: inout ParseBuffer, tracker: StackTracker) throws -> UID {
-        guard let uid = UID(exactly: try self.parseNZNumber(buffer: &buffer, tracker: tracker)) else {
-            throw ParserError(hint: "UID out of range.")
-        }
-        return uid
-    }
-
-    // uniqueid        = nz-number
     static func parseUIDValidity(buffer: inout ParseBuffer, tracker: StackTracker) throws -> UIDValidity {
         guard let validity = UIDValidity(exactly: try self.parseNZNumber(buffer: &buffer, tracker: tracker)) else {
             throw ParserError(hint: "Invalid UID validity.")
@@ -78,8 +70,7 @@ extension GrammarParser {
     // uid-set
     static func parseUIDSet(buffer: inout ParseBuffer, tracker: StackTracker) throws -> UIDSet {
         func parseUIDSet_number(buffer: inout ParseBuffer, tracker: StackTracker) throws -> UIDRange {
-            let num = try self.parseUID(buffer: &buffer, tracker: tracker)
-            return UIDRange(num)
+            return UIDRange(try self.parseMessageIdentifier(buffer: &buffer, tracker: tracker))
         }
 
         func parseUIDSet_element(buffer: inout ParseBuffer, tracker: StackTracker) throws -> UIDRange {
@@ -116,8 +107,7 @@ extension GrammarParser {
 
     static func parseUIDRangeArray(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [UIDRange] {
         func parseUIDArray_number(buffer: inout ParseBuffer, tracker: StackTracker) throws -> UIDRange {
-            let num = try self.parseUID(buffer: &buffer, tracker: tracker)
-            return UIDRange(num)
+            return UIDRange(try self.parseMessageIdentifier(buffer: &buffer, tracker: tracker))
         }
 
         func parseUIDArray_element(buffer: inout ParseBuffer, tracker: StackTracker) throws -> UIDRange {
