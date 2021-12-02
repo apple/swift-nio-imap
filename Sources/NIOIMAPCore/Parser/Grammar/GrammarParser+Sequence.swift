@@ -88,7 +88,7 @@ extension GrammarParser {
     // seq-last-command   = "$"
     static func parseSequenceSet(buffer: inout ParseBuffer, tracker: StackTracker) throws -> LastCommandSet<SequenceSet> {
         func parseSequenceSet_number(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SequenceRange {
-            return SequenceRange(try self.parseMessageIdentifier(buffer: &buffer, tracker: tracker))
+            SequenceRange(try self.parseMessageIdentifier(buffer: &buffer, tracker: tracker))
         }
 
         func parseSequenceSet_element(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SequenceRange {

@@ -70,7 +70,7 @@ extension GrammarParser {
     // uid-set
     static func parseUIDSet(buffer: inout ParseBuffer, tracker: StackTracker) throws -> UIDSet {
         func parseUIDSet_number(buffer: inout ParseBuffer, tracker: StackTracker) throws -> UIDRange {
-            return UIDRange(try self.parseMessageIdentifier(buffer: &buffer, tracker: tracker))
+            UIDRange(try self.parseMessageIdentifier(buffer: &buffer, tracker: tracker))
         }
 
         func parseUIDSet_element(buffer: inout ParseBuffer, tracker: StackTracker) throws -> UIDRange {
@@ -107,7 +107,7 @@ extension GrammarParser {
 
     static func parseUIDRangeArray(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [UIDRange] {
         func parseUIDArray_number(buffer: inout ParseBuffer, tracker: StackTracker) throws -> UIDRange {
-            return UIDRange(try self.parseMessageIdentifier(buffer: &buffer, tracker: tracker))
+            UIDRange(try self.parseMessageIdentifier(buffer: &buffer, tracker: tracker))
         }
 
         func parseUIDArray_element(buffer: inout ParseBuffer, tracker: StackTracker) throws -> UIDRange {
