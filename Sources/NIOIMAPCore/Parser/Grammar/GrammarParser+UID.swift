@@ -24,41 +24,6 @@ import struct NIO.ByteBuffer
 import struct NIO.ByteBufferView
 
 extension GrammarParser {
-    // uid-range       = (uniqueid ":" uniqueid)
-    static func parseUIDRange(buffer: inout ParseBuffer, tracker: StackTracker) throws -> UIDRange {
-        func parse_wildcard(buffer: inout ParseBuffer, tracker: StackTracker) throws -> UID {
-            try PL.parseFixedString("*", buffer: &buffer, tracker: tracker)
-            return .max
-        }
-
-        func parse_UIDOrWildcard(buffer: inout ParseBuffer, tracker: StackTracker) throws -> UID {
-            try PL.parseOneOf(
-                parse_wildcard,
-                self.parseMessageIdentifier,
-                buffer: &buffer,
-                tracker: tracker
-            )
-        }
-
-        func parse_colonAndUIDOrWildcard(buffer: inout ParseBuffer, tracker: StackTracker) throws -> UID {
-            try PL.parseFixedString(":", buffer: &buffer, tracker: tracker)
-            return try parse_UIDOrWildcard(buffer: &buffer, tracker: tracker)
-        }
-
-        return try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> UIDRange in
-            let id1 = try parse_UIDOrWildcard(buffer: &buffer, tracker: tracker)
-            let id2 = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: parse_colonAndUIDOrWildcard)
-            if let id2 = id2 {
-                guard id1 <= id2 else {
-                    throw ParserError(hint: "Invalid range \(id1):\(id2)")
-                }
-                return UIDRange(id1 ... id2)
-            } else {
-                return UIDRange(id1)
-            }
-        }
-    }
-
     // uniqueid        = nz-number
     static func parseUIDValidity(buffer: inout ParseBuffer, tracker: StackTracker) throws -> UIDValidity {
         guard let validity = UIDValidity(exactly: try self.parseNZNumber(buffer: &buffer, tracker: tracker)) else {
@@ -75,7 +40,7 @@ extension GrammarParser {
 
         func parseUIDSet_element(buffer: inout ParseBuffer, tracker: StackTracker) throws -> UIDRange {
             try PL.parseOneOf(
-                self.parseUIDRange,
+                self.parseMessageIdentifierRange,
                 parseUIDSet_number,
                 buffer: &buffer,
                 tracker: tracker
@@ -112,7 +77,7 @@ extension GrammarParser {
 
         func parseUIDArray_element(buffer: inout ParseBuffer, tracker: StackTracker) throws -> UIDRange {
             try PL.parseOneOf(
-                self.parseUIDRange,
+                self.parseMessageIdentifierRange,
                 parseUIDArray_number,
                 buffer: &buffer,
                 tracker: tracker

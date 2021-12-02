@@ -25,13 +25,13 @@ import struct NIO.ByteBufferView
 
 extension GrammarParser {
     // Sequence Range
-    static func parseSequenceRange(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SequenceRange {
-        func parse_wildcard(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SequenceNumber {
+    static func parseMessageIdentifierRange<T: MessageIdentifier>(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageIdentifierRange<T> {
+        func parse_wildcard<T: MessageIdentifier>(buffer: inout ParseBuffer, tracker: StackTracker) throws -> T {
             try PL.parseFixedString("*", buffer: &buffer, tracker: tracker)
             return .max
         }
 
-        func parse_SequenceOrWildcard(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SequenceNumber {
+        func parse_identifierOrWildcard<T: MessageIdentifier>(buffer: inout ParseBuffer, tracker: StackTracker) throws -> T {
             try PL.parseOneOf(
                 parse_wildcard,
                 self.parseMessageIdentifier,
@@ -40,23 +40,21 @@ extension GrammarParser {
             )
         }
 
-        func parse_colonAndSequenceOrWildcard(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SequenceNumber {
+        func parse_colonAndIdentifierOrWildcard<T: MessageIdentifier>(buffer: inout ParseBuffer, tracker: StackTracker) throws -> T {
             try PL.parseFixedString(":", buffer: &buffer, tracker: tracker)
-            return try parse_SequenceOrWildcard(buffer: &buffer, tracker: tracker)
+            return try parse_identifierOrWildcard(buffer: &buffer, tracker: tracker)
         }
 
-        return try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> SequenceRange in
-            let id1 = try parse_SequenceOrWildcard(buffer: &buffer, tracker: tracker)
-            let id2 = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: parse_colonAndSequenceOrWildcard)
+        return try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> MessageIdentifierRange<T> in
+            let id1: T = try parse_identifierOrWildcard(buffer: &buffer, tracker: tracker)
+            let id2: T? = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: parse_colonAndIdentifierOrWildcard)
             if let id2 = id2 {
                 guard id1 <= id2 else {
                     throw ParserError(hint: "Invalid range, \(id1):\(id2)")
                 }
-                return SequenceRange(id1 ... id2)
-            } else if id1 == .max {
-                return .all
+                return MessageIdentifierRange(id1 ... id2)
             } else {
-                return SequenceRange(id1)
+                return MessageIdentifierRange(id1)
             }
         }
     }
@@ -93,7 +91,7 @@ extension GrammarParser {
 
         func parseSequenceSet_element(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SequenceRange {
             try PL.parseOneOf(
-                self.parseSequenceRange,
+                self.parseMessageIdentifierRange,
                 parseSequenceSet_number,
                 buffer: &buffer,
                 tracker: tracker
