@@ -44,7 +44,7 @@ extension GrammarParser_UID_Tests {
 extension GrammarParser_UID_Tests {
     func testUIDRange() {
         self.iterateTests(
-            testFunction: GrammarParser.parseUIDRange,
+            testFunction: GrammarParser.parseMessageIdentifierRange,
             validInputs: [
                 ("*", "\r\n", MessageIdentifierRange<UID>(.max), #line),
                 ("1:*", "\r\n", MessageIdentifierRange<UID>.all, #line),

@@ -18,30 +18,6 @@ import XCTest
 
 class GrammarParser_Sequence_Tests: XCTestCase, _ParserTestHelpers {}
 
-// MARK: - SequenceRange
-
-extension GrammarParser_Sequence_Tests {
-    func testParseSequenceRange() {
-        self.iterateTests(
-            testFunction: GrammarParser.parseSequenceRange,
-            validInputs: [
-                ("*", "\r\n", MessageIdentifierRange<SequenceNumber>.all, #line),
-                ("1:*", "\r\n", MessageIdentifierRange<SequenceNumber>.all, #line),
-                ("12:34", "\r\n", MessageIdentifierRange<SequenceNumber>(12 ... 34), #line),
-                ("12:*", "\r\n", MessageIdentifierRange<SequenceNumber>(12 ... (.max)), #line),
-                ("1:34", "\r\n", MessageIdentifierRange<SequenceNumber>((.min) ... 34), #line),
-            ],
-            parserErrorInputs: [
-                ("a", "", #line),
-            ],
-            incompleteMessageInputs: [
-                ("", "", #line),
-                ("111", "", #line),
-            ]
-        )
-    }
-}
-
 // MARK: - sequence-set parseSequenceSet
 
 extension GrammarParser_Sequence_Tests {
