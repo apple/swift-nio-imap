@@ -53,8 +53,6 @@ extension GrammarParser {
                     throw ParserError(hint: "Invalid range, \(id1):\(id2)")
                 }
                 return MessageIdentifierRange(id1 ... id2)
-            } else if id1 == .max {
-                return .all
             } else {
                 return MessageIdentifierRange(id1)
             }

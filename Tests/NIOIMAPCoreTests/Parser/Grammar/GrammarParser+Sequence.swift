@@ -27,7 +27,7 @@ extension GrammarParser_Sequence_Tests {
             validInputs: [
                 ("765", " ", .set([765]), #line),
                 ("1,2:5,7,9:*", " ", .set([MessageIdentifierRange<SequenceNumber>(1), MessageIdentifierRange<SequenceNumber>(2 ... 5), MessageIdentifierRange<SequenceNumber>(7), MessageIdentifierRange<SequenceNumber>(9...)]), #line),
-                ("*", "\r", .set([.all]), #line),
+                ("1:*", "\r", .set([.all]), #line),
                 ("1:2", "\r", .set([1 ... 2]), #line),
                 ("1:2,2:3,3:4", "\r", .set([1 ... 2, 2 ... 3, 3 ... 4]), #line),
                 ("$", "\r", .lastCommand, #line),
