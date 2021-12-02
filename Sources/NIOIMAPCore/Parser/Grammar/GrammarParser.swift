@@ -2221,7 +2221,7 @@ extension GrammarParser {
     //                       "(" [tagged-ext-comp] ")"
     static func parseParameterValue(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ParameterValue {
         func parseTaggedExtensionSimple_set(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ParameterValue {
-            .sequence(try self.parseSequenceSet(buffer: &buffer, tracker: tracker))
+            .sequence(try self.parseMessageIdentifierSet(buffer: &buffer, tracker: tracker))
         }
 
         func parseTaggedExtensionVal_comp(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ParameterValue {
