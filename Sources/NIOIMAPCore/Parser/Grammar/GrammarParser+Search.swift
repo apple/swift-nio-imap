@@ -293,7 +293,7 @@ extension GrammarParser {
         }
 
         func parseSearchKey_sequenceSet(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SearchKey {
-            .sequenceNumbers(try self.parseSequenceSet(buffer: &buffer, tracker: tracker))
+            .sequenceNumbers(try self.parseMessageIdentifierSet(buffer: &buffer, tracker: tracker))
         }
 
         func parseSearchKey_array(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SearchKey {
@@ -407,7 +407,7 @@ extension GrammarParser {
 
         func parseSearchReturnData_all(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SearchReturnData {
             try PL.parseFixedString("ALL ", buffer: &buffer, tracker: tracker)
-            return .all(try self.parseSequenceSet(buffer: &buffer, tracker: tracker))
+            return .all(try self.parseMessageIdentifierSet(buffer: &buffer, tracker: tracker))
         }
 
         func parseSearchReturnData_count(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SearchReturnData {

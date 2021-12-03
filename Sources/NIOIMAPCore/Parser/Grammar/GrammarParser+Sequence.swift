@@ -84,26 +84,26 @@ extension GrammarParser {
     // And from RFC 5182
     // sequence-set       =/ seq-last-command
     // seq-last-command   = "$"
-    static func parseSequenceSet(buffer: inout ParseBuffer, tracker: StackTracker) throws -> LastCommandSet<SequenceSet> {
-        func parseSequenceSet_number(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SequenceRange {
-            SequenceRange(try self.parseMessageIdentifier(buffer: &buffer, tracker: tracker))
+    static func parseMessageIdentifierSet<T: MessageIdentifier>(buffer: inout ParseBuffer, tracker: StackTracker) throws -> LastCommandSet<MessageIdentifierSet<T>> {
+        func parseMessageIdentifierSet_number<T: MessageIdentifier>(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageIdentifierRange<T> {
+            MessageIdentifierRange<T>(try self.parseMessageIdentifier(buffer: &buffer, tracker: tracker))
         }
 
-        func parseSequenceSet_element(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SequenceRange {
+        func parseMessageIdentifierSet_element<T: MessageIdentifier>(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageIdentifierRange<T> {
             try PL.parseOneOf(
                 self.parseMessageIdentifierRange,
-                parseSequenceSet_number,
+                parseMessageIdentifierSet_number,
                 buffer: &buffer,
                 tracker: tracker
             )
         }
 
-        func parseSequenceSet_base(buffer: inout ParseBuffer, tracker: StackTracker) throws -> LastCommandSet<SequenceSet> {
+        func parseMessageIdentifierSet_base<T: MessageIdentifier>(buffer: inout ParseBuffer, tracker: StackTracker) throws -> LastCommandSet<MessageIdentifierSet<T>> {
             try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
-                var output = [try parseSequenceSet_element(buffer: &buffer, tracker: tracker)]
+                var output: [MessageIdentifierRange<T>] = [try parseMessageIdentifierSet_element(buffer: &buffer, tracker: tracker)]
                 try PL.parseZeroOrMore(buffer: &buffer, into: &output, tracker: tracker) { buffer, tracker in
                     try PL.parseFixedString(",", buffer: &buffer, tracker: tracker)
-                    return try parseSequenceSet_element(buffer: &buffer, tracker: tracker)
+                    return try parseMessageIdentifierSet_element(buffer: &buffer, tracker: tracker)
                 }
                 guard !output.isEmpty else {
                     throw ParserError(hint: "Sequence set is empty.")
@@ -112,14 +112,14 @@ extension GrammarParser {
             }
         }
 
-        func parseSequenceSet_lastCommand(buffer: inout ParseBuffer, tracker: StackTracker) throws -> LastCommandSet<SequenceSet> {
+        func parseMessageIdentifierSet_lastCommand<T: MessageIdentifier>(buffer: inout ParseBuffer, tracker: StackTracker) throws -> LastCommandSet<MessageIdentifierSet<T>> {
             try PL.parseFixedString("$", buffer: &buffer, tracker: tracker)
             return .lastCommand
         }
 
         return try PL.parseOneOf(
-            parseSequenceSet_base,
-            parseSequenceSet_lastCommand,
+            parseMessageIdentifierSet_base,
+            parseMessageIdentifierSet_lastCommand,
             buffer: &buffer,
             tracker: tracker
         )

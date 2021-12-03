@@ -231,7 +231,7 @@ extension GrammarParser {
     static func parseCommandSuffix_store(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Command in
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-            let sequence = try self.parseSequenceSet(buffer: &buffer, tracker: tracker)
+            let sequence: LastCommandSet<SequenceSet> = try self.parseMessageIdentifierSet(buffer: &buffer, tracker: tracker)
             let modifiers = try PL.parseOptional(buffer: &buffer, tracker: tracker) { buffer, tracker -> [StoreModifier] in
                 try PL.parseSpaces(buffer: &buffer, tracker: tracker)
                 try PL.parseFixedString("(", buffer: &buffer, tracker: tracker)
@@ -260,7 +260,7 @@ extension GrammarParser {
     static func parseCommandSuffix_move(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Command in
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-            let set = try self.parseSequenceSet(buffer: &buffer, tracker: tracker)
+            let set: LastCommandSet<SequenceSet> = try self.parseMessageIdentifierSet(buffer: &buffer, tracker: tracker)
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             let mailbox = try self.parseMailbox(buffer: &buffer, tracker: tracker)
             return .move(set, mailbox)
@@ -280,7 +280,7 @@ extension GrammarParser {
     static func parseCommandSuffix_copy(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Command in
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-            let sequence = try self.parseSequenceSet(buffer: &buffer, tracker: tracker)
+            let sequence: LastCommandSet<SequenceSet> = try self.parseMessageIdentifierSet(buffer: &buffer, tracker: tracker)
             try PL.parseFixedString(" ", buffer: &buffer, tracker: tracker)
             let mailbox = try self.parseMailbox(buffer: &buffer, tracker: tracker)
             return .copy(sequence, mailbox)
@@ -475,7 +475,7 @@ extension GrammarParser {
     static func parseCommandSuffix_fetch(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Command in
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-            let sequence = try self.parseSequenceSet(buffer: &buffer, tracker: tracker)
+            let sequence: LastCommandSet<SequenceSet> = try self.parseMessageIdentifierSet(buffer: &buffer, tracker: tracker)
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             let att = try parseFetch_type(buffer: &buffer, tracker: tracker)
             let modifiers = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseParameters) ?? [:]
