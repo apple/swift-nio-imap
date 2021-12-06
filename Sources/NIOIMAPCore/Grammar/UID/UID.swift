@@ -74,6 +74,25 @@ public struct UID: MessageIdentifier {
     }
 }
 
+/// Either a `UID` or a `SequenceNumber`. We weren't able to tell
+/// at the time of parsing. Use `UID.init(Messageidentifier)` and
+/// `SequenceNumber.init(MessageIdentifier)` to convert
+/// between the two.
+public struct UnknownMessageIdentifier: MessageIdentifier {
+    public var rawValue: UInt32
+
+    public init(rawValue: UInt32) {
+        self.rawValue = rawValue
+    }
+}
+
+extension MessageIdentifier {
+    /// Used to convert between `UID`, `SequenceNumber`, and `UnknownMessageIdentifier`.
+    init<T: MessageIdentifier>(id: T) {
+        self.init(rawValue: id.rawValue)
+    }
+}
+
 extension BinaryInteger {
     public init<IdentifierType: MessageIdentifier>(_ id: IdentifierType) {
         self = Self(id.rawValue)

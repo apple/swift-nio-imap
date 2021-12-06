@@ -69,7 +69,7 @@ final class RoundtripTests: XCTestCase {
             (.status(.inbox, [.messageCount]), #line),
             (.status(MailboxName("foobar"), [.messageCount, .recentCount, .uidNext]), #line),
 
-            (.copy(LastCommandSet(2...), .inbox), #line),
+            (.copy(LastCommandSet.set(MessageIdentifierSet(2...)), .inbox), #line),
 
             (.fetch(.set([.all]), .all, [:]), #line),
             (.fetch(.set([.all]), .fast, [:]), #line),
@@ -80,9 +80,9 @@ final class RoundtripTests: XCTestCase {
             (.fetch(.set([5678]), [.flags, .bodySection(peek: false, .init(kind: .header), 3 ... 4)], [:]), #line),
             (.fetch(.set([5678]), [.bodySection(peek: false, .init(part: [12, 34], kind: .headerFields(["some", "header"])), 3 ... 4)], [:]), #line),
 
-            (.store(.all, [], .flags(.remove(silent: true, list: [.answered, .deleted]))), #line),
-            (.store(.all, [], .flags(.add(silent: true, list: [.draft, .extension("\\some")]))), #line),
-            (.store(.all, [], .flags(.replace(silent: true, list: [.keyword(.colorBit0)]))), #line),
+            (.store(.set(.all), [], .flags(.remove(silent: true, list: [.answered, .deleted]))), #line),
+            (.store(.set(.all), [], .flags(.add(silent: true, list: [.draft, .extension("\\some")]))), #line),
+            (.store(.set(.all), [], .flags(.replace(silent: true, list: [.keyword(.colorBit0)]))), #line),
 
             (.uidCopy(.set(.all), .inbox), #line),
 
