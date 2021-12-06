@@ -747,7 +747,7 @@ extension ParserUnitTests {
     func testCopy_valid() {
         TestUtilities.withParseBuffer("COPY 1,2,3 inbox", terminator: " ") { (buffer) in
             let copy = try GrammarParser.parseCommand(buffer: &buffer, tracker: .testTracker)
-            let expectedSequence = LastCommandSet([1, 2, 3])!
+            let expectedSequence: LastCommandSet<SequenceSet> = LastCommandSet.set([1, 2, 3])
             let expectedMailbox = MailboxName.inbox
             XCTAssertEqual(copy, Command.copy(expectedSequence, expectedMailbox))
         }

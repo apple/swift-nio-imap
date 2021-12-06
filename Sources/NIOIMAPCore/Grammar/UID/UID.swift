@@ -80,19 +80,17 @@ public struct UID: MessageIdentifier {
 /// between the two.
 public struct UnknownMessageIdentifier: MessageIdentifier {
     public var rawValue: UInt32
-    
+
     public init(rawValue: UInt32) {
         self.rawValue = rawValue
     }
 }
 
 extension MessageIdentifier {
-    
     /// Used to convert between `UID`, `SequenceNumber`, and `UnknownMessageIdentifier`.
     init<T: MessageIdentifier>(id: T) {
         self.init(rawValue: id.rawValue)
     }
-    
 }
 
 extension BinaryInteger {

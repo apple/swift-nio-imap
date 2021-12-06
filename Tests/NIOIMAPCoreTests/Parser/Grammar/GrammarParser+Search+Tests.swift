@@ -106,7 +106,7 @@ extension GrammarParser_Search_Tests {
                 ("NOT LARGER 1234", "\r", .not(.messageSizeLarger(1234)), #line),
                 ("OR LARGER 6 SMALLER 4", "\r", .or(.messageSizeLarger(6), .messageSizeSmaller(4)), #line),
                 ("UID 2:4", "\r", .uid(.set(MessageIdentifierSetNonEmpty(set: MessageIdentifierSet<UID>(2 ... 4))!)), #line),
-                ("2:4", "\r", .sequenceNumbers(.init(2 ... 4)), #line),
+                ("2:4", "\r", .sequenceNumbers(.set([2 ... 4])), #line),
                 ("(LARGER 1)", "\r", .messageSizeLarger(1), #line),
                 ("(LARGER 1 SMALLER 5 KEYWORD hello)", "\r", .and([.messageSizeLarger(1), .messageSizeSmaller(5), .keyword(Flag.Keyword("hello"))]), #line),
                 ("YOUNGER 34", "\r", .younger(34), #line),
