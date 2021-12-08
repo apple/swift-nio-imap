@@ -24,9 +24,26 @@ private let LITERAL_MINUS = UInt8(ascii: "-")
 private let DIGIT_0 = UInt8(ascii: "0")
 private let DIGIT_9 = UInt8(ascii: "9")
 
-struct InvalidFrame: Error, Hashable {}
+/// The frame contained bytes that can never lead to a
+ /// valid command or response, and so can be safely
+ /// discarded without having to close the connection.
+ public struct InvalidFrame: Error, Hashable {
+     public init() {}
+ }
 
-struct LiteralSizeParsingError: Error, Hashable {}
+/// An error occurred when attempting to parse the size
+/// of a `literal`. The bytes in question are attached.
+ public struct LiteralSizeParsingError: Error, Hashable {
+     /// The bytes that resulted in a parsing error.
+     public var buffer: ByteBuffer
+
+     /// Creates a new `LiteralSizeParsingError` with
+     /// the bytes that failed to parse into a `UInt64`.
+     /// - parameter buffer: The bytes that resulted in a parsing error
+     public init(buffer: ByteBuffer) {
+         self.buffer = buffer
+     }
+ }
 
 extension FixedWidthInteger {
     init?(buffer: ByteBuffer) {
@@ -133,19 +150,11 @@ enum FrameStatus: Hashable {
         }
 
         let frames = self.parseFrames()
-        guard let lastFrame = frames.last else {
-            return frames
+        if let lastFrame = frames.last, case .incomplete = lastFrame, self.buffer.readableBytes > self.bufferSizeLimit {
+            throw ByteToMessageDecoderError.PayloadTooLargeError()
         }
 
-        if case FramingResult.incomplete = lastFrame {
-            if self.buffer.readableBytes > self.bufferSizeLimit {
-                throw ByteToMessageDecoderError.PayloadTooLargeError()
-            } else {
-                return frames
-            }
-        } else {
-            return frames
-        }
+        return frames
     }
 
     private mutating func parseFrames() -> [FramingResult] {
@@ -390,17 +399,17 @@ extension FramingParser {
             case DIGIT_0 ... DIGIT_9:
                 sizeBuffer.writeInteger(byte)
                 guard sizeBuffer.readableBytes <= UInt64.maximumAllowedCharacters else {
-                    throw LiteralSizeParsingError()
+                    throw LiteralSizeParsingError(buffer: sizeBuffer)
                 }
             case LITERAL_PLUS, LITERAL_MINUS:
                 guard let size = UInt64(String(buffer: sizeBuffer)) else {
-                    throw LiteralSizeParsingError()
+                    throw LiteralSizeParsingError(buffer: sizeBuffer)
                 }
                 self.state = .searchingForLiteralHeader(.findingClosingCurly(size))
                 return try self.readByte_state_searchingForLiteralHeader_findingClosingCurly(size)
             case LITERAL_HEADER_END:
                 guard let size = UInt64(String(buffer: sizeBuffer)) else {
-                    throw LiteralSizeParsingError()
+                    throw LiteralSizeParsingError(buffer: sizeBuffer)
                 }
                 self.state = .searchingForLiteralHeader(.findingCR(size))
                 return try self.readByte_state_searchingForLiteralHeader_findingCR(size)
