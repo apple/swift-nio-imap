@@ -18,12 +18,14 @@ import NIOIMAPCore
 public struct FrameDecoder: ByteToMessageDecoder {
     public typealias InboundOut = FramingResult
 
-    private var framingParser = FramingParser()
+    private var framingParser: FramingParser
 
-    public init() {}
+    public init(frameSizeLimit: Int = 1_000) {
+        self.framingParser = FramingParser(bufferSizeLimit: frameSizeLimit)
+    }
 
     public mutating func decode(context: ChannelHandlerContext, buffer: inout ByteBuffer) throws -> DecodingState {
-        let frames = self.framingParser.appendAndFrameBuffer(&buffer)
+        let frames = try self.framingParser.appendAndFrameBuffer(&buffer)
         guard frames.count > 0 else {
             return .needMoreData
         }

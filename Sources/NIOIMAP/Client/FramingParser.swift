@@ -105,8 +105,11 @@ enum FrameStatus: Hashable {
     var state: State = .normalTraversal(.includeInFrame)
     var frameLength: Int = 0
     var buffer = ByteBuffer()
+    var bufferSizeLimit: Int
 
-    @_spi(NIOIMAPInternal) public init() {}
+    @_spi(NIOIMAPInternal) public init(bufferSizeLimit: Int = 1_000) {
+        self.bufferSizeLimit = bufferSizeLimit
+    }
 
     /// Appends the given `ByteBuffer` to the parsing buffer, and parses as many frames as possible.
     /// Each frame should be fully parsable by the client or server parsers, meaning they shouldn't throw
@@ -115,12 +118,11 @@ enum FrameStatus: Hashable {
     /// - returns: An array of frames.
     /// - throws: `InvalidFrame` if a frame was found to be unparsable.
     /// - throws: `LiteralSizeParsingError` if when parsing a literal header we found an invalid size field.
-    @_spi(NIOIMAPInternal) public mutating func appendAndFrameBuffer(_ buffer: inout ByteBuffer) -> [FramingResult] {
+    @_spi(NIOIMAPInternal) public mutating func appendAndFrameBuffer(_ buffer: inout ByteBuffer) throws -> [FramingResult] {
         // fast paths should be fast
         guard buffer.readableBytes > 0 else {
             return []
         }
-
         self.buffer.writeBuffer(&buffer)
 
         // Discard bytes when we've read over half the buffer and at least 1KB
@@ -130,7 +132,20 @@ enum FrameStatus: Hashable {
             }
         }
 
-        return self.parseFrames()
+        let frames = self.parseFrames()
+        guard let lastFrame = frames.last else {
+            return frames
+        }
+        
+        if case FramingResult.incomplete(_) = lastFrame {
+            if self.buffer.readableBytes > self.bufferSizeLimit {
+                throw ByteToMessageDecoderError.PayloadTooLargeError()
+            } else {
+                return frames
+            }
+        } else {
+            return frames
+        }
     }
 
     private mutating func parseFrames() -> [FramingResult] {
