@@ -136,8 +136,8 @@ enum FrameStatus: Hashable {
         guard let lastFrame = frames.last else {
             return frames
         }
-        
-        if case FramingResult.incomplete(_) = lastFrame {
+
+        if case FramingResult.incomplete = lastFrame {
             if self.buffer.readableBytes > self.bufferSizeLimit {
                 throw ByteToMessageDecoderError.PayloadTooLargeError()
             } else {
