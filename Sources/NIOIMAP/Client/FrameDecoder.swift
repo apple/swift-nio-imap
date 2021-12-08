@@ -20,7 +20,7 @@ public struct FrameDecoder: ByteToMessageDecoder {
 
     private var framingParser: FramingParser
 
-    public init(frameSizeLimit: Int = 1_000) {
+    public init(frameSizeLimit: Int = FramingParser.defaultFrameSizeLimit) {
         self.framingParser = FramingParser(bufferSizeLimit: frameSizeLimit)
     }
 
