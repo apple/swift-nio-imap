@@ -128,7 +128,13 @@ extension CommandStreamPart: CustomDebugStringConvertible {
     public var debugDescription: String {
         var buffer = CommandEncodeBuffer(buffer: ByteBuffer(), options: .rfc3501)
         buffer.writeCommandStream(self)
-        return String(buffer: buffer.buffer.nextChunk().bytes)
+        var chunk = buffer.buffer.nextChunk()
+        var result = String(buffer: chunk.bytes)
+        while chunk.waitForContinuation {
+            chunk = buffer.buffer.nextChunk()
+            result += String(buffer: chunk.bytes)
+        }
+        return result
     }
 }
 
