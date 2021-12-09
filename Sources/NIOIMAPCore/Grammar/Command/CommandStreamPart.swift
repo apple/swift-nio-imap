@@ -124,6 +124,20 @@ public enum CommandStreamPart: Equatable {
     }
 }
 
+extension CommandStreamPart: CustomDebugStringConvertible {
+    public var debugDescription: String {
+        var buffer = CommandEncodeBuffer(buffer: ByteBuffer(), options: .rfc3501)
+        buffer.writeCommandStream(self)
+        var chunk = buffer.buffer.nextChunk()
+        var result = String(buffer: chunk.bytes)
+        while chunk.waitForContinuation {
+            chunk = buffer.buffer.nextChunk()
+            result += String(buffer: chunk.bytes)
+        }
+        return result
+    }
+}
+
 extension CommandEncodeBuffer {
     /// Writes a `CommandStreamPart` to the buffer ready to be sent to the network.
     /// - parameter stream: The `CommandStreamPart` to write.

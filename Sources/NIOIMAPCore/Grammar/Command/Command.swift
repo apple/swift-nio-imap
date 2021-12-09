@@ -178,6 +178,20 @@ public enum Command: Equatable {
     case compress(Capability.CompressionKind)
 }
 
+extension Command: CustomDebugStringConvertible {
+    public var debugDescription: String {
+        var buffer = CommandEncodeBuffer(buffer: ByteBuffer(), options: .rfc3501)
+        buffer.writeCommand(self)
+        var chunk = buffer.buffer.nextChunk()
+        var result = String(buffer: chunk.bytes)
+        while chunk.waitForContinuation {
+            chunk = buffer.buffer.nextChunk()
+            result += String(buffer: chunk.bytes)
+        }
+        return result
+    }
+}
+
 // MARK: - IMAP
 
 extension CommandEncodeBuffer {
