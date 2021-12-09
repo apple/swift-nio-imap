@@ -103,10 +103,10 @@ enum FrameStatus: Hashable {
     case continueParsing
 }
 
-@_spi(NIOIMAPInternal) public struct FramingParser: Hashable {
+public struct FramingParser: Hashable {
     
     /// RFC 3501 states that a line should be no more than 1000 bytes.
-    static let defaultFrameSizeLimit = 1_000
+    public static let defaultFrameSizeLimit = 1_000
     
     enum LiteralHeaderState: Hashable {
         case findingBinaryFlag
