@@ -196,7 +196,7 @@ extension FramingParserTests {
         XCTAssertEqual(try self.parser.appendAndFrameBuffer(&buffer), [.complete(" test\r\n")])
     }
 
-    func testInvalidLiteralThrowsError() {
+    func testInvalidLiteral() {
         // Invalid CRLF
         var parser = FramingParser()
         var b1: ByteBuffer = "A1 LOGIN {3}aaa"
