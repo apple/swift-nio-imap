@@ -86,7 +86,7 @@ public final class IMAPServerHandler: ChannelDuplexHandler {
     public func channelRead(context: ChannelHandlerContext, data: NIOAny) {
         let frame = self.unwrapInboundIn(data)
         switch frame {
-        case .complete(let buffer):
+        case .complete(let buffer), .insideLiteral(let buffer, remainingBytes: _):
             do {
                 try self.decoder.process(buffer: buffer) { command in
                     self.numberOfOutstandingContinuationRequests += command.numberOfSynchronisingLiterals

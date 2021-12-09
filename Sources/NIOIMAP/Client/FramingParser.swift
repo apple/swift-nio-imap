@@ -63,6 +63,10 @@ public enum FramingResult: Hashable, CustomDebugStringConvertible {
     /// are needed to complete the frame.
     case incomplete(Int)
 
+    /// We're currently inside a literal, and have `remainingBytes` left
+    /// to go.
+    case insideLiteral(ByteBuffer, remainingBytes: UInt64)
+
     /// The frame was determined to be incorrect, and these are the bytes.
     case invalid(ByteBuffer)
 
@@ -72,6 +76,8 @@ public enum FramingResult: Hashable, CustomDebugStringConvertible {
             return "COMPLETE: \(String(buffer: buffer))"
         case .incomplete(let bytesNeeded):
             return "INCOMPLETE: \(bytesNeeded) bytes required)"
+        case .insideLiteral(let bytes, remainingBytes: let remaining):
+            return "INSIDE_LITERAL: \(String(buffer: bytes)) remaining: \(remaining)"
         case .invalid(let buffer):
             return "INVALID: \(String(buffer: buffer))"
         }
@@ -171,7 +177,7 @@ public struct FramingParser: Hashable {
             case .incomplete:
                 // we need to stop at the first incomplete frame
                 return results
-            case .invalid, .complete:
+            case .invalid, .complete, .insideLiteral:
                 ()
             }
         }
@@ -208,7 +214,8 @@ public struct FramingParser: Hashable {
             case .insideLiteral(lineFeedStrategy: let lfs, remaining: let remaining):
                 self.readByte_state_insideLiteral(lineFeedStrategy: lfs, remainingLiteralBytes: remaining)
                 if self.frameLength > 0 {
-                    return .complete(self.readFrame())
+                    let buffer = self.readFrame()
+                    return .insideLiteral(buffer, remainingBytes: remaining - UInt64(buffer.readableBytes))
                 } else {
                     return .incomplete(self.generateIncompleteFramingResult())
                 }

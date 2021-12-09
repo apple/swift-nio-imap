@@ -99,17 +99,17 @@ extension FramingParserTests {
     // Rememeber that the framing parser is just there to look for frames.
     func testParsingLiteral() {
         var buffer: ByteBuffer = "A1 LOGIN {3}\r\nhey\r\n"
-        XCTAssertEqual(try self.parser.appendAndFrameBuffer(&buffer), [.complete("A1 LOGIN {3}\r\n"), .complete("hey"), .complete("\r\n")])
+        XCTAssertEqual(try self.parser.appendAndFrameBuffer(&buffer), [.complete("A1 LOGIN {3}\r\n"), .insideLiteral("hey", remainingBytes: 0), .complete("\r\n")])
     }
 
     func testParsingLiteralNoLF() {
         var buffer: ByteBuffer = "A1 LOGIN {3}\rhey\r\n"
-        XCTAssertEqual(try self.parser.appendAndFrameBuffer(&buffer), [.complete("A1 LOGIN {3}\r"), .complete("hey"), .complete("\r\n")])
+        XCTAssertEqual(try self.parser.appendAndFrameBuffer(&buffer), [.complete("A1 LOGIN {3}\r"), .insideLiteral("hey", remainingBytes: 0), .complete("\r\n")])
     }
 
     func testParsingLiteralNoCR() {
         var buffer: ByteBuffer = "A1 LOGIN {3}\nhey\r\n"
-        XCTAssertEqual(try self.parser.appendAndFrameBuffer(&buffer), [.complete("A1 LOGIN {3}\n"), .complete("hey"), .complete("\r\n")])
+        XCTAssertEqual(try self.parser.appendAndFrameBuffer(&buffer), [.complete("A1 LOGIN {3}\n"), .insideLiteral("hey", remainingBytes: 0), .complete("\r\n")])
     }
 
     func testParsingLiteralNoCRLF() {
@@ -120,12 +120,12 @@ extension FramingParserTests {
 
     func testParsingBinaryLiteral() {
         var buffer: ByteBuffer = "A1 LOGIN {~3}\r\nhey\r\n"
-        XCTAssertEqual(try self.parser.appendAndFrameBuffer(&buffer), [.complete("A1 LOGIN {~3}\r\n"), .complete("hey"), .complete("\r\n")])
+        XCTAssertEqual(try self.parser.appendAndFrameBuffer(&buffer), [.complete("A1 LOGIN {~3}\r\n"), .insideLiteral("hey", remainingBytes: 0), .complete("\r\n")])
     }
 
     func testParsingLiteralPlus() {
         var buffer: ByteBuffer = "A1 LOGIN {3+}\r\nhey\r\n"
-        XCTAssertEqual(try self.parser.appendAndFrameBuffer(&buffer), [.complete("A1 LOGIN {3+}\r\n"), .complete("hey"), .complete("\r\n")])
+        XCTAssertEqual(try self.parser.appendAndFrameBuffer(&buffer), [.complete("A1 LOGIN {3+}\r\n"), .insideLiteral("hey", remainingBytes: 0), .complete("\r\n")])
     }
 
     func testParsingLiteralIntegerOverflow() {
@@ -135,12 +135,12 @@ extension FramingParserTests {
 
     func testParsingLiteralMinus() {
         var buffer: ByteBuffer = "A1 LOGIN {3-}\r\nhey\r\n"
-        XCTAssertEqual(try self.parser.appendAndFrameBuffer(&buffer), [.complete("A1 LOGIN {3-}\r\n"), .complete("hey"), .complete("\r\n")])
+        XCTAssertEqual(try self.parser.appendAndFrameBuffer(&buffer), [.complete("A1 LOGIN {3-}\r\n"), .insideLiteral("hey", remainingBytes: 0), .complete("\r\n")])
     }
 
     func testParsingBinaryLiteralPlus() {
         var buffer: ByteBuffer = "A1 LOGIN {~3+}\r\nhey\r\n"
-        XCTAssertEqual(try self.parser.appendAndFrameBuffer(&buffer), [.complete("A1 LOGIN {~3+}\r\n"), .complete("hey"), .complete("\r\n")])
+        XCTAssertEqual(try self.parser.appendAndFrameBuffer(&buffer), [.complete("A1 LOGIN {~3+}\r\n"), .insideLiteral("hey", remainingBytes: 0), .complete("\r\n")])
     }
 
     // full command "A1 LOGIN {3}\r\n123 test\r\n
@@ -158,13 +158,13 @@ extension FramingParserTests {
         XCTAssertEqual(try self.parser.appendAndFrameBuffer(&buffer), [.incomplete(1)])
 
         buffer = "1"
-        XCTAssertEqual(try self.parser.appendAndFrameBuffer(&buffer), [.complete("1")])
+        XCTAssertEqual(try self.parser.appendAndFrameBuffer(&buffer), [.insideLiteral("1", remainingBytes: 2)])
 
         buffer = "2"
-        XCTAssertEqual(try self.parser.appendAndFrameBuffer(&buffer), [.complete("2")])
+        XCTAssertEqual(try self.parser.appendAndFrameBuffer(&buffer), [.insideLiteral("2", remainingBytes: 1)])
 
         buffer = "3"
-        XCTAssertEqual(try self.parser.appendAndFrameBuffer(&buffer), [.complete("3")])
+        XCTAssertEqual(try self.parser.appendAndFrameBuffer(&buffer), [.insideLiteral("3", remainingBytes: 0)])
 
         buffer = " test\r\n"
         XCTAssertEqual(try self.parser.appendAndFrameBuffer(&buffer), [.complete(" test\r\n")])
@@ -184,13 +184,13 @@ extension FramingParserTests {
         XCTAssertEqual(try self.parser.appendAndFrameBuffer(&buffer), [.incomplete(1)])
 
         buffer = "1"
-        XCTAssertEqual(try self.parser.appendAndFrameBuffer(&buffer), [.complete("1")])
+        XCTAssertEqual(try self.parser.appendAndFrameBuffer(&buffer), [.insideLiteral("1", remainingBytes: 2)])
 
         buffer = "2"
-        XCTAssertEqual(try self.parser.appendAndFrameBuffer(&buffer), [.complete("2")])
+        XCTAssertEqual(try self.parser.appendAndFrameBuffer(&buffer), [.insideLiteral("2", remainingBytes: 1)])
 
         buffer = "3"
-        XCTAssertEqual(try self.parser.appendAndFrameBuffer(&buffer), [.complete("3")])
+        XCTAssertEqual(try self.parser.appendAndFrameBuffer(&buffer), [.insideLiteral("3", remainingBytes: 0)])
 
         buffer = " test\r\n"
         XCTAssertEqual(try self.parser.appendAndFrameBuffer(&buffer), [.complete(" test\r\n")])
