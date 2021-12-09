@@ -316,7 +316,7 @@ extension ParserUnitTests {
     func testParseAtom() {
         let b1 = ByteBuffer(string: "test\r")
         var pb1 = ParseBuffer(b1)
-        XCTAssertNoThrow(XCTAssertEqual(try GrammarParser.parseAtom(buffer: &pb1, tracker: .testTracker), "test"))
+        XCTAssertEqual(try GrammarParser.parseAtom(buffer: &pb1, tracker: .testTracker), "test")
     }
 }
 

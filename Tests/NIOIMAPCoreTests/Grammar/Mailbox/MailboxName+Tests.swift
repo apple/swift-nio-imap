@@ -45,7 +45,7 @@ extension MailboxName_Tests {
             ),
         ]
         for (path, newName, newPath, line) in inputs {
-            XCTAssertNoThrow(XCTAssertEqual(try path.makeSubMailbox(displayName: newName), newPath, line: line), line: line)
+            XCTAssertEqual(try path.makeSubMailbox(displayName: newName), newPath, line: line)
         }
 
         // sad path test make sure that mailbox size limit is enforced
@@ -72,7 +72,7 @@ extension MailboxName_Tests {
             ),
         ]
         for (newName, separator, newPath, line) in inputs {
-            XCTAssertNoThrow(XCTAssertEqual(try MailboxPath.makeRootMailbox(displayName: newName, pathSeparator: separator), newPath, line: line), line: line)
+            XCTAssertEqual(try MailboxPath.makeRootMailbox(displayName: newName, pathSeparator: separator), newPath, line: line)
         }
 
         // sad path test make sure that mailbox size limit is enforced

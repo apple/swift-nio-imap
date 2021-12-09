@@ -53,8 +53,8 @@ extension ResponseParser_Tests {
 
         // send some bytes to make sure it's worked
         buffer = "0123456789"
-        XCTAssertNoThrow(XCTAssertEqual(try parser.parseResponseStream(buffer: &buffer), .response(.fetch(.streamingBytes("0123456789")))))
-        XCTAssertNoThrow(XCTAssertEqual(try parser.parseResponseStream(buffer: &buffer), .response(.fetch(.streamingEnd))))
+        XCTAssertEqual(try parser.parseResponseStream(buffer: &buffer), .response(.fetch(.streamingBytes("0123456789"))))
+        XCTAssertEqual(try parser.parseResponseStream(buffer: &buffer), .response(.fetch(.streamingEnd)))
     }
 
     func testParseResponseStream() {
@@ -259,7 +259,7 @@ extension ResponseParser_Tests {
         var parser = ResponseParser()
         var input = ByteBuffer(string: "* 1 FETCH (* 2 FETCH \n")
 
-        XCTAssertNoThrow(XCTAssertEqual(try parser.parseResponseStream(buffer: &input), .response(.fetch(.start(1)))))
+        XCTAssertEqual(try parser.parseResponseStream(buffer: &input), .response(.fetch(.start(1))))
         XCTAssertThrowsError(try parser.parseResponseStream(buffer: &input))
     }
 }
