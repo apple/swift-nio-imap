@@ -62,6 +62,7 @@ final class ParserIntegrationTests: XCTestCase {
             .serverChannelOption(ChannelOptions.socket(.init(SOL_SOCKET), .init(SO_REUSEADDR)), value: 1)
             .childChannelInitializer { channel in
                 channel.pipeline.addHandlers(
+                    ByteToMessageHandler(FrameDecoder()),
                     IMAPServerHandler(),
                     CollectEverythingHandler(collectionDonePromise: collectionDonePromise)
                 )

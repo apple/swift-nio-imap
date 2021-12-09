@@ -268,10 +268,10 @@ extension ParserLibraryTests {
 extension ParserLibraryTests {
     func testParseBufferAsUTF8() {
         let test1 = ByteBuffer(string: "hello, world")
-        XCTAssertNoThrow(XCTAssertEqual(try ParserLibrary.parseBufferAsUTF8(test1), "hello, world"))
+        XCTAssertEqual(try ParserLibrary.parseBufferAsUTF8(test1), "hello, world")
 
         let test2 = ByteBuffer(bytes: [0xE2, 0x9A, 0xA1, 0xE2, 0x9A, 0xA2, 0xE2, 0x9A, 0xA3, 0xE2, 0x9A, 0xA4])
-        XCTAssertNoThrow(XCTAssertEqual(try ParserLibrary.parseBufferAsUTF8(test2), "⚡⚢⚣⚤"))
+        XCTAssertEqual(try ParserLibrary.parseBufferAsUTF8(test2), "⚡⚢⚣⚤")
 
         let test3 = ByteBuffer(bytes: [0xC2])
         XCTAssertThrowsError(try ParserLibrary.parseBufferAsUTF8(test3))

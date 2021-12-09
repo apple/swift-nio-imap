@@ -15,8 +15,24 @@
 import NIO
 import NIOIMAPCore
 
+public struct ReceivedInvalidFrame: Hashable {
+    public var frame: ByteBuffer
+
+    public init(frame: ByteBuffer) {
+        self.frame = frame
+    }
+}
+
+public struct ReceivedIncompleteFrame: Hashable {
+    public var requiredBytes: Int
+
+    public init(requiredBytes: Int) {
+        self.requiredBytes = requiredBytes
+    }
+}
+
 public final class IMAPServerHandler: ChannelDuplexHandler {
-    public typealias InboundIn = ByteBuffer
+    public typealias InboundIn = FramingResult
     public typealias InboundOut = CommandStreamPart
     public typealias OutboundIn = Response
     public typealias OutboundOut = ByteBuffer
@@ -68,15 +84,23 @@ public final class IMAPServerHandler: ChannelDuplexHandler {
     }
 
     public func channelRead(context: ChannelHandlerContext, data: NIOAny) {
-        do {
-            try self.decoder.process(buffer: self.unwrapInboundIn(data)) { command in
-                self.numberOfOutstandingContinuationRequests += command.numberOfSynchronisingLiterals
-                if let command = command.commandPart {
-                    context.fireChannelRead(self.wrapInboundOut(command))
+        let frame = self.unwrapInboundIn(data)
+        switch frame {
+        case .complete(let buffer):
+            do {
+                try self.decoder.process(buffer: buffer) { command in
+                    self.numberOfOutstandingContinuationRequests += command.numberOfSynchronisingLiterals
+                    if let command = command.commandPart {
+                        context.fireChannelRead(self.wrapInboundOut(command))
+                    }
                 }
+            } catch {
+                context.fireErrorCaught(error)
             }
-        } catch {
-            context.fireErrorCaught(error)
+        case .incomplete(let requiredBytes):
+            context.fireUserInboundEventTriggered(ReceivedIncompleteFrame(requiredBytes: requiredBytes))
+        case .invalid(let buffer):
+            context.fireUserInboundEventTriggered(ReceivedInvalidFrame(frame: buffer))
         }
     }
 
