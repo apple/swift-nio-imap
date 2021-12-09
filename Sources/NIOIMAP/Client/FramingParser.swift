@@ -62,7 +62,7 @@ public enum FramingResult: Hashable, CustomDebugStringConvertible {
     /// The frame isn't yet complete, and how many bytes
     /// are needed to complete the frame.
     case incomplete(Int)
-    
+
     /// We're currently inside a literal, and have `remainingBytes` left
     /// to go.
     case insideLiteral(ByteBuffer, remainingBytes: UInt64)
