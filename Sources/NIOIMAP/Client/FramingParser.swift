@@ -25,25 +25,25 @@ private let DIGIT_0 = UInt8(ascii: "0")
 private let DIGIT_9 = UInt8(ascii: "9")
 
 /// The frame contained bytes that can never lead to a
- /// valid command or response, and so can be safely
- /// discarded without having to close the connection.
- public struct InvalidFrame: Error, Hashable {
-     public init() {}
- }
+/// valid command or response, and so can be safely
+/// discarded without having to close the connection.
+public struct InvalidFrame: Error, Hashable {
+    public init() {}
+}
 
 /// An error occurred when attempting to parse the size
 /// of a `literal`. The bytes in question are attached.
- public struct LiteralSizeParsingError: Error, Hashable {
-     /// The bytes that resulted in a parsing error.
-     public var buffer: ByteBuffer
+public struct LiteralSizeParsingError: Error, Hashable {
+    /// The bytes that resulted in a parsing error.
+    public var buffer: ByteBuffer
 
-     /// Creates a new `LiteralSizeParsingError` with
-     /// the bytes that failed to parse into a `UInt64`.
-     /// - parameter buffer: The bytes that resulted in a parsing error
-     public init(buffer: ByteBuffer) {
-         self.buffer = buffer
-     }
- }
+    /// Creates a new `LiteralSizeParsingError` with
+    /// the bytes that failed to parse into a `UInt64`.
+    /// - parameter buffer: The bytes that resulted in a parsing error
+    public init(buffer: ByteBuffer) {
+        self.buffer = buffer
+    }
+}
 
 extension FixedWidthInteger {
     init?(buffer: ByteBuffer) {
@@ -104,10 +104,9 @@ enum FrameStatus: Hashable {
 }
 
 public struct FramingParser: Hashable {
-    
     /// RFC 3501 states that a line should be no more than 1000 bytes.
     public static let defaultFrameSizeLimit = 1_000
-    
+
     enum LiteralHeaderState: Hashable {
         case findingBinaryFlag
         case findingSize(ByteBuffer)
