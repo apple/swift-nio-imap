@@ -17,7 +17,7 @@ import struct NIO.ByteBuffer
 /// Untagged status responses
 ///
 /// The untagged versions in RFC 3501 section 7.1
-public enum UntaggedStatus: Equatable {
+public enum UntaggedStatus: Hashable {
     /// Indicates a success.
     case ok(ResponseText)
 

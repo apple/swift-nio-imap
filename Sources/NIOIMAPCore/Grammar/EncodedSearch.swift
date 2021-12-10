@@ -15,7 +15,7 @@
 import struct NIO.ByteBuffer
 
 /// A percent-encoded search.
-public struct EncodedSearch: Equatable {
+public struct EncodedSearch: Hashable {
     /// The percent-encoded data.
     public var query: String
 

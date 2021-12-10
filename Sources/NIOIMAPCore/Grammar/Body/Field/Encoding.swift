@@ -17,7 +17,7 @@ import struct NIO.ByteBuffer
 extension BodyStructure {
     /// Represents the body transfer encoding as defined in MIME-IMB.
     /// Recommended reading: RFC 2045
-    public struct Encoding: CustomDebugStringConvertible, Equatable {
+    public struct Encoding: CustomDebugStringConvertible, Hashable {
         /// Represents 7-bit encoding, octets with a value larger than 127 are forbidden.
         public static var sevenBit: Self { Self("7BIT") }
 

@@ -18,7 +18,7 @@ import struct NIO.ByteBuffer
 /// They're used to designate a special use to certain mailboxes.
 /// The raw `String` value is lower-cased on initialisation to ensure
 /// case-insensitive comparison.
-public struct UseAttribute: Equatable {
+public struct UseAttribute: Hashable {
     /// A mailbox that presents all messages in the user's store.
     public static let all = Self("\\All")
 
@@ -51,6 +51,10 @@ public struct UseAttribute: Equatable {
 
     public static func == (lhs: Self, rhs: Self) -> Bool {
         lhs.stringValue.lowercased() == rhs.stringValue.lowercased()
+    }
+    
+    public func hash(into hasher: inout Hasher) {
+        self.stringValue.lowercased().hash(into: &hasher)
     }
 }
 

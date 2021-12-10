@@ -15,7 +15,7 @@
 import struct NIO.ByteBuffer
 
 /// Describes the metadata item type.
-public struct EntryKindResponse: Equatable {
+public struct EntryKindResponse: Hashable {
     fileprivate var backing: String
 
     /// `priv` - Private metadata item type.

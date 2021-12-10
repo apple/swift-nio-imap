@@ -13,7 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 /// RFC 5092
-public struct EncodedSearchQuery: Equatable {
+public struct EncodedSearchQuery: Hashable {
     /// The mailbox to search.
     public var mailboxUIDValidity: MailboxUIDValidity
 

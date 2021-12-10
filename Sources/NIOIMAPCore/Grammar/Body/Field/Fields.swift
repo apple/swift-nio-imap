@@ -17,7 +17,7 @@ import struct OrderedCollections.OrderedDictionary
 
 extension BodyStructure {
     /// Contains fields that are common across bodies of all types (*basic*, *message*, and *text*)
-    public struct Fields: Equatable {
+    public struct Fields: Hashable {
         /// An array of *attribute/value* pairs
         public var parameters: OrderedDictionary<String, String>
 

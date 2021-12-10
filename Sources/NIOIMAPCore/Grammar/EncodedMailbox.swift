@@ -15,7 +15,7 @@
 import struct NIO.ByteBuffer
 
 /// A percent-encoded `MailboxName`
-public struct EncodedMailbox: Equatable {
+public struct EncodedMailbox: Hashable {
     /// The percent-encoded data.
     public var mailbox: String
 

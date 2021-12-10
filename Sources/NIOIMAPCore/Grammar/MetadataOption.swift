@@ -13,7 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 /// Metadata options use in a `.getMetadata` command.
-public enum MetadataOption: Equatable {
+public enum MetadataOption: Hashable {
     /// Only entry values that are less than or equal in octet size to the specified
     /// MAXSIZE limit are returned.
     case maxSize(Int)

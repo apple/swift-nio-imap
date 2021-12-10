@@ -15,7 +15,7 @@
 import struct NIO.ByteBuffer
 
 /// A resource with it's corresponding limits.
-public struct QuotaLimit: Equatable {
+public struct QuotaLimit: Hashable {
     /// The resource that the quota is applied to.
     public var resourceName: String
 

@@ -13,7 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 /// Used an option to `.getMetadata` to specify the depth.
-public struct ScopeOption: Equatable {
+public struct ScopeOption: Hashable {
     /// No entries below the specified entry are returned
     public static let zero = Self(_backing: .zero)
 

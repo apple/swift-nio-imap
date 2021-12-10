@@ -15,7 +15,7 @@
 import struct NIO.ByteBuffer
 
 /// Similar to `AuthImapURL`, but with an additional field to help verify the URL authorization.
-public struct FullAuthenticatedURL: Equatable {
+public struct FullAuthenticatedURL: Hashable {
     /// An IMAP url pointing to a remote message.
     public var networkMessagePath: NetworkMessagePath
 

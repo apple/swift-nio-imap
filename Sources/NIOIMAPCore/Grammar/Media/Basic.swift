@@ -16,7 +16,7 @@ import struct NIO.ByteBuffer
 
 extension Media {
     /// Represents a simple but common data type such as *application* or *image*
-    public struct BasicKind: CustomDebugStringConvertible, Equatable {
+    public struct BasicKind: CustomDebugStringConvertible, Hashable {
         /// IMAP4rev1 application
         public static let application = Self("application")
 
@@ -52,7 +52,7 @@ extension Media {
 
     /// A basic media type to form a full data type. It contains a high-level type, e.g. "video", and a lower-level
     /// subtype, e.g. "MP4", to construct to construct "video/mp4".
-    public struct Basic: Equatable {
+    public struct Basic: Hashable {
         /// The top-level media kind.
         public var kind: BasicKind
 

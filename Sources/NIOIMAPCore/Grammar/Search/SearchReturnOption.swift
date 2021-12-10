@@ -15,7 +15,7 @@
 import struct NIO.ByteBuffer
 
 /// Used to control what data is sent back as part of a search response.
-public enum SearchReturnOption: Equatable {
+public enum SearchReturnOption: Hashable {
     /// Return the lowest message number/UID that satisfies the SEARCH criteria.
     case min
 

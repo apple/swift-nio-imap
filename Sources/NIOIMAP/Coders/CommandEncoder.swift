@@ -22,7 +22,7 @@ enum CommandEncodingError: Error, Equatable {
 class CommandEncoder: MessageToByteEncoder {
     typealias OutboundIn = CommandStreamPart
 
-    enum Mode: Equatable {
+    enum Mode: Hashable {
         case normal
         case bytes(remaining: Int)
     }

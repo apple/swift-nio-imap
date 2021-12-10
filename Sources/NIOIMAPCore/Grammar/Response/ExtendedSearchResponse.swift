@@ -15,7 +15,7 @@
 import struct NIO.ByteBuffer
 
 /// Sent from a server in response to an extended search.
-public struct ExtendedSearchResponse: Equatable {
+public struct ExtendedSearchResponse: Hashable {
     /// Identifies the search that resulted in this response.
     public var correlator: SearchCorrelator?
 

@@ -15,7 +15,7 @@
 import struct NIO.ByteBuffer
 
 /// Options that can be used by themselves.
-public enum ListSelectBaseOption: Equatable {
+public enum ListSelectBaseOption: Hashable {
     /// *SUBSCRIBED* - Lists subscribed mailboxes.
     case subscribed
 

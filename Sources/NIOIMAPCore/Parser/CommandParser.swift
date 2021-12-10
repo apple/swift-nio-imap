@@ -15,7 +15,7 @@
 import struct NIO.ByteBuffer
 
 /// A `CommandStreamPart` (i.e. a command or part of a command) and any synchronising literals that are ready to be sent down the network to a server.
-public struct SynchronizedCommand: Equatable {
+public struct SynchronizedCommand: Hashable {
     /// The number of synchronising literals contained in the corresponding `command`.
     public var numberOfSynchronisingLiterals: Int
 
@@ -33,7 +33,7 @@ public struct SynchronizedCommand: Equatable {
 
 /// A parser dedicated to parsing commands sent from a client.
 public struct CommandParser: Parser {
-    enum Mode: Equatable {
+    enum Mode: Hashable {
         case lines
         case idle
         case waitingForMessage

@@ -15,7 +15,7 @@
 import struct NIO.ByteBuffer
 
 /// Wraps data and a URL that the data is associated with. Returned as part of a `.urlFetch` command.
-public struct URLFetchData: Equatable {
+public struct URLFetchData: Hashable {
     // TODO: This is defined in the spec as being an `astring`, however is really a full URL wrapped in quotes
     // we should consider extracting the data of the quotes and correctly parsing the URL
     /// The IMAP URL that's being fetched.

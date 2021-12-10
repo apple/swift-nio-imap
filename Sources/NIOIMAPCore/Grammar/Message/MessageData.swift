@@ -15,7 +15,7 @@
 import struct NIO.ByteBuffer
 
 /// A piece of data regarding a message, returned as an untagged server response.
-public enum MessageData: Equatable {
+public enum MessageData: Hashable {
     /// The specified message sequence number has been permanently removed from the mailbox
     case expunge(SequenceNumber)
 

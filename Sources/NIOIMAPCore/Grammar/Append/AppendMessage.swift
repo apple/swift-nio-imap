@@ -15,7 +15,7 @@
 import struct NIO.ByteBuffer
 
 /// Metadata for a message that will be appended to a mailbox.
-public struct AppendMessage: Equatable {
+public struct AppendMessage: Hashable {
     /// A collection of non-essential options, such as any flags to be added to the message.
     public var options: AppendOptions
 

@@ -15,7 +15,7 @@
 import struct NIO.ByteBuffer
 
 /// Wraps a percent-encoded section to be used in an IMAP URL.
-public struct URLMessageSection: Equatable {
+public struct URLMessageSection: Hashable {
     /// The percent-encoded section.
     public var encodedSection: EncodedSection
 

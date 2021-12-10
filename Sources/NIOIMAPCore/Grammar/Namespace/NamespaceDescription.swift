@@ -17,7 +17,7 @@ import struct OrderedCollections.OrderedDictionary
 
 /// Represents an IMAP Namespace, providing a delimiter to
 /// break the namespace into it's constituent components.
-public struct NamespaceDescription: Equatable {
+public struct NamespaceDescription: Hashable {
     /// The full namespace string.
     public var string: ByteBuffer
 

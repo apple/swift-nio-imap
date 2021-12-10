@@ -15,7 +15,7 @@
 import struct NIO.ByteBuffer
 
 /// Options that do not syntactically interact with other options
-public enum ListSelectIndependentOption: Equatable {
+public enum ListSelectIndependentOption: Hashable {
     /// *REMOTE* - Asks the list response to return both remote and local mailboxes
     case remote
 

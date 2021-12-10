@@ -15,7 +15,7 @@
 import struct NIO.ByteBuffer
 
 /// RFC 5465 - One or more mailboxes
-public struct Mailboxes: Equatable {
+public struct Mailboxes: Hashable {
     /// Array of at least one mailbox.
     public let content: [MailboxName]
 

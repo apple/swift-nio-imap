@@ -19,7 +19,7 @@ import struct NIO.ByteBufferView
 /// roots".  Each quota root has zero or more resource limits.  All
 /// mailboxes that share the same named quota root share the resource
 /// limits of the quota root.
-public struct QuotaRoot: Equatable {
+public struct QuotaRoot: Hashable {
     /// The raw bytes, readable as `[UInt8]`
     public var storage: ByteBuffer
 

@@ -13,7 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 /// Combines an IMAP server location with a command to be executed once a connection is made.
-public struct NetworkPath: Equatable {
+public struct NetworkPath: Hashable {
     /// The server to connect to.
     public var server: IMAPServer
 

@@ -229,7 +229,7 @@ extension GrammarParser {
 
     // status-att-list  = status-att-val *(SP status-att-val)
     static func parseMailboxStatus(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxStatus {
-        enum MailboxValue: Equatable {
+        enum MailboxValue: Hashable {
             case messages(Int)
             case uidNext(UID)
             case uidValidity(UIDValidity)

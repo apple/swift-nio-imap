@@ -18,7 +18,7 @@ import struct OrderedCollections.OrderedDictionary
 extension BodyStructure {
     /// Represents a *multipart* body as defined in RFC 3501.
     /// Recommended reading: RFC 3501 § 6.4.5.
-    public struct Multipart: Equatable {
+    public struct Multipart: Hashable {
         /// The parts of the body. Each part is assigned a consecutive part number.
         public var parts: [BodyStructure]
 
@@ -43,7 +43,7 @@ extension BodyStructure {
 extension BodyStructure.Multipart {
     /// Optional fields that are not required to form a valid `Multipart`. Links an array of `ParameterPair` with a `DispositionAndLanguage.
     /// Partially simplified to make the API nice, for example `DispositionAndLanguage` pairs a disposition and a language.
-    public struct Extension: Equatable {
+    public struct Extension: Hashable {
         /// An array of *key/value* pairs.
         public var parameters: OrderedDictionary<String, String>
 

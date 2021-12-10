@@ -16,7 +16,7 @@ import struct NIO.ByteBuffer
 
 /// Multiple searches may be run concurrently, and so a `SearchCorrelator` can be used
 /// to identify the search to which a response belongs.
-public struct SearchCorrelator: Equatable {
+public struct SearchCorrelator: Hashable {
     /// The original option from RFC4466 - a random string.
     public var tag: ByteBuffer
 

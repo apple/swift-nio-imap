@@ -17,7 +17,7 @@ import struct NIO.ByteBuffer
 extension BodyStructure {
     /// Pairs a location with `BodyExtensions`s. An abstraction from RFC 3501
     /// to make the API slightly easier to work with and enforce validity.
-    public struct LocationAndExtensions: Equatable {
+    public struct LocationAndExtensions: Hashable {
         /// A string giving the body content URI. Defined in LOCATION.
         public var location: String?
 

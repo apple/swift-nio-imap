@@ -18,7 +18,7 @@ extension TaggedResponse {
     /// Tagged status responses
     ///
     /// The tagged versions in RFC 3501 section 7.1
-    public enum State: Equatable {
+    public enum State: Hashable {
         /// The command executed successfully.
         case ok(ResponseText)
 

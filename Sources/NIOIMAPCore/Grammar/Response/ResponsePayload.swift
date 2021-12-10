@@ -17,7 +17,7 @@ import struct OrderedCollections.OrderedDictionary
 
 /// Data returned as part of an untagged response. Typically one of these cases will be returned
 /// for each message or mailbox that is of interest.
-public enum ResponsePayload: Equatable {
+public enum ResponsePayload: Hashable {
     /// Indicates if the command, or subcommand, executed successfully.
     case conditionalState(UntaggedStatus)
 

@@ -16,7 +16,7 @@ import struct NIO.ByteBuffer
 
 /// The envelope of a message contains various fields, all of which may be empty or `nil`.
 /// It's entirely possible for an envelope to be completely empty, though this will be rare.
-public struct Envelope: Equatable {
+public struct Envelope: Hashable {
     /// The local time and date that the message was written.
     public var date: InternetMessageDate?
 

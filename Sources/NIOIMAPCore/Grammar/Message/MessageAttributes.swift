@@ -17,7 +17,7 @@ import struct NIO.ByteBuffer
 /// These are the individual parts of a `FETCH` response.
 ///
 /// - SeeAlso: RFC 3501 section 7.4.2
-public enum MessageAttribute: Equatable {
+public enum MessageAttribute: Hashable {
     /// `FLAGS` -- A list of flags that are set for this message.
     case flags([Flag])
     /// `ENVELOPE` -- A list that describes the envelope structure of a message.

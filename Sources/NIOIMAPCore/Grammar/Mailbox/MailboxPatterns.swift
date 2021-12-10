@@ -16,7 +16,7 @@ import struct NIO.ByteBuffer
 
 // mbx-or-pat
 /// Extends the LIST command to allow multiple mailbox patterns
-public enum MailboxPatterns: Equatable {
+public enum MailboxPatterns: Hashable {
     /// Match a single mailbox pattern
     case mailbox(ByteBuffer)
 

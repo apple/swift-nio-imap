@@ -15,7 +15,7 @@
 import struct NIO.ByteBuffer
 
 /// A percent-encoded user.
-public struct EncodedUser: Equatable {
+public struct EncodedUser: Hashable {
     /// The percent-encoded data.
     public var data: String
 
