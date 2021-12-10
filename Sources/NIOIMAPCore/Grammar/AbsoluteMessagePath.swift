@@ -13,7 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 /// An absolute IMAP path.
-public struct AbsoluteMessagePath: Equatable {
+public struct AbsoluteMessagePath: Hashable {
     /// A command (including a URL) to execute.
     public var command: URLCommand?
 

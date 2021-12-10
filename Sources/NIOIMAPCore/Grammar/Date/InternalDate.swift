@@ -145,13 +145,13 @@ extension ServerMessageDate {
         var day: Int
     }
 
-    fileprivate struct Time: Equatable {
+    fileprivate struct Time: Hashable {
         var hour: Int
         var minute: Int
         var second: Int
     }
 
-    fileprivate struct TimeZone: Equatable {
+    fileprivate struct TimeZone: Hashable {
         var minutes: Int
     }
 }

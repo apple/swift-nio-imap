@@ -16,7 +16,7 @@ import struct NIO.ByteBuffer
 import struct OrderedCollections.OrderedDictionary
 
 /// Sent by the server as a response to a `.getMetdata` command.
-public enum MetadataResponse: Equatable {
+public enum MetadataResponse: Hashable {
     /// Provides an array of values for the specified mailbox.
     case values(values: OrderedDictionary<MetadataEntryName, MetadataValue>, mailbox: MailboxName)
 

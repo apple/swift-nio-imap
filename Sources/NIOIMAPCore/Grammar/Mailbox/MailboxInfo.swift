@@ -16,7 +16,7 @@ import struct NIO.ByteBuffer
 import struct OrderedCollections.OrderedDictionary
 
 /// A collection of mailbox attributes defined in the supported IMAP4 RFCs.
-public struct MailboxInfo: Equatable {
+public struct MailboxInfo: Hashable {
     /// An array of mailbox attributes.
     public var attributes: [Attribute]
 
@@ -79,6 +79,10 @@ extension MailboxInfo {
 
         public static func == (lhs: Self, rhs: Self) -> Bool {
             lhs.backing.lowercased() == rhs.backing.lowercased()
+        }
+
+        public func hash(into hasher: inout Hasher) {
+            self.backing.lowercased().hash(into: &hasher)
         }
     }
 }

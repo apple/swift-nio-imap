@@ -13,7 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 /// A date and time defined in RFC 3339.
-public struct FullDateTime: Equatable {
+public struct FullDateTime: Hashable {
     /// The date.
     public var date: FullDate
 
@@ -30,7 +30,7 @@ public struct FullDateTime: Equatable {
 }
 
 /// A date.
-public struct FullDate: Equatable {
+public struct FullDate: Hashable {
     /// The year. Any non-negative integer.
     public let year: Int
 
@@ -54,7 +54,7 @@ public struct FullDate: Equatable {
 }
 
 /// A time.
-public struct FullTime: Equatable {
+public struct FullTime: Hashable {
     /// The hour. 0-based in the range `0...23`.
     public var hour: Int
 

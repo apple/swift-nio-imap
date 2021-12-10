@@ -15,7 +15,7 @@
 import struct NIO.ByteBuffer
 
 /// A group of addresses.
-public struct EmailAddressGroup: Equatable {
+public struct EmailAddressGroup: Hashable {
     /// The name of the group.
     public var groupName: ByteBuffer
 
@@ -37,7 +37,7 @@ public struct EmailAddressGroup: Equatable {
 }
 
 /// Used inside `Envelope` to distinguish between either a single address, or a group of addresses.
-public indirect enum EmailAddressListElement: Equatable {
+public indirect enum EmailAddressListElement: Hashable {
     /// A single address with no children.
     case singleAddress(EmailAddress)
 

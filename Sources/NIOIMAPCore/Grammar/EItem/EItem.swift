@@ -13,7 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 /// A vendor-specific tag for extended list data
-public struct EItemVendorTag: Equatable {
+public struct EItemVendorTag: Hashable {
     /// A reserved portion of the ACAP namespace. Must be registered with IANA
     public var token: String
 

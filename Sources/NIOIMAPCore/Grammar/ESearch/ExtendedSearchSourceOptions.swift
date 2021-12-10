@@ -15,7 +15,7 @@
 import struct NIO.ByteBuffer
 
 /// RFC 7377 - Source options
-public struct ExtendedSearchSourceOptions: Equatable {
+public struct ExtendedSearchSourceOptions: Hashable {
     /// Array of at least one mailbox filter.
     public let sourceMailbox: [MailboxFilter]
 

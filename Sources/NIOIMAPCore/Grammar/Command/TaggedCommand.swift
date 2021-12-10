@@ -15,7 +15,7 @@
 import struct NIO.ByteBuffer
 
 /// Represents a IMAP command that is preceded by a tag that can be used for command/response identification.
-public struct TaggedCommand: Equatable {
+public struct TaggedCommand: Hashable {
     /// The tag, typically a mixture of alphanumeric characters.
     public var tag: String
 

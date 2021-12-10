@@ -16,7 +16,7 @@ import struct NIO.ByteBuffer
 
 /// Represents an IMAP connection configuration that be used to connect
 /// to an IMAP server.
-public struct IMAPServer: Equatable {
+public struct IMAPServer: Hashable {
     /// If present, authentication details for the server.
     public var userAuthenticationMechanism: UserAuthenticationMechanism?
 

@@ -16,7 +16,7 @@ import struct NIO.ByteBuffer
 
 /// Provides support for future extensions. Any future extensions to body fields must
 /// match one case of this enum, either an `nstring` or `number`.
-public enum BodyExtension: Equatable {
+public enum BodyExtension: Hashable {
     /// A generic `nstring` field.
     case string(ByteBuffer?)
 

@@ -13,7 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 /// Wraps the modification time of a message that is returned as part of a `.fetch` command.
-public struct FetchModificationResponse: Equatable {
+public struct FetchModificationResponse: Hashable {
     /// The date that the message was last modified.
     public var modificationSequenceValue: ModificationSequenceValue
 

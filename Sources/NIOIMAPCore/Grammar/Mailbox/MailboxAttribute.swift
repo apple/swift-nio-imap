@@ -48,7 +48,7 @@ public enum MailboxAttribute: String, CaseIterable {
 }
 
 /// The (aggregated) information about a mailbox that the server reports as part of the response to e.g. a `SELECT` command.
-public struct MailboxStatus: Equatable {
+public struct MailboxStatus: Hashable {
     /// `MESSAGES`
     /// The number of messages in the mailbox.
     public var messageCount: Int?

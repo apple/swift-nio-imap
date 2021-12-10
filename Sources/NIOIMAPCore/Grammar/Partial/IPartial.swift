@@ -13,7 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 /// Used to append a `PartialRange` to the end of a *UID FETCH BODY.PEEK*.
-public struct IPartial: Equatable {
+public struct IPartial: Hashable {
     /// The `PartialRange` to append.
     public var range: PartialRange
 

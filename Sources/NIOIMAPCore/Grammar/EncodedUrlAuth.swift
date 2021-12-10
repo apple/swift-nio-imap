@@ -15,7 +15,7 @@
 import struct NIO.ByteBuffer
 
 /// A percent-encoded URL auth.
-public struct EncodedAuthenticatedURL: Equatable {
+public struct EncodedAuthenticatedURL: Hashable {
     /// The percent-encoded data.
     public var data: String
 

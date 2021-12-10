@@ -21,7 +21,7 @@ public struct SynchronizingLiteralParser {
     private var synchronisingLiterals = 0
     private var state = State.waitingForCompleteLine
 
-    private enum State: Equatable {
+    private enum State: Hashable {
         case waitingForCompleteLine
         case waitingForLiteralBytes(Int)
     }

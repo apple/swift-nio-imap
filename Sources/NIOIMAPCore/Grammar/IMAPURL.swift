@@ -13,7 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 /// A URL that specifies a server to connect to and a command to run once a connection has been established.
-public struct IMAPURL: Equatable {
+public struct IMAPURL: Hashable {
     /// The server to connect to.
     public var server: IMAPServer
 

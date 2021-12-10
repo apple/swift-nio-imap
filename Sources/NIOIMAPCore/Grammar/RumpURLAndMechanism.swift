@@ -15,7 +15,7 @@
 import struct NIO.ByteBuffer
 
 /// Pairs an IMAP "rump" URL with an authentication mechanism
-public struct RumpURLAndMechanism: Equatable {
+public struct RumpURLAndMechanism: Hashable {
     /// The IMAP URL excluding the access mechanism and access token.
     public var urlRump: ByteBuffer
 

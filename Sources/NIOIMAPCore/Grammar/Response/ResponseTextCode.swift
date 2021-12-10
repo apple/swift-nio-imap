@@ -18,7 +18,7 @@ import struct NIO.ByteBuffer
 /// Used to help tell a client why a command failed. Machine readable, not guaranteed to
 /// be human readable.
 /// See also https://www.iana.org/assignments/imap-response-codes/imap-response-codes.xhtml
-public enum ResponseTextCode: Equatable {
+public enum ResponseTextCode: Hashable {
     /// The human-readable text contains a special alert that MUST be
     /// presented to the user in a fashion that calls the user's
     /// attention to the message.

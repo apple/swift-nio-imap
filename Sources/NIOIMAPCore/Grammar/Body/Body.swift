@@ -16,7 +16,7 @@ import struct NIO.ByteBuffer
 
 /// A parsed representation of the MIME-IMB body structure information of the message.
 /// Recomended reading: RFC 3501 § 2.6.3 and 7.4.2.
-public enum BodyStructure: Equatable {
+public enum BodyStructure: Hashable {
     /// A message that at the top level contains only one part. Note that a "message" body contains a nested
     /// body, which may itself be multipart.
     case singlepart(Singlepart)
@@ -112,7 +112,7 @@ extension BodyStructure: RandomAccessCollection {
 
 extension BodyStructure {
     /// The subtype of a multi-part body.
-    public struct MediaSubtype: CustomDebugStringConvertible, Equatable {
+    public struct MediaSubtype: CustomDebugStringConvertible, Hashable {
         /// `multipart/alternative`. For representing the same data as different formats.
         public static var alternative: Self {
             .init("multipart/alternative")

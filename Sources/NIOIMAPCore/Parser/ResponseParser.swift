@@ -16,18 +16,18 @@ import struct NIO.ByteBuffer
 
 /// A parser to be used by Clients in order to parse responses sent from a server.
 public struct ResponseParser: Parser {
-    enum AttributeState: Equatable {
+    enum AttributeState: Hashable {
         case head
         case attribute
         case separator
     }
 
-    enum ResponseState: Equatable {
+    enum ResponseState: Hashable {
         case fetchOrNormal
         case fetchMiddle
     }
 
-    enum Mode: Equatable {
+    enum Mode: Hashable {
         case response(ResponseState)
         case streamingQuoted
         case attributeBytes(Int)
@@ -89,7 +89,7 @@ public struct ResponseParser: Parser {
 
 extension ResponseParser {
     fileprivate mutating func parseResponse(state: ResponseState, buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseOrContinuationRequest {
-        enum _Response: Equatable {
+        enum _Response: Hashable {
             case untaggedResponse(ResponsePayload)
             case fetchResponse(GrammarParser._FetchResponse)
         }

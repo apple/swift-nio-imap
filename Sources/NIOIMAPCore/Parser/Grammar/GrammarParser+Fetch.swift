@@ -218,7 +218,7 @@ extension GrammarParser {
 
     // needed to tell the response parser which type of streaming is
     // going to take place, e.g. quoted or literal
-    enum _FetchResponse: Equatable {
+    enum _FetchResponse: Hashable {
         case start(SequenceNumber)
         case simpleAttribute(MessageAttribute)
         case literalStreamingBegin(kind: StreamingKind, byteCount: Int)

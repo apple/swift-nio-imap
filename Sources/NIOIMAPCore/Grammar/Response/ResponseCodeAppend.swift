@@ -15,7 +15,7 @@
 /// Returned after a successful `.uidAppend` command. Provides the new identifiers
 /// of the appended messages, and the uid validity of the destination mailbox. Note that multiple
 /// appends ae only supported if the capability `MULTISEARCH` is enabled.
-public struct ResponseCodeAppend: Equatable {
+public struct ResponseCodeAppend: Hashable {
     /// The UID validity of the destination mailbox.
     public var uidValidity: UIDValidity
 

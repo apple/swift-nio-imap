@@ -15,7 +15,7 @@
 /// A wrapper to combine a message sequence set and a corresponding UID set.
 /// Both are provided in ascending order.
 /// Recommended reading RFC 7162 § 3.2.5.2
-public struct SequenceMatchData: Equatable {
+public struct SequenceMatchData: Hashable {
     /// Set of message numbers corresponding to the UIDs in known-uid-set, in ascending order. * is not allowed.
     public var knownSequenceSet: LastCommandSet<MessageIdentifierSetNonEmpty<UID>>
 
