@@ -52,7 +52,7 @@ public struct UseAttribute: Hashable {
     public static func == (lhs: Self, rhs: Self) -> Bool {
         lhs.stringValue.lowercased() == rhs.stringValue.lowercased()
     }
-    
+
     public func hash(into hasher: inout Hasher) {
         self.stringValue.lowercased().hash(into: &hasher)
     }

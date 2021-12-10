@@ -18,19 +18,18 @@ import XCTest
 
 class MailboxInfo_Tests: EncodeTestClass {}
 
-// MARK - Attribute
+// MARK: - Attribute
+
 extension MailboxInfo_Tests {
-    
     func testAttribute_hashable() {
         var testSet = Set<MailboxInfo.Attribute>()
         let attribute1 = MailboxInfo.Attribute("test")
         let attribute2 = MailboxInfo.Attribute("TEST")
-        
+
         // hashing should be case insensitive
         testSet.insert(attribute1)
         XCTAssertTrue(testSet.contains(attribute2))
     }
-    
 }
 
 // MARK: - Encoding

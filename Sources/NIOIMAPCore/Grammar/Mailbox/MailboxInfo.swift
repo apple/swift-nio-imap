@@ -80,7 +80,7 @@ extension MailboxInfo {
         public static func == (lhs: Self, rhs: Self) -> Bool {
             lhs.backing.lowercased() == rhs.backing.lowercased()
         }
-        
+
         public func hash(into hasher: inout Hasher) {
             self.backing.lowercased().hash(into: &hasher)
         }
