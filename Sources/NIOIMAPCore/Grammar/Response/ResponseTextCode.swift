@@ -132,7 +132,7 @@ public enum ResponseTextCode: Hashable {
 
     /// Used with an OK response to the STORE command.  (It can also be used in a NO
     /// response.)
-    case modificationSequence(LastCommandSet<SequenceSet>)
+    case modified(LastCommandSet<MessageIdentifierSet<UnknownMessageIdentifier>>)
 
     /// A server supporting the persistent storage of mod-sequences for the mailbox
     /// MUST send the OK untagged response including HIGHESTMODSEQ response
@@ -309,7 +309,7 @@ extension EncodeBuffer {
             return self.writeString("CLOSED")
         case .noModificationSequence:
             return self.writeString("NOMODSEQ")
-        case .modificationSequence(let set):
+        case .modified(let set):
             return self.writeString("MODIFIED ") + self.writeLastCommandSet(set)
         case .highestModificationSequence(let val):
             return self.writeString("HIGHESTMODSEQ ") + self.writeModificationSequenceValue(val)

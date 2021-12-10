@@ -220,7 +220,7 @@ extension GrammarParser {
 
         func parseResponseTextCode_modified(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
             try PL.parseFixedString("MODIFIED ", buffer: &buffer, tracker: tracker)
-            return .modificationSequence(try self.parseMessageIdentifierSet(buffer: &buffer, tracker: tracker))
+            return .modified(try self.parseMessageIdentifierSet(buffer: &buffer, tracker: tracker))
         }
 
         func parseResponseTextCode_highestModifiedSequence(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {

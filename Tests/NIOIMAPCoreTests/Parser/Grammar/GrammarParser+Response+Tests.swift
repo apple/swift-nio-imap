@@ -77,7 +77,7 @@ extension GrammarParser_Response_Tests {
                 ("UIDVALIDITY 34", "\r", .uidValidity(34), #line),
                 ("UNSEEN 56", "\r", .unseen(56), #line),
                 ("NOMODSEQ", "\r", .noModificationSequence, #line),
-                ("MODIFIED 1", "\r", .modificationSequence(.set([1])), #line),
+                ("MODIFIED 1", "\r", .modified(.set([1])), #line),
                 ("HIGHESTMODSEQ 1", "\r", .highestModificationSequence(.init(integerLiteral: 1)), #line),
                 ("NAMESPACE NIL NIL NIL", "\r", .namespace(.init(userNamespace: [], otherUserNamespace: [], sharedNamespace: [])), #line),
                 ("some", "\r", .other("some", nil), #line),
