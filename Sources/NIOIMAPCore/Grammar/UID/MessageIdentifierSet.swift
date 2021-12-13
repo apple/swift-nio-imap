@@ -143,7 +143,7 @@ extension MessageIdentifierSet {
     ///
     /// - Note: Returns `true` for the empty set.
     public var isContiguous: Bool {
-        return _ranges.ranges.count <= 1
+        _ranges.ranges.count <= 1
     }
 }
 
