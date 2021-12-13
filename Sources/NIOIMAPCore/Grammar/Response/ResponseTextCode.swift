@@ -262,6 +262,16 @@ public enum ResponseTextCode: Hashable {
     case compressionActive
 }
 
+extension ResponseTextCode {
+    public static func modified(_: MessageIdentifierSet<UID>) -> Self {
+        .modified(.set(.init()))
+    }
+
+    public static func modified(_ set: MessageIdentifierSet<SequenceNumber>) -> Self {
+        .modified(.set(.init(set)))
+    }
+}
+
 // MARK: - Encoding
 
 extension EncodeBuffer {

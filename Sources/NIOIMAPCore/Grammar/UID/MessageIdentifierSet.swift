@@ -435,6 +435,40 @@ extension MessageIdentifierSet: SetAlgebra {
     }
 }
 
+extension MessageIdentifierSet where IdentifierType == SequenceNumber {
+    init(_ set: MessageIdentifierSet<UnknownMessageIdentifier>) {
+        let converted = set.ranges.map { range in
+            MessageIdentifierRange<SequenceNumber>(range)
+        }
+        self.init(converted)
+    }
+}
+
+extension MessageIdentifierSet where IdentifierType == UID {
+    init(_ set: MessageIdentifierSet<UnknownMessageIdentifier>) {
+        let converted = set.ranges.map { range in
+            MessageIdentifierRange<UID>(range)
+        }
+        self.init(converted)
+    }
+}
+
+extension MessageIdentifierSet where IdentifierType == UnknownMessageIdentifier {
+    init(_ set: MessageIdentifierSet<UID>) {
+        let converted = set.ranges.map { range in
+            MessageIdentifierRange<UnknownMessageIdentifier>(range)
+        }
+        self.init(converted)
+    }
+
+    init(_ set: MessageIdentifierSet<SequenceNumber>) {
+        let converted = set.ranges.map { range in
+            MessageIdentifierRange<UnknownMessageIdentifier>(range)
+        }
+        self.init(converted)
+    }
+}
+
 // MARK: - Encoding
 
 extension MessageIdentifierSet: IMAPEncodable {

@@ -98,6 +98,28 @@ extension MessageIdentifier {
     }
 }
 
+extension MessageIdentifierRange where IdentifierType == SequenceNumber {
+    init(_ range: MessageIdentifierRange<UnknownMessageIdentifier>) {
+        self.init(SequenceNumber(range.range.lowerBound) ... SequenceNumber(range.range.upperBound))
+    }
+}
+
+extension MessageIdentifierRange where IdentifierType == UID {
+    init(_ range: MessageIdentifierRange<UnknownMessageIdentifier>) {
+        self.init(UID(range.range.lowerBound) ... UID(range.range.upperBound))
+    }
+}
+
+extension MessageIdentifierRange where IdentifierType == UnknownMessageIdentifier {
+    init(_ range: MessageIdentifierRange<UID>) {
+        self.init(IdentifierType(range.range.lowerBound) ... IdentifierType(range.range.upperBound))
+    }
+
+    init(_ range: MessageIdentifierRange<SequenceNumber>) {
+        self.init(IdentifierType(range.range.lowerBound) ... IdentifierType(range.range.upperBound))
+    }
+}
+
 // MARK: - Encoding
 
 extension EncodeBuffer {
