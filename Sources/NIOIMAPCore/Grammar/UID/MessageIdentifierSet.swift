@@ -137,6 +137,17 @@ extension MessageIdentifierRange {
 // MARK: -
 
 extension MessageIdentifierSet {
+    /// Returns `true` if there are no gaps in the values, i.e. the set is non-sparse.
+    ///
+    /// For example: `5:10` is contiguous, but `5:6,8` is _not_.
+    ///
+    /// - Note: Returns `true` for the empty set.
+    public var isContiguous: Bool {
+        return _ranges.ranges.count <= 1
+    }
+}
+
+extension MessageIdentifierSet {
     public struct RangeView: Sequence {
         fileprivate var underlying: RangeSet<MessageIdentificationShiftWrapper>.Ranges
 
