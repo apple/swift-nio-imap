@@ -86,16 +86,23 @@ public struct UnknownMessageIdentifier: MessageIdentifier {
     }
 }
 
-extension MessageIdentifier {
-    /// Used to convert between `UID`, `SequenceNumber`, and `UnknownMessageIdentifier`.
-    init<T: MessageIdentifier>(id: T) {
-        self.init(rawValue: id.rawValue)
-    }
-}
-
 extension BinaryInteger {
     public init<IdentifierType: MessageIdentifier>(_ id: IdentifierType) {
         self = Self(id.rawValue)
+    }
+}
+
+// MARK: - Conversion
+
+extension UID {
+    init(_ other: UnknownMessageIdentifier) {
+        self.init(rawValue: other.rawValue)
+    }
+}
+
+extension UnknownMessageIdentifier {
+    init(_ other: UID) {
+        self.init(rawValue: other.rawValue)
     }
 }
 
