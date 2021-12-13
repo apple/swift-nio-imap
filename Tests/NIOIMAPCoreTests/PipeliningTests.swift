@@ -403,9 +403,9 @@ extension PipeliningTests {
             (#line, .search(key: .all, charset: nil, returnOptions: [.all])),
             (#line, .uidSearch(key: .all, charset: nil, returnOptions: [])),
             (#line, .extendedSearch(ExtendedSearchOptions(key: .all))),
-            (#line, .fetch(.set([1]), [.envelope, .uid], [:])),
-            (#line, .fetch(.set([1]), [.bodyStructure(extensions: false)], [:])),
-            (#line, .uidFetch(.set([1]), [.envelope, .uid], [:])),
+            (#line, .fetch(.set([1]), [.envelope, .uid], [])),
+            (#line, .fetch(.set([1]), [.bodyStructure(extensions: false)], [])),
+            (#line, .uidFetch(.set([1]), [.envelope, .uid], [])),
             (#line, .store(.set([1]), [], .flags(.add(silent: true, list: [.answered])))),
             (#line, .store(.set([1]), [], .flags(.add(silent: false, list: [.answered])))),
             (#line, .uidStore(.set([1]), [:], .flags(.add(silent: true, list: [.answered])))),
@@ -479,8 +479,8 @@ extension PipeliningTests {
             (#line, .close),
             (#line, .expunge),
             (#line, .uidExpunge(.set([1]))),
-            (#line, .uidFetch(.set([1]), [.envelope, .uid], [:])),
-            (#line, .uidFetch(.set([1]), [.bodyStructure(extensions: false)], [:])),
+            (#line, .uidFetch(.set([1]), [.envelope, .uid], [])),
+            (#line, .uidFetch(.set([1]), [.bodyStructure(extensions: false)], [])),
             (#line, .uidStore(.set([1]), [:], .flags(.add(silent: true, list: [.answered])))),
             (#line, .uidCopy(.set([1]), .food)),
             (#line, .uidMove(.set([1]), .food)),
@@ -488,8 +488,8 @@ extension PipeliningTests {
 
         // All commands that reference messages by sequence numbers have this requirement:
         Assert(commands: [
-            (#line, .fetch(.set([1]), [.envelope, .uid], [:])),
-            (#line, .fetch(.set([1]), [.bodyStructure(extensions: false)], [:])),
+            (#line, .fetch(.set([1]), [.envelope, .uid], [])),
+            (#line, .fetch(.set([1]), [.bodyStructure(extensions: false)], [])),
             (#line, .copy(.set([1]), .food)),
             (#line, .move(.set([1]), .food)),
             (#line, .store(.set([1]), [], .flags(.add(silent: true, list: [.answered])))),
@@ -563,8 +563,8 @@ extension PipeliningTests {
             (#line, .search(key: .uid(.set([1])), charset: nil, returnOptions: [])),
             (#line, .uidSearch(key: .bcc("foo"), charset: nil, returnOptions: [])),
             (#line, .uidSearch(key: .uid(.set([1])), charset: nil, returnOptions: [])),
-            (#line, .uidFetch(.set([1]), [.envelope, .uid], [:])),
-            (#line, .uidFetch(.set([1]), [.bodyStructure(extensions: false)], [:])),
+            (#line, .uidFetch(.set([1]), [.envelope, .uid], [])),
+            (#line, .uidFetch(.set([1]), [.bodyStructure(extensions: false)], [])),
             (#line, .uidStore(.set([1]), [:], .flags(.add(silent: true, list: [.answered])))),
             (#line, .uidCopy(.set([1]), .food)),
             (#line, .uidMove(.set([1]), .food)),
@@ -576,8 +576,8 @@ extension PipeliningTests {
             (#line, .search(key: .sequenceNumbers(.set([1])), charset: nil, returnOptions: [.all])),
             (#line, .extendedSearch(ExtendedSearchOptions(key: .sequenceNumbers(.set([1]))))),
 
-            (#line, .fetch(.set([1]), [.envelope, .uid], [:])),
-            (#line, .fetch(.set([1]), [.bodyStructure(extensions: false)], [:])),
+            (#line, .fetch(.set([1]), [.envelope, .uid], [])),
+            (#line, .fetch(.set([1]), [.bodyStructure(extensions: false)], [])),
             (#line, .copy(.set([1]), .food)),
             (#line, .move(.set([1]), .food)),
             (#line, .store(.set([1]), [], .flags(.add(silent: true, list: [.answered])))),
@@ -648,10 +648,10 @@ extension PipeliningTests {
             (#line, .check),
             (#line, .close),
             (#line, .expunge),
-            (#line, .fetch(.set([1]), [.envelope, .uid], [:])),
-            (#line, .fetch(.set([1]), [.bodyStructure(extensions: false)], [:])),
-            (#line, .uidFetch(.set([1]), [.envelope, .uid], [:])),
-            (#line, .uidFetch(.set([1]), [.bodyStructure(extensions: false)], [:])),
+            (#line, .fetch(.set([1]), [.envelope, .uid], [])),
+            (#line, .fetch(.set([1]), [.bodyStructure(extensions: false)], [])),
+            (#line, .uidFetch(.set([1]), [.envelope, .uid], [])),
+            (#line, .uidFetch(.set([1]), [.bodyStructure(extensions: false)], [])),
             (#line, .uidStore(.set([1]), [:], .flags(.add(silent: true, list: [.answered])))),
             (#line, .uidCopy(.set([1]), .food)),
             (#line, .uidMove(.set([1]), .food)),
@@ -662,9 +662,9 @@ extension PipeliningTests {
 
         Assert(commands: [
             // FETCH that return flags:
-            (#line, .fetch(.set([1]), [.envelope, .uid, .flags], [:])),
-            (#line, .fetch(.set([1]), [.uid, .flags], [:])),
-            (#line, .uidFetch(.lastCommand, [.envelope, .uid, .flags], [:])),
+            (#line, .fetch(.set([1]), [.envelope, .uid, .flags], [])),
+            (#line, .fetch(.set([1]), [.uid, .flags], [])),
+            (#line, .uidFetch(.lastCommand, [.envelope, .uid, .flags], [])),
             // STORE without SILENT will also return flags:
             (#line, .store(.set([1]), [], .flags(.add(silent: false, list: [.answered])))),
         ], require: .noFlagChangesToAnyMessage)
@@ -672,8 +672,8 @@ extension PipeliningTests {
         MessageIdentifierSetNonEmpty<UID>.arbitrarySets.forEach { uids in
             Assert(commands: [
                 // UID FETCH that return flags:
-                (#line, .uidFetch(.set(uids), [.envelope, .uid, .flags], [:])),
-                (#line, .uidFetch(.set(uids), [.uid, .flags], [:])),
+                (#line, .uidFetch(.set(uids), [.envelope, .uid, .flags], [])),
+                (#line, .uidFetch(.set(uids), [.uid, .flags], [])),
                 // UID STORE without SILENT will also return flags:
                 (#line, .uidStore(.set(uids), [:], .flags(.add(silent: false, list: [.answered])))),
             ], require: .noFlagChanges(uids), "uids: \(uids)")
@@ -742,14 +742,14 @@ extension PipeliningTests {
             (#line, .check),
             (#line, .close),
             (#line, .expunge),
-            (#line, .fetch(.set([1]), [.envelope, .uid], [:])),
-            (#line, .fetch(.set([1]), [.bodyStructure(extensions: false)], [:])),
-            (#line, .fetch(.set([1]), [.envelope, .uid, .flags], [:])),
-            (#line, .fetch(.set([1]), [.uid, .flags], [:])),
-            (#line, .uidFetch(.set([1]), [.envelope, .uid], [:])),
-            (#line, .uidFetch(.set([1]), [.bodyStructure(extensions: false)], [:])),
-            (#line, .uidFetch(.set([1]), [.envelope, .uid, .flags], [:])),
-            (#line, .uidFetch(.set([1]), [.uid, .flags], [:])),
+            (#line, .fetch(.set([1]), [.envelope, .uid], [])),
+            (#line, .fetch(.set([1]), [.bodyStructure(extensions: false)], [])),
+            (#line, .fetch(.set([1]), [.envelope, .uid, .flags], [])),
+            (#line, .fetch(.set([1]), [.uid, .flags], [])),
+            (#line, .uidFetch(.set([1]), [.envelope, .uid], [])),
+            (#line, .uidFetch(.set([1]), [.bodyStructure(extensions: false)], [])),
+            (#line, .uidFetch(.set([1]), [.envelope, .uid, .flags], [])),
+            (#line, .uidFetch(.set([1]), [.uid, .flags], [])),
             (#line, .uidCopy(.set([1]), .food)),
             (#line, .uidMove(.set([1]), .food)),
         ], require: .noFlagReadsFromAnyMessage)
@@ -826,9 +826,9 @@ extension PipeliningTests {
             (#line, .search(key: .all, charset: nil, returnOptions: [.all])),
             (#line, .uidSearch(key: .all, charset: nil, returnOptions: [])),
             (#line, .extendedSearch(ExtendedSearchOptions(key: .all))),
-            (#line, .fetch(.set([1]), [.envelope, .uid], [:])),
-            (#line, .fetch(.set([1]), [.bodyStructure(extensions: false)], [:])),
-            (#line, .uidFetch(.set([1]), [.envelope, .uid], [:])),
+            (#line, .fetch(.set([1]), [.envelope, .uid], [])),
+            (#line, .fetch(.set([1]), [.bodyStructure(extensions: false)], [])),
+            (#line, .uidFetch(.set([1]), [.envelope, .uid], [])),
             (#line, .uidStore(.set([1]), [:], .flags(.add(silent: true, list: [.answered])))),
             (#line, .uidCopy(.set([1]), .food)),
             (#line, .uidMove(.set([1]), .food)),
@@ -892,9 +892,9 @@ extension PipeliningTests {
             (#line, .search(key: .all, charset: nil, returnOptions: [.all])),
             (#line, .uidSearch(key: .all, charset: nil, returnOptions: [])),
             (#line, .extendedSearch(ExtendedSearchOptions(key: .all))),
-            (#line, .fetch(.set([1]), [.envelope, .uid], [:])),
-            (#line, .fetch(.set([1]), [.bodyStructure(extensions: false)], [:])),
-            (#line, .uidFetch(.set([1]), [.envelope, .uid], [:])),
+            (#line, .fetch(.set([1]), [.envelope, .uid], [])),
+            (#line, .fetch(.set([1]), [.bodyStructure(extensions: false)], [])),
+            (#line, .uidFetch(.set([1]), [.envelope, .uid], [])),
             (#line, .uidStore(.set([1]), [:], .flags(.add(silent: true, list: [.answered])))),
             (#line, .uidCopy(.set([1]), .food)),
             (#line, .uidMove(.set([1]), .food)),
@@ -911,8 +911,8 @@ extension PipeliningTests {
         // trigger an untagged EXPUNGE.
         AssertFalse(commands: [
             // FETCH, STORE, and SEARCH
-            (#line, .fetch(.set([1]), [.envelope, .uid], [:])),
-            (#line, .fetch(.set([1]), [.bodyStructure(extensions: false)], [:])),
+            (#line, .fetch(.set([1]), [.envelope, .uid], [])),
+            (#line, .fetch(.set([1]), [.bodyStructure(extensions: false)], [])),
             (#line, .store(.set([1]), [], .flags(.add(silent: true, list: [.answered])))),
             (#line, .store(.set([1]), [], .flags(.add(silent: false, list: [.answered])))),
             (#line, .search(key: .all, charset: nil, returnOptions: [.all])),
@@ -941,7 +941,7 @@ extension PipeliningTests {
             (#line, .check),
             (#line, .expunge),
             (#line, .uidSearch(key: .all, charset: nil, returnOptions: [])),
-            (#line, .uidFetch(.set([1]), [.envelope, .uid], [:])),
+            (#line, .uidFetch(.set([1]), [.envelope, .uid], [])),
             (#line, .uidStore(.set([1]), [:], .flags(.add(silent: true, list: [.answered])))),
             (#line, .uidCopy(.set([1]), .food)),
             (#line, .uidMove(.set([1]), .food)),
@@ -1003,8 +1003,8 @@ extension PipeliningTests {
 
             (#line, .check),
             (#line, .expunge),
-            (#line, .fetch(.set([1]), [.envelope, .uid], [:])),
-            (#line, .fetch(.set([1]), [.bodyStructure(extensions: false)], [:])),
+            (#line, .fetch(.set([1]), [.envelope, .uid], [])),
+            (#line, .fetch(.set([1]), [.bodyStructure(extensions: false)], [])),
             (#line, .copy(.set([1]), .food)),
             (#line, .move(.set([1]), .food)),
             (#line, .store(.set([1]), [], .flags(.add(silent: true, list: [.answered])))),
@@ -1020,7 +1020,7 @@ extension PipeliningTests {
         ], haveBehavior: .isUIDBased)
 
         Assert(commands: [
-            (#line, .uidFetch(.set([1]), [.envelope, .uid], [:])),
+            (#line, .uidFetch(.set([1]), [.envelope, .uid], [])),
             (#line, .uidStore(.set([1]), [:], .flags(.add(silent: true, list: [.answered])))),
             (#line, .uidCopy(.set([1]), .food)),
             (#line, .uidMove(.set([1]), .food)),
@@ -1084,11 +1084,11 @@ extension PipeliningTests {
             (#line, .check),
             (#line, .expunge),
             (#line, .uidExpunge(.set([1]))),
-            (#line, .fetch(.set([1]), [.envelope, .uid], [:])),
-            (#line, .fetch(.set([1]), [.bodyStructure(extensions: false)], [:])),
+            (#line, .fetch(.set([1]), [.envelope, .uid], [])),
+            (#line, .fetch(.set([1]), [.bodyStructure(extensions: false)], [])),
             (#line, .search(key: .all, charset: nil, returnOptions: [.all])),
             (#line, .uidSearch(key: .all, charset: nil, returnOptions: [])),
-            (#line, .uidFetch(.set([1]), [.envelope, .uid], [:])),
+            (#line, .uidFetch(.set([1]), [.envelope, .uid], [])),
             (#line, .uidCopy(.set([1]), .food)),
             (#line, .uidMove(.set([1]), .food)),
             (#line, .copy(.set([1]), .food)),
@@ -1169,22 +1169,22 @@ extension PipeliningTests {
             (#line, .store(.set([1]), [], .flags(.add(silent: true, list: [.answered])))),
 
             // FETCH is ok as long as it’s not fetching flags:
-            (#line, .fetch(.set([1]), [.envelope, .uid], [:])),
-            (#line, .fetch(.set([1]), [.bodyStructure(extensions: false)], [:])),
-            (#line, .uidFetch(.set([1]), [.envelope, .uid], [:])),
+            (#line, .fetch(.set([1]), [.envelope, .uid], [])),
+            (#line, .fetch(.set([1]), [.bodyStructure(extensions: false)], [])),
+            (#line, .uidFetch(.set([1]), [.envelope, .uid], [])),
         ], haveBehavior: .readsFlagsFromAnyMessage)
 
         Assert(commands: [
-            (#line, .fetch(.set([1]), [.envelope, .uid, .flags], [:])),
-            (#line, .fetch(.set([1]), [.uid, .flags], [:])),
+            (#line, .fetch(.set([1]), [.envelope, .uid, .flags], [])),
+            (#line, .fetch(.set([1]), [.uid, .flags], [])),
             // This will also return flags:
             (#line, .store(.set([1]), [], .flags(.add(silent: false, list: [.answered])))),
             (#line, .uidStore(.lastCommand, [:], .flags(.add(silent: false, list: [.answered])))),
         ], haveBehavior: .readsFlagsFromAnyMessage)
         MessageIdentifierSetNonEmpty<UID>.arbitrarySets.forEach { uids in
             Assert(commands: [
-                (#line, .uidFetch(.set(uids), [.envelope, .uid, .flags], [:])),
-                (#line, .uidFetch(.set(uids), [.uid, .flags], [:])),
+                (#line, .uidFetch(.set(uids), [.envelope, .uid, .flags], [])),
+                (#line, .uidFetch(.set(uids), [.uid, .flags], [])),
                 // This will also return flags:
                 (#line, .uidStore(.set(uids), [:], .flags(.add(silent: false, list: [.answered])))),
                 (#line, .uidStore(.set(uids), [:], .flags(.add(silent: false, list: [.answered])))),
@@ -1237,10 +1237,10 @@ extension PipeliningTests {
 
             (#line, .check),
             (#line, .expunge),
-            (#line, .fetch(.set([1]), [.envelope, .uid], [:])),
-            (#line, .fetch(.set([1]), [.bodyStructure(extensions: false)], [:])),
+            (#line, .fetch(.set([1]), [.envelope, .uid], [])),
+            (#line, .fetch(.set([1]), [.bodyStructure(extensions: false)], [])),
             (#line, .uidSearch(key: .all, charset: nil, returnOptions: [])),
-            (#line, .uidFetch(.set([1]), [.envelope, .uid], [:])),
+            (#line, .uidFetch(.set([1]), [.envelope, .uid], [])),
             (#line, .uidCopy(.set([1]), .food)),
             (#line, .uidMove(.set([1]), .food)),
             (#line, .uidStore(.set([1]), [:], .flags(.add(silent: true, list: [.answered])))),

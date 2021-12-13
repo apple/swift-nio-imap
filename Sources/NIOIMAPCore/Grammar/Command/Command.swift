@@ -518,23 +518,23 @@ extension CommandEncodeBuffer {
             self.buffer.writeMailbox(mailbox)
     }
 
-    private mutating func writeCommandKind_fetch(set: LastCommandSet<SequenceSet>, atts: [FetchAttribute], modifiers: OrderedDictionary<String, ParameterValue?>) -> Int {
+    private mutating func writeCommandKind_fetch(set: LastCommandSet<SequenceSet>, atts: [FetchAttribute], modifiers: [FetchModifier]) -> Int {
         self.buffer.writeString("FETCH ") +
             self.buffer.writeLastCommandSet(set) +
             self.buffer.writeSpace() +
             self.buffer.writeFetchAttributeList(atts) +
             self.buffer.writeIfExists(modifiers) { (modifiers) -> Int in
-                self.buffer.writeParameters(modifiers)
+                self.buffer.writeFetchModifiers(modifiers)
             }
     }
 
-    private mutating func writeCommandKind_uidFetch(set: LastCommandSet<MessageIdentifierSetNonEmpty<UID>>, atts: [FetchAttribute], modifiers: OrderedDictionary<String, ParameterValue?>) -> Int {
+    private mutating func writeCommandKind_uidFetch(set: LastCommandSet<MessageIdentifierSetNonEmpty<UID>>, atts: [FetchAttribute], modifiers: [FetchModifier]) -> Int {
         self.buffer.writeString("UID FETCH ") +
             self.buffer.writeLastCommandSet(set) +
             self.buffer.writeSpace() +
             self.buffer.writeFetchAttributeList(atts) +
             self.buffer.writeIfExists(modifiers) { (modifiers) -> Int in
-                self.buffer.writeParameters(modifiers)
+                self.buffer.writeFetchModifiers(modifiers)
             }
     }
 
