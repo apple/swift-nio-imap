@@ -110,6 +110,18 @@ extension MessageIdentifierRange where IdentifierType == UID {
     }
 }
 
+extension MessageIdentifierRange where IdentifierType == UnknownMessageIdentifier {
+    
+    init(_ range: MessageIdentifierRange<UID>) {
+        self.init(IdentifierType(range.range.lowerBound) ... IdentifierType(range.range.upperBound))
+    }
+    
+    init(_ range: MessageIdentifierRange<SequenceNumber>) {
+        self.init(IdentifierType(range.range.lowerBound) ... IdentifierType(range.range.upperBound))
+    }
+    
+}
+
 // MARK: - Encoding
 
 extension EncodeBuffer {

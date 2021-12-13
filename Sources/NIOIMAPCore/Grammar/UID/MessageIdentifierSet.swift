@@ -453,6 +453,21 @@ extension MessageIdentifierSet where IdentifierType == UID {
     }
 }
 
+extension MessageIdentifierSet where IdentifierType == UnknownMessageIdentifier {
+    init(_ set: MessageIdentifierSet<UID>) {
+        let converted = set.ranges.map { range in
+            MessageIdentifierRange<UnknownMessageIdentifier>(range)
+        }
+        self.init(converted)
+    }
+    init(_ set: MessageIdentifierSet<SequenceNumber>) {
+        let converted = set.ranges.map { range in
+            MessageIdentifierRange<UnknownMessageIdentifier>(range)
+        }
+        self.init(converted)
+    }
+}
+
 // MARK: - Encoding
 
 extension MessageIdentifierSet: IMAPEncodable {
