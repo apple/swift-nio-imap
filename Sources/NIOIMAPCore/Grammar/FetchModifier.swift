@@ -33,4 +33,12 @@ extension EncodeBuffer {
             return self.writeParameter(param)
         }
     }
+
+    @discardableResult mutating func writeFetchModifiers(_ a: [FetchModifier]) -> Int {
+        self.writeString(" (") +
+            self.writeArray(a) { (modifier, self) in
+                self.writeFetchModifier(modifier)
+            } +
+            self.writeString(")")
+    }
 }

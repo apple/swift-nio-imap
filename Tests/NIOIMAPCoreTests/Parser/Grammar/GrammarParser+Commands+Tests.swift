@@ -502,7 +502,7 @@ extension GrammarParser_Commands_Tests {
             validInputs: [
                 (" EXPUNGE 1", "\r\n", .uidExpunge(.set([1])), #line),
                 (" COPY 1 Inbox", "\r\n", .uidCopy(.set([1]), .inbox), #line),
-                (" FETCH 1 FLAGS", "\r\n", .uidFetch(.set([1]), [.flags], [:]), #line),
+                (" FETCH 1 FLAGS", "\r\n", .uidFetch(.set([1]), [.flags], []), #line),
                 (" SEARCH CHARSET UTF8 ALL", "\r\n", .uidSearch(key: .all, charset: "UTF8"), #line),
                 (" STORE 1 +FLAGS (Test)", "\r\n", .uidStore(.set([1]), [:], .flags(.add(silent: false, list: [.keyword(.init("Test"))]))), #line),
                 (" COPY * Inbox", "\r\n", .uidCopy(.set([MessageIdentifierRange<UID>(.max)]), .inbox), #line),
@@ -520,13 +520,13 @@ extension GrammarParser_Commands_Tests {
         self.iterateTests(
             testFunction: GrammarParser.parseCommandSuffix_fetch,
             validInputs: [
-                (" 1:3 ALL", "\r", .fetch(.set([1 ... 3]), .all, [:]), #line),
-                (" 2:4 FULL", "\r", .fetch(.set([2 ... 4]), .full, [:]), #line),
-                (" 3:5 FAST", "\r", .fetch(.set([3 ... 5]), .fast, [:]), #line),
-                (" 4:6 ENVELOPE", "\r", .fetch(.set([4 ... 6]), [.envelope], [:]), #line),
-                (" 5:7 (ENVELOPE FLAGS)", "\r", .fetch(.set([5 ... 7]), [.envelope, .flags], [:]), #line),
-                (" 3:5 FAST (name)", "\r", .fetch(.set([3 ... 5]), .fast, ["name": nil]), #line),
-                (" 1 BODY[TEXT]", "\r", .fetch(.set([1]), [.bodySection(peek: false, .init(kind: .text), nil)], [:]), #line),
+                (" 1:3 ALL", "\r", .fetch(.set([1 ... 3]), .all, []), #line),
+                (" 2:4 FULL", "\r", .fetch(.set([2 ... 4]), .full, []), #line),
+                (" 3:5 FAST", "\r", .fetch(.set([3 ... 5]), .fast, []), #line),
+                (" 4:6 ENVELOPE", "\r", .fetch(.set([4 ... 6]), [.envelope], []), #line),
+                (" 5:7 (ENVELOPE FLAGS)", "\r", .fetch(.set([5 ... 7]), [.envelope, .flags], []), #line),
+                (" 3:5 FAST (name)", "\r", .fetch(.set([3 ... 5]), .fast, [.other(.init(key: "name", value: nil))]), #line),
+                (" 1 BODY[TEXT]", "\r", .fetch(.set([1]), [.bodySection(peek: false, .init(kind: .text), nil)], []), #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []

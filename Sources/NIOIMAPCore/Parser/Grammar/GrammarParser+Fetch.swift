@@ -190,6 +190,20 @@ extension GrammarParser {
         ], buffer: &buffer, tracker: tracker)
     }
 
+    static func parseFetchModifiers(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [FetchModifier] {
+        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
+            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+            try PL.parseFixedString("(", buffer: &buffer, tracker: tracker)
+            var array = [try self.parseFetchModifier(buffer: &buffer, tracker: tracker)]
+            try PL.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { buffer, tracker -> FetchModifier in
+                try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+                return try self.parseFetchModifier(buffer: &buffer, tracker: tracker)
+            }
+            try PL.parseFixedString(")", buffer: &buffer, tracker: tracker)
+            return array
+        }
+    }
+
     static func parseFetchModifier(buffer: inout ParseBuffer, tracker: StackTracker) throws -> FetchModifier {
         func parseFetchModifier_changedSince(buffer: inout ParseBuffer, tracker: StackTracker) throws -> FetchModifier {
             .changedSince(try self.parseChangedSinceModifier(buffer: &buffer, tracker: tracker))

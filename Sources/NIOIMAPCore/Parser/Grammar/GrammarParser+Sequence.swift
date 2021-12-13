@@ -127,7 +127,7 @@ extension GrammarParser {
 
     // mod-sequence-valzer = "0" / mod-sequence-value
     static func parseModificationSequenceValue(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ModificationSequenceValue {
-        let number = UInt64(try self.parseNumber(buffer: &buffer, tracker: tracker))
+        let (number, _) = try ParserLibrary.parseUnsignedInt64(buffer: &buffer, tracker: tracker, allowLeadingZeros: true)
         return ModificationSequenceValue(number)
     }
 }

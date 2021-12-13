@@ -425,7 +425,7 @@ extension GrammarParser {
                 let set = try self.parseUIDSetNonEmpty(buffer: &buffer, tracker: tracker)
                 try PL.parseSpaces(buffer: &buffer, tracker: tracker)
                 let att = try parseFetch_type(buffer: &buffer, tracker: tracker)
-                let modifiers = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseParameters) ?? [:]
+                let modifiers = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseFetchModifiers) ?? []
                 return .uidFetch(.set(set), att, modifiers)
             }
         }
@@ -478,7 +478,7 @@ extension GrammarParser {
             let sequence: LastCommandSet<SequenceSet> = try self.parseMessageIdentifierSet(buffer: &buffer, tracker: tracker)
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             let att = try parseFetch_type(buffer: &buffer, tracker: tracker)
-            let modifiers = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseParameters) ?? [:]
+            let modifiers = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseFetchModifiers) ?? []
             return .fetch(sequence, att, modifiers)
         }
     }
