@@ -91,7 +91,7 @@ extension UIDSetTests {
 
     func testIsContiguous() {
         XCTAssert(MessageIdentifierSet<UID>.empty.isContiguous)
-        XCTAssert(MessageIdentifierSet<UID>(20).isContiguous)
+        XCTAssert(MessageIdentifierSet<UID>(20 as UID).isContiguous)
         XCTAssert(MessageIdentifierSet<UID>(20 ... 22).isContiguous)
         XCTAssertFalse(MessageIdentifierSet<UID>([20 ... 22, 24 ... 25]).isContiguous)
     }
