@@ -97,7 +97,7 @@ public enum Command: Hashable {
     case copy(LastCommandSet<SequenceSet>, MailboxName)
 
     /// Fetches an array of specified attributes for each message in a given set.
-    case fetch(LastCommandSet<SequenceSet>, [FetchAttribute], OrderedDictionary<String, ParameterValue?>)
+    case fetch(LastCommandSet<SequenceSet>, [FetchAttribute], [FetchModifier])
 
     /// Alters data associated with a message, typically returning the new data as an untagged fetch response.
     case store(LastCommandSet<SequenceSet>, [StoreModifier], StoreData)
@@ -121,7 +121,7 @@ public enum Command: Hashable {
     case uidMove(LastCommandSet<MessageIdentifierSetNonEmpty<UID>>, MailboxName)
 
     /// Similar to `.fetch`, but uses unique identifier instead of sequence numbers to identify messages.
-    case uidFetch(LastCommandSet<MessageIdentifierSetNonEmpty<UID>>, [FetchAttribute], OrderedDictionary<String, ParameterValue?>)
+    case uidFetch(LastCommandSet<MessageIdentifierSetNonEmpty<UID>>, [FetchAttribute], [FetchModifier])
 
     /// Similar to `.search`, but uses unique identifier instead of sequence numbers to identify messages.
     case uidSearch(key: SearchKey, charset: String? = nil, returnOptions: [SearchReturnOption] = [])
@@ -659,7 +659,7 @@ extension Command {
     /// - parameter attributes: Which attributes to retrieve.
     /// - parameter modifiers: Fetch modifiers.
     /// - returns: `nil` if `messages` is empty, otherwise a `Command`.
-    public static func uidFetch(messages: UIDSet, attributes: [FetchAttribute], modifiers: OrderedDictionary<String, ParameterValue?>) -> Command? {
+    public static func uidFetch(messages: UIDSet, attributes: [FetchAttribute], modifiers: [FetchModifier]) -> Command? {
         guard let set = MessageIdentifierSetNonEmpty(set: messages) else {
             return nil
         }
