@@ -99,19 +99,15 @@ extension MessageIdentifier {
 }
 
 extension MessageIdentifierRange where IdentifierType == SequenceNumber {
-    
     init(_ range: MessageIdentifierRange<UnknownMessageIdentifier>) {
         self.init(SequenceNumber(range.range.lowerBound) ... SequenceNumber(range.range.upperBound))
     }
-    
 }
 
 extension MessageIdentifierRange where IdentifierType == UID {
-    
     init(_ range: MessageIdentifierRange<UnknownMessageIdentifier>) {
         self.init(UID(range.range.lowerBound) ... UID(range.range.upperBound))
     }
-    
 }
 
 // MARK: - Encoding
