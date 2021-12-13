@@ -89,6 +89,13 @@ extension UIDSetTests {
         XCTAssert(MessageIdentifierSet<UID>.all.contains(.max))
     }
 
+    func testIsContiguous() {
+        XCTAssert(MessageIdentifierSet<UID>.empty.isContiguous)
+        XCTAssert(MessageIdentifierSet<UID>(20 as UID).isContiguous)
+        XCTAssert(MessageIdentifierSet<UID>(20 ... 22).isContiguous)
+        XCTAssertFalse(MessageIdentifierSet<UID>([20 ... 22, 24 ... 25]).isContiguous)
+    }
+
     func testUnion() {
         XCTAssertEqual("\(MessageIdentifierSet<UID>(20 as UID).union(MessageIdentifierSet(30 as UID)))", "20,30")
         XCTAssertEqual("\(MessageIdentifierSet<UID>(20 as UID).union(MessageIdentifierSet(21 as UID)))", "20:21")
