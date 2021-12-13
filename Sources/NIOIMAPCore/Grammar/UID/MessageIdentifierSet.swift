@@ -460,6 +460,7 @@ extension MessageIdentifierSet where IdentifierType == UnknownMessageIdentifier 
         }
         self.init(converted)
     }
+
     init(_ set: MessageIdentifierSet<SequenceNumber>) {
         let converted = set.ranges.map { range in
             MessageIdentifierRange<UnknownMessageIdentifier>(range)
