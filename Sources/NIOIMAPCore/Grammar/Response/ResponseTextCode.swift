@@ -15,10 +15,15 @@
 import struct NIO.ByteBuffer
 
 // TODO: Convert to struct
-/// Used to help tell a client why a command failed. Machine readable, not guaranteed to
-/// be human readable.
+/// Additional, structured status information for `UntaggedStatus` and `TaggedResponse`.
+///
+/// `ResponseTextCode` contains the parsed part, whereas the human-readable description
+/// is captured by `ResponseText`’s `text`.
+///
 /// See also https://www.iana.org/assignments/imap-response-codes/imap-response-codes.xhtml
-public enum ResponseTextCode: Hashable {
+///
+/// - Note: This `enum` is `indirect` to work around the compiler generating large types. (86318397)
+public indirect enum ResponseTextCode: Hashable {
     /// The human-readable text contains a special alert that MUST be
     /// presented to the user in a fashion that calls the user's
     /// attention to the message.
