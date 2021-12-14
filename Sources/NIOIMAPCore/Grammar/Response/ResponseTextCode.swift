@@ -268,8 +268,8 @@ public indirect enum ResponseTextCode: Hashable {
 }
 
 extension ResponseTextCode {
-    public static func modified(_: MessageIdentifierSet<UID>) -> Self {
-        .modified(.set(.init()))
+    public static func modified(_ set: MessageIdentifierSet<UID>) -> Self {
+        .modified(.set(.init(set)))
     }
 
     public static func modified(_ set: MessageIdentifierSet<SequenceNumber>) -> Self {
