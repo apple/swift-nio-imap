@@ -29,4 +29,13 @@ extension FetchModifier_Tests {
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeFetchModifier($0) })
     }
+
+    func testEncodeArray() {
+        let inputs: [([FetchModifier], String, UInt)] = [
+            ([.changedSince(.init(modificationSequence: 3665089505007763456))], " (CHANGEDSINCE 3665089505007763456)", #line),
+            ([.other(.init(key: "test", value: nil)), .other(.init(key: "test", value: .sequence(.set([4]))))], " (test test 4)", #line),
+            ([], "", #line),
+        ]
+        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeFetchModifiers($0) })
+    }
 }
