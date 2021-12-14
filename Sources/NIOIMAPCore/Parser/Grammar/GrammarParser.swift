@@ -2436,7 +2436,7 @@ extension GrammarParser {
     // RFC 7377
     // esearch-source-opts =  "IN" SP "(" source-mbox [SP "(" scope-options ")"] ")"
     func parseExtendedSearchSourceOptions(buffer: inout ParseBuffer,
-                                                 tracker: StackTracker) throws -> ExtendedSearchSourceOptions
+                                          tracker: StackTracker) throws -> ExtendedSearchSourceOptions
     {
         func parseExtendedSearchSourceOptions_spaceFilter(buffer: inout ParseBuffer,
                                                           tracker: StackTracker) throws -> MailboxFilter
@@ -2488,7 +2488,7 @@ extension GrammarParser {
     // [SP search-return-opts] SP search-program
     // Ignoring the command here.
     func parseExtendedSearchOptions(buffer: inout ParseBuffer,
-                                           tracker: StackTracker) throws -> ExtendedSearchOptions
+                                    tracker: StackTracker) throws -> ExtendedSearchOptions
     {
         func parseExtendedSearchOptions_sourceOptions(buffer: inout ParseBuffer,
                                                       tracker: StackTracker) throws -> ExtendedSearchSourceOptions

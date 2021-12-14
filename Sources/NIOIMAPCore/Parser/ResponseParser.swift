@@ -113,10 +113,10 @@ extension ResponseParser {
             try? PL.parseSpaces(buffer: &buffer, tracker: tracker)
             do {
                 let response = try withoutActuallyEscaping(parseResponse_normal) { parse_normal in
-                    return try withoutActuallyEscaping(parseResponse_fetch) { parse_fetch in
+                    try withoutActuallyEscaping(parseResponse_fetch) { parse_fetch in
                         try PL.parseOneOf([
                             parse_normal,
-                            parse_fetch
+                            parse_fetch,
                         ], buffer: &buffer, tracker: tracker)
                     }
                 }

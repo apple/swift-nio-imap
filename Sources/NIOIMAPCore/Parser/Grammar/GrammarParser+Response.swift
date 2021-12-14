@@ -445,7 +445,7 @@ extension GrammarParser {
 
     // quotaroot_response ::= "QUOTAROOT" SP astring *(SP astring)
     func parseResponsePayload_quotaRoot(buffer: inout ParseBuffer,
-                                               tracker: StackTracker) throws -> ResponsePayload
+                                        tracker: StackTracker) throws -> ResponsePayload
     {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             try PL.parseFixedString("QUOTAROOT ", buffer: &buffer, tracker: tracker)
