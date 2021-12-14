@@ -25,7 +25,7 @@ import struct NIO.ByteBufferView
 
 extension GrammarParser {
     // uniqueid        = nz-number
-    static func parseUIDValidity(buffer: inout ParseBuffer, tracker: StackTracker) throws -> UIDValidity {
+    func parseUIDValidity(buffer: inout ParseBuffer, tracker: StackTracker) throws -> UIDValidity {
         guard let validity = UIDValidity(exactly: try self.parseNZNumber(buffer: &buffer, tracker: tracker)) else {
             throw ParserError(hint: "Invalid UID validity.")
         }
@@ -33,7 +33,7 @@ extension GrammarParser {
     }
 
     // uid-set
-    static func parseUIDSet(buffer: inout ParseBuffer, tracker: StackTracker) throws -> UIDSet {
+    func parseUIDSet(buffer: inout ParseBuffer, tracker: StackTracker) throws -> UIDSet {
         func parseUIDSet_number(buffer: inout ParseBuffer, tracker: StackTracker) throws -> UIDRange {
             UIDRange(try self.parseMessageIdentifier(buffer: &buffer, tracker: tracker))
         }
@@ -61,7 +61,7 @@ extension GrammarParser {
         }
     }
 
-    static func parseUIDSetNonEmpty(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageIdentifierSetNonEmpty<UID> {
+    func parseUIDSetNonEmpty(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageIdentifierSetNonEmpty<UID> {
         try PL.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
             guard let set = MessageIdentifierSetNonEmpty(set: try self.parseUIDSet(buffer: &buffer, tracker: tracker)) else {
                 throw ParserError(hint: "Need at least one UID")
@@ -70,7 +70,7 @@ extension GrammarParser {
         }
     }
 
-    static func parseUIDRangeArray(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [UIDRange] {
+    func parseUIDRangeArray(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [UIDRange] {
         func parseUIDArray_number(buffer: inout ParseBuffer, tracker: StackTracker) throws -> UIDRange {
             UIDRange(try self.parseMessageIdentifier(buffer: &buffer, tracker: tracker))
         }

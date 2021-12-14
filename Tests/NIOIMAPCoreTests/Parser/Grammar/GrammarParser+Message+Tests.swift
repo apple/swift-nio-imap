@@ -26,7 +26,7 @@ extension GrammarParser_Message_Tests {
         let date = ServerMessageDate(components!)
 
         self.iterateTests(
-            testFunction: GrammarParser.parseMessageAttribute,
+            testFunction: GrammarParser().parseMessageAttribute,
             validInputs: [
                 ("UID 1234", " ", .uid(1234), #line),
                 ("RFC822.SIZE 1234", " ", .rfc822Size(1234), #line),
@@ -69,7 +69,7 @@ extension GrammarParser_Message_Tests {
 extension GrammarParser_Message_Tests {
     func testParseMessageData() {
         self.iterateTests(
-            testFunction: GrammarParser.parseMessageData,
+            testFunction: GrammarParser().parseMessageData,
             validInputs: [
                 ("3 EXPUNGE", "\r", .expunge(3), #line),
                 ("VANISHED 1:3", "\r", .vanished([1 ... 3]), #line),

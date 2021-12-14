@@ -23,7 +23,7 @@ class GrammarParser_Entry_Tests: XCTestCase, _ParserTestHelpers {}
 extension GrammarParser_Entry_Tests {
     func testParseEntryValue() {
         self.iterateTests(
-            testFunction: GrammarParser.parseEntryValue,
+            testFunction: GrammarParser().parseEntryValue,
             validInputs: [
                 ("\"name\" \"value\"", "", .init(key: "name", value: .init("value")), #line),
                 ("\"name\" NIL", "", .init(key: "name", value: .init(nil)), #line),
@@ -41,7 +41,7 @@ extension GrammarParser_Entry_Tests {
 extension GrammarParser_Entry_Tests {
     func testParseEntryValues() {
         self.iterateTests(
-            testFunction: GrammarParser.parseEntryValues,
+            testFunction: GrammarParser().parseEntryValues,
             validInputs: [
                 (
                     "(\"name\" \"value\")",
@@ -69,7 +69,7 @@ extension GrammarParser_Entry_Tests {
 extension GrammarParser_Entry_Tests {
     func testParseEntries() {
         self.iterateTests(
-            testFunction: GrammarParser.parseEntries,
+            testFunction: GrammarParser().parseEntries,
             validInputs: [
                 ("\"name\"", "", ["name"], #line),
                 ("(\"name\")", "", ["name"], #line),
@@ -88,7 +88,7 @@ extension GrammarParser_Entry_Tests {
 extension GrammarParser_Entry_Tests {
     func testParseEntryList() {
         self.iterateTests(
-            testFunction: GrammarParser.parseEntryList,
+            testFunction: GrammarParser().parseEntryList,
             validInputs: [
                 ("\"name\"", "\r", ["name"], #line),
                 ("\"name1\" \"name2\"", "\r", ["name1", "name2"], #line),
@@ -106,7 +106,7 @@ extension GrammarParser_Entry_Tests {
 extension GrammarParser_Entry_Tests {
     func testParseEntryFlagName() {
         self.iterateTests(
-            testFunction: GrammarParser.parseEntryFlagName,
+            testFunction: GrammarParser().parseEntryFlagName,
             validInputs: [
                 ("\"/flags/\\\\Answered\"", "", .init(flag: .answered), #line),
             ],
@@ -125,7 +125,7 @@ extension GrammarParser_Entry_Tests {
 extension GrammarParser_Entry_Tests {
     func testParseEntryTypeRequest() {
         self.iterateTests(
-            testFunction: GrammarParser.parseEntryKindRequest,
+            testFunction: GrammarParser().parseEntryKindRequest,
             validInputs: [
                 ("all", " ", .all, #line),
                 ("ALL", " ", .all, #line),
@@ -146,7 +146,7 @@ extension GrammarParser_Entry_Tests {
 extension GrammarParser_Entry_Tests {
     func testParseEntryTypeResponse() {
         self.iterateTests(
-            testFunction: GrammarParser.parseEntryKindResponse,
+            testFunction: GrammarParser().parseEntryKindResponse,
             validInputs: [
                 ("priv", " ", .private, #line),
                 ("PRIV", " ", .private, #line),

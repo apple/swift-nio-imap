@@ -28,7 +28,7 @@ extension GrammarParser_List_Tests {
         for v in valid {
             var buffer = TestUtilities.makeParseBuffer(for: String(decoding: [v], as: UTF8.self))
             do {
-                let str = try GrammarParser.parseListWildcards(buffer: &buffer, tracker: .testTracker)
+                let str = try GrammarParser().parseListWildcards(buffer: &buffer, tracker: .testTracker)
                 XCTAssertEqual(str[str.startIndex], Character(Unicode.Scalar(v)))
             } catch {
                 XCTFail("\(v) doesn't satisfy \(error)")
@@ -37,7 +37,7 @@ extension GrammarParser_List_Tests {
         }
         for v in invalid {
             var buffer = TestUtilities.makeParseBuffer(for: String(decoding: [v], as: UTF8.self))
-            XCTAssertThrowsError(try GrammarParser.parseListWildcards(buffer: &buffer, tracker: .testTracker)) { e in
+            XCTAssertThrowsError(try GrammarParser().parseListWildcards(buffer: &buffer, tracker: .testTracker)) { e in
                 XCTAssertTrue(e is ParserError)
             }
         }

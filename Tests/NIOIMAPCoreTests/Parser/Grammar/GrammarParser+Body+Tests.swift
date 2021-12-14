@@ -23,7 +23,7 @@ class GrammarParser_Body_Tests: XCTestCase, _ParserTestHelpers {}
 extension GrammarParser_Body_Tests {
     func testParseBodyExtension() {
         self.iterateTests(
-            testFunction: GrammarParser.parseBodyExtension,
+            testFunction: GrammarParser().parseBodyExtension,
             validInputs: [
                 ("1", "\r", [.number(1)], #line),
                 ("\"s\"", "\r", [.string("s")], #line),
@@ -43,7 +43,7 @@ extension GrammarParser_Body_Tests {
 extension GrammarParser_Body_Tests {
     func testParseBodyFieldDsp_some() {
         TestUtilities.withParseBuffer(#"("astring" ("f1" "v1"))"#) { (buffer) in
-            let dsp = try GrammarParser.parseBodyFieldDsp(buffer: &buffer, tracker: .testTracker)
+            let dsp = try GrammarParser().parseBodyFieldDsp(buffer: &buffer, tracker: .testTracker)
             XCTAssertNotNil(dsp)
             XCTAssertEqual(dsp, BodyStructure.Disposition(kind: "astring", parameters: ["f1": "v1"]))
         }
@@ -51,7 +51,7 @@ extension GrammarParser_Body_Tests {
 
     func testParseBodyFieldDsp_none() {
         TestUtilities.withParseBuffer(#"NIL"#, terminator: "") { (buffer) in
-            let string = try GrammarParser.parseBodyFieldDsp(buffer: &buffer, tracker: .testTracker)
+            let string = try GrammarParser().parseBodyFieldDsp(buffer: &buffer, tracker: .testTracker)
             XCTAssertEqual(string, .none)
         }
     }
@@ -62,7 +62,7 @@ extension GrammarParser_Body_Tests {
 extension GrammarParser_Body_Tests {
     func testParseBodyEncoding() {
         self.iterateTests(
-            testFunction: GrammarParser.parseBodyEncoding,
+            testFunction: GrammarParser().parseBodyEncoding,
             validInputs: [
                 (#""BASE64""#, " ", .base64, #line),
                 (#""BINARY""#, " ", .binary, #line),
@@ -78,7 +78,7 @@ extension GrammarParser_Body_Tests {
 
     func testParseBodyEncoding_invalid_missingQuotes() {
         var buffer = TestUtilities.makeParseBuffer(for: "other")
-        XCTAssertThrowsError(try GrammarParser.parseBodyEncoding(buffer: &buffer, tracker: .testTracker)) { e in
+        XCTAssertThrowsError(try GrammarParser().parseBodyEncoding(buffer: &buffer, tracker: .testTracker)) { e in
             XCTAssertTrue(e is ParserError)
         }
     }
@@ -89,7 +89,7 @@ extension GrammarParser_Body_Tests {
 extension GrammarParser_Body_Tests {
     func testParseBodyFieldLanguage() {
         self.iterateTests(
-            testFunction: GrammarParser.parseBodyFieldLanguage,
+            testFunction: GrammarParser().parseBodyFieldLanguage,
             validInputs: [
                 (#""english""#, " ", ["english"], #line),
                 (#"("english")"#, " ", ["english"], #line),
@@ -106,7 +106,7 @@ extension GrammarParser_Body_Tests {
 extension GrammarParser_Body_Tests {
     func testParseBodyFieldParam() {
         self.iterateTests(
-            testFunction: GrammarParser.parseBodyFieldParam,
+            testFunction: GrammarParser().parseBodyFieldParam,
             validInputs: [
                 (#"NIL"#, " ", [:], #line),
                 (#"("f1" "v1")"#, " ", ["f1": "v1"], #line),
@@ -119,7 +119,7 @@ extension GrammarParser_Body_Tests {
 
     func testParseBodyFieldParam_invalid_oneObject() {
         var buffer = TestUtilities.makeParseBuffer(for: #"("p1" "#)
-        XCTAssertThrowsError(try GrammarParser.parseBodyFieldParam(buffer: &buffer, tracker: .testTracker)) { e in
+        XCTAssertThrowsError(try GrammarParser().parseBodyFieldParam(buffer: &buffer, tracker: .testTracker)) { e in
             XCTAssertTrue(e is IncompleteMessage)
         }
     }
@@ -130,7 +130,7 @@ extension GrammarParser_Body_Tests {
 extension GrammarParser_Body_Tests {
     func testParseBodyFields_valid() {
         TestUtilities.withParseBuffer(#"("f1" "v1") "id" "desc" "8BIT" 1234"#, terminator: " ") { (buffer) in
-            let result = try GrammarParser.parseBodyFields(buffer: &buffer, tracker: .testTracker)
+            let result = try GrammarParser().parseBodyFields(buffer: &buffer, tracker: .testTracker)
             XCTAssertEqual(result.parameters, ["f1": "v1"])
             XCTAssertEqual(result.id, "id")
             XCTAssertEqual(result.contentDescription, "desc")
@@ -212,7 +212,7 @@ extension GrammarParser_Body_Tests {
 
         let inputs = basicInputs + messageInputs + textInputs
         self.iterateTests(
-            testFunction: GrammarParser.parseBodyKindSinglePart,
+            testFunction: GrammarParser().parseBodyKindSinglePart,
             validInputs: inputs,
             parserErrorInputs: [],
             incompleteMessageInputs: []

@@ -25,7 +25,7 @@ import struct NIO.ByteBufferView
 
 extension GrammarParser {
     // Sequence Range
-    static func parseMessageIdentifierRange<T: MessageIdentifier>(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageIdentifierRange<T> {
+    func parseMessageIdentifierRange<T: MessageIdentifier>(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageIdentifierRange<T> {
         func parse_wildcard<T: MessageIdentifier>(buffer: inout ParseBuffer, tracker: StackTracker) throws -> T {
             try PL.parseFixedString("*", buffer: &buffer, tracker: tracker)
             return .max
@@ -59,7 +59,7 @@ extension GrammarParser {
         }
     }
 
-    static func parseSequenceMatchData(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SequenceMatchData {
+    func parseSequenceMatchData(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SequenceMatchData {
         try PL.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
             try PL.parseFixedString("(", buffer: &buffer, tracker: tracker)
             let knownSequenceSet = try self.parseLastCommandSet(buffer: &buffer, tracker: tracker, setParser: self.parseUIDSetNonEmpty)
@@ -73,7 +73,7 @@ extension GrammarParser {
     // Parses a `MessageIdentifier`
     // Note: the formal syntax for `UID` and `SequenceNumber` is bogus here.
     // "*" is a sequence range, but not a sequence number.
-    static func parseMessageIdentifier<T: MessageIdentifier>(buffer: inout ParseBuffer, tracker: StackTracker) throws -> T {
+    func parseMessageIdentifier<T: MessageIdentifier>(buffer: inout ParseBuffer, tracker: StackTracker) throws -> T {
         guard let id = T(exactly: try self.parseNZNumber(buffer: &buffer, tracker: tracker)) else {
             throw ParserError(hint: "Sequence number out of range.")
         }
@@ -84,7 +84,7 @@ extension GrammarParser {
     // And from RFC 5182
     // sequence-set       =/ seq-last-command
     // seq-last-command   = "$"
-    static func parseMessageIdentifierSet<T: MessageIdentifier>(buffer: inout ParseBuffer, tracker: StackTracker) throws -> LastCommandSet<MessageIdentifierSet<T>> {
+    func parseMessageIdentifierSet<T: MessageIdentifier>(buffer: inout ParseBuffer, tracker: StackTracker) throws -> LastCommandSet<MessageIdentifierSet<T>> {
         func parseMessageIdentifierSet_number<T: MessageIdentifier>(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageIdentifierRange<T> {
             MessageIdentifierRange<T>(try self.parseMessageIdentifier(buffer: &buffer, tracker: tracker))
         }
@@ -126,7 +126,7 @@ extension GrammarParser {
     }
 
     // mod-sequence-valzer = "0" / mod-sequence-value
-    static func parseModificationSequenceValue(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ModificationSequenceValue {
+    func parseModificationSequenceValue(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ModificationSequenceValue {
         let (number, _) = try ParserLibrary.parseUnsignedInt64(buffer: &buffer, tracker: tracker, allowLeadingZeros: true)
         return ModificationSequenceValue(number)
     }

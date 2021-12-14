@@ -89,7 +89,7 @@ extension GrammarParser_Envelope_Tests {
             ),
         ]
         for (original, expected, line) in inputs {
-            let actual = GrammarParser.parseEnvelopeEmailAddressGroups(original)
+            let actual = GrammarParser().parseEnvelopeEmailAddressGroups(original)
             XCTAssertEqual(actual, expected, line: line)
         }
     }
@@ -100,7 +100,7 @@ extension GrammarParser_Envelope_Tests {
 extension GrammarParser_Envelope_Tests {
     func testParseEnvelopeEmailAddresses() {
         self.iterateTests(
-            testFunction: GrammarParser.parseEnvelopeEmailAddresses,
+            testFunction: GrammarParser().parseEnvelopeEmailAddresses,
             validInputs: [
                 (
                     "((NIL NIL NIL NIL))",
@@ -131,7 +131,7 @@ extension GrammarParser_Envelope_Tests {
 extension GrammarParser_Envelope_Tests {
     func testParseOptionalEnvelopeEmailAddresses() {
         self.iterateTests(
-            testFunction: GrammarParser.parseOptionalEnvelopeEmailAddresses,
+            testFunction: GrammarParser().parseOptionalEnvelopeEmailAddresses,
             validInputs: [
                 ("NIL", " ", [], #line),
             ],
@@ -145,7 +145,7 @@ extension GrammarParser_Envelope_Tests {
 extension GrammarParser_Envelope_Tests {
     func testParseEnvelopeTo_valid() {
         TestUtilities.withParseBuffer(#"("date" "subject" (("name1" "adl1" "mailbox1" "host1")) (("name2" "adl2" "mailbox2" "host2")) (("name3" "adl3" "mailbox3" "host3")) (("name4" "adl4" "mailbox4" "host4")) (("name5" "adl5" "mailbox5" "host5")) (("name6" "adl6" "mailbox6" "host6")) "someone" "messageid")"#) { (buffer) in
-            let envelope = try GrammarParser.parseEnvelope(buffer: &buffer, tracker: .testTracker)
+            let envelope = try GrammarParser().parseEnvelope(buffer: &buffer, tracker: .testTracker)
             XCTAssertEqual(envelope.date, "date")
             XCTAssertEqual(envelope.subject, "subject")
             XCTAssertEqual(envelope.from, [.singleAddress(.init(personName: "name1", sourceRoot: "adl1", mailbox: "mailbox1", host: "host1"))])

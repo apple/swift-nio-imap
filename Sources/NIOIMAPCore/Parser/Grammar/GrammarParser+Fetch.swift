@@ -24,7 +24,7 @@ import struct NIO.ByteBuffer
 import struct NIO.ByteBufferView
 
 extension GrammarParser {
-    static func parseFetch_type(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [FetchAttribute] {
+    func parseFetch_type(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [FetchAttribute] {
         func parseFetch_type_all(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [FetchAttribute] {
             try PL.parseFixedString("ALL", buffer: &buffer, tracker: tracker)
             return [.flags, .internalDate, .rfc822Size, .envelope]
@@ -72,7 +72,7 @@ extension GrammarParser {
     //                   "BINARY" [".PEEK"] section-binary [partial] /
     //                   "BINARY.SIZE" section-binary
     // TODO: rev2
-    static func parseFetchAttribute(buffer: inout ParseBuffer, tracker: StackTracker) throws -> FetchAttribute {
+    func parseFetchAttribute(buffer: inout ParseBuffer, tracker: StackTracker) throws -> FetchAttribute {
         func parseFetchAttribute_bodySection(buffer: inout ParseBuffer, tracker: StackTracker) throws -> FetchAttribute {
             // Try to parse a section, `[something]`. If this fails, then it's a normal, boring body, without extensions
             // (with extensions is sent as `BODYSTRUCTURE`).
@@ -147,7 +147,7 @@ extension GrammarParser {
         }
     }
 
-    static func parseFetchStreamingResponse(buffer: inout ParseBuffer, tracker: StackTracker) throws -> StreamingKind {
+    func parseFetchStreamingResponse(buffer: inout ParseBuffer, tracker: StackTracker) throws -> StreamingKind {
         func parseFetchStreamingResponse_rfc822Text(buffer: inout ParseBuffer, tracker: StackTracker) throws -> StreamingKind {
             try PL.parseFixedString("RFC822.TEXT", buffer: &buffer, tracker: tracker)
             return .rfc822Text
@@ -190,7 +190,7 @@ extension GrammarParser {
         ], buffer: &buffer, tracker: tracker)
     }
 
-    static func parseFetchModifiers(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [FetchModifier] {
+    func parseFetchModifiers(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [FetchModifier] {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             try PL.parseFixedString("(", buffer: &buffer, tracker: tracker)
@@ -204,7 +204,7 @@ extension GrammarParser {
         }
     }
 
-    static func parseFetchModifier(buffer: inout ParseBuffer, tracker: StackTracker) throws -> FetchModifier {
+    func parseFetchModifier(buffer: inout ParseBuffer, tracker: StackTracker) throws -> FetchModifier {
         func parseFetchModifier_changedSince(buffer: inout ParseBuffer, tracker: StackTracker) throws -> FetchModifier {
             .changedSince(try self.parseChangedSinceModifier(buffer: &buffer, tracker: tracker))
         }
@@ -221,7 +221,7 @@ extension GrammarParser {
         )
     }
 
-    static func parseFetchResponseStart(buffer: inout ParseBuffer, tracker: StackTracker) throws -> _FetchResponse {
+    func parseFetchResponseStart(buffer: inout ParseBuffer, tracker: StackTracker) throws -> _FetchResponse {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             try PL.parseFixedString("* ", buffer: &buffer, tracker: tracker)
             let number: SequenceNumber = try self.parseMessageIdentifier(buffer: &buffer, tracker: tracker)
@@ -240,7 +240,7 @@ extension GrammarParser {
         case finish
     }
 
-    static func parseFetchResponse(buffer: inout ParseBuffer, tracker: StackTracker) throws -> _FetchResponse {
+    func parseFetchResponse(buffer: inout ParseBuffer, tracker: StackTracker) throws -> _FetchResponse {
         func parseFetchResponse_simpleAttribute(buffer: inout ParseBuffer, tracker: StackTracker) throws -> _FetchResponse {
             let attribute = try self.parseMessageAttribute(buffer: &buffer, tracker: tracker)
             return .simpleAttribute(attribute)

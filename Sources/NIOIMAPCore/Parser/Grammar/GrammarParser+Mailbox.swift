@@ -26,7 +26,7 @@ import struct OrderedCollections.OrderedDictionary
 
 extension GrammarParser {
     // mailbox         = "INBOX" / astring
-    static func parseMailbox(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxName {
+    func parseMailbox(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxName {
         MailboxName(try self.parseAString(buffer: &buffer, tracker: tracker))
     }
 
@@ -34,7 +34,7 @@ extension GrammarParser {
     //                    esearch-response /
     //                    "STATUS" SP mailbox SP "(" [status-att-list] ")" /
     //                    number SP "EXISTS" / Namespace-Response
-    static func parseMailboxData(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxData {
+    func parseMailboxData(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxData {
         func parseMailboxData_flags(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxData {
             try PL.parseFixedString("FLAGS ", buffer: &buffer, tracker: tracker)
             return .flags(try self.parseFlagList(buffer: &buffer, tracker: tracker))
@@ -120,7 +120,7 @@ extension GrammarParser {
     // mailbox-list    = "(" [mbx-list-flags] ")" SP
     //                    (DQUOTE QUOTED-CHAR DQUOTE / nil) SP mailbox
     //                    [SP mbox-list-extended]
-    static func parseMailboxList(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxInfo {
+    func parseMailboxList(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxInfo {
         func parseMailboxList_quotedChar_some(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Character? {
             try PL.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> Character? in
                 try PL.parseFixedString("\"", buffer: &buffer, tracker: tracker)
@@ -163,7 +163,7 @@ extension GrammarParser {
 
     // mbox-list-extended =  "(" [mbox-list-extended-item
     //                       *(SP mbox-list-extended-item)] ")"
-    static func parseMailboxListExtended(buffer: inout ParseBuffer, tracker: StackTracker) throws -> OrderedDictionary<ByteBuffer, ParameterValue> {
+    func parseMailboxListExtended(buffer: inout ParseBuffer, tracker: StackTracker) throws -> OrderedDictionary<ByteBuffer, ParameterValue> {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> OrderedDictionary<ByteBuffer, ParameterValue> in
             try PL.parseFixedString("(", buffer: &buffer, tracker: tracker)
             let data = try PL.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> OrderedDictionary<ByteBuffer, ParameterValue> in
@@ -183,7 +183,7 @@ extension GrammarParser {
 
     // mbox-list-extended-item =  mbox-list-extended-item-tag SP
     //                            tagged-ext-val
-    static func parseMailboxListExtendedItem(buffer: inout ParseBuffer, tracker: StackTracker) throws -> KeyValue<ByteBuffer, ParameterValue> {
+    func parseMailboxListExtendedItem(buffer: inout ParseBuffer, tracker: StackTracker) throws -> KeyValue<ByteBuffer, ParameterValue> {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> KeyValue<ByteBuffer, ParameterValue> in
             let tag = try self.parseAString(buffer: &buffer, tracker: tracker)
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
@@ -193,7 +193,7 @@ extension GrammarParser {
     }
 
     // mbox-or-pat =  list-mailbox / patterns
-    static func parseMailboxOrPat(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxPatterns {
+    func parseMailboxOrPat(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxPatterns {
         func parseMailboxOrPat_list(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxPatterns {
             .mailbox(try self.parseListMailbox(buffer: &buffer, tracker: tracker))
         }
@@ -213,7 +213,7 @@ extension GrammarParser {
     // mbx-list-flags  = *(mbx-list-oflag SP) mbx-list-sflag
     //                   *(SP mbx-list-oflag) /
     //                   mbx-list-oflag *(SP mbx-list-oflag)
-    static func parseMailboxListFlags(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [MailboxInfo.Attribute] {
+    func parseMailboxListFlags(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [MailboxInfo.Attribute] {
         var results = [MailboxInfo.Attribute(try self.parseFlagExtension(buffer: &buffer, tracker: tracker))]
         do {
             while true {
@@ -228,7 +228,7 @@ extension GrammarParser {
     }
 
     // status-att-list  = status-att-val *(SP status-att-val)
-    static func parseMailboxStatus(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxStatus {
+    func parseMailboxStatus(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxStatus {
         enum MailboxValue: Hashable {
             case messages(Int)
             case uidNext(UID)
@@ -318,7 +318,7 @@ extension GrammarParser {
     }
 
     // mbox-or-pat  = list-mailbox / patterns
-    static func parseMailboxPatterns(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxPatterns {
+    func parseMailboxPatterns(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxPatterns {
         func parseMailboxPatterns_list(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxPatterns {
             .mailbox(try self.parseListMailbox(buffer: &buffer, tracker: tracker))
         }

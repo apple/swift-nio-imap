@@ -23,7 +23,7 @@ class GrammarParser_Mailbox_Tests: XCTestCase, _ParserTestHelpers {}
 extension GrammarParser_Mailbox_Tests {
     func testParseMailboxData() {
         self.iterateTests(
-            testFunction: GrammarParser.parseMailboxData,
+            testFunction: GrammarParser().parseMailboxData,
             validInputs: [
                 ("FLAGS (\\seen \\draft)", " ", .flags([.seen, .draft]), #line),
                 (
@@ -60,7 +60,7 @@ extension GrammarParser_Mailbox_Tests {
 extension GrammarParser_Mailbox_Tests {
     func testParseMailboxList() {
         self.iterateTests(
-            testFunction: GrammarParser.parseMailboxList,
+            testFunction: GrammarParser().parseMailboxList,
             validInputs: [
                 (
                     "() NIL inbox",
@@ -94,14 +94,14 @@ extension GrammarParser_Mailbox_Tests {
 
     func testParseMailboxList_invalid_character_incomplete() {
         var buffer = TestUtilities.makeParseBuffer(for: "() \"")
-        XCTAssertThrowsError(try GrammarParser.parseMailboxList(buffer: &buffer, tracker: .testTracker)) { e in
+        XCTAssertThrowsError(try GrammarParser().parseMailboxList(buffer: &buffer, tracker: .testTracker)) { e in
             XCTAssertTrue(e is IncompleteMessage)
         }
     }
 
     func testParseMailboxList_invalid_character() {
         var buffer = TestUtilities.makeParseBuffer(for: "() \"\\\" inbox")
-        XCTAssertThrowsError(try GrammarParser.parseMailboxList(buffer: &buffer, tracker: .testTracker)) { e in
+        XCTAssertThrowsError(try GrammarParser().parseMailboxList(buffer: &buffer, tracker: .testTracker)) { e in
             XCTAssertTrue(e is ParserError)
         }
     }
@@ -112,7 +112,7 @@ extension GrammarParser_Mailbox_Tests {
 extension GrammarParser_Mailbox_Tests {
     func testParseMailboxListFlags() {
         self.iterateTests(
-            testFunction: GrammarParser.parseMailboxListFlags,
+            testFunction: GrammarParser().parseMailboxListFlags,
             validInputs: [
                 ("\\marked", "\r", [.marked], #line),
                 ("\\marked \\remote", "\r", [.marked, .remote], #line),

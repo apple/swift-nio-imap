@@ -23,7 +23,7 @@ class GrammarParser_Response_Tests: XCTestCase, _ParserTestHelpers {}
 extension GrammarParser_Response_Tests {
     func testParseResponseData() {
         self.iterateTests(
-            testFunction: GrammarParser.parseResponseData,
+            testFunction: GrammarParser().parseResponseData,
             validInputs: [
                 ("* CAPABILITY ENABLE\r\n", " ", .capabilityData([.enable]), #line),
             ],
@@ -38,7 +38,7 @@ extension GrammarParser_Response_Tests {
 extension GrammarParser_Response_Tests {
     func testParseResponsePayload() {
         self.iterateTests(
-            testFunction: GrammarParser.parseResponsePayload,
+            testFunction: GrammarParser().parseResponsePayload,
             validInputs: [
                 ("CAPABILITY ENABLE", "\r", .capabilityData([.enable]), #line),
                 ("BYE test", "\r", .conditionalState(.bye(.init(code: nil, text: "test"))), #line),
@@ -60,7 +60,7 @@ extension GrammarParser_Response_Tests {
 extension GrammarParser_Response_Tests {
     func testParseResponseTextCode() {
         self.iterateTests(
-            testFunction: GrammarParser.parseResponseTextCode,
+            testFunction: GrammarParser().parseResponseTextCode,
             validInputs: [
                 ("ALERT", "\r", .alert, #line),
                 ("BADCHARSET", "\r", .badCharset([]), #line),
@@ -103,7 +103,7 @@ extension GrammarParser_Response_Tests {
 extension GrammarParser_Response_Tests {
     func testParseResponseText() {
         self.iterateTests(
-            testFunction: GrammarParser.parseResponseText,
+            testFunction: GrammarParser().parseResponseText,
             validInputs: [
                 ("", "\r", .init(code: nil, text: ""), #line),
                 (" ", "\r", .init(code: nil, text: ""), #line),

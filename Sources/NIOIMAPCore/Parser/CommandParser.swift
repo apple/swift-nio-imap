@@ -52,6 +52,7 @@ public struct CommandParser: Parser {
         }
     }
 
+    let parser = GrammarParser()
     let bufferLimit: Int
     private(set) var mode: Mode = .lines
     private var synchronisingLiteralParser = SynchronizingLiteralParser()
@@ -148,7 +149,7 @@ public struct CommandParser: Parser {
 
     private mutating func handleLines(buffer: inout ParseBuffer, tracker: StackTracker) throws -> CommandStreamPart {
         func parseCommand(buffer: inout ParseBuffer, tracker: StackTracker) throws -> CommandStreamPart {
-            let command = try GrammarParser.parseTaggedCommand(buffer: &buffer, tracker: tracker)
+            let command = try self.parser.parseTaggedCommand(buffer: &buffer, tracker: tracker)
             try PL.parseNewline(buffer: &buffer, tracker: tracker)
             if case .idleStart = command.command {
                 self.mode = .idle
@@ -157,13 +158,13 @@ public struct CommandParser: Parser {
         }
 
         func parseAppend(buffer: inout ParseBuffer, tracker: StackTracker) throws -> CommandStreamPart {
-            let appendCommand = try GrammarParser.parseAppend(buffer: &buffer, tracker: tracker)
+            let appendCommand = try self.parser.parseAppend(buffer: &buffer, tracker: tracker)
             self.mode = .waitingForMessage
             return appendCommand
         }
 
         func parseAuthenticationChallengeResponse(buffer: inout ParseBuffer, tracker: StackTracker) throws -> CommandStreamPart {
-            let authenticationChallengeResponse = try GrammarParser.parseBase64(buffer: &buffer, tracker: tracker)
+            let authenticationChallengeResponse = try self.parser.parseBase64(buffer: &buffer, tracker: tracker)
             try PL.parseNewline(buffer: &buffer, tracker: tracker)
             return .continuationResponse(authenticationChallengeResponse)
         }
@@ -178,7 +179,7 @@ public struct CommandParser: Parser {
 
     private mutating func handleWaitingForMessage(buffer: inout ParseBuffer, tracker: StackTracker) throws -> CommandStreamPart {
         do {
-            let command = try GrammarParser.parseAppendOrCatenateMessage(buffer: &buffer, tracker: tracker)
+            let command = try self.parser.parseAppendOrCatenateMessage(buffer: &buffer, tracker: tracker)
 
             switch command {
             case .append(let message):
@@ -207,13 +208,13 @@ public struct CommandParser: Parser {
     }
 
     private mutating func handleIdle(buffer: inout ParseBuffer, tracker: StackTracker) throws -> CommandStreamPart {
-        try GrammarParser.parseIdleDone(buffer: &buffer, tracker: tracker)
+        try self.parser.parseIdleDone(buffer: &buffer, tracker: tracker)
         self.mode = .lines
         return .idleDone
     }
 
     private mutating func handleCatenatePart(expectPrecedingSpace: Bool, buffer: inout ParseBuffer, tracker: StackTracker) throws -> CommandStreamPart {
-        let result = try GrammarParser.parseCatenatePart(expectPrecedingSpace: expectPrecedingSpace, buffer: &buffer, tracker: tracker)
+        let result = try self.parser.parseCatenatePart(expectPrecedingSpace: expectPrecedingSpace, buffer: &buffer, tracker: tracker)
         switch result {
         case .url(let url):
             self.mode = .waitingForCatenatePart(seenPreviousPart: true)
