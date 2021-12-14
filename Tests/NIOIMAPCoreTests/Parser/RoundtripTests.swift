@@ -86,7 +86,7 @@ final class RoundtripTests: XCTestCase {
 
             (.uidCopy(.set(.all), .inbox), #line),
 
-            (.uidStore(.set(.all), [:], .flags(.add(silent: true, list: [.draft, .deleted, .answered]))), #line),
+            (.uidStore(.set(.all), [], .flags(.add(silent: true, list: [.draft, .deleted, .answered]))), #line),
 
             (.search(key: .all), #line),
             (.search(key: .or(.deleted, .unseen), charset: "UTF-7"), #line),

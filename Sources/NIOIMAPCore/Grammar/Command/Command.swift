@@ -127,7 +127,7 @@ public enum Command: Hashable {
     case uidSearch(key: SearchKey, charset: String? = nil, returnOptions: [SearchReturnOption] = [])
 
     /// Similar to `.store`, but uses unique identifier instead of sequence numbers to identify messages.
-    case uidStore(LastCommandSet<MessageIdentifierSetNonEmpty<UID>>, OrderedDictionary<String, ParameterValue?>, StoreData)
+    case uidStore(LastCommandSet<MessageIdentifierSetNonEmpty<UID>>, [StoreModifier], StoreData)
 
     /// Similar to `.expunge`, but uses unique identifier instead of sequence numbers to identify messages.
     case uidExpunge(LastCommandSet<MessageIdentifierSetNonEmpty<UID>>)
@@ -551,11 +551,11 @@ extension CommandEncodeBuffer {
             self.buffer.writeStoreData(data)
     }
 
-    private mutating func writeCommandKind_uidStore(set: LastCommandSet<MessageIdentifierSetNonEmpty<UID>>, modifiers: OrderedDictionary<String, ParameterValue?>, data: StoreData) -> Int {
+    private mutating func writeCommandKind_uidStore(set: LastCommandSet<MessageIdentifierSetNonEmpty<UID>>, modifiers: [StoreModifier], data: StoreData) -> Int {
         self.buffer.writeString("UID STORE ") +
             self.buffer.writeLastCommandSet(set) +
             self.buffer.write(if: modifiers.count >= 1) {
-                self.buffer.writeParameters(modifiers)
+                self.buffer.writeStoreModifiers(modifiers)
             } +
             self.buffer.writeSpace() +
             self.buffer.writeStoreData(data)
@@ -672,7 +672,7 @@ extension Command {
     /// - parameter modifiers: Store modifiers.
     /// - parameter flags: The flags to store.
     /// - returns: `nil` if `messages` is empty, otherwise a `Command`.
-    public static func uidStore(messages: UIDSet, modifiers: OrderedDictionary<String, ParameterValue?>, data: StoreData) -> Command? {
+    public static func uidStore(messages: UIDSet, modifiers: [StoreModifier], data: StoreData) -> Command? {
         guard let set = MessageIdentifierSetNonEmpty(set: messages) else {
             return nil
         }

@@ -504,7 +504,7 @@ extension GrammarParser_Commands_Tests {
                 (" COPY 1 Inbox", "\r\n", .uidCopy(.set([1]), .inbox), #line),
                 (" FETCH 1 FLAGS", "\r\n", .uidFetch(.set([1]), [.flags], []), #line),
                 (" SEARCH CHARSET UTF8 ALL", "\r\n", .uidSearch(key: .all, charset: "UTF8"), #line),
-                (" STORE 1 +FLAGS (Test)", "\r\n", .uidStore(.set([1]), [:], .flags(.add(silent: false, list: [.keyword(.init("Test"))]))), #line),
+                (" STORE 1 +FLAGS (Test)", "\r\n", .uidStore(.set([1]), [], .flags(.add(silent: false, list: [.keyword(.init("Test"))]))), #line),
                 (" COPY * Inbox", "\r\n", .uidCopy(.set([MessageIdentifierRange<UID>(.max)]), .inbox), #line),
             ],
             parserErrorInputs: [

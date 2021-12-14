@@ -232,17 +232,7 @@ extension GrammarParser {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Command in
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             let sequence: LastCommandSet<SequenceSet> = try self.parseMessageIdentifierSet(buffer: &buffer, tracker: tracker)
-            let modifiers = try PL.parseOptional(buffer: &buffer, tracker: tracker) { buffer, tracker -> [StoreModifier] in
-                try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-                try PL.parseFixedString("(", buffer: &buffer, tracker: tracker)
-                var array = [try self.parseStoreModifier(buffer: &buffer, tracker: tracker)]
-                try PL.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker, parser: { (buffer, tracker) in
-                    try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-                    return try self.parseStoreModifier(buffer: &buffer, tracker: tracker)
-                })
-                try PL.parseFixedString(")", buffer: &buffer, tracker: tracker)
-                return array
-            } ?? []
+            let modifiers = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseStoreModifiers) ?? []
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             let storeData = try self.parseStoreData(buffer: &buffer, tracker: tracker)
             return .store(sequence, modifiers, storeData)
@@ -444,7 +434,7 @@ extension GrammarParser {
             try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Command in
                 try PL.parseFixedString("STORE ", buffer: &buffer, tracker: tracker)
                 let set = try self.parseUIDSetNonEmpty(buffer: &buffer, tracker: tracker)
-                let modifiers = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseParameters) ?? [:]
+                let modifiers = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseStoreModifiers) ?? []
                 try PL.parseSpaces(buffer: &buffer, tracker: tracker)
                 let storeData = try self.parseStoreData(buffer: &buffer, tracker: tracker)
                 return .uidStore(.set(set), modifiers, storeData)
