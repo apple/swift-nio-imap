@@ -523,9 +523,7 @@ extension CommandEncodeBuffer {
             self.buffer.writeLastCommandSet(set) +
             self.buffer.writeSpace() +
             self.buffer.writeFetchAttributeList(atts) +
-            self.buffer.writeIfExists(modifiers) { (modifiers) -> Int in
-                self.buffer.writeFetchModifiers(modifiers)
-            }
+            self.buffer.writeFetchModifiers(modifiers)
     }
 
     private mutating func writeCommandKind_uidFetch(set: LastCommandSet<MessageIdentifierSetNonEmpty<UID>>, atts: [FetchAttribute], modifiers: [FetchModifier]) -> Int {
@@ -533,9 +531,7 @@ extension CommandEncodeBuffer {
             self.buffer.writeLastCommandSet(set) +
             self.buffer.writeSpace() +
             self.buffer.writeFetchAttributeList(atts) +
-            self.buffer.writeIfExists(modifiers) { (modifiers) -> Int in
-                self.buffer.writeFetchModifiers(modifiers)
-            }
+            self.buffer.writeFetchModifiers(modifiers)
     }
 
     private mutating func writeCommandKind_store(set: LastCommandSet<SequenceSet>, modifiers: [StoreModifier], data: StoreData) -> Int {

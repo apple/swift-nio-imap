@@ -47,6 +47,9 @@ extension CommandType_Tests {
             (.getMetadata(options: [.maxSize(123)], mailbox: .inbox, entries: ["a"]), CommandEncodingOptions(), ["GETMETADATA (MAXSIZE 123) \"INBOX\" (\"a\")"], #line),
             (.setMetadata(mailbox: .inbox, entries: ["a": nil]), CommandEncodingOptions(), ["SETMETADATA \"INBOX\" (\"a\" NIL)"], #line),
 
+            (.fetch(.set([1 ... 40]), [.uid, .internalDate], []), CommandEncodingOptions(), ["FETCH 1:40 (UID INTERNALDATE)"], #line),
+            (.fetch(.set([77]), [.uid, .bodySection(peek: true, .header, nil)], [.changedSince(.init(modificationSequence: 707484939116871680))]), CommandEncodingOptions(), ["FETCH 77 (UID BODY.PEEK[HEADER]) (CHANGEDSINCE 707484939116871680)"], #line),
+
             (.resetKey(mailbox: nil, mechanisms: []), CommandEncodingOptions(), ["RESETKEY"], #line),
             (.resetKey(mailbox: nil, mechanisms: [.internal]), CommandEncodingOptions(), ["RESETKEY"], #line), // no mailbox, so no mechanisms written
             (.resetKey(mailbox: .inbox, mechanisms: [.internal]), CommandEncodingOptions(), ["RESETKEY \"INBOX\" INTERNAL"], #line),
