@@ -45,6 +45,8 @@ extension ResponseTextCodeTests {
             (.closed, "CLOSED", #line),
             (.noModificationSequence, "NOMODSEQ", #line),
             (.modified(.set([1])), "MODIFIED 1", #line),
+            (.modified(.set([45, 77] as MessageIdentifierSet<UID>)), "MODIFIED 45,77", #line),
+            (.modified(.set([23 ... 873] as MessageIdentifierSet<SequenceNumber>)), "MODIFIED 23:873", #line),
             (.highestModificationSequence(1), "HIGHESTMODSEQ 1", #line),
             (.metadataMaxsize(123), "METADATA MAXSIZE 123", #line),
             (.metadataLongEntries(456), "METADATA LONGENTRIES 456", #line),
