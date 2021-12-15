@@ -364,6 +364,7 @@ extension GrammarParser_Commands_Tests {
             validInputs: [
                 (" 1 +FLAGS \\answered", "\r", .store(.set([1]), [], .flags(.add(silent: false, list: [.answered]))), #line),
                 (" 1 (label) -FLAGS \\seen", "\r", .store(.set([1]), [.other(.init(key: "label", value: nil))], .flags(.remove(silent: false, list: [.seen]))), #line),
+                (" 1 (label UNCHANGEDSINCE 5) -FLAGS \\seen", "\r", .store(.set([1]), [.other(.init(key: "label", value: nil)), .unchangedSince(.init(modificationSequence: 5))], .flags(.remove(silent: false, list: [.seen]))), #line),
             ],
             parserErrorInputs: [
                 (" +FLAGS \\answered", "\r", #line),
@@ -505,6 +506,7 @@ extension GrammarParser_Commands_Tests {
                 (" FETCH 1 FLAGS", "\r\n", .uidFetch(.set([1]), [.flags], []), #line),
                 (" SEARCH CHARSET UTF8 ALL", "\r\n", .uidSearch(key: .all, charset: "UTF8"), #line),
                 (" STORE 1 +FLAGS (Test)", "\r\n", .uidStore(.set([1]), [], .flags(.add(silent: false, list: [.keyword(.init("Test"))]))), #line),
+                (" STORE 1 (UNCHANGEDSINCE 5 test) +FLAGS (Test)", "\r\n", .uidStore(.set([1]), [.unchangedSince(.init(modificationSequence: 5)), .other(.init(key: "test", value: nil))], .flags(.add(silent: false, list: [.keyword(.init("Test"))]))), #line),
                 (" COPY * Inbox", "\r\n", .uidCopy(.set([MessageIdentifierRange<UID>(.max)]), .inbox), #line),
             ],
             parserErrorInputs: [
