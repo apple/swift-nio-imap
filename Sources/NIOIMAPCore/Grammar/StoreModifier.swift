@@ -27,17 +27,16 @@ public enum StoreModifier: Hashable {
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    
     @discardableResult mutating func writeStoreModifiers(_ array: [StoreModifier]) -> Int {
         guard array.count > 0 else {
             return 0
         }
-        
+
         return self.writeArray(array, prefix: " ", separator: " ", suffix: "", parenthesis: true) { (element, self) in
             self.writeStoreModifier(element)
         }
     }
-    
+
     @discardableResult mutating func writeStoreModifier(_ val: StoreModifier) -> Int {
         switch val {
         case .unchangedSince(let unchangedSince):

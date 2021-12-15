@@ -1996,19 +1996,19 @@ extension GrammarParser {
     }
 
     static func parseStoreModifiers(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [StoreModifier] {
-        try PL.composite(buffer: &buffer, tracker: tracker, { buffer, tracker in
+        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
+            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+            try PL.parseFixedString("(", buffer: &buffer, tracker: tracker)
+            var array = [try self.parseStoreModifier(buffer: &buffer, tracker: tracker)]
+            try PL.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker, parser: { (buffer, tracker) in
                 try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-                try PL.parseFixedString("(", buffer: &buffer, tracker: tracker)
-                var array = [try self.parseStoreModifier(buffer: &buffer, tracker: tracker)]
-                try PL.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker, parser: { (buffer, tracker) in
-                    try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-                    return try self.parseStoreModifier(buffer: &buffer, tracker: tracker)
-                })
-                try PL.parseFixedString(")", buffer: &buffer, tracker: tracker)
-                return array
-        })
+                return try self.parseStoreModifier(buffer: &buffer, tracker: tracker)
+            })
+            try PL.parseFixedString(")", buffer: &buffer, tracker: tracker)
+            return array
+        }
     }
-    
+
     static func parseStoreModifier(buffer: inout ParseBuffer, tracker: StackTracker) throws -> StoreModifier {
         func parseFetchModifier_unchangedSince(buffer: inout ParseBuffer, tracker: StackTracker) throws -> StoreModifier {
             .unchangedSince(try self.parseUnchangedSinceModifier(buffer: &buffer, tracker: tracker))
