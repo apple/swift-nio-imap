@@ -112,15 +112,11 @@ extension ResponseParser {
         return try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             try? PL.parseSpaces(buffer: &buffer, tracker: tracker)
             do {
-                let response = try withoutActuallyEscaping(parseResponse_normal) { parse_normal in
-                    try withoutActuallyEscaping(parseResponse_fetch) { parse_fetch in
-                        try PL.parseOneOf([
-                            parse_normal,
-                            parse_fetch,
-                        ], buffer: &buffer, tracker: tracker)
-                    }
-                }
-
+                let response = try PL.parseOneOf(
+                    parseResponse_fetch, parseResponse_normal,
+                    buffer: &buffer,
+                    tracker: tracker
+                )
                 switch response {
                 case .fetchResponse(.start(let num)):
                     self.moveStateMachine(expected: .response(.fetchOrNormal), next: .response(.fetchMiddle))

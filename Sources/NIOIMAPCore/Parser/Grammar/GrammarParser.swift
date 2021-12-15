@@ -657,14 +657,12 @@ extension GrammarParser {
             .set(try setParser(&buffer, tracker))
         }
 
-        return try withoutActuallyEscaping(parseLastCommandSet_set) { (parseLastCommandSet_set) in
-            try PL.parseOneOf(
-                parseLastCommandSet_lastCommand,
-                parseLastCommandSet_set,
-                buffer: &buffer,
-                tracker: tracker
-            )
-        }
+        return try PL.parseOneOf(
+            parseLastCommandSet_lastCommand,
+            parseLastCommandSet_set,
+            buffer: &buffer,
+            tracker: tracker
+        )
     }
 
     func parseAbsoluteMessagePath(buffer: inout ParseBuffer, tracker: StackTracker) throws -> AbsoluteMessagePath {
