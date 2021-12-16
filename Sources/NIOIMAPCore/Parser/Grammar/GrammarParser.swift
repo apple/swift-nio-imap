@@ -23,11 +23,7 @@ let badOS = { fatalError("unsupported OS") }()
 import struct NIO.ByteBuffer
 import struct OrderedCollections.OrderedDictionary
 struct GrammarParser {
-
-    init() {
-
-    }
-
+    init() {}
 }
 
 typealias PL = ParserLibrary
