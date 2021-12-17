@@ -1995,7 +1995,7 @@ extension GrammarParser {
         }
     }
 
-    static func parseStoreModifiers(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [StoreModifier] {
+    func parseStoreModifiers(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [StoreModifier] {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             try PL.parseFixedString("(", buffer: &buffer, tracker: tracker)
@@ -2009,7 +2009,7 @@ extension GrammarParser {
         }
     }
 
-    static func parseStoreModifier(buffer: inout ParseBuffer, tracker: StackTracker) throws -> StoreModifier {
+    func parseStoreModifier(buffer: inout ParseBuffer, tracker: StackTracker) throws -> StoreModifier {
         func parseFetchModifier_unchangedSince(buffer: inout ParseBuffer, tracker: StackTracker) throws -> StoreModifier {
             .unchangedSince(try self.parseUnchangedSinceModifier(buffer: &buffer, tracker: tracker))
         }
