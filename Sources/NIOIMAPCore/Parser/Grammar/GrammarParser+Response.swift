@@ -25,7 +25,7 @@ import struct NIO.ByteBufferView
 
 extension GrammarParser {
     // response-data   = "*" SP response-payload CRLF
-    static func parseResponseData(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponsePayload {
+    func parseResponseData(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponsePayload {
         try PL.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
             try PL.parseFixedString("* ", buffer: &buffer, tracker: tracker)
             let payload = try self.parseResponsePayload(buffer: &buffer, tracker: tracker)
@@ -35,7 +35,7 @@ extension GrammarParser {
     }
 
     // response-tagged = tag SP resp-cond-state CRLF
-    static func parseTaggedResponse(buffer: inout ParseBuffer, tracker: StackTracker) throws -> TaggedResponse {
+    func parseTaggedResponse(buffer: inout ParseBuffer, tracker: StackTracker) throws -> TaggedResponse {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> TaggedResponse in
             let tag = try self.parseTag(buffer: &buffer, tracker: tracker)
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
@@ -46,7 +46,7 @@ extension GrammarParser {
     }
 
     // resp-code-apnd  = "APPENDUID" SP nz-number SP append-uid
-    static func parseResponseCodeAppend(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseCodeAppend {
+    func parseResponseCodeAppend(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseCodeAppend {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> ResponseCodeAppend in
             try PL.parseFixedString("APPENDUID ", buffer: &buffer, tracker: tracker)
             let number = try self.parseUIDValidity(buffer: &buffer, tracker: tracker)
@@ -57,7 +57,7 @@ extension GrammarParser {
     }
 
     // resp-code-copy  = "COPYUID" SP nz-number SP uid-set SP uid-set
-    static func parseResponseCodeCopy(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseCodeCopy {
+    func parseResponseCodeCopy(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseCodeCopy {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> ResponseCodeCopy in
             try PL.parseFixedString("COPYUID ", buffer: &buffer, tracker: tracker)
             let uidValidity = try self.parseUIDValidity(buffer: &buffer, tracker: tracker)
@@ -70,7 +70,7 @@ extension GrammarParser {
     }
 
     /// This is a combination of `resp-cond-state`, `resp-cond-bye`, and `greeting`.
-    static func parseUntaggedResponseStatus(buffer: inout ParseBuffer, tracker: StackTracker) throws -> UntaggedStatus {
+    func parseUntaggedResponseStatus(buffer: inout ParseBuffer, tracker: StackTracker) throws -> UntaggedStatus {
         try PL.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
             let code = try self.parseAtom(buffer: &buffer, tracker: tracker)
 
@@ -100,7 +100,7 @@ extension GrammarParser {
     }
 
     // resp-cond-state = ("OK" / "NO" / "BAD") SP resp-text
-    static func parseTaggedResponseState(buffer: inout ParseBuffer, tracker: StackTracker) throws -> TaggedResponse.State {
+    func parseTaggedResponseState(buffer: inout ParseBuffer, tracker: StackTracker) throws -> TaggedResponse.State {
         try PL.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
             let code = try self.parseAtom(buffer: &buffer, tracker: tracker)
 
@@ -130,7 +130,7 @@ extension GrammarParser {
     }
 
     // response-payload = resp-cond-state / resp-cond-bye / mailbox-data / message-data / capability-data / id-response / enable-data
-    static func parseResponsePayload(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponsePayload {
+    func parseResponsePayload(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponsePayload {
         func parseResponsePayload_conditionalState(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponsePayload {
             .conditionalState(try self.parseUntaggedResponseStatus(buffer: &buffer, tracker: tracker))
         }
@@ -173,7 +173,7 @@ extension GrammarParser {
     }
 
     // resp-text       = ["[" resp-text-code "]" SP] text
-    static func parseResponseText(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseText {
+    func parseResponseText(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseText {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> ResponseText in
             let code = try PL.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> ResponseTextCode in
                 try PL.parseFixedString("[", buffer: &buffer, tracker: tracker)
@@ -207,7 +207,7 @@ extension GrammarParser {
     //                   "UNSEEN" SP nz-number
     //                   atom [SP 1*<any TEXT-CHAR except "]">] /
     //                   "NOTSAVED"
-    static func parseResponseTextCode(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
+    func parseResponseTextCode(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
         func parseResponseTextCode_alert(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
             try PL.parseFixedString("ALERT", buffer: &buffer, tracker: tracker)
             return .alert
@@ -405,7 +405,7 @@ extension GrammarParser {
     }
 
     // quota_response  ::= "QUOTA" SP astring SP quota_list
-    static func parseResponsePayload_quota(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponsePayload {
+    func parseResponsePayload_quota(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponsePayload {
         // quota_resource  ::= atom SP number SP number
         func parseQuotaResource(buffer: inout ParseBuffer, tracker: StackTracker) throws -> QuotaResource {
             try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
@@ -444,8 +444,8 @@ extension GrammarParser {
     }
 
     // quotaroot_response ::= "QUOTAROOT" SP astring *(SP astring)
-    static func parseResponsePayload_quotaRoot(buffer: inout ParseBuffer,
-                                               tracker: StackTracker) throws -> ResponsePayload
+    func parseResponsePayload_quotaRoot(buffer: inout ParseBuffer,
+                                        tracker: StackTracker) throws -> ResponsePayload
     {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             try PL.parseFixedString("QUOTAROOT ", buffer: &buffer, tracker: tracker)

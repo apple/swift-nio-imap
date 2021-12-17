@@ -24,7 +24,7 @@ import struct NIO.ByteBuffer
 import struct NIO.ByteBufferView
 
 extension GrammarParser {
-    static func parseEnvelopeEmailAddressGroups(_ addresses: [EmailAddress]) -> [EmailAddressListElement] {
+    func parseEnvelopeEmailAddressGroups(_ addresses: [EmailAddress]) -> [EmailAddressListElement] {
         var results: [EmailAddressListElement] = []
         var stack: [EmailAddressGroup] = []
 
@@ -51,7 +51,7 @@ extension GrammarParser {
     }
 
     // reusable for a lot of the env-* types
-    static func parseEnvelopeEmailAddresses(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [EmailAddress] {
+    func parseEnvelopeEmailAddresses(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [EmailAddress] {
         try PL.parseFixedString("(", buffer: &buffer, tracker: tracker)
         let addresses = try PL.parseOneOrMore(buffer: &buffer, tracker: tracker) { buffer, tracker in
             try self.parseEmailAddress(buffer: &buffer, tracker: tracker)
@@ -60,7 +60,7 @@ extension GrammarParser {
         return addresses
     }
 
-    static func parseOptionalEnvelopeEmailAddresses(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [EmailAddressListElement] {
+    func parseOptionalEnvelopeEmailAddresses(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [EmailAddressListElement] {
         func parseOptionalEnvelopeEmailAddresses_nil(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [EmailAddress] {
             try self.parseNil(buffer: &buffer, tracker: tracker)
             return []
@@ -77,7 +77,7 @@ extension GrammarParser {
 
     // address         = "(" addr-name SP addr-adl SP addr-mailbox SP
     //                   addr-host ")"
-    static func parseEmailAddress(buffer: inout ParseBuffer, tracker: StackTracker) throws -> EmailAddress {
+    func parseEmailAddress(buffer: inout ParseBuffer, tracker: StackTracker) throws -> EmailAddress {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> EmailAddress in
             try PL.parseFixedString("(", buffer: &buffer, tracker: tracker)
             let name = try self.parseNString(buffer: &buffer, tracker: tracker)
@@ -92,7 +92,7 @@ extension GrammarParser {
         }
     }
 
-    static func parseMessageID(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageID? {
+    func parseMessageID(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageID? {
         if let parsed = try self.parseNString(buffer: &buffer, tracker: tracker) {
             let string = try ParserLibrary.parseBufferAsUTF8(parsed)
             return .init(string)
@@ -103,7 +103,7 @@ extension GrammarParser {
     // envelope        = "(" env-date SP env-subject SP env-from SP
     //                   env-sender SP env-reply-to SP env-to SP env-cc SP
     //                   env-bcc SP env-in-reply-to SP env-message-id ")"
-    static func parseEnvelope(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Envelope {
+    func parseEnvelope(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Envelope {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Envelope in
             try PL.parseFixedString("(", buffer: &buffer, tracker: tracker)
             let date = try self.parseNString(buffer: &buffer, tracker: tracker).flatMap { InternetMessageDate(String(buffer: $0)) }

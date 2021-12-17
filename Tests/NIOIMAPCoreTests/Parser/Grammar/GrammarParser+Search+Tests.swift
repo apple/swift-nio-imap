@@ -23,7 +23,7 @@ class GrammarParser_Search_Tests: XCTestCase, _ParserTestHelpers {}
 extension GrammarParser_Search_Tests {
     func testParseSearchCorrelator() {
         self.iterateTests(
-            testFunction: GrammarParser.parseSearchCorrelator,
+            testFunction: GrammarParser().parseSearchCorrelator,
             validInputs: [
                 (" (TAG \"test1\")", "\r", SearchCorrelator(tag: "test1"), #line),
                 (" (tag \"test2\")", "\r", SearchCorrelator(tag: "test2"), #line),
@@ -53,7 +53,7 @@ extension GrammarParser_Search_Tests {
 extension GrammarParser_Search_Tests {
     func testParseSearchCriteria() {
         self.iterateTests(
-            testFunction: GrammarParser.parseSearchCriteria,
+            testFunction: GrammarParser().parseSearchCriteria,
             validInputs: [
                 ("ALL", "\r", [.all], #line),
                 ("ALL ANSWERED DELETED", "\r", [.all, .answered, .deleted], #line),
@@ -69,7 +69,7 @@ extension GrammarParser_Search_Tests {
 extension GrammarParser_Search_Tests {
     func testParseSearchKey() {
         self.iterateTests(
-            testFunction: GrammarParser.parseSearchKey,
+            testFunction: GrammarParser().parseSearchKey,
             validInputs: [
                 ("ALL", "\r", .all, #line),
                 ("ANSWERED", "\r", .answered, #line),
@@ -121,7 +121,7 @@ extension GrammarParser_Search_Tests {
 
     func testParseSearchKey_array_none_invalid() {
         var buffer = TestUtilities.makeParseBuffer(for: "()")
-        XCTAssertThrowsError(try GrammarParser.parseSearchKey(buffer: &buffer, tracker: .testTracker)) { e in
+        XCTAssertThrowsError(try GrammarParser().parseSearchKey(buffer: &buffer, tracker: .testTracker)) { e in
             XCTAssertTrue(e is ParserError)
         }
     }
@@ -134,7 +134,7 @@ extension GrammarParser_Search_Tests {
     // our parser gives priority to "sequence-set"
     func testParseSearchReturnDataExtension() {
         self.iterateTests(
-            testFunction: GrammarParser.parseSearchReturnDataExtension,
+            testFunction: GrammarParser().parseSearchReturnDataExtension,
             validInputs: [
                 ("modifier 64", "\r", .init(key: "modifier", value: .sequence(.set([64]))), #line),
             ],
@@ -149,7 +149,7 @@ extension GrammarParser_Search_Tests {
 extension GrammarParser_Search_Tests {
     func testParseSearchModifierSequence() {
         self.iterateTests(
-            testFunction: GrammarParser.parseSearchModificationSequence,
+            testFunction: GrammarParser().parseSearchModificationSequence,
             validInputs: [
                 ("MODSEQ 4", " ", .init(extensions: [:], sequenceValue: 4), #line),
                 (
@@ -179,7 +179,7 @@ extension GrammarParser_Search_Tests {
 extension GrammarParser_Search_Tests {
     func testParseSearchModifierSequenceExtension() {
         self.iterateTests(
-            testFunction: GrammarParser.parseSearchModificationSequenceExtension,
+            testFunction: GrammarParser().parseSearchModificationSequenceExtension,
             validInputs: [
                 (" \"/flags/\\\\Seen\" all", "", .init(key: .init(flag: .seen), value: .all), #line),
             ],
@@ -194,7 +194,7 @@ extension GrammarParser_Search_Tests {
 extension GrammarParser_Search_Tests {
     func testParseSearchReturnData() {
         self.iterateTests(
-            testFunction: GrammarParser.parseSearchReturnData,
+            testFunction: GrammarParser().parseSearchReturnData,
             validInputs: [
                 ("MIN 1", "\r", .min(1), #line),
                 ("MAX 2", "\r", .max(2), #line),
@@ -215,7 +215,7 @@ extension GrammarParser_Search_Tests {
 extension GrammarParser_Search_Tests {
     func testParseSearchReturnOption() {
         self.iterateTests(
-            testFunction: GrammarParser.parseSearchReturnOption,
+            testFunction: GrammarParser().parseSearchReturnOption,
             validInputs: [
                 ("MIN", "\r", .min, #line),
                 ("min", "\r", .min, #line),
@@ -245,7 +245,7 @@ extension GrammarParser_Search_Tests {
 extension GrammarParser_Search_Tests {
     func testParseSearchReturnOptions() {
         self.iterateTests(
-            testFunction: GrammarParser.parseSearchReturnOptions,
+            testFunction: GrammarParser().parseSearchReturnOptions,
             validInputs: [
                 (" RETURN (ALL)", "\r", [.all], #line),
                 (" RETURN (MIN MAX COUNT)", "\r", [.min, .max, .count], #line),
@@ -265,7 +265,7 @@ extension GrammarParser_Search_Tests {
 extension GrammarParser_Search_Tests {
     func testParseSearchReturnOptionExtension() {
         self.iterateTests(
-            testFunction: GrammarParser.parseSearchReturnOptionExtension,
+            testFunction: GrammarParser().parseSearchReturnOptionExtension,
             validInputs: [
                 ("modifier", "\r", .init(key: "modifier", value: nil), #line),
                 ("modifier 4", "\r", .init(key: "modifier", value: .sequence(.set([4]))), #line),
@@ -283,7 +283,7 @@ extension GrammarParser_Search_Tests {
 extension GrammarParser_Search_Tests {
     func testParseSearchSortModifierSequence() {
         self.iterateTests(
-            testFunction: GrammarParser.parseSearchSortModificationSequence,
+            testFunction: GrammarParser().parseSearchSortModificationSequence,
             validInputs: [
                 ("(MODSEQ 123)", "\r", 123, #line),
             ],

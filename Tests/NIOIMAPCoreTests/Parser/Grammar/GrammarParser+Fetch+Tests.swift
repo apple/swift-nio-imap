@@ -23,7 +23,7 @@ class GrammarParser_Fetch_Tests: XCTestCase, _ParserTestHelpers {}
 extension GrammarParser_Fetch_Tests {
     func testParseFetchAttribute() {
         self.iterateTests(
-            testFunction: GrammarParser.parseFetchAttribute,
+            testFunction: GrammarParser().parseFetchAttribute,
             validInputs: [
                 ("ENVELOPE", " ", .envelope, #line),
                 ("FLAGS", " ", .flags, #line),
@@ -61,7 +61,7 @@ extension GrammarParser_Fetch_Tests {
 extension GrammarParser_Fetch_Tests {
     func testParseFetchResponse() {
         self.iterateTests(
-            testFunction: GrammarParser.parseFetchResponse,
+            testFunction: GrammarParser().parseFetchResponse,
             validInputs: [
                 ("UID 54", " ", .simpleAttribute(.uid(54)), #line),
                 ("RFC822.SIZE 40639", " ", .simpleAttribute(.rfc822Size(40639)), #line),
@@ -81,7 +81,7 @@ extension GrammarParser_Fetch_Tests {
 extension GrammarParser_Fetch_Tests {
     func testParseFetchResponseStart() {
         self.iterateTests(
-            testFunction: GrammarParser.parseFetchResponseStart,
+            testFunction: GrammarParser().parseFetchResponseStart,
             validInputs: [
                 ("* 1 FETCH (", " ", .start(1), #line),
             ],
@@ -96,7 +96,7 @@ extension GrammarParser_Fetch_Tests {
 extension GrammarParser_Fetch_Tests {
     func testParseFetchModifier() {
         self.iterateTests(
-            testFunction: GrammarParser.parseFetchModifier,
+            testFunction: GrammarParser().parseFetchModifier,
             validInputs: [
                 ("CHANGEDSINCE 2", " ", .changedSince(.init(modificationSequence: 2)), #line),
                 ("test", "\r", .other(.init(key: "test", value: nil)), #line),

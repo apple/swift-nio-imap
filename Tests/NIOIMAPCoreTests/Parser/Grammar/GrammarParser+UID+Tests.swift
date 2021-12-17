@@ -23,7 +23,7 @@ class GrammarParser_UID_Tests: XCTestCase, _ParserTestHelpers {}
 extension GrammarParser_UID_Tests {
     func testParseUIDValidity() {
         self.iterateTests(
-            testFunction: GrammarParser.parseUIDValidity,
+            testFunction: GrammarParser().parseUIDValidity,
             validInputs: [
                 ("1", " ", 1, #line),
                 ("12", " ", 12, #line),
@@ -44,7 +44,7 @@ extension GrammarParser_UID_Tests {
 extension GrammarParser_UID_Tests {
     func testUIDRange() {
         self.iterateTests(
-            testFunction: GrammarParser.parseMessageIdentifierRange,
+            testFunction: GrammarParser().parseMessageIdentifierRange,
             validInputs: [
                 ("*", "\r\n", MessageIdentifierRange<UID>(.max), #line),
                 ("1:*", "\r\n", MessageIdentifierRange<UID>.all, #line),
@@ -68,7 +68,7 @@ extension GrammarParser_UID_Tests {
 extension GrammarParser_UID_Tests {
     func testParseUIDSet() {
         self.iterateTests(
-            testFunction: GrammarParser.parseUIDSet,
+            testFunction: GrammarParser().parseUIDSet,
             validInputs: [
                 ("1234", "\r\n", MessageIdentifierSet(1234 as UID), #line),
                 ("12:34", "\r\n", MessageIdentifierSet(MessageIdentifierRange<UID>(12 ... 34)), #line),

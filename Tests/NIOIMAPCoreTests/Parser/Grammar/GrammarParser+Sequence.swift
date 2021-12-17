@@ -23,7 +23,7 @@ class GrammarParser_Sequence_Tests: XCTestCase, _ParserTestHelpers {}
 extension GrammarParser_Sequence_Tests {
     func testSequenceSet() {
         self.iterateTests(
-            testFunction: GrammarParser.parseMessageIdentifierSet,
+            testFunction: GrammarParser().parseMessageIdentifierSet,
             validInputs: [
                 ("765", " ", .set([765]), #line),
                 ("1,2:5,7,9:*", " ", .set([MessageIdentifierRange<SequenceNumber>(1), MessageIdentifierRange<SequenceNumber>(2 ... 5), MessageIdentifierRange<SequenceNumber>(7), MessageIdentifierRange<SequenceNumber>(9...)]), #line),
@@ -52,7 +52,7 @@ extension GrammarParser_Sequence_Tests {
 extension GrammarParser_Sequence_Tests {
     func testParseModifierSequenceValue() {
         self.iterateTests(
-            testFunction: GrammarParser.parseModificationSequenceValue,
+            testFunction: GrammarParser().parseModificationSequenceValue,
             validInputs: [
                 ("1", " ", 1, #line),
                 ("123", " ", 123, #line),
@@ -71,7 +71,7 @@ extension GrammarParser_Sequence_Tests {
 extension GrammarParser_Sequence_Tests {
     func testParseModifierSequenceValueZero() {
         self.iterateTests(
-            testFunction: GrammarParser.parseModificationSequenceValue,
+            testFunction: GrammarParser().parseModificationSequenceValue,
             validInputs: [
                 ("0", " ", .zero, #line),
                 ("123", " ", 123, #line),

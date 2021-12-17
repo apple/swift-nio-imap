@@ -27,7 +27,7 @@ extension GrammarParser_Append_Tests {}
 extension GrammarParser_Append_Tests {
     func testParseAppendData() {
         self.iterateTests(
-            testFunction: GrammarParser.parseAppendData,
+            testFunction: GrammarParser().parseAppendData,
             validInputs: [
                 ("{123}\r\n", "hello", .init(byteCount: 123), #line),
                 ("~{456}\r\n", "hello", .init(byteCount: 456, withoutContentTransferEncoding: true), #line),
@@ -45,7 +45,7 @@ extension GrammarParser_Append_Tests {
 
     func testNegativeAppendDataDoesNotParse() {
         TestUtilities.withParseBuffer("{-1}\r\n", shouldRemainUnchanged: true) { buffer in
-            XCTAssertThrowsError(try GrammarParser.parseAppendData(buffer: &buffer, tracker: .testTracker)) { error in
+            XCTAssertThrowsError(try GrammarParser().parseAppendData(buffer: &buffer, tracker: .testTracker)) { error in
                 XCTAssertNotNil(error as? ParserError)
             }
         }
@@ -54,7 +54,7 @@ extension GrammarParser_Append_Tests {
     func testHugeAppendDataDoesNotParse() {
         let oneAfterMaxInt = "\(UInt(Int.max) + 1)"
         TestUtilities.withParseBuffer("{\(oneAfterMaxInt)}\r\n", shouldRemainUnchanged: true) { buffer in
-            XCTAssertThrowsError(try GrammarParser.parseAppendData(buffer: &buffer, tracker: .testTracker)) { error in
+            XCTAssertThrowsError(try GrammarParser().parseAppendData(buffer: &buffer, tracker: .testTracker)) { error in
                 XCTAssertNotNil(error as? ParserError)
             }
         }
@@ -67,7 +67,7 @@ extension GrammarParser_Append_Tests {
     // NOTE: Spec is ambiguous when parsing `append-data`, which may contain `append-data-ext`, which is the same as `append-ext`, which is inside `append-opts`
     func testParseMessage() {
         self.iterateTests(
-            testFunction: GrammarParser.parseAppendMessage,
+            testFunction: GrammarParser().parseAppendMessage,
             validInputs: [
                 (
                     " (\\Answered) {123}\r\n",
@@ -96,7 +96,7 @@ extension GrammarParser_Append_Tests {
         let date = ServerMessageDate(components!)
 
         self.iterateTests(
-            testFunction: GrammarParser.parseAppendOptions,
+            testFunction: GrammarParser().parseAppendOptions,
             validInputs: [
                 ("", "\r", .none, #line),
                 (" (\\Answered)", "\r", .init(flagList: [.answered], internalDate: nil, extensions: [:]), #line),

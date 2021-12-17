@@ -25,12 +25,12 @@ import struct NIO.ByteBufferView
 import struct OrderedCollections.OrderedDictionary
 
 extension GrammarParser {
-    static func parseMetadataEntryName(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MetadataEntryName {
+    func parseMetadataEntryName(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MetadataEntryName {
         let buffer = try self.parseAString(buffer: &buffer, tracker: tracker)
         return MetadataEntryName(buffer)
     }
 
-    static func parseEntryValue(buffer: inout ParseBuffer, tracker: StackTracker) throws -> KeyValue<MetadataEntryName, MetadataValue> {
+    func parseEntryValue(buffer: inout ParseBuffer, tracker: StackTracker) throws -> KeyValue<MetadataEntryName, MetadataValue> {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> KeyValue<MetadataEntryName, MetadataValue> in
             let name = try self.parseMetadataEntryName(buffer: &buffer, tracker: tracker)
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
@@ -39,7 +39,7 @@ extension GrammarParser {
         }
     }
 
-    static func parseEntryValues(buffer: inout ParseBuffer, tracker: StackTracker) throws -> OrderedDictionary<MetadataEntryName, MetadataValue> {
+    func parseEntryValues(buffer: inout ParseBuffer, tracker: StackTracker) throws -> OrderedDictionary<MetadataEntryName, MetadataValue> {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> OrderedDictionary<MetadataEntryName, MetadataValue> in
             try PL.parseFixedString("(", buffer: &buffer, tracker: tracker)
             var kvs = OrderedDictionary<MetadataEntryName, MetadataValue>()
@@ -54,7 +54,7 @@ extension GrammarParser {
         }
     }
 
-    static func parseEntries(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [MetadataEntryName] {
+    func parseEntries(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [MetadataEntryName] {
         func parseEntries_singleUnbracketed(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [MetadataEntryName] {
             [try self.parseMetadataEntryName(buffer: &buffer, tracker: tracker)]
         }
@@ -78,7 +78,7 @@ extension GrammarParser {
         )
     }
 
-    static func parseEntryList(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [MetadataEntryName] {
+    func parseEntryList(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [MetadataEntryName] {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             var array = [try self.parseMetadataEntryName(buffer: &buffer, tracker: tracker)]
             try PL.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker, parser: { buffer, tracker in
@@ -89,7 +89,7 @@ extension GrammarParser {
         }
     }
 
-    static func parseEntryFlagName(buffer: inout ParseBuffer, tracker: StackTracker) throws -> EntryFlagName {
+    func parseEntryFlagName(buffer: inout ParseBuffer, tracker: StackTracker) throws -> EntryFlagName {
         try PL.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> EntryFlagName in
             try PL.parseFixedString("\"/flags/", buffer: &buffer, tracker: tracker)
             let flag = try self.parseAttributeFlag(buffer: &buffer, tracker: tracker)
@@ -99,7 +99,7 @@ extension GrammarParser {
     }
 
     // entry-type-req = entry-type-resp / all
-    static func parseEntryKindRequest(buffer: inout ParseBuffer, tracker: StackTracker) throws -> EntryKindRequest {
+    func parseEntryKindRequest(buffer: inout ParseBuffer, tracker: StackTracker) throws -> EntryKindRequest {
         func parseEntryKindRequest_all(buffer: inout ParseBuffer, tracker: StackTracker) throws -> EntryKindRequest {
             try PL.parseFixedString("all", buffer: &buffer, tracker: tracker)
             return .all
@@ -125,7 +125,7 @@ extension GrammarParser {
     }
 
     // entry-type-resp = "priv" / "shared"
-    static func parseEntryKindResponse(buffer: inout ParseBuffer, tracker: StackTracker) throws -> EntryKindResponse {
+    func parseEntryKindResponse(buffer: inout ParseBuffer, tracker: StackTracker) throws -> EntryKindResponse {
         func parseEntryKindResponse_private(buffer: inout ParseBuffer, tracker: StackTracker) throws -> EntryKindResponse {
             try PL.parseFixedString("priv", buffer: &buffer, tracker: tracker)
             return .private

@@ -25,7 +25,7 @@ import struct NIO.ByteBufferView
 
 extension GrammarParser {
     // date            = date-text / DQUOTE date-text DQUOTE
-    static func parseDate(buffer: inout ParseBuffer, tracker: StackTracker) throws -> IMAPCalendarDay {
+    func parseDate(buffer: inout ParseBuffer, tracker: StackTracker) throws -> IMAPCalendarDay {
         func parseDateText_quoted(buffer: inout ParseBuffer, tracker: StackTracker) throws -> IMAPCalendarDay {
             try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
                 try PL.parseFixedString("\"", buffer: &buffer, tracker: tracker)
@@ -44,7 +44,7 @@ extension GrammarParser {
     }
 
     // date-day        = 1*2DIGIT
-    static func parseDateDay(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Int {
+    func parseDateDay(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Int {
         let (num, size) = try PL.parseUnsignedInteger(buffer: &buffer, tracker: tracker, allowLeadingZeros: true)
         guard size <= 2 else {
             throw ParserError(hint: "Expected 1 or 2 bytes, got \(size)")
@@ -53,7 +53,7 @@ extension GrammarParser {
     }
 
     // date-day-fixed  = (SP DIGIT) / 2DIGIT
-    static func parseDateDayFixed(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Int {
+    func parseDateDayFixed(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Int {
         func parseDateDayFixed_spaced(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Int {
             try PL.parseFixedString(" ", buffer: &buffer, tracker: tracker)
             return try self.parseNDigits(buffer: &buffer, tracker: tracker, bytes: 1)
@@ -69,7 +69,7 @@ extension GrammarParser {
 
     // date-month      = "Jan" / "Feb" / "Mar" / "Apr" / "May" / "Jun" /
     //                   "Jul" / "Aug" / "Sep" / "Oct" / "Nov" / "Dec"
-    static func parseDateMonth(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Int {
+    func parseDateMonth(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Int {
         let parsed = try PL.parseOneOrMoreCharacters(buffer: &buffer, tracker: tracker) { char -> Bool in
             isalnum(Int32(char)) != 0
         }
@@ -81,7 +81,7 @@ extension GrammarParser {
     }
 
     // date-text       = date-day "-" date-month "-" date-year
-    static func parseDateText(buffer: inout ParseBuffer, tracker: StackTracker) throws -> IMAPCalendarDay {
+    func parseDateText(buffer: inout ParseBuffer, tracker: StackTracker) throws -> IMAPCalendarDay {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             let day = try self.parseDateDay(buffer: &buffer, tracker: tracker)
             try PL.parseFixedString("-", buffer: &buffer, tracker: tracker)
@@ -97,7 +97,7 @@ extension GrammarParser {
 
     // date-time       = DQUOTE date-day-fixed "-" date-month "-" date-year
     //                   SP time SP zone DQUOTE
-    static func parseInternalDate(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ServerMessageDate {
+    func parseInternalDate(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ServerMessageDate {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             try PL.parseFixedString("\"", buffer: &buffer, tracker: tracker)
             let day = try self.parseDateDayFixed(buffer: &buffer, tracker: tracker)

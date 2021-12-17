@@ -33,6 +33,7 @@ public struct ResponseParser: Parser {
         case attributeBytes(Int)
     }
 
+    let parser = GrammarParser()
     let bufferLimit: Int
     private var mode: Mode
 
@@ -97,25 +98,25 @@ extension ResponseParser {
         func parseResponse_fetch(buffer: inout ParseBuffer, tracker: StackTracker) throws -> _Response {
             switch state {
             case .fetchOrNormal:
-                return .fetchResponse(try GrammarParser.parseFetchResponseStart(buffer: &buffer, tracker: tracker))
+                return .fetchResponse(try self.parser.parseFetchResponseStart(buffer: &buffer, tracker: tracker))
             case .fetchMiddle:
-                return .fetchResponse(try GrammarParser.parseFetchResponse(buffer: &buffer, tracker: tracker))
+                return .fetchResponse(try self.parser.parseFetchResponse(buffer: &buffer, tracker: tracker))
             }
         }
 
         func parseResponse_normal(buffer: inout ParseBuffer, tracker: StackTracker) throws -> _Response {
-            let response = try GrammarParser.parseResponseData(buffer: &buffer, tracker: tracker)
+            let response = try self.parser.parseResponseData(buffer: &buffer, tracker: tracker)
             return .untaggedResponse(response)
         }
 
         return try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             try? PL.parseSpaces(buffer: &buffer, tracker: tracker)
             do {
-                let response = try PL.parseOneOf([
-                    parseResponse_normal,
-                    parseResponse_fetch,
-                ], buffer: &buffer, tracker: tracker)
-
+                let response = try PL.parseOneOf(
+                    parseResponse_fetch, parseResponse_normal,
+                    buffer: &buffer,
+                    tracker: tracker
+                )
                 switch response {
                 case .fetchResponse(.start(let num)):
                     self.moveStateMachine(expected: .response(.fetchOrNormal), next: .response(.fetchMiddle))
@@ -144,13 +145,13 @@ extension ResponseParser {
         }
     }
 
-    private mutating func _parseResponse(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseOrContinuationRequest {
+    private func _parseResponse(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseOrContinuationRequest {
         func parseResponse_continuation(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseOrContinuationRequest {
-            .continuationRequest(try GrammarParser.parseContinuationRequest(buffer: &buffer, tracker: tracker))
+            .continuationRequest(try self.parser.parseContinuationRequest(buffer: &buffer, tracker: tracker))
         }
 
         func parseResponse_tagged(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseOrContinuationRequest {
-            .response(.tagged(try GrammarParser.parseTaggedResponse(buffer: &buffer, tracker: tracker)))
+            .response(.tagged(try self.parser.parseTaggedResponse(buffer: &buffer, tracker: tracker)))
         }
 
         return try PL.parseOneOf([
@@ -191,7 +192,7 @@ extension ResponseParser {
     }
 
     fileprivate mutating func parseQuotedBytes(buffer: inout ParseBuffer) throws -> Response {
-        let quoted = try GrammarParser.parseQuoted(buffer: &buffer, tracker: .makeNewDefaultLimitStackTracker)
+        let quoted = try self.parser.parseQuoted(buffer: &buffer, tracker: .makeNewDefaultLimitStackTracker)
         return self.moveStateMachine(expected: .streamingQuoted, next: .attributeBytes(0), returnValue: .fetch(.streamingBytes(quoted)))
     }
 }

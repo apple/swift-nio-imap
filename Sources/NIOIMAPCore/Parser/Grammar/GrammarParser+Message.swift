@@ -25,7 +25,7 @@ import struct NIO.ByteBufferView
 
 extension GrammarParser {
     // message-data    = nz-number SP ("EXPUNGE" / ("FETCH" SP msg-att))
-    static func parseMessageData(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageData {
+    func parseMessageData(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageData {
         func parseMessageData_expunge(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageData {
             let number: SequenceNumber = try self.parseMessageIdentifier(buffer: &buffer, tracker: tracker)
             try PL.parseFixedString(" EXPUNGE", buffer: &buffer, tracker: tracker)
@@ -78,7 +78,7 @@ extension GrammarParser {
     //                   "UID" SP uniqueid
     // msg-att-dynamic = "FLAGS" SP "(" [flag-fetch *(SP flag-fetch)] ")"
     // ---- This function combines static and dynamic
-    static func parseMessageAttribute(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute {
+    func parseMessageAttribute(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute {
         func parseMessageAttribute_flags(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute {
             try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> MessageAttribute in
                 try PL.parseSpaces(buffer: &buffer, tracker: tracker)
