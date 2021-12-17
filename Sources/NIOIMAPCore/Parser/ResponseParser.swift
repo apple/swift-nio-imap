@@ -14,6 +14,17 @@
 
 import struct NIO.ByteBuffer
 
+public struct ExceededMaximumMessageAttributesError: Error {
+    
+    public let limit: Int
+    public let actual: Int
+    
+    public init(limit: Int, actual: Int)  {
+        self.limit = limit
+        self.actual = actual
+    }
+}
+
 /// A parser to be used by Clients in order to parse responses sent from a server.
 public struct ResponseParser: Parser {
     enum AttributeState: Hashable {
@@ -24,24 +35,26 @@ public struct ResponseParser: Parser {
 
     enum ResponseState: Hashable {
         case fetchOrNormal
-        case fetchMiddle
+        case fetchMiddle(attributeCount: Int)
     }
 
     enum Mode: Hashable {
         case response(ResponseState)
-        case streamingQuoted
-        case attributeBytes(Int)
+        case streamingQuoted(attributeCount: Int)
+        case attributeBytes(Int, attributeCount: Int)
     }
 
     let parser = GrammarParser()
     let bufferLimit: Int
+    let messageAttributeLimit: Int
     private var mode: Mode
 
     /// Creates a new `ResponseParser`.
     /// - parameter bufferLimit: The maximum amount of data that may be buffered by the parser. If this limit is exceeded then an error will be thrown. Defaults to 1000 bytes.
-    public init(bufferLimit: Int = 1_000) {
+    public init(bufferLimit: Int = 1_000, messageAttributeLimit: Int = .max) {
         self.bufferLimit = bufferLimit
         self.mode = .response(.fetchOrNormal)
+        self.messageAttributeLimit = messageAttributeLimit
     }
 
     /// Parses a `ResponseStream` and returns the result.
@@ -62,10 +75,10 @@ public struct ResponseParser: Parser {
             switch self.mode {
             case .response(let state):
                 return try self.parseResponse(state: state, buffer: &parseBuffer, tracker: tracker)
-            case .attributeBytes(let remaining):
-                return .response(try self.parseBytes(buffer: &parseBuffer, tracker: tracker, remaining: remaining))
-            case .streamingQuoted:
-                return .response(try self.parseQuotedBytes(buffer: &parseBuffer))
+            case .attributeBytes(let remaining, attributeCount: let attributeCount):
+                return .response(try self.parseBytes(buffer: &parseBuffer, tracker: tracker, remaining: remaining, attributeCount: attributeCount))
+            case .streamingQuoted(attributeCount: let attributeCount):
+                return .response(try self.parseQuotedBytes(buffer: &parseBuffer, attributeCount: attributeCount))
             }
         } catch is IncompleteMessage {
             return nil
@@ -119,18 +132,27 @@ extension ResponseParser {
                 )
                 switch response {
                 case .fetchResponse(.start(let num)):
-                    self.moveStateMachine(expected: .response(.fetchOrNormal), next: .response(.fetchMiddle))
+                    self.moveStateMachine(expected: .response(.fetchOrNormal), next: .response(.fetchMiddle(attributeCount: 0)))
                     return .response(.fetch(.start(num)))
                 case .fetchResponse(.literalStreamingBegin(kind: let kind, byteCount: let size)):
-                    self.moveStateMachine(expected: .response(.fetchMiddle), next: .attributeBytes(size))
+                    guard case .response(.fetchMiddle(attributeCount: let count)) = self.mode else {
+                        preconditionFailure("We should be in fetch middle: \(self.mode)")
+                    }
+                    self.moveStateMachine(expected: .response(.fetchMiddle(attributeCount: count)), next: .attributeBytes(size, attributeCount: count))
                     return .response(.fetch(.streamingBegin(kind: kind, byteCount: size)))
 
                 case .fetchResponse(.quotedStreamingBegin(kind: let kind, byteCount: let size)):
-                    self.moveStateMachine(expected: .response(.fetchMiddle), next: .streamingQuoted)
+                    guard case .response(.fetchMiddle(attributeCount: let count)) = self.mode else {
+                        preconditionFailure("We should be in fetch middle: \(self.mode)")
+                    }
+                    self.moveStateMachine(expected: .response(.fetchMiddle(attributeCount: count)), next: .streamingQuoted(attributeCount: count))
                     return .response(.fetch(.streamingBegin(kind: kind, byteCount: size)))
 
                 case .fetchResponse(.finish):
-                    self.moveStateMachine(expected: .response(.fetchMiddle), next: .response(.fetchOrNormal))
+                    guard case .response(.fetchMiddle(attributeCount: let count)) = self.mode else {
+                        preconditionFailure("We should be in fetch middle: \(self.mode)")
+                    }
+                    self.moveStateMachine(expected: .response(.fetchMiddle(attributeCount: count)), next: .response(.fetchOrNormal))
                     return .response(.fetch(.finish))
 
                 case .untaggedResponse(let payload):
@@ -169,11 +191,11 @@ extension ResponseParser {
     /// `ByteBuffer` will be emptied.
     /// - parameter buffer: The buffer from which bytes should be extracted.
     /// - returns: A new `ByteBuffer` containing extracted bytes.
-    fileprivate mutating func parseBytes(buffer: inout ParseBuffer, tracker: StackTracker, remaining: Int) throws -> Response {
+    fileprivate mutating func parseBytes(buffer: inout ParseBuffer, tracker: StackTracker, remaining: Int, attributeCount: Int) throws -> Response {
         if remaining == 0 {
             return self.moveStateMachine(
-                expected: .attributeBytes(remaining),
-                next: .response(.fetchMiddle),
+                expected: .attributeBytes(remaining, attributeCount: attributeCount),
+                next: .response(.fetchMiddle(attributeCount: attributeCount + 1)), // we've finished parsing an attribute here so increment the count
                 returnValue: .fetch(.streamingEnd)
             )
         } else {
@@ -184,15 +206,19 @@ extension ResponseParser {
             assert(leftToRead >= 0, "\(leftToRead) is negative")
 
             return self.moveStateMachine(
-                expected: .attributeBytes(remaining),
-                next: .attributeBytes(leftToRead),
+                expected: .attributeBytes(remaining, attributeCount: attributeCount),
+                next: .attributeBytes(leftToRead, attributeCount: attributeCount),
                 returnValue: .fetch(.streamingBytes(bytes))
             )
         }
     }
 
-    fileprivate mutating func parseQuotedBytes(buffer: inout ParseBuffer) throws -> Response {
+    fileprivate mutating func parseQuotedBytes(buffer: inout ParseBuffer, attributeCount: Int) throws -> Response {
         let quoted = try self.parser.parseQuoted(buffer: &buffer, tracker: .makeNewDefaultLimitStackTracker)
-        return self.moveStateMachine(expected: .streamingQuoted, next: .attributeBytes(0), returnValue: .fetch(.streamingBytes(quoted)))
+        return self.moveStateMachine(
+            expected: .streamingQuoted(attributeCount: attributeCount),
+            next: .attributeBytes(0, attributeCount: attributeCount),
+            returnValue: .fetch(.streamingBytes(quoted))
+        )
     }
 }
