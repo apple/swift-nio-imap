@@ -19,7 +19,7 @@ public struct ExceededMaximumMessageAttributesError: Error {
 }
 
 public struct ExceededMaximumBodySizeError: Error {
-    public init() { }
+    public init() {}
 }
 
 /// A parser to be used by Clients in order to parse responses sent from a server.
@@ -174,7 +174,7 @@ extension ResponseParser {
         }
         return attributeCount
     }
-    
+
     private func guardStreamingSizeLimit(size: Int) throws {
         guard size < self.bodySizeLimit else {
             throw ExceededMaximumBodySizeError()
