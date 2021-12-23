@@ -95,7 +95,7 @@ public struct ResponseParser: Parser {
 // MARK: - Parse responses
 
 extension ResponseParser {
-    fileprivate mutating func parseResponse(state: ResponseState, buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseOrContinuationRequest {
+    private mutating func parseResponse(state: ResponseState, buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseOrContinuationRequest {
         enum _Response: Hashable {
             case untaggedResponse(ResponsePayload)
             case fetchResponse(GrammarParser._FetchResponse)
@@ -155,7 +155,7 @@ extension ResponseParser {
             }
         }
     }
-    
+
     /// Validates that the attribute count is within the allowed limit, and returns it.
     private func guardFetchMiddleAttributeCount() throws -> Int {
         guard case .response(.fetchMiddle(attributeCount: let attributeCount)) = self.mode else {
@@ -191,7 +191,7 @@ extension ResponseParser {
     /// `ByteBuffer` will be emptied.
     /// - parameter buffer: The buffer from which bytes should be extracted.
     /// - returns: A new `ByteBuffer` containing extracted bytes.
-    fileprivate mutating func parseBytes(buffer: inout ParseBuffer, tracker: StackTracker, remaining: Int, attributeCount: Int) throws -> Response {
+    private mutating func parseBytes(buffer: inout ParseBuffer, tracker: StackTracker, remaining: Int, attributeCount: Int) throws -> Response {
         if remaining == 0 {
             return self.moveStateMachine(
                 expected: .attributeBytes(remaining, attributeCount: attributeCount),
@@ -213,7 +213,7 @@ extension ResponseParser {
         }
     }
 
-    fileprivate mutating func parseQuotedBytes(buffer: inout ParseBuffer, attributeCount: Int) throws -> Response {
+    private mutating func parseQuotedBytes(buffer: inout ParseBuffer, attributeCount: Int) throws -> Response {
         let quoted = try self.parser.parseQuoted(buffer: &buffer, tracker: .makeNewDefaultLimitStackTracker)
         return self.moveStateMachine(
             expected: .streamingQuoted(attributeCount: attributeCount),
