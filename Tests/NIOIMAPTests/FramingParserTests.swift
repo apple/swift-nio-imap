@@ -71,7 +71,7 @@ extension FramingParserTests {
         buffer = " 2\r\n"
         XCTAssertEqual(try self.parser.appendAndFrameBuffer(&buffer), [.complete("* SEARCH 2\r\n")])
     }
-    
+
     func testSimpleCommandTimes2() {
         var buffer: ByteBuffer = "A1 NOOP\r\nA2 NOOP\r\n"
         XCTAssertEqual(try self.parser.appendAndFrameBuffer(&buffer), [.complete("A1 NOOP\r\n"), .complete("A2 NOOP\r\n")])

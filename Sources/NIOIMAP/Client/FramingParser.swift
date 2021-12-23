@@ -151,7 +151,7 @@ public struct FramingParser: Hashable {
         }
         self.buffer.writeBuffer(&buffer)
 
-        return try adjustBufferAndParseFrames()
+        return try self.adjustBufferAndParseFrames()
     }
 
     @_spi(NIOIMAPInternal) public mutating func appendAndFrameBytes(_ bytes: UnsafeRawBufferPointer) throws -> [FramingResult] {
@@ -162,11 +162,11 @@ public struct FramingParser: Hashable {
 
         self.buffer.writeBytes(bytes)
 
-        return try adjustBufferAndParseFrames()
+        return try self.adjustBufferAndParseFrames()
     }
 
     @_spi(NIOIMAPInternal) public var inputBufferByteCount: Int {
-        buffer.readableBytes
+        self.buffer.readableBytes
     }
 
     private mutating func adjustBufferAndParseFrames() throws -> [FramingResult] {
