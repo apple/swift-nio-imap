@@ -128,32 +128,17 @@ extension ResponseParser {
                     self.moveStateMachine(expected: .response(.fetchOrNormal), next: .response(.fetchMiddle(attributeCount: 0)))
                     return .response(.fetch(.start(num)))
                 case .fetchResponse(.literalStreamingBegin(kind: let kind, byteCount: let size)):
-                    guard case .response(.fetchMiddle(attributeCount: let attributeCount)) = self.mode else {
-                        preconditionFailure("We should be in fetch middle: \(self.mode)")
-                    }
-                    guard attributeCount < self.messageAttributeLimit else {
-                        throw ExceededMaximumMessageAttributesError()
-                    }
+                    let attributeCount = try self.guardFetchMiddleAttributeCount()
                     self.moveStateMachine(expected: .response(.fetchMiddle(attributeCount: attributeCount)), next: .attributeBytes(size, attributeCount: attributeCount + 1))
                     return .response(.fetch(.streamingBegin(kind: kind, byteCount: size)))
 
                 case .fetchResponse(.quotedStreamingBegin(kind: let kind, byteCount: let size)):
-                    guard case .response(.fetchMiddle(attributeCount: let attributeCount)) = self.mode else {
-                        preconditionFailure("We should be in fetch middle: \(self.mode)")
-                    }
-                    guard attributeCount < self.messageAttributeLimit else {
-                        throw ExceededMaximumMessageAttributesError()
-                    }
+                    let attributeCount = try self.guardFetchMiddleAttributeCount()
                     self.moveStateMachine(expected: .response(.fetchMiddle(attributeCount: attributeCount)), next: .streamingQuoted(attributeCount: attributeCount + 1))
                     return .response(.fetch(.streamingBegin(kind: kind, byteCount: size)))
 
                 case .fetchResponse(.finish):
-                    guard case .response(.fetchMiddle(attributeCount: let attributeCount)) = self.mode else {
-                        preconditionFailure("We should be in fetch middle: \(self.mode)")
-                    }
-                    guard attributeCount < self.messageAttributeLimit else {
-                        throw ExceededMaximumMessageAttributesError()
-                    }
+                    let attributeCount = try self.guardFetchMiddleAttributeCount()
                     self.moveStateMachine(expected: .response(.fetchMiddle(attributeCount: attributeCount)), next: .response(.fetchOrNormal))
                     return .response(.fetch(.finish))
 
@@ -161,12 +146,7 @@ extension ResponseParser {
                     return .response(.untagged(payload))
 
                 case .fetchResponse(.simpleAttribute(let att)):
-                    guard case .response(.fetchMiddle(attributeCount: let attributeCount)) = self.mode else {
-                        preconditionFailure("We should be in fetch middle: \(self.mode)")
-                    }
-                    guard attributeCount < self.messageAttributeLimit else {
-                        throw ExceededMaximumMessageAttributesError()
-                    }
+                    let attributeCount = try self.guardFetchMiddleAttributeCount()
                     self.moveStateMachine(expected: .response(.fetchMiddle(attributeCount: attributeCount)), next: .response(.fetchMiddle(attributeCount: attributeCount + 1)))
                     return .response(.fetch(.simpleAttribute(att)))
                 }
@@ -174,6 +154,17 @@ extension ResponseParser {
                 return try self._parseResponse(buffer: &buffer, tracker: tracker)
             }
         }
+    }
+    
+    /// Validates that the attribute count is within the allowed limit, and returns it.
+    private func guardFetchMiddleAttributeCount() throws -> Int {
+        guard case .response(.fetchMiddle(attributeCount: let attributeCount)) = self.mode else {
+            preconditionFailure("We should be in fetch middle: \(self.mode)")
+        }
+        guard attributeCount < self.messageAttributeLimit else {
+            throw ExceededMaximumMessageAttributesError()
+        }
+        return attributeCount
     }
 
     private func _parseResponse(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseOrContinuationRequest {
