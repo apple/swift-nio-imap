@@ -15,14 +15,7 @@
 import struct NIO.ByteBuffer
 
 public struct ExceededMaximumMessageAttributesError: Error {
-    
-    public let limit: Int
-    public let actual: Int
-    
-    public init(limit: Int, actual: Int)  {
-        self.limit = limit
-        self.actual = actual
-    }
+    public init() {}
 }
 
 /// A parser to be used by Clients in order to parse responses sent from a server.
@@ -135,30 +128,46 @@ extension ResponseParser {
                     self.moveStateMachine(expected: .response(.fetchOrNormal), next: .response(.fetchMiddle(attributeCount: 0)))
                     return .response(.fetch(.start(num)))
                 case .fetchResponse(.literalStreamingBegin(kind: let kind, byteCount: let size)):
-                    guard case .response(.fetchMiddle(attributeCount: let count)) = self.mode else {
+                    guard case .response(.fetchMiddle(attributeCount: let attributeCount)) = self.mode else {
                         preconditionFailure("We should be in fetch middle: \(self.mode)")
                     }
-                    self.moveStateMachine(expected: .response(.fetchMiddle(attributeCount: count)), next: .attributeBytes(size, attributeCount: count))
+                    guard attributeCount < self.messageAttributeLimit else {
+                        throw ExceededMaximumMessageAttributesError()
+                    }
+                    self.moveStateMachine(expected: .response(.fetchMiddle(attributeCount: attributeCount)), next: .attributeBytes(size, attributeCount: attributeCount + 1))
                     return .response(.fetch(.streamingBegin(kind: kind, byteCount: size)))
 
                 case .fetchResponse(.quotedStreamingBegin(kind: let kind, byteCount: let size)):
-                    guard case .response(.fetchMiddle(attributeCount: let count)) = self.mode else {
+                    guard case .response(.fetchMiddle(attributeCount: let attributeCount)) = self.mode else {
                         preconditionFailure("We should be in fetch middle: \(self.mode)")
                     }
-                    self.moveStateMachine(expected: .response(.fetchMiddle(attributeCount: count)), next: .streamingQuoted(attributeCount: count))
+                    guard attributeCount < self.messageAttributeLimit else {
+                        throw ExceededMaximumMessageAttributesError()
+                    }
+                    self.moveStateMachine(expected: .response(.fetchMiddle(attributeCount: attributeCount)), next: .streamingQuoted(attributeCount: attributeCount + 1))
                     return .response(.fetch(.streamingBegin(kind: kind, byteCount: size)))
 
                 case .fetchResponse(.finish):
-                    guard case .response(.fetchMiddle(attributeCount: let count)) = self.mode else {
+                    guard case .response(.fetchMiddle(attributeCount: let attributeCount)) = self.mode else {
                         preconditionFailure("We should be in fetch middle: \(self.mode)")
                     }
-                    self.moveStateMachine(expected: .response(.fetchMiddle(attributeCount: count)), next: .response(.fetchOrNormal))
+                    guard attributeCount < self.messageAttributeLimit else {
+                        throw ExceededMaximumMessageAttributesError()
+                    }
+                    self.moveStateMachine(expected: .response(.fetchMiddle(attributeCount: attributeCount)), next: .response(.fetchOrNormal))
                     return .response(.fetch(.finish))
 
                 case .untaggedResponse(let payload):
                     return .response(.untagged(payload))
 
                 case .fetchResponse(.simpleAttribute(let att)):
+                    guard case .response(.fetchMiddle(attributeCount: let attributeCount)) = self.mode else {
+                        preconditionFailure("We should be in fetch middle: \(self.mode)")
+                    }
+                    guard attributeCount < self.messageAttributeLimit else {
+                        throw ExceededMaximumMessageAttributesError()
+                    }
+                    self.moveStateMachine(expected: .response(.fetchMiddle(attributeCount: attributeCount)), next: .response(.fetchMiddle(attributeCount: attributeCount + 1)))
                     return .response(.fetch(.simpleAttribute(att)))
                 }
             } catch is ParserError {
