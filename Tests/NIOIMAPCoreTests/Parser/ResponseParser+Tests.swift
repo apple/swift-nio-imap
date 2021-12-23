@@ -23,7 +23,7 @@ class ResponseParser_Tests: XCTestCase {}
 extension ResponseParser_Tests {
     func testInit_defaultBufferSize() {
         let parser = CommandParser()
-        XCTAssertEqual(parser.bufferLimit, 1_000)
+        XCTAssertEqual(parser.bufferLimit, 8_192)
     }
 
     func testInit_customBufferSize() {

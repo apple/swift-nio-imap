@@ -13,6 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import NIOIMAPCore
 
 private let LITERAL_HEADER_START = UInt8(ascii: "{")
 private let LITERAL_HEADER_END = UInt8(ascii: "}")
@@ -110,9 +111,6 @@ enum FrameStatus: Hashable {
 }
 
 public struct FramingParser: Hashable {
-    /// RFC 3501 states that a line should be no more than 1000 bytes.
-    public static let defaultFrameSizeLimit = 1_000
-
     enum LiteralHeaderState: Hashable {
         case findingBinaryFlag
         case findingSize(ByteBuffer)
@@ -133,7 +131,7 @@ public struct FramingParser: Hashable {
     var buffer = ByteBuffer()
     var bufferSizeLimit: Int
 
-    @_spi(NIOIMAPInternal) public init(bufferSizeLimit: Int = Self.defaultFrameSizeLimit) {
+    @_spi(NIOIMAPInternal) public init(bufferSizeLimit: Int = IMAPDefaults.lineLengthLimit) {
         self.bufferSizeLimit = bufferSizeLimit
     }
 
@@ -151,6 +149,25 @@ public struct FramingParser: Hashable {
         }
         self.buffer.writeBuffer(&buffer)
 
+        return try self.adjustBufferAndParseFrames()
+    }
+
+    @_spi(NIOIMAPInternal) public mutating func appendAndFrameBytes(_ bytes: UnsafeRawBufferPointer) throws -> [FramingResult] {
+        // fast paths should be fast
+        guard !bytes.isEmpty else {
+            return []
+        }
+
+        self.buffer.writeBytes(bytes)
+
+        return try self.adjustBufferAndParseFrames()
+    }
+
+    @_spi(NIOIMAPInternal) public var inputBufferByteCount: Int {
+        self.buffer.readableBytes
+    }
+
+    private mutating func adjustBufferAndParseFrames() throws -> [FramingResult] {
         // Discard bytes when we've read over half the buffer and at least 1KB
         defer {
             if self.buffer.readerIndex > (self.buffer.writerIndex / 2), self.buffer.readerIndex > 1000 {
