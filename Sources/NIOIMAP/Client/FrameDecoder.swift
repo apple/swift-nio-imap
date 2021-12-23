@@ -20,7 +20,7 @@ public struct FrameDecoder: ByteToMessageDecoder {
 
     private var framingParser: FramingParser
 
-    public init(frameSizeLimit: Int = FramingParser.defaultFrameSizeLimit) {
+    public init(frameSizeLimit: Int = IMAPDefaults.lineLengthLimit) {
         self.framingParser = FramingParser(bufferSizeLimit: frameSizeLimit)
     }
 
