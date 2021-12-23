@@ -13,6 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import NIOIMAPCore
 
 private let LITERAL_HEADER_START = UInt8(ascii: "{")
 private let LITERAL_HEADER_END = UInt8(ascii: "}")
@@ -110,9 +111,6 @@ enum FrameStatus: Hashable {
 }
 
 public struct FramingParser: Hashable {
-    /// RFC 3501 states that a line should be no more than 1000 bytes.
-    public static let defaultFrameSizeLimit = 1_000
-
     enum LiteralHeaderState: Hashable {
         case findingBinaryFlag
         case findingSize(ByteBuffer)
@@ -133,7 +131,7 @@ public struct FramingParser: Hashable {
     var buffer = ByteBuffer()
     var bufferSizeLimit: Int
 
-    @_spi(NIOIMAPInternal) public init(bufferSizeLimit: Int = Self.defaultFrameSizeLimit) {
+    @_spi(NIOIMAPInternal) public init(bufferSizeLimit: Int = IMAPDefaults.lineLengthLimit) {
         self.bufferSizeLimit = bufferSizeLimit
     }
 

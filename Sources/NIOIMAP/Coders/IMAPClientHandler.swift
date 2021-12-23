@@ -44,7 +44,7 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
 
     public init(encodingChangeCallback: @escaping (OrderedDictionary<String, String?>, inout CommandEncodingOptions) -> Void = { _, _ in }) {
         self.state = .init(encodingOptions: CommandEncodingOptions(capabilities: self.lastKnownCapabilities))
-        self.decoder = NIOSingleStepByteToMessageProcessor(ResponseDecoder(), maximumBufferSize: 1_000)
+        self.decoder = NIOSingleStepByteToMessageProcessor(ResponseDecoder(), maximumBufferSize: IMAPDefaults.lineLengthLimit)
         self.encodingChangeCallback = encodingChangeCallback
         self.lastKnownCapabilities = []
     }
