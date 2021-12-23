@@ -282,6 +282,19 @@ extension ResponseParser_Tests {
             XCTAssertTrue(e is ExceededMaximumMessageAttributesError)
         }
     }
+    
+    func testRejectLargeBodies() {
+        var parser = ResponseParser(bufferLimit: 1000, bodySizeLimit: 10)
+        var buffer: ByteBuffer = "* 999 FETCH (RFC822.TEXT {3}\r\n123 RFC822.HEADER {11}\r\n "
+        XCTAssertEqual(try parser.parseResponseStream(buffer: &buffer), .response(.fetch(.start(999))))
+        XCTAssertEqual(try parser.parseResponseStream(buffer: &buffer), .response(.fetch(.streamingBegin(kind: .rfc822Text, byteCount: 3))))
+        XCTAssertEqual(try parser.parseResponseStream(buffer: &buffer), .response(.fetch(.streamingBytes("123"))))
+        XCTAssertEqual(try parser.parseResponseStream(buffer: &buffer), .response(.fetch(.streamingEnd)))
+        
+        XCTAssertThrowsError(try parser.parseResponseStream(buffer: &buffer)) { e in
+            XCTAssertTrue(e is ExceededMaximumBodySizeError)
+        }
+    }
 }
 
 // MARK: - Stress tests

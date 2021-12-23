@@ -18,6 +18,10 @@ public struct ExceededMaximumMessageAttributesError: Error {
     public init() {}
 }
 
+public struct ExceededMaximumBodySizeError: Error {
+    public init() { }
+}
+
 /// A parser to be used by Clients in order to parse responses sent from a server.
 public struct ResponseParser: Parser {
     enum AttributeState: Hashable {
@@ -40,14 +44,16 @@ public struct ResponseParser: Parser {
     let parser = GrammarParser()
     let bufferLimit: Int
     let messageAttributeLimit: Int
+    let bodySizeLimit: UInt64
     private var mode: Mode
 
     /// Creates a new `ResponseParser`.
     /// - parameter bufferLimit: The maximum amount of data that may be buffered by the parser. If this limit is exceeded then an error will be thrown. Defaults to 1000 bytes.
-    public init(bufferLimit: Int = 1_000, messageAttributeLimit: Int = .max) {
+    public init(bufferLimit: Int = 1_000, messageAttributeLimit: Int = .max, bodySizeLimit: UInt64 = .max) {
         self.bufferLimit = bufferLimit
         self.mode = .response(.fetchOrNormal)
         self.messageAttributeLimit = messageAttributeLimit
+        self.bodySizeLimit = bodySizeLimit
     }
 
     /// Parses a `ResponseStream` and returns the result.
@@ -128,11 +134,13 @@ extension ResponseParser {
                     self.moveStateMachine(expected: .response(.fetchOrNormal), next: .response(.fetchMiddle(attributeCount: 0)))
                     return .response(.fetch(.start(num)))
                 case .fetchResponse(.literalStreamingBegin(kind: let kind, byteCount: let size)):
+                    try self.guardStreamingSizeLimit(size: size)
                     let attributeCount = try self.guardFetchMiddleAttributeCount()
                     self.moveStateMachine(expected: .response(.fetchMiddle(attributeCount: attributeCount)), next: .attributeBytes(size, attributeCount: attributeCount + 1))
                     return .response(.fetch(.streamingBegin(kind: kind, byteCount: size)))
 
                 case .fetchResponse(.quotedStreamingBegin(kind: let kind, byteCount: let size)):
+                    try self.guardStreamingSizeLimit(size: size)
                     let attributeCount = try self.guardFetchMiddleAttributeCount()
                     self.moveStateMachine(expected: .response(.fetchMiddle(attributeCount: attributeCount)), next: .streamingQuoted(attributeCount: attributeCount + 1))
                     return .response(.fetch(.streamingBegin(kind: kind, byteCount: size)))
@@ -165,6 +173,12 @@ extension ResponseParser {
             throw ExceededMaximumMessageAttributesError()
         }
         return attributeCount
+    }
+    
+    private func guardStreamingSizeLimit(size: Int) throws {
+        guard size < self.bodySizeLimit else {
+            throw ExceededMaximumBodySizeError()
+        }
     }
 
     private func _parseResponse(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseOrContinuationRequest {
