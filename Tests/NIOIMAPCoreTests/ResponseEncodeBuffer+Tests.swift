@@ -22,7 +22,7 @@ extension ResponseEncodeBuffer_Tests {
     // we previously had a bug where spaces weren't inserted between attributes
     // this test will prevent regression
     func testCorrectlyStreamsManySimpleAttributes() {
-        var buffer = ResponseEncodeBuffer(buffer: ByteBuffer(string: ""), options: .rfc3501)
+        var buffer = ResponseEncodeBuffer(buffer: ByteBuffer(string: ""), options: .rfc3501, loggingMode: false)
         buffer.writeFetchResponse(.start(1))
         buffer.writeFetchResponse(.simpleAttribute(.flags([.answered])))
         buffer.writeFetchResponse(.simpleAttribute(.uid(999)))
@@ -35,7 +35,7 @@ extension ResponseEncodeBuffer_Tests {
     }
 
     func testFetchStreaming() {
-        var buffer = ResponseEncodeBuffer(buffer: ByteBuffer(string: ""), options: .rfc3501)
+        var buffer = ResponseEncodeBuffer(buffer: ByteBuffer(string: ""), options: .rfc3501, loggingMode: false)
         buffer.writeFetchResponse(.start(1))
         buffer.writeFetchResponse(.streamingBegin(kind: .body(section: .complete, offset: nil), byteCount: 10))
         buffer.writeFetchResponse(.streamingBytes(ByteBuffer(string: "0123456789")))

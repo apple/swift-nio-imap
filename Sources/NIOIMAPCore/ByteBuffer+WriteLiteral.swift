@@ -34,10 +34,15 @@ extension EncodeBuffer {
     ///     - buffer: The buffer to write.
     /// - returns: The number of bytes written.
     @discardableResult mutating func writeIMAPString(_ buffer: ByteBuffer) -> Int {
-        self.writeIMAPString(buffer.readableBytesView)
+        self.writeIMAPString(buffer.readableBytesView, loggingMode: loggingMode)
     }
 
-    private mutating func writeIMAPString<T: Collection>(_ bytes: T) -> Int where T.Element == UInt8 {
+    private mutating func writeIMAPString<T: Collection>(_ bytes: T, loggingMode: Bool = false) -> Int where T.Element == UInt8 {
+        
+        if self.loggingMode {
+            return self.writeIMAPStringLoggingMode(bytes)
+        }
+        
         switch stringEncoding(for: bytes) {
         case .quotedString:
             return writeString("\"") + writeBytes(bytes) + writeString("\"")
@@ -47,6 +52,21 @@ extension EncodeBuffer {
             return writeString("{\(bytes.count)}\r\n") + markStopPoint() + writeBytes(bytes)
         case .clientNonSynchronizingLiteral:
             return writeString("{\(bytes.count)+}\r\n") + writeBytes(bytes)
+        }
+    }
+    
+    private mutating func writeIMAPStringLoggingMode<T: Collection>(_ bytes: T) -> Int where T.Element == UInt8 {
+        switch stringEncoding(for: bytes) {
+        case .quotedString:
+            return writeString("\"") + writeBytes([]) + writeString("\"")
+        case .serverLiteral:
+            return writeString("{\(bytes.count)}\r\n") + writeBytes([])
+        case .clientSynchronizingLiteral:
+            return writeString("{\(bytes.count)}\r\n") + markStopPoint() + writeBytes([])
+        case .clientNonSynchronizingLiteralPlus:
+            return writeString("{\(bytes.count)+}\r\n") + writeBytes([])
+        case .clientNonSynchronizingLiteralMinus:
+            return writeString("{\(bytes.count)-}\r\n") + writeBytes([])
         }
     }
 

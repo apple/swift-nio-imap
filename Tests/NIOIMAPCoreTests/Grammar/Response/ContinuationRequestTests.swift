@@ -46,9 +46,9 @@ private let fixtures: [(ContinuationRequest, String, UInt)] = [
 extension ContinuationRequestTests {
     func testEncode() {
         self.iterateInputs(inputs: fixtures, encoder: { req in
-            var encoder = ResponseEncodeBuffer(buffer: self.testBuffer.buffer, options: ResponseEncodingOptions())
+            var encoder = ResponseEncodeBuffer(buffer: self.testBuffer.buffer, options: ResponseEncodingOptions(), loggingMode: false)
             defer {
-                self.testBuffer = EncodeBuffer.serverEncodeBuffer(buffer: encoder.readBytes(), options: ResponseEncodingOptions())
+                self.testBuffer = EncodeBuffer.serverEncodeBuffer(buffer: encoder.readBytes(), options: ResponseEncodingOptions(), loggingMode: false)
             }
             return encoder.writeContinuationRequest(req)
         })

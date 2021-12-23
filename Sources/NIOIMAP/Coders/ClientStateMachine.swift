@@ -80,7 +80,7 @@ struct ClientStateMachine {
         mutating func drop() -> EventLoopPromise<Void>? {
             defer {
                 self.promise = nil
-                self.buffer = .init(buffer: ByteBuffer(), capabilities: .init())
+                self.buffer = .init(buffer: ByteBuffer(), capabilities: .init(), loggingMode: false)
             }
             return self.promise
         }
@@ -438,7 +438,7 @@ extension ClientStateMachine {
 
     private func makeEncodeBuffer(_ command: CommandStreamPart? = nil) -> CommandEncodeBuffer {
         let byteBuffer = self.allocator.buffer(capacity: 128)
-        var encodeBuffer = CommandEncodeBuffer(buffer: byteBuffer, options: self.encodingOptions)
+        var encodeBuffer = CommandEncodeBuffer(buffer: byteBuffer, options: self.encodingOptions, loggingMode: false)
         if let command = command {
             encodeBuffer.writeCommandStream(command)
         }
@@ -557,7 +557,8 @@ extension ClientStateMachine {
         var encodeBuffer = CommandEncodeBuffer(
             buffer: ByteBuffer(),
             options: self.encodingOptions,
-            encodedAtLeastOneCatenateElement: appendingStateMachine.hasCatenatedAtLeastOneObject
+            encodedAtLeastOneCatenateElement: appendingStateMachine.hasCatenatedAtLeastOneObject,
+            loggingMode: false
         )
         encodeBuffer.writeCommandStream(.append(command))
 

@@ -89,7 +89,7 @@ extension FetchAttribute: CustomDebugStringConvertible {
         options.useQuotedString = true
         options.useSynchronizingLiteral = false
         options.useNonSynchronizingLiteralPlus = true
-        var buffer = EncodeBuffer.clientEncodeBuffer(buffer: ByteBuffer(), options: options)
+        var buffer = EncodeBuffer.clientEncodeBuffer(buffer: ByteBuffer(), options: options, loggingMode: true)
         buffer.writeFetchAttribute(self)
         return String(bestEffortDecodingUTF8Bytes: buffer.buffer.readableBytesView)
     }

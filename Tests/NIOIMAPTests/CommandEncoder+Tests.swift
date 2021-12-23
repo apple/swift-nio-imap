@@ -36,7 +36,7 @@ extension CommandEncoder_Tests {
 
         for (command, expected, line) in inputs {
             var buffer = ByteBuffer()
-            let encoder = CommandEncoder()
+            let encoder = CommandEncoder(loggingMode: false)
             encoder.encode(data: command, out: &buffer)
             XCTAssertEqual(expected, buffer, "\(String(buffer: expected)) is not equal to \(String(buffer: buffer))", line: line)
             XCTAssertEqual(String(reflecting: command), String(buffer: expected), line: line)

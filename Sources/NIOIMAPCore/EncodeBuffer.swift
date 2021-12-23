@@ -28,13 +28,16 @@ import struct NIO.CircularBuffer
         case server(streamingAttributes: Bool, options: ResponseEncodingOptions)
     }
 
+    public var loggingMode: Bool
+    
     internal var mode: Mode
     @usableFromInline internal var buffer: ByteBuffer
     @usableFromInline internal var stopPoints: CircularBuffer<Int> = []
 
-    init(_ buffer: ByteBuffer, mode: Mode) {
+    init(_ buffer: ByteBuffer, mode: Mode, loggingMode: Bool) {
         self.buffer = buffer
         self.mode = mode
+        self.loggingMode = loggingMode
     }
 }
 
@@ -43,32 +46,32 @@ extension EncodeBuffer {
     /// - parameter buffer: An initial `ByteBuffer` to write to. Note that this is copied and not taken as `inout`.
     /// - parameter options: Configuration to use when writing.
     /// - returns: A new `EncodeBuffer` configured for client use.
-    static func clientEncodeBuffer(buffer: ByteBuffer, options: CommandEncodingOptions) -> EncodeBuffer {
-        EncodeBuffer(buffer, mode: .client(options: options))
+    static func clientEncodeBuffer(buffer: ByteBuffer, options: CommandEncodingOptions, loggingMode: Bool) -> EncodeBuffer {
+        EncodeBuffer(buffer, mode: .client(options: options), loggingMode: loggingMode)
     }
 
     /// Creates a new `EncodeBuffer` suitable for a client to write commands.
     /// - parameter buffer: An initial `ByteBuffer` to write to. Note that this is copied and not taken as `inout`.
     /// - parameter options: Configuration to use when writing.
     /// - returns: A new `EncodeBuffer` configured for client use.
-    static func clientEncodeBuffer(buffer: ByteBuffer, capabilities: [Capability]) -> EncodeBuffer {
-        clientEncodeBuffer(buffer: buffer, options: CommandEncodingOptions(capabilities: capabilities))
+    static func clientEncodeBuffer(buffer: ByteBuffer, capabilities: [Capability], loggingMode: Bool) -> EncodeBuffer {
+        clientEncodeBuffer(buffer: buffer, options: CommandEncodingOptions(capabilities: capabilities), loggingMode: loggingMode)
     }
 
     /// Creates a new `EncodeBuffer` suitable for a client to write commands.
     /// - parameter buffer: An initial `ByteBuffer` to write to. Note that this is copied and not taken as `inout`.
     /// - parameter options: Configuration to use when writing.
     /// - returns: A new `EncodeBuffer` configured for server use.
-    static func serverEncodeBuffer(buffer: ByteBuffer, options: ResponseEncodingOptions) -> EncodeBuffer {
-        EncodeBuffer(buffer, mode: .server(streamingAttributes: false, options: options))
+    static func serverEncodeBuffer(buffer: ByteBuffer, options: ResponseEncodingOptions, loggingMode: Bool) -> EncodeBuffer {
+        EncodeBuffer(buffer, mode: .server(streamingAttributes: false, options: options), loggingMode: loggingMode)
     }
 
     /// Creates a new `EncodeBuffer` suitable for a client to write commands.
     /// - parameter buffer: An initial `ByteBuffer` to write to. Note that this is copied and not taken as `inout`.
     /// - parameter options: Configuration to use when writing.
     /// - returns: A new `EncodeBuffer` configured for server use.
-    static func serverEncodeBuffer(buffer: ByteBuffer, capabilities: [Capability]) -> EncodeBuffer {
-        serverEncodeBuffer(buffer: buffer, options: ResponseEncodingOptions(capabilities: capabilities))
+    static func serverEncodeBuffer(buffer: ByteBuffer, capabilities: [Capability], loggingMode: Bool) -> EncodeBuffer {
+        serverEncodeBuffer(buffer: buffer, options: ResponseEncodingOptions(capabilities: capabilities), loggingMode: loggingMode)
     }
 }
 

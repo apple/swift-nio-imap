@@ -37,9 +37,9 @@ class EncodeTestClass: XCTestCase {
     }
 
     override func setUp() {
-        self.testBuffer = .serverEncodeBuffer(buffer: ByteBufferAllocator().buffer(capacity: 128), capabilities: [])
+        self.testBuffer = .serverEncodeBuffer(buffer: ByteBufferAllocator().buffer(capacity: 128), capabilities: [], loggingMode: false)
     }
-
+    
     override func tearDown() {
         self.testBuffer = nil
     }
@@ -50,7 +50,7 @@ class EncodeTestClass: XCTestCase {
 
     func iterateInputs<T>(inputs: [(T, CommandEncodingOptions, [String], UInt)], encoder: (T) throws -> Int, file: StaticString = #file) {
         for (test, options, expectedStrings, line) in inputs {
-            self.testBuffer = EncodeBuffer.clientEncodeBuffer(buffer: ByteBufferAllocator().buffer(capacity: 128), options: options)
+            self.testBuffer = EncodeBuffer.clientEncodeBuffer(buffer: ByteBufferAllocator().buffer(capacity: 128), options: options, loggingMode: false)
             do {
                 let size = try encoder(test)
                 XCTAssertEqual(size, expectedStrings.reduce(0) { $0 + $1.utf8.count }, file: (file), line: line)
@@ -76,7 +76,7 @@ class EncodeTestClass: XCTestCase {
 
     func iterateInputs<T>(inputs: [(T, ResponseEncodingOptions, String, UInt)], encoder: (T) throws -> Int, file: StaticString = #file) {
         for (test, options, expectedString, line) in inputs {
-            self.testBuffer = EncodeBuffer.serverEncodeBuffer(buffer: ByteBufferAllocator().buffer(capacity: 128), options: options)
+            self.testBuffer = EncodeBuffer.serverEncodeBuffer(buffer: ByteBufferAllocator().buffer(capacity: 128), options: options, loggingMode: false)
             do {
                 let size = try encoder(test)
                 XCTAssertEqual(size, expectedString.utf8.count, file: (file), line: line)
