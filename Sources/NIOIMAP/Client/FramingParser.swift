@@ -151,6 +151,25 @@ public struct FramingParser: Hashable {
         }
         self.buffer.writeBuffer(&buffer)
 
+        return try adjustBufferAndParseFrames()
+    }
+
+    @_spi(NIOIMAPInternal) public mutating func appendAndFrameBytes(_ bytes: UnsafeRawBufferPointer) throws -> [FramingResult] {
+        // fast paths should be fast
+        guard !bytes.isEmpty else {
+            return []
+        }
+
+        self.buffer.writeBytes(bytes)
+
+        return try adjustBufferAndParseFrames()
+    }
+
+    @_spi(NIOIMAPInternal) public var inputBufferByteCount: Int {
+        buffer.readableBytes
+    }
+
+    private mutating func adjustBufferAndParseFrames() throws -> [FramingResult] {
         // Discard bytes when we've read over half the buffer and at least 1KB
         defer {
             if self.buffer.readerIndex > (self.buffer.writerIndex / 2), self.buffer.readerIndex > 1000 {
