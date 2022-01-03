@@ -1937,6 +1937,7 @@ extension ParserUnitTests {
             testFunction: PL.parseNewline,
             validInputs: [
                 ("\n", "", #line),
+                ("\r", "", #line),
                 ("\r\n", "", #line),
             ],
             parserErrorInputs: [
@@ -1944,7 +1945,6 @@ extension ParserUnitTests {
             ],
             incompleteMessageInputs: [
                 ("", "", #line),
-                ("\r", "", #line),
             ]
         )
     }
