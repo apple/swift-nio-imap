@@ -330,7 +330,7 @@ extension ParserLibrary {
             // fast path: we find CRLF
             buffer.bytes.moveReaderIndex(forwardBy: 2)
             return
-        case .some(let x) where UInt8(x >> 8) == UInt8(ascii: "\n"):
+        case .some(let x) where (UInt8(x >> 8) == UInt8(ascii: "\n") || UInt8(x >> 8) == UInt8(ascii: "\r")):
             // other fast path: we find LF + some other byte
             buffer.bytes.moveReaderIndex(forwardBy: 1)
             return
@@ -345,11 +345,9 @@ extension ParserLibrary {
                 throw IncompleteMessage()
             }
             switch first {
-            case UInt8(ascii: "\n"):
+            case UInt8(ascii: "\n"), UInt8(ascii: "\r"):
                 buffer.bytes.moveReaderIndex(forwardBy: 1)
                 return
-            case UInt8(ascii: "\r"):
-                throw IncompleteMessage()
             default:
                 // found only one byte which is neither CR nor LF.
                 throw ParserError()

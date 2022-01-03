@@ -247,7 +247,7 @@ extension B2MV_Tests {
             ("tag BAD [PARSE] Complete", [.tagged(.init(tag: "tag", state: .bad(.init(code: .parse, text: "Complete"))))]),
         ]
 
-        let inputs = inoutPairs.map { ($0.0 + CRLF, $0.1.map { ResponseOrContinuationRequest.response($0) }) }
+        let inputs = inoutPairs.map { ($0.0 + "\n", $0.1.map { ResponseOrContinuationRequest.response($0) }) }
         do {
             try ByteToMessageDecoderVerifier.verifyDecoder(
                 stringInputOutputPairs: inputs,
