@@ -23,7 +23,7 @@ class ResponseParser_Tests: XCTestCase {}
 extension ResponseParser_Tests {
     func testInit_defaultBufferSize() {
         let parser = CommandParser()
-        XCTAssertEqual(parser.bufferLimit, 1_000)
+        XCTAssertEqual(parser.bufferLimit, 8_192)
     }
 
     func testInit_customBufferSize() {
@@ -248,6 +248,51 @@ extension ResponseParser_Tests {
             }
             XCTAssertEqual(results, expected, line: line)
             XCTAssertEqual(buffer.readableBytes, 0)
+        }
+    }
+
+    func testAttributeLimit_failOnStreaming() {
+        var parser = ResponseParser(bufferLimit: 1000, messageAttributeLimit: 3)
+        var buffer: ByteBuffer = "* 999 FETCH (FLAGS (\\Seen) UID 1 RFC822.SIZE 123 RFC822.TEXT {3}\r\n "
+
+        // limit is 3, so let's parse the first 3
+        XCTAssertEqual(try parser.parseResponseStream(buffer: &buffer), .response(.fetch(.start(999))))
+        XCTAssertEqual(try parser.parseResponseStream(buffer: &buffer), .response(.fetch(.simpleAttribute(.flags([.seen])))))
+        XCTAssertEqual(try parser.parseResponseStream(buffer: &buffer), .response(.fetch(.simpleAttribute(.uid(1)))))
+        XCTAssertEqual(try parser.parseResponseStream(buffer: &buffer), .response(.fetch(.simpleAttribute(.rfc822Size(123)))))
+
+        // the limit is 3, so the fourth should fail
+        XCTAssertThrowsError(try parser.parseResponseStream(buffer: &buffer)) { e in
+            XCTAssertTrue(e is ExceededMaximumMessageAttributesError)
+        }
+    }
+
+    func testAttributeLimit_failOnSimple() {
+        var parser = ResponseParser(bufferLimit: 1000, messageAttributeLimit: 3)
+        var buffer: ByteBuffer = "* 999 FETCH (FLAGS (\\Seen) UID 1 RFC822.SIZE 123 UID 2 "
+
+        // limit is 3, so let's parse the first 3
+        XCTAssertEqual(try parser.parseResponseStream(buffer: &buffer), .response(.fetch(.start(999))))
+        XCTAssertEqual(try parser.parseResponseStream(buffer: &buffer), .response(.fetch(.simpleAttribute(.flags([.seen])))))
+        XCTAssertEqual(try parser.parseResponseStream(buffer: &buffer), .response(.fetch(.simpleAttribute(.uid(1)))))
+        XCTAssertEqual(try parser.parseResponseStream(buffer: &buffer), .response(.fetch(.simpleAttribute(.rfc822Size(123)))))
+
+        // the limit is 3, so the fourth should fail
+        XCTAssertThrowsError(try parser.parseResponseStream(buffer: &buffer)) { e in
+            XCTAssertTrue(e is ExceededMaximumMessageAttributesError)
+        }
+    }
+
+    func testRejectLargeBodies() {
+        var parser = ResponseParser(bufferLimit: 1000, bodySizeLimit: 10)
+        var buffer: ByteBuffer = "* 999 FETCH (RFC822.TEXT {3}\r\n123 RFC822.HEADER {11}\r\n "
+        XCTAssertEqual(try parser.parseResponseStream(buffer: &buffer), .response(.fetch(.start(999))))
+        XCTAssertEqual(try parser.parseResponseStream(buffer: &buffer), .response(.fetch(.streamingBegin(kind: .rfc822Text, byteCount: 3))))
+        XCTAssertEqual(try parser.parseResponseStream(buffer: &buffer), .response(.fetch(.streamingBytes("123"))))
+        XCTAssertEqual(try parser.parseResponseStream(buffer: &buffer), .response(.fetch(.streamingEnd)))
+
+        XCTAssertThrowsError(try parser.parseResponseStream(buffer: &buffer)) { e in
+            XCTAssertTrue(e is ExceededMaximumBodySizeError)
         }
     }
 }
