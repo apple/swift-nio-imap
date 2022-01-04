@@ -1194,7 +1194,7 @@ extension GrammarParser {
         })
         return .init(hour: hour, minute: minute, second: second, fraction: fraction)
     }
-    
+
     func parseLiteralSize(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Int {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Int in
             try PL.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
@@ -1243,7 +1243,7 @@ extension GrammarParser {
             return bytes
         }
     }
-    
+
     /// Parses *only* the literal size from the header, and ensures that the parsed size
     /// is within the allowed limit.
     func parseLiteralLength(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Int {

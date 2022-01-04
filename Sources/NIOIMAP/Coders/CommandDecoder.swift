@@ -30,7 +30,7 @@ struct CommandDecoder: NIOSingleStepByteToMessageDecoder {
     private var ok: ByteBuffer?
     private var parser: CommandParser
     private var synchronisingLiteralParser = SynchronizingLiteralParser()
-    
+
     init(literalSizeLimit: Int = IMAPDefaults.literalSizeLimit) {
         self.parser = CommandParser(literalSizeLimit: literalSizeLimit)
     }
