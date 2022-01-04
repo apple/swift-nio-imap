@@ -45,15 +45,17 @@ public struct ResponseParser: Parser {
     let bufferLimit: Int
     let messageAttributeLimit: Int
     let bodySizeLimit: UInt64
+    let literalSizeLimit: UInt64
     private var mode: Mode
 
     /// Creates a new `ResponseParser`.
     /// - parameter bufferLimit: The maximum amount of data that may be buffered by the parser. If this limit is exceeded then an error will be thrown. Defaults to 1000 bytes.
     public init(bufferLimit: Int = 8_192, messageAttributeLimit: Int = .max, bodySizeLimit: UInt64 = .max, parsedStringCache: ((String) -> String)? = nil) {
-        self.parser = GrammarParser(parsedStringCache: parsedStringCache)
         self.bufferLimit = bufferLimit
         self.mode = .response(.fetchOrNormal)
         self.messageAttributeLimit = messageAttributeLimit
+        self.literalSizeLimit = .max
+        self.parser = GrammarParser(literalSizeLimit: literalSizeLimit, parsedStringCache: parsedStringCache)
         self.bodySizeLimit = bodySizeLimit
     }
 

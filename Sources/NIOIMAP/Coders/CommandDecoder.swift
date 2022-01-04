@@ -28,8 +28,12 @@ struct CommandDecoder: NIOSingleStepByteToMessageDecoder {
     typealias InboundOut = SynchronizedCommand
 
     private var ok: ByteBuffer?
-    private var parser = CommandParser()
+    private var parser: CommandParser
     private var synchronisingLiteralParser = SynchronizingLiteralParser()
+    
+    init(literalSizeLimit: Int = IMAPDefaults.literalSizeLimit) {
+        self.parser = CommandParser(literalSizeLimit: literalSizeLimit)
+    }
 
     mutating func decode(buffer: inout ByteBuffer) throws -> SynchronizedCommand? {
         let save = buffer

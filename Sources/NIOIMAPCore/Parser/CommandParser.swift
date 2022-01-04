@@ -52,15 +52,16 @@ public struct CommandParser: Parser {
         }
     }
 
-    let parser = GrammarParser()
+    let parser: GrammarParser
     let bufferLimit: Int
     private(set) var mode: Mode = .lines
     private var synchronisingLiteralParser = SynchronizingLiteralParser()
 
     /// Creates a new `CommandParser` with a built in buffer limit. Used to prevent DOS attacks, an error will be thrown if this limit is exceeded.
     /// - parameter bufferLimit. The maximum size of the buffer in bytes at any one time. Defaults to 8192 bytes.
-    public init(bufferLimit: Int = IMAPDefaults.lineLengthLimit) {
+    public init(bufferLimit: Int = IMAPDefaults.lineLengthLimit, literalSizeLimit: Int = IMAPDefaults.literalSizeLimit) {
         self.bufferLimit = bufferLimit
+        self.parser = GrammarParser(literalSizeLimit: literalSizeLimit)
     }
 
     /// Parses a given `ByteBuffer` into a `CommandStreamPart` that may then be transmitted.
