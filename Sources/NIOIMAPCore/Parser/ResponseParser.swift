@@ -45,7 +45,6 @@ public struct ResponseParser: Parser {
     let bufferLimit: Int
     let messageAttributeLimit: Int
     let bodySizeLimit: UInt64
-    let literalSizeLimit: UInt64
     private var mode: Mode
 
     /// Creates a new `ResponseParser`.

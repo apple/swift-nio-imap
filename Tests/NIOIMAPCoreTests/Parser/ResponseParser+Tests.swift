@@ -317,6 +317,15 @@ extension ResponseParser_Tests {
         XCTAssertEqual(try parser.parseResponseStream(buffer: &buffer), .response(.fetch(.start(999))))
         XCTAssertEqual(try parser.parseResponseStream(buffer: &buffer), .response(.fetch(.simpleAttribute(.flags([.init("\\nees")])))))
     }
+    
+    // setting the literal size limit to 1 should mean that sending the first RFC822.TEXT should fail
+    // if the limits for "normal" literals and "fetch" literals are not different.
+    func testSeparateLiteralSizeLimit() {
+        var parser = ResponseParser(bufferLimit: 1000, bodySizeLimit: 10, literalSizeLimit: 1)
+        var buffer: ByteBuffer = "* 999 FETCH (RFC822.TEXT {3}\r\n123 RFC822.HEADER {11}\r\n "
+        XCTAssertEqual(try parser.parseResponseStream(buffer: &buffer), .response(.fetch(.start(999))))
+        XCTAssertEqual(try parser.parseResponseStream(buffer: &buffer), .response(.fetch(.streamingBegin(kind: .rfc822Text, byteCount: 3))))
+    }
 }
 
 // MARK: - Stress tests
