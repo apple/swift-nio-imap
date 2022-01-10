@@ -23,19 +23,16 @@ let badOS = { fatalError("unsupported OS") }()
 import struct NIO.ByteBuffer
 import struct OrderedCollections.OrderedDictionary
 struct GrammarParser {
-    
     static let defaultParsedStringCache: (String) -> String = { str in
         str
     }
-    
+
     var parsedStringCache: (String) -> String
-    
+
     /// - parameter parseCache
     init(parsedStringCache: ((String) -> String)? = nil) {
         self.parsedStringCache = parsedStringCache ?? Self.defaultParsedStringCache
     }
-    
-    
 }
 
 typealias PL = ParserLibrary
@@ -560,8 +557,9 @@ extension GrammarParser {
 
     // flag-perm       = flag / "\*"
     func
-    
-    parseFlagPerm(buffer: inout ParseBuffer, tracker: StackTracker) throws -> PermanentFlag {
+
+        parseFlagPerm(buffer: inout ParseBuffer, tracker: StackTracker) throws -> PermanentFlag
+    {
         func parseFlagPerm_wildcard(buffer: inout ParseBuffer, tracker: StackTracker) throws -> PermanentFlag {
             try PL.parseFixedString("\\*", buffer: &buffer, tracker: tracker)
             return .wildcard

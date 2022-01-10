@@ -295,24 +295,23 @@ extension ResponseParser_Tests {
             XCTAssertTrue(e is ExceededMaximumBodySizeError)
         }
     }
-    
+
     func testParseNoStringCache() {
         var parser = ResponseParser(bufferLimit: 1000, bodySizeLimit: 10)
         var buffer: ByteBuffer = "* 999 FETCH (FLAGS (\\Seen))\r\n"
         XCTAssertEqual(try parser.parseResponseStream(buffer: &buffer), .response(.fetch(.start(999))))
         XCTAssertEqual(try parser.parseResponseStream(buffer: &buffer), .response(.fetch(.simpleAttribute(.flags([.seen])))))
     }
-    
+
     // The flag "seen" should be given to our cache closure
     // which will replace it with "nees", and therefore our
     // parse result should contain the flag "nees".
     func testParseWithStringCache() {
-        
         func testCache(string: String) -> String {
             XCTAssertEqual(string.lowercased(), "seen")
             return "nees"
         }
-        
+
         var parser = ResponseParser(bufferLimit: 1000, bodySizeLimit: 10, parsedStringCache: testCache)
         var buffer: ByteBuffer = "* 999 FETCH (FLAGS (\\Seen))\r\n"
         XCTAssertEqual(try parser.parseResponseStream(buffer: &buffer), .response(.fetch(.start(999))))
