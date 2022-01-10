@@ -31,8 +31,8 @@ struct GrammarParser {
     var parsedStringCache: (String) -> String
     
     /// - parameter parseCache
-    init(parsedStringCache: @escaping (String) -> String = Self.defaultParsedStringCache) {
-        self.parsedStringCache = parsedStringCache
+    init(parsedStringCache: ((String) -> String)? = nil) {
+        self.parsedStringCache = parsedStringCache ?? Self.defaultParsedStringCache
     }
     
     
@@ -510,31 +510,6 @@ extension GrammarParser {
     // flag            = "\Answered" / "\Flagged" / "\Deleted" /
     //                   "\Seen" / "\Draft" / flag-keyword / flag-extension
     func parseFlag(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Flag {
-        func parseFlag_answered(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Flag {
-            try PL.parseFixedString("\\Answered", buffer: &buffer, tracker: tracker)
-            return .answered
-        }
-
-        func parseFlag_flagged(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Flag {
-            try PL.parseFixedString("\\Flagged", buffer: &buffer, tracker: tracker)
-            return .flagged
-        }
-
-        func parseFlag_deleted(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Flag {
-            try PL.parseFixedString("\\Deleted", buffer: &buffer, tracker: tracker)
-            return .deleted
-        }
-
-        func parseFlag_seen(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Flag {
-            try PL.parseFixedString("\\Seen", buffer: &buffer, tracker: tracker)
-            return .seen
-        }
-
-        func parseFlag_draft(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Flag {
-            try PL.parseFixedString("\\Draft", buffer: &buffer, tracker: tracker)
-            return .draft
-        }
-
         func parseFlag_keyword(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Flag {
             let word = try self.parseFlagKeyword(buffer: &buffer, tracker: tracker)
             return .keyword(word)
@@ -546,11 +521,6 @@ extension GrammarParser {
         }
 
         return try PL.parseOneOf([
-            parseFlag_seen,
-            parseFlag_draft,
-            parseFlag_answered,
-            parseFlag_flagged,
-            parseFlag_deleted,
             parseFlag_keyword,
             parseFlag_extension,
         ], buffer: &buffer, tracker: tracker)
@@ -589,7 +559,9 @@ extension GrammarParser {
     }
 
     // flag-perm       = flag / "\*"
-    func parseFlagPerm(buffer: inout ParseBuffer, tracker: StackTracker) throws -> PermanentFlag {
+    func
+    
+    parseFlagPerm(buffer: inout ParseBuffer, tracker: StackTracker) throws -> PermanentFlag {
         func parseFlagPerm_wildcard(buffer: inout ParseBuffer, tracker: StackTracker) throws -> PermanentFlag {
             try PL.parseFixedString("\\*", buffer: &buffer, tracker: tracker)
             return .wildcard
