@@ -23,7 +23,19 @@ let badOS = { fatalError("unsupported OS") }()
 import struct NIO.ByteBuffer
 import struct OrderedCollections.OrderedDictionary
 struct GrammarParser {
-    init() {}
+    
+    static let defaultParsedStringCache: (String) -> String = { str in
+        str
+    }
+    
+    var parsedStringCache: (String) -> String
+    
+    /// - parameter parseCache
+    init(parsedStringCache: @escaping (String) -> String = Self.defaultParsedStringCache) {
+        self.parsedStringCache = parsedStringCache
+    }
+    
+    
 }
 
 typealias PL = ParserLibrary
@@ -80,7 +92,8 @@ extension GrammarParser {
         let parsed = try PL.parseOneOrMoreCharacters(buffer: &buffer, tracker: tracker) { char -> Bool in
             char.isAtomChar
         }
-        return try ParserLibrary.parseBufferAsUTF8(parsed)
+        let string = try ParserLibrary.parseBufferAsUTF8(parsed)
+        return self.parsedStringCache(string)
     }
 
     // RFC 7162 Condstore
