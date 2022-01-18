@@ -148,15 +148,14 @@ extension MessageIdentifierSet {
 }
 
 extension MessageIdentifierSet {
-    public struct RangeView: Sequence {
+    public struct RangeView: RandomAccessCollection {
         fileprivate var underlying: RangeSet<MessageIdentificationShiftWrapper>.Ranges
 
-        public func makeIterator() -> AnyIterator<MessageIdentifierRange<IdentifierType>> {
-            var u = underlying.makeIterator()
-            return AnyIterator {
-                guard let r = u.next() else { return nil }
-                return MessageIdentifierRange<IdentifierType>(r)
-            }
+        public var startIndex: Int { underlying.startIndex }
+        public var endIndex: Int { underlying.endIndex }
+
+        public subscript(i: Int) -> MessageIdentifierRange<IdentifierType> {
+            MessageIdentifierRange<IdentifierType>(underlying[i])
         }
     }
 
