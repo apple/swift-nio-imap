@@ -45,10 +45,8 @@ extension EncodeBuffer {
             return writeString("{\(bytes.count)}\r\n") + writeBytes(bytes)
         case .clientSynchronizingLiteral:
             return writeString("{\(bytes.count)}\r\n") + markStopPoint() + writeBytes(bytes)
-        case .clientNonSynchronizingLiteralPlus:
+        case .clientNonSynchronizingLiteral:
             return writeString("{\(bytes.count)+}\r\n") + writeBytes(bytes)
-        case .clientNonSynchronizingLiteralMinus:
-            return writeString("{\(bytes.count)-}\r\n") + writeBytes(bytes)
         }
     }
 
@@ -60,9 +58,7 @@ extension EncodeBuffer {
         /// `{7}CRLF` + `foo bar`
         case clientSynchronizingLiteral
         /// `{7+}CRLFfoo bar`
-        case clientNonSynchronizingLiteralPlus
-        /// `{7-}CRLFfoo bar`
-        case clientNonSynchronizingLiteralMinus
+        case clientNonSynchronizingLiteral
     }
 
     private func stringEncoding<T: Collection>(for bytes: T) -> StringEncoding where T.Element == UInt8 {
@@ -70,10 +66,10 @@ extension EncodeBuffer {
         case .client(options: let options):
             if options.useQuotedString, canUseQuotedString(for: bytes) {
                 return .quotedString
-            } else if options.useNonSynchronizingLiteralMinus, bytes.count <= 4096 {
-                return .clientNonSynchronizingLiteralMinus
             } else if options.useNonSynchronizingLiteralPlus {
-                return .clientNonSynchronizingLiteralPlus
+                return .clientNonSynchronizingLiteral
+            } else if options.useNonSynchronizingLiteralMinus, bytes.count <= 4096 {
+                return .clientNonSynchronizingLiteral
             } else {
                 return .clientSynchronizingLiteral
             }
