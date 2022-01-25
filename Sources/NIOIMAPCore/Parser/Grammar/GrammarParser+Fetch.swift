@@ -249,7 +249,7 @@ extension GrammarParser {
         func parseFetchResponse_streamingBegin(buffer: inout ParseBuffer, tracker: StackTracker) throws -> _FetchResponse {
             let type = try self.parseFetchStreamingResponse(buffer: &buffer, tracker: tracker)
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-            let literalSize = try self.parseLiteralSize(buffer: &buffer, tracker: tracker)
+            let literalSize = try self.parseLiteralSize(buffer: &buffer, tracker: tracker, maxLength: self.messageBodySizeLimit)
             return .literalStreamingBegin(kind: type, byteCount: literalSize)
         }
 
