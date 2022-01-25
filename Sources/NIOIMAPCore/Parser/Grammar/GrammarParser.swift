@@ -22,7 +22,6 @@ let badOS = { fatalError("unsupported OS") }()
 
 public struct ExceededLiteralSizeLimitError: Error {}
 
-import CoreText
 import struct NIO.ByteBuffer
 import struct OrderedCollections.OrderedDictionary
 
