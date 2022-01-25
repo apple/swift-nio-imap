@@ -57,9 +57,13 @@ extension GrammarParser {
 
         func parseMailboxData_search(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxData {
             try PL.parseFixedString("SEARCH", buffer: &buffer, tracker: tracker)
-            let nums = try PL.parseZeroOrMore(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> Int in
+            let nums = try PL.parseZeroOrMore(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> UnknownMessageIdentifier in
                 try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-                return try self.parseNZNumber(buffer: &buffer, tracker: tracker)
+                let num = try self.parseNZNumber(buffer: &buffer, tracker: tracker)
+                guard let id = UnknownMessageIdentifier(exactly: num) else {
+                    throw ParserError(hint: "Can't make unknown message identfiier from \(num)")
+                }
+                return id
             }
             return .search(nums)
         }
