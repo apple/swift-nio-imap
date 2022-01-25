@@ -22,9 +22,9 @@ let badOS = { fatalError("unsupported OS") }()
 
 public struct ExceededLiteralSizeLimitError: Error {}
 
+import CoreText
 import struct NIO.ByteBuffer
 import struct OrderedCollections.OrderedDictionary
-import CoreText
 
 struct GrammarParser {
     static let defaultParsedStringCache: (String) -> String = { str in
@@ -1202,7 +1202,7 @@ extension GrammarParser {
     func parseLiteralSize(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Int {
         try self.parseLiteralSize(buffer: &buffer, tracker: tracker, maxLength: self.literalSizeLimit)
     }
-    
+
     func parseLiteralSize(buffer: inout ParseBuffer, tracker: StackTracker, maxLength: Int) throws -> Int {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Int in
             try PL.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
@@ -1258,7 +1258,7 @@ extension GrammarParser {
     func parseLiteralLength(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Int {
         try self.parseLiteralLength(buffer: &buffer, tracker: tracker, maxLength: self.literalSizeLimit)
     }
-    
+
     /// Parses *only* the literal size from the header, and ensures that the parsed size
     /// is within the allowed limit.
     func parseLiteralLength(buffer: inout ParseBuffer, tracker: StackTracker, maxLength: Int) throws -> Int {

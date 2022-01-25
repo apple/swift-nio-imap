@@ -18,7 +18,7 @@ public struct IMAPDefaults {
 
     /// Allow 4KB literals by default.
     public static let literalSizeLimit: Int = 4_096
-    
+
     /// Allow any size bodies by default.
     public static let bodySizeLimit: Int = .max
 
