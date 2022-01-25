@@ -317,7 +317,7 @@ extension ResponseParser_Tests {
         XCTAssertEqual(try parser.parseResponseStream(buffer: &buffer), .response(.fetch(.start(999))))
         XCTAssertEqual(try parser.parseResponseStream(buffer: &buffer), .response(.fetch(.simpleAttribute(.flags([.init("\\nees")])))))
     }
-    
+
     // Even with a `literalSizeLimit` of 1 parsing a RFC822.TEXT should _not_ fail
     // if the `bodySizeLimit` is large enough.
     func testSeparateLiteralSizeLimit() {
