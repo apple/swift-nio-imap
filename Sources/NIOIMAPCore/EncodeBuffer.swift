@@ -29,7 +29,7 @@ import struct NIO.CircularBuffer
     }
 
     public var loggingMode: Bool
-    
+
     internal var mode: Mode
     @usableFromInline internal var buffer: ByteBuffer
     @usableFromInline internal var stopPoints: CircularBuffer<Int> = []

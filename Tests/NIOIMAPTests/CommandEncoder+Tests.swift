@@ -41,9 +41,8 @@ extension CommandEncoder_Tests {
             XCTAssertEqual(expected, buffer, "\(String(buffer: expected)) is not equal to \(String(buffer: buffer))", line: line)
         }
     }
-    
+
     func testEncodingLoggingMode() {
-        
         let inputs: [(CommandStreamPart, ByteBuffer, UInt)] = [
             (.tagged(.init(tag: "1", command: .noop)), "1 NOOP\r\n", #line),
             (.append(.start(tag: "2", appendingTo: .inbox)), "2 APPEND \"\"", #line),
@@ -59,6 +58,5 @@ extension CommandEncoder_Tests {
             encoder.encode(data: command, out: &buffer)
             XCTAssertEqual(expected, buffer, "\(String(buffer: expected)) is not equal to \(String(buffer: buffer))", line: line)
         }
-        
     }
 }

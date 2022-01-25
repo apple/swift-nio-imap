@@ -39,7 +39,7 @@ class EncodeTestClass: XCTestCase {
     override func setUp() {
         self.testBuffer = .serverEncodeBuffer(buffer: ByteBufferAllocator().buffer(capacity: 128), capabilities: [], loggingMode: false)
     }
-    
+
     override func tearDown() {
         self.testBuffer = nil
     }

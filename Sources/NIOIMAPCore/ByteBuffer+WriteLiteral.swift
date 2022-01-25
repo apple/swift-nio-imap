@@ -38,11 +38,10 @@ extension EncodeBuffer {
     }
 
     private mutating func writeIMAPString<T: Collection>(_ bytes: T) -> Int where T.Element == UInt8 {
-        
         guard !self.loggingMode else {
             return self.writeIMAPStringLoggingMode(bytes)
         }
-        
+
         switch stringEncoding(for: bytes) {
         case .quotedString:
             return writeString("\"") + writeBytes(bytes) + writeString("\"")
@@ -54,7 +53,7 @@ extension EncodeBuffer {
             return writeString("{\(bytes.count)+}\r\n") + writeBytes(bytes)
         }
     }
-    
+
     private mutating func writeIMAPStringLoggingMode<T: Collection>(_ bytes: T) -> Int where T.Element == UInt8 {
         switch stringEncoding(for: bytes) {
         case .quotedString:
