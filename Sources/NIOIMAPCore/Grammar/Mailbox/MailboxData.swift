@@ -109,7 +109,7 @@ extension EncodeBuffer {
 
     private mutating func writeMailboxData_search(_ list: [UnknownMessageIdentifier], modificationSequence: ModificationSequenceValue?) -> Int {
         self.writeString("SEARCH") +
-            self.writeArray(list, separator: " ", parenthesis: false) { (id, buffer) -> Int in
+            self.writeArray(list, prefix: " ", separator: " ", parenthesis: false) { (id, buffer) -> Int in
                 buffer.writeMessageIdentifier(id)
             } +
             self.writeIfExists(modificationSequence) { value -> Int in
