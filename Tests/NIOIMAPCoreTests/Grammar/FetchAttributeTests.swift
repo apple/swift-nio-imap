@@ -48,6 +48,8 @@ extension FetchAttributeTests {
         self.iterateInputs(inputs: inputs.map { ($0, $1, [$2], $3) }, encoder: { self.testBuffer.writeFetchAttribute($0) })
     }
 
+    // Some tests may have empty fields as debug strings should use
+    // the logging mode.
     func testCustomDebugStringConvertible() {
         let inputs: [(FetchAttribute, String, UInt)] = [
             (.envelope, "ENVELOPE", #line),
@@ -62,7 +64,7 @@ extension FetchAttributeTests {
             (.bodyStructure(extensions: true), "BODYSTRUCTURE", #line),
             (.bodySection(peek: false, .init(kind: .header), nil), "BODY[HEADER]", #line),
             (.bodySection(peek: false, .init(kind: .header), nil), "BODY[HEADER]", #line),
-            (.bodySection(peek: true, .init(kind: .headerFields(["message-id", "in-reply-to"])), nil), #"BODY.PEEK[HEADER.FIELDS ("message-id" "in-reply-to")]"#, #line),
+            (.bodySection(peek: true, .init(kind: .headerFields(["message-id", "in-reply-to"])), nil), #"BODY.PEEK[HEADER.FIELDS ("" "")]"#, #line),
             (.binarySize(section: [1]), "BINARY.SIZE[1]", #line),
             (.binary(peek: true, section: [1, 2, 3], partial: nil), "BINARY.PEEK[1.2.3]", #line),
             (.binary(peek: false, section: [3, 4, 5], partial: nil), "BINARY[3.4.5]", #line),
