@@ -34,12 +34,12 @@ extension EncodeBuffer {
     ///     - buffer: The buffer to write.
     /// - returns: The number of bytes written.
     @discardableResult mutating func writeIMAPString(_ buffer: ByteBuffer) -> Int {
-        self.writeIMAPString(buffer.readableBytesView, loggingMode: loggingMode)
+        self.writeIMAPString(buffer.readableBytesView)
     }
 
-    private mutating func writeIMAPString<T: Collection>(_ bytes: T, loggingMode: Bool = false) -> Int where T.Element == UInt8 {
+    private mutating func writeIMAPString<T: Collection>(_ bytes: T) -> Int where T.Element == UInt8 {
         
-        if self.loggingMode {
+        guard !self.loggingMode else {
             return self.writeIMAPStringLoggingMode(bytes)
         }
         
@@ -63,10 +63,8 @@ extension EncodeBuffer {
             return writeString("{\(bytes.count)}\r\n") + writeBytes([])
         case .clientSynchronizingLiteral:
             return writeString("{\(bytes.count)}\r\n") + markStopPoint() + writeBytes([])
-        case .clientNonSynchronizingLiteralPlus:
+        case .clientNonSynchronizingLiteral:
             return writeString("{\(bytes.count)+}\r\n") + writeBytes([])
-        case .clientNonSynchronizingLiteralMinus:
-            return writeString("{\(bytes.count)-}\r\n") + writeBytes([])
         }
     }
 
