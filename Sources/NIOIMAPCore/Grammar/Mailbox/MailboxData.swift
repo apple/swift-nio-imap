@@ -26,7 +26,7 @@ public enum MailboxData: Hashable {
     case lsub(MailboxInfo)
 
     /// Response to a search command, containing `SequenceNumber`s from `search`, or `UID`s from `uid search`.
-    case search([Int], ModificationSequenceValue? = nil)
+    case search([UnknownMessageIdentifier], ModificationSequenceValue? = nil)
 
     /// Response to an extended search command.
     case extendedSearch(ExtendedSearchResponse)
@@ -107,10 +107,10 @@ extension EncodeBuffer {
         }
     }
 
-    private mutating func writeMailboxData_search(_ list: [Int], modificationSequence: ModificationSequenceValue?) -> Int {
+    private mutating func writeMailboxData_search(_ list: [UnknownMessageIdentifier], modificationSequence: ModificationSequenceValue?) -> Int {
         self.writeString("SEARCH") +
-            self.writeArray(list, separator: "", parenthesis: false) { (num, buffer) -> Int in
-                buffer.writeString(" \(num)")
+            self.writeArray(list, separator: " ", parenthesis: false) { (id, buffer) -> Int in
+                buffer.writeMessageIdentifier(id)
             } +
             self.writeIfExists(modificationSequence) { value -> Int in
                 self.writeString(" (MODSEQ ") +
