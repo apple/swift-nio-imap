@@ -57,7 +57,7 @@ extension EncodeBuffer {
     private mutating func writeIMAPStringLoggingMode<T: Collection>(_ bytes: T) -> Int where T.Element == UInt8 {
         switch stringEncoding(for: bytes) {
         case .quotedString:
-            return writeString(#"∅"#)
+            return writeString(#""∅""#)
         case .serverLiteral:
             return writeString("{\(bytes.count)}\r\n∅")
         case .clientSynchronizingLiteral:
