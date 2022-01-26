@@ -1197,7 +1197,6 @@ extension GrammarParser {
         return .init(hour: hour, minute: minute, second: second, fraction: fraction)
     }
 
-    // Couldn't use `self` in a default parameter.
     func parseLiteralSize(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Int {
         try self.parseLiteralSize(buffer: &buffer, tracker: tracker, maxLength: self.literalSizeLimit)
     }
@@ -1251,7 +1250,6 @@ extension GrammarParser {
         }
     }
 
-    // Couldn't use `self` in a default parameter.
     /// Parses *only* the literal size from the header, and ensures that the parsed size
     /// is within the allowed limit.
     func parseLiteralLength(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Int {
