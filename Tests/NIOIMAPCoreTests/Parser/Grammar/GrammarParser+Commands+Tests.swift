@@ -21,6 +21,17 @@ class GrammarParser_Commands_Tests: XCTestCase, _ParserTestHelpers {}
 // MARK: - Top level
 
 extension GrammarParser_Commands_Tests {
+    func testParserLiteralLengthLimit() {
+        let parser = GrammarParser(literalSizeLimit: 5)
+        var b1 = ParseBuffer("{5}\r\nabcde")
+        XCTAssertEqual(try parser.parseLiteral(buffer: &b1, tracker: .makeNewDefaultLimitStackTracker), "abcde")
+
+        var b2 = ParseBuffer("{6}\r\nabcdef")
+        XCTAssertThrowsError(try parser.parseLiteral(buffer: &b2, tracker: .makeNewDefaultLimitStackTracker)) { e in
+            XCTAssertTrue(e is ExceededLiteralSizeLimitError)
+        }
+    }
+
     func testParseTaggedCommand() {
         // the failures here don't have a parseable tag
         self.iterateTests(

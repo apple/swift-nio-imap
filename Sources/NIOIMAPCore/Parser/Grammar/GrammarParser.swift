@@ -20,8 +20,11 @@ import Glibc
 let badOS = { fatalError("unsupported OS") }()
 #endif
 
+public struct ExceededLiteralSizeLimitError: Error {}
+
 import struct NIO.ByteBuffer
 import struct OrderedCollections.OrderedDictionary
+
 struct GrammarParser {
     static let defaultParsedStringCache: (String) -> String = { str in
         str
@@ -29,8 +32,13 @@ struct GrammarParser {
 
     var parsedStringCache: (String) -> String
 
+    let literalSizeLimit: Int
+    let messageBodySizeLimit: Int
+
     /// - parameter parseCache
-    init(parsedStringCache: ((String) -> String)? = nil) {
+    init(literalSizeLimit: Int = IMAPDefaults.literalSizeLimit, messageBodySizeLimit: Int = IMAPDefaults.bodySizeLimit, parsedStringCache: ((String) -> String)? = nil) {
+        self.literalSizeLimit = literalSizeLimit
+        self.messageBodySizeLimit = messageBodySizeLimit
         self.parsedStringCache = parsedStringCache ?? Self.defaultParsedStringCache
     }
 }
@@ -1190,12 +1198,16 @@ extension GrammarParser {
     }
 
     func parseLiteralSize(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Int {
+        try self.parseLiteralSize(buffer: &buffer, tracker: tracker, maxLength: self.literalSizeLimit)
+    }
+
+    func parseLiteralSize(buffer: inout ParseBuffer, tracker: StackTracker, maxLength: Int) throws -> Int {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Int in
             try PL.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
                 try PL.parseFixedString("~", buffer: &buffer, tracker: tracker)
             }
             try PL.parseFixedString("{", buffer: &buffer, tracker: tracker)
-            let length = try self.parseNumber(buffer: &buffer, tracker: tracker)
+            let length = try self.parseLiteralLength(buffer: &buffer, tracker: tracker, maxLength: maxLength)
             try PL.parseFixedString("}", buffer: &buffer, tracker: tracker)
             try PL.parseNewline(buffer: &buffer, tracker: tracker)
             return length
@@ -1206,7 +1218,7 @@ extension GrammarParser {
     func parseLiteral(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ByteBuffer {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> ByteBuffer in
             try PL.parseFixedString("{", buffer: &buffer, tracker: tracker)
-            let length = try self.parseNumber(buffer: &buffer, tracker: tracker)
+            let length = try self.parseLiteralLength(buffer: &buffer, tracker: tracker)
             try PL.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
                 try PL.parseFixedString("+", buffer: &buffer, tracker: tracker)
             }
@@ -1224,7 +1236,7 @@ extension GrammarParser {
     func parseLiteral8(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ByteBuffer {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> ByteBuffer in
             try PL.parseFixedString("~{", buffer: &buffer, tracker: tracker)
-            let length = try self.parseNumber(buffer: &buffer, tracker: tracker)
+            let length = try self.parseLiteralLength(buffer: &buffer, tracker: tracker)
             try PL.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
                 try PL.parseFixedString("+", buffer: &buffer, tracker: tracker)
             }
@@ -1236,6 +1248,22 @@ extension GrammarParser {
             }
             return bytes
         }
+    }
+
+    /// Parses *only* the literal size from the header, and ensures that the parsed size
+    /// is within the allowed limit.
+    func parseLiteralLength(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Int {
+        try self.parseLiteralLength(buffer: &buffer, tracker: tracker, maxLength: self.literalSizeLimit)
+    }
+
+    /// Parses *only* the literal size from the header, and ensures that the parsed size
+    /// is within the allowed limit.
+    func parseLiteralLength(buffer: inout ParseBuffer, tracker: StackTracker, maxLength: Int) throws -> Int {
+        let length = try self.parseNumber(buffer: &buffer, tracker: tracker)
+        guard length <= maxLength else {
+            throw ExceededLiteralSizeLimitError()
+        }
+        return length
     }
 
     // media-basic     = ((DQUOTE ("APPLICATION" / "AUDIO" / "IMAGE" /

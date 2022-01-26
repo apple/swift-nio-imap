@@ -16,5 +16,11 @@ public struct IMAPDefaults {
     /// A line should be no more than 8192 bytes according to RFC 7162 section 4.
     public static let lineLengthLimit: Int = 8_192
 
+    /// Allow 4KB literals by default.
+    public static let literalSizeLimit: Int = 4_096
+
+    /// Allow any size bodies by default.
+    public static let bodySizeLimit: Int = .max
+
     private init() {}
 }
