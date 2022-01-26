@@ -29,8 +29,8 @@ public struct ResponseEncodeBuffer {
     /// Creates a new `ResponseEncodeBuffer` from an initial `ByteBuffer` and configuration.
     /// - parameter buffer: The inital `ByteBuffer` to use. Note that this is copied, not taken as `inout`.
     /// - parameter options: The `ResponseEncodingOptions` to use when writing responses.
-    public init(buffer: ByteBuffer, options: ResponseEncodingOptions) {
-        self.buffer = .serverEncodeBuffer(buffer: buffer, options: options)
+    public init(buffer: ByteBuffer, options: ResponseEncodingOptions, loggingMode: Bool) {
+        self.buffer = .serverEncodeBuffer(buffer: buffer, options: options, loggingMode: loggingMode)
     }
 }
 
@@ -38,8 +38,8 @@ extension ResponseEncodeBuffer {
     /// Creates a new `ResponseEncodeBuffer` from an initial `ByteBuffer` and configuration.
     /// - parameter buffer: The inital `ByteBuffer` to use. Note that this is copied, not taken as `inout`.
     /// - parameter capabilities: Server capabilites to use when writing responses. These will be converted into a `ResponseEncodingOptions`.
-    public init(buffer: ByteBuffer, capabilities: [Capability]) {
-        self.buffer = .serverEncodeBuffer(buffer: buffer, capabilities: capabilities)
+    public init(buffer: ByteBuffer, capabilities: [Capability], loggingMode: Bool) {
+        self.buffer = .serverEncodeBuffer(buffer: buffer, capabilities: capabilities, loggingMode: loggingMode)
     }
 }
 

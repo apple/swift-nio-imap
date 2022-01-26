@@ -45,7 +45,7 @@ public final class IMAPServerHandler: ChannelDuplexHandler {
         set {
             self._continuationRequest = newValue
             let buffer = ByteBufferAllocator().buffer(capacity: 16)
-            var encodeBuffer = ResponseEncodeBuffer(buffer: buffer, capabilities: self.capabilities)
+            var encodeBuffer = ResponseEncodeBuffer(buffer: buffer, capabilities: self.capabilities, loggingMode: false)
             encodeBuffer.writeContinuationRequest(newValue)
             self.continuationRequestBytes = encodeBuffer.readBytes()
         }
@@ -55,7 +55,7 @@ public final class IMAPServerHandler: ChannelDuplexHandler {
     private var numberOfOutstandingContinuationRequests = 0
     private var continuationRequestBytes: ByteBuffer
 
-    private var responseEncodeBuffer = ResponseEncodeBuffer(buffer: ByteBuffer(string: ""), options: .init())
+    private var responseEncodeBuffer = ResponseEncodeBuffer(buffer: ByteBuffer(string: ""), options: .init(), loggingMode: false)
 
     public var capabilities: [Capability] = []
 
@@ -63,7 +63,7 @@ public final class IMAPServerHandler: ChannelDuplexHandler {
         self.decoder = NIOSingleStepByteToMessageProcessor(CommandDecoder(literalSizeLimit: literalSizeLimit), maximumBufferSize: IMAPDefaults.lineLengthLimit)
         self._continuationRequest = continuationRequest
         let buffer = ByteBufferAllocator().buffer(capacity: 16)
-        var encodeBuffer = ResponseEncodeBuffer(buffer: buffer, capabilities: self.capabilities)
+        var encodeBuffer = ResponseEncodeBuffer(buffer: buffer, capabilities: self.capabilities, loggingMode: false)
         encodeBuffer.writeContinuationRequest(continuationRequest)
         self.continuationRequestBytes = encodeBuffer.readBytes()
     }

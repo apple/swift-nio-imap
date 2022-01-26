@@ -33,9 +33,9 @@ extension Response_Tests {
 
         for (test, expectedString, line) in inputs {
             self.testBuffer.clear()
-            var encoder = ResponseEncodeBuffer(buffer: self.testBuffer.buffer, options: ResponseEncodingOptions())
+            var encoder = ResponseEncodeBuffer(buffer: self.testBuffer.buffer, options: ResponseEncodingOptions(), loggingMode: false)
             let size = encoder.writeResponse(test)
-            self.testBuffer = EncodeBuffer.serverEncodeBuffer(buffer: encoder.readBytes(), options: ResponseEncodingOptions())
+            self.testBuffer = EncodeBuffer.serverEncodeBuffer(buffer: encoder.readBytes(), options: ResponseEncodingOptions(), loggingMode: false)
             XCTAssertEqual(size, expectedString.utf8.count, line: line)
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }
@@ -59,11 +59,11 @@ extension Response_Tests {
 
         for (test, expectedString, line) in inputs {
             self.testBuffer.clear()
-            var encoder = ResponseEncodeBuffer(buffer: self.testBuffer.buffer, options: ResponseEncodingOptions())
+            var encoder = ResponseEncodeBuffer(buffer: self.testBuffer.buffer, options: ResponseEncodingOptions(), loggingMode: false)
             let size = test.reduce(into: 0) { (size, response) in
                 size += encoder.writeFetchResponse(response)
             }
-            self.testBuffer = EncodeBuffer.serverEncodeBuffer(buffer: encoder.readBytes(), options: ResponseEncodingOptions())
+            self.testBuffer = EncodeBuffer.serverEncodeBuffer(buffer: encoder.readBytes(), options: ResponseEncodingOptions(), loggingMode: false)
             XCTAssertEqual(size, expectedString.utf8.count, line: line)
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }

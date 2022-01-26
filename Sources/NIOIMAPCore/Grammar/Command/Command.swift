@@ -180,7 +180,7 @@ public enum Command: Hashable {
 
 extension Command: CustomDebugStringConvertible {
     public var debugDescription: String {
-        var buffer = CommandEncodeBuffer(buffer: ByteBuffer(), options: .rfc3501)
+        var buffer = CommandEncodeBuffer(buffer: ByteBuffer(), options: .rfc3501, loggingMode: true)
         buffer.writeCommand(self)
         var chunk = buffer.buffer.nextChunk()
         var result = String(buffer: chunk.bytes)

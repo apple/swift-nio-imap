@@ -43,7 +43,7 @@ extension CommandStream_Tests {
         ]
 
         for (command, expected, line) in inputs {
-            var commandEncodeBuffer = CommandEncodeBuffer(buffer: "", capabilities: [])
+            var commandEncodeBuffer = CommandEncodeBuffer(buffer: "", capabilities: [], loggingMode: false)
             commandEncodeBuffer.writeCommandStream(command)
             XCTAssertEqual(String(buffer: commandEncodeBuffer.buffer.buffer), expected, line: line)
         }
@@ -58,7 +58,7 @@ extension CommandStream_Tests {
             .finish,
         ]
 
-        var buffer = CommandEncodeBuffer(buffer: "", capabilities: [])
+        var buffer = CommandEncodeBuffer(buffer: "", capabilities: [], loggingMode: false)
         parts.map { CommandStreamPart.append($0) }.forEach {
             buffer.writeCommandStream($0)
         }
@@ -85,7 +85,7 @@ extension CommandStream_Tests {
 
         var options = CommandEncodingOptions()
         options.useNonSynchronizingLiteralPlus = true
-        var buffer = CommandEncodeBuffer(buffer: "", options: options)
+        var buffer = CommandEncodeBuffer(buffer: "", options: options, loggingMode: false)
         parts.map { CommandStreamPart.append($0) }.forEach {
             buffer.writeCommandStream($0)
         }
@@ -119,7 +119,7 @@ extension CommandStream_Tests {
             .finish,
         ]
 
-        var buffer = CommandEncodeBuffer(buffer: "", capabilities: [])
+        var buffer = CommandEncodeBuffer(buffer: "", capabilities: [], loggingMode: false)
         parts.map { CommandStreamPart.append($0) }.forEach {
             buffer.writeCommandStream($0)
         }
@@ -173,7 +173,7 @@ extension CommandStream_Tests {
 
         var options = CommandEncodingOptions()
         options.useNonSynchronizingLiteralPlus = true
-        var buffer = CommandEncodeBuffer(buffer: "", options: options)
+        var buffer = CommandEncodeBuffer(buffer: "", options: options, loggingMode: false)
         parts.map { CommandStreamPart.append($0) }.forEach {
             buffer.writeCommandStream($0)
         }
@@ -202,7 +202,7 @@ extension CommandStream_Tests {
         ]
 
         // Apply parts twice.
-        var buffer = CommandEncodeBuffer(buffer: "", capabilities: [])
+        var buffer = CommandEncodeBuffer(buffer: "", capabilities: [], loggingMode: false)
         (parts + parts).map { CommandStreamPart.append($0) }.forEach {
             buffer.writeCommandStream($0)
         }
