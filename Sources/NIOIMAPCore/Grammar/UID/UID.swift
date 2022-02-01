@@ -95,13 +95,13 @@ extension BinaryInteger {
 // MARK: - Conversion
 
 extension UID {
-    init(_ other: UnknownMessageIdentifier) {
+    public init(_ other: UnknownMessageIdentifier) {
         self.init(rawValue: other.rawValue)
     }
 }
 
 extension UnknownMessageIdentifier {
-    init(_ other: UID) {
+    public init(_ other: UID) {
         self.init(rawValue: other.rawValue)
     }
 }

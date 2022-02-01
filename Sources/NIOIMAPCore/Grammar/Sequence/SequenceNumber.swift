@@ -29,13 +29,13 @@ public struct SequenceNumber: MessageIdentifier {
 // MARK: - Conversion
 
 extension SequenceNumber {
-    init(_ other: UnknownMessageIdentifier) {
+    public init(_ other: UnknownMessageIdentifier) {
         self.init(rawValue: other.rawValue)
     }
 }
 
 extension UnknownMessageIdentifier {
-    init(_ other: SequenceNumber) {
+    public init(_ other: SequenceNumber) {
         self.init(rawValue: other.rawValue)
     }
 }
