@@ -120,6 +120,27 @@ extension MessageIdentifierRange where IdentifierType == UnknownMessageIdentifie
     }
 }
 
+// MARK: - Convenience
+
+extension MessageIdentifierRange {
+    /// The range's lower bound.
+    public var lowerBound: IdentifierType {
+        range.lowerBound
+    }
+
+    /// The range's upper bound.
+    public var upperBound: IdentifierType {
+        range.upperBound
+    }
+
+    /// The number of elements in the range.
+    ///
+    /// - Complexity: O(1)
+    @inlinable public var count: Int {
+        range.count
+    }
+}
+
 // MARK: - Encoding
 
 extension EncodeBuffer {

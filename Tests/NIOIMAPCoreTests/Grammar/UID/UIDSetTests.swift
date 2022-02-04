@@ -74,6 +74,30 @@ extension UIDSetTests {
     }
 }
 
+// MARK: - Convenience - Custom Overrides
+
+extension UIDSetTests {
+    func testMinMax() {
+        XCTAssertNil(MessageIdentifierSet<UID>().min())
+        XCTAssertNil(MessageIdentifierSet<UID>().max())
+
+        XCTAssertEqual(MessageIdentifierSet<UID>([55]).min(), 55)
+        XCTAssertEqual(MessageIdentifierSet<UID>([55]).max(), 55)
+
+        XCTAssertEqual(MessageIdentifierSet<UID>([55, 66]).min(), 55)
+        XCTAssertEqual(MessageIdentifierSet<UID>([55, 66]).max(), 66)
+
+        XCTAssertEqual(MessageIdentifierSet<UID>([55 ... 66]).min(), 55)
+        XCTAssertEqual(MessageIdentifierSet<UID>([55 ... 66]).max(), 66)
+
+        XCTAssertEqual(MessageIdentifierSet<UID>([44, 55 ... 66]).min(), 44)
+        XCTAssertEqual(MessageIdentifierSet<UID>([44, 55 ... 66]).max(), 66)
+
+        XCTAssertEqual(MessageIdentifierSet<UID>([55 ... 66, 77]).min(), 55)
+        XCTAssertEqual(MessageIdentifierSet<UID>([55 ... 66, 77]).max(), 77)
+    }
+}
+
 // MARK: - Set Algebra
 
 extension UIDSetTests {

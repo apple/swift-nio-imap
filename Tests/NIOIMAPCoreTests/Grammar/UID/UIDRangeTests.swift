@@ -56,6 +56,23 @@ extension UIDRangeTests {
     }
 }
 
+// MARK: - Convenience
+
+extension UIDRangeTests {
+    func testCount() {
+        XCTAssertEqual(MessageIdentifierRange<UID>(654).count, 1)
+        XCTAssertEqual(MessageIdentifierRange<UID>(777 ... 999).count, 223)
+    }
+
+    func testBounds() {
+        XCTAssertEqual(MessageIdentifierRange<UID>(654).lowerBound, 654)
+        XCTAssertEqual(MessageIdentifierRange<UID>(654).upperBound, 654)
+
+        XCTAssertEqual(MessageIdentifierRange<UID>(777 ... 999).lowerBound, 777)
+        XCTAssertEqual(MessageIdentifierRange<UID>(777 ... 999).upperBound, 999)
+    }
+}
+
 // MARK: - Encoding
 
 extension UIDRangeTests {

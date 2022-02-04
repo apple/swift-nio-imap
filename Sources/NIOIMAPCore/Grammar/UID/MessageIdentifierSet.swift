@@ -68,28 +68,6 @@ public struct MessageIdentifierSet<IdentifierType: MessageIdentifier>: Hashable 
     }
 }
 
-/// A wrapper around a `MessageIdentifierSet` that enforces at least one element.
-public struct MessageIdentifierSetNonEmpty<IdentifierType: MessageIdentifier>: Hashable {
-    /// A set that contains a single range, that in turn contains all messages.
-    public static var all: Self {
-        MessageIdentifierSetNonEmpty(set: .all)!
-    }
-
-    /// The underlying `MessageIdentifierSet`
-    public private(set) var set: MessageIdentifierSet<IdentifierType>
-
-    /// Creates a new `MessageIdentifierSetNonEmpty` from a `MessageIdentifierSet`, after first
-    /// validating that the set is not emtpy.
-    /// - parameter set: The underlying `MessageIdentifierSet` to use.
-    /// - returns: `nil` if the given `MessageIdentifierSet` is empty.
-    public init?(set: MessageIdentifierSet<IdentifierType>) {
-        guard set.count > 0 else {
-            return nil
-        }
-        self.set = set
-    }
-}
-
 // MARK: -
 
 /// UIDs/SequenceNumbers shifted by 1, such that 1 -> 0, and `type`.max -> UInt32.max - 1
@@ -131,6 +109,28 @@ extension Range where Element == MessageIdentificationShiftWrapper {
 extension MessageIdentifierRange {
     init(_ r: Range<MessageIdentificationShiftWrapper>) {
         self.init(IdentifierType(r.lowerBound) ... IdentifierType(r.upperBound.advanced(by: -1)))
+    }
+}
+
+// MARK: - Sequence where Self.Element : Comparable
+
+extension MessageIdentifierSet {
+    /// Returns the minimum element in the set.
+    ///
+    /// - Complexity: O(1)
+    @warn_unqualified_access
+    @inlinable
+    public func min() -> IdentifierType? {
+        ranges.first?.range.lowerBound
+    }
+
+    /// Returns the maximum element in the set.
+    ///
+    /// - Complexity: O(1)
+    @warn_unqualified_access
+    @inlinable
+    public func max() -> IdentifierType? {
+        ranges.last?.range.upperBound
     }
 }
 
@@ -230,13 +230,6 @@ extension MessageIdentifierSet: CustomDebugStringConvertible {
     }
 }
 
-extension MessageIdentifierSetNonEmpty: CustomDebugStringConvertible {
-    /// Creates a human-readable text representation of the set by joined ranges with a comma.
-    public var debugDescription: String {
-        self.set.debugDescription
-    }
-}
-
 // MARK: - Array Literal
 
 extension MessageIdentifierSet: ExpressibleByArrayLiteral {
@@ -244,15 +237,6 @@ extension MessageIdentifierSet: ExpressibleByArrayLiteral {
     /// - parameter arrayLiteral: The elements to use, assumed to be non-empty.
     public init(arrayLiteral elements: MessageIdentifierRange<IdentifierType>...) {
         self.init(elements)
-    }
-}
-
-extension MessageIdentifierSetNonEmpty: ExpressibleByArrayLiteral {
-    /// Creates a new MessageIdentifierSet from a literal array of ranges.
-    /// - parameter arrayLiteral: The elements to use, assumed to be non-empty.
-    public init(arrayLiteral elements: MessageIdentifierRange<IdentifierType>...) {
-        precondition(elements.count > 0, "At least one element is required.")
-        self.set = MessageIdentifierSet(elements)
     }
 }
 
@@ -479,18 +463,8 @@ extension MessageIdentifierSet: IMAPEncodable {
     }
 }
 
-extension MessageIdentifierSetNonEmpty: IMAPEncodable {
-    @_spi(NIOIMAPInternal) public func writeIntoBuffer(_ buffer: inout EncodeBuffer) -> Int {
-        self.set.writeIntoBuffer(&buffer)
-    }
-}
-
 extension EncodeBuffer {
     @discardableResult mutating func writeUIDSet<IdentifierType: MessageIdentifier>(_ set: MessageIdentifierSet<IdentifierType>) -> Int {
-        set.writeIntoBuffer(&self)
-    }
-
-    @discardableResult mutating func writeUIDSet<IdentifierType: MessageIdentifier>(_ set: MessageIdentifierSetNonEmpty<IdentifierType>) -> Int {
         set.writeIntoBuffer(&self)
     }
 }
