@@ -70,7 +70,7 @@ extension MessageIdentifierSetNonEmpty {
     @warn_unqualified_access
     @inlinable
     public func min() -> IdentifierType {
-        set.ranges.first!.range.lowerBound
+        set.min()!
     }
 
     /// Returns the maximum element in the set.
@@ -79,7 +79,7 @@ extension MessageIdentifierSetNonEmpty {
     @warn_unqualified_access
     @inlinable
     public func max() -> IdentifierType {
-        set.ranges.last!.range.upperBound
+        set.max()!
     }
 }
 
