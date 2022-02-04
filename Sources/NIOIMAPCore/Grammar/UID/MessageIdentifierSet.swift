@@ -134,6 +134,28 @@ extension MessageIdentifierRange {
     }
 }
 
+// MARK: - Sequence where Self.Element : Comparable
+
+extension MessageIdentifierSet {
+    /// Returns the minimum element in the set.
+    ///
+    /// - Complexity: O(1)
+    @warn_unqualified_access
+    @inlinable
+    public func min() -> IdentifierType? {
+        ranges.first?.range.lowerBound
+    }
+
+    /// Returns the maximum element in the set.
+    ///
+    /// - Complexity: O(1)
+    @warn_unqualified_access
+    @inlinable
+    public func max() -> IdentifierType? {
+        ranges.last?.range.upperBound
+    }
+}
+
 // MARK: -
 
 extension MessageIdentifierSet {
