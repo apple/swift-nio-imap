@@ -51,6 +51,8 @@ extension CommandEncoder_Tests {
             (.tagged(.init(tag: "1", command: .noop)), "1 NOOP\r\n", #line),
             (.idleDone, "DONE\r\n", #line),
             (.tagged(.init(tag: "4", command: .rename(from: .inbox, to: .init("test"), parameters: [:]))), "4 RENAME \"∅\" \"∅\"\r\n", #line),
+            (.tagged(.init(tag: "AB", command: .store(.set([42]), [.unchangedSince(.init(modificationSequence: .init(361_656)))], .flags(.add(silent: false, list: [.answered, .draft]))))), #"AB STORE 42 (UNCHANGEDSINCE 361656) +FLAGS (\Answered \Draft)\#r\#n"#, #line),
+            (.tagged(.init(tag: "AB", command: .store(.set([42]), [.unchangedSince(.init(modificationSequence: .init(361_656)))], .gmailLabels(.remove(silent: false, gmailLabels: [GmailLabel(ByteBuffer(string: "foobar"))]))))), #"AB STORE 42 (UNCHANGEDSINCE 361656) -X-GM-LABELS ("∅")\#r\#n"#, #line),
 
             // APPEND
             (.append(.start(tag: "2", appendingTo: .inbox)), #"2 APPEND "∅""#, #line),
