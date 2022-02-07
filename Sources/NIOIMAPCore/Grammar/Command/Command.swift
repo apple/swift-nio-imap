@@ -452,8 +452,13 @@ extension CommandEncodeBuffer {
         self.buffer.writeString("AUTHENTICATE ") +
             self.buffer.writeAuthenticationMechanism(mechanism) +
             self.buffer.writeIfExists(initialResponse) { resp in
-                self.buffer.writeSpace() +
-                    self.buffer.writeInitialResponse(resp)
+                var c = self.buffer.writeSpace()
+                if self.buffer.loggingMode {
+                    c += self.buffer.writeString("∅")
+                } else {
+                    c += self.buffer.writeInitialResponse(resp)
+                }
+                return c
             }
     }
 

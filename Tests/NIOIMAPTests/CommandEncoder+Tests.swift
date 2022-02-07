@@ -44,9 +44,12 @@ extension CommandEncoder_Tests {
 
     func testEncodingLoggingMode() {
         let inputs: [(CommandStreamPart, ByteBuffer, UInt)] = [
+            // LOGIN / AUTHENTICATE
+            (.tagged(.init(tag: "3", command: .login(username: "username", password: "\\pass"))), "3 LOGIN \"∅\" {5+}\r\n∅\r\n", #line),
+            (.tagged(.init(tag: "B23", command: .authenticate(mechanism: AuthenticationMechanism.plain, initialResponse: .init(ByteBuffer(string: "foobar"))))), "B23 AUTHENTICATE PLAIN ∅\r\n", #line),
+
             (.tagged(.init(tag: "1", command: .noop)), "1 NOOP\r\n", #line),
             (.idleDone, "DONE\r\n", #line),
-            (.tagged(.init(tag: "3", command: .login(username: "username", password: "\\pass"))), "3 LOGIN \"∅\" {5+}\r\n∅\r\n", #line),
             (.tagged(.init(tag: "4", command: .rename(from: .inbox, to: .init("test"), parameters: [:]))), "4 RENAME \"∅\" \"∅\"\r\n", #line),
 
             // APPEND
