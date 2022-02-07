@@ -173,8 +173,12 @@ extension CommandEncodeBuffer {
         case .beginMessage(message: let message):
             return self.buffer.writeAppendMessage(message)
         case .messageBytes(var bytes):
+            guard !self.buffer.loggingMode else { return 0 }
             return self.buffer.writeBuffer(&bytes)
         case .endMessage:
+            guard !self.buffer.loggingMode else {
+                return self.buffer.writeString("∅")
+            }
             return 0
         case .beginCatenate(options: let options):
             return self.buffer.writeAppendOptions(options) +
