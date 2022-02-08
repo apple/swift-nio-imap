@@ -228,6 +228,27 @@ extension ResponseParser_Tests {
                 ],
                 #line
             ),
+            (
+                #"* 2114 FETCH (UID 2114 MODSEQ (3143) RFC822.SIZE 11867 BODYSTRUCTURE ((("text" "plain" ("CHARSET" "UTF-8") NIL NIL NIL 1423 44 NIL NIL NIL NIL)("text" "html" ("CHARSET" "UTF-8") NIL NIL "quoted-printable" 2524 34 NIL NIL NIL NIL) "alternative" ("BOUNDARY" "000000000000ccac3a05a5ef76c3") NIL NIL NIL)("text" "plain" ("CHARSET" "us-ascii") NIL NIL "7bit" 151 4 NIL NIL NIL NIL) "mixed" ("BOUNDARY" "===============5781602957316160403==") NIL NIL NIL))"#,
+                [
+                    .response(.fetch(.start(234))),
+                    .response(
+                        .fetch(.simpleAttribute(.body(.multipart(.init(parts: [
+                            .multipart(
+                                .init(parts: [
+                                    .singlepart(.init(kind: .text(.init(mediaText: "PLAIN", lineCount: 24)), fields: .init(parameters: ["CHARSET": "ISO-8859-1"], id: nil, contentDescription: nil, encoding: .quotedPrintable, octetCount: 410), extension: .init(digest: nil, dispositionAndLanguage: .init(disposition: nil, language: .init(languages: []))))),
+                                    .singlepart(.init(kind: .text(.init(mediaText: "HTML", lineCount: 30)), fields: .init(parameters: ["CHARSET": "ISO-8859-1"], id: nil, contentDescription: nil, encoding: .quotedPrintable, octetCount: 1407), extension: .init(digest: nil, dispositionAndLanguage: .init(disposition: .init(kind: "INLINE", parameters: [:]), language: .init(languages: []))))),
+                                ], mediaSubtype: .init("ALTERNATIVE"), extension: .init(parameters: ["BOUNDARY": "hqjksdm1__="], dispositionAndLanguage: .init(disposition: nil, language: .init(languages: []))))
+                            ),
+                            .singlepart(
+                                .init(kind: .basic(.init(kind: .image, subtype: .init("PNG"))), fields: BodyStructure.Fields(parameters: ["NAME": "screenshot.png"], id: "<3__=f2fcxd>", contentDescription: nil, encoding: .base64, octetCount: 40655), extension: .init(digest: nil, dispositionAndLanguage: .init(disposition: .init(kind: "INLINE", parameters: ["FILENAME": "screenshot.png"]), language: .init(languages: []))))
+                            ),
+                        ], mediaSubtype: .init("RELATED"), extension: .init(parameters: ["BOUNDARY": "5__=hsdqjkm"], dispositionAndLanguage: .init(disposition: nil, language: .init(languages: []))))), hasExtensionData: true)))
+                    ),
+                    .response(.fetch(.finish)),
+                ],
+                #line
+            ),
         ]
 
         for (input, expected, line) in inputs {
