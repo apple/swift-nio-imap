@@ -224,7 +224,6 @@ extension GrammarParser_Body_Tests {
 
 extension GrammarParser_Body_Tests {
     func testParseBody() {
-        
         let singleParts: [(String, String, BodyStructure, UInt)] = [
             (
                 #"("text" "plain" ("CHARSET" "UTF-8") NIL NIL NIL 1423 44 NIL NIL NIL NIL)"#,
@@ -243,7 +242,7 @@ extension GrammarParser_Body_Tests {
                 #line
             ),
         ]
-        
+
         let multiParts: [(String, String, BodyStructure, UInt)] = [
             (
                 #"((("text" "plain" ("CHARSET" "UTF-8") NIL NIL NIL 1423 44 NIL NIL NIL NIL)("text" "html" ("CHARSET" "UTF-8") NIL NIL "quoted-printable" 2524 34 NIL NIL NIL NIL) "alternative" ("BOUNDARY" "000000000000ccac3a05a5ef76c3") NIL NIL NIL)("text" "plain" ("CHARSET" "us-ascii") NIL NIL "7bit" 151 4 NIL NIL NIL NIL) "mixed" ("BOUNDARY" "===============5781602957316160403==") NIL NIL NIL)"#,
@@ -255,7 +254,7 @@ extension GrammarParser_Body_Tests {
                                 .singlepart(.init(
                                     kind: .text(.init(mediaText: "plain", lineCount: 44)),
                                     fields: .init(
-                                        parameters: ["CHARSET" : "UTF-8"],
+                                        parameters: ["CHARSET": "UTF-8"],
                                         id: nil,
                                         contentDescription: nil,
                                         encoding: nil,
@@ -269,7 +268,7 @@ extension GrammarParser_Body_Tests {
                                 .singlepart(.init(
                                     kind: .text(.init(mediaText: "html", lineCount: 34)),
                                     fields: .init(
-                                        parameters: ["CHARSET" : "UTF-8"],
+                                        parameters: ["CHARSET": "UTF-8"],
                                         id: nil,
                                         contentDescription: nil,
                                         encoding: .quotedPrintable,
@@ -282,11 +281,11 @@ extension GrammarParser_Body_Tests {
                                             language: .init(languages: [], location: .init(location: nil, extensions: []))
                                         )
                                     )
-                                ))
+                                )),
                             ],
                             mediaSubtype: .alternative,
                             extension: .init(
-                                parameters: ["BOUNDARY":"000000000000ccac3a05a5ef76c3"],
+                                parameters: ["BOUNDARY": "000000000000ccac3a05a5ef76c3"],
                                 dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: .init(location: nil, extensions: [])))
                             )
                         )),
@@ -303,11 +302,11 @@ extension GrammarParser_Body_Tests {
                                 digest: nil,
                                 dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: .init(location: nil, extensions: [])))
                             )
-                        ))
+                        )),
                     ],
                     mediaSubtype: .mixed,
                     extension: .init(
-                        parameters: ["BOUNDARY" : "===============5781602957316160403=="],
+                        parameters: ["BOUNDARY": "===============5781602957316160403=="],
                         dispositionAndLanguage: .init(
                             disposition: nil,
                             language: .init(languages: [], location: .init(location: nil, extensions: []))
@@ -317,7 +316,7 @@ extension GrammarParser_Body_Tests {
                 #line
             ),
         ]
-        
+
         let inputs = singleParts + multiParts
         self.iterateTests(
             testFunction: GrammarParser().parseBody,

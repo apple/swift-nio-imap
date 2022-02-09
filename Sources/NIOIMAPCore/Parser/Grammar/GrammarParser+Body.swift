@@ -214,7 +214,7 @@ extension GrammarParser {
         func parseBodyEncoding_quotePrintable(buffer: inout ParseBuffer, tracker: StackTracker) throws -> BodyStructure.Encoding? {
             try parseBodyEncoding_option("QUOTED-PRINTABLE", result: .quotedPrintable, buffer: &buffer, tracker: tracker)
         }
-        
+
         func parseBodyEncoding_nil(buffer: inout ParseBuffer, tracker: StackTracker) throws -> BodyStructure.Encoding? {
             try parseNil(buffer: &buffer, tracker: tracker)
             return nil
@@ -227,7 +227,7 @@ extension GrammarParser {
             parseBodyEncoding_base64,
             parseBodyEncoding_quotePrintable,
             parseBodyEncoding_string,
-            parseBodyEncoding_nil
+            parseBodyEncoding_nil,
         ], buffer: &buffer, tracker: tracker)
     }
 
