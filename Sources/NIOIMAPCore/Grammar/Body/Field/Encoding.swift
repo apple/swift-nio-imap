@@ -56,7 +56,10 @@ extension String {
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeBodyEncoding(_ encoding: BodyStructure.Encoding) -> Int {
-        self.writeString("\"\(encoding.stringValue)\"")
+    @discardableResult mutating func writeBodyEncoding(_ encoding: BodyStructure.Encoding?) -> Int {
+        guard let encoding = encoding else {
+            return self.writeNil()
+        }
+        return self.writeString("\"\(encoding.stringValue)\"")
     }
 }

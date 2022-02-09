@@ -141,14 +141,14 @@ extension GrammarParser {
                 try ParserLibrary.parseBufferAsUTF8(buffer)
             }
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-            let Encoding = try self.parseBodyEncoding(buffer: &buffer, tracker: tracker)
+            let encoding = try self.parseBodyEncoding(buffer: &buffer, tracker: tracker)
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             let fieldOctets = try self.parseNumber(buffer: &buffer, tracker: tracker)
             return BodyStructure.Fields(
                 parameters: fieldParam,
                 id: fieldID,
                 contentDescription: fieldDescription,
-                encoding: Encoding,
+                encoding: encoding,
                 octetCount: fieldOctets
             )
         }
@@ -181,38 +181,43 @@ extension GrammarParser {
     }
 
     // body-fld-enc    = (DQUOTE ("7BIT" / "8BIT" / "BINARY" / "BASE64"/
-    //                   "QUOTED-PRINTABLE") DQUOTE) / string
-    func parseBodyEncoding(buffer: inout ParseBuffer, tracker: StackTracker) throws -> BodyStructure.Encoding {
-        func parseBodyEncoding_string(buffer: inout ParseBuffer, tracker: StackTracker) throws -> BodyStructure.Encoding {
+    //                   "QUOTED-PRINTABLE") DQUOTE) / string (or NIL because of some implementations)
+    func parseBodyEncoding(buffer: inout ParseBuffer, tracker: StackTracker) throws -> BodyStructure.Encoding? {
+        func parseBodyEncoding_string(buffer: inout ParseBuffer, tracker: StackTracker) throws -> BodyStructure.Encoding? {
             let parsed = try self.parseString(buffer: &buffer, tracker: tracker)
             return .init(try ParserLibrary.parseBufferAsUTF8(parsed))
         }
 
-        func parseBodyEncoding_option(_ option: String, result: BodyStructure.Encoding, buffer: inout ParseBuffer, tracker: StackTracker) throws -> BodyStructure.Encoding {
+        func parseBodyEncoding_option(_ option: String, result: BodyStructure.Encoding, buffer: inout ParseBuffer, tracker: StackTracker) throws -> BodyStructure.Encoding? {
             try PL.parseFixedString("\"", buffer: &buffer, tracker: tracker)
             try PL.parseFixedString(option, buffer: &buffer, tracker: tracker)
             try PL.parseFixedString("\"", buffer: &buffer, tracker: tracker)
             return result
         }
 
-        func parseBodyEncoding_7bit(buffer: inout ParseBuffer, tracker: StackTracker) throws -> BodyStructure.Encoding {
+        func parseBodyEncoding_7bit(buffer: inout ParseBuffer, tracker: StackTracker) throws -> BodyStructure.Encoding? {
             try parseBodyEncoding_option("7BIT", result: .sevenBit, buffer: &buffer, tracker: tracker)
         }
 
-        func parseBodyEncoding_8bit(buffer: inout ParseBuffer, tracker: StackTracker) throws -> BodyStructure.Encoding {
+        func parseBodyEncoding_8bit(buffer: inout ParseBuffer, tracker: StackTracker) throws -> BodyStructure.Encoding? {
             try parseBodyEncoding_option("8BIT", result: .eightBit, buffer: &buffer, tracker: tracker)
         }
 
-        func parseBodyEncoding_binary(buffer: inout ParseBuffer, tracker: StackTracker) throws -> BodyStructure.Encoding {
+        func parseBodyEncoding_binary(buffer: inout ParseBuffer, tracker: StackTracker) throws -> BodyStructure.Encoding? {
             try parseBodyEncoding_option("BINARY", result: .binary, buffer: &buffer, tracker: tracker)
         }
 
-        func parseBodyEncoding_base64(buffer: inout ParseBuffer, tracker: StackTracker) throws -> BodyStructure.Encoding {
+        func parseBodyEncoding_base64(buffer: inout ParseBuffer, tracker: StackTracker) throws -> BodyStructure.Encoding? {
             try parseBodyEncoding_option("BASE64", result: .base64, buffer: &buffer, tracker: tracker)
         }
 
-        func parseBodyEncoding_quotePrintable(buffer: inout ParseBuffer, tracker: StackTracker) throws -> BodyStructure.Encoding {
+        func parseBodyEncoding_quotePrintable(buffer: inout ParseBuffer, tracker: StackTracker) throws -> BodyStructure.Encoding? {
             try parseBodyEncoding_option("QUOTED-PRINTABLE", result: .quotedPrintable, buffer: &buffer, tracker: tracker)
+        }
+        
+        func parseBodyEncoding_nil(buffer: inout ParseBuffer, tracker: StackTracker) throws -> BodyStructure.Encoding? {
+            try parseNil(buffer: &buffer, tracker: tracker)
+            return nil
         }
 
         return try PL.parseOneOf([
@@ -222,6 +227,7 @@ extension GrammarParser {
             parseBodyEncoding_base64,
             parseBodyEncoding_quotePrintable,
             parseBodyEncoding_string,
+            parseBodyEncoding_nil
         ], buffer: &buffer, tracker: tracker)
     }
 
