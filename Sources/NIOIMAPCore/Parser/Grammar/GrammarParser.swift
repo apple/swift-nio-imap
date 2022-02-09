@@ -1336,7 +1336,17 @@ extension GrammarParser {
     // media-subtype   = string
     func parseMediaSubtype(buffer: inout ParseBuffer, tracker: StackTracker) throws -> BodyStructure.MediaSubtype {
         let parsed = try self.parseString(buffer: &buffer, tracker: tracker)
-        return .init(try ParserLibrary.parseBufferAsUTF8(parsed))
+        let string = try ParserLibrary.parseBufferAsUTF8(parsed).lowercased()
+        switch string {
+        case "alternative":
+            return .alternative
+        case "mixed":
+            return .mixed
+        case "related":
+            return .related
+        default:
+            return .init(string)
+        }
     }
 
     // media-text      = DQUOTE "TEXT" DQUOTE SP media-subtype

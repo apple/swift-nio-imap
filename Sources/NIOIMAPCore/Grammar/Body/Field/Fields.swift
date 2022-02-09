@@ -28,7 +28,7 @@ extension BodyStructure {
         public var contentDescription: String?
 
         /// The string giving the content transfer encoding as defined in MIME-IMB
-        public var encoding: Encoding
+        public var encoding: Encoding?
 
         /// The size of the body in octets. Note that this is in the encoded state, before any decoding takes place.
         public var octetCount: Int
@@ -39,7 +39,7 @@ extension BodyStructure {
         /// - parameter description: A string giving the content description as defined in MIME-IMB
         /// - parameter encoding: The string giving the content transfer encoding as defined in MIME-IMB
         /// - parameter octetCount: The size of the body in octets. Note that this is in the encoded state, before any decoding takes place.
-        public init(parameters: OrderedDictionary<String, String>, id: String?, contentDescription: String?, encoding: BodyStructure.Encoding, octetCount: Int) {
+        public init(parameters: OrderedDictionary<String, String>, id: String?, contentDescription: String?, encoding: BodyStructure.Encoding?, octetCount: Int) {
             self.parameters = parameters
             self.id = id
             self.contentDescription = contentDescription
