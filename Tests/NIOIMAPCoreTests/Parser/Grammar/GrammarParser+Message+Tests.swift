@@ -56,7 +56,8 @@ extension GrammarParser_Message_Tests {
                 ("X-GM-LABELS (\\Inbox \\Sent Important \"Muy Importante\")", " ", .gmailLabels([GmailLabel("\\Inbox"), GmailLabel("\\Sent"), GmailLabel("Important"), GmailLabel("Muy Importante")]), #line),
                 ("X-GM-LABELS (foo)", " ", .gmailLabels([GmailLabel("foo")]), #line),
                 ("X-GM-LABELS ()", " ", .gmailLabels([]), #line),
-                ("X-GM-LABELS (\\Drafts)", " ", .gmailLabels([GmailLabel("\\Drafts")]), #line),
+                (#"X-GM-LABELS (\Drafts)"#, " ", .gmailLabels([GmailLabel(#"\Drafts"#)]), #line),
+                (#"X-GM-LABELS ("\\Important")"#, " ", .gmailLabels([GmailLabel(#"\Important"#)]), #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []

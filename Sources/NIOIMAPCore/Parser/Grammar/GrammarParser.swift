@@ -1734,14 +1734,48 @@ extension GrammarParser {
     }
 
     // quoted          = DQUOTE *QUOTED-CHAR DQUOTE
+    // QUOTED-CHAR     = <any TEXT-CHAR except quoted-specials> /
+    //                   "\" quoted-specials
+    // quoted-specials = DQUOTE / "\"
     func parseQuoted(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ByteBuffer {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> ByteBuffer in
             try PL.parseFixedString("\"", buffer: &buffer, tracker: tracker)
+            var hasQuotedSpecial = false
+            var lastIsEscape = false
             let data = try PL.parseZeroOrMoreCharacters(buffer: &buffer, tracker: tracker) { char in
-                char.isQuotedChar
+                if lastIsEscape {
+                    lastIsEscape = false
+                    return char.isQuotedSpecial
+                } else if char.isQuotedChar {
+                    lastIsEscape = false
+                    return true
+                } else if char == UInt8(ascii: "\\") {
+                    lastIsEscape = true
+                    hasQuotedSpecial = true
+                    return true
+                } else {
+                    return false
+                }
             }
             try PL.parseFixedString("\"", buffer: &buffer, tracker: tracker)
-            return data
+            guard hasQuotedSpecial else { return data }
+            // Replace '\\' with '\' and '\"' with '"':
+            var escaped = data
+            var unescaped = ByteBuffer()
+            while let next = escaped.readBytes(length: 1)?.first {
+                if next == UInt8(ascii: "\\") {
+                    guard
+                        let special = escaped.readBytes(length: 1)?.first,
+                        special.isQuotedSpecial
+                    else {
+                        throw ParserError(hint: "Invalid escape in quoted string '\(String(decoding: data.readableBytesView, as: Unicode.UTF8.self))'")
+                    }
+                    unescaped.writeBytes([special])
+                } else {
+                    unescaped.writeBytes([next])
+                }
+            }
+            return unescaped
         }
     }
 

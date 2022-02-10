@@ -1974,6 +1974,36 @@ extension ParserUnitTests {
     }
 }
 
+// MARK: - astring parseNString
+
+extension ParserUnitTests {
+    func testParseAString() {
+        // 1*ASTRING-CHAR / quoted / literal
+        self.iterateTests(
+            testFunction: GrammarParser().parseAString,
+            validInputs: [
+                ("NIL", " ", "NIL", #line),
+                ("A", " ", "A", #line),
+                ("Foo", " ", "Foo", #line),
+                ("a]b", " ", "a]b", #line),
+                ("{3}\r\nabc", "", "abc", #line),
+                ("{3+}\r\nabc", "", "abc", #line),
+                (#""abc""#, "", "abc", #line),
+                (#""a\\bc""#, "", #"a\bc"#, #line),
+                (#""a\"bc""#, "", #"a"bc"#, #line),
+            ],
+            parserErrorInputs: [
+                (#""a\bc""#, "", #line),
+            ],
+            incompleteMessageInputs: [
+                ("\"", "", #line),
+                (#""a\""#, "", #line),
+                ("{1}\r\n", "", #line),
+            ]
+        )
+    }
+}
+
 // MARK: - nstring parseNString
 
 extension ParserUnitTests {
@@ -1984,10 +2014,13 @@ extension ParserUnitTests {
                 ("NIL", "", nil, #line),
                 ("{3}\r\nabc", "", "abc", #line),
                 ("{3+}\r\nabc", "", "abc", #line),
-                ("\"abc\"", "", "abc", #line),
+                (#""abc""#, "", "abc", #line),
+                (#""a\\bc""#, "", #"a\bc"#, #line),
+                (#""a\"bc""#, "", #"a"bc"#, #line),
             ],
             parserErrorInputs: [
                 ("abc", " ", #line),
+                (#""a\bc""#, "", #line),
             ],
             incompleteMessageInputs: [
                 ("\"", "", #line),
