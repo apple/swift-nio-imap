@@ -90,6 +90,8 @@ extension EncodeBuffer {
     @discardableResult mutating func writeMediaBasic(_ media: Media.Basic) -> Int {
         self.writeMediaBasicKind(media.kind) +
             self.writeSpace() +
-            self.writeMediaSubtype(media.subtype)
+            self.writeString("\"") +
+            self.writeMediaSubtype(media.subtype) +
+            self.writeString("\"")
     }
 }

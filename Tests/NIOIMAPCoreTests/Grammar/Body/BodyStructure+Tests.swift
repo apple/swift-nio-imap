@@ -32,10 +32,10 @@ extension BodyStructure_Tests {
 extension BodyStructure_Tests {
     func testEncode_mediaSubtype() {
         let inputs: [(BodyStructure.MediaSubtype, String, UInt)] = [
-            (.related, #""multipart/related""#, #line),
-            (.mixed, #""multipart/mixed""#, #line),
-            (.alternative, #""multipart/alternative""#, #line),
-            (.init("other"), #""other""#, #line),
+            (.related, "related", #line),
+            (.mixed, "mixed", #line),
+            (.alternative, "alternative", #line),
+            (.init("other"), "other", #line),
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeMediaSubtype($0) })
     }

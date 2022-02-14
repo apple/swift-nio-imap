@@ -25,29 +25,29 @@ extension BodySinglepartTests {
         let inputs: [(BodyStructure.Singlepart, String, UInt)] = [
             (
                 .init(
-                    kind: .basic(.init(kind: .application, subtype: .alternative)),
+                    kind: .basic(.init(kind: .application, subtype: .init("jpeg"))),
                     fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .base64, octetCount: 6),
                     extension: nil
                 ),
-                "\"application\" \"multipart/alternative\" NIL NIL NIL \"BASE64\" 6",
+                "\"application\" \"jpeg\" NIL NIL NIL \"BASE64\" 6",
                 #line
             ),
             (
                 .init(
-                    kind: .basic(.init(kind: .application, subtype: .related)),
+                    kind: .basic(.init(kind: .application, subtype: .init("jpeg"))),
                     fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .base64, octetCount: 7),
                     extension: .init(digest: "md5", dispositionAndLanguage: nil)
                 ),
-                "\"application\" \"multipart/related\" NIL NIL NIL \"BASE64\" 7 \"md5\"",
+                "\"application\" \"jpeg\" NIL NIL NIL \"BASE64\" 7 \"md5\"",
                 #line
             ),
             (
                 .init(
-                    kind: .text(.init(mediaText: "subtype", lineCount: 5)),
+                    kind: .text(.init(mediaText: "html", lineCount: 5)),
                     fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .base64, octetCount: 6),
                     extension: nil
                 ),
-                "\"TEXT\" \"subtype\" NIL NIL NIL \"BASE64\" 6 5",
+                "\"TEXT\" \"html\" NIL NIL NIL \"BASE64\" 6 5",
                 #line
             ),
             (

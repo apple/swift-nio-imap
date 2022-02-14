@@ -22,7 +22,7 @@ extension BodyStructure {
         /// The parts of the body. Each part is assigned a consecutive part number.
         public var parts: [BodyStructure]
 
-        /// The subtype of the message, e.g. *multipart/mixed*
+        /// The subtype of the message, e.g. `mixed` (from `multipart/mixed`)
         public var mediaSubtype: MediaSubtype
 
         /// Optional additional fields that are not required to form a valid `Multipart`
@@ -68,7 +68,9 @@ extension EncodeBuffer {
             result += self.writeBody(body)
         } +
             self.writeSpace() +
+            self.writeString("\"multipart/") +
             self.writeMediaSubtype(part.mediaSubtype) +
+            self.writeString("\"") +
             self.writeIfExists(part.extension) { (ext) -> Int in
                 self.writeSpace() +
                     self.writeBodyExtensionMultipart(ext)
@@ -83,6 +85,6 @@ extension EncodeBuffer {
     }
 
     @discardableResult mutating func writeMediaSubtype(_ type: BodyStructure.MediaSubtype) -> Int {
-        self.writeString("\"\(type.stringValue)\"")
+        self.writeString(type.stringValue)
     }
 }
