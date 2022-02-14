@@ -146,7 +146,7 @@ extension GrammarParser_Body_Tests {
     func testParseBodyTypeSinglepart() {
         let basicInputs: [(String, String, BodyStructure.Singlepart, UInt)] = [
             (
-                "\"AUDIO\" \"multipart/alternative\" NIL NIL NIL \"BASE64\" 1",
+                "\"AUDIO\" \"alternative\" NIL NIL NIL \"BASE64\" 1",
                 "\r\n",
                 .init(
                     kind: .basic(.init(kind: .audio, subtype: .alternative)),
@@ -156,7 +156,7 @@ extension GrammarParser_Body_Tests {
                 #line
             ),
             (
-                "\"APPLICATION\" \"multipart/mixed\" NIL \"id\" \"description\" \"7BIT\" 2",
+                "\"APPLICATION\" \"mixed\" NIL \"id\" \"description\" \"7BIT\" 2",
                 "\r\n",
                 .init(
                     kind: .basic(.init(kind: .application, subtype: .mixed)),
@@ -166,7 +166,7 @@ extension GrammarParser_Body_Tests {
                 #line
             ),
             (
-                "\"VIDEO\" \"multipart/related\" (\"f1\" \"v1\") NIL NIL \"8BIT\" 3",
+                "\"VIDEO\" \"related\" (\"f1\" \"v1\") NIL NIL \"8BIT\" 3",
                 "\r\n",
                 .init(
                     kind: .basic(.init(kind: .video, subtype: .related)),
@@ -179,7 +179,7 @@ extension GrammarParser_Body_Tests {
 
         let messageInputs: [(String, String, BodyStructure.Singlepart, UInt)] = [
             (
-                "\"MESSAGE\" \"RFC822\" NIL NIL NIL \"BASE64\" 4 (NIL NIL NIL NIL NIL NIL NIL NIL NIL NIL) (\"IMAGE\" \"multipart/related\" NIL NIL NIL \"BINARY\" 5) 8",
+                "\"MESSAGE\" \"RFC822\" NIL NIL NIL \"BASE64\" 4 (NIL NIL NIL NIL NIL NIL NIL NIL NIL NIL) (\"IMAGE\" \"related\" NIL NIL NIL \"BINARY\" 5) 8",
                 "\r\n",
                 .init(
                     kind: .message(

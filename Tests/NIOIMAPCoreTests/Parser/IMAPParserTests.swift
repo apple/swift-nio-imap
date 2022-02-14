@@ -1757,7 +1757,7 @@ extension ParserUnitTests {
 
 extension ParserUnitTests {
     func testParseMediaBasic_valid_match() {
-        var buffer = TestUtilities.makeParseBuffer(for: #""APPLICATION" "multipart/mixed""#)
+        var buffer = TestUtilities.makeParseBuffer(for: #""APPLICATION" "mixed""#)
         do {
             let mediaBasic = try GrammarParser().parseMediaBasic(buffer: &buffer, tracker: .testTracker)
             XCTAssertEqual(mediaBasic, Media.Basic(kind: .application, subtype: .mixed))
@@ -1767,7 +1767,7 @@ extension ParserUnitTests {
     }
 
     func testParseMediaBasic_valid_string() {
-        var buffer = TestUtilities.makeParseBuffer(for: #""STRING" "multipart/related""#)
+        var buffer = TestUtilities.makeParseBuffer(for: #""STRING" "related""#)
         do {
             let mediaBasic = try GrammarParser().parseMediaBasic(buffer: &buffer, tracker: .testTracker)
             XCTAssertEqual(mediaBasic, Media.Basic(kind: .init("STRING"), subtype: .related))
