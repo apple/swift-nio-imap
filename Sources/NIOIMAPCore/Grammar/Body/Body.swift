@@ -113,17 +113,17 @@ extension BodyStructure: RandomAccessCollection {
 extension BodyStructure {
     /// The subtype of a multi-part body.
     public struct MediaSubtype: CustomDebugStringConvertible, Hashable {
-        /// For `multipart/alternative`. For representing the same data as different formats.
+        /// When used with a `multipart` type, specifies the same data as different formats.
         public static var alternative: Self {
             .init("alternative")
         }
 
-        /// For `multipart/related`. Used for compound objects consisting of several related body parts.
+        /// When used with a `multipart` type, specifies compound objects consisting of several related body parts.
         public static var related: Self {
             .init("related")
         }
 
-        /// For `multipart/mixed`. Specifies a generic set of mixed data types.
+        /// When used with a `multipart` type, specifies a generic set of mixed data types.
         public static var mixed: Self {
             .init("mixed")
         }
