@@ -26,7 +26,7 @@ extension ExtendedSearchResponse_Tests {
             (.init(correlator: nil, uid: false, returnData: []), "ESEARCH", #line),
             (.init(correlator: nil, uid: true, returnData: []), "ESEARCH UID", #line),
             (.init(correlator: nil, uid: false, returnData: [.count(2)]), "ESEARCH COUNT 2", #line),
-            (.init(correlator: SearchCorrelator(tag: "some"), uid: false, returnData: []), "ESEARCH (TAG \"some\")", #line),
+            (.init(correlator: SearchCorrelator(tag: "some"), uid: false, returnData: []), #"ESEARCH (TAG "some")"#, #line),
         ]
 
         for (test, expectedString, line) in inputs {

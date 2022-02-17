@@ -330,7 +330,10 @@ extension GrammarParser_Commands_Tests {
                 (" ALL", "\r", .search(key: .all), #line),
                 (" ALL DELETED FLAGGED", "\r", .search(key: .and([.all, .deleted, .flagged])), #line),
                 (" CHARSET UTF-8 ALL", "\r", .search(key: .all, charset: "UTF-8"), #line),
-                (" RETURN () ALL", "\r", .search(key: .all), #line),
+                (" DELETED", "\r", .search(key: .deleted, returnOptions: []), #line),
+                (" RETURN () DELETED", "\r", .search(key: .deleted, returnOptions: [.all]), #line),
+                (" RETURN (ALL) DELETED", "\r", .search(key: .deleted, returnOptions: [.all]), #line),
+                (" RETURN (ALL COUNT) ANSWERED", "\r", .search(key: .answered, returnOptions: [.all, .count]), #line),
                 (" RETURN (MIN) ALL", "\r", .search(key: .all, returnOptions: [.min]), #line),
                 (
                     #" CHARSET UTF-8 (OR FROM "me" FROM "you") (OR NEW UNSEEN)"#,

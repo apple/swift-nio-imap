@@ -103,6 +103,14 @@ public enum Command: Hashable {
     case store(LastCommandSet<SequenceSet>, [StoreModifier], StoreData)
 
     /// Searches the currently-selected mailbox for messages that match the search criteria.
+    ///
+    /// This is a RFC 3501 / RFC 4731 style search. RFC 7377 style searches use `.extendedSearch`.
+    ///
+    /// If `returnOptions` is empty, this is a RFC 3501 style search. Notably the empty `RETURN ()`
+    /// maps to `[.all]` — as it’s equivalent to `RETURN (ALL)`.
+    ///
+    /// * `SEARCH ANSWERED` is `.search(key:. answered, returnOptions: [])`
+    /// * `SEARCH RETURN () ANSWERED` is `.search(key:. answered, returnOptions: [.all])`
     case search(key: SearchKey, charset: String? = nil, returnOptions: [SearchReturnOption] = [])
 
     /// Moves each message in a given set into a new mailbox, removing the copy from the current mailbox.
@@ -152,7 +160,7 @@ public enum Command: Hashable {
     /// string).
     case setMetadata(mailbox: MailboxName, entries: OrderedDictionary<MetadataEntryName, MetadataValue>)
 
-    /// Performs an extended search as defined in RFC 4731.
+    /// Performs a “multimailbox” search as defined in RFC 7377.
     case extendedSearch(ExtendedSearchOptions)
 
     /// When sent with no arguments: removes all mailbox access keys

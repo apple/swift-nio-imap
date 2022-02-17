@@ -17,8 +17,8 @@ import struct NIO.ByteBuffer
 /// Multiple searches may be run concurrently, and so a `SearchCorrelator` can be used
 /// to identify the search to which a response belongs.
 public struct SearchCorrelator: Hashable {
-    /// The original option from RFC4466 - a random string.
-    public var tag: ByteBuffer
+    /// The tag of the command that this search result is a response to.
+    public var tag: String
 
     /// The mailbox being searched. Required iff using RFC 7377
     public var mailbox: MailboxName?
@@ -30,7 +30,7 @@ public struct SearchCorrelator: Hashable {
     /// - parameter tag: The original option from RFC4466 - a random string.
     /// - parameter mailbox: The mailbox being searched. Required iff using RFC 7377.
     /// - parameter uidValidity: Required iff using RFC 7377.
-    public init(tag: ByteBuffer, mailbox: MailboxName? = nil, uidValidity: UIDValidity? = nil) {
+    public init(tag: String, mailbox: MailboxName? = nil, uidValidity: UIDValidity? = nil) {
         self.tag = tag
         self.mailbox = mailbox
         self.uidValidity = uidValidity
@@ -41,8 +41,9 @@ public struct SearchCorrelator: Hashable {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeSearchCorrelator(_ correlator: SearchCorrelator) -> Int {
-        self.writeString(" (TAG ") +
-            self.writeTagString(correlator.tag) +
+        self.writeString(" (TAG \"") +
+            self.writeString(correlator.tag) +
+            self.writeString("\"") +
             self.writeIfExists(correlator.mailbox) { mailbox in
                 self.writeString(" MAILBOX ") + self.writeMailbox(mailbox)
             } +
