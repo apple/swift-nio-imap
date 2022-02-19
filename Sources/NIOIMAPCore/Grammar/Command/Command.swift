@@ -184,6 +184,12 @@ public enum Command: Hashable {
 
     /// Instructs the server to use the named compression mechanism.
     case compress(Capability.CompressionKind)
+
+    /// A custom command that’s not defined in any RFC.
+    ///
+    /// If `payload` contains multiple elements, no spaces or other separators will be output
+    /// between them. A `.verbatim` element must be used to output spaces if desired.
+    case custom(name: String, payloads: [CustomCommandPayload])
 }
 
 extension Command: CustomDebugStringConvertible {
@@ -297,6 +303,8 @@ extension CommandEncodeBuffer {
             return self.writeCommandKind_urlFetch(urls: urls)
         case .compress(let kind):
             return self.writeCommandKind_compress(kind: kind)
+        case .custom(name: let name, payloads: let payloads):
+            return self.writeCommandKind_custom(name: name, payloads: payloads)
         }
     }
 
@@ -454,6 +462,13 @@ extension CommandEncodeBuffer {
 
     private mutating func writeCommandKind_compress(kind: Capability.CompressionKind) -> Int {
         self.buffer.writeString("COMPRESS \(kind.rawValue)")
+    }
+
+    private mutating func writeCommandKind_custom(name: String, payloads: [Command.CustomCommandPayload]) -> Int {
+        self.buffer.writeString("\(name)") +
+            self.buffer.writeArray(payloads, prefix: " ", separator: "", parenthesis: false) { (payload, self) in
+                self.writeCustomCommandPayload(payload)
+            }
     }
 
     private mutating func writeCommandKind_authenticate(mechanism: AuthenticationMechanism, initialResponse: InitialResponse?) -> Int {
