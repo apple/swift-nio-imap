@@ -78,7 +78,7 @@ public enum ModifiedUTF7 {
     /// - throws: An `OddByteCountError` if `buffer` contains an off number of bytes.
     /// - returns: A `String` that can be used to e.g. display to a user.
     static func decode(_ buffer: ByteBuffer) throws -> String {
-        var string: String = ""
+        var string = ""
         string.reserveCapacity(buffer.readableBytes)
 
         var buffer = buffer
