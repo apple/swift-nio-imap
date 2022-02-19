@@ -28,6 +28,12 @@ public enum MessageAttribute: Hashable {
     case uid(UID)
     /// `RFC822.SIZE` -- A number expressing the RFC 2822 size of the message.
     case rfc822Size(Int)
+    
+    case rfc822(ByteBuffer?)
+    
+    case rfc822Text(ByteBuffer?)
+    
+    case rfc822Header(ByteBuffer?)
 
     /// `BODYSTRUCTURE` or `BODY` -- A list that describes the MIME body structure of a message.
     ///
@@ -91,6 +97,12 @@ extension EncodeBuffer {
             return self.writeMessageAttribute_gmailThreadID(id)
         case .gmailLabels(let labels):
             return self.writeMessageAttribute_gmailLabels(labels)
+        case .rfc822(let buffer):
+            return self.writeMessageAttribute_rfc822(buffer)
+        case .rfc822Header(let buffer):
+            return self.writeMessageAttribute_rfc822Header(buffer)
+        case .rfc822Text(let buffer):
+            return self.writeMessageAttribute_rfc822Text(buffer)
         }
     }
 
