@@ -23,7 +23,7 @@ class SearchModifiedSequence_Tests: EncodeTestClass {}
 extension SearchModifiedSequence_Tests {
     func testEncode() {
         let inputs: [(SearchModificationSequence, String, UInt)] = [
-            (.init(extensions: [:], sequenceValue: .init(integerLiteral: 1)), "MODSEQ 1", #line),
+            (.init(extensions: [:], sequenceValue: 1), "MODSEQ 1", #line),
             (
                 .init(extensions: [
                     .init(flag: .answered): .all,
@@ -39,7 +39,7 @@ extension SearchModifiedSequence_Tests {
                 "MODSEQ \"/flags/\\\\answered\" all \"/flags/\\\\seen\" priv 1",
                 #line
             ),
-            (.init(extensions: [:], sequenceValue: .init(integerLiteral: 1)), "MODSEQ 1", #line),
+            (.init(extensions: [:], sequenceValue: 1), "MODSEQ 1", #line),
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeSearchModificationSequence($0) })
     }

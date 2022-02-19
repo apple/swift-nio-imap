@@ -57,13 +57,14 @@ extension GrammarParser {
     //                      ; Each correlator MUST appear exactly once.
     // search-correlator =  SP "(" one-correlator *(SP one-correlator) ")"
     func parseSearchCorrelator(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SearchCorrelator {
-        var tag: ByteBuffer?
+        var tag: String?
         var mailbox: MailboxName?
         var uidValidity: UIDValidity?
 
         func parseSearchCorrelator_tag(buffer: inout ParseBuffer, tracker: StackTracker) throws {
-            try PL.parseFixedString("TAG ", buffer: &buffer, tracker: tracker)
-            tag = try self.parseString(buffer: &buffer, tracker: tracker)
+            try PL.parseFixedString("TAG \"", buffer: &buffer, tracker: tracker)
+            tag = try self.parseTag(buffer: &buffer, tracker: tracker)
+            try PL.parseFixedString("\"", buffer: &buffer, tracker: tracker)
         }
 
         func parseSearchCorrelator_mailbox(buffer: inout ParseBuffer, tracker: StackTracker) throws {
@@ -397,12 +398,12 @@ extension GrammarParser {
     func parseSearchReturnData(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SearchReturnData {
         func parseSearchReturnData_min(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SearchReturnData {
             try PL.parseFixedString("MIN ", buffer: &buffer, tracker: tracker)
-            return .min(try self.parseNZNumber(buffer: &buffer, tracker: tracker))
+            return .min(try self.parseMessageIdentifier(buffer: &buffer, tracker: tracker))
         }
 
         func parseSearchReturnData_max(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SearchReturnData {
             try PL.parseFixedString("MAX ", buffer: &buffer, tracker: tracker)
-            return .max(try self.parseNZNumber(buffer: &buffer, tracker: tracker))
+            return .max(try self.parseMessageIdentifier(buffer: &buffer, tracker: tracker))
         }
 
         func parseSearchReturnData_all(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SearchReturnData {

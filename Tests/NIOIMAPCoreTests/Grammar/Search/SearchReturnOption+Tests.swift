@@ -43,6 +43,8 @@ extension SearchReturnOption_Tests {
         let inputs: [([SearchReturnOption], String, UInt)] = [
             ([], "", #line),
             ([.min], " RETURN (MIN)", #line),
+            ([.all], " RETURN ()", #line),
+            ([.min, .all], " RETURN (MIN ALL)", #line),
             ([.min, .max, .count], " RETURN (MIN MAX COUNT)", #line),
         ]
 

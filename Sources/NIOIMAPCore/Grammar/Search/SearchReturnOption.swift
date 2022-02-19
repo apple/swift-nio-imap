@@ -60,6 +60,9 @@ extension EncodeBuffer {
         guard options.count > 0 else {
             return 0
         }
+        if options == [.all] {
+            return self.writeString(" RETURN ()")
+        }
         return
             self.writeString(" RETURN (") +
             self.writeIfExists(options) { (options) -> Int in

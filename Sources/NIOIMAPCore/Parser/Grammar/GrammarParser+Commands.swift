@@ -360,10 +360,16 @@ extension GrammarParser {
     // search          = "SEARCH" [search-return-opts] SP search-program
     func parseCommandSuffix_search(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
         try PL.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
-            let returnOpts = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseSearchReturnOptions) ?? []
+            let returnOpts = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseSearchReturnOptions)
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             let (charset, program) = try parseSearchProgram(buffer: &buffer, tracker: tracker)
-            return .search(key: program, charset: charset, returnOptions: returnOpts)
+            if let o = returnOpts {
+                // We have options. Map an empty options list to `[.all]`:
+                return .search(key: program, charset: charset, returnOptions: (o == []) ? [.all] : o)
+            } else {
+                // No options -> normal search with `returnOptions: []`
+                return .search(key: program, charset: charset, returnOptions: [])
+            }
         }
     }
 

@@ -17,10 +17,10 @@ import struct NIO.ByteBuffer
 /// Contains information returned from a complete search command, not on a per-message basis.
 public enum SearchReturnData: Hashable {
     /// Return the lowest message number/UID that satisfies the SEARCH criteria.
-    case min(Int)
+    case min(UnknownMessageIdentifier)
 
     /// Return the highest message number/UID that satisfies the SEARCH criteria.
-    case max(Int)
+    case max(UnknownMessageIdentifier)
 
     /// Return all message numbers/UIDs that satisfy the SEARCH criteria.
     case all(LastCommandSet<MessageIdentifierSet<UnknownMessageIdentifier>>)

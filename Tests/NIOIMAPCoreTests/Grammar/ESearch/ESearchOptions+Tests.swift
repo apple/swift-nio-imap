@@ -34,6 +34,16 @@ extension ExtendedSearchOptions_Tests {
                 #line
             ),
             (
+                ExtendedSearchOptions(key: .deleted, returnOptions: [.min, .all]),
+                " RETURN (MIN ALL) DELETED",
+                #line
+            ),
+            (
+                ExtendedSearchOptions(key: .deleted, returnOptions: [.all]),
+                " RETURN () DELETED",
+                #line
+            ),
+            (
                 ExtendedSearchOptions(key: .all, charset: "Alien"),
                 " CHARSET Alien ALL",
                 #line
