@@ -177,17 +177,17 @@ extension GrammarParser {
             try PL.parseFixedString(")", buffer: &buffer, tracker: tracker)
             return .gmailLabels(attributes)
         }
-        
+
         func parseMessageAttribute_rfc822(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute {
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             return .rfc822(try self.parseNString(buffer: &buffer, tracker: tracker))
         }
-        
+
         func parseMessageAttribute_rfc822Text(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute {
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             return .rfc822Text(try self.parseNString(buffer: &buffer, tracker: tracker))
         }
-        
+
         func parseMessageAttribute_rfc822Header(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute {
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             return .rfc822Header(try self.parseNString(buffer: &buffer, tracker: tracker))
@@ -206,7 +206,7 @@ extension GrammarParser {
             "X-GM-THRID": parseMessageAttribute_gmailThreadID,
             "X-GM-LABELS": parseMessageAttribute_gmailLabels,
             "MODSEQ": parseMessageAttribute_fetchModifierResponse,
-            
+
             // note the order matters here
             // RFC822 needs to be the *last* attempted out of
             // all of the RFC822.* options, as RFC822.SIZE will

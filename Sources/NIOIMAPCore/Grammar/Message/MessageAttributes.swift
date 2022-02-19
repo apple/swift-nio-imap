@@ -28,11 +28,11 @@ public enum MessageAttribute: Hashable {
     case uid(UID)
     /// `RFC822.SIZE` -- A number expressing the RFC 2822 size of the message.
     case rfc822Size(Int)
-    
+
     case rfc822(ByteBuffer?)
-    
+
     case rfc822Text(ByteBuffer?)
-    
+
     case rfc822Header(ByteBuffer?)
 
     /// `BODYSTRUCTURE` or `BODY` -- A list that describes the MIME body structure of a message.
