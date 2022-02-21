@@ -24,7 +24,7 @@ class CommandRoundtripHandler_PromiseTests: XCTestCase {
 
     override func setUp() {
         let logger = Logger(label: "test")
-        channel = EmbeddedChannel(handler: CommandRoundtripHandler(logger: logger))
+        self.channel = EmbeddedChannel(handler: CommandRoundtripHandler(logger: logger))
     }
 
     override func tearDown() {
