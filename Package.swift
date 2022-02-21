@@ -1,4 +1,4 @@
-// swift-tools-version:5.6
+// swift-tools-version:5.5
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
@@ -12,7 +12,7 @@ let package = Package(
         .package(url: "https://github.com/apple/swift-nio-ssl", from: "2.16.0"),
         .package(url: "https://github.com/apple/swift-log", from: "1.4.0"),
         .package(url: "https://github.com/nicklockwood/SwiftFormat", exact: "0.49.4"),
-        .package(url: "https://github.com/apple/swift-standard-library-preview.git", exact: "0.0.3"),
+        .package(url: "https://github.com/apple/swift-standard-library-preview.git", .exact("0.0.3")),
         .package(url: "https://github.com/apple/swift-collections.git", .upToNextMajor(from: "1.0.0")),
     ],
     targets: [
