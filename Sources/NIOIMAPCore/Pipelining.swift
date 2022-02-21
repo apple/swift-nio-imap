@@ -225,6 +225,14 @@ extension Command {
              .generateAuthorizedURL,
              .urlFetch:
             return []
+        case .custom:
+            return [
+                .noMailboxCommandsRunning,
+                .noUntaggedExpungeResponse,
+                .noUIDBasedCommandRunning,
+                .noFlagChanges(.all),
+                .noFlagReads(.all),
+            ]
         }
     }
 }
@@ -379,6 +387,8 @@ extension Command {
              .setMetadata:
             // TODO: Metadata dependencies?
             return [.mayTriggerUntaggedExpunge]
+        case .custom:
+            return [.barrier]
         }
     }
 }

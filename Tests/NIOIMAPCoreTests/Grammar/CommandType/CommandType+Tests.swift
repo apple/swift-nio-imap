@@ -64,6 +64,17 @@ extension CommandType_Tests {
             (.create(.inbox, []), CommandEncodingOptions(), ["CREATE \"INBOX\""], #line),
             (.create(.inbox, [.attributes([.archive, .drafts, .flagged])]), CommandEncodingOptions(), ["CREATE \"INBOX\" (USE (\\Archive \\Drafts \\Flagged))"], #line),
             (.compress(.deflate), CommandEncodingOptions(), ["COMPRESS DEFLATE"], #line),
+
+            // Custom
+
+            (.custom(name: "FOOBAR", payloads: []), CommandEncodingOptions(), ["FOOBAR"], #line),
+            (.custom(name: "FOOBAR", payloads: [.verbatim(.init(string: "A B C"))]), CommandEncodingOptions(), ["FOOBAR A B C"], #line),
+            (.custom(name: "FOOBAR", payloads: [.verbatim(.init(string: "A")), .verbatim(.init(string: "B"))]), CommandEncodingOptions(), ["FOOBAR AB"], #line),
+            (.custom(name: "FOOBAR", payloads: [.literal(.init(string: "A"))]), CommandEncodingOptions(), [#"FOOBAR "A""#], #line),
+            (.custom(name: "FOOBAR", payloads: [.literal(.init(string: "A B C"))]), CommandEncodingOptions(), [#"FOOBAR "A B C""#], #line),
+            (.custom(name: "FOOBAR", payloads: [.literal(.init(string: "A")), .literal(.init(string: "B"))]), CommandEncodingOptions(), [#"FOOBAR "A""B""#], #line),
+            (.custom(name: "FOOBAR", payloads: [.literal(.init(string: "A")), .verbatim(.init(string: " ")), .literal(.init(string: "B"))]), CommandEncodingOptions(), [#"FOOBAR "A" "B""#], #line),
+            (.custom(name: "FOOBAR", payloads: [.literal(.init(string: "¶"))]), CommandEncodingOptions(), ["FOOBAR {2}\r\n", "¶"], #line),
         ]
 
         for (test, options, expectedStrings, line) in inputs {

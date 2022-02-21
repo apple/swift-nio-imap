@@ -81,7 +81,7 @@ extension GrammarParser_Commands_Tests {
     }
 
     // Minimum 1 valid test for each command to ensure all commands are supported
-    // dedicated unit tests areprovided for each sub-parser
+    // dedicated unit tests are provided for each sub-parser
     func testParseCommand() {
         self.iterateTests(
             testFunction: GrammarParser().parseCommand,
