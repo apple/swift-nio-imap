@@ -45,6 +45,15 @@ extension GrammarParser_Envelope_Tests {
                 ],
                 #line
             ),
+            ( // 1 address with no information
+                [
+                    .init(personName: nil, sourceRoot: nil, mailbox: nil, host: nil),
+                ],
+                [
+                    .singleAddress(.init(personName: nil, sourceRoot: nil, mailbox: nil, host: nil)),
+                ],
+                #line
+            ),
             ( // single group: 1 address
                 [
                     .init(personName: nil, sourceRoot: nil, mailbox: "group", host: nil),
