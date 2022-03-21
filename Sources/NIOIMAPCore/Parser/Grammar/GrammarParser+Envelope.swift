@@ -29,7 +29,6 @@ extension GrammarParser {
         var stack: [EmailAddressGroup] = []
 
         for address in addresses {
-
             // RFC 2822 Syntaxt: If the host is nil then the group has started
             // if the mailbox is also nil, then the group has finished.
             if address.host == nil, let name = address.mailbox { // start of group

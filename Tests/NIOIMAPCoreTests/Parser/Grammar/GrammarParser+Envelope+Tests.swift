@@ -50,7 +50,7 @@ extension GrammarParser_Envelope_Tests {
                     .init(personName: nil, sourceRoot: nil, mailbox: nil, host: nil),
                 ],
                 [
-                    .singleAddress(.init(personName: nil, sourceRoot: nil, mailbox: nil, host: nil))
+                    .singleAddress(.init(personName: nil, sourceRoot: nil, mailbox: nil, host: nil)),
                 ],
                 #line
             ),
