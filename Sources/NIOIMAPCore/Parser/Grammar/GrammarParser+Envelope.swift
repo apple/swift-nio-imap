@@ -29,10 +29,12 @@ extension GrammarParser {
         var stack: [EmailAddressGroup] = []
 
         for address in addresses {
+
+            // RFC 2822 Syntaxt: If the host is nil then the group has started
+            // if the mailbox is also nil, then the group has finished.
             if address.host == nil, let name = address.mailbox { // start of group
                 stack.append(EmailAddressGroup(groupName: name, sourceRoot: address.sourceRoot, children: []))
-            } else if address.host == nil { // end of group
-                let group = stack.popLast()!
+            } else if address.host == nil, let group = stack.popLast() { // end of group
                 if stack.last == nil {
                     results.append(.group(group))
                 } else {
