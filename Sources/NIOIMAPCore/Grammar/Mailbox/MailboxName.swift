@@ -95,11 +95,11 @@ extension MailboxPath {
     /// - returns: `[String]` containing path components
     public func displayStringComponents(omittingEmptySubsequences: Bool = true) -> [String] {
         guard let pathSeparator = self.pathSeparator else {
-            return [self.decodeBufferToString(self.name.bytes)]
+            return [self.decodeBufferToString(ByteBuffer(bytes: self.name.bytes))]
         }
 
         assert(pathSeparator.isASCII)
-        return self.name.bytes.readableBytesView
+        return self.name.bytes
             .split(separator: pathSeparator.asciiValue!, omittingEmptySubsequences: omittingEmptySubsequences)
             .map { bytes in
                 self.decodeBufferToString(ByteBuffer(ByteBufferView(bytes)))
@@ -157,7 +157,7 @@ extension MailboxPath {
         }
 
         // if a separator exists, write it after the root mailbox
-        var newStorage = self.name.bytes
+        var newStorage = ByteBuffer(bytes: self.name.bytes)
         newStorage.writeBytes(separator.utf8)
 
         var encodedNewName = ModifiedUTF7.encode(displayName)
@@ -179,29 +179,68 @@ extension MailboxPath {
 /// 1. create a (display) `String` from a path.
 /// 2. create a path from a `String` (for new mailboxes created by a user)
 /// 3. split a path into its components (to figure out how paths are nested into each other).
-public struct MailboxName: Hashable {
+///
+/// Since it’s common to use `MailboxName` as a key in a dictionary and/or compare
+/// `MailboxName` for equality, `MailboxName` will pre-calculate its hash value, and
+/// store it. As a result `Hashable` (and `Equatable`) performance is very fast.
+public struct MailboxName {
     /// Represents an inbox.
     public static let inbox = Self(ByteBuffer(string: "INBOX"))
 
     /// The raw bytes, readable as `[UInt8]`
-    public let bytes: ByteBuffer
+    public let bytes: [UInt8]
+    /// The hash value.
+    ///
+    /// We store a pre-calculated hash value to make `Hashable` conformance fast.
+    public let hashValue: Int
 
     /// `true` if the internal storage reads "INBOX"
     /// otherwise `false`
     public var isInbox: Bool {
-        bytes.readableBytesView.lazy.map { $0 & 0xDF }.elementsEqual("INBOX".utf8)
+        bytes.lazy.map { $0 & 0xDF }.elementsEqual("INBOX".utf8)
     }
 
     /// Creates a new `MailboxName` from the given bytes.
     /// - note: The bytes provided should be UTF-7.
     /// - parameter bytes: The bytes to construct a `MailboxName` from. Note that if any case-insensitive variation of *INBOX* is provided then it will be uppercased.
-    public init(_ bytes: ByteBuffer) {
-        let isInbox = bytes.readableBytesView.lazy.map { $0 & 0xDF }.elementsEqual("INBOX".utf8)
+    public init(_ bytes: [UInt8]) {
+        let isInbox = bytes.lazy.map { $0 & 0xDF }.elementsEqual("INBOX".utf8)
+        let b: [UInt8]
         if isInbox {
-            self.bytes = ByteBuffer(ByteBufferView("INBOX".utf8))
+            b = Array("INBOX".utf8)
         } else {
-            self.bytes = bytes
+            b = bytes
         }
+        self.bytes = b
+        var hasher = Hasher()
+        b.withUnsafeBytes { buffer in
+            hasher.combine(bytes: buffer)
+        }
+        self.hashValue = hasher.finalize()
+    }
+}
+
+extension MailboxName {
+    public init(_ bytes: ByteBuffer) {
+        self = bytes.withUnsafeReadableBytes { buffer in
+            MailboxName(Array(buffer.bindMemory(to: UInt8.self)))
+        }
+    }
+}
+
+// MARK: - Hashable
+
+extension MailboxName: Hashable {
+    @inlinable
+    public static func == (lhs: Self, rhs: Self) -> Bool {
+        // Compare the digest first, since it’s a lot cheaper to compare:
+        guard lhs.hashValue == rhs.hashValue else { return false }
+        return lhs.bytes == rhs.bytes
+    }
+
+    @inlinable
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(hashValue)
     }
 }
 
@@ -210,7 +249,7 @@ public struct MailboxName: Hashable {
 extension MailboxName: CustomDebugStringConvertible {
     /// Provides a human-readable description.
     public var debugDescription: String {
-        String(bestEffortDecodingUTF8Bytes: self.bytes.readableBytesView)
+        String(bestEffortDecodingUTF8Bytes: self.bytes)
     }
 }
 

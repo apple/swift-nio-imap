@@ -37,7 +37,13 @@ extension EncodeBuffer {
         self.writeIMAPString(buffer.readableBytesView)
     }
 
-    private mutating func writeIMAPString<T: Collection>(_ bytes: T) -> Int where T.Element == UInt8 {
+    /// Writes an IMAP `string` type as defined by the grammar in RFC 3501.
+    /// The function will decide to use either `quoted` or `literal` syntax based
+    /// upon what bytes `buffer` contains, and what encoding types are supported.
+    /// - parameters:
+    ///     - buffer: The buffer to write.
+    /// - returns: The number of bytes written.
+    @discardableResult mutating func writeIMAPString<T: Collection>(_ bytes: T) -> Int where T.Element == UInt8 {
         guard !self.loggingMode else {
             return self.writeIMAPStringLoggingMode(bytes)
         }

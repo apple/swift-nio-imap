@@ -26,7 +26,7 @@ public struct GmailLabel: Hashable {
 
     /// Creates a new `GmailLabel` from the given `MailboxName`.
     public init(mailboxName: MailboxName) {
-        self.buffer = mailboxName.bytes
+        self.buffer = ByteBuffer(bytes: mailboxName.bytes)
     }
 
     /// Creates a new `GmailLabel` from the given `UseAttribute`.
