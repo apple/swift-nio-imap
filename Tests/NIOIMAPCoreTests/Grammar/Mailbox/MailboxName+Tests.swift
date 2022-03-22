@@ -127,22 +127,57 @@ extension MailboxName_Tests {
 extension MailboxName_Tests {
     func testMailboxNameInitInbox() {
         let test1 = MailboxName("INBOX")
-        XCTAssertEqual(test1.bytes, "INBOX")
+        XCTAssertEqual(test1.bytes, Array("INBOX".utf8))
         XCTAssertTrue(test1.isInbox)
 
         let test2 = MailboxName("inbox")
-        XCTAssertEqual(test2.bytes, "INBOX")
+        XCTAssertEqual(test2.bytes, Array("INBOX".utf8))
         XCTAssertTrue(test2.isInbox)
 
         let test3 = MailboxName("notinbox")
-        XCTAssertEqual(test3.bytes, "notinbox")
+        XCTAssertEqual(test3.bytes, Array("notinbox".utf8))
         XCTAssertFalse(test3.isInbox)
     }
 
     func testMailboxNameInitNonUTF8() {
         let hexBytes: [UInt8] = [0x80]
         let test1 = MailboxName(.init(bytes: hexBytes))
-        XCTAssertEqual(test1.bytes, .init(bytes: hexBytes))
+        XCTAssertEqual(test1.bytes, hexBytes)
         XCTAssertFalse(test1.isInbox)
+    }
+
+    func testEquality() {
+        // Since we’re using a custom implementation of Hashable.
+
+        XCTAssertEqual(MailboxName("INBOX"), MailboxName("inbox"))
+        XCTAssertEqual(MailboxName("AA"), MailboxName("AA"))
+        XCTAssertNotEqual(MailboxName("A"), MailboxName("B"))
+        XCTAssertNotEqual(MailboxName("Sent"), MailboxName("Drafts"))
+    }
+
+    func testHashValue() {
+        // Since we’re using a custom implementation of Hashable.
+
+        func countBits(_ v: Int) -> Int {
+            var value = UInt(bitPattern: v)
+            var count = 0
+            while (value != 0) {
+                count += 1
+                value = value & (value &- 1)
+            }
+            return count
+        }
+
+        func countChangedBits(_ a: String, _ b: String) -> Int {
+            let ma = MailboxName(Array(a.utf8))
+            let mb = MailboxName(Array(b.utf8))
+            return countBits(ma.hashValue ^ mb.hashValue)
+        }
+
+        XCTAssertGreaterThan(countChangedBits("A", "B"), 20)
+        XCTAssertGreaterThan(countChangedBits("A", "AA"), 20)
+        XCTAssertGreaterThan(countChangedBits("INBOX", "Drafts"), 20)
+        XCTAssertGreaterThan(countChangedBits("Sent", "Drafts"), 20)
+        XCTAssertGreaterThan(countChangedBits("Sent", "sent"), 20)
     }
 }
