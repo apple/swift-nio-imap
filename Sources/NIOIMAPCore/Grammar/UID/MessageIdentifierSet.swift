@@ -15,21 +15,6 @@
 import struct NIO.ByteBuffer
 import StandardLibraryPreview
 
-/// See `MessageIdentifierRange<SequenceNumber>`
-public typealias SequenceRange = MessageIdentifierRange<SequenceNumber>
-
-/// See `MessageIdentifierRange<UID>`
-public typealias UIDRange = MessageIdentifierRange<UID>
-
-/// See `MessageIdentifierSet<SequenceNumber>`
-public typealias SequenceSet = MessageIdentifierSet<SequenceNumber>
-
-/// See `MessageIdentifierSet<UID>`
-public typealias UIDSet = MessageIdentifierSet<UID>
-
-/// See `MessageIdentifierSetNonEmpty<UID>`
-public typealias UIDSetNonEmpty = MessageIdentifierSetNonEmpty<UID>
-
 /// A set contains an array of `MessageIdentifierRange<MessageIdentifier>>` to represent a (potentially large) collection of messages.
 ///
 /// `MessageIdentifier`s are _not_ sorted.
@@ -418,37 +403,27 @@ extension MessageIdentifierSet: SetAlgebra {
     }
 }
 
+// MARK: - Conversion
+
 extension MessageIdentifierSet where IdentifierType == SequenceNumber {
-    init(_ set: MessageIdentifierSet<UnknownMessageIdentifier>) {
-        let converted = set.ranges.map { range in
-            MessageIdentifierRange<SequenceNumber>(range)
-        }
-        self.init(converted)
+    public init(_ set: MessageIdentifierSet<UnknownMessageIdentifier>) {
+        self.init(set._ranges)
     }
 }
 
 extension MessageIdentifierSet where IdentifierType == UID {
-    init(_ set: MessageIdentifierSet<UnknownMessageIdentifier>) {
-        let converted = set.ranges.map { range in
-            MessageIdentifierRange<UID>(range)
-        }
-        self.init(converted)
+    public init(_ set: MessageIdentifierSet<UnknownMessageIdentifier>) {
+        self.init(set._ranges)
     }
 }
 
 extension MessageIdentifierSet where IdentifierType == UnknownMessageIdentifier {
-    init(_ set: MessageIdentifierSet<UID>) {
-        let converted = set.ranges.map { range in
-            MessageIdentifierRange<UnknownMessageIdentifier>(range)
-        }
-        self.init(converted)
+    public init(_ set: MessageIdentifierSet<UID>) {
+        self.init(set._ranges)
     }
 
-    init(_ set: MessageIdentifierSet<SequenceNumber>) {
-        let converted = set.ranges.map { range in
-            MessageIdentifierRange<UnknownMessageIdentifier>(range)
-        }
-        self.init(converted)
+    public init(_ set: MessageIdentifierSet<SequenceNumber>) {
+        self.init(set._ranges)
     }
 }
 
