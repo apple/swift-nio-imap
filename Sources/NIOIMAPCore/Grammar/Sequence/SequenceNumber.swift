@@ -26,6 +26,12 @@ public struct SequenceNumber: MessageIdentifier {
     }
 }
 
+/// See `MessageIdentifierRange<SequenceNumber>`
+public typealias SequenceRange = MessageIdentifierRange<SequenceNumber>
+
+/// See `MessageIdentifierSet<SequenceNumber>`
+public typealias SequenceSet = MessageIdentifierSet<SequenceNumber>
+
 // MARK: - Conversion
 
 extension SequenceNumber {
