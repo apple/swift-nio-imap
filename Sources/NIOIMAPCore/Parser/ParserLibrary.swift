@@ -206,7 +206,7 @@ extension ParserLibrary {
     }
 
     static func parseFixedString(_ needle: String, caseSensitive: Bool = false, allowLeadingSpaces: Bool = false, buffer: inout ParseBuffer, tracker: StackTracker) throws {
-        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, _ in
+        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
 
             if allowLeadingSpaces {
                 try self.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseSpaces)
@@ -336,7 +336,7 @@ extension ParserLibrary {
             return
         case .some(let x) where UInt8(x >> 8) == UInt8(ascii: " "):
             // found a space that we’ll skip. Some servers insert an extra space at the end.
-            try PL.composite(buffer: &buffer, tracker: tracker) { buffer, _ in
+            try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
                 buffer.bytes.moveReaderIndex(forwardBy: 1)
                 try PL.parseNewline(buffer: &buffer, tracker: tracker)
             }

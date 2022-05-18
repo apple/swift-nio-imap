@@ -426,7 +426,7 @@ extension GrammarParser {
     }
 
     func parseEncodedURLAuth(buffer: inout ParseBuffer, tracker: StackTracker) throws -> EncodedAuthenticatedURL {
-        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, _ -> EncodedAuthenticatedURL in
+        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> EncodedAuthenticatedURL in
             let bytes = try PL.parseBytes(buffer: &buffer, tracker: tracker, length: 32)
             guard bytes.readableBytesView.allSatisfy(\.isHexCharacter) else {
                 throw ParserError(hint: "Found invalid character in \(String(buffer: bytes))")

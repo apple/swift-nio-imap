@@ -116,15 +116,22 @@ extension ParserLibraryTests {
     }
 
     func test_fixedStringNonASCII() {
-        var buffer = TestUtilities.makeParseBuffer(for: "fooFooFOO")
-
-        buffer = TestUtilities.makeParseBuffer(for: "fooFooFOÖ")
+        var buffer = TestUtilities.makeParseBuffer(for: "fooFooFOÖ")
         XCTAssertThrowsError(try PL.parseFixedString("fooFooFOO",
                                                      caseSensitive: true,
                                                      buffer: &buffer,
                                                      tracker: .testTracker)) { error in
             XCTAssert(error is ParserError, "\(error)")
         }
+    }
+
+    func test_fixedStringWithLeadingSpaces() {
+        var buffer = TestUtilities.makeParseBuffer(for: String(repeating: " ", count: 500) + "fooFooFOO")
+        XCTAssertNoThrow(try PL.parseFixedString("fooFooFOO",
+                                                 caseSensitive: true,
+                                                 allowLeadingSpaces: true,
+                                                 buffer: &buffer,
+                                                 tracker: .testTracker))
     }
 }
 
@@ -278,5 +285,40 @@ extension ParserLibraryTests {
 
         let test4 = ByteBuffer(bytes: [0xE1, 0x80])
         XCTAssertThrowsError(try ParserLibrary.parseBufferAsUTF8(test4))
+    }
+}
+
+// MARK: - parseNewline
+
+extension ParserLibraryTests {
+    func checkParseNewline(newline: String, line: UInt = #line) {
+        var buffer = TestUtilities.makeParseBuffer(for: newline + "hello, world")
+        XCTAssertNoThrow(try ParserLibrary.parseNewline(buffer: &buffer, tracker: StackTracker.makeNewDefaultLimitStackTracker), line: line)
+        XCTAssertNoThrow(try ParserLibrary.parseFixedString("hello, world", buffer: &buffer, tracker: StackTracker.makeNewDefaultLimitStackTracker), line: line)
+    }
+
+    func testParseNewline() {
+        self.checkParseNewline(newline: "\r\n")
+        self.checkParseNewline(newline: "\n")
+        self.checkParseNewline(newline: "\r")
+
+        self.checkParseNewline(newline: " \r\n")
+        self.checkParseNewline(newline: " \n")
+        self.checkParseNewline(newline: " \r")
+
+        self.checkParseNewline(newline: "      \r\n")
+        self.checkParseNewline(newline: "      \n")
+        self.checkParseNewline(newline: "      \r")
+    }
+
+    func testParseNewlineRecursion() {
+        var buffer = TestUtilities.makeParseBuffer(for: String(repeating: " ", count: 80) + "\r\nhello, world")
+        XCTAssertNoThrow(try ParserLibrary.parseNewline(buffer: &buffer, tracker: StackTracker(maximumParserStackDepth: 100)))
+        XCTAssertNoThrow(try ParserLibrary.parseFixedString("hello, world", buffer: &buffer, tracker: StackTracker.makeNewDefaultLimitStackTracker))
+    }
+
+    func testParseNewlineTooMuchRecursion() {
+        var buffer = TestUtilities.makeParseBuffer(for: String(repeating: " ", count: 200) + "\r\nhello, world")
+        XCTAssertThrowsError(try ParserLibrary.parseNewline(buffer: &buffer, tracker: StackTracker(maximumParserStackDepth: 100)))
     }
 }
