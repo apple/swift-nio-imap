@@ -206,7 +206,7 @@ extension ParserLibrary {
     }
 
     static func parseFixedString(_ needle: String, caseSensitive: Bool = false, allowLeadingSpaces: Bool = false, buffer: inout ParseBuffer, tracker: StackTracker) throws {
-        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, _ in
+        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
 
             if allowLeadingSpaces {
                 try self.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseSpaces)
