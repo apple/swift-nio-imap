@@ -6,7 +6,8 @@ services:
     image: swift-nio-imap:20.04-5.7
     build:
       args:
-        base_image: "swiftlang/swift:nightly-focal"
+        swift_version: "nightly"
+        swift_repo: "swiftlang/swift"
         ubuntu_version: "focal"
 
   test:
