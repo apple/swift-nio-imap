@@ -32,4 +32,11 @@ extension ResponseText_Tests {
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeResponseText($0) })
     }
+
+    func testDebugDescription() {
+        XCTAssertEqual(ResponseText(code: nil, text: "buffer").debugDescription,
+                       "buffer")
+        XCTAssertEqual(ResponseText(code: .alert, text: "buffer").debugDescription,
+                       "[ALERT] buffer")
+    }
 }
