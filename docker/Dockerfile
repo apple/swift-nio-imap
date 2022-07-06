@@ -1,4 +1,4 @@
-ARG swift_version=nightly
+ARG swift_version=nightly-5.7
 ARG ubuntu_version=focal
 ARG swift_repo=swiftlang/swift
 ARG base_image=$swift_repo:$swift_version-$ubuntu_version

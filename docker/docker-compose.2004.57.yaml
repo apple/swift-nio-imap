@@ -6,7 +6,7 @@ services:
     image: swift-nio-imap:20.04-5.7
     build:
       args:
-        swift_version: "nightly"
+        swift_version: "nightly-5.7"
         swift_repo: "swiftlang/swift"
         ubuntu_version: "focal"
 
@@ -17,4 +17,7 @@ services:
     image: swift-nio-imap:20.04-5.7
     
   performance-test:
+    image: swift-nio-imap:20.04-5.7
+
+  soundness:
     image: swift-nio-imap:20.04-5.7
