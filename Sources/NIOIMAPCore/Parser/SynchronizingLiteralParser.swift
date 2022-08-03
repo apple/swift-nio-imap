@@ -126,7 +126,7 @@ public struct SynchronizingLiteralParser {
         repeat {
             switch self.state {
             case .waitingForCompleteLine:
-                if let newlineIndex = buffer.readableBytesView[(buffer.readableBytesView.startIndex + self.offset)...].firstIndex(where: { $0 == UInt8(ascii: "\n") || $0 == UInt8(ascii: "\r") }) {
+                if let newlineIndex = buffer.readableBytesView[(buffer.readableBytesView.startIndex + self.offset)...].findNewlineIndex() {
                     self.offset = newlineIndex - buffer.readableBytesView.startIndex + 1
                     switch try Self.lineFragmentType(buffer.readableBytesView[...newlineIndex]) {
                     case .synchronisingLiteral(let length):
@@ -169,5 +169,24 @@ public struct SynchronizingLiteralParser {
     public mutating func consumed(_ numberOfBytes: Int) {
         precondition(self.offset >= numberOfBytes, "offset=\(self.offset), numberOfBytes consumed=\(numberOfBytes)")
         self.offset -= numberOfBytes
+    }
+}
+
+extension ByteBufferView {
+    fileprivate func findNewlineIndex() -> Index? {
+        guard let first = firstIndex(where: { $0 == UInt8(ascii: "\n") || $0 == UInt8(ascii: "\r") }) else {
+            return nil
+        }
+        guard self[first] == UInt8(ascii: "\r") else {
+            return first
+        }
+        let second = index(after: first)
+        guard second < endIndex else {
+            return first
+        }
+        guard self[second] == UInt8(ascii: "\n") else {
+            return first
+        }
+        return second
     }
 }
