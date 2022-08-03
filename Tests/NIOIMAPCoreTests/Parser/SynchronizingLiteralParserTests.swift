@@ -29,6 +29,12 @@ final class SynchronizingLiteralParserTests: XCTestCase {
         self.assertOneParse(string, continuationsNecessary: 0)
     }
 
+    func testSingleCRNewline() {
+        let string = "LOGIN \"a\" \"b\"\r"
+        self.feed(string)
+        self.assertOneParse(string, continuationsNecessary: 0)
+    }
+
     func testEmptyLiteralsWork() {
         let string = "LOGIN {0}\r\n {0+}\r\n {~0}\r\n {~0+}\r\n {0-}\r\n\r\nFOO x y\r\n"
         self.feed(string)
@@ -54,7 +60,7 @@ final class SynchronizingLiteralParserTests: XCTestCase {
     }
 
     func testPartialCommandsDontMakeBytesVisible() {
-        let string = "LOGIN \"a\" \"b\"\r"
+        let string = "LOGIN \"a\" \"b\""
         self.feed(string)
         self.assertOneParse("", continuationsNecessary: 0)
     }
@@ -71,15 +77,24 @@ final class SynchronizingLiteralParserTests: XCTestCase {
         self.assertOneParse(string, continuationsNecessary: 1)
     }
 
-    func testDripFeedWorksForLiterals() {
+    func testDripFeedWorksForLiterals_1() {
         self.feed("LOGIN {")
         self.feed("1")
         self.feed("}")
-        self.feed("\r")
         XCTAssertEqual(0, self.parses.last?.synchronizingLiteralCount ?? -1)
-        self.feed("\n")
+        self.feed("\r\n")
         XCTAssertEqual(1, self.parses.last?.synchronizingLiteralCount ?? -1)
-        self.assertMultipleParses(["", "", "", "", "LOGIN {1}\r\n"], continuationsNecessary: 1)
+        self.assertMultipleParses(["", "", "", "LOGIN {1}\r\n"], continuationsNecessary: 1)
+    }
+
+    func testDripFeedWorksForLiterals_2() {
+        self.feed("LOGIN {")
+        self.feed("1")
+        self.feed("}")
+        XCTAssertEqual(0, self.parses.last?.synchronizingLiteralCount ?? -1)
+        self.feed("\r")
+        XCTAssertEqual(1, self.parses.last?.synchronizingLiteralCount ?? -1)
+        self.assertMultipleParses(["", "", "", "LOGIN {1}\r"], continuationsNecessary: 1)
     }
 
     func testLiteralDataInNormalLiteral() {
@@ -115,13 +130,12 @@ final class SynchronizingLiteralParserTests: XCTestCase {
 
     func testDripFeedWorks() {
         self.feed("LOGIN {")
-        self.feed("1}\r")
-        self.feed("\n")
+        self.feed("1}\r\n")
         self.feed("\n")
         self.feed("\n")
         self.feed("LOGIN {")
-        self.feed("1}\r")
-        self.feed("\n {2}\n\r\n\nFOO {5}\n{0}\r\n\n")
+        self.feed("1}")
+        self.feed("\r\n {2}\n\r\n\nFOO {5}\n{0}\r\n\n")
         self.indicateConsume("LOGIN {1}\r\n\n\n")
         self.feed("")
         self.indicateConsume("LOGIN {1}\r\n")
@@ -136,7 +150,6 @@ final class SynchronizingLiteralParserTests: XCTestCase {
         self.feed("")
 
         self.assertMultipleParses([
-            "",
             "",
             "LOGIN {1}\r\n",
             "LOGIN {1}\r\n\n",

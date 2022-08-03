@@ -51,7 +51,7 @@ extension B2MV_Tests {
             // MARK: Login
 
             (#"tag LOGIN "foo" "bar""#, [.tagged(.init(tag: "tag", command: .login(username: "foo", password: "bar")))]),
-            ("tag LOGIN \"\" {0+}\r\n", [.tagged(.init(tag: "tag", command: .login(username: "", password: "")))]),
+            ("tag LOGIN \"\" {0+}\n", [.tagged(.init(tag: "tag", command: .login(username: "", password: "")))]),
             (#"tag LOGIN "foo" "bar""#, [.tagged(.init(tag: "tag", command: .login(username: "foo", password: "bar")))]),
             (#"tag LOGIN foo bar"#, [.tagged(.init(tag: "tag", command: .login(username: "foo", password: "bar")))]),
 
@@ -59,14 +59,14 @@ extension B2MV_Tests {
 
             ("tag SELECT box1", [.tagged(.init(tag: "tag", command: .select(.init("box1"), [])))]),
             ("tag SELECT \"box2\"", [.tagged(.init(tag: "tag", command: .select(.init("box2"), [])))]),
-            ("tag SELECT {4+}\r\nbox3", [.tagged(.init(tag: "tag", command: .select(.init("box3"), [])))]),
+            ("tag SELECT {4+}\nbox3", [.tagged(.init(tag: "tag", command: .select(.init("box3"), [])))]),
             ("tag SELECT box4 (k1 1 k2 2)", [.tagged(.init(tag: "tag", command: .select(.init("box4"), [.basic(.init(key: "k1", value: .sequence(.set([1])))), .basic(.init(key: "k2", value: .sequence(.set([2]))))])))]),
 
             // MARK: Examine
 
             ("tag EXAMINE box1", [.tagged(.init(tag: "tag", command: .examine(.init("box1"), [])))]),
             ("tag EXAMINE \"box2\"", [.tagged(.init(tag: "tag", command: .examine(.init("box2"), [])))]),
-            ("tag EXAMINE {4+}\r\nbox3", [.tagged(.init(tag: "tag", command: .examine(.init("box3"), [])))]),
+            ("tag EXAMINE {4+}\nbox3", [.tagged(.init(tag: "tag", command: .examine(.init("box3"), [])))]),
             ("tag EXAMINE box4 (k3 1 k4 2)", [.tagged(.init(tag: "tag", command: .examine(.init("box4"), [.basic(.init(key: "k3", value: .sequence(.set([1])))), .basic(.init(key: "k4", value: .sequence(.set([2]))))])))]),
             ("tag EXAMINE box4 (QRESYNC (67890007 20050715194045000 41,43:211,214:541))", [.tagged(.init(tag: "tag", command: .examine(.init("box4"), [.qresync(QResyncParameter(uidValidity: 67890007, modificationSequenceValue: 20050715194045000, knownUIDs: [41, 43 ... 211, 214 ... 541], sequenceMatchData: nil))])))]),
             ("tag EXAMINE box4 (CONDSTORE)", [.tagged(.init(tag: "tag", command: .examine(.init("box4"), [.condStore])))]),
@@ -75,20 +75,20 @@ extension B2MV_Tests {
 
             ("tag CREATE newBox1", [.tagged(.init(tag: "tag", command: .create(.init("newBox1"), [])))]),
             ("tag CREATE \"newBox2\"", [.tagged(.init(tag: "tag", command: .create(.init("newBox2"), [])))]),
-            ("tag CREATE {7+}\r\nnewBox3", [.tagged(.init(tag: "tag", command: .create(.init("newBox3"), [])))]),
+            ("tag CREATE {7+}\nnewBox3", [.tagged(.init(tag: "tag", command: .create(.init("newBox3"), [])))]),
             ("tag CREATE newBox4 (k5 5 k6 6)", [.tagged(.init(tag: "tag", command: .create(.init("newBox4"), [.labelled(.init(key: "k5", value: .sequence(.set([5])))), .labelled(.init(key: "k6", value: .sequence(.set([6]))))])))]),
 
             // MARK: Delete
 
             ("tag DELETE box1", [.tagged(.init(tag: "tag", command: .delete(.init("box1"))))]),
             ("tag DELETE \"box1\"", [.tagged(.init(tag: "tag", command: .delete(.init("box1"))))]),
-            ("tag DELETE {4+}\r\nbox1", [.tagged(.init(tag: "tag", command: .delete(.init("box1"))))]),
+            ("tag DELETE {4+}\nbox1", [.tagged(.init(tag: "tag", command: .delete(.init("box1"))))]),
 
             // MARK: Rename
 
             (#"tag RENAME "foo" "bar""#, [.tagged(TaggedCommand(tag: "tag", command: .rename(from: MailboxName("foo"), to: MailboxName("bar"), parameters: [:])))]),
             (#"tag RENAME InBoX "inBOX""#, [.tagged(TaggedCommand(tag: "tag", command: .rename(from: .inbox, to: .inbox, parameters: [:])))]),
-            ("tag RENAME {1+}\r\n1 {1+}\r\n2", [.tagged(TaggedCommand(tag: "tag", command: .rename(from: MailboxName("1"), to: MailboxName("2"), parameters: [:])))]),
+            ("tag RENAME {1+}\n1 {1+}\n2", [.tagged(TaggedCommand(tag: "tag", command: .rename(from: MailboxName("1"), to: MailboxName("2"), parameters: [:])))]),
 
             // MARK: Subscribe
 
@@ -96,7 +96,7 @@ extension B2MV_Tests {
             ("tag SUBSCRIBE INBOX", [.tagged(.init(tag: "tag", command: .subscribe(.inbox)))]),
             ("tag SUBSCRIBE iNbOx", [.tagged(.init(tag: "tag", command: .subscribe(.inbox)))]),
             ("tag SUBSCRIBE \"INBOX\"", [.tagged(.init(tag: "tag", command: .subscribe(.inbox)))]),
-            ("tag SUBSCRIBE {5+}\r\nINBOX", [.tagged(.init(tag: "tag", command: .subscribe(.inbox)))]),
+            ("tag SUBSCRIBE {5+}\nINBOX", [.tagged(.init(tag: "tag", command: .subscribe(.inbox)))]),
 
             // MARK: Unsubscribe
 
@@ -104,7 +104,7 @@ extension B2MV_Tests {
             ("tag UNSUBSCRIBE INBOX", [.tagged(.init(tag: "tag", command: .unsubscribe(.inbox)))]),
             ("tag UNSUBSCRIBE iNbOx", [.tagged(.init(tag: "tag", command: .unsubscribe(.inbox)))]),
             ("tag UNSUBSCRIBE \"INBOX\"", [.tagged(.init(tag: "tag", command: .unsubscribe(.inbox)))]),
-            ("tag UNSUBSCRIBE {5+}\r\nINBOX", [.tagged(.init(tag: "tag", command: .unsubscribe(.inbox)))]),
+            ("tag UNSUBSCRIBE {5+}\nINBOX", [.tagged(.init(tag: "tag", command: .unsubscribe(.inbox)))]),
 
             // MARK: Check
 
@@ -126,7 +126,7 @@ extension B2MV_Tests {
 
             // MARK: Append
 
-            ("tag APPEND box (\\Seen) {1+}\r\na", [
+            ("tag APPEND box (\\Seen) {1+}\na", [
                 .append(.start(tag: "tag", appendingTo: .init("box"))),
                 .append(.beginMessage(message: .init(options: .init(flagList: [.seen], extensions: [:]), data: .init(byteCount: 1)))),
                 .append(.messageBytes("a")),
@@ -135,7 +135,7 @@ extension B2MV_Tests {
             ]),
         ]
 
-        let input = inoutPairs.map { ($0.0 + CRLF, $0.1.map { SynchronizedCommand($0) }) }
+        let input = inoutPairs.map { ($0.0 + "\n", $0.1.map { SynchronizedCommand($0) }) }
         do {
             try ByteToMessageDecoderVerifier.verifyDecoder(
                 stringInputOutputPairs: input,
