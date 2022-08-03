@@ -41,6 +41,8 @@ public struct SynchronizingLiteralParser {
             buffer.moveWriterIndex(to: buffer.writerIndex - 2)
         case (_, UInt8(ascii: "\n")):
             buffer.moveWriterIndex(to: buffer.writerIndex - 1)
+        case (_, UInt8(ascii: "\r")):
+            buffer.moveWriterIndex(to: buffer.writerIndex - 1)
         default:
             throw ParserError()
         }
@@ -124,7 +126,7 @@ public struct SynchronizingLiteralParser {
         repeat {
             switch self.state {
             case .waitingForCompleteLine:
-                if let newlineIndex = buffer.readableBytesView[(buffer.readableBytesView.startIndex + self.offset)...].firstIndex(of: UInt8(ascii: "\n")) {
+                if let newlineIndex = buffer.readableBytesView[(buffer.readableBytesView.startIndex + self.offset)...].firstIndex(where: { $0 == UInt8(ascii: "\n") || $0 == UInt8(ascii: "\r") }) {
                     self.offset = newlineIndex - buffer.readableBytesView.startIndex + 1
                     switch try Self.lineFragmentType(buffer.readableBytesView[...newlineIndex]) {
                     case .synchronisingLiteral(let length):

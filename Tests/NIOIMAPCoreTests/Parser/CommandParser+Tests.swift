@@ -49,6 +49,24 @@ extension CommandParser_Tests {
         XCTAssertNoThrow(XCTAssertNil(try parser.parseCommandStream(buffer: &literalBuffer)))
     }
 
+    func testParseWithLFMissingFromNewline() {
+        // The FramingParser might split the CRLF lineline into CF only (LF in the “next frame”).
+        // We thus need to be able to parse this:
+        var inputA = ByteBuffer("A26 UID FETCH 1:10002 (UID FLAGS MODSEQ)\r")
+        var parser = CommandParser()
+
+        XCTAssertEqual(
+            try parser.parseCommandStream(buffer: &inputA),
+            .init(.tagged(.init(tag: "A26", command: .uidFetch(messages: UIDSet([1 ... 10002]), attributes: [.uid, .flags, .modificationSequence], modifiers: [])!)), numberOfSynchronisingLiterals: 0)
+        )
+        // Send in another line:
+        var inputB = ByteBuffer("A27 UID FETCH 2:22 (UID FLAGS)\r")
+        XCTAssertEqual(
+            try parser.parseCommandStream(buffer: &inputB),
+            .init(.tagged(.init(tag: "A27", command: .uidFetch(messages: UIDSet([2 ... 22]), attributes: [.uid, .flags], modifiers: [])!)), numberOfSynchronisingLiterals: 0)
+        )
+    }
+
     func testNormalUsage() {
         var input = ByteBuffer("")
         var parser = CommandParser()
