@@ -2223,7 +2223,9 @@ extension ParserUnitTests {
                 ("1.2.3", "\r", .init(part: [1, 2, 3], kind: .complete), #line),
                 ("1.2.3.HEADER", "\r", .init(part: [1, 2, 3], kind: .header), #line),
             ],
-            parserErrorInputs: [],
+            parserErrorInputs: [
+                ("MIME", "\r", #line),
+            ],
             incompleteMessageInputs: [
                 ("", "", #line),
                 ("1", "", #line),

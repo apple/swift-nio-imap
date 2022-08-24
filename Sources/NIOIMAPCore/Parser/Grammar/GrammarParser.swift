@@ -1887,8 +1887,13 @@ extension GrammarParser {
     // section-spec    = section-msgtext / (section-part ["." section-text])
     func parseSectionSpecifier(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SectionSpecifier {
         func parseSectionSpecifier_noPart(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SectionSpecifier {
-            let kind = try self.parseSectionSpecifierKind(buffer: &buffer, tracker: tracker)
-            return .init(kind: kind)
+            try PL.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> SectionSpecifier in
+                let kind = try self.parseSectionSpecifierKind(buffer: &buffer, tracker: tracker)
+                guard kind != .MIMEHeader else {
+                    throw ParserError(hint: "Cannot use MIME with an empty section part")
+                }
+                return .init(kind: kind)
+            }
         }
 
         func parseSectionSpecifier_withPart(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SectionSpecifier {
