@@ -127,7 +127,12 @@ extension GrammarParser {
 
     // mod-sequence-valzer = "0" / mod-sequence-value
     func parseModificationSequenceValue(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ModificationSequenceValue {
-        let (number, _) = try ParserLibrary.parseUnsignedInt64(buffer: &buffer, tracker: tracker, allowLeadingZeros: true)
-        return ModificationSequenceValue(number)
+        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
+            let (number, _) = try ParserLibrary.parseUnsignedInt64(buffer: &buffer, tracker: tracker, allowLeadingZeros: true)
+            guard let v = ModificationSequenceValue(exactly: number) else {
+                throw ParserError(hint: "Mod-seq value is too large.")
+            }
+            return v
+        }
     }
 }

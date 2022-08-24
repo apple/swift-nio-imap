@@ -66,17 +66,21 @@ extension GrammarParser_Sequence_Tests {
     }
 }
 
-// MARK: - mod-sequence-valzer parseModifierSequenceValueZero
+// MARK: - mod-sequence-valzer testParseModifierSequenceValueExtremes
 
 extension GrammarParser_Sequence_Tests {
-    func testParseModifierSequenceValueZero() {
+    func testParseModifierSequenceValueExtremes() {
         self.iterateTests(
             testFunction: GrammarParser().parseModificationSequenceValue,
             validInputs: [
                 ("0", " ", .zero, #line),
-                ("123", " ", 123, #line),
+                ("9223372036854775807", " ", 9223372036854775807, #line),
             ],
-            parserErrorInputs: [],
+            parserErrorInputs: [
+                ("9223372036854775808", " ", #line),
+                ("13853076851840262211", " ", #line),
+                ("18446744073709551615", " ", #line),
+            ],
             incompleteMessageInputs: []
         )
     }
