@@ -38,6 +38,31 @@ extension FramingParserTests {
         XCTAssertEqual(try self.parser.appendAndFrameBuffer(&buffer), [.complete("A1 NOOP\r\n")])
     }
 
+    func testCommandWithQuoted() {
+        var buffer: ByteBuffer = "A1 LOGIN \"foo\" \"bar\"\r\n"
+        XCTAssertEqual(try self.parser.appendAndFrameBuffer(&buffer), [.complete("A1 LOGIN \"foo\" \"bar\"\r\n")])
+    }
+
+    func testCommandWithQuotedContinuationLike_1() {
+        var buffer: ByteBuffer = #"A1 LOGIN "aa{2}bb" "bar"\#r\#n"#
+        XCTAssertEqual(try self.parser.appendAndFrameBuffer(&buffer), [.complete(#"A1 LOGIN "aa{2}bb" "bar"\#r\#n"#)])
+    }
+
+    func testCommandWithQuotedContinuationLike_2() {
+        var buffer: ByteBuffer = #"A1 LOGIN "aa{}bb" "bar"\#r\#n"#
+        XCTAssertEqual(try self.parser.appendAndFrameBuffer(&buffer), [.complete(#"A1 LOGIN "aa{}bb" "bar"\#r\#n"#)])
+    }
+
+    func testCommandWithQuotedContinuationLikeAndEscapedQuote_1() {
+        var buffer: ByteBuffer = #"A1 LOGIN "a\"a{2}bb" "bar"\#r\#n"#
+        XCTAssertEqual(try self.parser.appendAndFrameBuffer(&buffer), [.complete(#"A1 LOGIN "a\"a{2}bb" "bar"\#r\#n"#)])
+    }
+
+    func testCommandWithQuotedContinuationLikeAndEscapedQuote_2() {
+        var buffer: ByteBuffer = #"A1 LOGIN "a\"a\\a{2}bb" "bar"\#r\#n"#
+        XCTAssertEqual(try self.parser.appendAndFrameBuffer(&buffer), [.complete(#"A1 LOGIN "a\"a\\a{2}bb" "bar"\#r\#n"#)])
+    }
+
     // Shows that we don't need a CR to complete a frame
     // as some IMAP implementations don't bother with them.
     func testSimpleCommandNoCR() {
@@ -110,7 +135,7 @@ extension FramingParserTests {
     }
 
     // Note this isn't strictly a valid login command, but it doesn't matter.
-    // Rememeber that the framing parser is just there to look for frames.
+    // Remember that the framing parser is just there to look for frames.
     func testParsingLiteral() {
         var buffer: ByteBuffer = "A1 LOGIN {3}\r\nhey\r\n"
         XCTAssertEqual(try self.parser.appendAndFrameBuffer(&buffer), [.complete("A1 LOGIN {3}\r\n"), .insideLiteral("hey", remainingBytes: 0), .complete("\r\n")])
@@ -130,6 +155,16 @@ extension FramingParserTests {
         var buffer: ByteBuffer = "A1 LOGIN {3}hey\r\n"
         let results = try! self.parser.appendAndFrameBuffer(&buffer)
         XCTAssertEqual(results, [.invalid("A1 LOGIN {3}h"), .complete("ey\r\n")])
+    }
+
+    func testParsingQuotedFollowedByLiteral() {
+        var buffer: ByteBuffer = #"A1 LOGIN "foobar" {3}\#r\#nhey\#r\#n"#
+        XCTAssertEqual(try self.parser.appendAndFrameBuffer(&buffer), [.complete(#"A1 LOGIN "foobar" {3}\#r\#n"#), .insideLiteral("hey", remainingBytes: 0), .complete("\r\n")])
+    }
+
+    func testParsingQuotedWithEscapedQuoteFollowedByLiteral() {
+        var buffer: ByteBuffer = #"A1 LOGIN "foo\"bar" {3}\#r\#nhey\#r\#n"#
+        XCTAssertEqual(try self.parser.appendAndFrameBuffer(&buffer), [.complete(#"A1 LOGIN "foo\"bar" {3}\#r\#n"#), .insideLiteral("hey", remainingBytes: 0), .complete("\r\n")])
     }
 
     func testParsingBinaryLiteral() {
