@@ -16,6 +16,8 @@ import NIO
 import NIOIMAPCore
 
 private let LITERAL_HEADER_START = UInt8(ascii: "{")
+private let ESCAPE = UInt8(ascii: "\\")
+private let DOUBLE_QUOTE = UInt8(ascii: "\"")
 private let LITERAL_HEADER_END = UInt8(ascii: "}")
 private let CR = UInt8(ascii: "\r")
 private let LF = UInt8(ascii: "\n")
@@ -124,6 +126,12 @@ public struct FramingParser: Hashable {
         case foundCR
         case searchingForLiteralHeader(LiteralHeaderState)
         case insideLiteral(lineFeedStrategy: LineFeedByteStrategy, remaining: UInt64)
+        case insideQuoted(QuotedState)
+    }
+
+    enum QuotedState: Hashable {
+        case normal
+        case escaped
     }
 
     var state: State = .normalTraversal(.includeInFrame)
@@ -221,6 +229,15 @@ public struct FramingParser: Hashable {
                     continue
                 }
 
+            case .insideQuoted(let s):
+                let status = readByte_state_insideQuoted(quotedState: s)
+                switch status {
+                case .parsedCompleteFrame:
+                    return .complete(self.readFrame())
+                case .continueParsing:
+                    continue
+                }
+
             case .foundCR:
                 self.readByte_state_foundCR()
                 return .complete(self.readFrame())
@@ -260,6 +277,8 @@ public struct FramingParser: Hashable {
         switch self.state {
         case .normalTraversal:
             return 2 // we need the CRLF (not strictly _need_ as we're lenient)
+        case .insideQuoted:
+            return 3 // we need the last quote + CRLF
         case .foundCR:
             return 0
         case .searchingForLiteralHeader(let substate):
@@ -315,7 +334,7 @@ public struct FramingParser: Hashable {
 }
 
 extension FramingParser {
-    /// Returns `true` if the frame is complete.
+    /// Returns `.parsedCompleteFrame` if the frame is complete.
     private mutating func readByte_state_normalTraversal(lineFeedStrategy: LineFeedByteStrategy) -> FrameStatus {
         let byte = self.readByte()
         switch byte {
@@ -340,10 +359,39 @@ extension FramingParser {
             self.state = .searchingForLiteralHeader(.findingBinaryFlag)
             return .continueParsing
 
+        case DOUBLE_QUOTE:
+            self.state = .insideQuoted(.normal)
+            return .continueParsing
+
         default:
             // We don't need to do anything this byte, as it's just a "normal" part of a
             // command. We "consume" it in the call to readByte above, which just makes
             // the current frame one byte longer.
+            return .continueParsing
+        }
+    }
+
+    private mutating func readByte_state_insideQuoted(quotedState: QuotedState) -> FrameStatus {
+        let byte = self.readByte()
+        switch (byte, quotedState) {
+        case (CR, _), (LF, _):
+            // This is bogus: Can’t have CR or LR inside quoted string.
+            // Complete the frame and let it fail.
+            return .parsedCompleteFrame
+
+        case (ESCAPE, .normal):
+            self.state = .insideQuoted(.escaped)
+            return .continueParsing
+
+        case (DOUBLE_QUOTE, .normal):
+            self.state = .normalTraversal(.includeInFrame)
+            return .continueParsing
+
+        default:
+            // We don't need to do anything this byte, as it's just a "normal" part of a
+            // command. We "consume" it in the call to readByte above, which just makes
+            // the current frame one byte longer.
+            self.state = .insideQuoted(.normal)
             return .continueParsing
         }
     }
