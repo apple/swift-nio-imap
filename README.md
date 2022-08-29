@@ -2,45 +2,69 @@
 
 A Swift project that provides an implementation of the IMAP4rev1 protocol, built upon SwiftNIO.
 
+This project implements:
+ * Parsing IMAPv4 wire-format to type-safe Swift data structures
+ * Encoding these Swift data structures to the IMAPv4 wire format
+ * Extensive support for common IMAP extensions
+ * Integration with SwiftNIO
+
+For a list of IMAP extensions, see [EXTENSIONS.md](EXTENSIONS.md). 
+
+*Note:* This is still a prototype and not quite production ready, yet.
+
 ### Introduction and Usage
 
 `swift-nio-imap` implements the IMAP4rev1 protocol described in RFC 3501 and related RFCs. It is intended as a building block to build mail clients and/or servers. It is built upon SwiftNIO v2.x.
 
 To use the framework use `import NIOIMAP`. NIOIMAP supports a variety of IMAP extensions, check `EXTENSIONS.md` for full details.
 
-### Commands
+### Example Exchange
 
-Commands are what an IMAP client sends to a server.
+As a quick example, here’s part of the the exchange listed in RFC 3501 section 8, where lines starting with S: and C: are from the server and client respectively:
 
-A command consists of a `Tag` and a `Command`.
-
-#### Examples
-`Command("tag1", .noop)` => `tag1 NOOP`
-`Command("tag2", .capability)` => `tag1 CAPABILITY`
-`Command("tag3", .login("email@apple.com", "password"))` => `tag3 LOGIN "email@apple.com" "password"`
-
-To send a command we recommend using a `MessageToByteHandler` with `CommandEncoder` as the encoder:
-
-```
-ClientBootstrap(group: context.eventLoop).channelInitializer { channel in
-  channel.addHandler(MessageToByteHandler(CommandEncoder()))
-}
+```text
+S: * OK IMAP4rev1 Service Ready
+C: a001 login mrc secret
+S: a001 OK LOGIN completed
+C: a002 select inbox
+S: * 18 EXISTS
+S: * FLAGS (\Answered \Flagged \Deleted \Seen \Draft)
+S: * 2 RECENT
+S: * OK [UNSEEN 17] Message 17 is the first unseen message
+S: * OK [UIDVALIDITY 3857529045] UIDs valid
+S: a002 OK [READ-WRITE] SELECT completed```
 ```
 
-Alternatively, you can write a command manually to a `ByteBuffer` manually like this:
+The first 3 lines would correspond to the following in SwiftNIO IMAP:
+```swift
+Response.untagged(.conditionalState(.ok(ResponseText(text: "IMAP4rev1 Service Ready"))))
+CommandStreamPart.tagged(TaggedCommand(tag: "a001", command: .login(username: "mrc", password: "secret")))
+Response.tagged(.init(tag: "a001", state: .ok(ResponseText(text: "LOGIN completed"))))
 ```
-let command = ...
-var buffer = ...
-let writtenSize = buffer.writeCommand(command)
+
+Next, up is the SELECT command and its responses, which are more interesting:
+```swift
+CommandStreamPart.tagged(TaggedCommand(tag: "a002", command: .select(MailboxName("box1"), [])))
+Response.untagged(.mailboxData(.exists(18)))
+Response.untagged(.mailboxData(.flags([.answered, .flagged, .deleted, .seen, .draft])))
+Response.untagged(.mailboxData(.recent(2)))
+Response.untagged(.conditionalState(.ok(ResponseText(code: .unseen(17), text: "Message 17 is the first unseen message"))))
+Response.untagged(.conditionalState(.ok(ResponseText(code: .uidValidity(3857529045), text: "UIDs valid"))))
+Response.tagged(.init(tag: "a002", state: .ok(ResponseText(code: .readWrite, text: "SELECT completed"))))
 ```
 
-### Sample applications
-#### Proxy
-We provide a simple proxy that can be placed between some mail client and server. The mail server *must* support TLS.
+There’s more going on here than this example shows. But this gives a general idea of how the types look and feel.
 
-`swift run Proxy <local_address> <local_port> <server_address> <server_port>`
+### Integration with SwiftNIO
 
-#### CLI
-The CLI allows you (the user) to connect to a mail server and enter commands. The mail server *must* support TLS. The CLI will always attempt to connect to the server on port 993.
+SwiftNIO IMAP provides a pair of ChannelHandler objects that can be integrated into a SwiftNIO ChannelPipeline. This allows sending IMAP commands using NIO Channels.
 
-`swift run CLI`
+The two handlers SwiftNIO IMAP provides are IMAPClientHandler and IMAPServerHandler. Each of these can be inserted into the ChannelPipeline. They can then be used to encode and decode messages. For example:
+```swift
+let group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
+let channel = try await ClientBootstrap(group).channelInitializer { channel in
+    channel.pipeline.addHandler(IMAPClientHandler())
+}.connect(host: example.com, port: 143).get()
+
+try await channel.writeAndFlush(CommandStreamPart.tagged(TaggedCommand(tag: "a001", command: .login(username: "mrc", password: "secret"))), promise: nil)
+```
