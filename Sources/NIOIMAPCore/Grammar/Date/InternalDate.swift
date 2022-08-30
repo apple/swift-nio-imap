@@ -2,7 +2,7 @@
 //
 // This source file is part of the SwiftNIO open source project
 //
-// Copyright (c) 2020 Apple Inc. and the SwiftNIO project authors
+// Copyright (c) 2020-2022 Apple Inc. and the SwiftNIO project authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
@@ -95,7 +95,7 @@ extension ServerMessageDate {
         /// Time zone offset in minutes.
         public let zoneMinutes: Int
 
-        /// Creates a new `Components` collection from the given parameters. Note that currently no sanity checks are performed.
+        /// Creates a new `Components` collection from the given parameters. Note that currently no language checks are performed.
         /// - parameter year: The year, typically to be represented as a 4-digit integer.
         /// - parameter month: The month, typically represented as a 2-digit integer in the range `1...12`
         /// - parameter day: The day, typically represented as a 2-digit integer in the range `1...31`
