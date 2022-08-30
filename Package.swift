@@ -11,7 +11,7 @@ let package = Package(
         .package(url: "https://github.com/apple/swift-nio", from: "2.40.0"),
         .package(url: "https://github.com/apple/swift-nio-ssl", from: "2.20.0"),
         .package(url: "https://github.com/apple/swift-log", from: "1.4.0"),
-        .package(url: "https://github.com/apple/swift-standard-library-preview.git", from: "0.0.3"),
+        .package(url: "https://github.com/apple/swift-se0270-range-set.git", from: "1.0.1"),
         .package(url: "https://github.com/apple/swift-collections.git", "1.0.2" ..< "2.0.0"),
         .package(url: "https://github.com/nicklockwood/SwiftFormat", from: "0.49.11"),
     ],
@@ -42,7 +42,7 @@ let package = Package(
             name: "NIOIMAPCore",
             dependencies: [
                 .product(name: "NIO", package: "swift-nio"),
-                .product(name: "StandardLibraryPreview", package: "swift-standard-library-preview"),
+                .product(name: "SE0270_RangeSet", package: "swift-se0270-range-set"),
                 .product(name: "OrderedCollections", package: "swift-collections"),
             ]
         ),

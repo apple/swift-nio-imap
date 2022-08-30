@@ -13,7 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 import struct NIO.ByteBuffer
-import StandardLibraryPreview
+import SE0270_RangeSet
 
 /// A set contains an array of `MessageIdentifierRange<MessageIdentifier>>` to represent a (potentially large) collection of messages.
 ///
