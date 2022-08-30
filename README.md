@@ -10,7 +10,7 @@ This project implements:
 
 For a list of IMAP extensions, see [EXTENSIONS.md](EXTENSIONS.md). 
 
-*Note:* This is still a prototype and not quite production ready, yet.
+⚠️ **Note:** This library is still in development phases and not ready to be used in production system yet. ⚠️ 
 
 ### Introduction and Usage
 
