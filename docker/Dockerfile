@@ -1,9 +1,9 @@
-ARG swift_version=nightly-5.7
+ARG swift_version=5.7
 ARG ubuntu_version=focal
-ARG swift_repo=swiftlang/swift
-ARG base_image=$swift_repo:$swift_version-$ubuntu_version
+ARG base_image=swift:$swift_version-$ubuntu_version
 FROM $base_image
 # needed to do again after FROM due to docker limitation
+ARG swift_version
 ARG ubuntu_version
 
 # set as UTF-8
@@ -16,13 +16,16 @@ ENV LANGUAGE en_US.UTF-8
 RUN apt-get update && apt-get install -y wget
 RUN apt-get update && apt-get install -y lsof dnsutils netcat-openbsd net-tools curl jq # used by integration tests
 
-# ruby and jazzy for docs generation
- RUN apt-get update && apt-get install -y ruby ruby-dev libsqlite3-dev build-essential
- # switch of gem docs building
- RUN echo "gem: --no-document" > ~/.gemrc
- # jazzy no longer works on xenial as ruby is too old.
- RUN if [ "${ubuntu_version}" != "xenial" ] ; then  gem install jazzy; fi
+# ruby
+RUN apt-get update && apt-get install -y ruby ruby-dev libsqlite3-dev build-essential
 
 # tools
 RUN mkdir -p $HOME/.tools
 RUN echo 'export PATH="$HOME/.tools:$PATH"' >> $HOME/.profile
+
+# swiftformat (until part of the toolchain)
+
+ARG swiftformat_version=0.49.17
+RUN git clone --branch $swiftformat_version --depth 1 https://github.com/nicklockwood/SwiftFormat $HOME/.tools/swift-format
+RUN cd $HOME/.tools/swift-format && swift build -c release
+RUN ln -s $HOME/.tools/swift-format/.build/release/swiftformat $HOME/.tools/swiftformat
