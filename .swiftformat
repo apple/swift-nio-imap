@@ -1,6 +1,6 @@
 # file options
 
---swiftversion 5.4
+--swiftversion 5.7
 --exclude .build
 
 # format options
@@ -15,3 +15,5 @@
 --decimalgrouping ignore
 --binarygrouping ignore
 --octalgrouping ignore
+--extensionacl on-declarations
+

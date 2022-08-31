@@ -95,7 +95,7 @@ extension ServerMessageDate {
         /// Time zone offset in minutes.
         public let zoneMinutes: Int
 
-        /// Creates a new `Components` collection from the given parameters. Note that currently no language checks are performed.
+        /// Creates a new `Components` collection from the given parameters. Note that currently no soundness checks are performed.
         /// - parameter year: The year, typically to be represented as a 4-digit integer.
         /// - parameter month: The month, typically represented as a 2-digit integer in the range `1...12`
         /// - parameter day: The day, typically represented as a 2-digit integer in the range `1...31`
