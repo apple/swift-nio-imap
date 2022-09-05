@@ -13,7 +13,6 @@ let package = Package(
         .package(url: "https://github.com/apple/swift-log", from: "1.4.0"),
         .package(url: "https://github.com/apple/swift-standard-library-preview.git", from: "0.0.3"),
         .package(url: "https://github.com/apple/swift-collections.git", "1.0.2" ..< "2.0.0"),
-        .package(url: "https://github.com/nicklockwood/SwiftFormat", from: "0.49.11"),
     ],
     targets: [
         .executableTarget(
@@ -85,13 +84,6 @@ let package = Package(
                 "NIOIMAP",
                 .product(name: "NIO", package: "swift-nio"),
                 .product(name: "NIOSSL", package: "swift-nio-ssl"),
-            ]
-        ),
-
-        .executableTarget(
-            name: "NIOIMAPFormatter",
-            dependencies: [
-                .product(name: "swiftformat", package: "SwiftFormat"),
             ]
         ),
 
