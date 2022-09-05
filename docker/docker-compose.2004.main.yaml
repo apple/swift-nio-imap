@@ -1,0 +1,21 @@
+version: "3"
+
+services:
+
+  runtime-setup:
+    image: swift-nio-imap:20.04-main
+    build:
+      args:
+        base_image: "swiftlang/swift:nightly-main-focal"
+
+  test:
+    image: swift-nio-imap:20.04-main
+
+  shell:
+    image: swift-nio-imap:20.04-main
+    
+  performance-test:
+    image: swift-nio-imap:20.04-main
+
+  soundness:
+    image: swift-nio-imap:20.04-main
