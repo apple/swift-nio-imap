@@ -51,3 +51,20 @@ extension CommandEncodeBuffer {
         self.encodedAtLeastOneCatenateElement = encodedAtLeastOneCatenateElement
     }
 }
+
+extension CommandEncodeBuffer {
+    /// Call the closure with a buffer, return the result as a String.
+    ///
+    /// Used for implementing ``CustomDebugStringConvertible`` conformance.
+    static func makeDescription(_ closure: (inout CommandEncodeBuffer) -> Void) -> String {
+        var buffer = CommandEncodeBuffer(buffer: ByteBuffer(), options: .rfc3501, loggingMode: false)
+        closure(&buffer)
+        var chunk = buffer.buffer.nextChunk()
+        var result = String(bestEffortDecodingUTF8Bytes: chunk.bytes.readableBytesView)
+        while chunk.waitForContinuation {
+            chunk = buffer.buffer.nextChunk()
+            result += String(bestEffortDecodingUTF8Bytes: chunk.bytes.readableBytesView)
+        }
+        return result
+    }
+}

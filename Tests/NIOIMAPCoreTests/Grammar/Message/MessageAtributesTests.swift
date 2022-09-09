@@ -64,3 +64,18 @@ extension MessageAttributesTests {
         }
     }
 }
+
+// MARK: - CustomDebugStringConvertible
+
+extension MessageAttributesTests {
+    func testCustomDebugStringConvertible() {
+        let inputs: [(MessageAttribute, String, UInt)] = [
+            (.rfc822Size(123), "RFC822.SIZE 123", #line),
+            (.flags([.draft]), "FLAGS (\\Draft)", #line),
+            (.gmailLabels([GmailLabel("\\Inbox"), GmailLabel("\\Sent"), GmailLabel("Important"), GmailLabel("Muy Importante")]), "X-GM-LABELS (\\Inbox \\Sent \"Important\" \"Muy Importante\")", #line),
+        ]
+        inputs.forEach { (part, expected, line) in
+            XCTAssertEqual("\(part)", expected, line: line)
+        }
+    }
+}

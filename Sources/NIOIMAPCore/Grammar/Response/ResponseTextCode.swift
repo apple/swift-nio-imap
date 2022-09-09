@@ -402,9 +402,8 @@ extension EncodeBuffer {
 
 extension ResponseTextCode: CustomDebugStringConvertible {
     public var debugDescription: String {
-        var encoder = EncodeBuffer
-            .serverEncodeBuffer(buffer: ByteBuffer(), options: ResponseEncodingOptions(), loggingMode: true)
-        _ = encoder.writeResponseTextCode(self)
-        return String(bestEffortDecodingUTF8Bytes: encoder.buffer.readableBytesView)
+        EncodeBuffer.makeDescription {
+            $0.writeResponseTextCode(self)
+        }
     }
 }

@@ -76,6 +76,21 @@ extension EncodeBuffer {
 }
 
 extension EncodeBuffer {
+    /// Call the closure with a buffer, return the result as a String.
+    ///
+    /// Used for implementing ``CustomDebugStringConvertible`` conformance.
+    static func makeDescription(_ closure: (inout EncodeBuffer) -> Void) -> String {
+        var options = CommandEncodingOptions.rfc3501
+        options.useQuotedString = true
+        options.useSynchronizingLiteral = false
+        options.useNonSynchronizingLiteralPlus = true
+        var buffer = EncodeBuffer.clientEncodeBuffer(buffer: ByteBuffer(), options: options, loggingMode: false)
+        closure(&buffer)
+        return String(bestEffortDecodingUTF8Bytes: buffer.buffer.readableBytesView)
+    }
+}
+
+extension EncodeBuffer {
     /// Represents a piece of data that is ready to be written to the network.
     public struct Chunk: Hashable {
         /// The data that is ready to be written.

@@ -56,6 +56,14 @@ public enum MessageAttribute: Hashable {
     case gmailLabels([GmailLabel])
 }
 
+extension MessageAttribute: CustomDebugStringConvertible {
+    public var debugDescription: String {
+        EncodeBuffer.makeDescription {
+            $0.writeMessageAttribute(self)
+        }
+    }
+}
+
 // MARK: - Encoding
 
 extension EncodeBuffer {

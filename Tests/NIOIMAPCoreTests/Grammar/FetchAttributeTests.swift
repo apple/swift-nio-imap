@@ -64,7 +64,7 @@ extension FetchAttributeTests {
             (.bodyStructure(extensions: true), "BODYSTRUCTURE", #line),
             (.bodySection(peek: false, .init(kind: .header), nil), "BODY[HEADER]", #line),
             (.bodySection(peek: false, .init(kind: .header), nil), "BODY[HEADER]", #line),
-            (.bodySection(peek: true, .init(kind: .headerFields(["message-id", "in-reply-to"])), nil), #"BODY.PEEK[HEADER.FIELDS ("∅" "∅")]"#, #line),
+            (.bodySection(peek: true, .init(kind: .headerFields(["message-id", "in-reply-to"])), nil), #"BODY.PEEK[HEADER.FIELDS ("message-id" "in-reply-to")]"#, #line),
             (.binarySize(section: [1]), "BINARY.SIZE[1]", #line),
             (.binary(peek: true, section: [1, 2, 3], partial: nil), "BINARY.PEEK[1.2.3]", #line),
             (.binary(peek: false, section: [3, 4, 5], partial: nil), "BINARY[3.4.5]", #line),

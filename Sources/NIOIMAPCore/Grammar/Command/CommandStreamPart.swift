@@ -126,15 +126,9 @@ public enum CommandStreamPart: Hashable {
 
 extension CommandStreamPart: CustomDebugStringConvertible {
     public var debugDescription: String {
-        var buffer = CommandEncodeBuffer(buffer: ByteBuffer(), options: .rfc3501, loggingMode: true)
-        buffer.writeCommandStream(self)
-        var chunk = buffer.buffer.nextChunk()
-        var result = String(buffer: chunk.bytes)
-        while chunk.waitForContinuation {
-            chunk = buffer.buffer.nextChunk()
-            result += String(buffer: chunk.bytes)
+        CommandEncodeBuffer.makeDescription {
+            $0.writeCommandStream(self)
         }
-        return result
     }
 }
 

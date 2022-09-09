@@ -43,6 +43,19 @@ extension ResponseEncodeBuffer {
     }
 }
 
+extension ResponseEncodeBuffer {
+    /// Call the closure with a buffer, return the result as a String.
+    ///
+    /// Used for implementing ``CustomDebugStringConvertible`` conformance.
+    static func makeDescription(_ closure: (inout ResponseEncodeBuffer) -> Void) -> String {
+        var options = ResponseEncodingOptions()
+        options.useQuotedString = true
+        var buffer = ResponseEncodeBuffer(buffer: ByteBuffer(), options: options, loggingMode: false)
+        closure(&buffer)
+        return String(bestEffortDecodingUTF8Bytes: buffer.buffer.buffer.readableBytesView)
+    }
+}
+
 // MARK: - Encode ContinuationRequest
 
 extension ResponseEncodeBuffer {
@@ -132,24 +145,28 @@ extension ResponseEncodeBuffer {
         }
     }
 
-    @discardableResult mutating func writeStreamingKind(_ type: StreamingKind, size: Int) -> Int {
-        switch type {
+    @discardableResult mutating func writeStreamingKind(_ kind: StreamingKind, size: Int) -> Int {
+        self.writeStreamingKind(kind) +
+            self.buffer.writeSpace() +
+            self.buffer.writeString("{\(size)}\r\n")
+    }
+
+    @discardableResult mutating func writeStreamingKind(_ kind: StreamingKind) -> Int {
+        switch kind {
         case .binary:
-            return self.buffer.writeString("BINARY {\(size)}\r\n")
+            return self.buffer.writeString("BINARY")
         case .body(let section, let offset):
             return self.buffer.writeString("BODY") +
                 self.buffer.writeSection(section) +
                 self.buffer.writeIfExists(offset) { offset in
                     self.buffer.writeString("<\(offset)>")
-                } +
-                self.buffer.writeSpace() +
-                self.buffer.writeString("{\(size)}\r\n")
+                }
         case .rfc822:
-            return self.buffer.writeString("RFC822 {\(size)}\r\n")
+            return self.buffer.writeString("RFC822")
         case .rfc822Text:
-            return self.buffer.writeString("RFC822.TEXT {\(size)}\r\n")
+            return self.buffer.writeString("RFC822.TEXT")
         case .rfc822Header:
-            return self.buffer.writeString("RFC822.HEADER {\(size)}\r\n")
+            return self.buffer.writeString("RFC822.HEADER")
         }
     }
 }
