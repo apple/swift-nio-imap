@@ -69,3 +69,21 @@ extension Response_Tests {
         }
     }
 }
+
+// MARK: - CustomDebugStringConvertible
+
+extension Response_Tests {
+    func testCustomDebugStringConvertible_StreamingKind() {
+        let inputs: [(StreamingKind, String, UInt)] = [
+            (.body(section: .init(), offset: nil), "BODY[]", #line),
+            (.body(section: .init(), offset: 1234), "BODY[]<1234>", #line),
+            (.body(section: .init(part: [2, 3], kind: .header), offset: 1234), "BODY[2.3.HEADER]<1234>", #line),
+            (.rfc822, "RFC822", #line),
+            (.rfc822Text, "RFC822.TEXT", #line),
+            (.rfc822Header, "RFC822.HEADER", #line),
+        ]
+        inputs.forEach { (part, expected, line) in
+            XCTAssertEqual("\(part)", expected, line: line)
+        }
+    }
+}

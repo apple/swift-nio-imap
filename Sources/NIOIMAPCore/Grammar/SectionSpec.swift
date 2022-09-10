@@ -80,22 +80,9 @@ extension SectionSpecifier: CustomDebugStringConvertible {
     /// A textual representation of the `SectionSpecifier` that is inline with the IMAP RFC.
     /// E.g. *.MIME*.
     public var debugDescription: String {
-        let kind: String
-        switch self.kind {
-        case .complete:
-            kind = ""
-        case .header:
-            kind = ".HEADER"
-        case .headerFields(let fields):
-            kind = ".HEADER.FIELDS (\(fields.joined(separator: ","))"
-        case .headerFieldsNot(let fields):
-            kind = ".HEADER.FIELDS.NOT (\(fields.joined(separator: ","))"
-        case .MIMEHeader:
-            kind = ".MIME"
-        case .text:
-            kind = ".TEXT"
+        EncodeBuffer.makeDescription {
+            $0.writeSectionSpecifier(self)
         }
-        return "\(part)\(kind)"
     }
 }
 
@@ -179,7 +166,9 @@ extension SectionSpecifier.Part: Comparable {
 extension SectionSpecifier.Part: CustomDebugStringConvertible {
     /// Produces a textual representation as period-separated numbers (as defined in the IMAP RFC).
     public var debugDescription: String {
-        self.array.map { "\($0)" }.joined(separator: ".")
+        EncodeBuffer.makeDescription {
+            $0.writeSectionPart(self)
+        }
     }
 }
 

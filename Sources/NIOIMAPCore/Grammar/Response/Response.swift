@@ -134,3 +134,11 @@ extension StreamingKind {
         }
     }
 }
+
+extension StreamingKind: CustomDebugStringConvertible {
+    public var debugDescription: String {
+        ResponseEncodeBuffer.makeDescription {
+            $0.writeStreamingKind(self)
+        }
+    }
+}

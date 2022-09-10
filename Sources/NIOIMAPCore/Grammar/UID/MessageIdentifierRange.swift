@@ -43,10 +43,8 @@ public struct MessageIdentifierRange<IdentifierType: MessageIdentifier>: Hashabl
 extension MessageIdentifierRange: CustomDebugStringConvertible {
     /// Creates a human-readable representation of the range.
     public var debugDescription: String {
-        if self.range.lowerBound < self.range.upperBound {
-            return "\(self.range.lowerBound):\(self.range.upperBound)"
-        } else {
-            return "\(self.range.lowerBound)"
+        EncodeBuffer.makeDescription {
+            $0.writeMessageIdentifierRange(self)
         }
     }
 }

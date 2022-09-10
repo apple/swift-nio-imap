@@ -45,10 +45,8 @@ extension MessageIdentifier {
     /// Creates a human-readable `String` representation of the `MessageIdentifier`.
     /// `*` if `self = UInt32.max`, otherwise `self.rawValue` as a `String`.
     public var debugDescription: String {
-        if self == .max {
-            return "*"
-        } else {
-            return "\(self.rawValue)"
+        EncodeBuffer.makeDescription {
+            $0.writeMessageIdentifier(self)
         }
     }
 

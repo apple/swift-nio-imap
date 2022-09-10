@@ -85,13 +85,9 @@ extension Array where Element == FetchAttribute {
 
 extension FetchAttribute: CustomDebugStringConvertible {
     public var debugDescription: String {
-        var options = CommandEncodingOptions.rfc3501
-        options.useQuotedString = true
-        options.useSynchronizingLiteral = false
-        options.useNonSynchronizingLiteralPlus = true
-        var buffer = EncodeBuffer.clientEncodeBuffer(buffer: ByteBuffer(), options: options, loggingMode: true)
-        buffer.writeFetchAttribute(self)
-        return String(bestEffortDecodingUTF8Bytes: buffer.buffer.readableBytesView)
+        EncodeBuffer.makeDescription {
+            $0.writeFetchAttribute(self)
+        }
     }
 }
 

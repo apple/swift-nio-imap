@@ -194,15 +194,9 @@ public enum Command: Hashable {
 
 extension Command: CustomDebugStringConvertible {
     public var debugDescription: String {
-        var buffer = CommandEncodeBuffer(buffer: ByteBuffer(), options: .rfc3501, loggingMode: true)
-        buffer.writeCommand(self)
-        var chunk = buffer.buffer.nextChunk()
-        var result = String(buffer: chunk.bytes)
-        while chunk.waitForContinuation {
-            chunk = buffer.buffer.nextChunk()
-            result += String(buffer: chunk.bytes)
+        CommandEncodeBuffer.makeDescription {
+            $0.writeCommand(self)
         }
-        return result
     }
 }
 

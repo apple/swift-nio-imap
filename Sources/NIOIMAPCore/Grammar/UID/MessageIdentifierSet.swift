@@ -208,10 +208,9 @@ extension MessageIdentifierSet {
 extension MessageIdentifierSet: CustomDebugStringConvertible {
     /// Creates a human-readable text representation of the set by joined ranges with a comma.
     public var debugDescription: String {
-        _ranges
-            .ranges
-            .map { "\(MessageIdentifierRange<IdentifierType>($0))" }
-            .joined(separator: ",")
+        EncodeBuffer.makeDescription {
+            _ = self.writeIntoBuffer(&$0)
+        }
     }
 }
 
