@@ -38,73 +38,154 @@ extension BodyStructure: RandomAccessCollection {
     /// Because `BodyStructure` is a recursive type, a`SubSequence` is defined as `Slice<BodyStructure>`.
     public typealias SubSequence = Slice<BodyStructure>
 
+    public var underestimatedCount: Int {
+        // The complete part + sub-parts at level 1:
+        1 + subpartCount
+    }
+
+    public var isEmpty: Bool { false }
+
     /// Gets the body at the given `position`.
+    ///
+    /// This will assert if `position` is not a valid part of this ``BodyStructure``.
+    ///
     /// - parameter position: The position of the desired body.
     /// - returns: The body located at the given `position`.
     public subscript(position: SectionSpecifier.Part) -> BodyStructure {
-        // TODO: Can we get rid of this guard if we move the checks to SectionSpecifier.Part.init?
-        guard let first = position.array.first, first > 0 else {
-            preconditionFailure("Part must contain a first number > 0")
-        }
+        guard
+            let r = subBodyStructure(at: position)
+        else { fatalError("Invalid SectionSpecifier.Part \(String(reflecting: position))") }
+        return r
+    }
 
-        switch self {
-        case .singlepart(let part):
-            switch part.kind {
-            case .basic:
-                return self
-            case .message(let message):
-                return message.body
-            case .text:
-                return self
-            }
-
-        case .multipart(let part):
-            guard first <= part.parts.count else {
-                fatalError("\(first) is out of range")
-            }
-            if position.array.count == 1 {
-                return part.parts[first - 1]
-            } else {
-                let subPosition = SectionSpecifier.Part(Array(position.array.dropFirst()))
-                return part.parts[first - 1][subPosition]
-            }
-        }
+    /// Gets the body at the given `position`.
+    ///
+    /// Returns `nil` if the given part does not exist.
+    public func find(_ position: SectionSpecifier.Part) -> BodyStructure? {
+        subBodyStructure(at: position)
     }
 
     /// The index of the first part of the body. Note that single-part and multi-part messages always have at least one part. IN
     /// a single-part message, the only part is the message itself.
     public var startIndex: SectionSpecifier.Part {
-        [1]
+        []
     }
 
     /// The last index of the body. Note that this does not go into child nodes, but only considers sibling parts.
     public var endIndex: SectionSpecifier.Part {
-        switch self {
-        case .singlepart:
-            return [2]
-        case .multipart(let part):
-            return [part.parts.count + 1]
-        }
+        [subpartCount + 1]
     }
 
-    /// Gets the index before the given index. Note that this does not go into child nodes, but only considers sibling parts.
+    /// Gets the index before the given index.
     /// - parameter i: The index in question.
     /// - returns: The index required to get the previous body part.
     public func index(before i: SectionSpecifier.Part) -> SectionSpecifier.Part {
-        guard let first = i.array.first else {
-            fatalError("Must contain at least one number")
+        guard
+            let last = i.array.last
+        else { fatalError("Invalid SectionSpecifier.Part \(String(reflecting: i))") }
+        // If the last value is larger than 1, we subtract one from it:
+        if last > 1 {
+            let sibling = SectionSpecifier.Part(Array(i.array.dropLast()) + [last - 1])
+            return lastPart(inside: sibling)
         }
-        return [first - 1]
+        // The last value is 1.
+        let parent = i.dropLast()
+        return parent
     }
 
-    /// Gets the index after the given index. Note that this does not go into child nodes, but only considers sibling parts.
+    /// Gets the index after the given index.
     /// - parameter i: The index in question.
-    /// - returns: The index required to get the next body.
+    /// - returns: The index required to get the next body part.
     public func index(after i: SectionSpecifier.Part) -> SectionSpecifier.Part {
-        guard let first = i.array.first else {
-            fatalError("Must contain at least one number")
+        guard
+            let bs = self.subBodyStructure(at: i)
+        else { fatalError("Invalid SectionSpecifier.Part \(String(reflecting: i))") }
+        if bs.subpartCount > 0 {
+            return i.appending(1)
         }
-        return [first + 1]
+        var ii = i
+        while let last = ii.array.last {
+            let parent = ii.dropLast()
+            let siblingCount = self.subBodyStructure(at: parent)!.subpartCount
+            // Note: parts are 1-based:
+            if last < siblingCount {
+                return parent.appending(last + 1)
+            }
+            ii = parent
+        }
+        return endIndex
+    }
+}
+
+extension BodyStructure {
+    /// Returns the sub-`BodyStructure` for the given part — or `nil` if the part doesn’t exist.
+    private func subBodyStructure(at part: SectionSpecifier.Part) -> BodyStructure? {
+        guard
+            let first = part.array.first
+        else { return self }
+        guard
+            let sub = subBodyStructure(at: first)
+        else { return nil }
+        return sub.subBodyStructure(at: part.dropFirst())
+    }
+
+    private func subBodyStructure(at index: Int) -> BodyStructure? {
+        guard index > 0 else { return nil }
+        switch self {
+        case .singlepart(let part):
+            switch part.kind {
+            case .message(let message):
+                return message.body.subBodyStructure(at: index) ?? message.body
+            default:
+                // Other single-part do not have sub-parts.
+                return nil
+            }
+        case .multipart(let part):
+            guard index <= part.parts.count else { return nil }
+            // SectionSpecifier.Part is 1-based:
+            return part.parts[index - 1]
+        }
+    }
+}
+
+// MARK: - Helpers
+
+extension SectionSpecifier.Part {
+    func dropFirst() -> SectionSpecifier.Part {
+        SectionSpecifier.Part(Array(self.array.dropFirst()))
+    }
+
+    func dropLast() -> SectionSpecifier.Part {
+        SectionSpecifier.Part(Array(self.array.dropLast()))
+    }
+
+    func appending(_ element: Int) -> SectionSpecifier.Part {
+        SectionSpecifier.Part(self.array + [element])
+    }
+}
+
+extension BodyStructure {
+    private var subpartCount: Int {
+        switch self {
+        case .singlepart(let part):
+            switch part.kind {
+            case .message(let message):
+                return message.body.subpartCount
+            default:
+                return 0
+            }
+        case .multipart(let part):
+            return part.parts.count
+        }
+    }
+
+    private func lastPart(inside part: SectionSpecifier.Part) -> SectionSpecifier.Part {
+        var result = part
+        while let bs = subBodyStructure(at: result) {
+            guard bs.subpartCount > 0 else { break }
+            result = result.appending(bs.subpartCount)
+        }
+        return result
     }
 }
 
