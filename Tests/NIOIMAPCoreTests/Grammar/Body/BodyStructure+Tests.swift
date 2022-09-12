@@ -44,7 +44,7 @@ extension BodyStructure_Tests {
 // MARK: - RandomAccessCollection
 
 extension BodyStructure_Tests {
-    func testRansomAccessCollection_indexBeforeAfter() {
+    func testRandomAccessCollection_indexBeforeAfter() {
         // This checks that
         //  * startIndex
         //  * endIndex
