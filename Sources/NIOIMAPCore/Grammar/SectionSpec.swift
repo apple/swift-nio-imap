@@ -255,6 +255,42 @@ extension SectionSpecifier.Kind: Comparable {
     }
 }
 
+// MARK: - Helpers
+
+extension SectionSpecifier.Part {
+    /// Returns a `Part` containing all but the initial part number.
+    ///
+    /// If the `Part` is empty (i.e. the complete message), it returns the empty
+    /// `Part` / complete message specifier.
+    public func dropFirst() -> SectionSpecifier.Part {
+        SectionSpecifier.Part(Array(self.array.dropFirst()))
+    }
+
+    /// Returns a `Part` containing all but the last part number.
+    ///
+    /// If the `Part` is empty (i.e. the complete message), it returns the empty
+    /// `Part` / complete message specifier.
+    public func dropLast() -> SectionSpecifier.Part {
+        SectionSpecifier.Part(Array(self.array.dropLast()))
+    }
+
+    /// Returns a `Part` that has the given part number appended.
+    public func appending(_ element: Int) -> SectionSpecifier.Part {
+        SectionSpecifier.Part(self.array + [element])
+    }
+
+    /// Returns `true` if the `other` part is nested inside this `Part`. Returns `false` otherwise.
+    public func isSubPart(of other: SectionSpecifier.Part) -> Bool {
+        let a = Array(self)
+        let b = Array(other)
+        guard
+            b.count < a.count,
+            b != a
+        else { return false }
+        return zip(a, b).allSatisfy { $0.0 == $0.1 }
+    }
+}
+
 // MARK: - Encoding
 
 extension EncodeBuffer {

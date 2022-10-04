@@ -150,22 +150,28 @@ extension BodyStructure {
 
 // MARK: - Helpers
 
-extension SectionSpecifier.Part {
-    func dropFirst() -> SectionSpecifier.Part {
-        SectionSpecifier.Part(Array(self.array.dropFirst()))
-    }
-
-    func dropLast() -> SectionSpecifier.Part {
-        SectionSpecifier.Part(Array(self.array.dropLast()))
-    }
-
-    func appending(_ element: Int) -> SectionSpecifier.Part {
-        SectionSpecifier.Part(self.array + [element])
-    }
-}
-
 extension BodyStructure {
-    private var subpartCount: Int {
+    /// Enumerates all sub-parts in this `BodyStructure`.
+    ///
+    /// For each part, the given `closure` will be called with the part’s `SectionSpecifier.Part` and it’s (sub-) `BodyStructure`.
+    ///
+    /// The closure will be called with `SectionSpecifier.Part` being ordered ascending.
+    public func enumerateParts(_ closure: (SectionSpecifier.Part, BodyStructure) throws -> Void) rethrows {
+        try closure([], self)
+        try recursiveEnumerateParts(parent: [], closure)
+    }
+
+    private func recursiveEnumerateParts(parent: SectionSpecifier.Part, _ closure: (SectionSpecifier.Part, BodyStructure) throws -> Void) rethrows {
+        guard self.subpartCount > 0 else { return }
+        for part in 1 ... self.subpartCount {
+            let spec = SectionSpecifier.Part(Array(parent) + [part])
+            let bs = self[[part]]
+            try closure(spec, bs)
+            try bs.recursiveEnumerateParts(parent: spec, closure)
+        }
+    }
+
+    public var subpartCount: Int {
         switch self {
         case .singlepart(let part):
             switch part.kind {

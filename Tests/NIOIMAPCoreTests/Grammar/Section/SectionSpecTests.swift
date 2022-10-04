@@ -127,6 +127,60 @@ extension SectionSpecifierTests {
     }
 }
 
+// MARK: - Helpers
+
+extension SectionSpecifierTests {
+    func testDropFirst() {
+        let inputs: [(SectionSpecifier.Part, SectionSpecifier.Part, UInt)] = [
+            ([], [], #line),
+            ([5], [], #line),
+            ([5, 3], [3], #line),
+            ([5, 3, 8], [3, 8], #line),
+        ]
+        inputs.forEach { (part, expected, line) in
+            XCTAssertEqual(part.dropFirst(), expected, line: line)
+        }
+    }
+
+    func testDropLast() {
+        let inputs: [(SectionSpecifier.Part, SectionSpecifier.Part, UInt)] = [
+            ([], [], #line),
+            ([5], [], #line),
+            ([5, 3], [5], #line),
+            ([5, 3, 8], [5, 3], #line),
+        ]
+        inputs.forEach { (part, expected, line) in
+            XCTAssertEqual(part.dropLast(), expected, line: line)
+        }
+    }
+
+    func testAppending() {
+        let inputs: [(SectionSpecifier.Part, Int, SectionSpecifier.Part, UInt)] = [
+            ([], 1, [1], #line),
+            ([5, 3, 8], 4, [5, 3, 8, 4], #line),
+        ]
+        inputs.forEach { (part, new, expected, line) in
+            XCTAssertEqual(part.appending(new), expected, line: line)
+        }
+    }
+
+    func testIsSubPartOf() {
+        let inputs: [(SectionSpecifier.Part, SectionSpecifier.Part, Bool, UInt)] = [
+            ([], [], false, #line),
+            ([2, 3], [2, 3], false, #line),
+            ([2, 3, 1], [2, 3], true, #line),
+            ([2, 3], [2, 3, 1], false, #line),
+            ([2, 3, 1, 7], [2, 3], true, #line),
+            ([2, 3, 1, 7], [2, 3, 1], true, #line),
+            ([2, 4, 1, 7], [2, 3], false, #line),
+            ([5, 3, 1, 7], [2, 3], false, #line),
+        ]
+        inputs.forEach { (part, other, expected, line) in
+            XCTAssertEqual(part.isSubPart(of: other), expected, line: line)
+        }
+    }
+}
+
 // MARK: - CustomDebugStringConvertible
 
 extension SectionSpecifierTests {
