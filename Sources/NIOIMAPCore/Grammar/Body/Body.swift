@@ -195,46 +195,6 @@ extension BodyStructure {
     }
 }
 
-// MARK: - Types
-
-extension BodyStructure {
-    /// The subtype of a multi-part body.
-    public struct MediaSubtype: CustomDebugStringConvertible, Hashable {
-        /// When used with a `multipart` type, specifies the same data as different formats.
-        public static var alternative: Self {
-            .init("alternative")
-        }
-
-        /// When used with a `multipart` type, specifies compound objects consisting of several related body parts.
-        public static var related: Self {
-            .init("related")
-        }
-
-        /// When used with a `multipart` type, specifies a generic set of mixed data types.
-        public static var mixed: Self {
-            .init("mixed")
-        }
-
-        /// The subtype as a lowercased string
-        internal let stringValue: String
-
-        /// The subtype as a lowercased string
-        public var debugDescription: String { stringValue }
-
-        /// Creates a new `MediaSubtype` from the given `String`, which will be lowercased.
-        /// - parameter rawValue: The subtype as a `String`. Note that the string will be lowercased.
-        public init(_ stringValue: String) {
-            self.stringValue = stringValue.lowercased()
-        }
-    }
-}
-
-extension String {
-    public init(_ other: BodyStructure.MediaSubtype) {
-        self = other.stringValue
-    }
-}
-
 // MARK: - Encoding
 
 extension EncodeBuffer {

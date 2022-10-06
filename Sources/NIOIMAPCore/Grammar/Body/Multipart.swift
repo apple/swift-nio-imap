@@ -23,7 +23,7 @@ extension BodyStructure {
         public var parts: [BodyStructure]
 
         /// The subtype of the message, e.g. `mixed` (from `multipart/mixed`)
-        public var mediaSubtype: MediaSubtype
+        public var mediaSubtype: Media.Subtype
 
         /// Optional additional fields that are not required to form a valid `Multipart`
         public var `extension`: Extension?
@@ -32,7 +32,7 @@ extension BodyStructure {
         /// - parameter parts: The sub-parts that form the `Multipart`
         /// - parameter mediaSubtype: The subtype of the message, e.g. *multipart/mixed*
         /// - parameter extension: Optional additional fields that are not required to form a valid `Multipart` body
-        public init(parts: [BodyStructure], mediaSubtype: MediaSubtype, extension: Extension? = nil) {
+        public init(parts: [BodyStructure], mediaSubtype: Media.Subtype, extension: Extension? = nil) {
             self.parts = parts
             self.mediaSubtype = mediaSubtype
             self.extension = `extension`
@@ -68,9 +68,7 @@ extension EncodeBuffer {
             result += self.writeBody(body)
         } +
             self.writeSpace() +
-            self.writeString("\"multipart/") +
             self.writeMediaSubtype(part.mediaSubtype) +
-            self.writeString("\"") +
             self.writeIfExists(part.extension) { (ext) -> Int in
                 self.writeSpace() +
                     self.writeBodyExtensionMultipart(ext)
@@ -82,9 +80,5 @@ extension EncodeBuffer {
             self.writeIfExists(ext.dispositionAndLanguage) { (dspLanguage) -> Int in
                 self.writeBodyDispositionAndLanguage(dspLanguage)
             }
-    }
-
-    @discardableResult mutating func writeMediaSubtype(_ type: BodyStructure.MediaSubtype) -> Int {
-        self.writeString(type.stringValue)
     }
 }

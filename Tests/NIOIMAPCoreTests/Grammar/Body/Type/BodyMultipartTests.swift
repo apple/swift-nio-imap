@@ -25,24 +25,24 @@ extension BodyMultipartTests {
         let inputs: [(BodyStructure.Multipart, String, UInt)] = [
             (
                 .init(parts: [
-                    .singlepart(BodyStructure.Singlepart(kind: .text(.init(mediaText: "subtype", lineCount: 5)), fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .base64, octetCount: 6), extension: nil)),
+                    .singlepart(BodyStructure.Singlepart(kind: .text(.init(mediaSubtype: "subtype", lineCount: 5)), fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .base64, octetCount: 6), extension: nil)),
                 ], mediaSubtype: .mixed, extension: nil),
-                "(\"TEXT\" \"subtype\" NIL NIL NIL \"BASE64\" 6 5) \"multipart/mixed\"",
+                #"("TEXT" "SUBTYPE" NIL NIL NIL "BASE64" 6 5) "MIXED""#,
                 #line
             ),
             (
                 .init(parts: [
-                    .singlepart(BodyStructure.Singlepart(kind: .text(.init(mediaText: "subtype", lineCount: 5)), fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .base64, octetCount: 6), extension: nil)),
+                    .singlepart(BodyStructure.Singlepart(kind: .text(.init(mediaSubtype: "html", lineCount: 5)), fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .base64, octetCount: 6), extension: nil)),
                 ], mediaSubtype: .alternative, extension: .init(parameters: [:], dispositionAndLanguage: nil)),
-                "(\"TEXT\" \"subtype\" NIL NIL NIL \"BASE64\" 6 5) \"multipart/alternative\" NIL",
+                #"("TEXT" "HTML" NIL NIL NIL "BASE64" 6 5) "ALTERNATIVE" NIL"#,
                 #line
             ),
             (
                 .init(parts: [
-                    .singlepart(BodyStructure.Singlepart(kind: .text(.init(mediaText: "subtype", lineCount: 5)), fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .base64, octetCount: 6), extension: nil)),
-                    .singlepart(BodyStructure.Singlepart(kind: .text(.init(mediaText: "subtype", lineCount: 6)), fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .base64, octetCount: 7), extension: nil)),
+                    .singlepart(BodyStructure.Singlepart(kind: .text(.init(mediaSubtype: "html", lineCount: 5)), fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .base64, octetCount: 6), extension: nil)),
+                    .singlepart(BodyStructure.Singlepart(kind: .text(.init(mediaSubtype: "plain", lineCount: 6)), fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .base64, octetCount: 7), extension: nil)),
                 ], mediaSubtype: .related, extension: nil),
-                "(\"TEXT\" \"subtype\" NIL NIL NIL \"BASE64\" 6 5)(\"TEXT\" \"subtype\" NIL NIL NIL \"BASE64\" 7 6) \"multipart/related\"",
+                #"("TEXT" "HTML" NIL NIL NIL "BASE64" 6 5)("TEXT" "PLAIN" NIL NIL NIL "BASE64" 7 6) "RELATED""#,
                 #line
             ),
         ]
@@ -59,15 +59,5 @@ extension BodyMultipartTests {
             ),
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeBodyExtensionMultipart($0) })
-    }
-
-    func testEncode_mediaSubtype() {
-        let inputs: [(BodyStructure.MediaSubtype, String, UInt)] = [
-            (.alternative, "alternative", #line),
-            (.mixed, "mixed", #line),
-            (.related, "related", #line),
-            (.init("other"), "other", #line),
-        ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeMediaSubtype($0) })
     }
 }

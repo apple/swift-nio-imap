@@ -44,7 +44,7 @@ extension BodyStructure.Singlepart {
     /// Represents the type of a single-part message.
     public indirect enum Kind: Hashable {
         /// A simple message containing only one kind of data.
-        case basic(Media.Basic)
+        case basic(Media.MediaType)
 
         /// A "full" email message containing an envelope, and a child body.
         case message(Message)
@@ -55,8 +55,8 @@ extension BodyStructure.Singlepart {
 
     /// Represents a typical "full" email message, containing an envelope and a child message.
     public struct Message: Hashable {
-        /// Indication if the message contains an encapsulated message.
-        public var message: Media.Message
+        /// The RFC 2045 sub-type. This will usually be `rfc822`.
+        public var message: Media.Subtype
 
         /// The envelope of the message, potentially including the message sender, bcc list, etc.
         public var envelope: Envelope
@@ -72,7 +72,7 @@ extension BodyStructure.Singlepart {
         /// - parameter envelope: The envelope of the message
         /// - parameter body: The encapsulated message. Note that this may be a multi-part.
         /// - parameter lineCount: The number of lines in the message
-        public init(message: Media.Message, envelope: Envelope, body: BodyStructure, lineCount: Int) {
+        public init(message: Media.Subtype, envelope: Envelope, body: BodyStructure, lineCount: Int) {
             self.message = message
             self.envelope = envelope
             self.body = body
@@ -82,8 +82,8 @@ extension BodyStructure.Singlepart {
 
     /// Represents a text-based message body.
     public struct Text: Hashable {
-        /// The type of text message, e.g. `text/html` or `text/plain`
-        public var mediaText: String
+        /// The media sub-type of a text part, e.g. `html` or `plain` for `text/html` and `text/plain` respectively.
+        public var mediaSubtype: Media.Subtype
 
         /// The number of lines in the message.
         public var lineCount: Int
@@ -91,8 +91,8 @@ extension BodyStructure.Singlepart {
         /// Creates a new `Text`.
         /// - parameter mediaText: The type of text message, e.g. `text/html` or `text/plain`
         /// - parameter lineCount: The number of lines in the message.
-        public init(mediaText: String, lineCount: Int) {
-            self.mediaText = mediaText
+        public init(mediaSubtype: Media.Subtype, lineCount: Int) {
+            self.mediaSubtype = mediaSubtype
             self.lineCount = lineCount
         }
     }
@@ -123,7 +123,7 @@ extension EncodeBuffer {
         var size = 0
         switch part.kind {
         case .basic(let basic):
-            size += self.writeBodyKindBasic(mediaKind: basic, fields: part.fields)
+            size += self.writeBodyKindBasic(mediaType: basic, fields: part.fields)
         case .message(let message):
             size += self.writeBodyKindMessage(message, fields: part.fields)
         case .text(let text):
@@ -138,14 +138,16 @@ extension EncodeBuffer {
     }
 
     @discardableResult private mutating func writeBodyKindText(_ body: BodyStructure.Singlepart.Text, fields: BodyStructure.Fields) -> Int {
-        self.writeMediaText(body.mediaText) +
+        self.writeString(#""TEXT" "#) +
+            self.writeMediaSubtype(body.mediaSubtype) +
             self.writeSpace() +
             self.writeBodyFields(fields) +
             self.writeString(" \(body.lineCount)")
     }
 
     @discardableResult private mutating func writeBodyKindMessage(_ message: BodyStructure.Singlepart.Message, fields: BodyStructure.Fields) -> Int {
-        self.writeMediaMessage(message.message) +
+        self.writeString(#""MESSAGE" "#) +
+            self.writeMediaSubtype(message.message) +
             self.writeSpace() +
             self.writeBodyFields(fields) +
             self.writeSpace() +
@@ -155,8 +157,8 @@ extension EncodeBuffer {
             self.writeString(" \(message.lineCount)")
     }
 
-    @discardableResult private mutating func writeBodyKindBasic(mediaKind: Media.Basic, fields: BodyStructure.Fields) -> Int {
-        self.writeMediaBasic(mediaKind) +
+    @discardableResult private mutating func writeBodyKindBasic(mediaType: Media.MediaType, fields: BodyStructure.Fields) -> Int {
+        self.writeMediaType(mediaType) +
             self.writeSpace() +
             self.writeBodyFields(fields)
     }
