@@ -312,7 +312,7 @@ extension GrammarParser {
         }
 
         func parseBodyKindSinglePart_basic(buffer: inout ParseBuffer, tracker: StackTracker) throws -> BodyStructure.Singlepart {
-            let media = try self.parseMediaBasic(buffer: &buffer, tracker: tracker)
+            let media = try self.parseMediaType(buffer: &buffer, tracker: tracker)
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             let fields = try self.parseBodyFields(buffer: &buffer, tracker: tracker)
             let ext = try parseBodyKindSinglePart_extension(buffer: &buffer, tracker: tracker)
@@ -340,7 +340,7 @@ extension GrammarParser {
             let fields = try self.parseBodyFields(buffer: &buffer, tracker: tracker)
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             let fieldLines = try self.parseNumber(buffer: &buffer, tracker: tracker)
-            let text = BodyStructure.Singlepart.Text(mediaText: media, lineCount: fieldLines)
+            let text = BodyStructure.Singlepart.Text(mediaSubtype: media, lineCount: fieldLines)
             let ext = try parseBodyKindSinglePart_extension(buffer: &buffer, tracker: tracker)
             return BodyStructure.Singlepart(kind: .text(text), fields: fields, extension: ext)
         }

@@ -149,7 +149,7 @@ extension GrammarParser_Body_Tests {
                 "\"AUDIO\" \"alternative\" NIL NIL NIL \"BASE64\" 1",
                 "\r\n",
                 .init(
-                    kind: .basic(.init(kind: .audio, subtype: .alternative)),
+                    kind: .basic(.init(topLevel: .audio, sub: .alternative)),
                     fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .base64, octetCount: 1),
                     extension: nil
                 ),
@@ -159,7 +159,7 @@ extension GrammarParser_Body_Tests {
                 "\"APPLICATION\" \"mixed\" NIL \"id\" \"description\" \"7BIT\" 2",
                 "\r\n",
                 .init(
-                    kind: .basic(.init(kind: .application, subtype: .mixed)),
+                    kind: .basic(.init(topLevel: .application, sub: .mixed)),
                     fields: .init(parameters: [:], id: "id", contentDescription: "description", encoding: .sevenBit, octetCount: 2),
                     extension: nil
                 ),
@@ -169,7 +169,7 @@ extension GrammarParser_Body_Tests {
                 "\"VIDEO\" \"related\" (\"f1\" \"v1\") NIL NIL \"8BIT\" 3",
                 "\r\n",
                 .init(
-                    kind: .basic(.init(kind: .video, subtype: .related)),
+                    kind: .basic(.init(topLevel: .video, sub: .related)),
                     fields: .init(parameters: ["f1": "v1"], id: nil, contentDescription: nil, encoding: .eightBit, octetCount: 3),
                     extension: nil
                 ),
@@ -186,7 +186,7 @@ extension GrammarParser_Body_Tests {
                         .init(
                             message: .rfc822,
                             envelope: Envelope(date: nil, subject: nil, from: [], sender: [], reply: [], to: [], cc: [], bcc: [], inReplyTo: nil, messageID: nil),
-                            body: .singlepart(.init(kind: .basic(.init(kind: .image, subtype: .related)), fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .binary, octetCount: 5))),
+                            body: .singlepart(.init(kind: .basic(.init(topLevel: .image, sub: .related)), fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .binary, octetCount: 5))),
                             lineCount: 8
                         )
                     ),
@@ -202,7 +202,7 @@ extension GrammarParser_Body_Tests {
                 "\"TEXT\" \"media\" NIL NIL NIL \"QUOTED-PRINTABLE\" 1 2",
                 "\r\n",
                 .init(
-                    kind: .text(.init(mediaText: "media", lineCount: 2)),
+                    kind: .text(.init(mediaSubtype: "media", lineCount: 2)),
                     fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .quotedPrintable, octetCount: 1),
                     extension: nil
                 ),
@@ -229,7 +229,7 @@ extension GrammarParser_Body_Tests {
                 #"("text" "plain" ("CHARSET" "UTF-8") NIL NIL NIL 1423 44 NIL NIL NIL NIL)"#,
                 "\r\n",
                 .singlepart(.init(
-                    kind: .text(.init(mediaText: "plain", lineCount: 44)),
+                    kind: .text(.init(mediaSubtype: "plain", lineCount: 44)),
                     fields: .init(
                         parameters: ["CHARSET": "UTF-8"],
                         id: nil,
@@ -252,7 +252,7 @@ extension GrammarParser_Body_Tests {
                         .multipart(.init(
                             parts: [
                                 .singlepart(.init(
-                                    kind: .text(.init(mediaText: "plain", lineCount: 44)),
+                                    kind: .text(.init(mediaSubtype: "plain", lineCount: 44)),
                                     fields: .init(
                                         parameters: ["CHARSET": "UTF-8"],
                                         id: nil,
@@ -266,7 +266,7 @@ extension GrammarParser_Body_Tests {
                                     )
                                 )),
                                 .singlepart(.init(
-                                    kind: .text(.init(mediaText: "html", lineCount: 34)),
+                                    kind: .text(.init(mediaSubtype: "html", lineCount: 34)),
                                     fields: .init(
                                         parameters: ["CHARSET": "UTF-8"],
                                         id: nil,
@@ -290,7 +290,7 @@ extension GrammarParser_Body_Tests {
                             )
                         )),
                         .singlepart(.init(
-                            kind: .text(.init(mediaText: "plain", lineCount: 4)),
+                            kind: .text(.init(mediaSubtype: "plain", lineCount: 4)),
                             fields: .init(
                                 parameters: ["CHARSET": "us-ascii"],
                                 id: nil,

@@ -1269,72 +1269,69 @@ extension GrammarParser {
     // media-basic     = ((DQUOTE ("APPLICATION" / "AUDIO" / "IMAGE" /
     //                   "MESSAGE" / "VIDEO") DQUOTE) / string) SP
     //                   media-subtype
-    func parseMediaBasic(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Media.Basic {
-        func parseMediaBasic_Kind_defined(_ option: String, result: Media.BasicKind, buffer: inout ParseBuffer, tracker: StackTracker) throws -> Media.BasicKind {
+    func parseMediaType(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Media.MediaType {
+        func parseMediaTopLevel_defined(_ option: String, result: Media.TopLevelType, buffer: inout ParseBuffer, tracker: StackTracker) throws -> Media.TopLevelType {
             try PL.parseFixedString("\"", buffer: &buffer, tracker: tracker)
             try PL.parseFixedString(option, buffer: &buffer, tracker: tracker)
             try PL.parseFixedString("\"", buffer: &buffer, tracker: tracker)
             return result
         }
 
-        func parseMediaBasic_Kind_application(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Media.BasicKind {
-            try parseMediaBasic_Kind_defined("APPLICATION", result: .application, buffer: &buffer, tracker: tracker)
+        func parseMediaTopLevel_application(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Media.TopLevelType {
+            try parseMediaTopLevel_defined("APPLICATION", result: .application, buffer: &buffer, tracker: tracker)
         }
 
-        func parseMediaBasic_Kind_audio(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Media.BasicKind {
-            try parseMediaBasic_Kind_defined("AUDIO", result: .audio, buffer: &buffer, tracker: tracker)
+        func parseMediaTopLevel_audio(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Media.TopLevelType {
+            try parseMediaTopLevel_defined("AUDIO", result: .audio, buffer: &buffer, tracker: tracker)
         }
 
-        func parseMediaBasic_Kind_image(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Media.BasicKind {
-            try parseMediaBasic_Kind_defined("IMAGE", result: .image, buffer: &buffer, tracker: tracker)
+        func parseMediaTopLevel_image(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Media.TopLevelType {
+            try parseMediaTopLevel_defined("IMAGE", result: .image, buffer: &buffer, tracker: tracker)
         }
 
-        func parseMediaBasic_Kind_message(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Media.BasicKind {
-            try parseMediaBasic_Kind_defined("MESSAGE", result: .message, buffer: &buffer, tracker: tracker)
+        func parseMediaTopLevel_message(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Media.TopLevelType {
+            try parseMediaTopLevel_defined("MESSAGE", result: .message, buffer: &buffer, tracker: tracker)
         }
 
-        func parseMediaBasic_Kind_video(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Media.BasicKind {
-            try parseMediaBasic_Kind_defined("VIDEO", result: .video, buffer: &buffer, tracker: tracker)
+        func parseMediaTopLevel_video(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Media.TopLevelType {
+            try parseMediaTopLevel_defined("VIDEO", result: .video, buffer: &buffer, tracker: tracker)
         }
 
-        func parseMediaBasic_Kind_other(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Media.BasicKind {
+        func parseMediaTopLevel_other(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Media.TopLevelType {
             let parsed = try self.parseString(buffer: &buffer, tracker: tracker)
             return .init(try ParserLibrary.parseBufferAsUTF8(parsed))
         }
 
-        return try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Media.Basic in
-            let basicType = try PL.parseOneOf([
-                parseMediaBasic_Kind_application,
-                parseMediaBasic_Kind_audio,
-                parseMediaBasic_Kind_image,
-                parseMediaBasic_Kind_message,
-                parseMediaBasic_Kind_video,
-                parseMediaBasic_Kind_other,
+        return try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Media.MediaType in
+            let topLevel = try PL.parseOneOf([
+                parseMediaTopLevel_application,
+                parseMediaTopLevel_audio,
+                parseMediaTopLevel_image,
+                parseMediaTopLevel_message,
+                parseMediaTopLevel_video,
+                parseMediaTopLevel_other,
             ], buffer: &buffer, tracker: tracker)
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-            let subtype = try self.parseMediaSubtype(buffer: &buffer, tracker: tracker)
-            return Media.Basic(kind: basicType, subtype: subtype)
+            let sub = try self.parseMediaSubtype(buffer: &buffer, tracker: tracker)
+            return Media.MediaType(topLevel: topLevel, sub: sub)
         }
     }
 
     // media-message   = DQUOTE "MESSAGE" DQUOTE SP
     //                   DQUOTE ("RFC822" / "GLOBAL") DQUOTE
-    func parseMediaMessage(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Media.Message {
-        func parseMediaMessage_rfc(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Media.Message {
-            try PL.parseFixedString("RFC822", buffer: &buffer, tracker: tracker)
-            return .rfc822
+    func parseMediaMessage(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Media.Subtype {
+        let media = try self.parseMediaType(buffer: &buffer, tracker: tracker)
+        guard
+            media.topLevel == .message,
+            media.sub == .rfc822
+        else {
+            throw ParserError(hint: "Failed to construct esearch source options")
         }
-
-        return try PL.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> Media.Message in
-            try PL.parseFixedString("\"MESSAGE\" \"", buffer: &buffer, tracker: tracker)
-            let message = try parseMediaMessage_rfc(buffer: &buffer, tracker: tracker)
-            try PL.parseFixedString("\"", buffer: &buffer, tracker: tracker)
-            return message
-        }
+        return media.sub
     }
 
     // media-subtype   = string
-    func parseMediaSubtype(buffer: inout ParseBuffer, tracker: StackTracker) throws -> BodyStructure.MediaSubtype {
+    func parseMediaSubtype(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Media.Subtype {
         let parsed = try self.parseString(buffer: &buffer, tracker: tracker)
         let string = try ParserLibrary.parseBufferAsUTF8(parsed).lowercased()
         switch string {
@@ -1350,11 +1347,10 @@ extension GrammarParser {
     }
 
     // media-text      = DQUOTE "TEXT" DQUOTE SP media-subtype
-    func parseMediaText(buffer: inout ParseBuffer, tracker: StackTracker) throws -> String {
-        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> String in
+    func parseMediaText(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Media.Subtype {
+        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Media.Subtype in
             try PL.parseFixedString("\"TEXT\" ", buffer: &buffer, tracker: tracker)
-            let parsed = try self.parseString(buffer: &buffer, tracker: tracker)
-            return try ParserLibrary.parseBufferAsUTF8(parsed)
+            return try self.parseMediaSubtype(buffer: &buffer, tracker: tracker)
         }
     }
 

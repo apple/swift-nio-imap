@@ -25,29 +25,29 @@ extension BodySinglepartTests {
         let inputs: [(BodyStructure.Singlepart, String, UInt)] = [
             (
                 .init(
-                    kind: .basic(.init(kind: .application, subtype: .init("jpeg"))),
+                    kind: .basic(.init(topLevel: .application, sub: "jpeg")),
                     fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .base64, octetCount: 6),
                     extension: nil
                 ),
-                "\"application\" \"jpeg\" NIL NIL NIL \"BASE64\" 6",
+                #""APPLICATION" "JPEG" NIL NIL NIL "BASE64" 6"#,
                 #line
             ),
             (
                 .init(
-                    kind: .basic(.init(kind: .application, subtype: .init("jpeg"))),
+                    kind: .basic(.init(topLevel: .application, sub: "jpeg")),
                     fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .base64, octetCount: 7),
                     extension: .init(digest: "md5", dispositionAndLanguage: nil)
                 ),
-                "\"application\" \"jpeg\" NIL NIL NIL \"BASE64\" 7 \"md5\"",
+                #""APPLICATION" "JPEG" NIL NIL NIL "BASE64" 7 "md5""#,
                 #line
             ),
             (
                 .init(
-                    kind: .text(.init(mediaText: "html", lineCount: 5)),
+                    kind: .text(.init(mediaSubtype: "html", lineCount: 5)),
                     fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .base64, octetCount: 6),
                     extension: nil
                 ),
-                "\"TEXT\" \"html\" NIL NIL NIL \"BASE64\" 6 5",
+                #""TEXT" "HTML" NIL NIL NIL "BASE64" 6 5"#,
                 #line
             ),
             (
@@ -58,7 +58,7 @@ extension BodySinglepartTests {
                             envelope: .init(date: "date", subject: nil, from: [], sender: [], reply: [], to: [], cc: [], bcc: [], inReplyTo: nil, messageID: nil),
                             body: .singlepart(
                                 .init(
-                                    kind: .text(.init(mediaText: "subtype", lineCount: 5)),
+                                    kind: .text(.init(mediaSubtype: "subtype", lineCount: 5)),
                                     fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .base64, octetCount: 6),
                                     extension: nil
                                 )
@@ -69,7 +69,7 @@ extension BodySinglepartTests {
                     fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .base64, octetCount: 6),
                     extension: nil
                 ),
-                "\"MESSAGE\" \"RFC822\" NIL NIL NIL \"BASE64\" 6 (\"date\" NIL NIL NIL NIL NIL NIL NIL NIL NIL) (\"TEXT\" \"subtype\" NIL NIL NIL \"BASE64\" 6 5) 8",
+                #""MESSAGE" "RFC822" NIL NIL NIL "BASE64" 6 ("date" NIL NIL NIL NIL NIL NIL NIL NIL NIL) ("TEXT" "SUBTYPE" NIL NIL NIL "BASE64" 6 5) 8"#,
                 #line
             ),
         ]

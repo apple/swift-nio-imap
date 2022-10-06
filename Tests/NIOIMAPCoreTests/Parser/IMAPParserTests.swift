@@ -1753,32 +1753,32 @@ extension ParserUnitTests {
     }
 }
 
-// MARK: - parseMediaBasic
+// MARK: - testParseMediaType
 
 extension ParserUnitTests {
-    func testParseMediaBasic_valid_match() {
+    func testParseMediaType_valid_match() {
         var buffer = TestUtilities.makeParseBuffer(for: #""APPLICATION" "mixed""#)
         do {
-            let mediaBasic = try GrammarParser().parseMediaBasic(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(mediaBasic, Media.Basic(kind: .application, subtype: .mixed))
+            let mediaBasic = try GrammarParser().parseMediaType(buffer: &buffer, tracker: .testTracker)
+            XCTAssertEqual(mediaBasic, Media.MediaType(topLevel: .application, sub: .mixed))
         } catch {
             XCTFail("\(error)")
         }
     }
 
-    func testParseMediaBasic_valid_string() {
+    func testParseMediaType_valid_string() {
         var buffer = TestUtilities.makeParseBuffer(for: #""STRING" "related""#)
         do {
-            let mediaBasic = try GrammarParser().parseMediaBasic(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(mediaBasic, Media.Basic(kind: .init("STRING"), subtype: .related))
+            let mediaBasic = try GrammarParser().parseMediaType(buffer: &buffer, tracker: .testTracker)
+            XCTAssertEqual(mediaBasic, Media.MediaType(topLevel: .init("STRING"), sub: .related))
         } catch {
             XCTFail("\(error)")
         }
     }
 
-    func testParseMediaBasic_valid_invalidString() {
+    func testParseMediaType_valid_invalidString() {
         var buffer = TestUtilities.makeParseBuffer(for: #"hey "something""#)
-        XCTAssertThrowsError(try GrammarParser().parseMediaBasic(buffer: &buffer, tracker: .testTracker)) { e in
+        XCTAssertThrowsError(try GrammarParser().parseMediaType(buffer: &buffer, tracker: .testTracker)) { e in
             XCTAssertTrue(e is ParserError)
         }
     }
