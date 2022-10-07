@@ -17,7 +17,7 @@ import Foundation
 import XCTest
 
 class IdleStateMachineTests: XCTestCase {
-    func testNormalWorkflow() {
+    func testNormalWorkflow_untagged() {
         var machine = ClientStateMachine.Idle()
 
         // server confirms idle
@@ -27,6 +27,23 @@ class IdleStateMachineTests: XCTestCase {
         XCTAssertNoThrow(try machine.receiveResponse(.untagged(.id(["Key1": "Value1"]))))
         XCTAssertNoThrow(try machine.receiveResponse(.untagged(.id(["Key2": "Value2"]))))
         XCTAssertNoThrow(try machine.receiveResponse(.untagged(.id(["Key3": "Value3"]))))
+
+        // user ends idle
+        machine.sendCommand(.idleDone)
+    }
+
+    func testNormalWorkflow_fetch() {
+        var machine = ClientStateMachine.Idle()
+
+        // server confirms idle
+        XCTAssertNoThrow(try machine.receiveContinuationRequest(.responseText(.init(text: "OK"))))
+
+        // server is allowed to send untagged responses while idle.
+        // `Response.fetch` are all untagged responses.
+        XCTAssertNoThrow(try machine.receiveResponse(.fetch(.start(1))))
+        XCTAssertNoThrow(try machine.receiveResponse(.fetch(.simpleAttribute(.flags([.answered])))))
+        XCTAssertNoThrow(try machine.receiveResponse(.fetch(.simpleAttribute(.uid(999)))))
+        XCTAssertNoThrow(try machine.receiveResponse(.fetch(.finish)))
 
         // user ends idle
         machine.sendCommand(.idleDone)

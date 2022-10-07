@@ -64,9 +64,9 @@ extension ClientStateMachine {
         private func receiveResponse_idlingState(_ response: Response) throws {
             assert(self.state == .idling)
             switch response {
-            case .untagged:
+            case .untagged, .fetch:
                 break
-            case .fetch, .tagged, .fatal, .authenticationChallenge, .idleStarted:
+            case .tagged, .fatal, .authenticationChallenge, .idleStarted:
                 throw UnexpectedResponse(activePromise: nil)
             }
         }
