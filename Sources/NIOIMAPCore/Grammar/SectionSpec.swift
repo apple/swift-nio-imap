@@ -19,14 +19,20 @@ import struct NIO.ByteBuffer
 /// Is used in a `FETCH` command’s `BODY[<section>]<<partial>>` for the `<section>` part.
 ///
 /// Use `SectionSpecifier.complete` for an empty section specifier (i.e. the complete message).
+///
+/// These are defined in RFC 3501 section 6.4.5.
 public struct SectionSpecifier: Hashable {
     /// The part of the body.
     public let part: Part
 
-    /// The type of section, e.g. *HEADER*.
+    /// The type of section, e.g. `HEADER`.
     public let kind: Kind
 
     /// Creates a new *complete* `SectionSpecifier`.
+    ///
+    /// Note that only certain `kind` values are valid, based on what kind of part `part` refers to.
+    /// See the documentation for ``SectionSpecifier.Kind`` for more details.
+    ///
     /// - parameter part: The part of the body. Can only be empty if `kind` is not `.MIMEHeader`.
     /// - parameter kind: The type of section, e.g. *HEADER*. Defaults to `.complete`.
     public init(part: Part = .init([]), kind: Kind = .complete) {
@@ -114,19 +120,45 @@ extension SectionSpecifier {
         }
     }
 
-    /// The last part of a body section sepcifier if it’s not a part number.
+    /// The last part of a body section specifier if it’s not a part number.
+    ///
+    ///  These correspond to the `HEADER`, `TEXT`, `MIME` part specifiers prefixed
+    ///  by a numeric part or the sole specifier.
+    ///
+    ///  The way these work depends on what kind of part the numeric part refers to.
+    ///
+    ///  For `message/rfc822` (and for the message itself) these are valid:
+    ///   * `.complete` (no suffix)
+    ///   * `.header` / `HEADER` (and by extension `.headerFields` and `.headerFieldsNot`)
+    ///   * `.text` / `TEXT`
+    ///
+    ///  For other parts (i.e. non-`message/rfc822` and not the message itself) these are valid:
+    ///   * `.complete` (the part without its MIME IMB header)
+    ///   * `.MIMEHeader` / `MIME` (the MIME IMB header)
     public enum Kind: Hashable {
-        /// The entire section, corresponding to a section specifier that ends in a part number, e.g. `4.2.2.1`
+        /// A section specifier that ends in a part number, e.g. `4.2.2.1`.
+        ///
+        /// If the numeric part refers to the complete message or a `message/rfc822` part, this
+        /// will refer to that _complete_ message.
+        ///
+        /// For any other part (single- or multi-part), it will refer to that parts
+        /// content, i.e. it will _not_ include any of the MIME headers of that part.
         case complete
-        /// All header fields, corresponding to e.g. `4.2.HEADER`.
+        /// If the numeric part refers to the complete message or a `message/rfc822` part, this
+        /// will refer to that message’s headers.
         case header
         /// The specified fields, corresponding to e.g. `4.2.HEADER.FIELDS (SUBJECT)`.
         case headerFields([String])
         /// All except the specified fields, corresponding to e.g. `4.2.HEADER.FIELDS.NOT (SUBJECT)`.
         case headerFieldsNot([String])
         /// MIME IMB header, corresponding to e.g. `4.2.MIME`.
+        ///
+        /// This is only valid for a part that is _not_ a `message/rfc822` part. And in those cases,
+        /// this refers to the MIME IMB header of that (single- or multi-) part.
         case MIMEHeader
         /// Text body without header, corresponding to e.g. `4.2.TEXT`.
+        ///
+        /// This is only valid for a part that’s a `message/rfc822` part, e.g. the complete message.
         case text
     }
 }
