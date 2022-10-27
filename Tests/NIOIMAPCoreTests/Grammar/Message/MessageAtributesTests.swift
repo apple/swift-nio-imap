@@ -31,8 +31,6 @@ extension MessageAttributesTests {
             (.envelope(Envelope(date: "date", subject: "subject", from: [.singleAddress(.init(personName: "name", sourceRoot: "adl", mailbox: "mailbox", host: "host"))], sender: [.singleAddress(.init(personName: "name", sourceRoot: "adl", mailbox: "mailbox", host: "host"))], reply: [.singleAddress(.init(personName: "name", sourceRoot: "adl", mailbox: "mailbox", host: "host"))], to: [.singleAddress(.init(personName: "name", sourceRoot: "adl", mailbox: "mailbox", host: "host"))], cc: [.singleAddress(.init(personName: "name", sourceRoot: "adl", mailbox: "mailbox", host: "host"))], bcc: [.singleAddress(.init(personName: "name", sourceRoot: "adl", mailbox: "mailbox", host: "host"))], inReplyTo: "replyto", messageID: "abc123")), "ENVELOPE (\"date\" \"subject\" ((\"name\" \"adl\" \"mailbox\" \"host\")) ((\"name\" \"adl\" \"mailbox\" \"host\")) ((\"name\" \"adl\" \"mailbox\" \"host\")) ((\"name\" \"adl\" \"mailbox\" \"host\")) ((\"name\" \"adl\" \"mailbox\" \"host\")) ((\"name\" \"adl\" \"mailbox\" \"host\")) \"replyto\" \"abc123\")", #line),
             (.internalDate(date), #"INTERNALDATE "25-Jun-1994 01:02:03 +0000""#, #line),
             (.binarySize(section: [2], size: 3), "BINARY.SIZE[2] 3", #line),
-            (.binary(section: [3], data: nil), "BINARY[3] NIL", #line),
-            (.binary(section: [3], data: "test"), "BINARY[3] \"test\"", #line),
             (.flags([.draft]), "FLAGS (\\Draft)", #line),
             (.flags([.flagged, .draft]), "FLAGS (\\Flagged \\Draft)", #line),
             (.fetchModificationResponse(.init(modifierSequenceValue: 3)), "MODSEQ (3)", #line),

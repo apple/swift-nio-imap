@@ -126,13 +126,6 @@ extension GrammarParser {
             return .binarySize(section: section, size: number)
         }
 
-        func parseMessageAttribute_binary(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute {
-            let section = try self.parseSectionBinary(buffer: &buffer, tracker: tracker)
-            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-            let string = try self.parseNString(buffer: &buffer, tracker: tracker)
-            return .binary(section: section, data: string)
-        }
-
         func parseMessageAttribute_fetchModifierResponse(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute {
             try PL.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> MessageAttribute in
                 try PL.parseSpaces(buffer: &buffer, tracker: tracker)
@@ -186,7 +179,6 @@ extension GrammarParser {
             "BODYSTRUCTURE": parseMessageAttribute_bodyStructure,
             "UID": parseMessageAttribute_uid,
             "BINARY.SIZE": parseMessageAttribute_binarySize,
-            "BINARY": parseMessageAttribute_binary,
             "X-GM-MSGID": parseMessageAttribute_gmailMessageID,
             "X-GM-THRID": parseMessageAttribute_gmailThreadID,
             "X-GM-LABELS": parseMessageAttribute_gmailLabels,

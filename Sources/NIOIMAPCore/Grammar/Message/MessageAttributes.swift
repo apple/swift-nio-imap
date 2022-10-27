@@ -34,10 +34,6 @@ public enum MessageAttribute: Hashable {
     /// A `BODYSTRUCTURE` response will have `hasExtensionData` set to `true`.
     case body(BodyStructure, hasExtensionData: Bool)
 
-    /// `BINARY<section-binary>[<<number>>]` -- The content of the
-    /// specified section after removing any content-transfer-encoding related encoding.
-    /// - SeeAlso: RFC 3516 “IMAP4 Binary Content Extension”
-    case binary(section: SectionSpecifier.Part, data: ByteBuffer?)
     /// `BINARY.SIZE<section-binary>` -- The size of the section after
     /// removing any content-transfer-encoding related encoding.
     /// - SeeAlso: RFC 3516 “IMAP4 Binary Content Extension”
@@ -85,8 +81,6 @@ extension EncodeBuffer {
             return self.writeMessageAttribute_body(body, hasExtensionData: hasExtensionData)
         case .uid(let uid):
             return self.writeString("UID \(uid.rawValue)")
-        case .binary(section: let section, data: let string):
-            return self.writeMessageAttribute_binaryString(section: section, string: string)
         case .binarySize(section: let section, size: let number):
             return self.writeMessageAttribute_binarySize(section: section, number: number)
         case .flags(let flags):
@@ -100,13 +94,6 @@ extension EncodeBuffer {
         case .gmailLabels(let labels):
             return self.writeMessageAttribute_gmailLabels(labels)
         }
-    }
-
-    @discardableResult mutating func writeMessageAttribute_binaryString(section: SectionSpecifier.Part, string: ByteBuffer?) -> Int {
-        self.writeString("BINARY") +
-            self.writeSectionBinary(section) +
-            self.writeSpace() +
-            self.writeNString(string)
     }
 
     @discardableResult mutating func writeMessageAttribute_binarySize(section: SectionSpecifier.Part, number: Int) -> Int {
