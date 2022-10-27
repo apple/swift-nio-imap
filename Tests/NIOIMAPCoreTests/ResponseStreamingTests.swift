@@ -73,11 +73,30 @@ extension ResponseStreamingTests {
             (.fetch(.finish), #line),
         ])
 
+        self.AssertFetchResponses("* 3 FETCH (BODY[5.2.MIME] NIL)\r\n", [
+            (.fetch(.start(3)), #line),
+            (.fetch(.simpleAttribute(.nilBody(.body(section: .init(part: [5, 2], kind: .MIMEHeader), offset: nil)))), #line),
+            (.fetch(.finish), #line),
+        ])
+
+        self.AssertFetchResponses("* 3 FETCH (BODY[3] NIL UID 456)\r\n", [
+            (.fetch(.start(3)), #line),
+            (.fetch(.simpleAttribute(.nilBody(.body(section: .init(part: [3]), offset: nil)))), #line),
+            (.fetch(.simpleAttribute(.uid(456))), #line),
+            (.fetch(.finish), #line),
+        ])
+
         self.AssertFetchResponses("* 3 FETCH (BINARY[4] {3}\r\nghi)\r\n", [
             (.fetch(.start(3)), #line),
             (.fetch(.streamingBegin(kind: .binary(section: [4], offset: nil), byteCount: 3)), #line),
             (.fetch(.streamingBytes("ghi")), #line),
             (.fetch(.streamingEnd), #line),
+            (.fetch(.finish), #line),
+        ])
+
+        self.AssertFetchResponses("* 3 FETCH (BINARY[4] NIL)\r\n", [
+            (.fetch(.start(3)), #line),
+            (.fetch(.simpleAttribute(.nilBody(.binary(section: [4], offset: nil)))), #line),
             (.fetch(.finish), #line),
         ])
 

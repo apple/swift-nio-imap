@@ -39,6 +39,14 @@ public enum MessageAttribute: Hashable {
     /// - SeeAlso: RFC 3516 “IMAP4 Binary Content Extension”
     case binarySize(section: SectionSpecifier.Part, size: Int)
 
+    /// A `NIL` response to a `StreamingKind`.
+    ///
+    /// This corresponds to e.g. `BODY[4.TEXT] NIL`, i.e. when there’s no data
+    /// for a particular body section. Note that this is different than a
+    /// `.streamingBegin` with a `byteCount` of `0`. The former indicates
+    /// that the section does not exist, the latter than it has zero length.
+    case nilBody(StreamingKind)
+
     /// The modification time of the message.
     case fetchModificationResponse(FetchModificationResponse)
 
@@ -85,6 +93,8 @@ extension EncodeBuffer {
             return self.writeMessageAttribute_binarySize(section: section, number: number)
         case .flags(let flags):
             return self.writeMessageAttributeFlags(flags)
+        case .nilBody(let kind):
+            return self.writeMessageAttributeNilBody(kind)
         case .fetchModificationResponse(let resp):
             return self.writeFetchModificationResponse(resp)
         case .gmailMessageID(let id):
@@ -107,6 +117,12 @@ extension EncodeBuffer {
             self.writeArray(atts) { (element, self) in
                 self.writeFlag(element)
             }
+    }
+
+    @discardableResult mutating func writeMessageAttributeNilBody(_ kind: StreamingKind) -> Int {
+        self.writeStreamingKind(kind) +
+            self.writeSpace() +
+            self.writeNil()
     }
 
     @discardableResult mutating func writeMessageAttribute_envelope(_ env: Envelope) -> Int {

@@ -137,7 +137,7 @@ extension StreamingKind {
 
 extension StreamingKind: CustomDebugStringConvertible {
     public var debugDescription: String {
-        ResponseEncodeBuffer.makeDescription {
+        EncodeBuffer.makeDescription {
             $0.writeStreamingKind(self)
         }
     }

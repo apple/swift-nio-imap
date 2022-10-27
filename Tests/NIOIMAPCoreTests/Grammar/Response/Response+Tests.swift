@@ -55,6 +55,11 @@ extension Response_Tests {
                 "* 3 FETCH (UID 123 RFC822.HEADER {0}\r\n UID 456)\r\n",
                 #line
             ),
+            (
+                [.start(87), .simpleAttribute(.nilBody(.body(section: .init(part: [4], kind: .text), offset: nil))), .simpleAttribute(.uid(123)), .finish],
+                "* 87 FETCH (BODY[4.TEXT] NIL UID 123)\r\n",
+                #line
+            ),
         ]
 
         for (test, expectedString, line) in inputs {

@@ -146,27 +146,29 @@ extension ResponseEncodeBuffer {
     }
 
     @discardableResult mutating func writeStreamingKind(_ kind: StreamingKind, size: Int) -> Int {
-        self.writeStreamingKind(kind) +
+        self.buffer.writeStreamingKind(kind) +
             self.buffer.writeSpace() +
             self.buffer.writeString("{\(size)}\r\n")
     }
+}
 
+extension EncodeBuffer {
     @discardableResult mutating func writeStreamingKind(_ kind: StreamingKind) -> Int {
         switch kind {
         case .binary:
-            return self.buffer.writeString("BINARY")
+            return self.writeString("BINARY")
         case .body(let section, let offset):
-            return self.buffer.writeString("BODY") +
-                self.buffer.writeSection(section) +
-                self.buffer.writeIfExists(offset) { offset in
-                    self.buffer.writeString("<\(offset)>")
+            return self.writeString("BODY") +
+                self.writeSection(section) +
+                self.writeIfExists(offset) { offset in
+                    self.writeString("<\(offset)>")
                 }
         case .rfc822:
-            return self.buffer.writeString("RFC822")
+            return self.writeString("RFC822")
         case .rfc822Text:
-            return self.buffer.writeString("RFC822.TEXT")
+            return self.writeString("RFC822.TEXT")
         case .rfc822Header:
-            return self.buffer.writeString("RFC822.HEADER")
+            return self.writeString("RFC822.HEADER")
         }
     }
 }
