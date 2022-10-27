@@ -147,47 +147,44 @@ extension GrammarParser {
         }
     }
 
+    func parseFetchStreamingResponse_rfc822Text(buffer: inout ParseBuffer, tracker: StackTracker) throws -> StreamingKind {
+        .rfc822Text
+    }
+
+    func parseFetchStreamingResponse_rfc822Header(buffer: inout ParseBuffer, tracker: StackTracker) throws -> StreamingKind {
+        .rfc822Header
+    }
+
+    func parseFetchStreamingResponse_bodySectionText(buffer: inout ParseBuffer, tracker: StackTracker) throws -> StreamingKind {
+        let section = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseSection) ?? .init()
+        let offset = try PL.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> Int in
+            try PL.parseFixedString("<", buffer: &buffer, tracker: tracker)
+            let num = try self.parseNumber(buffer: &buffer, tracker: tracker)
+            try PL.parseFixedString(">", buffer: &buffer, tracker: tracker)
+            return num
+        }
+        return .body(section: section, offset: offset)
+    }
+
+    func parseFetchStreamingResponse_binary(buffer: inout ParseBuffer, tracker: StackTracker) throws -> StreamingKind {
+        let section = try self.parseSectionBinary(buffer: &buffer, tracker: tracker)
+        let offset = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> Int in
+            try PL.parseFixedString("<", buffer: &buffer, tracker: tracker)
+            let num = try self.parseNumber(buffer: &buffer, tracker: tracker)
+            try PL.parseFixedString(">", buffer: &buffer, tracker: tracker)
+            return num
+        })
+        return .binary(section: section, offset: offset)
+    }
+
     func parseFetchStreamingResponse(buffer: inout ParseBuffer, tracker: StackTracker) throws -> StreamingKind {
-        func parseFetchStreamingResponse_rfc822Text(buffer: inout ParseBuffer, tracker: StackTracker) throws -> StreamingKind {
-            try PL.parseFixedString("RFC822.TEXT", buffer: &buffer, tracker: tracker)
-            return .rfc822Text
-        }
-
-        func parseFetchStreamingResponse_rfc822Header(buffer: inout ParseBuffer, tracker: StackTracker) throws -> StreamingKind {
-            try PL.parseFixedString("RFC822.HEADER", buffer: &buffer, tracker: tracker)
-            return .rfc822Header
-        }
-
-        func parseFetchStreamingResponse_bodySectionText(buffer: inout ParseBuffer, tracker: StackTracker) throws -> StreamingKind {
-            try PL.parseFixedString("BODY", buffer: &buffer, tracker: tracker)
-            let section = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseSection) ?? .init()
-            let offset = try PL.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> Int in
-                try PL.parseFixedString("<", buffer: &buffer, tracker: tracker)
-                let num = try self.parseNumber(buffer: &buffer, tracker: tracker)
-                try PL.parseFixedString(">", buffer: &buffer, tracker: tracker)
-                return num
-            }
-            return .body(section: section, offset: offset)
-        }
-
-        func parseFetchStreamingResponse_binary(buffer: inout ParseBuffer, tracker: StackTracker) throws -> StreamingKind {
-            try PL.parseFixedString("BINARY", buffer: &buffer, tracker: tracker)
-            let section = try self.parseSectionBinary(buffer: &buffer, tracker: tracker)
-            let offset = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> Int in
-                try PL.parseFixedString("<", buffer: &buffer, tracker: tracker)
-                let num = try self.parseNumber(buffer: &buffer, tracker: tracker)
-                try PL.parseFixedString(">", buffer: &buffer, tracker: tracker)
-                return num
-            })
-            return .binary(section: section, offset: offset)
-        }
-
-        return try PL.parseOneOf([
-            parseFetchStreamingResponse_rfc822Text,
-            parseFetchStreamingResponse_rfc822Header,
-            parseFetchStreamingResponse_bodySectionText,
-            parseFetchStreamingResponse_binary,
-        ], buffer: &buffer, tracker: tracker)
+        let parsers: [String: (inout ParseBuffer, StackTracker) throws -> StreamingKind] = [
+            "RFC822.TEXT": parseFetchStreamingResponse_rfc822Text,
+            "RFC822.HEADER": parseFetchStreamingResponse_rfc822Header,
+            "BODY": parseFetchStreamingResponse_bodySectionText,
+            "BINARY": parseFetchStreamingResponse_binary,
+        ]
+        return try self.parseFromLookupTable(buffer: &buffer, tracker: tracker, parsers: parsers)
     }
 
     func parseFetchModifiers(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [FetchModifier] {
@@ -262,13 +259,6 @@ extension GrammarParser {
             return .quotedStreamingBegin(kind: type, byteCount: quoted.readableBytes)
         }
 
-        func parseFetchResponse_nilBody(buffer: inout ParseBuffer, tracker: StackTracker) throws -> _FetchResponse {
-            let type = try self.parseFetchStreamingResponse(buffer: &buffer, tracker: tracker)
-            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-            try parseNil(buffer: &buffer, tracker: tracker)
-            return .simpleAttribute(.nilBody(type))
-        }
-
         func parseFetchResponse_finish(buffer: inout ParseBuffer, tracker: StackTracker) throws -> _FetchResponse {
             try PL.parseFixedString(")", buffer: &buffer, tracker: tracker)
             try PL.parseNewline(buffer: &buffer, tracker: tracker)
@@ -278,7 +268,6 @@ extension GrammarParser {
         return try PL.parseOneOf([
             parseFetchResponse_streamingBegin,
             parseFetchResponse_streamingBeginQuoted,
-            parseFetchResponse_nilBody,
             parseFetchResponse_simpleAttribute,
             parseFetchResponse_finish,
         ], buffer: &buffer, tracker: tracker)

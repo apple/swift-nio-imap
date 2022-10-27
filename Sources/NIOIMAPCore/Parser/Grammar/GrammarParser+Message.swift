@@ -103,9 +103,18 @@ extension GrammarParser {
         }
 
         func parseMessageAttribute_body(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute {
-            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-            let body = try self.parseBody(buffer: &buffer, tracker: tracker)
-            return .body(body, hasExtensionData: false)
+            // `BODY` can either be a body(structure) or a body section:
+
+            func parseMessageAttribute_body_structure(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute {
+                try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+                let body = try self.parseBody(buffer: &buffer, tracker: tracker)
+                return .body(body, hasExtensionData: false)
+            }
+
+            return try PL.parseOneOf([
+                parseMessageAttribute_body_structure,
+                parseMessageAttribute_bodySection_nilBody,
+            ], buffer: &buffer, tracker: tracker)
         }
 
         func parseMessageAttribute_bodyStructure(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute {
@@ -170,6 +179,34 @@ extension GrammarParser {
             return .gmailLabels(attributes)
         }
 
+        func parseMessageAttribute_rfc822Text_nilBody(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute {
+            let kind = try self.parseFetchStreamingResponse_rfc822Text(buffer: &buffer, tracker: tracker)
+            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+            try self.parseNil(buffer: &buffer, tracker: tracker)
+            return .nilBody(kind)
+        }
+
+        func parseMessageAttribute_rfc822Header_nilBody(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute {
+            let kind = try self.parseFetchStreamingResponse_rfc822Header(buffer: &buffer, tracker: tracker)
+            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+            try self.parseNil(buffer: &buffer, tracker: tracker)
+            return .nilBody(kind)
+        }
+
+        func parseMessageAttribute_bodySection_nilBody(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute {
+            let kind = try self.parseFetchStreamingResponse_bodySectionText(buffer: &buffer, tracker: tracker)
+            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+            try self.parseNil(buffer: &buffer, tracker: tracker)
+            return .nilBody(kind)
+        }
+
+        func parseMessageAttribute_binary_nilBody(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute {
+            let kind = try self.parseFetchStreamingResponse_binary(buffer: &buffer, tracker: tracker)
+            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+            try self.parseNil(buffer: &buffer, tracker: tracker)
+            return .nilBody(kind)
+        }
+
         let parsers: [String: (inout ParseBuffer, StackTracker) throws -> MessageAttribute] = [
             "FLAGS": parseMessageAttribute_flags,
             "ENVELOPE": parseMessageAttribute_envelope,
@@ -183,6 +220,9 @@ extension GrammarParser {
             "X-GM-THRID": parseMessageAttribute_gmailThreadID,
             "X-GM-LABELS": parseMessageAttribute_gmailLabels,
             "MODSEQ": parseMessageAttribute_fetchModifierResponse,
+            "RFC822.TEXT": parseMessageAttribute_rfc822Text_nilBody,
+            "RFC822.HEADER": parseMessageAttribute_rfc822Header_nilBody,
+            "BINARY": parseMessageAttribute_binary_nilBody,
         ]
         return try self.parseFromLookupTable(buffer: &buffer, tracker: tracker, parsers: parsers)
     }

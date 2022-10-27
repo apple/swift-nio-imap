@@ -28,6 +28,7 @@ extension GrammarParser_Message_Tests {
         self.iterateTests(
             testFunction: GrammarParser().parseMessageAttribute,
             validInputs: [
+                (#"FLAGS (\seen)"#, " ", .flags([.seen]), #line),
                 ("UID 1234", " ", .uid(1234), #line),
                 ("RFC822.SIZE 1234", " ", .rfc822Size(1234), #line),
                 ("BINARY.SIZE[3] 4", " ", .binarySize(section: [3], size: 4), #line),
@@ -49,6 +50,18 @@ extension GrammarParser_Message_Tests {
                     )),
                     #line
                 ),
+                (#"BODY (("TEXT" "PLAIN" ("CHARSET" "utf-8") NIL NIL "QUOTED-PRINTABLE" 1772 47 NIL NIL NIL NIL)("TEXT" "HTML" ("CHARSET" "utf-8") NIL NIL "QUOTED-PRINTABLE" 2778 40 NIL NIL NIL NIL) "ALTERNATIVE" ("BOUNDARY" "Apple-Mail=_0D97185D-4FF1-42FE-9B8F-A0759D299015") NIL NIL NIL)"#, " ", .body(.multipart(.init(parts: [
+                    .singlepart(.init(kind: .text(.init(mediaSubtype: "PLAIN", lineCount: 47)), fields: .init(parameters: ["CHARSET": "utf-8"], id: nil, contentDescription: nil, encoding: .quotedPrintable, octetCount: 1772), extension: .init(digest: nil, dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: .init(location: nil, extensions: [])))))),
+                    .singlepart(.init(kind: .text(.init(mediaSubtype: "HTML", lineCount: 40)), fields: .init(parameters: ["CHARSET": "utf-8"], id: nil, contentDescription: nil, encoding: .quotedPrintable, octetCount: 2778), extension: .init(digest: nil, dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: .init(location: nil, extensions: [])))))),
+                ], mediaSubtype: .alternative, extension: .init(parameters: ["BOUNDARY": "Apple-Mail=_0D97185D-4FF1-42FE-9B8F-A0759D299015"], dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: .init(location: nil, extensions: [])))))), hasExtensionData: false), #line),
+                (#"BODYSTRUCTURE (("TEXT" "PLAIN" ("CHARSET" "utf-8") NIL NIL "QUOTED-PRINTABLE" 1772 47 NIL NIL NIL NIL)("TEXT" "HTML" ("CHARSET" "utf-8") NIL NIL "QUOTED-PRINTABLE" 2778 40 NIL NIL NIL NIL) "ALTERNATIVE" ("BOUNDARY" "Apple-Mail=_0D97185D-4FF1-42FE-9B8F-A0759D299015") NIL NIL NIL)"#, " ", .body(.multipart(.init(parts: [
+                    .singlepart(.init(kind: .text(.init(mediaSubtype: "PLAIN", lineCount: 47)), fields: .init(parameters: ["CHARSET": "utf-8"], id: nil, contentDescription: nil, encoding: .quotedPrintable, octetCount: 1772), extension: .init(digest: nil, dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: .init(location: nil, extensions: [])))))),
+                    .singlepart(.init(kind: .text(.init(mediaSubtype: "HTML", lineCount: 40)), fields: .init(parameters: ["CHARSET": "utf-8"], id: nil, contentDescription: nil, encoding: .quotedPrintable, octetCount: 2778), extension: .init(digest: nil, dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: .init(location: nil, extensions: [])))))),
+                ], mediaSubtype: .alternative, extension: .init(parameters: ["BOUNDARY": "Apple-Mail=_0D97185D-4FF1-42FE-9B8F-A0759D299015"], dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: .init(location: nil, extensions: [])))))), hasExtensionData: true), #line),
+                ("RFC822.TEXT NIL", " ", .nilBody(.rfc822Text), #line),
+                ("RFC822.HEADER NIL", " ", .nilBody(.rfc822Header), #line),
+                ("BINARY[4]<5> NIL", " ", .nilBody(.binary(section: [4], offset: 5)), #line),
+                ("BODY[4.TEXT]<5> NIL", " ", .nilBody(.body(section: .init(part: [4], kind: .text), offset: 5)), #line),
                 ("MODSEQ (3)", " ", .fetchModificationResponse(.init(modifierSequenceValue: 3)), #line),
                 ("X-GM-MSGID 1278455344230334865", " ", .gmailMessageID(1278455344230334865), #line),
                 ("X-GM-THRID 1278455344230334865", " ", .gmailThreadID(1278455344230334865), #line),
