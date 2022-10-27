@@ -262,6 +262,13 @@ extension GrammarParser {
             return .quotedStreamingBegin(kind: type, byteCount: quoted.readableBytes)
         }
 
+        func parseFetchResponse_nilBody(buffer: inout ParseBuffer, tracker: StackTracker) throws -> _FetchResponse {
+            let type = try self.parseFetchStreamingResponse(buffer: &buffer, tracker: tracker)
+            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+            try parseNil(buffer: &buffer, tracker: tracker)
+            return .simpleAttribute(.nilBody(type))
+        }
+
         func parseFetchResponse_finish(buffer: inout ParseBuffer, tracker: StackTracker) throws -> _FetchResponse {
             try PL.parseFixedString(")", buffer: &buffer, tracker: tracker)
             try PL.parseNewline(buffer: &buffer, tracker: tracker)
@@ -271,6 +278,7 @@ extension GrammarParser {
         return try PL.parseOneOf([
             parseFetchResponse_streamingBegin,
             parseFetchResponse_streamingBeginQuoted,
+            parseFetchResponse_nilBody,
             parseFetchResponse_simpleAttribute,
             parseFetchResponse_finish,
         ], buffer: &buffer, tracker: tracker)

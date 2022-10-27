@@ -73,6 +73,19 @@ extension ResponseStreamingTests {
             (.fetch(.finish), #line),
         ])
 
+        self.AssertFetchResponses("* 3 FETCH (BODY[5.2.MIME] NIL)\r\n", [
+            (.fetch(.start(3)), #line),
+            (.fetch(.simpleAttribute(.nilBody(.body(section: .init(part: [5, 2], kind: .MIMEHeader), offset: nil)))), #line),
+            (.fetch(.finish), #line),
+        ])
+
+        self.AssertFetchResponses("* 3 FETCH (BODY[3] NIL UID 456)\r\n", [
+            (.fetch(.start(3)), #line),
+            (.fetch(.simpleAttribute(.nilBody(.body(section: .init(part: [3]), offset: nil)))), #line),
+            (.fetch(.simpleAttribute(.uid(456))), #line),
+            (.fetch(.finish), #line),
+        ])
+
         self.AssertFetchResponses("* 4 FETCH (BODY[4.TEXT]<4> {3}\r\nabc FLAGS (\\seen \\answered))\r\n", [
             (.fetch(.start(4)), #line),
             (.fetch(.streamingBegin(kind: .body(section: .init(part: [4], kind: .text), offset: 4), byteCount: 3)), #line),
