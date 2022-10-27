@@ -31,7 +31,6 @@ extension GrammarParser_Message_Tests {
                 ("UID 1234", " ", .uid(1234), #line),
                 ("RFC822.SIZE 1234", " ", .rfc822Size(1234), #line),
                 ("BINARY.SIZE[3] 4", " ", .binarySize(section: [3], size: 4), #line),
-                ("BINARY[3] \"hello\"", " ", .binary(section: [3], data: "hello"), #line),
                 (#"INTERNALDATE "25-jun-1994 01:02:03 +0000""#, " ", .internalDate(date), #line),
                 (
                     #"ENVELOPE ("date" "subject" (("from1" "from2" "from3" "from4")) (("sender1" "sender2" "sender3" "sender4")) (("reply1" "reply2" "reply3" "reply4")) (("to1" "to2" "to3" "to4")) (("cc1" "cc2" "cc3" "cc4")) (("bcc1" "bcc2" "bcc3" "bcc4")) "inreplyto" "messageid")"#,
