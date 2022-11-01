@@ -46,7 +46,7 @@ public struct BadCommand: Error {
 
 /// An error ocurred when parsing an IMAP command or response.
 public struct ParserError: Error {
-    static func invalidUTF8(file: String = (#file), line: Int = #line) -> Self {
+    static func invalidUTF8(file: String = (#fileID), line: Int = #line) -> Self {
         ParserError(hint: "Invalid UTF8", file: file, line: line)
     }
 
@@ -55,7 +55,7 @@ public struct ParserError: Error {
     var file: String
     var line: Int
 
-    init(hint: String = "Unknown", file: String = (#file), line: Int = #line) {
+    init(hint: String = "Unknown", file: String = (#fileID), line: Int = #line) {
         self.hint = hint
         self.file = file
         self.line = line
@@ -77,7 +77,7 @@ public struct TooMuchRecursion: Error {
 extension ParserLibrary {
     /// Throws `ParserError.invalidUTF8` if the given `ByteBuffer` doesn't
     /// contain a valid UTF8 sequence.
-    static func parseBufferAsUTF8(_ buffer: ByteBuffer, file: String = (#file), line: Int = #line) throws -> String {
+    static func parseBufferAsUTF8(_ buffer: ByteBuffer, file: String = (#fileID), line: Int = #line) throws -> String {
         guard let string = String(validatingUTF8Bytes: buffer.readableBytesView) else {
             throw ParserError.invalidUTF8(file: file, line: line)
         }
@@ -236,7 +236,7 @@ extension ParserLibrary {
         }
     }
 
-    static func parseOneOf<T>(_ subParsers: [SubParser<T>], buffer: inout ParseBuffer, tracker: StackTracker, file: String = (#file), line: Int = #line) throws -> T {
+    static func parseOneOf<T>(_ subParsers: [SubParser<T>], buffer: inout ParseBuffer, tracker: StackTracker, file: String = (#fileID), line: Int = #line) throws -> T {
         for parser in subParsers {
             do {
                 return try PL.composite(buffer: &buffer, tracker: tracker, parser)
@@ -252,7 +252,7 @@ extension ParserLibrary {
     static func parseOneOf<T>(_ parser1: SubParser<T>,
                               _ parser2: SubParser<T>,
                               buffer: inout ParseBuffer,
-                              tracker: StackTracker, file: String = (#file), line: Int = #line) throws -> T
+                              tracker: StackTracker, file: String = (#fileID), line: Int = #line) throws -> T
     {
         do {
             return try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
@@ -274,7 +274,7 @@ extension ParserLibrary {
                               _ parser2: SubParser<T>,
                               _ parser3: SubParser<T>,
                               buffer: inout ParseBuffer,
-                              tracker: StackTracker, file: String = (#file), line: Int = #line) throws -> T
+                              tracker: StackTracker, file: String = (#fileID), line: Int = #line) throws -> T
     {
         do {
             return try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in

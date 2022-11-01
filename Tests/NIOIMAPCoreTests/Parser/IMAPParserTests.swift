@@ -32,7 +32,7 @@ protocol _ParserTestHelpers {}
 final class ParserUnitTests: XCTestCase, _ParserTestHelpers {}
 
 extension _ParserTestHelpers {
-    private func iterateTestInputs_generic<T: Equatable>(_ inputs: [(String, String, T, UInt)], file: StaticString = #file, testFunction: (inout ParseBuffer, StackTracker) throws -> T) {
+    private func iterateTestInputs_generic<T: Equatable>(_ inputs: [(String, String, T, UInt)], file: StaticString = #filePath, testFunction: (inout ParseBuffer, StackTracker) throws -> T) {
         for (input, terminator, expected, line) in inputs {
             TestUtilities.withParseBuffer(input, terminator: terminator, shouldRemainUnchanged: false, file: file, line: line) { (buffer) in
                 let testValue = try testFunction(&buffer, .testTracker)
@@ -41,7 +41,7 @@ extension _ParserTestHelpers {
         }
     }
 
-    private func iterateInvalidTestInputs_ParserError_generic<T: Equatable>(_ inputs: [(String, String, UInt)], file: StaticString = #file, testFunction: (inout ParseBuffer, StackTracker) throws -> T) {
+    private func iterateInvalidTestInputs_ParserError_generic<T: Equatable>(_ inputs: [(String, String, UInt)], file: StaticString = #filePath, testFunction: (inout ParseBuffer, StackTracker) throws -> T) {
         for (input, terminator, line) in inputs {
             TestUtilities.withParseBuffer(input, terminator: terminator, shouldRemainUnchanged: true, file: file, line: line) { (buffer) in
                 XCTAssertThrowsError(try testFunction(&buffer, .testTracker), file: file, line: line) { e in
@@ -51,7 +51,7 @@ extension _ParserTestHelpers {
         }
     }
 
-    private func iterateInvalidTestInputs_IncompleteMessage_generic<T: Equatable>(_ inputs: [(String, String, UInt)], file: StaticString = #file, testFunction: (inout ParseBuffer, StackTracker) throws -> T) {
+    private func iterateInvalidTestInputs_IncompleteMessage_generic<T: Equatable>(_ inputs: [(String, String, UInt)], file: StaticString = #filePath, testFunction: (inout ParseBuffer, StackTracker) throws -> T) {
         for (input, terminator, line) in inputs {
             TestUtilities.withParseBuffer(input, terminator: terminator, shouldRemainUnchanged: true, file: file, line: line) { (buffer) in
                 XCTAssertThrowsError(try testFunction(&buffer, .testTracker), file: file, line: line) { e in
@@ -61,7 +61,7 @@ extension _ParserTestHelpers {
         }
     }
 
-    private func iterateTestInputs(_ inputs: [(String, String, UInt)], file: StaticString = #file, testFunction: (inout ParseBuffer, StackTracker) throws -> Void) {
+    private func iterateTestInputs(_ inputs: [(String, String, UInt)], file: StaticString = #filePath, testFunction: (inout ParseBuffer, StackTracker) throws -> Void) {
         for (input, terminator, line) in inputs {
             TestUtilities.withParseBuffer(input, terminator: terminator, shouldRemainUnchanged: false, file: file, line: line) { (buffer) in
                 try testFunction(&buffer, .testTracker)
@@ -69,7 +69,7 @@ extension _ParserTestHelpers {
         }
     }
 
-    private func iterateInvalidTestInputs_ParserError(_ inputs: [(String, String, UInt)], file: StaticString = #file, testFunction: (inout ParseBuffer, StackTracker) throws -> Void) {
+    private func iterateInvalidTestInputs_ParserError(_ inputs: [(String, String, UInt)], file: StaticString = #filePath, testFunction: (inout ParseBuffer, StackTracker) throws -> Void) {
         for (input, terminator, line) in inputs {
             TestUtilities.withParseBuffer(input, terminator: terminator, shouldRemainUnchanged: true, file: file, line: line) { (buffer) in
                 XCTAssertThrowsError(try testFunction(&buffer, .testTracker), file: file, line: line) { e in
@@ -79,7 +79,7 @@ extension _ParserTestHelpers {
         }
     }
 
-    private func iterateInvalidTestInputs_IncompleteMessage(_ inputs: [(String, String, UInt)], file: StaticString = #file, testFunction: (inout ParseBuffer, StackTracker) throws -> Void) {
+    private func iterateInvalidTestInputs_IncompleteMessage(_ inputs: [(String, String, UInt)], file: StaticString = #filePath, testFunction: (inout ParseBuffer, StackTracker) throws -> Void) {
         for (input, terminator, line) in inputs {
             TestUtilities.withParseBuffer(input, terminator: terminator, shouldRemainUnchanged: true, file: file, line: line) { (buffer) in
                 XCTAssertThrowsError(try testFunction(&buffer, .testTracker), file: file, line: line) { e in
@@ -99,7 +99,7 @@ extension _ParserTestHelpers {
         validInputs: [(String, String, T, UInt)],
         parserErrorInputs: [(String, String, UInt)],
         incompleteMessageInputs: [(String, String, UInt)],
-        file: StaticString = #file
+        file: StaticString = #filePath
     ) {
         self.iterateTestInputs_generic(validInputs, file: file, testFunction: testFunction)
         self.iterateInvalidTestInputs_ParserError_generic(parserErrorInputs, file: file, testFunction: testFunction)
@@ -116,7 +116,7 @@ extension _ParserTestHelpers {
         validInputs: [(String, String, UInt)],
         parserErrorInputs: [(String, String, UInt)],
         incompleteMessageInputs: [(String, String, UInt)],
-        file: StaticString = #file
+        file: StaticString = #filePath
     ) {
         self.iterateTestInputs(validInputs, file: file, testFunction: testFunction)
         self.iterateInvalidTestInputs_ParserError(parserErrorInputs, file: file, testFunction: testFunction)
