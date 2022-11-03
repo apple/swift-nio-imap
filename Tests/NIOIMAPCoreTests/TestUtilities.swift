@@ -30,7 +30,7 @@ extension TestUtilities {
     static func withParseBuffer(_ string: String,
                                 terminator: String = "",
                                 shouldRemainUnchanged: Bool = false,
-                                file: StaticString = (#file), line: UInt = #line, _ body: (inout ParseBuffer) throws -> Void)
+                                file: StaticString = (#filePath), line: UInt = #line, _ body: (inout ParseBuffer) throws -> Void)
     {
         var inputBuffer = ByteBufferAllocator().buffer(capacity: string.utf8.count + terminator.utf8.count + 10)
         inputBuffer.writeString("hello")
