@@ -141,6 +141,64 @@ public indirect enum SearchKey: Hashable {
 }
 
 extension SearchKey {
+    /// Are there any (nested) search keys that use strings?
+    ///
+    /// We use this to check if we need to specify `CHARSET UTF-8`
+    var usesString: Bool {
+        switch self {
+        case .all,
+             .answered,
+             .deleted,
+             .flagged,
+             .new,
+             .old,
+             .recent,
+             .seen,
+             .unanswered,
+             .undeleted,
+             .unflagged,
+             .unseen,
+             .draft,
+             .undraft,
+             .before,
+             .keyword,
+             .on,
+             .since,
+             .unkeyword,
+             .messageSizeLarger,
+             .sentBefore,
+             .sentOn,
+             .sentSince,
+             .messageSizeSmaller,
+             .uid,
+             .sequenceNumbers,
+             .older,
+             .younger,
+             .modificationSequence,
+             .filter:
+            return false
+
+        case .bcc,
+             .body,
+             .cc,
+             .from,
+             .subject,
+             .text,
+             .to,
+             .header:
+            return true
+
+        case .not(let key):
+            return key.usesString
+        case .or(let keyA, let keyB):
+            return keyA.usesString || keyB.usesString
+        case .and(let keys):
+            return keys.contains(where: \.usesString)
+        }
+    }
+}
+
+extension SearchKey {
     fileprivate var count: Int {
         switch self {
         case .all,
@@ -195,10 +253,6 @@ extension SearchKey {
 // MARK: - IMAP
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeSearchKeys(_ keys: [SearchKey]) -> Int {
-        writeSearchKey(.and(keys))
-    }
-
     @discardableResult mutating func writeSearchKey(_ key: SearchKey, encloseInParenthesisIfNeeded: Bool = false) -> Int {
         let encloseInParenthesis = encloseInParenthesisIfNeeded && key.count > 1
         if encloseInParenthesis {

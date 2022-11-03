@@ -585,8 +585,10 @@ extension CommandEncodeBuffer {
                 self.buffer.writeSearchReturnOptions(options)
             } +
             self.buffer.writeSpace() +
-            self.buffer.writeIfExists(charset) { (charset) -> Int in
-                self.buffer.writeString("CHARSET \(charset) ")
+            self.buffer.write(if: key.usesString) {
+                self.buffer.writeIfExists(charset) { (charset) -> Int in
+                    self.buffer.writeString("CHARSET \(charset) ")
+                }
             } +
             self.buffer.writeSearchKey(key)
     }
