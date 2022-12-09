@@ -134,9 +134,17 @@ extension MailboxName_Tests {
         XCTAssertEqual(test2.bytes, Array("INBOX".utf8))
         XCTAssertTrue(test2.isInbox)
 
-        let test3 = MailboxName("notinbox")
-        XCTAssertEqual(test3.bytes, Array("notinbox".utf8))
-        XCTAssertFalse(test3.isInbox)
+        let test3 = MailboxName("Inbox")
+        XCTAssertEqual(test3.bytes, Array("INBOX".utf8))
+        XCTAssertTrue(test3.isInbox)
+
+        let test4 = MailboxName("notinbox")
+        XCTAssertEqual(test4.bytes, Array("notinbox".utf8))
+        XCTAssertFalse(test4.isInbox)
+
+        let test5 = MailboxName("inBox2")
+        XCTAssertEqual(test5.bytes, Array("inBox2".utf8))
+        XCTAssertFalse(test5.isInbox)
     }
 
     func testMailboxNameInitNonUTF8() {

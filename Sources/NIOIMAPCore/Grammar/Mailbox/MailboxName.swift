@@ -197,8 +197,12 @@ public struct MailboxName {
     /// `true` if the internal storage reads "INBOX"
     /// otherwise `false`
     public var isInbox: Bool {
-        bytes.lazy.map { $0 & 0xDF }.elementsEqual("INBOX".utf8)
+        hashValue == MailboxName.inboxHashValue &&
+            bytes.count == 5 &&
+            bytes.map { $0 & 0xDF }.elementsEqual("INBOX".utf8)
     }
+
+    private static let inboxHashValue: Int = MailboxName.inbox.hashValue
 
     /// Creates a new `MailboxName` from the given bytes.
     /// - note: The bytes provided should be UTF-7.
