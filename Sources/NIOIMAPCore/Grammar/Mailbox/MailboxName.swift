@@ -198,7 +198,8 @@ public struct MailboxName {
     /// otherwise `false`
     public var isInbox: Bool {
         hashValue == MailboxName.inboxHashValue &&
-            bytes.lazy.map { $0 & 0xDF }.elementsEqual("INBOX".utf8)
+            bytes.count == 5 &&
+            bytes.map { $0 & 0xDF }.elementsEqual("INBOX".utf8)
     }
 
     private static let inboxHashValue: Int = MailboxName.inbox.hashValue
