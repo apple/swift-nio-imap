@@ -32,6 +32,41 @@ extension CommandEncoder_Tests {
             (.tagged(.init(tag: "1", command: .noop)), "1 NOOP\r\n", #line),
             (.append(.start(tag: "2", appendingTo: .inbox)), "2 APPEND \"INBOX\"", #line),
             (.idleDone, "DONE\r\n", #line),
+
+            // SEARCH
+            // We only want to include "CHARSET" if there’s a string in the search key / query.
+
+            (.tagged(.init(tag: "A1", command: .search(key: .all, charset: "UTF-8"))),
+             #"A1 SEARCH ALL\#r\#n"#, #line),
+            (.tagged(.init(tag: "A1", command: .search(key: .draft, charset: "UTF-8"))),
+             #"A1 SEARCH DRAFT\#r\#n"#, #line),
+            (.tagged(.init(tag: "A1", command: .search(key: .uid(.set([2 ... 80])), charset: "UTF-8"))),
+             #"A1 SEARCH UID 2:80\#r\#n"#, #line),
+            (.tagged(.init(tag: "A1", command: .search(key: .sequenceNumbers(.set([2 ... 80])), charset: "UTF-8"))),
+             #"A1 SEARCH 2:80\#r\#n"#, #line),
+
+            (.tagged(.init(tag: "A1", command: .search(key: .and([.draft, .to("foo")]), charset: "UTF-8"))),
+             #"A1 SEARCH CHARSET UTF-8 DRAFT TO "foo"\#r\#n"#, #line),
+            (.tagged(.init(tag: "A1", command: .search(key: .or(.draft, .to("foo")), charset: "UTF-8"))),
+             #"A1 SEARCH CHARSET UTF-8 OR DRAFT TO "foo"\#r\#n"#, #line),
+            (.tagged(.init(tag: "A1", command: .search(key: .not(.to("foo")), charset: "UTF-8"))),
+             #"A1 SEARCH CHARSET UTF-8 NOT TO "foo"\#r\#n"#, #line),
+            (.tagged(.init(tag: "A1", command: .search(key: .bcc("foo"), charset: "UTF-8"))),
+             #"A1 SEARCH CHARSET UTF-8 BCC "foo"\#r\#n"#, #line),
+            (.tagged(.init(tag: "A1", command: .search(key: .body("foo"), charset: "UTF-8"))),
+             #"A1 SEARCH CHARSET UTF-8 BODY "foo"\#r\#n"#, #line),
+            (.tagged(.init(tag: "A1", command: .search(key: .cc("foo"), charset: "UTF-8"))),
+             #"A1 SEARCH CHARSET UTF-8 CC "foo"\#r\#n"#, #line),
+            (.tagged(.init(tag: "A1", command: .search(key: .from("foo"), charset: "UTF-8"))),
+             #"A1 SEARCH CHARSET UTF-8 FROM "foo"\#r\#n"#, #line),
+            (.tagged(.init(tag: "A1", command: .search(key: .subject("foo"), charset: "UTF-8"))),
+             #"A1 SEARCH CHARSET UTF-8 SUBJECT "foo"\#r\#n"#, #line),
+            (.tagged(.init(tag: "A1", command: .search(key: .text("foo"), charset: "UTF-8"))),
+             #"A1 SEARCH CHARSET UTF-8 TEXT "foo"\#r\#n"#, #line),
+            (.tagged(.init(tag: "A1", command: .search(key: .to("foo"), charset: "UTF-8"))),
+             #"A1 SEARCH CHARSET UTF-8 TO "foo"\#r\#n"#, #line),
+            (.tagged(.init(tag: "A1", command: .search(key: .header("foo", "bar"), charset: "UTF-8"))),
+             #"A1 SEARCH CHARSET UTF-8 HEADER "foo" "bar"\#r\#n"#, #line),
         ]
 
         for (command, expected, line) in inputs {

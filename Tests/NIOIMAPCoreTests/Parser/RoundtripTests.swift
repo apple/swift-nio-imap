@@ -89,9 +89,9 @@ final class RoundtripTests: XCTestCase {
             (.uidStore(.set(.all), [], .flags(.add(silent: true, list: [.draft, .deleted, .answered]))), #line),
 
             (.search(key: .all), #line),
-            (.search(key: .or(.deleted, .unseen), charset: "UTF-7"), #line),
-            (.search(key: .or(.deleted, .unseen), charset: "UTF-7", returnOptions: [.min, .max]), #line),
-            (.search(key: .and([.new, .deleted, .unseen]), charset: "UTF-7", returnOptions: [.min, .max]), #line),
+            (.search(key: .or(.deleted, .from("example")), charset: "UTF-7"), #line),
+            (.search(key: .or(.to("bar"), .unseen), charset: "UTF-8", returnOptions: [.min, .max]), #line),
+            (.search(key: .and([.new, .deleted, .unseen]), charset: nil, returnOptions: [.min, .max]), #line),
 
             (.extendedSearch(ExtendedSearchOptions(key: .all, sourceOptions: ExtendedSearchSourceOptions(sourceMailbox: [.inboxes]))), #line),
         ]
