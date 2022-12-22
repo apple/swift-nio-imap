@@ -337,6 +337,9 @@ extension Capability {
     /// https://developers.google.com/gmail/imap/imap-extensions
     public static let gmailExtensions = Self(unchecked: "X-GM-EXT-1")
 
+    /// Yahoo Mail Highest Modification-Sequence
+    public static let yahooMailHighestModificationSequence = Self(unchecked: "XYMHIGHESTMODSEQ")
+
     /// The server supports non-synchronising literals - RFC 7888.
     public static let literalPlus = Self(unchecked: "LITERAL+")
 
