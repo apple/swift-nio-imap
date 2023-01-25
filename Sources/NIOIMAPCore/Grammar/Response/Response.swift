@@ -57,6 +57,25 @@ public enum Response: Hashable {
     }
 }
 
+extension Response: CustomDebugStringConvertible {
+    public var debugDescription: String {
+        ResponseEncodeBuffer.makeDescription(loggingMode: false) {
+            $0.writeResponse(self)
+        }
+    }
+
+    /// Creates a string from the array of `Response` with all _personally identifiable information_ redacted.
+    ///
+    /// This is equivalent to joining `debugDescription` of all elements.
+    public static func descriptionWithoutPII(_ responses: some Sequence<Response>) -> String {
+        ResponseEncodeBuffer.makeDescription(loggingMode: true) {
+            for response in responses {
+                $0.writeResponse(response)
+            }
+        }
+    }
+}
+
 /// The first event will always be `start`
 /// The last event will always be `finish`
 /// Every `start` has exactly one corresponding `finish`

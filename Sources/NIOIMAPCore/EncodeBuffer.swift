@@ -154,7 +154,11 @@ extension EncodeBuffer {
     @discardableResult
     @inlinable
     public mutating func writeBytes<Bytes: Sequence>(_ bytes: Bytes) -> Int where Bytes.Element == UInt8 {
-        self.buffer.writeBytes(bytes)
+        if loggingMode {
+            return self.buffer.writeString("[\(Array(bytes).count) bytes]")
+        } else {
+            return self.buffer.writeBytes(bytes)
+        }
     }
 
     /// Writes a `ByteBuffer` to the buffer.
@@ -163,7 +167,11 @@ extension EncodeBuffer {
     @discardableResult
     @inlinable
     public mutating func writeBuffer(_ buffer: inout ByteBuffer) -> Int {
-        self.buffer.writeBuffer(&buffer)
+        if loggingMode {
+            return self.buffer.writeString("[\(buffer.readableBytes) bytes]")
+        } else {
+            return self.buffer.writeBuffer(&buffer)
+        }
     }
 
     /// Erases all data from the buffer.

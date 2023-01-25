@@ -91,4 +91,42 @@ extension Response_Tests {
             XCTAssertEqual("\(part)", expected, line: line)
         }
     }
+
+    func testCustomDebugStringConvertible_Response() {
+        let inputs: [(Response, String, UInt)] = [
+            (.idleStarted, "+ idling\r\n", #line),
+            (.authenticationChallenge("hello"), "+ aGVsbG8=\r\n", #line),
+            (.fatal(.init(text: "Oh no you're dead")), "* BYE Oh no you're dead\r\n", #line),
+            (.tagged(.init(tag: "A1", state: .ok(.init(text: "NOOP complete")))), "A1 OK NOOP complete\r\n", #line),
+            (.untagged(.id([:])), "* ID NIL\r\n", #line),
+            (.fetch(.start(1)), "* 1 FETCH (", #line),
+            (.fetch(.simpleAttribute(.uid(123))), "UID 123", #line),
+            (.fetch(.streamingBegin(kind: .rfc822Text, byteCount: 0)), "RFC822.TEXT {0}\r\n", #line),
+            (.fetch(.streamingBytes(ByteBuffer(string: "hello"))), "hello", #line),
+            (.fetch(.finish), ")\r\n", #line),
+        ]
+
+        for (test, expectedString, line) in inputs {
+            XCTAssertEqual(String(reflecting: test), expectedString, line: line)
+        }
+    }
+
+    func testDescriptionWithoutPII_Response() {
+        let inputs: [(Response, String, UInt)] = [
+            (.idleStarted, "+ idling\r\n", #line),
+            (.authenticationChallenge("hello"), "+ [8 bytes]\r\n", #line),
+            (.fatal(.init(text: "Oh no you're dead")), "* BYE Oh no you're dead\r\n", #line),
+            (.tagged(.init(tag: "A1", state: .ok(.init(text: "NOOP complete")))), "A1 OK NOOP complete\r\n", #line),
+            (.untagged(.id([:])), "* ID NIL\r\n", #line),
+            (.fetch(.start(1)), "* 1 FETCH (", #line),
+            (.fetch(.simpleAttribute(.uid(123))), "UID 123", #line),
+            (.fetch(.streamingBegin(kind: .rfc822Text, byteCount: 0)), "RFC822.TEXT {0}\r\n", #line),
+            (.fetch(.streamingBytes(ByteBuffer(string: "hello"))), "[5 bytes]", #line),
+            (.fetch(.finish), ")\r\n", #line),
+        ]
+
+        for (test, expectedString, line) in inputs {
+            XCTAssertEqual(Response.descriptionWithoutPII([test]), expectedString, line: line)
+        }
+    }
 }

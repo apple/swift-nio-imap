@@ -47,10 +47,10 @@ extension ResponseEncodeBuffer {
     /// Call the closure with a buffer, return the result as a String.
     ///
     /// Used for implementing ``CustomDebugStringConvertible`` conformance.
-    static func makeDescription(_ closure: (inout ResponseEncodeBuffer) -> Void) -> String {
+    static func makeDescription(loggingMode: Bool, _ closure: (inout ResponseEncodeBuffer) -> Void) -> String {
         var options = ResponseEncodingOptions()
         options.useQuotedString = true
-        var buffer = ResponseEncodeBuffer(buffer: ByteBuffer(), options: options, loggingMode: false)
+        var buffer = ResponseEncodeBuffer(buffer: ByteBuffer(), options: options, loggingMode: loggingMode)
         closure(&buffer)
         return String(bestEffortDecodingUTF8Bytes: buffer.buffer.buffer.readableBytesView)
     }
