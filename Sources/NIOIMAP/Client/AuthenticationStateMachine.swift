@@ -62,9 +62,9 @@ extension ClientStateMachine {
             // the function below.
 
             switch response {
-            case .untagged, .fetch, .fatal, .idleStarted, .authenticationChallenge:
+            case .fetch, .fatal, .idleStarted, .authenticationChallenge:
                 throw UnexpectedResponse(activePromise: nil)
-            case .tagged:
+            case .untagged, .tagged:
                 try self.handleTaggedResponse()
             }
         }
