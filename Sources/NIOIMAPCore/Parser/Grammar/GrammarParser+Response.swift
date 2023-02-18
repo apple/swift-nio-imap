@@ -46,26 +46,26 @@ extension GrammarParser {
     }
 
     // resp-code-apnd  = "APPENDUID" SP nz-number SP append-uid
-    func parseResponseCodeAppend(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseCodeAppend {
-        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> ResponseCodeAppend in
-            try PL.parseFixedString("APPENDUID ", buffer: &buffer, tracker: tracker)
+    func parseSuffix_appendUID(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
+        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> ResponseTextCode in
+            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             let number = try self.parseUIDValidity(buffer: &buffer, tracker: tracker)
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             let uids = try self.parseUIDSetNonEmpty(buffer: &buffer, tracker: tracker)
-            return ResponseCodeAppend(uidValidity: number, uids: uids)
+            return .uidAppend(ResponseCodeAppend(uidValidity: number, uids: uids))
         }
     }
 
     // resp-code-copy  = "COPYUID" SP nz-number SP uid-set SP uid-set
-    func parseResponseCodeCopy(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseCodeCopy {
-        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> ResponseCodeCopy in
-            try PL.parseFixedString("COPYUID ", buffer: &buffer, tracker: tracker)
+    func parseSuffix_uidCopy(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
+        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> ResponseTextCode in
+            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             let uidValidity = try self.parseUIDValidity(buffer: &buffer, tracker: tracker)
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             let sourceUIDRanges = try self.parseUIDRangeArray(buffer: &buffer, tracker: tracker)
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             let destinationUIDRanges = try self.parseUIDRangeArray(buffer: &buffer, tracker: tracker)
-            return ResponseCodeCopy(destinationUIDValidity: uidValidity, sourceUIDs: sourceUIDRanges, destinationUIDs: destinationUIDRanges)
+            return .uidCopy(ResponseCodeCopy(destinationUIDValidity: uidValidity, sourceUIDs: sourceUIDRanges, destinationUIDs: destinationUIDRanges))
         }
     }
 
@@ -197,44 +197,24 @@ extension GrammarParser {
         }
     }
 
-    // resp-text-code  = "ALERT" /
-    //                   "BADCHARSET" [SP "(" charset *(SP charset) ")" ] /
-    //                   capability-data / "PARSE" /
-    //                   "PERMANENTFLAGS" SP "("
-    //                   [flag-perm *(SP flag-perm)] ")" /
-    //                   "READ-ONLY" / "READ-WRITE" / "TRYCREATE" /
-    //                   "UIDNEXT" SP nz-number / "UIDVALIDITY" SP nz-number /
-    //                   "UNSEEN" SP nz-number
-    //                   atom [SP 1*<any TEXT-CHAR except "]">] /
-    //                   "NOTSAVED"
+    /// See https://www.iana.org/assignments/imap-response-codes/imap-response-codes.xhtml
     func parseResponseTextCode(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
-        func parseResponseTextCode_alert(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
-            try PL.parseFixedString("ALERT", buffer: &buffer, tracker: tracker)
-            return .alert
-        }
-
-        func parseResponseTextCode_noModifierSequence(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
-            try PL.parseFixedString("NOMODSEQ", buffer: &buffer, tracker: tracker)
-            return .noModificationSequence
-        }
-
-        func parseResponseTextCode_modified(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
-            try PL.parseFixedString("MODIFIED ", buffer: &buffer, tracker: tracker)
+        func parseSuffix_modified(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
+            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             return .modified(try self.parseMessageIdentifierSet(buffer: &buffer, tracker: tracker))
         }
 
-        func parseResponseTextCode_highestModifiedSequence(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
-            try PL.parseFixedString("HIGHESTMODSEQ ", buffer: &buffer, tracker: tracker)
+        func parseSuffix_highestModifiedSequence(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
+            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             return .highestModificationSequence(try self.parseModificationSequenceValue(buffer: &buffer, tracker: tracker))
         }
 
-        func parseResponseTextCode_referral(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
-            try PL.parseFixedString("REFERRAL ", buffer: &buffer, tracker: tracker)
+        func parseSuffix_referral(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
+            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             return .referral(try self.parseIMAPURL(buffer: &buffer, tracker: tracker))
         }
 
-        func parseResponseTextCode_badCharset(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
-            try PL.parseFixedString("BADCHARSET", buffer: &buffer, tracker: tracker)
+        func parseSuffix_badCharset(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
             let charsets = try PL.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> [String] in
                 try PL.parseFixedString(" (", buffer: &buffer, tracker: tracker)
                 var array = [try self.parseCharset(buffer: &buffer, tracker: tracker)]
@@ -248,17 +228,13 @@ extension GrammarParser {
             return .badCharset(charsets)
         }
 
-        func parseResponseTextCode_capabilityData(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
-            .capability(try self.parseCapabilityData(buffer: &buffer, tracker: tracker))
+        func parseSuffix_capability(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
+            .capability(try self.parseCapabilitySuffix(buffer: &buffer, tracker: tracker))
         }
 
-        func parseResponseTextCode_parse(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
-            try PL.parseFixedString("PARSE", buffer: &buffer, tracker: tracker)
-            return .parse
-        }
-
-        func parseResponseTextCode_permanentFlags(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
-            try PL.parseFixedString("PERMANENTFLAGS (", buffer: &buffer, tracker: tracker)
+        func parseSuffix_permanentFlags(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
+            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+            try PL.parseFixedString("(", buffer: &buffer, tracker: tracker)
             let array = try PL.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> [PermanentFlag] in
                 var array = [try self.parseFlagPerm(buffer: &buffer, tracker: tracker)]
                 try PL.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) in
@@ -271,38 +247,66 @@ extension GrammarParser {
             return .permanentFlags(array ?? [])
         }
 
-        func parseResponseTextCode_readOnly(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
-            try PL.parseFixedString("READ-ONLY", buffer: &buffer, tracker: tracker)
-            return .readOnly
-        }
-
-        func parseResponseTextCode_readWrite(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
-            try PL.parseFixedString("READ-WRITE", buffer: &buffer, tracker: tracker)
-            return .readWrite
-        }
-
-        func parseResponseTextCode_tryCreate(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
-            try PL.parseFixedString("TRYCREATE", buffer: &buffer, tracker: tracker)
-            return .tryCreate
-        }
-
-        func parseResponseTextCode_uidNext(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
-            try PL.parseFixedString("UIDNEXT ", buffer: &buffer, tracker: tracker)
+        func parseSuffix_uidNext(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
+            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             return .uidNext(try self.parseMessageIdentifier(buffer: &buffer, tracker: tracker))
         }
 
-        func parseResponseTextCode_uidValidity(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
-            try PL.parseFixedString("UIDVALIDITY ", buffer: &buffer, tracker: tracker)
+        func parseSuffix_uidValidity(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
+            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             return .uidValidity(try self.parseUIDValidity(buffer: &buffer, tracker: tracker))
         }
 
-        func parseResponseTextCode_unseen(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
-            try PL.parseFixedString("UNSEEN ", buffer: &buffer, tracker: tracker)
+        func parseSuffix_unseen(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
+            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             return .unseen(try self.parseMessageIdentifier(buffer: &buffer, tracker: tracker))
         }
 
-        func parseResponseTextCode_namespace(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
-            .namespace(try self.parseNamespaceResponse(buffer: &buffer, tracker: tracker))
+        func parseSuffix_metadata(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
+            func parseSuffix_metadataLongEntries(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
+                try PL.parseFixedString("LONGENTRIES ", buffer: &buffer, tracker: tracker)
+                let num = try self.parseNumber(buffer: &buffer, tracker: tracker)
+                return .metadataLongEntries(num)
+            }
+
+            func parseSuffix_metadataMaxSize(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
+                try PL.parseFixedString("MAXSIZE ", buffer: &buffer, tracker: tracker)
+                let num = try self.parseNumber(buffer: &buffer, tracker: tracker)
+                return .metadataMaxsize(num)
+            }
+
+            func parseSuffix_metadataTooMany(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
+                try PL.parseFixedString("TOOMANY", buffer: &buffer, tracker: tracker)
+                return .metadataTooMany
+            }
+
+            func parseSuffix_metadataNoPrivate(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
+                try PL.parseFixedString("NOPRIVATE", buffer: &buffer, tracker: tracker)
+                return .metadataNoPrivate
+            }
+
+            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+
+            return try PL.parseOneOf([
+                parseSuffix_metadataLongEntries,
+                parseSuffix_metadataMaxSize,
+                parseSuffix_metadataTooMany,
+                parseSuffix_metadataNoPrivate,
+            ], buffer: &buffer, tracker: tracker)
+        }
+
+        func parseSuffix_urlMechanisms(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
+            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+            try PL.parseFixedString("INTERNAL", buffer: &buffer, tracker: tracker)
+            let array = try PL.parseZeroOrMore(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> MechanismBase64 in
+                try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+                return try self.parseMechanismBase64(buffer: &buffer, tracker: tracker)
+            })
+            return .urlMechanisms(array)
+        }
+
+        func parseSuffix_namespace(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
+            .namespace(try self.parseNamespaceSuffix(buffer: &buffer, tracker: tracker))
         }
 
         func parseResponseTextCode_atom(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
@@ -317,89 +321,58 @@ extension GrammarParser {
             }
             return .other(atom, string)
         }
+        
+        let commandParsers: [String: (inout ParseBuffer, StackTracker) throws -> ResponseTextCode] = [
+            "ALERT": { _, _ in .alert },
+            "ALREADYEXISTS": { _, _ in .alreadyExists },
+            "APPENDUID": parseSuffix_appendUID,
+            "AUTHENTICATIONFAILED": { _, _ in .authenticationFailed },
+            "AUTHORIZATIONFAILED": { _, _ in .authorizationFailed },
+            "BADCHARSET": parseSuffix_badCharset,
+            "CANNOT": { _, _ in .cannot },
+            "CAPABILITY": parseSuffix_capability,
+            "CLIENTBUG": { _, _ in .clientBug },
+            "CLOSED": { _, _ in .closed },
+            "COMPRESSIONACTIVE": { _, _ in .compressionActive },
+            "CONTACTADMIN": { _, _ in .contactAdmin },
+            "COPYUID": parseSuffix_uidCopy,
+            "CORRUPTION": { _, _ in .corruption },
+            "EXPIRED": { _, _ in .expired },
+            "EXPUNGEISSUED": { _, _ in .expungeIssued },
+            "HIGHESTMODSEQ": parseSuffix_highestModifiedSequence,
+            "INUSE": { _, _ in .inUse },
+            "LIMIT": { _, _ in .limit },
+            "METADATA": parseSuffix_metadata,
+            "MODIFIED": parseSuffix_modified,
+            "NAMESPACE": parseSuffix_namespace,
+            "NOMODSEQ": { _, _ in .noModificationSequence },
+            "NONEXISTENT": { _, _ in .nonExistent },
+            "NOPERM": { _, _ in .noPermission },
+            "NOTSAVED": { _, _ in .notSaved },
+            "OVERQUOTA": { _, _ in .overQuota },
+            "PARSE": { _, _ in .parse },
+            "PERMANENTFLAGS": parseSuffix_permanentFlags,
+            "PRIVACYREQUIRED": { _, _ in .privacyRequired },
+            "READ-ONLY": { _, _ in .readOnly },
+            "READ-WRITE": { _, _ in .readWrite },
+            "REFERRAL": parseSuffix_referral,
+            "SERVERBUG": { _, _ in .serverBug },
+            "TRYCREATE": { _, _ in .tryCreate },
+            "UIDNEXT": parseSuffix_uidNext,
+            "UIDNOTSTICKY": { _, _ in .uidNotSticky },
+            "UIDVALIDITY": parseSuffix_uidValidity,
+            "UNAVAILABLE": { _, _ in .unavailable },
+            "UNSEEN": parseSuffix_unseen,
+            "URLMECH": parseSuffix_urlMechanisms,
+            "USEATTR": { _, _ in .useAttribute },
+        ]
 
-        func parseResponseTextCode_uidNotSticky(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
-            try PL.parseFixedString("UIDNOTSTICKY", buffer: &buffer, tracker: tracker)
-            return .uidNotSticky
-        }
-
-        func parseResponseTextCode_closed(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
-            try PL.parseFixedString("CLOSED", buffer: &buffer, tracker: tracker)
-            return .closed
-        }
-
-        func parseResponseTextCode_uidCopy(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
-            .uidCopy(try self.parseResponseCodeCopy(buffer: &buffer, tracker: tracker))
-        }
-
-        func parseResponseTextCode_uidAppend(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
-            .uidAppend(try self.parseResponseCodeAppend(buffer: &buffer, tracker: tracker))
-        }
-
-        // RFC 5182
-        func parseResponseTextCode_notSaved(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
-            try PL.parseFixedString("NOTSAVED", buffer: &buffer, tracker: tracker)
-            return .notSaved
-        }
-
-        func parseResponseTextCode_metadataLongEntries(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
-            try PL.parseFixedString("METADATA LONGENTRIES ", buffer: &buffer, tracker: tracker)
-            let num = try self.parseNumber(buffer: &buffer, tracker: tracker)
-            return .metadataLongEntries(num)
-        }
-
-        func parseResponseTextCode_metadataMaxSize(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
-            try PL.parseFixedString("METADATA MAXSIZE ", buffer: &buffer, tracker: tracker)
-            let num = try self.parseNumber(buffer: &buffer, tracker: tracker)
-            return .metadataMaxsize(num)
-        }
-
-        func parseResponseTextCode_metadataTooMany(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
-            try PL.parseFixedString("METADATA TOOMANY", buffer: &buffer, tracker: tracker)
-            return .metadataTooMany
-        }
-
-        func parseResponseTextCode_metadataNoPrivate(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
-            try PL.parseFixedString("METADATA NOPRIVATE", buffer: &buffer, tracker: tracker)
-            return .metadataNoPrivate
-        }
-
-        func parseResponseTextCode_urlMechanisms(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
-            try PL.parseFixedString("URLMECH INTERNAL", buffer: &buffer, tracker: tracker)
-            let array = try PL.parseZeroOrMore(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> MechanismBase64 in
-                try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-                return try self.parseMechanismBase64(buffer: &buffer, tracker: tracker)
-            })
-            return .urlMechanisms(array)
+        func parseKnownResponseTextCode(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
+            try parseFromLookupTable(buffer: &buffer, tracker: tracker, parsers: commandParsers)
         }
 
         return try PL.parseOneOf([
-            parseResponseTextCode_alert,
-            parseResponseTextCode_noModifierSequence,
-            parseResponseTextCode_modified,
-            parseResponseTextCode_highestModifiedSequence,
-            parseResponseTextCode_badCharset,
-            parseResponseTextCode_capabilityData,
-            parseResponseTextCode_parse,
-            parseResponseTextCode_permanentFlags,
-            parseResponseTextCode_readOnly,
-            parseResponseTextCode_readWrite,
-            parseResponseTextCode_tryCreate,
-            parseResponseTextCode_uidNext,
-            parseResponseTextCode_uidValidity,
-            parseResponseTextCode_unseen,
-            parseResponseTextCode_namespace,
-            parseResponseTextCode_uidNotSticky,
-            parseResponseTextCode_notSaved,
-            parseResponseTextCode_uidCopy,
-            parseResponseTextCode_uidAppend,
-            parseResponseTextCode_closed,
-            parseResponseTextCode_metadataLongEntries,
-            parseResponseTextCode_metadataMaxSize,
-            parseResponseTextCode_metadataTooMany,
-            parseResponseTextCode_metadataNoPrivate,
-            parseResponseTextCode_urlMechanisms,
-            parseResponseTextCode_referral,
+            parseKnownResponseTextCode,
             parseResponseTextCode_atom,
         ], buffer: &buffer, tracker: tracker)
     }

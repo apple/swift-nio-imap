@@ -12,6 +12,73 @@
 //
 //===----------------------------------------------------------------------===//
 
+
+/*
+
+
+ Response Code     Reference     Status Description (Optional)
+ NEWNAME    [RFC2060]    obsolete
+ REFERRAL    [RFC2221]
+ ALERT    [RFC3501][RFC9051]
+ BADCHARSET    [RFC3501][RFC9051]
+ PARSE    [RFC3501][RFC9051]
+ PERMANENTFLAGS    [RFC3501][RFC9051]
+ READ-ONLY    [RFC3501][RFC9051]
+ READ-WRITE    [RFC3501][RFC9051]
+ TRYCREATE    [RFC3501][RFC9051]
+ UIDNEXT    [RFC3501][RFC9051]
+ UIDVALIDITY    [RFC3501][RFC9051]
+ UNSEEN    [RFC3501][RFC9051]
+ UNKNOWN-CTE    [RFC3516][RFC9051]
+ UIDNOTSTICKY    [RFC4315][RFC9051]
+ APPENDUID    [RFC4315][RFC9051]
+ COPYUID    [RFC4315][RFC9051]
+ URLMECH    [RFC4467]
+ TOOBIG    [RFC4469]
+ BADURL    [RFC4469]
+ HIGHESTMODSEQ    [RFC4551]
+ NOMODSEQ    [RFC4551]
+ MODIFIED    [RFC4551]
+ COMPRESSIONACTIVE    [RFC4978]
+ CLOSED    [RFC5162][RFC9051]
+ NOTSAVED    [RFC5182]
+ BADCOMPARATOR    [RFC5255]
+ ANNOTATE    [RFC5257]
+ ANNOTATIONS    [RFC5257]
+ TEMPFAIL    [RFC5259]
+ MAXCONVERTMESSAGES    [RFC5259]
+ MAXCONVERTPARTS    [RFC5259]
+ NOUPDATE    [RFC5267]
+ NOTIFICATIONOVERFLOW    [RFC5465]
+ BADEVENT    [RFC5465]
+ UNDEFINED-FILTER    [RFC5466]
+ METADATA    [RFC5464]
+ UNAVAILABLE    [RFC5530][RFC9051]
+ AUTHENTICATIONFAILED    [RFC5530][RFC9051]
+ AUTHORIZATIONFAILED    [RFC5530][RFC9051]
+ EXPIRED    [RFC5530][RFC9051]
+ PRIVACYREQUIRED    [RFC5530][RFC9051]
+ CONTACTADMIN    [RFC5530][RFC9051]
+ NOPERM    [RFC5530][RFC9051]
+ INUSE    [RFC5530][RFC9051]
+ EXPUNGEISSUED    [RFC5530][RFC9051]
+ CORRUPTION    [RFC5530][RFC9051]
+ SERVERBUG    [RFC5530][RFC9051]
+ CLIENTBUG    [RFC5530][RFC9051]
+ CANNOT    [RFC5530][RFC9051]
+ LIMIT    [RFC5530][RFC9051]
+ OVERQUOTA    [RFC5530][RFC9051]
+ ALREADYEXISTS    [RFC5530][RFC9051]
+ NONEXISTENT    [RFC5530][RFC9051]
+ USEATTR    [RFC6154]
+ DOWNGRADED    [RFC6858]
+ MAILBOXID    [RFC8474]
+ CAPABILITY    [RFC3501][RFC9051]
+ HASCHILDREN    [RFC9051]
+
+ */
+
+
 import struct NIO.ByteBuffer
 
 // TODO: Convert to struct
@@ -28,6 +95,11 @@ public indirect enum ResponseTextCode: Hashable {
     /// presented to the user in a fashion that calls the user's
     /// attention to the message.
     case alert
+
+    /// The operation attempts to create something that already exists,
+    /// such as when the CREATE or RENAME directories attempt to create
+    /// a mailbox and there is already one of that name.
+    case alreadyExists
 
     /// A SEARCH failed because the given charset is not supported by
     /// this implementation.  If the optional list of charsets is
@@ -253,11 +325,6 @@ public indirect enum ResponseTextCode: Hashable {
     /// IMAP QUOTA extension defined by [RFC2087], then there is a
     /// quota, but the client cannot find out what the quota is.
     case overQuota
-
-    /// The operation attempts to create something that already exists,
-    /// such as when the CREATE or RENAME directories attempt to create
-    /// a mailbox and there is already one of that name.
-    case alreadyExists
 
     /// The operation attempts to delete something that does not exist.
     /// Similar to ALREADYEXISTS.

@@ -193,10 +193,15 @@ extension GrammarParser {
     func parseCapabilityData(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [Capability] {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> [Capability] in
             try PL.parseFixedString("CAPABILITY", buffer: &buffer, tracker: tracker)
-            return try PL.parseOneOrMore(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
-                try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-                return try self.parseCapability(buffer: &buffer, tracker: tracker)
-            }
+            return try self.parseCapabilitySuffix(buffer: &buffer, tracker: tracker)
+        }
+    }
+
+    // *(SP capability)
+    func parseCapabilitySuffix(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [Capability] {
+        return try PL.parseOneOrMore(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
+            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+            return try self.parseCapability(buffer: &buffer, tracker: tracker)
         }
     }
 
@@ -1551,7 +1556,15 @@ extension GrammarParser {
     //                       SP Namespace SP Namespace
     func parseNamespaceResponse(buffer: inout ParseBuffer, tracker: StackTracker) throws -> NamespaceResponse {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> NamespaceResponse in
-            try PL.parseFixedString("NAMESPACE ", buffer: &buffer, tracker: tracker)
+            try PL.parseFixedString("NAMESPACE", buffer: &buffer, tracker: tracker)
+            return try parseNamespaceSuffix(buffer: &buffer, tracker: tracker)
+        }
+    }
+
+    // SP Namespace SP Namespace SP Namespace
+    func parseNamespaceSuffix(buffer: inout ParseBuffer, tracker: StackTracker) throws -> NamespaceResponse {
+        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> NamespaceResponse in
+            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             let n1 = try self.parseNamespace(buffer: &buffer, tracker: tracker)
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             let n2 = try self.parseNamespace(buffer: &buffer, tracker: tracker)
@@ -1560,7 +1573,6 @@ extension GrammarParser {
             return NamespaceResponse(userNamespace: n1, otherUserNamespace: n2, sharedNamespace: n3)
         }
     }
-
     // nil             = "NIL"
     func parseNil(buffer: inout ParseBuffer, tracker: StackTracker) throws {
         try PL.parseFixedString("nil", buffer: &buffer, tracker: tracker)
