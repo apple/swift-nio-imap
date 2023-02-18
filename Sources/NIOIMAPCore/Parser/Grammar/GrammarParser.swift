@@ -199,7 +199,7 @@ extension GrammarParser {
 
     // *(SP capability)
     func parseCapabilitySuffix(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [Capability] {
-        return try PL.parseOneOrMore(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
+        try PL.parseOneOrMore(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             return try self.parseCapability(buffer: &buffer, tracker: tracker)
         }
@@ -1573,6 +1573,7 @@ extension GrammarParser {
             return NamespaceResponse(userNamespace: n1, otherUserNamespace: n2, sharedNamespace: n3)
         }
     }
+
     // nil             = "NIL"
     func parseNil(buffer: inout ParseBuffer, tracker: StackTracker) throws {
         try PL.parseFixedString("nil", buffer: &buffer, tracker: tracker)

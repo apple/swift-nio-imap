@@ -321,7 +321,7 @@ extension GrammarParser {
             }
             return .other(atom, string)
         }
-        
+
         let commandParsers: [String: (inout ParseBuffer, StackTracker) throws -> ResponseTextCode] = [
             "ALERT": { _, _ in .alert },
             "ALREADYEXISTS": { _, _ in .alreadyExists },

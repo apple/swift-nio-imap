@@ -77,7 +77,7 @@ extension GrammarParser_Response_Tests {
                 ("CLOSED", "\r", .closed, #line),
                 ("COMPRESSIONACTIVE", "\r", .compressionActive, #line),
                 ("CONTACTADMIN", "\r", .contactAdmin, #line),
-                ("COPYUID 443 3:5 6:8", "\r", .uidCopy(.init(destinationUIDValidity: 443, sourceUIDs: [3...5], destinationUIDs: [6...8])), #line),
+                ("COPYUID 443 3:5 6:8", "\r", .uidCopy(.init(destinationUIDValidity: 443, sourceUIDs: [3 ... 5], destinationUIDs: [6 ... 8])), #line),
                 ("CORRUPTION", "\r", .corruption, #line),
                 ("EXPIRED", "\r", .expired, #line),
                 ("EXPUNGEISSUED", "\r", .expungeIssued, #line),
