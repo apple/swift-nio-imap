@@ -29,6 +29,11 @@ public indirect enum ResponseTextCode: Hashable {
     /// attention to the message.
     case alert
 
+    /// The operation attempts to create something that already exists,
+    /// such as when the CREATE or RENAME directories attempt to create
+    /// a mailbox and there is already one of that name.
+    case alreadyExists
+
     /// A SEARCH failed because the given charset is not supported by
     /// this implementation.  If the optional list of charsets is
     /// given, this lists the charsets that are supported by this
@@ -253,11 +258,6 @@ public indirect enum ResponseTextCode: Hashable {
     /// IMAP QUOTA extension defined by [RFC2087], then there is a
     /// quota, but the client cannot find out what the quota is.
     case overQuota
-
-    /// The operation attempts to create something that already exists,
-    /// such as when the CREATE or RENAME directories attempt to create
-    /// a mailbox and there is already one of that name.
-    case alreadyExists
 
     /// The operation attempts to delete something that does not exist.
     /// Similar to ALREADYEXISTS.
