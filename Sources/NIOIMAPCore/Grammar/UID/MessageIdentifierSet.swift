@@ -400,6 +400,30 @@ extension MessageIdentifierSet: SetAlgebra {
     public mutating func formSymmetricDifference(_ other: MessageIdentifierSet) {
         _ranges.formSymmetricDifference(other._ranges)
     }
+
+    public func subtracting(_ other: Self) -> Self {
+        MessageIdentifierSet(_ranges.subtracting(other._ranges))
+    }
+
+    public func isSubset(of other: Self) -> Bool {
+        _ranges.isSubset(of: other._ranges)
+    }
+
+    public func isSuperset(of other: Self) -> Bool {
+        _ranges.isSuperset(of: other._ranges)
+    }
+
+    public mutating func subtract(_ other: Self) {
+        _ranges.subtract(other._ranges)
+    }
+
+    public func isStrictSuperset(of other: Self) -> Bool {
+        _ranges.isStrictSuperset(of: other._ranges)
+    }
+
+    public func isStrictSubset(of other: Self) -> Bool {
+        _ranges.isStrictSubset(of: other._ranges)
+    }
 }
 
 // MARK: - Conversion

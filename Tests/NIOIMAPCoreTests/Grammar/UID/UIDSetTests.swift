@@ -212,6 +212,109 @@ extension UIDSetTests {
         XCTAssertEqual("\(sut)", "20:29,36:40")
     }
 
+    func testSubtracting() {
+        let sut = MessageIdentifierSet<UID>(20 ... 35)
+        let a = sut.subtracting(MessageIdentifierSet<UID>(21 ... 24))
+        XCTAssertEqual("\(sut)", "20:35")
+        XCTAssertEqual("\(a)", "20,25:35")
+    }
+
+    func testIsSubset() {
+        XCTAssert(MessageIdentifierSet<UID>(20 ... 35)
+            .isSubset(of: MessageIdentifierSet<UID>(20 ... 35))
+        )
+        XCTAssertFalse(MessageIdentifierSet<UID>(20 ... 35)
+            .isSubset(of: MessageIdentifierSet<UID>(2 ... 3))
+        )
+        XCTAssertFalse(MessageIdentifierSet<UID>(20 ... 35)
+            .isSubset(of: MessageIdentifierSet<UID>(24 ... 25))
+        )
+        XCTAssertFalse(MessageIdentifierSet<UID>(2 ... 3)
+            .isSubset(of: MessageIdentifierSet<UID>(20 ... 35))
+        )
+        XCTAssert(MessageIdentifierSet<UID>(24 ... 25)
+            .isSubset(of: MessageIdentifierSet<UID>(20 ... 35))
+        )
+    }
+
+    func testIsStrictSubset() {
+        XCTAssertFalse(MessageIdentifierSet<UID>(20 ... 35)
+            .isStrictSubset(of: MessageIdentifierSet<UID>(20 ... 35))
+        )
+        XCTAssertFalse(MessageIdentifierSet<UID>(20 ... 35)
+            .isStrictSubset(of: MessageIdentifierSet<UID>(2 ... 3))
+        )
+        XCTAssertFalse(MessageIdentifierSet<UID>(20 ... 35)
+            .isStrictSubset(of: MessageIdentifierSet<UID>(24 ... 25))
+        )
+        XCTAssertFalse(MessageIdentifierSet<UID>(2 ... 3)
+            .isStrictSubset(of: MessageIdentifierSet<UID>(20 ... 35))
+        )
+        XCTAssert(MessageIdentifierSet<UID>(24 ... 25)
+            .isStrictSubset(of: MessageIdentifierSet<UID>(20 ... 35))
+        )
+    }
+
+    func testIsDisjoint() {
+        XCTAssertFalse(MessageIdentifierSet<UID>(20 ... 35)
+            .isDisjoint(with: MessageIdentifierSet<UID>(20 ... 35))
+        )
+        XCTAssert(MessageIdentifierSet<UID>(20 ... 35)
+            .isDisjoint(with: MessageIdentifierSet<UID>(2 ... 3))
+        )
+        XCTAssertFalse(MessageIdentifierSet<UID>(20 ... 35)
+            .isDisjoint(with: MessageIdentifierSet<UID>(24 ... 25))
+        )
+        XCTAssert(MessageIdentifierSet<UID>(2 ... 3)
+            .isDisjoint(with: MessageIdentifierSet<UID>(20 ... 35))
+        )
+        XCTAssertFalse(MessageIdentifierSet<UID>(24 ... 25)
+            .isDisjoint(with: MessageIdentifierSet<UID>(20 ... 35))
+        )
+    }
+
+    func testIsSuperset() {
+        XCTAssert(MessageIdentifierSet<UID>(20 ... 35)
+            .isSuperset(of: MessageIdentifierSet<UID>(20 ... 35))
+        )
+        XCTAssertFalse(MessageIdentifierSet<UID>(20 ... 35)
+            .isSuperset(of: MessageIdentifierSet<UID>(2 ... 3))
+        )
+        XCTAssert(MessageIdentifierSet<UID>(20 ... 35)
+            .isSuperset(of: MessageIdentifierSet<UID>(24 ... 25))
+        )
+        XCTAssertFalse(MessageIdentifierSet<UID>(2 ... 3)
+            .isSuperset(of: MessageIdentifierSet<UID>(20 ... 35))
+        )
+        XCTAssertFalse(MessageIdentifierSet<UID>(24 ... 25)
+            .isSuperset(of: MessageIdentifierSet<UID>(20 ... 35))
+        )
+    }
+
+    func testIsStrictSuperset() {
+        XCTAssertFalse(MessageIdentifierSet<UID>(20 ... 35)
+            .isStrictSuperset(of: MessageIdentifierSet<UID>(20 ... 35))
+        )
+        XCTAssertFalse(MessageIdentifierSet<UID>(20 ... 35)
+            .isStrictSuperset(of: MessageIdentifierSet<UID>(2 ... 3))
+        )
+        XCTAssert(MessageIdentifierSet<UID>(20 ... 35)
+            .isStrictSuperset(of: MessageIdentifierSet<UID>(24 ... 25))
+        )
+        XCTAssertFalse(MessageIdentifierSet<UID>(2 ... 3)
+            .isStrictSuperset(of: MessageIdentifierSet<UID>(20 ... 35))
+        )
+        XCTAssertFalse(MessageIdentifierSet<UID>(24 ... 25)
+            .isStrictSuperset(of: MessageIdentifierSet<UID>(20 ... 35))
+        )
+    }
+
+    func testSubtract() {
+        var sut = MessageIdentifierSet<UID>(20 ... 35)
+        sut.subtract(MessageIdentifierSet<UID>(21 ... 24))
+        XCTAssertEqual("\(sut)", "20,25:35")
+    }
+
     func testEmptyCollection() {
         XCTAssertEqual(MessageIdentifierSet<UID>().map { "\($0)" }, [])
         XCTAssertEqual(MessageIdentifierSet<UID>().count, 0)
