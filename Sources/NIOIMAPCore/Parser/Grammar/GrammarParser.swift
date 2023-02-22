@@ -460,15 +460,15 @@ extension GrammarParser {
         try PL.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
             try PL.parseFixedString("ESEARCH", buffer: &buffer, tracker: tracker)
             let correlator = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseSearchCorrelator)
-            let uid = try PL.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
+            let kind: ExtendedSearchResponse.Kind = try PL.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
                 try PL.parseFixedString(" UID", buffer: &buffer, tracker: tracker)
-                return true
-            } ?? false
+                return .uid
+            } ?? .sequenceNumber
             let searchReturnData = try PL.parseZeroOrMore(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> SearchReturnData in
                 try PL.parseSpaces(buffer: &buffer, tracker: tracker)
                 return try self.parseSearchReturnData(buffer: &buffer, tracker: tracker)
             }
-            return ExtendedSearchResponse(correlator: correlator, uid: uid, returnData: searchReturnData)
+            return ExtendedSearchResponse(correlator: correlator, kind: kind, returnData: searchReturnData)
         }
     }
 

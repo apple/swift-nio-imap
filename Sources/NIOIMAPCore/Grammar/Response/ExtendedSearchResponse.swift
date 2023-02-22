@@ -19,20 +19,30 @@ public struct ExtendedSearchResponse: Hashable {
     /// Identifies the search that resulted in this response.
     public var correlator: SearchCorrelator?
 
-    /// `true` if this was a UID SEARCH, otherwise `false`.
-    public var uid: Bool
+    /// Is this a UID or a sequence number response?
+    public var kind: Kind
 
     /// Data returned from the search.
     public var returnData: [SearchReturnData]
 
     /// Creates a new `ExtendedSearchResponse`.
     /// - parameter correlator: Identifies the search that resulted in this response. Defaults to `nil`.
-    /// - parameter uid: `true` if this was a UID SEARCH, otherwise `false`.
+    /// - parameter kind: Is this a response to `UID SEARCH` or `SEARCH`?
     /// - parameter returnData: Data returned from the search.
-    public init(correlator: SearchCorrelator? = nil, uid: Bool, returnData: [SearchReturnData]) {
+    public init(correlator: SearchCorrelator? = nil, kind: Kind, returnData: [SearchReturnData]) {
         self.correlator = correlator
-        self.uid = uid
+        self.kind = kind
         self.returnData = returnData
+    }
+}
+
+extension ExtendedSearchResponse {
+    /// The kind of search response.
+    ///
+    /// Describes if the `UnknownMessageIdentifier` in the `returnData`’s `SearchReturnData` are `UID` or `SequenceNumber`.
+    public enum Kind: Hashable {
+        case sequenceNumber
+        case uid
     }
 }
 
@@ -44,7 +54,7 @@ extension EncodeBuffer {
             self.writeIfExists(response.correlator) { (correlator) -> Int in
                 self.writeSearchCorrelator(correlator)
             } +
-            self.write(if: response.uid) {
+            self.write(if: response.kind == .uid) {
                 self.writeString(" UID")
             } +
             self.write(if: response.returnData.count > 0) {

@@ -23,10 +23,10 @@ class ExtendedSearchResponse_Tests: EncodeTestClass {}
 extension ExtendedSearchResponse_Tests {
     func testEncode() {
         let inputs: [(ExtendedSearchResponse, String, UInt)] = [
-            (.init(correlator: nil, uid: false, returnData: []), "ESEARCH", #line),
-            (.init(correlator: nil, uid: true, returnData: []), "ESEARCH UID", #line),
-            (.init(correlator: nil, uid: false, returnData: [.count(2)]), "ESEARCH COUNT 2", #line),
-            (.init(correlator: SearchCorrelator(tag: "some"), uid: false, returnData: []), #"ESEARCH (TAG "some")"#, #line),
+            (.init(correlator: nil, kind: .sequenceNumber, returnData: []), "ESEARCH", #line),
+            (.init(correlator: nil, kind: .uid, returnData: []), "ESEARCH UID", #line),
+            (.init(correlator: nil, kind: .sequenceNumber, returnData: [.count(2)]), "ESEARCH COUNT 2", #line),
+            (.init(correlator: SearchCorrelator(tag: "some"), kind: .sequenceNumber, returnData: []), #"ESEARCH (TAG "some")"#, #line),
         ]
 
         for (test, expectedString, line) in inputs {

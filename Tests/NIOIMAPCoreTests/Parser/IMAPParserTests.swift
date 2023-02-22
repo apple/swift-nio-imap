@@ -1161,11 +1161,11 @@ extension ParserUnitTests {
         self.iterateTests(
             testFunction: GrammarParser().parseExtendedSearchResponse,
             validInputs: [
-                ("ESEARCH", "\r", .init(correlator: nil, uid: false, returnData: []), #line),
-                ("ESEARCH UID", "\r", .init(correlator: nil, uid: true, returnData: []), #line),
-                ("ESEARCH (TAG \"col\") UID", "\r", .init(correlator: SearchCorrelator(tag: "col"), uid: true, returnData: []), #line),
-                ("ESEARCH (TAG \"col\") UID COUNT 2", "\r", .init(correlator: SearchCorrelator(tag: "col"), uid: true, returnData: [.count(2)]), #line),
-                ("ESEARCH (TAG \"col\") UID MIN 1 MAX 2", "\r", .init(correlator: SearchCorrelator(tag: "col"), uid: true, returnData: [.min(1), .max(2)]), #line),
+                ("ESEARCH", "\r", .init(correlator: nil, kind: .sequenceNumber, returnData: []), #line),
+                ("ESEARCH UID", "\r", .init(correlator: nil, kind: .uid, returnData: []), #line),
+                ("ESEARCH (TAG \"col\") UID", "\r", .init(correlator: SearchCorrelator(tag: "col"), kind: .uid, returnData: []), #line),
+                ("ESEARCH (TAG \"col\") UID COUNT 2", "\r", .init(correlator: SearchCorrelator(tag: "col"), kind: .uid, returnData: [.count(2)]), #line),
+                ("ESEARCH (TAG \"col\") UID MIN 1 MAX 2", "\r", .init(correlator: SearchCorrelator(tag: "col"), kind: .uid, returnData: [.min(1), .max(2)]), #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
