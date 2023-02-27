@@ -137,6 +137,28 @@ extension MessageIdentifierRange {
     @inlinable public var count: Int {
         range.count
     }
+
+    /// A Boolean value indicating whether the range is empty.
+    @inlinable public var isEmpty: Bool {
+        range.isEmpty
+    }
+
+    /// Returns a copy of this range clamped to the given limiting range.
+    @inlinable public func clamped(to limits: MessageIdentifierRange) -> MessageIdentifierRange {
+        Self(range.clamped(to: limits.range))
+    }
+
+    /// Returns a Boolean value indicating whether this range and the given range
+    /// contain an element in common.
+    @inlinable public func overlaps(_ other: MessageIdentifierRange) -> Bool {
+        range.overlaps(other.range)
+    }
+
+    /// Returns a Boolean value indicating whether the given element is contained
+    /// within the range.
+    @inlinable public func contains(_ element: IdentifierType) -> Bool {
+        range.contains(element)
+    }
 }
 
 // MARK: - Encoding
