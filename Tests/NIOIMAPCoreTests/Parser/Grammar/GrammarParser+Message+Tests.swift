@@ -22,8 +22,10 @@ class GrammarParser_Message_Tests: XCTestCase, _ParserTestHelpers {}
 
 extension GrammarParser_Message_Tests {
     func testParseMessageAttribute() throws {
-        let components = ServerMessageDate.Components(year: 1994, month: 6, day: 25, hour: 1, minute: 2, second: 3, timeZoneMinutes: 0)
-        let date = ServerMessageDate(components!)
+        let components1 = ServerMessageDate.Components(year: 1994, month: 6, day: 25, hour: 1, minute: 2, second: 3, timeZoneMinutes: 0)
+        let date1 = ServerMessageDate(components1!)
+        let components2 = ServerMessageDate.Components(year: 2023, month: 3, day: 8, hour: 12, minute: 16, second: 47, timeZoneMinutes: 8 * 60)
+        let date2 = ServerMessageDate(components2!)
 
         self.iterateTests(
             testFunction: GrammarParser().parseMessageAttribute,
@@ -32,7 +34,9 @@ extension GrammarParser_Message_Tests {
                 ("UID 1234", " ", .uid(1234), #line),
                 ("RFC822.SIZE 1234", " ", .rfc822Size(1234), #line),
                 ("BINARY.SIZE[3] 4", " ", .binarySize(section: [3], size: 4), #line),
-                (#"INTERNALDATE "25-jun-1994 01:02:03 +0000""#, " ", .internalDate(date), #line),
+                (#"INTERNALDATE "25-jun-1994 01:02:03 +0000""#, " ", .internalDate(date1), #line),
+                (#"INTERNALDATE "8-Mar-2023 12:16:47 +0800""#, " ", .internalDate(date2), #line), // qq.com can return a day without a leading zero
+                (#"INTERNALDATE "08-Mar-2023 12:16:47 +0800""#, " ", .internalDate(date2), #line),
                 (
                     #"ENVELOPE ("date" "subject" (("from1" "from2" "from3" "from4")) (("sender1" "sender2" "sender3" "sender4")) (("reply1" "reply2" "reply3" "reply4")) (("to1" "to2" "to3" "to4")) (("cc1" "cc2" "cc3" "cc4")) (("bcc1" "bcc2" "bcc3" "bcc4")) "inreplyto" "messageid")"#,
                     " ",
