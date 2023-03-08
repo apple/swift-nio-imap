@@ -24,7 +24,7 @@ extension GrammarParser_Message_Tests {
     func testParseMessageAttribute() throws {
         let components1 = ServerMessageDate.Components(year: 1994, month: 6, day: 25, hour: 1, minute: 2, second: 3, timeZoneMinutes: 0)
         let date1 = ServerMessageDate(components1!)
-        let components2 = ServerMessageDate.Components(year: 2023, month: 3, day: 8, hour: 12, minute: 16, second: 47, timeZoneMinutes: 8*60)
+        let components2 = ServerMessageDate.Components(year: 2023, month: 3, day: 8, hour: 12, minute: 16, second: 47, timeZoneMinutes: 8 * 60)
         let date2 = ServerMessageDate(components2!)
 
         self.iterateTests(
