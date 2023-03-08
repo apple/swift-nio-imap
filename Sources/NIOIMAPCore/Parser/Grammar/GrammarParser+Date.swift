@@ -55,7 +55,11 @@ extension GrammarParser {
     // date-day-fixed  = (SP DIGIT) / 2DIGIT
     func parseDateDayFixed(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Int {
         func parseDateDayFixed_spaced(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Int {
-            try PL.parseFixedString(" ", buffer: &buffer, tracker: tracker)
+            // According to the RFC, there should be a space here.
+            // But some servers (e.g. qq.com) don't include one.
+            try PL.parseOptional(buffer: &buffer, tracker: tracker) { buffer, tracker in
+                try PL.parseFixedString(" ", buffer: &buffer, tracker: tracker)
+            }
             return try self.parseNDigits(buffer: &buffer, tracker: tracker, bytes: 1)
         }
 
