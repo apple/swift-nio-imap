@@ -16,16 +16,16 @@ import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
 import XCTest
 
-class PartialRange_Tests: EncodeTestClass {}
+class MessagePathByteRange_Tests: EncodeTestClass {}
 
 // MARK: - Encoding
 
-extension PartialRange_Tests {
-    func testEncode() {
-        let inputs: [(PartialRange, String, UInt)] = [
-            (.init(offset: 1, length: nil), "1", #line),
-            (.init(offset: 1, length: 2), "1.2", #line),
+extension MessagePathByteRange_Tests {
+    func testEncode_MessagePathByteRange() {
+        let inputs: [(MessagePath.ByteRange, String, UInt)] = [
+            (.init(range: .init(offset: 1, length: nil)), "/;PARTIAL=1", #line),
+            (.init(range: .init(offset: 1, length: 2)), "/;PARTIAL=1.2", #line),
         ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writePartialRange($0) })
+        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeMessagePathByteRange($0) })
     }
 }

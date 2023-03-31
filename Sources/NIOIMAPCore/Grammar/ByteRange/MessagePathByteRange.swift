@@ -12,27 +12,29 @@
 //
 //===----------------------------------------------------------------------===//
 
-/// Used to append a `PartialRange` to the end of a *UID FETCH BODY.PEEK*.
-public struct IPartial: Hashable {
-    /// The `PartialRange` to append.
-    public var range: PartialRange
+extension MessagePath {
+    /// Used to append a `ByteRange` as part of a URL.
+    public struct ByteRange: Hashable {
+        /// The `PartialRange` to append.
+        public var range: NIOIMAPCore.ByteRange
 
-    /// Creates a new `IPartial`.
-    /// - parameter range: The `PartialRange` to append.
-    public init(range: PartialRange) {
-        self.range = range
+        /// Creates a new `MessagePath.ByteRange`.
+        /// - parameter range: The `PartialRange` to append.
+        public init(range: NIOIMAPCore.ByteRange) {
+            self.range = range
+        }
     }
 }
 
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeIPartial(_ data: IPartial) -> Int {
+    @discardableResult mutating func writeMessagePathByteRange(_ data: MessagePath.ByteRange) -> Int {
         self.writeString("/;PARTIAL=") +
             self.writePartialRange(data.range)
     }
 
-    @discardableResult mutating func writeIPartialOnly(_ data: IPartial) -> Int {
+    @discardableResult mutating func writeMessagePathByteRangeOnly(_ data: MessagePath.ByteRange) -> Int {
         self.writeString(";PARTIAL=") +
             self.writePartialRange(data.range)
     }

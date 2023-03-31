@@ -16,11 +16,11 @@ import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
 import XCTest
 
-class Partial_Tests: EncodeTestClass {}
+class ByteRange_Tests: EncodeTestClass {}
 
 // MARK: - Encoding
 
-extension Partial_Tests {
+extension ByteRange_Tests {
     func testEncode() {
         let inputs: [(ClosedRange<UInt32>, String, UInt)] = [
             /// Encoded format is `<offset.count>`:
@@ -38,5 +38,13 @@ extension Partial_Tests {
             XCTAssertEqual(size, expectedString.utf8.count, line: line)
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }
+    }
+
+    func testEncode_ByteRange() {
+        let inputs: [(ByteRange, String, UInt)] = [
+            (.init(offset: 1, length: nil), "1", #line),
+            (.init(offset: 1, length: 2), "1.2", #line),
+        ]
+        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writePartialRange($0) })
     }
 }

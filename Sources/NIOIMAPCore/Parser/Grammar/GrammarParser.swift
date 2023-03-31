@@ -747,15 +747,15 @@ extension GrammarParser {
         try PL.parseNewline(buffer: &buffer, tracker: tracker)
     }
 
-    func parseIPartial(buffer: inout ParseBuffer, tracker: StackTracker) throws -> IPartial {
-        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> IPartial in
+    func parseMessagePathByteRange(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessagePath.ByteRange {
+        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> MessagePath.ByteRange in
             try PL.parseFixedString("/", buffer: &buffer, tracker: tracker)
-            return try parseIPartialOnly(buffer: &buffer, tracker: tracker)
+            return try parseMessagePathByteRangeOnly(buffer: &buffer, tracker: tracker)
         }
     }
 
-    func parseIPartialOnly(buffer: inout ParseBuffer, tracker: StackTracker) throws -> IPartial {
-        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> IPartial in
+    func parseMessagePathByteRangeOnly(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessagePath.ByteRange {
+        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> MessagePath.ByteRange in
             try PL.parseFixedString(";PARTIAL=", buffer: &buffer, tracker: tracker)
             return .init(range: try self.parsePartialRange(buffer: &buffer, tracker: tracker))
         }
@@ -919,23 +919,23 @@ extension GrammarParser {
             }
 
             var section = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseIMAPURLSection)
-            var partial: IPartial?
+            var byteRange: MessagePath.ByteRange?
             if section?.encodedSection.section.last == Character(.init(UInt8(ascii: "/"))) {
                 try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
                     section!.encodedSection.section = String(section!.encodedSection.section.dropLast())
 
-                    partial = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseIPartialOnly)
+                    byteRange = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseMessagePathByteRangeOnly)
                 }
             } else {
-                partial = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseIPartial)
+                byteRange = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseMessagePathByteRange)
             }
-            return .init(mailboxReference: ref, iUID: uid, section: section, range: partial)
+            return .init(mailboxReference: ref, iUID: uid, section: section, range: byteRange)
         }
     }
 
     func parseURLFetchType(buffer: inout ParseBuffer, tracker: StackTracker) throws -> URLFetchType {
         func parseURLFetchType_partialOnly(buffer: inout ParseBuffer, tracker: StackTracker) throws -> URLFetchType {
-            let partial = try self.parseIPartialOnly(buffer: &buffer, tracker: tracker)
+            let partial = try self.parseMessagePathByteRangeOnly(buffer: &buffer, tracker: tracker)
             return .partialOnly(partial)
         }
 
@@ -944,16 +944,16 @@ extension GrammarParser {
             if section.encodedSection.section.last == Character(.init(UInt8(ascii: "/"))) {
                 section.encodedSection.section = String(section.encodedSection.section.dropLast())
                 do {
-                    let partial = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseIPartialOnly)
+                    let partial = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseMessagePathByteRangeOnly)
                     return .sectionPartial(section: section, partial: partial)
                 } catch is ParserError {
                     section.encodedSection.section.append("/")
                     return .sectionPartial(section: section, partial: nil)
                 }
             }
-            let partial = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> IPartial in
+            let partial = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> MessagePath.ByteRange in
                 try PL.parseFixedString("/", buffer: &buffer, tracker: tracker)
-                return try self.parseIPartialOnly(buffer: &buffer, tracker: tracker)
+                return try self.parseMessagePathByteRangeOnly(buffer: &buffer, tracker: tracker)
             })
             return .sectionPartial(section: section, partial: partial)
         }
@@ -967,16 +967,16 @@ extension GrammarParser {
             if section?.encodedSection.section.last == Character(.init(UInt8(ascii: "/"))) {
                 section!.encodedSection.section = String(section!.encodedSection.section.dropLast())
                 do {
-                    let partial = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseIPartialOnly)
+                    let partial = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseMessagePathByteRangeOnly)
                     return .uidSectionPartial(uid: uid, section: section, partial: partial)
                 } catch is ParserError {
                     section?.encodedSection.section.append("/")
                     return .uidSectionPartial(uid: uid, section: section, partial: nil)
                 }
             }
-            let partial = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> IPartial in
+            let partial = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> MessagePath.ByteRange in
                 try PL.parseFixedString("/", buffer: &buffer, tracker: tracker)
-                return try self.parseIPartialOnly(buffer: &buffer, tracker: tracker)
+                return try self.parseMessagePathByteRangeOnly(buffer: &buffer, tracker: tracker)
             })
             return .uidSectionPartial(uid: uid, section: section, partial: partial)
         }
@@ -991,16 +991,16 @@ extension GrammarParser {
             if section?.encodedSection.section.last == Character(.init(UInt8(ascii: "/"))) {
                 section!.encodedSection.section = String(section!.encodedSection.section.dropLast())
                 do {
-                    let partial = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseIPartialOnly)
+                    let partial = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseMessagePathByteRangeOnly)
                     return .refUidSectionPartial(ref: ref, uid: uid, section: section, partial: partial)
                 } catch is ParserError {
                     section?.encodedSection.section.append("/")
                     return .refUidSectionPartial(ref: ref, uid: uid, section: section, partial: nil)
                 }
             }
-            let partial = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> IPartial in
+            let partial = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> MessagePath.ByteRange in
                 try PL.parseFixedString("/", buffer: &buffer, tracker: tracker)
-                return try self.parseIPartialOnly(buffer: &buffer, tracker: tracker)
+                return try self.parseMessagePathByteRangeOnly(buffer: &buffer, tracker: tracker)
             })
             return .refUidSectionPartial(ref: ref, uid: uid, section: section, partial: partial)
         }
@@ -1709,13 +1709,13 @@ extension GrammarParser {
         }
     }
 
-    func parsePartialRange(buffer: inout ParseBuffer, tracker: StackTracker) throws -> PartialRange {
+    func parsePartialRange(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ByteRange {
         func parsePartialRange_length(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Int {
             try PL.parseFixedString(".", buffer: &buffer, tracker: tracker)
             return try self.parseNumber(buffer: &buffer, tracker: tracker)
         }
 
-        return try PL.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> PartialRange in
+        return try PL.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> ByteRange in
             let offset = try self.parseNumber(buffer: &buffer, tracker: tracker)
             let length = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: parsePartialRange_length)
             return .init(offset: offset, length: length)

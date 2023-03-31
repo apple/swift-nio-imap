@@ -24,14 +24,14 @@ public struct MessagePath: Hashable {
     public var section: URLMessageSection?
 
     /// A specific range of bytes of the message/section in question.
-    public var range: IPartial?
+    public var range: MessagePath.ByteRange?
 
-    /// Create a new `MessagePath`.
+    /// Create a new `MessagePath`.z
     /// - parameter mailboxUIDValidity: Connection details for a server and a specific mailbox hosted on that server.
     /// - parameter iUID: The UID of the message in question.
     /// - parameter IMAPURLSection: An optional section of the message in question.
     /// - parameter iPartial: A specific range of bytes of the message/section in question.
-    public init(mailboxReference: MailboxUIDValidity, iUID: IUID, section: URLMessageSection? = nil, range: IPartial? = nil) {
+    public init(mailboxReference: MailboxUIDValidity, iUID: IUID, section: URLMessageSection? = nil, range: MessagePath.ByteRange? = nil) {
         self.mailboxReference = mailboxReference
         self.iUID = iUID
         self.section = section
@@ -49,7 +49,7 @@ extension EncodeBuffer {
                 self.writeURLMessageSection(section)
             } +
             self.writeIfExists(data.range) { partial in
-                self.writeIPartial(partial)
+                self.writeMessagePathByteRange(partial)
             }
     }
 }

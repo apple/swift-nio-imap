@@ -12,8 +12,10 @@
 //
 //===----------------------------------------------------------------------===//
 
+import struct NIO.ByteBuffer
+
 /// Represents a range of bytes in a larger whole. See RFC 5092
-public struct PartialRange: Hashable {
+public struct ByteRange: Hashable {
     /// The offset in bytes from the beginning of the message/data in question.
     public var offset: Int
 
@@ -32,7 +34,11 @@ public struct PartialRange: Hashable {
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    @discardableResult mutating func writePartialRange(_ data: PartialRange) -> Int {
+    @discardableResult mutating func writePartial(_ num: ClosedRange<UInt32>) -> Int {
+        self.writeString("<\(num.lowerBound).\(num.count)>")
+    }
+
+    @discardableResult mutating func writePartialRange(_ data: ByteRange) -> Int {
         self.writeString("\(data.offset)") +
             self.writeIfExists(data.length) { length in
                 self.writeString(".\(length)")
