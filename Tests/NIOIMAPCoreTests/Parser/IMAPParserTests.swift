@@ -1402,12 +1402,12 @@ extension ParserUnitTests {
     }
 }
 
-// MARK: - parseIPartial
+// MARK: - parseMessagePathByteRange
 
 extension ParserUnitTests {
-    func testParseIPartial() {
+    func testParseMessagePathByteRange() {
         self.iterateTests(
-            testFunction: GrammarParser().parseIPartial,
+            testFunction: GrammarParser().parseMessagePathByteRange,
             validInputs: [
                 ("/;PARTIAL=1", " ", .init(range: .init(offset: 1, length: nil)), #line),
                 ("/;PARTIAL=1.2", " ", .init(range: .init(offset: 1, length: 2)), #line),
@@ -1423,12 +1423,12 @@ extension ParserUnitTests {
     }
 }
 
-// MARK: - parseIPartialOnly
+// MARK: - parseMessagePathByteRangeOnly
 
 extension ParserUnitTests {
-    func testParseIPartialOnly() {
+    func testParseMessagePathByteRangeOnly() {
         self.iterateTests(
-            testFunction: GrammarParser().parseIPartialOnly,
+            testFunction: GrammarParser().parseMessagePathByteRangeOnly,
             validInputs: [
                 (";PARTIAL=1", " ", .init(range: .init(offset: 1, length: nil)), #line),
                 (";PARTIAL=1.2", " ", .init(range: .init(offset: 1, length: 2)), #line),
