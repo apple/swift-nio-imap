@@ -1215,27 +1215,6 @@ extension ParserUnitTests {
     }
 }
 
-// MARK: - parseFlag
-
-extension ParserUnitTests {
-    func testParseFlag() {
-        self.iterateTests(
-            testFunction: GrammarParser().parseFlag,
-            validInputs: [
-                ("\\answered", " ", .answered, #line),
-                ("\\flagged", " ", .flagged, #line),
-                ("\\deleted", " ", .deleted, #line),
-                ("\\seen", " ", .seen, #line),
-                ("\\draft", " ", .draft, #line),
-                ("keyword", " ", .keyword(Flag.Keyword("keyword")), #line),
-                ("\\extension", " ", .extension("\\extension"), #line),
-            ],
-            parserErrorInputs: [],
-            incompleteMessageInputs: []
-        )
-    }
-}
-
 // MARK: - parseFullDateTime
 
 extension ParserUnitTests {

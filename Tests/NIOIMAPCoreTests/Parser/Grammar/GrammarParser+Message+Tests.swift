@@ -21,6 +21,31 @@ class GrammarParser_Message_Tests: XCTestCase, _ParserTestHelpers {}
 // MARK: - parseMessageAttribute
 
 extension GrammarParser_Message_Tests {
+    func testParseMessageFlags() throws {
+        self.iterateTests(
+            testFunction: GrammarParser().parseFlag,
+            validInputs: [
+                (#"\Answered"#, " ", .answered, #line),
+                (#"\flagged"#, " ", .flagged, #line),
+                (#"\deleted"#, " ", .deleted, #line),
+                (#"\seen"#, " ", .seen, #line),
+                (#"\Draft"#, " ", .draft, #line),
+                (#"\extension"#, " ", .extension(#"\extension"#), #line),
+                (#"$Forwarded"#, " ", "$Forwarded", #line),
+                (#"Forwarded"#, " ", "Forwarded", #line),
+                // Apple / NeXT flag colors:
+                (#"$MailFlagBit0"#, " ", "$MailFlagBit0", #line),
+                (#"$MailFlagBit2"#, " ", "$MailFlagBit2", #line),
+                // Gmail exposes its labels as keyword flags:
+                (#"OIB-Seen-INBOX"#, " ", "OIB-Seen-INBOX", #line),
+                (#"OIB-Seen-Unsubscribe"#, " ", "OIB-Seen-Unsubscribe", #line),
+                (#"OIB-Seen-[Gmail]/Trash"#, " ", "OIB-Seen-[Gmail]/Trash", #line),
+            ],
+            parserErrorInputs: [],
+            incompleteMessageInputs: []
+        )
+    }
+
     func testParseMessageAttribute() throws {
         let components1 = ServerMessageDate.Components(year: 1994, month: 6, day: 25, hour: 1, minute: 2, second: 3, timeZoneMinutes: 0)
         let date1 = ServerMessageDate(components1!)
@@ -31,6 +56,7 @@ extension GrammarParser_Message_Tests {
             testFunction: GrammarParser().parseMessageAttribute,
             validInputs: [
                 (#"FLAGS (\seen)"#, " ", .flags([.seen]), #line),
+                (#"FLAGS (\Answered \Flagged \Draft)"#, " ", .flags([.answered, .flagged, .draft]), #line),
                 ("UID 1234", " ", .uid(1234), #line),
                 ("RFC822.SIZE 1234", " ", .rfc822Size(1234), #line),
                 ("BINARY.SIZE[3] 4", " ", .binarySize(section: [3], size: 4), #line),
