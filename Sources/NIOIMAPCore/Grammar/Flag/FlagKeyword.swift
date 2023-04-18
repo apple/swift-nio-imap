@@ -30,20 +30,26 @@ extension Flag {
         }
 
         /// The raw case-preserved string value of the `Keyword`.
-        public let rawValue: String
+        let rawValue: String
 
         /// Creates a new `Keyword`.
         /// - parameter string: A raw `String` to create the `Keyword`.  Each character in the`String` must be a valid atom-char as defined in RFC 3501.
-        public init(_ string: String) {
-            precondition(string.utf8.allSatisfy { (c) -> Bool in
-                c.isAtomChar
-            }, "String contains invalid characters")
+        public init?(_ string: String) {
+            /// RFC 3501 defines `flag-keyword` as `atom`,
+            /// but Gmail sends flags with `[` and `]` in them.
+            guard
+                string.utf8.allSatisfy({ (c) -> Bool in
+                    c.isAtomChar || c.isResponseSpecial
+                })
+            else { return nil }
             self.rawValue = string
         }
 
-        fileprivate init(unchecked string: String) {
+        init(unchecked string: String) {
+            /// RFC 3501 defines `flag-keyword` as `atom`,
+            /// but Gmail sends flags with `[` and `]` in them.
             assert(string.utf8.allSatisfy { (c) -> Bool in
-                c.isAtomChar
+                c.isAtomChar || c.isResponseSpecial
             })
             self.rawValue = string
         }
@@ -53,6 +59,12 @@ extension Flag {
         public func hash(into hasher: inout Hasher) {
             rawValue.uppercased().hash(into: &hasher)
         }
+    }
+}
+
+extension String {
+    public init(_ other: Flag.Keyword) {
+        self = other.rawValue
     }
 }
 
@@ -95,8 +107,8 @@ extension Flag.Keyword {
 
 // MARK: - String Literal
 
-extension Flag.Keyword: ExpressibleByStringLiteral {
-    /// Creates a new `Keyword` from a string literal. Typically used when making static custom keywords
+extension Flag: ExpressibleByStringLiteral {
+    /// Creates a new `keyword` flag from a string literal. Typically used when making static custom keywords
     /// that are embedded in code (e.g. Mail client features that depend on flags). Also useful when writing tests.
     /// - parameter stringLiteral: The string literal to construct a `Keyword` from.
     public init(stringLiteral value: String) {

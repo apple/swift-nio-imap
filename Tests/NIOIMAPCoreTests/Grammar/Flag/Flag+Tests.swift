@@ -21,6 +21,21 @@ class Flag_Tests: EncodeTestClass {}
 // MARK: - init
 
 extension Flag_Tests {
+    func testKeywordInit() {
+        XCTAssertEqual(Flag.Keyword("Redirected").map { String($0) }, "Redirected")
+        XCTAssertEqual(Flag.Keyword("redirected").map { String($0) }, "redirected")
+        XCTAssertEqual(Flag.Keyword("$MailFlagBit0").map { String($0) }, "$MailFlagBit0")
+        XCTAssertEqual(Flag.Keyword("OIB-Seen-[Gmail]/Trash").map { String($0) }, "OIB-Seen-[Gmail]/Trash")
+
+        XCTAssertNil(Flag.Keyword(#"a"b"#))
+        XCTAssertNil(Flag.Keyword(#"a(b"#))
+        XCTAssertNil(Flag.Keyword(#"a)b"#))
+        XCTAssertNil(Flag.Keyword(#"a{b"#))
+        XCTAssertNil(Flag.Keyword(#"a b"#))
+        XCTAssertNil(Flag.Keyword(#"a%b"#))
+        XCTAssertNil(Flag.Keyword(#"a*b"#))
+    }
+
     // test a couple of cases to make sure that extensions are converted into non-extensions when appropriate
     // test that casing doesn't matter
     func testInit_extension() {
@@ -58,16 +73,16 @@ extension Flag_Tests {
         AssertEqualAndEqualHash(.keyword(.colorBit0), .keyword(.colorBit0))
         AssertEqualAndEqualHash(.keyword(.junk), .keyword(.junk))
         AssertEqualAndEqualHash(.keyword(.unregistered_junk), .keyword(.unregistered_junk))
-        AssertEqualAndEqualHash(.keyword(Flag.Keyword("FooBar")), .keyword(Flag.Keyword("FooBar")))
+        AssertEqualAndEqualHash(.keyword(Flag.Keyword("FooBar")!), .keyword(Flag.Keyword("FooBar")!))
         AssertEqualAndEqualHash(.extension("\\FooBar"), .extension("\\FooBar"))
         AssertEqualAndEqualHash(.answered, .extension("\\Answered"))
 
         // Case-insensitive:
         AssertEqualAndEqualHash(.answered, .extension("\\ANSWERED"))
         AssertEqualAndEqualHash(.answered, .extension("\\answered"))
-        AssertEqualAndEqualHash(.keyword(Flag.Keyword("foobar")), .keyword(Flag.Keyword("FOOBAR")))
-        AssertEqualAndEqualHash(.keyword(Flag.Keyword("FOOBAR")), .keyword(Flag.Keyword("foobar")))
-        AssertEqualAndEqualHash(.keyword(Flag.Keyword("FOOBAR")), .keyword(Flag.Keyword("FooBar")))
+        AssertEqualAndEqualHash(.keyword(Flag.Keyword("foobar")!), .keyword(Flag.Keyword("FOOBAR")!))
+        AssertEqualAndEqualHash(.keyword(Flag.Keyword("FOOBAR")!), .keyword(Flag.Keyword("foobar")!))
+        AssertEqualAndEqualHash(.keyword(Flag.Keyword("FOOBAR")!), .keyword(Flag.Keyword("FooBar")!))
         AssertEqualAndEqualHash(.extension("\\foobar"), .extension("\\FOOBAR"))
         AssertEqualAndEqualHash(.extension("\\FOOBAR"), .extension("\\foobar"))
         AssertEqualAndEqualHash(.extension("\\FOOBAR"), .extension("\\FooBar"))
@@ -85,7 +100,7 @@ extension Flag_Tests {
         AssertNotEqual(.answered, .keyword(.colorBit0))
         AssertNotEqual(.answered, .keyword(.junk))
         AssertNotEqual(.answered, .keyword(.unregistered_junk))
-        AssertNotEqual(.answered, .keyword(Flag.Keyword("FooBar")))
+        AssertNotEqual(.answered, .keyword(Flag.Keyword("FooBar")!))
         AssertNotEqual(.answered, .extension("\\FooBar"))
 
         AssertNotEqual(.extension("\\Baz"), .answered)
@@ -96,7 +111,7 @@ extension Flag_Tests {
         AssertNotEqual(.extension("\\Baz"), .keyword(.colorBit0))
         AssertNotEqual(.extension("\\Baz"), .keyword(.junk))
         AssertNotEqual(.extension("\\Baz"), .keyword(.unregistered_junk))
-        AssertNotEqual(.extension("\\Baz"), .keyword(Flag.Keyword("FooBar")))
+        AssertNotEqual(.extension("\\Baz"), .keyword(Flag.Keyword("FooBar")!))
         AssertNotEqual(.extension("\\Baz"), .extension("\\FooBar"))
         AssertNotEqual(.extension("\\Baz"), .extension("\\Answered"))
 
@@ -108,7 +123,7 @@ extension Flag_Tests {
         AssertNotEqual(.keyword(.notJunk), .keyword(.colorBit0))
         AssertNotEqual(.keyword(.notJunk), .keyword(.junk))
         AssertNotEqual(.keyword(.notJunk), .keyword(.unregistered_junk))
-        AssertNotEqual(.keyword(.notJunk), .keyword(Flag.Keyword("FooBar")))
+        AssertNotEqual(.keyword(.notJunk), .keyword(Flag.Keyword("FooBar")!))
         AssertNotEqual(.keyword(.notJunk), .extension("\\FooBar"))
         AssertNotEqual(.keyword(.notJunk), .extension("\\Answered"))
     }
@@ -129,9 +144,9 @@ extension Flag_Tests {
             (.extension("\\extension"), "\\extension", #line),
             (.extension("\\Extension"), "\\Extension", #line),
             (.extension("\\EXTENSION"), "\\EXTENSION", #line),
-            (.keyword(Flag.Keyword("$extension")), "$extension", #line),
-            (.keyword(Flag.Keyword("$Extension")), "$Extension", #line),
-            (.keyword(Flag.Keyword("$EXTENSION")), "$EXTENSION", #line),
+            (.keyword(Flag.Keyword("$extension")!), "$extension", #line),
+            (.keyword(Flag.Keyword("$Extension")!), "$Extension", #line),
+            (.keyword(Flag.Keyword("$EXTENSION")!), "$EXTENSION", #line),
         ]
 
         for (test, expectedString, line) in inputs {

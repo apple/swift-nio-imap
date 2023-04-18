@@ -545,10 +545,17 @@ extension GrammarParser {
         }
     }
 
-    // flag-keyword    = "$MDNSent" / "$Forwarded" / atom
+    /// RFC 3501 defines
+    /// ```
+    /// flag-keyword    = atom
+    /// ```
+    /// but Gmail sends flags with `[` and `]` in them.
     func parseFlagKeyword(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Flag.Keyword {
-        let string = try self.parseAtom(buffer: &buffer, tracker: tracker)
-        return Flag.Keyword(string)
+        let parsed = try PL.parseOneOrMoreCharacters(buffer: &buffer, tracker: tracker) { char -> Bool in
+            char.isAtomChar || char.isResponseSpecial
+        }
+        let string = try self.parsedStringCache(ParserLibrary.parseBufferAsUTF8(parsed))
+        return Flag.Keyword(unchecked: string)
     }
 
     // flag-list       = "(" [flag *(SP flag)] ")"
