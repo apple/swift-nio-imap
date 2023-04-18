@@ -394,6 +394,7 @@ extension GrammarParser {
     //                     "MAX" SP nz-number /
     //                     "ALL" SP sequence-set /
     //                     "COUNT" SP number /
+    //                     "PARTIAL" SP "(" partial-range SP partial-results ")"
     //                     search-ret-data-ext
     func parseSearchReturnData(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SearchReturnData {
         func parseSearchReturnData_min(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SearchReturnData {
@@ -454,6 +455,7 @@ extension GrammarParser {
 
     // search-return-opt  = "MIN" / "MAX" / "ALL" / "COUNT" /
     //                      "SAVE" /
+    //                      "PARTIAL" SP partial-range
     //                      search-ret-opt-ext
     func parseSearchReturnOption(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SearchReturnOption {
         func parseSearchReturnOption_min(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SearchReturnOption {
@@ -481,6 +483,13 @@ extension GrammarParser {
             return .save
         }
 
+        func parseSearchReturnOption_partial(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SearchReturnOption {
+            try PL.parseFixedString("PARTIAL", buffer: &buffer, tracker: tracker)
+            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+            let range = try parsePartialRange(buffer: &buffer, tracker: tracker)
+            return .partial(range)
+        }
+
         func parseSearchReturnOption_extension(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SearchReturnOption {
             let optionExtension = try self.parseSearchReturnOptionExtension(buffer: &buffer, tracker: tracker)
             return .optionExtension(optionExtension)
@@ -492,6 +501,7 @@ extension GrammarParser {
             parseSearchReturnOption_all,
             parseSearchReturnOption_count,
             parseSearchReturnOption_save,
+            parseSearchReturnOption_partial,
             parseSearchReturnOption_extension,
         ], buffer: &buffer, tracker: tracker)
     }
