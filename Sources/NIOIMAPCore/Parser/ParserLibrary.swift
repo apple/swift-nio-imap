@@ -236,6 +236,18 @@ extension ParserLibrary {
         }
     }
 
+    static func parseFixedByte(_ needle: Character, buffer: inout ParseBuffer, tracker: StackTracker) throws {
+        assert(needle.isASCII)
+        let needleByte = needle.asciiValue!
+        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
+            let byte = try parseByte(buffer: &buffer, tracker: tracker)
+            guard byte == needleByte
+            else {
+                throw ParserError(hint: "looking for \(needleByte) found \(byte)")
+            }
+        }
+    }
+
     static func parseOneOf<T>(_ subParsers: [SubParser<T>], buffer: inout ParseBuffer, tracker: StackTracker, file: String = (#fileID), line: Int = #line) throws -> T {
         for parser in subParsers {
             do {

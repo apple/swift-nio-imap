@@ -117,6 +117,27 @@ extension GrammarParser_Body_Tests {
         )
     }
 
+    func testParseBodyFieldParam_nonASCII() throws {
+        // This has non-ASCII characters in it:
+        let buffer = ByteBuffer(bytes: [
+            0x28, 0x22, 0x4E, 0x41, 0x4D, 0x45, 0x22, 0x20, 0x22, 0x4E, 0x75, 0x74,
+            0x7A, 0x75, 0x6E, 0x67, 0x73, 0x62, 0x65, 0x64, 0x69, 0x6E, 0x67, 0x75,
+            0x6E, 0x67, 0x65, 0x6E, 0x20, 0x66, 0xC3, 0x83, 0xC2, 0x83, 0xC3, 0x82,
+            0xC2, 0xBC, 0x72, 0x20, 0x4D, 0x65, 0x69, 0x6E, 0x65, 0x20, 0x41, 0x6C,
+            0x6C, 0x69, 0x61, 0x6E, 0x7A, 0x2E, 0x70, 0x64, 0x66, 0x22, 0x29,
+            // Add a space at the end
+            0x20,
+        ])
+        var parseBuffer = ParseBuffer(buffer)
+        let result = try GrammarParser().parseBodyFieldParam(
+            buffer: &parseBuffer,
+            tracker: StackTracker(maximumParserStackDepth: 10)
+        )
+        XCTAssertEqual(result.count, 1)
+        XCTAssertEqual(Array(result.keys), ["NAME"])
+        XCTAssertEqual(Array(result.values), ["Nutzungsbedingungen fÃÂ¼r Meine Allianz.pdf"])
+    }
+
     func testParseBodyFieldParam_invalid_oneObject() {
         var buffer = TestUtilities.makeParseBuffer(for: #"("p1" "#)
         XCTAssertThrowsError(try GrammarParser().parseBodyFieldParam(buffer: &buffer, tracker: .testTracker)) { e in

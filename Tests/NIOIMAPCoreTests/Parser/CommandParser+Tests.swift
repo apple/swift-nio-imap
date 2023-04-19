@@ -16,7 +16,7 @@ import NIO
 @testable import NIOIMAPCore
 import XCTest
 
-class CommandParser_Tests: XCTestCase {}
+class CommandParser_Tests: XCTestCase, _ParserTestHelpers {}
 
 // MARK: - init
 
@@ -118,5 +118,104 @@ extension CommandParser_Tests {
                 // do nothing, we don't care
             }
         }
+    }
+}
+
+// MARK: -
+
+extension CommandParser_Tests {
+    func testParseString() {
+        let inputs: [(String, String, ByteBuffer, UInt)] = [
+            (
+                #""foo""#,
+                " ",
+                ByteBuffer(string: "foo"),
+                #line
+            ),
+            (
+                #""f\"oo""#,
+                " ",
+                ByteBuffer(string: #"f"oo"#),
+                #line
+            ),
+            (
+                #""f\\oo""#,
+                " ",
+                ByteBuffer(string: #"f\oo"#),
+                #line
+            ),
+            (
+                "{3}\r\nfoo",
+                " ",
+                ByteBuffer(string: "foo"),
+                #line
+            ),
+        ]
+        let invalidInputs: [(String, String, UInt)] = [
+            (
+                #""aäb""#,
+                " ",
+                #line
+            ),
+            (
+                #"foo"#,
+                " ",
+                #line
+            ),
+            (
+                #" "foo""#,
+                " ",
+                #line
+            ),
+        ]
+
+        self.iterateTests(
+            testFunction: GrammarParser().parseString,
+            validInputs: inputs,
+            parserErrorInputs: invalidInputs,
+            incompleteMessageInputs: []
+        )
+    }
+
+    func testParseStringAllowingNonASCII() {
+        let inputs: [(String, String, ByteBuffer, UInt)] = [
+            (
+                #""foo""#,
+                " ",
+                ByteBuffer(string: "foo"),
+                #line
+            ),
+            (
+                #""äø""#,
+                " ",
+                ByteBuffer(string: "äø"),
+                #line
+            ),
+            (
+                #""ä\"ø""#,
+                " ",
+                ByteBuffer(string: #"ä"ø"#),
+                #line
+            ),
+            (
+                #""ä\\ø""#,
+                " ",
+                ByteBuffer(string: #"ä\ø"#),
+                #line
+            ),
+            (
+                "{3}\r\nfoo",
+                " ",
+                ByteBuffer(string: "foo"),
+                #line
+            ),
+        ]
+
+        self.iterateTests(
+            testFunction: GrammarParser().parseStringAllowingNonASCII,
+            validInputs: inputs,
+            parserErrorInputs: [],
+            incompleteMessageInputs: []
+        )
     }
 }
