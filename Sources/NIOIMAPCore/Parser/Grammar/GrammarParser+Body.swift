@@ -275,8 +275,8 @@ extension GrammarParser {
             let parsedField = try parseString(buffer: &buffer, tracker: tracker)
             let field = try ParserLibrary.parseBufferAsUTF8(parsedField)
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-            let parsedValue = try parseString(buffer: &buffer, tracker: tracker)
-            let value = try ParserLibrary.parseBufferAsUTF8(parsedValue)
+            let parsedValue = try parseStringAllowingNonASCII(buffer: &buffer, tracker: tracker)
+            let value = String(bestEffortDecodingUTF8Bytes: parsedValue.readableBytesView)
             return (field, value)
         }
 
