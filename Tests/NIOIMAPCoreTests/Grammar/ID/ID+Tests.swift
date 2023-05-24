@@ -17,7 +17,7 @@ import NIO
 import OrderedCollections
 import XCTest
 
-class ID_Tests: EncodeTestClass {}
+class ID_Tests: EncodeTestClass, _ParserTestHelpers {}
 
 // MARK: - Encoding
 
@@ -28,5 +28,21 @@ extension ID_Tests {
             (["key": "value"], #"("key" "value")"#, #line),
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeIDParameters($0) })
+    }
+
+    func testParse() {
+        self.iterateTests(
+            testFunction: GrammarParser().parseResponsePayload,
+            validInputs: [
+                (#"ID NIL"#, "\r", .id([:]), #line),
+                (#"ID ("key" NIL)"#, "\r", .id(["key": nil]), #line),
+                (#"ID ("name" "Imap" "version" "1.5")"#, "\r", .id(["name": "Imap", "version": "1.5"]), #line),
+                (#"ID ("name" "Imap" "version" "1.5" "os" "centos" "os-version" "5.5" "support-url" "mailto:admin@xgen.in")"#, "\r", .id(["name": "Imap", "version": "1.5", "os": "centos", "os-version": "5.5", "support-url": "mailto:admin@xgen.in"]), #line),
+                // datamail.in appends a `+` to the ID response:
+                (#"ID ("name" "Imap" "version" "1.5" "os" "centos" "os-version" "5.5" "support-url" "mailto:admin@xgen.in")+"#, "\r", .id(["name": "Imap", "version": "1.5", "os": "centos", "os-version": "5.5", "support-url": "mailto:admin@xgen.in"]), #line),
+            ],
+            parserErrorInputs: [],
+            incompleteMessageInputs: []
+        )
     }
 }

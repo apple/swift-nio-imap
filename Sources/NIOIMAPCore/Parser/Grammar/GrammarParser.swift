@@ -698,7 +698,12 @@ extension GrammarParser {
     func parseIDResponse(buffer: inout ParseBuffer, tracker: StackTracker) throws -> OrderedDictionary<String, String?> {
         try PL.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
             try PL.parseFixedString("ID ", buffer: &buffer, tracker: tracker)
-            return try parseIDParamsList(buffer: &buffer, tracker: tracker)
+            let result = try parseIDParamsList(buffer: &buffer, tracker: tracker)
+            // datamail.in appends a `+` here for some reason.
+            try PL.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
+                try PL.parseFixedByte("+", buffer: &buffer, tracker: tracker)
+            }
+            return result
         }
     }
 
