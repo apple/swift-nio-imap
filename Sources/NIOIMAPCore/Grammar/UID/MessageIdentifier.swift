@@ -32,6 +32,7 @@ extension MessageIdentifier {
     /// Creates a `MessageIdentifier` from some `BinaryInteger`, ensuring that the given value fits within a `UInt32`.
     /// - parameter source: The raw value to use.
     /// - returns: `nil` if `source` does not fit within a `UInt32`, otherwise a `UID`.
+    @inlinable
     public init?<T>(exactly source: T) where T: BinaryInteger {
         guard source > 0, let rawValue = UInt32(exactly: source) else { return nil }
         self.init(rawValue: rawValue)
@@ -116,7 +117,8 @@ extension MessageIdentifier {
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeMessageIdentifier<IdentifierType: MessageIdentifier>(_ id: IdentifierType) -> Int {
+    @discardableResult
+    mutating func writeMessageIdentifier<IdentifierType: MessageIdentifier>(_ id: IdentifierType) -> Int {
         if id == .max {
             return self.writeString("*")
         } else {

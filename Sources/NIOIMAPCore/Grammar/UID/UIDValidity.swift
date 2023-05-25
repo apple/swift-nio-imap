@@ -15,12 +15,14 @@
 /// The unique identifier validity value of a mailbox. Combined with a message UID to form a 64-bit identifier.
 public struct UIDValidity: Hashable {
     /// The underlying raw value.
+    @usableFromInline
     let rawValue: UInt32
 
     /// Creates a `UIDValidity` from some `BinaryInteger` after checking
     /// that the given value fits within a `UInt32`.
     /// - parameter source: Some `BinaryInteger`.
     /// - returns: `nil` if the given value cannot fit within a `UInt32`, otherwise a new `UIDValidity`.
+    @inlinable
     public init?<T>(exactly source: T) where T: BinaryInteger {
         guard source > 0, let rawValue = UInt32(exactly: source) else { return nil }
         self.rawValue = rawValue

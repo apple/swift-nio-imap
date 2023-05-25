@@ -33,13 +33,14 @@ public struct ModificationSequenceValue: Hashable {
     /// Creates a `ModificationSequenceValue` from some `BinaryInteger`, ensuring that the given value fits within the valid range `0...Int64.max`.
     /// - parameter source: The raw value to use.
     /// - returns: `nil` if `source` is not within the valid range.
+    @inlinable
     public init?<T>(exactly source: T) where T: BinaryInteger {
         guard
             source >= 0,
             let value = UInt64(exactly: source),
             value <= UInt64(Int64.max)
         else { return nil }
-        self.value = value
+        self.init(value)
     }
 }
 
