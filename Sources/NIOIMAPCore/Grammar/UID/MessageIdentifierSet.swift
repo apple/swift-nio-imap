@@ -30,13 +30,15 @@ public struct MessageIdentifierSet<IdentifierType: MessageIdentifier>: Hashable 
     }
 
     /// A non-empty array of `MessageIdentifier` ranges.
-    fileprivate var _ranges: RangeSet<MessageIdentificationShiftWrapper>
+    @usableFromInline
+    var _ranges: RangeSet<MessageIdentificationShiftWrapper>
 
     fileprivate init(_ ranges: RangeSet<MessageIdentificationShiftWrapper>) {
         self._ranges = ranges
     }
 
     /// Creates a new `MessageIdentifierSet` containing the `MessageIdentifier`s in the given ranges.
+    @inlinable
     public init<S: Sequence>(_ ranges: S) where S.Element == MessageIdentifierRange<IdentifierType> {
         self.init()
         ranges.forEach {
@@ -58,6 +60,7 @@ public struct MessageIdentifierSet<IdentifierType: MessageIdentifier>: Hashable 
 /// UIDs/SequenceNumbers shifted by 1, such that 1 -> 0, and `type`.max -> UInt32.max - 1
 /// This allows us to store `type`.max + 1 inside a UInt32.
 /// This applies for both UIDs and SequenceNumbers.
+@usableFromInline
 struct MessageIdentificationShiftWrapper: Hashable {
     var rawValue: UInt32
 
@@ -72,17 +75,20 @@ struct MessageIdentificationShiftWrapper: Hashable {
 }
 
 extension MessageIdentificationShiftWrapper: Strideable {
+    @usableFromInline
     func distance(to other: MessageIdentificationShiftWrapper) -> Int64 {
         Int64(other.rawValue) - Int64(self.rawValue)
     }
 
+    @usableFromInline
     func advanced(by n: Int64) -> MessageIdentificationShiftWrapper {
         MessageIdentificationShiftWrapper(rawValue: UInt32(Int64(rawValue) + n))
     }
 }
 
 extension Range where Element == MessageIdentificationShiftWrapper {
-    fileprivate init<IdentifierType: MessageIdentifier>(_ r: MessageIdentifierRange<IdentifierType>) {
+    @usableFromInline
+    init<IdentifierType: MessageIdentifier>(_ r: MessageIdentifierRange<IdentifierType>) {
         self = MessageIdentificationShiftWrapper(r.range.lowerBound) ..< MessageIdentificationShiftWrapper(r.range.upperBound).advanced(by: 1)
     }
 
