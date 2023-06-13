@@ -266,22 +266,37 @@ extension GrammarParser {
 
     // continue-req    = "+" SP (resp-text / base64) CRLF
     func parseContinuationRequest(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ContinuationRequest {
-        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> ContinuationRequest in
-            try PL.parseFixedString("+", buffer: &buffer, tracker: tracker)
-            // Allow no space and no additional text after "+":
-            let req: ContinuationRequest
-            if try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: PL.parseSpaces) != nil {
-                if let base64 = try? self.parseBase64(buffer: &buffer, tracker: tracker), base64.readableBytes > 0 {
-                    req = .data(base64)
-                } else {
-                    req = .responseText(try self.parseResponseText(buffer: &buffer, tracker: tracker))
-                }
-            } else {
-                req = .responseText(ResponseText(code: nil, text: ""))
-            }
+        func parseContinuationRequest_base64(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ContinuationRequest {
+            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+            let base64 = try self.parseBase64(buffer: &buffer, tracker: tracker)
             try PL.parseNewline(buffer: &buffer, tracker: tracker)
-            return req
+
+            guard base64.readableBytes > 0 else {
+                throw ParserError()
+            }
+
+            return .data(base64)
         }
+
+        func parseContinuationRequest_responseText(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ContinuationRequest {
+            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+            let responseText = try self.parseResponseText(buffer: &buffer, tracker: tracker)
+            try PL.parseNewline(buffer: &buffer, tracker: tracker)
+            return .responseText(responseText)
+        }
+
+        // Allow no space and no additional text after "+":
+        func parseContinuationRequest_empty(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ContinuationRequest {
+            try PL.parseNewline(buffer: &buffer, tracker: tracker)
+            return .responseText(ResponseText(code: nil, text: ""))
+        }
+
+        try PL.parseFixedString("+", buffer: &buffer, tracker: tracker)
+        return try PL.parseOneOf([
+            parseContinuationRequest_base64,
+            parseContinuationRequest_responseText,
+            parseContinuationRequest_empty,
+        ], buffer: &buffer, tracker: tracker)
     }
 
     // create-param = create-param-name [SP create-param-value]
