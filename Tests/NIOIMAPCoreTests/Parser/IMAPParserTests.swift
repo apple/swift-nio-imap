@@ -635,6 +635,9 @@ extension ParserUnitTests {
             validInputs: [
                 ("+ OK\r\n", " ", .responseText(.init(code: nil, text: "OK")), #line),
                 ("+ YQ==\r\n", " ", .data("a"), #line),
+                ("+ IDLE accepted, awaiting DONE command.\r\n", " ", .responseText(.init(code: nil, text: "IDLE accepted, awaiting DONE command.")), #line),
+                ("+ \r\n", " ", .responseText(.init(code: nil, text: "")), #line),
+                ("+\r\n", " ", .responseText(.init(code: nil, text: "")), #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
