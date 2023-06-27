@@ -193,12 +193,20 @@ extension ClientStateMachineTests {
         XCTAssertNoThrow(try self.stateMachine.sendCommand(.tagged(.init(tag: "A3", command: .noop))))
     }
 
+    func testAuthenticationWorkflow_untagged() {
+        // set up the state machine to authenticate
+        XCTAssertNoThrow(try self.stateMachine.sendCommand(.tagged(.init(tag: "A1", command: .authenticate(mechanism: .gssAPI, initialResponse: nil)))))
+
+        // machine is authenticating, so sending an untagged response should be ignored
+        XCTAssertNoThrow(try self.stateMachine.receiveResponse(.untagged(.enableData([.metadata]))))
+    }
+
     func testAuthenticationWorkflow_unexpectedResponse() {
         // set up the state machine to authenticate
         XCTAssertNoThrow(try self.stateMachine.sendCommand(.tagged(.init(tag: "A1", command: .authenticate(mechanism: .gssAPI, initialResponse: nil)))))
 
-        // machine is authenticating, so sending an untagged response should throw
-        XCTAssertThrowsError(try self.stateMachine.receiveResponse(.untagged(.enableData([.metadata])))) { e in
+        // machine is authenticating, so sending idle started should throw
+        XCTAssertThrowsError(try self.stateMachine.receiveResponse(.idleStarted)) { e in
             XCTAssertTrue(e is UnexpectedResponse)
         }
     }
