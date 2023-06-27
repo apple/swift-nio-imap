@@ -27,9 +27,25 @@ class AuthenticationStateMachineTests: XCTestCase {
         stateMachine.sendCommand(.continuationResponse("response2"))
         XCTAssertNoThrow(try stateMachine.receiveContinuationRequest(.data("challenge3")))
         stateMachine.sendCommand(.continuationResponse("response3"))
+        XCTAssertEqual(stateMachine.state, .waitingForServer)
 
         // finish
         XCTAssertNoThrow(try stateMachine.receiveResponse(.tagged(.init(tag: "A1", state: .ok(.init(code: nil, text: "OK"))))))
+        XCTAssertEqual(stateMachine.state, .finished)
+    }
+
+    func testReceivingUntaggedDuringAuthentication() {
+        var stateMachine = ClientStateMachine.Authentication()
+
+        // send and respond to a couple of challenges
+        XCTAssertNoThrow(try stateMachine.receiveContinuationRequest(.data("challenge1")))
+        stateMachine.sendCommand(.continuationResponse("response1"))
+        XCTAssertNoThrow(try stateMachine.receiveResponse(.untagged(.capabilityData([.imap4rev1]))))
+        XCTAssertEqual(stateMachine.state, .waitingForServer)
+
+        // finish
+        XCTAssertNoThrow(try stateMachine.receiveResponse(.tagged(.init(tag: "A1", state: .ok(.init(code: nil, text: "OK"))))))
+        XCTAssertEqual(stateMachine.state, .finished)
     }
 
     func testDuplicateChallengeThrows() {
