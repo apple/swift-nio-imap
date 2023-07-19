@@ -321,6 +321,16 @@ extension SectionSpecifier.Part {
         else { return false }
         return zip(a, b).allSatisfy { $0.0 == $0.1 }
     }
+
+    /// Returns `true` if the `other` part is a directly below this `Part`, e.g. `2.1` is a child of `2`, and `2` is a child of the top-level part. Returns `false` otherwise.
+    public func isChildPart(of other: SectionSpecifier.Part) -> Bool {
+        guard
+            self.array.count == other.array.count + 1
+        else { return false }
+        let a = Array(self).dropLast(1)
+        let b = Array(other)[...]
+        return b == a
+    }
 }
 
 // MARK: - Encoding

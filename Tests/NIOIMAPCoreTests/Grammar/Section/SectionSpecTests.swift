@@ -179,6 +179,29 @@ extension SectionSpecifierTests {
             XCTAssertEqual(part.isSubPart(of: other), expected, line: line)
         }
     }
+
+    func testIsChildPartOf() {
+        let inputs: [(SectionSpecifier.Part, SectionSpecifier.Part, Bool, UInt)] = [
+            ([], [], false, #line),
+            ([], [1], false, #line),
+            ([], [8], false, #line),
+            ([1], [], true, #line),
+            ([8], [], true, #line),
+            ([2, 3], [2, 3], false, #line),
+            ([2, 3, 1], [2, 3], true, #line),
+            ([2, 3, 1], [4, 3], false, #line),
+            ([2, 3, 1], [2, 7], false, #line),
+            ([2, 3, 1, 4], [2, 3], false, #line),
+            ([2, 3], [2, 3, 1], false, #line),
+            ([2, 3, 1, 7], [2, 3], false, #line),
+            ([2, 3, 1, 7], [2, 3, 1], true, #line),
+            ([2, 4, 1, 7], [2, 3], false, #line),
+            ([5, 3, 1, 7], [2, 3], false, #line),
+        ]
+        inputs.forEach { (part, other, expected, line) in
+            XCTAssertEqual(part.isChildPart(of: other), expected, line: line)
+        }
+    }
 }
 
 // MARK: - CustomDebugStringConvertible
