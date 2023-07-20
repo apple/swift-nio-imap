@@ -34,7 +34,7 @@ extension ByteRange_Tests {
 
         for (test, expectedString, line) in inputs {
             self.testBuffer.clear()
-            let size = self.testBuffer.writePartial(test)
+            let size = self.testBuffer.writeByteRange(test)
             XCTAssertEqual(size, expectedString.utf8.count, line: line)
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }
@@ -45,6 +45,6 @@ extension ByteRange_Tests {
             (.init(offset: 1, length: nil), "1", #line),
             (.init(offset: 1, length: 2), "1.2", #line),
         ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writePartialRange($0) })
+        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeByteRange($0) })
     }
 }

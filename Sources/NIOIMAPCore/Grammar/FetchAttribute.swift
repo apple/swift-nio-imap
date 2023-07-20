@@ -194,7 +194,7 @@ extension EncodeBuffer {
         self.writeString(peek ? "BODY.PEEK" : "BODY") +
             self.writeSection(section) +
             self.writeIfExists(partial) { (partial) -> Int in
-                self.writePartial(partial)
+                self.writeByteRange(partial)
             }
     }
 
@@ -210,7 +210,7 @@ extension EncodeBuffer {
             } +
             self.writeSectionBinary(section) +
             self.writeIfExists(partial) { (partial) -> Int in
-                self.writePartial(partial)
+                self.writeByteRange(partial)
             }
     }
 
