@@ -34,11 +34,11 @@ public struct ByteRange: Hashable {
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    @discardableResult mutating func writePartial(_ num: ClosedRange<UInt32>) -> Int {
+    @discardableResult mutating func writeByteRange(_ num: ClosedRange<UInt32>) -> Int {
         self.writeString("<\(num.lowerBound).\(num.count)>")
     }
 
-    @discardableResult mutating func writePartialRange(_ data: ByteRange) -> Int {
+    @discardableResult mutating func writeByteRange(_ data: ByteRange) -> Int {
         self.writeString("\(data.offset)") +
             self.writeIfExists(data.length) { length in
                 self.writeString(".\(length)")

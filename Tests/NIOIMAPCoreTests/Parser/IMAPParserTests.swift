@@ -2092,7 +2092,7 @@ extension ParserUnitTests {
 extension ParserUnitTests {
     func testParsePartialRange() {
         self.iterateTests(
-            testFunction: GrammarParser().parsePartialRange,
+            testFunction: GrammarParser().parseByteRange,
             validInputs: [
                 ("1", " ", .init(offset: 1, length: nil), #line),
                 ("1.2", " ", .init(offset: 1, length: 2), #line),

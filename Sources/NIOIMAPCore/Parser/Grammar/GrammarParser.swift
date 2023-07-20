@@ -784,7 +784,7 @@ extension GrammarParser {
     func parseMessagePathByteRangeOnly(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessagePath.ByteRange {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> MessagePath.ByteRange in
             try PL.parseFixedString(";PARTIAL=", buffer: &buffer, tracker: tracker)
-            return .init(range: try self.parsePartialRange(buffer: &buffer, tracker: tracker))
+            return .init(range: try self.parseByteRange(buffer: &buffer, tracker: tracker))
         }
     }
 
@@ -1736,15 +1736,15 @@ extension GrammarParser {
         }
     }
 
-    func parsePartialRange(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ByteRange {
-        func parsePartialRange_length(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Int {
+    func parseByteRange(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ByteRange {
+        func parseByteRange_length(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Int {
             try PL.parseFixedString(".", buffer: &buffer, tracker: tracker)
             return try self.parseNumber(buffer: &buffer, tracker: tracker)
         }
 
         return try PL.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> ByteRange in
             let offset = try self.parseNumber(buffer: &buffer, tracker: tracker)
-            let length = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: parsePartialRange_length)
+            let length = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: parseByteRange_length)
             return .init(offset: offset, length: length)
         }
     }
