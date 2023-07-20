@@ -18,6 +18,9 @@ public enum FetchModifier: Hashable {
     /// metadata items have changed since the given reference point.
     case changedSince(ChangedSinceModifier)
 
+    /// Tells the server to only return FETCH results for messages in the specified range
+    case partial(PartialRange)
+
     /// Implemented as a catch-all to support modifiers defined in future extensions.
     case other(KeyValue<String, ParameterValue?>)
 }
@@ -29,6 +32,8 @@ extension EncodeBuffer {
         switch val {
         case .changedSince(let changedSince):
             return self.writeChangedSinceModifier(changedSince)
+        case .partial(let range):
+            return self.writeString("PARTIAL ") + self.writePartialRange(range)
         case .other(let param):
             return self.writeParameter(param)
         }

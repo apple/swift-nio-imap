@@ -99,6 +99,7 @@ extension GrammarParser_Fetch_Tests {
             testFunction: GrammarParser().parseFetchModifier,
             validInputs: [
                 ("CHANGEDSINCE 2", " ", .changedSince(.init(modificationSequence: 2)), #line),
+                ("PARTIAL -735:-88032", " ", .partial(.last(735 ... 88_032)), #line),
                 ("test", "\r", .other(.init(key: "test", value: nil)), #line),
                 ("test 1", " ", .other(.init(key: "test", value: .sequence(.set([1])))), #line),
             ],
@@ -109,6 +110,19 @@ extension GrammarParser_Fetch_Tests {
                 ("CHANGEDSINCE 1", "", #line),
                 ("test 1", "", #line),
             ]
+        )
+    }
+
+    func testParseFetchModifiers() {
+        self.iterateTests(
+            testFunction: GrammarParser().parseFetchModifiers,
+            validInputs: [
+                (" (CHANGEDSINCE 2)", " ", [.changedSince(.init(modificationSequence: 2))], #line),
+                (" (PARTIAL -735:-88032)", " ", [.partial(.last(735 ... 88_032))], #line),
+                (" (PARTIAL -1:-30 CHANGEDSINCE 98305)", " ", [.partial(.last(1 ... 30)), .changedSince(.init(modificationSequence: 98305))], #line),
+            ],
+            parserErrorInputs: [],
+            incompleteMessageInputs: []
         )
     }
 }

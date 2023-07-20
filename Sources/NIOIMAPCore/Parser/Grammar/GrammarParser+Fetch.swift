@@ -206,12 +206,19 @@ extension GrammarParser {
             .changedSince(try self.parseChangedSinceModifier(buffer: &buffer, tracker: tracker))
         }
 
+        func parseFetchModifier_partial(buffer: inout ParseBuffer, tracker: StackTracker) throws -> FetchModifier {
+            try PL.parseFixedString("PARTIAL", buffer: &buffer, tracker: tracker)
+            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+            return .partial(try self.parsePartialRange(buffer: &buffer, tracker: tracker))
+        }
+
         func parseFetchModifier_other(buffer: inout ParseBuffer, tracker: StackTracker) throws -> FetchModifier {
             .other(try self.parseParameter(buffer: &buffer, tracker: tracker))
         }
 
         return try PL.parseOneOf(
             parseFetchModifier_changedSince,
+            parseFetchModifier_partial,
             parseFetchModifier_other,
             buffer: &buffer,
             tracker: tracker

@@ -24,6 +24,7 @@ extension FetchModifier_Tests {
     func testEncode() {
         let inputs: [(FetchModifier, String, UInt)] = [
             (.changedSince(.init(modificationSequence: 4)), "CHANGEDSINCE 4", #line),
+            (.partial(.last(735 ... 88_032)), "PARTIAL -735:-88032", #line),
             (.other(.init(key: "test", value: nil)), "test", #line),
             (.other(.init(key: "test", value: .sequence(.set([4])))), "test 4", #line),
         ]
@@ -32,7 +33,8 @@ extension FetchModifier_Tests {
 
     func testEncodeArray() {
         let inputs: [([FetchModifier], String, UInt)] = [
-            ([.changedSince(.init(modificationSequence: 3665089505007763456))], " (CHANGEDSINCE 3665089505007763456)", #line),
+            ([.partial(.last(1 ... 30)), .changedSince(.init(modificationSequence: 3665089505007763456))], " (PARTIAL -1:-30 CHANGEDSINCE 3665089505007763456)", #line),
+            ([.changedSince(.init(modificationSequence: 98305))], " (CHANGEDSINCE 98305)", #line),
             ([.other(.init(key: "test", value: nil)), .other(.init(key: "test", value: .sequence(.set([4]))))], " (test test 4)", #line),
             ([], "", #line),
         ]
