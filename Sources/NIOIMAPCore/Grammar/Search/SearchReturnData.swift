@@ -33,6 +33,8 @@ public enum SearchReturnData: Hashable {
 
     /// The message numbers/UIDs that satisfy the SEARCH criteria for a
     /// partial (paged) search.
+    ///
+    /// Part of https://datatracker.ietf.org/doc/draft-ietf-extra-imap-partial/
     case partial(PartialRange, MessageIdentifierSet<UnknownMessageIdentifier>)
 
     /// Implemented as a catch-all to support any return data options defined in future extensions.

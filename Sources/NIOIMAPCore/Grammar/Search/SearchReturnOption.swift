@@ -33,6 +33,8 @@ public enum SearchReturnOption: Hashable {
     case save
 
     /// Request a subset of the results.
+    ///
+    /// Part of https://datatracker.ietf.org/doc/draft-ietf-extra-imap-partial/
     case partial(PartialRange)
 
     /// Implemented as a catch-all to support future extensions.

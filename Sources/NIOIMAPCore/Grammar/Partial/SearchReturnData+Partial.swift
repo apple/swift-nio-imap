@@ -19,8 +19,6 @@ extension SearchReturnData {
         /// The requested range.
         public var range: PartialRange
         /// The matching messages.
-        ///
-        /// `nil` indicates no results correspond to the requested range.
-        public var messageNumbers: MessageIdentifierSet<UnknownMessageIdentifier>?
+        public var messageNumbers: MessageIdentifierSet<UnknownMessageIdentifier>
     }
 }
