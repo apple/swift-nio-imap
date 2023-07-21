@@ -210,6 +210,22 @@ extension GrammarParser_Search_Tests {
     }
 }
 
+// MARK: - `ret-data-partial` parseSearchReturnData_partial
+
+extension GrammarParser_Search_Tests {
+    func testParseSearchReturnDataPartial() {
+        self.iterateTests(
+            testFunction: GrammarParser().parseSearchReturnData_partial,
+            validInputs: [
+                ("PARTIAL (23500:24000 67,100:102)", "\r", .partial(.first(23_500 ... 24_000), [67, 100 ... 102]), #line),
+                ("PARTIAL (-55:-700 NIL)", "\r", .partial(.last(55 ... 700), []), #line),
+            ],
+            parserErrorInputs: [],
+            incompleteMessageInputs: []
+        )
+    }
+}
+
 // MARK: - `search-ret-opt` parseSearchReturnOption
 
 extension GrammarParser_Search_Tests {
@@ -232,6 +248,8 @@ extension GrammarParser_Search_Tests {
                 ("SAVE", "\r", .save, #line),
                 ("save", "\r", .save, #line),
                 ("saVE", "\r", .save, #line),
+                ("PARTIAL 23500:24000", "\r", .partial(.first(23_500 ... 24_000)), #line),
+                ("partial -1:-100", "\r", .partial(.last(1 ... 100)), #line),
                 ("modifier", "\r", .optionExtension(.init(key: "modifier", value: nil)), #line),
             ],
             parserErrorInputs: [],
@@ -253,6 +271,8 @@ extension GrammarParser_Search_Tests {
                     .optionExtension(.init(key: "m1", value: nil)),
                     .optionExtension(.init(key: "m2", value: nil)),
                 ], #line),
+                (" RETURN (PARTIAL 23500:24000)", "\r", [.partial(.first(23_500 ... 24_000))], #line),
+                (" RETURN (MIN PARTIAL -1:-100 MAX)", "\r", [.min, .partial(.last(1 ... 100)), .max], #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []

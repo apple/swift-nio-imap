@@ -32,6 +32,11 @@ public enum SearchReturnOption: Hashable {
     /// SEARCH, e.g., SORT and THREAD [SORT]) and store it
     case save
 
+    /// Request a subset of the results.
+    ///
+    /// Part of https://datatracker.ietf.org/doc/draft-ietf-extra-imap-partial/
+    case partial(PartialRange)
+
     /// Implemented as a catch-all to support future extensions.
     case optionExtension(KeyValue<String, ParameterValue?>)
 }
@@ -51,6 +56,8 @@ extension EncodeBuffer {
             return self.writeString("COUNT")
         case .save:
             return self.writeString("SAVE")
+        case .partial(let range):
+            return self.writeString("PARTIAL ") + self.writePartialRange(range)
         case .optionExtension(let option):
             return self.writeSearchReturnOptionExtension(option)
         }

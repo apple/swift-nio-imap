@@ -28,6 +28,8 @@ extension SearchReturnData_Tests {
             (.all(LastCommandSet.set(MessageIdentifierSet<UnknownMessageIdentifier>(1 ... 3))), "ALL 1:3", #line),
             (.count(1), "COUNT 1", #line),
             (.modificationSequence(1), "MODSEQ 1", #line),
+            (.partial(.first(23_500 ... 24_000), [67, 100 ... 102]), "PARTIAL (23500:24000 67,100:102)", #line),
+            (.partial(.last(55 ... 700), []), "PARTIAL (-55:-700 NIL)", #line),
             (.dataExtension(.init(key: "modifier", value: .sequence(.set([3])))), "modifier 3", #line),
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeSearchReturnData($0) })

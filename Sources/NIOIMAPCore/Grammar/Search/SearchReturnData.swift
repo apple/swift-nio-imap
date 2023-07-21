@@ -31,6 +31,12 @@ public enum SearchReturnData: Hashable {
     /// Contains the highest mod-sequence for all messages being returned.
     case modificationSequence(ModificationSequenceValue)
 
+    /// The message numbers/UIDs that satisfy the SEARCH criteria for a
+    /// partial (paged) search.
+    ///
+    /// Part of https://datatracker.ietf.org/doc/draft-ietf-extra-imap-partial/
+    case partial(PartialRange, MessageIdentifierSet<UnknownMessageIdentifier>)
+
     /// Implemented as a catch-all to support any return data options defined in future extensions.
     case dataExtension(KeyValue<String, ParameterValue>)
 }
@@ -50,6 +56,16 @@ extension EncodeBuffer {
                 self.writeLastCommandSet(set)
         case .count(let num):
             return self.writeString("COUNT \(num)")
+        case .partial(let range, let set):
+            var count = self.writeString("PARTIAL (") +
+                self.writePartialRange(range) +
+                self.writeString(" ")
+            if set.isEmpty {
+                count += self.writeNil()
+            } else {
+                count += self.writeUIDSet(set)
+            }
+            return count + self.writeString(")")
         case .dataExtension(let optionExt):
             return self.writeSearchReturnDataExtension(optionExt)
         case .modificationSequence(let seq):
