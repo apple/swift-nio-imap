@@ -60,7 +60,7 @@ extension ExtendedSearchResponse {
     ///
     /// Note: The response will not contain an `.all` item if there are no matching UIDs. In this
     /// case, though, this property will return an empty `UIDSet`.
-    var matchedUIDs: UIDSet? {
+    public var matchedUIDs: UIDSet? {
         guard kind == .uid else { return nil }
         return UIDSet(_matchedIdentifierSet)
     }
@@ -76,7 +76,7 @@ extension ExtendedSearchResponse {
     ///
     /// Note: The response will not contain an `.all` item if there are no matching UIDs. In this
     /// case, though, this property will return an empty `UIDSet`.
-    var matchedSequenceNumbers: MessageIdentifierSet<SequenceNumber>? {
+    public var matchedSequenceNumbers: MessageIdentifierSet<SequenceNumber>? {
         guard kind == .sequenceNumber else { return nil }
         return MessageIdentifierSet(_matchedIdentifierSet)
     }
@@ -94,7 +94,7 @@ extension ExtendedSearchResponse {
     }
 
     /// Returns the count value in the response.
-    var count: Int? {
+    public var count: Int? {
         returnData.lazy.compactMap { data -> Int? in
             guard case .count(let c) = data else { return nil }
             return c
@@ -102,7 +102,7 @@ extension ExtendedSearchResponse {
     }
 
     /// Returns the `MIN` value in the response, if the result contains it and is a UID response.
-    var minUID: UID? {
+    public var minUID: UID? {
         guard
             kind == .uid,
             let value = returnData.lazy.compactMap({ data -> UnknownMessageIdentifier? in
@@ -114,7 +114,7 @@ extension ExtendedSearchResponse {
     }
 
     /// Returns the `MIN` value in the response, if the result contains it and is a sequence number response.
-    var minSequenceNumber: SequenceNumber? {
+    public var minSequenceNumber: SequenceNumber? {
         guard
             kind == .sequenceNumber,
             let value = returnData.lazy.compactMap({ data -> UnknownMessageIdentifier? in
@@ -126,7 +126,7 @@ extension ExtendedSearchResponse {
     }
 
     /// Returns the `MAX` value in the response, if the result contains it and is a UID response.
-    var maxUID: UID? {
+    public var maxUID: UID? {
         guard
             kind == .uid,
             let value = returnData.lazy.compactMap({ data -> UnknownMessageIdentifier? in
@@ -138,7 +138,7 @@ extension ExtendedSearchResponse {
     }
 
     /// Returns the `MAX` value in the response, if the result contains it and is a sequence number response.
-    var maxSequenceNumber: SequenceNumber? {
+    public var maxSequenceNumber: SequenceNumber? {
         guard
             kind == .sequenceNumber,
             let value = returnData.lazy.compactMap({ data -> UnknownMessageIdentifier? in
