@@ -325,6 +325,11 @@ extension Capability {
     /// in both the CAPABILITY response and the equivalent response-code - RFC 5550.
     public static let partialURL = Self(unchecked: "URL-PARTIAL")
 
+    /// Paged SEARCH and FETCH, RFC 9394.
+    ///
+    /// Allows clients to limit the number of results returned.
+    public static let partial = Self(unchecked: "PARTIAL")
+
     /// Provides a means by which an IMAP client can use URLs carrying authorization
     /// to access limited message data on the IMAP server - RFC 4467.
     public static let authenticatedURL = Self(unchecked: "URLAUTH")
