@@ -80,6 +80,7 @@ extension GrammarParser {
     //                   addr-host ")"
     func parseEmailAddress(buffer: inout ParseBuffer, tracker: StackTracker) throws -> EmailAddress {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> EmailAddress in
+            try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: PL.parseSpaces)
             try PL.parseFixedString("(", buffer: &buffer, tracker: tracker)
             let name = try self.parseNString(buffer: &buffer, tracker: tracker)
             try PL.parseFixedString(" ", buffer: &buffer, tracker: tracker)
