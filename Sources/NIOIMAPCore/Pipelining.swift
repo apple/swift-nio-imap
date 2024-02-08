@@ -439,7 +439,8 @@ extension FetchAttribute {
              .binarySize,
              .gmailMessageID,
              .gmailThreadID,
-             .gmailLabels:
+             .gmailLabels,
+             .preview:
             return false
         }
     }

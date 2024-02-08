@@ -87,6 +87,7 @@ extension Capability_Tests {
             (.unselect, "UNSELECT", #line),
             (.utf8(.accept), "UTF8=ACCEPT", #line),
             (.within, "WITHIN", #line),
+            (.preview, "PREVIEW", #line),
         ]
 
         for (capability, expectedString, line) in tests {

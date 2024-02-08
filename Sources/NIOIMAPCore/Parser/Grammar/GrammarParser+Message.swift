@@ -206,6 +206,23 @@ extension GrammarParser {
             try self.parseNil(buffer: &buffer, tracker: tracker)
             return .nilBody(kind)
         }
+        
+        func parseMessageAttribute_preview(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute {
+            func parseMessageAttribute_preview_literal(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute {
+                try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+                return .preview(try self.parseLiteral(buffer: &buffer, tracker: tracker))
+            }
+            
+            func parseMessageAttribute_preview_inline(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute {
+                try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+                return .preview(try self.parseQuoted(buffer: &buffer, tracker: tracker))
+            }
+            
+            return try PL.parseOneOf([
+                parseMessageAttribute_preview_literal,
+                parseMessageAttribute_preview_inline,
+            ], buffer: &buffer, tracker: tracker)
+        }
 
         let parsers: [String: (inout ParseBuffer, StackTracker) throws -> MessageAttribute] = [
             "FLAGS": parseMessageAttribute_flags,
@@ -223,6 +240,7 @@ extension GrammarParser {
             "RFC822.TEXT": parseMessageAttribute_rfc822Text_nilBody,
             "RFC822.HEADER": parseMessageAttribute_rfc822Header_nilBody,
             "BINARY": parseMessageAttribute_binary_nilBody,
+            "PREVIEW": parseMessageAttribute_preview
         ]
         return try self.parseFromLookupTable(buffer: &buffer, tracker: tracker, parsers: parsers)
     }

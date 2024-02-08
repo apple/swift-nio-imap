@@ -68,6 +68,10 @@ public enum FetchAttribute: Hashable {
 
     /// The message's GMail labels.
     case gmailLabels
+    
+    /// The RFC 8970 Server-generated abbreviated text representation of message
+    /// data that is useful as a contextual preview of the entire message.
+    case preview(lazy: Bool)
 }
 
 extension Array where Element == FetchAttribute {
@@ -151,6 +155,8 @@ extension EncodeBuffer {
             return self.writeFetchAttribute_gmailThreadID()
         case .gmailLabels:
             return self.writeFetchAttribute_gmailLabels()
+        case .preview(let lazy):
+            return self.writeFetchAttribute_preview(lazy)
         }
     }
 
@@ -184,6 +190,10 @@ extension EncodeBuffer {
 
     @discardableResult mutating func writeFetchAttribute_rfc822Text() -> Int {
         self.writeString("RFC822.TEXT")
+    }
+    
+    @discardableResult mutating func writeFetchAttribute_preview(_ lazy: Bool) -> Int {
+        self.writeString(lazy ? "PREVIEW (LAZY)" : "PREVIEW")
     }
 
     @discardableResult mutating func writeFetchAttribute_bodyStructure(extensions: Bool) -> Int {
