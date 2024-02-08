@@ -170,4 +170,15 @@ extension ResponseStreamingTests {
             (.fetch(.finish), #line),
         ])
     }
+    
+    func testStreamingStartingWithNewline() {
+        self.AssertFetchResponses("\n* 1 FETCH (BODY[TEXT]<4> {3}\r\nabc FLAGS (\\seen \\answered))\r\n", [
+            (.fetch(.start(1)), #line),
+            (.fetch(.streamingBegin(kind: .body(section: .text, offset: 4), byteCount: 3)), #line),
+            (.fetch(.streamingBytes("abc")), #line),
+            (.fetch(.streamingEnd), #line),
+            (.fetch(.simpleAttribute(.flags([.seen, .answered]))), #line),
+            (.fetch(.finish), #line),
+        ])
+    }
 }

@@ -251,6 +251,15 @@ extension ResponseParser_Tests {
         }
     }
 
+    func testResponseStartingWithNewline() {
+        var parser = ResponseParser()
+        var buffer: ByteBuffer = "\n* 145 FETCH (UID 12024 INTERNALDATE \"07-Feb-2024 12:42:19 +0000\")"
+
+        XCTAssertEqual(try parser.parseResponseStream(buffer: &buffer), .response(.fetch(.start(145))))
+        XCTAssertEqual(try parser.parseResponseStream(buffer: &buffer), .response(.fetch(.simpleAttribute(.uid(12024)))))
+        XCTAssertEqual(try parser.parseResponseStream(buffer: &buffer), .response(.fetch(.simpleAttribute(.internalDate(.init(.init(year: 2024, month: 2, day: 7, hour: 12, minute: 42, second: 19, timeZoneMinutes: 0)!))))))
+    }
+    
     func testAttributeLimit_failOnStreaming() {
         var parser = ResponseParser(bufferLimit: 1000, messageAttributeLimit: 3)
         var buffer: ByteBuffer = "* 999 FETCH (FLAGS (\\Seen) UID 1 RFC822.SIZE 123 RFC822.TEXT {3}\r\n "
