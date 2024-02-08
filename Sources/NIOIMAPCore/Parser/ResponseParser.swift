@@ -130,6 +130,8 @@ extension ResponseParser {
 
         return try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             try? PL.parseSpaces(buffer: &buffer, tracker: tracker)
+            try? PL.parseNewline(buffer: &buffer, tracker: tracker)
+            
             do {
                 let response = try PL.parseOneOf(
                     parseResponse_fetch, parseResponse_normal,
