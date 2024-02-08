@@ -38,6 +38,7 @@ UIDPLUS|[RFC4315](https://www.iana.org/go/rfc4315)
 UNSELECT|[RFC3691](https://www.iana.org/go/rfc3691)
 URLAUTH|[RFC4467](https://www.iana.org/go/rfc4467)
 WITHIN|[RFC5032](https://www.iana.org/go/rfc5032)
+PREVIEW|[RFC8970](https://www.iana.org/go/rfc8970)
 
 We have also implemented:
 - "Collected Extensions to IMAP 4", [RFC4466](https://www.iana.org/go/rfc4466).

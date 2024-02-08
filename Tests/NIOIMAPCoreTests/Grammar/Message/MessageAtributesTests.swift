@@ -37,6 +37,7 @@ extension MessageAttributesTests {
             (.gmailMessageID(1278455344230334865), "X-GM-MSGID 1278455344230334865", #line),
             (.gmailThreadID(1266894439832287888), "X-GM-THRID 1266894439832287888", #line),
             (.gmailLabels([GmailLabel("\\Inbox"), GmailLabel("\\Sent"), GmailLabel("Important"), GmailLabel("Muy Importante")]), "X-GM-LABELS (\\Inbox \\Sent \"Important\" \"Muy Importante\")", #line),
+            (.preview("Lorem ipsum dolor sit amet"), "PREVIEW \"Lorem ipsum dolor sit amet\"", #line)
         ]
 
         for (test, expectedString, line) in inputs {

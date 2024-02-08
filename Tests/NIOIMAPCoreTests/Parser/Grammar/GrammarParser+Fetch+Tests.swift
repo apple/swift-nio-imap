@@ -49,6 +49,8 @@ extension GrammarParser_Fetch_Tests {
                 ("X-GM-THRID", " ", .gmailThreadID, #line),
                 ("X-GM-LABELS", " ", .gmailLabels, #line),
                 ("MODSEQ", " ", .modificationSequence, #line),
+                ("PREVIEW", " ", .preview(lazy: false), #line),
+                ("PREVIEW (LAZY)", " ", .preview(lazy: true), #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
@@ -69,6 +71,7 @@ extension GrammarParser_Fetch_Tests {
                 ("FLAGS (\\seen)", " ", .simpleAttribute(.flags([.seen])), #line),
                 ("FLAGS (\\seen \\answered \\draft)", " ", .simpleAttribute(.flags([.seen, .answered, .draft])), #line),
                 (")\r\n", " ", .finish, #line),
+                ("PREVIEW \"Lorem ipsum dolor sit amet\"", " ", .simpleAttribute(.preview("Lorem ipsum dolor sit amet")), #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
