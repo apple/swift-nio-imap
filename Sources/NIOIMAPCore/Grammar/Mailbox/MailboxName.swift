@@ -51,7 +51,7 @@ public struct MailboxPath: Hashable {
     /// The path separator, e.g. */* in *foo/bar*
     @inlinable
     public var pathSeparator: Character? {
-        (_pathSeparator == 0) ? nil : Unicode.Scalar(UInt32(_pathSeparator)).map { Character($0) }
+        (self._pathSeparator == 0) ? nil : Unicode.Scalar(UInt32(self._pathSeparator)).map { Character($0) }
     }
 
     /// Creates a new `MailboxPath` with the given data.
@@ -61,7 +61,7 @@ public struct MailboxPath: Hashable {
     /// - throws: `InvalidPathSeparatorError` if the `pathSeparator` is not a valid ascii value.
     public init(name: MailboxName, pathSeparator: Character? = nil) throws {
         // if a path separator is given, it must be a valid ascii character
-        if let pathSeparator = pathSeparator, !pathSeparator.isASCII {
+        if let pathSeparator, !pathSeparator.isASCII {
             throw InvalidPathSeparatorError(description: "The path separator must be an ascii value")
         }
 
@@ -122,8 +122,8 @@ extension MailboxPath {
     /// - throws: `InvalidMailboxNameError` if the `displayName` contains a `pathSeparator`.
     /// - returns: A new `MailboxPath` containing the given name and separator.
     public static func makeRootMailbox(displayName: String, pathSeparator: Character? = nil) throws -> MailboxPath {
-        guard displayName.utf8.count <= maximumMailboxSize else {
-            throw MailboxTooBigError(maximumSize: maximumMailboxSize, actualSize: displayName.utf8.count)
+        guard displayName.utf8.count <= self.maximumMailboxSize else {
+            throw MailboxTooBigError(maximumSize: self.maximumMailboxSize, actualSize: displayName.utf8.count)
         }
 
         if let separator = pathSeparator {
@@ -202,17 +202,18 @@ public struct MailboxName {
     /// We store a pre-calculated hash value to make `Hashable` conformance fast.
     @inlinable
     public var hashValue: Int {
-        _hashValue.value
+        self._hashValue.value
     }
+
     @usableFromInline
     let _hashValue: HashValue
 
     /// `true` if the internal storage reads "INBOX"
     /// otherwise `false`
     public var isInbox: Bool {
-        hashValue == MailboxName.inboxHashValue &&
-            bytes.count == 5 &&
-            bytes.map { $0 & 0xDF }.elementsEqual("INBOX".utf8)
+        self.hashValue == MailboxName.inboxHashValue &&
+            self.bytes.count == 5 &&
+            self.bytes.map { $0 & 0xDF }.elementsEqual("INBOX".utf8)
     }
 
     private static let inboxHashValue: Int = MailboxName.inbox.hashValue
@@ -248,7 +249,7 @@ extension MailboxName {
         init(_ value: Int) {
             let a = UInt(bitPattern: value)
             let b = a ^ (a >> 32)
-            _value = UInt32(truncatingIfNeeded: b)
+            self._value = UInt32(truncatingIfNeeded: b)
         }
 
         @inlinable
@@ -279,7 +280,7 @@ extension MailboxName: Hashable {
 
     @inlinable
     public func hash(into hasher: inout Hasher) {
-        hasher.combine(hashValue)
+        hasher.combine(self.hashValue)
     }
 }
 
