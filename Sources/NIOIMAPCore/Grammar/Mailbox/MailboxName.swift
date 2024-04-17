@@ -43,13 +43,21 @@ public struct MailboxPath: Hashable {
     /// The full mailbox name, e.g. *foo/bar*
     public let name: MailboxName
 
+    // Using this instead of `Character?` to reduce the size of this type.
+    // A value of `0` denotes no path separator (i.e. `nil`).
+    @usableFromInline
+    let _pathSeparator: UInt8
+
     /// The path separator, e.g. */* in *foo/bar*
-    public let pathSeparator: Character?
+    @inlinable
+    public var pathSeparator: Character? {
+        (_pathSeparator == 0) ? nil : Unicode.Scalar(UInt32(_pathSeparator)).map { Character($0) }
+    }
 
     /// Creates a new `MailboxPath` with the given data.
     /// - Note: Do not use this initialiser to create a root/sub mailbox that requires validation. Instead use `makeRootMailbox(displayName:pathSeparator:)`
     /// - parameter name: The `MailboxName` containing UTF-7 encoded bytes
-    /// - parameter pathSeparator: An optional `Character` used to delimit sub-mailboxes.
+    /// - parameter pathSeparator: An optional `Character` used to delimit sub-mailboxes. Note that this needs to be an ASCII character.
     /// - throws: `InvalidPathSeparatorError` if the `pathSeparator` is not a valid ascii value.
     public init(name: MailboxName, pathSeparator: Character? = nil) throws {
         // if a path separator is given, it must be a valid ascii character
@@ -58,7 +66,7 @@ public struct MailboxPath: Hashable {
         }
 
         self.name = name
-        self.pathSeparator = pathSeparator
+        self._pathSeparator = pathSeparator?.asciiValue ?? 0
     }
 }
 
@@ -192,7 +200,12 @@ public struct MailboxName {
     /// The hash value.
     ///
     /// We store a pre-calculated hash value to make `Hashable` conformance fast.
-    public let hashValue: Int
+    @inlinable
+    public var hashValue: Int {
+        _hashValue.value
+    }
+    @usableFromInline
+    let _hashValue: HashValue
 
     /// `true` if the internal storage reads "INBOX"
     /// otherwise `false`
@@ -220,7 +233,29 @@ public struct MailboxName {
         b.withUnsafeBytes { buffer in
             hasher.combine(bytes: buffer)
         }
-        self.hashValue = hasher.finalize()
+        self._hashValue = HashValue(hasher.finalize())
+    }
+}
+
+extension MailboxName {
+    /// A helper to store a hash value (for `Hashable` conformance) inside
+    /// a `UInt32` (i.e. 4 bytes) even on platforms where `Int` is 64 bit.
+    @usableFromInline
+    struct HashValue {
+        @usableFromInline
+        let _value: UInt32
+
+        init(_ value: Int) {
+            let a = UInt(bitPattern: value)
+            let b = a ^ (a >> 32)
+            _value = UInt32(truncatingIfNeeded: b)
+        }
+
+        @inlinable
+        var value: Int {
+            let a = UInt64(_value)
+            return Int(truncatingIfNeeded: Int64(bitPattern: (a << 32) | a))
+        }
     }
 }
 
