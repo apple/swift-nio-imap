@@ -27,6 +27,7 @@ MULTIAPPEND|[RFC3502](https://www.iana.org/go/rfc3502)
 MULTISEARCH|[RFC7377](https://www.iana.org/go/rfc7377)
 NAMESPACE|[RFC2342](https://www.iana.org/go/rfc2342)
 PARTIAL|[RFC9394](https://www.iana.org/go/rfc9394)
+PREVIEW|[RFC8970](https://www.iana.org/go/rfc8970)
 QRESYNC|[RFC7162](https://www.iana.org/go/rfc7162)
 QUOTA|[RFC2087](https://www.iana.org/go/rfc2087)
 SASL-IR|[RFC4959](https://www.iana.org/go/rfc4959)
@@ -38,7 +39,6 @@ UIDPLUS|[RFC4315](https://www.iana.org/go/rfc4315)
 UNSELECT|[RFC3691](https://www.iana.org/go/rfc3691)
 URLAUTH|[RFC4467](https://www.iana.org/go/rfc4467)
 WITHIN|[RFC5032](https://www.iana.org/go/rfc5032)
-PREVIEW|[RFC8970](https://www.iana.org/go/rfc8970)
 
 We have also implemented:
 - "Collected Extensions to IMAP 4", [RFC4466](https://www.iana.org/go/rfc4466).
