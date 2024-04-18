@@ -366,16 +366,79 @@ extension GrammarParser_Body_Tests {
                 #line
             ),
             (
+                #"((The (quick (brown (fox)) jumps) over (the (lazy dog.))) Suddenly, (the (sky (darkens (and (the (rain (begins to fall))))))))"#,
+                " UID 1",
+                .invalid,
+                #line
+            ),
+            // Quoted:
+            (
                 #"("text" "plain" ("CHARSET" "UTF-8") NIL NIL NIL 1423 44 NIL NIL NIL NIL)"#,
                 " UID 1",
                 .invalid,
+                #line
+            ),
+            // Literal:
+            (
+                #"("text" "plain" ("CHARSET" {5}\#r\#nUTF-8) NIL NIL NIL 1423 44 NIL NIL NIL NIL)"#,
+                " UID 1",
+                .invalid,
+                #line
+            ),
+            // Quoted with `(` and `)`:
+            (
+                #"("te(xt" "pl(ain" ("CHA(RSET" "UT(F-8") NIL NIL NIL 1423 44 NIL NIL NIL NIL)"#,
+                " UID 1",
+                .invalid,
+                #line
+            ),
+            (
+                #"("te)xt" "pl)ain" ("CHA)RSET" "UT)F-8") NIL NIL NIL 1423 44 NIL NIL NIL NIL)"#,
+                " UID 1",
+                .invalid,
+                #line
+            ),
+            // Literal with `(`:
+            (
+                #"("text" "plain" ("CHARSET" {7}\#r\#nU(TF-(8) NIL NIL NIL 1423 44 NIL NIL NIL NIL)"#,
+                " UID 1",
+                .invalid,
+                #line
+            ),
+            // Complex but valid:
+            (
+                #"((("text" "plain" ("CHARSET" "UTF-8") NIL NIL NIL 1423 44 NIL NIL NIL NIL)("text" "html" ("CHARSET" "UTF-8") NIL NIL "quoted-printable" 2524 34 NIL NIL NIL NIL) "alternative" ("BOUNDARY" "000000000000ccac3a05a5ef76c3") NIL NIL NIL)("text" "plain" ("CHARSET" "us-ascii") NIL NIL "7bit" 151 4 NIL NIL NIL NIL) "mixed" ("BOUNDARY" "===============5781602957316160403==") NIL NIL NIL)"#,
+                " UID 1",
+                .invalid,
+                #line
+            ),
+        ]
+        let invalidInputs: [(String, String, UInt)] = [
+            (
+                #" UID 1"#,
+                " UID 1",
+                #line
+            ),
+            (
+                #" ()"#,
+                " UID 1",
+                #line
+            ),
+            (
+                #") (a)"#,
+                " UID 1",
+                #line
+            ),
+            (
+                #"("text" "plain" ("CHARSET" {1234567}\#r\#nU(TF-(8) NIL NIL NIL 1423 44 NIL NIL NIL NIL)"#,
+                " UID 1",
                 #line
             ),
         ]
         self.iterateTests(
             testFunction: GrammarParser().parseInvalidBody,
             validInputs: inputs,
-            parserErrorInputs: [],
+            parserErrorInputs: invalidInputs,
             incompleteMessageInputs: []
         )
     }

@@ -64,39 +64,76 @@ extension GrammarParser {
 
     /// Effectively _skips_ the `body` data.
     func parseInvalidBody(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute.BodyStructure {
-        // We’re basically just counting `(` vs. `)`, but we need to skip
-        // * quoted strings
-        // * literals
+        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
+            // We’re basically just counting `(` vs. `)`, but we need to skip
+            // * quoted strings
+            // * literals
 
-        try PL.parseFixedString("(", buffer: &buffer, tracker: tracker)
-        var parenthesisCount = 1
-        var byteCount = 0
-        let maximumByteCount = 200_000
-        while true {
-            guard
-                byteCount < maximumByteCount
-            else { throw ParserError(hint: "Run-away body structure") }
-            // Skip anything except for
-            // 7b `{` -> literal
-            // 28 `(` / 29 `)` -> count
-            // 22 `"` -> quoted string
-            byteCount += try PL.parseZeroOrMoreCharacters(buffer: &buffer, tracker: tracker, where: {
-                $0 != 0x7b && $0 != 0x28 && $0 != 0x29 && $0 != 0x22
-            }).readableBytes + 1
-            switch try PL.parseByte(buffer: &buffer, tracker: tracker) {
-            case 0x7b:
-                fatalError("TODO")
-            case 0x28:
-                parenthesisCount += 1
-            case 0x29:
-                parenthesisCount -= 1
+            try PL.parseFixedString("(", buffer: &buffer, tracker: tracker)
+            var parenthesisCount = 1
+
+            var byteCount = 0
+            let maximumByteCount = 200_000
+
+            enum State {
+                case normal
+                case quoted
+            }
+            var state = State.normal
+
+            while true {
                 guard
-                    0 < parenthesisCount
-                else { return .invalid }
-            case 0x22:
-                fatalError("TODO")
-            default:
-                throw ParserError(hint: "Unexpected byte in body structure")
+                    byteCount < maximumByteCount
+                else { throw ParserError(hint: "Run-away body structure") }
+                switch state {
+                case .normal:
+                    // Skip anything except for
+                    // 7b `{` -> literal
+                    // 28 `(` / 29 `)` -> count
+                    // 22 `"` -> quoted string
+                    byteCount += try PL.parseZeroOrMoreCharacters(buffer: &buffer, tracker: tracker, where: {
+                        $0 != 0x7B && $0 != 0x28 && $0 != 0x29 && $0 != 0x22
+                    }).readableBytes + 1
+                    switch try PL.parseByte(buffer: &buffer, tracker: tracker) {
+                    case 0x7B:
+                        let literalCount: Int
+                        do {
+                            literalCount = try parseLiteralLength(buffer: &buffer, tracker: tracker, maxLength: max(0, maximumByteCount - byteCount))
+                        } catch {
+                            throw ParserError(hint: "Run-away literal in body structure")
+                        }
+                        try PL.parseFixedString("}", buffer: &buffer, tracker: tracker)
+                        try PL.parseNewline(buffer: &buffer, tracker: tracker)
+                        _ = try PL.parseBytes(buffer: &buffer, tracker: tracker, length: literalCount)
+                    case 0x28:
+                        parenthesisCount += 1
+                    case 0x29:
+                        parenthesisCount -= 1
+                        guard
+                            parenthesisCount > 0
+                        else { return .invalid }
+                    case 0x22:
+                        state = .quoted
+                    default:
+                        throw ParserError(hint: "Unexpected byte in body structure")
+                    }
+                case .quoted:
+                    // Skip anything except for
+                    // 5c `\` -> escaped
+                    // 22 `"` -> quoted string
+                    byteCount += try PL.parseZeroOrMoreCharacters(buffer: &buffer, tracker: tracker, where: {
+                        $0 != 0x5C && $0 != 0x22
+                    }).readableBytes + 1
+                    switch try PL.parseByte(buffer: &buffer, tracker: tracker) {
+                    case 0x5C:
+                        _ = try PL.parseByte(buffer: &buffer, tracker: tracker)
+                        byteCount += 1
+                    case 0x22:
+                        state = .normal
+                    default:
+                        throw ParserError(hint: "Unexpected byte in body structure")
+                    }
+                }
             }
         }
     }
