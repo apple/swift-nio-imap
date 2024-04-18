@@ -354,6 +354,18 @@ extension GrammarParser_Body_Tests {
     func testInvalidParseBody() {
         let inputs: [(String, String, MessageAttribute.BodyStructure, UInt)] = [
             (
+                #"()"#,
+                " UID 1",
+                .invalid,
+                #line
+            ),
+            (
+                #"(foo bar)"#,
+                " UID 1",
+                .invalid,
+                #line
+            ),
+            (
                 #"("text" "plain" ("CHARSET" "UTF-8") NIL NIL NIL 1423 44 NIL NIL NIL NIL)"#,
                 " UID 1",
                 .invalid,

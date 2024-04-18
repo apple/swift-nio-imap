@@ -64,10 +64,41 @@ extension GrammarParser {
 
     /// Effectively _skips_ the `body` data.
     func parseInvalidBody(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute.BodyStructure {
+        // We’re basically just counting `(` vs. `)`, but we need to skip
+        // * quoted strings
+        // * literals
 
-        // TODO
-
-        return .invalid
+        try PL.parseFixedString("(", buffer: &buffer, tracker: tracker)
+        var parenthesisCount = 1
+        var byteCount = 0
+        let maximumByteCount = 200_000
+        while true {
+            guard
+                byteCount < maximumByteCount
+            else { throw ParserError(hint: "Run-away body structure") }
+            // Skip anything except for
+            // 7b `{` -> literal
+            // 28 `(` / 29 `)` -> count
+            // 22 `"` -> quoted string
+            byteCount += try PL.parseZeroOrMoreCharacters(buffer: &buffer, tracker: tracker, where: {
+                $0 != 0x7b && $0 != 0x28 && $0 != 0x29 && $0 != 0x22
+            }).readableBytes + 1
+            switch try PL.parseByte(buffer: &buffer, tracker: tracker) {
+            case 0x7b:
+                fatalError("TODO")
+            case 0x28:
+                parenthesisCount += 1
+            case 0x29:
+                parenthesisCount -= 1
+                guard
+                    0 < parenthesisCount
+                else { return .invalid }
+            case 0x22:
+                fatalError("TODO")
+            default:
+                throw ParserError(hint: "Unexpected byte in body structure")
+            }
+        }
     }
 
     // body-extension  = nstring / number /
