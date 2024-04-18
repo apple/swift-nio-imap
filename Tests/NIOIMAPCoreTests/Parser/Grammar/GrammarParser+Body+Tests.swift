@@ -347,3 +347,24 @@ extension GrammarParser_Body_Tests {
         )
     }
 }
+
+// MARK: - parseBody
+
+extension GrammarParser_Body_Tests {
+    func testInvalidParseBody() {
+        let inputs: [(String, String, MessageAttribute.BodyStructure, UInt)] = [
+            (
+                #"("text" "plain" ("CHARSET" "UTF-8") NIL NIL NIL 1423 44 NIL NIL NIL NIL)"#,
+                " UID 1",
+                .invalid,
+                #line
+            ),
+        ]
+        self.iterateTests(
+            testFunction: GrammarParser().parseInvalidBody,
+            validInputs: inputs,
+            parserErrorInputs: [],
+            incompleteMessageInputs: []
+        )
+    }
+}

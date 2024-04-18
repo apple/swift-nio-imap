@@ -14,6 +14,23 @@
 
 import struct NIO.ByteBuffer
 
+extension MessageAttribute {
+    /// A common parser failure is inside `BodyStructure`.
+    ///
+    /// This helper type is able to express failure to parse the RFC 3501 `body` (`NIOIMAPCore.BodyStructure`),
+    /// without failing the overall parsing.
+    ///
+    /// A server has to parse a MIME message to build up the RFC 3501 `body` data, and since there are a lot of
+    /// badly formatted messages in the wild, servers can sometimes end up generating “bad” `body` data.
+    /// The most common source is from junk messages, that are more-or-less intentionally ill-formated.
+    public enum BodyStructure: Hashable {
+        /// A normal, valid RFC 3501 `body` (aka. body structure).
+        case valid(NIOIMAPCore.BodyStructure)
+        /// We failed to parse the body structure.
+        case invalid
+    }
+}
+
 /// A parsed representation of the MIME-IMB body structure information of the message.
 /// Recomended reading: RFC 3501 § 2.6.3 and 7.4.2.
 public enum BodyStructure: Hashable {
@@ -113,7 +130,7 @@ extension BodyStructure: RandomAccessCollection {
             }
             ii = parent
         }
-        return endIndex
+        return self.endIndex
     }
 }
 
@@ -158,7 +175,7 @@ extension BodyStructure {
     /// The closure will be called with `SectionSpecifier.Part` being ordered ascending.
     public func enumerateParts(_ closure: (SectionSpecifier.Part, BodyStructure) throws -> Void) rethrows {
         try closure([], self)
-        try recursiveEnumerateParts(parent: [], closure)
+        try self.recursiveEnumerateParts(parent: [], closure)
     }
 
     private func recursiveEnumerateParts(parent: SectionSpecifier.Part, _ closure: (SectionSpecifier.Part, BodyStructure) throws -> Void) rethrows {
@@ -198,6 +215,15 @@ extension BodyStructure {
 // MARK: - Encoding
 
 extension EncodeBuffer {
+    @discardableResult mutating func writeBody(_ body: MessageAttribute.BodyStructure) -> Int {
+        switch body {
+        case .valid(let wrapped):
+            return self.writeBody(wrapped)
+        case .invalid:
+            return self.writeString("(") + self.writeString(")")
+        }
+    }
+
     @discardableResult mutating func writeBody(_ body: BodyStructure) -> Int {
         var size = 0
         size += self.writeString("(")

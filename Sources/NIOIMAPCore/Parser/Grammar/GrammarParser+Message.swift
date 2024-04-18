@@ -34,12 +34,12 @@ extension GrammarParser {
 
         func parseMessageData_vanished(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageData {
             try PL.parseFixedString("VANISHED ", buffer: &buffer, tracker: tracker)
-            return .vanished(try self.parseUIDSet(buffer: &buffer, tracker: tracker))
+            return try .vanished(self.parseUIDSet(buffer: &buffer, tracker: tracker))
         }
 
         func parseMessageData_vanishedEarlier(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageData {
             try PL.parseFixedString("VANISHED (EARLIER) ", buffer: &buffer, tracker: tracker)
-            return .vanishedEarlier(try self.parseUIDSet(buffer: &buffer, tracker: tracker))
+            return try .vanishedEarlier(self.parseUIDSet(buffer: &buffer, tracker: tracker))
         }
 
         func parseMessageData_generateAuthorizedURL(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageData {
@@ -89,17 +89,17 @@ extension GrammarParser {
 
         func parseMessageAttribute_envelope(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute {
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-            return .envelope(try self.parseEnvelope(buffer: &buffer, tracker: tracker))
+            return try .envelope(self.parseEnvelope(buffer: &buffer, tracker: tracker))
         }
 
         func parseMessageAttribute_internalDate(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute {
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-            return .internalDate(try self.parseInternalDate(buffer: &buffer, tracker: tracker))
+            return try .internalDate(self.parseInternalDate(buffer: &buffer, tracker: tracker))
         }
 
         func parseMessageAttribute_rfc822Size(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute {
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-            return .rfc822Size(try self.parseNumber(buffer: &buffer, tracker: tracker))
+            return try .rfc822Size(self.parseNumber(buffer: &buffer, tracker: tracker))
         }
 
         func parseMessageAttribute_body(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute {
@@ -107,7 +107,7 @@ extension GrammarParser {
 
             func parseMessageAttribute_body_structure(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute {
                 try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-                let body = try self.parseBody(buffer: &buffer, tracker: tracker)
+                let body = try self.parseMessageAttributeBody(buffer: &buffer, tracker: tracker)
                 return .body(body, hasExtensionData: false)
             }
 
@@ -119,13 +119,13 @@ extension GrammarParser {
 
         func parseMessageAttribute_bodyStructure(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute {
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-            let body = try self.parseBody(buffer: &buffer, tracker: tracker)
+            let body = try self.parseMessageAttributeBody(buffer: &buffer, tracker: tracker)
             return .body(body, hasExtensionData: true)
         }
 
         func parseMessageAttribute_uid(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute {
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-            return .uid(try self.parseMessageIdentifier(buffer: &buffer, tracker: tracker))
+            return try .uid(self.parseMessageIdentifier(buffer: &buffer, tracker: tracker))
         }
 
         func parseMessageAttribute_binarySize(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute {
@@ -166,7 +166,7 @@ extension GrammarParser {
                 try parseGmailLabel(buffer: &buffer, tracker: tracker)
             }
 
-            if let first = first {
+            if let first {
                 attributes.append(first)
 
                 try PL.parseZeroOrMore(buffer: &buffer, into: &attributes, tracker: tracker) { buffer, tracker in
