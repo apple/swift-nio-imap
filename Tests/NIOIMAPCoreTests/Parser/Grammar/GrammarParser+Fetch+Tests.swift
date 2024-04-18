@@ -71,7 +71,7 @@ extension GrammarParser_Fetch_Tests {
                 ("FLAGS (\\seen)", " ", .simpleAttribute(.flags([.seen])), #line),
                 ("FLAGS (\\seen \\answered \\draft)", " ", .simpleAttribute(.flags([.seen, .answered, .draft])), #line),
                 (")\r\n", " ", .finish, #line),
-                ("PREVIEW \"Lorem ipsum dolor sit amet\"", " ", .simpleAttribute(.preview("Lorem ipsum dolor sit amet")), #line),
+                ("PREVIEW \"Lorem ipsum dolor sit amet\"", " ", .simpleAttribute(.preview(.init("Lorem ipsum dolor sit amet"))), #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
