@@ -162,11 +162,11 @@ extension GrammarParser_Envelope_Tests {
             XCTAssertEqual(envelope.reply, [.singleAddress(.init(personName: "name3", sourceRoot: "adl3", mailbox: "mailbox3", host: "host3"))])
             XCTAssertEqual(envelope.to, [
                 .singleAddress(.init(personName: "name4", sourceRoot: "adl4", mailbox: "mailbox4", host: "host4")),
-                .singleAddress(.init(personName: "name5", sourceRoot: "adl5", mailbox: "mailbox5", host: "host5"))
+                .singleAddress(.init(personName: "name5", sourceRoot: "adl5", mailbox: "mailbox5", host: "host5")),
             ])
             XCTAssertEqual(envelope.cc, [
                 .singleAddress(.init(personName: "name6", sourceRoot: "adl6", mailbox: "mailbox6", host: "host6")),
-                .singleAddress(.init(personName: "name7", sourceRoot: "adl7", mailbox: "mailbox7", host: "host7"))
+                .singleAddress(.init(personName: "name7", sourceRoot: "adl7", mailbox: "mailbox7", host: "host7")),
             ])
             XCTAssertEqual(envelope.bcc, [.singleAddress(.init(personName: "name8", sourceRoot: "adl8", mailbox: "mailbox8", host: "host8"))])
             XCTAssertEqual(envelope.inReplyTo, "someone")
