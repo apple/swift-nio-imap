@@ -26,12 +26,12 @@ import struct NIO.ByteBufferView
 extension GrammarParser {
     // Sequence Range
     func parseMessageIdentifierRange<T: MessageIdentifier>(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageIdentifierRange<T> {
-        func parse_wildcard<T: MessageIdentifier>(buffer: inout ParseBuffer, tracker: StackTracker) throws -> T {
+        func parse_wildcard(buffer: inout ParseBuffer, tracker: StackTracker) throws -> T {
             try PL.parseFixedString("*", buffer: &buffer, tracker: tracker)
             return .max
         }
 
-        func parse_identifierOrWildcard<T: MessageIdentifier>(buffer: inout ParseBuffer, tracker: StackTracker) throws -> T {
+        func parse_identifierOrWildcard(buffer: inout ParseBuffer, tracker: StackTracker) throws -> T {
             try PL.parseOneOf(
                 parse_wildcard,
                 self.parseMessageIdentifier,
@@ -40,7 +40,7 @@ extension GrammarParser {
             )
         }
 
-        func parse_colonAndIdentifierOrWildcard<T: MessageIdentifier>(buffer: inout ParseBuffer, tracker: StackTracker) throws -> T {
+        func parse_colonAndIdentifierOrWildcard(buffer: inout ParseBuffer, tracker: StackTracker) throws -> T {
             try PL.parseFixedString(":", buffer: &buffer, tracker: tracker)
             return try parse_identifierOrWildcard(buffer: &buffer, tracker: tracker)
         }
@@ -85,11 +85,11 @@ extension GrammarParser {
     // sequence-set       =/ seq-last-command
     // seq-last-command   = "$"
     func parseMessageIdentifierSet<T: MessageIdentifier>(buffer: inout ParseBuffer, tracker: StackTracker) throws -> LastCommandSet<MessageIdentifierSet<T>> {
-        func parseMessageIdentifierSet_number<T: MessageIdentifier>(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageIdentifierRange<T> {
+        func parseMessageIdentifierSet_number(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageIdentifierRange<T> {
             MessageIdentifierRange<T>(try self.parseMessageIdentifier(buffer: &buffer, tracker: tracker))
         }
 
-        func parseMessageIdentifierSet_element<T: MessageIdentifier>(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageIdentifierRange<T> {
+        func parseMessageIdentifierSet_element(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageIdentifierRange<T> {
             try PL.parseOneOf(
                 self.parseMessageIdentifierRange,
                 parseMessageIdentifierSet_number,
@@ -98,7 +98,7 @@ extension GrammarParser {
             )
         }
 
-        func parseMessageIdentifierSet_base<T: MessageIdentifier>(buffer: inout ParseBuffer, tracker: StackTracker) throws -> LastCommandSet<MessageIdentifierSet<T>> {
+        func parseMessageIdentifierSet_base(buffer: inout ParseBuffer, tracker: StackTracker) throws -> LastCommandSet<MessageIdentifierSet<T>> {
             try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
                 var output: [MessageIdentifierRange<T>] = [try parseMessageIdentifierSet_element(buffer: &buffer, tracker: tracker)]
                 try PL.parseZeroOrMore(buffer: &buffer, into: &output, tracker: tracker) { buffer, tracker in
@@ -112,7 +112,7 @@ extension GrammarParser {
             }
         }
 
-        func parseMessageIdentifierSet_lastCommand<T: MessageIdentifier>(buffer: inout ParseBuffer, tracker: StackTracker) throws -> LastCommandSet<MessageIdentifierSet<T>> {
+        func parseMessageIdentifierSet_lastCommand(buffer: inout ParseBuffer, tracker: StackTracker) throws -> LastCommandSet<MessageIdentifierSet<T>> {
             try PL.parseFixedString("$", buffer: &buffer, tracker: tracker)
             return .lastCommand
         }

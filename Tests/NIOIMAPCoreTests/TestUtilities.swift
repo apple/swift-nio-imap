@@ -62,15 +62,33 @@ extension TestUtilities {
     }
 }
 
-extension ByteBuffer: ExpressibleByStringLiteral {
-    public typealias StringLiteralType = String
-
-    public init(stringLiteral value: Self.StringLiteralType) {
+#if swift(>=5.8)
+#if hasFeature(RetroactiveAttribute)
+extension ByteBuffer: @retroactive ExpressibleByStringLiteral {
+    public init(stringLiteral value: String) {
         let allocator = ByteBufferAllocator()
         self = allocator.buffer(capacity: 0)
         self.writeString(value)
     }
 }
+#else
+extension ByteBuffer: ExpressibleByStringLiteral {
+    public init(stringLiteral value: String) {
+        let allocator = ByteBufferAllocator()
+        self = allocator.buffer(capacity: 0)
+        self.writeString(value)
+    }
+}
+#endif
+#else
+extension ByteBuffer: ExpressibleByStringLiteral {
+    public init(stringLiteral value: String) {
+        let allocator = ByteBufferAllocator()
+        self = allocator.buffer(capacity: 0)
+        self.writeString(value)
+    }
+}
+#endif
 
 extension TestUtilities {
     static func roundTripCodable<A>(_ value: A) throws -> A where A: Codable {
