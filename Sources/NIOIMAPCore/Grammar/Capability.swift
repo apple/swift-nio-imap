@@ -351,6 +351,10 @@ extension Capability {
     /// RFC 7888 LITERAL-
     public static let literalMinus = Self(unchecked: "LITERAL-")
 
+    /// RFC 9586 UIDONLY
+    /// Message numbers are not returned in responses and cannot be used in requests once this extension is enabled.
+    public static let uidOnly = Self(unchecked: "UIDONLY")
+
     /// Creates a new *AUTH* capability.
     /// - parameter type: The `AuthenticationMechanism`.
     /// - returns: A new `Capability`.
