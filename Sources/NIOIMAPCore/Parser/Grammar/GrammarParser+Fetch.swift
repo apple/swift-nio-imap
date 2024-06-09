@@ -226,18 +226,35 @@ extension GrammarParser {
     }
 
     func parseFetchResponseStart(buffer: inout ParseBuffer, tracker: StackTracker) throws -> _FetchResponse {
-        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
-            try PL.parseFixedString("* ", buffer: &buffer, tracker: tracker)
-            let number: SequenceNumber = try self.parseMessageIdentifier(buffer: &buffer, tracker: tracker)
-            try PL.parseFixedString(" FETCH (", buffer: &buffer, tracker: tracker)
-            return .start(number)
+        func parseFetchResponseStart_normal(buffer: inout ParseBuffer, tracker: StackTracker) throws -> _FetchResponse {
+            try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
+                try PL.parseFixedString("* ", buffer: &buffer, tracker: tracker)
+                let number: SequenceNumber = try self.parseMessageIdentifier(buffer: &buffer, tracker: tracker)
+                try PL.parseFixedString(" FETCH (", buffer: &buffer, tracker: tracker)
+                return .start(number)
+            }
         }
+
+        func parseFetchResponseStart_uid(buffer: inout ParseBuffer, tracker: StackTracker) throws -> _FetchResponse {
+            try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
+                try PL.parseFixedString("* ", buffer: &buffer, tracker: tracker)
+                let number: UID = try self.parseMessageIdentifier(buffer: &buffer, tracker: tracker)
+                try PL.parseFixedString(" UIDFETCH (", buffer: &buffer, tracker: tracker)
+                return .startUID(number)
+            }
+        }
+
+        return try PL.parseOneOf([
+            parseFetchResponseStart_normal,
+            parseFetchResponseStart_uid,
+        ], buffer: &buffer, tracker: tracker)
     }
 
     // needed to tell the response parser which type of streaming is
     // going to take place, e.g. quoted or literal
     enum _FetchResponse: Hashable {
         case start(SequenceNumber)
+        case startUID(UID)
         case simpleAttribute(MessageAttribute)
         case literalStreamingBegin(kind: StreamingKind, byteCount: Int)
         case quotedStreamingBegin(kind: StreamingKind, byteCount: Int)

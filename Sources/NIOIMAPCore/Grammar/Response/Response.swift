@@ -78,13 +78,16 @@ extension Response: CustomDebugStringConvertible {
 
 /// The first event will always be `start`
 /// The last event will always be `finish`
-/// Every `start` has exactly one corresponding `finish`
-/// After recieving `start` you may recieve n `simpleAttribute`, `streamingBegin`, and `streamingBytes` events.
+/// Every `start` (or `startUID`) has exactly one corresponding `finish`
+/// After recieving `start` (or `startUID`) you may recieve n `simpleAttribute`, `streamingBegin`, and `streamingBytes` events.
 /// Every `streamingBegin` has exaclty one corresponding `streamingEnd`
 /// `streamingBegin` has a `type` that specifies the type of data to be streamed
 public enum FetchResponse: Hashable {
     /// A fetch response is beginning for the message with the given sequence number.
     case start(SequenceNumber)
+
+    /// An RFC 9586 “UID Only”  fetch response is beginning for the message with the given UID.
+    case startUID(UID)
 
     /// A basic attribute that is small enough to be sent as one chunk, for example flags or an envelope.
     case simpleAttribute(MessageAttribute)
