@@ -228,6 +228,17 @@ extension ResponseParser_Tests {
                 ],
                 #line
             ),
+            (
+                "* 12183 FETCH (UID 2282556735 PREVIEW {3}\r\nabc FLAGS (\\Seen))",
+                [
+                    .response(.fetch(.start(12183))),
+                    .response(.fetch(.simpleAttribute(.uid(2282556735)))),
+                    .response(.fetch(.simpleAttribute(.preview(.init("abc"))))),
+                    .response(.fetch(.simpleAttribute(.flags([.seen])))),
+                    .response(.fetch(.finish)),
+                ],
+                #line
+            ),
         ]
 
         for (input, expected, line) in inputs {

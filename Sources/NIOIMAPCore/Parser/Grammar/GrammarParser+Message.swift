@@ -219,10 +219,17 @@ extension GrammarParser {
                 let raw = try self.parseQuoted(buffer: &buffer, tracker: tracker)
                 return .preview(PreviewText(String(buffer: raw)))
             }
-            
+
+            func parseMessageAttribute_preview_nil(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute {
+                try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+                try self.parseNil(buffer: &buffer, tracker: tracker)
+                return .preview(nil)
+            }
+
             return try PL.parseOneOf([
                 parseMessageAttribute_preview_literal,
                 parseMessageAttribute_preview_inline,
+                parseMessageAttribute_preview_nil,
             ], buffer: &buffer, tracker: tracker)
         }
 

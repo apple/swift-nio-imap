@@ -63,7 +63,7 @@ public enum MessageAttribute: Hashable {
     /// is useful as a contextual preview of the entire message. 
     ///
     /// - SeeAlso: RFC 8970 (IMAP4 Extension: Message Preview Generation)
-    case preview(PreviewText)
+    case preview(PreviewText?)
 }
 
 extension MessageAttribute: CustomDebugStringConvertible {
@@ -204,9 +204,9 @@ extension EncodeBuffer {
             }
     }
     
-    @discardableResult mutating func writeMessageAttribute_preview(_ previewText: PreviewText) -> Int {
+    @discardableResult mutating func writeMessageAttribute_preview(_ previewText: PreviewText?) -> Int {
         self.writeString("PREVIEW") +
             self.writeSpace() +
-            self.writeNString(String(previewText))
+        self.writeNString(previewText.map { String($0) })
     }
 }
