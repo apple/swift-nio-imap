@@ -351,6 +351,11 @@ extension Capability {
     /// RFC 7888 LITERAL-
     public static let literalMinus = Self(unchecked: "LITERAL-")
 
+    /// RFC 8970 - IMAP4 Extension: Message Preview Generation
+    ///
+    /// Allows a client to request a server-generated abbreviated text representation of message data.
+    public static let preview = Self(unchecked: "PREVIEW")
+
     /// RFC 9586 UIDONLY
     /// Message numbers are not returned in responses and cannot be used in requests once this extension is enabled.
     public static let uidOnly = Self(unchecked: "UIDONLY")

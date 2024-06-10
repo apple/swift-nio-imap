@@ -44,6 +44,8 @@ extension FetchAttributeTests {
             (.gmailMessageID, .rfc3501, "X-GM-MSGID", #line),
             (.gmailThreadID, .rfc3501, "X-GM-THRID", #line),
             (.gmailLabels, .rfc3501, "X-GM-LABELS", #line),
+            (.preview(lazy: false), .rfc3501, "PREVIEW", #line),
+            (.preview(lazy: true), .rfc3501, "PREVIEW (LAZY)", #line),
         ]
         self.iterateInputs(inputs: inputs.map { ($0, $1, [$2], $3) }, encoder: { self.testBuffer.writeFetchAttribute($0) })
     }
@@ -74,6 +76,8 @@ extension FetchAttributeTests {
             (.gmailMessageID, "X-GM-MSGID", #line),
             (.gmailThreadID, "X-GM-THRID", #line),
             (.gmailLabels, "X-GM-LABELS", #line),
+            (.preview(lazy: false), "PREVIEW", #line),
+            (.preview(lazy: true), "PREVIEW (LAZY)", #line),
         ]
         for (attr, expected, line) in inputs {
             XCTAssertEqual(String(reflecting: attr), expected, line: line)
@@ -92,6 +96,8 @@ extension FetchAttributeTests {
             ([.flags, .bodyStructure(extensions: true), .rfc822Size, .internalDate, .envelope], .rfc3501, "(FLAGS BODYSTRUCTURE RFC822.SIZE INTERNALDATE ENVELOPE)", #line),
             ([.flags, .bodyStructure(extensions: false), .rfc822Size, .internalDate, .envelope, .uid], .rfc3501, "(FLAGS BODY RFC822.SIZE INTERNALDATE ENVELOPE UID)", #line),
             ([.gmailLabels, .gmailMessageID, .gmailThreadID], .rfc3501, "(X-GM-LABELS X-GM-MSGID X-GM-THRID)", #line),
+            ([.preview(lazy: false)], .rfc3501, "(PREVIEW)", #line),
+            ([.preview(lazy: true)], .rfc3501, "(PREVIEW (LAZY))", #line),
         ]
         self.iterateInputs(inputs: inputs.map { ($0, $1, [$2], $3) }, encoder: { self.testBuffer.writeFetchAttributeList($0) })
     }

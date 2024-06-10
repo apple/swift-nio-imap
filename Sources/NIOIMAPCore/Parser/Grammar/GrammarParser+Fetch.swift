@@ -116,6 +116,23 @@ extension GrammarParser {
             return .binarySize(section: sectionBinary)
         }
 
+        func parseFetchAttribute_preview(buffer: inout ParseBuffer, tracker: StackTracker) throws -> FetchAttribute {
+            // RFC 8970
+            // fetch-att         =/ "PREVIEW" [SP "(" preview-mod *(SP preview-mod) ")"]
+            // preview-mod       =  "LAZY"
+            func parsePreviewLazyModifier(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Bool {
+                do {
+                    try PL.parseFixedString(" (LAZY)", buffer: &buffer, tracker: tracker)
+                    return true
+                } catch {
+                    return false
+                }
+            }
+
+            let lazy = try parsePreviewLazyModifier(buffer: &buffer, tracker: tracker)
+            return .preview(lazy: lazy)
+        }
+
         let parsers: [String: (inout ParseBuffer, StackTracker) throws -> FetchAttribute] = [
             "ENVELOPE": { _, _ in .envelope },
             "FLAGS": { _, _ in .flags },
@@ -135,6 +152,7 @@ extension GrammarParser {
             "BINARY.SIZE": parseFetchAttribute_binarySize,
             "BINARY": parseFetchAttribute_binary,
             "BINARY.PEEK": parseFetchAttribute_binaryPeek,
+            "PREVIEW": parseFetchAttribute_preview,
         ]
 
         // try to use the lookup table, however obviously an unknown number

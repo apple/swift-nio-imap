@@ -101,6 +101,7 @@ extension GrammarParser_Message_Tests {
                 ("X-GM-LABELS ()", " ", .gmailLabels([]), #line),
                 (#"X-GM-LABELS (\Drafts)"#, " ", .gmailLabels([GmailLabel(#"\Drafts"#)]), #line),
                 (#"X-GM-LABELS ("\\Important")"#, " ", .gmailLabels([GmailLabel(#"\Important"#)]), #line),
+                ("PREVIEW \"Lorem ipsum dolor sit amet\"", "", .preview(.init("Lorem ipsum dolor sit amet")), #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
