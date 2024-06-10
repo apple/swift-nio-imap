@@ -112,6 +112,10 @@ extension ResponseEncodeBuffer {
             return self.buffer.writeString("* ") +
                 self.buffer.writeSequenceNumber(num) +
                 self.buffer.writeString(" FETCH (")
+        case .startUID(let num):
+            return self.buffer.writeString("* ") +
+                self.buffer.writeMessageIdentifier(num) +
+                self.buffer.writeString(" UIDFETCH (")
         case .simpleAttribute(let att):
             guard case .server(streamingAttributes: let streamingAttributes, let options) = self.buffer.mode else {
                 preconditionFailure("Only server can write responses.")

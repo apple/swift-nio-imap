@@ -265,6 +265,11 @@ public indirect enum ResponseTextCode: Hashable {
 
     /// Compression is active.
     case compressionActive
+
+    /// RFC 9586 UIDONLY
+    ///
+    /// The client MUST NOT use message sequence numbers.
+    case uidRequired
 }
 
 extension ResponseTextCode {
@@ -379,6 +384,8 @@ extension EncodeBuffer {
             return self.writeString("NONEXISTENT")
         case .compressionActive:
             return self.writeString("COMPRESSIONACTIVE")
+        case .uidRequired:
+            return self.writeString("UIDREQUIRED")
         }
     }
 

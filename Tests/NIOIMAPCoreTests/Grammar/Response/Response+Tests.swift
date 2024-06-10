@@ -44,6 +44,7 @@ extension Response_Tests {
     func testEncode_fetchResponse_multiple() {
         let inputs: [([NIOIMAPCore.FetchResponse], String, UInt)] = [
             ([.start(1), .simpleAttribute(.rfc822Size(123)), .finish], "* 1 FETCH (RFC822.SIZE 123)\r\n", #line),
+            ([.startUID(1), .simpleAttribute(.rfc822Size(123)), .finish], "* 1 UIDFETCH (RFC822.SIZE 123)\r\n", #line),
             ([.start(2), .simpleAttribute(.uid(123)), .simpleAttribute(.rfc822Size(456)), .finish], "* 2 FETCH (UID 123 RFC822.SIZE 456)\r\n", #line),
             (
                 [.start(3), .simpleAttribute(.uid(123)), .streamingBegin(kind: .rfc822Text, byteCount: 0), .streamingEnd, .simpleAttribute(.uid(456)), .finish],
@@ -58,6 +59,11 @@ extension Response_Tests {
             (
                 [.start(87), .simpleAttribute(.nilBody(.body(section: .init(part: [4], kind: .text), offset: nil))), .simpleAttribute(.uid(123)), .finish],
                 "* 87 FETCH (BODY[4.TEXT] NIL UID 123)\r\n",
+                #line
+            ),
+            (
+                [.startUID(87), .simpleAttribute(.nilBody(.body(section: .init(part: [4], kind: .text), offset: nil))), .simpleAttribute(.uid(123)), .finish],
+                "* 87 UIDFETCH (BODY[4.TEXT] NIL UID 123)\r\n",
                 #line
             ),
         ]

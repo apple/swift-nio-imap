@@ -152,6 +152,9 @@ extension ResponseParser {
                 case .fetchResponse(.start(let num)):
                     self.moveStateMachine(expected: .response(.fetchOrNormal), next: .response(.fetchMiddle(attributeCount: 0)))
                     return .response(.fetch(.start(num)))
+                case .fetchResponse(.startUID(let num)):
+                    self.moveStateMachine(expected: .response(.fetchOrNormal), next: .response(.fetchMiddle(attributeCount: 0)))
+                    return .response(.fetch(.startUID(num)))
                 case .fetchResponse(.literalStreamingBegin(kind: let kind, byteCount: let size)):
                     try self.guardStreamingSizeLimit(size: size)
                     let attributeCount = try self.guardFetchMiddleAttributeCount()

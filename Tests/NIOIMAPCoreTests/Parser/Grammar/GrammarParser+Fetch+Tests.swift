@@ -84,6 +84,7 @@ extension GrammarParser_Fetch_Tests {
             testFunction: GrammarParser().parseFetchResponseStart,
             validInputs: [
                 ("* 1 FETCH (", " ", .start(1), #line),
+                ("* 1 UIDFETCH (", " ", .startUID(1), #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []

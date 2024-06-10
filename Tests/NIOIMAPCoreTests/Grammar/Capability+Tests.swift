@@ -83,6 +83,7 @@ extension Capability_Tests {
             (.status(.size), "STATUS=SIZE", #line),
             (.thread(.orderedSubject), "THREAD=ORDEREDSUBJECT", #line),
             (.thread(.references), "THREAD=REFERENCES", #line),
+            (.uidOnly, "UIDONLY", #line),
             (.uidPlus, "UIDPLUS", #line),
             (.unselect, "UNSELECT", #line),
             (.utf8(.accept), "UTF8=ACCEPT", #line),

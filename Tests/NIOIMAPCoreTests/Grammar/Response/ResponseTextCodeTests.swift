@@ -53,6 +53,9 @@ extension ResponseTextCodeTests {
             (.noPermission, "NOPERM", #line),
             (.nonExistent, "NONEXISTENT", #line),
             (.notSaved, "NOTSAVED", #line),
+            (.other("SOMETHING", nil), "SOMETHING", #line),
+            (.other("some", "thing"), "some thing", #line),
+            (.other("some", nil), "some", #line),
             (.overQuota, "OVERQUOTA", #line),
             (.parse, "PARSE", #line),
             (.permanentFlags([.flag(.deleted), .flag(.draft)]), #"PERMANENTFLAGS (\Deleted \Draft)"#, #line),
@@ -65,6 +68,7 @@ extension ResponseTextCodeTests {
             (.serverBug, "SERVERBUG", #line),
             (.tryCreate, "TRYCREATE", #line),
             (.uidNext(123), "UIDNEXT 123", #line),
+            (.uidRequired, "UIDREQUIRED", #line),
             (.uidValidity(234), "UIDVALIDITY 234", #line),
             (.unavailable, "UNAVAILABLE", #line),
             (.unseen(345), "UNSEEN 345", #line),
@@ -73,9 +77,6 @@ extension ResponseTextCodeTests {
             (.urlMechanisms([.init(mechanism: .internal, base64: nil)]), "URLMECH INTERNAL INTERNAL", #line),
             (.urlMechanisms([]), "URLMECH INTERNAL", #line),
             (.useAttribute, "USEATTR", #line),
-            (.other("some", "thing"), "some thing", #line),
-            (.other("some", nil), "some", #line),
-            (.other("SOMETHING", nil), "SOMETHING", #line),
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeResponseTextCode($0) })
     }

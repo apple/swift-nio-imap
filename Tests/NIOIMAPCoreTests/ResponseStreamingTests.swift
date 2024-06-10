@@ -48,8 +48,8 @@ extension ResponseStreamingTests {
             (.fetch(.finish), #line),
         ])
 
-        self.AssertFetchResponses("* 2 FETCH (FLAGS (\\deleted) BODY[TEXT] {3}\r\ndef)\r\n", [
-            (.fetch(.start(2)), #line),
+        self.AssertFetchResponses("* 2 UIDFETCH (FLAGS (\\deleted) BODY[TEXT] {3}\r\ndef)\r\n", [
+            (.fetch(.startUID(2)), #line),
             (.fetch(.simpleAttribute(.flags([.deleted]))), #line),
             (.fetch(.streamingBegin(kind: .body(section: .text, offset: nil), byteCount: 3)), #line),
             (.fetch(.streamingBytes("def")), #line),
@@ -162,8 +162,8 @@ extension ResponseStreamingTests {
             (.fetch(.finish), #line),
         ])
 
-        self.AssertFetchResponses("* 2 FETCH (BINARY[1.2]<77> {4}\r\n1234)\r\n", [
-            (.fetch(.start(2)), #line),
+        self.AssertFetchResponses("* 2 UIDFETCH (BINARY[1.2]<77> {4}\r\n1234)\r\n", [
+            (.fetch(.startUID(2)), #line),
             (.fetch(.streamingBegin(kind: .binary(section: [1, 2], offset: 77), byteCount: 4)), #line),
             (.fetch(.streamingBytes("1234")), #line),
             (.fetch(.streamingEnd), #line),
