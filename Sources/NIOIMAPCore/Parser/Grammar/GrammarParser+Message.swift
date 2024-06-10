@@ -249,7 +249,7 @@ extension GrammarParser {
             "RFC822.TEXT": parseMessageAttribute_rfc822Text_nilBody,
             "RFC822.HEADER": parseMessageAttribute_rfc822Header_nilBody,
             "BINARY": parseMessageAttribute_binary_nilBody,
-            "PREVIEW": parseMessageAttribute_preview
+            "PREVIEW": parseMessageAttribute_preview,
         ]
         return try self.parseFromLookupTable(buffer: &buffer, tracker: tracker, parsers: parsers)
     }
