@@ -88,6 +88,7 @@ extension GrammarParser_Message_Tests {
                     .singlepart(.init(kind: .text(.init(mediaSubtype: "PLAIN", lineCount: 47)), fields: .init(parameters: ["CHARSET": "utf-8"], id: nil, contentDescription: nil, encoding: .quotedPrintable, octetCount: 1772), extension: .init(digest: nil, dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: .init(location: nil, extensions: [])))))),
                     .singlepart(.init(kind: .text(.init(mediaSubtype: "HTML", lineCount: 40)), fields: .init(parameters: ["CHARSET": "utf-8"], id: nil, contentDescription: nil, encoding: .quotedPrintable, octetCount: 2778), extension: .init(digest: nil, dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: .init(location: nil, extensions: [])))))),
                 ], mediaSubtype: .alternative, extension: .init(parameters: ["BOUNDARY": "Apple-Mail=_0D97185D-4FF1-42FE-9B8F-A0759D299015"], dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: .init(location: nil, extensions: []))))))), hasExtensionData: true), #line),
+                (#"BODYSTRUCTURE ("text")"#, " ", .body(.invalid, hasExtensionData: true), #line),
                 ("RFC822.TEXT NIL", " ", .nilBody(.rfc822Text), #line),
                 ("RFC822.HEADER NIL", " ", .nilBody(.rfc822Header), #line),
                 ("BINARY[4]<5> NIL", " ", .nilBody(.binary(section: [4], offset: 5)), #line),
