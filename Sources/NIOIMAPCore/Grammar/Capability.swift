@@ -350,7 +350,7 @@ extension Capability {
 
     /// RFC 7888 LITERAL-
     public static let literalMinus = Self(unchecked: "LITERAL-")
-    
+
     /// RFC 8970 - IMAP4 Extension: Message Preview Generation
     ///
     /// Allows a client to request a server-generated abbreviated text representation of message data.

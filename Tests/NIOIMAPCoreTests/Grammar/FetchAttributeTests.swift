@@ -45,7 +45,7 @@ extension FetchAttributeTests {
             (.gmailThreadID, .rfc3501, "X-GM-THRID", #line),
             (.gmailLabels, .rfc3501, "X-GM-LABELS", #line),
             (.preview(lazy: false), .rfc3501, "PREVIEW", #line),
-            (.preview(lazy: true), .rfc3501, "PREVIEW (LAZY)", #line)
+            (.preview(lazy: true), .rfc3501, "PREVIEW (LAZY)", #line),
         ]
         self.iterateInputs(inputs: inputs.map { ($0, $1, [$2], $3) }, encoder: { self.testBuffer.writeFetchAttribute($0) })
     }
@@ -97,7 +97,7 @@ extension FetchAttributeTests {
             ([.flags, .bodyStructure(extensions: false), .rfc822Size, .internalDate, .envelope, .uid], .rfc3501, "(FLAGS BODY RFC822.SIZE INTERNALDATE ENVELOPE UID)", #line),
             ([.gmailLabels, .gmailMessageID, .gmailThreadID], .rfc3501, "(X-GM-LABELS X-GM-MSGID X-GM-THRID)", #line),
             ([.preview(lazy: false)], .rfc3501, "(PREVIEW)", #line),
-            ([.preview(lazy: true)], .rfc3501, "(PREVIEW (LAZY))", #line)
+            ([.preview(lazy: true)], .rfc3501, "(PREVIEW (LAZY))", #line),
         ]
         self.iterateInputs(inputs: inputs.map { ($0, $1, [$2], $3) }, encoder: { self.testBuffer.writeFetchAttributeList($0) })
     }

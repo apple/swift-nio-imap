@@ -206,14 +206,14 @@ extension GrammarParser {
             try self.parseNil(buffer: &buffer, tracker: tracker)
             return .nilBody(kind)
         }
-        
+
         func parseMessageAttribute_preview(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute {
             func parseMessageAttribute_preview_literal(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute {
                 try PL.parseSpaces(buffer: &buffer, tracker: tracker)
                 let raw = try self.parseLiteral(buffer: &buffer, tracker: tracker)
                 return .preview(PreviewText(String(buffer: raw)))
             }
-            
+
             func parseMessageAttribute_preview_inline(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute {
                 try PL.parseSpaces(buffer: &buffer, tracker: tracker)
                 let raw = try self.parseQuoted(buffer: &buffer, tracker: tracker)

@@ -58,9 +58,9 @@ public enum MessageAttribute: Hashable {
 
     /// `X-GM-LABELS`: provides the labels for a given message
     case gmailLabels([GmailLabel])
-    
+
     /// `PREVIEW`: a server-generated abbreviated text representation of message data that
-    /// is useful as a contextual preview of the entire message. 
+    /// is useful as a contextual preview of the entire message.
     ///
     /// - SeeAlso: RFC 8970 (IMAP4 Extension: Message Preview Generation)
     case preview(PreviewText?)
@@ -203,10 +203,10 @@ extension EncodeBuffer {
                 buffer.writeGmailLabel(label)
             }
     }
-    
+
     @discardableResult mutating func writeMessageAttribute_preview(_ previewText: PreviewText?) -> Int {
         self.writeString("PREVIEW") +
             self.writeSpace() +
-        self.writeNString(previewText.map { String($0) })
+            self.writeNString(previewText.map { String($0) })
     }
 }

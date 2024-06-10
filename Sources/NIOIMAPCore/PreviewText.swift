@@ -14,7 +14,7 @@
 
 public struct PreviewText: Hashable {
     fileprivate let text: String
-    
+
     public init(_ text: String) {
         self.text = text
     }
