@@ -356,6 +356,10 @@ extension Capability {
     /// Allows a client to request a server-generated abbreviated text representation of message data.
     public static let preview = Self(unchecked: "PREVIEW")
 
+    /// RFC 9586 UIDONLY
+    /// Message numbers are not returned in responses and cannot be used in requests once this extension is enabled.
+    public static let uidOnly = Self(unchecked: "UIDONLY")
+
     /// Creates a new *AUTH* capability.
     /// - parameter type: The `AuthenticationMechanism`.
     /// - returns: A new `Capability`.

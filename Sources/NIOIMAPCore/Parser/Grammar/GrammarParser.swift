@@ -20,7 +20,15 @@ import Glibc
 let badOS = { fatalError("unsupported OS") }()
 #endif
 
-public struct ExceededLiteralSizeLimitError: Error {}
+public struct ExceededLiteralSizeLimitError: Error {
+    public var actualCount: Int
+    public var maximumCount: Int
+
+    public init(actualCount: Int, maximumCount: Int) {
+        self.actualCount = actualCount
+        self.maximumCount = maximumCount
+    }
+}
 
 import struct NIO.ByteBuffer
 import struct OrderedCollections.OrderedDictionary
@@ -1293,7 +1301,10 @@ extension GrammarParser {
     func parseLiteralLength(buffer: inout ParseBuffer, tracker: StackTracker, maxLength: Int) throws -> Int {
         let length = try self.parseNumber(buffer: &buffer, tracker: tracker)
         guard length <= maxLength else {
-            throw ExceededLiteralSizeLimitError()
+            throw ExceededLiteralSizeLimitError(
+                actualCount: length,
+                maximumCount: maxLength
+            )
         }
         return length
     }

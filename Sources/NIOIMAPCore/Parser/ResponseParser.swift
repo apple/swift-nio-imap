@@ -15,11 +15,23 @@
 import struct NIO.ByteBuffer
 
 public struct ExceededMaximumMessageAttributesError: Error {
-    public init() {}
+    public var actualCount: Int
+    public var maximumCount: Int
+
+    public init(actualCount: Int, maximumCount: Int) {
+        self.actualCount = actualCount
+        self.maximumCount = maximumCount
+    }
 }
 
 public struct ExceededMaximumBodySizeError: Error {
-    public init() {}
+    public var actualCount: UInt64
+    public var maximumCount: UInt64
+
+    public init(actualCount: UInt64, maximumCount: UInt64) {
+        self.actualCount = actualCount
+        self.maximumCount = maximumCount
+    }
 }
 
 /// A parser to be used by Clients in order to parse responses sent from a server.
@@ -140,6 +152,9 @@ extension ResponseParser {
                 case .fetchResponse(.start(let num)):
                     self.moveStateMachine(expected: .response(.fetchOrNormal), next: .response(.fetchMiddle(attributeCount: 0)))
                     return .response(.fetch(.start(num)))
+                case .fetchResponse(.startUID(let num)):
+                    self.moveStateMachine(expected: .response(.fetchOrNormal), next: .response(.fetchMiddle(attributeCount: 0)))
+                    return .response(.fetch(.startUID(num)))
                 case .fetchResponse(.literalStreamingBegin(kind: let kind, byteCount: let size)):
                     try self.guardStreamingSizeLimit(size: size)
                     let attributeCount = try self.guardFetchMiddleAttributeCount()
@@ -177,14 +192,20 @@ extension ResponseParser {
             preconditionFailure("We should be in fetch middle: \(self.mode)")
         }
         guard attributeCount < self.messageAttributeLimit else {
-            throw ExceededMaximumMessageAttributesError()
+            throw ExceededMaximumMessageAttributesError(
+                actualCount: attributeCount,
+                maximumCount: self.messageAttributeLimit
+            )
         }
         return attributeCount
     }
 
     private func guardStreamingSizeLimit(size: Int) throws {
         guard size < self.bodySizeLimit else {
-            throw ExceededMaximumBodySizeError()
+            throw ExceededMaximumBodySizeError(
+                actualCount: UInt64(exactly: size) ?? 0,
+                maximumCount: self.bodySizeLimit
+            )
         }
     }
 

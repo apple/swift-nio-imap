@@ -360,6 +360,7 @@ extension GrammarParser {
             "TRYCREATE": { _, _ in .tryCreate },
             "UIDNEXT": parseSuffix_uidNext,
             "UIDNOTSTICKY": { _, _ in .uidNotSticky },
+            "UIDREQUIRED": { _, _ in .uidRequired },
             "UIDVALIDITY": parseSuffix_uidValidity,
             "UNAVAILABLE": { _, _ in .unavailable },
             "UNSEEN": parseSuffix_unseen,

@@ -25,6 +25,19 @@ import struct NIO.ByteBufferView
 import struct OrderedCollections.OrderedDictionary
 
 extension GrammarParser {
+    func parseMessageAttributeBody(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute.BodyStructure {
+        func parseValid(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute.BodyStructure {
+            try .valid(self.parseBody(buffer: &buffer, tracker: tracker))
+        }
+
+        return try PL.parseOneOf(
+            parseValid,
+            self.parseInvalidBody,
+            buffer: &buffer,
+            tracker: tracker
+        )
+    }
+
     // body            = "(" (body-type-1part / body-type-mpart) ")"
     func parseBody(buffer: inout ParseBuffer, tracker: StackTracker) throws -> BodyStructure {
         func parseBody_singlePart(buffer: inout ParseBuffer, tracker: StackTracker) throws -> BodyStructure {
@@ -49,15 +62,91 @@ extension GrammarParser {
         )
     }
 
+    /// Effectively _skips_ the `body` data.
+    func parseInvalidBody(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute.BodyStructure {
+        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
+            // We’re basically just counting `(` vs. `)`, but we need to skip
+            // * quoted strings
+            // * literals
+
+            try PL.parseFixedString("(", buffer: &buffer, tracker: tracker)
+            var parenthesisCount = 1
+
+            var byteCount = 0
+            let maximumByteCount = 200_000
+
+            enum State {
+                case normal
+                case quoted
+            }
+            var state = State.normal
+
+            while true {
+                guard
+                    byteCount < maximumByteCount
+                else { throw ParserError(hint: "Run-away body structure") }
+                switch state {
+                case .normal:
+                    // Skip anything except for
+                    // 7b `{` -> literal
+                    // 28 `(` / 29 `)` -> count
+                    // 22 `"` -> quoted string
+                    byteCount += try PL.parseZeroOrMoreCharacters(buffer: &buffer, tracker: tracker, where: {
+                        $0 != 0x7B && $0 != 0x28 && $0 != 0x29 && $0 != 0x22
+                    }).readableBytes + 1
+                    switch try PL.parseByte(buffer: &buffer, tracker: tracker) {
+                    case 0x7B:
+                        let literalCount: Int
+                        do {
+                            literalCount = try parseLiteralLength(buffer: &buffer, tracker: tracker, maxLength: max(0, maximumByteCount - byteCount))
+                        } catch {
+                            throw ParserError(hint: "Run-away literal in body structure")
+                        }
+                        try PL.parseFixedString("}", buffer: &buffer, tracker: tracker)
+                        try PL.parseNewline(buffer: &buffer, tracker: tracker)
+                        _ = try PL.parseBytes(buffer: &buffer, tracker: tracker, length: literalCount)
+                    case 0x28:
+                        parenthesisCount += 1
+                    case 0x29:
+                        parenthesisCount -= 1
+                        guard
+                            parenthesisCount > 0
+                        else { return .invalid }
+                    case 0x22:
+                        state = .quoted
+                    default:
+                        throw ParserError(hint: "Unexpected byte in body structure")
+                    }
+                case .quoted:
+                    // Skip anything except for
+                    // 5c `\` -> escaped
+                    // 22 `"` -> quoted string
+                    byteCount += try PL.parseZeroOrMoreCharacters(buffer: &buffer, tracker: tracker, where: {
+                        $0 != 0x5C && $0 != 0x22
+                    }).readableBytes + 1
+                    switch try PL.parseByte(buffer: &buffer, tracker: tracker) {
+                    case 0x5C:
+                        _ = try PL.parseByte(buffer: &buffer, tracker: tracker)
+                        byteCount += 1
+                    case 0x22:
+                        state = .normal
+                    default:
+                        throw ParserError(hint: "Unexpected byte in body structure")
+                    }
+                }
+            }
+        }
+    }
+
     // body-extension  = nstring / number /
     //                    "(" body-extension *(SP body-extension) ")"
     func parseBodyExtension(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [BodyExtension] {
         func parseBodyExtensionKind_string(buffer: inout ParseBuffer, tracker: StackTracker) throws -> BodyExtension {
-            .string(try self.parseNString(buffer: &buffer, tracker: tracker))
+            try .string(self.parseNString(buffer: &buffer, tracker: tracker))
         }
 
         func parseBodyExtensionKind_number(buffer: inout ParseBuffer, tracker: StackTracker) throws -> BodyExtension {
-            .number(try self.parseNumber(buffer: &buffer, tracker: tracker))
+            try .number(self.parseNumber(buffer: &buffer, tracker: tracker))
         }
 
         func parseBodyExtensionKind(buffer: inout ParseBuffer, tracker: StackTracker, into array: inout [BodyExtension]) throws {
@@ -109,7 +198,7 @@ extension GrammarParser {
             }
             let dsp = try PL.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> BodyStructure.DispositionAndLanguage in
                 try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-                return try parseBodyDescriptionLanguage(buffer: &buffer, tracker: tracker)
+                return try self.parseBodyDescriptionLanguage(buffer: &buffer, tracker: tracker)
             }
             return BodyStructure.Singlepart.Extension(digest: md5, dispositionAndLanguage: dsp)
         }
@@ -121,7 +210,7 @@ extension GrammarParser {
             let param = try self.parseBodyFieldParam(buffer: &buffer, tracker: tracker)
             let dsp = try PL.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> BodyStructure.DispositionAndLanguage in
                 try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-                return try parseBodyDescriptionLanguage(buffer: &buffer, tracker: tracker)
+                return try self.parseBodyDescriptionLanguage(buffer: &buffer, tracker: tracker)
             }
             return BodyStructure.Multipart.Extension(parameters: param, dispositionAndLanguage: dsp)
         }
@@ -185,7 +274,7 @@ extension GrammarParser {
     func parseBodyEncoding(buffer: inout ParseBuffer, tracker: StackTracker) throws -> BodyStructure.Encoding? {
         func parseBodyEncoding_string(buffer: inout ParseBuffer, tracker: StackTracker) throws -> BodyStructure.Encoding? {
             let parsed = try self.parseString(buffer: &buffer, tracker: tracker)
-            return .init(try ParserLibrary.parseBufferAsUTF8(parsed))
+            return try .init(ParserLibrary.parseBufferAsUTF8(parsed))
         }
 
         func parseBodyEncoding_option(_ option: String, result: BodyStructure.Encoding, buffer: inout ParseBuffer, tracker: StackTracker) throws -> BodyStructure.Encoding? {
@@ -237,14 +326,14 @@ extension GrammarParser {
             guard let parsed = try self.parseNString(buffer: &buffer, tracker: tracker) else {
                 return []
             }
-            return [try ParserLibrary.parseBufferAsUTF8(parsed)]
+            return try [ParserLibrary.parseBufferAsUTF8(parsed)]
         }
 
         func parseBodyFieldLanguage_multiple(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [String] {
             try PL.parseFixedString("(", buffer: &buffer, tracker: tracker)
 
             let parsed = try self.parseString(buffer: &buffer, tracker: tracker)
-            var array = [try ParserLibrary.parseBufferAsUTF8(parsed)]
+            var array = try [ParserLibrary.parseBufferAsUTF8(parsed)]
 
             try PL.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) -> String in
                 try PL.parseSpaces(buffer: &buffer, tracker: tracker)
@@ -387,7 +476,7 @@ extension GrammarParser {
         let fieldLanguage = try self.parseBodyFieldLanguage(buffer: &buffer, tracker: tracker)
         let locationExtension = try PL.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> BodyStructure.LocationAndExtensions in
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-            return try parseBodyLocationExtension(buffer: &buffer, tracker: tracker)
+            return try self.parseBodyLocationExtension(buffer: &buffer, tracker: tracker)
         }
         return BodyStructure.LanguageLocation(languages: fieldLanguage, location: locationExtension)
     }
@@ -396,7 +485,7 @@ extension GrammarParser {
         let description = try self.parseBodyFieldDsp(buffer: &buffer, tracker: tracker)
         let language = try PL.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> BodyStructure.LanguageLocation in
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-            return try parseBodyLanguageLocation(buffer: &buffer, tracker: tracker)
+            return try self.parseBodyLanguageLocation(buffer: &buffer, tracker: tracker)
         }
         return BodyStructure.DispositionAndLanguage(disposition: description, language: language)
     }
