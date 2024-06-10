@@ -30,12 +30,16 @@ extension GrammarParser {
             try .valid(self.parseBody(buffer: &buffer, tracker: tracker))
         }
 
-        return try PL.parseOneOf(
-            parseValid,
-            self.parseInvalidBody,
-            buffer: &buffer,
-            tracker: tracker
-        )
+        do {
+            return try .valid(self.parseBody(buffer: &buffer, tracker: tracker))
+        } catch let originalError {
+            // Re-try parsing as an invalid body response:
+            do {
+                return try parseInvalidBody(buffer: &buffer, tracker: tracker)
+            } catch {
+                throw originalError
+            }
+        }
     }
 
     // body            = "(" (body-type-1part / body-type-mpart) ")"
