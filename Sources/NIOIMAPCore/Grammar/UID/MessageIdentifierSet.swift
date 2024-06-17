@@ -209,6 +209,20 @@ extension MessageIdentifierSet {
     }
 }
 
+// MARK: - Unknown
+
+extension MessageIdentifierSet<UnknownMessageIdentifier> {
+    init<A: MessageIdentifier>(_ other: MessageIdentifierSet<A>) {
+        self.init(other._ranges)
+    }
+}
+
+extension MessageIdentifierSet {
+    init(unknown other: MessageIdentifierSet<UnknownMessageIdentifier>) {
+        self.init(other._ranges)
+    }
+}
+
 // MARK: - CustomDebugStringConvertible
 
 extension MessageIdentifierSet: CustomDebugStringConvertible {
@@ -458,7 +472,7 @@ extension MessageIdentifierSet where IdentifierType == UnknownMessageIdentifier 
 
 // MARK: - Encoding
 
-extension MessageIdentifierSet: IMAPEncodable {
+extension MessageIdentifierSet {
     @_spi(NIOIMAPInternal) public func writeIntoBuffer(_ buffer: inout EncodeBuffer) -> Int {
         buffer.writeArray(self._ranges.ranges, separator: ",", parenthesis: false) { (element, buffer) in
             let r = MessageIdentifierRange<IdentifierType>(element)

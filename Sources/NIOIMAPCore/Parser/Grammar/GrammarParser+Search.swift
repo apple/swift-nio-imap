@@ -293,6 +293,16 @@ extension GrammarParser {
             return .uid(try self.parseLastCommandSet(buffer: &buffer, tracker: tracker, setParser: self.parseUIDSetNonEmpty))
         }
 
+        func parseSearchKey_uidAfter(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SearchKey {
+            try PL.parseFixedString("UIDAFTER ", buffer: &buffer, tracker: tracker)
+            return .uidAfter(try self.parseLastCommandMessageID(buffer: &buffer, tracker: tracker, setParser: self.parseMessageIdentifier))
+        }
+
+        func parseSearchKey_uidBefore(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SearchKey {
+            try PL.parseFixedString("UIDBEFORE ", buffer: &buffer, tracker: tracker)
+            return .uidBefore(try self.parseLastCommandMessageID(buffer: &buffer, tracker: tracker, setParser: self.parseMessageIdentifier))
+        }
+
         func parseSearchKey_sequenceSet(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SearchKey {
             .sequenceNumbers(try self.parseMessageIdentifierSet(buffer: &buffer, tracker: tracker))
         }
@@ -352,6 +362,8 @@ extension GrammarParser {
             parseSearchKey_sentOn,
             parseSearchKey_sentSince,
             parseSearchKey_uid,
+            parseSearchKey_uidAfter,
+            parseSearchKey_uidBefore,
             parseSearchKey_sequenceSet,
             parseSearchKey_array,
             parseSearchKey_filter,

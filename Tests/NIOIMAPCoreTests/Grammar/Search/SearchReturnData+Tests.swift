@@ -25,7 +25,7 @@ extension SearchReturnData_Tests {
         let inputs: [(SearchReturnData, String, UInt)] = [
             (.min(1), "MIN 1", #line),
             (.max(1), "MAX 1", #line),
-            (.all(LastCommandSet.set(MessageIdentifierSet<UnknownMessageIdentifier>(1 ... 3))), "ALL 1:3", #line),
+            (.all(LastCommandSet.range(1 ... 3)), "ALL 1:3", #line),
             (.count(1), "COUNT 1", #line),
             (.modificationSequence(1), "MODSEQ 1", #line),
             (.partial(.first(23_500 ... 24_000), [67, 100 ... 102]), "PARTIAL (23500:24000 67,100:102)", #line),

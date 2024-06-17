@@ -13,28 +13,22 @@
 //===----------------------------------------------------------------------===//
 
 /// Provides support for using either the result of the last command (`.lastCommand`) or
-/// a concrete set type.
-public enum LastCommandSet<N: MessageIdentifier>: Hashable {
-    /// A specific set that will be sent to the IMAP server. E.g. `1, 2:5, 10:*`
-    case set(MessageIdentifierSetNonEmpty<N>)
+/// a concrete message identifier (UID or message sequence number).
+public enum LastCommandMessageID<N: MessageIdentifier>: Hashable {
+    /// A specific message identifier, e.g. the UID 54011.
+    case id(N)
 
-    /// Tells the server to use the result of the last command, described in RFC 5182.
+    /// `$`: Tells the server to use the result of the last command, described in RFC 5182.
     case lastCommand
 }
 
-extension LastCommandSet {
-    public static func range(_ range: MessageIdentifierRange<N>) -> Self {
-        .set(MessageIdentifierSetNonEmpty(range: range))
-    }
-}
-
 extension EncodeBuffer {
-    @discardableResult mutating func writeLastCommandSet<T>(_ set: LastCommandSet<T>) -> Int {
+    @discardableResult mutating func writeLastCommandMessageID<T>(_ set: LastCommandMessageID<T>) -> Int {
         switch set {
         case .lastCommand:
             return self.writeString("$")
-        case .set(let set):
-            return set.writeIntoBuffer(&self)
+        case .id(let num):
+            return writeMessageIdentifier(num)
         }
     }
 }

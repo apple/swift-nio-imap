@@ -669,7 +669,7 @@ extension GrammarParser {
         }
     }
 
-    func parseLastCommandSet<T: IMAPEncodable>(buffer: inout ParseBuffer, tracker: StackTracker, setParser: SubParser<T>) throws -> LastCommandSet<T> {
+    func parseLastCommandSet<T: MessageIdentifier>(buffer: inout ParseBuffer, tracker: StackTracker, setParser: SubParser<MessageIdentifierSetNonEmpty<T>>) throws -> LastCommandSet<T> {
         func parseLastCommandSet_lastCommand(buffer: inout ParseBuffer, tracker: StackTracker) throws -> LastCommandSet<T> {
             try PL.parseFixedString("$", buffer: &buffer, tracker: tracker)
             return .lastCommand
@@ -682,6 +682,24 @@ extension GrammarParser {
         return try PL.parseOneOf(
             parseLastCommandSet_lastCommand,
             parseLastCommandSet_set,
+            buffer: &buffer,
+            tracker: tracker
+        )
+    }
+
+    func parseLastCommandMessageID<T: MessageIdentifier>(buffer: inout ParseBuffer, tracker: StackTracker, setParser: SubParser<T>) throws -> LastCommandMessageID<T> {
+        func parseLastCommandMessageID_lastCommand(buffer: inout ParseBuffer, tracker: StackTracker) throws -> LastCommandMessageID<T> {
+            try PL.parseFixedString("$", buffer: &buffer, tracker: tracker)
+            return .lastCommand
+        }
+
+        func parseLastCommandMessageID_id(buffer: inout ParseBuffer, tracker: StackTracker) throws -> LastCommandMessageID<T> {
+            .id(try setParser(&buffer, tracker))
+        }
+
+        return try PL.parseOneOf(
+            parseLastCommandMessageID_lastCommand,
+            parseLastCommandMessageID_id,
             buffer: &buffer,
             tracker: tracker
         )

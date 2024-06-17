@@ -119,10 +119,13 @@ public indirect enum SearchKey: Hashable {
     case messageSizeSmaller(Int)
 
     /// RFC 3501: Messages with unique identifiers corresponding to the specified unique identifier set. Sequence set ranges are permitted.
-    case uid(LastCommandSet<MessageIdentifierSetNonEmpty<UID>>)
+    case uid(LastCommandSet<UID>)
+
+    case uidAfter(LastCommandMessageID<UID>)
+    case uidBefore(LastCommandMessageID<UID>)
 
     /// RFC 3501: Messages that match a given sequence set.
-    case sequenceNumbers(LastCommandSet<SequenceSet>)
+    case sequenceNumbers(LastCommandSet<SequenceNumber>)
 
     /// RFC 3501: Messages that match all of the given keys.
     case and([SearchKey])
@@ -171,6 +174,8 @@ extension SearchKey {
              .sentSince,
              .messageSizeSmaller,
              .uid,
+             .uidAfter,
+             .uidBefore,
              .sequenceNumbers,
              .older,
              .younger,
@@ -233,6 +238,8 @@ extension SearchKey {
              .sentSince,
              .messageSizeSmaller,
              .uid,
+             .uidAfter,
+             .uidBefore,
              .undraft,
              .sequenceNumbers,
              .older,
@@ -383,6 +390,16 @@ extension EncodeBuffer {
             return
                 self.writeString("UID ") +
                 self.writeLastCommandSet(set)
+
+        case .uidAfter(let uid):
+            return
+                self.writeString("UIDAFTER ") +
+                self.writeLastCommandMessageID(uid)
+
+        case .uidBefore(let uid):
+            return
+                self.writeString("UIDBEFORE ") +
+                self.writeLastCommandMessageID(uid)
 
         case .sequenceNumbers(let set):
             return self.writeLastCommandSet(set)

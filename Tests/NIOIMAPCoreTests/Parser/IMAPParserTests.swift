@@ -532,12 +532,11 @@ extension ParserUnitTests {
             validInputs: [
                 ("ACL", " ", .acl, #line),
                 ("ANNOTATE-EXPERIMENT-1", " ", .annotateExperiment1, #line),
-                ("AUTH=PTOKEN", " ", .authenticate(.pToken), #line),
                 ("AUTH=PLAIN", " ", .authenticate(.plain), #line),
+                ("AUTH=PTOKEN", " ", .authenticate(.pToken), #line),
                 ("AUTH=TOKEN", " ", .authenticate(.token), #line),
                 ("AUTH=WETOKEN", " ", .authenticate(.weToken), #line),
                 ("AUTH=WSTOKEN", " ", .authenticate(.wsToken), #line),
-                ("URLAUTH", " ", .authenticatedURL, #line),
                 ("BINARY", " ", .binary, #line),
                 ("CATENATE", " ", .catenate, #line),
                 ("CHILDREN", " ", .children, #line),
@@ -547,30 +546,32 @@ extension ParserUnitTests {
                 ("CONTEXT=SORT", " ", .context(.sort), #line),
                 ("CREATE-SPECIAL-USE", " ", .createSpecialUse, #line),
                 ("ENABLE", " ", .enable, #line),
-                ("ESORT", " ", .esort, #line),
                 ("ESEARCH", " ", .extendedSearch, #line),
+                ("ESORT", " ", .esort, #line),
                 ("FILTERS", " ", .filters, #line),
                 ("ID", " ", .id, #line),
                 ("IDLE", " ", .idle, #line),
                 ("LANGUAGE", " ", .language, #line),
                 ("LIST-STATUS", " ", .listStatus, #line),
-                ("LITERAL-", " ", .literalMinus, #line),
                 ("LITERAL+", " ", .literalPlus, #line),
+                ("LITERAL-", " ", .literalMinus, #line),
                 ("LOGIN-REFERRALS", " ", .loginReferrals, #line),
+                ("MESSAGELIMIT=68901", " ", .messageLimit(68_901), #line),
                 ("METADATA", " ", .metadata, #line),
                 ("METADATA-SERVER", " ", .metadataServer, #line),
                 ("MOVE", " ", .move, #line),
                 ("MULTISEARCH", " ", .multiSearch, #line),
                 ("NAMESPACE", " ", .namespace, #line),
                 ("PARTIAL", " ", .partial, #line),
-                ("URL-PARTIAL", " ", .partialURL, #line),
+                ("PREVIEW", " ", .preview, #line),
                 ("QRESYNC", " ", .qresync, #line),
                 ("QUOTA", " ", .quota, #line),
                 ("RIGHTS=TEKX", " ", .rights(.tekx), #line),
                 ("SASL-IR", " ", .saslIR, #line),
+                ("SAVELIMIT=64406", " ", .saveLimit(64_406), #line),
                 ("SEARCHRES", " ", .searchRes, #line),
-                ("SORT=DISPLAY", " ", .sort(.display), #line),
                 ("SORT", " ", .sort(nil), #line),
+                ("SORT=DISPLAY", " ", .sort(.display), #line),
                 ("SPECIAL-USE", " ", .specialUse, #line),
                 ("STATUS=SIZE", " ", .status(.size), #line),
                 ("THREAD=ORDEREDSUBJECT", " ", .thread(.orderedSubject), #line),
@@ -578,8 +579,12 @@ extension ParserUnitTests {
                 ("UIDONLY", " ", .uidOnly, #line),
                 ("UIDPLUS", " ", .uidPlus, #line),
                 ("UNSELECT", " ", .unselect, #line),
+                ("URL-PARTIAL", " ", .partialURL, #line),
+                ("URLAUTH", " ", .authenticatedURL, #line),
                 ("UTF8=ACCEPT", " ", .utf8(.accept), #line),
                 ("WITHIN", " ", .within, #line),
+                ("X-GM-EXT-1", " ", .gmailExtensions, #line),
+                ("XYMHIGHESTMODSEQ", " ", .yahooMailHighestModificationSequence, #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
@@ -795,7 +800,7 @@ extension ParserUnitTests {
     func testCopy_valid() {
         TestUtilities.withParseBuffer("COPY 1,2,3 inbox", terminator: " ") { (buffer) in
             let copy = try GrammarParser().parseCommand(buffer: &buffer, tracker: .testTracker)
-            let expectedSequence: LastCommandSet<SequenceSet> = LastCommandSet.set([1, 2, 3])
+            let expectedSequence: LastCommandSet<SequenceNumber> = LastCommandSet.set([1, 2, 3])
             let expectedMailbox = MailboxName.inbox
             XCTAssertEqual(copy, Command.copy(expectedSequence, expectedMailbox))
         }

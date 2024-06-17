@@ -58,6 +58,7 @@ extension Capability_Tests {
             (.esort, "ESORT", #line),
             (.extendedSearch, "ESEARCH", #line),
             (.filters, "FILTERS", #line),
+            (.gmailExtensions, "X-GM-EXT-1", #line),
             (.id, "ID", #line),
             (.idle, "IDLE", #line),
             (.language, "LANGUAGE", #line),
@@ -65,6 +66,7 @@ extension Capability_Tests {
             (.literalMinus, "LITERAL-", #line),
             (.literalPlus, "LITERAL+", #line),
             (.loginReferrals, "LOGIN-REFERRALS", #line),
+            (.messageLimit(1_234), "MESSAGELIMIT=1234", #line),
             (.metadata, "METADATA", #line),
             (.metadataServer, "METADATA-SERVER", #line),
             (.move, "MOVE", #line),
@@ -72,10 +74,12 @@ extension Capability_Tests {
             (.namespace, "NAMESPACE", #line),
             (.partial, "PARTIAL", #line),
             (.partialURL, "URL-PARTIAL", #line),
+            (.preview, "PREVIEW", #line),
             (.qresync, "QRESYNC", #line),
             (.quota, "QUOTA", #line),
             (.rights(.tekx), "RIGHTS=TEKX", #line),
             (.saslIR, "SASL-IR", #line),
+            (.saveLimit(64_152), "SAVELIMIT=64152", #line),
             (.searchRes, "SEARCHRES", #line),
             (.sort(.display), "SORT=DISPLAY", #line),
             (.sort(nil), "SORT", #line),
@@ -88,7 +92,7 @@ extension Capability_Tests {
             (.unselect, "UNSELECT", #line),
             (.utf8(.accept), "UTF8=ACCEPT", #line),
             (.within, "WITHIN", #line),
-            (.preview, "PREVIEW", #line),
+            (.yahooMailHighestModificationSequence, "XYMHIGHESTMODSEQ", #line),
         ]
 
         for (capability, expectedString, line) in tests {

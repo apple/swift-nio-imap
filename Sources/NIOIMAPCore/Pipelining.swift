@@ -506,6 +506,8 @@ extension SearchKey {
              .sentOn,
              .sentSince,
              .uid,
+             .uidAfter,
+             .uidBefore,
              .undraft,
              .younger:
             return false
@@ -561,7 +563,9 @@ extension SearchKey {
              .younger:
             return false
         case .filter, // Have to assume yes, since we can't know
-             .uid:
+             .uid,
+             .uidAfter,
+             .uidBefore:
             return true
         case .and(let keys):
             return keys.contains(where: \.referencesUIDs)
@@ -597,6 +601,8 @@ extension SearchKey {
              .sentOn,
              .sentSince,
              .uid,
+             .uidAfter,
+             .uidBefore,
              .younger:
             return false
         case .answered,

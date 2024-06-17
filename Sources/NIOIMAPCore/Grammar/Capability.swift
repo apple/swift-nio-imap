@@ -357,8 +357,23 @@ extension Capability {
     public static let preview = Self(unchecked: "PREVIEW")
 
     /// RFC 9586 UIDONLY
+    ///
     /// Message numbers are not returned in responses and cannot be used in requests once this extension is enabled.
     public static let uidOnly = Self(unchecked: "UIDONLY")
+
+    /// MESSAGELIMIT
+    ///
+    /// Allows servers to announce a limit on the number of messages that can be processed in a single command.
+    public static func messageLimit(_ count: Int) -> Self {
+        Self("MESSAGELIMIT=\(count)")
+    }
+
+    /// SAVELIMIT
+    ///
+    /// Allows servers to announce a limit on the number of messages that can be processed in a single command.
+    public static func saveLimit(_ count: Int) -> Self {
+        Self("SAVELIMIT=\(count)")
+    }
 
     /// Creates a new *AUTH* capability.
     /// - parameter type: The `AuthenticationMechanism`.

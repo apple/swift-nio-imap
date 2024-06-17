@@ -79,12 +79,12 @@ extension GrammarParser {
             return MessageIdentifierSet()
         }
         func parseSearchReturnData_partial_set(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageIdentifierSet<UnknownMessageIdentifier> {
-            let set: LastCommandSet<MessageIdentifierSet<UnknownMessageIdentifier>>
+            let set: LastCommandSet<UnknownMessageIdentifier>
             set = try parseMessageIdentifierSet(buffer: &buffer, tracker: tracker)
             guard case .set(let result) = set else {
                 throw ParserError(hint: "PARTIAL set invalid")
             }
-            return result
+            return result.set
         }
 
         try PL.parseFixedString("PARTIAL", buffer: &buffer, tracker: tracker)

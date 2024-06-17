@@ -23,7 +23,7 @@ public enum SearchReturnData: Hashable {
     case max(UnknownMessageIdentifier)
 
     /// Return all message numbers/UIDs that satisfy the SEARCH criteria.
-    case all(LastCommandSet<MessageIdentifierSet<UnknownMessageIdentifier>>)
+    case all(LastCommandSet<UnknownMessageIdentifier>)
 
     /// Return number of the messages that satisfy the SEARCH criteria.
     case count(Int)
