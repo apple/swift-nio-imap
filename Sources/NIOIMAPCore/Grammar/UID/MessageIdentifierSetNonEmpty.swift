@@ -63,7 +63,6 @@ extension MessageIdentifierSetNonEmpty: ExpressibleByArrayLiteral {
 
 // MARK: - Unknown
 
-
 extension MessageIdentifierSetNonEmpty<UnknownMessageIdentifier> {
     init<A: MessageIdentifier>(_ other: MessageIdentifierSetNonEmpty<A>) {
         self.init(set: MessageIdentifierSet<IdentifierType>(other.set))!
