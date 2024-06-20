@@ -82,9 +82,9 @@ extension ExtendedSearchResponse {
     }
 
     private var _matchedIdentifierSet: MessageIdentifierSet<UnknownMessageIdentifier> {
-        returnData.lazy.compactMap {
-            guard case .all(.set(let set)) = $0 else { return nil }
-            return set
+        returnData.lazy.compactMap { data -> MessageIdentifierSet<UnknownMessageIdentifier>? in
+            guard case .all(.set(let set)) = data else { return nil }
+            return set.set
         }.first ??
             returnData.lazy.compactMap {
                 guard case .partial(_, let set) = $0 else { return nil }

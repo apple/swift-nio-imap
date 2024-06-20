@@ -17,17 +17,17 @@
 /// Recommended reading RFC 7162 § 3.2.5.2
 public struct SequenceMatchData: Hashable {
     /// Set of message numbers corresponding to the UIDs in known-uid-set, in ascending order. * is not allowed.
-    public var knownSequenceSet: LastCommandSet<MessageIdentifierSetNonEmpty<UID>>
+    public var knownSequenceSet: LastCommandSet<UID>
 
     /// Set of UIDs corresponding to the messages in known-sequence-set, in ascending order. * is not allowed.
-    public var knownUidSet: LastCommandSet<MessageIdentifierSetNonEmpty<UID>>
+    public var knownUidSet: LastCommandSet<UID>
 
     // TODO: Enforce ascneding order.
     /// Creates a new `SequenceMatchData`. Note that both `knownSequenceSet` and `knownUidSet`
     /// should be provided in ascending order, though this is not currently enforced.
     /// - parameter knownSequenceSet: Set of message numbers corresponding to the UIDs in known-uid-set, in ascending order. * is not allowed.
     /// - parameter knownUidSet: Set of UIDs corresponding to the messages in known-sequence-set, in ascending order. * is not allowed.
-    public init(knownSequenceSet: LastCommandSet<MessageIdentifierSetNonEmpty<UID>>, knownUidSet: LastCommandSet<MessageIdentifierSetNonEmpty<UID>>) {
+    public init(knownSequenceSet: LastCommandSet<UID>, knownUidSet: LastCommandSet<UID>) {
         self.knownSequenceSet = knownSequenceSet
         self.knownUidSet = knownUidSet
     }

@@ -84,7 +84,7 @@ extension GrammarParser {
     // And from RFC 5182
     // sequence-set       =/ seq-last-command
     // seq-last-command   = "$"
-    func parseMessageIdentifierSet<T: MessageIdentifier>(buffer: inout ParseBuffer, tracker: StackTracker) throws -> LastCommandSet<MessageIdentifierSet<T>> {
+    func parseMessageIdentifierSet<T: MessageIdentifier>(buffer: inout ParseBuffer, tracker: StackTracker) throws -> LastCommandSet<T> {
         func parseMessageIdentifierSet_number(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageIdentifierRange<T> {
             MessageIdentifierRange<T>(try self.parseMessageIdentifier(buffer: &buffer, tracker: tracker))
         }
@@ -98,21 +98,22 @@ extension GrammarParser {
             )
         }
 
-        func parseMessageIdentifierSet_base(buffer: inout ParseBuffer, tracker: StackTracker) throws -> LastCommandSet<MessageIdentifierSet<T>> {
+        func parseMessageIdentifierSet_base(buffer: inout ParseBuffer, tracker: StackTracker) throws -> LastCommandSet<T> {
             try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
                 var output: [MessageIdentifierRange<T>] = [try parseMessageIdentifierSet_element(buffer: &buffer, tracker: tracker)]
                 try PL.parseZeroOrMore(buffer: &buffer, into: &output, tracker: tracker) { buffer, tracker in
                     try PL.parseFixedString(",", buffer: &buffer, tracker: tracker)
                     return try parseMessageIdentifierSet_element(buffer: &buffer, tracker: tracker)
                 }
-                guard !output.isEmpty else {
+                let set = MessageIdentifierSet(output)
+                guard let nonEmpty = MessageIdentifierSetNonEmpty(set: set) else {
                     throw ParserError(hint: "Sequence set is empty.")
                 }
-                return .set(.init(output))
+                return .set(nonEmpty)
             }
         }
 
-        func parseMessageIdentifierSet_lastCommand(buffer: inout ParseBuffer, tracker: StackTracker) throws -> LastCommandSet<MessageIdentifierSet<T>> {
+        func parseMessageIdentifierSet_lastCommand(buffer: inout ParseBuffer, tracker: StackTracker) throws -> LastCommandSet<T> {
             try PL.parseFixedString("$", buffer: &buffer, tracker: tracker)
             return .lastCommand
         }

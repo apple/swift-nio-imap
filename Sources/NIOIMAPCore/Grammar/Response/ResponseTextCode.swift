@@ -142,7 +142,7 @@ public indirect enum ResponseTextCode: Hashable {
 
     /// Used with an OK response to the STORE command.  (It can also be used in a NO
     /// response.)
-    case modified(LastCommandSet<MessageIdentifierSet<UnknownMessageIdentifier>>)
+    case modified(LastCommandSet<UnknownMessageIdentifier>)
 
     /// A server supporting the persistent storage of mod-sequences for the mailbox
     /// MUST send the OK untagged response including HIGHESTMODSEQ response
@@ -273,11 +273,11 @@ public indirect enum ResponseTextCode: Hashable {
 }
 
 extension ResponseTextCode {
-    public static func modified(_ set: MessageIdentifierSet<UID>) -> Self {
+    public static func modified(_ set: UIDSetNonEmpty) -> Self {
         .modified(.set(.init(set)))
     }
 
-    public static func modified(_ set: MessageIdentifierSet<SequenceNumber>) -> Self {
+    public static func modified(_ set: MessageIdentifierSetNonEmpty<SequenceNumber>) -> Self {
         .modified(.set(.init(set)))
     }
 }

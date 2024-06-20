@@ -61,6 +61,20 @@ extension MessageIdentifierSetNonEmpty: ExpressibleByArrayLiteral {
     }
 }
 
+// MARK: - Unknown
+
+extension MessageIdentifierSetNonEmpty<UnknownMessageIdentifier> {
+    init<A: MessageIdentifier>(_ other: MessageIdentifierSetNonEmpty<A>) {
+        self.init(set: MessageIdentifierSet<IdentifierType>(other.set))!
+    }
+}
+
+extension MessageIdentifierSetNonEmpty {
+    init(unknown other: MessageIdentifierSetNonEmpty<UnknownMessageIdentifier>) {
+        self.init(set: MessageIdentifierSet<IdentifierType>(unknown: other.set))!
+    }
+}
+
 // MARK: - Min Max
 
 extension MessageIdentifierSetNonEmpty {
@@ -85,7 +99,7 @@ extension MessageIdentifierSetNonEmpty {
 
 // MARK: - Encoding
 
-extension MessageIdentifierSetNonEmpty: IMAPEncodable {
+extension MessageIdentifierSetNonEmpty {
     @_spi(NIOIMAPInternal) public func writeIntoBuffer(_ buffer: inout EncodeBuffer) -> Int {
         self.set.writeIntoBuffer(&buffer)
     }

@@ -94,13 +94,13 @@ public enum Command: Hashable {
     case idleStart
 
     /// Copies each message in a given set to a new mailbox, preserving the original in the current mailbox.
-    case copy(LastCommandSet<SequenceSet>, MailboxName)
+    case copy(LastCommandSet<SequenceNumber>, MailboxName)
 
     /// Fetches an array of specified attributes for each message in a given set.
-    case fetch(LastCommandSet<SequenceSet>, [FetchAttribute], [FetchModifier])
+    case fetch(LastCommandSet<SequenceNumber>, [FetchAttribute], [FetchModifier])
 
     /// Alters data associated with a message, typically returning the new data as an untagged fetch response.
-    case store(LastCommandSet<SequenceSet>, [StoreModifier], StoreData)
+    case store(LastCommandSet<SequenceNumber>, [StoreModifier], StoreData)
 
     /// Searches the currently-selected mailbox for messages that match the search criteria.
     ///
@@ -114,7 +114,7 @@ public enum Command: Hashable {
     case search(key: SearchKey, charset: String? = nil, returnOptions: [SearchReturnOption] = [])
 
     /// Moves each message in a given set into a new mailbox, removing the copy from the current mailbox.
-    case move(LastCommandSet<SequenceSet>, MailboxName)
+    case move(LastCommandSet<SequenceNumber>, MailboxName)
 
     /// Identifies the client to the server
     case id(OrderedDictionary<String, String?>)
@@ -123,22 +123,22 @@ public enum Command: Hashable {
     case namespace
 
     /// Similar to `.copy`, but uses unique identifier instead of sequence numbers to identify messages.
-    case uidCopy(LastCommandSet<MessageIdentifierSetNonEmpty<UID>>, MailboxName)
+    case uidCopy(LastCommandSet<UID>, MailboxName)
 
     /// Similar to `.move`, but uses unique identifier instead of sequence numbers to identify messages.
-    case uidMove(LastCommandSet<MessageIdentifierSetNonEmpty<UID>>, MailboxName)
+    case uidMove(LastCommandSet<UID>, MailboxName)
 
     /// Similar to `.fetch`, but uses unique identifier instead of sequence numbers to identify messages.
-    case uidFetch(LastCommandSet<MessageIdentifierSetNonEmpty<UID>>, [FetchAttribute], [FetchModifier])
+    case uidFetch(LastCommandSet<UID>, [FetchAttribute], [FetchModifier])
 
     /// Similar to `.search`, but uses unique identifier instead of sequence numbers to identify messages.
     case uidSearch(key: SearchKey, charset: String? = nil, returnOptions: [SearchReturnOption] = [])
 
     /// Similar to `.store`, but uses unique identifier instead of sequence numbers to identify messages.
-    case uidStore(LastCommandSet<MessageIdentifierSetNonEmpty<UID>>, [StoreModifier], StoreData)
+    case uidStore(LastCommandSet<UID>, [StoreModifier], StoreData)
 
     /// Similar to `.expunge`, but uses unique identifier instead of sequence numbers to identify messages.
-    case uidExpunge(LastCommandSet<MessageIdentifierSetNonEmpty<UID>>)
+    case uidExpunge(LastCommandSet<UID>)
 
     /// Takes the name of a quota root and returns the quota root's resource usage and limits.
     case getQuota(QuotaRoot)
@@ -502,7 +502,7 @@ extension CommandEncodeBuffer {
         self.buffer.writeString("EXPUNGE")
     }
 
-    private mutating func writeCommandKind_uidExpunge(_ set: LastCommandSet<MessageIdentifierSetNonEmpty<UID>>) -> Int {
+    private mutating func writeCommandKind_uidExpunge(_ set: LastCommandSet<UID>) -> Int {
         self.buffer.writeString("EXPUNGE ") +
             self.buffer.writeLastCommandSet(set)
     }
@@ -526,21 +526,21 @@ extension CommandEncodeBuffer {
             }
     }
 
-    private mutating func writeCommandKind_copy(set: LastCommandSet<SequenceSet>, mailbox: MailboxName) -> Int {
+    private mutating func writeCommandKind_copy(set: LastCommandSet<SequenceNumber>, mailbox: MailboxName) -> Int {
         self.buffer.writeString("COPY ") +
             self.buffer.writeLastCommandSet(set) +
             self.buffer.writeSpace() +
             self.buffer.writeMailbox(mailbox)
     }
 
-    private mutating func writeCommandKind_uidCopy(set: LastCommandSet<MessageIdentifierSetNonEmpty<UID>>, mailbox: MailboxName) -> Int {
+    private mutating func writeCommandKind_uidCopy(set: LastCommandSet<UID>, mailbox: MailboxName) -> Int {
         self.buffer.writeString("UID COPY ") +
             self.buffer.writeLastCommandSet(set) +
             self.buffer.writeSpace() +
             self.buffer.writeMailbox(mailbox)
     }
 
-    private mutating func writeCommandKind_fetch(set: LastCommandSet<SequenceSet>, atts: [FetchAttribute], modifiers: [FetchModifier]) -> Int {
+    private mutating func writeCommandKind_fetch(set: LastCommandSet<SequenceNumber>, atts: [FetchAttribute], modifiers: [FetchModifier]) -> Int {
         self.buffer.writeString("FETCH ") +
             self.buffer.writeLastCommandSet(set) +
             self.buffer.writeSpace() +
@@ -548,7 +548,7 @@ extension CommandEncodeBuffer {
             self.buffer.writeFetchModifiers(modifiers)
     }
 
-    private mutating func writeCommandKind_uidFetch(set: LastCommandSet<MessageIdentifierSetNonEmpty<UID>>, atts: [FetchAttribute], modifiers: [FetchModifier]) -> Int {
+    private mutating func writeCommandKind_uidFetch(set: LastCommandSet<UID>, atts: [FetchAttribute], modifiers: [FetchModifier]) -> Int {
         self.buffer.writeString("UID FETCH ") +
             self.buffer.writeLastCommandSet(set) +
             self.buffer.writeSpace() +
@@ -556,7 +556,7 @@ extension CommandEncodeBuffer {
             self.buffer.writeFetchModifiers(modifiers)
     }
 
-    private mutating func writeCommandKind_store(set: LastCommandSet<SequenceSet>, modifiers: [StoreModifier], data: StoreData) -> Int {
+    private mutating func writeCommandKind_store(set: LastCommandSet<SequenceNumber>, modifiers: [StoreModifier], data: StoreData) -> Int {
         self.buffer.writeString("STORE ") +
             self.buffer.writeLastCommandSet(set) +
             self.buffer.write(if: modifiers.count >= 1) {
@@ -569,7 +569,7 @@ extension CommandEncodeBuffer {
             self.buffer.writeStoreData(data)
     }
 
-    private mutating func writeCommandKind_uidStore(set: LastCommandSet<MessageIdentifierSetNonEmpty<UID>>, modifiers: [StoreModifier], data: StoreData) -> Int {
+    private mutating func writeCommandKind_uidStore(set: LastCommandSet<UID>, modifiers: [StoreModifier], data: StoreData) -> Int {
         self.buffer.writeString("UID STORE ") +
             self.buffer.writeLastCommandSet(set) +
             self.buffer.write(if: modifiers.count >= 1) {
@@ -598,14 +598,14 @@ extension CommandEncodeBuffer {
             self.writeCommandKind_search(key: key, charset: charset, returnOptions: returnOptions)
     }
 
-    private mutating func writeCommandKind_move(set: LastCommandSet<SequenceSet>, mailbox: MailboxName) -> Int {
+    private mutating func writeCommandKind_move(set: LastCommandSet<SequenceNumber>, mailbox: MailboxName) -> Int {
         self.buffer.writeString("MOVE ") +
             self.buffer.writeLastCommandSet(set) +
             self.buffer.writeSpace() +
             self.buffer.writeMailbox(mailbox)
     }
 
-    private mutating func writeCommandKind_uidMove(set: LastCommandSet<MessageIdentifierSetNonEmpty<UID>>, mailbox: MailboxName) -> Int {
+    private mutating func writeCommandKind_uidMove(set: LastCommandSet<UID>, mailbox: MailboxName) -> Int {
         self.buffer.writeString("UID MOVE ") +
             self.buffer.writeLastCommandSet(set) +
             self.buffer.writeSpace() +

@@ -17,7 +17,7 @@ import struct NIO.ByteBuffer
 /// Implemented as a catch-all to support types defined in future extensions.
 public enum ParameterValue: Hashable {
     /// Specifies a `SequenceSet` as the value.
-    case sequence(LastCommandSet<SequenceSet>)
+    case sequence(LastCommandSet<SequenceNumber>)
 
     /// Uses an array of `String` as the value.
     case comp([String])
