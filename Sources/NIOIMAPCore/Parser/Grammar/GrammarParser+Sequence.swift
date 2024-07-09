@@ -81,10 +81,7 @@ extension GrammarParser {
     }
 
     // sequence-set    = (seq-number / seq-range) ["," sequence-set]
-    // And from RFC 5182
-    // sequence-set       =/ seq-last-command
-    // seq-last-command   = "$"
-    func parseMessageIdentifierSetOrLast<T: MessageIdentifier>(buffer: inout ParseBuffer, tracker: StackTracker) throws -> LastCommandSet<T> {
+    func parseMessageIdentifierSet<T: MessageIdentifier>(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageIdentifierSetNonEmpty<T> {
         func parseMessageIdentifierSet_number(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageIdentifierRange<T> {
             MessageIdentifierRange<T>(try self.parseMessageIdentifier(buffer: &buffer, tracker: tracker))
         }
@@ -98,19 +95,25 @@ extension GrammarParser {
             )
         }
 
+        var output: [MessageIdentifierRange<T>] = [try parseMessageIdentifierSet_element(buffer: &buffer, tracker: tracker)]
+        try PL.parseZeroOrMore(buffer: &buffer, into: &output, tracker: tracker) { buffer, tracker in
+            try PL.parseFixedString(",", buffer: &buffer, tracker: tracker)
+            return try parseMessageIdentifierSet_element(buffer: &buffer, tracker: tracker)
+        }
+        let set = MessageIdentifierSet(output)
+        guard let nonEmpty = MessageIdentifierSetNonEmpty(set: set) else {
+            throw ParserError(hint: "Sequence set is empty.")
+        }
+        return nonEmpty
+    }
+
+    // sequence-set    = (seq-number / seq-range) ["," sequence-set]
+    // And from RFC 5182
+    // sequence-set       =/ seq-last-command
+    // seq-last-command   = "$"
+    func parseMessageIdentifierSetOrLast<T: MessageIdentifier>(buffer: inout ParseBuffer, tracker: StackTracker) throws -> LastCommandSet<T> {
         func parseMessageIdentifierSet_base(buffer: inout ParseBuffer, tracker: StackTracker) throws -> LastCommandSet<T> {
-            try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
-                var output: [MessageIdentifierRange<T>] = [try parseMessageIdentifierSet_element(buffer: &buffer, tracker: tracker)]
-                try PL.parseZeroOrMore(buffer: &buffer, into: &output, tracker: tracker) { buffer, tracker in
-                    try PL.parseFixedString(",", buffer: &buffer, tracker: tracker)
-                    return try parseMessageIdentifierSet_element(buffer: &buffer, tracker: tracker)
-                }
-                let set = MessageIdentifierSet(output)
-                guard let nonEmpty = MessageIdentifierSetNonEmpty(set: set) else {
-                    throw ParserError(hint: "Sequence set is empty.")
-                }
-                return .set(nonEmpty)
-            }
+            return .set(try self.parseMessageIdentifierSet(buffer: &buffer, tracker: tracker))
         }
 
         func parseMessageIdentifierSet_lastCommand(buffer: inout ParseBuffer, tracker: StackTracker) throws -> LastCommandSet<T> {
