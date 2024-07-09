@@ -436,7 +436,7 @@ extension GrammarParser {
 
         func parseSearchReturnData_partial(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SearchReturnData {
             func parseSearchReturnData_partial_set(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageIdentifierSet<UnknownMessageIdentifier> {
-                return try self.parseMessageIdentifierSet(buffer: &buffer, tracker: tracker).set
+                try self.parseMessageIdentifierSet(buffer: &buffer, tracker: tracker).set
             }
 
             func parseSearchReturnData_partial_nil(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageIdentifierSet<UnknownMessageIdentifier> {

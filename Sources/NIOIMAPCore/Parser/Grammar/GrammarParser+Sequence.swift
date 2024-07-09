@@ -113,7 +113,7 @@ extension GrammarParser {
     // seq-last-command   = "$"
     func parseMessageIdentifierSetOrLast<T: MessageIdentifier>(buffer: inout ParseBuffer, tracker: StackTracker) throws -> LastCommandSet<T> {
         func parseMessageIdentifierSet_base(buffer: inout ParseBuffer, tracker: StackTracker) throws -> LastCommandSet<T> {
-            return .set(try self.parseMessageIdentifierSet(buffer: &buffer, tracker: tracker))
+            .set(try self.parseMessageIdentifierSet(buffer: &buffer, tracker: tracker))
         }
 
         func parseMessageIdentifierSet_lastCommand(buffer: inout ParseBuffer, tracker: StackTracker) throws -> LastCommandSet<T> {
