@@ -84,7 +84,7 @@ extension GrammarParser {
     // And from RFC 5182
     // sequence-set       =/ seq-last-command
     // seq-last-command   = "$"
-    func parseMessageIdentifierSet<T: MessageIdentifier>(buffer: inout ParseBuffer, tracker: StackTracker) throws -> LastCommandSet<T> {
+    func parseMessageIdentifierSetOrLast<T: MessageIdentifier>(buffer: inout ParseBuffer, tracker: StackTracker) throws -> LastCommandSet<T> {
         func parseMessageIdentifierSet_number(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageIdentifierRange<T> {
             MessageIdentifierRange<T>(try self.parseMessageIdentifier(buffer: &buffer, tracker: tracker))
         }
