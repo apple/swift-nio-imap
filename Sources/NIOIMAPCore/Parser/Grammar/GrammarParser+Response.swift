@@ -201,7 +201,7 @@ extension GrammarParser {
     func parseResponseTextCode(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
         func parseSuffix_modified(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-            return .modified(try self.parseMessageIdentifierSet(buffer: &buffer, tracker: tracker))
+            return .modified(try self.parseMessageIdentifierSetOrLast(buffer: &buffer, tracker: tracker))
         }
 
         func parseSuffix_highestModifiedSequence(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
