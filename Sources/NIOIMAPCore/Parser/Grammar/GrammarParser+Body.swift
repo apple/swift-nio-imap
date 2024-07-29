@@ -32,13 +32,10 @@ extension GrammarParser {
 
         do {
             return try .valid(self.parseBody(buffer: &buffer, tracker: tracker))
-        } catch let originalError {
-            // Re-try parsing as an invalid body response:
-            do {
-                return try parseInvalidBody(buffer: &buffer, tracker: tracker)
-            } catch {
-                throw originalError
-            }
+        } catch {
+            // Re-try parsing as an invalid body response.
+            // This may throw either IncompleteMessage or a “real” parse error.
+            return try parseInvalidBody(buffer: &buffer, tracker: tracker)
         }
     }
 
@@ -98,7 +95,8 @@ extension GrammarParser {
                     byteCount += try PL.parseZeroOrMoreCharacters(buffer: &buffer, tracker: tracker, where: {
                         $0 != 0x7B && $0 != 0x28 && $0 != 0x29 && $0 != 0x22
                     }).readableBytes + 1
-                    switch try PL.parseByte(buffer: &buffer, tracker: tracker) {
+                    let byte = try PL.parseByte(buffer: &buffer, tracker: tracker)
+                    switch byte {
                     case 0x7B:
                         let literalCount: Int
                         do {
@@ -119,7 +117,7 @@ extension GrammarParser {
                     case 0x22:
                         state = .quoted
                     default:
-                        throw ParserError(hint: "Unexpected byte in body structure")
+                        throw ParserError(hint: "Unexpected byte \(byte) in body structure")
                     }
                 case .quoted:
                     // Skip anything except for
@@ -128,14 +126,15 @@ extension GrammarParser {
                     byteCount += try PL.parseZeroOrMoreCharacters(buffer: &buffer, tracker: tracker, where: {
                         $0 != 0x5C && $0 != 0x22
                     }).readableBytes + 1
-                    switch try PL.parseByte(buffer: &buffer, tracker: tracker) {
+                    let byte = try PL.parseByte(buffer: &buffer, tracker: tracker)
+                    switch byte {
                     case 0x5C:
                         _ = try PL.parseByte(buffer: &buffer, tracker: tracker)
                         byteCount += 1
                     case 0x22:
                         state = .normal
                     default:
-                        throw ParserError(hint: "Unexpected byte in body structure")
+                        throw ParserError(hint: "Unexpected byte \(byte) inside quoted in body structure")
                     }
                 }
             }
