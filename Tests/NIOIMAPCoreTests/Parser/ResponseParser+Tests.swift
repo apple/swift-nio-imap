@@ -276,6 +276,29 @@ extension ResponseParser_Tests {
         }
     }
 
+    func testParseIncompleteInvalidBodyStructure() {
+        //
+        // When parsing an incomplete buffer, parseInvalidBody() will throw an
+        // IncompleteMessage error. This needs to _not_ fail the parsing, but instead
+        // bubble up to parseResponseStream() which will then wait for more data.
+        //
+        var buffer = ByteBuffer(string: #"""
+        * 61785 FETCH (UID 127139 BODYSTRUCTURE (("TEXT" "PLAIN" ("CHARSET" "utf-8") NIL NIL "QUOTED-PRINTABLE" 71399 1519 NIL NIL NIL NIL)(("TEXT" "HTML" ("CHARSET" "utf-8") NIL NIL "QUOTED-PRINTABLE" 659725 9831 NIL NIL NIL NIL)("IMAGE" "PNG" ("X-UNIX-MODE" "0666" "NAME" "H9eubHenuyTiQAAAABJRU5ErkJggg==.png") "<5079C210-D42C-49F4-A942-2BA779C88A96>" NIL "BASE64" 104028 NIL ("INLINE" ("FILENAME" "H9eubHenuyTiQAAAABJRU5ErkJggg==.png")) NIL NIL)("IMAGE" "PNG" ("X-UNIX-MODE" "0666" "NAME" "IAEJCABCUhAAhKQgAQkIAEJSEACEpCABCQgAQlIQAISkIAEJNAKAQMdW8HsSSQgAQlIQAISkIAEJCABCUhAAhKQgAQkIAEJSEACEpCABCQgAQlIQAISkIAEJCABCUhAA") "<23E8CC74-836D-4B45-8B1E-1CF023182729>" NIL "BASE64" 55168 NIL ("INLINE" ("FILENAME" {4138}\#r\#naaaaaaaa
+        """#)
+        var parser = ResponseParser()
+        XCTAssertEqual(try { () -> [ResponseOrContinuationRequest] in
+            var results: [ResponseOrContinuationRequest] = []
+            while buffer.readableBytes > 0 {
+                guard let resp = try parser.parseResponseStream(buffer: &buffer) else { break }
+                results.append(resp)
+            }
+            return results
+        }(), [
+            .response(.fetch(.start(617_85))),
+            .response(.fetch(.simpleAttribute(.uid(127_139)))),
+        ])
+    }
+
     func testAttributeLimit_failOnStreaming() {
         var parser = ResponseParser(bufferLimit: 1000, messageAttributeLimit: 3)
         var buffer: ByteBuffer = "* 999 FETCH (FLAGS (\\Seen) UID 1 RFC822.SIZE 123 RFC822.TEXT {3}\r\n "
