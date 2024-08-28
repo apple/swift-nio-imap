@@ -29,3 +29,5 @@ public struct KeyValue<Key: Hashable, Value: Hashable>: Hashable {
         self.value = value
     }
 }
+
+extension KeyValue: Sendable where Key: Sendable, Value: Sendable {}

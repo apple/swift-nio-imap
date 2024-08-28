@@ -15,7 +15,7 @@
 import NIO
 
 /// Used in the `.getMetadata` and `.setMetadata` commands.
-public struct MetadataEntryName: Hashable {
+public struct MetadataEntryName: Hashable, Sendable {
     fileprivate var backing: ByteBuffer
 
     /// Creates a `MetadataEntryName` from a `ByteBuffer`.

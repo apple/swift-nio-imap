@@ -36,7 +36,7 @@
 ///     inter-dependencies. But by being a bit more smart, certain commands can be allowed
 ///     to run in parallel. It’s ok for this logic not to be perfect as long as it errs on the
 ///     side of caution.
-public enum PipeliningRequirement: Hashable {
+public enum PipeliningRequirement: Hashable, Sendable {
     /// No command that depend on the _Selected State_ must be running.
     case noMailboxCommandsRunning
     /// No command besides `FETCH`, `STORE`, and `SEARCH` is running.
@@ -64,7 +64,7 @@ extension PipeliningRequirement {
 /// Describes the behavior of a running command.
 ///
 /// See `PipeliningRequirement`.
-public enum PipeliningBehavior: Hashable {
+public enum PipeliningBehavior: Hashable, Sendable {
     /// This command changes the _mailbox selection_.
     case changesMailboxSelection
     /// This command depends on the _mailbox selection_.

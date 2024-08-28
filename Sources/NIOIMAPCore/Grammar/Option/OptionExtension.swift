@@ -15,7 +15,7 @@
 import struct NIO.ByteBuffer
 
 /// Specifies the type of `OptionExtension`
-public enum OptionExtensionKind: Hashable {
+public enum OptionExtensionKind: Hashable, Sendable {
     /// A simple string-based value.
     case standard(String)
 

@@ -13,7 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 /// Can be used as a direct path to a specific message section and part.
-public struct MessagePath: Hashable {
+public struct MessagePath: Hashable, Sendable {
     /// Connection details for a server and a specific mailbox hosted on that server.
     public var mailboxReference: MailboxUIDValidity
 

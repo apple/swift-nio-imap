@@ -15,7 +15,7 @@
 import struct NIO.ByteBuffer
 
 /// A wrapper for an option value.
-public enum OptionValueComp: Hashable {
+public enum OptionValueComp: Hashable, Sendable {
     /// A single value
     case string(ByteBuffer)
 

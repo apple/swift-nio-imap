@@ -471,7 +471,7 @@ class IMAPClientHandlerTests: XCTestCase {
 //        self.writeOutbound(.command(.init(tag: "A2", command: .noop)), wait: true)
 //    }
 
-    func testWriteCascadesPromiseFailure() {
+    func testWriteCascadesPromiseFailure() async {
         struct TestError: Error {}
         class TestOutboundHandlerThatFails: ChannelOutboundHandler {
             typealias OutboundIn = ByteBuffer
@@ -481,15 +481,15 @@ class IMAPClientHandlerTests: XCTestCase {
             }
         }
 
-        try! self.channel.pipeline.addHandler(TestOutboundHandlerThatFails(), position: .first).wait()
+        try! await self.channel.pipeline.addHandler(TestOutboundHandlerThatFails(), position: .first).get()
 
         // writing a command that has a continuation
-        var didComplete = false
+        let didComplete = expectation(description: "did write data")
         self.writeOutbound(.tagged(.init(tag: "A1", command: .create(.init("\\"), []))), wait: false).whenFailure { error in
             XCTAssertTrue(error is TestError)
-            didComplete = true
+            didComplete.fulfill()
         }
-        XCTAssertTrue(didComplete)
+        await fulfillment(of: [didComplete])
     }
 
     func testWriteCascadesContinuationPromiseFailure() {
@@ -517,12 +517,12 @@ class IMAPClientHandlerTests: XCTestCase {
         testHandler.failNextWrite = true
         self.writeInbound("+ OK\r\n")
 
-        var didComplete = false
+        let didComplete = expectation(description: "did write data")
         future.whenFailure { error in
             XCTAssertTrue(error is TestError)
-            didComplete = true
+            didComplete.fulfill()
         }
-        XCTAssertTrue(didComplete)
+        wait(for: [didComplete])
     }
 
     func testAppendWaitsForContinuation() {

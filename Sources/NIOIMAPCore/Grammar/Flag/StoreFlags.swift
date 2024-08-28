@@ -15,7 +15,7 @@
 import struct NIO.ByteBuffer
 
 /// What operation to perform on the flags.
-public enum StoreOperation: String, Hashable {
+public enum StoreOperation: String, Hashable, Sendable {
     /// Add to the flags for the message.
     case add = "+"
 
@@ -26,12 +26,12 @@ public enum StoreOperation: String, Hashable {
     case replace = ""
 }
 
-public enum StoreData: Hashable {
+public enum StoreData: Hashable, Sendable {
     case flags(StoreFlags)
     case gmailLabels(StoreGmailLabels)
 }
 
-public struct StoreGmailLabels: Hashable {
+public struct StoreGmailLabels: Hashable, Sendable {
     /// Convenience function to create a new *add* operation.
     /// - parameter silent: `false` if the server should return the new flags list for the message(s), otherwise `true`.
     /// - parameter list: The `Flag`s to add.
@@ -67,7 +67,7 @@ public struct StoreGmailLabels: Hashable {
 }
 
 /// Defines if certain flags should be added, removed, or replaced.
-public struct StoreFlags: Hashable {
+public struct StoreFlags: Hashable, Sendable {
     /// Convenience function to create a new *add* operation.
     /// - parameter silent: `false` if the server should return the new flags list for the message(s), otherwise `true`.
     /// - parameter list: The `Flag`s to add.

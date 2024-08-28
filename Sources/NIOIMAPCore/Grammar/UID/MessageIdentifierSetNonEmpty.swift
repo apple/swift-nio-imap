@@ -15,7 +15,7 @@
 import struct NIO.ByteBuffer
 
 /// A wrapper around a `MessageIdentifierSet` that enforces at least one element.
-public struct MessageIdentifierSetNonEmpty<IdentifierType: MessageIdentifier>: Hashable {
+public struct MessageIdentifierSetNonEmpty<IdentifierType: MessageIdentifier>: Hashable, Sendable {
     /// A set that contains a single range, that in turn contains all messages.
     public static var all: Self {
         MessageIdentifierSetNonEmpty(set: .all)!

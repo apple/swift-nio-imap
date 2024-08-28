@@ -16,7 +16,7 @@ import struct NIO.ByteBuffer
 
 /// Used when performing a search with `MODSEQ`. Note that this is similar to `Flag`, however `.recent`
 /// is not present.
-public struct AttributeFlag: Hashable {
+public struct AttributeFlag: Hashable, Sendable {
     /// The raw `String` to use as the flag.
     internal let stringValue: String
 

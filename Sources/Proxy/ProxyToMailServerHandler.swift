@@ -28,8 +28,9 @@ class ProxyToMailServerHandler: ChannelInboundHandler {
     }
 
     func channelActive(context: ChannelHandlerContext) {
+        let boundContext = NIOLoopBound(context, eventLoop: context.eventLoop)
         self.mailAppToProxyChannel.closeFuture.whenSuccess {
-            context.close(promise: nil)
+            boundContext.value.close(promise: nil)
         }
     }
 

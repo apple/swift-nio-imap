@@ -13,7 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 /// Used to verify IMAP URL authorization.
-public struct AuthenticatedURLVerifier: Hashable {
+public struct AuthenticatedURLVerifier: Hashable, Sendable {
     /// The auth mechanism.
     public var urlAuthenticationMechanism: URLAuthenticationMechanism
 

@@ -13,7 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 /// A date and time defined in RFC 3339.
-public struct FullDateTime: Hashable {
+public struct FullDateTime: Hashable, Sendable {
     /// The date.
     public var date: FullDate
 
@@ -30,7 +30,7 @@ public struct FullDateTime: Hashable {
 }
 
 /// A date.
-public struct FullDate: Hashable {
+public struct FullDate: Hashable, Sendable {
     /// The year. Any non-negative integer.
     public let year: Int
 
@@ -54,7 +54,7 @@ public struct FullDate: Hashable {
 }
 
 /// A time.
-public struct FullTime: Hashable {
+public struct FullTime: Hashable, Sendable {
     /// The hour. 0-based in the range `0...23`.
     public var hour: Int
 

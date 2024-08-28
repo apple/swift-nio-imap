@@ -33,8 +33,11 @@ class MailClientToProxyHandler: ChannelInboundHandler {
 
     func channelActive(context: ChannelHandlerContext) {
         let mailClientToProxyChannel = context.channel
+        let serverHost = self.serverHost
+        let boundContext = NIOLoopBound(context, eventLoop: context.eventLoop)
+        let boundSelf = NIOLoopBound(self, eventLoop: context.eventLoop)
         ClientBootstrap(group: context.eventLoop).channelInitializer { channel in
-            let sslHandler = try! NIOSSLClientHandler(context: NIOSSLContext(configuration: .clientDefault), serverHostname: self.serverHost)
+            let sslHandler = try! NIOSSLClientHandler(context: NIOSSLContext(configuration: .clientDefault), serverHostname: serverHost)
             return channel.pipeline.addHandlers([
                 sslHandler,
                 OutboundPrintHandler(type: "CLIENT (Encoded)"),
@@ -42,14 +45,14 @@ class MailClientToProxyHandler: ChannelInboundHandler {
                 IMAPClientHandler(encodingChangeCallback: { _, _ in }),
                 ProxyToMailServerHandler(mailAppToProxyChannel: mailClientToProxyChannel),
             ])
-        }.connect(host: self.serverHost, port: self.serverPort).map { channel in
-            self.clientChannel = channel
+        }.connect(host: serverHost, port: self.serverPort).map { channel in
+            boundSelf.value.clientChannel = channel
             channel.closeFuture.whenSuccess {
-                context.close(promise: nil)
+                boundContext.value.close(promise: nil)
             }
         }.whenFailure { error in
             print("CONNECT ERROR: \(error)")
-            context.close(promise: nil)
+            boundContext.value.close(promise: nil)
         }
 
         context.fireChannelActive()

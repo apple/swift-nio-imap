@@ -191,7 +191,7 @@ extension MailboxPath {
 /// Since it’s common to use `MailboxName` as a key in a dictionary and/or compare
 /// `MailboxName` for equality, `MailboxName` will pre-calculate its hash value, and
 /// store it. As a result `Hashable` (and `Equatable`) performance is very fast.
-public struct MailboxName {
+public struct MailboxName: Sendable {
     /// Represents an inbox.
     public static let inbox = Self(ByteBuffer(string: "INBOX"))
 
@@ -242,7 +242,7 @@ extension MailboxName {
     /// A helper to store a hash value (for `Hashable` conformance) inside
     /// a `UInt32` (i.e. 4 bytes) even on platforms where `Int` is 64 bit.
     @usableFromInline
-    struct HashValue {
+    struct HashValue: Sendable {
         @usableFromInline
         let _value: UInt32
 

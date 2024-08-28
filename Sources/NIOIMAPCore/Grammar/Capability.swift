@@ -17,7 +17,7 @@ import struct NIO.ByteBuffer
 /// A `Capability` is advertised as a piece of functionality that a server supports. If the
 /// server does not explicitly advertise a capability then the client should not assume the functionality
 /// is present.
-public struct Capability: Hashable {
+public struct Capability: Hashable, Sendable {
     /// The raw string value of the capability.
     var rawValue: String
     private var splitIndex: String.Index?
@@ -60,7 +60,7 @@ public struct Capability: Hashable {
 
 extension Capability {
     /// Wraps supported contexts including *SEARCH* and *SORT*.
-    public struct ContextKind: Hashable {
+    public struct ContextKind: Hashable, Sendable {
         /// Support extended search commands and accepts new return options.
         public static let search = Self(unchecked: "SEARCH")
 
@@ -82,7 +82,7 @@ extension Capability {
     }
 
     /// Wraps *SORT=* extensions.
-    public struct SortKind: Hashable {
+    public struct SortKind: Hashable, Sendable {
         /// A server that supports the full SORT extension as well as both the
         /// DISPLAYFROM and DISPLAYTO sort criteria indicates this by returning
         /// "SORT=DISPLAY" in its CAPABILITY response.
@@ -103,7 +103,7 @@ extension Capability {
     }
 
     /// Wraps *THREAD=* extensions.
-    public struct ThreadKind: Hashable {
+    public struct ThreadKind: Hashable, Sendable {
         /// The searched messages are sorted by base subject and then
         /// by the sent date.  The messages are then split into separate
         /// threads, with each thread containing messages with the same
@@ -130,7 +130,7 @@ extension Capability {
     }
 
     /// Wraps *STATUS=* extensions.
-    public struct StatusKind: Hashable {
+    public struct StatusKind: Hashable, Sendable {
         /// Allows retrieving the total storage size of a mailbox with
         /// a single STATUS command rather than retrieving and
         /// summing the sizes of all individual messages in that mailbox.
@@ -151,7 +151,7 @@ extension Capability {
     }
 
     /// Wraps *UTF8=* extensions
-    public struct UTF8Kind: Hashable {
+    public struct UTF8Kind: Hashable, Sendable {
         /// Enabling this extension will tell the server that the client accepts
         /// UTF8-encoded strings.
         public static let accept = Self(unchecked: "ACCEPT")
@@ -172,7 +172,7 @@ extension Capability {
 
     /// Wraps *RIGHTS=* extensions. For more information on what each
     /// letter means see RFC 4314 section 4.
-    public struct RightsKind: Hashable {
+    public struct RightsKind: Hashable, Sendable {
         /// Allowed operations in auth state: *DELETE*, *APPEND*, *CREATE*, *RENAME*,
         /// Allowed operations in selected state: *COPY*, *STORE flags*, *EXPUNGE* (required)
         public static let tekx = Self(unchecked: "TEKX")
@@ -192,7 +192,7 @@ extension Capability {
     }
 
     /// The type of compression used in IMAP  responses.
-    public struct CompressionKind: Hashable {
+    public struct CompressionKind: Hashable, Sendable {
         /// The `DEFLATE` algorithm is used. RFC 4978
         public static let deflate = Self(unchecked: "DEFLATE")
 

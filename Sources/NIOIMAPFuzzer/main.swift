@@ -17,7 +17,9 @@ import NIOIMAP
 
 var buffer = ByteBufferAllocator().buffer(capacity: 1000)
 
-@_cdecl("LLVMFuzzerTestOneInput") public func fuzzMe(data: UnsafePointer<CChar>, size: CInt) -> CInt {
+@_cdecl("LLVMFuzzerTestOneInput")
+@MainActor
+public func fuzzMe(data: UnsafePointer<CChar>, size: CInt) -> CInt {
     buffer.clear()
     buffer.writeBytes(UnsafeRawBufferPointer(start: UnsafeRawPointer(data), count: Int(size)))
     var parser = CommandParser()

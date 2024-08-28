@@ -13,7 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 /// The type of authentication mechanism
-public enum IMAPURLAuthenticationMechanism: Hashable {
+public enum IMAPURLAuthenticationMechanism: Hashable, Sendable {
     /// The client should select any appropriate authentication mechanism.
     case any
 

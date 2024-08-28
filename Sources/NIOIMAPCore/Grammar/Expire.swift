@@ -13,7 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 /// Used optionally in an IMAP URL to specify the latest date and time that the URL is valid.
-public struct Expire: Hashable {
+public struct Expire: Hashable, Sendable {
     /// The latest date and time that an IMAP URL is valid.
     public var dateTime: FullDateTime
 

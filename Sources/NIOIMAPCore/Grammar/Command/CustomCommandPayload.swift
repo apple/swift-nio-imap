@@ -15,7 +15,7 @@
 import struct NIO.ByteBuffer
 
 extension Command {
-    public enum CustomCommandPayload: Hashable {
+    public enum CustomCommandPayload: Hashable, Sendable {
         ///  This will be encoded using `quoted` or `literal`.
         case literal(ByteBuffer)
         /// This will be encoded _verbatim_, i.e. directly copied to the output buffer without change.

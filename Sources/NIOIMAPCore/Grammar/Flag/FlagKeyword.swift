@@ -20,7 +20,7 @@ extension Flag {
     /// `Keyword`s are case preserving, but case insensitive.
     /// As such e.g. `Flag.Keyword("$Forwarded") == Flag.Keyword("$forwarded")`, but
     /// it will round-trip preserving its case.
-    public struct Keyword: Hashable {
+    public struct Keyword: Hashable, Sendable {
         /// Performs a case-insensitive equality comparison.
         /// - parameter lhs: The first flag to compare.
         /// - parameter rhs: The second flag to compare.

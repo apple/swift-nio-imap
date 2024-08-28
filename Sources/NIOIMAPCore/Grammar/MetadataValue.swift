@@ -15,7 +15,7 @@
 import struct NIO.ByteBuffer
 
 /// The value for a metadata entry.
-public struct MetadataValue: Hashable {
+public struct MetadataValue: Hashable, Sendable {
     /// The raw value bytes.
     public let bytes: ByteBuffer?
 

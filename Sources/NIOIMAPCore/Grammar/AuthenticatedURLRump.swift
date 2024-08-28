@@ -13,7 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 /// Pairs an auth URL rump with an optional expiry date and access restrictions.
-public struct AuthenticatedURLRump: Hashable {
+public struct AuthenticatedURLRump: Hashable, Sendable {
     /// The optional expiry date of the URL.
     public var expire: Expire?
 

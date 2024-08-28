@@ -16,7 +16,7 @@ import struct NIO.ByteBuffer
 import struct OrderedCollections.OrderedDictionary
 
 /// Various options that may be added to a message when it is appended to a mailbox.
-public struct AppendOptions: Hashable {
+public struct AppendOptions: Hashable, Sendable {
     /// Flags that will be added to the message
     public var flagList: [Flag]
 

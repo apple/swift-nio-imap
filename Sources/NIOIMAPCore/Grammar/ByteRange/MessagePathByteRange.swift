@@ -14,7 +14,7 @@
 
 extension MessagePath {
     /// Used to append a `ByteRange` as part of a URL.
-    public struct ByteRange: Hashable {
+    public struct ByteRange: Hashable, Sendable {
         /// The `PartialRange` to append.
         public var range: NIOIMAPCore.ByteRange
 

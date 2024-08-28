@@ -14,7 +14,7 @@
 
 /// Provides the `UIDValitiy` for a percent-encoded mailbox. If the `UIDValidity` is present
 /// it will be used to ensure the URL is not stale.
-public struct MailboxUIDValidity: Hashable {
+public struct MailboxUIDValidity: Hashable, Sendable {
     /// The percent-encoded mailbox.
     public var encodedMailbox: EncodedMailbox
 

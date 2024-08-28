@@ -41,7 +41,7 @@ extension Media {
     /// The RFC 2045 “top-level type” of a “media type”.
     ///
     /// E.g. for `text/plain`, the top-level type is `text`.
-    public struct TopLevelType: CustomDebugStringConvertible, Hashable {
+    public struct TopLevelType: CustomDebugStringConvertible, Hashable, Sendable {
         /// application
         public static let multipart = Self("multipart")
 
@@ -100,7 +100,7 @@ extension Media {
     /// The RFC 2045 “subtype” of a “media type”.
     ///
     /// E.g. for `text/plain`, the subtype is `plain`.
-    public struct Subtype: CustomDebugStringConvertible, Hashable {
+    public struct Subtype: CustomDebugStringConvertible, Hashable, Sendable {
         /// When used with a `multipart` type, specifies the same data as different formats.
         public static let alternative = Self("alternative")
 

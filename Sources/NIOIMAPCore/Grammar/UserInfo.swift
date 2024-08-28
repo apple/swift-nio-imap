@@ -13,7 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 /// Matches an encoded user with a permitted authentication mechanism.
-public struct UserAuthenticationMechanism: Hashable {
+public struct UserAuthenticationMechanism: Hashable, Sendable {
     /// The percent-encoded user data.
     public let encodedUser: EncodedUser?
 

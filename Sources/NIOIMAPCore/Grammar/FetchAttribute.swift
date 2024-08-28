@@ -15,7 +15,7 @@
 import struct NIO.ByteBuffer
 
 /// Attributes of a message that can be retrieved as part of a `.fetch` command.
-public enum FetchAttribute: Hashable {
+public enum FetchAttribute: Hashable, Sendable {
     /// The message's envelope including the sender(s), bcc list, cc list, etc.
     case envelope
 

@@ -18,7 +18,7 @@ import struct NIO.ByteBuffer
 /// They're used to designate a special use to certain mailboxes.
 /// The raw `String` value is lower-cased on initialisation to ensure
 /// case-insensitive comparison.
-public struct UseAttribute: Hashable {
+public struct UseAttribute: Hashable, Sendable {
     /// A mailbox that presents all messages in the user's store.
     public static let all = Self("\\All")
 

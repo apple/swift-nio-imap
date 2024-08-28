@@ -15,7 +15,7 @@
 import struct NIO.ByteBuffer
 
 /// Parameters to use when creating a mailbox.
-public enum CreateParameter: Hashable {
+public enum CreateParameter: Hashable, Sendable {
     /// Implemented as a catch-all to provide support for cases defined in future extensions.
     case labelled(KeyValue<String, ParameterValue?>)
 

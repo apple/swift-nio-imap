@@ -22,6 +22,8 @@ public enum LastCommandMessageID<N: MessageIdentifier>: Hashable {
     case lastCommand
 }
 
+extension LastCommandMessageID: Sendable where N: Sendable {}
+
 extension EncodeBuffer {
     @discardableResult mutating func writeLastCommandMessageID<T>(_ set: LastCommandMessageID<T>) -> Int {
         switch set {

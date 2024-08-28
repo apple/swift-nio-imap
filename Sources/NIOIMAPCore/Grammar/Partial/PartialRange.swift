@@ -15,7 +15,7 @@
 /// A range for `draft-ietf-extra-imap-partial-04` aka. “Paged SEARCH & FETCH”
 ///
 /// Aka. `partial-range`.
-public enum PartialRange: Hashable {
+public enum PartialRange: Hashable, Sendable {
     /// A range relative to the oldest (lowest UID) message.
     ///
     /// Aka. `partial-range-first`.

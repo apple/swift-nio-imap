@@ -15,7 +15,7 @@
 import struct OrderedCollections.OrderedDictionary
 
 /// Used when performing a search to only include messages modified since a particular moment.
-public struct SearchModificationSequence: Hashable {
+public struct SearchModificationSequence: Hashable, Sendable {
     /// Extensions defined to catch data sent as part of any future extensions.
     public var extensions: OrderedDictionary<EntryFlagName, EntryKindRequest>
 
