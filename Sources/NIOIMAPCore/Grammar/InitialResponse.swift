@@ -18,7 +18,7 @@ import struct NIO.ByteBuffer
 /// up the process.
 public struct InitialResponse: Hashable {
     /// Creates a new empty `InitialResponse` that will be encoded as `=`.
-    public static var empty: Self = .init(ByteBuffer())
+    public static let empty: Self = .init(ByteBuffer())
 
     /// The data to be base-64 encoded.
     public var data: ByteBuffer
