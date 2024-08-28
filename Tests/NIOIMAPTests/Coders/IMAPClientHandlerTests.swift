@@ -484,12 +484,12 @@ class IMAPClientHandlerTests: XCTestCase {
         try! self.channel.pipeline.addHandler(TestOutboundHandlerThatFails(), position: .first).wait()
 
         // writing a command that has a continuation
-        let didComplete = expectation(description: "did write data")
+        var didComplete = NIOLoopBound(false, eventLoop: self.channel.eventLoop)
         self.writeOutbound(.tagged(.init(tag: "A1", command: .create(.init("\\"), []))), wait: false).whenFailure { error in
             XCTAssertTrue(error is TestError)
-            didComplete.fulfill()
+            didComplete.value = true
         }
-        wait(for: [didComplete])
+        XCTAssertTrue(didComplete.value)
     }
 
     func testWriteCascadesContinuationPromiseFailure() {
@@ -517,12 +517,12 @@ class IMAPClientHandlerTests: XCTestCase {
         testHandler.failNextWrite = true
         self.writeInbound("+ OK\r\n")
 
-        let didComplete = expectation(description: "did write data")
+        var didComplete = NIOLoopBound(false, eventLoop: self.channel.eventLoop)
         future.whenFailure { error in
             XCTAssertTrue(error is TestError)
-            didComplete.fulfill()
+            didComplete.value = true
         }
-        wait(for: [didComplete])
+        XCTAssertTrue(didComplete.value)
     }
 
     func testAppendWaitsForContinuation() {
