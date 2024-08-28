@@ -108,10 +108,10 @@ extension Media {
         public static let related = Self("related")
 
         /// When used with a `multipart` type, specifies a generic set of mixed data types.
-        public static var mixed = Self("mixed")
+        public static let mixed = Self("mixed")
 
         /// `message` sub-type.
-        public static var rfc822 = Self("rfc822")
+        public static let rfc822 = Self("rfc822")
 
         /// The subtype as a lowercased string
         internal let stringValue: String

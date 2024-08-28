@@ -19,10 +19,10 @@ public struct EntryKindResponse: Hashable {
     fileprivate var backing: String
 
     /// `priv` - Private metadata item type.
-    public static var `private` = Self(backing: "priv")
+    public static let `private` = Self(backing: "priv")
 
     /// `shared` - Shared metadata item type.
-    public static var shared = Self(backing: "shared")
+    public static let shared = Self(backing: "shared")
 }
 
 // MARK: - Encoding
