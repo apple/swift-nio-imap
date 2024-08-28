@@ -108,7 +108,6 @@ func measure(_ fn: () throws -> Int) rethrows -> [TimeInterval] {
 
 let limitSet = CommandLine.arguments.dropFirst()
 
-@MainActor
 func measureAndPrint(desc: String, fn: () throws -> Int) rethrows {
     if limitSet.count == 0 || limitSet.contains(desc) {
         print("measuring\(warning): \(desc): ", terminator: "")
