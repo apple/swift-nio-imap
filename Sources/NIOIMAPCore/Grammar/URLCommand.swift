@@ -13,7 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 /// A command that should be executed once a server has been successfully connected to.
-public enum URLCommand: Hashable {
+public enum URLCommand: Hashable, Sendable {
     /// Performs a `.select` or `.examine` command.
     case messageList(EncodedSearchQuery)
 

@@ -18,7 +18,7 @@
 /// The maximum value is often rendered as `*` when encoded.
 ///
 /// See RFC 3501 section 2.3.1.1.
-public struct UID: MessageIdentifier {
+public struct UID: MessageIdentifier, Sendable {
     public var rawValue: UInt32
 
     public init(rawValue: UInt32) {

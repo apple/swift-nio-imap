@@ -18,7 +18,7 @@ import struct NIO.ByteBuffer
 /// (e.g. an email with multiple attachments), and so this enum provides an easy way to send
 /// or recieve parts of an email methodically. Multi-append is also supported by sending
 /// multiple `beginMessage`.
-public enum AppendCommand: Hashable {
+public enum AppendCommand: Hashable, Sendable {
     /// The beginning of an `AppendCommand`. There must be exactly one `start` for each `finish`.
     /// Always send this first before sending any other `AppendCommand`.
     /// - parameter tag: An identifier for the command, as in `TaggedCommand`
@@ -76,7 +76,7 @@ extension AppendCommand {
     /// One `begin(size:)` message must be sent before exactly one
     /// `end` message, with zero or more `bytes(ByteBuffer)` messages
     /// in the middle.
-    public enum CatenateData: Hashable {
+    public enum CatenateData: Hashable, Sendable {
         /// Signals that a given number of bytes are ready to be sent.
         /// - parameter size: The number of bytes to be streamed
         case begin(size: Int)
@@ -95,7 +95,7 @@ extension AppendCommand {
 /// the `.tagged(TaggedCommand)` case. Of note are `.idleDone` which will end an idle
 /// session started by a previous idle `TaggedCommand`, and  `.append(AppendCommand)`
 /// which is used to manage the lifecycle of appending multiple messages sequentially.
-public enum CommandStreamPart: Hashable {
+public enum CommandStreamPart: Hashable, Sendable {
     /// Signals that a previous `idle` command has finished, and more
     /// commands will now be sent.
     case idleDone

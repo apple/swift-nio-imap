@@ -16,7 +16,7 @@
 /// copied messages in the destination mailbox.
 /// - Note: This type uses `[UIDRange]` over `UIDSet` as it's important to preserve the array ordering
 /// so that the source UIDs can be matched to destination UIDs.
-public struct ResponseCodeCopy: Hashable {
+public struct ResponseCodeCopy: Hashable, Sendable {
     /// The `UIDValidity` of the destination mailbox
     public var destinationUIDValidity: UIDValidity
 

@@ -34,7 +34,7 @@ import struct NIO.ByteBuffer
 import struct OrderedCollections.OrderedDictionary
 
 struct GrammarParser {
-    static let defaultParsedStringCache: (String) -> String = { str in
+    static let defaultParsedStringCache: @Sendable (String) -> String = { str in
         str
     }
 

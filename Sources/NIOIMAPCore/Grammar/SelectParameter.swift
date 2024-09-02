@@ -14,7 +14,7 @@
 
 /// Quick resynchronisation parameters for the `.select` and `.examine` commands.
 /// Recommended reading: RFC 7162 § 3.2.5.
-public struct QResyncParameter: Hashable {
+public struct QResyncParameter: Hashable, Sendable {
     /// The last known UID validity.
     public var uidValidity: UIDValidity
 
@@ -41,7 +41,7 @@ public struct QResyncParameter: Hashable {
 }
 
 /// Used to specify the type of `.select` command that should be execuuted.
-public enum SelectParameter: Hashable {
+public enum SelectParameter: Hashable, Sendable {
     /// Perform a basic `.select` command without Condition Store or Quick Resynchronisation.
     case basic(KeyValue<String, ParameterValue?>)
 

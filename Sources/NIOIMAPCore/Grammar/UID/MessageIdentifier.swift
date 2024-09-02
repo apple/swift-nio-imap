@@ -63,7 +63,7 @@ extension MessageIdentifier {
 /// at the time of parsing. Use `UID.init(Messageidentifier)` and
 /// `SequenceNumber.init(MessageIdentifier)` to convert
 /// between the two.
-public struct UnknownMessageIdentifier: MessageIdentifier {
+public struct UnknownMessageIdentifier: MessageIdentifier, Sendable {
     public var rawValue: UInt32
 
     public init(rawValue: UInt32) {

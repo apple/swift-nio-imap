@@ -15,7 +15,7 @@
 import struct NIO.ByteBuffer
 
 /// Represents a range of bytes in a larger whole. See RFC 5092
-public struct ByteRange: Hashable {
+public struct ByteRange: Hashable, Sendable {
     /// The offset in bytes from the beginning of the message/data in question.
     public var offset: Int
 

@@ -16,7 +16,7 @@ import struct NIO.ByteBuffer
 
 /// Represents a day with the format `yyyy-MM-dd`.
 /// (RFC 3501)
-public struct IMAPCalendarDay: Hashable {
+public struct IMAPCalendarDay: Hashable, Sendable {
     /// 4-digit year in the range (1900, 2500)
     public let year: Int
 

@@ -15,7 +15,7 @@
 import struct NIO.ByteBuffer
 
 /// Filters to be used when selecting mailboxes to be notified about.
-public enum MailboxFilter: Hashable {
+public enum MailboxFilter: Hashable, Sendable {
     /// All selectable mailboxes in the user's personal
     /// namespace(s) to which messages may be delivered by a Message Delivery Agent (MDA)
     case inboxes

@@ -15,7 +15,7 @@
 import struct NIO.ByteBuffer
 
 /// Options to control what is returned as the response of a list command.
-public enum ListSelectOption: Hashable {
+public enum ListSelectOption: Hashable, Sendable {
     /// *SUBSCRIBED* - Returns mailboxes that the user has subscribed to
     case subscribed
 
@@ -36,7 +36,7 @@ public enum ListSelectOption: Hashable {
 
 /// Combines an array of `ListSelectOption` with a `ListSelectBaseOption`. Used
 /// when performing a `.list` command.
-public struct ListSelectOptions: Hashable {
+public struct ListSelectOptions: Hashable, Sendable {
     /// The base option to use.
     public var baseOption: ListSelectBaseOption
 

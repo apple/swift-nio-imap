@@ -15,7 +15,7 @@
 import struct NIO.ByteBuffer
 
 /// Mailbox attributes that may be requested and returned as part of a *LIST* command.
-public enum MailboxAttribute: String, CaseIterable {
+public enum MailboxAttribute: String, CaseIterable, Sendable {
     /// `MESSAGES`
     /// The number of messages in the mailbox.
     case messageCount = "MESSAGES"
@@ -48,7 +48,7 @@ public enum MailboxAttribute: String, CaseIterable {
 }
 
 /// The (aggregated) information about a mailbox that the server reports as part of the response to e.g. a `SELECT` command.
-public struct MailboxStatus: Hashable {
+public struct MailboxStatus: Hashable, Sendable {
     /// `MESSAGES`
     /// The number of messages in the mailbox.
     public var messageCount: Int?

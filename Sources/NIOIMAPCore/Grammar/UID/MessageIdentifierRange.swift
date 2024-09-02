@@ -38,6 +38,8 @@ public struct MessageIdentifierRange<IdentifierType: MessageIdentifier>: Hashabl
     }
 }
 
+extension MessageIdentifierRange: Sendable where IdentifierType: Sendable {}
+
 // MARK: - CustomDebugStringConvertible
 
 extension MessageIdentifierRange: CustomDebugStringConvertible {

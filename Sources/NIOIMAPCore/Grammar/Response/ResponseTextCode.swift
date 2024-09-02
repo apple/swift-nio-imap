@@ -23,7 +23,7 @@ import struct NIO.ByteBuffer
 /// See also https://www.iana.org/assignments/imap-response-codes/imap-response-codes.xhtml
 ///
 /// - Note: This `enum` is `indirect` to work around the compiler generating large types. (86318397)
-public indirect enum ResponseTextCode: Hashable {
+public indirect enum ResponseTextCode: Hashable, Sendable {
     /// The human-readable text contains a special alert that MUST be
     /// presented to the user in a fashion that calls the user's
     /// attention to the message.

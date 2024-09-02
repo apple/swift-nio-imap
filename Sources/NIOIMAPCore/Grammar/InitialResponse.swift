@@ -16,7 +16,7 @@ import struct NIO.ByteBuffer
 
 /// Allows a client to optionally send an initial response when authenticating to speed
 /// up the process.
-public struct InitialResponse: Hashable {
+public struct InitialResponse: Hashable, Sendable {
     /// Creates a new empty `InitialResponse` that will be encoded as `=`.
     public static let empty: Self = .init(ByteBuffer())
 

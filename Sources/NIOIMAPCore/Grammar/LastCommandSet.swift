@@ -14,7 +14,7 @@
 
 /// Provides support for using either the result of the last command (`.lastCommand`) or
 /// a concrete set type.
-public enum LastCommandSet<N: MessageIdentifier>: Hashable {
+public enum LastCommandSet<N: MessageIdentifier>: Hashable, Sendable {
     /// A specific set that will be sent to the IMAP server. E.g. `1, 2:5, 10:*`
     case set(MessageIdentifierSetNonEmpty<N>)
 

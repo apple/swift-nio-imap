@@ -14,7 +14,7 @@
 import struct NIO.ByteBuffer
 
 /// GMail treats labels as folders.
-public struct GmailLabel: Hashable {
+public struct GmailLabel: Hashable, Sendable {
     /// The label's raw value -  a sequence of bytes
     let buffer: ByteBuffer
 

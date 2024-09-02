@@ -13,7 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 /// A wrapper around `AttributeFlag`, used in `SearchModificationSequence`
-public struct EntryFlagName: Hashable {
+public struct EntryFlagName: Hashable, Sendable {
     /// An `AttributeFlag`
     public var flag: AttributeFlag
 

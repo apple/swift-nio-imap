@@ -13,7 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 /// Specifies a URL and a verifier that can be used to verify the authorisation URL.
-public struct AuthenticatedURL: Hashable {
+public struct AuthenticatedURL: Hashable, Sendable {
     /// The URL.
     public var authenticatedURL: AuthenticatedURLRump
 

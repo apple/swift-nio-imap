@@ -8,11 +8,11 @@ let package = Package(
     products: [
         .library(name: "NIOIMAP", targets: ["NIOIMAP"]),
     ], dependencies: [
-        .package(url: "https://github.com/apple/swift-nio", from: "2.40.0"),
-        .package(url: "https://github.com/apple/swift-nio-ssl", from: "2.20.0"),
-        .package(url: "https://github.com/apple/swift-log", from: "1.4.0"),
+        .package(url: "https://github.com/apple/swift-nio", from: "2.64.0"),
+        .package(url: "https://github.com/apple/swift-nio-ssl", from: "2.24.0"),
+        .package(url: "https://github.com/apple/swift-log", from: "1.4.4"),
         .package(url: "https://github.com/apple/swift-se0270-range-set.git", from: "1.0.1"),
-        .package(url: "https://github.com/apple/swift-collections.git", "1.0.2" ..< "2.0.0"),
+        .package(url: "https://github.com/apple/swift-collections.git", "1.1.0" ..< "2.0.0"),
     ],
     targets: [
         .executableTarget(

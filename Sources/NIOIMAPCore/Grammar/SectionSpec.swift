@@ -21,7 +21,7 @@ import struct NIO.ByteBuffer
 /// Use `SectionSpecifier.complete` for an empty section specifier (i.e. the complete message).
 ///
 /// These are defined in RFC 3501 section 6.4.5.
-public struct SectionSpecifier: Hashable {
+public struct SectionSpecifier: Hashable, Sendable {
     /// The part of the body.
     public let part: Part
 
@@ -100,7 +100,7 @@ extension SectionSpecifier {
     /// This corresponds to the part number mentioned in RFC 3501 section 6.4.5.
     ///
     /// Examples are `1`, `4.1`, and `4.2.2.1`.
-    public struct Part: Hashable, ExpressibleByArrayLiteral {
+    public struct Part: Hashable, ExpressibleByArrayLiteral, Sendable {
         /// Each element in the array can be thought of as an index of the section identified by the previous element.
         public typealias ArrayLiteralElement = Int
 
@@ -135,7 +135,7 @@ extension SectionSpecifier {
     ///  For other parts (i.e. non-`message/rfc822` and not the message itself) these are valid:
     ///   * `.complete` (the part without its MIME IMB header)
     ///   * `.MIMEHeader` / `MIME` (the MIME IMB header)
-    public enum Kind: Hashable {
+    public enum Kind: Hashable, Sendable {
         /// A section specifier that ends in a part number, e.g. `4.2.2.1`.
         ///
         /// If the numeric part refers to the complete message or a `message/rfc822` part, this

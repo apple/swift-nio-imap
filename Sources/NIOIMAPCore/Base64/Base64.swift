@@ -5,7 +5,7 @@
 @usableFromInline
 enum Base64 {
     @usableFromInline
-    struct EncodingOptions: OptionSet {
+    struct EncodingOptions: OptionSet, Sendable {
         @usableFromInline
         let rawValue: UInt
 
@@ -20,7 +20,7 @@ enum Base64 {
     }
 
     @usableFromInline
-    struct DecodingOptions: OptionSet {
+    struct DecodingOptions: OptionSet, Sendable {
         @usableFromInline
         let rawValue: UInt
 

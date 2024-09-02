@@ -16,7 +16,7 @@ import struct NIO.ByteBuffer
 
 /// Specifies what items of data should be returned for each matching mailbox when
 /// executing a `.list` command.
-public enum ReturnOption: Hashable {
+public enum ReturnOption: Hashable, Sendable {
     /// Causes the LIST command to return subscription state
     /// for all matching mailbox names.
     case subscribed

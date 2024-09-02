@@ -19,7 +19,7 @@ import struct NIO.ByteBuffer
 /// Flags are case preserving, but case insensitive.
 /// As such e.g. `.extension("\\FOOBAR") == .extension("\\FooBar")`, but
 /// it will round-trip preserving its case.
-public struct Flag: Hashable {
+public struct Flag: Hashable, Sendable {
     /// The raw case-sensitive `String` value.
     internal let stringValue: String
 

@@ -13,7 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 /// Used to instruct the server to only return certain messages that meet given requirements.
-public enum FetchModifier: Hashable {
+public enum FetchModifier: Hashable, Sendable {
     /// Tells the server to respond to a `.fetch` command with messages who's
     /// metadata items have changed since the given reference point.
     case changedSince(ChangedSinceModifier)

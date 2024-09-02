@@ -17,7 +17,7 @@
 /// See RFC 3501 section 2.3.1.2.
 ///
 /// IMAPv4 `seq-number`
-public struct SequenceNumber: MessageIdentifier {
+public struct SequenceNumber: MessageIdentifier, Sendable {
     /// The raw value of the sequence number, defined in RFC 3501 to be an unsigned 32-bit integer.
     public var rawValue: UInt32
 

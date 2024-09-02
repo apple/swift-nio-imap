@@ -15,7 +15,7 @@
 import struct NIO.ByteBuffer
 
 /// A percent-encoded section.
-public struct EncodedSection: Hashable {
+public struct EncodedSection: Hashable, Sendable {
     /// The percent-encoded data.
     public var section: String
 

@@ -13,7 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 /// The name of the algorithm used to generate and verify a URLAUTH.
-public struct URLAuthenticationMechanism: Hashable {
+public struct URLAuthenticationMechanism: Hashable, Sendable {
     /// Uses a token generation algorithm of the server's choosing
     public static let `internal` = Self("INTERNAL")
 

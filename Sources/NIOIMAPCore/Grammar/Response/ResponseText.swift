@@ -15,7 +15,7 @@
 import struct NIO.ByteBuffer
 
 /// Data sent from the server to signal a success or failure.
-public struct ResponseText: Hashable {
+public struct ResponseText: Hashable, Sendable {
     /// Used as a quick way to signal, e.g. *[ALERT]*. Not required.
     public var code: ResponseTextCode?
 

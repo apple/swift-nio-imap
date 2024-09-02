@@ -14,7 +14,7 @@
 
 /// Used in a fetch command to fetch data for all messages that have metadata
 /// items changed since some known modification sequence.
-public struct ChangedSinceModifier: Hashable {
+public struct ChangedSinceModifier: Hashable, Sendable {
     /// The known modification sequence to use as a reference date.
     public var modificationSequence: ModificationSequenceValue
 
@@ -27,7 +27,7 @@ public struct ChangedSinceModifier: Hashable {
 
 /// Used in a fetch command to fetch data for all messages that have not had
 /// metadata items changed since some known modification sequence.
-public struct UnchangedSinceModifier: Hashable {
+public struct UnchangedSinceModifier: Hashable, Sendable {
     /// The known modification sequence to use as a reference date.
     public var modificationSequence: ModificationSequenceValue
 

@@ -21,7 +21,7 @@ import struct OrderedCollections.OrderedDictionary
 /// This is handled separately using the `AppendCommand` type,
 /// as a state is maintained to enable streaming of large amounts
 /// of data.
-public enum Command: Hashable {
+public enum Command: Hashable, Sendable {
     /// Requests a server's capabilities.
     case capability
 

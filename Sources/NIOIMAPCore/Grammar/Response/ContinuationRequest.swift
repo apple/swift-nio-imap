@@ -19,7 +19,7 @@ import struct NIO.ByteBuffer
 /// RFC 3501 section 7.5
 ///
 /// IMAPv4 `continue-req`
-public enum ContinuationRequest: Hashable {
+public enum ContinuationRequest: Hashable, Sendable {
     /// A continuation request that contains a `ResponseText`.
     case responseText(ResponseText)
 

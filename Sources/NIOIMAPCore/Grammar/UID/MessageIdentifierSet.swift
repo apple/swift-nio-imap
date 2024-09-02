@@ -13,12 +13,12 @@
 //===----------------------------------------------------------------------===//
 
 import struct NIO.ByteBuffer
-import SE0270_RangeSet
+@preconcurrency import SE0270_RangeSet
 
 /// A set contains an array of `MessageIdentifierRange<MessageIdentifier>>` to represent a (potentially large) collection of messages.
 ///
 /// `MessageIdentifier`s are _not_ sorted.
-public struct MessageIdentifierSet<IdentifierType: MessageIdentifier>: Hashable {
+public struct MessageIdentifierSet<IdentifierType: MessageIdentifier>: Hashable, Sendable {
     /// A set that contains a single range, that in turn contains all messages.
     public static var all: Self {
         MessageIdentifierSet(MessageIdentifierRange<IdentifierType>.all)
