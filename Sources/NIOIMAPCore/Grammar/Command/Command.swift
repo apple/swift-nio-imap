@@ -106,8 +106,8 @@ public enum Command: Hashable, Sendable {
     ///
     /// This is a RFC 3501 / RFC 4731 style search. RFC 7377 style searches use `.extendedSearch`.
     ///
-    /// If `returnOptions` is empty, this is a RFC 3501 style search. Notably the empty `RETURN ()`
-    /// maps to `[.all]` — as it’s equivalent to `RETURN (ALL)`.
+    /// If `returnOptions` is empty, this is a RFC 3501 style search. But note that the empty
+    /// RFC 7377 `RETURN ()` maps to `[.all]` — as it’s equivalent to `RETURN (ALL)`.
     ///
     /// * `SEARCH ANSWERED` is `.search(key:. answered, returnOptions: [])`
     /// * `SEARCH RETURN () ANSWERED` is `.search(key:. answered, returnOptions: [.all])`

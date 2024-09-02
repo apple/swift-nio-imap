@@ -67,9 +67,9 @@ extension EncodeBuffer {
         guard options.count > 0 else {
             return 0
         }
-        if options == [.all] {
-            return self.writeString(" RETURN ()")
-        }
+        // When `options == [.all]`, we _could_ encode this as
+        // `RETURN ()` according to RFC 7377, but many esoteric
+        // servers will fail to parse this correctly.
         return
             self.writeString(" RETURN (") +
             self.writeIfExists(options) { (options) -> Int in
