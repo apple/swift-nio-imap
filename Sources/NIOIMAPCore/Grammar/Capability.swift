@@ -270,6 +270,9 @@ extension Capability {
     /// Allow clients to transparently connect to an alternate IMAP4 server, if their home IMAP4 server has changed - RFC 2221.
     public static let loginReferrals = Self(unchecked: "LOGIN-REFERRALS")
 
+    /// RFC 7889 “Mailbox-Specific APPENDLIMIT” — maximum upload size.
+    public static let mailboxSpecificAppendLimit = Self(unchecked: "APPENDLIMIT")
+
     /// Permits clients and servers to maintain "annotations" or "metadata" on IMAP servers - RFC 5464.
     public static let metadata = Self(unchecked: "METADATA")
 
@@ -360,6 +363,13 @@ extension Capability {
     ///
     /// Message numbers are not returned in responses and cannot be used in requests once this extension is enabled.
     public static let uidOnly = Self(unchecked: "UIDONLY")
+
+    /// RFC 7889 `APPENDLIMIT` — maximum upload size.
+    ///
+    /// See also: ``mailboxSpecificAppendLimit``
+    public static func appendLimit(_ count: Int) -> Self {
+        Self("APPENDLIMIT=\(count)")
+    }
 
     /// MESSAGELIMIT
     ///

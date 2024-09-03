@@ -40,6 +40,7 @@ extension Capability_Tests {
         let tests: [(Capability, String, UInt)] = [
             (.acl, "ACL", #line),
             (.annotateExperiment1, "ANNOTATE-EXPERIMENT-1", #line),
+            (.appendLimit(11_206_521), "APPENDLIMIT=11206521", #line),
             (.authenticate(.pToken), "AUTH=PTOKEN", #line),
             (.authenticate(.plain), "AUTH=PLAIN", #line),
             (.authenticate(.token), "AUTH=TOKEN", #line),
@@ -66,6 +67,7 @@ extension Capability_Tests {
             (.literalMinus, "LITERAL-", #line),
             (.literalPlus, "LITERAL+", #line),
             (.loginReferrals, "LOGIN-REFERRALS", #line),
+            (.mailboxSpecificAppendLimit, "APPENDLIMIT", #line),
             (.messageLimit(1_234), "MESSAGELIMIT=1234", #line),
             (.metadata, "METADATA", #line),
             (.metadataServer, "METADATA-SERVER", #line),

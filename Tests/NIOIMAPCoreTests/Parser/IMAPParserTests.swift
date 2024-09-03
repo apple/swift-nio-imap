@@ -2353,8 +2353,11 @@ extension ParserUnitTests {
         self.iterateTests(
             testFunction: GrammarParser().parseMailboxStatus,
             validInputs: [
-                ("MESSAGES 1", "\r", .init(messageCount: 1), #line),
-                ("MESSAGES 1 RECENT 2 UIDNEXT 3 UIDVALIDITY 4 UNSEEN 5 SIZE 6 HIGHESTMODSEQ 7", "\r", .init(messageCount: 1, recentCount: 2, nextUID: 3, uidValidity: 4, unseenCount: 5, size: 6, highestModificationSequence: 7), #line),
+                ("MESSAGES 1", ")", .init(messageCount: 1), #line),
+                ("MESSAGES 1 RECENT 2 UIDNEXT 3 UIDVALIDITY 4 UNSEEN 5 SIZE 6 HIGHESTMODSEQ 7", ")", .init(messageCount: 1, recentCount: 2, nextUID: 3, uidValidity: 4, unseenCount: 5, size: 6, highestModificationSequence: 7), #line),
+                ("APPENDLIMIT 257890", ")", .init(appendLimit: 257_890), #line),
+                ("SIZE 81630", ")", .init(size: 81_630), #line),
+                ("UIDNEXT 95604  HIGHESTMODSEQ 35227 APPENDLIMIT 81818  UIDVALIDITY 33682", ")", .init(nextUID: 95604, uidValidity: 33682, highestModificationSequence: 35227, appendLimit: 81818), #line),
             ],
             parserErrorInputs: [
                 ("MESSAGES UNSEEN 3 RECENT 4", "\r", #line),

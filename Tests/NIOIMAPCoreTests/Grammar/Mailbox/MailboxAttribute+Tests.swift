@@ -25,6 +25,9 @@ extension MailboxAttribute_Tests {
         let inputs: [([MailboxAttribute], String, UInt)] = [
             ([], "", #line),
             ([MailboxAttribute.messageCount, .recentCount, .unseenCount], "MESSAGES RECENT UNSEEN", #line),
+            ([MailboxAttribute.appendLimit, .uidNext, .uidValidity], "APPENDLIMIT UIDNEXT UIDVALIDITY", #line),
+            ([MailboxAttribute.size], "SIZE", #line),
+            ([MailboxAttribute.highestModificationSequence, .messageCount], "HIGHESTMODSEQ MESSAGES", #line),
         ]
 
         for (test, expectedString, line) in inputs {
@@ -39,8 +42,18 @@ extension MailboxAttribute_Tests {
         let inputs: [(MailboxStatus, String, UInt)] = [
             (.init(), "", #line),
             (
-                .init(messageCount: 1, recentCount: 2, nextUID: 3, uidValidity: 4, unseenCount: 5, size: 6, highestModificationSequence: 7),
-                "MESSAGES 1 RECENT 2 UIDNEXT 3 UIDVALIDITY 4 UNSEEN 5 SIZE 6 HIGHESTMODSEQ 7",
+                .init(messageCount: 133701, recentCount: 255813, nextUID: 377003, uidValidity: 427421, unseenCount: 528028, size: 680543, highestModificationSequence: 797237, appendLimit: 86254193),
+                "MESSAGES 133701 RECENT 255813 UIDNEXT 377003 UIDVALIDITY 427421 UNSEEN 528028 SIZE 680543 HIGHESTMODSEQ 797237 APPENDLIMIT 86254193",
+                #line
+            ),
+            (
+                .init(messageCount: 133701, nextUID: 377003, uidValidity: 427421, appendLimit: 86254193),
+                "MESSAGES 133701 UIDNEXT 377003 UIDVALIDITY 427421 APPENDLIMIT 86254193",
+                #line
+            ),
+            (
+                .init(nextUID: 377003),
+                "UIDNEXT 377003",
                 #line
             ),
         ]
