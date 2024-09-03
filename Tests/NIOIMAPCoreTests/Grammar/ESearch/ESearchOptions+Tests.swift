@@ -40,7 +40,7 @@ extension ExtendedSearchOptions_Tests {
             ),
             (
                 ExtendedSearchOptions(key: .deleted, returnOptions: [.all]),
-                " RETURN () DELETED",
+                " RETURN (ALL) DELETED",
                 #line
             ),
             (
