@@ -4,6 +4,7 @@ NIOIMAP supports a variety of known IMAP [extensions](https://www.iana.org/assig
 
 | Capability | RFC |
 | --- | --- |
+APPENDLIMIT|[RFC7889]((https://www.iana.org/go/rfc7889)
 AUTH=|[RFC3501](https://www.iana.org/go/rfc3501)
 BINARY|[RFC3516](https://www.iana.org/go/rfc3516)
 CATENATE|[RFC4469](https://www.iana.org/go/rfc4469)

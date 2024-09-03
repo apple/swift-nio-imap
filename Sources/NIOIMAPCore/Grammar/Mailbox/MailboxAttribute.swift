@@ -45,6 +45,11 @@ public enum MailboxAttribute: String, CaseIterable, Sendable {
     /// RFC 7162
     /// The highest mod-sequence value of all messages in the mailbox.
     case highestModificationSequence = "HIGHESTMODSEQ"
+
+    /// `APPENDLIMIT`
+    ///
+    /// RFC 7889. Maximum upload size.
+    case appendLimit = "APPENDLIMIT"
 }
 
 /// The (aggregated) information about a mailbox that the server reports as part of the response to e.g. a `SELECT` command.
@@ -75,6 +80,11 @@ public struct MailboxStatus: Hashable, Sendable {
     /// The highest mod-sequence value of all messages in the mailbox.
     public var highestModificationSequence: ModificationSequenceValue?
 
+    /// `APPENDLIMIT`
+    ///
+    /// RFC 7889 per-mailbox `APPENDLIMIT`, i.e. maximum message upload size.
+    public var appendLimit: Int?
+
     /// Creates a new `MailboxStatus`. All parameters default to `nil`.
     /// - parameter messageCount: RFC 3501: `MESSAGES` - The number of messages in the mailbox.
     /// - parameter recentCount: RFC 3501: `RECENT` - The number of messages with the \Recent flag set.
@@ -83,6 +93,7 @@ public struct MailboxStatus: Hashable, Sendable {
     /// - parameter unseenCount: RFC 3501: `UNSEEN` - The number of messages which do not have the `\Seen` flag set.
     /// - parameter size: RFC 8438: `SIZE` - The number of messages which do not have the `\Seen` flag set.
     /// - parameter highestModificationSequence: RFC 7162: `SIZE` - The total size of the mailbox in octets.
+    /// - parameter appendLimit: RFC 7889 per-mailbox `APPENDLIMIT`, i.e. maximum message upload size.
     public init(
         messageCount: Int? = nil,
         recentCount: Int? = nil,
@@ -90,7 +101,8 @@ public struct MailboxStatus: Hashable, Sendable {
         uidValidity: UIDValidity? = nil,
         unseenCount: Int? = nil,
         size: Int? = nil,
-        highestModificationSequence: ModificationSequenceValue? = nil
+        highestModificationSequence: ModificationSequenceValue? = nil,
+        appendLimit: Int? = nil
     ) {
         self.messageCount = messageCount
         self.recentCount = recentCount
@@ -99,6 +111,7 @@ public struct MailboxStatus: Hashable, Sendable {
         self.unseenCount = unseenCount
         self.size = size
         self.highestModificationSequence = highestModificationSequence
+        self.appendLimit = appendLimit
     }
 }
 
@@ -137,6 +150,7 @@ extension EncodeBuffer {
         append(\.unseenCount, "UNSEEN")
         append(\.size, "SIZE")
         append(\.highestModificationSequence, "HIGHESTMODSEQ")
+        append(\.appendLimit, "APPENDLIMIT")
 
         return self.writeArray(array, parenthesis: false) { (element, self) -> Int in
             self.writeString("\(element.0) \(element.1)")
