@@ -15,7 +15,7 @@
 import struct NIO.ByteBuffer
 
 /// Sent from a server in response to an extended search.
-public struct ExtendedSearchResponse: Hashable {
+public struct ExtendedSearchResponse: Hashable, Sendable {
     /// Identifies the search that resulted in this response.
     public var correlator: SearchCorrelator?
 
@@ -40,7 +40,7 @@ extension ExtendedSearchResponse {
     /// The kind of search response.
     ///
     /// Describes if the `UnknownMessageIdentifier` in the `returnData`’s `SearchReturnData` are `UID` or `SequenceNumber`.
-    public enum Kind: Hashable {
+    public enum Kind: Hashable, Sendable {
         case sequenceNumber
         case uid
     }

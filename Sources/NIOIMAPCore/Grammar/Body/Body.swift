@@ -23,7 +23,7 @@ extension MessageAttribute {
     /// A server has to parse a MIME message to build up the RFC 3501 `body` data, and since there are a lot of
     /// badly formatted messages in the wild, servers can sometimes end up generating “bad” `body` data.
     /// The most common source is from junk messages, that are more-or-less intentionally ill-formated.
-    public enum BodyStructure: Hashable {
+    public enum BodyStructure: Hashable, Sendable {
         /// A normal, valid RFC 3501 `body` (aka. body structure).
         case valid(NIOIMAPCore.BodyStructure)
         /// We failed to parse the body structure.
@@ -33,7 +33,7 @@ extension MessageAttribute {
 
 /// A parsed representation of the MIME-IMB body structure information of the message.
 /// Recomended reading: RFC 3501 § 2.6.3 and 7.4.2.
-public enum BodyStructure: Hashable {
+public enum BodyStructure: Hashable, Sendable {
     /// A message that at the top level contains only one part. Note that a "message" body contains a nested
     /// body, which may itself be multipart.
     case singlepart(Singlepart)

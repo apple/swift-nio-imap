@@ -17,7 +17,7 @@
 /// See RFC-2822 section 3.3. “Date and Time Specification”.
 ///
 /// Use `String(init(_: InternetMessageDate)` to get the underlying string representation.
-public struct InternetMessageDate: Hashable {
+public struct InternetMessageDate: Hashable, Sendable {
     var value: String
 
     /// Creates a new `InternetMessageDate` from a given `String`.

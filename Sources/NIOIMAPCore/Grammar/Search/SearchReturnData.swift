@@ -15,7 +15,7 @@
 import struct NIO.ByteBuffer
 
 /// Contains information returned from a complete search command, not on a per-message basis.
-public enum SearchReturnData: Hashable {
+public enum SearchReturnData: Hashable, Sendable {
     /// Return the lowest message number/UID that satisfies the SEARCH criteria.
     case min(UnknownMessageIdentifier)
 

@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-public struct PreviewText: Hashable {
+public struct PreviewText: Hashable, Sendable {
     fileprivate let text: String
 
     public init(_ text: String) {

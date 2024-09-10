@@ -16,7 +16,7 @@ import struct NIO.ByteBuffer
 
 /// Multiple searches may be run concurrently, and so a `SearchCorrelator` can be used
 /// to identify the search to which a response belongs.
-public struct SearchCorrelator: Hashable {
+public struct SearchCorrelator: Hashable, Sendable {
     /// The tag of the command that this search result is a response to.
     public var tag: String
 

@@ -16,7 +16,7 @@ import struct NIO.ByteBuffer
 
 extension BodyStructure {
     /// Represents a single-part body as defined in RFC 3501.
-    public struct Singlepart: Hashable {
+    public struct Singlepart: Hashable, Sendable {
         /// The type of single-part. Note that "message" types may contain a multi-part.
         public var kind: Kind
 
@@ -42,7 +42,7 @@ extension BodyStructure {
 
 extension BodyStructure.Singlepart {
     /// Represents the type of a single-part message.
-    public indirect enum Kind: Hashable {
+    public indirect enum Kind: Hashable, Sendable {
         /// A simple message containing only one kind of data.
         case basic(Media.MediaType)
 
@@ -54,7 +54,7 @@ extension BodyStructure.Singlepart {
     }
 
     /// Represents a typical "full" email message, containing an envelope and a child message.
-    public struct Message: Hashable {
+    public struct Message: Hashable, Sendable {
         /// The RFC 2045 sub-type. This will usually be `rfc822`.
         public var message: Media.Subtype
 
@@ -81,7 +81,7 @@ extension BodyStructure.Singlepart {
     }
 
     /// Represents a text-based message body.
-    public struct Text: Hashable {
+    public struct Text: Hashable, Sendable {
         /// The media sub-type of a text part, e.g. `html` or `plain` for `text/html` and `text/plain` respectively.
         public var mediaSubtype: Media.Subtype
 
@@ -98,7 +98,7 @@ extension BodyStructure.Singlepart {
     }
 
     /// Optional extension fields, initially pairing an MD5 body digest with a `DispositionAndLanguage`.
-    public struct Extension: Hashable {
+    public struct Extension: Hashable, Sendable {
         /// A string giving the body MD5 value.
         public let digest: String?
 
