@@ -16,7 +16,7 @@ import struct NIO.ByteBuffer
 import struct OrderedCollections.OrderedDictionary
 
 /// A collection of mailbox attributes defined in the supported IMAP4 RFCs.
-public struct MailboxInfo: Hashable {
+public struct MailboxInfo: Hashable, Sendable {
     /// An array of mailbox attributes.
     public var attributes: [Attribute]
 
@@ -41,7 +41,7 @@ public struct MailboxInfo: Hashable {
 
 extension MailboxInfo {
     /// A single attribute of a Mailbox
-    public struct Attribute: Hashable {
+    public struct Attribute: Hashable, Sendable {
         /// It is not possible to use this name as a selectable mailbox.
         public static var noSelect: Self { Self(#"\Noselect"#) }
 

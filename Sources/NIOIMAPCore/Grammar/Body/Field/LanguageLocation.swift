@@ -17,7 +17,7 @@ import struct NIO.ByteBuffer
 extension BodyStructure {
     /// Pairs languages with a `Location`. An abstraction from RFC 3501
     /// to make the API slightly easier to work with and enforce validity.
-    public struct LanguageLocation: Hashable {
+    public struct LanguageLocation: Hashable, Sendable {
         /// The body language value(s) as defined in BCP 47 and RFC 3066.
         public var languages: [String]
         /// A string list giving the body content URI as defined in RFC 2557.

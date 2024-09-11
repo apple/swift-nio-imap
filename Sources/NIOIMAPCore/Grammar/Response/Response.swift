@@ -15,13 +15,13 @@
 import struct NIO.ByteBuffer
 import struct NIO.ByteBufferAllocator
 
-public enum ResponseOrContinuationRequest: Hashable {
+public enum ResponseOrContinuationRequest: Hashable, Sendable {
     case continuationRequest(ContinuationRequest)
     case response(Response)
 }
 
 /// Wraps the various response types that may be sent by a server.
-public enum Response: Hashable {
+public enum Response: Hashable, Sendable {
     /// Servers may send one or more untagged response for every tagged response.
     /// Untagged responses are sent before their corresponding tagged response.
     case untagged(ResponsePayload)
@@ -82,7 +82,7 @@ extension Response: CustomDebugStringConvertible {
 /// After recieving `start` (or `startUID`) you may recieve n `simpleAttribute`, `streamingBegin`, and `streamingBytes` events.
 /// Every `streamingBegin` has exaclty one corresponding `streamingEnd`
 /// `streamingBegin` has a `type` that specifies the type of data to be streamed
-public enum FetchResponse: Hashable {
+public enum FetchResponse: Hashable, Sendable {
     /// A fetch response is beginning for the message with the given sequence number.
     case start(SequenceNumber)
 
@@ -108,7 +108,7 @@ public enum FetchResponse: Hashable {
 }
 
 /// The current type of data that is being streamed.
-public enum StreamingKind: Hashable {
+public enum StreamingKind: Hashable, Sendable {
     /// BINARY RFC 3516, streams BINARY when using a `literal`
     case binary(section: SectionSpecifier.Part, offset: Int?)
 

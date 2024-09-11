@@ -17,7 +17,7 @@ public enum Media {}
 
 extension Media {
     /// An RFC 2045 media type, also known as MIME type.
-    public struct MediaType: Hashable {
+    public struct MediaType: Hashable, Sendable {
         public var topLevel: TopLevelType
         public var sub: Subtype
 

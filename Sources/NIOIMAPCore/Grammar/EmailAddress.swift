@@ -16,7 +16,7 @@ import struct NIO.ByteBuffer
 
 /// An address structure is a parenthesized list that describes an
 /// electronic mail address.
-public struct EmailAddress: Hashable {
+public struct EmailAddress: Hashable, Sendable {
     /// The addressee's personal name (may be an alias).
     public var personName: ByteBuffer?
 

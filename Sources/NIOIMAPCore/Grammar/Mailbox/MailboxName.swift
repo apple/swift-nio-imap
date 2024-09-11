@@ -39,7 +39,7 @@ public struct InvalidPathSeparatorError: Error, Equatable {
 /// Represents a complete mailbox path, delimited by the `pathSeparator`.
 /// For example, *foo/bar* is the `MailboxName`, and so "/" would be the `pathSeparator`.
 /// Path separators are optional, and so the simple `MailboxName` *foo* has `pathSeparator = nil`.
-public struct MailboxPath: Hashable {
+public struct MailboxPath: Hashable, Sendable {
     /// The full mailbox name, e.g. *foo/bar*
     public let name: MailboxName
 

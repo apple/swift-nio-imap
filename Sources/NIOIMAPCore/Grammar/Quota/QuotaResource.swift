@@ -15,7 +15,7 @@
 import struct NIO.ByteBuffer
 
 /// A resource with it's current usage and maximum size.
-public struct QuotaResource: Hashable {
+public struct QuotaResource: Hashable, Sendable {
     /// The resource that the quota is applied to.
     public var resourceName: String
 

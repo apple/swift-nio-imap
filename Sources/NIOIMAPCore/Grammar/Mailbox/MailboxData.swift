@@ -15,7 +15,7 @@
 import struct NIO.ByteBuffer
 
 /// Mailbox attributes with associated data, part of a fetch response.
-public enum MailboxData: Hashable {
+public enum MailboxData: Hashable, Sendable {
     /// The flags associated with a mailbox.
     case flags([Flag])
 
@@ -49,7 +49,7 @@ public enum MailboxData: Hashable {
 
 extension MailboxData {
     /// A container for an array of message identifiers, and a sequence.
-    public struct SearchSort: Hashable {
+    public struct SearchSort: Hashable, Sendable {
         /// An array of message identifiers that were matched in a search.
         public var identifiers: [Int]
 
