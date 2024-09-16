@@ -15,7 +15,7 @@
 import struct NIO.ByteBuffer
 
 /// Used to buffer commands before writing to the network.
-public struct CommandEncodeBuffer: Hashable {
+public struct CommandEncodeBuffer: Hashable, Sendable {
     /// The underlying buffer containing data to be written.
     @_spi(NIOIMAPInternal) public var buffer: EncodeBuffer
 

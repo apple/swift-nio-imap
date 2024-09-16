@@ -35,19 +35,19 @@ public struct ExceededMaximumBodySizeError: Error {
 }
 
 /// A parser to be used by Clients in order to parse responses sent from a server.
-public struct ResponseParser: Parser {
-    enum AttributeState: Hashable {
+public struct ResponseParser: Parser, Sendable {
+    enum AttributeState: Hashable, Sendable {
         case head
         case attribute
         case separator
     }
 
-    enum ResponseState: Hashable {
+    enum ResponseState: Hashable, Sendable {
         case fetchOrNormal
         case fetchMiddle(attributeCount: Int)
     }
 
-    enum Mode: Hashable {
+    enum Mode: Hashable, Sendable {
         case response(ResponseState)
         case streamingQuoted(attributeCount: Int)
         case attributeBytes(Int, attributeCount: Int)

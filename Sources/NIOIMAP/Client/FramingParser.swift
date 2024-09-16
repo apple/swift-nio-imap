@@ -58,7 +58,7 @@ extension FixedWidthInteger {
     }
 }
 
-public enum FramingResult: Hashable, CustomDebugStringConvertible {
+public enum FramingResult: Hashable, Sendable, CustomDebugStringConvertible {
     /// We've found a complete frame, and this is the result
     case complete(ByteBuffer)
 
@@ -112,8 +112,8 @@ enum FrameStatus: Hashable {
     case continueParsing
 }
 
-public struct FramingParser: Hashable {
-    enum LiteralHeaderState: Hashable {
+public struct FramingParser: Hashable, Sendable {
+    enum LiteralHeaderState: Hashable, Sendable {
         case findingBinaryFlag
         case findingSize(ByteBuffer)
         case findingLiteralExtension(UInt64)
@@ -121,7 +121,7 @@ public struct FramingParser: Hashable {
         case findingCR(UInt64)
     }
 
-    enum State: Hashable {
+    enum State: Hashable, Sendable {
         case normalTraversal(LineFeedByteStrategy)
         case foundCR
         case searchingForLiteralHeader(LiteralHeaderState)
@@ -129,7 +129,7 @@ public struct FramingParser: Hashable {
         case insideQuoted(QuotedState)
     }
 
-    enum QuotedState: Hashable {
+    enum QuotedState: Hashable, Sendable {
         case normal
         case escaped
     }

@@ -73,7 +73,7 @@ public struct ServerMessageDate: Hashable, Sendable {
 extension ServerMessageDate {
     /// Contains the individual components extracted from an `ServerMessageDate`, and can be used to
     /// construct an `ServerMessageDate`.
-    public struct Components {
+    public struct Components: Sendable {
         /// The year.
         public let year: Int
 

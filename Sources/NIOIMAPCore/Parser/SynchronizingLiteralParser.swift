@@ -16,17 +16,17 @@ import struct NIO.ByteBuffer
 import struct NIO.ByteBufferView
 
 /// A parser dedicated to handling syncrhonising literals.
-public struct SynchronizingLiteralParser {
+public struct SynchronizingLiteralParser: Sendable {
     private var offset = 0
     private var synchronisingLiterals = 0
     private var state = State.waitingForCompleteLine
 
-    private enum State: Hashable {
+    private enum State: Hashable, Sendable {
         case waitingForCompleteLine
         case waitingForLiteralBytes(Int)
     }
 
-    private enum LineFragmentType {
+    private enum LineFragmentType: Sendable {
         case completeLine
         case synchronisingLiteral(Int)
         case nonSynchronisingLiteral(Int)
@@ -110,7 +110,7 @@ public struct SynchronizingLiteralParser {
     }
 
     /// Contains information on the result of a call to `parseContinuationsNecessary`.
-    public struct FramingResult {
+    public struct FramingResult: Sendable {
         /// The maximum number of bytes that can be consumed by a `ResponseParser` until more data is required.
         public var maximumValidBytes: Int
 

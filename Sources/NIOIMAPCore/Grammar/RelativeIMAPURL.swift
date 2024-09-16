@@ -13,7 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 ///
-public enum RelativeIMAPURL: Hashable {
+public enum RelativeIMAPURL: Hashable, Sendable {
     /// Rarely used, typically it's better to use an absolute path
     case networkPath(NetworkPath)
 

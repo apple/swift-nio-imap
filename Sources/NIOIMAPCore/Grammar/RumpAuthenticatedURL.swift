@@ -15,7 +15,7 @@
 import struct NIO.ByteBuffer
 
 /// Associates an `RumpAuthenticatedURL` with a rump URL to use for authorization verification is required.
-public struct RumpAuthenticatedURL: Hashable {
+public struct RumpAuthenticatedURL: Hashable, Sendable {
     /// An IMAP URL pointing to a message.
     public var authenticatedURL: NetworkMessagePath
 

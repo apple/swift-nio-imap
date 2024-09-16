@@ -15,7 +15,7 @@
 import NIO
 import NIOIMAPCore
 
-public struct FrameDecoder: ByteToMessageDecoder {
+public struct FrameDecoder: ByteToMessageDecoder, Sendable {
     public typealias InboundOut = FramingResult
 
     private var framingParser: FramingParser

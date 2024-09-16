@@ -15,7 +15,7 @@
 import struct NIO.ByteBuffer
 
 /// Sent as a response to a `.sort` command.
-public struct SortData: Hashable {
+public struct SortData: Hashable, Sendable {
     /// Message sequence numbers that match the search.
     public var identifiers: [Int]
 
