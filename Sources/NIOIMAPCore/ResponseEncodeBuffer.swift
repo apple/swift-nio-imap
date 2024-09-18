@@ -15,7 +15,7 @@
 import struct NIO.ByteBuffer
 
 /// Used to write responses in preparation for sending down a network.
-public struct ResponseEncodeBuffer {
+public struct ResponseEncodeBuffer: Sendable {
     private var buffer: EncodeBuffer
 
     /// Data that is waiting to be sent.

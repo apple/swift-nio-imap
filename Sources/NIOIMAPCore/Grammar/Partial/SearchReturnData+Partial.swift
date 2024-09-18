@@ -15,7 +15,7 @@
 import struct NIO.ByteBuffer
 
 extension SearchReturnData {
-    public struct Partial: Hashable {
+    public struct Partial: Hashable, Sendable {
         /// The requested range.
         public var range: PartialRange
         /// The matching messages.

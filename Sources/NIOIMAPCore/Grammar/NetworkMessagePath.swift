@@ -15,7 +15,7 @@
 import struct NIO.ByteBuffer
 
 /// A URL that can be used to point directly at a message part on a specified IMAP server.
-public struct NetworkMessagePath: Hashable {
+public struct NetworkMessagePath: Hashable, Sendable {
     /// The server containing the message.
     public var server: IMAPServer
 

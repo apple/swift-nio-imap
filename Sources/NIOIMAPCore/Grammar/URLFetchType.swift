@@ -13,7 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 /// Provides a variety of ways to load message data.
-public enum URLFetchType: Hashable {
+public enum URLFetchType: Hashable, Sendable {
     /// Uses a mailbox reference and message UID to load a message, and optional message section and part.
     case refUidSectionPartial(ref: MailboxUIDValidity, uid: IUID, section: URLMessageSection?, partial: MessagePath.ByteRange?)
 

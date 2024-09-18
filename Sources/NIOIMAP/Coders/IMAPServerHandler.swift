@@ -15,7 +15,7 @@
 import NIO
 import NIOIMAPCore
 
-public struct ReceivedInvalidFrame: Hashable {
+public struct ReceivedInvalidFrame: Hashable, Sendable {
     public var frame: ByteBuffer
 
     public init(frame: ByteBuffer) {
@@ -23,7 +23,7 @@ public struct ReceivedInvalidFrame: Hashable {
     }
 }
 
-public struct ReceivedIncompleteFrame: Hashable {
+public struct ReceivedIncompleteFrame: Hashable, Sendable {
     public var requiredBytes: Int
 
     public init(requiredBytes: Int) {

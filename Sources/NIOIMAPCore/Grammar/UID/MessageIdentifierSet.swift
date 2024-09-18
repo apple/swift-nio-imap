@@ -139,7 +139,7 @@ extension MessageIdentifierSet {
 }
 
 extension MessageIdentifierSet {
-    public struct RangeView: RandomAccessCollection {
+    public struct RangeView: RandomAccessCollection, Sendable {
         fileprivate var underlying: RangeSet<MessageIdentificationShiftWrapper>.Ranges
 
         public var startIndex: Int { underlying.startIndex }
@@ -245,7 +245,7 @@ extension MessageIdentifierSet: ExpressibleByArrayLiteral {
 }
 
 extension MessageIdentifierSet: BidirectionalCollection {
-    public struct Index {
+    public struct Index: Sendable {
         fileprivate var rangeIndex: RangeSet<MessageIdentificationShiftWrapper>.Ranges.Index
         fileprivate var indexInRange: IdentifierType.Stride
     }
