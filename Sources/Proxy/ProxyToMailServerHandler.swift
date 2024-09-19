@@ -34,7 +34,7 @@ class ProxyToMailServerHandler: ChannelInboundHandler {
     }
 
     func channelRead(context: ChannelHandlerContext, data: NIOAny) {
-        var stream = self.unwrapInboundIn(data)
+        let stream = self.unwrapInboundIn(data)
         self.mailAppToProxyChannel.writeAndFlush(stream, promise: nil)
     }
 
