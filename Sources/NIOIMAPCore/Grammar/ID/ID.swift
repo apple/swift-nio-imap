@@ -22,15 +22,19 @@ extension EncodeBuffer {
         guard values.count > 0 else {
             return self.writeNil()
         }
-        return self.writeOrderedDictionary(values) { (e, self) in
-            self.writeIMAPString(e.key) +
-                self.writeSpace() +
-                self.writeNString(e.value)
+        return self.withoutLoggingMode { buffer in
+            buffer.writeOrderedDictionary(values) { (e, buffer) in
+                buffer.writeIMAPString(e.key) +
+                    buffer.writeSpace() +
+                    buffer.writeNString(e.value)
+            }
         }
     }
 
     @discardableResult mutating func writeIDResponse(_ response: OrderedDictionary<String, String?>) -> Int {
-        self.writeString("ID ") +
-            self.writeIDParameters(response)
+        self.withoutLoggingMode {
+            $0.writeString("ID ") +
+                $0.writeIDParameters(response)
+        }
     }
 }
