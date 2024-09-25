@@ -130,6 +130,15 @@ extension CommandStreamPart: CustomDebugStringConvertible {
             $0.writeCommandStream(self)
         }
     }
+
+    /// Creates a string from the array of `CommandStreamPart` with all _personally identifiable information_ redacted.
+    public static func descriptionWithoutPII(_ parts: some Sequence<CommandStreamPart>) -> String {
+        CommandEncodeBuffer.makeDescription(loggingMode: true) {
+            for p in parts {
+                $0.writeCommandStream(p)
+            }
+        }
+    }
 }
 
 extension CommandEncodeBuffer {

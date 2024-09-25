@@ -225,4 +225,27 @@ extension CommandStream_Tests {
         XCTAssertEqual(String(buffer: encodedCommand.bytes), #"hello)\#r\#n"#)
         XCTAssertFalse(encodedCommand.waitForContinuation, "Should not have additional continuations.")
     }
+
+    func testDescriptionWithoutPII() {
+        let inputs: [(CommandStreamPart, String, UInt)] = [
+            (.append(.start(tag: "1", appendingTo: .inbox)), "1 APPEND \"∅\"", #line),
+            (
+                .append(.beginMessage(message: .init(options: .none, data: .init(byteCount: 3)))),
+                " {3}\r\n",
+                #line
+            ),
+            (
+                .append(.beginMessage(message: .init(options: .init(flagList: [.seen, .deleted], extensions: [:]), data: .init(byteCount: 3)))),
+                " (\\Seen \\Deleted) {3}\r\n",
+                #line
+            ),
+            (.tagged(.init(tag: "1", command: .noop)), "1 NOOP\r\n", #line),
+            (.idleDone, "DONE\r\n", #line),
+            (.continuationResponse("test"), "[8 bytes]\r\n", #line),
+        ]
+
+        for (part, expected, line) in inputs {
+            XCTAssertEqual(CommandStreamPart.descriptionWithoutPII([part]), expected, line: line)
+        }
+    }
 }

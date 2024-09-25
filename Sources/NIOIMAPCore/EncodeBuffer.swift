@@ -181,3 +181,14 @@ extension EncodeBuffer {
         self.buffer.clear()
     }
 }
+
+extension EncodeBuffer {
+    mutating func withoutLoggingMode<R>(_ closure: (inout EncodeBuffer) -> R) -> R {
+        let old = self.loggingMode
+        defer {
+            self.loggingMode = old
+        }
+        self.loggingMode = false
+        return closure(&self)
+    }
+}
