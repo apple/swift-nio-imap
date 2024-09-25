@@ -52,7 +52,7 @@ extension ID_Tests {
         let id = Response.untagged(ResponsePayload.id(["name": "A"]))
         XCTAssertEqual("\(Response.descriptionWithoutPII([id]))", #"""
         * ID ("name" "A")\#r
-        
+
         """#)
     }
 
@@ -60,7 +60,7 @@ extension ID_Tests {
         let part = CommandStreamPart.tagged(TaggedCommand(tag: "A1", command: .id(["name": "A"])))
         XCTAssertEqual("\(CommandStreamPart.descriptionWithoutPII([part]))", #"""
         A1 ID ("name" "A")\#r
-        
+
         """#)
     }
 }
