@@ -771,17 +771,27 @@ extension GrammarParser {
         }
 
         func parseIDParamsList_empty(buffer: inout ParseBuffer, tracker: StackTracker) throws -> OrderedDictionary<String, String?> {
-            try PL.parseFixedString("()", buffer: &buffer, tracker: tracker)
+            try PL.parseFixedString("(", buffer: &buffer, tracker: tracker)
+            _ = try PL.parseOptional(buffer: &buffer, tracker: tracker) { buffer, tracker in
+                try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+            }
+            try PL.parseFixedString(")", buffer: &buffer, tracker: tracker)
             return [:]
         }
 
         func parseIDParamsList_some(buffer: inout ParseBuffer, tracker: StackTracker) throws -> OrderedDictionary<String, String?> {
             try PL.parseFixedString("(", buffer: &buffer, tracker: tracker)
+            _ = try PL.parseOptional(buffer: &buffer, tracker: tracker) { buffer, tracker in
+                try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+            }
             let (key, value) = try parseIDParamsList_element(buffer: &buffer, tracker: tracker)
             var dic: OrderedDictionary<String, String?> = [key: value]
             try PL.parseZeroOrMore(buffer: &buffer, into: &dic, tracker: tracker) { (buffer, tracker) -> (String, String?) in
                 try PL.parseSpaces(buffer: &buffer, tracker: tracker)
                 return try parseIDParamsList_element(buffer: &buffer, tracker: tracker)
+            }
+            _ = try PL.parseOptional(buffer: &buffer, tracker: tracker) { buffer, tracker in
+                try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             }
             try PL.parseFixedString(")", buffer: &buffer, tracker: tracker)
             return dic
