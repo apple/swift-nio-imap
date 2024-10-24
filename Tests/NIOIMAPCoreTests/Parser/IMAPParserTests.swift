@@ -1414,6 +1414,8 @@ extension ParserUnitTests {
             testFunction: GrammarParser().parseIDParamsList,
             validInputs: [
                 ("NIL", " ", [:], #line),
+                ("()", " ", [:], #line),
+                ("( )", " ", [:], #line),
                 (#"("key1" "value1")"#, "", ["key1": "value1"], #line),
                 (
                     #"("key1" "value1" "key2" "value2" "key3" "value3")"#,
@@ -1425,6 +1427,25 @@ extension ParserUnitTests {
                     #"("key1" "&AKM-" "flag" "&2Dzf9NtA3GfbQNxi20DcZdtA3G7bQNxn20Dcfw-")"#,
                     #""#,
                     ["key1": "£", "flag": "🏴󠁧󠁢󠁥󠁮󠁧󠁿"],
+                    #line
+                ),
+                (
+                    #"("a" "1" "b" "2")"#,
+                    "",
+                    ["a": "1", "b": "2"],
+                    #line
+                ),
+                // Extra spaces
+                (
+                    #"( "a" "1" "b" "2" )"#,
+                    "",
+                    ["a": "1", "b": "2"],
+                    #line
+                ),
+                (
+                    #"("a"  "1"  "b"   "2")"#,
+                    "",
+                    ["a": "1", "b": "2"],
                     #line
                 ),
             ],
