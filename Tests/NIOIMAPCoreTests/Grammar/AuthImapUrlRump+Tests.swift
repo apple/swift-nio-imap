@@ -24,10 +24,19 @@ extension AuthIMAPURLRump_Tests {
     func testEncoding() {
         let inputs: [(RumpAuthenticatedURL, String, UInt)] = [
             (
-                .init(authenticatedURL: .init(server: .init(host: "localhost"), messagePath: .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: .init(uid: 123))), authenticatedURLRump: .init(access: .anonymous)),
+                .init(
+                    authenticatedURL: .init(
+                        server: .init(host: "localhost"),
+                        messagePath: .init(
+                            mailboxReference: .init(encodeMailbox: .init(mailbox: "test")),
+                            iUID: .init(uid: 123)
+                        )
+                    ),
+                    authenticatedURLRump: .init(access: .anonymous)
+                ),
                 "imap://localhost/test/;UID=123;URLAUTH=anonymous",
                 #line
-            ),
+            )
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeAuthIMAPURLRump($0) })
     }

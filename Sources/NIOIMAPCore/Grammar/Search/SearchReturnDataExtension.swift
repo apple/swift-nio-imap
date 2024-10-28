@@ -18,8 +18,6 @@ import struct NIO.ByteBuffer
 
 extension EncodeBuffer {
     @discardableResult mutating func writeSearchReturnDataExtension(_ data: KeyValue<String, ParameterValue>) -> Int {
-        self.writeString(data.key) +
-            self.writeSpace() +
-            self.writeParameterValue(data.value)
+        self.writeString(data.key) + self.writeSpace() + self.writeParameterValue(data.value)
     }
 }

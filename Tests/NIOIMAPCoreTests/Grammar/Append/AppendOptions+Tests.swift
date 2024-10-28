@@ -20,13 +20,24 @@ class AppendOptions_Tests: EncodeTestClass {}
 
 extension AppendOptions_Tests {
     func testEncode() throws {
-        let components = ServerMessageDate.Components(year: 1994, month: 6, day: 25, hour: 1, minute: 2, second: 3, timeZoneMinutes: 0)!
+        let components = ServerMessageDate.Components(
+            year: 1994,
+            month: 6,
+            day: 25,
+            hour: 1,
+            minute: 2,
+            second: 3,
+            timeZoneMinutes: 0
+        )!
         let date = ServerMessageDate(components)
 
         let inputs: [(AppendOptions, String, UInt)] = [
             (.none, "", #line),
             (.init(flagList: [.answered], internalDate: nil, extensions: [:]), " (\\Answered)", #line),
-            (.init(flagList: [.answered], internalDate: date, extensions: [:]), " (\\Answered) \"25-Jun-1994 01:02:03 +0000\"", #line),
+            (
+                .init(flagList: [.answered], internalDate: date, extensions: [:]),
+                " (\\Answered) \"25-Jun-1994 01:02:03 +0000\"", #line
+            ),
         ]
 
         for (test, expectedString, line) in inputs {

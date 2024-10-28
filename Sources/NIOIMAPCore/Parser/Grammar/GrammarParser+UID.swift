@@ -61,9 +61,13 @@ extension GrammarParser {
         }
     }
 
-    func parseUIDSetNonEmpty(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageIdentifierSetNonEmpty<UID> {
+    func parseUIDSetNonEmpty(
+        buffer: inout ParseBuffer,
+        tracker: StackTracker
+    ) throws -> MessageIdentifierSetNonEmpty<UID> {
         try PL.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
-            guard let set = MessageIdentifierSetNonEmpty(set: try self.parseUIDSet(buffer: &buffer, tracker: tracker)) else {
+            guard let set = MessageIdentifierSetNonEmpty(set: try self.parseUIDSet(buffer: &buffer, tracker: tracker))
+            else {
                 throw ParserError(hint: "Need at least one UID")
             }
             return set

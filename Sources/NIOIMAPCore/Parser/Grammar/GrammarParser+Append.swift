@@ -38,14 +38,16 @@ extension GrammarParser {
     // append-data = literal / literal8 / append-data-ext
     func parseAppendData(buffer: inout ParseBuffer, tracker: StackTracker) throws -> AppendData {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> AppendData in
-            let withoutContentTransferEncoding = try PL.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
-                try PL.parseFixedString("~", buffer: &buffer, tracker: tracker)
-            }.map { () in true } ?? false
+            let withoutContentTransferEncoding =
+                try PL.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
+                    try PL.parseFixedString("~", buffer: &buffer, tracker: tracker)
+                }.map { () in true } ?? false
             try PL.parseFixedString("{", buffer: &buffer, tracker: tracker)
             let length = try self.parseNumber(buffer: &buffer, tracker: tracker)
-            _ = try PL.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
-                try PL.parseFixedString("+", buffer: &buffer, tracker: tracker)
-            }.map { () in false } ?? true
+            _ =
+                try PL.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
+                    try PL.parseFixedString("+", buffer: &buffer, tracker: tracker)
+                }.map { () in false } ?? true
             try PL.parseFixedString("}", buffer: &buffer, tracker: tracker)
             try PL.parseNewline(buffer: &buffer, tracker: tracker)
             return .init(byteCount: length, withoutContentTransferEncoding: withoutContentTransferEncoding)
@@ -77,7 +79,10 @@ extension GrammarParser {
         case catenate(AppendOptions)
     }
 
-    func parseAppendOrCatenateMessage(buffer: inout ParseBuffer, tracker: StackTracker) throws -> AppendOrCatenateMessage {
+    func parseAppendOrCatenateMessage(
+        buffer: inout ParseBuffer,
+        tracker: StackTracker
+    ) throws -> AppendOrCatenateMessage {
         func parseAppend(buffer: inout ParseBuffer, tracker: StackTracker) throws -> AppendOrCatenateMessage {
             try .append(self.parseAppendMessage(buffer: &buffer, tracker: tracker))
         }
@@ -97,16 +102,19 @@ extension GrammarParser {
     // append-options = [SP flag-list] [SP date-time] *(SP append-ext)
     func parseAppendOptions(buffer: inout ParseBuffer, tracker: StackTracker) throws -> AppendOptions {
         try PL.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
-            let flagList = try PL.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> [Flag] in
-                try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-                return try self.parseFlagList(buffer: &buffer, tracker: tracker)
-            } ?? []
-            let internalDate = try PL.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> ServerMessageDate in
+            let flagList =
+                try PL.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> [Flag] in
+                    try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+                    return try self.parseFlagList(buffer: &buffer, tracker: tracker)
+                } ?? []
+            let internalDate = try PL.parseOptional(buffer: &buffer, tracker: tracker) {
+                (buffer, tracker) -> ServerMessageDate in
                 try PL.parseSpaces(buffer: &buffer, tracker: tracker)
                 return try self.parseInternalDate(buffer: &buffer, tracker: tracker)
             }
             var kvs = OrderedDictionary<String, ParameterValue>()
-            try PL.parseZeroOrMore(buffer: &buffer, into: &kvs, tracker: tracker) { (buffer, tracker) -> KeyValue<String, ParameterValue> in
+            try PL.parseZeroOrMore(buffer: &buffer, into: &kvs, tracker: tracker) {
+                (buffer, tracker) -> KeyValue<String, ParameterValue> in
                 try PL.parseSpaces(buffer: &buffer, tracker: tracker)
                 return try self.parseTaggedExtension(buffer: &buffer, tracker: tracker)
             }
@@ -120,7 +128,11 @@ extension GrammarParser {
         case end
     }
 
-    func parseCatenatePart(expectPrecedingSpace: Bool, buffer: inout ParseBuffer, tracker: StackTracker) throws -> CatenatePart {
+    func parseCatenatePart(
+        expectPrecedingSpace: Bool,
+        buffer: inout ParseBuffer,
+        tracker: StackTracker
+    ) throws -> CatenatePart {
         func parseCatenateURL(buffer: inout ParseBuffer, tracker: StackTracker) throws -> CatenatePart {
             if expectPrecedingSpace {
                 try PL.parseSpaces(buffer: &buffer, tracker: tracker)
@@ -136,9 +148,10 @@ extension GrammarParser {
             }
             try PL.parseFixedString("TEXT {", buffer: &buffer, tracker: tracker)
             let length = try self.parseNumber(buffer: &buffer, tracker: tracker)
-            _ = try PL.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
-                try PL.parseFixedString("+", buffer: &buffer, tracker: tracker)
-            }.map { () in false } ?? true
+            _ =
+                try PL.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
+                    try PL.parseFixedString("+", buffer: &buffer, tracker: tracker)
+                }.map { () in false } ?? true
             try PL.parseFixedString("}", buffer: &buffer, tracker: tracker)
             try PL.parseNewline(buffer: &buffer, tracker: tracker)
             return .text(length)

@@ -52,14 +52,12 @@ extension EncodeBuffer {
     @discardableResult mutating func writeExtendedSearchOptions(_ options: ExtendedSearchOptions) -> Int {
         self.writeIfExists(options.sourceOptions) { (options) -> Int in
             self.writeSpace() + self.writeExtendedSearchSourceOptions(options)
-        } +
-            self.writeIfExists(options.returnOptions) { (options) -> Int in
+        }
+            + self.writeIfExists(options.returnOptions) { (options) -> Int in
                 self.writeSearchReturnOptions(options)
-            } +
-            self.writeSpace() +
-            self.writeIfExists(options.charset) { (charset) -> Int in
+            } + self.writeSpace()
+            + self.writeIfExists(options.charset) { (charset) -> Int in
                 self.writeString("CHARSET \(charset) ")
-            } +
-            self.writeSearchKey(options.key)
+            } + self.writeSearchKey(options.key)
     }
 }

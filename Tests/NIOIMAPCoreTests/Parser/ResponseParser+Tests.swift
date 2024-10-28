@@ -53,14 +53,20 @@ extension ResponseParser_Tests {
 
         // send some bytes to make sure it's worked
         buffer = "0123456789"
-        XCTAssertEqual(try parser.parseResponseStream(buffer: &buffer), .response(.fetch(.streamingBytes("0123456789"))))
+        XCTAssertEqual(
+            try parser.parseResponseStream(buffer: &buffer),
+            .response(.fetch(.streamingBytes("0123456789")))
+        )
         XCTAssertEqual(try parser.parseResponseStream(buffer: &buffer), .response(.fetch(.streamingEnd)))
     }
 
     func testParseResponseStream() {
         let inputs: [(String, [ResponseOrContinuationRequest], UInt)] = [
             ("+ OK Continue", [.continuationRequest(.responseText(.init(text: "OK Continue")))], #line),
-            ("1 OK NOOP Completed", [.response(.tagged(.init(tag: "1", state: .ok(.init(text: "NOOP Completed")))))], #line),
+            (
+                "1 OK NOOP Completed", [.response(.tagged(.init(tag: "1", state: .ok(.init(text: "NOOP Completed")))))],
+                #line
+            ),
             (
                 "* 999 FETCH (FLAGS (\\Seen))",
                 [
@@ -75,10 +81,78 @@ extension ResponseParser_Tests {
                 [
                     .response(.fetch(.start(12190))),
                     .response(
-                        .fetch(.simpleAttribute(.body(.valid(.multipart(.init(parts: [
-                            .singlepart(.init(kind: .text(.init(mediaSubtype: "PLAIN", lineCount: 47)), fields: .init(parameters: ["CHARSET": "utf-8"], id: nil, contentDescription: nil, encoding: .quotedPrintable, octetCount: 1772), extension: .init(digest: nil, dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: .init(location: nil, extensions: [])))))),
-                            .singlepart(.init(kind: .text(.init(mediaSubtype: "HTML", lineCount: 40)), fields: .init(parameters: ["CHARSET": "utf-8"], id: nil, contentDescription: nil, encoding: .quotedPrintable, octetCount: 2778), extension: .init(digest: nil, dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: .init(location: nil, extensions: [])))))),
-                        ], mediaSubtype: .alternative, extension: .init(parameters: ["BOUNDARY": "Apple-Mail=_0D97185D-4FF1-42FE-9B8F-A0759D299015"], dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: .init(location: nil, extensions: []))))))), hasExtensionData: true)))
+                        .fetch(
+                            .simpleAttribute(
+                                .body(
+                                    .valid(
+                                        .multipart(
+                                            .init(
+                                                parts: [
+                                                    .singlepart(
+                                                        .init(
+                                                            kind: .text(.init(mediaSubtype: "PLAIN", lineCount: 47)),
+                                                            fields: .init(
+                                                                parameters: ["CHARSET": "utf-8"],
+                                                                id: nil,
+                                                                contentDescription: nil,
+                                                                encoding: .quotedPrintable,
+                                                                octetCount: 1772
+                                                            ),
+                                                            extension: .init(
+                                                                digest: nil,
+                                                                dispositionAndLanguage: .init(
+                                                                    disposition: nil,
+                                                                    language: .init(
+                                                                        languages: [],
+                                                                        location: .init(location: nil, extensions: [])
+                                                                    )
+                                                                )
+                                                            )
+                                                        )
+                                                    ),
+                                                    .singlepart(
+                                                        .init(
+                                                            kind: .text(.init(mediaSubtype: "HTML", lineCount: 40)),
+                                                            fields: .init(
+                                                                parameters: ["CHARSET": "utf-8"],
+                                                                id: nil,
+                                                                contentDescription: nil,
+                                                                encoding: .quotedPrintable,
+                                                                octetCount: 2778
+                                                            ),
+                                                            extension: .init(
+                                                                digest: nil,
+                                                                dispositionAndLanguage: .init(
+                                                                    disposition: nil,
+                                                                    language: .init(
+                                                                        languages: [],
+                                                                        location: .init(location: nil, extensions: [])
+                                                                    )
+                                                                )
+                                                            )
+                                                        )
+                                                    ),
+                                                ],
+                                                mediaSubtype: .alternative,
+                                                extension: .init(
+                                                    parameters: [
+                                                        "BOUNDARY": "Apple-Mail=_0D97185D-4FF1-42FE-9B8F-A0759D299015"
+                                                    ],
+                                                    dispositionAndLanguage: .init(
+                                                        disposition: nil,
+                                                        language: .init(
+                                                            languages: [],
+                                                            location: .init(location: nil, extensions: [])
+                                                        )
+                                                    )
+                                                )
+                                            )
+                                        )
+                                    ),
+                                    hasExtensionData: true
+                                )
+                            )
+                        )
                     ),
                     .response(.fetch(.finish)),
                 ],
@@ -89,9 +163,54 @@ extension ResponseParser_Tests {
                 [
                     .response(.fetch(.start(12194))),
                     .response(
-                        .fetch(.simpleAttribute(.body(.valid(.multipart(.init(parts: [
-                            .singlepart(.init(kind: .text(.init(mediaSubtype: "HTML", lineCount: 50)), fields: .init(parameters: ["CHARSET": "UTF-8"], id: nil, contentDescription: nil, encoding: .quotedPrintable, octetCount: 3034), extension: .init(digest: nil, dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: .init(location: nil, extensions: [])))))),
-                        ], mediaSubtype: .alternative, extension: .init(parameters: ["BOUNDARY": "_____5C088583DDA30A778CEA0F5BFE2856D1"], dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: .init(location: nil, extensions: []))))))), hasExtensionData: true)))
+                        .fetch(
+                            .simpleAttribute(
+                                .body(
+                                    .valid(
+                                        .multipart(
+                                            .init(
+                                                parts: [
+                                                    .singlepart(
+                                                        .init(
+                                                            kind: .text(.init(mediaSubtype: "HTML", lineCount: 50)),
+                                                            fields: .init(
+                                                                parameters: ["CHARSET": "UTF-8"],
+                                                                id: nil,
+                                                                contentDescription: nil,
+                                                                encoding: .quotedPrintable,
+                                                                octetCount: 3034
+                                                            ),
+                                                            extension: .init(
+                                                                digest: nil,
+                                                                dispositionAndLanguage: .init(
+                                                                    disposition: nil,
+                                                                    language: .init(
+                                                                        languages: [],
+                                                                        location: .init(location: nil, extensions: [])
+                                                                    )
+                                                                )
+                                                            )
+                                                        )
+                                                    )
+                                                ],
+                                                mediaSubtype: .alternative,
+                                                extension: .init(
+                                                    parameters: ["BOUNDARY": "_____5C088583DDA30A778CEA0F5BFE2856D1"],
+                                                    dispositionAndLanguage: .init(
+                                                        disposition: nil,
+                                                        language: .init(
+                                                            languages: [],
+                                                            location: .init(location: nil, extensions: [])
+                                                        )
+                                                    )
+                                                )
+                                            )
+                                        )
+                                    ),
+                                    hasExtensionData: true
+                                )
+                            )
+                        )
                     ),
                     .response(.fetch(.finish)),
                 ],
@@ -102,10 +221,80 @@ extension ResponseParser_Tests {
                 [
                     .response(.fetch(.start(12180))),
                     .response(
-                        .fetch(.simpleAttribute(.body(.valid(.multipart(.init(parts: [
-                            .singlepart(.init(kind: .text(.init(mediaSubtype: "PLAIN", lineCount: 5)), fields: .init(parameters: ["CHARSET": "UTF-8"], id: nil, contentDescription: nil, encoding: .sevenBit, octetCount: 221), extension: .init(digest: nil, dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: .init(location: nil, extensions: [])))))),
-                            .singlepart(.init(kind: .text(.init(mediaSubtype: "HTML", lineCount: 20)), fields: .init(parameters: ["CHARSET": "UTF-8"], id: nil, contentDescription: nil, encoding: .sevenBit, octetCount: 2075), extension: .init(digest: nil, dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: .init(location: nil, extensions: [])))))),
-                        ], mediaSubtype: .alternative, extension: .init(parameters: ["BOUNDARY": "--==_mimepart_5efddab8ca39a_6a343f841aacb93410876c", "CHARSET": "UTF-8"], dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: .init(location: nil, extensions: []))))))), hasExtensionData: true)))
+                        .fetch(
+                            .simpleAttribute(
+                                .body(
+                                    .valid(
+                                        .multipart(
+                                            .init(
+                                                parts: [
+                                                    .singlepart(
+                                                        .init(
+                                                            kind: .text(.init(mediaSubtype: "PLAIN", lineCount: 5)),
+                                                            fields: .init(
+                                                                parameters: ["CHARSET": "UTF-8"],
+                                                                id: nil,
+                                                                contentDescription: nil,
+                                                                encoding: .sevenBit,
+                                                                octetCount: 221
+                                                            ),
+                                                            extension: .init(
+                                                                digest: nil,
+                                                                dispositionAndLanguage: .init(
+                                                                    disposition: nil,
+                                                                    language: .init(
+                                                                        languages: [],
+                                                                        location: .init(location: nil, extensions: [])
+                                                                    )
+                                                                )
+                                                            )
+                                                        )
+                                                    ),
+                                                    .singlepart(
+                                                        .init(
+                                                            kind: .text(.init(mediaSubtype: "HTML", lineCount: 20)),
+                                                            fields: .init(
+                                                                parameters: ["CHARSET": "UTF-8"],
+                                                                id: nil,
+                                                                contentDescription: nil,
+                                                                encoding: .sevenBit,
+                                                                octetCount: 2075
+                                                            ),
+                                                            extension: .init(
+                                                                digest: nil,
+                                                                dispositionAndLanguage: .init(
+                                                                    disposition: nil,
+                                                                    language: .init(
+                                                                        languages: [],
+                                                                        location: .init(location: nil, extensions: [])
+                                                                    )
+                                                                )
+                                                            )
+                                                        )
+                                                    ),
+                                                ],
+                                                mediaSubtype: .alternative,
+                                                extension: .init(
+                                                    parameters: [
+                                                        "BOUNDARY":
+                                                            "--==_mimepart_5efddab8ca39a_6a343f841aacb93410876c",
+                                                        "CHARSET": "UTF-8",
+                                                    ],
+                                                    dispositionAndLanguage: .init(
+                                                        disposition: nil,
+                                                        language: .init(
+                                                            languages: [],
+                                                            location: .init(location: nil, extensions: [])
+                                                        )
+                                                    )
+                                                )
+                                            )
+                                        )
+                                    ),
+                                    hasExtensionData: true
+                                )
+                            )
+                        )
                     ),
                     .response(.fetch(.finish)),
                 ],
@@ -116,10 +305,76 @@ extension ResponseParser_Tests {
                 [
                     .response(.fetch(.start(12182))),
                     .response(
-                        .fetch(.simpleAttribute(.body(.valid(.multipart(.init(parts: [
-                            .singlepart(.init(kind: .text(.init(mediaSubtype: "PLAIN", lineCount: 4078)), fields: .init(parameters: ["CHARSET": "utf-8"], id: nil, contentDescription: nil, encoding: .quotedPrintable, octetCount: 239844), extension: .init(digest: nil, dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: .init(location: nil, extensions: [])))))),
-                            .singlepart(.init(kind: .text(.init(mediaSubtype: "HTML", lineCount: 4078)), fields: .init(parameters: ["CHARSET": "utf-8"], id: nil, contentDescription: nil, encoding: .quotedPrintable, octetCount: 239844), extension: .init(digest: nil, dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: .init(location: nil, extensions: [])))))),
-                        ], mediaSubtype: .alternative, extension: .init(parameters: ["BOUNDARY": "===============8996999810533184102=="], dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: .init(location: nil, extensions: []))))))), hasExtensionData: true)))
+                        .fetch(
+                            .simpleAttribute(
+                                .body(
+                                    .valid(
+                                        .multipart(
+                                            .init(
+                                                parts: [
+                                                    .singlepart(
+                                                        .init(
+                                                            kind: .text(.init(mediaSubtype: "PLAIN", lineCount: 4078)),
+                                                            fields: .init(
+                                                                parameters: ["CHARSET": "utf-8"],
+                                                                id: nil,
+                                                                contentDescription: nil,
+                                                                encoding: .quotedPrintable,
+                                                                octetCount: 239844
+                                                            ),
+                                                            extension: .init(
+                                                                digest: nil,
+                                                                dispositionAndLanguage: .init(
+                                                                    disposition: nil,
+                                                                    language: .init(
+                                                                        languages: [],
+                                                                        location: .init(location: nil, extensions: [])
+                                                                    )
+                                                                )
+                                                            )
+                                                        )
+                                                    ),
+                                                    .singlepart(
+                                                        .init(
+                                                            kind: .text(.init(mediaSubtype: "HTML", lineCount: 4078)),
+                                                            fields: .init(
+                                                                parameters: ["CHARSET": "utf-8"],
+                                                                id: nil,
+                                                                contentDescription: nil,
+                                                                encoding: .quotedPrintable,
+                                                                octetCount: 239844
+                                                            ),
+                                                            extension: .init(
+                                                                digest: nil,
+                                                                dispositionAndLanguage: .init(
+                                                                    disposition: nil,
+                                                                    language: .init(
+                                                                        languages: [],
+                                                                        location: .init(location: nil, extensions: [])
+                                                                    )
+                                                                )
+                                                            )
+                                                        )
+                                                    ),
+                                                ],
+                                                mediaSubtype: .alternative,
+                                                extension: .init(
+                                                    parameters: ["BOUNDARY": "===============8996999810533184102=="],
+                                                    dispositionAndLanguage: .init(
+                                                        disposition: nil,
+                                                        language: .init(
+                                                            languages: [],
+                                                            location: .init(location: nil, extensions: [])
+                                                        )
+                                                    )
+                                                )
+                                            )
+                                        )
+                                    ),
+                                    hasExtensionData: true
+                                )
+                            )
+                        )
                     ),
                     .response(.fetch(.finish)),
                 ],
@@ -130,7 +385,37 @@ extension ResponseParser_Tests {
                 [
                     .response(.fetch(.start(12183))),
                     .response(
-                        .fetch(.simpleAttribute(.body(.valid(.singlepart(.init(kind: .text(.init(mediaSubtype: "HTML", lineCount: 603)), fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .binary, octetCount: 28803), extension: .init(digest: nil, dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: .init(location: nil, extensions: []))))))), hasExtensionData: true)))
+                        .fetch(
+                            .simpleAttribute(
+                                .body(
+                                    .valid(
+                                        .singlepart(
+                                            .init(
+                                                kind: .text(.init(mediaSubtype: "HTML", lineCount: 603)),
+                                                fields: .init(
+                                                    parameters: [:],
+                                                    id: nil,
+                                                    contentDescription: nil,
+                                                    encoding: .binary,
+                                                    octetCount: 28803
+                                                ),
+                                                extension: .init(
+                                                    digest: nil,
+                                                    dispositionAndLanguage: .init(
+                                                        disposition: nil,
+                                                        language: .init(
+                                                            languages: [],
+                                                            location: .init(location: nil, extensions: [])
+                                                        )
+                                                    )
+                                                )
+                                            )
+                                        )
+                                    ),
+                                    hasExtensionData: true
+                                )
+                            )
+                        )
                     ),
                     .response(.fetch(.finish)),
                 ],
@@ -141,7 +426,37 @@ extension ResponseParser_Tests {
                 [
                     .response(.fetch(.start(12184))),
                     .response(
-                        .fetch(.simpleAttribute(.body(.valid(.singlepart(.init(kind: .text(.init(mediaSubtype: "PLAIN", lineCount: 30)), fields: .init(parameters: ["CHARSET": "utf-8"], id: "<DDB621064D883242BBC8DBE205F0250F@pex.exch.apple.com>", contentDescription: nil, encoding: .base64, octetCount: 2340), extension: .init(digest: nil, dispositionAndLanguage: .init(disposition: nil, language: .init(languages: ["EN-US"], location: .init(location: nil, extensions: []))))))), hasExtensionData: true)))
+                        .fetch(
+                            .simpleAttribute(
+                                .body(
+                                    .valid(
+                                        .singlepart(
+                                            .init(
+                                                kind: .text(.init(mediaSubtype: "PLAIN", lineCount: 30)),
+                                                fields: .init(
+                                                    parameters: ["CHARSET": "utf-8"],
+                                                    id: "<DDB621064D883242BBC8DBE205F0250F@pex.exch.apple.com>",
+                                                    contentDescription: nil,
+                                                    encoding: .base64,
+                                                    octetCount: 2340
+                                                ),
+                                                extension: .init(
+                                                    digest: nil,
+                                                    dispositionAndLanguage: .init(
+                                                        disposition: nil,
+                                                        language: .init(
+                                                            languages: ["EN-US"],
+                                                            location: .init(location: nil, extensions: [])
+                                                        )
+                                                    )
+                                                )
+                                            )
+                                        )
+                                    ),
+                                    hasExtensionData: true
+                                )
+                            )
+                        )
                     ),
                     .response(.fetch(.finish)),
                 ],
@@ -153,18 +468,298 @@ extension ResponseParser_Tests {
                     .response(.fetch(.start(12187))),
                     .response(
                         .fetch(
-                            .simpleAttribute(.body(.valid(.multipart(.init(parts: [
-                                .singlepart(.init(kind: .text(.init(mediaSubtype: "PLAIN", lineCount: 170)), fields: .init(parameters: ["CHARSET": "utf-8"], id: nil, contentDescription: nil, encoding: .quotedPrintable, octetCount: 6990), extension: .init(digest: nil, dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: .init(location: nil, extensions: [])))))),
-                                .multipart(.init(parts: [
-                                    .singlepart(.init(kind: .text(.init(mediaSubtype: "HTML", lineCount: 274)), fields: .init(parameters: ["CHARSET": "utf-8"], id: nil, contentDescription: nil, encoding: .quotedPrintable, octetCount: 18865), extension: .init(digest: nil, dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: .init(location: nil, extensions: [])))))),
-                                    .singlepart(.init(kind: .basic(.init(topLevel: .application, sub: .init("OCTET-STREAM"))), fields: .init(parameters: ["X-UNIX-MODE": "0644", "NAME": "Whiteboard on Webex.key"], id: nil, contentDescription: nil, encoding: .base64, octetCount: 4876604), extension: .init(digest: nil, dispositionAndLanguage: .init(disposition: .init(kind: "ATTACHMENT", parameters: ["FILENAME": "Whiteboard on Webex.key"]), language: .init(languages: [], location: .init(location: nil, extensions: [])))))),
-                                    .singlepart(.init(kind: .text(.init(mediaSubtype: "HTML", lineCount: 17)), fields: .init(parameters: ["CHARSET": "us-ascii"], id: nil, contentDescription: nil, encoding: .quotedPrintable, octetCount: 1143), extension: .init(digest: nil, dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: .init(location: nil, extensions: [])))))),
-                                    .singlepart(.init(kind: .basic(.init(topLevel: .application, sub: .init("PDF"))), fields: .init(parameters: ["X-UNIX-MODE": "0644", "NAME": "Whiteboard on Webex.pdf"], id: nil, contentDescription: nil, encoding: .base64, octetCount: 1191444), extension: .init(digest: nil, dispositionAndLanguage: .init(disposition: .init(kind: "INLINE", parameters: ["FILENAME": "Whiteboard on Webex.pdf"]), language: .init(languages: [], location: .init(location: nil, extensions: [])))))),
-                                    .singlepart(.init(kind: .text(.init(mediaSubtype: "HTML", lineCount: 32)), fields: .init(parameters: ["CHARSET": "us-ascii"], id: nil, contentDescription: nil, encoding: .quotedPrintable, octetCount: 2217), extension: .init(digest: nil, dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: .init(location: nil, extensions: [])))))),
-                                    .singlepart(.init(kind: .basic(.init(topLevel: .application, sub: .init("PDF"))), fields: .init(parameters: ["X-UNIX-MODE": "0666", "NAME": "Resume.pdf"], id: nil, contentDescription: nil, encoding: .base64, octetCount: 217550), extension: .init(digest: nil, dispositionAndLanguage: .init(disposition: .init(kind: "INLINE", parameters: ["FILENAME": "Resume.pdf"]), language: .init(languages: [], location: .init(location: nil, extensions: [])))))),
-                                    .singlepart(.init(kind: .text(.init(mediaSubtype: "HTML", lineCount: 62)), fields: .init(parameters: ["CHARSET": "utf-8"], id: nil, contentDescription: nil, encoding: .quotedPrintable, octetCount: 4450), extension: .init(digest: nil, dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: .init(location: nil, extensions: [])))))),
-                                ], mediaSubtype: .mixed, extension: .init(parameters: ["BOUNDARY": "Apple-Mail=_1B76125E-EB81-4B78-A023-B30D1F9070F2"], dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: .init(location: nil, extensions: [])))))),
-                            ], mediaSubtype: .alternative, extension: .init(parameters: ["BOUNDARY": "Apple-Mail=_2F0988E2-CA7E-4379-B088-7E556A97E21F"], dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: .init(location: nil, extensions: []))))))), hasExtensionData: true))
+                            .simpleAttribute(
+                                .body(
+                                    .valid(
+                                        .multipart(
+                                            .init(
+                                                parts: [
+                                                    .singlepart(
+                                                        .init(
+                                                            kind: .text(.init(mediaSubtype: "PLAIN", lineCount: 170)),
+                                                            fields: .init(
+                                                                parameters: ["CHARSET": "utf-8"],
+                                                                id: nil,
+                                                                contentDescription: nil,
+                                                                encoding: .quotedPrintable,
+                                                                octetCount: 6990
+                                                            ),
+                                                            extension: .init(
+                                                                digest: nil,
+                                                                dispositionAndLanguage: .init(
+                                                                    disposition: nil,
+                                                                    language: .init(
+                                                                        languages: [],
+                                                                        location: .init(location: nil, extensions: [])
+                                                                    )
+                                                                )
+                                                            )
+                                                        )
+                                                    ),
+                                                    .multipart(
+                                                        .init(
+                                                            parts: [
+                                                                .singlepart(
+                                                                    .init(
+                                                                        kind: .text(
+                                                                            .init(mediaSubtype: "HTML", lineCount: 274)
+                                                                        ),
+                                                                        fields: .init(
+                                                                            parameters: ["CHARSET": "utf-8"],
+                                                                            id: nil,
+                                                                            contentDescription: nil,
+                                                                            encoding: .quotedPrintable,
+                                                                            octetCount: 18865
+                                                                        ),
+                                                                        extension: .init(
+                                                                            digest: nil,
+                                                                            dispositionAndLanguage: .init(
+                                                                                disposition: nil,
+                                                                                language: .init(
+                                                                                    languages: [],
+                                                                                    location: .init(
+                                                                                        location: nil,
+                                                                                        extensions: []
+                                                                                    )
+                                                                                )
+                                                                            )
+                                                                        )
+                                                                    )
+                                                                ),
+                                                                .singlepart(
+                                                                    .init(
+                                                                        kind: .basic(
+                                                                            .init(
+                                                                                topLevel: .application,
+                                                                                sub: .init("OCTET-STREAM")
+                                                                            )
+                                                                        ),
+                                                                        fields: .init(
+                                                                            parameters: [
+                                                                                "X-UNIX-MODE": "0644",
+                                                                                "NAME": "Whiteboard on Webex.key",
+                                                                            ],
+                                                                            id: nil,
+                                                                            contentDescription: nil,
+                                                                            encoding: .base64,
+                                                                            octetCount: 4_876_604
+                                                                        ),
+                                                                        extension: .init(
+                                                                            digest: nil,
+                                                                            dispositionAndLanguage: .init(
+                                                                                disposition: .init(
+                                                                                    kind: "ATTACHMENT",
+                                                                                    parameters: [
+                                                                                        "FILENAME":
+                                                                                            "Whiteboard on Webex.key"
+                                                                                    ]
+                                                                                ),
+                                                                                language: .init(
+                                                                                    languages: [],
+                                                                                    location: .init(
+                                                                                        location: nil,
+                                                                                        extensions: []
+                                                                                    )
+                                                                                )
+                                                                            )
+                                                                        )
+                                                                    )
+                                                                ),
+                                                                .singlepart(
+                                                                    .init(
+                                                                        kind: .text(
+                                                                            .init(mediaSubtype: "HTML", lineCount: 17)
+                                                                        ),
+                                                                        fields: .init(
+                                                                            parameters: ["CHARSET": "us-ascii"],
+                                                                            id: nil,
+                                                                            contentDescription: nil,
+                                                                            encoding: .quotedPrintable,
+                                                                            octetCount: 1143
+                                                                        ),
+                                                                        extension: .init(
+                                                                            digest: nil,
+                                                                            dispositionAndLanguage: .init(
+                                                                                disposition: nil,
+                                                                                language: .init(
+                                                                                    languages: [],
+                                                                                    location: .init(
+                                                                                        location: nil,
+                                                                                        extensions: []
+                                                                                    )
+                                                                                )
+                                                                            )
+                                                                        )
+                                                                    )
+                                                                ),
+                                                                .singlepart(
+                                                                    .init(
+                                                                        kind: .basic(
+                                                                            .init(
+                                                                                topLevel: .application,
+                                                                                sub: .init("PDF")
+                                                                            )
+                                                                        ),
+                                                                        fields: .init(
+                                                                            parameters: [
+                                                                                "X-UNIX-MODE": "0644",
+                                                                                "NAME": "Whiteboard on Webex.pdf",
+                                                                            ],
+                                                                            id: nil,
+                                                                            contentDescription: nil,
+                                                                            encoding: .base64,
+                                                                            octetCount: 1_191_444
+                                                                        ),
+                                                                        extension: .init(
+                                                                            digest: nil,
+                                                                            dispositionAndLanguage: .init(
+                                                                                disposition: .init(
+                                                                                    kind: "INLINE",
+                                                                                    parameters: [
+                                                                                        "FILENAME":
+                                                                                            "Whiteboard on Webex.pdf"
+                                                                                    ]
+                                                                                ),
+                                                                                language: .init(
+                                                                                    languages: [],
+                                                                                    location: .init(
+                                                                                        location: nil,
+                                                                                        extensions: []
+                                                                                    )
+                                                                                )
+                                                                            )
+                                                                        )
+                                                                    )
+                                                                ),
+                                                                .singlepart(
+                                                                    .init(
+                                                                        kind: .text(
+                                                                            .init(mediaSubtype: "HTML", lineCount: 32)
+                                                                        ),
+                                                                        fields: .init(
+                                                                            parameters: ["CHARSET": "us-ascii"],
+                                                                            id: nil,
+                                                                            contentDescription: nil,
+                                                                            encoding: .quotedPrintable,
+                                                                            octetCount: 2217
+                                                                        ),
+                                                                        extension: .init(
+                                                                            digest: nil,
+                                                                            dispositionAndLanguage: .init(
+                                                                                disposition: nil,
+                                                                                language: .init(
+                                                                                    languages: [],
+                                                                                    location: .init(
+                                                                                        location: nil,
+                                                                                        extensions: []
+                                                                                    )
+                                                                                )
+                                                                            )
+                                                                        )
+                                                                    )
+                                                                ),
+                                                                .singlepart(
+                                                                    .init(
+                                                                        kind: .basic(
+                                                                            .init(
+                                                                                topLevel: .application,
+                                                                                sub: .init("PDF")
+                                                                            )
+                                                                        ),
+                                                                        fields: .init(
+                                                                            parameters: [
+                                                                                "X-UNIX-MODE": "0666",
+                                                                                "NAME": "Resume.pdf",
+                                                                            ],
+                                                                            id: nil,
+                                                                            contentDescription: nil,
+                                                                            encoding: .base64,
+                                                                            octetCount: 217550
+                                                                        ),
+                                                                        extension: .init(
+                                                                            digest: nil,
+                                                                            dispositionAndLanguage: .init(
+                                                                                disposition: .init(
+                                                                                    kind: "INLINE",
+                                                                                    parameters: [
+                                                                                        "FILENAME": "Resume.pdf"
+                                                                                    ]
+                                                                                ),
+                                                                                language: .init(
+                                                                                    languages: [],
+                                                                                    location: .init(
+                                                                                        location: nil,
+                                                                                        extensions: []
+                                                                                    )
+                                                                                )
+                                                                            )
+                                                                        )
+                                                                    )
+                                                                ),
+                                                                .singlepart(
+                                                                    .init(
+                                                                        kind: .text(
+                                                                            .init(mediaSubtype: "HTML", lineCount: 62)
+                                                                        ),
+                                                                        fields: .init(
+                                                                            parameters: ["CHARSET": "utf-8"],
+                                                                            id: nil,
+                                                                            contentDescription: nil,
+                                                                            encoding: .quotedPrintable,
+                                                                            octetCount: 4450
+                                                                        ),
+                                                                        extension: .init(
+                                                                            digest: nil,
+                                                                            dispositionAndLanguage: .init(
+                                                                                disposition: nil,
+                                                                                language: .init(
+                                                                                    languages: [],
+                                                                                    location: .init(
+                                                                                        location: nil,
+                                                                                        extensions: []
+                                                                                    )
+                                                                                )
+                                                                            )
+                                                                        )
+                                                                    )
+                                                                ),
+                                                            ],
+                                                            mediaSubtype: .mixed,
+                                                            extension: .init(
+                                                                parameters: [
+                                                                    "BOUNDARY":
+                                                                        "Apple-Mail=_1B76125E-EB81-4B78-A023-B30D1F9070F2"
+                                                                ],
+                                                                dispositionAndLanguage: .init(
+                                                                    disposition: nil,
+                                                                    language: .init(
+                                                                        languages: [],
+                                                                        location: .init(location: nil, extensions: [])
+                                                                    )
+                                                                )
+                                                            )
+                                                        )
+                                                    ),
+                                                ],
+                                                mediaSubtype: .alternative,
+                                                extension: .init(
+                                                    parameters: [
+                                                        "BOUNDARY": "Apple-Mail=_2F0988E2-CA7E-4379-B088-7E556A97E21F"
+                                                    ],
+                                                    dispositionAndLanguage: .init(
+                                                        disposition: nil,
+                                                        language: .init(
+                                                            languages: [],
+                                                            location: .init(location: nil, extensions: [])
+                                                        )
+                                                    )
+                                                )
+                                            )
+                                        )
+                                    ),
+                                    hasExtensionData: true
+                                )
+                            )
                         )
                     ),
                     .response(.fetch(.finish)),
@@ -175,9 +770,54 @@ extension ResponseParser_Tests {
                 #"* 53 FETCH (BODYSTRUCTURE (("TEXT" "HTML" NIL NIL NIL "7BIT" 151 0 NIL NIL NIL) "MIXED" ("BOUNDARY" "----=rfsewr") NIL NIL))"#,
                 [
                     .response(.fetch(.start(53))),
-                    .response(.fetch(.simpleAttribute(.body(.valid(.multipart(.init(parts: [
-                        .singlepart(.init(kind: .text(.init(mediaSubtype: "HTML", lineCount: 0)), fields: BodyStructure.Fields(parameters: [:], id: nil, contentDescription: nil, encoding: .sevenBit, octetCount: 151), extension: BodyStructure.Singlepart.Extension(digest: nil, dispositionAndLanguage: BodyStructure.DispositionAndLanguage(disposition: nil, language: BodyStructure.LanguageLocation(languages: [], location: nil))))),
-                    ], mediaSubtype: .mixed, extension: .init(parameters: ["BOUNDARY": "----=rfsewr"], dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [], location: nil)))))), hasExtensionData: true)))),
+                    .response(
+                        .fetch(
+                            .simpleAttribute(
+                                .body(
+                                    .valid(
+                                        .multipart(
+                                            .init(
+                                                parts: [
+                                                    .singlepart(
+                                                        .init(
+                                                            kind: .text(.init(mediaSubtype: "HTML", lineCount: 0)),
+                                                            fields: BodyStructure.Fields(
+                                                                parameters: [:],
+                                                                id: nil,
+                                                                contentDescription: nil,
+                                                                encoding: .sevenBit,
+                                                                octetCount: 151
+                                                            ),
+                                                            extension: BodyStructure.Singlepart.Extension(
+                                                                digest: nil,
+                                                                dispositionAndLanguage:
+                                                                    BodyStructure.DispositionAndLanguage(
+                                                                        disposition: nil,
+                                                                        language: BodyStructure.LanguageLocation(
+                                                                            languages: [],
+                                                                            location: nil
+                                                                        )
+                                                                    )
+                                                            )
+                                                        )
+                                                    )
+                                                ],
+                                                mediaSubtype: .mixed,
+                                                extension: .init(
+                                                    parameters: ["BOUNDARY": "----=rfsewr"],
+                                                    dispositionAndLanguage: .init(
+                                                        disposition: nil,
+                                                        language: .init(languages: [], location: nil)
+                                                    )
+                                                )
+                                            )
+                                        )
+                                    ),
+                                    hasExtensionData: true
+                                )
+                            )
+                        )
+                    ),
                     .response(.fetch(.finish)),
                 ],
                 #line
@@ -187,20 +827,163 @@ extension ResponseParser_Tests {
                 [
                     .response(.fetch(.start(433))),
                     .response(
-                        .fetch(.simpleAttribute(.body(.valid(.multipart(.init(parts: [
-                            .multipart(
-                                .init(parts: [
-                                    .multipart(
-                                        .init(parts: [
-                                            .singlepart(.init(kind: .text(.init(mediaSubtype: "PLAIN", lineCount: 20)), fields: .init(parameters: ["CHARSET": "ISO-8859-1"], id: nil, contentDescription: nil, encoding: .quotedPrintable, octetCount: 710), extension: .init(digest: nil, dispositionAndLanguage: .init(disposition: nil, language: .init(languages: []))))),
-                                            .singlepart(.init(kind: .text(.init(mediaSubtype: "HTML", lineCount: 42)), fields: .init(parameters: ["CHARSET": "ISO-8859-1"], id: nil, contentDescription: nil, encoding: .quotedPrintable, octetCount: 4323), extension: .init(digest: nil, dispositionAndLanguage: .init(disposition: .init(kind: "INLINE", parameters: [:]), language: .init(languages: []))))),
-                                        ], mediaSubtype: .alternative, extension: .init(parameters: ["BOUNDARY": "4__=rtfgha"], dispositionAndLanguage: .init(disposition: nil, language: .init(languages: []))))
+                        .fetch(
+                            .simpleAttribute(
+                                .body(
+                                    .valid(
+                                        .multipart(
+                                            .init(
+                                                parts: [
+                                                    .multipart(
+                                                        .init(
+                                                            parts: [
+                                                                .multipart(
+                                                                    .init(
+                                                                        parts: [
+                                                                            .singlepart(
+                                                                                .init(
+                                                                                    kind: .text(
+                                                                                        .init(
+                                                                                            mediaSubtype: "PLAIN",
+                                                                                            lineCount: 20
+                                                                                        )
+                                                                                    ),
+                                                                                    fields: .init(
+                                                                                        parameters: [
+                                                                                            "CHARSET": "ISO-8859-1"
+                                                                                        ],
+                                                                                        id: nil,
+                                                                                        contentDescription: nil,
+                                                                                        encoding: .quotedPrintable,
+                                                                                        octetCount: 710
+                                                                                    ),
+                                                                                    extension: .init(
+                                                                                        digest: nil,
+                                                                                        dispositionAndLanguage: .init(
+                                                                                            disposition: nil,
+                                                                                            language: .init(
+                                                                                                languages: [])
+                                                                                        )
+                                                                                    )
+                                                                                )
+                                                                            ),
+                                                                            .singlepart(
+                                                                                .init(
+                                                                                    kind: .text(
+                                                                                        .init(
+                                                                                            mediaSubtype: "HTML",
+                                                                                            lineCount: 42
+                                                                                        )
+                                                                                    ),
+                                                                                    fields: .init(
+                                                                                        parameters: [
+                                                                                            "CHARSET": "ISO-8859-1"
+                                                                                        ],
+                                                                                        id: nil,
+                                                                                        contentDescription: nil,
+                                                                                        encoding: .quotedPrintable,
+                                                                                        octetCount: 4323
+                                                                                    ),
+                                                                                    extension: .init(
+                                                                                        digest: nil,
+                                                                                        dispositionAndLanguage: .init(
+                                                                                            disposition: .init(
+                                                                                                kind: "INLINE",
+                                                                                                parameters: [:]
+                                                                                            ),
+                                                                                            language: .init(
+                                                                                                languages: [])
+                                                                                        )
+                                                                                    )
+                                                                                )
+                                                                            ),
+                                                                        ],
+                                                                        mediaSubtype: .alternative,
+                                                                        extension: .init(
+                                                                            parameters: ["BOUNDARY": "4__=rtfgha"],
+                                                                            dispositionAndLanguage: .init(
+                                                                                disposition: nil,
+                                                                                language: .init(languages: [])
+                                                                            )
+                                                                        )
+                                                                    )
+                                                                ),
+                                                                .singlepart(
+                                                                    .init(
+                                                                        kind: .basic(
+                                                                            .init(topLevel: .image, sub: .init("JPEG"))
+                                                                        ),
+                                                                        fields: .init(
+                                                                            parameters: ["NAME": "bike.jpeg"],
+                                                                            id: "<2__=lgkfjr>",
+                                                                            contentDescription: nil,
+                                                                            encoding: .base64,
+                                                                            octetCount: 64
+                                                                        ),
+                                                                        extension: .init(
+                                                                            digest: nil,
+                                                                            dispositionAndLanguage: .init(
+                                                                                disposition: .init(
+                                                                                    kind: "INLINE",
+                                                                                    parameters: [
+                                                                                        "FILENAME": "bike.jpeg"
+                                                                                    ]
+                                                                                ),
+                                                                                language: .init(languages: [])
+                                                                            )
+                                                                        )
+                                                                    )
+                                                                ),
+                                                            ],
+                                                            mediaSubtype: .related,
+                                                            extension: .init(
+                                                                parameters: ["BOUNDARY": "0__=rtfgaa"],
+                                                                dispositionAndLanguage: .init(
+                                                                    disposition: nil,
+                                                                    language: .init(languages: [])
+                                                                )
+                                                            )
+                                                        )
+                                                    ),
+                                                    .singlepart(
+                                                        .init(
+                                                            kind: .basic(
+                                                                .init(topLevel: .application, sub: .init("PDF"))
+                                                            ),
+                                                            fields: .init(
+                                                                parameters: ["NAME": "title.pdf"],
+                                                                id: "<5__=jlgkfr>",
+                                                                contentDescription: nil,
+                                                                encoding: .base64,
+                                                                octetCount: 333980
+                                                            ),
+                                                            extension: .init(
+                                                                digest: nil,
+                                                                dispositionAndLanguage: .init(
+                                                                    disposition: .init(
+                                                                        kind: "ATTACHMENT",
+                                                                        parameters: ["FILENAME": "list.pdf"]
+                                                                    ),
+                                                                    language: .init(languages: [])
+                                                                )
+                                                            )
+                                                        )
+                                                    ),
+                                                ],
+                                                mediaSubtype: .mixed,
+                                                extension: .init(
+                                                    parameters: ["BOUNDARY": "1__=tfgrhs"],
+                                                    dispositionAndLanguage: .init(
+                                                        disposition: nil,
+                                                        language: .init(languages: [])
+                                                    )
+                                                )
+                                            )
+                                        )
                                     ),
-                                    .singlepart(.init(kind: .basic(.init(topLevel: .image, sub: .init("JPEG"))), fields: .init(parameters: ["NAME": "bike.jpeg"], id: "<2__=lgkfjr>", contentDescription: nil, encoding: .base64, octetCount: 64), extension: .init(digest: nil, dispositionAndLanguage: .init(disposition: .init(kind: "INLINE", parameters: ["FILENAME": "bike.jpeg"]), language: .init(languages: []))))),
-                                ], mediaSubtype: .related, extension: .init(parameters: ["BOUNDARY": "0__=rtfgaa"], dispositionAndLanguage: .init(disposition: nil, language: .init(languages: []))))
-                            ),
-                            .singlepart(.init(kind: .basic(.init(topLevel: .application, sub: .init("PDF"))), fields: .init(parameters: ["NAME": "title.pdf"], id: "<5__=jlgkfr>", contentDescription: nil, encoding: .base64, octetCount: 333980), extension: .init(digest: nil, dispositionAndLanguage: .init(disposition: .init(kind: "ATTACHMENT", parameters: ["FILENAME": "list.pdf"]), language: .init(languages: []))))),
-                        ], mediaSubtype: .mixed, extension: .init(parameters: ["BOUNDARY": "1__=tfgrhs"], dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [])))))), hasExtensionData: true))
+                                    hasExtensionData: true
+                                )
+                            )
                         )
                     ),
                     .response(.fetch(.finish)),
@@ -212,17 +995,110 @@ extension ResponseParser_Tests {
                 [
                     .response(.fetch(.start(234))),
                     .response(
-                        .fetch(.simpleAttribute(.body(.valid(.multipart(.init(parts: [
-                            .multipart(
-                                .init(parts: [
-                                    .singlepart(.init(kind: .text(.init(mediaSubtype: "PLAIN", lineCount: 24)), fields: .init(parameters: ["CHARSET": "ISO-8859-1"], id: nil, contentDescription: nil, encoding: .quotedPrintable, octetCount: 410), extension: .init(digest: nil, dispositionAndLanguage: .init(disposition: nil, language: .init(languages: []))))),
-                                    .singlepart(.init(kind: .text(.init(mediaSubtype: "HTML", lineCount: 30)), fields: .init(parameters: ["CHARSET": "ISO-8859-1"], id: nil, contentDescription: nil, encoding: .quotedPrintable, octetCount: 1407), extension: .init(digest: nil, dispositionAndLanguage: .init(disposition: .init(kind: "INLINE", parameters: [:]), language: .init(languages: []))))),
-                                ], mediaSubtype: .alternative, extension: .init(parameters: ["BOUNDARY": "hqjksdm1__="], dispositionAndLanguage: .init(disposition: nil, language: .init(languages: []))))
-                            ),
-                            .singlepart(
-                                .init(kind: .basic(.init(topLevel: .image, sub: .init("PNG"))), fields: BodyStructure.Fields(parameters: ["NAME": "screenshot.png"], id: "<3__=f2fcxd>", contentDescription: nil, encoding: .base64, octetCount: 40655), extension: .init(digest: nil, dispositionAndLanguage: .init(disposition: .init(kind: "INLINE", parameters: ["FILENAME": "screenshot.png"]), language: .init(languages: []))))
-                            ),
-                        ], mediaSubtype: .related, extension: .init(parameters: ["BOUNDARY": "5__=hsdqjkm"], dispositionAndLanguage: .init(disposition: nil, language: .init(languages: [])))))), hasExtensionData: true)))
+                        .fetch(
+                            .simpleAttribute(
+                                .body(
+                                    .valid(
+                                        .multipart(
+                                            .init(
+                                                parts: [
+                                                    .multipart(
+                                                        .init(
+                                                            parts: [
+                                                                .singlepart(
+                                                                    .init(
+                                                                        kind: .text(
+                                                                            .init(mediaSubtype: "PLAIN", lineCount: 24)
+                                                                        ),
+                                                                        fields: .init(
+                                                                            parameters: ["CHARSET": "ISO-8859-1"],
+                                                                            id: nil,
+                                                                            contentDescription: nil,
+                                                                            encoding: .quotedPrintable,
+                                                                            octetCount: 410
+                                                                        ),
+                                                                        extension: .init(
+                                                                            digest: nil,
+                                                                            dispositionAndLanguage: .init(
+                                                                                disposition: nil,
+                                                                                language: .init(languages: [])
+                                                                            )
+                                                                        )
+                                                                    )
+                                                                ),
+                                                                .singlepart(
+                                                                    .init(
+                                                                        kind: .text(
+                                                                            .init(mediaSubtype: "HTML", lineCount: 30)
+                                                                        ),
+                                                                        fields: .init(
+                                                                            parameters: ["CHARSET": "ISO-8859-1"],
+                                                                            id: nil,
+                                                                            contentDescription: nil,
+                                                                            encoding: .quotedPrintable,
+                                                                            octetCount: 1407
+                                                                        ),
+                                                                        extension: .init(
+                                                                            digest: nil,
+                                                                            dispositionAndLanguage: .init(
+                                                                                disposition: .init(
+                                                                                    kind: "INLINE",
+                                                                                    parameters: [:]
+                                                                                ),
+                                                                                language: .init(languages: [])
+                                                                            )
+                                                                        )
+                                                                    )
+                                                                ),
+                                                            ],
+                                                            mediaSubtype: .alternative,
+                                                            extension: .init(
+                                                                parameters: ["BOUNDARY": "hqjksdm1__="],
+                                                                dispositionAndLanguage: .init(
+                                                                    disposition: nil,
+                                                                    language: .init(languages: [])
+                                                                )
+                                                            )
+                                                        )
+                                                    ),
+                                                    .singlepart(
+                                                        .init(
+                                                            kind: .basic(.init(topLevel: .image, sub: .init("PNG"))),
+                                                            fields: BodyStructure.Fields(
+                                                                parameters: ["NAME": "screenshot.png"],
+                                                                id: "<3__=f2fcxd>",
+                                                                contentDescription: nil,
+                                                                encoding: .base64,
+                                                                octetCount: 40655
+                                                            ),
+                                                            extension: .init(
+                                                                digest: nil,
+                                                                dispositionAndLanguage: .init(
+                                                                    disposition: .init(
+                                                                        kind: "INLINE",
+                                                                        parameters: ["FILENAME": "screenshot.png"]
+                                                                    ),
+                                                                    language: .init(languages: [])
+                                                                )
+                                                            )
+                                                        )
+                                                    ),
+                                                ],
+                                                mediaSubtype: .related,
+                                                extension: .init(
+                                                    parameters: ["BOUNDARY": "5__=hsdqjkm"],
+                                                    dispositionAndLanguage: .init(
+                                                        disposition: nil,
+                                                        language: .init(languages: [])
+                                                    )
+                                                )
+                                            )
+                                        )
+                                    ),
+                                    hasExtensionData: true
+                                )
+                            )
+                        )
                     ),
                     .response(.fetch(.finish)),
                 ],
@@ -232,7 +1108,7 @@ extension ResponseParser_Tests {
                 "* 12183 FETCH (UID 2282556735 PREVIEW {3}\r\nabc FLAGS (\\Seen))",
                 [
                     .response(.fetch(.start(12183))),
-                    .response(.fetch(.simpleAttribute(.uid(2282556735)))),
+                    .response(.fetch(.simpleAttribute(.uid(2_282_556_735)))),
                     .response(.fetch(.simpleAttribute(.preview(.init("abc"))))),
                     .response(.fetch(.simpleAttribute(.flags([.seen])))),
                     .response(.fetch(.finish)),
@@ -282,21 +1158,26 @@ extension ResponseParser_Tests {
         // IncompleteMessage error. This needs to _not_ fail the parsing, but instead
         // bubble up to parseResponseStream() which will then wait for more data.
         //
-        var buffer = ByteBuffer(string: #"""
-        * 61785 FETCH (UID 127139 BODYSTRUCTURE (("TEXT" "PLAIN" ("CHARSET" "utf-8") NIL NIL "QUOTED-PRINTABLE" 71399 1519 NIL NIL NIL NIL)(("TEXT" "HTML" ("CHARSET" "utf-8") NIL NIL "QUOTED-PRINTABLE" 659725 9831 NIL NIL NIL NIL)("IMAGE" "PNG" ("X-UNIX-MODE" "0666" "NAME" "H9eubHenuyTiQAAAABJRU5ErkJggg==.png") "<5079C210-D42C-49F4-A942-2BA779C88A96>" NIL "BASE64" 104028 NIL ("INLINE" ("FILENAME" "H9eubHenuyTiQAAAABJRU5ErkJggg==.png")) NIL NIL)("IMAGE" "PNG" ("X-UNIX-MODE" "0666" "NAME" "IAEJCABCUhAAhKQgAQkIAEJSEACEpCABCQgAQlIQAISkIAEJNAKAQMdW8HsSSQgAQlIQAISkIAEJCABCUhAAhKQgAQkIAEJSEACEpCABCQgAQlIQAISkIAEJCABCUhAA") "<23E8CC74-836D-4B45-8B1E-1CF023182729>" NIL "BASE64" 55168 NIL ("INLINE" ("FILENAME" {4138}\#r\#naaaaaaaa
-        """#)
+        var buffer = ByteBuffer(
+            string: #"""
+                * 61785 FETCH (UID 127139 BODYSTRUCTURE (("TEXT" "PLAIN" ("CHARSET" "utf-8") NIL NIL "QUOTED-PRINTABLE" 71399 1519 NIL NIL NIL NIL)(("TEXT" "HTML" ("CHARSET" "utf-8") NIL NIL "QUOTED-PRINTABLE" 659725 9831 NIL NIL NIL NIL)("IMAGE" "PNG" ("X-UNIX-MODE" "0666" "NAME" "H9eubHenuyTiQAAAABJRU5ErkJggg==.png") "<5079C210-D42C-49F4-A942-2BA779C88A96>" NIL "BASE64" 104028 NIL ("INLINE" ("FILENAME" "H9eubHenuyTiQAAAABJRU5ErkJggg==.png")) NIL NIL)("IMAGE" "PNG" ("X-UNIX-MODE" "0666" "NAME" "IAEJCABCUhAAhKQgAQkIAEJSEACEpCABCQgAQlIQAISkIAEJNAKAQMdW8HsSSQgAQlIQAISkIAEJCABCUhAAhKQgAQkIAEJSEACEpCABCQgAQlIQAISkIAEJCABCUhAA") "<23E8CC74-836D-4B45-8B1E-1CF023182729>" NIL "BASE64" 55168 NIL ("INLINE" ("FILENAME" {4138}\#r\#naaaaaaaa
+                """#
+        )
         var parser = ResponseParser()
-        XCTAssertEqual(try { () -> [ResponseOrContinuationRequest] in
-            var results: [ResponseOrContinuationRequest] = []
-            while buffer.readableBytes > 0 {
-                guard let resp = try parser.parseResponseStream(buffer: &buffer) else { break }
-                results.append(resp)
-            }
-            return results
-        }(), [
-            .response(.fetch(.start(617_85))),
-            .response(.fetch(.simpleAttribute(.uid(127_139)))),
-        ])
+        XCTAssertEqual(
+            try { () -> [ResponseOrContinuationRequest] in
+                var results: [ResponseOrContinuationRequest] = []
+                while buffer.readableBytes > 0 {
+                    guard let resp = try parser.parseResponseStream(buffer: &buffer) else { break }
+                    results.append(resp)
+                }
+                return results
+            }(),
+            [
+                .response(.fetch(.start(617_85))),
+                .response(.fetch(.simpleAttribute(.uid(127_139)))),
+            ]
+        )
     }
 
     func testAttributeLimit_failOnStreaming() {
@@ -305,9 +1186,15 @@ extension ResponseParser_Tests {
 
         // limit is 3, so let's parse the first 3
         XCTAssertEqual(try parser.parseResponseStream(buffer: &buffer), .response(.fetch(.start(999))))
-        XCTAssertEqual(try parser.parseResponseStream(buffer: &buffer), .response(.fetch(.simpleAttribute(.flags([.seen])))))
+        XCTAssertEqual(
+            try parser.parseResponseStream(buffer: &buffer),
+            .response(.fetch(.simpleAttribute(.flags([.seen]))))
+        )
         XCTAssertEqual(try parser.parseResponseStream(buffer: &buffer), .response(.fetch(.simpleAttribute(.uid(1)))))
-        XCTAssertEqual(try parser.parseResponseStream(buffer: &buffer), .response(.fetch(.simpleAttribute(.rfc822Size(123)))))
+        XCTAssertEqual(
+            try parser.parseResponseStream(buffer: &buffer),
+            .response(.fetch(.simpleAttribute(.rfc822Size(123))))
+        )
 
         // the limit is 3, so the fourth should fail
         XCTAssertThrowsError(try parser.parseResponseStream(buffer: &buffer)) { e in
@@ -321,9 +1208,15 @@ extension ResponseParser_Tests {
 
         // limit is 3, so let's parse the first 3
         XCTAssertEqual(try parser.parseResponseStream(buffer: &buffer), .response(.fetch(.start(999))))
-        XCTAssertEqual(try parser.parseResponseStream(buffer: &buffer), .response(.fetch(.simpleAttribute(.flags([.seen])))))
+        XCTAssertEqual(
+            try parser.parseResponseStream(buffer: &buffer),
+            .response(.fetch(.simpleAttribute(.flags([.seen]))))
+        )
         XCTAssertEqual(try parser.parseResponseStream(buffer: &buffer), .response(.fetch(.simpleAttribute(.uid(1)))))
-        XCTAssertEqual(try parser.parseResponseStream(buffer: &buffer), .response(.fetch(.simpleAttribute(.rfc822Size(123)))))
+        XCTAssertEqual(
+            try parser.parseResponseStream(buffer: &buffer),
+            .response(.fetch(.simpleAttribute(.rfc822Size(123))))
+        )
 
         // the limit is 3, so the fourth should fail
         XCTAssertThrowsError(try parser.parseResponseStream(buffer: &buffer)) { e in
@@ -335,7 +1228,10 @@ extension ResponseParser_Tests {
         var parser = ResponseParser(bufferLimit: 1000, bodySizeLimit: 10)
         var buffer: ByteBuffer = "* 999 FETCH (RFC822.TEXT {3}\r\n123 RFC822.HEADER {11}\r\n "
         XCTAssertEqual(try parser.parseResponseStream(buffer: &buffer), .response(.fetch(.start(999))))
-        XCTAssertEqual(try parser.parseResponseStream(buffer: &buffer), .response(.fetch(.streamingBegin(kind: .rfc822Text, byteCount: 3))))
+        XCTAssertEqual(
+            try parser.parseResponseStream(buffer: &buffer),
+            .response(.fetch(.streamingBegin(kind: .rfc822Text, byteCount: 3)))
+        )
         XCTAssertEqual(try parser.parseResponseStream(buffer: &buffer), .response(.fetch(.streamingBytes("123"))))
         XCTAssertEqual(try parser.parseResponseStream(buffer: &buffer), .response(.fetch(.streamingEnd)))
 
@@ -348,7 +1244,10 @@ extension ResponseParser_Tests {
         var parser = ResponseParser(bufferLimit: 1000, bodySizeLimit: 10)
         var buffer: ByteBuffer = "* 999 FETCH (FLAGS (\\Seen))\r\n"
         XCTAssertEqual(try parser.parseResponseStream(buffer: &buffer), .response(.fetch(.start(999))))
-        XCTAssertEqual(try parser.parseResponseStream(buffer: &buffer), .response(.fetch(.simpleAttribute(.flags([.seen])))))
+        XCTAssertEqual(
+            try parser.parseResponseStream(buffer: &buffer),
+            .response(.fetch(.simpleAttribute(.flags([.seen]))))
+        )
     }
 
     // The flag "seen" should be given to our cache closure
@@ -363,7 +1262,10 @@ extension ResponseParser_Tests {
         var parser = ResponseParser(bufferLimit: 1000, bodySizeLimit: 10, parsedStringCache: testCache)
         var buffer: ByteBuffer = "* 999 FETCH (FLAGS (\\Seen))\r\n"
         XCTAssertEqual(try parser.parseResponseStream(buffer: &buffer), .response(.fetch(.start(999))))
-        XCTAssertEqual(try parser.parseResponseStream(buffer: &buffer), .response(.fetch(.simpleAttribute(.flags([.init("\\nees")])))))
+        XCTAssertEqual(
+            try parser.parseResponseStream(buffer: &buffer),
+            .response(.fetch(.simpleAttribute(.flags([.init("\\nees")]))))
+        )
     }
 
     // Even with a `literalSizeLimit` of 1 parsing a RFC822.TEXT should _not_ fail
@@ -372,7 +1274,10 @@ extension ResponseParser_Tests {
         var parser = ResponseParser(bufferLimit: 1000, bodySizeLimit: 10, literalSizeLimit: 1)
         var buffer: ByteBuffer = "* 999 FETCH (RFC822.TEXT {3}\r\n123 RFC822.HEADER {11}\r\n "
         XCTAssertEqual(try parser.parseResponseStream(buffer: &buffer), .response(.fetch(.start(999))))
-        XCTAssertEqual(try parser.parseResponseStream(buffer: &buffer), .response(.fetch(.streamingBegin(kind: .rfc822Text, byteCount: 3))))
+        XCTAssertEqual(
+            try parser.parseResponseStream(buffer: &buffer),
+            .response(.fetch(.streamingBegin(kind: .rfc822Text, byteCount: 3)))
+        )
     }
 }
 

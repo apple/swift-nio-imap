@@ -54,31 +54,39 @@ extension ExtendedSearchOptions_Tests {
                 #line
             ),
             (
-                ExtendedSearchOptions(key: .all,
-                                      charset: "Alien",
-                                      sourceOptions: ExtendedSearchSourceOptions(sourceMailbox: [.inboxes])),
+                ExtendedSearchOptions(
+                    key: .all,
+                    charset: "Alien",
+                    sourceOptions: ExtendedSearchSourceOptions(sourceMailbox: [.inboxes])
+                ),
                 " IN (inboxes) CHARSET Alien ALL",
                 #line
             ),
             (
-                ExtendedSearchOptions(key: .all,
-                                      returnOptions: [.min],
-                                      sourceOptions: ExtendedSearchSourceOptions(sourceMailbox: [.inboxes])),
+                ExtendedSearchOptions(
+                    key: .all,
+                    returnOptions: [.min],
+                    sourceOptions: ExtendedSearchSourceOptions(sourceMailbox: [.inboxes])
+                ),
                 " IN (inboxes) RETURN (MIN) ALL",
                 #line
             ),
             (
-                ExtendedSearchOptions(key: .all,
-                                      charset: "Alien",
-                                      returnOptions: [.min]),
+                ExtendedSearchOptions(
+                    key: .all,
+                    charset: "Alien",
+                    returnOptions: [.min]
+                ),
                 " RETURN (MIN) CHARSET Alien ALL",
                 #line
             ),
             (
-                ExtendedSearchOptions(key: .all,
-                                      charset: "Alien",
-                                      returnOptions: [.min],
-                                      sourceOptions: ExtendedSearchSourceOptions(sourceMailbox: [.inboxes])),
+                ExtendedSearchOptions(
+                    key: .all,
+                    charset: "Alien",
+                    returnOptions: [.min],
+                    sourceOptions: ExtendedSearchSourceOptions(sourceMailbox: [.inboxes])
+                ),
                 " IN (inboxes) RETURN (MIN) CHARSET Alien ALL",
                 #line
             ),

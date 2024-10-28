@@ -65,7 +65,13 @@ extension GrammarParser {
             let sourceUIDRanges = try self.parseUIDRangeArray(buffer: &buffer, tracker: tracker)
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             let destinationUIDRanges = try self.parseUIDRangeArray(buffer: &buffer, tracker: tracker)
-            return .uidCopy(ResponseCodeCopy(destinationUIDValidity: uidValidity, sourceUIDs: sourceUIDRanges, destinationUIDs: destinationUIDRanges))
+            return .uidCopy(
+                ResponseCodeCopy(
+                    destinationUIDValidity: uidValidity,
+                    sourceUIDs: sourceUIDRanges,
+                    destinationUIDs: destinationUIDRanges
+                )
+            )
         }
     }
 
@@ -131,27 +137,41 @@ extension GrammarParser {
 
     // response-payload = resp-cond-state / resp-cond-bye / mailbox-data / message-data / capability-data / id-response / enable-data
     func parseResponsePayload(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponsePayload {
-        func parseResponsePayload_conditionalState(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponsePayload {
+        func parseResponsePayload_conditionalState(
+            buffer: inout ParseBuffer,
+            tracker: StackTracker
+        ) throws -> ResponsePayload {
             .conditionalState(try self.parseUntaggedResponseStatus(buffer: &buffer, tracker: tracker))
         }
 
-        func parseResponsePayload_mailboxData(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponsePayload {
+        func parseResponsePayload_mailboxData(
+            buffer: inout ParseBuffer,
+            tracker: StackTracker
+        ) throws -> ResponsePayload {
             .mailboxData(try self.parseMailboxData(buffer: &buffer, tracker: tracker))
         }
 
-        func parseResponsePayload_messageData(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponsePayload {
+        func parseResponsePayload_messageData(
+            buffer: inout ParseBuffer,
+            tracker: StackTracker
+        ) throws -> ResponsePayload {
             .messageData(try self.parseMessageData(buffer: &buffer, tracker: tracker))
         }
 
-        func parseResponsePayload_capabilityData(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponsePayload {
+        func parseResponsePayload_capabilityData(
+            buffer: inout ParseBuffer,
+            tracker: StackTracker
+        ) throws -> ResponsePayload {
             .capabilityData(try self.parseCapabilityData(buffer: &buffer, tracker: tracker))
         }
 
-        func parseResponsePayload_idResponse(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponsePayload {
+        func parseResponsePayload_idResponse(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponsePayload
+        {
             .id(try self.parseIDResponse(buffer: &buffer, tracker: tracker))
         }
 
-        func parseResponsePayload_enableData(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponsePayload {
+        func parseResponsePayload_enableData(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponsePayload
+        {
             .enableData(try self.parseEnableData(buffer: &buffer, tracker: tracker))
         }
 
@@ -159,23 +179,28 @@ extension GrammarParser {
             .metadata(try self.parseMetadataResponse(buffer: &buffer, tracker: tracker))
         }
 
-        return try PL.parseOneOf([
-            parseResponsePayload_mailboxData,
-            parseResponsePayload_messageData,
-            parseResponsePayload_capabilityData,
-            parseResponsePayload_idResponse,
-            parseResponsePayload_enableData,
-            parseResponsePayload_quota,
-            parseResponsePayload_quotaRoot,
-            parseResponsePayload_metadata,
-            parseResponsePayload_conditionalState,
-        ], buffer: &buffer, tracker: tracker)
+        return try PL.parseOneOf(
+            [
+                parseResponsePayload_mailboxData,
+                parseResponsePayload_messageData,
+                parseResponsePayload_capabilityData,
+                parseResponsePayload_idResponse,
+                parseResponsePayload_enableData,
+                parseResponsePayload_quota,
+                parseResponsePayload_quotaRoot,
+                parseResponsePayload_metadata,
+                parseResponsePayload_conditionalState,
+            ],
+            buffer: &buffer,
+            tracker: tracker
+        )
     }
 
     // resp-text       = ["[" resp-text-code "]" SP] text
     func parseResponseText(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseText {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> ResponseText in
-            let code = try PL.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> ResponseTextCode in
+            let code = try PL.parseOptional(buffer: &buffer, tracker: tracker) {
+                (buffer, tracker) -> ResponseTextCode in
                 try PL.parseFixedString("[", buffer: &buffer, tracker: tracker)
                 let code = try self.parseResponseTextCode(buffer: &buffer, tracker: tracker)
                 try PL.parseFixedString("]", buffer: &buffer, tracker: tracker)
@@ -204,9 +229,14 @@ extension GrammarParser {
             return .modified(try self.parseMessageIdentifierSetOrLast(buffer: &buffer, tracker: tracker))
         }
 
-        func parseSuffix_highestModifiedSequence(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
+        func parseSuffix_highestModifiedSequence(
+            buffer: inout ParseBuffer,
+            tracker: StackTracker
+        ) throws -> ResponseTextCode {
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-            return .highestModificationSequence(try self.parseModificationSequenceValue(buffer: &buffer, tracker: tracker))
+            return .highestModificationSequence(
+                try self.parseModificationSequenceValue(buffer: &buffer, tracker: tracker)
+            )
         }
 
         func parseSuffix_referral(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
@@ -215,16 +245,18 @@ extension GrammarParser {
         }
 
         func parseSuffix_badCharset(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
-            let charsets = try PL.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> [String] in
-                try PL.parseFixedString(" (", buffer: &buffer, tracker: tracker)
-                var array = [try self.parseCharset(buffer: &buffer, tracker: tracker)]
-                try PL.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) -> String in
-                    try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-                    return try self.parseCharset(buffer: &buffer, tracker: tracker)
-                }
-                try PL.parseFixedString(")", buffer: &buffer, tracker: tracker)
-                return array
-            } ?? []
+            let charsets =
+                try PL.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> [String] in
+                    try PL.parseFixedString(" (", buffer: &buffer, tracker: tracker)
+                    var array = [try self.parseCharset(buffer: &buffer, tracker: tracker)]
+                    try PL.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) {
+                        (buffer, tracker) -> String in
+                        try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+                        return try self.parseCharset(buffer: &buffer, tracker: tracker)
+                    }
+                    try PL.parseFixedString(")", buffer: &buffer, tracker: tracker)
+                    return array
+                } ?? []
             return .badCharset(charsets)
         }
 
@@ -235,7 +267,8 @@ extension GrammarParser {
         func parseSuffix_permanentFlags(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             try PL.parseFixedString("(", buffer: &buffer, tracker: tracker)
-            let array = try PL.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> [PermanentFlag] in
+            let array = try PL.parseOptional(buffer: &buffer, tracker: tracker) {
+                (buffer, tracker) -> [PermanentFlag] in
                 var array = [try self.parseFlagPerm(buffer: &buffer, tracker: tracker)]
                 try PL.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) in
                     try PL.parseSpaces(buffer: &buffer, tracker: tracker)
@@ -263,45 +296,65 @@ extension GrammarParser {
         }
 
         func parseSuffix_metadata(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
-            func parseSuffix_metadataLongEntries(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
+            func parseSuffix_metadataLongEntries(
+                buffer: inout ParseBuffer,
+                tracker: StackTracker
+            ) throws -> ResponseTextCode {
                 try PL.parseFixedString("LONGENTRIES ", buffer: &buffer, tracker: tracker)
                 let num = try self.parseNumber(buffer: &buffer, tracker: tracker)
                 return .metadataLongEntries(num)
             }
 
-            func parseSuffix_metadataMaxSize(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
+            func parseSuffix_metadataMaxSize(
+                buffer: inout ParseBuffer,
+                tracker: StackTracker
+            ) throws -> ResponseTextCode {
                 try PL.parseFixedString("MAXSIZE ", buffer: &buffer, tracker: tracker)
                 let num = try self.parseNumber(buffer: &buffer, tracker: tracker)
                 return .metadataMaxsize(num)
             }
 
-            func parseSuffix_metadataTooMany(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
+            func parseSuffix_metadataTooMany(
+                buffer: inout ParseBuffer,
+                tracker: StackTracker
+            ) throws -> ResponseTextCode {
                 try PL.parseFixedString("TOOMANY", buffer: &buffer, tracker: tracker)
                 return .metadataTooMany
             }
 
-            func parseSuffix_metadataNoPrivate(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
+            func parseSuffix_metadataNoPrivate(
+                buffer: inout ParseBuffer,
+                tracker: StackTracker
+            ) throws -> ResponseTextCode {
                 try PL.parseFixedString("NOPRIVATE", buffer: &buffer, tracker: tracker)
                 return .metadataNoPrivate
             }
 
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
 
-            return try PL.parseOneOf([
-                parseSuffix_metadataLongEntries,
-                parseSuffix_metadataMaxSize,
-                parseSuffix_metadataTooMany,
-                parseSuffix_metadataNoPrivate,
-            ], buffer: &buffer, tracker: tracker)
+            return try PL.parseOneOf(
+                [
+                    parseSuffix_metadataLongEntries,
+                    parseSuffix_metadataMaxSize,
+                    parseSuffix_metadataTooMany,
+                    parseSuffix_metadataNoPrivate,
+                ],
+                buffer: &buffer,
+                tracker: tracker
+            )
         }
 
         func parseSuffix_urlMechanisms(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             try PL.parseFixedString("INTERNAL", buffer: &buffer, tracker: tracker)
-            let array = try PL.parseZeroOrMore(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> MechanismBase64 in
-                try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-                return try self.parseMechanismBase64(buffer: &buffer, tracker: tracker)
-            })
+            let array = try PL.parseZeroOrMore(
+                buffer: &buffer,
+                tracker: tracker,
+                parser: { buffer, tracker -> MechanismBase64 in
+                    try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+                    return try self.parseMechanismBase64(buffer: &buffer, tracker: tracker)
+                }
+            )
             return .urlMechanisms(array)
         }
 
@@ -372,10 +425,14 @@ extension GrammarParser {
             try parseFromLookupTable(buffer: &buffer, tracker: tracker, parsers: commandParsers)
         }
 
-        return try PL.parseOneOf([
-            parseKnownResponseTextCode,
-            parseResponseTextCode_atom,
-        ], buffer: &buffer, tracker: tracker)
+        return try PL.parseOneOf(
+            [
+                parseKnownResponseTextCode,
+                parseResponseTextCode_atom,
+            ],
+            buffer: &buffer,
+            tracker: tracker
+        )
     }
 
     // quota_response  ::= "QUOTA" SP astring SP quota_list
@@ -397,7 +454,8 @@ extension GrammarParser {
             try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
                 try PL.parseFixedString("(", buffer: &buffer, tracker: tracker)
                 var resources: [QuotaResource] = []
-                while let resource = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: parseQuotaResource) {
+                while let resource = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: parseQuotaResource)
+                {
                     resources.append(resource)
                     if try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: PL.parseSpaces) == nil {
                         break
@@ -418,9 +476,10 @@ extension GrammarParser {
     }
 
     // quotaroot_response ::= "QUOTAROOT" SP astring *(SP astring)
-    func parseResponsePayload_quotaRoot(buffer: inout ParseBuffer,
-                                        tracker: StackTracker) throws -> ResponsePayload
-    {
+    func parseResponsePayload_quotaRoot(
+        buffer: inout ParseBuffer,
+        tracker: StackTracker
+    ) throws -> ResponsePayload {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             try PL.parseFixedString("QUOTAROOT ", buffer: &buffer, tracker: tracker)
             let mailbox = try parseMailbox(buffer: &buffer, tracker: tracker)

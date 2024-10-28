@@ -35,8 +35,6 @@ public struct RumpURLAndMechanism: Hashable, Sendable {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeURLRumpMechanism(_ data: RumpURLAndMechanism) -> Int {
-        self.writeIMAPString(data.urlRump) +
-            self.writeSpace() +
-            self.writeURLAuthenticationMechanism(data.mechanism)
+        self.writeIMAPString(data.urlRump) + self.writeSpace() + self.writeURLAuthenticationMechanism(data.mechanism)
     }
 }

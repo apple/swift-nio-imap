@@ -25,7 +25,10 @@ public struct SearchModificationSequence: Hashable, Sendable {
     /// Creates a new `SearchModificationSequence`.
     /// - parameter extensions: Extensions defined to catch data sent as part of any future extensions.
     /// - parameter sequenceValue: The minimum `ModificationSequenceValue` that any messages returned as part of the search must have.
-    public init(extensions: OrderedDictionary<EntryFlagName, EntryKindRequest>, sequenceValue: ModificationSequenceValue) {
+    public init(
+        extensions: OrderedDictionary<EntryFlagName, EntryKindRequest>,
+        sequenceValue: ModificationSequenceValue
+    ) {
         self.extensions = extensions
         self.sequenceValue = sequenceValue
     }
@@ -35,14 +38,11 @@ public struct SearchModificationSequence: Hashable, Sendable {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeSearchModificationSequence(_ data: SearchModificationSequence) -> Int {
-        self.writeString("MODSEQ") +
-            self.writeOrderedDictionary(data.extensions, separator: "", parenthesis: false) { (element, self) -> Int in
-                self.writeSpace() +
-                    self.writeEntryFlagName(element.key) +
-                    self.writeSpace() +
-                    self.writeEntryKindRequest(element.value)
-            } +
-            self.writeSpace() +
-            self.writeModificationSequenceValue(data.sequenceValue)
+        self.writeString("MODSEQ")
+            + self.writeOrderedDictionary(data.extensions, separator: "", parenthesis: false) {
+                (element, self) -> Int in
+                self.writeSpace() + self.writeEntryFlagName(element.key) + self.writeSpace()
+                    + self.writeEntryKindRequest(element.value)
+            } + self.writeSpace() + self.writeModificationSequenceValue(data.sequenceValue)
     }
 }

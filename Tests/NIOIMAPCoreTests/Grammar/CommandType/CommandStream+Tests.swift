@@ -30,12 +30,19 @@ extension CommandStream_Tests {
                 #line
             ),
             (
-                .append(.beginMessage(message: .init(options: .init(flagList: [.seen, .deleted], extensions: [:]), data: .init(byteCount: 3)))),
+                .append(
+                    .beginMessage(
+                        message: .init(
+                            options: .init(flagList: [.seen, .deleted], extensions: [:]),
+                            data: .init(byteCount: 3)
+                        )
+                    )
+                ),
                 " (\\Seen \\Deleted) {3}\r\n",
                 #line
             ),
             (.append(.messageBytes("123")), "123", #line),
-            (.append(.endMessage), "", #line), // dummy command, we don't expect anything
+            (.append(.endMessage), "", #line),  // dummy command, we don't expect anything
             (.append(.finish), "\r\n", #line),
             (.tagged(.init(tag: "1", command: .noop)), "1 NOOP\r\n", #line),
             (.idleDone, "DONE\r\n", #line),
@@ -125,28 +132,40 @@ extension CommandStream_Tests {
         }
 
         var encodedCommand = buffer.buffer.nextChunk()
-        XCTAssertEqual(String(buffer: encodedCommand.bytes), #"A003 APPEND "Drafts" (\Seen \Draft $MDNSent) CATENATE (URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=HEADER" TEXT {42}\#r\#n"#)
+        XCTAssertEqual(
+            String(buffer: encodedCommand.bytes),
+            #"A003 APPEND "Drafts" (\Seen \Draft $MDNSent) CATENATE (URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=HEADER" TEXT {42}\#r\#n"#
+        )
         guard encodedCommand.waitForContinuation else {
             XCTFail("Should have had a continuation.")
             return
         }
 
         encodedCommand = buffer.buffer.nextChunk()
-        XCTAssertEqual(String(buffer: encodedCommand.bytes), #"\#r\#n--------------030308070208000400050907\#r\#n URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=1.MIME" URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=1" TEXT {42}\#r\#n"#)
+        XCTAssertEqual(
+            String(buffer: encodedCommand.bytes),
+            #"\#r\#n--------------030308070208000400050907\#r\#n URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=1.MIME" URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=1" TEXT {42}\#r\#n"#
+        )
         guard encodedCommand.waitForContinuation else {
             XCTFail("Should have had a continuation.")
             return
         }
 
         encodedCommand = buffer.buffer.nextChunk()
-        XCTAssertEqual(String(buffer: encodedCommand.bytes), #"\#r\#n--------------030308070208000400050907\#r\#n URL "/Drafts;UIDVALIDITY=385759045/;UID=30" TEXT {44}\#r\#n"#)
+        XCTAssertEqual(
+            String(buffer: encodedCommand.bytes),
+            #"\#r\#n--------------030308070208000400050907\#r\#n URL "/Drafts;UIDVALIDITY=385759045/;UID=30" TEXT {44}\#r\#n"#
+        )
         guard encodedCommand.waitForContinuation else {
             XCTFail("Should have had a continuation.")
             return
         }
 
         encodedCommand = buffer.buffer.nextChunk()
-        XCTAssertEqual(String(buffer: encodedCommand.bytes), #"\#r\#n--------------030308070208000400050907--\#r\#n)\#r\#n"#)
+        XCTAssertEqual(
+            String(buffer: encodedCommand.bytes),
+            #"\#r\#n--------------030308070208000400050907--\#r\#n)\#r\#n"#
+        )
         XCTAssertFalse(encodedCommand.waitForContinuation, "Should not have additional continuations.")
     }
 
@@ -181,10 +200,10 @@ extension CommandStream_Tests {
         let encodedCommand = buffer.buffer.nextChunk()
         XCTAssertEqual(
             String(buffer: encodedCommand.bytes),
-            #"A003 APPEND "Drafts" (\Seen \Draft $MDNSent) CATENATE (URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=HEADER" TEXT {42+}\#r\#n"# +
-                #"\#r\#n--------------030308070208000400050907\#r\#n URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=1.MIME" URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=1" TEXT {42+}\#r\#n"# +
-                #"\#r\#n--------------030308070208000400050907\#r\#n URL "/Drafts;UIDVALIDITY=385759045/;UID=30" TEXT {44+}\#r\#n"# +
-                #"\#r\#n--------------030308070208000400050907--\#r\#n)\#r\#n"#
+            #"A003 APPEND "Drafts" (\Seen \Draft $MDNSent) CATENATE (URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=HEADER" TEXT {42+}\#r\#n"#
+                + #"\#r\#n--------------030308070208000400050907\#r\#n URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=1.MIME" URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=1" TEXT {42+}\#r\#n"#
+                + #"\#r\#n--------------030308070208000400050907\#r\#n URL "/Drafts;UIDVALIDITY=385759045/;UID=30" TEXT {44+}\#r\#n"#
+                + #"\#r\#n--------------030308070208000400050907--\#r\#n)\#r\#n"#
         )
         XCTAssertFalse(encodedCommand.waitForContinuation, "Should not have additional continuations.")
     }
@@ -208,14 +227,20 @@ extension CommandStream_Tests {
         }
 
         var encodedCommand = buffer.buffer.nextChunk()
-        XCTAssertEqual(String(buffer: encodedCommand.bytes), #"A003 APPEND "Drafts" (\Seen \Draft $MDNSent) CATENATE (URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=HEADER" TEXT {5}\#r\#n"#)
+        XCTAssertEqual(
+            String(buffer: encodedCommand.bytes),
+            #"A003 APPEND "Drafts" (\Seen \Draft $MDNSent) CATENATE (URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=HEADER" TEXT {5}\#r\#n"#
+        )
         guard encodedCommand.waitForContinuation else {
             XCTFail("Should have had a continuation.")
             return
         }
 
         encodedCommand = buffer.buffer.nextChunk()
-        XCTAssertEqual(String(buffer: encodedCommand.bytes), #"hello)\#r\#nA003 APPEND "Drafts" (\Seen \Draft $MDNSent) CATENATE (URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=HEADER" TEXT {5}\#r\#n"#)
+        XCTAssertEqual(
+            String(buffer: encodedCommand.bytes),
+            #"hello)\#r\#nA003 APPEND "Drafts" (\Seen \Draft $MDNSent) CATENATE (URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=HEADER" TEXT {5}\#r\#n"#
+        )
         guard encodedCommand.waitForContinuation else {
             XCTFail("Should have had a continuation.")
             return
@@ -235,7 +260,14 @@ extension CommandStream_Tests {
                 #line
             ),
             (
-                .append(.beginMessage(message: .init(options: .init(flagList: [.seen, .deleted], extensions: [:]), data: .init(byteCount: 3)))),
+                .append(
+                    .beginMessage(
+                        message: .init(
+                            options: .init(flagList: [.seen, .deleted], extensions: [:]),
+                            data: .init(byteCount: 3)
+                        )
+                    )
+                ),
                 " (\\Seen \\Deleted) {3}\r\n",
                 #line
             ),

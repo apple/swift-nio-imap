@@ -1,0 +1,76 @@
+{
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:swift-nio-imap}",
+            "name": "Debug Proxy",
+            "program": "${workspaceFolder:swift-nio-imap}/.build/debug/Proxy",
+            "preLaunchTask": "swift: Build Debug Proxy"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:swift-nio-imap}",
+            "name": "Release Proxy",
+            "program": "${workspaceFolder:swift-nio-imap}/.build/release/Proxy",
+            "preLaunchTask": "swift: Build Release Proxy"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:swift-nio-imap}",
+            "name": "Debug NIOIMAPPerformanceTester",
+            "program": "${workspaceFolder:swift-nio-imap}/.build/debug/NIOIMAPPerformanceTester",
+            "preLaunchTask": "swift: Build Debug NIOIMAPPerformanceTester"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:swift-nio-imap}",
+            "name": "Release NIOIMAPPerformanceTester",
+            "program": "${workspaceFolder:swift-nio-imap}/.build/release/NIOIMAPPerformanceTester",
+            "preLaunchTask": "swift: Build Release NIOIMAPPerformanceTester"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:swift-nio-imap}",
+            "name": "Debug NIOIMAPFuzzer",
+            "program": "${workspaceFolder:swift-nio-imap}/.build/debug/NIOIMAPFuzzer",
+            "preLaunchTask": "swift: Build Debug NIOIMAPFuzzer"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:swift-nio-imap}",
+            "name": "Release NIOIMAPFuzzer",
+            "program": "${workspaceFolder:swift-nio-imap}/.build/release/NIOIMAPFuzzer",
+            "preLaunchTask": "swift: Build Release NIOIMAPFuzzer"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:swift-nio-imap}",
+            "name": "Debug CLI",
+            "program": "${workspaceFolder:swift-nio-imap}/.build/debug/CLI",
+            "preLaunchTask": "swift: Build Debug CLI"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:swift-nio-imap}",
+            "name": "Release CLI",
+            "program": "${workspaceFolder:swift-nio-imap}/.build/release/CLI",
+            "preLaunchTask": "swift: Build Release CLI"
+        }
+    ]
+}

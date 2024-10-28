@@ -55,11 +55,28 @@ extension BodySinglepartTests {
                     kind: .message(
                         .init(
                             message: .rfc822,
-                            envelope: .init(date: "date", subject: nil, from: [], sender: [], reply: [], to: [], cc: [], bcc: [], inReplyTo: nil, messageID: nil),
+                            envelope: .init(
+                                date: "date",
+                                subject: nil,
+                                from: [],
+                                sender: [],
+                                reply: [],
+                                to: [],
+                                cc: [],
+                                bcc: [],
+                                inReplyTo: nil,
+                                messageID: nil
+                            ),
                             body: .singlepart(
                                 .init(
                                     kind: .text(.init(mediaSubtype: "subtype", lineCount: 5)),
-                                    fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .base64, octetCount: 6),
+                                    fields: .init(
+                                        parameters: [:],
+                                        id: nil,
+                                        contentDescription: nil,
+                                        encoding: .base64,
+                                        octetCount: 6
+                                    ),
                                     extension: nil
                                 )
                             ),
@@ -86,7 +103,12 @@ extension BodySinglepartTests {
         let inputs: [(BodyStructure.Singlepart.Extension, String, UInt)] = [
             (.init(digest: nil, dispositionAndLanguage: nil), "NIL", #line),
             (.init(digest: "md5", dispositionAndLanguage: nil), "\"md5\"", #line),
-            (.init(digest: "md5", dispositionAndLanguage: .init(disposition: .init(kind: "string", parameters: [:]), language: nil)), "\"md5\" (\"string\" NIL)", #line),
+            (
+                .init(
+                    digest: "md5",
+                    dispositionAndLanguage: .init(disposition: .init(kind: "string", parameters: [:]), language: nil)
+                ), "\"md5\" (\"string\" NIL)", #line
+            ),
         ]
 
         for (test, expectedString, line) in inputs {

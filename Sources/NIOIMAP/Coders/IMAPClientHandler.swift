@@ -42,9 +42,17 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
     /// capabilities.
     var encodingChangeCallback: (OrderedDictionary<String, String?>, inout CommandEncodingOptions) -> Void
 
-    public init(encodingChangeCallback: @escaping (OrderedDictionary<String, String?>, inout CommandEncodingOptions) -> Void = { _, _ in }) {
+    public init(
+        encodingChangeCallback: @escaping (OrderedDictionary<String, String?>, inout CommandEncodingOptions) -> Void = {
+            _,
+            _ in
+        }
+    ) {
         self.state = .init(encodingOptions: CommandEncodingOptions(capabilities: self.lastKnownCapabilities))
-        self.decoder = NIOSingleStepByteToMessageProcessor(ResponseDecoder(), maximumBufferSize: IMAPDefaults.lineLengthLimit)
+        self.decoder = NIOSingleStepByteToMessageProcessor(
+            ResponseDecoder(),
+            maximumBufferSize: IMAPDefaults.lineLengthLimit
+        )
         self.encodingChangeCallback = encodingChangeCallback
         self.lastKnownCapabilities = []
     }
@@ -74,7 +82,10 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
         context.fireChannelActive()
     }
 
-    private func handleResponseOrContinuationRequest(_ response: ResponseOrContinuationRequest, context: ChannelHandlerContext) throws {
+    private func handleResponseOrContinuationRequest(
+        _ response: ResponseOrContinuationRequest,
+        context: ChannelHandlerContext
+    ) throws {
         switch response {
         case .continuationRequest(let continuationRequest):
             let action = try self.state.receiveContinuationRequest(continuationRequest)
@@ -95,7 +106,11 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
         }
     }
 
-    private func handleContinuationRequestAction(_ action: ClientStateMachine.ContinuationRequestAction, request: ContinuationRequest, context: ChannelHandlerContext) {
+    private func handleContinuationRequestAction(
+        _ action: ClientStateMachine.ContinuationRequestAction,
+        request: ContinuationRequest,
+        context: ChannelHandlerContext
+    ) {
         switch action {
         case .sendChunks(let chunks):
             self.writeChunks(chunks, context: context)
@@ -107,7 +122,9 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
             switch request {
             case .responseText:
                 // No valid base64, so forward on an empty BB
-                context.fireChannelRead(self.wrapInboundOut(.authenticationChallenge(context.channel.allocator.buffer(capacity: 0))))
+                context.fireChannelRead(
+                    self.wrapInboundOut(.authenticationChallenge(context.channel.allocator.buffer(capacity: 0)))
+                )
             case .data(let byteBuffer):
                 context.fireChannelRead(self.wrapInboundOut(.authenticationChallenge(byteBuffer)))
             }
@@ -131,7 +148,7 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
         chunks.forEach { chunk in
             self.writeChunk(chunk, context: context)
         }
-        context.flush() // we wouldn't reach this point if we hadn't already flushed
+        context.flush()  // we wouldn't reach this point if we hadn't already flushed
     }
 
     private func writeChunk(_ chunk: OutgoingChunk, context: ChannelHandlerContext) {

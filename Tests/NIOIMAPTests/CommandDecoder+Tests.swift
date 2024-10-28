@@ -31,7 +31,13 @@ extension CommandDecoder_Tests {
 
         let output: [(CommandStreamPart, UInt)] = [
             (.append(.start(tag: "tag", appendingTo: .init("box"))), #line),
-            (.append(.beginMessage(message: .init(options: .init(flagList: [.seen], extensions: [:]), data: .init(byteCount: 1)))), #line),
+            (
+                .append(
+                    .beginMessage(
+                        message: .init(options: .init(flagList: [.seen], extensions: [:]), data: .init(byteCount: 1))
+                    )
+                ), #line
+            ),
             (.append(.messageBytes("a")), #line),
             (.append(.endMessage), #line),
             (.append(.finish), #line),
@@ -41,7 +47,8 @@ extension CommandDecoder_Tests {
             XCTAssertNoThrow(
                 XCTAssertEqual(
                     try channel.readInbound(as: SynchronizedCommand.self),
-                    SynchronizedCommand(expected), line: line
+                    SynchronizedCommand(expected),
+                    line: line
                 ),
                 line: line
             )

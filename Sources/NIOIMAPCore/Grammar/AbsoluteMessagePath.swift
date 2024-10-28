@@ -28,8 +28,8 @@ public struct AbsoluteMessagePath: Hashable, Sendable {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeAbsoluteMessagePath(_ path: AbsoluteMessagePath) -> Int {
-        self.writeString("/") +
-            self.writeIfExists(path.command) { command in
+        self.writeString("/")
+            + self.writeIfExists(path.command) { command in
                 self.writeURLCommand(command)
             }
     }

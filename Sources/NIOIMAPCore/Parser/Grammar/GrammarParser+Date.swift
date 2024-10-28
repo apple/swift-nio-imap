@@ -156,7 +156,15 @@ extension GrammarParser {
 
             try PL.parseFixedString("\"", buffer: &buffer, tracker: tracker)
             guard
-                let components = ServerMessageDate.Components(year: year, month: month, day: day, hour: hour, minute: minute, second: second, timeZoneMinutes: zone)
+                let components = ServerMessageDate.Components(
+                    year: year,
+                    month: month,
+                    day: day,
+                    hour: hour,
+                    minute: minute,
+                    second: second,
+                    timeZoneMinutes: zone
+                )
             else {
                 throw ParserError(hint: "Invalid internal date.")
             }

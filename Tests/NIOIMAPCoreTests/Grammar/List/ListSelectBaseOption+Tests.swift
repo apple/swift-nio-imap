@@ -37,7 +37,7 @@ extension ListSelectBaseOption_Tests {
 
     func testEncodeQuoted() {
         let inputs: [(ListSelectBaseOption, String, UInt)] = [
-            (.subscribed, #""SUBSCRIBED""#, #line),
+            (.subscribed, #""SUBSCRIBED""#, #line)
         ]
 
         for (test, expectedString, line) in inputs {

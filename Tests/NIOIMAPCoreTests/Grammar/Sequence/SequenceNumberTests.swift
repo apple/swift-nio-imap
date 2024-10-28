@@ -41,7 +41,7 @@ extension SequenceNumberTests {
         XCTAssertFalse(SequenceNumber.max < .max)
         XCTAssertFalse(SequenceNumber.max < 999)
         XCTAssertTrue(SequenceNumber.max > 999)
-        XCTAssertTrue(SequenceNumber(1) < 999) // use .number to force type
+        XCTAssertTrue(SequenceNumber(1) < 999)  // use .number to force type
     }
 }
 

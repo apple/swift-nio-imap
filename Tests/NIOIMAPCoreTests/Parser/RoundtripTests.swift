@@ -76,9 +76,21 @@ final class RoundtripTests: XCTestCase {
             (.fetch(.set([.all]), .full, []), #line),
             (.fetch(.set([5678]), [.uid, .flags, .internalDate, .envelope], []), #line),
             (.fetch(.set([5678]), [.flags, .bodyStructure(extensions: true)], []), #line),
-            (.fetch(.set([5678]), [.flags, .bodySection(peek: false, .complete, 3 ... 4)], []), #line),
-            (.fetch(.set([5678]), [.flags, .bodySection(peek: false, .init(kind: .header), 3 ... 4)], []), #line),
-            (.fetch(.set([5678]), [.bodySection(peek: false, .init(part: [12, 34], kind: .headerFields(["some", "header"])), 3 ... 4)], []), #line),
+            (.fetch(.set([5678]), [.flags, .bodySection(peek: false, .complete, 3...4)], []), #line),
+            (.fetch(.set([5678]), [.flags, .bodySection(peek: false, .init(kind: .header), 3...4)], []), #line),
+            (
+                .fetch(
+                    .set([5678]),
+                    [
+                        .bodySection(
+                            peek: false,
+                            .init(part: [12, 34], kind: .headerFields(["some", "header"])),
+                            3...4
+                        )
+                    ],
+                    []
+                ), #line
+            ),
 
             (.store(.set(.all), [], .flags(.remove(silent: true, list: [.answered, .deleted]))), #line),
             (.store(.set(.all), [], .flags(.add(silent: true, list: [.draft, .extension("\\some")]))), #line),
@@ -93,7 +105,14 @@ final class RoundtripTests: XCTestCase {
             (.search(key: .or(.to("bar"), .unseen), charset: "UTF-8", returnOptions: [.min, .max]), #line),
             (.search(key: .and([.new, .deleted, .unseen]), charset: nil, returnOptions: [.min, .max]), #line),
 
-            (.extendedSearch(ExtendedSearchOptions(key: .all, sourceOptions: ExtendedSearchSourceOptions(sourceMailbox: [.inboxes]))), #line),
+            (
+                .extendedSearch(
+                    ExtendedSearchOptions(
+                        key: .all,
+                        sourceOptions: ExtendedSearchSourceOptions(sourceMailbox: [.inboxes])
+                    )
+                ), #line
+            ),
         ]
 
         for (i, test) in tests.enumerated() {
@@ -103,7 +122,8 @@ final class RoundtripTests: XCTestCase {
             let tag = "\(i + 1)"
             let command = TaggedCommand(tag: tag, command: commandType)
             encodeBuffer.writeCommand(command)
-            encodeBuffer.buffer.writeString("\r\n") // required for commands that might terminate with a literal (e.g. append)
+            // required for commands that might terminate with a literal (e.g. append)
+            encodeBuffer.buffer.writeString("\r\n")
             var buffer = ByteBufferAllocator().buffer(capacity: 128)
             while true {
                 let next = encodeBuffer.buffer.nextChunk()

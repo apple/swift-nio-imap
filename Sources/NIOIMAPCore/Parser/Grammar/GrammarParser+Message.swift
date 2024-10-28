@@ -42,31 +42,46 @@ extension GrammarParser {
             return try .vanishedEarlier(self.parseUIDSet(buffer: &buffer, tracker: tracker))
         }
 
-        func parseMessageData_generateAuthorizedURL(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageData {
+        func parseMessageData_generateAuthorizedURL(
+            buffer: inout ParseBuffer,
+            tracker: StackTracker
+        ) throws -> MessageData {
             try PL.parseFixedString("GENURLAUTH", buffer: &buffer, tracker: tracker)
-            let array = try PL.parseOneOrMore(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> ByteBuffer in
-                try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-                return try self.parseAString(buffer: &buffer, tracker: tracker)
-            })
+            let array = try PL.parseOneOrMore(
+                buffer: &buffer,
+                tracker: tracker,
+                parser: { buffer, tracker -> ByteBuffer in
+                    try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+                    return try self.parseAString(buffer: &buffer, tracker: tracker)
+                }
+            )
             return .generateAuthorizedURL(array)
         }
 
         func parseMessageData_fetchData(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageData {
             try PL.parseFixedString("URLFETCH", buffer: &buffer, tracker: tracker)
-            let array = try PL.parseOneOrMore(buffer: &buffer, tracker: tracker, parser: { buffer, tracker -> URLFetchData in
-                try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-                return try self.parseURLFetchData(buffer: &buffer, tracker: tracker)
-            })
+            let array = try PL.parseOneOrMore(
+                buffer: &buffer,
+                tracker: tracker,
+                parser: { buffer, tracker -> URLFetchData in
+                    try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+                    return try self.parseURLFetchData(buffer: &buffer, tracker: tracker)
+                }
+            )
             return .urlFetch(array)
         }
 
-        return try PL.parseOneOf([
-            parseMessageData_expunge,
-            parseMessageData_vanished,
-            parseMessageData_vanishedEarlier,
-            parseMessageData_generateAuthorizedURL,
-            parseMessageData_fetchData,
-        ], buffer: &buffer, tracker: tracker)
+        return try PL.parseOneOf(
+            [
+                parseMessageData_expunge,
+                parseMessageData_vanished,
+                parseMessageData_vanishedEarlier,
+                parseMessageData_generateAuthorizedURL,
+                parseMessageData_fetchData,
+            ],
+            buffer: &buffer,
+            tracker: tracker
+        )
     }
 
     // msg-att-static  = "ENVELOPE" SP envelope / "INTERNALDATE" SP date-time /
@@ -87,17 +102,24 @@ extension GrammarParser {
             }
         }
 
-        func parseMessageAttribute_envelope(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute {
+        func parseMessageAttribute_envelope(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute
+        {
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             return try .envelope(self.parseEnvelope(buffer: &buffer, tracker: tracker))
         }
 
-        func parseMessageAttribute_internalDate(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute {
+        func parseMessageAttribute_internalDate(
+            buffer: inout ParseBuffer,
+            tracker: StackTracker
+        ) throws -> MessageAttribute {
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             return try .internalDate(self.parseInternalDate(buffer: &buffer, tracker: tracker))
         }
 
-        func parseMessageAttribute_rfc822Size(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute {
+        func parseMessageAttribute_rfc822Size(
+            buffer: inout ParseBuffer,
+            tracker: StackTracker
+        ) throws -> MessageAttribute {
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             return try .rfc822Size(self.parseNumber(buffer: &buffer, tracker: tracker))
         }
@@ -105,19 +127,29 @@ extension GrammarParser {
         func parseMessageAttribute_body(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute {
             // `BODY` can either be a body(structure) or a body section:
 
-            func parseMessageAttribute_body_structure(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute {
+            func parseMessageAttribute_body_structure(
+                buffer: inout ParseBuffer,
+                tracker: StackTracker
+            ) throws -> MessageAttribute {
                 try PL.parseSpaces(buffer: &buffer, tracker: tracker)
                 let body = try self.parseMessageAttributeBody(buffer: &buffer, tracker: tracker)
                 return .body(body, hasExtensionData: false)
             }
 
-            return try PL.parseOneOf([
-                parseMessageAttribute_body_structure,
-                parseMessageAttribute_bodySection_nilBody,
-            ], buffer: &buffer, tracker: tracker)
+            return try PL.parseOneOf(
+                [
+                    parseMessageAttribute_body_structure,
+                    parseMessageAttribute_bodySection_nilBody,
+                ],
+                buffer: &buffer,
+                tracker: tracker
+            )
         }
 
-        func parseMessageAttribute_bodyStructure(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute {
+        func parseMessageAttribute_bodyStructure(
+            buffer: inout ParseBuffer,
+            tracker: StackTracker
+        ) throws -> MessageAttribute {
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             let body = try self.parseMessageAttributeBody(buffer: &buffer, tracker: tracker)
             return .body(body, hasExtensionData: true)
@@ -128,14 +160,20 @@ extension GrammarParser {
             return try .uid(self.parseMessageIdentifier(buffer: &buffer, tracker: tracker))
         }
 
-        func parseMessageAttribute_binarySize(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute {
+        func parseMessageAttribute_binarySize(
+            buffer: inout ParseBuffer,
+            tracker: StackTracker
+        ) throws -> MessageAttribute {
             let section = try self.parseSectionBinary(buffer: &buffer, tracker: tracker)
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             let number = try self.parseNumber(buffer: &buffer, tracker: tracker)
             return .binarySize(section: section, size: number)
         }
 
-        func parseMessageAttribute_fetchModifierResponse(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute {
+        func parseMessageAttribute_fetchModifierResponse(
+            buffer: inout ParseBuffer,
+            tracker: StackTracker
+        ) throws -> MessageAttribute {
             try PL.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> MessageAttribute in
                 try PL.parseSpaces(buffer: &buffer, tracker: tracker)
                 try PL.parseFixedString("(", buffer: &buffer, tracker: tracker)
@@ -145,19 +183,28 @@ extension GrammarParser {
             }
         }
 
-        func parseMessageAttribute_gmailMessageID(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute {
+        func parseMessageAttribute_gmailMessageID(
+            buffer: inout ParseBuffer,
+            tracker: StackTracker
+        ) throws -> MessageAttribute {
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             let (id, _) = try PL.parseUnsignedInt64(buffer: &buffer, tracker: tracker)
             return .gmailMessageID(id)
         }
 
-        func parseMessageAttribute_gmailThreadID(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute {
+        func parseMessageAttribute_gmailThreadID(
+            buffer: inout ParseBuffer,
+            tracker: StackTracker
+        ) throws -> MessageAttribute {
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             let (id, _) = try PL.parseUnsignedInt64(buffer: &buffer, tracker: tracker)
             return .gmailThreadID(id)
         }
 
-        func parseMessageAttribute_gmailLabels(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute {
+        func parseMessageAttribute_gmailLabels(
+            buffer: inout ParseBuffer,
+            tracker: StackTracker
+        ) throws -> MessageAttribute {
             var attributes: [GmailLabel] = []
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             try PL.parseFixedString("(", buffer: &buffer, tracker: tracker)
@@ -179,58 +226,84 @@ extension GrammarParser {
             return .gmailLabels(attributes)
         }
 
-        func parseMessageAttribute_rfc822Text_nilBody(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute {
+        func parseMessageAttribute_rfc822Text_nilBody(
+            buffer: inout ParseBuffer,
+            tracker: StackTracker
+        ) throws -> MessageAttribute {
             let kind = try self.parseFetchStreamingResponse_rfc822Text(buffer: &buffer, tracker: tracker)
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             try self.parseNil(buffer: &buffer, tracker: tracker)
             return .nilBody(kind)
         }
 
-        func parseMessageAttribute_rfc822Header_nilBody(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute {
+        func parseMessageAttribute_rfc822Header_nilBody(
+            buffer: inout ParseBuffer,
+            tracker: StackTracker
+        ) throws -> MessageAttribute {
             let kind = try self.parseFetchStreamingResponse_rfc822Header(buffer: &buffer, tracker: tracker)
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             try self.parseNil(buffer: &buffer, tracker: tracker)
             return .nilBody(kind)
         }
 
-        func parseMessageAttribute_bodySection_nilBody(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute {
+        func parseMessageAttribute_bodySection_nilBody(
+            buffer: inout ParseBuffer,
+            tracker: StackTracker
+        ) throws -> MessageAttribute {
             let kind = try self.parseFetchStreamingResponse_bodySectionText(buffer: &buffer, tracker: tracker)
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             try self.parseNil(buffer: &buffer, tracker: tracker)
             return .nilBody(kind)
         }
 
-        func parseMessageAttribute_binary_nilBody(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute {
+        func parseMessageAttribute_binary_nilBody(
+            buffer: inout ParseBuffer,
+            tracker: StackTracker
+        ) throws -> MessageAttribute {
             let kind = try self.parseFetchStreamingResponse_binary(buffer: &buffer, tracker: tracker)
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             try self.parseNil(buffer: &buffer, tracker: tracker)
             return .nilBody(kind)
         }
 
-        func parseMessageAttribute_preview(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute {
-            func parseMessageAttribute_preview_literal(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute {
+        func parseMessageAttribute_preview(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute
+        {
+            func parseMessageAttribute_preview_literal(
+                buffer: inout ParseBuffer,
+                tracker: StackTracker
+            ) throws -> MessageAttribute {
                 try PL.parseSpaces(buffer: &buffer, tracker: tracker)
                 let raw = try self.parseLiteral(buffer: &buffer, tracker: tracker)
                 return .preview(PreviewText(String(buffer: raw)))
             }
 
-            func parseMessageAttribute_preview_inline(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute {
+            func parseMessageAttribute_preview_inline(
+                buffer: inout ParseBuffer,
+                tracker: StackTracker
+            ) throws -> MessageAttribute {
                 try PL.parseSpaces(buffer: &buffer, tracker: tracker)
                 let raw = try self.parseQuoted(buffer: &buffer, tracker: tracker)
                 return .preview(PreviewText(String(buffer: raw)))
             }
 
-            func parseMessageAttribute_preview_nil(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute {
+            func parseMessageAttribute_preview_nil(
+                buffer: inout ParseBuffer,
+                tracker: StackTracker
+            ) throws -> MessageAttribute {
                 try PL.parseSpaces(buffer: &buffer, tracker: tracker)
                 try self.parseNil(buffer: &buffer, tracker: tracker)
                 return .preview(nil)
             }
 
-            return try PL.parseOneOf([
-                parseMessageAttribute_preview_literal,
-                parseMessageAttribute_preview_inline,
-                parseMessageAttribute_preview_nil,
-            ], buffer: &buffer, tracker: tracker)
+            return try PL.parseOneOf(
+                [
+                    parseMessageAttribute_preview_literal,
+                    parseMessageAttribute_preview_inline,
+                    parseMessageAttribute_preview_nil,
+                ],
+                buffer: &buffer,
+                tracker: tracker
+            )
         }
 
         let parsers: [String: (inout ParseBuffer, StackTracker) throws -> MessageAttribute] = [

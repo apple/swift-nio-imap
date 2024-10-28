@@ -23,7 +23,13 @@ class ResponseCodeCopy_Tests: EncodeTestClass {}
 extension ResponseCodeCopy_Tests {
     func testEncode() {
         let inputs: [(ResponseCodeCopy, String, UInt)] = [
-            (.init(destinationUIDValidity: 1, sourceUIDs: [MessageIdentifierRange<UID>(.max)], destinationUIDs: [MessageIdentifierRange<UID>(.max)]), "COPYUID 1 * *", #line),
+            (
+                .init(
+                    destinationUIDValidity: 1,
+                    sourceUIDs: [MessageIdentifierRange<UID>(.max)],
+                    destinationUIDs: [MessageIdentifierRange<UID>(.max)]
+                ), "COPYUID 1 * *", #line
+            )
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeResponseCodeCopy($0) })
     }

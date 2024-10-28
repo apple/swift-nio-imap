@@ -28,7 +28,6 @@ public struct Expire: Hashable, Sendable {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeExpire(_ data: Expire) -> Int {
-        self.writeString(";EXPIRE=") +
-            self.writeFullDateTime(data.dateTime)
+        self.writeString(";EXPIRE=") + self.writeFullDateTime(data.dateTime)
     }
 }

@@ -30,7 +30,11 @@ public struct MailboxInfo: Hashable, Sendable {
     /// - parameter attributes: An array of mailbox attributes.
     /// - parameter path: The mailbox path.
     /// - parameter extensions: A catch-all to support any attributes added in future extensions.
-    public init(attributes: [Attribute] = [], path: MailboxPath, extensions: OrderedDictionary<ByteBuffer, ParameterValue>) {
+    public init(
+        attributes: [Attribute] = [],
+        path: MailboxPath,
+        extensions: OrderedDictionary<ByteBuffer, ParameterValue>
+    ) {
         self.attributes = attributes
         self.path = path
         self.extensions = extensions
@@ -111,14 +115,11 @@ extension EncodeBuffer {
     }
 
     @discardableResult mutating func writeMailboxInfo(_ list: MailboxInfo) -> Int {
-        self.writeString("(") +
-            self.writeIfExists(list.attributes) { (flags) -> Int in
+        self.writeString("(")
+            + self.writeIfExists(list.attributes) { (flags) -> Int in
                 self.writeMailboxListFlags(flags)
-            } +
-            self.writeString(") ") +
-            self.writeMailboxPathSeparator(list.path.pathSeparator) +
-            self.writeSpace() +
-            self.writeMailbox(list.path.name)
+            } + self.writeString(") ") + self.writeMailboxPathSeparator(list.path.pathSeparator) + self.writeSpace()
+            + self.writeMailbox(list.path.name)
     }
 
     @discardableResult mutating func writeMailboxListFlags(_ flags: [MailboxInfo.Attribute]) -> Int {

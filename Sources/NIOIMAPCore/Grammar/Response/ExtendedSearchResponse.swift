@@ -85,12 +85,10 @@ extension ExtendedSearchResponse {
         returnData.lazy.compactMap { data -> MessageIdentifierSet<UnknownMessageIdentifier>? in
             guard case .all(.set(let set)) = data else { return nil }
             return set.set
-        }.first ??
-            returnData.lazy.compactMap {
-                guard case .partial(_, let set) = $0 else { return nil }
-                return set
-            }.first ??
-            MessageIdentifierSet()
+        }.first ?? returnData.lazy.compactMap {
+            guard case .partial(_, let set) = $0 else { return nil }
+            return set
+        }.first ?? MessageIdentifierSet()
     }
 
     /// Returns the count value in the response.
@@ -154,17 +152,17 @@ extension ExtendedSearchResponse {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeExtendedSearchResponse(_ response: ExtendedSearchResponse) -> Int {
-        self.writeString("ESEARCH") +
-            self.writeIfExists(response.correlator) { (correlator) -> Int in
+        self.writeString("ESEARCH")
+            + self.writeIfExists(response.correlator) { (correlator) -> Int in
                 self.writeSearchCorrelator(correlator)
-            } +
-            self.write(if: response.kind == .uid) {
+            }
+            + self.write(if: response.kind == .uid) {
                 self.writeString(" UID")
-            } +
-            self.write(if: response.returnData.count > 0) {
+            }
+            + self.write(if: response.returnData.count > 0) {
                 self.writeSpace()
-            } +
-            self.writeArray(response.returnData, parenthesis: false) { (data, self) in
+            }
+            + self.writeArray(response.returnData, parenthesis: false) { (data, self) in
                 self.writeSearchReturnData(data)
             }
     }

@@ -105,14 +105,20 @@ extension GrammarParser_Search_Tests {
                 ("UNKEYWORD key2", "\r", .unkeyword(Flag.Keyword("key2")!), #line),
                 ("NOT LARGER 1234", "\r", .not(.messageSizeLarger(1234)), #line),
                 ("OR LARGER 6 SMALLER 4", "\r", .or(.messageSizeLarger(6), .messageSizeSmaller(4)), #line),
-                ("UID 2:4", "\r", .uid(.set(MessageIdentifierSetNonEmpty(set: MessageIdentifierSet<UID>(2 ... 4))!)), #line),
+                (
+                    "UID 2:4", "\r", .uid(.set(MessageIdentifierSetNonEmpty(set: MessageIdentifierSet<UID>(2...4))!)),
+                    #line
+                ),
                 ("UIDAFTER 33875", "\r", .uidAfter(.id(33_875)), #line),
                 ("UIDAFTER $", "\r", .uidAfter(.lastCommand), #line),
                 ("UIDBEFORE 44371", "\r", .uidBefore(.id(44_371)), #line),
                 ("UIDBEFORE $", "\r", .uidBefore(.lastCommand), #line),
-                ("2:4", "\r", .sequenceNumbers(.set([2 ... 4])), #line),
+                ("2:4", "\r", .sequenceNumbers(.set([2...4])), #line),
                 ("(LARGER 1)", "\r", .messageSizeLarger(1), #line),
-                ("(LARGER 1 SMALLER 5 KEYWORD hello)", "\r", .and([.messageSizeLarger(1), .messageSizeSmaller(5), .keyword(Flag.Keyword("hello")!)]), #line),
+                (
+                    "(LARGER 1 SMALLER 5 KEYWORD hello)", "\r",
+                    .and([.messageSizeLarger(1), .messageSizeSmaller(5), .keyword(Flag.Keyword("hello")!)]), #line
+                ),
                 ("YOUNGER 34", "\r", .younger(34), #line),
                 ("OLDER 45", "\r", .older(45), #line),
                 ("FILTER something", "\r", .filter("something"), #line),
@@ -140,7 +146,7 @@ extension GrammarParser_Search_Tests {
         self.iterateTests(
             testFunction: GrammarParser().parseSearchReturnDataExtension,
             validInputs: [
-                ("modifier 64", "\r", .init(key: "modifier", value: .sequence(.set([64]))), #line),
+                ("modifier 64", "\r", .init(key: "modifier", value: .sequence(.set([64]))), #line)
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
@@ -165,10 +171,13 @@ extension GrammarParser_Search_Tests {
                 (
                     "MODSEQ \"/flags/\\\\Answered\" priv \"/flags/\\\\Seen\" shared 4",
                     " ",
-                    .init(extensions: [
-                        .init(flag: .answered): .private,
-                        .init(flag: .seen): .shared,
-                    ], sequenceValue: 4),
+                    .init(
+                        extensions: [
+                            .init(flag: .answered): .private,
+                            .init(flag: .seen): .shared,
+                        ],
+                        sequenceValue: 4
+                    ),
                     #line
                 ),
             ],
@@ -185,7 +194,7 @@ extension GrammarParser_Search_Tests {
         self.iterateTests(
             testFunction: GrammarParser().parseSearchModificationSequenceExtension,
             validInputs: [
-                (" \"/flags/\\\\Seen\" all", "", .init(key: .init(flag: .seen), value: .all), #line),
+                (" \"/flags/\\\\Seen\" all", "", .init(key: .init(flag: .seen), value: .all), #line)
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
@@ -206,9 +215,9 @@ extension GrammarParser_Search_Tests {
                 ("ALL 3,4,5", "\r", .all(.set([3, 4, 5])), #line),
                 ("COUNT 4", "\r", .count(4), #line),
                 ("MODSEQ 4", "\r", .modificationSequence(4), #line),
-                ("PARTIAL (1:10 108595)", "\r", .partial(.first(1 ... 10), [108595]), #line),
-                ("PARTIAL (-2:-20 20:24,108595)", "\r", .partial(.last(2 ... 20), [20 ... 24, 108595]), #line),
-                ("PARTIAL (1:10 NIL)", "\r", .partial(.first(1 ... 10), []), #line),
+                ("PARTIAL (1:10 108595)", "\r", .partial(.first(1...10), [108595]), #line),
+                ("PARTIAL (-2:-20 20:24,108595)", "\r", .partial(.last(2...20), [20...24, 108595]), #line),
+                ("PARTIAL (1:10 NIL)", "\r", .partial(.first(1...10), []), #line),
                 ("modifier 5", "\r", .dataExtension(.init(key: "modifier", value: .sequence(.set([5])))), #line),
             ],
             parserErrorInputs: [],
@@ -224,8 +233,8 @@ extension GrammarParser_Search_Tests {
         self.iterateTests(
             testFunction: GrammarParser().parseSearchReturnData_partial,
             validInputs: [
-                ("PARTIAL (23500:24000 67,100:102)", "\r", .partial(.first(23_500 ... 24_000), [67, 100 ... 102]), #line),
-                ("PARTIAL (-55:-700 NIL)", "\r", .partial(.last(55 ... 700), []), #line),
+                ("PARTIAL (23500:24000 67,100:102)", "\r", .partial(.first(23_500...24_000), [67, 100...102]), #line),
+                ("PARTIAL (-55:-700 NIL)", "\r", .partial(.last(55...700), []), #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
@@ -255,8 +264,8 @@ extension GrammarParser_Search_Tests {
                 ("SAVE", "\r", .save, #line),
                 ("save", "\r", .save, #line),
                 ("saVE", "\r", .save, #line),
-                ("PARTIAL 23500:24000", "\r", .partial(.first(23_500 ... 24_000)), #line),
-                ("partial -1:-100", "\r", .partial(.last(1 ... 100)), #line),
+                ("PARTIAL 23500:24000", "\r", .partial(.first(23_500...24_000)), #line),
+                ("partial -1:-100", "\r", .partial(.last(1...100)), #line),
                 ("modifier", "\r", .optionExtension(.init(key: "modifier", value: nil)), #line),
             ],
             parserErrorInputs: [],
@@ -274,12 +283,15 @@ extension GrammarParser_Search_Tests {
             validInputs: [
                 (" RETURN (ALL)", "\r", [.all], #line),
                 (" RETURN (MIN MAX COUNT)", "\r", [.min, .max, .count], #line),
-                (" RETURN (m1 m2)", "\r", [
-                    .optionExtension(.init(key: "m1", value: nil)),
-                    .optionExtension(.init(key: "m2", value: nil)),
-                ], #line),
-                (" RETURN (PARTIAL 23500:24000)", "\r", [.partial(.first(23_500 ... 24_000))], #line),
-                (" RETURN (MIN PARTIAL -1:-100 MAX)", "\r", [.min, .partial(.last(1 ... 100)), .max], #line),
+                (
+                    " RETURN (m1 m2)", "\r",
+                    [
+                        .optionExtension(.init(key: "m1", value: nil)),
+                        .optionExtension(.init(key: "m2", value: nil)),
+                    ], #line
+                ),
+                (" RETURN (PARTIAL 23500:24000)", "\r", [.partial(.first(23_500...24_000))], #line),
+                (" RETURN (MIN PARTIAL -1:-100 MAX)", "\r", [.min, .partial(.last(1...100)), .max], #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
@@ -299,7 +311,7 @@ extension GrammarParser_Search_Tests {
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: [
-                ("modifier ", "", #line),
+                ("modifier ", "", #line)
             ]
         )
     }
@@ -312,10 +324,10 @@ extension GrammarParser_Search_Tests {
         self.iterateTests(
             testFunction: GrammarParser().parseSearchSortModificationSequence,
             validInputs: [
-                ("(MODSEQ 123)", "\r", 123, #line),
+                ("(MODSEQ 123)", "\r", 123, #line)
             ],
             parserErrorInputs: [
-                ("(MODSEQ a)", "", #line),
+                ("(MODSEQ a)", "", #line)
             ],
             incompleteMessageInputs: [
                 ("(MODSEQ ", "", #line),

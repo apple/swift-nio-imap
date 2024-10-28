@@ -38,7 +38,9 @@ public class CommandRoundtripHandler: ChannelOutboundHandler {
         var originalBuffer = self.unwrapOutboundIn(data)
         do {
             var originalBufferCopy = originalBuffer
-            guard let commandStream = try parser.parseCommandStream(buffer: &originalBufferCopy), let command = commandStream.commandPart else {
+            guard let commandStream = try parser.parseCommandStream(buffer: &originalBufferCopy),
+                let command = commandStream.commandPart
+            else {
                 // this is fine because the command is input by the user, so *should* be valid
                 throw CommandRoundtripError.incompleteCommand
             }
@@ -53,8 +55,12 @@ public class CommandRoundtripHandler: ChannelOutboundHandler {
 
             if originalBuffer != roundtripBuffer {
                 self.logger.warning("Input command vs roundtrip output is different")
-                self.logger.warning("Command (original):\n\(originalBuffer.readString(length: originalBuffer.readableBytes)!)")
-                self.logger.warning("Command (roundtrip):\n\(roundtripBuffer.readString(length: roundtripBuffer.readableBytes)!)")
+                self.logger.warning(
+                    "Command (original):\n\(originalBuffer.readString(length: originalBuffer.readableBytes)!)"
+                )
+                self.logger.warning(
+                    "Command (roundtrip):\n\(roundtripBuffer.readString(length: roundtripBuffer.readableBytes)!)"
+                )
             }
 
             context.write(data, promise: promise)

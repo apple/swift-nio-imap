@@ -30,7 +30,7 @@ extension IMAPRangeTests {
 
     func testIMAPEncoded_range() {
         let expected = "2:4"
-        let size = self.testBuffer.writeSequenceRange(MessageIdentifierRange<SequenceNumber>(2 ... 4))
+        let size = self.testBuffer.writeSequenceRange(MessageIdentifierRange<SequenceNumber>(2...4))
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }
@@ -52,7 +52,7 @@ extension IMAPRangeTests {
     }
 
     func testRange_closed() {
-        let sut = MessageIdentifierRange<SequenceNumber>(3 ... 4)
+        let sut = MessageIdentifierRange<SequenceNumber>(3...4)
         XCTAssertEqual(sut.range.lowerBound, 3)
         XCTAssertEqual(sut.range.upperBound, 4)
     }

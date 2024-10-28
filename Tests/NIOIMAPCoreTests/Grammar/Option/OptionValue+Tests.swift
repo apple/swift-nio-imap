@@ -23,7 +23,7 @@ class OptionValue_Tests: EncodeTestClass {}
 extension OptionValue_Tests {
     func testEncode() {
         let inputs: [(OptionValueComp, String, UInt)] = [
-            (.string("test"), "(\"test\")", #line),
+            (.string("test"), "(\"test\")", #line)
         ]
 
         for (test, expectedString, line) in inputs {

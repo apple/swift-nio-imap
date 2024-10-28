@@ -23,7 +23,7 @@ class EncodedUser_Tests: EncodeTestClass {}
 extension EncodedUser_Tests {
     func testEncode() {
         let inputs: [(EncodedUser, String, UInt)] = [
-            (.init(data: "hello"), "hello", #line),
+            (.init(data: "hello"), "hello", #line)
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeEncodedUser($0) })
     }

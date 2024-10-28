@@ -46,7 +46,11 @@ extension EncodeBuffer {
     /// - parameter buffer: An initial `ByteBuffer` to write to. Note that this is copied and not taken as `inout`.
     /// - parameter options: Configuration to use when writing.
     /// - returns: A new `EncodeBuffer` configured for client use.
-    static func clientEncodeBuffer(buffer: ByteBuffer, options: CommandEncodingOptions, loggingMode: Bool) -> EncodeBuffer {
+    static func clientEncodeBuffer(
+        buffer: ByteBuffer,
+        options: CommandEncodingOptions,
+        loggingMode: Bool
+    ) -> EncodeBuffer {
         EncodeBuffer(buffer, mode: .client(options: options), loggingMode: loggingMode)
     }
 
@@ -55,14 +59,22 @@ extension EncodeBuffer {
     /// - parameter options: Configuration to use when writing.
     /// - returns: A new `EncodeBuffer` configured for client use.
     static func clientEncodeBuffer(buffer: ByteBuffer, capabilities: [Capability], loggingMode: Bool) -> EncodeBuffer {
-        clientEncodeBuffer(buffer: buffer, options: CommandEncodingOptions(capabilities: capabilities), loggingMode: loggingMode)
+        clientEncodeBuffer(
+            buffer: buffer,
+            options: CommandEncodingOptions(capabilities: capabilities),
+            loggingMode: loggingMode
+        )
     }
 
     /// Creates a new `EncodeBuffer` suitable for a client to write commands.
     /// - parameter buffer: An initial `ByteBuffer` to write to. Note that this is copied and not taken as `inout`.
     /// - parameter options: Configuration to use when writing.
     /// - returns: A new `EncodeBuffer` configured for server use.
-    static func serverEncodeBuffer(buffer: ByteBuffer, options: ResponseEncodingOptions, loggingMode: Bool) -> EncodeBuffer {
+    static func serverEncodeBuffer(
+        buffer: ByteBuffer,
+        options: ResponseEncodingOptions,
+        loggingMode: Bool
+    ) -> EncodeBuffer {
         EncodeBuffer(buffer, mode: .server(streamingAttributes: false, options: options), loggingMode: loggingMode)
     }
 
@@ -71,7 +83,11 @@ extension EncodeBuffer {
     /// - parameter options: Configuration to use when writing.
     /// - returns: A new `EncodeBuffer` configured for server use.
     static func serverEncodeBuffer(buffer: ByteBuffer, capabilities: [Capability], loggingMode: Bool) -> EncodeBuffer {
-        serverEncodeBuffer(buffer: buffer, options: ResponseEncodingOptions(capabilities: capabilities), loggingMode: loggingMode)
+        serverEncodeBuffer(
+            buffer: buffer,
+            options: ResponseEncodingOptions(capabilities: capabilities),
+            loggingMode: loggingMode
+        )
     }
 }
 
@@ -116,13 +132,17 @@ extension EncodeBuffer {
     @_spi(NIOIMAPInternal) public mutating func nextChunk(allowEmptyChunk: Bool) -> Chunk {
         switch self.mode {
         case .client:
-            if let stopPoint = self.stopPoints.popFirst() {
-                return .init(bytes: self.buffer.readSlice(length: stopPoint - self.buffer.readerIndex)!,
-                             waitForContinuation: stopPoint != self.buffer.writerIndex)
-            } else {
+            guard let stopPoint = self.stopPoints.popFirst() else {
                 precondition(allowEmptyChunk || self.buffer.readableBytes > 0, "No next chunk to send.")
-                return .init(bytes: self.buffer.readSlice(length: self.buffer.readableBytes)!, waitForContinuation: false)
+                return .init(
+                    bytes: self.buffer.readSlice(length: self.buffer.readableBytes)!,
+                    waitForContinuation: false
+                )
             }
+            return .init(
+                bytes: self.buffer.readSlice(length: stopPoint - self.buffer.readerIndex)!,
+                waitForContinuation: stopPoint != self.buffer.writerIndex
+            )
         case .server:
             return .init(bytes: self.buffer.readSlice(length: self.buffer.readableBytes)!, waitForContinuation: false)
         }
@@ -154,11 +174,10 @@ extension EncodeBuffer {
     @discardableResult
     @inlinable
     public mutating func writeBytes<Bytes: Sequence>(_ bytes: Bytes) -> Int where Bytes.Element == UInt8 {
-        if loggingMode {
-            return self.buffer.writeString("[\(Array(bytes).count) bytes]")
-        } else {
+        guard loggingMode else {
             return self.buffer.writeBytes(bytes)
         }
+        return self.buffer.writeString("[\(Array(bytes).count) bytes]")
     }
 
     /// Writes a `ByteBuffer` to the buffer.
@@ -167,11 +186,10 @@ extension EncodeBuffer {
     @discardableResult
     @inlinable
     public mutating func writeBuffer(_ buffer: inout ByteBuffer) -> Int {
-        if loggingMode {
-            return self.buffer.writeString("[\(buffer.readableBytes) bytes]")
-        } else {
+        guard loggingMode else {
             return self.buffer.writeBuffer(&buffer)
         }
+        return self.buffer.writeString("[\(buffer.readableBytes) bytes]")
     }
 
     /// Erases all data from the buffer.

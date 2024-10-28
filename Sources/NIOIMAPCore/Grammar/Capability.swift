@@ -403,11 +403,10 @@ extension Capability {
     /// - parameter type: The `SortKind`.
     /// - returns: A new `Capability`.
     public static func sort(_ type: SortKind?) -> Self {
-        if let type = type {
-            return Self("SORT=\(type.rawValue)")
-        } else {
+        guard let type = type else {
             return Self("SORT")
         }
+        return Self("SORT=\(type.rawValue)")
     }
 
     /// Creates a new *UTF8* capability.
@@ -462,8 +461,8 @@ extension EncodeBuffer {
     }
 
     @discardableResult mutating func writeCapabilityData(_ data: [Capability]) -> Int {
-        self.writeString("CAPABILITY") +
-            self.writeArray(data, prefix: " ", parenthesis: false) { (capability, self) -> Int in
+        self.writeString("CAPABILITY")
+            + self.writeArray(data, prefix: " ", parenthesis: false) { (capability, self) -> Int in
                 self.writeCapability(capability)
             }
     }

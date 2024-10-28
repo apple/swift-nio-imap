@@ -18,8 +18,6 @@ import struct NIO.ByteBuffer
 
 extension EncodeBuffer {
     @discardableResult mutating func writeResponseFatal(_ fatal: ResponseText) -> Int {
-        self.writeString("* ") +
-            self.writeUntaggedStatus(.bye(fatal)) +
-            self.writeString("\r\n")
+        self.writeString("* ") + self.writeUntaggedStatus(.bye(fatal)) + self.writeString("\r\n")
     }
 }

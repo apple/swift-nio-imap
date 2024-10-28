@@ -45,8 +45,8 @@ extension EncodeBuffer {
         if a.isEmpty {
             return 0
         }
-        return self.writeSpace() +
-            self.writeArray(a) { (modifier, self) in
+        return self.writeSpace()
+            + self.writeArray(a) { (modifier, self) in
                 self.writeFetchModifier(modifier)
             }
     }

@@ -23,7 +23,7 @@ class NamespaceCommand_Tests: EncodeTestClass {}
 extension NamespaceCommand_Tests {
     func testEncode() {
         let inputs: [(String, UInt)] = [
-            ("NAMESPACE", #line),
+            ("NAMESPACE", #line)
         ]
 
         for (expectedString, line) in inputs {

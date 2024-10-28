@@ -23,7 +23,7 @@ class EncodedMailbox_Tests: EncodeTestClass {}
 extension EncodedMailbox_Tests {
     func testEncode() {
         let inputs: [(EncodedMailbox, String, UInt)] = [
-            (.init(mailbox: "hello"), "hello", #line),
+            (.init(mailbox: "hello"), "hello", #line)
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeEncodedMailbox($0) })
     }

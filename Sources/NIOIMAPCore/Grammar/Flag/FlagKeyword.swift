@@ -48,9 +48,11 @@ extension Flag {
         init(unchecked string: String) {
             /// RFC 3501 defines `flag-keyword` as `atom`,
             /// but Gmail sends flags with `[` and `]` in them.
-            assert(string.utf8.allSatisfy { (c) -> Bool in
-                c.isAtomChar || c.isResponseSpecial
-            })
+            assert(
+                string.utf8.allSatisfy { (c) -> Bool in
+                    c.isAtomChar || c.isResponseSpecial
+                }
+            )
             self.rawValue = string
         }
 

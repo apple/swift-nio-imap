@@ -12,7 +12,9 @@
 //
 //===----------------------------------------------------------------------===//
 
-public protocol MessageIdentifier: Hashable, Codable, CustomDebugStringConvertible, ExpressibleByIntegerLiteral, Strideable where Stride == Int64 {
+public protocol MessageIdentifier: Hashable, Codable, CustomDebugStringConvertible, ExpressibleByIntegerLiteral,
+    Strideable
+where Stride == Int64 {
     var rawValue: UInt32 { get set }
 
     init(rawValue: UInt32)
@@ -119,10 +121,9 @@ extension MessageIdentifier {
 extension EncodeBuffer {
     @discardableResult
     mutating func writeMessageIdentifier<IdentifierType: MessageIdentifier>(_ id: IdentifierType) -> Int {
-        if id == .max {
-            return self.writeString("*")
-        } else {
+        guard id == .max else {
             return self.writeString("\(id.rawValue)")
         }
+        return self.writeString("*")
     }
 }

@@ -46,9 +46,11 @@ extension BodyStructure {
 
         /// Attempts to find and convert the value for the common field "SIZE". If the field doesn't exist or is not a valid integer then `nil` is returned.
         public var size: Int? {
-            guard let value = self.parameters.first(where: { (pair) -> Bool in
-                pair.0.lowercased() == "size"
-            })?.1 else {
+            guard
+                let value = self.parameters.first(where: { (pair) -> Bool in
+                    pair.0.lowercased() == "size"
+                })?.1
+            else {
                 return nil
             }
             return Int(value)
@@ -78,10 +80,7 @@ extension EncodeBuffer {
         }
 
         return
-            self.writeString("(") +
-            self.writeIMAPString(dsp.kind.rawValue) +
-            self.writeSpace() +
-            self.writeBodyParameterPairs(dsp.parameters) +
-            self.writeString(")")
+            self.writeString("(") + self.writeIMAPString(dsp.kind.rawValue) + self.writeSpace()
+            + self.writeBodyParameterPairs(dsp.parameters) + self.writeString(")")
     }
 }

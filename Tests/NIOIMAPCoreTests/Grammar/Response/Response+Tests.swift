@@ -33,9 +33,17 @@ extension Response_Tests {
 
         for (test, expectedString, line) in inputs {
             self.testBuffer.clear()
-            var encoder = ResponseEncodeBuffer(buffer: self.testBuffer.buffer, options: ResponseEncodingOptions(), loggingMode: false)
+            var encoder = ResponseEncodeBuffer(
+                buffer: self.testBuffer.buffer,
+                options: ResponseEncodingOptions(),
+                loggingMode: false
+            )
             let size = encoder.writeResponse(test)
-            self.testBuffer = EncodeBuffer.serverEncodeBuffer(buffer: encoder.readBytes(), options: ResponseEncodingOptions(), loggingMode: false)
+            self.testBuffer = EncodeBuffer.serverEncodeBuffer(
+                buffer: encoder.readBytes(),
+                options: ResponseEncodingOptions(),
+                loggingMode: false
+            )
             XCTAssertEqual(size, expectedString.utf8.count, line: line)
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }
@@ -45,24 +53,40 @@ extension Response_Tests {
         let inputs: [([NIOIMAPCore.FetchResponse], String, UInt)] = [
             ([.start(1), .simpleAttribute(.rfc822Size(123)), .finish], "* 1 FETCH (RFC822.SIZE 123)\r\n", #line),
             ([.startUID(1), .simpleAttribute(.rfc822Size(123)), .finish], "* 1 UIDFETCH (RFC822.SIZE 123)\r\n", #line),
-            ([.start(2), .simpleAttribute(.uid(123)), .simpleAttribute(.rfc822Size(456)), .finish], "* 2 FETCH (UID 123 RFC822.SIZE 456)\r\n", #line),
             (
-                [.start(3), .simpleAttribute(.uid(123)), .streamingBegin(kind: .rfc822Text, byteCount: 0), .streamingEnd, .simpleAttribute(.uid(456)), .finish],
+                [.start(2), .simpleAttribute(.uid(123)), .simpleAttribute(.rfc822Size(456)), .finish],
+                "* 2 FETCH (UID 123 RFC822.SIZE 456)\r\n", #line
+            ),
+            (
+                [
+                    .start(3), .simpleAttribute(.uid(123)), .streamingBegin(kind: .rfc822Text, byteCount: 0),
+                    .streamingEnd, .simpleAttribute(.uid(456)), .finish,
+                ],
                 "* 3 FETCH (UID 123 RFC822.TEXT {0}\r\n UID 456)\r\n",
                 #line
             ),
             (
-                [.start(3), .simpleAttribute(.uid(123)), .streamingBegin(kind: .rfc822Header, byteCount: 0), .streamingEnd, .simpleAttribute(.uid(456)), .finish],
+                [
+                    .start(3), .simpleAttribute(.uid(123)), .streamingBegin(kind: .rfc822Header, byteCount: 0),
+                    .streamingEnd, .simpleAttribute(.uid(456)), .finish,
+                ],
                 "* 3 FETCH (UID 123 RFC822.HEADER {0}\r\n UID 456)\r\n",
                 #line
             ),
             (
-                [.start(87), .simpleAttribute(.nilBody(.body(section: .init(part: [4], kind: .text), offset: nil))), .simpleAttribute(.uid(123)), .finish],
+                [
+                    .start(87), .simpleAttribute(.nilBody(.body(section: .init(part: [4], kind: .text), offset: nil))),
+                    .simpleAttribute(.uid(123)), .finish,
+                ],
                 "* 87 FETCH (BODY[4.TEXT] NIL UID 123)\r\n",
                 #line
             ),
             (
-                [.startUID(87), .simpleAttribute(.nilBody(.body(section: .init(part: [4], kind: .text), offset: nil))), .simpleAttribute(.uid(123)), .finish],
+                [
+                    .startUID(87),
+                    .simpleAttribute(.nilBody(.body(section: .init(part: [4], kind: .text), offset: nil))),
+                    .simpleAttribute(.uid(123)), .finish,
+                ],
                 "* 87 UIDFETCH (BODY[4.TEXT] NIL UID 123)\r\n",
                 #line
             ),
@@ -70,11 +94,19 @@ extension Response_Tests {
 
         for (test, expectedString, line) in inputs {
             self.testBuffer.clear()
-            var encoder = ResponseEncodeBuffer(buffer: self.testBuffer.buffer, options: ResponseEncodingOptions(), loggingMode: false)
+            var encoder = ResponseEncodeBuffer(
+                buffer: self.testBuffer.buffer,
+                options: ResponseEncodingOptions(),
+                loggingMode: false
+            )
             let size = test.reduce(into: 0) { (size, response) in
                 size += encoder.writeFetchResponse(response)
             }
-            self.testBuffer = EncodeBuffer.serverEncodeBuffer(buffer: encoder.readBytes(), options: ResponseEncodingOptions(), loggingMode: false)
+            self.testBuffer = EncodeBuffer.serverEncodeBuffer(
+                buffer: encoder.readBytes(),
+                options: ResponseEncodingOptions(),
+                loggingMode: false
+            )
             XCTAssertEqual(size, expectedString.utf8.count, line: line)
             XCTAssertEqual(self.testBufferString, expectedString, line: line)
         }

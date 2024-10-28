@@ -163,9 +163,7 @@ extension BodyStructure {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeMediaType(_ media: Media.MediaType) -> Int {
-        self.writeMediaTopLevelType(media.topLevel) +
-            self.writeSpace() +
-            self.writeMediaSubtype(media.sub)
+        self.writeMediaTopLevelType(media.topLevel) + self.writeSpace() + self.writeMediaSubtype(media.sub)
     }
 
     @discardableResult mutating func writeMediaTopLevelType(_ type: Media.TopLevelType) -> Int {
@@ -173,8 +171,6 @@ extension EncodeBuffer {
     }
 
     @discardableResult mutating func writeMediaSubtype(_ type: Media.Subtype) -> Int {
-        self.writeString("\"") +
-            self.writeString(String(type).uppercased()) +
-            self.writeString("\"")
+        self.writeString("\"") + self.writeString(String(type).uppercased()) + self.writeString("\"")
     }
 }

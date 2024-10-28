@@ -38,15 +38,12 @@ public struct ExtendedSearchSourceOptions: Hashable, Sendable {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeExtendedSearchSourceOptions(_ options: ExtendedSearchSourceOptions) -> Int {
-        self.writeString("IN (") +
-            self.writeArray(options.sourceMailbox, parenthesis: false) { (filter, buffer) -> Int in
+        self.writeString("IN (")
+            + self.writeArray(options.sourceMailbox, parenthesis: false) { (filter, buffer) -> Int in
                 buffer.writeMailboxFilter(filter)
-            } +
-            self.writeIfExists(options.scopeOptions) { scopeOptions in
-                self.writeString(" (") +
-                    self.writeExtendedSearchScopeOptions(scopeOptions) +
-                    self.writeString(")")
-            } +
-            self.writeString(")")
+            }
+            + self.writeIfExists(options.scopeOptions) { scopeOptions in
+                self.writeString(" (") + self.writeExtendedSearchScopeOptions(scopeOptions) + self.writeString(")")
+            } + self.writeString(")")
     }
 }

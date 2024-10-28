@@ -1,3 +1,17 @@
+//===----------------------------------------------------------------------===//
+//
+// This source file is part of the SwiftNIO open source project
+//
+// Copyright (c) 2023 Apple Inc. and the SwiftNIO project authors
+// Licensed under Apache License v2.0
+//
+// See LICENSE.txt for license information
+// See CONTRIBUTORS.txt for the list of SwiftNIO project authors
+//
+// SPDX-License-Identifier: Apache-2.0
+//
+//===----------------------------------------------------------------------===//
+
 // https://github.com/swift-extras/swift-extras-base64
 
 // minor modifications to remove public attributes
@@ -40,8 +54,7 @@ enum Base64 {
 extension String {
     @usableFromInline
     init<Buffer: Collection>(base64Encoding bytes: Buffer, options: Base64.EncodingOptions = [])
-        where Buffer.Element == UInt8
-    {
+    where Buffer.Element == UInt8 {
         self = Base64.encodeString(bytes: bytes, options: options)
     }
 

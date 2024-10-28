@@ -34,14 +34,11 @@ extension EncodeBuffer {
     @discardableResult mutating func writePartialRange(_ range: PartialRange) -> Int {
         switch range {
         case .first(let r):
-            return self.writeSequenceNumberOrWildcard(r.range.lowerBound) +
-                self.writeString(":") +
-                self.writeSequenceNumberOrWildcard(r.range.upperBound)
+            return self.writeSequenceNumberOrWildcard(r.range.lowerBound) + self.writeString(":")
+                + self.writeSequenceNumberOrWildcard(r.range.upperBound)
         case .last(let r):
-            return self.writeString("-") +
-                self.writeSequenceNumberOrWildcard(r.range.lowerBound) +
-                self.writeString(":-") +
-                self.writeSequenceNumberOrWildcard(r.range.upperBound)
+            return self.writeString("-") + self.writeSequenceNumberOrWildcard(r.range.lowerBound)
+                + self.writeString(":-") + self.writeSequenceNumberOrWildcard(r.range.upperBound)
         }
     }
 }

@@ -23,7 +23,7 @@ class EncodedSection_Tests: EncodeTestClass {}
 extension EncodedSection_Tests {
     func testEncode() {
         let inputs: [(EncodedSection, String, UInt)] = [
-            (.init(section: "hello"), "hello", #line),
+            (.init(section: "hello"), "hello", #line)
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeEncodedSection($0) })
     }

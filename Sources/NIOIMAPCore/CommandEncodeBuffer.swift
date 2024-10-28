@@ -25,7 +25,12 @@ public struct CommandEncodeBuffer: Hashable, Sendable {
     /// Creates a new `CommandEncodeBuffer` from a given initial `ByteBuffer` and configuration options.
     /// - parameter buffer: The initial `ByteBuffer` to build upon.
     /// - parameter options: The options to use when writing commands and data.
-    public init(buffer: ByteBuffer, options: CommandEncodingOptions, encodedAtLeastOneCatenateElement: Bool = false, loggingMode: Bool) {
+    public init(
+        buffer: ByteBuffer,
+        options: CommandEncodingOptions,
+        encodedAtLeastOneCatenateElement: Bool = false,
+        loggingMode: Bool
+    ) {
         self.buffer = .clientEncodeBuffer(buffer: buffer, options: options, loggingMode: loggingMode)
         self.encodedAtLeastOneCatenateElement = encodedAtLeastOneCatenateElement
     }
@@ -35,7 +40,9 @@ extension CommandEncodeBuffer {
     /// The options used when writing commands and data.
     public var options: CommandEncodingOptions {
         get {
-            guard case .client(let options) = buffer.mode else { preconditionFailure("Command encoder mode must be 'client'.") }
+            guard case .client(let options) = buffer.mode else {
+                preconditionFailure("Command encoder mode must be 'client'.")
+            }
             return options
         }
         set {
@@ -46,7 +53,12 @@ extension CommandEncodeBuffer {
     /// Creates a new `CommandEncodeBuffer` from a given initial `ByteBuffer` and configuration options.
     /// - parameter buffer: The initial `ByteBuffer` to build upon.
     /// - parameter capabilities: Capabilities to use when writing commands and data. Will be converted to `CommandEncodingOptions`.
-    public init(buffer: ByteBuffer, capabilities: [Capability], encodedAtLeastOneCatenateElement: Bool = false, loggingMode: Bool) {
+    public init(
+        buffer: ByteBuffer,
+        capabilities: [Capability],
+        encodedAtLeastOneCatenateElement: Bool = false,
+        loggingMode: Bool
+    ) {
         self.buffer = .clientEncodeBuffer(buffer: buffer, capabilities: capabilities, loggingMode: loggingMode)
         self.encodedAtLeastOneCatenateElement = encodedAtLeastOneCatenateElement
     }

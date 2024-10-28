@@ -71,12 +71,11 @@ extension EncodeBuffer {
         // `RETURN ()` according to RFC 7377, but many esoteric
         // servers will fail to parse this correctly.
         return
-            self.writeString(" RETURN (") +
-            self.writeIfExists(options) { (options) -> Int in
+            self.writeString(" RETURN (")
+            + self.writeIfExists(options) { (options) -> Int in
                 self.writeArray(options, parenthesis: false) { (option, self) in
                     self.writeSearchReturnOption(option)
                 }
-            } +
-            self.writeString(")")
+            } + self.writeString(")")
     }
 }

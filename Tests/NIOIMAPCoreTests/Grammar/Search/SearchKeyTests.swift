@@ -57,8 +57,11 @@ extension SearchKeyTests {
             (.sentBefore(IMAPCalendarDay(year: 2018, month: 12, day: 7)!), "SENTBEFORE 7-Dec-2018", #line),
             (.sentSince(IMAPCalendarDay(year: 2018, month: 12, day: 7)!), "SENTSINCE 7-Dec-2018", #line),
             (.messageSizeSmaller(555), "SMALLER 555", #line),
-            (.uid(.set(MessageIdentifierSetNonEmpty(set: MessageIdentifierSet<UID>(333 ... 444))!)), "UID 333:444", #line),
-            (.sequenceNumbers(.range(1 ... 222)), "1:222", #line),
+            (
+                .uid(.set(MessageIdentifierSetNonEmpty(set: MessageIdentifierSet<UID>(333...444))!)), "UID 333:444",
+                #line
+            ),
+            (.sequenceNumbers(.range(1...222)), "1:222", #line),
             (.sequenceNumbers(.range(222...)), "222:*", #line),
             (.and([]), "()", #line),
             (.and([.messageSizeSmaller(444), .messageSizeLarger(333)]), "SMALLER 444 LARGER 333", #line),
@@ -73,8 +76,14 @@ extension SearchKeyTests {
             (.not(.and([.messageSizeSmaller(444)])), "NOT SMALLER 444", #line),
             (.not(.and([.messageSizeSmaller(444), .messageSizeLarger(333)])), "NOT (SMALLER 444 LARGER 333)", #line),
             (.or(.not(.messageSizeSmaller(444)), .messageSizeLarger(333)), "OR (NOT SMALLER 444) LARGER 333", #line),
-            (.or(.not(.and([.messageSizeSmaller(444), .messageSizeLarger(333)])), .undeleted), "OR (NOT (SMALLER 444 LARGER 333)) UNDELETED", #line),
-            (.and([.or(.messageSizeSmaller(444), .messageSizeLarger(333)), .undeleted]), "(OR SMALLER 444 LARGER 333) UNDELETED", #line),
+            (
+                .or(.not(.and([.messageSizeSmaller(444), .messageSizeLarger(333)])), .undeleted),
+                "OR (NOT (SMALLER 444 LARGER 333)) UNDELETED", #line
+            ),
+            (
+                .and([.or(.messageSizeSmaller(444), .messageSizeLarger(333)), .undeleted]),
+                "(OR SMALLER 444 LARGER 333) UNDELETED", #line
+            ),
         ]
 
         for (test, expectedString, line) in inputs {

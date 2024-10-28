@@ -57,7 +57,8 @@ extension GrammarParser {
 
         func parseMailboxData_search(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxData {
             try PL.parseFixedString("SEARCH", buffer: &buffer, tracker: tracker)
-            let nums = try PL.parseZeroOrMore(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> UnknownMessageIdentifier in
+            let nums = try PL.parseZeroOrMore(buffer: &buffer, tracker: tracker) {
+                (buffer, tracker) -> UnknownMessageIdentifier in
                 try PL.parseSpaces(buffer: &buffer, tracker: tracker)
                 let num = try self.parseNZNumber(buffer: &buffer, tracker: tracker)
                 guard let id = UnknownMessageIdentifier(exactly: num) else {
@@ -72,10 +73,15 @@ extension GrammarParser {
             try PL.parseFixedString("SEARCH", buffer: &buffer, tracker: tracker)
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             var array = [try self.parseNZNumber(buffer: &buffer, tracker: tracker)]
-            try PL.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker, parser: { (buffer, tracker) in
-                try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-                return try self.parseNZNumber(buffer: &buffer, tracker: tracker)
-            })
+            try PL.parseZeroOrMore(
+                buffer: &buffer,
+                into: &array,
+                tracker: tracker,
+                parser: { (buffer, tracker) in
+                    try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+                    return try self.parseNZNumber(buffer: &buffer, tracker: tracker)
+                }
+            )
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             let seq = try self.parseSearchSortModificationSequence(buffer: &buffer, tracker: tracker)
             return .searchSort(.init(identifiers: array, modificationSequence: seq))
@@ -107,18 +113,22 @@ extension GrammarParser {
             .namespace(try self.parseNamespaceResponse(buffer: &buffer, tracker: tracker))
         }
 
-        return try PL.parseOneOf([
-            parseMailboxData_flags,
-            parseMailboxData_list,
-            parseMailboxData_lsub,
-            parseMailboxData_extendedSearch,
-            parseMailboxData_status,
-            parseMailboxData_exists,
-            parseMailboxData_recent,
-            parseMailboxData_searchSort,
-            parseMailboxData_search,
-            parseMailboxData_namespace,
-        ], buffer: &buffer, tracker: tracker)
+        return try PL.parseOneOf(
+            [
+                parseMailboxData_flags,
+                parseMailboxData_list,
+                parseMailboxData_lsub,
+                parseMailboxData_extendedSearch,
+                parseMailboxData_status,
+                parseMailboxData_exists,
+                parseMailboxData_recent,
+                parseMailboxData_searchSort,
+                parseMailboxData_search,
+                parseMailboxData_namespace,
+            ],
+            buffer: &buffer,
+            tracker: tracker
+        )
     }
 
     // mailbox-list    = "(" [mbx-list-flags] ")" SP
@@ -131,7 +141,9 @@ extension GrammarParser {
 
                 let character = try PL.parseByte(buffer: &buffer, tracker: tracker)
                 guard character.isQuotedChar else {
-                    throw ParserError(hint: "Expected quoted char found \(String(decoding: [character], as: Unicode.UTF8.self))")
+                    throw ParserError(
+                        hint: "Expected quoted char found \(String(decoding: [character], as: Unicode.UTF8.self))"
+                    )
                 }
 
                 try PL.parseFixedString("\"", buffer: &buffer, tracker: tracker)
@@ -146,7 +158,8 @@ extension GrammarParser {
 
         return try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> MailboxInfo in
             try PL.parseFixedString("(", buffer: &buffer, tracker: tracker)
-            let flags = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseMailboxListFlags) ?? []
+            let flags =
+                try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseMailboxListFlags) ?? []
             try PL.parseFixedString(")", buffer: &buffer, tracker: tracker)
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             let character = try PL.parseOneOf(
@@ -157,29 +170,46 @@ extension GrammarParser {
             )
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             let mailbox = try self.parseMailbox(buffer: &buffer, tracker: tracker)
-            let listExtended = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: { (buffer, tracker) -> OrderedDictionary<ByteBuffer, ParameterValue> in
-                try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-                return try self.parseMailboxListExtended(buffer: &buffer, tracker: tracker)
-            }) ?? [:]
-            return MailboxInfo(attributes: flags, path: try .init(name: mailbox, pathSeparator: character), extensions: listExtended)
+            let listExtended =
+                try PL.parseOptional(
+                    buffer: &buffer,
+                    tracker: tracker,
+                    parser: { (buffer, tracker) -> OrderedDictionary<ByteBuffer, ParameterValue> in
+                        try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+                        return try self.parseMailboxListExtended(buffer: &buffer, tracker: tracker)
+                    }
+                ) ?? [:]
+            return MailboxInfo(
+                attributes: flags,
+                path: try .init(name: mailbox, pathSeparator: character),
+                extensions: listExtended
+            )
         }
     }
 
     // mbox-list-extended =  "(" [mbox-list-extended-item
     //                       *(SP mbox-list-extended-item)] ")"
-    func parseMailboxListExtended(buffer: inout ParseBuffer, tracker: StackTracker) throws -> OrderedDictionary<ByteBuffer, ParameterValue> {
-        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> OrderedDictionary<ByteBuffer, ParameterValue> in
+    func parseMailboxListExtended(
+        buffer: inout ParseBuffer,
+        tracker: StackTracker
+    ) throws -> OrderedDictionary<ByteBuffer, ParameterValue> {
+        try PL.composite(buffer: &buffer, tracker: tracker) {
+            buffer,
+            tracker -> OrderedDictionary<ByteBuffer, ParameterValue> in
             try PL.parseFixedString("(", buffer: &buffer, tracker: tracker)
-            let data = try PL.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> OrderedDictionary<ByteBuffer, ParameterValue> in
-                var kvs = OrderedDictionary<ByteBuffer, ParameterValue>()
-                let item = try self.parseMailboxListExtendedItem(buffer: &buffer, tracker: tracker)
-                kvs[item.key] = item.value
-                try PL.parseZeroOrMore(buffer: &buffer, into: &kvs, tracker: tracker) { (buffer, tracker) -> KeyValue<ByteBuffer, ParameterValue> in
-                    try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-                    return try self.parseMailboxListExtendedItem(buffer: &buffer, tracker: tracker)
-                }
-                return kvs
-            } ?? [:]
+            let data =
+                try PL.parseOptional(buffer: &buffer, tracker: tracker) {
+                    (buffer, tracker) -> OrderedDictionary<ByteBuffer, ParameterValue> in
+                    var kvs = OrderedDictionary<ByteBuffer, ParameterValue>()
+                    let item = try self.parseMailboxListExtendedItem(buffer: &buffer, tracker: tracker)
+                    kvs[item.key] = item.value
+                    try PL.parseZeroOrMore(buffer: &buffer, into: &kvs, tracker: tracker) {
+                        (buffer, tracker) -> KeyValue<ByteBuffer, ParameterValue> in
+                        try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+                        return try self.parseMailboxListExtendedItem(buffer: &buffer, tracker: tracker)
+                    }
+                    return kvs
+                } ?? [:]
             try PL.parseFixedString(")", buffer: &buffer, tracker: tracker)
             return data
         }
@@ -187,7 +217,10 @@ extension GrammarParser {
 
     // mbox-list-extended-item =  mbox-list-extended-item-tag SP
     //                            tagged-ext-val
-    func parseMailboxListExtendedItem(buffer: inout ParseBuffer, tracker: StackTracker) throws -> KeyValue<ByteBuffer, ParameterValue> {
+    func parseMailboxListExtendedItem(
+        buffer: inout ParseBuffer,
+        tracker: StackTracker
+    ) throws -> KeyValue<ByteBuffer, ParameterValue> {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> KeyValue<ByteBuffer, ParameterValue> in
             let tag = try self.parseAString(buffer: &buffer, tracker: tracker)
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
@@ -244,17 +277,22 @@ extension GrammarParser {
             case appendLimit(Int)
         }
 
-        func parseStatusAttributeValue_messages(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxValue {
+        func parseStatusAttributeValue_messages(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxValue
+        {
             try PL.parseFixedString("MESSAGES ", buffer: &buffer, tracker: tracker)
             return .messages(try self.parseNumber(buffer: &buffer, tracker: tracker))
         }
 
-        func parseStatusAttributeValue_uidnext(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxValue {
+        func parseStatusAttributeValue_uidnext(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxValue
+        {
             try PL.parseFixedString("UIDNEXT ", buffer: &buffer, tracker: tracker)
             return .uidNext(try self.parseMessageIdentifier(buffer: &buffer, tracker: tracker))
         }
 
-        func parseStatusAttributeValue_uidvalidity(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxValue {
+        func parseStatusAttributeValue_uidvalidity(
+            buffer: inout ParseBuffer,
+            tracker: StackTracker
+        ) throws -> MailboxValue {
             try PL.parseFixedString("UIDVALIDITY ", buffer: &buffer, tracker: tracker)
             return .uidValidity(try self.parseUIDValidity(buffer: &buffer, tracker: tracker))
         }
@@ -269,7 +307,10 @@ extension GrammarParser {
             return .size(try self.parseNumber(buffer: &buffer, tracker: tracker))
         }
 
-        func parseStatusAttributeValue_modificationSequence(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxValue {
+        func parseStatusAttributeValue_modificationSequence(
+            buffer: inout ParseBuffer,
+            tracker: StackTracker
+        ) throws -> MailboxValue {
             try PL.parseFixedString("HIGHESTMODSEQ ", buffer: &buffer, tracker: tracker)
             return .highestModifierSequence(try self.parseModificationSequenceValue(buffer: &buffer, tracker: tracker))
         }
@@ -279,28 +320,36 @@ extension GrammarParser {
             return .recent(try self.parseNumber(buffer: &buffer, tracker: tracker))
         }
 
-        func parseStatusAttributeValue_appendLimit(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxValue {
+        func parseStatusAttributeValue_appendLimit(
+            buffer: inout ParseBuffer,
+            tracker: StackTracker
+        ) throws -> MailboxValue {
             try PL.parseFixedString("APPENDLIMIT ", buffer: &buffer, tracker: tracker)
             return .appendLimit(try self.parseNumber(buffer: &buffer, tracker: tracker))
         }
 
         func parseStatusAttributeValue(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxValue {
-            try PL.parseOneOf([
-                parseStatusAttributeValue_messages,
-                parseStatusAttributeValue_uidnext,
-                parseStatusAttributeValue_uidvalidity,
-                parseStatusAttributeValue_unseen,
-                parseStatusAttributeValue_size,
-                parseStatusAttributeValue_modificationSequence,
-                parseStatusAttributeValue_recent,
-                parseStatusAttributeValue_appendLimit,
-            ], buffer: &buffer, tracker: tracker)
+            try PL.parseOneOf(
+                [
+                    parseStatusAttributeValue_messages,
+                    parseStatusAttributeValue_uidnext,
+                    parseStatusAttributeValue_uidvalidity,
+                    parseStatusAttributeValue_unseen,
+                    parseStatusAttributeValue_size,
+                    parseStatusAttributeValue_modificationSequence,
+                    parseStatusAttributeValue_recent,
+                    parseStatusAttributeValue_appendLimit,
+                ],
+                buffer: &buffer,
+                tracker: tracker
+            )
         }
 
         return try PL.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> MailboxStatus in
 
             var array = [try parseStatusAttributeValue(buffer: &buffer, tracker: tracker)]
-            try PL.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) -> MailboxValue in
+            try PL.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) {
+                (buffer, tracker) -> MailboxValue in
                 try PL.parseSpaces(buffer: &buffer, tracker: tracker)
                 return try parseStatusAttributeValue(buffer: &buffer, tracker: tracker)
             }

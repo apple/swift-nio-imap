@@ -70,15 +70,12 @@ extension MailboxData {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeMailboxDataSearchSort(_ data: MailboxData.SearchSort?) -> Int {
-        self.writeString("SEARCH") +
-            self.writeIfExists(data) { (data) -> Int in
+        self.writeString("SEARCH")
+            + self.writeIfExists(data) { (data) -> Int in
                 self.writeArray(data.identifiers, prefix: " ", parenthesis: false) { (element, buffer) -> Int in
                     buffer.writeString("\(element)")
-                } +
-                    self.writeSpace() +
-                    self.writeString("(MODSEQ ") +
-                    self.writeModificationSequenceValue(data.modificationSequence) +
-                    self.writeString(")")
+                } + self.writeSpace() + self.writeString("(MODSEQ ")
+                    + self.writeModificationSequenceValue(data.modificationSequence) + self.writeString(")")
             }
     }
 
@@ -107,38 +104,33 @@ extension EncodeBuffer {
         }
     }
 
-    private mutating func writeMailboxData_search(_ list: [UnknownMessageIdentifier], modificationSequence: ModificationSequenceValue?) -> Int {
-        self.writeString("SEARCH") +
-            self.writeArray(list, prefix: " ", separator: " ", parenthesis: false) { (id, buffer) -> Int in
+    private mutating func writeMailboxData_search(
+        _ list: [UnknownMessageIdentifier],
+        modificationSequence: ModificationSequenceValue?
+    ) -> Int {
+        self.writeString("SEARCH")
+            + self.writeArray(list, prefix: " ", separator: " ", parenthesis: false) { (id, buffer) -> Int in
                 buffer.writeMessageIdentifier(id)
-            } +
-            self.writeIfExists(modificationSequence) { value -> Int in
-                self.writeString(" (MODSEQ ") +
-                    self.writeModificationSequenceValue(value) +
-                    self.writeString(")")
+            }
+            + self.writeIfExists(modificationSequence) { value -> Int in
+                self.writeString(" (MODSEQ ") + self.writeModificationSequenceValue(value) + self.writeString(")")
             }
     }
 
     private mutating func writeMailboxData_flags(_ flags: [Flag]) -> Int {
-        self.writeString("FLAGS ") +
-            self.writeFlags(flags)
+        self.writeString("FLAGS ") + self.writeFlags(flags)
     }
 
     private mutating func writeMailboxData_list(_ list: MailboxInfo) -> Int {
-        self.writeString("LIST ") +
-            self.writeMailboxInfo(list)
+        self.writeString("LIST ") + self.writeMailboxInfo(list)
     }
 
     private mutating func writeMailboxData_lsub(_ list: MailboxInfo) -> Int {
-        self.writeString("LSUB ") +
-            self.writeMailboxInfo(list)
+        self.writeString("LSUB ") + self.writeMailboxInfo(list)
     }
 
     private mutating func writeMailboxData_status(mailbox: MailboxName, status: MailboxStatus) -> Int {
-        self.writeString("STATUS ") +
-            self.writeMailbox(mailbox) +
-            self.writeString(" (") +
-            self.writeMailboxStatus(status) +
-            self.writeString(")")
+        self.writeString("STATUS ") + self.writeMailbox(mailbox) + self.writeString(" (")
+            + self.writeMailboxStatus(status) + self.writeString(")")
     }
 }

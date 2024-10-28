@@ -41,15 +41,12 @@ public struct SearchCorrelator: Hashable, Sendable {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeSearchCorrelator(_ correlator: SearchCorrelator) -> Int {
-        self.writeString(" (TAG \"") +
-            self.writeString(correlator.tag) +
-            self.writeString("\"") +
-            self.writeIfExists(correlator.mailbox) { mailbox in
+        self.writeString(" (TAG \"") + self.writeString(correlator.tag) + self.writeString("\"")
+            + self.writeIfExists(correlator.mailbox) { mailbox in
                 self.writeString(" MAILBOX ") + self.writeMailbox(mailbox)
-            } +
-            self.writeIfExists(correlator.uidValidity) { uidValidity in
+            }
+            + self.writeIfExists(correlator.uidValidity) { uidValidity in
                 self.writeString(" UIDVALIDITY ") + self.writeUIDValidity(uidValidity)
-            } +
-            self.writeString(")")
+            } + self.writeString(")")
     }
 }

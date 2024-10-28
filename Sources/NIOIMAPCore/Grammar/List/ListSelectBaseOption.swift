@@ -36,8 +36,6 @@ extension EncodeBuffer {
     }
 
     @discardableResult mutating func writeListSelectBaseOptionQuoted(_ option: ListSelectBaseOption) -> Int {
-        self.writeString("\"") +
-            self.writeListSelectBaseOption(option) +
-            self.writeString("\"")
+        self.writeString("\"") + self.writeListSelectBaseOption(option) + self.writeString("\"")
     }
 }

@@ -71,14 +71,11 @@ extension EncodeBuffer {
     }
 
     @discardableResult mutating func writeListSelectOptions(_ options: ListSelectOptions?) -> Int {
-        self.writeString("(") +
-            self.writeIfExists(options) { (optionsData) -> Int in
+        self.writeString("(")
+            + self.writeIfExists(options) { (optionsData) -> Int in
                 self.writeArray(optionsData.options, separator: "", parenthesis: false) { (option, self) -> Int in
-                    self.writeListSelectOption(option) +
-                        self.writeSpace()
-                } +
-                    self.writeListSelectBaseOption(optionsData.baseOption)
-            } +
-            self.writeString(")")
+                    self.writeListSelectOption(option) + self.writeSpace()
+                } + self.writeListSelectBaseOption(optionsData.baseOption)
+            } + self.writeString(")")
     }
 }

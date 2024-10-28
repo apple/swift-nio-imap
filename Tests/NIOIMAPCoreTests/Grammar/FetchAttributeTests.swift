@@ -47,7 +47,10 @@ extension FetchAttributeTests {
             (.preview(lazy: false), .rfc3501, "PREVIEW", #line),
             (.preview(lazy: true), .rfc3501, "PREVIEW (LAZY)", #line),
         ]
-        self.iterateInputs(inputs: inputs.map { ($0, $1, [$2], $3) }, encoder: { self.testBuffer.writeFetchAttribute($0) })
+        self.iterateInputs(
+            inputs: inputs.map { ($0, $1, [$2], $3) },
+            encoder: { self.testBuffer.writeFetchAttribute($0) }
+        )
     }
 
     // Some tests may have empty fields as debug strings should use
@@ -66,7 +69,10 @@ extension FetchAttributeTests {
             (.bodyStructure(extensions: true), "BODYSTRUCTURE", #line),
             (.bodySection(peek: false, .init(kind: .header), nil), "BODY[HEADER]", #line),
             (.bodySection(peek: false, .init(kind: .header), nil), "BODY[HEADER]", #line),
-            (.bodySection(peek: true, .init(kind: .headerFields(["message-id", "in-reply-to"])), nil), #"BODY.PEEK[HEADER.FIELDS ("message-id" "in-reply-to")]"#, #line),
+            (
+                .bodySection(peek: true, .init(kind: .headerFields(["message-id", "in-reply-to"])), nil),
+                #"BODY.PEEK[HEADER.FIELDS ("message-id" "in-reply-to")]"#, #line
+            ),
             (.binarySize(section: [1]), "BINARY.SIZE[1]", #line),
             (.binary(peek: true, section: [1, 2, 3], partial: nil), "BINARY.PEEK[1.2.3]", #line),
             (.binary(peek: false, section: [3, 4, 5], partial: nil), "BINARY[3.4.5]", #line),
@@ -91,14 +97,29 @@ extension FetchAttributeTests {
             ([.internalDate, .rfc822Size, .flags], .rfc3501, "FAST", #line),
             ([.flags, .internalDate, .rfc822Size, .envelope], .rfc3501, "ALL", #line),
             ([.rfc822Size, .flags, .envelope, .internalDate], .rfc3501, "ALL", #line),
-            ([.flags, .internalDate, .rfc822Size, .envelope, .bodyStructure(extensions: false)], .rfc3501, "FULL", #line),
-            ([.flags, .bodyStructure(extensions: false), .rfc822Size, .internalDate, .envelope], .rfc3501, "FULL", #line),
-            ([.flags, .bodyStructure(extensions: true), .rfc822Size, .internalDate, .envelope], .rfc3501, "(FLAGS BODYSTRUCTURE RFC822.SIZE INTERNALDATE ENVELOPE)", #line),
-            ([.flags, .bodyStructure(extensions: false), .rfc822Size, .internalDate, .envelope, .uid], .rfc3501, "(FLAGS BODY RFC822.SIZE INTERNALDATE ENVELOPE UID)", #line),
+            (
+                [.flags, .internalDate, .rfc822Size, .envelope, .bodyStructure(extensions: false)], .rfc3501, "FULL",
+                #line
+            ),
+            (
+                [.flags, .bodyStructure(extensions: false), .rfc822Size, .internalDate, .envelope], .rfc3501, "FULL",
+                #line
+            ),
+            (
+                [.flags, .bodyStructure(extensions: true), .rfc822Size, .internalDate, .envelope], .rfc3501,
+                "(FLAGS BODYSTRUCTURE RFC822.SIZE INTERNALDATE ENVELOPE)", #line
+            ),
+            (
+                [.flags, .bodyStructure(extensions: false), .rfc822Size, .internalDate, .envelope, .uid], .rfc3501,
+                "(FLAGS BODY RFC822.SIZE INTERNALDATE ENVELOPE UID)", #line
+            ),
             ([.gmailLabels, .gmailMessageID, .gmailThreadID], .rfc3501, "(X-GM-LABELS X-GM-MSGID X-GM-THRID)", #line),
             ([.preview(lazy: false)], .rfc3501, "(PREVIEW)", #line),
             ([.preview(lazy: true)], .rfc3501, "(PREVIEW (LAZY))", #line),
         ]
-        self.iterateInputs(inputs: inputs.map { ($0, $1, [$2], $3) }, encoder: { self.testBuffer.writeFetchAttributeList($0) })
+        self.iterateInputs(
+            inputs: inputs.map { ($0, $1, [$2], $3) },
+            encoder: { self.testBuffer.writeFetchAttributeList($0) }
+        )
     }
 }

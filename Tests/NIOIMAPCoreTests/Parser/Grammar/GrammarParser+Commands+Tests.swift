@@ -24,10 +24,10 @@ extension GrammarParser_Commands_Tests {
     func testParserLiteralLengthLimit() {
         let parser = GrammarParser(literalSizeLimit: 5)
         var b1 = ParseBuffer("{5}\r\nabcde")
-        XCTAssertEqual(try parser.parseLiteral(buffer: &b1, tracker: .makeNewDefaultLimitStackTracker), "abcde")
+        XCTAssertEqual(try parser.parseLiteral(buffer: &b1, tracker: .makeNewDefault), "abcde")
 
         var b2 = ParseBuffer("{6}\r\nabcdef")
-        XCTAssertThrowsError(try parser.parseLiteral(buffer: &b2, tracker: .makeNewDefaultLimitStackTracker)) { e in
+        XCTAssertThrowsError(try parser.parseLiteral(buffer: &b2, tracker: .makeNewDefault)) { e in
             XCTAssertTrue(e is ExceededLiteralSizeLimitError)
         }
     }
@@ -42,10 +42,10 @@ extension GrammarParser_Commands_Tests {
                 ("a1 CAPABILITY", "\r", .init(tag: "a1", command: .capability), #line),
             ],
             parserErrorInputs: [
-                ("(", "CAPABILITY", #line),
+                ("(", "CAPABILITY", #line)
             ],
             incompleteMessageInputs: [
-                ("a CAPABILITY", "", #line),
+                ("a CAPABILITY", "", #line)
             ]
         )
     }
@@ -98,17 +98,26 @@ extension GrammarParser_Commands_Tests {
                 ("NAMESPACE", "\r", .namespace, #line),
                 ("ID NIL", "\r", .id(.init()), #line),
                 ("ENABLE BINARY", "\r", .enable([.binary]), #line),
-                ("GETMETADATA INBOX (test)", "\r", .getMetadata(options: [], mailbox: .inbox, entries: ["test"]), #line),
+                (
+                    "GETMETADATA INBOX (test)", "\r", .getMetadata(options: [], mailbox: .inbox, entries: ["test"]),
+                    #line
+                ),
                 ("SETMETADATA INBOX (test NIL)", "\r", .setMetadata(mailbox: .inbox, entries: ["test": nil]), #line),
                 ("RESETKEY INBOX INTERNAL", "\r", .resetKey(mailbox: .inbox, mechanisms: [.internal]), #line),
-                ("GENURLAUTH rump INTERNAL", "\r", .generateAuthorizedURL([.init(urlRump: "rump", mechanism: .internal)]), #line),
+                (
+                    "GENURLAUTH rump INTERNAL", "\r",
+                    .generateAuthorizedURL([.init(urlRump: "rump", mechanism: .internal)]), #line
+                ),
                 ("URLFETCH test", "\r", .urlFetch(["test"]), #line),
                 ("COPY 1 INBOX", "\r", .copy(.set([1]), .inbox), #line),
                 ("DELETE INBOX", "\r", .delete(.inbox), #line),
                 ("MOVE $ INBOX", "\r", .move(.lastCommand, .inbox), #line),
                 ("SEARCH ALL", "\r", .search(key: .all, charset: nil, returnOptions: []), #line),
                 ("ESEARCH ALL", "\r", .extendedSearch(.init(key: .all)), #line),
-                ("STORE $ +FLAGS \\Answered", "\r", .store(.lastCommand, [], .flags(.add(silent: false, list: [.answered]))), #line),
+                (
+                    "STORE $ +FLAGS \\Answered", "\r",
+                    .store(.lastCommand, [], .flags(.add(silent: false, list: [.answered]))), #line
+                ),
                 ("EXAMINE INBOX", "\r", .examine(.inbox, .init()), #line),
                 ("LIST INBOX test", "\r", .list(nil, reference: .inbox, .mailbox("test"), []), #line),
                 ("LSUB INBOX test", "\r", .lsub(reference: .inbox, pattern: "test"), #line),
@@ -117,14 +126,20 @@ extension GrammarParser_Commands_Tests {
                 ("STATUS INBOX (SIZE)", "\r", .status(.inbox, [.size]), #line),
                 ("SUBSCRIBE INBOX", "\r", .subscribe(.inbox), #line),
                 ("UNSUBSCRIBE INBOX", "\r", .unsubscribe(.inbox), #line),
-                ("UID EXPUNGE 1:2", "\r", .uidExpunge(.set([1 ... 2])), #line),
+                ("UID EXPUNGE 1:2", "\r", .uidExpunge(.set([1...2])), #line),
                 ("FETCH $ (FLAGS)", "\r", .fetch(.lastCommand, [.flags], .init()), #line),
                 ("LOGIN \"user\" \"password\"", "\r", .login(username: "user", password: "password"), #line),
-                ("AUTHENTICATE GSSAPI", "\r", .authenticate(mechanism: AuthenticationMechanism("GSSAPI"), initialResponse: nil), #line),
+                (
+                    "AUTHENTICATE GSSAPI", "\r",
+                    .authenticate(mechanism: AuthenticationMechanism("GSSAPI"), initialResponse: nil), #line
+                ),
                 ("CREATE test", "\r", .create(.init("test"), []), #line),
                 ("GETQUOTA root", "\r", .getQuota(.init("root")), #line),
                 ("GETQUOTAROOT INBOX", "\r", .getQuotaRoot(.inbox), #line),
-                ("SETQUOTA ROOT (resource 123)", "\r", .setQuota(.init("ROOT"), [.init(resourceName: "resource", limit: 123)]), #line),
+                (
+                    "SETQUOTA ROOT (resource 123)", "\r",
+                    .setQuota(.init("ROOT"), [.init(resourceName: "resource", limit: 123)]), #line
+                ),
                 ("COMPRESS DEFLATE", "\r", .compress(.deflate), #line),
             ],
             parserErrorInputs: [
@@ -171,10 +186,10 @@ extension GrammarParser_Commands_Tests {
                 (" ACL BINARY CHILDREN", "\r", .enable([.acl, .binary, .children]), #line),
             ],
             parserErrorInputs: [
-                (" (ACL)", "\r", #line),
+                (" (ACL)", "\r", #line)
             ],
             incompleteMessageInputs: [
-                (" ACL", "", #line),
+                (" ACL", "", #line)
             ]
         )
     }
@@ -184,10 +199,13 @@ extension GrammarParser_Commands_Tests {
             testFunction: GrammarParser().parseCommandSuffix_getMetadata,
             validInputs: [
                 (" INBOX a", " ", .getMetadata(options: [], mailbox: .inbox, entries: ["a"]), #line),
-                (" (MAXSIZE 123) INBOX (a b)", " ", .getMetadata(options: [.maxSize(123)], mailbox: .inbox, entries: ["a", "b"]), #line),
+                (
+                    " (MAXSIZE 123) INBOX (a b)", " ",
+                    .getMetadata(options: [.maxSize(123)], mailbox: .inbox, entries: ["a", "b"]), #line
+                ),
             ],
             parserErrorInputs: [
-                (" (MAXSIZE 123 rogue) INBOX", "\r", #line),
+                (" (MAXSIZE 123 rogue) INBOX", "\r", #line)
             ],
             incompleteMessageInputs: [
                 (" (key", "", #line),
@@ -201,10 +219,10 @@ extension GrammarParser_Commands_Tests {
         self.iterateTests(
             testFunction: GrammarParser().parseCommandSuffix_setMetadata,
             validInputs: [
-                (" INBOX (a NIL)", " ", .setMetadata(mailbox: .inbox, entries: ["a": .init(nil)]), #line),
+                (" INBOX (a NIL)", " ", .setMetadata(mailbox: .inbox, entries: ["a": .init(nil)]), #line)
             ],
             parserErrorInputs: [
-                (" (a NIL)", "", #line),
+                (" (a NIL)", "", #line)
             ],
             incompleteMessageInputs: [
                 (" INBOX", "", #line),
@@ -221,10 +239,12 @@ extension GrammarParser_Commands_Tests {
                 ("", "\r", .resetKey(mailbox: nil, mechanisms: []), #line),
                 (" INBOX", "\r", .resetKey(mailbox: .inbox, mechanisms: []), #line),
                 (" INBOX INTERNAL", "\r", .resetKey(mailbox: .inbox, mechanisms: [.internal]), #line),
-                (" INBOX INTERNAL test", "\r", .resetKey(mailbox: .inbox, mechanisms: [.internal, .init("test")]), #line),
+                (
+                    " INBOX INTERNAL test", "\r", .resetKey(mailbox: .inbox, mechanisms: [.internal, .init("test")]),
+                    #line
+                ),
             ],
-            parserErrorInputs: [
-            ],
+            parserErrorInputs: [],
             incompleteMessageInputs: [
                 (" INBOX", "", #line),
                 (" INBOX INTERNAL", "", #line),
@@ -238,10 +258,15 @@ extension GrammarParser_Commands_Tests {
             testFunction: GrammarParser().parseCommandSuffix_genURLAuth,
             validInputs: [
                 (" test INTERNAL", "\r", .generateAuthorizedURL([.init(urlRump: "test", mechanism: .internal)]), #line),
-                (" test INTERNAL test2 INTERNAL", "\r", .generateAuthorizedURL([.init(urlRump: "test", mechanism: .internal), .init(urlRump: "test2", mechanism: .internal)]), #line),
+                (
+                    " test INTERNAL test2 INTERNAL", "\r",
+                    .generateAuthorizedURL([
+                        .init(urlRump: "test", mechanism: .internal), .init(urlRump: "test2", mechanism: .internal),
+                    ]), #line
+                ),
             ],
             parserErrorInputs: [
-                (" \\", "", #line),
+                (" \\", "", #line)
             ],
             incompleteMessageInputs: [
                 (" ", "", #line),
@@ -259,7 +284,7 @@ extension GrammarParser_Commands_Tests {
                 (" test1 test2", "\r", .urlFetch(["test1", "test2"]), #line),
             ],
             parserErrorInputs: [
-                (" \\ ", "", #line),
+                (" \\ ", "", #line)
             ],
             incompleteMessageInputs: [
                 (" test", "", #line),
@@ -275,7 +300,7 @@ extension GrammarParser_Commands_Tests {
                 (" $ inbox", "\r", .copy(.lastCommand, .inbox), #line),
                 (" 1 inbox", "\r", .copy(.set([1]), .inbox), #line),
                 (" 1,5,7 inbox", "\r", .copy(.set([1, 5, 7]), .inbox), #line),
-                (" 1:100 inbox", "\r", .copy(.set([1 ... 100]), .inbox), #line),
+                (" 1:100 inbox", "\r", .copy(.set([1...100]), .inbox), #line),
             ],
             parserErrorInputs: [
                 (" a inbox", "\r", #line),
@@ -292,13 +317,13 @@ extension GrammarParser_Commands_Tests {
         self.iterateTests(
             testFunction: GrammarParser().parseCommandSuffix_delete,
             validInputs: [
-                (" INBOX", "\r\n", .delete(.inbox), #line),
+                (" INBOX", "\r\n", .delete(.inbox), #line)
             ],
             parserErrorInputs: [
-                (" {5}12345", " ", #line),
+                (" {5}12345", " ", #line)
             ],
             incompleteMessageInputs: [
-                (" INBOX", "", #line),
+                (" INBOX", "", #line)
             ]
         )
     }
@@ -310,7 +335,7 @@ extension GrammarParser_Commands_Tests {
                 (" $ inbox", "\r", .move(.lastCommand, .inbox), #line),
                 (" 1 inbox", "\r", .move(.set([1]), .inbox), #line),
                 (" 1,5,7 inbox", "\r", .move(.set([1, 5, 7]), .inbox), #line),
-                (" 1:100 inbox", "\r", .move(.set([1 ... 100]), .inbox), #line),
+                (" 1:100 inbox", "\r", .move(.set([1...100]), .inbox), #line),
             ],
             parserErrorInputs: [
                 (" a inbox", "\r", #line),
@@ -344,7 +369,11 @@ extension GrammarParser_Commands_Tests {
                 (
                     #" RETURN (MIN MAX) CHARSET UTF-8 OR (FROM "me" FROM "you") (NEW UNSEEN)"#,
                     "\r",
-                    .search(key: .or(.and([.from("me"), .from("you")]), .and([.new, .unseen])), charset: "UTF-8", returnOptions: [.min, .max]),
+                    .search(
+                        key: .or(.and([.from("me"), .from("you")]), .and([.new, .unseen])),
+                        charset: "UTF-8",
+                        returnOptions: [.min, .max]
+                    ),
                     #line
                 ),
             ],
@@ -360,14 +389,23 @@ extension GrammarParser_Commands_Tests {
                 (" ALL", "\r", .extendedSearch(.init(key: .all)), #line),
                 (
                     " IN (mailboxes \"folder1\" subtree \"folder2\") unseen", "\r",
-                    .extendedSearch(ExtendedSearchOptions(key: .unseen, charset: nil, returnOptions: [], sourceOptions: ExtendedSearchSourceOptions(sourceMailbox: [.mailboxes(Mailboxes([MailboxName("folder1")])!), .subtree(Mailboxes([MailboxName("folder2")])!)]))),
+                    .extendedSearch(
+                        ExtendedSearchOptions(
+                            key: .unseen,
+                            charset: nil,
+                            returnOptions: [],
+                            sourceOptions: ExtendedSearchSourceOptions(sourceMailbox: [
+                                .mailboxes(Mailboxes([MailboxName("folder1")])!),
+                                .subtree(Mailboxes([MailboxName("folder2")])!),
+                            ])
+                        )
+                    ),
                     #line
                 ),
             ],
-            parserErrorInputs: [
-            ],
+            parserErrorInputs: [],
             incompleteMessageInputs: [
-                (" IN (mailboxes ", "", #line),
+                (" IN (mailboxes ", "", #line)
             ]
         )
     }
@@ -376,12 +414,29 @@ extension GrammarParser_Commands_Tests {
         self.iterateTests(
             testFunction: GrammarParser().parseCommandSuffix_store,
             validInputs: [
-                (" 1 +FLAGS \\answered", "\r", .store(.set([1]), [], .flags(.add(silent: false, list: [.answered]))), #line),
-                (" 1 (label) -FLAGS \\seen", "\r", .store(.set([1]), [.other(.init(key: "label", value: nil))], .flags(.remove(silent: false, list: [.seen]))), #line),
-                (" 1 (label UNCHANGEDSINCE 5) -FLAGS \\seen", "\r", .store(.set([1]), [.other(.init(key: "label", value: nil)), .unchangedSince(.init(modificationSequence: 5))], .flags(.remove(silent: false, list: [.seen]))), #line),
+                (
+                    " 1 +FLAGS \\answered", "\r", .store(.set([1]), [], .flags(.add(silent: false, list: [.answered]))),
+                    #line
+                ),
+                (
+                    " 1 (label) -FLAGS \\seen", "\r",
+                    .store(
+                        .set([1]),
+                        [.other(.init(key: "label", value: nil))],
+                        .flags(.remove(silent: false, list: [.seen]))
+                    ), #line
+                ),
+                (
+                    " 1 (label UNCHANGEDSINCE 5) -FLAGS \\seen", "\r",
+                    .store(
+                        .set([1]),
+                        [.other(.init(key: "label", value: nil)), .unchangedSince(.init(modificationSequence: 5))],
+                        .flags(.remove(silent: false, list: [.seen]))
+                    ), #line
+                ),
             ],
             parserErrorInputs: [
-                (" +FLAGS \\answered", "\r", #line),
+                (" +FLAGS \\answered", "\r", #line)
             ],
             incompleteMessageInputs: [
                 (" ", "", #line),
@@ -407,7 +462,7 @@ extension GrammarParser_Commands_Tests {
         self.iterateTests(
             testFunction: GrammarParser().parseCommandSuffix_list,
             validInputs: [
-                (#" "" """#, "\r", .list(nil, reference: MailboxName(""), .mailbox(""), []), #line),
+                (#" "" """#, "\r", .list(nil, reference: MailboxName(""), .mailbox(""), []), #line)
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
@@ -422,7 +477,7 @@ extension GrammarParser_Commands_Tests {
                 (" \"inbox\" \"someList\"", " ", .lsub(reference: .inbox, pattern: "someList"), #line),
             ],
             parserErrorInputs: [
-                (" {5}inbox", "", #line),
+                (" {5}inbox", "", #line)
             ],
             incompleteMessageInputs: [
                 (" inbox", "", #line),
@@ -435,7 +490,11 @@ extension GrammarParser_Commands_Tests {
         self.iterateTests(
             testFunction: GrammarParser().parseCommandSuffix_rename,
             validInputs: [
-                (" box1 box2", "\r", .rename(from: .init(.init(string: "box1")), to: .init(.init(string: "box2")), parameters: [:]), #line),
+                (
+                    " box1 box2", "\r",
+                    .rename(from: .init(.init(string: "box1")), to: .init(.init(string: "box2")), parameters: [:]),
+                    #line
+                )
             ],
             parserErrorInputs: [
                 (" {2}b1 {2}b2", "", #line),
@@ -456,10 +515,10 @@ extension GrammarParser_Commands_Tests {
                 (" inbox (some1)", "\r", .select(.inbox, [.basic(.init(key: "some1", value: nil))]), #line),
             ],
             parserErrorInputs: [
-                (" ", "\r", #line),
+                (" ", "\r", #line)
             ],
             incompleteMessageInputs: [
-                (" ", "", #line),
+                (" ", "", #line)
             ]
         )
     }
@@ -469,10 +528,13 @@ extension GrammarParser_Commands_Tests {
             testFunction: GrammarParser().parseCommandSuffix_status,
             validInputs: [
                 (" inbox (messages unseen)", "\r\n", .status(.inbox, [.messageCount, .unseenCount]), #line),
-                (" Deleted (messages unseen HIGHESTMODSEQ)", "\r\n", .status(MailboxName("Deleted"), [.messageCount, .unseenCount, .highestModificationSequence]), #line),
+                (
+                    " Deleted (messages unseen HIGHESTMODSEQ)", "\r\n",
+                    .status(MailboxName("Deleted"), [.messageCount, .unseenCount, .highestModificationSequence]), #line
+                ),
             ],
             parserErrorInputs: [
-                (" inbox (messages unseen", "\r\n", #line),
+                (" inbox (messages unseen", "\r\n", #line)
             ],
             incompleteMessageInputs: [
                 ("", "", #line),
@@ -485,13 +547,13 @@ extension GrammarParser_Commands_Tests {
         self.iterateTests(
             testFunction: GrammarParser().parseCommandSuffix_subscribe,
             validInputs: [
-                (" INBOX", "\r", .subscribe(.inbox), #line),
+                (" INBOX", "\r", .subscribe(.inbox), #line)
             ],
             parserErrorInputs: [
-                ("inbox", "", #line),
+                ("inbox", "", #line)
             ],
             incompleteMessageInputs: [
-                (" inbox", "", #line),
+                (" inbox", "", #line)
             ]
         )
     }
@@ -500,13 +562,13 @@ extension GrammarParser_Commands_Tests {
         self.iterateTests(
             testFunction: GrammarParser().parseCommandSuffix_unsubscribe,
             validInputs: [
-                (" inbox", "\r", .unsubscribe(.inbox), #line),
+                (" inbox", "\r", .unsubscribe(.inbox), #line)
             ],
             parserErrorInputs: [
-                ("inbox", "", #line),
+                ("inbox", "", #line)
             ],
             incompleteMessageInputs: [
-                (" inbox", "", #line),
+                (" inbox", "", #line)
             ]
         )
     }
@@ -519,12 +581,22 @@ extension GrammarParser_Commands_Tests {
                 (" COPY 1 Inbox", "\r\n", .uidCopy(.set([1]), .inbox), #line),
                 (" FETCH 1 FLAGS", "\r\n", .uidFetch(.set([1]), [.flags], []), #line),
                 (" SEARCH CHARSET UTF8 ALL", "\r\n", .uidSearch(key: .all, charset: "UTF8"), #line),
-                (" STORE 1 +FLAGS (Test)", "\r\n", .uidStore(.set([1]), [], .flags(.add(silent: false, list: ["Test"]))), #line),
-                (" STORE 1 (UNCHANGEDSINCE 5 test) +FLAGS (Test)", "\r\n", .uidStore(.set([1]), [.unchangedSince(.init(modificationSequence: 5)), .other(.init(key: "test", value: nil))], .flags(.add(silent: false, list: ["Test"]))), #line),
+                (
+                    " STORE 1 +FLAGS (Test)", "\r\n",
+                    .uidStore(.set([1]), [], .flags(.add(silent: false, list: ["Test"]))), #line
+                ),
+                (
+                    " STORE 1 (UNCHANGEDSINCE 5 test) +FLAGS (Test)", "\r\n",
+                    .uidStore(
+                        .set([1]),
+                        [.unchangedSince(.init(modificationSequence: 5)), .other(.init(key: "test", value: nil))],
+                        .flags(.add(silent: false, list: ["Test"]))
+                    ), #line
+                ),
                 (" COPY * Inbox", "\r\n", .uidCopy(.set([MessageIdentifierRange<UID>(.max)]), .inbox), #line),
             ],
             parserErrorInputs: [
-                ("UID RENAME inbox other", " ", #line),
+                ("UID RENAME inbox other", " ", #line)
             ],
             incompleteMessageInputs: [
                 //                ("UID COPY 1", " ", #line),
@@ -536,13 +608,19 @@ extension GrammarParser_Commands_Tests {
         self.iterateTests(
             testFunction: GrammarParser().parseCommandSuffix_fetch,
             validInputs: [
-                (" 1:3 ALL", "\r", .fetch(.set([1 ... 3]), .all, []), #line),
-                (" 2:4 FULL", "\r", .fetch(.set([2 ... 4]), .full, []), #line),
-                (" 3:5 FAST", "\r", .fetch(.set([3 ... 5]), .fast, []), #line),
-                (" 4:6 ENVELOPE", "\r", .fetch(.set([4 ... 6]), [.envelope], []), #line),
-                (" 5:7 (ENVELOPE FLAGS)", "\r", .fetch(.set([5 ... 7]), [.envelope, .flags], []), #line),
-                (" 3:5 FAST (name)", "\r", .fetch(.set([3 ... 5]), .fast, [.other(.init(key: "name", value: nil))]), #line),
-                (" 1 BODY[TEXT]", "\r", .fetch(.set([1]), [.bodySection(peek: false, .init(kind: .text), nil)], []), #line),
+                (" 1:3 ALL", "\r", .fetch(.set([1...3]), .all, []), #line),
+                (" 2:4 FULL", "\r", .fetch(.set([2...4]), .full, []), #line),
+                (" 3:5 FAST", "\r", .fetch(.set([3...5]), .fast, []), #line),
+                (" 4:6 ENVELOPE", "\r", .fetch(.set([4...6]), [.envelope], []), #line),
+                (" 5:7 (ENVELOPE FLAGS)", "\r", .fetch(.set([5...7]), [.envelope, .flags], []), #line),
+                (
+                    " 3:5 FAST (name)", "\r", .fetch(.set([3...5]), .fast, [.other(.init(key: "name", value: nil))]),
+                    #line
+                ),
+                (
+                    " 1 BODY[TEXT]", "\r", .fetch(.set([1]), [.bodySection(peek: false, .init(kind: .text), nil)], []),
+                    #line
+                ),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
@@ -558,7 +636,7 @@ extension GrammarParser_Commands_Tests {
                 (" {5}\r\nemail {8}\r\npassword", "\r", .login(username: "email", password: "password"), #line),
             ],
             parserErrorInputs: [
-                ("email password", "", #line),
+                ("email password", "", #line)
             ],
             incompleteMessageInputs: [
                 (" email", "", #line),
@@ -573,13 +651,16 @@ extension GrammarParser_Commands_Tests {
             testFunction: GrammarParser().parseCommandSuffix_authenticate,
             validInputs: [
                 (" GSSAPI", "\r", .authenticate(mechanism: .gssAPI, initialResponse: nil), #line),
-                (" GSSAPI aGV5", "\r", .authenticate(mechanism: .gssAPI, initialResponse: .init(.init(.init(string: "hey")))), #line),
+                (
+                    " GSSAPI aGV5", "\r",
+                    .authenticate(mechanism: .gssAPI, initialResponse: .init(.init(.init(string: "hey")))), #line
+                ),
             ],
             parserErrorInputs: [
-                (" \"GSSAPI\"", "", #line),
+                (" \"GSSAPI\"", "", #line)
             ],
             incompleteMessageInputs: [
-                (" gssapi", "", #line),
+                (" gssapi", "", #line)
             ]
         )
     }
@@ -595,7 +676,13 @@ extension GrammarParser_Commands_Tests {
                 (
                     " inbox (USE (\\All \\Flagged) some1 2 USE (\\Sent))",
                     "\r",
-                    .create(.inbox, [.attributes([.all, .flagged]), .labelled(.init(key: "some1", value: .sequence(.set([2])))), .attributes([.sent])]),
+                    .create(
+                        .inbox,
+                        [
+                            .attributes([.all, .flagged]), .labelled(.init(key: "some1", value: .sequence(.set([2])))),
+                            .attributes([.sent]),
+                        ]
+                    ),
                     #line
                 ),
             ],
@@ -615,10 +702,10 @@ extension GrammarParser_Commands_Tests {
                 (" \"quota\"", "\r", .getQuota(.init("quota")), #line),
             ],
             parserErrorInputs: [
-                (" {5}quota", "\r", #line),
+                (" {5}quota", "\r", #line)
             ],
             incompleteMessageInputs: [
-                (" \"root", "", #line),
+                (" \"root", "", #line)
             ]
         )
     }
@@ -627,15 +714,21 @@ extension GrammarParser_Commands_Tests {
         self.iterateTests(
             testFunction: GrammarParser().parseCommandSuffix_setQuota,
             validInputs: [
-                (#" "" (STORAGE 512)"#, "\r", .setQuota(.init(""), [.init(resourceName: "STORAGE", limit: 512)]), #line),
+                (
+                    #" "" (STORAGE 512)"#, "\r", .setQuota(.init(""), [.init(resourceName: "STORAGE", limit: 512)]),
+                    #line
+                ),
                 (
                     #" "" (STORAGE 512 BANDWIDTH 123)"#, "\r",
-                    .setQuota(.init(""), [.init(resourceName: "STORAGE", limit: 512), .init(resourceName: "BANDWIDTH", limit: 123)]),
+                    .setQuota(
+                        .init(""),
+                        [.init(resourceName: "STORAGE", limit: 512), .init(resourceName: "BANDWIDTH", limit: 123)]
+                    ),
                     #line
                 ),
             ],
             parserErrorInputs: [
-                (#" "" STORAGE 512"#, "", #line),
+                (#" "" STORAGE 512"#, "", #line)
             ],
             incompleteMessageInputs: [
                 (#" ""#, "", #line),
@@ -656,10 +749,10 @@ extension GrammarParser_Commands_Tests {
                 (" {5}\r\nINBOX", "\r", .getQuotaRoot(.inbox), #line),
             ],
             parserErrorInputs: [
-                (" {5}INBOX", "", #line),
+                (" {5}INBOX", "", #line)
             ],
             incompleteMessageInputs: [
-                (" INBOX", "", #line),
+                (" INBOX", "", #line)
             ]
         )
     }

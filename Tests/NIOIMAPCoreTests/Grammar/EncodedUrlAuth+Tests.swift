@@ -23,7 +23,7 @@ class EncodedURLAuth_Tests: EncodeTestClass {}
 extension EncodedURLAuth_Tests {
     func testEncode() {
         let inputs: [(EncodedAuthenticatedURL, String, UInt)] = [
-            (.init(data: "1F"), "1F", #line),
+            (.init(data: "1F"), "1F", #line)
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeEncodedAuthenticationURL($0) })
     }

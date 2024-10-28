@@ -31,7 +31,12 @@ public struct MessagePath: Hashable, Sendable {
     /// - parameter iUID: The UID of the message in question.
     /// - parameter IMAPURLSection: An optional section of the message in question.
     /// - parameter iPartial: A specific range of bytes of the message/section in question.
-    public init(mailboxReference: MailboxUIDValidity, iUID: IUID, section: URLMessageSection? = nil, range: MessagePath.ByteRange? = nil) {
+    public init(
+        mailboxReference: MailboxUIDValidity,
+        iUID: IUID,
+        section: URLMessageSection? = nil,
+        range: MessagePath.ByteRange? = nil
+    ) {
         self.mailboxReference = mailboxReference
         self.iUID = iUID
         self.section = section
@@ -43,12 +48,11 @@ public struct MessagePath: Hashable, Sendable {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeMessagePath(_ data: MessagePath) -> Int {
-        self.writeEncodedMailboxUIDValidity(data.mailboxReference) +
-            self.writeIUID(data.iUID) +
-            self.writeIfExists(data.section) { section in
+        self.writeEncodedMailboxUIDValidity(data.mailboxReference) + self.writeIUID(data.iUID)
+            + self.writeIfExists(data.section) { section in
                 self.writeURLMessageSection(section)
-            } +
-            self.writeIfExists(data.range) { partial in
+            }
+            + self.writeIfExists(data.range) { partial in
                 self.writeMessagePathByteRange(partial)
             }
     }

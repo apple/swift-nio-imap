@@ -176,7 +176,7 @@ extension SectionSpecifier.Part: Comparable {
     /// - returns: `true` if `lhs` evaluates to strictly less than `rhs`, otherwise `false`.
     public static func < (lhs: SectionSpecifier.Part, rhs: SectionSpecifier.Part) -> Bool {
         let minSize = min(lhs.array.count, rhs.array.count)
-        for i in 0 ..< minSize {
+        for i in 0..<minSize {
             if lhs.array[i] == rhs.array[i] {
                 continue
             } else if lhs.array[i] < rhs.array[i] {
@@ -187,11 +187,10 @@ extension SectionSpecifier.Part: Comparable {
         }
 
         // [1.2.3.4] < [1.2.3.4.5]
-        if lhs.array.count < rhs.array.count {
-            return true
-        } else {
+        guard lhs.array.count < rhs.array.count else {
             return false
         }
+        return true
     }
 }
 
@@ -337,22 +336,19 @@ extension SectionSpecifier.Part {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeSectionBinary(_ binary: SectionSpecifier.Part) -> Int {
-        self.writeString("[") +
-            self.writeSectionPart(binary) +
-            self.writeString("]")
+        self.writeString("[") + self.writeSectionPart(binary) + self.writeString("]")
     }
 
     @discardableResult mutating func writeSection(_ section: SectionSpecifier?) -> Int {
-        self.writeString("[") +
-            self.writeIfExists(section) { (spec) -> Int in
+        self.writeString("[")
+            + self.writeIfExists(section) { (spec) -> Int in
                 self.writeSectionSpecifier(spec)
-            } +
-            self.writeString("]")
+            } + self.writeString("]")
     }
 
     @discardableResult mutating func writeSectionSpecifier(_ spec: SectionSpecifier?) -> Int {
         guard let spec = spec else {
-            return 0 // do nothing
+            return 0  // do nothing
         }
 
         return self.writeSectionPart(spec.part)
@@ -375,13 +371,9 @@ extension EncodeBuffer {
         case .header:
             return size + self.writeString("HEADER")
         case .headerFields(let list):
-            return size +
-                self.writeString("HEADER.FIELDS ") +
-                self.writeHeaderList(list)
+            return size + self.writeString("HEADER.FIELDS ") + self.writeHeaderList(list)
         case .headerFieldsNot(let list):
-            return size +
-                self.writeString("HEADER.FIELDS.NOT ") +
-                self.writeHeaderList(list)
+            return size + self.writeString("HEADER.FIELDS.NOT ") + self.writeHeaderList(list)
         case .text:
             return size + self.writeString("TEXT")
         case .complete:

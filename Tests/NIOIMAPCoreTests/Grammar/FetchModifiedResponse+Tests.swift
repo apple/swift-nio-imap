@@ -23,7 +23,7 @@ class FetchModifiedResponse_Tests: EncodeTestClass {}
 extension FetchModifiedResponse_Tests {
     func testEncode() {
         let inputs: [(FetchModificationResponse, String, UInt)] = [
-            (.init(modifierSequenceValue: 3), "MODSEQ (3)", #line),
+            (.init(modifierSequenceValue: 3), "MODSEQ (3)", #line)
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeFetchModificationResponse($0) })
     }

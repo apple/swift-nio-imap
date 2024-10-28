@@ -26,13 +26,13 @@ final class RealWorldTests: XCTestCase {}
 extension RealWorldTests {
     func test_realWorldTest() {
         let input = """
-        * 1 FETCH (UID 54 RFC822.SIZE 40639)
-        * 2 FETCH (UID 55 RFC822.SIZE 27984)
-        * 3 FETCH (UID 56 RFC822.SIZE 34007)
-        15.16 OK Fetch completed (0.001 + 0.000 secs).
-        tag OK [REFERRAL imap://hostname/foo/bar/;UID=1234]
+            * 1 FETCH (UID 54 RFC822.SIZE 40639)
+            * 2 FETCH (UID 55 RFC822.SIZE 27984)
+            * 3 FETCH (UID 56 RFC822.SIZE 34007)
+            15.16 OK Fetch completed (0.001 + 0.000 secs).
+            tag OK [REFERRAL imap://hostname/foo/bar/;UID=1234]
 
-        """
+            """
 
         let inoutPairs: [(String, [ResponseOrContinuationRequest])] = [
             (
@@ -50,24 +50,50 @@ extension RealWorldTests {
                     .response(.fetch(.simpleAttribute(.uid(56)))),
                     .response(.fetch(.simpleAttribute(.rfc822Size(34007)))),
                     .response(.fetch(.finish)),
-                    .response(.tagged(.init(tag: "15.16", state: .ok(.init(code: nil, text: "Fetch completed (0.001 + 0.000 secs)."))))),
-                    .response(.tagged(
-                        TaggedResponse(tag: "tag",
-                                       state: .ok(ResponseText(code:
-                                           .referral(IMAPURL(server: IMAPServer(userAuthenticationMechanism: nil, host: "hostname", port: nil),
-                                                             query: URLCommand.fetch(
-                                                                 path: MessagePath(
-                                                                     mailboxReference: MailboxUIDValidity(encodeMailbox: EncodedMailbox(mailbox: "foo/bar"),
-                                                                                                          uidValidity: nil),
-                                                                     iUID: IUID(uid: 1234),
-                                                                     section: nil,
-                                                                     range: nil
-                                                                 ),
-                                                                 authenticatedURL: nil
-                                                             ))),
-                                           text: ""))))),
+                    .response(
+                        .tagged(
+                            .init(
+                                tag: "15.16",
+                                state: .ok(.init(code: nil, text: "Fetch completed (0.001 + 0.000 secs)."))
+                            )
+                        )
+                    ),
+                    .response(
+                        .tagged(
+                            TaggedResponse(
+                                tag: "tag",
+                                state: .ok(
+                                    ResponseText(
+                                        code:
+                                            .referral(
+                                                IMAPURL(
+                                                    server: IMAPServer(
+                                                        userAuthenticationMechanism: nil,
+                                                        host: "hostname",
+                                                        port: nil
+                                                    ),
+                                                    query: URLCommand.fetch(
+                                                        path: MessagePath(
+                                                            mailboxReference: MailboxUIDValidity(
+                                                                encodeMailbox: EncodedMailbox(mailbox: "foo/bar"),
+                                                                uidValidity: nil
+                                                            ),
+                                                            iUID: IUID(uid: 1234),
+                                                            section: nil,
+                                                            range: nil
+                                                        ),
+                                                        authenticatedURL: nil
+                                                    )
+                                                )
+                                            ),
+                                        text: ""
+                                    )
+                                )
+                            )
+                        )
+                    ),
                 ]
-            ),
+            )
         ]
 
         do {

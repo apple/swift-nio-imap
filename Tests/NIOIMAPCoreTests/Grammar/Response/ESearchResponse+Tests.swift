@@ -23,73 +23,87 @@ class ExtendedSearchResponse_Tests: EncodeTestClass {}
 extension ExtendedSearchResponse_Tests {
     func testMatchedUIDs() {
         XCTAssertEqual(
-            ExtendedSearchResponse(kind: .uid, returnData: [.all(.set([44, 70 ... 120]))]).matchedUIDs,
-            [44, 70 ... 120]
+            ExtendedSearchResponse(kind: .uid, returnData: [.all(.set([44, 70...120]))]).matchedUIDs,
+            [44, 70...120]
         )
         XCTAssertEqual(
             ExtendedSearchResponse(kind: .uid, returnData: []).matchedUIDs,
             []
         )
         XCTAssertEqual(
-            ExtendedSearchResponse(kind: .uid, returnData: [.count(5), .all(.set([44, 70 ... 120]))]).matchedUIDs,
-            [44, 70 ... 120]
+            ExtendedSearchResponse(kind: .uid, returnData: [.count(5), .all(.set([44, 70...120]))]).matchedUIDs,
+            [44, 70...120]
         )
         XCTAssertEqual(
-            ExtendedSearchResponse(kind: .uid, returnData: [.all(.set([44, 70 ... 120])), .max(6)]).matchedUIDs,
-            [44, 70 ... 120]
+            ExtendedSearchResponse(kind: .uid, returnData: [.all(.set([44, 70...120])), .max(6)]).matchedUIDs,
+            [44, 70...120]
         )
         XCTAssertEqual(
-            ExtendedSearchResponse(kind: .uid, returnData: [.partial(.last(34 ... 10_000), [99 ... 107, 200])]).matchedUIDs,
-            [99 ... 107, 200]
+            ExtendedSearchResponse(kind: .uid, returnData: [.partial(.last(34...10_000), [99...107, 200])]).matchedUIDs,
+            [99...107, 200]
         )
         XCTAssertEqual(
-            ExtendedSearchResponse(kind: .uid, returnData: [.partial(.last(34 ... 10_000), [99 ... 107, 200]), .all(.set([44, 70 ... 120]))]).matchedUIDs,
-            [44, 70 ... 120]
+            ExtendedSearchResponse(
+                kind: .uid,
+                returnData: [.partial(.last(34...10_000), [99...107, 200]), .all(.set([44, 70...120]))]
+            ).matchedUIDs,
+            [44, 70...120]
         )
         XCTAssertNil(
-            ExtendedSearchResponse(kind: .sequenceNumber, returnData: [.all(.set([44, 70 ... 120]))]).matchedUIDs
+            ExtendedSearchResponse(kind: .sequenceNumber, returnData: [.all(.set([44, 70...120]))]).matchedUIDs
         )
         XCTAssertNil(
-            ExtendedSearchResponse(kind: .sequenceNumber, returnData: [.count(5), .all(.set([44, 70 ... 120]))]).matchedUIDs
+            ExtendedSearchResponse(kind: .sequenceNumber, returnData: [.count(5), .all(.set([44, 70...120]))])
+                .matchedUIDs
         )
         XCTAssertNil(
-            ExtendedSearchResponse(kind: .sequenceNumber, returnData: [.partial(.last(34 ... 10_000), [99 ... 107, 200])]).matchedUIDs
+            ExtendedSearchResponse(kind: .sequenceNumber, returnData: [.partial(.last(34...10_000), [99...107, 200])])
+                .matchedUIDs
         )
     }
 
     func testMatchedSequenceNumbers() {
         XCTAssertEqual(
-            ExtendedSearchResponse(kind: .sequenceNumber, returnData: [.all(.set([44, 70 ... 120]))]).matchedSequenceNumbers,
-            [44, 70 ... 120]
+            ExtendedSearchResponse(kind: .sequenceNumber, returnData: [.all(.set([44, 70...120]))])
+                .matchedSequenceNumbers,
+            [44, 70...120]
         )
         XCTAssertEqual(
             ExtendedSearchResponse(kind: .sequenceNumber, returnData: []).matchedSequenceNumbers,
             []
         )
         XCTAssertEqual(
-            ExtendedSearchResponse(kind: .sequenceNumber, returnData: [.count(5), .all(.set([44, 70 ... 120]))]).matchedSequenceNumbers,
-            [44, 70 ... 120]
+            ExtendedSearchResponse(kind: .sequenceNumber, returnData: [.count(5), .all(.set([44, 70...120]))])
+                .matchedSequenceNumbers,
+            [44, 70...120]
         )
         XCTAssertEqual(
-            ExtendedSearchResponse(kind: .sequenceNumber, returnData: [.all(.set([44, 70 ... 120])), .max(6)]).matchedSequenceNumbers,
-            [44, 70 ... 120]
+            ExtendedSearchResponse(kind: .sequenceNumber, returnData: [.all(.set([44, 70...120])), .max(6)])
+                .matchedSequenceNumbers,
+            [44, 70...120]
         )
         XCTAssertEqual(
-            ExtendedSearchResponse(kind: .sequenceNumber, returnData: [.partial(.last(34 ... 10_000), [99 ... 107, 200])]).matchedSequenceNumbers,
-            [99 ... 107, 200]
+            ExtendedSearchResponse(kind: .sequenceNumber, returnData: [.partial(.last(34...10_000), [99...107, 200])])
+                .matchedSequenceNumbers,
+            [99...107, 200]
         )
         XCTAssertEqual(
-            ExtendedSearchResponse(kind: .sequenceNumber, returnData: [.partial(.last(34 ... 10_000), [99 ... 107, 200]), .all(.set([44, 70 ... 120]))]).matchedSequenceNumbers,
-            [44, 70 ... 120]
+            ExtendedSearchResponse(
+                kind: .sequenceNumber,
+                returnData: [.partial(.last(34...10_000), [99...107, 200]), .all(.set([44, 70...120]))]
+            ).matchedSequenceNumbers,
+            [44, 70...120]
         )
         XCTAssertNil(
-            ExtendedSearchResponse(kind: .uid, returnData: [.all(.set([44, 70 ... 120]))]).matchedSequenceNumbers
+            ExtendedSearchResponse(kind: .uid, returnData: [.all(.set([44, 70...120]))]).matchedSequenceNumbers
         )
         XCTAssertNil(
-            ExtendedSearchResponse(kind: .uid, returnData: [.count(5), .all(.set([44, 70 ... 120]))]).matchedSequenceNumbers
+            ExtendedSearchResponse(kind: .uid, returnData: [.count(5), .all(.set([44, 70...120]))])
+                .matchedSequenceNumbers
         )
         XCTAssertNil(
-            ExtendedSearchResponse(kind: .uid, returnData: [.partial(.last(34 ... 10_000), [99 ... 107, 200])]).matchedSequenceNumbers
+            ExtendedSearchResponse(kind: .uid, returnData: [.partial(.last(34...10_000), [99...107, 200])])
+                .matchedSequenceNumbers
         )
     }
 
@@ -99,15 +113,15 @@ extension ExtendedSearchResponse_Tests {
             5
         )
         XCTAssertEqual(
-            ExtendedSearchResponse(kind: .uid, returnData: [.count(5), .all(.set([44, 70 ... 120]))]).count,
+            ExtendedSearchResponse(kind: .uid, returnData: [.count(5), .all(.set([44, 70...120]))]).count,
             5
         )
         XCTAssertEqual(
-            ExtendedSearchResponse(kind: .uid, returnData: [.all(.set([44, 70 ... 120])), .count(5)]).count,
+            ExtendedSearchResponse(kind: .uid, returnData: [.all(.set([44, 70...120])), .count(5)]).count,
             5
         )
         XCTAssertNil(
-            ExtendedSearchResponse(kind: .uid, returnData: [.all(.set([44, 70 ... 120])), .max(5)]).count
+            ExtendedSearchResponse(kind: .uid, returnData: [.all(.set([44, 70...120])), .max(5)]).count
         )
         XCTAssertNil(
             ExtendedSearchResponse(kind: .uid, returnData: []).count
@@ -140,7 +154,8 @@ extension ExtendedSearchResponse_Tests {
             73
         )
         XCTAssertEqual(
-            ExtendedSearchResponse(kind: .sequenceNumber, returnData: [.max(82), .min(73), .count(8)]).minSequenceNumber,
+            ExtendedSearchResponse(kind: .sequenceNumber, returnData: [.max(82), .min(73), .count(8)])
+                .minSequenceNumber,
             73
         )
         XCTAssertNil(
@@ -180,7 +195,8 @@ extension ExtendedSearchResponse_Tests {
             103
         )
         XCTAssertEqual(
-            ExtendedSearchResponse(kind: .sequenceNumber, returnData: [.min(82), .max(103), .count(8)]).maxSequenceNumber,
+            ExtendedSearchResponse(kind: .sequenceNumber, returnData: [.min(82), .max(103), .count(8)])
+                .maxSequenceNumber,
             103
         )
         XCTAssertNil(
@@ -203,7 +219,10 @@ extension ExtendedSearchResponse_Tests {
             (.init(correlator: nil, kind: .sequenceNumber, returnData: []), "ESEARCH", #line),
             (.init(correlator: nil, kind: .uid, returnData: []), "ESEARCH UID", #line),
             (.init(correlator: nil, kind: .sequenceNumber, returnData: [.count(2)]), "ESEARCH COUNT 2", #line),
-            (.init(correlator: SearchCorrelator(tag: "some"), kind: .sequenceNumber, returnData: []), #"ESEARCH (TAG "some")"#, #line),
+            (
+                .init(correlator: SearchCorrelator(tag: "some"), kind: .sequenceNumber, returnData: []),
+                #"ESEARCH (TAG "some")"#, #line
+            ),
         ]
 
         for (test, expectedString, line) in inputs {

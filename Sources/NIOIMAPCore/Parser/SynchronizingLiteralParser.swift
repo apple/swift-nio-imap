@@ -65,8 +65,10 @@ public struct SynchronizingLiteralParser: Sendable {
         var magnitude = 1
         while true {
             switch buffer.readableBytesView.last {
-            case .some(let digit) where (UInt8(ascii: "0") ... UInt8(ascii: "9")).contains(digit):
-                let (newCurrent, currentOverflowed) = current.addingReportingOverflow((magnitude * Int(digit - UInt8(ascii: "0"))))
+            case .some(let digit) where (UInt8(ascii: "0")...UInt8(ascii: "9")).contains(digit):
+                let (newCurrent, currentOverflowed) = current.addingReportingOverflow(
+                    (magnitude * Int(digit - UInt8(ascii: "0")))
+                )
                 if currentOverflowed {
                     throw ParserError(hint: "Overflow")
                 }
@@ -78,11 +80,10 @@ public struct SynchronizingLiteralParser: Sendable {
                 magnitude = newMagnitude
                 buffer.moveWriterIndex(to: buffer.writerIndex - 1)
             case .some:
-                if magnitude == 1 {
-                    throw ParserError()
-                } else {
+                guard magnitude == 1 else {
                     return current
                 }
+                throw ParserError()
             case .none:
                 throw ParserError()
             }
@@ -94,19 +95,17 @@ public struct SynchronizingLiteralParser: Sendable {
         assert(fragment.readableBytes > 0, "\(fragment)")
         try reverseParseTrailingNewlines(&fragment)
         guard fragment.readableBytes > 0 else {
-            return .completeLine // this is just an empty line
+            return .completeLine  // this is just an empty line
         }
-        if try reverseParseIf(UInt8(ascii: "}"), &fragment) {
-            if try reverseParseIf(UInt8(ascii: "+"), &fragment) || reverseParseIf(UInt8(ascii: "-"), &fragment) {
-                let number = try reverseParseNumber(&fragment)
-                return .nonSynchronisingLiteral(number)
-            } else {
-                let number = try reverseParseNumber(&fragment)
-                return .synchronisingLiteral(number)
-            }
-        } else {
+        guard try reverseParseIf(UInt8(ascii: "}"), &fragment) else {
             return .completeLine
         }
+        guard try reverseParseIf(UInt8(ascii: "+"), &fragment) || reverseParseIf(UInt8(ascii: "-"), &fragment) else {
+            let number = try reverseParseNumber(&fragment)
+            return .synchronisingLiteral(number)
+        }
+        let number = try reverseParseNumber(&fragment)
+        return .nonSynchronisingLiteral(number)
     }
 
     /// Contains information on the result of a call to `parseContinuationsNecessary`.
@@ -126,7 +125,9 @@ public struct SynchronizingLiteralParser: Sendable {
         repeat {
             switch self.state {
             case .waitingForCompleteLine:
-                if let newlineIndex = buffer.readableBytesView[(buffer.readableBytesView.startIndex + self.offset)...].findNewlineIndex() {
+                if let newlineIndex = buffer.readableBytesView[(buffer.readableBytesView.startIndex + self.offset)...]
+                    .findNewlineIndex()
+                {
                     self.offset = newlineIndex - buffer.readableBytesView.startIndex + 1
                     switch try Self.lineFragmentType(buffer.readableBytesView[...newlineIndex]) {
                     case .synchronisingLiteral(let length):
@@ -139,11 +140,12 @@ public struct SynchronizingLiteralParser: Sendable {
                             assert(self.state == .waitingForCompleteLine)
                         }
                     case .completeLine:
-                        () // nothing to do
+                        ()  // nothing to do
                     }
                 }
             case .waitingForLiteralBytes(let literalBytesLeft):
-                let remainingBytes = buffer.readableBytesView.endIndex - (buffer.readableBytesView.startIndex + self.offset)
+                let remainingBytes =
+                    buffer.readableBytesView.endIndex - (buffer.readableBytesView.startIndex + self.offset)
                 if remainingBytes >= literalBytesLeft {
                     self.state = .waitingForCompleteLine
                     self.offset += literalBytesLeft
@@ -157,8 +159,10 @@ public struct SynchronizingLiteralParser: Sendable {
             guard lastOffset < self.offset, self.offset < buffer.readableBytesView.endIndex else {
                 let synchronisingLiterals = self.synchronisingLiterals
                 self.synchronisingLiterals = 0
-                return FramingResult(maximumValidBytes: self.offset,
-                                     synchronizingLiteralCount: synchronisingLiterals)
+                return FramingResult(
+                    maximumValidBytes: self.offset,
+                    synchronizingLiteralCount: synchronisingLiterals
+                )
             }
             lastOffset = self.offset
         } while true

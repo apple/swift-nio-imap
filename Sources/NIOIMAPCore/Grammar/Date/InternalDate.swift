@@ -44,7 +44,15 @@ public struct ServerMessageDate: Hashable, Sendable {
         let zoneMinutes = Int(zoneValue) * ((zoneIsNegative == 0) ? 1 : -1)
 
         // safe to bang as we can't have an invalid `ServerMessageDate`
-        return Components(year: year, month: month, day: day, hour: hour, minute: minute, second: second, timeZoneMinutes: zoneMinutes)!
+        return Components(
+            year: year,
+            month: month,
+            day: day,
+            hour: hour,
+            minute: minute,
+            second: second,
+            timeZoneMinutes: zoneMinutes
+        )!
     }
 
     /// Creates a new `ServerMessageDate` from a given collection of `Components`
@@ -105,13 +113,13 @@ extension ServerMessageDate {
         /// - parameter zoneMinutes: The timezone as an offset in minutes from UTC.
         public init?(year: Int, month: Int, day: Int, hour: Int, minute: Int, second: Int, timeZoneMinutes: Int) {
             guard
-                (1 ... 31).contains(day),
-                (1 ... 12).contains(month),
-                (0 ... 23).contains(hour),
-                (0 ... 59).contains(minute),
-                (0 ... 60).contains(second),
-                ((-24 * 60) ... (24 * 60)).contains(timeZoneMinutes),
-                (1 ... Int(UInt16.max)).contains(year)
+                (1...31).contains(day),
+                (1...12).contains(month),
+                (0...23).contains(hour),
+                (0...59).contains(minute),
+                (0...60).contains(second),
+                ((-24 * 60)...(24 * 60)).contains(timeZoneMinutes),
+                (1...Int(UInt16.max)).contains(year)
             else {
                 return nil
             }
@@ -180,11 +188,8 @@ extension EncodeBuffer {
         }
 
         return
-            self.writeString("\"\(p.0.day)-\(monthName)-\(p.0.year) ") +
-            self.writeTime(p.1) +
-            self.writeSpace() +
-            self.writeTimezone(p.2) +
-            self.writeString("\"")
+            self.writeString("\"\(p.0.day)-\(monthName)-\(p.0.year) ") + self.writeTime(p.1) + self.writeSpace()
+            + self.writeTimezone(p.2) + self.writeString("\"")
     }
 }
 

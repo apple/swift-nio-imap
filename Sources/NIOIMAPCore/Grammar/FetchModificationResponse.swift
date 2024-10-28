@@ -28,8 +28,7 @@ public struct FetchModificationResponse: Hashable, Sendable {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeFetchModificationResponse(_ resp: FetchModificationResponse) -> Int {
-        self.writeString("MODSEQ (") +
-            self.writeModificationSequenceValue(resp.modificationSequenceValue) +
-            self.writeString(")")
+        self.writeString("MODSEQ (") + self.writeModificationSequenceValue(resp.modificationSequenceValue)
+            + self.writeString(")")
     }
 }

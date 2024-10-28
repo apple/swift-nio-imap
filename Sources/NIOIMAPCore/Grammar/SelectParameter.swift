@@ -32,7 +32,12 @@ public struct QResyncParameter: Hashable, Sendable {
     /// - parameter modificationSequenceValue: The last known modification sequence
     /// - parameter knownUIDs: The optional set of known UIDs.
     /// - parameter sequenceMatchData: An optional parenthesized list of known sequence ranges and their corresponding UIDs.
-    public init(uidValidity: UIDValidity, modificationSequenceValue: ModificationSequenceValue, knownUIDs: UIDSet?, sequenceMatchData: SequenceMatchData?) {
+    public init(
+        uidValidity: UIDValidity,
+        modificationSequenceValue: ModificationSequenceValue,
+        knownUIDs: UIDSet?,
+        sequenceMatchData: SequenceMatchData?
+    ) {
         self.uidValidity = uidValidity
         self.modificationSequenceValue = modificationSequenceValue
         self.knownUIDs = knownUIDs
@@ -61,8 +66,8 @@ extension EncodeBuffer {
         }
 
         return
-            self.writeSpace() +
-            self.writeArray(params) { (param, self) -> Int in
+            self.writeSpace()
+            + self.writeArray(params) { (param, self) -> Int in
                 self.writeSelectParameter(param)
             }
     }
@@ -79,14 +84,13 @@ extension EncodeBuffer {
     }
 
     @discardableResult mutating func writeQResyncParameter(param: QResyncParameter) -> Int {
-        self.writeString("QRESYNC (\(param.uidValidity.rawValue) ") +
-            self.writeModificationSequenceValue(param.modificationSequenceValue) +
-            self.writeIfExists(param.knownUIDs) { (set) -> Int in
+        self.writeString("QRESYNC (\(param.uidValidity.rawValue) ")
+            + self.writeModificationSequenceValue(param.modificationSequenceValue)
+            + self.writeIfExists(param.knownUIDs) { (set) -> Int in
                 self.writeSpace() + self.writeUIDSet(set)
-            } +
-            self.writeIfExists(param.sequenceMatchData) { (data) -> Int in
+            }
+            + self.writeIfExists(param.sequenceMatchData) { (data) -> Int in
                 self.writeSpace() + self.writeSequenceMatchData(data)
-            } +
-            self.writeString(")")
+            } + self.writeString(")")
     }
 }

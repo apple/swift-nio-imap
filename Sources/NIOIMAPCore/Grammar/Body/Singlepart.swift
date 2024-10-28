@@ -137,35 +137,33 @@ extension EncodeBuffer {
         return size
     }
 
-    @discardableResult private mutating func writeBodyKindText(_ body: BodyStructure.Singlepart.Text, fields: BodyStructure.Fields) -> Int {
-        self.writeString(#""TEXT" "#) +
-            self.writeMediaSubtype(body.mediaSubtype) +
-            self.writeSpace() +
-            self.writeBodyFields(fields) +
-            self.writeString(" \(body.lineCount)")
+    @discardableResult private mutating func writeBodyKindText(
+        _ body: BodyStructure.Singlepart.Text,
+        fields: BodyStructure.Fields
+    ) -> Int {
+        self.writeString(#""TEXT" "#) + self.writeMediaSubtype(body.mediaSubtype) + self.writeSpace()
+            + self.writeBodyFields(fields) + self.writeString(" \(body.lineCount)")
     }
 
-    @discardableResult private mutating func writeBodyKindMessage(_ message: BodyStructure.Singlepart.Message, fields: BodyStructure.Fields) -> Int {
-        self.writeString(#""MESSAGE" "#) +
-            self.writeMediaSubtype(message.message) +
-            self.writeSpace() +
-            self.writeBodyFields(fields) +
-            self.writeSpace() +
-            self.writeEnvelope(message.envelope) +
-            self.writeSpace() +
-            self.writeBody(message.body) +
-            self.writeString(" \(message.lineCount)")
+    @discardableResult private mutating func writeBodyKindMessage(
+        _ message: BodyStructure.Singlepart.Message,
+        fields: BodyStructure.Fields
+    ) -> Int {
+        self.writeString(#""MESSAGE" "#) + self.writeMediaSubtype(message.message) + self.writeSpace()
+            + self.writeBodyFields(fields) + self.writeSpace() + self.writeEnvelope(message.envelope)
+            + self.writeSpace() + self.writeBody(message.body) + self.writeString(" \(message.lineCount)")
     }
 
-    @discardableResult private mutating func writeBodyKindBasic(mediaType: Media.MediaType, fields: BodyStructure.Fields) -> Int {
-        self.writeMediaType(mediaType) +
-            self.writeSpace() +
-            self.writeBodyFields(fields)
+    @discardableResult private mutating func writeBodyKindBasic(
+        mediaType: Media.MediaType,
+        fields: BodyStructure.Fields
+    ) -> Int {
+        self.writeMediaType(mediaType) + self.writeSpace() + self.writeBodyFields(fields)
     }
 
     @discardableResult mutating func writeBodyExtensionSinglePart(_ ext: BodyStructure.Singlepart.Extension) -> Int {
-        self.writeNString(ext.digest) +
-            self.writeIfExists(ext.dispositionAndLanguage) { (dsp) -> Int in
+        self.writeNString(ext.digest)
+            + self.writeIfExists(ext.dispositionAndLanguage) { (dsp) -> Int in
                 self.writeBodyDispositionAndLanguage(dsp)
             }
     }

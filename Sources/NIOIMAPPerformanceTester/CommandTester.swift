@@ -30,7 +30,7 @@ class CommandTester: Benchmark {
     func tearDown() {}
 
     @discardableResult func run() throws -> Int {
-        for i in 1 ... self.iterations {
+        for i in 1...self.iterations {
             var commandBuffer = CommandEncodeBuffer(buffer: ByteBuffer(), options: .init(), loggingMode: false)
             commandBuffer.writeCommand(.init(tag: "\(i)", command: self.command))
 

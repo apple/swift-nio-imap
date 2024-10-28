@@ -26,8 +26,14 @@ extension UntaggedStatus_Tests {
             (.ok(.init(code: .alert, text: "error")), "OK [ALERT] error", #line),
             (.no(.init(code: .readOnly, text: "everything")), "NO [READ-ONLY] everything", #line),
             (.bad(.init(code: .parse, text: "something")), "BAD [PARSE] something", #line),
-            (.preauth(.init(code: .capability([.uidPlus]), text: "logged in as Smith")), "PREAUTH [CAPABILITY UIDPLUS] logged in as Smith", #line),
-            (.bye(.init(code: .alert, text: "Autologout; idle for too long")), "BYE [ALERT] Autologout; idle for too long", #line),
+            (
+                .preauth(.init(code: .capability([.uidPlus]), text: "logged in as Smith")),
+                "PREAUTH [CAPABILITY UIDPLUS] logged in as Smith", #line
+            ),
+            (
+                .bye(.init(code: .alert, text: "Autologout; idle for too long")),
+                "BYE [ALERT] Autologout; idle for too long", #line
+            ),
 
             (.ok(.init(text: "error")), "OK error", #line),
             (.no(.init(text: "everything")), "NO everything", #line),

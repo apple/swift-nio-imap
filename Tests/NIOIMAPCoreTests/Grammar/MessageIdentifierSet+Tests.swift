@@ -22,14 +22,14 @@ class MessageIdentifierSet_Tests: EncodeTestClass {}
 
 extension MessageIdentifierSet_Tests {
     func testConvert_sequenceNumber() {
-        let input = MessageIdentifierSet<UnknownMessageIdentifier>([1 ... 5, 10 ... 15, 20 ... 30])
+        let input = MessageIdentifierSet<UnknownMessageIdentifier>([1...5, 10...15, 20...30])
         let output = MessageIdentifierSet<SequenceNumber>(input)
-        XCTAssertEqual(output, [1 ... 5, 10 ... 15, 20 ... 30])
+        XCTAssertEqual(output, [1...5, 10...15, 20...30])
     }
 
     func testConvert_uid() {
-        let input = MessageIdentifierSet<UnknownMessageIdentifier>([1 ... 5, 10 ... 15, 20 ... 30])
+        let input = MessageIdentifierSet<UnknownMessageIdentifier>([1...5, 10...15, 20...30])
         let output = MessageIdentifierSet<UID>(input)
-        XCTAssertEqual(output, [1 ... 5, 10 ... 15, 20 ... 30])
+        XCTAssertEqual(output, [1...5, 10...15, 20...30])
     }
 }

@@ -18,18 +18,16 @@ import struct NIO.ByteBuffer
 
 extension EncodeBuffer {
     @discardableResult mutating func writeNString(_ string: ByteBuffer?) -> Int {
-        if let string = string {
-            return self.writeIMAPString(string)
-        } else {
+        guard let string = string else {
             return self.writeNil()
         }
+        return self.writeIMAPString(string)
     }
 
     @discardableResult mutating func writeNString(_ string: String?) -> Int {
-        if let string = string {
-            return self.writeIMAPString(string)
-        } else {
+        guard let string = string else {
             return self.writeNil()
         }
+        return self.writeIMAPString(string)
     }
 }

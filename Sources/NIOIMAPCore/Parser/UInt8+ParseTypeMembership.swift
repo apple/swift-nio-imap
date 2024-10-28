@@ -62,7 +62,7 @@ extension UInt8 {
 
     var isAtomSpecial: Bool {
         switch self {
-        case 0 ... 31, UInt8(ascii: "("), UInt8(ascii: ")"), UInt8(ascii: "{"), UInt8(ascii: " "):
+        case 0...31, UInt8(ascii: "("), UInt8(ascii: ")"), UInt8(ascii: "{"), UInt8(ascii: " "):
             return true
         case _ where self.isListWildcard, _ where self.isResponseSpecial, _ where self.isQuotedSpecial:
             return true
@@ -125,7 +125,7 @@ extension UInt8 {
     }
 
     var isNum: Bool {
-        (UInt8(ascii: "0") ... UInt8(ascii: "9")).contains(self)
+        (UInt8(ascii: "0")...UInt8(ascii: "9")).contains(self)
     }
 
     /// tagged-label-fchar  = ALPHA / "-" / "_" / "."
@@ -133,9 +133,9 @@ extension UInt8 {
         switch self {
         case UInt8(ascii: "-"), UInt8(ascii: "_"), UInt8(ascii: "."):
             return true
-        case UInt8(ascii: "a") ... UInt8(ascii: "z"):
+        case UInt8(ascii: "a")...UInt8(ascii: "z"):
             return true
-        case UInt8(ascii: "A") ... UInt8(ascii: "Z"):
+        case UInt8(ascii: "A")...UInt8(ascii: "Z"):
             return true
         default:
             return false
@@ -147,7 +147,7 @@ extension UInt8 {
         switch self {
         case UInt8(ascii: ":"):
             return true
-        case UInt8(ascii: "0") ... UInt8(ascii: "9"):
+        case UInt8(ascii: "0")...UInt8(ascii: "9"):
             return true
         default:
             return self.isTaggedLabelFchar
@@ -158,13 +158,13 @@ extension UInt8 {
     var isSubDelimsSh: Bool {
         switch self {
         case UInt8(ascii: "!"),
-             UInt8(ascii: "$"),
-             UInt8(ascii: "'"),
-             UInt8(ascii: "("),
-             UInt8(ascii: ")"),
-             UInt8(ascii: "*"),
-             UInt8(ascii: "+"),
-             UInt8(ascii: ","):
+            UInt8(ascii: "$"),
+            UInt8(ascii: "'"),
+            UInt8(ascii: "("),
+            UInt8(ascii: ")"),
+            UInt8(ascii: "*"),
+            UInt8(ascii: "+"),
+            UInt8(ascii: ","):
             return true
         default:
             return false
@@ -175,10 +175,10 @@ extension UInt8 {
     var isUnreserved: Bool {
         switch self {
         case _ where self.isAlphaNum,
-             UInt8(ascii: "-"),
-             UInt8(ascii: "."),
-             UInt8(ascii: "_"),
-             UInt8(ascii: "~"):
+            UInt8(ascii: "-"),
+            UInt8(ascii: "."),
+            UInt8(ascii: "_"),
+            UInt8(ascii: "~"):
             return true
         default:
             return false
@@ -187,7 +187,8 @@ extension UInt8 {
 
     var isHexCharacter: Bool {
         switch self {
-        case UInt8(ascii: "0") ... UInt8(ascii: "9"), UInt8(ascii: "a") ... UInt8(ascii: "f"), UInt8(ascii: "A") ... UInt8(ascii: "F"):
+        case UInt8(ascii: "0")...UInt8(ascii: "9"), UInt8(ascii: "a")...UInt8(ascii: "f"),
+            UInt8(ascii: "A")...UInt8(ascii: "F"):
             return true
         default:
             return false

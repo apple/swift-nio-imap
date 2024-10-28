@@ -35,8 +35,6 @@ extension EncodeBuffer {
     @discardableResult mutating func writeAuthenticatedURLRump(_ data: AuthenticatedURLRump) -> Int {
         self.writeIfExists(data.expire) { expire in
             self.writeExpire(expire)
-        } +
-            self.writeString(";URLAUTH=") +
-            self.writeAccess(data.access)
+        } + self.writeString(";URLAUTH=") + self.writeAccess(data.access)
     }
 }

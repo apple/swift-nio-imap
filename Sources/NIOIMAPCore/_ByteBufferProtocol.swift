@@ -106,6 +106,7 @@ extension ByteBufferView: _ByteBufferViewAPITemplate {}
 /// ### Notes
 /// All `ByteBuffer` methods that don't contain the word 'unsafe' will only allow you to access the 'readable bytes'.
 ///
+// swift-format-ignore: AmbiguousTrailingClosureOverload
 protocol _ByteBufferAPITemplate where Self: Hashable, Self: CustomStringConvertible {
     /// The number of bytes writable until `ByteBuffer` will need to grow its underlying storage which will likely
     /// trigger a copy of the bytes.
@@ -167,7 +168,10 @@ protocol _ByteBufferAPITemplate where Self: Hashable, Self: CustomStringConverti
     ///     - minimumWritableBytes: The number of writable bytes to reserve capacity for before vending the `ByteBuffer` pointer to `body`.
     ///     - body: The closure that will accept the yielded bytes and return the number of bytes written.
     /// - returns: The number of bytes written.
-    mutating func writeWithUnsafeMutableBytes(minimumWritableBytes: Int, _ body: (UnsafeMutableRawBufferPointer) throws -> Int) rethrows -> Int
+    mutating func writeWithUnsafeMutableBytes(
+        minimumWritableBytes: Int,
+        _ body: (UnsafeMutableRawBufferPointer) throws -> Int
+    ) rethrows -> Int
 
     /// This vends a pointer to the storage of the `ByteBuffer`. It's marked as _very unsafe_ because it might contain
     /// uninitialised memory and it's undefined behaviour to read it. In most cases you should use `withUnsafeReadableBytes`.
@@ -201,10 +205,14 @@ protocol _ByteBufferAPITemplate where Self: Hashable, Self: CustomStringConverti
     /// - parameters:
     ///     - body: The closure that will accept the yielded bytes and the `storageManagement`.
     /// - returns: The value returned by `body`.
-    func withUnsafeReadableBytesWithStorageManagement<T>(_ body: (UnsafeRawBufferPointer, Unmanaged<AnyObject>) throws -> T) rethrows -> T
+    func withUnsafeReadableBytesWithStorageManagement<T>(
+        _ body: (UnsafeRawBufferPointer, Unmanaged<AnyObject>) throws -> T
+    ) rethrows -> T
 
     /// See `withUnsafeReadableBytesWithStorageManagement` and `withVeryUnsafeBytes`.
-    func withVeryUnsafeBytesWithStorageManagement<T>(_ body: (UnsafeRawBufferPointer, Unmanaged<AnyObject>) throws -> T) rethrows -> T
+    func withVeryUnsafeBytesWithStorageManagement<T>(
+        _ body: (UnsafeRawBufferPointer, Unmanaged<AnyObject>) throws -> T
+    ) rethrows -> T
 
     /// Returns a slice of size `length` bytes, starting at `index`. The `ByteBuffer` this is invoked on and the
     /// `ByteBuffer` returned will share the same underlying storage. However, the byte at `index` in this `ByteBuffer`
@@ -439,6 +447,7 @@ protocol _ByteBufferAPITemplate where Self: Hashable, Self: CustomStringConverti
     /// - parameters:
     ///     - body: The closure that will accept the yielded bytes and returns the number of bytes it processed.
     /// - returns: The number of bytes read.
+    // swift-format-ignore: AmbiguousTrailingClosureOverload
     mutating func readWithUnsafeReadableBytes(_ body: (UnsafeRawBufferPointer) throws -> Int) rethrows -> Int
 
     /// Yields an immutable buffer pointer containing this `ByteBuffer`'s readable bytes. Will move the reader index
@@ -449,6 +458,7 @@ protocol _ByteBufferAPITemplate where Self: Hashable, Self: CustomStringConverti
     /// - parameters:
     ///     - body: The closure that will accept the yielded bytes and returns the number of bytes it processed along with some other value.
     /// - returns: The value `body` returned in the second tuple component.
+    // swift-format-ignore: AmbiguousTrailingClosureOverload
     mutating func readWithUnsafeReadableBytes<T>(_ body: (UnsafeRawBufferPointer) throws -> (Int, T)) rethrows -> T
 
     /// Yields a mutable buffer pointer containing this `ByteBuffer`'s readable bytes. You may modify the yielded bytes.
@@ -459,7 +469,10 @@ protocol _ByteBufferAPITemplate where Self: Hashable, Self: CustomStringConverti
     /// - parameters:
     ///     - body: The closure that will accept the yielded bytes and returns the number of bytes it processed.
     /// - returns: The number of bytes read.
-    mutating func readWithUnsafeMutableReadableBytes(_ body: (UnsafeMutableRawBufferPointer) throws -> Int) rethrows -> Int
+    // swift-format-ignore: AmbiguousTrailingClosureOverload
+    mutating func readWithUnsafeMutableReadableBytes(
+        _ body: (UnsafeMutableRawBufferPointer) throws -> Int
+    ) rethrows -> Int
 
     /// Yields a mutable buffer pointer containing this `ByteBuffer`'s readable bytes. You may modify the yielded bytes.
     /// Will move the reader index by the number of bytes `body` returns in the first tuple component but leave writer index as it was.
@@ -469,7 +482,10 @@ protocol _ByteBufferAPITemplate where Self: Hashable, Self: CustomStringConverti
     /// - parameters:
     ///     - body: The closure that will accept the yielded bytes and returns the number of bytes it processed along with some other value.
     /// - returns: The value `body` returned in the second tuple component.
-    mutating func readWithUnsafeMutableReadableBytes<T>(_ body: (UnsafeMutableRawBufferPointer) throws -> (Int, T)) rethrows -> T
+    // swift-format-ignore: AmbiguousTrailingClosureOverload
+    mutating func readWithUnsafeMutableReadableBytes<T>(
+        _ body: (UnsafeMutableRawBufferPointer) throws -> (Int, T)
+    ) rethrows -> T
 
     /// Copy `buffer`'s readable bytes into this `ByteBuffer` starting at `index`. Does not move any of the reader or writer indices.
     ///
@@ -558,7 +574,8 @@ protocol _ByteBufferAPITemplate where Self: Hashable, Self: CustomStringConverti
     ///     - index: The index of the first byte to write.
     ///     - endianness: The endianness to use, defaults to big endian.
     /// - returns: The number of bytes written.
-    mutating func setInteger<T>(_ integer: T, at index: Int, endianness: Endianness, as: T.Type) -> Int where T: FixedWidthInteger
+    mutating func setInteger<T>(_ integer: T, at index: Int, endianness: Endianness, as: T.Type) -> Int
+    where T: FixedWidthInteger
 
     /// A view into the readable bytes of the `ByteBuffer`.
     var readableBytesView: ByteBufferView { get }
@@ -581,7 +598,8 @@ protocol _ByteBufferAPITemplate where Self: Hashable, Self: CustomStringConverti
 ///
 /// A `ByteBufferView` is useful whenever a `Collection where Element == UInt8` representing a portion of a
 /// `ByteBuffer` is needed.
-protocol _ByteBufferViewAPITemplate where Self: RandomAccessCollection, Self: MutableCollection, Self: RangeReplaceableCollection {
+protocol _ByteBufferViewAPITemplate
+where Self: RandomAccessCollection, Self: MutableCollection, Self: RangeReplaceableCollection {
     /// A type representing the sequence's elements.
     associatedtype Element = UInt8
 
@@ -735,5 +753,6 @@ protocol _ByteBufferViewAPITemplate where Self: RandomAccessCollection, Self: Mu
     ///   *m* is the length of `newElements`. If the call to this method simply
     ///   appends the contents of `newElements` to the collection, this method is
     ///   equivalent to `append(contentsOf:)`.
-    mutating func replaceSubrange<C>(_ subrange: Range<Index>, with newElements: C) where C: Collection, C.Element == ByteBufferView.Element
+    mutating func replaceSubrange<C>(_ subrange: Range<Index>, with newElements: C)
+    where C: Collection, C.Element == ByteBufferView.Element
 }

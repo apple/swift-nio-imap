@@ -29,10 +29,20 @@ extension GrammarParser_Mailbox_Tests {
                 (
                     "LIST (\\oflag1 \\oflag2) NIL inbox",
                     "\r\n",
-                    .list(.init(attributes: [.init("\\oflag1"), .init("\\oflag2")], path: try! .init(name: .inbox), extensions: [:])),
+                    .list(
+                        .init(
+                            attributes: [.init("\\oflag1"), .init("\\oflag2")],
+                            path: try! .init(name: .inbox),
+                            extensions: [:]
+                        )
+                    ),
                     #line
                 ),
-                ("ESEARCH MIN 1 MAX 2", "\r\n", .extendedSearch(.init(correlator: nil, kind: .sequenceNumber, returnData: [.min(1), .max(2)])), #line),
+                (
+                    "ESEARCH MIN 1 MAX 2", "\r\n",
+                    .extendedSearch(.init(correlator: nil, kind: .sequenceNumber, returnData: [.min(1), .max(2)])),
+                    #line
+                ),
                 ("1234 EXISTS", "\r\n", .exists(1234), #line),
                 ("5678 RECENT", "\r\n", .recent(5678), #line),
                 ("STATUS INBOX ()", "\r\n", .status(.inbox, .init()), #line),
@@ -40,14 +50,26 @@ extension GrammarParser_Mailbox_Tests {
                 (
                     "LSUB (\\seen \\draft) NIL inbox",
                     "\r\n",
-                    .lsub(.init(attributes: [.init("\\seen"), .init("\\draft")], path: try! .init(name: .inbox), extensions: [:])),
+                    .lsub(
+                        .init(
+                            attributes: [.init("\\seen"), .init("\\draft")],
+                            path: try! .init(name: .inbox),
+                            extensions: [:]
+                        )
+                    ),
                     #line
                 ),
                 ("SEARCH", "\r\n", .search([]), #line),
                 ("SEARCH 1", "\r\n", .search([1]), #line),
                 ("SEARCH 1 2 3 4 5", "\r\n", .search([1, 2, 3, 4, 5]), #line),
-                ("NAMESPACE NIL NIL NIL", "\r\n", .namespace(.init(userNamespace: [], otherUserNamespace: [], sharedNamespace: [])), #line),
-                ("SEARCH 1 2 3 (MODSEQ 4)", "\r\n", .searchSort(.init(identifiers: [1, 2, 3], modificationSequence: 4)), #line),
+                (
+                    "NAMESPACE NIL NIL NIL", "\r\n",
+                    .namespace(.init(userNamespace: [], otherUserNamespace: [], sharedNamespace: [])), #line
+                ),
+                (
+                    "SEARCH 1 2 3 (MODSEQ 4)", "\r\n",
+                    .searchSort(.init(identifiers: [1, 2, 3], modificationSequence: 4)), #line
+                ),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
@@ -77,13 +99,21 @@ extension GrammarParser_Mailbox_Tests {
                 (
                     "(\\oflag1 \\oflag2) NIL inbox",
                     "\r",
-                    .init(attributes: [.init("\\oflag1"), .init("\\oflag2")], path: try! .init(name: .inbox), extensions: [:]),
+                    .init(
+                        attributes: [.init("\\oflag1"), .init("\\oflag2")],
+                        path: try! .init(name: .inbox),
+                        extensions: [:]
+                    ),
                     #line
                 ),
                 (
                     "(\\oflag1 \\oflag2) \"d\" inbox",
                     "\r",
-                    .init(attributes: [.init("\\oflag1"), .init("\\oflag2")], path: try! .init(name: .inbox, pathSeparator: "d"), extensions: [:]),
+                    .init(
+                        attributes: [.init("\\oflag1"), .init("\\oflag2")],
+                        path: try! .init(name: .inbox, pathSeparator: "d"),
+                        extensions: [:]
+                    ),
                     #line
                 ),
             ],

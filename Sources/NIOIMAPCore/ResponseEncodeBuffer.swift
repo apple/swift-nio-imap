@@ -101,45 +101,39 @@ extension ResponseEncodeBuffer {
 
     @discardableResult mutating func writeAuthenticationChallenge(_ bytes: ByteBuffer) -> Int {
         let base64 = Base64.encodeBytes(bytes: bytes.readableBytesView)
-        return self.buffer.writeString("+ ") +
-            self.buffer.writeBytes(base64) +
-            self.buffer.writeString("\r\n")
+        return self.buffer.writeString("+ ") + self.buffer.writeBytes(base64) + self.buffer.writeString("\r\n")
     }
 
     @discardableResult mutating func writeFetchResponse(_ response: FetchResponse) -> Int {
         switch response {
         case .start(let num):
-            return self.buffer.writeString("* ") +
-                self.buffer.writeSequenceNumber(num) +
-                self.buffer.writeString(" FETCH (")
+            return self.buffer.writeString("* ") + self.buffer.writeSequenceNumber(num)
+                + self.buffer.writeString(" FETCH (")
         case .startUID(let num):
-            return self.buffer.writeString("* ") +
-                self.buffer.writeMessageIdentifier(num) +
-                self.buffer.writeString(" UIDFETCH (")
+            return self.buffer.writeString("* ") + self.buffer.writeMessageIdentifier(num)
+                + self.buffer.writeString(" UIDFETCH (")
         case .simpleAttribute(let att):
             guard case .server(streamingAttributes: let streamingAttributes, let options) = self.buffer.mode else {
                 preconditionFailure("Only server can write responses.")
             }
-            if streamingAttributes {
-                return self.buffer.writeSpace() + self.buffer.writeMessageAttribute(att)
-            } else {
+            guard streamingAttributes else {
                 self.buffer.mode = .server(streamingAttributes: true, options: options)
                 return self.buffer.writeMessageAttribute(att)
             }
+            return self.buffer.writeSpace() + self.buffer.writeMessageAttribute(att)
         case .streamingBegin(let type, let size):
             guard case .server(streamingAttributes: let streamingAttributes, let options) = self.buffer.mode else {
                 preconditionFailure("Only server can write responses.")
             }
-            if streamingAttributes {
-                return self.buffer.writeSpace() + self.writeStreamingKind(type, size: size)
-            } else {
+            guard streamingAttributes else {
                 self.buffer.mode = .server(streamingAttributes: true, options: options)
                 return self.writeStreamingKind(type, size: size)
             }
+            return self.buffer.writeSpace() + self.writeStreamingKind(type, size: size)
         case .streamingBytes(var bytes):
             return self.buffer.writeBuffer(&bytes)
         case .streamingEnd:
-            return 0 // do nothing, this is a "fake" event
+            return 0  // do nothing, this is a "fake" event
         case .finish:
             guard case .server(_, let options) = self.buffer.mode else {
                 preconditionFailure("Only server can write responses.")
@@ -150,9 +144,7 @@ extension ResponseEncodeBuffer {
     }
 
     @discardableResult mutating func writeStreamingKind(_ kind: StreamingKind, size: Int) -> Int {
-        self.buffer.writeStreamingKind(kind) +
-            self.buffer.writeSpace() +
-            self.buffer.writeString("{\(size)}\r\n")
+        self.buffer.writeStreamingKind(kind) + self.buffer.writeSpace() + self.buffer.writeString("{\(size)}\r\n")
     }
 }
 
@@ -162,9 +154,8 @@ extension EncodeBuffer {
         case .binary:
             return self.writeString("BINARY")
         case .body(let section, let offset):
-            return self.writeString("BODY") +
-                self.writeSection(section) +
-                self.writeIfExists(offset) { offset in
+            return self.writeString("BODY") + self.writeSection(section)
+                + self.writeIfExists(offset) { offset in
                     self.writeString("<\(offset)>")
                 }
         case .rfc822:

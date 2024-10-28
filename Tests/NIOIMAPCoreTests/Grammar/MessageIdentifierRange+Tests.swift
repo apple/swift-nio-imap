@@ -22,14 +22,14 @@ class MessageIdentifierRange_Tests: EncodeTestClass {}
 
 extension MessageIdentifierRange_Tests {
     func testConvert_sequenceNumber() {
-        let input = MessageIdentifierRange<UnknownMessageIdentifier>(UnknownMessageIdentifier(1) ... 2)
+        let input = MessageIdentifierRange<UnknownMessageIdentifier>(UnknownMessageIdentifier(1)...2)
         let output = MessageIdentifierRange<SequenceNumber>(input)
-        XCTAssertEqual(output, 1 ... 2)
+        XCTAssertEqual(output, 1...2)
     }
 
     func testConvert_uid() {
-        let input = MessageIdentifierRange<UnknownMessageIdentifier>(UnknownMessageIdentifier(5) ... 6)
+        let input = MessageIdentifierRange<UnknownMessageIdentifier>(UnknownMessageIdentifier(5)...6)
         let output = MessageIdentifierRange<UID>(input)
-        XCTAssertEqual(output, 5 ... 6)
+        XCTAssertEqual(output, 5...6)
     }
 }

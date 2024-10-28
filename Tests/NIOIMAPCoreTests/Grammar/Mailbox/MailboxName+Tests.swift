@@ -42,7 +42,7 @@ extension MailboxName_Tests {
                 "£",
                 try! .init(name: .init("box/&AKM-"), pathSeparator: "/"),
                 #line
-            ),
+            )
         ]
         for (path, newName, newPath, line) in inputs {
             XCTAssertEqual(try path.makeSubMailbox(displayName: newName), newPath, line: line)
@@ -50,7 +50,8 @@ extension MailboxName_Tests {
 
         // sad path test make sure that mailbox size limit is enforced
         XCTAssertThrowsError(
-            try MailboxPath(name: .init(ByteBuffer(string: String(repeating: "a", count: 999))), pathSeparator: "/").makeSubMailbox(displayName: "1")
+            try MailboxPath(name: .init(ByteBuffer(string: String(repeating: "a", count: 999))), pathSeparator: "/")
+                .makeSubMailbox(displayName: "1")
         ) { error in
             XCTAssertEqual(error as! MailboxTooBigError, MailboxTooBigError(maximumSize: 1000, actualSize: 1001))
         }
@@ -72,7 +73,11 @@ extension MailboxName_Tests {
             ),
         ]
         for (newName, separator, newPath, line) in inputs {
-            XCTAssertEqual(try MailboxPath.makeRootMailbox(displayName: newName, pathSeparator: separator), newPath, line: line)
+            XCTAssertEqual(
+                try MailboxPath.makeRootMailbox(displayName: newName, pathSeparator: separator),
+                newPath,
+                line: line
+            )
         }
 
         // sad path test make sure that mailbox size limit is enforced
@@ -88,10 +93,16 @@ extension MailboxName_Tests {
             (try! .init(name: .init("ABC"), pathSeparator: "B"), true, ["A", "C"], #line),
             (try! .init(name: .init("ABC"), pathSeparator: "D"), true, ["ABC"], #line),
             (try! .init(name: .init(""), pathSeparator: "D"), true, [], #line),
-            (try! .init(name: .init("some/real/mailbox"), pathSeparator: "/"), true, ["some", "real", "mailbox"], #line),
+            (
+                try! .init(name: .init("some/real/mailbox"), pathSeparator: "/"), true, ["some", "real", "mailbox"],
+                #line
+            ),
             (try! .init(name: .init("mailbox#test"), pathSeparator: "#"), true, ["mailbox", "test"], #line),
             (try! .init(name: .init("//test1//test2//"), pathSeparator: "/"), true, ["test1", "test2"], #line),
-            (try! .init(name: .init("//test1//test2//"), pathSeparator: "/"), false, ["", "", "test1", "", "test2", "", ""], #line),
+            (
+                try! .init(name: .init("//test1//test2//"), pathSeparator: "/"), false,
+                ["", "", "test1", "", "test2", "", ""], #line
+            ),
         ]
         for (path, ommitEmpty, expected, line) in inputs {
             XCTAssertEqual(path.displayStringComponents(omittingEmptySubsequences: ommitEmpty), expected, line: line)
@@ -169,7 +180,7 @@ extension MailboxName_Tests {
         func countBits(_ v: Int) -> Int {
             var value = UInt(bitPattern: v)
             var count = 0
-            while (value != 0) {
+            while value != 0 {
                 count += 1
                 value = value & (value &- 1)
             }

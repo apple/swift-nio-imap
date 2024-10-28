@@ -41,7 +41,7 @@ extension UIDTests {
         XCTAssertFalse(UID.max < .max)
         XCTAssertFalse(UID.max < 999)
         XCTAssertTrue(UID.max > 999)
-        XCTAssertTrue(UID(1) < 999) // use .number to force type
+        XCTAssertTrue(UID(1) < 999)  // use .number to force type
     }
 }
 

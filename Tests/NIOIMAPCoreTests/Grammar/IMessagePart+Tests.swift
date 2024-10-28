@@ -24,22 +24,42 @@ extension MessagePath_Tests {
     func testEncode() {
         let inputs: [(MessagePath, String, UInt)] = [
             (
-                .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: .init(uid: 123), section: nil, range: nil),
+                .init(
+                    mailboxReference: .init(encodeMailbox: .init(mailbox: "test")),
+                    iUID: .init(uid: 123),
+                    section: nil,
+                    range: nil
+                ),
                 "test/;UID=123",
                 #line
             ),
             (
-                .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: .init(uid: 123), section: .init(encodedSection: .init(section: "section")), range: nil),
+                .init(
+                    mailboxReference: .init(encodeMailbox: .init(mailbox: "test")),
+                    iUID: .init(uid: 123),
+                    section: .init(encodedSection: .init(section: "section")),
+                    range: nil
+                ),
                 "test/;UID=123/;SECTION=section",
                 #line
             ),
             (
-                .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: .init(uid: 123), section: nil, range: .init(range: .init(offset: 123, length: 4))),
+                .init(
+                    mailboxReference: .init(encodeMailbox: .init(mailbox: "test")),
+                    iUID: .init(uid: 123),
+                    section: nil,
+                    range: .init(range: .init(offset: 123, length: 4))
+                ),
                 "test/;UID=123/;PARTIAL=123.4",
                 #line
             ),
             (
-                .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: .init(uid: 123), section: .init(encodedSection: .init(section: "section")), range: .init(range: .init(offset: 123, length: 4))),
+                .init(
+                    mailboxReference: .init(encodeMailbox: .init(mailbox: "test")),
+                    iUID: .init(uid: 123),
+                    section: .init(encodedSection: .init(section: "section")),
+                    range: .init(range: .init(offset: 123, length: 4))
+                ),
                 "test/;UID=123/;SECTION=section/;PARTIAL=123.4",
                 #line
             ),

@@ -39,9 +39,18 @@ extension ByteBufferWriteLiteralTests {
                 ["{71}\r\n", "01234567890123456789012345678901234567890123456789012345678901234567890"],
                 #line
             ),
-            (ByteBuffer(string: String(repeating: "a", count: 100)), .literalMinus, ["{100+}\r\n" + String(repeating: "a", count: 100)], #line),
-            (ByteBuffer(string: String(repeating: "a", count: 4096)), .literalMinus, ["{4096+}\r\n" + String(repeating: "a", count: 4096)], #line),
-            (ByteBuffer(string: String(repeating: "a", count: 4097)), .literalMinus, ["{4097}\r\n", String(repeating: "a", count: 4097)], #line),
+            (
+                ByteBuffer(string: String(repeating: "a", count: 100)), .literalMinus,
+                ["{100+}\r\n" + String(repeating: "a", count: 100)], #line
+            ),
+            (
+                ByteBuffer(string: String(repeating: "a", count: 4096)), .literalMinus,
+                ["{4096+}\r\n" + String(repeating: "a", count: 4096)], #line
+            ),
+            (
+                ByteBuffer(string: String(repeating: "a", count: 4097)), .literalMinus,
+                ["{4097}\r\n", String(repeating: "a", count: 4097)], #line
+            ),
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeIMAPString($0) })
     }

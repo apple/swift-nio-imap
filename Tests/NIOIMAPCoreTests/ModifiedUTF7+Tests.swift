@@ -60,7 +60,10 @@ extension ModifiedUTF7_Tests {
             ("~ab", "~ab", #line),
         ]
         for (input, expected, line) in inputs {
-            XCTAssertNoThrow(XCTAssertEqual(expected, try ModifiedUTF7.decode(ByteBuffer(string: input)), line: line), line: line)
+            XCTAssertNoThrow(
+                XCTAssertEqual(expected, try ModifiedUTF7.decode(ByteBuffer(string: input)), line: line),
+                line: line
+            )
         }
     }
 

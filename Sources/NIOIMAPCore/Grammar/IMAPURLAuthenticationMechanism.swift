@@ -24,7 +24,8 @@ public enum IMAPURLAuthenticationMechanism: Hashable, Sendable {
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeIMAPURLAuthenticationMechanism(_ data: IMAPURLAuthenticationMechanism) -> Int {
+    @discardableResult mutating func writeIMAPURLAuthenticationMechanism(_ data: IMAPURLAuthenticationMechanism) -> Int
+    {
         switch data {
         case .any:
             return self.writeString(";AUTH=*")

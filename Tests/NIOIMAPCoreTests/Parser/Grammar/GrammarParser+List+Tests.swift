@@ -23,7 +23,7 @@ class GrammarParser_List_Tests: XCTestCase, _ParserTestHelpers {}
 extension GrammarParser_List_Tests {
     func testWildcard() {
         let valid: Set<UInt8> = [UInt8(ascii: "%"), UInt8(ascii: "*")]
-        let invalid: Set<UInt8> = Set(UInt8.min ... UInt8.max).subtracting(valid)
+        let invalid: Set<UInt8> = Set(UInt8.min...UInt8.max).subtracting(valid)
 
         for v in valid {
             var buffer = TestUtilities.makeParseBuffer(for: String(decoding: [v], as: UTF8.self))

@@ -56,11 +56,10 @@ extension EncodeBuffer {
     }
 
     @discardableResult mutating func writeGmailLabel(_ label: GmailLabel) -> Int {
-        if label.buffer.getInteger(at: label.buffer.readerIndex) == UInt8(ascii: "\\") {
-            var stringValue = label.buffer
-            return self.writeBuffer(&stringValue)
-        } else {
+        guard label.buffer.getInteger(at: label.buffer.readerIndex) == UInt8(ascii: "\\") else {
             return self.writeIMAPString(label.buffer)
         }
+        var stringValue = label.buffer
+        return self.writeBuffer(&stringValue)
     }
 }

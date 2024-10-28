@@ -51,7 +51,9 @@ public struct MessageIdentifierSet<IdentifierType: MessageIdentifier>: Hashable,
     }
 
     public init(_ id: IdentifierType) {
-        self._ranges = RangeSet(MessageIdentificationShiftWrapper(id) ..< (MessageIdentificationShiftWrapper(id).advanced(by: 1)))
+        self._ranges = RangeSet(
+            MessageIdentificationShiftWrapper(id)..<(MessageIdentificationShiftWrapper(id).advanced(by: 1))
+        )
     }
 }
 
@@ -89,17 +91,20 @@ extension MessageIdentificationShiftWrapper: Strideable {
 extension Range where Element == MessageIdentificationShiftWrapper {
     @usableFromInline
     init<IdentifierType: MessageIdentifier>(_ r: MessageIdentifierRange<IdentifierType>) {
-        self = MessageIdentificationShiftWrapper(r.range.lowerBound) ..< MessageIdentificationShiftWrapper(r.range.upperBound).advanced(by: 1)
+        self =
+            MessageIdentificationShiftWrapper(
+                r.range.lowerBound
+            )..<MessageIdentificationShiftWrapper(r.range.upperBound).advanced(by: 1)
     }
 
     fileprivate init<IdentifierType: MessageIdentifier>(_ id: IdentifierType) {
-        self = MessageIdentificationShiftWrapper(id) ..< MessageIdentificationShiftWrapper(id).advanced(by: 1)
+        self = MessageIdentificationShiftWrapper(id)..<MessageIdentificationShiftWrapper(id).advanced(by: 1)
     }
 }
 
 extension MessageIdentifierRange {
     init(_ r: Range<MessageIdentificationShiftWrapper>) {
-        self.init(IdentifierType(r.lowerBound) ... IdentifierType(r.upperBound.advanced(by: -1)))
+        self.init(IdentifierType(r.lowerBound)...IdentifierType(r.upperBound.advanced(by: -1)))
     }
 }
 
@@ -165,7 +170,10 @@ extension MessageIdentifierSet.RangeView: ExpressibleByArrayLiteral {
 }
 
 extension MessageIdentifierSet.RangeView: Equatable {
-    public static func == (lhs: MessageIdentifierSet<IdentifierType>.RangeView, rhs: MessageIdentifierSet<IdentifierType>.RangeView) -> Bool {
+    public static func == (
+        lhs: MessageIdentifierSet<IdentifierType>.RangeView,
+        rhs: MessageIdentifierSet<IdentifierType>.RangeView
+    ) -> Bool {
         lhs.elementsEqual(rhs)
     }
 }
@@ -197,7 +205,7 @@ extension MessageIdentifierSet {
         if range.isEmpty {
             self.init()
         } else {
-            self.init(range.lowerBound ... range.upperBound.advanced(by: -1))
+            self.init(range.lowerBound...range.upperBound.advanced(by: -1))
         }
     }
 
@@ -269,23 +277,7 @@ extension MessageIdentifierSet: BidirectionalCollection {
     ///
     /// - Complexity: O(n)
     public func index(_ i: Self.Index, offsetBy distance: Int) -> Self.Index {
-        if distance < 0 {
-            var result = i
-            result.indexInRange = result.indexInRange.advanced(by: distance)
-            while true {
-                if result.indexInRange >= 0 {
-                    break
-                }
-                guard _ranges.ranges.startIndex < result.rangeIndex else {
-                    break
-                }
-                // We need to find the previous range:
-                result.rangeIndex = _ranges.ranges.index(before: result.rangeIndex)
-                let indexCount = IdentifierType.Stride(_ranges.ranges[result.rangeIndex].count)
-                result.indexInRange = result.indexInRange.advanced(by: Int(indexCount))
-            }
-            return result
-        } else {
+        guard distance < 0 else {
             var remainingDistance = distance
             var result = i
             while remainingDistance > 0 {
@@ -299,12 +291,29 @@ extension MessageIdentifierSet: BidirectionalCollection {
                     break
                 }
                 let nextRange = _ranges.ranges.index(after: result.rangeIndex)
-                let step = result.indexInRange.distance(to: IdentifierType.Stride(_ranges.ranges[result.rangeIndex].count))
+                let step = result.indexInRange.distance(
+                    to: IdentifierType.Stride(_ranges.ranges[result.rangeIndex].count)
+                )
                 result = Index(rangeIndex: nextRange, indexInRange: 0)
                 remainingDistance -= step
             }
             return result
         }
+        var result = i
+        result.indexInRange = result.indexInRange.advanced(by: distance)
+        while true {
+            if result.indexInRange >= 0 {
+                break
+            }
+            guard _ranges.ranges.startIndex < result.rangeIndex else {
+                break
+            }
+            // We need to find the previous range:
+            result.rangeIndex = _ranges.ranges.index(before: result.rangeIndex)
+            let indexCount = IdentifierType.Stride(_ranges.ranges[result.rangeIndex].count)
+            result.indexInRange = result.indexInRange.advanced(by: Int(indexCount))
+        }
+        return result
     }
 
     /// Returns the distance between two indices.
@@ -344,19 +353,17 @@ extension MessageIdentifierSet: BidirectionalCollection {
 
 extension MessageIdentifierSet.Index: Comparable {
     public static func < (lhs: MessageIdentifierSet.Index, rhs: MessageIdentifierSet.Index) -> Bool {
-        if lhs.rangeIndex == rhs.rangeIndex {
-            return lhs.indexInRange < rhs.indexInRange
-        } else {
+        guard lhs.rangeIndex == rhs.rangeIndex else {
             return lhs.rangeIndex < rhs.rangeIndex
         }
+        return lhs.indexInRange < rhs.indexInRange
     }
 
     public static func > (lhs: MessageIdentifierSet.Index, rhs: MessageIdentifierSet.Index) -> Bool {
-        if lhs.rangeIndex == rhs.rangeIndex {
-            return lhs.indexInRange > rhs.indexInRange
-        } else {
+        guard lhs.rangeIndex == rhs.rangeIndex else {
             return lhs.rangeIndex > rhs.rangeIndex
         }
+        return lhs.indexInRange > rhs.indexInRange
     }
 
     public static func == (lhs: MessageIdentifierSet.Index, rhs: MessageIdentifierSet.Index) -> Bool {
@@ -482,7 +489,9 @@ extension MessageIdentifierSet {
 }
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeUIDSet<IdentifierType: MessageIdentifier>(_ set: MessageIdentifierSet<IdentifierType>) -> Int {
+    @discardableResult mutating func writeUIDSet<IdentifierType: MessageIdentifier>(
+        _ set: MessageIdentifierSet<IdentifierType>
+    ) -> Int {
         set.writeIntoBuffer(&self)
     }
 }

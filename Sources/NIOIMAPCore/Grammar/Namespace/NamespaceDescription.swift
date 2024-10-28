@@ -31,7 +31,11 @@ public struct NamespaceDescription: Hashable, Sendable {
     /// - parameter string: The full namespace string.
     /// - parameter char: A hierarchy delimiter.
     /// - parameter responseExtensions: A catch-all to provide support fo future extensions.
-    public init(string: ByteBuffer, char: Character? = nil, responseExtensions: OrderedDictionary<ByteBuffer, [ByteBuffer]>) {
+    public init(
+        string: ByteBuffer,
+        char: Character? = nil,
+        responseExtensions: OrderedDictionary<ByteBuffer, [ByteBuffer]>
+    ) {
         self.string = string
         self.delimiter = char
         self.responseExtensions = responseExtensions

@@ -25,7 +25,11 @@ class AppendStateMachineTests: XCTestCase {
 
     func testNormalWorkflow() {
         // append a message
-        XCTAssertTrue(self.stateMachine.sendCommand(.append(.beginMessage(message: .init(options: .init(), data: .init(byteCount: 10))))))
+        XCTAssertTrue(
+            self.stateMachine.sendCommand(
+                .append(.beginMessage(message: .init(options: .init(), data: .init(byteCount: 10))))
+            )
+        )
         XCTAssertNoThrow(try self.stateMachine.receiveContinuationRequest(.data("req")))
         XCTAssertFalse(self.stateMachine.sendCommand(.append(.messageBytes("12345"))))
         XCTAssertFalse(self.stateMachine.sendCommand(.append(.messageBytes("67890"))))
@@ -44,8 +48,13 @@ class AppendStateMachineTests: XCTestCase {
         XCTAssertFalse(self.stateMachine.sendCommand(.append(.endCatenate)))
 
         XCTAssertFalse(self.stateMachine.sendCommand(.append(.finish)))
-        XCTAssertNoThrow(XCTAssertEqual(
-            try self.stateMachine.receiveResponse(.tagged(.init(tag: "A1", state: .ok(.init(code: nil, text: "OK"))))), true
-        ))
+        XCTAssertNoThrow(
+            XCTAssertEqual(
+                try self.stateMachine.receiveResponse(
+                    .tagged(.init(tag: "A1", state: .ok(.init(code: nil, text: "OK"))))
+                ),
+                true
+            )
+        )
     }
 }

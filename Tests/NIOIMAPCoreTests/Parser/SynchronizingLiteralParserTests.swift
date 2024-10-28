@@ -120,12 +120,15 @@ final class SynchronizingLiteralParserTests: XCTestCase {
         self.indicateConsume("\r\n")
         self.feed("")
         self.indicateConsume("FOO {1}\r\nx y\r\n")
-        self.assertMultipleParses([
-            "LOGIN {1}\r\nA {1}\r\nB\r\nFOO {1}\r\nx y\r\n",
-            "B\r\nFOO {1}\r\nx y\r\n",
-            "\r\nFOO {1}\r\nx y\r\n",
-            "FOO {1}\r\nx y\r\n",
-        ], continuationsNecessary: 3)
+        self.assertMultipleParses(
+            [
+                "LOGIN {1}\r\nA {1}\r\nB\r\nFOO {1}\r\nx y\r\n",
+                "B\r\nFOO {1}\r\nx y\r\n",
+                "\r\nFOO {1}\r\nx y\r\n",
+                "FOO {1}\r\nx y\r\n",
+            ],
+            continuationsNecessary: 3
+        )
     }
 
     func testDripFeedWorks() {
@@ -149,21 +152,24 @@ final class SynchronizingLiteralParserTests: XCTestCase {
         self.indicateConsume("FOO {5}\n{0}\r\n\n")
         self.feed("")
 
-        self.assertMultipleParses([
-            "",
-            "LOGIN {1}\r\n",
-            "LOGIN {1}\r\n\n",
-            "LOGIN {1}\r\n\n\n",
-            "LOGIN {1}\r\n\n\n",
-            "LOGIN {1}\r\n\n\n",
-            "LOGIN {1}\r\n\n\nLOGIN {1}\r\n {2}\n\r\n\nFOO {5}\n{0}\r\n\n",
-            "LOGIN {1}\r\n {2}\n\r\n\nFOO {5}\n{0}\r\n\n",
-            " {2}\n\r\n\nFOO {5}\n{0}\r\n\n",
-            "{2}\n\r\n\nFOO {5}\n{0}\r\n\n",
-            "\n\nFOO {5}\n{0}\r\n\n",
-            "FOO {5}\n{0}\r\n\n",
-            "",
-        ], continuationsNecessary: 4)
+        self.assertMultipleParses(
+            [
+                "",
+                "LOGIN {1}\r\n",
+                "LOGIN {1}\r\n\n",
+                "LOGIN {1}\r\n\n\n",
+                "LOGIN {1}\r\n\n\n",
+                "LOGIN {1}\r\n\n\n",
+                "LOGIN {1}\r\n\n\nLOGIN {1}\r\n {2}\n\r\n\nFOO {5}\n{0}\r\n\n",
+                "LOGIN {1}\r\n {2}\n\r\n\nFOO {5}\n{0}\r\n\n",
+                " {2}\n\r\n\nFOO {5}\n{0}\r\n\n",
+                "{2}\n\r\n\nFOO {5}\n{0}\r\n\n",
+                "\n\nFOO {5}\n{0}\r\n\n",
+                "FOO {5}\n{0}\r\n\n",
+                "",
+            ],
+            continuationsNecessary: 4
+        )
     }
 
     func testAppendFollowedByHalfCommand() {
@@ -174,10 +180,12 @@ final class SynchronizingLiteralParserTests: XCTestCase {
         self.feed("")
         self.feed("t")
 
-        self.assertMultipleParses(["tag APPEND box (\\Seen) {1+}\r\na\r\n",
-                                   "a\r\n",
-                                   "\r\n",
-                                   "\r\n"])
+        self.assertMultipleParses([
+            "tag APPEND box (\\Seen) {1+}\r\na\r\n",
+            "a\r\n",
+            "\r\n",
+            "\r\n",
+        ])
     }
 
     override func setUp() {
@@ -201,7 +209,9 @@ final class SynchronizingLiteralParserTests: XCTestCase {
     private func feed(_ string: String) {
         let buffer = self.stringBuffer(string)
         self.accumulator.writeBytes(buffer.readableBytesView)
-        XCTAssertNoThrow(self.parses.append(try self.parser.parseContinuationsNecessary(self.bufferWithGarbage(self.accumulator))))
+        XCTAssertNoThrow(
+            self.parses.append(try self.parser.parseContinuationsNecessary(self.bufferWithGarbage(self.accumulator)))
+        )
     }
 
     private func indicateConsume(_ string: String) {
@@ -210,10 +220,12 @@ final class SynchronizingLiteralParserTests: XCTestCase {
         self.parser.consumed(string.utf8.count)
     }
 
-    private func assertMultipleParses(_ expectedStrings: [String], continuationsNecessary: Int = 0,
-                                      file: StaticString = (#filePath),
-                                      line: UInt = #line)
-    {
+    private func assertMultipleParses(
+        _ expectedStrings: [String],
+        continuationsNecessary: Int = 0,
+        file: StaticString = (#filePath),
+        line: UInt = #line
+    ) {
         guard expectedStrings.count == self.parses.count else {
             XCTFail("Unexpected number of parses: \(self.parses.count)", file: file, line: line)
             return
@@ -227,26 +239,37 @@ final class SynchronizingLiteralParserTests: XCTestCase {
             let parse = self.parses[expected.offset]
             let expectedUTF8 = Array(expected.element.utf8)
             let actual = Array(allBytes.readableBytesView.prefix(parse.maximumValidBytes))
-            XCTAssertEqual(expectedUTF8, actual,
-                           "parse \(expected.0): \(String(decoding: expectedUTF8, as: UTF8.self)) != \(String(decoding: actual, as: UTF8.self))",
-                           file: file, line: line)
+            XCTAssertEqual(
+                expectedUTF8,
+                actual,
+                "parse \(expected.0): \(String(decoding: expectedUTF8, as: UTF8.self)) != \(String(decoding: actual, as: UTF8.self))",
+                file: file,
+                line: line
+            )
             XCTAssertGreaterThanOrEqual(parse.synchronizingLiteralCount, 0)
             continuations += parse.synchronizingLiteralCount
 
-            let newReader = self.consumptions.filter {
-                $0.numberOfPriorParses <= expected.offset + 1
-            }.map(\.consumption).reduce(0, +) + initialAllByteReader
+            let newReader =
+                self.consumptions.filter {
+                    $0.numberOfPriorParses <= expected.offset + 1
+                }.map(\.consumption).reduce(0, +) + initialAllByteReader
             allBytes.moveReaderIndex(to: newReader)
         }
-        XCTAssertEqual(continuationsNecessary, continuations,
-                       "wrong number of continuations",
-                       file: file, line: line)
+        XCTAssertEqual(
+            continuationsNecessary,
+            continuations,
+            "wrong number of continuations",
+            file: file,
+            line: line
+        )
     }
 
-    private func assertOneParse(_ string: String, continuationsNecessary: Int = 0,
-                                file: StaticString = (#filePath),
-                                line: UInt = #line)
-    {
+    private func assertOneParse(
+        _ string: String,
+        continuationsNecessary: Int = 0,
+        file: StaticString = (#filePath),
+        line: UInt = #line
+    ) {
         XCTAssertEqual(1, self.parses.count)
         guard let parse = self.parses.first else {
             XCTFail("no parses found", file: file, line: line)
@@ -254,11 +277,19 @@ final class SynchronizingLiteralParserTests: XCTestCase {
         }
         let expected = Array(string.utf8)
         let actual = Array(self.accumulator.readableBytesView.prefix(parse.maximumValidBytes))
-        XCTAssertEqual(expected, actual,
-                       "\(String(decoding: expected, as: UTF8.self)) != \(String(decoding: actual, as: UTF8.self))",
-                       file: file, line: line)
-        XCTAssertEqual(continuationsNecessary, parse.synchronizingLiteralCount,
-                       file: file, line: line)
+        XCTAssertEqual(
+            expected,
+            actual,
+            "\(String(decoding: expected, as: UTF8.self)) != \(String(decoding: actual, as: UTF8.self))",
+            file: file,
+            line: line
+        )
+        XCTAssertEqual(
+            continuationsNecessary,
+            parse.synchronizingLiteralCount,
+            file: file,
+            line: line
+        )
     }
 
     private func stringBuffer(_ string: String) -> ByteBuffer {
@@ -269,7 +300,7 @@ final class SynchronizingLiteralParserTests: XCTestCase {
 
     private func bufferWithGarbage(_ buffer: ByteBuffer) -> ByteBuffer {
         var buffer = buffer
-        let garbageByteCount = (0 ..< 32).randomElement() ?? 0
+        let garbageByteCount = (0..<32).randomElement() ?? 0
         var newBuffer = ByteBufferAllocator().buffer(capacity: garbageByteCount + buffer.readableBytes)
         newBuffer.writeString(String(repeating: "X", count: garbageByteCount))
         newBuffer.moveReaderIndex(forwardBy: garbageByteCount)
