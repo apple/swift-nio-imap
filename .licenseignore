@@ -31,3 +31,4 @@ Dockerfile
 **/Dockerfile
 Snippets/*
 dev/git.commit.template
+Sources/NIOIMAPCore/Base64
