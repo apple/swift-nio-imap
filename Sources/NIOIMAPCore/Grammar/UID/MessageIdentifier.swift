@@ -121,9 +121,9 @@ extension MessageIdentifier {
 extension EncodeBuffer {
     @discardableResult
     mutating func writeMessageIdentifier<IdentifierType: MessageIdentifier>(_ id: IdentifierType) -> Int {
-        guard id == .max else {
-            return self.writeString("\(id.rawValue)")
+        guard id != .max else {
+            return self.writeString("*")
         }
-        return self.writeString("*")
+        return self.writeString("\(id.rawValue)")
     }
 }

@@ -54,9 +54,9 @@ extension EncodeBuffer {
     }
 
     @discardableResult mutating func writeSequenceNumberOrWildcard(_ num: SequenceNumber) -> Int {
-        guard num.rawValue == UInt32.max else {
-            return self.writeString("\(num.rawValue)")
+        guard num.rawValue < UInt32.max else {
+            return self.writeString("*")
         }
-        return self.writeString("*")
+        return self.writeString("\(num.rawValue)")
     }
 }
