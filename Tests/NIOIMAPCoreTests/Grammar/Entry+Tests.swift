@@ -24,7 +24,7 @@ class Entry_Tests: EncodeTestClass {}
 extension Entry_Tests {
     func testEncode() {
         let inputs: [(KeyValue<MetadataEntryName, MetadataValue>, String, UInt)] = [
-            (.init(key: "name", value: .init("value")), "\"name\" ~{5}\r\nvalue", #line),
+            (.init(key: "name", value: .init("value")), "\"name\" ~{5}\r\nvalue", #line)
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeEntry($0) })
     }

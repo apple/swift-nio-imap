@@ -43,9 +43,8 @@ extension EncodeBuffer {
     @discardableResult mutating func writeIMAPServer(_ server: IMAPServer) -> Int {
         self.writeIfExists(server.userAuthenticationMechanism) { authMechanism in
             self.writeUserAuthenticationMechanism(authMechanism) + self.writeString("@")
-        } +
-            self.writeString("\(server.host)") +
-            self.writeIfExists(server.port) { port in
+        } + self.writeString("\(server.host)")
+            + self.writeIfExists(server.port) { port in
                 self.writeString(":\(port)")
             }
     }

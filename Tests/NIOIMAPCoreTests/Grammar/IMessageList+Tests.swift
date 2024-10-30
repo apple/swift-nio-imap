@@ -24,12 +24,18 @@ extension EncodedSearchQuery_Tests {
     func testEncode() {
         let inputs: [(EncodedSearchQuery, String, UInt)] = [
             (
-                .init(mailboxUIDValidity: .init(encodeMailbox: .init(mailbox: "box"), uidValidity: nil), encodedSearch: nil),
+                .init(
+                    mailboxUIDValidity: .init(encodeMailbox: .init(mailbox: "box"), uidValidity: nil),
+                    encodedSearch: nil
+                ),
                 "box",
                 #line
             ),
             (
-                .init(mailboxUIDValidity: .init(encodeMailbox: .init(mailbox: "box"), uidValidity: nil), encodedSearch: .init(query: "search")),
+                .init(
+                    mailboxUIDValidity: .init(encodeMailbox: .init(mailbox: "box"), uidValidity: nil),
+                    encodedSearch: .init(query: "search")
+                ),
                 "box?search",
                 #line
             ),

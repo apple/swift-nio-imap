@@ -33,7 +33,6 @@ public struct AuthenticatedURL: Hashable, Sendable {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeIAuthenticatedURL(_ data: AuthenticatedURL) -> Int {
-        self.writeAuthenticatedURLRump(data.authenticatedURL) +
-            self.writeAuthenticatedURLVerifier(data.verifier)
+        self.writeAuthenticatedURLRump(data.authenticatedURL) + self.writeAuthenticatedURLVerifier(data.verifier)
     }
 }

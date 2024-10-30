@@ -26,7 +26,9 @@ public enum OptionExtensionKind: Hashable, Sendable {
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeOptionExtension(_ option: KeyValue<OptionExtensionKind, OptionValueComp?>) -> Int {
+    @discardableResult mutating func writeOptionExtension(
+        _ option: KeyValue<OptionExtensionKind, OptionValueComp?>
+    ) -> Int {
         var size = 0
         switch option.key {
         case .standard(let atom):
@@ -43,8 +45,6 @@ extension EncodeBuffer {
     }
 
     @discardableResult mutating func writeOptionVendorTag(_ tag: KeyValue<String, String>) -> Int {
-        self.writeString(tag.key) +
-            self.writeString("-") +
-            self.writeString(tag.value)
+        self.writeString(tag.key) + self.writeString("-") + self.writeString(tag.value)
     }
 }

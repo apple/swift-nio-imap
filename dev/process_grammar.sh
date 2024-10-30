@@ -29,7 +29,7 @@ function functionalise() {
             continue
         fi
         if $uppercase_next; then
-            echo -n "${string:$i:1}" | tr a-z A-Z
+            echo -n "${string:$i:1}" | tr '[:upper:]' '[:lower:]'
             uppercase_next=false
         else
             echo -n "${string:$i:1}"
@@ -50,9 +50,12 @@ function output_last() {
     all_types+=( "$swift_id" )
 
     returnType=$swift_id
-    returnType=$( echo $swift_id | sed "s/Addr/Address\./g" )
-    returnType=$( echo $swift_id | sed "s/Env/Envelope\./g" )
-    returnType=$( echo $swift_id | sed "s/Fld/Field\./g" )
+    # shellcheck disable=SC2001
+    returnType=$( echo "$swift_id" | sed "s/Addr/Address\./g" )
+    # shellcheck disable=SC2001
+    returnType=$( echo "$swift_id" | sed "s/Env/Envelope\./g" )
+    # shellcheck disable=SC2001
+    returnType=$( echo "$swift_id" | sed "s/Fld/Field\./g" )
 
     echo "func parse$swift_id(buffer: inout ParseBuffer, tracker: StackTracker) throws -> NIOIMAO.$returnType {"
     echo "    return try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> $swift_id in"

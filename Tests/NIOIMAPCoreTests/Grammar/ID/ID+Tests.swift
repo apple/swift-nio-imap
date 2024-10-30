@@ -37,9 +37,23 @@ extension ID_Tests {
                 (#"ID NIL"#, "\r", .id([:]), #line),
                 (#"ID ("key" NIL)"#, "\r", .id(["key": nil]), #line),
                 (#"ID ("name" "Imap" "version" "1.5")"#, "\r", .id(["name": "Imap", "version": "1.5"]), #line),
-                (#"ID ("name" "Imap" "version" "1.5" "os" "centos" "os-version" "5.5" "support-url" "mailto:admin@xgen.in")"#, "\r", .id(["name": "Imap", "version": "1.5", "os": "centos", "os-version": "5.5", "support-url": "mailto:admin@xgen.in"]), #line),
+                (
+                    #"ID ("name" "Imap" "version" "1.5" "os" "centos" "os-version" "5.5" "support-url" "mailto:admin@xgen.in")"#,
+                    "\r",
+                    .id([
+                        "name": "Imap", "version": "1.5", "os": "centos", "os-version": "5.5",
+                        "support-url": "mailto:admin@xgen.in",
+                    ]), #line
+                ),
                 // datamail.in appends a `+` to the ID response:
-                (#"ID ("name" "Imap" "version" "1.5" "os" "centos" "os-version" "5.5" "support-url" "mailto:admin@xgen.in")+"#, "\r", .id(["name": "Imap", "version": "1.5", "os": "centos", "os-version": "5.5", "support-url": "mailto:admin@xgen.in"]), #line),
+                (
+                    #"ID ("name" "Imap" "version" "1.5" "os" "centos" "os-version" "5.5" "support-url" "mailto:admin@xgen.in")+"#,
+                    "\r",
+                    .id([
+                        "name": "Imap", "version": "1.5", "os": "centos", "os-version": "5.5",
+                        "support-url": "mailto:admin@xgen.in",
+                    ]), #line
+                ),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
@@ -50,17 +64,23 @@ extension ID_Tests {
 extension ID_Tests {
     func testThatAnIDResponseDoesNotGetRedactedForLogging() {
         let id = Response.untagged(ResponsePayload.id(["name": "A"]))
-        XCTAssertEqual("\(Response.descriptionWithoutPII([id]))", #"""
-        * ID ("name" "A")\#r
+        XCTAssertEqual(
+            "\(Response.descriptionWithoutPII([id]))",
+            #"""
+            * ID ("name" "A")\#r
 
-        """#)
+            """#
+        )
     }
 
     func testThatAnIDCommandDoesNotGetRedactedForLogging() {
         let part = CommandStreamPart.tagged(TaggedCommand(tag: "A1", command: .id(["name": "A"])))
-        XCTAssertEqual("\(CommandStreamPart.descriptionWithoutPII([part]))", #"""
-        A1 ID ("name" "A")\#r
+        XCTAssertEqual(
+            "\(CommandStreamPart.descriptionWithoutPII([part]))",
+            #"""
+            A1 ID ("name" "A")\#r
 
-        """#)
+            """#
+        )
     }
 }

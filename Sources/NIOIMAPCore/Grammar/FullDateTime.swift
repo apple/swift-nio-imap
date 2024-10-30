@@ -86,9 +86,7 @@ public struct FullTime: Hashable, Sendable {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeFullDateTime(_ data: FullDateTime) -> Int {
-        self.writeFullDate(data.date) +
-            self.writeString("T") +
-            self.writeFullTime(data.time)
+        self.writeFullDate(data.date) + self.writeString("T") + self.writeFullTime(data.time)
     }
 
     @discardableResult mutating func writeFullDate(_ data: FullDate) -> Int {
@@ -102,18 +100,17 @@ extension EncodeBuffer {
         let hour = self.padInteger(data.hour, minimum: 2)
         let minute = self.padInteger(data.minute, minimum: 2)
         let second = self.padInteger(data.second, minimum: 2)
-        return self.writeString("\(hour):\(minute):\(second)") +
-            self.writeIfExists(data.fraction) { fraction in
+        return self.writeString("\(hour):\(minute):\(second)")
+            + self.writeIfExists(data.fraction) { fraction in
                 self.writeString(".\(fraction)")
             }
     }
 
     func padInteger(_ int: Int, minimum: Int) -> String {
         let short = "\(int)"
-        if short.count < minimum {
-            return String(repeating: "0", count: (minimum - short.count)) + short
-        } else {
+        guard short.count < minimum else {
             return short
         }
+        return String(repeating: "0", count: (minimum - short.count)) + short
     }
 }

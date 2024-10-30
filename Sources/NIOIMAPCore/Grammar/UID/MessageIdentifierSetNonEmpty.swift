@@ -106,7 +106,9 @@ extension MessageIdentifierSetNonEmpty {
 }
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeUIDSet<IdentifierType: MessageIdentifier>(_ set: MessageIdentifierSetNonEmpty<IdentifierType>) -> Int {
+    @discardableResult mutating func writeUIDSet<IdentifierType: MessageIdentifier>(
+        _ set: MessageIdentifierSetNonEmpty<IdentifierType>
+    ) -> Int {
         set.writeIntoBuffer(&self)
     }
 }

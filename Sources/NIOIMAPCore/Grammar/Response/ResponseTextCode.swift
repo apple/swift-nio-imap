@@ -297,8 +297,7 @@ extension EncodeBuffer {
             return self.writeString("PARSE")
         case .permanentFlags(let flags):
             return
-                self.writeString("PERMANENTFLAGS ") +
-                self.writePermanentFlags(flags)
+                self.writeString("PERMANENTFLAGS ") + self.writePermanentFlags(flags)
         case .readOnly:
             return self.writeString("READ-ONLY")
         case .readWrite:
@@ -342,8 +341,8 @@ extension EncodeBuffer {
         case .metadataNoPrivate:
             return self.writeString("METADATA NOPRIVATE")
         case .urlMechanisms(let array):
-            return self.writeString("URLMECH INTERNAL") +
-                self.writeArray(array, prefix: " ", parenthesis: false) { mechanism, buffer in
+            return self.writeString("URLMECH INTERNAL")
+                + self.writeArray(array, prefix: " ", parenthesis: false) { mechanism, buffer in
                     buffer.writeMechanismBase64(mechanism)
                 }
         case .referral(let url):
@@ -390,18 +389,18 @@ extension EncodeBuffer {
     }
 
     private mutating func writeResponseTextCode_badCharsets(_ charsets: [String]) -> Int {
-        self.writeString("BADCHARSET") +
-            self.write(if: charsets.count >= 1) {
-                self.writeSpace() +
-                    self.writeArray(charsets) { (charset, self) in
+        self.writeString("BADCHARSET")
+            + self.write(if: charsets.count >= 1) {
+                self.writeSpace()
+                    + self.writeArray(charsets) { (charset, self) in
                         self.writeString(charset)
                     }
             }
     }
 
     private mutating func writeResponseTextCode_other(atom: String, string: String?) -> Int {
-        self.writeString(atom) +
-            self.writeIfExists(string) { (string) -> Int in
+        self.writeString(atom)
+            + self.writeIfExists(string) { (string) -> Int in
                 self.writeString(" \(string)")
             }
     }

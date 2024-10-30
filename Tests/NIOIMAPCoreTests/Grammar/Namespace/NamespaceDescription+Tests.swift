@@ -25,7 +25,10 @@ extension NamespaceDescription_Tests {
         let inputs: [(NamespaceDescription, String, UInt)] = [
             (.init(string: "string", char: nil, responseExtensions: [:]), "(\"string\" NIL)", #line),
             (.init(string: "string", char: "a", responseExtensions: [:]), "(\"string\" \"a\")", #line),
-            (.init(string: "string", char: nil, responseExtensions: ["str2": ["str3"]]), "(\"string\" NIL \"str2\" (\"str3\"))", #line),
+            (
+                .init(string: "string", char: nil, responseExtensions: ["str2": ["str3"]]),
+                "(\"string\" NIL \"str2\" (\"str3\"))", #line
+            ),
         ]
 
         for (test, expectedString, line) in inputs {

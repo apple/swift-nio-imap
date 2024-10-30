@@ -31,15 +31,15 @@ extension GrammarParser {
         for address in addresses {
             // RFC 2822 Syntaxt: If the host is nil then the group has started
             // if the mailbox is also nil, then the group has finished.
-            if address.host == nil, let name = address.mailbox { // start of group
+            if address.host == nil, let name = address.mailbox {  // start of group
                 stack.append(EmailAddressGroup(groupName: name, sourceRoot: address.sourceRoot, children: []))
-            } else if address.host == nil, let group = stack.popLast() { // end of group
+            } else if address.host == nil, let group = stack.popLast() {  // end of group
                 if stack.last == nil {
                     results.append(.group(group))
                 } else {
                     stack[stack.count - 1].children.append(.group(group))
                 }
-            } else { // normal address
+            } else {  // normal address
                 if stack.last == nil {
                     results.append(.singleAddress(address))
                 } else {
@@ -61,8 +61,14 @@ extension GrammarParser {
         return addresses
     }
 
-    func parseOptionalEnvelopeEmailAddresses(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [EmailAddressListElement] {
-        func parseOptionalEnvelopeEmailAddresses_nil(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [EmailAddress] {
+    func parseOptionalEnvelopeEmailAddresses(
+        buffer: inout ParseBuffer,
+        tracker: StackTracker
+    ) throws -> [EmailAddressListElement] {
+        func parseOptionalEnvelopeEmailAddresses_nil(
+            buffer: inout ParseBuffer,
+            tracker: StackTracker
+        ) throws -> [EmailAddress] {
             try self.parseNil(buffer: &buffer, tracker: tracker)
             return []
         }
@@ -108,7 +114,9 @@ extension GrammarParser {
     func parseEnvelope(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Envelope {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Envelope in
             try PL.parseFixedString("(", buffer: &buffer, tracker: tracker)
-            let date = try self.parseNString(buffer: &buffer, tracker: tracker).flatMap { InternetMessageDate(String(buffer: $0)) }
+            let date = try self.parseNString(buffer: &buffer, tracker: tracker).flatMap {
+                InternetMessageDate(String(buffer: $0))
+            }
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             let subject = try self.parseNString(buffer: &buffer, tracker: tracker)
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)

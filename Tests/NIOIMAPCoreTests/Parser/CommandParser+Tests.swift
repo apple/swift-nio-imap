@@ -38,7 +38,7 @@ extension CommandParser_Tests {
     // test that we don't just get returned an empty byte case if
     // we haven't yet recieved any literal data from the network
     func testParseEmptyByteBufferAppend() {
-        var input = ByteBuffer("1 APPEND INBOX {5}\r\n") // everything except the literal data
+        var input = ByteBuffer("1 APPEND INBOX {5}\r\n")  // everything except the literal data
         var parser = CommandParser()
         XCTAssertNoThrow(XCTAssertNotNil(try parser.parseCommandStream(buffer: &input)))
         XCTAssertNoThrow(XCTAssertNotNil(try parser.parseCommandStream(buffer: &input)))
@@ -57,13 +57,33 @@ extension CommandParser_Tests {
 
         XCTAssertEqual(
             try parser.parseCommandStream(buffer: &inputA),
-            .init(.tagged(.init(tag: "A26", command: .uidFetch(messages: UIDSet([1 ... 10002]), attributes: [.uid, .flags, .modificationSequence], modifiers: [])!)), numberOfSynchronisingLiterals: 0)
+            .init(
+                .tagged(
+                    .init(
+                        tag: "A26",
+                        command: .uidFetch(
+                            messages: UIDSet([1...10002]),
+                            attributes: [.uid, .flags, .modificationSequence],
+                            modifiers: []
+                        )!
+                    )
+                ),
+                numberOfSynchronisingLiterals: 0
+            )
         )
         // Send in another line:
         var inputB = ByteBuffer("A27 UID FETCH 2:22 (UID FLAGS)\r")
         XCTAssertEqual(
             try parser.parseCommandStream(buffer: &inputB),
-            .init(.tagged(.init(tag: "A27", command: .uidFetch(messages: UIDSet([2 ... 22]), attributes: [.uid, .flags], modifiers: [])!)), numberOfSynchronisingLiterals: 0)
+            .init(
+                .tagged(
+                    .init(
+                        tag: "A27",
+                        command: .uidFetch(messages: UIDSet([2...22]), attributes: [.uid, .flags], modifiers: [])!
+                    )
+                ),
+                numberOfSynchronisingLiterals: 0
+            )
         )
     }
 
@@ -86,13 +106,19 @@ extension CommandParser_Tests {
         XCTAssertNoThrow(
             XCTAssertEqual(
                 try parser.parseCommandStream(buffer: &input),
-                .init(.tagged(.init(tag: "2", command: .login(username: "", password: ""))), numberOfSynchronisingLiterals: 2)
+                .init(
+                    .tagged(.init(tag: "2", command: .login(username: "", password: ""))),
+                    numberOfSynchronisingLiterals: 2
+                )
             )
         )
         XCTAssertEqual(input, "")
 
         input = "3 APPEND INBOX {3+}\r\n123 {3+}\r\n456 {3+}\r\n789\r\n"
-        XCTAssertEqual(try! parser.parseCommandStream(buffer: &input), .init(.append(.start(tag: "3", appendingTo: .inbox)), numberOfSynchronisingLiterals: 0))
+        XCTAssertEqual(
+            try! parser.parseCommandStream(buffer: &input),
+            .init(.append(.start(tag: "3", appendingTo: .inbox)), numberOfSynchronisingLiterals: 0)
+        )
         XCTAssertEqual(input, " {3+}\r\n123 {3+}\r\n456 {3+}\r\n789\r\n")
     }
 
@@ -100,7 +126,10 @@ extension CommandParser_Tests {
         let inputs: [[UInt8]] = [
             Array("+000000000000000000000000000000000000000000000000000000000}\n".utf8),
             Array("eSequence468117eY SEARCH 4:1 000,0\n000059?000000600=)O".utf8),
-            [0x41, 0x5D, 0x20, 0x55, 0x49, 0x44, 0x20, 0x43, 0x4F, 0x50, 0x59, 0x20, 0x35, 0x2C, 0x35, 0x3A, 0x34, 0x00, 0x3D, 0x0C, 0x0A, 0x43, 0x20, 0x22, 0xE8],
+            [
+                0x41, 0x5D, 0x20, 0x55, 0x49, 0x44, 0x20, 0x43, 0x4F, 0x50, 0x59, 0x20, 0x35, 0x2C, 0x35, 0x3A, 0x34,
+                0x00, 0x3D, 0x0C, 0x0A, 0x43, 0x20, 0x22, 0xE8,
+            ],
         ]
 
         for input in inputs {

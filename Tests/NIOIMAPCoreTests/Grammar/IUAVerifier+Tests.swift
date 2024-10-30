@@ -23,7 +23,7 @@ class AuthenticatedURLVerifier_Tests: EncodeTestClass {}
 extension AuthenticatedURLVerifier_Tests {
     func testEncode() {
         let inputs: [(AuthenticatedURLVerifier, String, UInt)] = [
-            (.init(urlAuthMechanism: .internal, encodedAuthenticationURL: .init(data: "test")), ":INTERNAL:test", #line),
+            (.init(urlAuthMechanism: .internal, encodedAuthenticationURL: .init(data: "test")), ":INTERNAL:test", #line)
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeAuthenticatedURLVerifier($0) })
     }

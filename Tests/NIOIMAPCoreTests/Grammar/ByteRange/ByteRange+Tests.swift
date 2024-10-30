@@ -24,12 +24,12 @@ extension ByteRange_Tests {
     func testEncode() {
         let inputs: [(ClosedRange<UInt32>, String, UInt)] = [
             /// Encoded format is `<offset.count>`:
-            (0 ... 199, "<0.200>", #line),
-            (1 ... 2, "<1.2>", #line),
-            (10 ... 20, "<10.11>", #line),
-            (100 ... 199, "<100.100>", #line),
-            (400 ... 479, "<400.80>", #line),
-            (843 ... 1_369, "<843.527>", #line),
+            (0...199, "<0.200>", #line),
+            (1...2, "<1.2>", #line),
+            (10...20, "<10.11>", #line),
+            (100...199, "<100.100>", #line),
+            (400...479, "<400.80>", #line),
+            (843...1_369, "<843.527>", #line),
         ]
 
         for (test, expectedString, line) in inputs {

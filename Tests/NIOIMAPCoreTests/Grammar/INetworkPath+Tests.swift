@@ -27,7 +27,7 @@ extension NetworkPath_Tests {
                 .init(server: .init(host: "localhost"), query: nil),
                 "//localhost/",
                 #line
-            ),
+            )
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeNetworkPath($0) })
     }

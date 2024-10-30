@@ -25,7 +25,7 @@ extension GrammarParser_Response_Tests {
         self.iterateTests(
             testFunction: GrammarParser().parseResponseData,
             validInputs: [
-                ("* CAPABILITY ENABLE\r\n", " ", .capabilityData([.enable]), #line),
+                ("* CAPABILITY ENABLE\r\n", " ", .capabilityData([.enable]), #line)
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
@@ -77,7 +77,10 @@ extension GrammarParser_Response_Tests {
                 ("CLOSED", "\r", .closed, #line),
                 ("COMPRESSIONACTIVE", "\r", .compressionActive, #line),
                 ("CONTACTADMIN", "\r", .contactAdmin, #line),
-                ("COPYUID 443 3:5 6:8", "\r", .uidCopy(.init(destinationUIDValidity: 443, sourceUIDs: [3 ... 5], destinationUIDs: [6 ... 8])), #line),
+                (
+                    "COPYUID 443 3:5 6:8", "\r",
+                    .uidCopy(.init(destinationUIDValidity: 443, sourceUIDs: [3...5], destinationUIDs: [6...8])), #line
+                ),
                 ("CORRUPTION", "\r", .corruption, #line),
                 ("EXPIRED", "\r", .expired, #line),
                 ("EXPUNGEISSUED", "\r", .expungeIssued, #line),
@@ -89,8 +92,20 @@ extension GrammarParser_Response_Tests {
                 ("METADATA NOPRIVATE", "\r", .metadataNoPrivate, #line),
                 ("METADATA TOOMANY", "\r", .metadataTooMany, #line),
                 ("MODIFIED 1", "\r", .modified(.set([1])), #line),
-                ("NAMESPACE NIL NIL NIL", "\r", .namespace(.init(userNamespace: [], otherUserNamespace: [], sharedNamespace: [])), #line),
-                (#"NAMESPACE (("Foo" NIL)) NIL (("Bar" NIL))"#, "\r", .namespace(.init(userNamespace: [.init(string: "Foo", responseExtensions: [:])], otherUserNamespace: [], sharedNamespace: [.init(string: "Bar", char: nil, responseExtensions: [:])])), #line),
+                (
+                    "NAMESPACE NIL NIL NIL", "\r",
+                    .namespace(.init(userNamespace: [], otherUserNamespace: [], sharedNamespace: [])), #line
+                ),
+                (
+                    #"NAMESPACE (("Foo" NIL)) NIL (("Bar" NIL))"#, "\r",
+                    .namespace(
+                        .init(
+                            userNamespace: [.init(string: "Foo", responseExtensions: [:])],
+                            otherUserNamespace: [],
+                            sharedNamespace: [.init(string: "Bar", char: nil, responseExtensions: [:])]
+                        )
+                    ), #line
+                ),
                 ("NOMODSEQ", "\r", .noModificationSequence, #line),
                 ("NONEXISTENT", "\r", .nonExistent, #line),
                 ("NOPERM", "\r", .noPermission, #line),
@@ -98,12 +113,18 @@ extension GrammarParser_Response_Tests {
                 ("OVERQUOTA", "\r", .overQuota, #line),
                 ("PARSE", "\r", .parse, #line),
                 ("PERMANENTFLAGS ()", "\r", .permanentFlags([]), #line),
-                ("PERMANENTFLAGS (\\Answered \\Seen \\*)", "\r", .permanentFlags([.flag(.answered), .flag(.seen), .wildcard]), #line),
+                (
+                    "PERMANENTFLAGS (\\Answered \\Seen \\*)", "\r",
+                    .permanentFlags([.flag(.answered), .flag(.seen), .wildcard]), #line
+                ),
                 ("PERMANENTFLAGS (\\Answered)", "\r", .permanentFlags([.flag(.answered)]), #line),
                 ("PRIVACYREQUIRED", "\r", .privacyRequired, #line),
                 ("READ-ONLY", "\r", .readOnly, #line),
                 ("READ-WRITE", "\r", .readWrite, #line),
-                ("REFERRAL imap://localhost/", "\r", .referral(.init(server: .init(host: "localhost"), query: nil)), #line),
+                (
+                    "REFERRAL imap://localhost/", "\r", .referral(.init(server: .init(host: "localhost"), query: nil)),
+                    #line
+                ),
                 ("SERVERBUG", "\r", .serverBug, #line),
                 ("SOMETHING", "\r", .other("SOMETHING", nil), #line),
                 ("TRYCREATE", "\r", .tryCreate, #line),
@@ -114,7 +135,10 @@ extension GrammarParser_Response_Tests {
                 ("UNAVAILABLE", "\r", .unavailable, #line),
                 ("UNSEEN 56", "\r", .unseen(56), #line),
                 ("URLMECH INTERNAL INTERNAL", "\r", .urlMechanisms([.init(mechanism: .internal, base64: nil)]), #line),
-                ("URLMECH INTERNAL INTERNAL=YQ==", "\r", .urlMechanisms([.init(mechanism: .internal, base64: "a")]), #line),
+                (
+                    "URLMECH INTERNAL INTERNAL=YQ==", "\r", .urlMechanisms([.init(mechanism: .internal, base64: "a")]),
+                    #line
+                ),
                 ("URLMECH INTERNAL", "\r", .urlMechanisms([]), #line),
                 ("USEATTR", "\r", .useAttribute, #line),
                 ("some thing", "\r", .other("some", "thing"), #line),
@@ -140,7 +164,7 @@ extension GrammarParser_Response_Tests {
                 ("[UNSEEN 1]", "\r", .init(code: .unseen(1), text: ""), #line),
                 ("[UNSEEN 2] ", "\r", .init(code: .unseen(2), text: ""), #line),
                 ("[UNSEEN 2] some text", "\r", .init(code: .unseen(2), text: "some text"), #line),
-                ("[UIDVALIDITY 1561789793]", "\r", .init(code: .uidValidity(1561789793), text: ""), #line),
+                ("[UIDVALIDITY 1561789793]", "\r", .init(code: .uidValidity(1_561_789_793), text: ""), #line),
                 ("[UIDNEXT 171]", "\r", .init(code: .uidNext(171), text: ""), #line),
             ],
             parserErrorInputs: [],

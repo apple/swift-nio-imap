@@ -26,10 +26,16 @@ extension GrammarParser_Sequence_Tests {
             testFunction: GrammarParser().parseMessageIdentifierSetOrLast,
             validInputs: [
                 ("765", " ", .set([765]), #line),
-                ("1,2:5,7,9:*", " ", .set([MessageIdentifierRange<SequenceNumber>(1), MessageIdentifierRange<SequenceNumber>(2 ... 5), MessageIdentifierRange<SequenceNumber>(7), MessageIdentifierRange<SequenceNumber>(9...)]), #line),
+                (
+                    "1,2:5,7,9:*", " ",
+                    .set([
+                        MessageIdentifierRange<SequenceNumber>(1), MessageIdentifierRange<SequenceNumber>(2...5),
+                        MessageIdentifierRange<SequenceNumber>(7), MessageIdentifierRange<SequenceNumber>(9...),
+                    ]), #line
+                ),
                 ("1:*", "\r", .set([.all]), #line),
-                ("1:2", "\r", .set([1 ... 2]), #line),
-                ("1:2,2:3,3:4", "\r", .set([1 ... 2, 2 ... 3, 3 ... 4]), #line),
+                ("1:2", "\r", .set([1...2]), #line),
+                ("1:2,2:3,3:4", "\r", .set([1...2, 2...3, 3...4]), #line),
                 ("$", "\r", .lastCommand, #line),
             ],
             parserErrorInputs: [
@@ -57,8 +63,8 @@ extension GrammarParser_Sequence_Tests {
                 ("1", " ", 1, #line),
                 ("123", " ", 123, #line),
                 ("12345", " ", 12345, #line),
-                ("1234567", " ", 1234567, #line),
-                ("123456789", " ", 123456789, #line),
+                ("1234567", " ", 1_234_567, #line),
+                ("123456789", " ", 123_456_789, #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
@@ -74,7 +80,7 @@ extension GrammarParser_Sequence_Tests {
             testFunction: GrammarParser().parseModificationSequenceValue,
             validInputs: [
                 ("0", " ", .zero, #line),
-                ("9223372036854775807", " ", 9223372036854775807, #line),
+                ("9223372036854775807", " ", 9_223_372_036_854_775_807, #line),
             ],
             parserErrorInputs: [
                 ("9223372036854775808", " ", #line),

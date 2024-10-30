@@ -44,11 +44,10 @@ public struct CommandParser: Parser, Sendable {
         case streamingCatenateEnd
 
         var isStreamingAppend: Bool {
-            if case .streamingBytes = self {
-                return true
-            } else {
+            guard case .streamingBytes = self else {
                 return false
             }
+            return true
         }
     }
 
@@ -59,7 +58,8 @@ public struct CommandParser: Parser, Sendable {
 
     /// Creates a new `CommandParser` with a built in buffer limit. Used to prevent DOS attacks, an error will be thrown if this limit is exceeded.
     /// - parameter bufferLimit. The maximum size of the buffer in bytes at any one time. Defaults to 8192 bytes.
-    public init(bufferLimit: Int = IMAPDefaults.lineLengthLimit, literalSizeLimit: Int = IMAPDefaults.literalSizeLimit) {
+    public init(bufferLimit: Int = IMAPDefaults.lineLengthLimit, literalSizeLimit: Int = IMAPDefaults.literalSizeLimit)
+    {
         self.bufferLimit = bufferLimit
         self.parser = GrammarParser(literalSizeLimit: literalSizeLimit)
     }
@@ -75,29 +75,43 @@ public struct CommandParser: Parser, Sendable {
 
         let save = buffer
         let framingResult = try self.synchronisingLiteralParser.parseContinuationsNecessary(buffer)
-        var actuallyVisible = ParseBuffer(buffer.getSlice(at: buffer.readerIndex, length: framingResult.maximumValidBytes)!)
+        var actuallyVisible = ParseBuffer(
+            buffer.getSlice(at: buffer.readerIndex, length: framingResult.maximumValidBytes)!
+        )
 
         func parseCommand() throws -> CommandStreamPart? {
             do {
-                if let command = try self.parseCommandStream0(buffer: &actuallyVisible, tracker: .makeNewDefaultLimitStackTracker) {
-                    // We need to discard the bytes we consumed from the real buffer.
-                    let consumedBytes = framingResult.maximumValidBytes - actuallyVisible.readableBytes
-                    buffer.moveReaderIndex(forwardBy: consumedBytes)
-
-                    assert(buffer.writerIndex == save.writerIndex,
-                           "the writer index of the buffer moved whilst parsing which is not supported: \(buffer), \(save)")
-                    assert(consumedBytes >= 0,
-                           "allegedly, we consumed a negative amount of bytes: \(consumedBytes)")
-                    self.synchronisingLiteralParser.consumed(consumedBytes)
-                    assert(consumedBytes <= framingResult.maximumValidBytes,
-                           "We consumed \(consumedBytes) which is more than the framing parser thought are maximally " +
-                               "valid: \(framingResult), \(self.synchronisingLiteralParser)")
-                    return command
-                } else {
-                    assert(framingResult.maximumValidBytes == actuallyVisible.readableBytes,
-                           "parser consumed bytes on nil: readableBytes before parse: \(framingResult.maximumValidBytes), buffer: \(actuallyVisible)")
+                guard
+                    let command = try self.parseCommandStream0(
+                        buffer: &actuallyVisible,
+                        tracker: .makeNewDefault
+                    )
+                else {
+                    assert(
+                        framingResult.maximumValidBytes == actuallyVisible.readableBytes,
+                        "parser consumed bytes on nil: readableBytes before parse: \(framingResult.maximumValidBytes), buffer: \(actuallyVisible)"
+                    )
                     return nil
                 }
+                // We need to discard the bytes we consumed from the real buffer.
+                let consumedBytes = framingResult.maximumValidBytes - actuallyVisible.readableBytes
+                buffer.moveReaderIndex(forwardBy: consumedBytes)
+
+                assert(
+                    buffer.writerIndex == save.writerIndex,
+                    "the writer index of the buffer moved whilst parsing which is not supported: \(buffer), \(save)"
+                )
+                assert(
+                    consumedBytes >= 0,
+                    "allegedly, we consumed a negative amount of bytes: \(consumedBytes)"
+                )
+                self.synchronisingLiteralParser.consumed(consumedBytes)
+                assert(
+                    consumedBytes <= framingResult.maximumValidBytes,
+                    "We consumed \(consumedBytes) which is more than the framing parser thought are maximally "
+                        + "valid: \(framingResult), \(self.synchronisingLiteralParser)"
+                )
+                return command
             } catch is IncompleteMessage {
                 return nil
             }
@@ -112,7 +126,10 @@ public struct CommandParser: Parser, Sendable {
         }
     }
 
-    private mutating func parseCommandStream0(buffer: inout ParseBuffer, tracker: StackTracker) throws -> CommandStreamPart? {
+    private mutating func parseCommandStream0(
+        buffer: inout ParseBuffer,
+        tracker: StackTracker
+    ) throws -> CommandStreamPart? {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             switch self.mode {
             case .idle:
@@ -126,7 +143,11 @@ public struct CommandParser: Parser, Sendable {
             case .streamingEnd:
                 return try self.handleStreamingEnd(buffer: &buffer, tracker: tracker)
             case .waitingForCatenatePart(seenPreviousPart: let seenPreviousPart):
-                return try self.handleCatenatePart(expectPrecedingSpace: seenPreviousPart, buffer: &buffer, tracker: tracker)
+                return try self.handleCatenatePart(
+                    expectPrecedingSpace: seenPreviousPart,
+                    buffer: &buffer,
+                    tracker: tracker
+                )
             case .streamingCatenateBytes(let remaining):
                 return try self.handleStreamingCatenateBytes(buffer: &buffer, tracker: tracker, remaining: remaining)
             case .streamingCatenateEnd:
@@ -135,7 +156,11 @@ public struct CommandParser: Parser, Sendable {
         }
     }
 
-    private mutating func handleStreamingBytes(buffer: inout ParseBuffer, tracker: StackTracker, remaining: Int) throws -> CommandStreamPart {
+    private mutating func handleStreamingBytes(
+        buffer: inout ParseBuffer,
+        tracker: StackTracker,
+        remaining: Int
+    ) throws -> CommandStreamPart {
         assert(self.mode.isStreamingAppend)
         let bytes = try PL.parseBytes(buffer: &buffer, tracker: tracker, upTo: remaining)
 
@@ -164,7 +189,10 @@ public struct CommandParser: Parser, Sendable {
             return appendCommand
         }
 
-        func parseAuthenticationChallengeResponse(buffer: inout ParseBuffer, tracker: StackTracker) throws -> CommandStreamPart {
+        func parseAuthenticationChallengeResponse(
+            buffer: inout ParseBuffer,
+            tracker: StackTracker
+        ) throws -> CommandStreamPart {
             let authenticationChallengeResponse = try self.parser.parseBase64(buffer: &buffer, tracker: tracker)
             try PL.parseNewline(buffer: &buffer, tracker: tracker)
             return .continuationResponse(authenticationChallengeResponse)
@@ -174,11 +202,15 @@ public struct CommandParser: Parser, Sendable {
             parseCommand,
             parseAppend,
             parseAuthenticationChallengeResponse,
-            buffer: &buffer, tracker: tracker
+            buffer: &buffer,
+            tracker: tracker
         )
     }
 
-    private mutating func handleWaitingForMessage(buffer: inout ParseBuffer, tracker: StackTracker) throws -> CommandStreamPart {
+    private mutating func handleWaitingForMessage(
+        buffer: inout ParseBuffer,
+        tracker: StackTracker
+    ) throws -> CommandStreamPart {
         do {
             let command = try self.parser.parseAppendOrCatenateMessage(buffer: &buffer, tracker: tracker)
 
@@ -203,7 +235,10 @@ public struct CommandParser: Parser, Sendable {
         }
     }
 
-    private mutating func handleStreamingEnd(buffer: inout ParseBuffer, tracker: StackTracker) throws -> CommandStreamPart {
+    private mutating func handleStreamingEnd(
+        buffer: inout ParseBuffer,
+        tracker: StackTracker
+    ) throws -> CommandStreamPart {
         self.mode = .waitingForMessage
         return .append(.endMessage)
     }
@@ -214,8 +249,16 @@ public struct CommandParser: Parser, Sendable {
         return .idleDone
     }
 
-    private mutating func handleCatenatePart(expectPrecedingSpace: Bool, buffer: inout ParseBuffer, tracker: StackTracker) throws -> CommandStreamPart {
-        let result = try self.parser.parseCatenatePart(expectPrecedingSpace: expectPrecedingSpace, buffer: &buffer, tracker: tracker)
+    private mutating func handleCatenatePart(
+        expectPrecedingSpace: Bool,
+        buffer: inout ParseBuffer,
+        tracker: StackTracker
+    ) throws -> CommandStreamPart {
+        let result = try self.parser.parseCatenatePart(
+            expectPrecedingSpace: expectPrecedingSpace,
+            buffer: &buffer,
+            tracker: tracker
+        )
         switch result {
         case .url(let url):
             self.mode = .waitingForCatenatePart(seenPreviousPart: true)
@@ -229,7 +272,11 @@ public struct CommandParser: Parser, Sendable {
         }
     }
 
-    private mutating func handleStreamingCatenateBytes(buffer: inout ParseBuffer, tracker: StackTracker, remaining: Int) throws -> CommandStreamPart {
+    private mutating func handleStreamingCatenateBytes(
+        buffer: inout ParseBuffer,
+        tracker: StackTracker,
+        remaining: Int
+    ) throws -> CommandStreamPart {
         let bytes = try PL.parseBytes(buffer: &buffer, tracker: tracker, upTo: remaining)
 
         assert(bytes.readableBytes <= remaining)
@@ -242,7 +289,10 @@ public struct CommandParser: Parser, Sendable {
         return .append(.catenateData(.bytes(bytes)))
     }
 
-    private mutating func handleStreamingCatenateEnd(buffer: inout ParseBuffer, tracker: StackTracker) throws -> CommandStreamPart {
+    private mutating func handleStreamingCatenateEnd(
+        buffer: inout ParseBuffer,
+        tracker: StackTracker
+    ) throws -> CommandStreamPart {
         self.mode = .waitingForCatenatePart(seenPreviousPart: true)
         return .append(.catenateData(.end))
     }

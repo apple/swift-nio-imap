@@ -37,7 +37,10 @@ class MailClientToProxyHandler: ChannelInboundHandler {
         let boundContext = NIOLoopBound(context, eventLoop: context.eventLoop)
         let boundSelf = NIOLoopBound(self, eventLoop: context.eventLoop)
         ClientBootstrap(group: context.eventLoop).channelInitializer { channel in
-            let sslHandler = try! NIOSSLClientHandler(context: NIOSSLContext(configuration: .clientDefault), serverHostname: serverHost)
+            let sslHandler = try! NIOSSLClientHandler(
+                context: NIOSSLContext(configuration: .clientDefault),
+                serverHostname: serverHost
+            )
             return channel.pipeline.addHandlers([
                 sslHandler,
                 OutboundPrintHandler(type: "CLIENT (Encoded)"),

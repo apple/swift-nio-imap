@@ -16,7 +16,7 @@
 import XCTest
 
 final class UInt8ParseTypeMembershipTests: XCTestCase {
-    let allChars = Set(UInt8.min ... UInt8.max)
+    let allChars = Set(UInt8.min...UInt8.max)
 }
 
 // MARK: - test isCR
@@ -80,11 +80,11 @@ extension UInt8ParseTypeMembershipTests {
     func testAtomSpecial() {
         var valid: Set<UInt8> = [
             UInt8(ascii: "("), UInt8(ascii: ")"), UInt8(ascii: " "), UInt8(ascii: "{"),
-            UInt8(ascii: "]"), // ResponseSpecial
-            UInt8(ascii: "%"), UInt8(ascii: "*"), // ListWildcard
-            UInt8(ascii: "\""), UInt8(ascii: "\\"), // QuotedSpecial
+            UInt8(ascii: "]"),  // ResponseSpecial
+            UInt8(ascii: "%"), UInt8(ascii: "*"),  // ListWildcard
+            UInt8(ascii: "\""), UInt8(ascii: "\\"),  // QuotedSpecial
         ]
-        valid = valid.union(0 ... 31)
+        valid = valid.union(0...31)
         self.allChars.forEach { char in
             if valid.contains(char) {
                 XCTAssertTrue(char.isAtomSpecial)
@@ -101,7 +101,7 @@ extension UInt8ParseTypeMembershipTests {
     // thanks Johannes
     func testTextChar() {
         let invalid: Set<UInt8> = [UInt8(ascii: "\r"), .init(ascii: "\n"), 0]
-        let valid = self.allChars.subtracting(invalid).subtracting(128 ... UInt8.max)
+        let valid = self.allChars.subtracting(invalid).subtracting(128...UInt8.max)
         XCTAssertTrue(valid.allSatisfy(\.isTextChar))
         XCTAssertTrue(invalid.allSatisfy { !$0.isTextChar })
     }
@@ -112,9 +112,9 @@ extension UInt8ParseTypeMembershipTests {
 extension UInt8ParseTypeMembershipTests {
     func testHexCharacter() {
         var valid = Set<UInt8>()
-        valid = valid.union(UInt8(ascii: "0") ... UInt8(ascii: "9"))
-        valid = valid.union(UInt8(ascii: "a") ... UInt8(ascii: "f"))
-        valid = valid.union(UInt8(ascii: "A") ... UInt8(ascii: "F"))
+        valid = valid.union(UInt8(ascii: "0")...UInt8(ascii: "9"))
+        valid = valid.union(UInt8(ascii: "a")...UInt8(ascii: "f"))
+        valid = valid.union(UInt8(ascii: "A")...UInt8(ascii: "F"))
 
         let invalid = self.allChars.subtracting(valid)
         XCTAssertTrue(valid.allSatisfy(\.isHexCharacter))
@@ -127,9 +127,9 @@ extension UInt8ParseTypeMembershipTests {
 extension UInt8ParseTypeMembershipTests {
     func testBase64Character() {
         var valid = Set<UInt8>()
-        valid = valid.union(UInt8(ascii: "0") ... UInt8(ascii: "9"))
-        valid = valid.union(UInt8(ascii: "a") ... UInt8(ascii: "z"))
-        valid = valid.union(UInt8(ascii: "A") ... UInt8(ascii: "Z"))
+        valid = valid.union(UInt8(ascii: "0")...UInt8(ascii: "9"))
+        valid = valid.union(UInt8(ascii: "a")...UInt8(ascii: "z"))
+        valid = valid.union(UInt8(ascii: "A")...UInt8(ascii: "Z"))
         valid = valid.union([UInt8(ascii: "+"), UInt8(ascii: "/")])
 
         let invalid = self.allChars.subtracting(valid)

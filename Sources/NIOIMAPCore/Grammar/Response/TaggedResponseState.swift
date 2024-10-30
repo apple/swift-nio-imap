@@ -46,16 +46,13 @@ extension EncodeBuffer {
         switch cond {
         case .ok(let text):
             return
-                self.writeString("OK ") +
-                self.writeResponseText(text)
+                self.writeString("OK ") + self.writeResponseText(text)
         case .no(let text):
             return
-                self.writeString("NO ") +
-                self.writeResponseText(text)
+                self.writeString("NO ") + self.writeResponseText(text)
         case .bad(let text):
             return
-                self.writeString("BAD ") +
-                self.writeResponseText(text)
+                self.writeString("BAD ") + self.writeResponseText(text)
         }
     }
 }

@@ -52,14 +52,11 @@ extension EncodeBuffer {
             return self.writeString("MAX \(num)")
         case .all(let set):
             return
-                self.writeString("ALL ") +
-                self.writeLastCommandSet(set)
+                self.writeString("ALL ") + self.writeLastCommandSet(set)
         case .count(let num):
             return self.writeString("COUNT \(num)")
         case .partial(let range, let set):
-            var count = self.writeString("PARTIAL (") +
-                self.writePartialRange(range) +
-                self.writeString(" ")
+            var count = self.writeString("PARTIAL (") + self.writePartialRange(range) + self.writeString(" ")
             if set.isEmpty {
                 count += self.writeNil()
             } else {

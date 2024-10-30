@@ -65,24 +65,13 @@ We require that your commit messages match our template. The easiest way to do t
 
 The default policy for taking contributions is “Squash and Merge” - because of this the commit message format rule above applies to the PR rather than every commit contained within it.
 
-### Make sure Tests work on Linux
+### Run CI checks locally
 
-SwiftNIO IMAP uses XCTest to run tests on both macOS and Linux. While the macOS version of XCTest is able to use the Objective-C runtime to discover tests at execution time, the Linux version is not (prior to swift 5.1).
-For this reason, whenever you add new tests **you have to run a script** that generates the hooks needed to run those tests on Linux, or our CI will complain that the tests are not all present on Linux. To do this, merely execute `ruby ./scripts/generate_linux_tests.rb` at the root of the package and check the changes it made.
-
-### Make sure your patch works for all supported versions of swift
-
-The CI will do this for you.  You can use the docker-compose files included if you wish to check locally.  Currently all versions of swift >= 5.4 are supported.  For example usage of docker compose see the main [README](./README.md#an-alternative-using-docker-compose)
+You can run the Github Actions workflows locally using [act](https://github.com/nektos/act). For detailed steps on how to do this please see [https://github.com/swiftlang/github-workflows?tab=readme-ov-file#running-workflows-locally](https://github.com/swiftlang/github-workflows?tab=readme-ov-file#running-workflows-locally).
 
 ### Make sure your code is performant
 
 SwiftNIO has been created to be high performance.  The integration tests cover some measures of performance including allocations which should be avoided if possible.  For help with allocation problems refer to the guide to [allocation debugging](./docs/debugging-allocations.md)
-
-### Formatting
-
-Try to keep your lines less than 120 characters long so github can correctly display your changes.
-
-It is intended SwiftNIO IMAP will use the swift-format tool in the future to bring consistency to code formatting.  To follow the discussion on this topic see the swift evolution proposal [SE-250](https://github.com/apple/swift-evolution/blob/main/proposals/0250-swift-style-guide-and-formatter.md)
 
 ### Extensibility
 

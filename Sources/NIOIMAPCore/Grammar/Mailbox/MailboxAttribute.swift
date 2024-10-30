@@ -129,8 +129,8 @@ extension EncodeBuffer {
     }
 
     @discardableResult mutating func writeMailboxOptions(_ option: [MailboxAttribute]) -> Int {
-        self.writeString("STATUS ") +
-            self.writeArray(option) { (att, self) in
+        self.writeString("STATUS ")
+            + self.writeArray(option) { (att, self) in
                 self.writeMailboxAttribute(att)
             }
     }

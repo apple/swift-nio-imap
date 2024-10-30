@@ -18,12 +18,13 @@ import struct OrderedCollections.OrderedDictionary
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeNamespaceResponseExtensions(_ extensions: OrderedDictionary<ByteBuffer, [ByteBuffer]>) -> Int {
+    @discardableResult mutating func writeNamespaceResponseExtensions(
+        _ extensions: OrderedDictionary<ByteBuffer, [ByteBuffer]>
+    ) -> Int {
         extensions.reduce(into: 0) { (res, ext) in
-            res += self.writeSpace() +
-                self.writeIMAPString(ext.0) +
-                self.writeSpace() +
-                self.writeArray(ext.1) { (string, self) in
+            res +=
+                self.writeSpace() + self.writeIMAPString(ext.0) + self.writeSpace()
+                + self.writeArray(ext.1) { (string, self) in
                     self.writeIMAPString(string)
                 }
         }

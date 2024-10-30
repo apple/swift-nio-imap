@@ -22,9 +22,7 @@ extension EncodeBuffer {
             return self.writeNil()
         }
         return self.writeOrderedDictionary(params) { (element, self) in
-            self.writeIMAPString(element.key) +
-                self.writeSpace() +
-                self.writeIMAPString(element.value)
+            self.writeIMAPString(element.key) + self.writeSpace() + self.writeIMAPString(element.value)
         }
     }
 }

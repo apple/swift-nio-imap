@@ -23,7 +23,7 @@ class ResponseDataTests: EncodeTestClass {}
 extension ResponseDataTests {
     func testEncode() {
         let inputs: [(ResponsePayload, String, UInt)] = [
-            (.messageData(.expunge(3)), "* 3 EXPUNGE\r\n", #line),
+            (.messageData(.expunge(3)), "* 3 EXPUNGE\r\n", #line)
         ]
 
         for (test, expectedString, line) in inputs {

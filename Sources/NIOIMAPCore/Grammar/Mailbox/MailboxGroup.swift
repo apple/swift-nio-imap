@@ -49,22 +49,25 @@ public indirect enum EmailAddressListElement: Hashable, Sendable {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeEmailAddressGroup(_ group: EmailAddressGroup) -> Int {
-        self.writeEmailAddress(.init(
-            personName: nil,
-            sourceRoot: group.sourceRoot,
-            mailbox: group.groupName,
-            host: nil
-        )
-        ) +
-            self.writeArray(group.children, prefix: "", separator: "", suffix: "", parenthesis: false) { (child, self) in
-                self.writeEmailAddressOrGroup(child)
-            } +
-            self.writeEmailAddress(.init(
+        self.writeEmailAddress(
+            .init(
                 personName: nil,
                 sourceRoot: group.sourceRoot,
-                mailbox: nil,
+                mailbox: group.groupName,
                 host: nil
             )
+        )
+            + self.writeArray(group.children, prefix: "", separator: "", suffix: "", parenthesis: false) {
+                (child, self) in
+                self.writeEmailAddressOrGroup(child)
+            }
+            + self.writeEmailAddress(
+                .init(
+                    personName: nil,
+                    sourceRoot: group.sourceRoot,
+                    mailbox: nil,
+                    host: nil
+                )
             )
     }
 

@@ -211,9 +211,8 @@ public struct MailboxName: Sendable {
     /// `true` if the internal storage reads "INBOX"
     /// otherwise `false`
     public var isInbox: Bool {
-        self.hashValue == MailboxName.inboxHashValue &&
-            self.bytes.count == 5 &&
-            self.bytes.map { $0 & 0xDF }.elementsEqual("INBOX".utf8)
+        self.hashValue == MailboxName.inboxHashValue && self.bytes.count == 5
+            && self.bytes.map { $0 & 0xDF }.elementsEqual("INBOX".utf8)
     }
 
     private static let inboxHashValue: Int = MailboxName.inbox.hashValue

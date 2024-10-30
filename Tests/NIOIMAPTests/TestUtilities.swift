@@ -40,11 +40,14 @@ extension TestUtilities {
         return buffer
     }
 
-    static func withBuffer(_ string: String,
-                           terminator: String = "",
-                           shouldRemainUnchanged: Bool = false,
-                           file: StaticString = (#filePath), line: UInt = #line, _ body: (inout ByteBuffer) throws -> Void)
-    {
+    static func withBuffer(
+        _ string: String,
+        terminator: String = "",
+        shouldRemainUnchanged: Bool = false,
+        file: StaticString = (#filePath),
+        line: UInt = #line,
+        _ body: (inout ByteBuffer) throws -> Void
+    ) {
         var inputBuffer = ByteBufferAllocator().buffer(capacity: string.utf8.count + terminator.utf8.count + 10)
         inputBuffer.writeString("hello")
         inputBuffer.moveReaderIndex(forwardBy: 5)
@@ -53,15 +56,21 @@ extension TestUtilities {
         inputBuffer.writeString("hallo")
         inputBuffer.moveWriterIndex(to: inputBuffer.writerIndex - 5)
 
-        let expected = inputBuffer.getSlice(at: inputBuffer.readerIndex + string.utf8.count, length: terminator.utf8.count)!
+        let expected = inputBuffer.getSlice(
+            at: inputBuffer.readerIndex + string.utf8.count,
+            length: terminator.utf8.count
+        )!
         let beforeRunningBody = inputBuffer
 
         var parseBuffer = ParseBuffer(inputBuffer)
 
         defer {
-            let remaining = (try? PL.parseBytes(buffer: &parseBuffer,
-                                                tracker: .makeNewDefaultLimitStackTracker,
-                                                upTo: .max)) ?? ByteBuffer()
+            let remaining =
+                (try? PL.parseBytes(
+                    buffer: &parseBuffer,
+                    tracker: .makeNewDefault,
+                    upTo: .max
+                )) ?? ByteBuffer()
             let expectedString = String(buffer: expected)
             let remainingString = String(buffer: remaining)
             if shouldRemainUnchanged {

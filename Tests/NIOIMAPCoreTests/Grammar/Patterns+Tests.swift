@@ -23,7 +23,7 @@ class Patterns_Tests: EncodeTestClass {}
 extension Patterns_Tests {
     func testEncode() {
         let inputs: [([ByteBuffer], String, UInt)] = [
-            (["Mailbox1", "Mailbox2"], "(\"Mailbox1\" \"Mailbox2\")", #line),
+            (["Mailbox1", "Mailbox2"], "(\"Mailbox1\" \"Mailbox2\")", #line)
         ]
 
         for (test, expectedString, line) in inputs {

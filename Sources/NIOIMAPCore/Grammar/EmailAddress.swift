@@ -46,14 +46,8 @@ public struct EmailAddress: Hashable, Sendable {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeEmailAddress(_ address: EmailAddress) -> Int {
-        self.writeString("(") +
-            self.writeNString(address.personName) +
-            self.writeSpace() +
-            self.writeNString(address.sourceRoot) +
-            self.writeSpace() +
-            self.writeNString(address.mailbox) +
-            self.writeSpace() +
-            self.writeNString(address.host) +
-            self.writeString(")")
+        self.writeString("(") + self.writeNString(address.personName) + self.writeSpace()
+            + self.writeNString(address.sourceRoot) + self.writeSpace() + self.writeNString(address.mailbox)
+            + self.writeSpace() + self.writeNString(address.host) + self.writeString(")")
     }
 }

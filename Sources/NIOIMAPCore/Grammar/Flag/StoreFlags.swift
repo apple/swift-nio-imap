@@ -108,8 +108,7 @@ extension EncodeBuffer {
     @discardableResult mutating func writeStoreAttributeFlags(_ flags: StoreFlags) -> Int {
         let silentString = flags.silent ? ".SILENT" : ""
         return
-            self.writeString("\(flags.operation.rawValue)FLAGS\(silentString) ") +
-            self.writeFlags(flags.flags)
+            self.writeString("\(flags.operation.rawValue)FLAGS\(silentString) ") + self.writeFlags(flags.flags)
     }
 
     @discardableResult mutating func writeStoreData(_ data: StoreData) -> Int {
@@ -124,7 +123,7 @@ extension EncodeBuffer {
     @discardableResult mutating func writeStoreGmailLabels(_ labels: StoreGmailLabels) -> Int {
         let silentString = labels.silent ? ".SILENT" : ""
         return
-            self.writeString("\(labels.operation.rawValue)X-GM-LABELS\(silentString) ") +
-            self.writeGmailLabels(labels.gmailLabels)
+            self.writeString("\(labels.operation.rawValue)X-GM-LABELS\(silentString) ")
+            + self.writeGmailLabels(labels.gmailLabels)
     }
 }

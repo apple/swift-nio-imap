@@ -35,7 +35,6 @@ public struct ResponseCodeAppend: Hashable, Sendable {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeResponseCodeAppend(_ data: ResponseCodeAppend) -> Int {
-        self.writeString("APPENDUID \(data.uidValidity.rawValue) ") +
-            self.writeUIDSet(data.uids)
+        self.writeString("APPENDUID \(data.uidValidity.rawValue) ") + self.writeUIDSet(data.uids)
     }
 }

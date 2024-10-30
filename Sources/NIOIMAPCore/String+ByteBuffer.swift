@@ -29,7 +29,9 @@ extension String {
                 return nil
             }
         }
-        preconditionFailure("This should never happen - either the whole string should be successfully parsed as UTF8, or an error caught.")
+        preconditionFailure(
+            "This should never happen - either the whole string should be successfully parsed as UTF8, or an error caught."
+        )
     }
 
     /// Will try to decode the bytes as UTF8, skipping any that are invalid.

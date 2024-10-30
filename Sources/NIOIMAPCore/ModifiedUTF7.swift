@@ -49,7 +49,7 @@ public enum ModifiedUTF7 {
             } else {
                 // complicated character, time for Base64
                 var specials: [UInt8] = []
-                while index < string.endIndex { // append all non-ascii chars to an array
+                while index < string.endIndex {  // append all non-ascii chars to an array
                     let char = string[index]
                     if let ascVal = char.asciiValue, ascVal > 0x1F, ascVal < 0x7F {
                         break
@@ -63,7 +63,8 @@ public enum ModifiedUTF7 {
                 }
 
                 // convert the buffer to base64
-                let b64 = Base64.encodeBytes(bytes: specials).map { $0 == UInt8(ascii: "/") ? UInt8(ascii: ",") : $0 }.filter { $0 != UInt8(ascii: "=") }
+                let b64 = Base64.encodeBytes(bytes: specials).map { $0 == UInt8(ascii: "/") ? UInt8(ascii: ",") : $0 }
+                    .filter { $0 != UInt8(ascii: "=") }
                 buffer.writeInteger(UInt8(ascii: "&"))
                 buffer.writeBytes(b64)
                 buffer.writeInteger(UInt8(ascii: "-"))

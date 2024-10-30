@@ -22,7 +22,10 @@ class UIDSetTests: EncodeTestClass {}
 
 extension UIDSetTests {
     func testCustomDebugStringConvertible() {
-        XCTAssertEqual("\([1 ... 3, MessageIdentifierRange<UID>(6), MessageIdentifierRange<UID>(88)] as MessageIdentifierSet)", "1:3,6,88")
+        XCTAssertEqual(
+            "\([1 ... 3, MessageIdentifierRange<UID>(6), MessageIdentifierRange<UID>(88)] as MessageIdentifierSet)",
+            "1:3,6,88"
+        )
         XCTAssertEqual("\([1 ... (UID.max)] as MessageIdentifierSet)", "1:*")
         XCTAssertEqual("\([MessageIdentifierRange<UID>(37)] as MessageIdentifierSet)", "37")
         XCTAssertEqual("\([MessageIdentifierRange<UID>(.max)] as MessageIdentifierSet)", "*")
@@ -34,14 +37,14 @@ extension UIDSetTests {
 extension UIDSetTests {
     func testIMAPEncoded_one() {
         let expected = "22"
-        let size = self.testBuffer.writeUIDSet(MessageIdentifierSet<UID>(22 ... 22))
+        let size = self.testBuffer.writeUIDSet(MessageIdentifierSet<UID>(22...22))
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }
 
     func testIMAPEncoded_oneRange() {
         let expected = "5:22"
-        let size = self.testBuffer.writeUIDSet(MessageIdentifierSet<UID>(5 ... 22))
+        let size = self.testBuffer.writeUIDSet(MessageIdentifierSet<UID>(5...22))
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }
@@ -55,20 +58,22 @@ extension UIDSetTests {
 
     func testIMAPEncoded_almostAll() {
         let expected = "1:4294967294"
-        let size = self.testBuffer.writeUIDSet(MessageIdentifierSet<UID>(1 ... 4_294_967_294))
+        let size = self.testBuffer.writeUIDSet(MessageIdentifierSet<UID>(1...4_294_967_294))
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }
 
     func testIMAPEncoded_full() {
         let expected = "1,22:30,47,55,66:*"
-        let size = self.testBuffer.writeUIDSet(MessageIdentifierSet([
-            MessageIdentifierRange<UID>(1),
-            MessageIdentifierRange<UID>(22 ... 30),
-            MessageIdentifierRange<UID>(47),
-            MessageIdentifierRange<UID>(55),
-            MessageIdentifierRange<UID>(66...),
-        ]))
+        let size = self.testBuffer.writeUIDSet(
+            MessageIdentifierSet([
+                MessageIdentifierRange<UID>(1),
+                MessageIdentifierRange<UID>(22...30),
+                MessageIdentifierRange<UID>(47),
+                MessageIdentifierRange<UID>(55),
+                MessageIdentifierRange<UID>(66...),
+            ])
+        )
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }
@@ -87,14 +92,14 @@ extension UIDSetTests {
         XCTAssertEqual(MessageIdentifierSet<UID>([55, 66]).min(), 55)
         XCTAssertEqual(MessageIdentifierSet<UID>([55, 66]).max(), 66)
 
-        XCTAssertEqual(MessageIdentifierSet<UID>([55 ... 66]).min(), 55)
-        XCTAssertEqual(MessageIdentifierSet<UID>([55 ... 66]).max(), 66)
+        XCTAssertEqual(MessageIdentifierSet<UID>([55...66]).min(), 55)
+        XCTAssertEqual(MessageIdentifierSet<UID>([55...66]).max(), 66)
 
-        XCTAssertEqual(MessageIdentifierSet<UID>([44, 55 ... 66]).min(), 44)
-        XCTAssertEqual(MessageIdentifierSet<UID>([44, 55 ... 66]).max(), 66)
+        XCTAssertEqual(MessageIdentifierSet<UID>([44, 55...66]).min(), 44)
+        XCTAssertEqual(MessageIdentifierSet<UID>([44, 55...66]).max(), 66)
 
-        XCTAssertEqual(MessageIdentifierSet<UID>([55 ... 66, 77]).min(), 55)
-        XCTAssertEqual(MessageIdentifierSet<UID>([55 ... 66, 77]).max(), 77)
+        XCTAssertEqual(MessageIdentifierSet<UID>([55...66, 77]).min(), 55)
+        XCTAssertEqual(MessageIdentifierSet<UID>([55...66, 77]).max(), 77)
     }
 }
 
@@ -102,12 +107,12 @@ extension UIDSetTests {
 
 extension UIDSetTests {
     func testContains() {
-        XCTAssertFalse(MessageIdentifierSet<UID>(20 ... 22).contains(19))
-        XCTAssert(MessageIdentifierSet<UID>(20 ... 22).contains(20))
-        XCTAssert(MessageIdentifierSet<UID>(20 ... 22).contains(21))
-        XCTAssert(MessageIdentifierSet<UID>(20 ... 22).contains(22))
-        XCTAssertFalse(MessageIdentifierSet<UID>(20 ... 22).contains(23))
-        XCTAssertFalse(MessageIdentifierSet<UID>(20 ... 22).contains(.max))
+        XCTAssertFalse(MessageIdentifierSet<UID>(20...22).contains(19))
+        XCTAssert(MessageIdentifierSet<UID>(20...22).contains(20))
+        XCTAssert(MessageIdentifierSet<UID>(20...22).contains(21))
+        XCTAssert(MessageIdentifierSet<UID>(20...22).contains(22))
+        XCTAssertFalse(MessageIdentifierSet<UID>(20...22).contains(23))
+        XCTAssertFalse(MessageIdentifierSet<UID>(20...22).contains(.max))
 
         XCTAssert(MessageIdentifierSet<UID>.all.contains(1))
         XCTAssert(MessageIdentifierSet<UID>.all.contains(.max))
@@ -116,8 +121,8 @@ extension UIDSetTests {
     func testIsContiguous() {
         XCTAssert(MessageIdentifierSet<UID>.empty.isContiguous)
         XCTAssert(MessageIdentifierSet<UID>(20 as UID).isContiguous)
-        XCTAssert(MessageIdentifierSet<UID>(20 ... 22).isContiguous)
-        XCTAssertFalse(MessageIdentifierSet<UID>([20 ... 22, 24 ... 25]).isContiguous)
+        XCTAssert(MessageIdentifierSet<UID>(20...22).isContiguous)
+        XCTAssertFalse(MessageIdentifierSet<UID>([20...22, 24...25]).isContiguous)
     }
 
     func testUnion() {
@@ -129,7 +134,10 @@ extension UIDSetTests {
         XCTAssertEqual("\(MessageIdentifierSet<UID>(4 ... 39).union(MessageIdentifierSet(20 ... 35)))", "4:39")
         XCTAssertEqual("\(MessageIdentifierSet<UID>.all.union(MessageIdentifierSet(20 ... 35)))", "1:*")
         XCTAssertEqual("\(MessageIdentifierSet<UID>(20 ... 35).union(MessageIdentifierSet.all))", "1:*")
-        XCTAssertEqual("\(MessageIdentifierSet<UID>(20 ... 21).union(MessageIdentifierSet(4_294_967_294 as UID)))", "20:21,4294967294")
+        XCTAssertEqual(
+            "\(MessageIdentifierSet<UID>(20 ... 21).union(MessageIdentifierSet(4_294_967_294 as UID)))",
+            "20:21,4294967294"
+        )
     }
 
     func testIntersection() {
@@ -140,14 +148,29 @@ extension UIDSetTests {
         XCTAssertEqual("\(MessageIdentifierSet<UID>(20 ... 35).intersection(MessageIdentifierSet(30 ... 39)))", "30:35")
         XCTAssertEqual("\(MessageIdentifierSet<UID>.all.intersection(MessageIdentifierSet(20 ... 35)))", "20:35")
         XCTAssertEqual("\(MessageIdentifierSet<UID>(20 ... 35).intersection(MessageIdentifierSet.all))", "20:35")
-        XCTAssertEqual("\(MessageIdentifierSet<UID>.all.intersection(MessageIdentifierSet(2 ... 4_294_967_294)))", "2:4294967294")
+        XCTAssertEqual(
+            "\(MessageIdentifierSet<UID>.all.intersection(MessageIdentifierSet(2 ... 4_294_967_294)))",
+            "2:4294967294"
+        )
     }
 
     func testSymmetricDifference() {
-        XCTAssertEqual("\(MessageIdentifierSet<UID>(20 as UID).symmetricDifference(MessageIdentifierSet(30 as UID)))", "20,30")
-        XCTAssertEqual("\(MessageIdentifierSet<UID>(20 as UID).symmetricDifference(MessageIdentifierSet(20 as UID)))", "")
-        XCTAssertEqual("\(MessageIdentifierSet<UID>(20 ... 35).symmetricDifference(MessageIdentifierSet(30 ... 39)))", "20:29,36:39")
-        XCTAssertEqual("\(MessageIdentifierSet<UID>(20 ... 35).symmetricDifference(MessageIdentifierSet.all))", "1:19,36:*")
+        XCTAssertEqual(
+            "\(MessageIdentifierSet<UID>(20 as UID).symmetricDifference(MessageIdentifierSet(30 as UID)))",
+            "20,30"
+        )
+        XCTAssertEqual(
+            "\(MessageIdentifierSet<UID>(20 as UID).symmetricDifference(MessageIdentifierSet(20 as UID)))",
+            ""
+        )
+        XCTAssertEqual(
+            "\(MessageIdentifierSet<UID>(20 ... 35).symmetricDifference(MessageIdentifierSet(30 ... 39)))",
+            "20:29,36:39"
+        )
+        XCTAssertEqual(
+            "\(MessageIdentifierSet<UID>(20 ... 35).symmetricDifference(MessageIdentifierSet.all))",
+            "1:19,36:*"
+        )
     }
 
     func testInsert() {
@@ -164,7 +187,7 @@ extension UIDSetTests {
     }
 
     func testRemove_1() {
-        var sut = MessageIdentifierSet<UID>(4 ... 6)
+        var sut = MessageIdentifierSet<UID>(4...6)
         XCTAssertNil(sut.remove(1))
         XCTAssertEqual("\(sut)", "4:6")
         XCTAssertEqual(sut.count, 3)
@@ -175,7 +198,7 @@ extension UIDSetTests {
     }
 
     func testRemove_2() {
-        var sut = MessageIdentifierSet<UID>(1 ... 3)
+        var sut = MessageIdentifierSet<UID>(1...3)
         XCTAssertEqual(sut.remove(1), 1)
         XCTAssertEqual("\(sut)", "2:3")
         XCTAssertEqual(sut.count, 2)
@@ -201,117 +224,142 @@ extension UIDSetTests {
     }
 
     func testFormIntersection() {
-        var sut = MessageIdentifierSet<UID>(20 ... 35)
-        sut.formIntersection(MessageIdentifierSet(30 ... 40))
+        var sut = MessageIdentifierSet<UID>(20...35)
+        sut.formIntersection(MessageIdentifierSet(30...40))
         XCTAssertEqual("\(sut)", "30:35")
     }
 
     func testFormSymmetricDifference() {
-        var sut = MessageIdentifierSet<UID>(20 ... 35)
-        sut.formSymmetricDifference(MessageIdentifierSet(30 ... 40))
+        var sut = MessageIdentifierSet<UID>(20...35)
+        sut.formSymmetricDifference(MessageIdentifierSet(30...40))
         XCTAssertEqual("\(sut)", "20:29,36:40")
     }
 
     func testSubtracting() {
-        let sut = MessageIdentifierSet<UID>(20 ... 35)
-        let a = sut.subtracting(MessageIdentifierSet<UID>(21 ... 24))
+        let sut = MessageIdentifierSet<UID>(20...35)
+        let a = sut.subtracting(MessageIdentifierSet<UID>(21...24))
         XCTAssertEqual("\(sut)", "20:35")
         XCTAssertEqual("\(a)", "20,25:35")
     }
 
     func testIsSubset() {
-        XCTAssert(MessageIdentifierSet<UID>(20 ... 35)
-            .isSubset(of: MessageIdentifierSet<UID>(20 ... 35))
+        XCTAssert(
+            MessageIdentifierSet<UID>(20...35)
+                .isSubset(of: MessageIdentifierSet<UID>(20...35))
         )
-        XCTAssertFalse(MessageIdentifierSet<UID>(20 ... 35)
-            .isSubset(of: MessageIdentifierSet<UID>(2 ... 3))
+        XCTAssertFalse(
+            MessageIdentifierSet<UID>(20...35)
+                .isSubset(of: MessageIdentifierSet<UID>(2...3))
         )
-        XCTAssertFalse(MessageIdentifierSet<UID>(20 ... 35)
-            .isSubset(of: MessageIdentifierSet<UID>(24 ... 25))
+        XCTAssertFalse(
+            MessageIdentifierSet<UID>(20...35)
+                .isSubset(of: MessageIdentifierSet<UID>(24...25))
         )
-        XCTAssertFalse(MessageIdentifierSet<UID>(2 ... 3)
-            .isSubset(of: MessageIdentifierSet<UID>(20 ... 35))
+        XCTAssertFalse(
+            MessageIdentifierSet<UID>(2...3)
+                .isSubset(of: MessageIdentifierSet<UID>(20...35))
         )
-        XCTAssert(MessageIdentifierSet<UID>(24 ... 25)
-            .isSubset(of: MessageIdentifierSet<UID>(20 ... 35))
+        XCTAssert(
+            MessageIdentifierSet<UID>(24...25)
+                .isSubset(of: MessageIdentifierSet<UID>(20...35))
         )
     }
 
     func testIsStrictSubset() {
-        XCTAssertFalse(MessageIdentifierSet<UID>(20 ... 35)
-            .isStrictSubset(of: MessageIdentifierSet<UID>(20 ... 35))
+        XCTAssertFalse(
+            MessageIdentifierSet<UID>(20...35)
+                .isStrictSubset(of: MessageIdentifierSet<UID>(20...35))
         )
-        XCTAssertFalse(MessageIdentifierSet<UID>(20 ... 35)
-            .isStrictSubset(of: MessageIdentifierSet<UID>(2 ... 3))
+        XCTAssertFalse(
+            MessageIdentifierSet<UID>(20...35)
+                .isStrictSubset(of: MessageIdentifierSet<UID>(2...3))
         )
-        XCTAssertFalse(MessageIdentifierSet<UID>(20 ... 35)
-            .isStrictSubset(of: MessageIdentifierSet<UID>(24 ... 25))
+        XCTAssertFalse(
+            MessageIdentifierSet<UID>(20...35)
+                .isStrictSubset(of: MessageIdentifierSet<UID>(24...25))
         )
-        XCTAssertFalse(MessageIdentifierSet<UID>(2 ... 3)
-            .isStrictSubset(of: MessageIdentifierSet<UID>(20 ... 35))
+        XCTAssertFalse(
+            MessageIdentifierSet<UID>(2...3)
+                .isStrictSubset(of: MessageIdentifierSet<UID>(20...35))
         )
-        XCTAssert(MessageIdentifierSet<UID>(24 ... 25)
-            .isStrictSubset(of: MessageIdentifierSet<UID>(20 ... 35))
+        XCTAssert(
+            MessageIdentifierSet<UID>(24...25)
+                .isStrictSubset(of: MessageIdentifierSet<UID>(20...35))
         )
     }
 
     func testIsDisjoint() {
-        XCTAssertFalse(MessageIdentifierSet<UID>(20 ... 35)
-            .isDisjoint(with: MessageIdentifierSet<UID>(20 ... 35))
+        XCTAssertFalse(
+            MessageIdentifierSet<UID>(20...35)
+                .isDisjoint(with: MessageIdentifierSet<UID>(20...35))
         )
-        XCTAssert(MessageIdentifierSet<UID>(20 ... 35)
-            .isDisjoint(with: MessageIdentifierSet<UID>(2 ... 3))
+        XCTAssert(
+            MessageIdentifierSet<UID>(20...35)
+                .isDisjoint(with: MessageIdentifierSet<UID>(2...3))
         )
-        XCTAssertFalse(MessageIdentifierSet<UID>(20 ... 35)
-            .isDisjoint(with: MessageIdentifierSet<UID>(24 ... 25))
+        XCTAssertFalse(
+            MessageIdentifierSet<UID>(20...35)
+                .isDisjoint(with: MessageIdentifierSet<UID>(24...25))
         )
-        XCTAssert(MessageIdentifierSet<UID>(2 ... 3)
-            .isDisjoint(with: MessageIdentifierSet<UID>(20 ... 35))
+        XCTAssert(
+            MessageIdentifierSet<UID>(2...3)
+                .isDisjoint(with: MessageIdentifierSet<UID>(20...35))
         )
-        XCTAssertFalse(MessageIdentifierSet<UID>(24 ... 25)
-            .isDisjoint(with: MessageIdentifierSet<UID>(20 ... 35))
+        XCTAssertFalse(
+            MessageIdentifierSet<UID>(24...25)
+                .isDisjoint(with: MessageIdentifierSet<UID>(20...35))
         )
     }
 
     func testIsSuperset() {
-        XCTAssert(MessageIdentifierSet<UID>(20 ... 35)
-            .isSuperset(of: MessageIdentifierSet<UID>(20 ... 35))
+        XCTAssert(
+            MessageIdentifierSet<UID>(20...35)
+                .isSuperset(of: MessageIdentifierSet<UID>(20...35))
         )
-        XCTAssertFalse(MessageIdentifierSet<UID>(20 ... 35)
-            .isSuperset(of: MessageIdentifierSet<UID>(2 ... 3))
+        XCTAssertFalse(
+            MessageIdentifierSet<UID>(20...35)
+                .isSuperset(of: MessageIdentifierSet<UID>(2...3))
         )
-        XCTAssert(MessageIdentifierSet<UID>(20 ... 35)
-            .isSuperset(of: MessageIdentifierSet<UID>(24 ... 25))
+        XCTAssert(
+            MessageIdentifierSet<UID>(20...35)
+                .isSuperset(of: MessageIdentifierSet<UID>(24...25))
         )
-        XCTAssertFalse(MessageIdentifierSet<UID>(2 ... 3)
-            .isSuperset(of: MessageIdentifierSet<UID>(20 ... 35))
+        XCTAssertFalse(
+            MessageIdentifierSet<UID>(2...3)
+                .isSuperset(of: MessageIdentifierSet<UID>(20...35))
         )
-        XCTAssertFalse(MessageIdentifierSet<UID>(24 ... 25)
-            .isSuperset(of: MessageIdentifierSet<UID>(20 ... 35))
+        XCTAssertFalse(
+            MessageIdentifierSet<UID>(24...25)
+                .isSuperset(of: MessageIdentifierSet<UID>(20...35))
         )
     }
 
     func testIsStrictSuperset() {
-        XCTAssertFalse(MessageIdentifierSet<UID>(20 ... 35)
-            .isStrictSuperset(of: MessageIdentifierSet<UID>(20 ... 35))
+        XCTAssertFalse(
+            MessageIdentifierSet<UID>(20...35)
+                .isStrictSuperset(of: MessageIdentifierSet<UID>(20...35))
         )
-        XCTAssertFalse(MessageIdentifierSet<UID>(20 ... 35)
-            .isStrictSuperset(of: MessageIdentifierSet<UID>(2 ... 3))
+        XCTAssertFalse(
+            MessageIdentifierSet<UID>(20...35)
+                .isStrictSuperset(of: MessageIdentifierSet<UID>(2...3))
         )
-        XCTAssert(MessageIdentifierSet<UID>(20 ... 35)
-            .isStrictSuperset(of: MessageIdentifierSet<UID>(24 ... 25))
+        XCTAssert(
+            MessageIdentifierSet<UID>(20...35)
+                .isStrictSuperset(of: MessageIdentifierSet<UID>(24...25))
         )
-        XCTAssertFalse(MessageIdentifierSet<UID>(2 ... 3)
-            .isStrictSuperset(of: MessageIdentifierSet<UID>(20 ... 35))
+        XCTAssertFalse(
+            MessageIdentifierSet<UID>(2...3)
+                .isStrictSuperset(of: MessageIdentifierSet<UID>(20...35))
         )
-        XCTAssertFalse(MessageIdentifierSet<UID>(24 ... 25)
-            .isStrictSuperset(of: MessageIdentifierSet<UID>(20 ... 35))
+        XCTAssertFalse(
+            MessageIdentifierSet<UID>(24...25)
+                .isStrictSuperset(of: MessageIdentifierSet<UID>(20...35))
         )
     }
 
     func testSubtract() {
-        var sut = MessageIdentifierSet<UID>(20 ... 35)
-        sut.subtract(MessageIdentifierSet<UID>(21 ... 24))
+        var sut = MessageIdentifierSet<UID>(20...35)
+        sut.subtract(MessageIdentifierSet<UID>(21...24))
         XCTAssertEqual("\(sut)", "20,25:35")
     }
 
@@ -329,21 +377,21 @@ extension UIDSetTests {
     }
 
     func testSingleRangeCollection() {
-        let sut = MessageIdentifierSet<UID>(55 ... 57)
+        let sut = MessageIdentifierSet<UID>(55...57)
         XCTAssertEqual(sut.map { "\($0)" }, ["55", "56", "57"])
         XCTAssertEqual(sut.count, 3)
         XCTAssertFalse(sut.isEmpty)
     }
 
     func testCollection_A() {
-        let sut = MessageIdentifierSet([MessageIdentifierRange<UID>(55 ... 57), MessageIdentifierRange<UID>(80)])
+        let sut = MessageIdentifierSet([MessageIdentifierRange<UID>(55...57), MessageIdentifierRange<UID>(80)])
         XCTAssertEqual(sut.map { "\($0)" }, ["55", "56", "57", "80"])
         XCTAssertEqual(sut.count, 4)
         XCTAssertFalse(sut.isEmpty)
     }
 
     func testCollection_B() {
-        let sut = MessageIdentifierSet([MessageIdentifierRange<UID>(8), MessageIdentifierRange<UID>(55 ... 57)])
+        let sut = MessageIdentifierSet([MessageIdentifierRange<UID>(8), MessageIdentifierRange<UID>(55...57)])
         XCTAssertEqual(sut.map { "\($0)" }, ["8", "55", "56", "57"])
         XCTAssertEqual(sut.count, 4)
         XCTAssertFalse(sut.isEmpty)
@@ -352,29 +400,49 @@ extension UIDSetTests {
 
 extension UIDSetTests {
     func testIndexes_singleRange() {
-        let sut = MessageIdentifierSet<UID>(40 ... 89)
-        XCTAssertEqual(sut.index(sut.startIndex, offsetBy: 10),
-                       sut.index(sut.index(sut.startIndex, offsetBy: 4), offsetBy: 6))
-        XCTAssertEqual(sut.index(sut.index(sut.startIndex, offsetBy: 33), offsetBy: -33),
-                       sut.startIndex)
-        XCTAssertEqual(sut.index(sut.startIndex, offsetBy: 50),
-                       sut.endIndex)
-        XCTAssertEqual(sut.index(sut.endIndex, offsetBy: -50),
-                       sut.startIndex)
+        let sut = MessageIdentifierSet<UID>(40...89)
+        XCTAssertEqual(
+            sut.index(sut.startIndex, offsetBy: 10),
+            sut.index(sut.index(sut.startIndex, offsetBy: 4), offsetBy: 6)
+        )
+        XCTAssertEqual(
+            sut.index(sut.index(sut.startIndex, offsetBy: 33), offsetBy: -33),
+            sut.startIndex
+        )
+        XCTAssertEqual(
+            sut.index(sut.startIndex, offsetBy: 50),
+            sut.endIndex
+        )
+        XCTAssertEqual(
+            sut.index(sut.endIndex, offsetBy: -50),
+            sut.startIndex
+        )
 
-        XCTAssertEqual(sut.index(sut.startIndex, offsetBy: 10),
-                       sut.index(sut.index(sut.startIndex, offsetBy: 110), offsetBy: -100))
-        XCTAssertEqual(sut.index(sut.startIndex, offsetBy: 10),
-                       sut.index(sut.index(sut.startIndex, offsetBy: -100), offsetBy: 110))
+        XCTAssertEqual(
+            sut.index(sut.startIndex, offsetBy: 10),
+            sut.index(sut.index(sut.startIndex, offsetBy: 110), offsetBy: -100)
+        )
+        XCTAssertEqual(
+            sut.index(sut.startIndex, offsetBy: 10),
+            sut.index(sut.index(sut.startIndex, offsetBy: -100), offsetBy: 110)
+        )
 
-        XCTAssertGreaterThan(sut.index(sut.startIndex, offsetBy: 51),
-                             sut.endIndex)
-        XCTAssertGreaterThan(sut.index(sut.startIndex, offsetBy: 52),
-                             sut.index(sut.startIndex, offsetBy: 51))
-        XCTAssertLessThan(sut.index(sut.endIndex, offsetBy: -51),
-                          sut.startIndex)
-        XCTAssertLessThan(sut.index(sut.endIndex, offsetBy: -52),
-                          sut.index(sut.endIndex, offsetBy: -51))
+        XCTAssertGreaterThan(
+            sut.index(sut.startIndex, offsetBy: 51),
+            sut.endIndex
+        )
+        XCTAssertGreaterThan(
+            sut.index(sut.startIndex, offsetBy: 52),
+            sut.index(sut.startIndex, offsetBy: 51)
+        )
+        XCTAssertLessThan(
+            sut.index(sut.endIndex, offsetBy: -51),
+            sut.startIndex
+        )
+        XCTAssertLessThan(
+            sut.index(sut.endIndex, offsetBy: -52),
+            sut.index(sut.endIndex, offsetBy: -51)
+        )
 
         XCTAssertEqual(sut.index(sut.endIndex, offsetBy: -50, limitedBy: sut.startIndex), sut.startIndex)
         XCTAssertNil(sut.index(sut.endIndex, offsetBy: -51, limitedBy: sut.startIndex))
@@ -386,39 +454,60 @@ extension UIDSetTests {
     func testIndexes_multipleSingleValues() {
         let sut: MessageIdentifierSet<UID> = {
             var sut = MessageIdentifierSet<UID>()
-            for uid in [762 as UID, 7370, 8568, 11423, 11708, 11889, 12679,
-                        18833, 22152, 22374, 22733, 23838, 30058, 30985, 32465,
-                        33579, 39714, 43224, 44377, 46424, 53884, 61461, 71310,
-                        75310, 77045, 81983, 82711, 85170, 95660, 99173]
-            {
+            for uid in [
+                762 as UID, 7370, 8568, 11423, 11708, 11889, 12679,
+                18833, 22152, 22374, 22733, 23838, 30058, 30985, 32465,
+                33579, 39714, 43224, 44377, 46424, 53884, 61461, 71310,
+                75310, 77045, 81983, 82711, 85170, 95660, 99173,
+            ] {
                 sut.insert(uid)
             }
             return sut
         }()
         XCTAssertEqual(sut.count, 30, "30 values")
 
-        XCTAssertEqual(sut.index(sut.startIndex, offsetBy: 10),
-                       sut.index(sut.index(sut.startIndex, offsetBy: 4), offsetBy: 6))
-        XCTAssertEqual(sut.index(sut.index(sut.startIndex, offsetBy: 17), offsetBy: -17),
-                       sut.startIndex)
-        XCTAssertEqual(sut.index(sut.startIndex, offsetBy: 30),
-                       sut.endIndex)
-        XCTAssertEqual(sut.index(sut.endIndex, offsetBy: -30),
-                       sut.startIndex)
+        XCTAssertEqual(
+            sut.index(sut.startIndex, offsetBy: 10),
+            sut.index(sut.index(sut.startIndex, offsetBy: 4), offsetBy: 6)
+        )
+        XCTAssertEqual(
+            sut.index(sut.index(sut.startIndex, offsetBy: 17), offsetBy: -17),
+            sut.startIndex
+        )
+        XCTAssertEqual(
+            sut.index(sut.startIndex, offsetBy: 30),
+            sut.endIndex
+        )
+        XCTAssertEqual(
+            sut.index(sut.endIndex, offsetBy: -30),
+            sut.startIndex
+        )
 
-        XCTAssertEqual(sut.index(sut.startIndex, offsetBy: 10),
-                       sut.index(sut.index(sut.startIndex, offsetBy: 110), offsetBy: -100))
-        XCTAssertEqual(sut.index(sut.startIndex, offsetBy: 10),
-                       sut.index(sut.index(sut.startIndex, offsetBy: -100), offsetBy: 110))
+        XCTAssertEqual(
+            sut.index(sut.startIndex, offsetBy: 10),
+            sut.index(sut.index(sut.startIndex, offsetBy: 110), offsetBy: -100)
+        )
+        XCTAssertEqual(
+            sut.index(sut.startIndex, offsetBy: 10),
+            sut.index(sut.index(sut.startIndex, offsetBy: -100), offsetBy: 110)
+        )
 
-        XCTAssertGreaterThan(sut.index(sut.startIndex, offsetBy: 31),
-                             sut.endIndex)
-        XCTAssertGreaterThan(sut.index(sut.startIndex, offsetBy: 32),
-                             sut.index(sut.startIndex, offsetBy: 31))
-        XCTAssertLessThan(sut.index(sut.endIndex, offsetBy: -31),
-                          sut.startIndex)
-        XCTAssertLessThan(sut.index(sut.endIndex, offsetBy: -32),
-                          sut.index(sut.endIndex, offsetBy: -31))
+        XCTAssertGreaterThan(
+            sut.index(sut.startIndex, offsetBy: 31),
+            sut.endIndex
+        )
+        XCTAssertGreaterThan(
+            sut.index(sut.startIndex, offsetBy: 32),
+            sut.index(sut.startIndex, offsetBy: 31)
+        )
+        XCTAssertLessThan(
+            sut.index(sut.endIndex, offsetBy: -31),
+            sut.startIndex
+        )
+        XCTAssertLessThan(
+            sut.index(sut.endIndex, offsetBy: -32),
+            sut.index(sut.endIndex, offsetBy: -31)
+        )
 
         XCTAssertEqual(sut.index(sut.endIndex, offsetBy: -30, limitedBy: sut.startIndex), sut.startIndex)
         XCTAssertNil(sut.index(sut.endIndex, offsetBy: -31, limitedBy: sut.startIndex))
@@ -429,58 +518,84 @@ extension UIDSetTests {
 
     func testIndexes_multipleShortRanges() {
         let sut = MessageIdentifierSet([
-            MessageIdentifierRange<UID>(55 ... 57),
-            MessageIdentifierRange<UID>(155 ... 157),
-            MessageIdentifierRange<UID>(255 ... 257),
-            MessageIdentifierRange<UID>(355 ... 357),
-            MessageIdentifierRange<UID>(455 ... 457),
-            MessageIdentifierRange<UID>(555 ... 557),
-            MessageIdentifierRange<UID>(655 ... 657),
-            MessageIdentifierRange<UID>(755 ... 757),
-            MessageIdentifierRange<UID>(855 ... 857),
-            MessageIdentifierRange<UID>(955 ... 957),
+            MessageIdentifierRange<UID>(55...57),
+            MessageIdentifierRange<UID>(155...157),
+            MessageIdentifierRange<UID>(255...257),
+            MessageIdentifierRange<UID>(355...357),
+            MessageIdentifierRange<UID>(455...457),
+            MessageIdentifierRange<UID>(555...557),
+            MessageIdentifierRange<UID>(655...657),
+            MessageIdentifierRange<UID>(755...757),
+            MessageIdentifierRange<UID>(855...857),
+            MessageIdentifierRange<UID>(955...957),
         ])
         XCTAssertEqual(sut.count, 30, "30 values")
 
-        XCTAssertEqual(sut.index(sut.startIndex, offsetBy: 10),
-                       sut.index(sut.index(sut.startIndex, offsetBy: 4), offsetBy: 6))
-        XCTAssertEqual(sut.index(sut.index(sut.startIndex, offsetBy: 17), offsetBy: -17),
-                       sut.startIndex)
-        XCTAssertEqual(sut.index(sut.startIndex, offsetBy: 30),
-                       sut.endIndex)
-        XCTAssertEqual(sut.index(sut.endIndex, offsetBy: -30),
-                       sut.startIndex)
+        XCTAssertEqual(
+            sut.index(sut.startIndex, offsetBy: 10),
+            sut.index(sut.index(sut.startIndex, offsetBy: 4), offsetBy: 6)
+        )
+        XCTAssertEqual(
+            sut.index(sut.index(sut.startIndex, offsetBy: 17), offsetBy: -17),
+            sut.startIndex
+        )
+        XCTAssertEqual(
+            sut.index(sut.startIndex, offsetBy: 30),
+            sut.endIndex
+        )
+        XCTAssertEqual(
+            sut.index(sut.endIndex, offsetBy: -30),
+            sut.startIndex
+        )
 
-        for step in 1 ... 15 {
+        for step in 1...15 {
             let count = sut.count / step
             var a = sut.startIndex
-            for c in 1 ... count {
+            for c in 1...count {
                 a = sut.index(a, offsetBy: step)
-                XCTAssertEqual(a,
-                               sut.index(sut.startIndex, offsetBy: step * c),
-                               "c = \(c), step = \(step)")
-                XCTAssertEqual(sut.distance(from: sut.startIndex, to: a),
-                               step * c,
-                               "c = \(c), step = \(step)")
-                XCTAssertEqual(sut.distance(from: sut.endIndex, to: a),
-                               step * c - 30,
-                               "c = \(c), step = \(step)")
+                XCTAssertEqual(
+                    a,
+                    sut.index(sut.startIndex, offsetBy: step * c),
+                    "c = \(c), step = \(step)"
+                )
+                XCTAssertEqual(
+                    sut.distance(from: sut.startIndex, to: a),
+                    step * c,
+                    "c = \(c), step = \(step)"
+                )
+                XCTAssertEqual(
+                    sut.distance(from: sut.endIndex, to: a),
+                    step * c - 30,
+                    "c = \(c), step = \(step)"
+                )
             }
         }
 
-        XCTAssertEqual(sut.index(sut.startIndex, offsetBy: 10),
-                       sut.index(sut.index(sut.startIndex, offsetBy: 110), offsetBy: -100))
-        XCTAssertEqual(sut.index(sut.startIndex, offsetBy: 10),
-                       sut.index(sut.index(sut.startIndex, offsetBy: -100), offsetBy: 110))
+        XCTAssertEqual(
+            sut.index(sut.startIndex, offsetBy: 10),
+            sut.index(sut.index(sut.startIndex, offsetBy: 110), offsetBy: -100)
+        )
+        XCTAssertEqual(
+            sut.index(sut.startIndex, offsetBy: 10),
+            sut.index(sut.index(sut.startIndex, offsetBy: -100), offsetBy: 110)
+        )
 
-        XCTAssertGreaterThan(sut.index(sut.startIndex, offsetBy: 31),
-                             sut.endIndex)
-        XCTAssertGreaterThan(sut.index(sut.startIndex, offsetBy: 32),
-                             sut.index(sut.startIndex, offsetBy: 31))
-        XCTAssertLessThan(sut.index(sut.endIndex, offsetBy: -31),
-                          sut.startIndex)
-        XCTAssertLessThan(sut.index(sut.endIndex, offsetBy: -32),
-                          sut.index(sut.endIndex, offsetBy: -31))
+        XCTAssertGreaterThan(
+            sut.index(sut.startIndex, offsetBy: 31),
+            sut.endIndex
+        )
+        XCTAssertGreaterThan(
+            sut.index(sut.startIndex, offsetBy: 32),
+            sut.index(sut.startIndex, offsetBy: 31)
+        )
+        XCTAssertLessThan(
+            sut.index(sut.endIndex, offsetBy: -31),
+            sut.startIndex
+        )
+        XCTAssertLessThan(
+            sut.index(sut.endIndex, offsetBy: -32),
+            sut.index(sut.endIndex, offsetBy: -31)
+        )
 
         XCTAssertEqual(sut.index(sut.endIndex, offsetBy: -30, limitedBy: sut.startIndex), sut.startIndex)
         XCTAssertNil(sut.index(sut.endIndex, offsetBy: -31, limitedBy: sut.startIndex))
@@ -491,24 +606,35 @@ extension UIDSetTests {
 
     func testRangeView() {
         XCTAssertEqual(Array(MessageIdentifierSet<UID>().ranges), [])
-        XCTAssertEqual(Array(MessageIdentifierSet<UID>([1_234]).ranges), [
-            MessageIdentifierRange<UID>(1_234 ... 1_234),
-        ])
-        XCTAssertEqual(Array(MessageIdentifierSet([1, 4]).ranges), [
-            MessageIdentifierRange<UID>(1 ... 1),
-            MessageIdentifierRange<UID>(4 ... 4),
-        ])
-        XCTAssertEqual(Array(MessageIdentifierSet([
-            17 ... 32,
-            400 ... 1_234,
-            2_001 ... 2_001,
-            20_800 ... 21_044,
-        ]).ranges), [
-            MessageIdentifierRange<UID>(17 ... 32),
-            MessageIdentifierRange<UID>(400 ... 1_234),
-            MessageIdentifierRange<UID>(2_001 ... 2_001),
-            MessageIdentifierRange<UID>(20_800 ... 21_044),
-        ])
+        XCTAssertEqual(
+            Array(MessageIdentifierSet<UID>([1_234]).ranges),
+            [
+                MessageIdentifierRange<UID>(1_234...1_234)
+            ]
+        )
+        XCTAssertEqual(
+            Array(MessageIdentifierSet([1, 4]).ranges),
+            [
+                MessageIdentifierRange<UID>(1...1),
+                MessageIdentifierRange<UID>(4...4),
+            ]
+        )
+        XCTAssertEqual(
+            Array(
+                MessageIdentifierSet([
+                    17...32,
+                    400...1_234,
+                    2_001...2_001,
+                    20_800...21_044,
+                ]).ranges
+            ),
+            [
+                MessageIdentifierRange<UID>(17...32),
+                MessageIdentifierRange<UID>(400...1_234),
+                MessageIdentifierRange<UID>(2_001...2_001),
+                MessageIdentifierRange<UID>(20_800...21_044),
+            ]
+        )
     }
 }
 

@@ -23,7 +23,7 @@ class NamespaceResponse_Tests: EncodeTestClass {}
 extension NamespaceResponse_Tests {
     func testEncode() {
         let inputs: [(NamespaceResponse, String, UInt)] = [
-            (.init(userNamespace: [], otherUserNamespace: [], sharedNamespace: []), "NAMESPACE NIL NIL NIL", #line),
+            (.init(userNamespace: [], otherUserNamespace: [], sharedNamespace: []), "NAMESPACE NIL NIL NIL", #line)
         ]
 
         for (test, expectedString, line) in inputs {

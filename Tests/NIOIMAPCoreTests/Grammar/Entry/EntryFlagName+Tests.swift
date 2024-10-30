@@ -19,7 +19,7 @@ import XCTest
 class EntryFlagName_Tests: EncodeTestClass {
     func testEncoding() {
         let inputs: [(EntryFlagName, String, UInt)] = [
-            (.init(flag: .answered), "\"/flags/\\\\answered\"", #line), // mad, but absolutely correct
+            (.init(flag: .answered), "\"/flags/\\\\answered\"", #line)  // mad, but absolutely correct
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeEntryFlagName($0) })
     }

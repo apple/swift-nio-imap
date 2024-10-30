@@ -123,9 +123,9 @@ extension Command {
     var pipeliningRequirements: Set<PipeliningRequirement> {
         switch self {
         case .select,
-             .unselect,
-             .close,
-             .examine:
+            .unselect,
+            .close,
+            .examine:
             return [.noMailboxCommandsRunning]
 
         case .search(key: let key, charset: _, returnOptions: _):
@@ -144,86 +144,86 @@ extension Command {
             return attributes.makePipeliningRequirements(uids)
 
         case .copy,
-             .move:
+            .move:
             return [.noUntaggedExpungeResponse, .noUIDBasedCommandRunning]
 
         case .uidCopy,
-             .uidMove,
-             .uidExpunge,
-             .expunge:
+            .uidMove,
+            .uidExpunge,
+            .expunge:
             return []
 
         case .store(_, _, let data):
             switch data {
             case .flags(let flags):
-                return flags.silent ?
-                    [.noUntaggedExpungeResponse, .noUIDBasedCommandRunning, .noFlagReadsFromAnyMessage] :
-                    [.noUntaggedExpungeResponse, .noUIDBasedCommandRunning, .noFlagReadsFromAnyMessage, .noFlagChangesToAnyMessage]
+                return flags.silent
+                    ? [.noUntaggedExpungeResponse, .noUIDBasedCommandRunning, .noFlagReadsFromAnyMessage]
+                    : [
+                        .noUntaggedExpungeResponse, .noUIDBasedCommandRunning, .noFlagReadsFromAnyMessage,
+                        .noFlagChangesToAnyMessage,
+                    ]
             case .gmailLabels(let labels):
-                return labels.silent ?
-                    [.noUntaggedExpungeResponse, .noUIDBasedCommandRunning, .noFlagReadsFromAnyMessage] :
-                    [.noUntaggedExpungeResponse, .noUIDBasedCommandRunning, .noFlagReadsFromAnyMessage, .noFlagChangesToAnyMessage]
+                return labels.silent
+                    ? [.noUntaggedExpungeResponse, .noUIDBasedCommandRunning, .noFlagReadsFromAnyMessage]
+                    : [
+                        .noUntaggedExpungeResponse, .noUIDBasedCommandRunning, .noFlagReadsFromAnyMessage,
+                        .noFlagChangesToAnyMessage,
+                    ]
             }
         case .uidStore(.lastCommand, _, let data):
             switch data {
             case .flags(let flags):
-                return flags.silent ?
-                    [.noFlagReadsFromAnyMessage] :
-                    [.noFlagReadsFromAnyMessage, .noFlagChangesToAnyMessage]
+                return flags.silent
+                    ? [.noFlagReadsFromAnyMessage] : [.noFlagReadsFromAnyMessage, .noFlagChangesToAnyMessage]
             case .gmailLabels(let labels):
-                return labels.silent ?
-                    [.noFlagReadsFromAnyMessage] :
-                    [.noFlagReadsFromAnyMessage, .noFlagChangesToAnyMessage]
+                return labels.silent
+                    ? [.noFlagReadsFromAnyMessage] : [.noFlagReadsFromAnyMessage, .noFlagChangesToAnyMessage]
             }
         case .uidStore(.set(let uids), _, let data):
             switch data {
             case .flags(let flags):
-                return flags.silent ?
-                    [.noFlagReads(uids)] :
-                    [.noFlagReads(uids), .noFlagChanges(uids)]
+                return flags.silent ? [.noFlagReads(uids)] : [.noFlagReads(uids), .noFlagChanges(uids)]
             case .gmailLabels(let labels):
-                return labels.silent ?
-                    [.noFlagReads(uids)] :
-                    [.noFlagReads(uids), .noFlagChanges(uids)]
+                return labels.silent ? [.noFlagReads(uids)] : [.noFlagReads(uids), .noFlagChanges(uids)]
             }
 
         case .capability,
-             .logout,
-             .noop,
-             .check,
-             .authenticate,
-             .login,
-             .startTLS,
-             .enable,
-             .idleStart,
-             .id,
-             .namespace,
-             .compress,
+            .logout,
+            .noop,
+            .check,
+            .authenticate,
+            .login,
+            .startTLS,
+            .enable,
+            .idleStart,
+            .id,
+            .namespace,
+            .compress,
 
-             // Mailbox:
-             .status,
-             .create,
-             .list,
-             .listIndependent,
-             .lsub,
-             .subscribe,
-             .unsubscribe,
-             .delete,
-             .rename,
+            // Mailbox:
+            .status,
+            .create,
+            .list,
+            .listIndependent,
+            .lsub,
+            .subscribe,
+            .unsubscribe,
+            .delete,
+            .rename,
 
-             // Quota:
-             .getQuota,
-             .getQuotaRoot,
-             .setQuota,
+            // Quota:
+            .getQuota,
+            .getQuotaRoot,
+            .setQuota,
 
-             // Metadata:
-             .getMetadata,
-             .setMetadata,
+            // Metadata:
+            .getMetadata,
+            .setMetadata,
 
-             // URL Auth:
-             .resetKey,
-             .generateAuthorizedURL,
-             .urlFetch:
+            // URL Auth:
+            .resetKey,
+            .generateAuthorizedURL,
+            .urlFetch:
             return []
         case .custom:
             return [
@@ -263,9 +263,9 @@ extension Command {
     var pipeliningBehavior: Set<PipeliningBehavior> {
         switch self {
         case .select,
-             .unselect,
-             .examine,
-             .close:
+            .unselect,
+            .examine,
+            .close:
             return [.changesMailboxSelection, .mayTriggerUntaggedExpunge]
 
         case .expunge:
@@ -274,17 +274,16 @@ extension Command {
             return [.dependsOnMailboxSelection, .isUIDBased, .mayTriggerUntaggedExpunge]
 
         case .fetch(_, let attributes, _):
-            return attributes.readsFlags ?
-                [.dependsOnMailboxSelection, .readsFlagsFromAnyMessage] :
-                [.dependsOnMailboxSelection]
+            return attributes.readsFlags
+                ? [.dependsOnMailboxSelection, .readsFlagsFromAnyMessage] : [.dependsOnMailboxSelection]
         case .uidFetch(.lastCommand, let attributes, _):
-            return attributes.readsFlags ?
-                [.dependsOnMailboxSelection, .mayTriggerUntaggedExpunge, .isUIDBased, .readsFlagsFromAnyMessage] :
-                [.dependsOnMailboxSelection, .mayTriggerUntaggedExpunge, .isUIDBased]
+            return attributes.readsFlags
+                ? [.dependsOnMailboxSelection, .mayTriggerUntaggedExpunge, .isUIDBased, .readsFlagsFromAnyMessage]
+                : [.dependsOnMailboxSelection, .mayTriggerUntaggedExpunge, .isUIDBased]
         case .uidFetch(.set(let uids), let attributes, _):
-            return attributes.readsFlags ?
-                [.dependsOnMailboxSelection, .mayTriggerUntaggedExpunge, .isUIDBased, .readsFlags(uids)] :
-                [.dependsOnMailboxSelection, .mayTriggerUntaggedExpunge, .isUIDBased]
+            return attributes.readsFlags
+                ? [.dependsOnMailboxSelection, .mayTriggerUntaggedExpunge, .isUIDBased, .readsFlags(uids)]
+                : [.dependsOnMailboxSelection, .mayTriggerUntaggedExpunge, .isUIDBased]
 
         case .copy, .move:
             return [.dependsOnMailboxSelection, .mayTriggerUntaggedExpunge]
@@ -307,45 +306,57 @@ extension Command {
         case .store(_, _, let data):
             switch data {
             case .flags(let storeFlags):
-                return storeFlags.silent ?
-                    [.dependsOnMailboxSelection, .changesFlagsOnAnyMessage] :
-                    [.dependsOnMailboxSelection, .changesFlagsOnAnyMessage, .readsFlagsFromAnyMessage]
+                return storeFlags.silent
+                    ? [.dependsOnMailboxSelection, .changesFlagsOnAnyMessage]
+                    : [.dependsOnMailboxSelection, .changesFlagsOnAnyMessage, .readsFlagsFromAnyMessage]
             case .gmailLabels(let storeGmailLabels):
-                return storeGmailLabels.silent ?
-                    [.dependsOnMailboxSelection, .changesFlagsOnAnyMessage] :
-                    [.dependsOnMailboxSelection, .changesFlagsOnAnyMessage, .readsFlagsFromAnyMessage]
+                return storeGmailLabels.silent
+                    ? [.dependsOnMailboxSelection, .changesFlagsOnAnyMessage]
+                    : [.dependsOnMailboxSelection, .changesFlagsOnAnyMessage, .readsFlagsFromAnyMessage]
             }
         case .uidStore(.lastCommand, _, let data):
             switch data {
             case .flags(let storeFlags):
-                return storeFlags.silent ?
-                    [.dependsOnMailboxSelection, .mayTriggerUntaggedExpunge, .isUIDBased, .changesFlagsOnAnyMessage] :
-                    [.dependsOnMailboxSelection, .mayTriggerUntaggedExpunge, .isUIDBased, .changesFlagsOnAnyMessage, .readsFlagsFromAnyMessage]
+                return storeFlags.silent
+                    ? [.dependsOnMailboxSelection, .mayTriggerUntaggedExpunge, .isUIDBased, .changesFlagsOnAnyMessage]
+                    : [
+                        .dependsOnMailboxSelection, .mayTriggerUntaggedExpunge, .isUIDBased, .changesFlagsOnAnyMessage,
+                        .readsFlagsFromAnyMessage,
+                    ]
             case .gmailLabels(let storeGmailLabels):
-                return storeGmailLabels.silent ?
-                    [.dependsOnMailboxSelection, .mayTriggerUntaggedExpunge, .isUIDBased, .changesFlagsOnAnyMessage] :
-                    [.dependsOnMailboxSelection, .mayTriggerUntaggedExpunge, .isUIDBased, .changesFlagsOnAnyMessage, .readsFlagsFromAnyMessage]
+                return storeGmailLabels.silent
+                    ? [.dependsOnMailboxSelection, .mayTriggerUntaggedExpunge, .isUIDBased, .changesFlagsOnAnyMessage]
+                    : [
+                        .dependsOnMailboxSelection, .mayTriggerUntaggedExpunge, .isUIDBased, .changesFlagsOnAnyMessage,
+                        .readsFlagsFromAnyMessage,
+                    ]
             }
         case .uidStore(.set(let uids), _, let data):
             switch data {
             case .flags(let storeFlags):
-                return storeFlags.silent ?
-                    [.dependsOnMailboxSelection, .mayTriggerUntaggedExpunge, .isUIDBased, .changesFlags(uids)] :
-                    [.dependsOnMailboxSelection, .mayTriggerUntaggedExpunge, .isUIDBased, .changesFlags(uids), .readsFlags(uids)]
+                return storeFlags.silent
+                    ? [.dependsOnMailboxSelection, .mayTriggerUntaggedExpunge, .isUIDBased, .changesFlags(uids)]
+                    : [
+                        .dependsOnMailboxSelection, .mayTriggerUntaggedExpunge, .isUIDBased, .changesFlags(uids),
+                        .readsFlags(uids),
+                    ]
             case .gmailLabels(let storeGmailLabels):
-                return storeGmailLabels.silent ?
-                    [.dependsOnMailboxSelection, .mayTriggerUntaggedExpunge, .isUIDBased, .changesFlags(uids)] :
-                    [.dependsOnMailboxSelection, .mayTriggerUntaggedExpunge, .isUIDBased, .changesFlags(uids), .readsFlags(uids)]
+                return storeGmailLabels.silent
+                    ? [.dependsOnMailboxSelection, .mayTriggerUntaggedExpunge, .isUIDBased, .changesFlags(uids)]
+                    : [
+                        .dependsOnMailboxSelection, .mayTriggerUntaggedExpunge, .isUIDBased, .changesFlags(uids),
+                        .readsFlags(uids),
+                    ]
             }
 
         case .noop,
-             .check:
+            .check:
             return [.dependsOnMailboxSelection, .mayTriggerUntaggedExpunge]
 
         case .startTLS,
-             .logout,
-             .authenticate,
-             .compress:
+            .logout,
+            .authenticate,
+            .compress:
             return [.barrier]
 
         case .idleStart:
@@ -355,36 +366,36 @@ extension Command {
             return []
 
         case .capability,
-             .create,
-             .delete,
-             .rename,
-             .list,
-             .listIndependent,
-             .lsub,
-             .status,
-             .id,
-             .namespace,
-             .enable,
-             .resetKey:
+            .create,
+            .delete,
+            .rename,
+            .list,
+            .listIndependent,
+            .lsub,
+            .status,
+            .id,
+            .namespace,
+            .enable,
+            .resetKey:
             return [.mayTriggerUntaggedExpunge]
 
         case .generateAuthorizedURL,
-             .urlFetch:
+            .urlFetch:
             return [.mayTriggerUntaggedExpunge, .isUIDBased]
 
         case .subscribe,
-             .unsubscribe:
+            .unsubscribe:
             // TODO: Subscribe vs. LIST / LSUB ?!?
             return [.mayTriggerUntaggedExpunge]
 
         case .getQuota,
-             .getQuotaRoot,
-             .setQuota:
+            .getQuotaRoot,
+            .setQuota:
             // TODO: Quota dependencies?
             return [.mayTriggerUntaggedExpunge]
 
         case .getMetadata,
-             .setMetadata:
+            .setMetadata:
             // TODO: Metadata dependencies?
             return [.mayTriggerUntaggedExpunge]
         case .custom:
@@ -425,22 +436,22 @@ extension FetchAttribute {
         case .flags:
             return true
         case .envelope,
-             .internalDate,
-             .rfc822,
-             .rfc822Header,
-             .rfc822Size,
-             .rfc822Text,
-             .bodyStructure,
-             .bodySection,
-             .uid,
-             .modificationSequence,
-             .modificationSequenceValue,
-             .binary,
-             .binarySize,
-             .gmailMessageID,
-             .gmailThreadID,
-             .gmailLabels,
-             .preview:
+            .internalDate,
+            .rfc822,
+            .rfc822Header,
+            .rfc822Size,
+            .rfc822Text,
+            .bodyStructure,
+            .bodySection,
+            .uid,
+            .modificationSequence,
+            .modificationSequenceValue,
+            .binary,
+            .binarySize,
+            .gmailMessageID,
+            .gmailThreadID,
+            .gmailLabels,
+            .preview:
             return false
         }
     }
@@ -473,46 +484,46 @@ extension SearchKey {
     private var referencesSequenceNumbers: Bool {
         switch self {
         case .all,
-             .answered,
-             .bcc,
-             .before,
-             .body,
-             .cc,
-             .deleted,
-             .flagged,
-             .from,
-             .keyword,
-             .modificationSequence,
-             .new,
-             .old,
-             .on,
-             .recent,
-             .seen,
-             .since,
-             .subject,
-             .text,
-             .to,
-             .unanswered,
-             .undeleted,
-             .unflagged,
-             .unkeyword,
-             .unseen,
-             .draft,
-             .header,
-             .messageSizeLarger,
-             .messageSizeSmaller,
-             .older,
-             .sentBefore,
-             .sentOn,
-             .sentSince,
-             .uid,
-             .uidAfter,
-             .uidBefore,
-             .undraft,
-             .younger:
+            .answered,
+            .bcc,
+            .before,
+            .body,
+            .cc,
+            .deleted,
+            .flagged,
+            .from,
+            .keyword,
+            .modificationSequence,
+            .new,
+            .old,
+            .on,
+            .recent,
+            .seen,
+            .since,
+            .subject,
+            .text,
+            .to,
+            .unanswered,
+            .undeleted,
+            .unflagged,
+            .unkeyword,
+            .unseen,
+            .draft,
+            .header,
+            .messageSizeLarger,
+            .messageSizeSmaller,
+            .older,
+            .sentBefore,
+            .sentOn,
+            .sentSince,
+            .uid,
+            .uidAfter,
+            .uidBefore,
+            .undraft,
+            .younger:
             return false
-        case .filter, // Have to assume yes, since we can't know
-             .sequenceNumbers:
+        case .filter,  // Have to assume yes, since we can't know
+            .sequenceNumbers:
             return true
         case .and(let keys):
             return keys.contains(where: \.referencesSequenceNumbers)
@@ -526,46 +537,46 @@ extension SearchKey {
     private var referencesUIDs: Bool {
         switch self {
         case .all,
-             .answered,
-             .bcc,
-             .before,
-             .body,
-             .cc,
-             .deleted,
-             .flagged,
-             .from,
-             .keyword,
-             .modificationSequence,
-             .new,
-             .old,
-             .on,
-             .recent,
-             .seen,
-             .since,
-             .subject,
-             .text,
-             .to,
-             .unanswered,
-             .undeleted,
-             .unflagged,
-             .unkeyword,
-             .unseen,
-             .draft,
-             .header,
-             .messageSizeLarger,
-             .messageSizeSmaller,
-             .older,
-             .sentBefore,
-             .sentOn,
-             .sentSince,
-             .sequenceNumbers,
-             .undraft,
-             .younger:
+            .answered,
+            .bcc,
+            .before,
+            .body,
+            .cc,
+            .deleted,
+            .flagged,
+            .from,
+            .keyword,
+            .modificationSequence,
+            .new,
+            .old,
+            .on,
+            .recent,
+            .seen,
+            .since,
+            .subject,
+            .text,
+            .to,
+            .unanswered,
+            .undeleted,
+            .unflagged,
+            .unkeyword,
+            .unseen,
+            .draft,
+            .header,
+            .messageSizeLarger,
+            .messageSizeSmaller,
+            .older,
+            .sentBefore,
+            .sentOn,
+            .sentSince,
+            .sequenceNumbers,
+            .undraft,
+            .younger:
             return false
-        case .filter, // Have to assume yes, since we can't know
-             .uid,
-             .uidAfter,
-             .uidBefore:
+        case .filter,  // Have to assume yes, since we can't know
+            .uid,
+            .uidAfter,
+            .uidBefore:
             return true
         case .and(let keys):
             return keys.contains(where: \.referencesUIDs)
@@ -579,45 +590,45 @@ extension SearchKey {
     var referencesFlags: Bool {
         switch self {
         case .all,
-             .bcc,
-             .before,
-             .body,
-             .cc,
-             .from,
-             .sequenceNumbers,
-             .new,
-             .old,
-             .on,
-             .recent,
-             .since,
-             .subject,
-             .text,
-             .to,
-             .header,
-             .messageSizeLarger,
-             .messageSizeSmaller,
-             .older,
-             .sentBefore,
-             .sentOn,
-             .sentSince,
-             .uid,
-             .uidAfter,
-             .uidBefore,
-             .younger:
+            .bcc,
+            .before,
+            .body,
+            .cc,
+            .from,
+            .sequenceNumbers,
+            .new,
+            .old,
+            .on,
+            .recent,
+            .since,
+            .subject,
+            .text,
+            .to,
+            .header,
+            .messageSizeLarger,
+            .messageSizeSmaller,
+            .older,
+            .sentBefore,
+            .sentOn,
+            .sentSince,
+            .uid,
+            .uidAfter,
+            .uidBefore,
+            .younger:
             return false
         case .answered,
-             .deleted,
-             .filter, // Have to assume yes, since we can't know
-             .flagged,
-             .keyword,
-             .unanswered,
-             .undeleted,
-             .unflagged,
-             .unkeyword,
-             .seen,
-             .unseen,
-             .draft,
-             .undraft:
+            .deleted,
+            .filter,  // Have to assume yes, since we can't know
+            .flagged,
+            .keyword,
+            .unanswered,
+            .undeleted,
+            .unflagged,
+            .unkeyword,
+            .seen,
+            .unseen,
+            .draft,
+            .undraft:
             return true
         case .and(let keys):
             return keys.contains(where: \.referencesFlags)

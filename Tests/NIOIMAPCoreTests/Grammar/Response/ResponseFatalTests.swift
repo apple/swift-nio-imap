@@ -23,7 +23,7 @@ class ResponseFatalTests: EncodeTestClass {}
 extension ResponseFatalTests {
     func testEncode() {
         let inputs: [(ResponseText, String, UInt)] = [
-            (.init(code: .alert, text: "error"), "* BYE [ALERT] error\r\n", #line),
+            (.init(code: .alert, text: "error"), "* BYE [ALERT] error\r\n", #line)
         ]
 
         for (test, expectedString, line) in inputs {

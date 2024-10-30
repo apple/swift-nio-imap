@@ -38,8 +38,6 @@ extension EncodeBuffer {
     /// - parameter `message`: The `AppendMessage` to write.
     /// - returns: The number of bytes written.
     @discardableResult mutating func writeAppendMessage(_ message: AppendMessage) -> Int {
-        self.writeAppendOptions(message.options) +
-            self.writeSpace() +
-            self.writeAppendData(message.data)
+        self.writeAppendOptions(message.options) + self.writeSpace() + self.writeAppendData(message.data)
     }
 }

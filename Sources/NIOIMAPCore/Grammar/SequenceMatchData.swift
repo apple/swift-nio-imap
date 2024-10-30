@@ -37,10 +37,7 @@ public struct SequenceMatchData: Hashable, Sendable {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeSequenceMatchData(_ data: SequenceMatchData) -> Int {
-        self.writeString("(") +
-            self.writeLastCommandSet(data.knownSequenceSet) +
-            self.writeSpace() +
-            self.writeLastCommandSet(data.knownUidSet) +
-            self.writeString(")")
+        self.writeString("(") + self.writeLastCommandSet(data.knownSequenceSet) + self.writeSpace()
+            + self.writeLastCommandSet(data.knownUidSet) + self.writeString(")")
     }
 }

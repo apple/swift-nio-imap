@@ -23,14 +23,14 @@ class ChangedSinceModifier_Tests: EncodeTestClass {}
 extension ChangedSinceModifier_Tests {
     func testEncode() {
         let inputs: [(ChangedSinceModifier, String, UInt)] = [
-            (.init(modificationSequence: 3), "CHANGEDSINCE 3", #line),
+            (.init(modificationSequence: 3), "CHANGEDSINCE 3", #line)
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeChangedSinceModifier($0) })
     }
 
     func testEncode_unchanged() {
         let inputs: [(UnchangedSinceModifier, String, UInt)] = [
-            (.init(modificationSequence: 3), "UNCHANGEDSINCE 3", #line),
+            (.init(modificationSequence: 3), "UNCHANGEDSINCE 3", #line)
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeUnchangedSinceModifier($0) })
     }

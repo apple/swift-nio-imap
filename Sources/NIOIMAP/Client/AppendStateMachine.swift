@@ -57,7 +57,8 @@ extension ClientStateMachine {
 
         var hasCatenatedAtLeastOneObject: Bool {
             switch self.state {
-            case .started, .waitingForAppendContinuationRequest, .sendingMessageBytes, .waitingForCatenateContinuationRequest, .sendingCatenateBytes, .waitingForTaggedResponse, .finished:
+            case .started, .waitingForAppendContinuationRequest, .sendingMessageBytes,
+                .waitingForCatenateContinuationRequest, .sendingCatenateBytes, .waitingForTaggedResponse, .finished:
                 return false
             case .catenating(sentFirstObject: let sentFirstObject):
                 return sentFirstObject
@@ -69,7 +70,7 @@ extension ClientStateMachine {
         mutating func receiveResponse(_ response: Response) throws -> Bool {
             switch self.state {
             case .started, .waitingForAppendContinuationRequest, .sendingMessageBytes, .catenating,
-                 .waitingForCatenateContinuationRequest, .sendingCatenateBytes, .finished:
+                .waitingForCatenateContinuationRequest, .sendingCatenateBytes, .finished:
                 throw UnexpectedContinuationRequest()
             case .waitingForTaggedResponse:
                 break
@@ -87,7 +88,7 @@ extension ClientStateMachine {
         mutating func receiveContinuationRequest(_: ContinuationRequest) throws {
             switch self.state {
             case .started, .sendingMessageBytes, .catenating,
-                 .sendingCatenateBytes, .finished, .waitingForTaggedResponse:
+                .sendingCatenateBytes, .finished, .waitingForTaggedResponse:
                 throw UnexpectedContinuationRequest()
             case .waitingForAppendContinuationRequest:
                 self.state = .sendingMessageBytes
@@ -108,7 +109,8 @@ extension ClientStateMachine {
             }
 
             switch self.state {
-            case .waitingForTaggedResponse, .waitingForAppendContinuationRequest, .waitingForCatenateContinuationRequest, .finished:
+            case .waitingForTaggedResponse, .waitingForAppendContinuationRequest,
+                .waitingForCatenateContinuationRequest, .finished:
                 preconditionFailure("Invalid state: \(self.state)")
             case .started:
                 return self.sendCommand_startedState(appendCommand)
@@ -157,14 +159,15 @@ extension ClientStateMachine.Append {
         case .endMessage:
             self.state = .started(canFinish: true)
         case .messageBytes:
-            self.state = .sendingMessageBytes // continue sending bytes until we're told to stop
+            self.state = .sendingMessageBytes  // continue sending bytes until we're told to stop
         }
     }
 
     /// `true` if a continuation is required, otherwise `false`
     private mutating func sendCommand_catenatingState(_ command: AppendCommand) -> Bool {
         switch command {
-        case .start, .beginMessage, .beginCatenate, .messageBytes, .endMessage, .finish, .catenateData(.bytes), .catenateData(.end):
+        case .start, .beginMessage, .beginCatenate, .messageBytes, .endMessage, .finish, .catenateData(.bytes),
+            .catenateData(.end):
             preconditionFailure("Invalid command for state: \(self.state)")
         case .catenateURL:
             self.state = .catenating(sentFirstObject: true)
@@ -181,12 +184,13 @@ extension ClientStateMachine.Append {
     /// `true` if a continuation is required, otherwise `false`
     private mutating func sendCommand_sendingCatenateBytesState(_ command: AppendCommand) {
         switch command {
-        case .start, .beginMessage, .beginCatenate, .endMessage, .catenateURL, .messageBytes, .finish, .endCatenate, .catenateData(.begin):
+        case .start, .beginMessage, .beginCatenate, .endMessage, .catenateURL, .messageBytes, .finish, .endCatenate,
+            .catenateData(.begin):
             preconditionFailure("Invalid command for state: \(self.state)")
         case .catenateData(.end):
             self.state = .catenating(sentFirstObject: true)
         case .catenateData(.bytes):
-            self.state = .sendingCatenateBytes // continue sending bytes until we're told to stop
+            self.state = .sendingCatenateBytes  // continue sending bytes until we're told to stop
         }
     }
 }

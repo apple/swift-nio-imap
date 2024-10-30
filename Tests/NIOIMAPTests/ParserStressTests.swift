@@ -59,7 +59,7 @@ final class ParserStressTests: XCTestCase {
     func testArbitraryNumberOfFlags() {
         var longBuffer = self.channel.allocator.buffer(capacity: 90_000)
         longBuffer.writeString("STORE 1, ")
-        for i in 2 ..< 20_000 {
+        for i in 2..<20_000 {
             longBuffer.writeString("\(i), ")
         }
 
@@ -72,11 +72,11 @@ final class ParserStressTests: XCTestCase {
     func testPreventInfiniteRecursion() {
         var longBuffer = self.channel.allocator.buffer(capacity: 80_000)
         longBuffer.writeString("tag SEARCH (")
-        for _ in 0 ..< 3_000 {
+        for _ in 0..<3_000 {
             longBuffer.writeString(#"ALL ANSWERED BCC CC ("#)
         }
-        for _ in 0 ..< 3_000 {
-            longBuffer.writeString(")") // close the recursive brackets
+        for _ in 0..<3_000 {
+            longBuffer.writeString(")")  // close the recursive brackets
         }
         longBuffer.writeString(")\r\n")
 
@@ -100,15 +100,17 @@ final class ParserStressTests: XCTestCase {
 
     func testManyShortCommands() {
         var longBuffer = self.channel.allocator.buffer(capacity: 80_000)
-        for _ in 1 ... 1_000 {
+        for _ in 1...1_000 {
             longBuffer.writeString("1 NOOP\r\n")
         }
         XCTAssertNoThrow(try self.channel.writeInbound(longBuffer))
-        for _ in 1 ... 1_000 {
-            XCTAssertNoThrow(XCTAssertEqual(
-                CommandStreamPart.tagged(.init(tag: "1", command: .noop)),
-                try self.channel.readInbound(as: CommandStreamPart.self)
-            ))
+        for _ in 1...1_000 {
+            XCTAssertNoThrow(
+                XCTAssertEqual(
+                    CommandStreamPart.tagged(.init(tag: "1", command: .noop)),
+                    try self.channel.readInbound(as: CommandStreamPart.self)
+                )
+            )
         }
     }
 }

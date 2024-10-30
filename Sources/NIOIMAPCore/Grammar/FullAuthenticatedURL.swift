@@ -35,7 +35,6 @@ public struct FullAuthenticatedURL: Hashable, Sendable {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeAuthIMAPURLFull(_ data: FullAuthenticatedURL) -> Int {
-        self.writeAuthenticatedURL(data.networkMessagePath) +
-            self.writeIAuthenticatedURL(data.authenticatedURL)
+        self.writeAuthenticatedURL(data.networkMessagePath) + self.writeIAuthenticatedURL(data.authenticatedURL)
     }
 }

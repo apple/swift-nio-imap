@@ -34,7 +34,10 @@ extension URLFetchType_Tests {
                 #line
             ),
             (
-                .sectionPartial(section: .init(encodedSection: .init(section: "section")), partial: .init(range: .init(offset: 1, length: 2))),
+                .sectionPartial(
+                    section: .init(encodedSection: .init(section: "section")),
+                    partial: .init(range: .init(offset: 1, length: 2))
+                ),
                 ";SECTION=section/;PARTIAL=1.2",
                 #line
             ),
@@ -44,37 +47,69 @@ extension URLFetchType_Tests {
                 #line
             ),
             (
-                .uidSectionPartial(uid: .init(uid: 123), section: .init(encodedSection: .init(section: "test")), partial: nil),
+                .uidSectionPartial(
+                    uid: .init(uid: 123),
+                    section: .init(encodedSection: .init(section: "test")),
+                    partial: nil
+                ),
                 ";UID=123/;SECTION=test",
                 #line
             ),
             (
-                .uidSectionPartial(uid: .init(uid: 123), section: nil, partial: .init(range: .init(offset: 1, length: 2))),
+                .uidSectionPartial(
+                    uid: .init(uid: 123),
+                    section: nil,
+                    partial: .init(range: .init(offset: 1, length: 2))
+                ),
                 ";UID=123/;PARTIAL=1.2",
                 #line
             ),
             (
-                .uidSectionPartial(uid: .init(uid: 123), section: .init(encodedSection: .init(section: "test")), partial: .init(range: .init(offset: 1, length: 2))),
+                .uidSectionPartial(
+                    uid: .init(uid: 123),
+                    section: .init(encodedSection: .init(section: "test")),
+                    partial: .init(range: .init(offset: 1, length: 2))
+                ),
                 ";UID=123/;SECTION=test/;PARTIAL=1.2",
                 #line
             ),
             (
-                .refUidSectionPartial(ref: .init(encodeMailbox: .init(mailbox: "test")), uid: .init(uid: 123), section: nil, partial: nil),
+                .refUidSectionPartial(
+                    ref: .init(encodeMailbox: .init(mailbox: "test")),
+                    uid: .init(uid: 123),
+                    section: nil,
+                    partial: nil
+                ),
                 "test;UID=123",
                 #line
             ),
             (
-                .refUidSectionPartial(ref: .init(encodeMailbox: .init(mailbox: "test")), uid: .init(uid: 123), section: .init(encodedSection: .init(section: "box")), partial: nil),
+                .refUidSectionPartial(
+                    ref: .init(encodeMailbox: .init(mailbox: "test")),
+                    uid: .init(uid: 123),
+                    section: .init(encodedSection: .init(section: "box")),
+                    partial: nil
+                ),
                 "test;UID=123/;SECTION=box",
                 #line
             ),
             (
-                .refUidSectionPartial(ref: .init(encodeMailbox: .init(mailbox: "test")), uid: .init(uid: 123), section: nil, partial: .init(range: .init(offset: 1, length: 2))),
+                .refUidSectionPartial(
+                    ref: .init(encodeMailbox: .init(mailbox: "test")),
+                    uid: .init(uid: 123),
+                    section: nil,
+                    partial: .init(range: .init(offset: 1, length: 2))
+                ),
                 "test;UID=123/;PARTIAL=1.2",
                 #line
             ),
             (
-                .refUidSectionPartial(ref: .init(encodeMailbox: .init(mailbox: "test")), uid: .init(uid: 123), section: .init(encodedSection: .init(section: "box")), partial: .init(range: .init(offset: 1, length: 2))),
+                .refUidSectionPartial(
+                    ref: .init(encodeMailbox: .init(mailbox: "test")),
+                    uid: .init(uid: 123),
+                    section: .init(encodedSection: .init(section: "box")),
+                    partial: .init(range: .init(offset: 1, length: 2))
+                ),
                 "test;UID=123/;SECTION=box/;PARTIAL=1.2",
                 #line
             ),

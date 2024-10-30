@@ -46,9 +46,12 @@ extension ResponseTextCodeTests {
             (.metadataNoPrivate, "METADATA NOPRIVATE", #line),
             (.metadataTooMany, "METADATA TOOMANY", #line),
             (.modified(.range(MessageIdentifierRange<UnknownMessageIdentifier>(1))), "MODIFIED 1", #line),
-            (.modified(MessageIdentifierSetNonEmpty<SequenceNumber>(range: 23 ... 873)), "MODIFIED 23:873", #line),
+            (.modified(MessageIdentifierSetNonEmpty<SequenceNumber>(range: 23...873)), "MODIFIED 23:873", #line),
             (.modified(MessageIdentifierSetNonEmpty<UID>(set: [45, 77])!), "MODIFIED 45,77", #line),
-            (.namespace(.init(userNamespace: [], otherUserNamespace: [], sharedNamespace: [])), "NAMESPACE NIL NIL NIL", #line),
+            (
+                .namespace(.init(userNamespace: [], otherUserNamespace: [], sharedNamespace: [])),
+                "NAMESPACE NIL NIL NIL", #line
+            ),
             (.noModificationSequence, "NOMODSEQ", #line),
             (.noPermission, "NOPERM", #line),
             (.nonExistent, "NONEXISTENT", #line),
@@ -72,7 +75,11 @@ extension ResponseTextCodeTests {
             (.uidValidity(234), "UIDVALIDITY 234", #line),
             (.unavailable, "UNAVAILABLE", #line),
             (.unseen(345), "UNSEEN 345", #line),
-            (.urlMechanisms([.init(mechanism: .init("m1"), base64: "b1"), .init(mechanism: .init("m2"), base64: "b2")]), "URLMECH INTERNAL m1=b1 m2=b2", #line),
+            (
+                .urlMechanisms([
+                    .init(mechanism: .init("m1"), base64: "b1"), .init(mechanism: .init("m2"), base64: "b2"),
+                ]), "URLMECH INTERNAL m1=b1 m2=b2", #line
+            ),
             (.urlMechanisms([.init(mechanism: .internal, base64: "test")]), "URLMECH INTERNAL INTERNAL=test", #line),
             (.urlMechanisms([.init(mechanism: .internal, base64: nil)]), "URLMECH INTERNAL INTERNAL", #line),
             (.urlMechanisms([]), "URLMECH INTERNAL", #line),

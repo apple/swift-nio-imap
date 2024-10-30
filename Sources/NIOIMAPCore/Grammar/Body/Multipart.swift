@@ -53,7 +53,10 @@ extension BodyStructure.Multipart {
         /// Creates a new `Multipart.Extension`.
         /// - parameter parameters : An array of *key/value* pairs.
         /// - parameter dispositionAndLanguage: A disposition paired to an array of languages.
-        public init(parameters: OrderedDictionary<String, String>, dispositionAndLanguage: BodyStructure.DispositionAndLanguage?) {
+        public init(
+            parameters: OrderedDictionary<String, String>,
+            dispositionAndLanguage: BodyStructure.DispositionAndLanguage?
+        ) {
             self.parameters = parameters
             self.dispositionAndLanguage = dispositionAndLanguage
         }
@@ -66,18 +69,15 @@ extension EncodeBuffer {
     @discardableResult mutating func writeBodyMultipart(_ part: BodyStructure.Multipart) -> Int {
         part.parts.reduce(into: 0) { (result, body) in
             result += self.writeBody(body)
-        } +
-            self.writeSpace() +
-            self.writeMediaSubtype(part.mediaSubtype) +
-            self.writeIfExists(part.extension) { (ext) -> Int in
-                self.writeSpace() +
-                    self.writeBodyExtensionMultipart(ext)
+        } + self.writeSpace() + self.writeMediaSubtype(part.mediaSubtype)
+            + self.writeIfExists(part.extension) { (ext) -> Int in
+                self.writeSpace() + self.writeBodyExtensionMultipart(ext)
             }
     }
 
     @discardableResult mutating func writeBodyExtensionMultipart(_ ext: BodyStructure.Multipart.Extension) -> Int {
-        self.writeBodyParameterPairs(ext.parameters) +
-            self.writeIfExists(ext.dispositionAndLanguage) { (dspLanguage) -> Int in
+        self.writeBodyParameterPairs(ext.parameters)
+            + self.writeIfExists(ext.dispositionAndLanguage) { (dspLanguage) -> Int in
                 self.writeBodyDispositionAndLanguage(dspLanguage)
             }
     }

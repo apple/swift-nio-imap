@@ -22,21 +22,74 @@ class MessageAttributesTests: EncodeTestClass {}
 
 extension MessageAttributesTests {
     func testEncode() throws {
-        let components = ServerMessageDate.Components(year: 1994, month: 6, day: 25, hour: 1, minute: 2, second: 3, timeZoneMinutes: 0)!
+        let components = ServerMessageDate.Components(
+            year: 1994,
+            month: 6,
+            day: 25,
+            hour: 1,
+            minute: 2,
+            second: 3,
+            timeZoneMinutes: 0
+        )!
         let date = ServerMessageDate(components)
 
         let inputs: [(MessageAttribute, String, UInt)] = [
             (.rfc822Size(123), "RFC822.SIZE 123", #line),
             (.uid(123), "UID 123", #line),
-            (.envelope(Envelope(date: "date", subject: "subject", from: [.singleAddress(.init(personName: "name", sourceRoot: "adl", mailbox: "mailbox", host: "host"))], sender: [.singleAddress(.init(personName: "name", sourceRoot: "adl", mailbox: "mailbox", host: "host"))], reply: [.singleAddress(.init(personName: "name", sourceRoot: "adl", mailbox: "mailbox", host: "host"))], to: [.singleAddress(.init(personName: "name", sourceRoot: "adl", mailbox: "mailbox", host: "host"))], cc: [.singleAddress(.init(personName: "name", sourceRoot: "adl", mailbox: "mailbox", host: "host"))], bcc: [.singleAddress(.init(personName: "name", sourceRoot: "adl", mailbox: "mailbox", host: "host"))], inReplyTo: "replyto", messageID: "abc123")), "ENVELOPE (\"date\" \"subject\" ((\"name\" \"adl\" \"mailbox\" \"host\")) ((\"name\" \"adl\" \"mailbox\" \"host\")) ((\"name\" \"adl\" \"mailbox\" \"host\")) ((\"name\" \"adl\" \"mailbox\" \"host\")) ((\"name\" \"adl\" \"mailbox\" \"host\")) ((\"name\" \"adl\" \"mailbox\" \"host\")) \"replyto\" \"abc123\")", #line),
+            (
+                .envelope(
+                    Envelope(
+                        date: "date",
+                        subject: "subject",
+                        from: [
+                            .singleAddress(
+                                .init(personName: "name", sourceRoot: "adl", mailbox: "mailbox", host: "host")
+                            )
+                        ],
+                        sender: [
+                            .singleAddress(
+                                .init(personName: "name", sourceRoot: "adl", mailbox: "mailbox", host: "host")
+                            )
+                        ],
+                        reply: [
+                            .singleAddress(
+                                .init(personName: "name", sourceRoot: "adl", mailbox: "mailbox", host: "host")
+                            )
+                        ],
+                        to: [
+                            .singleAddress(
+                                .init(personName: "name", sourceRoot: "adl", mailbox: "mailbox", host: "host")
+                            )
+                        ],
+                        cc: [
+                            .singleAddress(
+                                .init(personName: "name", sourceRoot: "adl", mailbox: "mailbox", host: "host")
+                            )
+                        ],
+                        bcc: [
+                            .singleAddress(
+                                .init(personName: "name", sourceRoot: "adl", mailbox: "mailbox", host: "host")
+                            )
+                        ],
+                        inReplyTo: "replyto",
+                        messageID: "abc123"
+                    )
+                ),
+                "ENVELOPE (\"date\" \"subject\" ((\"name\" \"adl\" \"mailbox\" \"host\")) ((\"name\" \"adl\" \"mailbox\" \"host\")) ((\"name\" \"adl\" \"mailbox\" \"host\")) ((\"name\" \"adl\" \"mailbox\" \"host\")) ((\"name\" \"adl\" \"mailbox\" \"host\")) ((\"name\" \"adl\" \"mailbox\" \"host\")) \"replyto\" \"abc123\")",
+                #line
+            ),
             (.internalDate(date), #"INTERNALDATE "25-Jun-1994 01:02:03 +0000""#, #line),
             (.binarySize(section: [2], size: 3), "BINARY.SIZE[2] 3", #line),
             (.flags([.draft]), "FLAGS (\\Draft)", #line),
             (.flags([.flagged, .draft]), "FLAGS (\\Flagged \\Draft)", #line),
             (.fetchModificationResponse(.init(modifierSequenceValue: 3)), "MODSEQ (3)", #line),
-            (.gmailMessageID(1278455344230334865), "X-GM-MSGID 1278455344230334865", #line),
-            (.gmailThreadID(1266894439832287888), "X-GM-THRID 1266894439832287888", #line),
-            (.gmailLabels([GmailLabel("\\Inbox"), GmailLabel("\\Sent"), GmailLabel("Important"), GmailLabel("Muy Importante")]), "X-GM-LABELS (\\Inbox \\Sent \"Important\" \"Muy Importante\")", #line),
+            (.gmailMessageID(1_278_455_344_230_334_865), "X-GM-MSGID 1278455344230334865", #line),
+            (.gmailThreadID(1_266_894_439_832_287_888), "X-GM-THRID 1266894439832287888", #line),
+            (
+                .gmailLabels([
+                    GmailLabel("\\Inbox"), GmailLabel("\\Sent"), GmailLabel("Important"), GmailLabel("Muy Importante"),
+                ]), "X-GM-LABELS (\\Inbox \\Sent \"Important\" \"Muy Importante\")", #line
+            ),
             (.preview(.init("Lorem ipsum dolor sit amet")), "PREVIEW \"Lorem ipsum dolor sit amet\"", #line),
             (.preview(.init(#"A\B"#)), "PREVIEW {3}\r\nA\\B", #line),
         ]
@@ -72,7 +125,11 @@ extension MessageAttributesTests {
         let inputs: [(MessageAttribute, String, UInt)] = [
             (.rfc822Size(123), "RFC822.SIZE 123", #line),
             (.flags([.draft]), "FLAGS (\\Draft)", #line),
-            (.gmailLabels([GmailLabel("\\Inbox"), GmailLabel("\\Sent"), GmailLabel("Important"), GmailLabel("Muy Importante")]), "X-GM-LABELS (\\Inbox \\Sent \"Important\" \"Muy Importante\")", #line),
+            (
+                .gmailLabels([
+                    GmailLabel("\\Inbox"), GmailLabel("\\Sent"), GmailLabel("Important"), GmailLabel("Muy Importante"),
+                ]), "X-GM-LABELS (\\Inbox \\Sent \"Important\" \"Muy Importante\")", #line
+            ),
         ]
         inputs.forEach { (part, expected, line) in
             XCTAssertEqual("\(part)", expected, line: line)

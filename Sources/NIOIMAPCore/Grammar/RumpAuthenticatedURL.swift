@@ -35,7 +35,6 @@ public struct RumpAuthenticatedURL: Hashable, Sendable {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeAuthIMAPURLRump(_ data: RumpAuthenticatedURL) -> Int {
-        self.writeAuthenticatedURL(data.authenticatedURL) +
-            self.writeAuthenticatedURLRump(data.authenticatedURLRump)
+        self.writeAuthenticatedURL(data.authenticatedURL) + self.writeAuthenticatedURLRump(data.authenticatedURLRump)
     }
 }

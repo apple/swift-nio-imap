@@ -34,7 +34,11 @@ public struct AppendOptions: Hashable, Sendable {
     /// - parameter flagList: Flags that will be added to the message. Defaults to `[]`.
     /// - parameter internalDate: An optional date to be associated with the message, typically representing the date of delivery. Defaults to `nil`.
     /// - parameter extensions: Any additional pieces of information to be associated with the message. Implemented as a "catch-all" to support future extensions. Defaults to `[:]`.
-    public init(flagList: [Flag] = [], internalDate: ServerMessageDate? = nil, extensions: OrderedDictionary<String, ParameterValue> = [:]) {
+    public init(
+        flagList: [Flag] = [],
+        internalDate: ServerMessageDate? = nil,
+        extensions: OrderedDictionary<String, ParameterValue> = [:]
+    ) {
         self.flagList = flagList
         self.internalDate = internalDate
         self.extensions = extensions
@@ -47,12 +51,11 @@ extension EncodeBuffer {
     @discardableResult mutating func writeAppendOptions(_ options: AppendOptions) -> Int {
         self.write(if: options.flagList.count >= 1) {
             self.writeSpace() + self.writeFlags(options.flagList)
-        } +
-            self.writeIfExists(options.internalDate) { (internalDate) -> Int in
-                self.writeSpace() +
-                    self.writeInternalDate(internalDate)
-            } +
-            self.writeOrderedDictionary(options.extensions, prefix: " ", parenthesis: false) { (ext, self) -> Int in
+        }
+            + self.writeIfExists(options.internalDate) { (internalDate) -> Int in
+                self.writeSpace() + self.writeInternalDate(internalDate)
+            }
+            + self.writeOrderedDictionary(options.extensions, prefix: " ", parenthesis: false) { (ext, self) -> Int in
                 self.writeTaggedExtension(ext)
             }
     }

@@ -150,47 +150,47 @@ extension SearchKey {
     var usesString: Bool {
         switch self {
         case .all,
-             .answered,
-             .deleted,
-             .flagged,
-             .new,
-             .old,
-             .recent,
-             .seen,
-             .unanswered,
-             .undeleted,
-             .unflagged,
-             .unseen,
-             .draft,
-             .undraft,
-             .before,
-             .keyword,
-             .on,
-             .since,
-             .unkeyword,
-             .messageSizeLarger,
-             .sentBefore,
-             .sentOn,
-             .sentSince,
-             .messageSizeSmaller,
-             .uid,
-             .uidAfter,
-             .uidBefore,
-             .sequenceNumbers,
-             .older,
-             .younger,
-             .modificationSequence,
-             .filter:
+            .answered,
+            .deleted,
+            .flagged,
+            .new,
+            .old,
+            .recent,
+            .seen,
+            .unanswered,
+            .undeleted,
+            .unflagged,
+            .unseen,
+            .draft,
+            .undraft,
+            .before,
+            .keyword,
+            .on,
+            .since,
+            .unkeyword,
+            .messageSizeLarger,
+            .sentBefore,
+            .sentOn,
+            .sentSince,
+            .messageSizeSmaller,
+            .uid,
+            .uidAfter,
+            .uidBefore,
+            .sequenceNumbers,
+            .older,
+            .younger,
+            .modificationSequence,
+            .filter:
             return false
 
         case .bcc,
-             .body,
-             .cc,
-             .from,
-             .subject,
-             .text,
-             .to,
-             .header:
+            .body,
+            .cc,
+            .from,
+            .subject,
+            .text,
+            .to,
+            .header:
             return true
 
         case .not(let key):
@@ -207,45 +207,45 @@ extension SearchKey {
     fileprivate var count: Int {
         switch self {
         case .all,
-             .answered,
-             .bcc,
-             .before,
-             .body,
-             .cc,
-             .deleted,
-             .flagged,
-             .from,
-             .keyword,
-             .new,
-             .old,
-             .on,
-             .recent,
-             .seen,
-             .since,
-             .subject,
-             .text,
-             .to,
-             .unanswered,
-             .undeleted,
-             .unflagged,
-             .unkeyword,
-             .unseen,
-             .draft,
-             .header,
-             .messageSizeLarger,
-             .sentBefore,
-             .sentOn,
-             .sentSince,
-             .messageSizeSmaller,
-             .uid,
-             .uidAfter,
-             .uidBefore,
-             .undraft,
-             .sequenceNumbers,
-             .older,
-             .younger,
-             .modificationSequence,
-             .filter:
+            .answered,
+            .bcc,
+            .before,
+            .body,
+            .cc,
+            .deleted,
+            .flagged,
+            .from,
+            .keyword,
+            .new,
+            .old,
+            .on,
+            .recent,
+            .seen,
+            .since,
+            .subject,
+            .text,
+            .to,
+            .unanswered,
+            .undeleted,
+            .unflagged,
+            .unkeyword,
+            .unseen,
+            .draft,
+            .header,
+            .messageSizeLarger,
+            .sentBefore,
+            .sentOn,
+            .sentSince,
+            .messageSizeSmaller,
+            .uid,
+            .uidAfter,
+            .uidBefore,
+            .undraft,
+            .sequenceNumbers,
+            .older,
+            .younger,
+            .modificationSequence,
+            .filter:
             return 1
         case .not(let inner):
             return 1 + inner.count
@@ -260,15 +260,13 @@ extension SearchKey {
 // MARK: - IMAP
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeSearchKey(_ key: SearchKey, encloseInParenthesisIfNeeded: Bool = false) -> Int {
+    @discardableResult mutating func writeSearchKey(_ key: SearchKey, encloseInParenthesisIfNeeded: Bool = false) -> Int
+    {
         let encloseInParenthesis = encloseInParenthesisIfNeeded && key.count > 1
-        if encloseInParenthesis {
-            return writeString("(") +
-                _writeSearchKey(key) +
-                writeString(")")
-        } else {
+        guard encloseInParenthesis else {
             return _writeSearchKey(key)
         }
+        return writeString("(") + _writeSearchKey(key) + writeString(")")
     }
 
     private mutating func _writeSearchKey(_ key: SearchKey) -> Int {
@@ -303,103 +301,83 @@ extension EncodeBuffer {
             return self.writeString("UNDRAFT")
         case .bcc(let str):
             return
-                self.writeString("BCC ") +
-                self.writeIMAPString(str)
+                self.writeString("BCC ") + self.writeIMAPString(str)
 
         case .before(let date):
             return
-                self.writeString("BEFORE ") +
-                self.writeDate(date)
+                self.writeString("BEFORE ") + self.writeDate(date)
 
         case .body(let str):
             return
-                self.writeString("BODY ") +
-                self.writeIMAPString(str)
+                self.writeString("BODY ") + self.writeIMAPString(str)
 
         case .cc(let str):
             return
-                self.writeString("CC ") +
-                self.writeIMAPString(str)
+                self.writeString("CC ") + self.writeIMAPString(str)
 
         case .from(let str):
             return
-                self.writeString("FROM ") +
-                self.writeIMAPString(str)
+                self.writeString("FROM ") + self.writeIMAPString(str)
 
         case .keyword(let flag):
             return
-                self.writeString("KEYWORD ") +
-                self.writeFlagKeyword(flag)
+                self.writeString("KEYWORD ") + self.writeFlagKeyword(flag)
 
         case .on(let date):
             return
-                self.writeString("ON ") +
-                self.writeDate(date)
+                self.writeString("ON ") + self.writeDate(date)
 
         case .since(let date):
             return
-                self.writeString("SINCE ") +
-                self.writeDate(date)
+                self.writeString("SINCE ") + self.writeDate(date)
 
         case .subject(let str):
             return
-                self.writeString("SUBJECT ") +
-                self.writeIMAPString(str)
+                self.writeString("SUBJECT ") + self.writeIMAPString(str)
 
         case .text(let str):
             return
-                self.writeString("TEXT ") +
-                self.writeIMAPString(str)
+                self.writeString("TEXT ") + self.writeIMAPString(str)
 
         case .to(let str):
             return
-                self.writeString("TO ") +
-                self.writeIMAPString(str)
+                self.writeString("TO ") + self.writeIMAPString(str)
 
         case .unkeyword(let keyword):
             return
-                self.writeString("UNKEYWORD ") +
-                self.writeFlagKeyword(keyword)
+                self.writeString("UNKEYWORD ") + self.writeFlagKeyword(keyword)
 
         case .header(let field, let value):
             return
-                self.writeString("HEADER ") +
-                self.writeIMAPString(field) +
-                self.writeSpace() +
-                self.writeIMAPString(value)
+                self.writeString("HEADER ") + self.writeIMAPString(field) + self.writeSpace()
+                + self.writeIMAPString(value)
 
         case .messageSizeLarger(let n):
             return self.writeString("LARGER \(n)")
 
         case .not(let key):
             return
-                self.writeString("NOT ") +
-                self.writeSearchKey(key, encloseInParenthesisIfNeeded: true)
+                self.writeString("NOT ") + self.writeSearchKey(key, encloseInParenthesisIfNeeded: true)
 
         case .or(let k1, let k2):
             return
-                self.writeString("OR ") +
-                self.writeSearchKey(k1, encloseInParenthesisIfNeeded: true) +
-                self.writeSpace() +
-                self.writeSearchKey(k2, encloseInParenthesisIfNeeded: true)
+                self.writeString("OR ") + self.writeSearchKey(k1, encloseInParenthesisIfNeeded: true)
+                + self.writeSpace() + self.writeSearchKey(k2, encloseInParenthesisIfNeeded: true)
 
         case .messageSizeSmaller(let n):
             return self.writeString("SMALLER \(n)")
 
         case .uid(let set):
             return
-                self.writeString("UID ") +
-                self.writeLastCommandSet(set)
+                self.writeString("UID ") + self.writeLastCommandSet(set)
 
         case .uidAfter(let uid):
             return
-                self.writeString("UIDAFTER ") +
-                self.writeLastCommandMessageID(uid)
+                self.writeString("UIDAFTER ") + self.writeLastCommandMessageID(uid)
 
         case .uidBefore(let uid):
             return
-                self.writeString("UIDBEFORE ") +
-                self.writeLastCommandMessageID(uid)
+                self.writeString("UIDBEFORE ") + self.writeLastCommandMessageID(uid)
 
         case .sequenceNumbers(let set):
             return self.writeLastCommandSet(set)
@@ -413,9 +391,8 @@ extension EncodeBuffer {
                 return keys.enumerated().reduce(0) { (size, row) in
                     let (i, key) = row
                     return
-                        size +
-                        self.writeSearchKey(key, encloseInParenthesisIfNeeded: true) +
-                        self.write(if: i < keys.count - 1) { () -> Int in
+                        size + self.writeSearchKey(key, encloseInParenthesisIfNeeded: true)
+                        + self.write(if: i < keys.count - 1) { () -> Int in
                             self.writeString(" ")
                         }
                 }
@@ -429,16 +406,13 @@ extension EncodeBuffer {
                 self.writeString("FILTER \(filterName)")
         case .sentBefore(let date):
             return
-                self.writeString("SENTBEFORE ") +
-                self.writeDate(date)
+                self.writeString("SENTBEFORE ") + self.writeDate(date)
         case .sentOn(let date):
             return
-                self.writeString("SENTON ") +
-                self.writeDate(date)
+                self.writeString("SENTON ") + self.writeDate(date)
         case .sentSince(let date):
             return
-                self.writeString("SENTSINCE ") +
-                self.writeDate(date)
+                self.writeString("SENTSINCE ") + self.writeDate(date)
 
         case .modificationSequence(let seq):
             return self.writeSearchModificationSequence(seq)

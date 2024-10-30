@@ -47,7 +47,12 @@ extension EmailAddressTests {
     }
 
     func testNoneNil() {
-        let address = EmailAddress(personName: "somename", sourceRoot: "someadl", mailbox: "somemailbox", host: "someaddress")
+        let address = EmailAddress(
+            personName: "somename",
+            sourceRoot: "someadl",
+            mailbox: "somemailbox",
+            host: "someaddress"
+        )
         let expected = "(\"somename\" \"someadl\" \"somemailbox\" \"someaddress\")"
         let size = self.testBuffer.writeEmailAddress(address)
         XCTAssertEqual(size, expected.utf8.count)

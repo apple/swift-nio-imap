@@ -35,15 +35,21 @@ extension GrammarParser_Fetch_Tests {
                 ("BODY", " ", .bodyStructure(extensions: false), #line),
                 ("BODYSTRUCTURE", " ", .bodyStructure(extensions: true), #line),
                 ("UID", " ", .uid, #line),
-                ("BODY[1]<1.2>", " ", .bodySection(peek: false, .init(part: [1], kind: .complete), 1 ... 2 as ClosedRange), #line),
+                (
+                    "BODY[1]<1.2>", " ",
+                    .bodySection(peek: false, .init(part: [1], kind: .complete), 1...2 as ClosedRange), #line
+                ),
                 ("BODY[1.TEXT]", " ", .bodySection(peek: false, .init(part: [1], kind: .text), nil), #line),
                 ("BODY[4.2.TEXT]", " ", .bodySection(peek: false, .init(part: [4, 2], kind: .text), nil), #line),
                 ("BODY[HEADER]", " ", .bodySection(peek: false, .init(kind: .header), nil), #line),
-                ("BODY.PEEK[HEADER]<3.4>", " ", .bodySection(peek: true, .init(kind: .header), 3 ... 6 as ClosedRange), #line),
+                (
+                    "BODY.PEEK[HEADER]<3.4>", " ", .bodySection(peek: true, .init(kind: .header), 3...6 as ClosedRange),
+                    #line
+                ),
                 ("BODY.PEEK[HEADER]", " ", .bodySection(peek: true, .init(kind: .header), nil), #line),
                 ("BINARY.PEEK[1]", " ", .binary(peek: true, section: [1], partial: nil), #line),
-                ("BINARY.PEEK[1]<3.4>", " ", .binary(peek: true, section: [1], partial: 3 ... 6 as ClosedRange), #line),
-                ("BINARY[2]<4.5>", " ", .binary(peek: false, section: [2], partial: 4 ... 8 as ClosedRange), #line),
+                ("BINARY.PEEK[1]<3.4>", " ", .binary(peek: true, section: [1], partial: 3...6 as ClosedRange), #line),
+                ("BINARY[2]<4.5>", " ", .binary(peek: false, section: [2], partial: 4...8 as ClosedRange), #line),
                 ("BINARY.SIZE[5]", " ", .binarySize(section: [5]), #line),
                 ("X-GM-MSGID", " ", .gmailMessageID, #line),
                 ("X-GM-THRID", " ", .gmailThreadID, #line),
@@ -69,9 +75,15 @@ extension GrammarParser_Fetch_Tests {
                 ("RFC822.SIZE 40639", " ", .simpleAttribute(.rfc822Size(40639)), #line),
                 ("FLAGS ()", " ", .simpleAttribute(.flags([])), #line),
                 ("FLAGS (\\seen)", " ", .simpleAttribute(.flags([.seen])), #line),
-                ("FLAGS (\\seen \\answered \\draft)", " ", .simpleAttribute(.flags([.seen, .answered, .draft])), #line),
+                (
+                    "FLAGS (\\seen \\answered \\draft)", " ", .simpleAttribute(.flags([.seen, .answered, .draft])),
+                    #line
+                ),
                 (")\r\n", " ", .finish, #line),
-                ("PREVIEW \"Lorem ipsum dolor sit amet\"", " ", .simpleAttribute(.preview(.init("Lorem ipsum dolor sit amet"))), #line),
+                (
+                    "PREVIEW \"Lorem ipsum dolor sit amet\"", " ",
+                    .simpleAttribute(.preview(.init("Lorem ipsum dolor sit amet"))), #line
+                ),
                 ("PREVIEW NIL", " ", .simpleAttribute(.preview(nil)), #line),
             ],
             parserErrorInputs: [],
@@ -104,12 +116,12 @@ extension GrammarParser_Fetch_Tests {
             testFunction: GrammarParser().parseFetchModifier,
             validInputs: [
                 ("CHANGEDSINCE 2", " ", .changedSince(.init(modificationSequence: 2)), #line),
-                ("PARTIAL -735:-88032", " ", .partial(.last(735 ... 88_032)), #line),
+                ("PARTIAL -735:-88032", " ", .partial(.last(735...88_032)), #line),
                 ("test", "\r", .other(.init(key: "test", value: nil)), #line),
                 ("test 1", " ", .other(.init(key: "test", value: .sequence(.set([1])))), #line),
             ],
             parserErrorInputs: [
-                ("1", " ", #line),
+                ("1", " ", #line)
             ],
             incompleteMessageInputs: [
                 ("CHANGEDSINCE 1", "", #line),
@@ -123,8 +135,11 @@ extension GrammarParser_Fetch_Tests {
             testFunction: GrammarParser().parseFetchModifiers,
             validInputs: [
                 (" (CHANGEDSINCE 2)", " ", [.changedSince(.init(modificationSequence: 2))], #line),
-                (" (PARTIAL -735:-88032)", " ", [.partial(.last(735 ... 88_032))], #line),
-                (" (PARTIAL -1:-30 CHANGEDSINCE 98305)", " ", [.partial(.last(1 ... 30)), .changedSince(.init(modificationSequence: 98305))], #line),
+                (" (PARTIAL -735:-88032)", " ", [.partial(.last(735...88_032))], #line),
+                (
+                    " (PARTIAL -1:-30 CHANGEDSINCE 98305)", " ",
+                    [.partial(.last(1...30)), .changedSince(.init(modificationSequence: 98305))], #line
+                ),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []

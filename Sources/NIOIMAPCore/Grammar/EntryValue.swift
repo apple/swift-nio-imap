@@ -17,12 +17,12 @@ import struct OrderedCollections.OrderedDictionary
 
 extension EncodeBuffer {
     @discardableResult mutating func writeEntry(_ entry: KeyValue<MetadataEntryName, MetadataValue>) -> Int {
-        self.writeIMAPString(String(entry.key)) +
-            self.writeSpace() +
-            self.writeMetadataValue(entry.value)
+        self.writeIMAPString(String(entry.key)) + self.writeSpace() + self.writeMetadataValue(entry.value)
     }
 
-    @discardableResult mutating func writeEntryValues(_ array: OrderedDictionary<MetadataEntryName, MetadataValue>) -> Int {
+    @discardableResult mutating func writeEntryValues(
+        _ array: OrderedDictionary<MetadataEntryName, MetadataValue>
+    ) -> Int {
         self.writeOrderedDictionary(array) { element, buffer in
             buffer.writeEntry(element)
         }

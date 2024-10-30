@@ -36,15 +36,13 @@ public struct ResponseText: Hashable, Sendable {
 extension EncodeBuffer {
     @discardableResult mutating func writeResponseText(_ text: ResponseText) -> Int {
         self.writeIfExists(text.code) { (code) -> Int in
-            self.writeString("[") +
-                self.writeResponseTextCode(code) +
-                self.writeString("] ")
-        } +
+            self.writeString("[") + self.writeResponseTextCode(code) + self.writeString("] ")
+        }
 
             // If the text is empty, write an additional space
             // to enforce standard compliance. Oddly, this is
             // perfectly legal IMAP.
-            self.writeText(text.text.count > 0 ? text.text : " ")
+            + self.writeText(text.text.count > 0 ? text.text : " ")
     }
 
     @discardableResult mutating func writeText(_ text: String) -> Int {

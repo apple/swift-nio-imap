@@ -38,12 +38,12 @@ extension BodyStructure {
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeBodyLocationAndExtensions(_ locationExtension: BodyStructure.LocationAndExtensions) -> Int {
-        self.writeSpace() +
-            self.writeNString(locationExtension.location) +
-            self.write(if: !locationExtension.extensions.isEmpty) {
-                self.writeSpace() +
-                    self.writeBodyExtensions(locationExtension.extensions)
+    @discardableResult mutating func writeBodyLocationAndExtensions(
+        _ locationExtension: BodyStructure.LocationAndExtensions
+    ) -> Int {
+        self.writeSpace() + self.writeNString(locationExtension.location)
+            + self.write(if: !locationExtension.extensions.isEmpty) {
+                self.writeSpace() + self.writeBodyExtensions(locationExtension.extensions)
             }
     }
 }

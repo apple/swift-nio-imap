@@ -23,15 +23,15 @@ class UIDSetNonEmptyTests: EncodeTestClass {}
 extension UIDSetNonEmptyTests {
     func testInitWithSet() {
         XCTAssertEqual(
-            MessageIdentifierSetNonEmpty(set: MessageIdentifierSet<UID>([6, 100 ... 108]))?.set,
-            MessageIdentifierSet<UID>([6, 100 ... 108])
+            MessageIdentifierSetNonEmpty(set: MessageIdentifierSet<UID>([6, 100...108]))?.set,
+            MessageIdentifierSet<UID>([6, 100...108])
         )
     }
 
     func testInitWithRange() {
         XCTAssertEqual(
-            MessageIdentifierSetNonEmpty(range: MessageIdentifierRange(100 ... 108)).set,
-            MessageIdentifierSet<UID>([100 ... 108])
+            MessageIdentifierSetNonEmpty(range: MessageIdentifierRange(100...108)).set,
+            MessageIdentifierSet<UID>([100...108])
         )
 
         XCTAssertEqual(
@@ -54,13 +54,15 @@ extension UIDSetNonEmptyTests {
 extension UIDSetNonEmptyTests {
     func testIMAPEncoded_full() {
         let expected = "1,22:30,47,55,66:*"
-        let size = self.testBuffer.writeUIDSet(MessageIdentifierSetNonEmpty<UID>(set: [
-            1,
-            22 ... 30,
-            47,
-            55,
-            66...,
-        ])!)
+        let size = self.testBuffer.writeUIDSet(
+            MessageIdentifierSetNonEmpty<UID>(set: [
+                1,
+                22...30,
+                47,
+                55,
+                66...,
+            ])!
+        )
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }
@@ -76,13 +78,13 @@ extension UIDSetNonEmptyTests {
         XCTAssertEqual(MessageIdentifierSetNonEmpty<UID>(set: [55, 66])!.min(), 55)
         XCTAssertEqual(MessageIdentifierSetNonEmpty<UID>(set: [55, 66])!.max(), 66)
 
-        XCTAssertEqual(MessageIdentifierSetNonEmpty<UID>(set: [55 ... 66])!.min(), 55)
-        XCTAssertEqual(MessageIdentifierSetNonEmpty<UID>(set: [55 ... 66])!.max(), 66)
+        XCTAssertEqual(MessageIdentifierSetNonEmpty<UID>(set: [55...66])!.min(), 55)
+        XCTAssertEqual(MessageIdentifierSetNonEmpty<UID>(set: [55...66])!.max(), 66)
 
-        XCTAssertEqual(MessageIdentifierSetNonEmpty<UID>(set: [44, 55 ... 66])!.min(), 44)
-        XCTAssertEqual(MessageIdentifierSetNonEmpty<UID>(set: [44, 55 ... 66])!.max(), 66)
+        XCTAssertEqual(MessageIdentifierSetNonEmpty<UID>(set: [44, 55...66])!.min(), 44)
+        XCTAssertEqual(MessageIdentifierSetNonEmpty<UID>(set: [44, 55...66])!.max(), 66)
 
-        XCTAssertEqual(MessageIdentifierSetNonEmpty<UID>(set: [55 ... 66, 77])!.min(), 55)
-        XCTAssertEqual(MessageIdentifierSetNonEmpty<UID>(set: [55 ... 66, 77])!.max(), 77)
+        XCTAssertEqual(MessageIdentifierSetNonEmpty<UID>(set: [55...66, 77])!.min(), 55)
+        XCTAssertEqual(MessageIdentifierSetNonEmpty<UID>(set: [55...66, 77])!.max(), 77)
     }
 }

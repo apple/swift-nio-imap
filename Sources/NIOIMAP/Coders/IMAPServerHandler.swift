@@ -55,12 +55,22 @@ public final class IMAPServerHandler: ChannelDuplexHandler {
     private var numberOfOutstandingContinuationRequests = 0
     private var continuationRequestBytes: ByteBuffer
 
-    private var responseEncodeBuffer = ResponseEncodeBuffer(buffer: ByteBuffer(string: ""), options: .init(), loggingMode: false)
+    private var responseEncodeBuffer = ResponseEncodeBuffer(
+        buffer: ByteBuffer(string: ""),
+        options: .init(),
+        loggingMode: false
+    )
 
     public var capabilities: [Capability] = []
 
-    public init(continuationRequest: ContinuationRequest = .responseText(ResponseText(text: "OK")), literalSizeLimit: Int = IMAPDefaults.literalSizeLimit) {
-        self.decoder = NIOSingleStepByteToMessageProcessor(CommandDecoder(literalSizeLimit: literalSizeLimit), maximumBufferSize: IMAPDefaults.lineLengthLimit)
+    public init(
+        continuationRequest: ContinuationRequest = .responseText(ResponseText(text: "OK")),
+        literalSizeLimit: Int = IMAPDefaults.literalSizeLimit
+    ) {
+        self.decoder = NIOSingleStepByteToMessageProcessor(
+            CommandDecoder(literalSizeLimit: literalSizeLimit),
+            maximumBufferSize: IMAPDefaults.lineLengthLimit
+        )
         self._continuationRequest = continuationRequest
         let buffer = ByteBufferAllocator().buffer(capacity: 16)
         var encodeBuffer = ResponseEncodeBuffer(buffer: buffer, capabilities: self.capabilities, loggingMode: false)
@@ -77,7 +87,7 @@ public final class IMAPServerHandler: ChannelDuplexHandler {
             return
         }
 
-        for _ in 0 ..< outstanding {
+        for _ in 0..<outstanding {
             context.write(self.wrapOutboundOut(self.continuationRequestBytes), promise: nil)
         }
         context.flush()

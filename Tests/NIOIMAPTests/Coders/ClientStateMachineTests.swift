@@ -28,32 +28,54 @@ class ClientStateMachineTests: XCTestCase {
     func testNormalWorkflow() {
         // NOOP
         XCTAssertNoThrow(try self.stateMachine.sendCommand(.tagged(.init(tag: "A1", command: .noop))))
-        XCTAssertNoThrow(try self.stateMachine.receiveResponse(.tagged(.init(tag: "A1", state: .ok(.init(text: "OK"))))))
+        XCTAssertNoThrow(
+            try self.stateMachine.receiveResponse(.tagged(.init(tag: "A1", state: .ok(.init(text: "OK")))))
+        )
 
         // LOGIN one continuation
-        XCTAssertNoThrow(try self.stateMachine.sendCommand(.tagged(.init(tag: "A3", command: .login(username: "\\", password: "hey")))))
+        XCTAssertNoThrow(
+            try self.stateMachine.sendCommand(
+                .tagged(.init(tag: "A3", command: .login(username: "\\", password: "hey")))
+            )
+        )
         XCTAssertNoThrow(try self.stateMachine.receiveContinuationRequest(.data("OK")))
-        XCTAssertNoThrow(try self.stateMachine.receiveResponse(.tagged(.init(tag: "A3", state: .no(.init(text: "Invalid"))))))
+        XCTAssertNoThrow(
+            try self.stateMachine.receiveResponse(.tagged(.init(tag: "A3", state: .no(.init(text: "Invalid")))))
+        )
 
         // LOGIN two continuations
-        XCTAssertNoThrow(try self.stateMachine.sendCommand(.tagged(.init(tag: "A3", command: .login(username: "\\", password: "\\")))))
+        XCTAssertNoThrow(
+            try self.stateMachine.sendCommand(
+                .tagged(.init(tag: "A3", command: .login(username: "\\", password: "\\")))
+            )
+        )
         XCTAssertNoThrow(try self.stateMachine.receiveContinuationRequest(.data("OK")))
         XCTAssertNoThrow(try self.stateMachine.receiveContinuationRequest(.data("OK")))
-        XCTAssertNoThrow(try self.stateMachine.receiveResponse(.tagged(.init(tag: "A3", state: .no(.init(text: "Invalid"))))))
+        XCTAssertNoThrow(
+            try self.stateMachine.receiveResponse(.tagged(.init(tag: "A3", state: .no(.init(text: "Invalid")))))
+        )
 
         // IDLE
         XCTAssertNoThrow(try self.stateMachine.sendCommand(.tagged(.init(tag: "A2", command: .idleStart))))
         XCTAssertNoThrow(try self.stateMachine.receiveContinuationRequest(.responseText(.init(text: "OK"))))
         XCTAssertNoThrow(try self.stateMachine.sendCommand(.idleDone))
-        XCTAssertNoThrow(try self.stateMachine.receiveResponse(.tagged(.init(tag: "A2", state: .ok(.init(text: "OK"))))))
+        XCTAssertNoThrow(
+            try self.stateMachine.receiveResponse(.tagged(.init(tag: "A2", state: .ok(.init(text: "OK")))))
+        )
 
         // SELECT
         XCTAssertNoThrow(try self.stateMachine.sendCommand(.tagged(.init(tag: "A5", command: .select(.inbox, [])))))
-        XCTAssertNoThrow(try self.stateMachine.receiveResponse(.tagged(.init(tag: "A5", state: .ok(.init(text: "OK"))))))
+        XCTAssertNoThrow(
+            try self.stateMachine.receiveResponse(.tagged(.init(tag: "A5", state: .ok(.init(text: "OK")))))
+        )
 
         // APPEND
         XCTAssertNoThrow(try self.stateMachine.sendCommand(.append(.start(tag: "A4", appendingTo: .inbox))))
-        XCTAssertNoThrow(try self.stateMachine.sendCommand(.append(.beginMessage(message: .init(options: .init(), data: .init(byteCount: 10))))))
+        XCTAssertNoThrow(
+            try self.stateMachine.sendCommand(
+                .append(.beginMessage(message: .init(options: .init(), data: .init(byteCount: 10))))
+            )
+        )
         XCTAssertNoThrow(try self.stateMachine.receiveContinuationRequest(.data("OK")))
         XCTAssertNoThrow(try self.stateMachine.sendCommand(.append(.messageBytes("0123456789"))))
         XCTAssertNoThrow(try self.stateMachine.sendCommand(.append(.endMessage)))
@@ -81,7 +103,9 @@ class ClientStateMachineTests: XCTestCase {
         XCTAssertEqual(action, .sendChunks([.init(bytes: "\\\r\n", promise: nil, shouldSucceedPromise: true)]))
 
         // this time we expect a tagged response, so let's send one
-        XCTAssertNoThrow(try self.stateMachine.receiveResponse(.tagged(.init(tag: "A1", state: .ok(.init(text: "OK"))))))
+        XCTAssertNoThrow(
+            try self.stateMachine.receiveResponse(.tagged(.init(tag: "A1", state: .ok(.init(text: "OK")))))
+        )
     }
 
     func testChunkingMultipleCommands() {
@@ -100,10 +124,13 @@ class ClientStateMachineTests: XCTestCase {
 
         var result3: ClientStateMachine.ContinuationRequestAction!
         XCTAssertNoThrow(result3 = try self.stateMachine.receiveContinuationRequest(.data("OK")))
-        XCTAssertEqual(result3, .sendChunks([
-            .init(bytes: "\\ \"pass\"\r\n", promise: nil, shouldSucceedPromise: true),
-            .init(bytes: "A2 NOOP\r\n", promise: nil, shouldSucceedPromise: true),
-        ]))
+        XCTAssertEqual(
+            result3,
+            .sendChunks([
+                .init(bytes: "\\ \"pass\"\r\n", promise: nil, shouldSucceedPromise: true),
+                .init(bytes: "A2 NOOP\r\n", promise: nil, shouldSucceedPromise: true),
+            ])
+        )
     }
 
     func testMultipleCommandsCanRunConcurrently() {
@@ -111,10 +138,18 @@ class ClientStateMachineTests: XCTestCase {
         XCTAssertNoThrow(try self.stateMachine.sendCommand(.tagged(.init(tag: "A2", command: .noop))))
         XCTAssertNoThrow(try self.stateMachine.sendCommand(.tagged(.init(tag: "A3", command: .noop))))
         XCTAssertNoThrow(try self.stateMachine.sendCommand(.tagged(.init(tag: "A4", command: .noop))))
-        XCTAssertNoThrow(try self.stateMachine.receiveResponse(.tagged(.init(tag: "A2", state: .ok(.init(text: "OK"))))))
-        XCTAssertNoThrow(try self.stateMachine.receiveResponse(.tagged(.init(tag: "A4", state: .ok(.init(text: "OK"))))))
-        XCTAssertNoThrow(try self.stateMachine.receiveResponse(.tagged(.init(tag: "A1", state: .ok(.init(text: "OK"))))))
-        XCTAssertNoThrow(try self.stateMachine.receiveResponse(.tagged(.init(tag: "A3", state: .ok(.init(text: "OK"))))))
+        XCTAssertNoThrow(
+            try self.stateMachine.receiveResponse(.tagged(.init(tag: "A2", state: .ok(.init(text: "OK")))))
+        )
+        XCTAssertNoThrow(
+            try self.stateMachine.receiveResponse(.tagged(.init(tag: "A4", state: .ok(.init(text: "OK")))))
+        )
+        XCTAssertNoThrow(
+            try self.stateMachine.receiveResponse(.tagged(.init(tag: "A1", state: .ok(.init(text: "OK")))))
+        )
+        XCTAssertNoThrow(
+            try self.stateMachine.receiveResponse(.tagged(.init(tag: "A3", state: .ok(.init(text: "OK")))))
+        )
     }
 
     func testDuplicateTagThrows() {
@@ -131,7 +166,9 @@ extension ClientStateMachineTests {
     func testIdleWorkflow_normal() {
         // set up the state machine, show we can send a command
         XCTAssertNoThrow(try self.stateMachine.sendCommand(.tagged(.init(tag: "A1", command: .noop))))
-        XCTAssertNoThrow(try self.stateMachine.receiveResponse(.tagged(.init(tag: "A1", state: .ok(.init(text: "OK"))))))
+        XCTAssertNoThrow(
+            try self.stateMachine.receiveResponse(.tagged(.init(tag: "A1", state: .ok(.init(text: "OK")))))
+        )
 
         // 1. start idle
         // 2. server confirms idle
@@ -150,7 +187,9 @@ extension ClientStateMachineTests {
         XCTAssertNoThrow(try self.stateMachine.receiveContinuationRequest(.responseText(.init(text: "IDLE started"))))
 
         // machine is idle, so sending a different command should throw
-        XCTAssertThrowsError(try self.stateMachine.receiveContinuationRequest(.responseText(.init(text: "IDLE started")))) { e in
+        XCTAssertThrowsError(
+            try self.stateMachine.receiveContinuationRequest(.responseText(.init(text: "IDLE started")))
+        ) { e in
             XCTAssertTrue(e is UnexpectedContinuationRequest)
         }
     }
@@ -162,18 +201,26 @@ extension ClientStateMachineTests {
     func testAuthenticationWorkflow_normal() {
         // set up the state machine, show we can send a command
         XCTAssertNoThrow(try self.stateMachine.sendCommand(.tagged(.init(tag: "A1", command: .noop))))
-        XCTAssertNoThrow(try self.stateMachine.receiveResponse(.tagged(.init(tag: "A1", state: .ok(.init(text: "OK"))))))
+        XCTAssertNoThrow(
+            try self.stateMachine.receiveResponse(.tagged(.init(tag: "A1", state: .ok(.init(text: "OK")))))
+        )
 
         // 1. start authenticating
         // 2. a couple of challenges back and forth
-        XCTAssertNoThrow(try self.stateMachine.sendCommand(.tagged(.init(tag: "A2", command: .authenticate(mechanism: .gssAPI, initialResponse: nil)))))
+        XCTAssertNoThrow(
+            try self.stateMachine.sendCommand(
+                .tagged(.init(tag: "A2", command: .authenticate(mechanism: .gssAPI, initialResponse: nil)))
+            )
+        )
         XCTAssertNoThrow(try self.stateMachine.receiveContinuationRequest(.data("c1")))
         XCTAssertNoThrow(try self.stateMachine.sendCommand(.continuationResponse("r1")))
         XCTAssertNoThrow(try self.stateMachine.receiveContinuationRequest(.data("c2")))
         XCTAssertNoThrow(try self.stateMachine.sendCommand(.continuationResponse("r2")))
 
         // finish authenticating
-        XCTAssertNoThrow(try self.stateMachine.receiveResponse(.tagged(.init(tag: "A2", state: .ok(.init(code: nil, text: "OK"))))))
+        XCTAssertNoThrow(
+            try self.stateMachine.receiveResponse(.tagged(.init(tag: "A2", state: .ok(.init(code: nil, text: "OK")))))
+        )
 
         // state machine should have reset, so we can send a normal command again
         XCTAssertNoThrow(try self.stateMachine.sendCommand(.tagged(.init(tag: "A3", command: .noop))))
@@ -182,12 +229,20 @@ extension ClientStateMachineTests {
     func testAuthenticationWorkflow_normal_noChallenges() {
         // set up the state machine, show we can send a command
         XCTAssertNoThrow(try self.stateMachine.sendCommand(.tagged(.init(tag: "A1", command: .noop))))
-        XCTAssertNoThrow(try self.stateMachine.receiveResponse(.tagged(.init(tag: "A1", state: .ok(.init(text: "OK"))))))
+        XCTAssertNoThrow(
+            try self.stateMachine.receiveResponse(.tagged(.init(tag: "A1", state: .ok(.init(text: "OK")))))
+        )
 
         // 1. start authenticating
         // 2. server immediately confirms
-        XCTAssertNoThrow(try self.stateMachine.sendCommand(.tagged(.init(tag: "A2", command: .authenticate(mechanism: .gssAPI, initialResponse: nil)))))
-        XCTAssertNoThrow(try self.stateMachine.receiveResponse(.tagged(.init(tag: "A2", state: .ok(.init(code: nil, text: "OK"))))))
+        XCTAssertNoThrow(
+            try self.stateMachine.sendCommand(
+                .tagged(.init(tag: "A2", command: .authenticate(mechanism: .gssAPI, initialResponse: nil)))
+            )
+        )
+        XCTAssertNoThrow(
+            try self.stateMachine.receiveResponse(.tagged(.init(tag: "A2", state: .ok(.init(code: nil, text: "OK")))))
+        )
 
         // state machine should have reset, so we can send a normal command again
         XCTAssertNoThrow(try self.stateMachine.sendCommand(.tagged(.init(tag: "A3", command: .noop))))
@@ -195,7 +250,11 @@ extension ClientStateMachineTests {
 
     func testAuthenticationWorkflow_untagged() {
         // set up the state machine to authenticate
-        XCTAssertNoThrow(try self.stateMachine.sendCommand(.tagged(.init(tag: "A1", command: .authenticate(mechanism: .gssAPI, initialResponse: nil)))))
+        XCTAssertNoThrow(
+            try self.stateMachine.sendCommand(
+                .tagged(.init(tag: "A1", command: .authenticate(mechanism: .gssAPI, initialResponse: nil)))
+            )
+        )
 
         // machine is authenticating, so sending an untagged response should be ignored
         XCTAssertNoThrow(try self.stateMachine.receiveResponse(.untagged(.enableData([.metadata]))))
@@ -203,7 +262,11 @@ extension ClientStateMachineTests {
 
     func testAuthenticationWorkflow_unexpectedResponse() {
         // set up the state machine to authenticate
-        XCTAssertNoThrow(try self.stateMachine.sendCommand(.tagged(.init(tag: "A1", command: .authenticate(mechanism: .gssAPI, initialResponse: nil)))))
+        XCTAssertNoThrow(
+            try self.stateMachine.sendCommand(
+                .tagged(.init(tag: "A1", command: .authenticate(mechanism: .gssAPI, initialResponse: nil)))
+            )
+        )
 
         // machine is authenticating, so sending idle started should throw
         XCTAssertThrowsError(try self.stateMachine.receiveResponse(.idleStarted)) { e in
@@ -238,12 +301,16 @@ extension ClientStateMachineTests {
         // append a message
         self.assert(
             .init(bytes: " {10}\r\n", promise: nil, shouldSucceedPromise: true),
-            try self.stateMachine.sendCommand(.append(.beginMessage(message: .init(options: .init(), data: .init(byteCount: 10)))))
+            try self.stateMachine.sendCommand(
+                .append(.beginMessage(message: .init(options: .init(), data: .init(byteCount: 10))))
+            )
         )
-        XCTAssertNoThrow(XCTAssertEqual(
-            try self.stateMachine.receiveContinuationRequest(.data("ready2")),
-            .sendChunks([])
-        ))
+        XCTAssertNoThrow(
+            XCTAssertEqual(
+                try self.stateMachine.receiveContinuationRequest(.data("ready2")),
+                .sendChunks([])
+            )
+        )
         self.assert(
             .init(bytes: "01234", promise: nil, shouldSucceedPromise: true),
             try self.stateMachine.sendCommand(.append(.messageBytes("01234")))
@@ -297,7 +364,9 @@ extension ClientStateMachineTests {
             .init(bytes: "\r\n", promise: nil, shouldSucceedPromise: true),
             try self.stateMachine.sendCommand(.append(.finish))
         )
-        XCTAssertNoThrow(try self.stateMachine.receiveResponse(.tagged(.init(tag: "A1", state: .ok(.init(code: nil, text: "OK"))))))
+        XCTAssertNoThrow(
+            try self.stateMachine.receiveResponse(.tagged(.init(tag: "A1", state: .ok(.init(code: nil, text: "OK")))))
+        )
         self.assert(
             .init(bytes: "A2 NOOP\r\n", promise: nil, shouldSucceedPromise: true),
             try self.stateMachine.sendCommand(.tagged(.init(tag: "A2", command: .noop)))
@@ -309,7 +378,11 @@ extension ClientStateMachineTests {
         XCTAssertNoThrow(result = try self.stateMachine.sendCommand(.append(.start(tag: "A1", appendingTo: .inbox))))
         XCTAssertEqual(result, .init(bytes: "A1 APPEND \"INBOX\"", promise: nil, shouldSucceedPromise: true))
 
-        XCTAssertNoThrow(result = try self.stateMachine.sendCommand(.append(.beginMessage(message: .init(options: .none, data: .init(byteCount: 5))))))
+        XCTAssertNoThrow(
+            result = try self.stateMachine.sendCommand(
+                .append(.beginMessage(message: .init(options: .none, data: .init(byteCount: 5))))
+            )
+        )
         XCTAssertEqual(result, .init(bytes: " {5}\r\n", promise: nil, shouldSucceedPromise: true))
 
         XCTAssertNoThrow(result = try self.stateMachine.sendCommand(.append(.messageBytes("0"))))
@@ -331,15 +404,18 @@ extension ClientStateMachineTests {
         var resultAction: ClientStateMachine.ContinuationRequestAction!
         XCTAssertNoThrow(resultAction = try self.stateMachine.receiveContinuationRequest(.data("OK")))
 
-        XCTAssertEqual(resultAction, .sendChunks([
-            .init(bytes: "0", promise: nil, shouldSucceedPromise: true),
-            .init(bytes: "1", promise: nil, shouldSucceedPromise: true),
-            .init(bytes: "2", promise: nil, shouldSucceedPromise: true),
-            .init(bytes: "3", promise: nil, shouldSucceedPromise: true),
-            .init(bytes: "4", promise: nil, shouldSucceedPromise: true),
-            .init(bytes: "", promise: nil, shouldSucceedPromise: true),
-            .init(bytes: "\r\n", promise: nil, shouldSucceedPromise: true),
-        ]))
+        XCTAssertEqual(
+            resultAction,
+            .sendChunks([
+                .init(bytes: "0", promise: nil, shouldSucceedPromise: true),
+                .init(bytes: "1", promise: nil, shouldSucceedPromise: true),
+                .init(bytes: "2", promise: nil, shouldSucceedPromise: true),
+                .init(bytes: "3", promise: nil, shouldSucceedPromise: true),
+                .init(bytes: "4", promise: nil, shouldSucceedPromise: true),
+                .init(bytes: "", promise: nil, shouldSucceedPromise: true),
+                .init(bytes: "\r\n", promise: nil, shouldSucceedPromise: true),
+            ])
+        )
     }
 
     func testSendingAnAuthencationChallengeWhenUnexpectedThrows() {

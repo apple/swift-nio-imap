@@ -178,9 +178,12 @@ extension BodyStructure {
         try self.recursiveEnumerateParts(parent: [], closure)
     }
 
-    private func recursiveEnumerateParts(parent: SectionSpecifier.Part, _ closure: (SectionSpecifier.Part, BodyStructure) throws -> Void) rethrows {
+    private func recursiveEnumerateParts(
+        parent: SectionSpecifier.Part,
+        _ closure: (SectionSpecifier.Part, BodyStructure) throws -> Void
+    ) rethrows {
         guard self.subpartCount > 0 else { return }
-        for part in 1 ... self.subpartCount {
+        for part in 1...self.subpartCount {
             let spec = SectionSpecifier.Part(Array(parent) + [part])
             let bs = self[[part]]
             try closure(spec, bs)

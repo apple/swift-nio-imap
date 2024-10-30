@@ -82,7 +82,9 @@ extension Array where Element == FetchAttribute {
     public static let fast: [Element] = [.flags, .internalDate, .rfc822Size]
 
     /// Macro equivalent to `[.flags, .internalDate, .rfc822Size, envelope, body]`
-    public static let full: [Element] = [.flags, .internalDate, .rfc822Size, .envelope, .bodyStructure(extensions: false)]
+    public static let full: [Element] = [
+        .flags, .internalDate, .rfc822Size, .envelope, .bodyStructure(extensions: false),
+    ]
 }
 
 // MARK: - Encoding
@@ -109,7 +111,9 @@ extension EncodeBuffer {
             if atts.count == 4, atts.contains(.rfc822Size), atts.contains(.envelope) {
                 return self.writeString("ALL")
             }
-            if atts.count == 5, atts.contains(.rfc822Size), atts.contains(.envelope), atts.contains(.bodyStructure(extensions: false)) {
+            if atts.count == 5, atts.contains(.rfc822Size), atts.contains(.envelope),
+                atts.contains(.bodyStructure(extensions: false))
+            {
                 return self.writeString("FULL")
             }
         }
@@ -200,26 +204,31 @@ extension EncodeBuffer {
         self.writeString(extensions ? "BODYSTRUCTURE" : "BODY")
     }
 
-    @discardableResult mutating func writeFetchAttribute_body(peek: Bool, section: SectionSpecifier?, partial: ClosedRange<UInt32>?) -> Int {
-        self.writeString(peek ? "BODY.PEEK" : "BODY") +
-            self.writeSection(section) +
-            self.writeIfExists(partial) { (partial) -> Int in
+    @discardableResult mutating func writeFetchAttribute_body(
+        peek: Bool,
+        section: SectionSpecifier?,
+        partial: ClosedRange<UInt32>?
+    ) -> Int {
+        self.writeString(peek ? "BODY.PEEK" : "BODY") + self.writeSection(section)
+            + self.writeIfExists(partial) { (partial) -> Int in
                 self.writeByteRange(partial)
             }
     }
 
     @discardableResult mutating func writeFetchAttribute_binarySize(_ section: SectionSpecifier.Part) -> Int {
-        self.writeString("BINARY.SIZE") +
-            self.writeSectionBinary(section)
+        self.writeString("BINARY.SIZE") + self.writeSectionBinary(section)
     }
 
-    @discardableResult mutating func writeFetchAttribute_binary(peek: Bool, section: SectionSpecifier.Part, partial: ClosedRange<UInt32>?) -> Int {
-        self.writeString("BINARY") +
-            self.write(if: peek) {
+    @discardableResult mutating func writeFetchAttribute_binary(
+        peek: Bool,
+        section: SectionSpecifier.Part,
+        partial: ClosedRange<UInt32>?
+    ) -> Int {
+        self.writeString("BINARY")
+            + self.write(if: peek) {
                 self.writeString(".PEEK")
-            } +
-            self.writeSectionBinary(section) +
-            self.writeIfExists(partial) { (partial) -> Int in
+            } + self.writeSectionBinary(section)
+            + self.writeIfExists(partial) { (partial) -> Int in
                 self.writeByteRange(partial)
             }
     }

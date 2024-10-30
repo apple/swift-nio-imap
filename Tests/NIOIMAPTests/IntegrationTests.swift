@@ -58,26 +58,30 @@ final class ParserIntegrationTests: XCTestCase {
 
         let collectionDonePromise = group.next().makePromise(of: [CommandStreamPart].self)
         var server: Channel?
-        XCTAssertNoThrow(server = try ServerBootstrap(group: group)
-            .serverChannelOption(ChannelOptions.socket(.init(SOL_SOCKET), .init(SO_REUSEADDR)), value: 1)
-            .childChannelInitializer { channel in
-                channel.pipeline.addHandlers(
-                    ByteToMessageHandler(FrameDecoder()),
-                    IMAPServerHandler(),
-                    CollectEverythingHandler(collectionDonePromise: collectionDonePromise)
-                )
-            }
-            .bind(to: .init(ipAddress: "127.0.0.1", port: 0))
-            .wait())
+        XCTAssertNoThrow(
+            server = try ServerBootstrap(group: group)
+                .serverChannelOption(ChannelOptions.socket(.init(SOL_SOCKET), .init(SO_REUSEADDR)), value: 1)
+                .childChannelInitializer { channel in
+                    channel.pipeline.addHandlers(
+                        ByteToMessageHandler(FrameDecoder()),
+                        IMAPServerHandler(),
+                        CollectEverythingHandler(collectionDonePromise: collectionDonePromise)
+                    )
+                }
+                .bind(to: .init(ipAddress: "127.0.0.1", port: 0))
+                .wait()
+        )
         XCTAssertNotNil(server)
         defer {
             XCTAssertNoThrow(try server?.close().wait())
         }
 
         var maybeClient: Channel?
-        XCTAssertNoThrow(maybeClient = try ClientBootstrap(group: group)
-            .connect(to: server?.localAddress ?? SocketAddress(unixDomainSocketPath: "should fail"))
-            .wait())
+        XCTAssertNoThrow(
+            maybeClient = try ClientBootstrap(group: group)
+                .connect(to: server?.localAddress ?? SocketAddress(unixDomainSocketPath: "should fail"))
+                .wait()
+        )
         guard let client = maybeClient else {
             XCTFail("couldn't connect client")
             return

@@ -97,11 +97,10 @@ extension EncodeBuffer {
                 return .clientSynchronizingLiteral
             }
         case .server(_, options: let options):
-            if options.useQuotedString, canUseQuotedString(for: bytes) {
-                return .quotedString
-            } else {
+            guard options.useQuotedString, canUseQuotedString(for: bytes) else {
                 return .serverLiteral
             }
+            return .quotedString
         }
     }
 
@@ -128,9 +127,7 @@ extension EncodeBuffer {
     @discardableResult mutating func writeLiteral8<T: Collection>(_ bytes: T) -> Int where T.Element == UInt8 {
         let length = "~{\(bytes.count)}\r\n"
         return
-            self.writeString(length) +
-            self.markStopPoint() +
-            self.writeBytes(bytes)
+            self.writeString(length) + self.markStopPoint() + self.writeBytes(bytes)
     }
 
     /// Writes the string `"NIL"` to self.
@@ -154,29 +151,35 @@ extension EncodeBuffer {
     ///     - parenthesis: Writes `(` immediately before the first element, and `)` immediately after the last. Enabled by default.
     ///     - writer: The closure to call for each element that writes the element.
     /// - returns: The number of bytes written.
-    @discardableResult mutating func writeArray<C, T>(_ collection: C, prefix: String = "", separator: String = " ", suffix: String = "", parenthesis: Bool = true, _ writer: (T, inout EncodeBuffer) -> Int) -> Int where C: RandomAccessCollection, C.Element == T {
+    @discardableResult mutating func writeArray<C, T>(
+        _ collection: C,
+        prefix: String = "",
+        separator: String = " ",
+        suffix: String = "",
+        parenthesis: Bool = true,
+        _ writer: (T, inout EncodeBuffer) -> Int
+    ) -> Int where C: RandomAccessCollection, C.Element == T {
         // TODO: This should probably check
         //   collection.count != 0
         // such that an empty collection gets encoded as "()".
         self.write(if: collection.count > 0) {
             self.writeString(prefix)
-        } +
-            self.write(if: parenthesis) { () -> Int in
+        }
+            + self.write(if: parenthesis) { () -> Int in
                 self.writeString("(")
-            } +
-            collection.enumerated().reduce(0) { (size, row) in
+            }
+            + collection.enumerated().reduce(0) { (size, row) in
                 let (i, element) = row
                 return
-                    size +
-                    writer(element, &self) +
-                    self.write(if: i < collection.count - 1) { () -> Int in
+                    size + writer(element, &self)
+                    + self.write(if: i < collection.count - 1) { () -> Int in
                         self.writeString(separator)
                     }
-            } +
-            self.write(if: parenthesis) { () -> Int in
+            }
+            + self.write(if: parenthesis) { () -> Int in
                 self.writeString(")")
-            } +
-            self.write(if: collection.count > 0) {
+            }
+            + self.write(if: collection.count > 0) {
                 self.writeString(suffix)
             }
     }
@@ -190,29 +193,35 @@ extension EncodeBuffer {
     ///     - parenthesis: Writes `(` immediately before the first element, and `)` immediately after the last. Enabled by default.
     ///     - writer: The closure to call for each element that writes the element.
     /// - returns: The number of bytes written.
-    @discardableResult mutating func writeOrderedDictionary<K, V>(_ values: OrderedDictionary<K, V>, prefix: String = "", separator: String = " ", suffix: String = "", parenthesis: Bool = true, _ writer: (KeyValue<K, V>, inout EncodeBuffer) -> Int) -> Int {
+    @discardableResult mutating func writeOrderedDictionary<K, V>(
+        _ values: OrderedDictionary<K, V>,
+        prefix: String = "",
+        separator: String = " ",
+        suffix: String = "",
+        parenthesis: Bool = true,
+        _ writer: (KeyValue<K, V>, inout EncodeBuffer) -> Int
+    ) -> Int {
         // TODO: This should probably check
         //   collection.count != 0
         // such that an empty collection gets encoded as "()".
         self.write(if: values.count > 0) {
             self.writeString(prefix)
-        } +
-            self.write(if: parenthesis) { () -> Int in
+        }
+            + self.write(if: parenthesis) { () -> Int in
                 self.writeString("(")
-            } +
-            values.enumerated().reduce(0) { (size, row) in
+            }
+            + values.enumerated().reduce(0) { (size, row) in
                 let (i, element) = row
                 return
-                    size +
-                    writer(.init(key: element.0, value: element.1), &self) +
-                    self.write(if: i < values.count - 1) { () -> Int in
+                    size + writer(.init(key: element.0, value: element.1), &self)
+                    + self.write(if: i < values.count - 1) { () -> Int in
                         self.writeString(separator)
                     }
-            } +
-            self.write(if: parenthesis) { () -> Int in
+            }
+            + self.write(if: parenthesis) { () -> Int in
                 self.writeString(")")
-            } +
-            self.write(if: values.count > 0) {
+            }
+            + self.write(if: values.count > 0) {
                 self.writeString(suffix)
             }
     }

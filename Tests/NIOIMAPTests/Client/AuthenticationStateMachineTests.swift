@@ -30,7 +30,9 @@ class AuthenticationStateMachineTests: XCTestCase {
         XCTAssertEqual(stateMachine.state, .waitingForServer)
 
         // finish
-        XCTAssertNoThrow(try stateMachine.receiveResponse(.tagged(.init(tag: "A1", state: .ok(.init(code: nil, text: "OK"))))))
+        XCTAssertNoThrow(
+            try stateMachine.receiveResponse(.tagged(.init(tag: "A1", state: .ok(.init(code: nil, text: "OK")))))
+        )
         XCTAssertEqual(stateMachine.state, .finished)
     }
 
@@ -44,7 +46,9 @@ class AuthenticationStateMachineTests: XCTestCase {
         XCTAssertEqual(stateMachine.state, .waitingForServer)
 
         // finish
-        XCTAssertNoThrow(try stateMachine.receiveResponse(.tagged(.init(tag: "A1", state: .ok(.init(code: nil, text: "OK"))))))
+        XCTAssertNoThrow(
+            try stateMachine.receiveResponse(.tagged(.init(tag: "A1", state: .ok(.init(code: nil, text: "OK")))))
+        )
         XCTAssertEqual(stateMachine.state, .finished)
     }
 

@@ -30,7 +30,11 @@ public struct NamespaceResponse: Hashable, Sendable {
     /// - parameter userNamespace: Descriptions of the current user's namespaces.
     /// - parameter otherUserNamespace: Descriptions of other user's namespaces.
     /// - parameter sharedNamespace: Descriptions of shared namespaces.
-    public init(userNamespace: [NamespaceDescription], otherUserNamespace: [NamespaceDescription], sharedNamespace: [NamespaceDescription]) {
+    public init(
+        userNamespace: [NamespaceDescription],
+        otherUserNamespace: [NamespaceDescription],
+        sharedNamespace: [NamespaceDescription]
+    ) {
         self.userNamespace = userNamespace
         self.otherUserNamespace = otherUserNamespace
         self.sharedNamespace = sharedNamespace
@@ -41,11 +45,8 @@ public struct NamespaceResponse: Hashable, Sendable {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeNamespaceResponse(_ response: NamespaceResponse) -> Int {
-        self.writeString("NAMESPACE ") +
-            self.writeNamespace(response.userNamespace) +
-            self.writeSpace() +
-            self.writeNamespace(response.otherUserNamespace) +
-            self.writeSpace() +
-            self.writeNamespace(response.sharedNamespace)
+        self.writeString("NAMESPACE ") + self.writeNamespace(response.userNamespace) + self.writeSpace()
+            + self.writeNamespace(response.otherUserNamespace) + self.writeSpace()
+            + self.writeNamespace(response.sharedNamespace)
     }
 }

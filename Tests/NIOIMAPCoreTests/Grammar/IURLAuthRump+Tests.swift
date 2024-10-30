@@ -25,7 +25,15 @@ extension AuthenticatedURLRump_Tests {
         let inputs: [(AuthenticatedURLRump, String, UInt)] = [
             (.init(access: .anonymous), ";URLAUTH=anonymous", #line),
             (
-                .init(expire: .init(dateTime: .init(date: .init(year: 1234, month: 12, day: 23), time: .init(hour: 12, minute: 34, second: 56))), access: .authenticateUser),
+                .init(
+                    expire: .init(
+                        dateTime: .init(
+                            date: .init(year: 1234, month: 12, day: 23),
+                            time: .init(hour: 12, minute: 34, second: 56)
+                        )
+                    ),
+                    access: .authenticateUser
+                ),
                 ";EXPIRE=1234-12-23T12:34:56;URLAUTH=authuser",
                 #line
             ),

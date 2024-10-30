@@ -23,7 +23,7 @@ class QuotaResourceTests: EncodeTestClass {}
 extension QuotaResourceTests {
     func testEncode() {
         let inputs: [(QuotaResource, String, UInt)] = [
-            (QuotaResource(resourceName: "STORAGE", usage: 10, limit: 512), "STORAGE 10 512", #line),
+            (QuotaResource(resourceName: "STORAGE", usage: 10, limit: 512), "STORAGE 10 512", #line)
         ]
 
         for (test, expectedString, line) in inputs {

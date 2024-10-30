@@ -35,12 +35,12 @@ This product contains "Base64.swift", "DecodingError.swift", and "Chromium.swift
     * https://github.com/swift-extras/swift-extras-base64
     
   * LICENSE (BSD 2-Clause):
-    * https://github.com/lemire/fastbase64/blob/master/LICENSE
+    * https://github.com/lemire/fastbase64/blob/63ed168854875c065bad6c1e6023fbc71f4211df/LICENSE
   * HOMEPAGE:
     * https://github.com/lemire/fastbase64
     
   * LICENSE (The MIT License):
-    * https://github.com/client9/stringencoders/blob/master/LICENSE
+    * https://github.com/client9/stringencoders/blob/7755852327c06a17d95a978dcd013d6789323ded/LICENSE
   * HOMEPAGE:
     * https://github.com/client9/stringencoders
 

@@ -23,14 +23,17 @@ class FullDateTime_Tests: EncodeTestClass {}
 extension FullDateTime_Tests {
     func testEncode_fullDateTime() {
         let inputs: [(FullDateTime, String, UInt)] = [
-            (.init(date: .init(year: 1, month: 2, day: 3), time: .init(hour: 4, minute: 5, second: 6)), "0001-02-03T04:05:06", #line),
+            (
+                .init(date: .init(year: 1, month: 2, day: 3), time: .init(hour: 4, minute: 5, second: 6)),
+                "0001-02-03T04:05:06", #line
+            )
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeFullDateTime($0) })
     }
 
     func testEncode_fullDate() {
         let inputs: [(FullDate, String, UInt)] = [
-            (.init(year: 1, month: 2, day: 3), "0001-02-03", #line),
+            (.init(year: 1, month: 2, day: 3), "0001-02-03", #line)
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeFullDate($0) })
     }

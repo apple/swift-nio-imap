@@ -29,8 +29,8 @@ extension SearchReturnOption_Tests {
             (.count, "COUNT", #line),
             (.save, "SAVE", #line),
             (.optionExtension(.init(key: "modifier", value: nil)), "modifier", #line),
-            (.partial(.first(23_500 ... 24_000)), "PARTIAL 23500:24000", #line),
-            (.partial(.last(1 ... 100)), "PARTIAL -1:-100", #line),
+            (.partial(.first(23_500...24_000)), "PARTIAL 23500:24000", #line),
+            (.partial(.last(1...100)), "PARTIAL -1:-100", #line),
         ]
 
         for (test, expectedString, line) in inputs {
@@ -48,7 +48,7 @@ extension SearchReturnOption_Tests {
             ([.all], " RETURN (ALL)", #line),
             ([.min, .all], " RETURN (MIN ALL)", #line),
             ([.min, .max, .count], " RETURN (MIN MAX COUNT)", #line),
-            ([.min, .partial(.last(400 ... 1_000))], " RETURN (MIN PARTIAL -400:-1000)", #line),
+            ([.min, .partial(.last(400...1_000))], " RETURN (MIN PARTIAL -400:-1000)", #line),
         ]
 
         for (test, expectedString, line) in inputs {

@@ -92,11 +92,10 @@ extension EncodeBuffer {
         }
 
         return
-            self.writeString("(") +
-            self.writeArray(addresses, separator: "", parenthesis: false) { (aog, self) -> Int in
+            self.writeString("(")
+            + self.writeArray(addresses, separator: "", parenthesis: false) { (aog, self) -> Int in
                 self.writeEmailAddressOrGroup(aog)
-            } +
-            self.writeString(")")
+            } + self.writeString(")")
     }
 
     @discardableResult mutating func writeOptionalMessageID(_ id: MessageID?) -> Int {
@@ -107,26 +106,13 @@ extension EncodeBuffer {
     }
 
     @discardableResult mutating func writeEnvelope(_ envelope: Envelope) -> Int {
-        self.writeString("(") +
-            self.writeNString(envelope.date?.value) +
-            self.writeSpace() +
-            self.writeNString(envelope.subject) +
-            self.writeSpace() +
-            self.writeEnvelopeAddresses(envelope.from) +
-            self.writeSpace() +
-            self.writeEnvelopeAddresses(envelope.sender) +
-            self.writeSpace() +
-            self.writeEnvelopeAddresses(envelope.reply) +
-            self.writeSpace() +
-            self.writeEnvelopeAddresses(envelope.to) +
-            self.writeSpace() +
-            self.writeEnvelopeAddresses(envelope.cc) +
-            self.writeSpace() +
-            self.writeEnvelopeAddresses(envelope.bcc) +
-            self.writeSpace() +
-            self.writeOptionalMessageID(envelope.inReplyTo) +
-            self.writeSpace() +
-            self.writeOptionalMessageID(envelope.messageID) +
-            self.writeString(")")
+        self.writeString("(") + self.writeNString(envelope.date?.value) + self.writeSpace()
+            + self.writeNString(envelope.subject) + self.writeSpace() + self.writeEnvelopeAddresses(envelope.from)
+            + self.writeSpace() + self.writeEnvelopeAddresses(envelope.sender) + self.writeSpace()
+            + self.writeEnvelopeAddresses(envelope.reply) + self.writeSpace() + self.writeEnvelopeAddresses(envelope.to)
+            + self.writeSpace() + self.writeEnvelopeAddresses(envelope.cc) + self.writeSpace()
+            + self.writeEnvelopeAddresses(envelope.bcc) + self.writeSpace()
+            + self.writeOptionalMessageID(envelope.inReplyTo) + self.writeSpace()
+            + self.writeOptionalMessageID(envelope.messageID) + self.writeString(")")
     }
 }

@@ -25,21 +25,41 @@ extension MailboxDataTests {
         let inputs: [(MailboxData, String, UInt)] = [
             (.exists(1), "1 EXISTS", #line),
             (.flags([.answered, .deleted]), "FLAGS (\\Answered \\Deleted)", #line),
-            (.list(MailboxInfo(attributes: [], path: try! .init(name: .inbox), extensions: [:])), "LIST () NIL \"INBOX\"", #line),
             (
-                .lsub(.init(attributes: [.init("\\draft")], path: try! .init(name: .init("Drafts"), pathSeparator: "."), extensions: [:])),
+                .list(MailboxInfo(attributes: [], path: try! .init(name: .inbox), extensions: [:])),
+                "LIST () NIL \"INBOX\"", #line
+            ),
+            (
+                .lsub(
+                    .init(
+                        attributes: [.init("\\draft")],
+                        path: try! .init(name: .init("Drafts"), pathSeparator: "."),
+                        extensions: [:]
+                    )
+                ),
                 "LSUB (\\draft) \".\" \"Drafts\"",
                 #line
             ),
-            (.extendedSearch(ExtendedSearchResponse(correlator: nil, kind: .sequenceNumber, returnData: [.count(1)])), "ESEARCH COUNT 1", #line),
-            (.extendedSearch(ExtendedSearchResponse(correlator: nil, kind: .sequenceNumber, returnData: [.count(1), .count(2)])), "ESEARCH COUNT 1 COUNT 2", #line),
+            (
+                .extendedSearch(
+                    ExtendedSearchResponse(correlator: nil, kind: .sequenceNumber, returnData: [.count(1)])
+                ), "ESEARCH COUNT 1", #line
+            ),
+            (
+                .extendedSearch(
+                    ExtendedSearchResponse(correlator: nil, kind: .sequenceNumber, returnData: [.count(1), .count(2)])
+                ), "ESEARCH COUNT 1 COUNT 2", #line
+            ),
             (.status(.inbox, .init(messageCount: 1)), "STATUS \"INBOX\" (MESSAGES 1)", #line),
             (.status(.inbox, .init(messageCount: 1, unseenCount: 2)), "STATUS \"INBOX\" (MESSAGES 1 UNSEEN 2)", #line),
-            (.namespace(.init(userNamespace: [], otherUserNamespace: [], sharedNamespace: [])), "NAMESPACE NIL NIL NIL", #line),
+            (
+                .namespace(.init(userNamespace: [], otherUserNamespace: [], sharedNamespace: [])),
+                "NAMESPACE NIL NIL NIL", #line
+            ),
             (.search([]), "SEARCH", #line),
             (.search([1]), "SEARCH 1", #line),
             (.search([1, 2, 3, 4, 5]), "SEARCH 1 2 3 4 5", #line),
-            (.search([20, 23], ModificationSequenceValue(917162500)), "SEARCH 20 23 (MODSEQ 917162500)", #line),
+            (.search([20, 23], ModificationSequenceValue(917_162_500)), "SEARCH 20 23 (MODSEQ 917162500)", #line),
         ]
 
         for (test, expectedString, line) in inputs {

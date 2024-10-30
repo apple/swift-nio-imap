@@ -34,11 +34,10 @@ public struct InitialResponse: Hashable, Sendable {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeInitialResponse(_ resp: InitialResponse) -> Int {
-        if resp.data.readableBytes == 0 {
-            return self.writeString("=")
-        } else {
+        guard resp.data.readableBytes == 0 else {
             let encoded = Base64.encodeBytes(bytes: resp.data.readableBytesView)
             return self.writeBytes(encoded)
         }
+        return self.writeString("=")
     }
 }

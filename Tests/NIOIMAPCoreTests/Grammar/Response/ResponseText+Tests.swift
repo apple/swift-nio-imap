@@ -34,9 +34,13 @@ extension ResponseText_Tests {
     }
 
     func testDebugDescription() {
-        XCTAssertEqual(ResponseText(code: nil, text: "buffer").debugDescription,
-                       "buffer")
-        XCTAssertEqual(ResponseText(code: .alert, text: "buffer").debugDescription,
-                       "[ALERT] buffer")
+        XCTAssertEqual(
+            ResponseText(code: nil, text: "buffer").debugDescription,
+            "buffer"
+        )
+        XCTAssertEqual(
+            ResponseText(code: .alert, text: "buffer").debugDescription,
+            "[ALERT] buffer"
+        )
     }
 }

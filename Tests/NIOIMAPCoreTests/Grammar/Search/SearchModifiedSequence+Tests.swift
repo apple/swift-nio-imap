@@ -25,17 +25,23 @@ extension SearchModifiedSequence_Tests {
         let inputs: [(SearchModificationSequence, String, UInt)] = [
             (.init(extensions: [:], sequenceValue: 1), "MODSEQ 1", #line),
             (
-                .init(extensions: [
-                    .init(flag: .answered): .all,
-                ], sequenceValue: .init(integerLiteral: 1)),
+                .init(
+                    extensions: [
+                        .init(flag: .answered): .all
+                    ],
+                    sequenceValue: .init(integerLiteral: 1)
+                ),
                 "MODSEQ \"/flags/\\\\answered\" all 1",
                 #line
             ),
             (
-                .init(extensions: [
-                    .init(flag: .answered): .all,
-                    .init(flag: .seen): .private,
-                ], sequenceValue: .init(integerLiteral: 1)),
+                .init(
+                    extensions: [
+                        .init(flag: .answered): .all,
+                        .init(flag: .seen): .private,
+                    ],
+                    sequenceValue: .init(integerLiteral: 1)
+                ),
                 "MODSEQ \"/flags/\\\\answered\" all \"/flags/\\\\seen\" priv 1",
                 #line
             ),

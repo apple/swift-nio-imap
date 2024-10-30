@@ -42,12 +42,21 @@ extension MailboxAttribute_Tests {
         let inputs: [(MailboxStatus, String, UInt)] = [
             (.init(), "", #line),
             (
-                .init(messageCount: 133701, recentCount: 255813, nextUID: 377003, uidValidity: 427421, unseenCount: 528028, size: 680543, highestModificationSequence: 797237, appendLimit: 86254193),
+                .init(
+                    messageCount: 133701,
+                    recentCount: 255813,
+                    nextUID: 377003,
+                    uidValidity: 427421,
+                    unseenCount: 528028,
+                    size: 680543,
+                    highestModificationSequence: 797237,
+                    appendLimit: 86_254_193
+                ),
                 "MESSAGES 133701 RECENT 255813 UIDNEXT 377003 UIDVALIDITY 427421 UNSEEN 528028 SIZE 680543 HIGHESTMODSEQ 797237 APPENDLIMIT 86254193",
                 #line
             ),
             (
-                .init(messageCount: 133701, nextUID: 377003, uidValidity: 427421, appendLimit: 86254193),
+                .init(messageCount: 133701, nextUID: 377003, uidValidity: 427421, appendLimit: 86_254_193),
                 "MESSAGES 133701 UIDNEXT 377003 UIDVALIDITY 427421 APPENDLIMIT 86254193",
                 #line
             ),

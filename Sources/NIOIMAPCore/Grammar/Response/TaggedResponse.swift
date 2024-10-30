@@ -36,8 +36,6 @@ public struct TaggedResponse: Hashable, Sendable {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeTaggedResponse(_ response: TaggedResponse) -> Int {
-        self.writeString("\(response.tag) ") +
-            self.writeTaggedResponseState(response.state) +
-            self.writeString("\r\n")
+        self.writeString("\(response.tag) ") + self.writeTaggedResponseState(response.state) + self.writeString("\r\n")
     }
 }

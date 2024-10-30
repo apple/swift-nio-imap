@@ -30,10 +30,10 @@ extension GrammarParser_UID_Tests {
                 ("123", " ", 123, #line),
             ],
             parserErrorInputs: [
-                ("0", " ", #line),
+                ("0", " ", #line)
             ],
             incompleteMessageInputs: [
-                ("1", "", #line),
+                ("1", "", #line)
             ]
         )
     }
@@ -48,16 +48,16 @@ extension GrammarParser_UID_Tests {
             validInputs: [
                 ("*", "\r\n", MessageIdentifierRange<UID>(.max), #line),
                 ("1:*", "\r\n", MessageIdentifierRange<UID>.all, #line),
-                ("12:34", "\r\n", MessageIdentifierRange<UID>(12 ... 34), #line),
+                ("12:34", "\r\n", MessageIdentifierRange<UID>(12...34), #line),
                 ("12:*", "\r\n", MessageIdentifierRange<UID>(12 ... .max), #line),
-                ("1:34", "\r\n", MessageIdentifierRange<UID>((.min) ... 34), #line),
+                ("1:34", "\r\n", MessageIdentifierRange<UID>((.min)...34), #line),
             ],
             parserErrorInputs: [
                 ("!", " ", #line),
                 ("a", " ", #line),
             ],
             incompleteMessageInputs: [
-                ("1", "", #line),
+                ("1", "", #line)
             ]
         )
     }
@@ -71,19 +71,22 @@ extension GrammarParser_UID_Tests {
             testFunction: GrammarParser().parseUIDSet,
             validInputs: [
                 ("1234", "\r\n", MessageIdentifierSet(1234 as UID), #line),
-                ("12:34", "\r\n", MessageIdentifierSet(MessageIdentifierRange<UID>(12 ... 34)), #line),
-                ("1,2,34:56,78:910,11", "\r\n", MessageIdentifierSet([
-                    MessageIdentifierRange<UID>(1),
-                    MessageIdentifierRange<UID>(2),
-                    MessageIdentifierRange<UID>(34 ... 56),
-                    MessageIdentifierRange<UID>(78 ... 910),
-                    MessageIdentifierRange<UID>(11),
-                ]), #line),
+                ("12:34", "\r\n", MessageIdentifierSet(MessageIdentifierRange<UID>(12...34)), #line),
+                (
+                    "1,2,34:56,78:910,11", "\r\n",
+                    MessageIdentifierSet([
+                        MessageIdentifierRange<UID>(1),
+                        MessageIdentifierRange<UID>(2),
+                        MessageIdentifierRange<UID>(34...56),
+                        MessageIdentifierRange<UID>(78...910),
+                        MessageIdentifierRange<UID>(11),
+                    ]), #line
+                ),
                 ("*", "\r\n", MessageIdentifierSet(MessageIdentifierRange<UID>(.max)), #line),
                 ("1:*", "\r\n", .all, #line),
             ],
             parserErrorInputs: [
-                ("a", " ", #line),
+                ("a", " ", #line)
             ],
             incompleteMessageInputs: [
                 ("1234", "", #line),

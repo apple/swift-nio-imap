@@ -43,7 +43,7 @@ extension GrammarParser {
             let a: SequenceNumber = try parseMessageIdentifier(buffer: &buffer, tracker: tracker)
             try PL.parseFixedString(":", buffer: &buffer, tracker: tracker)
             let b: SequenceNumber = try parseMessageIdentifier(buffer: &buffer, tracker: tracker)
-            let range = (a <= b) ? SequenceRange(a ... b) : SequenceRange(b ... a)
+            let range = (a <= b) ? SequenceRange(a...b) : SequenceRange(b...a)
             return .first(range)
         }
 
@@ -52,7 +52,7 @@ extension GrammarParser {
             let a: SequenceNumber = try parseMessageIdentifier(buffer: &buffer, tracker: tracker)
             try PL.parseFixedString(":-", buffer: &buffer, tracker: tracker)
             let b: SequenceNumber = try parseMessageIdentifier(buffer: &buffer, tracker: tracker)
-            let range = (a <= b) ? SequenceRange(a ... b) : SequenceRange(b ... a)
+            let range = (a <= b) ? SequenceRange(a...b) : SequenceRange(b...a)
             return .last(range)
         }
 
@@ -74,11 +74,17 @@ extension GrammarParser {
     ///     ;; NIL indicates no results correspond to the requested range.
     /// ```
     func parseSearchReturnData_partial(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SearchReturnData {
-        func parseSearchReturnData_partial_nil(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageIdentifierSet<UnknownMessageIdentifier> {
+        func parseSearchReturnData_partial_nil(
+            buffer: inout ParseBuffer,
+            tracker: StackTracker
+        ) throws -> MessageIdentifierSet<UnknownMessageIdentifier> {
             try PL.parseFixedString("NIL", buffer: &buffer, tracker: tracker)
             return MessageIdentifierSet()
         }
-        func parseSearchReturnData_partial_set(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageIdentifierSet<UnknownMessageIdentifier> {
+        func parseSearchReturnData_partial_set(
+            buffer: inout ParseBuffer,
+            tracker: StackTracker
+        ) throws -> MessageIdentifierSet<UnknownMessageIdentifier> {
             let set: LastCommandSet<UnknownMessageIdentifier>
             set = try parseMessageIdentifierSetOrLast(buffer: &buffer, tracker: tracker)
             guard case .set(let result) = set else {

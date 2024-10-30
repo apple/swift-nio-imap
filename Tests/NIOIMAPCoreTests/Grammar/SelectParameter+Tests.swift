@@ -27,22 +27,40 @@ extension SelectParameter_Tests {
             (.basic(.init(key: "test", value: nil)), "test", #line),
             (.basic(.init(key: "test", value: .sequence(.set([1])))), "test 1", #line),
             (
-                .qresync(.init(uidValidity: 1, modificationSequenceValue: .zero, knownUIDs: nil, sequenceMatchData: nil)),
+                .qresync(
+                    .init(uidValidity: 1, modificationSequenceValue: .zero, knownUIDs: nil, sequenceMatchData: nil)
+                ),
                 "QRESYNC (1 0)",
                 #line
             ),
             (
-                .qresync(.init(uidValidity: 1, modificationSequenceValue: .zero, knownUIDs: [1], sequenceMatchData: nil)),
+                .qresync(
+                    .init(uidValidity: 1, modificationSequenceValue: .zero, knownUIDs: [1], sequenceMatchData: nil)
+                ),
                 "QRESYNC (1 0 1)",
                 #line
             ),
             (
-                .qresync(.init(uidValidity: 1, modificationSequenceValue: .zero, knownUIDs: nil, sequenceMatchData: .init(knownSequenceSet: .set(.all), knownUidSet: .set(.all)))),
+                .qresync(
+                    .init(
+                        uidValidity: 1,
+                        modificationSequenceValue: .zero,
+                        knownUIDs: nil,
+                        sequenceMatchData: .init(knownSequenceSet: .set(.all), knownUidSet: .set(.all))
+                    )
+                ),
                 "QRESYNC (1 0 (1:* 1:*))",
                 #line
             ),
             (
-                .qresync(.init(uidValidity: 1, modificationSequenceValue: .zero, knownUIDs: [1], sequenceMatchData: .init(knownSequenceSet: .set(.all), knownUidSet: .set(.all)))),
+                .qresync(
+                    .init(
+                        uidValidity: 1,
+                        modificationSequenceValue: .zero,
+                        knownUIDs: [1],
+                        sequenceMatchData: .init(knownSequenceSet: .set(.all), knownUidSet: .set(.all))
+                    )
+                ),
                 "QRESYNC (1 0 1 (1:* 1:*))",
                 #line
             ),

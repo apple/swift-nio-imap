@@ -51,6 +51,6 @@ extension String_ByteBuffer_Tests {
 
     func testInitBestEffortDecodingInvalid() {
         let test2: [UInt8] = [0x41, 0xFF, 0x42]
-        XCTAssertEqual(String(bestEffortDecodingUTF8Bytes: test2), "AB") // we've removed the invalid middle byte
+        XCTAssertEqual(String(bestEffortDecodingUTF8Bytes: test2), "AB")  // we've removed the invalid middle byte
     }
 }

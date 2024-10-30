@@ -23,7 +23,7 @@ class EncodedSearch_Tests: EncodeTestClass {}
 extension EncodedSearch_Tests {
     func testEncode() {
         let inputs: [(EncodedSearch, String, UInt)] = [
-            (.init(query: "hello"), "hello", #line),
+            (.init(query: "hello"), "hello", #line)
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeEncodedSearch($0) })
     }

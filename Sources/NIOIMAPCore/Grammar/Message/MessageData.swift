@@ -51,13 +51,13 @@ extension EncodeBuffer {
         case .vanishedEarlier(let set):
             return self.writeString("VANISHED (EARLIER) ") + self.writeUIDSet(set)
         case .generateAuthorizedURL(let array):
-            return self.writeString("GENURLAUTH") +
-                self.writeArray(array, prefix: " ", parenthesis: false) { data, buffer in
+            return self.writeString("GENURLAUTH")
+                + self.writeArray(array, prefix: " ", parenthesis: false) { data, buffer in
                     buffer.writeIMAPString(data)
                 }
         case .urlFetch(let array):
-            return self.writeString("URLFETCH") +
-                self.writeArray(array) { data, buffer in
+            return self.writeString("URLFETCH")
+                + self.writeArray(array) { data, buffer in
                     buffer.writeURLFetchData(data)
                 }
         }

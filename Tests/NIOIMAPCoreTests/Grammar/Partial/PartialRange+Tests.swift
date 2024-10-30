@@ -23,10 +23,10 @@ class PartialRange_Tests: EncodeTestClass, _ParserTestHelpers {}
 extension PartialRange_Tests {
     func testEncode() {
         let inputs: [(PartialRange, String, UInt)] = [
-            (.first(1 ... 1), "1:1", #line),
-            (.first(100 ... 200), "100:200", #line),
-            (.last(1 ... 1), "-1:-1", #line),
-            (.last(100 ... 200), "-100:-200", #line),
+            (.first(1...1), "1:1", #line),
+            (.first(100...200), "100:200", #line),
+            (.last(1...1), "-1:-1", #line),
+            (.last(100...200), "-100:-200", #line),
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writePartialRange($0) })
     }
@@ -35,18 +35,18 @@ extension PartialRange_Tests {
         self.iterateTests(
             testFunction: GrammarParser().parsePartialRange,
             validInputs: [
-                ("1:2", " ", .first(1 ... 2), #line),
-                ("1:1", " ", .first(1 ... 1), #line),
-                ("100:200", " ", .first(100 ... 200), #line),
-                ("200:100", " ", .first(100 ... 200), #line),
-                ("333:333", " ", .first(333 ... 333), #line),
-                ("1234567:2345678", " ", .first(1234567 ... 2345678), #line),
-                ("-1:-2", " ", .last(1 ... 2), #line),
-                ("-1:-1", " ", .last(1 ... 1), #line),
-                ("-100:-200", " ", .last(100 ... 200), #line),
-                ("-200:-100", " ", .last(100 ... 200), #line),
-                ("-333:-333", " ", .last(333 ... 333), #line),
-                ("-1234567:-2345678", " ", .last(1234567 ... 2345678), #line),
+                ("1:2", " ", .first(1...2), #line),
+                ("1:1", " ", .first(1...1), #line),
+                ("100:200", " ", .first(100...200), #line),
+                ("200:100", " ", .first(100...200), #line),
+                ("333:333", " ", .first(333...333), #line),
+                ("1234567:2345678", " ", .first(1_234_567...2_345_678), #line),
+                ("-1:-2", " ", .last(1...2), #line),
+                ("-1:-1", " ", .last(1...1), #line),
+                ("-100:-200", " ", .last(100...200), #line),
+                ("-200:-100", " ", .last(100...200), #line),
+                ("-333:-333", " ", .last(333...333), #line),
+                ("-1234567:-2345678", " ", .last(1_234_567...2_345_678), #line),
             ],
             parserErrorInputs: [
                 ("1", " ", #line),

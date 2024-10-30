@@ -28,10 +28,8 @@ extension GrammarParser_Entry_Tests {
                 ("\"name\" \"value\"", "", .init(key: "name", value: .init("value")), #line),
                 ("\"name\" NIL", "", .init(key: "name", value: .init(nil)), #line),
             ],
-            parserErrorInputs: [
-            ],
-            incompleteMessageInputs: [
-            ]
+            parserErrorInputs: [],
+            incompleteMessageInputs: []
         )
     }
 }
@@ -56,10 +54,8 @@ extension GrammarParser_Entry_Tests {
                     #line
                 ),
             ],
-            parserErrorInputs: [
-            ],
-            incompleteMessageInputs: [
-            ]
+            parserErrorInputs: [],
+            incompleteMessageInputs: []
         )
     }
 }
@@ -75,10 +71,8 @@ extension GrammarParser_Entry_Tests {
                 ("(\"name\")", "", ["name"], #line),
                 ("(\"name1\" \"name2\")", "", ["name1", "name2"], #line),
             ],
-            parserErrorInputs: [
-            ],
-            incompleteMessageInputs: [
-            ]
+            parserErrorInputs: [],
+            incompleteMessageInputs: []
         )
     }
 }
@@ -93,10 +87,8 @@ extension GrammarParser_Entry_Tests {
                 ("\"name\"", "\r", ["name"], #line),
                 ("\"name1\" \"name2\"", "\r", ["name1", "name2"], #line),
             ],
-            parserErrorInputs: [
-            ],
-            incompleteMessageInputs: [
-            ]
+            parserErrorInputs: [],
+            incompleteMessageInputs: []
         )
     }
 }
@@ -108,13 +100,13 @@ extension GrammarParser_Entry_Tests {
         self.iterateTests(
             testFunction: GrammarParser().parseEntryFlagName,
             validInputs: [
-                ("\"/flags/\\\\Answered\"", "", .init(flag: .answered), #line),
+                ("\"/flags/\\\\Answered\"", "", .init(flag: .answered), #line)
             ],
             parserErrorInputs: [
-                ("/flags/\\Answered", "", #line),
+                ("/flags/\\Answered", "", #line)
             ],
             incompleteMessageInputs: [
-                ("\"/flags", "", #line),
+                ("\"/flags", "", #line)
             ]
         )
     }
