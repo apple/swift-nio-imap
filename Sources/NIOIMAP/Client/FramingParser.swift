@@ -380,9 +380,11 @@ extension FramingParser {
         let byte = self.readByte()
         switch (byte, quotedState) {
         case (CR, _), (LF, _):
-            // This is bogus: Can’t have CR or LR inside quoted string.
-            // Complete the frame and let it fail.
-            return .parsedCompleteFrame
+            // Can’t have CR or LF inside quoted strings, but certain
+            // parts (notably `text`) is allowed to have _any_ character
+            // (except CR or LF).
+            // Thus, fall through to “normal” state:
+            return readByte_state_normalTraversal(lineFeedStrategy: .includeInFrame)
 
         case (ESCAPE, .normal):
             self.state = .insideQuoted(.escaped)
