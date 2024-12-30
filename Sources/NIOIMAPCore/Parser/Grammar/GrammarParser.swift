@@ -1843,6 +1843,21 @@ extension GrammarParser {
         }
     }
 
+    // uidbatches-response = "UIDBATCHES" search-correlator
+    //                       [SP uid-range *("," uid-range) ]
+    func parseUIDBatchesResponse(buffer: inout ParseBuffer, tracker: StackTracker) throws -> UIDBatchesResponse {
+        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> UIDBatchesResponse in
+            try PL.parseFixedString(#"UIDBATCHES (TAG ""#, buffer: &buffer, tracker: tracker)
+            let tag = try self.parseTag(buffer: &buffer, tracker: tracker)
+            try PL.parseFixedString("\")", buffer: &buffer, tracker: tracker)
+            let batches = try PL.parseOptional(buffer: &buffer, tracker: tracker) { buffer, tracker -> [UIDRange] in
+                try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+                return try parseUIDRangeArray(buffer: &buffer, tracker: tracker)
+            } ?? []
+            return UIDBatchesResponse(correlator: tag, batches: batches)
+        }
+    }
+
     // nil             = "NIL"
     func parseNil(buffer: inout ParseBuffer, tracker: StackTracker) throws {
         try PL.parseFixedString("nil", buffer: &buffer, tracker: tracker)

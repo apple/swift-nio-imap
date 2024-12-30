@@ -39,6 +39,15 @@ extension GrammarParser_Mailbox_Tests {
                     #line
                 ),
                 (
+                    #"LSUB () "." #news.comp.mail.misc"#, "\r\n",
+                    .lsub(MailboxInfo(
+                        attributes: [],
+                        path: try! .init(name: MailboxName("#news.comp.mail.misc"), pathSeparator: "."),
+                        extensions: [:]
+                    )),
+                    #line
+                ),
+                (
                     "ESEARCH MIN 1 MAX 2", "\r\n",
                     .extendedSearch(.init(correlator: nil, kind: .sequenceNumber, returnData: [.min(1), .max(2)])),
                     #line
@@ -69,6 +78,20 @@ extension GrammarParser_Mailbox_Tests {
                 (
                     "SEARCH 1 2 3 (MODSEQ 4)", "\r\n",
                     .searchSort(.init(identifiers: [1, 2, 3], modificationSequence: 4)), #line
+                ),
+                (
+                    "SEARCH 1 (MODSEQ 2)", "\r\n",
+                    .searchSort(.init(identifiers: [1], modificationSequence: 2)),
+                    #line),
+                (
+                    "NAMESPACE NIL NIL NIL", "\r\n",
+                    .namespace(.init(userNamespace: [], otherUserNamespace: [], sharedNamespace: [])),
+                    #line
+                ),
+                (
+                    #"UIDBATCHES (TAG "A143") 20351:7829,7830:1"#, "\r\n",
+                    .uidBatches(.init(correlator: "A143", batches: [7_829...20_351, 1...7_830])),
+                    #line
                 ),
             ],
             parserErrorInputs: [],

@@ -1476,6 +1476,26 @@ extension ParserUnitTests {
     }
 }
 
+// MARK: - parseUIDBatchesResponse
+
+extension ParserUnitTests {
+    func testParseUIDBatchesResponse() {
+        self.iterateTests(
+            testFunction: GrammarParser().parseUIDBatchesResponse,
+            validInputs: [
+                (#"UIDBATCHES (TAG "A143") 215295:99695,99696:20350,20351:7829,7830:1"#, "\r", .init(correlator: "A143", batches: [
+                    99695...215295, 20350...99696, 7829...20351, 1...7830,
+                ]), #line),
+                (#"UIDBATCHES (TAG "A143")"#, "\r", .init(correlator: "A143", batches: []), #line),
+                (#"UIDBATCHES (TAG "A143") 99695"#, "\r", .init(correlator: "A143", batches: [99695...99695]), #line),
+                (#"UIDBATCHES (TAG "A143") 20350:20350"#, "\r", .init(correlator: "A143", batches: [20350...20350]), #line),
+            ],
+            parserErrorInputs: [],
+            incompleteMessageInputs: []
+        )
+    }
+}
+
 // MARK: - parseExpire
 
 extension ParserUnitTests {
