@@ -166,10 +166,12 @@ extension MessageIdentifierRange {
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeMessageIdentifierRange<T>(_ range: MessageIdentifierRange<T>) -> Int {
-        self.writeMessageIdentifier(range.range.lowerBound)
-            + self.write(if: range.range.lowerBound < range.range.upperBound) {
-                self.writeString(":") + self.writeMessageIdentifier(range.range.upperBound)
-            }
+    @discardableResult mutating func writeMessageIdentifierRange<T>(_ range: MessageIdentifierRange<T>, descending: Bool = false) -> Int {
+        let a = descending ? range.range.upperBound : range.range.lowerBound
+        let b = descending ? range.range.lowerBound : range.range.upperBound
+        return self.writeMessageIdentifier(a)
+        + self.write(if: range.range.lowerBound < range.range.upperBound) {
+            self.writeString(":") + self.writeMessageIdentifier(b)
+        }
     }
 }
