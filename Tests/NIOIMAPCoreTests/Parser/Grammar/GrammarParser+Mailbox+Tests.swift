@@ -52,6 +52,7 @@ extension GrammarParser_Mailbox_Tests {
                     .extendedSearch(.init(correlator: nil, kind: .sequenceNumber, returnData: [.min(1), .max(2)])),
                     #line
                 ),
+                ("ESEARCH", "\r", .extendedSearch(.init(correlator: nil, kind: .sequenceNumber, returnData: [])), #line),
                 ("1234 EXISTS", "\r\n", .exists(1234), #line),
                 ("5678 RECENT", "\r\n", .recent(5678), #line),
                 ("STATUS INBOX ()", "\r\n", .status(.inbox, .init()), #line),
