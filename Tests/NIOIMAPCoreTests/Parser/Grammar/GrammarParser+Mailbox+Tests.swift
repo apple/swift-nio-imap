@@ -40,11 +40,13 @@ extension GrammarParser_Mailbox_Tests {
                 ),
                 (
                     #"LSUB () "." #news.comp.mail.misc"#, "\r\n",
-                    .lsub(MailboxInfo(
-                        attributes: [],
-                        path: try! .init(name: MailboxName("#news.comp.mail.misc"), pathSeparator: "."),
-                        extensions: [:]
-                    )),
+                    .lsub(
+                        MailboxInfo(
+                            attributes: [],
+                            path: try! .init(name: MailboxName("#news.comp.mail.misc"), pathSeparator: "."),
+                            extensions: [:]
+                        )
+                    ),
                     #line
                 ),
                 (
@@ -52,7 +54,10 @@ extension GrammarParser_Mailbox_Tests {
                     .extendedSearch(.init(correlator: nil, kind: .sequenceNumber, returnData: [.min(1), .max(2)])),
                     #line
                 ),
-                ("ESEARCH", "\r", .extendedSearch(.init(correlator: nil, kind: .sequenceNumber, returnData: [])), #line),
+                (
+                    "ESEARCH", "\r", .extendedSearch(.init(correlator: nil, kind: .sequenceNumber, returnData: [])),
+                    #line
+                ),
                 ("1234 EXISTS", "\r\n", .exists(1234), #line),
                 ("5678 RECENT", "\r\n", .recent(5678), #line),
                 ("STATUS INBOX ()", "\r\n", .status(.inbox, .init()), #line),
@@ -83,7 +88,8 @@ extension GrammarParser_Mailbox_Tests {
                 (
                     "SEARCH 1 (MODSEQ 2)", "\r\n",
                     .searchSort(.init(identifiers: [1], modificationSequence: 2)),
-                    #line),
+                    #line
+                ),
                 (
                     "NAMESPACE NIL NIL NIL", "\r\n",
                     .namespace(.init(userNamespace: [], otherUserNamespace: [], sharedNamespace: [])),

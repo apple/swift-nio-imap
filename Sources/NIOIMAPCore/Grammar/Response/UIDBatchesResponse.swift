@@ -36,11 +36,11 @@ public struct UIDBatchesResponse: Hashable, Sendable {
 extension EncodeBuffer {
     @discardableResult mutating func writeUIDBatchesResponse(_ response: UIDBatchesResponse) -> Int {
         self.writeString(#"UIDBATCHES (TAG "\#(response.correlator)")"#)
-        + self.write(if: !response.batches.isEmpty) {
-            self.writeString(" ") +
-            self.writeArray(response.batches, separator: ",", parenthesis: false) { range, buffer -> Int in
-                buffer.writeMessageIdentifierRange(range, descending: true)
+            + self.write(if: !response.batches.isEmpty) {
+                self.writeString(" ")
+                    + self.writeArray(response.batches, separator: ",", parenthesis: false) { range, buffer -> Int in
+                        buffer.writeMessageIdentifierRange(range, descending: true)
+                    }
             }
-        }
     }
 }

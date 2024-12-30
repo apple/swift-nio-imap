@@ -473,12 +473,17 @@ extension CommandEncodeBuffer {
     }
 
     private mutating func writeCommandKind_uidBatches(batchSize: Int, batchRange: ClosedRange<Int>?) -> Int {
-        self.buffer.writeString("UIDBATCHES \(batchSize)") + self.buffer.writeIfExists(batchRange) {
-            let range = UnknownMessageIdentifier(exactly: $0.lowerBound)!...UnknownMessageIdentifier(exactly: $0.upperBound)!
-            return self.buffer
-                .writeString(" ") + self.buffer
-                .writeMessageIdentifierRange(range)
-        }
+        self.buffer.writeString("UIDBATCHES \(batchSize)")
+            + self.buffer.writeIfExists(batchRange) {
+                let range =
+                    UnknownMessageIdentifier(exactly: $0.lowerBound)!...UnknownMessageIdentifier(
+                        exactly: $0.upperBound
+                    )!
+                return self.buffer
+                    .writeString(" ")
+                    + self.buffer
+                    .writeMessageIdentifierRange(range)
+            }
     }
 
     private mutating func writeCommandKind_custom(name: String, payloads: [Command.CustomCommandPayload]) -> Int {
