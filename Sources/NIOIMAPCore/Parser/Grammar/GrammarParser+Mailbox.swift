@@ -113,6 +113,10 @@ extension GrammarParser {
             .namespace(try self.parseNamespaceResponse(buffer: &buffer, tracker: tracker))
         }
 
+        func parseMailboxData_uidBatchesResponse(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxData {
+            .uidBatches(try self.parseUIDBatchesResponse(buffer: &buffer, tracker: tracker))
+        }
+
         return try PL.parseOneOf(
             [
                 parseMailboxData_flags,
@@ -125,6 +129,7 @@ extension GrammarParser {
                 parseMailboxData_searchSort,
                 parseMailboxData_search,
                 parseMailboxData_namespace,
+                parseMailboxData_uidBatchesResponse,
             ],
             buffer: &buffer,
             tracker: tracker
