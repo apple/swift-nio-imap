@@ -45,6 +45,9 @@ public enum MailboxData: Hashable, Sendable {
 
     /// Response to a search-sort command, containing an array of identifiers and sequence information.
     case searchSort(SearchSort)
+
+    /// TODO: Add link to RFC
+    case uidBatches(UIDBatchesResponse)
 }
 
 extension MailboxData {
@@ -101,6 +104,8 @@ extension EncodeBuffer {
             return self.writeNamespaceResponse(namespaceResponse)
         case .searchSort(let data):
             return self.writeMailboxDataSearchSort(data)
+        case .uidBatches(let response):
+            return self.writeUIDBatchesResponse(response)
         }
     }
 
