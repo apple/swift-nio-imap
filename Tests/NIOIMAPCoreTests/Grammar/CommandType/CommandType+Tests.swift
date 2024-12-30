@@ -122,6 +122,8 @@ extension CommandType_Tests {
                 ["CREATE \"INBOX\" (USE (\\Archive \\Drafts \\Flagged))"], #line
             ),
             (.compress(.deflate), CommandEncodingOptions(), ["COMPRESS DEFLATE"], #line),
+            (.uidBatches(batchSize: 2_000), CommandEncodingOptions(), ["UIDBATCHES 2000"], #line),
+            (.uidBatches(batchSize: 1_000, batchRange: 10...20), CommandEncodingOptions(), ["UIDBATCHES 1000 10:20"], #line),
 
             // Custom
 
