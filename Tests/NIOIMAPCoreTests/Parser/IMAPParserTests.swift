@@ -1455,18 +1455,18 @@ extension ParserUnitTests {
         self.iterateTests(
             testFunction: GrammarParser().parseExtendedSearchResponse,
             validInputs: [
-                ("ESEARCH", "\r", .init(correlator: nil, kind: .sequenceNumber, returnData: []), #line),
-                ("ESEARCH UID", "\r", .init(correlator: nil, kind: .uid, returnData: []), #line),
+                ("", "\r", .init(correlator: nil, kind: .sequenceNumber, returnData: []), #line),
+                (" UID", "\r", .init(correlator: nil, kind: .uid, returnData: []), #line),
                 (
-                    "ESEARCH (TAG \"col\") UID", "\r",
+                    " (TAG \"col\") UID", "\r",
                     .init(correlator: SearchCorrelator(tag: "col"), kind: .uid, returnData: []), #line
                 ),
                 (
-                    "ESEARCH (TAG \"col\") UID COUNT 2", "\r",
+                    " (TAG \"col\") UID COUNT 2", "\r",
                     .init(correlator: SearchCorrelator(tag: "col"), kind: .uid, returnData: [.count(2)]), #line
                 ),
                 (
-                    "ESEARCH (TAG \"col\") UID MIN 1 MAX 2", "\r",
+                    " (TAG \"col\") UID MIN 1 MAX 2", "\r",
                     .init(correlator: SearchCorrelator(tag: "col"), kind: .uid, returnData: [.min(1), .max(2)]), #line
                 ),
             ],
@@ -1483,12 +1483,12 @@ extension ParserUnitTests {
         self.iterateTests(
             testFunction: GrammarParser().parseUIDBatchesResponse,
             validInputs: [
-                (#"UIDBATCHES (TAG "A143") 215295:99695,99696:20350,20351:7829,7830:1"#, "\r", .init(correlator: "A143", batches: [
+                (#" (TAG "A143") 215295:99695,99696:20350,20351:7829,7830:1"#, "\r", .init(correlator: "A143", batches: [
                     99695...215295, 20350...99696, 7829...20351, 1...7830,
                 ]), #line),
-                (#"UIDBATCHES (TAG "A143")"#, "\r", .init(correlator: "A143", batches: []), #line),
-                (#"UIDBATCHES (TAG "A143") 99695"#, "\r", .init(correlator: "A143", batches: [99695...99695]), #line),
-                (#"UIDBATCHES (TAG "A143") 20350:20350"#, "\r", .init(correlator: "A143", batches: [20350...20350]), #line),
+                (#" (TAG "A143")"#, "\r", .init(correlator: "A143", batches: []), #line),
+                (#" (TAG "A143") 99695"#, "\r", .init(correlator: "A143", batches: [99695...99695]), #line),
+                (#" (TAG "A143") 20350:20350"#, "\r", .init(correlator: "A143", batches: [20350...20350]), #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
@@ -2318,7 +2318,7 @@ extension ParserUnitTests {
             testFunction: GrammarParser().parseNamespaceResponse,
             validInputs: [
                 (
-                    "NAMESPACE nil nil nil", " ", .init(userNamespace: [], otherUserNamespace: [], sharedNamespace: []),
+                    " nil nil nil", " ", .init(userNamespace: [], otherUserNamespace: [], sharedNamespace: []),
                     #line
                 )
             ],

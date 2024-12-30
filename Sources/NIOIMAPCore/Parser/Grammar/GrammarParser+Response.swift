@@ -359,7 +359,7 @@ extension GrammarParser {
         }
 
         func parseSuffix_namespace(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
-            .namespace(try self.parseNamespaceSuffix(buffer: &buffer, tracker: tracker))
+            .namespace(try self.parseNamespaceResponse(buffer: &buffer, tracker: tracker))
         }
 
         func parseResponseTextCode_atom(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {

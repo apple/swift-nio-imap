@@ -521,7 +521,6 @@ extension GrammarParser {
     func parseExtendedSearchResponse(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ExtendedSearchResponse
     {
         try PL.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
-            try PL.parseFixedString("ESEARCH", buffer: &buffer, tracker: tracker)
             let correlator = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseSearchCorrelator)
             let kind: ExtendedSearchResponse.Kind =
                 try PL.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
@@ -1821,17 +1820,8 @@ extension GrammarParser {
         }
     }
 
-    // Namespace-Response = "*" SP "NAMESPACE" SP Namespace
-    //                       SP Namespace SP Namespace
-    func parseNamespaceResponse(buffer: inout ParseBuffer, tracker: StackTracker) throws -> NamespaceResponse {
-        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> NamespaceResponse in
-            try PL.parseFixedString("NAMESPACE", buffer: &buffer, tracker: tracker)
-            return try parseNamespaceSuffix(buffer: &buffer, tracker: tracker)
-        }
-    }
-
     // SP Namespace SP Namespace SP Namespace
-    func parseNamespaceSuffix(buffer: inout ParseBuffer, tracker: StackTracker) throws -> NamespaceResponse {
+    func parseNamespaceResponse(buffer: inout ParseBuffer, tracker: StackTracker) throws -> NamespaceResponse {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> NamespaceResponse in
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             let n1 = try self.parseNamespace(buffer: &buffer, tracker: tracker)
@@ -1847,7 +1837,8 @@ extension GrammarParser {
     //                       [SP uid-range *("," uid-range) ]
     func parseUIDBatchesResponse(buffer: inout ParseBuffer, tracker: StackTracker) throws -> UIDBatchesResponse {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> UIDBatchesResponse in
-            try PL.parseFixedString(#"UIDBATCHES (TAG ""#, buffer: &buffer, tracker: tracker)
+            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+            try PL.parseFixedString(#"(TAG ""#, buffer: &buffer, tracker: tracker)
             let tag = try self.parseTag(buffer: &buffer, tracker: tracker)
             try PL.parseFixedString("\")", buffer: &buffer, tracker: tracker)
             let batches = try PL.parseOptional(buffer: &buffer, tracker: tracker) { buffer, tracker -> [UIDRange] in
