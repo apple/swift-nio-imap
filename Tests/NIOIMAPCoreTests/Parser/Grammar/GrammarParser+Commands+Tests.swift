@@ -141,6 +141,10 @@ extension GrammarParser_Commands_Tests {
                     .setQuota(.init("ROOT"), [.init(resourceName: "resource", limit: 123)]), #line
                 ),
                 ("COMPRESS DEFLATE", "\r", .compress(.deflate), #line),
+                ("UIDBATCHES 2000", "\r", .uidBatches(batchSize: 2_000, batchRange: nil), #line),
+                ("UIDBATCHES 1000 10:20", "\r", .uidBatches(batchSize: 1_000, batchRange: 10...20), #line),
+                ("UIDBATCHES 500 22:22", "\r", .uidBatches(batchSize: 500, batchRange: 22...22), #line),
+                ("UIDBATCHES 1000 1", "\r", .uidBatches(batchSize: 1_000, batchRange: 1...1), #line),
             ],
             parserErrorInputs: [
                 ("123", "\r", #line),
