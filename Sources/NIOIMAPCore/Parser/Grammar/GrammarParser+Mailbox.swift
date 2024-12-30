@@ -52,13 +52,16 @@ extension GrammarParser {
                 return .lsub(try self.parseMailboxList(buffer: &buffer, tracker: tracker))
             }
 
-            func parseMailboxData_extendedSearch(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxData {
+            func parseMailboxData_extendedSearch(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxData
+            {
                 let response = try self.parseExtendedSearchResponse(buffer: &buffer, tracker: tracker)
                 return .extendedSearch(response)
             }
 
-
-            func parseMailboxData_search_combined(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxData {
+            func parseMailboxData_search_combined(
+                buffer: inout ParseBuffer,
+                tracker: StackTracker
+            ) throws -> MailboxData {
                 func parseMailboxData_search(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxData {
                     let nums = try PL.parseZeroOrMore(buffer: &buffer, tracker: tracker) {
                         (buffer, tracker) -> UnknownMessageIdentifier in
@@ -72,7 +75,8 @@ extension GrammarParser {
                     return .search(nums)
                 }
 
-                func parseMailboxData_searchSort(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxData {
+                func parseMailboxData_searchSort(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxData
+                {
                     try PL.parseSpaces(buffer: &buffer, tracker: tracker)
                     var array = [try self.parseNZNumber(buffer: &buffer, tracker: tracker)]
                     try PL.parseZeroOrMore(
@@ -111,7 +115,10 @@ extension GrammarParser {
                 .namespace(try self.parseNamespaceResponse(buffer: &buffer, tracker: tracker))
             }
 
-            func parseMailboxData_uidBatchesResponse(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxData {
+            func parseMailboxData_uidBatchesResponse(
+                buffer: inout ParseBuffer,
+                tracker: StackTracker
+            ) throws -> MailboxData {
                 .uidBatches(try self.parseUIDBatchesResponse(buffer: &buffer, tracker: tracker))
             }
 
