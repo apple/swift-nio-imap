@@ -63,7 +63,7 @@ public struct MessageIdentifierSet<IdentifierType: MessageIdentifier>: Hashable,
 /// This allows us to store `type`.max + 1 inside a UInt32.
 /// This applies for both UIDs and SequenceNumbers.
 @usableFromInline
-struct MessageIdentificationShiftWrapper: Hashable {
+struct MessageIdentificationShiftWrapper: Hashable, Sendable {
     var rawValue: UInt32
 
     init(rawValue: UInt32) {
