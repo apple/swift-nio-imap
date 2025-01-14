@@ -28,6 +28,7 @@ extension MailboxAttribute_Tests {
             ([MailboxAttribute.appendLimit, .uidNext, .uidValidity], "APPENDLIMIT UIDNEXT UIDVALIDITY", #line),
             ([MailboxAttribute.size], "SIZE", #line),
             ([MailboxAttribute.highestModificationSequence, .messageCount], "HIGHESTMODSEQ MESSAGES", #line),
+            ([MailboxAttribute.mailboxID], "MAILBOXID", #line),
         ]
 
         for (test, expectedString, line) in inputs {
