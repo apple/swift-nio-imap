@@ -16,20 +16,41 @@
 public struct MailboxID: Hashable, Sendable {
     fileprivate var objectID: ObjectID
 
+    /// Creates a new `MailboxID` from an `ObjectID`.
+    init(_ objectID: ObjectID) {
+        self.objectID = objectID
+    }
+
     /// Creates a new `MailboxID` from a `String`.
     ///
     /// Valid mailbox IDs are 1-255 alphanumeric or `-` or `_` characters.
-    init?(_ rawValue: String) {
+    public init?(_ rawValue: String) {
         guard let objectID = ObjectID(rawValue) else {
             return nil
         }
 
-        self.objectID = objectID
+        self.init(objectID)
     }
 }
 
 extension String {
     public init(_ mailboxID: MailboxID) {
         self = String(mailboxID.objectID)
+    }
+}
+
+// MARK: - ExpressibleByStringLiteral
+
+extension MailboxID: ExpressibleByStringLiteral {
+    public init(stringLiteral value: StringLiteralType) {
+        self.init(value)!
+    }
+}
+
+// MARK: - Encoding
+
+extension EncodeBuffer {
+    @discardableResult mutating func writeMailboxID(_ id: MailboxID) -> Int {
+        self.writeObjectID(id.objectID)
     }
 }

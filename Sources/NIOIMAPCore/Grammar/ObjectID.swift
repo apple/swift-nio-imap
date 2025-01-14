@@ -39,3 +39,11 @@ extension String {
         self = objectID.rawValue
     }
 }
+
+// MARK: - Encoding
+
+extension EncodeBuffer {
+    @discardableResult mutating func writeObjectID(_ id: ObjectID) -> Int {
+        self.writeString("\(id.rawValue)")
+    }
+}

@@ -3015,6 +3015,19 @@ extension GrammarParser {
             sourceOptions: sourceOptions
         )
     }
+
+    // RFC 8474
+    // objectid = 1*255(ALPHA / DIGIT / "_" / "-")
+    func parseObjectID(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ObjectID {
+        let parsed = try PL.parseZeroOrMoreCharacters(buffer: &buffer, tracker: tracker) { char -> Bool in
+            char.isObjectIDChar
+        }
+        let string = try PL.parseBufferAsUTF8(parsed)
+        guard let objectID = ObjectID(string) else {
+            throw ParserError(hint: "Invalid object ID.")
+        }
+        return objectID
+    }
 }
 
 // MARK: - Helper Parsers
