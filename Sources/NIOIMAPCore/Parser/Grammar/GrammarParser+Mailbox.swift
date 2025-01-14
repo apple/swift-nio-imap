@@ -131,6 +131,11 @@ extension GrammarParser {
         )
     }
 
+    func parseMailboxID(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxID {
+        let objectID = try parseObjectID(buffer: &buffer, tracker: tracker)
+        return MailboxID(objectID)
+    }
+
     // mailbox-list    = "(" [mbx-list-flags] ")" SP
     //                    (DQUOTE QUOTED-CHAR DQUOTE / nil) SP mailbox
     //                    [SP mbox-list-extended]
