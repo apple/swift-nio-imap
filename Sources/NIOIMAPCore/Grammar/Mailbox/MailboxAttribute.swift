@@ -50,6 +50,11 @@ public enum MailboxAttribute: String, CaseIterable, Sendable {
     ///
     /// RFC 7889. Maximum upload size.
     case appendLimit = "APPENDLIMIT"
+
+    /// `MAILBOXID`
+    ///
+    /// RFC 8474. Object ID of the mailbox.
+    case mailboxID = "MAILBOXID"
 }
 
 /// The (aggregated) information about a mailbox that the server reports as part of the response to e.g. a `SELECT` command.
